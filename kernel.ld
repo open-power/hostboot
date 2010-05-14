@@ -1,12 +1,13 @@
-base_load_address = 0xfff00000;
-text_load_address = 0xfff08000;
-hreset_load_address = 0xfffffffc;
+rom_offset = 0xfff00000;
+base_load_address = 0x00000000;
+text_load_address = 0x00008000;
+hreset_load_address = 0x000ffffc;
 
 SECTIONS
 {
     . = base_load_address;
 
-    .text.intvects ALIGN(0x1000): {
+    .text.intvects ALIGN(0x1000): AT(base_load_address + rom_offset) {
 	*(.text.intvects)
     }
 

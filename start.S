@@ -15,8 +15,8 @@ _start:
 pre_relocate:
     mflr 2
     lis 1,0x0010
-    cmp 0,2,1		;// Check LR is less than 1MB
-    bc 0,0,finished_relocate	;// No need to relocate if less than 1MB
+    cmpl 0,2,1		;// Check LR is less than 1MB
+    blt finished_relocate	;// No need to relocate if less than 1MB
     
     ;// Get addresses for relocation.
     ;// Write address in r5
@@ -30,6 +30,10 @@ pre_relocate:
     and 1,1,2	;// and with pre_relocate's address from r2 to get start of
 		;// rom section.
     
+    ;// Update LR to low address.
+    and 6,2,3
+    mtlr 6
+
     ;// Moving 1MB , so load r2 with (1MB / 8 bytes per word)
     lis 2, 0x2
     mtctr 2
@@ -51,6 +55,9 @@ relocate_loop:
     not 10,10
     and 11,11,10
     mtmsr 11
+    
+    ;// Jump to low address.
+    blr
 
 finished_relocate: 
     b _main
