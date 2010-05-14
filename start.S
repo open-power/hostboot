@@ -36,7 +36,7 @@ pre_relocate:
 relocate_loop:
     ld 4, 0(1)
     std 4, 0(5)
-    dcbt 0,1
+    dcbst 0,5
     sync
     icbi 0,5
     sync
