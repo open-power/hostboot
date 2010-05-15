@@ -37,17 +37,17 @@ pre_relocate:
     ;// Moving 1MB , so load r2 with (1MB / 8 bytes per word)
     lis 2, 0x2
     mtctr 2
-relocate_loop:
+relocate_loop:		
+    ;// The dcbst/sync/icbi/isync sequence comes from PowerISA
     ld 4, 0(1)
     std 4, 0(5)
     dcbst 0,5
     sync
     icbi 0,5
-    sync
+    isync
     addi 1,1,8
     addi 5,5,8
     bdnz+ relocate_loop
-    isync
     
     ;// Now that we've relocated, erase exception prefix.
     mfmsr 11
