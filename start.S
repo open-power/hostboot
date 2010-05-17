@@ -60,6 +60,12 @@ relocate_loop:
     blr
 
 finished_relocate: 
+    ;// Set up initial TOC Base
+    lis 2, opd_load_address@h
+    ori 2, 2, opd_load_address@l
+    ld 2,8(2)
+
+    ;// Jump to main.
     b _main
 
 .org _start + 0x100

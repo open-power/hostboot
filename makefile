@@ -1,7 +1,9 @@
 CC = powerpc64-unknown-linux-gnu-gcc
 LD = powerpc64-unknown-linux-gnu-ld
 
-CFLAGS = -O3
+COMMONFLAGS = -O3 -nostdlib
+CFLAGS = ${COMMONFLAGS} -mcpu=620
+LDFLAGS = -static ${COMMONFLAGS}
 
 OBJECTS = start.o kernel.o
 

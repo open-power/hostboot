@@ -1,6 +1,6 @@
 rom_offset = 0xfff00000;
 base_load_address = 0x00000000;
-text_load_address = 0x00008000;
+text_load_address = 0x00003000;
 hreset_load_address = 0x000ffffc;
 
 SECTIONS
@@ -16,15 +16,21 @@ SECTIONS
 	*(.text)
 	*(.rodata)
 	*(.rodata.*)
-    }
 
+    }
+    
     .data ALIGN(0x1000): {
+	data_load_address = .;
 	*(.data)
 	*(.data.*)
 	*(.branch_lt)
-	*(.opd)
-
 	*(.bss)
+
+	toc_load_address = .;
+	*(.toc)
+	opd_load_address = .;
+	*(.opd)
+	*(.got)
     }
 
     . = hreset_load_address;

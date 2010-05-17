@@ -1,14 +1,12 @@
 
 void _main(void)
 {
-    unsigned int i = 100;
-    while(i != 0)
-    {
-	asm volatile("eieio");
-	i--;
-    }
-
+    static unsigned char kernel_stack[16 * 1024] = {0};
+    register void * stack = &kernel_stack;
+    asm volatile("mr 1,%0" :: "r" (stack) );
+   
     while(1)
     {
+	//asm volatile("wait");
     }
 }
