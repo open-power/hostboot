@@ -2,7 +2,7 @@ IMGDIR = ../img
 OBJDIR = ../obj
 include ../config.mk
 
-SUBDIRS = kernel.d
+SUBDIRS = kernel.d lib.d libc++.d
 IMAGES += ${IMGDIR}/kernel.elf 
 IMAGES += ${IMGDIR}/kernel.bin
 

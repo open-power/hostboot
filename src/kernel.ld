@@ -14,6 +14,7 @@ SECTIONS
     . = text_load_address;
     .text ALIGN(0x1000): {
 	*(.text)
+	*(.text._*)
 	*(.rodata)
 	*(.rodata.*)
 
@@ -24,13 +25,16 @@ SECTIONS
 	*(.data)
 	*(.data.*)
 	*(.branch_lt)
-	*(.bss)
 
 	toc_load_address = .;
 	*(.toc)
 	opd_load_address = .;
 	*(.opd)
 	*(.got)
+
+	*(.bss)
+	*(.bss.*)
+
     }
 
     . = hreset_load_address;
