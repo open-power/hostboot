@@ -70,8 +70,8 @@ intvect_system_reset:
 .section .text
 _main:
     ;// Set up initial TOC Base
-    lis 2, opd_load_address@h
-    ori 2, 2, opd_load_address@l
+    lis 2, main@h
+    ori 2, 2, main@l
     ld 2,8(2)
     
     ;// Set up initial stack
