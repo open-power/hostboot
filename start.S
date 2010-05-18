@@ -60,17 +60,43 @@ relocate_loop:
     blr
 
 finished_relocate: 
-    ;// Set up initial TOC Base
-    lis 2, opd_load_address@h
-    ori 2, 2, opd_load_address@l
-    ld 2,8(2)
-
     ;// Jump to main.
     b _main
 
 .org _start + 0x100
 intvect_system_reset:
     b _start
+
+.section .text
+_main:
+    ;// Set up initial TOC Base
+    lis 2, opd_load_address@h
+    ori 2, 2, opd_load_address@l
+    ld 2,8(2)
+    
+    ;// Set up initial stack
+    lis 1, kernel_stack@h
+    ori 1, 1, kernel_stack@l
+    addi 1, 1, 16368
+
+    ;// Set up exception stack
+    lis 3, exception_stack@h
+    ori 3, 3, exception_stack@l
+    addi 3, 3, 16368
+    mtsprg0 3
+
+    ;// Call main.
+    bl main
+_main_loop:
+    b _main_loop
+
+
+.section .data
+    .balign 1024
+kernel_stack:
+    .space 16*1024
+exception_stack:
+    .space 16*1024
 
 .section .text.hreset
 hreset:
