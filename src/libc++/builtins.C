@@ -5,7 +5,15 @@ extern "C" int __cxa_guard_acquire(volatile uint64_t* gv)
     // 0 -> uninitialized
     // 1 -> locked
     // 2 -> unlocked and initialized
-
+    
+    uint32_t v = __sync_val_compare_and_swap((volatile uint32_t*)gv, 0, 1);
+    if (v == 0)
+	return 1;
+    if (v == 2)
+	return 0;
+    while(2 != *(volatile uint32_t*)gv);
+    return 0;
+/*
     register volatile void* guard = gv;
     register uint32_t c = 0;
 
@@ -27,13 +35,17 @@ extern "C" int __cxa_guard_acquire(volatile uint64_t* gv)
     }
     return (3 == c ? 1 : 0);  // 3 means success in lock, return 1 (obtained)
 			      // 2 means initialized, return 0
+*/
 }
 
 extern "C" void __cxa_guard_release(volatile uint64_t* gv)
 {
+    (*(volatile uint32_t*)gv) = 2;
+    /*
     register volatile void* guard = gv;
     register uint32_t c = 2;
     asm volatile("stw %0, 0(%1)" :: "r"(c) , "r" (guard): "memory");
+    */
     return;
 }
 
