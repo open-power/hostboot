@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <string.h>
 
-void printk(const char*);
+void printk(const char*, ...);
 
 class Console
 {
