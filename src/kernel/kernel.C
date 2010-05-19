@@ -3,7 +3,7 @@
 
 int main()
 {
-    printk("Welcome to the kernel!\n");
+    printk("Booting Chenoo kernel...\n");
     while(1);
 
     return 0;
