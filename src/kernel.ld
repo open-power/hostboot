@@ -17,6 +17,10 @@ SECTIONS
 	*(.text._*)
 	*(.rodata)
 	*(.rodata.*)
+	. = ALIGN(0x8);
+	ctor_start = .;
+	*(.ctors)
+	ctor_end = .;
 
     }
     
@@ -45,6 +49,7 @@ SECTIONS
     /DISCARD/ : {
 	*(.comment)
 	*(.gnu.attributes)
+	*(.dtors)
     }
 }
 
