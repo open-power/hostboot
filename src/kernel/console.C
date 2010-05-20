@@ -31,6 +31,20 @@ class ConsoleDisplay
 	static void display(Console& c, _T value) {};
 };
 
+template <ConsoleTraits::trait _S>
+class ConsoleDisplay<char*, _S>
+{
+    public:
+	static void display(Console&c, char* value)
+	{
+	    while(*value != '\0')
+	    {
+		c.putc(*value);
+		value++;
+	    }
+	}
+};
+
 template <>
 class ConsoleDisplay<char, ConsoleTraits::NONE>
 {
@@ -112,6 +126,7 @@ void printk(const char* str, ...)
 		    if (format)
 		    {
 			ConsoleDisplay<char>::display(console, '%');
+			format = false;
 		    }
 		    else
 		    {
@@ -136,6 +151,11 @@ void printk(const char* str, ...)
 	    case 'l':
 		{
 		    size++;
+		    break;
+		}
+	    case 'z': // size_t or ssize_t
+		{
+		    size = 4;
 		    break;
 		}
 	    case 'd': // decimal
