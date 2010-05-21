@@ -4,6 +4,8 @@
 #include <kernel/heapmgr.H>
 #include <util/singleton.H>
 
+#include <stdlib.h>
+
 class Kernel
 {
     public:
@@ -41,6 +43,7 @@ void Kernel::cppBootstrap()
 
 void Kernel::memBootstrap()
 {
-    PageManager::freePage(PageManager::allocatePage());
+    PageManager::init();
+    HeapManager::init();
 }
 

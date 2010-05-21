@@ -11,6 +11,8 @@
 class PageManager
 {
     public:
+	static void init();
+
 	static void* allocatePage(size_t n = 1);
 	static void freePage(void*, size_t n = 1);
 

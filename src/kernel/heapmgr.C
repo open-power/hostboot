@@ -3,6 +3,11 @@
 #include <kernel/console.H>
 #include <kernel/pagemgr.H>
 
+void HeapManager::init()
+{
+    Singleton<HeapManager>::instance();
+}
+
 void* HeapManager::allocate(size_t n)
 {
     HeapManager& hmgr = Singleton<HeapManager>::instance();
@@ -37,7 +42,7 @@ void HeapManager::_free(void* p)
 {
     if (NULL == p) return;
 
-    chunk_t* chunk = (chunk_t*)((size_t*)p)-1;
+    chunk_t* chunk = (chunk_t*)(((size_t*)p)-1);
     push_bucket(chunk, chunk->len);
 }
 

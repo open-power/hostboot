@@ -7,12 +7,16 @@
 class HeapManager
 {
     public:
+	static void init();
+
 	static void* allocate(size_t n);
 	static void  free(void *);
 
 	enum
 	{
 	    BUCKETS = 8,
+
+	    MAX_ALLOC_SIZE = (1 << (BUCKETS + 4)) - 8,
 	};
 
     protected:

@@ -2,6 +2,11 @@
 #include <util/singleton.H>
 #include <kernel/console.H>
 
+void PageManager::init()
+{
+    Singleton<PageManager>::instance();
+}
+
 void* PageManager::allocatePage(size_t n)
 {
     PageManager& pmgr = Singleton<PageManager>::instance();
