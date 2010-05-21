@@ -93,8 +93,11 @@ PageManager::page_t* PageManager::pop_bucket(size_t n)
 	// Couldn't allocate from the correct size bucket, so split up an
 	// item from the next sized bucket.
 	p = pop_bucket(n+1);
-	push_bucket((page_t*) (((uint64_t)p) + (PAGESIZE * (1 << n))),
-		    n);
+	if (NULL != p)
+	{
+	    push_bucket((page_t*) (((uint64_t)p) + (PAGESIZE * (1 << n))),
+			n);
+	}
     }
     return p;
 }
