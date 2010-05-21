@@ -2,6 +2,7 @@
 #define __KERNEL_PAGEMGR_H
 
 #include <stdint.h>
+#include <util/lockfree/stack.H>
 
 /** @class PageManager
  *  @brief Manages the allocation of memory pages.
@@ -31,9 +32,9 @@ class PageManager
 	
 	struct page_t
 	{
-	    page_t* next_page;
+	    page_t* next;
 	};
-	page_t* first_page[BUCKETS];
+	Util::Lockfree::Stack<page_t> first_page[BUCKETS];
 
 	page_t* pop_bucket(size_t);
 	void push_bucket(page_t*, size_t);

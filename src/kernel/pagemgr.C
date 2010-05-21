@@ -33,10 +33,6 @@ PageManager::PageManager()
 	   length,
 	   (uint64_t)page);
     
-    // Clear page buckets.
-    for(int i = 0; i < BUCKETS; i++)
-	first_page[i] = NULL;
-
     // Allocate pages to buckets.
     size_t page_length = BUCKETS-1;
     while(length > 0)
@@ -44,8 +40,7 @@ PageManager::PageManager()
 	while (length < (1 << page_length))
 	    page_length--;
 
-	page->next_page = first_page[page_length];
-	first_page[page_length] = page;
+	first_page[page_length].push(page);
 	page = (page_t*)((uint64_t)page + (1 << page_length)*PAGESIZE);
 	length -= (1 << page_length);
     }
@@ -91,7 +86,7 @@ PageManager::page_t* PageManager::pop_bucket(size_t n)
 {
     if (n >= BUCKETS) return NULL;
     
-    page_t* p = first_page[n];
+    page_t* p = first_page[n].pop();
 
     if (NULL == p)
     { 
@@ -101,24 +96,11 @@ PageManager::page_t* PageManager::pop_bucket(size_t n)
 	push_bucket((page_t*) (((uint64_t)p) + (PAGESIZE * (1 << n))),
 		    n);
     }
-    else
-    {
-	// This bucket appears to have items in it, allocate one.
-	if (!__sync_bool_compare_and_swap(&first_page[n],
-					  p,
-					  p->next_page))
-	    return pop_bucket(n);
-    }
     return p;
 }
 
 void PageManager::push_bucket(page_t* p, size_t n)
 {
     if (n >= BUCKETS) return;
-    
-    p->next_page = first_page[n];
-    if (!__sync_bool_compare_and_swap(&first_page[n],
-				      p->next_page,
-				      p))
-	push_bucket(p, n);
+    first_page[n].push(p);
 }
