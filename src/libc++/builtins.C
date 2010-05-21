@@ -1,4 +1,25 @@
 #include <stdint.h>
+#include <stdlib.h>
+
+void* operator new(size_t s)
+{
+    return malloc(s);
+};
+
+void* operator new[](size_t s)
+{
+    return malloc(s);
+};
+
+void operator delete(void* p)
+{
+    return free(p);
+};
+
+void operator delete[](void* p)
+{
+    return free(p);
+};
 
 extern "C" int __cxa_guard_acquire(volatile uint64_t* gv)
 {

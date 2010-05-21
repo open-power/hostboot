@@ -23,7 +23,7 @@ int main()
     Kernel& kernel = Singleton<Kernel>::instance();
     kernel.cppBootstrap();
     kernel.memBootstrap(); 
-    
+
     while(1);
     return 0;
 }
