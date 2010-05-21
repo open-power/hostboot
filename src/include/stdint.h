@@ -1,6 +1,8 @@
 #ifndef __STDINT_H
 #define __STDINT_H
 
+#include <stddef.h>
+
 typedef char 			int8_t;
 typedef short int 		int16_t;
 typedef int			int32_t;

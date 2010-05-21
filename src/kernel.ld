@@ -18,9 +18,9 @@ SECTIONS
 	*(.rodata)
 	*(.rodata.*)
 	. = ALIGN(0x8);
-	ctor_start = .;
+	ctor_start_address = .;
 	*(.ctors)
-	ctor_end = .;
+	ctor_end_address = .;
 
     }
     
@@ -40,6 +40,8 @@ SECTIONS
 	*(.bss.*)
 
     }
+
+    end_load_address = .;
 
     . = hreset_load_address;
     .text.hreset : {
