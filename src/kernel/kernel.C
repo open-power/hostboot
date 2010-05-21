@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <kernel/console.H>
 #include <kernel/pagemgr.H>
+#include <kernel/heapmgr.H>
 #include <util/singleton.H>
 
 class Kernel
@@ -20,7 +21,7 @@ int main()
     Kernel& kernel = Singleton<Kernel>::instance();
     kernel.cppBootstrap();
     kernel.memBootstrap(); 
-
+    
     while(1);
     return 0;
 }

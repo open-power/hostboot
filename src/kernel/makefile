@@ -1,7 +1,7 @@
 OBJDIR = ../../obj
 include ../../config.mk
 
-OBJS = start.o kernel.o console.o pagemgr.o
+OBJS = start.o kernel.o console.o pagemgr.o heapmgr.o
 OBJECTS = $(addprefix ${OBJDIR}/, ${OBJS})
 
 all: ${OBJECTS}
