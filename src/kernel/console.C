@@ -11,10 +11,13 @@ Console::Console() : iv_pos(0), iv_buffer(kernel_printk_buffer)
 
 int Console::putc(int c)
 {
-    if (BUFFER_SIZE > iv_pos)
+    if ('\b' == c)
     {
-	iv_buffer[iv_pos] = c;
-	iv_pos++;
+	__sync_sub_and_fetch(&iv_pos, 1);
+    }
+    else if (BUFFER_SIZE > iv_pos)
+    {
+	iv_buffer[__sync_fetch_and_add(&iv_pos, 1)] = c;
     }
 }
 
