@@ -6,7 +6,7 @@ COMMONFLAGS = -O3 -nostdlib
 CFLAGS = ${COMMONFLAGS} -mcpu=620 -nostdinc -g
 ASMFLAGS = ${COMMONFLAGS} -mcpu=620
 CXXFLAGS = ${CFLAGS} -nostdinc++ -fno-rtti -fno-exceptions
-LDFLAGS = -static ${COMMONFLAGS}
+LDFLAGS = -static --sort-common  -Map $@.map ${COMMONFLAGS}
 
 INCDIR = ${OBJDIR}/../src/include/
 

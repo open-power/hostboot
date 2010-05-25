@@ -2,3 +2,4 @@
 *.swp
 *.bin
 *.elf
+*.map

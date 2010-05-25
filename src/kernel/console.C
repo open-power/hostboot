@@ -2,7 +2,7 @@
 #include <kernel/console.H>
 #include <stdarg.h>
 
-static char kernel_printk_buffer[Console::BUFFER_SIZE];
+char kernel_printk_buffer[Console::BUFFER_SIZE];
 
 Console::Console() : iv_pos(0), iv_buffer(kernel_printk_buffer)
 {
