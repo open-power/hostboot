@@ -74,15 +74,15 @@ _main:
     ori 2, 2, main@l
     ld 2,8(2)
     
-    ;// Set up initial stack
+    ;// Set up initial stack, space for 8 double-words
     lis 1, kernel_stack@h
     ori 1, 1, kernel_stack@l
-    addi 1, 1, 16368
+    addi 1, 1, 16320
 
-    ;// Set up exception stack
+    ;// Set up exception stack, space for 8 double-words
     lis 3, exception_stack@h
     ori 3, 3, exception_stack@l
-    addi 3, 3, 16368
+    addi 3, 3, 16320
     mtsprg0 3
 
     ;// Call main.
