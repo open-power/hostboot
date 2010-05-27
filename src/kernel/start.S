@@ -22,17 +22,14 @@ pre_relocate:
     ;// Write address in r5
     ;// Read address in r1
     li 5,0
-    li 1, -1	;// fill r1 with ffff..ffffff
-    lis 3, 0x1
-    subi 3,3,1	;// fill r3 with 0000..00ffff
-    xor 1,1,3	;// mask off r1  ffff..ff0000
+    lis 1, -1	;// fill r1 with ffff..ff0000
 
     and 1,1,2	;// and with pre_relocate's address from r2 to get start of
 		;// rom section.
     
     ;// Update LR to low address.
-    and 6,2,3
-    mtlr 6
+    clrldi 2,2,48  ;// Equiv to ~(0x0FFFF)
+    mtlr 2
 
     ;// Moving 1MB , so load r2 with (1MB / 8 bytes per word)
     lis 2, 0x2
@@ -51,9 +48,10 @@ relocate_loop:
     
     ;// Now that we've relocated, erase exception prefix.
     mfmsr 11
-    li 10, 0x40 ;// bit 6 is MSR_EP
-    not 10,10
-    and 11,11,10
+    
+    rldicl 11,11,57,1  ;// Erase bit 6 ( equiv to r11 & ~(0x40))
+    rotldi 11,11,7
+    
     mtmsr 11
     
     ;// Jump to low address.
