@@ -2,6 +2,7 @@
 #include <kernel/console.H>
 #include <kernel/pagemgr.H>
 #include <kernel/heapmgr.H>
+#include <kernel/cpumgr.H>
 #include <util/singleton.H>
 
 #include <stdlib.h>
@@ -11,6 +12,7 @@ class Kernel
     public:
 	void cppBootstrap();	
 	void memBootstrap();
+	void cpuBootstrap();
 
     protected:
 	Kernel() {};
@@ -23,6 +25,7 @@ int main()
     Kernel& kernel = Singleton<Kernel>::instance();
     kernel.cppBootstrap();
     kernel.memBootstrap(); 
+    kernel.cpuBootstrap();
 
     while(1);
     return 0;
@@ -45,5 +48,10 @@ void Kernel::memBootstrap()
 {
     PageManager::init();
     HeapManager::init();
+}
+
+void Kernel::cpuBootstrap()
+{
+    CpuManager::init();
 }
 

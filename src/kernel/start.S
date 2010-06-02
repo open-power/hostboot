@@ -77,12 +77,6 @@ _main:
     ori 1, 1, kernel_stack@l
     addi 1, 1, 16320
 
-    ;// Set up exception stack, space for 8 double-words
-    lis 3, exception_stack@h
-    ori 3, 3, exception_stack@l
-    addi 3, 3, 16320
-    mtsprg0 3
-
     ;// Call main.
     bl main
 _main_loop:
@@ -92,8 +86,6 @@ _main_loop:
 .section .data
     .balign 1024
 kernel_stack:
-    .space 16*1024
-exception_stack:
     .space 16*1024
 
 .section .text.hreset
