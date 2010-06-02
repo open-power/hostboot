@@ -1,0 +1,27 @@
+#!/usr/bin/env perl
+
+use strict;
+
+my $command = shift;
+
+if ("start" eq $command)
+{
+    system "make all > /dev/null";
+    system "qemu-system-ppc64 -bios ./img/kernel.bin -cpu 620 -M prep -m 8mb ".
+	   "-nographic -monitor telnet:localhost:4444,server,nowait -daemonize";
+}
+elsif (("stop" eq $command) || ("quit" eq $command))
+{
+    system "echo 'quit' | nc6 localhost 4444 2> /dev/null > /dev/null";
+}
+elsif (("command" eq $command) || ("control" eq $command))
+{
+    system "telnet localhost 4444";
+}
+elsif ("trace" eq $command)
+{
+    system "rm -f /tmp/qemu.trace";
+    system "echo memsave `grep kernel_printk_buffer ./img/kernel.bin.map | sed 's/kernel_printk_buffer//' | sed 's/ *//g'` 4096 \\\"/tmp/qemu.trace\\\" | nc6 -x localhost 4444 2> /dev/null > /dev/null";
+    while (not -e "/tmp/qemu.trace") {};
+    system "cat /tmp/qemu.trace";
+}
