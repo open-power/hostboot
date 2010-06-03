@@ -1,58 +1,60 @@
+.include "kernel/ppcconsts.S"
+
 .section .text.intvects
 
 .global _start
 _start:
     ;// Enter 64 bit mode
-    mfmsr 0
-    lis 11, 0x8000
-    sldi 11,11, 32
-    or 11,11,0
-    mtmsr 11
+    mfmsr r0
+    lis r11, 0x8000
+    sldi r11,r11, 32
+    or r11,r11,r0
+    mtmsr r11
     isync
     
     ;// Relocate code
     bl pre_relocate	;// fill LR with address
 pre_relocate:
-    mflr 2
-    lis 1,0x0010
-    cmpl 0,2,1		;// Check LR is less than 1MB
+    mflr r2
+    lis r1,0x0010
+    cmpl cr0,r2,r1		;// Check LR is less than 1MB
     blt finished_relocate	;// No need to relocate if less than 1MB
     
     ;// Get addresses for relocation.
     ;// Write address in r5
     ;// Read address in r1
-    li 5,0
-    lis 1, -1	;// fill r1 with ffff..ff0000
+    li r5,0
+    lis r1, -1	;// fill r1 with ffff..ff0000
 
-    and 1,1,2	;// and with pre_relocate's address from r2 to get start of
-		;// rom section.
+    and r1,r1,r2 ;// and with pre_relocate's address from r2 to get start of
+		 ;// rom section.
     
     ;// Update LR to low address.
-    clrldi 2,2,48  ;// Equiv to ~(0x0FFFF)
+    clrldi r2,r2,48  ;// Equiv to ~(0x0FFFF)
     mtlr 2
 
     ;// Moving 1MB , so load r2 with (1MB / 8 bytes per word)
-    lis 2, 0x2
-    mtctr 2
+    lis r2, 0x2
+    mtctr r2
 relocate_loop:		
     ;// The dcbst/sync/icbi/isync sequence comes from PowerISA
-    ld 4, 0(1)
-    std 4, 0(5)
-    dcbst 0,5
+    ld r4, 0(r1)
+    std r4, 0(r5)
+    dcbst 0,r5
     sync
-    icbi 0,5
+    icbi 0,r5
     isync
-    addi 1,1,8
-    addi 5,5,8
+    addi r1,r1,8
+    addi r5,r5,8
     bdnz+ relocate_loop
     
     ;// Now that we've relocated, erase exception prefix.
-    mfmsr 11
+    mfmsr r11
     
-    rldicl 11,11,57,1  ;// Erase bit 6 ( equiv to r11 & ~(0x40))
-    rotldi 11,11,7
+    rldicl r11,r11,57,1  ;// Erase bit 6 ( equiv to r11 & ~(0x40))
+    rotldi r11,r11,7
     
-    mtmsr 11
+    mtmsr r11
     
     ;// Jump to low address.
     blr
@@ -68,14 +70,14 @@ intvect_system_reset:
 .section .text
 _main:
     ;// Set up initial TOC Base
-    lis 2, main@h
-    ori 2, 2, main@l
-    ld 2,8(2)
+    lis r2, main@h
+    ori r2, r2, main@l
+    ld r2,8(r2)
     
     ;// Set up initial stack, space for 8 double-words
-    lis 1, kernel_stack@h
-    ori 1, 1, kernel_stack@l
-    addi 1, 1, 16320
+    lis r1, kernel_stack@h
+    ori r1, r1, kernel_stack@l
+    addi r1, r1, 16320
 
     ;// Call main.
     bl main

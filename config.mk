@@ -17,7 +17,7 @@ ${OBJDIR}/%.o : %.c
 	${CC} -c ${CFLAGS} $< -o $@ -I ${INCDIR}
 
 ${OBJDIR}/%.o : %.S
-	${CC} -c ${ASMFLAGS} $< -o $@
+	${CC} -c ${ASMFLAGS} $< -o $@ -Wa,-I${INCDIR}
 
 ${IMGDIR}/%.elf: kernel.ld ${OBJDIR}/*.o
 	${LD} ${LDFLAGS} ${OBJDIR}/*.o -T kernel.ld -o $@
