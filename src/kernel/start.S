@@ -117,7 +117,7 @@ intvect_system_call:
 	
 	;// Retrieve processing address for interrupt.
     lis r1,intvect_system_call_finish_save@h
-    li r1,intvect_system_call_finish_save@l
+    ori r1,intvect_system_call_finish_save@l
 	;// Save interrupt address in SPRG0
     mtsprg0 r1
     
@@ -125,6 +125,15 @@ intvect_system_call:
     b kernel_save_task 		;// Save current task.
 
 intvect_system_call_finish_save:
+	;// Get TOC entry for kernel_execute_systemcall
+    lis r2, kernel_execute_systemcall@h
+    ori r2, r2, kernel_execute_systemcall@l
+    ld r0,0(r2)	;// Load call addr.
+    mtlr r0
+    ld r2,8(r2)	;// Load TOC base.
+
+    blr				;// Call kernel_execute_systemcall
+    nop
     b kernel_dispatch_task	;// Return to task.
 
 .org _start + 0xD00

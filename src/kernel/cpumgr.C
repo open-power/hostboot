@@ -46,7 +46,8 @@ void CpuManager::startCPU(ssize_t i)
 	// Initialize CPU.
 	cpu->cpu = i;
 	cpu->scheduler = new Scheduler();
-	cpu->kernel_stack = PageManager::allocatePage(4);
+	cpu->kernel_stack = 
+	    (void*) (((uint64_t)PageManager::allocatePage(4)) + 16320);
 	
 	// Create idle task.
 	task_t * idle_task = TaskManager::createIdleTask();
