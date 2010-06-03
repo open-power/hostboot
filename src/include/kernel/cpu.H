@@ -7,10 +7,10 @@ class Scheduler;
 
 struct cpu_t
 {
+    void* kernel_stack;
     cpuid_t cpu;
 
     Scheduler* scheduler;
-    void* kernel_stack;
 };
 
 #endif

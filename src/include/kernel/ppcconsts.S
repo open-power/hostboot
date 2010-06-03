@@ -122,3 +122,48 @@
                 .set HID0,1008
                 .set IABR,1010
 
+#*--------------------------------------------------------------------*#
+#*  Task offset Constants                                             *#
+#*--------------------------------------------------------------------*#
+
+.set TASK_CPUPTR, 0
+.set TASK_STACKPTR, TASK_CPUPTR+8
+.set TASK_NIP, TASK_STACKPTR+8
+.set TASK_GPR_0, TASK_NIP+8
+.set TASK_GPR_1, TASK_GPR_0+8
+.set TASK_GPR_2, TASK_GPR_1+8
+.set TASK_GPR_3, TASK_GPR_2+8
+.set TASK_GPR_4, TASK_GPR_3+8
+.set TASK_GPR_5, TASK_GPR_4+8
+.set TASK_GPR_6, TASK_GPR_5+8
+.set TASK_GPR_7, TASK_GPR_6+8
+.set TASK_GPR_8, TASK_GPR_7+8
+.set TASK_GPR_9, TASK_GPR_8+8
+.set TASK_GPR_10, TASK_GPR_9+8
+.set TASK_GPR_11, TASK_GPR_10+8
+.set TASK_GPR_12, TASK_GPR_11+8
+.set TASK_GPR_13, TASK_GPR_12+8
+.set TASK_GPR_14, TASK_GPR_13+8
+.set TASK_GPR_15, TASK_GPR_14+8
+.set TASK_GPR_16, TASK_GPR_15+8
+.set TASK_GPR_17, TASK_GPR_16+8
+.set TASK_GPR_18, TASK_GPR_17+8
+.set TASK_GPR_19, TASK_GPR_18+8
+.set TASK_GPR_20, TASK_GPR_19+8
+.set TASK_GPR_21, TASK_GPR_20+8
+.set TASK_GPR_22, TASK_GPR_21+8
+.set TASK_GPR_23, TASK_GPR_22+8
+.set TASK_GPR_24, TASK_GPR_23+8
+.set TASK_GPR_25, TASK_GPR_24+8
+.set TASK_GPR_26, TASK_GPR_25+8
+.set TASK_GPR_27, TASK_GPR_26+8
+.set TASK_GPR_28, TASK_GPR_27+8
+.set TASK_GPR_29, TASK_GPR_28+8
+.set TASK_GPR_30, TASK_GPR_29+8
+.set TASK_GPR_31, TASK_GPR_30+8
+.set TASK_LR, TASK_GPR_31+8
+.set TASK_CR, TASK_LR+8
+.set TASK_CTR, TASK_CR+8
+.set TASK_XER, TASK_CTR+8
+
+

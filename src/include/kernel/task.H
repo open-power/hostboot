@@ -9,6 +9,7 @@ struct context_t
     void* nip;
     uint64_t gprs[32];
     uint64_t lr;
+    uint64_t cr;
     uint64_t ctr;
     uint64_t xer;
 };

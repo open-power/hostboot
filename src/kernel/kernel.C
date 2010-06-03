@@ -7,6 +7,8 @@
 
 #include <stdlib.h>
 
+extern "C" void kernel_dispatch_task();
+
 class Kernel
 {
     public:
@@ -26,6 +28,8 @@ int main()
     kernel.cppBootstrap();
     kernel.memBootstrap(); 
     kernel.cpuBootstrap();
+
+    kernel_dispatch_task();
 
     while(1);
     return 0;
