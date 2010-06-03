@@ -117,7 +117,7 @@ intvect_system_call:
 	
 	;// Retrieve processing address for interrupt.
     lis r1,intvect_system_call_finish_save@h
-    ori r1,intvect_system_call_finish_save@l
+    ori r1,r1,intvect_system_call_finish_save@l
 	;// Save interrupt address in SPRG0
     mtsprg0 r1
     
