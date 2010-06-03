@@ -105,11 +105,33 @@ intvect_fp_unavail:
 
 .org _start + 0x900
 intvect_decrementer:
-    b intvect_decrementer;
+    mtsprg1 r1 	;// Save GPR1
+	
+	;// Retrieve processing address for interrupt.
+    lis r1,intvect_decrementer_finish_save@h
+    ori r1,r1,intvect_decrementer_finish_save@l
+	;// Save interrupt address in SPRG0
+    mtsprg0 r1
+    
+    mfsprg1 r1 			;// Restore GPR1
+    b kernel_save_task 		;// Save current task.
+
+intvect_decrementer_finish_save:
+	;// Get TOC entry for kernel_execute_systemcall
+    lis r2, kernel_execute_decrementer@h
+    ori r2, r2, kernel_execute_decrementer@l
+    ld r0,0(r2)	;// Load call addr.
+    mtlr r0
+    ld r2,8(r2)	;// Load TOC base.
+
+    blrl			;// Call kernel_execute_systemcall
+    nop
+    b kernel_dispatch_task	;// Return to task.
+
 
 .org _start + 0x980
 intvect_hype_decrementer:
-    b intvect_hype_decrementer;
+    b intvect_decrementer;
 
 .org _start + 0xC00
 intvect_system_call:
@@ -132,7 +154,7 @@ intvect_system_call_finish_save:
     mtlr r0
     ld r2,8(r2)	;// Load TOC base.
 
-    blr				;// Call kernel_execute_systemcall
+    blrl			;// Call kernel_execute_systemcall
     nop
     b kernel_dispatch_task	;// Return to task.
 
@@ -270,7 +292,7 @@ kernel_dispatch_task:
     mtxer r23		;// Restore XER
     
     mfmsr r2		;// Get current MSR
-			;// TODO: Modify MSR to user-space.
+    ori r2,r2, 0xC000	;// Enable MSR[EE,PR].
     mtsrr1 r2		;// Set task MSR (SRR1)
 
     ld r2, TASK_NIP(r1)	;// Load NIP from context.

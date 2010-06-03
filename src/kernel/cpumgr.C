@@ -61,6 +61,11 @@ void CpuManager::startCPU(ssize_t i)
     {
 	register task_t* idle_task = iv_cpus[i]->scheduler->getIdleTask();
 	asm volatile("mtsprg3 %0" :: "r" (idle_task));
+
+	// TODO: Set up decrementer properly.
+	register uint64_t decrementer = 0x0f000000;
+	asm volatile("mtdec %0" :: "r"(decrementer));
+
     }
     else
     {
