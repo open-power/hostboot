@@ -228,7 +228,7 @@ kernel_save_task:
     mfctr r0
     std r0, TASK_CTR(r1)	;// Save CTR
     mfxer r0
-    std r0, TASK_CTR(r1)	;// Save XER
+    std r0, TASK_XER(r1)	;// Save XER
     mfsprg1 r0
     std r0, TASK_GPR_1(r1)	;// Save GPR1
     std r2, TASK_GPR_2(r1)	;// Save GPR2
