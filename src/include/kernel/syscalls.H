@@ -6,6 +6,9 @@ namespace Systemcalls
     enum SysCalls
     {
 	TASK_YIELD = 0,
+	TASK_START,
+	TASK_END,
+	TASK_GETTID,
 
 	SYSCALL_MAX
     };

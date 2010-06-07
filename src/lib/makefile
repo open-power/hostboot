@@ -1,7 +1,8 @@
 OBJDIR = ../../obj
 include ../../config.mk
 
-OBJS = string.o stdlib.o syscall_stub.o
+OBJS = string.o stdlib.o 
+OBJS += syscall_stub.o syscall_task.o
 OBJECTS = $(addprefix ${OBJDIR}/, ${OBJS})
 
 all: ${OBJECTS}

@@ -1,5 +1,12 @@
 #include <kernel/console.H>  // TODO : Remove this.
-#include <sys/syscall.h>     // TODO : Remove this.
+
+#include <sys/task.h>
+
+void init_child(void* unused)
+{
+    printk("Here I am %d\n", task_gettid());
+    task_end();
+}
 
 void init_main(void* unused)
 {
@@ -7,7 +14,8 @@ void init_main(void* unused)
 
     while(1)
     {
-	_syscall0(Systemcalls::TASK_YIELD);
-	for (volatile int i = 0 ; i < 100000; i++);
+	int t = task_create(&init_child, NULL);
+	printk("Created child %d\n", t);
+	for (volatile int i = 0 ; i < 10000000; i++);
     }
 }

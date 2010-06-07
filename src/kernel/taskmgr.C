@@ -66,7 +66,8 @@ task_t* TaskManager::_createTask(TaskManager::task_fn_t t,
     // Setup stack.
     if (withStack)
     {
-	task->context.stack_ptr = PageManager::allocatePage(4);
+	task->context.stack_ptr = 
+	    PageManager::allocatePage(TASK_DEFAULT_STACK_SIZE);
 	task->context.gprs[1] = ((uint64_t)task->context.stack_ptr) + 16320;
     }
     else

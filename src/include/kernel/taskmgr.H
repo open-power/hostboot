@@ -10,15 +10,14 @@ class TaskManager
 	static void setCurrentTask(task_t* t);
 	
 	typedef void(*task_fn_t)(void*);
+	static task_t* createTask(task_fn_t, void*);
 
 	friend class CpuManager;
-	friend class Kernel;
     protected:
 	TaskManager();
 	~TaskManager() {};
 
 	static task_t* createIdleTask();
-	static task_t* createTask(task_fn_t, void*);
 
     private:
 	tid_t getNextTid();

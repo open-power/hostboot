@@ -19,7 +19,7 @@ void* _syscall7(uint64_t, void*, void*, void*, void*, void*, void*, void*);
 
 #ifdef __cplusplus
 }
+#include <kernel/syscalls.H>
 #endif
 
-#include <kernel/syscalls.H>
 #endif

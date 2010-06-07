@@ -23,4 +23,6 @@ struct task_t
     task_t* next;
 };
 
+enum { TASK_DEFAULT_STACK_SIZE = 4 };
+
 #endif
