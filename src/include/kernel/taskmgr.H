@@ -17,7 +17,7 @@ class TaskManager
 	~TaskManager() {};
 
 	static task_t* createIdleTask();
-	static task_t* createTask(task_fn_t);
+	static task_t* createTask(task_fn_t, void*);
 
     private:
 	tid_t getNextTid();
@@ -26,7 +26,7 @@ class TaskManager
 
 	static void idleTaskLoop();
 	task_t* _createIdleTask();
-	task_t* _createTask(task_fn_t, bool);
+	task_t* _createTask(task_fn_t, void*, bool);
 };
 
 #endif

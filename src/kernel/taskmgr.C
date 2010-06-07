@@ -33,9 +33,9 @@ task_t* TaskManager::createIdleTask()
     return Singleton<TaskManager>::instance()._createIdleTask();
 }
 
-task_t* TaskManager::createTask(TaskManager::task_fn_t t)
+task_t* TaskManager::createTask(TaskManager::task_fn_t t, void* p)
 {
-    return Singleton<TaskManager>::instance()._createTask(t, true);
+    return Singleton<TaskManager>::instance()._createTask(t, p, true);
 }
 
 tid_t TaskManager::getNextTid()
@@ -45,10 +45,11 @@ tid_t TaskManager::getNextTid()
 
 task_t* TaskManager::_createIdleTask()
 {
-    return this->_createTask(&TaskManager::idleTaskLoop, false);
+    return this->_createTask(&TaskManager::idleTaskLoop, NULL, false);
 }
 
-task_t* TaskManager::_createTask(TaskManager::task_fn_t t, bool withStack)
+task_t* TaskManager::_createTask(TaskManager::task_fn_t t, 
+				 void* p, bool withStack)
 {
     task_t* task = new task_t;
     task->tid = this->getNextTid();
@@ -58,6 +59,9 @@ task_t* TaskManager::_createTask(TaskManager::task_fn_t t, bool withStack)
     //     TOC[1] = TOC base -> r2
     task->context.nip = (void*) ((uint64_t*) t)[0];
     task->context.gprs[2] = ((uint64_t*)t)[1];
+
+    // Set up argument.
+    task->context.gprs[3] = (uint64_t) p;
     
     // Setup stack.
     if (withStack)
