@@ -15,7 +15,8 @@ class Scheduler
 	void setNextRunnable();
 
     protected:
-	Scheduler() : iv_direction(false) {};
+	Scheduler(cpu_t* cpu) : 
+		iv_direction(false), iv_idleTask(NULL), iv_cpu(cpu) {};
 	~Scheduler() {};
 
 	void setIdleTask(task_t* t) { iv_idleTask = t; };
@@ -26,6 +27,7 @@ class Scheduler
 	Util::Lockfree::Stack<task_t> iv_taskList[2];
 
 	task_t* iv_idleTask;
+	cpu_t* iv_cpu;
 };
 
 #endif

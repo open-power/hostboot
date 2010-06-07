@@ -4,10 +4,15 @@
 #include <kernel/heapmgr.H>
 #include <kernel/cpumgr.H>
 #include <util/singleton.H>
+#include <kernel/cpu.H>
+#include <kernel/task.H>
+#include <kernel/scheduler.H>
+#include <kernel/taskmgr.H>
 
 #include <stdlib.h>
 
 extern "C" void kernel_dispatch_task();
+extern void init_main(void* unused);
 
 class Kernel
 {
@@ -15,6 +20,7 @@ class Kernel
 	void cppBootstrap();	
 	void memBootstrap();
 	void cpuBootstrap();
+	void inittaskBootstrap();
 
     protected:
 	Kernel() {};
@@ -29,8 +35,9 @@ int main()
     kernel.memBootstrap(); 
     kernel.cpuBootstrap();
 
-    kernel_dispatch_task();
+    kernel.inittaskBootstrap();
 
+    kernel_dispatch_task(); // no return.    
     while(1);
     return 0;
 }
@@ -57,5 +64,13 @@ void Kernel::memBootstrap()
 void Kernel::cpuBootstrap()
 {
     CpuManager::init();
+}
+
+void Kernel::inittaskBootstrap()
+{
+    task_t * t = TaskManager::createTask(&init_main, NULL);
+    t->cpu = CpuManager::getCurrentCPU();
+    TaskManager::setCurrentTask(t);
+
 }
 

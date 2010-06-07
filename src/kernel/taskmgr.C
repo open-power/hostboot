@@ -3,7 +3,7 @@
 #include <kernel/task.H>
 #include <kernel/pagemgr.H>
 
-void TaskManager::idleTaskLoop()
+void TaskManager::idleTaskLoop(void* unused)
 {
     while(1)
     {
