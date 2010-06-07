@@ -7,6 +7,7 @@ class TaskManager
 {
     public:
 	static task_t* getCurrentTask();
+	static void setCurrentTask(task_t* t);
 	
 	typedef void(*task_fn_t)();
 

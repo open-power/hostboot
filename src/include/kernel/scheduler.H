@@ -9,6 +9,11 @@ class Scheduler
     public:
 	friend class CpuManager;
 
+	void addTask(task_t*);
+
+	void returnRunnable();
+	void setNextRunnable();
+
     protected:
 	Scheduler() : iv_direction(false) {};
 	~Scheduler() {};

@@ -12,7 +12,7 @@ class CpuManager
 	 *  Returns a pointer to the current CPU structure by using the
 	 *  task structure in SPRG3.
 	 */
-	cpu_t* getCurrentCPU();
+	static cpu_t* getCurrentCPU();
 
 	static void init();
 

@@ -17,6 +17,13 @@ task_t* TaskManager::getCurrentTask()
     return current_task;
 }
 
+void TaskManager::setCurrentTask(task_t* t)
+{
+    register task_t* _t = t;
+    asm volatile("mtsprg3 %0" :: "r" (_t));
+    return;
+}
+
 TaskManager::TaskManager() : iv_nextTid(0)
 {
 }
