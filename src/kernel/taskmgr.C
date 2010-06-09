@@ -24,7 +24,7 @@ void TaskManager::setCurrentTask(task_t* t)
     return;
 }
 
-TaskManager::TaskManager() : iv_nextTid(0)
+TaskManager::TaskManager() : iv_nextTid()
 {
 }
 
@@ -36,11 +36,6 @@ task_t* TaskManager::createIdleTask()
 task_t* TaskManager::createTask(TaskManager::task_fn_t t, void* p)
 {
     return Singleton<TaskManager>::instance()._createTask(t, p, true);
-}
-
-tid_t TaskManager::getNextTid()
-{
-    return __sync_fetch_and_add(&iv_nextTid, 1);
 }
 
 task_t* TaskManager::_createIdleTask()

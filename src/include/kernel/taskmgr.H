@@ -2,6 +2,7 @@
 #define __KENREL_TASKMGR_H
 
 #include <kernel/types.h>
+#include <util/lockfree/counter.H>
 
 class TaskManager
 {
@@ -20,9 +21,8 @@ class TaskManager
 	static task_t* createIdleTask();
 
     private:
-	tid_t getNextTid();
-
-	tid_t iv_nextTid;
+	tid_t getNextTid() { return iv_nextTid.next(); };
+	Util::Lockfree::Counter<tid_t> iv_nextTid;
 
 	static void idleTaskLoop(void*);
 	task_t* _createIdleTask();
