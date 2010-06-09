@@ -20,6 +20,7 @@ struct task_t
     context_t context;
     
     tid_t tid;
+    task_t* prev;
     task_t* next;
 };
 

@@ -6,7 +6,7 @@ void Scheduler::addTask(task_t* t)
 {
     if (iv_idleTask != t)
     {
-	iv_taskList[iv_direction ? 0 : 1].push(t);
+	iv_taskList.insert(t);
     }
 }
 
@@ -17,16 +17,7 @@ void Scheduler::returnRunnable()
 
 void Scheduler::setNextRunnable()
 {
-    task_t* t = NULL;
-
-    bool direction = iv_direction;
-    t = iv_taskList[direction ? 1 : 0].pop();
-
-    if (NULL == t)
-    {
-	t = iv_taskList[direction ? 0 : 1].pop();
-	__sync_bool_compare_and_swap(&iv_direction, direction, !direction);
-    }
+    task_t* t = iv_taskList.remove();
 
     if (NULL == t)
     {

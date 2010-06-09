@@ -2,6 +2,9 @@
 #define __KERNEL_SCHEDULER_H
 
 #include <kernel/types.h>
+#include <kernel/spinlock.H>
+#include <util/locked/queue.H>
+
 #include <util/lockfree/stack.H>
 
 class Scheduler
@@ -16,15 +19,14 @@ class Scheduler
 
     protected:
 	Scheduler(cpu_t* cpu) : 
-		iv_direction(false), iv_idleTask(NULL), iv_cpu(cpu) {};
+		iv_taskList(), iv_idleTask(NULL), iv_cpu(cpu) {};
 	~Scheduler() {};
 
 	void setIdleTask(task_t* t) { iv_idleTask = t; };
 	task_t* getIdleTask() { return iv_idleTask; };
 
     private:
-	bool iv_direction;
-	Util::Lockfree::Stack<task_t> iv_taskList[2];
+	Util::Locked::Queue<task_t, true, Spinlock> iv_taskList;
 
 	task_t* iv_idleTask;
 	cpu_t* iv_cpu;
