@@ -1,6 +1,8 @@
 #ifndef __UTIL_LOCKED_QUEUE_H
 #define __UTIL_LOCKED_QUEUE_H
 
+#include <util/locked/lock.H>
+
 namespace Util
 {
     namespace Locked
@@ -21,6 +23,9 @@ namespace Util
 
 		_S lock;
 
+		void __lock();
+		void __unlock();
+
 	};
 
 	template <typename _T, bool locked, typename _S>
@@ -28,8 +33,7 @@ namespace Util
 	{
 	    _T* item = NULL;
 
-	    if (locked)
-		lock.lock();
+	    __lock();
 	    
 	    if (tail != NULL)
 	    {
@@ -40,17 +44,15 @@ namespace Util
 		    tail = item->prev;
 	    }
 
-	    if (locked)
-		lock.unlock();
-
+	    __unlock();
+	    
 	    return item;
 	}
 
 	template <typename _T, bool locked, typename _S>
 	void Queue<_T,locked,_S>::insert(_T* item)
 	{
-	    if (locked)
-		lock.lock();
+	    __lock();
 	    
 	    if (head == NULL)
 	    {
@@ -63,10 +65,23 @@ namespace Util
 		item->next = head;
 		head = head->prev = item;
 	    }
-
-	    if (locked)
-		lock.unlock();
+	    
+	    __unlock();
 	}
+
+	template <typename _T, bool locked, typename _S>
+	void Queue<_T,locked,_S>::__lock()
+	{
+	    Util::Locked::LockHelper<locked,_S>(lock).lock();
+	}
+	
+	template <typename _T, bool locked, typename _S>
+	void Queue<_T,locked,_S>::__unlock()
+	{
+	    Util::Locked::LockHelper<locked,_S>(lock).unlock();
+	}
+
+
     };
 };
 

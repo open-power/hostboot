@@ -1,4 +1,5 @@
 #include <sys/task.h>
+#include <sys/syscall.h>
 #include <kernel/task.H>
 
 using namespace Systemcalls;
@@ -9,9 +10,9 @@ void task_yield()
     return;
 }
 
-int task_create(void(*fn)(void*), void* ptr)
+tid_t task_create(void(*fn)(void*), void* ptr)
 {
-    return (int64_t) _syscall2(TASK_START, (void*)fn, ptr);
+    return (tid_t) _syscall2(TASK_START, (void*)fn, ptr);
 }
 
 void task_end()
@@ -20,7 +21,7 @@ void task_end()
     return;
 }
 
-uint64_t task_gettid()
+tid_t task_gettid()
 {
-    return (uint64_t)_syscall0(TASK_GETTID);
+    return (tid_t)_syscall0(TASK_GETTID);
 }

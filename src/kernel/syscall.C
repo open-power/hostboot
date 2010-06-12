@@ -6,6 +6,7 @@
 #include <kernel/syscalls.H>
 #include <kernel/console.H>
 #include <kernel/pagemgr.H>
+#include <kernel/usermutex.H>
 
 extern "C"
 void kernel_execute_decrementer()
@@ -26,6 +27,10 @@ namespace Systemcalls
     void TaskStart(task_t*);
     void TaskEnd(task_t*);
     void TaskGettid(task_t*);
+    void MutexCreate(task_t*);
+    void MutexDestroy(task_t*);
+    void MutexLockCont(task_t*);
+    void MutexUnlockCont(task_t*);
 
     syscall syscalls[] =
 	{
@@ -33,6 +38,11 @@ namespace Systemcalls
 	    &TaskStart,
 	    &TaskEnd,
 	    &TaskGettid,
+
+	    &MutexCreate,
+	    &MutexDestroy,
+	    &MutexLockCont,
+	    &MutexUnlockCont,
 	};
 };
 
@@ -102,5 +112,61 @@ namespace Systemcalls
     void TaskGettid(task_t* t)
     {
 	TASK_SETRTN(t, t->tid);
+    }
+
+    void MutexCreate(task_t* t)
+    {
+	UserMutex * m = new UserMutex();
+	TASK_SETRTN(t, (uint64_t)m);
+    }
+
+    void MutexDestroy(task_t* t)
+    {
+	// TODO: Extra verification of parameter and mutex state.
+
+	delete (UserMutex*) TASK_GETARG0(t);
+	TASK_SETRTN(t, 0);
+    }
+
+    void MutexLockCont(task_t* t)
+    {
+	// TODO: Extra verification of parameter and mutex state.
+	
+	UserMutex* m = (UserMutex*) TASK_GETARG0(t);
+	m->lock.lock();
+	if (m->unlock_pend) 
+	{   
+	    // We missed the unlock syscall, take lock and return to userspace.
+	    m->unlock_pend = false;
+	    m->lock.unlock();
+
+	}
+	else
+	{
+	    // Queue ourself to wait for unlock.
+	    m->waiting.insert(TaskManager::getCurrentTask());
+	    m->lock.unlock();
+	    CpuManager::getCurrentCPU()->scheduler->setNextRunnable();
+	}
+	TASK_SETRTN(t, 0);	
+    }
+
+    void MutexUnlockCont(task_t* t)
+    {
+	// TODO: Extra verification of parameter and mutex state.
+
+	UserMutex* m = (UserMutex*) TASK_GETARG0(t);
+	m->lock.lock();
+	task_t* wait_task = m->waiting.remove();
+	if (NULL == wait_task)
+	{
+	    m->unlock_pend = true;
+	}
+	else
+	{
+	    wait_task->cpu->scheduler->addTask(wait_task);
+	}
+	m->lock.unlock();
+	TASK_SETRTN(t, 0);
     }
 };
