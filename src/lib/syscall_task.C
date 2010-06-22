@@ -1,6 +1,7 @@
 #include <sys/task.h>
 #include <sys/syscall.h>
 #include <kernel/task.H>
+#include <kernel/taskmgr.H>
 
 using namespace Systemcalls;
 
@@ -23,5 +24,11 @@ void task_end()
 
 tid_t task_gettid()
 {
-    return (tid_t)_syscall0(TASK_GETTID);
+    // Even though we have a syscall for GETTID, we can implement this as a 
+    // direct access to SPRG3.  On processor that do not support unprivilaged
+    // access to this SPR, we implement it as an emulated instruction in the
+    // exception handler.
+
+    return TaskManager::getCurrentTask()->tid;
+    //return (tid_t)_syscall0(TASK_GETTID);
 }
