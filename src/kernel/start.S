@@ -63,132 +63,59 @@ finished_relocate:
     ;// Jump to main.
     b _main
 
+;// Interrupt vectors.
+
+#define UNIMPL_INTERRUPT(name, address) \
+    .org _start + address; \
+    intvect_##name: \
+	b intvect_##name
+
+#define STD_INTERRUPT(name, address) \
+    .org _start + address; \
+    intvect_##name: \
+	mtsprg1 r1; /* Save GPR1 */ \
+	    ;/* Retrieve processing address for interrupt. */ \
+	lis r1, intvect_##name##_finish_save@h; \
+	ori r1, r1, intvect_##name##_finish_save@l; \
+	    ;/* Save interrupt address in SPRG0 */ \
+	mtsprg0 r1; \
+	mfsprg1 r1; /* Restore GPR1 */ \
+	b kernel_save_task ; /* Save current task. */ \
+    intvect_##name##_finish_save: \
+	; /* Get TOC entry for kernel C function */ \
+	lis r2, kernel_execute_##name##@h; \
+	ori r2, r2, kernel_execute_##name##@l; \
+	ld r0, 0(r2); /* Load call address */ \
+	mtlr r0; \
+	ld r2, 8(r2); /* Load TOC base. */ \
+	blrl; /* Call kernel function */ \
+	nop; \
+	b kernel_dispatch_task; /* Return to task */
+
 .org _start + 0x100
 intvect_system_reset:
     b _start
 
-.org _start + 0x200
-intvect_machine_check:
-    b intvect_machine_check;
-
-.org _start + 0x300
-intvect_data_storage:
-    b intvect_data_storage;
-
-.org _start + 0x380
-intvect_data_segment:
-    b intvect_data_segment;
-
-.org _start + 0x400
-intvect_inst_storage:
-    b intvect_inst_storage;
-
-.org _start + 0x480
-intvect_inst_segment:
-    b intvect_inst_segment;
-
-.org _start + 0x500
-intvect_external:
-    b intvect_external;
-
-.org _start + 0x600
-intvect_alignment:
-    b intvect_alignment;
-
-.org _start + 0x700
-intvect_program:
-    b intvect_program;
-
-.org _start + 0x800
-intvect_fp_unavail:
-    b intvect_fp_unavail;
-
-.org _start + 0x900
-intvect_decrementer:
-    mtsprg1 r1 	;// Save GPR1
-	
-	;// Retrieve processing address for interrupt.
-    lis r1,intvect_decrementer_finish_save@h
-    ori r1,r1,intvect_decrementer_finish_save@l
-	;// Save interrupt address in SPRG0
-    mtsprg0 r1
-    
-    mfsprg1 r1 			;// Restore GPR1
-    b kernel_save_task 		;// Save current task.
-
-intvect_decrementer_finish_save:
-	;// Get TOC entry for kernel_execute_systemcall
-    lis r2, kernel_execute_decrementer@h
-    ori r2, r2, kernel_execute_decrementer@l
-    ld r0,0(r2)	;// Load call addr.
-    mtlr r0
-    ld r2,8(r2)	;// Load TOC base.
-
-    blrl			;// Call kernel_execute_systemcall
-    nop
-    b kernel_dispatch_task	;// Return to task.
-
-
-.org _start + 0x980
-intvect_hype_decrementer:
-    b intvect_decrementer;
-
-.org _start + 0xC00
-intvect_system_call:
-    mtsprg1 r1 	;// Save GPR1
-	
-	;// Retrieve processing address for interrupt.
-    lis r1,intvect_system_call_finish_save@h
-    ori r1,r1,intvect_system_call_finish_save@l
-	;// Save interrupt address in SPRG0
-    mtsprg0 r1
-    
-    mfsprg1 r1 			;// Restore GPR1
-    b kernel_save_task 		;// Save current task.
-
-intvect_system_call_finish_save:
-	;// Get TOC entry for kernel_execute_systemcall
-    lis r2, kernel_execute_systemcall@h
-    ori r2, r2, kernel_execute_systemcall@l
-    ld r0,0(r2)	;// Load call addr.
-    mtlr r0
-    ld r2,8(r2)	;// Load TOC base.
-
-    blrl			;// Call kernel_execute_systemcall
-    nop
-    b kernel_dispatch_task	;// Return to task.
-
-.org _start + 0xD00
-intvect_trace:
-    b intvect_trace;
-
-.org _start + 0xE00
-intvect_hype_data_storage:
-    b intvect_hype_data_storage;
-
-.org _start + 0xE20
-intvect_hype_inst_storage:
-    b intvect_hype_inst_storage;
-
-.org _start + 0xE40
-intvect_hype_emu_assist:
-    b intvect_hype_emu_assist;
-
-.org _start + 0xE60
-intvect_hype_maint:
-    b intvect_hype_maint;
-
-.org _start + 0xF00
-intvect_perf_monitor:
-    b intvect_perf_monitor;
-
-.org _start + 0xF20
-intvect_vector_unavail:
-    b intvect_vector_unavail;
-
-.org _start + 0xF40
-intvect_vsx_unavail:
-    b intvect_vsx_unavail;
+UNIMPL_INTERRUPT(machine_check, 0x200)
+UNIMPL_INTERRUPT(data_storage, 0x300)
+UNIMPL_INTERRUPT(data_segment, 0x380)
+UNIMPL_INTERRUPT(inst_storage, 0x400)
+UNIMPL_INTERRUPT(inst_segment, 0x480)
+UNIMPL_INTERRUPT(external, 0x500)
+UNIMPL_INTERRUPT(alignment, 0x600)
+UNIMPL_INTERRUPT(program, 0x700)
+UNIMPL_INTERRUPT(fp_unavail, 0x800)
+STD_INTERRUPT(decrementer, 0x900)
+UNIMPL_INTERRUPT(hype_decrementer, 0x980)
+STD_INTERRUPT(system_call, 0xC00)
+UNIMPL_INTERRUPT(trace, 0xD00)
+UNIMPL_INTERRUPT(hype_data_storage, 0xE00)
+UNIMPL_INTERRUPT(hype_inst_storage, 0xE20)
+UNIMPL_INTERRUPT(hype_emu_assist, 0xE40)
+UNIMPL_INTERRUPT(hype_maint, 0xE60)
+UNIMPL_INTERRUPT(perf_monitor, 0xF00)
+UNIMPL_INTERRUPT(vector_unavail, 0xF20)
+UNIMPL_INTERRUPT(vsx_unavail, 0xF40)
 
 .section .text
 _main:

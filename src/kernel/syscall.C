@@ -47,7 +47,7 @@ namespace Systemcalls
 };
 
 extern "C"
-void kernel_execute_systemcall()
+void kernel_execute_system_call()
 {
     using namespace Systemcalls;
     task_t* t = TaskManager::getCurrentTask();
