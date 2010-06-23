@@ -10,4 +10,4 @@ all: ${SUBDIRS}
 	${MAKE} ${IMAGES}
 
 clean: $(patsubst %.d,%.clean, ${SUBDIRS})
-	(rm -f ${IMAGES} )
+	(rm -f ${IMAGES} $(addsuffix .map, ${IMAGES}) )
