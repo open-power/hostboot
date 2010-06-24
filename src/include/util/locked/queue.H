@@ -17,7 +17,7 @@ namespace Util
 		_T* remove();
 		void insert(_T*);
 
-	    private:
+	    protected:
 		_T* head;
 		_T* tail;
 

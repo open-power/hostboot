@@ -7,6 +7,7 @@
 #include <kernel/console.H>
 #include <kernel/pagemgr.H>
 #include <kernel/usermutex.H>
+#include <kernel/msg.H>
 
 extern "C"
 void kernel_execute_decrementer()
@@ -31,6 +32,14 @@ namespace Systemcalls
     void MutexDestroy(task_t*);
     void MutexLockCont(task_t*);
     void MutexUnlockCont(task_t*);
+    void MsgQCreate(task_t*);
+    void MsgQDestroy(task_t*);
+    void MsgQRegisterRoot(task_t*);
+    void MsgQResolveRoot(task_t*);
+    void MsgSend(task_t*);
+    void MsgSendRecv(task_t*);
+    void MsgRespond(task_t*);
+    void MsgWait(task_t*);
 
     syscall syscalls[] =
 	{
@@ -43,6 +52,16 @@ namespace Systemcalls
 	    &MutexDestroy,
 	    &MutexLockCont,
 	    &MutexUnlockCont,
+
+	    &MsgQCreate,
+	    &MsgQDestroy,
+	    &MsgQRegisterRoot,
+	    &MsgQResolveRoot,
+
+	    &MsgSend,
+	    &MsgSendRecv,
+	    &MsgRespond,
+	    &MsgWait,
 	};
 };
 
@@ -169,4 +188,139 @@ namespace Systemcalls
 	m->lock.unlock();
 	TASK_SETRTN(t, 0);
     }
+
+    void MsgQCreate(task_t* t)
+    {
+	TASK_SETRTN(t, (uint64_t) new MessageQueue());
+    }
+
+    void MsgQDestroy(task_t* t)
+    {
+	MessageQueue* mq = (MessageQueue*) TASK_GETARG0(t);
+	if (NULL != mq)
+	    delete mq;
+	TASK_SETRTN(t, 0);
+    }
+
+    static MessageQueue* msgQRoot = NULL;
+
+    void MsgQRegisterRoot(task_t* t)
+    {
+	msgQRoot = (MessageQueue*) TASK_GETARG0(t);
+	TASK_SETRTN(t, 0);
+    }
+
+    void MsgQResolveRoot(task_t* t)
+    {
+	TASK_SETRTN(t, (uint64_t) msgQRoot);
+    }
+
+    void MsgSend(task_t* t)
+    {
+	MessageQueue* mq = (MessageQueue*) TASK_GETARG0(t);
+	msg_t* m = (msg_t*) TASK_GETARG1(t);
+	m->__reserved__async = 0; // set to async msg.
+
+	mq->lock.lock();
+	
+	// Get waiting (server) task.
+	task_t* waiter = mq->waiting.remove();
+	if (NULL == waiter) // None found, add to 'messages' queue.
+	{
+	    MessagePending* mp = new MessagePending();
+	    mp->key = m;
+	    mp->task = t;
+	    mq->messages.insert(mp);
+	}
+	else // Add waiter back to its scheduler.
+	{
+	    TASK_SETRTN(waiter, (uint64_t) m);
+	    waiter->cpu->scheduler->addTask(waiter);
+	}
+	
+	mq->lock.unlock();
+	TASK_SETRTN(t, 0);
+    }
+
+    void MsgSendRecv(task_t* t)
+    {
+	MessageQueue* mq = (MessageQueue*) TASK_GETARG0(t);
+	msg_t* m = (msg_t*) TASK_GETARG1(t);
+	m->__reserved__async = 1; // set to sync msg.
+	
+	mq->lock.lock();
+	MessagePending* mp = new MessagePending();
+	mp->key = m;
+	mp->task = t;
+
+	// Get waiting (server) task.
+	task_t* waiter = mq->waiting.remove();
+	if (NULL == waiter) // None found, add to 'messages' queue.
+	{
+	    mq->messages.insert(mp);
+	}
+	else // Context switch to waiter.
+	{
+	    TASK_SETRTN(waiter, (uint64_t) m);
+	    mq->responses.insert(mp);
+	    waiter->cpu = t->cpu;
+	    TaskManager::setCurrentTask(waiter);
+	}
+
+	mq->lock.unlock();
+	TASK_SETRTN(t,0);
+    }
+
+    void MsgRespond(task_t* t)
+    {
+    	MessageQueue* mq = (MessageQueue*) TASK_GETARG0(t);
+	msg_t* m = (msg_t*) TASK_GETARG1(t);
+	
+	mq->lock.lock();
+	MessagePending* mp = mq->responses.find(m);
+	if (NULL != mp)
+	{
+	    task_t* waiter = mp->task;
+
+	    mq->responses.erase(mp);
+	    delete mp;
+	    
+	    waiter->cpu = t->cpu;
+	    TaskManager::setCurrentTask(waiter);
+	    t->cpu->scheduler->addTask(t);
+
+	    TASK_SETRTN(t,0);
+	}
+	else
+	{
+	    TASK_SETRTN(t, -1);
+	}
+	mq->lock.unlock();
+    }
+
+    void MsgWait(task_t* t)
+    {
+    	MessageQueue* mq = (MessageQueue*) TASK_GETARG0(t);
+
+	mq->lock.lock();
+	MessagePending* mp = mq->messages.remove();
+	
+	if (NULL == mp)
+	{
+	    mq->waiting.insert(t);
+	    t->cpu->scheduler->setNextRunnable();
+	}
+	else
+	{
+	    msg_t* m = mp->key;
+	    if (m->__reserved__async)
+		mq->responses.insert(mp);
+	    else
+		delete mp;
+	    TASK_SETRTN(t, (uint64_t) m);
+	}
+	mq->lock.unlock();
+    }
+
+
 };
