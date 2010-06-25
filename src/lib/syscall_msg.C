@@ -1,11 +1,10 @@
 #include <sys/msg.h>
 #include <sys/syscall.h>
+#include <sys/vfs.h>
 
 #include <string.h>
 
 using namespace Systemcalls;
-
-const char* VFS_ROOT = "/"; // TODO.
 
 msg_q_t msg_q_create()
 {
@@ -17,7 +16,7 @@ int msg_q_destroy(msg_q_t q)
     return (int64_t)_syscall1(MSGQ_DESTROY, q);
 }
 
-int msg_q_register(msg_q_t q, char* name)
+int msg_q_register(msg_q_t q, const char* name)
 {
     if (0 == strcmp(VFS_ROOT, name))
     {
@@ -25,12 +24,17 @@ int msg_q_register(msg_q_t q, char* name)
     }
     else
     {
-	// TODO.
-	return -1;
+	msg_q_t vfsQ = (msg_q_t)_syscall0(MSGQ_RESOLVE_ROOT);
+	msg_t* msg = msg_allocate();
+	msg->type = VFS_MSG_REGISTER_MSGQ;
+	msg->extra_data = (void*) name;
+	int rc = msg_sendrecv(vfsQ, msg);
+	msg_free(msg);
+	return rc;
     }
 }
 
-msg_q_t msg_q_resolve(char* name)
+msg_q_t msg_q_resolve(const char* name)
 {
     if (0 == strcmp(VFS_ROOT, name))
     {
@@ -38,8 +42,14 @@ msg_q_t msg_q_resolve(char* name)
     }
     else
     {
-	// TODO.
-	return NULL;
+	msg_q_t vfsQ = (msg_q_t)_syscall0(MSGQ_RESOLVE_ROOT);
+	msg_t* msg = msg_allocate();
+	msg->type = VFS_MSG_RESOLVE_MSGQ;
+	msg->extra_data = (void*) name;
+	msg_sendrecv(vfsQ, msg);
+	msg_q_t rc = (msg_q_t) msg->data[0];
+	msg_free(msg);
+	return rc;
     }
 }
 

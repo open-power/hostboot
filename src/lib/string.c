@@ -10,6 +10,18 @@ void* memset(void* s, int c, size_t n)
     }
 }
 
+char* strcpy(char* d, const char* s)
+{
+    char* d1 = d;
+
+    do
+    {
+	*d1 = *s;
+	if (*s == '\0') return d;
+	d1++; s++;
+    } while(1);
+}
+
 int strcmp(const char* a, const char* b)
 {
     while((*a != '\0') && (*b != '\0'))

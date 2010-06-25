@@ -14,13 +14,21 @@ void init_child(void* unused)
     task_end();
 }
 
+void vfs_main(void*);
+
 void init_main(void* unused)
 {
     printk("Starting init!\n");
+    
+    printk("Bringing up VFS...");
+    task_create(&vfs_main, NULL);
+    task_yield(); // TODO... add a barrier to ensure VFS is fully up.
 
     global_mutex = mutex_create();
 
     msg_q_t msgq = msg_q_create();
+    msg_q_register(msgq, "/msg/init");
+
     msg_t* msg = msg_allocate();
     msg->type = 1; msg->data[0] = 0xDEADBEEF12345678;
     msg_send(msgq, msg);

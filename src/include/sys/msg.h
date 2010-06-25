@@ -22,8 +22,8 @@ struct msg_t
 // Message queue interfaces.
 msg_q_t msg_q_create();
 int msg_q_destroy();
-int msg_q_register(msg_q_t q, char* name);
-msg_q_t msg_q_resolve(char* name);
+int msg_q_register(msg_q_t q, const char* name);
+msg_q_t msg_q_resolve(const char* name);
 
 // Message interfaces.
 __attribute__((always_inline)) 
