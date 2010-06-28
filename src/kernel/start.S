@@ -214,15 +214,6 @@ kernel_dispatch_task:
     ldarx r0, 0, r1	;// Clear the reservation by loading / storing
     stdcx. r0, 0, r1	;// the CPU pointer in the task.
 
-    ld r28, TASK_LR(r1)     ;// Load from context: LR, CR, CTR, XER
-    ld r29, TASK_CR(r1)	
-    ld r30, TASK_CTR(r1)
-    ld r31, TASK_XER(r1)
-    mtlr  r28		;// Restore LR
-    mtcr  r29		;// Restore CR
-    mtctr r30		;// Restore CTR
-    mtxer r23		;// Restore XER
-    
     mfmsr r2		;// Get current MSR
     ori r2,r2, 0xC000	;// Enable MSR[EE,PR].
     mtsrr1 r2		;// Set task MSR (SRR1)
@@ -262,6 +253,16 @@ kernel_dispatch_task:
     ld r29, TASK_GPR_29(r1)	;// GPR29
     ld r30, TASK_GPR_30(r1)	;// GPR30
     ld r31, TASK_GPR_31(r1)	;// GPR31
+
+    ld r28, TASK_LR(r1)     ;// Load from context: LR, CR, CTR, XER
+    ld r29, TASK_CR(r1)	
+    ld r30, TASK_CTR(r1)
+    ld r31, TASK_XER(r1)
+    mtlr  r28		;// Restore LR
+    mtcr  r29		;// Restore CR
+    mtctr r30		;// Restore CTR
+    mtxer r31		;// Restore XER
+
     ld r1, TASK_GPR_1(r1)	;// GPR1
 			
     rfi				;// Execute task.
