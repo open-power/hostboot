@@ -249,10 +249,6 @@ kernel_dispatch_task:
     ld r25, TASK_GPR_25(r1)	;// GPR25
     ld r26, TASK_GPR_26(r1)	;// GPR26
     ld r27, TASK_GPR_27(r1)	;// GPR27
-    ld r28, TASK_GPR_28(r1)	;// GPR28
-    ld r29, TASK_GPR_29(r1)	;// GPR29
-    ld r30, TASK_GPR_30(r1)	;// GPR30
-    ld r31, TASK_GPR_31(r1)	;// GPR31
 
     ld r28, TASK_LR(r1)     ;// Load from context: LR, CR, CTR, XER
     ld r29, TASK_CR(r1)	
@@ -263,9 +259,13 @@ kernel_dispatch_task:
     mtctr r30		;// Restore CTR
     mtxer r31		;// Restore XER
 
+    ld r28, TASK_GPR_28(r1)	;// GPR28
+    ld r29, TASK_GPR_29(r1)	;// GPR29
+    ld r30, TASK_GPR_30(r1)	;// GPR30
+    ld r31, TASK_GPR_31(r1)	;// GPR31
     ld r1, TASK_GPR_1(r1)	;// GPR1
 			
-    rfi				;// Execute task.
+    rfid			;// Execute task.
 
 .section .data
     .balign 1024
