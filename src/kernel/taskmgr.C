@@ -2,6 +2,7 @@
 #include <kernel/taskmgr.H>
 #include <kernel/task.H>
 #include <kernel/pagemgr.H>
+#include <kernel/ppcarch.H>
 
 void TaskManager::idleTaskLoop(void* unused)
 {
@@ -12,15 +13,13 @@ void TaskManager::idleTaskLoop(void* unused)
 
 task_t* TaskManager::getCurrentTask()
 {
-    register task_t* current_task = NULL;
-    asm volatile("mfsprg3 %0" : "=r" (current_task) );
+    register task_t* current_task = (task_t*) ppc_getSPRG3();
     return current_task;
 }
 
 void TaskManager::setCurrentTask(task_t* t)
 {
-    register task_t* _t = t;
-    asm volatile("mtsprg3 %0" :: "r" (_t));
+    ppc_setSPRG3((uint64_t)t);
     return;
 }
 

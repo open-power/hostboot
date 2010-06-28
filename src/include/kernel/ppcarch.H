@@ -11,4 +11,37 @@ inline uint64_t ppc_getSRR1()
     return srr1;
 } 
 
+__attribute__((always_inline))
+inline uint64_t ppc_getPVR() 
+{
+    register uint64_t pvr = 0;
+    asm volatile("mfspr %0, 287" : "=r" (pvr));
+    return pvr;
+}
+
+__attribute__((always_inline))
+inline uint64_t ppc_getPIR() 
+{
+    register uint64_t pir = 0;
+    asm volatile("mfspr %0, 1023" : "=r" (pir));
+    return pir;
+}
+
+__attribute__((always_inline))
+inline uint64_t ppc_getSPRG3()
+{
+    register uint64_t sprg3 = 0;
+    asm volatile("mfsprg3 %0" : "=r" (sprg3));
+    return sprg3;
+}
+
+__attribute__((always_inline))
+inline void ppc_setSPRG3(uint64_t _sprg3)
+{
+    register uint64_t sprg3 = _sprg3;
+    asm volatile("mtsprg3 %0" : : "r" (sprg3));
+    return;
+}
+
+
 #endif

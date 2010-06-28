@@ -23,7 +23,7 @@ void init_main(void* unused)
     printk("Bringing up VFS...");
     task_create(&vfs_main, NULL);
     task_yield(); // TODO... add a barrier to ensure VFS is fully up.
-
+    
     global_mutex = mutex_create();
 
     msg_q_t msgq = msg_q_create();

@@ -6,6 +6,7 @@
 #include <kernel/pagemgr.H>
 #include <kernel/console.H>
 #include <util/singleton.H>
+#include <kernel/ppcarch.H>
 
 CpuManager::CpuManager()
 {
@@ -15,8 +16,7 @@ CpuManager::CpuManager()
 
 cpu_t* CpuManager::getCurrentCPU()
 {
-    register task_t* current_task = NULL;
-    asm volatile("mfsprg3 %0" : "=r" (current_task) );
+    register task_t* current_task = (task_t*) ppc_getSPRG3();
     return current_task->cpu;
 }
 
@@ -59,8 +59,7 @@ void CpuManager::startCPU(ssize_t i)
 
     if (currentCPU)
     {
-	register task_t* idle_task = iv_cpus[i]->scheduler->getIdleTask();
-	asm volatile("mtsprg3 %0" :: "r" (idle_task));
+	ppc_setSPRG3((uint64_t) iv_cpus[i]->scheduler->getIdleTask());
 
 	// TODO: Set up decrementer properly.
 	register uint64_t decrementer = 0x0f000000;
