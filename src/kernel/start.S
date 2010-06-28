@@ -96,6 +96,11 @@ finished_relocate:
 intvect_system_reset:
     b _start
 
+.org _start + 0x17C
+hbi_pre_phyp_breakpoint:
+    trap;   /* TODO: Add actual breakpoint attention. */
+    b _start
+
 UNIMPL_INTERRUPT(machine_check, 0x200)
 UNIMPL_INTERRUPT(data_storage, 0x300)
 UNIMPL_INTERRUPT(data_segment, 0x380)
