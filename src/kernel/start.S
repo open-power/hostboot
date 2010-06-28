@@ -98,7 +98,7 @@ intvect_system_reset:
 
 .org _start + 0x17C
 hbi_pre_phyp_breakpoint:
-    trap;   /* TODO: Add actual breakpoint attention. */
+    attn;   /* TODO: Add actual breakpoint attention. */
     b _start
 
 UNIMPL_INTERRUPT(machine_check, 0x200)
