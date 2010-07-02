@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <util/lockfree/stack.H>
+#include <kernel/vmmmgr.H>
 
 /** @class PageManager
  *  @brief Manages the allocation of memory pages.
@@ -18,8 +19,8 @@ class PageManager
 
 	enum 
 	{ 
-	    PAGESIZE = 4096,
-	    MEMLEN = 8 * 1024 * 1024,
+	    PAGESIZE = VmmManager::PAGESIZE,
+	    MEMLEN = VmmManager::HTABORG,
 
 	    BUCKETS = 16,
 	};

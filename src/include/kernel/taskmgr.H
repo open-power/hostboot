@@ -3,6 +3,7 @@
 
 #include <kernel/types.h>
 #include <util/lockfree/counter.H>
+#include <kernel/vmmmgr.H>
 
 class TaskManager
 {
@@ -21,7 +22,8 @@ class TaskManager
 	static task_t* createIdleTask();
 
     private:
-	tid_t getNextTid() { return iv_nextTid.next(); };
+	tid_t getNextTid() 
+	    { return iv_nextTid.next() + VmmManager::FirstPid; };
 	Util::Lockfree::Counter<tid_t> iv_nextTid;
 
 	static void idleTaskLoop(void*);

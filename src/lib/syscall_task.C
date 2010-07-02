@@ -13,7 +13,7 @@ void task_yield()
 
 tid_t task_create(void(*fn)(void*), void* ptr)
 {
-    return (tid_t) _syscall2(TASK_START, (void*)fn, ptr);
+    return (tid_t)(uint64_t) _syscall2(TASK_START, (void*)fn, ptr);
 }
 
 void task_end()

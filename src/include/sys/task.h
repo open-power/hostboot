@@ -2,13 +2,12 @@
 #define __SYS_TASK_H
 
 #include <stdint.h>
+#include <kernel/types.h>
 
 #ifdef __cplusplus
 extern "C" 
 {
 #endif
-
-typedef uint64_t tid_t;
 
 void task_yield();
 tid_t task_create(void(*)(void*), void*);

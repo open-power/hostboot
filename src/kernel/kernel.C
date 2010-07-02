@@ -8,6 +8,7 @@
 #include <kernel/task.H>
 #include <kernel/scheduler.H>
 #include <kernel/taskmgr.H>
+#include <kernel/vmmmgr.H>
 
 #include <stdlib.h>
 
@@ -59,6 +60,7 @@ void Kernel::memBootstrap()
 {
     PageManager::init();
     HeapManager::init();
+    VmmManager::init();
 }
 
 void Kernel::cpuBootstrap()
