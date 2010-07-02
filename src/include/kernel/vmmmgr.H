@@ -113,12 +113,6 @@ class VmmManager
 	{
 	    return (pte.b & 0x0FFFFFFFFFFFF000) >> 12;
 	}
-
-	inline void pteSync()
-	{
-	    asm volatile("ptesync" ::: "memory");
-	}
-
 };
 
 #endif

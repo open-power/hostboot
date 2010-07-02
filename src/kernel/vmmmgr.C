@@ -49,9 +49,6 @@ void VmmManager::initPTEs()
 	setPage(i, pte);
 	setValid(true, pte);
     }
-    
-    // PTE sync.
-    pteSync();
 }
 
 void VmmManager::initSDR1()
