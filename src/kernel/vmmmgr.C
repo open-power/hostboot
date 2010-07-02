@@ -12,7 +12,7 @@ void VmmManager::init()
     
     VmmManager& v = Singleton<VmmManager>::instance();
 
-    //v.initSLB();
+    v.initSLB();
     v.initPTEs();
     v.initSDR1();
 
@@ -23,13 +23,14 @@ void VmmManager::initSLB()
 {
     register uint64_t slbRS, slbRB;
 
-    // ESID = 0, V = 1, Index = 0.
-    slbRB = 0x0000000008000000; 
+    // ESID = 0, V = 1, Index = 1.
+    slbRB = 0x0000000008000001; 
     
     // B = 01 (1TB), VSID = 0, Ks = 0, Kp = 1, NLCLP = 0
     slbRS = 0x4000000000000400;
-
+    
     asm volatile("slbmte %0, %1" :: "r"(slbRS), "r"(slbRB) : "memory");
+    asm volatile("isync" ::: "memory");
 }
 
 void VmmManager::initPTEs()
@@ -53,8 +54,8 @@ void VmmManager::initPTEs()
 
 void VmmManager::initSDR1()
 {
-    // HTABORG << 17, HTABSIZE = 0 (11 bits, 256k table)
-    register uint64_t sdr1 = (((uint64_t)HTABORG) << 17);
+    // HTABORG, HTABSIZE = 0 (11 bits, 256k table)
+    register uint64_t sdr1 = (uint64_t)HTABORG;
     asm volatile("mtsdr1 %0" :: "r"(sdr1) : "memory");
 }
 

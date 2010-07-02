@@ -215,7 +215,9 @@ kernel_dispatch_task:
     stdcx. r0, 0, r1	;// the CPU pointer in the task.
 
     mfmsr r2		;// Get current MSR
-    ori r2,r2, 0xC000	;// Enable MSR[EE,PR].
+    ori r2,r2, 0xC030	;// Enable MSR[EE,PR,IR,DR].
+    rldicl r2,r2,1,1	;// Clear ...
+    rotldi r2,r2,63	;// 	MSR[TA]
     mtsrr1 r2		;// Set task MSR (SRR1)
 
     ld r2, TASK_NIP(r1)	;// Load NIP from context.

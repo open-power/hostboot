@@ -43,5 +43,20 @@ inline void ppc_setSPRG3(uint64_t _sprg3)
     return;
 }
 
+__attribute__((always_inline))
+inline uint64_t ppc_getMSR()
+{
+    register uint64_t msr = 0;
+    asm volatile("mfmsr %0" : "=r" (msr));
+    return msr;
+}
+
+__attribute__((always_inline))
+inline void ppc_setMSR(uint64_t _msr)
+{
+    register uint64_t msr = _msr;
+    asm volatile("mtmsr %0; isync" : "=r" (msr));
+}
+
 
 #endif

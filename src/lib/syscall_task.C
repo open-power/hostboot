@@ -24,11 +24,11 @@ void task_end()
 
 tid_t task_gettid()
 {
-    // Even though we have a syscall for GETTID, we can implement this as a 
-    // direct access to SPRG3.  On processor that do not support unprivilaged
-    // access to this SPR, we implement it as an emulated instruction in the
-    // exception handler.
+    // Even though we have a syscall for GETTID, we also have the task in 
+    // GRP13.
 
-    return TaskManager::getCurrentTask()->tid;
+    register task_t* task;
+    asm volatile("addi %0, 13, 0" : "=r"(task));
+    return task->tid;
     //return (tid_t)_syscall0(TASK_GETTID);
 }

@@ -54,6 +54,9 @@ task_t* TaskManager::_createTask(TaskManager::task_fn_t t,
     task->context.nip = (void*) ((uint64_t*) t)[0];
     task->context.gprs[2] = ((uint64_t*)t)[1];
 
+    // Set up GRP[13] as task structure reserved.
+    task->context.gprs[13] = (uint64_t)task;
+
     // Set up argument.
     task->context.gprs[3] = (uint64_t) p;
     
