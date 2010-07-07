@@ -14,6 +14,7 @@
 
 extern "C" void kernel_dispatch_task();
 extern void init_main(void* unused);
+extern uint64_t kernel_other_thread_spinlock;
 
 class Kernel
 {
@@ -27,6 +28,7 @@ class Kernel
 	Kernel() {};
 };
 
+extern "C"
 int main()
 {
     printk("Booting %s kernel...\n\n", "Chenoo");
@@ -37,9 +39,22 @@ int main()
     kernel.cpuBootstrap();
 
     kernel.inittaskBootstrap();
+    
+    // Ready to let the other CPUs go.
+    kernel_other_thread_spinlock = 1;
 
     kernel_dispatch_task(); // no return.    
     while(1);
+    return 0;
+}
+
+extern "C"
+int smp_slave_main(cpu_t* cpu)
+{
+    CpuManager::init_slave_smp(cpu);
+    VmmManager::init_slb();
+    cpu->scheduler->setNextRunnable();
+    kernel_dispatch_task();
     return 0;
 }
 
@@ -73,6 +88,5 @@ void Kernel::inittaskBootstrap()
     task_t * t = TaskManager::createTask(&init_main, NULL);
     t->cpu = CpuManager::getCurrentCPU();
     TaskManager::setCurrentTask(t);
-
 }
 

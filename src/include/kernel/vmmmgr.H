@@ -38,6 +38,7 @@ class VmmManager
 	};
 
 	static void init();
+	static void init_slb();
 
     protected:
 	VmmManager();

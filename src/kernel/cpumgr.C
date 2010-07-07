@@ -8,10 +8,12 @@
 #include <util/singleton.H>
 #include <kernel/ppcarch.H>
 
+cpu_t* CpuManager::cv_cpus[CpuManager::MAXCPUS] = { NULL };
+
 CpuManager::CpuManager()
 {
     for (int i = 0; i < MAXCPUS; i++)
-	iv_cpus[i] = NULL;
+	cv_cpus[i] = NULL;
 }
 
 cpu_t* CpuManager::getCurrentCPU()
@@ -22,7 +24,13 @@ cpu_t* CpuManager::getCurrentCPU()
 
 void CpuManager::init()
 {
-    Singleton<CpuManager>::instance().startCPU();
+    for (int i = 0; i < KERNEL_MAX_SUPPORTED_CPUS; i++)
+	Singleton<CpuManager>::instance().startCPU(i);
+}
+
+void CpuManager::init_slave_smp(cpu_t* cpu)
+{
+    Singleton<CpuManager>::instance().startSlaveCPU(cpu);
 }
 
 void CpuManager::startCPU(ssize_t i)
@@ -30,48 +38,56 @@ void CpuManager::startCPU(ssize_t i)
     bool currentCPU = false;
     if (i < 0)
     {
-	// TODO: Determine position of this CPU, somehow.
-	i = 0;
-
+	i = getCpuId();
+	currentCPU = true;
+    }
+    else if (getCpuId() == i)
+    {
 	currentCPU = true;
     }
 
-    printk("Starting CPU %d...", i);    
-
     // Initialize CPU structure.
-    if (NULL == iv_cpus[i])
+    if (NULL == cv_cpus[i])
     {
-	cpu_t* cpu = iv_cpus[i] = new cpu_t;
+	printk("Starting CPU %d...", i);    
+	cpu_t* cpu = cv_cpus[i] = new cpu_t;
 	
 	// Initialize CPU.
 	cpu->cpu = i;
-	cpu->scheduler = new Scheduler(cpu);
+	cpu->scheduler = &Singleton<Scheduler>::instance();
 	cpu->kernel_stack = 
 	    (void*) (((uint64_t)PageManager::allocatePage(4)) + 16320);
 	
 	// Create idle task.
-	task_t * idle_task = TaskManager::createIdleTask();
-	idle_task->cpu = cpu;
+	cpu->idle_task = TaskManager::createIdleTask();
+	cpu->idle_task->cpu = cpu;
 	
-	// Add to scheduler.
-	cpu->scheduler->setIdleTask(idle_task);
+	printk("done\n");
     }
 
     if (currentCPU)
     {
-	ppc_setSPRG3((uint64_t) iv_cpus[i]->scheduler->getIdleTask());
+	ppc_setSPRG3((uint64_t) cv_cpus[i]->idle_task);
 
 	// TODO: Set up decrementer properly.
 	register uint64_t decrementer = 0x0f000000;
 	asm volatile("mtdec %0" :: "r"(decrementer));
+    }
+    return;
+}
 
-    }
-    else
-    {
-	// TODO once we get to SMP.
-    }
+void CpuManager::startSlaveCPU(cpu_t* cpu)
+{
+    ppc_setSPRG3((uint64_t) cpu->idle_task);
     
-    printk("done\n");
+    // TODO: Set up decrementer properly.
+    register uint64_t decrementer = 0x0f000000;
+    asm volatile("mtdec %0" :: "r"(decrementer));
 
     return;
+}
+
+uint64_t isCPU0()
+{
+    return (0 == getCpuId());
 }

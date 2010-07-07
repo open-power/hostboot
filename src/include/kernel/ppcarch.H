@@ -55,8 +55,7 @@ __attribute__((always_inline))
 inline void ppc_setMSR(uint64_t _msr)
 {
     register uint64_t msr = _msr;
-    asm volatile("mtmsr %0; isync" : "=r" (msr));
+    asm volatile("mtmsr %0; isync" :: "r" (msr));
 }
-
 
 #endif

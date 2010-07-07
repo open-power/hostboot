@@ -1,10 +1,13 @@
 #include <kernel/task.H>
 #include <kernel/scheduler.H>
 #include <kernel/taskmgr.H>
+#include <kernel/cpu.H>
+#include <kernel/cpumgr.H>
+#include <kernel/console.H>
 
 void Scheduler::addTask(task_t* t)
 {
-    if (iv_idleTask != t)
+    if (t->cpu->idle_task != t)
     {
 	iv_taskList.insert(t);
     }
@@ -21,7 +24,10 @@ void Scheduler::setNextRunnable()
 
     if (NULL == t)
     {
-	t = iv_idleTask;
+	t = CpuManager::getCurrentCPU()->idle_task;
+	// Set short decrementer.
+	register uint64_t decrementer = 0x000f0000;
+	asm volatile("mtdec %0" :: "r"(decrementer));
     }
     
     TaskManager::setCurrentTask(t);

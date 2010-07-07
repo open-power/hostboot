@@ -19,6 +19,13 @@ void VmmManager::init()
     printk("done.\n");
 };
 
+void VmmManager::init_slb()
+{
+    VmmManager& v = Singleton<VmmManager>::instance();
+    v.initSLB();
+    v.initSDR1();
+}
+
 void VmmManager::initSLB()
 {
     register uint64_t slbRS, slbRB;

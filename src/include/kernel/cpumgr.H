@@ -13,8 +13,10 @@ class CpuManager
 	 *  task structure in SPRG3.
 	 */
 	static cpu_t* getCurrentCPU();
+	static cpu_t* getCpu(size_t i) { return cv_cpus[i]; };
 
 	static void init();
+	static void init_slave_smp(cpu_t*);
 
     protected:
 	CpuManager();
@@ -24,9 +26,12 @@ class CpuManager
 	 *  Starts the requested CPU. Default of -1 implies current CPU.
 	 */
 	void startCPU(ssize_t i = -1);
+	void startSlaveCPU(cpu_t*);
 
     private:
-	cpu_t* iv_cpus[MAXCPUS];
+	static cpu_t* cv_cpus[MAXCPUS]; // Need to be able to access this
+					// from start.S to get initial stacks
+					// of secondary cpus / threads.
 };
 
 #endif

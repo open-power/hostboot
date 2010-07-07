@@ -4,14 +4,14 @@
 
 .global _start
 _start:
-    ;// Enter 64 bit mode
-    mfmsr r0
-    lis r11, 0x8000
-    sldi r11,r11, 32
-    or r11,r11,r0
-    mtmsr r11
-    isync
-    
+    ;// Check if first thread.
+    mfspr r1, PIR
+    li r2, 0x0003
+    and r1, r1, r2
+    li r2, 0x0
+    cmpl cr0, r1, r2
+    bnel cr0, _other_thread_spinlock
+
     ;// Relocate code
     bl pre_relocate	;// fill LR with address
 pre_relocate:
@@ -123,6 +123,8 @@ UNIMPL_INTERRUPT(vector_unavail, 0xF20)
 UNIMPL_INTERRUPT(vsx_unavail, 0xF40)
 
 .section .text
+;// _main:
+;//	Set up stack and TOC and call kernel's main.
 _main:
     ;// Set up initial TOC Base
     lis r2, main@h
@@ -137,6 +139,36 @@ _main:
     ;// Call main.
     bl main
 _main_loop:
+    b _main_loop
+
+;// _other_thread_spinlock:
+;//	Used for threads other than 0 to wait for the system to boot to a 
+;//	stable point where we can start the other threads.  At this point
+;//	nothing is initalized in the thread except r1 = thread ID.
+_other_thread_spinlock:
+    ;// Read spinlock value.
+    lis r2, kernel_other_thread_spinlock@h
+    ori r2, r2, kernel_other_thread_spinlock@l
+    ld r3, 0(r2)
+    ;// Loop until value is not 0...
+    li r4, 0
+    cmp cr0, r3, r4
+    bne _other_thread_spinlock_complete
+    b _other_thread_spinlock
+;// Now released by primary thread.
+_other_thread_spinlock_complete:
+    ;// Get CPU object from thread ID.
+    lis r2, _ZN10CpuManager7cv_cpusE@h
+    ori r2, r2, _ZN10CpuManager7cv_cpusE@l
+    muli r3, r1, 8
+    add r2, r3, r2
+    ld r3, 0(r2)		;// Load CPU object.
+    ld r1, 0(r3)		;// Load initial stack.
+    
+    lis r2, smp_slave_main@h 	;// Load TOC base.
+    ori r2, r2, smp_slave_main@l
+    ld r2, 8(r2)
+    bl smp_slave_main		;// Call smp_slave_main
     b _main_loop
 
     ;// @fn kernel_save_task
@@ -273,6 +305,10 @@ kernel_dispatch_task:
     .balign 1024
 kernel_stack:
     .space 16*1024
+
+.global kernel_other_thread_spinlock
+kernel_other_thread_spinlock:
+    .space 8
 
 .section .text.hreset
 hreset:

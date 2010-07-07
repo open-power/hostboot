@@ -9,8 +9,9 @@ mutex_t global_mutex;
 void init_child(void* unused)
 {
     mutex_lock(global_mutex);
-    printk("Here I am %d\n", task_gettid());
+    printk("Crun: %d on %d\n", task_gettid(), task_getcpuid());
     mutex_unlock(global_mutex);
+    for (volatile int i = 0 ; i < 100000; i++);
     task_end();
 }
 
@@ -20,7 +21,7 @@ void init_main(void* unused)
 {
     printk("Starting init!\n");
     
-    printk("Bringing up VFS...");
+    printk("Bringing up VFS..."); 
     task_create(&vfs_main, NULL);
     task_yield(); // TODO... add a barrier to ensure VFS is fully up.
     
@@ -40,8 +41,8 @@ void init_main(void* unused)
     {
 	mutex_lock(global_mutex);
 	int t = task_create(&init_child, NULL);
-	printk("Created child %d\n", t);
-	for (volatile int i = 0 ; i < 10000000; i++);
+	printk("Create child %d\n", t);
+	for (volatile int i = 0 ; i < 1000000; i++);
 	mutex_unlock(global_mutex);
     }
 }

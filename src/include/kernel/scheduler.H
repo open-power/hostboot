@@ -18,18 +18,12 @@ class Scheduler
 	void setNextRunnable();
 
     protected:
-	Scheduler(cpu_t* cpu) : 
-		iv_taskList(), iv_idleTask(NULL), iv_cpu(cpu) {};
+	Scheduler() : 
+		iv_taskList() {};
 	~Scheduler() {};
-
-	void setIdleTask(task_t* t) { iv_idleTask = t; };
-	task_t* getIdleTask() { return iv_idleTask; };
 
     private:
 	Util::Locked::Queue<task_t, true, Spinlock> iv_taskList;
-
-	task_t* iv_idleTask;
-	cpu_t* iv_cpu;
 };
 
 #endif

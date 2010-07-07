@@ -3,8 +3,8 @@ CXX = powerpc64-unknown-linux-gnu-g++
 LD = powerpc64-unknown-linux-gnu-ld
 
 COMMONFLAGS = -O3 -nostdlib
-CFLAGS = ${COMMONFLAGS} -mcpu=620 -nostdinc -g
-ASMFLAGS = ${COMMONFLAGS} -mcpu=620
+CFLAGS = ${COMMONFLAGS} -mcpu=power7 -nostdinc -g -msoft-float -mno-altivec
+ASMFLAGS = ${COMMONFLAGS} -mcpu=power7
 CXXFLAGS = ${CFLAGS} -nostdinc++ -fno-rtti -fno-exceptions
 LDFLAGS = -static --sort-common  -Map $@.map ${COMMONFLAGS}
 

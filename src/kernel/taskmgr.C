@@ -19,6 +19,7 @@ task_t* TaskManager::getCurrentTask()
 
 void TaskManager::setCurrentTask(task_t* t)
 {
+    t->cpu = getCurrentTask()->cpu;
     ppc_setSPRG3((uint64_t)t);
     return;
 }

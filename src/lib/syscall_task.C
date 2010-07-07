@@ -2,6 +2,7 @@
 #include <sys/syscall.h>
 #include <kernel/task.H>
 #include <kernel/taskmgr.H>
+#include <kernel/cpu.H>
 
 using namespace Systemcalls;
 
@@ -31,4 +32,11 @@ tid_t task_gettid()
     asm volatile("addi %0, 13, 0" : "=r"(task));
     return task->tid;
     //return (tid_t)_syscall0(TASK_GETTID);
+}
+
+cpuid_t task_getcpuid()
+{
+    register task_t* task;
+    asm volatile("addi %0, 13, 0" : "=r"(task));
+    return task->cpu->cpu;
 }
