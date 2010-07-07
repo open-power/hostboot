@@ -27,6 +27,7 @@ int msg_q_register(msg_q_t q, const char* name)
 	msg_q_t vfsQ = (msg_q_t)_syscall0(MSGQ_RESOLVE_ROOT);
 	msg_t* msg = msg_allocate();
 	msg->type = VFS_MSG_REGISTER_MSGQ;
+	msg->data[0] = (uint64_t) q;
 	msg->extra_data = (void*) name;
 	int rc = msg_sendrecv(vfsQ, msg);
 	msg_free(msg);
