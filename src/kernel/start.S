@@ -102,12 +102,12 @@ hbi_pre_phyp_breakpoint:
     b _start
 
 UNIMPL_INTERRUPT(machine_check, 0x200)
-UNIMPL_INTERRUPT(data_storage, 0x300)
-UNIMPL_INTERRUPT(data_segment, 0x380)
-UNIMPL_INTERRUPT(inst_storage, 0x400)
-UNIMPL_INTERRUPT(inst_segment, 0x480)
+STD_INTERRUPT(data_storage, 0x300)
+STD_INTERRUPT(data_segment, 0x380)
+STD_INTERRUPT(inst_storage, 0x400)
+STD_INTERRUPT(inst_segment, 0x480)
 UNIMPL_INTERRUPT(external, 0x500)
-UNIMPL_INTERRUPT(alignment, 0x600)
+STD_INTERRUPT(alignment, 0x600)
 STD_INTERRUPT(prog_ex, 0x700)
 UNIMPL_INTERRUPT(fp_unavail, 0x800)
 STD_INTERRUPT(decrementer, 0x900)

@@ -40,6 +40,8 @@ namespace Systemcalls
     void MsgSendRecv(task_t*);
     void MsgRespond(task_t*);
     void MsgWait(task_t*);
+    void MmioMap(task_t*);
+    void MmioUnmap(task_t*);
 
     syscall syscalls[] =
 	{
@@ -62,6 +64,9 @@ namespace Systemcalls
 	    &MsgSendRecv,
 	    &MsgRespond,
 	    &MsgWait,
+
+	    &MmioMap,
+	    &MmioUnmap,
 	};
 };
 
@@ -320,6 +325,22 @@ namespace Systemcalls
 	    TASK_SETRTN(t, (uint64_t) m);
 	}
 	mq->lock.unlock();
+    }
+    
+    void MmioMap(task_t* t)
+    {
+	void* ra = (void*)TASK_GETARG0(t);
+	size_t pages = TASK_GETARG1(t);
+
+	TASK_SETRTN(t, (uint64_t) VmmManager::mmioMap(ra,pages));
+    }
+
+    void MmioUnmap(task_t* t)
+    {
+	void* ea = (void*)TASK_GETARG0(t);
+	size_t pages = TASK_GETARG1(t);
+
+	TASK_SETRTN(t, VmmManager::mmioUnmap(ea,pages));
     }
 
 

@@ -58,4 +58,22 @@ inline void ppc_setMSR(uint64_t _msr)
     asm volatile("mtmsr %0; isync" :: "r" (msr));
 }
 
+__attribute__((always_inline))
+inline uint64_t ppc_getDSISR()
+{
+    register uint64_t dsisr = 0;
+    asm volatile("mfspr %0, 18" : "=r" (dsisr));
+    return dsisr;
+}
+
+__attribute__((always_inline))
+inline uint64_t ppc_getDAR()
+{
+    register uint64_t dar = 0;
+    asm volatile("mfspr %0, 19" : "=r" (dar));
+    return dar;
+}
+
+
+
 #endif

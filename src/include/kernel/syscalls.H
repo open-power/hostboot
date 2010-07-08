@@ -25,6 +25,9 @@ namespace Systemcalls
 	MSG_RESPOND,
 	MSG_WAIT,
 
+	MMIO_MAP,
+	MMIO_UNMAP,
+
 	SYSCALL_MAX
     };
 };

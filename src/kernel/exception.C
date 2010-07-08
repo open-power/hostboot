@@ -3,6 +3,7 @@
 #include <kernel/task.H>
 #include <kernel/taskmgr.H>
 #include <kernel/ppcarch.H>
+#include <kernel/vmmmgr.H>
 
 namespace Systemcalls { void TaskEnd(task_t*); }
 namespace ExceptionHandles
@@ -31,6 +32,62 @@ void kernel_execute_prog_ex()
 	printk("Program exception, killing task %d\n", t->tid);
 	Systemcalls::TaskEnd(t);
     }
+}
+
+const uint64_t EXCEPTION_DSISR_MASK	= 0x0000000040000000;
+const uint64_t EXCEPTION_DSISR_PTEMISS  = 0x0000000040000000;
+
+extern "C"
+void kernel_execute_data_storage()
+{
+    task_t* t = TaskManager::getCurrentTask();
+    uint64_t exception = ppc_getDSISR() & EXCEPTION_DSISR_MASK;
+
+    bool handled = false;
+    switch(exception)
+    {
+	case EXCEPTION_DSISR_PTEMISS:
+	    handled = VmmManager::pteMiss(t);
+	    break;
+    }
+    if (!handled)
+    {
+	printk("Data Storage exception on %d: %llx, %llx\n", 
+	       t->tid, ppc_getDAR(), ppc_getDSISR());
+	Systemcalls::TaskEnd(t);
+    }
+}
+
+extern "C"
+void kernel_execute_data_segment()
+{
+    task_t* t = TaskManager::getCurrentTask();
+    printk("Data Segment exception, killing task %d\n", t->tid);
+    Systemcalls::TaskEnd(t);
+}
+
+extern "C"
+void kernel_execute_inst_storage()
+{
+    task_t* t = TaskManager::getCurrentTask();
+    printk("Inst Storage exception, killing task %d\n", t->tid);
+    Systemcalls::TaskEnd(t);
+}
+
+extern "C"
+void kernel_execute_inst_segment()
+{
+    task_t* t = TaskManager::getCurrentTask();
+    printk("Inst Segment exception, killing task %d\n", t->tid);
+    Systemcalls::TaskEnd(t);
+}
+
+extern "C"
+void kernel_execute_alignment()
+{
+    task_t* t = TaskManager::getCurrentTask();
+    printk("Alignment exception, killing task %d\n", t->tid);
+    Systemcalls::TaskEnd(t);
 }
 
 namespace ExceptionHandles

@@ -3,6 +3,7 @@
 #include <sys/task.h>
 #include <sys/mutex.h>
 #include <sys/msg.h>
+#include <sys/mmio.h>
 
 mutex_t global_mutex;
 
@@ -24,7 +25,10 @@ void init_main(void* unused)
     printk("Bringing up VFS..."); 
     task_create(&vfs_main, NULL);
     task_yield(); // TODO... add a barrier to ensure VFS is fully up.
-    
+   
+    uint64_t* mmio_addr = (uint64_t*) mmio_map((void*)0x800000000, 1);
+    printk("MMIO Access %llx\n", *mmio_addr);
+
     global_mutex = mutex_create();
 
     msg_q_t msgq = msg_q_create();

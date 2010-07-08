@@ -2,6 +2,7 @@
 #define __KERNEL_VMMMGR_H
 
 #include <kernel/types.h>
+#include <kernel/spinlock.H>
 
 class VmmManager
 {
@@ -26,6 +27,7 @@ class VmmManager
 	enum ACCESS_TYPES
 	{
 	    NO_USER_ACCESS,
+	    READ_O_ACCESS,
 	    NORMAL_ACCESS,
 	    CI_ACCESS,
 	};
@@ -37,32 +39,49 @@ class VmmManager
 	    FirstPid,
 	};
 
+	enum MMIO_SPACE_INFO
+	{
+	    MMIO_T_ENTRIES = 
+		FULL_MEM_SIZE * (MMIOSpace - LinearSpace) / PAGESIZE,
+	};
+
 	static void init();
 	static void init_slb();
+	static bool pteMiss(task_t*);
+
+	static void* mmioMap(void*, size_t);
+	static int mmioUnmap(void*, size_t);
 
     protected:
 	VmmManager();
 	~VmmManager() {};
     
     private:
+	Spinlock lock;
+	uint64_t mmioMapT[MMIO_T_ENTRIES];
+
 	void initSLB();
 	void initPTEs();	
 	void initSDR1();
 
+	bool _pteMiss(task_t*);
+	void* _mmioMap(void*, size_t);
+	int _mmioUnmap(void*, size_t);
+
 	static pte_t* page_table;
 
-	inline pte_t& getPte(uint64_t pteg, uint64_t idx)
+	inline volatile pte_t& getPte(uint64_t pteg, uint64_t idx)
 	{
 	    return page_table[pteg * PTEG_SIZE + idx];
 	}
 	
-	inline void defaultPte(pte_t& pte)
+	inline void defaultPte(volatile pte_t& pte)
 	{
 	    pte.a = 0x4000000000000000; // B = 01 (1TB).
 	    pte.b = 0x0;
 	}
 
-	inline void setValid(bool valid, pte_t& pte)
+	inline void setValid(bool valid, volatile pte_t& pte)
 	{
 	    // Adding a page requires EIEIO to ensure update of PTE prior
 	    // to making valid and PTESYNC afterwards.  
@@ -78,39 +97,40 @@ class VmmManager
 	    asm volatile("ptesync" ::: "memory");
 	}
 
-	inline bool isValid(pte_t& pte)
+	inline bool isValid(volatile pte_t& pte)
 	{
 	    return ((pte.a & 0x01) == 0x01);
 	}
 
-	inline void setTid(tid_t tid, pte_t& pte)
+	inline void setTid(tid_t tid, volatile pte_t& pte)
 	{
 	    pte.a &= 0xC00000000000007F;
 	    pte.a |= ((uint64_t) tid) << 7;
 	}
 
-	inline tid_t getTid(pte_t& pte)
+	inline tid_t getTid(volatile pte_t& pte)
 	{
 	    return (tid_t) ((pte.a & 0xC00000000000007F) >> 7);
 	}
 
-	inline void setAccess(ACCESS_TYPES t, pte_t& pte)
+	inline void setAccess(ACCESS_TYPES t, volatile pte_t& pte)
 	{
 	    uint64_t pteMask = ~0x800000000000007B;
 	    pte.b &= pteMask;
 	    pte.b |= (NO_USER_ACCESS == t ? 0x0000000000000010 :
+		     (READ_O_ACCESS == t ?  0x0000000000000011 :
 		     (NORMAL_ACCESS == t ?  0x0000000000000012 :
 		     (CI_ACCESS == t ?      0x000000000000002A :
-		      0x0)));
+		      0x0))));
 	}
 
-	inline void setPage(uint64_t page, pte_t& pte)
+	inline void setPage(uint64_t page, volatile pte_t& pte)
 	{
 	    pte.b &= ~0x0FFFFFFFFFFFF000;
 	    pte.b |= page << 12;
 	}
 
-	inline uint64_t getPage(pte_t& pte)
+	inline uint64_t getPage(volatile pte_t& pte)
 	{
 	    return (pte.b & 0x0FFFFFFFFFFFF000) >> 12;
 	}
