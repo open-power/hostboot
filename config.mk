@@ -1,6 +1,6 @@
-CC = powerpc64-unknown-linux-gnu-gcc
-CXX = powerpc64-unknown-linux-gnu-g++
-LD = powerpc64-unknown-linux-gnu-ld
+CC = ppc64-linux-gcc
+CXX = ppc64-linux-g++
+LD = ppc64-linux-ld
 
 COMMONFLAGS = -O3 -nostdlib
 CFLAGS = ${COMMONFLAGS} -mcpu=power7 -nostdinc -g -msoft-float -mno-altivec
