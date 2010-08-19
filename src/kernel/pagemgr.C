@@ -42,7 +42,7 @@ PageManager::PageManager()
     size_t page_length = BUCKETS-1;
     while(length > 0)
     {
-	while (length < (1 << page_length))
+	while (length < (size_t)(1 << page_length))
 	    page_length--;
 
 	first_page[page_length].push(page);
@@ -55,8 +55,8 @@ PageManager::PageManager()
 
 void* PageManager::_allocatePage(size_t n)
 {
-    int which_bucket = 0;
-    while (n > (1 << which_bucket)) which_bucket++;
+    size_t which_bucket = 0;
+    while (n > (size_t)(1 << which_bucket)) which_bucket++;
     
     int retries = 0;
     page_t* page = (page_t*)NULL;
@@ -80,8 +80,8 @@ void PageManager::_freePage(void* p, size_t n)
 {
     if ((NULL == p) || (0 == n)) return;
 
-    int which_bucket = 0;
-    while (n > (1 << which_bucket)) which_bucket++;
+    size_t which_bucket = 0;
+    while (n > (size_t)(1 << which_bucket)) which_bucket++;
 
     push_bucket((page_t*)p, which_bucket);
     return;

@@ -2,10 +2,11 @@ CC = ppc64-linux-gcc
 CXX = ppc64-linux-g++
 LD = ppc64-linux-ld
 
-COMMONFLAGS = -O3 -nostdlib
-CFLAGS = ${COMMONFLAGS} -mcpu=power7 -nostdinc -g -msoft-float -mno-altivec
+COMMONFLAGS = -O3 -nostdlib ${EXTRACOMMONFLAGS}
+CFLAGS = ${COMMONFLAGS} -mcpu=power7 -nostdinc -g -msoft-float -mno-altivec \
+	 -Wall
 ASMFLAGS = ${COMMONFLAGS} -mcpu=power7
-CXXFLAGS = ${CFLAGS} -nostdinc++ -fno-rtti -fno-exceptions
+CXXFLAGS = ${CFLAGS} -nostdinc++ -fno-rtti -fno-exceptions -Wall
 LDFLAGS = -static --sort-common  -Map $@.map ${COMMONFLAGS}
 
 INCDIR = ${OBJDIR}/../src/include/

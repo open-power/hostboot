@@ -8,6 +8,7 @@ void* memset(void* s, int c, size_t n)
 	*_s = c;
 	_s++; n--;
     }
+    return s;
 }
 
 char* strcpy(char* d, const char* s)

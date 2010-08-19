@@ -22,8 +22,8 @@ void HeapManager::free(void* p)
 
 void* HeapManager::_allocate(size_t n)
 {
-    int which_bucket = 0;
-    while (n > ((1 << (which_bucket + 4)) - 8)) which_bucket++;
+    size_t which_bucket = 0;
+    while (n > (size_t)((1 << (which_bucket + 4)) - 8)) which_bucket++;
 
     chunk_t* chunk = (chunk_t*)NULL;
     chunk = pop_bucket(which_bucket);

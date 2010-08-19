@@ -61,12 +61,12 @@ void VmmManager::initSLB()
 void VmmManager::initPTEs()
 {
     // Invalidate all.
-    for(int i = 0; i < PTEG_COUNT; i++)
-	for (int j = 0; j < PTEG_SIZE; j++)
+    for(size_t i = 0; i < PTEG_COUNT; i++)
+	for (size_t j = 0; j < PTEG_SIZE; j++)
 	    setValid(false, getPte(i,j));
     
     // Set up linear map.
-    for(int i = 0; i < (FULL_MEM_SIZE / PAGESIZE); i++)
+    for(size_t i = 0; i < (FULL_MEM_SIZE / PAGESIZE); i++)
     {
 	ACCESS_TYPES access = NORMAL_ACCESS;
 	if (0 == i)
@@ -164,17 +164,17 @@ void* VmmManager::_mmioMap(void* ra, size_t pages)
     uint64_t _ra = (uint64_t) ra;
 
     // Search for memory already mapped in.
-    for (int i = 0; i < MMIO_T_ENTRIES; i++)
+    for (size_t i = 0; i < MMIO_T_ENTRIES; i++)
     {
-	if ((mmioMapT[i] & ~(PAGESIZE - 1) == _ra))
+	if ((mmioMapT[i] & ~(PAGESIZE - 1)) == _ra)
 	{
 	    if (i + pages < MMIO_T_ENTRIES)
 	    {
 		bool matched = true;
-		for (int j = 1; j < pages; j++)
+		for (size_t j = 1; j < pages; j++)
 		{
-		    if ((mmioMapT[i+j] & ~(PAGESIZE - 1) != 
-			(_ra + (j*PAGESIZE))))
+		    if ((mmioMapT[i+j] & ~(PAGESIZE - 1)) != 
+			(_ra + (j*PAGESIZE)))
 		    {
 			matched = false; 
 			break;
@@ -193,7 +193,7 @@ void* VmmManager::_mmioMap(void* ra, size_t pages)
     if (-1 != match)
     {
 	// Increment ref counts.
-	for (int i = 0; i < pages; i++)
+	for (size_t i = 0; i < pages; i++)
 	{
 	    mmioMapT[match + i]++;
 	}
@@ -203,12 +203,12 @@ void* VmmManager::_mmioMap(void* ra, size_t pages)
     }
 
     // Search for empty region in map.
-    for (int i = 0; i < MMIO_T_ENTRIES; i++)
+    for (size_t i = 0; i < MMIO_T_ENTRIES; i++)
     {
 	if (0 == mmioMapT[i])
 	{
 	    bool matched = true;
-	    for (int j = 1; j < pages; j++)
+	    for (size_t j = 1; j < pages; j++)
 	    {
 		if (0 != mmioMapT[i+j])
 		{
@@ -227,7 +227,7 @@ void* VmmManager::_mmioMap(void* ra, size_t pages)
     // Found region to use for map.
     if (-1 != match)
     {
-	for (int i = 0; i < pages; i++)
+	for (size_t i = 0; i < pages; i++)
 	{
 	    mmioMapT[match + i] = _ra + 1; // RA + ref count of 1.
 	}

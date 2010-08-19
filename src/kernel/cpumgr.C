@@ -41,7 +41,7 @@ void CpuManager::startCPU(ssize_t i)
 	i = getCpuId();
 	currentCPU = true;
     }
-    else if (getCpuId() == i)
+    else if (getCpuId() == (uint64_t)i)
     {
 	currentCPU = true;
     }

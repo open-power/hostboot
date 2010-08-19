@@ -18,8 +18,8 @@ class Console
 	~Console() {};
 
     private:
+	size_t iv_pos;    
 	char * iv_buffer;
-	size_t iv_pos;
 };
 
 #endif

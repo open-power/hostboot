@@ -19,6 +19,7 @@ int Console::putc(int c)
     {
 	iv_buffer[__sync_fetch_and_add(&iv_pos, 1)] = c;
     }
+    return c;
 }
 
 class ConsoleTraits
@@ -117,7 +118,7 @@ void printk(const char* str, ...)
     Console& console = Singleton<Console>::instance();
     
     bool format = false;
-    int size;
+    int size = 0;
 
     while('\0' != *str)
     {
