@@ -1,13 +1,15 @@
-IMGDIR = ../img
-OBJDIR = ../obj
-include ../config.mk
+ROOTPATH = ..
+IMGDIR = ${ROOTPATH}/img
+OBJDIR = ${ROOTPATH}/obj/hbicore
 
-SUBDIRS = kernel.d lib.d libc++.d sys.d
-IMAGES += ${IMGDIR}/kernel.elf 
-IMAGES += ${IMGDIR}/kernel.bin
+SUBDIRS = kernel.d lib.d libc++.d sys.d bld.d
+IMAGES += ${IMGDIR}/hbicore.elf 
+IMAGES += ${IMGDIR}/hbicore.bin
 
 all: ${SUBDIRS}
 	${MAKE} ${IMAGES}
 
 clean: $(patsubst %.d,%.clean, ${SUBDIRS})
 	(rm -f ${IMAGES} $(addsuffix .map, ${IMAGES}) )
+
+include ../config.mk

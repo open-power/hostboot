@@ -7,9 +7,10 @@ CFLAGS = ${COMMONFLAGS} -mcpu=power7 -nostdinc -g -msoft-float -mno-altivec \
 	 -Wall
 ASMFLAGS = ${COMMONFLAGS} -mcpu=power7
 CXXFLAGS = ${CFLAGS} -nostdinc++ -fno-rtti -fno-exceptions -Wall
-LDFLAGS = -static --sort-common  -Map $@.map ${COMMONFLAGS}
+LDFLAGS = --nostdlib --sort-common ${COMMONFLAGS}
+LDMAPFLAGS = -Map $@.map 
 
-INCDIR = ${OBJDIR}/../src/include/
+INCDIR = ${ROOTPATH}/src/include/
 
 ${OBJDIR}/%.o : %.C
 	${CXX} -c ${CXXFLAGS} $< -o $@ -I ${INCDIR}
@@ -20,11 +21,16 @@ ${OBJDIR}/%.o : %.c
 ${OBJDIR}/%.o : %.S
 	${CC} -c ${ASMFLAGS} $< -o $@ -Wa,-I${INCDIR}
 
-${IMGDIR}/%.elf: kernel.ld ${OBJDIR}/*.o
-	${LD} ${LDFLAGS} ${OBJDIR}/*.o -T kernel.ld -o $@
+${OBJDIR}/%.so : ${OBJECTS} ${ROOTPATH}/src/module.ld
+	${LD} -shared -z now --gc-sections ${LDFLAGS} $< \
+	      -T ${ROOTPATH}/src/module.ld -o $@
 
-${IMGDIR}/%.bin: kernel.ld ${OBJDIR}/*.o
-	${LD} ${LDFLAGS} ${OBJDIR}/*.o --oformat=binary -T kernel.ld -o $@
+${IMGDIR}/%.elf: kernel.ld ${OBJDIR}/*.o ${ROOTPATH}/src/kernel.ld
+	${LD} -static ${LDFLAGS} ${LDMAPFLAGS} ${OBJDIR}/*.o \
+	      -T ${ROOTPATH}/src/kernel.ld -o $@
+
+${IMGDIR}/%.bin: ${IMGDIR}/%.elf $(wildcard ${IMGDIR}/*.so)
+	${ROOTPATH}/src/bld/linker $@ $^
 
 %.d:
 	cd ${basename $@} && ${MAKE}

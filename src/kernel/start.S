@@ -309,7 +309,3 @@ kernel_stack:
 .global kernel_other_thread_spinlock
 kernel_other_thread_spinlock:
     .space 8
-
-.section .text.hreset
-hreset:
-    b _start
