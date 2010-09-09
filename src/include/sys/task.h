@@ -16,6 +16,8 @@ void task_end();
 tid_t task_gettid();
 cpuid_t task_getcpuid();
 
+tid_t task_exec(const char*, void*);
+
 #ifdef __cplusplus
 }
 #endif

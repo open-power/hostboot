@@ -1,5 +1,8 @@
 #include <kernel/console.H>  // TODO : Remove this.
 
+#include <kernel/syscalls.H>
+#include <sys/syscall.h>
+
 #include <sys/task.h>
 #include <sys/mutex.h>
 #include <sys/msg.h>
@@ -7,6 +10,7 @@
 
 mutex_t global_mutex;
 
+/*
 void init_child(void* unused)
 {
     mutex_lock(global_mutex);
@@ -15,6 +19,7 @@ void init_child(void* unused)
     for (volatile int i = 0 ; i < 100000; i++);
     task_end();
 }
+*/
 
 void vfs_main(void*);
 
@@ -24,7 +29,12 @@ void init_main(void* unused)
     
     printk("Bringing up VFS..."); 
     task_create(&vfs_main, NULL);
-    task_yield(); // TODO... add a barrier to ensure VFS is fully up.
+    
+    // TODO... add a barrier to ensure VFS is fully up.
+    while (NULL == _syscall0(Systemcalls::MSGQ_RESOLVE_ROOT));
+	task_yield(); 
+
+
 /* 
     uint64_t* mmio_addr = (uint64_t*) mmio_map((void*)0x800000000, 1);
     printk("MMIO Access %llx\n", *mmio_addr);
@@ -50,6 +60,8 @@ void init_main(void* unused)
 	mutex_unlock(global_mutex);
     }
 */
+
+    task_exec("libexample.so", NULL);
 
     while(1)
 	task_yield();

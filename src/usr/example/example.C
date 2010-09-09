@@ -24,5 +24,6 @@ void _init(void*)
 extern "C"
 void _start(void*)
 {
+    printk("Executing example module.\n");
     task_end();
 }

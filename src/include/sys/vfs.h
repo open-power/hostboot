@@ -24,6 +24,7 @@ enum VfsMessages
 {
     VFS_MSG_REGISTER_MSGQ,
     VFS_MSG_RESOLVE_MSGQ,
+    VFS_MSG_EXEC,
 };
 
 struct VfsSystemModule

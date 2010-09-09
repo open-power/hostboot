@@ -3,6 +3,8 @@
 #include <kernel/task.H>
 #include <kernel/taskmgr.H>
 #include <kernel/cpu.H>
+#include <sys/vfs.h>
+#include <sys/msg.h>
 
 using namespace Systemcalls;
 
@@ -39,4 +41,33 @@ cpuid_t task_getcpuid()
     register task_t* task;
     asm volatile("addi %0, 13, 0" : "=r"(task));
     return task->cpu->cpu;
+}
+
+tid_t task_exec(const char* file, void* ptr)
+{
+    // The VFS process is responsible for finding the module and creating the
+    // new process.  So, we send a message over to that process.
+    
+    tid_t child = -1; 
+    
+    // Create message, send.
+    msg_q_t vfsQ = (msg_q_t)_syscall0(MSGQ_RESOLVE_ROOT);
+    msg_t* msg = msg_allocate();
+    msg->type = VFS_MSG_EXEC;
+    msg->data[0] = (uint64_t) file;
+    msg->data[1] = (uint64_t) ptr;
+    int rc = msg_sendrecv(vfsQ, msg);
+
+    if (0 == rc)
+    {
+	// Get child ID from message data 0.
+	child = (tid_t) msg->data[0];
+    }
+    else
+    {
+	child = rc;
+    }
+    
+    msg_free(msg);
+    return child;
 }

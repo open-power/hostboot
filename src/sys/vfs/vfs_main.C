@@ -2,6 +2,7 @@
 
 #include <sys/msg.h>
 #include <sys/vfs.h>
+#include <sys/task.h>
 
 #include <util/locked/list.H>
 #include <kernel/console.H>  // TODO : Remove this.
@@ -90,6 +91,27 @@ void vfs_main(void* unused)
 		    else
 			msg->data[0] = (uint64_t) e->msg_q;
 		    msg_respond(vfsMsgQ, msg);		    
+		}
+		break;
+	    
+	    case VFS_MSG_EXEC:
+		{
+		    printk("VFS: Got exec request of %s\n", 
+		           (const char*)msg->data[0]);
+		    VfsSystemModule* module = &VFS_MODULES[0];
+		    tid_t child = -1;
+		    while ('\0' != module->module[0])
+		    {
+			if (0 == strcmp((const char*) msg->data[0], 
+					module->module))
+			{
+			    child = task_create(module->start,
+					        (void*) msg->data[1]);
+			    break;
+			}
+		    }
+		    msg->data[0] = child;
+		    msg_respond(vfsMsgQ, msg);
 		}
 		break;
 
