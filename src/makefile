@@ -12,4 +12,4 @@ all: ${SUBDIRS}
 clean: $(patsubst %.d,%.clean, ${SUBDIRS})
 	(rm -f ${IMAGES} $(addsuffix .map, ${IMAGES}) )
 
-include ../config.mk
+include ${ROOTPATH}/config.mk

@@ -8,4 +8,4 @@ all: ${SUBDIRS}
 
 clean: $(patsubst %.d,%.clean, ${SUBDIRS})
 
-include ../../config.mk
+include ${ROOTPATH}/config.mk

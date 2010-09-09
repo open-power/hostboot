@@ -9,4 +9,4 @@ all: ${OBJECTS}
 clean:
 	(rm -f ${OBJECTS} )
 
-include ../../config.mk
+include ${ROOTPATH}/config.mk
