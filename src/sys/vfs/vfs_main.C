@@ -10,6 +10,8 @@ const char* VFS_ROOT = "/";
 const char* VFS_ROOT_BIN = "/bin/";
 const char* VFS_ROOT_DATA = "/data/";
 const char* VFS_ROOT_MSG = "/msg/";
+VfsSystemModule VFS_MODULES[VFS_MODULE_MAX];
+uint64_t VFS_LAST_ADDRESS;
 
 struct VfsPath
 {
@@ -28,13 +30,34 @@ struct VfsEntry
     VfsEntry* prev;
 };
 
+void vfs_module_init()
+{
+    printk("Initializing modules.\n");
+
+    VfsSystemModule* module = &VFS_MODULES[0];
+    while ('\0' != module->module[0])
+    {
+	printk("\tIniting module %s...", module->module);
+	(module->init)(NULL);
+	printk("done.\n");
+
+	module++;
+    }
+
+    printk("Modules initialized.");
+}
+
 void vfs_main(void* unused)
 {
+    // Create message queue, register with kernel.
     msg_q_t vfsMsgQ = msg_q_create();
     msg_q_register(vfsMsgQ, VFS_ROOT);
     
     printk("done.\n");
     // TODO... barrier with init.
+    
+    // Initalize modules.
+    vfs_module_init();
 
     Util::Locked::List<VfsEntry, VfsEntry::key_type> vfsContents;
 

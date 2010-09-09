@@ -21,7 +21,7 @@ ${OBJDIR}/%.o : %.c
 ${OBJDIR}/%.o : %.S
 	${CC} -c ${ASMFLAGS} $< -o $@ -Wa,-I${INCDIR}
 
-${OBJDIR}/%.so : ${OBJECTS} ${ROOTPATH}/src/module.ld
+${IMGDIR}/%.so : ${OBJECTS} ${ROOTPATH}/src/module.ld
 	${LD} -shared -z now --gc-sections ${LDFLAGS} $< \
 	      -T ${ROOTPATH}/src/module.ld -o $@
 

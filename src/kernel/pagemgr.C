@@ -1,6 +1,7 @@
 #include <kernel/pagemgr.H>
 #include <util/singleton.H>
 #include <kernel/console.H>
+#include <sys/vfs.h>
 
 void PageManager::init()
 {
@@ -21,11 +22,8 @@ void PageManager::freePage(void* p, size_t n)
 
 PageManager::PageManager()
 {
-    // NOTE: This will need to change once we support loading modules.
-
     // Determine first page of un-allocated memory.
-    extern void* end_load_address;
-    uint64_t addr = (uint64_t)&end_load_address;
+    uint64_t addr = (uint64_t) VFS_LAST_ADDRESS;
     if (0 != (addr % PAGESIZE))
 	addr = (addr - (addr % PAGESIZE)) + PAGESIZE;
     

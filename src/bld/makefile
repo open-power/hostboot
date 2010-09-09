@@ -1,5 +1,5 @@
 linker: linker.C
-	g++ -O3 linker.C -o linker -lbfd
+	g++ -O3 -g linker.C -o linker -lbfd -I../include/sys
 
 all: linker
 

@@ -25,7 +25,7 @@ void init_main(void* unused)
     printk("Bringing up VFS..."); 
     task_create(&vfs_main, NULL);
     task_yield(); // TODO... add a barrier to ensure VFS is fully up.
-   
+/* 
     uint64_t* mmio_addr = (uint64_t*) mmio_map((void*)0x800000000, 1);
     printk("MMIO Access %llx\n", *mmio_addr);
 
@@ -49,4 +49,8 @@ void init_main(void* unused)
 	for (volatile int i = 0 ; i < 1000000; i++);
 	mutex_unlock(global_mutex);
     }
+*/
+
+    while(1)
+	task_yield();
 }

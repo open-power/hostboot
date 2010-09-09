@@ -3,6 +3,13 @@
 
 #include <stdint.h>
 
+#define VFS_MODULE_MAX 128
+#define VFS_MODULE_NAME_MAX 64
+#define VFS_SYMBOL_INIT _init
+#define VFS_SYMBOL_START _start
+#define VFS_STRINGIFY(X) #X
+#define VFS_TOSTRING(X) VFS_STRINGIFY(X)
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -18,6 +25,17 @@ enum VfsMessages
     VFS_MSG_REGISTER_MSGQ,
     VFS_MSG_RESOLVE_MSGQ,
 };
+
+struct VfsSystemModule
+{
+    const char module[VFS_MODULE_NAME_MAX];
+    void  (*init)(void*);
+    void  (*start)(void*);
+};
+
+extern VfsSystemModule VFS_MODULES[VFS_MODULE_MAX];
+extern uint64_t VFS_LAST_ADDRESS;
+
 
 #ifdef __cplusplus
 }
