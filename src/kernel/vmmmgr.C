@@ -51,9 +51,11 @@ void VmmManager::initSLB()
     // ESID = 0, V = 1, Index = 1.
     slbRB = 0x0000000008000001; 
     
-    // B = 01 (1TB), VSID = 0, Ks = 1, Kp = 1, NLCLP = 0
-    slbRS = 0x4000000000000C00;
+    // B = 01 (1TB), VSID = 0, Ks = 0, Kp = 1, NLCLP = 0
+    slbRS = 0x4000000000000400;
     
+    asm volatile("slbia" ::: "memory");
+    asm volatile("isync" ::: "memory");    
     asm volatile("slbmte %0, %1" :: "r"(slbRS), "r"(slbRB) : "memory");
     asm volatile("isync" ::: "memory");
 }
@@ -64,7 +66,7 @@ void VmmManager::initPTEs()
     for(size_t i = 0; i < PTEG_COUNT; i++)
 	for (size_t j = 0; j < PTEG_SIZE; j++)
 	    setValid(false, getPte(i,j));
-    
+   
     // Set up linear map.
     for(size_t i = 0; i < (FULL_MEM_SIZE / PAGESIZE); i++)
     {

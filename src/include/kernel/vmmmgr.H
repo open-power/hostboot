@@ -93,6 +93,24 @@ class VmmManager
 	    
 	    pte.a &= ~0x01;
 	    pte.a |= (valid ? 0x1 : 0x0);
+
+	    if (!valid)
+	    {
+		asm volatile("ptesync" ::: "memory");
+		
+		register uint64_t rS = 0, rB = 0;
+		rB = (getTid(pte) << 11) // VA[0:54).
+		   | (((uint64_t)&pte) & 0x3FF8) >> 7; // VA[55:65].
+		rB <<= 12; // Put in rB[0:51].
+		rB |= 0x0100; // B = 01 (1TB).
+		
+		// TLBIE isn't correct in gcc, hand code asm.
+		asm volatile(".long 0x7c000264 | (%0 << 11) | (%1 << 21)" ::
+		             "r"(rB), "r"(rS) : "memory");
+		
+		asm volatile("eieio" ::: "memory");
+		asm volatile("tlbsync" ::: "memory");
+	    }
 	    
 	    asm volatile("ptesync" ::: "memory");
 	}
