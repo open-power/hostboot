@@ -13,12 +13,15 @@ LDMAPFLAGS = -Map $@.map
 INCDIR = ${ROOTPATH}/src/include/
 
 ${OBJDIR}/%.o : %.C
+	mkdir -p ${OBJDIR}
 	${CXX} -c ${CXXFLAGS} $< -o $@ -I ${INCDIR}
 
 ${OBJDIR}/%.o : %.c
+	mkdir -p ${OBJDIR}
 	${CC} -c ${CFLAGS} $< -o $@ -I ${INCDIR}
 
 ${OBJDIR}/%.o : %.S
+	mkdir -p ${OBJDIR}
 	${CC} -c ${ASMFLAGS} $< -o $@ -Wa,-I${INCDIR}
 
 ${IMGDIR}/%.so : ${OBJECTS} ${ROOTPATH}/src/module.ld
@@ -30,7 +33,7 @@ ${IMGDIR}/%.elf: kernel.ld ${OBJDIR}/*.o ${ROOTPATH}/src/kernel.ld
 	      -T ${ROOTPATH}/src/kernel.ld -o $@
 
 ${IMGDIR}/%.bin: ${IMGDIR}/%.elf $(wildcard ${IMGDIR}/*.so)
-	${ROOTPATH}/src/bld/linker $@ $^
+	${ROOTPATH}/src/build/linker $@ $^
 
 %.d:
 	cd ${basename $@} && ${MAKE}

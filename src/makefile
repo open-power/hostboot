@@ -2,7 +2,7 @@ ROOTPATH = ..
 IMGDIR = ${ROOTPATH}/img
 OBJDIR = ${ROOTPATH}/obj/hbicore
 
-SUBDIRS = kernel.d lib.d libc++.d sys.d usr.d bld.d
+SUBDIRS = kernel.d lib.d libc++.d sys.d usr.d build.d
 IMAGES += ${IMGDIR}/hbicore.elf 
 IMAGES += ${IMGDIR}/hbicore.bin
 
