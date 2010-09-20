@@ -9,6 +9,7 @@
 #include <kernel/scheduler.H>
 #include <kernel/taskmgr.H>
 #include <kernel/vmmmgr.H>
+#include <kernel/timemgr.H>
 
 #include <stdlib.h>
 
@@ -80,6 +81,7 @@ void Kernel::memBootstrap()
 
 void Kernel::cpuBootstrap()
 {
+    TimeManager::init();
     CpuManager::init();
 }
 

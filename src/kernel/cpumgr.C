@@ -7,6 +7,7 @@
 #include <kernel/console.H>
 #include <util/singleton.H>
 #include <kernel/ppcarch.H>
+#include <kernel/timemgr.H>
 
 cpu_t* CpuManager::cv_cpus[CpuManager::MAXCPUS] = { NULL };
 
@@ -69,8 +70,7 @@ void CpuManager::startCPU(ssize_t i)
     {
 	ppc_setSPRG3((uint64_t) cv_cpus[i]->idle_task);
 
-	// TODO: Set up decrementer properly.
-	register uint64_t decrementer = 0x0f000000;
+	register uint64_t decrementer = TimeManager::getTimeSliceCount();
 	asm volatile("mtdec %0" :: "r"(decrementer));
     }
     return;
@@ -80,8 +80,7 @@ void CpuManager::startSlaveCPU(cpu_t* cpu)
 {
     ppc_setSPRG3((uint64_t) cpu->idle_task);
     
-    // TODO: Set up decrementer properly.
-    register uint64_t decrementer = 0x0f000000;
+    register uint64_t decrementer = TimeManager::getTimeSliceCount();
     asm volatile("mtdec %0" :: "r"(decrementer));
 
     return;

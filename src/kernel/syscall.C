@@ -15,10 +15,6 @@ void kernel_execute_decrementer()
     Scheduler* s = CpuManager::getCurrentCPU()->scheduler;
     s->returnRunnable();
     s->setNextRunnable();
-
-    // Resync decrementer.
-    register uint64_t decrementer = 0x0f000000;
-    asm volatile("mtdec %0" :: "r"(decrementer));
 }
 
 namespace Systemcalls

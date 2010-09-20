@@ -4,6 +4,7 @@
 #include <kernel/cpu.H>
 #include <kernel/cpumgr.H>
 #include <kernel/console.H>
+#include <kernel/timemgr.H>
 
 void Scheduler::addTask(task_t* t)
 {
@@ -26,7 +27,7 @@ void Scheduler::setNextRunnable()
     {
 	t = CpuManager::getCurrentCPU()->idle_task;
 	// Set short decrementer.
-	register uint64_t decrementer = 0x000f0000;
+	register uint64_t decrementer = TimeManager::getTimeSliceCount();
 	asm volatile("mtdec %0" :: "r"(decrementer));
     }
     
