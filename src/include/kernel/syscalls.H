@@ -28,6 +28,8 @@ namespace Systemcalls
 	MMIO_MAP,
 	MMIO_UNMAP,
 
+	TIME_NANOSLEEP,
+
 	SYSCALL_MAX
     };
 };

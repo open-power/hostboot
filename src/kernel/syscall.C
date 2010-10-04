@@ -8,11 +8,13 @@
 #include <kernel/pagemgr.H>
 #include <kernel/usermutex.H>
 #include <kernel/msg.H>
+#include <kernel/timemgr.H>
 
 extern "C"
 void kernel_execute_decrementer()
 {
     Scheduler* s = CpuManager::getCurrentCPU()->scheduler;
+    TimeManager::checkReleaseTasks(s);        
     s->returnRunnable();
     s->setNextRunnable();
 }
@@ -38,6 +40,7 @@ namespace Systemcalls
     void MsgWait(task_t*);
     void MmioMap(task_t*);
     void MmioUnmap(task_t*);
+    void TimeNanosleep(task_t*);
 
     syscall syscalls[] =
 	{
@@ -63,6 +66,8 @@ namespace Systemcalls
 
 	    &MmioMap,
 	    &MmioUnmap,
+
+	    &TimeNanosleep,
 	};
 };
 
@@ -337,6 +342,15 @@ namespace Systemcalls
 	size_t pages = TASK_GETARG1(t);
 
 	TASK_SETRTN(t, VmmManager::mmioUnmap(ea,pages));
+    }
+
+    void TimeNanosleep(task_t* t)
+    {
+	TimeManager::delayTask(t, TASK_GETARG0(t), TASK_GETARG1(t));
+	TASK_SETRTN(t, 0);
+
+	Scheduler* s = t->cpu->scheduler;
+	s->setNextRunnable();
     }
 
 

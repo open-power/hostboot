@@ -74,6 +74,14 @@ inline uint64_t ppc_getDAR()
     return dar;
 }
 
+__attribute__((always_inline))
+inline uint64_t ppc_getTB()
+{
+    register uint64_t tb = 0;
+    asm volatile("mfspr %0, 268" : "=r" (tb));
+    return tb;
+}
+
 
 
 #endif
