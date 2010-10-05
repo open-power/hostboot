@@ -1,7 +1,9 @@
-linker: linker.C
-	g++ -O3 -g linker.C -o linker -lbfd -I../include/sys
+ROOTPATH = ../..
 
-all: linker
+SUBDIRS = linker.d
 
-clean:
-	(rm -f linker)
+all: ${SUBDIRS}
+
+clean: $(patsubst %.d,%.clean, ${SUBDIRS})
+
+include ${ROOTPATH}/config.mk

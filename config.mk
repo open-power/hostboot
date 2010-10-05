@@ -33,7 +33,7 @@ ${IMGDIR}/%.elf: kernel.ld ${OBJDIR}/*.o ${ROOTPATH}/src/kernel.ld
 	      -T ${ROOTPATH}/src/kernel.ld -o $@
 
 ${IMGDIR}/%.bin: ${IMGDIR}/%.elf $(wildcard ${IMGDIR}/*.so)
-	${ROOTPATH}/src/build/linker $@ $^
+	${ROOTPATH}/src/build/linker/linker $@ $^
 
 %.d:
 	cd ${basename $@} && ${MAKE}
