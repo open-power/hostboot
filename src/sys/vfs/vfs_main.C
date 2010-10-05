@@ -75,7 +75,7 @@ void vfs_main(void* unused)
 		    e->msg_q = (msg_q_t) msg->data[0];
 		    vfsContents.insert(e);
 
-		    printk("VFS: Registering %llx as %s\n",
+		    printk("VFS: Registering %lx as %s\n",
 			   e->msg_q, e->key.key);
 		    msg_respond(vfsMsgQ, msg);
 		}

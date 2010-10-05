@@ -32,7 +32,7 @@ PageManager::PageManager()
     size_t length = (MEMLEN - addr) / PAGESIZE;
     
     // Display.
-    printk("Initializing PageManager with %zd pages starting at %llx...",
+    printk("Initializing PageManager with %zd pages starting at %lx...",
 	   length,
 	   (uint64_t)page);
     

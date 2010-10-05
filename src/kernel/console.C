@@ -180,12 +180,12 @@ void printk(const char* str, ...)
 			    break;
 
 			case 2:
-			case 3:
 			    ConsoleDisplay<int, ConsoleTraits::DEC>
 				::display(console,
 					  va_arg(args,int));
 			    break;
 
+			case 3:
 			case 4:
 			    ConsoleDisplay<long, ConsoleTraits::DEC>
 				::display(console,
@@ -214,12 +214,12 @@ void printk(const char* str, ...)
 			    break;
 
 			case 2:
-			case 3:
 			    ConsoleDisplay<unsigned int, ConsoleTraits::DEC>
 				::display(console,
 					  va_arg(args,unsigned int));
 			    break;
-
+			
+			case 3:
 			case 4:
 			    ConsoleDisplay<unsigned long, ConsoleTraits::DEC>
 				::display(console,
@@ -249,12 +249,12 @@ void printk(const char* str, ...)
 			    break;
 
 			case 2:
-			case 3:
 			    ConsoleDisplay<unsigned int, ConsoleTraits::HEX>
 				::display(console,
 					  va_arg(args,unsigned int));
 			    break;
-
+			
+			case 3:
 			case 4:
 			    ConsoleDisplay<unsigned long, ConsoleTraits::HEX>
 				::display(console,

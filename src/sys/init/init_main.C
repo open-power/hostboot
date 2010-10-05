@@ -37,7 +37,7 @@ void init_main(void* unused)
 
 /* 
     uint64_t* mmio_addr = (uint64_t*) mmio_map((void*)0x800000000, 1);
-    printk("MMIO Access %llx\n", *mmio_addr);
+    printk("MMIO Access %lx\n", *mmio_addr);
 
     global_mutex = mutex_create();
 
@@ -49,7 +49,7 @@ void init_main(void* unused)
     msg_send(msgq, msg);
     msg = msg_wait(msgq);
 
-    printk("Got Message: %llx\n", msg->data[0]);
+    printk("Got Message: %lx\n", msg->data[0]);
 
     while(1)
     {
@@ -65,7 +65,7 @@ void init_main(void* unused)
     
     volatile uint64_t* ptr = (uint64_t*) 0x3000;
     (*ptr) = 0x1234;
-    printk("Value = %llx\n", *ptr);
+    printk("Value = %lx\n", *ptr);
 
     while(1)
 	task_yield();

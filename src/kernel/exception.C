@@ -52,7 +52,7 @@ void kernel_execute_data_storage()
     }
     if (!handled)
     {
-	printk("Data Storage exception on %d: %llx, %llx\n", 
+	printk("Data Storage exception on %d: %lx, %lx\n", 
 	       t->tid, ppc_getDAR(), ppc_getDSISR());
 	Systemcalls::TaskEnd(t);
     }
@@ -94,7 +94,7 @@ namespace ExceptionHandles
 {
     bool HvEmulation(task_t* t)
     {
-	/*printk("NIP = %llx : Inst = %lx\n",
+	/*printk("NIP = %lx : Inst = %x\n",
 	       t->context.nip,
 	       (*(uint32_t*)t->context.nip));*/
 

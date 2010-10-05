@@ -18,7 +18,7 @@ void _init(void*)
 	ctors++;
     }
 
-    printk("Here! %llx, %s\n", (uint64_t) value, VFS_ROOT);
+    printk("Here! %lx, %s\n", (uint64_t) value, VFS_ROOT);
 }
 
 extern "C"
