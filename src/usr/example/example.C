@@ -2,6 +2,7 @@
 #include <sys/mutex.h>
 #include <sys/vfs.h>
 #include <sys/task.h>
+#include <tracinterface.H>
 
 static mutex_t value = mutex_create();
 
@@ -19,6 +20,7 @@ void _init(void*)
     }
 
     printk("Here! %lx, %s\n", (uint64_t) value, VFS_ROOT);
+    TRACFCOMP(NULL, "This is a test %lx, %s", (uint64_t) value, VFS_ROOT);
 }
 
 extern "C"

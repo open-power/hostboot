@@ -9,6 +9,6 @@ OBJECTS = $(addprefix ${OBJDIR}/, ${OBJS})
 all: ${OBJECTS}
 
 clean:
-	(rm -f ${OBJECTS} )
+	(rm -f ${OBJECTS} $(addsuffix .hash, ${OBJECTS}))
 
 include ${ROOTPATH}/config.mk

@@ -11,6 +11,6 @@ LIBRARIES = $(addprefix ${IMGDIR}/, ${LIBS})
 all: ${OBJECTS} ${LIBRARIES}
 
 clean:
-	(rm -f ${OBJECTS} ${LIBRARIES} )
+	(rm -f ${OBJECTS} $(addsuffix .hash, ${OBJECTS}) ${LIBRARIES} )
 
 include ${ROOTPATH}/config.mk

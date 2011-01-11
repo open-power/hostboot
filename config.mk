@@ -1,5 +1,8 @@
-CC = ppc64-linux-gcc
-CXX = ppc64-linux-g++
+CUSTOM_LINKER = ${ROOTPATH}/src/build/linker/linker
+TRACEPP = ${ROOTPATH}/src/build/trace/tracepp
+
+CC = ${TRACEPP} ppc64-linux-gcc
+CXX = ${TRACEPP} ppc64-linux-g++
 LD = ppc64-linux-ld
 
 COMMONFLAGS = -O3 -nostdlib ${EXTRACOMMONFLAGS}
@@ -33,7 +36,7 @@ ${IMGDIR}/%.elf: kernel.ld ${OBJDIR}/*.o ${ROOTPATH}/src/kernel.ld
 	      -T ${ROOTPATH}/src/kernel.ld -o $@
 
 ${IMGDIR}/%.bin: ${IMGDIR}/%.elf $(wildcard ${IMGDIR}/*.so)
-	${ROOTPATH}/src/build/linker/linker $@ $^
+	${CUSTOM_LINKER} $@ $^
 
 %.d:
 	cd ${basename $@} && ${MAKE}

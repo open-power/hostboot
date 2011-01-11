@@ -1,0 +1,397 @@
+#!/usr/bin/perl -w
+use strict;
+use File::Basename;
+
+# *** tracepp - a fsp/common Linux trace pre processor
+# this one replaces the trace strings by the corresponding hash value
+# (i.e. the complete call to trace_adal_hash is replaced)
+
+# *** Usage
+#
+# prepend compiler call with the call of this pre processor, i.e if you have
+#      $(CC) $(CFLAGS) -o $@ $<
+# in your Makefile change it to this:
+#      tracepp $(CC) $(CFLAGS) -o $@ $<
+# tracepp will use "$(CC) -E" to call the C pre processor "cpp". 
+# you can set a env var "REALCPP" to the name of a program to select
+# a different programm as cpp
+#
+# tracepp creates a file "$target.hash" with the trace strings and the hash values.
+#
+# to enable debug mode set envvar TRACEPPDEBUG to 1 or give '-d' as first arg
+
+# *** Change History
+#
+# 2003-02-26  RBa  created from scratch
+# 2003-02-28  RBa  add C++ support (C++ interface uses own type for the hash)
+# 2003-05-28  RBa  if cc should link instead of compile just call compiler
+# 2003-07-11  AGe  Change search alg. slightly and put just format back
+# 2003-07-25  RBa  just call gcc if called to link instead to compile
+#                  eat argument for option -x
+# 2003-11-26  RBa  fix c/c++ algo: compile as c++ if realcc=*g++
+# 2004-02-02  RBa  remove explicit test whether source file is readable
+#                  it is obsolete and might lead to an error if afs is used
+# 2004-02-13  RBa  add support for dependency generation (-MD/-MG, -MF)
+#                  don't prepend './' to object filename
+# 2006-04-19  RBa  rewrite trace_adal_write_all support, handle C and C++ the same
+# 2006-05-24  RBa  fix handling of missing -o ; add TRAC_PPVER for macro/API version
+# 2006-09-15  RBa  add handling of \" in trace format strings ; reduce non-error output
+#                  put object file in current dir if no -o given
+# 2007-03-22  RBa  handle more gcc options (-i) ; protect " in call to shell
+#                  store output of cpp as "unmodified" output for debug
+#                  only write string/hash file if strings found
+
+my $debug = 0;
+if (exists $ENV{TRACEPPDEBUG}) {
+	$debug = $ENV{TRACEPPDEBUG};
+}
+
+my $version = '$Id: tracepp,v 1.8 2007/06/22 13:37:17 fldbuild Exp $';
+$version =~ s/^.*(\d+(\.\d+)+).*$/$1/;
+# api/macro version. to #error if macro and tracepp doesn't fit
+my $macro_version = '1';
+
+sub parse_line($$);
+sub get_has($$);
+
+if (@ARGV == 0 || (@ARGV == 1 && lc($ARGV[0]) eq '-h') ) {
+	print STDERR "usage: $0 realcompiler compileroptions -o target source\n";
+	exit 127;
+}
+my $realcc = shift @ARGV;
+my $cctype = 'c++';
+my $optx_found = 0;
+
+if ($realcc eq '-d') {
+	$debug = 1;
+	$realcc = shift @ARGV;
+}
+
+# wait until -d options is handled before checking $debug
+print STDERR "tracepp version $version - API/macro version $macro_version\n" if $debug;
+
+my $realcpp = $ENV{REALCPP};
+if (!$realcpp) {
+	print STDERR "cannot find cpp, using \<realcompiler\> -E'\n" if $debug;
+	$realcpp = "$realcc -E";
+}
+print "realcpp is $realcpp\n" if $debug;
+
+my $opt;
+my ($source, $object, @ccopts, @cppopts);
+my $dodeps = 0;
+my $depfile;
+my @origargs = @ARGV;
+while(defined($opt = shift @ARGV)) {
+	if ($opt =~ m/^-o(.*)$/) {
+		if (defined $object) {
+			print STDERR "two -o options, aborting\n";
+			exit 1;
+		}
+		if ($1) {
+			$object = $1;
+		} else {
+			$object = shift @ARGV;
+		}
+		print "object is now $object\n" if $debug;
+	} elsif ($opt eq '-c') {
+		# don't call cpp with -c, this is for the compiler
+		#push @cppopts, $opt;
+		push @ccopts, $opt;
+		print "found -c option\n" if $debug;
+	} elsif ($opt =~ m/^-l/) {
+		# cpp doesn't need library arguments
+		push @ccopts, $opt;
+	} elsif ($opt =~ m/^-i./) {
+		# option takes an argument, handle it too
+		my$optarg = shift @ARGV;
+		push @ccopts, $opt, $optarg;
+		push @cppopts, $opt, $optarg;
+		print "found option '$opt $optarg'\n" if $debug;
+	} elsif ($opt =~ m/^-[LIxbBVD]$/ || $opt eq '--param' || $opt =~ m/^-M[QT]$/) {
+		# option takes an argument, handle it too
+		my $optarg = shift @ARGV;
+		push @ccopts, $opt, $optarg;
+		push @cppopts, $opt, $optarg;
+		print "found option '$opt $optarg'\n" if $debug;
+		if ($opt eq '-x') {
+			# option x sets the language - c or c++
+			if ($optarg ne 'c' and $optarg ne 'c++') {
+				print STDERR "cannot process language '$optarg', aborting\n";
+				exit 1;
+			}
+			$cctype = $optarg;
+			$optx_found = 1;
+		}
+	} elsif ($opt eq '-MD' or $opt eq '-MG') {
+		# gen deps
+		$dodeps = 1;
+		print "found $opt, creating dependencies\n" if $debug;
+	} elsif ($opt eq '-MF') {
+		# set dependencies file
+		$depfile = shift @ARGV;
+		print "set dependencies file to '$depfile'\n" if $debug;
+	} elsif ($opt =~ m/^-/) {
+		# arg starts with - so it's an option
+		push @ccopts, $opt;
+		push @cppopts, $opt;
+		print "found option '$opt'\n" if $debug;
+	} elsif ($opt =~ m/\.[ao]$/) {
+		# an object or archive, ignore this but give it to cc
+		push @ccopts, $opt;
+		print "found object/archive '$opt'\n" if $debug;
+	} elsif ($opt =~ m/\.c[xp]*$/i) {
+		# the source file(s). we should only get one
+		if (defined $source) {
+			print STDERR "don't know to handle two source files, aborting\n";
+			exit 1;
+		}
+		$source = $opt;
+		# put the - (for read-from-stdin) where the source file was
+		# (order is important!)
+		push @ccopts, "-";
+		print "found source file $source\n" if $debug;
+	} elsif (!-f $opt) {
+		# option but not a file, an unknown option?
+		push @ccopts, $opt;
+		push @cppopts, $opt;
+		print "found unknown option '$opt'\n" if $debug;
+	}
+}
+
+if (!defined $source) {
+	# this might be a call to link a program instead of compile a source (or asm source)
+	print "NOTME: starting as cc '$realcc @origargs'\n" if $debug;
+	exec($realcc, @origargs) || die "cannot exec $realcc\n";
+}
+if (!defined $object) {
+	print STDERR "no object file given, default to source name\n" if $debug;
+	# gcc builds object name from source name if no -o given, replacing 
+	# suffix with .o. The file is placed in the current directory, 
+	# not in the source directory!
+	my ($n,$d,$s) = fileparse($source, qr{\.[^.]+});
+	if ($n && $s) {
+		$object = "$n.o";
+		print "tracpp: guessing object name $object\n",
+		      "        from source name     $source\n" if $debug;
+	} else {
+		print STDERR "Unable to determine Source File Name\n";
+		exit 1;
+	}
+}
+my $hashtype;
+# set value of trace hash according to language
+# check source file extension if no explicit -x option given
+if (!$optx_found) {
+	if ($realcc =~ m/g\+\+/) {
+		print "compiler language: C++ (from compiler name)\n" if $debug;
+		$cctype = 'c++';
+	} else {
+		if ($source =~ m/\.c$/) {
+			print "compiler language: C (from source file extension)\n"
+				if $debug;
+			$cctype = 'c';
+		} else {
+			print "compiler language: C++ (default)\n" if $debug;
+			$cctype = 'c++';
+		}
+	}
+} else {
+	print "compiler language: $cctype (from option '-x')\n" if $debug;
+}
+
+if ($cctype eq 'c') {
+	$hashtype = 'unsigned long';
+} else {
+	$hashtype = 'trace_hash_val';
+}
+# define TRAC_TRACEPP for macros
+push(@cppopts,"-DTRAC_TRACEPP -DTRAC_PPVER=$macro_version");
+if ($dodeps) {
+	if (!defined $depfile) {
+		if (exists $ENV{DEPENDENCIES_OUTPUT}) {
+			$depfile = $ENV{DEPENDENCIES_OUTPUT};
+		} elsif (exists $ENV{SUNPRO_DEPENDENCIES}) {
+			$depfile = $ENV{SUNPRO_DEPENDENCIES};
+		} else {
+			($depfile = $object) =~ s/.o$/.d/;
+		}
+	}
+	push @cppopts, "-MD -MF $depfile";
+}
+# start cpp.
+print "starting as cpp '$realcpp @cppopts $source -o-'\n" if $debug;
+if (!open(CPP, "$realcpp @cppopts $source -o-|")) {
+	print STDERR "cannot start cpp '$realcpp'\n";
+	perror("");
+	exit 1;
+}
+# start cc. manually set language as source file extension not available to cc
+my $type_str = '';
+if ($optx_found == 0) {
+	# no option -x given by caller, set manually
+	$type_str = "-x $cctype";
+}
+print "starting as cc '$realcc $type_str @ccopts -o $object'\n" if $debug;
+if (!open(CC, "| $realcc $type_str @ccopts -o $object")) {
+	print STDERR "cannot start cc '$realcc'\n";
+	perror("");
+	exit 1;
+}
+
+my $modifiedfile = 0;
+my $unmodifiedfile = 0;
+if ($debug) {
+	$modifiedfile = $object . ".debug";
+	if (!open(DEBUG, ">$modifiedfile")) {
+		perror("cannot open file $modifiedfile");
+		$modifiedfile = 0;
+	} else {
+		print STDERR "writing preprocessed source to $modifiedfile\n";
+	}
+	$unmodifiedfile = $object . ".debug_in";
+	if (!open(DEBUGIN, ">$unmodifiedfile")) {
+		perror("cannot open file $unmodifiedfile");
+		$unmodifiedfile = 0;
+	} else {
+		print STDERR "writing unprocessed source to $unmodifiedfile\n";
+	}
+}
+
+my %hashtab;
+my $oldline;
+while(defined($oldline = <CPP>)) {
+	print DEBUGIN $oldline if $unmodifiedfile;
+	my $newline = parse_line(\%hashtab, $oldline);
+	#print "oldline = $oldline";
+	#print "newline = $newline";
+	if (!defined $newline) {
+		print STDERR "hash error in/with file $source\n";
+		exit 1;
+	}
+	#print "newline = $newline\n";
+	print CC $newline;
+	print DEBUG $newline if $modifiedfile;
+}
+if ($modifiedfile) {
+	close DEBUG;
+}
+if ($unmodifiedfile) {
+	close DEBUGIN;
+}
+if (!close(CPP) || ($? >> 8 != 0)) {
+	print STDERR "error from cpp\n";
+	if ($? & 127) {
+		print STDERR "cpp got signal ",$? & 127,"\n";
+		exit 1;
+	} elsif ($? >> 8) {
+		print STDERR "cpp returned ",$? >> 8,"\n";
+		exit $? >> 8;
+	}
+}
+if (!close(CC) || ($? >> 8 != 0)) {
+	print STDERR "error from cc\n";
+	if ($? & 127) {
+		print STDERR "cc got signal ",$? & 127,"\n";
+		exit 1;
+	} elsif ($? >> 8) {
+		print STDERR "cc returned ",$? >> 8,"\n";
+		exit $? >> 8;
+	}
+}
+if (%hashtab) {
+	my $stringfile = "$object.hash";
+	# open trace string file
+	if (!open(TRC, ">$stringfile")) {
+		print STDERR "cannot write trace string file '$stringfile'\n";
+		exit 1;
+	}
+	print "Writing to file $stringfile\n" if $debug;
+
+	printf TRC "#FSP_TRACE_v2|||%s|||BUILD:%s",scalar(localtime()),`pwd`;
+	foreach my $key (keys %hashtab) {
+		if ($hashtab{$key} =~ m/\|\|$source$/) {
+			# source file name is already part of the string
+			print TRC "$key||$hashtab{$key}\n";
+		} else {
+			print TRC "$key||$hashtab{$key}||$source\n";
+		}
+		#print TRC "$key||$source||$hashtab{$key}\n";
+	}
+	close TRC;
+} else {
+	print "No trace calls/strings found, not writing hash file\n" if $debug;
+}
+exit 0;
+
+sub parse_line($$)
+{
+	my ($rhash, $line) = @_;
+	my $format;
+	my $tmp_strng;
+	my @format_param = ();
+	my $data;
+	my $hash;
+	my $newline = '';
+	my $write_all_suffix;
+	my ($prefix, $strings, $salt, $suffix);
+	# trace_adal_hash ( "..." ".." "..." , 2 )
+	# regex: PREFIX 'trace_adal_hash' space '(' space STRINGS  space ',' space NUMBER space ')' SUFFIX
+	# STRINGS:  '"' .* '"' space? +
+	while($line =~ m/^(.*?)trace_adal_hash\s*\(\s*((".*?(?<!\\)"\s*)+),\s*(-?\d+)\s*\)(.*)$/) {
+		($prefix, $strings, $salt, $suffix) = ($1, $2, $4, $5);
+		print "\n\nprefix = $prefix\nstrings = $strings\nsalt = $salt\nsuffix = $suffix\n" if $debug;
+		$strings =~ s/^"//;
+		$strings =~ s/"\s*$//;
+		$strings =~ s/"\s*"//g;
+		$strings =~ s/\\"/"/g; # remove \ from \"
+		# is this a trace_adal_write_all call?
+		if ($prefix =~ m/trace_adal_write_all\s*\(/) {
+			# yes. replace trace_adal_hash with hash value and reduced format string
+			(@format_param) = ($strings =~ /(%[#0\- +'I]*\d*(?:\.\d*)?[hlLqjzt]*[diouxXeEfFgGaAcsCSpn])/g);
+			$format = join(',', @format_param);
+			# reduced format string will be added after hash value
+			$write_all_suffix = '," ' . $format . '"';
+			if ($salt == -1) {
+				$salt = scalar(@format_param);
+			} elsif ($salt != scalar(@format_param)) {
+				print STDERR ("printf % mismatch in '$line': TRACE says $salt, format says ",
+					scalar(@format_param), " args\n");
+			}
+		} else {
+			$write_all_suffix = '';
+		}
+		$hash = get_hash($strings, $salt);
+		if (exists $$rhash{$hash} && $$rhash{$hash} ne $strings) {
+			print STDERR "hash collision: two different strings give the same hash value '$hash'\n",
+				$strings, "\n", $$rhash{$hash}, "\n";
+			return undef;
+		}
+		$$rhash{$hash} = $strings;
+		$newline .= $prefix . "(($hashtype) ${hash}U)$write_all_suffix";
+		print "changed call: $prefix(($hashtype) ${hash}U)$write_all_suffix...\n" if $debug;
+		$line = $suffix;
+	}
+	$newline .= $line if $line;
+	$newline .= "\n" unless $newline =~ m/\n$/;
+	return $newline;
+}
+
+sub get_hash($$)
+{
+	my ($string, $salt) = @_;
+	$string =~ s/([\\"])/\\$1/g;
+	my $hash = `trexhash "$string" $salt`;
+	chomp $hash;
+	if ($hash !~ m/^\d+$/) {
+		print STDERR "trexhash error: $hash\n";
+		print STDERR "for call <<trexhash \"$string\" $salt>>\n";
+		die "$!";
+	}
+	if (!$hash) {
+		for (my $i=0; $i < length($string); $i++) {
+			$hash += ord(substr($string, $i, 1));
+		}
+	}
+	return $hash;
+}

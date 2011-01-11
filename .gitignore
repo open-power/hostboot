@@ -1,4 +1,5 @@
 *.o
+*.o.hash
 *.so
 *.swp
 *.bin
