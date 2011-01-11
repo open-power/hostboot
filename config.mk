@@ -9,7 +9,7 @@ OBJDIR = ${ROOTPATH}/obj/hbicore
 IMGDIR = ${ROOTPATH}/img
 endif
 
-CUSTOM_LINKER = ${ROOTPATH}/src/build/linker/linker
+CUSTOM_LINKER = i686-mcp6-jail ${ROOTPATH}/src/build/linker/linker
 TRACEPP = ${ROOTPATH}/src/build/trace/tracepp
 
 CC = ${TRACEPP} ppc64-mcp6-gcc
