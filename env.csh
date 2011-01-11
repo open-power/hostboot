@@ -1,4 +1,4 @@
-setenv MCP_PATH /esw/user/nfs/iawillia/fakeroot
+setenv MCP_PATH /opt/mcp/shared/openhal
 if (-e /esw/fakeroot/) then
     setenv MCP_PATH /esw/fakeroot
 endif

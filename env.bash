@@ -1,4 +1,4 @@
-export MCP_PATH=/esw/user/nfs/iawillia/fakeroot
+export MCP_PATH=/opt/mcp/shared/openhal
 
 if [ -e /esw/fakeroot/ ]; then
     export MCP_PATH=/esw/fakeroot
