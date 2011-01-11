@@ -1,2 +1,7 @@
-export LD_LIBRARY_PATH=/esw/fakeroot/usr/lib/
-export PATH=${PATH}:/esw/fakeroot/opt/mcp/ppc64/bin:`pwd`/src/build/trace
+export MCP_PATH=/esw/user/nfs/iawillia/fakeroot
+
+if [ -e /esw/fakeroot/ ]; then
+    export MCP_PATH=/esw/fakeroot
+fi
+
+export PATH=${PATH}:${MCP_PATH}/opt/mcp/bin:${MCP_PATH}/usr/bin:`pwd`/src/build/trace

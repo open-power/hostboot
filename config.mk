@@ -12,9 +12,9 @@ endif
 CUSTOM_LINKER = ${ROOTPATH}/src/build/linker/linker
 TRACEPP = ${ROOTPATH}/src/build/trace/tracepp
 
-CC = ${TRACEPP} ppc64-linux-gcc
-CXX = ${TRACEPP} ppc64-linux-g++
-LD = ppc64-linux-ld
+CC = ${TRACEPP} ppc64-mcp6-gcc
+CXX = ${TRACEPP} ppc64-mcp6-g++
+LD = ppc64-mcp6-ld
 
 COMMONFLAGS = -O3 -nostdlib ${EXTRACOMMONFLAGS}
 CFLAGS = ${COMMONFLAGS} -mcpu=power7 -nostdinc -g -msoft-float -mno-altivec \
