@@ -1,16 +1,7 @@
 ROOTPATH = ../../..
-OBJDIR = ${ROOTPATH}/obj/modules/example
-IMGDIR = ${ROOTPATH}/img
-EXTRACOMMONFLAGS = -fPIC
+MODULE = example
 
 OBJS = example.o
-OBJECTS = $(addprefix ${OBJDIR}/, ${OBJS})
 LIBS = libexample.so
-LIBRARIES = $(addprefix ${IMGDIR}/, ${LIBS})
-
-all: ${OBJECTS} ${LIBRARIES}
-
-clean:
-	(rm -f ${OBJECTS} $(addsuffix .hash, ${OBJECTS}) ${LIBRARIES} )
 
 include ${ROOTPATH}/config.mk

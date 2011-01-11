@@ -1,3 +1,14 @@
+all: ALL
+
+ifdef MODULE
+OBJDIR = ${ROOTPATH}/obj/modules/${MODULE}
+IMGDIR = ${ROOTPATH}/img
+EXTRACOMMONFLAGS += -fPIC
+else
+OBJDIR = ${ROOTPATH}/obj/hbicore
+IMGDIR = ${ROOTPATH}/img
+endif
+
 CUSTOM_LINKER = ${ROOTPATH}/src/build/linker/linker
 TRACEPP = ${ROOTPATH}/src/build/trace/tracepp
 
@@ -14,6 +25,9 @@ LDFLAGS = --nostdlib --sort-common ${COMMONFLAGS}
 LDMAPFLAGS = -Map $@.map 
 
 INCDIR = ${ROOTPATH}/src/include/
+
+OBJECTS = $(addprefix ${OBJDIR}/, ${OBJS})
+LIBRARIES = $(addprefix ${IMGDIR}/, ${LIBS})
 
 ${OBJDIR}/%.o : %.C
 	mkdir -p ${OBJDIR}
@@ -43,3 +57,13 @@ ${IMGDIR}/%.bin: ${IMGDIR}/%.elf $(wildcard ${IMGDIR}/*.so)
 
 %.clean:
 	cd ${basename $@} && ${MAKE} clean
+
+ALL: ${SUBDIRS} ${OBJECTS} ${LIBRARIES}
+ifdef IMAGES
+	    ${MAKE} ${IMAGES}
+endif
+
+clean: $(patsubst %.d,%.clean, ${SUBDIRS})
+	(rm -f ${OBJECTS} $(addsuffix .hash, ${OBJECTS}) ${LIBRARIES} \
+	       ${IMAGES} $(addsuffix .map, ${IMAGES}) )
+

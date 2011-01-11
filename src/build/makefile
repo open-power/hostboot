@@ -2,8 +2,4 @@ ROOTPATH = ../..
 
 SUBDIRS = linker.d
 
-all: ${SUBDIRS}
-
-clean: $(patsubst %.d,%.clean, ${SUBDIRS})
-
 include ${ROOTPATH}/config.mk
