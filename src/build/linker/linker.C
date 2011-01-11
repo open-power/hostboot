@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include <algorithm>
 
-#include <vfs.h>
+#include "../../include/sys/vfs.h"
 
 using std::cout;
 using std::endl;
