@@ -1,4 +1,4 @@
-setenv MCP_PATH /opt/mcp/shared/openhal
+setenv MCP_PATH /opt/mcp/shared/powerhal
 if (-e /esw/fakeroot/) then
     setenv MCP_PATH /esw/fakeroot
 endif
