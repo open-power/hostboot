@@ -8,6 +8,7 @@ void TaskManager::idleTaskLoop(void* unused)
 {
     while(1)
     {
+	setThreadPriorityLow();
     }
 }
 

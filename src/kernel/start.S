@@ -4,6 +4,9 @@
 
 .global _start
 _start:
+    ;// Set thread priority high.
+    or 3,3,3
+
     ;// Check if first thread.
     mfspr r1, PIR
     li r2, 0x0003
@@ -68,11 +71,13 @@ finished_relocate:
 #define UNIMPL_INTERRUPT(name, address) \
     .org _start + address; \
     intvect_##name: \
+	or 1,1,1; /* Drop thread priority while in loop. */ \
 	b intvect_##name
 
 #define STD_INTERRUPT(name, address) \
     .org _start + address; \
     intvect_##name: \
+	or 3,3,3; /* Ensure thread priority is high. */ \
 	mtsprg1 r1; /* Save GPR1 */ \
 	    ;/* Retrieve processing address for interrupt. */ \
 	lis r1, intvect_##name##_finish_save@h; \
@@ -149,14 +154,17 @@ _other_thread_spinlock:
     ;// Read spinlock value.
     lis r2, kernel_other_thread_spinlock@h
     ori r2, r2, kernel_other_thread_spinlock@l
+1:
     ld r3, 0(r2)
     ;// Loop until value is not 0...
     li r4, 0
     cmp cr0, r3, r4
     bne _other_thread_spinlock_complete
-    b _other_thread_spinlock
+    or 1,1,1 ;// Lower thread priority.
+    b 1b
 ;// Now released by primary thread.
 _other_thread_spinlock_complete:
+    or 3,3,3 ;// Raise thread priority.
     ;// Get CPU object from thread ID.
     lis r2, _ZN10CpuManager7cv_cpusE@h
     ori r2, r2, _ZN10CpuManager7cv_cpusE@l
