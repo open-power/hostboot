@@ -63,10 +63,6 @@ void init_main(void* unused)
 
     task_exec("libexample.so", NULL);
     
-    volatile uint64_t* ptr = (uint64_t*) 0x3000;
-    (*ptr) = 0x1234;
-    printk("Value = %lx\n", *ptr);
-
     while(1)
 	task_yield();
 }

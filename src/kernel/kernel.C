@@ -32,7 +32,7 @@ class Kernel
 extern "C"
 int main()
 {
-    printk("Booting %s kernel...\n\n", "Chenoo");
+    printk("Booting %s kernel...\n\n", "HBI");
     
     Kernel& kernel = Singleton<Kernel>::instance();
     kernel.cppBootstrap();
