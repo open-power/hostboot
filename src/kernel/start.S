@@ -309,3 +309,7 @@ kernel_stack:
 .global kernel_other_thread_spinlock
 kernel_other_thread_spinlock:
     .space 8
+
+.global hbi_ImageId
+hbi_ImageId:
+    .space 128

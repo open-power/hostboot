@@ -1,6 +1,7 @@
 #ifndef __UTIL_LOCKED_LIST_H
 #define __UTIL_LOCKED_LIST_H
 
+#include <stddef.h>
 #include <util/locked/lock.H>
 
 namespace Util

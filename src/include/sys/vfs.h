@@ -10,6 +10,12 @@
 #define VFS_STRINGIFY(X) #X
 #define VFS_TOSTRING(X) VFS_STRINGIFY(X)
 
+#define VFS_MODULE_DEFINE_START(f) \
+    extern "C" void VFS_SYMBOL_START(void* args) \
+    { \
+	f(args); \
+    }
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -36,7 +42,6 @@ struct VfsSystemModule
 
 extern VfsSystemModule VFS_MODULES[VFS_MODULE_MAX];
 extern uint64_t VFS_LAST_ADDRESS;
-
 
 #ifdef __cplusplus
 }

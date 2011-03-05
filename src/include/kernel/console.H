@@ -3,8 +3,9 @@
 
 #include <stdint.h>
 #include <string.h>
+#include <builtins.h>
 
-void printk(const char*, ...)  __attribute__((format (printf, 1, 2)));
+void printk(const char*, ...) FORMAT_PRINTF;
 
 class Console
 {

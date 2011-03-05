@@ -86,6 +86,8 @@
                 .set SDR1,25
                 .set SRR0,26
                 .set SRR1,27
+                .set HSRR0,314
+                .set HSRR1,315
                 .set SPRG0,272
                 .set SPRG1,273
                 .set SPRG2,274

@@ -1,7 +1,7 @@
 #include <util/singleton.H>
 #include <kernel/vmmmgr.H>
 #include <kernel/console.H>
-#include <kernel/ppcarch.H>
+#include <arch/ppc.H>
 
 extern void* data_load_address;
 
@@ -102,7 +102,7 @@ bool VmmManager::_pteMiss(task_t* t)
 {
     lock.lock();
 
-    uint64_t effAddr = ppc_getDAR();
+    uint64_t effAddr = getDAR();
     uint64_t effPid = effAddr / FULL_MEM_SIZE;
 
     

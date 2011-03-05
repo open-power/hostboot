@@ -1,0 +1,9 @@
+#ifndef __NEW_H
+#define __NEW_H
+
+#ifdef __cplusplus
+extern void *operator new(size_t, void*);
+extern void *operator new[](size_t, void*);
+#endif
+
+#endif

@@ -5,3 +5,6 @@ all: linker
 
 clean:
 	(rm -f linker)
+
+beam:
+

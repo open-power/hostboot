@@ -1,7 +1,5 @@
 *.o
+*.list
+*.dep
 *.o.hash
-*.so
 *.swp
-*.bin
-*.elf
-*.map

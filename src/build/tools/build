@@ -1,0 +1,10 @@
+#!/bin/sh
+
+if [ -f 'env.bash' ]; then
+    . env.bash
+else
+    echo "env.bash does not exist, are you running from your repository home?"
+    exit 1;
+fi
+
+make && make docs

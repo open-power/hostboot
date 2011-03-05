@@ -1,0 +1,94 @@
+#!/usr/bin/perl
+
+use strict;
+
+sub add_image_subdir
+{
+    my $image = shift;
+    if (!($image =~ m/\/img/)) { $image = "./img/".$image };
+    return $image;
+}
+
+my $image_offset = $ENV{"HAL_IMAGE_OFFSET"};
+if (not $image_offset) { $image_offset = "0x0"; };
+$image_offset = hex $image_offset;
+
+my $image;
+my $all_modules = 0;
+my @modules = ();
+
+if ($#ARGV == -1)
+{
+    die "gensyms <image> [modules]\n";
+}
+if ($#ARGV == 0)
+{
+    $all_modules = 1;
+}
+else
+{
+    @modules = @ARGV[1..$#ARGV];
+}
+
+$image = add_image_subdir($ARGV[0]);
+
+my %module_offsets = ();
+open MODINFO, "< $image.modinfo";
+
+while (my $modline = <MODINFO>)
+{
+    chomp $modline;
+    my @splitline = split /,/, $modline;
+    $module_offsets{@splitline[0]} = (hex @splitline[1]) + $image_offset;
+    if ($all_modules)
+    {
+	push @modules, @splitline[0];
+    }
+}
+
+my %output = ();
+foreach my $module (@modules)
+{
+    open OBJDUMP, ("ppc64-mcp6-objdump --syms -C ".add_image_subdir($module)."|");
+    while (my $line = <OBJDUMP>)
+    {
+	if (($line =~ m/\*ABS\*/) || ($line =~ m/\*UND\*/))
+	{
+	    next;
+	}
+	if ("d" eq substr($line, 22, 1))
+	{
+	    next;
+	}
+	if (!($line =~ m/^[0-9a-f]{16}/))
+	{
+	    next;
+	}
+
+	$line =~ s/[\s]*$//;
+	
+	my $address = (hex substr($line, 0, 16)) + $module_offsets{$module};
+	my $is_function = ("F" eq substr($line, 23, 1));
+        my $size = (hex substr($line, 32, 16));
+	my $name = substr($line, 48);
+	my $code_loc = 0;
+	if ($is_function)
+	{
+	    open XXD, ("/usr/bin/xxd -p -s ".($address - $image_offset)." -l 8 -g 8 ".add_image_subdir($image)."|");
+	    $code_loc = (hex <XXD>) + $image_offset;
+	    close XXD;
+	    
+	    my $tmp = $code_loc; $code_loc = $address; $address = $tmp;
+	}
+	my $outstring = "";
+	$outstring = sprintf "%s,%08x,%08x,%08x,%s\n", ($is_function?"F":"V"),$address,$code_loc,$size,$name;
+
+	$output{$outstring} = $outstring;
+    }
+    close OBJDUMP;
+}
+
+foreach my $outstring (sort { substr($a,2,8) cmp substr($b,2,8) } keys %output)
+{
+    print $outstring;
+}

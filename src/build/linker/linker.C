@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <bfd.h>
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <vector>
 #include <map>
@@ -14,6 +15,7 @@
 #include "../../include/sys/vfs.h"
 
 using std::cout;
+using std::cerr;
 using std::endl;
 using std::string;
 using std::vector;
@@ -21,6 +23,7 @@ using std::map;
 using std::for_each;
 using std::mem_fun_ref;
 using std::bind1st;
+using std::ofstream;
 
 struct Symbol
 {
@@ -28,6 +31,7 @@ struct Symbol
     uint8_t type;
     uint64_t address;
     uint64_t addend;
+    uint64_t base;
 
     enum SymbolType
     {
@@ -75,6 +79,8 @@ struct Object
 
 vector<Object> objects;
 FILE* output;
+ofstream modinfo;
+vector<uint64_t> all_relocations;
 
 int main(int argc, char** argv)
 {
@@ -92,6 +98,8 @@ int main(int argc, char** argv)
 	cout << "Error opening " << argv[1] << endl;
 	cout << strerror(error) << endl;
     }
+    // Open modinfo file.
+    modinfo.open((string(argv[1])+".modinfo").c_str());
     
     // Read input objects.
     for (int files = 2; files < argc; files++)
@@ -108,6 +116,12 @@ int main(int argc, char** argv)
     for_each(objects.begin(), objects.end(), 
 	     bind2nd(mem_fun_ref(&Object::write_object), output));
     uint64_t last_address = ftell(output);
+    if (0 != (last_address % 8))
+    {
+	char zero = 0;
+	fwrite(&zero, 0, 8 - (last_address % 8), output);
+	last_address = ftell(output);
+    }
 
     cout << "Local relocations..." << endl;
     for_each(objects.begin(), objects.end(), 
@@ -149,9 +163,13 @@ int main(int argc, char** argv)
 	uint64_t start_symbol = i->find_start_symbol();
 
 	char data[sizeof(uint64_t)];
-
+	
+	if (0 != init_symbol)
+	    all_relocations.push_back(ftell(output));
 	bfd_putb64(init_symbol, data);
 	fwrite(data, sizeof(uint64_t), 1, output);
+	if (0 != start_symbol)
+	    all_relocations.push_back(ftell(output));
 	bfd_putb64(start_symbol, data);
 	fwrite(data, sizeof(uint64_t), 1, output);
 
@@ -169,8 +187,24 @@ int main(int argc, char** argv)
     char last_addr_data[sizeof(uint64_t)];
     bfd_putb64(last_address, last_addr_data);
     fwrite(last_addr_data, sizeof(uint64_t), 1, output);
-    
+
     cout << last_address << " to " << last_address_entry_address << endl;
+
+    // Output relocation data.
+    {
+	fseek(output, 0, SEEK_END);
+	char temp64[sizeof(uint64_t)];
+
+	uint64_t count = all_relocations.size();
+	bfd_putb64(count, temp64);
+	fwrite(temp64, sizeof(uint64_t), 1, output);
+
+	for (int i = 0; i < all_relocations.size(); i++)
+	{
+	    bfd_putb64(all_relocations[i], temp64);
+	    fwrite(temp64, sizeof(uint64_t), 1, output);
+	}
+    }
 
     return 0;
 }
@@ -254,6 +288,8 @@ bool Object::write_object(FILE* file)
 	cout << "Error writing to output." << endl;
 	cout << strerror(error) << endl;
     }
+
+    modinfo << &name[(name.find_last_of("/")+1)] << ",0x" << std::hex << offset << endl;
 }
 
 bool Object::read_relocation()
@@ -292,6 +328,7 @@ bool Object::read_relocation()
 	Symbol s;
 	s.name = syms[i]->name;
 	s.address = syms[i]->value;
+	s.base = syms[i]->section->vma;
 	s.type = 0;
 
 	cout << "\tSymbol: " << syms[i]->name << endl;
@@ -362,6 +399,15 @@ bool Object::read_relocation()
 	{
 	    s.type = Symbol::UNRESOLVED;
 	}
+	
+	if (loc[i]->howto->name == string("R_PPC64_ADDR64"))
+	{
+	    s.type |= Symbol::VARIABLE;
+	}
+	else if (loc[i]->howto->name == string("R_PPC64_JMP_SLOT"))
+	{
+	    s.type |= Symbol::FUNCTION;
+	}
 	this->relocs.push_back(s);
 	
 	cout << "\tSymbol: " << loc[i]->sym_ptr_ptr[0]->name;
@@ -401,17 +447,30 @@ bool Object::perform_local_relocations(FILE* file)
 	address = bfd_getb64(data);
 	if (address != i->addend)
 	{
-	    cout << "Expected " << i->addend << " found " << address << endl;
-	    continue;
+	    cout << "Expected " << i->addend << " found " << address 
+		 << " at " << (offset + i->address) << endl;
+	    cerr << "Expected " << i->addend << " found " << address 
+		 << " at " << (offset + i->address) << endl;
+	    exit(-1);
+	}
+
+	// If it is a non-ABS relocation, also need to add the symbol addr.
+	if (i->name != BFD_ABS_SECTION_NAME) 
+	{
+	    Symbol& s = this->symbols[i->name];
+	    uint64_t symbol_addr = s.base + s.address;
+	    i->addend += symbol_addr;
+	    relocation += symbol_addr;
 	}
 
 	address = relocation;
 	bfd_putb64(address, data);
+	all_relocations.push_back(offset + i->address);
 	
 	fseek(file, offset + i->address, SEEK_SET);
 	fwrite(data, sizeof(uint64_t), 1, file);
 
-	cout << "\tRelocated " << i->addend << " to " 
+	cout << "\tRelocated " << i->addend << " at " << i->address << " to " 
 	     << relocation << endl;
     }
 }
@@ -424,54 +483,92 @@ bool Object::perform_global_relocations(FILE* file)
         i != relocs.end();
 	++i)
     {
+	bool found_symbol = false;
+
 	if (!(i->type & Symbol::UNRESOLVED))
 	    continue;
 
 	cout << "\tSymbol: " << i->name << endl;
 	
 	char data[sizeof(uint64_t)*3];
-
-	for(vector<Object>::iterator j = objects.begin();
-	    j != objects.end();
-	    ++j)
+	
+	for(int allow_local = 0; 
+	    ((allow_local < 2) && (!found_symbol)); 
+	    allow_local++)
 	{
-	    if (j->symbols.find(i->name) != j->symbols.end())
+	    for(vector<Object>::iterator j = objects.begin();
+		    j != objects.end();
+		    ++j)
 	    {
-		Symbol s = j->symbols[i->name];
-		uint64_t symbol_addr = 
-			j->offset + s.address + j->data.vma_offset;
-
-		if (s.type & Symbol::UNRESOLVED)
-		    continue;
-		if (s.type & Symbol::LOCAL)
-		    continue;
-		if (!(s.type & Symbol::GLOBAL))
-		    continue;
-		
-		if (s.type & Symbol::FUNCTION)
+		if (j->symbols.find(i->name) != j->symbols.end())
 		{
-		    fseek(file, symbol_addr, SEEK_SET);
-		    fread(data, sizeof(uint64_t), 3, file);
+		    Symbol s = j->symbols[i->name];
+		    uint64_t symbol_addr = 
+			j->offset + s.address + s.base; 
 
-		    fseek(file, offset + i->address, SEEK_SET);
-		    fwrite(data, sizeof(uint64_t), 3, file);
+		    if (s.type & Symbol::UNRESOLVED)
+			continue;
+		    if ((s.type & Symbol::LOCAL) && (!allow_local))
+			continue;
+		    if ((!(s.type & Symbol::GLOBAL)) && (!allow_local))
+			continue;
 
-		    cout << "\tCopied relocation from " << std::hex 
-			<< symbol_addr << " to " 
-			<< offset + i->address << "." << endl;
+		    found_symbol = true;
+
+		    if ((s.type & Symbol::FUNCTION) && 
+			(i->type & Symbol::FUNCTION))
+		    {
+			if (i->addend != 0)
+			{
+			    cerr << "Can't handle offset unresolved function." 
+				<< endl;
+			    exit(-1);
+			}
+
+			fseek(file, symbol_addr, SEEK_SET);
+			fread(data, sizeof(uint64_t), 3, file);
+
+			fseek(file, offset + i->address, SEEK_SET);
+			fwrite(data, sizeof(uint64_t), 3, file);
+			all_relocations.push_back(offset + i->address);
+			all_relocations.push_back(offset + i->address + 8);
+			all_relocations.push_back(offset + i->address + 16);
+
+			cout << "\tCopied relocation from " << std::hex 
+			    << symbol_addr << " to " 
+			    << offset + i->address << "." << endl;
+		    }
+		    else
+		    {
+			if (s.type & Symbol::FUNCTION)
+			{
+			    cout << "\tTOC link for function: " << s.name
+			         << endl;
+			}
+			if (i->addend != 0)
+			{
+			    cout << "\tOffset to " << i->addend << endl;
+			    symbol_addr += i->addend;
+			}
+			bfd_putb64(symbol_addr, data);
+			fseek(file, offset + i->address, SEEK_SET);
+			fwrite(data, sizeof(uint64_t), 1, file);
+			all_relocations.push_back(offset + i->address);
+
+			cout << "\tRelocated from " << std::hex
+			    << symbol_addr << " to "
+			    << offset + i->address << "." << endl;
+		    }
+		    break;
 		}
-		else
-		{
-		    bfd_putb64(symbol_addr, data);
-		    fseek(file, offset + i->address, SEEK_SET);
-		    fwrite(data, sizeof(uint64_t), 1, file);
-
-		    cout << "\tRelocated from " << std::hex
-			 << symbol_addr << " to "
-			 << offset + i->address << "." << endl;
-		}
-		break;
 	    }
+	}
+
+	if (!found_symbol)
+	{
+	    cout << "Could not find symbol " << i->name << std::endl;
+	    cerr << "Could not find symbol " << i->name << std::endl;
+	    exit(-1);
 	}
     }
 }

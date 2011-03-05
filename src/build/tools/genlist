@@ -1,0 +1,180 @@
+#!/usr/bin/perl
+
+use strict;
+
+sub add_image_subdir
+{
+    my $image = shift;
+    if (!($image =~ m/\/img/)) { $image = "./img/".$image };
+    return $image;
+}
+
+sub find_symbol_name
+{
+    my $offset = shift;
+    my $require_function = shift;
+    my $symbol_addrs = shift;
+    my $symbol_funcs = shift;
+
+    if (defined $symbol_addrs->{$offset})
+    {
+	for my $sym (@{$symbol_addrs->{$offset}})
+	{
+	    if ($symbol_funcs->{$sym})
+	    {
+		return $sym;
+	    }
+	}
+	if ($require_function)
+	{
+	    return 0;
+	}
+	return @{$symbol_addrs->{$offset}}[0];
+    }
+    if ($require_function)
+    {
+	return 0;
+    }
+
+    my $prevoffset = 0;
+    foreach my $off (keys %$symbol_addrs)
+    {
+	if (($off > $prevoffset) and ($off <= $offset))
+	{
+	    $prevoffset = $off;
+	}
+    }
+    if (defined $symbol_addrs->{$prevoffset})
+    {
+	for my $sym (@{$symbol_addrs->{$prevoffset}})
+	{
+	    if ($symbol_funcs->{$sym})
+	    {
+		return sprintf "%s+0x%x", $sym, ($offset - $prevoffset);
+	    }
+	}
+	return sprintf "%s+0x%x", @{$symbol_addrs->{$prevoffset}}[0], 
+			($offset - $prevoffset);
+    }
+    return sprintf "Unknown @ 0x%x", $offset;
+}
+
+use FindBin qw($Bin);
+
+my $image_offset = $ENV{"HAL_IMAGE_OFFSET"};
+if (not $image_offset) { $image_offset = "0x0"; };
+$image_offset = hex $image_offset;
+
+my $image;
+my $all_modules = 0;
+my @modules = ();
+
+if ($#ARGV == -1)
+{
+    die "genlist <image> [modules]\n";
+}
+if ($#ARGV == 0)
+{
+    $all_modules = 1;
+}
+else
+{
+    @modules = @ARGV[1..$#ARGV];
+}
+
+$image = add_image_subdir($ARGV[0]);
+
+my %module_offsets = ();
+open MODINFO, "< $image.modinfo";
+
+while (my $modline = <MODINFO>)
+{
+    chomp $modline;
+    my @splitline = split /,/, $modline;
+    $module_offsets{@splitline[0]} = (hex @splitline[1]) + $image_offset;
+    if ($all_modules)
+    {
+	push @modules, @splitline[0];
+    }
+}
+
+my %symbol_address = ();
+my %symbol_isfunc = ();
+
+my $cmd = "$Bin/gensyms ".$image; 
+foreach my $module (@modules)
+{
+    $cmd = $cmd." ".$module;
+}
+open GENSYMS, $cmd."|";
+while (my $line = <GENSYMS>)
+{
+    chomp $line;
+    my ($is_func,$code_addr,$addr,$function);
+    
+    $line =~ m/(.*?),(.*?),(.*?),(.*?),(.*)/;
+    $is_func = "F" eq $1;
+    $addr = hex $2;
+    $function = $5;
+
+    if (not defined $symbol_address{$addr})
+    {
+	$symbol_address{$addr} = ();
+    }
+    push @{$symbol_address{$addr}}, $function;
+    $symbol_isfunc{$function} = $is_func;
+}
+
+
+foreach my $module (@modules)
+{
+    print "BEGIN MODULE ---- ".$module." ----\n";
+    my $enabled = 0;
+    open OBJDUMP, ("ppc64-mcp6-objdump -DCS ".add_image_subdir($module)."|");
+    while (my $line = <OBJDUMP>)
+    {
+	if ($line =~ m/Disassembly of section/)
+	{
+	    if (($line =~ m/.text/) || ($line =~ m/.data/))
+	    {
+		$enabled = 1;
+	    }
+	    else
+	    {
+		$enabled = 0;
+	    }
+	}
+	elsif ($enabled)
+	{
+	    if ($line =~ s/(^[\s]*)([0-9a-f]+)(:)/$1__HEXVALUE__$3/)
+	    {
+		my $value = hex $2;
+		my $offset = $value + $module_offsets{$module};
+		my $format = sprintf "%x\t%08x", $value, $offset;
+		$line =~ s/__HEXVALUE__/$format/;
+		
+		my $symname = find_symbol_name($offset, 1, \%symbol_address, 
+					       \%symbol_isfunc);
+		if ($symname)
+		{
+		    printf "%016x <%s>:\n", $offset, $symname;
+		}
+
+		if ($line =~ s/(b[a-z]*[+-]*[\s]*(.*,){0,1})([0-9a-f]+)([\s]*<)(.*)(>)/$1__HEXVALUE__$4__FUNCREF__$6/)
+		{
+		    $value = hex $3;
+		    $offset = $value + $module_offsets{$module};
+		    $format = sprintf "%x", $offset;
+		    $line =~ s/__HEXVALUE__/$format/;
+
+		    my $refname = find_symbol_name($offset, 0, 
+					\%symbol_address, \%symbol_isfunc);
+		    $line =~ s/__FUNCREF__/$refname/
+		}
+	    }
+	    print $line;
+	}
+    }
+    close OBJDUMP;
+    print "\n";
+}

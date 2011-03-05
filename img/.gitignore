@@ -1,0 +1,10 @@
+*.bin
+*.bin.modinfo
+*.elf
+*.fips
+*.lid
+*.lidhdr
+*.ruhx
+*.so
+*.syms
+.*.lnkout

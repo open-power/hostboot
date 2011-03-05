@@ -1,0 +1,207 @@
+#!/usr/bin/perl
+
+# This script builds and publishes drivers.
+# It does:
+# 1) creates a git repository
+# 2) checks out from the powerhal repository
+# 3) builds
+# 4) tags the driver
+#
+# This assumes:
+# 1) you have current GSA credentials
+# 2) you are in powerhal/writers GSA group
+# 3) git is in your path
+# 4) you are running this on gfwr801 or other suitable build machine
+
+use strict;
+use Getopt::Long;
+use Cwd;
+
+my $POWERHAL_HOME = "/gsa/rchgsa/projects/p/powerhal";
+my $POWERHAL_REPO = $POWERHAL_HOME."/git";
+my $DEFAULT_DRIVERS_HOME = $POWERHAL_HOME."/drivers";
+my $DEFAULT_PUBLISH_HOME = $POWERHAL_HOME."/builds";
+my $BUILD_SCRIPT = "src/build/tools/build";
+
+my $FIRST_SPIN_NAME = "a";
+my $DEFAULT_RELEASE ="110";
+my $DEFAULT_BRANCH = "devel";
+
+
+# Constructs a build name in the format bMMDDx_YYWW.rrr
+# Example: b0126a_1104.110
+sub constructBuildName
+{
+    my ($spin, $release) = @_;
+
+    # TODO Rewrite this to avoid the date call and build it in perl?
+    my $dateCmd = "/bin/date +b%m%d".$spin."_%y%W.".$release;
+
+    my $buildName = `$dateCmd`;
+    chomp $buildName;
+
+    return $buildName;
+}
+
+# Return the build name to use
+# This looks in the $driverHome for existing spins on this date and updates the spin name accordingly
+sub getBuildName
+{
+    my ($driverHome, $release) = @_;
+
+    my $driverNamePattern = constructBuildName(".", $release);
+    my $dir;
+    opendir ($dir, $driverHome) or die "Cannot open $driverHome.";
+    my @matches = sort grep { /^$driverNamePattern/ } readdir ($dir);
+    closedir ($dir);
+
+    my $buildName;
+    if (scalar(@matches) > 0)
+    {
+        print "Existing spins for this build date and release:\n";
+        foreach (@matches)
+        {
+            print "\t".$_."\n";
+        }
+
+        my $lastSpin = $matches[-1];
+        print "Last spin was $lastSpin\n";
+        $lastSpin =~ /^b\d\d\d\d([a-z])/ or die "Found driver matches, but spin name match failed.";
+        $lastSpin = $1;
+        die "Too many spins today!!!" if ($lastSpin eq "z");
+        $lastSpin++;
+        $buildName = constructBuildName($lastSpin, $release);
+    }
+    else
+    {
+        print "First spin for this build date and release.\n";
+        $buildName = constructBuildName($FIRST_SPIN_NAME, $release);
+    }
+
+    print "This build will be: $buildName\n";
+
+    return $buildName;
+}
+
+# Creates a directory with the $dir name 
+# Creates a git repository
+# Adds $remoteRepository as the remote repository
+# Checks out $branch
+# Creates a tag $tag
+# Pushes the tag to the remote repository
+sub createRepo
+{
+    my ($dir, $remoteRepository, $branch, $tag) = @_;
+    die "createRepo: dir is required" unless (defined $dir);
+    die "createRepo: remoteRepository is required" unless (defined $remoteRepository);
+    die "createRepo: branch is required" unless (defined $branch);
+    die "createRepo: tag is required" unless (defined $tag);
+
+    mkdir $dir or die "Cannot mkdir $dir";
+    chdir $dir or die "Cannot chdir to $dir";
+
+    my $cmd = "git init";
+    system "$cmd";
+    my $rc = $?;
+    die "Failed running '$cmd' with rc $rc" unless ($rc == 0);
+
+    $cmd = "git remote add origin ".$remoteRepository;
+    system "$cmd";
+    $rc = $?;
+    die "Failed running '$cmd' with rc $rc" unless ($rc == 0);
+
+    $cmd = "git fetch origin";
+    system "$cmd";
+    $rc = $?;
+    die "Failed running '$cmd' with rc $rc" unless ($rc == 0);
+
+    $cmd = "git checkout -b ".$branch." origin/".$branch;
+    system "$cmd";
+    $rc = $?;
+    die "Failed running '$cmd' with rc $rc" unless ($rc == 0);
+
+    $cmd = "git tag -a -m \"Build ".$tag."\" ".$tag;
+    system "$cmd";
+    $rc = $?;
+    die "Failed running '$cmd' with rc $rc" unless ($rc == 0);
+
+    $cmd = "git push --tags origin";
+    system "$cmd";
+    $rc = $?;
+    die "Failed running '$cmd' with rc $rc" unless ($rc == 0);
+}
+
+# Builds the driver
+# Assumes the current working directory is the root of the git repository
+sub build
+{
+    die "Cannot find build script \"$BUILD_SCRIPT\"" unless (-e $BUILD_SCRIPT);
+
+    system "$BUILD_SCRIPT | /usr/bin/tee build.log";
+    my $rc = $?;
+    print "Compile output in ".cwd()."/build.log\n";
+    die "Compile failed with rc $rc" unless ($rc == 0);
+}
+
+sub publish
+{
+    my ($dir) = @_;
+    die "publish: dir is required" unless (defined $dir);
+
+    mkdir $dir or die "Cannot mkdir $dir";
+    
+    system "cp -p img/*.lid img/*.ruhx img/*.lidhdr $dir";
+    my $rc = $?;
+    die "Could not copy lids to $dir" unless ($rc == 0);
+
+    mkdir $dir."/include" or die "Cannot mkdir include";
+    mkdir $dir."/include/hal" or die "Cannot mkdir include/hal";
+    system "cp -p src/include/hal/hal.h obj/doxygen/html/hal_8h.html obj/doxygen/html/*.css $dir"."/include/hal/";
+    $rc = $?;
+    die "Could not copy hal.h and doxygen files" unless ($rc == 0);
+}
+
+
+# main
+my $startTime = time();
+my $currentTime = localtime();
+print "Build starting at $currentTime.\n";
+
+my $driversHome = $DEFAULT_DRIVERS_HOME;
+my $release = $DEFAULT_RELEASE;
+my $remoteRepository = $POWERHAL_REPO;
+my $branch = $DEFAULT_BRANCH;
+my $tag; # Default tag is the build name
+my $publishHome = $DEFAULT_PUBLISH_HOME;
+
+GetOptions("home=s"     => \$driversHome,
+           "release=s"  => \$release,
+           "remote=s"   => \$remoteRepository,
+           "branch=s"   => \$branch,
+           "tag=s"      => \$tag,
+           "publishhome=s" => \$publishHome);
+
+die "Unsupported parameters: @ARGV" unless (scalar(@ARGV) == 0);
+
+print "Drivers home = $driversHome\n";
+print "Release = $release\n";
+print "Remote repository = $remoteRepository\n";
+print "Branch = $branch\n";
+
+my $buildName = getBuildName($driversHome, $release);
+print "Build name = $buildName\n";
+
+$tag = (defined $tag) ? $tag : $buildName;
+print "Tag = $tag\n";
+print "Publish home = $publishHome\n";
+
+
+# This changes the current working directory to the new repository
+createRepo($driversHome."/".$buildName, $remoteRepository, $branch, $tag);
+build();
+publish($publishHome."/".$buildName);
+
+$currentTime = localtime();
+print "Build $buildName completed successfully at $currentTime.\n";
+print "Duration: ".(time() - $startTime)." seconds\n";
+

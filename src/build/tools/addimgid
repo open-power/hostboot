@@ -1,0 +1,27 @@
+#!/usr/bin/perl
+
+use strict;
+
+my $imageIdSym = "hbi_ImageId";
+
+my $img = shift;
+my $src = shift;
+
+my $imgBase = $img;
+$imgBase =~ s/.*\///;
+
+my $address = hex `ppc64-mcp6-nm $src -C | grep $imageIdSym | colrm 17`;
+my $imageId = `git describe --dirty || echo Unknown-Image \`git rev-parse --short HEAD\``;
+
+chomp $imageId;
+$imageId = $imageId."/".$imgBase;
+
+if (($imageId =~ m/Unknown-Image/) ||  	# Couldn't find git describe tag.
+    ($imageId =~ m/dirty/) ||	 	# Find 'dirty' commit.
+    ($imageId =~ m/^.{15}-[1-9]+/))	# Found commits after a tag.
+{
+    $imageId = $imageId."/".$ENV{"USER"};
+}
+
+system("echo -n $imageId | dd of=$img conv=notrunc bs=1 seek=$address count=127");
+exit $?

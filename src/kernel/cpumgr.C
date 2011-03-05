@@ -6,7 +6,7 @@
 #include <kernel/pagemgr.H>
 #include <kernel/console.H>
 #include <util/singleton.H>
-#include <kernel/ppcarch.H>
+#include <arch/ppc.H>
 #include <kernel/timemgr.H>
 
 cpu_t* CpuManager::cv_cpus[CpuManager::MAXCPUS] = { NULL };
@@ -19,7 +19,7 @@ CpuManager::CpuManager()
 
 cpu_t* CpuManager::getCurrentCPU()
 {
-    register task_t* current_task = (task_t*) ppc_getSPRG3();
+    register task_t* current_task = (task_t*) getSPRG3();
     return current_task->cpu;
 }
 
@@ -50,7 +50,7 @@ void CpuManager::startCPU(ssize_t i)
     // Initialize CPU structure.
     if (NULL == cv_cpus[i])
     {
-	printk("Starting CPU %d...", i);    
+	printk("Starting CPU %ld...", i);    
 	cpu_t* cpu = cv_cpus[i] = new cpu_t;
 	
 	// Initialize CPU.
@@ -68,7 +68,7 @@ void CpuManager::startCPU(ssize_t i)
 
     if (currentCPU)
     {
-	ppc_setSPRG3((uint64_t) cv_cpus[i]->idle_task);
+	setSPRG3((uint64_t) cv_cpus[i]->idle_task);
 
 	register uint64_t decrementer = TimeManager::getTimeSliceCount();
 	asm volatile("mtdec %0" :: "r"(decrementer));
@@ -78,7 +78,7 @@ void CpuManager::startCPU(ssize_t i)
 
 void CpuManager::startSlaveCPU(cpu_t* cpu)
 {
-    ppc_setSPRG3((uint64_t) cpu->idle_task);
+    setSPRG3((uint64_t) cpu->idle_task);
     
     register uint64_t decrementer = TimeManager::getTimeSliceCount();
     asm volatile("mtdec %0" :: "r"(decrementer));

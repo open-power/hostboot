@@ -4,4 +4,4 @@ if (-e /esw/fakeroot/) then
 endif
 
 
-setenv PATH ${PATH}:${MCP_PATH}/opt/mcp/bin:${MCP_PATH}/usr/bin:`pwd`/src/build/trace
+setenv PATH ${PATH}:${MCP_PATH}/opt/mcp/bin:${MCP_PATH}/usr/bin:`pwd`/src/build/lids:`pwd`/src/build/trace

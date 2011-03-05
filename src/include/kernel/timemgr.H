@@ -2,7 +2,7 @@
 #define __KERNEL_TIMEMGR_H
 
 #include <kernel/types.h>
-#include <kernel/ppcarch.H>
+#include <arch/ppc.H>
 
 #include <util/locked/pqueue.H>
 #include <kernel/spinlock.H>
@@ -33,7 +33,7 @@ class TimeManager
 
 	static uint64_t getCurrentTimeBase()
 	    {
-		return ppc_getTB();
+		return getTB();
 	    };
 
 	static uint64_t convertSecToTicks(uint64_t i_sec, uint64_t i_nsec);

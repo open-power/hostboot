@@ -11,6 +11,16 @@ void* operator new[](size_t s)
     return malloc(s);
 };
 
+void* operator new(size_t s, void *place)
+{
+    return place;
+}
+
+void* operator new[](size_t s, void *place)
+{
+    return place;
+}
+
 void operator delete(void* p)
 {
     return free(p);

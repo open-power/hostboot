@@ -1,0 +1,494 @@
+#!/usr/bin/perl -w
+#$sec = "IBM INTERNAL USE ONLY"; $sec;
+# Author: Randal Allen Anderson III
+#
+# change history:
+# ---------------
+# 2004/02/18    v2cib526 Created from stripfipshdr shell
+#
+# enhancment suggestions:
+# -----------------------
+
+select (STDERR);$| = 1;		# Make all prints to STDERR flush the buffer immediately
+select (STDOUT);$| = 1;		# Make all prints to STDOUT flush the buffer immediately
+require 'ctime.pl';
+
+#global variables
+my $pgmrc = 0;
+my $Debug = 0;
+my $inputImage;
+my $inputLidhdr;
+my $outFips;
+my $magicn = 0x0222;  # indicates fips header
+my $version = 3;      # header version #
+my @lidnumber = (0x0000, 0x0000);  # eight digit hex value
+my $bcddate1;
+my $bcddate2;
+my $bcdtime;
+my $fipsclass;
+my $lidsize;
+my $hdrsize;
+my $phylength = 4;
+my @phylum = (0xff00, 0x0000);  # default to all known platforms
+my $lidinfomax = 64;
+my $lidinfo = "";
+my $mtd = 0;
+my $binfile = "";  # binary image file
+my $crc = 0;
+
+# matrix values for crc calculation
+my @crctl = (0x00000000, 0x04C11DB7, 0x09823B6E, 0x0D4326D9,
+               0x130476DC, 0x17C56B6B, 0x1A864DB2, 0x1E475005,
+               0x2608EDB8, 0x22C9F00F, 0x2F8AD6D6, 0x2B4BCB61,
+               0x350C9B64, 0x31CD86D3, 0x3C8EA00A, 0x384FBDBD);
+
+my @crcth = (0x00000000, 0x4C11DB70, 0x9823B6E0, 0xD4326D90,
+               0x34867077, 0x7897AB07, 0xACA5C697, 0xE0B41DE7,
+               0x690CE0EE, 0x251D3B9E, 0xF12F560E, 0xBD3E8D7E,
+               0x5D8A9099, 0x119B4BE9, 0xC5A92679, 0x89B8FD09);
+
+$ProgName = "apyfipshdr";
+&ParseArgs();
+chomp($msgdate = `date`);
+OutputMessage("Start of $ProgName $msgdate",4,__LINE__);
+OutputMessage("Applying fips header to $inputImage using $inputLidhdr to create $outFips",4,__LINE__);
+&readLidhdr();              # read lidhdr configuration information from lidhdr file
+&readImage();               # read in the binary file to add header to
+$crc = qx(crc32 $inputImage); # calculate crc for the file
+$crc = hex($crc);
+if ($crc <= 0) {
+   OutputMessage("$ProgName was NOT successful. crc=0. Command crc32 is needed - is it in your path?",2,__LINE__);
+    exit 99;
+}
+&putFips();                 # create new file with fips header
+if ($pgmrc) {
+    OutputMessage("$ProgName was NOT successful rc=$pgmrc",2,__LINE__);
+}
+else {
+    OutputMessage("$ProgName was successful.",4,__LINE__);
+}
+chomp($msgdate = `date`);
+OutputMessage("$ProgName complete. $msgdate",4,__LINE__);
+exit($pgmrc);
+
+
+#----------------------------------------------------
+# Convert number to four digit BCD
+#----------------------------------------------------
+sub bcd {
+    my $intval = shift;
+    my $text = sprintf( "%04d", $intval );
+    my $hexval = hex( $text );
+    return $hexval;
+} # end of sub bcd
+
+
+
+#----------------------------------------------------
+# Get FipS lid class information from lidhdr file
+#----------------------------------------------------
+sub getfipsclass {
+    my $text = shift;
+    my $hexval = hex( $text );  # either hex value or mnemonic
+    if( $hexval == 0 ){
+        if( $text =~ m/FIPS_GENUS/i ){
+            $hexval = 0x1301;
+	}
+        elsif( $text =~ m/MASTERLIST/i ){
+            $hexval = 0x1311;
+	}
+        elsif( $text =~ m/MARKER_LID/i ){
+            $hexval = 0x1321;
+	}
+        elsif( $text =~ m/MARKER_DS/i ){
+            $hexval = 0x1331;
+	}
+        elsif( $text =~ m/KEY_LID/i ){
+            $hexval = 0x1341;
+	}
+        elsif( $text =~ m/FLASH_CODE/i ){
+            $hexval = 0x2000;
+	}
+        elsif( $text =~ m/FLASH_DATA/i ){
+            $hexval = 0x2001;
+	}
+        elsif( $text =~ m/BOOT_CODE/i ){
+            $hexval = 0x2100;
+	}
+        elsif( $text =~ m/BOOT_KEEP/i ){
+            $hexval = 0x2110;
+	}
+        elsif( $text =~ m/FIPS_CODE/i ){
+            $hexval = 0x2200;
+	}
+        elsif( $text =~ m/FIPS_DATA/i ){
+            $hexval = 0x2301;
+	}
+        elsif( $text =~ m/KEEP_TGZ/i ){
+            $hexval = 0x2310;
+	}
+        elsif( $text =~ m/LANGUAGE/i ){
+            $hexval = 0x2311;
+	}
+        elsif( $text =~ m/NORM_TGZ/i ){
+            $hexval = 0x2320;
+	}
+        elsif( $text =~ m/FIPS_DS/i ){
+            $hexval = 0x2331;
+	}
+        elsif( $text =~ m/TBALL_KEEP/i ){
+            $hexval = 0x2400;
+	}
+        elsif( $text =~ m/TBALL_DISC/i ){
+            $hexval = 0x2500;
+	}
+        elsif( $text =~ m/PHYP_CODE/i ){
+            $hexval = 0x3000;
+	}
+        elsif( $text =~ m/PHYP_DATA/i ){
+            $hexval = 0x3001;
+	}
+        elsif( $text =~ m/PHYP_DS/i ){
+            $hexval = 0x3031;
+	}
+        elsif( $text =~ m/SPCN_CODE/i ){
+            $hexval = 0x4000;
+	}
+        elsif( $text =~ m/SPCN_DATA/i ){
+            $hexval = 0x4001;
+	}
+        elsif( $text =~ m/PFW_CODE/i ){
+            $hexval = 0x5000;
+	}
+        elsif( $text =~ m/PFW_DATA/i ){
+            $hexval = 0x5001;
+	}
+        elsif( $text =~ m/PFW_DS/i ){
+            $hexval = 0x5031;
+	}
+        elsif( $text =~ m/SMA_CODE/i ){
+           $hexval = 0x6000;
+	}
+        elsif( $text =~ m/SMA_DATA/i ){
+            $hexval = 0x6001;
+	}
+        elsif( $text =~ m/SLDR_CODE/i ){
+             $hexval = 0x7000;
+	}
+        elsif( $text =~ m/SLDR_DATA/i ){
+            $hexval = 0x7001;
+        }
+    }
+    return $hexval;
+} # end of sub getfipsclass
+
+
+#----------------------------------------------------
+# Get lid number from lidhdr file
+#----------------------------------------------------
+sub getlidnum {
+    my $text = shift;
+    $text =~ s/^\s*//;
+    $text =~ s/\s*$//;
+    my $count = ($text =~ tr/0-9A-Fa-f//);  # either all hex or mnemonic
+    if( $count == 8 ){
+        my $first = substr( $text, 0, 4 );
+        my $secnd = substr( $text, 4 );
+        $lidnum[0] = hex( $first );
+        $lidnum[1] = hex( $secnd );
+    }
+    else {
+        OutputMessage("RULOADID: lid number is not recognizable", 2, __LINE__);
+    }
+} # end of sub getlidnum
+
+
+#----------------------------------------------------
+# Get platform phylum information from lidhdr file
+#----------------------------------------------------
+sub getphylum {
+    my $text = shift;
+    $text =~ s/^\s*//;
+    $text =~ s/\s*$//;
+    my $count = ($text =~ tr/0-9A-Fa-f//);  # either all hex or mnemonic
+    if( $count == length( $text )){
+        $phylength = int(( length( $text ) + 1 ) / 2 );
+        if( $phylength < 4 ){
+            $phylength = 4;  # default 4 bytes for phylum data
+        }
+        while( length( $text ) < ( $phylength * 2 )){
+            $text .= "0";  # expand input to proper length
+        }
+        @phylum = ();
+        do {
+            if( length( $text ) > 4 ){
+                $convt = substr( $text, 0, 4 );
+                $text = substr( $text, 4 );
+            }
+            else {
+                $convt = $text;
+                $text = "";
+            }
+            while( length( $convt ) < 4 ){
+                $convt .= "0";  # four digit integer - forces bits to high end
+            }
+            my $hexval = hex( $convt );
+            push @phylum, $hexval;
+        } while( length( $text ) > 0 );
+    }
+    else {
+        @phylum = (0x0000, 0x0000);  # default to no platforms
+        my @platforms = split( ',', $text );  # separate by commas
+        while( my $pltfrm = shift( @platforms )){
+            my @plats = split( ' ', $pltfrm );  # separage by spaces
+            while( my $pform = shift( @plats )){
+                $pform =~ s/^\s*//;
+                $pform =~ s/\s*$//;
+                if( $pform =~ m/CRP/i ){
+                    $phylum[0] |= 0x8000;
+                }
+                elsif( $pform =~ m/ALPHA/i ){
+                    $phylum[0] |= 0x4000;
+                }
+                elsif( $pform =~ m/QLA1/i ){
+                    $phylum[0] |= 0x2000;
+                }
+                elsif( $pform =~ m/HE/i ){
+                    $phylum[0] |= 0x0800;
+                }
+                elsif( $pform =~ m/SC/i ){
+                    $phylum[0] |= 0x0800;
+                }
+                elsif( $pform =~ m/MR/i ){
+                    $phylum[0] |= 0x0400;
+                }
+                elsif( $pform =~ m/ML/i ){
+                    $phylum[0] |= 0x0400;
+                }
+                elsif( $pform =~ m/LE/i ){
+                    $phylum[0] |= 0x0200;
+                }
+                elsif( $pform =~ m/BPC/i ){
+                    $phylum[0] |= 0x0100;
+                }
+            }
+        }
+    }
+} # end of sub getphylum
+
+
+#----------------------------------------------------
+# Display help text for this program
+#----------------------------------------------------
+sub help {
+    print STDERR "$ProgName, Version $version\n";
+    print STDERR "Description:  This program will apply a fips header to a file.\n";
+    print STDERR "Usage:\n\t$ProgName -r <filename.lidhdr> -l <filename> [-o <filename.fips>] [-debug] [-help]\n";
+    print STDERR "Where:\n";
+    print STDERR "\t -debug\t\t\t- display debug messages.\n";
+    print STDERR "\t -help\t\t\t- this help display.\n";
+    print STDERR "Example:\n";
+    print STDERR "\t$ProgName -r 80a00001.lidhdr -l 80a00001.img -o 80a00001.fips\n";
+    print "\n";
+    exit(0);
+} # end of sub help
+
+
+#----------------------------------------------------
+# Generate an error message
+#----------------------------------------------------
+sub OutputMessage {
+    local($message, $sevLevel, $lineNum) = @_;
+
+  # Set the severity tag
+    if ($sevLevel == 1) {
+	$tag = "(S)";
+    } elsif ($sevLevel == 2) {
+	$tag = "(E)";
+    } elsif ($sevLevel == 3) {
+	$tag = "(W)";
+    } elsif ($sevLevel == 4) {
+	$tag = "(I)";
+    } else {
+	$tag = "(?)";
+    }
+
+  # print the user message
+    print "$tag [$ProgName-$lineNum] $message\n";
+
+  # Exit upon a severe message
+    exit(-1) if ($sevLevel == 1);
+} # end of sub OutputMessage
+
+
+#----------------------------------------------------
+# Parse the program input arguments
+#----------------------------------------------------
+sub ParseArgs {
+    local(@args) = @ARGV;
+    local($Arg);
+    my $oops;
+    while ($Arg = shift(@args)) {
+	if ($Arg =~ m/^-debug$/) {		#debug flag for more verbose output
+	    $Debug = 1;
+	    next;
+	}
+	elsif ($Arg =~ m/^-h/) {		#display help
+	    &help;
+	    exit(0);
+	}
+	elsif ($Arg =~ m/-r/) {			#set name of VPD info file
+            $inputLidhdr = shift(@args);
+	    next;
+	}
+	elsif ($Arg =~ m/-l/) {			#set name of image input file
+            $inputImage = shift(@args);
+	    next;
+	}
+	elsif ($Arg =~ m/-o/) {			#set name of output file
+            $outFips = shift(@args);
+	    next;
+	}
+	else {
+            $oops .= "$Arg is not a valid parameter.";
+	}
+    }
+    if( !$inputImage ){
+        $oops .= "You must supply an input image file.\n";
+    }
+    if( !$inputLidhdr ){
+        if( $inputImage ){
+            $inputLidhdr = $inputImage;
+            if( $inputLidhdr =~ m/(.*)\..*/ ){
+                $inputLidhdr = $1;
+            }
+            $inputLidhdr .= ".lidhdr";
+        }
+    }
+    if( !$outFips ){
+        if( $inputImage ){
+            $outFips = $inputImage;
+            if( $outFips =~ m/(.*)\..*/ ){
+                $outFips = $1;
+            }
+            $outFips .= ".fips";
+        }
+    }
+    if( $oops ){
+        OutputMessage( $oops, 2, __LINE__ );
+        &help;
+    }
+} # end of sub ParseArgs
+
+
+#----------------------------------------------------
+# Put the FipS header and file data to a new file
+#----------------------------------------------------
+sub putFips {
+    OutputMessage("Creating $outFips file",4,__LINE__);
+    if (open(FIPS,">$outFips")) {
+        binmode(FIPS);
+        #          n fields    H8 fields   C fields    lidinfo n fields    phylum
+        $hdrsize = ( 8 * 2 ) + ( 3 * 4 ) + ( 4 * 1 ) + 64 +    ( 4 * 2 ) + $phylength;
+        print FIPS pack('n',$magicn);     # fips file magic #
+        print FIPS pack('n',$version);    # version
+        print FIPS pack('n',$lidnum[0]);  # high lid # nibble
+        print FIPS pack('n',$lidnum[1]);  # low lid # nibble
+        print FIPS pack('n',$bcddate1);   # bcd year
+        print FIPS pack('n',$bcddate2);   # bcd mm/dd
+        print FIPS pack('n',$bcdtime);    # bcd hh:mm
+        print FIPS pack('n',$fipsclass);  # fips lid class
+        $crchex = sprintf( "%08x", $crc );
+        print FIPS pack('H8',$crchex);       # 32 bit IEEE standard crc
+        $lidsizehex = sprintf( "%08x", $lidsize );
+        print FIPS pack('H8',$lidsizehex);   # lid size
+        $hdrsizehex = sprintf( "%08x", $hdrsize );
+        print FIPS pack('H8',$hdrsizehex);   # header size
+        print FIPS pack('C',$mtd);        # mtd #
+        print FIPS pack('C',1);           # valid=1, invalid=0
+        print FIPS pack('C',0);           # alignment
+        print FIPS pack('C',$lidinfomax); # lid info size
+        print FIPS pack('a64',$lidinfo);  # lid info string (64 bytes)
+        print FIPS pack('n',0);           # bcd update date year
+        print FIPS pack('n',0);           # bcd update date mm/dd
+        print FIPS pack('n',0);           # bcd update time hh:mm
+        print FIPS pack('n',$phylength);  # size of phylum field
+        if( $phylength > 0 ){
+            my $phytemp = "";
+            foreach my $phy ( @phylum ){
+                $phytemp .= sprintf( "%04x", $phy );
+            }
+            for( my $iTemp = 0; $iTemp < $phylength; $iTemp++ ){
+                my $hoot = substr( $phytemp, $iTemp*2, 2 );
+                my $ttemp = hex( $hoot );
+                print FIPS pack('C',$ttemp);
+            }
+        }
+        print FIPS $binfile;
+        close(FIPS);
+    }
+    else {
+        OutputMessage("failed to open $outFips for output",1,__LINE__);
+    }
+} # end of sub putFips
+
+
+#----------------------------------------------------
+# Get the lidhdr information from the lidhdr file
+#----------------------------------------------------
+sub readLidhdr {
+    if (open(LIDHDR,"<$inputLidhdr")) {
+        while( my $line = <LIDHDR> ) {
+            if( $line =~ m/ruloadid\.(.*)/i ){
+                &getlidnum( $1 );
+            }
+            elsif( $line =~ m/fipsclass\.(.*)/i ){
+                $fipsclass = &getfipsclass( $1 );
+            }
+            elsif( $line =~ m/phylum\.(.*)/i ){
+                &getphylum( $1 );
+            }
+            elsif( $line =~ m/lidinfo\.(.*)/i ){
+                $lidinfo = $1;
+                $lidinfo =~ s/\s//g;
+                if( length( $lidinfo ) > $lidinfomax ){
+                    $lidinfo = substr( $lidinfo, 0, $lidinfomax );
+                }
+            }
+            elsif( $line =~ m/mtd\.(.*)/i ){
+                $mtd = $1;
+            }
+        }
+        close(LIDHDR);
+    }
+    else {
+	OutputMessage( "lidhdr file $inputLidhdr could not be opened.", 1, __LINE__);
+    }
+} # end of sub readLidhdr
+
+
+#----------------------------------------------------
+# Get the image file as binary data
+#----------------------------------------------------
+sub readImage {
+    my $readsize = 512;
+    my $bytesread;
+    if (open(LID,"<$inputImage")) {
+        binmode(LID);
+        $bytesread = $readsize;
+        while ($bytesread == $readsize) {
+            $bytesread = read(LID,$binfile,$readsize,length($binfile));
+        }
+        close(LID);
+        my ($dev, $ino, $mode, $nlink, $uid, $gid, $rdef, $size, $atime, $mtime, $ctime, 
+         $blksize, $blocks) = stat("$inputImage");
+        my ($sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst) = localtime( $ctime );
+        $bcddate1 = bcd( $year + 1900 );
+        $bcddate2 = bcd((( $mon + 1 ) * 100 ) + $mday );
+        $bcdtime = bcd(( $hour * 100 ) + $min );
+        $lidsize = $size;
+    }
+    else {
+        OutputMessage( "Input file $inputImage could not be opened.", 1, __LINE__);
+    }
+} # end of sub readImage

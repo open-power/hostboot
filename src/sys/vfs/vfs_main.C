@@ -11,8 +11,8 @@ const char* VFS_ROOT = "/";
 const char* VFS_ROOT_BIN = "/bin/";
 const char* VFS_ROOT_DATA = "/data/";
 const char* VFS_ROOT_MSG = "/msg/";
-VfsSystemModule VFS_MODULES[VFS_MODULE_MAX];
-uint64_t VFS_LAST_ADDRESS;
+
+void vfs_module_init();
 
 struct VfsPath
 {
@@ -30,23 +30,6 @@ struct VfsEntry
     VfsEntry* next;
     VfsEntry* prev;
 };
-
-void vfs_module_init()
-{
-    printk("Initializing modules.\n");
-
-    VfsSystemModule* module = &VFS_MODULES[0];
-    while ('\0' != module->module[0])
-    {
-	printk("\tIniting module %s...", module->module);
-	(module->init)(NULL);
-	printk("done.\n");
-
-	module++;
-    }
-
-    printk("Modules initialized.");
-}
 
 void vfs_main(void* unused)
 {
@@ -75,7 +58,7 @@ void vfs_main(void* unused)
 		    e->msg_q = (msg_q_t) msg->data[0];
 		    vfsContents.insert(e);
 
-		    printk("VFS: Registering %lx as %s\n",
+		    printk("VFS: Registering %p as %s\n",
 			   e->msg_q, e->key.key);
 		    msg_respond(vfsMsgQ, msg);
 		}

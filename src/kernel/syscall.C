@@ -81,7 +81,7 @@ void kernel_execute_system_call()
     if (syscall > SYSCALL_MAX)
     {
 	// TODO : kill task.
-	printk("Invalid syscall : %lld\n", syscall);
+	printk("Invalid syscall : %ld\n", syscall);
 	while(1);
     }
     else

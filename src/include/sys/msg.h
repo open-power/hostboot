@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#include <builtins.h>
 
 #ifdef __cplusplus
 extern "C"
@@ -26,9 +27,9 @@ int msg_q_register(msg_q_t q, const char* name);
 msg_q_t msg_q_resolve(const char* name);
 
 // Message interfaces.
-__attribute__((always_inline)) 
+ALWAYS_INLINE 
     inline msg_t* msg_allocate() { return (msg_t*)malloc(sizeof(msg_t)); }
-__attribute__((always_inline))
+ALWAYS_INLINE
     inline void msg_free(msg_t* m) { free(m); }
 
 int msg_send(msg_q_t q, msg_t* msg);
@@ -36,7 +37,7 @@ int msg_sendrecv(msg_q_t q, msg_t* msg);
 int msg_respond(msg_q_t q, msg_t* msg);
 msg_t* msg_wait(msg_q_t q);
 
-__attribute__((always_inline))
+ALWAYS_INLINE
     inline uint32_t msg_is_async(msg_t* msg) 
 	{ return 0 == msg->__reserved__async; }
 
