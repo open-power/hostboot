@@ -6,7 +6,7 @@
 #include <builtins.h>
 
 // Thread ID support only, Power7 (4 threads).
-#define KERNEL_MAX_SUPPORTED_CPUS 4
+#define KERNEL_MAX_SUPPORTED_CPUS (4 * 8 * 4) // Sockets, cores, threads.
 
 class Scheduler;
 

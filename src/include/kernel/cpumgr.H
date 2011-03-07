@@ -2,11 +2,12 @@
 #define __KERNEL_CPUMGR_H
 
 #include <kernel/types.h>
+#include <kernel/cpu.H>
 
 class CpuManager
 {
     public:
-	enum { MAXCPUS = 8 };
+	enum { MAXCPUS = KERNEL_MAX_SUPPORTED_CPUS };
 	
 	/** @fn getCurrentCPU 
 	 *  Returns a pointer to the current CPU structure by using the

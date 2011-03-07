@@ -6,15 +6,23 @@
 _start:
     ;// Set thread priority high.
     or 3,3,3
-
-    ;// Check if first thread.
-    mfspr r1, PIR
-    li r2, 0x0003
-    and r1, r1, r2
-    li r2, 0x0
-    cmpl cr0, r1, r2
+    
+    ;// Determine if this is the first thread.
+    li r4, 2
+    ;// Read spinlock value.
+    lis r2, kernel_other_thread_spinlock@h
+    ori r2, r2, kernel_other_thread_spinlock@l
+    lwsync
+1:
+    lwarx r3, 0, r2
+    cmpwi r3, 0	;// Non-zero means this thread wasn't first.
     bnel cr0, _other_thread_spinlock
+    stwcx. r4, 0, r2	;// Attempt to store 2.
+    bne 1b ;// Loop until sucessful at stwcx.
+    isync
 
+    b _main
+/*
     ;// Relocate code
     bl pre_relocate	;// fill LR with address
 pre_relocate:
@@ -65,6 +73,7 @@ relocate_loop:
 finished_relocate: 
     ;// Jump to main.
     b _main
+*/
 
 ;// Interrupt vectors.
 
@@ -147,25 +156,26 @@ _main_loop:
     b _main_loop
 
 ;// _other_thread_spinlock:
-;//	Used for threads other than 0 to wait for the system to boot to a 
+;//	Used for threads other than first to wait for the system to boot to a 
 ;//	stable point where we can start the other threads.  At this point
-;//	nothing is initalized in the thread except r1 = thread ID.
+;//	nothing is initalized in the thread.
 _other_thread_spinlock:
     ;// Read spinlock value.
     lis r2, kernel_other_thread_spinlock@h
     ori r2, r2, kernel_other_thread_spinlock@l
 1:
     ld r3, 0(r2)
-    ;// Loop until value is not 0...
-    li r4, 0
+    ;// Loop until value is 1...
+    li r4, 1
     cmp cr0, r3, r4
-    bne _other_thread_spinlock_complete
+    beq _other_thread_spinlock_complete
     or 1,1,1 ;// Lower thread priority.
     b 1b
 ;// Now released by primary thread.
 _other_thread_spinlock_complete:
     or 3,3,3 ;// Raise thread priority.
     ;// Get CPU object from thread ID.
+    mfspr r1, PIR
     lis r2, _ZN10CpuManager7cv_cpusE@h
     ori r2, r2, _ZN10CpuManager7cv_cpusE@l
     muli r3, r1, 8

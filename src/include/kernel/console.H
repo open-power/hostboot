@@ -12,7 +12,7 @@ class Console
     public:
 	int putc(int);
 	
-	enum { BUFFER_SIZE = 1024 * 4 };
+	enum { BUFFER_SIZE = 1024 * 16 };
 
     protected:
 	Console();
