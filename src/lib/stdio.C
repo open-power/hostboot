@@ -39,6 +39,6 @@ int sprintf(char *str, const char * format, ...)
 			     format, args);
 
     va_end(args);
-
+    console.putc('\0');
     return count;
 }
