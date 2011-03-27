@@ -1,6 +1,7 @@
 #ifndef __UTIL_LOCKED_QUEUE_H
 #define __UTIL_LOCKED_QUEUE_H
 
+#include <stddef.h>
 #include <util/locked/lock.H>
 
 namespace Util
@@ -11,15 +12,19 @@ namespace Util
 	class Queue
 	{
 	    public:
-		Queue() : head(NULL), tail(NULL), lock() {};
+		Queue() : head(NULL), tail(NULL), count(0), lock() {};
 		~Queue() {};
 
 		_T* remove();
 		void insert(_T*);
 
+		size_t size();
+
 	    protected:
 		_T* head;
 		_T* tail;
+
+		size_t count;
 
 		_S lock;
 
@@ -44,6 +49,8 @@ namespace Util
 		    tail = item->prev;
 	    }
 
+	    count--;
+
 	    __unlock();
 	    
 	    return item;
@@ -65,8 +72,22 @@ namespace Util
 		item->next = head;
 		head = head->prev = item;
 	    }
+
+	    count++;
 	    
 	    __unlock();
+	}
+
+	template <typename _T, bool locked, typename _S>
+	size_t Queue<_T,locked,_S>::size()
+	{
+	    size_t sz = 0;
+
+	    __lock();
+	    sz = count;
+	    __unlock();
+
+	    return sz;
 	}
 
 	template <typename _T, bool locked, typename _S>
