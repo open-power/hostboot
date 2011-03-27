@@ -47,10 +47,10 @@ namespace Util
 		    head = tail = NULL;
 		else
 		    tail = item->prev;
+		
+		count--;
 	    }
-
-	    count--;
-
+	    
 	    __unlock();
 	    
 	    return item;
@@ -72,7 +72,7 @@ namespace Util
 		item->next = head;
 		head = head->prev = item;
 	    }
-
+	    
 	    count++;
 	    
 	    __unlock();
@@ -81,13 +81,7 @@ namespace Util
 	template <typename _T, bool locked, typename _S>
 	size_t Queue<_T,locked,_S>::size()
 	{
-	    size_t sz = 0;
-
-	    __lock();
-	    sz = count;
-	    __unlock();
-
-	    return sz;
+	    return count;
 	}
 
 	template <typename _T, bool locked, typename _S>
