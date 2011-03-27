@@ -264,6 +264,8 @@ namespace Systemcalls
 	if (NULL == waiter) // None found, add to 'messages' queue.
 	{
 	    mq->messages.insert(mp);
+	    // Choose next thread to execute, this one is delayed.
+	    t->cpu->scheduler->setNextRunnable();	    
 	}
 	else // Context switch to waiter.
 	{
