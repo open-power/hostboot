@@ -17,8 +17,10 @@ TRACEPP = ${ROOTPATH}/src/build/trace/tracepp
 CUSTOM_LINKER_EXE = ${ROOTPATH}/src/build/linker/linker
 CUSTOM_LINKER = i686-mcp6-jail ${CUSTOM_LINKER_EXE}
 
-CC = ${TRACEPP} ppc64-mcp6-gcc
-CXX = ${TRACEPP} ppc64-mcp6-g++
+CC_RAW = ppc64-mcp6-gcc
+CXX_RAW = ppc64-mcp6-g++
+CC = ${TRACEPP} ${CC_RAW}
+CXX = ${TRACEPP} ${CXX_RAW}
 LD = ppc64-mcp6-ld
 OBJDUMP = ppc64-mcp6-objdump
 APYFIPSHDR = apyfipshdr
@@ -35,7 +37,7 @@ BEAMFLAGS = \
 
 COMMONFLAGS = -O3 -nostdlib ${EXTRACOMMONFLAGS}
 CFLAGS = ${COMMONFLAGS} -mcpu=power7 -nostdinc -g -msoft-float -mno-altivec \
-	 -Wall -Werror
+	 -Wall -Werror ${CUSTOMFLAGS}
 ASMFLAGS = ${COMMONFLAGS} -mcpu=power7
 CXXFLAGS = ${CFLAGS} -nostdinc++ -fno-rtti -fno-exceptions -Wall
 LDFLAGS = --nostdlib --sort-common ${COMMONFLAGS}
@@ -73,21 +75,21 @@ ${OBJDIR}/%.o : %.S
 ${OBJDIR}/%.dep : %.C
 	mkdir -p ${OBJDIR}; \
 	rm -f $@; \
-	${CXX} -M ${CXXFLAGS} $< -o $@.$$$$ -I ${INCDIR}; \
+	${CXX_RAW} -M ${CXXFLAGS} $< -o $@.$$$$ -I ${INCDIR}; \
 	sed 's,\($*\)\.o[ :]*,${OBJDIR}/\1.o $@ : ,g' < $@.$$$$ > $@; \
 	rm -f $@.$$$$
 
 ${OBJDIR}/%.dep : %.c
 	mkdir -p ${OBJDIR}; \
 	rm -f $@; \
-	${CC} -M ${CFLAGS} -std=c99 $< -o $@.$$$$ -I ${INCDIR}; \
+	${CC_RAW} -M ${CFLAGS} -std=c99 $< -o $@.$$$$ -I ${INCDIR}; \
 	sed 's,\($*\)\.o[ :]*,${OBJDIR}/\1.o $@ : ,g' < $@.$$$$ > $@; \
 	rm -f $@.$$$$
 
 ${OBJDIR}/%.dep : %.S
 	mkdir -p ${OBJDIR}; \
 	rm -f $@; \
-	${CC} -M ${ASMFLAGS} $< -o $@.$$$$ -Wa,-I${INCDIR} -I${INCDIR}; \
+	${CC_RAW} -M ${ASMFLAGS} $< -o $@.$$$$ -Wa,-I${INCDIR} -I${INCDIR}; \
 	sed 's,\($*\)\.o[ :]*,${OBJDIR}/\1.o $@ : ,g' < $@.$$$$ > $@; \
 	rm -f $@.$$$$
 
