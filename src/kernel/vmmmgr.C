@@ -79,9 +79,9 @@ void VmmManager::initPTEs()
 	{
 	    access = READ_O_ACCESS;
 	}
-	volatile pte_t& pte = getPte(i, 0);
+	volatile pte_t& pte = getPte(i % PTEG_COUNT, i / PTEG_COUNT);
 	defaultPte(pte);
-	setTid(LinearSpace, pte);
+	setTid(i / PTEG_COUNT, pte);
 	setAccess(access, pte);
 	setPage(i, pte);
 	setValid(true, pte);
@@ -106,7 +106,7 @@ bool VmmManager::_pteMiss(task_t* t)
     uint64_t effPid = effAddr / FULL_MEM_SIZE;
 
     
-    if (effPid == LinearSpace)
+    if (effPid <= LinearSpace)
     {
 	lock.unlock();
 	return false;	// Should not get this exception in Linear space

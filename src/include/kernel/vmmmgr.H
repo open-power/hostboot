@@ -14,7 +14,9 @@ class VmmManager
 
 	enum VMM_CONSTS
 	{
-	    FULL_MEM_SIZE = 8 * 1024 * 1024,
+	    EIGHT_MEG = 8 * 1024 * 1024,
+
+	    FULL_MEM_SIZE = 1 * EIGHT_MEG,
 	    PAGESIZE = 4096,
 
 	    PTSIZE = (1 << 18),
@@ -34,8 +36,8 @@ class VmmManager
 
 	enum PID_ALLOCATIONS
 	{
-	    LinearSpace = 0,
-	    MMIOSpace = 1,
+	    LinearSpace = (FULL_MEM_SIZE / EIGHT_MEG) - 1,
+	    MMIOSpace = LinearSpace + 1,
 	    FirstPid,
 	};
 
