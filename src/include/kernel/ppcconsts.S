@@ -86,8 +86,8 @@
                 .set SDR1,25
                 .set SRR0,26
                 .set SRR1,27
-                .set HSRR0,314
-                .set HSRR1,315
+                .set CFAR,28
+                .set TB,268
                 .set SPRG0,272
                 .set SPRG1,273
                 .set SPRG2,274
@@ -96,35 +96,13 @@
                 .set TBL,284
                 .set TBU,285
                 .set PVR,287
-                .set IBAT0U,528
-                .set IBAT0L,529
-                .set IBAT1U,530
-                .set IBAT1L,531
-                .set IBAT2U,532
-                .set IBAT2L,533
-                .set IBAT3U,534
-                .set IBAT3L,535
-
-                .set DBAT0U,536
-                .set DBAT0L,537
-                .set DBAT1U,538
-                .set DBAT1L,539
-                .set DBAT2U,540
-                .set DBAT2L,541
-                .set DBAT3U,542
-                .set DBAT3L,543
-
-                .set DMISS,976
-                .set DCMP,977
-                .set HASH1,978
-                .set HASH2,979
-                .set IMISS,980   
-                .set ICMP,981
-                .set RPA,982
-                .set HID0,1008
-                .set IABR,1010
-
-		.set PIR, 1023
+                .set HSPRG0,304
+                .set HSPRG1,305
+                .set HDSISR,306
+                .set HDEC,310
+                .set HSRR0,314
+                .set HSRR1,315
+                .set PIR, 1023
 
 #*--------------------------------------------------------------------*#
 #*  Task offset Constants                                             *#
