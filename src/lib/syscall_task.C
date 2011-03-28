@@ -16,6 +16,11 @@ void task_yield()
 
 tid_t task_create(void(*fn)(void*), void* ptr)
 {
+    // Verify we have (memory) permissions to load the function pointer so
+    // we don't load bad memory from kernel space.
+    register uint64_t function = (uint64_t) fn;
+    asm volatile("ld %0, 0(%1)" : "=b"(function) : "b" (function));
+
     return (tid_t)(uint64_t) _syscall2(TASK_START, (void*)fn, ptr);
 }
 
