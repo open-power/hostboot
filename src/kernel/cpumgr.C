@@ -19,8 +19,7 @@ CpuManager::CpuManager()
 
 cpu_t* CpuManager::getCurrentCPU()
 {
-    register task_t* current_task = (task_t*) getSPRG3();
-    return current_task->cpu;
+    return cv_cpus[getPIR()];
 }
 
 void CpuManager::init()

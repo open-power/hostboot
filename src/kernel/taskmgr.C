@@ -2,6 +2,7 @@
 #include <kernel/taskmgr.H>
 #include <kernel/task.H>
 #include <kernel/pagemgr.H>
+#include <kernel/cpumgr.H>
 #include <arch/ppc.H>
 
 void TaskManager::idleTaskLoop(void* unused)
@@ -20,7 +21,7 @@ task_t* TaskManager::getCurrentTask()
 
 void TaskManager::setCurrentTask(task_t* t)
 {
-    t->cpu = getCurrentTask()->cpu;
+    t->cpu = CpuManager::getCurrentCPU();
     setSPRG3((uint64_t)t);
     return;
 }
