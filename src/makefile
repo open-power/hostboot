@@ -15,7 +15,7 @@ DIRECT_BOOT_OBJECTS = start.o kernel.o taskmgr.o cpumgr.o syscall.o \
 
 RUNTIME_OBJECTS =
 
-BASE_MODULES = 
+BASE_MODULES = trace
 DIRECT_BOOT_MODULES = example
 RUNTIME_MODULES = 
 
