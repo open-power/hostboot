@@ -92,6 +92,7 @@ void vfs_main(void* unused)
 					        (void*) msg->data[1]);
 			    break;
 			}
+                        module++;
 		    }
 		    msg->data[0] = child;
 		    msg_respond(vfsMsgQ, msg);
