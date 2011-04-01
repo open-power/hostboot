@@ -132,8 +132,8 @@ typedef struct trace_buf_list {
 } trace_buf_list_t;
 
 
-typedef int trace_desc_t;	//Type definition for users trace descriptor data type
-typedef int tracDesc_t;		//Type definition for older trace descriptor type
+typedef uint64_t trace_desc_t;	//Type definition for users trace descriptor data type
+typedef uint64_t tracDesc_t;		//Type definition for older trace descriptor type
 typedef unsigned long trace_strings_t;	/* type for trace strings */
 
 

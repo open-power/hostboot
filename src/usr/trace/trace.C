@@ -9,7 +9,7 @@ int32_t trace_adal_init_buffer(trace_desc_t * td, const char* comp,
                                const size_t size )
 {
     // For now, just store the component name.
-    td = (trace_desc_t*) comp;
+    *td = (trace_desc_t) comp;
     return 0;
 }
 
