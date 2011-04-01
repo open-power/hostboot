@@ -1,0 +1,101 @@
+#!/usr/bin/perl
+
+use strict;
+my $buf;
+
+my $memory_file = shift;
+my $syms_file = "./img/hbicore.syms";
+my $search_path = "./obj/";
+
+# Print header.
+printf "-------------------------------------------------------------------------------\n";
+printf "%8s %6s %5s %8s %4s %s\n",
+    "Sec", "Usec",
+    "PID", "Comp", "Line",
+    "Entry Data";
+printf "-------------------------------------------------------------------------------\n";
+
+
+
+open MEMORY, $memory_file || die "Cannot open $memory_file";
+binmode MEMORY;
+
+# Find pointer for trace buffer instance.
+my $first_page = hex ((split ",",`grep ",Singleton<TraceBuffer>::instance()::instance" $syms_file`)[1]);
+
+seek MEMORY, $first_page, 0;
+read MEMORY, $buf, 8;
+$first_page = unpack "Q>1", $buf;
+
+# Iterate over all the trace pages.
+while (0 != $first_page)
+{
+    printf "Buffer Page: 0x%08x - ", $first_page;
+    
+    # Read page size (in bytes)
+    seek MEMORY, $first_page + 8, 0;
+    read MEMORY, $buf, 8;
+    my $page_size = unpack "Q>1", $buf;
+    if ($page_size > 4096) { $page_size = 4096; }
+    printf "%d bytes\n", $page_size;
+
+    while ($page_size)
+    {
+        read MEMORY, $buf, 32;
+        my ($comp, $tid, $len, $hash, $timestamp, $line, $unused) =
+            unpack "Q>1 S>1 S>1 L>1 Q>1 L>1 L>1", $buf;
+
+        if (0 == $hash)
+        {
+            $page_size = 0;
+        }
+        else
+        {
+            my $hash_string = 
+                `find $search_path -name "*.hash" | xargs grep $hash`;
+            chomp $hash_string;
+            my ($unused, $format, $file) = split /\|\|/, $hash_string;
+            $page_size -= 32;
+            
+            # Read extra words.
+            my @extra_words = ();
+            while ($len)
+            {
+                read MEMORY, $buf, 8;
+                my $data = unpack "Q>1", $buf;
+                $len -= 8;
+                $page_size -= 8;
+
+                push @extra_words, $data;
+            }
+
+            # Read component string.
+            if (0 != $comp)
+            {
+                my $loc = tell MEMORY;
+                seek MEMORY, $comp, 0;
+                $/ = "\0";
+                $comp = <MEMORY>;
+                seek MEMORY, $loc, 0;
+            }
+
+            # Calculate time in seconds.
+            my $timesec = int($timestamp / 512000000);
+            my $timeusec = int(($timestamp - ($timesec * 512000000)) / 512);
+
+            printf "%08d.%06d|%5d|%8s|%4d|$format\n", 
+                $timesec, $timeusec,
+                $tid,
+                $comp,
+                $line,
+                @extra_words;
+        }
+    }
+
+    # Find pointer to next page.
+    seek MEMORY, $first_page, 0;
+    read MEMORY, $buf, 8;
+    $first_page = unpack "Q>1", $buf;
+}
+
+close MEMORY;
