@@ -3,6 +3,7 @@
 #include <util/sprintf.H>
 #include <util/functor.H>
 #include <stdarg.h>
+#include <arch/ppc.H>
 
 char kernel_printk_buffer[Console::BUFFER_SIZE];
 
@@ -19,7 +20,10 @@ int Console::putc(int c)
     }
     else if (BUFFER_SIZE > iv_pos)
     {
-	iv_buffer[__sync_fetch_and_add(&iv_pos, 1)] = c;
+        size_t pos = __sync_fetch_and_add(&iv_pos, 1);
+	iv_buffer[pos] = c;
+        dcbf(&iv_buffer[pos]);  // TODO: This is temporary for VBU since we
+                                // can't read the L3 if data is in L2.
     }
     return c;
 }
