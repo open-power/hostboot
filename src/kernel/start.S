@@ -14,10 +14,10 @@ _start:
     ori r2, r2, kernel_other_thread_spinlock@l
     lwsync
 1:
-    lwarx r3, 0, r2
+    ldarx r3, 0, r2
     cmpwi r3, 0	;// Non-zero means this thread wasn't first.
     bnel cr0, _other_thread_spinlock
-    stwcx. r4, 0, r2	;// Attempt to store 2.
+    stdcx. r4, 0, r2	;// Attempt to store 2.
     bne 1b ;// Loop until sucessful at stwcx.
     isync
 
