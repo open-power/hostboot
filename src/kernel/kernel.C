@@ -10,6 +10,7 @@
 #include <kernel/taskmgr.H>
 #include <kernel/vmmmgr.H>
 #include <kernel/timemgr.H>
+#include <sys/vfs.h>
 
 #include <stdlib.h>
 
@@ -74,6 +75,15 @@ void Kernel::cppBootstrap()
 
 void Kernel::memBootstrap()
 {
+    // Populate L3 cache lines after code space.
+    uint64_t* cache_line = (uint64_t*) VFS_LAST_ADDRESS;
+    uint64_t* end_cache_line = (uint64_t*) VmmManager::FULL_MEM_SIZE;
+    while (cache_line != end_cache_line)
+    {
+        dcbz(cache_line);
+        cache_line++;
+    }
+
     PageManager::init();
     HeapManager::init();
     VmmManager::init();

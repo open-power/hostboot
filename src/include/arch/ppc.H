@@ -165,6 +165,13 @@ inline void dcbf(void* _ptr)
 }
 
 ALWAYS_INLINE
+inline void dcbz(void* _ptr)
+{
+    register void* ptr = _ptr;
+    asm volatile("dcbz 0, %0" : : "b" (ptr) : "memory");
+}
+
+ALWAYS_INLINE
 inline void icbi(void* _ptr)
 {
     register void* ptr = _ptr;
