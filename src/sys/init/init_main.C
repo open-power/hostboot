@@ -31,7 +31,7 @@ void init_main(void* unused)
     task_create(&vfs_main, NULL);
     
     // TODO... add a barrier to ensure VFS is fully up.
-    while (NULL == _syscall0(Systemcalls::MSGQ_RESOLVE_ROOT));
+    while (NULL == _syscall0(Systemcalls::MSGQ_RESOLVE_ROOT))
 	task_yield(); 
 
 
