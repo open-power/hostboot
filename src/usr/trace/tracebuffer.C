@@ -1,5 +1,5 @@
 #include <limits.h>
-#include "TraceBuffer.H"
+#include "tracebuffer.H"
 
 TracePage* TracePage::setNext(TracePage* new_next)
 {

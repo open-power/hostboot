@@ -3,7 +3,7 @@
 #include <stdarg.h>
 #include <arch/ppc.H>
 
-#include "TraceBuffer.H"
+#include "tracebuffer.H"
 
 int32_t trace_adal_init_buffer(trace_desc_t * td, const char* comp, 
                                const size_t size )
