@@ -19,7 +19,7 @@ void vfs_module_init()
 	module++;
     }
 
-    printk("Modules initialized.");
+    printk("Modules initialized.\n");
 }
 
 void (*vfs_module_find_start(const char* modName))(void*)
