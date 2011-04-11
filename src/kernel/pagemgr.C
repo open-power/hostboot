@@ -2,6 +2,7 @@
 #include <util/singleton.H>
 #include <kernel/console.H>
 #include <sys/vfs.h>
+#include <arch/ppc.H>
 
 void PageManager::init()
 {
@@ -36,6 +37,15 @@ PageManager::PageManager()
 	   length,
 	   (uint64_t)page);
     
+    // Populate L3 cache lines.
+    uint64_t* cache_line = (uint64_t*) addr;
+    uint64_t* end_cache_line = (uint64_t*) VmmManager::FULL_MEM_SIZE;
+    while (cache_line != end_cache_line)
+    {
+        dcbz(cache_line);
+        cache_line++;
+    }
+
     // Allocate pages to buckets.
     size_t page_length = BUCKETS-1;
     while(length > 0)

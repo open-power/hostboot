@@ -75,18 +75,6 @@ void Kernel::cppBootstrap()
 
 void Kernel::memBootstrap()
 {
-    // Populate L3 cache lines after code space.  
-    // Needs to be rounded up to nearest 256 bytes (cache line size).
-    uint64_t* cache_line = (uint64_t*) (VFS_LAST_ADDRESS + 
-        ((VFS_LAST_ADDRESS % 256) ? (256 - (VFS_LAST_ADDRESS % 256)) : 0))
-    ;
-    uint64_t* end_cache_line = (uint64_t*) VmmManager::FULL_MEM_SIZE;
-    while (cache_line != end_cache_line)
-    {
-        dcbz(cache_line);
-        cache_line++;
-    }
-
     PageManager::init();
     HeapManager::init();
     VmmManager::init();
