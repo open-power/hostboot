@@ -84,8 +84,3 @@ void CpuManager::startSlaveCPU(cpu_t* cpu)
 
     return;
 }
-
-uint64_t isCPU0()
-{
-    return (0 == getCpuId());
-}
