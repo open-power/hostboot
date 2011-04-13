@@ -39,7 +39,7 @@ void TimeManager::_delayTask(task_t* t, uint64_t i_sec, uint64_t i_nsec)
 		this->convertSecToTicks(i_sec, i_nsec);
     node->task = t;
 
-    iv_taskList.insert(node);
+    iv_taskList[getPIR()].insert(node);
 }
 
 void TimeManager::checkReleaseTasks(Scheduler* s)
@@ -52,7 +52,7 @@ void TimeManager::_checkReleaseTasks(Scheduler* s)
     uint64_t l_currentTime = getCurrentTimeBase();
     _TimeManager_Delay_t* node = NULL;
 
-    while(NULL != (node = iv_taskList.remove_if(l_currentTime)))
+    while(NULL != (node = iv_taskList[getPIR()].remove_if(l_currentTime)))
     {
 	s->addTask(node->task);
 	delete node;

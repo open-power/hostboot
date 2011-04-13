@@ -2,6 +2,7 @@
 #define __KERNEL_TIMEMGR_H
 
 #include <kernel/types.h>
+#include <kernel/cpu.H>
 #include <arch/ppc.H>
 
 #include <util/locked/pqueue.H>
@@ -42,8 +43,7 @@ class TimeManager
 	static void checkReleaseTasks(Scheduler* s);
 
     protected:
-	TimeManager() : 
-	    iv_taskList() {};
+	TimeManager() {};
 	~TimeManager() {};
 
     private:
@@ -51,8 +51,8 @@ class TimeManager
 	void _delayTask(task_t* t, uint64_t i_sec, uint64_t i_nsec);
 	void _checkReleaseTasks(Scheduler* s);
 	    
-	Util::Locked::PQueue<_TimeManager_Delay_t, uint64_t, 
-			     true, Spinlock> iv_taskList;
+	Util::Locked::PQueue<_TimeManager_Delay_t, uint64_t>
+			iv_taskList[KERNEL_MAX_SUPPORTED_CPUS];
 	static uint64_t iv_timebaseFreq;
 };
 
