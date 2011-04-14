@@ -33,7 +33,7 @@ class Kernel
 extern "C"
 int main()
 {
-    printk("Booting %s kernel...\n\n", "HBI");
+    printk("Booting %s kernel...\n\n", "Hostboot");
     
     Kernel& kernel = Singleton<Kernel>::instance();
     kernel.cppBootstrap();
