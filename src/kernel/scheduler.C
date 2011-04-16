@@ -27,13 +27,11 @@ void Scheduler::setNextRunnable()
     {
 	t = CpuManager::getCurrentCPU()->idle_task;
 	// TODO: Set short decrementer.
-	register uint64_t decrementer = TimeManager::getTimeSliceCount();
-	asm volatile("mtdec %0" :: "r"(decrementer));
+        setDEC(TimeManager::getTimeSliceCount());
     }
     else // Set normal timeslice to decrementer.
     {
-	register uint64_t decrementer = TimeManager::getTimeSliceCount();
-	asm volatile("mtdec %0" :: "r"(decrementer));
+        setDEC(TimeManager::getTimeSliceCount());
     }
     
     TaskManager::setCurrentTask(t);

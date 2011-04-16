@@ -106,6 +106,13 @@ inline uint64_t getTB()
 }
 
 ALWAYS_INLINE
+inline void setDEC(uint64_t _dec)
+{
+    register uint64_t dec = _dec;
+    asm volatile("mtdec %0" :: "r" (dec));
+}
+
+ALWAYS_INLINE
 inline void sync()
 {
     asm volatile("sync");
