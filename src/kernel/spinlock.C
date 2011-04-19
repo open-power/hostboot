@@ -13,6 +13,7 @@ void Spinlock::lock()
 	while(iv_ready != reservation);
 	setThreadPriorityHigh();
     }
+    isync();
 }
 
 void Spinlock::unlock()
