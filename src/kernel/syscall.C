@@ -276,7 +276,6 @@ namespace Systemcalls
 	}
 
 	mq->lock.unlock();
-	TASK_SETRTN(t,0);
     }
 
     void MsgRespond(task_t* t)
@@ -295,9 +294,10 @@ namespace Systemcalls
 	    
 	    waiter->cpu = t->cpu;
 	    TaskManager::setCurrentTask(waiter);
-	    t->cpu->scheduler->addTask(t);
+            TASK_SETRTN(waiter,0);
 
 	    TASK_SETRTN(t,0);
+	    t->cpu->scheduler->addTask(t);            
 	}
 	else
 	{
