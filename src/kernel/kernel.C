@@ -43,6 +43,7 @@ int main()
     kernel.inittaskBootstrap();
     
     // Ready to let the other CPUs go.
+    lwsync();
     kernel_other_thread_spinlock = 1;
 
     kernel_dispatch_task(); // no return.    

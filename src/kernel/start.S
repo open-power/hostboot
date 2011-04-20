@@ -174,6 +174,7 @@ _other_thread_spinlock:
 ;// Now released by primary thread.
 _other_thread_spinlock_complete:
     or 3,3,3 ;// Raise thread priority.
+    isync
     ;// Get CPU object from thread ID.
     mfspr r1, PIR
     lis r2, _ZN10CpuManager7cv_cpusE@h
