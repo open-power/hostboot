@@ -7,6 +7,7 @@ IMGDIR = ${ROOTPATH}/img
 EXTRACOMMONFLAGS += -fPIC -Bsymbolic -Bsymbolic-functions
 LIBS += $(addsuffix .so, $(addprefix lib, ${MODULE}))
 MODULE_INIT = ${ROOTPATH}/obj/core/module_init.o
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr
 else
 OBJDIR = ${ROOTPATH}/obj/core
 BEAMDIR = ${ROOTPATH}/obj/beam/core
@@ -43,6 +44,9 @@ CXXFLAGS = ${CFLAGS} -nostdinc++ -fno-rtti -fno-exceptions -Wall
 LDFLAGS = --nostdlib --sort-common ${COMMONFLAGS}
 
 INCDIR = ${ROOTPATH}/src/include/
+_INCDIRS = ${INCDIR} ${EXTRAINCDIR}
+INCFLAGS = $(addprefix -I, ${_INCDIRS} )
+ASMINCFLAGS = $(addprefix $(lastword -Wa,-I), ${_INCDIRS})
 
 OBJECTS = $(addprefix ${OBJDIR}/, ${OBJS})
 LIBRARIES = $(addprefix ${IMGDIR}/, ${LIBS})
@@ -60,36 +64,36 @@ endif
 
 ${OBJDIR}/%.o ${OBJDIR}/%.list : %.C
 	mkdir -p ${OBJDIR}
-	${CXX} -c ${CXXFLAGS} $< -o $@ -I ${INCDIR}
+	${CXX} -c ${CXXFLAGS} $< -o $@ ${INCFLAGS}
 	${OBJDUMP} -dCS $@ > $(basename $@).list	
 
 ${OBJDIR}/%.o ${OBJDIR}/%.list : %.c
 	mkdir -p ${OBJDIR}
-	${CC} -c ${CFLAGS} -std=c99 $< -o $@ -I ${INCDIR}
+	${CC} -c ${CFLAGS} -std=c99 $< -o $@ ${INCFLAGS}
 	${OBJDUMP} -dCS $@ > $(basename $@).list
 
 ${OBJDIR}/%.o : %.S
 	mkdir -p ${OBJDIR}
-	${CC} -c ${ASMFLAGS} $< -o $@ -Wa,-I${INCDIR} -I${INCDIR}
+	${CC} -c ${ASMFLAGS} $< -o $@ ${ASMINCFLAGS} ${INCFLAGS}
 
 ${OBJDIR}/%.dep : %.C
 	mkdir -p ${OBJDIR}; \
 	rm -f $@; \
-	${CXX_RAW} -M ${CXXFLAGS} $< -o $@.$$$$ -I ${INCDIR}; \
+	${CXX_RAW} -M ${CXXFLAGS} $< -o $@.$$$$ ${INCFLAGS}; \
 	sed 's,\($*\)\.o[ :]*,${OBJDIR}/\1.o $@ : ,g' < $@.$$$$ > $@; \
 	rm -f $@.$$$$
 
 ${OBJDIR}/%.dep : %.c
 	mkdir -p ${OBJDIR}; \
 	rm -f $@; \
-	${CC_RAW} -M ${CFLAGS} -std=c99 $< -o $@.$$$$ -I ${INCDIR}; \
+	${CC_RAW} -M ${CFLAGS} -std=c99 $< -o $@.$$$$ ${INCFLAGS}; \
 	sed 's,\($*\)\.o[ :]*,${OBJDIR}/\1.o $@ : ,g' < $@.$$$$ > $@; \
 	rm -f $@.$$$$
 
 ${OBJDIR}/%.dep : %.S
 	mkdir -p ${OBJDIR}; \
 	rm -f $@; \
-	${CC_RAW} -M ${ASMFLAGS} $< -o $@.$$$$ -Wa,-I${INCDIR} -I${INCDIR}; \
+	${CC_RAW} -M ${ASMFLAGS} $< -o $@.$$$$ ${ASMINCFLAGS} ${INCFLAGS}; \
 	sed 's,\($*\)\.o[ :]*,${OBJDIR}/\1.o $@ : ,g' < $@.$$$$ > $@; \
 	rm -f $@.$$$$
 
