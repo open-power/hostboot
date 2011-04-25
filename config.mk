@@ -31,6 +31,7 @@ BEAMVER = beam-3.5.2
 BEAMPATH = /afs/rch/projects/esw/beam/${BEAMVER}
 BEAMCMD = i686-mcp6-jail ${BEAMPATH}/bin/beam_compile
 BEAMFLAGS = \
+    --beam::source=${BEAMPATH}/tcl/beam_default_parms.tcl \
     --beam::source=${ROOTPATH}/src/build/beam/compiler_c_config.tcl \
     --beam::source=${ROOTPATH}/src/build/beam/compiler_cpp_config.tcl \
     --beam::exit0 \
@@ -185,12 +186,12 @@ endif
 ${BEAMDIR}/%.beam : %.C
 	mkdir -p ${BEAMDIR}
 	${BEAMCMD} -I ${INCDIR} ${CXXFLAGS} ${BEAMFLAGS} $< \
-	    --beam::complaint_file=$@ --beam::parser_file=$@
+	    --beam::complaint_file=$@ --beam::parser_file=/dev/null
 
 ${BEAMDIR}/%.beam : %.c
 	mkdir -p ${BEAMDIR}
 	${BEAMCMD} -I ${INCDIR} ${CXXFLAGS} ${BEAMFLAGS} $< \
-	    --beam::complaint_file=$@ --beam::parser_file=$@
+	    --beam::complaint_file=$@ --beam::parser_file=/dev/null
 
 ${BEAMDIR}/%.beam : %.S
 	echo Skipping ASM file.
