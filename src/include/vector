@@ -1,0 +1,820 @@
+#ifndef stl_vector
+#define stl_vector
+
+/**
+ * @file vector
+ * @brief simple stl vector template class declaration.
+ */
+
+#include <stddef.h>
+
+#if !defined( __STDC_LIMIT_MACROS)
+#define __STDC_LIMIT_MACROS
+#endif
+#include <stdint.h>
+#include <new>
+#include <algorithm>
+#include <assert.h>
+
+namespace std
+{
+
+    /**
+     * @class vector
+     * subset of stl vector
+     * @note Does not support allocators, reverse iterators.
+     */
+    template <class T>
+        class vector
+        {
+            public:
+
+                typedef T * iterator;
+                typedef const T * const_iterator;
+                typedef T & reference;
+                typedef const T & const_reference;
+                typedef size_t size_type;
+                typedef size_t difference_type;
+                //  typedef ptrdiff_t difference_type;
+                typedef T value_type;
+                typedef T * pointer;
+                typedef const T * const_pointer;
+
+
+            protected:
+
+                pointer iv_start;
+                pointer iv_finish;
+                pointer iv_end_of_storage;
+
+            public:
+
+                /**
+                 * Constructor default
+                 * @post     The vector is created with no elements. size() == 0, capacity() == 0
+                 */
+                __attribute__ ((always_inline))
+                explicit vector(void)
+                   :
+                        iv_start(NULL),
+                        iv_finish(NULL),
+                        iv_end_of_storage(NULL)
+                {}
+
+
+                /**
+                 * Constructor to create a vector of size n elements of value.
+                 * @param[in] n number of elements to create
+                 * @param[in] value used to create the n elements
+                 * @post     The vector is created with n elements of value.
+                 *           Storage allocated. size() == n, capacity() == n
+                 */
+                explicit vector(size_type n, const T& value = T())
+                    :
+                        iv_start(NULL),
+                        iv_finish(NULL),
+                        iv_end_of_storage(NULL)
+                {
+                    reserve(n);
+                    iv_finish = iv_start+n;
+                    ctor_fill(iv_start,iv_finish,value);
+                }
+
+
+                /**
+                 * COPY CTOR create a vector from another vector
+                 * @param[in] x  source vector
+                 * @post     vector of x.size() is created from x with same # nodes
+                 *           size() == capacity() == x.size()
+                 */
+                vector(const vector<T>& x)
+                    :
+                        iv_start(NULL),
+                        iv_finish(NULL),
+                        iv_end_of_storage(NULL)
+                {
+                    reserve(x.size());
+                    iv_finish = ctor_copy(x.iv_start, x.iv_finish, iv_start);
+                }
+
+                /**
+                 * CTOR create a vector from a container slice
+                 * @param[in] first iterator first in source sequence
+                 * @param[in] last  iterator one past end of source sequence
+                 * @returns  None.
+                 * @pre      last > first; first,last contained within source vector
+                 * @post     vector is created from slice given
+                 */
+                template<typename InputIterator>
+                    vector(InputIterator first, InputIterator last)
+                    :
+                        iv_start(NULL),
+                        iv_finish(NULL),
+                        iv_end_of_storage(NULL)
+                {
+                    //    assert(last >= first);
+                    // input iterators only support operator ( ++i, i++,==,!=,*,->,=)
+                    size_type n = 0;
+                    for(InputIterator i = first; i != last; ++i) ++n;
+                    reserve(n);
+                    iv_finish = ctor_copy(first,last,iv_start);
+                }
+
+                /**
+                 * DTOR
+                 * @post     Storage released
+                 */
+                __attribute__ ((always_inline))
+                ~vector()
+                {
+                    clear();  // call dtors
+                    free_storage(iv_start);
+                }
+
+                /**
+                 * Assignment operator.
+                 * @param[in] x   A vector.
+                 * @return  A vector (for the purpose of multiple assigns). 
+                 * @pre     None.
+                 * @post    *this == x, this->capacity() == x.size().
+                 *           All previously obtained iterators are invalid.
+                 */
+                vector<T>& operator=(const vector<T>& x)
+                {
+                    clear();
+                    reserve(x.size());
+                    iv_finish = ctor_copy(x.iv_start, x.iv_finish, iv_start);
+                    return(*this); 
+                }
+                
+                // Iterators --------------------
+                
+                /**
+                 * Get iterator to the first vector element
+                 * @return iterator of rist vector element
+                 * @pre None.
+                 * @post None.
+                 */
+                __attribute__ ((always_inline))
+                iterator begin()
+                { 
+                    return (iv_start);
+                }
+
+                /**
+                 * Get const_iterator to the first vector element
+                 * @return const_iterator of rist vector element
+                 * @pre None.
+                 * @post None.
+                 */
+                __attribute__ ((always_inline))
+                const_iterator begin() const
+                { 
+                    return (iv_start);
+                }
+
+                /**
+                 * Get iterator to the last vector element + 1
+                 * @return iterator
+                 * @pre None.
+                 * @post None.
+                 */
+                __attribute__ ((always_inline))
+                iterator end()
+                { 
+                    return (iv_finish);
+                }
+
+                /**
+                 * Get const_iterator to the last vector element + 1
+                 * @return const_iterator
+                 * @pre None.
+                 * @post None.
+                 */
+                __attribute__ ((always_inline))
+                const_iterator end() const
+                { 
+                    return (iv_finish);
+                }
+
+                /* TODO - Implement only if needed
+                reverse_iterator rbegin()
+                {
+                    return(iv_finish -1);
+                }
+
+                const_reverse_iterator rend()
+                {
+                    return (iv_start - 1);
+                }
+                */
+
+                //  Capacity -----------------------------------------------
+
+                /**
+                 * Get the number of elements in the container
+                 * @return number of elements in the container
+                 */
+                __attribute__ ((always_inline))
+                size_type size() const
+                {
+                    return(iv_finish - iv_start);
+                }
+
+                /**
+                 * Return the maximum potential size the container could reach.
+                 * @return number of the maximum element count this container could reach
+                 */
+                __attribute__ ((always_inline))
+                size_type max_size() const
+                {
+                    return UINT64_MAX/sizeof(T);
+                }
+
+                /**
+                 * Resize the vector to contain n elements
+                 * @param[in]  n new size
+                 * @param[in] x object used to copy to any added elements if size() is increased
+                 * @post All previously obtained iterators are invalid.
+                 * @node if n < size(), vector is truncated.
+                 *       if n > size(), vector is padded with copies of x
+                 */
+                void resize( size_type n, T x = T());
+
+                /**
+                 * Get the number of elements the vector can hold before needing to reallocate storage.
+                 * @return element capacity of the vector 
+                 * @pre   None.
+                 * @post  None.
+                 */
+                __attribute__ ((always_inline))
+                size_type capacity() const
+                {
+                    return(iv_end_of_storage - iv_start);
+                }
+
+                /**
+                 * Query for empty container
+                 * @return bool, true if size()==0 else false.
+                 * @pre none
+                 * @post none
+                 */
+                __attribute__ ((always_inline))
+                bool empty() const
+                {
+                    return(size() == 0);
+                }
+
+                 /**
+                  * Reserve storage for a given number of elements
+                  * @param[in] n The requested capacity of the vector
+                  * @pre  None
+                  * @post If current cpacity() < n then new capcity == n; else no change.
+                  *       All previously obtained iterators are invalid
+                  */
+                void reserve(size_type n);
+
+                // - Element Access -----------------------------------
+
+                /**
+                 * Access a mutable reference to an element in the container
+                 * @param An index into the vector
+                 * @return A reference to an element
+                 * @pre    0 <= n < size()
+                 * @post   None.
+                 */
+                __attribute__ ((always_inline))
+                reference operator[](size_type n)
+                {
+                    return(*(iv_start + n)); 
+                }
+
+                /**
+                 * Access a mutable reference to an element in the container
+                 * @param[in] index An index into the vector
+                 * @return A reference to an element
+                 * @pre    0 <= n < size()
+                 * @post   None.
+                 * @note no exception handling
+                 */
+                __attribute__ ((always_inline))
+                reference at(size_type index)
+                {
+                    assert(index < size());
+                    return(*(iv_start + index));
+                }
+
+                /**
+                 * Get an immutable reference to an element in the container
+                 * @param[in] index An index into the vector
+                 * @return A const_reference to an object or type T
+                 * @pre    0 <= n < size()
+                 * @post   None.
+                 */
+                __attribute__ ((always_inline))
+                const_reference operator[](size_type index) const
+                {
+                    assert(index < size());
+                    return(*(iv_start + index)); 
+                }
+
+                /**
+                 * Get an immutable reference to an element in the container
+                 * @param[in] index An index into the vector
+                 * @return A const_reference to an object or type T
+                 * @pre    0 <= n < size()
+                 * @post   None.
+                 * @note no exception handling
+                 */
+                __attribute__ ((always_inline))
+                const_reference at(size_type index) const
+                {
+                    assert(index < size());
+                    return(*(iv_start + index));
+                }
+
+                /**
+                 * Get a mutable reference to the first element in the container
+                 * @return reference to first element
+                 * @pre none
+                 * @post None
+                 */
+                __attribute__ ((always_inline))
+                reference front()
+                {
+                    return *iv_start;
+                }
+
+                /**
+                 * Get an Immutable reference to the first element in the container
+                 * @return const_reference to first element
+                 * @pre none
+                 * @post None
+                 */
+                __attribute__ ((always_inline))
+                const_reference front() const
+                {
+                    return *iv_start;
+                }
+
+                /**
+                 * Get a mutable reference to the last element in the container
+                 * @return reference to last element
+                 * @pre none
+                 * @post None
+                 */
+                __attribute__ ((always_inline))
+                reference back()
+                {
+                    return *(iv_finish-1);
+                }
+
+                /**
+                 * Get an Immutable reference to the last element in the container
+                 * @return reference to last element
+                 * @pre none
+                 * @post None
+                 */
+                __attribute__ ((always_inline))
+                const_reference back() const
+                {
+                    return *(iv_finish-1);
+                }
+
+                // -- Modifiers -----------------------------
+
+                /*
+                 * Assign new content to the vector object
+                 * @param[n] first iterator to first element to copy in
+                 * @param[n] last  iterator to last element + 1 to copy in
+                 */
+                template <class InputIterator>
+                    void assign (InputIterator first, InputIterator last)
+                {
+                    clear();
+                    size_type n = 0;
+                    for(InputIterator i = first; i != last; ++i) ++n;
+                    reserve(n);
+                    iv_finish = ctor_copy(first,last,iv_start);
+                }
+
+
+                /*
+                 * Assign new content to the vector object
+                 * @param[in] n number of elements to assign
+                 * @param[in] x reference to element to copy in 
+                 */
+                void assign ( size_type n, const T& x)
+                {
+                    clear();
+                    reserve(n);
+                    ctor_fill_n(iv_start,n,x);
+                    iv_finish = iv_start + n;
+                }
+
+
+                /**
+                 * Add element to the back of the container
+                 * @param[in] x reference to object used to create new element
+                 * @pre none
+                 * @post All previously obtained iterators are invalid.
+                 */
+                __attribute__ ((always_inline))
+                void push_back(const T& x) 
+                {
+                    reserve(size() + 1);
+                    new (iv_finish++) T(x);
+                }
+
+                /**
+                 * Remove the last element in the container
+                 * @return nothing
+                 * @pre size() > 0
+                 * @post size() decreased by one
+                 */
+                __attribute__ ((always_inline))
+                void pop_back()
+                {
+                    erase(iv_finish-1,iv_finish);
+                }
+
+                /**
+                 * Insert an element into the container at a given position
+                 * @param[in] position iterator to position to insert
+                 * @param[in] x reference of element to insert
+                 * @pre  begin() <= position < end()
+                 * @post Element inserted at position, storage adjusted as needed.
+                 *       All previously obtained iterators are invalid.
+                 */
+                iterator insert(iterator position, const T& x)
+                {
+                    // iv_start will change if the vector gets resized - so save the offset for
+                    // return.
+                    difference_type offset = position - iv_start;
+                    insert(position, 1, x);
+                    return (iv_start + offset);
+                }
+
+                /**
+                 * Insert a number of copies of a given elements at a given position
+                 * @param[in] postion iterator, postion to insert elements
+                 * @param[in] n number of elements to insert
+                 * @param[in] x A reference to the object to uses to create the new elements
+                 * @pre   begin() <= postion < end()
+                 * @post  All previously obtained iterators are invalid.
+                 */
+                void insert (iterator position, size_type n, const T& x);
+
+                /**
+                 * Insert a slice into the current container at a given position
+                 * @param[in] position iterator, position to insert slice
+                 * @param[in] first iterator to first element of slice insert
+                 * @param[in] last  iterator to last element + 1 of slice to insert
+                 * @pre   begin() <= postion <= end(), first < last.
+                 * @post Elements inserted at postition. Storage adjusted as needed.
+                 *       All previously obtained iterators are invalid.
+                 * @note element pointed to by last is not inserted.
+                 */
+                template <class InputIterator>
+                    void insert (iterator position, InputIterator first, 
+                                 InputIterator last);
+
+
+                /**
+                 * Remove an element from the container
+                 * @param[in] position iterator, position of element to remove
+                 * @pre begin() <= position < end()
+                 * @post All previously obtained iterators are invalid.
+                 */
+                __attribute__ ((always_inline))
+                void erase(iterator position)
+                {
+                    erase(position,position+1);
+                }
+
+                /**
+                 * Remove a slice of elements from the container
+                 * @param[in] first iterator, postion of the first element to remove
+                 * @param[in] last iterator, postion of the last element + 1 to remove
+                 * @pre begin() <= first,last <= end(), first < last.
+                 * @post  All previously obtained iterators are invalid.
+                 * @note The element pointed to be last is not deleted.
+                 */
+                void erase(iterator first, iterator last) 
+                {
+                    assert(last >= first);
+                    assert(first >= iv_start);
+                    assert(first < iv_finish);
+                    assert(last > iv_start);
+                    assert(last <= iv_finish);
+
+                    first = copy(last,iv_finish,first);
+                    while(first != iv_finish)
+                    {
+                        --iv_finish;
+                        iv_finish->~T();
+                    }
+                }  
+
+
+                /**
+                 * Swap this vector with another
+                 * @param reference to another vector of this type
+                 */
+                void swap(vector<T>& x)
+                {
+                    std::swap(iv_start,x.iv_start);
+                    std::swap(iv_finish,x.iv_finish);
+                    std::swap(iv_end_of_storage,x.iv_end_of_storage);
+                }
+
+                /**
+                 * Clear the vector
+                 * @pre none.
+                 * @post size() = 0, All previously obtained iterators are invalid
+                 * @note capacity unchanged
+                 */
+                void clear ()
+                {
+                    while(iv_finish != iv_start)
+                    {
+                        --iv_finish;
+                        (iv_finish)->~T();
+                    }
+                }
+
+            private:
+
+                /**
+                 * Copy constructs elements into raw storage
+                 * @param[in] first iterator of first element to copy
+                 * @pararm[in] last iterator of last element + 1 to copy
+                 * @param[in] destination iterator of destination
+                 * @post elements moved
+                 */
+                template <class InputIterator, class OutputIterator>
+                    OutputIterator
+                    ctor_copy(InputIterator first,
+                              InputIterator last,
+                              OutputIterator destination)
+                    {
+                        while(first != last)
+                        {
+                            new (destination) T(*first);
+                            ++destination;
+                            ++first;
+                        }
+                        return(destination);
+                    }
+
+                /**
+                 * Copy constructs elements into raw storage
+                 * @param[in] first iterator of first element to copy
+                 * @param[in] last iterator of last element + 1 to copy
+                 * @param[in] destination iterator to end of destination + 1
+                 * @post elements moved
+                 */
+                template <class BidirectionalIterator1, class BidirectionalIterator2>
+                    BidirectionalIterator2
+                    ctor_copy_backward ( BidirectionalIterator1 first,
+                                         BidirectionalIterator1 last,
+                                         BidirectionalIterator2 destination)
+                    {
+                        while(last != first)
+                        {
+                            --destination;
+                            --last;
+                            new(destination) T(*last);
+                        }
+                        return destination;
+                    }
+
+                /**
+                 * fill by copy construct ino raw storage
+                 * @param[in] first itertor fo first element
+                 * @param[in] last iterator to last element + 1
+                 * @param[in] value to use to fill
+                 */
+                template < class ForwardIterator, class Tp >
+                    void
+                    ctor_fill (ForwardIterator first, ForwardIterator last, const Tp& value )
+                    {
+                        while (first != last)
+                        {
+                            new (first) T(value);
+                            ++first;
+                        }
+                    }
+
+                /**
+                 * fill by copy construct into raw storage
+                 * @param[in] first iterator first location to fill
+                 * @param[in] n number of elements to fill
+                 * @param[in] value to use to fill
+                 */
+                template < class OutputIterator, class Size, class Tp >
+                    void
+                    ctor_fill_n( OutputIterator first, Size n, const Tp& value )
+                    {
+                        for(; n>0; --n)
+                        {
+                            new (first) T(value);
+                            ++first;
+                        }
+                    }
+                
+
+                /**
+                 * Free all the storage allocated to this vector
+                 * @param[in] i_start iterator to start of storage block
+                 */
+                 __attribute__ ((always_inline))
+                 void free_storage(iterator i_start)
+                 {
+                     delete [] (uint8_t *)i_start;
+                 }
+
+                 /**
+                  * Allocate storage for this vector
+                  * @param[in] n, number of elements required
+                  */
+                 __attribute__ ((always_inline))
+                 iterator allocate_storage(size_type n) 
+                 {
+                     return (iterator) new uint8_t[n * sizeof(T)];
+                 }
+
+                /**
+                 * debug dump
+                 */
+                //void dump(const char * msg = "")
+                //{
+                //    puts(msg);
+                //    printf("vector_dump::start 0x%016lx finish 0x%016lx eos 0x%016lx\n",
+                //           (uint64_t)iv_start, (uint64_t)iv_finish, (uint64_t)iv_end_of_storage);
+                //}
+        };
+
+}; // end namespace std
+
+// ------------------------------------------------------------------------------------------------
+
+template <class T>
+void std::vector<T>::reserve(size_type n)
+{
+    size_type c = capacity();
+    if(n > c)
+    {
+        // if requested new capacity < 10% of current capacity then increase by 10%
+        size_type dif = n - c;
+        size_type inc = 1 + (c/size_type(10));
+        if(dif < inc)
+        {
+            n += inc;
+        }
+
+        iterator newStart = allocate_storage(n);
+        if(NULL == iv_start)
+        {
+            iv_finish = newStart;
+        }
+        else
+        {
+            iterator newFinish = ctor_copy(iv_start, iv_finish, newStart);
+            clear();
+            iv_finish = newFinish;
+            free_storage(iv_start);
+        }
+        iv_end_of_storage = newStart + n;
+        iv_start = newStart;
+    }
+}
+
+
+// ------------------------------------------------------------------------------------------------
+
+template <class T>
+void std::vector<T>::insert (iterator position, size_type n, const T& x)
+{
+    //assert (position >= iv_start);
+    //assert (position <= iv_finish);
+    size_type new_size = size() + n;
+    if(position == end())
+    {
+        reserve(new_size);
+        while(n--) new (iv_finish++) T(x);
+    }
+    else if(new_size > capacity())
+    {
+        vector<T> new_vec;
+        new_vec.reserve(new_size);
+        for(const_iterator i = begin(); i != end(); ++i)
+        {
+            if(i == position)
+            {
+                while(n--) new_vec.push_back(x);
+            }
+            new_vec.push_back(*i);
+        }
+        swap(new_vec);  // swap this with new_vec
+    }
+    else  // already have enough space
+    {
+        size_type m = iv_finish - position;  // # of existing elements to move
+        pointer new_finish = iv_finish + n;
+        if(m < n)
+        {
+            ctor_copy_backward(position,iv_finish,new_finish);
+            while(n--)
+            {
+                if(position < iv_finish) *position = x;
+                else new (position) T(x);
+                ++position;
+            }
+        }
+        else // n <= m
+        {
+            ctor_copy_backward(iv_finish-n,iv_finish,new_finish);  // raw storage copy
+            copy_backward(position, iv_finish-n, iv_finish);       // operator= copy
+            fill_n(position,n,x);
+        }
+        iv_finish = new_finish;
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
+
+template <class T>
+template <class InputIterator>
+void std::vector<T>::insert (iterator position,
+                             InputIterator first, 
+                             InputIterator last)
+// Should only move storage if there is not room
+// InputIterators are not random access  (eg. can't do diff = last - first)
+{
+    size_type n = 0;
+    for(InputIterator i = first; i != last; ++i) ++n;
+    size_type new_size = size() + n;
+
+    if(position == end())
+    {
+        reserve(new_size);
+        iv_finish = ctor_copy(first,last,iv_finish);
+    }
+    else if(new_size > capacity())  // make a new vector
+    {
+        vector<T> new_vec;
+        new_vec.reserve(new_size);
+        for(const_iterator i = begin(); i != end(); ++i)
+        {
+            if(i == position)
+            {
+                while(n--) new_vec.push_back(*first++);
+            }
+            new_vec.push_back(*i);
+        }
+        swap(new_vec);
+    }
+    else  // already have enough space
+    {
+        size_type m = iv_finish - position;  // # of exising elements to adjust
+        if(m < n)
+        {
+            ctor_copy_backward(position,iv_finish,iv_finish+n); // cp all existing elements to raw storage
+            while(first != last)
+            {
+                if(position < iv_finish) *position = *first; // cp new elements to existing element locations
+                else new (position) T(*first);               // cp remaining new elements to raw storage
+                ++position;
+                ++first;
+            }
+        }
+        else // n <= m
+        {
+            ctor_copy_backward(iv_finish-n, iv_finish, iv_finish+n); // cp existing elements to raw storage
+            copy_backward(position, iv_finish-n, iv_finish);  // cp rest of existing elements to existing locations
+            copy(first,last,position);                        // cp in new elements to existing locations
+        }
+        iv_finish += n;
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
+
+template <class T>
+void std::vector<T>::resize(size_type n, T x)
+{
+    size_type sz = size();
+    if(n < sz)
+    {
+        erase(iv_start + n,iv_finish);
+    }
+    else if(n > sz)
+    {
+        insert(iv_finish,n-sz,x);
+    }
+    // else n == size() do nothing
+}
+
+#endif    
+

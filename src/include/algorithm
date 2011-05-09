@@ -1,0 +1,132 @@
+#ifndef ALGORITHM
+#define ALGORITHM
+
+#ifdef __cplusplus
+namespace std
+{
+    /**
+     * Copy a range of elements
+     * @param[in] first InputIterator to the initial position in the source sequence.
+     * @param[in] last  InputIterator to last position + 1 in the source sequence.
+     * @param[in] result OutputIterator to initial position in the destination sequence.
+     * @return an iterator to the last element in the destination range
+     * @note If both ranges overlap in such a way that result points to an elmenent in the source
+     * range then fuction copy_backward should be used.
+     */
+    template <class InputIterator, class OutputIterator>
+    inline OutputIterator
+    copy (InputIterator first, InputIterator last, OutputIterator result )
+    {
+        while(first!=last)
+        {
+            *result = *first;
+            ++result;
+            ++first;
+        }
+        return result;
+    }
+
+    /**
+     * Copy a range of elements backwards
+     * @param[in] first Bidirectional iterator to the initial source position
+     * @param[in] last  Bidirectional iterator to the final source position + 1
+     * @param[in] result Bidirectional iterator to end of the destination sequence + 1.
+     * @return an iterator to the first element in the destination sequence.
+     * @note If both ranges overlap in such a way that result points to an element in the  source
+     * range, the function copy should be used instead.
+     */
+    template <class BidirectionalIterator1, class BidirectionalIterator2>
+    inline BidirectionalIterator2 
+    copy_backward (  BidirectionalIterator1 first,
+                     BidirectionalIterator1 last,
+                     BidirectionalIterator2 result )
+    {
+        while(last!=first)
+        {
+            --result;
+            --last;
+            *result = *last;
+        }
+        return result;
+    }
+
+    /**
+     * Exchange values of two objects
+     * @param[in] a reference to an object to be swaped with b
+     * @param[in] b reference to an object to be swaped with a
+     * @note this function may not be an efficient way to swap large objects.
+     */
+    template <class T> 
+        inline void 
+        swap(T& a, T&b )
+    {
+        T c(a);
+        a=b;
+        b=c;
+    }
+
+    /**
+     * Fill a range with value
+     * @param[in] first ForwardIterator to the first position in the source range.
+     * @param[in] last  ForwardIterator to the last position +1 in the source range.
+     * @param[in] value reference to the object used to fill the sequence.
+     */
+    template < class ForwardIterator, class T >
+    inline void
+    fill (ForwardIterator first, ForwardIterator last, const T& value )
+    {
+        while (first != last)
+        {
+            *first = value;
+            ++first;
+        }
+    }
+
+    /**
+     * Fill a sequence with value
+     * @param[in] first OutputIterator to the first position in the sequence.
+     * @param[in] n number of elements in the sequence
+     * @param[in] value reference to the value used to fill the sequence.
+     */
+    template < class OutputIterator, class Size, class T >
+    inline void
+    fill_n( OutputIterator first, Size n, const T& value )
+    {
+        for(; n>0; --n)
+        {
+            *first = value;
+            ++first;
+        }
+    }
+
+    /**
+     * Return the lesser of two arguments
+     * @param[in] a object reference
+     * @param[in] b object reference
+     * @return reference to te lesser object
+     */
+    template <class T>
+    inline const T& 
+    min(const T& a, const T& b)
+    {
+        if( b < a) return b;
+        return a;
+    }
+
+    /**
+     * Return the greater of two arguments
+     * @param[in] a object reference
+     * @param[in] b object reference
+     * @return reference to te greater object
+     */    
+    template <class T>
+    inline const T&
+    max(const T& a, const T& b)
+    {
+        if(a < b) return b;
+        return a;
+    }
+};
+#endif
+
+#endif
