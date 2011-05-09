@@ -8,6 +8,8 @@ TracePage* TracePage::setNext(TracePage* new_next)
 
 traceEntry* TracePage::claimEntry(size_t size)
 {
+    // this->size will eventually wrap and it will suddenly look like there
+    // is free space?
     size_t position = __sync_fetch_and_add(&this->size, size);
     if (position > (PAGE_SIZE - sizeof(TracePage)))
     {

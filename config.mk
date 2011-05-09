@@ -98,7 +98,7 @@ ${OBJDIR}/%.dep : %.S
 	rm -f $@.$$$$
 
 ifdef MODULE
-${IMGDIR}/%.so : ${OBJECTS} ${ROOTPATH}/src/module.ld ${MODULE_INIT} ${SUBDIRS}
+${IMGDIR}/%.so : ${OBJECTS} ${ROOTPATH}/src/module.ld ${MODULE_INIT}
 	${LD} -shared -z now ${LDFLAGS} \
 	      $(filter-out ${ROOTPATH}/src/module.ld,$^) \
 	      -T ${ROOTPATH}/src/module.ld -o $@
