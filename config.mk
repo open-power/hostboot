@@ -56,6 +56,7 @@ IMGS_ = $(addprefix ${IMGDIR}/, ${IMGS})
 LIDS = $(foreach lid,$(addsuffix _LIDNUMBER, $(IMGS)),$(addprefix ${IMGDIR}/,$(addsuffix .ruhx, $($(lid)))))
 IMAGES = $(addsuffix .bin, ${IMGS_}) $(addsuffix .elf, ${IMGS_}) ${LIDS}
 #$(addsuffix .ruhx, ${IMGS_})
+IMAGE_EXTRAS = $(addprefix ${IMGDIR}/, hbotStringFile)
 endif
 
 ifdef EXTRA_LIDS
@@ -141,6 +142,9 @@ ${IMGDIR}/$$($(1)_LIDNUMBER).lidhdr: $${ROOTPATH}/src/build/lids/$(1).lidhdr
 endef
 $(foreach lid,$(EXTRA_LIDS),$(eval $(call LIDHDR_template,$(lid))))
 
+${IMGDIR}/hbotStringFile : ${IMAGES}
+	${ROOTPATH}/src/build/trace/tracehash_hb.pl -c -d ${ROOTPATH}/obj -s $@
+
 %.d: ${OBJECTS}
 	cd ${basename $@} && ${MAKE}
 
@@ -152,7 +156,7 @@ $(foreach lid,$(EXTRA_LIDS),$(eval $(call LIDHDR_template,$(lid))))
 
 ALL: ${OBJECTS} ${SUBDIRS} ${LIBRARIES} ${EXTRA_LIDS_}
 ifdef IMAGES
-	${MAKE} ${IMAGES}
+	${MAKE} ${IMAGES} ${IMAGE_EXTRAS}
 endif
 
 ${BEAMDIR}/%.beam : %.C
@@ -176,7 +180,7 @@ clean: ${SUBDIRS:.d=.clean}
 	       ${BEAMOBJS} ${LIBRARIES} \
 	       ${IMAGES} ${IMAGES:.bin=.list} ${IMAGES:.bin=.syms} \
 	       ${IMAGES:.bin=.bin.modinfo} ${IMAGES:.ruhx=.lid} \
-	       ${IMAGES:.ruhx=.lidhdr} ${EXTRA_LIDS_})
+	       ${IMAGES:.ruhx=.lidhdr} ${IMAGE_EXTRAS} ${EXTRA_LIDS_})
 
 cscope: ALL
 	mkdir -p ${ROOTPATH}/obj/cscope
