@@ -16,7 +16,7 @@ DIRECT_BOOT_OBJECTS = start.o kernel.o taskmgr.o cpumgr.o syscall.o \
 RUNTIME_OBJECTS =
 
 BASE_MODULES = trace
-DIRECT_BOOT_MODULES = example
+DIRECT_BOOT_MODULES = example cxxtest testexample
 RUNTIME_MODULES = 
 
 RELOCATABLE_IMAGE_LDFLAGS = -pie --export-dynamic

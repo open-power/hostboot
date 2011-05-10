@@ -1,8 +1,6 @@
 ROOTPATH = ../../..
-MODULE = example
+MODULE = cxxtest
 
-OBJS = example.o
-
-SUBDIRS = test.d
+OBJS = TestSuite.o
 
 include ${ROOTPATH}/config.mk
