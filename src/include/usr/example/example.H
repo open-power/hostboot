@@ -15,4 +15,13 @@
      */
 uint64_t example1_function();
 
+/**
+ * @brief Example of creating an error log function
+ *
+ * @return void
+ *
+ */
+void example2_create_errorlog_function();
+
+
 #endif

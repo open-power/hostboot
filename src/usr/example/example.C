@@ -4,6 +4,8 @@
 #include <sys/task.h>
 #include <trace/interface.H>
 #include <example/example.H>
+#include <example/examplerc.H>
+#include <errl/errlentry.H>
 
 //static mutex_t value = mutex_create();
 trace_desc_t *g_trac_test = NULL;
@@ -24,4 +26,27 @@ uint64_t example1_function()
     //TRACFCOMP(g_trac_test, "Someone Called example1_function!");
 
     return l_rc;
+}
+
+// This example shows how to create an error log with passed-in
+// defined parameters
+void example2_create_errorlog_function()
+{
+    /*@
+     * @errortype
+     * @moduleid     MY_MODULE_ID_1
+     * @reasoncode   MY_REASON_CODE_1
+     * @userdata1    Meaning of userdata1 value
+     * @userdata2    Meaning of userdata2 value
+     * @devdesc      Example of creating an error log
+     */
+    errlHndl_t l_err = new ERRORLOG::ErrlEntry(
+                        ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                        MY_MODULE_ID_1,
+                        MY_REASON_CODE_1,
+                        0x8000000000000001,
+                        0x9000000000000003);
+    delete l_err;
+    l_err = NULL;
+    return;
 }
