@@ -23,6 +23,16 @@ public:
         // Call functions and validate results
         // TS_FAIL("Failed test call to example3 function");
     }
+    void testExample4(void)
+    {
+        // Call functions and validate results
+        // TS_FAIL("Failed test call to example3 function");
+    }
+    void testExample5(void)
+    {
+        // Call functions and validate results
+        // TS_FAIL("Failed test call to example3 function");
+    }
 
 };
 

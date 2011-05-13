@@ -1,7 +1,7 @@
 ROOTPATH = ..
 
 SUBDIRS = kernel.d lib.d libc++.d sys.d usr.d build.d
-IMGS = hbicore 
+IMGS = hbicore hbicore_test
 EXTRA_LIDS = dslid
 
 BASE_OBJECTS = console.o spinlock.o string.o stdlib.o assert.o stdio.o \
@@ -16,14 +16,18 @@ DIRECT_BOOT_OBJECTS = start.o kernel.o taskmgr.o cpumgr.o syscall.o \
 RUNTIME_OBJECTS =
 
 BASE_MODULES = trace
-DIRECT_BOOT_MODULES = example cxxtest testexample
-RUNTIME_MODULES = 
+DIRECT_BOOT_MODULES = example
+RUNTIME_MODULES =
+TESTCASE_MODULES = cxxtest testexample
 
 RELOCATABLE_IMAGE_LDFLAGS = -pie --export-dynamic
 
 hbicore_OBJECTS = ${BASE_OBJECTS} ${DIRECT_BOOT_OBJECTS}
 hbicore_MODULES = ${BASE_MODULES} ${DIRECT_BOOT_MODULES}
 hbicore_LIDNUMBER = 80f00100
+
+hbicore_test_OBJECTS = ${hbicore_OBJECTS}
+hbicore_test_MODULES = ${hbicore_MODULES} ${TESTCASE_MODULES}
 
 #halruntime_OBJECTS = ${BASE_OBJECTS} ${RUNTIME_OBJECTS}
 #halruntime_MODULES = ${BASE_MODULES} ${RUNTIME_MODULES}

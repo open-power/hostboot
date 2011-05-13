@@ -43,6 +43,23 @@ ASMFLAGS = ${COMMONFLAGS} -mcpu=power7
 CXXFLAGS = ${CFLAGS} -nostdinc++ -fno-rtti -fno-exceptions -Wall
 LDFLAGS = --nostdlib --sort-common ${COMMONFLAGS}
 
+ifdef USE_PYTHON
+    TESTGEN = ${ROOTPATH}/src/usr/cxxtest/cxxtestgen.py
+else
+    TESTGEN = ${ROOTPATH}/src/usr/cxxtest/cxxtestgen.pl
+endif
+
+ifdef TESTS
+ifdef MODULE
+OBJS += ${MODULE}.o
+EXTRA_OBJS += ${OBJDIR}/${MODULE}.C
+vpath %.C ${OBJDIR} $(shell mkdir -p ${OBJDIR})
+else
+$(error MODULE must be defined for a testcase.)
+endif
+endif
+
+
 INCDIR = ${ROOTPATH}/src/include/
 _INCDIRS = ${INCDIR} ${EXTRAINCDIR}
 INCFLAGS = $(addprefix -I, ${_INCDIRS} )
@@ -65,36 +82,36 @@ endif
 
 ${OBJDIR}/%.o ${OBJDIR}/%.list : %.C
 	mkdir -p ${OBJDIR}
-	${CXX} -c ${CXXFLAGS} $< -o $@ ${INCFLAGS}
+	${CXX} -c ${CXXFLAGS} $< -o $@ ${INCFLAGS} -iquote .
 	${OBJDUMP} -dCS $@ > $(basename $@).list	
 
 ${OBJDIR}/%.o ${OBJDIR}/%.list : %.c
 	mkdir -p ${OBJDIR}
-	${CC} -c ${CFLAGS} -std=c99 $< -o $@ ${INCFLAGS}
+	${CC} -c ${CFLAGS} -std=c99 $< -o $@ ${INCFLAGS} -iquote .
 	${OBJDUMP} -dCS $@ > $(basename $@).list
 
 ${OBJDIR}/%.o : %.S
 	mkdir -p ${OBJDIR}
-	${CC} -c ${ASMFLAGS} $< -o $@ ${ASMINCFLAGS} ${INCFLAGS}
+	${CC} -c ${ASMFLAGS} $< -o $@ ${ASMINCFLAGS} ${INCFLAGS} -iquote .
 
 ${OBJDIR}/%.dep : %.C
 	mkdir -p ${OBJDIR}; \
 	rm -f $@; \
-	${CXX_RAW} -M ${CXXFLAGS} $< -o $@.$$$$ ${INCFLAGS}; \
+	${CXX_RAW} -M ${CXXFLAGS} $< -o $@.$$$$ ${INCFLAGS} -iquote .; \
 	sed 's,\($*\)\.o[ :]*,${OBJDIR}/\1.o $@ : ,g' < $@.$$$$ > $@; \
 	rm -f $@.$$$$
 
 ${OBJDIR}/%.dep : %.c
 	mkdir -p ${OBJDIR}; \
 	rm -f $@; \
-	${CC_RAW} -M ${CFLAGS} -std=c99 $< -o $@.$$$$ ${INCFLAGS}; \
+	${CC_RAW} -M ${CFLAGS} -std=c99 $< -o $@.$$$$ ${INCFLAGS} -iquote .; \
 	sed 's,\($*\)\.o[ :]*,${OBJDIR}/\1.o $@ : ,g' < $@.$$$$ > $@; \
 	rm -f $@.$$$$
 
 ${OBJDIR}/%.dep : %.S
 	mkdir -p ${OBJDIR}; \
 	rm -f $@; \
-	${CC_RAW} -M ${ASMFLAGS} $< -o $@.$$$$ ${ASMINCFLAGS} ${INCFLAGS}; \
+	${CC_RAW} -M ${ASMFLAGS} $< -o $@.$$$$ ${ASMINCFLAGS} ${INCFLAGS} -iquote .; \
 	sed 's,\($*\)\.o[ :]*,${OBJDIR}/\1.o $@ : ,g' < $@.$$$$ > $@; \
 	rm -f $@.$$$$
 
@@ -103,6 +120,12 @@ ${IMGDIR}/%.so : ${OBJECTS} ${ROOTPATH}/src/module.ld ${MODULE_INIT}
 	${LD} -shared -z now ${LDFLAGS} \
 	      $(filter-out ${ROOTPATH}/src/module.ld,$^) \
 	      -T ${ROOTPATH}/src/module.ld -o $@
+endif
+
+ifdef TESTS
+${OBJDIR}/${MODULE}.C: ${TESTS}
+	mkdir -p ${OBJDIR}
+	${TESTGEN} --hostboot -o $@ ${TESTS}
 endif
 
 define ELF_template
@@ -146,7 +169,7 @@ ${IMGDIR}/hbotStringFile : ${IMAGES}
 	${ROOTPATH}/src/build/trace/tracehash_hb.pl -c -d ${ROOTPATH}/obj -s $@
 
 %.d: ${OBJECTS}
-	cd ${basename $@} && ${MAKE}
+	cd ${basename $@} && ${MAKE} all
 
 %.clean:
 	cd ${basename $@} && ${MAKE} clean
@@ -180,7 +203,8 @@ clean: ${SUBDIRS:.d=.clean}
 	       ${BEAMOBJS} ${LIBRARIES} \
 	       ${IMAGES} ${IMAGES:.bin=.list} ${IMAGES:.bin=.syms} \
 	       ${IMAGES:.bin=.bin.modinfo} ${IMAGES:.ruhx=.lid} \
-	       ${IMAGES:.ruhx=.lidhdr} ${IMAGE_EXTRAS} ${EXTRA_LIDS_})
+	       ${IMAGES:.ruhx=.lidhdr} ${IMAGE_EXTRAS} ${EXTRA_LIDS_} \
+	       ${EXTRA_OBJS})
 
 cscope: ALL
 	mkdir -p ${ROOTPATH}/obj/cscope

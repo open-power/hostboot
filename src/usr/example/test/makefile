@@ -1,6 +1,6 @@
 ROOTPATH = ../../../..
-MODULE = testexample
 
-OBJS = exampletest.o
+MODULE = testexample
+TESTS = *.H
 
 include ${ROOTPATH}/config.mk
