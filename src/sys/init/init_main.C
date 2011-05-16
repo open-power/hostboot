@@ -62,6 +62,8 @@ void init_main(void* unused)
 */
 
     task_exec("libexample.so", NULL);
+
+    task_exec("libcxxtest.so", NULL);
     
     while(1)
 	task_yield();
