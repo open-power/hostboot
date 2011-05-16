@@ -18,7 +18,7 @@ RUNTIME_OBJECTS =
 BASE_MODULES = trace
 DIRECT_BOOT_MODULES = example
 RUNTIME_MODULES =
-TESTCASE_MODULES = cxxtest testexample
+TESTCASE_MODULES = cxxtest testexample testtrace
 
 RELOCATABLE_IMAGE_LDFLAGS = -pie --export-dynamic
 

@@ -1,7 +1,9 @@
 /* TODO
- *  - Add support in for debug traces
- *  - Time support
+ *  - Add support in for debug trace enable/disable
  *  - FORMAT_PRINTF support
+ *  - %s support
+ *  - Multiple buffer support
+ *  - Prolog
  *
  *
  */
@@ -17,8 +19,9 @@
 #include <stdlib.h>
 #include <sys/task.h>
 #include <sys/mutex.h>
+#include <string.h>
 
-#include "trace.H"
+#include <trace/trace.H>
 
 /******************************************************************************/
 // Namespace
@@ -30,28 +33,43 @@ namespace TRACE
 // Globals/Constants
 /******************************************************************************/
 
-#define TRAC_TIME_REAL   0  // upper 32 = seconds, lower 32 = microseconds
-#define TRAC_TIME_50MHZ  1
-#define TRAC_TIME_200MHZ 2
-#define TRAC_TIME_167MHZ 3  // 166666667Hz
-#define COMP_NAME_SIZE   16
+const uint32_t TRAC_TIME_REAL   = 0;  // upper 32 = seconds, lower 32 = microseconds
+const uint32_t TRAC_TIME_50MHZ  = 1;
+const uint32_t TRAC_TIME_200MHZ = 2;
+const uint32_t TRAC_TIME_167MHZ = 3;  // 166666667Hz
+const uint32_t COMP_NAME_SIZE   = 16;
 
-// Global value used as a "timer" to provide tracing point32_t of reference
-uint32_t  g_trac_time_high = 0;
-uint32_t  g_trac_time_low = 0;
+const uint64_t TRAC_DEFAULT_BUFFER_SIZE = 0x1000;
 
-// Global Mutex
-mutex_t    g_trac_mutex;
-
-// Global buffer
+// Global trace buffer. - Keep global so it can be found in syms file
 trace_desc_t *g_trac_global = NULL;
 
+/******************************************************************************/
+// Trace::Trace
+/******************************************************************************/
+Trace::Trace()
+{
+    iv_trac_mutex = mutex_create();
+
+    g_trac_global = static_cast<trace_desc_t *>(malloc(TRAC_DEFAULT_BUFFER_SIZE));
+
+    initValuesBuffer(g_trac_global,
+                     "GLOBAL");
+}
+
+/******************************************************************************/
+// Trace::~Trace
+/******************************************************************************/
+Trace::~Trace()
+{
+
+}
 
 
 /******************************************************************************/
 // trace_adal_init_buffer
 /******************************************************************************/
-void trace_adal_init_buffer(trace_desc_t **o_td, const char* i_comp,
+void Trace::initBuffer(trace_desc_t **o_td, const char* i_comp,
                             const size_t i_size )
 {
     /*------------------------------------------------------------------------*/
@@ -63,35 +81,18 @@ void trace_adal_init_buffer(trace_desc_t **o_td, const char* i_comp,
     /*------------------------------------------------------------------------*/
     if(*o_td == NULL)
     {
-        if(g_trac_global == NULL)
-        {
-            // TODO - How do I make this pre-emption/mutli-threading safe?
-            g_trac_mutex = mutex_create();
-
-            printk("Global trace buffer is NULL so create and init it!\n");
-
-            g_trac_global = (trace_desc_t *)(malloc(PAGE_SIZE));
-            char l_g_comp[TRAC_COMP_SIZE] = "GLOBAL";
-            trace_init_values_buffer(g_trac_global,
-                                     l_g_comp);
-
-        }
-
         // Just assign it to the global buffer since we only have
         // one buffer
         *o_td = g_trac_global;
-        printk("Assigned input trace descriptor to global buffer\n");
     }
-
-    printk("*td = %lu\n",(unsigned long int)*o_td);
 
     return;
 }
 
 /******************************************************************************/
-// trace_init_values_buffer
+// initValuesBuffer
 /******************************************************************************/
-void trace_init_values_buffer(trace_desc_t *o_buf,const char *i_comp)
+void Trace::initValuesBuffer(trace_desc_t *o_buf,const char *i_comp)
 {
     /*------------------------------------------------------------------------*/
     /*  Local Variables                                                       */
@@ -102,16 +103,16 @@ void trace_init_values_buffer(trace_desc_t *o_buf,const char *i_comp)
     /*------------------------------------------------------------------------*/
 
     // Initialize it to all 0's
-    memset(o_buf,0,(size_t)PAGE_SIZE);
+    memset(o_buf,0,(size_t)TRAC_DEFAULT_BUFFER_SIZE);
 
-    (o_buf)->ver = TRACE_BUF_VERSION;
-    (o_buf)->hdr_len = sizeof(trace_buf_head_t);
-    (o_buf)->time_flg = TRAC_TIME_167MHZ;
-    (o_buf)->endian_flg = 'B';  // Big Endian
-    memcpy((o_buf)->comp,i_comp,(size_t)COMP_NAME_SIZE);
-    (o_buf)->size = PAGE_SIZE;
-    (o_buf)->times_wrap = 0;
-    (o_buf)->next_free = sizeof(trace_buf_head_t);
+    o_buf->ver = TRACE_BUF_VERSION;
+    o_buf->hdr_len = sizeof(trace_buf_head_t);
+    o_buf->time_flg = TRAC_TIME_REAL;
+    o_buf->endian_flg = 'B';  // Big Endian
+    strcpy(o_buf->comp,i_comp);
+    o_buf->size = TRAC_DEFAULT_BUFFER_SIZE;
+    o_buf->times_wrap = 0;
+    o_buf->next_free = sizeof(trace_buf_head_t);
 
     return;
 }
@@ -119,11 +120,11 @@ void trace_init_values_buffer(trace_desc_t *o_buf,const char *i_comp)
 /******************************************************************************/
 // trace_adal_write_all
 /******************************************************************************/
-void trace_adal_write_all(trace_desc_t *io_td,
-                          const trace_hash_val i_hash,
-                          const char * i_fmt,
-                          const uint32_t i_line,
-                          const int32_t i_type, ...)
+void Trace::trace_adal_write_all(trace_desc_t *io_td,
+                                 const trace_hash_val i_hash,
+                                 const char * i_fmt,
+                                 const uint32_t i_line,
+                                 const int32_t i_type, ...)
 {
     /*------------------------------------------------------------------------*/
     /*  Local Variables                                                       */
@@ -146,11 +147,7 @@ void trace_adal_write_all(trace_desc_t *io_td,
         _fmt++;
     }
 
-    if(num_args > TRAC_MAX_ARGS)
-    {
-        printk ("Too many arguments: %u",num_args);
-    }
-    else if(io_td != NULL)
+    if((num_args <= TRAC_MAX_ARGS) && (io_td != NULL))
     {
 
         // Calculate total space needed
@@ -169,7 +166,7 @@ void trace_adal_write_all(trace_desc_t *io_td,
         l_entry_size = (l_entry_size + 3) & ~3;
 
         // Fill in the entry structure
-        l_entry.stamp.tid = (uint32_t)task_gettid();   // What is response to this in AME code?
+        l_entry.stamp.tid = static_cast<uint32_t>(task_gettid());
 
         // Length is equal to size of data
         l_entry.head.length = (num_args * sizeof(uint64_t));
@@ -178,7 +175,7 @@ void trace_adal_write_all(trace_desc_t *io_td,
         l_entry.head.line = i_line;
 
         // Time stamp
-        *(l_entry.stamp.tb) = getTB();
+        convertTime(&l_entry.stamp);
 
         uint64_t* data = &l_entry.args[0];
 
@@ -193,41 +190,36 @@ void trace_adal_write_all(trace_desc_t *io_td,
 
         // Now put total size at end of buffer
         // Note that fsp-trace assumes this to be a 32 bit long word
-        uint32_t *l_size = (uint32_t *)&(l_entry.args[num_args]);
+        uint32_t *l_size = reinterpret_cast<uint32_t *>
+                            (&(l_entry.args[num_args]));
         *l_size = l_entry_size;
-
-        printk("l_entry_size = %u ttid = %u\n",l_entry_size,l_entry.stamp.tid);
 
         // We now have total size and need to reserve a part of the trace
         // buffer for this
 
         // CRITICAL REGION START
-        l_rc = mutex_lock(g_trac_mutex);
+        l_rc = mutex_lock(iv_trac_mutex);
         if(l_rc != 0)
         {
-            printk("trace_adal_write_all: Failed to get mutex");
+            // This will assert so we'll never hit this code.
         }
         else
         {
             // Update the entry count
             io_td->te_count++;
 
-            trace_write_data(io_td,
-                            (void *)&l_entry,
-                            l_entry_size);
+            writeData(io_td,
+                      static_cast<void *>(&l_entry),
+                      l_entry_size);
 
-            l_rc = mutex_unlock(g_trac_mutex);
+            l_rc = mutex_unlock(iv_trac_mutex);
             if(l_rc != 0)
             {
                 // Badness
-                printk("trace_adal_write_all: Failed to release mutex");
+                // This will assert so we'll never hit this code.
             }
         }
         // CRITICAL REGION END
-    }
-    else
-    {
-        printk("trace_adal_write_all: User passed invalid parameter");
     }
 
     return;
@@ -236,11 +228,11 @@ void trace_adal_write_all(trace_desc_t *io_td,
 /******************************************************************************/
 // trace_adal_write_bin
 /******************************************************************************/
-void trace_adal_write_bin(trace_desc_t *io_td,const trace_hash_val i_hash,
-                    const uint32_t i_line,
-                    const void *i_ptr,
-                    const uint32_t i_size,
-                    const int32_t type)
+void Trace::trace_adal_write_bin(trace_desc_t *io_td,const trace_hash_val i_hash,
+                                 const uint32_t i_line,
+                                 const void *i_ptr,
+                                 const uint32_t i_size,
+                                 const int32_t type)
 {
     /*------------------------------------------------------------------------*/
     /*  Local Variables                                                       */
@@ -276,7 +268,7 @@ void trace_adal_write_bin(trace_desc_t *io_td,const trace_hash_val i_hash,
         l_entry_size = (l_entry_size + 3) & ~3;
 
         // Fill in the entry structure
-        l_entry.stamp.tid = (uint32_t)task_gettid();   // What is response to this in AME code?
+        l_entry.stamp.tid = static_cast<uint32_t>(task_gettid());
 
         // Length is equal to size of data
         l_entry.head.length = i_size;
@@ -288,41 +280,41 @@ void trace_adal_write_bin(trace_desc_t *io_td,const trace_hash_val i_hash,
         // buffer for this
 
         // Time stamp
-        *(l_entry.stamp.tb) = getTB();
+        convertTime(&l_entry.stamp);
 
         // CRITICAL REGION START
-        l_rc = mutex_lock(g_trac_mutex);
+        l_rc = mutex_lock(iv_trac_mutex);
         if(l_rc != 0)
         {
-            printk("trace_adal_write_bin: Failed to get mutex");
+            // This will assert so we'll never hit this code.
         }
         else
         {
 
             // Increment trace counter
-            io_td->te_count++;;
+            io_td->te_count++;
 
             // First write the header
-            trace_write_data(io_td,
-                             (void *)&l_entry,
-                             sizeof(l_entry));
+            writeData(io_td,
+                      static_cast<void *>(&l_entry),
+                      sizeof(l_entry));
 
             // Now write the actual binary data
-            trace_write_data(io_td,
-                             i_ptr,
-                             i_size);
+            writeData(io_td,
+                      i_ptr,
+                      i_size);
 
             // Now write the size at the end
-            trace_write_data(io_td,
-                             (void *)&l_entry_size,
-                             sizeof(l_entry_size));
+            writeData(io_td,
+                      static_cast<void *>(&l_entry_size),
+                      sizeof(l_entry_size));
 
             // CRITICAL REGION END
-            l_rc = mutex_unlock(g_trac_mutex);
+            l_rc = mutex_unlock(iv_trac_mutex);
             if(l_rc != 0)
             {
                 // Badness
-                printk("trace_adal_write_bin: Failed to release mutex");
+                // This will assert so we'll never hit this code.
             }
         }
 
@@ -332,9 +324,9 @@ void trace_adal_write_bin(trace_desc_t *io_td,const trace_hash_val i_hash,
 }
 
 /******************************************************************************/
-// trace_write_data
+// writeData
 /******************************************************************************/
-void trace_write_data(trace_desc_t *io_td,
+void Trace::writeData(trace_desc_t *io_td,
                     const void *i_ptr,
                     const uint32_t i_size)
 {
@@ -344,6 +336,7 @@ void trace_write_data(trace_desc_t *io_td,
     uint32_t            l_total_size = i_size;
     void                *l_buf_ptr = NULL;
     uint32_t            l_offset = 0;
+    uint64_t            l_align = 0;
 
     /*------------------------------------------------------------------------*/
     /*  Code                                                                  */
@@ -352,19 +345,26 @@ void trace_write_data(trace_desc_t *io_td,
     do
     {
 
-        if(i_size > PAGE_SIZE)
+        if(i_size > (io_td->size-sizeof(trace_buf_head_t)))
         {
-            printk("trace_write_data: Input size to large!");
             break;
         }
 
-        if((io_td->next_free + l_total_size) > PAGE_SIZE)
+
+        if((io_td->next_free + l_total_size) > io_td->size)
         {
-            // copy what we can to end
-            l_buf_ptr = (char *)io_td + io_td->next_free;
-            l_buf_ptr = (void *) ( ((uint64_t) l_buf_ptr + 3) & ~3);
-            l_offset = PAGE_SIZE-io_td->next_free;
-            memcpy(l_buf_ptr,i_ptr,(size_t)l_offset);
+            // Get the pointer to current location in buffer
+            l_buf_ptr = reinterpret_cast<char *>(io_td) + io_td->next_free;
+            // Figure out the alignment
+            l_align = ( (reinterpret_cast<uint64_t>(l_buf_ptr) + 3) & ~3) -
+                          reinterpret_cast<uint64_t>(l_buf_ptr);
+            // Add on the alignment
+            l_buf_ptr = reinterpret_cast<void *>(reinterpret_cast<uint64_t>
+                         (l_buf_ptr) + l_align);
+            // Ensure offset accounts for the alignment
+            l_offset = io_td->size-io_td->next_free - l_align;
+            // Copy in what fits
+            memcpy(l_buf_ptr,i_ptr,static_cast<size_t>(l_offset));
 
             l_total_size -= l_offset;
 
@@ -373,17 +373,23 @@ void trace_write_data(trace_desc_t *io_td,
             io_td->next_free = io_td->hdr_len;
         }
 
-        l_buf_ptr = (char *)io_td + io_td->next_free;
+        // Get the pointer to current location in buffer
+        l_buf_ptr = reinterpret_cast<char *>(io_td) + io_td->next_free;
+        // Figure out the alignment
+        l_align = ( (reinterpret_cast<uint64_t>(l_buf_ptr) + 3) & ~3) -
+                                  reinterpret_cast<uint64_t>(l_buf_ptr);
+        // Add on the alignment
+        l_buf_ptr = reinterpret_cast<void *>(reinterpret_cast<uint64_t>
+                                 (l_buf_ptr) + l_align);
 
-        // Word align the write - total size includes this allignment
-        l_buf_ptr = (void *) ( ((uint64_t) l_buf_ptr + 3) & ~3);
+        memcpy(l_buf_ptr,reinterpret_cast<const char *>(i_ptr) + l_offset,
+               l_total_size);
 
-        memcpy(l_buf_ptr,(char *)i_ptr + l_offset,l_total_size);
-
-        // Make sure size is correct for word allignment
+        // Make sure size is correct for word alignment
         // Note that this works with binary trace because only the binary data
         // has the potential to be un-word aligned.  If two parts of the binary
         // trace had this problem then this code would not work.
+        // Note that fsp-trace will ignore garbage data in the unaligned areas.
         l_total_size = (l_total_size + 3) & ~3;
         io_td->next_free += l_total_size;
 
@@ -394,9 +400,34 @@ void trace_write_data(trace_desc_t *io_td,
 }
 
 /******************************************************************************/
-// TRAC_get_td - TODO
+// convertTime
 /******************************************************************************/
-trace_desc_t * trace_get_td(const char *i_comp)
+void Trace::convertTime(trace_entry_stamp_t *o_entry)
+{
+    /*------------------------------------------------------------------------*/
+    /*  Local Variables                                                       */
+    /*------------------------------------------------------------------------*/
+
+    /*------------------------------------------------------------------------*/
+    /*  Code                                                                  */
+    /*------------------------------------------------------------------------*/
+
+    // TODO - Future Sprint will collect proc frequency and correctly
+    //        calculate this.
+    uint64_t l_time = getTB();
+    //o_entry->tbh = l_time && 0xFFFFFFFF00000000;
+    //o_entry->tbl = l_time && 0x00000000FFFFFFFF;
+
+    // This basically supports SIMICS, but will look weird on real hw
+    o_entry->tbh = (l_time / 512000000);
+    o_entry->tbl = ((l_time - (o_entry->tbh * 512000000)) / 512);
+
+}
+
+/******************************************************************************/
+// getTd - TODO
+/******************************************************************************/
+trace_desc_t * Trace::getTd(const char *i_comp)
 {
     /*------------------------------------------------------------------------*/
     /*  Local Variables                                                       */
@@ -427,9 +458,9 @@ trace_desc_t * trace_get_td(const char *i_comp)
 }
 
 /******************************************************************************/
-// trace_get_buffer - TODO
+// getBuffer - TODO
 /******************************************************************************/
-int32_t trace_get_buffer(const trace_desc_t *i_td_ptr,
+int32_t Trace::getBuffer(const trace_desc_t *i_td_ptr,
                     void *o_data)
 {
     /*------------------------------------------------------------------------*/
@@ -446,11 +477,10 @@ int32_t trace_get_buffer(const trace_desc_t *i_td_ptr,
         // Get the lock
         // TODO Mutex
 #if 0
-        l_rc = UTIL_MUTEX_GET(&g_trac_mutex,TRAC_INTF_MUTEX_TIMEOUT);
+        l_rc = UTIL_MUTEX_GET(&iv_trac_mutex,TRAC_INTF_MUTEX_TIMEOUT);
         if(l_rc != 0)
         {
             // Badness
-            printk("TRAC_get_buffer: Failed to get mutex");
         }
         else
         {
@@ -458,15 +488,11 @@ int32_t trace_get_buffer(const trace_desc_t *i_td_ptr,
         }
 #endif
         // Copy it's buffer into temp one
-        memcpy(o_data,i_td_ptr,(size_t)PAGE_SIZE);
+        memcpy(o_data,i_td_ptr,(size_t)TRAC_DEFAULT_BUFFER_SIZE);
 
         // Always try to release even if error above
         // TODO - mutex
-        //UTIL_MUTEX_PUT(&g_trac_mutex);
-    }
-    else
-    {
-        printk("TRAC_get_buffer: Invalid parameter passed by caller");
+        //UTIL_MUTEX_PUT(&iv_trac_mutex);
     }
 
     return(l_rc);
@@ -474,10 +500,10 @@ int32_t trace_get_buffer(const trace_desc_t *i_td_ptr,
 
 #if 0
 /******************************************************************************/
-// trace_get_buffer_partial - TODO
+// getBufferPartial - TODO
 /******************************************************************************/
 // TODO
-int32_t trace_get_buffer_partial(const trace_desc_t *i_td_ptr,
+int32_t Trace::getBufferPartial(const trace_desc_t *i_td_ptr,
                     void *o_data,
                     uint32_t *io_size)
 {
@@ -633,9 +659,9 @@ int32_t trace_get_buffer_partial(const trace_desc_t *i_td_ptr,
 #endif
 
 /******************************************************************************/
-// trace_reset_buf - TODO
+// resetBuf - TODO
 /******************************************************************************/
-int32_t trace_reset_buf()
+int32_t Trace::resetBuf()
 {
     /*------------------------------------------------------------------------*/
     /*  Local Variables                                                       */
@@ -651,7 +677,7 @@ int32_t trace_reset_buf()
     // Get mutex so no one traces
 #if 0
     // TODO
-    l_rc = UTIL_MUTEX_GET(&g_trac_mutex,TRAC_INTF_MUTEX_TIMEOUT);
+    l_rc = UTIL_MUTEX_GET(&iv_trac_mutex,TRAC_INTF_MUTEX_TIMEOUT);
     if(l_rc != TX_SUCCESS)
     {
         printk("trace_reset_buf: Failure trying to get mutex");
@@ -677,7 +703,7 @@ int32_t trace_reset_buf()
 #endif
     // Always try to release even if fail above
     // TODO - mutex
-    //UTIL_MUTEX_PUT(&g_trac_mutex);
+    //UTIL_MUTEX_PUT(&iv_trac_mutex);
 
     return(l_rc);
 }

@@ -33,22 +33,20 @@
 // Includes
 /******************************************************************************/
 #include <stdint.h>
+#include "trace.H"      // Internal function and struct definitions
 
 /******************************************************************************/
 // Globals/Constants
 /******************************************************************************/
 #define ENTER_MRK ">>"
 #define EXIT_MRK  "<<"
-#define ERR_MRK	  "E>"
+#define ERR_MRK   "E>"
 #define INFO_MRK  "I>"
-#define ARG_MRK	  "A>"
+#define ARG_MRK   "A>"
 
-#define TRAC_COMP_SIZE      16      // Max component name size
-#define TRAC_MAX_ARGS       9       // Max number of arguments in trace
+const uint32_t TRACE_DEBUG   = 1;       //Indicates trace is debug
+const uint32_t TRACE_FIELD   = 0;       //Indicates trace is field
 
-
-#define TRACE_DEBUG         1       //Indicates trace is debug
-#define TRACE_FIELD         0       //Indicates trace is field
 
 // check compatibility of header file/macros and preprocessor tracepp
 // if tracepp was used
@@ -101,7 +99,7 @@
 
 /* a macro w/o the param number suffix. number is calculated from printf string */
 #define TRACDCOMP(des,printf_string,args...) \
-        TRACE::trace_adal_write_all((des),__ALL_HASH(printf_string,-1),__LINE__,TRACE_DEBUG, ##args)
+        TRACE::theTrace::instance().trace_adal_write_all((des),__ALL_HASH(printf_string,-1),__LINE__,TRACE_DEBUG, ##args)
 
 /**
  * @fn void TRACDBIN(des,descString,address,length)
@@ -119,7 +117,7 @@
 
 */
 #define TRACDBIN(des,printf_string,address,len)                    \
-        TRACE::trace_adal_write_bin(des,__ALL_HASH(printf_string,0),      \
+        TRACE::theTrace::instance().trace_adal_write_bin(des,__ALL_HASH(printf_string,0),      \
                              __LINE__,                             \
                              address,                              \
                              len,                                  \
@@ -143,7 +141,7 @@
 
 /* a macro w/o the param number suffix. number is calculated from printf string */
 #define TRACFCOMP(des,printf_string,args...) \
-        TRACE::trace_adal_write_all((des),__ALL_HASH(printf_string,-1),__LINE__,TRACE_FIELD, ##args)
+        TRACE::theTrace::instance().trace_adal_write_all((des),__ALL_HASH(printf_string,-1),__LINE__,TRACE_FIELD, ##args)
 
 
 /**
@@ -161,7 +159,7 @@
  * @return void
 */
 #define TRACFBIN(des,printf_string,address,len) \
-        TRACE::trace_adal_write_bin(des,__ALL_HASH(printf_string,0),      \
+        TRACE::theTrace::instance().trace_adal_write_bin(des,__ALL_HASH(printf_string,0),      \
                              __LINE__,                             \
                              address,                              \
                              len,                                  \
@@ -184,7 +182,7 @@
  * @return void
 */
 #define TRAC_INIT_BUFFER(des,comp_name, bufferSize) \
-        TRACE::trace_adal_init_buffer((des), (comp_name), (bufferSize))
+        TRACE::theTrace::instance().initBuffer((des), (comp_name), (bufferSize))
 
 /*******************************************************************************
   TRAC_INIT: Class for creating trace descriptor object.
@@ -202,127 +200,8 @@
 #define TRAC_INIT_LINE(des, name, sz, ln) TRAC_INIT_UNIQ(des, name, sz, ln)
 #define TRAC_INIT(des, name, sz)	 TRAC_INIT_LINE(des, name, sz, __LINE__)
 
-
-/******************************************************************************/
-// Internals - Not to be called or used directly by host boot code
-/******************************************************************************/
-
-
-typedef uint32_t trace_hash_val;    // Hash values are 32 bytes
-
-/*
- * @brief Structure is put at beginning of all trace buffers
- */
-typedef struct trace_buf_head {
-    unsigned char ver;          /*!< version of this struct (1)               */
-    unsigned char hdr_len;      /*!< size of this struct in bytes             */
-    unsigned char time_flg;     /*!< meaning of timestamp entry field         */
-    unsigned char endian_flg;   /*!< flag for big ('B') or little ('L') endian*/
-    char comp[TRAC_COMP_SIZE];  /*!< the buffer name as specified in init call*/
-    uint32_t size;              /*!< size of buffer, including this struct    */
-    uint32_t times_wrap;        /*!< how often the buffer wrapped             */
-    uint32_t next_free;         /*!< offset of the byte behind the latest entry*/
-    uint32_t te_count;          /*!< Updated each time a trace is done        */
-    uint32_t extracted;         /*!< Not currently used                       */
-}trace_buf_head_t;
-
-/*!
- * @brief Timestamp and thread id for each trace entry.
- */
-typedef struct trace_entry_stamp {
-    //uint32_t tbh;        /*!< timestamp upper part                            */
-    //uint32_t tbl;        /*!< timestamp lower part                            */
-    uint32_t tb[2];
-    //uint64_t tb;
-    uint32_t tid;        /*!< process/thread id                               */
-}trace_entry_stamp_t;
-
-/*
- * @brief Structure is used by adal app. layer to fill in trace info.
- */
-typedef struct trace_entry_head {
-    uint16_t length;    /*!< size of trace entry                              */
-    uint16_t tag;       /*!< type of entry: xTRACE xDUMP, (un)packed          */
-    uint32_t hash;      /*!< a value for the (format) string                  */
-    uint32_t line;      /*!< source file line number of trace call            */
-}trace_entry_head_t;
-
-/*
- * @brief Parameter traces can be all contained in one write.
- */
-typedef struct trace_entire_entry {
-    trace_entry_stamp_t stamp;
-    trace_entry_head_t head;
-    uint64_t args[TRAC_MAX_ARGS + 1];
-} trace_entire_entry_t;
-
-
-/*
- * @brief Binary first writes header and time stamp.
- */
-typedef struct trace_bin_entry {
-    trace_entry_stamp_t stamp;
-    trace_entry_head_t head;
-} trace_bin_entry_t;
-
-/**
- * @brief New version name of this typedef
- */
-typedef trace_buf_head_t trace_desc_t;
-
 namespace TRACE
 {
-
-/**
- *  @brief  Initialize a trace buffer
- *
- *  @param o_td[out] Trace descriptor to initialize
- *  @param i_comp[in] Component name for trace buffer
- *  @param i_size[in] Size to allocate for trace buffer
- *
- *  @return void
- */
-void trace_adal_init_buffer(trace_desc_t **o_td,
-                            const char* i_comp,
-                            const size_t i_size );
-
-/**
- *  @brief  Write component trace out to input buffer
- *
- *  @param io_td[inout] Trace descriptor of buffer to write to.
- *  @param i_hash[in] Descriptive string hash value
- *  @param i_fmt [in] Formatting string
- *  @param i_line[in] Line number trace was done at
- *  @param i_type[in] Type of trace (TRACE_DEBUG, TRACE_FIELD)
- *
- *  @return void
- */
-void trace_adal_write_all(trace_desc_t *io_td,
-                          const trace_hash_val i_hash,
-                          const char * i_fmt,
-                          const uint32_t i_line,
-                          const int32_t i_type, ...);
-
-/**
- *  @brief  Write binary data out to trace buffer
- *
- *  @param io_td[inout] Trace descriptor of buffer to write to.
- *  @param i_hash[in] Descriptive string hash value
- *  @param i_line[in] Line number trace was done at
- *  @param i_ptr[in] Pointer to binary data
- *  @param i_size[in] Size of binary data
- *  @param i_type[in] Type of trace (TRACE_DEBUG, TRACE_FIELD)
- *
- *  @return void
- */
-void trace_adal_write_bin(trace_desc_t * io_td,
-                            const trace_hash_val i_hash,
-                            const uint32_t i_line,
-                            const void *i_ptr,
-                            const uint32_t i_size,
-                            const int32_t type);
-
-
 /******************************************************************************/
 // Allow users to init trace buffer outside of a function
 /******************************************************************************/
@@ -345,6 +224,7 @@ class TracInit
 
 };
 
-}; // Namespace
+}
+
 
 #endif //! -- !defined __TRACE_INTERFACE_H

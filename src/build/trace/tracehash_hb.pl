@@ -627,10 +627,12 @@ sub assimilate_file($) {
 	    chop $line;         # remove EOL
 
 	    # 64 bit support
-	    $line =~ s/\%d/\%lld/;
-	    $line =~ s/\%u/\%llu/;
-	    $line =~ s/\%x/\%llx/;
-	    $line =~ s/\%X/\%llX/;
+	    $line =~ s/\%d/\%lld/g;
+	    $line =~ s/\%u/\%llu/g;
+	    $line =~ s/\%x/\%llx/g;
+	    $line =~ s/\%X/\%llX/g;
+	    $line =~ s/\%p/0x\%llX/g;   # Replace pointer format with hex value
+	    $line =~ s/\%c/0x\%02llX/g; # Replace character format with 1 byte hex display
 	    #print "line: $line\n";
 
 	    if($version eq "1")
