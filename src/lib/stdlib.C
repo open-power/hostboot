@@ -52,7 +52,7 @@ void* realloc(void* p, size_t s)
         cur_size = (1 << (*len + 4)) - 8;
     }
     
-    if (s < cur_size)
+    if (s <= cur_size)
         return p;
 
     void* new_p = malloc(s);

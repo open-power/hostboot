@@ -40,6 +40,11 @@ extern "C"
 #define SYMB_SECTION(x) __attribute__((section(#x)))
 
 /**
+ * Use of this macro will ensure a data structure is not padded 
+ */
+#define PACKED __attribute__((packed))
+
+/**
  * Get the value of the link register
  *
  * @return the value of the link register
