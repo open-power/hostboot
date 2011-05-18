@@ -3,6 +3,11 @@
 #ifndef __cxxtest__TestSuite_h__
 #define __cxxtest__TestSuite_h__
 
+/******************************************************************************/
+// Includes
+/******************************************************************************/
+#include <stdint.h>
+
 //
 // class TestSuite is the base class for all test suites.
 // To define a test suite, derive from this class and add
@@ -18,7 +23,7 @@ namespace CxxTest
         virtual void setUp();
         virtual void tearDown();
     };
-    
+
     class AbortTest {};
 
     void doTrace( const char *file, unsigned line, const char *message );
@@ -27,6 +32,13 @@ namespace CxxTest
     void doFailAssert( const char *file, unsigned line, const char *expression, const char *message );
 
 
+    void        reportTotalTests( const char *suitename, uint64_t numtests );
+
+    // $$ these should be set up as readonly accessors
+    uint64_t    getTotalTests(void);
+    uint64_t    getFailedTests(void);
+    uint64_t    getWarnings(void);
+    uint64_t    getTraceCalls(void);
 
 #       define _TS_TRY
 #       define ___TSM_CATCH(f,l,m)

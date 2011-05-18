@@ -618,16 +618,17 @@ sub writeHostBootPreamble() {
   print "#include <sys/task.h>\n";
   print "#include <trace/interface.H>\n";
 
-  ## print "#include <cxxtest/TestSuite.h>\n";
+  print "#include <cxxtest/TestSuite.H>\n";
 
   print "\n";
   $didHBPreamble = 1;
 }
 
 sub writeHostBootSuites() {
-  my  ( $suitecount, $suitevar );
+  my  ( $suitecount, $suitevar, $testcount );
 
   $suitecount   =   1;                          #   initialize suite count
+  $testcount    =   0;                          #   initialize test count
 
   foreach (@suites) {
     $suite = $_;
@@ -663,13 +664,18 @@ sub writeHostBootSuites() {
     ##  run each of the tests in the list
     foreach (@{suiteTests()}) {
         $test = $_;
-        print   "\tprintk(\"Executing test module ", testName(), ".\\n\");\n";
+        if ( $debug )   {   print   "\tprintk(\"Executing test module ", testName(), ".\\n\");\n";  }
         printf "\t$suitevar->%s();\n\n", testName();
+        $testcount++;
     }
+
 
     print   "\n";
     ##  delete the suite instance
     print   "\tdelete   ", $suitevar, ";\n";
+    
+    print   "\n";
+    print "\tCxxTest::reportTotalTests( \"", suiteName(), "\", $testcount );\n";
 
     $suitecount++;                            # bump to the next suite
   }
@@ -682,7 +688,7 @@ sub write_start() {
 
   print   "\n";
   print   "trace_desc_t *g_trac_test = NULL;\n";
-  print   "TRAC_INIT(&g_trac_test, \"EXAMPLE\", 4096);\n";
+  print   "TRAC_INIT(&g_trac_test, \"", suiteName(), "\", 4096);\n";
 
 
   print   "\n\n";

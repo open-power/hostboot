@@ -1,6 +1,7 @@
 #include <sys/vfs.h>
 #include <sys/task.h>
 #include <string.h>
+#include <kernel/console.H>
 
 /* Iterate through all modules in the VFS named "libtest*" and create children
  * tasks to execute them. 
@@ -9,6 +10,8 @@ extern "C"
 void _start(void*) 
 {
     VfsSystemModule* vfsItr = &VFS_MODULES[0];
+
+    printk( "Executing CxxTestExec module.\n");
 
     while(vfsItr->module[0] != '\0')
     {

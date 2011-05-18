@@ -5,55 +5,84 @@
  *  @file exampletest.H
  *
  *  @brief Example for people to use when writing test cases for their module.
+ *  @todo  add more doxygen blocks
 */
 
 #include <cxxtest/TestSuite.H>
 #include <example/example.H>
 
+
 class ExampleTest: public CxxTest::TestSuite
 {
 public:
 
+
     /**
-     * @test Test Description
-     */
-    void testExample1(void)
+     * @test TS_WARN will run if the example1_function FAILS
+     *      */
+    void testExampleWarn(void)
     {
         uint64_t    l_rc = 0;
         l_rc = example1_function();
         if(l_rc)
         {
-            TS_FAIL("Call to example1_function1 failed!");
+                TS_WARN("Warning, Call to example1_function1 returned bad value.\n");
+        }
+    }
+
+
+    /**
+          * @test TS_TRACE will run if the example1_function FAILS
+          *      */
+    void testExampleTrace(void)
+    {
+        uint64_t    l_rc = 0;
+        l_rc = example1_function();
+        if(l_rc)
+        {
+                TS_TRACE("Tracing something in example1_function1\n");
         }
     }
 
     /**
-     * @test Test Description
+          * @test TS_FAIL will run if the example1_function FAILS
      */
-    void testExample2(void)
+    void testExampleFail(void)
     {
-        // Call functions and validate results
-        // TS_FAIL("Failed test call to example2 function");
+        uint64_t    l_rc = 0;
+        l_rc = example1_function();
+        if(l_rc)
+        {
+                TS_FAIL("Call to example1_function1 failed!\n");
+        }
+    }
+    /**
+          * @test this will always run TS_FAIL
+     */
+    void testExampleForceFail(void)
+    {
+
+        TS_FAIL("Run TS_FAIL() as part of the example test.\n" );
     }
 
     /**
-     * @test Test Description
+          * @test this will always run TS_WARN
      */
-    void testExample3(void)
+    void testExampleForceWarn(void)
     {
-        // Call functions and validate results
-        // TS_FAIL("Failed test call to example3 function");
+
+        TS_WARN("Run TS_WARN() as part of the example test\n" );
     }
-    void testExample4(void)
+    /**
+          * @test this will always run TS_WARN
+     */
+    void testExampleForceTrace(void)
     {
-        // Call functions and validate results
-        // TS_FAIL("Failed test call to example3 function");
+
+        TS_TRACE("Run TS_TRACE() as part of the example test\n" );
     }
-    void testExample5(void)
-    {
-        // Call functions and validate results
-        // TS_FAIL("Failed test call to example3 function");
-    }
+
+
 
 };
 
