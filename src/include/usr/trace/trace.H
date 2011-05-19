@@ -119,9 +119,9 @@ public:
     /**
      *  @brief  Initialize a trace buffer
      *
-     *  @param o_td[out] Trace descriptor to initialize
-     *  @param i_comp[in] Component name for trace buffer
-     *  @param i_size[in] Size to allocate for trace buffer
+     *  @param [out] o_td Trace descriptor to initialize
+     *  @param [in] i_comp Component name for trace buffer
+     *  @param [in] i_size Size to allocate for trace buffer
      *
      *  @return void
      */
@@ -135,11 +135,11 @@ public:
      *  Note that to continue to support tracepp, we must keep the
      *  name of this function as is.
      *
-     *  @param io_td[inout] Trace descriptor of buffer to write to.
-     *  @param i_hash[in] Descriptive string hash value
-     *  @param i_fmt [in] Formatting string
-     *  @param i_line[in] Line number trace was done at
-     *  @param i_type[in] Type of trace (TRACE_DEBUG, TRACE_FIELD)
+     *  @param [in,out] io_td Trace descriptor of buffer to write to.
+     *  @param [in] i_hash Descriptive string hash value
+     *  @param [in] i_fmt Formatting string
+     *  @param [in] i_line Line number trace was done at
+     *  @param [in] i_type Type of trace (TRACE_DEBUG, TRACE_FIELD)
      *
      *  @return void
      */
@@ -155,12 +155,12 @@ public:
      *  Note that to continue to support tracepp, we must keep the
      *  name of this function as is.
      *
-     *  @param io_td[inout] Trace descriptor of buffer to write to.
-     *  @param i_hash[in] Descriptive string hash value
-     *  @param i_line[in] Line number trace was done at
-     *  @param i_ptr[in] Pointer to binary data
-     *  @param i_size[in] Size of binary data
-     *  @param i_type[in] Type of trace (TRACE_DEBUG, TRACE_FIELD)
+     *  @param [in,out] io_td Trace descriptor of buffer to write to.
+     *  @param [in] i_hash Descriptive string hash value
+     *  @param [in] i_line Line number trace was done at
+     *  @param [in] i_ptr Pointer to binary data
+     *  @param [in] i_size Size of binary data
+     *  @param [in] i_type Type of trace (TRACE_DEBUG, TRACE_FIELD)
      *
      *  @return void
      */
@@ -169,7 +169,7 @@ public:
                               const uint32_t i_line,
                               const void *i_ptr,
                               const uint32_t i_size,
-                              const int32_t type);
+                              const int32_t i_type);
 
 protected:
 
@@ -191,8 +191,8 @@ private:
      * Internal function responsible setting up the defaults in a newly created
      * trace buffer.
      *
-     * @param[out] o_buf Trace descriptor of component buffer to initialize.
-     * @param[in] i_comp Component name
+     * @param [out] o_buf Trace descriptor of component buffer to initialize.
+     * @param [in] i_comp Component name
      *
      * @return void
      *
@@ -207,9 +207,9 @@ private:
      * Internal function responsible for copying the trace data into the appropriate
      * buffer.
      *
-     * @param[inout] io_td Trace descriptor of component buffer to write to.
-     * @param[in] i_ptr Pointer to data to copy into the trace buffer.
-     * @param[in] i_size Size of the i_ptr data to copy into the buffer.
+     * @param [in,out] io_td Trace descriptor of component buffer to write to.
+     * @param [in] i_ptr Pointer to data to copy into the trace buffer.
+     * @param [in] i_size Size of the i_ptr data to copy into the buffer.
      *
      * @return void
      *
@@ -225,8 +225,8 @@ private:
      *  This function assumes memory has already been allocated for
      *  the full trace buffer in o_data.
      *
-     *  @param i_td_ptr Trace descriptor of buffer to retrieve.
-     *  @param o_data Pre-allocated pointer to where data will be stored.
+     *  @param [in] i_td_ptr Trace descriptor of buffer to retrieve.
+     *  @param [out] o_data Pre-allocated pointer to where data will be stored.
      *
      *  TODO - Not Supported Yet
      *
@@ -245,9 +245,9 @@ private:
      *
      *  TODO - Not Supported Yet
      *
-     *  @param i_td_ptr Trace descriptor of buffer to retrieve.
-     *  @param o_data Pre-allocated pointer to where data will be stored.
-     *  @param io_size Size of trace data to retrieve (input)
+     *  @param [in] i_td_ptr Trace descriptor of buffer to retrieve.
+     *  @param [out] o_data Pre-allocated pointer to where data will be stored.
+     *  @param [in,out] io_size Size of trace data to retrieve (input)
      *                 Actual size of trace data stored (output)
      *
      *  @return Non-zero return code on error
@@ -259,7 +259,7 @@ private:
     /**
      *  @brief  Retrieve trace descriptor for input component name
      *
-     *  @param i_comp Component name to retrieve trace descriptor for.
+     *  @param [in] i_comp Component name to retrieve trace descriptor for.
      *
      *  TODO - Not Supported Yet
      *
