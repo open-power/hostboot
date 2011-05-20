@@ -33,7 +33,7 @@
 // Includes
 /******************************************************************************/
 #include <stdint.h>
-#include "trace.H"      // Internal function and struct definitions
+#include <trace/trace.H>      // Internal function and struct definitions
 
 /******************************************************************************/
 // Globals/Constants
