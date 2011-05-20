@@ -210,7 +210,7 @@ clean: ${SUBDIRS:.d=.clean}
 cscope: ALL
 	mkdir -p ${ROOTPATH}/obj/cscope
 	(cd ${ROOTPATH}/obj/cscope ; rm -f cscope.* ; \
-	    find ../../ -name '*.[CHchS]' -fprint cscope.files; \
+	    find ../../ -name '*.[CHchS]' -type f -fprint cscope.files; \
 	    cscope -bqk)
 
 ifneq ($(MAKECMDGOALS),clean)
