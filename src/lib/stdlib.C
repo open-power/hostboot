@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 #include <kernel/heapmgr.H>
 #include <kernel/pagemgr.H>
 
@@ -32,4 +33,31 @@ void free(void* p)
     {
 	HeapManager::free(p);
     }
+}
+
+void* realloc(void* p, size_t s)
+{
+    if (NULL == p) return malloc(s);
+    
+    size_t* len = (size_t*)p;
+    len--;
+
+    size_t cur_size;
+    if ((*len) > 0xff)
+    {
+        cur_size = ((*len) >> 8) * PageManager::PAGESIZE - 8;
+    }
+    else
+    {
+        cur_size = (1 << (*len + 4)) - 8;
+    }
+    
+    if (s < cur_size)
+        return p;
+
+    void* new_p = malloc(s);
+    memcpy(new_p, p, cur_size);
+    free(p);
+
+    return new_p;
 }
