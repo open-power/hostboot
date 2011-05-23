@@ -126,6 +126,34 @@ namespace std
         if(a < b) return b;
         return a;
     }
+
+    /**
+     * Find the location of an element within a range.
+     * @param[in] first InputIterator to the first position in the range.
+     * @param[in] last  InputIterator to the last position in the range.
+     * @param[in] value Value to use for comparison.
+     *
+     * Returns the first iterator i in the range [first,last) such that
+     *     (*i == value) or else last if no element is found.
+     *
+     * @return An iterator in the range [first,last].  last implies that no
+     *         matching element was found.
+     */
+    template <typename InputIterator, typename EqualityComparable>
+    inline InputIterator
+    find(InputIterator first, InputIterator last,
+         const EqualityComparable& value)
+    {
+        while(first != last)
+        {
+            if ((*first) == value)
+                return first;
+
+            first++;
+        }
+
+        return last;
+    }
 };
 #endif
 
