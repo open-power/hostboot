@@ -11,6 +11,8 @@ struct UserMutex
     bool unlock_pend;
     Spinlock lock;
     Util::Locked::Queue<task_t> waiting;
+
+    UserMutex() : value(0), unlock_pend(false) {};
 };
 
 #endif
