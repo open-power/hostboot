@@ -115,6 +115,10 @@ class Trace
 {
 
 public:
+    /**
+     * @brief Get singleton instance of this class.
+     */
+    static Trace& getTheInstance();
 
     /**
      *  @brief  Initialize a trace buffer

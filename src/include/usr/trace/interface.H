@@ -99,7 +99,7 @@ const uint32_t TRACE_FIELD   = 0;       //Indicates trace is field
 
 /* a macro w/o the param number suffix. number is calculated from printf string */
 #define TRACDCOMP(des,printf_string,args...) \
-        TRACE::theTrace::instance().trace_adal_write_all((des),__ALL_HASH(printf_string,-1),__LINE__,TRACE_DEBUG, ##args)
+        TRACE::Trace::getTheInstance().trace_adal_write_all((des),__ALL_HASH(printf_string,-1),__LINE__,TRACE_DEBUG, ##args)
 
 /**
  * @fn void TRACDBIN(des,descString,address,length)
@@ -117,7 +117,7 @@ const uint32_t TRACE_FIELD   = 0;       //Indicates trace is field
 
 */
 #define TRACDBIN(des,printf_string,address,len)                    \
-        TRACE::theTrace::instance().trace_adal_write_bin(des,__ALL_HASH(printf_string,0),      \
+        TRACE::Trace::getTheInstance().trace_adal_write_bin(des,__ALL_HASH(printf_string,0),      \
                              __LINE__,                             \
                              address,                              \
                              len,                                  \
@@ -141,7 +141,7 @@ const uint32_t TRACE_FIELD   = 0;       //Indicates trace is field
 
 /* a macro w/o the param number suffix. number is calculated from printf string */
 #define TRACFCOMP(des,printf_string,args...) \
-        TRACE::theTrace::instance().trace_adal_write_all((des),__ALL_HASH(printf_string,-1),__LINE__,TRACE_FIELD, ##args)
+        TRACE::Trace::getTheInstance().trace_adal_write_all((des),__ALL_HASH(printf_string,-1),__LINE__,TRACE_FIELD, ##args)
 
 
 /**
@@ -159,7 +159,7 @@ const uint32_t TRACE_FIELD   = 0;       //Indicates trace is field
  * @return void
 */
 #define TRACFBIN(des,printf_string,address,len) \
-        TRACE::theTrace::instance().trace_adal_write_bin(des,__ALL_HASH(printf_string,0),      \
+        TRACE::Trace::getTheInstance().trace_adal_write_bin(des,__ALL_HASH(printf_string,0),      \
                              __LINE__,                             \
                              address,                              \
                              len,                                  \
@@ -182,7 +182,7 @@ const uint32_t TRACE_FIELD   = 0;       //Indicates trace is field
  * @return void
 */
 #define TRAC_INIT_BUFFER(des,comp_name, bufferSize) \
-        TRACE::theTrace::instance().initBuffer((des), (comp_name), (bufferSize))
+        TRACE::Trace::getTheInstance().initBuffer((des), (comp_name), (bufferSize))
 
 /*******************************************************************************
   TRAC_INIT: Class for creating trace descriptor object.
