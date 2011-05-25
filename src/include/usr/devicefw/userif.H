@@ -10,12 +10,12 @@
 #define __DEVICEFW_USERIF
 
 #include <stdint.h>
+#include <errl/errltypes.H>
 
 namespace DeviceFW
 {
-    /* TODO: Update these to real error log / target handle type once those
-     *       pieces of code are complete. */
-    typedef void* ErrorHandle_t;
+    /* TODO: Update these to real target handle type once that piece of code
+     *       is complete. */
     typedef int TargetHandle_t;
 
     /** @enum AccessType
@@ -68,9 +68,9 @@ namespace DeviceFW
      *  </PRE>
      *
      */
-    ErrorHandle_t deviceRead(TargetHandle_t i_target, 
-                             void* o_buffer, size_t& io_buflen,
-                             AccessType i_accessType, ...);
+    errlHndl_t deviceRead(TargetHandle_t i_target, 
+                          void* o_buffer, size_t& io_buflen,
+                          AccessType i_accessType, ...);
 
     /** 
      *  @brief Perform a hardware write operation.
@@ -98,9 +98,9 @@ namespace DeviceFW
      *  </PRE>
      *
      */
-    ErrorHandle_t deviceWrite(TargetHandle_t i_target,
-                              void* i_buffer, size_t& io_buflen,
-                              AccessType i_accessType, ...);
+    errlHndl_t deviceWrite(TargetHandle_t i_target,
+                           void* i_buffer, size_t& io_buflen,
+                           AccessType i_accessType, ...);
 
 };
 

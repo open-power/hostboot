@@ -38,6 +38,13 @@ const compId_t ERRL_COMP_ID = 0x0100;
 const char ERRL_COMP_NAME[] = "errl";
 //@}
 
+/** @name DEVFW
+ *  Device Framework component
+ */
+//@{
+const compId_t DEVFW_COMP_ID = 0x0200;
+const char DEVFW_COMP_NAME[] = "devfw";
+//@}
 
 
 #endif

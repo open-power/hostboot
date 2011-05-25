@@ -1,7 +1,12 @@
 #include <algorithm>
+#include <errl/errlentry.H>
+#include <errl/errlmanager.H>
+#include <trace/interface.H>
+
+#include <devicefw/devfwreasoncodes.H>
 #include "associator.H"
 
-#include <trace/interface.H>
+using namespace ERRORLOG;
 
 namespace DeviceFW
 {
@@ -71,9 +76,24 @@ namespace DeviceFW
         if(((targets.flag) && (i_targetType != WILDCARD)) ||
            ((!targets.flag) && (i_targetType == WILDCARD)))
         {
-            // TODO: Create error log for invalid target type?
-            bool l_invalidTargetType = false;
-            assert(l_invalidTargetType);
+            /*@ 
+             *  @errortype
+             *  @moduleid       DEVFW_MOD_ASSOCIATOR
+             *  @reasoncode     DEVFW_RC_INVALID_REGISTRATION
+             *  @userdata1      (OpType << 32) | (AccessType)
+             *  @userdata2      TargetType
+             *
+             *  @devdesc        An invalid registration type was given to 
+             *                  register a device with the routing framework.
+             */
+            errlHndl_t l_errl = 
+                new ErrlEntry(ERRL_SEV_INFORMATIONAL,
+                              DEVFW_MOD_ASSOCIATOR,
+                              DEVFW_RC_INVALID_REGISTRATION,
+                              TWO_UINT32_TO_UINT64(i_opType, i_accType),
+                              TO_UINT64(i_targetType)
+                             );
+            errlCommit(l_errl);
         }
 
         // Index offset to proper target type.  This is now lowest level of map.
@@ -101,10 +121,10 @@ namespace DeviceFW
         mutex_unlock(iv_mutex);
     }
 
-    ErrorHandle_t Associator::performOp(OperationType i_opType,
-                                        TargetHandle_t i_target,
-                                        void* io_buffer, size_t& io_buflen,
-                                        int64_t i_accessType, va_list i_addr) 
+    errlHndl_t Associator::performOp(OperationType i_opType,
+                                     TargetHandle_t i_target,
+                                     void* io_buffer, size_t& io_buflen,
+                                     int64_t i_accessType, va_list i_addr) 
         const
     {
         TRACDCOMP(g_traceBuffer, "Device op requested for (%d, %d, %d)",
@@ -114,7 +134,7 @@ namespace DeviceFW
         // compiler due to the template specializations in driverif.H.  
         // No assert-checks will be done here.
         
-        ErrorHandle_t l_errl = NULL;
+        errlHndl_t l_errl = NULL;
         
         mutex_lock(iv_mutex);
 
@@ -188,8 +208,23 @@ namespace DeviceFW
         // Call function if one was found, create error otherwise.
         if (NULL == l_devRoute)
         {
-            // TODO: create error log.
-            assert(NULL != l_devRoute);
+            /*@
+             *  @errortype
+             *  @moduleid       DEVFW_MOD_ASSOCIATOR
+             *  @reasoncode     DEVFW_RC_NO_ROUTE_FOUND
+             *  @userdata1      (OpType << 32) | (AccessType)
+             *  @userdata1      TargetType
+             *
+             *  @devdesc        A device driver operation was attempted for
+             *                  which no driver has been registered.
+             */
+            l_errl = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
+                                   DEVFW_MOD_ASSOCIATOR,
+                                   DEVFW_RC_NO_ROUTE_FOUND,
+                                   TWO_UINT32_TO_UINT64(i_opType, i_accessType),
+                                        /*TODO: i_target->type*/
+                                   TO_UINT64(PROCESSOR)
+                                  );
         }
         else
         {

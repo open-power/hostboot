@@ -50,10 +50,10 @@ namespace DeviceFW
                                deviceOp_t i_regRoute);
                 
                 /** Perform routing.  See deviceOp. */
-            ErrorHandle_t performOp(OperationType i_opType,
-                                    TargetHandle_t i_target,
-                                    void* io_buffer, size_t& io_buflen,
-                                    int64_t i_accessType, va_list i_addr) const;
+            errlHndl_t performOp(OperationType i_opType,
+                                 TargetHandle_t i_target,
+                                 void* io_buffer, size_t& io_buflen,
+                                 int64_t i_accessType, va_list i_addr) const;
         private:
             typedef std::vector<deviceOp_t> opVector_t;
             

@@ -117,13 +117,13 @@ namespace DeviceFW
     //          TargType - TargetType only.
     //          AccType - AccessType, AccessType_DriverOnly (no WILDCARD).
     template <> 
-    ErrorHandle_t deviceOp<>(OperationType i_opType,
-                            TargetHandle_t i_target,
-                            void* io_buffer, size_t& io_buflen,
-                            AccessType i_accessType, ...)
+    errlHndl_t deviceOp<>(OperationType i_opType,
+                          TargetHandle_t i_target,
+                          void* io_buffer, size_t& io_buflen,
+                          AccessType i_accessType, ...)
     {
         va_list args;
-        ErrorHandle_t errl;
+        errlHndl_t errl;
 
         va_start(args, i_accessType);
 
@@ -136,13 +136,13 @@ namespace DeviceFW
     }
 
     template <> 
-    ErrorHandle_t deviceOp<>(OperationType i_opType,
-                            TargetHandle_t i_target,
-                            void* io_buffer, size_t& io_buflen,
-                            AccessType_DriverOnly i_accessType, ...)
+    errlHndl_t deviceOp<>(OperationType i_opType,
+                          TargetHandle_t i_target,
+                          void* io_buffer, size_t& io_buflen,
+                          AccessType_DriverOnly i_accessType, ...)
     {
         va_list args;
-        ErrorHandle_t errl;
+        errlHndl_t errl;
 
         va_start(args, i_accessType);
 

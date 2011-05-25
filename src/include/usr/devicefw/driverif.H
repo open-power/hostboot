@@ -72,10 +72,10 @@ namespace DeviceFW
     /** @typedef deviceOp_t
      *  @brief Function prototype for registered device-driver operations.
      */
-    typedef ErrorHandle_t(*deviceOp_t)(OperationType,
-                                       TargetHandle_t,
-                                       void*, size_t&,
-                                       int64_t, va_list);
+    typedef errlHndl_t(*deviceOp_t)(OperationType,
+                                    TargetHandle_t,
+                                    void*, size_t&,
+                                    int64_t, va_list);
     
     /**
      *  @brief Register a device driver routing function with the framework.
@@ -173,10 +173,10 @@ namespace DeviceFW
      *  perform accesses which may be only visible to internal drivers.
      */
     template <typename AccType>
-    ErrorHandle_t deviceOp(OperationType i_opType,
-                           TargetHandle_t i_target,
-                           void* io_buffer, size_t& io_buflen,
-                           AccType i_accessType, ...) 
+    errlHndl_t deviceOp(OperationType i_opType,
+                        TargetHandle_t i_target,
+                        void* io_buffer, size_t& io_buflen,
+                        AccType i_accessType, ...) 
     { 
         return InvalidParameterType(); // Cause a compile fail if not one of
                                        // the explicit template specializations.
@@ -235,15 +235,15 @@ namespace DeviceFW
     //          TargType - TargetType only.
     //          AccType - AccessType, AccessType_DriverOnly (no WILDCARD).
     template <> 
-    ErrorHandle_t deviceOp<>(OperationType i_opType,
-                             TargetHandle_t i_target,
-                             void* io_buffer, size_t& io_buflen,
-                             AccessType i_accessType, ...);
+    errlHndl_t deviceOp<>(OperationType i_opType,
+                          TargetHandle_t i_target,
+                          void* io_buffer, size_t& io_buflen,
+                          AccessType i_accessType, ...);
     template <> 
-    ErrorHandle_t deviceOp<>(OperationType i_opType,
-                             TargetHandle_t i_target,
-                             void* io_buffer, size_t& io_buflen,
-                             AccessType_DriverOnly i_accessType, ...);
+    errlHndl_t deviceOp<>(OperationType i_opType,
+                          TargetHandle_t i_target,
+                          void* io_buffer, size_t& io_buflen,
+                          AccessType_DriverOnly i_accessType, ...);
 
 };
 

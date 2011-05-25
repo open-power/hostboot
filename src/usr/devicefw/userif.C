@@ -9,12 +9,12 @@
 
 namespace DeviceFW
 {
-    ErrorHandle_t deviceRead(TargetHandle_t i_target, 
-                             void* o_buffer, size_t& io_buflen,
-                             AccessType i_accessType, ...)
+    errlHndl_t deviceRead(TargetHandle_t i_target, 
+                          void* o_buffer, size_t& io_buflen,
+                          AccessType i_accessType, ...)
     {
         va_list args;
-        ErrorHandle_t errl;
+        errlHndl_t errl;
 
         va_start(args, i_accessType);
 
@@ -26,12 +26,12 @@ namespace DeviceFW
         return errl;
     }
 
-    ErrorHandle_t deviceWrite(TargetHandle_t i_target, 
-                              void* i_buffer, size_t& io_buflen,
-                              AccessType i_accessType, ...)
+    errlHndl_t deviceWrite(TargetHandle_t i_target, 
+                           void* i_buffer, size_t& io_buflen,
+                           AccessType i_accessType, ...)
     {
         va_list args;
-        ErrorHandle_t errl;
+        errlHndl_t errl;
 
         va_start(args, i_accessType);
 

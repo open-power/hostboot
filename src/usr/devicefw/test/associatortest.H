@@ -2,6 +2,8 @@
 #define __TEST_ASSOCIATORTEST_H
 
 #include <cxxtest/TestSuite.H>
+#include <errl/errlentry.H>
+#include <devicefw/devfwreasoncodes.H>
 #include "../associator.H"
 
 using namespace DeviceFW;
@@ -33,10 +35,10 @@ public:
 
     // Used for registration testing.
     static
-    ErrorHandle_t performOperation(OperationType i_opType,
-                                   TargetHandle_t i_target,
-                                   void* io_buffer, size_t& io_buflen,
-                                   int64_t i_accessType, va_list i_addr)
+    errlHndl_t performOperation(OperationType i_opType,
+                                TargetHandle_t i_target,
+                                void* io_buffer, size_t& io_buflen,
+                                int64_t i_accessType, va_list i_addr)
     {
         g_associatorTest_result = g_associatorTest_value;
         g_associatorTest_opType = i_opType;
@@ -61,9 +63,9 @@ public:
                          PROCESSOR,
                          &performOperation);
         
-        ErrorHandle_t l_errl = as.performOp(READ, TargetHandle_t(), 
-                                            buf, bufsize,
-                                            SCOM, va_list());
+        errlHndl_t l_errl = as.performOp(READ, TargetHandle_t(), 
+                                         buf, bufsize,
+                                         SCOM, va_list());
 
         if (l_errl)
         {
@@ -102,9 +104,9 @@ public:
                          PROCESSOR,
                          &performOperation);
         
-        ErrorHandle_t l_errl = as.performOp(WRITE, TargetHandle_t(), 
-                                            buf, bufsize,
-                                            SCOM, va_list());
+        errlHndl_t l_errl = as.performOp(WRITE, TargetHandle_t(), 
+                                         buf, bufsize,
+                                         SCOM, va_list());
 
         if (l_errl)
         {
@@ -143,9 +145,9 @@ public:
                          WILDCARD,
                          &performOperation);
         
-        ErrorHandle_t l_errl = as.performOp(READ, TargetHandle_t(), 
-                                            buf, bufsize,
-                                            SCOM, va_list());
+        errlHndl_t l_errl = as.performOp(READ, TargetHandle_t(), 
+                                         buf, bufsize,
+                                         SCOM, va_list());
 
         if (l_errl)
         {
@@ -167,6 +169,38 @@ public:
             TS_FAIL("Invalid access type.");
         }
     }
+
+        
+    /**
+     * @test Verify missing registration returns an error log.
+     */
+    void testMissingRegistration()
+    {
+        void* buf = NULL;
+        size_t bufsize = 0;
+
+        g_associatorTest_value = &AssociatorTest::testMissingRegistration;
+
+        Associator as;
+        as.registerRoute(READ,
+                         SCOM,
+                         WILDCARD,
+                         &performOperation);
+        
+        errlHndl_t l_errl = as.performOp(READ, TargetHandle_t(), 
+                                         buf, bufsize,
+                                         MAILBOX, va_list());
+
+        if (NULL == l_errl)
+        {
+            TS_FAIL("Error not received from performOp.");
+        }
+        else if (DEVFW_RC_NO_ROUTE_FOUND != l_errl->reasonCode())
+        {
+            TS_FAIL("Reason code different from DEVFW_RC_NO_ROUTE_FOUND.");
+        }
+    }
+
 
 };
 
