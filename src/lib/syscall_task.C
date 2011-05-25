@@ -36,7 +36,7 @@ tid_t task_gettid()
     // GRP13.
 
     register task_t* task;
-    asm volatile("addi %0, 13, 0" : "=r"(task));
+    asm volatile("mr %0, 13" : "=r"(task));
     return task->tid;
     //return (tid_t)_syscall0(TASK_GETTID);
 }
@@ -44,7 +44,7 @@ tid_t task_gettid()
 cpuid_t task_getcpuid()
 {
     register task_t* task;
-    asm volatile("addi %0, 13, 0" : "=r"(task));
+    asm volatile("mr %0, 13" : "=r"(task));
     return task->cpu->cpu;
 }
 
@@ -75,4 +75,24 @@ tid_t task_exec(const char* file, void* ptr)
     
     msg_free(msg);
     return child;
+}
+
+void task_affinity_pin()
+{
+    // Get task structure.
+    register task_t* task;
+    asm volatile("mr %0, 13" : "=r"(task));
+
+    // Increment pin count.
+    __sync_add_and_fetch(&task->affinity_pinned, 1);
+}
+
+void task_affinity_unpin()
+{
+    // Get task structure.
+    register task_t* task;
+    asm volatile("mr %0, 13" : "=r"(task));
+
+    // Decrement pin count.
+    __sync_sub_and_fetch(&task->affinity_pinned, 1);
 }
