@@ -10,7 +10,22 @@ void Scheduler::addTask(task_t* t)
 {
     if (t->cpu->idle_task != t)
     {
-	iv_taskList.insert(t);
+        // If task is pinned to this CPU, add to the per-CPU queue.
+        if (0 != t->affinity_pinned)
+        {
+            // Allocate a per-CPU queue if this is the first pinning CPU.
+            if (NULL == t->cpu->scheduler_extra)
+            {
+                t->cpu->scheduler_extra = new Runqueue_t();
+            }
+            // Insert into queue.
+            static_cast<Runqueue_t*>(t->cpu->scheduler_extra)->insert(t);
+        }
+        // Not pinned, add to global run-queue.
+        else
+        {
+	    iv_taskList.insert(t);
+        }
     }
 }
 
@@ -21,11 +36,25 @@ void Scheduler::returnRunnable()
 
 void Scheduler::setNextRunnable()
 {
-    task_t* t = iv_taskList.remove();
-
+    task_t* t = NULL;
+    cpu_t* cpu = CpuManager::getCurrentCPU();
+    
+    // Check for ready task in local run-queue, if it exists.
+    if (NULL != cpu->scheduler_extra)
+    {
+        t = static_cast<Runqueue_t*>(cpu->scheduler_extra)->remove();
+    }
+    
+    // Check for ready task in global run-queue.
     if (NULL == t)
     {
-	t = CpuManager::getCurrentCPU()->idle_task;
+        t = iv_taskList.remove();
+    }
+
+    // Choose idle task if no other ready task is available.
+    if (NULL == t)
+    {
+	t = cpu->idle_task;
 	// TODO: Set short decrementer.
         setDEC(TimeManager::getTimeSliceCount());
     }
@@ -33,6 +62,6 @@ void Scheduler::setNextRunnable()
     {
         setDEC(TimeManager::getTimeSliceCount());
     }
-    
+   
     TaskManager::setCurrentTask(t);
 }

@@ -23,7 +23,8 @@ class Scheduler
 	~Scheduler() {};
 
     private:
-	Util::Locked::Queue<task_t, true, Spinlock> iv_taskList;
+        typedef Util::Locked::Queue<task_t, true, Spinlock> Runqueue_t;
+        Runqueue_t iv_taskList;
 };
 
 #endif

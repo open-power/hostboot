@@ -1,8 +1,16 @@
+/** @file task.H
+ *  @brief Defines kernel information about tasks.
+ */
 #ifndef __KERNEL_TASK_H
 #define __KERNEL_TASK_H
 
 #include <kernel/types.h>
 
+/** @struct context_t
+ *  @brief Defines the save-restore context for the task.
+ *
+ *  See PowerISA for information on registers listed.
+ */
 struct context_t
 {
     void* stack_ptr;
@@ -14,12 +22,25 @@ struct context_t
     uint64_t xer;
 };
 
+/** @struct task_t
+ *  @brief The kernel-level task structure.
+ */
 struct task_t
 {
+        /** Pointer to the CPU this task is assigned to. */
     cpu_t* cpu;
+        /** Context information.  This MUST stay here due to 
+         *  save-restore asm code. */
     context_t context;
-    
+        
+        /** Task ID */
     tid_t tid;
+        /** Determines if user-space would like this task pinned to a CPU.
+         *  This value is considered a count of the number of times the pinned
+         *  as been requested, so pinning can be used recursively. */
+    uint64_t affinity_pinned;
+        
+        // Pointers for queue containers.
     task_t* prev;
     task_t* next;
 };

@@ -1,3 +1,8 @@
+/** @file cpu.H
+ *  @brief Defines kernel information and functions about CPUs.
+ *  
+ *  In this kernel the term CPU refers to a hardware thread (SMT), not core.
+ */
 #ifndef __KERNEL_CPU_H
 #define __KERNEL_CPU_H
 
@@ -10,17 +15,31 @@
 
 class Scheduler;
 
+/** @struct cpu_t
+ *  @brief Stores per-CPU kernel information.
+ */
 struct cpu_t
 {
+        /** Stack to use while in kernel mode. */
     void* kernel_stack;
+        /** ID of the CPU (PIR value) */
     cpuid_t cpu;
-
+        
+        /** Pointer to the scheduler for this CPU (may not be unique) */
     Scheduler* scheduler;
+        /** Location for scheduler to store per-CPU data, currently used
+         *  for the local run-queue for processor affinity.
+         */
+    void* scheduler_extra;
+        /** Pointer to the idle task for this CPU */
     task_t* idle_task;
 };
 
+/** @fn getCpuId
+ *  @brief Read the PIR value to determine the cpuid_t of this CPU.
+ */
 ALWAYS_INLINE
-inline uint64_t getCpuId()
+inline cpuid_t getCpuId()
 {
     return getPIR() & (KERNEL_MAX_SUPPORTED_CPUS - 1);
 }

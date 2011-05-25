@@ -55,6 +55,7 @@ void CpuManager::startCPU(ssize_t i)
 	// Initialize CPU.
 	cpu->cpu = i;
 	cpu->scheduler = &Singleton<Scheduler>::instance();
+        cpu->scheduler_extra = NULL;
 	cpu->kernel_stack = 
 	    (void*) (((uint64_t)PageManager::allocatePage(4)) + 16320);
 	

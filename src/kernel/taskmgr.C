@@ -4,6 +4,7 @@
 #include <kernel/pagemgr.H>
 #include <kernel/cpumgr.H>
 #include <arch/ppc.H>
+#include <string.h>
 
 void TaskManager::idleTaskLoop(void* unused)
 {
@@ -49,6 +50,8 @@ task_t* TaskManager::_createTask(TaskManager::task_fn_t t,
 				 void* p, bool withStack)
 {
     task_t* task = new task_t;
+    memset(task, '\0', sizeof(task_t));
+
     task->tid = this->getNextTid();
 
     // Function pointer 't' is actually a TOC entry.  
