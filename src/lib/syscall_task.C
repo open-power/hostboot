@@ -32,13 +32,9 @@ void task_end()
 
 tid_t task_gettid()
 {
-    // Even though we have a syscall for GETTID, we also have the task in 
-    // GRP13.
-
     register task_t* task;
     asm volatile("mr %0, 13" : "=r"(task));
     return task->tid;
-    //return (tid_t)_syscall0(TASK_GETTID);
 }
 
 cpuid_t task_getcpuid()

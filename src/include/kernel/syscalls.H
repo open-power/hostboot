@@ -1,36 +1,81 @@
+/** @file syscalls.H
+ *  @brief Defines all the system call IDs to be shared between the kernel and
+ *         the system libc.
+ */
+
 #ifndef __KERNEL_SYSCALLS_H
 #define __KERNEL_SYSCALLS_H
 
 namespace Systemcalls
 {
+    /** @enum SysCalls
+     *  @brief List of normal system calls and their IDs.
+     *
+     *  These are passed by userspace code via r3 when the sc instruction is
+     *  executed.  The kernel performs a case statement to switch to the
+     *  appropriate system call handler.
+     */
     enum SysCalls
     {
+            /** task_yield() */
 	TASK_YIELD = 0,
+            /** task_create() */
 	TASK_START,
+            /** task_end() */
 	TASK_END,
-	TASK_GETTID,
-
+            
+            /** mutex_create() */
 	MUTEX_CREATE,
+            /** mutex_destroy() */
 	MUTEX_DESTROY,
+            /** mutex_lock() */
 	MUTEX_LOCK_CONTESTED,
+            /** mutex_unlock() */
 	MUTEX_UNLOCK_CONTESTED,
-
+            
+            /** msgq_create() */
 	MSGQ_CREATE,
+            /** msgq_destroy() */
 	MSGQ_DESTROY,
+            /** VFS internal */
 	MSGQ_REGISTER_ROOT,
+            /** VFS internal */
 	MSGQ_RESOLVE_ROOT,
-
+            
+            /** msg_send() */
 	MSG_SEND,
+            /** msg_sendrecv() */
 	MSG_SENDRECV,
+            /** msg_respond() */
 	MSG_RESPOND,
+            /** msg_wait() */
 	MSG_WAIT,
 
+            /** mmio_map() */
 	MMIO_MAP,
+            /** mmio_unmap() */
 	MMIO_UNMAP,
 
+            /** nanosleep() */
 	TIME_NANOSLEEP,
 
 	SYSCALL_MAX
+    };
+
+    /** @enum SysCalls_FastPath
+     *  @brief List of fast-path system calls and their IDs.
+     *
+     *  @note If any of these change, their handling in start.S must also be
+     *        updated.  The ASM code relies on these values.
+     */
+    enum SysCalls_FastPath
+    {
+            /** mmio_hmer_read() */
+        MMIO_HMER_READ = 0x0800,
+            /** mmio_hmer_write() */
+        MMIO_HMER_WRITE = 0x0801,
+
+        SYSCALL_FASTPATH_MAX
     };
 };
 #endif

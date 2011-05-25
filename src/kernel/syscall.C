@@ -47,7 +47,6 @@ namespace Systemcalls
 	    &TaskYield,
 	    &TaskStart,
 	    &TaskEnd,
-	    &TaskGettid,
 
 	    &MutexCreate,
 	    &MutexDestroy,
@@ -132,11 +131,6 @@ namespace Systemcalls
 	// Clean up task memory.
 	PageManager::freePage(t->context.stack_ptr, TASK_DEFAULT_STACK_SIZE);
 	delete t;
-    }
-
-    void TaskGettid(task_t* t)
-    {
-	TASK_SETRTN(t, t->tid);
     }
 
     void MutexCreate(task_t* t)

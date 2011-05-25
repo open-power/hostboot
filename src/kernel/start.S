@@ -126,7 +126,24 @@ STD_INTERRUPT(prog_ex, 0x700)
 UNIMPL_INTERRUPT(fp_unavail, 0x800)
 STD_INTERRUPT(decrementer, 0x900)
 UNIMPL_INTERRUPT(hype_decrementer, 0x980)
-STD_INTERRUPT(system_call, 0xC00)
+
+;// System Call Exception Vector
+;//
+;// This exception vector implements the save/restore for normal system calls
+;// that require C++ code for handling but also implements a fast-path for
+;// some simple calls, such as reading protected SPRs.
+;//
+;// Since this is called from userspace as a function call (see __syscall* 
+;// functions) we only need to honor the ELF ABI calling conventions.  That
+;// means some registers and condition fields can be considered volatile and
+;// modified prior to being saved.
+;//
+.org _start + 0xC00
+intvect_system_call_fast:
+    cmpi cr0, r3, 0x0800
+    bge  cr0, system_call_fast_path  
+STD_INTERRUPT(system_call, 0xC08)
+
 UNIMPL_INTERRUPT(trace, 0xD00)
 UNIMPL_INTERRUPT(hype_data_storage, 0xE00)
 UNIMPL_INTERRUPT(hype_inst_storage, 0xE20)
@@ -319,6 +336,29 @@ kernel_dispatch_task:
     ld r1, TASK_GPR_1(r1)	;// GPR1
 			
     rfid			;// Execute task.
+
+    ;// @fn system_call_fast_path
+    ;// Handle fast path system calls.
+    ;//         0x800 = HMER read (HMER -> r3).
+    ;//         0x801 = HMER write (r4 -> HMER).
+system_call_fast_path:
+        ;// Check if this is HMER read (0x800).
+        ;// Compare was already done in system call path.
+    bne cr0, 2f
+    mfspr r3, HMER
+    b 1f                        ;// Jump to exit point.
+        ;// Check if this is HMER write (0x801).
+2:
+    cmpi cr0, r3, 0x801
+    bne cr0, 3f
+    mtspr HMER, r4
+    li r3, 0
+    b 1f                        ;// Jump to exit point.
+        ;// Invalid system call, loop for debug.
+3:
+    b 3b
+1:
+    rfid                        ;// Return from interrupt.
 
 .section .data
     .balign 1024
