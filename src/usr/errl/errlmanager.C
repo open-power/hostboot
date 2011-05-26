@@ -47,7 +47,7 @@ void ErrlManager::commitErrLog(errlHndl_t& io_err)
     // If NULL, put out warning trace
     if (io_err == NULL)
     {
-        //@thi TRACFCOMP(g_trac_errl, "commitErrLog() - NULL pointer");
+        TRACFCOMP(g_trac_errl, "commitErrLog() - NULL pointer");
     }
     else
     {
@@ -69,6 +69,14 @@ void ErrlManager::commitErrLog(errlHndl_t& io_err)
 uint32_t ErrlManager::getUniqueErrId()
 {
     return (__sync_add_and_fetch(&iv_currLogId, 1));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+void errlCommit(errlHndl_t& io_err)
+{
+    ERRORLOG::theErrlManager::instance().commitErrLog(io_err);
+    return;
 }
 
 } // End namespace

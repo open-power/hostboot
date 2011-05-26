@@ -1,8 +1,8 @@
-#ifndef __ERRL_SERVICE_CODE_H
-#define __ERRL_SERVICE_CODE_H
+#ifndef __ERRL_REASON_CODES_H
+#define __ERRL_REASON_CODES_H
 
 /**
- *  @file errlservicecodes.H
+ *  @file errlreasoncodes.H
  *
  *  @brief  Reason code and Module ID definitions for ERRL component.
  *

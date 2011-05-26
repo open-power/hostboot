@@ -209,7 +209,6 @@ public:
      * @param[in]   i_ffdcSctnPtr    Pointer to FFDC section to add data to.
      *                               This pointer is returned when addFFDC
      *                               function is called earlier.
-     * @param[in]   i_compId         Component Id of the caller
      * @param[in]   i_dataPtr        Points to data block to be added
      * @param[in]   i_dataLen        Length of data in bytes
      * @return void

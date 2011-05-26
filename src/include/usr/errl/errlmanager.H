@@ -18,6 +18,26 @@
 namespace ERRORLOG
 {
 
+/**
+ *  @brief  Global function to log an error
+ *  Writes the log to PNOR where committed logs are kept.
+ *  If there's not enough room, remove the latest log(s) to make
+ *  enough room to commit this log.
+ *  The error log will be automatically deleted after the
+ *  commit.  The input handle will be set to NULL.
+ *  For Host Boot environment, there's no individual committer
+ *  (i.e. committer = Host Boot), so no component ID of
+ *  committer is specified.
+ *  This function is global in order to workaround the singleton
+ *  linker issue in HostBoot (linker can't find singleton outside of
+ *  a module).
+ *
+ *  @param[in,out] io_err  Error log handle to be committed
+ *
+ *  @return None
+ */
+void errlCommit(errlHndl_t& io_err);
+
 /*****************************************************************************/
 // Forward class declarations
 /*****************************************************************************/
@@ -40,21 +60,20 @@ public:
 
     /**
       *  @brief Commit an error log by sending it to the repository
-      *  - Writes the log to PNOR where committed logs are kept.
-      *    If there's not enough room, remove the latest log(s) to make
-      *    enough room to commit this log.
-      *  - The error log will be automatically deleted after the
-      *    commit.  The input handle will be set to NULL.
-      *  - For Host Boot environment, there's no individual committer
-      *    (i.e. committer = Host Boot), so no component ID of
-      *    committer is specified.
+      *  Writes the log to PNOR where committed logs are kept.
+      *  If there's not enough room, remove the latest log(s) to make
+      *  enough room to commit this log.
+      *  The error log will be automatically deleted after the
+      *  commit.  The input handle will be set to NULL.
+      *  For Host Boot environment, there's no individual committer
+      *  (i.e. committer = Host Boot), so no component ID of
+      *  committer is specified.
       *
-      *  @param[in/out]  io_err      Error log handle to be committed
+      *  @param[in,out] io_err  Error log handle to be committed
       *
       *  @return None
       */
      void commitErrLog(errlHndl_t& io_err);
-
 
      /**
       * @brief  Returns a unique error log ID

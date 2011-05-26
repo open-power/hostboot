@@ -16,6 +16,41 @@
 namespace ERRORLOG { class ErrlEntry; };
 typedef ERRORLOG::ErrlEntry* errlHndl_t;
 
+/**
+ * @brief Macros to store different numbers into uint64_t
+ */
+
+// Convert any integer to uint16_t
+#define TO_UINT16(x)    static_cast<uint16_t>(x)
+
+// Convert any integer to uint32_t
+#define TO_UINT32(x)    static_cast<uint32_t>(x)
+
+// Convert any integer to uint64_t
+#define TO_UINT64(x)    static_cast<uint64_t>(x)
+
+// uint16_t val = 8bit:8bit
+#define TWO_UINT8_TO_UINT16(left_8, right_8) \
+            ( (TO_UINT16(left_8) << 8) | TO_UINT16(right_8) )
+
+// uint32_t val = 16bit:16bit
+#define TWO_UINT16_TO_UINT32(left_16, right_16) \
+            ( (TO_UINT32(left_16) << 16) | TO_UINT32(right_16) )
+
+// uint64_t val = 32bit:32bit
+#define TWO_UINT32_TO_UINT64(left_32, right_32) \
+            ( (TO_UINT64(left_32) << 32) | TO_UINT64(right_32) )
+
+// uint64_t val = 16bit:16bit:32bit
+#define TWO_UINT16_ONE_UINT32_TO_UINT64(left_16, mid_16, right_32) \
+            ( (TO_UINT64(TWO_UINT16_TO_UINT32(left_16, mid_16)) << 32) | \
+              TO_UINT64(right_32) )
+
+// uint64_t val = 16bit:16bit:16bit:16bit
+#define FOUR_UINT16_TO_UINT64(mostleft_16, left_16, right_16, mostright_16) \
+        ( (TO_UINT64(TWO_UINT16_TO_UINT32(mostleft_16, left_16)) << 32) | \
+          (TO_UINT64(TWO_UINT16_TO_UINT32(right_16, mostright_16))) )
+
 namespace ERRORLOG
 {
 

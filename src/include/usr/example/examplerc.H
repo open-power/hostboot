@@ -8,9 +8,9 @@
 
 // The definitions in this file is an example that shows how to define
 // reason codes.  Each Host Boot component should have a service code
-// file (<component>servicecodes.H) that defines its module IDs and
+// file (<component>reasoncodes.H) that defines its module IDs and
 // unique reason codes.
-// See errlservicecodes.H for example of this file for ERRL component.
+// See errlreasoncodes.H for example of this file for ERRL component.
 
 // Below is an example of defining reason codes
 enum myModuleId
