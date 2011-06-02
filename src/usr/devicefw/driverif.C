@@ -8,108 +8,109 @@
 
 namespace DeviceFW
 {
+    /** @brief Wrapper function to call singleton instance for registerRoute.
+     *
+     *  This is defined as an extern "C" function so that it can be aliased
+     *  by the template type-safe implementations of deviceRegisterRoute().
+     *  This causes the compiler to generate just a single copy of the code.
+     */
+    extern "C" 
+    void DeviceFW_deviceRegisterRoute(int64_t i_opType,
+                                      int64_t i_accessType,
+                                      int64_t i_targetType,
+                                      deviceOp_t i_regRoute)
+    {
+        Singleton<Associator>::instance().registerRoute(i_opType,
+                                                        i_accessType,
+                                                        i_targetType,
+                                                        i_regRoute);
+    }
+
+    // deviceRegisterRoute:
+    //          OpType - OperationType or WILDCARD
+    //          TargType - TargetType or WILDCARD
+    //          AccType - AccessType, AccessType_DriverOnly (no WILDCARD).
+
     template <> 
     void deviceRegisterRoute<>(OperationType i_opType,
+                               AccessType i_accessType,
+                               TargetType_t i_targetType,
+                               deviceOp_t i_regRoute)
+        __attribute__((alias("DeviceFW_deviceRegisterRoute")));
+
+    template <> 
+    void deviceRegisterRoute<>(OperationType i_opType,
+                               AccessType_DriverOnly i_accessType,
+                               TargetType_t i_targetType,
+                               deviceOp_t i_regRoute) 
+        __attribute__((alias("DeviceFW_deviceRegisterRoute")));
+
+    template <> 
+    void deviceRegisterRoute<>(OperationType i_opType,
+                               AccessType i_accessType,
+                               DriverSpecial i_targetType,
+                               deviceOp_t i_regRoute)
+        __attribute__((alias("DeviceFW_deviceRegisterRoute")));
+
+    template <> 
+    void deviceRegisterRoute<>(OperationType i_opType,
+                               AccessType_DriverOnly i_accessType,
+                               DriverSpecial i_targetType,
+                               deviceOp_t i_regRoute) 
+        __attribute__((alias("DeviceFW_deviceRegisterRoute")));
+
+    template <> 
+    void deviceRegisterRoute<>(DriverSpecial i_opType,
                               AccessType i_accessType,
                               TargetType_t i_targetType,
                               deviceOp_t i_regRoute)
-    {
-        Singleton<Associator>::instance().registerRoute(
-                static_cast<int64_t>(i_opType),
-                static_cast<int64_t>(i_accessType),
-                static_cast<int64_t>(i_targetType),
-                i_regRoute);
-    }
-
-    template <> 
-    void deviceRegisterRoute<>(OperationType i_opType,
-                              AccessType_DriverOnly i_accessType,
-                              TargetType_t i_targetType,
-                              deviceOp_t i_regRoute) 
-    {
-        Singleton<Associator>::instance().registerRoute(
-                static_cast<int64_t>(i_opType),
-                static_cast<int64_t>(i_accessType),
-                static_cast<int64_t>(i_targetType),
-                i_regRoute);
-    }
-
-    template <> 
-    void deviceRegisterRoute<>(OperationType i_opType,
-                              AccessType i_accessType,
-                              DriverSpecial i_targetType,
-                              deviceOp_t i_regRoute) 
-    {
-        Singleton<Associator>::instance().registerRoute(
-                static_cast<int64_t>(i_opType),
-                static_cast<int64_t>(i_accessType),
-                static_cast<int64_t>(i_targetType),
-                i_regRoute);
-    }
-
-    template <> 
-    void deviceRegisterRoute<>(OperationType i_opType,
-                              AccessType_DriverOnly i_accessType,
-                              DriverSpecial i_targetType,
-                              deviceOp_t i_regRoute) 
-    {
-        Singleton<Associator>::instance().registerRoute(
-                static_cast<int64_t>(i_opType),
-                static_cast<int64_t>(i_accessType),
-                static_cast<int64_t>(i_targetType),
-                i_regRoute);
-    }
+        __attribute__((alias("DeviceFW_deviceRegisterRoute")));
 
     template <> 
     void deviceRegisterRoute<>(DriverSpecial i_opType,
-                              AccessType i_accessType,
-                              TargetType_t i_targetType,
-                              deviceOp_t i_regRoute) 
-    {
-        Singleton<Associator>::instance().registerRoute(
-                static_cast<int64_t>(i_opType),
-                static_cast<int64_t>(i_accessType),
-                static_cast<int64_t>(i_targetType),
-                i_regRoute);
-    }
+                               AccessType_DriverOnly i_accessType,
+                               TargetType_t i_targetType,
+                               deviceOp_t i_regRoute)
+        __attribute__((alias("DeviceFW_deviceRegisterRoute")));
 
     template <> 
     void deviceRegisterRoute<>(DriverSpecial i_opType,
-                              AccessType_DriverOnly i_accessType,
-                              TargetType_t i_targetType,
-                              deviceOp_t i_regRoute) 
-    {
-        Singleton<Associator>::instance().registerRoute(
-                static_cast<int64_t>(i_opType),
-                static_cast<int64_t>(i_accessType),
-                static_cast<int64_t>(i_targetType),
-                i_regRoute);
-    }
+                               AccessType i_accessType,
+                               DriverSpecial i_targetType,
+                               deviceOp_t i_regRoute)
+        __attribute__((alias("DeviceFW_deviceRegisterRoute")));    
 
     template <> 
     void deviceRegisterRoute<>(DriverSpecial i_opType,
-                              AccessType i_accessType,
-                              DriverSpecial i_targetType,
-                              deviceOp_t i_regRoute) 
-    {
-        Singleton<Associator>::instance().registerRoute(
-                static_cast<int64_t>(i_opType),
-                static_cast<int64_t>(i_accessType),
-                static_cast<int64_t>(i_targetType),
-                i_regRoute);
-    }
+                               AccessType_DriverOnly i_accessType,
+                               DriverSpecial i_targetType,
+                               deviceOp_t i_regRoute)
+        __attribute__((alias("DeviceFW_deviceRegisterRoute")));
 
-    template <> 
-    void deviceRegisterRoute<>(DriverSpecial i_opType,
-                              AccessType_DriverOnly i_accessType,
-                              DriverSpecial i_targetType,
-                              deviceOp_t i_regRoute) 
+    /** @brief Wrapper function to call singleton instance for performOp.
+     *
+     *  This is defined as an extern "C" function so that it can be aliased
+     *  by the template type-safe implementations of deviceOp().
+     *  This causes the compiler to generate just a single copy of the code.
+     */
+    extern "C"
+    errlHndl_t DeviceFW_deviceOp(OperationType i_opType,
+                                 TargetHandle_t i_target,
+                                 void* io_buffer, size_t& io_buflen,
+                                 int64_t i_accessType, ...)
     {
-        Singleton<Associator>::instance().registerRoute(
-                static_cast<int64_t>(i_opType),
-                static_cast<int64_t>(i_accessType),
-                static_cast<int64_t>(i_targetType),
-                i_regRoute);
+        va_list args;
+        errlHndl_t errl;
+
+        va_start(args, i_accessType);
+
+        errl = Singleton<Associator>::instance().performOp(
+                i_opType, i_target, io_buffer, io_buflen,
+                i_accessType, args);
+
+        va_end(args);
+        return errl;
+
     }
 
     // deviceOp:
@@ -121,37 +122,13 @@ namespace DeviceFW
                           TargetHandle_t i_target,
                           void* io_buffer, size_t& io_buflen,
                           AccessType i_accessType, ...)
-    {
-        va_list args;
-        errlHndl_t errl;
-
-        va_start(args, i_accessType);
-
-        errl = Singleton<Associator>::instance().performOp(
-                i_opType, i_target, io_buffer, io_buflen,
-                i_accessType, args);
-
-        va_end(args);
-        return errl;
-    }
+        __attribute__((alias("DeviceFW_deviceOp")));
 
     template <> 
     errlHndl_t deviceOp<>(OperationType i_opType,
                           TargetHandle_t i_target,
                           void* io_buffer, size_t& io_buflen,
                           AccessType_DriverOnly i_accessType, ...)
-    {
-        va_list args;
-        errlHndl_t errl;
-
-        va_start(args, i_accessType);
-
-        errl = Singleton<Associator>::instance().performOp(
-                i_opType, i_target, io_buffer, io_buflen,
-                i_accessType, args);
-
-        va_end(args);
-        return errl;
-    }
+        __attribute__((alias("DeviceFW_deviceOp")));        
 
 };
