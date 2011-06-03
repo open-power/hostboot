@@ -2,7 +2,7 @@
 #define __SYS_MMIO_H
 
 #include <stdint.h>
-#include <sys/mutex.h>
+#include <sys/sync.h>
 
 #ifdef __cplusplus
 extern "C"
@@ -38,7 +38,7 @@ int mmio_hmer_write(uint64_t value);
  *        affinity pin.  If the pin is moved the mutex is no longer
  *        guarenteed for the CPU the task is executing on.
  */
-mutex_t mmio_xscom_mutex();
+mutex_t * mmio_xscom_mutex();
 
 #ifdef __cplusplus
 }

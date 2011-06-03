@@ -5,7 +5,7 @@
 #define __DEVICEFW_ASSOCIATOR_H
 
 #include <devicefw/driverif.H>
-#include <sys/mutex.h>
+#include <sys/sync.h>
 #include <vector>
 
 #include "assoccontain.H"
@@ -53,7 +53,7 @@ namespace DeviceFW
             errlHndl_t performOp(OperationType i_opType,
                                  TargetHandle_t i_target,
                                  void* io_buffer, size_t& io_buflen,
-                                 int64_t i_accessType, va_list i_addr) const;
+                                 int64_t i_accessType, va_list i_addr);
         private:
             typedef std::vector<deviceOp_t> opVector_t;
             

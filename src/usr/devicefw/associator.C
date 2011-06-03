@@ -13,17 +13,16 @@ namespace DeviceFW
     trace_desc_t* g_traceBuffer = NULL;
     TRAC_INIT(&g_traceBuffer, "DevFW", 4096);
 
-    Associator::Associator() : iv_mutex(mutex_create())
+    Associator::Associator() : iv_mutex()
     {
         TRACFCOMP(g_traceBuffer, ENTER_MRK "Associator::Associator");
-        
+        mutex_init(&iv_mutex);
         // Allocate first level of map (access types).
         iv_routeMap = iv_associations.allocate(LAST_DRIVER_ACCESS_TYPE);
     }
 
     Associator::~Associator()
     {
-        mutex_destroy(iv_mutex);
 
         TRACFCOMP(g_traceBuffer, EXIT_MRK "Associator::~Associator");        
     }
@@ -40,7 +39,7 @@ namespace DeviceFW
         // compiler due to the template specializations in driverif.H.  
         // No assert-checks will be done here.
 
-        mutex_lock(iv_mutex);
+        mutex_lock(&iv_mutex);
         
         size_t ops = 0;
         AssociationData targets = AssociationData();
@@ -118,14 +117,13 @@ namespace DeviceFW
         // Set function offset into map.  True flag indicates valid.
         (*iv_associations[targets.offset]) = AssociationData(true, opLoc);
 
-        mutex_unlock(iv_mutex);
+        mutex_unlock(&iv_mutex);
     }
 
     errlHndl_t Associator::performOp(OperationType i_opType,
                                      TargetHandle_t i_target,
                                      void* io_buffer, size_t& io_buflen,
                                      int64_t i_accessType, va_list i_addr) 
-        const
     {
         TRACDCOMP(g_traceBuffer, "Device op requested for (%d, %d, %d)",
                   i_opType, i_accessType, /*TODO: i_target->type*/PROCESSOR);
@@ -136,7 +134,7 @@ namespace DeviceFW
         
         errlHndl_t l_errl = NULL;
         
-        mutex_lock(iv_mutex);
+        mutex_lock(&iv_mutex);
 
             // Function pointer found for this route request.
         deviceOp_t l_devRoute = NULL;
@@ -203,7 +201,7 @@ namespace DeviceFW
             }
         } while(0);
 
-        mutex_unlock(iv_mutex);        
+        mutex_unlock(&iv_mutex);        
         
         // Call function if one was found, create error otherwise.
         if (NULL == l_devRoute)

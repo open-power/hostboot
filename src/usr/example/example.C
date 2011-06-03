@@ -1,5 +1,5 @@
 #include <kernel/console.H>
-#include <sys/mutex.h>
+#include <sys/sync.h>
 #include <sys/vfs.h>
 #include <sys/task.h>
 #include <trace/interface.H>
@@ -7,7 +7,7 @@
 #include <example/examplerc.H>
 #include <errl/errlentry.H>
 
-//static mutex_t value = mutex_create();
+//static mutex_t value = MUTEX_INITIALIZER;
 trace_desc_t *g_trac_test = NULL;
 TRAC_INIT(&g_trac_test, "EXAMPLE", 4096);
 

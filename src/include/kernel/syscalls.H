@@ -24,15 +24,6 @@ namespace Systemcalls
             /** task_end() */
 	TASK_END,
             
-            /** mutex_create() */
-	MUTEX_CREATE,
-            /** mutex_destroy() */
-	MUTEX_DESTROY,
-            /** mutex_lock() */
-	MUTEX_LOCK_CONTESTED,
-            /** mutex_unlock() */
-	MUTEX_UNLOCK_CONTESTED,
-            
             /** msgq_create() */
 	MSGQ_CREATE,
             /** msgq_destroy() */
@@ -58,6 +49,12 @@ namespace Systemcalls
 
             /** nanosleep() */
 	TIME_NANOSLEEP,
+
+            /** futex_wait() */
+        FUTEX_WAIT,
+
+            /** futex_wake() */
+        FUTEX_WAKE,
 
 	SYSCALL_MAX
     };

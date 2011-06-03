@@ -9,16 +9,16 @@ BASE_OBJECTS = console.o spinlock.o string.o stdlib.o assert.o stdio.o \
 
 DIRECT_BOOT_OBJECTS = start.o kernel.o taskmgr.o cpumgr.o syscall.o \
 		      scheduler.o exception.o vmmmgr.o timemgr.o \
-		      syscall_stub.o syscall_task.o syscall_mutex.o \
+		      syscall_stub.o syscall_task.o \
 		      syscall_msg.o syscall_mmio.o syscall_time.o \
-		      init_main.o vfs_main.o
+		      init_main.o vfs_main.o sync.o futexmgr.o
 
 RUNTIME_OBJECTS =
 
 BASE_MODULES = trace errl devicefw
 DIRECT_BOOT_MODULES = example
 RUNTIME_MODULES =
-TESTCASE_MODULES = cxxtest testerrl testdevicefw
+TESTCASE_MODULES = cxxtest testerrl testdevicefw testsyslib
 
 RELOCATABLE_IMAGE_LDFLAGS = -pie --export-dynamic
 

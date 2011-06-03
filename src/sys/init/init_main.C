@@ -4,18 +4,18 @@
 #include <sys/syscall.h>
 
 #include <sys/task.h>
-#include <sys/mutex.h>
+#include <sys/sync.h>
 #include <sys/msg.h>
 #include <sys/mmio.h>
 
-mutex_t global_mutex;
+mutex_t global_mutex = MUTEX_INITIALIZER;
 
 /*
 void init_child(void* unused)
 {
-    mutex_lock(global_mutex);
+    mutex_lock(&global_mutex);
     printk("Crun: %d on %d\n", task_gettid(), task_getcpuid());
-    mutex_unlock(global_mutex);
+    mutex_unlock(&global_mutex);
     for (volatile int i = 0 ; i < 100000; i++);
     task_end();
 }
@@ -39,8 +39,6 @@ void init_main(void* unused)
     uint64_t* mmio_addr = (uint64_t*) mmio_map((void*)0x800000000, 1);
     printk("MMIO Access %lx\n", *mmio_addr);
 
-    global_mutex = mutex_create();
-
     msg_q_t msgq = msg_q_create();
     msg_q_register(msgq, "/msg/init");
 
@@ -53,11 +51,11 @@ void init_main(void* unused)
 
     while(1)
     {
-	mutex_lock(global_mutex);
+	mutex_lock(&global_mutex);
 	int t = task_create(&init_child, NULL);
 	printk("Create child %d\n", t);
 	for (volatile int i = 0 ; i < 1000000; i++);
-	mutex_unlock(global_mutex);
+	mutex_unlock(&global_mutex);
     }
 */
 

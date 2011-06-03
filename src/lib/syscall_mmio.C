@@ -26,7 +26,7 @@ int mmio_hmer_write(uint64_t value)
     return (int)(int64_t)_syscall1(MMIO_HMER_WRITE, (void*)value);
 }
 
-mutex_t mmio_xscom_mutex()
+mutex_t * mmio_xscom_mutex()
 {
     // Get task structure.
     register task_t* task;
@@ -36,7 +36,7 @@ mutex_t mmio_xscom_mutex()
     assert(task->affinity_pinned);
 
     // Get mutex from cpu structure.
-    mutex_t mutex = task->cpu->xscom_mutex;
+    mutex_t * mutex = task->cpu->xscom_mutex;
 
     // Create mutex if not created.
     if (NULL == mutex)

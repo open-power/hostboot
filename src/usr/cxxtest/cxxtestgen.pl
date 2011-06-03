@@ -613,7 +613,7 @@ sub writeHostBootPreamble() {
   ##    print the standard includes for Hostboot
   print "\n";
   print "#include <kernel/console.H>\n";
-  print "#include <sys/mutex.h>\n";
+  print "#include <sys/sync.h>\n";
   print "#include <sys/vfs.h>\n";
   print "#include <sys/task.h>\n";
   print "#include <trace/interface.H>\n";

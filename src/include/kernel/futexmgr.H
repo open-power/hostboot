@@ -1,0 +1,89 @@
+#ifndef FUTEXMGR
+#define FUTEXMGR
+
+/**
+ * @file futexmgr.H
+ * @brief Declaration for kernel side futex management
+ */
+
+#include <stdint.h>
+#include <util/locked/list.H>
+#include <kernel/spinlock.H>
+
+struct task_t;
+
+
+/**
+ * @class FutexManager
+ * Kernel internal management of fuxtexs
+ */
+class FutexManager
+{
+    public:
+
+        /**
+         * Put the current processes on a wait queue
+         * @param[in] i_task  pointer to the current task structure
+         * @param[in] i_addr  Futex address 
+         * @param[in] i_val   Value that *i_addr should contain
+         * @returns [0 | error code]  if *i_addr != i_val returns EWOULDBLOCK
+         */
+        static uint64_t wait(task_t * i_task, uint64_t * i_addr, uint64_t i_val);
+
+        /**
+         * Wakeup threads
+         * @param[in] i_addr pointer to a futex
+         * @param[in] i_count The max number of threads to wake
+         * @returns The number of threads awoken
+         */
+        static uint64_t wake(uint64_t * i_addr, uint64_t i_count);
+
+    protected:
+
+        /**
+         * Ctor
+         */
+        FutexManager() {};
+
+        /**
+         * Dtor
+         */
+        ~FutexManager() {};
+
+    private: // functions
+
+        /**
+         * Put the current processes on a wait queue
+         * @param[in] i_task  pointer to the current task structure
+         * @param[in] i_addr  Futex address 
+         * @param[in] i_val   Value that *i_addr should contain
+         * @returns [0 | error code]  if *i_addr != i_val returns EWOULDBLOCK
+         */
+        uint64_t _wait(task_t * i_task, uint64_t * i_addr, uint64_t i_val);
+
+        /**
+         * Wakeup threads
+         * @param[in] i_addr pointer to a futex
+         * @param[in] i_count The max number of threads to wake
+         * @returns The number of threads awoken
+         */
+        uint64_t _wake(uint64_t * i_addr, uint64_t i_count);
+
+    private: // data
+
+        struct _FutexWait_t
+        {
+            _FutexWait_t * next;    ///< next _FutexWait_t in list
+            _FutexWait_t * prev;    ///< prev _FutexWait_t in list
+            uint64_t * key;         ///< search key is futex address
+            task_t* task;           ///< task on wait list
+        };
+
+        typedef Util::Locked::List<_FutexWait_t, uint64_t *> FutexList_t;
+
+        Spinlock iv_lock;       ///< lock
+        FutexList_t iv_list;    ///< List of waiting tasks for all futexes
+};
+
+#endif
+

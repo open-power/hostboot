@@ -18,7 +18,7 @@
 #include <limits.h>
 #include <stdlib.h>
 #include <sys/task.h>
-#include <sys/mutex.h>
+#include <sys/sync.h>
 #include <string.h>
 
 #include <trace/trace.H>
@@ -57,7 +57,7 @@ Trace& Trace::getTheInstance()
 /******************************************************************************/
 Trace::Trace()
 {
-    iv_trac_mutex = mutex_create();
+    mutex_init(&iv_trac_mutex);
 
     g_trac_global = static_cast<trace_desc_t *>(malloc(TRAC_DEFAULT_BUFFER_SIZE));
 
@@ -137,7 +137,6 @@ void Trace::trace_adal_write_all(trace_desc_t *io_td,
     /*------------------------------------------------------------------------*/
     /*  Local Variables                                                       */
     /*------------------------------------------------------------------------*/
-    int64_t                 l_rc = 0;
     uint32_t                l_entry_size = 0;
     trace_entire_entry_t    l_entry;
 
@@ -206,27 +205,15 @@ void Trace::trace_adal_write_all(trace_desc_t *io_td,
         // buffer for this
 
         // CRITICAL REGION START
-        l_rc = mutex_lock(iv_trac_mutex);
-        if(l_rc != 0)
-        {
-            // This will assert so we'll never hit this code.
-        }
-        else
-        {
-            // Update the entry count
-            io_td->te_count++;
+        mutex_lock(&iv_trac_mutex);
+        // Update the entry count
+        io_td->te_count++;
 
-            writeData(io_td,
-                      static_cast<void *>(&l_entry),
-                      l_entry_size);
+        writeData(io_td,
+                  static_cast<void *>(&l_entry),
+                  l_entry_size);
 
-            l_rc = mutex_unlock(iv_trac_mutex);
-            if(l_rc != 0)
-            {
-                // Badness
-                // This will assert so we'll never hit this code.
-            }
-        }
+        mutex_unlock(&iv_trac_mutex);
         // CRITICAL REGION END
     }
 
@@ -245,7 +232,6 @@ void Trace::trace_adal_write_bin(trace_desc_t *io_td,const trace_hash_val i_hash
     /*------------------------------------------------------------------------*/
     /*  Local Variables                                                       */
     /*------------------------------------------------------------------------*/
-    int64_t                 l_rc = 0;
     uint32_t                l_entry_size = 0;
     trace_bin_entry_t       l_entry;
 
@@ -291,40 +277,28 @@ void Trace::trace_adal_write_bin(trace_desc_t *io_td,const trace_hash_val i_hash
         convertTime(&l_entry.stamp);
 
         // CRITICAL REGION START
-        l_rc = mutex_lock(iv_trac_mutex);
-        if(l_rc != 0)
-        {
-            // This will assert so we'll never hit this code.
-        }
-        else
-        {
+        mutex_lock(&iv_trac_mutex);
 
-            // Increment trace counter
-            io_td->te_count++;
+        // Increment trace counter
+        io_td->te_count++;
 
-            // First write the header
-            writeData(io_td,
-                      static_cast<void *>(&l_entry),
-                      sizeof(l_entry));
+        // First write the header
+        writeData(io_td,
+                  static_cast<void *>(&l_entry),
+                  sizeof(l_entry));
 
-            // Now write the actual binary data
-            writeData(io_td,
-                      i_ptr,
-                      i_size);
+        // Now write the actual binary data
+        writeData(io_td,
+                  i_ptr,
+                  i_size);
 
-            // Now write the size at the end
-            writeData(io_td,
-                      static_cast<void *>(&l_entry_size),
-                      sizeof(l_entry_size));
+        // Now write the size at the end
+        writeData(io_td,
+                  static_cast<void *>(&l_entry_size),
+                  sizeof(l_entry_size));
 
-            // CRITICAL REGION END
-            l_rc = mutex_unlock(iv_trac_mutex);
-            if(l_rc != 0)
-            {
-                // Badness
-                // This will assert so we'll never hit this code.
-            }
-        }
+        // CRITICAL REGION END
+        mutex_unlock(&iv_trac_mutex);
 
     }while(0);
 

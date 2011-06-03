@@ -6,9 +6,9 @@
 #include <kernel/syscalls.H>
 #include <kernel/console.H>
 #include <kernel/pagemgr.H>
-#include <kernel/usermutex.H>
 #include <kernel/msg.H>
 #include <kernel/timemgr.H>
+#include <kernel/futexmgr.H>
 
 extern "C"
 void kernel_execute_decrementer()
@@ -26,10 +26,6 @@ namespace Systemcalls
     void TaskStart(task_t*);
     void TaskEnd(task_t*);
     void TaskGettid(task_t*);
-    void MutexCreate(task_t*);
-    void MutexDestroy(task_t*);
-    void MutexLockCont(task_t*);
-    void MutexUnlockCont(task_t*);
     void MsgQCreate(task_t*);
     void MsgQDestroy(task_t*);
     void MsgQRegisterRoot(task_t*);
@@ -41,17 +37,14 @@ namespace Systemcalls
     void MmioMap(task_t*);
     void MmioUnmap(task_t*);
     void TimeNanosleep(task_t*);
+    void FutexWait(task_t *t);
+    void FutexWake(task_t *t);
 
     syscall syscalls[] =
 	{
 	    &TaskYield,
 	    &TaskStart,
 	    &TaskEnd,
-
-	    &MutexCreate,
-	    &MutexDestroy,
-	    &MutexLockCont,
-	    &MutexUnlockCont,
 
 	    &MsgQCreate,
 	    &MsgQDestroy,
@@ -67,6 +60,9 @@ namespace Systemcalls
 	    &MmioUnmap,
 
 	    &TimeNanosleep,
+
+            &FutexWait,
+            &FutexWake,
 	};
 };
 
@@ -131,62 +127,6 @@ namespace Systemcalls
 	// Clean up task memory.
 	PageManager::freePage(t->context.stack_ptr, TASK_DEFAULT_STACK_SIZE);
 	delete t;
-    }
-
-    void MutexCreate(task_t* t)
-    {
-	UserMutex * m = new UserMutex();
-	TASK_SETRTN(t, (uint64_t)m);
-    }
-
-    void MutexDestroy(task_t* t)
-    {
-	// TODO: Extra verification of parameter and mutex state.
-
-	delete (UserMutex*) TASK_GETARG0(t);
-	TASK_SETRTN(t, 0);
-    }
-
-    void MutexLockCont(task_t* t)
-    {
-	// TODO: Extra verification of parameter and mutex state.
-	
-	UserMutex* m = (UserMutex*) TASK_GETARG0(t);
-	m->lock.lock();
-	if (m->unlock_pend) 
-	{   
-	    // We missed the unlock syscall, take lock and return to userspace.
-	    m->unlock_pend = false;
-	    m->lock.unlock();
-
-	}
-	else
-	{
-	    // Queue ourself to wait for unlock.
-	    m->waiting.insert(TaskManager::getCurrentTask());
-	    m->lock.unlock();
-	    CpuManager::getCurrentCPU()->scheduler->setNextRunnable();
-	}
-	TASK_SETRTN(t, 0);	
-    }
-
-    void MutexUnlockCont(task_t* t)
-    {
-	// TODO: Extra verification of parameter and mutex state.
-
-	UserMutex* m = (UserMutex*) TASK_GETARG0(t);
-	m->lock.lock();
-	task_t* wait_task = m->waiting.remove();
-	if (NULL == wait_task)
-	{
-	    m->unlock_pend = true;
-	}
-	else
-	{
-	    wait_task->cpu->scheduler->addTask(wait_task);
-	}
-	m->lock.unlock();
-	TASK_SETRTN(t, 0);
     }
 
     void MsgQCreate(task_t* t)
@@ -349,5 +289,37 @@ namespace Systemcalls
 	s->setNextRunnable();
     }
 
+    /**
+     * Put task on wait queue based on futex
+     * @param[in] t:  The task to block
+     */
+    void FutexWait(task_t * t)
+    {
+        uint64_t * uaddr = (uint64_t *) TASK_GETARG0(t);
+        uint64_t val   = (uint64_t) TASK_GETARG1(t);
+
+        //TODO translate uaddr from user space to kernel space
+        //     Right now they are the same.
+
+        uint64_t rc = FutexManager::wait(t,uaddr,val);
+        TASK_SETRTN(t,rc);
+    }
+
+    /**
+     * Wake tasks on futex wait queue
+     * @param[in] t:  The current task
+     */
+    void FutexWake(task_t * t)
+    {
+        uint64_t * uaddr = (uint64_t *) TASK_GETARG0(t);
+        uint64_t count = (uint64_t) TASK_GETARG1(t);
+
+        // TODO translate uaddr from user space to kernel space
+        //      Right now they are the same
+
+        uint64_t started = FutexManager::wake(uaddr,count);
+
+        TASK_SETRTN(t,started);
+    }
 
 };

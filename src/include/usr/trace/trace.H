@@ -15,7 +15,7 @@
 #include <stdint.h>
 #include <trace/interface.H>
 #include <util/singleton.H>
-#include <sys/mutex.h>
+#include <sys/sync.h>
 
 /******************************************************************************/
 // Globals/Constants
