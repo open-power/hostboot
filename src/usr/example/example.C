@@ -12,9 +12,12 @@ trace_desc_t *g_trac_test = NULL;
 TRAC_INIT(&g_trac_test, "EXAMPLE", 4096);
 
 extern "C"
-void _start(void*)
+void _start(void *ptr)
 {
-    printk("Executing example module.\n");
+    /**
+     * @todo    fix printk to accept (NULL)
+     */
+    printk( "Executing Example module, arg=%s\n", ( (ptr==NULL) ? "(NULL)" : (char*)ptr ) );
 
     task_end();
 }

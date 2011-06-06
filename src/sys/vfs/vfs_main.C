@@ -26,7 +26,7 @@ struct VfsEntry
     typedef VfsPath key_type;
     key_type key;
     msg_q_t msg_q;
-    
+
     VfsEntry* next;
     VfsEntry* prev;
 };
@@ -36,10 +36,10 @@ void vfs_main(void* unused)
     // Create message queue, register with kernel.
     msg_q_t vfsMsgQ = msg_q_create();
     msg_q_register(vfsMsgQ, VFS_ROOT);
-    
+
     printk("done.\n");
     // TODO... barrier with init.
-    
+
     // Initalize modules.
     vfs_module_init();
 
@@ -73,21 +73,27 @@ void vfs_main(void* unused)
 			msg->data[0] = (uint64_t) NULL;
 		    else
 			msg->data[0] = (uint64_t) e->msg_q;
-		    msg_respond(vfsMsgQ, msg);		    
+		    msg_respond(vfsMsgQ, msg);
 		}
 		break;
-	    
+
 	    case VFS_MSG_EXEC:
 		{
-		    printk("VFS: Got exec request of %s\n", 
+		    printk("VFS: Got exec request of %s\n",
 		           (const char*)msg->data[0]);
 		    VfsSystemModule* module = &VFS_MODULES[0];
 		    tid_t child = -1;
 		    while ('\0' != module->module[0])
 		    {
-			if (0 == strcmp((const char*) msg->data[0], 
+			if (0 == strcmp((const char*) msg->data[0],
 					module->module))
 			{
+			    if ( module->start == NULL)
+			    {
+			        //  module has no _start() routine,
+			        //  return child = -1
+			        break;
+			    }
 			    child = task_create(module->start,
 					        (void*) msg->data[1]);
 			    break;
@@ -103,5 +109,5 @@ void vfs_main(void* unused)
 		msg_free(msg);
 		break;
 	}
-    }
+    }   // end while(1)
 }

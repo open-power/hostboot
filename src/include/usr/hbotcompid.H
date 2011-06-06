@@ -60,6 +60,13 @@ const char SCOM_COMP_NAME[] = "scom";
 //@{
 const compId_t XSCOM_COMP_ID = 0x0400;
 const char XSCOM_COMP_NAME[] = "xscom";
+
+/** @name INITSERVICE
+ *  Initialization Service component
+ */
+//@{
+const compId_t INITSVC_COMP_ID = 0x0500;
+const char INITSVC_COMP_NAME[] = "initservice";
 //@}
 
 #endif
