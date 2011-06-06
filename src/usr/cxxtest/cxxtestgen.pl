@@ -1,9 +1,9 @@
 #!/usr/bin/perl -w
 #
-#	Change History:
-#	mww 2011-05-10	simplify for sprint1 - stuff for later is commented out with "##"
-#					modified from /esw/fips730/Builds/built/tools/x86/cxxtestgen.pl	
-#					(actually this looks the same as the latest on sourceforge)
+#       Change History:
+#       mww 2011-05-10  simplify for sprint1 - stuff for later is commented out with "##"
+#                                       modified from /esw/fips730/Builds/built/tools/x86/cxxtestgen.pl
+#                                       (actually this looks the same as the latest on sourceforge)
 #
 use strict;
 use Getopt::Long;
@@ -53,26 +53,26 @@ my @headers = ();
 sub parseCommandline() {
   @ARGV = expandWildcards(@ARGV);
   GetOptions( 'version'        => \&printVersion,
-	      'output=s'       => \$output,
-	      'template=s'     => \$template,
-	      'runner=s'       => \$runner,
-	      'gui=s',         => \$gui,
-	      'error-printer'  => sub { $runner = 'ErrorPrinter'; $haveStd = 1; },
-	      'abort-on-fail'  => \$abortOnFail,
-	      'have-eh'        => \$haveEh,
-	      'no-eh'          => \$noEh,
-	      'have-std'        => \$haveStd,
-	      'no-std'          => \$noStd,
-	      'include=s'      => \@headers,
-	      'root'           => \$root,
-	      'part'           => \$part,
-	      'no-static-init' => \$noStaticInit,
-	      'factor'         => \$factor,
-	      'longlong:s'     => \$longlong,
-	      'hostboot'       => \$hostboot,
-	      'debug'          => \$debug
-	    ) or usage();
-	
+              'output=s'       => \$output,
+              'template=s'     => \$template,
+              'runner=s'       => \$runner,
+              'gui=s',         => \$gui,
+              'error-printer'  => sub { $runner = 'ErrorPrinter'; $haveStd = 1; },
+              'abort-on-fail'  => \$abortOnFail,
+              'have-eh'        => \$haveEh,
+              'no-eh'          => \$noEh,
+              'have-std'        => \$haveStd,
+              'no-std'          => \$noStd,
+              'include=s'      => \@headers,
+              'root'           => \$root,
+              'part'           => \$part,
+              'no-static-init' => \$noStaticInit,
+              'factor'         => \$factor,
+              'longlong:s'     => \$longlong,
+              'hostboot'       => \$hostboot,
+              'debug'          => \$debug
+            ) or usage();
+
   scalar @ARGV or $root or usage();
 
   if ( defined($noStaticInit) && (defined($root) || defined($part)) ) {
@@ -135,9 +135,9 @@ sub scanInputFile($) {
 
     if ( $suite ) {
       if ( lineBelongsToSuite( $suite, $., $line ) ) {
-	scanLineForTest( $., $line );
-	scanLineForCreate( $., $line );
-	scanLineForDestroy( $., $line );
+        scanLineForTest( $., $line );
+        scanLineForCreate( $., $line );
+        scanLineForDestroy( $., $line );
       }
     }
   }
@@ -189,13 +189,13 @@ sub startSuite($$$$) {
   my ($name, $file, $line, $generated) = @_;
   closeSuite();
   $suite = { 'name' => $name,
-	     'file' => $file,
-	     'line' => $line,
-	     'generated' => $generated,
-	     'create' => 0,
-	     'destroy' => 0,
-	     'tests' => [],
-	     'lines' => [] };
+             'file' => $file,
+             'line' => $line,
+             'generated' => $generated,
+             'create' => 0,
+             'destroy' => 0,
+             'tests' => [],
+             'lines' => [] };
 }
 
 sub lineStartsBlock($) {
@@ -213,7 +213,7 @@ sub scanLineForTest($$) {
 sub addTest($$$) {
   my ($name, $line) = @_;
   $test = { 'name' => $name,
-	    'line' => $line };
+            'line' => $line };
   push @{suiteTests()}, $test;
 }
 
@@ -516,7 +516,7 @@ sub writeDynamicDescription() {
   if ( !$noStaticInit ) {
     printf "( %s, %s, \"%s\", %s, %s, %s, %s )",
       fileString(), $suite->{'line'}, suiteName(), testList(),
-	suiteObject(), suiteCreateLine(), suiteDestroyLine();
+        suiteObject(), suiteCreateLine(), suiteDestroyLine();
   }
   print ";\n\n";
 }
@@ -543,17 +543,17 @@ sub writeInitialize() {
     if ( dynamicSuite() ) {
       printf "  %s = 0;\n", suiteObject();
       printf "  %s.initialize( %s, %s, \"%s\", %s, %s, %s, %s );\n",
-	suiteDescription(), fileString(), $suite->{'line'}, suiteName(), testList(),
-	  suiteObject(), suiteCreateLine(), suiteDestroyLine();
+        suiteDescription(), fileString(), $suite->{'line'}, suiteName(), testList(),
+          suiteObject(), suiteCreateLine(), suiteDestroyLine();
     } else {
       printf "  %s.initialize( %s, %s, \"%s\", %s, %s );\n",
-	suiteDescription(), fileString(), $suite->{'line'}, suiteName(), suiteObject(), testList();
+        suiteDescription(), fileString(), $suite->{'line'}, suiteName(), suiteObject(), testList();
     }
 
     foreach (@{suiteTests()}) {
       $test = $_;
       printf "  testDescription_%s_%s.initialize( %s, %s, %s, \"%s\" );\n",
-	suiteName(), testName(), testList(), suiteDescription(), testLine(), testName();
+        suiteName(), testName(), testList(), suiteDescription(), testLine(), testName();
     }
   }
   print " }\n";
@@ -653,8 +653,9 @@ sub writeHostBootSuites() {
     }
 
     ##  declare and instantiate a new instance of the suite
-    print   "\t// Test Suite #1: ", suiteName(), "\n";
+    print   "\t// Test Suite ", $suitecount, ": " , suiteName(), "\n";
     print   "\tprintk(\"Executing test suite ", suiteName(), ".\\n\");\n";
+    print   "\tTRACDCOMP( g_trac_test, \"Execute ", suiteName(), ".\");\n";
     print   "\t", suiteName(), "\t*", $suitevar, "   =   new ", suiteName(), ";\n";
 
     ##if ( $suite->{'generated'} ) { generateSuite(); }
@@ -673,22 +674,25 @@ sub writeHostBootSuites() {
     print   "\n";
     ##  delete the suite instance
     print   "\tdelete   ", $suitevar, ";\n";
-    
+
     print   "\n";
     print "\tCxxTest::reportTotalTests( \"", suiteName(), "\", $testcount );\n";
-    
+    print   "\n";
+
     $suitecount++;                            # bump to the next suite
   }
 }
 
 ##
-##  mww for HostBoot we write a _start() routine, there is no main()
+##  For HostBoot we write a _start() routine, there is no main()
 ##
 sub write_start() {
 
   print   "\n";
   print   "trace_desc_t *g_trac_test = NULL;\n";
-  print   "TRAC_INIT(&g_trac_test, \"", suiteName(), "\", 4096);\n";
+##  Use same trace buffer for all unit tests, i.e. "UNIT_TEST"  
+##  print   "TRAC_INIT(&g_trac_test, \"", suiteName(), "\", 4096);\n";
+  print   "TRAC_INIT(&g_trac_test, \"", "UNIT_TEST", "\", 4096);\n";
 
 
   print   "\n\n";

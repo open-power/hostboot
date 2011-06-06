@@ -95,7 +95,6 @@ public:
         if ( (int16_t)tidrc < 0  )
         {
             TS_TRACE( "SUCCESS: startTask returned an errorlog.\n");
-            //  @todo   dump error log to trace?
         }
         else
         {
@@ -127,7 +126,6 @@ public:
         if ( (int16_t)tidrc >= 0  )
         {
             TS_TRACE( "SUCCESS: startTask returned OK.\n");
-            //  @todo   dump error log to trace?
         }
         else
         {
@@ -160,7 +158,6 @@ public:
         if ( (int16_t)tidrc < 0  )
         {
             TS_TRACE( "SUCCESS: startTask returned an error log.\n");
-            //  @todo   dump error log to trace?
         }
         else
         {
@@ -191,6 +188,10 @@ public:
         if ( errl != NULL)
         {
             TS_FAIL( "ERROR:  expected the NULL errlHndl_t to stay NULL\n");
+        }
+        else
+        {
+            TS_TRACE( "SUCCESS: reportError returned OK.");
         }
 
         return;
@@ -225,11 +226,14 @@ public:
         {
             TS_FAIL( "ERROR: reportError did not delete the errlHndl_t handle!\n" );
         }
-
-
+        else
+        {
+            TS_TRACE( "SUCCESS: reportError returned OK.");
+        }
 
         return;
     }
+
 };  // class InitServiceTest
 
 

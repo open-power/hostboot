@@ -2,6 +2,7 @@
 #include <sys/task.h>
 #include <string.h>
 #include <kernel/console.H>
+#include <sys/time.h>
 
 namespace CxxTest
 {
@@ -27,6 +28,8 @@ void _start(void*)
             if (NULL != vfsItr->start)
             {
                 __sync_add_and_fetch(&CxxTest::g_ModulesStarted, 1);
+                printk( "running %s, ModulesStarted=0x%ld\n",
+                        vfsItr->module, CxxTest::g_ModulesStarted );
                 task_exec(vfsItr->module, NULL);
             }
         }
@@ -34,6 +37,7 @@ void _start(void*)
     }
 
     __sync_add_and_fetch(&CxxTest::g_ModulesCompleted, 1);
+    printk( " ModulesCompleted=0x%ld\n", CxxTest::g_ModulesCompleted );
 
     task_end();
 }
