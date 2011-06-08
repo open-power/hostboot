@@ -1,0 +1,304 @@
+
+#ifndef TARG_TARGET_H
+#define TARG_TARGET_H
+
+/**
+ *  @file target.H
+ *
+ *  @brief Interface for the target class
+ *
+ *  This header file contains the interface for the target class which
+ *  associates entities of interest to host boot to their various attributes
+ */
+
+//******************************************************************************
+// Includes
+//******************************************************************************
+
+// STD
+#include <stdint.h>
+#include <stdlib.h>
+#include <assert.h>
+#include <vector>
+
+// This component
+#include <targeting/attributes.H>
+
+namespace TARGETING
+{
+
+//******************************************************************************
+// Type Aliases
+//******************************************************************************
+
+class Target;
+typedef const Target* ConstTargetHandle_t;
+typedef       Target* TargetHandle_t;
+
+typedef std::vector<TargetHandle_t> TargetHandleList;
+typedef std::vector<Target>         TargetList;
+
+class Target
+{
+    public: // Constructors and destructors
+
+        /**
+         *  @brief Destroys the target
+         *
+         *  Destroys the target, and any exclusively owned resources
+         *
+         *  @post Target is destroyed, and all exclusively owned resources are
+         *      reclaimed
+         */
+        ~Target();
+
+    public: // User interface
+
+        /**
+         *  @brief Try to get the target's specified attribute value
+         *
+         *  Attempts to return the target's specified attribute value.  It
+         *  returns false (with invalid o_attrValue) if the specified attribute
+         *  does not exist for the associated target, true (with a valid
+         *  o_attrValue) otherwise.
+         *
+         *  @param[out] o_attrValue Value of the attribute
+         *
+         *  @pre Target service must be initialized
+         *
+         *  @post See "return"
+         *
+         *  @return bool indicating whether the specified attribute was returned
+         *      or not
+         *
+         *  @retval true Attribute returned in o_attrValue
+         *  @retval false Attribute not found; o_attValue not valid
+         */
+        template<const ATTRIBUTE_ID A>
+        inline bool tryGetAttr(
+            typename AttributeTraits<A>::Type& o_attrValue) const
+        {
+            // Note: the compiler optimizes the following check (which fails
+            // at compile time if the attribute is not readable) away
+            if(AttributeTraits<A>::readable) { }
+            return _tryGetAttr(A,sizeof(o_attrValue),&o_attrValue);
+        }
+
+        /**
+         *  @brief Get the target's specified attribute value
+         *
+         *  Returns the target's specified attribute value.  If the specified
+         *  attribute does not exist for the associated target, the routine
+         *  asserts.  Thus callers must be sure the attribute exists for the
+         *  given target.
+         *
+         *  @pre Target service must be initialized
+         *
+         *  @post Target's specified attribute value returned, or assert
+         *      called if specified attribute doesn't exist for the
+         *      associated target
+         *
+         *  @return Data type associated with the attribute being returned
+         *
+         *  @retval Varies The attribute data
+         */
+        template<const ATTRIBUTE_ID A>
+        typename AttributeTraits<A>::Type getAttr() const;
+
+        /**
+         *  @brief DEBUG ONLY!  Returns the requested attribute as a string
+         *
+         *  Returns the attribute value (for the associated target) as a string.
+         *  If the specified attribute does not have a string conversion, the
+         *  compile will fail.
+         *
+         *  @pre Target service must be initialized
+         *
+         *  @post Specified attribute's value returned as a string.  If the
+         *      specified attribute does not exist, the routine asserts.
+         *
+         *  @return String representing the attribute
+         *
+         *  @retval Varies based on the attribute type and value
+         */
+        template<const ATTRIBUTE_ID A>
+        const char* getAttrAsString() const;
+
+        /**
+         *  @brief Tries to set the target's specified attribute value
+         *
+         *  Attempts to set the target's specified attribute value.  It
+         *  returns false if the specified attribute does not exist for the
+         *  associated target, true otherwise.
+         *
+         *  @param[in] i_attrValue Value of the attribute
+         *
+         *  @pre Target service must be initialized
+         *
+         *  @post Target's attribute value updated (if it exists), and caller
+         *      notified whether the update occurred or not.
+         *
+         *  @return bool indicating whether the specified attribute was updated
+         *      or not
+         *
+         *  @retval true Attribute updated
+         *  @retval false Attribute not updated
+         */
+        template<const ATTRIBUTE_ID A>
+        bool trySetAttr(
+            typename AttributeTraits<A>::Type const& i_attrValue)
+        {
+            // Note: the compiler optimizes the following check (which fails
+            // at compile time if the attribute is not writable) away
+            if(AttributeTraits<A>::writeable) { }
+            return _trySetAttr(A,sizeof(i_attrValue),&i_attrValue);
+        }
+
+        /**
+         *  @brief Sets the target's specified attribute value
+         *
+         *  Sets the target's specified attribute value.
+         *
+         *  @param[in] i_attrValue Value of the attribute
+         *
+         *  @pre Target service must be initialized
+         *
+         *  @post Target's attribute value updated if it exists, otherwise
+         *      routine asserts
+         */
+        template<const ATTRIBUTE_ID A>
+        void setAttr(
+            typename AttributeTraits<A>::Type const& i_attrValue)
+        {
+            bool l_wrote = trySetAttr<A>(i_attrValue);
+            assert(l_wrote);
+        }
+
+    private: // Private helper interfaces
+
+        /**
+         *  @brief Tries to get the target's specified attribute value
+         *
+         *  Tries to get the target's specified attribute value
+         *
+         *  @param[in] i_attr Attribute to retrieve
+         *  @param[in] i_size Size of the attribute
+         *  @param[in/out] io_attrData On input, location to store the attribute.
+         *      On output, location updated with attribute data
+         *
+         *  @pre Target service must be initialized
+         *
+         *  @post Caller notified if attribute retrieval succeeded or not.  If
+         *      so, the attribute data is stored at io_addrData
+         *
+         *  @return bool indicating if attribute retrieval succeeded or not
+         *
+         *  @retval true Attribute retrieval succeeded
+         *  @retval false Attribute retrieval failed
+         */
+        bool _tryGetAttr(
+            ATTRIBUTE_ID i_attr,
+            uint32_t     i_size,
+            void*        io_attrData) const;
+
+        /**
+         *  @brief Tries to set the target's specified attribute value
+         *
+         *  Tries to set the target's specified attribute value
+         *
+         *  @param[in] i_attr Attribute to retrieve
+         *  @param[in] i_size Size of the attribute
+         *  @param[in] i_pAttrData Location holding the attribute data to set
+         *
+         *  @pre Target service must be initialized
+         *
+         *  @post If attribute exists for the associated target, attribute value
+         *      updated and success (true) returned.  Otherwise, attribute value
+         *      not updated and failure (false) returned.
+         *
+         *  @return bool indicating if attribute update succeeded or not
+         *
+         *  @retval true Attribute update succeeded
+         *  @retval false Attribute update failed
+         */
+        bool _trySetAttr(
+            ATTRIBUTE_ID i_attr,
+            uint32_t     i_size,
+            const void*  i_pAttrData) const;
+
+        /**
+         *  @brief Gets a pointer to the target's associated attribute
+         *
+         *  Gets a pointer to the target's associated attribute
+         *
+         *  @param[in] i_attr Attribute to retrieve
+         *  @param[out] o_pAttr Pointer to data location to hold the attribute
+         *      data
+         *
+         *  @pre Target service must be initialized
+         *
+         *  @post If attribute exists for the associated target, caller's
+         *      pointer updated with associated attribute pointer.  Otherwise,
+         *      caller's pointer updated to NULL.
+         */
+        void _getAttrPtr(
+            ATTRIBUTE_ID i_attr,
+            void*&       o_pAttr) const;
+
+    private: // Private instance variables
+
+        uint32_t       iv_attrs;          ///< Total attributes allowed for this
+                                          ///< instance
+        ATTRIBUTE_ID (*iv_pAttrNames)[];  ///< Pointer to array of valid
+                                          ///< attributes
+        void*        (*iv_pAttrValues)[]; ///< Pointer to array of void*'s
+                                          ///< (which point to individual
+                                          ///< attributes)
+
+    private: // Private CTORs/DTORs/Operators
+
+        /**
+         *  @brief Build a target object
+         *
+         *  Builds a target object; currently there is little to no need to
+         *  construct new targets; they are already preloaded in PNOR.
+         */
+        Target();
+
+        // Disable the copy constructor/assignment operator.
+
+        Target(
+            const Target& i_right);
+
+        Target& operator=(
+            const Target& i_right);
+
+      friend class PnorBuilderService;
+
+} PACKED;
+
+template<const ATTRIBUTE_ID A>
+typename AttributeTraits<A>::Type Target::getAttr() const
+{
+    typename AttributeTraits<A>::Type l_attrValue;
+    bool l_read = tryGetAttr<A>(l_attrValue);
+    assert(l_read);
+    return l_attrValue;
+}
+
+template<const ATTRIBUTE_ID A>
+const char* Target::getAttrAsString() const
+{
+    // Note: the compiler optimizes the following check (which fails
+    // at compile time if the attribute does not have a string
+    // conversion) away
+    if(AttributeTraits<A>::hasStringConversion) { }
+    typename AttributeTraits<A>::Type l_attrValue;
+    bool l_read = tryGetAttr<A>(l_attrValue);
+    assert(l_read);
+    return attrToString<A>(l_attrValue);
+}
+
+} // End namespace TARGETING
+
+#endif // TARG_TARGET_H
