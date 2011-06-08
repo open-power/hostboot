@@ -58,6 +58,7 @@ void CpuManager::startCPU(ssize_t i)
         cpu->scheduler_extra = NULL;
 	cpu->kernel_stack = 
 	    (void*) (((uint64_t)PageManager::allocatePage(4)) + 16320);
+        cpu->xscom_mutex = NULL;
 	
 	// Create idle task.
 	cpu->idle_task = TaskManager::createIdleTask();

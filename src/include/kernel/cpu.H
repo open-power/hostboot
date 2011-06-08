@@ -9,6 +9,7 @@
 #include <kernel/types.h>
 #include <arch/ppc.H>
 #include <builtins.h>
+#include <sys/mutex.h>
 
 // Thread ID support only, Power7 (4 threads).
 #define KERNEL_MAX_SUPPORTED_CPUS (4 * 8 * 4) // Sockets, cores, threads.
@@ -33,6 +34,9 @@ struct cpu_t
     void* scheduler_extra;
         /** Pointer to the idle task for this CPU */
     task_t* idle_task;
+
+        /** XSCOM mutex to serialize access per CPU */
+    mutex_t xscom_mutex;
 };
 
 /** @fn getCpuId
