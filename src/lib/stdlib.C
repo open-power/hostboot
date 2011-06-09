@@ -7,7 +7,8 @@ void* malloc(size_t s)
 {
     if (s > HeapManager::MAX_ALLOC_SIZE)
     {
-	size_t pages = (s+8) / PageManager::PAGESIZE;
+	size_t pages = (s + 8 + (PageManager::PAGESIZE - 1)) 
+                     / PageManager::PAGESIZE;
 	void* v = PageManager::allocatePage(pages);
 	size_t* len = (size_t*)v;
 	*len = pages << 8;
