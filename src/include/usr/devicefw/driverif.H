@@ -56,6 +56,13 @@ namespace DeviceFW
         WILDCARD = -1,
     };
     
+    /** Construct the device addressing parameters for XSCOM device ops.
+     *  @param[in] i_address - XSCom address to operate on.
+     */
+    #define DEVICE_XSCOM_ADDRESS(i_address) \
+        DeviceFW::XSCOM, static_cast<uint64_t>((i_address))
+
+
     /** @class InvalidParameterType 
      *  @brief Unused type to cause compiler fails for invalid template types.
      *

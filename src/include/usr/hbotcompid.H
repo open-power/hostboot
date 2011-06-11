@@ -46,5 +46,20 @@ const compId_t DEVFW_COMP_ID = 0x0200;
 const char DEVFW_COMP_NAME[] = "devfw";
 //@}
 
+/** @name SCOM
+ *  SCOM component
+ */
+//@{
+const compId_t SCOM_COMP_ID = 0x0300;
+const char SCOM_COMP_NAME[] = "scom";
+//@}
+
+/** @name XSCOM
+ *  XSCOM component
+ */
+//@{
+const compId_t XSCOM_COMP_ID = 0x0400;
+const char XSCOM_COMP_NAME[] = "xscom";
+//@}
 
 #endif
