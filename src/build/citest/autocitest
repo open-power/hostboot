@@ -1,10 +1,13 @@
 #!/bin/bash
 ################################################################################
-#  Simics automation using autosim
+##  Simics automation using autosim
 ##  2011-05-23  mww modified to run hostboot in simics
 ##  2011-06-02  mww check in first working version.
 ##                  Profuse thanks to Patrick Williams for getting this going
-##                  on the Gerrit server!!
+##                  on the Jenkins server!!
+##
+##  Usage:
+##       autocitest [--quiet] <backing_build> <sandbox_name> <hbi_image>
 ################################################################################
 function    waitkb()
 {
@@ -57,24 +60,24 @@ fi
 ##
 ##  set up
 ##
-DRIVER="$1"                         ##  backing tree
-TEST_SANDBOX="$2"                   ##  test sandbox
-HBICORE_TEST="$3"                   ##  path to hbicore_test.img
+DRIVER="$1"                     ##  backing tree
+TEST_SANDBOX="$2"               ##  test sandbox
+HBICORE_TEST="$3"               ##  path to hbicore_test.img
 
-export SHELL="/bin/bash"            ##  Needed to fool workon to launch a bash shell, which
-                                    ##  autosim expects.
-NOWIN="--nowin"                     ##  remote execution does not have a display...
+export SHELL="/bin/bash"        ##  Needed to fool workon to launch a bash 
+                                ##  shell, which autosim expects.
+NOWIN="--nowin"                 ##  remote execution does not have a display
 
 MACHINE="SALERNO"
 HBOT_SIMICS_SETUP="/gsa/ausgsa/home/a/n/andrewg/web/public/hostboot/simics/hbot_simics_setup.pl"
 
-##  gerrit creates a new workspace for every compile.
+##  jenkins creates a new workspace for every compile.
 ##     cxxtest-start.sh will verify this and then export WORKSPACE_DIR for us.
-SBXDIR=$WORKSPACE_DIR
+SBXHOME=$WORKSPACE_DIR
 
 ##  autosim, mksb, workon, etc should look in $SANDBOXRC for the location of the sandbox.
 ##  this is more effective than using -rc option (autosim has no option for this anyway)
-LOCAL_SANDBOXRC="$WORKSPACE_DIR/my.sandboxrc"
+SANDBOXRC="$SBXHOME/my.sandboxrc"
 
 
 if [ "$DRIVER" = "" ] ; then
@@ -89,21 +92,19 @@ if [ "$TEST_SANDBOX" = "" ] ; then
         exit 1
 fi
 
-if [ ! -f "$HBICORE_TEST" ] ; then
+if [ ! -f "${SBXHOME}/${HBICORE_TEST}" ] ; then
         echo "ERROR: you must specify a valid hbicore_test.bin file."
         usage
         exit 1
 fi
 
-##  extract the pathname of hbicore_test.* from $HBICORE_TEST
-##  parse out the dir and file names for hbicore_test
-HBICORE_TEST_DIR=${HBICORE_TEST%/*}
-HBICORE_TEST_FILE=${HBICORE_TEST##*/}
+##  Find the .syms file for the image.  Remove extension, add .syms.
+HBICORE_TEST_SYMS="${HBICORE_TEST%%.*}.syms"
 
 
 
 ## let's get set up
-cd $WORKSPACE_DIR
+cd $SBXHOME
 
 echo    "$0"
 echo    "VERBOSE            = $VERBOSE"
@@ -111,13 +112,10 @@ echo    "NOWIN              = $NOWIN"
 echo    "BACKING_TREE       = $DRIVER"
 echo    "TEST_SANDBOX       = $TEST_SANDBOX"
 echo    "HBICORE_TEST       = $HBICORE_TEST"
-echo    "HBICORE_TEST_DIR   = $HBICORE_TEST_DIR"
-echo    "LOCAL_SANDBOXRC    = $LOCAL_SANDBOXRC"
-echo    "SBXDIR             = $SBXDIR"
+echo    "HBICORE_TEST_SYMS  = $HBICORE_TEST_SYMS"
+echo    "SANDBOXRC          = $SANDBOXRC"
+echo    "SBXHOME            = $SBXHOME"
 echo    "current directory is " `pwd`
-# echo    "env vars are " `env`
-
-
 
 waitkb
 
@@ -127,12 +125,11 @@ echo "$timestamp Starting autosample test..."
 
 
 # Set up the test sandbox backed to the specified build
-##  Assumption here is that we will always run inside the workspace created by gerrit,
-##  so we always create a new sandbox
+##  Assumption here is that we will always run inside the workspace created by 
+##  jenkins, so we always create a new sandbox
 ##
 
 echo "Setting up sandbox environment..."
-
 
 ##  mksb fills the log with "please type backing tree file" if it can't find
 ##  the -back file.   We wish to avoid this.
@@ -141,21 +138,19 @@ if [ ! -d "$DRIVER" ] ; then
         exit 1
 fi
 
+##  set $SANDBOXRC to the local one, this should cause this to make and run 
+##  in a new sandbox at the base workspace dir.
+export SANDBOXRC
 
-##  set $SANDBOXRC to the local one, this should cause this to make and run in a new sandbox
-export SANDBOXRC=$LOCAL_SANDBOXRC
-
-
-##      at the base workspace dir.
-if [ ! -d "$SBXDIR/$TEST_SANDBOX" ] ; then
+if [ ! -d "$SBXHOME/$TEST_SANDBOX" ] ; then
         echo "run mksb to create the sandbox "
-        mksb  -rc $LOCAL_SANDBOXRC -dir $SBXDIR -back $DRIVER -sb $TEST_SANDBOX -m ppc
+        mksb  -rc $SANDBOXRC -dir $SBXHOME -back $DRIVER -sb $TEST_SANDBOX -m ppc
         if [ $? -ne 0 ] ; then
             echo "ERROR: mksb failed: $?"
             exit 1
         fi
 else
-        echo "$SBXDIR/$TEST_SANDBOX already exists, " `ls -la`
+        echo "$SBXHOME/$TEST_SANDBOX already exists, " `ls -la`
         `usrsbinfo -s`
         chkdrv=`usrsbinfo -s | grep " $TEST_SANDBOX "| awk '{ print $2 }'`
         if [ "$chkdrv" != "$DRIVER" ] ; then
@@ -183,7 +178,7 @@ fi
 waitkb
 
 ##  under normal circumstances $sb would be set by start_simics
-export sb=$SBXDIR/$TEST_SANDBOX/src
+export sb=$SBXHOME/$TEST_SANDBOX/src
 echo $sb
 
 echo "** Set up simics directories **"
@@ -191,14 +186,10 @@ echo "start_simics -no_start -machine $MACHINE" > $sb/my_simics_env_setup
 chmod 775 $sb/my_simics_env_setup
 workon -sb $TEST_SANDBOX -mppc -c ./my_simics_env_setup
 
-echo "** Run workaround from Ched **"
-/afs/rchland/usr2/ched/public/hostboot/fix_ph110510.sh
-
-echo " Create required config directory and copy in required file (make L3 8MB for now) **"
-mkdir -p $sb/simu/configs/ && cp /gsa/ausgsa/home/a/n/andrewg/web/public/hostboot/simics/P8_SALERNO.config $sb/simu/configs/
-
-echo "** Copy in the P8 scomdef **"
-mkdir -p $sb/src/engd/scomdef && cp /gsa/ausgsa/home/a/n/andrewg/web/public/hostboot/simics/p8_910400.scomdef $sb/src/engd/scomdef/
+echo "** Executing workarounds **"
+if [ -f ${SBXHOME}/src/build/citest/etc/workarounds ] ; then
+    ${SBXHOME}/src/build/citest/etc/workarounds
+fi
 
 echo "** Create img directory for hbicore.bin **"
 mkdir -p $sb/../img
@@ -211,25 +202,12 @@ waitkb
 ##  copied to $sb/../img/hbicore.bin .  This works out to $TEST_SANDBOX/img/hbicore.bin
 ##  Note the name change; thus we are always pretty safe in always doing this.
 ##
-echo    "copy $HBICORE_TEST to $WORKSPACE_DIR/$TEST_SANDBOX/img/hbicore.bin"
-cp $HBICORE_TEST $WORKSPACE_DIR/$TEST_SANDBOX/img/hbicore.bin
+echo    "copy $HBICORE_TEST to ${SBXHOME}/$TEST_SANDBOX/img/hbicore.bin"
+cp ${SBXHOME}/${HBICORE_TEST} ${SBXHOME}/${TEST_SANDBOX}/img/hbicore.bin
 if [ $? -ne 0 ] ; then
         echo "ERROR: Copy of $HBICORE_TEST to $TEST_SANDBOX/../img failed: $?"
         exit 1
 fi
-
-##  we also need the hbicore_test.syms file.  Assume that it is the same dir as the .bin file.
-##  NOTE:  it may already be there.
-##
-echo    "copy hbicore_test.syms file to $WORKSPACE_DIR/img/hbicore_test.syms"
-if [ ! -f "$WORKSPACE_DIR/img/hbicore_test.syms" ]; then
-    cp $HBICORE_TEST_DIR/hbicore_test.syms $WORKSPACE_DIR/img/hbicore_test.syms
-    if [ $? -ne 0 ] ; then
-        echo "ERROR: Copy of hbicore_test.syms to $WORKSPACE_DIR/img/ failed: $?"
-        exit 1
-    fi
-fi
-
 
 
 waitkb
@@ -251,7 +229,7 @@ waitkb
 
 ##  $$TODO Need to wait here for hostboot to finish
 ##  for now just sleep for 20 seconds
-sleep 20
+## sleep 20
 
 
 waitkb
@@ -267,64 +245,86 @@ waitkb
 
 
 ##  grep for the globals
-echo "find totaltests, etc in $HBICORE_TEST_DIR/hbicore_test.syms"
-printk_buffer_addr=`grep "kernel_printk_buffer" $HBICORE_TEST_DIR/hbicore_test.syms | awk '{split($0,a,","); print a[2]}'`
-printk_buffer_size=`grep "kernel_printk_buffer" $HBICORE_TEST_DIR/hbicore_test.syms | awk '{split($0,a,","); print a[4]}'`
-totaltests_addr=`grep "CxxTest::g_TotalTests" $HBICORE_TEST_DIR/hbicore_test.syms | awk '{split($0,a,","); print a[2]}'`
-failedtests_addr=`grep "CxxTest::g_FailedTests" $HBICORE_TEST_DIR/hbicore_test.syms | awk '{split($0,a,","); print a[2]}'`
-warnings_addr=`grep "CxxTest::g_Warnings" $HBICORE_TEST_DIR/hbicore_test.syms  | awk '{split($0,a,","); print a[2]}'`
-tracecalls_addr=`grep "CxxTest::g_TraceCalls" $HBICORE_TEST_DIR/hbicore_test.syms | awk '{split($0,a,","); print a[2]}'`
-
+echo "find totaltests, etc in ${SBXHOME}/${HBICORE_TEST_SYMS}"
+printk_buffer_addr=`grep "kernel_printk_buffer" \
+        ${SBXHOME}/${HBICORE_TEST_SYMS} | awk '{split($0,a,","); print a[2]}'`
+printk_buffer_size=`grep "kernel_printk_buffer" \
+        ${SBXHOME}/${HBICORE_TEST_SYMS} | awk '{split($0,a,","); print a[4]}'`
+totaltests_addr=`grep "CxxTest::g_TotalTests" \
+        ${SBXHOME}/${HBICORE_TEST_SYMS} | awk '{split($0,a,","); print a[2]}'`
+failedtests_addr=`grep "CxxTest::g_FailedTests" \
+        ${SBXHOME}/${HBICORE_TEST_SYMS} | awk '{split($0,a,","); print a[2]}'`
+warnings_addr=`grep "CxxTest::g_Warnings" \
+        ${SBXHOME}/${HBICORE_TEST_SYMS} | awk '{split($0,a,","); print a[2]}'`
+tracecalls_addr=`grep "CxxTest::g_TraceCalls" \
+        ${SBXHOME}/${HBICORE_TEST_SYMS} | awk '{split($0,a,","); print a[2]}'`
+mods_started_addr=`grep "CxxTest::g_ModulesStarted" \
+        ${SBXHOME}/${HBICORE_TEST_SYMS} | awk '{split($0,a,","); print a[2]}'`
+mods_completed_addr=`grep "CxxTest::g_ModulesCompleted" \
+        ${SBXHOME}/${HBICORE_TEST_SYMS} | awk '{split($0,a,","); print a[2]}'`
 
 
 ##  note, don't use $VERBOSE here or you get all sorts of extra junk in the output file.
+echo "Wait for unit test completion."
+modsstarted=0
+modscompleted=0
+while [ $modsstarted -lt 1 -o $modsstarted -ne $modscompleted ]; do
+    sleep 1
+    autosim $NOWIN --simcmd   "phys_mem.read 0x$mods_started_addr 0x08"     1> $SBXHOME/modsstarted.log  2> /dev/null
+    modsstarted=`cat $SBXHOME/modsstarted.log | xargs echo -n`
+    autosim $NOWIN --simcmd   "phys_mem.read 0x$mods_completed_addr 0x08"     1> $SBXHOME/modscompleted.log  2> /dev/null
+    modscompleted=`cat $SBXHOME/modscompleted.log | xargs echo -n`
+
+    echo "$modsstarted:$modscompleted"
+done
+
+
 echo "====> dump totaltests..."
-autosim $NOWIN --simcmd   "phys_mem.x 0x$totaltests_addr 0x08"     1> $WORKSPACE_DIR/totaltests.log  2> /dev/null
+autosim $NOWIN --simcmd   "phys_mem.read 0x$totaltests_addr 0x08"     1> $SBXHOME/totaltests.log  2> /dev/null
 if [ $? -ne 0 ] ; then
         echo "ERROR: Unable to run $?"
         stopsim
         stopserver
         exit 1
 fi
-totaltests=`cat $WORKSPACE_DIR/totaltests.log | awk '{ print $5 }'`
+totaltests=`cat $SBXHOME/totaltests.log | xargs echo -n`
 
 
 echo "====> dump failedtests..."
-autosim $NOWIN --simcmd   "phys_mem.x 0x$failedtests_addr 0x08"     1> $WORKSPACE_DIR/failedtests.log  2> /dev/null
+autosim $NOWIN --simcmd   "phys_mem.read 0x$failedtests_addr 0x08"     1> $SBXHOME/failedtests.log  2> /dev/null
 if [ $? -ne 0 ] ; then
         echo "ERROR: Unable to run $?"
         stopsim
         stopserver
         exit 1
 fi
-failedtests=`cat $WORKSPACE_DIR/failedtests.log | awk '{ print $5 }'`
+failedtests=`cat $SBXHOME/failedtests.log | xargs echo -n`
 
 
 echo "====> dump warnings..."
-autosim $NOWIN --simcmd   "phys_mem.x 0x$warnings_addr 0x08"     1> $WORKSPACE_DIR/warnings.log  2> /dev/null
+autosim $NOWIN --simcmd   "phys_mem.read 0x$warnings_addr 0x08"     1> $SBXHOME/warnings.log  2> /dev/null
 if [ $? -ne 0 ] ; then
         echo "ERROR: Unable to run $?"
         stopsim
         stopserver
         exit 1
 fi
-warnings=`cat $WORKSPACE_DIR/warnings.log | awk '{ print $5 }'`
+warnings=`cat $SBXHOME/warnings.log | xargs echo -n`
 
 
 echo "====> dump tracecalls..."
-autosim $NOWIN --simcmd   "phys_mem.x 0x$tracecalls_addr 0x08"     1> $WORKSPACE_DIR/tracecalls.log  2> /dev/null
+autosim $NOWIN --simcmd   "phys_mem.read 0x$tracecalls_addr 0x08"     1> $SBXHOME/tracecalls.log  2> /dev/null
 if [ $? -ne 0 ] ; then
         echo "ERROR: Unable to run $?"
         stopsim
         stopserver
         exit 1
 fi
-tracecalls=`cat $WORKSPACE_DIR/tracecalls.log | awk '{ print $5 }'`
-
+tracecalls=`cat $SBXHOME/tracecalls.log | xargs echo -n`
 
 
 echo "====> dump printk buffer..."
-autosim $NOWIN --simcmd   "memory_image_ln0.save $WORKSPACE_DIR/testprintk.log 0x$printk_buffer_addr 0x$printk_buffer_size"  1> /dev/null 2> /dev/null
+autosim $NOWIN --simcmd "memory_image_ln0.save ${SBXHOME}/testprintk.log 0x$printk_buffer_addr 0x$printk_buffer_size"  1> /dev/null 2> /dev/null
 if [ $? -ne 0 ] ; then
 echo "ERROR: Unable to run $?"
        stopsim
@@ -346,11 +346,11 @@ stopserver
 timestamp=`date +'%H:%M:%S'`
 
 echo    "----------------- Printk Buffer -------------------"
-cat $WORKSPACE_DIR/testprintk.log
+cat $SBXHOME/testprintk.log
 
 echo
 echo    "==================================================="
-echo    "$timestamp Finished autosample test with no errors."
+echo    "$timestamp Finished autocitest with no errors."
 echo    "    total tests:   $totaltests"
 echo    "    failed tests:  $failedtests"
 echo    "    warnings:      $warnings"
@@ -358,6 +358,14 @@ echo    "    trace calls:   $tracecalls"
 echo    "==================================================="
 echo
 
+if [ 0 !=  $failedtests ] ; then
+    echo "$failedtests testcases failed."
+    exit 1
+fi
+if [ 0 != $warnings ] ; then
+    echo "$warnings testcase warnings found."
+    exit 1
+fi
 
 exit 0
 

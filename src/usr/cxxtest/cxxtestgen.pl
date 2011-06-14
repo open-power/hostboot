@@ -676,7 +676,7 @@ sub writeHostBootSuites() {
     
     print   "\n";
     print "\tCxxTest::reportTotalTests( \"", suiteName(), "\", $testcount );\n";
-
+    
     $suitecount++;                            # bump to the next suite
   }
 }
@@ -700,7 +700,7 @@ sub write_start() {
   writeHostBootSuites();
 
   print   "\n";
-
+  print "\t__sync_add_and_fetch(&CxxTest::g_ModulesCompleted, 1);\n";
   print   "\ttask_end();\n";
   print   "}\n";
 

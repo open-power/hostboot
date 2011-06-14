@@ -40,6 +40,8 @@ namespace CxxTest
     uint64_t    getWarnings(void);
     uint64_t    getTraceCalls(void);
 
+    extern uint64_t g_ModulesCompleted;
+
 #       define _TS_TRY
 #       define ___TSM_CATCH(f,l,m)
 #       define __TSM_CATCH(f,l,m)

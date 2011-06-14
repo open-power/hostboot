@@ -1,0 +1,25 @@
+#!/bin/sh
+
+echo "+++ Workaround for SMM error starting simics."
+/afs/rchland/usr2/ched/public/hostboot/fix_ph110510.sh
+
+echo "+++ Copy desired SALERNO config file to sandbox and modify L3 to 8MB."
+mkdir -p $sb/simu/configs
+cp $BACKING_BUILD/src/simu/configs/P8_SALERNO.config $sb/simu/configs
+sed -i -e's/SETENV GFW_P8_SALERNO_L3_MB_SIZE.*/SETENV GFW_P8_SALERNO_L3_MB_SIZE 8/' $sb/simu/configs/P8_SALERNO.config
+
+echo "+++ Copy in the P8 scomdef."
+mkdir -p $sb/src/engd/scomdef 
+cp /gsa/ausgsa/home/a/n/andrewg/web/public/hostboot/simics/p8_910400.scomdef \
+        $sb/src/engd/scomdef/
+
+echo "+++ XSCOM patch for HMER status."
+rm $sb/../simics/amd64-linux/lib/p8_phyp_scom.so
+ln -s /afs/rch/usr7/calebs/public/simics/salerno/p8_phyp_scom.so \
+        $sb/../simics/amd64-linux/lib/p8_phyp_scom.so
+
+echo "+++ Clock state workaround."
+mkdir -p $sb/simu/data/cec-chip
+cp $BACKING_BUILD/src/simu/data/cec-chip/p8.por $sb/simu/data/cec-chip
+sed -i -e's/LOGIC(0xFF000001).*/LOGIC(0xFF000001)=0xFFFFFFFF FFFFFFFF/' \
+        $sb/simu/data/cec-chip/p8.por
