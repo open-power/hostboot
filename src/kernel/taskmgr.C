@@ -3,8 +3,10 @@
 #include <kernel/task.H>
 #include <kernel/pagemgr.H>
 #include <kernel/cpumgr.H>
+#include <sys/task.h>
 #include <arch/ppc.H>
 #include <string.h>
+#include <limits.h>
 
 void TaskManager::idleTaskLoop(void* unused)
 {
@@ -60,6 +62,11 @@ task_t* TaskManager::_createTask(TaskManager::task_fn_t t,
     task->context.nip = (void*) ((uint64_t*) t)[0];
     task->context.gprs[2] = ((uint64_t*)t)[1];
 
+    // Set up LR to be the entry point for task_end in case a task 
+    // 'returns' from its entry point.  By the Power ABI, the entry
+    // point address is in (func_ptr)[0].
+    task->context.lr = reinterpret_cast<uint64_t*>(&task_end)[0];
+
     // Set up GRP[13] as task structure reserved.
     task->context.gprs[13] = (uint64_t)task;
 
@@ -71,6 +78,8 @@ task_t* TaskManager::_createTask(TaskManager::task_fn_t t,
     {
 	task->context.stack_ptr = 
 	    PageManager::allocatePage(TASK_DEFAULT_STACK_SIZE);
+        memset(task->context.stack_ptr, '\0', 
+               TASK_DEFAULT_STACK_SIZE * PAGE_SIZE);
 	task->context.gprs[1] = ((uint64_t)task->context.stack_ptr) + 16320;
     }
     else

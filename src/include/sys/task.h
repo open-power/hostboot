@@ -36,9 +36,11 @@ tid_t task_create(void(*start_routine)(void*), void* arg);
  *
  *  See POSIX pthread_exit.
  *
- *  @note A thread must call task_end when it wishes to exit.  It is not
- *        acceptable to simply return from the 'start_routine' and may result
- *        in unexpected behavior.
+ *  @note A task must call task_end when it wishes to exit.  If a task were
+ *        to simply return from its entry point function, the kernel sets up
+ *        the initial task structure with the link-register pointing to this
+ *        function.  Therefore, returning from the entry point function will
+ *        also cause the task to end cleanly using this function.
  */
 void task_end();
 
