@@ -1,6 +1,6 @@
 ROOTPATH = ../../..
 
-MODULE = testsyslib
-TESTS = *.H
+SUBDIRS = lib.d
 
 include ${ROOTPATH}/config.mk
+
