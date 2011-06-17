@@ -66,15 +66,6 @@ void barrier_wait (barrier_t * i_barrier)
 
 //-----------------------------------------------------------------------------
 
-mutex_t * mutex_create()
-{
-    mutex_t * m = new mutex_t;
-    mutex_init(m);
-    return m;
-}
-
-//-----------------------------------------------------------------------------
-
 void mutex_init(mutex_t * o_mutex)
 {
     o_mutex->iv_val = 0;
@@ -85,8 +76,7 @@ void mutex_init(mutex_t * o_mutex)
 
 void mutex_destroy(mutex_t *& i_mutex)
 {
-    delete i_mutex;
-    i_mutex = NULL;
+    i_mutex->iv_val = ~0;
     return;
 }
 

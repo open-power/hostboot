@@ -36,7 +36,7 @@ struct cpu_t
     task_t* idle_task;
 
         /** XSCOM mutex to serialize access per CPU */
-    mutex_t * xscom_mutex;
+    mutex_t xscom_mutex;
 };
 
 /** @fn getCpuId

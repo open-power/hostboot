@@ -51,12 +51,6 @@ void barrier_destroy (barrier_t * i_barrier);
 void barrier_wait (barrier_t * i_barrier);
 
 /**
- * Create a mutex and initialize a mutex
- * @returns a pointer to the mutex
- */
-mutex_t * mutex_create();
-
-/**
  * Initialize a mutex object
  * @param[out] o_mutex the mutex
  * @pre an uninitialized mutex object
@@ -65,11 +59,12 @@ mutex_t * mutex_create();
 void mutex_init(mutex_t * o_mutex);
 
 /**
- * Destroy a mutex
- * @param[in/out] i_mutex The mutex
- * @pre mutex must have been created with mutex_create()
+ * Destroy / Uninitialize a mutex object.
+ * @param[in] i_mutex The mutex
+ * @note This does not free the memory associated with the object if the mutex
+ *       was allocated off the heap.
  */
-void mutex_destroy(mutex_t *& io_mutex);
+void mutex_destroy(mutex_t * i_mutex);
 
 /**
  * Obtain a lock on a mutex

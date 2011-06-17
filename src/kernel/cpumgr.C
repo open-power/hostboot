@@ -8,6 +8,7 @@
 #include <util/singleton.H>
 #include <arch/ppc.H>
 #include <kernel/timemgr.H>
+#include <sys/sync.h>
 
 cpu_t* CpuManager::cv_cpus[CpuManager::MAXCPUS] = { NULL };
 
@@ -58,7 +59,7 @@ void CpuManager::startCPU(ssize_t i)
         cpu->scheduler_extra = NULL;
 	cpu->kernel_stack = 
 	    (void*) (((uint64_t)PageManager::allocatePage(4)) + 16320);
-        cpu->xscom_mutex = NULL;
+        cpu->xscom_mutex = (mutex_t)MUTEX_INITIALIZER;
 	
 	// Create idle task.
 	cpu->idle_task = TaskManager::createIdleTask();
