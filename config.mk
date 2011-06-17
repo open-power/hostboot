@@ -39,7 +39,7 @@ BEAMFLAGS = \
 
 COMMONFLAGS = -O3 -nostdlib ${EXTRACOMMONFLAGS}
 CFLAGS = ${COMMONFLAGS} -mcpu=power7 -nostdinc -g -msoft-float -mno-altivec \
-	 -Wall -Werror ${CUSTOMFLAGS}
+	 -Wall -Werror -fshort-enums ${CUSTOMFLAGS}
 ASMFLAGS = ${COMMONFLAGS} -mcpu=power7
 CXXFLAGS = ${CFLAGS} -nostdinc++ -fno-rtti -fno-exceptions -Wall
 LDFLAGS = --nostdlib --sort-common ${COMMONFLAGS}
