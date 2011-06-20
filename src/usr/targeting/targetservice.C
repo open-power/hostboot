@@ -15,6 +15,7 @@
 #include <string.h>
 
 // Other components
+#include <sys/task.h>
 #include <trace/interface.H>
 
 // This component
@@ -30,6 +31,36 @@ namespace TARGETING
 {
 
 #define TARG_NAMESPACE "TARGETING::"
+
+//******************************************************************************
+// _start
+//******************************************************************************
+
+#define TARG_CLASS ""
+
+/**
+ *  @brief Entry point for initialization service to initialize the targeting
+ *      code 
+ *
+ *  @note: Link register is configured to automatically invoke task_end() when 
+ *      this routine returns
+ */
+extern "C"
+void _start(void* io_pArgs)
+{
+    #define TARG_FN "_start(...)"
+
+    TARG_ENTER();
+
+    TargetService& l_targetService = targetService();
+    (void)l_targetService.init();
+
+    TARG_EXIT();
+
+    task_end();
+
+    #undef TARG_FN
+}
 
 //******************************************************************************
 // targetService
@@ -51,6 +82,7 @@ TARGETING::TargetService& targetService()
 trace_desc_t* g_trac_targeting = NULL;
 TRAC_INIT(&g_trac_targeting, "TARG", 4096);
 
+#undef TARG_CLASS
 #define TARG_CLASS "TargetService::"
 
 //******************************************************************************
