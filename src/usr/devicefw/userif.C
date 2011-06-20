@@ -9,7 +9,7 @@
 
 namespace DeviceFW
 {
-    errlHndl_t deviceRead(TargetHandle_t i_target, 
+    errlHndl_t deviceRead(TARGETING::Target* i_target, 
                           void* o_buffer, size_t& io_buflen,
                           AccessType i_accessType, ...)
     {
@@ -26,7 +26,7 @@ namespace DeviceFW
         return errl;
     }
 
-    errlHndl_t deviceWrite(TargetHandle_t i_target, 
+    errlHndl_t deviceWrite(TARGETING::Target* i_target, 
                            void* i_buffer, size_t& io_buflen,
                            AccessType i_accessType, ...)
     {

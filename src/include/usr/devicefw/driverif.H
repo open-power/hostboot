@@ -11,18 +11,10 @@
 #include <devicefw/userif.H>
 #include <stdarg.h>
 #include <builtins.h>
+#include <targeting/targetservice.H>
 
 namespace DeviceFW
 {
-    /** TODO: Update these to real target handle type once that piece of
-     *        code is complete */
-    enum TargetType_t
-    {
-        PROCESSOR = 0,
-
-        LAST_TARGET_TYPE
-    };
-    
     /** @enum AccessType_DriverOnly
      *  @brief Access types to be used internally by drivers for routing
      *         requests to other drivers.
@@ -80,7 +72,7 @@ namespace DeviceFW
      *  @brief Function prototype for registered device-driver operations.
      */
     typedef errlHndl_t(*deviceOp_t)(OperationType,
-                                    TargetHandle_t,
+                                    TARGETING::Target*,
                                     void*, size_t&,
                                     int64_t, va_list);
     
@@ -105,13 +97,13 @@ namespace DeviceFW
      *          // High-level address manipulation routing function.
      *          deviceRegisterRoute(WILDCARD,
      *                              SCOM,
-     *                              MEMORY_CONTROLLER,
-     *                              &scomAdjustMCAddresses);
+     *                              TYPE_CORE,
+     *                              &scomAdjustCoreAddresses);
      *
      *          // Low-level (internal) XSCOM read operation.
      *          deviceRegisterRoute(READ,
      *                              XSCOM,
-     *                              PROCESSOR,
+     *                              TYPE_PROC,
      *                              &xscomPerformRead);
      *  </PRE>
      *
@@ -181,7 +173,7 @@ namespace DeviceFW
      */
     template <typename AccType>
     errlHndl_t deviceOp(OperationType i_opType,
-                        TargetHandle_t i_target,
+                        TARGETING::Target* i_target,
                         void* io_buffer, size_t& io_buflen,
                         AccType i_accessType, ...) 
     { 
@@ -199,12 +191,12 @@ namespace DeviceFW
     template <> 
     void deviceRegisterRoute<>(OperationType i_opType,
                                AccessType i_accessType,
-                               TargetType_t i_targetType,
+                               TARGETING::TYPE i_targetType,
                                deviceOp_t i_regRoute);
     template <> 
     void deviceRegisterRoute<>(OperationType i_opType,
                                AccessType_DriverOnly i_accessType,
-                               TargetType_t i_targetType,
+                               TARGETING::TYPE i_targetType,
                                deviceOp_t i_regRoute);
     template <>
     void deviceRegisterRoute<>(OperationType i_opType,
@@ -219,12 +211,12 @@ namespace DeviceFW
     template <> 
     void deviceRegisterRoute<>(DriverSpecial i_opType,
                                AccessType i_accessType,
-                               TargetType_t i_targetType,
+                               TARGETING::TYPE i_targetType,
                                deviceOp_t i_regRoute);
     template <> 
     void deviceRegisterRoute<>(DriverSpecial i_opType,
                                AccessType_DriverOnly i_accessType,
-                               TargetType_t i_targetType,
+                               TARGETING::TYPE i_targetType,
                                deviceOp_t i_regRoute);
     template <> 
     void deviceRegisterRoute<>(DriverSpecial i_opType,
@@ -243,12 +235,12 @@ namespace DeviceFW
     //          AccType - AccessType, AccessType_DriverOnly (no WILDCARD).
     template <> 
     errlHndl_t deviceOp<>(OperationType i_opType,
-                          TargetHandle_t i_target,
+                          TARGETING::Target* i_target,
                           void* io_buffer, size_t& io_buflen,
                           AccessType i_accessType, ...);
     template <> 
     errlHndl_t deviceOp<>(OperationType i_opType,
-                          TargetHandle_t i_target,
+                          TARGETING::Target* i_target,
                           void* io_buffer, size_t& io_buflen,
                           AccessType_DriverOnly i_accessType, ...);
 

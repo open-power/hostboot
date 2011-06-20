@@ -114,7 +114,7 @@ enum TYPE
     TYPE_ABUS,
     TYPE_PCI,
 
-    TYPE_LAST_IN_RANGE = TYPE_ABUS
+    TYPE_LAST_IN_RANGE
 
 };
 

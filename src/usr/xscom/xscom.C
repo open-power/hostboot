@@ -28,7 +28,7 @@ namespace XSCOM
 // Register XSCcom access functions to DD framework
 DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
                       DeviceFW::XSCOM,
-                      DeviceFW::PROCESSOR,
+                      TARGETING::TYPE_PROC,
                       xscomPerformOp);
 
 /**
@@ -114,7 +114,7 @@ bool XSComRetry(const HMER i_hmer)
  * @return  errlHndl_t
  */
 errlHndl_t xscomOpSanityCheck(const DeviceFW::OperationType i_opType,
-                              const DeviceFW::TargetHandle_t i_target,
+                              const TARGETING::Target* i_target,
                               const void* i_buffer,
                               const size_t& i_buflen,
                               const va_list i_args)
@@ -172,7 +172,7 @@ errlHndl_t xscomOpSanityCheck(const DeviceFW::OperationType i_opType,
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 errlHndl_t xscomPerformOp(DeviceFW::OperationType i_opType,
-                          DeviceFW::TargetHandle_t i_target,
+                          TARGETING::Target* i_target,
                           void* io_buffer,
                           size_t& io_buflen,
                           int64_t i_accessType,

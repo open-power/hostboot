@@ -51,7 +51,7 @@ namespace DeviceFW
                 
                 /** Perform routing.  See deviceOp. */
             errlHndl_t performOp(OperationType i_opType,
-                                 TargetHandle_t i_target,
+                                 TARGETING::Target* i_target,
                                  void* io_buffer, size_t& io_buflen,
                                  int64_t i_accessType, va_list i_addr);
         private:

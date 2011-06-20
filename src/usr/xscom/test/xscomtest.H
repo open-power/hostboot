@@ -13,6 +13,8 @@
 #include <errl/errltypes.H>
 #include <devicefw/userif.H>
 
+using namespace TARGETING;
+
 // Address and data to read/write
 struct testXscomAddrData
 {
@@ -45,7 +47,7 @@ public:
 
         //@todo - Replace printk with traces
 
-        DeviceFW::TargetHandle_t l_testTarget = 0; //@todo - Fix this
+        TARGETING::Target* l_testTarget = MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
         size_t l_size = sizeof(uint64_t);
 
         // Loop thru table

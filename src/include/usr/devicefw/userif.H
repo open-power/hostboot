@@ -11,13 +11,10 @@
 
 #include <stdint.h>
 #include <errl/errltypes.H>
+#include <targeting/targetservice.H>
 
 namespace DeviceFW
 {
-    /* TODO: Update these to real target handle type once that piece of code
-     *       is complete. */
-    typedef int TargetHandle_t;
-
     /** @enum AccessType
      *  @brief Access types for accessing a hardware device.
      */
@@ -68,7 +65,7 @@ namespace DeviceFW
      *  </PRE>
      *
      */
-    errlHndl_t deviceRead(TargetHandle_t i_target, 
+    errlHndl_t deviceRead(TARGETING::Target* i_target, 
                           void* o_buffer, size_t& io_buflen,
                           AccessType i_accessType, ...);
 
@@ -98,7 +95,7 @@ namespace DeviceFW
      *  </PRE>
      *
      */
-    errlHndl_t deviceWrite(TargetHandle_t i_target,
+    errlHndl_t deviceWrite(TARGETING::Target* i_target,
                            void* i_buffer, size_t& io_buflen,
                            AccessType i_accessType, ...);
 

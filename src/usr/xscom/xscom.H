@@ -47,7 +47,7 @@ namespace XSCOM
  * @return  errlHndl_t
  */
 errlHndl_t xscomPerformOp(DeviceFW::OperationType i_opType,
-                          DeviceFW::TargetHandle_t i_target,
+                          TARGETING::Target* i_target,
                           void* io_buffer,
                           size_t& io_buflen,
                           int64_t i_accessType,

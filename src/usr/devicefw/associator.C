@@ -7,6 +7,7 @@
 #include "associator.H"
 
 using namespace ERRORLOG;
+using namespace TARGETING;
 
 namespace DeviceFW
 {
@@ -66,7 +67,7 @@ namespace DeviceFW
             else
             {
                 // Allocate full number of spaces.
-                targets.offset = iv_associations.allocate(LAST_TARGET_TYPE);
+                targets.offset = iv_associations.allocate(TYPE_LAST_IN_RANGE+1);
             }
             iv_associations[ops][i_opType] = targets;
         }
@@ -121,12 +122,16 @@ namespace DeviceFW
     }
 
     errlHndl_t Associator::performOp(OperationType i_opType,
-                                     TargetHandle_t i_target,
+                                     Target* i_target,
                                      void* io_buffer, size_t& io_buflen,
                                      int64_t i_accessType, va_list i_addr) 
     {
+        TARGETING::TYPE l_devType = 
+            (i_target == MASTER_PROCESSOR_CHIP_TARGET_SENTINEL) ? 
+            TYPE_PROC : i_target->getAttr<ATTR_TYPE>();
+
         TRACDCOMP(g_traceBuffer, "Device op requested for (%d, %d, %d)",
-                  i_opType, i_accessType, /*TODO: i_target->type*/PROCESSOR);
+                  i_opType, i_accessType, l_devType);
 
         // The ranges of the parameters should all be verified by the
         // compiler due to the template specializations in driverif.H.  
@@ -167,11 +172,11 @@ namespace DeviceFW
                 // Check access type = i_target->type registrations.
                 const AssociationData* targets =
                     iv_associations[ops[WILDCARD].offset];
-                if (targets[/*TODO: i_target->type*/PROCESSOR].flag)
+                if (targets[l_devType].flag)
                 {
                     l_devRoute =
                         iv_operations[
-                            targets[/*TODO: i_target->type*/PROCESSOR].offset];
+                            targets[l_devType].offset];
                     break;
                 }
             }
@@ -191,11 +196,11 @@ namespace DeviceFW
                 // Check access type = i_target->type registrations.
                 const AssociationData* targets =
                     iv_associations[ops[i_opType].offset];
-                if (targets[/*TODO: i_target->type*/PROCESSOR].flag)
+                if (targets[l_devType].flag)
                 {
                     l_devRoute =
                         iv_operations[
-                            targets[/*TODO: i_target->type*/PROCESSOR].offset];
+                            targets[l_devType].offset];
                     break;
                 }
             }
@@ -220,8 +225,7 @@ namespace DeviceFW
                                    DEVFW_MOD_ASSOCIATOR,
                                    DEVFW_RC_NO_ROUTE_FOUND,
                                    TWO_UINT32_TO_UINT64(i_opType, i_accessType),
-                                        /*TODO: i_target->type*/
-                                   TO_UINT64(PROCESSOR)
+                                   TO_UINT64(l_devType)
                                   );
         }
         else

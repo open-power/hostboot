@@ -7,6 +7,7 @@
 #include "../associator.H"
 
 using namespace DeviceFW;
+using namespace TARGETING;
 
 class AssociatorTest;
 typedef void (AssociatorTest::*test_fn)();
@@ -36,7 +37,7 @@ public:
     // Used for registration testing.
     static
     errlHndl_t performOperation(OperationType i_opType,
-                                TargetHandle_t i_target,
+                                Target* i_target,
                                 void* io_buffer, size_t& io_buflen,
                                 int64_t i_accessType, va_list i_addr)
     {
@@ -60,10 +61,11 @@ public:
         Associator as;
         as.registerRoute(READ,
                          SCOM,
-                         PROCESSOR,
+                         TYPE_PROC,
                          &performOperation);
         
-        errlHndl_t l_errl = as.performOp(READ, TargetHandle_t(), 
+        errlHndl_t l_errl = as.performOp(READ, 
+                                         MASTER_PROCESSOR_CHIP_TARGET_SENTINEL, 
                                          buf, bufsize,
                                          SCOM, va_list());
 
@@ -101,10 +103,11 @@ public:
         Associator as;
         as.registerRoute(WILDCARD,
                          SCOM,
-                         PROCESSOR,
+                         TYPE_PROC,
                          &performOperation);
         
-        errlHndl_t l_errl = as.performOp(WRITE, TargetHandle_t(), 
+        errlHndl_t l_errl = as.performOp(WRITE,
+                                         MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
                                          buf, bufsize,
                                          SCOM, va_list());
 
@@ -145,7 +148,8 @@ public:
                          WILDCARD,
                          &performOperation);
         
-        errlHndl_t l_errl = as.performOp(READ, TargetHandle_t(), 
+        errlHndl_t l_errl = as.performOp(READ, 
+                                         MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
                                          buf, bufsize,
                                          SCOM, va_list());
 
@@ -187,7 +191,8 @@ public:
                          WILDCARD,
                          &performOperation);
         
-        errlHndl_t l_errl = as.performOp(READ, TargetHandle_t(), 
+        errlHndl_t l_errl = as.performOp(READ,
+                                         MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
                                          buf, bufsize,
                                          MAILBOX, va_list());
 

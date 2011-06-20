@@ -19,13 +19,13 @@ namespace SCOM
 // Register SCom access functions to DD framework
 DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
                       DeviceFW::SCOM,
-                      DeviceFW::PROCESSOR,
+                      TARGETING::TYPE_PROC,
                       scomPerformOp);
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 errlHndl_t scomPerformOp(DeviceFW::OperationType i_opType,
-                         DeviceFW::TargetHandle_t i_target,
+                         TARGETING::Target* i_target,
                          void* io_buffer,
                          size_t& io_buflen,
                          int64_t i_accessType,

@@ -34,14 +34,14 @@ namespace DeviceFW
     template <> 
     void deviceRegisterRoute<>(OperationType i_opType,
                                AccessType i_accessType,
-                               TargetType_t i_targetType,
+                               TARGETING::TYPE i_targetType,
                                deviceOp_t i_regRoute)
         __attribute__((alias("DeviceFW_deviceRegisterRoute")));
 
     template <> 
     void deviceRegisterRoute<>(OperationType i_opType,
                                AccessType_DriverOnly i_accessType,
-                               TargetType_t i_targetType,
+                               TARGETING::TYPE i_targetType,
                                deviceOp_t i_regRoute) 
         __attribute__((alias("DeviceFW_deviceRegisterRoute")));
 
@@ -62,14 +62,14 @@ namespace DeviceFW
     template <> 
     void deviceRegisterRoute<>(DriverSpecial i_opType,
                               AccessType i_accessType,
-                              TargetType_t i_targetType,
+                              TARGETING::TYPE i_targetType,
                               deviceOp_t i_regRoute)
         __attribute__((alias("DeviceFW_deviceRegisterRoute")));
 
     template <> 
     void deviceRegisterRoute<>(DriverSpecial i_opType,
                                AccessType_DriverOnly i_accessType,
-                               TargetType_t i_targetType,
+                               TARGETING::TYPE i_targetType,
                                deviceOp_t i_regRoute)
         __attribute__((alias("DeviceFW_deviceRegisterRoute")));
 
@@ -95,7 +95,7 @@ namespace DeviceFW
      */
     extern "C"
     errlHndl_t DeviceFW_deviceOp(OperationType i_opType,
-                                 TargetHandle_t i_target,
+                                 TARGETING::Target* i_target,
                                  void* io_buffer, size_t& io_buflen,
                                  int64_t i_accessType, ...)
     {
@@ -119,14 +119,14 @@ namespace DeviceFW
     //          AccType - AccessType, AccessType_DriverOnly (no WILDCARD).
     template <> 
     errlHndl_t deviceOp<>(OperationType i_opType,
-                          TargetHandle_t i_target,
+                          TARGETING::Target* i_target,
                           void* io_buffer, size_t& io_buflen,
                           AccessType i_accessType, ...)
         __attribute__((alias("DeviceFW_deviceOp")));
 
     template <> 
     errlHndl_t deviceOp<>(OperationType i_opType,
-                          TargetHandle_t i_target,
+                          TARGETING::Target* i_target,
                           void* io_buffer, size_t& io_buflen,
                           AccessType_DriverOnly i_accessType, ...)
         __attribute__((alias("DeviceFW_deviceOp")));        
