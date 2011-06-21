@@ -57,6 +57,13 @@ void VmmManager::initSLB()
     asm volatile("slbia" ::: "memory");
     asm volatile("isync" ::: "memory");    
     asm volatile("slbmte %0, %1" :: "r"(slbRS), "r"(slbRB) : "memory");
+
+    // ESID = 2TB, V = 1, Index = 3
+    slbRB = 0x0000020008000003;
+    // B = 01 (1TB), VSID = 2TB, Ks = 0, Kp = 1, NLCLP = 0
+    slbRS = 0x4000020000000400;
+
+    asm volatile("slbmte %0, %1" :: "r"(slbRS), "r"(slbRB) : "memory");
     asm volatile("isync" ::: "memory");
 }
 

@@ -1,6 +1,6 @@
 ROOTPATH = ../../..
 
-SUBDIRS = lib.d
+SUBDIRS = lib.d kernel.d
 
 include ${ROOTPATH}/config.mk
 

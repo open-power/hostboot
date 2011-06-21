@@ -20,7 +20,7 @@ EXTENDED_MODULES = targeting
 DIRECT_BOOT_MODULES = example
 RUNTIME_MODULES =
 TESTCASE_MODULES = cxxtest testerrl testdevicefw testsyslib \
-                   testscom testxscom testtargeting testinitservice
+                   testscom testxscom testtargeting testinitservice testkernel
 
 RELOCATABLE_IMAGE_LDFLAGS = -pie --export-dynamic
 
