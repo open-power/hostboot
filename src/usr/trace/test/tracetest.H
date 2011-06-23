@@ -10,6 +10,7 @@
 #include <cxxtest/TestSuite.H>
 //#include <trace/interface.H>
 #include <tracinterface.H>
+#include <stdio.h>
 
 class TraceTest : public CxxTest::TestSuite
 {
@@ -120,6 +121,52 @@ public:
                 TRACFCOMP(g_trac_test, "64 Bit Value Test - 0x123456789ABCDEF0: 0x%X",
                           0x123456789ABCDEF0);
 
+            }
+        }
+    }
+
+    /**
+     * @test Test max component name size
+     */
+    void testTracCompName(void)
+    {
+        trace_desc_t *g_trac_test = NULL;
+        char l_comp[] = "EXAMPLE89ABCDEFGHI";
+
+        TRAC_INIT_BUFFER(&g_trac_test, l_comp, 4096);
+
+        if(g_trac_test == NULL)
+        {
+            TS_FAIL("g_trac_test was returned as NULL!");
+        }
+        else
+        {
+            TRACFCOMP(g_trac_test, INFO_MRK"Testing max component name");
+        }
+    }
+
+    /**
+     * @test Test max number of buffers
+     */
+    void testTracMaxBuffers(void)
+    {
+        trace_desc_t *g_trac_test = NULL;
+        char l_comp[8] = "TRACE";
+
+        for (uint32_t i=0; i < 26; i++)
+        {
+            sprintf (l_comp, "TRACE%d", i);
+            
+            g_trac_test = NULL;
+            TRAC_INIT_BUFFER(&g_trac_test, l_comp, 4096);
+
+            if(g_trac_test == NULL)
+            {
+                TS_FAIL("g_trac_test was returned as NULL!");
+            }
+            else
+            {
+                TRACFCOMP(g_trac_test, INFO_MRK"Testing max buffers %u", i);
             }
         }
     }

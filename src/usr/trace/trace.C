@@ -15,6 +15,7 @@
 #include <stdarg.h>
 #include <arch/ppc.H>
 #include <kernel/console.H>
+#include <kernel/pagemgr.H>
 #include <limits.h>
 #include <stdlib.h>
 #include <sys/task.h>
@@ -37,12 +38,30 @@ const uint32_t TRAC_TIME_REAL   = 0;  // upper 32 = seconds, lower 32 = microsec
 const uint32_t TRAC_TIME_50MHZ  = 1;
 const uint32_t TRAC_TIME_200MHZ = 2;
 const uint32_t TRAC_TIME_167MHZ = 3;  // 166666667Hz
-const uint32_t COMP_NAME_SIZE   = 16;
+const uint32_t COMP_NAME_SIZE   = 16; // NULL terminated string
 
-const uint64_t TRAC_DEFAULT_BUFFER_SIZE = 0x1000;
+// Initial implementation is to allocate a fixed 2KB buffer to each 
+// component on request.
+// NOTE: any change to this value will require change to Trace::initBuffer()
+// since currently malloc() does not work for large allocations/fragmentations
+// and we are using PageManager::allocatePage() to allocate space for two 
+// buffers at a time.  Once malloc() works, we can remove this constraint.
+const uint64_t TRAC_DEFAULT_BUFFER_SIZE = 0x0800;  //2KB
 
-// Global trace buffer. - Keep global so it can be found in syms file
-trace_desc_t *g_trac_global = NULL;
+// NOTE: This constant should only be changed to an even number for now.
+// Same reason as above.
+const uint64_t TRAC_MAX_NUM_BUFFERS = 24;
+
+const char * const TRAC_DEFAULT_BUFFER_NAME = "DEFAULT";
+
+// Global component trace buffer array.  Initially allow for 24 buffers max.
+// Keep global so it can be found in syms file
+typedef struct trace_desc_array {
+    char comp[COMP_NAME_SIZE];        // the buffer name
+    trace_desc_t * td_entry;          // pointer to the buffer
+}trace_desc_array_t;
+
+trace_desc_array_t g_desc_array[TRAC_MAX_NUM_BUFFERS];
 
 /******************************************************************************/
 // Trace::getTheInstance
@@ -59,10 +78,7 @@ Trace::Trace()
 {
     mutex_init(&iv_trac_mutex);
 
-    g_trac_global = static_cast<trace_desc_t *>(malloc(TRAC_DEFAULT_BUFFER_SIZE));
-
-    initValuesBuffer(g_trac_global,
-                     "GLOBAL");
+    memset(g_desc_array, 0, sizeof(g_desc_array));
 }
 
 /******************************************************************************/
@@ -83,15 +99,125 @@ void Trace::initBuffer(trace_desc_t **o_td, const char* i_comp,
     /*------------------------------------------------------------------------*/
     /*  Local Variables                                                       */
     /*------------------------------------------------------------------------*/
+    uint32_t i = 0;
+    char * l_td = NULL;
+    char l_comp[COMP_NAME_SIZE] = {'\0'};
 
     /*------------------------------------------------------------------------*/
     /*  Code                                                                  */
     /*------------------------------------------------------------------------*/
     if(*o_td == NULL)
     {
-        // Just assign it to the global buffer since we only have
-        // one buffer
-        *o_td = g_trac_global;
+        // Limit component name to 15 characters. 
+        // Too bad we don't have strncpy(), strncmp()
+        if (strlen(i_comp) > (COMP_NAME_SIZE -1))
+        {
+            memcpy(l_comp, i_comp, COMP_NAME_SIZE - 1);
+        }
+        else
+        {
+            strcpy(l_comp, i_comp);
+        }
+
+        // CRITICAL REGION START
+        mutex_lock(&iv_trac_mutex);
+
+        // Search through the descriptor array for the first unallocated buffer.
+        // The last buffer is the reserved default buffer for any component
+        // which didn't get its own buffer.
+        for (i = 0; i < (TRAC_MAX_NUM_BUFFERS - 1); i++)
+        {
+            if(!strcmp(l_comp, g_desc_array[i].comp))
+            {
+                //printk("Trace::initBuffer - buffer already allocated %d\n", i);
+
+                // Buffer is already allocated.  Return the buffer.
+                *o_td = g_desc_array[i].td_entry;
+
+                break;
+            }
+            else if (strlen(g_desc_array[i].comp) == 0)
+            {
+                //printk("Trace::initBuffer - found unallocated buffer %d\n", i);
+
+                // Found the first unallocated buffer; use this one.
+
+                // Set the component name for the buffer
+                strcpy(g_desc_array[i].comp, l_comp);
+
+                // Allocate memory if needed
+                if (NULL == g_desc_array[i].td_entry)
+                {
+                    //printk("Trace::initBuffer - allocate memory\n");
+
+                    // Allocate memory for two buffers.
+                    // Once malloc() works, we can allocate memory for one
+                    // one buffer at a time.
+                    l_td = static_cast<char *>(PageManager::allocatePage());
+
+                    g_desc_array[i].td_entry = 
+                        reinterpret_cast<trace_desc_t *>(l_td);
+
+                    g_desc_array[i+1].td_entry =
+                        reinterpret_cast<trace_desc_t *>(
+                            l_td + TRAC_DEFAULT_BUFFER_SIZE);
+                }
+
+                // Initialize the buffer header
+                initValuesBuffer(g_desc_array[i].td_entry,
+                                 g_desc_array[i].comp);
+
+                // Return the newly allocated buffer
+                *o_td = g_desc_array[i].td_entry;
+
+                break;
+            }
+        }
+
+        if ((TRAC_MAX_NUM_BUFFERS - 1) == i)
+        {
+            //printk("Trace::initBuffer - allocate default buffer %d\n", i);
+
+            // We're out of buffers to allocate.  
+            // Use the default buffer reserved for everyone else.
+            // Initialize only once
+            if (strlen(g_desc_array[i].comp) == 0)
+            {
+                // Set the component name for the buffer
+                strcpy(g_desc_array[i].comp, TRAC_DEFAULT_BUFFER_NAME);
+
+                // Allocate memory if needed 
+                // Memory should have already been reserved if
+                // TRAC_MAX_NUM_BUFFERS is an even # and we're using
+                // PageManager::allocatePage().  Add check just in
+                // case TRAC_MAC_NUM_BUFFERS is set to an odd number.
+                if (NULL == g_desc_array[i].td_entry)
+                {
+                    //printk("Trace::initBuffer - allocate memory\n");
+
+                    // Allocate memory for buffer
+                    l_td = static_cast<char *>(PageManager::allocatePage());
+
+                    // Throw away the last 2KB for now to keep code simple
+                    // until we decide to add support for variable-sized
+                    // buffers.  Also, once we change to use malloc(), 
+                    // we won't have this problem.
+                    g_desc_array[i].td_entry = 
+                        reinterpret_cast<trace_desc_t *>(l_td);
+                }
+
+                // Initialize the buffer header
+                initValuesBuffer(g_desc_array[i].td_entry,
+                                 g_desc_array[i].comp);
+            }
+
+            // Return the default buffer
+            *o_td = g_desc_array[i].td_entry;
+        }
+
+        mutex_unlock(&iv_trac_mutex);
+        // CRITICAL REGION END
+
     }
 
     return;
@@ -166,7 +292,7 @@ void Trace::trace_adal_write_all(trace_desc_t *io_td,
         // need to add that on to total size
         l_entry_size += sizeof(uint32_t);
 
-        // Now add on size for acutal number of arguments we're tracing
+        // Now add on size for actual number of arguments we're tracing
         l_entry_size += (num_args * sizeof(uint64_t));
 
         // Word align the entry
@@ -407,36 +533,57 @@ void Trace::convertTime(trace_entry_stamp_t *o_entry)
 }
 
 /******************************************************************************/
-// getTd - TODO
+// getTd
 /******************************************************************************/
 trace_desc_t * Trace::getTd(const char *i_comp)
 {
     /*------------------------------------------------------------------------*/
     /*  Local Variables                                                       */
     /*------------------------------------------------------------------------*/
-    //uint32_t            l_num_des = 0;
-    //uint32_t            i=0;
-    //trace_desc_t *      l_td = NULL;
+    uint32_t            i=0;
+    trace_desc_t *      l_td = NULL;
+    char                l_comp[COMP_NAME_SIZE] = {'\0'};
 
     /*------------------------------------------------------------------------*/
     /*  Code                                                                  */
     /*------------------------------------------------------------------------*/
 
-#if 0
-    l_num_des = sizeof(g_des_array) / sizeof(trace_descriptor_array_t);
-
-    for(i=0;i<l_num_des;i++)
+    if (strlen(i_comp) != 0)
     {
-        if(memcmp(i_comp,(g_des_array[i].entry)->comp,(size_t)COMP_NAME_SIZE) == 0)
+        // Limit component name to 15 characters. 
+        if (strlen(i_comp) > (COMP_NAME_SIZE -1))
         {
-            // Found the component
-            l_td = g_des_array[i].entry;
-            break;
+            memcpy(l_comp, i_comp, COMP_NAME_SIZE - 1);
+        }
+        else
+        {
+            strcpy(l_comp, i_comp);
+        }
+
+        // Search all allocated component buffers
+        for(i=0;
+            (i < (TRAC_MAX_NUM_BUFFERS - 1)) && 
+            (strlen(g_desc_array[i].comp) != 0);
+            i++)
+        {
+            if(!strcmp(l_comp, g_desc_array[i].comp))
+            {
+                // Found the component buffer
+                l_td = g_desc_array[i].td_entry;
+                break;
+            }
+        }
+
+        if (((TRAC_MAX_NUM_BUFFERS - 1) == i) &&
+            (strlen(g_desc_array[i].comp) != 0))
+            
+        {
+            // Must be the default buffer
+            l_td = g_desc_array[i].td_entry;
         }
     }
-#endif
-    // Only one trace buffer currently
-    return(g_trac_global);
+
+    return(l_td);
 }
 
 /******************************************************************************/

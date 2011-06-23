@@ -7,9 +7,11 @@
 #include <example/examplerc.H>
 #include <errl/errlentry.H>
 
+#if 0
 //static mutex_t value = MUTEX_INITIALIZER;
 trace_desc_t *g_trac_test = NULL;
 TRAC_INIT(&g_trac_test, "EXAMPLE", 4096);
+#endif
 
 extern "C"
 void _start(void *ptr)
