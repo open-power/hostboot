@@ -1,17 +1,22 @@
-all: ALL ${EXTRA_PARTS}
+all:
+	${MAKE} gen_pass
+	${MAKE} code_pass
 
 ifdef MODULE
 OBJDIR = ${ROOTPATH}/obj/modules/${MODULE}
 BEAMDIR = ${ROOTPATH}/obj/beam/${MODULE}
+GENDIR = ${ROOTPATH}/obj/genfiles/
 IMGDIR = ${ROOTPATH}/img
 EXTRACOMMONFLAGS += -fPIC -Bsymbolic -Bsymbolic-functions
 LIBS += $(addsuffix .so, $(addprefix lib, ${MODULE}))
 MODULE_INIT = ${ROOTPATH}/obj/core/module_init.o
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr ${GENDIR}
 else
 OBJDIR = ${ROOTPATH}/obj/core
 BEAMDIR = ${ROOTPATH}/obj/beam/core
+GENDIR = ${ROOTPATH}/obj/genfiles/
 IMGDIR = ${ROOTPATH}/img
+EXTRAINCDIR += ${GENDIR}
 endif
 
 TRACEPP = ${ROOTPATH}/src/build/trace/tracepp
@@ -170,7 +175,10 @@ ${IMGDIR}/hbotStringFile : ${IMAGES}
 	${ROOTPATH}/src/build/trace/tracehash_hb.pl -c -d ${ROOTPATH}/obj -s $@
 
 %.d: ${OBJECTS}
-	cd ${basename $@} && ${MAKE} all
+	cd ${basename $@} && ${MAKE} code_pass
+
+%.gen_pass:
+	cd ${basename $@} && ${MAKE} gen_pass
 
 %.clean:
 	cd ${basename $@} && ${MAKE} clean
@@ -178,10 +186,17 @@ ${IMGDIR}/hbotStringFile : ${IMAGES}
 %.beamdir:
 	cd ${basename $@} && ${MAKE} beam
 
-ALL: ${OBJECTS} ${SUBDIRS} ${LIBRARIES} ${EXTRA_LIDS_}
+code_pass: ${OBJECTS} ${SUBDIRS} ${LIBRARIES} ${EXTRA_LIDS_} ${EXTRA_PARTS}
 ifdef IMAGES
 	${MAKE} ${IMAGES} ${IMAGE_EXTRAS}
 endif
+
+gen_pass:
+	mkdir -p ${GENDIR}
+	${MAKE} GEN_PASS
+
+_GENFILES = $(addprefix ${GENDIR}/, ${GENFILES})
+GEN_PASS: ${_GENFILES} ${SUBDIRS:.d=.gen_pass}
 
 ${BEAMDIR}/%.beam : %.C
 	mkdir -p ${BEAMDIR}
@@ -205,9 +220,9 @@ clean: ${SUBDIRS:.d=.clean}
 	       ${IMAGES} ${IMAGES:.bin=.list} ${IMAGES:.bin=.syms} \
 	       ${IMAGES:.bin=.bin.modinfo} ${IMAGES:.ruhx=.lid} \
 	       ${IMAGES:.ruhx=.lidhdr} ${IMAGE_EXTRAS} ${EXTRA_LIDS_} \
-	       ${EXTRA_OBJS})
+	       ${EXTRA_OBJS} ${_GENFILES})
 
-cscope: ALL
+cscope: code_pass
 	mkdir -p ${ROOTPATH}/obj/cscope
 	(cd ${ROOTPATH}/obj/cscope ; rm -f cscope.* ; \
 	    find ../../ -name '*.[CHchS]' -type f -fprint cscope.files; \
