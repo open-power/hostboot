@@ -1,7 +1,7 @@
 ROOTPATH = ../../..
 MODULE = trace
 
-OBJS = trace.o tracebuffer.o
+OBJS = trace.o tracebuffer.o assert.o
 
 SUBDIRS = test.d
 

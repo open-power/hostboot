@@ -33,7 +33,7 @@ void barrier_init (barrier_t * o_barrier, uint64_t i_count)
 
 void barrier_destroy (barrier_t * i_barrier)
 {
-    assert(i_barrier->iv_missing == i_barrier->iv_count);
+    crit_assert(i_barrier->iv_missing == i_barrier->iv_count);
     return;
 }
 

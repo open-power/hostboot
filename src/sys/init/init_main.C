@@ -33,7 +33,7 @@ void init_main(void* unused)
     {
         printk( "ERROR: init_main: failed to launch initservice: %d\n", tidrc );
 
-        assert( 0 );        // stop here.
+        crit_assert( 0 );        // stop here.
     }
 
     // should never reach this point...

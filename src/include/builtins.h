@@ -45,6 +45,16 @@ extern "C"
 #define PACKED __attribute__((packed))
 
 /**
+ * Compiler hint for branch conditions. "condition is likely to be true"
+ */
+#define likely(expr) __builtin_expect((expr),1)
+
+/**
+ * Compiler hint for branch conditions. "condition is likely to be false"
+ */
+#define unlikely(expr) __builtin_expect((expr),0)
+
+/**
  * Get the value of the link register
  *
  * @return the value of the link register
@@ -52,7 +62,7 @@ extern "C"
 ALWAYS_INLINE
 static inline void *linkRegister()
 {
-    return __builtin_return_address(1);
+    return __builtin_return_address(0);
 }
 
 /**

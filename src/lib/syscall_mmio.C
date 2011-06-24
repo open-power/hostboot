@@ -33,7 +33,7 @@ mutex_t * mmio_xscom_mutex()
     asm volatile("mr %0, 13" : "=r"(task));
 
     // Ensure task is pinned.
-    assert(task->affinity_pinned);
+    crit_assert(task->affinity_pinned);
     
     // Return mutex from cpu structure.
     return &task->cpu->xscom_mutex;

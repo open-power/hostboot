@@ -77,7 +77,7 @@ uint64_t FutexManager::_wake(uint64_t * i_addr, uint64_t i_count)
 
         // This means we had a waiter in the queue, but that waiter had
         // a Null task assigned to it.  This should NEVER happen
-        assert(wait_task != NULL);
+        kassert(wait_task != NULL);
 
         wait_task->cpu->scheduler->addTask(wait_task);
         ++started;

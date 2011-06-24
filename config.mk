@@ -7,7 +7,8 @@ OBJDIR = ${ROOTPATH}/obj/modules/${MODULE}
 BEAMDIR = ${ROOTPATH}/obj/beam/${MODULE}
 GENDIR = ${ROOTPATH}/obj/genfiles/
 IMGDIR = ${ROOTPATH}/img
-EXTRACOMMONFLAGS += -fPIC -Bsymbolic -Bsymbolic-functions
+EXTRACOMMONFLAGS += -fPIC -Bsymbolic -Bsymbolic-functions 
+CUSTOMFLAGS += -D__HOSTBOOT_MODULE=${MODULE}
 LIBS += $(addsuffix .so, $(addprefix lib, ${MODULE}))
 MODULE_INIT = ${ROOTPATH}/obj/core/module_init.o
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr ${GENDIR}
