@@ -11,13 +11,20 @@
 /**
  *  @brief  Max number of retries if XSCOM fails with certain errors
  */
-#define     MAX_XSCOM_RETRY     1
+#define MAX_XSCOM_RETRY     1
+
+/**
+ *  @brief  The (fixed) base address value for master proc
+ */
+//@todo - Verify this value for HW
+#define MASTER_PROC_XSCOM_BASE_ADDR     0x300000000000
 
 /**
  *  @brief  Type definition for XSCom address and Chip ID
  */
 typedef uint32_t XSComAddress_t;
 typedef uint16_t XSComChipId_t;
+typedef uint16_t XSComNodeId_t;
 typedef uint64_t XSComBase_t;
 
 namespace XSCOM
@@ -135,15 +142,15 @@ class XSComP8Address
      * @brief Constructor of XSComP8Address class
      *
      * @param[in]   i_addr          PCB address of the register being accessed
-     *
+     * @param[in]   i_nodeId        Node number where the processor chip resides
      * @param[in]   i_chipId        Chip number of the processor chip that
      *                              holds the register being accessed.
-     *
      * @param[in]   i_mXSComBase    Base address of XSCom address range.
      *
      * @return  None
      */
      ALWAYS_INLINE inline XSComP8Address(const XSComAddress_t i_addr,
+                                         const XSComNodeId_t i_nodeId,
                                          const XSComChipId_t i_chipId,
                                          const XSComBase_t i_mXSComBase);
 
@@ -181,7 +188,8 @@ class XSComP8Address
         {
             uint64_t mReserved1:18;     // Not currently used (0:17)
             uint64_t mBaseAddress:5;    // Base address (18:22)
-            uint64_t mChipId:6;         // Targeted chip ID (23:28)
+            uint64_t mNodeId:3;         // Node where target resides (23:25)
+            uint64_t mChipId:3;         // Targeted chip ID (26:28)
             uint64_t mSComAddrHi:27;    // PCB Address High (29:55)
             uint64_t mCacheLine:1;      // Cached line (56)
             uint64_t mSComAddrLo:4;     // PCB Address low (57:60)
@@ -198,10 +206,12 @@ class XSComP8Address
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 XSComP8Address::XSComP8Address(const XSComAddress_t i_addr,
+                               const XSComNodeId_t i_nodeId,
                                const XSComChipId_t i_chipId,
                                const XSComBase_t i_mXSComBase)
 :mMmioAddress(i_mXSComBase)
 {
+    mAddressParts.mNodeId = i_nodeId;
     mAddressParts.mChipId = i_chipId;
     mAddressParts.mSComAddrHi = i_addr >> 4; // Get 27-bits
     mAddressParts.mSComAddrLo = i_addr;      // Get 4 bits

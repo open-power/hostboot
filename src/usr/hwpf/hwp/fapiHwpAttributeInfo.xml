@@ -1,0 +1,50 @@
+<!-- XML file specifying HW Procedure requested attributes. -->
+<!-- This is just the initial test version. HWPs will replace with an official version. -->
+
+<attributes>
+  <!-- *********************************************************************** -->
+  <attribute>
+    <id>ATTR_TEST_UINT8</id>
+    <description>Test Attribute UINT8</description>
+    <valueType>uint8</valueType>
+  </attribute>
+  <!-- *********************************************************************** -->
+  <attribute>
+    <id>ATTR_TEST_UINT32</id>
+    <description>Test Attribute UINT32</description>
+    <valueType>uint32</valueType>
+  </attribute>
+  <!-- *********************************************************************** -->
+  <attribute>
+    <id>ATTR_TEST_UINT64</id>
+    <description>Test Attribute UINT64</description>
+    <valueType>uint64</valueType>
+  </attribute>
+  <!-- *********************************************************************** -->
+  <attribute>
+    <id>ATTR_TEST_UINT8_ARRAY</id>
+    <description>Test Attribute UINT8 ARRAY</description>
+    <valueType>uint8</valueType>
+    <array>3</array>
+  </attribute>
+  <!-- *********************************************************************** -->
+  <attribute>
+    <id>ATTR_TEST_UINT32_ARRAY</id>
+    <description>Test Attribute UINT32 ARRAY</description>
+    <valueType>uint32</valueType>
+    <array>4</array>
+  </attribute>
+  <!-- *********************************************************************** -->
+  <attribute>
+    <id>ATTR_TEST_UINT64_ARRAY</id>
+    <description>Test Attribute UINT64 ARRAY</description>
+    <valueType>uint64</valueType>
+    <array>5</array>
+  </attribute>
+  <!-- *********************************************************************** -->
+  <attribute>
+    <id>ATTR_TEST_STRING</id>
+    <description>Test Attribute STRING</description>
+    <valueType>string</valueType>
+  </attribute>
+</attributes>

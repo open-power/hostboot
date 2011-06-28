@@ -15,6 +15,7 @@
 #include <trace/interface.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
+#include <targeting/targetservice.H>
 #include <xscom/xscomreasoncodes.H>
 #include "xscom.H"
 
@@ -199,11 +200,22 @@ errlHndl_t xscomPerformOp(DeviceFW::OperationType i_opType,
         io_buflen = 0;
 
         // Setup the address
-        // @todo: Hard code chipId and Base address for now
-        XSComChipId_t l_chipId = 0;
-        XSComBase_t l_XSComBaseAddr = 0x300000000000; // Node0,chip0, Simics map
-        XSComP8Address l_mmioAddr(va_arg(i_args,uint64_t), l_chipId,
-                                 l_XSComBaseAddr);
+
+        // Init values are for master processor, as PNOR may not
+        // yet available
+        XSComBase_t l_XSComBaseAddr = MASTER_PROC_XSCOM_BASE_ADDR;
+        TARGETING::XscomChipInfo l_xscomChipInfo = {0};
+        if (i_target != TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL)
+        {
+            l_XSComBaseAddr =
+                    i_target->getAttr<TARGETING::ATTR_XSCOM_BASE_ADDRESS>();
+            l_xscomChipInfo =
+                    i_target->getAttr<TARGETING::ATTR_XSCOM_CHIP_INFO>();
+        }
+
+        // Build the XSCom address
+        XSComP8Address l_mmioAddr(va_arg(i_args,uint64_t), l_xscomChipInfo.nodeId,
+                                  l_xscomChipInfo.chipId, l_XSComBaseAddr);
 
         // Re-init l_retry for loop
         l_retry = false;
@@ -215,22 +227,22 @@ errlHndl_t xscomPerformOp(DeviceFW::OperationType i_opType,
         l_XSComMutex = mmio_xscom_mutex();
         mutex_lock(l_XSComMutex);
 
-        // Single XSCom read
-        // Keep MMIO reading until XSCOM successfully done or error
+        // Calculate MMIO addr
+        uint64_t l_page = l_mmioAddr.page();
+        uint64_t l_offset_64 = (l_mmioAddr.offset()/sizeof(uint64_t));
+        uint64_t* l_virtAddr = static_cast<uint64_t*>
+                (mmio_map(reinterpret_cast<void*>(l_page), 1));
+
+        // Keep MMIO access until XSCOM successfully done or error
+        uint64_t l_data = 0;
         do
         {
             // Reset status
             resetHMERStatus();
 
-            // Calculate MMIO addr
-            uint64_t l_page = l_mmioAddr.page();
-            uint64_t l_offset_64 = (l_mmioAddr.offset()/sizeof(uint64_t));
-            uint64_t* l_virtAddr = static_cast<uint64_t*>
-                    (mmio_map(reinterpret_cast<void*>(l_page), 1));
-
             // The dereferencing should handle Cache inhibited internally
             // Use local variable and memcpy to avoid unaligned memory access
-            uint64_t l_data = 0;
+            l_data = 0;
             if (i_opType == DeviceFW::READ)
             {
                  l_data = *(l_virtAddr + l_offset_64);
@@ -242,23 +254,31 @@ errlHndl_t xscomPerformOp(DeviceFW::OperationType i_opType,
                 *(l_virtAddr + l_offset_64) = l_data;
             }
 
-            // @todo - Need to un-map for now
-            mmio_unmap(l_virtAddr, 1);
-
-            TRACFCOMP(g_trac_xscom, "xscomPerformOp: OpType 0x%.8X, Address %llx, Page %llx; Offset %llx; VirtAddr %llx; l_virtAddr+l_offset %llx",
-                    i_opType, static_cast<uint64_t>(l_mmioAddr), l_page,
-                    l_offset_64, l_virtAddr, l_virtAddr + l_offset_64);
-
-             // Check for error or done
+            // Check for error or done
             l_hmer = waitForHMERStatus();
 
-        } while (l_hmer.mXSComStatus == HMER::XSCOM_BLOCKED); // Single read
+        } while (l_hmer.mXSComStatus == HMER::XSCOM_BLOCKED);
+
+        // @todo - Need to un-map for now
+        mmio_unmap(l_virtAddr, 1);
 
         // Unlock
         mutex_unlock(l_XSComMutex);
 
         // Done, un-pin
         task_affinity_unpin();
+
+        TRACFCOMP(g_trac_xscom, "xscomPerformOp: OpType 0x%.8X, Address %llx, Page %llx; Offset %llx; VirtAddr %llx; l_virtAddr+l_offset %llx",
+                i_opType, static_cast<uint64_t>(l_mmioAddr), l_page,
+                l_offset_64, l_virtAddr, l_virtAddr + l_offset_64);
+
+        if (i_opType == DeviceFW::READ)
+        {
+            TRACFCOMP(g_trac_xscom, "xscomPerformOp: Read data: %llx", l_data);        }
+        else
+        {
+            TRACFCOMP(g_trac_xscom, "xscomPerformOp: Write data: %llx", l_data);
+        }
 
         // Handle error
         if (l_hmer.mXSComStatus != HMER::XSCOM_GOOD)

@@ -13,6 +13,8 @@
 #include <errl/errltypes.H>
 #include <devicefw/userif.H>
 
+extern trace_desc_t* g_trac_xscom;
+
 using namespace TARGETING;
 
 // Address and data to read/write
@@ -44,32 +46,25 @@ public:
      */
     void testXscom1(void)
     {
-
-        //@todo - Replace printk with traces
-
         TARGETING::Target* l_testTarget = MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
         size_t l_size = sizeof(uint64_t);
 
         // Loop thru table
+        errlHndl_t l_err = NULL;
         for( uint32_t l_num=0; l_num < g_xscomAddrTableSz; l_num++)
         {
              testXscomAddrData l_testEntry = g_xscomAddrTable[l_num];
 
              // Perform XSComOM read
              uint64_t l_data = 0;
-             errlHndl_t l_err = deviceRead(l_testTarget,
+             l_err = deviceRead(l_testTarget,
                                 &l_data,
                                 l_size,
                                 DEVICE_SCOM_ADDRESS(l_testEntry.addr));
              if (l_err)
              {
-                 printk("\ntestXscom1: XSCom read: deviceRead() fails (1) !\n");
-             }
-             else
-             {
-                 printk("\ntestXscom1: XSCom read (1) Address 0x%.8X, Data %llx\n\n\n",
-                          l_testEntry.addr,
-                          (long long unsigned)l_data);
+                 TS_FAIL("testXscom1: XSCom read: deviceRead() fails! Error committed.");
+                 break;
              }
 
              // Perform an XSCom write
@@ -81,14 +76,8 @@ public:
 
              if (l_err)
              {
-                 printk("\ntestXscom1: XSCom write: deviceWrite() fails!\n");
+                 TS_FAIL("testXscom1: XSCom write: deviceWrite() fails!");
                  break;
-             }
-             else
-             {
-                 printk("\ntestXscom1: XSCom write Address 0x%.8X, Data %llx\n",
-                         l_testEntry.addr,
-                         (long long unsigned)l_testEntry.data);
              }
 
              // Read back
@@ -99,16 +88,21 @@ public:
                                 DEVICE_SCOM_ADDRESS(l_testEntry.addr));
              if (l_err)
              {
-                 printk("\ntestXscom1: XSCom read: deviceRead() fails (2) !\n");
+                 TS_FAIL("testXscom1: XSCom read back: deviceRead() fails!");
+                 break;
              }
-             else
-             {
-                 printk("\ntestXscom1: XSCom read (2) Address 0x%.8X, Data %llx\n\n\n",
-                          l_testEntry.addr,
-                          (long long unsigned)l_data);
-             }
-         }
-         return;
+        }
+
+        if (l_err)
+        {
+            TS_FAIL("testXscom1 failed!  Error committed.");
+            errlCommit(l_err);
+        }
+        else
+        {
+            TS_TRACE("testXscom1 runs successfully!");
+        }
+        return;
     }
 };
 

@@ -1,0 +1,15 @@
+<!-- XML file specifying HW Procedure generated errors. -->
+<!-- This is just the initial test version. HWPs will replace with an official version. -->
+
+<hwpErrors>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <id>RC_TEST_ERROR_A</id>
+    <description>Test Error A</description>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <id>RC_TEST_ERROR_B</id>
+    <description>Test Error B</description>
+  </hwpError>
+</hwpErrors>
