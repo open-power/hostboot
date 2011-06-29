@@ -146,6 +146,48 @@ public:
     }
 
     /**
+     * @test Test trace macros
+     */
+    void testTracMacros(void)
+    {
+        trace_desc_t *g_trac_test = NULL;
+        char l_comp[] = "TEST";
+
+        #define __COMP_TD__ g_trac_test
+        #define __COMP_NAMESPACE__ "TRACE"
+        #define __COMP_CLASS__ "TraceTest"
+        #define __COMP_FN__ "testTracMacros"
+
+        TRAC_INIT_BUFFER(&g_trac_test, l_comp, 4096);
+
+        if(g_trac_test == NULL)
+        {
+            TS_FAIL("g_trac_test was returned as NULL!");
+        }
+        else
+        {
+            TRAC_ENTER("testTracMacros");
+            TRAC_ENTER_();
+            TRAC_INF("Testing Info Mark");
+            TRAC_ERR("Testing Error Mark");
+            TRAC_EXIT("testTracMacros");
+            TRAC_EXIT_();
+
+            DTRAC_ENTER("testTracMacros - Debug Trace");
+            DTRAC_ENTER_(" - Debug Trace");
+            DTRAC_INF("Testing Debug Info Mark");
+            DTRAC_ERR("Testing Debug Error Mark");
+            DTRAC_EXIT("testTracMacros - Debug Trace");
+            DTRAC_EXIT_(" - Debug Trace");
+        }
+
+        #undef __COMP_FN__
+        #undef __COMP_CLASS__
+        #undef __COMP_NAMESPACE__
+        #undef __COMP_TD__
+    }
+
+    /**
      * @test Test max number of buffers
      */
     void testTracMaxBuffers(void)

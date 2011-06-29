@@ -101,6 +101,7 @@ const uint32_t TRACE_FIELD   = 0;       //Indicates trace is field
 #define TRACDCOMP(des,printf_string,args...) \
         TRACE::Trace::getTheInstance().trace_adal_write_all((des),__ALL_HASH(printf_string,-1),__LINE__,TRACE_DEBUG, ##args)
 
+
 /**
  * @fn void TRACDBIN(des,descString,address,length)
  * @brief Defines debug binary trace
@@ -164,7 +165,47 @@ const uint32_t TRACE_FIELD   = 0;       //Indicates trace is field
                              address,                              \
                              len,                                  \
                              TRACE_FIELD)
-			
+
+/**
+ * Field and Debug trace macros
+ * Users must define COMP_TD for their components prior to using macros.
+ * Additionally, users must define COMP_NAMESPACE, COMP_CLASS & COMP_FN 
+ * prior to using the ENTER_/EXIT_ macros.
+ * Example:
+ *     #define COMP_TD g_my_trace_desc
+ *     #define COMP_NAMESPACE "my_namespace"
+ *     #define COMP_CLASS "my_class"
+ *     #define COMP_FN "my_function"
+ */
+
+#define TRAC_ENTER(args...) \
+        TRACFCOMP(__COMP_TD__, ENTER_MRK args)
+#define TRAC_EXIT(args...) \
+        TRACFCOMP(__COMP_TD__, EXIT_MRK args)
+#define TRAC_INF(args...) \
+        TRACFCOMP(__COMP_TD__, INFO_MRK args)
+#define TRAC_ERR(args...) \
+        TRACFCOMP(__COMP_TD__, ERR_MRK args)
+
+#define TRAC_ENTER_(args...) \
+        TRACFCOMP(__COMP_TD__, ENTER_MRK __COMP_NAMESPACE__ "::" __COMP_CLASS__ "::" __COMP_FN__ " " args)
+#define TRAC_EXIT_(args...) \
+        TRACFCOMP(__COMP_TD__, EXIT_MRK __COMP_NAMESPACE__ "::" __COMP_CLASS__ "::" __COMP_FN__ " " args)
+
+#define DTRAC_ENTER(args...) \
+        TRACDCOMP(__COMP_TD__, ENTER_MRK args)
+#define DTRAC_EXIT(args...) \
+        TRACDCOMP(__COMP_TD__, EXIT_MRK args)
+#define DTRAC_INF(args...) \
+        TRACDCOMP(__COMP_TD__, INFO_MRK args)
+#define DTRAC_ERR(args...) \
+        TRACDCOMP(__COMP_TD__, ERR_MRK args)
+
+#define DTRAC_ENTER_(args...) \
+        TRACDCOMP(__COMP_TD__, ENTER_MRK __COMP_NAMESPACE__ "::" __COMP_CLASS__ "::" __COMP_FN__ " " args)
+#define DTRAC_EXIT_(args...) \
+        TRACDCOMP(__COMP_TD__, EXIT_MRK __COMP_NAMESPACE__ "::" __COMP_CLASS__ "::" __COMP_FN__ " " args)
+
 /**
  * @fn void TRAC_INIT_BUFFER(des,comp_name, bufferSize)
  * @brief Initializes trace buffer for component
