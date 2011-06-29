@@ -3,22 +3,29 @@
 #include <string.h>
 #include <kernel/console.H>
 #include <sys/time.h>
+#include <sys/sync.h>
+
+#include <cxxtest/TestSuite.H>
 
 namespace CxxTest
 {
-    uint64_t g_ModulesStarted = 0;
-    uint64_t g_ModulesCompleted = 0;
+    uint64_t    g_ModulesStarted = 0;
+    uint64_t    g_ModulesCompleted = 0;
 }
 
-/* Iterate through all modules in the VFS named "libtest*" and create children
- * tasks to execute them. 
+/**
+ *  @brief _start()
+ *  Iterate through all modules in the VFS named "libtest*" and create children
+ * tasks to execute them.
+ *
  */
 extern "C"
-void _start(void*) 
+void _start(void*)
 {
     VfsSystemModule* vfsItr = &VFS_MODULES[0];
+    tid_t   tidrc   =   0;
 
-    printk( "Executing CxxTestExec module.\n");
+    printk( "Executing CxxTestExec.\n");
     __sync_add_and_fetch(&CxxTest::g_ModulesStarted, 1);
 
     while(vfsItr->module[0] != '\0')
@@ -28,9 +35,15 @@ void _start(void*)
             if (NULL != vfsItr->start)
             {
                 __sync_add_and_fetch(&CxxTest::g_ModulesStarted, 1);
-                printk( "running %s, ModulesStarted=0x%ld\n",
-                        vfsItr->module, CxxTest::g_ModulesStarted );
-                task_exec(vfsItr->module, NULL);
+
+                printk( "CxxTestExec %d : running %s, ModulesStarted=0x%ld\n",
+                        __LINE__,
+                        vfsItr->module,
+                        CxxTest::g_ModulesStarted );
+                tidrc = task_exec( vfsItr->module, NULL );
+                printk( "CxxTestExec %d : tidrc=%d\n",
+                        __LINE__, tidrc );
+
             }
         }
         vfsItr++;
@@ -38,6 +51,13 @@ void _start(void*)
 
     __sync_add_and_fetch(&CxxTest::g_ModulesCompleted, 1);
     printk( " ModulesCompleted=0x%ld\n", CxxTest::g_ModulesCompleted );
+
+
+    printk( "total tests:   %ld\n", CxxTest::g_TotalTests  );
+    printk( "failed tests:  %ld\n", CxxTest::g_FailedTests );
+    printk( "warnings:      %ld\n", CxxTest::g_Warnings    );
+    printk( "trace calls:   %ld\n", CxxTest::g_TraceCalls  );
+
 
     task_end();
 }

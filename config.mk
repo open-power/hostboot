@@ -8,6 +8,9 @@ BEAMDIR = ${ROOTPATH}/obj/beam/${MODULE}
 GENDIR = ${ROOTPATH}/obj/genfiles/
 IMGDIR = ${ROOTPATH}/img
 EXTRACOMMONFLAGS += -fPIC -Bsymbolic -Bsymbolic-functions 
+ifdef STRICT
+        EXTRACOMMONFLAGS += -Weffc++
+endif
 CUSTOMFLAGS += -D__HOSTBOOT_MODULE=${MODULE}
 LIBS += $(addsuffix .so, $(addprefix lib, ${MODULE}))
 MODULE_INIT = ${ROOTPATH}/obj/core/module_init.o

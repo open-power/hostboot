@@ -15,7 +15,7 @@
 
 #include    <cxxtest/TestSuite.H>
 
-#include    "../initservice.H"
+#include    "../baseinitsvc/initservice.H"
 
 /**
  * @brief   set up a dummy TaskInfo struct for test 1.
@@ -24,26 +24,27 @@
  */
 const   INITSERVICE::TaskInfo    TASK_TEST1  =  {
         "libtestinitsvc_noexist.so" ,                   // taskname
+        NULL,                                           // ptr to fn
         {
-                true,                               // startflag=true, try to start
-                INITSERVICE::BASE_MODULE,           // Base Module
-                INITSERVICE::INIT_SVC_TEST1_ID,     // module id for errorlog
+                INITSERVICE::START_TASK,                // startflag=true, try to start
+                INITSERVICE::BASE_IMAGE,                // Base Module
+                INITSERVICE::INIT_SVC_TEST1_ERRL_ID,    // module id for errorlog
         },
 };
 
 
 /**
  * @brief   set up a dummy TaskInfo struct for test 2.
- *  example.C does indeed have a _start() function so this should return OK.
+ *  tasktest2 does indeed have a _start() function so this should return OK.
  *
- *  @todo   this needs to be replaced with a test module
  */
 const   INITSERVICE::TaskInfo    TASK_TEST2  =  {
-        "libexample.so" ,                           // taskname
+        "libtasktest2.so" ,                               // taskname
+        NULL,                                           // ptr to fn
         {
-                true,                               // startflag=true, try to start
-                INITSERVICE::BASE_MODULE,           // Base Module
-                INITSERVICE::INIT_SVC_TEST2_ID,     // module id for errorlog
+                INITSERVICE::START_TASK,                // startflag=true, try to start
+                INITSERVICE::BASE_IMAGE,                // Base Module
+                INITSERVICE::INIT_SVC_TEST2_ERRL_ID,    // module id for errorlog
         },
 };
 
@@ -55,11 +56,12 @@ const   INITSERVICE::TaskInfo    TASK_TEST2  =  {
  *  @todo   this needs to be replaced with a test module
  */
 const   INITSERVICE::TaskInfo    TASK_TEST3  =  {
-        "libtrace.so" ,                           // taskname
+        "libtrace.so" ,                                 // taskname
+        NULL,                                           // ptr to fn
         {
-                true,                               // startflag=true, try to start
-                INITSERVICE::BASE_MODULE,           // Base Module
-                INITSERVICE::INIT_SVC_TEST3_ID,     // module id for errorlog
+                INITSERVICE::START_TASK,                // startflag=true, try to start
+                INITSERVICE::BASE_IMAGE,                // Base Module
+                INITSERVICE::INIT_SVC_TEST3_ERRL_ID,    // module id for errorlog
         },
 };
 
@@ -81,18 +83,18 @@ public:
      */
     void testInitServiceStartTask1(void)
     {
+
         errlHndl_t  errl    = NULL;
         /**
          * @todo    use a separate instance here, not the singleton
          */
-        INITSERVICE::InitService   &l_is = INITSERVICE::InitService::getTheInstance();
-        tid_t   tidrc   =   0;
+        INITSERVICE::InitService &l_is = INITSERVICE::InitService::getTheInstance();
 
-
-        TS_TRACE( "=====>Attempt to run a nonexistent task.\n  ");
-        tidrc   =   l_is.startTask( TASK_TEST1, errl );
-        printk( "testInitServiceStartTask1: startTask returned %d: errl=%p\n", tidrc, errl );
-        if ( (int16_t)tidrc < 0  )
+        TS_TRACE( "=====>Attempt to run a nonexistent task, expect an ERROR.");
+        errl = l_is.startTask(  &TASK_TEST1,        // task struct
+                                NULL,               //  args
+                                errl );             // errlog
+        if ( errl  )
         {
             TS_TRACE( "SUCCESS: startTask returned an errorlog.\n");
         }
@@ -116,20 +118,19 @@ public:
         /**
          * @todo    use a separate instance here, not the singleton
          */
-        INITSERVICE::InitService   &l_is = INITSERVICE::InitService::getTheInstance();
-        tid_t   tidrc   =   0;
+        INITSERVICE::InitService &l_is = INITSERVICE::InitService::getTheInstance();
 
-
-        TS_TRACE( "=====>Attempt to run a task with a _start() function.\n  ");
-        tidrc   =   l_is.startTask( TASK_TEST2, errl );
-        printk( "testInitServiceStartTask2: startTask returned %d: errl=%p\n", tidrc, errl );
-        if ( (int16_t)tidrc >= 0  )
+        TS_TRACE( "=====>Attempt to run a task with a _start() function, expect SUCCESS.");
+        errl = l_is.startTask(  &TASK_TEST2,        // task struct
+                                NULL,               // args
+                                errl );             //  errlog
+        if ( errl )
         {
-            TS_TRACE( "SUCCESS: startTask returned OK.\n");
+            TS_FAIL( "ERROR: StartTask returned an error log.\n");
         }
         else
         {
-            TS_FAIL( "ERROR: StartTask returned an error log.\n");
+            TS_TRACE( "SUCCESS: startTask returned OK.\n");
         }
 
 
@@ -149,13 +150,12 @@ public:
          * @todo    use a separate instance here, not the singleton
          */
         INITSERVICE::InitService   &l_is = INITSERVICE::InitService::getTheInstance();
-        tid_t   tidrc   =   0;
 
-
-        TS_TRACE( "====>Attempt to run a task with NO _start() function.\n  ");
-        tidrc   =   l_is.startTask( TASK_TEST3, errl );
-        printk( "testInitServiceStartTask3: startTask returned %d: errl=%p\n", tidrc, errl );
-        if ( (int16_t)tidrc < 0  )
+        TS_TRACE( "====>Attempt to run a task with NO _start() function, expect an ERROR.");
+        errl = l_is.startTask(  &TASK_TEST3,            // task struct
+                                NULL,                   //  args
+                                errl );                 //  errlog
+        if ( errl )
         {
             TS_TRACE( "SUCCESS: startTask returned an error log.\n");
         }
@@ -214,13 +214,13 @@ public:
 
         errl = new ERRORLOG::ErrlEntry(
                 ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                INITSERVICE::INIT_SVC_TEST5_ID,
+                INITSERVICE::INIT_SVC_TEST5_ERRL_ID,
                 INITSERVICE::START_TASK_FAILED,
                 0,
                 0
         );
 
-        TS_TRACE( "====> call reportError with good error handle, should commit and then delete\n  ");
+        TS_TRACE( "====> call reportError with good error handle, should commit and then delete  ");
         l_is.reportError( errl );
         if ( errl !=NULL )
         {

@@ -114,53 +114,6 @@ void    reportTotalTests( const char *suitename, uint64_t numtests )
     return;
 }
 
-/**
- * @brief   accessor to read global totaltests var
- * @TODO  make these readonly accessors
- *
- * @return  number of total tests
- */
-uint64_t    getTotalTests(void)
-{
-
-    return  g_TotalTests;
-}
-
-/**
- * @brief   accessor to read global failedtests var
- * @TODO  make these readonly accessors
- *
- * @return  total number off failures executed
- */
-uint64_t    getFailedTests(void)
-{
-
-    return  g_FailedTests;
-}
-
-/**
- * @brief   accessor to read global warnings var
- * @TODO  make these readonly accessors
- *
- * @return  total number of warnings executed
- */
-uint64_t    getWarnings(void)
-{
-
-    return  g_Warnings;
-}
-
-/**
- * @brief   accessor to read global tracecalls var
- * @TODO  make these readonly accessors
- *
- * @return  total number of trace calls executed
- */
-uint64_t    getTraceCalls(void)
-{
-
-    return  g_TraceCalls;
-}
 
 };
 

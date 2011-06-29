@@ -616,7 +616,9 @@ sub writeHostBootPreamble() {
   print "#include <sys/sync.h>\n";
   print "#include <sys/vfs.h>\n";
   print "#include <sys/task.h>\n";
+  print "#include <sys/sync.h>\n";
   print "#include <trace/interface.H>\n";
+  ## $$TODO print "#include <taskargs/taskargs.H>\n";
 
   print "#include <cxxtest/TestSuite.H>\n";
 
@@ -629,6 +631,8 @@ sub writeHostBootSuites() {
 
   $suitecount   =   1;                          #   initialize suite count
   $testcount    =   0;                          #   initialize test count
+  
+  ## $$TODO print   "\tTaskArgs    *pTaskArgs  = (TaskArgs *)ptr;\n";
 
   foreach (@suites) {
     $suite = $_;
@@ -654,7 +658,7 @@ sub writeHostBootSuites() {
 
     ##  declare and instantiate a new instance of the suite
     print   "\t// Test Suite ", $suitecount, ": " , suiteName(), "\n";
-    print   "\tprintk(\"Executing test suite ", suiteName(), ".\\n\");\n";
+    if ( $debug )   { print   "\tprintk(\"Executing test suite ", suiteName(), ".\\n\");\n";    }
     print   "\tTRACDCOMP( g_trac_test, \"Execute ", suiteName(), ".\");\n";
     print   "\t", suiteName(), "\t*", $suitevar, "   =   new ", suiteName(), ";\n";
 
@@ -669,7 +673,12 @@ sub writeHostBootSuites() {
         printf "\t$suitevar->%s();\n\n", testName();
         $testcount++;
     }
-
+    
+    ## $$TODO print "\n";
+    ## $$TODO print "\tif  ( pTaskArgs )\n";
+    ## $$TODO print "\t{\n";
+    ## $$TODO print "\t\tpTaskArgs->waitChildSync();\n";
+    ## $$TODO print "\t}\n";
 
     print   "\n";
     ##  delete the suite instance
@@ -689,6 +698,9 @@ sub writeHostBootSuites() {
 sub write_start() {
 
   print   "\n";
+  ## $$TODO print   "\tusing namespace TASKARGS;\n";
+  
+  print   "\n";
   print   "trace_desc_t *g_trac_test = NULL;\n";
 ##  Use same trace buffer for all unit tests, i.e. "UNIT_TEST"  
 ##  print   "TRAC_INIT(&g_trac_test, \"", suiteName(), "\", 4096);\n";
@@ -697,14 +709,17 @@ sub write_start() {
 
   print   "\n\n";
   print   "extern \"C\"\n";
-  print   "void _start(void*) {\n";
-  print   "\n";
-
-  ## here's where the  magic happens....
+  print   "void _start(void *ptr) ";
+  print   "{\n";
+  
+  
+   ## here's where the  magic happens....
   writeHostBootSuites();
 
   print   "\n";
   print "\t__sync_add_and_fetch(&CxxTest::g_ModulesCompleted, 1);\n";
+  
+  print "\n";
   print   "\ttask_end();\n";
   print   "}\n";
 

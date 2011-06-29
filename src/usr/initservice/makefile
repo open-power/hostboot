@@ -1,11 +1,11 @@
 ROOTPATH = ../../..
-MODULE = initservice
+# MODULE = 
 
-OBJS =  initservice.o            \
-		initservicetaskentry.o   \
-		initservicevfs1.o        \
-		initservicevfs2.o
+# OBJS = 
 
-SUBDIRS = test.d
+# NOTE:	initsvcunittesttask2 is a dummy module that is executed by 
+#		unit test 2 in the test directory.  Please do not rename.
+SUBDIRS = baseinitsvc.d	extinitsvc.d taskargs.d	\
+			test.d initsvcunittesttask2.d
 
 include ${ROOTPATH}/config.mk

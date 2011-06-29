@@ -16,14 +16,14 @@ DIRECT_BOOT_OBJECTS = start.o kernel.o taskmgr.o cpumgr.o syscall.o \
 
 RUNTIME_OBJECTS =
 
-BASE_MODULES = trace errl devicefw scom xscom
-EXTENDED_MODULES = targeting ecmddatabuffer hwpf fapi hwp initservice plat
+BASE_MODULES = trace errl devicefw scom xscom initservice taskargs
+EXTENDED_MODULES = targeting ecmddatabuffer hwpf fapi hwp plat extinitsvc
 
 DIRECT_BOOT_MODULES = example
 RUNTIME_MODULES =
 TESTCASE_MODULES = cxxtest testerrl testdevicefw testsyslib \
                    testscom testxscom testtargeting testinitservice testkernel \
-                   testhwpf testecmddatabuffer
+                   testhwpf testecmddatabuffer tasktest2
 
 RELOCATABLE_IMAGE_LDFLAGS = -pie --export-dynamic
 

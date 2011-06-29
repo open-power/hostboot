@@ -1,4 +1,8 @@
-// Imported from FSP tree - /src/test/cxxtest/cxxtest/
+/** @file   TestSuite.H
+ *
+ *  Imported from FSP tree - /src/test/cxxtest/cxxtest/
+ */
+
 
 #ifndef __cxxtest__TestSuite_h__
 #define __cxxtest__TestSuite_h__
@@ -10,17 +14,24 @@
 
 #include    <trace/interface.H>
 
-extern trace_desc_t *g_trac_test;
-
-//
-// class TestSuite is the base class for all test suites.
-// To define a test suite, derive from this class and add
-// member functions called void test*();
-//
+extern  trace_desc_t   *g_trac_test;
 
 namespace CxxTest
 {
 
+extern  uint64_t        g_TotalTests;
+extern  uint64_t        g_TraceCalls;
+extern  uint64_t        g_Warnings;
+extern  uint64_t        g_FailedTests;
+
+/**
+ * @class   TestSuite
+ *
+ *  class TestSuite is the base class for all test suites.
+ *  To define a test suite, derive from this class and add
+ *  member functions called void test*();
+ *
+ */
 class TestSuite
 {
 public:
@@ -38,12 +49,6 @@ void doFailAssert( const char *file, unsigned line, const char *expression, cons
 
 
 void        reportTotalTests( const char *suitename, uint64_t numtests );
-
-// $$ these should be set up as readonly accessors
-uint64_t    getTotalTests(void);
-uint64_t    getFailedTests(void);
-uint64_t    getWarnings(void);
-uint64_t    getTraceCalls(void);
 
 extern uint64_t g_ModulesCompleted;
 

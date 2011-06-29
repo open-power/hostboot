@@ -17,6 +17,7 @@
 // Other components
 #include <sys/task.h>
 #include <trace/interface.H>
+#include <initservice/taskargs.H>
 
 // This component
 #include <targeting/targetservice.H>
@@ -30,7 +31,9 @@
 namespace TARGETING
 {
 
+
 #define TARG_NAMESPACE "TARGETING::"
+
 
 //******************************************************************************
 // _start
@@ -38,16 +41,20 @@ namespace TARGETING
 
 #define TARG_CLASS ""
 
+
 /**
  *  @brief Entry point for initialization service to initialize the targeting
- *      code 
+ *      code
  *
- *  @note: Link register is configured to automatically invoke task_end() when 
+ *  @note: Link register is configured to automatically invoke task_end() when
  *      this routine returns
  */
 extern "C"
 void _start(void* io_pArgs)
 {
+    INITSERVICE::TaskArgs::TaskArgs *pTaskArgs  =
+            reinterpret_cast<INITSERVICE::TaskArgs::TaskArgs *>(io_pArgs);
+
     #define TARG_FN "_start(...)"
 
     TARG_ENTER();
@@ -56,6 +63,11 @@ void _start(void* io_pArgs)
     (void)l_targetService.init();
 
     TARG_EXIT();
+
+    if  ( pTaskArgs )
+    {
+        pTaskArgs->waitChildSync();
+    }
 
     task_end();
 
