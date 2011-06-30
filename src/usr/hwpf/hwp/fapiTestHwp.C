@@ -1,7 +1,17 @@
 /**
  *  @file fapiTestHwp.C
  *
- *  @brief Implements test Hardware Procedures.
+ *  @brief Implements a simple test Hardware Procedure
+ */
+
+/*
+ * Change Log ******************************************************************
+ * Flag     Defect/Feature  User        Date        Description
+ * ------   --------------  ----------  ----------- ----------------------------
+ *                          mjjones     04/21/2011  Created.
+ *                          mjjones     06/02/2011  Use ecmdDataBufferBase
+ *                          mjjones     06/28/2011  Removed attribute tests
+ *
  */
 
 #include <fapiTestHwp.H>
@@ -21,66 +31,6 @@ fapi::ReturnCode hwpIsP7EM0ChipletClockOn(const fapi::Target & i_chip,
 
     // Attempt to call the attribute get/set functions for the test attributes
     fapi::ReturnCode l_rc;
-
-    // Test getting and setting attributes
-    {
-        char * l_pString = NULL;
-        uint8_t l_uint8 = 0;
-        uint32_t l_uint32 = 0;
-        uint64_t l_uint64 = 0;
-        uint8_t l_pUint8Array[3] = {0};
-        uint32_t l_pUint32Array[4] = {0};
-        uint64_t l_pUint64Array[5] = {0};
-
-        // All of the following should currently compile (not checking RC which
-        // should be FAPI_RC_NOT_IMPLEMENTED). The get/set functions do not
-        // currently do anything so passing NULL will work.
-        l_rc = FAPI_ATTR_GET(ATTR_TEST_STRING, &i_chip, l_pString);
-        l_rc = FAPI_ATTR_GET(ATTR_TEST_UINT8, &i_chip, l_uint8);
-        l_rc = FAPI_ATTR_GET(ATTR_TEST_UINT32, &i_chip, l_uint32);
-        l_rc = FAPI_ATTR_GET(ATTR_TEST_UINT64, &i_chip, l_uint64);
-        l_rc = FAPI_ATTR_GET(ATTR_TEST_UINT8_ARRAY, &i_chip, l_pUint8Array);
-        l_rc = FAPI_ATTR_GET(ATTR_TEST_UINT32_ARRAY, &i_chip, l_pUint32Array);
-        l_rc = FAPI_ATTR_GET(ATTR_TEST_UINT64_ARRAY, &i_chip, l_pUint64Array);
-
-        l_rc = FAPI_ATTR_SET(ATTR_TEST_STRING, &i_chip, l_pString);
-        l_rc = FAPI_ATTR_SET(ATTR_TEST_STRING, &i_chip, "test-string");
-        l_rc = FAPI_ATTR_SET(ATTR_TEST_UINT8, &i_chip, l_uint8);
-        l_rc = FAPI_ATTR_SET(ATTR_TEST_UINT32, &i_chip, l_uint32);
-        l_rc = FAPI_ATTR_SET(ATTR_TEST_UINT64, &i_chip, l_uint64);
-        l_rc = FAPI_ATTR_SET(ATTR_TEST_UINT8_ARRAY, &i_chip, l_pUint8Array);
-        l_rc = FAPI_ATTR_SET(ATTR_TEST_UINT32_ARRAY, &i_chip, l_pUint32Array);
-        l_rc = FAPI_ATTR_SET(ATTR_TEST_UINT64_ARRAY, &i_chip, l_pUint64Array);
-
-        // All of the following should not compile due to wrong types used
-        //l_rc = FAPI_ATTR_GET(ATTR_TEST_STRING, &i_chip, l_uint8);
-        //l_rc = FAPI_ATTR_GET(ATTR_TEST_STRING, &i_chip, l_uint32);
-        //l_rc = FAPI_ATTR_GET(ATTR_TEST_STRING, &i_chip, l_uint64);
-        //l_rc = FAPI_ATTR_GET(ATTR_TEST_STRING, &i_chip, l_pUint8Array);
-        //l_rc = FAPI_ATTR_GET(ATTR_TEST_UINT8, &i_chip, l_pString);
-        //l_rc = FAPI_ATTR_GET(ATTR_TEST_UINT32, &i_chip, l_uint8);
-        //l_rc = FAPI_ATTR_GET(ATTR_TEST_UINT64, &i_chip, l_pUint8Array);
-        //l_rc = FAPI_ATTR_GET(ATTR_TEST_UINT64, &i_chip, l_pUint64Array);
-        //l_rc = FAPI_ATTR_GET(ATTR_TEST_UINT8_ARRAY, &i_chip, l_pString);
-        //l_rc = FAPI_ATTR_GET(ATTR_TEST_UINT32_ARRAY, &i_chip, l_uint8);
-        //l_rc = FAPI_ATTR_GET(ATTR_TEST_UINT64_ARRAY, &i_chip, l_uint64);
-        //l_rc = FAPI_ATTR_GET(ATTR_TEST_UINT64_ARRAY, &i_chip, l_pUint32Array);
-
-        //l_rc = FAPI_ATTR_SET(ATTR_TEST_STRING, &i_chip, l_uint8);
-        //l_rc = FAPI_ATTR_SET(ATTR_TEST_STRING, &i_chip, l_uint32);
-        //l_rc = FAPI_ATTR_SET(ATTR_TEST_STRING, &i_chip, l_uint64);
-        //l_rc = FAPI_ATTR_SET(ATTR_TEST_STRING, &i_chip, l_pUint64Array);
-        //l_rc = FAPI_ATTR_SET(ATTR_TEST_UINT8, &i_chip, l_pString);
-        //l_rc = FAPI_ATTR_SET(ATTR_TEST_UINT32, &i_chip, l_uint64);
-        //l_rc = FAPI_ATTR_SET(ATTR_TEST_UINT64, &i_chip, l_pUint32Array);
-        //l_rc = FAPI_ATTR_SET(ATTR_TEST_UINT64, &i_chip, l_pUint64Array);
-        //l_rc = FAPI_ATTR_SET(ATTR_TEST_UINT8_ARRAY, &i_chip, l_pString);
-        //l_rc = FAPI_ATTR_SET(ATTR_TEST_UINT32_ARRAY, &i_chip, l_uint8);
-        //l_rc = FAPI_ATTR_SET(ATTR_TEST_UINT64_ARRAY, &i_chip, l_uint64);
-        //l_rc = FAPI_ATTR_SET(ATTR_TEST_UINT64_ARRAY, &i_chip, l_pUint8Array);
-
-        l_rc = fapi::FAPI_RC_SUCCESS;
-    }
 
     // Constants
     const uint64_t EM_CLOCK_STATUS_MASK = 0xEEC0000000000000ULL;
@@ -116,6 +66,5 @@ fapi::ReturnCode hwpIsP7EM0ChipletClockOn(const fapi::Target & i_chip,
 
     return l_rc;
 }
-
 
 } // extern "C"

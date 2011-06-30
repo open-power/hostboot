@@ -2,22 +2,29 @@
  *  @file fapiAttributeService.H
  *
  *  @brief Defines the FAPI_ATTR_GET and FAPI_ATTR_SET macros that a user calls
- *         to get/set attributes and the AttributeService functions that the
- *         macros use to get/set attributes
+ *         to get/set attributes and a check function that the macros use to
+ *         verify correct usage
+ */
+
+/*
+ * Change Log ******************************************************************
+ * Flag     Defect/Feature  User        Date        Description
+ * ------   --------------  ----------  ----------- ----------------------------
+ *                          mjjones     06/06/2011  Created.
+ *                          mjjones     06/22/2011  Major updates
  */
 
 #ifndef FAPIATTRIBUTESERVICE_H_
 #define FAPIATTRIBUTESERVICE_H_
 #include <stdint.h>
 #include <fapiAttributeIds.H>
-#include <fapiReturnCode.H>
-#include <fapiTarget.H>
+#include <fapiPlatAttributeService.H>
 
 /**
  * @brief Macros called by user to get/set attributes
  *
- * @note The user must use these macros rather than use the AttributeService
- *       _get/_set functions so that the type can be checked at compile time
+ * @note The user must use these macros rather than any AttributeService
+ *       functions.
  *
  * Code must have a pointer to a Target and an attribute ID (from XML file):
  *   fapi::ReturnCode l_rc;
@@ -42,385 +49,39 @@
  *   uint32_t l_pVal[4] = {0};
  *   l_rc = FAPI_ATTR_GET(l_id, l_pTarget, l_pVal);
  *   l_rc = FAPI_ATTR_SET(l_id, l_pTarget, l_pVal);
+ *
+ * The first part of these macros is a call to checkIdType that will cause a
+ * compile failure if the ID or VAL parameters are incorrect.
+ *
+ * The second part of these macros calls a macro named <ID>_GET/SETMACRO. This
+ * macro is defined by PLAT and must do the work of getting/setting the
+ * attribute.
  */
 #define FAPI_ATTR_GET(ID, PTARGET, VAL) \
-    fapi::AttributeService::_get<fapi::ID##_Type>(fapi::ID, PTARGET, VAL)
+    (fapi::AttributeCheck::checkIdType<fapi::ID##_Type>(fapi::ID, VAL), \
+     ID##_GETMACRO(ID, PTARGET, VAL))
 #define FAPI_ATTR_SET(ID, PTARGET, VAL) \
-    fapi::AttributeService::_set<fapi::ID##_Type>(fapi::ID, PTARGET, VAL)
+    (fapi::AttributeCheck::checkIdType<fapi::ID##_Type>(fapi::ID, VAL), \
+     ID##_SETMACRO(ID, PTARGET, VAL))
 
 namespace fapi
 {
 
-/**
- * @namespace AttributeService
- *
- * This class defines the attribute access functions. These functions must not
- * be accessed directly, they should only be called by the FAPI_ATTR_GET and
- * FAPI_ATTR_SET macros.
- *
- * Each function comes in two parts. If the caller of FAPI_ATTR_GET attempts to
- * get an incorrect type then the normal template function will be instantiated
- * and the construction of the undefined InvalidTypeRequestedForAttribute class
- * will cause a compile failure. Only if the caller attempts to get the correct
- * type will the specialized function be called which will work.
- */
-namespace AttributeService
+namespace AttributeCheck
 {
 
 /**
- * @brief Forward declaration of class that will never be defined
+ * @brief Check the ID and VAL
+ *
+ * This is called by FAPI_ATTR_GET/SET to check at compile time that the ID and
+ * VAL macro parameters are correct. If the ID is not an AttributeId or the VAL
+ * is not the type specified in the attribute XML file then no function will be
+ * found.
  */
-class InvalidTypeRequestedForAttribute;
+template<typename T> void checkIdType(AttributeId, T &) {}
 
-/**
- * @brief Get a copy of a string attribute
- *
- * @param[in]  i_id      Attribute ID
- * @param[in]  i_pTarget Pointer to Target that the attribute is associated with
- *                       (NULL if system attribute)
- * @param[out] o_pValue  Reference to pointer that will be set to point to newly
- *                       allocated memory holding the attribute value
- *
- * @return ReturnCode. Zero on success, else error.
- *
- * @note The caller must free the data with "delete [] o_pValue"
- */
-template<typename T>
-ReturnCode _get(const AttributeId i_id,
-                const Target * const i_pTarget,
-                char * & o_pValue)
-{
-    InvalidTypeRequestedForAttribute();
-    return FAPI_RC_SUCCESS;
 }
-template<> // Specialized template function defined in fapiAttributeService.C
-ReturnCode _get<char *> (const AttributeId i_id,
-                         const Target * const i_pTarget,
-                         char * & o_value);
 
-/**
- * @brief Get a copy of a uint8_t attribute
- *
- * @param[in]  i_id      Attribute ID
- * @param[in]  i_pTarget Pointer to Target that the attribute is associated with
- *                       (NULL if system attribute)
- * @param[out] o_value   Reference to data that will be set to the attribute val
- *
- * @return ReturnCode. Zero on success, else error.
- */
-template<typename T>
-ReturnCode _get(const AttributeId i_id,
-                const Target * const i_pTarget,
-                uint8_t& o_value)
-{
-    InvalidTypeRequestedForAttribute();
-    return FAPI_RC_SUCCESS;
 }
-template<> // Specialized template function defined in fapiAttributeService.C
-ReturnCode _get<uint8_t> (const AttributeId i_id,
-                          const Target * const i_pTarget,
-                          uint8_t & o_value);
-
-/**
- * @brief Get a copy of a uint32_t attribute
- *
- * @param[in]  i_id      Attribute ID
- * @param[in]  i_pTarget Pointer to Target that the attribute is associated with
- *                       (NULL if system attribute)
- * @param[out] o_value   Reference to data that will be set to the attribute val
- *
- * @return ReturnCode. Zero on success, else error.
- */
-template<typename T>
-ReturnCode _get(const AttributeId i_id,
-                const Target * const i_pTarget,
-                uint32_t& o_value)
-{
-    InvalidTypeRequestedForAttribute();
-    return FAPI_RC_SUCCESS;
-}
-template<> // Specialized template function defined in fapiAttributeService.C
-ReturnCode _get<uint32_t> (const AttributeId i_id,
-                           const Target * const i_pTarget,
-                           uint32_t & o_value);
-
-/**
- * @brief Get a copy of a uint64_t attribute
- *
- * @param[in]  i_id      Attribute ID
- * @param[in]  i_pTarget Pointer to Target that the attribute is associated with
- *                       (NULL if system attribute)
- * @param[out] o_value   Reference to data that will be set to the attribute val
- *
- * @return ReturnCode. Zero on success, else error.
- */
-template<typename T>
-ReturnCode _get(const AttributeId i_id,
-                const Target * const i_pTarget,
-                uint64_t& o_value)
-{
-    InvalidTypeRequestedForAttribute();
-    return FAPI_RC_SUCCESS;
-}
-template<> // Specialized template function defined in fapiAttributeService.C
-ReturnCode _get<uint64_t> (const AttributeId i_id,
-                           const Target * const i_pTarget,
-                           uint64_t & o_value);
-
-/**
- * @brief Get a copy of a uint8_t array attribute
- *
- * @param[in]  i_id      Attribute ID
- * @param[in]  i_pTarget Pointer to Target that the attribute is associated with
- *                       (NULL if system attribute)
- * @param[out] o_pValues Pointer to data that will be set to the attribute value
- *
- * @return ReturnCode. Zero on success, else error.
- *
- * @note The caller's o_pValues pointer must point to memory large enough to
- *       hold the attribute.
- */
-template<typename T>
-ReturnCode _get(const AttributeId i_id,
-                const Target * const i_pTarget,
-                uint8_t * const o_pValues)
-{
-    InvalidTypeRequestedForAttribute();
-    return FAPI_RC_SUCCESS;
-}
-template<> // Specialized template function defined in fapiAttributeService.C
-ReturnCode _get<uint8_t *> (const AttributeId i_id,
-                            const Target * const i_pTarget,
-                            uint8_t * const o_pValues);
-
-/**
- * @brief Get a copy of a uint32_t array attribute
- *
- * @param[in]  i_id      Attribute ID
- * @param[in]  i_pTarget Pointer to Target that the attribute is associated with
- *                       (NULL if system attribute)
- * @param[out] o_pValues Pointer to data that will be set to the attribute value
- *
- * @return ReturnCode. Zero on success, else error.
- *
- * @note The caller's o_pValues pointer must point to memory large enough to
- *       hold the attribute.
- */
-template<typename T>
-ReturnCode _get(const AttributeId i_id,
-                const Target * const i_pTarget,
-                uint32_t * const o_pValues)
-{
-    InvalidTypeRequestedForAttribute();
-    return FAPI_RC_SUCCESS;
-}
-template<> // Specialized template function defined in fapiAttributeService.C
-ReturnCode _get<uint32_t *> (const AttributeId i_id,
-                             const Target * const i_pTarget,
-                             uint32_t * const o_pValues);
-
-/**
- * @brief Get a copy of a uint64_t array attribute
- *
- * @param[in]  i_id      Attribute ID
- * @param[in]  i_pTarget Pointer to Target that the attribute is associated with
- *                       (NULL if system attribute)
- * @param[out] o_pValues Pointer to data that will be set to the attribute value
- *
- * @return ReturnCode. Zero on success, else error.
- *
- * @note The caller's o_pValues pointer must point to memory large enough to
- *       hold the attribute.
- */
-template<typename T>
-ReturnCode _get(const AttributeId i_id,
-                const Target * const i_pTarget,
-                uint64_t * const o_pValues)
-{
-    InvalidTypeRequestedForAttribute();
-    return FAPI_RC_SUCCESS;
-}
-template<> // Specialized template function defined in fapiAttributeService.C
-ReturnCode _get<uint64_t *> (const AttributeId i_id,
-                             const Target * const i_pTarget,
-                             uint64_t * const o_pValues);
-
-/**
- * @brief Set a string attribute
- *
- * @param[in] i_id      Attribute ID
- * @param[in] i_pTarget Pointer to Target that the attribute is associated with
- *                      (NULL if system attribute)
- * @param[in] i_pValue  Pointer to string containing the attribute value to set
- *
- * @return ReturnCode. Zero on success, else error.
- */
-template<typename T>
-ReturnCode _set(const AttributeId i_id,
-                const Target * const i_pTarget,
-                const char * const i_pValue)
-{
-    InvalidTypeRequestedForAttribute();
-    return FAPI_RC_SUCCESS;
-}
-template<> // Specialized template function defined in fapiAttributeService.C
-ReturnCode _set<char *> (const AttributeId i_id,
-                         const Target * const i_pTarget,
-                         const char * const i_pValue);
-
-/**
- * @brief Set a uint8_t attribute
- *
- * @param[in] i_id      Attribute ID
- * @param[in] i_pTarget Pointer to Target that the attribute is associated with
- *                      (NULL if system attribute)
- * @param[in] i_value   Attribute value to set
- *
- * @return ReturnCode. Zero on success, else error.
- */
-template<typename T>
-ReturnCode _set(const AttributeId i_id,
-                const Target * const i_pTarget,
-                const uint8_t i_value)
-{
-    InvalidTypeRequestedForAttribute();
-    return FAPI_RC_SUCCESS;
-}
-template<> // Specialized template function defined in fapiAttributeService.C
-ReturnCode _set<uint8_t> (const AttributeId i_id,
-                          const Target * const i_pTarget,
-                          const uint8_t i_value);
-
-/**
- * @brief Set a uint32_t attribute
- *
- * @param[in] i_id      Attribute ID
- * @param[in] i_pTarget Pointer to Target that the attribute is associated with
- *                      (NULL if system attribute)
- * @param[in] i_value   Attribute value to set
- *
- * @return ReturnCode. Zero on success, else error.
- */
-template<typename T>
-ReturnCode _set(const AttributeId i_id,
-                const Target * const i_pTarget,
-                const uint32_t i_value)
-{
-    InvalidTypeRequestedForAttribute();
-    return FAPI_RC_SUCCESS;
-}
-template<> // Specialized template function defined in fapiAttributeService.C
-ReturnCode _set<uint32_t> (const AttributeId i_id,
-                           const Target * const i_pTarget,
-                           const uint32_t i_value);
-
-/**
- * @brief Set a uint64_t attribute
- *
- * @param[in] i_id      Attribute ID
- * @param[in] i_pTarget Pointer to Target that the attribute is associated with
- *                      (NULL if system attribute)
- * @param[in] i_value   Attribute value to set
- *
- * @return ReturnCode. Zero on success, else error.
- */
-template<typename T>
-ReturnCode _set(const AttributeId i_id,
-                const Target * const i_pTarget,
-                const uint64_t i_value)
-{
-    InvalidTypeRequestedForAttribute();
-    return FAPI_RC_SUCCESS;
-}
-template<> // Specialized template function defined in fapiAttributeService.C
-ReturnCode _set<uint64_t> (const AttributeId i_id,
-                           const Target * const i_pTarget,
-                           const uint64_t i_value);
-
-/**
- * @brief Set a uint8_t array attribute
- *
- * @param[in]  i_id      Attribute ID
- * @param[in]  i_pTarget Pointer to Target that the attribute is associated
- *                       with (NULL if system attribute)
- * @param[out] i_pValues Pointer to array containing the attribute values to
- *                       set
- *
- * @return ReturnCode. Zero on success, else error.
- *
- * @note The caller's o_pValues pointer must point to memory large enough to
- *       hold the attribute.
- */
-template<typename T>
-ReturnCode _set(const AttributeId i_id,
-                const Target * const i_pTarget,
-                const uint8_t * const i_pValues)
-{
-    InvalidTypeRequestedForAttribute();
-    return FAPI_RC_SUCCESS;
-}
-template<> // Specialized template function defined in fapiAttributeService.C
-ReturnCode _set<uint8_t *> (const AttributeId i_id,
-                            const Target * const i_pTarget,
-                            const uint8_t * const i_pValues);
-
-/**
- * @brief Set a uint32_t array attribute
- *
- * @param[in]  i_id      Attribute ID
- * @param[in]  i_pTarget Pointer to Target that the attribute is associated
- *                       with (NULL if system attribute)
- * @param[out] i_pValues Pointer to array containing the attribute values to
- *                       set
- *
- * @return ReturnCode. Zero on success, else error.
- *
- * @note The caller's o_pValues pointer must point to memory large enough to
- *       hold the attribute.
- */
-template<typename T>
-ReturnCode _set(const AttributeId i_id,
-                const Target * const i_pTarget,
-                const uint32_t * const i_pValues)
-{
-    InvalidTypeRequestedForAttribute();
-    return FAPI_RC_SUCCESS;
-}
-template<> // Specialized template function defined in fapiAttributeService.C
-ReturnCode _set<uint32_t *> (const AttributeId i_id,
-                             const Target * const i_pTarget,
-                             const uint32_t * const i_pValues);
-
-/**
- * @brief Set a uint64_t array attribute
- *
- * @param[in]  i_id      Attribute ID
- * @param[in]  i_pTarget Pointer to Target that the attribute is associated
- *                       with (NULL if system attribute)
- * @param[out] i_pValues Pointer to array containing the attribute values to
- *                       set
- *
- * @return ReturnCode. Zero on success, else error.
- *
- * @note The caller's o_pValues pointer must point to memory large enough to
- *       hold the attribute.
- */
-template<typename T>
-ReturnCode _set(const AttributeId i_id,
-                const Target * const i_pTarget,
-                const uint64_t * const i_pValues)
-{
-    InvalidTypeRequestedForAttribute();
-    return FAPI_RC_SUCCESS;
-}
-template<> // Specialized template function defined in fapiAttributeService.C
-ReturnCode _set<uint64_t *> (const AttributeId i_id,
-                             const Target * const i_pTarget,
-                             const uint64_t * const i_pValues);
-
-
-} // namespace AttributeService
-
-} // namespace fapi
 
 #endif // FAPIATTRIBUTESERVICE_H_

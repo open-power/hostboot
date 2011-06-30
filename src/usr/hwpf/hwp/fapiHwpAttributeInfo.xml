@@ -2,49 +2,77 @@
 <!-- This is just the initial test version. HWPs will replace with an official version. -->
 
 <attributes>
-  <!-- *********************************************************************** -->
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_TEST_UINT8</id>
-    <description>Test Attribute UINT8</description>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Test Attr UINT8. DefaultVal 6</description>
     <valueType>uint8</valueType>
+    <defaultValue>6</defaultValue>
+    <writeable/>
   </attribute>
-  <!-- *********************************************************************** -->
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_TEST_UINT32</id>
-    <description>Test Attribute UINT32</description>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Test Attr UINT32. PLAT (sets val to 3). RO</description>
     <valueType>uint32</valueType>
+    <platInit/>
   </attribute>
-  <!-- *********************************************************************** -->
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_TEST_UINT64</id>
-    <description>Test Attribute UINT64</description>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Test Attr UINT64. Enum. DefaultVal VALB</description>
     <valueType>uint64</valueType>
+    <defaultValue>VALB</defaultValue>
+    <enum>VALA VALB VALC</enum>
+    <writeable/>
   </attribute>
-  <!-- *********************************************************************** -->
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_TEST_UINT8_ARRAY</id>
-    <description>Test Attribute UINT8 ARRAY</description>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Test Attr UINT8 ARRAY[3]. DefaultVal 2</description>
     <valueType>uint8</valueType>
+    <defaultValue>2</defaultValue>
     <array>3</array>
+    <writeable/>
   </attribute>
-  <!-- *********************************************************************** -->
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_TEST_UINT32_ARRAY</id>
-    <description>Test Attribute UINT32 ARRAY</description>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Test Attr UINT32 ARRAY[2][3][4]. DefaultVal 8</description>
     <valueType>uint32</valueType>
-    <array>4</array>
+    <defaultValue>8</defaultValue>
+    <array>2 3 4</array>
+    <writeable/>
   </attribute>
-  <!-- *********************************************************************** -->
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_TEST_UINT64_ARRAY</id>
-    <description>Test Attribute UINT64 ARRAY</description>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Test Attr UINT64 ARRAY[5]. PLAT (sets vals to 4). RO</description>
     <valueType>uint64</valueType>
+    <platInit/>
     <array>5</array>
   </attribute>
-  <!-- *********************************************************************** -->
+  <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_TEST_STRING</id>
-    <description>Test Attribute STRING</description>
+    <id>ATTR_TEST_STRING1</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Test Attr STRING1. DefaultVal 'mike'</description>
     <valueType>string</valueType>
+    <defaultValue>mike</defaultValue>
+    <writeable/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_TEST_STRING2</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Test Attr STRING2. PLAT (sets val to 'platString')</description>
+    <valueType>string</valueType>
+    <writeable/>
   </attribute>
 </attributes>

@@ -4,12 +4,21 @@
  *  @brief Defines utility functions that the platform code must implement.
  */
 
+/*
+ * Change Log ******************************************************************
+ * Flag     Defect/Feature  User        Date        Description
+ * ------   --------------  ----------  ----------- ----------------------------
+ *                          mjjones     04/13/2011  Created.
+ *                          camvanng	05/31/2011	Removed fapiOutputx macros
+ *                          mjjones     06/30/2011  Removed #include
+ *
+ */
+
 #ifndef FAPIUTIL_H_
 #define FAPIUTIL_H_
 
 #include <stdint.h>
 #include <stddef.h>
-#include <fapi.H>
 
 
 namespace fapi

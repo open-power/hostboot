@@ -5,6 +5,15 @@
  *         Procedure operation.
  */
 
+/*
+ * Change Log ******************************************************************
+ * Flag     Defect/Feature  User        Date        Description
+ * ------   --------------  ----------  ----------- ----------------------------
+ *                          mjjones     04/13/2011  Created. Based on Hlava prototype
+ *                          mjjones     06/29/2011  Removed incorrect MSB from 2 enums
+ *
+ */
+
 #ifndef FAPITARGET_H_
 #define FAPITARGET_H_
 
@@ -26,8 +35,8 @@ enum TargetType
     TARGET_TYPE_MEMBUF_CHIP = 0x00000008,
     TARGET_TYPE_EX_CHIPLET  = 0x00000010,
     TARGET_TYPE_MBA_CHIPLET = 0x00000020,
-    TARGET_TYPE_MBS_CHIPLET = 0x80000040,
-    TARGET_TYPE_MCS_CHIPLET = 0x80000080,
+    TARGET_TYPE_MBS_CHIPLET = 0x00000040,
+    TARGET_TYPE_MCS_CHIPLET = 0x00000080,
 };
 
 /**

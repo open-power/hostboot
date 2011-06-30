@@ -6,8 +6,9 @@
  *  Note that platform code must provide the implementation.
  */
 
+#include <assert.h>
 #include <trace/interface.H>
-#include <fapi.H>
+#include <fapiPlatTrace.H>
 
 //******************************************************************************
 // Trace descriptors

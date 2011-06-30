@@ -4,8 +4,19 @@
  *  @brief Implements the FAPI part of the ReturnCodeDataRef class.
  */
 
+/*
+ * Change Log ******************************************************************
+ * Flag     Defect/Feature  User        Date        Description
+ * ------   --------------  ----------  ----------- ----------------------------
+ *                          mjjones     04/13/2011  Created.
+ *                          camvanng	05/31/2011  Added debug traces
+ *                          mjjones     06/30/2011  Added #include
+ *
+ */
+
 #include <fapiReturnCodeDataRef.H>
 #include <fapiUtil.H>
+#include <fapiPlatTrace.H>
 
 namespace fapi
 {

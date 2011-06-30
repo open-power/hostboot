@@ -1,8 +1,16 @@
 /**
  *  @file fapiTestHwp.H
  *
- *  @brief Defines test Hardware Procedures that are intended to test out the
- *         Hardware Procedure Framework
+ *  @brief Defines a simple test Hardware Procedure
+ */
+
+/*
+ * Change Log ******************************************************************
+ * Flag     Defect/Feature  User        Date        Description
+ * ------   --------------  ----------  ----------- ----------------------------
+ *                          mjjones     04/21/2011  Created.
+ *                          mjjones     06/28/2011  Updated comment
+ *
  */
 
 #ifndef FAPITESTHWPROC_H_

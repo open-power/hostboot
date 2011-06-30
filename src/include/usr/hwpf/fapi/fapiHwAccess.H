@@ -2,16 +2,29 @@
  *  @file fapiHwAccess.H
  *
  *  @brief Defines the hardware access functions that platform code must
- *         implement. It is a HWP requirement that these be "C" functions.
+ *         implement. It is a HWP requirement that these be "C" functions
+ *         because it simplifies language bindings for non-C languages,
+ *         such as perl
+ */
+
+/*
+ * Change Log ******************************************************************
+ * Flag     Defect/Feature  User        Date        Description
+ * ------   --------------  ----------  ----------- ----------------------------
+ *                          mjjones     04/13/2011  Created. Copied from Hlava's code.
+ *                          mjjones     06/02/2011  Scom addresses should be uint64_t
+ *                                                  use ecmdDataBufferBase
+ *                          mjjones     06/30/2011  Updated comment
+ *
  */
 
 #ifndef FAPIHWACCESS_H_
 #define FAPIHWACCESS_H_
 
 #include <stdint.h>
+#include <ecmdDataBuffer.H>
 #include <fapiReturnCode.H>
 #include <fapiTarget.H>
-#include <ecmdDataBuffer.H>
 
 namespace fapi
 {
