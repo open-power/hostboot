@@ -9,8 +9,9 @@
  * Flag     Defect/Feature  User        Date        Description
  * ------   --------------  ----------  ----------- ----------------------------
  *                          mjjones     04/13/2011  Created.
- *                          camvanng	05/31/2011	Removed fapiOutputx macros
+ *                          camvanng    05/31/2011  Removed fapiOutputx macros
  *                          mjjones     06/30/2011  Removed #include
+ *                          mjjones     07/05/2011  Removed rogue tab
  *
  */
 

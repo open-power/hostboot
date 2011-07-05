@@ -11,7 +11,7 @@
  *                          mjjones     04/13/2011  Created.
  *                          camvanng	05/31/2011  Added debug traces
  *                          mjjones     06/30/2011  Added #include
- *
+ *                          mjjones     07/05/2011  Removed const from data
  */
 
 #include <fapiReturnCodeDataRef.H>
@@ -24,7 +24,7 @@ namespace fapi
 //******************************************************************************
 // Constructor
 //******************************************************************************
-ReturnCodeDataRef::ReturnCodeDataRef(const void * i_pData) :
+ReturnCodeDataRef::ReturnCodeDataRef(void * i_pData) :
     iv_refCount(1), iv_pData(i_pData)
 {
 
@@ -78,7 +78,7 @@ bool ReturnCodeDataRef::decRefCountCheckZero()
 //******************************************************************************
 // getData function
 //******************************************************************************
-const void * ReturnCodeDataRef::getData() const
+void * ReturnCodeDataRef::getData() const
 {
     return iv_pData;
 }
@@ -86,9 +86,9 @@ const void * ReturnCodeDataRef::getData() const
 //******************************************************************************
 // releaseData function
 //******************************************************************************
-const void * ReturnCodeDataRef::releaseData()
+void * ReturnCodeDataRef::releaseData()
 {
-    const void * l_pData = iv_pData;
+    void * l_pData = iv_pData;
     iv_pData = NULL;
     return l_pData;
 }

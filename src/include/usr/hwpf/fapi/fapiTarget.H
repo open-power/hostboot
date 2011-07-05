@@ -11,7 +11,7 @@
  * ------   --------------  ----------  ----------- ----------------------------
  *                          mjjones     04/13/2011  Created. Based on Hlava prototype
  *                          mjjones     06/29/2011  Removed incorrect MSB from 2 enums
- *
+ *                          mjjones     07/05/2011. Removed const from handle
  */
 
 #ifndef FAPITARGET_H_
@@ -74,7 +74,7 @@ public:
      * @param[in] i_pHandle Pointer to platform specific Target handle
      */
     Target(const TargetType i_type,
-           const void * i_pHandle);
+           void * i_pHandle);
 
     /**
      * @brief Copy Constructor
@@ -131,7 +131,7 @@ public:
      *
      * @param[in] i_pHandle Pointer to platform specific handle
      */
-    void set(const void * i_pHandle);
+    void set(void * i_pHandle);
 
     /**
      * @brief Get the target type
@@ -196,7 +196,7 @@ private:
     TargetType iv_type;
 
     // Pointer to platform specific Target Handle
-    const void * iv_pHandle;
+    void * iv_pHandle;
 };
 
 }

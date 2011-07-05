@@ -4,6 +4,14 @@
  *  @brief Implements the FAPI part of the Target class.
  */
 
+/*
+ * Change Log ******************************************************************
+ * Flag     Defect/Feature  User        Date        Description
+ * ------   --------------  ----------  ----------- ----------------------------
+ *                          mjjones     04/13/2011  Created. Based on Hlava prototype
+ *                          mjjones     07/05/2011. Removed const from handle
+ */
+
 #include <fapiTarget.H>
 
 namespace fapi
@@ -22,7 +30,7 @@ Target::Target() :
 // Constructor.
 //******************************************************************************
 Target::Target(const TargetType i_type,
-               const void * i_pHandle) :
+               void * i_pHandle) :
     iv_type(i_type), iv_pHandle(i_pHandle)
 {
 
@@ -88,13 +96,13 @@ bool Target::operator!=(const Target & i_right) const
 //******************************************************************************
 void * Target::get() const
 {
-    return const_cast<void *>(iv_pHandle);
+    return iv_pHandle;
 }
 
 //******************************************************************************
 // Set the handle.
 //******************************************************************************
-void Target::set(const void * i_pHandle)
+void Target::set(void * i_pHandle)
 {
     iv_pHandle = i_pHandle;
 }

@@ -17,12 +17,13 @@
 #                  mjjones   06/06/11  Minor updates for integration
 #                  mjjones   06/10/11  Added "use strict;"
 #                  mjjones   06/23/11  Parse more info
+#                  mjjones   07/05/11  Take output dir as parameter
 #
 # End Change Log ******************************************************
 
 #
 # Usage:
-# fapiParseAttributeInfo.pl <filename1> <filename2> .... <filenameN>
+# fapiParseAttributeInfo.pl <output dir> <filename1> <filename2> ...
 
 use strict;
 
@@ -30,9 +31,9 @@ use strict;
 # Print Command Line Help
 #------------------------------------------------------------------------------
 my $numArgs = $#ARGV + 1;
-if ($numArgs < 1)
+if ($numArgs < 2)
 {
-    print ("Usage: fapiParseAttributeInfo.pl <filename1> <filename2> .... <filenameN>\n");
+    print ("Usage: fapiParseAttributeInfo.pl <output dir> <filename1> <filename2> ...\n");
     print ("  This perl script will parse attribute XML files and add\n");
     print ("  attribute information to a file called fapiAttributeIds.H\n");
     exit(1);
@@ -50,7 +51,10 @@ my $xml = new XML::Simple (KeyAttr=>[]);
 #------------------------------------------------------------------------------
 # Open output file for writing
 #------------------------------------------------------------------------------
-open(OUTFILE, ">fapiAttributeIds.H");
+my $outputFile = $ARGV[0];
+$outputFile .= "/";
+$outputFile .= "fapiAttributeIds.H";
+open(OUTFILE, ">", $outputFile);
 
 #------------------------------------------------------------------------------
 # Print Start of file information
@@ -73,9 +77,10 @@ print OUTFILE "enum AttributeId\n{\n";
 #------------------------------------------------------------------------------
 # For each XML file
 #------------------------------------------------------------------------------
-my $infile;
-foreach $infile(@ARGV)
+foreach my $argnum (1 .. $#ARGV)
 {
+    my $infile = $ARGV[$argnum];
+
     # read XML file
     my $attributes = $xml->XMLin($infile);
 
@@ -115,8 +120,10 @@ print OUTFILE " *\/\n";
 #------------------------------------------------------------------------------
 # For each XML file
 #------------------------------------------------------------------------------
-foreach $infile(@ARGV)
+foreach my $argnum (1 .. $#ARGV)
 {
+    my $infile = $ARGV[$argnum];
+
     # read XML file
     my $attributes = $xml->XMLin($infile);
 

@@ -4,6 +4,14 @@
  *  @brief Defines the ReturnCode class that is a generic return code.
  */
 
+/*
+ * Change Log ******************************************************************
+ * Flag     Defect/Feature  User        Date        Description
+ * ------   --------------  ----------  ----------- ----------------------------
+ *                          mjjones     04/13/2011  Created.
+ *                          mjjones     07/05/2011. Removed const from data
+ */
+
 #ifndef FAPIRETURNCODE_H_
 #define FAPIRETURNCODE_H_
 
@@ -146,7 +154,7 @@ public:
      *
      * param[in] i_pData Pointer to ReturnCodeData (on the heap)
      */
-    void setData(const void * i_pData);
+    void setData(void * i_pData);
 
     /**
      * @brief Gets the creator of the return code

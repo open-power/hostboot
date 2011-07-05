@@ -4,6 +4,14 @@
  *  @brief Implements the ReturnCode class.
  */
 
+/*
+ * Change Log ******************************************************************
+ * Flag     Defect/Feature  User        Date        Description
+ * ------   --------------  ----------  ----------- ----------------------------
+ *                          mjjones     04/13/2011  Created.
+ *                          mjjones     07/05/2011. Removed const from data
+ */
+
 #include <fapiReturnCode.H>
 #include <fapiReturnCodeDataRef.H>
 
@@ -108,7 +116,7 @@ ReturnCode::operator uint32_t() const
 //******************************************************************************
 void * ReturnCode::getData() const
 {
-    const void * l_pData = NULL;
+    void * l_pData = NULL;
 
     if (iv_pDataRef)
     {
@@ -116,8 +124,7 @@ void * ReturnCode::getData() const
         l_pData = iv_pDataRef->getData();
     }
 
-    // Remove the constness and return
-    return const_cast<void *>(l_pData);
+    return l_pData;
 }
 
 //******************************************************************************
@@ -125,7 +132,7 @@ void * ReturnCode::getData() const
 //******************************************************************************
 void * ReturnCode::releaseData()
 {
-    const void * l_pData = NULL;
+    void * l_pData = NULL;
 
     if (iv_pDataRef)
     {
@@ -136,14 +143,13 @@ void * ReturnCode::releaseData()
         (void) removeData();
     }
 
-    // Remove the constness and return
-    return const_cast<void *>(l_pData);
+    return l_pData;
 }
 
 //******************************************************************************
 // setData function
 //******************************************************************************
-void ReturnCode::setData(const void * i_pData)
+void ReturnCode::setData(void * i_pData)
 {
     // Remove interest in pointed to ReturnCodeDataRef
     (void) removeData();

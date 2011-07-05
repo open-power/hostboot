@@ -5,6 +5,14 @@
  *         reference count to a platform specific ReturnCodeData object.
  */
 
+/*
+ * Change Log ******************************************************************
+ * Flag     Defect/Feature  User        Date        Description
+ * ------   --------------  ----------  ----------- ----------------------------
+ *                          mjjones     04/13/2011  Created.
+ *                          mjjones     07/05/2011. Removed const from data
+ */
+
 #ifndef FAPIRETURNCODEDATAREF_H_
 #define FAPIRETURNCODEDATAREF_H_
 
@@ -39,7 +47,7 @@ public:
      *
      * @param[in] i_pData Pointer to platform specific ReturnCodeData
      */
-    explicit ReturnCodeDataRef(const void * i_pData);
+    explicit ReturnCodeDataRef(void * i_pData);
 
     /**
      * @brief Destructor
@@ -67,7 +75,7 @@ public:
      * @return void *. Pointer to ReturnCodeData. If NULL then no data (must
      *                 have been released)
      */
-    const void * getData() const;
+    void * getData() const;
 
     /**
      * @brief Get a pointer to any ReturnCodeData and release ownership from
@@ -78,7 +86,7 @@ public:
      * @return void *. Pointer to ReturnCodeData. If NULL then no data (must
      *                 have been released)
      */
-    const void * releaseData();
+    void * releaseData();
 
 private:
 
@@ -98,7 +106,7 @@ private:
     uint32_t iv_refCount;
 
     // Pointer to platform specific ReturnCodeData
-    const void * iv_pData;
+    void * iv_pData;
 };
 
 }

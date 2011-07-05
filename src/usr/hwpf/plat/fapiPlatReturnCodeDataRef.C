@@ -21,8 +21,8 @@ void ReturnCodeDataRef::deleteData()
 {
 	FAPI_DBG("ReturnCodeDataRef::deleteData");
 
-    // FSP platform uses iv_pData to point at a FipS error log.
-    delete (reinterpret_cast<errlHndl_t>(const_cast<void *>(iv_pData)));
+    // HostBoot platform uses iv_pData to point at an error log.
+    delete (static_cast<errlHndl_t>(iv_pData));
 }
 
 }
