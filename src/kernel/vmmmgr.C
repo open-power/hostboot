@@ -2,6 +2,7 @@
 #include <kernel/vmmmgr.H>
 #include <kernel/console.H>
 #include <arch/ppc.H>
+#include <kernel/ptmgr.H>
 
 extern void* data_load_address;
 
@@ -11,7 +12,7 @@ VmmManager::VmmManager() : lock()
 
 void VmmManager::init()
 {
-    printk("Starting VMM...");
+    printk("Starting VMM...\n");
     
     VmmManager& v = Singleton<VmmManager>::instance();
 
@@ -19,7 +20,7 @@ void VmmManager::init()
     v.initPTEs();
     v.initSDR1();
 
-    printk("done.\n");
+    printk("...done.\n");
 };
 
 void VmmManager::init_slb()
@@ -69,12 +70,10 @@ void VmmManager::initSLB()
 
 void VmmManager::initPTEs()
 {
-    // Invalidate all.
-    for(size_t i = 0; i < PTEG_COUNT; i++)
-	for (size_t j = 0; j < PTEG_SIZE; j++)
-	    setValid(false, getPte(i,j));
-   
-    // Set up linear map.
+    // Initialize and invalidate the page table
+    PageTableManager::init();
+
+    // Set up linear map for every 4K page
     for(size_t i = 0; i < (FULL_MEM_SIZE / PAGESIZE); i++)
     {
 	ACCESS_TYPES access = NORMAL_ACCESS;
@@ -86,12 +85,8 @@ void VmmManager::initPTEs()
 	{
 	    access = READ_O_ACCESS;
 	}
-	volatile pte_t& pte = getPte(i % PTEG_COUNT, i / PTEG_COUNT);
-	defaultPte(pte);
-	setTid(i / PTEG_COUNT, pte);
-	setAccess(access, pte);
-	setPage(i, pte);
-	setValid(true, pte);
+
+        PageTableManager::addEntry( i*PAGESIZE, i, access );
     }
 }
 
@@ -101,9 +96,6 @@ void VmmManager::initSDR1()
     register uint64_t sdr1 = (uint64_t)HTABORG;
     asm volatile("mtsdr1 %0" :: "r"(sdr1) : "memory");
 }
-
-VmmManager::pte_t* VmmManager::page_table 
-	= (VmmManager::pte_t*) HTABORG;
 
 bool VmmManager::_pteMiss(task_t* t)
 {
@@ -137,22 +129,7 @@ bool VmmManager::_pteMiss(task_t* t)
 	uint64_t mmioMapPage = mmioMapEntry / PAGESIZE;
 
 	// Update PTE.
-	volatile pte_t& pte = getPte(effAddrPage, 1);
-	if ((getTid(pte) == effPid) && 
-	    (getPage(pte) == mmioMapPage) &&
-	    (isValid(pte)))
-	{
-	    // Already present, maybe another thread.
-	    lock.unlock();
-	    return true;
-	}
-	if (isValid(pte))	// Invalidate if already valid.
-	    setValid(false, pte);
-	defaultPte(pte);
-	setTid(effPid, pte);
-	setPage(mmioMapPage, pte);
-	setAccess(CI_ACCESS, pte);
-	setValid(true, pte);
+        PageTableManager::addEntry( effAddr, mmioMapPage, CI_ACCESS );
 	
 	lock.unlock();
 	return true;
