@@ -230,5 +230,9 @@ cscope: code_pass
 	    cscope -bqk)
 
 ifneq ($(MAKECMDGOALS),clean)
+ifneq ($(MAKECMDGOALS),gen_pass)
+ifneq ($(MAKECMDGOALS),GEN_PASS)
     include $(OBJECTS:.o=.dep)
+endif
+endif
 endif
