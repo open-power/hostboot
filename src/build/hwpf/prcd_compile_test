@@ -1,0 +1,99 @@
+#!/bin/bash
+
+#Note that this test case assumes 2 files present in the PWD (along with prcd_compile.tcl)
+# - fapiTestHwp.C and fapiTestHwp.H
+
+#BUILD="b0621a_2001_Sprint2"
+BUILD="master"
+
+###############################################################
+# Validate return code, exit on failure
+###############################################################
+function check_good_rc {
+
+    if [ $1 -eq 0 ]; then
+        echo SUCCESS
+        rm -f hbicore*
+        rm -f hbotStringFile
+        echo
+    else
+        echo FAIL; exit -1
+    fi
+}
+
+###############################################################
+# Validate return code is non-zero, exit on failure
+###############################################################
+function check_bad_rc {
+
+    if [ $1 -ne 0 ]; then
+        echo SUCCESS
+        echo
+    else
+        echo FAIL; exit -1
+    fi
+}
+
+###############################################################
+# Main
+###############################################################
+
+# Check if the needed files exist, if not try and copy them in
+if [ ! -f "./fapiTestHwp.H" ]; then
+    cp ../../include/usr/hwpf/hwp/fapiTestHwp.H ./
+    check_good_rc $?
+fi
+
+if [ ! -f "./fapiTestHwp.C" ]; then
+    cp ../../usr/hwpf/hwp/fapiTestHwp.C ./
+    check_good_rc $?
+fi
+
+echo 
+
+echo "TEST - Good Path - Multi Process"
+./prcd_compile.tcl -d $BUILD ./fapiTestHwp.H ./fapiTestHwp.C &
+sleep 2
+./prcd_compile.tcl -d $BUILD ./fapiTestHwp.H ./fapiTestHwp.C &
+sleep 2
+./prcd_compile.tcl -d $BUILD ./fapiTestHwp.H ./fapiTestHwp.C &
+sleep 20
+
+echo
+echo "TEST - Good Path - 1 C File"
+./prcd_compile.tcl -d $BUILD ./fapiTestHwp.C
+check_good_rc $?
+
+echo
+echo "TEST - Good Path - 1 H File with -o Param"
+./prcd_compile.tcl -d $BUILD -o ./ ./fapiTestHwp.H
+check_good_rc $?
+
+echo
+echo "TEST - Good Path - 2 Files"
+./prcd_compile.tcl -d $BUILD ./fapiTestHwp.H ./fapiTestHwp.C
+check_good_rc $?
+
+echo
+echo "TEST - Good Path - Directory Path and Output Directory"
+cp fapiTestHwp.H /tmp/
+mkdir output
+./prcd_compile.tcl -d $BUILD -o ./output/ /tmp/fapiTestHwp.H fapiTestHwp.C
+check_good_rc $?
+rm -rf output
+rm /tmp/fapiTestHwp.H
+
+echo
+echo "TEST - Good Path - No Files"
+./prcd_compile.tcl -d $BUILD
+check_good_rc $?
+
+echo
+echo "TEST - Bad Path - Compile Failure"
+rm -f hbicore*; 
+cp fapiTestHwp.H /tmp/
+echo COMPILE_FAIL >> /tmp/fapiTestHwp.H
+./prcd_compile.tcl -d $BUILD /tmp/fapiTestHwp.H fapiTestHwp.C
+check_bad_rc $?
+rm /tmp/fapiTestHwp.H
+

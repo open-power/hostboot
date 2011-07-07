@@ -81,4 +81,42 @@ errlHndl_t invokeHwpIsP7EM0ChipletClockOn(TARGETING::Target* i_target,
     return l_err;
 }
 
+//******************************************************************************
+// invokeHwpInitial function
+//******************************************************************************
+errlHndl_t invokeHwpInitialTest(TARGETING::Target* i_target)
+{
+
+    FAPI_DBG(ENTER_MRK "invokeHwpInitialTest");
+
+    errlHndl_t l_err = NULL;
+
+     // Create a generic Target object
+    Target l_target(TARGET_TYPE_PROC_CHIP, reinterpret_cast<void *> (i_target));
+
+    //@todo
+    // Double check to see if any locking is needed here.
+    // Lower XSCOM already has a mutex lock.
+
+    // Call the HWP executor macro
+    ReturnCode l_rc;
+    FAPI_EXEC_HWP(l_rc, hwpInitialTest, l_target);
+
+    if (l_rc != FAPI_RC_SUCCESS)
+    {
+        FAPI_ERR("invokeHwpInitialTest: Error (0x%x) from "
+                 "exechwpInitialTest",
+                 static_cast<uint32_t> (l_rc));
+        l_err = rcToErrl(l_rc);
+    }
+    else
+    {
+        FAPI_INF("Success in call to exechwpInitialTest");
+    }
+
+    FAPI_DBG(EXIT_MRK "invokeHwpInitialTest");
+
+    return l_err;
+}
+
 } // End namespace

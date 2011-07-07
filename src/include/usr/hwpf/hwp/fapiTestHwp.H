@@ -34,6 +34,18 @@ extern "C"
 fapi::ReturnCode hwpIsP7EM0ChipletClockOn(const fapi::Target & i_chip,
                                           bool & o_clocksOn);
 
+/**
+ * @brief Run a sample test function that can be overloaded by the hw dev
+ *        team.
+ *
+ * @param[in]  i_chip            Target chip
+ *
+ * @return ReturnCode
+ */
+fapi::ReturnCode hwpInitialTest(const fapi::Target & i_chip);
+
+
+
 } // extern "C"
 
 #endif // FAPITESTHWPROC_H_

@@ -70,7 +70,7 @@ public:
         l_err = invokeHwpIsP7EM0ChipletClockOn(l_testTarget, l_clocksOn);
         if (l_err)
         {
-            TS_FAIL("testHwpf2: Unit Test failed. HWP failed. Error logged");
+            TS_FAIL("testHwpf2: Unit Test failed. invokeHwpIsP7EM0ChipletClockOn failed. Error logged");
             // Commit/delete error
             errlCommit(l_err);
         }
@@ -84,6 +84,19 @@ public:
             {
                 TS_TRACE("testHwpf2: Success. Clocks are off");
             }
+        }
+
+        // Call test procedure too
+        l_err = invokeHwpInitialTest(l_testTarget);
+        if (l_err)
+        {
+            TS_FAIL("testHwpf2: Unit Test failed. invokeHwpInitialTest failed. Error logged");
+            // Commit/delete error
+            errlCommit(l_err);
+        }
+        else
+        {
+            TS_TRACE("testHwpf2: Unit test passed! invokeHwpInitialTest");
         }
 
         return;
