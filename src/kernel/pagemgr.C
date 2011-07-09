@@ -1,3 +1,4 @@
+#include <limits.h>
 #include <kernel/pagemgr.H>
 #include <util/singleton.H>
 #include <kernel/console.H>

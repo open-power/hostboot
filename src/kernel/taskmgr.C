@@ -80,7 +80,7 @@ task_t* TaskManager::_createTask(TaskManager::task_fn_t t,
 	task->context.stack_ptr = 
 	    PageManager::allocatePage(TASK_DEFAULT_STACK_SIZE);
         memset(task->context.stack_ptr, '\0', 
-               TASK_DEFAULT_STACK_SIZE * PAGE_SIZE);
+               TASK_DEFAULT_STACK_SIZE * PAGESIZE);
 	task->context.gprs[1] = ((uint64_t)task->context.stack_ptr) + 16320;
     }
     else

@@ -47,12 +47,12 @@ void kernel_execute_data_storage()
     switch(exception)
     {
 	case EXCEPTION_DSISR_PTEMISS:
-	    handled = VmmManager::pteMiss(t);
+	    handled = VmmManager::pteMiss(t, getDAR());
 	    break;
     }
     if (!handled)
     {
-	printk("Data Storage exception on %d: %lx, %lx\n", 
+	printk("Data Storage exception on %d: %lx, %lx\n",
 	       t->tid, getDAR(), getDSISR());
 	Systemcalls::TaskEnd(t);
     }
@@ -66,12 +66,28 @@ void kernel_execute_data_segment()
     Systemcalls::TaskEnd(t);
 }
 
+const uint64_t EXCEPTION_SRR1_INSTR_MASK    = 0x0000000040000000;
+const uint64_t EXCEPTION_SRR1_INSTR_PTEMISS = 0x0000000040000000;
+
 extern "C"
 void kernel_execute_inst_storage()
 {
     task_t* t = TaskManager::getCurrentTask();
-    printk("Inst Storage exception, killing task %d\n", t->tid);
-    Systemcalls::TaskEnd(t);
+    uint64_t exception = getSRR1() & EXCEPTION_SRR1_INSTR_MASK;
+
+    bool handled = false;
+    switch (exception)
+    {
+        case EXCEPTION_SRR1_INSTR_PTEMISS:
+            handled = VmmManager::pteMiss(t, getSRR0());
+            break;
+    }
+    if (!handled)
+    {
+        printk("Inst Storage exception on %d: %lx, %lx\n",
+               t->tid, getSRR0(), getSRR1());
+        Systemcalls::TaskEnd(t);
+    }
 }
 
 extern "C"
@@ -103,7 +119,7 @@ namespace ExceptionHandles
 	    // check for mfsprg3
 	if ((instruction & 0xfc1fffff) == 0x7c1342a6)
 	{
-	    t->context.gprs[(instruction & 0x03E00000) >> 21] = 
+	    t->context.gprs[(instruction & 0x03E00000) >> 21] =
 		    (uint64_t) t;
 	    t->context.nip = (void*) (((uint64_t)t->context.nip)+4);
 	    return true;

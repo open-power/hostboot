@@ -26,15 +26,6 @@ class slbtest: public CxxTest::TestSuite
             {
                 TS_FAIL("Data Segment exception expected in 1TB segment\n");
             }
-
-            rc = 0;
-            task_create(writeEA2TB, this);
-            while (rc == 0) task_yield();
-            task_yield();
-            if (rc == -1)
-            {
-                TS_FAIL("Data Storage exception expected in 2TB segment\n");
-            }
         }
 
     private:
@@ -44,16 +35,6 @@ class slbtest: public CxxTest::TestSuite
             rc = 1;
             sync();
             *(int *)0x10000000000 = 1;
-            sync();
-            rc = -1;
-            task_end();
-        }
-
-        static void writeEA2TB(void *i_p)
-        {
-            rc = 1;
-            sync();
-            *(int *)0x20000000000 = 1;
             sync();
             rc = -1;
             task_end();

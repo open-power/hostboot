@@ -6,8 +6,8 @@
 #include <assert.h>
 
 //#define Dprintk(...) printk(args...)
-#define Dprintk(args...) 
-#define Tprintk(args...) 
+#define Dprintk(args...)
+#define Tprintk(args...)
 #define Eprintk(args...) printk(args)
 
 // Utilities to do some bit manipulation
@@ -74,13 +74,13 @@ ALWAYS_INLINE uint64_t EXTRACT_RJ_LEN( uint64_t i_lastword,
     }
     else if( i_bitlen <= 64 )
     {
-        uint64_t diff = 64 - i_bitlen;  
+        uint64_t diff = 64 - i_bitlen;
         return EXTRACT_RJ( i_lastword, i_startbit + diff, i_lastbit + diff );
     }
     else if( i_lastbit < (i_bitlen - 64) )
     {
         // desired bits are inside the first word
-        return 0;        
+        return 0;
     }
 
     // goal is to left-justify the i_startbit to be bit0 in the resulting word
@@ -172,18 +172,18 @@ void PageTableManager::delEntry( uint64_t i_vAddr )
 void PageTableManager::delRangeVA( uint64_t i_vAddrStart,
                                    uint64_t i_vAddrFinish )
 {
-    return Singleton<PageTableManager>::instance()._delRangeVA(i_vAddrStart,i_vAddrFinish);    
-}    
+    return Singleton<PageTableManager>::instance()._delRangeVA(i_vAddrStart,i_vAddrFinish);
+}
 
 /**
  * STATIC
  * @brief Remove a range of entries from the hardware page table
  */
 void PageTableManager::delRangePN( uint64_t i_pnStart,
-                                   uint64_t i_pnFinish )   
+                                   uint64_t i_pnFinish )
 {
-    return Singleton<PageTableManager>::instance()._delRangePN(i_pnStart,i_pnFinish);    
-}    
+    return Singleton<PageTableManager>::instance()._delRangePN(i_pnStart,i_pnFinish);
+}
 
 
 /**
@@ -193,7 +193,7 @@ void PageTableManager::delRangePN( uint64_t i_pnStart,
 uint64_t PageTableManager::getStatus( uint64_t i_vAddr,
                                       uint64_t& o_pn )
 {
-    return Singleton<PageTableManager>::instance()._getStatus(i_vAddr,o_pn);    
+    return Singleton<PageTableManager>::instance()._getStatus(i_vAddr,o_pn);
 }
 
 /**
@@ -214,7 +214,7 @@ void PageTableManager::printPTE( const char* i_label,
 void PageTableManager::printPTE( uint64_t i_va,
                                  bool i_verbose )
 {
-    PageTableEntry* pte = Singleton<PageTableManager>::instance().findPTE(i_va);    
+    PageTableEntry* pte = Singleton<PageTableManager>::instance().findPTE(i_va);
     Singleton<PageTableManager>::instance().printPTE( NULL, pte, i_verbose );
 }
 
@@ -368,11 +368,11 @@ void PageTableManager::_delRangeVA( uint64_t i_vAddrStart,
     // Note : this could potentially be very slow for large ranges
 
     // loop around 4K pages within the range
-    for( uint64_t va = i_vAddrStart; va < i_vAddrFinish; va += VmmManager::PAGESIZE )
+    for( uint64_t va = i_vAddrStart; va < i_vAddrFinish; va += PAGESIZE )
     {
         _delEntry( va );
     }
-}    
+}
 
 /**
  * @brief Remove a range of entries from the hardware page table
@@ -395,7 +395,7 @@ void PageTableManager::_delRangePN( uint64_t i_pnStart,
 
         pte++;
     }
-}    
+}
 
 /**
  * @brief Return status information about an entry in the hardware page table
@@ -407,7 +407,7 @@ uint64_t PageTableManager::_getStatus( uint64_t i_vAddr,
     o_pn = INVALID_PN;
     if( pte ) {
         o_pn = pte->PN;
-    } 
+    }
     return getStatus( pte );
 }
 
@@ -453,7 +453,7 @@ uint64_t PageTableManager::getStatus( PageTableEntry* i_pte )
     if( i_pte->R == 1 ) {
         status |= PTE_ACCESSED;
     }
-    
+
     return status;
 }
 
@@ -522,7 +522,7 @@ uint64_t PageTableManager::findPTEG( uint64_t i_vAddr )
     // use the hash as the index into the array of PTEGs
     uint64_t pteg_addr = getAddress() + hash * PTEG_SIZE_BYTES;
 
-    Dprintk( "PageTableManager::findPTEG(i_vAddr=0x%.16lX) = 0x%.16lX\n", i_vAddr, pteg_addr );   
+    Dprintk( "PageTableManager::findPTEG(i_vAddr=0x%.16lX) = 0x%.16lX\n", i_vAddr, pteg_addr );
     return pteg_addr;
 }
 
@@ -572,7 +572,7 @@ PageTableManager::PageTableEntry* PageTableManager::findPTE( uint64_t i_vAddr,
     }
 
     Dprintk( "<<PageTableManager::findPTE() = %.16lX>>\n", (uint64_t)pte_found );
-    return pte_found;    
+    return pte_found;
 }
 
 /**
@@ -682,7 +682,7 @@ void PageTableManager::printPTE( const char* i_label,
     {
         printk( "[%4ld:%4ld]> @%p : %.16lX %.16lX : AVA=%16lX, PN=%ld\n", pte_num/PTEG_SIZE, pte_num%PTEG_SIZE, i_pte, i_pte->dword0, i_pte->dword1, i_pte->AVA, i_pte->PN );
     }
-   
+
 }
 
 
@@ -716,7 +716,7 @@ void PageTableManager::_printPT( void )
 uint64_t PageTableManager::getAddress( void )
 {
     if(ivTABLE) {
-        return (uint64_t)ivTABLE; 
+        return (uint64_t)ivTABLE;
     } else {
         return VmmManager::HTABORG;
     }
@@ -739,15 +739,23 @@ void PageTableManager::setAccessBits( PageTableEntry* o_pte,
     o_pte->dword1 &= ~PTE_ACCESS_BITS;
     if( VmmManager::NO_USER_ACCESS == i_accessType ) {
         o_pte->WIMG = 0b0010; // Memory Coherency Required
+        o_pte->N = 0b1;       // No Execute
     } else if( VmmManager::READ_O_ACCESS == i_accessType ) {
         o_pte->WIMG = 0b0010; // Memory Coherency Required
         o_pte->pp1_2 = 0b01;  // PP=001
+        o_pte->N = 0b1;       // No Execute
     } else if( VmmManager::NORMAL_ACCESS == i_accessType ) {
         o_pte->WIMG = 0b0010; // Memory Coherency Required
         o_pte->pp1_2 = 0b10;  // PP=010
+        o_pte->N = 0b0;       // @TODO Change to 'No Execute' when VFS supports.
     } else if( VmmManager::CI_ACCESS == i_accessType ) {
         o_pte->WIMG = 0b0101; // Cache Inhibited, Guarded
         o_pte->pp1_2 = 0b10;  // PP=010
+        o_pte->N = 0b1;       // No Execute
+    } else if( VmmManager::RO_EXE_ACCESS == i_accessType ) {
+        o_pte->WIMG = 0b0010; // Memory Coherency Required
+        o_pte->pp1_2 = 0b01;  // PP=001
+        o_pte->N = 0b0;       // Execute
     } else {
         //@fixme - add RO_EXE_ACCESS
         Eprintk( "** unrecognized access=%d\n", i_accessType );
@@ -795,7 +803,7 @@ void PageTableManager::setupDefaultPTE( PageTableEntry* o_pte )
     o_pte->L = 0b0;   //Virtual page size  (1=>4KB)
     o_pte->H = 0b0;   //Hash function identifier  (0=primary hash)
 }
- 
+
 /**
  * @brief  Find the real address of a PTE that that is empty or invalid
  */
@@ -822,7 +830,7 @@ PageTableManager::PageTableEntry* PageTableManager::findEmptyPTE( uint64_t i_pte
     }
 
     Dprintk( "<<PageTableManager::findEmptyPTE() = %p>>\n", pte_slot );
-    return pte_slot;    
+    return pte_slot;
 }
 
 /**
@@ -833,15 +841,15 @@ PageTableManager::PageTableEntry* PageTableManager::findOldPTE( uint64_t i_ptegA
 {
     // Order of preference for PTE slots to steal:
     // 1) PTE with highest use count (LRU==SW[2:3])
-    // 2) Lowest PTE with the highest use count 
+    // 2) Lowest PTE with the highest use count
     PageTableEntry* pte = (PageTableEntry*)i_ptegAddr;
     PageTableEntry* old_pte = pte;
     for( uint64_t x = 0; x < 8; x++ )
     {
         if( pte->LRU > old_pte->LRU )
         {
-            old_pte = pte;            
-        }        
+            old_pte = pte;
+        }
 
         pte++;
     }
@@ -860,7 +868,7 @@ void PageTableManager::updateLRU( const PageTableEntry* i_newPTE )
     // find the beginning of the PTEG
     uint64_t pteg_addr = (((uint64_t)i_newPTE) - getAddress()) / PTEG_SIZE_BYTES;
     pteg_addr = pteg_addr*PTEG_SIZE_BYTES + getAddress();
-  
+
     // loop through all 8 PTEs in the PTEG
     PageTableEntry* pte_cur = (PageTableEntry*)pteg_addr;
     for( uint64_t x = 0; x < 8; x++ )
@@ -894,7 +902,7 @@ void PageTableManager::updateLRU( const PageTableEntry* i_newPTE )
                                                     new_pte.dword0 ) );
 
             // tlbie, eieio, tlbsync, ptesync
-            invalidateTLB(pte_cur);   
+            invalidateTLB(pte_cur);
         }
 
         pte_cur++;
@@ -922,10 +930,10 @@ void PageTableManager::invalidateTLB( PageTableEntry* i_pte )
                      "r"(rB), "r"(rS) : "memory");
 
         /* order tlbie before tlbsync */
-        asm volatile("eieio" ::: "memory"); 
+        asm volatile("eieio" ::: "memory");
 
         /* order tlbie before ptesync */
-        asm volatile("tlbsync" ::: "memory"); 
+        asm volatile("tlbsync" ::: "memory");
 
         /* order tlbie, tlbsync and 1st update before 2nd update */
         asm volatile("ptesync" ::: "memory");

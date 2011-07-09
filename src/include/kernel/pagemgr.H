@@ -2,6 +2,7 @@
 #define __KERNEL_PAGEMGR_H
 
 #include <stdint.h>
+#include <limits.h>
 #include <util/lockfree/stack.H>
 #include <kernel/vmmmgr.H>
 
@@ -19,7 +20,6 @@ class PageManager
 
 	enum 
 	{ 
-	    PAGESIZE = VmmManager::PAGESIZE,
 	    MEMLEN = VmmManager::HTABORG,
 
 	    BUCKETS = 16,

@@ -1,3 +1,4 @@
+#include <limits.h>
 #include <stdlib.h>
 #include <string.h>
 #include <kernel/heapmgr.H>
@@ -7,8 +8,8 @@ void* malloc(size_t s)
 {
     if (s > HeapManager::MAX_ALLOC_SIZE)
     {
-	size_t pages = (s + 8 + (PageManager::PAGESIZE - 1)) 
-                     / PageManager::PAGESIZE;
+	size_t pages = (s + 8 + (PAGESIZE - 1)) 
+                     / PAGESIZE;
 	void* v = PageManager::allocatePage(pages);
 	size_t* len = (size_t*)v;
 	*len = pages << 8;
@@ -46,7 +47,7 @@ void* realloc(void* p, size_t s)
     size_t cur_size;
     if ((*len) > 0xff)
     {
-        cur_size = ((*len) >> 8) * PageManager::PAGESIZE - 8;
+        cur_size = ((*len) >> 8) * PAGESIZE - 8;
     }
     else
     {

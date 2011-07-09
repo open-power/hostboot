@@ -1,3 +1,4 @@
+#include <limits.h>
 #include <kernel/heapmgr.H>
 #include <util/singleton.H>
 #include <kernel/console.H>
@@ -79,7 +80,7 @@ void HeapManager::newPage()
 {
     void* page = PageManager::allocatePage();
     chunk_t * c = (chunk_t*)page;
-    for (int i = 0; i < (PageManager::PAGESIZE / (1 << (BUCKETS + 3))); i++)
+    for (int i = 0; i < (PAGESIZE / (1 << (BUCKETS + 3))); i++)
     {
 	c->len = BUCKETS-1;
 	push_bucket(c, BUCKETS-1);

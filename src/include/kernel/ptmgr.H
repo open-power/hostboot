@@ -17,7 +17,7 @@ class PageTableManager
     /**
      * Status Values
      */
-    enum 
+    enum
     {
         PTE_UNKNOWN          = 0x0000000000000000,  /**< Entry wasn't found */
         PTE_PRESENT          = 0x0000000000000001,  /**< Entry is present in table */
@@ -71,7 +71,7 @@ class PageTableManager
      * @param[in] i_vAddrFinish  End of VA range to remove  (full address)
      */
     static void delRangeVA( uint64_t i_vAddrStart,
-                          uint64_t i_vAddrFinish );    
+                            uint64_t i_vAddrFinish );
 
 
     /**
@@ -81,7 +81,7 @@ class PageTableManager
      * @param[in] i_pnFinish  Last Physical Page to remove  (page number)
      */
     static void delRangePN( uint64_t i_pnStart,
-                          uint64_t i_pnFinish );    
+                            uint64_t i_pnFinish );
 
     /**
      * @brief Return status information about an entry in the hardware page table
@@ -138,7 +138,7 @@ class PageTableManager
      * Local copy of Page Table for user-space testing
      *  (set to NULL for kernel instance)
      */
-    char* ivTABLE; 
+    char* ivTABLE;
 
 
     /**
@@ -177,7 +177,7 @@ class PageTableManager
                 uint64_t WIMG:4;   /**< 57:60 Storage control bits  */
                 uint64_t N:1;      /**< 61    No-execute page (N==1)  */
                 uint64_t pp1_2:2;  /**< 62:63 Page Protection bits 1:2  */
-            }; 
+            };
             uint64_t dword1;  /**< Full Dword1 */
         };
     } PACKED;
@@ -294,7 +294,7 @@ class PageTableManager
      * @param[in] i_vAddrFinish  End of VA range to remove
      */
     void _delRangeVA( uint64_t i_vAddrStart,
-                      uint64_t i_vAddrFinish );    
+                      uint64_t i_vAddrFinish );
 
     /**
      * @brief Remove a range of entries from the hardware page table
@@ -303,7 +303,7 @@ class PageTableManager
      * @param[in] i_pnFinish  Last Physical Page to remove
      */
     void _delRangePN( uint64_t i_pnStart,
-                      uint64_t i_pnFinish );    
+                      uint64_t i_pnFinish );
 
     /**
      * @brief Return status information about an entry in the hardware page table
@@ -399,7 +399,7 @@ class PageTableManager
 
 
 
-    // Allow testcase to see inside 
+    // Allow testcase to see inside
     friend class ptmgrtest;
 };
 
