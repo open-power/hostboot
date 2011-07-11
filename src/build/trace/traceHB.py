@@ -17,8 +17,11 @@ import conf
 import configuration
 import cli
 import binascii
+import datetime
 
-# Function to dump the global trace buffer
+#------------------------------------------------------------------------------
+# Function to dump the trace buffers
+#------------------------------------------------------------------------------
 def traceHB(compStr, symsFile, stringFile):
 
     # "constants"
@@ -125,17 +128,17 @@ def traceHB(compStr, symsFile, stringFile):
                         #print addr_str
                         addr_trace_buffer = int(addr_str,16)
 
-                        #save trace buffer to <sandbox>/simics/trace.out
+                        #save trace buffer to <sandbox>/simics/tracebin.out
                         string = "memory_image_ln0.save tmp.out 0x%x 0x800"%(addr_trace_buffer)
                         #print string
                         result = run_command(string)
                         #print result
 
                         if (buffer_found == 0): 
-                            fd1 = open('trace.out','wb')
+                            fd1 = open('tracebin.out','wb')
                             buffer_found = 1
                         else:
-                            fd1 = open('trace.out','ab')
+                            fd1 = open('tracebin.out','ab')
                         fd2 = open('tmp.out', 'rb')
                         fd1.write(fd2.read())
                         fd1.close()
@@ -148,17 +151,21 @@ def traceHB(compStr, symsFile, stringFile):
                     entry_addr += DESC_ARRAY_ENTRY_SIZE
 
             if (buffer_found == 1):
-                #display formatted trace
-                string = 'fsp-trace -s %s trace.out'%(stringFile)
+                #display formatted trace & save it to <sandbox>/simics/trace.out
+                string = 'fsp-trace -s %s tracebin.out | tee trace.out'%(stringFile)
                 #print string
                 os.system(string)
+                #remove tmp.out & tracebin.out
+                os.system('rm tmp.out tracebin.out')
 
             print
             break
     return
 
 
+#------------------------------------------------------------------------------
 # Function to dump the kernel printk buffer
+#------------------------------------------------------------------------------
 def printkHB(symsFile):
 
     print
@@ -187,8 +194,40 @@ def printkHB(symsFile):
             #print file.read()
             os.system('cat printk.out')
 
+            print
             break
     return
+
+
+#------------------------------------------------------------------------------
+# Function to dump L3
+#------------------------------------------------------------------------------
+def dumpL3():
+
+    # "constants"
+    L3_SIZE = 0x800000;
+
+    print
+
+    # Get a timestamp on when dump was collected
+    t = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+    #print t
+
+    #dump L3 to hbdump.<timestamp>
+    string = "memory_image_ln0.save hbdump.%s 0 0x%x"%(t, L3_SIZE)
+    #print string
+    result = run_command(string)
+    #print result
+
+    print "HostBoot dump saved to hbdump.%s in simics directory."%(t)
+
+    return
+
+
+#------------------------------------------------------------------------------
+# Function to dump L3
+#------------------------------------------------------------------------------
+
 
 #===============================================================================
 #   HOSTBOOT Commands
@@ -283,3 +322,24 @@ Examples: \n
     hb-printk ../hbicore.syms \n
     """)
     
+#------------------------------------------------
+#------------------------------------------------
+def hb_dump():
+    dumpL3()
+    return None
+
+new_command("hb-dump",
+    hb_dump,
+    #alias = "hbt",
+    type = ["hostboot-commands"],
+    #see_also = ["hb-trace"],
+    see_also = [ ],
+    short = "Dumps L3 to hbdump.<timestamp>",
+    doc = """
+Parameters: \n
+
+Defaults: \n
+
+Examples: \n
+    hb-dump \n
+    """)
