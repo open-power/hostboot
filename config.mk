@@ -217,7 +217,7 @@ beam: ${SUBDIRS:.d=.beamdir} ${BEAMOBJS}
 
 clean: ${SUBDIRS:.d=.clean}
 	(rm -f ${OBJECTS} ${OBJECTS:.o=.dep} ${OBJECTS:.o=.list} \
-	       ${BEAMOBJS} ${LIBRARIES} \
+	       ${OBJECTS:.o=.o.hash} ${BEAMOBJS} ${LIBRARIES} \
 	       ${IMAGES} ${IMAGES:.bin=.list} ${IMAGES:.bin=.syms} \
 	       ${IMAGES:.bin=.bin.modinfo} ${IMAGES:.ruhx=.lid} \
 	       ${IMAGES:.ruhx=.lidhdr} ${IMAGE_EXTRAS} ${EXTRA_LIDS_} \
