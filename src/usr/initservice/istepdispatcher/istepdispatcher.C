@@ -1,3 +1,20 @@
+/****************************************************************************
+ * $IBMCopyrightBlock:
+ * 
+ *  IBM Confidential
+ * 
+ *  Licensed Internal Code Source Materials
+ * 
+ *  IBM HostBoot Licensed Internal Code
+ * 
+ *  (C) Copyright IBM Corp. 2011
+ * 
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ * $
+****************************************************************************/
+
 /**
  *  @file istepdispatcher.C
  *
@@ -20,6 +37,7 @@
 #include    "istepdispatcher.H"
 #include    "isteplist.H"
 
+
 namespace   INITSERVICE
 {
 
@@ -29,26 +47,24 @@ namespace   INITSERVICE
 extern trace_desc_t *g_trac_initsvc;
 
 /**
- * @brief   set up _start() task entry procedure
- *
+ * @brief   set up _start() task entry procedure using the macro
  */
 TASK_ENTRY_MACRO( IStepDispatcher::getTheInstance().init );
 
 
 IStepDispatcher::IStepDispatcher()
-:
-             iv_istepmodeflag(false),
-             iv_nextistep( 0 ),
-             iv_cancontinueflag(false)
+:   iv_istepmodeflag(false),
+    iv_nextistep( 0 ),
+    iv_cancontinueflag(false)
 {
 
 }
+
 
 IStepDispatcher::~IStepDispatcher()
 {
 
 }
-
 
 
 IStepDispatcher& IStepDispatcher::getTheInstance()
@@ -72,7 +88,7 @@ void IStepDispatcher::init( void * ptr )
             nextIStep<INITSERVICE::MAX_ISTEPS;
             nextIStep++ )
     {
-        pistep    =   &(isteps[nextIStep]);
+        pistep    =   &(g_isteps[nextIStep]);
         if ( pistep->taskflags.task_type ==  END_TASK_LIST )
         {
             TRACDCOMP( g_trac_initsvc,
@@ -81,15 +97,29 @@ void IStepDispatcher::init( void * ptr )
         }
 
 
-        errl = executeFn( pistep, &args );
+        args.clear();           // clear the args struct for the next istep
+        errl = InitService::getTheInstance().executeFn( pistep,
+                                                        &args );
 
-        //  report an error
-        reportError( errl );
+        //  handle an errorlog from the parent, if it exists
+        InitService::getTheInstance().reportError( errl );
 
         /**
          * @todo call getCanContinueProcedure when we have some ISteps that
-     *          require them.
+         *          require them.
          */
+
+        if ( args.getReturnCode() != TASKARGS_UNDEFINED64 )
+        {
+            TRACFCOMP( g_trac_initsvc,
+                        ERR_MRK "IStep TaskArgs returned 0x%llx, errlog=%p",
+                        args.getReturnCode(),
+                        args.getErrorLog()
+                        );
+        }
+
+        // report an error from the child, if it exists.
+        reportIStepErrorLog( pistep, args.getErrorLog() );
 
     }   // endfor
 
@@ -98,6 +128,8 @@ void IStepDispatcher::init( void * ptr )
             EXIT_MRK "IStepDispatcher finished.");
 
 }
+
+
 
 /**
  * @note    IStep Mode is hardwired to false for now
@@ -112,12 +144,20 @@ bool IStepDispatcher::getIStepMode( )  const
 
 
 
-bool IStepDispatcher::getCanContinueProcedure(   TaskInfo   &i_failingIStep,
-        errlHndl_t  &i_failingError,
-        TaskInfo   &io_nextIstep  ) const
+bool IStepDispatcher::getCanContinueProcedure(  const  TaskInfo &i_failingIStep,
+                                                errlHndl_t      &i_failingError,
+                                                TaskInfo        &io_nextIstep
+                                                ) const
 {
 
     return  false;
+}
+
+void IStepDispatcher::reportIStepErrorLog(  const TaskInfo  *i_failingIStep,
+                                            errlHndl_t    io_errl )
+{
+
+    InitService::getTheInstance().reportError( io_errl );
 }
 
 } // namespace

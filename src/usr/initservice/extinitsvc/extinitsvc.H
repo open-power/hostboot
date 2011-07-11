@@ -1,3 +1,20 @@
+/****************************************************************************
+ * $IBMCopyrightBlock:
+ * 
+ *  IBM Confidential
+ * 
+ *  Licensed Internal Code Source Materials
+ * 
+ *  IBM HostBoot Licensed Internal Code
+ * 
+ *  (C) Copyright IBM Corp. 2011
+ * 
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ * $
+****************************************************************************/
+
 #ifndef __EXTINITSVC_EXTINITSVC_H
 #define __EXTINITSVC_EXTINITSVC_H
 /**
@@ -33,6 +50,7 @@ namespace   INITSERVICE
 /******************************************************************************/
 // Typedef/Enumerations
 /******************************************************************************/
+
 /**
  * @enum ShutdownStatus
  */
@@ -43,13 +61,10 @@ enum ShutdownStatus
     SHUTDOWN_STATUS_ISTEP_FAILED = 0x01230002,
 };
 
+
 /******************************************************************************/
 // ExtInitSvc Class
 /******************************************************************************/
-
-// Singleton definition
-class ExtInitSvc;
-typedef Singleton<ExtInitSvc> theExtInitSvc;
 
 /**
  *  @class  ExtInitSvc Singleton Class
@@ -57,7 +72,7 @@ typedef Singleton<ExtInitSvc> theExtInitSvc;
  *  This extended image module is launched by InitService
  *
  */
-class ExtInitSvc  : public InitService
+class ExtInitSvc
 {
 
 public:
@@ -82,28 +97,6 @@ public:
     void            init( void *i_args);
 
 
-    /**
-     * @todo    ExtInitSvcTest should be able to find protected functions.
-     */
-    // $$protected:
-
-    /**
-     * @brief   start a extended image task.
-     *
-     *  @param[in]      i_ptask     pointer to a TaskInfo struct
-     *  @param[in]      i_pargs     pointer to args struct
-     *  @param[inout]   i_rerrl     reference to an errorlog handle.
-     *                              errorlog will be filled out if error,
-     *                              otherwise untouched.
-     *
-     *  @return NULL if success, errorlog handle for failure
-     *
-     */
-    errlHndl_t     startTask(   const TaskInfo *i_ptask,
-                                TaskArgs::TaskArgs *i_pargs,
-                                errlHndl_t &i_rerrl ) const;
-
-
 protected:
     /**
      * @brief Constructor for the InitService object.
@@ -118,11 +111,15 @@ protected:
 
 
 private:
-
+    /**
+     * @note   Disable copy constructor and assignment operator
+     */
+    ExtInitSvc(const ExtInitSvc& i_right);
+    ExtInitSvc& operator=(const ExtInitSvc& i_right);
 
 
 };  //  class ExtInitSvc
 
-} // namespace EXTINITSVC
+} // namespace
 
 #endif

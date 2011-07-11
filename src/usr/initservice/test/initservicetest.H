@@ -1,3 +1,20 @@
+/****************************************************************************
+ * $IBMCopyrightBlock:
+ * 
+ *  IBM Confidential
+ * 
+ *  Licensed Internal Code Source Materials
+ * 
+ *  IBM Flexible Support Processor Licensed Internal Code
+ * 
+ *  (C) Copyright IBM Corp. 2011
+ * 
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ * $
+****************************************************************************/
+
 /**
  * @file    initservicetest.H
  *
@@ -92,8 +109,7 @@ public:
 
         TS_TRACE( "=====>Attempt to run a nonexistent task, expect an ERROR.");
         errl = l_is.startTask(  &TASK_TEST1,        // task struct
-                                NULL,               //  args
-                                errl );             // errlog
+                                NULL );             //  args
         if ( errl  )
         {
             TS_TRACE( "SUCCESS: startTask returned an errorlog.\n");
@@ -122,8 +138,7 @@ public:
 
         TS_TRACE( "=====>Attempt to run a task with a _start() function, expect SUCCESS.");
         errl = l_is.startTask(  &TASK_TEST2,        // task struct
-                                NULL,               // args
-                                errl );             //  errlog
+                                NULL );             // args
         if ( errl )
         {
             TS_FAIL( "ERROR: StartTask returned an error log.\n");
@@ -153,8 +168,7 @@ public:
 
         TS_TRACE( "====>Attempt to run a task with NO _start() function, expect an ERROR.");
         errl = l_is.startTask(  &TASK_TEST3,            // task struct
-                                NULL,                   //  args
-                                errl );                 //  errlog
+                                NULL );                 //  args
         if ( errl )
         {
             TS_TRACE( "SUCCESS: startTask returned an error log.\n");

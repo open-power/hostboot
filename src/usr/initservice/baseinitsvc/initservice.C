@@ -1,3 +1,20 @@
+/****************************************************************************
+ * $IBMCopyrightBlock:
+ * 
+ *  IBM Confidential
+ * 
+ *  Licensed Internal Code Source Materials
+ * 
+ *  IBM HostBoot Licensed Internal Code
+ * 
+ *  (C) Copyright IBM Corp. 2011
+ * 
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ * $
+****************************************************************************/
+
 /**
  * @file    initservice.C
  *
@@ -51,16 +68,12 @@ InitService::~InitService()
 
 }
 
-/**
- * @todo    mechanism to set taskcommand in TaskArgs struct
- * @todo    check taskreturncode inside of TaskArgs
- * @todo    test errorlog inside of Taskargs
- */
+
 errlHndl_t  InitService::startTask( const TaskInfo      *i_ptask,
-                                    TaskArgs::TaskArgs  *io_pargs,
-                                    errlHndl_t          &io_rerrl ) const
+                                    TaskArgs::TaskArgs  *io_pargs ) const
 {
-    tid_t   tidrc   =   0;
+    tid_t       tidrc   =   0;
+    errlHndl_t  lo_errl =   NULL;
 
     assert(i_ptask->taskflags.task_type == START_TASK);
 
@@ -68,7 +81,18 @@ errlHndl_t  InitService::startTask( const TaskInfo      *i_ptask,
     if ( static_cast<int16_t>(tidrc) < 0 )
     {
         // task failed to launch, post an errorlog and dump some trace
-        io_rerrl = new ERRORLOG::ErrlEntry(
+        /*@     errorlog tag
+         *  @errortype      ERRL_SEV_CRITICAL_SYS_TERM
+         *  @moduleid       see task list
+         *  @reasoncode     START_TASK_FAILED
+         *  @userdata1      task id or task return code
+         *  @userdata2      0
+         *
+         *  @devdesc        Initialization Service failed to start a task.
+         *                  The module id will identify the task.
+         *
+         */
+        lo_errl = new ERRORLOG::ErrlEntry(
                 ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,   //  severity
                 i_ptask->taskflags.module_id,            //  moduleid
                 INITSERVICE::START_TASK_FAILED,         //  reason Code
@@ -81,37 +105,36 @@ errlHndl_t  InitService::startTask( const TaskInfo      *i_ptask,
                 strlen(i_ptask->taskname) );
         TRACDCOMP( g_trac_initsvc,
                 "tidrc=%d, errlog p = %p" ,
-                (int16_t)tidrc, io_rerrl );
+                (int16_t)tidrc, lo_errl );
 
     }  // endif tidrc
     else
     {
-		// task launched OK.
+        // task launched OK.
         TRACDBIN( g_trac_initsvc,
                 "Task finished OK :",
                 i_ptask->taskname,
                 strlen(i_ptask->taskname) );
         TRACDCOMP( g_trac_initsvc,
                 "task number %d,  errlog p = %p",
-                tidrc, io_rerrl );
+                tidrc, lo_errl );
 
         if ( io_pargs )
         {
             io_pargs->waitParentSync();                      // sync up childtask
         }
-    
-	}
 
-    return io_rerrl;
+    }
+
+    return lo_errl;
 }
 
 
 errlHndl_t InitService::executeFn(  const TaskInfo  *i_ptask,
-        TaskArgs *io_pargs
-) const
+                                    TaskArgs *io_pargs ) const
 {
     tid_t       tidrc   =   0;
-    errlHndl_t  errl    =   NULL;
+    errlHndl_t  lo_errl    =   NULL;
 
     if ( i_ptask->taskfn == NULL )
     {
@@ -119,57 +142,82 @@ errlHndl_t InitService::executeFn(  const TaskInfo  *i_ptask,
                 "ERROR: NULL function pointer:",
                 i_ptask->taskname,
                 strlen(i_ptask->taskname) );
-
-        errl = new ERRORLOG::ErrlEntry(
+        /*@     errorlog tag
+         *  @errortype      ERRL_SEV_CRITICAL_SYS_TERM
+         *  @moduleid       see task list
+         *  @reasoncode     NULL_FN_PTR
+         *  @userdata1      0
+         *  @userdata2      0
+         *
+         *  @devdesc        Initialization Service attempted to start a
+         *                  function within a module but found a NULL pointer
+         *                  instead of the function.
+         *                  The module id will identify the task.
+         */
+        lo_errl = new ERRORLOG::ErrlEntry(
                 ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,   //  severity
                 i_ptask->taskflags.module_id,           //  moduleid
                 INITSERVICE::NULL_FN_PTR,               //  reason Code
                 0,
                 0   );
 
-        return  errl;
+        // fall through to end and return bad error log
     }
-
-
-    //  valid function, launch it
-    tidrc   =   task_create(    i_ptask->taskfn, io_pargs );
-    if ( static_cast<int16_t>(tidrc) < 0 )
-    {
-        errl = new ERRORLOG::ErrlEntry(
-                ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,   //  severity
-                i_ptask->taskflags.module_id,           //  moduleid
-                INITSERVICE::START_FN_FAILED,           //  reason Code
-                tidrc,                                  //  user1 = tidrc
-                0   );
-
-        TRACDBIN( g_trac_initsvc,
-                ENTER_MRK "ERROR starting function:",
-                i_ptask->taskname,
-                strlen(i_ptask->taskname) );
-        TRACDCOMP( g_trac_initsvc,
-                EXIT_MRK "tidrc=%d, errlog p = %p" ,
-                (int16_t)tidrc, errl );
-
-    }  // endif tidrc
     else
     {
-        TRACDBIN( g_trac_initsvc,
-                ENTER_MRK "function launched OK :",
-                i_ptask->taskname,
-                strlen(i_ptask->taskname) );
-        TRACDCOMP( g_trac_initsvc,
-                EXIT_MRK "task number %d,  errlog p = %p",
-                tidrc, errl );
-
-        // task launched OK.
-        if ( io_pargs )
+        //  valid function, launch it
+        tidrc   =   task_create(    i_ptask->taskfn, io_pargs );
+        if ( static_cast<int16_t>(tidrc) < 0 )
         {
-            io_pargs->waitParentSync();                 // sync up parent task
+            /*@     errorlog tag
+             *  @errortype      ERRL_SEV_CRITICAL_SYS_TERM
+             *  @moduleid       see task list
+             *  @reasoncode     NULL_FN_PTR
+             *  @userdata1      0
+             *  @userdata2      0
+             *
+             *  @devdesc        Initialization Service attempted to start a
+             *                  function within a module but the function
+             *                  failed to launch
+             *                  The module id will identify the task.
+             */
+            lo_errl = new ERRORLOG::ErrlEntry(
+                    ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,   //  severity
+                    i_ptask->taskflags.module_id,           //  moduleid
+                    INITSERVICE::START_FN_FAILED,           //  reason Code
+                    tidrc,                                  //  user1 = tidrc
+                    0   );
+
+            TRACDBIN( g_trac_initsvc,
+                    ENTER_MRK "ERROR starting function:",
+                    i_ptask->taskname,
+                    strlen(i_ptask->taskname) );
+            TRACDCOMP( g_trac_initsvc,
+                    EXIT_MRK "tidrc=%d, errlog p = %p" ,
+                    (int16_t)tidrc, lo_errl );
+
+        }  // endif tidrc
+        else
+        {
+            TRACDBIN( g_trac_initsvc,
+                    ENTER_MRK "function launched OK :",
+                    i_ptask->taskname,
+                    strlen(i_ptask->taskname) );
+            TRACDCOMP( g_trac_initsvc,
+                    EXIT_MRK "task number %d,  errlog p = %p",
+                    tidrc, lo_errl );
+
+            // task launched OK.
+            if ( io_pargs )
+            {
+                io_pargs->waitParentSync();                 // sync up parent task
+            }
         }
-    }
 
-    return errl;
+    }   // end else
 
+
+    return lo_errl;
 }
 
 
@@ -185,21 +233,19 @@ void    InitService::reportError(errlHndl_t &io_rerrl ) const
 
         TRACDCOMP( g_trac_initsvc,
                 "Committing the error log %p.",
-                io_rerrl
-        );
+                io_rerrl );
 
         errlCommit( io_rerrl );
 
     }
 
-    return;
 }
 
 
 /**
  * @todo    this will make a system call to post the error code.
  */
-void    InitService::setProgressCode( uint64_t  &i_progresscode ) const
+void    InitService::setProgressCode( uint64_t  i_progresscode ) const
 {
 
     // do nothing for now
@@ -212,10 +258,10 @@ void    InitService::setProgressCode( uint64_t  &i_progresscode ) const
  */
 void    InitService::init( void *i_ptr )
 {
-    errlHndl_t          errl            =   NULL;   // steps will return an error handle if failure
-    uint64_t            nextTask     =   0;
-    const TaskInfo      *ptask          =   NULL;
-    TaskArgs::TaskArgs            args;
+    errlHndl_t          errl        =   NULL;   // steps will return an error handle if failure
+    uint64_t            nextTask    =   0;
+    const TaskInfo      *ptask      =   NULL;
+    TaskArgs::TaskArgs  args;
 
     TRACFCOMP( g_trac_initsvc,
             ENTER_MRK "Initialization Service is starting." );
@@ -229,13 +275,15 @@ void    InitService::init( void *i_ptr )
             nextTask++ )
     {
         //  make a local copy of the base image task
-        ptask    =   &(iv_taskinfolist[nextTask]);
+        ptask    =   &(g_taskinfolist[nextTask]);
         if ( ptask->taskflags.task_type ==  END_TASK_LIST )
         {
             TRACDCOMP( g_trac_initsvc,
                     "End of Initialization Service task list.\n" );
             break;
         }
+
+        args.clear();               // clear args struct for next task
 
         //  dispatch tasks...
         switch ( ptask->taskflags.task_type)
@@ -253,30 +301,41 @@ void    InitService::init( void *i_ptr )
                     ptask->taskname,
                     strlen( ptask->taskname)   );
             errl    =   startTask(  ptask,          // task struct
-                                    &args,          //  args
-                                    errl );         //  errlog
+                    &args );        //  args
             break;
         case    START_FN:
             TRACDCOMP( g_trac_initsvc,
                     "task_type==START_FN : %p",
                     ptask->taskfn );
-            // $$TODO
+            errl    =   executeFn(  ptask,
+                    &args );
             break;
         case    BARRIER:
             TRACDCOMP( g_trac_initsvc,
                     "task_type==BARRIER" );
             // $$TODO
             break;
-
         default:
             TRACDCOMP( g_trac_initsvc,
                     "Invalid task_type %d: ",
                     ptask->taskflags.task_type );
+            /*@     errorlog tag
+             *  @errortype      ERRL_SEV_CRITICAL_SYS_TERM
+             *  @moduleid       BASE_INITSVC_ERRL_ID
+             *  @reasoncode     INVALID_TASK_TYPE
+             *  @userdata1      task_type value
+             *  @userdata2      0
+             *
+             *  @devdesc        Initialization Service found an invalid
+             *                  Task Type in the task list.
+             *                  The module id will identify the task.
+             *                  task_type value will be the invalid type.
+             */
             errl = new ERRORLOG::ErrlEntry(
                     ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,   //  severity
                     BASE_INITSVC_ERRL_ID,                   //  moduleid
                     INVALID_TASK_TYPE,                      //  reason Code
-                    0,                                      //  user1 = tidrc
+                    ptask->taskflags.task_type,
                     0 );
             break;
 
@@ -284,6 +343,20 @@ void    InitService::init( void *i_ptr )
 
         //  report an error
         reportError( errl );
+
+        if ( args.getReturnCode() != TASKARGS_UNDEFINED64 )
+        {
+            TRACFCOMP( g_trac_initsvc,
+                    ERR_MRK "InitService TaskArgs returned 0x%llx, errlog=%p",
+                    args.getReturnCode(),
+                    args.getErrorLog()
+            );
+
+            errlHndl_t   childerrl = args.getErrorLog();     // local copy
+            reportError( childerrl );                       // report child error
+        }
+
+
 
     }   // endfor
 
@@ -295,8 +368,7 @@ void    InitService::init( void *i_ptr )
             EXIT_MRK "Initilization Service finished.");
 
     // return to _start(), which may end the task or die.
-    return;
 }
 
 
-}   // namespace    INITSERVICE
+}   // namespace

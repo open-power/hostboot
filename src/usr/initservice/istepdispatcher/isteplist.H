@@ -1,7 +1,25 @@
+/****************************************************************************
+ * $IBMCopyrightBlock:
+ * 
+ *  IBM Confidential
+ * 
+ *  Licensed Internal Code Source Materials
+ * 
+ *  IBM Flexible Support Processor Licensed Internal Code
+ * 
+ *  (C) Copyright IBM Corp. 2011
+ * 
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ * $
+****************************************************************************/
+
 #ifndef __ISTEPS_H
 #define __ISTEPS_H
+
 /**
- * @file    extinitsvctasks.H
+ * @file    isteplist.H
  *
  *  TaskInfo structs for each task that will run in the extended image.
  */
@@ -15,7 +33,7 @@ namespace   INITSERVICE
 
 const   uint64_t MAX_ISTEPS   =   25;
 
-const TaskInfo    isteps[]   =   {
+const TaskInfo    g_isteps[]   =   {
 
         //  -----   ISteps Image  ------------------------------------------
 
@@ -54,4 +72,4 @@ const TaskInfo    isteps[]   =   {
 
 };  // namespace
 
-#endif  // __EXT_INIT_SVC_TASKS_H
+#endif

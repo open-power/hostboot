@@ -1,4 +1,21 @@
 #!/usr/bin/perl -w
+#############################################################################
+# $IBMCopyrightBlock:
+#
+# IBM Confidential
+#
+# Licensed Internal Code Source Materials
+#
+# IBM HostBoot Licensed Internal Code
+#
+# (C) Copyright IBM Corp. 2011
+#
+# The source code for this program is not published or other-
+# wise divested of its trade secrets, irrespective of what has
+# been deposited with the U.S. Copyright Office.
+#$
+#############################################################################
+
 #
 #       Change History:
 #       mww 2011-05-10  simplify for sprint1 - stuff for later is commented out with "##"
@@ -39,6 +56,7 @@ sub main {
   parseCommandline();
   scanInputFiles();
   writeOutput();
+  
 }
 
 #
@@ -718,6 +736,8 @@ sub write_start() {
 
   print   "\n";
   print "\t__sync_add_and_fetch(&CxxTest::g_ModulesCompleted, 1);\n";
+  print "\n";
+  print "\tbarrier_wait( &CxxTest::g_CxxTestBarrier );\n";
   
   print "\n";
   print   "\ttask_end();\n";

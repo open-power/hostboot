@@ -1,16 +1,20 @@
-/******************************************************************************
- * IBM Confidential
- *
- * Licensed Internal Code Source Materials
- *
- * IBM Flexible Support Processor Licensed Internal Code
- *
- * (c) Copyright IBM Corp. 2004, 2010
- *
- * The source code is for this program is not published or otherwise divested
- * of its trade secrets, irrespective of what has been deposited with the
- * U.S. Copyright Office.
- *****************************************************************************/
+/****************************************************************************
+ * $IBMCopyrightBlock:
+ * 
+ *  IBM Confidential
+ * 
+ *  Licensed Internal Code Source Materials
+ * 
+ *  IBM HostBoot Licensed Internal Code
+ * 
+ *  (C) Copyright IBM Corp. 2011
+ * 
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ * $
+****************************************************************************/
+
 
 #ifndef __TRACE_INTERFACE_H
 #define __TRACE_INTERFACE_H
@@ -169,7 +173,7 @@ const uint32_t TRACE_FIELD   = 0;       //Indicates trace is field
 /**
  * Field and Debug trace macros
  * Users must define COMP_TD for their components prior to using macros.
- * Additionally, users must define COMP_NAMESPACE, COMP_CLASS & COMP_FN 
+ * Additionally, users must define COMP_NAMESPACE, COMP_CLASS & COMP_FN
  * prior to using the ENTER_/EXIT_ macros.
  * Example:
  *     #define COMP_TD g_my_trace_desc

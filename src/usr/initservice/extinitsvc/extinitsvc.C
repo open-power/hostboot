@@ -1,3 +1,20 @@
+/****************************************************************************
+ * $IBMCopyrightBlock:
+ * 
+ *  IBM Confidential
+ * 
+ *  Licensed Internal Code Source Materials
+ * 
+ *  IBM HostBoot Licensed Internal Code
+ * 
+ *  (C) Copyright IBM Corp. 2011
+ * 
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ * $
+****************************************************************************/
+
 /**
  * @file    extinitsvc.C
  *
@@ -22,7 +39,6 @@
 #include "extinitsvctasks.H"
 
 
-
 namespace   INITSERVICE
 {
 
@@ -30,6 +46,8 @@ extern  trace_desc_t *g_trac_initsvc;
 
 /**
  * @brief   _start() - task entry point for this module
+ *
+ * @parms[in,out]   - pointer to TaskArgs struct
  *
  */
 extern "C"
@@ -76,21 +94,6 @@ ExtInitSvc::~ExtInitSvc()
 }
 
 
-errlHndl_t  ExtInitSvc::startTask( const TaskInfo *i_ptask,
-        TaskArgs::TaskArgs    *i_pargs,
-        errlHndl_t &io_rerrl ) const
-{
-    /**
-     *  @todo run constructor on task here.
-     */
-
-    InitService::startTask( i_ptask, i_pargs, io_rerrl );
-
-    return io_rerrl;
-}
-
-
-
 void ExtInitSvc::init( void *i_ptr )
 {
     errlHndl_t      errl        =   NULL;   // steps will return an error handle if failure
@@ -109,13 +112,15 @@ void ExtInitSvc::init( void *i_ptr )
             nextTask++ )
     {
         //  make a local copy of the extended image task
-        ptask    =   &(iv_exttaskinfolist[nextTask]);
+        ptask    =   &(g_exttaskinfolist[nextTask]);
         if ( ptask->taskflags.task_type ==  END_TASK_LIST )
         {
             TRACDCOMP( g_trac_initsvc,
-                    "End of ExtInitSvc task list.\n" );
+                    "End of ExtInitSvc task list." );
             break;
         }
+
+        args.clear();                   // clear args for next task
 
         //  dispatch tasks...
         switch ( ptask->taskflags.task_type)
@@ -132,14 +137,15 @@ void ExtInitSvc::init( void *i_ptr )
                     "task_type=START_TASK : ",
                     ptask->taskname,
                     strlen(ptask->taskname)    );
-            errl    =   startTask( ptask,
-                    &args,
-                    errl );
+            errl    =   InitService::getTheInstance().startTask(    ptask,
+                                                                    &args );
             break;
         case    START_FN:
             TRACDCOMP( g_trac_initsvc,
                     "task_type==START_FN : %p",
                     ptask->taskfn );
+            errl    =   InitService::getTheInstance().executeFn(    ptask,
+                                                                    &args );
             // $$TODO
             break;
         case    BARRIER:
@@ -152,6 +158,18 @@ void ExtInitSvc::init( void *i_ptr )
             TRACDCOMP( g_trac_initsvc,
                     "Invalid task_type: %d",
                     ptask->taskflags.task_type );
+            /*@     errorlog tag
+             *  @errortype      ERRL_SEV_CRITICAL_SYS_TERM
+             *  @moduleid       START_EXTINITSVC_ERRL_ID
+             *  @reasoncode     INVALID_TASK_TYPE
+             *  @userdata1      task_type value
+             *  @userdata2      0
+             *
+             *  @devdesc        Extended Initialization Service found an invalid
+             *                  Task Type in the task list.
+             *                  The module id will identify the task.
+             *                  task_type value will be the invalid type.
+             */
             errl = new ERRORLOG::ErrlEntry(
                     ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,   //  severity
                     START_EXTINITSVC_ERRL_ID,               //  moduleid
@@ -162,8 +180,16 @@ void ExtInitSvc::init( void *i_ptr )
         }   //  endswitch
 
         //  report an error
-        reportError( errl );
+        InitService::getTheInstance().reportError( errl );
 
+        if ( args.getReturnCode() != TASKARGS_UNDEFINED64 )
+        {
+            TRACFCOMP( g_trac_initsvc,
+                    ERR_MRK "ExtInitSvc TaskArgs returned 0x%llx, errlog=%p",
+                    args.getReturnCode(),
+                    args.getErrorLog()
+            );
+        }
 
     }   // endfor
 
@@ -171,33 +197,57 @@ void ExtInitSvc::init( void *i_ptr )
     TRACFCOMP( g_trac_initsvc,
             EXIT_MRK "ExtInitSvc finished.");
 
-
-
     //  =====================================================================
     //  -----   Unit Tests  -------------------------------------------------
     //  =====================================================================
     /**
      *  @note run all the unit tests after we finish the rest
+     *      there are 2 images generated in the build:
+     *      hbicore.bin         (HostBoot shippable image)
+     *      hbicore_test.bin    (runs all unit tests)
+     *      Only hbicore_test.bin has the libcxxtest.so module, so when
+     *      we execute startTask() below on hbicore.bin, it will return -1,
+     *      no module present.  This is OK.
+     *
      */
+
+    //  Pass it a set of args so we can wait on the barrier
+    //  This is a bit wasteful since it is always allocated; we need a
+    //  system call to check if a module exists.
+    TaskArgs::TaskArgs  cxxtestargs;        //  create a new one for cxxtest
+    cxxtestargs.clear();                    //  clear it
+
+    TRACFCOMP( g_trac_initsvc,
+                ENTER_MRK "    ");          // leave whitespace in trace
     TRACDBIN( g_trac_initsvc,
-            ENTER_MRK "Run Unit Tests: ",
+            ENTER_MRK "Run Unit Tests (if libcxxtests.so is present): ",
             CXXTEST_TASK.taskname,
             strlen(CXXTEST_TASK.taskname)    );
 
-    errl = startTask(   &CXXTEST_TASK,              //  task struct
-                        NULL,                       //  no args
-                        errl );                     //  pointer to errorlog
-    //  report an error
-    reportError( errl );
+    errl = InitService::getTheInstance().startTask( &CXXTEST_TASK,
+                                                    &cxxtestargs );
+
+    // check the returncode and errorlog in the returned args
+    if (    ( cxxtestargs.getReturnCode() != TASKARGS_UNDEFINED64 )
+            || ( cxxtestargs.getErrorLog() != NULL )
+    )
+    {
+        TRACFCOMP( g_trac_initsvc,
+                ERR_MRK "CxxTests returned an error 0x%lx and an errorlog %p",
+                cxxtestargs.getReturnCode(),
+                cxxtestargs.getErrorLog()
+        );
+        //  report an error
+        errlHndl_t  childerrl   =   cxxtestargs.getErrorLog();
+        InitService::getTheInstance().reportError( childerrl );
+    }
 
     TRACDCOMP( g_trac_initsvc,
             EXIT_MRK "Unit Tests finished.");
+    TRACFCOMP( g_trac_initsvc,
+                EXIT_MRK "    ");          // leave whitespace in trace
 
     // Shutdown all CPUs
-
-    // TODO. Current code does not wait for UTs to finish. Add a delay for now
-    // This will be fixed soon.
-    nanosleep(2, 0);
 
     uint64_t l_shutdownStatus = SHUTDOWN_STATUS_GOOD;
 
@@ -213,4 +263,4 @@ void ExtInitSvc::init( void *i_ptr )
 }
 
 
-}   // namespace    EXTINITSVC
+}   // namespace

@@ -1,3 +1,20 @@
+/****************************************************************************
+ * $IBMCopyrightBlock:
+ * 
+ *  IBM Confidential
+ * 
+ *  Licensed Internal Code Source Materials
+ * 
+ *  IBM Flexible Support Processor Licensed Internal Code
+ * 
+ *  (C) Copyright IBM Corp. 2011
+ * 
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ * $
+****************************************************************************/
+
 #ifndef __ISTEP_DISPATCHER_H
 #define __ISTEP_DISPATCHER_H
 /**
@@ -30,7 +47,6 @@ namespace   INITSERVICE
 // Globals/Constants
 /******************************************************************************/
 
-
 /******************************************************************************/
 // Typedef/Enumerations
 /******************************************************************************/
@@ -39,16 +55,13 @@ namespace   INITSERVICE
 //  Class
 /******************************************************************************/
 
-// Singleton definition
-class IStepDispatcher;
-typedef Singleton<IStepDispatcher> theIStepDispatcher;
-
-
 /**
- *  @class  IStepDispatcher Singleton Class
+ *  @class  IStepDispatcher
+ *
+ *  Dispatch ISteps and handle return codes, errorlogs, etc.
  *
  */
-class IStepDispatcher   :   public InitService
+class IStepDispatcher
 {
 
 public:
@@ -85,6 +98,12 @@ protected:
 private:
 
     /**
+     * @note   Disable copy constructor and assignment operator
+     */
+    IStepDispatcher(const IStepDispatcher& i_right);
+    IStepDispatcher& operator=(const IStepDispatcher& i_right);
+
+    /**
      * @brief   getIStepMode
      *  call into PNOR and fetch the "IStepMode flag" .
      *  This will tell us if we are locked to the SP (IStepMode=ON) or
@@ -108,10 +127,19 @@ private:
      *                  true otherwise
      *
      */
-    bool getCanContinueProcedure(   TaskInfo    &i_failingIStep,
-                                    errlHndl_t  &i_failingError,
-                                    TaskInfo    &io_nextIstep  ) const;
+    bool getCanContinueProcedure(   const TaskInfo  &i_failingIStep,
+                                    errlHndl_t      &i_failingError,
+                                    TaskInfo        &io_nextIstep  ) const;
 
+    /**
+     * @brief   reportIStepErrorLog
+     * If an IStep returns an error log, commit it.
+     *
+     * @todo Later there may be some decision about whether to report it
+     * based on the IStep.
+     */
+    void reportIStepErrorLog(   const TaskInfo  *i_failingIStep,
+                                errlHndl_t      io_errl );
 
 
     bool        iv_istepmodeflag;
@@ -120,6 +148,6 @@ private:
 
 };  //  class IStepDispatcher
 
-} // namespace ISTEPDISP
+} // namespace
 
 #endif

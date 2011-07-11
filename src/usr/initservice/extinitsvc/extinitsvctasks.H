@@ -1,5 +1,23 @@
+/****************************************************************************
+ * $IBMCopyrightBlock:
+ * 
+ *  IBM Confidential
+ * 
+ *  Licensed Internal Code Source Materials
+ * 
+ *  IBM Flexible Support Processor Licensed Internal Code
+ * 
+ *  (C) Copyright IBM Corp. 2011
+ * 
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ * $
+****************************************************************************/
+
 #ifndef __EXT_INIT_SVC_TASKS_H
 #define __EXT_INIT_SVC_TASKS_H
+
 /**
  * @file    extinitsvctasks.H
  *
@@ -15,7 +33,7 @@ namespace   INITSERVICE
 
 const   uint64_t MAX_EXT_TASKS   =   25;
 
-const TaskInfo iv_exttaskinfolist[]   =   {
+const TaskInfo g_exttaskinfolist[]   =   {
 
         //  -----   Extended Image  ------------------------------------------
 
@@ -77,6 +95,6 @@ const   TaskInfo    CXXTEST_TASK    =   {
         };
 
 
-};  // namespace    EXTINITSVC
+};  // namespace
 
 #endif  // __EXT_INIT_SVC_TASKS_H

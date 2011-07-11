@@ -1,3 +1,20 @@
+/****************************************************************************
+ * $IBMCopyrightBlock:
+ * 
+ *  IBM Confidential
+ * 
+ *  Licensed Internal Code Source Materials
+ * 
+ *  IBM Flexible Support Processor Licensed Internal Code
+ * 
+ *  (C) Copyright IBM Corp. 2011
+ * 
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ * $
+****************************************************************************/
+
 #ifndef __COMMON_INITSVCSTRUCTS_H
 #define __COMMON_INITSVCSTRUCTS_H
 /**
@@ -43,6 +60,8 @@ enum    TaskType
     STOP_TASK,
     END_TASK_LIST,
 };
+
+
 /**
  * @enum    ModuleType
  *  -   BASE_IMAGE == module in the base image
@@ -63,7 +82,6 @@ enum    ModuleType
  *  - module type, BASE_MODULE or EXT_MODULE
  *  - module_id for errorlog if task fails
  *
- * @todo revisit these flags in sprint3
  */
 struct  TaskFlags
 {
@@ -72,8 +90,9 @@ struct  TaskFlags
     InitServiceModuleID module_id;          // module id for errorlog
 };
 
+
 /**
- * @struct  _TaskInfo
+ * @struct  TaskInfo
  *
  * Holds information on each task in the system.
  *      - taskname

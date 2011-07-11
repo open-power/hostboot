@@ -1,3 +1,20 @@
+/****************************************************************************
+ * $IBMCopyrightBlock:
+ * 
+ *  IBM Confidential
+ * 
+ *  Licensed Internal Code Source Materials
+ * 
+ *  IBM HostBoot Licensed Internal Code
+ * 
+ *  (C) Copyright IBM Corp. 2011
+ * 
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ * $
+****************************************************************************/
+
 /** @file   TestSuite.H
  *
  *  Imported from FSP tree - /src/test/cxxtest/cxxtest/
@@ -19,10 +36,16 @@ extern  trace_desc_t   *g_trac_test;
 namespace CxxTest
 {
 
+/**
+ * @note extern declarations - see lib/cxxtest_data.C
+ *
+ * @see g_TotalTests, g_TraceCalls, g_Warnings, g_FailedTests
+ */
 extern  uint64_t        g_TotalTests;
 extern  uint64_t        g_TraceCalls;
 extern  uint64_t        g_Warnings;
 extern  uint64_t        g_FailedTests;
+extern  barrier_t       g_CxxTestBarrier;
 
 /**
  * @class   TestSuite

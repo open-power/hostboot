@@ -1,3 +1,20 @@
+/****************************************************************************
+ * $IBMCopyrightBlock:
+ * 
+ *  IBM Confidential
+ * 
+ *  Licensed Internal Code Source Materials
+ * 
+ *  IBM HostBoot Licensed Internal Code
+ * 
+ *  (C) Copyright IBM Corp. 2011
+ * 
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ * $
+****************************************************************************/
+
 #ifndef __TASKARGS_TASKARGS_H
 #define __TASKARGS_TASKARGS_H
 
@@ -13,6 +30,9 @@
 #include    <assert.h>
 #include    <sys/sync.h>
 #include    <trace/interface.H>
+
+#include    <errl/errlentry.H>
+#include    <errl/errlmanager.H>
 
 /**
  * @note macro to set up a _start() task entry routine.
@@ -63,6 +83,7 @@ class  TaskArgs
 
 public:
 
+
     /**
      * @brief   TaskArgs    constructor
      *
@@ -74,6 +95,7 @@ public:
      * @brief   TaskArgs    destructor
      */
     ~TaskArgs();
+
 
     /**
      * @brief   waitParentSync()
@@ -107,7 +129,7 @@ public:
      * @param[in]   i_returncode;
      *
      */
-    void    postReturnCode( const uint64_t &i_returncode );
+    void    postReturnCode( const uint64_t i_returncode );
 
 
     /**
@@ -128,7 +150,7 @@ public:
      *
      * @param[in]   i_command;
      */
-    void    setCommand( const uint64_t  &i_command );
+    void    setCommand( const uint64_t  i_command );
 
 
     /**
@@ -144,6 +166,39 @@ public:
     uint64_t    getCommand( )   const;
 
 
+    /**
+     * @brief   postErrorLog
+     *
+     * Child task can use this to post an errorlog to InitServices
+     * Caller is responsible for creating a new errorlog, etc.
+     * No checking is done.
+     *
+     * @param[in]   i_errl;
+     *
+     */
+    void    postErrorLog( errlHndl_t i_errl );
+
+
+    /**
+     * @brief   getErrorLog
+     *
+     * Parent task can use this to get an errorlog from the child
+     *
+     * @return iv_errl
+     *
+     */
+    errlHndl_t getErrorLog( );
+
+
+    /**
+     * @brief   clear taskargs struct between uses
+     *          - barrier is left alone,
+     *          - if iv_errl is non zero, we commit it here just to avoid
+     *              a memory leak.
+     */
+    void    clear();
+
+
 private:
 
     /**
@@ -153,14 +208,15 @@ private:
     TaskArgs& operator=(const TaskArgs& i_right);
 
 
-    barrier_t   iv_sync_barrier;
-
+    errlHndl_t  iv_errl;
     uint64_t    iv_taskreturncode;
     uint64_t    iv_taskcommand;
 
+    barrier_t   iv_sync_barrier;
+
 };
 
-};  // namespace TASKARGS
+};  // namespace
 
 
 #endif

@@ -1,3 +1,20 @@
+/****************************************************************************
+ * $IBMCopyrightBlock:
+ * 
+ *  IBM Confidential
+ * 
+ *  Licensed Internal Code Source Materials
+ * 
+ *  IBM HostBoot Licensed Internal Code
+ * 
+ *  (C) Copyright IBM Corp. 2011
+ * 
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ * $
+****************************************************************************/
+
 // Imported from FSP tree - /src/test/cxxtest/cxxtest/
 
 #ifndef __cxxtest__TestSuite_cpp__
@@ -14,26 +31,6 @@ namespace CxxTest
 /******************************************************************************/
 // Globals/Constants
 /******************************************************************************/
-
-/**
- * @brief global vars to keep track of unit tests.
- *
- * totaltests - initialized to 0, updated by reporttotaltests() below.
- *      each test suite will call reporttotaltests after all tests have
- *      run with the total number of tests for that suite.
- *      Once all the testsuites have run, the global totaltests will hold
- *      the total of number of unit test for that run.
- *
- *      Each unit test macro (TS_TRACE, TS_WARN, and TS_FAIL) will update
- *      the proper variable.  At the end the unit tester will print out
- *      the totals.
- * // Global cxxtest values - Keep global so it can be found in syms file
- */
-uint64_t        g_TotalTests      =       0;
-uint64_t        g_TraceCalls      =       0;
-uint64_t        g_Warnings        =       0;
-uint64_t        g_FailedTests     =       0;
-
 
 //
 // TestSuite members
@@ -109,7 +106,11 @@ void    reportTotalTests( const char *suitename, uint64_t numtests )
 
     //  $$TODO do nothing with the suite name for now, later it may be useful
     __sync_add_and_fetch( &g_TotalTests, numtests );
-    printk( "%s completed %ld tests\n", suitename, numtests);
+    TRACDBIN( g_trac_test,
+            "Suite Completed: ",
+            suitename,
+            strlen(suitename) );
+    // printk( "%s completed %ld tests\n", suitename, numtests);
 
     return;
 }

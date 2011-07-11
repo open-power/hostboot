@@ -1,3 +1,20 @@
+/****************************************************************************
+ * $IBMCopyrightBlock:
+ * 
+ *  IBM Confidential
+ * 
+ *  Licensed Internal Code Source Materials
+ * 
+ *  IBM HostBoot Licensed Internal Code
+ * 
+ *  (C) Copyright IBM Corp. 2011
+ * 
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ * $
+****************************************************************************/
+
 #ifndef __BASEINITSVC_INITSERVICE_H
 #define __BASEINITSVC_INITSERVICE_H
 /**
@@ -47,10 +64,6 @@ namespace   INITSERVICE
 // InitService Class
 /******************************************************************************/
 
-// Singleton definition
-class InitService;
-typedef Singleton<InitService> theInitService;
-
 /**
  *  @class  InitService Singleton Class
  *
@@ -59,7 +72,6 @@ typedef Singleton<InitService> theInitService;
  *
  *  Once started, it handles the rest of HostBoot Initialization.
  *
- *  @returns    none
  */
 class InitService
 {
@@ -102,18 +114,19 @@ public:
      *          See initsvctasks.H and the unit tests for some examples of
      *          how this is used.
      *
+     *
      *  @param[in]      i_ptask     pointer to a TaskInfo struct
      *  @param[in]      io_pargs    pointer to a TaskArgs struct, or NULL
-     *  @param[inout]   io_rerrl    reference to an errorlog handle.
-     *                              errorlog will be filled out if error,
-     *                              otherwise untouched.
      *
      *  @return NULL if success, errorlog handle for failure
      *
+     *  @note   startTask() can also be used to launch an asynchronous task
+     *          by calling it with i_pargs set to NULL.   This will disable
+     *          the barrier check.
+     *
      */
     errlHndl_t     startTask(   const TaskInfo      *i_ptask,
-                                TaskArgs::TaskArgs  *i_pargs,
-                                errlHndl_t          &io_rerrl ) const;
+                                TaskArgs::TaskArgs  *i_pargs    ) const;
 
     /**
      * @brief   executeFn
@@ -126,8 +139,7 @@ public:
      *                      if failure
      */
     errlHndl_t executeFn(   const TaskInfo  *i_ptask,
-                            TaskArgs        *i_pargs
-                        ) const;
+                            TaskArgs        *i_pargs    ) const;
 
 
 
@@ -152,7 +164,7 @@ public:
      * @return  nothing
      *
      */
-    void           setProgressCode( uint64_t  &i_progresscode ) const;
+    void           setProgressCode( uint64_t  i_progresscode ) const;
 
 
 
@@ -170,7 +182,11 @@ protected:
 
 
 private:
-
+    /**
+     * @note   Disable copy constructor and assignment operator
+     */
+    InitService(const InitService& i_right);
+    InitService& operator=(const InitService& i_right);
 
 };  //  class InitService
 

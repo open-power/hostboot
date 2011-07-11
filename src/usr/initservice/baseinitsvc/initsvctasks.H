@@ -1,11 +1,27 @@
+/****************************************************************************
+ * $IBMCopyrightBlock:
+ * 
+ *  IBM Confidential
+ * 
+ *  Licensed Internal Code Source Materials
+ * 
+ *  IBM Flexible Support Processor Licensed Internal Code
+ * 
+ *  (C) Copyright IBM Corp. 2011
+ * 
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ * $
+****************************************************************************/
+#ifndef __INIT_SVC_TASKS_H
+#define __INIT_SVC_TASKS_H
+
 /**
  * @file    initsvctasks.H
  *
  *  TaskInfo structs for each task that will run.
  */
-
-#ifndef __INIT_SVC_TASKS_H
-#define __INIT_SVC_TASKS_H
 
 #include    <initservice/initsvcreasoncodes.H>
 #include    "initservice.H"
@@ -15,7 +31,7 @@ namespace   INITSERVICE
 
 const   uint64_t MAX_TASKS   =   10;
 
-const TaskInfo    iv_taskinfolist[]   =   {
+const TaskInfo    g_taskinfolist[]   =   {
 
         /**
          *  @brief  Errorlog    Task
@@ -81,5 +97,5 @@ const TaskInfo    iv_taskinfolist[]   =   {
 };
 
 
-};  // namespace    INITSERVICE
-#endif  // __INIT_SVC_TASKS_H
+};  // namespace
+#endif  //

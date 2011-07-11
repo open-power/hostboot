@@ -1,3 +1,20 @@
+/****************************************************************************
+ * $IBMCopyrightBlock:
+ * 
+ *  IBM Confidential
+ * 
+ *  Licensed Internal Code Source Materials
+ * 
+ *  IBM HostBoot Licensed Internal Code
+ * 
+ *  (C) Copyright IBM Corp. 2011
+ * 
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ * $
+****************************************************************************/
+
 /**
  * @file    taskargs.C
  *
@@ -62,7 +79,7 @@ void    TaskArgs::waitChildSync( )
 }
 
 
-void    TaskArgs::postReturnCode( const uint64_t &i_returncode )
+void    TaskArgs::postReturnCode( const uint64_t i_returncode )
 {
     iv_taskreturncode  =   i_returncode;
 
@@ -77,7 +94,7 @@ uint64_t TaskArgs::getReturnCode( ) const
 }
 
 
-void    TaskArgs::setCommand( const uint64_t  &i_command )
+void    TaskArgs::setCommand( const uint64_t  i_command )
 {
 
     iv_taskcommand =   i_command;
@@ -93,9 +110,43 @@ uint64_t    TaskArgs::getCommand( ) const
 }
 
 
+void        TaskArgs::postErrorLog( errlHndl_t i_errl )
+{
+
+    iv_errl =   i_errl;
+}
+
+
+errlHndl_t  TaskArgs::getErrorLog( )
+{
+
+    return  iv_errl;
+}
+
+
+void    TaskArgs::clear()
+{
+    iv_taskreturncode   =   TASKARGS_UNDEFINED64;   //  init iv_returncode to undefined
+    iv_taskcommand      =   TASKARGS_UNDEFINED64;   //  init iv_command to undefined
+
+    //  this should not happen, should have been handled by the caller(s)
+    //  commit the errorlog here just to get rid of it
+    if ( iv_errl )
+    {
+        TRACFCOMP( g_trac_initsvc,
+                ERR_MRK "ERROR: errorlog %p was left in TaskArgs",
+                iv_errl );
+
+        errlCommit(iv_errl);
+    }
+
+}
+
+
 TaskArgs::TaskArgs()
-:  iv_taskreturncode(TASKARGS_UNDEFINED64),
-   iv_taskcommand(TASKARGS_UNDEFINED64)
+:   iv_errl( NULL ),                                //  init errorlog handle to NULL
+    iv_taskreturncode(TASKARGS_UNDEFINED64),        //  init iv_returncode to undefined
+    iv_taskcommand(TASKARGS_UNDEFINED64)            //  init iv_command to undefined
 {
     // set barrier to wait for 2 tasks before releasing,
     //  see notes above.
@@ -105,6 +156,7 @@ TaskArgs::TaskArgs()
 
 TaskArgs::~TaskArgs()
 {
+    clear();
     barrier_destroy( &iv_sync_barrier );
 }
 

@@ -33,9 +33,6 @@ void _start(void *ptr)
     TRACFCOMP( g_trac_initsvc,
             ENTER_MRK "Executing Initialization Service module." );
 
-    //  create an instance of InitService
-    //InitService::InitService& is =   InitService::getTheInstance();
-
     // initialize the base modules in Hostboot.
     InitService::getTheInstance().init( ptr );
 
@@ -45,4 +42,4 @@ void _start(void *ptr)
     task_end();
 }
 
-}   // INITSERVICE
+}   // namespace

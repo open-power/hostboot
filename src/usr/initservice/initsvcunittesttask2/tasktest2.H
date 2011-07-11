@@ -1,3 +1,20 @@
+/****************************************************************************
+ * $IBMCopyrightBlock:
+ * 
+ *  IBM Confidential
+ * 
+ *  Licensed Internal Code Source Materials
+ * 
+ *  IBM HostBoot Licensed Internal Code
+ * 
+ *  (C) Copyright IBM Corp. 2011
+ * 
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ * $
+****************************************************************************/
+
 #ifndef __INITSVC_TASK_TEST_2_H
 #define __INITSVC_TASK_TEST_2_H
 
@@ -13,7 +30,7 @@
 #include <kernel/console.H>     // printk
 #include <util/singleton.H>
 
-namespace   INITSVCTASKTEST2
+namespace   INITSERVICE
 {
 
 /******************************************************************************/
@@ -27,9 +44,6 @@ namespace   INITSVCTASKTEST2
 /******************************************************************************/
 // InitService Class
 /******************************************************************************/
-// Singleton definition
-class InitSvcTaskTest2;
-typedef Singleton<InitSvcTaskTest2> theTask2;
 
 /**
  *  @class  InitSvcTestTask2  Class
