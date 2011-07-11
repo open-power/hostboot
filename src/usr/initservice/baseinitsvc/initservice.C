@@ -65,14 +65,9 @@ errlHndl_t  InitService::startTask( const TaskInfo      *i_ptask,
     assert(i_ptask->taskflags.task_type == START_TASK);
 
     tidrc   =   task_exec( i_ptask->taskname, io_pargs );   // launch the child
-
-    if ( io_pargs )
-    {
-        io_pargs->waitParentSync();                      // sync up childtask
-    }
-
     if ( static_cast<int16_t>(tidrc) < 0 )
     {
+        // task failed to launch, post an errorlog and dump some trace
         io_rerrl = new ERRORLOG::ErrlEntry(
                 ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,   //  severity
                 i_ptask->taskflags.module_id,            //  moduleid
@@ -91,6 +86,7 @@ errlHndl_t  InitService::startTask( const TaskInfo      *i_ptask,
     }  // endif tidrc
     else
     {
+		// task launched OK.
         TRACDBIN( g_trac_initsvc,
                 "Task finished OK :",
                 i_ptask->taskname,
@@ -98,9 +94,82 @@ errlHndl_t  InitService::startTask( const TaskInfo      *i_ptask,
         TRACDCOMP( g_trac_initsvc,
                 "task number %d,  errlog p = %p",
                 tidrc, io_rerrl );
-    }
+
+        if ( io_pargs )
+        {
+            io_pargs->waitParentSync();                      // sync up childtask
+        }
+    
+	}
 
     return io_rerrl;
+}
+
+
+errlHndl_t InitService::executeFn(  const TaskInfo  *i_ptask,
+        TaskArgs *io_pargs
+) const
+{
+    tid_t       tidrc   =   0;
+    errlHndl_t  errl    =   NULL;
+
+    if ( i_ptask->taskfn == NULL )
+    {
+        TRACDBIN( g_trac_initsvc,
+                "ERROR: NULL function pointer:",
+                i_ptask->taskname,
+                strlen(i_ptask->taskname) );
+
+        errl = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,   //  severity
+                i_ptask->taskflags.module_id,           //  moduleid
+                INITSERVICE::NULL_FN_PTR,               //  reason Code
+                0,
+                0   );
+
+        return  errl;
+    }
+
+
+    //  valid function, launch it
+    tidrc   =   task_create(    i_ptask->taskfn, io_pargs );
+    if ( static_cast<int16_t>(tidrc) < 0 )
+    {
+        errl = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,   //  severity
+                i_ptask->taskflags.module_id,           //  moduleid
+                INITSERVICE::START_FN_FAILED,           //  reason Code
+                tidrc,                                  //  user1 = tidrc
+                0   );
+
+        TRACDBIN( g_trac_initsvc,
+                ENTER_MRK "ERROR starting function:",
+                i_ptask->taskname,
+                strlen(i_ptask->taskname) );
+        TRACDCOMP( g_trac_initsvc,
+                EXIT_MRK "tidrc=%d, errlog p = %p" ,
+                (int16_t)tidrc, errl );
+
+    }  // endif tidrc
+    else
+    {
+        TRACDBIN( g_trac_initsvc,
+                ENTER_MRK "function launched OK :",
+                i_ptask->taskname,
+                strlen(i_ptask->taskname) );
+        TRACDCOMP( g_trac_initsvc,
+                EXIT_MRK "task number %d,  errlog p = %p",
+                tidrc, errl );
+
+        // task launched OK.
+        if ( io_pargs )
+        {
+            io_pargs->waitParentSync();                 // sync up parent task
+        }
+    }
+
+    return errl;
+
 }
 
 

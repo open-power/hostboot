@@ -32,6 +32,19 @@ const TaskInfo iv_exttaskinfolist[]   =   {
                 }
         },
 
+        /**
+          * @brief   IStep Dispatcher task, runs ISteps
+          */
+         {
+                 "libistepdisp.so" ,                         // taskname
+                 NULL,                                       // no pointer to fn
+                 {
+                         START_TASK,                         // task type
+                         EXT_IMAGE,                          // Extended Module
+                         EXECUTE_ISTEPS_ERRL_ID,             // module id
+                 }
+         },
+
         //  ---------------------------------------------------------------
         //  -----   END OF LIST!!!  ---------------------------------------
         //  ---------------------------------------------------------------

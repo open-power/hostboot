@@ -108,4 +108,4 @@ TaskArgs::~TaskArgs()
     barrier_destroy( &iv_sync_barrier );
 }
 
-};  // namespace TASKARGS
+};  // namespace

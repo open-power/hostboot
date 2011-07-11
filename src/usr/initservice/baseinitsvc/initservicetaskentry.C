@@ -33,7 +33,6 @@ void _start(void *ptr)
     TRACFCOMP( g_trac_initsvc,
             ENTER_MRK "Executing Initialization Service module." );
 
-
     //  create an instance of InitService
     //InitService::InitService& is =   InitService::getTheInstance();
 

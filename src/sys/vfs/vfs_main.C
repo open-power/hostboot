@@ -91,7 +91,8 @@ void vfs_main(void* unused)
 			    if ( module->start == NULL)
 			    {
 			        //  module has no _start() routine,
-			        //  return child = -1
+			        //  return child = -2
+			        child   =   -2;
 			        break;
 			    }
 			    child = task_create(module->start,

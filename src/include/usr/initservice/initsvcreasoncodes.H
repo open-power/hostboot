@@ -46,6 +46,12 @@ enum    InitServiceModuleID
     DISABLE_WATCHDOG_ERRL_ID,
     EXECUTE_ISTEPS_ERRL_ID,
 
+    ISTEP_1_ERRL_ID,
+    ISTEP_2_ERRL_ID,
+    ISTEP_3_ERRL_ID,
+    ISTEP_4_ERRL_ID,
+    ISTEP_5_ERRL_ID,
+
     //  reserve some tasks for my unit tests...
     START_CXXTEST_ERRL_ID       =   0xf0,
     INIT_SVC_TEST1_ERRL_ID,
@@ -59,8 +65,10 @@ enum    InitServiceModuleID
 
 enum    InitServiceReasonCode
 {
-    START_TASK_FAILED           = INITSVC_COMP_ID | 0x01,
-    INVALID_TASK_TYPE           = INITSVC_COMP_ID | 0x02,
+    START_TASK_FAILED           =   INITSVC_COMP_ID | 0x01,
+    INVALID_TASK_TYPE           =   INITSVC_COMP_ID | 0x02,
+    START_FN_FAILED             =   INITSVC_COMP_ID | 0x03,
+    NULL_FN_PTR                 =   INITSVC_COMP_ID | 0x04,
 
 
 };

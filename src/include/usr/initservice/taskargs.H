@@ -14,6 +14,27 @@
 #include    <sys/sync.h>
 #include    <trace/interface.H>
 
+/**
+ * @note macro to set up a _start() task entry routine.
+ */
+#define TASK_ENTRY_MACRO( MyInitFn )                                        \
+extern "C"                                                                  \
+void _start( void *io_pArgs )                                               \
+{                                                                           \
+    INITSERVICE::TaskArgs::TaskArgs *pTaskArgs  =                           \
+            reinterpret_cast<INITSERVICE::TaskArgs::TaskArgs *>(io_pArgs);  \
+                                                                            \
+    MyInitFn( pTaskArgs );                                                  \
+                                                                            \
+    if  ( pTaskArgs )                                                       \
+    {                                                                       \
+        pTaskArgs->waitChildSync();                                         \
+    }                                                                       \
+                                                                            \
+    task_end();                                                             \
+}
+
+
 namespace   INITSERVICE
 {
 

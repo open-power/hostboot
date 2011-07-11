@@ -13,6 +13,7 @@
 
 #include <trace/interface.H>
 #include <errl/errlentry.H>
+#include <initservice/taskargs.H>       // task entry routine
 
 #include "extinitsvc.H"
 #include "extinitsvctasks.H"
@@ -44,6 +45,7 @@ void _start( void *io_pArgs )
 
     task_end();
 }
+
 
 
 /******************************************************************************/
