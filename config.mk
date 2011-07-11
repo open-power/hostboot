@@ -150,8 +150,10 @@ $(foreach img,$(IMGS),$(eval $(call ELF_template,$(img))))
 ${IMGDIR}/%.bin ${IMGDIR}/%.list ${IMGDIR}/%.syms: ${IMGDIR}/%.elf \
     $(wildcard ${IMGDIR}/*.so) ${CUSTOM_LINKER_EXE}
 	${CUSTOM_LINKER} $@ $< \
-	      $(addprefix ${IMGDIR}/lib, $(addsuffix .so, \
-		$($*_MODULES))) > ${IMGDIR}/.$*.lnkout
+	      $(addprefix ${IMGDIR}/lib, $(addsuffix .so, $($*_MODULES))) \
+		--extended=0x40000 ${IMGDIR}/$*_extended.bin \
+	      $(addprefix ${IMGDIR}/lib, $(addsuffix .so, $($*_EXTENDED_MODULES))) \
+	      > ${IMGDIR}/.$*.lnkout
 	${ROOTPATH}/src/build/tools/addimgid $@ $<
 	(cd ${ROOTPATH}; \
 	    src/build/tools/gensyms $*.bin > ./img/$*.syms ; \

@@ -3,10 +3,17 @@
 
 #include <stdint.h>
 
-#define VFS_MODULE_MAX 128
+// make TODO VFS_MODULE_MAX equal to the actual number of modules in the base image (+ 2?)
+#define VFS_MODULE_MAX 32
+// Extended use 4 4k pages
+#define VFS_EXTENDED_MODULE_MAX 128
+#define VFS_EXTENDED_MODULE_TABLE_ADDRESS 0x0000000040000000UL
 #define VFS_MODULE_NAME_MAX 64
 #define VFS_SYMBOL_INIT _init
 #define VFS_SYMBOL_START _start
+#define VFS_SYMBOL_FINI _fini
+#define VFS_SYMBOL_TEXT .text
+#define VFS_SYMBOL_DATA .data
 #define VFS_STRINGIFY(X) #X
 #define VFS_TOSTRING(X) VFS_STRINGIFY(X)
 
@@ -35,9 +42,13 @@ enum VfsMessages
 
 struct VfsSystemModule
 {
-    const char module[VFS_MODULE_NAME_MAX];
-    void  (*init)(void*);
-    void  (*start)(void*);
+    const char module[VFS_MODULE_NAME_MAX];     //!< Module name
+    void  (*init)(void*);                       //!< ptr to init()
+    void  (*start)(void*);                      //!< ptr to start()
+    void  (*fini)(void*);                       //!< ptr to fini()
+    uint64_t * text;                            //!< ptr to text (code) section
+    uint64_t * data;                            //!< ptr to data section
+    uint64_t page_size;                         //!< no. of memory pages used
 };
 
 extern VfsSystemModule VFS_MODULES[VFS_MODULE_MAX];
