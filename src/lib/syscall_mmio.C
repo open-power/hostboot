@@ -21,9 +21,9 @@ uint64_t mmio_hmer_read()
     return (uint64_t) _syscall0(MMIO_HMER_READ);
 }
 
-int mmio_hmer_write(uint64_t value)
+void mmio_hmer_write(uint64_t value)
 {
-    return (int)(int64_t)_syscall1(MMIO_HMER_WRITE, (void*)value);
+    _syscall1(MMIO_HMER_WRITE, (void*)value);
 }
 
 mutex_t * mmio_xscom_mutex()

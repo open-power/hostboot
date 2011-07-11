@@ -50,7 +50,6 @@ void resetHMERStatus()
     hmer.mXSComDone = 0;
     hmer.mXSComFail = 0;
     hmer.mXSComStatus = 0;
-    // This call always returns 0, no checking needed
     mmio_hmer_write(hmer);
     return;
 }

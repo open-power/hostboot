@@ -29,29 +29,35 @@ typedef _barrier_imp_t barrier_t;
 #define MUTEX_INITIALIZER {0}
 
 /**
- * Initialize a barrier object
+ * @fn barrier_init
+ * @brief Initialize a barrier object
  * @param[out] o_barrier The barrier
  * @param[in] i_count The number of threads to wait on
- * @pre an unitiailized barrier object
+ * @pre an uninitialized barrier object
  * @post a valid barrier object
  */
 void barrier_init (barrier_t * o_barrier, uint64_t i_count);
 
+
 /**
- * Destroy a barrier
+ * @fn barrier_destroy 
+ * @brief Destroy a barrier
  * @param[in] i_barrier  The barrier
  */
 void barrier_destroy (barrier_t * i_barrier);
 
+
 /**
- * Wait on a barrier
+ * @fn barrier_wait
+ * @brief Wait on a barrier
+ * This thread will block until the barrier count is reached.
  * @param[in] i_barrier The barrier
- * @post this thread will be blocked until the barrier count is reached.
  */
 void barrier_wait (barrier_t * i_barrier);
 
 /**
- * Initialize a mutex object
+ * @fn mutex_init
+ * @brief Initialize a mutex object
  * @param[out] o_mutex the mutex
  * @pre an uninitialized mutex object
  * @post a valid mutex object
@@ -59,25 +65,27 @@ void barrier_wait (barrier_t * i_barrier);
 void mutex_init(mutex_t * o_mutex);
 
 /**
- * Destroy / Uninitialize a mutex object.
- * @param[in] i_mutex The mutex
+ * @fn mutex_destroy
+ * @brief Destroy / uninitialize a mutex object.
+ * @param[in] i_mutex - the mutex
  * @note This does not free the memory associated with the object if the mutex
  *       was allocated off the heap.
  */
 void mutex_destroy(mutex_t * i_mutex);
 
 /**
- * Obtain a lock on a mutex
- * @param[in] i_mutex The mutex
+ * @fn mutex_lock
+ * @brief Obtain a lock on a mutex
+ * @param[in] i_mutex - The mutex
  * @post returns when this thread has the lock
  */
 void mutex_lock(mutex_t * i_mutex);
 
 /**
- * Release a lock on a mutex
- * @param[in] i_mutex the mutex
- * @returns non zero on error
- * @post mutex lock release
+ * @fn mutex_unlock
+ * @brief Release a lock on a mutex
+ * @param[in] i_mutex - the mutex
+ * @post mutex lock released
  */
 void mutex_unlock(mutex_t * i_mutex);
 

@@ -8,7 +8,15 @@ extern "C"
 {
 #endif
 
-int nanosleep(uint64_t sec, uint64_t nsec);
+
+/** @fn nanosleep()
+ *  @brief Sleep for time duration given: seconds plus nanoseconds.
+ *  @param[in] sec  - seconds
+ *  @param[in] nsec - nanoseconds (billionths of a second)
+ */
+void nanosleep(uint64_t sec, uint64_t nsec);
+
+
 
 #ifdef __cplusplus
 }

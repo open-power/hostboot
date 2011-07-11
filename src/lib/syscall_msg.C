@@ -11,9 +11,9 @@ msg_q_t msg_q_create()
     return (msg_q_t) _syscall0(MSGQ_CREATE);
 }
 
-int msg_q_destroy(msg_q_t q)
+void msg_q_destroy(msg_q_t q)
 {
-    return (int64_t)_syscall1(MSGQ_DESTROY, q);
+    _syscall1(MSGQ_DESTROY, q);
 }
 
 int msg_q_register(msg_q_t q, const char* name)
