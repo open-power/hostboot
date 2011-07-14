@@ -33,16 +33,21 @@ fapi::ReturnCode hwpIsP7EM0ChipletClockOn(const fapi::Target & i_chip,
     // Attempt to call the attribute get/set functions for the test attributes
     fapi::ReturnCode l_rc;
 
+    // -----------------------------------------------------------------------
+    // NOTE: @TODO
+    // There's no EM0 in P8.
+    // Must use core 3 clock status register to work in current VBU model
+    // -----------------------------------------------------------------------
     // Constants
-    const uint64_t EM_CLOCK_STATUS_MASK = 0xEEC0000000000000ULL;
-    const uint32_t EM0_CHIPLET_BASE_ADDR = 0x06000000;
+    const uint64_t EX_CLOCK_STATUS_MASK = 0xEEC0000000000000ULL;
+    const uint32_t EX3_CHIPLET_BASE_ADDR = 0x13000000;
     const uint32_t CHIPLET_CLOCK_ON_SCOM_ADDR = 0x00030008;
 
     // Set caller's result to default
     o_clocksOn = false;
 
     // Figure out the scom address and create a 64 bit data buffer
-    uint32_t l_addr = (EM0_CHIPLET_BASE_ADDR | CHIPLET_CLOCK_ON_SCOM_ADDR);
+    uint32_t l_addr = (EX3_CHIPLET_BASE_ADDR | CHIPLET_CLOCK_ON_SCOM_ADDR);
     ecmdDataBufferBase l_data(64);
 
     // Perform a GetScom operation on the chip
@@ -50,18 +55,18 @@ fapi::ReturnCode hwpIsP7EM0ChipletClockOn(const fapi::Target & i_chip,
 
     if (l_rc != fapi::FAPI_RC_SUCCESS)
     {
-        FAPI_ERR("hwpIsP7EM0ChipletClockOn: Error from GetScomChip");
+        FAPI_ERR("hwpIsP8EX3ChipletClockOn: Error from GetScomChip");
     }
     else
     {
-        if (!(l_data.getDoubleWord(0) & EM_CLOCK_STATUS_MASK))
+        if (!(l_data.getDoubleWord(0) & EX_CLOCK_STATUS_MASK))
         {
-            FAPI_INF("hwpIsP7EM0ChipletClockOn: Clocks are on");
+            FAPI_INF("hwpIsP8EX3ChipletClockOn: Clocks are on");
             o_clocksOn = true;
         }
         else
         {
-            FAPI_INF("hwpIsP7EM0ChipletClockOn: Clocks are off");
+            FAPI_INF("hwpIsP8EX3ChipletClockOn: Clocks are off");
         }
     }
 

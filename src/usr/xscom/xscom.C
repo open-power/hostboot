@@ -181,6 +181,7 @@ errlHndl_t xscomPerformOp(DeviceFW::OperationType i_opType,
     errlHndl_t l_err = NULL;
     HMER l_hmer;
     mutex_t* l_XSComMutex;
+    uint64_t l_addr = va_arg(i_args,uint64_t);
 
     // Retry loop
     bool l_retry = false;
@@ -213,7 +214,7 @@ errlHndl_t xscomPerformOp(DeviceFW::OperationType i_opType,
         }
 
         // Build the XSCom address
-        XSComP8Address l_mmioAddr(va_arg(i_args,uint64_t), l_xscomChipInfo.nodeId,
+        XSComP8Address l_mmioAddr(l_addr, l_xscomChipInfo.nodeId,
                                   l_xscomChipInfo.chipId, l_XSComBaseAddr);
 
         // Re-init l_retry for loop
@@ -266,10 +267,15 @@ errlHndl_t xscomPerformOp(DeviceFW::OperationType i_opType,
 
         // Done, un-pin
         task_affinity_unpin();
-
-        TRACFCOMP(g_trac_xscom, "xscomPerformOp: OpType 0x%.8X, Address %llx, Page %llx; Offset %llx; VirtAddr %llx; l_virtAddr+l_offset %llx",
-                i_opType, static_cast<uint64_t>(l_mmioAddr), l_page,
-                l_offset_64, l_virtAddr, l_virtAddr + l_offset_64);
+        TRACFCOMP(g_trac_xscom, "xscomPerformOp: OpType %llx, Address 0%llx, MMIO Address %llx",
+                       static_cast<uint64_t>(i_opType),
+                       l_addr,
+                       static_cast<uint64_t>(l_mmioAddr));
+        TRACFCOMP(g_trac_xscom, "xscomPerformOp: Page %llx; Offset %llx; VirtAddr %llx; l_virtAddr+l_offset %llx",
+                       l_page,
+                       l_offset_64,
+                       l_virtAddr,
+                       l_virtAddr + l_offset_64);
 
         if (i_opType == DeviceFW::READ)
         {
