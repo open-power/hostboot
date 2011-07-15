@@ -8,6 +8,8 @@
 #include <string.h>
 #include <limits.h>
 
+extern "C" void userspace_task_entry();
+
 void TaskManager::idleTaskLoop(void* unused)
 {
     while(1)
@@ -55,12 +57,11 @@ task_t* TaskManager::_createTask(TaskManager::task_fn_t t,
     memset(task, '\0', sizeof(task_t));
 
     task->tid = this->getNextTid();
-
-    // Function pointer 't' is actually a TOC entry.  
-    //     TOC[0] = function address
-    //     TOC[1] = TOC base -> r2
-    task->context.nip = (void*) ((uint64_t*) t)[0];
-    task->context.gprs[2] = ((uint64_t*)t)[1];
+    
+    // Set NIP to be userspace_task_entry stub and GPR3 to be the 
+    // function pointer for the desired task entry point.
+    task->context.nip = reinterpret_cast<void*>(&userspace_task_entry);
+    task->context.gprs[4] = reinterpret_cast<uint64_t>(t);
 
     // Set up LR to be the entry point for task_end in case a task 
     // 'returns' from its entry point.  By the Power ABI, the entry

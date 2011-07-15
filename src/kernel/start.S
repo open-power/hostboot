@@ -360,6 +360,29 @@ system_call_fast_path:
 1:
     rfid                        ;// Return from interrupt.
 
+
+    ;// @fn userspace_task_entry
+    ;// Stub to load the function address and TOC base from userspace and
+    ;// jump to task entry point.  Used so the kernel doesn't need to
+    ;// dereference userspace addresses (which could be bad).
+    ;//
+    ;// Requires: 
+    ;//     * GPR4 -> Function pointer.
+    ;//     * LR -> task_end stub.
+    ;//     * GPR3 -> Task argument.
+    ;//     * GPR1 -> Task stack pointer.
+    ;// Results:
+    ;//     * TOC base -> GPR2
+    ;//     * Function Address -> CTR
+    ;//     * GPR1, GPR3 preserved.
+    ;//     * Branch to CTR (no link).
+.global userspace_task_entry
+userspace_task_entry:
+    ld r5, 0(r4)
+    mtctr r5
+    ld r2, 8(r4)
+    bctr
+
 .section .data
     .balign 1024
 kernel_stack:
