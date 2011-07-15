@@ -1,3 +1,4 @@
+#include <arch/ppc.H>
 #include <sys/sync.h>
 #include <sys/syscall.h>
 #include <assert.h>
@@ -138,6 +139,7 @@ void mutex_unlock(mutex_t * i_mutex)
     }
 #endif
     // #idea 2
+    lwsync();
     uint64_t l_count = __sync_lock_test_and_set(&(i_mutex->iv_val),0);
     if(2 == l_count)
     {
