@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <kernel/cpumgr.H>
 #include <kernel/task.H>
 #include <kernel/cpu.H>
@@ -9,6 +10,7 @@
 #include <arch/ppc.H>
 #include <kernel/timemgr.H>
 #include <sys/sync.h>
+#include <kernel/cpuid.H>
 
 cpu_t* CpuManager::cv_cpus[CpuManager::MAXCPUS] = { NULL };
 bool CpuManager::cv_shutdown_requested = false;
@@ -27,8 +29,36 @@ cpu_t* CpuManager::getCurrentCPU()
 
 void CpuManager::init()
 {
-    for (int i = 0; i < KERNEL_MAX_SUPPORTED_CPUS; i++)
-	Singleton<CpuManager>::instance().startCPU(i);
+    // For the initial boot we only want to set up CPU objects for the threads
+    // on this core.  Otherwise we waste memory with kernel / idle task stacks.
+    //
+    // As long as the CPU object pointer is NULL, the start.S code won't
+    // enter the kernel, so we skip initializing all the other CPUs for now.
+
+    // Determine number of threads on this core.
+    size_t threads = -1;
+    switch (getCpuType())
+    {
+        case POWER7:
+        case POWER7_PLUS:
+            threads = 4;
+            break;
+
+        case POWER8_VENICE:
+        case POWER8_SALERNO:
+            threads = 8;
+            break;
+
+        case UNKNOWN:
+        default:
+            kassert(false);
+            break;
+    }
+
+    // Create CPU objects starting at the thread-0 for this core.
+    size_t baseCpu = getPIR() & ~(threads-1);
+    for (size_t i = 0; i < threads; i++)
+        Singleton<CpuManager>::instance().startCPU(i + baseCpu);
 }
 
 void CpuManager::init_slave_smp(cpu_t* cpu)

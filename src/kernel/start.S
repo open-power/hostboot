@@ -6,7 +6,7 @@
 _start:
     ;// Set thread priority high.
     or 3,3,3
-    
+
     ;// Determine if this is the first thread.
     li r4, 2
     ;// Read spinlock value.
@@ -30,7 +30,7 @@ pre_relocate:
     lis r1,0x0010
     cmpl cr0,r2,r1		;// Check LR is less than 1MB
     blt finished_relocate	;// No need to relocate if less than 1MB
-    
+
     ;// Get addresses for relocation.
     ;// Write address in r5
     ;// Read address in r1
@@ -39,7 +39,7 @@ pre_relocate:
 
     and r1,r1,r2 ;// and with pre_relocate's address from r2 to get start of
 		 ;// rom section.
-    
+
     ;// Update LR to low address.
     clrldi r2,r2,48  ;// Equiv to ~(0x0FFFF)
     mtlr 2
@@ -47,7 +47,7 @@ pre_relocate:
     ;// Moving 1MB , so load r2 with (1MB / 8 bytes per word)
     lis r2, 0x2
     mtctr r2
-relocate_loop:		
+relocate_loop:
     ;// The dcbst/sync/icbi/isync sequence comes from PowerISA
     ld r4, 0(r1)
     std r4, 0(r5)
@@ -58,19 +58,19 @@ relocate_loop:
     addi r1,r1,8
     addi r5,r5,8
     bdnz+ relocate_loop
-    
+
     ;// Now that we've relocated, erase exception prefix.
     mfmsr r11
-    
+
     rldicl r11,r11,57,1  ;// Erase bit 6 ( equiv to r11 & ~(0x40))
     rotldi r11,r11,7
-    
+
     mtmsr r11
-    
+
     ;// Jump to low address.
     blr
 
-finished_relocate: 
+finished_relocate:
     ;// Jump to main.
     b _main
 */
@@ -133,7 +133,7 @@ UNIMPL_INTERRUPT(hype_decrementer, 0x980)
 ;// that require C++ code for handling but also implements a fast-path for
 ;// some simple calls, such as reading protected SPRs.
 ;//
-;// Since this is called from userspace as a function call (see __syscall* 
+;// Since this is called from userspace as a function call (see __syscall*
 ;// functions) we only need to honor the ELF ABI calling conventions.  That
 ;// means some registers and condition fields can be considered volatile and
 ;// modified prior to being saved.
@@ -141,7 +141,7 @@ UNIMPL_INTERRUPT(hype_decrementer, 0x980)
 .org _start + 0xC00
 intvect_system_call_fast:
     cmpi cr0, r3, 0x0800
-    bge  cr0, system_call_fast_path  
+    bge  cr0, system_call_fast_path
 STD_INTERRUPT(system_call, 0xC08)
 
 UNIMPL_INTERRUPT(trace, 0xD00)
@@ -161,7 +161,7 @@ _main:
     lis r2, main@h
     ori r2, r2, main@l
     ld r2,8(r2)
-    
+
     ;// Set up initial stack, space for 8 double-words
     lis r1, kernel_stack@h
     ori r1, r1, kernel_stack@l
@@ -173,7 +173,7 @@ _main_loop:
     b _main_loop
 
 ;// _other_thread_spinlock:
-;//	Used for threads other than first to wait for the system to boot to a 
+;//	Used for threads other than first to wait for the system to boot to a
 ;//	stable point where we can start the other threads.  At this point
 ;//	nothing is initalized in the thread.
 _other_thread_spinlock:
@@ -199,17 +199,29 @@ _other_thread_spinlock_complete:
     muli r3, r1, 8
     add r2, r3, r2
     ld r3, 0(r2)		;// Load CPU object.
+    cmpi cr0, r3, 0             ;// Check for NULL CPU object.
+    beq- cr0, 1f                ;// Jump to handling if no CPU object found.
     ld r1, 0(r3)		;// Load initial stack.
-    
+
     lis r2, smp_slave_main@h 	;// Load TOC base.
     ori r2, r2, smp_slave_main@l
     ld r2, 8(r2)
     bl smp_slave_main		;// Call smp_slave_main
     b _main_loop
+1:
+    ;// No CPU object available, doze this CPU.
+        ;// We should only get to this point on simics.  SBE will only wake up
+        ;// a single core / thread at a time and we are responsible for
+        ;// further sequencing.
+    doze
+    b 1b
+
+
+
 
     ;// @fn kernel_save_task
     ;// Saves context to task structure and branches back to requested addr.
-    ;// 
+    ;//
     ;// Requires:
     ;//     * SPRG3 -> Task Structure.
     ;//     * SPRG0 -> Return address.
@@ -261,7 +273,7 @@ kernel_save_task:
     std r29, TASK_GPR_29(r1)	;// Save GPR29
     std r30, TASK_GPR_30(r1)	;// Save GPR30
     std r31, TASK_GPR_31(r1)	;// Save GPR31
-    
+
     ld r1, 0(r1)	;// Get CPU pointer
     ld r1, 0(r1)	;// Get kernel stack pointer.
 
@@ -272,7 +284,7 @@ kernel_save_task:
     ;// @fn dispatch_task
     ;// Loads context from task structure and performs rfi.
     ;//
-    ;// Requires: 
+    ;// Requires:
     ;//     * SPRG3 -> Task Structure.
     ;//     * Current contents of registers are not needed.
 kernel_dispatch_task:
@@ -321,7 +333,7 @@ kernel_dispatch_task:
     ld r27, TASK_GPR_27(r1)	;// GPR27
 
     ld r28, TASK_LR(r1)     ;// Load from context: LR, CR, CTR, XER
-    ld r29, TASK_CR(r1)	
+    ld r29, TASK_CR(r1)
     ld r30, TASK_CTR(r1)
     ld r31, TASK_XER(r1)
     mtlr  r28		;// Restore LR
@@ -334,7 +346,7 @@ kernel_dispatch_task:
     ld r30, TASK_GPR_30(r1)	;// GPR30
     ld r31, TASK_GPR_31(r1)	;// GPR31
     ld r1, TASK_GPR_1(r1)	;// GPR1
-			
+
     rfid			;// Execute task.
 
     ;// @fn system_call_fast_path
@@ -366,7 +378,7 @@ system_call_fast_path:
     ;// jump to task entry point.  Used so the kernel doesn't need to
     ;// dereference userspace addresses (which could be bad).
     ;//
-    ;// Requires: 
+    ;// Requires:
     ;//     * GPR4 -> Function pointer.
     ;//     * LR -> task_end stub.
     ;//     * GPR3 -> Task argument.
