@@ -32,7 +32,10 @@ class PageManager
     private:
 	void* _allocatePage(size_t);
 	void _freePage(void*, size_t);
-	
+
+            /** Statistics on number of free pages (for debug) */
+        uint64_t iv_pagesAvail;
+
 	struct page_t
 	{
 	    page_t* next;

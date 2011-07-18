@@ -22,7 +22,7 @@ void PageManager::freePage(void* p, size_t n)
     return pmgr._freePage(p, n);
 }
 
-PageManager::PageManager()
+PageManager::PageManager() : iv_pagesAvail(0)
 {
     // Determine first page of un-allocated memory.
     uint64_t addr = (uint64_t) VFS_LAST_ADDRESS;
@@ -32,6 +32,9 @@ PageManager::PageManager()
     // Determine number of pages available.
     page_t* page = (page_t*)((void*) addr);
     size_t length = (MEMLEN - addr) / PAGESIZE;
+
+    // Update statistics.
+    __sync_add_and_fetch(&iv_pagesAvail, length);
     
     // Display.
     printk("Initializing PageManager with %zd pages starting at %lx...",
@@ -82,6 +85,9 @@ void* PageManager::_allocatePage(size_t n)
 	while(1);
     }
 
+    // Update statistics.
+    __sync_sub_and_fetch(&iv_pagesAvail, n);
+
     return page;
 }
 
@@ -93,6 +99,10 @@ void PageManager::_freePage(void* p, size_t n)
     while (n > (size_t)(1 << which_bucket)) which_bucket++;
 
     push_bucket((page_t*)p, which_bucket);
+
+    // Update statistics.
+    __sync_add_and_fetch(&iv_pagesAvail, n);
+
     return;
 }
 
