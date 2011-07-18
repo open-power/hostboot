@@ -10,6 +10,9 @@
 #include <sys/vfs.h>
 #include <sys/task.h>
 #include <sys/sync.h>
+#include <sys/misc.h>
+#include <sys/time.h>
+#include <usr/cxxtest/TestSuite.H>
 
 #include <trace/interface.H>
 #include <errl/errlentry.H>
@@ -190,6 +193,20 @@ void ExtInitSvc::init( void *i_ptr )
     TRACDCOMP( g_trac_initsvc,
             EXIT_MRK "Unit Tests finished.");
 
+    // Shutdown all CPUs
+
+    // TODO. Current code does not wait for UTs to finish. Add a delay for now
+    // This will be fixed soon.
+    nanosleep(2, 0);
+
+    uint64_t l_shutdownStatus = SHUTDOWN_STATUS_GOOD;
+
+    if (CxxTest::g_FailedTests)
+    {
+        l_shutdownStatus = SHUTDOWN_STATUS_UT_FAILED;
+    }
+
+    shutdown(l_shutdownStatus);
 
     // return to _start(), which may end the task or die.
     return;

@@ -13,9 +13,29 @@
 extern "C"
 void kernel_execute_decrementer()
 {
-    Scheduler* s = CpuManager::getCurrentCPU()->scheduler;
+    cpu_t* c = CpuManager::getCurrentCPU();
+    Scheduler* s = c->scheduler;
     TimeManager::checkReleaseTasks(s);        
     s->returnRunnable();
+
+    if (CpuManager::isShutdownRequested())
+    {
+        // Shutdown was requested
+        if (c->master)
+        {
+            // Write the shutdown status to Scratch SPR 0
+            uint64_t status = CpuManager::getShutdownStatus();
+            printk("Shutdown Requested. Status = 0x%lx\n", status);
+            setScratch0Spr(status);
+        }
+
+        // Make the thread doze
+        while(1)
+        {
+            doze();
+        }
+    }
+
     s->setNextRunnable();
 }
 
@@ -39,6 +59,7 @@ namespace Systemcalls
     void TimeNanosleep(task_t*);
     void FutexWait(task_t *t);
     void FutexWake(task_t *t);
+    void Shutdown(task_t *t);
 
     syscall syscalls[] =
 	{
@@ -63,6 +84,8 @@ namespace Systemcalls
 
             &FutexWait,
             &FutexWake,
+
+            &Shutdown,
 	};
 };
 
@@ -320,6 +343,17 @@ namespace Systemcalls
         uint64_t started = FutexManager::wake(uaddr,count);
 
         TASK_SETRTN(t,started);
+    }
+
+    /**
+     * Shutdown all CPUs
+     * @param[in] t:  The current task
+     */
+    void Shutdown(task_t * t)
+    {
+        uint64_t status = static_cast<uint64_t>(TASK_GETARG0(t));
+        CpuManager::requestShutdown(status);
+        TASK_SETRTN(t, 0);
     }
 
 };

@@ -56,6 +56,9 @@ namespace Systemcalls
             /** futex_wake() */
         FUTEX_WAKE,
 
+            /** shutdown() */
+        MISC_SHUTDOWN,
+
 	SYSCALL_MAX
     };
 

@@ -11,6 +11,8 @@
 #include <sys/sync.h>
 
 cpu_t* CpuManager::cv_cpus[CpuManager::MAXCPUS] = { NULL };
+bool CpuManager::cv_shutdown_requested = false;
+uint64_t CpuManager::cv_shutdown_status = 0;
 
 CpuManager::CpuManager()
 {
@@ -34,6 +36,12 @@ void CpuManager::init_slave_smp(cpu_t* cpu)
     Singleton<CpuManager>::instance().startSlaveCPU(cpu);
 }
 
+void CpuManager::requestShutdown(uint64_t i_status)
+{
+    cv_shutdown_requested = true;
+    cv_shutdown_status = i_status;
+}
+
 void CpuManager::startCPU(ssize_t i)
 {
     bool currentCPU = false;
@@ -55,6 +63,14 @@ void CpuManager::startCPU(ssize_t i)
 	
 	// Initialize CPU.
 	cpu->cpu = i;
+    if (currentCPU)
+    {
+        cpu->master = true;
+    }
+    else
+    {
+        cpu->master = false;
+    }
 	cpu->scheduler = &Singleton<Scheduler>::instance();
         cpu->scheduler_extra = NULL;
 	cpu->kernel_stack = 

@@ -21,21 +21,27 @@ class Scheduler;
  */
 struct cpu_t
 {
-        /** Stack to use while in kernel mode. */
+    /** Stack to use while in kernel mode. */
     void* kernel_stack;
-        /** ID of the CPU (PIR value) */
+
+    /** ID of the CPU (PIR value) */
     cpuid_t cpu;
-        
-        /** Pointer to the scheduler for this CPU (may not be unique) */
+
+    /** If the CPU is the master */
+    bool master;
+
+    /** Pointer to the scheduler for this CPU (may not be unique) */
     Scheduler* scheduler;
-        /** Location for scheduler to store per-CPU data, currently used
-         *  for the local run-queue for processor affinity.
-         */
+
+    /** Location for scheduler to store per-CPU data, currently used
+     *  for the local run-queue for processor affinity.
+     */
     void* scheduler_extra;
-        /** Pointer to the idle task for this CPU */
+
+    /** Pointer to the idle task for this CPU */
     task_t* idle_task;
 
-        /** XSCOM mutex to serialize access per CPU */
+    /** XSCOM mutex to serialize access per CPU */
     mutex_t xscom_mutex;
 };
 
