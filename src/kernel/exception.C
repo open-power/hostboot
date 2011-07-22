@@ -106,6 +106,15 @@ void kernel_execute_alignment()
     Systemcalls::TaskEnd(t);
 }
 
+extern "C"
+void kernel_execute_hype_emu_assist()
+{
+    task_t* t = TaskManager::getCurrentTask();
+    printk("HypeEmu: Illegal instruction in task %d\n"
+           "\tHSSR0 = %lx, HEIR = %lx\n", t->tid, getHSRR0(), getHEIR());
+    Systemcalls::TaskEnd(t);
+}
+
 namespace ExceptionHandles
 {
     bool HvEmulation(task_t* t)

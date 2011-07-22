@@ -84,7 +84,10 @@ finished_relocate:
 	b intvect_##name
 
 #define STD_INTERRUPT(name, address) \
-    .org _start + address; \
+        .org _start + address; \
+        STD_INTERRUPT_NOADDR(name)
+
+#define STD_INTERRUPT_NOADDR(name) \
     intvect_##name: \
 	or 3,3,3; /* Ensure thread priority is high. */ \
 	mtsprg1 r1; /* Save GPR1 */ \
@@ -147,7 +150,11 @@ STD_INTERRUPT(system_call, 0xC08)
 UNIMPL_INTERRUPT(trace, 0xD00)
 UNIMPL_INTERRUPT(hype_data_storage, 0xE00)
 UNIMPL_INTERRUPT(hype_inst_storage, 0xE20)
-UNIMPL_INTERRUPT(hype_emu_assist, 0xE40)
+
+.org _start + 0xE40
+hype_emu_assist_stub:
+    b intvect_hype_emu_assist
+
 UNIMPL_INTERRUPT(hype_maint, 0xE60)
 UNIMPL_INTERRUPT(perf_monitor, 0xF00)
 UNIMPL_INTERRUPT(vector_unavail, 0xF20)
@@ -394,6 +401,8 @@ userspace_task_entry:
     mtctr r5
     ld r2, 8(r4)
     bctr
+
+STD_INTERRUPT_NOADDR(hype_emu_assist)
 
 .section .data
     .balign 1024

@@ -5,15 +5,15 @@
 #include <builtins.h>
 
 ALWAYS_INLINE
-inline uint64_t getSRR0() 
+inline uint64_t getSRR0()
 {
     register uint64_t srr0 = 0;
     asm volatile("mfsrr0 %0" : "=r" (srr0));
     return srr0;
-} 
+}
 
 ALWAYS_INLINE
-inline uint64_t getSRR1() 
+inline uint64_t getSRR1()
 {
     register uint64_t srr1 = 0;
     asm volatile("mfsrr1 %0" : "=r" (srr1));
@@ -21,21 +21,52 @@ inline uint64_t getSRR1()
 }
 
 ALWAYS_INLINE
-inline void setSRR0(uint64_t _srr0) 
+inline void setSRR0(uint64_t _srr0)
 {
     register uint64_t srr0 = _srr0;
     asm volatile("mtsrr0 %0" : : "r" (srr0));
-} 
+}
 
 ALWAYS_INLINE
-inline void setSRR1(uint64_t _srr1) 
+inline void setSRR1(uint64_t _srr1)
 {
     register uint64_t srr1 = _srr1;
     asm volatile("mtsrr1 %0" : : "r" (srr1));
-} 
+}
 
 ALWAYS_INLINE
-inline uint64_t getPVR() 
+inline uint64_t getHSRR0()
+{
+    register uint64_t hsrr0 = 0;
+    asm volatile("mfspr %0, 314" : "=r" (hsrr0));
+    return hsrr0;
+}
+
+ALWAYS_INLINE
+inline uint64_t getHSRR1()
+{
+    register uint64_t hsrr1 = 0;
+    asm volatile("mfspr %0, 315" : "=r" (hsrr1));
+    return hsrr1;
+}
+
+ALWAYS_INLINE
+inline void setHSRR0(uint64_t _hsrr0)
+{
+    register uint64_t hsrr0 = _hsrr0;
+    asm volatile("mtspr 314, %0" : : "r" (hsrr0));
+}
+
+ALWAYS_INLINE
+inline void setHSRR1(uint64_t _hsrr1)
+{
+    register uint64_t hsrr1 = _hsrr1;
+    asm volatile("mtspr 315, %0" : : "r" (hsrr1));
+}
+
+
+ALWAYS_INLINE
+inline uint64_t getPVR()
 {
     register uint64_t pvr = 0;
     asm volatile("mfspr %0, 287" : "=r" (pvr));
@@ -43,7 +74,7 @@ inline uint64_t getPVR()
 }
 
 ALWAYS_INLINE
-inline uint64_t getPIR() 
+inline uint64_t getPIR()
 {
     register uint64_t pir = 0;
     asm volatile("mfspr %0, 1023" : "=r" (pir));
@@ -137,7 +168,7 @@ inline void eieio()
 }
 
 ALWAYS_INLINE
-inline uint64_t getHMER() 
+inline uint64_t getHMER()
 {
     register uint64_t hmer = 0;
     asm volatile("mfspr %0, 336" : "=r" (hmer));
@@ -153,8 +184,16 @@ inline void setHMER(uint64_t _hmer)
 }
 
 ALWAYS_INLINE
+inline uint64_t getHEIR()
+{
+    register uint64_t heir = 0;
+    asm volatile("mfspr %0, 339" : "=r" (heir));
+    return heir;
+}
+
+ALWAYS_INLINE
 inline void setThreadPriorityLow()
-{	
+{
     asm volatile("or 1,1,1");
 }
 
