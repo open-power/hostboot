@@ -1,0 +1,263 @@
+#!/bin/sh
+
+execute_in_sandbox()
+{
+    [ -z "${SANDBOXBASE}" ] && echo "Missing SANDBOXBASE." && exit -1
+    [ -z "${SANDBOXROOT}" ] && echo "Missing SANDBOXROOT." && exit -1
+    [ -z "${SANDBOXNAME}" ] && echo "Missing SANDBOXNAME." && exit -1
+
+    SANDBOXRC="${SANDBOXROOT}/hbsandboxrc"
+    WORKON_CMD="workon -rc ${SANDBOXRC} -sb ${SANDBOXNAME} -m ppc "
+
+    echo $1 > ${SANDBOXBASE}/src/sandbox_execute_cmd
+    chmod 700 ${SANDBOXBASE}/src/sandbox_execute_cmd
+
+    ${WORKON_CMD} -c ./sandbox_execute_cmd
+
+    rm ${SANDBOXBASE}/src/sandbox_execute_cmd
+}
+
+hb_helptext()
+{
+    echo "Hostboot Utility Script"
+
+    case $1 in
+    workon)
+        echo "  Topic 'workon'"
+        echo
+        echo "  Usage:"
+        echo "      hb workon"
+        echo
+        echo "  Sources necessary environment files for building hostboot"
+        echo "  and begins a new shell.  The workon may be left via 'exit'."
+        echo
+        echo "  Environment Variables:"
+        echo "      SHELL: The shell program to launch."
+        echo
+        echo "  See also:"
+        echo "      customrc"
+        ;;
+    simsetup)
+        echo "  Topic 'simsetup'"
+        echo
+        echo "  Usage:"
+        echo "      hb simsetup"
+        echo
+        echo "  Creates a simics workspace (FSP sandbox) in the directed"
+        echo "  location and initializes simics as well as executing any"
+        echo "  hostboot specific workarounds."
+        echo
+        echo "  FSP backing build and workarounds are chosen as directed"
+        echo "  by the CI test files (src/build/citest/etc)."
+        echo
+        echo "  Environment Variables:"
+        echo "      SANDBOXROOT: Root directory of where the sandboxes"
+        echo "                   should go."
+        echo "      SANDBOXNAME: Desired name of the hostboot sandbox."
+        ;;
+    prime)
+        echo "  Topic 'prime'"
+        echo
+        echo "  Usage:"
+        echo "      hb prime"
+        echo "      hb prime --test"
+        echo
+        echo "  Copies hostboot images and simics scripts into the"
+        echo "  simics workspace."
+        echo
+        echo "  See also:"
+        echo "      simsetup"
+        ;;
+    startsimics)
+        echo "  Topic 'startsimics'"
+        echo
+        echo "  Usage:"
+        echo "      hb startsimics <opts>"
+        echo
+        echo "  Enters the simics workspace and starts simics using the"
+        echo "  start_simics utility.  Any options are passed directly to"
+        echo "  the start_simics script."
+        echo
+        echo "  Requires the hostboot image to be 'prime'd into the workspace."
+        echo
+        echo "  Environment Variables:"
+        echo "      MACHINE: Alternate simics machine type (default SALERNO)"
+        echo "      SIMICSOPTIONS: Additional options to always pass to the"
+        echo "                     start simics script, such as '-nre'."
+        echo
+        echo "  See also:"
+        echo "      simsetup, prime"
+        ;;
+    rsync)
+        echo "  Topic 'rsync'"
+        echo
+        echo "  Usage:"
+        echo "      hb rsync"
+        echo
+        echo "  Synchronizes an entire Hostboot repository with another"
+        echo "  directory.  This can be useful for creating a backup of"
+        echo "  the repository or for pushing it to a remote host, such"
+        echo "  as a pool machine where simics is executed."
+        echo
+        echo "  Environment Variables:"
+        echo "      RSYNCHOST: (optional) remote host to rsync to."
+        echo "      RSYNCDIR: Destination directory of the rsync."
+        echo
+        echo "  The trailing slash on RSYNCDIR, or lack thereof, has"
+        echo "  meaning to rsync.  Specifically /.../foo will create a new"
+        echo "  directory called 'foo' with the contents of your repository"
+        echo "  in it, while /.../foo/ will create a subdirectory within foo"
+        echo "  by the name of your repository's directory name."
+        ;;
+    customrc)
+        echo "  Topic 'customrc'"
+        echo
+        echo "  Setting up this file in the root of your repository gives a"
+        echo "  convienient way to create default environment variables for"
+        echo "  the 'hb' script and your hostboot workon environment.  Some"
+        echo "  of the hb sub-commands require environment variables assigned"
+        echo "  and they should be done through this 'customrc' file.  You"
+        echo "  may also use this as a place to source other files you need"
+        echo "  for your environment, such as setting up 'git'."
+        echo
+        echo "  The 'customrc' file is in the .gitignore file and should"
+        echo "  NEVER be committed to git.  These are your own custom "
+        echo "  settings."
+        echo
+        echo "  The minimal example 'customrc' file is as follows:"
+        echo "      #!/bin/sh"
+        echo "      export SANDBOXROOT=~/sandboxes"
+        echo "      export SANDBOXNAME=hostboot"
+        echo
+        echo "  See also:"
+        echo "      All other sub-commands."
+        ;;
+    *)
+        echo "  Usage:"
+        echo "      hb <cmd>"
+        echo "      hb help [<cmd>|<topic>]"
+        echo
+        echo "  Available Commands:"
+        echo "      workon, simsetup, prime, startsimics, rsync"
+        echo
+        echo "  Additional Help Topics:"
+        echo "      customrc"
+        echo
+        echo "  For initial setup:"
+        echo "      1) Create customrc file."
+        echo "      2) hb workon"
+        echo "      3) hb simsetup"
+        echo "      4) Create images (edit code, make, etc.)."
+        echo "      5) hb prime [--test]"
+        echo "      6) hb startsimics"
+        echo "      7) Return to step 4 until satisfied."
+        ;;
+    esac
+}
+
+hb_workon()
+{
+    if [ -n "${HOSTBOOT_INSIDE_WORKON}" ]; then
+        echo "Already in a workon."
+        exit -1
+    else
+        export HOSTBOOT_INSIDE_WORKON=1
+        echo "Setting environment variables..."
+        source ./env.bash
+
+        echo "Spawning new shell (${SHELL})..."
+        ${SHELL} && exit 0
+    fi
+}
+
+hb_prime()
+{
+    if [ -n "${SANDBOXBASE}" ]; then
+        cpfiles.pl $*
+    else
+        echo "SANDBOXBASE not set."
+        exit -1
+    fi
+}
+
+hb_simsetup()
+{
+    [ -z "${SANDBOXBASE}" ] && echo "Missing SANDBOXBASE." && exit -1
+    [ -z "${SANDBOXROOT}" ] && echo "Missing SANDBOXROOT." && exit -1
+    [ -z "${SANDBOXNAME}" ] && echo "Missing SANDBOXNAME." && exit -1
+    [ -z "${HOSTBOOTROOT}" ] && echo "Missing HOSTBOOTROOT." && exit -1
+
+    SANDBOXRC="${SANDBOXROOT}/hbsandboxrc"
+    DRIVER=`cat ${HOSTBOOTROOT}/src/build/citest/etc/bbuild`
+
+    if [ -d "${SANDBOXBASE}" ]; then
+        echo "Removing old sandbox."
+        mksb -rc ${SANDBOXRC} -dir ${SANDBOXROOT} -undo $SANDBOXNAME
+    fi
+
+    if [ ! -d "${SANDBOXROOT}" ]; then
+        echo "Creating sandbox root directory."
+        mkdir -p ${SANDBOXROOT}
+    fi
+
+    echo "Creating new sandbox."
+    mksb -rc ${SANDBOXRC} -dir ${SANDBOXROOT} -back $DRIVER \
+         -sb ${SANDBOXNAME} -m ppc
+
+    execute_in_sandbox "start_simics -no_start -machine ${MACHINE:-SALERNO}"
+
+    echo "Running workarounds."
+    cp ${HOSTBOOTROOT}/src/build/citest/etc/workarounds ${SANDBOXBASE}/src
+    execute_in_sandbox "export BACKING_BUILD=\$bb && ./workarounds"
+    rm ${SANDBOXBASE}/src/workarounds
+
+    mkdir ${SANDBOXBASE}/img
+}
+
+hb_startsimics()
+{
+    execute_in_sandbox \
+        "start_simics -machine ${MACHINE:-SALERNO} ${SIMICSOPTIONS} $*"
+}
+
+hb_rsync()
+{
+    [ -z "${HOSTBOOTROOT}" ] && echo "Missing HOSTBOOTROOT." && exit -1
+    [ -z "${RSYNCDIR}" ] && echo "Missing RSYNCDIR." && exit -1
+
+    if [ -z "${RSYNCHOST}" ]; then
+        rsync -av --delete ${HOSTBOOTROOT}/ ${RSYNCDIR}
+    else
+        rsync -zav --delete ${HOSTBOOTROOT}/ ${RSYNCHOST}:${RSYNCDIR}
+    fi
+}
+
+if [ 0 == $# ]; then
+    hb_helptext
+    exit -1
+fi
+
+FIRST_PARAM=$1
+shift
+
+case ${FIRST_PARAM} in
+workon)
+    hb_workon $*
+    ;;
+prime)
+    hb_prime $*
+    ;;
+simsetup)
+    hb_simsetup $*
+    ;;
+startsimics)
+    hb_startsimics $*
+    ;;
+rsync)
+    hb_rsync $*
+    ;;
+*)
+    hb_helptext $*
+    exit -1
+    ;;
+esac

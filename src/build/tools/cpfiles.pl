@@ -73,13 +73,13 @@ else
 {
     foreach (@ARGV)
     {
-        if ($_ eq "-help")
+        if (($_ eq "--help") || ($_ eq "-h"))
         {
             #Print command line help
             printUsage();
             exit (0);
         }
-        elsif ($_ eq "-test")
+        elsif ($_ eq "--test")
         {
             #Set flag to copy hbicore_test.<syms|bin> to hbcore_test.<syms|bin>
             $test = 1;
@@ -230,7 +230,7 @@ chdir $cwd;
 #------------------------------------------------------------------------------
 sub printUsage()
 {
-    print ("\nUsage: cpFiles.pl [-help] | [<path>] [-test]\n\n");
+    print ("\nUsage: cpFiles.pl [--help] | [<path>] [--test]\n\n");
     print ("  This program needs to be executed from the git repository.\n");
     print ("  It will copy all relevant files, scripts, hbotStringFile,\n");
     print ("  .list, .syms and .bin files needed for debug to one of two\n");
@@ -239,7 +239,7 @@ sub printUsage()
     print ("      2.  if <path> is not specified, then the files will be\n");
     print ('          copied to the path specified by env variable $SANDBOXBASE'."\n");
     print ("          if it is defined.\n\n");
-    print ("  -help: prints usage information\n");
-    print ("  -test: Copy hbicore_test.<syms|bin|list> to hbicore.<syms|bin|list>\n");
+    print ("  --help: prints usage information\n");
+    print ("  --test: Copy hbicore_test.<syms|bin|list> to hbicore.<syms|bin|list>\n");
 }
 
