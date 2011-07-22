@@ -15,11 +15,9 @@
 #$
 #############################################################################
 
-ROOTPATH = ../../..
-MODULE = cxxtest
+ROOTPATH = ../../../..
 
-SUBDIRS=test.d
-
-OBJS = TestSuite.o cxxtestexec.o
+MODULE = testcxxtest
+TESTS = *.H
 
 include ${ROOTPATH}/config.mk

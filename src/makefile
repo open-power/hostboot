@@ -43,7 +43,7 @@ DIRECT_BOOT_MODULES = example
 RUNTIME_MODULES =
 TESTCASE_MODULES = cxxtest testerrl testdevicefw testsyslib \
                    testscom testxscom testtargeting testinitservice testkernel \
-                   testhwpf testecmddatabuffer tasktest2
+                   testhwpf testecmddatabuffer tasktest2 testcxxtest
 
 RELOCATABLE_IMAGE_LDFLAGS = -pie --export-dynamic
 

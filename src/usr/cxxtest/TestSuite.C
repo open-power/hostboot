@@ -46,12 +46,11 @@ void TestSuite::tearDown() {}
  *   @return void
  *
  */
-void doTrace( void )
+void doTrace( )
 {
 
     __sync_add_and_fetch( &g_TraceCalls, 1 );
 
-    return;
 }
 
 /**
@@ -65,11 +64,24 @@ void doTrace( void )
  *   @return void
  *
  */
-void doWarn( const char *file, unsigned line, const char *message )
+void doWarn( )
 {
 
-    printk("WARN: %s %u %s\n", file, line, message);
     __sync_add_and_fetch( &g_Warnings, 1 );
+
+}
+
+/**
+ *   @brief Implement Fail action in unit tests
+ *
+ *   @return none
+ */
+
+void doFailTest( )
+{
+
+    __sync_add_and_fetch( &g_FailedTests, 1 );
+
 }
 
 /**
@@ -77,18 +89,22 @@ void doWarn( const char *file, unsigned line, const char *message )
  *
  *   @param [in] pointer to filename  (not used right now )
  *   @param [in] line number
- *   @param [in] failure message
  *
- *   @return void
+ *   @return none
  */
 
-void doFailTest( const char *file, unsigned line, const char *message )
+void doFailTest( const char *filename, uint32_t linenum )
 {
-
-    printk("FAIL: %s %u %s\n", file, line, message);
+    TRACDBIN( g_trac_test,
+            "!!!       > Test Failed: ",
+            filename,
+            strlen( filename) );
+    TRACDCOMP( g_trac_test,
+            "!!!       >at line %d ",
+            linenum );
     __sync_add_and_fetch( &g_FailedTests, 1 );
-}
 
+}
 /**
  *  @brief Report total number of unit tests in a test suite
  *
@@ -100,11 +116,14 @@ void doFailTest( const char *file, unsigned line, const char *message )
  *  @param [in] trace message
  *
  *  @return void
+ *
+ *  @TODO do nothing with the suite name for now, later it may be useful
+ *
  */
-void    reportTotalTests( const char *suitename, uint64_t numtests )
+void reportTotalTests(  const char *suitename,
+                        uint64_t numtests )
 {
 
-    //  $$TODO do nothing with the suite name for now, later it may be useful
     __sync_add_and_fetch( &g_TotalTests, numtests );
     TRACDBIN( g_trac_test,
             "Suite Completed: ",

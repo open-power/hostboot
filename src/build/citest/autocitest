@@ -1,4 +1,21 @@
 #!/bin/bash
+#############################################################################
+# $IBMCopyrightBlock:
+#
+# IBM Confidential
+#
+# Licensed Internal Code Source Materials
+#
+# IBM HostBoot Licensed Internal Code
+#
+# (C) Copyright IBM Corp. 2011
+#
+# The source code for this program is not published or other-
+# wise divested of its trade secrets, irrespective of what has
+# been deposited with the U.S. Copyright Office.
+#$
+#############################################################################
+
 ################################################################################
 ##  Simics automation using autosim
 ##  2011-05-23  mww modified to run hostboot in simics
@@ -48,6 +65,46 @@ function    stopserver()
     fi
 }
 
+
+function    runtraceHB()
+{
+
+    echo    "Collect traceHB info..."
+    `pwd`
+    
+    autosim $NOWIN --simcmd "@os.environ[\"HOSTBOOT_STRINGFILE\"]=\"${SBXHOME}/img/hbotStringFile\" "
+    if [ $? -ne 0 ] ; then
+        echo "ERROR 1: Unable to run $?"
+        stopsim
+        stopserver
+        exit 1
+    fi
+    
+    autosim $NOWIN --simcmd "@os.environ[\"HOSTBOOT_SYMS\"]=\"${SBXHOME}/img/hbicore_test.syms\" "
+    if [ $? -ne 0 ] ; then
+        echo "ERROR 2: Unable to run $?"
+        stopsim
+        stopserver
+        exit 1
+    fi
+
+    autosim $NOWIN --simcmd   "run-python-file ${SBXHOME}/src/build/trace/traceHB.py"
+    if [ $? -ne 0 ] ; then
+        echo "ERROR 3: Unable to run $?"
+        stopsim
+        stopserver
+        exit 1
+    fi
+    
+    autosim $NOWIN --simcmd   "hb-trace"
+    if [ $? -ne 0 ] ; then
+        echo "ERROR 4 : Unable to run $?"
+        stopsim
+        stopserver
+        exit 1
+    fi
+    
+}
 
 
 ##  mww verbose is the default.
@@ -101,20 +158,29 @@ fi
 ##  Find the .syms file for the image.  Remove extension, add .syms.
 HBICORE_TEST_SYMS="${HBICORE_TEST%%.*}.syms"
 
+##  Find the hbotStringfile for traceHB.
+HBICORE_TEST_STRINGFILE="${SBXHOME}/img/hbotStringFile"
+
+##  Set the path to the traceHB.py script 
+TRACEHB_PYTHON_FILE="${SBXHOME}/src/build/trace/traceHB.py"
+
+CPFILES="${SBXHOME}/src/build/tools/cpfiles.pl"
 
 
 ## let's get set up
 cd $SBXHOME
 
 echo    "$0"
-echo    "VERBOSE            = $VERBOSE"
-echo    "NOWIN              = $NOWIN"
-echo    "BACKING_TREE       = $DRIVER"
-echo    "TEST_SANDBOX       = $TEST_SANDBOX"
-echo    "HBICORE_TEST       = $HBICORE_TEST"
-echo    "HBICORE_TEST_SYMS  = $HBICORE_TEST_SYMS"
-echo    "SANDBOXRC          = $SANDBOXRC"
-echo    "SBXHOME            = $SBXHOME"
+echo    "VERBOSE                    = $VERBOSE"
+echo    "NOWIN                      = $NOWIN"
+echo    "BACKING_TREE               = $DRIVER"
+echo    "TEST_SANDBOX               = $TEST_SANDBOX"
+echo    "HBICORE_TEST               = $HBICORE_TEST"
+echo    "HBICORE_TEST_SYMS          = $HBICORE_TEST_SYMS"
+echo    "HBICORE_TEST_STRINGFILE    = $HBICORE_TEST_STRINGFILE"
+echo    "TRACEHB_PYTHON_FILE        = $TRACEHB_PYTHON_FILE"
+echo    "SANDBOXRC                  = $SANDBOXRC"
+echo    "SBXHOME                    = $SBXHOME"
 echo    "current directory is " `pwd`
 
 waitkb
@@ -158,6 +224,7 @@ else
         fi
 fi
 
+
 waitkb
 
 # Run set up in current shell
@@ -174,12 +241,20 @@ if [ $? -ne 0 ] ; then
         exit 1
 fi
 
-
 waitkb
 
 ##  under normal circumstances $sb would be set by start_simics
 export sb=$SBXHOME/$TEST_SANDBOX/src
-echo $sb
+echo "sandbox dir = $sb"
+
+
+##  waitkb
+##
+##    echo "Set up for traceHB.py:"  
+##    echo "Copy .syms, bin, hbotStringfile, etc to base sandbox dir."
+##    echo "$sb"
+##    $CPFILES $sb
+    
 
 echo "** Set up simics directories **"
 echo "start_simics -no_start -machine $MACHINE" > $sb/my_simics_env_setup
@@ -262,7 +337,12 @@ mods_started_addr=`grep "CxxTest::g_ModulesStarted" \
         ${SBXHOME}/${HBICORE_TEST_SYMS} | awk '{split($0,a,","); print a[2]}'`
 mods_completed_addr=`grep "CxxTest::g_ModulesCompleted" \
         ${SBXHOME}/${HBICORE_TEST_SYMS} | awk '{split($0,a,","); print a[2]}'`
-
+        
+##  borrowed from CamVan's python script        
+trace_buffer_addr=`grep "g_desc_array" \
+        ${SBXHOME}/${HBICORE_TEST_SYMS} | awk '{split($0,a,","); print a[2]}'`
+trace_buffer_size=`grep "g_desc_array" \
+        ${SBXHOME}/${HBICORE_TEST_SYMS} | awk '{split($0,a,","); print a[4]}'`
 
 ##  note, don't use $VERBOSE here or you get all sorts of extra junk in the output file.
 echo "Wait for unit test completion."
@@ -341,8 +421,19 @@ echo "ERROR: Unable to run $?"
        exit 1
 fi
 
+##  run CamVan's python script to dump out the trace logs
+echo "====> dump trace buffer(s)..."
+runtraceHB  1> $SBXHOME/traceHB.log  2> /dev/null
+if [ $? -ne 0 ] ; then
+echo "ERROR: Unable to run $?"
+       stopsim
+       stopserver
+exit 1
+fi
 
+########################################################
 ##  done.  Stop the simulation
+########################################################
 stopsim
 
 
@@ -350,12 +441,17 @@ stopsim
 stopserver
 
 
-
 ##  print out ending.
 timestamp=`date +'%H:%M:%S'`
 
 echo    "----------------- Printk Buffer -------------------"
 cat $SBXHOME/testprintk.log
+
+echo    "----------------- traceHB Buffer -------------------"
+cat $SBXHOME/traceHB.log
+
+
+
 
 echo
 echo    "==================================================="

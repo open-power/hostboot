@@ -65,13 +65,18 @@ public:
 
 class AbortTest {};
 
-void doTrace( void );
-void doWarn( const char *file, unsigned line, const char *message );
-void doFailTest( const char *file, unsigned line, const char *message );
-void doFailAssert( const char *file, unsigned line, const char *expression, const char *message );
+void doTrace( );
+void doWarn( );
+void doFailTest( );
+void doFailTest( const char *filename, uint32_t linenum );
+void doFailAssert(  const char *file,
+                    unsigned line,
+                    const char *expression,
+                    const char *message );
 
 
-void        reportTotalTests( const char *suitename, uint64_t numtests );
+void reportTotalTests(  const char *suitename,
+                        uint64_t numtests );
 
 extern uint64_t g_ModulesCompleted;
 
@@ -85,16 +90,18 @@ extern uint64_t g_ModulesCompleted;
 #define _TS_CATCH_ABORT(b)
 
 // TS_TRACE
-#define  TS_TRACE(...)   TRACDCOMP( g_trac_test, __VA_ARGS__); CxxTest::doTrace()
+#define  TS_TRACE(...)  TRACDCOMP( g_trac_test, "TS_TRACE> "__VA_ARGS__ );           \
+    CxxTest::doTrace( )
 
 
 // TS_WARN
-#define _TS_WARN(f,l,e) CxxTest::doWarn( (f), (l), e )
-#define TS_WARN(e) _TS_WARN( __FILE__, __LINE__, e )
+#define TS_WARN(...)    TRACDCOMP( g_trac_test, "!TS_WARN> " __VA_ARGS__ ); \
+    CxxTest::doWarn( )
+
 
 // TS_FAIL
-#define _TS_FAIL(f,l,e) CxxTest::doFailTest( (f), (l), e )
-#define TS_FAIL(e) _TS_FAIL( __FILE__, __LINE__, e )
+#define TS_FAIL(...)    TRACDCOMP( g_trac_test, "!!!TS_FAIL> " __VA_ARGS__); \
+    CxxTest::doFailTest( __FILE__, __LINE__ )
 
 }
 

@@ -7,7 +7,7 @@
  * 
  *  IBM HostBoot Licensed Internal Code
  * 
- *  (C) Copyright IBM Corp. 2011
+ *  (C) Copyright IBM Corp. 2004 - 2011
  * 
  *  The source code for this program is not published or other-
  *  wise divested of its trade secrets, irrespective of what has
@@ -45,6 +45,8 @@
 #define ENTER_MRK ">>"
 #define EXIT_MRK  "<<"
 #define ERR_MRK   "E>"
+#define FAIL_MRK  "F>"
+#define WARN_MRK  "W>"
 #define INFO_MRK  "I>"
 #define ARG_MRK   "A>"
 
