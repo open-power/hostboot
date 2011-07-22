@@ -23,7 +23,7 @@ void SegmentManager::initSLB()
 
 bool SegmentManager::_handlePageFault(task_t* i_task, uint64_t i_addr)
 {
-        // This constant should come from page manager.  Segment size.
+    // This constant should come from page manager.  Segment size.
     const size_t SLBE_s = 40;
 
     // Get segment ID from effective address.
@@ -48,7 +48,7 @@ void SegmentManager::_initSLB()
 {
     // Flush SLB.
     asm volatile("slbia" ::: "memory");
-    isync();  // Ensure slbia completes prior to slbmtes.
+    isync(); // Ensure slbia completes prior to slbmtes.
 
     register uint64_t slbRS, slbRB;
 

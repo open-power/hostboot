@@ -2,12 +2,16 @@
 #define __KERNEL_VMMMGR_H
 
 #include <limits.h>
+#include <sys/mmio.h>
 #include <kernel/types.h>
 #include <kernel/spinlock.H>
 
 class VmmManager
 {
     public:
+        /**
+         * Constants used throughout the virtual memory management classes
+         */
         enum VMM_CONSTS
         {
             ONE_MEG = 1 * 1024 * 1024,
@@ -49,6 +53,20 @@ class VmmManager
         static void* mmioMap(void*, size_t);
         static int mmioUnmap(void*, size_t);
 
+        /**
+         * @brief Map a device into the device segment(2TB)
+         * @param ra[in] - Void pointer to real address to be mapped in
+         * @param i_devDataSize[in] - Size of device segment block
+         * @return void* - Pointer to beginning virtual address, NULL otherwise
+         */
+        static void* devMap(void* ra, SEG_DATA_SIZES i_devDataSize);
+
+        /**
+         * @brief Unmap a device from the device segment(2TB)
+         * @param ea[in] - Void pointer to effective address
+         * @return int - 0 for successful unmap, non-zero otherwise
+         */
+        static int devUnmap(void* ea);
 
     protected:
         VmmManager();

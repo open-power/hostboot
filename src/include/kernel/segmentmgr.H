@@ -22,11 +22,11 @@ class SegmentManager
         /** Segment Identifiers */
         enum SegmentIds
         {
-                /** Base Segment (0-1TB). */
+            /** Base Segment (0-1TB). */
             BASE_SEGMENT_ID = 0,
-                /** Task Stack Segment (1-2TB). */
+            /** Task Stack Segment (1-2TB). */
             STACK_SEGMENT_ID = 1,
-                /** MMIO Space Segment (2-3TB). */
+            /** MMIO Space Segment (2-3TB). */
             MMIO_SEGMENT_ID = 2,
 
             MAX_SEGMENTS = 4
@@ -78,14 +78,14 @@ class SegmentManager
         static void initSLB();
 
     private:
-            /** See handlePageFault. */
+        /** See handlePageFault. */
         bool _handlePageFault(task_t* i_task, uint64_t i_addr);
-            /** See addSegment. */
+        /** See addSegment. */
         void _addSegment(Segment* i_segment, size_t i_segId);
-            /** See initSLB. */
+        /** See initSLB. */
         void _initSLB();
 
-            /** Array of segment objects to associated segment IDs. */
+        /** Array of segment objects to associated segment IDs. */
         Segment* iv_segments[MAX_SEGMENTS];
 };
 

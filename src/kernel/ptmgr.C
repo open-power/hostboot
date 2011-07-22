@@ -607,11 +607,11 @@ void PageTableManager::writePTE( PageTableEntry* i_pte,
     {
         Dprintk( ">> PageTableManager::writePTE( i_dest=0x%.lX, i_valid=%d )\n", i_dest, i_valid );
 
-        if( i_valid ) {
-            //        printPTE( "Writing", i_dest );
-        } else {
-            printPTE( "Removing", i_dest );
-        }
+        //if( i_valid ) {
+            //printPTE( "Writing", i_dest );
+        //} else {
+            //printPTE( "Removing", i_dest );
+        //}
 
         i_dest->V = 0; /* (other fields don't matter) */
 

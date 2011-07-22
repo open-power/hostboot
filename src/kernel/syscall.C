@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <kernel/cpu.H>
 #include <kernel/cpumgr.H>
 #include <kernel/scheduler.H>
@@ -57,6 +58,8 @@ namespace Systemcalls
     void MsgWait(task_t*);
     void MmioMap(task_t*);
     void MmioUnmap(task_t*);
+    void DevMap(task_t*);
+    void DevUnmap(task_t*);
     void TimeNanosleep(task_t*);
     void FutexWait(task_t *t);
     void FutexWake(task_t *t);
@@ -82,6 +85,8 @@ namespace Systemcalls
 
 	    &MmioMap,  // MMIO_MAP
 	    &MmioUnmap,  // MMIO_UNMAP
+            &DevMap,
+            &DevUnmap,
 
 	    &TimeNanosleep,  // TIME_NANOSLEEP
 
@@ -307,6 +312,30 @@ namespace Systemcalls
 	size_t pages = TASK_GETARG1(t);
 
 	TASK_SETRTN(t, VmmManager::mmioUnmap(ea,pages));
+    }
+
+    /**
+     * Map a device into virtual memory
+     * @param[in] t:  The task used to map a device
+     */
+    void DevMap(task_t *t)
+    {
+        void *ra = (void*)TASK_GETARG0(t);
+        SEG_DATA_SIZES devDataSize = (SEG_DATA_SIZES)TASK_GETARG1(t);
+
+        kassert(TASK_SETRTN(t, (uint64_t)VmmManager::devMap(ra,devDataSize)) !=
+                NULL);
+    }
+
+    /**
+     * Unmap a device from virtual memory
+     * @param[in] t:  The task used to unmap a device
+     */
+    void DevUnmap(task_t *t)
+    {
+        void *ea = (void*)TASK_GETARG0(t);
+
+        TASK_SETRTN(t, VmmManager::devUnmap(ea));
     }
 
     void TimeNanosleep(task_t* t)

@@ -46,18 +46,22 @@ namespace Systemcalls
 	MMIO_MAP,
             /** mmio_unmap() */
 	MMIO_UNMAP,
+            /** dev_map() */
+    DEV_MAP,
+            /** dev_unmap() */
+    DEV_UNMAP,
 
             /** nanosleep() */
 	TIME_NANOSLEEP,
 
             /** futex_wait() */
-        FUTEX_WAIT,
+    FUTEX_WAIT,
 
             /** futex_wake() */
-        FUTEX_WAKE,
+    FUTEX_WAKE,
 
             /** shutdown() */
-        MISC_SHUTDOWN,
+    MISC_SHUTDOWN,
 
             /** cpu_core_type() */
         MISC_CPUCORETYPE,

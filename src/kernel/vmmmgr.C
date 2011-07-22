@@ -43,14 +43,40 @@ bool VmmManager::pteMiss(task_t* t, uint64_t effAddr)
     return Singleton<VmmManager>::instance()._pteMiss(t, effAddr);
 }
 
+/**
+ * STATIC
+ * @brief DEPRECATED
+ */
 void* VmmManager::mmioMap(void* ra, size_t pages)
 {
     return DeviceSegment::mmioMap(ra, pages);
 }
 
+/**
+ * STATIC
+ * @brief DEPRECATED
+ */
 int VmmManager::mmioUnmap(void* ea, size_t pages)
 {
     return DeviceSegment::mmioUnmap(ea, pages);
+}
+
+/**
+ * STATIC
+ * @brief A facade to map a device into the device segment(2TB)
+ */
+void* VmmManager::devMap(void* ra, SEG_DATA_SIZES i_devDataSize)
+{
+    return DeviceSegment::devMap(ra, i_devDataSize);
+}
+
+/**
+ * STATIC
+ * @brief A facade to unmap a device from the device segment(2TB)
+ */
+int VmmManager::devUnmap(void* ea)
+{
+    return DeviceSegment::devUnmap(ea);
 }
 
 void VmmManager::initPTEs()
@@ -79,5 +105,4 @@ bool VmmManager::_pteMiss(task_t* t, uint64_t effAddr)
 
     return rc;
 }
-
 

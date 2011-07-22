@@ -2,32 +2,114 @@
 #define __KERNEL_DEVICESEGMENT_H
 
 #include <kernel/segment.H>
+#include <sys/mmio.h>
 
+/**
+ * @class DeviceSegment
+ * @brief Manages the device virtual memory segment
+ */
 class DeviceSegment : public Segment
 {
     public:
-        DeviceSegment() : Segment(0x020000000000ull) 
-            { 
-                for (int i = 0; i < MMIO_MAP_DEVICES; i++)
-                    iv_mmioMap[i] = 0;
-            };
+        /**
+         * @brief Constructor (Device segment at 2TB)
+         */
+        DeviceSegment() : Segment(0x020000000000ull) {};
+
+        /**
+         * @brief Destructor
+         */
         ~DeviceSegment() {};
 
+        /**
+         * @brief Add the device segment
+         */
         static void init();
         
+        /**
+         * @brief Handle a page fault for a device address access
+         * @param i_task[in] - Task pointer to the task requiring the page
+         * @param i_addr[in] - 64-bit address needed to be paged
+         * @return bool - true: Page added to page table
+         *               false: Not a valid address to be paged
+         */
         bool handlePageFault(task_t* i_task, uint64_t i_addr);
 
-        static void* mmioMap(void* ra, size_t pages); // to be deprecated.
-        static int mmioUnmap(void* ea, size_t pages); // to be deprecated.
+        /**
+         * @brief DEPRECATED
+         */
+        static void* mmioMap(void* ra, size_t pages);
+
+        /**
+         * @brief DEPRECATED
+         */
+        static int mmioUnmap(void* ea, size_t pages);
+
+        /**
+         * @brief Map a device into the device segment(2TB)
+         * @param ra[in] - Void pointer to real address to be mapped in
+         * @param i_devDataSize[in] - Size of device segment block
+         * @return void* - Pointer to beginning virtual address, NULL otherwise
+         */
+        static void* devMap(void* ra, SEG_DATA_SIZES i_devDataSize);
+
+        /**
+         * @brief Unmap a device from the device segment(2TB)
+         * @param ea[in] - Void pointer to effective address
+         * @return int - 0 for successful unmap, non-zero otherwise
+         */
+        static int devUnmap(void* ea);
 
     private:
-        enum { MMIO_MAP_DEVICES = 32 };
-        uint64_t iv_mmioMap[MMIO_MAP_DEVICES];
+        /**
+         * Attributes to represent a mapped device within a segment block
+         */
+        struct devSegData
+        {
+            uint64_t addr; /* Real address assigned to device */
+            SEG_DATA_SIZES size; /* A particular device's segment block size */
+            devSegData(): addr(0),size(THIRTYTWO_GB){};
+        };
 
+        /**
+         * Number of devices that can be mapped with a given segment block size
+         */
+        enum
+        {
+            MMIO_MAP_DEVICES = 32
+        }; //TODO - Only necessary if a device uses a SCOM region other than 32GB
+
+        devSegData iv_mmioMap[MMIO_MAP_DEVICES];
+
+        /**
+         * @brief Add the device segment
+         */
         void _init();
 
+        /**
+         * @brief DEPRECATED
+         */
         void* _mmioMap(void* ra, size_t pages);
+
+        /**
+         * @brief DEPRECATED
+         */
         int _mmioUnmap(void* ea, size_t pages);
+
+        /**
+         * @brief Map a device into the device segment(2TB)
+         * @param ra[in] - Void pointer to real address to be mapped in
+         * @param i_devDataSize[in] - Size of device segment block
+         * @return void* - Pointer to beginning virtual address, NULL otherwise
+         */
+        void* _devMap(void* ra, SEG_DATA_SIZES i_devDataSize);
+
+        /**
+         * @brief Unmap a device from the device segment(2TB)
+         * @param ea[in] - Void pointer to effective address
+         * @return int - 0 for successful unmap, non-zero otherwise
+         */
+        int _devUnmap(void* ea);
 };
 
 #endif

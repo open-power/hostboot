@@ -16,6 +16,16 @@ int mmio_unmap(void* ea, size_t pages)
     return (int64_t) _syscall2(MMIO_UNMAP, ea, (void*)pages);
 }
 
+void* mmio_dev_map(void *ra, SEG_DATA_SIZES i_devDataSize)
+{
+    return _syscall2(DEV_MAP, ra, (void*)i_devDataSize);
+}
+
+int mmio_dev_unmap(void *ea)
+{
+    return (int64_t) _syscall1(DEV_UNMAP, ea);
+}
+
 uint64_t mmio_hmer_read()
 {
     return (uint64_t) _syscall0(MMIO_HMER_READ);

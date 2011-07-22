@@ -9,29 +9,37 @@ extern "C"
 {
 #endif
 
-/** @fn mmio_map()
- *  @brief Map a region into virtual address space.
- *  
- *  @param[in] ra - address of page
- *  @param[in] pages - count of pages to map
- *
- *  @returns The virtual address where mapped.
+/**
+ * Sizes used to determine segment block size during map/unmap functions
+ * within the kernel or user space
+ */
+enum SEG_DATA_SIZES
+{
+    THIRTYTWO_GB = 0x800000000,
+};
+
+/**
+ * @brief DEPRECATED
  */
 void* mmio_map(void* ra, size_t pages);
-
-
-/** @fn mmio_unmap()
- *  @brief Unmap a region previously mapped into virtual address space.
- *
- *  Appears not to be implemented. See _mmioUnmap in src/kernel/vmmmgr.C
- *  
- *  @param[in] ea - virtual address as returned from mmio_map()
- *  @param[in] pages - count of pages to unmap
- *
- *  @returns -1 from _mmioUnmap in src/kernel/vmmmgr.C 
+/**
+ * @brief DEPRECATED
  */
 int mmio_unmap(void* ea, size_t pages);
 
+/**
+ * @brief System call to map a device into the device segment(2TB)
+ * @param ra[in] - Void pointer to real address to be mapped in
+ * @param i_devDataSize[in] - Size of device segment block
+ * @return void* - Pointer to beginning virtual address, NULL otherwise
+ */
+void* mmio_dev_map(void *ra, SEG_DATA_SIZES i_devDataSize);
+/**
+ * @brief System call to unmap a device from the device segment(2TB)
+ * @param ea[in] - Void pointer to effective address
+ * @return int - 0 for successful unmap, non-zero otherwise
+ */
+int mmio_dev_unmap(void *ea);
 
 /** @fn mmio_hmer_read()
  *  @brief Reads and returns protected HMER register.
