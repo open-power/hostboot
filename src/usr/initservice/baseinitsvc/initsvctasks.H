@@ -52,10 +52,10 @@ const TaskInfo    g_taskinfolist[]   =   {
          * @brief   PNOR    Driver  Task
          */
         {
-                "libpnordd.so" ,                        // taskname
+                "libpnor.so" ,                        // taskname
                 NULL,                                   // no pointer to fn
                 {
-                        NONE,                                // don't start
+                        START_TASK,                      // start
                         BASE_IMAGE,                     // Base Module
                         START_PNORDD_ERRL_ID,                // module id for errorlog
                 }

@@ -30,6 +30,7 @@
 #include    <assert.h>
 #include    <sys/sync.h>
 #include    <trace/interface.H>
+#include    <sys/task.h>  //needed to make macro work
 
 #include    <errl/errlentry.H>
 #include    <errl/errlmanager.H>

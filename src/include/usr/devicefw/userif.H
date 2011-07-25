@@ -23,7 +23,7 @@ namespace DeviceFW
         SCOM = 0,
         PNOR,
         MAILBOX,
-        PRESENT,         
+        PRESENT,
 
         LAST_ACCESS_TYPE,
     };
@@ -38,6 +38,18 @@ namespace DeviceFW
      */
     #define DEVICE_PRESENT_ADDRESS() \
         DeviceFW::PRESENT
+
+    /**
+     * Construct a PNOR DD address
+     *    address = 0000_0000_0000_000c_aaaa_aaaa_aaaa_aaaa
+     *      c=side, a=address
+     * @param[in] chip  Chip Select
+     * @param[in] addr  Offset (from zero) into selected flash chip
+     * @return  64-bit address to pass into PNOR device commands
+     */
+     #define DEVICE_PNOR_ADDRESS( chip, addr )  \
+        DeviceFW::PNOR, (((chip)<<32)|(addr))
+    
 
     /** 
      *  @brief Perform a hardware read operation.

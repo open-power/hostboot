@@ -36,7 +36,7 @@ DIRECT_BOOT_OBJECTS = start.o kernel.o taskmgr.o cpumgr.o syscall.o \
 
 RUNTIME_OBJECTS =
 
-BASE_MODULES = trace errl devicefw scom xscom initservice taskargs
+BASE_MODULES = trace errl devicefw scom xscom initservice taskargs pnor
 EXTENDED_MODULES = targeting ecmddatabuffer hwpf fapi hwp plat	\
 					extinitsvc istepdisp isteps
 DIRECT_BOOT_MODULES = example

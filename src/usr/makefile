@@ -4,6 +4,6 @@ OBJS = module_init.o
 
 SUBDIRS = example.d trace.d cxxtest.d testcore.d errl.d devicefw.d  \
           scom.d xscom.d targeting.d initservice.d hwpf.d 			\
-          ecmddatabuffer.d isteps.d
+          ecmddatabuffer.d isteps.d pnor.d
 
 include ${ROOTPATH}/config.mk

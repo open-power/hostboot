@@ -69,4 +69,12 @@ const compId_t INITSVC_COMP_ID = 0x0500;
 const char INITSVC_COMP_NAME[] = "initservice";
 //@}
 
+/** @name PNOR
+ *  PNOR component, includes RP and DD
+ */
+//@{
+const compId_t PNOR_COMP_ID = 0x0600;
+const char PNOR_COMP_NAME[] = "pnor";
+//@}
+
 #endif
