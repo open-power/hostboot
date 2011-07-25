@@ -5,6 +5,7 @@
 #include <kernel/segmentmgr.H>
 #include <kernel/block.H>
 #include <kernel/vmmmgr.H>
+#include <kernel/cpuid.H>
 
 BaseSegment::~BaseSegment()
 {
@@ -21,8 +22,22 @@ void BaseSegment::_init()
     // Assign segment to segment manager.
     SegmentManager::addSegment(this, SegmentManager::BASE_SEGMENT_ID);
 
-    // Create initial static 8MB block.
-    iv_block = new Block(0x0, 0x800000);
+    // Create initial static 3 or 8MB block.
+    uint64_t iv_baseBlockSize = 0;
+    switch (CpuID::getCpuType())
+    {
+        case CpuID::POWER7:
+        case CpuID::POWER7_PLUS:
+        case CpuID::POWER8_VENICE:
+            iv_baseBlockSize = VmmManager::EIGHT_MEG;
+            break;
+
+        case CpuID::POWER8_SALERNO:
+        default:
+            iv_baseBlockSize = VmmManager::THREE_MEG;
+            break;
+    }
+    iv_block = new Block(0x0, iv_baseBlockSize);
     iv_block->setParent(this);
 
     // Set default page permissions on block.

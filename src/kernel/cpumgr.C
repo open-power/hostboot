@@ -37,19 +37,19 @@ void CpuManager::init()
 
     // Determine number of threads on this core.
     size_t threads = -1;
-    switch (getCpuType())
+    switch (CpuID::getCpuType())
     {
-        case POWER7:
-        case POWER7_PLUS:
+        case CpuID::POWER7:
+        case CpuID::POWER7_PLUS:
             threads = 4;
             break;
 
-        case POWER8_VENICE:
-        case POWER8_SALERNO:
+        case CpuID::POWER8_VENICE:
+        case CpuID::POWER8_SALERNO:
             threads = 8;
             break;
 
-        case UNKNOWN:
+        case CpuID::UNKNOWN:
         default:
             kassert(false);
             break;
@@ -88,9 +88,9 @@ void CpuManager::startCPU(ssize_t i)
     // Initialize CPU structure.
     if (NULL == cv_cpus[i])
     {
-	printk("Starting CPU %ld...", i);    
+	printk("Starting CPU %ld...", i);
 	cpu_t* cpu = cv_cpus[i] = new cpu_t;
-	
+
 	// Initialize CPU.
 	cpu->cpu = i;
     if (currentCPU)
@@ -103,14 +103,14 @@ void CpuManager::startCPU(ssize_t i)
     }
 	cpu->scheduler = &Singleton<Scheduler>::instance();
         cpu->scheduler_extra = NULL;
-	cpu->kernel_stack = 
+	cpu->kernel_stack =
 	    (void*) (((uint64_t)PageManager::allocatePage(4)) + 16320);
         cpu->xscom_mutex = (mutex_t)MUTEX_INITIALIZER;
-	
+
 	// Create idle task.
 	cpu->idle_task = TaskManager::createIdleTask();
 	cpu->idle_task->cpu = cpu;
-	
+
 	printk("done\n");
     }
 

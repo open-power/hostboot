@@ -10,7 +10,7 @@ class TaskManager
     public:
 	static task_t* getCurrentTask();
 	static void setCurrentTask(task_t* t);
-	
+
 	typedef void(*task_fn_t)(void*);
 	static task_t* createTask(task_fn_t, void*);
 
@@ -22,8 +22,8 @@ class TaskManager
 	static task_t* createIdleTask();
 
     private:
-	tid_t getNextTid() 
-	    { return iv_nextTid.next() + VmmManager::FirstPid; };
+	tid_t getNextTid()
+	    { return iv_nextTid.next(); };
 	Util::Lockfree::Counter<tid_t> iv_nextTid;
 
 	static void idleTaskLoop(void*);

@@ -28,19 +28,19 @@ PageManager::PageManager() : iv_pagesAvail(0)
     uint64_t addr = (uint64_t) VFS_LAST_ADDRESS;
     if (0 != (addr % PAGESIZE))
 	addr = (addr - (addr % PAGESIZE)) + PAGESIZE;
-    
+
     // Determine number of pages available.
     page_t* page = (page_t*)((void*) addr);
     size_t length = (MEMLEN - addr) / PAGESIZE;
 
     // Update statistics.
     __sync_add_and_fetch(&iv_pagesAvail, length);
-    
+
     // Display.
     printk("Initializing PageManager with %zd pages starting at %lx...",
 	   length,
 	   (uint64_t)page);
-    
+
     // Populate L3 cache lines.
     uint64_t* cache_line = (uint64_t*) addr;
     uint64_t* end_cache_line = (uint64_t*) VmmManager::FULL_MEM_SIZE;
@@ -62,6 +62,9 @@ PageManager::PageManager() : iv_pagesAvail(0)
 	length -= (1 << page_length);
     }
 
+    // @TODO: Venice: Clear 3-8MB region and add to free memory pool.
+    //                Can't do this now due to fake-PNOR driver.
+
     printk("done\n");
 }
 
@@ -69,7 +72,7 @@ void* PageManager::_allocatePage(size_t n)
 {
     size_t which_bucket = 0;
     while (n > (size_t)(1 << which_bucket)) which_bucket++;
-    
+
     int retries = 0;
     page_t* page = (page_t*)NULL;
     while ((page == NULL) && (retries < 3))
@@ -109,11 +112,11 @@ void PageManager::_freePage(void* p, size_t n)
 PageManager::page_t* PageManager::pop_bucket(size_t n)
 {
     if (n >= BUCKETS) return NULL;
-    
+
     page_t* p = first_page[n].pop();
 
     if (NULL == p)
-    { 
+    {
 	// Couldn't allocate from the correct size bucket, so split up an
 	// item from the next sized bucket.
 	p = pop_bucket(n+1);

@@ -10,9 +10,11 @@ class VmmManager
     public:
         enum VMM_CONSTS
         {
-            EIGHT_MEG = 8 * 1024 * 1024,
+            ONE_MEG = 1 * 1024 * 1024,
+            THREE_MEG = 3 * ONE_MEG,
+            EIGHT_MEG = 8 * ONE_MEG,
 
-            FULL_MEM_SIZE = 1 * EIGHT_MEG,
+            FULL_MEM_SIZE = THREE_MEG,
 
             // put the Page Table at the end of our memory space
             PTSIZE = (1 << 18),
@@ -26,13 +28,6 @@ class VmmManager
             NORMAL_ACCESS,
             CI_ACCESS,
             RO_EXE_ACCESS,
-        };
-
-        enum PID_ALLOCATIONS
-        {
-            LinearSpace = (FULL_MEM_SIZE / EIGHT_MEG) - 1,
-            MMIOSpace = LinearSpace + 1,
-            FirstPid,
         };
 
         static void init();
