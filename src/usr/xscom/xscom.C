@@ -267,6 +267,7 @@ errlHndl_t xscomPerformOp(DeviceFW::OperationType i_opType,
 
         // Done, un-pin
         task_affinity_unpin();
+
         TRACFCOMP(g_trac_xscom, "xscomPerformOp: OpType %llx, Address 0%llx, MMIO Address %llx",
                        static_cast<uint64_t>(i_opType),
                        l_addr,
@@ -288,6 +289,9 @@ errlHndl_t xscomPerformOp(DeviceFW::OperationType i_opType,
         // Handle error
         if (l_hmer.mXSComStatus != HMER::XSCOM_GOOD)
         {
+            uint64_t l_hmerVal = l_hmer;
+            TRACFCOMP(g_trac_xscom, ERR_MRK "XSCOM status error HMER: %llx, XSComStatus %llx",
+                    l_hmerVal, l_hmer.mXSComStatus);
             /*@
              * @errortype
              * @moduleid     XSCOM_PERFORM_OP

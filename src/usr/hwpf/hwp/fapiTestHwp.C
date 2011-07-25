@@ -83,7 +83,7 @@ fapi::ReturnCode hwpInitialTest(const fapi::Target & i_chip)
     // Figure out the scom address and create a 64 bit data buffer
     ecmdDataBufferBase l_data(64);
 
-    const uint64_t l_addr = 0x0201240B;
+    const uint64_t l_addr = 0x13010002;
 
     // Perform a GetScom operation on the chip
     l_rc = GetScom(i_chip, l_addr, l_data);
