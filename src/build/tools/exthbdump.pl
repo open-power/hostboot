@@ -25,12 +25,9 @@ use File::Copy;
 #------------------------------------------------------------------------------
 # Constants
 #------------------------------------------------------------------------------
-use constant SIZE_HBI_IMAGE_ID => 19;
 use constant MAX_NUM_TRACE_BUFFERS => 24;
-use constant DESC_ARRAY_ENTRY_SIZE => 24;
 use constant DESC_ARRAY_ENTRY_ADDR_SIZE => 8;
 use constant DESC_ARRAY_ENTRY_COMP_NAME_SIZE => 16;
-use constant MAX_NUM_TRACE_BUFFERs => 24;
 use constant TRAC_DEFAULT_BUFFER_SIZE => 0x0800;
 
 
@@ -55,13 +52,23 @@ sub appendBinFile;
 my $numArgs = $#ARGV + 1;
 if ($numArgs < 1)
 {
-    print ("\nUsage: exthbdump.pl <dumpfile> [<symsfile>]\n\n");
+    print ("\nUsage: exthbdump.pl <dumpfile> [--test] [--dir <path to .syms file & hbotStringFile>]\n\n");
     print ("  This program will parse the hostboot dump file specified\n");
     print ("  and extract the code version, kernel printk buffer and traces\n");
-    print ("  to the current directory.\n");
-    print ("  If no symsfile is specified, this program will use the default\n");
-    print ("  hbicore.syms file found in the current working directory.\n");
-    print ("\nNOTE: User should run cpfiles.pl from the git repository to\n");
+    print ("  to the current directory.\n\n");
+    print ("  User should copy the relevant .syms file and hbotStringFile\n");
+    print ("  to the current directory or set the env variable HBDIR to the path\n");
+    print ("  of the hbicore.syms/hbicore_test.syms files & hbotStringFile.\n\n");
+    print ("  User should also copy the fsp-trace program to the current directory\n");
+    print ("  or set the env variable PATH to include the path to the program.\n\n");
+    print ("  --dir:  Override the automatically detected .syms and hbotStringFile\n");
+    print ("       in HBDIR or the current directory.  This program will search\n");
+    print ("       for the files in the following order:\n");
+    print ("       1.  from the path specified by user\n");
+    print ("       2.  from HBDIR if it is defined\n");
+    print ("       3.  from the current directory\n");
+    print ("  --test:  Use the hbicore_test.syms file vs the hbicore.syms file\n");
+    print ("\nNOTE: User can run cpfiles.pl from the git repository to\n");
     print ("  copy all files needed to parse the hostboot dump to the current\n");
     print ("  directory prior to running this program.\n");
     exit(1);
@@ -71,20 +78,68 @@ if ($numArgs < 1)
 # Parse the input argument(s)
 #------------------------------------------------------------------------------
 
+#Initialize default settings
+my $hbSymsFile = "hbicore.syms";
+my $hbStringFile = "hbotStringFile";
+
+my $hbDir = $ENV{'HBDIR'};
+if (defined ($hbDir))
+{
+    unless ($hbDir ne "")
+    {
+        $hbDir = '.';             #Set to current directory
+    }
+}
+else
+{
+    $hbDir = '.';                 #Set to current directory
+}
+
 # Save the user specifed dump file
 my $hbDumpFile = $ARGV[0];
 my $hbDumpFileBase = basename($hbDumpFile);
 
-my $hbSymsFile = "hbicore.syms";
-
-# Save the optional user specified syms file
-if ($numArgs > 1)
+# Save the optional user specified arguments
+for (my $i=1; $i<$numArgs; $i++)
 {
-    $hbSymsFile = $ARGV[1];
+    if ($ARGV[$i] eq "--dir")
+    {
+        if (($i + 1) >= $numArgs)
+        {
+            die "No value given for --dir parameter.\n";
+        }
+        $i++;
+        $hbDir = $ARGV[$i];
+    }
+    elsif ($ARGV[$i] eq "--test")
+    {
+        #Use hbicore_test.syms
+        $hbSymsFile = 'hbicore_test.syms';
+    }
+    else
+    {
+        print "Invalid argument entered:  $ARGV[$i]\n";
+        exit(1);
+    }
 }
 
+#Check for existence of .syms file and hbotStringFile
+if (!(-e "$hbDir/$hbSymsFile"))
+{
+      die "Cannot find $hbDir/$hbSymsFile\n";
+}
+
+if (!(-e "$hbDir/$hbStringFile"))
+{
+      die "Cannot find $hbDir/$hbStringFile\n";
+}
+
+#------------------------------------------------------------------------------
+#Print the files used
+#------------------------------------------------------------------------------
 print "hostboot dump file: $hbDumpFile\n";
-print "hostboot syms file: $hbSymsFile\n";
+print "hostboot syms file: $hbDir/$hbSymsFile\n";
+print "hostboot string file: $hbDir/$hbStringFile\n";
 
 
 #------------------------------------------------------------------------------
@@ -104,13 +159,14 @@ mkdir $extDir;
 #------------------------------------------------------------------------------
 # Open and read the .syms file
 #------------------------------------------------------------------------------
-open SYMSFILE, $hbSymsFile or die "ERROR: $hbSymsFile not found : $!";
+open SYMSFILE, "$hbDir/$hbSymsFile" or
+    die "ERROR: $hbDir/$hbSymsFile not found : $!";
 my @symslines = <SYMSFILE>;        # Read it into an array
 close(SYMSFILE);                   # Close the file
 
 unless (@symslines)
 {
-    print "ERROR: $hbSymsFile is empty\n";
+    print "ERROR: $hbDir/$hbSymsFile is empty\n";
     exit (1);
 }
 
@@ -144,7 +200,8 @@ $string = 'kernel_printk_buffer';
 if ((0 != $addr) && (0 != $size))
 {
     #Read the kernel printk buffer from dump file and save to file
-    $buffer = readBinFile($hbDumpFile, $addr, $size);
+    #$buffer = readBinFile($hbDumpFile, $addr, $size);
+    $buffer = readStringBinFile($hbDumpFile, $addr);
     chdir "$extDir";
     writeBinFile($string, $buffer);
     chdir "../";
@@ -197,13 +254,16 @@ if ((0 != $addr) && (0 != $size))
     if (-s $traceDir.'/tracBIN')
     {
         #create tracMERG file
-        $string = sprintf ("fsp-trace -s hbotStringFile %s/tracBIN > %s/tracMERG",
-                           $traceDir, $traceDir);
+        $string = sprintf ("fsp-trace -s %s/%s %s/tracBIN > %s/tracMERG",
+                           $hbDir, $hbStringFile, $traceDir, $traceDir);
         #print "$string\n";
         `$string`;
 
-        #delete tracBIN file
-        unlink $traceDir.'/tracBIN';
+        if (-s "$traceDir/tracMERG")
+        {
+            #delete tracBIN file
+            unlink $traceDir.'/tracBIN';
+        }
     }
 }
 
