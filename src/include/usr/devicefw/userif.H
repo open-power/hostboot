@@ -48,7 +48,7 @@ namespace DeviceFW
      * @return  64-bit address to pass into PNOR device commands
      */
      #define DEVICE_PNOR_ADDRESS( chip, addr )  \
-        DeviceFW::PNOR, (((chip)<<32)|(addr))
+        DeviceFW::PNOR, ((static_cast<uint64_t>(chip)<<32)|static_cast<uint64_t>(addr))
     
 
     /** 
