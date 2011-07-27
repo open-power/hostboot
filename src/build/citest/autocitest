@@ -266,6 +266,7 @@ mods_completed_addr=`grep "CxxTest::g_ModulesCompleted" \
 
 ##  note, don't use $VERBOSE here or you get all sorts of extra junk in the output file.
 echo "Wait for unit test completion."
+declare -i timeout=0
 modsstarted=0
 modscompleted=0
 loopcount=0
@@ -281,9 +282,8 @@ while [ $modsstarted -lt 1 -o $modsstarted -ne $modscompleted ]; do
     
     if [ "$loopcount" -gt 60 ];   then
         echo    "ERROR: timed out after 5 minutes"
-        stopsim
-        stopserver
-        exit 1
+        timeout=$(($modsstarted - $modscompleted))
+        break
     fi
 done
 
@@ -338,7 +338,7 @@ if [ $? -ne 0 ] ; then
 echo "ERROR: Unable to run $?"
        stopsim
        stopserver
-exit 1
+       exit 1
 fi
 
 
@@ -359,14 +359,24 @@ cat $SBXHOME/testprintk.log
 
 echo
 echo    "==================================================="
-echo    "$timestamp Finished autocitest with no errors."
-echo    "    total tests:   $totaltests"
-echo    "    failed tests:  $failedtests"
-echo    "    warnings:      $warnings"
-echo    "    trace calls:   $tracecalls"
+if [ $timeout = 0 ] ; then
+    echo    "$timestamp Finished autocitest with no errors."
+else
+    echo    "$timestamp Failed autocitest, modules timed out."
+    echo    "    failed modules:  $timeout"
+fi
+echo    "    total tests:     $totaltests"
+echo    "    failed tests:    $failedtests"
+echo    "    warnings:        $warnings"
+echo    "    trace calls:     $tracecalls"
 echo    "==================================================="
 echo
 
+if [ 0 !=  $timeout ] ; then
+    echo "Modules started:   $modsstarted"
+    echo "Modules completed: $modscompleted"
+    exit 1
+fi
 if [ 0 !=  $failedtests ] ; then
     echo "$failedtests testcases failed."
     exit 1
