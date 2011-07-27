@@ -6,6 +6,11 @@ execute_in_sandbox()
     [ -z "${SANDBOXROOT}" ] && echo "Missing SANDBOXROOT." && exit -1
     [ -z "${SANDBOXNAME}" ] && echo "Missing SANDBOXNAME." && exit -1
 
+    if [ ! -d "${SANDBOXBASE}" ]; then
+        echo "Sandbox does not exist.  Create with 'hb simsetup."
+        exit -1
+    fi
+
     SANDBOXRC="${SANDBOXROOT}/hbsandboxrc"
     WORKON_CMD="workon -rc ${SANDBOXRC} -sb ${SANDBOXNAME} -m ppc "
 
@@ -64,6 +69,9 @@ hb_helptext()
         echo
         echo "  Copies hostboot images and simics scripts into the"
         echo "  simics workspace."
+        echo
+        echo "  Options:"
+        echo "      --test : Copy test images (as opposed to non-test)."
         echo
         echo "  See also:"
         echo "      simsetup"
@@ -173,6 +181,10 @@ hb_workon()
 hb_prime()
 {
     if [ -n "${SANDBOXBASE}" ]; then
+        if [ ! -d "${SANDBOXBASE}" ]; then
+            echo "Sandbox does not exist.  Create with 'hb simsetup."
+            exit -1
+        fi
         cpfiles.pl $*
     else
         echo "SANDBOXBASE not set."
@@ -216,6 +228,25 @@ hb_simsetup()
 
 hb_startsimics()
 {
+    [ -z "${SANDBOXBASE}" ] && echo "Missing SANDBOXBASE." && exit -1
+    [ -z "${HOSTBOOTROOT}" ] && echo "Missing HOSTBOOTROOT." && exit -1
+
+    if [ ! -d "${SANDBOXBASE}" ]; then
+        echo "Sandbox does not exist.  Create with 'hb simsetup."
+        exit -1
+    fi
+
+    SBDRIVER=`cat ${SANDBOXBASE}/rc_files/sb.conf | \
+              grep "backing_build" | awk '{ print $3 }'`
+    DRIVER=`cat ${HOSTBOOTROOT}/src/build/citest/etc/bbuild`
+
+    if [ ${SBDRIVER} != ${DRIVER} ]; then
+        echo "Driver mismatch between sandbox and src/build/citest/etc/bbuild."
+        echo "Sandbox at ${SBDRIVER}"
+        echo "Update sandbox with 'hb simsetup'."
+        exit -1
+    fi
+
     execute_in_sandbox \
         "start_simics -machine ${MACHINE:-SALERNO} ${SIMICSOPTIONS} $*"
 }
