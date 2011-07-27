@@ -109,7 +109,7 @@ struct Object
         bool write_object();
 
         /**
-         * Read relocations 
+         * Read relocations
          * @return true if no errors
          * @post sets symbols, relocs
          */
@@ -228,6 +228,7 @@ vector<Object> objects;
 ofstream modinfo;
 vector<uint64_t> all_relocations;
 vector<ModuleTable> module_tables;
+map<string,size_t> weak_symbols;
 
 //-----------------------------------------------------------------------------
 // MAIN
@@ -276,7 +277,7 @@ int main(int argc, char** argv)
                 else  // extended module
                 {
                     // allocate space for the module table in the extended image
-                    uint64_t table_size = 
+                    uint64_t table_size =
                         page_align(112*VFS_EXTENDED_MODULE_MAX);
                     fseek(output, table_size, SEEK_SET);
                 }
@@ -311,11 +312,11 @@ int main(int argc, char** argv)
         }
 
         // Write objects to their output file
-        for_each(objects.begin(), objects.end(), 
+        for_each(objects.begin(), objects.end(),
                  mem_fun_ref(&Object::write_object));
         //bind2nd(mem_fun_ref(&Object::write_object), output));
 
-        // used to find start of unallocated memory 
+        // used to find start of unallocated memory
         // goes in base binary only
         uint64_t last_address = ftell(objects[0].iv_output);
 
@@ -334,7 +335,7 @@ int main(int argc, char** argv)
 
         //
         // Create module tables
-        // 
+        //
         for(vector<ModuleTable>::iterator i = module_tables.begin();
             i != module_tables.end(); ++i)
         {
@@ -404,7 +405,7 @@ bool Object::read_object(const char* i_file)
         }
         else
         {
-            cout << "NON ELF format on file: " << i_file 
+            cout << "NON ELF format on file: " << i_file
                 << ". The file will be added as a binary blob." << endl;
             image = NULL;
         }
@@ -436,7 +437,7 @@ bool Object::read_object(const char* i_file)
                 cout << "Section " << s->name << endl;
                 cout << "\tSize " << std::dec << s->size << endl;
                 cout << "\tVMA " << std::hex << s->vma_offset << endl;
-                cout << "\tData " << std::hex << bfd_getb64(s->data) 
+                cout << "\tData " << std::hex << bfd_getb64(s->data)
                     << "..." << endl;
             }
 
@@ -457,7 +458,7 @@ bool Object::write_object()
     offset = ftell(iv_output);
 
     if(isELF())
-    {    
+    {
         // Output TEXT section.
         fseek(iv_output, text.vma_offset, SEEK_CUR);
         if (text.size != fwrite(text.data, 1, text.size, iv_output))
@@ -484,7 +485,7 @@ bool Object::write_object()
             fwrite(&zero, 0, 8 - (eof % 8), iv_output);
         }
 
-        modinfo << &name[(name.find_last_of("/")+1)] << ",0x" 
+        modinfo << &name[(name.find_last_of("/")+1)] << ",0x"
             << std::hex << offset + base_addr << endl;
     }
     else // binary blob
@@ -557,6 +558,17 @@ bool Object::read_relocation()
         }
         else if (syms[i]->flags & (BSF_LOCAL | BSF_WEAK))
         {
+            // Check weak symbol list for duplicate weak symbols.
+            if (syms[i]->flags & (BSF_WEAK))
+            {
+                if (weak_symbols[syms[i]->name]++)
+                {
+                    throw std::runtime_error(
+                                string("Duplicate weak symbol detected: ") +
+                                s.name);
+                }
+            }
+
             s.type |= Symbol::LOCAL;
             cout << "\t\tLOCAL" << endl;
         }
@@ -665,14 +677,14 @@ bool Object::perform_local_relocations()
         if (address != i->addend)
         {
             ostringstream oss;
-            oss << "Expected " << i->addend << " found " << address 
+            oss << "Expected " << i->addend << " found " << address
                 << " at " << (offset + i->address);
             cout << oss.str() << endl;
             throw range_error(oss.str());
         }
 
         // If it is a non-ABS relocation, also need to add the symbol addr.
-        if (i->name != BFD_ABS_SECTION_NAME) 
+        if (i->name != BFD_ABS_SECTION_NAME)
         {
             Symbol& s = this->symbols[i->name];
             uint64_t symbol_addr = s.base + s.address;
@@ -687,7 +699,7 @@ bool Object::perform_local_relocations()
         fseek(iv_output, offset + i->address, SEEK_SET);
         fwrite(data, sizeof(uint64_t), 1, iv_output);
 
-        cout << "\tRelocated " << i->addend << " at " << i->address << " to " 
+        cout << "\tRelocated " << i->addend << " at " << i->address << " to "
             << relocation << endl;
     }
 }
@@ -711,8 +723,8 @@ bool Object::perform_global_relocations()
 
         char data[sizeof(uint64_t)*3];
 
-        for(int allow_local = 0; 
-            ((allow_local < 2) && (!found_symbol)); 
+        for(int allow_local = 0;
+            ((allow_local < 2) && (!found_symbol));
             allow_local++)
         {
             for(vector<Object>::iterator j = objects.begin();
@@ -722,8 +734,8 @@ bool Object::perform_global_relocations()
                 if (j->symbols.find(i->name) != j->symbols.end())
                 {
                     Symbol s = j->symbols[i->name];
-                    uint64_t symbol_addr = 
-                        j->offset + s.address + s.base; 
+                    uint64_t symbol_addr =
+                        j->offset + s.address + s.base;
 
                     if (s.type & Symbol::UNRESOLVED)
                         continue;
@@ -734,7 +746,7 @@ bool Object::perform_global_relocations()
 
                     found_symbol = true;
 
-                    if ((s.type & Symbol::FUNCTION) && 
+                    if ((s.type & Symbol::FUNCTION) &&
                         (i->type & Symbol::FUNCTION))
                     {
                         if (i->addend != 0)
@@ -758,8 +770,8 @@ bool Object::perform_global_relocations()
                             all_relocations.push_back(offset + i->address + 16);
                         }
 
-                        cout << "\tCopied relocation from " << std::hex 
-                            << j->base_addr << ':' << symbol_addr << " to " 
+                        cout << "\tCopied relocation from " << std::hex
+                            << j->base_addr << ':' << symbol_addr << " to "
                             << base_addr << ':' << offset + i->address << "."
                             << endl;
                     }
@@ -782,7 +794,7 @@ bool Object::perform_global_relocations()
                         if(!base_addr) all_relocations.push_back(offset + i->address);
 
                         cout << "\tRelocated from " << std::hex
-                            << j->base_addr << ':' 
+                            << j->base_addr << ':'
                             << symbol_addr - j->base_addr << " to "
                             << base_addr << ':' << offset + i->address << "."
                             << endl;
@@ -809,7 +821,7 @@ uint64_t Object::find_init_symbol()
     if (symbols.find(VFS_TOSTRING(VFS_SYMBOL_INIT)) == symbols.end())
         return 0;
 
-    return symbols[VFS_TOSTRING(VFS_SYMBOL_INIT)].address + 
+    return symbols[VFS_TOSTRING(VFS_SYMBOL_INIT)].address +
         offset + base_addr + data.vma_offset;
 }
 
@@ -820,7 +832,7 @@ uint64_t Object::find_start_symbol()
     if (symbols.find(VFS_TOSTRING(VFS_SYMBOL_START)) == symbols.end())
         return 0;
 
-    return symbols[VFS_TOSTRING(VFS_SYMBOL_START)].address + 
+    return symbols[VFS_TOSTRING(VFS_SYMBOL_START)].address +
         offset + base_addr + data.vma_offset;
 }
 
@@ -831,7 +843,7 @@ uint64_t Object::find_fini_symbol()
     if (symbols.find(VFS_TOSTRING(VFS_SYMBOL_FINI)) == symbols.end())
         return 0;
 
-    return symbols[VFS_TOSTRING(VFS_SYMBOL_FINI)].address + 
+    return symbols[VFS_TOSTRING(VFS_SYMBOL_FINI)].address +
         offset + base_addr + data.vma_offset;
 }
 
@@ -946,7 +958,7 @@ void ModuleTable::write_table(vector<Object> & i_objects)
         fwrite(data, sizeof(uint64_t), 1, iv_output);
 
         cout << std::hex << std::setfill('0');
-        cout << "\tAdded module " << object_name 
+        cout << "\tAdded module " << object_name
             << " page size 0x" << module_size << endl;
         cout << "\t\twith .text at 0x" << setw(16) << text_offset  << endl;
         cout << "\t\twith .data at 0x" << setw(16) << data_offset  << endl;
