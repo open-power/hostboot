@@ -2,6 +2,8 @@
 #include <stdlib.h>
 
 #include <arch/ppc.H>
+#include <util/locked/list.H>
+//#include <kernel/console.H>
 
 void* operator new(size_t s)
 {
@@ -65,16 +67,73 @@ extern "C" void __cxa_guard_release(volatile uint64_t* gv)
     return;
 }
 
-
-extern "C" int __cxa_atexit(void (*)(void*), void*, void*)
-{
-    return 0;
-}
-
 extern "C" void __cxa_pure_virtual()
 {
     // TODO: Add better code for invalid pure virtual call.
     while(1);
 }
 
+// ----------------------------------------------------------------------------
+//   Module exit support
+// ----------------------------------------------------------------------------
+
+
+// This one is just for the base object.  Each module has it's own giving
+// each module a unique value for __dso_handle.
 void*   __dso_handle = (void*) &__dso_handle;
+
+struct DtorEntry_t
+{
+    typedef void * key_type;
+    key_type    key;
+    void (*dtor)(void*);
+    void * arg;
+    void * dso_handle;
+
+    DtorEntry_t * next;
+    DtorEntry_t * prev;
+};
+
+Util::Locked::List<DtorEntry_t, DtorEntry_t::key_type> g_dtorRegistry;
+
+
+/**
+ * Call all the static destructors for the module identified by i_dso_handle
+ * @param[in] i_dso_handle  unique identifier for a module
+ * @post matching dtor functions called and then removed from the dtor registry
+ */
+void call_dtors(void * i_dso_handle)
+{
+    DtorEntry_t * entry = NULL;
+    // A module is never exited by different threads so 
+    // assume no locking needed here.
+    while( NULL != (entry = g_dtorRegistry.find(i_dso_handle)) )
+    {
+        g_dtorRegistry.erase(entry);  // remove from list
+        (*(entry->dtor))(entry->arg);
+        delete entry;
+    }
+}
+
+
+extern "C" int __cxa_atexit(void (*i_dtor)(void*),
+                            void* i_arg,
+                            void* i_dso_handle)
+{
+    // Base kernel code may try to call this before mem heap is 
+    // available - so don't add it.
+    // TODO - Only need dtors for extended image modules
+    if(i_dso_handle != __dso_handle)
+    {
+        // printk("Register dtor for %p\n",i_dso_handle);
+        DtorEntry_t * entry = new DtorEntry_t;
+        entry->key = i_dso_handle;
+        entry->dtor = i_dtor;
+        entry->arg = i_arg;
+        g_dtorRegistry.insert(entry);
+    }
+    return 0;
+}
+
+
+
