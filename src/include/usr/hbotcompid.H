@@ -60,7 +60,7 @@ const char SCOM_COMP_NAME[] = "scom";
 //@{
 const compId_t XSCOM_COMP_ID = 0x0400;
 const char XSCOM_COMP_NAME[] = "xscom";
-
+//@}
 /** @name INITSERVICE
  *  Initialization Service component
  */
@@ -83,6 +83,14 @@ const char PNOR_COMP_NAME[] = "pnor";
 //@{
 const compId_t I2C_COMP_ID = 0x0700;
 const char I2C_COMP_NAME[] = "i2c";
+//@}
+
+/** @name VFS
+ *  Virtual File System component
+ */
+//@{
+const compId_t VFS_COMP_ID = 0x0800;
+const char VFS_COMP_NAME[] = "vfs";
 //@}
 
 #endif

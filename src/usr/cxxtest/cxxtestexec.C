@@ -56,6 +56,8 @@ TRAC_INIT(&g_trac_cxxtest, "CXXTEST", 1024 );
 extern "C"
 void _start(void *io_pArgs)
 {
+    // TODO These modules will eventually all be in the extended binary.
+    // VfsSystemModule* vfsItr = (VfsSystemModule*) VFS_EXTENDED_MODULE_TABLE_ADDRESS; 
     VfsSystemModule* vfsItr     =   &VFS_MODULES[0];
     tid_t       tidrc           =   0;
     uint64_t    totalmodules    =   0;

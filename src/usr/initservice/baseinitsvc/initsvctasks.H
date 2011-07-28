@@ -61,18 +61,31 @@ const TaskInfo    g_taskinfolist[]   =   {
                 }
         },
 
+        /**
+         * @brief  Extended VFS module
+         */
+        {
+                "libvfs.so",                            // taskname
+                NULL,
+                {
+                        START_TASK,                     // start task
+                        BASE_IMAGE,                     // Base Module
+                        START_VFS_ERRL_ID,              // module id for error log
+                }
+        },
+
         //  -----   Extended Image  -----------------------------------------------------
 
         /**
          * @brief   extinitsvc, initializes extended module area
          */
         {
-                "libextinitsvc.so" ,                     // taskname
+                "libextinitsvc.so" ,                    // taskname
                 NULL,                                   // no pointer to fn
                 {
-                        START_TASK,                          // don't start
-                        EXT_IMAGE,                      // Ext Module
-                        START_EXTINITSVC_ERRL_ID,             // module id for errorlog
+                        START_TASK,                     // call start()
+                        BASE_IMAGE,                     // TODO EXT_IMAGE
+                        START_EXTINITSVC_ERRL_ID,       // module id for errorlog
                 }
         },
 

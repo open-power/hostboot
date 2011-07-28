@@ -3,6 +3,7 @@
 #include <sys/msg.h>
 #include <sys/vfs.h>
 #include <sys/task.h>
+#include <sys/sync.h>
 
 #include <util/locked/list.H>
 #include <kernel/console.H>  // TODO : Remove this.
@@ -11,8 +12,17 @@ const char* VFS_ROOT = "/";
 const char* VFS_ROOT_BIN = "/bin/";
 const char* VFS_ROOT_DATA = "/data/";
 const char* VFS_ROOT_MSG = "/msg/";
+const char* VFS_MSG = "/vfs/";
 
 void vfs_module_init();
+
+/**
+ * Call the module start routine
+ * @param[in] i_module VfsSystemModule data for the module
+ * @param[in] i_param parameter to pass to task_create() for this module
+ * @return tid_t of started task | -1 if i_module is NULL | -2 if there is no start()
+ */
+tid_t vfs_exec(VfsSystemModule * i_module, void* i_param);
 
 struct VfsPath
 {
@@ -31,14 +41,16 @@ struct VfsEntry
     VfsEntry* prev;
 };
 
-void vfs_main(void* unused)
+void vfs_main(void* i_barrier)
 {
+    barrier_t * barrier = (barrier_t *)i_barrier;
     // Create message queue, register with kernel.
     msg_q_t vfsMsgQ = msg_q_create();
     msg_q_register(vfsMsgQ, VFS_ROOT);
 
     printk("done.\n");
-    // TODO... barrier with init.
+
+    barrier_wait(barrier);
 
     // Initalize modules.
     vfs_module_init();
@@ -81,28 +93,40 @@ void vfs_main(void* unused)
 		{
 		    printk("VFS: Got exec request of %s\n",
 		           (const char*)msg->data[0]);
-		    VfsSystemModule* module = &VFS_MODULES[0];
-		    tid_t child = -1;
-		    while ('\0' != module->module[0])
-		    {
-			if (0 == strcmp((const char*) msg->data[0],
-					module->module))
-			{
-			    if ( module->start == NULL)
-			    {
-			        //  module has no _start() routine,
-			        //  return child = -2
-			        child   =   -2;
-			        break;
-			    }
-			    child = task_create(module->start,
-					        (void*) msg->data[1]);
-			    break;
-			}
-                        module++;
-		    }
-		    msg->data[0] = child;
-		    msg_respond(vfsMsgQ, msg);
+
+		    VfsSystemModule* module =
+                        vfs_find_module(VFS_MODULES,
+                                        (const char *) msg->data[0]);
+
+		    tid_t child = vfs_exec(module,(void*) msg->data[1]);
+
+                    // child == -1 means module not found in base image so send
+                    // a message to VFS_MSG queue to look in the extended image
+                    // VFS_MSG queue will handle the msg_respond()
+                    if( child == -1 ) // forward msg to usr vfs
+                    {
+                        VfsEntry::key_type k;
+                        strcpy(k.key, VFS_MSG);
+                        VfsEntry* e = vfsContents.find(k);
+                        if(e != NULL)
+                        {
+                            msg_t* emsg = msg_allocate();
+                            emsg->type = msg->type;
+                            emsg->data[0] = (uint64_t) msg;
+                            emsg->data[1] = (uint64_t) vfsMsgQ;
+                            msg_send(e->msg_q, emsg); // send async msg
+                        }
+                        else  // Cant find VFS_MSG queue - not started yet
+                        {
+                            msg->data[0] =  child;
+                            msg_respond(vfsMsgQ, msg);
+                        }
+                    }
+                    else // send back child (or errno)
+                    {
+                        msg->data[0] = child;
+                        msg_respond(vfsMsgQ, msg);
+                    }
 		}
 		break;
 
@@ -112,3 +136,25 @@ void vfs_main(void* unused)
 	}
     }   // end while(1)
 }
+
+// ----------------------------------------------------------------------------
+
+tid_t vfs_exec(VfsSystemModule * i_module, void* i_param)
+{
+    tid_t child = -1;
+    if(i_module != NULL)
+    {
+        if (i_module->start == NULL)
+        {
+            child = -2;  // module has no start() routine
+        }
+        else
+        {
+            child = task_create(i_module->start, i_param);
+        }
+    }
+    return child;
+}
+  
+
+

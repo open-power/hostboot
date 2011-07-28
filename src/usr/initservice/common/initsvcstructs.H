@@ -43,21 +43,25 @@ namespace   INITSERVICE
 /**
  * @enum    TaskType
  *  - NONE          ==  placeholder, no task
- *  - START_TASK   ==   task with _start() function entry point
+ *  - INIT_TASK     ==  load and initialize task, but task has no _start()
+ *                      (extended image only)
+ *  - START_TASK    ==  BASE_IMAGE: call _start() function entry point
+ *                      EXT_IMAGE: call _init(), then _start()
  *  - START_FN      ==  task with function pointer entry point
  *  - BARRIER       ==  set barrier for next N tasks.
- *  - STOP_TASK     ==  Execute the destructor on the task in extended image.
- *                      ( not implemented yet)
+ *  - UNINIT_TASK   ==  call _fini() to call static destructor(s) on the task.
+ *                      (extended image only)
  *  - END_TASK_LIST ==  last entry in the task list.
  */
 enum    TaskType
 {
     UNDEFINED_TT    =   0,
     NONE,
+    INIT_TASK,
     START_TASK,
     START_FN,
     BARRIER,
-    STOP_TASK,
+    UNINIT_TASK,
     END_TASK_LIST,
 };
 

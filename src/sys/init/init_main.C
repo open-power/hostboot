@@ -15,16 +15,15 @@ void vfs_main(void*);
 void init_main(void* unused)
 {
     tid_t   tidrc   =   0;
+    barrier_t l_barrier;
+    barrier_init(&l_barrier,2);
 
     printk("Starting init!\n");
 
     printk("Bringing up VFS...");
-    task_create( &vfs_main, NULL );
+    task_create( &vfs_main, &l_barrier );
 
-    // TODO... add a barrier to ensure VFS is fully up.
-    while (NULL == _syscall0(Systemcalls::MSGQ_RESOLVE_ROOT))
-        task_yield();
-
+    barrier_wait(&l_barrier);
 
     //  run initialization service to start up everything else.
     printk("init_main: Starting Initialization Service...\n");

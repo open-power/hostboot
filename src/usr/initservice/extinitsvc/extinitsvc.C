@@ -24,7 +24,7 @@
  */
 
 #include <kernel/console.H>
-#include <sys/vfs.h>
+#include <vfs/vfs.H>
 #include <sys/task.h>
 #include <sys/sync.h>
 #include <sys/misc.h>
@@ -132,7 +132,15 @@ void ExtInitSvc::init( void *i_ptr )
                     ptask->taskname,
                     strlen(ptask->taskname)    );
             break;
-        case    START_TASK:
+        case    INIT_TASK:
+            TRACDBIN( g_trac_initsvc,
+                    "task_type==INIT_TASK : ",
+                    ptask->taskname,
+                    strlen(ptask->taskname) );
+            errl     = VFS::module_load( ptask->taskname );
+            break;
+
+        case    START_TASK:   //  call _init(), _start(), stay resident
             TRACDBIN( g_trac_initsvc,
                     "task_type=START_TASK : ",
                     ptask->taskname,
@@ -140,6 +148,7 @@ void ExtInitSvc::init( void *i_ptr )
             errl    =   InitService::getTheInstance().startTask(    ptask,
                                                                     &args );
             break;
+
         case    START_FN:
             TRACDCOMP( g_trac_initsvc,
                     "task_type==START_FN : %p",
@@ -152,6 +161,14 @@ void ExtInitSvc::init( void *i_ptr )
             TRACDCOMP( g_trac_initsvc,
                     "task_type==BARRIER" );
             // $$TODO
+            break;
+
+        case    UNINIT_TASK:
+            TRACDBIN( g_trac_initsvc,
+                    "task_type=UNINIT_TASK : ",
+                    ptask->taskname,
+                    strlen(ptask->taskname)    );
+            errl    = VFS::module_unload( ptask->taskname ); 
             break;
 
         default:

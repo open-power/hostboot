@@ -2,6 +2,7 @@
 #define __SYS_MM_H
 
 #include <stdint.h>
+#include <limits.h>
 #include <sys/msg.h>
 
 #ifdef __cplusplus
@@ -23,5 +24,14 @@ int mm_alloc_block(msg_q_t mq,void* va,uint64_t size);
 #ifdef __cplusplus
 }
 #endif
+
+/** @fs mm_icache_invalidate()
+ *  @brief Invalidate the ICACHE for the given memory
+ *
+ *  @param[in] i_addr - Destination address
+ *  @param[in] i_cpu_word_count - number of CPU_WORDs (uint64_t)
+ */
+void mm_icache_invalidate(void * i_addr, size_t i_cpu_word_count);
+
 
 #endif

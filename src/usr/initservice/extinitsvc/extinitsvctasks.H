@@ -30,6 +30,7 @@
 namespace   INITSERVICE
 {
 
+    // TODO all these will eventuall be in BASE_IMAGE instead of BASE_IMAGE
 
 const   uint64_t MAX_EXT_TASKS   =   25;
 
@@ -45,7 +46,7 @@ const TaskInfo g_exttaskinfolist[]   =   {
                 NULL,                                       // no pointer to fn
                 {
                         START_TASK,                         // task type
-                        EXT_IMAGE,                          // Extended Module
+                        BASE_IMAGE,                         // Extended Module
                         START_TARGETING_ERRL_ID,            // module id
                 }
         },
@@ -58,7 +59,7 @@ const TaskInfo g_exttaskinfolist[]   =   {
                  NULL,                                       // no pointer to fn
                  {
                          START_TASK,                         // task type
-                         EXT_IMAGE,                          // Extended Module
+                         BASE_IMAGE,                          // Extended Module
                          EXECUTE_ISTEPS_ERRL_ID,             // module id
                  }
          },
@@ -89,7 +90,7 @@ const   TaskInfo    CXXTEST_TASK    =   {
                 NULL,                                       // no pointer to fn
                 {
                         START_TASK,                         // task type
-                        EXT_IMAGE,                          // Extended Module
+                        BASE_IMAGE,                          // Extended Module
                         START_CXXTEST_ERRL_ID,              // module id
                 }
         };

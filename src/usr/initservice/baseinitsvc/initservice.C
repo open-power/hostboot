@@ -25,6 +25,7 @@
 
 #include <kernel/console.H>
 #include <sys/vfs.h>
+#include <vfs/vfs.H>
 #include <sys/task.h>
 #include <trace/interface.H>
 #include <errl/errlentry.H>
@@ -77,54 +78,66 @@ errlHndl_t  InitService::startTask( const TaskInfo      *i_ptask,
 
     assert(i_ptask->taskflags.task_type == START_TASK);
 
-    tidrc   =   task_exec( i_ptask->taskname, io_pargs );   // launch the child
-    if ( static_cast<int16_t>(tidrc) < 0 )
+    // Base modules have already been loaded and initialized,
+    // extended modules have not.
+    if(i_ptask->taskflags.module_type == EXT_IMAGE)
     {
-        // task failed to launch, post an errorlog and dump some trace
-        /*@     errorlog tag
-         *  @errortype      ERRL_SEV_CRITICAL_SYS_TERM
-         *  @moduleid       see task list
-         *  @reasoncode     START_TASK_FAILED
-         *  @userdata1      task id or task return code
-         *  @userdata2      0
-         *
-         *  @devdesc        Initialization Service failed to start a task.
-         *                  The module id will identify the task.
-         *
-         */
-        lo_errl = new ERRORLOG::ErrlEntry(
-                ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,   //  severity
-                i_ptask->taskflags.module_id,            //  moduleid
-                INITSERVICE::START_TASK_FAILED,         //  reason Code
-                tidrc,                                  //  user1 = tidrc
-                0
-        );
-        TRACDBIN( g_trac_initsvc,
-                "ERROR starting task:",
-                i_ptask->taskname,
-                strlen(i_ptask->taskname) );
-        TRACDCOMP( g_trac_initsvc,
-                "tidrc=%d, errlog p = %p" ,
-                (int16_t)tidrc, lo_errl );
-
-    }  // endif tidrc
-    else
-    {
-        // task launched OK.
-        TRACDBIN( g_trac_initsvc,
-                "Task finished OK :",
-                i_ptask->taskname,
-                strlen(i_ptask->taskname) );
-        TRACDCOMP( g_trac_initsvc,
-                "task number %d,  errlog p = %p",
-                tidrc, lo_errl );
-
-        if ( io_pargs )
-        {
-            io_pargs->waitParentSync();                      // sync up childtask
-        }
-
+        // load module and call _init()
+        lo_errl = VFS::module_load( i_ptask->taskname );
     }
+
+    if( !lo_errl)
+    {
+        tidrc   =   task_exec( i_ptask->taskname, io_pargs );   // launch the child
+
+        if ( static_cast<int16_t>(tidrc) < 0 )
+        {
+            // task failed to launch, post an errorlog and dump some trace
+            /*@     errorlog tag
+             *  @errortype      ERRL_SEV_CRITICAL_SYS_TERM
+             *  @moduleid       see task list
+             *  @reasoncode     START_TASK_FAILED
+             *  @userdata1      task id or task return code
+             *  @userdata2      0
+             *
+             *  @devdesc        Initialization Service failed to start a task.
+             *                  The module id will identify the task.
+             *
+             */
+            lo_errl = new ERRORLOG::ErrlEntry(
+                                              ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,   //  severity
+                                              i_ptask->taskflags.module_id,            //  moduleid
+                                              INITSERVICE::START_TASK_FAILED,         //  reason Code
+                                              tidrc,                                  //  user1 = tidrc
+                                              0
+                                             );
+            TRACDBIN( g_trac_initsvc,
+                      "ERROR starting task:",
+                      i_ptask->taskname,
+                      strlen(i_ptask->taskname) );
+            TRACDCOMP( g_trac_initsvc,
+                       "tidrc=%d, errlog p = %p" ,
+                       (int16_t)tidrc, lo_errl );
+
+        }  // endif tidrc
+        else
+        {
+            // task launched OK.
+            TRACDBIN( g_trac_initsvc,
+                      "Task finished OK :",
+                      i_ptask->taskname,
+                      strlen(i_ptask->taskname) );
+            TRACDCOMP( g_trac_initsvc,
+                       "task number %d,  errlog p = %p",
+                       tidrc, lo_errl );
+
+            if ( io_pargs )
+            {
+                io_pargs->waitParentSync();                      // sync up childtask
+            }
+        }
+    }
+    // else module load failed. have error log
 
     return lo_errl;
 }
@@ -315,6 +328,15 @@ void    InitService::init( void *i_ptr )
                     "task_type==BARRIER" );
             // $$TODO
             break;
+
+        case    UNINIT_TASK:
+            TRACDBIN( g_trac_initsvc,
+                    "task_type=UNINIT_TASK : ",
+                    ptask->taskname,
+                    strlen(ptask->taskname)    );
+            errl    = VFS::module_unload( ptask->taskname ); 
+            break;
+
         default:
             TRACDCOMP( g_trac_initsvc,
                     "Invalid task_type %d: ",

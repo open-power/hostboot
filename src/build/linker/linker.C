@@ -23,7 +23,9 @@
 #include <stdexcept>
 #include <sstream>
 
+#define LINKER_C
 #include "../../include/sys/vfs.h"
+#undef LINKER_C
 
 using std::cout;
 using std::cerr;
