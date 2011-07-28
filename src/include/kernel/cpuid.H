@@ -3,27 +3,10 @@
 
 #include <stdint.h>
 #include <arch/ppc.H>
+#include <sys/misc.h>
 
 namespace CpuID
 {
-    /** @enum ProcessorCoreType
-     *  @brief Enumeration of the different supported processor cores.
-     */
-    enum ProcessorCoreType
-    {
-        /** Base Power7 */
-        POWER7,
-        /** Power7+ */
-        POWER7_PLUS,
-
-        /** Power8 "Salerno" (low-end) core */
-        POWER8_SALERNO,
-        /** Power8 "Venice" (high-end) core */
-        POWER8_VENICE,
-
-        UNKNOWN,
-    };
-
     /** @fn getCpuType()
      *  @brief Decode the processor type from the PVR register.
      *

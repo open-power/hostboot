@@ -26,13 +26,13 @@ void BaseSegment::_init()
     uint64_t iv_baseBlockSize = 0;
     switch (CpuID::getCpuType())
     {
-        case CpuID::POWER7:
-        case CpuID::POWER7_PLUS:
-        case CpuID::POWER8_VENICE:
+        case CORE_POWER7:
+        case CORE_POWER7_PLUS:
+        case CORE_POWER8_VENICE:
             iv_baseBlockSize = VmmManager::EIGHT_MEG;
             break;
 
-        case CpuID::POWER8_SALERNO:
+        case CORE_POWER8_SALERNO:
         default:
             iv_baseBlockSize = VmmManager::THREE_MEG;
             break;

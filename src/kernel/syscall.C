@@ -9,13 +9,14 @@
 #include <kernel/msg.H>
 #include <kernel/timemgr.H>
 #include <kernel/futexmgr.H>
+#include <kernel/cpuid.H>
 
 extern "C"
 void kernel_execute_decrementer()
 {
     cpu_t* c = CpuManager::getCurrentCPU();
     Scheduler* s = c->scheduler;
-    TimeManager::checkReleaseTasks(s);        
+    TimeManager::checkReleaseTasks(s);
     s->returnRunnable();
 
     if (CpuManager::isShutdownRequested())
@@ -60,6 +61,8 @@ namespace Systemcalls
     void FutexWait(task_t *t);
     void FutexWake(task_t *t);
     void Shutdown(task_t *t);
+    void CpuCoreType(task_t *t);
+    void CpuDDLevel(task_t *t);
 
     syscall syscalls[] =
 	{
@@ -86,6 +89,9 @@ namespace Systemcalls
             &FutexWake,
 
             &Shutdown,
+
+            &CpuCoreType,
+            &CpuDDLevel,
 	};
 };
 
@@ -131,7 +137,7 @@ namespace Systemcalls
 
     void TaskStart(task_t* t)
     {
-	task_t* newTask = 
+	task_t* newTask =
 	    TaskManager::createTask((TaskManager::task_fn_t)TASK_GETARG0(t),
 				    (void*)TASK_GETARG1(t));
 	newTask->cpu = t->cpu;
@@ -144,7 +150,7 @@ namespace Systemcalls
     {
 	// Make sure task pointers are updated before we delete this task.
 	t->cpu->scheduler->setNextRunnable();
-	
+
 	// TODO: Deal with join.
 
 	// Clean up task memory.
@@ -185,7 +191,7 @@ namespace Systemcalls
 	m->__reserved__async = 0; // set to async msg.
 
 	mq->lock.lock();
-	
+
 	// Get waiting (server) task.
 	task_t* waiter = mq->waiting.remove();
 	if (NULL == waiter) // None found, add to 'messages' queue.
@@ -200,7 +206,7 @@ namespace Systemcalls
 	    TASK_SETRTN(waiter, (uint64_t) m);
 	    waiter->cpu->scheduler->addTask(waiter);
 	}
-	
+
 	mq->lock.unlock();
 	TASK_SETRTN(t, 0);
     }
@@ -210,7 +216,7 @@ namespace Systemcalls
 	MessageQueue* mq = (MessageQueue*) TASK_GETARG0(t);
 	msg_t* m = (msg_t*) TASK_GETARG1(t);
 	m->__reserved__async = 1; // set to sync msg.
-	
+
 	mq->lock.lock();
 	MessagePending* mp = new MessagePending();
 	mp->key = m;
@@ -222,7 +228,7 @@ namespace Systemcalls
 	{
 	    mq->messages.insert(mp);
 	    // Choose next thread to execute, this one is delayed.
-	    t->cpu->scheduler->setNextRunnable();	    
+	    t->cpu->scheduler->setNextRunnable();
 	}
 	else // Context switch to waiter.
 	{
@@ -239,7 +245,7 @@ namespace Systemcalls
     {
     	MessageQueue* mq = (MessageQueue*) TASK_GETARG0(t);
 	msg_t* m = (msg_t*) TASK_GETARG1(t);
-	
+
 	mq->lock.lock();
 	MessagePending* mp = mq->responses.find(m);
 	if (NULL != mp)
@@ -248,13 +254,13 @@ namespace Systemcalls
 
 	    mq->responses.erase(mp);
 	    delete mp;
-	    
+
 	    waiter->cpu = t->cpu;
 	    TaskManager::setCurrentTask(waiter);
             TASK_SETRTN(waiter,0);
 
 	    TASK_SETRTN(t,0);
-	    t->cpu->scheduler->addTask(t);            
+	    t->cpu->scheduler->addTask(t);
 	}
 	else
 	{
@@ -269,7 +275,7 @@ namespace Systemcalls
 
 	mq->lock.lock();
 	MessagePending* mp = mq->messages.remove();
-	
+
 	if (NULL == mp)
 	{
 	    mq->waiting.insert(t);
@@ -286,7 +292,7 @@ namespace Systemcalls
 	}
 	mq->lock.unlock();
     }
-    
+
     void MmioMap(task_t* t)
     {
 	void* ra = (void*)TASK_GETARG0(t);
@@ -354,6 +360,18 @@ namespace Systemcalls
         uint64_t status = static_cast<uint64_t>(TASK_GETARG0(t));
         CpuManager::requestShutdown(status);
         TASK_SETRTN(t, 0);
+    }
+
+    /** Read CPU Core type using CpuID interfaces. */
+    void CpuCoreType(task_t *t)
+    {
+        TASK_SETRTN(t, CpuID::getCpuType());
+    }
+
+    /** Read CPU DD level using CpuID interfaces. */
+    void CpuDDLevel(task_t *t)
+    {
+        TASK_SETRTN(t, CpuID::getCpuDD());
     }
 
 };

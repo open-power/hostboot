@@ -23,7 +23,7 @@ namespace Systemcalls
 	TASK_START,
             /** task_end() */
 	TASK_END,
-            
+
             /** msgq_create() */
 	MSGQ_CREATE,
             /** msgq_destroy() */
@@ -32,7 +32,7 @@ namespace Systemcalls
 	MSGQ_REGISTER_ROOT,
             /** VFS internal */
 	MSGQ_RESOLVE_ROOT,
-            
+
             /** msg_send() */
 	MSG_SEND,
             /** msg_sendrecv() */
@@ -58,6 +58,11 @@ namespace Systemcalls
 
             /** shutdown() */
         MISC_SHUTDOWN,
+
+            /** cpu_core_type() */
+        MISC_CPUCORETYPE,
+            /** cpu_dd_level() */
+        MISC_CPUDDLEVEL,
 
 	SYSCALL_MAX
     };

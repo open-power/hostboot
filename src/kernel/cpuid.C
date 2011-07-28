@@ -21,16 +21,16 @@ namespace CpuID
         switch(l_pvr & 0xFFFF0000)
         {
             case 0x003F0000:
-                return POWER7;
+                return CORE_POWER7;
 
             case 0x004A0000:
-                return POWER7_PLUS;
+                return CORE_POWER7_PLUS;
 
             case 0x004B0000:
-                return POWER8_VENICE;
+                return CORE_POWER8_VENICE;
 
             default:
-                return UNKNOWN;
+                return CORE_UNKNOWN;
         }
     }
 

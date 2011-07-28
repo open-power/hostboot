@@ -39,17 +39,17 @@ void CpuManager::init()
     size_t threads = -1;
     switch (CpuID::getCpuType())
     {
-        case CpuID::POWER7:
-        case CpuID::POWER7_PLUS:
+        case CORE_POWER7:
+        case CORE_POWER7_PLUS:
             threads = 4;
             break;
 
-        case CpuID::POWER8_VENICE:
-        case CpuID::POWER8_SALERNO:
+        case CORE_POWER8_VENICE:
+        case CORE_POWER8_SALERNO:
             threads = 8;
             break;
 
-        case CpuID::UNKNOWN:
+        case CORE_UNKNOWN:
         default:
             kassert(false);
             break;
