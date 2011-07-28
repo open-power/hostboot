@@ -1,7 +1,7 @@
 SUBDIRS = src.d
 ROOTPATH = .
 
-EXTRA_PARTS = cscope
+EXTRA_PARTS = cscope ctags
 
 include ./config.mk
 

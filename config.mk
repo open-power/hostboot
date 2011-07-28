@@ -234,6 +234,11 @@ cscope: code_pass
 	    find ../../ -name '*.[CHchS]' -type f -fprint cscope.files; \
 	    cscope -bqk)
 
+ctags: code_pass
+	mkdir -p ${ROOTPATH}/obj/cscope
+	(cd ${ROOTPATH}/obj/cscope ; rm -f tags ; \
+	    ctags --recurse=yes --fields=+S ../../src)
+
 ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(MAKECMDGOALS),gen_pass)
 ifneq ($(MAKECMDGOALS),GEN_PASS)
