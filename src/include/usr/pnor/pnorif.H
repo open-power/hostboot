@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <builtins.h>
+#include <errl/errlentry.H>
 
 namespace PNOR
 {
@@ -14,7 +15,7 @@ enum SectionId
 {
     TOC,            /**< Table of Contents */
     GLOBAL_DATA,    /**< Global Data */
-    SBE_IPL,        /**< Self-Boot Enginer IPL image */
+    SBE_IPL,        /**< Self-Boot Engine IPL image */
     HB_BASE_CODE,   /**< Hostboot Base Image */
     HB_DATA,        /**< Hostboot Data */
     HB_ERRLOGS,     /**< Hostboot Error log Repository */
@@ -33,26 +34,29 @@ enum SectionId
 };
 
 /**
+ * Select a side of flash to access
+ */
+enum SideSelect
+{
+    SIDE_A,   /**< A-side of flash */
+    SIDE_B,   /**< B-side of flash */
+    SIDELESS, /**< Sideless data */
+};
+
+/**
  * Information about a section of PNOR
  */
 struct SectionInfo_t
 {
     SectionId id;  /**< Identifier for this section */
+    SideSelect side;  /**< Identifier for the side of flash */
     const char* name;  /**< Name of the section */
+
     uint64_t vaddr;  /**< Virtual address for the start of the section */
     uint64_t size;  /**< Actual size of content in bytes */
     bool eccProtected;  /**< Section is ECC protected */
 };
 
-/**
- * Select a side of flash to access
- */
-enum SideSelect
-{
-    SIDE_A    = 0xA, /**< A-side of flash */
-    SIDE_B    = 0xB, /**< B-side of flash */
-    SIDELESS  = 0xF, /**< Sideless data */
-};
 
 
 
@@ -63,11 +67,11 @@ enum SideSelect
  * @param[in] i_side  Side select
  * @param[out] o_info  Location and size information
  *
- * @return size_t  Offset of section in bytes
+ * @return errlHndl_t  Error log if request was invalid
  */
-void getSectionInfo( SectionId i_section,
-                     SideSelect i_side,
-                     SectionInfo_t& o_info );
+errlHndl_t getSectionInfo( SectionId i_section,
+                           SideSelect i_side,
+                           SectionInfo_t& o_info );
 
 
 }

@@ -42,6 +42,7 @@ iv_user2(i_user2),
 iv_sections(NULL)
 {
     iv_logId = theErrlManager::instance().getUniqueErrId();
+    TRACFCOMP(ERRORLOG::g_trac_errl, "Error %d created : modid=%X, rc=%X", iv_logId, iv_modId, iv_reasonCode);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -76,6 +76,7 @@ namespace DeviceFW
         if(((targets.flag) && (i_targetType != WILDCARD)) ||
            ((!targets.flag) && (i_targetType == WILDCARD)))
         {
+	    TRACFCOMP(g_traceBuffer, "Invalid registration type was given to register a device : i_opType=%d, i_accType=%d, i_targetType=%d", i_opType, i_accType, i_targetType );
             /*@ 
              *  @errortype
              *  @moduleid       DEVFW_MOD_ASSOCIATOR
@@ -211,6 +212,7 @@ namespace DeviceFW
         // Call function if one was found, create error otherwise.
         if (NULL == l_devRoute)
         {
+	    TRACFCOMP(g_traceBuffer, "A device driver operation was attempted for which no driver has been registered : i_opType=%d, i_accessType=%d, l_devType=%d", i_opType, i_accessType, l_devType );
             /*@
              *  @errortype
              *  @moduleid       DEVFW_MOD_ASSOCIATOR

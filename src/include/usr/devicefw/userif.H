@@ -42,13 +42,13 @@ namespace DeviceFW
     /**
      * Construct a PNOR DD address
      *    address = 0000_0000_0000_000c_aaaa_aaaa_aaaa_aaaa
-     *      c=side, a=address
-     * @param[in] chip  Chip Select
-     * @param[in] addr  Offset (from zero) into selected flash chip
+     *      c=chip, a=address
+     * @param[in] i_chip  Chip Select
+     * @param[in] i_addr  Offset (from zero) into selected flash chip
      * @return  64-bit address to pass into PNOR device commands
      */
-     #define DEVICE_PNOR_ADDRESS( chip, addr )  \
-        DeviceFW::PNOR, ((static_cast<uint64_t>(chip)<<32)|static_cast<uint64_t>(addr))
+     #define DEVICE_PNOR_ADDRESS( i_chip, i_addr )  \
+        DeviceFW::PNOR, ((static_cast<uint64_t>(i_chip)<<32)|static_cast<uint64_t>(i_addr))
     
 
     /** 

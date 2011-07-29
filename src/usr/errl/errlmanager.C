@@ -51,9 +51,12 @@ void ErrlManager::commitErrLog(errlHndl_t& io_err)
     }
     else
     {
+        TRACFCOMP( g_trac_errl, "commitErrLog()> Reasoncode=%X, Id=%d", io_err->reasonCode(), io_err->logId() );
+
+	//@fixme - an id is already assigned in the constructor, which one do we want?
         // Assign a unique error ID to the committed log
-        uint32_t l_errId = getUniqueErrId();
-        io_err->setLogId(l_errId);
+        //uint32_t l_errId = getUniqueErrId();
+        //io_err->setLogId(l_errId);
 
         // @todo:
         //  - Flatten error into PNOR

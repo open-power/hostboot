@@ -66,32 +66,32 @@ namespace Systemcalls
 
     syscall syscalls[] =
 	{
-	    &TaskYield,
-	    &TaskStart,
-	    &TaskEnd,
+	    &TaskYield,  // TASK_YIELD
+	    &TaskStart,  // TASK_START
+	    &TaskEnd,  // TASK_END
 
-	    &MsgQCreate,
-	    &MsgQDestroy,
-	    &MsgQRegisterRoot,
-	    &MsgQResolveRoot,
+	    &MsgQCreate,  // MSGQ_CREATE
+	    &MsgQDestroy,  // MSGQ_DESTROY
+	    &MsgQRegisterRoot,  // MSGQ_REGISTER_ROOT
+	    &MsgQResolveRoot,  // MSGQ_RESOLVE_ROOT
 
-	    &MsgSend,
-	    &MsgSendRecv,
-	    &MsgRespond,
-	    &MsgWait,
+	    &MsgSend,  // MSG_SEND
+	    &MsgSendRecv,  // MSG_SENDRECV
+	    &MsgRespond,  // MSG_RESPOND
+	    &MsgWait,  // MSG_WAIT
 
-	    &MmioMap,
-	    &MmioUnmap,
+	    &MmioMap,  // MMIO_MAP
+	    &MmioUnmap,  // MMIO_UNMAP
 
-	    &TimeNanosleep,
+	    &TimeNanosleep,  // TIME_NANOSLEEP
 
-            &FutexWait,
-            &FutexWake,
+            &FutexWait,  // FUTEX_WAIT
+            &FutexWake,  // FUTEX_WAKE
 
-            &Shutdown,
+            &Shutdown,  // MISC_SHUTDOWN
 
-            &CpuCoreType,
-            &CpuDDLevel,
+            &CpuCoreType,  // MISC_CPUCORETYPE
+            &CpuDDLevel,  // MISC_CPUDDLEVEL
 	};
 };
 

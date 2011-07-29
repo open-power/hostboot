@@ -5,7 +5,8 @@
 #include <sys/msg.h>
 #include <stdint.h>
 #include <builtins.h>
-class Block;
+#include <errl/errlentry.H>
+#include <limits.h>
 
 /**
  * PNOR Resource Provider
@@ -27,11 +28,11 @@ class PnorRP
      * @param[in] i_side  Side select
      * @param[out] o_info  Location and size information
      *
-     * @return size_t  Offset of section in bytes
+     * @return errlHndl_t  Error log if request was invalid
      */
-    void getSectionInfo( PNOR::SectionId i_section,
-                         PNOR::SideSelect i_side,
-                         PNOR::SectionInfo_t& o_info );
+    errlHndl_t getSectionInfo( PNOR::SectionId i_section,
+                               PNOR::SideSelect i_side,
+                               PNOR::SectionInfo_t& o_info );
 
   protected:
     /**
@@ -48,21 +49,68 @@ class PnorRP
   private:
 
     /**
+     * PNOR Constants
+     */
+    enum
+    {
+        BASE_VADDR = 0x80000000, /**< 2GB */
+
+        NUM_SIDES = 3,  /**< A, B, Sideless */
+
+        SIDE_SIZE = 0x2000000, /**< Allocate 32 MB of VA per side */
+
+        SIDEA_VADDR = BASE_VADDR,  /**< Base address of Side A */
+        SIDEB_VADDR = SIDEA_VADDR + SIDE_SIZE,  /**< Base address of Side B */
+        SIDELESS_VADDR = SIDEA_VADDR + SIDE_SIZE*2,  /**< Base address of Sideless data */
+
+        LAST_VADDR = BASE_VADDR + SIDE_SIZE*NUM_SIDES,  /**< End of our VA range */
+
+        /** Real number of bytes required to read 1 logical page */
+        PAGESIZE_PLUS_ECC = PAGESIZE * (9/8),  // 8 bytes of data + 1 byte of ECC 
+    };
+
+    /**
      * Table of Contents entry
+     *   This matches the PNOR binary layout  @todo this will change
      */
     struct TOCEntry_t
     {
         char name[8]; /**< Null terminated ascii string */
-        uint64_t offset;  /**< Offset to region from zero */
-        uint64_t size;  /**< Size of region in bytes */
+        uint64_t offset;  /**< Offset to region from zero (relative to chip) */
+        uint64_t size;  /**< Size of region in bytes (with or without ECC?) */
         uint64_t size_act;  /**< Actual size of content in bytes */
         char fuse_tbd[96];  /**< Remainder is TBD depending on FUSE requirements */
+        //@todo - need a chip select here I think?
+    };
+
+    /**
+     * Mode that PNOR controller is using
+     */
+    enum ControllerMode
+    {
+        MMRD_MODE,  /**< MMRD - Read-Only, ECC is hidden by hardware */
+        PMRW_MODE,  /**< PMRW - Write-able mode, ECC must be handled on reads/writes */
+    };
+
+    /**
+     * Internal information to deal with the sections of PNOR
+     */
+    struct SectionData_t {
+        PNOR::SectionId id;  /**< Identifier for this section */
+        PNOR::SideSelect side;  /** Side Select */
+
+        uint64_t chip;  /**< Chip Select */
+        uint64_t mmrdAddr;  /**< Address in MMRD mode (no ECC) */
+        uint64_t pmrwAddr;  /**< Address in PMRW mode (with ECC) */
+        uint64_t virtAddr;  /**< Virtual address for the start of the section */
+        uint64_t size;  /**< Actual size of content in bytes (not including ECC) */
+        bool eccProtected;  /**< Section is ECC protected */
     };
 
     /**
      * Cached copy of section data
      */
-    PNOR::SectionInfo_t iv_TOC[PNOR::NUM_SECTIONS+1];
+    SectionData_t iv_TOC[NUM_SIDES][PNOR::NUM_SECTIONS+1];
 
     /**
      * Pointer to the message queue where we receive messages
@@ -73,11 +121,6 @@ class PnorRP
      * Remember that we failed during initial startup
      */
     uint64_t iv_startupRC;
-
-    /**
-     * Memory Block associated with my PNOR memory space
-     */
-    Block* iv_block;
 
     /**
      * @brief Initialize the daemon, called by constructor
@@ -95,18 +138,20 @@ class PnorRP
     void waitForMessage();
 
     /**
-     * @brief  Retrieve 1 page of data from the PNOR device
+     * @brief  Retrieve 1 logical page of data from the PNOR device
      *
      * @param[in] i_offset  Offset into PNOR chip
      * @param[in] i_chip  Which PNOR chip
+     * @param[in] i_ecc  true=apply ECC after reading
      * @param[out] o_dest  Buffer to copy data into
      */
     void readFromDevice( uint64_t i_offset,
                          uint64_t i_chip,
+                         bool i_ecc,
                          void* o_dest );
 
     /**
-     * @brief  Write 1 page of data to the PNOR device
+     * @brief  Write 1 logical page of data to the PNOR device
      *
      * @param[in] i_offset  Offset into PNOR chip
      * @param[in] i_chip  Which PNOR chip
@@ -122,12 +167,31 @@ class PnorRP
      * @brief  Convert a virtual address into the PNOR device address
      *
      * @param[in] i_vaddr  Virtual address of page
+     * @param[in] i_mode  PNOR Controller mode
      * @param[out] o_offset  Offset into PNOR chip
      * @param[out] o_chip  Which PNOR chip
+     * @param[out] o_ecc  true=data is ECC-protected
+     *
+     * @return Error if VA is bad
      */
-    void computeDeviceAddr( void* i_vaddr,
-                            uint64_t& o_offset,
-                            uint64_t& o_chip );
+    errlHndl_t computeDeviceAddr( void* i_vaddr,
+                                  ControllerMode i_mode,
+                                  uint64_t& o_offset,
+                                  uint64_t& o_chip,
+                                  bool& o_ecc );
+
+    /**
+     * @brief  Figure out which section a VA belongs to
+     *
+     * @param[in] i_vaddr  Virtual address of page
+     * @param[out] o_side  Which side of the flash 
+     * @param[out] o_id  Which section of PNOR
+     *
+     * @return Error if VA is bad
+     */
+    errlHndl_t computeSection( uint64_t i_vaddr,
+                               PNOR::SideSelect& o_side,
+                               PNOR::SectionId& o_id );
 
     /**
      * @brief  Apply ECC algorithm to data
@@ -139,13 +203,15 @@ class PnorRP
                    void* o_ecc );
 
     /**
-     * @brief  Retrieve the section Id based on the virtual address
+     * @brief  Apply ECC algorithm to data, assumes size of 1 page
      *
-     * @param[in] i_addr  Virtual address of page within section
+     * @param[in] i_orig  Original data that was read
+     * @param[in] o_data  Data after removing ECC
      *
-     * @return SectionId  Id of matching section, =INVALID_SECTION if no match
+     * @return Error if ECC is incorrect
      */
-    PNOR::SectionId sectionFromAddr( void* i_addr );
+    errlHndl_t stripECC( void* i_orig,
+                         void* o_data );
 
     /**
      * @brief  Returns true if the initial startup failed for some reason
@@ -156,6 +222,7 @@ class PnorRP
     {
         if( iv_startupRC )
         {
+            //@patrick : Weak consistency bug? Will need some sort of lwsync / isync coordinating reading / setting of iv_startupRC if the daemonized task could be setting this.
             o_rc = iv_startupRC;
             return true;
         }
@@ -165,6 +232,14 @@ class PnorRP
 
     // allow local helper function to call private methods
     friend void wait_for_message( void* unused );
+
+    // allow testcase to see inside
+    friend class PnorRpTest;
+
+    /**
+     * @brief Static instance function for testcase only
+     */
+    static PnorRP& getInstance();
 };
 
 

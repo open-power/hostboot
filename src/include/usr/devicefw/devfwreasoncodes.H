@@ -7,7 +7,7 @@ namespace DeviceFW
 {
     enum DevFwModuleId
     {
-        DEVFW_MOD_ASSOCIATOR    = 0x00,
+        DEVFW_MOD_ASSOCIATOR    = 0x01,
     };
 
     enum DevFwReasonCode
