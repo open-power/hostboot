@@ -26,19 +26,12 @@
 /**
  *  @file initservice.H
  *
+ *  Base image Initialization Service
  *      - Manage high-level host boot IPL flow
  *      - Perform can-continue processing
  *      - Perform automatic and manual Istep execution
  *      - Handle flow errors as appropriate.
  *
- */
-
-/**
- * High-level todo list
- *
- * @todo    SP3:    move startTask() and reportError() to private
- * @todo    SP3:    add (NULL) detection to printk
- * @@todo           Add more macros to trace, discuss with Andrew and Nick
  */
 
 /******************************************************************************/
@@ -53,7 +46,7 @@
 #include <initservice/initsvcreasoncodes.H>
 #include <initservice/taskargs.H>
 
-#include "../common/initsvcstructs.H"
+#include <initservice/initsvcstructs.H>
 
 namespace   INITSERVICE
 {
@@ -71,8 +64,9 @@ namespace   INITSERVICE
 /******************************************************************************/
 
 /**
- *  @class  InitService Singleton Class
+ *  @class  InitService
  *
+ *  Singleton Class
  *  This class is launched by _start() (see initservicetaskentry.C),
  *  which is launched by the kernel (init_main.C).
  *
@@ -83,6 +77,7 @@ class InitService
 {
 
 public:
+
 
     friend  class InitServiceTest;
 
@@ -97,18 +92,18 @@ public:
      *  @brief  Provide an entry function into the class, called from _start()
      *
      *  @param[in]  i_args    pointer to any arguments passed in from
-     *                      _start() and by extension the kernel,
-     *                      currently this is NULL .
+     *                        _start() and by extension the kernel,
+     *                        currently this is always NULL .
+     *
+     *  @return nothing
+     *
      */
     void            init( void *i_args);
 
-    /**
-     * @todo    InitServiceTest should be able to find protected functions.
-     */
-    // $$protected:
 
-    /**
-     * @brief   start a task using the taskname string in the TaskInfo struct.
+     /**
+     * @brief   Start a task using the taskname string in the TaskInfo struct.
+     *
      *          taskname string will be something like "libtargeting.so", which
      *          is the name of the compiled and linked targetting module.
      *          The module is expected to have implemented a extern "C"
@@ -122,9 +117,14 @@ public:
      *
      *
      *  @param[in]      i_ptask     pointer to a TaskInfo struct
-     *  @param[in]      io_pargs    pointer to a TaskArgs struct, or NULL
+     *  @param[in,out]  io_pargs    pointer to a TaskArgs struct, or NULL
+     *                              On input, TaskArgs struct will have
+     *                              command, returncode, and errlog fields
+     *                              cleared.  task can fill in these values
+     *                              on return.
      *
-     *  @return NULL if success, errorlog handle for failure
+     *  @return pointer to errorlog
+     *  @retval NULL if success, filled in errorlog handle for failure
      *
      *  @note   startTask() can also be used to launch an asynchronous task
      *          by calling it with i_pargs set to NULL.   This will disable
@@ -132,38 +132,31 @@ public:
      *
      */
     errlHndl_t     startTask(   const TaskInfo      *i_ptask,
-                                TaskArgs::TaskArgs  *i_pargs    ) const;
+                                TaskArgs::TaskArgs  *io_pargs    ) const;
 
     /**
-     * @brief   executeFn
-     *  Execute an function
+     * @brief   Execute an function
      *
      *  @param[in]      i_ptask -   pointer to an TaskInfo struct
      *  @param[in,out]  i_pargs -   pointer to a TaskArgs struct
+     *                              On input, TaskArgs struct will have
+     *                              command, returncode, and errlog fields
+     *                              cleared.  Task can fill in these values
+     *                              on return.
      *
-     *  @return errlHndl_t  handle, NULL if success, filled out errorlog
-     *                      if failure
+     *  @return pointer to errorlog
+     *  @retval NULL if success, filled out errorlog if failure
      */
     errlHndl_t executeFn(   const TaskInfo  *i_ptask,
                             TaskArgs        *i_pargs    ) const;
 
 
-
-    /**
-     * @brief   report Error to the system.
-     *
-     * @param[in]  io_rerrl - errlHndl_t pointer to a filled-out error entry
-     *                                 errorlog will be committed, errorlog
-     *                                 will be deleted, and pointer will be
-     *                                 set to NULL on exit
-     *
-     * @return  nothing
-     */
-    void           reportError( errlHndl_t  &io_rerrl) const;
-
-
     /**
      * @brief   set progress code for task.
+     *          This is supposed to make a system call to post the error to
+     *          SP and will also write a SCOM reg
+     *
+     * @TODO need progress code categories defined.
      *
      * @param[in]  i_progresscode - 64-bit progress code.
      *
@@ -172,6 +165,21 @@ public:
      */
     void           setProgressCode( uint64_t  i_progresscode ) const;
 
+
+    /**
+     * @brief   dispatch Task depending on what type of task it is,
+     *          etc.
+     *
+     * @param[in]       i_ptask  -  pointer to a TaskInfo struct, which should
+     *                              contain all the info to run the task.
+     * @param[in,out]   io_pargs -  pointer to a TaskArgs struct.  It is
+     *                              possible that this will not be used at all.
+     *
+     * @return  pointer to errlog
+     * @retval  returns NULL, or a pointer to a filled out errorlog
+     */
+    errlHndl_t  dispatchTask( const TaskInfo    *i_ptask,
+                              TaskArgs          *io_pargs ) const;
 
 
 protected:

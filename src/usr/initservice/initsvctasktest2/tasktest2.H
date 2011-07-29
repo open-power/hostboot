@@ -25,7 +25,9 @@
 #define __INITSVC_TASK_TEST_2_H
 
 /**
- *  @file initsvctasktest2.H
+ *  @file tasktest2.H
+ *
+ *  dummy file for use in initservice unit tests
  *
   */
 
@@ -51,7 +53,7 @@ namespace   INITSERVICE
 /******************************************************************************/
 
 /**
- *  @class  InitSvcTestTask2  Class
+ *  @class  InitSvcTestTask2
  *
  *  test module launched
  */

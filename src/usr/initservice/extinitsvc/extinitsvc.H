@@ -36,15 +36,15 @@
 /******************************************************************************/
 // Includes
 /******************************************************************************/
-#include <stdint.h>
-#include <util/singleton.H>
-#include <sys/vfs.h>            // VFS_MODULE_NAME_MAX
+#include    <stdint.h>
+#include    <util/singleton.H>
+#include    <sys/vfs.h>            // VFS_MODULE_NAME_MAX
 
-#include <errl/errlentry.H>
-#include <initservice/taskargs.H>
-#include <initservice/initsvcreasoncodes.H>
+#include    <errl/errlentry.H>
+#include    <initservice/taskargs.H>
+#include    <initservice/initsvcreasoncodes.H>
 
-#include "../baseinitsvc/initservice.H"
+#include    "../baseinitsvc/initservice.H"
 
 namespace   INITSERVICE
 {
@@ -73,8 +73,9 @@ enum ShutdownStatus
 /******************************************************************************/
 
 /**
- *  @class  ExtInitSvc Singleton Class
+ *  @class  ExtInitSvc
  *
+ *  Singleton Class
  *  This extended image module is launched by InitService
  *
  */
@@ -98,7 +99,6 @@ public:
      *  @param[in]  i_args    pointer to any arguments passed in from
      *                      _start() and by extension the kernel,
      *                      currently this is NULL .
-     *
      */
     void            init( void *i_args);
 

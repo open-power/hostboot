@@ -66,7 +66,7 @@ namespace   INITSERVICE
 {
 
 /**
- * @const   TASKARGS_UNDEFINED64
+ * @def   TASKARGS_UNDEFINED64
  *  iv_taskreturncode and iv_taskcommand are initialized to this value -
  *  if parent or child change them, it can be easily recognized
  *
@@ -112,6 +112,7 @@ public:
      * Currently there is no difference between parent and child
      * but this may change.
      *
+     * @return  none
      */
     void    waitParentSync();
 
@@ -124,6 +125,7 @@ public:
      * Currently there is no difference between parent and child
      * but this may change.
      *
+     * @return none
      */
     void    waitChildSync();
 
@@ -135,6 +137,7 @@ public:
      *
      * @param[in]   i_returncode;
      *
+     * @return none.
      */
     void    postReturnCode( const uint64_t i_returncode );
 
@@ -156,6 +159,8 @@ public:
      * Parent can pass commands and info to the child using this function
      *
      * @param[in]   i_command;
+     *
+     *  @return none
      */
     void    setCommand( const uint64_t  i_command );
 
@@ -165,7 +170,7 @@ public:
      *
      * Child can get commands from the parent using this function
      *
-     *@return   value of iv_taskcommand;
+     * @return   value of iv_taskcommand;
      *
      * @todo    might overload this later if we need to pass structs,
      *          buffers, etc.
@@ -182,6 +187,7 @@ public:
      *
      * @param[in]   i_errl;
      *
+     * @return   none
      */
     void    postErrorLog( errlHndl_t i_errl );
 
@@ -190,6 +196,11 @@ public:
      * @brief   getErrorLog
      *
      * Parent task can use this to get an errorlog from the child
+     *
+     * @note    This routine sets the iv_errl pointer to the errorlog to NULL
+     *          after returning it, so we do not end up with 2 copies of the
+     *          pointer.   The caller must commit or otherwise handle the
+     *          errorlog to avoid a memory leak.
      *
      * @return iv_errl
      *
@@ -202,6 +213,8 @@ public:
      *          - barrier is left alone,
      *          - if iv_errl is non zero, we commit it here just to avoid
      *              a memory leak.
+     *
+     * @return  none
      */
     void    clear();
 

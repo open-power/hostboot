@@ -1,7 +1,7 @@
 #  IBM_PROLOG_BEGIN_TAG
 #  This is an automatically generated prolog.
 #
-#  $Source: src/usr/initservice/makefile $
+#  $Source: src/usr/initservice/initsvctasktest2/makefile $
 #
 #  IBM CONFIDENTIAL
 #
@@ -20,15 +20,9 @@
 #  Origin: 30
 #
 #  IBM_PROLOG_END
+ROOTPATH = ../../../..
+MODULE = initsvctasktest2
 
-ROOTPATH = ../../..
-# MODULE = 
-
-# OBJS = 
-
-# NOTE:	initsvctasktest2 is a dummy module that is executed by 
-#		unit test 2 in the test directory.  Please do not rename.
-SUBDIRS = baseinitsvc.d	extinitsvc.d taskargs.d	istepdispatcher.d	\
-			test.d initsvctasktest2.d
+OBJS =  tasktest2.o           
 
 include ${ROOTPATH}/config.mk

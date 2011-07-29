@@ -125,8 +125,12 @@ void        TaskArgs::postErrorLog( errlHndl_t i_errl )
 
 errlHndl_t  TaskArgs::getErrorLog( )
 {
+    errlHndl_t  l_errl  = iv_errl;
 
-    return  iv_errl;
+    // null out iv_errl after returning it to someone.
+    iv_errl =   NULL;
+
+    return  l_errl;
 }
 
 
@@ -164,6 +168,7 @@ TaskArgs::~TaskArgs()
 {
     clear();
     barrier_destroy( &iv_sync_barrier );
+    // add an assert here to check if there is still an errorlog pending?
 }
 
 };  // namespace

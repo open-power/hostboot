@@ -20,6 +20,7 @@
 //  Origin: 30
 //
 //  IBM_PROLOG_END
+
 /**
  * @file    initsvcreasoncodes.H
  *
@@ -92,7 +93,10 @@ enum    InitServiceReasonCode
     INVALID_TASK_TYPE           =   INITSVC_COMP_ID | 0x02,
     START_FN_FAILED             =   INITSVC_COMP_ID | 0x03,
     NULL_FN_PTR                 =   INITSVC_COMP_ID | 0x04,
-
+    ISTEP_FAILED_NO_ERRLOG      =   INITSVC_COMP_ID | 0x05,
+    INITSVC_FAILED_NO_ERRLOG    =   INITSVC_COMP_ID | 0x06,
+    EXTINITSVC_FAILED_NO_ERRLOG =   INITSVC_COMP_ID | 0x07,
+    CXXTEST_FAILED_NO_ERRLOG    =   INITSVC_COMP_ID | 0x08,
 
 };
 

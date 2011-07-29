@@ -20,10 +20,11 @@
 #  Origin: 30
 #
 #  IBM_PROLOG_END
+
 ROOTPATH = ../../../..
 MODULE = istepdisp
 
-OBJS =  istepdispatcher.o           
+OBJS =  istepdispatcher.o splesscommand.o splessstatus.o     
 
 ## SUBDIRS = test.d
 

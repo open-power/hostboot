@@ -20,10 +20,13 @@
 //  Origin: 30
 //
 //  IBM_PROLOG_END
+
 /**
- *  @file isteps.C
+ *  @file istep1.C
  *
- *  Collection of IStep modules
+ *  test ISTep file
+ *
+ *  @note, you must update isteps.h if you change this one
  *
  */
 
@@ -43,7 +46,8 @@
 #include    <initservice/taskargs.H>       //  task args
 
 //  pull in stuff to run HW procedure - from Andrew's hwpf testcase 2
-//  NOTE:  there are extra include paths in isteps/makefile to find the fapi includes:
+//  NOTE:  there are extra include paths in isteps/makefile to find the fapi
+//          includes:
 //      EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
 //      EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi
 //      EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/plat
@@ -66,7 +70,7 @@ trace_desc_t *g_trac_istep1 = NULL;
 TRAC_INIT(&g_trac_istep1, "ISTEP1", 4096);
 
 extern  "C"
-void    IStep1( void * io_pArgs )
+void    IStep0sub0( void * io_pArgs )
 {
     INITSERVICE::TaskArgs::TaskArgs *pTaskArgs  =
             reinterpret_cast<INITSERVICE::TaskArgs::TaskArgs *>(io_pArgs);
@@ -77,7 +81,7 @@ void    IStep1( void * io_pArgs )
 
     // print out stuff from taskargs
     TRACFCOMP( g_trac_istep1,
-            "starting IStep 1, command=0x%llx, returncode=0x%llx",
+            ENTER_MRK "starting IStep0sub0, command=0x%llx, returncode=0x%llx",
             command, returncode );
     //  -----   start ISTEP --------------------------------------------------
 
@@ -89,7 +93,7 @@ void    IStep1( void * io_pArgs )
     if (l_err)
     {
         TRACFCOMP( g_trac_istep1,
-                "IStep1 failed, posting error code 1");
+                "Failed, posting error code 1");
 
         // Commit/delete error
         errlCommit(l_err);
@@ -99,7 +103,7 @@ void    IStep1( void * io_pArgs )
     else
     {
         TRACFCOMP( g_trac_istep1,
-                "ISTep1 finished successfully.");
+                "Finished successfully.");
 
         pTaskArgs->postReturnCode( 0 );
     }
@@ -107,8 +111,9 @@ void    IStep1( void * io_pArgs )
 
 //  -----   end ISTEP   ------------------------------------------------------
     TRACFCOMP( g_trac_istep1,
-            EXIT_MRK "ending  IStep 1");
+            EXIT_MRK "ending  IStep0sub0");
 
+    // if non-null, wait for the barrier, otherwise just return
     if  ( pTaskArgs )
     {
         pTaskArgs->waitChildSync();
@@ -117,5 +122,64 @@ void    IStep1( void * io_pArgs )
     task_end();
 }
 
+extern  "C"
+void    IStep0sub1( void * io_pArgs )
+{
+    INITSERVICE::TaskArgs::TaskArgs *pTaskArgs  =
+            reinterpret_cast<INITSERVICE::TaskArgs::TaskArgs *>(io_pArgs);
+    uint64_t    command     =   pTaskArgs->getCommand();
+    uint64_t    returncode  =   pTaskArgs->getReturnCode();
+
+
+    // print out stuff from taskargs
+    TRACFCOMP( g_trac_istep1,
+            ENTER_MRK "starting IStep0sub1, command=0x%llx, returncode=0x%llx",
+            command, returncode );
+    //  -----   start ISTEP --------------------------------------------------
+
+    pTaskArgs->postReturnCode( 0 );
+
+    //  -----   end ISTEP   ------------------------------------------------------
+    TRACFCOMP( g_trac_istep1,
+            EXIT_MRK "ending  IStep0sub1");
+
+    // if non-null, wait for the barrier, otherwise just return
+    if  ( pTaskArgs )
+    {
+        pTaskArgs->waitChildSync();
+    }
+
+    task_end();
+}
+
+extern  "C"
+void    IStep1sub0( void * io_pArgs )
+{
+    INITSERVICE::TaskArgs::TaskArgs *pTaskArgs  =
+            reinterpret_cast<INITSERVICE::TaskArgs::TaskArgs *>(io_pArgs);
+    uint64_t    command     =   pTaskArgs->getCommand();
+    uint64_t    returncode  =   pTaskArgs->getReturnCode();
+
+
+    // print out stuff from taskargs
+    TRACFCOMP( g_trac_istep1,
+            ENTER_MRK "starting IStep1sub0, command=0x%llx, returncode=0x%llx",
+            command, returncode );
+    //  -----   start ISTEP --------------------------------------------------
+
+    pTaskArgs->postReturnCode( 0 );
+
+    //  -----   end ISTEP   --------------------------------------------------
+    TRACFCOMP( g_trac_istep1,
+            EXIT_MRK "ending  IStep1sub0");
+
+    // if non-null, wait for the barrier, otherwise just return
+    if  ( pTaskArgs )
+    {
+        pTaskArgs->waitChildSync();
+    }
+
+    task_end();
+}
 
 } // namespace

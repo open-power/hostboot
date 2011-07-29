@@ -21,8 +21,8 @@
 //
 //  IBM_PROLOG_END
 
-#ifndef __ISTEP_DISPATCHER_H
-#define __ISTEP_DISPATCHER_H
+#ifndef __ISTEPDISPATCHER_ISTEPDISPATCHER_H
+#define __ISTEPDISPATCHER_ISTEPDISPATCHER_H
 /**
  *  @file istepdispatcher.H
  *
@@ -34,20 +34,21 @@
 /******************************************************************************/
 // Includes
 /******************************************************************************/
-#include <stdint.h>
-#include <sys/vfs.h>            // VFS_MODULE_NAME_MAX
+#include    <stdint.h>
+#include    <util/singleton.H>
 
-#include <errl/errlentry.H>
-#include <initservice/taskargs.H>
-#include <initservice/initsvcreasoncodes.H>
+#include    <errl/errlentry.H>
+#include    <initservice/taskargs.H>
+#include    <initservice/initsvcreasoncodes.H>
+#include    <initservice/initsvcstructs.H>
 
-#include "../baseinitsvc/initservice.H"
-#include "../common/initsvcstructs.H"
+#include    "../baseinitsvc/initservice.H"
+
+#include    "splesscommon.H"
 
 
 namespace   INITSERVICE
 {
-
 
 /******************************************************************************/
 // Globals/Constants
@@ -58,7 +59,7 @@ namespace   INITSERVICE
 /******************************************************************************/
 
 /******************************************************************************/
-//  Class
+//  Class IStepDispatcher
 /******************************************************************************/
 
 /**
@@ -85,6 +86,8 @@ public:
      *
      *  @param[in]  i_pargs  pointer to any arguments passed in from
      *                      _start().
+     *
+     *  @return nothing
      */
     void            init( void *i_pargs);
 
@@ -109,50 +112,114 @@ private:
     IStepDispatcher(const IStepDispatcher& i_right);
     IStepDispatcher& operator=(const IStepDispatcher& i_right);
 
+
     /**
-     * @brief   getIStepMode
-     *  call into PNOR and fetch the "IStepMode flag" .
-     *  This will tell us if we are locked to the SP (IStepMode=ON) or
-     *  can run all the ISteps available (IStepMode=OFF).
+     * @brief   init iv_istepmode flag, called in constructor
      *
-     *  @return false if IStep Mode is "OFF"
+     *  Call into PNOR and fetch the "IStepMode flag" .
+     *
+     *  @todo currently this calls into the kernel to get the value of
+     *  an SCOM Scratch Reg - this will change when PNOR is finished
+     *
+     *  @return nothing
+     *
+     */
+    void initIStepMode( );
+
+
+    /**
+     * @brief   getIStepMode - return value of IStep Mode
+     *
+     *  @return bool - value of iv_istepmodeflag
+     *  @retval false if IStep Mode is "OFF"
      *          true if IStep Mode is "ON"
      */
-    bool getIStepMode( ) const;
+    bool getIStepMode( )    const;
+
+
+    /**
+     * @brief   Find a TaskInfo struct in the global istep list(s),
+     *          addressed by { IStep, SubStep }
+     *
+     *
+     * @param[in]   i_IStep     -   IStepNumber
+     * @param[in]   i_SubStep   -   SubStepNumber
+     *
+     * @return  pointer to a TaskInfo struct
+     * @retval  pointer to a TaskInfo struct, or NULL
+     *
+     */
+    const TaskInfo *findTaskInfo( uint16_t  i_IStep,
+                                  uint16_t  i_SubStep ) const;
+
+
+     /**
+      * @brief  singleStepISteps
+      *
+      * Stop and wait for SP to send the next IStep to run.  Run that, then
+      * wait for the next one.
+      * This is not expected to return - errors etc are sent to the user to
+      * handle.
+      *
+      * @param[in,out] io_ptr   -   pointer to any args passed in from
+      *                             ExtInitSvc.  This may be a pointer to an
+      *                             TaskArgs struct (or something else) which
+      *                             can be filled out on return
+      *
+      * @return none
+      */
+     void   singleStepISteps( void *  io_ptr )  const;
+
+
+     /**
+      * @brief  runAllISteps
+      *
+      * Run all available ISteps sequentially.
+      * If an IStep gets an error, report it and stop.
+      * Otherwise, return.
+      *
+      * @param[in,out] io_ptr   -   pointer to a TaskArgs struct on input
+      *                             command, returncode and errorlog will be
+      *                             clear on input
+      *                             one or more may be filled in on return
+      *
+      * @return none
+      */
+     void   runAllISteps( void *  io_ptr )  const;
 
 
     /**
      * @brief   getCanContinueProcedure
      *  If an IStep fails, this routine will fetch the recovery procedure
+     *  This is only used in "normal" mode, it will not be used when IStep Mode
+     *  is ON (i.e. it will not be used when single-stepping).
      *
-     *  @param[in]      reference to IStepInfo struct for failing Istep
-     *  @param[in]      reference to errorlog for the failure
-     *  @param[in,out]  reference to IStepInfo struct for next IStep to run
+     *  @param[in]      i_failingIStep  -   ref to IStepInfo struct for failing
+     *                                      Istep
+     *  @param[in]      i_failingError  -   ref to errorlog for the failure
+     *  @param[in,out]  io_nextIStep    -   ref to TaskInfo struct for next
+     *                                      IStep to run.  struct will be filled
+     *                                      out with info on the next IStep to
+     *                                      run.
      *
-     *  @return         false if there is no Can-Continue procedure
+     *  @return     bool
+     *  @retval     false if there is no Can-Continue procedure,
      *                  true otherwise
      *
+     *  @todo   2011-08-22 currently the defs for this procedure are pretty
+     *          vague - requirements for Can-Continue behaviour have not been
+     *          defined yet.
      */
     bool getCanContinueProcedure(   const TaskInfo  &i_failingIStep,
                                     errlHndl_t      &i_failingError,
-                                    TaskInfo        &io_nextIstep  ) const;
-
-    /**
-     * @brief   reportIStepErrorLog
-     * If an IStep returns an error log, commit it.
-     *
-     * @todo Later there may be some decision about whether to report it
-     * based on the IStep.
-     */
-    void reportIStepErrorLog(   const TaskInfo  *i_failingIStep,
-                                errlHndl_t      io_errl );
+                                    TaskInfo        &io_nextIStep  ) const;
 
 
+    //  -----   internal vars   -----------------------------
     bool        iv_istepmodeflag;
-    uint64_t    iv_nextistep;
-    bool        iv_cancontinueflag;
 
 };  //  class IStepDispatcher
+
 
 } // namespace
 

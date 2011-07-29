@@ -20,19 +20,20 @@
 //  Origin: 30
 //
 //  IBM_PROLOG_END
-
 #ifndef __COMMON_INITSVCSTRUCTS_H
 #define __COMMON_INITSVCSTRUCTS_H
 /**
  *  @file initsvcstructs.H
  *
  *  common structs for initservice, extinitsvc, istepdispatcher
+ *
  */
 
 /******************************************************************************/
 // Includes
 /******************************************************************************/
 #include <stdint.h>
+#include <sys/vfs.h>            // VFS_MODULE_MAX
 
 namespace   INITSERVICE
 {
@@ -54,11 +55,11 @@ namespace   INITSERVICE
  *  - START_TASK    ==  BASE_IMAGE: call _start() function entry point
  *                      EXT_IMAGE: call _init(), then _start()
  *  - START_FN      ==  task with function pointer entry point
- *  - BARRIER       ==  set barrier for next N tasks.
  *  - UNINIT_TASK   ==  call _fini() to call static destructor(s) on the task.
  *                      (extended image only)
  *  - END_TASK_LIST ==  last entry in the task list.
  */
+
 enum    TaskType
 {
     UNDEFINED_TT    =   0,
@@ -66,7 +67,6 @@ enum    TaskType
     INIT_TASK,
     START_TASK,
     START_FN,
-    BARRIER,
     UNINIT_TASK,
     END_TASK_LIST,
 };
@@ -95,7 +95,7 @@ enum    ModuleType
  */
 struct  TaskFlags
 {
-    TaskType            task_type;          // this is a task, run _start() function
+    TaskType            task_type;          // task execution flags
     ModuleType          module_type;        // BASE_IMAGE or EXT_IMAGE
     InitServiceModuleID module_id;          // module id for errorlog
 };

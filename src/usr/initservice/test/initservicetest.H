@@ -24,17 +24,14 @@
 /**
  * @file    initservicetest.H
  *
- *  Private functions for VFS2 phase.
+ *  Unit tests for initservice module
+ *
  */
 
 #ifndef __TEST_INIT_SERVICETEST_H
 #define __TEST_INIT_SERVICETEST_H
 
-/**
- *  @file initservicetest.H
- *
- *  @brief Unit tests for initservice module
- */
+
 
 #include    <cxxtest/TestSuite.H>
 
@@ -62,7 +59,7 @@ const   INITSERVICE::TaskInfo    TASK_TEST1  =  {
  *
  */
 const   INITSERVICE::TaskInfo    TASK_TEST2  =  {
-        "libtasktest2.so" ,                               // taskname
+        "libinitsvctasktest2.so" ,                               // taskname
         NULL,                                           // ptr to fn
         {
                 INITSERVICE::START_TASK,                // startflag=true, try to start
@@ -107,24 +104,26 @@ public:
     void testInitServiceStartTask1(void)
     {
 
-        errlHndl_t  errl    = NULL;
+        errlHndl_t  l_errl    = NULL;
         /**
          * @todo    use a separate instance here, not the singleton
          */
-        INITSERVICE::InitService &l_is = INITSERVICE::InitService::getTheInstance();
+        INITSERVICE::InitService &l_is
+            = INITSERVICE::InitService::getTheInstance();
 
-        TS_TRACE( "=====>Attempt to run a nonexistent task, expect an ERROR.");
-        errl = l_is.startTask(  &TASK_TEST1,        // task struct
-                                NULL );             //  args
-        if ( errl  )
+        TS_TRACE( "=====>Run a nonexistent task, expect an ERROR.");
+        l_errl = l_is.startTask(  &TASK_TEST1,
+                                NULL );
+        if ( l_errl  )
         {
             TS_TRACE( "SUCCESS: startTask returned an errorlog.\n");
+            //  clean up
+            errlCommit( l_errl );
         }
         else
         {
             TS_FAIL( "ERROR: no error log was returned.\n");
         }
-
 
         return;
     }
@@ -136,24 +135,25 @@ public:
      */
     void testInitServiceStartTask2(void)
     {
-        errlHndl_t  errl    = NULL;
+        errlHndl_t  l_errl  =   NULL;
         /**
          * @todo    use a separate instance here, not the singleton
          */
-        INITSERVICE::InitService &l_is = INITSERVICE::InitService::getTheInstance();
+        INITSERVICE::InitService &l_is
+            = INITSERVICE::InitService::getTheInstance();
 
-        TS_TRACE( "=====>Attempt to run a task with a _start() function, expect SUCCESS.");
-        errl = l_is.startTask(  &TASK_TEST2,        // task struct
-                                NULL );             // args
-        if ( errl )
+        TS_TRACE( "=====>Run a task with _start() function, expect SUCCESS.");
+        l_errl = l_is.startTask( &TASK_TEST2,
+                                 NULL );
+        if ( l_errl )
         {
             TS_FAIL( "ERROR: StartTask returned an error log.\n");
+            errlCommit( l_errl );
         }
         else
         {
             TS_TRACE( "SUCCESS: startTask returned OK.\n");
         }
-
 
         return;
     }
@@ -166,89 +166,24 @@ public:
      */
     void testInitServiceStartTask3(void)
     {
-        errlHndl_t  errl    = NULL;
+        errlHndl_t  l_errl    = NULL;
         /**
          * @todo    use a separate instance here, not the singleton
          */
-        INITSERVICE::InitService   &l_is = INITSERVICE::InitService::getTheInstance();
+        INITSERVICE::InitService   &l_is
+            = INITSERVICE::InitService::getTheInstance();
 
-        TS_TRACE( "====>Attempt to run a task with NO _start() function, expect an ERROR.");
-        errl = l_is.startTask(  &TASK_TEST3,            // task struct
-                                NULL );                 //  args
-        if ( errl )
+        TS_TRACE( "====>Run a task with NO _start() function, expect an ERROR.");
+        l_errl = l_is.startTask(  &TASK_TEST3,
+                                NULL );
+        if ( l_errl )
         {
             TS_TRACE( "SUCCESS: startTask returned an error log.\n");
+            errlCommit( l_errl );
         }
         else
         {
             TS_FAIL( "ERROR: StartTask did not return an error log.\n");
-        }
-
-        return;
-    }
-
-    /**
-     *  @brief  testInitServicereportError1
-     *      This will call reportError with a NULL errlHndl_t .  It should handle it
-     *      OK (reportError() will print an error message to trace)
-     */
-    void testInitServicereportError1(void)
-    {
-        errlHndl_t  errl    = NULL;
-        /**
-         * @todo    use a separate instance here, not the singleton
-         */
-        INITSERVICE::InitService   &l_is = INITSERVICE::InitService::getTheInstance();
-
-        TS_TRACE( "====> call reportError with NULL handle, should handle it OK\n  ");
-        l_is.reportError( errl );
-
-        // reportError() might crash, if it returns, just make sure it didn't modify
-        //  the input pointer
-        if ( errl != NULL)
-        {
-            TS_FAIL( "ERROR:  expected the NULL errlHndl_t to stay NULL\n");
-        }
-        else
-        {
-            TS_TRACE( "SUCCESS: reportError returned OK.");
-        }
-
-        return;
-    }
-
-    /**
-     *  @brief  testInitServicereportError1
-     *      This will call reportError with a good errorlog.
-     *      on return, it should be NULLED out
-     *      @todo can we check with the errorlogging facility to see if it got
-     *      posted??
-     */
-    void testInitServicereportError2(void)
-    {
-        errlHndl_t  errl    = NULL;
-        /**
-         * @todo    use a separate instance here, not the singleton
-         */
-        INITSERVICE::InitService   &l_is = INITSERVICE::InitService::getTheInstance();
-
-        errl = new ERRORLOG::ErrlEntry(
-                ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                INITSERVICE::INIT_SVC_TEST5_ERRL_ID,
-                INITSERVICE::START_TASK_FAILED,
-                0,
-                0
-        );
-
-        TS_TRACE( "====> call reportError with good error handle, should commit and then delete  ");
-        l_is.reportError( errl );
-        if ( errl !=NULL )
-        {
-            TS_FAIL( "ERROR: reportError did not delete the errlHndl_t handle!\n" );
-        }
-        else
-        {
-            TS_TRACE( "SUCCESS: reportError returned OK.");
         }
 
         return;
