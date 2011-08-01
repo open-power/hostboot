@@ -11,6 +11,7 @@
 #include <kernel/timemgr.H>
 #include <kernel/futexmgr.H>
 #include <kernel/cpuid.H>
+#include <kernel/misc.H>
 
 extern "C"
 void kernel_execute_decrementer()
@@ -22,20 +23,7 @@ void kernel_execute_decrementer()
 
     if (CpuManager::isShutdownRequested())
     {
-        // Shutdown was requested
-        if (c->master)
-        {
-            // Write the shutdown status to Scratch SPR 0
-            uint64_t status = CpuManager::getShutdownStatus();
-            printk("Shutdown Requested. Status = 0x%lx\n", status);
-            setScratch0Spr(status);
-        }
-
-        // Make the thread doze
-        while(1)
-        {
-            doze();
-        }
+        KernelMisc::shutdown();
     }
 
     s->setNextRunnable();

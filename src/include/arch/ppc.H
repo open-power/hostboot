@@ -229,33 +229,4 @@ inline void doze()
     asm volatile("doze");
 }
 
-ALWAYS_INLINE
-inline void setScratch0Spr(uint64_t _data)
-{
-    // Write to SPRC(276) to select the register
-    //   0x20 selects SCRATCH 0 SPR
-    // Write to SPRD(277) to write the data
-    // TODO This is per P7 Pervasive Spec. Is this the same for Salerno/Venice?
-    register uint64_t address = 0x20;
-    register uint64_t data = _data;
-    asm volatile("mtspr 276, %0\n"
-                 "isync\n"
-                 "mtspr 277, %1" :: "r" (address), "r" (data));
-}
-
-ALWAYS_INLINE
-inline uint64_t getScratch0Spr()
-{
-    // Write to SPRC(276) to select the register
-    //   0x20 selects SCRATCH 0 SPR
-    // Read from SPRD(277) to get the data
-    // TODO This is per P7 Pervasive Spec. Is this the same for Salerno/Venice?
-    register uint64_t address = 0x20;
-    register uint64_t data = 0;
-    asm volatile("mtspr 276, %1\n"
-                 "isync\n"
-                 "mfspr %0, 277" : "=r" (data) : "r" (address));
-    return data;
-}
-
 #endif
