@@ -34,7 +34,7 @@ void BaseSegment::_init()
 
         case CORE_POWER8_SALERNO:
         default:
-            iv_baseBlockSize = VmmManager::THREE_MEG;
+            iv_baseBlockSize = VmmManager::FOUR_MEG;
             break;
     }
     iv_block = new Block(0x0, iv_baseBlockSize);
