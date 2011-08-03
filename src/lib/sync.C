@@ -85,24 +85,28 @@ void mutex_destroy(mutex_t *& i_mutex)
 
 void mutex_lock(mutex_t * i_mutex)
 {
-#ifdef __IDEA_1
+
     uint64_t l_count = __sync_val_compare_and_swap(&(i_mutex->iv_val),0,1);
 
     if(l_count != 0)
     {
         if (l_count != 2)
+        {
+            lwsync();
             l_count = __sync_lock_test_and_set(&(i_mutex->iv_val), 2);
+        }
 
         while( l_count != 0 )
         {
             futex_wait( &(i_mutex->iv_val), 2);
+            lwsync();
             l_count = __sync_lock_test_and_set(&(i_mutex->iv_val),2);
             // if more than one thread gets out - one continues while
             // the rest get blocked again.
         }
     }
-#endif
 
+#ifdef __IDEA_2
     // Idea # 2
     while(1)
     {
@@ -123,6 +127,7 @@ void mutex_lock(mutex_t * i_mutex)
             }
         }
     }
+#endif
 
     return;
 }

@@ -117,8 +117,6 @@ void _start(void *io_pArgs)
                 tidrc = task_exec( vfsItr->module, NULL );
                 TRACDCOMP( g_trac_cxxtest, "Launched task: tidrc=%d",
                         tidrc );
-                //@fixme-try to alleviate cxxtest deadlock
-                nanosleep( 1, 0 ); //sleep 1 second
 
             }
         }
