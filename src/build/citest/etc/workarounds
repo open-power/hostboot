@@ -1,8 +1,8 @@
 #!/bin/sh
 
 # This workaround is fixed in b0722a_1132.750 according to Ched."
-echo "+++ Workaround for SMM error starting simics."
-/afs/rchland/usr2/ched/public/hostboot/fix_ph110510.sh
+#echo "+++ Workaround for SMM error starting simics."
+#/afs/rchland/usr2/ched/public/hostboot/fix_ph110510.sh
 
 echo "+++ Copy desired SALERNO config file to sandbox and modify L3 to 8MB."
 mkdir -p $sb/simu/configs
@@ -14,3 +14,6 @@ echo "+++ Copy in the P8 scomdef."
 mkdir -p $sb/engd/scomdef 
 cp /gsa/ausgsa/home/a/n/andrewg/web/public/hostboot/simics/p8_910431.scomdef $sb/engd/scomdef/
 
+echo "+++ Patch for PHYP flight recorder."
+sed -i -e's/.*PHYPLEVEL.*//' $sb/../simics/.simics_flightrecorder
+sed -i -e's/.*PHYP_PATCH_LEVEL.*//' $sb/../simics/.simics_flightrecorder

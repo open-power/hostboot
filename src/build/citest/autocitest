@@ -350,7 +350,7 @@ declare -i timeout=0
 modsstarted=0
 modscompleted=0
 loopcount=0
-while [ $modsstarted -lt 1 -o $modsstarted -ne $modscompleted ]; do
+while [ $(($modsstarted)) -lt 1 -o $(($modsstarted)) -ne $(($modscompleted)) ]; do
     sleep 5
     ((loopcount++))     # increment loopcount
     autosim $NOWIN --simcmd   "phys_mem.read 0x$mods_started_addr 0x08"     1> $SBXHOME/modsstarted.log  2> /dev/null
@@ -473,11 +473,11 @@ if [ 0 !=  $timeout ] ; then
     echo "Modules completed: $modscompleted"
     exit 1
 fi
-if [ 0 !=  $failedtests ] ; then
+if [ 0 !=  $(($failedtests)) ] ; then
     echo "$failedtests testcases failed."
     exit 1
 fi
-if [ 0 != $warnings ] ; then
+if [ 0 != $(($warnings)) ] ; then
     echo "$warnings testcase warnings found."
     exit 1
 fi
