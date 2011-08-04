@@ -20,7 +20,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
-
+#include <fapi.H>
 
 namespace fapi
 {
@@ -32,6 +32,37 @@ namespace fapi
  * @param[in] i_expression If not true then process should be aborted
  */
 void fapiAssert(bool i_expression);
+
+
+/**
+ * @brief Delay this thread. Hostboot will use the nanoseconds parameter
+ * and make a syscall to nanosleep. While in the syscall, the hostboot
+ * kernel will continue to consume CPU cycles as it looks for a runnable
+ * task.  When the delay time expires, the task becomes runnable and will soon
+ * return from the syscall.  Callers of delay() in the hostboot environment
+ * will likely have to know the mHz clock speed they are running on and
+ * compute a non-zero value for i_nanoSeconds. 
+ * 
+ * On the FSP, it was sometimes acceptable to just provide zero for the
+ * sleep delay time, causing the task to yield its time slice. By the
+ * time the calling task could run again, it was pretty certain enough
+ * host cycles had past.  This is probably not acceptable in
+ * the hostboot environment. Callers should calculate and provide a
+ * sleep value in nanoseconds relative to host clock speed.  
+ *
+ * On FSP when VBU is the target, then the i_simCycles parameter will be
+ * used instead.  The FSP needs to use the simdispatcher client/server
+ * API and issue a command to the awan to advance the simulation the
+ * specified number of cycles. 
+ * 
+ * @param[in] i_nanoSeconds    nanoseconds to sleep 
+ * @param[in] i_simCycles      count of Awan cycles to advance
+ * 
+ * @return ReturnCode. Zero on success, else platform specified error.
+ */
+ fapi::ReturnCode delay( uint64_t i_nanoSeconds, uint64_t i_simCycles );
+
+
 
 }
 
