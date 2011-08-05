@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 // make TODO VFS_MODULE_MAX equal to the actual number of modules in the base image (+ 2?)
-#define VFS_MODULE_MAX 32
+#define VFS_MODULE_MAX 64
 // Extended use 4 4k pages
 #define VFS_EXTENDED_MODULE_MAX 128
 #define VFS_EXTENDED_MODULE_TABLE_ADDRESS 0x0000000040000000UL
