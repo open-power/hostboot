@@ -155,6 +155,14 @@ class AttributeTraits<ATTR_XSCOM_CHIP_INFO>
         typedef XscomChipInfo Type;
 };
 
+template<>
+class AttributeTraits<ATTR_I2C_CHIP_INFO>
+{
+    public:
+        enum { readable };
+        typedef I2cChipInfo Type;
+};
+
 } // End namespace TARGETING
 
 #endif // TARG_ATTRIBUTETRAITS_H

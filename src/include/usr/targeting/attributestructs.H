@@ -81,6 +81,20 @@ struct XscomChipInfo
 
 } PACKED;
 
+/**
+ * @brief Structure which defines chip info necessary for I2C operations
+ *
+ * Structure which defines info necessary for I2C.  Only applicable for
+ * chip targets which support I2C.  Structure is read-only.
+ */
+struct I2cChipInfo
+{
+    uint32_t busSpeed;          // Slave Device bus speed
+    uint16_t deviceAddr;        // Slave Device address
+    uint8_t devicePort;         // Slave Device Port location
+    uint8_t deviceMasterEng;    // Master I2C engine slave is hung off of
+} PACKED;
+
 } // End namespace TARGETING
 
 #endif // TARG_ATTRIBUTESTRUCTS_H

@@ -23,6 +23,7 @@ namespace DeviceFW
     {
         XSCOM                   = LAST_ACCESS_TYPE,
         FSISCOM,
+        I2C,
 
         LAST_DRIVER_ACCESS_TYPE
     };
@@ -53,6 +54,12 @@ namespace DeviceFW
      */
     #define DEVICE_XSCOM_ADDRESS(i_address) \
         DeviceFW::XSCOM, static_cast<uint64_t>((i_address))
+
+    /**
+     * Construct the device addressing parameters for the I2C device ops.
+     */
+    #define DEVICE_I2C_ADDRESS( i_address )\
+        DeviceFW::I2C, static_cast<uint64_t>(( i_address ))
 
 
     /** @class InvalidParameterType 

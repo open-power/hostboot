@@ -77,4 +77,12 @@ const compId_t PNOR_COMP_ID = 0x0600;
 const char PNOR_COMP_NAME[] = "pnor";
 //@}
 
+/** @name I2C
+ *  I2C component
+ */
+//@{
+const compId_t I2C_COMP_ID = 0x0700;
+const char I2C_COMP_NAME[] = "i2c";
+//@}
+
 #endif

@@ -46,6 +46,7 @@ enum ATTRIBUTE_ID
     ATTR_XSCOM_CHIP_INFO        = 0x0A,
     ATTR_INBAND_SCOM_CHIP_INFO  = 0x0B,
     ATTR_FSI_SCOM_CHIP_INFO     = 0x0C,
+    ATTR_I2C_CHIP_INFO          = 0x0D,
 
     ATTR_DUMMY_WO               = 0xFD,
     ATTR_DUMMY_RO               = 0xFE,
