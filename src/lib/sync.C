@@ -85,49 +85,30 @@ void mutex_destroy(mutex_t *& i_mutex)
 
 void mutex_lock(mutex_t * i_mutex)
 {
+    // Weak consistency notes:
+    //     Since this is a lock, we do not need to ensure that all writes
+    //     are globally visible prior to execution (lwsync) but we do need
+    //     to ensure that all instructions finish completion prior to
+    //     leaving (isync).  Both __sync_val_compare_and_swap and
+    //     __sync_lock_test_and_set have an implied isync.
 
     uint64_t l_count = __sync_val_compare_and_swap(&(i_mutex->iv_val),0,1);
 
-    if(l_count != 0)
+    if(unlikely(l_count != 0))
     {
-        if (l_count != 2)
+        if (likely(l_count != 2))
         {
-            lwsync();
             l_count = __sync_lock_test_and_set(&(i_mutex->iv_val), 2);
         }
 
         while( l_count != 0 )
         {
             futex_wait( &(i_mutex->iv_val), 2);
-            lwsync();
             l_count = __sync_lock_test_and_set(&(i_mutex->iv_val),2);
             // if more than one thread gets out - one continues while
             // the rest get blocked again.
         }
     }
-
-#ifdef __IDEA_2
-    // Idea # 2
-    while(1)
-    {
-        uint64_t l_count = __sync_val_compare_and_swap(&(i_mutex->iv_val),0,1);
-        if( 0 == l_count ) // uncontended lock
-        {
-            break;
-        }
-        else if ( 2 == l_count ) // already contended
-        {
-            futex_wait( &(i_mutex->iv_val), l_count);
-        }
-        else if ( 1 == l_count ) // lock now contended
-        {
-            if (__sync_bool_compare_and_swap(&(i_mutex->iv_val),1,2))
-            {
-                futex_wait( &(i_mutex->iv_val), 2);
-            }
-        }
-    }
-#endif
 
     return;
 }
@@ -136,21 +117,21 @@ void mutex_lock(mutex_t * i_mutex)
 
 void mutex_unlock(mutex_t * i_mutex)
 {
-#ifdef __IDEA_1
-    if (__sync_fetch_and_sub(&(i_mutex->iv_val), 1) != 1)
+    // Weak consistency notes:
+    //     Since this is an unlock we need to ensure that all writes are
+    //     globally visible prior to execution (lwsync).  The
+    //     __sync_fetch_and_sub has an implied lwsync.  If we need to
+    //     release a task, due to a contended mutex, the write to iv_val
+    //     and futex_wake pair will appear globally ordered due to the
+    //     context synchronizing nature of the 'sc' instruction.
+
+    uint64_t l_count = __sync_fetch_and_sub(&(i_mutex->iv_val),1);
+    if(unlikely(2 <= l_count))
     {
-        i_mutex->iv_val = 0; // the thread that is started will set this back to 2
+        i_mutex->iv_val = 0;
         futex_wake(&(i_mutex->iv_val), 1); // wake one thread
     }
-#endif
-    // #idea 2
-    lwsync();
-    uint64_t l_count = __sync_lock_test_and_set(&(i_mutex->iv_val),0);
-    if(2 == l_count)
-    {
-        futex_wake(&(i_mutex->iv_val), 1); // wake one thread
-    }
- 
+
     return;
 }
 

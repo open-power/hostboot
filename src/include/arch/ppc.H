@@ -64,7 +64,6 @@ inline void setHSRR1(uint64_t _hsrr1)
     asm volatile("mtspr 315, %0" : : "r" (hsrr1));
 }
 
-
 ALWAYS_INLINE
 inline uint64_t getPVR()
 {
@@ -146,25 +145,25 @@ inline void setDEC(uint64_t _dec)
 ALWAYS_INLINE
 inline void sync()
 {
-    asm volatile("sync");
+    asm volatile("sync" ::: "memory");
 }
 
 ALWAYS_INLINE
 inline void lwsync()
 {
-    asm volatile("lwsync");
+    asm volatile("lwsync" ::: "memory");
 }
 
 ALWAYS_INLINE
 inline void isync()
 {
-    asm volatile("isync");
+    asm volatile("isync" ::: "memory");
 }
 
 ALWAYS_INLINE
 inline void eieio()
 {
-    asm volatile("eieio");
+    asm volatile("eieio" ::: "memory");
 }
 
 ALWAYS_INLINE

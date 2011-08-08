@@ -356,11 +356,18 @@ namespace Systemcalls
         uint64_t * uaddr = (uint64_t *) TASK_GETARG0(t);
         uint64_t val   = (uint64_t) TASK_GETARG1(t);
 
+        // Set RC to success initially.
+        TASK_SETRTN(t,0);
+
         //TODO translate uaddr from user space to kernel space
         //     Right now they are the same.
 
         uint64_t rc = FutexManager::wait(t,uaddr,val);
-        TASK_SETRTN(t,rc);
+        if (rc != 0) // Can only set rc if we still have control of the task,
+                     // which is only (for certain) on error rc's.
+        {
+            TASK_SETRTN(t,rc);
+        }
     }
 
     /**

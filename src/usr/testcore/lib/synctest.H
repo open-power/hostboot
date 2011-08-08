@@ -9,6 +9,7 @@
 #include <cxxtest/TestSuite.H>
 #include <sys/sync.h>
 #include <sys/task.h>
+#include <sys/time.h>
 
 class SyncTest: public CxxTest::TestSuite
 {
@@ -26,6 +27,20 @@ class SyncTest: public CxxTest::TestSuite
             task_create(func2, this);
             task_create(func2, this);
             task_create(func2, this);
+            barrier_wait(&barrier);
+            TS_TRACE("ALL THREADS ENDED");
+        }
+
+        void testMutexDoubleWait()
+        {
+            mutex_init(&mutex);
+            barrier_init(&barrier, 3);
+
+            mutex_lock(&mutex);
+            task_create(func2, this);
+            task_create(func2, this);
+            nanosleep(1,0);
+            mutex_unlock(&mutex);
             barrier_wait(&barrier);
             TS_TRACE("ALL THREADS ENDED");
         }

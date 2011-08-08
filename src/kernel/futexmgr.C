@@ -33,7 +33,7 @@ uint64_t FutexManager::_wait(task_t* i_task, uint64_t * i_addr, uint64_t i_val)
 
     iv_lock.lock();
 
-    if(*i_addr != i_val)
+    if(unlikely(*i_addr != i_val))
     {
         // some other thread has modified the futex
         // bail-out retry required.
