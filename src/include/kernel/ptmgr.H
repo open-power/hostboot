@@ -41,14 +41,14 @@ class PageTableManager
      */
     enum
     {
-        PTE_UNKNOWN          = 0x0000000000000000,  /**< Entry wasn't found */
-        PTE_PRESENT          = 0x0000000000000001,  /**< Entry is present in table */
-        PTE_VALID            = 0x0000000000000002,  /**< Entry is valid */
-        PTE_READ_ONLY        = 0x0000000000000004,  /**< Read-Only */
-        PTE_EXECUTE          = 0x0000000000000008,  /**< Execute permission */
-        PTE_CACHE_INHIBITED  = 0x0000000000000010,  /**< Cache-Inhibited Access */
-        PTE_MODIFIED         = 0x0000000000000020,  /**< Page has been modified */
-        PTE_ACCESSED         = 0x0000000000000040,  /**< Page has been accessed */
+        PTE_UNKNOWN         = 0x0000000000000000, /**< Entry wasn't found */
+        PTE_PRESENT         = 0x0000000000000001, /**< Entry is present in table */
+        PTE_VALID           = 0x0000000000000002, /**< Entry is valid */
+        PTE_READ_ONLY       = 0x0000000000000004, /**< Read-Only */
+        PTE_EXECUTE         = 0x0000000000000008, /**< Execute permission */
+        PTE_CACHE_INHIBITED = 0x0000000000000010, /**< Cache-Inhibited Access */
+        PTE_MODIFIED        = 0x0000000000000020, /**< Page has been modified */
+        PTE_ACCESSED        = 0x0000000000000040, /**< Page has been accessed */
     };
 
     /**
@@ -56,11 +56,30 @@ class PageTableManager
      */
     enum
     {
-        PT_SIZE = (1 << 18),  /**< Size of Page Table in bytes */
-        PTE_SIZE = 2*sizeof(uint64_t),   /**< Size of a single Page Table Entry in bytes */
-        PTEG_SIZE = 8,  /**< Number of PTEs in a single PTE Group */
-        PTEG_COUNT = (PT_SIZE / PTE_SIZE) / PTEG_SIZE,  /**< Number of PTEGs in the Page Table */
-        INVALID_PN = 0xFFFFFFFFFFFFFFFF,  /**< Invalid value for a Page Number return */
+        PT_SIZE = (1 << 18), /**< Size of Page Table in bytes */
+        PTE_SIZE = /**< Size of 1 Page Table Entry in bytes */
+            2*sizeof(uint64_t), 
+        PTEG_SIZE = 8, /**< Number of PTEs in a single PTE Group */
+        PTEG_COUNT =  /**< Number of PTEGs in the Page Table */
+            (PT_SIZE / PTE_SIZE) / PTEG_SIZE,
+        INVALID_PN = /**< Error value for a Page Number return */
+            0xFFFFFFFFFFFFFFFF, 
+    };
+
+    /**
+     * LRU Statistics
+     */
+    struct UsageStats_t {
+	union {
+	    struct { 
+		uint64_t C:1;    /**< Page has been modified  */
+		uint64_t R:1;    /**< Page has been referenced  */
+		uint64_t LRU:2;  /**< Current value of LRU  */
+		uint64_t rsv:60; /**< Reserved space  */
+	    };
+	    uint64_t fullword;  /**< Full Dword0 */
+	};
+	UsageStats_t():fullword(0){};
     };
 
     /**
@@ -175,7 +194,8 @@ class PageTableManager
             struct {  /**< Dword0 Attributes */
                 uint64_t B:2;    /**< 0:1   Segment Size  */
                 uint64_t AVA:55; /**< 2:56  Abbreviated Virtual Address = VA w/o bottom 23 bits  */
-                uint64_t SW:2;   /**< 57:58 =SW[0:1] - Reserved  */
+                uint64_t SW:1;   /**< 57 =SW[] - Reserved  */
+                uint64_t R2:1;   /**< 58 =SW[1] - Shadow R bit  */
                 uint64_t LRU:2;  /**< 59:60 =SW[2:3] - Used for LRU algorithm  */
                 uint64_t L:1;    /**< 61    Virtual page size  */
                 uint64_t H:1;    /**< 62    Hash function identifier  */
@@ -413,13 +433,27 @@ class PageTableManager
     VmmManager::ACCESS_TYPES getAccessType( const PageTableEntry* i_pte );
 
     /**
+     * @brief  Calculate the original Virtual Address from a PTE
+     *
+     * @param[in] i_pte  PTE to examine, must be pointer to real entry in table
+     *
+     * @return uint64_t  page-aligned virtual address
+     */
+    uint64_t getVirtAddrFromPTE( const PageTableEntry* i_pte );
+
+    /**
      * @brief  Fill in default values for the PTE
      *
      * @param[out] o_pte  PTE to modify
      */
     static void setupDefaultPTE( PageTableEntry* o_pte );
 
-
+    /**
+     * @brief  Push C/R/LRU bits to the VMM
+     *
+     * @param[in] i_pte  PTE to examine, must be pointer to real entry in table
+     */
+    void pushUsageStats( PageTableEntry* i_pte );
 
     // Allow testcase to see inside
     friend class ptmgrtest;

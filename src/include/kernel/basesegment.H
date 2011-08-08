@@ -63,7 +63,17 @@ class BaseSegment : public Segment
          *
          * Calls block chain to deal with page fault.
          */
-        bool handlePageFault(task_t* i_task, uint64_t i_addr);
+        virtual bool handlePageFault(task_t* i_task, uint64_t i_addr);
+
+        /**
+         * @brief Implementation of the pure-virtual function from Segment.
+         *        Update LRU statistics on the block that owns the address         *
+         *
+         * @param[in] i_vaddr - Virtual Address of page
+         * @param[in] i_stats - Usage statistics
+         */
+        virtual void updateRefCount( uint64_t i_vaddr,
+				     PageTableManager::UsageStats_t i_stats );
 
         /**
          * @brief Allocates a block of virtual memory of the given size

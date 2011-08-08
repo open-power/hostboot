@@ -30,6 +30,8 @@
 #include <kernel/task.H>
 #include <kernel/vmmmgr.H>
 #include <kernel/blockmsghdlr.H>
+#include <kernel/msghandler.H>
+#include <kernel/ptmgr.H>
 
 class ShadowPTE;
 class Segment;
@@ -139,6 +141,20 @@ class Block
          *         -EFAULT if not found @see errno.h
          */
         uint64_t findPhysicalAddress(uint64_t i_vaddr) const;
+
+        /**
+         * @brief Responsible for updating usage counts within the block [chain].
+         *
+         * @param[in] i_vaddr - Abbreviated Virtual Address of page
+         *                      (bottom 23 bits are zero)
+         * @param[in] i_stats - Usage statistics
+         *
+         * If the address is not within this block or a matching page cannot be
+         *  found, the block will attempt to make calls down the block-chain
+         *  if it exists.
+         */
+        void updateRefCount( uint64_t i_vaddr,
+			     PageTableManager::UsageStats_t i_stats );
 
         friend class Segment;
         friend class BaseSegment;

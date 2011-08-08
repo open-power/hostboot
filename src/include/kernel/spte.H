@@ -66,8 +66,11 @@ class ShadowPTE
                     /** Allocate from a zero'd page. */
                 uint32_t allocate_from_zero:1;
 
+                    /** LRU value - lower means it was accessed more recently. */
+                uint32_t last_access:3;
+
                     /** Reserved for future use. */
-                uint32_t reserved:6;
+                uint32_t reserved:3;
             } PACKED;
         };
 
@@ -106,10 +109,34 @@ class ShadowPTE
         bool isDirty() const { return dirty; };
             /** Set dirty bit. */
         void setDirty(bool i_dirty) { dirty = i_dirty; };
+
             /** Get allocate-from-zero bit. */
         bool isAllocateFromZero() const { return allocate_from_zero; };
             /** Set allocate-from-zero bit. */
         void setAllocateFromZero(bool i_zero) { allocate_from_zero = i_zero; };
+
+            /** Get last_acces bits. */
+        uint8_t getLRU() const { return last_access; };
+            /** Increment the LRU bits. */
+        void incLRU() {
+	    if( last_access < 0b111 )
+	    {
+		last_access++;
+	    }
+	};
+            /** Decrement the LRU bits. */
+        void decLRU() {
+	    if( last_access > 0 )
+	    {
+		last_access--;
+	    }
+	};
+            /** Zero out the LRU bits. */
+        void zeroLRU() {
+	    last_access = 0;
+	};
+
+
 };
 
 #endif

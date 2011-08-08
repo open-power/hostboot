@@ -95,8 +95,7 @@ class ptmgrtest : public CxxTest::TestSuite
      */
     void test_hash40( void )
     {
-        TS_TRACE( ">> test_hash40 <<" );
-        printkd( ">> test_hash40 <<\n" );
+        TS_TRACE( ">> ptmgrtest::test_hash40 <<" );
         uint64_t fails, total = 0;
 
         // Initialize the Page Table
@@ -123,7 +122,6 @@ class ptmgrtest : public CxxTest::TestSuite
         delete ptmgr;
 
         TS_TRACE( "ptmgrtest::test_hash40> fails=%d/%d", fails, total );
-        printkd( "ptmgrtest::test_hash40> fails=%ld/%ld\n", fails, total );
     }
 
     /**
@@ -134,8 +132,7 @@ class ptmgrtest : public CxxTest::TestSuite
      */
     void test_addEntry( void )
     {
-        TS_TRACE( ">> test_addEntry <<" );
-        printkd( ">> test_addEntry <<\n" );
+        TS_TRACE( ">> ptmgrtest::test_addEntry <<" );
         uint64_t fails = 0;
         uint64_t total = 0;
         uint64_t status = 0;
@@ -160,6 +157,16 @@ class ptmgrtest : public CxxTest::TestSuite
             else if( (status & PageTableManager::PTE_VALID) && (pn == TEST_DATA[x].page) )
             {
                 PASS_TRACE( "ptmgrtest::test_addEntry> PASS1 : 0x%.16lX", TEST_DATA[x].va );
+
+		PageTableManager::PageTableEntry* pte = ptmgr->findPTE(TEST_DATA[x].va);
+		uint64_t va = ptmgr->getVirtAddrFromPTE(pte);
+		if( va != (TEST_DATA[x].va - TEST_DATA[x].va%4096) )
+		{
+		    printk( "ptmgrtest::test_addEntry> ERROR6 : VA doesn't match expected" );
+		    printk( "Exp=%.16lX, Act=%.16lX", TEST_DATA[x].va, va );
+		    fails++;
+		}
+		total++;
             }
             else
             {
@@ -217,7 +224,6 @@ class ptmgrtest : public CxxTest::TestSuite
         delete ptmgr;
 
         TS_TRACE( "ptmgrtest::test_addEntry> fails=%d/%d", fails, total );
-        printkd( "ptmgrtest::test_addEntry> fails=%ld/%ld\n", fails, total );
     }
 
     /**
@@ -227,8 +233,7 @@ class ptmgrtest : public CxxTest::TestSuite
      */
     void test_delEntry( void )
     {
-        TS_TRACE( ">> test_delEntry <<" );
-        printkd( ">> test_delEntry <<\n" );
+        TS_TRACE( ">> ptmgrtest::test_delEntry <<" );
         uint64_t fails = 0;
         uint64_t total = 0;
         uint64_t ignored = 0;
@@ -266,7 +271,6 @@ class ptmgrtest : public CxxTest::TestSuite
         delete ptmgr;
 
         TS_TRACE( "ptmgrtest::test_delEntry> fails=%d/%d", fails, total );
-        printkd( "ptmgrtest::test_delEntry> fails=%ld/%ld\n", fails, total );
     }
 
     /**
@@ -277,8 +281,7 @@ class ptmgrtest : public CxxTest::TestSuite
      */
     void test_delRangeVA( void )
     {
-        TS_TRACE( ">> test_delRangeVA <<" );
-        printkd( ">> test_delRangeVA <<\n" );
+        TS_TRACE( ">> ptmgrtest::test_delRangeVA <<" );
         uint64_t fails = 0;
         uint64_t total = 0;
         uint64_t ignored = 0;
@@ -326,7 +329,6 @@ class ptmgrtest : public CxxTest::TestSuite
         delete ptmgr;
 
         TS_TRACE( "ptmgrtest::test_delRangeVA> fails=%d/%d", fails, total );
-        printkd( "ptmgrtest::test_delRangeVA> fails=%ld/%ld\n", fails, total );
     }
 
     /**
@@ -337,8 +339,7 @@ class ptmgrtest : public CxxTest::TestSuite
      */
     void test_delRangePN( void )
     {
-        TS_TRACE( ">> test_delRangePN <<" );
-        printkd( ">> test_delRangePN <<\n" );
+        TS_TRACE( ">> ptmgrtest::test_delRangePN <<" );
         uint64_t fails = 0;
         uint64_t total = 0;
         uint64_t pagenum = 0;
@@ -390,10 +391,11 @@ class ptmgrtest : public CxxTest::TestSuite
         delete ptmgr;
 
         TS_TRACE( "ptmgrtest::test_delRangePN> fails=%d/%d", fails, total );
-        printkd( "ptmgrtest::test_delRangePN> fails=%ld/%ld\n", fails, total );
     }
 
     //@todo - Test LRU
+
+    //@todo - Test propagation of C/R bits to blocks
 
   private:
     /**

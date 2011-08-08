@@ -24,8 +24,10 @@
 #include <kernel/vmmmgr.H>
 #include <util/singleton.H>
 #include <kernel/console.H>
+#include <kernel/segmentmgr.H>
 #include <arch/ppc.H>
 #include <assert.h>
+#include <util/align.H>
 
 //#define Dprintk(...) printkd(args...)
 #define Dprintk(args...)
@@ -308,14 +310,17 @@ void PageTableManager::_addEntry( uint64_t i_vAddr,
 
     //Note: no need to lock here because that is handled by higher function
 
+    // page-align this address
+    uint64_t l_vaddr = ALIGN_PAGE_DOWN(i_vAddr);
+
     PageTableEntry pte_data;
     setupDefaultPTE( &pte_data );
 
     // find the matching PTEG first so we only do it once
-    uint64_t pteg_addr = findPTEG( i_vAddr );
+    uint64_t pteg_addr = findPTEG( l_vaddr );
 
     //look for a matching entry in the table already
-    PageTableEntry* pte_slot = findPTE( i_vAddr, pteg_addr );
+    PageTableEntry* pte_slot = findPTE( l_vaddr, pteg_addr );
     if( pte_slot == NULL )
     {
         // look for an empty/invalid entry that we can use
@@ -324,14 +329,26 @@ void PageTableManager::_addEntry( uint64_t i_vAddr,
         {
             // look for a valid entry we can steal
             pte_slot = findOldPTE( pteg_addr );
+
+            // delete the entry that we're going to steal first
+            delEntry( pte_slot );
         }
+
+        // since the entry isn't in the table right now we should
+        //  start fresh with the usage bits
+        pte_data.C = 0b0;    //Clear Changed bit
+        pte_data.R = 0b0;    //Clear Referenced bit
+        pte_data.LRU = 0b00; //Clear LRU bits
     }
     else
     {
-        if( (pte_slot->V == 1) && (i_page != pte_slot->PN) )
+        if( pte_slot->V == 1 )
         {
-            Eprintk( "**ERROR** PageTableManager::_addEntry> Duplicate PTE with different page number\n" );
-            kassert(false);
+            if( i_page != pte_slot->PN )
+            {
+                Eprintk( "**ERROR** PageTableManager::_addEntry> Duplicate PTE with different page number\n" );
+                kassert(false);
+            }
         }
     }
 
@@ -378,7 +395,11 @@ void PageTableManager::_delEntry( uint64_t i_vAddr )
  */
 void PageTableManager::delEntry( PageTableEntry* i_pte )
 {
+    // clear the entry from the table
     writePTE( i_pte, i_pte, false );
+
+    // need to notify VMM when we remove a PTE
+    pushUsageStats( i_pte );
 }
 
 /**
@@ -412,7 +433,7 @@ void PageTableManager::_delRangePN( uint64_t i_pnStart,
     {
         if( (pte->V == 1) && (pte->PN >= i_pnStart) && (pte->PN <= i_pnFinish) )
         {
-            writePTE( pte, pte, false );
+            delEntry( pte );
         }
 
         pte++;
@@ -604,12 +625,18 @@ void PageTableManager::writePTE( PageTableEntry* i_pte,
                                  PageTableEntry* i_dest,
                                  bool i_valid )
 {
-    // are we stealing a PTE
-    bool pte_stolen = false;
+    // Are we stealing a valid PTE?
     if( (i_dest->V == 1) && i_valid )
     {
-        pte_stolen = true;
-        printPTE( "Stealing", i_dest );
+        // If the AVAs match then we're just modifying permissions or something
+        if( i_pte->AVA != i_dest->AVA )
+        {
+            // this should never happen because we should always go 
+            //   through the delEntry() path instead
+            printPTE( "Stealing", i_dest );
+            Eprintk( "**ERROR** PageTableManager::writePTE> Trying to steal a PTE\n" );
+            kassert(false);
+        }
     }
 
     if(ivTABLE)
@@ -703,7 +730,7 @@ void PageTableManager::printPTE( const char* i_label,
     }
     else
     {
-        printkd( "[%4ld:%4ld]> @%p : %.16lX %.16lX : AVA=%16lX, PN=%ld\n", pte_num/PTEG_SIZE, pte_num%PTEG_SIZE, i_pte, i_pte->dword0, i_pte->dword1, i_pte->AVA, i_pte->PN );
+        printkd( "[%4ld:%4ld]> @%p : %.16lX %.16lX : VA=%16lX, PN=%ld\n", pte_num/PTEG_SIZE, pte_num%PTEG_SIZE, i_pte, i_pte->dword0, i_pte->dword1, getVirtAddrFromPTE(i_pte), i_pte->PN );
     }
 
 }
@@ -822,9 +849,9 @@ VmmManager::ACCESS_TYPES PageTableManager::getAccessType( const PageTableEntry* 
  */
 void PageTableManager::setupDefaultPTE( PageTableEntry* o_pte )
 {
-    o_pte->B = 0b01;  //Segment Size  (01=1TB)
-    o_pte->L = 0b0;   //Virtual page size  (1=>4KB)
-    o_pte->H = 0b0;   //Hash function identifier  (0=primary hash)
+    o_pte->B = 0b01;   //Segment Size  (01=1TB)
+    o_pte->L = 0b0;    //Virtual page size  (1=>4KB)
+    o_pte->H = 0b0;    //Hash function identifier  (0=primary hash)
 }
 
 /**
@@ -876,7 +903,7 @@ PageTableManager::PageTableEntry* PageTableManager::findOldPTE( uint64_t i_ptegA
 
         pte++;
     }
-    PageTableManager::printPTE( "Dropping PTE", old_pte );
+    //PageTableManager::printPTE( "Dropping PTE", old_pte );
 
     return old_pte;
 }
@@ -908,21 +935,34 @@ void PageTableManager::updateLRU( const PageTableEntry* i_newPTE )
                 new_pte = *pte_cur;
                 old_pte = *pte_cur;
 
+		// if the entry is valid and has been used since last update
+		//   then reset the LRU to 0 and clear the R bit
                 if( (new_pte.V == 1) && (new_pte.R == 1) )
                 {
-                    new_pte.LRU = 1;
+                    new_pte.LRU = 0;
                     new_pte.R = 0;
+		    new_pte.R2 = 1; // remember that the R bit was set
                 }
                 else
                 {
+		    // page hasn't been used, increment the LRU
                     if( new_pte.LRU < 0b11 )
                     {
                         new_pte.LRU++;
                     }
                 }
-            } while( !__sync_bool_compare_and_swap( &(pte_cur->dword0),
-                                                    old_pte.dword0,
-                                                    new_pte.dword0 ) );
+
+
+                // if the value currently in the table (pte_cur) is still
+                //  equal to the value we saved off earlier (old_pte) then
+                //  we will write our new data (new_pte) into the table
+                // else we will try again
+            } while( !__sync_bool_compare_and_swap( &(pte_cur->dword1),
+                                                    old_pte.dword1,
+                                                    new_pte.dword1 ) );
+
+            // LRU and R2 are on dword0
+            pte_cur->dword0 = new_pte.dword0;
 
             // tlbie, eieio, tlbsync, ptesync
             invalidateTLB(pte_cur);
@@ -965,3 +1005,100 @@ void PageTableManager::invalidateTLB( PageTableEntry* i_pte )
     Tprintk( "<< PageTableManager::invalidateTLB( )\n" );
 }
 
+/**
+ * @brief  Calculate the original Virtual Address from a PTE
+ */
+uint64_t PageTableManager::getVirtAddrFromPTE( const PageTableEntry* i_pte )
+{
+    uint64_t pte_addr = (uint64_t)i_pte;
+
+    /*
+     0....5....1....5....2....5....3....5....4....5....50...5....6....5....7....5..    full VA (78 bits)
+     000000000000000vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv000000000000    top 15 and bottom 12 bits are zero
+     000000000000000---------aaaaaaaaaaaaaa----------------------------------------    X=VA[24:37]
+     000000000000000bbbbbbbbbbbbBBBBBBBBBBB----------------------------------------    Y=VA[0:37]
+     000000000000000-----------------------cccccccccccccccccCCCCCCCCCCC------------    Z=VA[38:65]
+     000000000000000dddddddddddddddddddddddddddddddddddddddd-----------------------    AVA = VA[0:54]
+
+     0000000000000000000000000000BBBBBBBBBBB = Y' = VA[27:37] = AVA[27:37]
+     0000000000000000000000000000CCCCCCCCCCC = Z' = VA[55:65]
+
+     X^Y^Z % 2048 = ptegnum
+     0^Y^Z % 2048 = ptegnum		(all of X is above the % line)
+     Y' ^ Z' = ptegnum
+     Z' = Y' ^ ptegnum
+     */
+
+    // first get the PTEG number (=hash result) based on the PTE pointer
+    uint64_t pteg_num = (pte_addr - getAddress())/PTEG_SIZE_BYTES;
+
+    // next pull the Y' value out of the AVA
+    uint64_t Yp = EXTRACT_RJ_LEN( i_pte->AVA, 55, 27, 37 );
+
+    // next invert the XOR operation from the hash function
+    uint64_t Zp = Yp ^ pteg_num;
+
+    // finally put everything together to make a complete virtual address
+    uint64_t va = (Zp << 12) | (i_pte->AVA << 23);
+
+    return va;
+}
+
+/**
+ * @brief  Push C/R/LRU bits to the VMM
+ *
+ * @param[in] i_pte  PTE to examine, must be pointer to real entry in table
+ */
+void PageTableManager::pushUsageStats( PageTableEntry* i_pte )
+{
+    // skip this in unit-test mode because addresses aren't really backed
+    if( ivTABLE )
+    {
+        return;
+    }
+
+    UsageStats_t stats;
+
+    PageTableEntry new_pte = *i_pte;
+    PageTableEntry old_pte = *i_pte;
+
+    // use this funny loop to avoid races where another thread
+    //  is causing the C bit to be updated at the same time
+    do {
+        new_pte = *i_pte;
+        old_pte = *i_pte;
+
+        // always update the R,R2,C bits, even for invalid entries
+        //  it is up to the caller to be sensible about when this
+        //  function is called
+
+        // read and clear the referenced bit
+        stats.R = new_pte.R || new_pte.R2;
+        new_pte.R = 0;
+        new_pte.R2 = 0; //R2 is on dword0
+
+        // read and clear the changed bit
+        stats.C = new_pte.C;
+        new_pte.C = 0;
+
+        // just read the LRU and send it up
+        stats.LRU = new_pte.LRU;
+
+        // if the value currently in the table (i_pte) is still
+        //  equal to the value we saved off earlier (old_pte) then
+        //  we will write our new data (new_pte) into the table
+        // else we will try again
+    } while( !__sync_bool_compare_and_swap( &(i_pte->dword1),
+                                            old_pte.dword1,
+                                            new_pte.dword1 ) );
+
+    // R2 is on dword0
+    i_pte->dword0 = new_pte.dword0;
+
+    // tlbie, eieio, tlbsync, ptesync
+    invalidateTLB(i_pte);
+
+    // now we need to send what we learned to the rest of the VMM
+    uint64_t va = getVirtAddrFromPTE(i_pte);
+    SegmentManager::updateRefCount( va, stats );
+}

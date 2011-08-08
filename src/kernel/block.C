@@ -32,7 +32,7 @@
 #include <kernel/vmmmgr.H>
 #include <kernel/ptmgr.H>
 #include <kernel/pagemgr.H>
-//#include <kernel/console.H>
+#include <kernel/console.H>
 
 Block::~Block()
 {
@@ -235,6 +235,7 @@ void Block::setPageAllocateFromZero(uint64_t i_vAddr)
         else
         {
             // No block owns this address.  Code bug.
+            printk("setPageAllocateFromZero> i_vaddr=0x%.lX\n", i_vAddr );
             kassert(iv_nextBlock);
         }
         return;
@@ -247,10 +248,10 @@ void Block::setPageAllocateFromZero(uint64_t i_vAddr)
 
 void Block::releaseAllPages()
 {
-        // Release all pages from page table.
+    // Release all pages from page table.
     PageTableManager::delRangeVA(iv_baseAddr, iv_baseAddr + iv_size);
 
-        // Free all pages back to page manager.
+    // Free all pages back to page manager.
     for(uint64_t page = iv_baseAddr;
         page < (iv_baseAddr + iv_size);
         page += PAGESIZE)
@@ -263,4 +264,40 @@ void Block::releaseAllPages()
             pte->setPageAddr(NULL);
         }
     }
+}
+
+void Block::updateRefCount( uint64_t i_vaddr,
+                            PageTableManager::UsageStats_t i_stats )
+{
+    // Check containment, call down chain if address isn't in this block.
+    if (!isContained(i_vaddr))
+    {
+        if (iv_nextBlock)
+        {
+            iv_nextBlock->updateRefCount(i_vaddr, i_stats);
+        }
+        else
+        {
+            // No block owns this address.  Code bug.
+            printk("updateRefCount> i_vaddr=0x%.lX\n", i_vaddr );
+            kassert(iv_nextBlock);
+        }
+        return;
+    }
+
+    ShadowPTE* spte = getPTE(i_vaddr);
+
+    // Adjust the LRU statistics
+    if( i_stats.R )
+    {
+        spte->zeroLRU();
+    }
+    else
+    {
+        spte->incLRU();
+    }
+
+    // track the changed/dirty bit
+    spte->setDirty( i_stats.C );
+
 }

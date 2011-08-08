@@ -28,6 +28,7 @@
 
 #include <kernel/task.H>
 #include <errno.h>
+#include <kernel/ptmgr.H>
 
 /** @class Segment
  *  @brief Virtual segment class to handle virtual memory management within
@@ -74,6 +75,19 @@ class Segment
          *          or -EFAULT if i_vaddr not found. @see errno.h
          */
          virtual uint64_t findPhysicalAddress(uint64_t i_vaddr) const { return -EFAULT; };
+
+        /**
+         * @brief Update LRU statistics on the block that owns the address
+         *
+         * @param[in] i_vaddr - Virtual Address of page
+         * @param[in] i_stats - Usage statistics
+         */
+        virtual void updateRefCount( uint64_t i_vaddr,
+				     PageTableManager::UsageStats_t i_stats )
+	{
+	    //default to a NOOP
+	    return;
+	};
 
     protected:
             /** The base address of the segment. */

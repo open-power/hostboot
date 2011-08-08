@@ -136,3 +136,9 @@ uint64_t BaseSegment::findPhysicalAddress(uint64_t i_vaddr) const
     return (iv_block ? iv_block->findPhysicalAddress(i_vaddr) : -EFAULT);
 }
 
+void BaseSegment::updateRefCount( uint64_t i_vaddr,
+				  PageTableManager::UsageStats_t i_stats )
+{
+    // Just call over to block chain
+    iv_block->updateRefCount(i_vaddr, i_stats);
+}

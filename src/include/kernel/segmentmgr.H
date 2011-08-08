@@ -29,6 +29,7 @@
 
 #include <kernel/task.H>
 #include <builtins.h>
+#include <kernel/ptmgr.H>
 
 // Forward declaration.
 class Segment;
@@ -107,6 +108,15 @@ class SegmentManager
          */
         static uint64_t findPhysicalAddress(uint64_t i_vaddr);
 
+        /**
+         * @brief Update LRU statistics on the block that owns the page
+         *
+         * @param[in] i_vaddr - Virtual Address of page
+         * @param[in] i_stats - Usage statistics
+         */
+        static void updateRefCount( uint64_t i_vaddr,
+				    PageTableManager::UsageStats_t i_stats );
+
 
     private:
         /** See handlePageFault. */
@@ -115,6 +125,9 @@ class SegmentManager
         void _addSegment(Segment* i_segment, size_t i_segId);
         /** See initSLB. */
         void _initSLB();
+            /** See updateRefCount. */
+	void _updateRefCount( uint64_t i_vaddr,
+			      PageTableManager::UsageStats_t i_stats );
 
         /** See findPhysicalAddress */
         uint64_t _findPhysicalAddress(uint64_t i_vaddr) const;

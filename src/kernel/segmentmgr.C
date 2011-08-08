@@ -49,6 +49,12 @@ uint64_t SegmentManager::findPhysicalAddress(uint64_t i_vaddr)
     return Singleton<SegmentManager>::instance()._findPhysicalAddress(i_vaddr);
 }
 
+void SegmentManager::updateRefCount( uint64_t i_vaddr,
+				     PageTableManager::UsageStats_t i_stats )
+{
+    Singleton<SegmentManager>::instance()._updateRefCount(i_vaddr,i_stats);
+}
+
 bool SegmentManager::_handlePageFault(task_t* i_task, uint64_t i_addr)
 {
     size_t segId = getSegmentIdFromAddress(i_addr);
@@ -112,3 +118,18 @@ uint64_t SegmentManager::_findPhysicalAddress(uint64_t i_vaddr) const
     return paddr;
 }
 
+void SegmentManager::_updateRefCount( uint64_t i_vaddr,
+				      PageTableManager::UsageStats_t i_stats )
+{
+    // This constant should come from page manager.  Segment size.
+    const size_t SLBE_s = 40;
+
+    // Get segment ID from effective address.
+    size_t segId = i_vaddr >> SLBE_s;
+
+    // Call contained segment object to update the reference count
+    if ((segId < MAX_SEGMENTS) && (NULL != iv_segments[segId]))
+    {
+        iv_segments[segId]->updateRefCount( i_vaddr, i_stats );
+    }
+}

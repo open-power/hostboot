@@ -25,7 +25,13 @@
 
 #include <limits.h>
 
+// Return a number >= input that is aligned on a 4-byte boundary
 #define ALIGN_4(u) ((u + 0x3ull) & ~0x3ull)
+
+// Return a number >= input that is aligned on a page boundary
 #define ALIGN_PAGE(u) ((u + (PAGESIZE-1)) & ~(PAGESIZE-1))
+
+// Return a number <= input that is aligned on a page boundary
+#define ALIGN_PAGE_DOWN(u) ((u) - (u)%PAGESIZE)
 
 #endif
