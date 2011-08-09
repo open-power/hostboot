@@ -6,3 +6,5 @@
 customrc
 *.CKP
 *.log
+my.sandboxrc
+cxxtest_sb/
