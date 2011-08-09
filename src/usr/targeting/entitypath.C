@@ -25,6 +25,7 @@ namespace TARGETING
 
 #define TARG_NAMESPACE "TARGETING::"
 #define TARG_CLASS "EntityPath::"
+#define TARG_LOC TARG_NAMESPACE TARG_CLASS TARG_FN ": "
 
 extern trace_desc_t* g_trac_targeting;
 
@@ -76,13 +77,9 @@ EntityPath& EntityPath::removeLast()
 {
     #define TARG_FN "removeLast()"
 
-    if(size() < 1)
-    {
-        TARG_ERR("Entity path empty (%d); cannot remove any path elements",
-                 size());
-        assert(0);
-    }
-
+    assert(size() >= 1, TARG_LOC "EntityPath empty (size = %d); cannot remove "
+           "any path elements", size());
+    
     iv_pathElement[size() - 1].type = TYPE_NA;
     iv_pathElement[size() - 1].instance = 0;
     --iv_size;
@@ -116,12 +113,8 @@ EntityPath& EntityPath::addLast(
 {
     #define TARG_FN "addLast(...)"
 
-    if(size() >= MAX_PATH_ELEMENTS)
-    {
-        TARG_ERR("Entity path cannot store any more path elements with size %d",
-                 size());
-        assert(size() < MAX_PATH_ELEMENTS);
-    }
+    assert(size() < MAX_PATH_ELEMENTS, TARG_LOC "Entity path cannot "
+           "store any more path elements with size %d", size());
 
     iv_pathElement[size()].type = i_type;
     iv_pathElement[size()].instance = i_instance;
@@ -189,12 +182,9 @@ bool EntityPath::equals(
 {
     #define TARG_FN "equals(...)"
 
-    if(i_size > MAX_PATH_ELEMENTS)
-    {
-        TARG_ERR("Caller specified invalid entity path size of %d which "
-                 "is greater than MAX_PATH_ELEMENTS",i_size,size());
-        assert(i_size <= MAX_PATH_ELEMENTS);
-    }
+    assert(i_size <= MAX_PATH_ELEMENTS, TARG_LOC "Caller specified invalid "
+           "entity path size of %d which is greater than MAX_PATH_ELEMENTS of "
+           "%d",i_size,MAX_PATH_ELEMENTS);
 
     return (   (i_rhs.iv_type == iv_type)
             && (i_size <= i_rhs.size())
@@ -215,12 +205,9 @@ const EntityPath::PathElement& EntityPath::operator[](
 {
     #define TARG_FN "operator[](...)"
 
-    if(i_index >= size())
-    {
-        TARG_ERR("Caller specified invalid entity path subscript of %d when "
-                 "size is only %d",i_index,size());
-        assert(0);
-    }
+    assert(i_index < size(), TARG_LOC "Caller specified invalid entity path "
+           "subscript of %d when size is only %d",i_index,size());
+    
     return iv_pathElement[i_index];
 
     #undef TARG_FN

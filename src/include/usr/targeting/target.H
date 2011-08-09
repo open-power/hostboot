@@ -171,7 +171,10 @@ class Target
             typename AttributeTraits<A>::Type const& i_attrValue)
         {
             bool l_wrote = trySetAttr<A>(i_attrValue);
-            assert(l_wrote);
+            
+            //@TODO: Remove assert once release has stabilized
+            assert(l_wrote,"TARGETING::Target::setAttr<%d>: trySetAttr "
+                   "returned false",A);
         }
 
     private: // Private helper interfaces
@@ -282,7 +285,10 @@ typename AttributeTraits<A>::Type Target::getAttr() const
 {
     typename AttributeTraits<A>::Type l_attrValue;
     bool l_read = tryGetAttr<A>(l_attrValue);
-    assert(l_read);
+    
+    //@TODO Remove assert once release has stablized 
+    assert(l_read,"TARGETING::Target::getAttr<%d>: tryGetAttr "
+           "returned false",A);
     return l_attrValue;
 }
 
@@ -295,7 +301,10 @@ const char* Target::getAttrAsString() const
     if(AttributeTraits<A>::hasStringConversion) { }
     typename AttributeTraits<A>::Type l_attrValue;
     bool l_read = tryGetAttr<A>(l_attrValue);
-    assert(l_read);
+
+    //@TODO Remove assert once release has stabilized
+    assert(l_read,"TARGETING::Target::getAttrAsString<%d>: tryGetAttr "
+           "returned false",A);
     return attrToString<A>(l_attrValue);
 }
 

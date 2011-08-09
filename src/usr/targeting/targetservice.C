@@ -34,6 +34,7 @@ namespace TARGETING
 
 #define TARG_NAMESPACE "TARGETING::"
 
+#define TARG_LOC TARG_NAMESPACE TARG_CLASS TARG_FN ": "
 
 //******************************************************************************
 // _start
@@ -168,18 +169,12 @@ void TargetService::getTopLevelTarget(
     Target*& o_targetHandle) const
 {
     #define TARG_FN "getTopLevelTarget(...)"
+    
+    assert(iv_initialized, TARG_LOC "TargetService not initialized");
 
-    if (iv_initialized)
-    {
-        EntityPath l_topLevelPhysicalPath(EntityPath::PATH_PHYSICAL);
-        l_topLevelPhysicalPath.addLast(TYPE_SYS, 0);
-        o_targetHandle = toTarget(l_topLevelPhysicalPath);
-    }
-    else
-    {
-        o_targetHandle = NULL;
-        assert(iv_initialized);
-    }
+    EntityPath l_topLevelPhysicalPath(EntityPath::PATH_PHYSICAL);
+    l_topLevelPhysicalPath.addLast(TYPE_SYS, 0);
+    o_targetHandle = toTarget(l_topLevelPhysicalPath);
 
     #undef TARG_FN
 }
@@ -195,19 +190,15 @@ void TargetService::exists(
     #define TARG_FN "exists(...)"
 
     bool l_found = false;
-    if (iv_initialized)
+
+    assert(iv_initialized, TARG_LOC "TargetService not initialized");
+
+    for (uint32_t i = 0; i < iv_maxTargets; ++i)
     {
-        for (uint32_t i = 0; i < iv_maxTargets; ++i)
+        if (i_entityPath == (*iv_targets)[i].getAttr<ATTR_PHYS_PATH> ())
         {
-            if (i_entityPath == (*iv_targets)[i].getAttr<ATTR_PHYS_PATH> ())
-            {
-                l_found = true;
-            }
+            l_found = true;
         }
-    }
-    else
-    {
-        assert(iv_initialized);
     }
 
     o_exists = l_found;
@@ -227,22 +218,18 @@ Target* TargetService::toTarget(
     // Used by -> operator on EntityPath for convenience (can be dangerous
     // though!)
     Target* l_pTarget = NULL;
-    if (iv_initialized)
+
+    assert(iv_initialized, TARG_LOC "TargetService not initialized");
+
+    for (uint32_t i = 0; i < iv_maxTargets; ++i)
     {
-        for (uint32_t i = 0; i < iv_maxTargets; ++i)
+        if (i_entityPath == (*iv_targets)[i].getAttr<ATTR_PHYS_PATH> ())
         {
-            if (i_entityPath == (*iv_targets)[i].getAttr<ATTR_PHYS_PATH> ())
-            {
-                l_pTarget = &(*iv_targets)[i];
-                break;
-            }
+            l_pTarget = &(*iv_targets)[i];
+            break;
         }
     }
-    else
-    {
-        assert(iv_initialized);
-    }
-
+    
     return l_pTarget;
 
     #undef TARG_FN
@@ -258,22 +245,18 @@ void TargetService::masterProcChipTargetHandle(
     #define TARG_FN "masterProcChipTargetHandle(...)"
 
     Target* l_pTarget = NULL;
-    if (iv_initialized)
-    {
-        //@TODO Need to query the actual hardware and cross check it with
-        // PNOR to determine the master chip
-        // target; for now, just always report sys0.n0.proc0
-        EntityPath l_masterProcChipEntityPath(EntityPath::PATH_PHYSICAL);
-        l_masterProcChipEntityPath.addLast(TYPE_SYS, 0).addLast(TYPE_NODE, 0)
-            .addLast(TYPE_PROC, 0);
 
-        l_pTarget = l_masterProcChipEntityPath.operator->();
-    }
-    else
-    {
-        assert(iv_initialized);
-    }
+    assert(iv_initialized, TARG_LOC "TargetService not initialized");
+    
+    //@TODO Need to query the actual hardware and cross check it with
+    // PNOR to determine the master chip
+    // target; for now, just always report sys0.n0.proc0
+    EntityPath l_masterProcChipEntityPath(EntityPath::PATH_PHYSICAL);
+    l_masterProcChipEntityPath.addLast(TYPE_SYS, 0).addLast(TYPE_NODE, 0)
+        .addLast(TYPE_PROC, 0);
 
+    l_pTarget = l_masterProcChipEntityPath.operator->();
+    
     o_masterProcChipTargetHandle = l_pTarget;
 
     #undef TARG_FN
@@ -291,30 +274,25 @@ bool TargetService::tryGetPath(
     #define TARG_FN "tryGetPath(...)"
 
     bool l_exist = false;
-    if (iv_initialized)
+
+    assert(iv_initialized, TARG_LOC "TargetService not initialized");
+
+    switch (i_attr)
     {
-        switch (i_attr)
-        {
-            case ATTR_PHYS_PATH:
-                l_exist = i_pTarget->tryGetAttr<ATTR_PHYS_PATH> (o_entityPath);
-                break;
-            case ATTR_AFFINITY_PATH:
-                l_exist = i_pTarget->tryGetAttr<ATTR_AFFINITY_PATH> (
-                    o_entityPath);
-                break;
-            case ATTR_POWER_PATH:
-                l_exist = i_pTarget->tryGetAttr<ATTR_POWER_PATH> (o_entityPath);
-                break;
-            default:
-                TARG_ERR("BUG; i_attr = 0x%08X does not map to an entity "
-                         "path");
-                assert(0);
-                break;
-        }
-    }
-    else
-    {
-        assert(iv_initialized);
+        case ATTR_PHYS_PATH:
+            l_exist = i_pTarget->tryGetAttr<ATTR_PHYS_PATH> (o_entityPath);
+            break;
+        case ATTR_AFFINITY_PATH:
+            l_exist = i_pTarget->tryGetAttr<ATTR_AFFINITY_PATH> (
+                o_entityPath);
+            break;
+        case ATTR_POWER_PATH:
+            l_exist = i_pTarget->tryGetAttr<ATTR_POWER_PATH> (o_entityPath);
+            break;
+        default:
+            assert(0, TARG_LOC "i_attr = 0x%08X does not map to an "
+                   "entity path",i_attr);
+            break;
     }
 
     return l_exist;
@@ -336,16 +314,13 @@ void TargetService::getAssociated(
 
     do {
 
-    assert(iv_initialized);
-
-    if(   (i_pTarget == NULL)
-       || (i_pTarget == MASTER_PROCESSOR_CHIP_TARGET_SENTINEL) )
-    {
-        TARG_ERR("BUG; caller tried to get association using a NULL target "
-                 "handle or the master processor chip target handle sentinel. "
-                 "i_pTarget = %p",i_pTarget);
-        assert(0);
-    }
+    assert(iv_initialized, TARG_LOC "TargetService not initialized");
+    
+    assert(   (i_pTarget != NULL) 
+           && (i_pTarget != MASTER_PROCESSOR_CHIP_TARGET_SENTINEL),
+           TARG_LOC "Caller tried to get association using a NULL target "
+           "handle or the master processor chip target handle sentinel. "
+           "i_pTarget = %p",i_pTarget);
 
     // Start with no elements
     o_list.clear();
@@ -375,10 +350,10 @@ void TargetService::getAssociated(
                 }
                 else
                 {
-                    TARG_ERR("BUG; iv_associationMappings[i].associationDir "
-                             "= 0x%X not supported",
-                             iv_associationMappings[i].associationDir);
-                    assert(0);
+                    assert(0, TARG_LOC 
+                           "iv_associationMappings[i].associationDir "
+                           "= 0x%X not supported",
+                           iv_associationMappings[i].associationDir);
                 }
             }
             break;
@@ -398,95 +373,90 @@ void TargetService::dump() const
 {
     #define TARG_FN "dump(...)"
 
-    if (iv_initialized)
-    {
-        TARG_INF("Targets (size=%d):",
-                 sizeof(Target)*iv_maxTargets);
+    assert(iv_initialized, TARG_LOC "TargetService not initialized");
 
-        for (uint32_t i = 0; i < iv_maxTargets; ++i)
+    TARG_INF("Targets (size=%d):",
+             sizeof(Target)*iv_maxTargets);
+
+    for (uint32_t i = 0; i < iv_maxTargets; ++i)
+    {
+        TARG_INF(
+            "[Target %d] "
+            "Class = 0x%X, "
+            "Type = 0x%X, "
+            "Model = 0x%X",
+            i,
+            (*iv_targets)[i].getAttr<ATTR_CLASS>(),
+            (*iv_targets)[i].getAttr<ATTR_TYPE>(),
+            (*iv_targets)[i].getAttr<ATTR_MODEL>());
+        TARG_INF("Physical");
+        (*iv_targets)[i].getAttr<ATTR_PHYS_PATH>().dump();
+
+        EntityPath l_entityPath;
+        if( (*iv_targets)[i].tryGetAttr<ATTR_AFFINITY_PATH>(l_entityPath) )
         {
-            TARG_INF(
-                "[Target %d] "
-                "Class = 0x%X, "
-                "Type = 0x%X, "
-                "Model = 0x%X",
-                i,
-                (*iv_targets)[i].getAttr<ATTR_CLASS>(),
-                (*iv_targets)[i].getAttr<ATTR_TYPE>(),
-                (*iv_targets)[i].getAttr<ATTR_MODEL>());
-            TARG_INF("Physical");
-            (*iv_targets)[i].getAttr<ATTR_PHYS_PATH>().dump();
-
-            EntityPath l_entityPath;
-            if( (*iv_targets)[i].tryGetAttr<ATTR_AFFINITY_PATH>(l_entityPath) )
-            {
-                TARG_INF("Affinity");
-                l_entityPath.dump();
-            }
-
-            if( (*iv_targets)[i].tryGetAttr<ATTR_POWER_PATH>(l_entityPath) )
-            {
-                TARG_INF("Power");
-                l_entityPath.dump();
-            }
-
-            uint8_t l_dummyRw = 0;
-            if ((*iv_targets)[i].tryGetAttr<ATTR_DUMMY_RW> (l_dummyRw))
-            {
-                TARG_INF("Dummy = 0x%X",
-                    l_dummyRw);
-            }
-
-            TARG_INF("Supports FSI SCOM = %d",
-            (*iv_targets)[i].getAttr<ATTR_PRIMARY_CAPABILITIES>()
-                .supportsFsiScom);
-            TARG_INF("Supports XSCOM SCOM = %d",
-            (*iv_targets)[i].getAttr<ATTR_PRIMARY_CAPABILITIES>()
-                .supportsXscom);
-            TARG_INF("Supports Inband SCOM = %d",
-            (*iv_targets)[i].getAttr<ATTR_PRIMARY_CAPABILITIES>()
-                .supportsInbandScom);
-
-            ScomSwitches l_switches = {0};
-            if ( (*iv_targets)[i].tryGetAttr<ATTR_SCOM_SWITCHES>(l_switches) )
-            {
-                TARG_INF("Use FSI SCOM = %d",l_switches.useFsiScom);
-                TARG_INF("Use XSCOM = %d",l_switches.useXscom);
-                TARG_INF("Use inband SCOM = %d",l_switches.useInbandScom);
-            }
-
-            uint64_t l_xscomBaseAddr = 0;
-            if ( (*iv_targets)[i].tryGetAttr<ATTR_XSCOM_BASE_ADDRESS>(
-                l_xscomBaseAddr) )
-            {
-                TARG_INF("XSCOM Base Address = 0x%X",l_xscomBaseAddr);
-            }
-
-            XscomChipInfo l_xscomChipInfo = {0};
-            if ( (*iv_targets)[i].tryGetAttr<ATTR_XSCOM_CHIP_INFO>(
-                l_xscomChipInfo) )
-            {
-                TARG_INF("XSCOM Node ID = 0x%X",l_xscomChipInfo.nodeId);
-                TARG_INF("XSCOM Chip ID = 0x%X",l_xscomChipInfo.chipId);
-            }
-
-            I2cChipInfo l_i2cChipInfo = {0};
-            if( (*iv_targets)[i].tryGetAttr<ATTR_I2C_CHIP_INFO>( l_i2cChipInfo ) )
-            {
-                TARG_INF( "I2C Bus Speed = 0x%X",
-                          l_i2cChipInfo.busSpeed );
-                TARG_INF( "I2C Device Address = 0x%X",
-                          l_i2cChipInfo.deviceAddr );
-                TARG_INF( "I2C Device Port = 0x%X",
-                          l_i2cChipInfo.devicePort );
-                TARG_INF( "I2C Master Engine = 0x%X",
-                          l_i2cChipInfo.deviceMasterEng );
-            }
+            TARG_INF("Affinity");
+            l_entityPath.dump();
         }
-    }
-    else
-    {
-        assert(iv_initialized);
+
+        if( (*iv_targets)[i].tryGetAttr<ATTR_POWER_PATH>(l_entityPath) )
+        {
+            TARG_INF("Power");
+            l_entityPath.dump();
+        }
+
+        uint8_t l_dummyRw = 0;
+        if ((*iv_targets)[i].tryGetAttr<ATTR_DUMMY_RW> (l_dummyRw))
+        {
+            TARG_INF("Dummy = 0x%X",
+                l_dummyRw);
+        }
+
+        TARG_INF("Supports FSI SCOM = %d",
+        (*iv_targets)[i].getAttr<ATTR_PRIMARY_CAPABILITIES>()
+            .supportsFsiScom);
+        TARG_INF("Supports XSCOM SCOM = %d",
+        (*iv_targets)[i].getAttr<ATTR_PRIMARY_CAPABILITIES>()
+            .supportsXscom);
+        TARG_INF("Supports Inband SCOM = %d",
+        (*iv_targets)[i].getAttr<ATTR_PRIMARY_CAPABILITIES>()
+            .supportsInbandScom);
+
+        ScomSwitches l_switches = {0};
+        if ( (*iv_targets)[i].tryGetAttr<ATTR_SCOM_SWITCHES>(l_switches) )
+        {
+            TARG_INF("Use FSI SCOM = %d",l_switches.useFsiScom);
+            TARG_INF("Use XSCOM = %d",l_switches.useXscom);
+            TARG_INF("Use inband SCOM = %d",l_switches.useInbandScom);
+        }
+
+        uint64_t l_xscomBaseAddr = 0;
+        if ( (*iv_targets)[i].tryGetAttr<ATTR_XSCOM_BASE_ADDRESS>(
+            l_xscomBaseAddr) )
+        {
+            TARG_INF("XSCOM Base Address = 0x%X",l_xscomBaseAddr);
+        }
+
+        XscomChipInfo l_xscomChipInfo = {0};
+        if ( (*iv_targets)[i].tryGetAttr<ATTR_XSCOM_CHIP_INFO>(
+            l_xscomChipInfo) )
+        {
+            TARG_INF("XSCOM Node ID = 0x%X",l_xscomChipInfo.nodeId);
+            TARG_INF("XSCOM Chip ID = 0x%X",l_xscomChipInfo.chipId);
+        }
+
+        I2cChipInfo l_i2cChipInfo = {0};
+        if( (*iv_targets)[i].tryGetAttr<ATTR_I2C_CHIP_INFO>( l_i2cChipInfo ) )
+        {
+            TARG_INF( "I2C Bus Speed = 0x%X",
+                      l_i2cChipInfo.busSpeed );
+            TARG_INF( "I2C Device Address = 0x%X",
+                      l_i2cChipInfo.deviceAddr );
+            TARG_INF( "I2C Device Port = 0x%X",
+                      l_i2cChipInfo.devicePort );
+            TARG_INF( "I2C Master Engine = 0x%X",
+                      l_i2cChipInfo.deviceMasterEng );
+        }
     }
 
     return;
