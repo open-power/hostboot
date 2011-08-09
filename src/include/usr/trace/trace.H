@@ -22,6 +22,7 @@
 /******************************************************************************/
 
 const uint32_t TRACE_BUF_VERSION = 0x01;    // Trace buffer version
+const uint32_t TRACE_COMP_TRACE  = 0x434F;  // Component Field Trace - "CO"
 const uint32_t TRACE_FIELDTRACE  = 0x4654;  // Field Trace - "FT"
 const uint32_t TRACE_FIELDBIN    = 0x4644;  // Binary Field Trace - "FD"
 
@@ -264,8 +265,6 @@ private:
      *  @brief  Retrieve trace descriptor for input component name
      *
      *  @param [in] i_comp Component name to retrieve trace descriptor for.
-     *
-     *  TODO - Not Supported Yet
      *
      *  @return Valid trace descriptor on success, NULL on failure.
      */

@@ -188,6 +188,52 @@ public:
     }
 
     /**
+     * @test Test String Trace Interface
+     */
+    void testTracString(void)
+    {
+        trace_desc_t *g_trac_test = NULL;
+        TRAC_INIT_BUFFER(&g_trac_test, "STRING", 4096);
+
+        if(g_trac_test == NULL)
+        {
+            TS_FAIL("g_trac_test was returned as NULL!");
+        }
+        else
+        {
+            TRACFCOMP(g_trac_test,"String at end '%s'", "Last");
+            TRACFCOMP(g_trac_test,"%s: String at beginning", "FIRST");
+            TRACFCOMP(g_trac_test,"Test '%s' string", "middle");
+
+            const char * str = "This is a \tlong string\nwith horizontal tab and newline.";
+            TRACFCOMP(g_trac_test,"Testing (c,u,s,X): %c, %u, %s 0x%X", 'b',0x11,str,10);
+
+            TRACFCOMP(g_trac_test,"Testing string len 1: %s, %s, %s", "A", "B", "C");
+            TRACFCOMP(g_trac_test,"Testing NULL string: %s", "");
+
+            TRACFCOMP(g_trac_test,"Testing string alignment: %s %s", "hello", "world");
+            TRACFCOMP(g_trac_test,"Testing string alignment: %s %s", "Hostboot", "Software");
+            TRACFCOMP(g_trac_test,"Testing string alignment: %s %s", "Hostboot2", "Software3");
+
+            TRACFCOMP(g_trac_test,"%s %s %s %s", "Four", "strings", "by", "themselves");
+
+            TRACFCOMP(g_trac_test,"Testing special characters: %s",
+                      "?!@#$%^&*()\"/\'\\<>.,:;");
+
+            TRACFCOMP(g_trac_test,"Testing percent: %% %%%d %%%s 100%%", 50, "hello");
+
+            TRACFCOMP(g_trac_test, INFO_MRK"Testing all number types (s,c,u,X,d): %s, %c %u 0x%X %d",
+                      "hello",'a',10,11,12);
+            TRACFCOMP(g_trac_test, "Testing all number types (c,u,s,X,d): %c %u %s 0x%X %d",
+                      'b',13,"world!",14,15);
+            TRACFCOMP(g_trac_test, "Testing all number types (c,u,X,d,s): %c %u 0x%X %d %s",
+                      'c',16,17,18,"Hostboot");
+            TRACFCOMP(g_trac_test, "Testing all number types (s,c,s,u,s,X): %s %c %s %u %s 0x%X",
+                      "Astring",'d',"Bstring12",19,"Cstring123",20);
+        }
+    }
+
+    /**
      * @test Test max number of buffers
      */
     void testTracMaxBuffers(void)

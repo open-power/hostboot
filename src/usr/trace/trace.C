@@ -21,6 +21,7 @@
 #include <sys/task.h>
 #include <sys/sync.h>
 #include <string.h>
+#include <util/align.H>
 
 #include <trace/trace.H>
 
@@ -280,27 +281,88 @@ void Trace::trace_adal_write_all(trace_desc_t *io_td,
     /*  Local Variables                                                       */
     /*------------------------------------------------------------------------*/
     uint32_t                l_entry_size = 0;
-    trace_entire_entry_t    l_entry;
+    uint32_t                l_data_size= 0;
+    //trace_entire_entry_t    l_entry;
+    trace_bin_entry_t       l_entry;
+    uint64_t                l_str_map = 0;
+
 
     /*------------------------------------------------------------------------*/
     /*  Code                                                                  */
     /*------------------------------------------------------------------------*/
 
-    // This code is incorrect for determining formatting but will work for now.
     uint32_t num_args = 0;
+    uint32_t num_4byte_args = 0; //fsp-trace counts 8-byte args as 2 4-byte args
     const char* _fmt = i_fmt;
-    while ('\0' != *_fmt)
-    {
-        if ('%' == *_fmt)
-            num_args++;
-        _fmt++;
-    }
 
-    if((num_args <= TRAC_MAX_ARGS) && (io_td != NULL))
+    va_list args;
+    va_start(args, i_type);
+    for (size_t i = 0; i <= strlen(_fmt); i++)
     {
+        if ('%' == _fmt[i])
+        {
+            i++;
+
+            if ('%' == _fmt[i])
+            {
+                continue;
+            }
+            else if ('s' == _fmt[i])
+            {
+                // Set flag to indicate argument is a string
+                l_str_map = l_str_map | (1 << num_args);
+
+                // String counts as one 4-byte arg
+                num_args++;
+                num_4byte_args++;
+
+                char * l_str = va_arg(args, char *);
+                size_t l_strLen = strlen(l_str);
+
+                // Add to total size of number of arguments we're tracing
+                // and account for word alignment
+                l_data_size += l_strLen + 1;
+                l_data_size = ALIGN_4(l_data_size);
+
+                //printk("Trace: STRING %s: strlen %d num_args %d l_data_size %d\n",
+                //       l_str, static_cast<uint32_t>(l_strLen),
+                //       num_args, l_data_size);
+                //printk("Trace: l_str_map 0x%16llX\n", static_cast<long long>(l_str_map));
+            }
+            else
+            {
+                // Numbers count as two 4-byte arg
+                num_args++;
+                num_4byte_args += 2;
+
+                // Retrieve the argument to increment to next one
+                uint64_t l_tmpData = va_arg(args, uint64_t);
+
+                // Add to total size; data is word aligned
+                l_data_size += sizeof(l_tmpData);
+            }
+        }
+    }
+    va_end(args);
+
+    if((num_4byte_args <= TRAC_MAX_ARGS) && (io_td != NULL))
+    {
+        // Fill in the entry structure
+        l_entry.stamp.tid = static_cast<uint32_t>(task_gettid());
+
+        // Length is equal to size of data
+        l_entry.head.length = l_data_size;
+        //l_entry.head.tag = TRACE_FIELDTRACE;
+        l_entry.head.tag = TRACE_COMP_TRACE;
+        l_entry.head.hash = i_hash;
+        l_entry.head.line = i_line;
+
+        // Time stamp
+        convertTime(&l_entry.stamp);
 
         // Calculate total space needed
-        l_entry_size = sizeof(trace_entry_stamp_t);
+        l_entry_size = l_data_size;
+        l_entry_size += sizeof(trace_entry_stamp_t);
         l_entry_size += sizeof(trace_entry_head_t);
 
         // We always add the size of the entry at the end of the trace entry
@@ -308,55 +370,80 @@ void Trace::trace_adal_write_all(trace_desc_t *io_td,
         // need to add that on to total size
         l_entry_size += sizeof(uint32_t);
 
-        // Now add on size for actual number of arguments we're tracing
-        l_entry_size += (num_args * sizeof(uint64_t));
-
         // Word align the entry
-        l_entry_size = (l_entry_size + 3) & ~3;
+        l_entry_size = ALIGN_4(l_entry_size);
 
-        // Fill in the entry structure
-        l_entry.stamp.tid = static_cast<uint32_t>(task_gettid());
+        // Allocate buffer for the arguments we're tracing
+        void * l_buffer = malloc(l_data_size);
+        memset(l_buffer, 0, l_data_size);
+        char * l_ptr = static_cast<char *> (l_buffer);
 
-        // Length is equal to size of data
-        l_entry.head.length = (num_args * sizeof(uint64_t));
-        l_entry.head.tag = TRACE_FIELDTRACE;
-        l_entry.head.hash = i_hash;
-        l_entry.head.line = i_line;
-
-        // Time stamp
-        convertTime(&l_entry.stamp);
-
-        uint64_t* data = &l_entry.args[0];
-
+        // Now copy the arguments to the buffer
         va_list args;
         va_start(args, i_type);
         for (size_t i = 0; i < num_args; i++)
         {
-            *data = va_arg(args, uint64_t);
-            data++;
+            uint32_t l_strLen = 0;
+
+            if (l_str_map & (1 << i))
+            {
+                // Save string to buffer
+                strcpy(l_ptr, va_arg(args, char *));
+
+                //printk("Trace: Saved String %s Arg[%d]\n", l_ptr, static_cast<uint32_t>(i));
+
+                // Length = string length + NULL termination
+                l_strLen += (strlen(l_ptr) + 1);
+
+                // Increment pointer to next word alignment
+                l_ptr += l_strLen;
+                l_ptr = reinterpret_cast<char *>(
+                        ALIGN_4(reinterpret_cast<uint64_t>(l_ptr)) );
+
+                //printk("Trace::trace_adal_write_all - l_buffer %p l_ptr %p l_strLen %d\n",
+                //       l_buffer, l_ptr, l_strLen);
+                //printk("Trace::trace_adal_write_all - num_args %d l_data_size %d l_entry_size %d\n",
+                //       num_args, l_data_size, l_entry_size);
+            }
+            else
+            {
+                // Save number to buffer & increment pointer (no need to align)
+                *(reinterpret_cast<uint64_t *>(l_ptr)) = va_arg(args, uint64_t);
+                l_ptr += sizeof(uint64_t);
+            }
         }
         va_end(args);
-
-        // Now put total size at end of buffer
-        // Note that fsp-trace assumes this to be a 32 bit long word
-        uint32_t *l_size = reinterpret_cast<uint32_t *>
-                            (&(l_entry.args[num_args]));
-        *l_size = l_entry_size;
 
         // We now have total size and need to reserve a part of the trace
         // buffer for this
 
         // CRITICAL REGION START
         mutex_lock(&iv_trac_mutex);
+
         // Update the entry count
         io_td->te_count++;
 
+        // First write the header
         writeData(io_td,
                   static_cast<void *>(&l_entry),
-                  l_entry_size);
+                  sizeof(l_entry));
+
+        // Now write the actual data
+        writeData(io_td,
+                  l_buffer,
+                  l_data_size);
+
+        // Now write the size at the end
+        // Note that fsp-trace assumes this to be a 32 bit long word
+        writeData(io_td,
+                  static_cast<void *>(&l_entry_size),
+                  sizeof(l_entry_size));
 
         mutex_unlock(&iv_trac_mutex);
         // CRITICAL REGION END
+
+        // Free allocated memory
+        free(l_buffer);
     }
 
     return;
@@ -397,11 +484,11 @@ void Trace::trace_adal_write_bin(trace_desc_t *io_td,const trace_hash_val i_hash
         // need to add that on to total size
         l_entry_size += sizeof(uint32_t);
 
-        // Now add on size for acutal size of the binary data
+        // Now add on size for actual size of the binary data
         l_entry_size += i_size;
 
         // Word align the entry
-        l_entry_size = (l_entry_size + 3) & ~3;
+        l_entry_size = ALIGN_4(l_entry_size);
 
         // Fill in the entry structure
         l_entry.stamp.tid = static_cast<uint32_t>(task_gettid());
@@ -480,8 +567,8 @@ void Trace::writeData(trace_desc_t *io_td,
             // Get the pointer to current location in buffer
             l_buf_ptr = reinterpret_cast<char *>(io_td) + io_td->next_free;
             // Figure out the alignment
-            l_align = ( (reinterpret_cast<uint64_t>(l_buf_ptr) + 3) & ~3) -
-                          reinterpret_cast<uint64_t>(l_buf_ptr);
+            l_align = ALIGN_4(reinterpret_cast<uint64_t>(l_buf_ptr)) -
+                      reinterpret_cast<uint64_t>(l_buf_ptr);
             // Add on the alignment
             l_buf_ptr = reinterpret_cast<void *>(reinterpret_cast<uint64_t>
                          (l_buf_ptr) + l_align);
@@ -500,8 +587,8 @@ void Trace::writeData(trace_desc_t *io_td,
         // Get the pointer to current location in buffer
         l_buf_ptr = reinterpret_cast<char *>(io_td) + io_td->next_free;
         // Figure out the alignment
-        l_align = ( (reinterpret_cast<uint64_t>(l_buf_ptr) + 3) & ~3) -
-                                  reinterpret_cast<uint64_t>(l_buf_ptr);
+        l_align = ALIGN_4(reinterpret_cast<uint64_t>(l_buf_ptr)) -
+                  reinterpret_cast<uint64_t>(l_buf_ptr);
         // Add on the alignment
         l_buf_ptr = reinterpret_cast<void *>(reinterpret_cast<uint64_t>
                                  (l_buf_ptr) + l_align);
@@ -514,7 +601,7 @@ void Trace::writeData(trace_desc_t *io_td,
         // has the potential to be un-word aligned.  If two parts of the binary
         // trace had this problem then this code would not work.
         // Note that fsp-trace will ignore garbage data in the unaligned areas.
-        l_total_size = (l_total_size + 3) & ~3;
+        l_total_size = ALIGN_4(l_total_size);
         io_td->next_free += l_total_size;
 
     }while(0);
