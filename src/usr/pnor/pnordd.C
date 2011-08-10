@@ -18,10 +18,11 @@
 #include <errl/errlmanager.H>
 #include "pnordd.H"
 #include <pnor/pnorif.H>
+#include <pnor/pnor_reasoncodes.H>
 
-#define FAKE_PNOR_START 7*1024*1024
+#define FAKE_PNOR_START 5*1024*1024
 #define FAKE_PNOR_END 8*1024*1024
-
+#define FAKE_PNOR_SIZE 3*1024*1024
 
 extern trace_desc_t* g_trac_pnor;
 
@@ -158,7 +159,7 @@ errlHndl_t PnorDD::read(void* o_buffer,
                         size_t& io_buflen,
                         uint64_t i_address)
 {
-    TRACDCOMP(g_trac_pnor, "PnorDD::read(i_address=0x%llx)> ", i_address);
+    //TRACDCOMP(g_trac_pnor, "PnorDD::read(i_address=0x%llx)> ", i_address);
     errlHndl_t l_err = NULL;
 
     do{
@@ -194,7 +195,7 @@ errlHndl_t PnorDD::write(void* i_buffer,
                          size_t& io_buflen,
                          uint64_t i_address)
 {
-    TRACDCOMP(g_trac_pnor, "PnorDD::write(i_address=0x%llx)> ", i_address);
+    //TRACDCOMP(g_trac_pnor, "PnorDD::write(i_address=0x%llx)> ", i_address);
     errlHndl_t l_err = NULL;
 
     do{
@@ -272,7 +273,7 @@ PnorDD::PnorDD()
 PnorDD::~PnorDD()
 {
 
-    //Nothing todo for now
+    //Nothing to do for now
 }
 
 errlHndl_t PnorDD::verifyAddressRange(uint64_t i_address,
@@ -282,10 +283,22 @@ errlHndl_t PnorDD::verifyAddressRange(uint64_t i_address,
 
     do{
 
-        if((i_address < FAKE_PNOR_START) ||
-           ((i_address+i_length) > FAKE_PNOR_END))
+        if((i_address+i_length) > FAKE_PNOR_SIZE)
         {
-            //@TODO create errorlog
+            TRACFCOMP( g_trac_pnor, "PnorDD::verifyAddressRange> Invalid Address Requested : i_address=%d", i_address );
+            /*@
+             * @errortype
+             * @moduleid     PNOR::MOD_PNORDD_VERIFYADDRESSRANGE
+             * @reasoncode   PNOR::RC_INVALID_SECTION
+             * @userdata1    Requested Address
+             * @userdata2    Requested Length
+             * @devdesc      PnorDD::verifyAddressRange> Invalid Address requested
+             */
+            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                            PNOR::MOD_PNORDD_VERIFYADDRESSRANGE,
+                                            PNOR::RC_INVALID_ADDRESS,
+                                            TO_UINT64(i_address),
+                                            TO_UINT64(i_length));
             break;
         }
 

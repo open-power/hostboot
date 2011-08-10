@@ -34,6 +34,7 @@ sub printUsage;
 
 #List of files to copy.  Path is relative to git repository.
 my @files = ("src/build/tools/exthbdump.pl",
+	     "src/build/simics/post_model_hook.simics",
              "src/build/trace/traceHB.py",
              "img/hbotStringFile",
              "img/hbicore.syms",
@@ -41,7 +42,9 @@ my @files = ("src/build/tools/exthbdump.pl",
              "img/hbicore.bin",
              "img/hbicore_test.bin",
              "img/hbicore.list",
-             "img/hbicore_test.list");
+             "img/hbicore_test.list",
+	     "img/hbicore_extended.bin",
+	     "img/pnor.toc");
 
 #Directories in base git repository
 my @gitRepoDirs = ("img",
@@ -182,7 +185,8 @@ foreach (@files)
     #print "$filename, $directories, $suffix\n";
 
     #Copy .bin to the img dir
-    if ($suffix eq ".bin")
+    if (($suffix eq ".bin") ||
+	($suffix eq ".toc"))
     {
         $copyDir = $imgDir;
     }

@@ -13,7 +13,8 @@
 #include <errl/errltypes.H>
 #include <pnor/pnorif.H>
 #include <devicefw/userif.H>
-//#include "../pnordd.H"
+
+#define BASE_SCRATCH_SPACE 2*1024*1024+1024*512  //2.5MB offset in fake PNOR
 
 extern trace_desc_t* g_trac_pnor;
 using namespace TARGETING;
@@ -24,24 +25,26 @@ class PnorDdTest : public CxxTest::TestSuite
   public:
 
     /**
-     * @brief PNOR DD test #1
+     * @brief PNOR DD readWriteTest
      *        Write some data to PNOR and read it back again
+     *        Using fakePNOR scratch space (2.5 - 3 MB)
      */
-    void testPnorDD1(void)
+    void test_readwrite(void)
     {
       //@TODO: make this table driven so it can test more values
-      //@TODO: compare results with expected data.
       //@TODO: Add some more interesting tests
 
       TARGETING::Target* l_testTarget = MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
       size_t l_size = sizeof(uint64_t); 
       errlHndl_t l_err = NULL;
+      uint64_t fails = 0;
+      uint64_t total = 4;
 
       do{
-        TS_TRACE("testPnorDD1: starting");
+        TS_TRACE("PnorDdTest::test_readwrite: starting");
 
         // Perform PnorDD Write 1
-        uint64_t l_address = 0x100;
+        uint64_t l_address = BASE_SCRATCH_SPACE+0x100;
         uint64_t l_writeData = 0x12345678FEEDB0B0;
         l_err = deviceWrite(l_testTarget,
                             &l_writeData,
@@ -49,19 +52,14 @@ class PnorDdTest : public CxxTest::TestSuite
                             DEVICE_PNOR_ADDRESS(0, l_address));
         if (l_err)
             {
-          TS_FAIL("testPnorDD1: PNORDD write 1: deviceWrite() failed! Error committed.");
+          TS_FAIL("PnorDdTest::test_readwrite: PNORDD write 1: deviceWrite() failed! Error committed.");
+          fails++;
           break;
-            }
-        else
-            {
-          TS_TRACE("testPnorDD1: PNORDD write 1, Address 0x%llx, Data %llx",
-                   l_address,
-                   (long long unsigned)l_writeData);
             }
 
 
         // Perform PnorDD Write 2
-        l_address = 0x108;
+        l_address = BASE_SCRATCH_SPACE+0x108;
         l_writeData = 0xFEEDBEEF000ABCDE;
         l_err = deviceWrite(l_testTarget,
                             &l_writeData,
@@ -69,18 +67,13 @@ class PnorDdTest : public CxxTest::TestSuite
                             DEVICE_PNOR_ADDRESS(0, l_address));
         if (l_err)
             {
-          TS_FAIL("testPnorDD1: PNORDD write 2: deviceWrite() failed! Error committed.");
+          TS_FAIL("PnorDdTest::test_readwrite: PNORDD write 2: deviceWrite() failed! Error committed.");
+          fails++;
           break;
-            }
-        else
-            {
-          TS_TRACE("testPnorDD1: PNORDD write 2, Address 0x%llx, Data %llx",
-                   l_address,
-                   (long long unsigned)l_writeData);
             }
 
         // Perform PnorDD read 1
-        l_address = 0x100;
+        l_address = BASE_SCRATCH_SPACE+0x100;
         uint64_t l_readData = 0;
         l_err = deviceRead(l_testTarget,
                            &l_readData,
@@ -88,33 +81,95 @@ class PnorDdTest : public CxxTest::TestSuite
                            DEVICE_PNOR_ADDRESS(0, l_address));
         if (l_err)
             {
-          TS_FAIL("testPnorDD1: PNORDD read 1: deviceRead() failed! Error committed.");
+          TS_FAIL("PnorDdTest::test_readwrite: PNORDD read 1: deviceRead() failed! Error committed.");
+          fails++;
           break;
             }
-        else
+        else if(l_readData != 0x12345678FEEDB0B0)
             {
-          TS_TRACE("testPnorDD1: PNORDD read 1, Address 0x%llx, Data %llx",
-                   l_address,
-                   (long long unsigned)l_readData);
+          TS_FAIL("PnorDdTest::test_readwrite: PNORDD read 1: Read data not expected value. Addr: 0x%llx, ExpData: 0x12345678FEEDB0B0, ActData: 0x%llx",
+                  l_address, (long long unsigned)l_readData);
+          fails++;
+          break;
             }
 
         // Perform PnorDD read 2
-        l_address = 0x108;
+        l_address = BASE_SCRATCH_SPACE+0x108;
         l_err = deviceRead(l_testTarget,
                            &l_readData,
                            l_size,
                            DEVICE_PNOR_ADDRESS(0, l_address));
         if (l_err)
             {
-          TS_FAIL("testPnorDD1: PNORDD read 2: deviceRead() failed! Error committed.");
+          TS_FAIL("PnorDdTest::test_readwrite: PNORDD read 2: deviceRead() failed! Error committed.");
+          break;
+            }
+        else if(l_readData != 0xFEEDBEEF000ABCDE)
+            {
+          TS_FAIL("PnorDdTest::test_readwrite: PNORDD read 2: Read data not expected value. Addr: 0x%llx, ExpData: 0xFEEDBEEF000ABCDE, ActData: 0x%llx",
+                  l_address, (long long unsigned)l_readData );
+          fails++;
+          break;
+            }
+
+          }while(0);
+
+
+          TRACFCOMP(g_trac_pnor, "PnorDdTest::test_readwrite> %d/%d fails", fails, total );
+
+    };
+
+
+/*Not really a real test, just using to verify ext image is loading properly.
+Leaving it commented out because the test-case will not dynamically find the extended image based on the TOC
+//    void testPnorDD2(void)
+    {
+
+      TARGETING::Target* l_testTarget = MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
+      size_t l_size = sizeof(uint64_t); 
+      errlHndl_t l_err = NULL;
+
+      do{
+        TS_TRACE("testPnorDD2: starting");
+
+        //Read fakeext data
+        uint64_t l_address = 0x690;
+        uint64_t l_readData = 0;
+        l_err = deviceRead(l_testTarget,
+                           &l_readData,
+                           l_size,
+                           DEVICE_PNOR_ADDRESS(0, l_address));
+        if (l_err)
+            {
+          TS_FAIL("testPnorDD2: PNORDD read fakeext: deviceRead() failed! Error committed.");
           break;
             }
         else
             {
-          TS_TRACE("testPnorDD1: PNORDD read 2, Address 0x%llx, Data %llx",
+          TS_TRACE("testPnorDD2: PNORDD read fakeext, Address 0x%llx, Data %llx",
                    l_address,
                    (long long unsigned)l_readData);
             }
+
+        //Read fakeext data
+        l_address = 0x698;
+        l_readData = 0;
+        l_err = deviceRead(l_testTarget,
+                           &l_readData,
+                           l_size,
+                           DEVICE_PNOR_ADDRESS(0, l_address));
+        if (l_err)
+            {
+          TS_FAIL("testPnorDD2: PNORDD read fakeext: deviceRead() failed! Error committed.");
+          break;
+            }
+        else
+            {
+          TS_TRACE("testPnorDD2: PNORDD read fakeext, Address 0x%llx, Data %llx",
+                   l_address,
+                   (long long unsigned)l_readData);
+            }
+
 
           }while(0);
 
@@ -123,7 +178,7 @@ class PnorDdTest : public CxxTest::TestSuite
 
     };
 
-
+*/
 };     
 
 

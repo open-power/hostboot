@@ -1,0 +1,134 @@
+<pnorToc>
+    <sbeLoc>0x180
+        <length>8</length>
+        <format>number</format>
+    </sbeLoc>
+    <tocVersion>0xFFFF
+        <length>8</length>
+        <format>number</format>
+    </tocVersion>
+    <tocEntry>
+	<length>56</length>
+        <field type="eyeCatch">TOC
+            <length>8</length>
+            <format>string</format>
+        </field>
+        <field type="logical_offset">0
+            <length>8</length>
+            <format>number</format>
+        </field>
+        <field type="physical_offset">0
+            <length>8</length>
+            <format>number</format>
+        </field>
+        <field type="logical_size">0x690
+            <length>8</length>
+            <format>number</format>
+        </field>
+        <field type="physical_size">0x690
+            <length>8</length>
+            <format>number</format>
+        </field>
+        <field type="Act_logical_size">0
+            <length>8</length>
+            <format>number</format>
+        </field>
+        <field type="Act_physical_size">0
+            <length>8</length>
+            <format>number</format>
+        </field>
+    </tocEntry>
+    <tocEntry>
+	<length>56</length>
+        <field type="eyeCatch">HBI
+            <length>8</length>
+            <format>string</format>
+    	</field>
+        <field type="logical_offset">0x690
+            <length>8</length>
+            <format>number</format>
+        </field>
+        <field type="physical_offset">0x690
+            <length>8</length>
+            <format>number</format>
+        </field>
+        <field type="logical_size">0x7D000
+            <length>8</length>
+            <format>number</format>
+        </field>
+        <field type="physical_size">0x7D000
+            <length>8</length>
+            <format>number</format>
+        </field>
+        <field type="Act_logical_size">0
+            <length>8</length>
+            <format>number</format>
+        </field>
+        <field type="Act_physical_size">0
+            <length>8</length>
+            <format>number</format>
+        </field>
+    </tocEntry>
+    <tocEntry>
+	<length>56</length>
+        <field type="eyeCatch">GLOBAL
+            <length>8</length>
+            <format>string</format>
+        </field>
+        <field type="logical_offset">0x7D690
+            <length>8</length>
+            <format>number</format>
+        </field>
+        <field type="physical_offset">0x7D690
+            <length>8</length>
+            <format>number</format>
+        </field>
+        <field type="logical_size">4096
+            <length>8</length>
+            <format>number</format>
+        </field>
+        <field type="physical_size">4096
+            <length>8</length>
+            <format>number</format>
+        </field>
+        <field type="Act_logical_size">0
+            <length>8</length>
+            <format>number</format>
+        </field>
+        <field type="Act_physical_size">0
+            <length>8</length>
+            <format>number</format>
+        </field>
+    </tocEntry>
+    <tocEntry>
+	<length>56</length>
+        <field type="eyeCatch">HBD
+            <length>8</length>
+            <format>string</format>
+    	</field>
+        <field type="logical_offset">0x7E690
+            <length>8</length>
+            <format>number</format>
+        </field>
+        <field type="physical_offset">0x7E690
+            <length>8</length>
+            <format>number</format>
+        </field>
+        <field type="logical_size">8192
+            <length>8</length>
+            <format>number</format>
+        </field>
+        <field type="physical_size">8192
+            <length>8</length>
+            <format>number</format>
+        </field>
+        <field type="Act_logical_size">0
+            <length>8</length>
+            <format>number</format>
+        </field>
+        <field type="Act_physical_size">0
+            <length>8</length>
+            <format>number</format>
+        </field>
+    </tocEntry>
+</pnorToc>

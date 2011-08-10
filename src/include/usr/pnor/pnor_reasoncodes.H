@@ -11,6 +11,7 @@ namespace PNOR
         MOD_PNORRP_COMPUTEDEVICEADDR   = 0x02, /**< pnorrp.C : PnorRP::computeDeviceAddr */
         MOD_PNORRP_GETSECTIONINFO      = 0x03, /**< pnorrp.C : PnorRP::getSectionInfo */
         MOD_PNORRP_COMPUTESECTION      = 0x04, /**< pnorrp.C : PnorRP::computeSection */
+        MOD_PNORDD_VERIFYADDRESSRANGE  = 0x05  /**< pnordd.C : PnorDD::verifyAddressRange */
     };
 
     enum PNORReasonCode

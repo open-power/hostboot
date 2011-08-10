@@ -1,5 +1,5 @@
 ROOTPATH = ../..
 
-SUBDIRS = linker.d
+SUBDIRS = linker.d tocgen.d
 
 include ${ROOTPATH}/config.mk

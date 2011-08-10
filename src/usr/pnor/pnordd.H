@@ -17,7 +17,7 @@ enum lscMode
   MMRD = 0,  /**< Indicates PNOR is in MMRD Mode */
   PMWR,      /**< Indicates PNOR is in PMWR Mode */    
 
-  LAST_MODE = PMWR,
+  LAST_MODE,
 };
 
 

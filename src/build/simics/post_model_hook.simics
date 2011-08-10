@@ -1,0 +1,38 @@
+################################################################################
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: firmsim firmsim_vob/firmsim_comp/simics/post_model_hook.simics 1$
+#
+# IBM CONFIDENTIAL
+#
+# OBJECT CODE ONLY SOURCE MATERIALS
+#
+# COPYRIGHT International Business Machines Corp. 2011,2011
+# All Rights Reserved
+#
+# The source code for this program is not published or otherwise
+# divested of its trade secrets, irrespective of what has been
+# deposited with the U.S. Copyright Office.
+#
+# IBM_PROLOG_END_TAG
+# post_model_hook.simics
+# This file is used to run a set of commands on the simics console after
+# modules have loaded.
+################################################################################
+#       Example for Hostboot group:
+#@os.environ["HOSTBOOT_SYMS"]="./hbicore.syms"
+#@os.environ["HOSTBOOT_OFILE"]="./hbotStringFile"
+#add-directory path="/esw/fips740/Builds/built/hostboot"
+#run-python-file traceHB.py
+#@del os.environ["HOSTBOOT_SYMS"]
+################################################################################
+
+
+#setup traces
+run-python-file traceHB.py
+
+#Load extended image and pnor.toc into phys_mem
+#This will be merged into once the proper tools are written.
+phys_mem.load-file ../img/hbicore_extended.bin 0x500690
+phys_mem.load-file ../img/pnor.toc 0x500000
