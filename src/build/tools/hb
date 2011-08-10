@@ -117,6 +117,16 @@ hb_helptext()
         echo "  in it, while /.../foo/ will create a subdirectory within foo"
         echo "  by the name of your repository's directory name."
         ;;
+    objsizes)
+        echo "  Topic 'objsizes'"
+        echo
+        echo "  Usage:"
+        echo "      hb objsizes"
+        echo
+        echo "  Reads the ELF header information from all of the hostboot"
+        echo "  modules and generates a CSV output of the sizes of the text"
+        echo "  and data sections of the modules."
+        ;;
     customrc)
         echo "  Topic 'customrc'"
         echo
@@ -146,7 +156,7 @@ hb_helptext()
         echo "      hb help [<cmd>|<topic>]"
         echo
         echo "  Available Commands:"
-        echo "      workon, simsetup, prime, startsimics, rsync"
+        echo "      workon, simsetup, prime, startsimics, rsync, objsizes"
         echo
         echo "  Additional Help Topics:"
         echo "      customrc"
@@ -263,6 +273,23 @@ hb_rsync()
     fi
 }
 
+hb_objsizes()
+{
+    [ -z "${HOSTBOOTROOT}" ] && echo "Missing HOSTBOOTROOT." && exit -1
+
+    echo "Object,Text Size,Data Size"
+
+    objdump -h ${HOSTBOOTROOT}/img/*.elf ${HOSTBOOTROOT}/img/*.so | \
+    grep -e ".elf" -e ".so:" -e ".text " -e ".data " | \
+    sed "s/.so:.*/.so/" | \
+    sed "s/.elf:.*/.elf/" | \
+    sed 's/.*\.text *\([0-9a-f]*\).*/,0x\1/' | \
+    sed "s/.*\.data *\([0-9a-f]*\).*/,0x\1/" | \
+    sed "N ; N ; s/\n//g" | \
+    xargs -n1 perl -e 'printf "%s,%d,%d\n", map { 0 == hex $_ ? $_ : hex $_ } split /\,/,shift;' | \
+    sed "s/.*\///"
+}
+
 if [ 0 == $# ]; then
     hb_helptext
     exit -1
@@ -286,6 +313,9 @@ startsimics)
     ;;
 rsync)
     hb_rsync $*
+    ;;
+objsizes)
+    hb_objsizes $*
     ;;
 *)
     hb_helptext $*
