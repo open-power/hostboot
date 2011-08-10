@@ -16,7 +16,7 @@ class HeapManager
 	{
 	    BUCKETS = 8,
 
-	    MAX_ALLOC_SIZE = (1 << (BUCKETS + 4)) - 8,
+	    MAX_ALLOC_SIZE = (1 << (BUCKETS + 3)) - 8,
 	};
 
     protected:
