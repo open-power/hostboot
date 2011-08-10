@@ -28,7 +28,7 @@ DIRECT_BOOT_OBJECTS = start.o kernel.o taskmgr.o cpumgr.o syscall.o \
                       scheduler.o exception.o vmmmgr.o timemgr.o \
                       syscall_stub.o syscall_task.o syscall_misc.o \
                       syscall_msg.o syscall_mmio.o syscall_time.o \
-                      init_main.o vfs_main.o sync.o futexmgr.o \
+                      syscall_mm.o init_main.o vfs_main.o sync.o futexmgr.o \
                       ptmgr.o segmentmgr.o basesegment.o devicesegment.o \
 		      block.o cxxtest_data.o cpuid.o misc.o
 

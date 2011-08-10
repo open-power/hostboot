@@ -106,3 +106,8 @@ bool VmmManager::_pteMiss(task_t* t, uint64_t effAddr)
     return rc;
 }
 
+int VmmManager::mmAllocBlock(MessageQueue* i_mq,void* i_va,uint64_t i_size)
+{
+    return BaseSegment::mmAllocBlock(i_mq,i_va,i_size);
+}
+

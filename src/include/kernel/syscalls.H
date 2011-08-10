@@ -56,17 +56,18 @@ namespace Systemcalls
 
             /** futex_wait() */
     FUTEX_WAIT,
-
             /** futex_wake() */
     FUTEX_WAKE,
 
             /** shutdown() */
     MISC_SHUTDOWN,
-
             /** cpu_core_type() */
-        MISC_CPUCORETYPE,
+    MISC_CPUCORETYPE,
             /** cpu_dd_level() */
-        MISC_CPUDDLEVEL,
+    MISC_CPUDDLEVEL,
+
+            /** mm_alloc_block() */
+    MM_ALLOC_BLOCK,
 
 	SYSCALL_MAX
     };

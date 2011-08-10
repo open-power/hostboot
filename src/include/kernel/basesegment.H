@@ -6,6 +6,8 @@
 
 #include <kernel/segment.H>
 
+// Forward declaration.
+class MessageQueue;
 class Block;
 
 /** @class BaseSegment
@@ -40,6 +42,16 @@ class BaseSegment : public Segment
          * Calls block chain to deal with page fault.
          */
         bool handlePageFault(task_t* i_task, uint64_t i_addr);
+
+        /**
+         * @brief Allocates a block of virtual memory of the given size
+         * @param i_mq[in] - Message queue to be associated with the block
+         * @param i_va[in] - Base virtual address of the block to be allocated
+         * @param i_size[in] - Requested virtual memory size of the block
+         * @return int - 0 for successful block allocation, non-zero otherwise
+         */
+        static int mmAllocBlock(MessageQueue* i_mq,void* i_va,
+                                uint64_t i_size);
 
     private:
         /**

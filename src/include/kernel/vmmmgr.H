@@ -6,6 +6,8 @@
 #include <kernel/types.h>
 #include <kernel/spinlock.H>
 
+class MessageQueue;
+
 class VmmManager
 {
     public:
@@ -67,6 +69,16 @@ class VmmManager
          * @return int - 0 for successful unmap, non-zero otherwise
          */
         static int devUnmap(void* ea);
+
+        /**
+         * @brief Allocates a block of virtual memory of the given size
+         * @param i_mq[in] - Message queue to be associated with the block
+         * @param i_va[in] - Base virtual address of the block to be allocated
+         * @param i_size[in] - Requested virtual memory size of the block
+         * @return int - 0 for successful block allocation, non-zero otherwise
+         */
+        static int mmAllocBlock(MessageQueue* i_mq,void* i_va,uint64_t i_size);
+
 
     protected:
         VmmManager();

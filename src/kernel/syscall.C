@@ -54,6 +54,7 @@ namespace Systemcalls
     void Shutdown(task_t *t);
     void CpuCoreType(task_t *t);
     void CpuDDLevel(task_t *t);
+    void MmAllocBlock(task_t *t);
 
     syscall syscalls[] =
 	{
@@ -73,18 +74,20 @@ namespace Systemcalls
 
 	    &MmioMap,  // MMIO_MAP
 	    &MmioUnmap,  // MMIO_UNMAP
-            &DevMap,
-            &DevUnmap,
+            &DevMap,  // DEV_MAP
+            &DevUnmap,  // DEV_UNMAP
 
 	    &TimeNanosleep,  // TIME_NANOSLEEP
 
-            &FutexWait,  // FUTEX_WAIT
-            &FutexWake,  // FUTEX_WAKE
+        &FutexWait,  // FUTEX_WAIT
+        &FutexWake,  // FUTEX_WAKE
 
-            &Shutdown,  // MISC_SHUTDOWN
+        &Shutdown,  // MISC_SHUTDOWN
 
-            &CpuCoreType,  // MISC_CPUCORETYPE
-            &CpuDDLevel,  // MISC_CPUDDLEVEL
+        &CpuCoreType,  // MISC_CPUCORETYPE
+        &CpuDDLevel,  // MISC_CPUDDLEVEL
+
+        &MmAllocBlock, // MM_ALLOC_BLOCK
 	};
 };
 
@@ -396,6 +399,19 @@ namespace Systemcalls
     void CpuDDLevel(task_t *t)
     {
         TASK_SETRTN(t, CpuID::getCpuDD());
+    }
+
+    /**
+     * Allocate a block of virtual memory within the base segment
+     * @param[in] t: The task used to allocate a block in the base segment
+     */
+    void MmAllocBlock(task_t* t)
+    {
+        MessageQueue* mq = (MessageQueue*)TASK_GETARG0(t);
+        void* va = (void*)TASK_GETARG1(t);
+        uint64_t size = (uint64_t)TASK_GETARG2(t);
+
+        TASK_SETRTN(t, VmmManager::mmAllocBlock(mq,va,size));
     }
 
 };

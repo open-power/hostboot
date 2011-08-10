@@ -10,6 +10,7 @@
 #include <sys/time.h>
 #include <sys/task.h>
 #include <sys/mmio.h>
+#include <sys/mm.h>
 
 class slbtest: public CxxTest::TestSuite
 {
@@ -60,6 +61,20 @@ class slbtest: public CxxTest::TestSuite
             if (rc != 0)
             {
                 TS_FAIL("Failed to unmap using mmio_dev_unmap\n");
+            }
+        }
+
+        void testSegBlock()
+        {
+            int rc = -1;
+            msg_q_t mq = msg_q_create(); //Create empty message queue
+            uint64_t va = 0xC800000000; //800GB
+            uint64_t size = 0x40000000; //1GB
+            printk("Allocate 1GB block with empty msgq @ vaddr = 800GB within base segment\n");
+            rc = mm_alloc_block(mq,reinterpret_cast<void*>(va),size);
+            if (rc != 0)
+            {
+                TS_FAIL("Failed to create BaseSegment block\n");
             }
         }
 

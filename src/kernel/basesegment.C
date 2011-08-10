@@ -70,3 +70,11 @@ bool BaseSegment::handlePageFault(task_t* i_task, uint64_t i_addr)
     // Tail recursion to block chain.
     return iv_block->handlePageFault(i_task, i_addr);
 }
+
+/**
+ * Allocates a block of virtual memory of the given size
+ */
+int BaseSegment::mmAllocBlock(MessageQueue* i_mq,void* i_va,uint64_t i_size)
+{
+    return 0;
+}
