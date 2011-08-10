@@ -26,6 +26,9 @@ TRAC_INIT(&g_trac_xscom, "XSCOM", 4096);
 namespace XSCOM
 {
 
+// Master processor virtual address
+uint64_t* g_masterProcVirtAddr = NULL;
+
 // Register XSCcom access functions to DD framework
 DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
                       DeviceFW::XSCOM,
@@ -227,11 +230,23 @@ errlHndl_t xscomPerformOp(DeviceFW::OperationType i_opType,
         l_XSComMutex = mmio_xscom_mutex();
         mutex_lock(l_XSComMutex);
 
-        // Calculate MMIO addr
-        uint64_t l_page = l_mmioAddr.page();
-        uint64_t l_offset_64 = (l_mmioAddr.offset()/sizeof(uint64_t));
-        uint64_t* l_virtAddr = static_cast<uint64_t*>
-                (mmio_map(reinterpret_cast<void*>(l_page), 1));
+        uint64_t* l_virtAddr = NULL;
+        if (i_target == TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL)
+        {
+            if (g_masterProcVirtAddr == NULL)
+            {
+                g_masterProcVirtAddr =  static_cast<uint64_t*>
+                (mmio_dev_map(reinterpret_cast<void*>(l_XSComBaseAddr), THIRTYTWO_GB));
+            }
+            l_virtAddr = g_masterProcVirtAddr;
+        }
+        else
+        {
+            //@todo - handle slave processors here
+        }
+
+        // Get the offset
+        uint64_t l_offset = l_mmioAddr.offset(l_XSComBaseAddr);
 
         // Keep MMIO access until XSCOM successfully done or error
         uint64_t l_data = 0;
@@ -245,13 +260,13 @@ errlHndl_t xscomPerformOp(DeviceFW::OperationType i_opType,
             l_data = 0;
             if (i_opType == DeviceFW::READ)
             {
-                 l_data = *(l_virtAddr + l_offset_64);
+                 l_data = *(l_virtAddr + l_offset);
                  memcpy(io_buffer, &l_data, sizeof(l_data));
             }
             else
             {
                 memcpy(&l_data, io_buffer, sizeof(l_data));
-                *(l_virtAddr + l_offset_64) = l_data;
+                *(l_virtAddr + l_offset) = l_data;
             }
 
             // Check for error or done
@@ -259,24 +274,20 @@ errlHndl_t xscomPerformOp(DeviceFW::OperationType i_opType,
 
         } while (l_hmer.mXSComStatus == HMER::XSCOM_BLOCKED);
 
-        // @todo - Need to un-map for now
-        mmio_unmap(l_virtAddr, 1);
-
         // Unlock
         mutex_unlock(l_XSComMutex);
 
         // Done, un-pin
         task_affinity_unpin();
 
-        TRACFCOMP(g_trac_xscom, "xscomPerformOp: OpType %llx, Address 0%llx, MMIO Address %llx",
+        TRACFCOMP(g_trac_xscom, "xscomPerformOp: OpType 0x%llX, Address 0x%llX, MMIO Address 0x%llX",
                        static_cast<uint64_t>(i_opType),
                        l_addr,
                        static_cast<uint64_t>(l_mmioAddr));
-        TRACFCOMP(g_trac_xscom, "xscomPerformOp: Page %llx; Offset %llx; VirtAddr %llx; l_virtAddr+l_offset %llx",
-                       l_page,
-                       l_offset_64,
+        TRACFCOMP(g_trac_xscom, "xscomPerformOp: l_offset 0x%llX; VirtAddr %p; l_virtAddr+l_offset %p",
+                       l_offset,
                        l_virtAddr,
-                       l_virtAddr + l_offset_64);
+                       l_virtAddr + l_offset);
 
         if (i_opType == DeviceFW::READ)
         {

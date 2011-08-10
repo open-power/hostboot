@@ -160,18 +160,13 @@ class XSComP8Address
       ALWAYS_INLINE inline operator uint64_t() const;
 
     /**
-      * @brief Return the page-aligned value of the address
+      * @brief Return the address' 64-bit full offset from the input
+      * XSCOM base addr
       *
       * @return  uint64_t
       */
-      ALWAYS_INLINE inline uint64_t page() const;
-
-     /**
-       * @brief Return the address' byte offset from the aligned page
-       *
-       * @return  uint64_t
-       */
-     ALWAYS_INLINE inline uint64_t offset() const;
+      ALWAYS_INLINE inline uint64_t offset(
+                      const uint64_t i_xscomBaseAddr) const;
 
   private:
     /**
@@ -226,16 +221,9 @@ XSComP8Address::operator uint64_t() const
 
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
-uint64_t XSComP8Address::page() const
+uint64_t XSComP8Address::offset(const uint64_t i_xscomBaseAddr) const
 {
-    return ((mMmioAddress/PAGE_SIZE) *  PAGE_SIZE);
-}
-
-////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
-uint64_t XSComP8Address::offset() const
-{
-    return (mMmioAddress % PAGE_SIZE);
+    return ((mMmioAddress - i_xscomBaseAddr) / sizeof(uint64_t));
 }
 
 };
