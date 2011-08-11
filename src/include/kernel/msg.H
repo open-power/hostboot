@@ -3,6 +3,7 @@
 
 #include <kernel/types.h>
 #include <sys/msg.h>
+#include <kernel/spinlock.H>
 #include <util/locked/list.H>
 #include <util/locked/queue.H>
 

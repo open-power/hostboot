@@ -111,3 +111,8 @@ int VmmManager::mmAllocBlock(MessageQueue* i_mq,void* i_va,uint64_t i_size)
     return BaseSegment::mmAllocBlock(i_mq,i_va,i_size);
 }
 
+Spinlock* VmmManager::getLock()
+{
+    return &Singleton<VmmManager>::instance().lock;
+}
+

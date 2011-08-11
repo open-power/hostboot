@@ -15,13 +15,72 @@ typedef void* msg_q_t;
 struct msg_t
 {
     uint32_t type;
-    uint32_t __reserved__async;
+    struct
+    {
+        uint32_t __reserved__async:1;
+        uint32_t __reserved__unused:31;
+    };
     uint64_t data[2];
     void* extra_data;
 };
 
-// Message queue interfaces.
+// System-defined message types.
+/** @enum msg_sys_types_t
+ *  @brief Message types potentially sent from the kernel itself.
+ */
+enum msg_sys_types_t
+{
+    MSG_FIRST_SYS_TYPE = 0x80000000,
 
+    MSG_MM_RP_READ,
+    MSG_MM_RP_WRITE,
+    MSG_MM_RP_PERM,
+};
+
+/** @var msg_sys_types_t::MSG_MM_RP_READ
+ *  @brief Memory Management - Resource Provider Read
+ *
+ *  Sent from the kernel to a msg_q_t registered with mm_block_create when
+ *  a page is requested to be read in from a resource.
+ *
+ *  <pre>
+ *  Format:
+ *      type = MSG_MM_RP_READ
+ *      data[0] = virtual address requested
+ *      data[1] = address to place contents
+ *
+ *  Expected Response:
+ *      type = MSG_MM_RP_READ
+ *      data[0] = virtual address requested
+ *      data[1] = rc (0 or negative errno value)
+ *  </pre>
+ */
+/** @var msg_sys_types_t::MSG_MM_RP_WRITE
+ *  @brief Memory Management - Resource Provider Write
+ *
+ *  Sent from the kernel to a msg_q_t registered with mm_block_create when
+ *  a page is requested to be written back to a resource.
+ *
+ *  <pre>
+ *  Format:
+ *      type = MSG_MM_RP_WRITE
+ *      data[0] = virtual address requested
+ *      data[1] = address to read contents from
+ *
+ *  Expected Response:
+ *      type = MSG_MM_RP_WRITE
+ *      data[0] = virtual address requested
+ *      data[1] = rc (0 or negative errno value)
+ *  </pre>
+ */
+/** @var msg_sys_types_t::MSG_MM_RP_PERM
+ *  @brief Memory Management - Resource Provider Permission Fault
+ *
+ *  TODO.
+ */
+
+
+// Message queue interfaces.
 
 /** @fn msg_q_create
   * @brief Create a new message queue.
@@ -44,7 +103,7 @@ void msg_q_destroy( msg_q_t q );
   *
   * @param[in] q - handle of message queue to name
   * @param[in] name - name
-  * 
+  *
   * @return  Result of msg_sendrecv where zero indicates success
   */
 int msg_q_register(msg_q_t q, const char* name);
@@ -65,10 +124,10 @@ msg_q_t msg_q_resolve(const char* name);
 
 // Message interfaces.
 /** @fn msg_allocate
-  * @brief Allocate space for message 
+  * @brief Allocate space for message
   * @return Pointer to message
   */
-ALWAYS_INLINE 
+ALWAYS_INLINE
     inline msg_t* msg_allocate() { return (msg_t*)malloc(sizeof(msg_t)); }
 
 
@@ -81,11 +140,11 @@ ALWAYS_INLINE
     inline void msg_free(msg_t* m) { free(m); }
 
 
-/** @fn msg_send 
+/** @fn msg_send
   * @brief Send a message asynchronously.
   *
-  * This call adds the message queue then returns 
-  * to the caller. Any process waiting for a message 
+  * This call adds the message queue then returns
+  * to the caller. Any process waiting for a message
   * in the queue will awake with this message.
   *
   * @param[in] q - message queue
@@ -98,8 +157,8 @@ int msg_send(msg_q_t q, msg_t* msg);
 /** @fn msg_sendrecv
   * @brief Send a message to a server and get a response synchronously.
   *
-  * The calling [client] thread blocks until the recipient [server] receives 
-  * and replies to the message. 
+  * The calling [client] thread blocks until the recipient [server] receives
+  * and replies to the message.
   *
   * @param[in] q - message queue
   * @param[in,out] msg - message
@@ -112,8 +171,8 @@ int msg_sendrecv(msg_q_t q, msg_t* msg);
   * @brief Respond to a synchronous message.
   *
   * This is how server-side code responds to synchronous
-  * messaging when clients call msg_sendrecv().  
-  * 
+  * messaging when clients call msg_sendrecv().
+  *
   * @param[in] q - message queue
   * @param[in] msg - response message
   * @return Zero on success, else negative.
@@ -123,10 +182,10 @@ int msg_respond(msg_q_t q, msg_t* msg);
 
 /** @fn msg_wait
   * @brief  Read a message from the message queue.
-  * 
+  *
   * If a message is already on the queue, this call will return immediately
   * with the message. Otherwise the calling thread will block and wait for
-  * a message. 
+  * a message.
   *
   * @param[in] q - message queue to read
   * @return the message posted to the queue
@@ -142,7 +201,7 @@ msg_t* msg_wait(msg_q_t q);
   * @return true if asynchronous message
   */
 ALWAYS_INLINE
-    inline uint32_t msg_is_async(msg_t* msg) 
+    inline uint32_t msg_is_async(msg_t* msg)
 	{ return 0 == msg->__reserved__async; }
 
 #ifdef __cplusplus

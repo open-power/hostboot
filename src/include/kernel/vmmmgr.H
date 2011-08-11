@@ -84,6 +84,13 @@ class VmmManager
         VmmManager();
         ~VmmManager() {};
 
+        /** @brief Get spinlock for memory subsystem.
+         *  This is useful for passing to a deferred user-space message
+         *  handler so that the subsystem code is SMP-safe when the message
+         *  response is obtained.
+         */
+        static Spinlock* getLock();
+
     private:
         Spinlock lock;
 
@@ -91,6 +98,9 @@ class VmmManager
         void initSDR1();
 
         bool _pteMiss(task_t*, uint64_t);
+
+    public:
+        friend class Block;
 
 };
 

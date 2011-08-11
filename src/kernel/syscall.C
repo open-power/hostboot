@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <errno.h>
 #include <kernel/cpu.H>
 #include <kernel/cpumgr.H>
 #include <kernel/scheduler.H>
@@ -12,6 +13,7 @@
 #include <kernel/futexmgr.H>
 #include <kernel/cpuid.H>
 #include <kernel/misc.H>
+#include <kernel/msghandler.H>
 
 extern "C"
 void kernel_execute_decrementer()
@@ -110,18 +112,6 @@ void kernel_execute_system_call()
     }
 }
 
-#define TASK_GETARGN(t, n) (t->context.gprs[n+4])
-#define TASK_GETARG0(t) (TASK_GETARGN(t,0))
-#define TASK_GETARG1(t) (TASK_GETARGN(t,1))
-#define TASK_GETARG2(t) (TASK_GETARGN(t,2))
-#define TASK_GETARG3(t) (TASK_GETARGN(t,3))
-#define TASK_GETARG4(t) (TASK_GETARGN(t,4))
-#define TASK_GETARG5(t) (TASK_GETARGN(t,5))
-#define TASK_GETARG6(t) (TASK_GETARGN(t,6))
-#define TASK_GETARG7(t) (TASK_GETARGN(t,7))
-
-#define TASK_SETRTN(t, n) (t->context.gprs[3] = (n))
-
 namespace Systemcalls
 {
     void TaskYield(task_t* t)
@@ -186,6 +176,12 @@ namespace Systemcalls
 	msg_t* m = (msg_t*) TASK_GETARG1(t);
 	m->__reserved__async = 0; // set to async msg.
 
+        if (m->type >= MSG_FIRST_SYS_TYPE)
+        {
+            TASK_SETRTN(t, -EINVAL);
+            return;
+        }
+
 	mq->lock.lock();
 
 	// Get waiting (server) task.
@@ -213,10 +209,18 @@ namespace Systemcalls
 	msg_t* m = (msg_t*) TASK_GETARG1(t);
 	m->__reserved__async = 1; // set to sync msg.
 
-	mq->lock.lock();
+        if (m->type >= MSG_FIRST_SYS_TYPE)
+        {
+            TASK_SETRTN(t, -EINVAL);
+            return;
+        }
+
+        // Create pending response object.
 	MessagePending* mp = new MessagePending();
 	mp->key = m;
 	mp->task = t;
+
+	mq->lock.lock();
 
 	// Get waiting (server) task.
 	task_t* waiter = mq->waiting.remove();
@@ -249,20 +253,34 @@ namespace Systemcalls
 	    task_t* waiter = mp->task;
 
 	    mq->responses.erase(mp);
+            mq->lock.unlock();
 	    delete mp;
 
-	    waiter->cpu = t->cpu;
-	    TaskManager::setCurrentTask(waiter);
-            TASK_SETRTN(waiter,0);
+            if (m->type >= MSG_FIRST_SYS_TYPE)
+            {
+                TASK_SETRTN(t,
+                            ((MessageHandler*)waiter)->recvMessage(m));
 
-	    TASK_SETRTN(t,0);
-	    t->cpu->scheduler->addTask(t);
+                if (TaskManager::getCurrentTask() != t)
+                {
+                    t->cpu->scheduler->addTask(t);
+                }
+            }
+            else
+            {
+                waiter->cpu = t->cpu;
+                TaskManager::setCurrentTask(waiter);
+                TASK_SETRTN(waiter,0);
+
+                TASK_SETRTN(t,0);
+                t->cpu->scheduler->addTask(t);
+            }
 	}
 	else
 	{
 	    TASK_SETRTN(t, -1);
+            mq->lock.unlock();
 	}
-	mq->lock.unlock();
     }
 
     void MsgWait(task_t* t)
