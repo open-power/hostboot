@@ -40,7 +40,6 @@ function   usage()
 
     echo    "usage:"
     echo    "$0 [--quiet]  backing_tree_dir  sandbox_name  path_to_hbicore_test_img    "
-
 }
 
 
@@ -88,7 +87,7 @@ function    runtraceHB()
         exit 1
     fi
 
-    autosim $NOWIN --simcmd   "run-python-file ${SBXHOME}/src/build/trace/traceHB.py"
+    autosim $NOWIN --simcmd   "run-python-file ${SBXHOME}/src/build/simics/hb-simdebug.py"
     if [ $? -ne 0 ] ; then
         echo "ERROR 3: Unable to run $?"
         stopsim
@@ -107,7 +106,7 @@ function    runtraceHB()
 }
 
 
-##  mww verbose is the default.
+##  verbose is the default.
 VERBOSE=" --verbose"
 if [ "$1" = "--quiet" ] ; then
         VERBOSE=""
@@ -425,10 +424,10 @@ fi
 echo "====> dump trace buffer(s)..."
 runtraceHB  1> $SBXHOME/traceHB.log  2> /dev/null
 if [ $? -ne 0 ] ; then
-echo "ERROR: Unable to run $?"
-       stopsim
-       stopserver
-exit 1
+    echo "ERROR: Unable to run $?"
+    stopsim
+    stopserver
+    exit 1
 fi
 
 ########################################################

@@ -1,4 +1,21 @@
 #!/usr/bin/perl
+#############################################################################
+# $IBMCopyrightBlock:
+#
+# IBM Confidential
+#
+# Licensed Internal Code Source Materials
+#
+# IBM HostBoot Licensed Internal Code
+#
+# (C) Copyright IBM Corp. 2011
+#
+# The source code for this program is not published or other-
+# wise divested of its trade secrets, irrespective of what has
+# been deposited with the U.S. Copyright Office.
+#$
+#############################################################################
+
 
 #
 # Purpose:  This perl script needs to be executed from the
@@ -34,9 +51,10 @@ sub printUsage;
 
 #List of files to copy.  Path is relative to git repository.
 my @files = ("src/build/tools/exthbdump.pl",
-	     "src/build/simics/post_model_hook.simics",
+	         "src/build/simics/post_model_hook.simics",
              "src/build/trace/traceHB.py",
              "src/usr/errl/parser/bin/errlparser", 
+             "src/build/simics/hb-simdebug.py",
              "img/hbotStringFile",
              "img/hbicore.syms",
              "img/hbicore_test.syms",
@@ -44,8 +62,9 @@ my @files = ("src/build/tools/exthbdump.pl",
              "img/hbicore_test.bin",
              "img/hbicore.list",
              "img/hbicore_test.list",
-	     "img/hbicore_extended.bin",
-	     "img/pnor.toc");
+	         "img/hbicore_extended.bin",
+	         "img/pnor.toc"
+             );
 
 #Directories in base git repository
 my @gitRepoDirs = ("img",

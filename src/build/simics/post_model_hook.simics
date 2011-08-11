@@ -30,7 +30,7 @@
 
 
 #setup traces
-run-python-file traceHB.py
+run-python-file hb-simdebug.py
 
 #Load extended image and pnor.toc into phys_mem
 #This will be merged into once the proper tools are written.
