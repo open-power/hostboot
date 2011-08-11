@@ -426,6 +426,9 @@ errlHndl_t xscomPerformOp(DeviceFW::OperationType i_opType,
     mutex_t* l_XSComMutex;
     uint64_t l_addr = va_arg(i_args,uint64_t);
 
+    //@todo - Override the target to be the master sentinel
+    i_target = TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
+
     // Retry loop
     bool l_retry = false;
     uint8_t l_retryCtr = 0;
@@ -542,28 +545,28 @@ errlHndl_t xscomPerformOp(DeviceFW::OperationType i_opType,
         // Done, un-pin
         task_affinity_unpin();
 
-        TRACFCOMP(g_trac_xscom, "xscomPerformOp: OpType 0x%llX, Address 0x%llX, MMIO Address 0x%llX",
+        TRACFCOMP(g_trac_xscom, "xscomPerformOp: OpType 0x%.16llX, Address 0x%llX, MMIO Address 0x%llX",
                        static_cast<uint64_t>(i_opType),
                        l_addr,
                        static_cast<uint64_t>(l_mmioAddr));
-        TRACFCOMP(g_trac_xscom, "xscomPerformOp: l_offset 0x%llX; VirtAddr %p; l_virtAddr+l_offset %p",
+        TRACFCOMP(g_trac_xscom, "xscomPerformOp: l_offset 0x%.16llX; VirtAddr %p; l_virtAddr+l_offset %p",
                        l_offset,
                        l_virtAddr,
                        l_virtAddr + l_offset);
 
         if (i_opType == DeviceFW::READ)
         {
-            TRACFCOMP(g_trac_xscom, "xscomPerformOp: Read data: %llx", l_data);        }
+            TRACFCOMP(g_trac_xscom, "xscomPerformOp: Read data: %.16llx", l_data);        }
         else
         {
-            TRACFCOMP(g_trac_xscom, "xscomPerformOp: Write data: %llx", l_data);
+            TRACFCOMP(g_trac_xscom, "xscomPerformOp: Write data: %.16llx", l_data);
         }
 
         // Handle error
         if (l_hmer.mXSComStatus != HMER::XSCOM_GOOD)
         {
             uint64_t l_hmerVal = l_hmer;
-            TRACFCOMP(g_trac_xscom, ERR_MRK "XSCOM status error HMER: %llx, XSComStatus %llx",
+            TRACFCOMP(g_trac_xscom, ERR_MRK "XSCOM status error HMER: %.16llx, XSComStatus %llx",
                     l_hmerVal, l_hmer.mXSComStatus);
             /*@
              * @errortype

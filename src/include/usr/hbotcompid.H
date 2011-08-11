@@ -122,4 +122,12 @@ const compId_t HWPF_COMP_ID = 0x0900;
 const char HWPF_COMP_NAME[] = "hwpf";
 //@}
 
+/** @name FSI
+ *  FSI component
+ */
+//@{
+const compId_t FSI_COMP_ID = 0x0A00;
+const char FSI_COMP_NAME[] = "fsi";
+//@}
+
 #endif

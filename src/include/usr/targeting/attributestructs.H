@@ -117,6 +117,22 @@ struct I2cChipInfo
     uint8_t deviceMasterEng;    // Master I2C engine slave is hung off of
 } PACKED;
 
+//@todo - NOT READY YET
+/**
+ * @brief Structure which defines info necessary to setup a FSI master
+ *
+ * Structure which defines info necessary for a FSI master.  Only applicable
+ * for chip targets which include MFSI of CMFSI logic.  Structure is read-only.
+ */
+struct FsiMasterInfo
+{
+    uint64_t modebits;      ///< TBD
+    uint16_t clockRatio0;   ///< Clock Ratio 0
+    uint16_t clockRatio1;   ///< Clock Ratio 1
+
+    uint8_t numPorts;       ///< Number of possible FSI-slave ports
+} PACKED;
+
 } // End namespace TARGETING
 
 #endif // TARG_ATTRIBUTESTRUCTS_H

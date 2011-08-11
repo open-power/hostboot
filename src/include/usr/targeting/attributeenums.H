@@ -70,6 +70,7 @@ enum ATTRIBUTE_ID
     ATTR_INBAND_SCOM_CHIP_INFO  = 0x0B,
     ATTR_FSI_SCOM_CHIP_INFO     = 0x0C,
     ATTR_I2C_CHIP_INFO          = 0x0D,
+    ATTR_FSI_MASTER_INFO        = 0x0E,
 
     ATTR_DUMMY_WO               = 0xFD,
     ATTR_DUMMY_RO               = 0xFE,
