@@ -225,7 +225,8 @@ clean: ${SUBDIRS:.d=.clean}
 	       ${OBJECTS:.o=.o.hash} ${BEAMOBJS} ${LIBRARIES} \
 	       ${IMAGES} ${IMAGES:.bin=.list} ${IMAGES:.bin=.syms} \
 	       ${IMAGES:.bin=.bin.modinfo} ${IMAGES:.ruhx=.lid} \
-	       ${IMAGES:.ruhx=.lidhdr} ${IMAGE_EXTRAS} ${EXTRA_LIDS_} \
+	       ${IMAGES:.ruhx=.lidhdr} ${IMAGES:.bin=_extended.bin} \
+	       ${IMAGE_EXTRAS} ${EXTRA_LIDS_} \
 	       ${EXTRA_OBJS} ${_GENFILES})
 
 cscope: code_pass
