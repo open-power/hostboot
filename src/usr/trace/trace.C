@@ -277,6 +277,27 @@ void Trace::trace_adal_write_all(trace_desc_t *io_td,
                                  const uint32_t i_line,
                                  const int32_t i_type, ...)
 {
+    va_list args;
+    va_start(args, i_type);
+
+    getTheInstance()._trace_adal_write_all(io_td,
+                                           i_hash,
+                                           i_fmt,
+                                           i_line,
+                                           i_type, args);
+
+    va_end(args);
+}
+
+/******************************************************************************/
+// trace_adal_write_all
+/******************************************************************************/
+void Trace::_trace_adal_write_all(trace_desc_t *io_td,
+                                 const trace_hash_val i_hash,
+                                 const char * i_fmt,
+                                 const uint32_t i_line,
+                                 const int32_t i_type, va_list i_args)
+{
     /*------------------------------------------------------------------------*/
     /*  Local Variables                                                       */
     /*------------------------------------------------------------------------*/
@@ -295,8 +316,10 @@ void Trace::trace_adal_write_all(trace_desc_t *io_td,
     uint32_t num_4byte_args = 0; //fsp-trace counts 8-byte args as 2 4-byte args
     const char* _fmt = i_fmt;
 
-    va_list args;
-    va_start(args, i_type);
+    // Save a copy
+    va_list l_args;
+    va_copy (l_args, i_args);
+
     for (size_t i = 0; i <= strlen(_fmt); i++)
     {
         if ('%' == _fmt[i])
@@ -316,7 +339,7 @@ void Trace::trace_adal_write_all(trace_desc_t *io_td,
                 num_args++;
                 num_4byte_args++;
 
-                char * l_str = va_arg(args, char *);
+                char * l_str = va_arg(i_args, char *);
                 size_t l_strLen = strlen(l_str);
 
                 // Add to total size of number of arguments we're tracing
@@ -336,14 +359,13 @@ void Trace::trace_adal_write_all(trace_desc_t *io_td,
                 num_4byte_args += 2;
 
                 // Retrieve the argument to increment to next one
-                uint64_t l_tmpData = va_arg(args, uint64_t);
+                uint64_t l_tmpData = va_arg(i_args, uint64_t);
 
                 // Add to total size; data is word aligned
                 l_data_size += sizeof(l_tmpData);
             }
         }
     }
-    va_end(args);
 
     if((num_4byte_args <= TRAC_MAX_ARGS) && (io_td != NULL))
     {
@@ -379,8 +401,6 @@ void Trace::trace_adal_write_all(trace_desc_t *io_td,
         char * l_ptr = static_cast<char *> (l_buffer);
 
         // Now copy the arguments to the buffer
-        va_list args;
-        va_start(args, i_type);
         for (size_t i = 0; i < num_args; i++)
         {
             uint32_t l_strLen = 0;
@@ -388,7 +408,7 @@ void Trace::trace_adal_write_all(trace_desc_t *io_td,
             if (l_str_map & (1 << i))
             {
                 // Save string to buffer
-                strcpy(l_ptr, va_arg(args, char *));
+                strcpy(l_ptr, va_arg(l_args, char *));
 
                 //printk("Trace: Saved String %s Arg[%d]\n", l_ptr, static_cast<uint32_t>(i));
 
@@ -408,11 +428,12 @@ void Trace::trace_adal_write_all(trace_desc_t *io_td,
             else
             {
                 // Save number to buffer & increment pointer (no need to align)
-                *(reinterpret_cast<uint64_t *>(l_ptr)) = va_arg(args, uint64_t);
+                *(reinterpret_cast<uint64_t *>(l_ptr)) = va_arg(l_args, uint64_t);
                 l_ptr += sizeof(uint64_t);
             }
         }
-        va_end(args);
+
+        va_end(l_args);
 
         // We now have total size and need to reserve a part of the trace
         // buffer for this
@@ -453,6 +474,22 @@ void Trace::trace_adal_write_all(trace_desc_t *io_td,
 // trace_adal_write_bin
 /******************************************************************************/
 void Trace::trace_adal_write_bin(trace_desc_t *io_td,const trace_hash_val i_hash,
+                                 const uint32_t i_line,
+                                 const void *i_ptr,
+                                 const uint32_t i_size,
+                                 const int32_t type)
+{
+    getTheInstance()._trace_adal_write_bin(io_td, i_hash,
+                                           i_line,
+                                           i_ptr,
+                                           i_size,
+                                           type);
+}
+
+/******************************************************************************/
+// trace_adal_write_bin
+/******************************************************************************/
+void Trace::_trace_adal_write_bin(trace_desc_t *io_td,const trace_hash_val i_hash,
                                  const uint32_t i_line,
                                  const void *i_ptr,
                                  const uint32_t i_size,

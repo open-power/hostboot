@@ -16,6 +16,7 @@
 #include <trace/interface.H>
 #include <util/singleton.H>
 #include <sys/sync.h>
+#include <stdarg.h>
 
 /******************************************************************************/
 // Globals/Constants
@@ -148,11 +149,12 @@ public:
      *
      *  @return void
      */
-    void trace_adal_write_all(trace_desc_t *io_td,
+    static void trace_adal_write_all(trace_desc_t *io_td,
                               const trace_hash_val i_hash,
                               const char * i_fmt,
                               const uint32_t i_line,
                               const int32_t i_type, ...);
+
 
     /**
      *  @brief  Write binary data out to trace buffer
@@ -169,7 +171,7 @@ public:
      *
      *  @return void
      */
-    void trace_adal_write_bin(trace_desc_t * io_td,
+    static void trace_adal_write_bin(trace_desc_t * io_td,
                               const trace_hash_val i_hash,
                               const uint32_t i_line,
                               const void *i_ptr,
@@ -291,6 +293,44 @@ private:
     // Disabled copy constructor and assignment operator
     Trace(const Trace & right);
     Trace & operator=(const Trace & right);
+
+    /**
+     *  @brief  Write component trace out to input buffer
+     *
+     *  @param [in,out] io_td Trace descriptor of buffer to write to.
+     *  @param [in] i_hash Descriptive string hash value
+     *  @param [in] i_fmt Formatting string
+     *  @param [in] i_line Line number trace was done at
+     *  @param [in] i_type Type of trace (TRACE_DEBUG, TRACE_FIELD)
+     *  @param [in] i_args Variable argument list
+     *
+     *  @return void
+     */
+    void _trace_adal_write_all(trace_desc_t *io_td,
+                              const trace_hash_val i_hash,
+                              const char * i_fmt,
+                              const uint32_t i_line,
+                              const int32_t i_type, va_list i_args);
+
+    /**
+     *  @brief  Write binary data out to trace buffer
+     *
+     *  @param [in,out] io_td Trace descriptor of buffer to write to.
+     *  @param [in] i_hash Descriptive string hash value
+     *  @param [in] i_line Line number trace was done at
+     *  @param [in] i_ptr Pointer to binary data
+     *  @param [in] i_size Size of binary data
+     *  @param [in] i_type Type of trace (TRACE_DEBUG, TRACE_FIELD)
+     *
+     *  @return void
+     */
+    void _trace_adal_write_bin(trace_desc_t * io_td,
+                              const trace_hash_val i_hash,
+                              const uint32_t i_line,
+                              const void *i_ptr,
+                              const uint32_t i_size,
+                              const int32_t i_type);
+
 
     // Global Mutex
     mutex_t    iv_trac_mutex;
