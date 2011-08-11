@@ -15,6 +15,7 @@
 #include <stdlib.h>
 #include <errl/errltypes.H>
 #include <hbotcompid.H>
+#include <string.h>
 
 namespace ERRORLOG
 {
@@ -24,7 +25,7 @@ namespace ERRORLOG
  */
 class ErrlSctnHdr
 {
-    // ErrlSctn needs to set the header's parameters
+    // ErrlSctn accesses ErrlSctnHdr directly.
     friend class ErrlSctn;
 
     /**
@@ -55,6 +56,8 @@ class ErrlSctnHdr
     //        is currently not yet determined.
     //        Note: stream is currently not supported
 
+
+
 private:
 
     /**
@@ -64,6 +67,7 @@ private:
     ErrlSctnHdr& operator=(const ErrlSctnHdr& i_right);
 
     // Data
+    // Can/will be accessed by friend class ErrlSctn
     compId_t iv_compId;
     uint8_t iv_sctnVer;
     uint8_t iv_subSect;

@@ -156,6 +156,27 @@ void __assert(AssertBehavior i_assertb, int i_line);
 #define crit_assert(expr,...) { }
 #endif
 
+
+
+/** @brief  Make an assertion at compile time. If Boolean expression exp
+ *  is false, then the compile will stop with an error.  Example usage:
+ *            CPPASSERT( 2 == sizeof(compId_t));
+ *  which would be used in front of errl flattening code that assumes  
+ *  compId_t is 2 bytes in size.  Also with the use of -f short-enums 
+ *  compiler switch, one could assert 
+ *            CPPASSERT( 1 == sizeof(errlEventType_t));
+ *  If the assertion fails, it will be a wakeup call that the errlEventType_t 
+ *  enum has grown larger than a byte in size.  The mechanism to abend the
+ *  compile when the expression is false is to cause a typedef of a char array
+ *  that is -1 bytes in size.
+ *
+ *  Similar:  #define CHECK_SIZE(DATA, EXPECTED_SIZE)\
+ *       typedef char CHECKSIZEVAR[(EXPECTED_SIZE == sizeof(DATA)) -1]
+ * 
+ */
+#define CPPASSERT(exp) typedef char compile_time_assert_failed[2*((exp)!=0)-1]
+
+
 #ifdef __cplusplus
 };
 #endif

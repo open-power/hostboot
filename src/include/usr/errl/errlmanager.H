@@ -14,9 +14,14 @@
 #include <stdlib.h>
 #include <util/singleton.H>
 #include <errl/errltypes.H>
+#include <sys/sync.h>
+#include <vector>
+#include <kernel/timemgr.H>
 
 namespace ERRORLOG
 {
+
+
 
 /**
  *  @brief  Global function to log an error
@@ -79,7 +84,7 @@ public:
       * @brief  Returns a unique error log ID
       *
       * This routine generates a unique Error ID and assign it to
-      * the input error log
+      * the input error log. Mutates iv_currLogId.
       *
       * @return  Unique generated error log ID
       */
@@ -112,8 +117,27 @@ private:
     ErrlManager(const ErrlManager& i_right);
     ErrlManager& operator=(const ErrlManager& i_right);
 
-
+    /**
+      * @brief
+      * Current log ID: increment this when assigning log ID to a new errlog
+      * as it is being committed.
+      */
     uint32_t    iv_currLogId;
+
+
+    /**
+      * @brief
+      * Pointer to the header that preceeds the error log storage buffer
+      * in L3 RAM.  This may go away when we adopt PNOR, or else become
+      * instance variables instead of a pointer pointing within the
+      * storage buffer.
+      */
+    storage_header_t * iv_pStorage;
+
+    /**
+      * @brief Serialization for error log commits.
+      */
+    mutex_t    iv_mutex;
 
 };
 

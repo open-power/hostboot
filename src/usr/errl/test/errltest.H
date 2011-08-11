@@ -10,9 +10,9 @@
 #include <cxxtest/TestSuite.H>
 #include <errl/errlmanager.H>
 #include <errl/errlentry.H>
-#include <errl/errltypes.H>
+#include <hbotcompid.H>
 
-#define TEST_REASON_CODE    0x0F0F
+#define TEST_REASON_CODE    (ERRL_COMP_ID | 0x0F)
 #define TEST_SEVERITY       ERRORLOG::ERRL_SEV_INFORMATIONAL
 #define TEST_MOD_ID         0x0022
 
@@ -29,7 +29,6 @@
 #define TEST_USR_64BIT_2    0x9000000000000003
 
 
-#define TEST_RETURN_CODE    0xF0F0
 
 class ErrlTest: public CxxTest::TestSuite
 {
@@ -45,36 +44,92 @@ public:
      */
     void testErrl1(void)
     {
+        ERRORLOG::ErrlFFDC * pffdc;
 
         // An example that shows how to use macros to stuff data into
         // the two 64-bit user data parameters in the error log.
         // l_userData1 = 16bit(0):l_bit8_1:l_bit8_2:l_32bit_1
-        uint8_t l_8bit_1 = TEST_USR_8BIT_1;
-        uint8_t l_8bit_2 = TEST_USR_8BIT_2;
-        uint32_t l_32bit_1 = TEST_USR_32BIT_1;
-        uint64_t l_userData1 =
-              TWO_UINT32_TO_UINT64(
-                TO_UINT32(TWO_UINT8_TO_UINT16(l_8bit_1, l_8bit_2)), l_32bit_1);
+        uint8_t l_8bit_1 = TEST_USR_8BIT_1;      // 0x80
+        uint8_t l_8bit_2 = TEST_USR_8BIT_2;      // 0x93 
+        uint32_t l_32bit_1 = TEST_USR_32BIT_1;   // 0x80000001
+        uint64_t l_userData1 = 
+          TWO_UINT32_TO_UINT64( TO_UINT32(TWO_UINT8_TO_UINT16(l_8bit_1, l_8bit_2)), l_32bit_1);
+            // yields 0x0000809380000001
+
+
         // l_userData2 = l_16bit_1:l_16bit_2:l_32bit_2
-        uint16_t l_16bit_1 = TEST_USR_16BIT_1;
-        uint16_t l_16bit_2 = TEST_USR_16BIT_2;
-        uint32_t l_32bit_2 = TEST_USR_32BIT_2;
-        uint64_t l_userData2 =
-                TWO_UINT16_ONE_UINT32_TO_UINT64(l_16bit_1, l_16bit_2, l_32bit_2);
+        uint16_t l_16bit_1 = TEST_USR_16BIT_1;  // 0x8000
+        uint16_t l_16bit_2 = TEST_USR_16BIT_2;  // 0x9003
+        uint32_t l_32bit_2 = TEST_USR_32BIT_2;  // 0x90000003
+        uint64_t l_userData2 = TWO_UINT16_ONE_UINT32_TO_UINT64(l_16bit_1, l_16bit_2, l_32bit_2);
+            // yields 0x8000900390000003
 
         // Create an error log
         errlHndl_t l_err = new ERRORLOG::ErrlEntry(
-                                TEST_SEVERITY,
+                                ERRORLOG::ERRL_SEV_INFORMATIONAL,
                                 TEST_MOD_ID,
                                 TEST_REASON_CODE,
                                 l_userData1,
                                 l_userData2);
+
 
         // Make sure log is created
         if (l_err == NULL)
         {
             TS_FAIL("testErrl1: createErrlLog() outputs NULL pointer!");
         }
+
+
+        // These addFFDC() calls return a pointer to class ERRORLOG::ErrlFFDC
+        // but errlffdc.H is not publicly includable to give me the definition
+        // for it.  addFFDC() should return a Boolean indication of success.
+
+        const char * pch = "martha washington";
+        pffdc = l_err->addFFDC( ERRL_COMP_ID, pch, strlen( pch ), 1, 2 );
+        if ( NULL == pffdc )
+        {
+            TS_FAIL("testErrl1: addFFDC() output NULL pointer");
+        }
+
+        pch = "george washington"; 
+        pffdc = l_err->addFFDC( DEVFW_COMP_ID, pch, strlen( pch ), 3, 4 );
+        if ( NULL == pffdc )
+        {
+            TS_FAIL("testErrl1: addFFDC() output NULL pointer");
+        }
+
+        pch = "dwight eisenhour";  
+        pffdc = l_err->addFFDC( SCOM_COMP_ID, pch, strlen( pch ), 5, 6 );
+        if ( NULL == pffdc )
+        {
+            TS_FAIL("testErrl1: addFFDC() output NULL pointer");
+        }
+
+        pch = "ronald ";
+        pffdc = l_err->addFFDC( ERRL_COMP_ID, pch, strlen( pch ), 7, 8 );
+        if ( NULL == pffdc )
+        {
+            TS_FAIL("testErrl1: addFFDC() output NULL pointer");
+        }
+
+        // Append data to something already added.
+        pch = "reagan";
+        l_err->appendToFFDC( pffdc, pch, strlen(pch) );
+
+
+        // Add null data.
+        pffdc = l_err->addFFDC( ERRL_COMP_ID, NULL, 0,  9, 10 );
+        if ( NULL != pffdc )
+        {
+            TS_FAIL("testErrl1: addFFDC() returned non null");
+        }
+     
+ 
+
+
+
+
+
 
         // Verify log data
         else if (l_err->sev() != ERRORLOG::ERRL_SEV_INFORMATIONAL)
@@ -133,7 +188,7 @@ public:
 
         // Create an error log
         errlHndl_t l_err = new ERRORLOG::ErrlEntry(
-                                TEST_SEVERITY,
+                                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                 TEST_MOD_ID,
                                 TEST_REASON_CODE,
                                 l_userData1,

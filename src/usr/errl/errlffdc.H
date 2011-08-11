@@ -58,17 +58,6 @@ public:
      */
     ~ErrlFFDC();
 
-    /**
-     *  @brief Appends data to the section
-     *  Grows the section by the given amount
-     *
-     *  @param[in]  i_data      Pointer to data source
-     *  @param[in]  i_size      Data size (bytes)
-     *
-     *  @return None
-     */
-    void addData(const void *i_data,
-                 const uint32_t i_size);
 
 private:
     /**
@@ -77,8 +66,6 @@ private:
     ErrlFFDC(const ErrlFFDC& i_right);
     ErrlFFDC& operator=(const ErrlFFDC& i_right);
 
-    uint8_t*    iv_data;    // Data Pointer
-    uint32_t    iv_size;    // Data Length
 };
 
 

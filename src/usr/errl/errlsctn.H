@@ -82,6 +82,46 @@ public:
      */
     compId_t compId() const;
 
+
+    /**
+     *  @brief Appends data to the section
+     *  Grows the section by the given amount
+     *
+     *  @param[in]  i_data      Pointer to data source
+     *  @param[in]  i_size      Data size (bytes)
+     *
+     *  @return Size of new data or else zero on error.
+     */
+    uint64_t addData(const void *i_data, const uint64_t i_size);
+
+
+    /**
+     *  @brief Get flattened size. Typically called prior to flatten().
+     *  Allocate space for the flat data, then call flatten().  These
+     *  functions commonly used by ErrlManager when committing error
+     *  logs.
+     *
+     *  @return size
+     *
+     */
+    uint64_t flattenedSize();
+
+    /**
+     *  @brief Get flattened data.
+     *
+     *  @param[in,out] io_pBuffer  Pointer to memory where flattened
+     *  error log will go.
+     *  @param[in]     i_cbBuffer  Count of bytes of memory available
+     *  at io_pBuffer.  Caller should ensure there is enough memory
+     *  available by calling flattenedSize() first.
+     *
+     *  @return Count of bytes flattened.
+     *
+     */
+    uint64_t flatten( void * io_pBuffer, const uint64_t i_cbBuffer );
+
+
+
 private:
 
     /**
@@ -90,8 +130,14 @@ private:
     ErrlSctn(const ErrlSctn& i_right);
     ErrlSctn& operator=(const ErrlSctn& i_right);
 
-    // Section header
-    ErrlSctnHdr iv_header;
+    // A section header object for this section.
+    ErrlSctnHdr iv_ErrlSctnHdr;
+
+    // Pointer to user-added data
+    uint8_t*    iv_pData;
+
+    // Count of bytes of user-added data
+    uint64_t    iv_cbData;
 
 };
 
@@ -103,25 +149,28 @@ private:
 ////////////////////////////////////////////////////////////////////////////
 inline uint8_t ErrlSctn::sctnVer() const
 {
-    return iv_header.iv_sctnVer;
+    return iv_ErrlSctnHdr.iv_sctnVer;
 }
 
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 inline uint8_t ErrlSctn::subSect() const
 {
-    return iv_header.iv_subSect;
+    return iv_ErrlSctnHdr.iv_subSect;
 }
 
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 inline compId_t ErrlSctn::compId() const
 {
-    return iv_header.iv_compId;
+    return iv_ErrlSctnHdr.iv_compId;
 }
 
 
+
+
 } // End namespace
+
 
 #endif //ERRLSCTN_H
 

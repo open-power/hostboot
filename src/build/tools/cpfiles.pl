@@ -36,6 +36,7 @@ sub printUsage;
 my @files = ("src/build/tools/exthbdump.pl",
 	     "src/build/simics/post_model_hook.simics",
              "src/build/trace/traceHB.py",
+             "src/usr/errl/parser/bin/errlparser", 
              "img/hbotStringFile",
              "img/hbicore.syms",
              "img/hbicore_test.syms",

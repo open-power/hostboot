@@ -8,6 +8,9 @@
  *  This header file contains the definition of ErrlEntry related
  *  parameters.
  *
+ *  This file will be included by error log parsers that run
+ *  on pool machines, so the stuff in here needs to be generic.
+ *
  */
 
 /**
@@ -55,7 +58,8 @@ namespace ERRORLOG
 {
 
 /**
- * @brief Enumeration of error log severity
+ * @brief Enumeration of error log severity.
+ * Needs to fit into 1 byte for flattening purposes.
  */
 enum errlSeverity_t
 {
@@ -67,11 +71,12 @@ enum errlSeverity_t
 
 /**
  * @brief Event (error) type
+ * Needs to fit into 1 byte for flattening purposes.
  */
 enum errlEventType_t
 {
-    ERRL_ETYPE_NOT_APPLICABLE           = 0,
-    ERRL_ETYPE_DUMP_NOTIFICATION        = 8,
+    ERRL_ETYPE_NOT_APPLICABLE           = 0x00,
+    ERRL_ETYPE_DUMP_NOTIFICATION        = 0x08,
     ERRL_ETYPE_USER_DECONFIG            = 0x20,
     ERRL_ETYPE_SYS_DECONFIG             = 0x21,
     ERRL_ETYPE_CONCURRENT_MAINTENANCE   = 0x40,
@@ -80,6 +85,7 @@ enum errlEventType_t
 
 /**
  * @brief Error log call out priority
+ * Needs to fit into 1 byte for flattening purposes.
  */
 enum callOutPriority_t
 {
@@ -90,6 +96,7 @@ enum callOutPriority_t
 
 /**
  * @brief Error log procedure Id
+ * Needs to fit into 1 byte for flattening purposes.
  */
 enum epubProcedureId_t
 {
@@ -98,6 +105,7 @@ enum epubProcedureId_t
 
 /**
  * @brief Sub system definitions
+ * Needs to fit into 1 byte for flattening purposes.
  */
 enum epubSubSystem_t
 {
@@ -107,6 +115,7 @@ enum epubSubSystem_t
 
 /**
  * @brief Terminating flag definitions
+ * Needs to fit into 1 word (32-bits) for flattening purposes.
  */
 enum errlTermState_t
 {
@@ -117,6 +126,7 @@ enum errlTermState_t
 
 /**
  * @brief SRC type definitions
+ * Needs to fit into 1 byte for flattening purposes.
  */
 enum srcType_t
 {
@@ -125,6 +135,89 @@ enum srcType_t
     SRC_IPL_STATUS         = 0xC1,
     SRC_GENERAL_STATUS     = 0xD1,
 };
+
+
+/**
+ * @brief  This is the size of the storage buffer, presently
+ * in L3 RAM.  When this storage is filled, no more error logs
+ * will be committed. The L3 RAM storage is g_ErrlStorage[]
+ * declared in errlmanager.C in BSS data. This will change
+ * when switching to PNOR.
+ */
+const uint32_t ERRL_STORAGE_SIZE = 65536;
+
+
+
+/**
+ * @brief Flattened error log header structure contains the basic
+ * instance variables of the ErrlEntry class.  Note the
+ * alignment of the fields, and that the structure is packed.
+ */
+typedef struct errl_header
+{
+    uint32_t cbytes;           // count of bytes in this struct
+    uint32_t csections;        // count of sections in this error log
+    uint16_t reasonCode;       // reason code
+    uint8_t  unused1;          // need this for alignment
+    uint8_t  modId;            // module id
+    uint8_t  sev;              // severity
+    uint8_t  eventType;        // event type
+    uint8_t  subSys;           // subsystem
+    uint8_t  srcType;          // SRC type
+    uint32_t termState;        // Terminate state
+    uint32_t logId;            // This log's unique ID
+    uint64_t user1;            // Optional user data 1
+    uint64_t user2;            // Optional user data 2
+    uint64_t CreationTime;     // time error log was created
+} __attribute__((packed)) errl_header_t;
+
+
+
+/**
+ * @brief Error logs may have a number of sections/FFDC sections added.
+ * This is a section header that preceeds the user-defined
+ * data that follows this header.  Note the alignment of the fields,
+ * and that this structure is packed.
+ */
+typedef struct section_header
+{
+    uint32_t  cbHeader;    // count of bytes in this struct (flattening)
+    uint32_t  cbSection;   // count of bytes in the user-added data
+    uint16_t  compId;      // component id
+    uint8_t   sctnVer;     // section version
+    uint8_t   subSect;     // subsection
+} __attribute__((packed)) section_header_t;
+
+
+/**
+ * @brief The RAM storage for committed error logs starts with this
+ * header.  This structure is org'ed at &g_ErrlStorage[0].  All
+ * offsets are based from &g_achErrlStorage[0], so the first
+ * marker will appear at offset sizeof( storage_header_t )
+ */
+typedef struct storage_header
+{
+    uint32_t    cbStorage;        // count of bytes in buffer
+    uint32_t    cInserted;        // count of logs ever commited
+    uint32_t    offsetStart;      // start-of-list marker
+    uint32_t    offsetMarker;     // next-insertion marker
+} __attribute__((packed)) storage_header_t;
+
+
+
+
+/**
+ * @brief The storage buffer is a series of flattened error logs
+ * interspersed with markers.
+ * A typical marker will give the offset to the next marker and also
+ * the length of the flattened error log data.
+ */
+typedef struct marker
+{
+    uint32_t    offsetNext;
+    uint32_t    length;
+} __attribute__((packed)) marker_t;
+
 
 
 } // End namespace

@@ -29,7 +29,7 @@ class ErrlSctn;
 class ErrlFFDC;
 
 /**
- *  @brief	Host Boot Error log entry class.
+ *  @brief      Host Boot Error log entry class.
  *  This class contains all of the entry management logic and necessary
  *  information to create a PEL or IPMI event type logs.
  *  A pointer to this class is known as an errlHndl_t (the error log handle)
@@ -43,7 +43,7 @@ class ErrlEntry
 
 public:
     /**
-     * @brief	ErrlEntry constructor. Builds an error log with info
+     * @brief   ErrlEntry constructor. Builds an error log with info
      * constructed from the input.
      * Event type, Sub System, SRC type, and Terminate state are defaulted
      * to the most common values for Host Boot environment.  These values
@@ -66,7 +66,7 @@ public:
      *                              in the primary SRC
      * @param[in]   i_user2         64 bits of user data which are placed
      *                              in the primary SRC
-     * @return	None
+     * @return  None
      */
     ErrlEntry(const errlSeverity_t i_sev,
               const uint8_t i_modId,
@@ -79,7 +79,9 @@ public:
      *
      * Releases all resources owned by the handle.  If the log has not
      * been committed, it effectively aborts the log.
-     * All logs (committed or not) must be deleted to avoid a resource leak.
+     * All logs not committed must be deleted to avoid a resource leak.
+     * Committing an error log via ErrlManager will cause ErrlManager
+     * to delete the log after saving it.
      *
      * @return  None
      *
@@ -92,6 +94,7 @@ public:
      *  problem is perceived to be.  The severity is
      *  initially set by the parameter in the constructor
      *  and can be changed at any point thereafter.
+     *  See errl/errltypes.H
      *
      *  @return Current Log Severity
      *
@@ -105,37 +108,70 @@ public:
      *  initially set by the parameter in the constructor
      *  and can be changed at any point thereafter.
      *
-     *  @return void
+     *  @param[in]  i_sev Severity. See errl/errltypes.H
      *
+     *  @return     void
      */
     void setSev(const errlSeverity_t i_sev);
 
+
     /**
-     *  @brief Returns the log's reason code
+     *  @brief Get reason code. See errl/errlreasoncodes.H
      *
-     *  @return uint16_t
-     *
+     *  @return reason code
      */
     uint16_t reasonCode() const;
 
     /**
-     *  @brief Returns the log's event type
+     *  @brief Set reason code
      *
+     *  @param[in]  i_reasonCode   The reason code.  The upper byte
+     *                             of a reason code is the component ID.
+     *                             See errl/errlreasoncodes.H
+     *
+     *  @return     void
+     */
+    void setReasonCode( const uint16_t i_reasonCode );
+
+    /**
+     *  @brief Get module id.  See errl/errlreasoncodes.H
+     *
+     *  @return module id
+     */
+    uint8_t moduleId() const;
+
+
+
+    /**
+     *  @brief Set module id
+     *
+     *  @param[in]  i_moduleId  The module ID. See errl/errlreasoncodes.H
+     *
+     *  @return     void
+     */
+    void setModuleId( const uint8_t i_moduleId );
+
+
+    /**
+     *  @brief Get the event type of the error log.
+     *         See errl/errltypes.H
      *  @return errlEventType_t
      *
      */
     errlEventType_t eventType() const;
 
     /**
-      *  @brief Set the log's event type
-      *
-      *  @return void
-      *
-      */
+     *  @brief Set the log's event type
+     *
+     *  @param[in]  i_eventType  Event type. See errl/errltypes.H
+     *
+     *  @return void
+     *
+     */
     void setEventType(const errlEventType_t i_eventType);
 
     /**
-     *  @brief Returns the log's sub system
+     *  @brief Returns the log's sub system. See errl/errltypes.H
      *
      *  @return epubSubSystem_t
      *
@@ -143,15 +179,17 @@ public:
     epubSubSystem_t subSys() const;
 
    /**
-     *  @brief Set the log's sub system
+     *  @brief Set the log's ePub sub system type.
+     *
+     *  @param[in]  i_subSys   Subsystem type. See errl/errltypes.H
      *
      *  @return void
-     *
      */
     void setSubSys(const epubSubSystem_t i_subSys);
 
+
     /**
-     *  @brief Returns the log's SRC type
+     *  @brief Returns the log's SRC type. See errl/errltypes.H
      *
      *  @return srcType_t
      *
@@ -161,13 +199,16 @@ public:
    /**
      *  @brief Set the log's SRC type
      *
-     *  @return void
+     *  @param[in]  i_srcType   The SRC type for this error log. See
+     *                          errl/errltypes.H
      *
+     *  @return void
      */
     void setSrcType(const srcType_t i_srcType);
 
     /**
-     *  @brief Returns the log's terminate state type
+     *  @brief Returns the log's terminate state type. See
+     *  errl/errltypes.H
      *
      *  @return errlTermState_t
      *
@@ -176,6 +217,8 @@ public:
 
     /**
      *  @brief Set the log's Terminating state
+     *
+     *  @param[in] i_termState  See errl/errltypes.H
      *
      *  @return void
      *
@@ -194,6 +237,7 @@ public:
      *                               which classifies the data.  This in
      *                               conjunction with the version can be used
      *                               to decode the data.
+     *
      * @return Pointer to FFDC section if successfully added.
      *         NULL if fails
      */
@@ -211,11 +255,39 @@ public:
      *                               function is called earlier.
      * @param[in]   i_dataPtr        Points to data block to be added
      * @param[in]   i_dataLen        Length of data in bytes
+     *
      * @return void
      */
     void appendToFFDC(ErrlFFDC* i_ffdcSctnPtr,
                       const void *i_dataPtr,
                       const uint32_t i_dataLen);
+
+
+
+
+
+    /**
+     * @brief Compute the flattened size of an error log.
+     *
+     * @return size in bytes of the flattened data.
+     */
+    uint64_t flattenedSize();
+
+
+    /**
+     * @brief Flatten the data to caller's buffer.
+     *
+     * @param[in,out]  io_buffer   Points to data block to be filled
+     * @param[in]      i_cbBuffer  Count of bytes in buffer supplied
+     *
+     * @return  Count of bytes copied to caller's
+     *          buffer or else zero if it does not fit.
+     */
+    uint64_t flatten( void * io_buffer, const uint64_t i_cbBuffer );
+
+
+
+
 private:
 
     /**
@@ -224,22 +296,7 @@ private:
      ErrlEntry(const ErrlEntry& i_right);
      ErrlEntry& operator=(const ErrlEntry& i_right);
 
-    /**
-     * @brief Add a data section to error log object
-     *
-     * @param[in]   i_sctn      Pointer to data section to be added
-     *
-     * @return void
-     */
-    void addSection(ErrlSctn* i_sctn);
 
-    /**
-     * @brief   Returns the unique Error Entry Id.  This ID is assigned to
-     *          the entry when it's created.
-     *          This is to be called by ErrlManager only.
-     * @return  32 bit unsigned identifier
-     */
-    uint32_t logId() const;
 
     /**
      *  @brief Set the log's id
@@ -247,14 +304,17 @@ private:
      *  set this log's ID to a unique input number.
      *  This is to be called by ErrlManager only.
      *
+     *  There is no call to get the log id because it
+     *  would just be zero until the log is committed.
+     *
+     *  @param[in] i_val  Log ID as assigned by ErrlManager
+     *
      *  @return void
      */
     void setLogId(const uint32_t i_val);
 
-    //@todo - Need to add serialization interfaces for ErrlSctn object.
-    //        Serialization method (boost serialization?) is for HostBoot
-    //        is currently not yet determined.
-    //        Note: stream is currently not supported
+
+
 
 
 #if 0
@@ -334,21 +394,19 @@ private:
 #endif
 
 private:
-
     // Data Members
-    uint16_t iv_reasonCode;     // Component ID and reason code, 2 nibbles each
-    errlSeverity_t iv_sev;      // Log severity
-    errlEventType_t iv_eventType;   // Event type
-    epubSubSystem_t iv_subSys;      // Sub system
-    srcType_t iv_srcType;           // SRC type
-    errlTermState_t iv_termState;   // Terminate state
-    uint8_t iv_modId;               // Module ID
-    uint64_t iv_user1;              // Optional user data 1
-    uint64_t iv_user2;              // Optional user data 2
-    uint32_t iv_logId;              // This log's unique ID
-
-    // Sections in this log object
-    std::vector<ErrlSctn*> iv_sections;
+    uint16_t        iv_reasonCode;   // Comp ID and reason code, 2 nibbles ea
+    errlSeverity_t  iv_sev;          // Log severity
+    errlEventType_t iv_eventType;    // Event type
+    epubSubSystem_t iv_subSys;       // Sub system
+    srcType_t       iv_srcType;      // SRC type
+    errlTermState_t iv_termState;    // Terminate state
+    uint8_t         iv_modId;        // Module ID
+    uint64_t        iv_user1;        // Optional user data 1
+    uint64_t        iv_user2;        // Optional user data 2
+    uint64_t        iv_CreationTime; // Time of instantiation
+    uint32_t        iv_logId;        // This log's unique ID
+    std::vector<ErrlSctn*> iv_SectionVector;  // list of user sections
 
 };
 
@@ -360,48 +418,65 @@ private:
 ////////////////////////////////////////////////////////////////////////////
 inline errlSeverity_t ErrlEntry::sev() const
 {
-    return (iv_sev);
+    return iv_sev;
 }
 
-////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
 inline void ErrlEntry::setSev(const errlSeverity_t i_sev)
 {
     iv_sev = i_sev;
     return;
 }
 
+
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 inline uint16_t ErrlEntry::reasonCode() const
 {
-    return (iv_reasonCode);
+    return iv_reasonCode;
 }
+
+inline void ErrlEntry::setReasonCode( const uint16_t i_reasonCode )
+{
+    iv_reasonCode = i_reasonCode;
+    return;
+}
+
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+inline uint8_t ErrlEntry::moduleId() const
+{
+    return iv_modId;
+}
+
+inline void ErrlEntry::setModuleId( const uint8_t i_moduleId )
+{
+    iv_modId = i_moduleId;
+    return;
+}
+
 
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 inline errlEventType_t ErrlEntry::eventType() const
 {
-    return (iv_eventType);
+    return iv_eventType;
 }
 
-////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
 inline void ErrlEntry::setEventType(const errlEventType_t i_eventType)
 {
     iv_eventType = i_eventType;
     return;
 }
 
+
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 inline epubSubSystem_t ErrlEntry::subSys() const
 {
-    return (iv_subSys);
+    return iv_subSys;
 }
 
-////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
 inline void ErrlEntry::setSubSys(const epubSubSystem_t i_subSys)
 {
     iv_subSys = i_subSys;
@@ -413,11 +488,9 @@ inline void ErrlEntry::setSubSys(const epubSubSystem_t i_subSys)
 ////////////////////////////////////////////////////////////////////////////
 inline srcType_t ErrlEntry::srcType() const
 {
-    return (iv_srcType);
+    return iv_srcType;
 }
 
-////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
 inline void ErrlEntry::setSrcType(const srcType_t i_srcType)
 {
     iv_srcType = i_srcType;
@@ -428,11 +501,9 @@ inline void ErrlEntry::setSrcType(const srcType_t i_srcType)
 ////////////////////////////////////////////////////////////////////////////
 inline errlTermState_t ErrlEntry::termState() const
 {
-    return (iv_termState);
+    return iv_termState;
 }
 
-////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
 inline void ErrlEntry::setTermState(const errlTermState_t i_termState)
 {
     iv_termState = i_termState;
@@ -440,18 +511,10 @@ inline void ErrlEntry::setTermState(const errlTermState_t i_termState)
 }
 
 ////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
-inline uint32_t ErrlEntry::logId() const
-{
-    return (iv_logId);
-}
-
-////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
+// Called by errlmanager at log commit time.
 inline void ErrlEntry::setLogId(const uint32_t i_val)
 {
     iv_logId = i_val;
-    return;
 }
 
 } // End namespace
