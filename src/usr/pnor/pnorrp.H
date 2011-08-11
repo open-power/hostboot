@@ -7,6 +7,7 @@
 #include <builtins.h>
 #include <errl/errlentry.H>
 #include <limits.h>
+#include "pnordd.H"
 
 /**
  * PNOR Resource Provider
@@ -53,17 +54,18 @@ class PnorRP
      */
     enum
     {
-        BASE_VADDR = 0x80000000, /**< 2GB */
+        BASE_VADDR = 2*1024*1024*1024ul, /**< 2GB = 0x80000000*/
 
         NUM_SIDES = 3,  /**< A, B, Sideless */
 
-        SIDE_SIZE = 0x2000000, /**< Allocate 32 MB of VA per side */
+        SIDE_SIZE = 32*1024*1024ul, /**< Allocate 32 MB (0x2000000) of VA per side */
 
         SIDEA_VADDR = BASE_VADDR,  /**< Base address of Side A */
         SIDEB_VADDR = SIDEA_VADDR + SIDE_SIZE,  /**< Base address of Side B */
-        SIDELESS_VADDR = SIDEA_VADDR + SIDE_SIZE*2,  /**< Base address of Sideless data */
+        SIDELESS_VADDR = SIDEB_VADDR + SIDE_SIZE,  /**< Base address of Sideless data */
 
-        LAST_VADDR = BASE_VADDR + SIDE_SIZE*NUM_SIDES,  /**< End of our VA range */
+        TOTAL_SIZE = SIDE_SIZE*NUM_SIDES,  /**< Size of PNOR VA region */
+        LAST_VADDR = BASE_VADDR + TOTAL_SIZE,  /**< End of our VA range */
 
         /** Real number of bytes required to read 1 logical page */
         PAGESIZE_PLUS_ECC = PAGESIZE * (9/8),  // 8 bytes of data + 1 byte of ECC 
@@ -81,16 +83,7 @@ class PnorRP
         uint64_t size_act;  /**< Actual size of content in bytes */
         char fuse_tbd[96];  /**< Remainder is TBD depending on FUSE requirements */
         //@todo - need a chip select here I think?
-    };
-
-    /**
-     * Mode that PNOR controller is using
-     */
-    enum ControllerMode
-    {
-        MMRD_MODE,  /**< MMRD - Read-Only, ECC is hidden by hardware */
-        PMRW_MODE,  /**< PMRW - Write-able mode, ECC must be handled on reads/writes */
-    };
+    } PACKED;
 
     /**
      * Internal information to deal with the sections of PNOR
@@ -99,13 +92,15 @@ class PnorRP
         PNOR::SectionId id;  /**< Identifier for this section */
         PNOR::SideSelect side;  /** Side Select */
 
-        uint64_t chip;  /**< Chip Select */
-        uint64_t mmrdAddr;  /**< Address in MMRD mode (no ECC) */
-        uint64_t pmrwAddr;  /**< Address in PMRW mode (with ECC) */
         uint64_t virtAddr;  /**< Virtual address for the start of the section */
-        uint64_t size;  /**< Actual size of content in bytes (not including ECC) */
-        bool eccProtected;  /**< Section is ECC protected */
-    };
+
+        uint32_t mmrdAddr;  /**< Address in MMRD mode (no ECC) */
+        uint32_t pmrwAddr;  /**< Address in PMRW mode (with ECC) */
+
+        uint32_t size;  /**< Actual size of content in bytes (not including ECC) */
+        uint8_t chip;  /**< Chip Select */
+        uint8_t eccProtected;  /**< Section is ECC protected */
+    } PACKED;
 
     /**
      * Cached copy of section data
@@ -119,6 +114,8 @@ class PnorRP
 
     /**
      * Remember that we failed during initial startup
+     *   This is set by startup methods to indicate to constructor that
+     *   something went wrong
      */
     uint64_t iv_startupRC;
 
@@ -129,8 +126,10 @@ class PnorRP
 
     /**
      * @brief Read the TOC and store section information
+     *
+     * @return Error from device
      */
-    void readTOC();
+    errlHndl_t readTOC();
 
     /**
      * @brief  Message receiver
@@ -144,11 +143,13 @@ class PnorRP
      * @param[in] i_chip  Which PNOR chip
      * @param[in] i_ecc  true=apply ECC after reading
      * @param[out] o_dest  Buffer to copy data into
+     *
+     * @return Error from device
      */
-    void readFromDevice( uint64_t i_offset,
-                         uint64_t i_chip,
-                         bool i_ecc,
-                         void* o_dest );
+    errlHndl_t readFromDevice( uint64_t i_offset,
+                               uint64_t i_chip,
+                               bool i_ecc,
+                               void* o_dest );
 
     /**
      * @brief  Write 1 logical page of data to the PNOR device
@@ -157,11 +158,13 @@ class PnorRP
      * @param[in] i_chip  Which PNOR chip
      * @param[in] i_ecc  true=apply ECC before writing
      * @param[in] i_src  Buffer to copy data from
+     *
+     * @return Error from device
      */
-    void writeToDevice( uint64_t i_offset,
-                        uint64_t i_chip,
-                        bool i_ecc,
-                        void* i_src );
+    errlHndl_t writeToDevice( uint64_t i_offset,
+                              uint64_t i_chip,
+                              bool i_ecc,
+                              void* i_src );
 
     /**
      * @brief  Convert a virtual address into the PNOR device address
@@ -175,7 +178,7 @@ class PnorRP
      * @return Error if VA is bad
      */
     errlHndl_t computeDeviceAddr( void* i_vaddr,
-                                  ControllerMode i_mode,
+                                  PNOR::lscMode i_mode,
                                   uint64_t& o_offset,
                                   uint64_t& o_chip,
                                   bool& o_ecc );

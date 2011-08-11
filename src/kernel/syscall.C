@@ -178,6 +178,7 @@ namespace Systemcalls
 
         if (m->type >= MSG_FIRST_SYS_TYPE)
         {
+            printk("MsgSend> type=%d\n", m->type); 
             TASK_SETRTN(t, -EINVAL);
             return;
         }
@@ -211,6 +212,7 @@ namespace Systemcalls
 
         if (m->type >= MSG_FIRST_SYS_TYPE)
         {
+            printk("MsgSendRecv> type=%d\n", m->type); 
             TASK_SETRTN(t, -EINVAL);
             return;
         }

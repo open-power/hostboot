@@ -445,17 +445,25 @@ timestamp=`date +'%H:%M:%S'`
 
 echo    "----------------- Printk Buffer -------------------"
 cat $SBXHOME/testprintk.log
+shutdown_code="$(grep --text 'Shutdown Requested' $SBXHOME/testprintk.log | awk -F '= 0x' '{ print $2 }')"
+
 
 echo    "----------------- traceHB Buffer -------------------"
 cat $SBXHOME/traceHB.log
 
 
-
+initfail=0
+echo "Shutdown Code = $shutdown_code"
+if [ "${shutdown_code}" != "0000000001230000" ]
+then
+ echo "**ERROR : System did not initialize and/or shutdown properly**"
+ initfail=1
+fi
 
 echo
 echo    "==================================================="
 if [ $timeout = 0 ] ; then
-    echo    "$timestamp Finished autocitest with no errors."
+    echo    "$timestamp Finished autocitest with no Cxx errors."
 else
     echo    "$timestamp Failed autocitest, modules timed out."
     echo    "    failed modules:  $timeout"
@@ -478,6 +486,10 @@ if [ 0 !=  $(($failedtests)) ] ; then
 fi
 if [ 0 != $(($warnings)) ] ; then
     echo "$warnings testcase warnings found."
+    exit 1
+fi
+if [ 0 != $(($initfail)) ] ; then
+    echo "Initialization Failure"
     exit 1
 fi
 

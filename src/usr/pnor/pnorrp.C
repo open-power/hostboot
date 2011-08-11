@@ -1,5 +1,4 @@
 #include "pnorrp.H"
-#include <sys/rp.h>
 #include <pnor/pnor_reasoncodes.H>
 #include <initservice/taskargs.H> 
 #include <sys/msg.h>
@@ -9,7 +8,9 @@
 #include <devicefw/userif.H>
 #include <limits.h>
 #include <string.h>
-#include <kernel/console.H>
+#include <sys/mm.h>
+#include <errno.h>
+
 
 // Trace definition
 trace_desc_t* g_trac_pnor = NULL;
@@ -22,7 +23,7 @@ TRAC_INIT(&g_trac_pnor, "PNOR", 4096); //4K
 /**
  * Eyecatcher strings for PNOR TOC entries
  */
-const char* cv_EYECATCHER[] = {
+const char* cv_EYECATCHER[] = {  //@todo - convert there to uint64_t
     "TOC",    /**< PNOR::TOC           : Table of Contents */
     "GLOBAL", /**< PNOR::GLOBAL_DATA   : Global Data */
     "SBE",    /**< PNOR::SBE_IPL       : Self-Boot Enginer IPL image */
@@ -107,7 +108,7 @@ PnorRP::PnorRP()
     // setup everything in a separate function
     initDaemon();
 
-    TRACFCOMP(g_trac_pnor, "< PnorRP::PnorRP " );
+    TRACFCOMP(g_trac_pnor, "< PnorRP::PnorRP : Startup Errors=%X ", iv_startupRC );
 }
 
 /**
@@ -118,7 +119,12 @@ PnorRP::~PnorRP()
     TRACFCOMP(g_trac_pnor, "PnorRP::~PnorRP> " );
 
     // delete the message queue we created
-    msg_q_destroy( iv_msgQ );
+    if( iv_msgQ )
+    {
+        msg_q_destroy( iv_msgQ );
+    }
+
+    // should kill the task we spawned, but that isn't needed right now
 
     TRACFCOMP(g_trac_pnor, "< PnorRP::~PnorRP" );
 }
@@ -129,18 +135,51 @@ PnorRP::~PnorRP()
 void PnorRP::initDaemon()
 {
     TRACUCOMP(g_trac_pnor, "PnorRP::initDaemon> " );
+    errlHndl_t l_errhdl = NULL;
 
-    // read the TOC in the PNOR to compute the sections
-    readTOC();
+    do
+    {
+        // read the TOC in the PNOR to compute the sections
+        l_errhdl = readTOC();
+        if( l_errhdl )
+        {
+            break;
+        }
 
-    // create a message queue
-    iv_msgQ = msg_q_create();
+        // create a message queue
+        iv_msgQ = msg_q_create();
 
-    // create a Block, passing in the message queue
-    //@todo  iv_block = new Block( 0, 0 ); 
+        // create a Block, passing in the message queue
+        int rc = mm_alloc_block( iv_msgQ, (void*) BASE_VADDR, TOTAL_SIZE );
+        if( rc )
+        {
+            TRACFCOMP( g_trac_pnor, "PnorRP::initDaemon> Error from mm_alloc_block : rc=%d", rc );
+            /*@
+             * @errortype
+             * @moduleid     PNOR::MOD_PNORRP_INITDAEMON
+             * @reasoncode   PNOR::RC_EXTERNAL_ERROR
+             * @userdata1    Requested Address
+             * @userdata2    rc from mm_alloc_block
+             * @devdesc      PnorRP::initDaemon> Error from mm_alloc_block
+             */
+            l_errhdl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                               PNOR::MOD_PNORRP_GETSECTIONINFO,
+                                               PNOR::RC_INVALID_SECTION,
+                                               TO_UINT64(BASE_VADDR),
+                                               TO_UINT64(rc));
+            break;
+        }
 
-    // start task to wait on the queue
-    task_create( wait_for_message, NULL );
+        // start task to wait on the queue
+        task_create( wait_for_message, NULL );
+
+    } while(0);
+
+    if( l_errhdl )
+    {
+        errlCommit(l_errhdl);
+        iv_startupRC = l_errhdl->reasonCode();        
+    }
 
     TRACUCOMP(g_trac_pnor, "< PnorRP::initDaemon" );
 }
@@ -154,44 +193,71 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
                                    PNOR::SectionInfo_t& o_info )
 {
     //TRACDCOMP(g_trac_pnor, "PnorRP::getSectionInfo> i_section=%d, i_side=%X", i_section, i_side );
-    errlHndl_t errhdl = NULL;
-    
+    errlHndl_t l_errhdl = NULL;
     PNOR::SectionId id = i_section;
 
-    // Zero-length means the section is invalid
-    if( 0 == iv_TOC[i_side][id].size )
-    {
-        TRACFCOMP( g_trac_pnor, "PnorRP::getSectionInfo> Invalid Section Requested : i_section=%d, i_side=%d", i_section, i_side );
-        TRACFCOMP(g_trac_pnor, "o_info={ id=%d, size=%d }", iv_TOC[i_side][i_section].id, iv_TOC[i_side][i_section].size );
-        /*@
-         * @errortype
-         * @moduleid     PNOR::MOD_PNORRP_GETSECTIONINFO
-         * @reasoncode   PNOR::RC_INVALID_SECTION
-         * @userdata1    Requested Section
-         * @userdata2    Requested Side
-         * @devdesc      PnorRP::waitForMessage> Invalid Address for read/write
-         */
-        errhdl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                         PNOR::MOD_PNORRP_GETSECTIONINFO,
-                                         PNOR::RC_INVALID_SECTION,
-                                         TO_UINT64(i_section),
-                                         TO_UINT64(i_side));
+    do
+    { 
+        // Abort this operation if we had a startup failure
+        uint64_t rc = 0;
+        if( didStartupFail(rc) )
+        {
+            TRACFCOMP( g_trac_pnor, "PnorRP::getSectionInfo> RP not properly initialized, failing : rc=%X", rc );
+            /*@
+             * @errortype
+             * @moduleid     PNOR::MOD_PNORRP_GETSECTIONINFO
+             * @reasoncode   PNOR::RC_STARTUP_FAIL
+             * @userdata1    Requested Section
+             * @userdata2    Startup RC
+             * @devdesc      PnorRP::getSectionInfo> RP not properly initialized
+             */
+            l_errhdl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                               PNOR::MOD_PNORRP_GETSECTIONINFO,
+                                               PNOR::RC_STARTUP_FAIL,
+                                               TO_UINT64(i_section),
+                                               rc);
 
-        // set the return valid to our invalid data
-        id = PNOR::INVALID_SECTION;
-    }
+            // set the return section to our invalid data
+            id = PNOR::INVALID_SECTION;
+            break;
+        }
+
+        // Zero-length means the section is invalid
+        if( 0 == iv_TOC[i_side][id].size )
+        {
+            TRACFCOMP( g_trac_pnor, "PnorRP::getSectionInfo> Invalid Section Requested : i_section=%d, i_side=%d", i_section, i_side );
+            TRACFCOMP(g_trac_pnor, "o_info={ id=%d, size=%d }", iv_TOC[i_side][i_section].id, iv_TOC[i_side][i_section].size );
+            /*@
+             * @errortype
+             * @moduleid     PNOR::MOD_PNORRP_GETSECTIONINFO
+             * @reasoncode   PNOR::RC_INVALID_SECTION
+             * @userdata1    Requested Section
+             * @userdata2    Requested Side
+             * @devdesc      PnorRP::getSectionInfo> Invalid Address for read/write
+             */
+            l_errhdl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                               PNOR::MOD_PNORRP_GETSECTIONINFO,
+                                               PNOR::RC_INVALID_SECTION,
+                                               TO_UINT64(i_section),
+                                               TO_UINT64(i_side));
+
+            // set the return section to our invalid data
+            id = PNOR::INVALID_SECTION;
+            break;
+        }
+    } while(0);
 
     TRACFCOMP( g_trac_pnor, "i_section=%d, i_side=%d : id=%d", i_section, i_side, iv_TOC[i_side][i_section].id );
 
     // copy my data into the external format
-    o_info.id = iv_TOC[i_side][i_section].id;
-    o_info.side = iv_TOC[i_side][i_section].side;
-    o_info.name = cv_EYECATCHER[i_section];
-    o_info.vaddr = iv_TOC[i_side][i_section].virtAddr;
-    o_info.size = iv_TOC[i_side][i_section].size;
-    o_info.eccProtected = iv_TOC[i_side][i_section].eccProtected;
+    o_info.id = iv_TOC[i_side][id].id;
+    o_info.side = iv_TOC[i_side][id].side;
+    o_info.name = cv_EYECATCHER[id];
+    o_info.vaddr = iv_TOC[i_side][id].virtAddr;
+    o_info.size = iv_TOC[i_side][id].size;
+    o_info.eccProtected = iv_TOC[i_side][id].eccProtected;
 
-    return errhdl;
+    return l_errhdl;
 }
 
 
@@ -199,9 +265,10 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
 /**
  * @brief Read the TOC and store section information
  */
-void PnorRP::readTOC()
+errlHndl_t PnorRP::readTOC()
 {
     TRACUCOMP(g_trac_pnor, "PnorRP::readTOC>" );
+    errlHndl_t l_errhdl = NULL;
 
     // Zero out my table
     for( uint64_t side = 0; side < NUM_SIDES; side++ )
@@ -217,11 +284,12 @@ void PnorRP::readTOC()
             iv_TOC[side][id].pmrwAddr = 0;
             iv_TOC[side][id].virtAddr = 0;
             iv_TOC[side][id].size = 0;
-            iv_TOC[side][id].eccProtected = false;
+            iv_TOC[side][id].eccProtected = 0;
         }
     }
 
     //@todo - Add in some dummy values for now
+    //  Will update under Story 3547
 
     // assume 1 chip with only 1 side for now, no sideless
     // TOC starts at offset zero in MMRD mode
@@ -244,17 +312,18 @@ void PnorRP::readTOC()
     iv_TOC[PNOR::SIDE_A][PNOR::GLOBAL_DATA].mmrdAddr = iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].mmrdAddr + iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].size;
     iv_TOC[PNOR::SIDE_A][PNOR::HB_DATA].mmrdAddr = iv_TOC[PNOR::SIDE_A][PNOR::GLOBAL_DATA].mmrdAddr + iv_TOC[PNOR::SIDE_A][PNOR::GLOBAL_DATA].size;
     // PMRW offsets - no ECC support yet so just equal to MMRD
-    iv_TOC[PNOR::SIDE_A][PNOR::TOC].pmrwAddr = BASE_VADDR + 0;
-    iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].pmrwAddr = iv_TOC[PNOR::SIDE_A][PNOR::TOC].virtAddr + iv_TOC[PNOR::SIDE_A][PNOR::TOC].size;
-    iv_TOC[PNOR::SIDE_A][PNOR::GLOBAL_DATA].pmrwAddr = iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].virtAddr + iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].size;
-    iv_TOC[PNOR::SIDE_A][PNOR::HB_DATA].pmrwAddr = iv_TOC[PNOR::SIDE_A][PNOR::GLOBAL_DATA].virtAddr + iv_TOC[PNOR::SIDE_A][PNOR::GLOBAL_DATA].size;
+    iv_TOC[PNOR::SIDE_A][PNOR::TOC].pmrwAddr = iv_TOC[PNOR::SIDE_A][PNOR::TOC].mmrdAddr;
+    iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].pmrwAddr = iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].mmrdAddr;
+    iv_TOC[PNOR::SIDE_A][PNOR::GLOBAL_DATA].pmrwAddr = iv_TOC[PNOR::SIDE_A][PNOR::GLOBAL_DATA].mmrdAddr;
+    iv_TOC[PNOR::SIDE_A][PNOR::HB_DATA].pmrwAddr = iv_TOC[PNOR::SIDE_A][PNOR::HB_DATA].mmrdAddr;
 
     //@todo - end fake data
 
     //@todo - load flash layout (how many chips)
     //@todo - read TOC on each chip/bank/whatever
-
+    
     TRACUCOMP(g_trac_pnor, "< PnorRP::readTOC" );
+    return l_errhdl;
 }
 
 
@@ -266,72 +335,110 @@ void PnorRP::waitForMessage()
 {
     TRACFCOMP(g_trac_pnor, "PnorRP::waitForMessage>" );
 
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_errhdl = NULL;
     msg_t* message = NULL;
     uint8_t* user_addr = NULL;
     uint8_t* eff_addr = NULL;
     uint64_t dev_offset = 0;
     uint64_t chip_select = 0xF;
     bool needs_ecc = false;
+    int rc = 0;
+    uint64_t status_rc = 0;
 
     while(1)
     {
+        status_rc = 0;
         TRACUCOMP(g_trac_pnor, "PnorRP::waitForMessage> waiting for message" );
         message = msg_wait( iv_msgQ );
         if( message )
         {
-            user_addr = (uint8_t*)message->data[0];
-            eff_addr = (uint8_t*)message->data[1];
-            l_err = computeDeviceAddr( eff_addr, MMRD_MODE, dev_offset, chip_select, needs_ecc );
-            //@todo - assuming MMRD mode for now
-            if( l_err )
-            {
-                errlCommit(l_err);
-                //@todo - kill calling task?, commit log
+            /*  data[0] = virtual address requested
+             *  data[1] = address to place contents
+             */
+            eff_addr = (uint8_t*)message->data[0];
+            user_addr = (uint8_t*)message->data[1];
 
-                if( !msg_is_async(message) )
+            //@todo - assuming MMRD mode for now  (Story 3548)
+            l_errhdl = computeDeviceAddr( eff_addr, PNOR::MMRD, dev_offset, chip_select, needs_ecc );
+            if( l_errhdl )
+            {
+                status_rc = -EFAULT; /* Bad address */
+            }
+            else
+            {
+                //@todo - handle MMRD/PMRW mode
+                //  if MMRD then needs_ecc = false
+
+                switch(message->type)
                 {
-                    TRACUCOMP( g_trac_pnor, "sending response...\n" );
-                    msg_respond( iv_msgQ, message ); //@todo - what goes in response message?
+                    case( MSG_MM_RP_READ ):
+                        l_errhdl = readFromDevice( dev_offset, chip_select, needs_ecc, user_addr );
+                        if( l_errhdl )
+                        {
+                            status_rc = -EIO; /* I/O error */
+                        }
+                        break;
+                    case( MSG_MM_RP_WRITE ):
+                        l_errhdl = writeToDevice( dev_offset, chip_select, needs_ecc, user_addr );
+                        if( l_errhdl )
+                        { 
+                            status_rc = -EIO; /* I/O error */
+                        }
+                        break;
+                    default:
+                        TRACFCOMP( g_trac_pnor, "PnorRP::waitForMessage> Unrecognized message type : user_addr=%p, eff_addr=%p, msgtype=%d", user_addr, eff_addr, message->type );
+                        /*@
+                         * @errortype
+                         * @moduleid     PNOR::MOD_PNORRP_WAITFORMESSAGE
+                         * @reasoncode   PNOR::RC_INVALID_MESSAGE
+                         * @userdata1    Message type
+                         * @userdata2    Requested Virtual Address
+                         * @devdesc      PnorRP::waitForMessage> Unrecognized message type
+                         */
+                        l_errhdl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                                        PNOR::MOD_PNORRP_WAITFORMESSAGE,
+                                                        PNOR::RC_INVALID_MESSAGE,
+                                                        TO_UINT64(message->type),
+                                                        (uint64_t)eff_addr);
+                        status_rc = -EINVAL; /* Invalid argument */
                 }
-                continue; // go wait for another message
+            }
+            
+            if( !l_errhdl && msg_is_async(message) )
+            {
+                TRACFCOMP( g_trac_pnor, "PnorRP::waitForMessage> Unsupported Asynchronous Message  : user_addr=%p, eff_addr=%p, msgtype=%d", user_addr, eff_addr, message->type );
+                /*@
+                 * @errortype
+                 * @moduleid     PNOR::MOD_PNORRP_WAITFORMESSAGE
+                 * @reasoncode   PNOR::RC_INVALID_MESSAGE
+                 * @userdata1    Message type
+                 * @userdata2    Requested Virtual Address
+                 * @devdesc      PnorRP::waitForMessage> Unrecognized message type
+                 */
+                l_errhdl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                                   PNOR::MOD_PNORRP_WAITFORMESSAGE,
+                                                   PNOR::RC_INVALID_MESSAGE,
+                                                   TO_UINT64(message->type),
+                                                   (uint64_t)eff_addr);
+                status_rc = -EINVAL; /* Invalid argument */
             }
 
-            //@todo - handle MMRD/PMRW mode
-            //  if MMRD then needs_ecc = false
-
-            switch(message->type)
+            if( l_errhdl )
             {
-                case( RP::READ_PAGE ):
-                    readFromDevice( dev_offset, chip_select, needs_ecc, user_addr );
-                    break;
-                case( RP::WRITE_PAGE ):
-                    writeToDevice( dev_offset, chip_select, needs_ecc, user_addr );
-                    break;
-                default:
-                    TRACFCOMP( g_trac_pnor, "PnorRP::waitForMessage> Unrecognized message type : user_addr=%p, eff_addr=%p, msgtype=%d", user_addr, eff_addr, message->type );
-                    /*@
-                     * @errortype
-                     * @moduleid     PNOR::MOD_PNORRP_WAITFORMESSAGE
-                     * @reasoncode   PNOR::RC_INVALID_MESSAGE
-                     * @userdata1    Message type
-                     * @userdata2    User memory address
-                     * @devdesc      PnorRP::waitForMessage> Unrecognized message type
-                     */
-                    l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                                    PNOR::MOD_PNORRP_WAITFORMESSAGE,
-                                                    PNOR::RC_INVALID_MESSAGE,
-                                                    TO_UINT64(message->type),
-                                                    (uint64_t)user_addr);
-                    errlCommit(l_err);
-                    //@todo - kill calling task?, commit log
-                    continue; // go wait for another message
+                errlCommit(l_errhdl);
             }
 
-            if( !msg_is_async(message) )
+
+            /*  Expected Response:
+             *      data[0] = virtual address requested
+             *      data[1] = rc (0 or negative errno value)
+             */
+            message->data[1] = status_rc;
+            rc = msg_respond( iv_msgQ, message ); 
+            if( rc )
             {
-                TRACUCOMP( g_trac_pnor, "sending response...\n" );
-                msg_respond( iv_msgQ, message ); //@todo - what goes in response message?
+                TRACFCOMP(g_trac_pnor, "PnorRP::waitForMessage> Error from msg_respond, giving up : rc=%d", rc );
+                break;
             }
         }
     }
@@ -344,80 +451,102 @@ void PnorRP::waitForMessage()
 /**
  * @brief  Retrieve 1 page of data from the PNOR device
  */
-void PnorRP::readFromDevice( uint64_t i_offset,
-                             uint64_t i_chip,
-                             bool i_ecc,
-                             void* o_dest )
+errlHndl_t PnorRP::readFromDevice( uint64_t i_offset,
+                                   uint64_t i_chip,
+                                   bool i_ecc,
+                                   void* o_dest )
 {
     TRACUCOMP(g_trac_pnor, "PnorRP::readFromDevice> i_offset=0x%X, i_chip=%d", i_offset, i_chip );
-
-    TARGETING::Target* pnor_target = TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL; //@todo
-
-    void* data_to_read = o_dest;
+    errlHndl_t l_errhdl = NULL;
     uint8_t* ecc_buffer = NULL;
-    size_t read_size = PAGESIZE;
-    if( i_ecc )
-    {
-        ecc_buffer = new uint8_t[PAGESIZE_PLUS_ECC];
-        data_to_read = ecc_buffer;
-        read_size = PAGESIZE_PLUS_ECC;
-    }
 
-    errlHndl_t l_err = DeviceFW::deviceRead(pnor_target, 
-                                            data_to_read,
-                                            read_size,
-                                            DEVICE_PNOR_ADDRESS(i_chip,i_offset) );
-    if( l_err )
+    do
     {
-        TRACFCOMP(g_trac_pnor, "PnorRP::readFromDevice> Error from device : RC=%X", l_err->reasonCode() );
-        errlCommit(l_err);
-        //@todo - anything else?
-    }
+        TARGETING::Target* pnor_target = TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
 
-    // remove the ECC data
-    if( i_ecc )
+        // assume a single page
+        void* data_to_read = o_dest;
+        size_t read_size = PAGESIZE;
+
+        // if we need to handle ECC we need to read more than 1 page
+        if( i_ecc )
+        {
+            ecc_buffer = new uint8_t[PAGESIZE_PLUS_ECC];
+            data_to_read = ecc_buffer;
+            read_size = PAGESIZE_PLUS_ECC;
+        }
+
+        // get the data from the PNOR DD
+        l_errhdl = DeviceFW::deviceRead(pnor_target, 
+                                        data_to_read,
+                                        read_size,
+                                        DEVICE_PNOR_ADDRESS(i_chip,i_offset) );
+        if( l_errhdl )
+        {
+            TRACFCOMP(g_trac_pnor, "PnorRP::readFromDevice> Error from device : RC=%X", l_errhdl->reasonCode() );
+            break;
+        }
+
+        // remove the ECC data
+        if( i_ecc )
+        {
+            l_errhdl = stripECC( data_to_read, o_dest );
+            if( l_errhdl )
+            {
+                break;
+            }
+        }
+    } while(0);
+
+    if( ecc_buffer )
     {
-        l_err = stripECC( data_to_read, o_dest );
-        //@todo - handle ECC error
         delete[] ecc_buffer;
     }
 
     TRACUCOMP(g_trac_pnor, "< PnorRP::readFromDevice" );
+    return l_errhdl;
 }
 
 /**
  * @brief  Write 1 page of data to the PNOR device
  */
-void PnorRP::writeToDevice( uint64_t i_offset,
-                            uint64_t i_chip,
-                            bool i_ecc,
-                            void* i_src )
+errlHndl_t PnorRP::writeToDevice( uint64_t i_offset,
+                                  uint64_t i_chip,
+                                  bool i_ecc,
+                                  void* i_src )
 {
     TRACUCOMP(g_trac_pnor, "PnorRP::writeToDevice> i_offset=%X, i_chip=%d", i_offset, i_chip );
-
-    TARGETING::Target* pnor_target = TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL; //@todo
-
-    // apply ECC to data if needed
-    void* data_to_write = i_src;
+    errlHndl_t l_errhdl = NULL;
     uint8_t* ecc_buffer = NULL;
-    if( i_ecc )
-    {
-        ecc_buffer = new uint8_t[PAGESIZE];
-        applyECC( i_src, ecc_buffer );
-        data_to_write = (void*)ecc_buffer;
-    }
 
-    size_t write_size = PAGESIZE;
-    errlHndl_t l_err = DeviceFW::deviceWrite(pnor_target, 
-                                             data_to_write,
-                                             write_size,
-                                             DEVICE_PNOR_ADDRESS(i_chip,i_offset) );
-    if( l_err )
+    do
     {
-        TRACFCOMP(g_trac_pnor, "PnorRP::readFromDevice> Error from device : RC=%X", l_err->reasonCode() );
-        errlCommit(l_err);
-        //@todo - anything else?
-    }
+        TARGETING::Target* pnor_target = TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
+
+        // assume a single page to write
+        void* data_to_write = i_src;
+        size_t write_size = PAGESIZE;
+
+        // apply ECC to data if needed
+        if( i_ecc )
+        {
+            ecc_buffer = new uint8_t[PAGESIZE];
+            applyECC( i_src, ecc_buffer );
+            data_to_write = (void*)ecc_buffer;
+            write_size = PAGESIZE_PLUS_ECC;
+        }
+
+        // write the data out to the PNOR DD
+        errlHndl_t l_errhdl = DeviceFW::deviceWrite(pnor_target, 
+                                                    data_to_write,
+                                                    write_size,
+                                                    DEVICE_PNOR_ADDRESS(i_chip,i_offset) );
+        if( l_errhdl )
+        {
+            TRACFCOMP(g_trac_pnor, "PnorRP::readFromDevice> Error from device : RC=%X", l_errhdl->reasonCode() );
+            break;
+        }
+    } while(0);
 
     if( ecc_buffer )
     {
@@ -425,18 +554,19 @@ void PnorRP::writeToDevice( uint64_t i_offset,
     }
 
     TRACUCOMP(g_trac_pnor, "< PnorRP::writeToDevice" );
+    return l_errhdl;
 }
 
 /**
  * @brief  Convert a virtual address into the PNOR device address
  */
 errlHndl_t PnorRP::computeDeviceAddr( void* i_vaddr,
-                                      ControllerMode i_mode,
+                                      PNOR::lscMode i_mode,
                                       uint64_t& o_offset,
                                       uint64_t& o_chip,
                                       bool& o_ecc )
 {
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_errhdl = NULL;
     o_offset = 0;
     o_chip = 99;
     uint64_t l_vaddr = (uint64_t)i_vaddr;
@@ -455,28 +585,28 @@ errlHndl_t PnorRP::computeDeviceAddr( void* i_vaddr,
          * @devdesc      PnorRP::computeDeviceAddr> Virtual Address outside
          *               known PNOR range
          */
-        l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+        l_errhdl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                         PNOR::MOD_PNORRP_COMPUTEDEVICEADDR,
                                         PNOR::RC_INVALID_ADDRESS,
                                         l_vaddr,
                                         BASE_VADDR);
-        return l_err;
+        return l_errhdl;
     }
 
     // find the matching section
     PNOR::SideSelect side = PNOR::SIDE_A;
     PNOR::SectionId id = PNOR::INVALID_SECTION;
-    l_err = computeSection( l_vaddr, side, id );
-    if( l_err )
+    l_errhdl = computeSection( l_vaddr, side, id );
+    if( l_errhdl )
     {
-        return l_err;
+        return l_errhdl;
     }
 
     // pull out the information we need to return from our global copy
     o_chip = iv_TOC[side][id].chip;
     o_ecc = iv_TOC[side][id].eccProtected;
     o_offset = l_vaddr - iv_TOC[side][id].virtAddr; //offset into pnor
-    if( MMRD_MODE == i_mode )
+    if( PNOR::MMRD == i_mode )
     {
         o_offset += iv_TOC[side][id].mmrdAddr;
     }
@@ -486,7 +616,7 @@ errlHndl_t PnorRP::computeDeviceAddr( void* i_vaddr,
     }
 
     TRACUCOMP( g_trac_pnor, "< PnorRP::computeDeviceAddr: o_offset=0x%X, o_chip=%d", o_offset, o_chip );
-    return l_err;
+    return l_errhdl;
 }
 
 
@@ -498,7 +628,7 @@ void PnorRP::applyECC( void* i_orig,
 {
     TRACFCOMP(g_trac_pnor, "> PnorRP::applyECC" );
 
-    //@todo - fill this in
+    //@todo - fill this in  (Story 3548)
     memcpy( o_ecc, i_orig, PAGESIZE );
 
     TRACFCOMP(g_trac_pnor, "< PnorRP::applyECC" );
@@ -512,7 +642,7 @@ errlHndl_t PnorRP::stripECC( void* i_orig,
 {
     TRACFCOMP(g_trac_pnor, "> PnorRP::stripECC" );
 
-    //@todo - fill this in
+    //@todo - fill this in  (Story 3548)
     memcpy( o_data, i_orig, PAGESIZE );
 
     TRACFCOMP(g_trac_pnor, "< PnorRP::stripECC" );

@@ -64,6 +64,7 @@ int MessageHandler::recvMessage(msg_t* i_msg)
     // Verify userspace didn't give a non-kernel message type.
     if (i_msg->type < MSG_FIRST_SYS_TYPE)
     {
+        printk("MessageHandler::recvMessage> type=%d\n", i_msg->type); 
         return -EINVAL;
     }
 
