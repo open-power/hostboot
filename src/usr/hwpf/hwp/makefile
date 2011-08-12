@@ -6,6 +6,8 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/plat
 
-OBJS = fapiTestHwp.o
+OBJS = fapiTestHwp.o \
+       fapiTestHwpError.o \
+       fapiTestHwpFfdc.o
 
 include ${ROOTPATH}/config.mk

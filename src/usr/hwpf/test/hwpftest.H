@@ -55,7 +55,7 @@ public:
 
 
     /**
-      * @brief Test HWPF: calling a procedure
+      * @brief Test HWPF: call a test procedure
       */
     void testHwpf2()
     {
@@ -65,28 +65,7 @@ public:
         // Set processor chip to the master
         TARGETING::Target* l_testTarget = MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
 
-        // Call the hardware procedure
-        bool l_clocksOn = false;
-        l_err = invokeHwpIsP7EM0ChipletClockOn(l_testTarget, l_clocksOn);
-        if (l_err)
-        {
-            TS_FAIL("testHwpf2: Unit Test failed. invokeHwpIsP7EM0ChipletClockOn failed. Error logged");
-            // Commit/delete error
-            errlCommit(l_err);
-        }
-        else
-        {
-            if (l_clocksOn)
-            {
-                TS_TRACE("testHwpf2: Success. Clocks are on");
-            }
-            else
-            {
-                TS_TRACE("testHwpf2: Success. Clocks are off");
-            }
-        }
-
-        // Call test procedure too
+        // Call the test hardware procedure
         l_err = invokeHwpInitialTest(l_testTarget);
         if (l_err)
         {
@@ -98,10 +77,32 @@ public:
         {
             TS_TRACE("testHwpf2: Unit test passed! invokeHwpInitialTest");
         }
-
-        return;
     }
 
+    /**
+      * @brief Test HWPF: call a test procedure that generates an error
+      */
+    void testHwpf3()
+    {
+        // Call a test hardware procedure
+        errlHndl_t l_err = NULL;
+
+        // Set processor chip to the master
+        TARGETING::Target* l_testTarget = MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
+
+        // Call the procedure that generates an error to test out error handling
+        l_err = invokeHwpTestError(l_testTarget);
+        if (l_err)
+        {
+            TS_TRACE("testHwpf3: Unit Test passed. invokeHwpTestError failed. Error logged");
+            // Commit/delete error
+            errlCommit(l_err);
+        }
+        else
+        {
+            TS_FAIL("testHwpf3: Unit Test failed. invokeHwpTestError passed. Error logged");
+        }
+    }
 };
 
 #endif

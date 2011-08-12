@@ -9,7 +9,9 @@
  * Flag     Defect/Feature  User        Date        Description
  * ------   --------------  ----------  ----------- ----------------------------
  *                          mjjones     04/13/2011  Created.
- *                          mjjones     07/05/2011. Removed const from data
+ *                          mjjones     07/05/2011  Removed const from data
+ *                          mjjones     07/25/2011  Added support for FFDC and
+ *                                                  Error Target
  */
 
 #ifndef FAPIRETURNCODE_H_
@@ -17,13 +19,15 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <fapiTarget.H>
 #include <fapiReturnCodes.H>
 
 namespace fapi
 {
 
-// Forward declaration
-class ReturnCodeDataRef;
+// Forward declarations
+class ReturnCodePlatDataRef;
+class ReturnCodeHwpFfdcRef;
 
 /**
  * @class ReturnCode
@@ -32,17 +36,19 @@ class ReturnCodeDataRef;
  * code value) which is of type uint32_t. A user can treat a ReturnCode just
  * as if it were a uint32_t.
  *
- * FAPI, PLAT and HWP code can all create a ReturnCode. PLAT can optionally add
- * platform specific ReturnCodeData to it.
+ * FAPI, PLAT and HWP code can all create a ReturnCode.
+ * PLAT can associate PlatData to it (use-case is an error log).
+ * HWP can add HwpFfdc to it.
+ * FAPI can add an error target to it (use-case is to record which target was
+ *   the subject of a HWP that generated an error)
  *
  * A ReturnCode is copyable and assignable. Therefore, it cannot be subclassed.
  *
- * When a ReturnCode is copied, any ReturnCodeData is not copied because it may
- * be heavyweight. Both ReturnCodes will refer to the same ReturnCodeData.
- * ReturnCodeData is only deleted when the last ReturnCode with a reference to
- * it is deleted. It is possible for PLAT to get a pointer to the ReturnCodeData
- * and to optionally release the data (ReturnCode no longer responsible for
- * deleting). This is done using the intermediate ReturnCodeDataRef class.
+ * When a ReturnCode is copied, any PlatData or HwpFfdc is not copied because it
+ * may be heavyweight. Both ReturnCodes will refer to the same data. Data is
+ * only deleted when the last ReturnCode with a reference to it is deleted. It
+ * is possible for PLAT to get a pointer to the PlatData and to optionally
+ * release the data (ReturnCode no longer responsible for deleting).
  *
  * A ReturnCode object is not thread safe, multiple threads must not use the
  * same ReturnCode object concurrently.
@@ -126,35 +132,59 @@ public:
     operator uint32_t() const;
 
     /**
-     * @brief Get a pointer to any ReturnCodeData. ReturnCode is still
-     *        responsible for deletion of the data. The caller must not delete
+     * @brief Get a pointer to any PlatData. ReturnCode is still responsible for
+     *        deletion of the data. The caller must not delete
      *
-     * The data pointed to is only meaningful to platform code.
+     * The data pointed to is only meaningful to platform code. The data pointer
+     * should be used immediately in the same thread because it may be deleted
+     * in the future.
      *
-     * @return void *. Pointer to any ReturnCodeData. If NULL then no data
+     * @return void *. Pointer to any PlatData. If NULL then no data
      */
-    void * getData() const;
+    void * getPlatData() const;
 
     /**
-     * @brief Get a pointer to any ReturnCodeData and release ownership from
+     * @brief Get a pointer to any PlatData and release ownership from
      *        ReturnCode. The caller is responsible for deletion.
      *
      * The data pointed to is only meaningful to platform code.
      *
-     * @return void *. Pointer to any ReturnCodeData. If NULL then no data
+     * @return void *. Pointer to any PlatData. If NULL then no data
      */
-    void * releaseData();
+    void * releasePlatData();
 
     /**
-     * @brief Sets ReturnCodeData. The ReturnCode object takes responsibility
-     *        for deleting the data (platform code actually implements the
-     *        delete function and must know the type and how to delete it).
+     * @brief Associates heap based PlatData with the ReturnCode. The ReturnCode
+     *        object takes responsibility for deleting the data (platform code
+     *        actually implements the delete function and must know the type and
+     *        how to delete it).
      *
-     * The data pointed to is only meaningful to platform code.
+     * The data pointed to is only meaningful to platform code. This is expected
+     * to be used to associate a platform error log with the ReturnCode.
      *
-     * param[in] i_pData Pointer to ReturnCodeData (on the heap)
+     * param[in] i_pData Pointer to PlatData (on the heap)
      */
-    void setData(void * i_pData);
+    void setPlatData(void * i_pData);
+
+    /**
+     * @brief Get a pointer to any stored HwpFfdc.
+     *
+     * The data pointer should be used immediately in the same thread because it
+     * is a pointer to internal object data.
+     *
+     * param[out] o_size Size of the FFDC data in bytes.
+     *
+     * @return void *. Pointer to any HwpFfdc. If NULL then no data
+     */
+    const void * getHwpFfdc(uint32_t & o_size) const;
+
+    /**
+     * @brief Stores a copy of the provided HwpFfdc
+     *
+     * param[in] i_pFfdc Pointer to HwpFfdc
+     * param[in] i_size  Size of the FFDC data in bytes
+     */
+    void setHwpFfdc(const void * i_pFfdc, const uint32_t i_size);
 
     /**
      * @brief Gets the creator of the return code
@@ -163,18 +193,47 @@ public:
      */
     returnCodeCreator getCreator() const;
 
+    /**
+     * @brief Stores a copy of the provided Target if there is an error and no
+     *        Target is already stored
+     *
+     * This is intended to be used by FAPI_EXEC_HWP to record which target was
+     * the subject of a HWP that generated an error.
+     *
+     * param[in] i_target Reference to Target
+     */
+    void setErrTarget(const Target & i_target);
+
+    /**
+     * @brief Gets the error target
+     *
+     * @return Target *. Pointer to Target. If NULL then no error Target
+     */
+    Target * getErrTarget() const;
+
 private:
 
     /**
-     * @brief Removes interest in pointed to ReturnCodeDataRef
+     * @brief Removes interest in pointed to ReturnCodePlatDataRef
      */
-    void removeData();
+    void removePlatData();
+
+    /**
+     * @brief Removes interest in pointed to ReturnCodeHwpFfdcRef
+     */
+    void removeHwpFfdc();
 
     // The rcValue
     uint32_t iv_rcValue;
 
-    // Pointer to ReturnCodeDataRef
-    ReturnCodeDataRef * iv_pDataRef;
+    // Pointer to ReturnCodePlatDataRef
+    ReturnCodePlatDataRef * iv_pPlatDataRef;
+
+    // Pointer to ReturnCodeHwpFfdcRef
+    ReturnCodeHwpFfdcRef * iv_pHwpFfdcRef;
+
+    // Pointer to error Target
+    Target * iv_pErrTarget;
 };
 
 }

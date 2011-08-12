@@ -1,18 +1,19 @@
 /**
- *  @file fapiTestHwpAttr.H
+ *  @file fapiTestHwpError.H
  *
- *  @brief Defines a test Hardware Procedure that exercises the test attributes
+ *  @brief Defines a simple test Hardware Procedure that returns an error
  */
 
 /*
  * Change Log ******************************************************************
  * Flag     Defect/Feature  User        Date        Description
  * ------   --------------  ----------  ----------- ----------------------------
- *                          mjjones     06/30/2011  Created.
+ *                          mjjones     08/08/2011  Created.
+ *
  */
 
-#ifndef FAPITESTHWPATTR_H_
-#define FAPITESTHWPATTR_H_
+#ifndef FAPITESTHWPERROR_H_
+#define FAPITESTHWPERROR_H_
 
 #include <fapi.H>
 
@@ -22,14 +23,14 @@ extern "C"
 {
 
 /**
- * @brief HWP that exercises attributes
+ * @brief Simple HWP that returns an error (RC_TEST_ERROR_A)
  *
  * @param[in] i_target Reference to target (unused by HWP)
  *
  * @return ReturnCode
  */
-fapi::ReturnCode hwpTestAttributes(const fapi::Target & i_target);
+fapi::ReturnCode hwpTestError(const fapi::Target & i_target);
 
 } // extern "C"
 
-#endif // FAPITESTHWPATTR_H_
+#endif // FAPITESTHWPERROR_H_

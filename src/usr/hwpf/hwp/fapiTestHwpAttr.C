@@ -21,7 +21,7 @@ extern "C"
 //******************************************************************************
 // hwpTestAttributes function
 //******************************************************************************
-fapi::ReturnCode hwpTestAttributes()
+fapi::ReturnCode hwpTestAttributes(const fapi::Target & i_target)
 {
     // Attempt to call the attribute get/set functions for the test attributes
     fapi::ReturnCode l_rc;

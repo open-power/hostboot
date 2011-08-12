@@ -19,21 +19,18 @@ namespace fapi
 {
 
 /**
- * @brief Invokes hwpIsP7EM0ChipletClockOn procedure
- *
- * @param[in]  i_target   Pointer to Chip
- * @param[out] o_clocksOn True if EM0 clocks are on, else false
- */
-errlHndl_t invokeHwpIsP7EM0ChipletClockOn(TARGETING::Target* i_target,
-                                          bool & o_clocksOn);
-
-/**
  * @brief Invokes hwpInitialTest procedure
  *
  * @param[in]  i_target   Pointer to Chip
  */
 errlHndl_t invokeHwpInitialTest(TARGETING::Target* i_target);
 
+/**
+ * @brief Invokes hwpTestError procedure
+ *
+ * @param[in]  i_target   Pointer to Chip
+ */
+errlHndl_t invokeHwpTestError(TARGETING::Target* i_target);
 
 }
 

@@ -10,6 +10,8 @@
  * ------   --------------  ----------  ----------- ----------------------------
  *                          mjjones     04/13/2011  Created.
  *                          mjjones     07/05/2011. Removed const from data
+ *                          mjjones     07/25/2011  Added support for FFDC and
+ *                                                  Error Target
  */
 
 #include <fapiReturnCode.H>
@@ -22,7 +24,8 @@ namespace fapi
 // Default Constructor
 //******************************************************************************
 ReturnCode::ReturnCode() :
-    iv_rcValue(FAPI_RC_SUCCESS), iv_pDataRef(NULL)
+    iv_rcValue(FAPI_RC_SUCCESS), iv_pPlatDataRef(NULL), iv_pHwpFfdcRef(NULL),
+    iv_pErrTarget(NULL)
 {
 
 }
@@ -31,7 +34,8 @@ ReturnCode::ReturnCode() :
 // Constructor
 //******************************************************************************
 ReturnCode::ReturnCode(const uint32_t i_rcValue) :
-    iv_rcValue(i_rcValue), iv_pDataRef(NULL)
+    iv_rcValue(i_rcValue), iv_pPlatDataRef(NULL), iv_pHwpFfdcRef(NULL),
+    iv_pErrTarget(NULL)
 {
 
 }
@@ -40,15 +44,26 @@ ReturnCode::ReturnCode(const uint32_t i_rcValue) :
 // Copy Constructor
 //******************************************************************************
 ReturnCode::ReturnCode(const ReturnCode & i_right) :
-    iv_rcValue(i_right.iv_rcValue), iv_pDataRef(i_right.iv_pDataRef)
+    iv_rcValue(i_right.iv_rcValue), iv_pPlatDataRef(i_right.iv_pPlatDataRef),
+    iv_pHwpFfdcRef(i_right.iv_pHwpFfdcRef), iv_pErrTarget(NULL)
 {
-    // Note shallow copy (in initializer list) of iv_pDataRef pointer. Both
-    // ReturnCodes now points to the same ReturnCodeDataRef
+    // Note shallow copy of data ref pointers. Both ReturnCodes now point to the
+    // same data
 
-    if (iv_pDataRef)
+    // Increment the data ref counts and create a new copy of the error target
+    if (iv_pPlatDataRef)
     {
-        // Increase the ReturnCodeDataRef reference count
-        (void) iv_pDataRef->incRefCount();
+        (void) iv_pPlatDataRef->incRefCount();
+    }
+
+    if (iv_pHwpFfdcRef)
+    {
+        (void) iv_pHwpFfdcRef->incRefCount();
+    }
+
+    if (i_right.iv_pErrTarget)
+    {
+        iv_pErrTarget = new Target(*i_right.iv_pErrTarget);
     }
 }
 
@@ -57,8 +72,10 @@ ReturnCode::ReturnCode(const ReturnCode & i_right) :
 //******************************************************************************
 ReturnCode::~ReturnCode()
 {
-    // Remove interest in any pointed to ReturnCodeDataRef
-    (void) removeData();
+    // Remove interest in any data references and delete any Error Target
+    (void) removePlatData();
+    (void) removeHwpFfdc();
+    delete iv_pErrTarget;
 }
 
 //******************************************************************************
@@ -69,18 +86,31 @@ ReturnCode & ReturnCode::operator=(const ReturnCode & i_right)
     // Test for self assignment
     if (this != &i_right)
     {
-        // Remove interest in any pointed to ReturnCodeDataRef
-        (void) removeData();
+        // Remove interest in any data references and delete any Error Target
+        (void) removePlatData();
+        (void) removeHwpFfdc();
+        delete iv_pErrTarget;
 
-        // Copy instance variables. Note shallow copy of iv_pDataRef pointer.
-        // Both ReturnCodes now points to the same ReturnCodeDataRef
+        // Copy instance variables. Note shallow copy of data ref pointers. Both
+        // ReturnCodes now point to the same data
         iv_rcValue = i_right.iv_rcValue;
-        iv_pDataRef = i_right.iv_pDataRef;
+        iv_pPlatDataRef = i_right.iv_pPlatDataRef;
+        iv_pHwpFfdcRef = i_right.iv_pHwpFfdcRef;
 
-        if (iv_pDataRef)
+        // Increment the data ref counts and create a new copy of the error tgt
+        if (iv_pPlatDataRef)
         {
-            // Increase the ReturnCodeDataRef reference count
-            (void) iv_pDataRef->incRefCount();
+            (void) iv_pPlatDataRef->incRefCount();
+        }
+
+        if (iv_pHwpFfdcRef)
+        {
+            (void) iv_pHwpFfdcRef->incRefCount();
+        }
+
+        if (i_right.iv_pErrTarget)
+        {
+            iv_pErrTarget = new Target(*i_right.iv_pErrTarget);
         }
     }
     return *this;
@@ -112,50 +142,78 @@ ReturnCode::operator uint32_t() const
 }
 
 //******************************************************************************
-// getData function
+// getPlatData function
 //******************************************************************************
-void * ReturnCode::getData() const
+void * ReturnCode::getPlatData() const
 {
     void * l_pData = NULL;
 
-    if (iv_pDataRef)
+    if (iv_pPlatDataRef)
     {
         // Get the data
-        l_pData = iv_pDataRef->getData();
+        l_pData = iv_pPlatDataRef->getData();
     }
 
     return l_pData;
 }
 
 //******************************************************************************
-// releaseData function
+// releasePlatData function
 //******************************************************************************
-void * ReturnCode::releaseData()
+void * ReturnCode::releasePlatData()
 {
     void * l_pData = NULL;
 
-    if (iv_pDataRef)
+    if (iv_pPlatDataRef)
     {
         // Release the data
-        l_pData = iv_pDataRef->releaseData();
+        l_pData = iv_pPlatDataRef->releaseData();
 
-        // Remove interest in pointed to ReturnCodeDataRef
-        (void) removeData();
+        // Remove interest in ReturnCodePlatDataRef
+        (void) removePlatData();
     }
 
     return l_pData;
 }
 
 //******************************************************************************
-// setData function
+// setPlatData function
 //******************************************************************************
-void ReturnCode::setData(void * i_pData)
+void ReturnCode::setPlatData(void * i_pData)
 {
-    // Remove interest in pointed to ReturnCodeDataRef
-    (void) removeData();
+    // Remove interest in ReturnCodePlatDataRef
+    (void) removePlatData();
 
-    // Create new ReturnCodeDataRef which points to the data
-    iv_pDataRef = new ReturnCodeDataRef(i_pData);
+    // Create a new ReturnCodePlatDataRef which points to the data
+    iv_pPlatDataRef = new ReturnCodePlatDataRef(i_pData);
+}
+
+//******************************************************************************
+// getHwpFfdc function
+//******************************************************************************
+const void * ReturnCode::getHwpFfdc(uint32_t & o_size) const
+{
+    const void * l_pFfdc = NULL;
+
+    if (iv_pHwpFfdcRef)
+    {
+        // Get the HwpFfdc
+        l_pFfdc = iv_pHwpFfdcRef->getData(o_size);
+    }
+
+    return l_pFfdc;
+}
+
+//******************************************************************************
+// setHwpFfdc function
+//******************************************************************************
+void ReturnCode::setHwpFfdc(const void * i_pFfdc, const uint32_t i_size)
+{
+    // Remove interest in ReturnCodeHwpFfdcRef
+    (void) removeHwpFfdc();
+
+    // Create a new ReturnCodeHwpFfdcRef which contains the HwpFfdc
+    iv_pHwpFfdcRef = new ReturnCodeHwpFfdcRef(i_pFfdc, i_size);
 }
 
 //******************************************************************************
@@ -178,20 +236,58 @@ ReturnCode::returnCodeCreator ReturnCode::getCreator() const
 }
 
 //******************************************************************************
-// removeData function
+// setErrTarget function
 //******************************************************************************
-void ReturnCode::removeData()
+void ReturnCode::setErrTarget(const Target & i_target)
 {
-    if (iv_pDataRef)
+    if ((iv_rcValue != FAPI_RC_SUCCESS) && (iv_pErrTarget == NULL))
     {
-        // Decrement the ReturnCodeDataRef refcount
-        if (iv_pDataRef->decRefCountCheckZero())
+        // Create a copy of the target
+        iv_pErrTarget = new Target(i_target);
+    }
+}
+
+//******************************************************************************
+// getErrTarget function
+//******************************************************************************
+Target * ReturnCode::getErrTarget() const
+{
+    return iv_pErrTarget;
+}
+
+//******************************************************************************
+// removePlatData function
+//******************************************************************************
+void ReturnCode::removePlatData()
+{
+    if (iv_pPlatDataRef)
+    {
+        // Decrement the ReturnCodePlatDataRef refcount
+        if (iv_pPlatDataRef->decRefCountCheckZero())
         {
             // Refcount decremented to zero. No other ReturnCode points to the
-            // ReturnCodeDataRef object, delete it
-            delete iv_pDataRef;
+            // ReturnCodePlatDataRef object, delete it
+            delete iv_pPlatDataRef;
         }
-        iv_pDataRef = NULL;
+        iv_pPlatDataRef = NULL;
+    }
+}
+
+//******************************************************************************
+// removeHwpFfdc function
+//******************************************************************************
+void ReturnCode::removeHwpFfdc()
+{
+    if (iv_pHwpFfdcRef)
+    {
+        // Decrement the ReturnCodeHwpFfdcRef refcount
+        if (iv_pHwpFfdcRef->decRefCountCheckZero())
+        {
+            // Refcount decremented to zero. No other ReturnCode points to the
+            // ReturnCodeHwpFfdcRef object, delete it
+            delete iv_pHwpFfdcRef;
+        }
+        iv_pHwpFfdcRef = NULL;
     }
 }
 

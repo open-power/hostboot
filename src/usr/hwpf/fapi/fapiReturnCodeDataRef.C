@@ -12,8 +12,10 @@
  *                          camvanng	05/31/2011  Added debug traces
  *                          mjjones     06/30/2011  Added #include
  *                          mjjones     07/05/2011  Removed const from data
+ *                          mjjones     07/25/2011  Added support for FFDC
  */
 
+#include <string.h>
 #include <fapiReturnCodeDataRef.H>
 #include <fapiUtil.H>
 #include <fapiPlatTrace.H>
@@ -22,16 +24,16 @@ namespace fapi
 {
 
 //******************************************************************************
-// Constructor
+// ReturnCodeDataRef Constructor
 //******************************************************************************
-ReturnCodeDataRef::ReturnCodeDataRef(void * i_pData) :
-    iv_refCount(1), iv_pData(i_pData)
+ReturnCodeDataRef::ReturnCodeDataRef() :
+    iv_refCount(1)
 {
 
 }
 
 //******************************************************************************
-// Destructor
+// ReturnCodeDataRef Destructor
 //******************************************************************************
 ReturnCodeDataRef::~ReturnCodeDataRef()
 {
@@ -40,28 +42,25 @@ ReturnCodeDataRef::~ReturnCodeDataRef()
         FAPI_ERR("ReturnCodeDataRef. Bug. Destruct with refcount");
         fapiAssert(false);
     }
-    else
-    {
-        // Call platform implemented deleteData
-        (void) deleteData();
-    }
 }
 
 //******************************************************************************
-// incRefCount function
+// ReturnCodeDataRef incRefCount function
 //******************************************************************************
 void ReturnCodeDataRef::incRefCount()
 {
-	FAPI_DBG("ReturnCodeDataRef::incRefCount: iv_refCount = %i on entry", iv_refCount);
+	FAPI_DBG("ReturnCodeDataRef::incRefCount: iv_refCount = %d on entry",
+             iv_refCount);
     iv_refCount++;
 }
 
 //******************************************************************************
-// decRefCountCheckZero function
+// ReturnCodeDataRef decRefCountCheckZero function
 //******************************************************************************
 bool ReturnCodeDataRef::decRefCountCheckZero()
 {
-	FAPI_DBG("ReturnCodeDataRef::decRefCountCheckZero: iv_refCount = %i on entry", iv_refCount);
+	FAPI_DBG("ReturnCodeDataRef::decRefCountCheckZero: iv_refCount = %d on "
+             "entry", iv_refCount);
 
     if (iv_refCount == 0)
     {
@@ -76,21 +75,68 @@ bool ReturnCodeDataRef::decRefCountCheckZero()
 }
 
 //******************************************************************************
-// getData function
+// ReturnCodePlatDataRef Constructor
 //******************************************************************************
-void * ReturnCodeDataRef::getData() const
+ReturnCodePlatDataRef::ReturnCodePlatDataRef(void * i_pData) :
+    iv_pData(i_pData)
+{
+
+}
+
+//******************************************************************************
+// ReturnCodePlatDataRef Destructor
+//******************************************************************************
+ReturnCodePlatDataRef::~ReturnCodePlatDataRef()
+{
+    // Call platform implemented deleteData
+    (void) deleteData();
+}
+
+//******************************************************************************
+// ReturnCodePlatDataRef getData function
+//******************************************************************************
+void * ReturnCodePlatDataRef::getData() const
 {
     return iv_pData;
 }
 
 //******************************************************************************
-// releaseData function
+// ReturnCodePlatDataRef releaseData function
 //******************************************************************************
-void * ReturnCodeDataRef::releaseData()
+void * ReturnCodePlatDataRef::releaseData()
 {
     void * l_pData = iv_pData;
     iv_pData = NULL;
     return l_pData;
+}
+
+//******************************************************************************
+// ReturnCodeHwpFfdcRef Constructor
+//******************************************************************************
+ReturnCodeHwpFfdcRef::ReturnCodeHwpFfdcRef(const void * i_pFfdc,
+                                           const uint32_t i_size)
+: iv_size(i_size)
+{
+    iv_pFfdc = new uint8_t[i_size];
+    memcpy(iv_pFfdc, i_pFfdc, i_size);
+}
+
+//******************************************************************************
+// ReturnCodeHwpFfdcRef Destructor
+//******************************************************************************
+ReturnCodeHwpFfdcRef::~ReturnCodeHwpFfdcRef()
+{
+    delete [] iv_pFfdc;
+    iv_pFfdc = NULL;
+}
+
+//******************************************************************************
+// ReturnCodeHwpFfdcRef getData function
+//******************************************************************************
+const void * ReturnCodeHwpFfdcRef::getData(uint32_t & o_size) const
+{
+    o_size = iv_size;
+    return iv_pFfdc;
 }
 
 }

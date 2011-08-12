@@ -42,7 +42,7 @@ fapi::ReturnCode GetScom(const fapi::Target& i_target,
         // Add the error log pointer as data to the ReturnCode
         FAPI_ERR("GetScom: HostBoot GetScom returns error");
         l_rc = fapi::FAPI_RC_PLAT_ERR_SEE_DATA;
-        l_rc.setData(reinterpret_cast<void *> (l_err));
+        l_rc.setPlatData(reinterpret_cast<void *> (l_err));
     }
     else
     {
@@ -79,7 +79,7 @@ fapi::ReturnCode PutScom(const fapi::Target& i_target,
         // Add the error log pointer as data to the ReturnCode
         FAPI_ERR("Putscom: HostBoot Putscom returns error");
         l_rc = fapi::FAPI_RC_PLAT_ERR_SEE_DATA;
-        l_rc.setData(reinterpret_cast<void *> (l_err));
+        l_rc.setPlatData(reinterpret_cast<void *> (l_err));
     }
 
     FAPI_DBG(EXIT_MRK "PutScom");

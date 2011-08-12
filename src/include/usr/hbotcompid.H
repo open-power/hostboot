@@ -91,6 +91,13 @@ const char I2C_COMP_NAME[] = "i2c";
 //@{
 const compId_t VFS_COMP_ID = 0x0800;
 const char VFS_COMP_NAME[] = "vfs";
+
+/** @name HWPF
+ *  HW Procedure Framework component
+ */
+//@{
+const compId_t HWPF_COMP_ID = 0x0900;
+const char HWPF_COMP_NAME[] = "hwpf";
 //@}
 
 #endif

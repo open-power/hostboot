@@ -4,12 +4,25 @@
 <hwpErrors>
   <!-- *********************************************************************** -->
   <hwpError>
-    <id>RC_TEST_ERROR_A</id>
-    <description>Test Error A</description>
+    <rc>RC_TEST_ERROR_A</rc>
+    <description>Test Error A for a HWP operating on a PROC_CHIP</description>
+    <callout>
+        <!-- The callout is the PROC_CHIP itself -->
+        <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+        <targetPos>0</targetPos>
+        <priority>HIGH</priority>
+    </callout>
+    <ffdc>
+        <!-- FFDC needs to be collected from the PROC_CHIP itself -->
+        <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+        <targetPos>0</targetPos>
+        <ffdcHwp>hwpTestFfdc1</ffdcHwp>
+        <ffdcHwpData>TestFfdc1</ffdcHwpData>
+    </ffdc>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <id>RC_TEST_ERROR_B</id>
+    <rc>RC_TEST_ERROR_B</rc>
     <description>Test Error B</description>
   </hwpError>
 </hwpErrors>

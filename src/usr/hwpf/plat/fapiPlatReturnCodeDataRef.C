@@ -17,12 +17,13 @@ namespace fapi
 //******************************************************************************
 // deleteData function
 //******************************************************************************
-void ReturnCodeDataRef::deleteData()
+void ReturnCodePlatDataRef::deleteData()
 {
-	FAPI_DBG("ReturnCodeDataRef::deleteData");
+	FAPI_DBG("ReturnCodePlatDataRef::deleteData");
 
     // HostBoot platform uses iv_pData to point at an error log.
     delete (static_cast<errlHndl_t>(iv_pData));
+    iv_pData = NULL;
 }
 
 }

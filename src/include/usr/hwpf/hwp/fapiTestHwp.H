@@ -10,6 +10,7 @@
  * ------   --------------  ----------  ----------- ----------------------------
  *                          mjjones     04/21/2011  Created.
  *                          mjjones     06/28/2011  Updated comment
+ *                          mjjones     08/11/2011  Removed Clock HWP
  *
  */
 
@@ -24,21 +25,9 @@ extern "C"
 {
 
 /**
- * @brief Finds if a P7 EM0 chiplet clock is on
+ * @brief A simple HWP. Can easily be modified by HW dev team for test
  *
- * @param[in]  i_chip            Target chip
- * @param[out] o_clocksOn        True if clocks are on, else false
- *
- * @return ReturnCode
- */
-fapi::ReturnCode hwpIsP7EM0ChipletClockOn(const fapi::Target & i_chip,
-                                          bool & o_clocksOn);
-
-/**
- * @brief Run a sample test function that can be overloaded by the hw dev
- *        team.
- *
- * @param[in]  i_chip            Target chip
+ * @param[in] i_chip Reference to target chip
  *
  * @return ReturnCode
  */
