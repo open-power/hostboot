@@ -1,11 +1,14 @@
 #include <limits.h>
 #include <assert.h>
 
+#include <sys/msg.h>
+
 #include <kernel/block.H>
 #include <kernel/spte.H>
 #include <kernel/vmmmgr.H>
 #include <kernel/ptmgr.H>
-
+#include <kernel/pagemgr.H>
+//#include <kernel/console.H>
 Block::~Block()
 {
     // Release shadow PTE array.
@@ -18,10 +21,16 @@ Block::~Block()
     }
 }
 
-void Block::init()
+void Block::init(MessageQueue* i_msgQ)
 {
     // Create a shadow PTE for each page.
     iv_ptes = new ShadowPTE[iv_size / PAGESIZE];
+    this->iv_msgHdlr = NULL;
+    if (i_msgQ != NULL)
+    {
+        //Create message handler attribute for this block with this msgq
+        this->iv_msgHdlr = new MessageHandler(VmmManager::getLock(),i_msgQ);
+    }
 }
 
 ShadowPTE* Block::getPTE(uint64_t i_addr) const
@@ -42,13 +51,29 @@ bool Block::handlePageFault(task_t* i_task, uint64_t i_addr)
 
     if (!pte->isPresent())
     {
-        // TODO.  Needs swapping support.
-        return false;
-    }
-
-    if (pte->getPage() == 0)
-    {
-        return false;
+        if (this->iv_msgHdlr != NULL)
+        {
+            void* l_page = reinterpret_cast<void*>(pte->getPageAddr());
+            //If the page data is zero, create the page
+            if (pte->getPage() == 0)
+            {
+                l_page = PageManager::allocatePage();
+                //Add to ShadowPTE
+                pte->setPageAddr(reinterpret_cast<uint64_t>(l_page));
+                //TODO - Update to correct permissions requested
+                pte->setExecutable(true);
+                pte->setWritable(false);
+            }
+            //Send message to handler to read page
+            this->iv_msgHdlr->sendMessage(MSG_MM_RP_READ,
+                    reinterpret_cast<void*>(i_addr),l_page,i_task);
+            //Done(waiting for response)
+            return true;
+        }
+        else
+        {
+            return false; //TODO - Swap kernel base block pages for user pages
+        }
     }
 
     // Add page table entry.

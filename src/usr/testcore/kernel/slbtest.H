@@ -69,9 +69,18 @@ class slbtest: public CxxTest::TestSuite
             int rc = -1;
             msg_q_t mq = msg_q_create(); //Create empty message queue
             uint64_t va = 0xC800000000; //800GB
-            uint64_t size = 0x40000000; //1GB
-            printk("Allocate 1GB block with empty msgq @ vaddr = 800GB within base segment\n");
+            uint64_t size = 0x100000; //1MB
+            printk("Allocate 1MB block with empty msgq @ vaddr = 800GB within base segment\n");
             rc = mm_alloc_block(mq,reinterpret_cast<void*>(va),size);
+            if (rc != 0)
+            {
+                TS_FAIL("Failed to create BaseSegment block\n");
+            }
+            msg_q_t mq2 = msg_q_create(); //Create empty message queue
+            uint64_t va2 = 0xE100000000; //900GB
+            uint64_t size2 = 0x100000; //1MB
+            printk("Allocate 1MB block with empty msgq @ vaddr = 900GB within base segment\n");
+            rc = mm_alloc_block(mq2,reinterpret_cast<void*>(va2),size2);
             if (rc != 0)
             {
                 TS_FAIL("Failed to create BaseSegment block\n");

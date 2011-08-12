@@ -7,9 +7,11 @@
 #include <stdint.h>
 #include <kernel/task.H>
 #include <kernel/vmmmgr.H>
+#include <kernel/msghandler.H>
 
 class ShadowPTE;
 class Segment;
+class MessageQueue;
 
 /** @class Block
  *  @brief Provides management of the memory pages associated with a block of
@@ -36,13 +38,17 @@ class Block
          *
          * @param[in] i_baseAddr - Base virtual Address of the block.
          * @param[in] i_size - Size of the block (in bytes).
+         * @param[in] i_msgQueue - Message queue passed along to the handler
+         *                         Default: NULL
          *
          * Will allocate enough shadow PTEs to track pages in the block.
          */
-        Block(uint64_t i_baseAddr, uint64_t i_size) :
+        Block(uint64_t i_baseAddr, uint64_t i_size,
+              MessageQueue* i_msgQueue = NULL) :
                 iv_baseAddr(i_baseAddr), iv_size(i_size),
-                iv_parent(NULL), iv_nextBlock(NULL), iv_ptes(NULL)
-            { init(); };
+                iv_parent(NULL), iv_nextBlock(NULL), iv_ptes(NULL),
+                iv_msgHdlr(NULL)
+            { init(i_msgQueue); };
 
         /**
          * @brief Destructor.
@@ -118,6 +124,18 @@ class Block
         void setPhysicalPage(uint64_t i_vAddr, uint64_t i_pAddr,
                              VmmManager::ACCESS_TYPES i_access);
 
+        /**
+         * @brief Adds up the total size of all blocks within the segment
+         *
+         * @param[in/out] io_totalSize - total size allocated within segment
+         */
+        void totalBlocksAlloc(uint64_t &io_totalSize)
+        {
+            io_totalSize=io_totalSize+this->iv_size;
+            if (iv_nextBlock == NULL) return;
+            else iv_nextBlock->totalBlocksAlloc(io_totalSize);
+        }
+
     private:
             /** Base address of the block */
         const uint64_t iv_baseAddr;
@@ -131,9 +149,13 @@ class Block
 
             /** Pointer to the Shadow PTE entries. */
         ShadowPTE* iv_ptes;
+            /** Pointer to the message handler */
+        MessageHandler* iv_msgHdlr;
 
         /**
          * @brief Finish initialization of block.
+         *
+         * @param[in] i_msgQ - The message queue associated with this block
          *
          * Construct ShadowPTE entries.
          *
@@ -142,7 +164,7 @@ class Block
          * "not-in-charge" version of each constructor, so put as much
          * common code into an init function.
          */
-        void init();
+        void init(MessageQueue* i_msgQ);
 
         /**
          * @brief Find the Shadow PTE for a virtual address.

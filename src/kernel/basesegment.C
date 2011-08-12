@@ -6,6 +6,8 @@
 #include <kernel/block.H>
 #include <kernel/vmmmgr.H>
 #include <kernel/cpuid.H>
+//#include <kernel/console.H>
+#define SLBE_s 40
 
 BaseSegment::~BaseSegment()
 {
@@ -72,9 +74,32 @@ bool BaseSegment::handlePageFault(task_t* i_task, uint64_t i_addr)
 }
 
 /**
+ * STATIC
  * Allocates a block of virtual memory of the given size
  */
 int BaseSegment::mmAllocBlock(MessageQueue* i_mq,void* i_va,uint64_t i_size)
 {
+    return Singleton<BaseSegment>::instance()._mmAllocBlock(i_mq,i_va,i_size);
+}
+
+/**
+ * Allocates a block of virtual memory of the given size
+ */
+int BaseSegment::_mmAllocBlock(MessageQueue* i_mq,void* i_va,uint64_t i_size)
+{
+    uint64_t l_vaddr = reinterpret_cast<uint64_t>(i_va);
+    uint64_t l_blockSizeTotal = 0;//iv_block->iv_size;
+    iv_block->totalBlocksAlloc(l_blockSizeTotal);
+    //Verify input address and size falls within this segment's address range
+    if ((l_vaddr < this->getBaseAddress() ||
+        l_vaddr >= (this->getBaseAddress() + (1ull << SLBE_s))) &&
+        (l_blockSizeTotal+i_size <= (1ull << SLBE_s)))
+    {
+        return -1;
+    }
+    //TODO - Align i_size to page size
+    Block* l_block = new Block(l_vaddr, i_size, i_mq);
+    l_block->setParent(this);
+    iv_block->appendBlock(l_block);
     return 0;
 }
