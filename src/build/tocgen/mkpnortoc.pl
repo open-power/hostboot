@@ -13,7 +13,7 @@ use XML::LibXML;
 use File::Basename;
 
 my $programName = File::Basename::basename $0;
-my $g_trace = 0; # 1 -> enable traces
+my $g_trace = 0; # >0 enable traces
 $tocDataFile = "";
 $tocOutFile = "";
 
@@ -163,9 +163,10 @@ sub parseTocEntry
 	{
 	    last;
 	}
-	elsif($curSibling->nodeName eq "text")
+	elsif(($curSibling->nodeName eq "text") ||
+	      ($curSibling->nodeName eq "#text"))
 	{
-	    #print "skipping ".$curSibling->nodeName."\n";
+	    trace(1, "ignoring ".$curSibling->nodeName);
 	}
 	elsif($curSibling->nodeName eq "length")
 	{
@@ -174,6 +175,7 @@ sub parseTocEntry
 	}
 	else
 	{
+	    trace(1, "Parsing ".$curSibling->nodeName);
 	    $fieldLen = writeElementToBinFile($i_FILEHANDLE, $curSibling);
 	    $sumFieldLen = $sumFieldLen + $fieldLen;
 
