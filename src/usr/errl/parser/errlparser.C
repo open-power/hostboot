@@ -40,7 +40,7 @@ Contact: Monte Copeland\n\
 // this program will be spawned from traceHB.py, I think we're better
 // served sending the error message to stdout, not stderr.  I don't
 // think Simics is piping stderr to its console.
-void halt( char * msg )
+void halt( const char * msg )
 {
     fprintf( stdout, "%s", msg );
 
@@ -57,7 +57,7 @@ void halt( char * msg )
 // that maps comp id to a string label for it.
 struct _errlcompname
 {
-    char *    pszName;
+    const char *    pszName;
     uint32_t  value;
 };
 typedef _errlcompname  ERRLCOMPNAME_t;
@@ -73,9 +73,9 @@ ERRLCOMPNAME_t  g_errlcompnames[] = {
 // it, return a char* to the component name. Return
 // null if not found, which printf seems to handle
 // OK by printing (null).
-char * FindComp( uint16_t reasoncode )
+const char * FindComp( uint16_t reasoncode )
 {
-    char * pch = NULL;
+    const char * pch = NULL;
     uint32_t id = (reasoncode & 0xFF00 );
     int c = sizeof( g_errlcompnames ) / sizeof( g_errlcompnames[0] );
     for( int i = 0; i < c; i++ )
@@ -336,7 +336,7 @@ char* ReadStorageBuffer(char* i_Image, uint32_t i_ulAddr, uint32_t &io_cbBuffer)
 //----------------------------------------------------------------------------
 // Open the given symbols file name, a text file, and find the storage address
 // of error logs given by the symbol in pszSearch.
-uint32_t FindSymbol( char * pszSymbolFile,  char * pszSearch )
+uint32_t FindSymbol( char * pszSymbolFile,  const char * pszSearch )
 {
     char * pszAddr = NULL;
     char * pch;

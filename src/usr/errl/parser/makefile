@@ -13,23 +13,25 @@ all: code_pass
 
 gen_pass:
 
-code_pass: bindir $(BIN)/errlparser 
+code_pass: $(BIN)/errlparser 
 
 clean:
 	rm -fr $(BIN)
 
 beam: 
 
-bindir: 
-	mkdir -p $(BIN) 	
+$(BIN)/comps.C: $(ROOTPATH)/src/include/usr/hbotcompid.H
+	mkdir -p $(BIN)
+	grep "const compId_t [A-Z0-9]*_COMP_ID" $^ | \
+	grep -v MY_COMP_ID | \
+	sed 's/const compId_t \([A-Z0-9]*\)_COMP_ID[ =\t]*\(0[xX][0-0a-fA-F]*\).*/{ "\1", \2 },/' \
+	> $@
 
-$(BIN)/comps.C: $(ROOTPATH)/src/include/usr/hbotcompid.H   readcomps.rex
-	rexx readcomps.rex $(ROOTPATH)/src/include/usr/hbotcompid.H  >$(BIN)/comps.C
-
-$(BIN)/errlparser.o: errlparser.C   $(ROOTPATH)/src/include/usr/errl/errltypes.H $(BIN)/comps.C
-	$(CC) -c  $(CFLAGS) -I bin  -o $(BIN)/errlparser.o  errlparser.C
+$(BIN)/errlparser.o: errlparser.C $(ROOTPATH)/src/include/usr/errl/errltypes.H $(BIN)/comps.C
+	mkdir -p $(BIN)
+	$(CC) -c  $(CFLAGS) -I bin -o $@  $<
 
 $(BIN)/errlparser: $(BIN)/errlparser.o
-	$(CC) -o  $(BIN)/errlparser  $(BIN)/errlparser.o 
+	$(CC) -o  $@ $<
 
 
