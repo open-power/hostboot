@@ -23,6 +23,7 @@
 #include <targeting/targetservice.H>
 #include "trace.H"
 #include "fakepnordata.H"
+#include <targeting/predicates/predicatebase.H>
 
 //******************************************************************************
 // targetService
@@ -157,6 +158,72 @@ void TargetService::init()
     iv_initialized = true;
 
     TARG_EXIT();
+
+    #undef TARG_FN
+}
+
+//******************************************************************************
+// TargetService::begin (non-const version)
+//******************************************************************************
+
+TargetService::iterator TargetService::begin()
+{
+    #define TARG_FN "begin()"
+
+    assert(iv_initialized);
+
+    Target* l_pFirstTarget = (iv_maxTargets == 0) ? NULL : &(*iv_targets)[0];
+    
+    return iterator(l_pFirstTarget);
+
+    #undef TARG_FN
+}
+
+//******************************************************************************
+// TargetService::begin (const version)
+//******************************************************************************
+
+//TargetService::const_iterator 
+_TargetIterator<const Target*> TargetService::begin() const
+{
+    #define TARG_FN "begin() const"
+
+    assert(iv_initialized);
+    
+    const Target* l_pFirstTarget = 
+        (iv_maxTargets == 0) ? NULL : &(*iv_targets)[0];
+
+    return const_iterator(l_pFirstTarget);
+
+    #undef TARG_FN
+}
+
+//******************************************************************************
+// TargetService::end (non-const version)
+//******************************************************************************
+
+TargetService::iterator TargetService::end()
+{
+    #define TARG_FN "end()"
+
+    assert(iv_initialized);
+
+    return iterator(NULL); 
+
+    #undef TARG_FN
+}
+
+//******************************************************************************
+// TargetService::end (const version)
+//******************************************************************************
+
+TargetService::const_iterator TargetService::end() const
+{
+    #define TARG_FN "end() const"
+
+    assert(iv_initialized);
+
+    return const_iterator(NULL);
 
     #undef TARG_FN
 }
@@ -305,10 +372,11 @@ bool TargetService::tryGetPath(
 //******************************************************************************
 
 void TargetService::getAssociated(
-    const Target* const     i_pTarget,
-    const ASSOCIATION_TYPE  i_type,
-    const RECURSION_LEVEL   i_recursionLevel,
-          TargetHandleList& o_list) const
+          TargetHandleList&    o_list,
+    const Target* const        i_pTarget,
+    const ASSOCIATION_TYPE     i_type,
+    const RECURSION_LEVEL      i_recursionLevel,
+    const PredicateBase* const i_pPredicate) const
 {
     #define TARG_FN "getAssociated(...)"
 
@@ -340,13 +408,13 @@ void TargetService::getAssociated(
                 if (iv_associationMappings[i].associationDir == INWARDS)
                 {
                     (void) _getInwards(iv_associationMappings[i].attr,
-                        i_recursionLevel, l_entityPath, o_list);
+                        i_recursionLevel, l_entityPath, i_pPredicate, o_list);
                 }
                 else if (iv_associationMappings[i].associationDir
                     == OUTWARDS)
                 {
                     (void) _getOutwards(iv_associationMappings[i].attr,
-                        i_recursionLevel, l_entityPath, o_list);
+                        i_recursionLevel, l_entityPath, i_pPredicate, o_list);
                 }
                 else
                 {
@@ -509,10 +577,11 @@ uint32_t TargetService::_maxTargets()
 //******************************************************************************
 
 void TargetService::_getInwards(
-    const ATTRIBUTE_ID      i_attr,
-    const RECURSION_LEVEL   i_recursionLevel,
-          EntityPath        i_entityPath,
-          TargetHandleList& o_list) const
+    const ATTRIBUTE_ID         i_attr,
+    const RECURSION_LEVEL      i_recursionLevel,
+          EntityPath           i_entityPath,
+    const PredicateBase* const i_pPredicate,
+          TargetHandleList&    o_list) const
 {
     #define TARG_FN "_getInwards(...)"
 
@@ -524,7 +593,10 @@ void TargetService::_getInwards(
             EntityPath l_candidatePath;
             bool l_candidateFound = tryGetPath(i_attr, &(*iv_targets)[i],
                 l_candidatePath);
-            if (l_candidateFound && (l_candidatePath == i_entityPath))
+            if (   l_candidateFound 
+                && (l_candidatePath == i_entityPath)
+                && (   (i_pPredicate == NULL)
+                    || (*i_pPredicate)( &(*iv_targets)[i]) ) )
             {
                 o_list.push_back(&(*iv_targets)[i]);
                 break;
@@ -545,10 +617,11 @@ void TargetService::_getInwards(
 //******************************************************************************
 
 void TargetService::_getOutwards(
-    const ATTRIBUTE_ID      i_attr,
-    const RECURSION_LEVEL   i_recursionLevel,
-          EntityPath        i_entityPath,
-          TargetHandleList& o_list) const
+    const ATTRIBUTE_ID         i_attr,
+    const RECURSION_LEVEL      i_recursionLevel,
+          EntityPath           i_entityPath,
+    const PredicateBase* const i_pPredicate,
+          TargetHandleList&    o_list) const
 {
     #define TARG_FN "_getOutwards()...)"
 
@@ -573,7 +646,9 @@ void TargetService::_getOutwards(
                 || (   (i_recursionLevel == ALL)
                     && (l_candidatePath.size() > i_entityPath.size())))
             {
-                if (i_entityPath.equals(l_candidatePath,i_entityPath.size()))
+                if (   i_entityPath.equals(l_candidatePath,i_entityPath.size())
+                    && (   (i_pPredicate == NULL)
+                        || (*i_pPredicate)( &(*iv_targets)[i]) ) )
                 {
                     o_list.push_back(&(*iv_targets)[i]);
                 }
@@ -591,3 +666,4 @@ void TargetService::_getOutwards(
 #undef TARG_NAMESPACE
 
 } // End namespace TARGETING
+

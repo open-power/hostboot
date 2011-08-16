@@ -34,6 +34,7 @@ namespace TARGETING
  */
 enum ATTRIBUTE_ID
 {
+    ATTR_NA                     = 0x00,
     ATTR_CLASS                  = 0x01,
     ATTR_TYPE                   = 0x02,
     ATTR_MODEL                  = 0x03,

@@ -22,6 +22,8 @@ namespace TARGETING
     extern trace_desc_t* g_trac_targeting;
 }
 
+#define TARG_LOC TARG_NAMESPACE TARG_CLASS TARG_FN ": "
+
 #define TARG_TAG "[TARG]"
 #define TARG_ENTER(args...) \
     TRACFCOMP(TARGETING::g_trac_targeting,TARG_TAG " " ENTER_MRK " " TARG_NAMESPACE \

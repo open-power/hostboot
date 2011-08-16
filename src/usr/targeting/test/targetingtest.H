@@ -23,6 +23,9 @@
 #include <targeting/entitypath.H>
 #include <targeting/target.H>
 #include <targeting/targetservice.H>
+#include <targeting/iterators/rangefilter.H>
+#include <targeting/predicates/predicatectm.H>
+#include <targeting/predicates/predicatepostfixexpr.H>
 
 class TargetingTestSuite: public CxxTest::TestSuite
 {
@@ -128,9 +131,11 @@ class TargetingTestSuite: public CxxTest::TestSuite
             //      TargetHandleList& o_list) const;
 
             TargetHandleList l_list;
-            (void) l_targetService.getAssociated(l_pTopLevel,
+            (void) l_targetService.getAssociated(
+                l_list,
+                l_pTopLevel,
                 TARGETING::TargetService::CHILD,
-                TARGETING::TargetService::IMMEDIATE, l_list);
+                TARGETING::TargetService::IMMEDIATE);
             if (!l_list.size())
             {
                 TS_FAIL("Should have found some child elements" );
@@ -140,9 +145,11 @@ class TargetingTestSuite: public CxxTest::TestSuite
             // target
 
             TargetHandleList l_parentList;
-            (void) l_targetService.getAssociated(l_list[0],
+            (void) l_targetService.getAssociated(
+                l_parentList,
+                l_list[0],
                 TARGETING::TargetService::PARENT,
-                TARGETING::TargetService::IMMEDIATE, l_parentList);
+                TARGETING::TargetService::IMMEDIATE);
 
             if (l_parentList.size() != 1)
             {
@@ -155,18 +162,22 @@ class TargetingTestSuite: public CxxTest::TestSuite
                         "handle" );
             }
 
-            (void) l_targetService.getAssociated(l_pTopLevel,
+            (void) l_targetService.getAssociated(
+                l_list,
+                l_pTopLevel,
                 TARGETING::TargetService::CHILD_BY_AFFINITY,
-                TARGETING::TargetService::IMMEDIATE, l_list);
+                TARGETING::TargetService::IMMEDIATE);
 
             if (!l_list.size())
             {
                 TS_FAIL("Should have found some child elements" );
             }
 
-            (void) l_targetService.getAssociated(l_pTopLevel,
+            (void) l_targetService.getAssociated(
+                l_list,
+                l_pTopLevel,
                 TARGETING::TargetService::CHILD_BY_AFFINITY,
-                TARGETING::TargetService::ALL, l_list);
+                TARGETING::TargetService::ALL);
 
             if (!l_list.size())
             {
@@ -451,6 +462,512 @@ class TargetingTestSuite: public CxxTest::TestSuite
             }
 
             TS_TRACE(EXIT_MRK "testTargetClass" );
+        }
+
+        void testPredicateCtm()
+        {
+            TS_TRACE(ENTER_MRK "testPredicateCtm" );
+
+            using namespace TARGETING;
+            TargetService& l_targetService = targetService();
+
+            // Get top level (system) target
+            Target* l_pTopLevel = NULL;
+            (void) l_targetService.getTopLevelTarget(l_pTopLevel);
+            if (l_pTopLevel == NULL)
+            {
+                TS_FAIL("Top level handle was NULL when initialization "
+                        "complete");
+            }
+
+            PredicateCTM l_allWild;
+            if( ! l_allWild(l_pTopLevel) )
+            {
+                TS_FAIL("CTM all wildcards filter should have matched system "
+                        "target");
+            }
+
+            PredicateCTM l_typeModelWild(CLASS_SYS);
+            if( ! l_typeModelWild(l_pTopLevel) )
+            {
+                TS_FAIL("CTM class sys, remaining wildcards filter should have "
+                        "matched system ");
+            }
+
+            PredicateCTM l_modelWild(CLASS_SYS,TYPE_SYS);
+            if( ! l_modelWild(l_pTopLevel) )
+            {
+                TS_FAIL("CTM class sys, type sys, remaining wildcards filter "
+                        "should have matched system ");
+            }
+
+            PredicateCTM l_noWild(CLASS_SYS,TYPE_SYS,MODEL_POWER8);
+            if( ! l_noWild(l_pTopLevel) )
+            {
+                TS_FAIL("CTM class sys, type sys, model power8 should have "
+                        "matched system ");
+            }
+
+            PredicateCTM l_classWild(CLASS_NA,TYPE_SYS,MODEL_POWER8);
+            if( ! l_classWild(l_pTopLevel) )
+            {
+                TS_FAIL("CTM class wild, type sys, model power8 should have "
+                        "matched system ");
+            }
+
+            PredicateCTM l_typeWild(CLASS_SYS,TYPE_NA,MODEL_POWER8);
+            if( ! l_typeWild(l_pTopLevel) )
+            {
+                TS_FAIL("CTM class sys, wild, model power8 should have "
+                        "matched system ");
+            }
+
+            PredicateCTM l_classModelWild(CLASS_NA,TYPE_SYS,MODEL_NA);
+            if( ! l_classModelWild(l_pTopLevel) )
+            {
+                TS_FAIL("CTM wild, type sys, wild should have "
+                        "matched system ");
+            }
+
+            PredicateCTM l_classTypeWild(CLASS_NA,TYPE_NA,MODEL_NA);
+            if( ! l_classTypeWild(l_pTopLevel) )
+            {
+                TS_FAIL("CTM wild, wild, model should have "
+                        "matched system ");
+            }
+
+            PredicateCTM l_chipClass(CLASS_CHIP,TYPE_NA,MODEL_NA);
+            if(  l_chipClass(l_pTopLevel) )
+            {
+                TS_FAIL("CTM of class chip, wild, wild should not have matched "
+                        "matched system ");
+            }
+
+            #if 0 // Prove copy CTOR/assignment operator is disabled
+            PredicateCTM l_ctmLhs;
+            PredicateCTM l_ctmRhs;
+
+            l_ctmLhs = l_ctmRhs;
+
+            PredicateCTM l_ctmCtor(l_ctmRhs);
+            #endif
+            
+            PredicateBase* l_pBase = new PredicateCTM(CLASS_SYS);
+            delete l_pBase;
+            l_pBase = NULL;
+
+            TS_TRACE(EXIT_MRK "testPredicateCtm" );
+                
+        }
+
+        void testPredicatePostfixExpr()
+        {
+            TS_TRACE(ENTER_MRK "testPredicatePostfixExpr" );
+
+            using namespace TARGETING;
+            TargetService& l_targetService = targetService();
+
+            // Get top level (system) target
+            Target* l_pTopLevel = NULL;
+            (void) l_targetService.getTopLevelTarget(l_pTopLevel);
+            if (l_pTopLevel == NULL)
+            {
+                TS_FAIL("Top level handle was NULL when initialization "
+                        "complete");
+            }
+
+            PredicatePostfixExpr l_alwaysTrueExpr;
+            if(!l_alwaysTrueExpr(l_pTopLevel) )
+            {
+                TS_FAIL("Always true filter should have matched system");
+            }
+
+            #if 0 
+            // Triggers NULL assertion check on push 
+            l_alwaysTrueExpr.push(NULL);
+            #endif
+
+            #if 0
+            // Triggers not enough stack elements assertion when evaluating Not
+            l_alwaysTrueExpr.Not();
+            if(l_alwaysTrueExpr(l_pTopLevel) )
+            {
+                TS_FAIL("Negated always true filter should not have matched "
+                        "system");
+            }
+            #endif
+
+            #if 0
+            // Triggers illegal target assertion
+            l_alwaysTrueExpr(NULL);
+            #endif
+
+            #if 0
+            // Triggers formatting assertion
+            l_alwaysTrueExpr.And();
+            l_alwaysTrueExpr(l_pTopLevel);
+            #endif
+
+            #if 0
+            // Triggers formatting assertion
+            l_alwaysTrueExpr.Or();
+            l_alwaysTrueExpr(l_pTopLevel);
+            #endif
+
+            PredicateCTM l_sysClass(CLASS_SYS);
+
+            #if 0
+            // Triggers formatting assertion
+            l_alwaysTrueExpr.push(&l_sysClass);
+            l_alwaysTrueExpr.And();
+            l_alwaysTrueExpr(l_pTopLevel);
+            #endif
+
+            #if 0
+            // Triggers formatting assertion
+            l_alwaysTrueExpr.push(&l_sysClass);
+            l_alwaysTrueExpr.Or();
+            l_alwaysTrueExpr(l_pTopLevel);
+            #endif
+
+            #if 0
+            // Triggers illegal formatting exception
+            // != 1 results on stack
+            l_alwaysTrueExpr.push(&l_sysClass);
+            l_alwaysTrueExpr.push(&l_sysClass);
+            l_alwaysTrueExpr.Not();
+            l_alwaysTrueExpr(l_pTopLevel);
+            #endif
+
+            PredicateCTM l_sysType(CLASS_NA,TYPE_SYS);
+            PredicateCTM l_power8Model(CLASS_NA,TYPE_NA,MODEL_POWER8);
+            PredicatePostfixExpr l_expr;
+            l_expr.push(&l_sysClass).push(&l_sysType).And();
+            l_expr.push(&l_power8Model).And();
+
+            if(!l_expr(l_pTopLevel) )
+            {
+                TS_FAIL("CTM of class sys && type sys && model power8 should "
+                        "have matched system");
+            }
+
+            l_expr.Not();
+
+            if(l_expr(l_pTopLevel) )
+            {
+                TS_FAIL("CTM of class sys && type sys && model power8 should "
+                        "npt have matched system after negation");
+            }
+
+            l_expr.push(&l_sysClass);
+            l_expr.Or();
+
+            if(!l_expr(l_pTopLevel) )
+            {
+                TS_FAIL("CTM of class sys && type sys && model power8 should "
+                        "have matched system after negation then || sys class");
+            }
+
+            PredicatePostfixExpr* l_pExpr = new PredicatePostfixExpr;
+            l_pExpr->push(&l_sysClass).push(&l_sysType).And();
+            l_pExpr->push(&l_power8Model).And();
+            delete (static_cast<PredicateBase*>(l_pExpr));
+            
+            #if 0
+            PredicatePostfixExpr l_lhs;
+            PredicatePostfixExpr l_rhs;
+
+            l_lhs = l_rhs;
+
+            PredicatePostfixExpr l_cpCtor(l_rhs);
+            #endif
+
+
+            TS_TRACE(EXIT_MRK "testPredicatePostfixExpr" );
+        }
+
+        void testTargetIterator()
+        {
+            TS_TRACE(ENTER_MRK "testTargetIterator");
+
+            using namespace TARGETING;
+            TargetService& l_targetService = targetService();
+
+
+            TargetIterator l_pIt;
+            if( l_pIt != l_targetService.end() )
+            {
+                TS_FAIL("Default TargetIterator should point to past the end "
+                        "of container");
+            }
+
+            ++l_pIt;
+            if( l_pIt != l_targetService.end() )
+            {
+                TS_FAIL("Default TargetIterator preincremented should point to "
+                        "past the end of container");
+            }
+
+            TargetIterator* l_pItNew = new TargetIterator;
+            delete l_pItNew;
+            l_pItNew = NULL;
+
+            if(*l_pIt != NULL)
+            {
+               TS_FAIL("Default TargetIterator dereference should return NULL");
+            }
+
+            // Get top level (system) target to verify at least 1 target
+            Target* l_pTopLevel = NULL;
+            (void) l_targetService.getTopLevelTarget(l_pTopLevel);
+            if (l_pTopLevel == NULL)
+            {
+                TS_FAIL("Top level handle was NULL when initialization "
+                        "complete");
+            }
+       
+            l_pIt = l_targetService.begin();
+            if((*l_pIt) == NULL)
+            {
+               TS_FAIL("TargetService begin() should return !NULL");
+            }
+
+            CLASS l_class = CLASS_NA;
+            if( !l_pIt->tryGetAttr<ATTR_CLASS>(l_class) )
+            {
+               TS_FAIL("Failed to get expected class attribute");
+            }
+
+            TargetIterator l_rhs = l_targetService.begin();
+            if( ! (l_pIt == l_rhs) )
+            {
+               TS_FAIL("Iterators should be equal, but aren't");
+            }
+
+            l_rhs = l_targetService.begin();
+            if( l_pIt != l_rhs )
+            {
+               TS_FAIL("Iterators should be equal, but aren't");
+            }
+
+            TargetIterator l_rhs2 = l_targetService.begin();
+            ++l_rhs2;
+            ++l_pIt;
+            if( l_pIt != l_rhs2 )
+            {
+               TS_FAIL("Iterators should be equal, but aren't");
+            }
+
+            l_rhs2++;
+            l_pIt++;
+            if( l_pIt != l_rhs2 )
+            {
+               TS_FAIL("Iterators should be equal, but aren't");
+            }
+
+            TargetIterator l_pItClone(l_rhs2);
+            if( l_pIt != l_pItClone)
+            {
+               TS_FAIL("Iterators should be equal, but aren't");
+            }
+ 
+            if(l_pIt != l_pItClone++)
+            {
+               TS_FAIL("Iterators should be equal, but aren't");
+            }
+
+            if( (++l_pIt) != l_pItClone)
+            {
+               TS_FAIL("Iterators should be equal, but aren't");
+            }
+
+            const TargetService& l_constTargetService = targetService();
+
+            ConstTargetIterator l_pConstIt;
+            if( l_pConstIt != l_constTargetService.end() )
+            {
+                TS_FAIL("Default ConstTargetIterator should point to past the "
+                        "end of container");
+            }
+
+            l_pConstIt = l_constTargetService.begin();
+            if( (*l_pConstIt) == NULL)
+            {
+                TS_FAIL("Iterator does not point to valid Target as expected");
+            }
+
+            TS_TRACE(EXIT_MRK "testTargetIterator" );
+        }
+
+        void testRangeFilter(void)
+        {
+            TS_TRACE(ENTER_MRK "testRangeFilters" );
+
+            using namespace TARGETING;
+
+            TargetRangeFilter* l_pRangeFilter = new TargetRangeFilter(
+                targetService().begin(),
+                targetService().end(),
+                NULL);
+            delete l_pRangeFilter;
+            l_pRangeFilter = NULL;
+
+            
+            TargetRangeFilter l_f1(
+                targetService().begin(),
+                targetService().end(),
+                NULL);
+
+            Target* l_pBegin = (*l_f1);
+            ++l_f1;
+            Target* l_pNext = (*l_f1);
+            if(   (l_pBegin == NULL)
+               || (l_pNext == NULL)
+               || (l_pBegin == l_pNext)
+               )
+            {
+                TS_FAIL("Target* pointed to by Begin/next NULL -or- begin =="
+                        "next");
+            }
+
+            l_f1.reset();
+            if( *l_f1 != l_pBegin )
+            {
+                TS_FAIL("Target* after reset should be equal to original");
+            }
+
+            l_f1.reset();
+            TargetRangeFilter l_f2 = l_f1;
+            PredicateCTM l_ctm(CLASS_SYS,TYPE_CORE); // Nonsense CTM
+            l_f1.setPredicate(&l_ctm);
+            if( *l_f1 == l_pBegin )
+            {
+                TS_FAIL("Target* after reset and change of predicate should be"
+                        "different than the original");
+            }
+
+            PredicateCTM l_ctm1(CLASS_CHIP,TYPE_PROC); 
+
+            TargetRangeFilter l_f3(
+                targetService().begin(),
+                targetService().end(),
+                &l_ctm1);
+            for(;l_f3;++l_f3)
+            {
+                if(l_f3->getAttr<ATTR_TYPE>() != TYPE_PROC)
+                {
+                    TS_FAIL("Should only have returned type proc");
+                    break;
+                }
+            }
+              
+            TargetIterator l_pIt = targetService().begin();
+            ++l_pIt;
+            ++l_pIt;
+
+            if(l_pIt == targetService().end())
+            {
+                TS_FAIL("Not enough elements for test");
+            }
+
+            TargetRangeFilter l_partial(
+                targetService().begin(),
+                l_pIt,
+                NULL);
+            int i=0;
+
+            for(; l_partial; ++l_partial)
+            {
+                i++;
+            }
+                    
+            if(i != 2)
+            {
+                TS_FAIL("Should have gotten 2 elements %d",i);
+            }
+
+            TS_TRACE(EXIT_MRK "testRangeFilter" );
+        }
+
+        void testComplexFilter(void)
+        {
+            TS_TRACE(ENTER_MRK "testComplexFilter" );
+
+            using namespace TARGETING;
+
+            TargetService& l_targetService = targetService();
+            
+            TargetRangeFilter f(l_targetService.begin(), 
+                                l_targetService.end(), 
+                                NULL);
+            int l_count = 0;
+            for(; f; ++f, l_count++)
+            {
+            }
+
+            TS_TRACE(INF_MRK "Found %d total targets", l_count);
+            
+            PredicateCTM l_procs(CLASS_CHIP);
+            PredicateCTM l_enclosures(CLASS_ENC);
+            PredicatePostfixExpr l_query;
+            l_query.push(&l_procs).push(&l_enclosures).Or();
+
+            f.setPredicate(&l_query);
+            f.reset();
+
+            l_count = 0;
+            for(; f; ++f, ++l_count)
+            {
+                EntityPath l_path = f->getAttr<ATTR_PHYS_PATH>();
+                l_path.dump();
+            }            
+
+            TS_TRACE(INF_MRK "Found %d targets that are chips or enclosures ",
+                      l_count);
+    
+            l_query.Not();
+            f.reset();
+
+            l_count = 0;
+            for(; f; ++f, ++l_count)
+            {
+            }
+
+            TS_TRACE(INF_MRK "Found %d targets that are not chips or "
+                     "enclosures",l_count);
+
+            Target* l_pMasterProcChipTargetHandle = NULL;
+            (void) l_targetService.masterProcChipTargetHandle(
+                l_pMasterProcChipTargetHandle);
+            if(l_pMasterProcChipTargetHandle == NULL)
+            {
+                TS_FAIL("Master processor chip target not found");
+            }
+
+            PredicateCTM l_ex(CLASS_UNIT,TYPE_EX);
+            PredicateCTM l_mba(CLASS_UNIT,TYPE_MBA);
+            PredicatePostfixExpr l_procquery;
+            l_procquery.push(&l_ex).push(&l_mba).Or();
+
+            TargetHandleList l_list;
+            (void) targetService().getAssociated(
+                    l_list,
+                    l_pMasterProcChipTargetHandle,
+                    TARGETING::TargetService::CHILD,
+                    TARGETING::TargetService::ALL,
+                    &l_procquery);
+
+            l_count = 0;
+            for(uint32_t i=0; i<l_list.size(); ++i, ++l_count)
+            {
+                 EntityPath l_path = l_list[i]->getAttr<ATTR_PHYS_PATH>();
+                l_path.dump();
+            }
+
+            TS_TRACE(INF_MRK "Found %d targets that are ex/mba units off "
+                     "master processor",l_count);
+
+            TS_TRACE(EXIT_MRK "testComplexFilter" );
         }
 };
 

@@ -28,6 +28,8 @@
 #include <targeting/attributeenums.H>
 #include <targeting/target.H>
 #include <targeting/entitypath.H>
+#include <targeting/iterators/targetiterator.H>
+#include <targeting/predicates/predicatebase.H>
 
 //******************************************************************************
 // Interface Definitions
@@ -138,6 +140,52 @@ class TargetService
          *  @post Target service fully initialized with all possible targets
          */
         void init();
+
+        /**
+         *  @brief Map iterator types to common aliases
+         */
+        typedef TargetIterator      iterator;
+        typedef ConstTargetIterator const_iterator; 
+
+        /**
+         *  @brief Return iterator which points to first target service target
+         *      (or end() if none)
+         * 
+         *  @return Iterator pointing to first target service target
+         */
+        iterator begin();
+        
+        /**
+         *  @brief Return iterator to const which points to first target service
+         *      target (or end() if none)
+         * 
+         *  @return Iterator to const pointing to first target service target
+         */ 
+        const_iterator begin() const;
+
+        /**
+         *  @brief Return iterator which points to the "past the end of the
+         *      list" target maintained by the target service
+         * 
+         *  @return Iterator pointing to the "past the end of the list" target
+         *      maintained by the target service
+         */
+        iterator end();
+        
+        /**
+         *  @brief Return iterator to const which points to the "past the end of
+         *      the list" target maintained by the target service
+         * 
+         *  @return Iterator to const pointing to the "past the end of the list"
+         *      target maintained by the target service
+         */
+        const_iterator end() const;
+
+        /**
+         *  @brief Allow iterator access to the target service's target store
+         */
+        friend class _TargetIterator<Target*>;    
+        friend class _TargetIterator<const Target*>; 
 
         /**
          *  @brief Returns the top level physical target
@@ -272,25 +320,31 @@ class TargetService
          *  for said source target, the routine will return all targets
          *  contained within the processor chip.
          *
+         *  @param[out] o_list List of target handles that match the specified
+         *      criteria
          *  @param[in] i_pTarget Target from which to search for other targets
          *  @param[in] i_type Type of association linking the specified target
          *      to candidate result targets
          *  @param[in] i_recursionLevel Whether to return candidate targets
          *      immediately associated to the specified target or recursively
          *      associated to it.
-         *  @param[out] o_list List of target handles that match the specified
-         *      criteria
+         *  @param[in] i_pPredicate Pointer to a predicate to be evaluated 
+         *      against each candidate target (as determined by the source
+         *      target, type, and recursion level parameters).  If the predicate
+         *      returns true, the target will be added to the result list.  A 
+         *      value of NULL acts as a predicate that always returns true.
          *
          *  @pre N/A
          *
          *  @post Caller's list cleared; list of target handles matching the
          *      specified criteria returned
          */
-        void getAssociated(
-            const Target*           i_pTarget,
-                  ASSOCIATION_TYPE  i_type,
-                  RECURSION_LEVEL   i_recursionLevel,
-                  TargetHandleList& o_list) const;
+         void getAssociated(
+                  TargetHandleList& o_list,
+            const Target* const     i_pTarget,
+            const ASSOCIATION_TYPE  i_type = CHILD,
+            const RECURSION_LEVEL   i_recursionLevel = IMMEDIATE,
+            const PredicateBase*    i_pPredicate = NULL) const;
 
         /**
          *  @brief Dump the target service for debug only
@@ -387,6 +441,10 @@ class TargetService
          *  @param[in] i_recursionLevel Whether to provide immediate or
          *      recursive results
          *  @param[in] i_entityPath Entity path to start search from
+         *  @param[in] i_pPredicate Pointer to a predicate to be evaluated 
+         *      against each candidate target.  If the predicate returns true, 
+         *      the target will be added to the result list.  A value of NULL 
+         *      acts as a predicate that always returns true.
          *  @param[out] o_list List of returned target handles
          *
          *  @pre Target service must be initialized
@@ -396,10 +454,11 @@ class TargetService
          *      path returned
          */
         void _getInwards(
-            ATTRIBUTE_ID      i_attr,
-            RECURSION_LEVEL   i_recursionLevel,
-            EntityPath        i_entityPath,
-            TargetHandleList& o_list) const;
+                  ATTRIBUTE_ID      i_attr,
+                  RECURSION_LEVEL   i_recursionLevel,
+                  EntityPath        i_entityPath,
+            const PredicateBase*    i_pPredicate,
+                  TargetHandleList& o_list) const;
 
         /**
          *  @brief Returns handles to the targets associated to the
@@ -418,6 +477,10 @@ class TargetService
          *  @param[in] i_recursionLevel Whether to provide immediate or
          *      recursive results
          *  @param[in] i_entityPath Entity path to look from
+         *  @param[in] i_pPredicate Pointer to a predicate to be evaluated 
+         *      against each candidate target.  If the predicate returns true, 
+         *      the target will be added to the result list.  A value of NULL 
+         *      acts as a predicate that always returns true.
          *  @param[out] o_list List of returned target handles
          *
          *  @pre Target service must be initialized
@@ -427,13 +490,13 @@ class TargetService
          *      entity path returned.
          */
         void _getOutwards(
-            ATTRIBUTE_ID      i_attr,
-            RECURSION_LEVEL   i_recursionLevel,
-            EntityPath        i_entityPath,
-            TargetHandleList& o_list ) const;
+                  ATTRIBUTE_ID      i_attr,
+                  RECURSION_LEVEL   i_recursionLevel,
+                  EntityPath        i_entityPath,
+            const PredicateBase*    i_pPredicate,
+                  TargetHandleList& o_list ) const;
 
         // Instance variables
-
         bool        iv_initialized; ///< Is service initialized or not
         Target    (*iv_targets)[];  ///< Pointer to array of target objects
         uint32_t    iv_maxTargets;  ///< Maximum # target objects in the array
