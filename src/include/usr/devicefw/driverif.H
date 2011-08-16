@@ -39,7 +39,7 @@ namespace DeviceFW
         LAST_OP_TYPE
 
     };
-    
+
     /** @enum DriverSpecial
      *  @brief Special Wildcard enum that can be used for drivers to do
      *         routing registrations.
@@ -48,7 +48,7 @@ namespace DeviceFW
     {
         WILDCARD = -1,
     };
-    
+
     /** Construct the device addressing parameters for XSCOM device ops.
      *  @param[in] i_address - XSCom address to operate on.
      */
@@ -62,7 +62,7 @@ namespace DeviceFW
         DeviceFW::I2C, static_cast<uint64_t>(( i_address ))
 
 
-    /** @class InvalidParameterType 
+    /** @class InvalidParameterType
      *  @brief Unused type to cause compiler fails for invalid template types.
      *
      *  Forward Declaration of type that is never actually used anywhere.
@@ -74,7 +74,7 @@ namespace DeviceFW
      *  type-safety above a int-parameter.
      */
     class InvalidParameterType;
-    
+
     /** @typedef deviceOp_t
      *  @brief Function prototype for registered device-driver operations.
      */
@@ -82,7 +82,7 @@ namespace DeviceFW
                                     TARGETING::Target*,
                                     void*, size_t&,
                                     int64_t, va_list);
-    
+
     /**
      *  @brief Register a device driver routing function with the framework.
      *
@@ -123,21 +123,22 @@ namespace DeviceFW
      *       referencing a InvalidParameterType class.
      */
     template <typename OpType, typename AccType, typename TargType>
-    void deviceRegisterRoute(OpType i_opType, 
+    void deviceRegisterRoute(OpType i_opType,
                              AccType i_accessType,
                              TargType i_targetType,
-                             deviceOp_t i_regRoute) 
-    { 
+                             deviceOp_t i_regRoute)
+    {
         return InvalidParameterType(); // Cause a compile fail if not one of
                                        // the explicit template specializations.
     }
 
         /** Assistance macro for stringification. */
-    #define __DEVICE_REGISTER_ROUTE_XY(X,Y) X##Y
-        /** Assistance macro for stringification. */    
-    #define __DEVICE_REGISTER_ROUTE_MAKENAME(X,Y) __DEVICE_REGISTER_ROUTE_XY(X,Y)
-        
-    /** 
+    #define __DEVICE_REGISTER_ROUTE_XYZ(X,Y,Z) X##Y##Z
+        /** Assistance macro for stringification. */
+    #define __DEVICE_REGISTER_ROUTE_MAKENAME(X,Y,Z) \
+                    __DEVICE_REGISTER_ROUTE_XYZ(X,Y,Z)
+
+    /**
      *  @brief Create a static constructed registration of a device driver
      *         function when a module is loaded.
      *
@@ -145,25 +146,26 @@ namespace DeviceFW
      *  route function should be passed by name as opposed to pointer.
      *
      *  If the route function is in a namespace, then this definition must
-     *  also be placed into that namespace.  
+     *  also be placed into that namespace.
      */
     #define DEVICE_REGISTER_ROUTE(i_opType, i_accessType, \
                                   i_targetType, i_regRoute) \
         class __DEVICE_REGISTER_ROUTE_MAKENAME(DeviceRouteRegistrator_, \
-                                               i_regRoute) \
+                                               i_regRoute, __LINE__) \
         { \
             public: \
                 __DEVICE_REGISTER_ROUTE_MAKENAME(DeviceRouteRegistrator_, \
-                                                 i_regRoute)() \
+                                                 i_regRoute, __LINE__)() \
                 { \
                     DeviceFW::deviceRegisterRoute(i_opType, i_accessType, \
                                                   i_targetType, &i_regRoute); \
                 } \
         }; \
-        __DEVICE_REGISTER_ROUTE_MAKENAME(DeviceRouteRegistrator_, i_regRoute) \
+        __DEVICE_REGISTER_ROUTE_MAKENAME(DeviceRouteRegistrator_, \
+                                         i_regRoute, __LINE__) \
             __DEVICE_REGISTER_ROUTE_MAKENAME(DeviceRouteRegistrator_instance_, \
-                                             i_regRoute);
-    
+                                             i_regRoute, __LINE__);
+
     /**
      *  @brief Perform a device operation by routing through the framework and
      *         calling the appropriate registered operation.
@@ -182,25 +184,25 @@ namespace DeviceFW
     errlHndl_t deviceOp(OperationType i_opType,
                         TARGETING::Target* i_target,
                         void* io_buffer, size_t& io_buflen,
-                        AccType i_accessType, ...) 
-    { 
+                        AccType i_accessType, ...)
+    {
         return InvalidParameterType(); // Cause a compile fail if not one of
                                        // the explicit template specializations.
     }
 
     // --- Below are template specializations to aid in type-safety. ---
-    
+
     // deviceRegisterRoute:
     //          OpType - OperationType or WILDCARD
     //          TargType - TargetType or WILDCARD
     //          AccType - AccessType, AccessType_DriverOnly (no WILDCARD).
 
-    template <> 
+    template <>
     void deviceRegisterRoute<>(OperationType i_opType,
                                AccessType i_accessType,
                                TARGETING::TYPE i_targetType,
                                deviceOp_t i_regRoute);
-    template <> 
+    template <>
     void deviceRegisterRoute<>(OperationType i_opType,
                                AccessType_DriverOnly i_accessType,
                                TARGETING::TYPE i_targetType,
@@ -210,27 +212,27 @@ namespace DeviceFW
                                AccessType i_accessType,
                                DriverSpecial i_targetType,
                                deviceOp_t i_regRoute);
-    template <> 
+    template <>
     void deviceRegisterRoute<>(OperationType i_opType,
                                AccessType_DriverOnly i_accessType,
                                DriverSpecial i_targetType,
                                deviceOp_t i_regRoute);
-    template <> 
+    template <>
     void deviceRegisterRoute<>(DriverSpecial i_opType,
                                AccessType i_accessType,
                                TARGETING::TYPE i_targetType,
                                deviceOp_t i_regRoute);
-    template <> 
+    template <>
     void deviceRegisterRoute<>(DriverSpecial i_opType,
                                AccessType_DriverOnly i_accessType,
                                TARGETING::TYPE i_targetType,
                                deviceOp_t i_regRoute);
-    template <> 
+    template <>
     void deviceRegisterRoute<>(DriverSpecial i_opType,
                                AccessType i_accessType,
                                DriverSpecial i_targetType,
                                deviceOp_t i_regRoute);
-    template <> 
+    template <>
     void deviceRegisterRoute<>(DriverSpecial i_opType,
                                AccessType_DriverOnly i_accessType,
                                DriverSpecial i_targetType,
@@ -240,12 +242,12 @@ namespace DeviceFW
     //          OpType - OperationType only.
     //          TargType - TargetType only.
     //          AccType - AccessType, AccessType_DriverOnly (no WILDCARD).
-    template <> 
+    template <>
     errlHndl_t deviceOp<>(OperationType i_opType,
                           TARGETING::Target* i_target,
                           void* io_buffer, size_t& io_buflen,
                           AccessType i_accessType, ...);
-    template <> 
+    template <>
     errlHndl_t deviceOp<>(OperationType i_opType,
                           TARGETING::Target* i_target,
                           void* io_buffer, size_t& io_buflen,
