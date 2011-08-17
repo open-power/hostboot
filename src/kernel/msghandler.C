@@ -13,9 +13,9 @@ void MessageHandler::sendMessage(msg_sys_types_t i_type, void* i_key,
                                  void* i_data, task_t* i_task)
 {
     // Save pending info for when we get the response.
-    MessageHandler_Pending* mp = new MessageHandler_Pending;
-    mp->key = i_key;
-    mp->task = i_task;
+    MessageHandler_Pending* mhp = new MessageHandler_Pending;
+    mhp->key = i_key;
+    mhp->task = i_task;
 
     // Send userspace message if one hasn't been sent for this key.
     if (!iv_pending.find(i_key))
@@ -56,7 +56,7 @@ void MessageHandler::sendMessage(msg_sys_types_t i_type, void* i_key,
     }
 
     // Insert pending info into our queue until response is recv'd.
-    iv_pending.insert(mp);
+    iv_pending.insert(mhp);
 }
 
 int MessageHandler::recvMessage(msg_t* i_msg)
@@ -64,7 +64,7 @@ int MessageHandler::recvMessage(msg_t* i_msg)
     // Verify userspace didn't give a non-kernel message type.
     if (i_msg->type < MSG_FIRST_SYS_TYPE)
     {
-        printk("MessageHandler::recvMessage> type=%d\n", i_msg->type); 
+        printk("MessageHandler::recvMessage> type=%d\n", i_msg->type);
         return -EINVAL;
     }
 
@@ -78,21 +78,23 @@ int MessageHandler::recvMessage(msg_t* i_msg)
 
     // Handle all pending responses.
     bool restored_task = false;
-    MessageHandler_Pending* mp = NULL;
-    while (NULL != (mp = iv_pending.find(key)))
+    MessageHandler_Pending* mhp = NULL;
+    while (NULL != (mhp = iv_pending.find(key)))
     {
+        task_t* deferred_task = mhp->task;
+
         // Call 'handle response'.
         HandleResult rc = this->handleResponse(
                 static_cast<msg_sys_types_t>(i_msg->type),
-                key, mp->task, msg_rc);
+                key, mhp->task, msg_rc);
 
         // Remove pending information from outstanding queue.
-        iv_pending.erase(mp);
-        delete mp;
+        iv_pending.erase(mhp);
+        delete mhp;
 
         // If there is no associated task then there is nothing to do, find
         // next pending response.
-        if (!mp->task) continue;
+        if (!deferred_task) continue;
 
         // Handle action requested from 'handle response'.
         if ((SUCCESS == rc) || (!msg_rc && UNHANDLED_RC == rc))
@@ -102,19 +104,19 @@ int MessageHandler::recvMessage(msg_t* i_msg)
             if (!restored_task) // Immediately execute first deferred task.
             {
                 restored_task = true;
-                TaskManager::setCurrentTask(mp->task);
+                TaskManager::setCurrentTask(deferred_task);
             }
             else // Add other deferred tasks to scheduler ready queue.
             {
-                mp->task->cpu->scheduler->addTask(mp->task);
+                deferred_task->cpu->scheduler->addTask(deferred_task);
             }
         }
         else if (UNHANDLED_RC == rc)
         {
             // Unsuccessful, unhandled response.  Kill task.
             printk("Unhandled msg rc %d for key %p on task %d @ %p\n",
-                   msg_rc, key, mp->task->tid, mp->task->context.nip);
-            Systemcalls::TaskEnd(mp->task);
+                   msg_rc, key, deferred_task->tid, deferred_task->context.nip);
+            Systemcalls::TaskEnd(deferred_task);
         }
         else if (CONTINUE_DEFER == rc)
         {
@@ -129,6 +131,9 @@ int MessageHandler::recvMessage(msg_t* i_msg)
 
     // Finished handling the response, unlock subsystem.
     if (iv_lock) iv_lock->unlock();
+
+    // Release memory for message (created from sendMsg).
+    delete(i_msg);
 
     return 0;
 }

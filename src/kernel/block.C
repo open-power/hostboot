@@ -8,7 +8,7 @@
 #include <kernel/vmmmgr.H>
 #include <kernel/ptmgr.H>
 #include <kernel/pagemgr.H>
-//#include <kernel/console.H>
+
 Block::~Block()
 {
     // Release shadow PTE array.
@@ -44,7 +44,7 @@ bool Block::handlePageFault(task_t* i_task, uint64_t i_addr)
     if (!isContained(i_addr))
     {
         return (iv_nextBlock ?
-                    false : iv_nextBlock->handlePageFault(i_task, i_addr));
+                    iv_nextBlock->handlePageFault(i_task, i_addr) : false);
     }
 
     ShadowPTE* pte = getPTE(i_addr);
