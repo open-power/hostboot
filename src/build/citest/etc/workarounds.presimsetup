@@ -43,9 +43,8 @@ sed -i -e's/SETENV GFW_P8_VENICE_L3_MB_SIZE.*/SETENV GFW_P8_VENICE_L3_MB_SIZE 8/
 
 echo "+++ Update to new simics build."
 mkdir -p $sb/simu/data
-grep -v "WSALIAS HOSTBOOT_LEVEL FIPSLEVEL" $BACKING_BUILD/src/simu/data/simicsInfo > $sb/simu/data/simicsInfo
-echo "WSALIAS HOSTBOOT_LEVEL FIPSLEVEL env/gfwa/simics-4.2.0/simics-4.2.77/fips/fld36/fi111019b700.42" >> $sb/simu/data/simicsInfo
-grep -v "WSALIAS HOSTBOOT_LEVEL SIMICSLEVEL" $BACKING_BUILD/src/simu/data/simicsInfo > $sb/simu/data/simicsInfo
+egrep -v "WSALIAS HOSTBOOT_LEVEL FIPSLEVEL|WSALIAS HOSTBOOT_LEVEL SIMICSLEVEL" $BACKING_BUILD/src/simu/data/simicsInfo > $sb/simu/data/simicsInfo
+echo "WSALIAS HOSTBOOT_LEVEL FIPSLEVEL env/gfwa/simics-4.2.0/simics-4.2.82/fips/fld36/fi111019b700.42" >> $sb/simu/data/simicsInfo
 echo "WSALIAS HOSTBOOT_LEVEL SIMICSLEVEL env/vtechb/simics-4.2.0/simics-4.2.82/bin" >> $sb/simu/data/simicsInfo
 
 echo "+++ New simics build (fi111013b700.42) needs some new files."

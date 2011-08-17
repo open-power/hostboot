@@ -43,7 +43,7 @@ namespace DeviceFW
      */
     enum AccessType_DriverOnly
     {
-        XSCOM                   = LAST_ACCESS_TYPE, 
+        XSCOM                   = LAST_ACCESS_TYPE,
         I2C,
         FSISCOM,
 
@@ -79,9 +79,16 @@ namespace DeviceFW
 
     /**
      * Construct the device addressing parameters for the I2C device ops.
+     * @param[in] i_address - I2C address to access on slave device.
+     * @param[in] i_port - Which port to use from the I2C master.
+     * @param[in] i_engine - Which I2C master engine to use.
+     * @param[in] i_devAddr - The device address on a given engine/port.
      */
-    #define DEVICE_I2C_ADDRESS( i_address )\
-        DeviceFW::I2C, static_cast<uint64_t>(( i_address ))
+    #define DEVICE_I2C_ADDRESS( i_address, i_port, i_engine, i_devAddr )\
+        DeviceFW::I2C, static_cast<uint64_t>(( i_address )),\
+        static_cast<uint64_t>(( i_port )),\
+        static_cast<uint64_t>(( i_engine )),\
+        static_cast<uint64_t>(( i_devAddr ))
 
 
     /** @class InvalidParameterType

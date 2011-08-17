@@ -27,7 +27,8 @@
  *  @file i2ctest.H
  *
  *  @brief Test case for I2C code
-*/
+ */
+#include <sys/time.h>
 
 #include <cxxtest/TestSuite.H>
 #include <errl/errlmanager.H>
@@ -41,95 +42,106 @@ extern trace_desc_t* g_trac_i2c;
 using namespace TARGETING;
 
 // Address and data to read/write
-struct testI2CAddrData
+struct testI2CParms
 {
-    uint32_t addr;
+    uint64_t port;
+    uint64_t engine;
+    uint64_t addr;
+    uint64_t devAddr;
     uint64_t data;
+    size_t   size;
 };
 
 // Test table values
-const testI2CAddrData g_i2cAddrTable[] =
+const testI2CParms g_i2cWriteCmdTable[] =
 {
-        // Write data to be ORed with read value
-        {0x13030007, 0x0000040000000000},
-        {0x13010002, 0x00000C0000000000},
+    { 0x00, 0x00, 0x1234, 0x50, 0xFEDCBA9876543210, 8 },
+    { 0x00, 0x00, 0x1234, 0x50, 0xFEDCBA9876543210, 8 },
 };
 
-const uint32_t g_i2cmAddrTableSz =
-                    sizeof(g_i2cAddrTable)/sizeof(testI2CAddrData);
+const uint32_t g_i2cWriteCmdTableSz =
+sizeof(g_i2cWriteCmdTable)/sizeof(testI2CParms);
 
 
 class I2CTest: public CxxTest::TestSuite
 {
-public:
+    public:
 
-    /**
-     * @brief I2C test #1
-     *        Write value and read back to verify
-     */
-    void testI2C1(void)
-    {
-        errlHndl_t l_err = NULL;
-        TS_TRACE( "I2C Test 1: its running!" );
-
-        do
+        /**
+         * @brief I2C test #1
+         *        Write value and read back to verify
+         *        Currently only 1 operation
+         */
+        void testI2C1(void)
         {
-            TARGETING::TargetService& targetService = TARGETING::targetService();
-            TARGETING::Target* l_testTarget = NULL;
-            targetService.masterProcChipTargetHandle( l_testTarget );
+            errlHndl_t err = NULL;
 
-            if( NULL == l_testTarget )
+            TS_TRACE( "I2C Test 1: its running!" );
+
+            do
             {
-                TS_TRACE( "I2C Test - PROC test target is NULL!" );
-                break;
+                TARGETING::TargetService& l_targetService = TARGETING::targetService();
+                TARGETING::Target* testTarget = NULL;
+                l_targetService.masterProcChipTargetHandle( testTarget );
+                assert(testTarget != NULL);
+
+                testI2CParms testEntry = g_i2cWriteCmdTable[0];
+
+                // Perform I2C write
+                uint64_t data = testEntry.data;
+                TS_TRACE( "I2C - calling from Write" );
+                err = deviceOp( DeviceFW::WRITE,
+                                testTarget,
+                                &data,
+                                testEntry.size,
+                                DEVICE_I2C_ADDRESS( testEntry.addr,
+                                                    testEntry.port,
+                                                    testEntry.engine,
+                                                    testEntry.devAddr ) );
+
+                TS_TRACE( "I2C - returned from Write" );
+                if( err )
+                {
+                    break;
+                }
+
+                // Perform I2C read
+                err = deviceOp( DeviceFW::READ,
+                                testTarget,
+                                &data,
+                                testEntry.size,
+                                DEVICE_I2C_ADDRESS( testEntry.addr,
+                                                    testEntry.port,
+                                                    testEntry.engine,
+                                                    testEntry.devAddr ) );
+
+                if( err )
+                {
+                    break;
+                }
+
+                // check the data read
+                if( testEntry.data != data )
+                {
+                    TS_FAIL( "testI2C1 failed! - Data read does not match what was written!" );
+                    TS_TRACE( "testI2C1 - Data Written: %016llx, Data Read: %016llx",
+                              testEntry.data, data );
+
+                }
+            } while( 0 );
+
+            if ( err )
+            {
+                TS_FAIL( "testI2C1 failed!  Error committed." );
+                errlCommit( err );
+            }
+            else
+            {
+                TS_TRACE( "testI2C1 runs successfully!" );
             }
 
-            size_t l_size = sizeof(uint64_t);
-            testI2CAddrData l_testEntry = g_i2cAddrTable[0];
-
-            // --------------------------------------------
-            // NOTE: The following doesn't actually read
-            // or write any data, it is strictly there to
-            // prove that the interfaces are working.  The
-            // real tests will be added at a later time.
-            // --------------------------------------------
-
-            // Perform I2C write
-            uint64_t l_data = 0;
-
-            l_err = deviceOp( DeviceFW::WRITE, 
-                              l_testTarget,
-                              &l_data,
-                              l_size,
-                              DEVICE_I2C_ADDRESS(l_testEntry.addr) );
-
-            if( l_err )
-            {
-                break;
-            }
-
-            // Perform I2C read
-            l_err = deviceOp( DeviceFW::READ,
-                              l_testTarget,
-                              &l_data,
-                              l_size,
-                              DEVICE_I2C_ADDRESS(l_testEntry.addr) );
-
-
-        } while( 0 );
-
-        if (l_err)
-        {
-            TS_FAIL("testI2C1 failed!  Error committed.");
-                        errlCommit(l_err);
+            return;
         }
-        else
-        {
-            TS_TRACE("testI2C1 runs successfully!");
-        }
-
-        return;
-    }
 };
 
 #endif
