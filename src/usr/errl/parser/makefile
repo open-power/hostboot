@@ -24,7 +24,7 @@ $(BIN)/comps.C: $(ROOTPATH)/src/include/usr/hbotcompid.H
 	mkdir -p $(BIN)
 	grep "const compId_t [A-Z0-9]*_COMP_ID" $^ | \
 	grep -v MY_COMP_ID | \
-	sed 's/const compId_t \([A-Z0-9]*\)_COMP_ID[ =\t]*\(0[xX][0-0a-fA-F]*\).*/{ "\1", \2 },/' \
+	sed 's/const compId_t \([A-Z0-9]*\)_COMP_ID[ =\t]*\(0[xX][0-9a-fA-F]*\).*/{ "\1", \2 },/' \
 	> $@
 
 $(BIN)/errlparser.o: errlparser.C $(ROOTPATH)/src/include/usr/errl/errltypes.H $(BIN)/comps.C

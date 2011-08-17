@@ -26,11 +26,30 @@ using namespace ERRORLOG;
 #define USAGE "\
 Usage:\n\
 \n\
-errlparser  <imagefile> <symsfile> [-l | -d <logid>]\n\
+errlparser [-i] <imagefile> [[-s] <symsfile>] [-l | -d <logid>] [-v]\n\
 \n\
-Provide L3 memory image file and its hbicore*.syms file.\n\
+Arguments:\n\
+  <imagefile>  data file name\n\
+  <symsfile>   symbols file name\n\
   -l       summarize all error logs (default)\n\
   -d id    print detail from specific error log\n\
+  -s name  explicitly name the symbols file\n\
+  -i name  explicitly name the image file\n\
+  -v       verbose output to stdout\n\
+\n\
+Sample command lines:\n\
+  errlparser image.bin hbicore.syms       # list logs from a full L3 image\n\
+  errlparser image.bin hbicore.syms -d 1  # print detail about log 1\n\
+  errlparser buffer.bin       # list logs from pre-extracted storage buffer\n\
+  errlparser buffer.bin -d 1  # detail log 1 from pre-extracted storage buffer\n\
+\n\
+Remarks:\n\
+[] If no symbols file name is given, <imagefile> is assumed to be an error\n\
+   log storage buffer, usually 64KB in size, that has been pre-extracted\n\
+   from an L3 image.\n\
+[] All output written to stdout\n\
+[] '-s' is optional if the symbols file name contains 'syms'\n\
+[] '-i' can be optional in most cases\n\
 \n\
 Contact: Monte Copeland\n\
 "
@@ -257,7 +276,7 @@ char* ReadStorageBuffer(char* i_Image, uint32_t i_ulAddr, uint32_t &io_cbBuffer)
     char * l_pchBuffer = NULL;   // pointer to return
     storage_header_t header;
 
-    // open the binary image of L3 RAM and read the errl log buffer
+    // open the image file and read the errl log buffer
     fd = open( i_Image, O_RDONLY );
     if ( fd == -1 )
     {
@@ -290,6 +309,14 @@ char* ReadStorageBuffer(char* i_Image, uint32_t i_ulAddr, uint32_t &io_cbBuffer)
 
     // io_cbBuffer is a count of bytes in storage
     io_cbBuffer = header.cbStorage;
+
+    if( io_cbBuffer > ( 5 * ERRL_STORAGE_SIZE ))
+    {
+        // Unreasonable
+        fprintf( stdout, "Problem with image file %s\n", i_Image );
+        fprintf( stdout, "Buffer size %d is unreasonable.\n", io_cbBuffer );
+        exit(2);
+    }
 
     if( ( i_ulAddr + io_cbBuffer ) > offsetEnd )
     {
@@ -496,7 +523,7 @@ int main( int argc,  char *argv[] )
     char * pszSearch;
     char * pszAddr = NULL;
     char * pchBuffer;
-    uint32_t ulAddr;
+    uint32_t ulAddr = 0;
     char szDivider[ 256 ];
     uint32_t ulLogId = 0;
     int c;
@@ -550,6 +577,26 @@ int main( int argc,  char *argv[] )
             fList = 0;
             fDetail = 1;
         }
+        else if( 0 == strcmp( "-i", argv[i] ))
+        {
+            i++;
+            if( i >= argc )
+            {
+              fprintf( stdout, "Provide -i <imagefile>\n" );
+              exit( 2 );
+            }
+            pszImageFile = strdup( argv[i] );
+        }
+        else if( 0 == strcmp( "-s", argv[i] ))
+        {
+            i++;
+            if( i >= argc )
+            {
+              fprintf( stdout, "Provide -s <symsfile>\n" );
+              exit( 2 );
+            }
+            pszSymbolFile = strdup( argv[i] );
+        }
         else if( 0 == strcmp( "-l", argv[i] ))
         {
             fList = 1;
@@ -574,10 +621,18 @@ int main( int argc,  char *argv[] )
             pch = strstr( argv[i], "syms" );
             if( pch )
             {
+                if( pszSymbolFile )
+                {
+                    halt( USAGE );
+                }
                 pszSymbolFile = strdup( argv[i] );
             }
             else
             {
+                if( pszImageFile )
+                {
+                    halt( USAGE );
+                }
                 pszImageFile = strdup( argv[i] );
             }
         }
@@ -587,24 +642,37 @@ int main( int argc,  char *argv[] )
 
 
     // Check args.
-    if((!pszImageFile) || (!pszSymbolFile))
+    if( !pszImageFile )
     {
         halt( USAGE );
     }
 
 
-
-    // Given the symbols file, locate the address/offset of the errl storage
-    // buffer.
-    ulAddr = FindSymbol( pszSymbolFile, "g_ErrlStorage" );
-    if( fVerbose )
+    if( pszSymbolFile )
     {
-        printf( "Error log storage buffer offset: 0x%08x\n", ulAddr );
+        // Given the symbols file, locate the address/offset of the
+        // errl storage buffer.
+        ulAddr = FindSymbol( pszSymbolFile, "g_ErrlStorage" );
+        if( fVerbose )
+        {
+            printf( "Error log storage buffer offset: 0x%08x\n", ulAddr );
+        }
+    }
+    else
+    {
+        // No symbols file name given.
+        // Proceed as though the image file is the 64KB storage buffer,
+        // already extracted for me. This is the case for awan.
+        ulAddr = 0;
+        if( fVerbose )
+        {
+            printf( "Assuming '%s' is errl storage buffer.\n", pszImageFile );
+        }
     }
 
 
     // Given the image file, read the portion that contains the
-    // error logs.
+    // error log storage buffer.
     pchBuffer = ReadStorageBuffer( pszImageFile, ulAddr, cbBuffer );
     assert( pchBuffer );
     assert( cbBuffer );
