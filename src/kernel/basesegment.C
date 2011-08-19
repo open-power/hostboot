@@ -7,6 +7,7 @@
 #include <kernel/vmmmgr.H>
 #include <kernel/cpuid.H>
 //#include <kernel/console.H>
+
 #define SLBE_s 40
 
 BaseSegment::~BaseSegment()
@@ -88,7 +89,7 @@ int BaseSegment::mmAllocBlock(MessageQueue* i_mq,void* i_va,uint64_t i_size)
 int BaseSegment::_mmAllocBlock(MessageQueue* i_mq,void* i_va,uint64_t i_size)
 {
     uint64_t l_vaddr = reinterpret_cast<uint64_t>(i_va);
-    uint64_t l_blockSizeTotal = 0;//iv_block->iv_size;
+    uint64_t l_blockSizeTotal = 0;
     iv_block->totalBlocksAlloc(l_blockSizeTotal);
     //Verify input address and size falls within this segment's address range
     if ((l_vaddr < this->getBaseAddress() ||

@@ -8,6 +8,7 @@
 #include <kernel/vmmmgr.H>
 #include <kernel/ptmgr.H>
 #include <kernel/pagemgr.H>
+//#include <kernel/console.H>
 
 Block::~Block()
 {
@@ -29,7 +30,7 @@ void Block::init(MessageQueue* i_msgQ)
     if (i_msgQ != NULL)
     {
         //Create message handler attribute for this block with this msgq
-        this->iv_msgHdlr = new MessageHandler(VmmManager::getLock(),i_msgQ);
+        this->iv_msgHdlr = new BlockMsgHdlr(VmmManager::getLock(),i_msgQ,this);
     }
 }
 
@@ -61,8 +62,8 @@ bool Block::handlePageFault(task_t* i_task, uint64_t i_addr)
                 //Add to ShadowPTE
                 pte->setPageAddr(reinterpret_cast<uint64_t>(l_page));
                 //TODO - Update to correct permissions requested
-                pte->setExecutable(true);
-                pte->setWritable(false);
+                pte->setExecutable(false);
+                pte->setWritable(true);
             }
             //Send message to handler to read page
             this->iv_msgHdlr->sendMessage(MSG_MM_RP_READ,
@@ -131,4 +132,24 @@ void Block::setPhysicalPage(uint64_t i_vAddr, uint64_t i_pAddr,
             kassert(false);
             break;
     }
+}
+
+void Block::setIsPresent(void* i_vaddr)
+{
+    uint64_t l_vaddr = reinterpret_cast<uint64_t>(i_vaddr);
+    ShadowPTE* l_pte = getPTE(l_vaddr);
+    //Set present bit
+    l_pte->setPresent(true);
+}
+
+void Block::addPTE(void* i_vaddr)
+{
+    uint64_t l_vaddr = reinterpret_cast<uint64_t>(i_vaddr);
+    ShadowPTE* l_pte = getPTE(l_vaddr);
+    //Add page table entry
+    PageTableManager::addEntry((l_vaddr / PAGESIZE) * PAGESIZE,
+                      l_pte->getPage(),
+                      (l_pte->isExecutable() ? VmmManager::RO_EXE_ACCESS :
+                      (l_pte->isWritable() ? VmmManager::NORMAL_ACCESS :
+                       VmmManager::READ_O_ACCESS)));
 }

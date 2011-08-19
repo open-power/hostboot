@@ -7,7 +7,7 @@
 #include <stdint.h>
 #include <kernel/task.H>
 #include <kernel/vmmmgr.H>
-#include <kernel/msghandler.H>
+#include <kernel/blockmsghdlr.H>
 
 class ShadowPTE;
 class Segment;
@@ -91,6 +91,23 @@ class Block
          */
         bool handlePageFault(task_t* i_task, uint64_t i_addr);
 
+        /**
+         * @brief Sets the 'present' bit within the Shadow page table
+         *
+         * @param[in] i_vaddr - Virtual address within the Shadow page table
+         */
+        void setIsPresent(void* i_vaddr);
+
+        /**
+         * @brief Adds the page table entry for the given address
+         *
+         * @param[in] i_vaddr - Virtual address to add to the page table
+         *
+         * The permissions set within the Shadow page table are used for
+         * this address
+         */
+        void addPTE(void* i_vaddr);
+
         friend class Segment;
         friend class BaseSegment;
         friend class StackSegment;
@@ -150,7 +167,7 @@ class Block
             /** Pointer to the Shadow PTE entries. */
         ShadowPTE* iv_ptes;
             /** Pointer to the message handler */
-        MessageHandler* iv_msgHdlr;
+        BlockMsgHdlr* iv_msgHdlr;
 
         /**
          * @brief Finish initialization of block.
