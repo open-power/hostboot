@@ -2,6 +2,8 @@
 
 use strict;
 
+use IO::Seekable;
+
 sub add_image_subdir
 {
     my $image = shift;
@@ -31,6 +33,8 @@ else
 }
 
 $image = add_image_subdir($ARGV[0]);
+open IMAGE, "< $image";
+binmode(IMAGE);
 
 my %module_offsets = ();
 open MODINFO, "< $image.modinfo";
@@ -46,7 +50,7 @@ while (my $modline = <MODINFO>)
     }
 }
 
-my %output = ();
+my @output = ();
 foreach my $module (@modules)
 {
     open OBJDUMP, ("ppc64-mcp6-objdump --syms -C ".add_image_subdir($module)."|");
@@ -74,21 +78,23 @@ foreach my $module (@modules)
 	my $code_loc = 0;
 	if ($is_function)
 	{
-	    open XXD, ("/usr/bin/xxd -p -s ".($address - $image_offset)." -l 8 -g 8 ".add_image_subdir($image)."|");
-	    $code_loc = (hex <XXD>) + $image_offset;
-	    close XXD;
+            seek IMAGE, ($address - $image_offset), SEEK_SET;
+            read IMAGE, $code_loc, 8;
+            $code_loc = unpack("Q>", $code_loc) + $image_offset;
 	    
 	    my $tmp = $code_loc; $code_loc = $address; $address = $tmp;
 	}
 	my $outstring = "";
 	$outstring = sprintf "%s,%08x,%08x,%08x,%s\n", ($is_function?"F":"V"),$address,$code_loc,$size,$name;
 
-	$output{$outstring} = $outstring;
+	push @output, $outstring;
     }
     close OBJDUMP;
 }
 
-foreach my $outstring (sort { substr($a,2,8) cmp substr($b,2,8) } keys %output)
+close IMAGE;
+
+foreach my $outstring (sort { substr($a,2) cmp substr($b,2) } @output)
 {
     print $outstring;
 }

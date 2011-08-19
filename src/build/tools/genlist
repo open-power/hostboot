@@ -4,17 +4,15 @@ use strict;
 
 sub add_image_subdir
 {
-    my $image = shift;
+    my ($image) = @_;
     if (!($image =~ m/\/img/)) { $image = "./img/".$image };
     return $image;
 }
 
 sub find_symbol_name
 {
-    my $offset = shift;
-    my $require_function = shift;
-    my $symbol_addrs = shift;
-    my $symbol_funcs = shift;
+    my ($offset, $require_function, $symbol_addrs, 
+        $symbol_sorted_addrs, $symbol_funcs) = @_;
 
     if (defined $symbol_addrs->{$offset})
     {
@@ -35,15 +33,38 @@ sub find_symbol_name
     {
 	return 0;
     }
-
-    my $prevoffset = 0;
-    foreach my $off (keys %$symbol_addrs)
+    
+    my $prevoffset = -1;
+    my $search_first = 0;
+    my $search_last = $#$symbol_sorted_addrs;
+    while ($search_first != $search_last)
     {
-	if (($off > $prevoffset) and ($off <= $offset))
-	{
-	    $prevoffset = $off;
-	}
+        my $search_mid = int ($search_first + $search_last) / 2;
+        if ($search_mid == $search_first)
+        {
+            if (@$symbol_sorted_addrs[$search_last] <= $offset)
+            {
+                $search_first = $search_last;
+            }
+            else
+            {
+                $search_last = $search_first;
+            }
+        }
+        elsif (@$symbol_sorted_addrs[$search_mid] <= $offset)
+        {
+            $search_first = $search_mid;
+        }
+        else
+        {
+            $search_last = $search_mid;
+        }
     }
+    if (@$symbol_sorted_addrs[$search_first] <= $offset)
+    {
+        $prevoffset = @$symbol_sorted_addrs[$search_first];
+    }
+    
     if (defined $symbol_addrs->{$prevoffset})
     {
 	for my $sym (@{$symbol_addrs->{$prevoffset}})
@@ -101,12 +122,9 @@ while (my $modline = <MODINFO>)
 my %symbol_address = ();
 my %symbol_isfunc = ();
 
-my $cmd = "$Bin/gensyms ".$image; 
-foreach my $module (@modules)
-{
-    $cmd = $cmd." ".$module;
-}
-open GENSYMS, $cmd."|";
+my $gensyms = $image;
+$gensyms =~ s/\.bin/\.syms/;
+open GENSYMS, "<".$gensyms;
 while (my $line = <GENSYMS>)
 {
     chomp $line;
@@ -124,20 +142,28 @@ while (my $line = <GENSYMS>)
     push @{$symbol_address{$addr}}, $function;
     $symbol_isfunc{$function} = $is_func;
 }
+my @symbol_sorted_addrs = sort { $a <=> $b} keys %symbol_address;
 
 
 foreach my $module (@modules)
 {
     print "BEGIN MODULE ---- ".$module." ----\n";
     my $enabled = 0;
+    my $sections = 0;
     open OBJDUMP, ("ppc64-mcp6-objdump -DCS ".add_image_subdir($module)."|");
     while (my $line = <OBJDUMP>)
     {
-	if ($line =~ m/Disassembly of section/)
+        if (!$enabled && ($sections >= 2)) 
+        { 
+            close OBJDUMP; 
+        }
+
+	if (($line =~ m/Disassembly/) && ($line =~ m/Disassembly of section/))
 	{
 	    if (($line =~ m/.text/) || ($line =~ m/.data/))
 	    {
 		$enabled = 1;
+                $sections = $sections + 1;
 	    }
 	    else
 	    {
@@ -153,7 +179,8 @@ foreach my $module (@modules)
 		my $format = sprintf "%x\t%08x", $value, $offset;
 		$line =~ s/__HEXVALUE__/$format/;
 		
-		my $symname = find_symbol_name($offset, 1, \%symbol_address, 
+		my $symname = find_symbol_name($offset, 1, \%symbol_address,
+                                               \@symbol_sorted_addrs,
 					       \%symbol_isfunc);
 		if ($symname)
 		{
@@ -168,7 +195,8 @@ foreach my $module (@modules)
 		    $line =~ s/__HEXVALUE__/$format/;
 
 		    my $refname = find_symbol_name($offset, 0, 
-					\%symbol_address, \%symbol_isfunc);
+					\%symbol_address, \@symbol_sorted_addrs,
+                                        \%symbol_isfunc);
 		    $line =~ s/__FUNCREF__/$refname/
 		}
 	    }
