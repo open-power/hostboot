@@ -169,9 +169,20 @@ class Block
          * @param[in] i_vAddr - The virtual address of the page.
          * @param[in] i_pAddr - The physical address of the page.
          * @param[in] i_access - The permissions of the page.
+         *
+         * @note If (i_pAddr == 0), then the virtual page is left with
+         *       the current present / page-number state but the access
+         *       mode is still set.
          */
         void setPhysicalPage(uint64_t i_vAddr, uint64_t i_pAddr,
                              VmmManager::ACCESS_TYPES i_access);
+
+        /**
+         * @brief Set up a virtual address to be "allocate-from-zero".
+         *
+         * @param[in] i_vAddr - The virtual address of the page.
+         */
+        void setPageAllocateFromZero(uint64_t i_vAddr);
 
         /**
          * @brief Adds up the total size of all blocks within the segment
@@ -184,6 +195,12 @@ class Block
             if (iv_nextBlock == NULL) return;
             else iv_nextBlock->totalBlocksAlloc(io_totalSize);
         }
+
+        /**
+         * @brief Release all allocated pages back to memory pool and remove
+         *        from page table.
+         */
+        void releaseAllPages();
 
     private:
             /** Base address of the block */

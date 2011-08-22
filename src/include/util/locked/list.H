@@ -32,7 +32,7 @@ namespace Util
     {
 	template <typename _T, typename _K,
 		  bool locked = false, typename _S = int>
-	class List 
+	class List
 	{
 	    public:
 	    	List() : head(NULL), tail(NULL), lock() {};
@@ -44,16 +44,16 @@ namespace Util
 		void erase(_T* node);
 		void erase(_K& key);
 
-		_T* find(_K& key);
+		_T* find(_K& key) const;
 
 	    protected:
 		_T* head;
 		_T* tail;
 
-		_S lock;
+		mutable _S lock;
 
-		void __lock();
-		void __unlock();
+		void __lock() const;
+		void __unlock() const;
 	};
 
 	template <typename _T, typename _K, bool locked, typename _S>
@@ -62,7 +62,7 @@ namespace Util
 	    _T* item = NULL;
 
 	    __lock();
-	    
+
 	    if (tail != NULL)
 	    {
 		item = tail;
@@ -73,7 +73,7 @@ namespace Util
 	    }
 
 	    __unlock();
-	    
+
 	    return item;
 	}
 
@@ -81,7 +81,7 @@ namespace Util
 	void List<_T,_K,locked,_S>::insert(_T* item)
 	{
 	    __lock();
-	    
+
 	    if (head == NULL)
 	    {
 		item->next = item->prev = NULL;
@@ -93,18 +93,18 @@ namespace Util
 		item->next = head;
 		head = head->prev = item;
 	    }
-	    
+
 	    __unlock();
 	}
 
 	template <typename _T, typename _K, bool locked, typename _S>
-	void List<_T,_K,locked,_S>::__lock()
+	void List<_T,_K,locked,_S>::__lock() const
 	{
 	    Util::Locked::LockHelper<locked,_S>(lock).lock();
 	}
-	
+
 	template <typename _T, typename _K, bool locked, typename _S>
-	void List<_T,_K,locked,_S>::__unlock()
+	void List<_T,_K,locked,_S>::__unlock() const
 	{
 	    Util::Locked::LockHelper<locked,_S>(lock).unlock();
 	}
@@ -122,7 +122,7 @@ namespace Util
 	    if (node == tail)
 		tail = node->prev;
 	    else
-		node->next->prev = node->prev; 
+		node->next->prev = node->prev;
 
 	    __unlock();
 	}
@@ -131,7 +131,7 @@ namespace Util
 	void List<_T,_K,locked,_S>::erase(_K& key)
 	{
 	    __lock();
-	    
+
 	    _T* node = head;
 
 	    while((node != NULL) && (node->key != key))
@@ -147,7 +147,7 @@ namespace Util
 		if (node == tail)
 		    tail = node->prev;
 		else
-		    node->next->prev = node->prev; 
+		    node->next->prev = node->prev;
 	    }
 
 	    __unlock();
@@ -156,7 +156,7 @@ namespace Util
 	}
 
 	template <typename _T, typename _K, bool locked, typename _S>
-	_T* List<_T,_K,locked,_S>::find(_K& key)
+	_T* List<_T,_K,locked,_S>::find(_K& key) const
 	{
 	    __lock();
 
@@ -166,7 +166,7 @@ namespace Util
 		node = node->next;
 
 	    __unlock();
-	    
+
 	    return node;
 	}
     }

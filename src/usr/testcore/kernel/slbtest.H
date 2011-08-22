@@ -40,19 +40,6 @@ class slbtest: public CxxTest::TestSuite
 
         static volatile int rc;
 
-        void testSLB()
-        {
-            rc = 0;
-            printk("Data Segment exception expected in 1TB segment test - ");
-            task_create(writeEA1TB, this);
-            while (rc == 0) task_yield();
-            task_yield();
-            if (rc == -1)
-            {
-                TS_FAIL("Data Segment exception expected in 1TB segment\n");
-            }
-        }
-
         void testDevSeg()
         {
             int rc = 0;
@@ -111,15 +98,6 @@ class slbtest: public CxxTest::TestSuite
 
     private:
 
-        static void writeEA1TB(void *i_p)
-        {
-            rc = 1;
-            sync();
-            *(int *)0x10000000000 = 1;
-            sync();
-            rc = -1;
-            task_end();
-        }
 };
 volatile int slbtest::rc = 0;
 

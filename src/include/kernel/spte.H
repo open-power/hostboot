@@ -106,6 +106,10 @@ class ShadowPTE
         bool isDirty() const { return dirty; };
             /** Set dirty bit. */
         void setDirty(bool i_dirty) { dirty = i_dirty; };
+            /** Get allocate-from-zero bit. */
+        bool isAllocateFromZero() const { return allocate_from_zero; };
+            /** Set allocate-from-zero bit. */
+        void setAllocateFromZero(bool i_zero) { allocate_from_zero = i_zero; };
 };
 
 #endif

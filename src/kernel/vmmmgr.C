@@ -27,8 +27,9 @@
 #include <arch/ppc.H>
 #include <kernel/ptmgr.H>
 #include <kernel/segmentmgr.H>
-#include <kernel/devicesegment.H>
 #include <kernel/basesegment.H>
+#include <kernel/stacksegment.H>
+#include <kernel/devicesegment.H>
 
 extern void* data_load_address;
 
@@ -43,6 +44,7 @@ void VmmManager::init()
     VmmManager& v = Singleton<VmmManager>::instance();
 
     BaseSegment::init();
+    StackSegment::init();
     DeviceSegment::init();
     SegmentManager::initSLB();
 

@@ -25,6 +25,7 @@
 #include <kernel/task.H>
 #include <kernel/pagemgr.H>
 #include <kernel/cpumgr.H>
+#include <kernel/stacksegment.H>
 #include <sys/task.h>
 #include <arch/ppc.H>
 #include <string.h>
@@ -99,12 +100,9 @@ task_t* TaskManager::_createTask(TaskManager::task_fn_t t,
     // Setup stack.
     if (withStack)
     {
-	task->context.stack_ptr =
-	    PageManager::allocatePage(TASK_DEFAULT_STACK_SIZE);
-        memset(task->context.stack_ptr, '\0',
-               TASK_DEFAULT_STACK_SIZE * PAGESIZE);
-	task->context.gprs[1] = ((uint64_t)task->context.stack_ptr) +
-               TASK_DEFAULT_STACK_SIZE * PAGESIZE - 8;
+        task->context.stack_ptr = StackSegment::createStack(task->tid);
+        task->context.gprs[1] =
+            reinterpret_cast<uint64_t>(task->context.stack_ptr);
     }
     else
     {

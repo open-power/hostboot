@@ -37,6 +37,7 @@
 #include <kernel/misc.H>
 #include <kernel/msghandler.H>
 #include <kernel/vmmmgr.H>
+#include <kernel/stacksegment.H>
 
 extern "C"
 void kernel_execute_decrementer()
@@ -164,7 +165,7 @@ namespace Systemcalls
         // TODO: Deal with join.
 
         // Clean up task memory.
-        PageManager::freePage(t->context.stack_ptr, TASK_DEFAULT_STACK_SIZE);
+        StackSegment::deleteStack(t->tid);
         delete t;
     }
 
@@ -218,7 +219,7 @@ namespace Systemcalls
 
         if (m->type >= MSG_FIRST_SYS_TYPE)
         {
-            printkd("MsgSend> type=%d\n", m->type);
+            printkd("Invalid type for msg_send, type=%d.\n", m->type);
             TASK_SETRTN(t, -EINVAL);
             return;
         }
@@ -252,7 +253,8 @@ namespace Systemcalls
 
         if (m->type >= MSG_FIRST_SYS_TYPE)
         {
-            printkd("MsgSendRecv> type=%d\n", m->type);
+            printkd("Invalid message type for msg_sendrecv, type=%d.\n",
+                    m->type);
             TASK_SETRTN(t, -EINVAL);
             return;
         }

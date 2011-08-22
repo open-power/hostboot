@@ -98,7 +98,7 @@ bool Block::handlePageFault(task_t* i_task, uint64_t i_addr)
             //Done(waiting for response)
             return true;
         }
-        else if (pte->allocate_from_zero)
+        else if (pte->isAllocateFromZero())
         {
             void* l_page = PageManager::allocatePage();
             memset(l_page, '\0', PAGESIZE);
@@ -144,8 +144,21 @@ void Block::setPhysicalPage(uint64_t i_vAddr, uint64_t i_pAddr,
 
     // Create virtual to physical mapping.
     ShadowPTE* pte = getPTE(i_vAddr);
-    pte->setPageAddr(i_pAddr);
-    pte->setPresent(true);
+    if (i_pAddr != 0)
+    {
+        pte->setPageAddr(i_pAddr);
+        pte->setPresent(true);
+
+        // Modified an SPTE, clear the HPTE.
+        PageTableManager::delEntry(i_vAddr);
+    }
+    // If the page is already present, we might be changing permissions, so
+    // clear the HPTE.
+    else if (pte->isPresent())
+    {
+        PageTableManager::delEntry(i_vAddr);
+    }
+
     switch(i_access)
     {
         case VmmManager::READ_O_ACCESS:
@@ -208,4 +221,46 @@ uint64_t Block::findPhysicalAddress(uint64_t i_vaddr) const
     }
 
     return paddr;
+}
+
+void Block::setPageAllocateFromZero(uint64_t i_vAddr)
+{
+    // Check containment, call down chain if address isn't in this block.
+    if (!isContained(i_vAddr))
+    {
+        if (iv_nextBlock)
+        {
+            iv_nextBlock->setPageAllocateFromZero(i_vAddr);
+        }
+        else
+        {
+            // No block owns this address.  Code bug.
+            kassert(iv_nextBlock);
+        }
+        return;
+    }
+
+    // Set page to allocate-from-zero.
+    ShadowPTE* pte = getPTE(i_vAddr);
+    pte->setAllocateFromZero(true);
+}
+
+void Block::releaseAllPages()
+{
+        // Release all pages from page table.
+    PageTableManager::delRangeVA(iv_baseAddr, iv_baseAddr + iv_size);
+
+        // Free all pages back to page manager.
+    for(uint64_t page = iv_baseAddr;
+        page < (iv_baseAddr + iv_size);
+        page += PAGESIZE)
+    {
+        ShadowPTE* pte = getPTE(page);
+        if (pte->isPresent() && (0 != pte->getPageAddr()))
+        {
+            PageManager::freePage(reinterpret_cast<void*>(pte->getPageAddr()));
+            pte->setPresent(false);
+            pte->setPageAddr(NULL);
+        }
+    }
 }
