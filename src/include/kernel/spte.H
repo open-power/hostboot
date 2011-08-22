@@ -63,9 +63,11 @@ class ShadowPTE
                 uint32_t track_write:1;
                     /** Has page been written to. */
                 uint32_t dirty:1;
+                    /** Allocate from a zero'd page. */
+                uint32_t allocate_from_zero:1;
 
                     /** Reserved for future use. */
-                uint32_t reserved:7;
+                uint32_t reserved:6;
             } PACKED;
         };
 

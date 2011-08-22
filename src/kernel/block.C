@@ -22,6 +22,7 @@
 //  IBM_PROLOG_END
 #include <limits.h>
 #include <assert.h>
+#include <string.h>
 
 #include <sys/msg.h>
 
@@ -92,6 +93,14 @@ bool Block::handlePageFault(task_t* i_task, uint64_t i_addr)
                     reinterpret_cast<void*>(i_addr),l_page,i_task);
             //Done(waiting for response)
             return true;
+        }
+        else if (pte->allocate_from_zero)
+        {
+            void* l_page = PageManager::allocatePage();
+            memset(l_page, '\0', PAGESIZE);
+
+            pte->setPageAddr(reinterpret_cast<uint64_t>(l_page));
+            pte->setPresent(true);
         }
         else
         {
