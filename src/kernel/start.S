@@ -393,10 +393,18 @@ system_call_fast_path:
     ;// Results:
     ;//     * TOC base -> GPR2
     ;//     * Function Address -> CTR
-    ;//     * GPR1, GPR3 preserved.
+    ;//     * GPR3 preserved.
+    ;//     * Initial stack-frame created.
     ;//     * Branch to CTR (no link).
 .global userspace_task_entry
 userspace_task_entry:
+        ;// Skip stack frame if GPR1 == NULL.
+    cmpi cr0, r1, 0
+    beq- 1f
+        ;// Create frame.
+        ;//     NULL back-chain + 48 bytes + quad-word alignment.  See ABI.
+    stdu r1, -56(r1)
+1:
     ld r5, 0(r4)
     mtctr r5
     ld r2, 8(r4)
