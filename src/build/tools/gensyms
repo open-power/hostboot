@@ -4,6 +4,8 @@ use strict;
 
 use IO::Seekable;
 
+my $littleendian = (unpack("L", pack("N", 0xabcd1234)) != 0xabcd1234);
+
 sub add_image_subdir
 {
     my $image = shift;
@@ -80,9 +82,16 @@ foreach my $module (@modules)
 	{
             seek IMAGE, ($address - $image_offset), SEEK_SET;
             read IMAGE, $code_loc, 8;
-            $code_loc = unpack("Q>", $code_loc) + $image_offset;
-	    
-	    my $tmp = $code_loc; $code_loc = $address; $address = $tmp;
+            if ($littleendian)
+            {
+                $code_loc = unpack("Q", reverse($code_loc)) + $image_offset;
+            }
+            else
+            {
+                $code_loc = unpack("Q", $code_loc) + $image_offset;
+            }
+
+            my $tmp = $code_loc; $code_loc = $address; $address = $tmp;
 	}
 	my $outstring = "";
 	$outstring = sprintf "%s,%08x,%08x,%08x,%s\n", ($is_function?"F":"V"),$address,$code_loc,$size,$name;
