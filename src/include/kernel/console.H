@@ -27,13 +27,19 @@
 #include <string.h>
 #include <builtins.h>
 
+#ifdef HOSTBOOT_DEBUG
+    #define printkd(format...) printk(## format)
+#else
+    #define printkd(format...)
+#endif
+
 void printk(const char*, ...) FORMAT_PRINTF;
 
 class Console
 {
     public:
 	int putc(int);
-	
+
 	enum { BUFFER_SIZE = 1024 * 16 };
 
     protected:
@@ -41,7 +47,7 @@ class Console
 	~Console() {};
 
     private:
-	size_t iv_pos;    
+	size_t iv_pos;
 	char * iv_buffer;
 };
 

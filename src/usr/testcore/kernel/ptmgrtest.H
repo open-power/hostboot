@@ -57,11 +57,11 @@ const pte_test_t TEST_DATA[] = {
     { 0x0000000040001FF8,  0x0000000000040001,  109,  true,   false }, // just before a page boundary
 
     //2 addresses in the same page
-    { 0x0000000090000040,  0x0000000000090000,  110,  true,   false  },    
-    { 0x0000000090000100,  0x0000000000090000,  110,  true,   false  },    
+    { 0x0000000090000040,  0x0000000000090000,  110,  true,   false  },
+    { 0x0000000090000100,  0x0000000000090000,  110,  true,   false  },
 
     //Out of range address (too big) ??
-    { 0x0040000000000000,  0x0000000000004000,  111,  true,   false  }, 
+    { 0x0040000000000000,  0x0000000000004000,  111,  true,   false  },
 
     //Several addresses with the same PTEG, enough to overflow a PTEG
     { 0x0000000080803000,  0x0000000000080803,  112,  false,  true  }, // 2TB+8MB+12K
@@ -84,7 +84,7 @@ class ptmgrtest : public CxxTest::TestSuite
         VA_RANGE_FINISH = 0x0000000085800000,
 
         PN_RANGE_START  = 107,
-        PN_RANGE_FINISH = 115,   
+        PN_RANGE_FINISH = 115,
     };
 
   public:
@@ -96,7 +96,7 @@ class ptmgrtest : public CxxTest::TestSuite
     void test_hash40( void )
     {
         TS_TRACE( ">> test_hash40 <<" );
-        printk( ">> test_hash40 <<\n" );
+        printkd( ">> test_hash40 <<\n" );
         uint64_t fails, total = 0;
 
         // Initialize the Page Table
@@ -110,12 +110,12 @@ class ptmgrtest : public CxxTest::TestSuite
             if( TEST_DATA[x].hash != hash )
             {
                 TS_FAIL( "ptmgrtest::test_hash40> ERROR : Hash mismatch" );
-                printk( "VA=0x%.16lX, Exp: %.16lX, Act: %.16lX\n", TEST_DATA[x].va, TEST_DATA[x].hash, hash );
+                printkd( "VA=0x%.16lX, Exp: %.16lX, Act: %.16lX\n", TEST_DATA[x].va, TEST_DATA[x].hash, hash );
                 fails++;
             }
             else
             {
-                PASS_TRACE( "ptmgrtest::test_hash40> PASS : 0x%.16lX", TEST_DATA[x].va );                
+                PASS_TRACE( "ptmgrtest::test_hash40> PASS : 0x%.16lX", TEST_DATA[x].va );
             }
             total++;
         }
@@ -123,7 +123,7 @@ class ptmgrtest : public CxxTest::TestSuite
         delete ptmgr;
 
         TS_TRACE( "ptmgrtest::test_hash40> fails=%d/%d", fails, total );
-        printk( "ptmgrtest::test_hash40> fails=%ld/%ld\n", fails, total );
+        printkd( "ptmgrtest::test_hash40> fails=%ld/%ld\n", fails, total );
     }
 
     /**
@@ -135,7 +135,7 @@ class ptmgrtest : public CxxTest::TestSuite
     void test_addEntry( void )
     {
         TS_TRACE( ">> test_addEntry <<" );
-        printk( ">> test_addEntry <<\n" );
+        printkd( ">> test_addEntry <<\n" );
         uint64_t fails = 0;
         uint64_t total = 0;
         uint64_t status = 0;
@@ -217,7 +217,7 @@ class ptmgrtest : public CxxTest::TestSuite
         delete ptmgr;
 
         TS_TRACE( "ptmgrtest::test_addEntry> fails=%d/%d", fails, total );
-        printk( "ptmgrtest::test_addEntry> fails=%ld/%ld\n", fails, total );
+        printkd( "ptmgrtest::test_addEntry> fails=%ld/%ld\n", fails, total );
     }
 
     /**
@@ -228,12 +228,12 @@ class ptmgrtest : public CxxTest::TestSuite
     void test_delEntry( void )
     {
         TS_TRACE( ">> test_delEntry <<" );
-        printk( ">> test_delEntry <<\n" );
+        printkd( ">> test_delEntry <<\n" );
         uint64_t fails = 0;
         uint64_t total = 0;
         uint64_t ignored = 0;
 
-        // 1) Initialize the Page Table 
+        // 1) Initialize the Page Table
         PageTableManager* ptmgr = new PageTableManager(true);
 
         // 2) Populate the Page Table
@@ -249,7 +249,7 @@ class ptmgrtest : public CxxTest::TestSuite
             if( status & PageTableManager::PTE_VALID )
             {
                 TS_FAIL( "ptmgrtest::test_delEntry> ERROR : entry still present!" );
-                printk( "VA = %.16lX\n", TEST_DATA[x].va );
+                printkd( "VA = %.16lX\n", TEST_DATA[x].va );
                 PageTableManager::printPTE( TEST_DATA[x].va, true );
                 fails++;
             }
@@ -266,7 +266,7 @@ class ptmgrtest : public CxxTest::TestSuite
         delete ptmgr;
 
         TS_TRACE( "ptmgrtest::test_delEntry> fails=%d/%d", fails, total );
-        printk( "ptmgrtest::test_delEntry> fails=%ld/%ld\n", fails, total );
+        printkd( "ptmgrtest::test_delEntry> fails=%ld/%ld\n", fails, total );
     }
 
     /**
@@ -277,13 +277,13 @@ class ptmgrtest : public CxxTest::TestSuite
      */
     void test_delRangeVA( void )
     {
-        TS_TRACE( ">> test_delRangeVA <<" );        
-        printk( ">> test_delRangeVA <<\n" );        
+        TS_TRACE( ">> test_delRangeVA <<" );
+        printkd( ">> test_delRangeVA <<\n" );
         uint64_t fails = 0;
         uint64_t total = 0;
         uint64_t ignored = 0;
 
-        // 1) Initialize the Page Table 
+        // 1) Initialize the Page Table
         PageTableManager* ptmgr = new PageTableManager(true);
 
         // 2) Populate the Page Table
@@ -302,14 +302,14 @@ class ptmgrtest : public CxxTest::TestSuite
                 if( (status & PageTableManager::PTE_VALID) && TEST_DATA[x].delrangeva )
                 {
                     TS_FAIL( "ptmgrtest::test_delRangeVA> ERROR1 : entry still present" );
-                    printk( "addr = %.16lX\n", TEST_DATA[x].va );
+                    printkd( "addr = %.16lX\n", TEST_DATA[x].va );
                     PageTableManager::printPTE( TEST_DATA[x].va, false );
                     fails++;
                 }
                 else if( !(status & PageTableManager::PTE_VALID) && !TEST_DATA[x].delrangeva )
                 {
                     TS_FAIL( "ptmgrtest::test_delRangeVA> ERROR2 : deleted a wrong entry" );
-                    printk( "addr = %.16lX\n", TEST_DATA[x].va );
+                    printkd( "addr = %.16lX\n", TEST_DATA[x].va );
                     PageTableManager::printPTE( TEST_DATA[x].va, false );
                     fails++;
                 }
@@ -326,7 +326,7 @@ class ptmgrtest : public CxxTest::TestSuite
         delete ptmgr;
 
         TS_TRACE( "ptmgrtest::test_delRangeVA> fails=%d/%d", fails, total );
-        printk( "ptmgrtest::test_delRangeVA> fails=%ld/%ld\n", fails, total );
+        printkd( "ptmgrtest::test_delRangeVA> fails=%ld/%ld\n", fails, total );
     }
 
     /**
@@ -337,13 +337,13 @@ class ptmgrtest : public CxxTest::TestSuite
      */
     void test_delRangePN( void )
     {
-        TS_TRACE( ">> test_delRangePN <<" );        
-        printk( ">> test_delRangePN <<\n" );        
+        TS_TRACE( ">> test_delRangePN <<" );
+        printkd( ">> test_delRangePN <<\n" );
         uint64_t fails = 0;
         uint64_t total = 0;
         uint64_t pagenum = 0;
 
-        // 1) Initialize the Page Table 
+        // 1) Initialize the Page Table
         PageTableManager* ptmgr = new PageTableManager(true);
 
         // 2) Populate the Page Table
@@ -364,7 +364,7 @@ class ptmgrtest : public CxxTest::TestSuite
                     && (pagenum <= PN_RANGE_FINISH) )
                 {
                     TS_FAIL( "ptmgrtest::test_delRangePN> ERROR1 : entry still present" );
-                    printk( "addr = %.16lX, page=%ld\n", TEST_DATA[x].va, pagenum );
+                    printkd( "addr = %.16lX, page=%ld\n", TEST_DATA[x].va, pagenum );
                     PageTableManager::printPTE( TEST_DATA[x].va, false );
                     fails++;
                 }
@@ -373,7 +373,7 @@ class ptmgrtest : public CxxTest::TestSuite
                          && (pagenum > PN_RANGE_FINISH) )
                 {
                     TS_FAIL( "ptmgrtest::test_delRangePN> ERROR2 : deleted a wrong entry" );
-                    printk( "addr = %.16lX, page=%ld\n", TEST_DATA[x].va, pagenum );
+                    printkd( "addr = %.16lX, page=%ld\n", TEST_DATA[x].va, pagenum );
                     PageTableManager::printPTE( TEST_DATA[x].va, false );
                     fails++;
                 }
@@ -390,7 +390,7 @@ class ptmgrtest : public CxxTest::TestSuite
         delete ptmgr;
 
         TS_TRACE( "ptmgrtest::test_delRangePN> fails=%d/%d", fails, total );
-        printk( "ptmgrtest::test_delRangePN> fails=%ld/%ld\n", fails, total );
+        printkd( "ptmgrtest::test_delRangePN> fails=%ld/%ld\n", fails, total );
     }
 
     //@todo - Test LRU

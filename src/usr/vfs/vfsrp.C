@@ -21,7 +21,7 @@
 //
 //  IBM_PROLOG_END
 /**
- * @file vfsrp.C 
+ * @file vfsrp.C
  * @brief Virtual File system Extended image support
  */
 
@@ -70,7 +70,7 @@ void VfsRp::init( void * i_taskArgs )
     errlHndl_t err = NULL;
     err = Singleton<VfsRp>::instance()._init();
     INITSERVICE::TaskArgs::TaskArgs* args = (INITSERVICE::TaskArgs::TaskArgs*)i_taskArgs;
-    if(err) 
+    if(err)
     {
         args->postErrorLog(err);
     }
@@ -187,9 +187,8 @@ void VfsRp::msgHandler()
 
             case VFS_MSG_EXEC:
                 {
-                    msg_t * msg1 = (msg_t *) msg->data[0];
                     TRACDCOMP(g_trac_vfs, "VFS: Got exec request of %s",
-                           (const char*)msg1->data[0]);
+                           (const char*)((msg_t*)msg->data[0])->data[0]);
 
                     // run in own task so page faults can be handled
                     task_create(exec, msg);
@@ -290,7 +289,7 @@ void VfsRp::_exec(msg_t * i_msg)
     //  The TOC for the extended image sits at the start of the image and is
     //  not location dependant, so just use the one pointed to by iv_pnor_vaddr
     //  to avoid having to copy it to this block
-    VfsSystemModule * module = 
+    VfsSystemModule * module =
         vfs_find_module((VfsSystemModule *)(iv_pnor_vaddr +
                                             VFS_EXTENDED_MODULE_TABLE_OFFSET),
                         (const char*) msg1->data[0]);

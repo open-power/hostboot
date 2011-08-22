@@ -25,7 +25,6 @@
 
 #include <arch/ppc.H>
 #include <util/locked/list.H>
-//#include <kernel/console.H>
 
 void* operator new(size_t s)
 {
@@ -63,19 +62,19 @@ extern "C" int __cxa_guard_acquire(volatile uint64_t* gv)
     //     0 -> uninitialized
     //     1 -> locked
     //     2 -> unlocked and initialized
-    
+
     uint32_t v = __sync_val_compare_and_swap((volatile uint32_t*)gv, 0, 1);
     if (v == 0)
 	return 1;
     if (v == 2)
 	return 0;
-    
+
     // Wait for peer thread to perform initialization (state 2).
     while(2 != *(volatile uint32_t*)gv);
-    
+
     // Instruction barrier to ensure value is set before later loads execute.
-    isync(); 
-    
+    isync();
+
     return 0;
 }
 
@@ -127,7 +126,7 @@ Util::Locked::List<DtorEntry_t, DtorEntry_t::key_type> g_dtorRegistry;
 void call_dtors(void * i_dso_handle)
 {
     DtorEntry_t * entry = NULL;
-    // A module is never exited by different threads so 
+    // A module is never exited by different threads so
     // assume no locking needed here.
     while( NULL != (entry = g_dtorRegistry.find(i_dso_handle)) )
     {
@@ -142,12 +141,11 @@ extern "C" int __cxa_atexit(void (*i_dtor)(void*),
                             void* i_arg,
                             void* i_dso_handle)
 {
-    // Base kernel code may try to call this before mem heap is 
+    // Base kernel code may try to call this before mem heap is
     // available - so don't add it.
     // TODO - Only need dtors for extended image modules
     if(i_dso_handle != __dso_handle)
     {
-        // printk("Register dtor for %p\n",i_dso_handle);
         DtorEntry_t * entry = new DtorEntry_t;
         entry->key = i_dso_handle;
         entry->dtor = i_dtor;

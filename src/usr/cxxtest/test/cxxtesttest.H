@@ -52,8 +52,11 @@ public:
     void testCxxTestTrace(void)
     {
         int32_t     l_dec   =   1234567890;
+        l_dec--; l_dec++;
         uint32_t    l_hex    =  0x12345678;
+        l_hex--; l_hex++;
         uint64_t    l_bighex =  0x1234567890abcdef;
+        l_bighex--; l_bighex++;
 
         TS_TRACE( "CxxTest Trace dec=%d",      l_dec );
         TS_TRACE( "CxxTest Trace hex=0x%x",    l_hex );

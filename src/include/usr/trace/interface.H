@@ -90,7 +90,16 @@ const uint32_t TRACE_FIELD   = 0;       //Indicates trace is field
 #define TRACDCOMP(des,printf_string,args...) do {} while(0)
 #define TRACDBIN(des,descString,address,length) do {} while(0)
 
-#else /* direct them to real function calls */
+#else
+#ifndef HOSTBOOT_DEBUG
+
+#define TRACDCOMP(des,printf_string,args...) do {} while(0)
+#define TRACDBIN(des,descString,address,length) do {} while(0)
+
+#else
+
+/* direct them to real function calls */
+
 
 /**
  * @fn void TRACDCOMP0(des, printf_string)
@@ -134,6 +143,7 @@ const uint32_t TRACE_FIELD   = 0;       //Indicates trace is field
                              address,                              \
                              len,                                  \
                              TRACE_DEBUG)
+#endif /* HOSTBOOT_DEBUG */
 #endif /* TRAC_DEBUG_OUT */
 
 /**

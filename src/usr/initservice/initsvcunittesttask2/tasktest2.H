@@ -33,7 +33,6 @@
 // Includes
 /******************************************************************************/
 #include <stdint.h>
-#include <kernel/console.H>     // printk
 #include <util/singleton.H>
 
 namespace   INITSERVICE

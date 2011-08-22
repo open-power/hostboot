@@ -92,8 +92,8 @@ void vfs_main(void* i_barrier)
 		    e->msg_q = (msg_q_t) msg->data[0];
 		    vfsContents.insert(e);
 
-		    printk("VFS: Registering %p as %s\n",
-			   e->msg_q, e->key.key);
+		    printkd("VFS: Registering %p as %s\n",
+			    e->msg_q, e->key.key);
 		    msg_respond(vfsMsgQ, msg);
 		}
 		break;
@@ -113,8 +113,8 @@ void vfs_main(void* i_barrier)
 
 	    case VFS_MSG_EXEC:
 		{
-		    printk("VFS: Got exec request of %s\n",
-		           (const char*)msg->data[0]);
+		    printkd("VFS: Got exec request of %s\n",
+		            (const char*)msg->data[0]);
 
 		    VfsSystemModule* module =
                         vfs_find_module(VFS_MODULES,
@@ -177,6 +177,6 @@ tid_t vfs_exec(VfsSystemModule * i_module, void* i_param)
     }
     return child;
 }
-  
+
 
 

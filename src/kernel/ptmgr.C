@@ -27,7 +27,7 @@
 #include <arch/ppc.H>
 #include <assert.h>
 
-//#define Dprintk(...) printk(args...)
+//#define Dprintk(...) printkd(args...)
 #define Dprintk(args...)
 #define Tprintk(args...)
 #define Eprintk(args...) printk(args)
@@ -267,7 +267,7 @@ PageTableManager::PageTableManager( bool i_userSpace )
     }
     else
     {
-        printk( "Page Table is at 0x%.16lX : 0x%.16lX\n", getAddress(), getAddress() + getSize() );
+        printkd( "Page Table is at 0x%.16lX : 0x%.16lX\n", getAddress(), getAddress() + getSize() );
     }
 
     //initialize the table to be invalid
@@ -678,31 +678,32 @@ void PageTableManager::printPTE( const char* i_label,
 {
     if( i_pte == NULL )
     {
-        if( i_label ) { printk( "%s :: ", i_label ); }
-        printk( "NULL PTE\n" );
+        if( i_label ) { printkd( "%s :: ", i_label ); }
+        printkd( "NULL PTE\n" );
         return;
     }
 
     uint64_t pte_num = (((uint64_t)i_pte) - getAddress()) / sizeof(PageTableEntry);
+    pte_num++; pte_num--;
 
-    if( i_label ) { printk( "%s :: ", i_label ); }
+    if( i_label ) { printkd( "%s :: ", i_label ); }
     if( i_verbose )
     {
-        printk( "[%4ld:%4ld]> @%p\n", pte_num/PTEG_SIZE, pte_num%PTEG_SIZE, i_pte );
-        printk( "Dword  : %.16lX %.16lX\n", ((uint64_t*)i_pte)[0], ((uint64_t*)i_pte)[1] );
-        printk( "-AVA   : 0x%.14lX\n", i_pte->AVA );
-        printk( "-SW    : %ld\n", i_pte->SW );
-        printk( "-LRU   : %ld\n", i_pte->LRU );
-        printk( "-V     : %ld\n", i_pte->V );
-        printk( "-RC    : %ld%ld\n", i_pte->R, i_pte->C );
-        printk( "-WIMG  : 0x%.1lX\n", i_pte->WIMG );
-        printk( "-pp0   : %ld\n", i_pte->pp0 );
-        printk( "-pp1_2 : %ld\n", i_pte->pp1_2 );
-        printk( "-PN    : %ld\n", i_pte->PN );
+        printkd( "[%4ld:%4ld]> @%p\n", pte_num/PTEG_SIZE, pte_num%PTEG_SIZE, i_pte );
+        printkd( "Dword  : %.16lX %.16lX\n", ((uint64_t*)i_pte)[0], ((uint64_t*)i_pte)[1] );
+        printkd( "-AVA   : 0x%.14lX\n", i_pte->AVA );
+        printkd( "-SW    : %ld\n", i_pte->SW );
+        printkd( "-LRU   : %ld\n", i_pte->LRU );
+        printkd( "-V     : %ld\n", i_pte->V );
+        printkd( "-RC    : %ld%ld\n", i_pte->R, i_pte->C );
+        printkd( "-WIMG  : 0x%.1lX\n", i_pte->WIMG );
+        printkd( "-pp0   : %ld\n", i_pte->pp0 );
+        printkd( "-pp1_2 : %ld\n", i_pte->pp1_2 );
+        printkd( "-PN    : %ld\n", i_pte->PN );
     }
     else
     {
-        printk( "[%4ld:%4ld]> @%p : %.16lX %.16lX : AVA=%16lX, PN=%ld\n", pte_num/PTEG_SIZE, pte_num%PTEG_SIZE, i_pte, i_pte->dword0, i_pte->dword1, i_pte->AVA, i_pte->PN );
+        printkd( "[%4ld:%4ld]> @%p : %.16lX %.16lX : AVA=%16lX, PN=%ld\n", pte_num/PTEG_SIZE, pte_num%PTEG_SIZE, i_pte, i_pte->dword0, i_pte->dword1, i_pte->AVA, i_pte->PN );
     }
 
 }
@@ -713,10 +714,10 @@ void PageTableManager::printPTE( const char* i_label,
  */
 void PageTableManager::_printPT( void )
 {
-    printk( "- -Page Table --\n" );
+    printkd( "- -Page Table --\n" );
     uint64_t pt_addr = getAddress();
     PageTableEntry* pte = (PageTableEntry*) pt_addr;
-    printk( "@%p..0x%.16lX\n", pte, pt_addr +  getSize() );
+    printkd( "@%p..0x%.16lX\n", pte, pt_addr +  getSize() );
 
     uint64_t num_ptes = getSize() / sizeof(PageTableEntry);
     for( uint64_t x = 0; x < num_ptes; x++ )
@@ -729,7 +730,7 @@ void PageTableManager::_printPT( void )
         pte++;
     }
 
-    printk( "-- End Page Table --\n" );
+    printkd( "-- End Page Table --\n" );
 }
 
 /**

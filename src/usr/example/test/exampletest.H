@@ -102,7 +102,9 @@ public:
     void testExampleForceTrace(void)
     {
         uint32_t i_32test   =   0xdeadbeef;
+        i_32test--; i_32test++;
         uint64_t i_64test   =   0xbadc0ffee0ddf00d;
+        i_64test--; i_64test++;
 
         TS_TRACE("Run TS_TRACE() as part of the example test\n" );
 
