@@ -51,10 +51,12 @@ def traceHB(compStr, symsFile, stringFile):
 
     print
 
+    gDescArraySym = "g_desc_array"
+
     #Find location of g_desc_array variable from the image's .syms file
     for line in open(symsFile):
 
-        if "g_desc_array" in line:                #if found
+        if gDescArraySym in line:                #if found
 
             #print line
             x = line.split(",")
@@ -146,17 +148,17 @@ def traceHB(compStr, symsFile, stringFile):
                         #print addr_str
                         addr_trace_buffer = int(addr_str,16)
 
-                        #save trace buffer to <sandbox>/simics/tracebin.out
+                        #save trace buffer to <sandbox>/simics/tracBIN
                         string = "memory_image_ln0.save tmp.out 0x%x 0x800"%(addr_trace_buffer)
                         #print string
                         result = run_command(string)
                         #print result
 
                         if (buffer_found == 0): 
-                            fd1 = open('tracebin.out','wb')
+                            fd1 = open('tracBIN','wb')
                             buffer_found = 1
                         else:
-                            fd1 = open('tracebin.out','ab')
+                            fd1 = open('tracBIN','ab')
                         fd2 = open('tmp.out', 'rb')
                         fd1.write(fd2.read())
                         fd1.close()
@@ -169,15 +171,24 @@ def traceHB(compStr, symsFile, stringFile):
                     entry_addr += DESC_ARRAY_ENTRY_SIZE
 
             if (buffer_found == 1):
-                #display formatted trace & save it to <sandbox>/simics/trace.out
-                string = 'fsp-trace -s %s tracebin.out | tee trace.out'%(stringFile)
+                #display formatted trace & save it to <sandbox>/simics/tracMERG
+                string = 'fsp-trace -s %s tracBIN | tee tracMERG'%(stringFile)
                 #print string
                 os.system(string)
-                #remove tmp.out & tracebin.out
-                os.system('rm tmp.out tracebin.out')
+                #remove tmp.out & tracBIN
+                os.system('rm tmp.out tracBIN')
+
+                print "\n\n\nData saved to %s/tracMERG."%(os.getcwd())
+            else:
+                print "\nNo component trace buffers found."
 
             print
             break
+
+    #print line
+    if gDescArraySym not in line:  #if not found
+        print "\nCannot find %s in %s"%(gDescArraySym,symsFile)
+
     return
 
 
@@ -188,10 +199,12 @@ def printkHB(symsFile):
 
     print
 
+    printkSym = "kernel_printk_buffer"
+
     #Find location of the kernel_printk_buffer variable from the image's .syms file
     #i.e. grep kernel_printk_buffer <gitrepo>/img/hbicore.syms
     for line in open(symsFile):
-        if "kernel_printk_buffer" in line:  #if found
+        if printkSym in line:  #if found
             #print line
             x = line.split(",")
             addr = int(x[1],16)             #address of kernel_printk_buffer
@@ -200,20 +213,27 @@ def printkHB(symsFile):
             #print "size = 0x%x"%(size)
 
             #save kernel printk buffer to <sandbox>/simics/printk.out
-            string = "memory_image_ln0.save printk.out 0x%x 0x%x"%(addr,size)
+            string = "memory_image_ln0.save %s 0x%x 0x%x"%(printkSym,addr,size)
             #print string
             result = run_command(string)
             #print result
 
             #display buffer
-            #for line in open("printk.out"):
+            #for line in open(printkSym):
             #    print line
-            #file = open("printk.out")
+            #file = open(printkSym)
             #print file.read()
-            os.system('cat printk.out')
+            string = "cat %s"%(printkSym)
+            os.system(string)
 
-            print
+            print "\n\nData saved to %s/%s."%(os.getcwd(),printkSym)
+
             break
+
+    #print line
+    if printkSym not in line:  #if not found
+        print "\nCannot find %s in %s"%(printkSym,symsFile)
+
     return
 
 
@@ -237,7 +257,7 @@ def dumpL3():
     result = run_command(string)
     #print result
 
-    print "HostBoot dump saved to hbdump.%s in simics directory."%(t)
+    print "HostBoot dump saved to %s/hbdump.%s."%(os.getcwd(),t)
 
     return
 
@@ -418,6 +438,36 @@ def istepHB( str_arg1, inList):
         return  
 
 
+#------------------------------------------------------------------------------
+# Function to dump error logs
+#------------------------------------------------------------------------------
+def errlHB(symsFile, flag, logid):
+
+    # "constants"
+    L3_SIZE = 0x800000
+    dumpFile = "hbdump.out"
+
+    print
+
+    #dump L3
+    string = "memory_image_ln0.save %s 0 0x%x"%(dumpFile,L3_SIZE)
+    #print string
+    result = run_command(string)
+    #print result
+
+    if logid == 0:
+        string = "./errlparser %s %s %s| tee Errorlogs"%(dumpFile,symsFile,flag)
+    else:
+        string = "./errlparser %s %s %s %d| tee Errorlogs"%(dumpFile,symsFile,flag,logid)
+    #print string
+    os.system(string)
+    os.system("rm hbdump.out")
+
+    print "\n\nData saved to %s/Errorlogs"%(os.getcwd())
+
+    return
+
+
 #===============================================================================
 #   HOSTBOOT Commands
 #===============================================================================
@@ -474,6 +524,7 @@ Defaults: \n
 Examples: \n
     hb-trace \n
     hb-trace all \n
+    hb-trace "ERRL,INITSERVICE" \n
     hb-trace ERRL ../hbicore.syms <git.repo>/img/hbotStringFile \n
     """)
 
@@ -582,6 +633,64 @@ Examples: \n
     hb-istep poweron..clock_frequency_set
     """)    
     
+#------------------------------------------------
+#------------------------------------------------
+default_flag = "-l"
+default_logid = 0
+def hb_errl(syms, flg_list, flg_detail, logid):
+    if syms == None:
+        if os.environ.has_key("HOSTBOOT_SYMS"):
+            syms = str(os.environ.get("HOSTBOOT_SYMS"))
+        else:
+            syms = default_syms
+
+    if flg_list and flg_detail:
+        print "Error:  enter either '-l' or '-d <logid>'"
+        return None
+
+    flag = default_flag
+    id = default_logid
+    if flg_list:
+        flag = "-l"
+    if flg_detail:
+        flag = "-d"
+        if logid == 0:
+            print "Error:  enter '-d <logid>'"
+            return None
+        else:
+            id = logid
+
+    print "syms=%s" % str(syms)
+    #print "logid=%d" % int(id)
+    errlHB(syms, flag, id)
+    return None
+
+new_command("hb-errl",
+    hb_errl,
+    [arg(str_t, "syms", "?", None),
+     arg(flag_t, "-l"),
+     arg(flag_t, "-d"),
+     arg(int_t, "logid", "?", 0)
+    ],
+    #alias = "hbt",
+    type = ["hostboot-commands"],
+    #see_also = ["hb_printk"],
+    see_also = [ ],
+    short = "Display the hostboot error logs",
+    doc = """
+Parameters: \n
+        in = SYMS file \n
+        in = option for dumping error logs\n
+
+Defaults: \n
+        'flag' = '-l' \n
+        'syms' = './hbicore.syms' \n
+
+Examples: \n
+    hb-errl -l \n
+    hb-errl -d 1\n
+    hb-errl ./hbicore_test.syms -l\n
+    """)
     
     
-    
+

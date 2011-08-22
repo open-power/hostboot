@@ -28,7 +28,7 @@
 
 #
 # Usage:
-# cpFiles.pl <path>
+# cpfiles.pl <path>
 
 
 #------------------------------------------------------------------------------
@@ -52,7 +52,6 @@ sub printUsage;
 #List of files to copy.  Path is relative to git repository.
 my @files = ("src/build/tools/exthbdump.pl",
 	         "src/build/simics/post_model_hook.simics",
-             "src/build/trace/traceHB.py",
              "src/usr/errl/parser/bin/errlparser", 
              "src/build/simics/hb-simdebug.py",
              "img/hbotStringFile",
@@ -254,7 +253,7 @@ chdir $cwd;
 #------------------------------------------------------------------------------
 sub printUsage()
 {
-    print ("\nUsage: cpFiles.pl [--help] | [<path>] [--test]\n\n");
+    print ("\nUsage: cpfiles.pl [--help] | [<path>] [--test]\n\n");
     print ("  This program needs to be executed from the git repository.\n");
     print ("  It will copy all relevant files, scripts, hbotStringFile,\n");
     print ("  .list, .syms and .bin files needed for debug to one of two\n");
