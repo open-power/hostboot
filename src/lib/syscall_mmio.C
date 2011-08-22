@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <kernel/task.H>
 #include <kernel/cpu.H>
+#include <kernel/cpuid.H>
 
 using namespace Systemcalls;
 
@@ -36,6 +37,45 @@ void mmio_hmer_write(uint64_t value)
     _syscall1(MMIO_HMER_WRITE, (void*)value);
 }
 
+/** @brief Determine the base register address of the mmio_scratch_base.
+ *
+ *  Since this code is called from within the kernel as part of static
+ *  construction of g_mmio_scratch_base, we can use internal kernel
+ *  functions here (and not system calls) to determine the CPU type.
+ *
+ *  @return Base address (SPRC value) of the scratch registers.
+ */
+static uint64_t mmio_scratch_base()
+{
+    ProcessorCoreType cpuType = CpuID::getCpuType();
+    switch (cpuType)
+    {
+        case CORE_POWER7:
+        case CORE_POWER7_PLUS:
+            return 0x20;
+
+        case CORE_POWER8_SALERNO:
+        case CORE_POWER8_VENICE:
+        case CORE_UNKNOWN:
+        default:
+            return 0x40;
+    }
+}
+    /** Global cache of the scratch register SPRC base address. */
+uint64_t g_mmio_scratch_base = mmio_scratch_base();
+
+uint64_t mmio_scratch_read(uint64_t which)
+{
+    return (uint64_t) _syscall1(MMIO_SCRATCH_READ,
+                                (void*)(which + g_mmio_scratch_base));
+}
+
+void mmio_scratch_write(uint64_t which, uint64_t value)
+{
+    _syscall2(MMIO_SCRATCH_WRITE,
+              (void*)(which + g_mmio_scratch_base), (void*)value);
+}
+
 mutex_t * mmio_xscom_mutex()
 {
     // Get task structure.
@@ -44,7 +84,7 @@ mutex_t * mmio_xscom_mutex()
 
     // Ensure task is pinned.
     crit_assert(task->affinity_pinned);
-    
+
     // Return mutex from cpu structure.
     return &task->cpu->xscom_mutex;
 }

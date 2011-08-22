@@ -47,13 +47,63 @@ int mmio_dev_unmap(void *ea);
  */
 uint64_t mmio_hmer_read();
 
-
 /** @fn mmio_hmer_write()
  *  @brief Writes the protected HMER register.
  *
  *  @param[in] value - The value to write into the HMER.
  */
 void mmio_hmer_write(uint64_t value);
+
+/** @enum MMIO_Scratch_Register
+ *  @brief Enumeration of the available scratch registers and their assigned
+ *         purpose.
+ *
+ *  These enumeration values should be used as the 'which' parameter of
+ *  mmio_scratch_read / mmio_scratch_write.
+ *
+ *  These values come from the Chip Pervasive Spec.
+ *
+ *  TODO: Verify that P7/P8 offsets are the same.
+ */
+enum MMIO_Scratch_Register
+{
+        /** Thread0 Scratch Register - Progress Code / Status. */
+    MMIO_SCRATCH_PROGRESS_CODE = 0x0,
+        /** Thread1 Scratch Register - IPL Step Command Register. */
+    MMIO_SCRATCH_IPLSTEP_COMMAND = 0x8,
+        /** Thread2 Scratch Register - IPL Step Status Register. */
+    MMIO_SCRATCH_IPLSTEP_STATUS = 0x10,
+        /** Thread3 Scratch Register - IPL Step Config Register. */
+    MMIO_SCRATCH_IPLSTEP_CONFIG = 0x18,  // TODO: This one is temporary until
+                                         // IPL by steps in configurable in
+                                         // PNOR.
+};
+
+/** @fn mmio_scratch_read()
+ *  @brief Reads and returns protected SCRATCH register.
+ *
+ *  @param[in] which - Which SCRATCH register to read (MMIO_Scratch_Register).
+ *  @return Requested SCRATCH register value
+ *
+ *  @note SCRATCH registers can only be modified from the master processor,
+ *        so this call may have the side effect of migrating your task to
+ *        another core or hardware thread.  Beware that any affinity settings
+ *        for the task are ignored by this call.
+ */
+uint64_t mmio_scratch_read(uint64_t which);
+
+/** @fn mmio_scratch_write()
+ *  @brief Writes the protected SCRATCH register.
+ *
+ *  @param[in] which - Which SCRATCH register to write (MMIO_Scratch_Register).
+ *  @param[in] value - The value to write into the SCRATCH.
+ *
+ *  @note SCRATCH registers can only be modified from the master processor,
+ *        so this call may have the side effect of migrating your task to
+ *        another core or hardware thread.  Beware that any affinity settings
+ *        for the task are ignored by this call.
+ */
+void mmio_scratch_write(uint64_t which, uint64_t value);
 
 
 /** @fn mmio_xscom_mutex()

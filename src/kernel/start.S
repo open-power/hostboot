@@ -360,6 +360,8 @@ kernel_dispatch_task:
     ;// Handle fast path system calls.
     ;//         0x800 = HMER read (HMER -> r3).
     ;//         0x801 = HMER write (r4 -> HMER).
+    ;//         0x802 = SCRATCH read (r4 -> SPRC, SPRD -> r3).
+    ;//         0x803 = SCRATCH write (r4 -> SPRC, r5 -> SPRD).
 system_call_fast_path:
         ;// Check if this is HMER read (0x800).
         ;// Compare was already done in system call path.
@@ -373,9 +375,25 @@ system_call_fast_path:
     mtspr HMER, r4
     li r3, 0
     b 1f                        ;// Jump to exit point.
-        ;// Invalid system call, loop for debug.
+        ;// Check if this is SCRATCH read (0x802).
 3:
-    b 3b
+    cmpi cr0, r3, 0x802
+    bne cr0, 4f
+    mtspr 276, r4
+    isync
+    mfspr r3, 277
+    b 1f                        ;// Jump to exit point.
+        ;// Check if this is SCRATCH write (0x803).
+4:
+    cmpi cr0, r3, 0x803
+    bne cr0, 5f
+    mtspr 276, r4
+    isync
+    mtspr 277, r5
+    b 1f                        ;// Jump to exit point.
+        ;// Invalid system call, loop for debug.
+5:
+    b 5b
 1:
     rfid                        ;// Return from interrupt.
 

@@ -18,6 +18,8 @@ namespace CpuID
         //     1 nibble reserved.
         //     1 nibble minor DD.
 
+        // TODO: Salerno PVR support.
+
         switch(l_pvr & 0xFFFF0000)
         {
             case 0x003F0000:

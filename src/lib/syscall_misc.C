@@ -1,10 +1,12 @@
 #include <sys/misc.h>
 #include <sys/syscall.h>
+#include <sys/mmio.h>
 
 using namespace Systemcalls;
 
 void shutdown(uint64_t i_status)
 {
+    mmio_scratch_write(MMIO_SCRATCH_IPLSTEP_CONFIG, 0x1234ABCD);
     _syscall1(MISC_SHUTDOWN, reinterpret_cast<void*>(i_status));
 }
 

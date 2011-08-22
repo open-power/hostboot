@@ -84,6 +84,10 @@ namespace Systemcalls
         MMIO_HMER_READ = 0x0800,
             /** mmio_hmer_write() */
         MMIO_HMER_WRITE = 0x0801,
+            /** mmio_scratch_read() */
+        MMIO_SCRATCH_READ = 0x0802,
+            /** mmio_scratch_write() */
+        MMIO_SCRATCH_WRITE = 0x0803,
 
         SYSCALL_FASTPATH_MAX
     };
