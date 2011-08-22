@@ -36,6 +36,7 @@
 #include <kernel/cpuid.H>
 #include <kernel/misc.H>
 #include <kernel/msghandler.H>
+#include <kernel/vmmmgr.H>
 
 extern "C"
 void kernel_execute_decrementer()
@@ -386,20 +387,28 @@ namespace Systemcalls
      */
     void FutexWait(task_t * t)
     {
-        uint64_t * uaddr = (uint64_t *) TASK_GETARG0(t);
+        uint64_t uaddr = (uint64_t) TASK_GETARG0(t);
         uint64_t val   = (uint64_t) TASK_GETARG1(t);
 
         // Set RC to success initially.
         TASK_SETRTN(t,0);
 
-        //TODO translate uaddr from user space to kernel space
-        //     Right now they are the same.
-
-        uint64_t rc = FutexManager::wait(t,uaddr,val);
-        if (rc != 0) // Can only set rc if we still have control of the task,
-                     // which is only (for certain) on error rc's.
+        //translate uaddr from user space to kernel space
+        uaddr = VmmManager::findPhysicalAddress(uaddr);
+        if(uaddr != (uint64_t)(-EFAULT))
         {
-            TASK_SETRTN(t,rc);
+            uint64_t rc = FutexManager::wait(t,(uint64_t *)uaddr,val);
+            if (rc != 0) // Can only set rc if we still have control of the task,
+                         // which is only (for certain) on error rc's.
+            {
+                TASK_SETRTN(t,rc);
+            }
+        }
+        else
+        {
+            printk("Task %d terminated. No physical address found for address 0x%p",
+                   t->tid, (void *) uaddr);
+            TaskEnd(t);
         }
     }
 
@@ -409,15 +418,23 @@ namespace Systemcalls
      */
     void FutexWake(task_t * t)
     {
-        uint64_t * uaddr = (uint64_t *) TASK_GETARG0(t);
+        uint64_t uaddr = (uint64_t) TASK_GETARG0(t);
         uint64_t count = (uint64_t) TASK_GETARG1(t);
 
-        // TODO translate uaddr from user space to kernel space
-        //      Right now they are the same
+        // translate uaddr from user space to kernel space
+        uaddr = VmmManager::findPhysicalAddress(uaddr);
+        if(uaddr != (uint64_t)(-EFAULT))
+        {
+            uint64_t started = FutexManager::wake((uint64_t *)uaddr,count);
 
-        uint64_t started = FutexManager::wake(uaddr,count);
-
-        TASK_SETRTN(t,started);
+            TASK_SETRTN(t,started);
+        }
+        else
+        {
+            printk("Task %d terminated. No physical address found for address 0x%p",
+                   t->tid, (void *) uaddr);
+            TaskEnd(t);
+        }
     }
 
     /**

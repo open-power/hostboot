@@ -27,6 +27,7 @@
 #define __KERNEL_SEGMENT_H
 
 #include <kernel/task.H>
+#include <errno.h>
 
 /** @class Segment
  *  @brief Virtual segment class to handle virtual memory management within
@@ -65,6 +66,14 @@ class Segment
          * @return Base address (as uint64_t).
          */
         uint64_t getBaseAddress() const { return iv_baseAddress; };
+
+        /**
+         * @brief Locate the physical address of the given virtual address
+         * @param[in] i_vaddr virtual address
+         * @return the physical address bound to the virtual address,
+         *          or -EFAULT if i_vaddr not found. @see errno.h
+         */
+         virtual uint64_t findPhysicalAddress(uint64_t i_vaddr) const { return -EFAULT; };
 
     protected:
             /** The base address of the segment. */

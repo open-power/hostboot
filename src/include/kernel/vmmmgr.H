@@ -101,6 +101,13 @@ class VmmManager
          */
         static int mmAllocBlock(MessageQueue* i_mq,void* i_va,uint64_t i_size);
 
+        /**
+         * @brief Find the phyiscal address bound to the given address
+         * @param[in] i_vaddr The address
+         * @return the physical address or -EFAULT @see errno.h
+         */
+        static uint64_t findPhysicalAddress(uint64_t i_vaddr);
+        
 
     protected:
         VmmManager();
@@ -120,6 +127,9 @@ class VmmManager
         void initSDR1();
 
         bool _pteMiss(task_t*, uint64_t);
+
+        /** See findPhysicalAddress */
+        uint64_t _findPhysicalAddress(uint64_t i_vaddr);
 
     public:
         friend class Block;

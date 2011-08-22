@@ -44,7 +44,7 @@ class BaseSegment : public Segment
          * @brief Constructor.
          * Initialize attributes and set base addresss of segment to 0 TB.
          */
-        BaseSegment() : Segment(0x0), iv_block(NULL) {};
+        BaseSegment() : Segment(0x0), iv_block(NULL), iv_physMemSize(0) {};
         /**
          * @brief Destructor
          * Delete any blocks owned by this segment.
@@ -75,6 +75,14 @@ class BaseSegment : public Segment
         static int mmAllocBlock(MessageQueue* i_mq,void* i_va,
                                 uint64_t i_size);
 
+        /**
+         * @brief Locate the physical address of the given virtual address
+         * @param[in] i_vaddr virtual address
+         * @return the physical address bound to the virtual address, or
+         *         -EFAULT if i_vaddr not found. @see errno.h
+         */
+         virtual uint64_t findPhysicalAddress(uint64_t i_vaddr) const;
+
     private:
         /**
          * @brief Internal implementation of init function.
@@ -84,6 +92,9 @@ class BaseSegment : public Segment
         /** Block-chain associated with this Segment. */
         Block* iv_block;
 
+        /** Physical memory byte size */
+        uint64_t iv_physMemSize;
+
         /**
          * @brief Allocates a block of virtual memory of the given size
          * @param i_mq[in] - Message queue to be associated with the block
@@ -92,6 +103,7 @@ class BaseSegment : public Segment
          * @return int - 0 for successful block allocation, non-zero otherwise
          */
         int _mmAllocBlock(MessageQueue* i_mq,void* i_va,uint64_t i_size);
+
 };
 
 #endif

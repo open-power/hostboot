@@ -21,6 +21,7 @@
 //
 //  IBM_PROLOG_END
 #include <limits.h>
+#include <errno.h>
 #include <util/singleton.H>
 
 #include <kernel/basesegment.H>
@@ -48,22 +49,24 @@ void BaseSegment::_init()
     SegmentManager::addSegment(this, SegmentManager::BASE_SEGMENT_ID);
 
     // Create initial static 3 or 8MB block.
-    uint64_t iv_baseBlockSize = 0;
     switch (CpuID::getCpuType())
     {
         case CORE_POWER7:
         case CORE_POWER7_PLUS:
         case CORE_POWER8_VENICE:
-            iv_baseBlockSize = VmmManager::EIGHT_MEG;
+            iv_physMemSize = VmmManager::EIGHT_MEG;
             break;
 
         case CORE_POWER8_SALERNO:
         default:
-            iv_baseBlockSize = VmmManager::FOUR_MEG;
+            iv_physMemSize = VmmManager::FOUR_MEG;
             break;
     }
-    iv_block = new Block(0x0, iv_baseBlockSize);
+    // Base block is L3 cache physical memory size
+    iv_block = new Block(0x0, iv_physMemSize);
     iv_block->setParent(this);
+
+    // TODO iv_physMemSize needs to be recalculated when DIMM memory is avail.
 
     // Set default page permissions on block.
     for (uint64_t i = 0; i < 0x800000; i += PAGESIZE)
@@ -126,3 +129,10 @@ int BaseSegment::_mmAllocBlock(MessageQueue* i_mq,void* i_va,uint64_t i_size)
     iv_block->appendBlock(l_block);
     return 0;
 }
+
+uint64_t BaseSegment::findPhysicalAddress(uint64_t i_vaddr) const
+{
+    if(i_vaddr < iv_physMemSize) return i_vaddr;
+    return (iv_block ? iv_block->findPhysicalAddress(i_vaddr) : -EFAULT);
+}
+

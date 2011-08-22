@@ -23,6 +23,7 @@
 #include <limits.h>
 #include <assert.h>
 #include <string.h>
+#include <errno.h>
 
 #include <sys/msg.h>
 
@@ -183,4 +184,25 @@ void Block::addPTE(void* i_vaddr)
                       (l_pte->isExecutable() ? VmmManager::RO_EXE_ACCESS :
                       (l_pte->isWritable() ? VmmManager::NORMAL_ACCESS :
                        VmmManager::READ_O_ACCESS)));
+}
+
+uint64_t Block::findPhysicalAddress(uint64_t i_vaddr) const
+{
+    uint64_t paddr = -EFAULT;
+
+    if(!isContained(i_vaddr))
+    {
+        return (iv_nextBlock ?
+                iv_nextBlock->findPhysicalAddress(i_vaddr) : paddr);
+    }
+
+    ShadowPTE* pte = getPTE(i_vaddr);
+
+    if (pte->isPresent() && pte->getPage() != 0)
+    {
+        paddr = pte->getPageAddr();
+        paddr += i_vaddr % PAGESIZE;
+    }
+
+    return paddr;
 }

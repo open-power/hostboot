@@ -65,6 +65,11 @@ bool VmmManager::pteMiss(task_t* t, uint64_t effAddr)
     return Singleton<VmmManager>::instance()._pteMiss(t, effAddr);
 }
 
+uint64_t VmmManager::findPhysicalAddress(uint64_t i_vaddr)
+{
+    return Singleton<VmmManager>::instance()._findPhysicalAddress(i_vaddr);
+}
+
 /**
  * STATIC
  * @brief DEPRECATED
@@ -137,4 +142,18 @@ Spinlock* VmmManager::getLock()
 {
     return &Singleton<VmmManager>::instance().lock;
 }
+
+uint64_t VmmManager::_findPhysicalAddress(uint64_t i_vaddr)
+{
+    uint64_t paddr = 0;
+
+    lock.lock();
+    
+    paddr = SegmentManager::findPhysicalAddress(i_vaddr);
+
+    lock.unlock();
+
+    return paddr;
+}
+    
 

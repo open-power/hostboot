@@ -21,6 +21,7 @@
 //
 //  IBM_PROLOG_END
 #include <assert.h>
+#include <errno.h>
 #include <arch/ppc.H>
 #include <util/singleton.H>
 
@@ -43,13 +44,14 @@ void SegmentManager::initSLB()
     Singleton<SegmentManager>::instance()._initSLB();
 }
 
+uint64_t SegmentManager::findPhysicalAddress(uint64_t i_vaddr)
+{
+    return Singleton<SegmentManager>::instance()._findPhysicalAddress(i_vaddr);
+}
+
 bool SegmentManager::_handlePageFault(task_t* i_task, uint64_t i_addr)
 {
-    // This constant should come from page manager.  Segment size.
-    const size_t SLBE_s = 40;
-
-    // Get segment ID from effective address.
-    size_t segId = i_addr >> SLBE_s;
+    size_t segId = getSegmentIdFromAddress(i_addr);
 
     // Call contained segment object to handle page fault.
     if ((segId < MAX_SEGMENTS) && (NULL != iv_segments[segId]))
@@ -96,3 +98,17 @@ void SegmentManager::_initSLB()
 
     isync(); // Ensure slbmtes complete prior to continuing on.
 }
+
+uint64_t SegmentManager::_findPhysicalAddress(uint64_t i_vaddr) const
+{
+    uint64_t paddr = -EFAULT;
+    size_t segId = getSegmentIdFromAddress(i_vaddr);
+
+    if ((segId < MAX_SEGMENTS) && (NULL != iv_segments[segId]))
+    {
+        paddr = iv_segments[segId]->findPhysicalAddress(i_vaddr);
+    }
+
+    return paddr;
+}
+

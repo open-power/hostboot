@@ -28,6 +28,7 @@
 #define __KERNEL_SEGMENTMGR_H
 
 #include <kernel/task.H>
+#include <builtins.h>
 
 // Forward declaration.
 class Segment;
@@ -99,6 +100,14 @@ class SegmentManager
          */
         static void initSLB();
 
+        /**
+         * @brief Find the phyiscal address bound to the given address
+         * @param[in] i_vaddr The address
+         * @return the physical address or -EFAULT @see errno.h
+         */
+        static uint64_t findPhysicalAddress(uint64_t i_vaddr);
+
+
     private:
         /** See handlePageFault. */
         bool _handlePageFault(task_t* i_task, uint64_t i_addr);
@@ -106,6 +115,15 @@ class SegmentManager
         void _addSegment(Segment* i_segment, size_t i_segId);
         /** See initSLB. */
         void _initSLB();
+
+        /** See findPhysicalAddress */
+        uint64_t _findPhysicalAddress(uint64_t i_vaddr) const;
+
+        ALWAYS_INLINE inline
+        size_t getSegmentIdFromAddress(uint64_t i_addr) const
+        {
+            return i_addr >> 40;  // SLBE_s = 40 Should come from page manager?
+        }
 
         /** Array of segment objects to associated segment IDs. */
         Segment* iv_segments[MAX_SEGMENTS];

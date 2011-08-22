@@ -130,6 +130,16 @@ class Block
          */
         void addPTE(void* i_vaddr);
 
+        /**
+         * @brief Locate the physical address of the given virtual address
+         *
+         * @param[in] i_vaddr virtual address
+         *
+         * @return the physical address bound to the virtual address, 
+         *         -EFAULT if not found @see errno.h
+         */
+        uint64_t findPhysicalAddress(uint64_t i_vaddr) const;
+
         friend class Segment;
         friend class BaseSegment;
         friend class StackSegment;
