@@ -348,6 +348,17 @@ char* ReadStorageBuffer(char* i_Image, uint32_t i_ulAddr, uint32_t &io_cbBuffer)
         exit(2);
     }
 
+
+    if( io_cbBuffer == 0  )
+    {
+        // The committing of the very first error log would have put
+        // data into the storage buffer header.  However, the data
+        // is zero, meaning no error log was ever committed.
+        fprintf( stdout, "No error logs to report.\n" );
+        exit(0);
+    }
+
+
     // re-seek and re-read entire buffer this time.
     rc = lseek( fd, i_ulAddr, SEEK_SET );
     assert( -1 != rc );
