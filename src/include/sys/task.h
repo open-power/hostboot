@@ -30,7 +30,7 @@
 #include <kernel/types.h>
 
 #ifdef __cplusplus
-extern "C" 
+extern "C"
 {
 #endif
 
@@ -102,8 +102,8 @@ tid_t task_exec(const char* path, void* arg);
 /** @fn task_affinity_pin
  *  @brief Pins a task onto the CPU it is currently executing on.
  *
- *  This function may be called any number of times and each should be paired 
- *  with a task_affinity_unpin call.  This is so that callers do not need to 
+ *  This function may be called any number of times and each should be paired
+ *  with a task_affinity_unpin call.  This is so that callers do not need to
  *  be concerned with affinity pinning desires of functions above and below in
  *  a call stack.
  *
@@ -120,6 +120,15 @@ void task_affinity_pin();
  *  See Linux sched_setaffinity.
  */
 void task_affinity_unpin();
+
+/** @fn task_affinity_migrate_to_master
+ *  @brief Moves a task from the CPU it is on to the master core/thread.
+ *
+ *  Unless the affinity is pinned, the task could be migrated to another
+ *  core at any point in time.  Suggestion is to use task_affinity_pin
+ *  prior to this call.
+ */
+void task_affinity_migrate_to_master();
 
 #ifdef __cplusplus
 }

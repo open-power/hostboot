@@ -36,62 +36,66 @@ namespace Systemcalls
      *  These are passed by userspace code via r3 when the sc instruction is
      *  executed.  The kernel performs a case statement to switch to the
      *  appropriate system call handler.
+     *
+     *  @note TASK_MIGRATE_TO_MASTER value must be kept in sync with start.S.
      */
     enum SysCalls
     {
             /** task_yield() */
-	TASK_YIELD = 0,
+        TASK_YIELD = 0,
             /** task_create() */
-	TASK_START,
+        TASK_START = 1,
             /** task_end() */
-	TASK_END,
+        TASK_END = 2,
+            /** task_affinity_migrate_to_master() */
+        TASK_MIGRATE_TO_MASTER = 3,
 
             /** msgq_create() */
-	MSGQ_CREATE,
+        MSGQ_CREATE,
             /** msgq_destroy() */
-	MSGQ_DESTROY,
+        MSGQ_DESTROY,
             /** VFS internal */
-	MSGQ_REGISTER_ROOT,
+        MSGQ_REGISTER_ROOT,
             /** VFS internal */
-	MSGQ_RESOLVE_ROOT,
+        MSGQ_RESOLVE_ROOT,
 
             /** msg_send() */
-	MSG_SEND,
+        MSG_SEND,
             /** msg_sendrecv() */
-	MSG_SENDRECV,
+        MSG_SENDRECV,
             /** msg_respond() */
-	MSG_RESPOND,
+        MSG_RESPOND,
             /** msg_wait() */
-	MSG_WAIT,
+        MSG_WAIT,
 
             /** mmio_map() */
-	MMIO_MAP,
+        MMIO_MAP,
             /** mmio_unmap() */
-	MMIO_UNMAP,
+        MMIO_UNMAP,
             /** dev_map() */
-    DEV_MAP,
+        DEV_MAP,
             /** dev_unmap() */
-    DEV_UNMAP,
+        DEV_UNMAP,
 
             /** nanosleep() */
-	TIME_NANOSLEEP,
+        TIME_NANOSLEEP,
 
             /** futex_wait() */
-    FUTEX_WAIT,
+        FUTEX_WAIT,
             /** futex_wake() */
-    FUTEX_WAKE,
+        FUTEX_WAKE,
 
             /** shutdown() */
-    MISC_SHUTDOWN,
+        MISC_SHUTDOWN,
             /** cpu_core_type() */
-    MISC_CPUCORETYPE,
+        MISC_CPUCORETYPE,
             /** cpu_dd_level() */
-    MISC_CPUDDLEVEL,
+        MISC_CPUDDLEVEL,
 
             /** mm_alloc_block() */
-    MM_ALLOC_BLOCK,
+        MM_ALLOC_BLOCK,
 
-	SYSCALL_MAX
+        SYSCALL_MAX
     };
 
     /** @enum SysCalls_FastPath

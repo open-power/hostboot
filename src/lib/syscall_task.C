@@ -70,9 +70,9 @@ tid_t task_exec(const char* file, void* ptr)
 {
     // The VFS process is responsible for finding the module and creating the
     // new process.  So, we send a message over to that process.
-    
-    tid_t child = -1; 
-    
+
+    tid_t child = -1;
+
     // Create message, send.
     msg_q_t vfsQ = (msg_q_t)_syscall0(MSGQ_RESOLVE_ROOT);
     msg_t* msg = msg_allocate();
@@ -83,14 +83,14 @@ tid_t task_exec(const char* file, void* ptr)
 
     if (0 == rc)
     {
-	// Get child ID from message data 0.
-	child = (tid_t) msg->data[0];
+        // Get child ID from message data 0.
+        child = (tid_t) msg->data[0];
     }
     else
     {
-	child = rc;
+        child = rc;
     }
-    
+
     msg_free(msg);
     return child;
 }
@@ -113,4 +113,9 @@ void task_affinity_unpin()
 
     // Decrement pin count.
     __sync_sub_and_fetch(&task->affinity_pinned, 1);
+}
+
+void task_affinity_migrate_to_master()
+{
+    _syscall0(TASK_MIGRATE_TO_MASTER);
 }

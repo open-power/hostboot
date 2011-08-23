@@ -49,6 +49,15 @@ cpu_t* CpuManager::getCurrentCPU()
     return cv_cpus[getPIR()];
 }
 
+cpu_t* CpuManager::getMasterCPU()
+{
+    for (int i = 0; i < MAXCPUS; i++)
+        if (cv_cpus[i] != NULL)
+            if (cv_cpus[i]->master)
+                return cv_cpus[i];
+    return NULL;
+}
+
 void CpuManager::init()
 {
     // For the initial boot we only want to set up CPU objects for the threads
@@ -115,14 +124,14 @@ void CpuManager::startCPU(ssize_t i)
 
 	// Initialize CPU.
 	cpu->cpu = i;
-    if (currentCPU)
-    {
-        cpu->master = true;
-    }
-    else
-    {
-        cpu->master = false;
-    }
+        if (currentCPU)
+        {
+            cpu->master = true;
+        }
+        else
+        {
+            cpu->master = false;
+        }
 	cpu->scheduler = &Singleton<Scheduler>::instance();
         cpu->scheduler_extra = NULL;
 	cpu->kernel_stack =

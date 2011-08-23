@@ -35,12 +35,13 @@ class Scheduler
 	friend class CpuManager;
 
 	void addTask(task_t*);
+        void addTaskMasterCPU(task_t*);
 
 	void returnRunnable();
 	void setNextRunnable();
 
     protected:
-	Scheduler() : 
+	Scheduler() :
 		iv_taskList() {};
 	~Scheduler() {};
 

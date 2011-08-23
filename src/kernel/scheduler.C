@@ -27,6 +27,7 @@
 #include <kernel/cpumgr.H>
 #include <kernel/console.H>
 #include <kernel/timemgr.H>
+#include <util/lockfree/atomic_construct.H>
 
 void Scheduler::addTask(task_t* t)
 {
@@ -35,11 +36,10 @@ void Scheduler::addTask(task_t* t)
         // If task is pinned to this CPU, add to the per-CPU queue.
         if (0 != t->affinity_pinned)
         {
-            // Allocate a per-CPU queue if this is the first pinning CPU.
-            if (NULL == t->cpu->scheduler_extra)
-            {
-                t->cpu->scheduler_extra = new Runqueue_t();
-            }
+            // Allocate a per-CPU queue if this is the first pinning to CPU.
+            Util::Lockfree::atomic_construct(
+                    reinterpret_cast<Runqueue_t**>(&t->cpu->scheduler_extra));
+
             // Insert into queue.
             static_cast<Runqueue_t*>(t->cpu->scheduler_extra)->insert(t);
         }
@@ -48,6 +48,22 @@ void Scheduler::addTask(task_t* t)
         {
 	    iv_taskList.insert(t);
         }
+    }
+}
+
+void Scheduler::addTaskMasterCPU(task_t* t)
+{
+    if (t->cpu->idle_task != t)
+    {
+        cpu_t* master = CpuManager::getMasterCPU();
+
+        // Allocate a per-CPU queue if this is the first pinning to CPU.
+        Util::Lockfree::atomic_construct(
+                reinterpret_cast<Runqueue_t**>(&master->scheduler_extra));
+
+        // Insert into queue.
+        static_cast<Runqueue_t*>(master->scheduler_extra)->insert(t);
+
     }
 }
 
@@ -60,13 +76,13 @@ void Scheduler::setNextRunnable()
 {
     task_t* t = NULL;
     cpu_t* cpu = CpuManager::getCurrentCPU();
-    
+
     // Check for ready task in local run-queue, if it exists.
     if (NULL != cpu->scheduler_extra)
     {
         t = static_cast<Runqueue_t*>(cpu->scheduler_extra)->remove();
     }
-    
+
     // Check for ready task in global run-queue.
     if (NULL == t)
     {
@@ -84,6 +100,6 @@ void Scheduler::setNextRunnable()
     {
         setDEC(TimeManager::getTimeSliceCount());
     }
-   
+
     TaskManager::setCurrentTask(t);
 }

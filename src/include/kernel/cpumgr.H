@@ -30,13 +30,17 @@ class CpuManager
 {
     public:
 	enum { MAXCPUS = KERNEL_MAX_SUPPORTED_CPUS };
-	
-	/** @fn getCurrentCPU 
+
+	/** @fn getCurrentCPU
 	 *  Returns a pointer to the current CPU structure by using the
 	 *  task structure in SPRG3.
 	 */
 	static cpu_t* getCurrentCPU();
 	static cpu_t* getCpu(size_t i) { return cv_cpus[i]; }
+
+        /** @brief Return pointer to master CPU object.
+         */
+        static cpu_t* getMasterCPU();
 
 	static void init();
 	static void init_slave_smp(cpu_t*);

@@ -60,7 +60,7 @@ namespace Systemcalls
     void TaskYield(task_t*);
     void TaskStart(task_t*);
     void TaskEnd(task_t*);
-    void TaskGettid(task_t*);
+    void TaskMigrateToMaster(task_t*);
     void MsgQCreate(task_t*);
     void MsgQDestroy(task_t*);
     void MsgQRegisterRoot(task_t*);
@@ -82,38 +82,39 @@ namespace Systemcalls
     void MmAllocBlock(task_t *t);
 
     syscall syscalls[] =
-	{
-	    &TaskYield,  // TASK_YIELD
-	    &TaskStart,  // TASK_START
-	    &TaskEnd,  // TASK_END
+        {
+            &TaskYield,  // TASK_YIELD
+            &TaskStart,  // TASK_START
+            &TaskEnd,  // TASK_END
+            &TaskMigrateToMaster, // TASK_MIGRATE_TO_MASTER
 
-	    &MsgQCreate,  // MSGQ_CREATE
-	    &MsgQDestroy,  // MSGQ_DESTROY
-	    &MsgQRegisterRoot,  // MSGQ_REGISTER_ROOT
-	    &MsgQResolveRoot,  // MSGQ_RESOLVE_ROOT
+            &MsgQCreate,  // MSGQ_CREATE
+            &MsgQDestroy,  // MSGQ_DESTROY
+            &MsgQRegisterRoot,  // MSGQ_REGISTER_ROOT
+            &MsgQResolveRoot,  // MSGQ_RESOLVE_ROOT
 
-	    &MsgSend,  // MSG_SEND
-	    &MsgSendRecv,  // MSG_SENDRECV
-	    &MsgRespond,  // MSG_RESPOND
-	    &MsgWait,  // MSG_WAIT
+            &MsgSend,  // MSG_SEND
+            &MsgSendRecv,  // MSG_SENDRECV
+            &MsgRespond,  // MSG_RESPOND
+            &MsgWait,  // MSG_WAIT
 
-	    &MmioMap,  // MMIO_MAP
-	    &MmioUnmap,  // MMIO_UNMAP
+            &MmioMap,  // MMIO_MAP
+            &MmioUnmap,  // MMIO_UNMAP
             &DevMap,  // DEV_MAP
             &DevUnmap,  // DEV_UNMAP
 
-	    &TimeNanosleep,  // TIME_NANOSLEEP
+            &TimeNanosleep,  // TIME_NANOSLEEP
 
-        &FutexWait,  // FUTEX_WAIT
-        &FutexWake,  // FUTEX_WAKE
+            &FutexWait,  // FUTEX_WAIT
+            &FutexWake,  // FUTEX_WAKE
 
-        &Shutdown,  // MISC_SHUTDOWN
+            &Shutdown,  // MISC_SHUTDOWN
 
-        &CpuCoreType,  // MISC_CPUCORETYPE
-        &CpuDDLevel,  // MISC_CPUDDLEVEL
+            &CpuCoreType,  // MISC_CPUCORETYPE
+            &CpuDDLevel,  // MISC_CPUDDLEVEL
 
-        &MmAllocBlock, // MM_ALLOC_BLOCK
-	};
+            &MmAllocBlock, // MM_ALLOC_BLOCK
+        };
 };
 
 extern "C"
@@ -125,13 +126,13 @@ void kernel_execute_system_call()
     uint64_t syscall = t->context.gprs[3];
     if (syscall > SYSCALL_MAX)
     {
-	// TODO : kill task.
-	printk("Invalid syscall : %ld\n", syscall);
-	while(1);
+        // TODO : kill task.
+        printk("Invalid syscall : %ld\n", syscall);
+        while(1);
     }
     else
     {
-	syscalls[syscall](t);
+        syscalls[syscall](t);
     }
 }
 
@@ -139,65 +140,81 @@ namespace Systemcalls
 {
     void TaskYield(task_t* t)
     {
-	Scheduler* s = t->cpu->scheduler;
-	s->returnRunnable();
-	s->setNextRunnable();
+        Scheduler* s = t->cpu->scheduler;
+        s->returnRunnable();
+        s->setNextRunnable();
     }
 
     void TaskStart(task_t* t)
     {
-	task_t* newTask =
-	    TaskManager::createTask((TaskManager::task_fn_t)TASK_GETARG0(t),
-				    (void*)TASK_GETARG1(t));
-	newTask->cpu = t->cpu;
-	t->cpu->scheduler->addTask(newTask);
+        task_t* newTask =
+            TaskManager::createTask((TaskManager::task_fn_t)TASK_GETARG0(t),
+                                    (void*)TASK_GETARG1(t));
+        newTask->cpu = t->cpu;
+        t->cpu->scheduler->addTask(newTask);
 
-	TASK_SETRTN(t, newTask->tid);
+        TASK_SETRTN(t, newTask->tid);
     }
 
     void TaskEnd(task_t* t)
     {
-	// Make sure task pointers are updated before we delete this task.
-	t->cpu->scheduler->setNextRunnable();
+        // Make sure task pointers are updated before we delete this task.
+        t->cpu->scheduler->setNextRunnable();
 
-	// TODO: Deal with join.
+        // TODO: Deal with join.
 
-	// Clean up task memory.
-	PageManager::freePage(t->context.stack_ptr, TASK_DEFAULT_STACK_SIZE);
-	delete t;
+        // Clean up task memory.
+        PageManager::freePage(t->context.stack_ptr, TASK_DEFAULT_STACK_SIZE);
+        delete t;
+    }
+
+    void TaskMigrateToMaster(task_t* t)
+    {
+        // Move r6 to r3.
+        //     This is needed so that this system call can be called from
+        //     within a "fast" system call in start.S.  The fast system call
+        //     will populate r6 with it's own syscall number.  When we return
+        //     from this system call, on the master processor, we'll be back
+        //     at the 'sc' instruction with r3 back to the fast syscall, and
+        //     the fast syscall will be executed on the master processor.
+        TASK_SETRTN(t, TASK_GETARG2(t));
+
+        // Move task to master CPU and pick a new task.
+        t->cpu->scheduler->addTaskMasterCPU(t);
+        t->cpu->scheduler->setNextRunnable();
     }
 
     void MsgQCreate(task_t* t)
     {
-	TASK_SETRTN(t, (uint64_t) new MessageQueue());
+        TASK_SETRTN(t, (uint64_t) new MessageQueue());
     }
 
     void MsgQDestroy(task_t* t)
     {
-	MessageQueue* mq = (MessageQueue*) TASK_GETARG0(t);
-	if (NULL != mq)
-	    delete mq;
-	TASK_SETRTN(t, 0);
+        MessageQueue* mq = (MessageQueue*) TASK_GETARG0(t);
+        if (NULL != mq)
+            delete mq;
+        TASK_SETRTN(t, 0);
     }
 
     static MessageQueue* msgQRoot = NULL;
 
     void MsgQRegisterRoot(task_t* t)
     {
-	msgQRoot = (MessageQueue*) TASK_GETARG0(t);
-	TASK_SETRTN(t, 0);
+        msgQRoot = (MessageQueue*) TASK_GETARG0(t);
+        TASK_SETRTN(t, 0);
     }
 
     void MsgQResolveRoot(task_t* t)
     {
-	TASK_SETRTN(t, (uint64_t) msgQRoot);
+        TASK_SETRTN(t, (uint64_t) msgQRoot);
     }
 
     void MsgSend(task_t* t)
     {
-	MessageQueue* mq = (MessageQueue*) TASK_GETARG0(t);
-	msg_t* m = (msg_t*) TASK_GETARG1(t);
-	m->__reserved__async = 0; // set to async msg.
+        MessageQueue* mq = (MessageQueue*) TASK_GETARG0(t);
+        msg_t* m = (msg_t*) TASK_GETARG1(t);
+        m->__reserved__async = 0; // set to async msg.
 
         if (m->type >= MSG_FIRST_SYS_TYPE)
         {
@@ -206,32 +223,32 @@ namespace Systemcalls
             return;
         }
 
-	mq->lock.lock();
+        mq->lock.lock();
 
-	// Get waiting (server) task.
-	task_t* waiter = mq->waiting.remove();
-	if (NULL == waiter) // None found, add to 'messages' queue.
-	{
-	    MessagePending* mp = new MessagePending();
-	    mp->key = m;
-	    mp->task = t;
-	    mq->messages.insert(mp);
-	}
-	else // Add waiter back to its scheduler.
-	{
-	    TASK_SETRTN(waiter, (uint64_t) m);
-	    waiter->cpu->scheduler->addTask(waiter);
-	}
+        // Get waiting (server) task.
+        task_t* waiter = mq->waiting.remove();
+        if (NULL == waiter) // None found, add to 'messages' queue.
+        {
+            MessagePending* mp = new MessagePending();
+            mp->key = m;
+            mp->task = t;
+            mq->messages.insert(mp);
+        }
+        else // Add waiter back to its scheduler.
+        {
+            TASK_SETRTN(waiter, (uint64_t) m);
+            waiter->cpu->scheduler->addTask(waiter);
+        }
 
-	mq->lock.unlock();
-	TASK_SETRTN(t, 0);
+        mq->lock.unlock();
+        TASK_SETRTN(t, 0);
     }
 
     void MsgSendRecv(task_t* t)
     {
-	MessageQueue* mq = (MessageQueue*) TASK_GETARG0(t);
-	msg_t* m = (msg_t*) TASK_GETARG1(t);
-	m->__reserved__async = 1; // set to sync msg.
+        MessageQueue* mq = (MessageQueue*) TASK_GETARG0(t);
+        msg_t* m = (msg_t*) TASK_GETARG1(t);
+        m->__reserved__async = 1; // set to sync msg.
 
         if (m->type >= MSG_FIRST_SYS_TYPE)
         {
@@ -241,45 +258,45 @@ namespace Systemcalls
         }
 
         // Create pending response object.
-	MessagePending* mp = new MessagePending();
-	mp->key = m;
-	mp->task = t;
+        MessagePending* mp = new MessagePending();
+        mp->key = m;
+        mp->task = t;
 
-	mq->lock.lock();
+        mq->lock.lock();
 
-	// Get waiting (server) task.
-	task_t* waiter = mq->waiting.remove();
-	if (NULL == waiter) // None found, add to 'messages' queue.
-	{
-	    mq->messages.insert(mp);
-	    // Choose next thread to execute, this one is delayed.
-	    t->cpu->scheduler->setNextRunnable();
-	}
-	else // Context switch to waiter.
-	{
-	    TASK_SETRTN(waiter, (uint64_t) m);
-	    mq->responses.insert(mp);
-	    waiter->cpu = t->cpu;
-	    TaskManager::setCurrentTask(waiter);
-	}
+        // Get waiting (server) task.
+        task_t* waiter = mq->waiting.remove();
+        if (NULL == waiter) // None found, add to 'messages' queue.
+        {
+            mq->messages.insert(mp);
+            // Choose next thread to execute, this one is delayed.
+            t->cpu->scheduler->setNextRunnable();
+        }
+        else // Context switch to waiter.
+        {
+            TASK_SETRTN(waiter, (uint64_t) m);
+            mq->responses.insert(mp);
+            waiter->cpu = t->cpu;
+            TaskManager::setCurrentTask(waiter);
+        }
 
-	mq->lock.unlock();
+        mq->lock.unlock();
     }
 
     void MsgRespond(task_t* t)
     {
-    	MessageQueue* mq = (MessageQueue*) TASK_GETARG0(t);
-	msg_t* m = (msg_t*) TASK_GETARG1(t);
+        MessageQueue* mq = (MessageQueue*) TASK_GETARG0(t);
+        msg_t* m = (msg_t*) TASK_GETARG1(t);
 
-	mq->lock.lock();
-	MessagePending* mp = mq->responses.find(m);
-	if (NULL != mp)
-	{
-	    task_t* waiter = mp->task;
+        mq->lock.lock();
+        MessagePending* mp = mq->responses.find(m);
+        if (NULL != mp)
+        {
+            task_t* waiter = mp->task;
 
-	    mq->responses.erase(mp);
+            mq->responses.erase(mp);
             mq->lock.unlock();
-	    delete mp;
+            delete mp;
 
             if (m->type >= MSG_FIRST_SYS_TYPE)
             {
@@ -300,52 +317,52 @@ namespace Systemcalls
                 TASK_SETRTN(t,0);
                 t->cpu->scheduler->addTask(t);
             }
-	}
-	else
-	{
-	    TASK_SETRTN(t, -1);
+        }
+        else
+        {
+            TASK_SETRTN(t, -1);
             mq->lock.unlock();
-	}
+        }
     }
 
     void MsgWait(task_t* t)
     {
-    	MessageQueue* mq = (MessageQueue*) TASK_GETARG0(t);
+        MessageQueue* mq = (MessageQueue*) TASK_GETARG0(t);
 
-	mq->lock.lock();
-	MessagePending* mp = mq->messages.remove();
+        mq->lock.lock();
+        MessagePending* mp = mq->messages.remove();
 
-	if (NULL == mp)
-	{
-	    mq->waiting.insert(t);
-	    t->cpu->scheduler->setNextRunnable();
-	}
-	else
-	{
-	    msg_t* m = mp->key;
-	    if (m->__reserved__async)
-		mq->responses.insert(mp);
-	    else
-		delete mp;
-	    TASK_SETRTN(t, (uint64_t) m);
-	}
-	mq->lock.unlock();
+        if (NULL == mp)
+        {
+            mq->waiting.insert(t);
+            t->cpu->scheduler->setNextRunnable();
+        }
+        else
+        {
+            msg_t* m = mp->key;
+            if (m->__reserved__async)
+                mq->responses.insert(mp);
+            else
+                delete mp;
+            TASK_SETRTN(t, (uint64_t) m);
+        }
+        mq->lock.unlock();
     }
 
     void MmioMap(task_t* t)
     {
-	void* ra = (void*)TASK_GETARG0(t);
-	size_t pages = TASK_GETARG1(t);
+        void* ra = (void*)TASK_GETARG0(t);
+        size_t pages = TASK_GETARG1(t);
 
-	TASK_SETRTN(t, (uint64_t) VmmManager::mmioMap(ra,pages));
+        TASK_SETRTN(t, (uint64_t) VmmManager::mmioMap(ra,pages));
     }
 
     void MmioUnmap(task_t* t)
     {
-	void* ea = (void*)TASK_GETARG0(t);
-	size_t pages = TASK_GETARG1(t);
+        void* ea = (void*)TASK_GETARG0(t);
+        size_t pages = TASK_GETARG1(t);
 
-	TASK_SETRTN(t, VmmManager::mmioUnmap(ea,pages));
+        TASK_SETRTN(t, VmmManager::mmioUnmap(ea,pages));
     }
 
     /**
@@ -374,11 +391,11 @@ namespace Systemcalls
 
     void TimeNanosleep(task_t* t)
     {
-	TimeManager::delayTask(t, TASK_GETARG0(t), TASK_GETARG1(t));
-	TASK_SETRTN(t, 0);
+        TimeManager::delayTask(t, TASK_GETARG0(t), TASK_GETARG1(t));
+        TASK_SETRTN(t, 0);
 
-	Scheduler* s = t->cpu->scheduler;
-	s->setNextRunnable();
+        Scheduler* s = t->cpu->scheduler;
+        s->setNextRunnable();
     }
 
     /**

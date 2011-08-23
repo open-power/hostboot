@@ -22,7 +22,7 @@
 //  IBM_PROLOG_END
 /** @file cpu.H
  *  @brief Defines kernel information and functions about CPUs.
- *  
+ *
  *  In this kernel the term CPU refers to a hardware thread (SMT), not core.
  */
 #ifndef __KERNEL_CPU_H
@@ -40,6 +40,12 @@ class Scheduler;
 
 /** @struct cpu_t
  *  @brief Stores per-CPU kernel information.
+ *
+ *  @note kernel_stack and master need to be at fixed locations in this
+ *        structure due to usages in start.S.
+ *
+ *  - kernel_stack is a double-word at cpu_t[0 bytes].
+ *  - master is a byte at cpu_t[12 bytes].
  */
 struct cpu_t
 {
@@ -49,8 +55,14 @@ struct cpu_t
     /** ID of the CPU (PIR value) */
     cpuid_t cpu;
 
-    /** If the CPU is the master */
-    bool master;
+    struct
+    {
+        /** If the CPU is the master */
+        bool master;
+
+        /** Ensure alignment of master attribute for asm code. */
+        uint64_t __reserved_master:24;
+    } PACKED;
 
     /** Pointer to the scheduler for this CPU (may not be unique) */
     Scheduler* scheduler;

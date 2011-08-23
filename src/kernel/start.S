@@ -401,14 +401,40 @@ system_call_fast_path:
 3:
     cmpi cr0, r3, 0x802
     bne cr0, 4f
+        ;// Check for being on master processor.
+    mfsprg3 r6          ;// Get task structure.
+    ld r6, 0(r6)        ;// Get CPU structure.
+    lbz r6, 12(r6)      ;// Read master boolean.
+    cmpi cr0, r6, 0x0
+    beq cr0, 300f       ;// Call TASK_MIGRATE_TO_MASTER if not on master.
+        ;// Read scratch.
     mtspr 276, r4
     isync
     mfspr r3, 277
     b 1f                        ;// Jump to exit point.
+        ;// Migrate task via TASK_MIGRATE_TO_MASTER
+300:
+        ;// Roll back NIA one instruction.
+    mfsrr0 r6
+    addi r6, r6, -4
+    mtsrr0 r6
+        ;// Move our syscall number to r6 (for TASK_MIGRATE_TO_MASTER handler).
+    mr r6, r3
+        ;// Set up TASK_MIGRATE_TO_MASTER syscall number.
+    li r3, 3
+        ;// Call back to syscall handler.
+    b intvect_system_call
         ;// Check if this is SCRATCH write (0x803).
 4:
     cmpi cr0, r3, 0x803
     bne cr0, 5f
+        ;// Check for master processor.
+    mfsprg3 r6          ;// Get task structure.
+    ld r6, 0(r6)        ;// Get CPU structure.
+    lbz r6, 12(r6)      ;// Read master boolean.
+    cmpi cr0, r6, 0x0
+    beq cr0, 300b       ;// Call TASK_MIGRATE_TO_MASTER if not on master.
+        ;// Write scratch.
     mtspr 276, r4
     isync
     mtspr 277, r5
