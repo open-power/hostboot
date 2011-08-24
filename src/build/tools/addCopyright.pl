@@ -135,8 +135,10 @@ while (defined($_ = shift))
     {
         if  ("Unknown" eq $filetype)
         {
-            print "ERROR: File $_ :Unknown Filetype: $_";
-            exit 1;
+            print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
+            print "WARNING:: File $_ :Unknown Filetype: $_";
+            print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
+            ## exit 1;
         }
         if ( hasoldcopyrightblock( $_, $filetype )    )
         {
