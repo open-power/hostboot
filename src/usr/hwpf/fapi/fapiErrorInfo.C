@@ -31,6 +31,7 @@
  * Flag     Defect/Feature  User        Date        Description
  * ------   --------------  ----------  ----------- ----------------------------
  *                          mjjones     08/05/2011  Created
+ *                          mjjones     08/24/2011  Added ErrorInfoGard.
  */
 
 #include <fapiErrorInfo.H>
@@ -48,6 +49,17 @@ ErrorInfoCallout::ErrorInfoCallout(const TargetType i_targetType,
 : iv_targetType(i_targetType),
   iv_targetPos(i_targetPos),
   iv_priority(i_priority)
+{
+
+}
+
+//******************************************************************************
+// ErrorInfoGard Constructor
+//******************************************************************************
+ErrorInfoGard::ErrorInfoGard(const TargetType i_targetType,
+                             const uint32_t i_targetPos)
+: iv_targetType(i_targetType),
+  iv_targetPos(i_targetPos)
 {
 
 }
@@ -81,6 +93,7 @@ ErrorInfoRecord::ErrorInfoRecord()
 ErrorInfoRecord::ErrorInfoRecord(const ErrorInfoRecord & i_right)
 : iv_rc(i_right.iv_rc),
   iv_callouts(i_right.iv_callouts),
+  iv_gards(i_right.iv_gards),
   iv_ffdcs(i_right.iv_ffdcs),
   iv_pDescription(NULL)
 {
@@ -110,6 +123,7 @@ ErrorInfoRecord & ErrorInfoRecord::operator=(const ErrorInfoRecord & i_right)
     {
         iv_rc = i_right.iv_rc;
         iv_callouts = i_right.iv_callouts;
+        iv_gards = i_right.iv_gards;
         iv_ffdcs = i_right.iv_ffdcs;
 
         // Perform deep copy of the description string

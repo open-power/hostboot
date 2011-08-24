@@ -32,6 +32,7 @@
  * Flag     Defect/Feature  User        Date        Description
  * ------   --------------  ----------  ----------- ----------------------------
  *                          mjjones     08/09/2011  Created.
+ *                          mjjones     08/24/2011  Added ErrorInfoGard.
  */
 
 #ifndef FAPIERRORINFO_H_
@@ -69,26 +70,52 @@ struct ErrorInfoCallout
     /**
      * @brief Constructor.
      *
-     * @param[in] i_targetType The type of the target being called out. If the
-     *                         same as the target of the HWP that generated the
-     *                         error then that is the target
-     * @param[in] i_targetPos  The position of the target being called out.
-     *                         Relative to the target of the HWP that generated
-     *                         the error
+     * @param[in] i_targetType The type of the target to callout. If the same as
+     *                         the target of the HWP that generated the error
+     *                         then that is the target
+     * @param[in] i_targetPos  The position of the target to callout. Relative
+     *                         to the target of the HWP that generated the error
      * @param[in] i_priority   The priority of the callout
      */
     ErrorInfoCallout(const TargetType i_targetType,
                      const uint32_t i_targetPos,
                      const CalloutPriority i_priority);
 
-    // The type of the target being called out. See ctor for details
+    // The type of the target to call out. See ctor for details
     TargetType iv_targetType;
 
-    // The position of the target being called out. See ctor for details
+    // The position of the target to call out. See ctor for details
     uint32_t iv_targetPos;
 
     // The priority of the callout
     CalloutPriority iv_priority;
+};
+
+/**
+ * @struct ErrorInfoGard
+ *
+ * This struct defines a target gard request. An ErrorInfoRecord can contain a
+ * number of these.
+ */
+struct ErrorInfoGard
+{
+    /**
+     * @brief Constructor.
+     *
+     * @param[in] i_targetType The type of the target to gard. If the same as
+     *                         the target of the HWP that generated the error
+     *                         then that is the target
+     * @param[in] i_targetPos  The position of the target to gard. Relative to
+     *                         the target of the HWP that generated the error
+     */
+    ErrorInfoGard(const TargetType i_targetType,
+                  const uint32_t i_targetPos);
+
+    // The type of the target to gard. See ctor for details
+    TargetType iv_targetType;
+
+    // The position of the target to gard. See ctor for details
+    uint32_t iv_targetPos;
 };
 
 /**
@@ -176,9 +203,13 @@ struct ErrorInfoRecord
     // The Return Code value
     uint32_t iv_rc;
 
-    // Vector of target callouts
+    // Vector of targets to callout
     std::vector<ErrorInfoCallout> iv_callouts;
     typedef std::vector<ErrorInfoCallout>::iterator ErrorInfoCalloutItr_t;
+
+    // Vector of targets to gard
+    std::vector<ErrorInfoGard> iv_gards;
+    typedef std::vector<ErrorInfoGard>::iterator ErrorInfoGardItr_t;
 
     // Vector of FFDC collection information
     std::vector<ErrorInfoFfdc> iv_ffdcs;

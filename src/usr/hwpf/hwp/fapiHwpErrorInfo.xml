@@ -34,6 +34,11 @@
         <targetPos>0</targetPos>
         <priority>HIGH</priority>
     </callout>
+    <gard>
+        <!-- The PROC_CHIP itself should be garded -->
+        <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+        <targetPos>0</targetPos>
+    </gard>
     <ffdc>
         <!-- FFDC needs to be collected from the PROC_CHIP itself -->
         <targetType>TARGET_TYPE_PROC_CHIP</targetType>

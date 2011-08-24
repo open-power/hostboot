@@ -111,8 +111,24 @@ errlHndl_t rcToErrl(ReturnCode i_rc)
             }
             else
             {
-                // TODO Iterate through callouts, adding each callout to the
-                // error log
+                // Iterate through callouts, adding each callout to the error
+                // log
+                for (ErrorInfoRecord::ErrorInfoCalloutItr_t l_itr =
+                         l_record.iv_callouts.begin();
+                     l_itr != l_record.iv_callouts.end(); ++l_itr)
+                {
+                    // TODO Add callouts to error log
+                    FAPI_ERR("rcToErrl: Adding callout TBD");
+                }
+
+                // Iterate through gard requests performing gard
+                for (ErrorInfoRecord::ErrorInfoGardItr_t l_itr =
+                         l_record.iv_gards.begin();
+                     l_itr != l_record.iv_gards.end(); ++l_itr)
+                {
+                    // TODO Gard component
+                    FAPI_ERR("rcToErrl: Garding TBD");
+                }
 
                 // Iterate through FFDC sections, collecting and adding FFDC to
                 // the error log

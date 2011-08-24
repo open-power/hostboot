@@ -43,6 +43,7 @@
 #                  mjjones   06/10/11  Added "use strict;"
 #                  mjjones   07/05/11  Take output dir as parameter
 #                  mjjones   08/08/11  Large update to create more code
+#                  mjjones   08/24/11  Parse GARD info
 #
 # End Change Log ******************************************************
 
@@ -150,6 +151,7 @@ print MIFILE "{\n";
 # Element names
 #------------------------------------------------------------------------------
 my $ffdc = 'ffdc';
+my $gard = 'gard';
 my $callout = 'callout';
 
 #------------------------------------------------------------------------------
@@ -160,12 +162,12 @@ foreach my $argnum (1 .. $#ARGV)
     my $infile = $ARGV[$argnum];
 
     #--------------------------------------------------------------------------
-    # Read XML file. Note that there may be multiple ffdc and callout elements
+    # Read XML file. Note that there may be multiple ffdc/gard/callout elements
     # so use the ForceArray option with these to ensure that XML::Simple
     # creates an array even for single elements of these types
     #--------------------------------------------------------------------------
     # read XML file
-    my $errors = $xml->XMLin($infile, ForceArray => [$ffdc, $callout]);
+    my $errors = $xml->XMLin($infile, ForceArray => [$ffdc, $gard, $callout]);
 
     # Uncomment to get debug output of all errors
     #print "\nFile: ", $infile, "\n", Dumper($errors), "\n";
@@ -213,19 +215,19 @@ foreach my $argnum (1 .. $#ARGV)
             #------------------------------------------------------------------
             if (! exists $callout->{targetType})
             {
-                print ("fapiParseErrorInfo.pl ERROR. targetType missing\n");
+                print ("fapiParseErrorInfo.pl ERROR. Callout targetType missing\n");
                 exit(1);
             }
 
             if (! exists $callout->{targetPos})
             {
-                print ("fapiParseErrorInfo.pl ERROR. targetPos missing\n");
+                print ("fapiParseErrorInfo.pl ERROR. Callout targetPos missing\n");
                 exit(1);
             }
 
             if (! exists $callout->{priority})
             {
-                print ("fapiParseErrorInfo.pl ERROR. priority missing\n");
+                print ("fapiParseErrorInfo.pl ERROR. Callout priority missing\n");
                 exit(1);
             }
 
@@ -240,6 +242,36 @@ foreach my $argnum (1 .. $#ARGV)
         }
 
         #----------------------------------------------------------------------
+        # For each Gard element
+        #----------------------------------------------------------------------
+        foreach my $gard (@{$err->{gard}})
+        {
+            #------------------------------------------------------------------
+            # Check that expected fields are present
+            #------------------------------------------------------------------
+            if (! exists $gard->{targetType})
+            {
+                print ("fapiParseErrorInfo.pl ERROR. Gard targetType missing\n");
+                exit(1);
+            }
+
+            if (! exists $gard->{targetPos})
+            {
+                print ("fapiParseErrorInfo.pl ERROR. Gard targetPos missing\n");
+                exit(1);
+            }
+
+            #------------------------------------------------------------------
+            # Print the Gard data to fapiErrorInfoMemInit.C
+            #------------------------------------------------------------------
+            print MIFILE "    {\n";
+            print MIFILE "    ErrorInfoGard l_gard($gard->{targetType}, ";
+            print MIFILE "$gard->{targetPos});\n";
+            print MIFILE "    l_record.iv_gards.push_back(l_gard);\n";
+            print MIFILE "    }\n";
+        }
+
+        #----------------------------------------------------------------------
         # For each FFDC element
         #----------------------------------------------------------------------
         foreach my $ffdc (@{$err->{ffdc}})
@@ -249,25 +281,25 @@ foreach my $argnum (1 .. $#ARGV)
             #------------------------------------------------------------------
             if (! exists $ffdc->{targetType})
             {
-                print ("fapiParseErrorInfo.pl ERROR. targetType missing\n");
+                print ("fapiParseErrorInfo.pl ERROR. FFDC targetType missing\n");
                 exit(1);
             }
 
             if (! exists $ffdc->{targetPos})
             {
-                print ("fapiParseErrorInfo.pl ERROR. targetPos missing\n");
+                print ("fapiParseErrorInfo.pl ERROR. FFDC targetPos missing\n");
                 exit(1);
             }
 
             if (! exists $ffdc->{ffdcHwp})
             {
-                print ("fapiParseErrorInfo.pl ERROR. ffdcHwp missing\n");
+                print ("fapiParseErrorInfo.pl ERROR. FFDC ffdcHwp missing\n");
                 exit(1);
             }
 
             if (! exists $ffdc->{ffdcHwpData})
             {
-                print ("fapiParseErrorInfo.pl ERROR. ffdcHwpData missing\n");
+                print ("fapiParseErrorInfo.pl ERROR. FFDC ffdcHwpData missing\n");
                 exit(1);
             }
 
