@@ -127,7 +127,7 @@ while (defined($_ = shift))
 
     ##
     ##  validate
-    ##      Exit 1 for unknown filetype
+    ##      Continue for unknown filetype
     ##      Exit 2 if has old copyright block
     ##      Exit 3 if no copyright block
     ##
