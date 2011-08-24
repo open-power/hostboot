@@ -135,30 +135,31 @@ while (defined($_ = shift))
     {
         if  ("Unknown" eq $filetype)
         {
-            print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
-            print "WARNING:: File $_ :Unknown Filetype: $_";
-            print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
+            print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
+            print "WARNING:: File $_ :Unknown Filetype: $_\n";
+            print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
             ## exit 1;
+            next;
         }
         if ( hasoldcopyrightblock( $_, $filetype )    )
         {
             print "ERROR File $_: has old copyright block, please fix\n";
             exit 2;
         }
-        
+
         if ( ! hascopyrightblock( $_, $filetype )  )
         {
             print "ERROR File $_: Missing Copyright notice!!!\n";
             exit 3;
         }
-        
+
         #   good file
         next;
     }
 
     ##
     ##  update
-    ##  Continue with a warning for unknown filetype - 
+    ##  Continue with a warning for unknown filetype -
     ##
     if ($operation =~ m/update/i)
     {
@@ -315,7 +316,7 @@ sub filetype
        ||( $filename =~ m/\.lidhdr$/i )
        ||( $filename =~ m/\.vpdinfo$/i )
        ||( $filename =~ m/\.pdf$/i )
-       
+
        )
     {
         # Known, but we can't deal with it so call it unknown.
@@ -414,7 +415,7 @@ sub hascopyrightblock
 {
     my ( $filename, $filetype ) =   @_;
     my $file = `head -180 $filename`;       # Must appear in first 180 lines.
-    
+
     #print $filename;
     #print $file;
     #print   $DELIMITER_BEGIN;
