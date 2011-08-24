@@ -28,7 +28,7 @@
 #include <builtins.h>
 
 #ifdef HOSTBOOT_DEBUG
-    #define printkd(format...) printk(## format)
+    #define printkd(format...) printk(format)
 #else
     #define printkd(format...)
 #endif
