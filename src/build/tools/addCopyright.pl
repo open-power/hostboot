@@ -133,6 +133,13 @@ while (defined($_ = shift))
     ##
     if ( $operation =~  m/validate/i )
     {
+        if  ( ! -e $_ )
+        {
+            print "---------------------------------------------------------\n";
+            print "Skipping deleted file: $_\n";
+            print "---------------------------------------------------------\n";
+            next;
+        }   
         if  ("Unknown" eq $filetype)
         {
             print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
