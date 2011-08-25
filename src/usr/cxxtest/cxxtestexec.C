@@ -21,7 +21,7 @@
 //
 //  IBM_PROLOG_END
 
-#include <sys/vfs.h>
+#include <vfs/vfs.H>
 #include <sys/task.h>
 #include <string.h>
 #include <kernel/console.H>
@@ -33,8 +33,8 @@
 
 namespace CxxTest
 {
-    uint64_t    g_ModulesStarted    =   0;
-    uint64_t    g_ModulesCompleted  =   0;
+    extern uint64_t    g_ModulesStarted;
+    extern uint64_t    g_ModulesCompleted;
 
     /**
      * @var g_CxxTestBarrier    -   barrier for CxxTest modules.
@@ -62,11 +62,8 @@ TRAC_INIT(&g_trac_cxxtest, "CXXTEST", 1024 );
 extern "C"
 void _start(void *io_pArgs)
 {
-    // TODO These modules will eventually all be in the extended binary.
-    // VfsSystemModule* vfsItr = (VfsSystemModule*) VFS_EXTENDED_MODULE_TABLE_ADDRESS;
-    VfsSystemModule* vfsItr     =   &VFS_MODULES[0];
+    std::vector<const char *> module_list;
     tid_t       tidrc           =   0;
-    uint64_t    totalmodules    =   0;
     TaskArgs::TaskArgs *pTaskArgs  =
             reinterpret_cast<TaskArgs::TaskArgs *>(io_pArgs);
 
@@ -74,61 +71,32 @@ void _start(void *io_pArgs)
     // count up the number of viable modules ahead of time
     TRACDCOMP( g_trac_cxxtest, "Counting CxxTextExec modules:" );
 
-    while(vfsItr->module[0] != '\0')
-    {
-        if (0 == memcmp(vfsItr->module, "libtest", 7))
-        {
-            if (NULL != vfsItr->start)
-            {
-                TRACDBIN( g_trac_cxxtest,
-                        "",
-                        &(vfsItr->module[0]),
-                        strlen( &(vfsItr->module[0]) )
-                        );
+    VFS::find_test_modules(module_list);
 
-                totalmodules++;
-            }
-        }
-        vfsItr++;
-    }
+    uint64_t totalmodules = module_list.size();
+
 
     //  start executing the CxxTest modules
     TRACDCOMP( g_trac_cxxtest, ENTER_MRK "Execute CxxTestExec, totalmodules=%d.",
             totalmodules);
-    vfsItr     =   &VFS_MODULES[0];             //  re-init
 
     // set barrier for all the modules being started, plus this module
     barrier_init( &CxxTest::g_CxxTestBarrier, totalmodules+1 );
 
     __sync_add_and_fetch(&CxxTest::g_ModulesStarted, 1);
 
-    while(vfsItr->module[0] != '\0')
+    for(std::vector<const char *>::const_iterator i = module_list.begin();
+        i != module_list.end(); ++i)
     {
-        if (0 == memcmp(vfsItr->module, "libtest", 7))
-        {
-            if (NULL != vfsItr->start)
-            {
-                __sync_add_and_fetch(&CxxTest::g_ModulesStarted, 1);
+        __sync_add_and_fetch(&CxxTest::g_ModulesStarted, 1);
 
-#if 0
-                // arrgh, no %s in trace
-                TRACDCOMP( g_trac_cxxtest,
-                        "Running %s, ModulesStarted=%d",
-                        __LINE__,
-                        vfsItr->module,
-                        CxxTest::g_ModulesStarted );
-#else
-                TRACDCOMP( g_trac_cxxtest,
-                        "ModulesStarted=%d",
-                        CxxTest::g_ModulesStarted );
-#endif
-                tidrc = task_exec( vfsItr->module, NULL );
-                TRACDCOMP( g_trac_cxxtest, "Launched task: tidrc=%d",
-                        tidrc );
+        TRACDCOMP( g_trac_cxxtest,
+                   "ModulesStarted=%d",
+                   CxxTest::g_ModulesStarted );
 
-            }
-        }
-        vfsItr++;
+        tidrc = task_exec( *i, NULL );
+        TRACDCOMP( g_trac_cxxtest, "Launched task: tidrc=%d",
+                   tidrc );
     }
 
     TRACDCOMP( g_trac_cxxtest,  "Waiting for all tasks to finish....");

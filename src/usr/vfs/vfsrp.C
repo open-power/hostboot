@@ -164,9 +164,8 @@ void VfsRp::msgHandler()
         {
             case VFS_MSG_LOAD:
                 {
-                    TRACDBIN(g_trac_vfs, "INFO: load module ",
-                             (const char *) msg->data[0],
-                             strlen((const char *) msg->data[0]));
+                    TRACDCOMP(g_trac_vfs, "Load request: %s",
+                              (const char *) msg->data[0]);
 
                     // run in own task so page faults can be handled
                     task_create(load_unload, msg);
@@ -175,9 +174,8 @@ void VfsRp::msgHandler()
 
             case VFS_MSG_UNLOAD:
                 {
-                    TRACDBIN(g_trac_vfs, "INFO: unload module ",
-                             (const char *) msg->data[0],
-                             strlen((const char *) msg->data[0]));
+                    TRACDCOMP(g_trac_vfs, "Unload request: %s",
+                              (const char *) msg->data[0]);
 
                     // run in own task so page faults can be handled
                     task_create(load_unload, msg);
@@ -187,7 +185,7 @@ void VfsRp::msgHandler()
 
             case VFS_MSG_EXEC:
                 {
-                    TRACDCOMP(g_trac_vfs, "VFS: Got exec request of %s",
+                    TRACDCOMP(g_trac_vfs, "EXEC request: %s",
                            (const char*)((msg_t*)msg->data[0])->data[0]);
 
                     // run in own task so page faults can be handled
@@ -198,10 +196,9 @@ void VfsRp::msgHandler()
 
             case MSG_MM_RP_READ:
                 {
-                    uint64_t vaddr = msg->data[0];
+                    uint64_t vaddr = msg->data[0]; //page aligned
                     uint64_t paddr = msg->data[1]; //page aligned
 
-                    vaddr -= vaddr % PAGE_SIZE;
                     vaddr -= VFS_EXTENDED_MODULE_VADDR;
                     memcpy((void *)paddr, (void *)(iv_pnor_vaddr+vaddr),
                            PAGE_SIZE);
@@ -243,7 +240,8 @@ void VfsRp::_load_unload(msg_t * i_msg)
     VfsSystemModule * module =
         vfs_find_module
         (
-         (VfsSystemModule *)iv_pnor_vaddr, //VFS_EXTENDED_MODULE_TABLE_ADDRESS,
+        //(VfsSystemModule *)VFS_EXTENDED_MODULE_VADDR,
+        (VfsSystemModule *)(iv_pnor_vaddr + VFS_EXTENDED_MODULE_TABLE_OFFSET),
          (const char *) i_msg->data[0]
         );
 
@@ -272,7 +270,7 @@ void VfsRp::_load_unload(msg_t * i_msg)
     {
         // TODO  error log? for now it's probably in the base
         //       and is aready loaded and initialized.
-        TRACFBIN(g_trac_vfs, ERR_MRK"Module not found: ",
+        TRACFBIN(g_trac_vfs, ERR_MRK"load Module not found: ",
                  (const char *) i_msg->data[0],
                  strlen((const char *) i_msg->data[0]) );
     }
@@ -302,6 +300,48 @@ void VfsRp::_exec(msg_t * i_msg)
 
     msg_respond(vfsRmsgQ,msg1);
     msg_free(i_msg);
+}
+
+// ----------------------------------------------------------------------------
+
+bool VfsRp::module_exists(const char * i_name) const
+{
+    bool result = false;
+    VfsSystemModule * module = vfs_find_module(VFS_MODULES,i_name);
+    if(!module)
+    {
+        module = vfs_find_module((VfsSystemModule *)(iv_pnor_vaddr +
+                                            VFS_EXTENDED_MODULE_TABLE_OFFSET),
+                                 i_name);
+    }
+    if(module) result = true;
+    return result;
+}
+
+// ----------------------------------------------------------------------------
+
+void VfsRp::get_test_modules(std::vector<const char *> & o_list) const
+{
+    o_list.clear();
+    o_list.reserve(32);
+
+    VfsSystemModule * vfsItr = 
+        (VfsSystemModule *) (iv_pnor_vaddr + VFS_EXTENDED_MODULE_TABLE_OFFSET);
+
+    //TRACDCOMP(g_trac_vfs,"finding test modules...");
+
+    while(vfsItr->module[0] != '\0')
+    {
+        if (0 == memcmp(vfsItr->module, "libtest", 7))
+        {
+            if (NULL != vfsItr->start)
+            {
+                //TRACDCOMP( g_trac_vfs, "%s",vfsItr->module);
+                o_list.push_back(vfsItr->module);
+            }
+        }
+        vfsItr++;
+    }                                            
 }
 
 
@@ -334,5 +374,19 @@ errlHndl_t VFS::module_load_unload(const char * i_module, VfsMessages i_msgtype)
 
     msg_free(msg);
     return err;
+}
+
+// ----------------------------------------------------------------------------
+
+void VFS::find_test_modules(std::vector<const char *> & o_list)
+{
+    Singleton<VfsRp>::instance().get_test_modules(o_list);
+}
+
+// ----------------------------------------------------------------------------
+
+bool VFS::module_exists(const char * i_name)
+{
+    return Singleton<VfsRp>::instance().module_exists(i_name);
 }
 

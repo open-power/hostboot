@@ -204,6 +204,9 @@ void ExtInitSvc::init( void *i_ptr )
                    ENTER_MRK "Run Unit Tests (if libcxxtests.so is present): %s",
                    l_pcxxtask->taskname );
 
+        // If the test task does not exist then don't run it.
+        if(!VFS::module_exists(l_pcxxtask->taskname)) break;
+        
         l_cxxerrl = InitService::getTheInstance().startTask( l_pcxxtask,
                                                              &l_cxxtestargs );
 

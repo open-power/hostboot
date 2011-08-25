@@ -91,7 +91,7 @@ const TaskInfo    g_taskinfolist[]   =   {
                 NULL,                                   // no pointer to fn
                 {
                         START_TASK,                     // call start()
-                        BASE_IMAGE,                     // TODO EXT_IMAGE
+                        EXT_IMAGE,                      // EXT_IMAGE
                         START_EXTINITSVC_ERRL_ID,       // module id for errorlog
                 }
         },

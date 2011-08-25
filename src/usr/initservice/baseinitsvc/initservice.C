@@ -209,6 +209,13 @@ errlHndl_t  InitService::dispatchTask( const TaskInfo   *i_ptask,
         l_errl = startTask( i_ptask,
                             io_pargs );
         break;
+    case INIT_TASK:
+        TRACDCOMP( g_trac_initsvc,
+                   "task_type==INIT_TASK: %s",
+                   i_ptask->taskname);
+                   
+        l_errl = VFS::module_load( i_ptask->taskname );
+        break;
     case START_FN:
         TRACDCOMP( g_trac_initsvc,
                    "task_type==START_FN : %s %p",

@@ -56,6 +56,8 @@ uint64_t        g_TotalTests      =     0;
 uint64_t        g_TraceCalls      =     0;
 uint64_t        g_Warnings        =     0;
 uint64_t        g_FailedTests     =     0;
+uint64_t        g_ModulesStarted  =     0;
+uint64_t        g_ModulesCompleted=     0;
 
 }
 

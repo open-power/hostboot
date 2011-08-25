@@ -46,6 +46,19 @@ namespace VFS
              */
             static void init(void * i_taskArgs);
 
+            /**
+             * Get the list of test modules
+             * @param[out] list of test module names
+             */
+            void get_test_modules(std::vector<const char *> & o_list) const;
+
+            /**
+             * Test for existance of module
+             * @param[in] i_name module name
+             * @return [true|false]
+             */
+            bool module_exists(const char * i_name) const;
+
         protected:
             /**
              * Ctor

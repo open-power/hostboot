@@ -1,20 +1,26 @@
 #!/bin/bash
-#############################################################################
-# $IBMCopyrightBlock:
+#  IBM_PROLOG_BEGIN_TAG
+#  This is an automatically generated prolog.
 #
-# IBM Confidential
+#  $Source: src/build/citest/autocitest $
 #
-# Licensed Internal Code Source Materials
+#  IBM CONFIDENTIAL
 #
-# IBM HostBoot Licensed Internal Code
+#  COPYRIGHT International Business Machines Corp. 2011
 #
-# (C) Copyright IBM Corp. 2011
+#  p1
 #
-# The source code for this program is not published or other-
-# wise divested of its trade secrets, irrespective of what has
-# been deposited with the U.S. Copyright Office.
-#$
-#############################################################################
+#  Object Code Only (OCO) source materials
+#  Licensed Internal Code Source Materials
+#  IBM HostBoot Licensed Internal Code
+#
+#  The source code for this program is not published or other-
+#  wise divested of its trade secrets, irrespective of what has
+#  been deposited with the U.S. Copyright Office.
+#
+#  Origin: 30
+#
+#  IBM_PROLOG_END
 
 ################################################################################
 ##  Simics automation using autosim
@@ -157,6 +163,8 @@ fi
 ##  Find the .syms file for the image.  Remove extension, add .syms.
 HBICORE_TEST_SYMS="${HBICORE_TEST%%.*}.syms"
 
+HBICORE_TEST_EXTENDED="${HBICORE_TEST%%.*}_extended.bin"
+
 ##  Find the hbotStringfile for traceHB.
 HBICORE_TEST_STRINGFILE="${SBXHOME}/img/hbotStringFile"
 
@@ -175,6 +183,7 @@ echo    "NOWIN                      = $NOWIN"
 echo    "BACKING_TREE               = $DRIVER"
 echo    "TEST_SANDBOX               = $TEST_SANDBOX"
 echo    "HBICORE_TEST               = $HBICORE_TEST"
+echo    "HBICORE_TEST_EXTENDED      = $HBICORE_TEST_EXTENDED"
 echo    "HBICORE_TEST_SYMS          = $HBICORE_TEST_SYMS"
 echo    "HBICORE_TEST_STRINGFILE    = $HBICORE_TEST_STRINGFILE"
 echo    "TRACEHB_PYTHON_FILE        = $TRACEHB_PYTHON_FILE"
@@ -246,15 +255,6 @@ waitkb
 export sb=$SBXHOME/$TEST_SANDBOX/src
 echo "sandbox dir = $sb"
 
-
-##  waitkb
-##
-##    echo "Set up for traceHB.py:"  
-##    echo "Copy .syms, bin, hbotStringfile, etc to base sandbox dir."
-##    echo "$sb"
-##    $CPFILES $sb
-    
-
 echo "** Set up simics directories **"
 echo "start_simics -no_start -machine $MACHINE" > $sb/my_simics_env_setup
 chmod 775 $sb/my_simics_env_setup
@@ -272,17 +272,13 @@ mkdir -p $sb/../img
 waitkb
 
 
-##  According to the new directions, the hbicore_test.bin file now needs to be
-##  copied to $sb/../img/hbicore.bin .  This works out to $TEST_SANDBOX/img/hbicore.bin
-##  Note the name change; thus we are always pretty safe in always doing this.
-##
-echo    "copy $HBICORE_TEST to ${SBXHOME}/$TEST_SANDBOX/img/hbicore.bin"
-cp ${SBXHOME}/${HBICORE_TEST} ${SBXHOME}/${TEST_SANDBOX}/img/hbicore.bin
+echo "Copy .syms, bin, hbotStringfile, etc to base sandbox dir."
+echo "$sb"
+$CPFILES $sb --test
 if [ $? -ne 0 ] ; then
-        echo "ERROR: Copy of $HBICORE_TEST to $TEST_SANDBOX/../img failed: $?"
-        exit 1
+    echo "ERROR: $CPFILES failed: $?"
+    exit 1
 fi
-
 
 waitkb
 

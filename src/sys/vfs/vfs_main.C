@@ -125,7 +125,7 @@ void vfs_main(void* i_barrier)
                     // child == -1 means module not found in base image so send
                     // a message to VFS_MSG queue to look in the extended image
                     // VFS_MSG queue will handle the msg_respond()
-                    if( child == -1 ) // forward msg to usr vfs
+                    if( child == (tid_t)-1 ) // forward msg to usr vfs
                     {
                         VfsEntry::key_type k;
                         strcpy(k.key, VFS_MSG);

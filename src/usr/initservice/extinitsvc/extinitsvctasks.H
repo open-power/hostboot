@@ -36,8 +36,6 @@
 namespace   INITSERVICE
 {
 
-    // TODO all these will eventuall be in BASE_IMAGE instead of BASE_IMAGE
-
 const   uint64_t MAX_EXT_TASKS   =   25;
 
 const TaskInfo g_exttaskinfolist[]   =   {
@@ -45,31 +43,97 @@ const TaskInfo g_exttaskinfolist[]   =   {
         //  -----   Extended Image  ------------------------------------------
 
         /**
-         * @brief   targeting task, initializes extended module area
+         * @brief   ecmddatabuffer task, 
          */
         {
-                "libtargeting.so" ,                         // taskname
+                "libecmddatabuffer.so" ,                    // taskname
                 NULL,                                       // no pointer to fn
                 {
-                        START_TASK,                         // task type
-                        BASE_IMAGE,                         // Extended Module
-                        START_TARGETING_ERRL_ID,            // module id
+                        INIT_TASK,                          // task type
+                        EXT_IMAGE,                          // Extended Module
+                        START_ECMDDATABUFFER_ERRL_ID,       // module id
                 }
         },
 
         /**
-          * @brief   IStep Dispatcher task, runs ISteps
-          */
-         {
-                 "libistepdisp.so" ,                         // taskname
-                 NULL,                                       // no pointer to fn
-                 {
-                         START_TASK,                         // task type
-                         BASE_IMAGE,                          // Extended Module
-                         EXECUTE_ISTEPS_ERRL_ID,             // module id
-                 }
-         },
+         * @brief   hwpf task, 
+         */
+        {
+                "libhwpf.so" ,                              // taskname
+                NULL,                                       // no pointer to fn
+                {
+                        INIT_TASK,                          // task type
+                        EXT_IMAGE,                          // Extended Module
+                        START_HWPF_ERRL_ID,                 // module id
+                }
+        },
 
+        /**
+         * @brief   fabi task, 
+         */
+        {
+                "libfapi.so" ,                              // taskname
+                NULL,                                       // no pointer to fn
+                {
+                        INIT_TASK,                          // task type
+                        EXT_IMAGE,                          // Extended Module
+                        START_FAPI_ERRL_ID,                 // module id
+                }
+        },
+        
+        /**
+         * @brief   hwp task, 
+         */
+        {
+                "libhwp.so" ,                               // taskname
+                NULL,                                       // no pointer to fn
+                {
+                        INIT_TASK,                          // task type
+                        EXT_IMAGE,                          // Extended Module
+                        START_HWP_ERRL_ID,                  // module id
+                }
+        },
+        
+        /**
+         * @brief   plat task, 
+         */
+        {
+                "libplat.so" ,                              // taskname
+                NULL,                                       // no pointer to fn
+                {
+                        INIT_TASK,                          // task type
+                        EXT_IMAGE,                          // Extended Module
+                        START_PLAT_ERRL_ID,                 // module id
+                }
+        },
+        
+        /**
+         * @brief   targeting task,
+         */
+        {
+            "libtargeting.so" ,                         // taskname
+            NULL,                                       // no pointer to fn
+            {
+                START_TASK,                         // task type
+                EXT_IMAGE,                          // Extended Module
+                START_TARGETING_ERRL_ID,            // module id
+            }
+        },
+
+        /**
+         * @brief   IStep Dispatcher task, runs ISteps
+         */
+        {
+            "libistepdisp.so" ,                         // taskname
+            NULL,                                       // no pointer to fn
+            {
+                START_TASK,                         // task type
+                EXT_IMAGE,                          // Extended Module
+                EXECUTE_ISTEPS_ERRL_ID,             // module id
+            }
+        },
+
+        
         //  ---------------------------------------------------------------
         //  -----   END OF LIST!!!  ---------------------------------------
         //  ---------------------------------------------------------------
@@ -96,7 +160,7 @@ const   TaskInfo    CXXTEST_TASK    =   {
                 NULL,                                       // no pointer to fn
                 {
                         START_TASK,                         // task type
-                        BASE_IMAGE,                          // Extended Module
+                        EXT_IMAGE,                          // Extended Module
                         START_CXXTEST_ERRL_ID,              // module id
                 }
         };

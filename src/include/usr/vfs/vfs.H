@@ -25,6 +25,7 @@
 
 #include <errl/errlentry.H>
 #include <sys/vfs.h>
+#include <vector>
 
 namespace VFS
 {
@@ -57,6 +58,19 @@ namespace VFS
     {
         return VFS::module_load_unload(i_module, VFS_MSG_UNLOAD);
     }
+
+    /**
+     * Find test modules
+     * @param[out] list of module names
+     */
+    void find_test_modules(std::vector<const char *> & o_list);
+
+    /**
+     * Test for existance of module
+     * @param[in] i_name module name
+     * @return [true|false]
+     */
+    bool module_exists(const char * i_name);
 
 };
 
