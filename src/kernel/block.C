@@ -72,7 +72,10 @@ bool Block::handlePageFault(task_t* i_task, uint64_t i_addr)
                     iv_nextBlock->handlePageFault(i_task, i_addr) : false);
     }
 
-    ShadowPTE* pte = getPTE(i_addr);
+    // Calculate page aligned virtual address.
+    uint64_t l_addr_palign = (i_addr / PAGESIZE) * PAGESIZE;
+
+    ShadowPTE* pte = getPTE(l_addr_palign);
 
     if (!pte->isPresent())
     {
@@ -91,7 +94,7 @@ bool Block::handlePageFault(task_t* i_task, uint64_t i_addr)
             }
             //Send message to handler to read page
             this->iv_msgHdlr->sendMessage(MSG_MM_RP_READ,
-                    reinterpret_cast<void*>(i_addr),l_page,i_task);
+                    reinterpret_cast<void*>(l_addr_palign),l_page,i_task);
             //Done(waiting for response)
             return true;
         }
@@ -111,7 +114,7 @@ bool Block::handlePageFault(task_t* i_task, uint64_t i_addr)
 
     // Add page table entry.
     PageTableManager::addEntry(
-            (i_addr / PAGESIZE) * PAGESIZE,
+            l_addr_palign,
             pte->getPage(),
             (pte->isExecutable() ? VmmManager::RO_EXE_ACCESS :
                 (pte->isWritable() ? VmmManager::NORMAL_ACCESS :
