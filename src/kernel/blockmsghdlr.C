@@ -22,7 +22,6 @@
 //  IBM_PROLOG_END
 #include <kernel/blockmsghdlr.H>
 #include <kernel/block.H>
-//#include <kernel/console.H>
 
 MessageHandler::HandleResult BlockMsgHdlr::handleResponse(
         msg_sys_types_t i_type, void* i_key, task_t* i_task, int i_rc)
