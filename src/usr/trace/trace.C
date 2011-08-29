@@ -328,6 +328,7 @@ void Trace::_trace_adal_write_all(trace_desc_t *io_td,
     //trace_entire_entry_t    l_entry;
     trace_bin_entry_t       l_entry;
     uint64_t                l_str_map = 0;
+    uint64_t                l_char_map = 0;
 
 
     /*------------------------------------------------------------------------*/
@@ -373,6 +374,21 @@ void Trace::_trace_adal_write_all(trace_desc_t *io_td,
                 //       l_str, static_cast<uint32_t>(l_strLen),
                 //       num_args, l_data_size);
                 //printk("Trace: l_str_map 0x%16llX\n", static_cast<long long>(l_str_map));
+            }
+            else if ('c' == _fmt[i])
+            {
+                // Set flag to indicate argument is a char
+                l_char_map = l_char_map | (1 << num_args);
+
+                // Increment arg counts
+                num_args++;
+                num_4byte_args++;
+
+                // Retrieve the argument to increment to next one
+                uint32_t l_tmpData = va_arg(i_args, uint32_t);
+
+                // Add to total size; data is word aligned
+                l_data_size += sizeof(l_tmpData);
             }
             else
             {
@@ -446,6 +462,13 @@ void Trace::_trace_adal_write_all(trace_desc_t *io_td,
                 //       l_buffer, l_ptr, l_strLen);
                 //printk("Trace::trace_adal_write_all - num_args %d l_data_size %d l_entry_size %d\n",
                 //       num_args, l_data_size, l_entry_size);
+            }
+            else if (l_char_map & (1 << i))
+            {
+                // Save char to buffer & increment pointer (no need to align)
+                *(reinterpret_cast<uint32_t *>(l_ptr)) = va_arg(l_args, uint32_t);
+                l_ptr += sizeof(uint32_t);
+
             }
             else
             {

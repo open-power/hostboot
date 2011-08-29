@@ -187,6 +187,31 @@ const uint32_t TRACE_FIELD   = 0;       //Indicates trace is field
                              len,                                  \
                              TRACE_FIELD)
 
+
+/**
+@fn void TRACSCOMP(des, printf_string, args...)
+@brief Defines all Strace Component Traces
+
+The user can pass 0 to 9 parameters to the macro.  These traces will be treated
+as debug traces but will never be compiled out of the code so that they can always be
+dynamically turned on/off.
+
+@note If you are passing parameters then make sure 'printf_string' has the
+@note necessary parameter formatting i.e. 'p1' = "hello" make sure
+@note 'printf_string' has '%s' somewhere in it to corretcly format p1.
+@return void The user will not be impacted by the failure of this function
+@param des This is assigned by TRAC_INIT_BUFFER
+@param printf_string string describing the trace entry and providing the formatting flags for any parameters passed.
+@param p1,p2... Optional parameters
+
+tracepp replaces trace_adal_hash() with hash value and reduced format string
+*/
+
+/* a macro w/o the param number suffix. number is calculated from printf string */
+#define TRACSCOMP(des,printf_string,args...) \
+     TRACE::Trace::trace_adal_write_all((des),__ALL_HASH(printf_string,-1),__LINE__,TRACE_DEBUG, ##args)
+
+
 /**
  * Field and Debug trace macros
  * Users must define COMP_TD for their components prior to using macros.
@@ -226,6 +251,20 @@ const uint32_t TRACE_FIELD   = 0;       //Indicates trace is field
         TRACDCOMP(__COMP_TD__, ENTER_MRK __COMP_NAMESPACE__ "::" __COMP_CLASS__ "::" __COMP_FN__ " " args)
 #define DTRAC_EXIT_(args...) \
         TRACDCOMP(__COMP_TD__, EXIT_MRK __COMP_NAMESPACE__ "::" __COMP_CLASS__ "::" __COMP_FN__ " " args)
+
+#define STRAC_ENTER(args...) \
+        TRACSCOMP(__COMP_TD__, ENTER_MRK args)
+#define STRAC_EXIT(args...) \
+        TRACSCOMP(__COMP_TD__, EXIT_MRK args)
+#define STRAC_INF(args...) \
+        TRACSCOMP(__COMP_TD__, INFO_MRK args)
+#define STRAC_ERR(args...) \
+        TRACSCOMP(__COMP_TD__, ERR_MRK args)
+
+#define STRAC_ENTER_(args...) \
+        TRACSCOMP(__COMP_TD__, ENTER_MRK __COMP_NAMESPACE__ "::" __COMP_CLASS__ "::" __COMP_FN__ " " args)
+#define STRAC_EXIT_(args...) \
+        TRACSCOMP(__COMP_TD__, EXIT_MRK __COMP_NAMESPACE__ "::" __COMP_CLASS__ "::" __COMP_FN__ " " args)
 
 /**
  * @fn void TRAC_INIT_BUFFER(des,comp_name, bufferSize)

@@ -71,7 +71,19 @@ public:
                 // Do a debug trace
                 TRACDCOMP(g_trac_test,"This is a debug trace");
 
-                // Need to run a formatting test, but I know it will fail.
+                // Do an strace
+                TRACSCOMP(g_trac_test, "STRACE: Testing all number types (c,u,X,d,s): %c %u 0x%X %d %s",
+                          'b',i,i+1,i+2,"Hostboot");
+
+                // Test formatting
+                TRACFCOMP(g_trac_test, "Test width.precision formatting (u,x,X,d): %8u 0x%.06x 0x%16X %01.01d",
+                          0xABCD,0x1234,0x123456789ABCDEF0,0x12345678);
+
+                TRACFCOMP(g_trac_test, "Test width.precision.length formatting (u,x,X,d): %8hu 0x%.06lx 0x%16LX %01.01lld",
+                          0xABCD,0x1234,0x123456789ABCDEF0,0x12345678);
+
+                TRACFCOMP(g_trac_test, "Test width.precision.length formatting (u,x,X,i): %8hu 0x%.06lx 0x%16LX %01.01lli",
+                          0xABCD,0x1234,0x123456789ABCDEF0,0x12345678AB);
             }
 
             // Be sure a NULL trace descriptor does not cause a failure
@@ -86,7 +98,7 @@ public:
     void testTracBinary(void)
     {
         trace_desc_t *g_trac_test = NULL;
-        TRAC_INIT_BUFFER(&g_trac_test, "EXAMPLE", 4096);
+        TRAC_INIT_BUFFER(&g_trac_test, "EXAMPLEBIN", 4096);
 
         if(g_trac_test == NULL)
         {
@@ -119,7 +131,7 @@ public:
     void testTracMix(void)
     {
         trace_desc_t *g_trac_test = NULL;
-        TRAC_INIT_BUFFER(&g_trac_test, "EXAMPLE", 4096);
+        TRAC_INIT_BUFFER(&g_trac_test, "EXAMPLEMIX", 4096);
 
         if(g_trac_test == NULL)
         {
@@ -201,6 +213,14 @@ public:
             DTRAC_ERR("Testing Debug Error Mark");
             DTRAC_EXIT("testTracMacros - Debug Trace");
             DTRAC_EXIT_(" - Debug Trace");
+
+            STRAC_ENTER("testTracMacros - Strace");
+            STRAC_ENTER_(" - Strace");
+            STRAC_INF("Testing Strace Info Mark");
+            STRAC_ERR("Testing Strace Error Mark");
+            STRAC_EXIT("testTracMacros - Strace");
+            STRAC_EXIT_(" - Strace");
+
         }
 
         #undef __COMP_FN__

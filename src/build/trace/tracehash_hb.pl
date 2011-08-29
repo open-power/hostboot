@@ -1,4 +1,26 @@
 #!/usr/bin/perl -w
+#  IBM_PROLOG_BEGIN_TAG
+#  This is an automatically generated prolog.
+#
+#  $Source: src/build/trace/tracehash_hb.pl $
+#
+#  IBM CONFIDENTIAL
+#
+#  COPYRIGHT International Business Machines Corp. 2011
+#
+#  p1
+#
+#  Object Code Only (OCO) source materials
+#  Licensed Internal Code Source Materials
+#  IBM HostBoot Licensed Internal Code
+#
+#  The source code for this program is not published or other-
+#  wise divested of its trade secrets, irrespective of what has
+#  been deposited with the U.S. Copyright Office.
+#
+#  Origin: 30
+#
+#  IBM_PROLOG_END
 # File tracehash.pl created by B J Zander.
 # 05/08/2011 - Update by andrewg to work in host boot environment
 
@@ -627,12 +649,12 @@ sub assimilate_file($) {
 	    chop $line;         # remove EOL
 
 	    # 64 bit support
-	    $line =~ s/\%d/\%lld/g;
-	    $line =~ s/\%u/\%llu/g;
-	    $line =~ s/\%x/\%llx/g;
-	    $line =~ s/\%X/\%llX/g;
+	    $line =~ s/\%(\d*)(\.?)(\d*)(?:h?|l{0,2}|L?)d\b/\%$1$2$3lld/g;
+	    $line =~ s/\%(\d*)(\.?)(\d*)(?:h?|l{0,2}|L?)i\b/\%$1$2$3lld/g;
+	    $line =~ s/\%(\d*)(\.?)(\d*)(?:h?|l{0,2}|L?)u\b/\%$1$2$3llu/g;
+	    $line =~ s/\%(\d*)(\.?)(\d*)(?:h?|l{0,2}|L?)x\b/\%$1$2$3llx/g;
+	    $line =~ s/\%(\d*)(\.?)(\d*)(?:h?|l{0,2}|L?)X\b/\%$1$2$3llX/g;
 	    $line =~ s/\%p/0x\%llX/g;   # Replace pointer format with hex value
-	    $line =~ s/\%c/0x\%02llX/g; # Replace character format with 1 byte hex display
 	    #print "line: $line\n";
 
 	    if($version eq "1")
