@@ -164,17 +164,10 @@ class XSComP8Address
      * @brief Constructor of XSComP8Address class
      *
      * @param[in]   i_addr          PCB address of the register being accessed
-     * @param[in]   i_nodeId        Node number where the processor chip resides
-     * @param[in]   i_chipId        Chip number of the processor chip that
-     *                              holds the register being accessed.
-     * @param[in]   i_mXSComBase    Base address of XSCom address range.
      *
      * @return  None
      */
-     ALWAYS_INLINE inline XSComP8Address(const XSComAddress_t i_addr,
-                                         const XSComNodeId_t i_nodeId,
-                                         const XSComChipId_t i_chipId,
-                                         const XSComBase_t i_mXSComBase);
+     ALWAYS_INLINE inline XSComP8Address(const XSComAddress_t i_addr);
 
     /**
       * @brief Conversion operator
@@ -182,13 +175,11 @@ class XSComP8Address
       ALWAYS_INLINE inline operator uint64_t() const;
 
     /**
-      * @brief Return the address' 64-bit full offset from the input
-      * XSCOM base addr
+      * @brief Return the address' 64-bit full offset
       *
       * @return  uint64_t
       */
-      ALWAYS_INLINE inline uint64_t offset(
-                      const uint64_t i_xscomBaseAddr) const;
+      ALWAYS_INLINE inline uint64_t offset(void) const;
 
   private:
     /**
@@ -222,14 +213,12 @@ class XSComP8Address
 
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
-XSComP8Address::XSComP8Address(const XSComAddress_t i_addr,
-                               const XSComNodeId_t i_nodeId,
-                               const XSComChipId_t i_chipId,
-                               const XSComBase_t i_mXSComBase)
-:mMmioAddress(i_mXSComBase)
+XSComP8Address::XSComP8Address(const XSComAddress_t i_addr)
+:mMmioAddress(0)
 {
-    mAddressParts.mNodeId = i_nodeId;
-    mAddressParts.mChipId = i_chipId;
+    // Relative address of Node 0, chip 0
+    // The chip's nodeId and chip id will be taken into account
+    // when calculating its XSCOM base address
     mAddressParts.mSComAddrHi = i_addr >> 4; // Get 27-bits
     mAddressParts.mSComAddrLo = i_addr;      // Get 4 bits
 }
@@ -243,9 +232,9 @@ XSComP8Address::operator uint64_t() const
 
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
-uint64_t XSComP8Address::offset(const uint64_t i_xscomBaseAddr) const
+uint64_t XSComP8Address::offset(void) const
 {
-    return ((mMmioAddress - i_xscomBaseAddr) / sizeof(uint64_t));
+    return (mMmioAddress / sizeof(uint64_t));
 }
 
 };

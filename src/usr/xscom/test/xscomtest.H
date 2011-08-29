@@ -69,7 +69,11 @@ public:
     void testXscom1(void)
     {
 
-        TARGETING::Target* l_testTarget = MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
+        TARGETING::TargetService& l_targetService = TARGETING::targetService();
+        TARGETING::Target* l_testTarget = NULL;
+        l_targetService.masterProcChipTargetHandle( l_testTarget );
+        assert(l_testTarget != NULL);
+
         size_t l_size = sizeof(uint64_t);
 
         // Loop thru table
