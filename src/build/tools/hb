@@ -1,4 +1,26 @@
 #!/bin/sh
+#  IBM_PROLOG_BEGIN_TAG
+#  This is an automatically generated prolog.
+#
+#  $Source: src/build/tools/hb $
+#
+#  IBM CONFIDENTIAL
+#
+#  COPYRIGHT International Business Machines Corp. 2011
+#
+#  p1
+#
+#  Object Code Only (OCO) source materials
+#  Licensed Internal Code Source Materials
+#  IBM HostBoot Licensed Internal Code
+#
+#  The source code for this program is not published or other-
+#  wise divested of its trade secrets, irrespective of what has
+#  been deposited with the U.S. Copyright Office.
+#
+#  Origin: 30
+#
+#  IBM_PROLOG_END
 
 execute_in_sandbox()
 {
@@ -127,6 +149,16 @@ hb_helptext()
         echo "  modules and generates a CSV output of the sizes of the text"
         echo "  and data sections of the modules."
         ;;
+    copyright_check)
+        echo "  Topic 'copyright_check'"
+        echo
+        echo "  Usage:"
+        echo "      hb copyright_check"
+        echo
+        echo "  Executes addCopyright.pl in validate mode against the most"
+        echo "  recent commit in your repository to ensure the prologs are"
+        echo "  all added properly."
+        ;;
     customrc)
         echo "  Topic 'customrc'"
         echo
@@ -156,7 +188,8 @@ hb_helptext()
         echo "      hb help [<cmd>|<topic>]"
         echo
         echo "  Available Commands:"
-        echo "      workon, simsetup, prime, startsimics, rsync, objsizes"
+        echo "      workon, simsetup, prime, startsimics, rsync, objsizes,"
+        echo "      copyright_check"
         echo
         echo "  Additional Help Topics:"
         echo "      customrc"
@@ -290,6 +323,11 @@ hb_objsizes()
     sed "s/.*\///"
 }
 
+hb_copyright_check()
+{
+    git diff HEAD~1 --name-only | xargs addCopyright.pl validate
+}
+
 if [ 0 == $# ]; then
     hb_helptext
     exit -1
@@ -316,6 +354,9 @@ rsync)
     ;;
 objsizes)
     hb_objsizes $*
+    ;;
+copyright_check)
+    hb_copyright_check $*
     ;;
 *)
     hb_helptext $*
