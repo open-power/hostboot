@@ -52,8 +52,7 @@
 //      EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi
 //      EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/plat
 
-#include <fapi.H>
-#include <fapiPlatHwpInvoker.H>
+#include <fapiTarget.H>
 #include <fapiPlatHwpInvoker.H>
 #include <targeting/targetservice.H>
 
@@ -85,26 +84,24 @@ void    IStep0sub0( void * io_pArgs )
             command, returncode );
     //  -----   start ISTEP --------------------------------------------------
 
-
     // Set processor chip to the master
-     TARGETING::Target* l_testTarget = MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
+    TARGETING::Target* l_pTarget = MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
 
-    l_err = invokeHwpInitialTest(l_testTarget);
+    // Create a FAPI Target and invoke the hwpInitialTest HWP
+    fapi::Target l_fapiTarget(TARGET_TYPE_PROC_CHIP,
+                              reinterpret_cast<void *> (l_pTarget));
+
+    FAPI_INVOKE_HWP(l_err, hwpInitialTest, l_fapiTarget);
+
     if (l_err)
     {
-        TRACFCOMP( g_trac_istep1,
-                "Failed, posting error code 1");
-
-        // Commit/delete error
+        TRACFCOMP( g_trac_istep1, "IStep1 failed, posting error code 1");
         errlCommit(l_err);
-
         pTaskArgs->postReturnCode( 1 );
     }
     else
     {
-        TRACFCOMP( g_trac_istep1,
-                "Finished successfully.");
-
+        TRACFCOMP( g_trac_istep1, "IStep1 finished successfully.");
         pTaskArgs->postReturnCode( 0 );
     }
 

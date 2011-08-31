@@ -75,54 +75,32 @@ public:
         return;
     }
 
-
     /**
-      * @brief Test HWPF: call a test procedure
+      * @brief Test HWPF: call a test procedure that generates an error
       */
     void testHwpf2()
     {
         // Call a test hardware procedure
         errlHndl_t l_err = NULL;
 
-        // Set processor chip to the master
-        TARGETING::Target* l_testTarget = MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
+        // Set processor chip to NULL. The target is not used by this HWP
+        TARGETING::Target* l_pTarget = NULL;
 
-        // Call the test hardware procedure
-        l_err = invokeHwpInitialTest(l_testTarget);
+        // Create a FAPI Target and invoke the hwpTestError HWP. The HWP
+        // returns an error to test out error handling
+        fapi::Target l_fapiTarget(TARGET_TYPE_PROC_CHIP,
+                                  reinterpret_cast<void *> (l_pTarget));
+
+        FAPI_INVOKE_HWP(l_err, hwpTestError, l_fapiTarget);
+
         if (l_err)
         {
-            TS_FAIL("testHwpf2: Unit Test failed. invokeHwpInitialTest failed. Error logged");
-            // Commit/delete error
+            TS_TRACE("testHwpf2: Unit Test passed. hwpTestError failed. Error logged");
             errlCommit(l_err);
         }
         else
         {
-            TS_TRACE("testHwpf2: Unit test passed! invokeHwpInitialTest");
-        }
-    }
-
-    /**
-      * @brief Test HWPF: call a test procedure that generates an error
-      */
-    void testHwpf3()
-    {
-        // Call a test hardware procedure
-        errlHndl_t l_err = NULL;
-
-        // Set processor chip to the master
-        TARGETING::Target* l_testTarget = MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
-
-        // Call the procedure that generates an error to test out error handling
-        l_err = invokeHwpTestError(l_testTarget);
-        if (l_err)
-        {
-            TS_TRACE("testHwpf3: Unit Test passed. invokeHwpTestError failed. Error logged");
-            // Commit/delete error
-            errlCommit(l_err);
-        }
-        else
-        {
-            TS_FAIL("testHwpf3: Unit Test failed. invokeHwpTestError passed. Error logged");
+            TS_FAIL("testHwpf2: Unit Test failed. hwpTestError passed. Error logged");
         }
     }
 };

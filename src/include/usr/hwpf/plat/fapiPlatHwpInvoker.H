@@ -23,36 +23,46 @@
 /**
  *  @file fapiPlatHwpInvoker.H
  *
- *  @brief Defines the platform specific HW Procedure invoker functions.
- *
- *  Note that each platform needs to provide an invoker function for each HW
- *  procedure. Prototypes cannot be provided because each platform will have
- *  functions that take platform specific targets and return platform specific
- *  return codes.
+ *  @brief Defines the HostBoot HWP invoker macro and a function to convert a
+ *         fapi::ReturnCode to an error log
  */
 
 #ifndef FAPIPLATHWPINVOKER_H_
 #define FAPIPLATHWPINVOKER_H_
 
-#include <targeting/targetservice.H>
 #include <errl/errlentry.H>
+#include <fapiReturnCode.H>
+#include <fapiHwpExecutor.H>
+
+/**
+ * @brief HWP Invoker macro
+ *
+ * This macro is called by HostBoot PLAT code to invoke a HW Procedure (HWP).
+ * The caller must create any necessary fapi::Targets and pass them as
+ * parameters. This macro simply calls the FAPI HWP executor macro and converts
+ * the returned fapi::Return code to a HostBoot error log
+ *
+ * ERRHNDL    - errlHndl_t
+ * FUNC       - HWP function name
+ * FAPITARGET - fapi::Target (first parameter of all HWPs)
+ * _args_...  - Any additional arguments that the HWP requires
+ */
+#define FAPI_INVOKE_HWP(ERRHNDL, FUNC, FAPITARGET, _args_...) \
+    fapi::ReturnCode l_rc; \
+    FAPI_EXEC_HWP(l_rc, FUNC, FAPITARGET, ##_args_); \
+    ERRHNDL = fapi::fapiRcToErrl(l_rc)
 
 namespace fapi
 {
 
 /**
- * @brief Invokes hwpInitialTest procedure
+ * @brief Converts a fapi::ReturnCode to a HostBoot PLAT error log
  *
- * @param[in]  i_target   Pointer to Chip
- */
-errlHndl_t invokeHwpInitialTest(TARGETING::Target* i_target);
-
-/**
- * @brief Invokes hwpTestError procedure
+ * @param[io] io_rc Reference to ReturnCode (set to success after function ends)
  *
- * @param[in]  i_target   Pointer to Chip
+ * @return errlHndl_t (NULL if Return Code contained success)
  */
-errlHndl_t invokeHwpTestError(TARGETING::Target* i_target);
+errlHndl_t fapiRcToErrl(ReturnCode & io_rc);
 
 }
 
