@@ -28,7 +28,7 @@ all:
 ifdef MODULE
 OBJDIR = ${ROOTPATH}/obj/modules/${MODULE}
 BEAMDIR = ${ROOTPATH}/obj/beam/${MODULE}
-GENDIR = ${ROOTPATH}/obj/genfiles/
+GENDIR = ${ROOTPATH}/obj/genfiles
 IMGDIR = ${ROOTPATH}/img
 EXTRACOMMONFLAGS += -fPIC -Bsymbolic -Bsymbolic-functions 
 ifdef STRICT
@@ -41,7 +41,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr ${GENDIR}
 else
 OBJDIR = ${ROOTPATH}/obj/core
 BEAMDIR = ${ROOTPATH}/obj/beam/core
-GENDIR = ${ROOTPATH}/obj/genfiles/
+GENDIR = ${ROOTPATH}/obj/genfiles
 IMGDIR = ${ROOTPATH}/img
 EXTRAINCDIR += ${GENDIR}
 endif
@@ -230,6 +230,8 @@ gen_pass:
 
 _GENFILES = $(addprefix ${GENDIR}/, ${GENFILES})
 GEN_PASS: ${_GENFILES} ${SUBDIRS:.d=.gen_pass}
+
+GENTARGET = $(addprefix %/, $(1))
 
 ${BEAMDIR}/%.beam : %.C
 	mkdir -p ${BEAMDIR}
