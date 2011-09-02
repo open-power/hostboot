@@ -302,7 +302,7 @@ void    IStepDispatcher::singleStepISteps( void *  io_ptr )   const
                 TRACDCOMP( g_trac_initsvc,
                            "execute Istep=0x%x / Substep=0x%x",
                            l_nextIStep,
-                           l_nextSubStep );
+                           l_nextSubstep );
 
                 //  clear status, etc for the next istep
                 l_taskStatus    =   0;
