@@ -106,7 +106,7 @@ extern uint64_t g_ModulesCompleted;
 
 
 // TS_FAIL
-#define TS_FAIL(...)    TRACDCOMP( g_trac_test, "!!!TS_FAIL> " __VA_ARGS__); \
+#define TS_FAIL(...)    TRACFCOMP( g_trac_test, "!!!TS_FAIL> " __VA_ARGS__); \
     CxxTest::doFailTest( __FILE__, __LINE__ )
 
 }
