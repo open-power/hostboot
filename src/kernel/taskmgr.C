@@ -110,6 +110,9 @@ task_t* TaskManager::_createTask(TaskManager::task_fn_t t,
         task->context.gprs[1] = NULL;
     }
 
+    // Clear FP context (start with FP disabled on all tasks).
+    task->fp_context = NULL;
+
     return task;
 }
 

@@ -165,7 +165,12 @@ namespace Systemcalls
         // TODO: Deal with join.
 
         // Clean up task memory.
+            // Delete FP context.
+        if (t->fp_context)
+            delete t->fp_context;
+            // Delete stack.
         StackSegment::deleteStack(t->tid);
+            // Delete task struct.
         delete t;
     }
 

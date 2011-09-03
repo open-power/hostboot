@@ -1,7 +1,7 @@
 //  IBM_PROLOG_BEGIN_TAG
 //  This is an automatically generated prolog.
 //
-//  $Source: src/include/math.h $
+//  $Source: src/usr/testcore/lib/fptest.H $
 //
 //  IBM CONFIDENTIAL
 //
@@ -20,28 +20,30 @@
 //  Origin: 30
 //
 //  IBM_PROLOG_END
-#include <stdint.h>
-#include <builtins.h>
+#ifndef __TESTCORE_LIB_FPTEST_H
+#define __TESTCORE_LIB_FPTEST_H
 
-#ifndef _MATH_H
-#define _MATH_H
+/** @file fptest.H
+ *  @brief Test cases for floating point support.
+ */
+#include <math.h>
 
-#ifdef __cplusplus
-extern "C"
+class FloatingPointTest : public CxxTest::TestSuite
 {
-#endif
+    public:
 
-ALWAYS_INLINE
-static inline int64_t log2(uint64_t s)
-{
-    int64_t n = cntlzd(s);
-    return 63-n;
-}
+        void testSqrt()
+        {
+            if (2.0 != sqrt(4.0))
+            {
+                TS_FAIL("SQRT(4) != 2");
+            }
 
-double sqrt(double);
-
-#ifdef __cplusplus
+            if (3.0 != sqrt(9.0))
+            {
+                TS_FAIL("SQRT(9) != 3");
+            }
+        }
 };
-#endif
 
 #endif

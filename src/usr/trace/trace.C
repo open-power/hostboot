@@ -329,6 +329,7 @@ void Trace::_trace_adal_write_all(trace_desc_t *io_td,
     trace_bin_entry_t       l_entry;
     uint64_t                l_str_map = 0;
     uint64_t                l_char_map = 0;
+    uint64_t                l_double_map = 0;
 
 
     /*------------------------------------------------------------------------*/
@@ -386,6 +387,21 @@ void Trace::_trace_adal_write_all(trace_desc_t *io_td,
 
                 // Retrieve the argument to increment to next one
                 uint32_t l_tmpData = va_arg(i_args, uint32_t);
+
+                // Add to total size; data is word aligned
+                l_data_size += sizeof(l_tmpData);
+            }
+            else if (('e' == _fmt[i]) || ('f' == _fmt[i]) || ('g' == _fmt[i]))
+            {
+                // Set flag to indicate argument is a double
+                l_double_map = l_double_map | (1 << num_args);
+
+                // Numbers count as two 4-byte arg
+                num_args++;
+                num_4byte_args += 2;
+
+                // Retrieve the argument to increment to next one
+                double l_tmpData = va_arg(i_args,double);
 
                 // Add to total size; data is word aligned
                 l_data_size += sizeof(l_tmpData);
@@ -469,6 +485,13 @@ void Trace::_trace_adal_write_all(trace_desc_t *io_td,
                 *(reinterpret_cast<uint32_t *>(l_ptr)) = va_arg(l_args, uint32_t);
                 l_ptr += sizeof(uint32_t);
 
+            }
+            else if (l_double_map & (1 << i))
+            {
+                // Save number to buffer & increment pointer (no need to align)
+                *(reinterpret_cast<double *>(l_ptr)) = va_arg(l_args, double);
+
+                l_ptr += sizeof(double);
             }
             else
             {

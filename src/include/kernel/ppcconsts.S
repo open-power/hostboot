@@ -1,24 +1,24 @@
 #   IBM_PROLOG_BEGIN_TAG
 #   This is an automatically generated prolog.
-# 
+#
 #   $Source: src/include/kernel/ppcconsts.S $
-# 
+#
 #   IBM CONFIDENTIAL
-# 
+#
 #   COPYRIGHT International Business Machines Corp. 2010 - 2011
-# 
+#
 #   p1
-# 
+#
 #   Object Code Only (OCO) source materials
 #   Licensed Internal Code Source Materials
 #   IBM HostBoot Licensed Internal Code
-# 
+#
 #   The source code for this program is not published or other-
 #   wise divested of its trade secrets, irrespective of what has
 #   been deposited with the U.S. Copyright Office.
-# 
+#
 #   Origin: 30
-# 
+#
 #   IBM_PROLOG_END
 #*--------------------------------------------------------------------*#
 #*  Register Constants                                                *#
@@ -50,12 +50,45 @@
                 .set r23,23
                 .set r24,24
                 .set r25,25
-                .set r26,26 
+                .set r26,26
                 .set r27,27
                 .set r28,28
                 .set r29,29
                 .set r30,30
                 .set r31,31
+
+                .set f0,0
+                .set f1,1
+                .set f2,2
+                .set f3,3
+                .set f4,4
+                .set f5,5
+                .set f6,6
+                .set f7,7
+                .set f8,8
+                .set f9,9
+                .set f10,10
+                .set f11,11
+                .set f12,12
+                .set f13,13
+                .set f14,14
+                .set f15,15
+                .set f16,16
+                .set f17,17
+                .set f18,18
+                .set f19,19
+                .set f20,20
+                .set f21,21
+                .set f22,22
+                .set f23,23
+                .set f24,24
+                .set f25,25
+                .set f26,26
+                .set f27,27
+                .set f28,28
+                .set f29,29
+                .set f30,30
+                .set f31,31
 
 #*--------------------------------------------------------------------*#
 #*  CR Register Constants                                             *#
@@ -172,4 +205,38 @@
 .set TASK_CTR, TASK_CR+8
 .set TASK_XER, TASK_CTR+8
 
+.set TASK_FP_CONTEXT, TASK_XER+8
+.set TASK_FPR_0, 0
+.set TASK_FPR_1, TASK_FPR_0+8
+.set TASK_FPR_2, TASK_FPR_1+8
+.set TASK_FPR_3, TASK_FPR_2+8
+.set TASK_FPR_4, TASK_FPR_3+8
+.set TASK_FPR_5, TASK_FPR_4+8
+.set TASK_FPR_6, TASK_FPR_5+8
+.set TASK_FPR_7, TASK_FPR_6+8
+.set TASK_FPR_8, TASK_FPR_7+8
+.set TASK_FPR_9, TASK_FPR_8+8
+.set TASK_FPR_10, TASK_FPR_9+8
+.set TASK_FPR_11, TASK_FPR_10+8
+.set TASK_FPR_12, TASK_FPR_11+8
+.set TASK_FPR_13, TASK_FPR_12+8
+.set TASK_FPR_14, TASK_FPR_13+8
+.set TASK_FPR_15, TASK_FPR_14+8
+.set TASK_FPR_16, TASK_FPR_15+8
+.set TASK_FPR_17, TASK_FPR_16+8
+.set TASK_FPR_18, TASK_FPR_17+8
+.set TASK_FPR_19, TASK_FPR_18+8
+.set TASK_FPR_20, TASK_FPR_19+8
+.set TASK_FPR_21, TASK_FPR_20+8
+.set TASK_FPR_22, TASK_FPR_21+8
+.set TASK_FPR_23, TASK_FPR_22+8
+.set TASK_FPR_24, TASK_FPR_23+8
+.set TASK_FPR_25, TASK_FPR_24+8
+.set TASK_FPR_26, TASK_FPR_25+8
+.set TASK_FPR_27, TASK_FPR_26+8
+.set TASK_FPR_28, TASK_FPR_27+8
+.set TASK_FPR_29, TASK_FPR_28+8
+.set TASK_FPR_30, TASK_FPR_29+8
+.set TASK_FPR_31, TASK_FPR_30+8
+.set TASK_FPSCR, TASK_FPR_31+8
 

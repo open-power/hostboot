@@ -1,7 +1,7 @@
 //  IBM_PROLOG_BEGIN_TAG
 //  This is an automatically generated prolog.
 //
-//  $Source: src/include/math.h $
+//  $Source: src/lib/math.C $
 //
 //  IBM CONFIDENTIAL
 //
@@ -20,28 +20,12 @@
 //  Origin: 30
 //
 //  IBM_PROLOG_END
-#include <stdint.h>
-#include <builtins.h>
+#include <math.h>
 
-#ifndef _MATH_H
-#define _MATH_H
-
-#ifdef __cplusplus
-extern "C"
+double sqrt(double x)
 {
-#endif
-
-ALWAYS_INLINE
-static inline int64_t log2(uint64_t s)
-{
-    int64_t n = cntlzd(s);
-    return 63-n;
+    register double _x = x;
+    asm volatile("fsqrt %0, %1" : "=f" (_x) : "f" (_x));
+    return _x;
 }
 
-double sqrt(double);
-
-#ifdef __cplusplus
-};
-#endif
-
-#endif

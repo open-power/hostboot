@@ -148,7 +148,7 @@ STD_INTERRUPT(inst_segment, 0x480)
 UNIMPL_INTERRUPT(external, 0x500)
 STD_INTERRUPT(alignment, 0x600)
 STD_INTERRUPT(prog_ex, 0x700)
-UNIMPL_INTERRUPT(fp_unavail, 0x800)
+STD_INTERRUPT(fp_unavail, 0x800)
 STD_INTERRUPT(decrementer, 0x900)
 UNIMPL_INTERRUPT(hype_decrementer, 0x980)
 
@@ -303,12 +303,62 @@ kernel_save_task:
     std r30, TASK_GPR_30(r1)	;// Save GPR30
     std r31, TASK_GPR_31(r1)	;// Save GPR31
 
+    ld r2, TASK_FP_CONTEXT(r1)  ;// Load FP Context pointer.
+    cmpi cr0, r2, 0
+    bne- cr0, 1f                ;// Jump to FP-save if != NULL.
+2:
+
     ld r1, 0(r1)	;// Get CPU pointer
     ld r1, 0(r1)	;// Get kernel stack pointer.
 
     mfsprg0 r0		;// Retrieve return address from SPRG0
     mtlr r0		;// Call
     blr
+        ;// Save FP context.
+1:
+        ;// Enable FP.
+    mfmsr r3
+    ori r3,r3,0x2000
+    mtmsrd r3
+        ;// Save FPRs.
+    stfd f0, TASK_FPR_0(r2)
+    stfd f1, TASK_FPR_1(r2)
+    stfd f2, TASK_FPR_2(r2)
+    stfd f3, TASK_FPR_3(r2)
+    stfd f4, TASK_FPR_4(r2)
+    stfd f5, TASK_FPR_5(r2)
+    stfd f6, TASK_FPR_6(r2)
+    stfd f7, TASK_FPR_7(r2)
+    stfd f8, TASK_FPR_8(r2)
+    stfd f9, TASK_FPR_9(r2)
+    stfd f10, TASK_FPR_10(r2)
+    stfd f11, TASK_FPR_11(r2)
+    stfd f12, TASK_FPR_12(r2)
+    stfd f13, TASK_FPR_13(r2)
+    stfd f14, TASK_FPR_14(r2)
+    stfd f15, TASK_FPR_15(r2)
+    stfd f16, TASK_FPR_16(r2)
+    stfd f17, TASK_FPR_17(r2)
+    stfd f18, TASK_FPR_18(r2)
+    stfd f19, TASK_FPR_19(r2)
+    stfd f20, TASK_FPR_20(r2)
+    stfd f21, TASK_FPR_21(r2)
+    stfd f22, TASK_FPR_22(r2)
+    stfd f23, TASK_FPR_23(r2)
+    stfd f24, TASK_FPR_24(r2)
+    stfd f25, TASK_FPR_25(r2)
+    stfd f26, TASK_FPR_26(r2)
+    stfd f27, TASK_FPR_27(r2)
+    stfd f28, TASK_FPR_28(r2)
+    stfd f29, TASK_FPR_29(r2)
+    stfd f30, TASK_FPR_30(r2)
+    stfd f31, TASK_FPR_31(r2)
+        ;// Save FPSRC
+    mffs f0
+    stfd f0, TASK_FPSCR(r2)
+
+    b 2b
+
 
     ;// @fn dispatch_task
     ;// Loads context from task structure and performs rfi.
@@ -327,11 +377,18 @@ kernel_dispatch_task:
     ori r2,r2, 0xC030	;// Enable MSR[EE,PR,IR,DR].
     rldicl r2,r2,1,1	;// Clear ...
     rotldi r2,r2,63	;// 	MSR[TA]
+    rldicl r2,r2,50,1   ;// Clear ...
+    rotldi r2,r2,14     ;//     MSR[FP]
     mtsrr1 r2		;// Set task MSR (SRR1)
 
     ld r2, TASK_NIP(r1)	;// Load NIP from context.
     mtsrr0 r2		;// Set task NIP (SRR0)
 
+                        ;// Check if FP enabled, load context.
+    ld r2, TASK_FP_CONTEXT(r1)
+    cmpi cr0, r2, 0
+    bne- 1f
+2:
 			;// Restore GPRs from context.
     ld r0, TASK_GPR_0(r1)	;// GPR0
     ld r2, TASK_GPR_2(r1)	;// GPR2
@@ -377,6 +434,56 @@ kernel_dispatch_task:
     ld r1, TASK_GPR_1(r1)	;// GPR1
 
     rfid			;// Execute task.
+
+        ;// Load FP context.
+1:
+        ;// Set MSR[FP] and also in SRR1.
+    mfmsr r3
+    ori r3,r3,0x2000
+    mtmsrd r3
+    mfsrr1 r3
+    ori r3,r3,0x2000
+    mtsrr1 r3
+        ;// Restore FPSCR
+    lfd f0, TASK_FPSCR(r2)
+    mtfsf f0,f0,1,1
+        ;// Restore FPRs
+    lfd f0, TASK_FPR_0(r2)
+    lfd f1, TASK_FPR_1(r2)
+    lfd f2, TASK_FPR_2(r2)
+    lfd f3, TASK_FPR_3(r2)
+    lfd f4, TASK_FPR_4(r2)
+    lfd f5, TASK_FPR_5(r2)
+    lfd f6, TASK_FPR_6(r2)
+    lfd f7, TASK_FPR_7(r2)
+    lfd f8, TASK_FPR_8(r2)
+    lfd f9, TASK_FPR_9(r2)
+    lfd f10, TASK_FPR_10(r2)
+    lfd f11, TASK_FPR_11(r2)
+    lfd f12, TASK_FPR_12(r2)
+    lfd f13, TASK_FPR_13(r2)
+    lfd f14, TASK_FPR_14(r2)
+    lfd f15, TASK_FPR_15(r2)
+    lfd f16, TASK_FPR_16(r2)
+    lfd f17, TASK_FPR_17(r2)
+    lfd f18, TASK_FPR_18(r2)
+    lfd f19, TASK_FPR_19(r2)
+    lfd f20, TASK_FPR_20(r2)
+    lfd f21, TASK_FPR_21(r2)
+    lfd f22, TASK_FPR_22(r2)
+    lfd f23, TASK_FPR_23(r2)
+    lfd f24, TASK_FPR_24(r2)
+    lfd f25, TASK_FPR_25(r2)
+    lfd f26, TASK_FPR_26(r2)
+    lfd f27, TASK_FPR_27(r2)
+    lfd f28, TASK_FPR_28(r2)
+    lfd f29, TASK_FPR_29(r2)
+    lfd f30, TASK_FPR_30(r2)
+    lfd f31, TASK_FPR_31(r2)
+
+    b 2b
+
+
 
     ;// @fn system_call_fast_path
     ;// Handle fast path system calls.

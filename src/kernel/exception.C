@@ -20,6 +20,7 @@
 //  Origin: 30
 //
 //  IBM_PROLOG_END
+#include <assert.h>
 #include <kernel/types.h>
 #include <kernel/console.H>
 #include <kernel/task.H>
@@ -159,4 +160,23 @@ namespace ExceptionHandles
 	return false;
     }
 
+}
+
+extern "C"
+void kernel_execute_fp_unavail()
+{
+    task_t* t = TaskManager::getCurrentTask();
+
+    if (t->fp_context)
+    {
+        printk("Error: FP unavailable while task has FP-context.\n");
+        kassert(t->fp_context == NULL);
+    }
+    else
+    {
+        // Enable FP by creating a FP context.
+        // Context switch code will handle the rest.
+        t->fp_context = new context_fp_t;
+        memset(t->fp_context, '\0', sizeof(context_fp_t));
+    }
 }

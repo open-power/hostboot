@@ -74,7 +74,7 @@ BEAMFLAGS = \
     -o /dev/null
 
 COMMONFLAGS = -O3 -nostdlib ${EXTRACOMMONFLAGS}
-CFLAGS = ${COMMONFLAGS} -mcpu=power7 -nostdinc -g -msoft-float -mno-altivec \
+CFLAGS = ${COMMONFLAGS} -mcpu=power7 -nostdinc -g -mno-vsx -mno-altivec\
 	 -Wall -Werror -fshort-enums ${CUSTOMFLAGS}
 ASMFLAGS = ${COMMONFLAGS} -mcpu=power7
 CXXFLAGS = ${CFLAGS} -nostdinc++ -fno-rtti -fno-exceptions -Wall

@@ -44,6 +44,18 @@ struct context_t
     uint64_t xer;
 };
 
+/** @struct context_fp_t
+ *  @brief Defines the save-restore context for the floating point registers
+ *         associated with a task.
+ *
+ *  See PowerISA for information on registers listed.
+ */
+struct context_fp_t
+{
+    uint64_t fprs[32];
+    uint64_t fpscr;
+};
+
 /** @struct task_t
  *  @brief The kernel-level task structure.
  */
@@ -54,6 +66,8 @@ struct task_t
         /** Context information.  This MUST stay here due to
          *  save-restore asm code. */
     context_t context;
+        /** Pointer to optional floating point context. */
+    context_fp_t* fp_context;
 
         /** Task ID */
     tid_t tid;
