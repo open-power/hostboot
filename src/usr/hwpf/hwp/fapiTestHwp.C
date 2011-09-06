@@ -35,6 +35,7 @@
  *                          mjjones     06/28/2011  Removed attribute tests
  *                          andrewg     07/07/2011  Added test for hw team to fill in
  *                          mjjones     08/10/2011  Removed clock HWP
+ *                          mjjones     09/01/2011  Call toString in InitialTest
  *
  */
 
@@ -49,6 +50,11 @@ extern "C"
 fapi::ReturnCode hwpInitialTest(const fapi::Target & i_chip)
 {
     FAPI_INF("Performing HWP: hwpInitialTest");
+
+    // Print the ecmd string of the chip
+    char l_string[fapi::MAX_ECMD_STRING_LEN] = {0};
+    i_chip.toString(l_string);
+    FAPI_INF("hwpInitialTest: Chip: %s", l_string);
 
     fapi::ReturnCode l_rc;
 

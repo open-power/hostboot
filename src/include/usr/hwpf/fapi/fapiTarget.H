@@ -33,7 +33,8 @@
  * ------   --------------  ----------  ----------- ----------------------------
  *                          mjjones     04/13/2011  Created. Based on Hlava prototype
  *                          mjjones     06/29/2011  Removed incorrect MSB from 2 enums
- *                          mjjones     07/05/2011. Removed const from handle
+ *                          mjjones     07/05/2011  Removed const from handle
+ *                          mjjones     08/29/2011  Updated toString function
  */
 
 #ifndef FAPITARGET_H_
@@ -65,6 +66,11 @@ enum TargetType
  * @brief Typedef used when passing multiple TargetType values
  */
 typedef uint32_t TargetTypes_t;
+
+/**
+ * @brief ECMD constants
+ */
+const uint32_t MAX_ECMD_STRING_LEN = 64;
 
 /**
  * @class Target
@@ -172,15 +178,15 @@ public:
     /**
      * @brief Convert a target to an ecmd-format target string
      *
+     * This is used in order to trace the target in the common SCAN trace
+     *
      * @note Implemented by platform code
      *
-     * @return A pointer to a c-string. If the object cannot be converted to a
-     *         valid ecmd string, a NULL pointer is returned.
-     *
-     * IMPORTANT: It is the caller's responsibility to free the returned string
-     * when done with it by calling "free(char*)".
+     * @param[out] o_ecmdString. Reference to a character array of length
+     *                           MAX_ECMD_STRING_LEN. This is filled in with the
+     *                           null terminated ECMD string.
      */
-    const char * toString() const;
+    void toString(char (&o_ecmdString)[MAX_ECMD_STRING_LEN]) const;
 
 private:
 

@@ -273,11 +273,32 @@ errlHndl_t getTargetVirtualAddress(const TARGETING::Target* i_target,
 
     do
     {
-        // Sentinel
+        // Find out if the target pointer is the master processor chip
+        bool l_isMasterProcChip = false;
+
         if (i_target == TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL)
         {
-            // If never XSCOM to sentinel before, calculate
-            // sentinel's virtAddr and store it
+            // Sentinel pointer representing the master processor chip
+            l_isMasterProcChip = true;
+        }
+        else
+        {
+            TARGETING::Target* l_pMasterProcChip = NULL;
+            TARGETING::targetService().
+                masterProcChipTargetHandle(l_pMasterProcChip);
+
+            if (i_target == l_pMasterProcChip)
+            {
+                // Target Service reports that this is the master processor chip
+                l_isMasterProcChip = true;
+            }
+        }
+
+        // Figure out the virtual address
+        if (l_isMasterProcChip)
+        {
+            // This is the master processor chip. The virtual address is
+            // g_masterProcVirtAddr. If this is NULL then initialize it
 
             // Use atomic update instructions here to avoid
             // race condition between different threads.
@@ -323,10 +344,10 @@ errlHndl_t getTargetVirtualAddress(const TARGETING::Target* i_target,
             // Set virtual address to sentinel's value
             o_virtAddr = g_masterProcVirtAddr;
         }
-
-        // Non-sentinel
         else
         {
+            // This is not the master processor chip
+
             // @todo:
             // We (Nick/Patrick/Thi) agree to review the performance cost of
             // map/unmap calls for each xscom to determine if it's justified
@@ -349,45 +370,26 @@ errlHndl_t getTargetVirtualAddress(const TARGETING::Target* i_target,
                 // update it. For Rainer systems the node id of the master chip may
                 // not be 0 if it is on a second node.
 
-                // Is this the master proc?
-                TARGETING::Target* l_masterProcTarget = NULL;
+                // Get system XSCOM base address
+                // Note: can't call TARGETING code prior to PNOR being
+                // brought up.
                 TARGETING::TargetService& l_targetService =
-                                            TARGETING::targetService();
-                l_targetService.masterProcChipTargetHandle( l_masterProcTarget );
-
-                // Use sentinel's virtual address for Master processor
-                if (l_masterProcTarget == i_target)
-                {
-                    // There's no way g_masterProcVirtAddr is NULL
-                    // at this point.  For safety
-                    assert(g_masterProcVirtAddr != NULL);
-                    o_virtAddr = g_masterProcVirtAddr;
-                }
-
-                // Calculate virtual address for slave processors
-                else
-                {
-                    // Get system XSCOM base address
-                    // Note: can't call TARGETING code prior to PNOR being
-                    // brought up.
-                    TARGETING::TargetService& l_targetService =
-                                            TARGETING::targetService();
-                    TARGETING::Target* l_pTopLevel = NULL;
-                    (void) l_targetService.getTopLevelTarget(l_pTopLevel);
-                    assert(l_pTopLevel != NULL);
-                    XSComBase_t l_systemBaseAddr =
+                                        TARGETING::targetService();
+                TARGETING::Target* l_pTopLevel = NULL;
+                (void) l_targetService.getTopLevelTarget(l_pTopLevel);
+                assert(l_pTopLevel != NULL);
+                XSComBase_t l_systemBaseAddr =
                     l_pTopLevel->getAttr<TARGETING::ATTR_XSCOM_BASE_ADDRESS>();
 
-                    // Target's XSCOM Base address
-                    l_XSComBaseAddr = l_systemBaseAddr +
-                        ( ( (g_xscomMaxChipsPerNode * l_xscomChipInfo.nodeId) +
-                                l_xscomChipInfo.chipId ) * THIRTYTWO_GB);
+                // Target's XSCOM Base address
+                l_XSComBaseAddr = l_systemBaseAddr +
+                    ( ( (g_xscomMaxChipsPerNode * l_xscomChipInfo.nodeId) +
+                            l_xscomChipInfo.chipId ) * THIRTYTWO_GB);
 
-                    // Target's virtual address
-                    o_virtAddr = static_cast<uint64_t*>
-                        (mmio_dev_map(reinterpret_cast<void*>(l_XSComBaseAddr),
-                          THIRTYTWO_GB));
-                }
+                // Target's virtual address
+                o_virtAddr = static_cast<uint64_t*>
+                    (mmio_dev_map(reinterpret_cast<void*>(l_XSComBaseAddr),
+                      THIRTYTWO_GB));
 
                 // @todo - Save as an attribute if Virtual address attribute
                 // is implemented,

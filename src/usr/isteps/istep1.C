@@ -84,8 +84,9 @@ void    IStep0sub0( void * io_pArgs )
             command, returncode );
     //  -----   start ISTEP --------------------------------------------------
 
-    // Set processor chip to the master
-    TARGETING::Target* l_pTarget = MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
+    // Get the master processor chip
+    TARGETING::Target* l_pTarget = NULL;
+    TARGETING::targetService().masterProcChipTargetHandle(l_pTarget);
 
     // Create a FAPI Target and invoke the hwpInitialTest HWP
     fapi::Target l_fapiTarget(TARGET_TYPE_PROC_CHIP,
