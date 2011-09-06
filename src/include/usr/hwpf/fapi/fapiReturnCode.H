@@ -34,6 +34,8 @@
  *                          mjjones     07/05/2011  Removed const from data
  *                          mjjones     07/25/2011  Added support for FFDC and
  *                                                  Error Target
+ *                          camvanng    09/06/2011  Added function template for
+ *                                                  setHwpFfdc
  */
 
 #ifndef FAPIRETURNCODE_H_
@@ -207,6 +209,21 @@ public:
      * param[in] i_size  Size of the FFDC data in bytes
      */
     void setHwpFfdc(const void * i_pFfdc, const uint32_t i_size);
+
+    /**
+     * @brief Stores a copy of the provided HwpFfdc
+     *
+     * param[in] i_data  FFDC data, which can be any type
+     *
+     * Example usage:
+     *     uint32_t l_data = 0x12345678;
+     *     fapi::ReturnCode l_rc;
+     *     l_rc.setHwpFfdc(l_data);
+     */
+    template<class T> void setHwpFfdc(const T & i_data)
+    {
+        setHwpFfdc(&i_data, sizeof(T));
+    }
 
     /**
      * @brief Gets the creator of the return code

@@ -34,6 +34,7 @@
  *                          camvanng    05/31/2011  Removed fapiOutputx macros
  *                          mjjones     06/30/2011  Removed #include
  *                          mjjones     07/05/2011  Removed rogue tab
+ *                          camvanng    09/06/2011  Added fapiLogError
  *
  */
 
@@ -85,6 +86,29 @@ void fapiAssert(bool i_expression);
  fapi::ReturnCode delay( uint64_t i_nanoSeconds, uint64_t i_simCycles );
 
 
+/**
+ * @brief Log an error.
+ *
+ * This function can be called by HWP to log an error.
+ *
+ * @note Implemented by platform code
+ *
+ * @param[io] Reference to ReturnCode (Any references to data and error
+ *            target are removed and rc value is set to success after
+ *            function ends.)
+ *
+ * Example usage:
+ *     fapi::ReturnCode l_rc;
+ *     FAPI_EXEC_HWP(l_rc, function1, i_target);
+ *     if (!l_rc)
+ *     {
+ *         fapiLogError(l_rc);
+ *     }
+ *
+ *     FAPI_EXEC_HWP(l_rc, function2, i_target)
+ *     return rc;
+ */
+void fapiLogError(ReturnCode & io_rc);
 
 }
 

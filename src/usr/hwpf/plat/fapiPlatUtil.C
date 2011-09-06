@@ -32,6 +32,8 @@
 #include <fapi.H>
 #include <trace/interface.H>
 #include <sys/time.h>
+#include <errl/errlmanager.H>
+#include <fapiPlatHwpInvoker.H>
 
 
 //******************************************************************************
@@ -83,6 +85,25 @@ fapi::ReturnCode delay( uint64_t i_nanoSeconds, uint64_t i_simCycles )
     FAPI_DBG( INFO_MRK "delay %lld nanosec", i_nanoSeconds );
     nanosleep( 0, i_nanoSeconds );
     return fapi::FAPI_RC_SUCCESS;
+}
+
+//******************************************************************************
+// fapiLogError
+//******************************************************************************
+void fapiLogError(ReturnCode & io_rc)
+{
+    errlHndl_t l_pError = NULL;
+
+    FAPI_ERR("fapiLogError: logging error");
+
+    // Convert the return code to an error log.
+    // This will set the return code to FAPI_RC_SUCCESS and clear any PLAT Data,
+    // HWP FFDC data, and Error Target associated with it.
+    l_pError = fapiRcToErrl(io_rc);
+
+    // Commit the error log. This will delete the error log and set the handle
+    // to NULL.
+    errlCommit(l_pError);
 }
 
 

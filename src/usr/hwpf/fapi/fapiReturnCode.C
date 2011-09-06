@@ -34,6 +34,10 @@
  *                          mjjones     07/05/2011. Removed const from data
  *                          mjjones     07/25/2011  Added support for FFDC and
  *                                                  Error Target
+ *                          camvanng    09/06/2011  Clear Plat Data, Hwp FFDC data,
+ *                                                  and Error Target if
+ *                                                  FAPI_RC_SUCCESS is assigned to
+ *                                                  ReturnCode
  */
 
 #include <fapiReturnCode.H>
@@ -98,6 +102,7 @@ ReturnCode::~ReturnCode()
     (void) removePlatData();
     (void) removeHwpFfdc();
     delete iv_pErrTarget;
+    iv_pErrTarget = NULL;
 }
 
 //******************************************************************************
@@ -112,6 +117,7 @@ ReturnCode & ReturnCode::operator=(const ReturnCode & i_right)
         (void) removePlatData();
         (void) removeHwpFfdc();
         delete iv_pErrTarget;
+        iv_pErrTarget = NULL;
 
         // Copy instance variables. Note shallow copy of data ref pointers. Both
         // ReturnCodes now point to the same data
@@ -144,6 +150,16 @@ ReturnCode & ReturnCode::operator=(const ReturnCode & i_right)
 ReturnCode & ReturnCode::operator=(const uint32_t i_rcValue)
 {
     iv_rcValue = i_rcValue;
+
+    if (ok())
+    {
+        // Remove interest in any data references and delete any Error Target
+        (void) removePlatData();
+        (void) removeHwpFfdc();
+        delete iv_pErrTarget;
+        iv_pErrTarget = NULL;
+    }
+
     return *this;
 }
 

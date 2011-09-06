@@ -31,6 +31,8 @@
  * Flag     Defect/Feature  User        Date        Description
  * ------   --------------  ----------  ----------- ----------------------------
  *                          mjjones     08/08/2011  Created.
+ *                          camvanng    09/06/2011  Added code to test
+ *                                                  fapiLogError
  *
  */
 
@@ -50,6 +52,42 @@ fapi::ReturnCode hwpTestError(const fapi::Target & i_target)
 
     // Add some local FFDC to the ReturnCode
     uint32_t l_ffdc = 0x12345678;
+    l_rc.setHwpFfdc(l_ffdc);
+
+    // Log the error
+    fapiLogError(l_rc);
+
+    // Check that the return code is set to success and any data or Error
+    // Target references are cleared
+    if (!l_rc.ok())
+    {
+        FAPI_ERR("Performing HWP: hwpTestError: rc is 0x%x, " \
+                 "expected success", static_cast<uint32_t>(l_rc));
+    }
+
+    if (l_rc.getErrTarget() != NULL)
+    {
+        FAPI_ERR("Performing HWP: hwpTestError: getErrTarget " \
+                 "returned non-null pointer");
+    }
+
+    if (l_rc.getPlatData() != NULL)
+    {
+        FAPI_ERR("Performing HWP: hwpTestError: getPlatData " \
+                 "returned non-null pointer");
+    }
+
+    uint32_t l_size = 0;
+    if (l_rc.getHwpFfdc(l_size) != NULL)
+    {
+        FAPI_ERR("Performing HWP: hwpTestError: getHwpFFDC " \
+                 "returned non-null pointer");
+    }
+
+    // Reset the return code
+    l_rc = fapi::RC_TEST_ERROR_A;
+
+    // Add some local FFDC to the ReturnCode
     l_rc.setHwpFfdc(reinterpret_cast<void *>(&l_ffdc), sizeof(uint32_t));
 
     return l_rc;
