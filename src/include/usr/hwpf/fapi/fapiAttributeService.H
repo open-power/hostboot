@@ -34,6 +34,7 @@
  * ------   --------------  ----------  ----------- ----------------------------
  *                          mjjones     06/06/2011  Created.
  *                          mjjones     06/22/2011  Major updates
+ *                          mjjones     09/06/2011  Remove support for strings
  */
 
 #ifndef FAPIATTRIBUTESERVICE_H_
@@ -45,22 +46,10 @@
 /**
  * @brief Macros called by user to get/set attributes
  *
- * @note The user must use these macros rather than any AttributeService
- *       functions.
- *
  * Code must have a pointer to a Target and an attribute ID (from XML file):
  *   fapi::ReturnCode l_rc;
  *   fapi::Target * l_pTarget = ????;
  *   AttributeId l_id = ????;
- *
- * To get a copy of a string attribute
- *   char * l_pString = NULL;
- *   l_rc = FAPI_ATTR_GET(l_id, l_pTarget, l_pString);
- *   delete[] l_pString; // When finished with the attribute
- *
- * To set a string attribute
- *   l_rc = FAPI_ATTR_SET(l_id, l_pTarget, "string-literal");
- *   l_rc = FAPI_ATTR_SET(l_id, l_pTarget, l_pString);
  *
  * To get a copy of an integer attribute and set the attribute
  *   uint64_t l_val = 0;
@@ -93,12 +82,10 @@ namespace AttributeCheck
 {
 
 /**
- * @brief Check the ID and VAL
+ * @brief Check the ID and TYPE
  *
- * This is called by FAPI_ATTR_GET/SET to check at compile time that the ID and
- * VAL macro parameters are correct. If the ID is not an AttributeId or the VAL
- * is not the type specified in the attribute XML file then no function will be
- * found.
+ * This is called by FAPI code to check at compile time that a FAPI attribute
+ * access is using the correct data type and a valid AttributeId
  */
 template<typename T> void checkIdType(AttributeId, T &) {}
 

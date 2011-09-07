@@ -21,7 +21,6 @@
 #  Origin: 30
 #
 #  IBM_PROLOG_END
-
 #
 # Purpose:  This perl script will parse HWP Attribute XML files
 # and add attribute information to a file called fapiAttributeIds.H
@@ -40,6 +39,7 @@
 #                  mjjones   06/10/11  Added "use strict;"
 #                  mjjones   06/23/11  Parse more info
 #                  mjjones   07/05/11  Take output dir as parameter
+#                  mjjones   09/06/11  Remove string/defaultVal support 
 #
 # End Change Log ******************************************************
 
@@ -117,7 +117,7 @@ foreach my $argnum (1 .. $#ARGV)
         #----------------------------------------------------------------------
         # Print the AttributeId
         #----------------------------------------------------------------------
-        if (!$attr->{id})
+        if (! exists $attr->{id})
         {
             print ("fapiParseAttributeInfo.pl ERROR. Att 'id' missing\n");
             exit(1);
@@ -159,7 +159,7 @@ foreach my $argnum (1 .. $#ARGV)
         #----------------------------------------------------------------------
         if ($attr->{description})
         {
-            print OUTFILE "// ", $attr->{id}, ": ", $attr->{description}, "\n";
+            print OUTFILE "// $attr->{id}: $attr->{description}\n";
         }
 
         #----------------------------------------------------------------------
@@ -173,43 +173,30 @@ foreach my $argnum (1 .. $#ARGV)
 
             foreach my $val (@vals)
             {
-                $arrayDimensions .= "[";
-                $arrayDimensions .= ${val};
-                $arrayDimensions .= "]";
+                $arrayDimensions .= "[${val}]";
             }
         }
 
         #----------------------------------------------------------------------
         # Print the typedef for each attribute's value type
         #----------------------------------------------------------------------
-        if (!$attr->{valueType})
+        if (! exists $attr->{valueType})
         {
             print ("fapiParseAttributeInfo.pl ERROR. Att 'valueType' missing\n");
             exit(1);
         }
 
-        print OUTFILE "typedef ";
-        my $attrDefaultValType;
-
         if ($attr->{valueType} eq 'uint8')
         {
-            $attrDefaultValType = "uint8_t";
-            print OUTFILE "uint8_t ", $attr->{id}, "_Type", $arrayDimensions, ";\n";
+            print OUTFILE "typedef uint8_t $attr->{id}_Type$arrayDimensions;\n";
         }
         elsif ($attr->{valueType} eq 'uint32')
         {
-            $attrDefaultValType = "uint32_t";
-            print OUTFILE "uint32_t ", $attr->{id}, "_Type", $arrayDimensions, ";\n";
+            print OUTFILE "typedef uint32_t $attr->{id}_Type$arrayDimensions;\n";
         }
         elsif ($attr->{valueType} eq 'uint64')
         {
-            $attrDefaultValType = "uint64_t";
-            print OUTFILE "uint64_t ", $attr->{id}, "_Type", $arrayDimensions, ";\n";
-        }
-        elsif ($attr->{valueType} eq 'string')
-        {
-            $attrDefaultValType = "char *";
-            print OUTFILE "char * ", $attr->{id}, "_Type;\n";
+            print OUTFILE "typedef uint64_t $attr->{id}_Type$arrayDimensions;\n";
         }
         else
         {
@@ -219,74 +206,42 @@ foreach my $argnum (1 .. $#ARGV)
         }
 
         #----------------------------------------------------------------------
+        # Print if the platform initializes the value
+        #----------------------------------------------------------------------
+        if (exists $attr->{platInit})
+        {
+            print OUTFILE "#define $attr->{id}_PLATINIT true\n"
+        }
+        else
+        {
+            print OUTFILE "#define $attr->{id}_PLATINIT false\n"
+        }
+
+        #----------------------------------------------------------------------
         # Print the value enumeration (if it is specified)
         #----------------------------------------------------------------------
-        if ($attr->{enum})
+        if (exists $attr->{enum})
         {
-            print OUTFILE "enum ", $attr->{id}, "_Enum\n{\n";
+            print OUTFILE "enum $attr->{id}_Enum\n{\n";
 
             # Values must be separated by white space
             my @vals = split(' ', $attr->{enum});
 
             foreach my $val (@vals)
             {
-                print OUTFILE "    ", $attr->{id}, "_", ${val}, ",\n";
+                print OUTFILE "    $attr->{id}_${val},\n";
             }
 
             print OUTFILE "};\n";
         }
 
         #----------------------------------------------------------------------
-        # Print the default value information
-        #----------------------------------------------------------------------
-        print OUTFILE "const bool ", $attr->{id}, "_HASDEFAULTVAL = ";
-
-        if ($attr->{defaultValue})
-        {
-            print OUTFILE "true;\n";
-
-            if ($attr->{valueType} eq 'string')
-            {
-                print OUTFILE "const char * const ", $attr->{id};
-                print OUTFILE "_DEFAULTVAL = \"", $attr->{defaultValue};
-                print OUTFILE "\";\n";
-            }
-            elsif ($attr->{enum})
-            {
-                print OUTFILE "const ", $attrDefaultValType, " ", $attr->{id};
-                print OUTFILE "_DEFAULTVAL = ", $attr->{id}, "_";
-                print OUTFILE $attr->{defaultValue}, ";\n";
-            }
-            else
-            {
-                print OUTFILE "const ", $attrDefaultValType, " ", $attr->{id};
-                print OUTFILE "_DEFAULTVAL = ", $attr->{defaultValue}, ";\n";
-            }
-        }
-        else
-        {
-            print OUTFILE "false;\n";
-
-            if ($attr->{valueType} eq 'string')
-            {
-                print OUTFILE "const char * const ", $attr->{id};
-                print OUTFILE "_DEFAULTVAL = \"\";\n";
-            }
-            else
-            {
-                print OUTFILE "const ", $attrDefaultValType, " ", $attr->{id};
-                print OUTFILE "_DEFAULTVAL = 0;\n";
-            }
-        }
-
-        #----------------------------------------------------------------------
         # If the attribute is read-only then define the _SETMACRO to something
-        # that will cause a compile failure
+        # that will cause a compile failure if a set is attempted
         #----------------------------------------------------------------------
-        if (!$attr->{writeable})
+        if (! exists $attr->{writeable})
         {
-            print OUTFILE "#define ", $attr->{id};
-            print OUTFILE "_SETMACRO ATTRIBUTE_NOT_WRITABLE\n";
+            print OUTFILE "#define $attr->{id}_SETMACRO ATTRIBUTE_NOT_WRITABLE\n";
         }
 
         #----------------------------------------------------------------------

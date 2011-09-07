@@ -21,80 +21,109 @@
    
      IBM_PROLOG_END -->
 <!-- XML file specifying HW Procedure requested attributes. -->
-<!-- This is just the initial test version. HWPs will replace with an official version. -->
+<!-- These are the scratch attributes that every platform must support for HWP development -->
 
 <attributes>
   <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_TEST_UINT8</id>
+    <id>ATTR_SCRATCH_UINT8_1</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>Test Attr UINT8. DefaultVal 6</description>
+    <description>Scratch uint8_t attribute 1</description>
     <valueType>uint8</valueType>
-    <defaultValue>6</defaultValue>
     <writeable/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_TEST_UINT32</id>
+    <id>ATTR_SCRATCH_UINT8_2</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>Test Attr UINT32. PLAT (sets val to 3). RO</description>
-    <valueType>uint32</valueType>
-    <platInit/>
+    <description>Scratch uint8_t attribute 2</description>
+    <valueType>uint8</valueType>
+    <writeable/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_TEST_UINT64</id>
+    <id>ATTR_SCRATCH_UINT32_1</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>Test Attr UINT64. Enum. DefaultVal VALB</description>
+    <description>Scratch uint32_t attribute 1</description>
+    <valueType>uint32</valueType>
+    <writeable/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SCRATCH_UINT32_2</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Scratch uint32_t attribute 2</description>
+    <valueType>uint32</valueType>
+    <writeable/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SCRATCH_UINT64_1</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Scratch uint64_t attribute 1</description>
     <valueType>uint64</valueType>
-    <defaultValue>VALB</defaultValue>
-    <enum>VALA VALB VALC</enum>
     <writeable/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_TEST_UINT8_ARRAY</id>
+    <id>ATTR_SCRATCH_UINT64_2</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>Test Attr UINT8 ARRAY[3]. DefaultVal 2</description>
+    <description>Scratch uint64_t attribute 2</description>
+    <valueType>uint64</valueType>
+    <writeable/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SCRATCH_UINT8_ARRAY_1</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Scratch uint8_t array ([32]) attribute 1</description>
     <valueType>uint8</valueType>
-    <defaultValue>2</defaultValue>
-    <array>3</array>
+    <array>32</array>
     <writeable/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_TEST_UINT32_ARRAY</id>
+    <id>ATTR_SCRATCH_UINT8_ARRAY_2</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>Test Attr UINT32 ARRAY[2][3][4]. DefaultVal 8</description>
-    <valueType>uint32</valueType>
-    <defaultValue>8</defaultValue>
+    <description>Scratch uint8_t array ([2][3][4]) attribute 2</description>
+    <valueType>uint8</valueType>
     <array>2 3 4</array>
     <writeable/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_TEST_UINT64_ARRAY</id>
+    <id>ATTR_SCRATCH_UINT32_ARRAY_1</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>Test Attr UINT64 ARRAY[5]. PLAT (sets vals to 4). RO</description>
-    <valueType>uint64</valueType>
-    <platInit/>
-    <array>5</array>
-  </attribute>
-  <!-- ********************************************************************* -->
-  <attribute>
-    <id>ATTR_TEST_STRING1</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>Test Attr STRING1. DefaultVal 'mike'</description>
-    <valueType>string</valueType>
-    <defaultValue>mike</defaultValue>
+    <description>Scratch uint32_t array ([8]) attribute 1</description>
+    <valueType>uint32</valueType>
+    <array>8</array>
     <writeable/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_TEST_STRING2</id>
+    <id>ATTR_SCRATCH_UINT32_ARRAY_2</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>Test Attr STRING2. PLAT (sets val to 'platString')</description>
-    <valueType>string</valueType>
+    <description>Scratch uint32_t array ([2][3]) attribute 2</description>
+    <valueType>uint32</valueType>
+    <array>2 3</array>
+    <writeable/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SCRATCH_UINT64_ARRAY_1</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Scratch uint64_t array ([4]) attribute 1</description>
+    <valueType>uint64</valueType>
+    <array>4</array>
+    <writeable/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SCRATCH_UINT64_ARRAY_2</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Scratch uint64_t array ([2][2]) attribute 2</description>
+    <valueType>uint64</valueType>
+    <array>2 2</array>
     <writeable/>
   </attribute>
 </attributes>
