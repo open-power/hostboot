@@ -28,7 +28,6 @@
 #include <kernel/basesegment.H>
 #include <kernel/segmentmgr.H>
 #include <kernel/block.H>
-#include <kernel/vmmmgr.H>
 #include <kernel/cpuid.H>
 
 
@@ -139,4 +138,12 @@ void BaseSegment::updateRefCount( uint64_t i_vaddr,
 {
     // Just call over to block chain
     iv_block->updateRefCount(i_vaddr, i_stats);
+}
+
+/**
+ * Sets the Page Permissions for a given page via virtual address
+ */
+int BaseSegment::mmSetPermission(void* i_va, uint64_t i_size,PAGE_PERMISSIONS i_access_type)
+{
+  return 0;
 }

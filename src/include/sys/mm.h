@@ -41,6 +41,21 @@ enum PAGE_REMOVAL_OPS
     FLUSH,
 };
 
+/**
+ * Page permission types mapped to the same bits in the Shadow PTE
+ */
+enum PAGE_PERMISSIONS
+{
+  READ_ONLY = 0x00000001,
+  WRITABLE = 0x000000002,
+  EXECUTABLE = 0x00000004,
+  WRITE_TRACKED = 0x00000008,
+  ALLOCATE_FROM_ZERO = 0x00000010,
+  NO_ALLOCATE_FROM_ZERO = 0x00000020,
+  NO_ACCESS = 0x00000040, 
+};
+
+
 /** @fn mm_alloc_block()
  *  @brief System call to allocate virtual memory block in the base segment
  *
@@ -62,6 +77,18 @@ int mm_alloc_block(msg_q_t mq,void* va,uint64_t size);
  *  @return int - 0 for successful page removal, non-zero otherwise
  */
 int mm_remove_pages(PAGE_REMOVAL_OPS i_op, void* i_vaddr, uint64_t i_size);
+
+/** @fn mm_set_permission()
+ *  @brief System call to set the page permissions
+ *
+ *  @param[in] va - virtual address of the pages(s) to update permission
+ *  @param[in] size - requested size of memory in bytes
+ *          if size = 0 then only a single page will be updated.
+ *  @param[in] access_type - Type of permission to be given to the page(s)
+ *
+ *  @return int - 0 for successful update of permission, non-zero otherwise
+ */
+int mm_set_permission(void* va, uint64_t size, PAGE_PERMISSIONS access_type);
 
 #ifdef __cplusplus
 }

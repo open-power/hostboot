@@ -118,6 +118,19 @@ class VmmManager
          */
         static int mmRemovePages(PAGE_REMOVAL_OPS i_op, void* i_vaddr,
                                  uint64_t i_size);
+        /**
+         * @brief Sets the permissions for a given page or range of pages
+         * @param i_va[in] - Virtual address of the page to update permission
+         * @param i_size[in] - range of memory that needs permissions updated...
+         *             if i_size equals 0 then we only need to update an 
+         *            individual page.
+         * @return int - 0 for successful permission update, non-zero otherwise
+         *
+         * The given virtual address will be 'rounded' down to the nearest page
+         * boundary, along with the given size will be 'rounded' up to the
+         * nearest divisible page size.
+         */
+        static int mmSetPermission(void* i_va,uint64_t i_size, PAGE_PERMISSIONS i_access_type);
 
     protected:
         VmmManager();
@@ -140,6 +153,9 @@ class VmmManager
 
         /** See findPhysicalAddress */
         uint64_t _findPhysicalAddress(uint64_t i_vaddr);
+
+        /* See mmSetPermission */
+        int _mmSetPermission(void* i_va,uint64_t i_size, PAGE_PERMISSIONS i_access_type);
 
     public:
         friend class Block;

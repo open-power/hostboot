@@ -140,6 +140,7 @@ int VmmManager::mmAllocBlock(MessageQueue* i_mq,void* i_va,uint64_t i_size)
     return BaseSegment::mmAllocBlock(i_mq,i_va,i_size);
 }
 
+
 Spinlock* VmmManager::getLock()
 {
     return &Singleton<VmmManager>::instance().lock;
@@ -162,4 +163,24 @@ int VmmManager::mmRemovePages(PAGE_REMOVAL_OPS i_op, void* i_vaddr,
                               uint64_t i_size)
 {
     return 0;
+}
+
+
+int VmmManager::mmSetPermission(void* i_va, uint64_t i_size, PAGE_PERMISSIONS i_access_type)
+{
+    return Singleton<VmmManager>::instance()._mmSetPermission(i_va, i_size, i_access_type);
+}
+
+
+int VmmManager::_mmSetPermission(void* i_va, uint64_t i_size, PAGE_PERMISSIONS i_access_type)
+{
+    int rc = 1;
+
+    lock.lock();
+
+    rc = BaseSegment::mmSetPermission(i_va, i_size, i_access_type);
+
+    lock.unlock();
+
+    return rc;
 }

@@ -97,7 +97,10 @@ namespace Systemcalls
             /** mm_remove_pages() */
         MM_REMOVE_PAGES,
 
-        SYSCALL_MAX
+           /** mm_set_permission() */
+        MM_SET_PERMISSION,
+
+	SYSCALL_MAX
     };
 
     /** @enum SysCalls_FastPath

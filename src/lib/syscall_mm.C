@@ -23,6 +23,7 @@
 #include <sys/syscall.h>
 #include <sys/mm.h>
 #include <arch/ppc.H>
+#include <kernel/vmmmgr.H>
 
 using namespace Systemcalls;
 
@@ -70,4 +71,13 @@ void mm_icache_invalidate(void * i_addr, size_t i_cpu_word_count)
     }
 
     isync();
+}
+        
+
+/**
+ * System call update permissions on a page for a given virtual address 
+ */
+int mm_set_permission(void* va, uint64_t size, PAGE_PERMISSIONS access_type)
+{
+    return (int64_t)_syscall3(MM_SET_PERMISSION, va, (void*)size,  (void*)access_type);
 }

@@ -27,6 +27,7 @@
 #define __KERNEL_BASESEGMENT_H
 
 #include <kernel/segment.H>
+//#include <kernel/vmmmgr.H>
 
 // Forward declaration.
 class MessageQueue;
@@ -93,6 +94,19 @@ class BaseSegment : public Segment
          */
          virtual uint64_t findPhysicalAddress(uint64_t i_vaddr) const;
 
+        /**
+         * @brief Sets the page permissions for a given virtual address and size.
+         * @param i_va[in] - virtual address of the page(s) to set permissions  
+         * @param i_size[in] - range of memory that needs permissions updated... 
+         *           if i_size equals 0 then we only need to update an
+         *           individual page.
+         * @param i_access_type[in] - type of permission to set
+         * @return int - 0 for successful block allocation, non-zero otherwise
+         */
+        static int mmSetPermission(void* i_va,
+                                      uint64_t i_size,
+                                      PAGE_PERMISSIONS i_access_type);
+
     private:
         /**
          * @brief Internal implementation of init function.
@@ -113,6 +127,20 @@ class BaseSegment : public Segment
          * @return int - 0 for successful block allocation, non-zero otherwise
          */
         int _mmAllocBlock(MessageQueue* i_mq,void* i_va,uint64_t i_size);
+
+        /**
+         * @brief Sets the page permissions for a given virtual address and size.
+         * @param i_va[in] - virtual address of the page(s) to set permissions
+         * @param i_size[in] - range of memory that needs permissions updated... 
+         *          if i_size equals 0 then we only need to update an individual
+         *          page.
+         * @param i_access_type[in] - type of permission to set
+         * @return int - 0 for successful block allocation, non-zero otherwise
+         */
+         int _mmSetPermission(void* i_va,
+                                 uint64_t i_size,
+                                 PAGE_PERMISSIONS i_access_type);
+
 
 };
 

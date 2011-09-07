@@ -105,8 +105,22 @@ class slbtest: public CxxTest::TestSuite
             if (rc != 0)
             {
                 TS_FAIL("Failed to remove pages\n");
+	    }
+	}
+
+        void testSetPerm()
+        {
+            int rc = -1;
+            uint64_t va = 0xC800000000; //800GB
+            uint64_t size = 0x0;
+            PAGE_PERMISSIONS access = WRITABLE; //Access value
+            printk("Update Page Permissions. but not real page or address\n");
+            rc = mm_set_permission(reinterpret_cast<void*>(va), size, access);
+            if (rc != 0)
+            {
+                TS_FAIL("Failed to Update permissions.\n");
             }
-        }
+	}
 
     private:
 

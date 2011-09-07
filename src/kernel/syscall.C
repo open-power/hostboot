@@ -82,6 +82,8 @@ namespace Systemcalls
     void CpuDDLevel(task_t *t);
     void MmAllocBlock(task_t *t);
     void MmRemovePages(task_t *t);
+    void MmSetPermission(task_t *t);
+
 
     syscall syscalls[] =
     {
@@ -116,7 +118,8 @@ namespace Systemcalls
 
         &MmAllocBlock, // MM_ALLOC_BLOCK
         &MmRemovePages, // MM_REMOVE_PAGES
-	};
+        &MmSetPermission, // MM_SET_PERMISSION
+        };
 };
 
 extern "C"
@@ -520,4 +523,17 @@ namespace Systemcalls
         TASK_SETRTN(t, VmmManager::mmRemovePages(oper,vaddr,size));
     }
 
+     /**
+     * Set the Permissions on a block containing the virtual address passed in.
+     * @param[in] t: The task used to set Page Permissions for a given block
+     */
+    void MmSetPermission(task_t* t)
+    {   
+        void* va = (void*)TASK_GETARG0(t);
+        uint64_t size = (uint64_t)TASK_GETARG1(t);
+        PAGE_PERMISSIONS access_type = (PAGE_PERMISSIONS)TASK_GETARG2(t);
+        
+        TASK_SETRTN(t, VmmManager::mmSetPermission(va,size, access_type));
+    }
+    
 };
