@@ -27,6 +27,7 @@
 #include <kernel/taskmgr.H>
 #include <arch/ppc.H>
 #include <kernel/vmmmgr.H>
+#include <kernel/cpuid.H>
 
 namespace Systemcalls { void TaskEnd(task_t*); }
 namespace ExceptionHandles
@@ -178,5 +179,37 @@ void kernel_execute_fp_unavail()
         // Context switch code will handle the rest.
         t->fp_context = new context_fp_t;
         memset(t->fp_context, '\0', sizeof(context_fp_t));
+    }
+}
+
+const uint64_t EXCEPTION_HSRR1_SOFTPATCH_MASK   = 0x0000000000100000;
+const uint64_t EXCEPTION_HSRR1_SOFTPATCH_DENORM = 0x0000000000100000;
+
+extern "C" void p7_softpatch_denorm_assist(context_fp_t*);
+
+extern "C"
+void kernel_execute_softpatch()
+{
+    task_t* t = TaskManager::getCurrentTask();
+
+    if ((getHSRR1() & EXCEPTION_HSRR1_SOFTPATCH_MASK) ==
+        EXCEPTION_HSRR1_SOFTPATCH_DENORM)
+    {
+        if (t->fp_context == NULL)
+        {
+            printk("Error: Task took Denorm-assist without FP active.\n");
+            kassert(t->fp_context != NULL);
+        }
+
+        switch (CpuID::getCpuType())
+        {
+            case CORE_POWER7:
+            case CORE_POWER7_PLUS:
+            case CORE_POWER8_SALERNO: // @TODO: Verify same procedure.
+            case CORE_POWER8_VENICE:  // @TODO: Verify same procedure.
+            case CORE_UNKNOWN:
+                p7_softpatch_denorm_assist(t->fp_context);
+                break;
+        }
     }
 }

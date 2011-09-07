@@ -37,7 +37,7 @@ DIRECT_BOOT_OBJECTS = start.o kernel.o taskmgr.o cpumgr.o syscall.o \
                       syscall_mm.o init_main.o vfs_main.o sync.o futexmgr.o \
                       ptmgr.o segmentmgr.o basesegment.o devicesegment.o \
 		      block.o cxxtest_data.o cpuid.o misc.o msghandler.o \
-		      blockmsghdlr.o stacksegment.o
+		      blockmsghdlr.o stacksegment.o softpatch_p7.o
 
 ## STUB_TESTCASE_OBJECT = cxxtest_stub.o
 

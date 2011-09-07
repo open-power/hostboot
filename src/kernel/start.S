@@ -182,6 +182,31 @@ UNIMPL_INTERRUPT(perf_monitor, 0xF00)
 UNIMPL_INTERRUPT(vector_unavail, 0xF20)
 UNIMPL_INTERRUPT(vsx_unavail, 0xF40)
 
+;// Softpatch Exception Vector
+;//
+;// This exception vector implements the softpatch / denormalization assist
+;// for certain floating point instructions which are unable to handle a
+;// certain format of floating point numbers.  The softpatch code will run
+;// a denormalization assist procedure.
+;//
+;// The processor sets HSRR0/HSRR1 for this exception instead of SRR0/SRR1
+;// because it is a hypervisor-level exception.  It is not possible for us
+;// to be in exception state already when this exception is called (since
+;// kernel code doesn't use floating-point), so it is safe to just move HSSR0
+;// onto SRR0 so that the normal save/restore code can be used.
+;//
+;// We also need to roll back the HSRR0 1 instruction (4 bytes) since the
+;// HSRR0 gets set to the instruction after the exception according to the
+;// P7 Book IV.
+.org _start + 0x1500
+softpatch_stub:
+    mtsprg1 r1          ;// Save of R1 temporarily.
+    mfspr r1, HSRR0     ;// Move HSRR0 -> SRR0.
+    subi r1, r1, 4      ;// Roll back SRR0 1 instruction to one taking except.
+    mtsrr0 r1
+    mfsprg1 r1          ;// Restore R1 and use normal interrupt code.
+STD_INTERRUPT_NOADDR(softpatch)
+
 .section .text
 ;// _main:
 ;//	Set up stack and TOC and call kernel's main.
