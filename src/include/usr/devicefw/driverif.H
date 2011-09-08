@@ -44,7 +44,6 @@ namespace DeviceFW
     enum AccessType_DriverOnly
     {
         XSCOM                   = LAST_ACCESS_TYPE, 
-        FSI,
         I2C,
         FSISCOM,
 

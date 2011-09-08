@@ -46,6 +46,7 @@ namespace DeviceFW
         PNOR,
         MAILBOX,
         PRESENT,
+        FSI,
 
         LAST_ACCESS_TYPE,
     };
