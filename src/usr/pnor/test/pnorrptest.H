@@ -67,7 +67,7 @@ class PnorRpTest : public CxxTest::TestSuite
             /* GLOBAL_DATA */ { PAGESIZE, 0x8007D690 },
             /* SBE_IPL */ { 0, 0 },
             /* HB_BASE_CODE */ { 0, 0 },
-            /* HB_DATA */ { 2*PAGESIZE, 0x8007E690 },
+            /* HB_DATA */ { 4*PAGESIZE, 0x8007E690 },
             /* HB_ERRLOGS */ { 0, 0 },
             /* HB_EXT_CODE */ { 0x7D000, 0x80000690 },
             /* HB_RUNTIME */ { 0, 0 }, 

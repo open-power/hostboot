@@ -40,12 +40,13 @@
 #include <sys/task.h>
 #include <trace/interface.H>
 #include <initservice/taskargs.H>
+#include <pnor/pnorif.H>
 
 // This component
 #include <targeting/targetservice.H>
 #include "trace.H"
-#include "fakepnordata.H"
 #include <targeting/predicates/predicatebase.H>
+#include <pnortargeting.H>
 
 //******************************************************************************
 // targetService
@@ -171,9 +172,24 @@ void TargetService::init()
     iv_associationMappings.push_back(a6);
 
     // Get+save pointer to beginning of targeting's swappable config in
-    // PNOR.  Note that this will change once PNOR is accessible
-    (void)thePnorBuilderService::instance()
-        .getTargetingImageBaseAddress(iv_pPnor);
+    // PNOR. 
+    //@TODO Fully account for the attribute resource provider
+    PNOR::SectionInfo_t l_sectionInfo;
+    errlHndl_t l_pElog = PNOR::getSectionInfo(
+        PNOR::HB_DATA, PNOR::SIDE_A, l_sectionInfo );
+    if(l_pElog)
+    {
+        l_pElog->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+        errlCommit(l_pElog);
+        assert("Failed to get handle to targeting data");
+    }
+
+    TargetingHeader* l_pHdr = reinterpret_cast<TargetingHeader*>(
+        l_sectionInfo.vaddr);
+    assert(l_pHdr->eyeCatcher == PNOR_TARG_EYE_CATCHER);
+    
+    iv_pPnor = reinterpret_cast<uint32_t*>(
+        (reinterpret_cast<char*>(l_pHdr) + l_pHdr->headerSize));
 
     (void)_configureTargetPool();
 
@@ -589,6 +605,9 @@ uint32_t TargetService::_maxTargets()
     // Target count found by following the pointer pointed to by the iv_pPnor
     // pointer.
     iv_maxTargets = *(*(reinterpret_cast<const uint32_t * const *>(iv_pPnor)));
+
+    TARG_INF("Max targets = %d",iv_maxTargets);
+
     return iv_maxTargets;
 
     #undef TARG_FN

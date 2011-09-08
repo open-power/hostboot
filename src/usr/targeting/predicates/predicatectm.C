@@ -38,7 +38,7 @@
 
 // Targeting Component
 #include <targeting/target.H>
-#include <targeting/attributeenums.H>
+#include <attributeenums.H>
 #include <targeting/predicates/predicatectm.H>
 
 //******************************************************************************
