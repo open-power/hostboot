@@ -67,7 +67,8 @@ my @files = ("src/build/tools/hb-parsedump.pl",
              "img/hbicore_test.list",
              "img/hbicore_extended.bin",
              "img/hbicore_test_extended.bin",
-             "img/pnor.toc"
+             "img/pnor.toc",
+             "img/targeting.bin",
              );
 
 #Directories in base git repository

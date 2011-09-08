@@ -1,4 +1,26 @@
 #!/usr/bin/perl
+#  IBM_PROLOG_BEGIN_TAG
+#  This is an automatically generated prolog.
+#
+#  $Source: src/build/tocgen/mkpnortoc.pl $
+#
+#  IBM CONFIDENTIAL
+#
+#  COPYRIGHT International Business Machines Corp. 2011
+#
+#  p1
+#
+#  Object Code Only (OCO) source materials
+#  Licensed Internal Code Source Materials
+#  IBM HostBoot Licensed Internal Code
+#
+#  The source code for this program is not published or other-
+#  wise divested of its trade secrets, irrespective of what has
+#  been deposited with the U.S. Copyright Office.
+#
+#  Origin: 30
+#
+#  IBM_PROLOG_END
 # File mkPnorTOC.pl created by ADAM R. MUHLE at 14:39:27 on Mon Aug  1 2011.
 
 #Limitations to address later
@@ -65,8 +87,8 @@ $onlytocVerNode = $tocVerNodes->pop();
 writeElementToBinFile(BIN_TOC_FILE, $onlytocVerNode);
 
 
-#Add the individual TOC entries
-$root = $doc->firstChild;
+#Add the individual TOC entries; skip over the mandatory comment block
+$root = $doc->firstChild->nextSibling;
 $curSibling = $root->firstChild;
 
 do {
@@ -85,7 +107,7 @@ do {
 	#skip these, already inserted above
     }
 
-}while($curSibling = $curSibling->nextSibling);
+}while($curSibling = $curSibling->nextSibling());
 
 
 close(BIN_TOC_FILE);

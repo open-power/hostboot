@@ -33,6 +33,7 @@ OBJS = fapiPlatHwAccess.o \
        fapiPlatReturnCodeDataRef.o \
        fapiPlatSystemConfig.o \
        fapiPlatTarget.o \
-       fapiPlatUtil.o
+       fapiPlatUtil.o \
+       fapiPlatAttributeService.o
 
 include ${ROOTPATH}/config.mk

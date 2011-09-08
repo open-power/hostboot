@@ -126,4 +126,14 @@
     <array>2 2</array>
     <writeable/>
   </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_DUMMY_SCRATCH_PLAT_INIT_UINT8</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Dummy plat init uint8 attribute used for testing</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <writeable/>
+    <array>1 3 5</array>
+  </attribute>
 </attributes>

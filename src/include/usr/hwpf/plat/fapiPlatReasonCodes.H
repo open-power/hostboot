@@ -29,18 +29,20 @@ namespace fapi
 {
     enum hwpfModuleId
     {
-        MOD_RC_TO_ERRL              = 0x01,
-        MOD_FAPI_GET_CHILD_CHIPLETS = 0x02,
-        MOD_FAPI_GET_PARENT_CHIP    = 0x03,
+        MOD_RC_TO_ERRL                             = 0x01,
+        MOD_FAPI_GET_CHILD_CHIPLETS                = 0x02,
+        MOD_FAPI_GET_PARENT_CHIP                   = 0x03,
+        MOD_PLAT_ATTR_SVC_CREATE_ATTR_ACCESS_ERROR = 0x04,
     };
 
     enum hwpfReasonCode
     {
-        RC_HWP_ERROR           = HWPF_COMP_ID | 0x01,
-        RC_FAPI_ERROR          = HWPF_COMP_ID | 0x02,
-        RC_INVALID_REQUEST     = HWPF_COMP_ID | 0x03,
-        RC_UNSUPPORTED_REQUEST = HWPF_COMP_ID | 0x04,
-        RC_NO_SINGLE_PARENT    = HWPF_COMP_ID | 0x05,
+        RC_HWP_ERROR                  = HWPF_COMP_ID | 0x01,
+        RC_FAPI_ERROR                 = HWPF_COMP_ID | 0x02,
+        RC_INVALID_REQUEST            = HWPF_COMP_ID | 0x03,
+        RC_UNSUPPORTED_REQUEST        = HWPF_COMP_ID | 0x04,
+        RC_NO_SINGLE_PARENT           = HWPF_COMP_ID | 0x05,
+        RC_FAILED_TO_ACCESS_ATTRIBUTE = HWPF_COMP_ID | 0x06,
     };
 };
 

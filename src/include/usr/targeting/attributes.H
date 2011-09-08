@@ -39,9 +39,9 @@
 #include <stdlib.h>
 
 // This component
-#include <targeting/attributeenums.H>
-#include <targeting/attributestructs.H>
-#include <targeting/attributetraits.H>
-#include <targeting/attributestrings.H>
+#include <attributeenums.H>
+#include <attributestructs.H>
+#include <attributetraits.H>
+#include <attributestrings.H>
 
 #endif // TARG_ATTRIBUTES_H

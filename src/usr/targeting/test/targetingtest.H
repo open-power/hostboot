@@ -39,6 +39,11 @@
 
 // CXXTEST
 #include <cxxtest/TestSuite.H>
+#include <hwpf/plat/fapiPlatAttributeService.H>
+#include <fapiReturnCode.H>
+#include <fapiAttributeIds.H>
+#include <fapiAttributeService.H>
+#include <errl/errlmanager.H>
 
 // This component
 #include <targeting/attributes.H>
@@ -86,6 +91,20 @@ class TargetingTestSuite: public CxxTest::TestSuite
             {
                 TS_FAIL("Post init; master proc chip target handle should not "
                         "be the NULL value");
+            }
+
+            ScomSwitches l_switches = {0};
+            l_switches =
+                l_pMasterProcChipTargetHandle->getAttr<ATTR_SCOM_SWITCHES>();
+            if(   l_switches.useFsiScom != 0
+               || l_switches.useXscom != 1
+               || l_switches.useInbandScom != 0
+               || l_switches.reserved != 0)
+            {
+                TS_FAIL("SCOM Switches stuct was not correct (%d, %d, %d, %d)",
+                   l_switches.useFsiScom, l_switches.useXscom,
+                   l_switches.useInbandScom ,
+                   l_switches.reserved);
             }
 
             if (   l_pMasterProcChipTargetHandle->getAttr<ATTR_CLASS> ()
@@ -447,41 +466,50 @@ class TargetingTestSuite: public CxxTest::TestSuite
 
             if(l_scom != 5)
             {
-                TS_FAIL("SCOM attribute should not have been altered in the failed "
-                        "write");
+                TS_FAIL("SCOM attribute should not have been altered in the "
+                        "failed write");
             }
 
-            uint8_t l_wo = 6;
+            DUMMY_RW_ATTR l_wo;
+            memset(l_wo,0x00,sizeof(l_wo));
+            l_wo[0][1][2] = 6;
             if( !l_pTarget->trySetAttr<ATTR_DUMMY_RW>(l_wo) )
             {
                 TS_FAIL("ATTR_DUMMY_RW should have been available for write");
             }
 
-            if(l_wo != 6)
+            if(l_wo[0][1][2] != 6)
             {
                 TS_FAIL("ATTR_DUMMY_RW local attribute should not have been "
                         "altered in the successful write");
             }
 
-            uint8_t l_read = l_pTarget->getAttr<ATTR_DUMMY_RW>();
-            if(l_read != l_wo)
+            DUMMY_RW_ATTR l_read;
+            l_pTarget->tryGetAttr<ATTR_DUMMY_RW>(l_read);
+            if(memcmp(l_read,l_wo,sizeof(l_read)))
             {
                 TS_FAIL("Failed to read back the correct ATTR_DUMMY_RW");
             }
 
-            uint8_t l_setWo = 9;
+            DUMMY_RW_ATTR l_setWo;
+            memset(l_setWo,0x00,sizeof(l_setWo));
+            l_setWo[0][2][4] = 9;
             l_pTarget->setAttr<ATTR_DUMMY_RW>(l_setWo);
-            if(l_setWo != 9)
+            if(l_setWo[0][2][4] != 9)
             {
                 TS_FAIL("ATTR_DUMMY_RW local attribute should not have been "
                         "altered in the successful setAttr");
             }
 
-            uint8_t l_setWoVerify = l_pTarget->getAttr<ATTR_DUMMY_RW>();
-            if(l_setWoVerify != l_setWo)
+            DUMMY_RW_ATTR l_setWoVerify;
+            l_pTarget->tryGetAttr<ATTR_DUMMY_RW>(l_setWoVerify);
+            if(memcmp(l_setWoVerify,l_setWo,sizeof(l_setWoVerify)))
             {
                 TS_FAIL("ATTR_DUMMY_RW read should have matched prior write");
             }
+            
+            memset(l_setWo,0x05,sizeof(l_setWo));
+            l_pTarget->setAttr<ATTR_DUMMY_RW>(l_setWo);
 
             TS_TRACE(EXIT_MRK "testTargetClass" );
         }
@@ -991,6 +1019,132 @@ class TargetingTestSuite: public CxxTest::TestSuite
 
             TS_TRACE(EXIT_MRK "testComplexFilter" );
         }
+
+        void testFapiToHbMacros ()
+        {
+            TS_TRACE(ENTER_MRK "testFapiToHbMacros" );
+
+            TS_TRACE(INF_MRK "Now using direct access macros");
+    
+            using namespace TARGETING;
+            using namespace fapi;
+
+            TargetService& l_targetService = targetService();
+
+            TARGETING::Target* l_pTarget = NULL;
+            (void) l_targetService.getTopLevelTarget(l_pTarget);
+            if (l_pTarget == NULL)
+            {
+                TS_FAIL("Top level handle was NULL when initialization "
+                        "complete");
+            }
+
+            DUMMY_RW_ATTR l_dummyRw;
+            memset(l_dummyRw,0x00,sizeof(l_dummyRw));
+            l_pTarget->tryGetAttr<TARGETING::ATTR_DUMMY_RW>(l_dummyRw);
+            if(l_dummyRw[0][1][2] != 5)
+            {
+                TS_FAIL("l_dummyRw value is %d, not 5 as expected in direct "
+                        "attribute access",l_dummyRw[0][1][2]);
+            }
+
+            TARGETING::CLASS l_class = 
+                l_pTarget->getAttr<TARGETING::ATTR_CLASS>();
+            if(l_class != TARGETING::CLASS_SYS)
+            {
+                TS_FAIL("l_class value is %d, not %d as expected in direct "
+                        "attribute access",l_class,TARGETING::CLASS_SYS);
+            }
+
+            TARGETING::TYPE l_type = l_pTarget->getAttr<TARGETING::ATTR_TYPE>();
+            if(l_type != TARGETING::TYPE_SYS)
+            {
+                TS_FAIL("l_type value is %d, not %d as expected in direct "
+                        "attribute access",l_type,TARGETING::TYPE_SYS);
+            }
+
+            uint64_t l_xscom = 
+                l_pTarget->getAttr<TARGETING::ATTR_XSCOM_BASE_ADDRESS>();
+            if(l_xscom != 0x300000000000)
+            {
+                TS_FAIL("l_xscom value is %x, not %x as expected in direct "
+                        "attribute access",l_xscom,0x300000000000);
+            }
+
+            TS_TRACE(INF_MRK "Now using FAPI get macros");
+
+            memset(l_dummyRw,0x00,sizeof(l_dummyRw));
+            fapi::ReturnCode l_rc = FAPI_ATTR_GET(
+                ATTR_DUMMY_SCRATCH_PLAT_INIT_UINT8, NULL, l_dummyRw);
+            if(l_rc != 0)
+            {
+                TS_FAIL("Failed to get dummy RW attribute on system target");
+            }
+
+            if(l_dummyRw[0][2][4] != 5)
+            {
+                TS_FAIL("l_dummyRw value is %d, not 5 as expected",
+                    l_dummyRw[0][2][4]);
+            }
+
+            TS_TRACE(INF_MRK "Now using FAPI set macros");              
+
+            l_dummyRw[0][2][3] = 6;
+            l_rc = FAPI_ATTR_SET(ATTR_DUMMY_SCRATCH_PLAT_INIT_UINT8, NULL, 
+                l_dummyRw);
+            if(l_rc != 0)
+            {
+                TS_FAIL("Failed to write dummy RW attribute on system target");
+            }
+
+            memset(l_dummyRw,0x00,sizeof(l_dummyRw));
+            l_rc = FAPI_ATTR_GET(ATTR_DUMMY_SCRATCH_PLAT_INIT_UINT8, NULL, 
+                l_dummyRw);
+            if(l_rc != 0)
+            {
+                TS_FAIL("Failed to get dummy RW attribute on system target");
+            }
+
+            if(l_dummyRw[0][2][3] != 6)
+            {
+                TS_FAIL("l_dummyRw value is %d, not 6 as expected due to a "
+                        "prior write",l_dummyRw[0][2][3]);
+            }
+       
+            TS_TRACE(INF_MRK "Now using targets without the attribute");  
+
+            memset(l_dummyRw,0x00,sizeof(l_dummyRw));
+            EntityPath l_realPath(EntityPath::PATH_PHYSICAL);
+            l_realPath.addLast(TYPE_SYS,0).addLast(TYPE_NODE,0);
+            l_pTarget = l_realPath.operator->();
+            if (l_pTarget == NULL)
+            {
+                TS_FAIL("Node 0 target handle should not be NULL");
+            }
+
+            fapi::Target* l_pFapiTarget = new fapi::Target(
+                 fapi::TARGET_TYPE_PROC_CHIP, l_pTarget);
+            l_rc = FAPI_ATTR_GET(ATTR_DUMMY_SCRATCH_PLAT_INIT_UINT8, 
+                l_pFapiTarget , l_dummyRw);
+            if(l_rc == 0)
+            {
+                TS_FAIL("Should have failed getting the attribute on "
+                        "non-supporting target");
+            }
+            else if(l_rc != FAPI_RC_PLAT_ERR_SEE_DATA)
+            {
+                TS_FAIL("Should have been a platform handled error");
+            }
+            else 
+            {
+                errlHndl_t l_pErrLog = static_cast<ERRORLOG::ErrlEntry*>(
+                    l_rc.releasePlatData());
+                ERRORLOG::errlCommit(l_pErrLog);
+            }
+
+            TS_TRACE(EXIT_MRK "testFapiToHbMacros" );
+        }
+
 };
 
 #endif // End __TESTTARGETING_H

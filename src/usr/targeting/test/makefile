@@ -22,9 +22,17 @@
 #  IBM_PROLOG_END
 ROOTPATH = ../../../..
 
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/plat
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
+
 MODULE = testtargeting
 TESTS = *.H
 
 OBJS = attributestrings.o 
 
 include ${ROOTPATH}/config.mk
+
+vpath %.C ${GENDIR}
+
