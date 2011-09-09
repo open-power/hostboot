@@ -32,6 +32,15 @@ extern "C"
 {
 #endif
 
+/**
+ * Page removal operations
+ */
+enum PAGE_REMOVAL_OPS
+{
+    RELEASE,
+    FLUSH,
+};
+
 /** @fn mm_alloc_block()
  *  @brief System call to allocate virtual memory block in the base segment
  *
@@ -42,6 +51,17 @@ extern "C"
  *  @return int - 0 for successful block allocation, non-zero otherwise
  */
 int mm_alloc_block(msg_q_t mq,void* va,uint64_t size);
+
+/** @fn mm_remove_pages()
+ *  @brief System call to remove pages by a specified operation
+ *
+ *  @param[in] i_op - Page removal operation to perform
+ *  @param[in] i_vaddr - Virtual address associated to page(s)
+ *  @param[in] size - Size of memory to perform page removal on
+ *
+ *  @return int - 0 for successful page removal, non-zero otherwise
+ */
+int mm_remove_pages(PAGE_REMOVAL_OPS i_op, void* i_vaddr, uint64_t i_size);
 
 #ifdef __cplusplus
 }

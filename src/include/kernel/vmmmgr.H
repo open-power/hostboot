@@ -25,6 +25,7 @@
 
 #include <limits.h>
 #include <sys/mmio.h>
+#include <sys/mm.h>
 #include <kernel/types.h>
 #include <kernel/spinlock.H>
 
@@ -108,6 +109,19 @@ class VmmManager
          */
         static uint64_t findPhysicalAddress(uint64_t i_vaddr);
         
+        /**
+         * @brief Remove pages by a specified operation of the given size
+         * @param[in] i_op - Page removal operation to perform
+         * @param[in] i_vaddr - Virtual address associated to page(s)
+         * @param[in] i_size - Size of memory to perform page removal on
+         * @return int - 0 for successful page removal, non-zero otherwise
+         *
+         * The given virtual address will be 'rounded' down to the nearest page
+         * boundary, along with the given size will be 'rounded' up to the
+         * nearest divisible page size.
+         */
+        static int mmRemovePages(PAGE_REMOVAL_OPS i_op, void* i_vaddr,
+                                 uint64_t i_size);
 
     protected:
         VmmManager();

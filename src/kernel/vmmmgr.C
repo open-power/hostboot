@@ -157,5 +157,9 @@ uint64_t VmmManager::_findPhysicalAddress(uint64_t i_vaddr)
 
     return paddr;
 }
-    
 
+int VmmManager::mmRemovePages(PAGE_REMOVAL_OPS i_op, void* i_vaddr,
+                              uint64_t i_size)
+{
+    return 0;
+}

@@ -34,6 +34,14 @@ int mm_alloc_block(msg_q_t mq,void* va,uint64_t size)
     return (int64_t)_syscall3(MM_ALLOC_BLOCK, mq, va, (void*)size);
 }
 
+/**
+ * System call to remove page(s) by a specified operation
+ */
+int mm_remove_pages(PAGE_REMOVAL_OPS i_op, void* i_vaddr, uint64_t i_size)
+{
+    return (int64_t)_syscall3(MM_REMOVE_PAGES, (void*)i_op, i_vaddr,
+                              (void*)i_size);
+}
 
 /*
  * Call to flush out the instruction cache
@@ -63,4 +71,3 @@ void mm_icache_invalidate(void * i_addr, size_t i_cpu_word_count)
 
     isync();
 }
-        

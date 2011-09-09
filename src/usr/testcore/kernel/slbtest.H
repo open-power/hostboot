@@ -96,6 +96,18 @@ class slbtest: public CxxTest::TestSuite
             }
         }
 
+        void testPageRemoval()
+        {
+            int rc = -1;
+            uint64_t va = 0xC800000000; //800GB
+            uint64_t size = 0x100000; //1MB
+            rc = mm_remove_pages(FLUSH,reinterpret_cast<void*>(va),size);
+            if (rc != 0)
+            {
+                TS_FAIL("Failed to remove pages\n");
+            }
+        }
+
     private:
 
 };

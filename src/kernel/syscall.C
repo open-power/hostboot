@@ -81,41 +81,42 @@ namespace Systemcalls
     void CpuCoreType(task_t *t);
     void CpuDDLevel(task_t *t);
     void MmAllocBlock(task_t *t);
+    void MmRemovePages(task_t *t);
 
     syscall syscalls[] =
-        {
-            &TaskYield,  // TASK_YIELD
-            &TaskStart,  // TASK_START
-            &TaskEnd,  // TASK_END
-            &TaskMigrateToMaster, // TASK_MIGRATE_TO_MASTER
+    {
+        &TaskYield,  // TASK_YIELD
+        &TaskStart,  // TASK_START
+        &TaskEnd,  // TASK_END
+        &TaskMigrateToMaster, // TASK_MIGRATE_TO_MASTER
 
-            &MsgQCreate,  // MSGQ_CREATE
-            &MsgQDestroy,  // MSGQ_DESTROY
-            &MsgQRegisterRoot,  // MSGQ_REGISTER_ROOT
-            &MsgQResolveRoot,  // MSGQ_RESOLVE_ROOT
+        &MsgQCreate,  // MSGQ_CREATE
+        &MsgQDestroy,  // MSGQ_DESTROY
+        &MsgQRegisterRoot,  // MSGQ_REGISTER_ROOT
+        &MsgQResolveRoot,  // MSGQ_RESOLVE_ROOT
 
-            &MsgSend,  // MSG_SEND
-            &MsgSendRecv,  // MSG_SENDRECV
-            &MsgRespond,  // MSG_RESPOND
-            &MsgWait,  // MSG_WAIT
+        &MsgSend,  // MSG_SEND
+        &MsgSendRecv,  // MSG_SENDRECV
+        &MsgRespond,  // MSG_RESPOND
+        &MsgWait,  // MSG_WAIT
 
-            &MmioMap,  // MMIO_MAP
-            &MmioUnmap,  // MMIO_UNMAP
-            &DevMap,  // DEV_MAP
-            &DevUnmap,  // DEV_UNMAP
+        &MmioMap,  // MMIO_MAP
+        &MmioUnmap,  // MMIO_UNMAP
+        &DevMap,  // DEV_MAP
+        &DevUnmap,  // DEV_UNMAP
 
-            &TimeNanosleep,  // TIME_NANOSLEEP
+        &TimeNanosleep,  // TIME_NANOSLEEP
 
-            &FutexWait,  // FUTEX_WAIT
-            &FutexWake,  // FUTEX_WAKE
+        &FutexWait,  // FUTEX_WAIT
+        &FutexWake,  // FUTEX_WAKE
 
-            &Shutdown,  // MISC_SHUTDOWN
+        &Shutdown,  // MISC_SHUTDOWN
+        &CpuCoreType,  // MISC_CPUCORETYPE
+        &CpuDDLevel,  // MISC_CPUDDLEVEL
 
-            &CpuCoreType,  // MISC_CPUCORETYPE
-            &CpuDDLevel,  // MISC_CPUDDLEVEL
-
-            &MmAllocBlock, // MM_ALLOC_BLOCK
-        };
+        &MmAllocBlock, // MM_ALLOC_BLOCK
+        &MmRemovePages, // MM_REMOVE_PAGES
+	};
 };
 
 extern "C"
@@ -504,6 +505,19 @@ namespace Systemcalls
         uint64_t size = (uint64_t)TASK_GETARG2(t);
 
         TASK_SETRTN(t, VmmManager::mmAllocBlock(mq,va,size));
+    }
+
+    /**
+     * Remove pages from virtual memory
+     * @param[in] t: The task used to remove pages
+     */
+    void MmRemovePages(task_t* t)
+    {
+        PAGE_REMOVAL_OPS oper = (PAGE_REMOVAL_OPS)TASK_GETARG0(t);
+        void* vaddr = (void*)TASK_GETARG1(t);
+        uint64_t size = (uint64_t)TASK_GETARG2(t);
+
+        TASK_SETRTN(t, VmmManager::mmRemovePages(oper,vaddr,size));
     }
 
 };

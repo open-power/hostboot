@@ -94,6 +94,8 @@ namespace Systemcalls
 
             /** mm_alloc_block() */
         MM_ALLOC_BLOCK,
+            /** mm_remove_pages() */
+        MM_REMOVE_PAGES,
 
         SYSCALL_MAX
     };
