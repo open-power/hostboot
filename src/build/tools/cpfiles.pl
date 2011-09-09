@@ -56,7 +56,8 @@ sub printUsage;
 
 #List of files to copy.  Path is relative to git repository.
 my @files = ("src/build/tools/hb-parsedump.pl",
-             "src/build/simics/*",
+             "src/build/simics/hb-simdebug.py",
+             "src/build/simics/post_model_hook.simics",
              "src/usr/errl/parser/bin/errlparser", 
              "img/hbotStringFile",
              "img/hbicore.syms",
@@ -153,7 +154,7 @@ elsif (defined ($sandbox))
 {
     unless ($sandbox ne "")
     {
-        die ('ERROR: No path specified and env $SANBOXBASE = NULL'."\n");
+        die ('ERROR: No path specified and env $SANDBOXBASE = NULL'."\n");
     }
 
     print "sandbox = $sandbox\n";
@@ -221,6 +222,16 @@ foreach (@files)
     {
         $copyDir = $simicsDir;
     }
+
+    #Delete the old file first (handles copying over symlinks)
+    $command = sprintf("rm -f %s/%s%s", $copyDir, $filename, $suffix);
+    if ($command ne "")
+    {
+        print "$command\n";
+        `$command`;
+    }
+    $command = "";
+
 
     #Check if user wants to copy test versions to hbicore.<syms|bin|list>
     if ($test == 1)

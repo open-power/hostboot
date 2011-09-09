@@ -582,6 +582,7 @@ errlHndl_t FsiDD::pollForComplete(uint64_t i_address,
             }
 
             //@fixme - Simics model is broken on writes, just assume completion
+            //  See SW101420
             if( !o_readData )
             {
                 read_data[0] &= ~OPB_STAT_BUSY;

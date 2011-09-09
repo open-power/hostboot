@@ -1,4 +1,26 @@
 #!/bin/sh
+#  IBM_PROLOG_BEGIN_TAG
+#  This is an automatically generated prolog.
+#
+#  $Source: src/build/citest/etc/workarounds $
+#
+#  IBM CONFIDENTIAL
+#
+#  COPYRIGHT International Business Machines Corp. 2011
+#
+#  p1
+#
+#  Object Code Only (OCO) source materials
+#  Licensed Internal Code Source Materials
+#  IBM HostBoot Licensed Internal Code
+#
+#  The source code for this program is not published or other-
+#  wise divested of its trade secrets, irrespective of what has
+#  been deposited with the U.S. Copyright Office.
+#
+#  Origin: 30
+#
+#  IBM_PROLOG_END
 
 echo "+++ Copy desired SALERNO config file to sandbox and modify L3 to 8MB."
 mkdir -p $sb/simu/configs
@@ -6,6 +28,19 @@ cp $BACKING_BUILD/src/simu/configs/P8_SALERNO.config $sb/simu/configs
 sed -i -e's/SETENV GFW_P8_SALERNO_L3_MB_SIZE.*/SETENV GFW_P8_SALERNO_L3_MB_SIZE 8/' $sb/simu/configs/P8_SALERNO.config
 # Backing build already contains 910431.  Leave this workaround here for future scomdef files
 #sed -i -e's/SETENV GFW_P8_SALERNO_MODEL_EC.*/SETENV GFW_P8_SALERNO_MODEL_EC 910431/' $sb/simu/configs/P8_SALERNO.config
+
+echo "+++ Copy desired VENICE config file to sandbox and modify L3 to 8MB."
+mkdir -p $sb/simu/configs
+cp $BACKING_BUILD/src/simu/configs/P8_VENICE.config $sb/simu/configs
+sed -i -e's/SETENV GFW_P8_VENICE_L3_MB_SIZE.*/SETENV GFW_P8_VENICE_L3_MB_SIZE 8/' $sb/simu/configs/P8_VENICE.config
+# Backing build already contains 910431.  Leave this workaround here for future scomdef files
+#sed -i -e's/SETENV GFW_P8_VENICE_MODEL_EC.*/SETENV GFW_P8_VENICE_MODEL_EC 910431/' $sb/simu/configs/P8_VENICE.config
+
+#echo "+++ Update to new simics build."
+#mkdir -p $sb/simu/data
+#grep -v "WSALIAS HOSTBOOT_LEVEL FIPSLEVEL" $BACKING_BUILD/src/simu/data/simicsInfo > $sb/simu/data/simicsInfo
+#echo "WSALIAS HOSTBOOT_LEVEL FIPSLEVEL env/gfwa/simics-4.2.0/simics-4.2.77/fips/fld36/fi110919b700.42" >> $sb/simu/data/simicsInfo
+
 
 echo "+++ Patch for PHYP flight recorder."
 sed -i -e's/.*PHYPLEVEL.*//' $sb/../simics/.simics_flightrecorder

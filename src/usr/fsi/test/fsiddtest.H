@@ -50,7 +50,6 @@ class FsiDDTest : public CxxTest::TestSuite
      */
     void test_readWrite(void)
     {
-        return; //@fixme - enable when simics fixes are integrated
         TRACFCOMP( g_trac_fsi, "FsiDDTest::test_readWrite> Start" );        
         uint64_t fails = 0;
         uint64_t total = 0;
@@ -62,14 +61,23 @@ class FsiDDTest : public CxxTest::TestSuite
             uint32_t data;
             bool writeable;
         } test_data[] = {
-            { FsiDD::MFSI_CONTROL_REG | 0x000000, 0x11111100, true }, //Mode Reg
-            //{ 0x000010, 0x22222222 },
-            //{ 0x000020, 0x33333333 },
-            { FsiDD::CMFSI_CONTROL_REG | 0x000074, 0x91010800, false }, //version
-            { FsiDD::MFSI_CONTROL_REG | 0x000074, 0x91010800, false }, //version
-            //{ FsiDD::MFSI_CONTROL_REG | 0x000018, 0x44444444, true },
+            //** Master Control Space
+            // version number
+            { FsiDD::CMFSI_CONTROL_REG | 0x000074, 0x91010800, false }, 
+            { FsiDD::MFSI_CONTROL_REG | 0x000074, 0x91010800, false }, 
 
-            { FsiDD::MFSI_PORT_0 | 0x000000, 0x91010800, false }, //Slave Config Table
+            // clock rate delay for ports 32-63 (unused ports)
+            { FsiDD::MFSI_CONTROL_REG | 0x00000C, 0x11111111, true }, 
+            { FsiDD::CMFSI_CONTROL_REG | 0x00000C, 0x22222222, true }, 
+
+            // port static level
+            { FsiDD::MFSI_CONTROL_REG | 0x000018, 0x80000000, false }, //port0
+            { FsiDD::MFSI_CONTROL_REG | 0x00001C, 0x00000000, false }, 
+            { FsiDD::CMFSI_CONTROL_REG | 0x000018, 0x00000000, false }, 
+            { FsiDD::CMFSI_CONTROL_REG | 0x00001C, 0x00000000, false }, 
+
+            //** Master Control Regs in Port space
+            //{ FsiDD::MFSI_PORT_0 | 0x000000, 0x91010800, false }, //Slave Config Table
         };
         const uint64_t NUM_ADDRS = sizeof(test_data)/sizeof(test_data[0]);
 
@@ -101,7 +109,7 @@ class FsiDDTest : public CxxTest::TestSuite
                 delete l_err;
             }
 
-            TRACFCOMP( g_trac_fsi, "0x%X = 0x%X", test_data[x].addr, read_data[x] );
+            TRACFCOMP( g_trac_fsi, "READ Reg 0x%X = 0x%X", test_data[x].addr, read_data[x] );
 
             //@todo - check op_size
         }
@@ -109,22 +117,25 @@ class FsiDDTest : public CxxTest::TestSuite
         // write X=A, Y=B, Z=C
         for( uint64_t x = 0; x < NUM_ADDRS; x++ )
         {
-            total++;
-	    l_err = DeviceFW::deviceOp( DeviceFW::WRITE,
-					fsi_target, 
-					&(test_data[x].data),
-					op_size,
-					DEVICE_FSI_ADDRESS(test_data[x].addr) );
-            if( l_err )
+            if( test_data[x].writeable )
             {
-                TRACFCOMP(g_trac_fsi, "FsiDDTest::test_readWrite> Error from device : addr=0x%X, RC=%X", test_data[x].addr, l_err->reasonCode() );
-                TS_FAIL( "FsiDDTest::test_readWrite> ERROR : Unexpected error log from write1" );
-                fails++;
-                errlCommit(l_err);
-                delete l_err;
-            }
+                total++;
+                l_err = DeviceFW::deviceOp( DeviceFW::WRITE,
+                                            fsi_target, 
+                                            &(test_data[x].data),
+                                            op_size,
+                                            DEVICE_FSI_ADDRESS(test_data[x].addr) );
+                if( l_err )
+                {
+                    TRACFCOMP(g_trac_fsi, "FsiDDTest::test_readWrite> Error from device : addr=0x%X, RC=%X", test_data[x].addr, l_err->reasonCode() );
+                    TS_FAIL( "FsiDDTest::test_readWrite> ERROR : Unexpected error log from write1" );
+                    fails++;
+                    errlCommit(l_err);
+                    delete l_err;
+                }
 
-            //@todo - check op_size
+                //@todo - check op_size
+            }
         }
 
         // read X,Y,Z
