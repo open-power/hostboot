@@ -231,9 +231,6 @@ class PageTableManager
         PTE_ACCESS_BITS = 0x800000000000007B,  /**< pp0 + WIMG + pp1_2  */
         PTEG_SIZE_BYTES = (sizeof(PageTableEntry)*8),  /**< Size of PTE Group in bytes */
 
-        SLBE_b = 12,  /**< Page Size in bits per SLBE  */
-        SLBE_s = 40,  /**< Segment Size in bits per SLBE  */
-
     };
 
     /**

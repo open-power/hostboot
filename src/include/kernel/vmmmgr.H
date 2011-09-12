@@ -39,11 +39,7 @@ class VmmManager
          */
         enum VMM_CONSTS
         {
-            ONE_MEG = 1 * 1024 * 1024,
-            FOUR_MEG = 4 * ONE_MEG,
-            EIGHT_MEG = 8 * ONE_MEG,
-
-            FULL_MEM_SIZE = FOUR_MEG,
+            FULL_MEM_SIZE = 4*MEGABYTE,
 
             // put the Page Table at the end of our memory space
             PTSIZE = (1 << 18),

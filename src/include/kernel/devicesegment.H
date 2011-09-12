@@ -25,6 +25,7 @@
 
 #include <kernel/segment.H>
 #include <sys/mmio.h>
+#include <usr/vmmconst.h>
 
 /**
  * @class DeviceSegment
@@ -36,7 +37,7 @@ class DeviceSegment : public Segment
         /**
          * @brief Constructor (Device segment at 2TB)
          */
-        DeviceSegment() : Segment(0x020000000000ull) {};
+        DeviceSegment() : Segment(VMM_VADDR_DEVICE_SEGMENT) {};
 
         /**
          * @brief Destructor

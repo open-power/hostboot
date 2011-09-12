@@ -25,6 +25,7 @@
 
 #include <stdint.h>
 #include <sys/sync.h>
+#include <limits.h>
 
 #ifdef __cplusplus
 extern "C"
@@ -37,7 +38,7 @@ extern "C"
  */
 enum SEG_DATA_SIZES
 {
-    THIRTYTWO_GB = 0x800000000,
+    THIRTYTWO_GB = (32*GIGABYTE),
 };
 
 /**

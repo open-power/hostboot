@@ -30,6 +30,7 @@
 #include <kernel/types.h>
 #include <kernel/segment.H>
 #include <util/locked/list.H>
+#include <usr/vmmconst.h>
 
 // Forward declaration.
 class Block;
@@ -60,18 +61,11 @@ struct StackBlockNode
 class StackSegment : public Segment
 {
     protected:
-        enum
-        {
-            EIGHT_MEGABYTE = 8 * 1024 * 1024ul,
-            ONE_TERABYTE = 1024 * 1024 * 1024 * 1024ul,
-        };
-
-
         /**
          * @brief Constructor.
          * Initialize attributes and set base addresss of segment to 1 TB.
          */
-        StackSegment() : Segment(ONE_TERABYTE) {};
+        StackSegment() : Segment(VMM_VADDR_STACK_SEGMENT) {};
 
         /**
          * @brief Destructor

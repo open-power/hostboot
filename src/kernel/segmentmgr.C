@@ -121,9 +121,6 @@ uint64_t SegmentManager::_findPhysicalAddress(uint64_t i_vaddr) const
 void SegmentManager::_updateRefCount( uint64_t i_vaddr,
 				      PageTableManager::UsageStats_t i_stats )
 {
-    // This constant should come from page manager.  Segment size.
-    const size_t SLBE_s = 40;
-
     // Get segment ID from effective address.
     size_t segId = i_vaddr >> SLBE_s;
 

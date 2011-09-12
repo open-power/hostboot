@@ -28,7 +28,7 @@
 #include <stdint.h>
 #include <builtins.h>
 #include <errl/errlentry.H>
-#include <limits.h>
+#include <vmmconst.h>
 #include "pnordd.H"
 
 /**
@@ -76,11 +76,11 @@ class PnorRP
      */
     enum
     {
-        BASE_VADDR = 2*1024*1024*1024ul, /**< 2GB = 0x80000000*/
+        BASE_VADDR = VMM_VADDR_PNOR_RP, /**< 2GB = 0x80000000*/
 
         NUM_SIDES = 3,  /**< A, B, Sideless */
 
-        SIDE_SIZE = 32*1024*1024ul, /**< Allocate 32 MB (0x2000000) of VA per side */
+        SIDE_SIZE = 32*MEGABYTE, /**< Allocate 32 MB (0x2000000) of VA per side */
 
         SIDEA_VADDR = BASE_VADDR,  /**< Base address of Side A */
         SIDEB_VADDR = SIDEA_VADDR + SIDE_SIZE,  /**< Base address of Side B */

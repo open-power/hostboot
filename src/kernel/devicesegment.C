@@ -28,8 +28,6 @@
 #include <kernel/devicesegment.H>
 #include <kernel/segmentmgr.H>
 
-#define SLBE_s 40
-
 #include <kernel/console.H>
 
 /**

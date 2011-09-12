@@ -102,7 +102,7 @@ void HeapManager::newPage()
 {
     void* page = PageManager::allocatePage();
     chunk_t * c = (chunk_t*)page;
-    for (int i = 0; i < (PAGESIZE / (1 << (BUCKETS + 3))); i++)
+    for (uint64_t i = 0; i < (PAGESIZE / (1 << (BUCKETS + 3))); i++)
     {
 	c->len = BUCKETS-1;
 	push_bucket(c, BUCKETS-1);

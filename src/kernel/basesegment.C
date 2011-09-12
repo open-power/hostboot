@@ -31,7 +31,6 @@
 #include <kernel/vmmmgr.H>
 #include <kernel/cpuid.H>
 
-#define SLBE_s 40
 
 BaseSegment::~BaseSegment()
 {
@@ -54,12 +53,12 @@ void BaseSegment::_init()
         case CORE_POWER7:
         case CORE_POWER7_PLUS:
         case CORE_POWER8_VENICE:
-            iv_physMemSize = VmmManager::EIGHT_MEG;
+            iv_physMemSize = (8*MEGABYTE);
             break;
 
         case CORE_POWER8_SALERNO:
         default:
-            iv_physMemSize = VmmManager::FOUR_MEG;
+            iv_physMemSize = (4*MEGABYTE);
             break;
     }
     // Base block is L3 cache physical memory size

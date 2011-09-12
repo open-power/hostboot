@@ -30,6 +30,7 @@
 #include <kernel/task.H>
 #include <builtins.h>
 #include <kernel/ptmgr.H>
+#include <usr/vmmconst.h>
 
 // Forward declaration.
 class Segment;
@@ -135,7 +136,7 @@ class SegmentManager
         ALWAYS_INLINE inline
         size_t getSegmentIdFromAddress(uint64_t i_addr) const
         {
-            return i_addr >> 40;  // SLBE_s = 40 Should come from page manager?
+            return i_addr >> SLBE_s;  
         }
 
         /** Array of segment objects to associated segment IDs. */

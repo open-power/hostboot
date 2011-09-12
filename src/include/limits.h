@@ -23,7 +23,12 @@
 #ifndef __LIMITS_H
 #define __LIMITS_H
 
-#define PAGESIZE 4096
+#define KILOBYTE  (1024ul)            /**< 1 KB */
+#define MEGABYTE  (1024 * 1024ul)     /**< 1 MB */
+#define GIGABYTE  (MEGABYTE * 1024ul) /**< 1 GB */
+#define TERABYTE  (GIGABYTE * 1024ul) /**< 1 TB */
+
+#define PAGESIZE  (4*KILOBYTE)  /**< 4 KB */
 #define PAGE_SIZE PAGESIZE
 
 #endif

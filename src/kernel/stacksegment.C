@@ -28,6 +28,7 @@
 #include <kernel/segmentmgr.H>
 #include <kernel/block.H>
 #include <errno.h>
+#include <usr/vmmconst.h>
 
 void StackSegment::init()
 {
@@ -62,7 +63,7 @@ StackSegment::~StackSegment()
 
 bool StackSegment::handlePageFault(task_t* i_task, uint64_t i_addr)
 {
-    uint64_t l_addr_8mb = i_addr & ~((EIGHT_MEGABYTE) - 1);
+    uint64_t l_addr_8mb = i_addr & ~((8*MEGABYTE) - 1);
 
     StackBlockNode* l_node = iv_blockList.find(l_addr_8mb);
 
@@ -73,7 +74,7 @@ bool StackSegment::handlePageFault(task_t* i_task, uint64_t i_addr)
 
 uint64_t StackSegment::findPhysicalAddress(uint64_t i_vaddr) const
 {
-    uint64_t l_addr_8mb = i_vaddr & ~((EIGHT_MEGABYTE) - 1);
+    uint64_t l_addr_8mb = i_vaddr & ~((8*MEGABYTE) - 1);
 
     StackBlockNode* l_node = iv_blockList.find(l_addr_8mb);
 
@@ -91,7 +92,7 @@ void StackSegment::_init()
 void* StackSegment::_createStack(tid_t i_task)
 {
     /* The segment is broken out into 8MB blocks so we need to place the
-     * stack somewhere within an 8MB range.  The constrants are ensuring
+     * stack somewhere within an 8MB range.  The constraints are ensuring
      * we have adequate protection and that the hashed page table does not
      * have a large number of collisions.  If we were to place all of the
      * stacks at (8MB - 64k) there would be a large amount of contention on
@@ -117,7 +118,7 @@ void* StackSegment::_createStack(tid_t i_task)
      * space).
      */
 
-    uint64_t l_addr_8mb = i_task * EIGHT_MEGABYTE + ONE_TERABYTE;
+    uint64_t l_addr_8mb = i_task * (8*MEGABYTE) + VMM_VADDR_STACK_SEGMENT;
         // Ensure block doesn't already exist.
     kassert(NULL == iv_blockList.find(l_addr_8mb));
 
@@ -149,7 +150,7 @@ void* StackSegment::_createStack(tid_t i_task)
 
 void StackSegment::_deleteStack(tid_t i_task)
 {
-    uint64_t l_addr_8mb = i_task * EIGHT_MEGABYTE + ONE_TERABYTE;
+    uint64_t l_addr_8mb = i_task * (8*MEGABYTE) + VMM_VADDR_STACK_SEGMENT;
 
     StackBlockNode* l_node = iv_blockList.find(l_addr_8mb);
     kassert(NULL != l_node);
