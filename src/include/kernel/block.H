@@ -156,6 +156,20 @@ class Block
         void updateRefCount( uint64_t i_vaddr,
 			     PageTableManager::UsageStats_t i_stats );
 
+        /**
+         * @brief Cast out older phyiscal memory pages
+         * @param[in] i_type - Castout contraint @see VmmManager::castOutPages()
+         * @return number of pages cast out
+         */
+        size_t castOutPages(uint64_t i_type);
+
+        /**
+         * @brief Evict a memory page
+         * @param[in] i_pte shadow page table entry
+         * @return true of page was evicted
+         */
+        bool evictPage(ShadowPTE* i_pte);
+
         friend class Segment;
         friend class BaseSegment;
         friend class StackSegment;

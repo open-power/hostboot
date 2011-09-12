@@ -27,6 +27,8 @@
 #include <limits.h>
 #include <util/lockfree/stack.H>
 #include <kernel/vmmmgr.H>
+#include <builtins.h>
+#include <kernel/console.H>
 
 /** @class PageManager
  *  @brief Manages the allocation of memory pages.
@@ -39,6 +41,12 @@ class PageManager
 
 	static void* allocatePage(size_t n = 1);
 	static void freePage(void*, size_t n = 1);
+
+        /**
+         * Query state for available memory
+         * @returns percent of pages available
+         */
+        static uint64_t queryAvail();
 
 	enum 
 	{ 
@@ -55,8 +63,17 @@ class PageManager
 	void* _allocatePage(size_t);
 	void _freePage(void*, size_t);
 
+        /** see queryAvail() */
+        ALWAYS_INLINE
+        uint64_t _queryAvail() const 
+        {
+            return (100*iv_pagesAvail)/iv_pagesTotal;
+        }
+
             /** Statistics on number of free pages (for debug) */
         uint64_t iv_pagesAvail;
+            /** Total number of pages */
+        uint64_t iv_pagesTotal;
 
 	struct page_t
 	{

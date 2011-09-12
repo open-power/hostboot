@@ -160,6 +160,11 @@ class PageTableManager
      */
     static void printPT( void );
 
+    /**
+     * @brief Flush reference status & unload unused pages
+     */
+    static void flush( void );
+
 
   protected:
     /**
@@ -451,6 +456,11 @@ class PageTableManager
      * @param[in] i_pte  PTE to examine, must be pointer to real entry in table
      */
     void pushUsageStats( PageTableEntry* i_pte );
+
+    /**
+     * @brief see flush
+     */
+    void _flush( void );
 
     // Allow testcase to see inside
     friend class ptmgrtest;

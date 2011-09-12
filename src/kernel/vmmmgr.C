@@ -72,6 +72,16 @@ uint64_t VmmManager::findPhysicalAddress(uint64_t i_vaddr)
     return Singleton<VmmManager>::instance()._findPhysicalAddress(i_vaddr);
 }
 
+void VmmManager::castOutPages(VmmManager::castout_t i_ct)
+{
+    Singleton<VmmManager>::instance()._castOutPages(i_ct);
+}
+
+void VmmManager::flushPageTable( void )
+{
+    Singleton<VmmManager>::instance()._flushPageTable();
+}
+
 /**
  * STATIC
  * @brief DEPRECATED
@@ -183,4 +193,22 @@ int VmmManager::_mmSetPermission(void* i_va, uint64_t i_size, PAGE_PERMISSIONS i
     lock.unlock();
 
     return rc;
+}
+    
+void VmmManager::_castOutPages(VmmManager::castout_t i_ct)
+{
+    lock.lock();
+
+    SegmentManager::castOutPages((uint64_t)i_ct);
+
+    lock.unlock();
+}
+
+void VmmManager::_flushPageTable( void )
+{
+    lock.lock();
+
+    PageTableManager::flush();
+
+    lock.unlock();
 }

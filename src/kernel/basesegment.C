@@ -29,6 +29,7 @@
 #include <kernel/segmentmgr.H>
 #include <kernel/block.H>
 #include <kernel/cpuid.H>
+#include <kernel/console.H>
 
 
 BaseSegment::~BaseSegment()
@@ -146,4 +147,12 @@ void BaseSegment::updateRefCount( uint64_t i_vaddr,
 int BaseSegment::mmSetPermission(void* i_va, uint64_t i_size,PAGE_PERMISSIONS i_access_type)
 {
   return 0;
+}
+
+void BaseSegment::castOutPages(uint64_t i_type)
+{
+    size_t cast_out = 0;
+    cast_out = iv_block->castOutPages(i_type);
+    // Could try again with a more agressive constraint if cast_out == 0 ????
+    if(cast_out) printkd("Cast out %ld pages,Type=%ld\n",cast_out,i_type);
 }

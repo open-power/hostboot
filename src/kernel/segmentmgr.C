@@ -55,6 +55,11 @@ void SegmentManager::updateRefCount( uint64_t i_vaddr,
     Singleton<SegmentManager>::instance()._updateRefCount(i_vaddr,i_stats);
 }
 
+void SegmentManager::castOutPages(uint64_t i_type)
+{
+    Singleton<SegmentManager>::instance()._castOutPages(i_type);
+}
+
 bool SegmentManager::_handlePageFault(task_t* i_task, uint64_t i_addr)
 {
     size_t segId = getSegmentIdFromAddress(i_addr);
@@ -122,11 +127,22 @@ void SegmentManager::_updateRefCount( uint64_t i_vaddr,
 				      PageTableManager::UsageStats_t i_stats )
 {
     // Get segment ID from effective address.
-    size_t segId = i_vaddr >> SLBE_s;
+    size_t segId = getSegmentIdFromAddress(i_vaddr);
 
     // Call contained segment object to update the reference count
     if ((segId < MAX_SEGMENTS) && (NULL != iv_segments[segId]))
     {
         iv_segments[segId]->updateRefCount( i_vaddr, i_stats );
+    }
+}
+
+void SegmentManager::_castOutPages(uint64_t i_type)
+{
+    for (size_t i = 0; i < MAX_SEGMENTS; i++)
+    {
+        if (NULL != iv_segments[i])
+        {
+            iv_segments[i]->castOutPages(i_type);
+        }
     }
 }

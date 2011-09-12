@@ -108,6 +108,15 @@ bool Block::handlePageFault(task_t* i_task, uint64_t i_addr)
         }
         else
         {
+            // Test code  @TODO remove - SET up ro pages to test cast out pages
+            //if(pte->getPage() == 0)
+            //{
+            //    void* l_page = PageManager::allocatePage();
+            //    memset(l_page,'U',PAGESIZE);
+            //    pte->setPageAddr(reinterpret_cast<uint64_t>(l_page));
+            //    pte->setPresent(true);
+            //    pte->setWritable(false);
+            //}
             return false; //TODO - Swap kernel base block pages for user pages
         }
     }
@@ -300,4 +309,94 @@ void Block::updateRefCount( uint64_t i_vaddr,
     // track the changed/dirty bit
     spte->setDirty( i_stats.C );
 
+}
+
+bool Block::evictPage(ShadowPTE* i_pte)
+{
+    ShadowPTE* pte = i_pte;
+    bool do_cast_out = false;
+
+    if(!pte->isWritable())  // ro, executable
+    {
+        do_cast_out = true;
+    }
+    else  // is writable...
+    {
+        // if pte->isWriteTracked() flush then cast out
+    }
+
+    if(do_cast_out)
+    {
+        PageTableManager::delEntry(pte->getPageAddr());
+        PageManager::freePage(reinterpret_cast<void*>(pte->getPageAddr()));
+        pte->setPresent(false);
+        pte->setPageAddr(NULL);
+    }
+
+    return do_cast_out;
+}
+
+size_t Block::castOutPages(uint64_t i_type)
+{
+    size_t cast_out = 0;
+    // drill down
+    if(iv_nextBlock)
+    {
+        cast_out += iv_nextBlock->castOutPages(i_type);
+    }
+
+    // TODO We will eventually need to skip other blocks as well, such as
+    // when the memory space grows.
+    if(iv_baseAddr != 0) // Skip base area
+    {
+        bool is_cast_out = false;
+        size_t rw_constraint = 5;
+        size_t ro_constraint = 3;
+
+        if(i_type == VmmManager::CRITICAL)
+        {
+            rw_constraint = 2;
+            ro_constraint = 1;
+        }
+        //printk("Block = %p:%ld\n",(void*)iv_baseAddr,iv_size / PAGESIZE);
+        for(uint64_t page = iv_baseAddr;
+            page < (iv_baseAddr + iv_size);
+            page += PAGESIZE)
+        {
+            ShadowPTE* pte = getPTE(page);
+            if (pte->isPresent() && (0 != pte->getPageAddr()))
+            {
+                //if(pte->isExecutable()) printk("x");
+                //else if(pte->isWritable()) printk("w");
+                //else printk("r");
+                //printk("%d",(int)pte->getLRU());
+
+                if(pte->isWritable())
+                {
+                    if((pte->getLRU() > rw_constraint) && pte->isWriteTracked())
+                    {
+                        is_cast_out = evictPage(pte);
+                        //printk("+");
+                    }
+                }
+                else  // ro and/or executable
+                {
+                    if(pte->getLRU() > ro_constraint)
+                    {
+                        is_cast_out = evictPage(pte);
+                    }
+                }
+                
+                if(is_cast_out)
+                {
+                    //printk("-");
+                    ++cast_out;
+                    is_cast_out = false;
+                }
+            }
+        }
+        //printk("\n");
+    }
+
+    return cast_out;
 }

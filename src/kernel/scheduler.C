@@ -77,6 +77,8 @@ void Scheduler::setNextRunnable()
     task_t* t = NULL;
     cpu_t* cpu = CpuManager::getCurrentCPU();
 
+    CpuManager::executePeriodics(cpu);
+
     // Check for ready task in local run-queue, if it exists.
     if (NULL != cpu->scheduler_extra)
     {

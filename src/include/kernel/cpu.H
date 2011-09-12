@@ -77,6 +77,9 @@ struct cpu_t
 
     /** XSCOM mutex to serialize access per CPU */
     mutex_t xscom_mutex;
+
+    /** counter for executePeriodics */
+    size_t periodic_count;
 };
 
 /** @fn getCpuId

@@ -44,7 +44,12 @@ void PageManager::freePage(void* p, size_t n)
     return pmgr._freePage(p, n);
 }
 
-PageManager::PageManager() : iv_pagesAvail(0)
+uint64_t PageManager::queryAvail()
+{
+    return Singleton<PageManager>::instance()._queryAvail();
+}
+
+PageManager::PageManager() : iv_pagesAvail(0), iv_pagesTotal(0)
 {
     // Determine first page of un-allocated memory.
     uint64_t addr = (uint64_t) VFS_LAST_ADDRESS;
@@ -55,6 +60,7 @@ PageManager::PageManager() : iv_pagesAvail(0)
     page_t* page = (page_t*)((void*) addr);
     size_t length = (MEMLEN - addr) / PAGESIZE;
 
+    iv_pagesTotal = length;
     // Update statistics.
     __sync_add_and_fetch(&iv_pagesAvail, length);
 
@@ -156,3 +162,4 @@ void PageManager::push_bucket(page_t* p, size_t n)
     if (n >= BUCKETS) return;
     first_page[n].push(p);
 }
+

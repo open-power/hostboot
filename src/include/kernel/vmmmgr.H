@@ -55,6 +55,12 @@ class VmmManager
             RO_EXE_ACCESS,
         };
 
+        enum castout_t
+        {
+            NORMAL,
+            CRITICAL,
+        };
+
         static void init();
         static void init_slb();
 
@@ -104,6 +110,17 @@ class VmmManager
          * @return the physical address or -EFAULT @see errno.h
          */
         static uint64_t findPhysicalAddress(uint64_t i_vaddr);
+
+        /**
+         * @brief Cast out older physical memory pages
+         * @param[in] castout constraint
+         */
+        static void castOutPages(castout_t i_ct);
+
+        /**
+         * @brief Flush pagetable, Update shadow page info
+         */
+        static void flushPageTable( void);
         
         /**
          * @brief Remove pages by a specified operation of the given size
@@ -156,6 +173,12 @@ class VmmManager
 
         /* See mmSetPermission */
         int _mmSetPermission(void* i_va,uint64_t i_size, PAGE_PERMISSIONS i_access_type);
+
+        /** See castOutPages */
+        void _castOutPages(castout_t i_ct);
+
+        /** See flushPageTable */
+        void _flushPageTable( void );
 
     public:
         friend class Block;

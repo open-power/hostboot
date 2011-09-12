@@ -251,6 +251,10 @@ void PageTableManager::printPT( void )
     Singleton<PageTableManager>::instance()._printPT();
 }
 
+void PageTableManager::flush( void )
+{
+    Singleton<PageTableManager>::instance()._flush();
+}
 
 /********************
  Private/Protected Methods
@@ -1102,3 +1106,21 @@ void PageTableManager::pushUsageStats( PageTableEntry* i_pte )
     uint64_t va = getVirtAddrFromPTE(i_pte);
     SegmentManager::updateRefCount( va, stats );
 }
+
+void PageTableManager::_flush( void )
+{
+    if( ivTABLE )
+    {
+        return;
+    }
+
+    PageTableEntry* pte = (PageTableEntry*)getAddress();
+    uint64_t num_ptes = getSize() / sizeof(PageTableEntry);
+    for (uint64_t i = 0; i < num_ptes; ++i)
+    {
+        updateLRU( pte );
+        pushUsageStats ( pte );
+        ++pte;
+    }
+}
+

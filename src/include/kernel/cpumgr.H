@@ -29,7 +29,12 @@
 class CpuManager
 {
     public:
-	enum { MAXCPUS = KERNEL_MAX_SUPPORTED_CPUS };
+	enum 
+        { 
+            MAXCPUS = KERNEL_MAX_SUPPORTED_CPUS,
+            CPU_PERIODIC_CHECK_MEMORY = 64,
+            CPU_PERIODIC_FLUSH_PAGETABLE = 1024,
+        };
 
 	/** @fn getCurrentCPU
 	 *  Returns a pointer to the current CPU structure by using the
@@ -59,6 +64,13 @@ class CpuManager
      *  Returns the status code that needs to be posted during shutdown
      */
     static uint32_t getShutdownStatus() { return cv_shutdown_status; }
+
+    /** @fn executePeriodics
+     * Perform periodic actions
+     * @param[in] cpu_t the CPU
+     */
+    static void executePeriodics(cpu_t * i_cpu);
+
 
     protected:
 	CpuManager();

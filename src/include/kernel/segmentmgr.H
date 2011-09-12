@@ -118,6 +118,12 @@ class SegmentManager
         static void updateRefCount( uint64_t i_vaddr,
 				    PageTableManager::UsageStats_t i_stats );
 
+        /**
+         * @brief Cast out oldest physical memory pages
+         * @param[in] castout type
+         */
+        static void castOutPages(uint64_t i_type);
+
 
     private:
         /** See handlePageFault. */
@@ -129,11 +135,13 @@ class SegmentManager
             /** See updateRefCount. */
 	void _updateRefCount( uint64_t i_vaddr,
 			      PageTableManager::UsageStats_t i_stats );
+        /** See castOutPages */
+        void _castOutPages(uint64_t i_type);
 
         /** See findPhysicalAddress */
         uint64_t _findPhysicalAddress(uint64_t i_vaddr) const;
 
-        ALWAYS_INLINE inline
+        ALWAYS_INLINE
         size_t getSegmentIdFromAddress(uint64_t i_addr) const
         {
             return i_addr >> SLBE_s;  

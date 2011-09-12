@@ -33,6 +33,7 @@
 #include <kernel/timemgr.H>
 #include <sys/sync.h>
 #include <kernel/cpuid.H>
+#include <kernel/ptmgr.H>
 
 cpu_t* CpuManager::cv_cpus[CpuManager::MAXCPUS] = { NULL };
 bool CpuManager::cv_shutdown_requested = false;
@@ -141,6 +142,7 @@ void CpuManager::startCPU(ssize_t i)
 	// Create idle task.
 	cpu->idle_task = TaskManager::createIdleTask();
 	cpu->idle_task->cpu = cpu;
+        cpu->periodic_count = 0;
 
 	printk("done\n");
     }
@@ -160,3 +162,33 @@ void CpuManager::startSlaveCPU(cpu_t* cpu)
 
     return;
 }
+
+void CpuManager::executePeriodics(cpu_t * i_cpu)
+{
+    if(i_cpu->master)
+    {
+        ++(i_cpu->periodic_count);
+        if(0 == (i_cpu->periodic_count % CPU_PERIODIC_CHECK_MEMORY))
+        {
+            uint64_t pcntAvail = PageManager::queryAvail();
+            if(pcntAvail < 16) // Less than 16% pages left TODO 16 ok?
+            {
+                VmmManager::flushPageTable();
+                ++(i_cpu->periodic_count);   // prevent another flush below
+                if(pcntAvail < 5) // TODO 5% ok
+                {
+                    VmmManager::castOutPages(VmmManager::CRITICAL);
+                }
+                else
+                {
+                    VmmManager::castOutPages(VmmManager::NORMAL);
+                }
+            }
+        }
+        if(0 == (i_cpu->periodic_count % CPU_PERIODIC_FLUSH_PAGETABLE))
+        {
+            VmmManager::flushPageTable();
+        }
+    }
+}
+

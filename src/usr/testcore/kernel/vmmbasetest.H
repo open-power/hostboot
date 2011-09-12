@@ -30,6 +30,7 @@
 #include <sys/task.h>
 #include <kernel/console.H>
 #include <arch/ppc.H>
+#include <sys/mm.h>
 
 class VmmBaseTest : public CxxTest::TestSuite
 {
@@ -85,6 +86,25 @@ class VmmBaseTest : public CxxTest::TestSuite
         void testExecuteModuleDataSpace()
         {
             // @TODO. VMM not ready.
+        }
+
+        void testCastOutPages()
+        {
+            //uint64_t vmemaddr = (1ul * 1024 * 1024 * 1024)/2;
+            //uint64_t vmsize = 4ul * 1024 * 500;
+            //printk("Test case: cast out pages\n");
+            //printk("Set up virtual block at %p\n",(void*)vmemaddr);
+            //size_t rc = mm_alloc_block(NULL, // need a msgq?
+            //                           (void*)vmemaddr,
+            //                           vmsize);
+            //if(rc) printk("RC=%ld\n",rc);
+            // touch something on every page
+            //for(uint64_t i = vmemaddr; i < (vmemaddr + vmsize); i += PAGESIZE)
+            //{
+            //    if(*((char *)i) != 'U') printk("Yiks %p is %c\n",(void*)i,*((char *)i));
+            //}
+
+            // see printk buffer for cast out pages
         }
 
     private:

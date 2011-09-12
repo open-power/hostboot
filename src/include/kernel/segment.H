@@ -89,6 +89,12 @@ class Segment
 	    return;
 	};
 
+        /**
+         * @brief Cast out older physical memory pages
+         * @param[in] i_type Constraint @see VmmManager::castOutPages
+         */
+        virtual void castOutPages(uint64_t i_type) {} // default to NOOP
+
     protected:
             /** The base address of the segment. */
         const uint64_t iv_baseAddress;
