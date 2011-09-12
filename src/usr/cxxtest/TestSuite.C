@@ -101,12 +101,9 @@ void doFailTest( )
 
 void doFailTest( const char *filename, uint32_t linenum )
 {
-    TRACDBIN( g_trac_test,
-            "!!!       > Test Failed: ",
-            filename,
-            strlen( filename) );
     TRACDCOMP( g_trac_test,
-            "!!!       >at line %d ",
+            "!!!       > Test %s Failed at line %d ",
+            filename,
             linenum );
     __sync_add_and_fetch( &g_FailedTests, 1 );
 
@@ -131,10 +128,9 @@ void reportTotalTests(  const char *suitename,
 {
 
     __sync_add_and_fetch( &g_TotalTests, numtests );
-    TRACDBIN( g_trac_test,
-            "Suite Completed: ",
-            suitename,
-            strlen(suitename) );
+    TRACDCOMP( g_trac_test,
+            "Suite %s Completed ",
+            suitename  );
     // printk( "%s completed %ld tests\n", suitename, numtests);
 
     return;

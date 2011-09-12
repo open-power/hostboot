@@ -27,6 +27,8 @@
 #include <kernel/console.H>
 #include <sys/time.h>
 #include <sys/sync.h>
+#include <errl/errlentry.H>
+#include <errl/errlmanager.H>
 
 #include <initservice/taskargs.H>
 #include <cxxtest/TestSuite.H>
@@ -62,6 +64,7 @@ TRAC_INIT(&g_trac_cxxtest, "CXXTEST", 1024 );
 extern "C"
 void _start(void *io_pArgs)
 {
+    errlHndl_t  l_errl  =   NULL;
     std::vector<const char *> module_list;
     tid_t       tidrc           =   0;
     TaskArgs::TaskArgs *pTaskArgs  =
@@ -94,9 +97,22 @@ void _start(void *io_pArgs)
                    "ModulesStarted=%d",
                    CxxTest::g_ModulesStarted );
 
+        // load module and call _init()
+        l_errl = VFS::module_load( *i );
+        if ( l_errl )
+        {
+            // vfs could not load a module and returned an errorlog.
+            //  commit the errorlog, mark the test failed, and
+            //  move on.
+            TS_FAIL( "ERROR: Task %s could not be loaded, committing errorlog",
+                    *i );
+            errlCommit( l_errl );
+            continue;
+        }
+
         tidrc = task_exec( *i, NULL );
-        TRACDCOMP( g_trac_cxxtest, "Launched task: tidrc=%d",
-                   tidrc );
+        TRACDCOMP( g_trac_cxxtest, "Launched task: %s tidrc=%d",
+                   *i, tidrc );
     }
 
     TRACDCOMP( g_trac_cxxtest,  "Waiting for all tasks to finish....");
