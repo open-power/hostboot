@@ -112,7 +112,7 @@ errlHndl_t VfsRp::_init()
     errlHndl_t err = NULL;
     size_t rc = 0;
     iv_msgQ = msg_q_create();
-    rc = msg_q_register(iv_msgQ, VFS_MSG);
+    rc = msg_q_register(iv_msgQ, VFS_ROOT_MSG_VFS);
 
     // Discover PNOR virtual address of extended image
     PNOR::SectionInfo_t l_pnor_info;
@@ -325,7 +325,7 @@ void VfsRp::get_test_modules(std::vector<const char *> & o_list) const
     o_list.clear();
     o_list.reserve(32);
 
-    VfsSystemModule * vfsItr = 
+    VfsSystemModule * vfsItr =
         (VfsSystemModule *) (iv_pnor_vaddr + VFS_EXTENDED_MODULE_TABLE_OFFSET);
 
     //TRACDCOMP(g_trac_vfs,"finding test modules...");
@@ -341,7 +341,7 @@ void VfsRp::get_test_modules(std::vector<const char *> & o_list) const
             }
         }
         vfsItr++;
-    }                                            
+    }
 }
 
 
@@ -350,7 +350,7 @@ void VfsRp::get_test_modules(std::vector<const char *> & o_list) const
 errlHndl_t VFS::module_load_unload(const char * i_module, VfsMessages i_msgtype)
 {
     errlHndl_t err = NULL;
-    msg_q_t vfsQ = msg_q_resolve(VFS_MSG);
+    msg_q_t vfsQ = msg_q_resolve(VFS_ROOT_MSG_VFS);
     msg_t* msg = msg_allocate();
     msg->type = i_msgtype;
     msg->data[0] = (uint64_t) i_module;

@@ -171,7 +171,11 @@ ALWAYS_INLINE
   *
   * @param[in] q - message queue
   * @param[in] msg - message
-  * @return    Always returns zero.
+  *
+  * @return Status of message send.
+  * @retval 0 - Success
+  * @retval -EINVAL - Invalid pointer passed to kernel.
+  * @retval -EINVAL - Message type is in kernel range.
   */
 int msg_send(msg_q_t q, msg_t* msg);
 
@@ -197,7 +201,10 @@ int msg_sendrecv(msg_q_t q, msg_t* msg);
   *
   * @param[in] q - message queue
   * @param[in] msg - response message
+  *
   * @return Zero on success, else negative.
+  * @retval -EBADF - Message was not sent synchronously.
+  *
   */
 int msg_respond(msg_q_t q, msg_t* msg);
 

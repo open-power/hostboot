@@ -121,7 +121,7 @@ int BaseSegment::_mmAllocBlock(MessageQueue* i_mq,void* i_va,uint64_t i_size)
         l_vaddr >= (this->getBaseAddress() + (1ull << SLBE_s)) ||
         (l_blockSizeTotal + ALIGN_PAGE(i_size)) >= (1ull << SLBE_s))
     {
-        return -1;
+        return -EINVAL;
     }
     Block* l_block = new Block(l_vaddr, ALIGN_PAGE(i_size), i_mq);
     l_block->setParent(this);

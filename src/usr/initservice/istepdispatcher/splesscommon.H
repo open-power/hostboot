@@ -194,9 +194,9 @@ namespace   SPLESSSTS
  *  Sub-step Running, bits 16:31 - the substep that is currently running.
  *  Task Status, bits 32:47 -  the status that IStep Dispatcher returns when
  *      trying to run the task.  For example:
- *      -3 IStep number is invalid
- *      -1, -2   (return code from kernel)  IStep could not be launched as a
- *          task or as a function within a task
+ *      -EINVAL IStep number is invalid
+ *      -ENOENT, -ENOEXEC   (return code from kernel)  IStep could not
+ *          be launched as a task or as a function within a task
  *  IStep Status, bits 48:63 - status returned from the IStep.
  *
  */

@@ -102,7 +102,7 @@ bool DeviceSegment::handlePageFault(task_t* i_task, uint64_t i_addr)
     //Verify the device is mapped
     uint64_t segment_ea = i_addr - this->getBaseAddress();
     size_t idx = segment_ea / ((1ull << SLBE_s) / MMIO_MAP_DEVICES);
-    uint64_t device_offset = segment_ea - 
+    uint64_t device_offset = segment_ea -
                                 (idx * (1ull << SLBE_s) / MMIO_MAP_DEVICES);
 
     if (0 == iv_mmioMap[idx].addr ||
@@ -128,7 +128,7 @@ void* DeviceSegment::_mmioMap(void* ra, size_t pages)
         {
             iv_mmioMap[i].size = THIRTYTWO_GB;
             iv_mmioMap[i].addr = reinterpret_cast<uint64_t>(ra);
-            return reinterpret_cast<void*>(i * 
+            return reinterpret_cast<void*>(i *
                                       ((1ull << SLBE_s) / MMIO_MAP_DEVICES) +
                                       this->getBaseAddress());
         }
@@ -142,7 +142,7 @@ void* DeviceSegment::_mmioMap(void* ra, size_t pages)
  */
 int DeviceSegment::_mmioUnmap(void* ea, size_t pages)
 {
-    uint64_t segment_ea = reinterpret_cast<uint64_t>(ea) - 
+    uint64_t segment_ea = reinterpret_cast<uint64_t>(ea) -
                           this->getBaseAddress();
     size_t idx = segment_ea / ((1ull << SLBE_s) / MMIO_MAP_DEVICES);
     if (0 != iv_mmioMap[idx].addr)
@@ -154,7 +154,7 @@ int DeviceSegment::_mmioUnmap(void* ea, size_t pages)
         return 0;
     }
 
-    return -1;
+    return -EINVAL;
 }
 
 /**
@@ -203,7 +203,7 @@ void *DeviceSegment::_devMap(void *ra, SEG_DATA_SIZES i_devDataSize)
  */
 int DeviceSegment::_devUnmap(void *ea)
 {
-    int rc = -1;
+    int rc = -EINVAL;
     uint64_t segment_ea = reinterpret_cast<uint64_t>(ea);
     //Verify input address falls within this segment's address range
     if (segment_ea < this->getBaseAddress() ||

@@ -27,6 +27,7 @@
 #include <kernel/cpu.H>
 #include <sys/vfs.h>
 #include <sys/msg.h>
+#include <errno.h>
 
 using namespace Systemcalls;
 
@@ -71,7 +72,8 @@ tid_t task_exec(const char* file, void* ptr)
     // The VFS process is responsible for finding the module and creating the
     // new process.  So, we send a message over to that process.
 
-    tid_t child = -1;
+    tid_t child = 0;
+    int rc = 0;
 
     // Create message, send.
     msg_q_t vfsQ = (msg_q_t)_syscall0(MSGQ_RESOLVE_ROOT);
@@ -79,7 +81,15 @@ tid_t task_exec(const char* file, void* ptr)
     msg->type = VFS_MSG_EXEC;
     msg->data[0] = (uint64_t) file;
     msg->data[1] = (uint64_t) ptr;
-    int rc = msg_sendrecv(vfsQ, msg);
+    if (vfsQ)
+    {
+        msg_sendrecv(vfsQ, msg);
+    }
+    else
+    {
+        // VFS process isn't fully up yet, return EAGAIN.
+        rc = -EAGAIN;
+    }
 
     if (0 == rc)
     {

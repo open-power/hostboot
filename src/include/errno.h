@@ -23,9 +23,12 @@
 #ifndef _ERRNO_H
 #define _ERRNO_H
 
-#define	EIO              5      // I/O error 
+#define ENOENT           2      // No such file or directory
+#define	EIO              5      // I/O error
+#define ENOEXEC          8      // Exec format error
+#define EBADF            9      // Bad file descriptor
 #define EAGAIN          11      // Try again
-#define	EFAULT          14      // Bad address 
+#define	EFAULT          14      // Bad address
 #define EINVAL          22      // Invalid argument
 
 #define EWOULDBLOCK     EAGAIN  // operation would block

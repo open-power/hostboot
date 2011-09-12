@@ -62,7 +62,7 @@ extern const char* VFS_ROOT;
 extern const char* VFS_ROOT_BIN;
 extern const char* VFS_ROOT_DATA;
 extern const char* VFS_ROOT_MSG;
-extern const char* VFS_MSG;
+extern const char* VFS_ROOT_MSG_VFS;
 
 enum VfsMessages
 {
@@ -105,7 +105,9 @@ VfsSystemModule * vfs_find_module(VfsSystemModule * i_table, const char * i_name
  * Call the module start routine
  * @param[in] i_module VfsSystemModule data for the module
  * @param[in] i_param parameter to pass to task_create() for this module
- * @return tid_t of started task | -1 if i_module is NULL | -2 if there is no start()
+ * @return tid_t of started task or negative value on error.
+ * @retval -ENOENT if i_module is NULL
+ * @retval -ENOEXEC if there is no start()
  */
 tid_t vfs_exec(VfsSystemModule * i_module, void* i_param);
 #endif

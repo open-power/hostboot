@@ -50,7 +50,7 @@ void init_main(void* unused)
     //  run initialization service to start up everything else.
     printk("init_main: Starting Initialization Service...\n");
     tidrc   =   task_exec( "libinitservice.so", NULL );
-    if ( (int16_t)tidrc < 0 )       //  task_exec returned a -1
+    if ( (int16_t)tidrc < 0 )       //  task_exec returned an error.
     {
         printk( "ERROR: init_main: failed to launch initservice: %d\n", tidrc );
 

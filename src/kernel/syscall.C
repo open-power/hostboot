@@ -220,6 +220,15 @@ namespace Systemcalls
     {
         MessageQueue* mq = (MessageQueue*) TASK_GETARG0(t);
         msg_t* m = (msg_t*) TASK_GETARG1(t);
+
+        if ((NULL == mq) || (NULL == m))
+        {
+            printkd("NULL pointer for message queue (%p) or message (%p).\n",
+                    mq, m);
+            TASK_SETRTN(t, -EINVAL);
+            return;
+        }
+
         m->__reserved__async = 0; // set to async msg.
 
         if (m->type >= MSG_FIRST_SYS_TYPE)
@@ -327,7 +336,7 @@ namespace Systemcalls
         }
         else
         {
-            TASK_SETRTN(t, -1);
+            TASK_SETRTN(t, -EBADF);
             mq->lock.unlock();
         }
     }

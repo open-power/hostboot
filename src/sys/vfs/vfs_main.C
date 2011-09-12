@@ -21,6 +21,7 @@
 //
 //  IBM_PROLOG_END
 #include <string.h>
+#include <errno.h>
 
 #include <sys/msg.h>
 #include <sys/vfs.h>
@@ -34,7 +35,7 @@ const char* VFS_ROOT = "/";
 const char* VFS_ROOT_BIN = "/bin/";
 const char* VFS_ROOT_DATA = "/data/";
 const char* VFS_ROOT_MSG = "/msg/";
-const char* VFS_MSG = "/vfs/";
+const char* VFS_ROOT_MSG_VFS = "/msg/vfs";
 
 void vfs_module_init();
 
@@ -42,7 +43,9 @@ void vfs_module_init();
  * Call the module start routine
  * @param[in] i_module VfsSystemModule data for the module
  * @param[in] i_param parameter to pass to task_create() for this module
- * @return tid_t of started task | -1 if i_module is NULL | -2 if there is no start()
+ * @return tid_t of started task or negative value on error.
+ * @retval -ENOENT if i_module is NULL
+ * @retval -ENOEXEC if there is no start()
  */
 tid_t vfs_exec(VfsSystemModule * i_module, void* i_param);
 
@@ -122,13 +125,14 @@ void vfs_main(void* i_barrier)
 
 		    tid_t child = vfs_exec(module,(void*) msg->data[1]);
 
-                    // child == -1 means module not found in base image so send
-                    // a message to VFS_MSG queue to look in the extended image
-                    // VFS_MSG queue will handle the msg_respond()
-                    if( child == (tid_t)-1 ) // forward msg to usr vfs
+                    // child == -ENOENT means module not found in base image
+                    // so send a message to VFS_MSG queue to look in the
+                    // extended image VFS_MSG queue will handle the
+                    // msg_respond()
+                    if( child == (tid_t)-ENOENT ) // forward msg to usr vfs
                     {
                         VfsEntry::key_type k;
-                        strcpy(k.key, VFS_MSG);
+                        strcpy(k.key, VFS_ROOT_MSG_VFS);
                         VfsEntry* e = vfsContents.find(k);
                         if(e != NULL)
                         {
@@ -163,12 +167,12 @@ void vfs_main(void* i_barrier)
 
 tid_t vfs_exec(VfsSystemModule * i_module, void* i_param)
 {
-    tid_t child = -1;
+    tid_t child = -ENOENT;
     if(i_module != NULL)
     {
         if (i_module->start == NULL)
         {
-            child = -2;  // module has no start() routine
+            child = -ENOEXEC;  // module has no start() routine
         }
         else
         {

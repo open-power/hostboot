@@ -180,7 +180,7 @@ void ExtInitSvc::init( void *i_ptr )
      *      hbicore.bin         (HostBoot shippable image)
      *      hbicore_test.bin    (runs all unit tests)
      *      Only hbicore_test.bin has the libcxxtest.so module, so when
-     *      we execute startTask() below on hbicore.bin, it will return -1,
+     *      we execute startTask() below on hbicore.bin, it will return -ENOENT,
      *      no module present.  This is OK.
      *
      *  @todo can we call call module_load() to see if libcxxtest.so exists?
@@ -206,7 +206,7 @@ void ExtInitSvc::init( void *i_ptr )
 
         // If the test task does not exist then don't run it.
         if(!VFS::module_exists(l_pcxxtask->taskname)) break;
-        
+
         l_cxxerrl = InitService::getTheInstance().startTask( l_pcxxtask,
                                                              &l_cxxtestargs );
 
