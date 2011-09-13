@@ -37,16 +37,33 @@ XMLTOHB_SOURCE_TARGETS =    \
 XMLTOHB_BINARY_TARGETS =    \
     targeting.bin
 
-GENFILES =                      \
-    ${XMLTOHB_HEADER_TARGETS}   \
-    ${XMLTOHB_SOURCE_TARGETS}   \
-    ${XMLTOHB_BINARY_TARGETS} 
+XMLTOHB_TARGETS = \
+    ${XMLTOHB_HEADER_TARGETS} \
+    ${XMLTOHB_SOURCE_TARGETS} \
+    ${XMLTOHB_BINARY_TARGETS}
+
+XMLTOHB_HBXML_SOURCES = \
+    hb.xml
+
+XMLTOHB_FAPIATTR_SOURCES = \
+    ${ROOTPATH}/src/usr/hwpf/hwp/fapiHwpAttributeInfo.xml
+
+GENFILES = ${XMLTOHB_TARGETS}
+
+EXTRA_PARTS = $(addprefix $(IMGDIR)/, $(XMLTOHB_BINARY_TARGETS))
+
+include ${ROOTPATH}/config.mk
 
 # Delete any generated file on error 
 .DELETE_ON_ERROR:
 
-$(addprefix %/,$(GENFILES)) : xmltohb.pl hb.xml
-	./$< --hb-xml-file ./hb.xml --fapi-attributes-xml-file=../../hwpf/hwp/fapiHwpAttributeInfo.xml --src-output-dir=$(dir $@) --img-output-dir=$(dir $@) $(filter-out $<,$^) 
-	cp -f $(dir $@)/targeting.bin $(IMGDIR) 
+${EXTRA_PARTS}: ${IMGDIR}/% : ${GENDIR}/%
+	cp -f $^ $@
 
-include ${ROOTPATH}/config.mk
+$(call GENTARGET,$(XMLTOHB_TARGETS)) : \
+		xmltohb.pl ${XMLTOHB_HBXML_SOURCES} ${XMLTOHB_FAPIATTR_SOURCES}
+	./$< $(addprefix --hb-xml-file=,${XMLTOHB_HBXML_SOURCES}) \
+	     $(addprefix --fapi-attributes-xml-file=,\
+			 ${XMLTOHB_FAPIATTR_SOURCES}) \
+	     --src-output-dir=$(dir $@) --img-output-dir=$(dir $@)
+
