@@ -39,10 +39,11 @@ ITERATORS_OBJS =        \
 TARGET_OBJS =       \
     target.o        \
     targetservice.o \
-    entitypath.o    
+    entitypath.o    \
+    fakepnordata.o
 
 OBJS = ${TARGET_OBJS} ${PREDICATES_OBJS} ${ITERATORS_OBJS}
 
-SUBDIRS = test.d xmltohb.d
+SUBDIRS = test.d
 
 include ${ROOTPATH}/config.mk

@@ -47,7 +47,7 @@
 #include <util/singleton.H>
 
 // This component
-#include <attributeenums.H>
+#include <targeting/attributeenums.H>
 #include <targeting/target.H>
 #include <targeting/entitypath.H>
 #include <targeting/iterators/targetiterator.H>

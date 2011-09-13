@@ -28,6 +28,3 @@ TESTS = *.H
 OBJS = attributestrings.o 
 
 include ${ROOTPATH}/config.mk
-
-vpath %.C ${GENDIR}
-

@@ -68,8 +68,7 @@ my @files = ("src/build/tools/exthbdump.pl",
              "img/hbicore_test.list",
              "img/hbicore_extended.bin",
              "img/hbicore_test_extended.bin",
-             "img/pnor.toc",
-             "img/targeting.bin",
+             "img/pnor.toc"
              );
 
 #Directories in base git repository
