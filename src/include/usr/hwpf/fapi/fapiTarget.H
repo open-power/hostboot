@@ -35,6 +35,7 @@
  *                          mjjones     06/29/2011  Removed incorrect MSB from 2 enums
  *                          mjjones     07/05/2011  Removed const from handle
  *                          mjjones     08/29/2011  Updated toString function
+ *                          mjjones     09/12/2011  Added isChip and isChiplet
  */
 
 #ifndef FAPITARGET_H_
@@ -66,6 +67,20 @@ enum TargetType
  * @brief Typedef used when passing multiple TargetType values
  */
 typedef uint32_t TargetTypes_t;
+
+/**
+ * @brief Enumeration of target state values (bitmask values)
+ */
+enum TargetState
+{
+    TARGET_STATE_PRESENT    = 0x00000001,
+    TARGET_STATE_FUNCTIONAL = 0x00000002,
+};
+
+/**
+ * @brief Typedef used when passing multiple TargetState values
+ */
+typedef uint32_t TargetStates_t;
 
 /**
  * @brief ECMD constants
@@ -174,6 +189,20 @@ public:
      * @param[in] i_type The type of target represented by this target
      */
     void setType(const TargetType i_type);
+
+    /**
+     * @brief Returns if the target is a chip
+     *
+     * @return boolean. true if chip else fase
+     */
+    bool isChip() const;
+
+    /**
+     * @brief Returns if the target is a chiplet
+     *
+     * @return boolean. true if chiplet else fase
+     */
+    bool isChiplet() const;
 
     /**
      * @brief Convert a target to an ecmd-format target string

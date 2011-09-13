@@ -37,6 +37,7 @@
 #include <fapiTestHwp.H>
 #include <fapiTestHwpError.H>
 #include <fapiTestHwpFfdc.H>
+#include <fapiTestHwpConfig.H>
 
 /**
  * @brief HWP Executor macro

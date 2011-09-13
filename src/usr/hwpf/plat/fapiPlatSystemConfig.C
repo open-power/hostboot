@@ -28,67 +28,271 @@
  *  Note that platform code must provide the implementation.
  */
 
-#include <fapiSystemConfig.H>
 #include <fapiPlatTrace.H>
+#include <fapiSystemConfig.H>
+#include <fapiPlatReasonCodes.H>
+#include <errl/errlentry.H>
+#include <targeting/targetservice.H>
+#include <targeting/predicates/predicatectm.H>
 
 extern "C"
 {
 
 //******************************************************************************
-// GetFunctionalChiplets function
+// fapiGetChildChiplets function
 //******************************************************************************
-fapi::ReturnCode GetFunctionalChiplets(const fapi::Target& i_target,
-                                       const fapi::TargetType i_chipletType,
-                                       std::vector<fapi::Target> & o_chiplets)
+fapi::ReturnCode fapiGetChildChiplets(
+    const fapi::Target & i_chip,
+    const fapi::TargetType i_chipletType,
+    std::vector<fapi::Target> & o_chiplets,
+    const fapi::TargetState i_state)
 {
-	FAPI_DBG(ENTER_MRK "GetFunctionalChiplets");
+    // TODO. Need to support i_state
 
-	FAPI_DBG(EXIT_MRK "GetFunctionalChiplets");
+    FAPI_INF(ENTER_MRK "fapiGetChildChiplets. Chiplet Type: 0x%x. State: 0x%x",
+             i_chipletType, i_state);
 
-	return fapi::FAPI_RC_PLAT_NOT_IMPLEMENTED;
+    fapi::ReturnCode l_rc;
+    o_chiplets.clear();
+
+    // Create a Class/Type/Model predicate to look for units
+    TARGETING::PredicateCTM l_predicate(TARGETING::CLASS_UNIT);
+
+    // Check that the input target is a chip
+    if (!i_chip.isChip())
+    {
+        FAPI_ERR("fapiGetChildChiplets. Input target type 0x%x is not a chip",
+                 i_chip.getType());
+
+        /*@
+         * @errortype
+         * @moduleid     MOD_FAPI_GET_CHILD_CHIPLETS
+         * @reasoncode   RC_INVALID_REQUEST
+         * @userdata1    Type of input target
+         * @devdesc      fapiGetChildChiplets request for non-chip
+         */
+        errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
+            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+            fapi::MOD_FAPI_GET_CHILD_CHIPLETS,
+            fapi::RC_INVALID_REQUEST,
+            i_chip.getType());
+
+        // Attach the error log to the fapi::ReturnCode
+        l_rc = fapi::FAPI_RC_PLAT_ERR_SEE_DATA;
+        l_rc.setPlatData(reinterpret_cast<void *> (l_pError));
+    }
+    else
+    {
+        // Update the predicate to look for the specified type
+        if (i_chipletType == fapi::TARGET_TYPE_EX_CHIPLET)
+        {
+            l_predicate.setType(TARGETING::TYPE_EX);
+        }
+        else if (i_chipletType == fapi::TARGET_TYPE_MBA_CHIPLET)
+        {
+            l_predicate.setType(TARGETING::TYPE_MBA);
+        }
+        else if (i_chipletType == fapi::TARGET_TYPE_MBS_CHIPLET)
+        {
+            l_predicate.setType(TARGETING::TYPE_MBS);
+        }
+        else if (i_chipletType == fapi::TARGET_TYPE_MCS_CHIPLET)
+        {
+            l_predicate.setType(TARGETING::TYPE_MCS);
+        }
+        else
+        {
+            FAPI_ERR("fapiGetChildChiplets. Chiplet type 0x%x not supported",
+                     i_chipletType);
+
+            /*@
+             * @errortype
+             * @moduleid     MOD_FAPI_GET_CHILD_CHIPLETS
+             * @reasoncode   RC_UNSUPPORTED_REQUEST
+             * @userdata1    Type of requested chiplet
+             * @devdesc      fapiGetChildChiplets request for unsupported
+             *               or invalid chiplet type
+             */
+            errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                fapi::MOD_FAPI_GET_CHILD_CHIPLETS,
+                fapi::RC_UNSUPPORTED_REQUEST,
+                i_chipletType);
+
+            // Attach the error log to the fapi::ReturnCode
+            l_rc = fapi::FAPI_RC_PLAT_ERR_SEE_DATA;
+            l_rc.setPlatData(reinterpret_cast<void *> (l_pError));
+        }
+    }
+
+    if (!l_rc)
+    {
+        // Extract the HostBoot Target pointer for the input chip
+        TARGETING::Target * l_pChip =
+            reinterpret_cast<TARGETING::Target*>(i_chip.get());
+
+        // Create a vector of TARGETING::Target pointers
+        TARGETING::TargetHandleList l_chipletList;
+
+        // Get children chiplets
+        TARGETING::targetService().
+            getAssociated(l_chipletList, l_pChip,
+                          TARGETING::TargetService::CHILD,
+                          TARGETING::TargetService::IMMEDIATE, &l_predicate);
+
+        // Return fapi::Targets to the caller
+        for (uint32_t i = 0; i < l_chipletList.size(); i++)
+        {
+            fapi::Target l_chiplet(i_chipletType,
+                                   reinterpret_cast<void *>(l_chipletList[i]));
+            o_chiplets.push_back(l_chiplet);
+        }
+    }
+
+    FAPI_INF(EXIT_MRK "fapiGetChildChiplets. %d results", o_chiplets.size());
+    return l_rc;
 }
 
 //******************************************************************************
-// GetExistingChiplets function
+// fapiGetAssociatedDimms function
 //******************************************************************************
-fapi::ReturnCode GetExistingChiplets(const fapi::Target& i_target,
-                                     const fapi::TargetType i_chipletType,
-                                     std::vector<fapi::Target> & o_chiplets)
+fapi::ReturnCode fapiGetAssociatedDimms(
+    const fapi::Target& i_target,
+    std::vector<fapi::Target> & o_dimms,
+    const fapi::TargetState i_state)
 {
-	FAPI_DBG(ENTER_MRK "GetExistingChiplets");
+    // TODO. Need to support i_state
 
-	FAPI_DBG(EXIT_MRK "GetExistingChiplets");
+    FAPI_INF(ENTER_MRK "fapiGetAssociatedDimms. State: 0x%x", i_state);
 
-	return fapi::FAPI_RC_PLAT_NOT_IMPLEMENTED;
+    fapi::ReturnCode l_rc;
+    o_dimms.clear();
 
+    // Create a Class/Type/Model predicate to look for dimm cards
+    TARGETING::PredicateCTM l_predicate(TARGETING::CLASS_CARD,
+                                        TARGETING::TYPE_DIMM);
+
+    // Extract the HostBoot Target pointer for the input target
+    TARGETING::Target * l_pTarget =
+        reinterpret_cast<TARGETING::Target*>(i_target.get());
+
+    // Create a vector of TARGETING::Target pointers
+    TARGETING::TargetHandleList l_dimmList;
+
+    // Get associated dimms
+    TARGETING::targetService().
+        getAssociated(l_dimmList, l_pTarget,
+                      TARGETING::TargetService::CHILD_BY_AFFINITY,
+                      TARGETING::TargetService::ALL, &l_predicate);
+
+    // Return fapi::Targets to the caller
+    for (uint32_t i = 0; i < l_dimmList.size(); i++)
+    {
+        fapi::Target l_dimm(fapi::TARGET_TYPE_DIMM,
+                            reinterpret_cast<void *>(l_dimmList[i]));
+        o_dimms.push_back(l_dimm);
+    }
+
+    FAPI_INF(EXIT_MRK "fapiGetAssociatedDimms. %d results", o_dimms.size());
+    return l_rc;
 }
 
 //******************************************************************************
-// GetFunctionalDimms function
+// fapiGetParentChip function
 //******************************************************************************
-fapi::ReturnCode GetFunctionalDimms(const fapi::Target& i_target,
-                                    std::vector<fapi::Target> & o_dimms)
+fapi::ReturnCode fapiGetParentChip(
+    const fapi::Target& i_chiplet,
+    fapi::Target & o_chip)
 {
-	FAPI_DBG(ENTER_MRK "GetFunctionalDimms");
+    FAPI_INF(ENTER_MRK "fapiGetParentChip");
 
-	FAPI_DBG(EXIT_MRK "GetFunctionalDimms");
+    fapi::ReturnCode l_rc;
 
-	return fapi::FAPI_RC_PLAT_NOT_IMPLEMENTED;
+    // Check that the input target is a chiplet
+    if (!i_chiplet.isChiplet())
+    {
+        FAPI_ERR("fapiGetParentChip. Input target type 0x%x is not a chiplet",
+                 i_chiplet.getType());
 
+        /*@
+         * @errortype
+         * @moduleid     MOD_FAPI_GET_PARENT_CHIP
+         * @reasoncode   RC_INVALID_REQUEST
+         * @userdata1    Type of input target
+         * @devdesc      fapiGetParentChip request for non-chiplet
+         */
+        errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
+            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+            fapi::MOD_FAPI_GET_PARENT_CHIP,
+            fapi::RC_INVALID_REQUEST,
+            i_chiplet.getType());
+
+        // Attach the error log to the fapi::ReturnCode
+        l_rc = fapi::FAPI_RC_PLAT_ERR_SEE_DATA;
+        l_rc.setPlatData(reinterpret_cast<void *> (l_pError));
+    }
+    else
+    {
+        // Create a Class/Type/Model predicate to look for chips
+        TARGETING::PredicateCTM l_predicate(TARGETING::CLASS_CHIP);
+
+        // Extract the HostBoot Target pointer for the input chiplet
+        TARGETING::Target * l_pChiplet =
+            reinterpret_cast<TARGETING::Target*>(i_chiplet.get());
+
+        // Create a vector of TARGETING::Target pointers
+        TARGETING::TargetHandleList l_chipList;
+
+        // Get parent
+        TARGETING::targetService().
+            getAssociated(l_chipList, l_pChiplet,
+                          TARGETING::TargetService::PARENT,
+                          TARGETING::TargetService::IMMEDIATE, &l_predicate);
+
+        if (l_chipList.size() != 1)
+        {
+            // One parent chip was not found
+            FAPI_ERR("fapiGetParentChip. Number of parents found is %d",
+                     l_chipList.size());
+
+            /*@
+             * @errortype
+             * @moduleid     MOD_FAPI_GET_PARENT_CHIP
+             * @reasoncode   RC_NO_SINGLE_PARENT
+             * @userdata1    Number of parents found
+             * @devdesc      fapiGetParentChip request did not find one parent
+             */
+            errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                fapi::MOD_FAPI_GET_PARENT_CHIP,
+                fapi::RC_NO_SINGLE_PARENT,
+                l_chipList.size());
+
+            // Attach the error log to the fapi::ReturnCode
+            l_rc = fapi::FAPI_RC_PLAT_ERR_SEE_DATA;
+            l_rc.setPlatData(reinterpret_cast<void *> (l_pError));
+        }
+        else
+        {
+            // Set the output chip type
+            if (l_chipList[0]->getAttr<TARGETING::ATTR_TYPE>() ==
+                TARGETING::TYPE_PROC)
+            {
+                o_chip.setType(fapi::TARGET_TYPE_PROC_CHIP);
+            }
+            else
+            {
+                o_chip.setType(fapi::TARGET_TYPE_MEMBUF_CHIP);
+            }
+
+            // Set the output chip (platform specific) handle
+            o_chip.set(reinterpret_cast<void *>(l_chipList[0]));
+        }
+    }
+
+    FAPI_INF(EXIT_MRK "fapiGetParentChip");
+    return l_rc;
 }
 
-//******************************************************************************
-// GetExistingDimms function
-//******************************************************************************
-fapi::ReturnCode GetExistingDimms(const fapi::Target& i_target,
-                                  std::vector<fapi::Target> & o_dimms)
-{
-	FAPI_DBG(ENTER_MRK "GetExistingDimms");
-
-	FAPI_DBG(EXIT_MRK "GetExistingDimms");
-
-	return fapi::FAPI_RC_PLAT_NOT_IMPLEMENTED;
-
-}
 
 } // extern "C"

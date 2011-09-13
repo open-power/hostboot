@@ -76,8 +76,8 @@ public:
     }
 
     /**
-      * @brief Test HWPF: call a test procedure that generates an error
-      */
+     * @brief Test HWPF: call a test procedure that generates an error
+     */
     void testHwpf2()
     {
         // Call a test hardware procedure
@@ -103,6 +103,37 @@ public:
             TS_FAIL("testHwpf2: Unit Test failed. hwpTestError passed. Error logged");
         }
     }
+
+    /**
+     * @brief Test HWPF Config: call a test procedure that exercises the FAPI
+     *        config query functions
+     */
+    void testHwpf3()
+    {
+        errlHndl_t l_err = NULL;
+
+        // Get the master processor chip
+        TARGETING::Target* l_pTarget = NULL;
+        TARGETING::targetService().masterProcChipTargetHandle(l_pTarget);
+
+        // Create a FAPI Target and invoke the hwpTestConfig HWP. The HWP
+        // exercises the FAPI config query functions
+        fapi::Target l_fapiTarget(TARGET_TYPE_PROC_CHIP,
+                                  reinterpret_cast<void *> (l_pTarget));
+
+        FAPI_INVOKE_HWP(l_err, hwpTestConfig, l_fapiTarget);
+
+        if (l_err)
+        {
+            TS_FAIL("testHwpf3: Unit Test failed. hwpTestConfig failed. Error logged");
+            errlCommit(l_err);
+        }
+        else
+        {
+            TS_TRACE("testHwpf3: Unit Test failed. hwpTestConfig passed. Error logged");
+        }
+    }
+
 };
 
 #endif

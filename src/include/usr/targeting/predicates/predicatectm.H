@@ -92,7 +92,28 @@ class PredicateCTM : public PredicateBase
             #define TARG_FUNC "~PredicateCTM()"
             #undef TARG_FUNC
         }
-    
+
+        /**
+         *  @brief Set the class
+         *
+         *  @param[in] i_class Class of matching target
+         */
+        void setClass(CLASS i_class);
+
+        /**
+         *  @brief Set the type
+         *
+         *  @param[in] i_type Type of matching target
+         */
+        void setType(TYPE i_type);
+
+        /**
+         *  @brief Set the model
+         *
+         *  @param[in] i_model Model of matching target
+         */
+        void setModel(MODEL i_model);
+
         /**
          *  @brief Returns whether target matches the specified class, type,
          *      model
@@ -130,6 +151,33 @@ inline PredicateCTM::PredicateCTM(
 {
     #define TARG_FUNC "PredicateCTM(...)"
     #undef TARG_FUNC
+}
+
+//******************************************************************************
+// PredicateCTM::setClass
+//******************************************************************************
+
+inline void PredicateCTM::setClass(CLASS i_class)
+{
+    iv_class = i_class;
+}
+
+//******************************************************************************
+// PredicateCTM::setType
+//******************************************************************************
+
+inline void PredicateCTM::setType(TYPE i_type)
+{
+    iv_type = i_type;
+}
+
+//******************************************************************************
+// PredicateCTM::setModel
+//******************************************************************************
+
+inline void PredicateCTM::setModel(MODEL i_model)
+{
+    iv_model = i_model;
 }
 
 #undef TARG_CLASS

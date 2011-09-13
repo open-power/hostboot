@@ -27,6 +27,14 @@
  *         implement. It is an eCMD requirement that these be "C" functions.
  */
 
+/*
+ * Change Log ******************************************************************
+ * Flag     Defect/Feature  User        Date        Description
+ * ------   --------------  ----------  ----------- ----------------------------
+ *                          mjjones     09/12/2011  Updated with new functions.
+ *
+ */
+
 #ifndef FAPISYSTEMCONFIG_H_
 #define FAPISYSTEMCONFIG_H_
 
@@ -38,57 +46,54 @@
 extern "C"
 {
 
-/**
- * @brief Gets the functional chiplets that are children of the supplied target
- *
- * @param[in]  i_target     Parent target
- * @param[in]  i_targetType Type of chiplet required
- * @param[out] o_chiplets   Reference to vector that is filled in with the
- *                          result chiplets
- *
- * @return ReturnCode. Zero on success, else error
- */
-fapi::ReturnCode GetFunctionalChiplets(const fapi::Target& i_target,
-                                       const fapi::TargetType i_chipletType,
-                                       std::vector<fapi::Target> & o_chiplets);
+/** 
+ * @brief Gets the chiplets that are children of the input chip
+ * 
+ * @param[in]  i_chip        Input chip
+ * @param[in]  i_chipletType Type of chiplet required
+ * @param[out] o_chiplets    Reference to vector that is cleared then filled in
+ *                           with the children chiplet Targets
+ * @param[in]  i_state       Only return targets of the specified state. Either
+ *                           present or functional (default)
+ * 
+ * @return ReturnCode. Zero on success, else error 
+ */ 
+fapi::ReturnCode fapiGetChildChiplets(
+    const fapi::Target & i_chip,
+    const fapi::TargetType i_chipletType, 
+    std::vector<fapi::Target> & o_chiplets,
+    const fapi::TargetState i_state = fapi::TARGET_STATE_FUNCTIONAL);
 
-/**
- * @brief Gets the existing chiplets that are children of the supplied target
+/** 
+ * @brief Gets the DIMMs that are logically associated with the input target
  *
- * @param[in]  i_target     Parent target
- * @param[in]  i_targetType Type of chiplet required
- * @param[out] o_chiplets   Reference to vector that is filled in with the
- *                          result chiplets
- *
- * @return ReturnCode. Zero on success, else error
- */
-fapi::ReturnCode GetExistingChiplets(const fapi::Target& i_target,
-                                     const fapi::TargetType i_chipletType,
-                                     std::vector<fapi::Target> & o_chiplets);
+ * The logical association is MCS-MBS-MBA-DIMM. The input target must be a MCS,
+ * MBS or MBA chiplet and the output will be the associated DIMMs
+ * 
+ * @param[in]  i_target Input target 
+ * @param[out] o_dimms  Reference to vector that is cleared then filled in with
+ *                      the associated DIMM Targets
+ * @param[in]  i_state  Only return targets of the specified state. Either
+ *                      present or functional (default)
+ * 
+ * @return ReturnCode. Zero on success, else error 
+ */ 
+fapi::ReturnCode fapiGetAssociatedDimms(
+    const fapi::Target& i_target, 
+    std::vector<fapi::Target> & o_dimms,
+    const fapi::TargetState i_state = fapi::TARGET_STATE_FUNCTIONAL); 
 
-/**
- * @brief Gets the functional DIMMs that are children of the supplied target
+/** 
+ * @brief Gets the parent chip of the input chiplet
  *
- * @param[in]  i_target Parent target
- * @param[out] o_dimms  Reference to vector that is filled in with the result
- *                      DIMMs
- *
- * @return ReturnCode. Zero on success, else error
- */
-fapi::ReturnCode GetFunctionalDimms(const fapi::Target& i_target,
-                                    std::vector<fapi::Target> & o_dimms);
-
-/**
- * @brief Gets the existing DIMMs that are children of the supplied target
- *
- * @param[in]  i_target Parent target
- * @param[out] o_dimms  Reference to vector that is filled in with the result
- *                      DIMMs
- *
- * @return ReturnCode. Zero on success, else error
- */
-fapi::ReturnCode GetExistingDimms(const fapi::Target& i_target,
-                                  std::vector<fapi::Target> & o_dimms);
+ * @param[in]  i_chiplet Input chiplet
+ * @param[out] o_chip    Reference to Target that is set to the parent chip
+ * 
+ * @return ReturnCode. Zero on success, else error 
+ */ 
+fapi::ReturnCode fapiGetParentChip(
+    const fapi::Target& i_chiplet,
+    fapi::Target & o_chip);
 
 } // extern "C"
 

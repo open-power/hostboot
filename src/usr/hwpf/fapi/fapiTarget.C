@@ -31,7 +31,8 @@
  * Flag     Defect/Feature  User        Date        Description
  * ------   --------------  ----------  ----------- ----------------------------
  *                          mjjones     04/13/2011  Created. Based on Hlava prototype
- *                          mjjones     07/05/2011. Removed const from handle
+ *                          mjjones     07/05/2011  Removed const from handle
+ *                          mjjones     09/12/2011  Added isChip and isChiplet
  */
 
 #include <fapiTarget.H>
@@ -143,6 +144,26 @@ TargetType Target::getType() const
 void Target::setType(const TargetType i_type)
 {
     iv_type = i_type;
+}
+
+//******************************************************************************
+// Is the target a chip?
+//******************************************************************************
+bool Target::isChip() const
+{
+    return ((iv_type == TARGET_TYPE_PROC_CHIP) ||
+            (iv_type == TARGET_TYPE_MEMBUF_CHIP));
+}
+
+//******************************************************************************
+// Is the target a chiplet?
+//******************************************************************************
+bool Target::isChiplet() const
+{
+    return ((iv_type == TARGET_TYPE_EX_CHIPLET) ||
+            (iv_type == TARGET_TYPE_MBA_CHIPLET) ||
+            (iv_type == TARGET_TYPE_MBS_CHIPLET) ||
+            (iv_type == TARGET_TYPE_MCS_CHIPLET));
 }
 
 }
