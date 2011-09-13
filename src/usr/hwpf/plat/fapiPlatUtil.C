@@ -43,6 +43,7 @@ trace_desc_t* g_fapiInfTd;
 trace_desc_t* g_fapiImpTd;
 trace_desc_t* g_fapiErrTd;
 trace_desc_t* g_fapiDbgTd;
+trace_desc_t* g_fapiScanTd;
 
 //******************************************************************************
 // Global TracInit objects. Construction will initialize the trace buffer
@@ -51,6 +52,7 @@ TRAC_INIT(&g_fapiInfTd, FAPI_INF_TRACE_NAME, 4096);
 TRAC_INIT(&g_fapiImpTd, FAPI_IMP_TRACE_NAME, 4096);
 TRAC_INIT(&g_fapiErrTd, FAPI_ERR_TRACE_NAME, 4096);
 TRAC_INIT(&g_fapiDbgTd, FAPI_DBG_TRACE_NAME, 4096);
+TRAC_INIT(&g_fapiScanTd, FAPI_SCAN_TRACE_NAME, 4096);
 
 namespace fapi
 {
@@ -110,4 +112,29 @@ void fapiLogError(ReturnCode & io_rc)
 
 
 
+
+
+//****************************************************************************
+// platform-level implementation 
+
+bool platIsScanTraceEnabled()
+{
+  // TODO: Get the answer from g_fapiScanTd conditional trace buffer. Camvan
+  // has not pushed the code yet.
+  return 1;
 }
+
+//****************************************************************************
+// platform-level implementation 
+
+void platSetScanTrace( bool i_enable )
+{
+  // TODO: enable or disable scan trace via the SCAN trace buffer.  Camvan
+  // has not pushed the code yet.
+  return;
+}
+
+
+
+
+} // namespace fapi

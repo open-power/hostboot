@@ -110,6 +110,25 @@ void fapiAssert(bool i_expression);
  */
 void fapiLogError(ReturnCode & io_rc);
 
+
+/**  @brief This function answers the question, is scand tracing turned on?
+ *   The implementation of this function is specific to the platform.
+ *
+ *   @returns Boolean indication
+ */
+bool platIsScanTraceEnabled();
+
+
+
+/**  @brief Alter the state of scand tracing.
+ *   The implementation of this function is specific to the platform.
+ *
+ *   @param[in] True to enable or false to disable scan trace.
+ *   @return  void
+ */
+void platSetScanTrace( bool i_enable );
+
+
 }
 
 #endif // FAPIUTIL_H_

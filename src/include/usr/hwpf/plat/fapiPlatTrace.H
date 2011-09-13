@@ -44,6 +44,7 @@ const char * const FAPI_INF_TRACE_NAME = "FAPI_T";
 const char * const FAPI_IMP_TRACE_NAME = "FAPI_I";
 const char * const FAPI_ERR_TRACE_NAME = "FAPI_E";
 const char * const FAPI_DBG_TRACE_NAME = "FAPI_D";
+const char * const FAPI_SCAN_TRACE_NAME = "SCAN";
 
 //******************************************************************************
 // Trace descriptors that are defined in a C file
@@ -52,6 +53,7 @@ extern trace_desc_t* g_fapiInfTd;
 extern trace_desc_t* g_fapiImpTd;
 extern trace_desc_t* g_fapiErrTd;
 extern trace_desc_t* g_fapiDbgTd;
+extern trace_desc_t* g_fapiScanTd;
 
 // Information traces (standard flight recorder that can wrap often)
 #define FAPI_INF(_fmt_, _args_...) TRACFCOMP(g_fapiInfTd, _fmt_, ##_args_ )
@@ -64,5 +66,8 @@ extern trace_desc_t* g_fapiDbgTd;
 
 // Debug traces (can wrap often)
 #define FAPI_DBG(_fmt_, _args_...) TRACDCOMP(g_fapiDbgTd, _fmt_, ##_args_)
+
+// Scan traces
+#define FAPI_SCAN(_fmt_, _args_...) TRACFCOMP(g_fapiScanTd, _fmt_, ##_args_)
 
 #endif // PLATTRACE_H_

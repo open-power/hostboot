@@ -31,6 +31,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
 OBJS =  fapiReturnCode.o \
         fapiReturnCodeDataRef.o \
         fapiTarget.o \
+        fapiHwAccess.o \
         fapiErrorInfo.o \
         fapiErrorInfoMem.o \
         fapiErrorInfoMemInit.o \

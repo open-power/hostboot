@@ -30,6 +30,7 @@
 
 #include <fapiHwAccess.H>
 #include <fapiPlatTrace.H>
+#include <fapiPlatHwAccess.H>
 #include <errl/errlentry.H>
 #include <targeting/targetservice.H>
 #include <devicefw/userif.H>
@@ -38,15 +39,15 @@ extern "C"
 {
 
 //******************************************************************************
-// GetScom function
+// platGetScom function, the platform implementation
 //******************************************************************************
-fapi::ReturnCode GetScom(const fapi::Target& i_target,
-                         const uint64_t i_address,
-                         ecmdDataBufferBase & o_data)
+fapi::ReturnCode platGetScom(const fapi::Target& i_target,
+                             const uint64_t i_address,
+                             ecmdDataBufferBase & o_data)
 {
-	FAPI_DBG(ENTER_MRK "GetScom");
+    FAPI_DBG(ENTER_MRK "platGetScom");
 
-	fapi::ReturnCode l_rc;
+    fapi::ReturnCode l_rc;
     errlHndl_t l_err = NULL;
 
     // Extract the component pointer
@@ -71,18 +72,18 @@ fapi::ReturnCode GetScom(const fapi::Target& i_target,
         o_data.setDoubleWord(0, l_data);
     }
 
-    FAPI_DBG(EXIT_MRK "GetScom");
+    FAPI_DBG(EXIT_MRK "platGetScom");
     return l_rc;
 }
 
 //******************************************************************************
-// PutScom function
+// platPutScom function
 //******************************************************************************
-fapi::ReturnCode PutScom(const fapi::Target& i_target,
-                         const uint64_t i_address,
-                         ecmdDataBufferBase & i_data)
+fapi::ReturnCode platPutScom(const fapi::Target& i_target,
+                             const uint64_t i_address,
+                             ecmdDataBufferBase & i_data)
 {
-    FAPI_DBG(ENTER_MRK "PutScom");
+    FAPI_DBG(ENTER_MRK "platPutScom");
     fapi::ReturnCode l_rc;
     errlHndl_t l_err = NULL;
 
@@ -104,60 +105,60 @@ fapi::ReturnCode PutScom(const fapi::Target& i_target,
         l_rc.setPlatData(reinterpret_cast<void *> (l_err));
     }
 
-    FAPI_DBG(EXIT_MRK "PutScom");
+    FAPI_DBG(EXIT_MRK "platPutScom");
     return l_rc;
 }
 
 //@todo - Implement these functions later
 #if 0
 //******************************************************************************
-// PutScomUnderMask function
+// platPutScomUnderMask function
 //******************************************************************************
-fapi::ReturnCode PutScomUnderMask(const fapi::Target& i_target,
-                                  const uint64_t i_address,
-                                  ecmdDataBufferBase & i_data,
-                                  ecmdDataBufferBase & i_mask)
+fapi::ReturnCode platPutScomUnderMask(const fapi::Target& i_target,
+                                      const uint64_t i_address,
+                                      ecmdDataBufferBase & i_data,
+                                      ecmdDataBufferBase & i_mask)
 {
-	FAPI_DBG(ENTER_MRK "PutScomUnderMask");
+	FAPI_DBG(ENTER_MRK "platPutScomUnderMask");
 
-	FAPI_DBG(EXIT_MRK "PutScomUnderMask");
+	FAPI_DBG(EXIT_MRK "platPutScomUnderMask");
 }
 
 //******************************************************************************
-// GetCfamRegister function
+// platGetCfamRegister function
 //******************************************************************************
-fapi::ReturnCode GetCfamRegister(const fapi::Target& i_target,
-                                 const uint32_t i_address,
-                                 ecmdDataBufferBase & o_data)
+fapi::ReturnCode platGetCfamRegister(const fapi::Target& i_target,
+                                     const uint32_t i_address,
+                                     ecmdDataBufferBase & o_data)
 {
-	FAPI_DBG(ENTER_MRK "GetCfamRegister");
+	FAPI_DBG(ENTER_MRK "platGetCfamRegister");
 
-	FAPI_DBG(EXIT_MRK "GetCfamRegister");
+	FAPI_DBG(EXIT_MRK "platGetCfamRegister");
 }
 
 //******************************************************************************
-// PutCfamRegister function
+// platPutCfamRegister function
 //******************************************************************************
-fapi::ReturnCode PutCfamRegister(const fapi::Target& i_target,
-                                 const uint32_t i_address,
-                                 ecmdDataBufferBase & i_data)
+fapi::ReturnCode platPutCfamRegister(const fapi::Target& i_target,
+                                     const uint32_t i_address,
+                                     ecmdDataBufferBase & i_data)
 {
-	FAPI_DBG(ENTER_MRK "PutCfamRegister");
+	FAPI_DBG(ENTER_MRK "platPutCfamRegister");
 
-	FAPI_DBG(EXIT_MRK "PutCfamRegister");
+	FAPI_DBG(EXIT_MRK "platPutCfamRegister");
 }
 
 //******************************************************************************
-// ModifyCfamRegister function
+// platModifyCfamRegister function
 //******************************************************************************
-fapi::ReturnCode ModifyCfamRegister(const fapi::Target& i_target,
-                                    const uint32_t i_address,
-                                    ecmdDataBufferBase & i_data,
-                                    const fapi::ChipOpModifyMode i_modifyMode)
+fapi::ReturnCode platModifyCfamRegister(const fapi::Target& i_target,
+                                        const uint32_t i_address,
+                                        ecmdDataBufferBase & i_data,
+                                        const fapi::ChipOpModifyMode i_modifyMode)
 {
-	FAPI_DBG(ENTER_MRK "ModifyCfamRegister");
+	FAPI_DBG(ENTER_MRK "platModifyCfamRegister");
 
-	FAPI_DBG(EXIT_MRK "ModifyCfamRegister");
+	FAPI_DBG(EXIT_MRK "platModifyCfamRegister");
 }
 #endif
 
