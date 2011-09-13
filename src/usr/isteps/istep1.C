@@ -71,8 +71,8 @@ TRAC_INIT(&g_trac_istep1, "ISTEP1", 4096);
 extern  "C"
 void    IStep0sub0( void * io_pArgs )
 {
-    INITSERVICE::TaskArgs::TaskArgs *pTaskArgs  =
-            reinterpret_cast<INITSERVICE::TaskArgs::TaskArgs *>(io_pArgs);
+    INITSERVICE::TaskArgs *pTaskArgs  =
+            static_cast<INITSERVICE::TaskArgs *>(io_pArgs);
     errlHndl_t l_err = NULL;
     uint64_t    command     =   pTaskArgs->getCommand();
     uint64_t    returncode  =   pTaskArgs->getReturnCode();
@@ -123,8 +123,8 @@ void    IStep0sub0( void * io_pArgs )
 extern  "C"
 void    IStep0sub1( void * io_pArgs )
 {
-    INITSERVICE::TaskArgs::TaskArgs *pTaskArgs  =
-            reinterpret_cast<INITSERVICE::TaskArgs::TaskArgs *>(io_pArgs);
+    INITSERVICE::TaskArgs *pTaskArgs  =
+            static_cast<INITSERVICE::TaskArgs *>(io_pArgs);
     uint64_t    command     =   pTaskArgs->getCommand();
     uint64_t    returncode  =   pTaskArgs->getReturnCode();
 
@@ -153,8 +153,8 @@ void    IStep0sub1( void * io_pArgs )
 extern  "C"
 void    IStep1sub0( void * io_pArgs )
 {
-    INITSERVICE::TaskArgs::TaskArgs *pTaskArgs  =
-            reinterpret_cast<INITSERVICE::TaskArgs::TaskArgs *>(io_pArgs);
+    INITSERVICE::TaskArgs *pTaskArgs  =
+            static_cast<INITSERVICE::TaskArgs *>(io_pArgs);
     uint64_t    command     =   pTaskArgs->getCommand();
     uint64_t    returncode  =   pTaskArgs->getReturnCode();
 

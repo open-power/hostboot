@@ -69,7 +69,8 @@ void VfsRp::init( void * i_taskArgs )
 {
     errlHndl_t err = NULL;
     err = Singleton<VfsRp>::instance()._init();
-    INITSERVICE::TaskArgs::TaskArgs* args = (INITSERVICE::TaskArgs::TaskArgs*)i_taskArgs;
+    INITSERVICE::TaskArgs* args =
+            static_cast<INITSERVICE::TaskArgs*>(i_taskArgs);
     if(err)
     {
         args->postErrorLog(err);

@@ -48,8 +48,8 @@
 extern "C"                                                                  \
 void _start( void *io_pArgs )                                               \
 {                                                                           \
-    INITSERVICE::TaskArgs::TaskArgs *pTaskArgs  =                           \
-            reinterpret_cast<INITSERVICE::TaskArgs::TaskArgs *>(io_pArgs);  \
+    INITSERVICE::TaskArgs *pTaskArgs  =                           \
+            static_cast<INITSERVICE::TaskArgs *>(io_pArgs);  \
                                                                             \
     MyInitFn( pTaskArgs );                                                  \
                                                                             \

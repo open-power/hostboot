@@ -22,7 +22,7 @@
 //  IBM_PROLOG_END
 #include "pnorrp.H"
 #include <pnor/pnor_reasoncodes.H>
-#include <initservice/taskargs.H> 
+#include <initservice/taskargs.H>
 #include <sys/msg.h>
 #include <trace/interface.H>
 #include <errl/errlmanager.H>
@@ -40,7 +40,7 @@ TRAC_INIT(&g_trac_pnor, "PNOR", 4096); //4K
 
 // Easy macro replace for unit testing
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
-#define TRACUCOMP(args...)  
+#define TRACUCOMP(args...)
 
 /**
  * Eyecatcher strings for PNOR TOC entries
@@ -57,7 +57,7 @@ const char* cv_EYECATCHER[] = {  //@todo - convert there to uint64_t
     "OPAL",   /**< PNOR::PAYLOAD       : HAL/OPAL */
     "PFWL",   /**< PNOR::PFW_LITE_CODE : PFW-lite */
     "OCC",    /**< PNOR::OCC_CODE      : OCC Code Image */
-    "PART",   /**< PNOR::KVM_PART_INFO : KVM Partition Information */    
+    "PART",   /**< PNOR::KVM_PART_INFO : KVM Partition Information */
     "XXX",    /**< PNOR::CODE_UPDATE   : Code Update Overhead */
     "XXX",    /**< NUM_SECTIONS       : Used as invalid entry */
 };
@@ -91,7 +91,8 @@ errlHndl_t PNOR::getSectionInfo( PNOR::SectionId i_section,
 void PnorRP::init( void* i_taskArgs )
 {
     TRACUCOMP(g_trac_pnor, "PnorRP::init> " );
-    INITSERVICE::TaskArgs::TaskArgs* args = (INITSERVICE::TaskArgs::TaskArgs*)i_taskArgs;
+    INITSERVICE::TaskArgs* args =
+            static_cast<INITSERVICE::TaskArgs*>(i_taskArgs);
     uint64_t rc = 0;
     if( Singleton<PnorRP>::instance().didStartupFail(rc) )
     {
@@ -200,7 +201,7 @@ void PnorRP::initDaemon()
     if( l_errhdl )
     {
         errlCommit(l_errhdl);
-        iv_startupRC = l_errhdl->reasonCode();        
+        iv_startupRC = l_errhdl->reasonCode();
     }
 
     TRACUCOMP(g_trac_pnor, "< PnorRP::initDaemon" );
@@ -219,7 +220,7 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
     PNOR::SectionId id = i_section;
 
     do
-    { 
+    {
         // Abort this operation if we had a startup failure
         uint64_t rc = 0;
         if( didStartupFail(rc) )
@@ -343,7 +344,7 @@ errlHndl_t PnorRP::readTOC()
 
     //@todo - load flash layout (how many chips)
     //@todo - read TOC on each chip/bank/whatever
-    
+
     TRACUCOMP(g_trac_pnor, "< PnorRP::readTOC" );
     return l_errhdl;
 }
@@ -403,7 +404,7 @@ void PnorRP::waitForMessage()
                     case( MSG_MM_RP_WRITE ):
                         l_errhdl = writeToDevice( dev_offset, chip_select, needs_ecc, user_addr );
                         if( l_errhdl )
-                        { 
+                        {
                             status_rc = -EIO; /* I/O error */
                         }
                         break;
@@ -425,7 +426,7 @@ void PnorRP::waitForMessage()
                         status_rc = -EINVAL; /* Invalid argument */
                 }
             }
-            
+
             if( !l_errhdl && msg_is_async(message) )
             {
                 TRACFCOMP( g_trac_pnor, "PnorRP::waitForMessage> Unsupported Asynchronous Message  : user_addr=%p, eff_addr=%p, msgtype=%d", user_addr, eff_addr, message->type );
@@ -456,7 +457,7 @@ void PnorRP::waitForMessage()
              *      data[1] = rc (0 or negative errno value)
              */
             message->data[1] = status_rc;
-            rc = msg_respond( iv_msgQ, message ); 
+            rc = msg_respond( iv_msgQ, message );
             if( rc )
             {
                 TRACFCOMP(g_trac_pnor, "PnorRP::waitForMessage> Error from msg_respond, giving up : rc=%d", rc );
@@ -499,7 +500,7 @@ errlHndl_t PnorRP::readFromDevice( uint64_t i_offset,
         }
 
         // get the data from the PNOR DD
-        l_errhdl = DeviceFW::deviceRead(pnor_target, 
+        l_errhdl = DeviceFW::deviceRead(pnor_target,
                                         data_to_read,
                                         read_size,
                                         DEVICE_PNOR_ADDRESS(i_chip,i_offset) );
@@ -559,7 +560,7 @@ errlHndl_t PnorRP::writeToDevice( uint64_t i_offset,
         }
 
         // write the data out to the PNOR DD
-        errlHndl_t l_errhdl = DeviceFW::deviceWrite(pnor_target, 
+        errlHndl_t l_errhdl = DeviceFW::deviceWrite(pnor_target,
                                                     data_to_write,
                                                     write_size,
                                                     DEVICE_PNOR_ADDRESS(i_chip,i_offset) );
@@ -602,7 +603,7 @@ errlHndl_t PnorRP::computeDeviceAddr( void* i_vaddr,
          * @errortype
          * @moduleid     PNOR::MOD_PNORRP_WAITFORMESSAGE
          * @reasoncode   PNOR::RC_INVALID_MESSAGE
-         * @userdata1    Virtual Address 
+         * @userdata1    Virtual Address
          * @userdata2    Base PNOR Address
          * @devdesc      PnorRP::computeDeviceAddr> Virtual Address outside
          *               known PNOR range
@@ -684,7 +685,7 @@ PnorRP& PnorRP::getInstance()
  */
 errlHndl_t PnorRP::computeSection( uint64_t i_vaddr,
                                    PNOR::SideSelect& o_side,
-                                   PNOR::SectionId& o_id ) 
+                                   PNOR::SectionId& o_id )
 {
     errlHndl_t errhdl = NULL;
 
@@ -715,7 +716,7 @@ errlHndl_t PnorRP::computeSection( uint64_t i_vaddr,
          * @reasoncode   PNOR::RC_INVALID_ADDRESS
          * @userdata1    Requested Virtual Address
          * @userdata2    <unused>
-         * @devdesc      PnorRP::computeSection> Invalid Address 
+         * @devdesc      PnorRP::computeSection> Invalid Address
          */
         errhdl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                          PNOR::MOD_PNORRP_COMPUTESECTION,
@@ -727,7 +728,7 @@ errlHndl_t PnorRP::computeSection( uint64_t i_vaddr,
 
     // loop through all sections to find a matching id
     for( PNOR::SectionId id = PNOR::FIRST_SECTION;
-         id < PNOR::NUM_SECTIONS; 
+         id < PNOR::NUM_SECTIONS;
          id = (PNOR::SectionId) (id + 1) )
     {
         if( (i_vaddr >= iv_TOC[o_side][id].virtAddr)
@@ -738,6 +739,6 @@ errlHndl_t PnorRP::computeSection( uint64_t i_vaddr,
         }
     }
 
-    return errhdl; 
+    return errhdl;
 }
 

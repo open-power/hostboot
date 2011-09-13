@@ -76,8 +76,8 @@ namespace TARGETING
 extern "C"
 void _start(void* io_pArgs)
 {
-    INITSERVICE::TaskArgs::TaskArgs *pTaskArgs  =
-            reinterpret_cast<INITSERVICE::TaskArgs::TaskArgs *>(io_pArgs);
+    INITSERVICE::TaskArgs *pTaskArgs  =
+            static_cast<INITSERVICE::TaskArgs *>(io_pArgs);
 
     #define TARG_FN "_start(...)"
 
@@ -195,7 +195,7 @@ TargetService::iterator TargetService::begin()
     assert(iv_initialized);
 
     Target* l_pFirstTarget = (iv_maxTargets == 0) ? NULL : &(*iv_targets)[0];
-    
+
     return iterator(l_pFirstTarget);
 
     #undef TARG_FN
@@ -205,14 +205,14 @@ TargetService::iterator TargetService::begin()
 // TargetService::begin (const version)
 //******************************************************************************
 
-//TargetService::const_iterator 
+//TargetService::const_iterator
 _TargetIterator<const Target*> TargetService::begin() const
 {
     #define TARG_FN "begin() const"
 
     assert(iv_initialized);
-    
-    const Target* l_pFirstTarget = 
+
+    const Target* l_pFirstTarget =
         (iv_maxTargets == 0) ? NULL : &(*iv_targets)[0];
 
     return const_iterator(l_pFirstTarget);
@@ -230,7 +230,7 @@ TargetService::iterator TargetService::end()
 
     assert(iv_initialized);
 
-    return iterator(NULL); 
+    return iterator(NULL);
 
     #undef TARG_FN
 }
@@ -258,7 +258,7 @@ void TargetService::getTopLevelTarget(
     Target*& o_targetHandle) const
 {
     #define TARG_FN "getTopLevelTarget(...)"
-    
+
     assert(iv_initialized, TARG_LOC "TargetService not initialized");
 
     EntityPath l_topLevelPhysicalPath(EntityPath::PATH_PHYSICAL);
@@ -318,7 +318,7 @@ Target* TargetService::toTarget(
             break;
         }
     }
-    
+
     return l_pTarget;
 
     #undef TARG_FN
@@ -336,7 +336,7 @@ void TargetService::masterProcChipTargetHandle(
     Target* l_pTarget = NULL;
 
     assert(iv_initialized, TARG_LOC "TargetService not initialized");
-    
+
     //@TODO Need to query the actual hardware and cross check it with
     // PNOR to determine the master chip
     // target; for now, just always report sys0.n0.proc0
@@ -345,7 +345,7 @@ void TargetService::masterProcChipTargetHandle(
         .addLast(TYPE_PROC, 0);
 
     l_pTarget = l_masterProcChipEntityPath.operator->();
-    
+
     o_masterProcChipTargetHandle = l_pTarget;
 
     #undef TARG_FN
@@ -405,8 +405,8 @@ void TargetService::getAssociated(
     do {
 
     assert(iv_initialized, TARG_LOC "TargetService not initialized");
-    
-    assert(   (i_pTarget != NULL) 
+
+    assert(   (i_pTarget != NULL)
            && (i_pTarget != MASTER_PROCESSOR_CHIP_TARGET_SENTINEL),
            TARG_LOC "Caller tried to get association using a NULL target "
            "handle or the master processor chip target handle sentinel. "
@@ -440,7 +440,7 @@ void TargetService::getAssociated(
                 }
                 else
                 {
-                    assert(0, TARG_LOC 
+                    assert(0, TARG_LOC
                            "iv_associationMappings[i].associationDir "
                            "= 0x%X not supported",
                            iv_associationMappings[i].associationDir);
@@ -615,7 +615,7 @@ void TargetService::_getInwards(
             EntityPath l_candidatePath;
             bool l_candidateFound = tryGetPath(i_attr, &(*iv_targets)[i],
                 l_candidatePath);
-            if (   l_candidateFound 
+            if (   l_candidateFound
                 && (l_candidatePath == i_entityPath)
                 && (   (i_pPredicate == NULL)
                     || (*i_pPredicate)( &(*iv_targets)[i]) ) )
