@@ -53,7 +53,7 @@
 #define VMM_VADDR_PNOR_RP  (2 * GIGABYTE)
 
 /** Attribute Resource Provider */
-//TBD
+#define VMM_VADDR_ATTR_RP  (3 * GIGABYTE)
 
 
 /**

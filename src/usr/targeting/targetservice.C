@@ -47,6 +47,7 @@
 #include "trace.H"
 #include <targeting/predicates/predicatebase.H>
 #include <pnortargeting.H>
+#include "attrrp.H"
 
 //******************************************************************************
 // targetService
@@ -84,8 +85,12 @@ void _start(void* io_pArgs)
 
     TARG_ENTER();
 
-    TargetService& l_targetService = targetService();
-    (void)l_targetService.init();
+    AttrRP::init(pTaskArgs);
+    if (( pTaskArgs ) && (!pTaskArgs->getErrorLog()))
+    {
+        TargetService& l_targetService = targetService();
+        (void)l_targetService.init();
+    }
 
     TARG_EXIT();
 
@@ -172,7 +177,7 @@ void TargetService::init()
     iv_associationMappings.push_back(a6);
 
     // Get+save pointer to beginning of targeting's swappable config in
-    // PNOR. 
+    // PNOR.
     //@TODO Fully account for the attribute resource provider
     PNOR::SectionInfo_t l_sectionInfo;
     errlHndl_t l_pElog = PNOR::getSectionInfo(
@@ -187,7 +192,7 @@ void TargetService::init()
     TargetingHeader* l_pHdr = reinterpret_cast<TargetingHeader*>(
         l_sectionInfo.vaddr);
     assert(l_pHdr->eyeCatcher == PNOR_TARG_EYE_CATCHER);
-    
+
     iv_pPnor = reinterpret_cast<uint32_t*>(
         (reinterpret_cast<char*>(l_pHdr) + l_pHdr->headerSize));
 

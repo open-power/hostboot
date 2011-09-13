@@ -39,9 +39,12 @@ ITERATORS_OBJS =        \
 TARGET_OBJS =       \
     target.o        \
     targetservice.o \
-    entitypath.o    
+    entitypath.o
 
-OBJS = ${TARGET_OBJS} ${PREDICATES_OBJS} ${ITERATORS_OBJS}
+ATTR_RP_OBJS = \
+    attrrp.o
+
+OBJS = ${TARGET_OBJS} ${PREDICATES_OBJS} ${ITERATORS_OBJS} ${ATTR_RP_OBJS}
 
 SUBDIRS = test.d xmltohb.d
 

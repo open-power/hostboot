@@ -130,4 +130,13 @@ const compId_t FSI_COMP_ID = 0x0A00;
 const char FSI_COMP_NAME[] = "fsi";
 //@}
 
+/** @name TARG
+ *  Targeting component
+ */
+//@{
+const compId_t TARG_COMP_ID = 0x0B00;
+const char TARG_COMP_NAME[] = "targ";
+//@}
+
+
 #endif

@@ -501,6 +501,7 @@ sub writeHeaderFormatHeaderFile {
 //******************************************************************************
 
 // STD
+#include <builtins.h>
 #include <stdint.h>
 
 // Targeting component
@@ -1959,7 +1960,7 @@ sub writeTargetingImage {
     # PNOR/heap sections
     #@TODO Need the final value of the base address after full host boot support
     # is implemented. 
-    my $pnorRoBaseAddress    = 0x8007E690; 
+    my $pnorRoBaseAddress    = 0xC0000000;  # 3GB - See vmmconst.H.
     my $pnorRwBaseAddress    = $pnorRoBaseAddress    + $vmmSectionOffset;  
     my $heapPnorInitBaseAddr = $pnorRwBaseAddress    + $vmmSectionOffset; 
     my $heapZeroInitBaseAddr = $heapPnorInitBaseAddr + $vmmSectionOffset; 
