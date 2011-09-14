@@ -35,6 +35,7 @@
  *                          mjjones     06/30/2011  Removed #include
  *                          mjjones     07/05/2011  Removed rogue tab
  *                          camvanng    09/06/2011  Added fapiLogError
+ *                          mjjones     09/14/2011  Prepended fapi to delay
  *
  */
 
@@ -55,7 +56,6 @@ namespace fapi
  * @param[in] i_expression If not true then process should be aborted
  */
 void fapiAssert(bool i_expression);
-
 
 /**
  * @brief Delay this thread. Hostboot will use the nanoseconds parameter
@@ -83,8 +83,7 @@ void fapiAssert(bool i_expression);
  * 
  * @return ReturnCode. Zero on success, else platform specified error.
  */
- fapi::ReturnCode delay( uint64_t i_nanoSeconds, uint64_t i_simCycles );
-
+fapi::ReturnCode fapiDelay(uint64_t i_nanoSeconds, uint64_t i_simCycles);
 
 /**
  * @brief Log an error.
@@ -110,15 +109,12 @@ void fapiAssert(bool i_expression);
  */
 void fapiLogError(ReturnCode & io_rc);
 
-
 /**  @brief This function answers the question, is scand tracing turned on?
  *   The implementation of this function is specific to the platform.
  *
  *   @returns Boolean indication
  */
 bool platIsScanTraceEnabled();
-
-
 
 /**  @brief Alter the state of scand tracing.
  *   The implementation of this function is specific to the platform.
@@ -127,7 +123,6 @@ bool platIsScanTraceEnabled();
  *   @return  void
  */
 void platSetScanTrace( bool i_enable );
-
 
 }
 

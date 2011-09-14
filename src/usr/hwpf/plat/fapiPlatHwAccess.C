@@ -109,8 +109,6 @@ fapi::ReturnCode platPutScom(const fapi::Target& i_target,
     return l_rc;
 }
 
-//@todo - Implement these functions later
-#if 0
 //******************************************************************************
 // platPutScomUnderMask function
 //******************************************************************************
@@ -119,9 +117,15 @@ fapi::ReturnCode platPutScomUnderMask(const fapi::Target& i_target,
                                       ecmdDataBufferBase & i_data,
                                       ecmdDataBufferBase & i_mask)
 {
-	FAPI_DBG(ENTER_MRK "platPutScomUnderMask");
+    FAPI_DBG(ENTER_MRK "platPutScomUnderMask");
+    fapi::ReturnCode l_rc;
 
-	FAPI_DBG(EXIT_MRK "platPutScomUnderMask");
+    // TODO Code needs to be implemented
+    FAPI_ERR("platPutScomUnderMask not implemented");
+    l_rc = fapi::FAPI_RC_NOT_IMPLEMENTED;
+
+    FAPI_DBG(EXIT_MRK "platPutScomUnderMask");
+    return l_rc;
 }
 
 //******************************************************************************
@@ -131,9 +135,15 @@ fapi::ReturnCode platGetCfamRegister(const fapi::Target& i_target,
                                      const uint32_t i_address,
                                      ecmdDataBufferBase & o_data)
 {
-	FAPI_DBG(ENTER_MRK "platGetCfamRegister");
+    FAPI_DBG(ENTER_MRK "platGetCfamRegister");
+    fapi::ReturnCode l_rc;
 
-	FAPI_DBG(EXIT_MRK "platGetCfamRegister");
+    // TODO Code needs to be implemented
+    FAPI_ERR("platGetCfamRegister not implemented");
+    l_rc = fapi::FAPI_RC_NOT_IMPLEMENTED;
+
+    FAPI_DBG(EXIT_MRK "platGetCfamRegister");
+    return l_rc;
 }
 
 //******************************************************************************
@@ -143,9 +153,15 @@ fapi::ReturnCode platPutCfamRegister(const fapi::Target& i_target,
                                      const uint32_t i_address,
                                      ecmdDataBufferBase & i_data)
 {
-	FAPI_DBG(ENTER_MRK "platPutCfamRegister");
+    FAPI_DBG(ENTER_MRK "platPutCfamRegister");
+    fapi::ReturnCode l_rc;
 
-	FAPI_DBG(EXIT_MRK "platPutCfamRegister");
+    // TODO Code needs to be implemented
+    FAPI_ERR("platPutCfamRegister not implemented");
+    l_rc = fapi::FAPI_RC_NOT_IMPLEMENTED;
+
+    FAPI_DBG(EXIT_MRK "platPutCfamRegister");
+    return l_rc;
 }
 
 //******************************************************************************
@@ -156,10 +172,15 @@ fapi::ReturnCode platModifyCfamRegister(const fapi::Target& i_target,
                                         ecmdDataBufferBase & i_data,
                                         const fapi::ChipOpModifyMode i_modifyMode)
 {
-	FAPI_DBG(ENTER_MRK "platModifyCfamRegister");
+    FAPI_DBG(ENTER_MRK "platModifyCfamRegister");
+    fapi::ReturnCode l_rc;
 
-	FAPI_DBG(EXIT_MRK "platModifyCfamRegister");
+    // TODO Code needs to be implemented
+    FAPI_ERR("platModifyCfamRegister not implemented");
+    l_rc = fapi::FAPI_RC_NOT_IMPLEMENTED;
+
+    FAPI_DBG(EXIT_MRK "platModifyCfamRegister");
+    return l_rc;
 }
-#endif
 
 } // extern "C"

@@ -30,6 +30,15 @@
  *  Note that platform code must provide the implementation.
  */
 
+/*
+ * Change Log ******************************************************************
+ * Flag     Defect/Feature  User        Date        Description
+ * ------   --------------  ----------  ----------- ----------------------------
+ *                          copelanm    09/13/2011  new for common scan traces
+ *                          mjjones     09/14/2011  Prepended fapi to functions
+ *                                                  and enabled all functions
+ */
+
 #include <fapi.H>
 #include <fapiPlatHwAccess.H>
 #include <errl/errlentry.H>
@@ -40,11 +49,11 @@ extern "C"
 {
 
 //******************************************************************************
-// GetScom function
+// fapiGetScom function
 //******************************************************************************
-fapi::ReturnCode GetScom(const fapi::Target& i_target,
-                         const uint64_t i_address,
-                         ecmdDataBufferBase & o_data)
+fapi::ReturnCode fapiGetScom(const fapi::Target& i_target,
+                             const uint64_t i_address,
+                             ecmdDataBufferBase & o_data)
 {
     fapi::ReturnCode l_rc;
     char l_string[fapi::MAX_ECMD_STRING_LEN] = {0};
@@ -79,11 +88,11 @@ fapi::ReturnCode GetScom(const fapi::Target& i_target,
 
 
 //******************************************************************************
-// PutScom function
+// fapiPutScom function
 //******************************************************************************
-fapi::ReturnCode PutScom(const fapi::Target& i_target,
-                         const uint64_t i_address,
-                         ecmdDataBufferBase & i_data)
+fapi::ReturnCode fapiPutScom(const fapi::Target& i_target,
+                             const uint64_t i_address,
+                             ecmdDataBufferBase & i_data)
 {
     fapi::ReturnCode l_rc;
     char l_string[fapi::MAX_ECMD_STRING_LEN] = {0};
@@ -114,15 +123,13 @@ fapi::ReturnCode PutScom(const fapi::Target& i_target,
     return l_rc;
 }
 
-//@todo - Implement these functions later
-#if 0
 //******************************************************************************
-// PutScomUnderMask function
+// fapiPutScomUnderMask function
 //******************************************************************************
-fapi::ReturnCode PutScomUnderMask(const fapi::Target& i_target,
-                                  const uint64_t i_address,
-                                  ecmdDataBufferBase & i_data,
-                                  ecmdDataBufferBase & i_mask)
+fapi::ReturnCode fapiPutScomUnderMask(const fapi::Target& i_target,
+                                      const uint64_t i_address,
+                                      ecmdDataBufferBase & i_data,
+                                      ecmdDataBufferBase & i_mask)
 {
     fapi::ReturnCode l_rc;
     char l_string[fapi::MAX_ECMD_STRING_LEN] = {0};
@@ -153,14 +160,15 @@ fapi::ReturnCode PutScomUnderMask(const fapi::Target& i_target,
 }
 
 //******************************************************************************
-// GetCfamRegister function
+// fapiGetCfamRegister function
 //******************************************************************************
-fapi::ReturnCode GetCfamRegister(const fapi::Target& i_target,
-                                 const uint32_t i_address,
-                                 ecmdDataBufferBase & o_data)
+fapi::ReturnCode fapiGetCfamRegister(const fapi::Target& i_target,
+                                     const uint32_t i_address,
+                                     ecmdDataBufferBase & o_data)
 {
     fapi::ReturnCode l_rc;
     char l_string[fapi::MAX_ECMD_STRING_LEN] = {0};
+    bool l_traceit = fapi::platIsScanTraceEnabled();
 
     if( l_traceit )
     {
@@ -175,7 +183,6 @@ fapi::ReturnCode GetCfamRegister(const fapi::Target& i_target,
     // call the platform implementation
     l_rc = platGetCfamRegister( i_target, i_address, o_data );
 
-
     if( l_traceit )
     {
         FAPI_SCAN( "TRACE : GETCFAMREG  : END   : %s : %.16llX %.16llX", 
@@ -188,11 +195,11 @@ fapi::ReturnCode GetCfamRegister(const fapi::Target& i_target,
 }
 
 //******************************************************************************
-// PutCfamRegister function
+// fapiPutCfamRegister function
 //******************************************************************************
-fapi::ReturnCode PutCfamRegister(const fapi::Target& i_target,
-                                 const uint32_t i_address,
-                                 ecmdDataBufferBase & i_data)
+fapi::ReturnCode fapiPutCfamRegister(const fapi::Target& i_target,
+                                     const uint32_t i_address,
+                                     ecmdDataBufferBase & i_data)
 {
     fapi::ReturnCode l_rc;
     char l_string[fapi::MAX_ECMD_STRING_LEN] = {0};
@@ -223,16 +230,17 @@ fapi::ReturnCode PutCfamRegister(const fapi::Target& i_target,
 }
 
 //******************************************************************************
-// ModifyCfamRegister function
+// fapiModifyCfamRegister function
 //******************************************************************************
-fapi::ReturnCode ModifyCfamRegister(const fapi::Target& i_target,
-                                    const uint32_t i_address,
-                                    ecmdDataBufferBase & i_data,
-                                    const fapi::ChipOpModifyMode i_modifyMode)
+fapi::ReturnCode fapiModifyCfamRegister(const fapi::Target& i_target,
+                                        const uint32_t i_address,
+                                        ecmdDataBufferBase & i_data,
+                                        const fapi::ChipOpModifyMode i_modifyMode)
 {
     fapi::ReturnCode l_rc;
     char l_string[fapi::MAX_ECMD_STRING_LEN] = {0};
     bool l_traceit = fapi::platIsScanTraceEnabled(); 
+    const char * l_pMode = NULL;
 
     if( l_traceit )
     {
@@ -240,13 +248,21 @@ fapi::ReturnCode ModifyCfamRegister(const fapi::Target& i_target,
         i_target.toString(l_string);
 
         // get string representation of the modify mode
-        const char * l_apsModes = { "?", "OR", "AND", "XOR" };
-        char * l_pMode = l_apsModes[0];
-        int l_mode = static_cast<int>(i_modifyMode);
-
-        if(( l_mode > 0 ) && ( l_mode < 4 ))
+        if (i_modifyMode == fapi::CHIP_OP_MODIFY_MODE_OR)
         {
-            l_pMode = l_apsModes[l_mode];
+            l_pMode = "OR";
+        }
+        else if (i_modifyMode == fapi::CHIP_OP_MODIFY_MODE_AND)
+        {
+            l_pMode = "AND";
+        }
+        else if (i_modifyMode == fapi::CHIP_OP_MODIFY_MODE_XOR)
+        {
+            l_pMode = "XOR";
+        }
+        else
+        {
+            l_pMode = "?";
         }
 
         FAPI_SCAN( "TRACE : MODCFAMREG  : START : %s : %.16llX %.16llX %s", 
@@ -259,7 +275,6 @@ fapi::ReturnCode ModifyCfamRegister(const fapi::Target& i_target,
     // call the platform implementation
     l_rc = platModifyCfamRegister( i_target, i_address, i_data, i_modifyMode );
 
-
     if( l_traceit )
     {
         FAPI_SCAN( "TRACE : MODCFAMREG  : END   : %s : %llX %s", 
@@ -270,7 +285,5 @@ fapi::ReturnCode ModifyCfamRegister(const fapi::Target& i_target,
 
     return l_rc;
 }
-
-#endif
 
 } // extern "C"

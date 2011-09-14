@@ -37,6 +37,7 @@
  *                          mjjones     06/02/2011  Scom addresses should be uint64_t
  *                                                  use ecmdDataBufferBase
  *                          mjjones     06/30/2011  Updated comment
+ *                          mjjones     09/14/2011  Prepended fapi to functions
  *
  */
 
@@ -76,9 +77,9 @@ extern "C"
  *                    address
  * @return ReturnCode. Zero on success, else platform specified error
  */
-fapi::ReturnCode GetScom(const fapi::Target& i_target,
-                         const uint64_t i_address,
-                         ecmdDataBufferBase & o_data);
+fapi::ReturnCode fapiGetScom(const fapi::Target& i_target,
+                             const uint64_t i_address,
+                             ecmdDataBufferBase & o_data);
 
 /**
  * @brief Writes a SCOM register on a Chip
@@ -88,9 +89,9 @@ fapi::ReturnCode GetScom(const fapi::Target& i_target,
  *                   address
  * @return ReturnCode. Zero on success, else platform specified error
  */
-fapi::ReturnCode PutScom(const fapi::Target& i_target,
-                         const uint64_t i_address,
-                         ecmdDataBufferBase & i_data);
+fapi::ReturnCode fapiPutScom(const fapi::Target& i_target,
+                             const uint64_t i_address,
+                             ecmdDataBufferBase & i_data);
 
 /**
  * @brief Writes a SCOM register under mask to a chip
@@ -101,10 +102,10 @@ fapi::ReturnCode PutScom(const fapi::Target& i_target,
  *                   write)
  * @return ReturnCode. Zero on success, else platform specified error
  */
-fapi::ReturnCode PutScomUnderMask(const fapi::Target& i_target,
-                                  const uint64_t i_address,
-                                  ecmdDataBufferBase & i_data,
-                                  ecmdDataBufferBase & i_mask);
+fapi::ReturnCode fapiPutScomUnderMask(const fapi::Target& i_target,
+                                      const uint64_t i_address,
+                                      ecmdDataBufferBase & i_data,
+                                      ecmdDataBufferBase & i_mask);
 
 
 /**
@@ -115,9 +116,9 @@ fapi::ReturnCode PutScomUnderMask(const fapi::Target& i_target,
  *                    address
  * @return ReturnCode. Zero on success, else platform specified error
  */
-fapi::ReturnCode GetCfamRegister(const fapi::Target& i_target,
-                                 const uint32_t i_address,
-                                 ecmdDataBufferBase & o_data);
+fapi::ReturnCode fapiGetCfamRegister(const fapi::Target& i_target,
+                                     const uint32_t i_address,
+                                     ecmdDataBufferBase & o_data);
 
 /**
  * @brief Writes a CFAM register to a chip
@@ -127,9 +128,9 @@ fapi::ReturnCode GetCfamRegister(const fapi::Target& i_target,
  *                   address
  * @return ReturnCode. Zero on success, else platform specified error
  */
-fapi::ReturnCode PutCfamRegister(const fapi::Target& i_target,
-                                 const uint32_t i_address,
-                                 ecmdDataBufferBase & i_data);
+fapi::ReturnCode fapiPutCfamRegister(const fapi::Target& i_target,
+                                     const uint32_t i_address,
+                                     ecmdDataBufferBase & i_data);
 
 /**
  * @brief Read-modify-write a CFAM register on a chip
@@ -139,10 +140,10 @@ fapi::ReturnCode PutCfamRegister(const fapi::Target& i_target,
  * @param[in] i_modifyMode The modify mode (or/and/xor)
  * @return ReturnCode. Zero on success, else platform specified error
  */
-fapi::ReturnCode ModifyCfamRegister(const fapi::Target& i_target,
-                                    const uint32_t i_address,
-                                    ecmdDataBufferBase & i_data,
-                                    const fapi::ChipOpModifyMode i_modifyMode);
+fapi::ReturnCode fapiModifyCfamRegister(const fapi::Target& i_target,
+                                        const uint32_t i_address,
+                                        ecmdDataBufferBase & i_data,
+                                        const fapi::ChipOpModifyMode i_modifyMode);
 
 
 } // extern "C"

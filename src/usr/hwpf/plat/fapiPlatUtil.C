@@ -66,7 +66,7 @@ void fapiAssert(bool i_expression)
 }
 
 //******************************************************************************
-// delay
+// fapiDelay
 //
 // At the present time, VBU runs hostboot without a Simics
 // front end. If a HW procedure wants to delay, we just make the
@@ -82,7 +82,7 @@ void fapiAssert(bool i_expression)
 // Monte  4 Aug 2011
 //******************************************************************************
 
-fapi::ReturnCode delay( uint64_t i_nanoSeconds, uint64_t i_simCycles )
+fapi::ReturnCode fapiDelay(uint64_t i_nanoSeconds, uint64_t i_simCycles)
 {
     FAPI_DBG( INFO_MRK "delay %lld nanosec", i_nanoSeconds );
     nanosleep( 0, i_nanoSeconds );

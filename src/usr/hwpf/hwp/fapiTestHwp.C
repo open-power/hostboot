@@ -36,6 +36,7 @@
  *                          andrewg     07/07/2011  Added test for hw team to fill in
  *                          mjjones     08/10/2011  Removed clock HWP
  *                          mjjones     09/01/2011  Call toString in InitialTest
+ *                          mjjones     09/14/2011  Update to scom function name
  *
  */
 
@@ -64,11 +65,11 @@ fapi::ReturnCode hwpInitialTest(const fapi::Target & i_chip)
     const uint64_t l_addr = 0x13010002;
 
     // Perform a GetScom operation on the chip
-    l_rc = GetScom(i_chip, l_addr, l_data);
+    l_rc = fapiGetScom(i_chip, l_addr, l_data);
 
     if (l_rc != fapi::FAPI_RC_SUCCESS)
     {
-        FAPI_ERR("hwpInitialTest: Error from GetScomChip");
+        FAPI_ERR("hwpInitialTest: Error from fapiGetScom");
     }
     else
     {
