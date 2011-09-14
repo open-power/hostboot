@@ -1,4 +1,26 @@
 #!/usr/bin/perl
+#  IBM_PROLOG_BEGIN_TAG
+#  This is an automatically generated prolog.
+#
+#  $Source: src/build/tools/hb-parsedump.pl $
+#
+#  IBM CONFIDENTIAL
+#
+#  COPYRIGHT International Business Machines Corp. 2011
+#
+#  p1
+#
+#  Object Code Only (OCO) source materials
+#  Licensed Internal Code Source Materials
+#  IBM HostBoot Licensed Internal Code
+#
+#  The source code for this program is not published or other-
+#  wise divested of its trade secrets, irrespective of what has
+#  been deposited with the U.S. Copyright Office.
+#
+#  Origin: 30
+#
+#  IBM_PROLOG_END
 
 #
 # Purpose:  This perl script will parse a hostboot dump file and extract
@@ -10,7 +32,9 @@
 
 #
 # Usage:
-# exthbdump.pl <path/hbDumpFile> <path/symsFile>
+# hb-parsedump.pl <dumpfile> [--test]
+#             [--in <path to .syms file, hbotStringFile, & errlparser>]
+#             [--out <path to save output data>]\n");
 
 
 #------------------------------------------------------------------------------
@@ -39,6 +63,7 @@ sub readBinFile;
 sub readStringBinFile;
 sub writeBinFile;
 sub appendBinFile;
+sub printUsage;
 
 
 #==============================================================================
@@ -52,26 +77,30 @@ sub appendBinFile;
 my $numArgs = $#ARGV + 1;
 if ($numArgs < 1)
 {
-    print ("\nUsage: exthbdump.pl <dumpfile> [--test] [--dir <path to .syms file & hbotStringFile>]\n\n");
-    print ("  This program will parse the hostboot dump file specified\n");
-    print ("  and extract the code version, kernel printk buffer and traces\n");
-    print ("  to the current directory.\n\n");
-    print ("  User should copy the relevant .syms file and hbotStringFile\n");
-    print ("  to the current directory or set the env variable HBDIR to the path\n");
-    print ("  of the hbicore.syms/hbicore_test.syms files & hbotStringFile.\n\n");
-    print ("  User should also copy the fsp-trace program to the current directory\n");
-    print ("  or set the env variable PATH to include the path to the program.\n\n");
-    print ("  --dir:  Override the automatically detected .syms and hbotStringFile\n");
-    print ("       in HBDIR or the current directory.  This program will search\n");
-    print ("       for the files in the following order:\n");
-    print ("       1.  from the path specified by user\n");
-    print ("       2.  from HBDIR if it is defined\n");
-    print ("       3.  from the current directory\n");
-    print ("  --test:  Use the hbicore_test.syms file vs the hbicore.syms file\n");
-    print ("\nNOTE: User can run cpfiles.pl from the git repository to\n");
-    print ("  copy all files needed to parse the hostboot dump to the current\n");
-    print ("  directory prior to running this program.\n");
-    exit(1);
+    #Print command line help
+    print ("ERROR: Enter the hostboot dump file.\n");
+    printUsage();
+    exit (1);
+}
+elsif ($numArgs > 6)
+{
+    #Print command line help
+    print ("ERROR: Too many arguments entered.\n");
+    printUsage();
+    exit (1);
+}
+elsif (($ARGV[0] eq "--help") || ($ARGV[0] eq "-h"))
+{
+    #Print command line help
+    printUsage();
+    exit (0);
+}
+elsif (substr($ARGV[0], 0, 1) eq '-')
+{
+    #Print command line help
+    print ("ERROR: Enter the hostboot dump file.\n");
+    printUsage();
+    exit (1);
 }
 
 #------------------------------------------------------------------------------
@@ -81,6 +110,9 @@ if ($numArgs < 1)
 #Initialize default settings
 my $hbSymsFile = "hbicore.syms";
 my $hbStringFile = "hbotStringFile";
+my $hbErrlParser = "errlparser";
+my $cwd = getcwd();
+my $outDir = $cwd;                #Default = current working directory
 
 my $hbDir = $ENV{'HBDIR'};
 if (defined ($hbDir))
@@ -99,17 +131,33 @@ else
 my $hbDumpFile = $ARGV[0];
 my $hbDumpFileBase = basename($hbDumpFile);
 
+#check if file exists and is not empty
+if (!(-s $hbDumpFile))
+{
+    die "$hbDumpFile is not found or is empty.\n";
+
+}
+
 # Save the optional user specified arguments
 for (my $i=1; $i<$numArgs; $i++)
 {
-    if ($ARGV[$i] eq "--dir")
+    if ($ARGV[$i] eq "--in")
     {
         if (($i + 1) >= $numArgs)
         {
-            die "No value given for --dir parameter.\n";
+            die "No value given for --in parameter.\n";
         }
         $i++;
         $hbDir = $ARGV[$i];
+    }
+    elsif ($ARGV[$i] eq "--out")
+    {
+        if (($i + 1) >= $numArgs)
+        {
+            die "No value given for --out parameter.\n";
+        }
+        $i++;
+        $outDir = $ARGV[$i];
     }
     elsif ($ARGV[$i] eq "--test")
     {
@@ -134,19 +182,25 @@ if (!(-e "$hbDir/$hbStringFile"))
       die "Cannot find $hbDir/$hbStringFile\n";
 }
 
+if (!(-e "$hbDir/$hbErrlParser"))
+{
+      die "Cannot find $hbDir/$hbErrlParser\n";
+}
+
 #------------------------------------------------------------------------------
 #Print the files used
 #------------------------------------------------------------------------------
 print "hostboot dump file: $hbDumpFile\n";
 print "hostboot syms file: $hbDir/$hbSymsFile\n";
 print "hostboot string file: $hbDir/$hbStringFile\n";
+print "hostboot errlog parser: $hbDir/$hbErrlParser\n";
 
 
 #------------------------------------------------------------------------------
 # Create dumpout subdir for extracted dump
 #------------------------------------------------------------------------------
 #print getcwd()."\n";
-my $extDir = "dumpout.$hbDumpFileBase";
+my $extDir = "$outDir/dumpout.$hbDumpFileBase";
 if (-d $extDir)
 {
     print "ERROR: directory $extDir exists.\n";
@@ -186,7 +240,7 @@ if (0 != $addr)
 
     chdir "$extDir";
     writeBinFile($string, $buffer);
-    chdir "../";
+    chdir "$cwd";
 }
 
 
@@ -204,7 +258,7 @@ if ((0 != $addr) && (0 != $size))
     $buffer = readStringBinFile($hbDumpFile, $addr);
     chdir "$extDir";
     writeBinFile($string, $buffer);
-    chdir "../";
+    chdir "$cwd";
 }
 
 
@@ -217,10 +271,6 @@ $string = 'g_desc_array';
 
 if ((0 != $addr) && (0 != $size))
 {
-    #make subdir component_traces to store all traces
-    my $traceDir = $extDir.'/component_traces';
-    mkdir $traceDir;
-
     #Read the g_desc_array from dump file and save the trace buffers
     for (my $i = 0; $i < MAX_NUM_TRACE_BUFFERS; $i++)
     {
@@ -238,44 +288,62 @@ if ((0 != $addr) && (0 != $size))
         $addr += DESC_ARRAY_ENTRY_ADDR_SIZE;
 
         #read the component trace buffer and save to file
+        #read the component trace buffer
         $buffer = readBinFile($hbDumpFile, $compBufAddr, TRAC_DEFAULT_BUFFER_SIZE);
 
-        chdir "$traceDir";
+        chdir "$extDir";
 
-        writeBinFile($compName, $buffer);
-
-        #also append to tracBIN
+        #append to tracBIN
         appendBinFile('tracBIN', $buffer);
 
-        chdir "../../";
+        chdir "$cwd";
     }
 
     #check if file exists and is not empty
-    if (-s $traceDir.'/tracBIN')
+    if (-s $extDir.'/tracBIN')
     {
         #create tracMERG file
         $string = sprintf ("fsp-trace -s %s/%s %s/tracBIN > %s/tracMERG",
-                           $hbDir, $hbStringFile, $traceDir, $traceDir);
+                           $hbDir, $hbStringFile, $extDir, $extDir);
         #print "$string\n";
         `$string`;
 
-        if (-s "$traceDir/tracMERG")
+        if (-s "$extDir/tracMERG")
         {
             #delete tracBIN file
-            unlink $traceDir.'/tracBIN';
+            unlink $extDir.'/tracBIN';
         }
     }
 }
 
 #------------------------------------------------------------------------------
-# Save dump file to dumpout dir
+# Extract the error logs
 #------------------------------------------------------------------------------
-copy ($hbDumpFile, $extDir) or die "Copy failed: $!";
+#Create error log file and write list header to file
+my $errlFile = "$extDir/Errorlogs";
+open (ERRLFILE, ">$errlFile") or die "Couldn't open $errlFile!";
+print ERRLFILE "Error Log List:\n\n";
+close(ERRLFILE);
+
+#Invoke errlparser to parse and save the list of error logs
+my $command = sprintf ("$hbDir/$hbErrlParser $hbDumpFile $hbDir/$hbSymsFile >> $errlFile");
+#print "$command\n";
+`$command`;
+
+#Write error log detail header
+open (ERRLFILE, ">>$errlFile") or die "Couldn't open $errlFile!";
+print ERRLFILE "\n\nError Log Details:\n\n";
+close(ERRLFILE);
+
+#Invoke errlparser to parse and save the individual error log detail data
+$command = sprintf ("$hbDir/$hbErrlParser $hbDumpFile $hbDir/$hbSymsFile -d >> $errlFile");
+#print "$command\n";
+`$command`;
 
 #------------------------------------------------------------------------------
 # Print location of dumpout dir
 #------------------------------------------------------------------------------
-print "Dump extracted to ./$extDir\n";
+print "\nDump extracted to $extDir\n";
 
 
 #==============================================================================
@@ -387,4 +455,31 @@ sub appendBinFile($$)
     binmode FILE;
     print FILE $buffer;
     close (FILE);
+}
+
+#------------------------------------------------------------------------------
+# Print command line help
+#------------------------------------------------------------------------------
+sub printUsage()
+{
+    print ("\nUsage: hb-parsedump.pl [--help] | <dumpfile> [--test]\n");
+    print ("                       [--in <path to .syms file, hbotStringFile & errlparser>]\n");
+    print ("                       [--out <path to save output data>]\n\n");
+    print ("  This program will parse the hostboot dump file specified\n");
+    print ("  and extract the code version, kernel printk buffer, component\n");
+    print ("  traces & error logs.\n\n");
+    print ("  User should copy the relevant .syms file, hbotStringFile and errlparser\n");
+    print ("  to the current directory or set the env variable HBDIR to the path\n");
+    print ("  of the files.\n\n");
+    print ("  User should also set the env variable PATH to include the path to the fsp-trace");
+    print (" program.\n\n");
+    print ("  --in:    Override the automatically detected .syms file, hbotStringFile\n");
+    print ("           and errlparser in HBDIR or the current directory.\n");
+    print ("           This program will search for the files in the following order:\n");
+    print ("           1.  from the path specified by user\n");
+    print ("           2.  from HBDIR if it is defined\n");
+    print ("           3.  from the current directory\n");
+    print ("  --out:   Directory where the output data will be saved.\n");
+    print ("           Default path is the current directory.\n");
+    print ("  --test:  Use the hbicore_test.syms file vs the hbicore.syms file\n");
 }

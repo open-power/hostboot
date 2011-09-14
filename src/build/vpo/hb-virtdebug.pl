@@ -1,4 +1,26 @@
 #!/usr/bin/perl
+#  IBM_PROLOG_BEGIN_TAG
+#  This is an automatically generated prolog.
+#
+#  $Source: src/build/vpo/hb-virtdebug.pl $
+#
+#  IBM CONFIDENTIAL
+#
+#  COPYRIGHT International Business Machines Corp. 2011
+#
+#  p1
+#
+#  Object Code Only (OCO) source materials
+#  Licensed Internal Code Source Materials
+#  IBM HostBoot Licensed Internal Code
+#
+#  The source code for this program is not published or other-
+#  wise divested of its trade secrets, irrespective of what has
+#  been deposited with the U.S. Copyright Office.
+#
+#  Origin: 30
+#
+#  IBM_PROLOG_END
 
 #
 # Purpose:  This perl script works on VBU and will dump either the entire L3 or
@@ -14,6 +36,7 @@
 use strict;
 use warnings;
 use POSIX;
+use Cwd;
 
 
 #------------------------------------------------------------------------------
@@ -41,21 +64,29 @@ sub printUsage;
 # MAIN
 #==============================================================================
 
-
 #------------------------------------------------------------------------------
 # Parse optional input arguments
 #------------------------------------------------------------------------------
 my $numArgs = $#ARGV + 1;
 #print "num args = $numArgs\n";
+#print "arg list: @ARGV\n";
 
 #Initialize default settings
 my $hbSymsFile = "hbicore.syms";  #Use hbicore.syms
 my $hbStringFile = "hbotStringFile";
+my $hbErrlParser = "errlparser";
 my $dumpPrintk = 0;               #Flag to dump printk
 my $dumpTrace = 0;                #Flag to dump trace buffers
+my $dumpErrl = 0;                 #Flag to dump error logs
+my $dumpErrlList = 1;             #Flag to dump a listing of all error logs
+my $dumpErrlDtl = 0;              #Flag to dump error log detail data
+my $errLogId = "all";             #Error log id; default = all
 my $dumpAll = 1;                  #Flag to dump everything
 my @comp;                         #Array of component trace buffers to dump
 my @symsLines;                    #Array to store the .syms file data
+my $outDir = getcwd();            #Default = current working directory
+my @ecmdOpt;                      #Array of ecmd options
+my $core = "3";                   #Default is core 3
 
 my $hbDir = $ENV{'HBDIR'};
 if (defined ($hbDir))
@@ -78,14 +109,23 @@ for (my $i=0; $i<$numArgs; $i++)
         printUsage();
         exit (0);
     }
-    elsif ($ARGV[$i] eq "--dir")
+    elsif ($ARGV[$i] eq "--in")
     {
         if (($i + 1) >= $numArgs)
         {
-            die "No value given for --dir parameter.\n";
+            die "No value given for --in parameter.\n";
         }
         $i++;
         $hbDir = $ARGV[$i];
+    }
+    elsif ($ARGV[$i] eq "--out")
+    {
+        if (($i + 1) >= $numArgs)
+        {
+            die "No value given for --out parameter.\n";
+        }
+        $i++;
+        $outDir = $ARGV[$i];
     }
     elsif ($ARGV[$i] eq "--test")
     {
@@ -115,6 +155,53 @@ for (my $i=0; $i<$numArgs; $i++)
             push (@comp, $ARGV[$i]);
         }
     }
+    elsif ($ARGV[$i] eq "--errl")
+    {
+        #Set flag to dump the error logs
+        $dumpErrl = 1;
+        $dumpAll = 0;
+
+        last if (($i + 1) >= $numArgs);
+        $i++;
+
+        if ($ARGV[$i] eq "-d")
+        {
+            $dumpErrlList = 0;
+            $dumpErrlDtl = 1;
+
+            last if (($i + 1) >= $numArgs);
+            $i++;
+
+            if (substr($ARGV[$i], 0, 1) eq '-')
+            {
+                $i--;
+            }
+            else
+            {
+                if (isdigit($ARGV[$i]))
+                {
+                    $errLogId = $ARGV[$i];
+                }
+                else
+                {
+                    die "ERROR:  Enter logid or 'all'"
+                        unless ($ARGV[$i] =~ /all/i);
+                }
+            }
+        }
+        elsif ($ARGV[$i] ne "-l")
+        {
+            $i--;
+        }
+    }
+    elsif ($ARGV[$i] =~ m/^-[c](\d+)/)
+    {
+        $core = $1;
+    }
+    elsif ($ARGV[$i] =~ m/^-[knsp]\d+/)
+    {
+        push(@ecmdOpt, $ARGV[$i]);
+    }
     else
     {
         print "Invalid argument entered:  $ARGV[$i]\n";
@@ -123,12 +210,16 @@ for (my $i=0; $i<$numArgs; $i++)
     }
 }
 
+push(@ecmdOpt, "-c$core");
+#print "ecmd options = @ecmdOpt\n";
+
+
 #------------------------------------------------------------------------------
 # Check for files needed to dump printk and component traces
 #------------------------------------------------------------------------------
 if (!$dumpAll)
 {
-    #Need .syms file for both printk and traces
+    #Need .syms file for error logs, printk and traces
     if (!(-e "$hbDir/$hbSymsFile"))
     {
       die "Cannot find $hbDir/$hbSymsFile\n";
@@ -140,6 +231,12 @@ if (!$dumpAll)
       die "Cannot find $hbDir/$hbStringFile\n";
     }
 
+    #Need errlparser for error logs
+    if (!(-e "$hbDir/$hbErrlParser") && $dumpErrl)
+    {
+      die "Cannot find $hbDir/$hbErrlParser\n";
+    }
+
     #Print the files that will be used
     print "hostboot syms file: $hbDir/$hbSymsFile\n";
 
@@ -148,6 +245,10 @@ if (!$dumpAll)
         print "hostboot string file: $hbDir/$hbStringFile\n";
     }
 
+    if ($dumpErrl)
+    {
+        print "hostboot error log parser: $hbDir/$hbErrlParser\n";
+    }
     #------------------------------------------------------------------------------
     # Open and read the .syms file
     #------------------------------------------------------------------------------
@@ -164,14 +265,21 @@ if (!$dumpAll)
 }
 
 #------------------------------------------------------------------------------
+# Output reminder to stop instructions
+#------------------------------------------------------------------------------
+print "\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
+print "\nREMINDER:  User need to stop instructions prior to running this program.\n";
+print "\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n\n";
+
+#------------------------------------------------------------------------------
 #Flush L2 - this step is needed in order to dump L3 quickly
 #------------------------------------------------------------------------------
 my $command = "";
 $command = "/afs/awd.austin.ibm.com/projects/eclipz/lab/p8/gsiexe/p8_runso.x86 ";
 $command .= "/afs/awd.austin.ibm.com/projects/eclipz/lab/p8/gsiexe/p8_l2_flush_x86.so ";
-$command .= "-c3 -debug5.6";
-#print "$command\n";
-system("$command");
+$command .= "@ecmdOpt -debug5.6";
+print "$command\n";
+die if (system("$command") != 0);
 
 
 #------------------------------------------------------------------------------
@@ -192,7 +300,9 @@ if ($dumpPrintk)
 
     if ((0 != $addr) && (0 != $size))
     {
-        print "Reading the kernel printk buffer...\n\n";
+        print "\nReading the kernel printk buffer...\n\n";
+
+        $string = "$outDir/$string";
 
         $offset = $addr % CACHE_LINE_SIZE;
         $cacheLines = ceil($size / CACHE_LINE_SIZE);
@@ -203,20 +313,28 @@ if ($dumpPrintk)
         #print "addr $addr, offset $offset, size $size, cacheLines $cacheLines\n";
 
         #Read the kernel printk buffer from L3 and save to file
-        $command = sprintf ("time p8_dump_l3 %x $cacheLines -f $string -b -c3",
+        $command = sprintf ("p8_dump_l3 %x $cacheLines -f $string -b @ecmdOpt",
                             $addr);
-        #print "$command\n";
-        system("$command");
+        print "$command\n";
+        die if (system("$command") != 0);
 
-        #Extract and save just the kernel printk buffer
-        $buffer = readStringBinFile($string, $offset);
-        writeBinFile($string, $buffer);
+        if (-s $string)
+        {
+	    #Extract and save just the kernel printk buffer
+	    $buffer = readStringBinFile($string, $offset);
 
-        #Output to screen
-        print "\nKernel printk buffer:";
-        print "\n=====================\n\n$buffer\n";
-        print "\n=====================\n\n";
-        print "Data saved to file $string\n\n";
+	    writeBinFile($string, $buffer);
+
+	    #Output to screen
+	    print "\nKernel printk buffer:";
+	    print "\n=====================\n\n$buffer\n";
+	    print "\n=====================\n\n";
+	    print "Data saved to file $string\n\n";
+        }
+        else
+        {
+            print "\nWARNING: Cannot read the kernel printk buffer.\n";
+        }
     }
 }
 
@@ -232,7 +350,9 @@ if ($dumpTrace)
 
     if ((0 != $addr) && (0 != $size))
     {
-        print "Reading the component trace buffer(s)...\n\n";
+        print "\nReading the component trace buffer(s)...\n\n";
+
+        $string = "$outDir/$string";
 
         #Read the g_desc_array from L3 and save to file
         $offset = $addr % CACHE_LINE_SIZE;
@@ -243,14 +363,14 @@ if ($dumpTrace)
         }
         #print "addr $addr, offset $offset, size $size, cacheLines $cacheLines\n";
 
-        $command = sprintf ("time p8_dump_l3 %x $cacheLines -f $string -b -c3",
+        $command = sprintf ("p8_dump_l3 %x $cacheLines -f $string -b @ecmdOpt",
                             $addr);
-        #print "$command\n";
-        system("$command");
+        print "$command\n";
+        die if (system("$command") != 0);
 
         #Save the trace buffers
         $addr = $offset;
-        for (my $i = 0; $i < MAX_NUM_TRACE_BUFFERS; $i++)
+        for (my $i = 0; ($i < MAX_NUM_TRACE_BUFFERS) && (-s $string); $i++)
         {
             #Get the component name
             my $compName = readStringBinFile($string, $addr);
@@ -275,52 +395,56 @@ if ($dumpTrace)
                 }
                 #print "$compName, addr $compBufAddr, offset $offset, cacheLines $cacheLines\n";
 
-                $command = sprintf ("time p8_dump_l3 %x $cacheLines -f trace.out -b -c3",
+                $command = sprintf ("p8_dump_l3 %x $cacheLines -f $outDir/trace.out -b @ecmdOpt",
                                    $compBufAddr);
-                #print "$command\n";
-                system("$command");
+                print "$command\n";
+                die if (system("$command") != 0);
 
                 #Extract just the component trace
-                $buffer = readBinFile("trace.out", $offset, TRAC_DEFAULT_BUFFER_SIZE);
+                $buffer = readBinFile("$outDir/trace.out", $offset, TRAC_DEFAULT_BUFFER_SIZE);
 
                 #Append to tracBIN
-                appendBinFile('tracBIN', $buffer);
-                unlink "trace.out";
+                appendBinFile("$outDir/tracBIN", $buffer);
+                unlink "$outDir/trace.out";
             }
         }
 
         #Check if file exists and is not empty
-        if (-s "tracBIN")
+        if (-z $string)
+        {
+            print "\nWARNING: Cannot read the component trace buffers.\n";
+        }
+        elsif (-s "$outDir/tracBIN")
         {
             print "\n";
 
             #create tracMERG file
-            `fsp-trace -s $hbDir/$hbStringFile tracBIN | tee tracMERG`;
+            `fsp-trace -s $hbDir/$hbStringFile $outDir/tracBIN | tee $outDir/tracMERG`;
 
             #Check if file exists and is not empty
             #This will be false if the fsp-trace tool cannot be found
-            if (-s "tracMERG")
+            if (-s "$outDir/tracMERG")
             {
-                open FILE, "tracMERG" or die "ERROR: $!";
+                open FILE, "$outDir/tracMERG" or die "ERROR: $!";
                 my @lines = <FILE>;        # Read it into an array
                 close(FILE);               # Close the file
                 print "\nComponent trace buffer(s):";
                 print "\n==========================\n\n";
                 print "@lines\n";        # Output to screen
                 print "\n==========================\n\n";
-                print "Data saved to file tracMERG\n\n";
+                print "Data saved to $outDir/tracMERG\n\n";
 
                 #delete tracBIN file
-                unlink "tracBIN";
+                unlink "$outDir/tracBIN";
             }
             else
             {
-                print "\nData saved to file tracBIN\n\n";
+                print "\nData saved to $outDir/tracBIN\n\n";
             }
         }
         else
         {
-            print "\nComponent trace buffer(s) not found\n\n";
+            print "\nComponent trace buffer(s) not found.\n\n";
         }
 
         #Delete g_desc_array file
@@ -330,11 +454,72 @@ if ($dumpTrace)
 
 
 #------------------------------------------------------------------------------
+# Dump the error logs 
+#------------------------------------------------------------------------------
+if ($dumpErrl)
+{
+    #Find address and size of the g_ErrlStorage from the .syms file
+    $string = 'g_ErrlStorage';
+    ($addr, $size) = getAddrNSize($string, \@symsLines);
+
+    if ((0 != $addr) && (0 != $size))
+    {
+        print "\nReading the error log(s)...\n\n";
+
+        $string = "$outDir/$string";
+
+        #Read the binary error log buffer from L3 and save to file
+        $offset = $addr % CACHE_LINE_SIZE;
+        $cacheLines = ceil($size / CACHE_LINE_SIZE);
+        if ($offset != 0)
+        {
+            $cacheLines += 1;
+        }
+        #print "addr $addr, offset $offset, size $size, cacheLines $cacheLines\n";
+
+        $command = sprintf ("p8_dump_l3 %x $cacheLines -f $string -b @ecmdOpt",
+                            $addr);
+        print "$command\n";
+        die if (system("$command") != 0);
+
+        if (-s $string)
+        {
+            #Extract and save just the error log buffer
+            $buffer = readBinFile($string, $offset, $size);
+            writeBinFile($string, $buffer);
+
+            #Parse error log buffer and save to file
+            my $hbErrlFile = "$outDir/Errorlogs";
+            if ($dumpErrlList)
+            {
+                $command = sprintf("$hbDir/$hbErrlParser $string|tee $hbErrlFile");
+            }
+            else
+            {
+                $command = sprintf("$hbDir/$hbErrlParser $string -d $errLogId |tee $hbErrlFile");
+            }
+            die if (system("$command") != 0);
+
+            if (-s $hbErrlFile)
+            {
+                print "\n\nData saved to file $hbErrlFile\n\n";
+                unlink "$string";
+            }
+        }
+        else
+        {
+	    print "\nWARNING: Cannot read the error logs.\n";
+        }
+    }
+}
+
+
+#------------------------------------------------------------------------------
 #Dump the entire L3 to a file
 #------------------------------------------------------------------------------
 if ($dumpAll)
 {
-    print "Dumping L3...\n\n";
+    print "\nDumping L3...\n\n";
 
     #Get current timestamp
     my $timeStamp = strftime "%Y%m%d%H%M\n", localtime;
@@ -342,36 +527,21 @@ if ($dumpAll)
     #print "timestamp: $timeStamp\n";
 
     #Dump L3 to file
-    my $hbDumpFile = "hbdump.$timeStamp";
-    $command = "time p8_dump_l3 0 65536 -f $hbDumpFile -b -c3";
-    #print "$command\n";
-    system("$command");
+    my $hbDumpFile = "$outDir/hbdump.$timeStamp";
+    $command = "p8_dump_l3 0 65536 -f $hbDumpFile -b @ecmdOpt";
+    print "$command\n";
+    die if (system("$command") != 0);
 
-    print "\nDump saved to $hbDumpFile.\n";
-
-    #Check if we can extract the dump
-    if ((-e "$hbDir/exthbdump.pl") &&
-        (-e "$hbDir/$hbSymsFile") &&
-        (-e "$hbDir/$hbStringFile"))
+    #Check if hbDumpFile exists and is not empty
+    if (-s "$hbDumpFile")
     {
-        if ($hbSymsFile eq "hbicore_test.syms")
-        {
-            $command = "$hbDir/exthbdump.pl $hbDumpFile --dir $hbDir --test";
-        }
-        else
-        {
-            $command = "$hbDir/exthbdump.pl $hbDumpFile --dir $hbDir";
-        }
-
-        print "\nExtracting dump...\n";
-        #print "$command\n";
-        system"$command";
-
-        #print "Dump extracted to dumpout.$hbDumpFile\n\n";
+        print "\nHostBoot dump saved to $hbDumpFile.\n";
+        print "Use hb-parsedump.pl program to parse the dump.\n";
     }
     else
     {
-        print "Use exthbdump.pl to extract and view dump.\n\n";
+        print "\nWARNING: Cannot dump L3.  Did you stop instructions?\n\n";
+	unlink $hbDumpFile;
     }
 }
 
@@ -492,26 +662,41 @@ sub appendBinFile($$)
 #------------------------------------------------------------------------------
 sub printUsage()
 {
-    print ("\nUsage: hb-dump.pl [--help] | [--dir <path to .syms file & hbotStringFile>]\n");
-    print ("                  [--test] [--printk]\n");
-    print ("                  [--trace [<compName1 compName2 compName3 ...>]]\n\n");
-    print ("  This program dumps the user requested data from L3.\n");
+    print ("\nUsage: hb-virtdebug.pl [--help] | [--in <path to .syms file, hbotStringFile & errlparser>]\n");
+    print ("                  [--out <path to save output data>]\n");
+    print ("                  [--test] [--errl [-l | -d [<logid>|all]] [--printk]\n");
+    print ("                  [--trace [<compName1 compName2 compName3 ...>]]\n");
+    print ("                  [-k#] [-n#] [-s#] [-p#] [-c#]\n\n");
+    print ("  This program retrieves the user requested data from L3.\n");
     print ("  If no options are specified, this program will dump the entire L3 to a file.\n");
-    print ("  Use the exthbdump.pl program to parse and view data in the file.\n\n");
-    print ("  User should copy the relevant .syms file and hbotStringFile\n");
+    print ("  Use the hb-parsedump.pl program to expand and view data in the file.\n\n");
+    print ("  User should copy the relevant .syms file, hbotStringFile & errlparser\n");
     print ("  to the current directory or set the env variable HBDIR to the path\n");
-    print ("  of the hbicore.syms/hbicore_test.syms files & hbotStringFile.\n\n");
-    print ("  User should also copy the fsp-trace program to the current directory\n");
-    print ("  or set the env variable PATH to include the path to the program.\n\n");
-    print ("  --help: Prints usage information\n");
-    print ("  --dir:  Override the automatically detected .syms and hbotStringFile\n");
-    print ("       in HBDIR or the current directory.  This program will search\n");
-    print ("       for the files in the following order:\n");
-    print ("       1.  from the path specified by user\n");
-    print ("       2.  from HBDIR if it is defined\n");
-    print ("       3.  from the current directory\n");
-    print ("  --test:  Use the hbicore_test.syms file vs the hbicore.syms file\n");
-    print ("  --printk:  Dumps the kernel printk buffer only\n");
-    print ("  --trace:  Dumps all or just the user specified component trace buffer(s)\n");
+    print ("  of the files.\n\n");
+    print ("  User should also set the env variable PATH to include the path to the fsp-trace program.\n\n");
+    print ("  --help            Prints usage information\n");
+    print ("  --in              Overrides the automatically detected .syms file,\n");
+    print ("                    hbotStringFile & errlparser in HBDIR or the current\n");
+    print ("                    directory.  This program will search for the files in\n");
+    print ("                    the following order:\n");
+    print ("                        1.  from the path specified by user\n");
+    print ("                        2.  from HBDIR if it is defined\n");
+    print ("                        3.  from the current directory\n");
+    print ("  --out             Directory where the output data will be saved\n");
+    print ("                    Default path is the current directory\n");
+    print ("  --test            Use the hbicore_test.syms file vs the hbicore.syms file\n");
+    print ("  --errl            Dumps the error logs\n");
+    print ("      -l            Dumps a listing of all the error logs\n");
+    print ("      -d <logid>    Dumps detailed data of the specified error log\n");
+    print ("      -d [all]      Dumps detailed data of all error logs\n");
+    print ("  --printk          Dumps the kernel printk buffer only\n");
+    print ("  --trace           Dumps all or just the user specified component trace buffer(s)\n");
+    print ("  -k#               Specify which cage to act on (default = 0)\n");
+    print ("  -n#               Specify which node to act on (default = 0)\n");
+    print ("  -s#               Specify which slot to act on (default = 0)\n");
+    print ("  -p#               Specify which chip position to act on (default = 0)\n");
+    print ("  -c#               Specify which core/chipUnit to act on (default = 3)\n");
+    print ("\n  NOTE:  This program will not work if user has not stopped instructions\n");
+    print ("         prior to running this program.\n");
 }
 

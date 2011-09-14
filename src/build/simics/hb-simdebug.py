@@ -1,20 +1,25 @@
-#############################################################################
-# $IBMCopyrightBlock:
+#  IBM_PROLOG_BEGIN_TAG
+#  This is an automatically generated prolog.
 #
-# IBM Confidential
+#  $Source: src/build/simics/hb-simdebug.py $
 #
-# Licensed Internal Code Source Materials
+#  IBM CONFIDENTIAL
 #
-# IBM HostBoot Licensed Internal Code
+#  COPYRIGHT International Business Machines Corp. 2011
 #
-# (C) Copyright IBM Corp. 2011
+#  p1
 #
-# The source code for this program is not published or other-
-# wise divested of its trade secrets, irrespective of what has
-# been deposited with the U.S. Copyright Office.
-#$
-#############################################################################
-
+#  Object Code Only (OCO) source materials
+#  Licensed Internal Code Source Materials
+#  IBM HostBoot Licensed Internal Code
+#
+#  The source code for this program is not published or other-
+#  wise divested of its trade secrets, irrespective of what has
+#  been deposited with the U.S. Copyright Office.
+#
+#  Origin: 30
+#
+#  IBM_PROLOG_END
 # *** hb-simdebug.py
 #
 # Script to extract and display formatted trace in simics
@@ -441,7 +446,7 @@ def istepHB( str_arg1, inList):
 #------------------------------------------------------------------------------
 # Function to dump error logs
 #------------------------------------------------------------------------------
-def errlHB(symsFile, flag, logid):
+def errlHB(symsFile, errlParser, flag, logid):
 
     # "constants"
     L3_SIZE = 0x800000
@@ -455,10 +460,10 @@ def errlHB(symsFile, flag, logid):
     result = run_command(string)
     #print result
 
-    if logid == 0:
-        string = "./errlparser %s %s %s| tee Errorlogs"%(dumpFile,symsFile,flag)
+    if logid == "all":
+        string = "./%s %s %s %s| tee Errorlogs"%(errlParser,dumpFile,symsFile,flag)
     else:
-        string = "./errlparser %s %s %s %d| tee Errorlogs"%(dumpFile,symsFile,flag,logid)
+        string = "./%s %s %s %s %s| tee Errorlogs"%(errlParser,dumpFile,symsFile,flag,logid)
     #print string
     os.system(string)
     os.system("rm hbdump.out")
@@ -478,32 +483,23 @@ default_stringFile = "hbotStringFile"
 
 #------------------------------------------------
 #------------------------------------------------
-def hb_trace(str_arg1, str_arg2, str_arg3):   
-    if ((str_arg1 == None) or (str_arg1 == "all") or (str_arg1 == "ALL") or (str_arg1 == "All")):
-            str_arg1 = default_comp
-    if str_arg2 == None:
-        if os.environ.has_key("HOSTBOOT_SYMS"):
-            str_arg2 = str(os.environ.get("HOSTBOOT_SYMS"))
-        else:
-            str_arg2 = default_syms
-    if str_arg3 == None:
-        if os.environ.has_key("HOSTBOOT_STRINGFILE"):
-            str_arg3 = str(os.environ.get("HOSTBOOT_STRINGFILE"))
-        else:
-            str_arg3 = default_stringFile
+def hb_trace(comp):
+    syms = default_syms
+    stringFile = default_stringFile
+
+    if comp == None:
+            comp = default_comp
             
-    print "comp=%s" % str(str_arg1)
+    print "comp=%s" % str(comp)
             
-    print "syms=%s" % str(str_arg2)
-    print "StringFile=%s" % str(str_arg3)
-    traceHB(str_arg1, str_arg2, str_arg3)
+    print "syms=%s" % str(syms)
+    print "StringFile=%s" % str(stringFile)
+    traceHB(comp, syms, stringFile)
     return None
     
 new_command("hb-trace",
     hb_trace,
     [arg(str_t, "comp", "?", None),
-     arg(str_t, "syms", "?", None),
-     arg(str_t, "stringFile", "?", None),
     ],
     #alias = "hbt",
     type = ["hostboot-commands"],
@@ -512,9 +508,7 @@ new_command("hb-trace",
     short = "Display the hostboot trace",
     doc = """
 Parameters: \n
-        in = component name \n
-        in = SYMS file \n
-        in = hostboot string file \n
+        in = component name(s) \n
 
 Defaults: \n
         'comp' = all buffers \n
@@ -523,28 +517,21 @@ Defaults: \n
 
 Examples: \n
     hb-trace \n
-    hb-trace all \n
+    hb-trace ERRL\n
     hb-trace "ERRL,INITSERVICE" \n
-    hb-trace ERRL ../hbicore.syms <git.repo>/img/hbotStringFile \n
     """)
 
 #------------------------------------------------
 #------------------------------------------------
-def hb_printk(str_arg1):   
-    if str_arg1 == None:
-        if os.environ.has_key("HOSTBOOT_SYMS"):
-            str_arg1 = str(os.environ.get("HOSTBOOT_SYMS"))
-        else:
-            str_arg1 = default_syms
-    
-    print "syms=%s" % str(str_arg1)
-    printkHB(str_arg1)
+def hb_printk():
+    syms = default_syms
+
+    print "syms=%s" % str(syms)
+    printkHB(syms)
     return None
     
 new_command("hb-printk",
     hb_printk,
-    [arg(str_t, "syms", "?", None),
-    ],
     #alias = "hbt",
     type = ["hostboot-commands"],
     #see_also = ["hb-trace"],
@@ -552,14 +539,12 @@ new_command("hb-printk",
     short = "Display the kernel printk buffer",
     doc = """
 Parameters: \n
-        in = SYMS file \n
  
 Defaults: \n
         'syms' = './hbicore.syms' \n\n
 
 Examples: \n
     hb-printk \n
-    hb-printk ../hbicore.syms \n
     """)
     
 #------------------------------------------------
@@ -636,16 +621,19 @@ Examples: \n
 #------------------------------------------------
 #------------------------------------------------
 default_flag = "-l"
-default_logid = 0
-def hb_errl(syms, flg_list, flg_detail, logid):
-    if syms == None:
-        if os.environ.has_key("HOSTBOOT_SYMS"):
-            syms = str(os.environ.get("HOSTBOOT_SYMS"))
-        else:
-            syms = default_syms
+default_logid = "all"
+default_errlParser = "errlparser"
+def hb_errl(logid, logidStr, flg_list, flg_detail):
+    #print "logid=%s" % str(logid)
+    #print "logidStr=%s" % str(logidStr)
+    #print "flg_list=%s" % str(flg_list)
+    #print "flg_detail=%s" % str(flg_detail)
+
+    syms = default_syms
+    errlParser = default_errlParser
 
     if flg_list and flg_detail:
-        print "Error:  enter either '-l' or '-d <logid>'"
+        print "ERROR:  enter either '-l' or '-d [<logid | all>]'"
         return None
 
     flag = default_flag
@@ -654,23 +642,29 @@ def hb_errl(syms, flg_list, flg_detail, logid):
         flag = "-l"
     if flg_detail:
         flag = "-d"
-        if logid == 0:
-            print "Error:  enter '-d <logid>'"
-            return None
-        else:
-            id = logid
+        if logid != None:
+            id = str(logid)
+
+    if (flag == "-l") and (logid or logidStr):
+        print "ERROR:  enter either '-l' or '-d [<logid | all>]'"
+        return None
+
+    if logidStr and (logid or (logidStr.lower() != "all")):
+        print "ERROR:  enter <logid> or 'all'"
+        return None
 
     print "syms=%s" % str(syms)
-    #print "logid=%d" % int(id)
-    errlHB(syms, flag, id)
+    print "errlParser=%s" % str(errlParser)
+    #print "logid=%s" % str(id)
+    errlHB(syms, errlParser, flag, id)
     return None
 
 new_command("hb-errl",
     hb_errl,
-    [arg(str_t, "syms", "?", None),
+    [ arg(int_t, "logid", "?", None),
+     arg(str_t, "logidStr", "?", None),
      arg(flag_t, "-l"),
      arg(flag_t, "-d"),
-     arg(int_t, "logid", "?", 0)
     ],
     #alias = "hbt",
     type = ["hostboot-commands"],
@@ -679,17 +673,17 @@ new_command("hb-errl",
     short = "Display the hostboot error logs",
     doc = """
 Parameters: \n
-        in = SYMS file \n
         in = option for dumping error logs\n
 
 Defaults: \n
         'flag' = '-l' \n
         'syms' = './hbicore.syms' \n
+        'errlParser' = ./errlparser'\n
 
 Examples: \n
-    hb-errl -l \n
+    hb_errl [-l]\n
     hb-errl -d 1\n
-    hb-errl ./hbicore_test.syms -l\n
+    hb-errl -d [all]\n
     """)
     
     

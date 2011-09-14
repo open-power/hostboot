@@ -55,10 +55,9 @@ sub printUsage;
 #------------------------------------------------------------------------------
 
 #List of files to copy.  Path is relative to git repository.
-my @files = ("src/build/tools/exthbdump.pl",
-             "src/build/simics/post_model_hook.simics",
+my @files = ("src/build/tools/hb-parsedump.pl",
+             "src/build/simics/*",
              "src/usr/errl/parser/bin/errlparser", 
-             "src/build/simics/hb-simdebug.py",
              "img/hbotStringFile",
              "img/hbicore.syms",
              "img/hbicore_test.syms",

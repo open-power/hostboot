@@ -48,7 +48,7 @@ using namespace ERRORLOG;
 #define USAGE "\
 Usage:\n\
 \n\
-errlparser [-i] <imagefile> [[-s] <symsfile>] [-l | -d <logid>] [-v]\n\
+errlparser [-i] <imagefile> [[-s] <symsfile>] [-l | -d [<logid>|all]] [-v]\n\
 \n\
 Arguments:\n\
   <imagefile>  data file name\n\
@@ -575,6 +575,7 @@ int main( int argc,  char *argv[] )
     int fVerbose = 0;
     int fList = 1;
     int fDetail = 0;
+    int fAll    = 0;
     int fFound = 0;
 
 
@@ -598,15 +599,23 @@ int main( int argc,  char *argv[] )
             i++;
             if( i >= argc )
             {
-              fprintf( stdout, "Provide -d <logid>\n" );
-              exit( 2 );
+                // nothing after -d
+                fAll = 1;
             }
-            int c = sscanf( argv[i], "%d", &ulLogId );
-            if( c != 1 )
+            else if( 0 == strcmp( argv[i], "all" ))
             {
-              fprintf( stdout, "Provide -d <decimal log ID>\n" );
-              exit( 2 );
+                fAll = 1;
             }
+            else
+            {
+                int c = sscanf( argv[i], "%d", &ulLogId );
+                if( c != 1 )
+                {
+                  fprintf( stdout, "Provide -d <decimal log ID>\n" );
+                  exit( 2 );
+                }
+            }
+
             fList = 0;
             fDetail = 1;
         }
@@ -774,7 +783,7 @@ int main( int argc,  char *argv[] )
             printf( "%s\n", szDivider );
             PrintErrlSummary( perr );
         }
-        else if(( fDetail ) && ( perr->logId ==  ulLogId ))
+        else if(( fDetail ) && (( perr->logId ==  ulLogId ) || (fAll)))
         {
             // Print the detail for the one error log.
             printf( "%s\n", szDivider );

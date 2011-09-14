@@ -1,0 +1,158 @@
+#!/usr/bin/perl
+#  IBM_PROLOG_BEGIN_TAG
+#  This is an automatically generated prolog.
+#
+#  $Source: src/build/vpo/hb-trace $
+#
+#  IBM CONFIDENTIAL
+#
+#  COPYRIGHT International Business Machines Corp. 2011
+#
+#  p1
+#
+#  Object Code Only (OCO) source materials
+#  Licensed Internal Code Source Materials
+#  IBM HostBoot Licensed Internal Code
+#
+#  The source code for this program is not published or other-
+#  wise divested of its trade secrets, irrespective of what has
+#  been deposited with the U.S. Copyright Office.
+#
+#  Origin: 30
+#
+#  IBM_PROLOG_END
+
+#
+# Purpose:  This perl script works on VBU and will dump the component trace
+# buffers.
+#
+# Author: CamVan Nguyen
+# Last Updated: 09/07/2011
+#
+
+#------------------------------------------------------------------------------
+# Specify perl modules to use
+#------------------------------------------------------------------------------
+use strict;
+use warnings;
+
+
+#------------------------------------------------------------------------------
+# Forward Declaration
+#------------------------------------------------------------------------------
+sub printUsage;
+
+
+#==============================================================================
+# MAIN
+#==============================================================================
+
+#------------------------------------------------------------------------------
+# Parse optional input arguments
+#------------------------------------------------------------------------------
+my $numArgs = $#ARGV + 1;
+#print "num args = $numArgs\n";
+#print "argument list = @ARGV\n";
+
+my $hbDir = $ENV{'HBDIR'};
+if (defined ($hbDir))
+{
+    unless ($hbDir ne "")
+    {
+        $hbDir = '.';             #Set to current directory
+    }
+}
+else
+{
+    $hbDir = '.';                 #Set to current directory
+}
+
+# Skip the component names
+my $i = 0;
+for ($i=0; $i<$numArgs; $i++)
+{
+    last if (substr($ARGV[$i], 0, 1) eq '-')
+}
+
+# Parse the other arguments
+for ( ;$i<$numArgs; $i++)
+{
+    if (($ARGV[$i] eq "--help") || ($ARGV[$i] eq "-h"))
+    {
+        #Print command line help
+        printUsage();
+        exit (0);
+    }
+    elsif ($ARGV[$i] eq "--in")
+    {
+        if (($i + 1) >= $numArgs)
+        {
+            die "No value given for --in parameter.\n";
+        }
+        $i++;
+        $hbDir = $ARGV[$i];
+    }
+    elsif ($ARGV[$i] eq "--out")
+    {
+        if (($i + 1) >= $numArgs)
+        {
+            die "No value given for --out parameter.\n";
+        }
+        $i++;
+    }
+    elsif (($ARGV[$i] ne "--test") && ($ARGV[$i] !~ m/^-[cknsp]\d+/))
+    {
+        print "Invalid argument entered:  $ARGV[$i]\n";
+        printUsage();
+        exit(1);
+    }
+}
+
+
+#------------------------------------------------------------------------------
+# Dump the component trace buffer(s)
+#------------------------------------------------------------------------------
+my $command = "$hbDir/hb-virtdebug.pl --trace @ARGV";
+system($command);
+
+
+#==============================================================================
+# SUBROUTINES
+#==============================================================================
+
+#------------------------------------------------------------------------------
+# Print command line help
+#------------------------------------------------------------------------------
+sub printUsage()
+{
+    print ("\nUsage: hb-trace [--help] | [<compName1> <compName2> ...]\n");
+    print ("                [--in <path to .syms file, hbotStringFile & hb-virtdebug.pl>]\n");
+    print ("                [--out <path to save output data>]\n");
+    print ("                [--test] [-k#] [-n#] [-s#] [-p#] [-c#]\n\n");
+    print ("  This program retrieves the component trace buffer(s) from L3.\n");
+    print ("  User should copy the relevant .syms file, hbotStringFile & hb-virtdebug.pl\n");
+    print ("  to the current directory or set the env variable HBDIR to the path of ");
+    print ("the files.\n\n");
+    print ("  User should also set the env variable PATH to include the path to the ");
+    print ("fsp-trace program.\n\n");
+    print ("  --help            Prints usage information.\n");
+    print ("  --in              Overrides the automatically detected .syms file,\n");
+    print ("                    hbotStringFile & hb-virtdebug.pl in HBDIR or the\n");
+    print ("                    current directory.\n");
+    print ("                    This program will search for the files in the ");
+    print ("following order:\n");
+    print ("                        1.  from the path specified by the user\n");
+    print ("                        2.  from HBDIR if it is defined\n");
+    print ("                        3.  from the current directory\n");
+    print ("  --out             Directory where the output data will be saved.\n");
+    print ("                    Default path is the current directory.\n");
+    print ("  --test            Use the hbicore_test.syms file vs the hbicore.syms file\n");
+    print ("  -k#               Specify which cage to act on (default = 0).\n");
+    print ("  -n#               Specify which node to act on (default = 0).\n");
+    print ("  -s#               Specify which slot to act on (default = 0).\n");
+    print ("  -p#               Specify which chip position to act on (default = 0).\n");
+    print ("  -c#               Specify which core/chipUnit to act on (default = 3).\n");
+    print ("\n  NOTE:  This program will not work if user has not stopped instructions\n");
+    print ("         prior to running this program.\n");
+}
+
