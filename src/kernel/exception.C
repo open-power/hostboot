@@ -213,3 +213,15 @@ void kernel_execute_softpatch()
         }
     }
 }
+
+extern "C"
+void kernel_execute_machine_check()
+{
+    task_t* t = TaskManager::getCurrentTask();
+    printk("Machine check in %d on %ld:\n"
+           "\tSRR0 = %lx, SRR1 = %lx\n"
+           "\tDSISR = %lx, DAR = %lx\n",
+           t->tid, getPIR(),
+           getSRR0(), getSRR0(), getDSISR(), getDAR());
+    kassert(false);
+}

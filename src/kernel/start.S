@@ -140,7 +140,13 @@ hbi_pre_phyp_breakpoint:
     attn;   /* TODO: Add actual breakpoint attention. */
     b _start
 
-UNIMPL_INTERRUPT(machine_check, 0x200)
+    /* TODO: Eventually we likely need specific code for machine check
+     *       interrupts because they can happen at any time, including
+     *       while we're already in an interrupt path.  (Don't want to
+     *       save kernel state over top of a user-space task structure).
+     */
+STD_INTERRUPT(machine_check, 0x200)
+
 STD_INTERRUPT(data_storage, 0x300)
 STD_INTERRUPT(data_segment, 0x380)
 STD_INTERRUPT(inst_storage, 0x400)
