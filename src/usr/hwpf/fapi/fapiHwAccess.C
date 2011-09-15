@@ -41,9 +41,6 @@
 
 #include <fapi.H>
 #include <fapiPlatHwAccess.H>
-#include <errl/errlentry.H>
-#include <targeting/targetservice.H>
-#include <devicefw/userif.H>
 
 extern "C"
 {
