@@ -26,9 +26,49 @@
  */
 #include <sys/vfs.h>
 #include <kernel/console.H> 
+#include <limits.h>
+#include <sys/mm.h>
 
 VfsSystemModule VFS_MODULES[VFS_MODULE_MAX];
 uint64_t VFS_LAST_ADDRESS;
+
+
+int vfs_module_perms(VfsSystemModule* module)
+{
+    int rc = 0;
+    uint64_t memsize = (module->page_size*PAGESIZE);
+    uint64_t textsize= (uint64_t)module->data - (uint64_t)module->text;
+
+    uint64_t datasize = memsize - textsize;
+
+    printkd("%s text=%lx:%lx data=%lx:%lx\n",
+            module->module,
+            module->text,
+            textsize,
+            module->data,
+            datasize);
+
+    if(textsize != 0)
+    {
+        // Mark text pages(s) as executable
+        rc |= mm_set_permission(module->text,
+                                textsize,
+                                EXECUTABLE);
+
+        // Mark data pages(s) as normal
+        rc |= mm_set_permission(module->data,
+                                datasize,
+                                WRITABLE);
+    }
+    else // ro data module
+    {
+        // Mark data pages(s) as normal
+        rc |= mm_set_permission(module->data,
+                                datasize,
+                                READ_ONLY);
+    }
+    return rc;
+}
 
 // ----------------------------------------------------------------------------
 
@@ -39,12 +79,21 @@ void vfs_module_init()
     VfsSystemModule* module = &VFS_MODULES[0];
     while ('\0' != module->module[0])
     {
+        int rc = vfs_module_perms(module);
+        if(rc) printk("Perms set failed on %s, rc = %d\n",
+                      module->module,rc);
+        ++module;
+    }
+
+    module = &VFS_MODULES[0];
+    while ('\0' != module->module[0])
+    {
 	printk("\tIniting module %s...", module->module);
 	if (NULL != module->init)
 	    (module->init)(NULL);
 	printk("done.\n");
 
-	module++;
+	++module;
     }
 
     printk("Modules initialized.\n");

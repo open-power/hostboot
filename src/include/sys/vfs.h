@@ -110,6 +110,14 @@ VfsSystemModule * vfs_find_module(VfsSystemModule * i_table, const char * i_name
  * @retval -ENOEXEC if there is no start()
  */
 tid_t vfs_exec(VfsSystemModule * i_module, void* i_param);
+
+/**
+ * Change permissions on the virtual pages associated with the module
+ * @param[in] module  The vfsSystemModule
+ * @return rc from mm_set_permission()
+ */
+int vfs_module_perms(VfsSystemModule* module);
+
 #endif
 
 #endif

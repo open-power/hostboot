@@ -131,6 +131,8 @@ errlHndl_t VfsRp::_init()
             );
         if(rc == 0)
         {
+            // TODO set permissions here or are defaults OK?
+
             // Start msg_handler
             //  NOTE: This would be a weak consistancy issues if
             //  task_create were not a system call.
@@ -138,6 +140,16 @@ errlHndl_t VfsRp::_init()
         }
         else
         {
+            /*@ errorlog tag
+             * @errortype       ERRL_SEV_CRITICAL_SYS_TERM
+             * @moduleid        VFS_MODULE_ID
+             * @reasoncode      VFS_ALLOC_VMEM_FAILED
+             * @userdata1       returncode from mm_alloc_block()
+             * @userdata2       0
+             *
+             * @defdesc         Could not allocate virtual memory.
+             *
+             */
             err = new ERRORLOG::ErrlEntry
                 (
                  ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,   //  severity
@@ -234,6 +246,7 @@ void VfsRp::msgHandler()
 void VfsRp::_load_unload(msg_t * i_msg)
 {
     errlHndl_t err = NULL;
+
     // Find VfsSystemModule
     //  The TOC for the extended image sits at the start of the image and is
     //  not location dependant, so just use the one pointed to by iv_pnor_vaddr
@@ -241,20 +254,23 @@ void VfsRp::_load_unload(msg_t * i_msg)
     VfsSystemModule * module =
         vfs_find_module
         (
-        //(VfsSystemModule *)VFS_EXTENDED_MODULE_VADDR,
         (VfsSystemModule *)(iv_pnor_vaddr + VFS_EXTENDED_MODULE_TABLE_OFFSET),
          (const char *) i_msg->data[0]
         );
 
     if(module)
     {
-        // TODO mark text page(s) as ro/executable
-        // TODO mark data page(s) as rw
+        int rc = 0;
         if(i_msg->type == VFS_MSG_LOAD)
         {
-            if(module->init)
+            rc = vfs_module_perms(module);
+
+            if(!rc)
             {
-                (module->init)(NULL);
+                if(module->init)
+                {
+                    (module->init)(NULL);
+                }
             }
         }
         else // unload
@@ -264,16 +280,69 @@ void VfsRp::_load_unload(msg_t * i_msg)
                 (module->fini)(NULL);
             }
 
-            // TODO mark pages as no access
+            // TODO
+            //rc = mm_set_permission(module->text,
+            //                       module->page_size*PAGESIZE,
+            //                       READ_ONLY); // TODO NO_ACCESS
+            rc = mm_remove_pages(RELEASE,
+                                 module->text,
+                                 module->page_size*PAGESIZE);
+        }
+        if(rc)
+        {
+            /*@ errorlog tag
+             * @errortype       ERRL_SEV_CRITICAL_SYS_TERM
+             * @moduleid        VFS_MODULE_ID
+             * @reasoncode      VFS_PERMS_VMEM_FAILED
+             * @userdata1       returncode from mm_set_permission()
+             * @userdata2       0
+             *
+             * @defdesc         Could not set permissions on virtual memory.
+             *
+             */
+            err = new ERRORLOG::ErrlEntry
+                (
+                 ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,   //  severity
+                 VFS::VFS_MODULE_ID,                     //  moduleid
+                 VFS_PERMS_VMEM_FAILED,                  //  reason Code
+                 rc,                                     //  user1 = rc
+                 0                                       //  user2 = 0
+                );
         }
     }
     else
     {
-        // TODO  error log? for now it's probably in the base
-        //       and is aready loaded and initialized.
-        TRACFBIN(g_trac_vfs, ERR_MRK"load Module not found: ",
-                 (const char *) i_msg->data[0],
-                 strlen((const char *) i_msg->data[0]) );
+        // Module does not exist in extended image.
+        // If it exists then it is in the base image and it's already
+        // initialized, however, we still should not be here, so put out a 
+        // trace msg; 
+        // If it does not exist anywhere then also create an error log
+        TRACFCOMP(g_trac_vfs, ERR_MRK"load Module not found: %s",
+                 (const char *) i_msg->data[0]);
+
+        uint64_t * name = (uint64_t*)i_msg->data[0];
+
+        if(!module_exists((const char *)i_msg->data[0]))
+        {
+            /*@ errorlog tag
+             * @errortype       ERRL_SEV_CRITICAL_SYS_TERM
+             * @moduleid        VFS_MODULE_ID
+             * @reasoncode      VFS_MODULE_DOES_NOT_EXIST
+             * @userdata1       first 8 bytes of module name
+             * @userdata2       next 8 bytes of module name
+             *
+             * @defdesc         Requested Module does not exist.
+             *
+             */
+            err = new ERRORLOG::ErrlEntry
+                (
+                 ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,   //  severity
+                 VFS::VFS_MODULE_ID,                     //  moduleid
+                 VFS_MODULE_DOES_NOT_EXIST,              //  reason Code
+                 name[0],
+                 name[1]
+                );
+        }
     }
     i_msg->data[0] = (uint64_t) err;
     msg_respond(iv_msgQ, i_msg);
@@ -363,6 +432,16 @@ errlHndl_t VFS::module_load_unload(const char * i_module, VfsMessages i_msgtype)
     }
     else
     {
+        /*@ errorlog tag
+         * @errortype       ERRL_SEV_CRITICAL_SYS_TERM
+         * @moduleid        VFS_MODULE_ID
+         * @reasoncode      VFS_LOAD_FAILED
+         * @userdata1       returncode from msg_sendrecv()
+         * @userdata2       VfsMessages type [LOAD | UNLOAD]
+         *
+         * @defdesc         Could not load/unload module.
+         *
+         */
         err = new ERRORLOG::ErrlEntry
             (
              ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,   //  severity

@@ -38,6 +38,8 @@ namespace VFS
         VFS_LOAD_FAILED     =       VFS_COMP_ID | 0x01,
         VFS_UNLOAD_FAILED   =       VFS_COMP_ID | 0x02,
         VFS_ALLOC_VMEM_FAILED =     VFS_COMP_ID | 0x03,
+        VFS_PERMS_VMEM_FAILED =     VFS_COMP_ID | 0x04,
+        VFS_MODULE_DOES_NOT_EXIST = VFS_COMP_ID | 0x05,
     };
 };
 
