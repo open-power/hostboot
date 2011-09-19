@@ -142,11 +142,53 @@ void BaseSegment::updateRefCount( uint64_t i_vaddr,
 }
 
 /**
+ *  STATIC
  * Sets the Page Permissions for a given page via virtual address
  */
-int BaseSegment::mmSetPermission(void* i_va, uint64_t i_size,PAGE_PERMISSIONS i_access_type)
+int BaseSegment::mmSetPermission(void* i_va, uint64_t i_size, uint64_t i_access_type)
 {
-  return 0;
+  return Singleton<BaseSegment>::instance()._mmSetPermission(i_va,i_size,i_access_type);
+}
+
+
+/**
+ * Sets the Page Permissions for a given page via virtual address
+ */
+int BaseSegment::_mmSetPermission(void* i_va, uint64_t i_size, uint64_t i_access_type)
+{
+  int l_rc = 0;
+  Block *l_block = iv_block;
+  uint64_t l_va = reinterpret_cast<uint64_t>(i_va);
+
+
+  do
+  {
+    // If the va is not part of this block
+    if (!(l_block->isContained(l_va)))
+    {
+      // Check to see if there is a next block
+      if (l_block->iv_nextBlock)
+      {
+	// set local block to the next block 
+	l_block = l_block->iv_nextBlock;
+      }
+      else
+      {
+	// address passed in does not fall into a block
+	return -EINVAL;
+      }
+    }
+    // The virtual address falls within this block
+    else
+    {
+        // Set the permission on the the current block.
+       return(l_block->mmSetPermission(l_va, i_size, i_access_type));
+
+    }
+  } while (l_block->iv_nextBlock);
+
+  return l_rc;
+
 }
 
 void BaseSegment::castOutPages(uint64_t i_type)

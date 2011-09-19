@@ -32,6 +32,7 @@
 #include <kernel/blockmsghdlr.H>
 #include <kernel/msghandler.H>
 #include <kernel/ptmgr.H>
+#include <sys/mm.h>
 
 class ShadowPTE;
 class Segment;
@@ -231,6 +232,21 @@ class Block
          *        from page table.
          */
         void releaseAllPages();
+
+        /**
+         * @brief Sets the page permissions for a given virtual addr
+         *          and a size of memory needing updated permissions
+         * @param i_va[in] - virtual address of the beginning of the
+         *           pages that need updating.
+         * @param i_size[in] - range of memory that needs updating 
+         *          if i_size equals 0 then we only need to update an
+         *          individual page.
+         * @param i_access_type[in] - type of permission to set using
+         *             PAGE_PERMISSION enum values OR'd together
+         * @return int - 0 for successful block allocation,
+         *             non-zero otherwise
+         */
+        int mmSetPermission(uint64_t i_va, uint64_t i_size, uint64_t i_access_type);
 
     private:
             /** Base address of the block */

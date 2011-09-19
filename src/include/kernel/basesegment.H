@@ -105,7 +105,7 @@ class BaseSegment : public Segment
          */
         static int mmSetPermission(void* i_va,
                                       uint64_t i_size,
-                                      PAGE_PERMISSIONS i_access_type);
+                                      uint64_t i_access_type);
          /**
           * @breif Cast out older physical memory pages
           * @param[in] castout Constraint
@@ -144,7 +144,7 @@ class BaseSegment : public Segment
          */
          int _mmSetPermission(void* i_va,
                                  uint64_t i_size,
-                                 PAGE_PERMISSIONS i_access_type);
+                                 uint64_t i_access_type);
 
 
 };

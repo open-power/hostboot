@@ -33,6 +33,7 @@
 #include <kernel/ptmgr.H>
 #include <kernel/pagemgr.H>
 #include <kernel/console.H>
+#include <util/align.H>
 
 Block::~Block()
 {
@@ -171,16 +172,19 @@ void Block::setPhysicalPage(uint64_t i_vAddr, uint64_t i_pAddr,
     switch(i_access)
     {
         case VmmManager::READ_O_ACCESS:
+            pte->setReadable(true);
             pte->setExecutable(false);
             pte->setWritable(false);
             break;
 
         case VmmManager::NORMAL_ACCESS:
+            pte->setReadable(true);
             pte->setExecutable(false);
             pte->setWritable(true);
             break;
 
         case VmmManager::RO_EXE_ACCESS:
+            pte->setReadable(true);
             pte->setExecutable(true);
             pte->setWritable(false);
             break;
@@ -311,6 +315,7 @@ void Block::updateRefCount( uint64_t i_vaddr,
 
 }
 
+
 bool Block::evictPage(ShadowPTE* i_pte)
 {
     ShadowPTE* pte = i_pte;
@@ -399,4 +404,109 @@ size_t Block::castOutPages(uint64_t i_type)
     }
 
     return cast_out;
+}
+
+
+int Block::mmSetPermission(uint64_t i_va, uint64_t i_size,uint64_t i_access_type)
+{
+ int l_rc = 0;
+
+ // Need to align the page address and the size on a page boundary. before I get the page.
+ uint64_t l_aligned_va = ALIGN_PAGE_DOWN(i_va);
+ uint64_t l_aligned_size = ALIGN_PAGE(i_size);
+//printk("aligned VA = 0x%.lX aligned size = %ld\n", l_aligned_va, l_aligned_size);
+
+ // if size is zero..we are only updating 1 page.. so need to increment the size to 1 page
+ if (i_size == 0)
+ {
+   l_aligned_size+=PAGESIZE;
+ }
+
+  // loop through all the pages asked for based on passed aligned
+  // Virtual address and passed in aligned size.
+ for(uint64_t cur_page_addr = l_aligned_va;
+     cur_page_addr < (l_aligned_va + l_aligned_size);
+     cur_page_addr += PAGESIZE)
+ {
+//printk("aligned VA = 0x%.lX aligned size = %ld\n", l_aligned_va, l_aligned_size);
+   ShadowPTE* spte = getPTE(cur_page_addr);
+
+   // if the page present need to delete the hardware
+   // page table entry before we set permissions.
+   if (spte->isPresent())
+   {
+     // delete the hardware page table entry
+      PageTableManager::delEntry(cur_page_addr);
+   }
+
+   // If read_only
+   if ( i_access_type & READ_ONLY)
+   {
+     spte->setReadable(true);
+     spte->setExecutable(false);
+     spte->setWritable(false);
+
+     // If the writable or executable access bits
+     // are set.. invalid combination.. return error
+     if ((i_access_type & WRITABLE) || (i_access_type & EXECUTABLE))
+     { 
+       return -EINVAL;
+     }
+   }
+   // if writable
+   else if ( i_access_type & WRITABLE)
+   {
+     spte->setReadable(true);
+     spte->setWritable(true);
+     spte->setExecutable(false);
+
+     if (i_access_type & EXECUTABLE)
+     {
+       // error condition.. not valid to be
+       // writable and executable
+       return -EINVAL;
+     }
+   }
+   // if executable
+   else if ( i_access_type & EXECUTABLE)
+   {
+     spte->setReadable(true);
+     spte->setExecutable(true);
+     spte->setWritable(false);
+   }
+
+   // if write_tracked
+   if ( i_access_type & WRITE_TRACKED)
+   {
+     spte->setWriteTracked(true);
+   }
+   else
+   {
+     spte->setWriteTracked(false);
+   }
+
+   // if Allocate from zero
+   if ( i_access_type & ALLOCATE_FROM_ZERO)
+   {
+     spte->setAllocateFromZero(true);
+   }
+   // not allocated from zero
+   else
+   {
+     spte->setAllocateFromZero(false);
+   }
+
+   // if no access
+   if ( i_access_type & NO_ACCESS)
+   {
+     spte->setReadable(false);
+     spte->setExecutable(false);
+     spte->setWritable(false);
+     spte->setAllocateFromZero(false);
+     spte->setWriteTracked(false);
+   }
+
+ }
+ return l_rc;
+
 }

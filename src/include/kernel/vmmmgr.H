@@ -147,7 +147,7 @@ class VmmManager
          * boundary, along with the given size will be 'rounded' up to the
          * nearest divisible page size.
          */
-        static int mmSetPermission(void* i_va,uint64_t i_size, PAGE_PERMISSIONS i_access_type);
+        static int mmSetPermission(void* i_va,uint64_t i_size, uint64_t i_access_type);
 
     protected:
         VmmManager();
@@ -172,7 +172,7 @@ class VmmManager
         uint64_t _findPhysicalAddress(uint64_t i_vaddr);
 
         /* See mmSetPermission */
-        int _mmSetPermission(void* i_va,uint64_t i_size, PAGE_PERMISSIONS i_access_type);
+        int _mmSetPermission(void* i_va,uint64_t i_size, uint64_t i_access_type);
 
         /** See castOutPages */
         void _castOutPages(castout_t i_ct);

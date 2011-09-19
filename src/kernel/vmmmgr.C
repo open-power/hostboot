@@ -176,13 +176,13 @@ int VmmManager::mmRemovePages(PAGE_REMOVAL_OPS i_op, void* i_vaddr,
 }
 
 
-int VmmManager::mmSetPermission(void* i_va, uint64_t i_size, PAGE_PERMISSIONS i_access_type)
+int VmmManager::mmSetPermission(void* i_va, uint64_t i_size, uint64_t i_access_type)
 {
     return Singleton<VmmManager>::instance()._mmSetPermission(i_va, i_size, i_access_type);
 }
 
 
-int VmmManager::_mmSetPermission(void* i_va, uint64_t i_size, PAGE_PERMISSIONS i_access_type)
+int VmmManager::_mmSetPermission(void* i_va, uint64_t i_size, uint64_t i_access_type)
 {
     int rc = 1;
 

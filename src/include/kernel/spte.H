@@ -53,7 +53,8 @@ class ShadowPTE
                 uint32_t page:20;
                     /** Page is present (is PN valid?). */
                 uint32_t present:1;
-
+                    /** May the page be read        */
+		uint32_t readable:1;
                     /** May the page be written to. */
                 uint32_t writable:1;
                     /** May code be executed off page. */
@@ -65,12 +66,10 @@ class ShadowPTE
                 uint32_t dirty:1;
                     /** Allocate from a zero'd page. */
                 uint32_t allocate_from_zero:1;
-
                     /** LRU value - lower means it was accessed more recently. */
                 uint32_t last_access:3;
-
                     /** Reserved for future use. */
-                uint32_t reserved:3;
+                uint32_t reserved:2;
             } PACKED;
         };
 
@@ -91,7 +90,10 @@ class ShadowPTE
         bool isPresent() const { return present; };
             /** Set present bit. */
         void setPresent(bool i_present) { present = i_present; };
-
+            /** Get readable bit. */
+        bool isReadable() const { return readable; };
+            /** Set readable bit. */
+        void setReadable(bool i_read) { readable = i_read; };
             /** Get writable bit. */
         bool isWritable() const { return writable; };
             /** Set writable bit. */
