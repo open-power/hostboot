@@ -26,6 +26,7 @@
 #include <stdint.h>
 #include <builtins.h>
 #include <errl/errltypes.H>
+#include <sys/msg.h>
 
 struct msg_t;
 
@@ -58,6 +59,14 @@ namespace VFS
              * @return [true|false]
              */
             bool module_exists(const char * i_name) const;
+
+            /**
+             * get VfsSystemModule information
+             * @param[in] i_name module name
+             * @return pointer to VfsSystemModule entree
+             *         or NULL if not found
+             */
+            const VfsSystemModule * get_vfs_info(const char * i_name) const;
 
         protected:
             /**

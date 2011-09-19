@@ -28,7 +28,6 @@
 #include <limits.h>
 #include <string.h>
 #include <errno.h>
-#include <sys/msg.h>
 #include <sys/vfs.h>
 #include <vfs/vfs.H>
 #include <vfs/vfs_reasoncodes.H>
@@ -261,6 +260,7 @@ void VfsRp::_load_unload(msg_t * i_msg)
     if(module)
     {
         int rc = 0;
+
         if(i_msg->type == VFS_MSG_LOAD)
         {
             rc = vfs_module_perms(module);
@@ -280,13 +280,13 @@ void VfsRp::_load_unload(msg_t * i_msg)
                 (module->fini)(NULL);
             }
 
-            // TODO
-            //rc = mm_set_permission(module->text,
-            //                       module->page_size*PAGESIZE,
-            //                       READ_ONLY); // TODO NO_ACCESS
+            rc = mm_set_permission(module->text,
+                                   module->page_count*PAGESIZE,
+                                   NO_ACCESS);
+
             rc = mm_remove_pages(RELEASE,
                                  module->text,
-                                 module->page_size*PAGESIZE);
+                                 module->page_count*PAGESIZE);
         }
         if(rc)
         {
@@ -390,6 +390,15 @@ bool VfsRp::module_exists(const char * i_name) const
 
 // ----------------------------------------------------------------------------
 
+const VfsSystemModule * VfsRp::get_vfs_info(const char * i_name) const
+{
+    return vfs_find_module((VfsSystemModule *)(iv_pnor_vaddr +
+                                             VFS_EXTENDED_MODULE_TABLE_OFFSET),
+                           i_name);
+}
+
+// ----------------------------------------------------------------------------
+
 void VfsRp::get_test_modules(std::vector<const char *> & o_list) const
 {
     o_list.clear();
@@ -468,5 +477,44 @@ void VFS::find_test_modules(std::vector<const char *> & o_list)
 bool VFS::module_exists(const char * i_name)
 {
     return Singleton<VfsRp>::instance().module_exists(i_name);
+}
+
+// -----------------------------------------------------------------------------
+
+errlHndl_t VFS::module_address(const char * i_name, const char *& o_address, size_t & o_size)
+{
+    errlHndl_t err = NULL;
+    o_address = NULL;
+    o_size = 0;
+
+    const VfsSystemModule * vfs = Singleton<VfsRp>::instance().get_vfs_info(i_name);
+    if(!vfs || (vfs->text != vfs->data))
+    {
+        // module not found or is not a data module
+        /*@ errorlog tag
+         * @errortype       ERRL_SEV_INFORMATIONAL
+         * @moduleid        VFS_MODULE_ID
+         * @reasoncode      VFS_INVALID_DATA_MODULE
+         * @userdata1       0
+         * @userdata2       0
+         *
+         * @defdesc         Module is not a data module
+         *
+         */
+        err = new ERRORLOG::ErrlEntry
+            (
+             ERRORLOG::ERRL_SEV_INFORMATIONAL,       //  severity
+             VFS::VFS_MODULE_ID,                     //  moduleid
+             VFS::VFS_INVALID_DATA_MODULE,           //  reason Code
+             0,
+             0
+            );
+    }
+    else
+    {
+        o_address = (const char *)vfs->data;
+        o_size = vfs->page_count * PAGESIZE;
+    }
+    return err;
 }
 

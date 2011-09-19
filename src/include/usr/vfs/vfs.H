@@ -25,6 +25,7 @@
 
 #include <errl/errlentry.H>
 #include <sys/vfs.h>
+#include <sys/sync.h>
 #include <vector>
 
 namespace VFS
@@ -71,6 +72,16 @@ namespace VFS
      * @return [true|false]
      */
     bool module_exists(const char * i_name);
+
+    /**
+     * Get the start memory address of a data module
+     * @param[in] module name
+     * @param[out] o_address  memory address
+     * @param[out] o_size module size
+     * @retun error log on error
+     * @pre load_module() must have been called
+     */
+    errlHndl_t module_address(const char * i_name, const char *& o_address, size_t & o_size);
 
 };
 

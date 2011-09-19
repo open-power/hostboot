@@ -30,6 +30,7 @@
 #define EAGAIN          11      // Try again
 #define	EFAULT          14      // Bad address
 #define EINVAL          22      // Invalid argument
+#define ENFILE          23      // Too many open files in system
 
 #define EWOULDBLOCK     EAGAIN  // operation would block
 

@@ -1,7 +1,7 @@
 #  IBM_PROLOG_BEGIN_TAG
 #  This is an automatically generated prolog.
 #
-#  $Source: src/usr/vfs/makefile $
+#  $Source: src/usr/vfs/test/makefile $
 #
 #  IBM CONFIDENTIAL
 #
@@ -20,11 +20,18 @@
 #  Origin: 30
 #
 #  IBM_PROLOG_END
-ROOTPATH = ../../..
-MODULE = vfs
+ROOTPATH = ../../../..
 
-OBJS = vfsrp.o
+MODULE = testvfs
 
-SUBDIRS = test.d
+TESTS = *.H
+
+${ROOTPATH}/img/testdata: 
+	echo "This is a test image" > ${ROOTPATH}/img/testdata
+
+code_pass: ${ROOTPATH}/img/testdata
+
+EXTRA_PARTS = ${ROOTPATH}/img/testdata
 
 include ${ROOTPATH}/config.mk
+

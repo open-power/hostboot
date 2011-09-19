@@ -40,6 +40,7 @@ namespace VFS
         VFS_ALLOC_VMEM_FAILED =     VFS_COMP_ID | 0x03,
         VFS_PERMS_VMEM_FAILED =     VFS_COMP_ID | 0x04,
         VFS_MODULE_DOES_NOT_EXIST = VFS_COMP_ID | 0x05,
+        VFS_INVALID_DATA_MODULE   = VFS_COMP_ID | 0x06,
     };
 };
 

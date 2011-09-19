@@ -8,3 +8,4 @@ customrc
 *.log
 my.sandboxrc
 cxxtest_sb/
+testdata

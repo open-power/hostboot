@@ -81,7 +81,7 @@ struct VfsSystemModule
     void  (*fini)(void*);                       //!< ptr to fini()
     uint64_t * text;                            //!< ptr to text (code) section
     uint64_t * data;                            //!< ptr to data section
-    uint64_t page_size;                         //!< no. of memory pages used
+    uint64_t page_count;                        //!< no. of memory pages used
 };
 
 extern VfsSystemModule VFS_MODULES[VFS_MODULE_MAX];

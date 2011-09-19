@@ -54,19 +54,21 @@ RUNTIME_MODULES =
 TESTCASE_MODULES = cxxtest testerrl testdevicefw testsyslib \
                    testscom testxscom testtargeting testinitservice testkernel \
                    testhwpf testecmddatabuffer initsvctasktest2 testcxxtest \
-                   testpnor testi2c testfsi
+                   testpnor testi2c testfsi testvfs
 
 RELOCATABLE_IMAGE_LDFLAGS = -pie --export-dynamic
 
 hbicore_OBJECTS = ${BASE_OBJECTS} ${DIRECT_BOOT_OBJECTS} ${STUB_TESTCASE_OBJECT}
 hbicore_MODULES = ${BASE_MODULES} ${DIRECT_BOOT_MODULES}
 hbicore_EXTENDED_MODULES = ${EXTENDED_MODULES}
+hbicore_DATA_MODULES = 
 
 hbicore_LIDNUMBER = 80f00100
 
 hbicore_test_OBJECTS = ${BASE_OBJECTS} ${DIRECT_BOOT_OBJECTS}
 hbicore_test_MODULES = ${hbicore_MODULES}
 hbicore_test_EXTENDED_MODULES = ${hbicore_EXTENDED_MODULES} ${TESTCASE_MODULES}
+hbicore_test_DATA_MODULES = ${hbicore_DATA_MODULES} testdata
 
 #halruntime_OBJECTS = ${BASE_OBJECTS} ${RUNTIME_OBJECTS}
 #halruntime_MODULES = ${BASE_MODULES} ${EXTENDED_MODULES} ${RUNTIME_MODULES}

@@ -36,7 +36,7 @@ uint64_t VFS_LAST_ADDRESS;
 int vfs_module_perms(VfsSystemModule* module)
 {
     int rc = 0;
-    uint64_t memsize = (module->page_size*PAGESIZE);
+    uint64_t memsize = (module->page_count*PAGESIZE);
     uint64_t textsize= (uint64_t)module->data - (uint64_t)module->text;
 
     uint64_t datasize = memsize - textsize;
