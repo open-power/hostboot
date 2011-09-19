@@ -21,7 +21,7 @@
 //
 //  IBM_PROLOG_END
 #ifndef __KERNEL_TYPES_H
-#define __KNERLE_TYPES_H
+#define __KERNEL_TYPES_H
 
 #include <stdint.h>
 
