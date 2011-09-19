@@ -52,7 +52,7 @@ enum PAGE_PERMISSIONS
   WRITE_TRACKED = 0x00000008,
   ALLOCATE_FROM_ZERO = 0x00000010,
   NO_ALLOCATE_FROM_ZERO = 0x00000020,
-  NO_ACCESS = 0x00000040, 
+  NO_ACCESS = 0x00000040,
 };
 
 
@@ -88,7 +88,7 @@ int mm_remove_pages(PAGE_REMOVAL_OPS i_op, void* i_vaddr, uint64_t i_size);
  *
  *  @return int - 0 for successful update of permission, non-zero otherwise
  */
-int mm_set_permission(void* va, uint64_t size, PAGE_PERMISSIONS access_type);
+int mm_set_permission(void* va, uint64_t size, uint64_t access_type);
 
 #ifdef __cplusplus
 }

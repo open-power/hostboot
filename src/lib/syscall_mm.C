@@ -46,7 +46,7 @@ int mm_remove_pages(PAGE_REMOVAL_OPS i_op, void* i_vaddr, uint64_t i_size)
 
 /*
  * Call to flush out the instruction cache
- * From the PowerPC ISA book II, section 1.8 
+ * From the PowerPC ISA book II, section 1.8
  *     Instruction Storage
  */
 void mm_icache_invalidate(void * i_addr, size_t i_cpu_word_count)
@@ -72,12 +72,12 @@ void mm_icache_invalidate(void * i_addr, size_t i_cpu_word_count)
 
     isync();
 }
-        
+
 
 /**
- * System call update permissions on a page for a given virtual address 
+ * System call update permissions on a page for a given virtual address
  */
-int mm_set_permission(void* va, uint64_t size, PAGE_PERMISSIONS access_type)
+int mm_set_permission(void* va, uint64_t size, uint64_t access_type)
 {
     return (int64_t)_syscall3(MM_SET_PERMISSION, va, (void*)size,  (void*)access_type);
 }
