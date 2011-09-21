@@ -1,3 +1,25 @@
+//  IBM_PROLOG_BEGIN_TAG
+//  This is an automatically generated prolog.
+//
+//  $Source: src/build/linker/linker.C $
+//
+//  IBM CONFIDENTIAL
+//
+//  COPYRIGHT International Business Machines Corp. 2011
+//
+//  p1
+//
+//  Object Code Only (OCO) source materials
+//  Licensed Internal Code Source Materials
+//  IBM HostBoot Licensed Internal Code
+//
+//  The source code for this program is not published or other-
+//  wise divested of its trade secrets, irrespective of what has
+//  been deposited with the U.S. Copyright Office.
+//
+//  Origin: 30
+//
+//  IBM_PROLOG_END
 /**
  * @file linker.C   Linker to generate the host boot binary images
  */
@@ -180,6 +202,7 @@ class ModuleTable
 {
     private:
         FILE * iv_output;
+        string iv_path;
         string iv_vfs_mod_table_name;
 
     public:
@@ -187,14 +210,24 @@ class ModuleTable
         /**
          * CTOR
          */
-        ModuleTable(FILE * i_binfile, const string & i_mod_table_name)
-            : iv_output(i_binfile), iv_vfs_mod_table_name(i_mod_table_name) {}
+        ModuleTable(FILE * i_binfile,
+                    const string & i_path,
+                    const string & i_mod_table_name)
+            : 
+                iv_output(i_binfile),
+                iv_path(i_path),
+                iv_vfs_mod_table_name(i_mod_table_name) {}
 
         /**
          * Write module table to file
          * @param[in] list of objects
          */
         void write_table(vector<Object> & i_objects);
+
+        /**
+         * Clean up after an error
+         */
+        void handle_error();
 };
 
 /**
@@ -283,7 +316,7 @@ int main(int argc, char** argv)
                         page_align(112*VFS_EXTENDED_MODULE_MAX);
                     fseek(output, table_size, SEEK_SET);
                 }
-                ModuleTable module_table(output,table_symbol);
+                ModuleTable module_table(output,fname,table_symbol);
                 module_tables.push_back(module_table);
             }
             else if (0 == fname.compare(0,11,"--extended="))
@@ -382,6 +415,12 @@ int main(int argc, char** argv)
     {
         cerr << "exception caught: " << e.what() << endl;
         rc = -1;
+        // remove any partial output file(s)
+        for(vector<ModuleTable>::iterator i = module_tables.begin();
+            i != module_tables.end(); ++i)
+        {
+            i->handle_error();
+        }
     }
 
     return rc;
@@ -970,3 +1009,12 @@ void ModuleTable::write_table(vector<Object> & i_objects)
     }
 }
 
+void ModuleTable::handle_error()
+{
+    if(iv_output)
+    {
+        fclose(iv_output);
+        cout << "Removing " << iv_path << endl;
+        remove(iv_path.c_str());
+    }
+}
