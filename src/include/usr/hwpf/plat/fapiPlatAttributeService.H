@@ -104,11 +104,11 @@ namespace platAttrSvc
     #define FAPI_PLAT_ATTR_SVC_GETMACRO_DIRECT(ID, PTARGET, VAL) \
         ( ((PTARGET) ? \
             static_cast<TARGETING::Target*>( \
-                static_cast<fapi::Target*>(PTARGET)->get()) \
+                static_cast<const fapi::Target*>(PTARGET)->get()) \
         : fapi::platAttrSvc::getSystemTarget())->tryGetAttr< \
             FAPI_PLAT_ATTR_SVC_MACRO_DIRECT_FAPI_##ID>(VAL)) \
-                ? FAPI_RC_SUCCESS : fapi::platAttrSvc::createAttrAccessError( \
-                    FAPI_PLAT_ATTR_SVC_MACRO_DIRECT_FAPI_##ID,ID,PTARGET)
+                ? fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::createAttrAccessError( \
+                    FAPI_PLAT_ATTR_SVC_MACRO_DIRECT_FAPI_##ID,fapi::ID,PTARGET)
     /**
      *  @brief Macro which directly maps a FAPI request to set a platform
      *      attribute to the equivalent host boot request 
@@ -116,11 +116,11 @@ namespace platAttrSvc
     #define FAPI_PLAT_ATTR_SVC_SETMACRO_DIRECT(ID, PTARGET, VAL) \
         ( ((PTARGET) ? \
             static_cast<TARGETING::Target*>( \
-                static_cast<fapi::Target*>(PTARGET)->get()) \
+                static_cast<const fapi::Target*>(PTARGET)->get()) \
         : fapi::platAttrSvc::getSystemTarget())->trySetAttr< \
              FAPI_PLAT_ATTR_SVC_MACRO_DIRECT_FAPI_##ID>(VAL)) \
-                ? FAPI_RC_SUCCESS : fapi::platAttrSvc::createAttrAccessError( \
-                    FAPI_PLAT_ATTR_SVC_MACRO_DIRECT_FAPI_##ID,ID,PTARGET)
+                ? fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::createAttrAccessError( \
+                    FAPI_PLAT_ATTR_SVC_MACRO_DIRECT_FAPI_##ID,fapi::ID,PTARGET)
 }
 
 }

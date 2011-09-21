@@ -93,7 +93,18 @@ void RangeFilter<IteratorType>::advanceIfNoMatch()
         advance();
     }
 }
- 
+
+//******************************************************************************
+// RangeFilter<IteratorType>::operator fake_bool
+//******************************************************************************
+
+template<typename IteratorType>
+RangeFilter<IteratorType>::operator fake_bool() const
+{   
+    return (iv_current != iv_end) 
+        ? &RangeFilter::notComparable : NULL;
+}
+
 //******************************************************************************
 // Explicit template class member function instantiations
 //******************************************************************************
@@ -103,6 +114,9 @@ template void RangeFilter<ConstTargetIterator>::advance();
 
 template void RangeFilter<TargetIterator>::advanceIfNoMatch();
 template void RangeFilter<ConstTargetIterator>::advanceIfNoMatch();
+
+template RangeFilter<TargetIterator>::operator fake_bool() const; 
+template RangeFilter<ConstTargetIterator>::operator fake_bool() const;
 
 #undef TARG_CLASS
 #undef TARG_NAMESPACE

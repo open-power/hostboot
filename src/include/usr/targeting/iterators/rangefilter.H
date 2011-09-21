@@ -115,11 +115,7 @@ class RangeFilter
          *  @brief Dummy function used to implement ability to check if range 
          *      iterator is valid 
          */ 
-        operator fake_bool() const
-        {   
-            return (iv_current != iv_end) 
-                ? &RangeFilter::notComparable : NULL;
-        }
+        operator fake_bool() const;
 
         /**
          *  @brief Pre-increment operator which advances the range's iterator
