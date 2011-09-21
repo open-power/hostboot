@@ -77,13 +77,13 @@ function    runtraceHB()
     echo    "Collect traceHB info..."
     `pwd`
     
-    autosim $NOWIN --simcmd   "run-python-file ${SBXHOME}/src/build/simics/hb-simdebug.py"
-    if [ $? -ne 0 ] ; then
-        echo "ERROR 3: Unable to run $?"
-        stopsim
-        stopserver
-        exit 1
-    fi
+    #autosim $NOWIN --simcmd   "run-python-file ${SBXHOME}/src/build/simics/hb-simdebug.py"
+    #if [ $? -ne 0 ] ; then
+    #    echo "ERROR 3: Unable to run $?"
+    #    stopsim
+    #    stopserver
+    #    exit 1
+    #fi
     
     autosim $NOWIN --simcmd   "hb-trace"
     if [ $? -ne 0 ] ; then
@@ -152,8 +152,8 @@ HBICORE_TEST_EXTENDED="${HBICORE_TEST%%.*}_extended.bin"
 ##  Find the hbotStringfile for traceHB.
 HBICORE_TEST_STRINGFILE="${SBXHOME}/img/hbotStringFile"
 
-##  Set the path to the traceHB.py script 
-TRACEHB_PYTHON_FILE="${SBXHOME}/src/build/trace/traceHB.py"
+##  Set the path to the hb-simdebug.py script 
+SIMDEBUG_PYTHON_FILE="${SBXHOME}/src/build/simics/hb-simdebug.py"
 
 CPFILES="${SBXHOME}/src/build/tools/cpfiles.pl"
 
@@ -170,7 +170,7 @@ echo    "HBICORE_TEST               = $HBICORE_TEST"
 echo    "HBICORE_TEST_EXTENDED      = $HBICORE_TEST_EXTENDED"
 echo    "HBICORE_TEST_SYMS          = $HBICORE_TEST_SYMS"
 echo    "HBICORE_TEST_STRINGFILE    = $HBICORE_TEST_STRINGFILE"
-echo    "TRACEHB_PYTHON_FILE        = $TRACEHB_PYTHON_FILE"
+echo    "SIMDEBUG_PYTHON_FILE       = $SIMDEBUG_PYTHON_FILE"
 echo    "SANDBOXRC                  = $SANDBOXRC"
 echo    "SBXHOME                    = $SBXHOME"
 echo    "current directory is " `pwd`
@@ -410,6 +410,15 @@ if [ $? -ne 0 ] ; then
     exit 1
 fi
 
+echo "====> dump L3..."
+autosim $NOWIN --simcmd   "hb-dump"
+if [ $? -ne 0 ] ; then
+    echo "ERROR 4 : Unable to run $?"
+    stopsim
+    stopserver
+    exit 1
+fi
+
 ########################################################
 ##  done.  Stop the simulation
 ########################################################
@@ -430,7 +439,6 @@ shutdown_code="$(grep --text 'Shutdown Requested' $SBXHOME/testprintk.log | awk 
 
 echo    "----------------- traceHB Buffer -------------------"
 cat $SBXHOME/traceHB.log
-
 
 initfail=0
 echo "Shutdown Code = $shutdown_code"
