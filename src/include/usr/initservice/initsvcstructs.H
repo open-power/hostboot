@@ -35,6 +35,7 @@
 #include <stdint.h>
 #include <sys/vfs.h>            // VFS_MODULE_MAX
 
+
 namespace   INITSERVICE
 {
 
@@ -115,6 +116,19 @@ struct  TaskInfo
     void                (*taskfn)(void *ptr);
     const   TaskFlags   taskflags;
 
+};
+
+
+/**
+ * @struct  ExtTaskInfo
+ *
+ * struct to store the TaskInfo for the ISteps, plus the number of items in
+ * the istep (calculated at compiletime).
+ */
+struct  ExtTaskInfo
+{
+    const TaskInfo  *const pti;
+    const uint64_t  numitems;
 };
 
 } // namespace

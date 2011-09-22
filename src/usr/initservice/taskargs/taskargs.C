@@ -60,13 +60,7 @@ extern  trace_desc_t *g_trac_initsvc;
 void    TaskArgs::waitParentSync( )
 {
 
-    TRACDCOMP( g_trac_initsvc,
-            "Parent: wait for barrier %p", &iv_sync_barrier );
-
     barrier_wait( &iv_sync_barrier);
-
-    TRACDCOMP( g_trac_initsvc,
-            "Parent: returned from barrier %p", &iv_sync_barrier );
 
 }
 
@@ -74,13 +68,7 @@ void    TaskArgs::waitParentSync( )
 void    TaskArgs::waitChildSync( )
 {
 
-    TRACDCOMP( g_trac_initsvc,
-            "Child: wait for barrier %p", &iv_sync_barrier );
-
     barrier_wait( &iv_sync_barrier);
-
-    TRACDCOMP( g_trac_initsvc,
-            "Child: returned from barrier %p", &iv_sync_barrier );
 
 }
 

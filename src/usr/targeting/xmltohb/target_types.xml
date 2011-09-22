@@ -38,6 +38,7 @@
     <attribute>
         <id>PRIMARY_CAPABILITIES</id>
     </attribute>
+    <attribute><id>HWAS_STATE</id></attribute>
 </targetType>
 
 <targetType>

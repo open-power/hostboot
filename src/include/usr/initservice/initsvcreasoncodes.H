@@ -80,6 +80,20 @@ enum    InitServiceModuleID
     ISTEP_4_ERRL_ID,
     ISTEP_5_ERRL_ID,
 
+    //
+    //  HWAS:  ISTEP 4
+    //  HWAS named isteps (substeps)
+    //  @todo sync these names up with Dean's document later
+    //
+    HWAS_1_ERRL_ID,
+    HWAS_2_ERRL_ID,
+    HWAS_3_ERRL_ID,
+    HWAS_4_ERRL_ID,
+    HWAS_5_ERRL_ID,
+    HWAS_6_ERRL_ID,
+    HWAS_7_ERRL_ID,
+    HWAS_8_ERRL_ID,
+
     //  reserve some tasks for my unit tests...
     START_CXXTEST_ERRL_ID       =   0xf0,
     INIT_SVC_TEST1_ERRL_ID,
@@ -101,6 +115,8 @@ enum    InitServiceReasonCode
     INITSVC_FAILED_NO_ERRLOG    =   INITSVC_COMP_ID | 0x06,
     EXTINITSVC_FAILED_NO_ERRLOG =   INITSVC_COMP_ID | 0x07,
     CXXTEST_FAILED_NO_ERRLOG    =   INITSVC_COMP_ID | 0x08,
+
+
 
 };
 

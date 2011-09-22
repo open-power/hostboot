@@ -1,11 +1,11 @@
 #  IBM_PROLOG_BEGIN_TAG
 #  This is an automatically generated prolog.
 #
-#  $Source: src/usr/makefile $
+#  $Source: src/usr/hwas/makefile $
 #
 #  IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2010 - 2011
+#  COPYRIGHT International Business Machines Corp. 2011
 #
 #  p1
 #
@@ -20,12 +20,11 @@
 #  Origin: 30
 #
 #  IBM_PROLOG_END
-ROOTPATH = ../..
+ROOTPATH = ../../..
+MODULE = hwas
 
-OBJS = module_init.o
+OBJS =  hwas.o   
 
-SUBDIRS = example.d trace.d cxxtest.d testcore.d errl.d devicefw.d  \
-          scom.d xscom.d targeting.d initservice.d hwpf.d 			\
-          ecmddatabuffer.d pnor.d i2c.d vfs.d fsi.d hwas.d
+SUBDIRS=test.d
 
 include ${ROOTPATH}/config.mk

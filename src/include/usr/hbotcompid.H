@@ -138,5 +138,12 @@ const compId_t TARG_COMP_ID = 0x0B00;
 const char TARG_COMP_NAME[] = "targ";
 //@}
 
+/** @name HWAS
+ *  Hardware Availability Service
+ */
+//@{
+const compId_t HWAS_COMP_ID = 0x0C00;
+const char HWAS_COMP_NAME[] = "hwas";
+//@}
 
 #endif

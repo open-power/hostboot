@@ -45,7 +45,7 @@ namespace   INITSERVICE
 {
 
 trace_desc_t *g_trac_initsvc = NULL;
-TRAC_INIT(&g_trac_initsvc, "INITSERVICE", 4096 );
+TRAC_INIT(&g_trac_initsvc, "INITSVC", 4096 );
 
 
 errlHndl_t InitService::startTask( const TaskInfo       *i_ptask,

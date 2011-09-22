@@ -44,12 +44,14 @@
 #include    <errl/errlentry.H>              //  errlHndl_t
 #include    <devicefw/userif.H>             //  targeting
 #include    <sys/mmio.h>                    //  mmio_scratch_read()
+#include    <initservice/taskargs.H>        //  TaskArgs    structs
+
 
 #include    "istepdispatcher.H"
 
 #include    "splesscommon.H"
 
-#include    <isteps/isteplist.H>
+#include    <isteps/istepmasterlist.H>
 
 
 namespace   INITSERVICE
@@ -100,14 +102,25 @@ const TaskInfo *IStepDispatcher::findTaskInfo( const uint16_t i_IStep,
 {
     const TaskInfo      *l_pistep       =   NULL;
 
-    TRACDCOMP( g_trac_initsvc,
-               "g_isteps[%d].numitems = 0x%x",
-               i_IStep,
-               g_isteps[i_IStep].numitems );
 
     //  apply filters
     do
     {
+
+        //  Sanity check / dummy IStep
+        if ( g_isteps[i_IStep].pti == NULL)
+        {
+            TRACDCOMP( g_trac_initsvc,
+                       "g_isteps[%d].pti == NULL",
+                       i_IStep );
+            break;
+        }
+
+        TRACDCOMP( g_trac_initsvc,
+                   "g_isteps[%d].numitems = 0x%x",
+                   i_IStep,
+                   g_isteps[i_IStep].numitems );
+
 
         // check input range - IStep
         if  (   i_IStep >= MAX_ISTEPS   )
@@ -445,7 +458,7 @@ void    IStepDispatcher::runAllISteps( void * io_ptr )   const
             {
 
                 TRACDCOMP( g_trac_initsvc,
-                           "End of ISubStep list." );
+                           "End of ISubStep 0x%x list.", l_SubStep );
                 break;  // break out of inner for loop
             }
 
@@ -457,9 +470,10 @@ void    IStepDispatcher::runAllISteps( void * io_ptr )   const
             l_args.clear();
 
             TRACFCOMP( g_trac_initsvc,
-                       "Run IStep 0x%x / Substep 0x%x",
+                       INFO_MRK "Run IStep 0x%x / Substep 0x%x %s",
                        l_IStep,
-                       l_SubStep );
+                       l_SubStep,
+                       l_pistep->taskname );
 
             l_errl = InitService::getTheInstance().executeFn( l_pistep,
                                                               &l_args );

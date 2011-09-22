@@ -32,11 +32,11 @@ SRCPARSE_HEADER_TARGET = \
 	${GENFILES}/hostBootSrcParse.H
 
 CC=g++ -m32
-CFLAGS:=-g -O0   -I $(ROOTPATH)/src/include/usr 
+CFLAGS:=-g -O0   -I $(ROOTPATH)/src/include/usr  -D PARSER
 BIN:=bin
 
 
-all: code_pass
+all: gen_pass code_pass
 
 gen_pass:
 

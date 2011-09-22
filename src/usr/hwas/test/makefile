@@ -1,7 +1,7 @@
 #  IBM_PROLOG_BEGIN_TAG
 #  This is an automatically generated prolog.
 #
-#  $Source: src/usr/isteps/makefile $
+#  $Source: src/usr/targeting/test/makefile $
 #
 #  IBM CONFIDENTIAL
 #
@@ -20,17 +20,19 @@
 #  Origin: 30
 #
 #  IBM_PROLOG_END
-ROOTPATH = ../../..
+ROOTPATH = ../../../..
 
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/plat
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
 
-MODULE = isteps
+MODULE = testhwas
+TESTS = *.H
 
-OBJS = istep1.o
-
-# SUBDIRS = test
+OBJS = attributestrings.o 
 
 include ${ROOTPATH}/config.mk
+
+vpath %.C ${GENDIR}
+

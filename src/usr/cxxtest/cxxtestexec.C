@@ -67,8 +67,8 @@ void _start(void *io_pArgs)
     errlHndl_t  l_errl  =   NULL;
     std::vector<const char *> module_list;
     tid_t       tidrc           =   0;
-    TaskArgs::TaskArgs *pTaskArgs  =
-            reinterpret_cast<TaskArgs::TaskArgs *>(io_pArgs);
+    TASKARGS_INIT_TASKARGS( io_pArgs );
+
 
     // output a blank line so that it's easier to find the beginning of
     //  CxxTest
@@ -121,30 +121,24 @@ void _start(void *io_pArgs)
                    *i, tidrc );
     }
 
-    TRACDCOMP( g_trac_cxxtest,  "Waiting for all tasks to finish....");
+    TRACFCOMP( g_trac_cxxtest,  "Waiting for all tasks to finish....");
     //  wait for all the launched tasks to finish
     barrier_wait( &CxxTest::g_CxxTestBarrier );
 
     __sync_add_and_fetch(&CxxTest::g_ModulesCompleted, 1);
-    TRACDCOMP( g_trac_cxxtest, " ModulesCompleted=%d",
+    TRACFCOMP( g_trac_cxxtest, " ModulesCompleted=%d",
             CxxTest::g_ModulesCompleted );
 
-    TRACDCOMP( g_trac_cxxtest, EXIT_MRK "Finished CxxTestExec: ");
-    TRACDCOMP( g_trac_cxxtest, "    total tests:   %d",
+    TRACFCOMP( g_trac_cxxtest, EXIT_MRK "Finished CxxTestExec: ");
+    TRACFCOMP( g_trac_cxxtest, "    total tests:   %d",
             CxxTest::g_TotalTests  );
-    TRACDCOMP( g_trac_cxxtest, "    failed tests:  %d",
+    TRACFCOMP( g_trac_cxxtest, "    failed tests:  %d",
             CxxTest::g_FailedTests );
-    TRACDCOMP( g_trac_cxxtest, "    warnings:      %d",
+    TRACFCOMP( g_trac_cxxtest, "    warnings:      %d",
             CxxTest::g_Warnings    );
-    TRACDCOMP( g_trac_cxxtest, "    trace calls:   %d",
+    TRACFCOMP( g_trac_cxxtest, "    trace calls:   %d",
             CxxTest::g_TraceCalls  );
 
 
-    // wait for TaskArgs barrier
-    if  ( pTaskArgs )
-    {
-        pTaskArgs->waitChildSync();
-    }
-
-    task_end();
+    TASKARGS_WAIT_AND_ENDTASK();
 }

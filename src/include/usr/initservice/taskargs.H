@@ -41,25 +41,45 @@
 #include    <errl/errlentry.H>
 #include    <errl/errlmanager.H>
 
+
+/**
+ * @note    macro to setup the input void * pArgs pointer.
+ *          Casts it to a pointer to the incoming TaskArgs struct
+ */
+#define TASKARGS_INIT_TASKARGS(P_ARGS)                                      \
+        INITSERVICE::TaskArgs *pTaskArgs =                                  \
+        static_cast<INITSERVICE::TaskArgs *>(P_ARGS)
+
+/**
+ * @note    macro to wait on the TaskArgs barrier and end the task
+ */
+#define TASKARGS_WAIT_AND_ENDTASK()                                         \
+        if  ( pTaskArgs )                                                   \
+        {                                                                   \
+            pTaskArgs->waitChildSync();                                     \
+        }                                                                   \
+        task_end()                                                          \
+
+/**
+ * @note    macro to post an error log to IStepDispatcher
+ */
+#define POST_ERROR_LOG( MyErrl )                                           \
+        pTaskArgs->postErrorLog( MyErrl )
+
+
 /**
  * @note macro to set up a _start() task entry routine.
  */
 #define TASK_ENTRY_MACRO( MyInitFn )                                        \
-extern "C"                                                                  \
-void _start( void *io_pArgs )                                               \
-{                                                                           \
-    INITSERVICE::TaskArgs *pTaskArgs  =                           \
-            static_cast<INITSERVICE::TaskArgs *>(io_pArgs);  \
+        extern "C"                                                          \
+        void _start( void *io_pArgs )                                       \
+        {                                                                   \
+            TASKARGS_INIT_TASKARGS(io_pArgs);                               \
                                                                             \
-    MyInitFn( pTaskArgs );                                                  \
+            MyInitFn( pTaskArgs );                                          \
                                                                             \
-    if  ( pTaskArgs )                                                       \
-    {                                                                       \
-        pTaskArgs->waitChildSync();                                         \
-    }                                                                       \
-                                                                            \
-    task_end();                                                             \
-}
+            TASKARGS_WAIT_AND_ENDTASK();                                    \
+        }
 
 
 namespace   INITSERVICE
