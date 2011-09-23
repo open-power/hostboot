@@ -1,0 +1,8 @@
+This file contains raw text.  
+addCopyright.pl should print an warning for this file and then continue:
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+WARNING:: File <file> :Unknown Filetype: <file>
+         Skipping this file and continuing,
+         Please add the copyright prologue manually.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

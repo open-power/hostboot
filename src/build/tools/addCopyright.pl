@@ -144,9 +144,11 @@ while (defined($_ = shift))
 
         if  ("Unknown" eq $filetype)
         {
-            print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
-            print "WARNING:: File $_ :Unknown Filetype: $_\n";
-            print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
+            print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
+            print "WARNING:: File $_ :Unknown Filetype: $filetype\n";
+            print "         Skipping this file and continuing.\n";
+            print "         Please add the copyright prologue manually.\n";
+            print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
             ## exit 1;
             next;
         }
