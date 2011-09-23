@@ -25,7 +25,7 @@
  * @brief function definitions for funtions used to initialize modules
  */
 #include <sys/vfs.h>
-#include <kernel/console.H> 
+#include <kernel/console.H>
 #include <limits.h>
 #include <sys/mm.h>
 
@@ -41,7 +41,7 @@ int vfs_module_perms(VfsSystemModule* module)
 
     uint64_t datasize = memsize - textsize;
 
-    printkd("%s text=%lx:%lx data=%lx:%lx\n",
+    printkd("%s text=%p:%lx data=%p:%lx\n",
             module->module,
             module->text,
             textsize,
@@ -105,7 +105,7 @@ VfsSystemModule * vfs_find_module(VfsSystemModule * i_table,
                                   const char * i_name)
 {
     VfsSystemModule* module = i_table;
-    VfsSystemModule* ret = NULL; 
+    VfsSystemModule* ret = NULL;
     while ('\0' != module->module[0])
     {
         if (0 == strcmp(i_name,module->module))
