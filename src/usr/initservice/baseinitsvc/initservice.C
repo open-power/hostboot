@@ -92,20 +92,9 @@ errlHndl_t InitService::startTask( const TaskInfo       *i_ptask,
                     INITSERVICE::START_TASK_FAILED,
                     l_tidrc,
                     0 );
-            TRACFCOMP( g_trac_initsvc,
-                      "ERROR starting task %s : tidrc=%d, errlog p = %p",
-                      i_ptask->taskname,
-                      l_tidrc,
-                      l_errl );
         } // endif tidrc
         else
         {
-            // task launched OK.
-            TRACDCOMP( g_trac_initsvc,
-                       "Task %s launched OK: tid=%d",
-                       i_ptask->taskname,
-                       l_tidrc );
-
             //  if InitService passed in a taskargs, wait for barrier.
             if ( io_pargs )
             {
@@ -136,7 +125,7 @@ errlHndl_t InitService::executeFn( const TaskInfo   *i_ptask,
          *  @errortype      ERRL_SEV_CRITICAL_SYS_TERM
          *  @moduleid       see task list
          *  @reasoncode     START_FN_FAILED
-         *  @userdata1      0
+         *  @userdata1      task id or task return code
          *  @userdata2      0
          *
          *  @devdesc        Initialization Service attempted to start a
@@ -151,20 +140,9 @@ errlHndl_t InitService::executeFn( const TaskInfo   *i_ptask,
                 l_tidrc,
                 0 );
 
-        TRACFCOMP( g_trac_initsvc,
-                   "ERROR starting function %s: tidrc=%d, errlog p = %p" ,
-                   i_ptask->taskname,
-                   l_tidrc,
-                   l_errl );
-
     } // endif tidrc
     else
     {
-        TRACDCOMP( g_trac_initsvc,
-                   "Function %s launched OK : task number %d",
-                   i_ptask->taskname,
-                   l_tidrc );
-
         // task launched OK.
         if ( io_pargs )
         {
@@ -213,7 +191,7 @@ errlHndl_t  InitService::dispatchTask( const TaskInfo   *i_ptask,
         TRACDCOMP( g_trac_initsvc,
                    "task_type==INIT_TASK: %s",
                    i_ptask->taskname);
-                   
+
         l_errl = VFS::module_load( i_ptask->taskname );
         break;
     case START_FN:
