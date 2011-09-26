@@ -1,0 +1,301 @@
+// IBM_PROLOG_BEGIN_TAG
+// This is an automatically generated prolog.
+//
+// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/ifcompiler/initCompiler.C,v $
+//
+// IBM CONFIDENTIAL
+//
+// COPYRIGHT International Business Machines Corp. 2010,2010
+//
+//UNDEFINED 
+//
+// Origin: UNDEFINED
+//
+// IBM_PROLOG_END_TAG
+// Change Log *************************************************************************************
+//                                                                      
+//  Flag   Track    Userid   Date     Description                
+//  ----- -------- -------- -------- -------------------------------------------------------------
+//         D754106 dgilbert 06/14/10 Create
+//  dg002 SW039868 dgilbert 10/15/10 Add support to filter unneeded inits by EC
+//  dg003  D779902 dgilbert 12/08/10 Add ability to specify ouput if file
+//                 andrewg  05/24/11 Port over for VPL/PgP
+// End Change Log *********************************************************************************
+
+/**
+ * @file initCompiler.C
+ * @brief Compile an initfile into bytecode.
+ */
+#include <stdint.h>
+#include <stdio.h>
+#include <string>
+#include <sstream>
+#include <iostream>
+#include <fstream>
+#include <iomanip>
+#include <map>
+#include <stdexcept>
+#include <initCompiler.H>
+#include <initRpn.H>
+#include <initSymbols.H>
+#include <initScom.H>
+//#include <initSpy.H>
+
+using namespace init;
+using namespace std;
+
+//Globals
+
+int yyline = 1;
+init::ScomList * yyscomlist = NULL;
+
+ostringstream init::dbg;
+ostringstream init::erros;
+ostringstream init::stats;   // TODO move to Parser
+
+// Main
+int main(int narg, char ** argv)
+{
+    int rc = 0;
+
+#if 0
+    yyin = fopen("sample.initfile","r");
+    if(!yyin)
+    {
+        std::cerr << "\nERROR: Failed to open sample.initfile! " << std::endl;
+        exit(-1);
+    }
+    yyparse();
+    fclose(yyin);
+#endif
+
+    try
+    {
+        // Parser: 
+        //   - Parse args
+        //   - Set up source location and source type
+        //   - Load & parse Symbols & Spy/Array tables
+        //   - Load & parse the initfile (if there is one)
+        //
+        Parser parsed(narg,argv);
+
+        string initfile = parsed.source_fn();
+        uint32_t type = parsed.get_source_type();
+
+        BINSEQ bin_seq;
+        bin_seq.reserve(0x38000);
+
+        if(type == Parser::IF_TYPE)  // input is binary *.if file - build listing from it.
+        {
+
+            //for(SPY_LIST::iterator i = yyspylist->begin(); i != yyspylist->end(); ++i)
+            //{
+            //    cout << (*i)->listing() << endl;
+            //}
+
+            ifstream ifs(initfile.c_str(), ios_base::in | ios_base::binary);
+            if(!ifs)
+            {
+                string msg("Can't open ");
+                msg.append(initfile);
+                throw invalid_argument(msg);
+            }
+            while(1)
+            {
+                int ch = ifs.get();
+                if (!(ifs.good())) break;
+                bin_seq.push_back(ch);
+            }
+            ifs.close();
+
+            yyscomlist->listing(bin_seq, cout);
+
+            erros << parsed.get_scomlist()->get_symbols()->not_found_listing();
+
+        }
+        else // normal initfile processing
+        {
+            // Already parsed
+            yyscomlist->compile(bin_seq);
+
+
+            std::cerr << "Compiled size = " << std::dec << bin_seq.size() << endl;
+
+            // if there are missing symbols, SpyList::listing() will add duplicates
+            // So get the listing now
+            erros << parsed.get_scomlist()->get_symbols()->not_found_listing();
+
+            string if_fn = parsed.binseq_fn();
+            ofstream ofs(if_fn.c_str(), ios_base::out | ios_base::binary);
+            if(!ofs)
+            {
+                erros << "ERROR - Could not open" << if_fn << endl;
+                throw invalid_argument(if_fn);
+            }
+            else
+            {
+                for(BINSEQ::const_iterator bli = bin_seq.begin(); bli != bin_seq.end(); ++bli)
+                    ofs.put((char)(*bli));
+
+                ofs.close();
+            }
+            //cout << dbg << std::endl;
+            printf("Generate Listing\n");
+            // This builds a listing from the compiled binary sequence
+            yyscomlist->listing(bin_seq, parsed.listing_ostream());
+
+            // open if file and read in to new SpyList
+            
+            printf("Generate Stats\n");
+            stats << "*********************************************************\n";
+
+            cerr << stats.str() << endl;  // TODO -> cout
+
+        }
+
+        printf("Generate Debug\n");
+        parsed.capture_dbg();
+        //if(parsed.debug_mode()) cout << dbg.str() << endl;
+    }
+    catch(exception & e)
+    {
+        cerr << "ERROR! exception caught: " << e.what() << endl;
+        rc = 2;
+    }
+
+    if(erros.str().size())
+    {
+        rc = 1;
+        cerr << erros.str() << endl;
+    }
+    return rc;
+}
+
+// ------------------------------------------------------------------------------------------------
+//  Parser:
+//    Check the args and build the symbol table
+//  -----------------------------------------------------------------------------------------------
+
+Parser::Parser(int narg, char ** argv)
+: iv_type(0), iv_scomlist(NULL), iv_dbg(false), iv_ec(0xFFFFFFFF)   //dg002c
+{
+    set<string> header_files;
+    iv_prog_name = argv[0];
+
+    stats << iv_prog_name << endl;
+    --narg; ++argv;
+
+    string type;
+
+    pair<string,string> compare;
+
+    for(int i = 0; i < narg; ++i)
+    {
+        string arg(argv[i]);
+        if(arg.compare(0,5,"-init") == 0)  iv_source_path = argv[++i];
+        else if (arg.compare(0,3,"-kw") == 0 ||
+                 arg.compare(0,4,"-spy") == 0 ||
+                 arg.compare(0,5,"-attr") == 0 || 
+                 arg.compare(0,6,"-array") == 0 ) header_files.insert(string(argv[++i]));
+        else if (arg.compare(0,7,"-outdir") == 0) iv_outdir = argv[++i];
+        else if (arg.compare(0,2,"-o") == 0)      iv_outfile = argv[++i];              //dg003a
+        else if (arg.compare(0,3,"-if") == 0)     iv_source_path = argv[++i];
+        else if (arg.compare(0,3,"-ec") == 0)     iv_ec = strtoul(argv[++i],NULL,16);  //dg002a
+        else if (arg.compare(0,9,"--compare") == 0)
+        {
+            compare.first = argv[++i];
+            compare.second = argv[++i];
+        }
+        else if (arg.compare(0,7,"--debug") == 0) iv_dbg = true;
+
+    }
+    if(iv_source_path.size() == 0) iv_source_path = compare.first;
+
+    if(!narg) // TEST MODE
+    {
+        iv_source_path = "p7.initfile";
+        header_files.insert("p7_init_spies.h");
+        header_files.insert("p7_init_arrays.h");
+        header_files.insert("ciniIfSymbols.H");
+    }
+
+    size_t pos = iv_source_path.rfind('.');
+    if(pos != string::npos)
+    {
+        string type = iv_source_path.substr(pos+1);
+        if(type.compare(0,2,"if") == 0) iv_type = IF_TYPE;
+        else if(type.compare(0,8,"initfile") == 0) iv_type = INITFILE_TYPE;
+
+        size_t pos1 = iv_source_path.rfind('/',pos);
+        if(pos1 == string::npos) pos1 = 0;
+        else ++pos1;
+
+        iv_initfile = iv_source_path.substr(pos1,pos-pos1);
+    }
+
+    if(iv_outdir.length() == 0) iv_outdir.push_back('.');
+    if(iv_outdir.at(iv_outdir.size()-1) != '/') iv_outdir.push_back('/');
+
+    if(iv_outfile.size() == 0) 
+    {
+        iv_outfile.append(iv_initfile);
+        iv_outfile.append(".if");
+    }
+
+    iv_outfile.insert(0,iv_outdir);
+
+    stats << "*********************************************************" << endl;
+    stats << "* source:  " << iv_source_path << endl;
+    stats << "* listing: " << listing_fn() << endl;
+    stats << "* binary:  " << binseq_fn() << endl;
+
+    iv_scomlist = new ScomList(iv_source_path, header_files, stats, iv_ec);   //dg002c
+    if(compare.second.size())
+    {
+        ScomList cmplist(compare.second, header_files, stats, iv_ec);  //dg002c
+        if(iv_scomlist->compare(cmplist))
+        {
+            cout << "Compare SUCCESS" << endl;
+        }
+        else
+        {
+            cout << stats;
+        }
+    }
+
+    iv_list_ostream.open(listing_fn().c_str());
+    if(!iv_list_ostream)
+    {
+        throw invalid_argument(string("ERROR! Could not open ") + listing_fn());
+    }
+
+}
+
+Parser::~Parser()
+{
+    iv_list_ostream.close();
+}
+
+void Parser::capture_dbg()
+{
+    if(iv_dbg)
+    {
+        string fname(iv_outdir);
+        fname.append(iv_initfile);
+        fname.append(".dbg");
+        ofstream dbgfs(fname.c_str());
+        if(!dbgfs)
+        {
+            string msg("Can't open ");
+            msg.append(fname);
+            throw invalid_argument(msg);
+        }
+        dbgfs << dbg.str() << endl;
+        dbgfs.close();
+    }
+}
+
+// TODO
+//  - Detect all errors down to a line # ?
+//  - bad rows/cols check - have already?
+//
