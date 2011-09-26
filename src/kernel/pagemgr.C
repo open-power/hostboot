@@ -24,8 +24,10 @@
 #include <kernel/pagemgr.H>
 #include <util/singleton.H>
 #include <kernel/console.H>
-#include <sys/vfs.h>
 #include <arch/ppc.H>
+#include <util/locked/pqueue.H>
+
+size_t PageManager::cv_coalesce_count = 0;
 
 void PageManager::init()
 {
@@ -51,14 +53,11 @@ uint64_t PageManager::queryAvail()
 
 PageManager::PageManager() : iv_pagesAvail(0), iv_pagesTotal(0)
 {
-    // Determine first page of un-allocated memory.
-    uint64_t addr = (uint64_t) VFS_LAST_ADDRESS;
-    if (0 != (addr % PAGESIZE))
-	addr = (addr - (addr % PAGESIZE)) + PAGESIZE;
-
-    // Determine number of pages available.
-    page_t* page = (page_t*)((void*) addr);
+    // Determine first page of un-allocated memory
+    // and number of pages available.
+    uint64_t addr = firstPageAddr();
     size_t length = (MEMLEN - addr) / PAGESIZE;
+    page_t* page = reinterpret_cast<page_t *>(addr);
 
     iv_pagesTotal = length;
     // Update statistics.
@@ -70,7 +69,7 @@ PageManager::PageManager() : iv_pagesAvail(0), iv_pagesTotal(0)
 	   (uint64_t)page);
 
     // Populate L3 cache lines.
-    uint64_t* cache_line = (uint64_t*) addr;
+    uint64_t* cache_line = reinterpret_cast<uint64_t*>(addr);
     uint64_t* end_cache_line = (uint64_t*) VmmManager::FULL_MEM_SIZE;
     while (cache_line != end_cache_line)
     {
@@ -162,4 +161,77 @@ void PageManager::push_bucket(page_t* p, size_t n)
     if (n >= BUCKETS) return;
     first_page[n].push(p);
 }
+
+void PageManager::coalesce( void )
+{
+    Singleton<PageManager>::instance()._coalesce();
+}
+
+
+// Coalsesce adjacent free memory blocks
+void PageManager::_coalesce( void )
+{
+    // Look at all the "free buckets" and find blocks to merge
+    // Since this is binary, all merges will be from the same free bucket
+    // Each bucket is a stack of non-allocated memory blocks of the same size
+    // Once two blocks are merged they become a single block twice the size.
+    // The source blocks must be removed from the current bucket (stack) and
+    // the new block needs to be pushed onto the next biggest stack.
+    for(size_t bucket = 0; bucket < (BUCKETS-1); ++bucket)
+    {
+        // Move the this stack bucket into a priority queue
+        // sorted by address, highest to lowest
+        Util::Locked::PQueue<page_t,page_t*> pq;
+        page_t * p = NULL;
+        while(NULL != (p = first_page[bucket].pop()))
+        {
+            p->key = p;
+            pq.insert(p);
+        }
+
+        while(NULL != (p = pq.remove()))
+        {
+            // p needs to be the even buddy to prevent merging of wrong block.
+            // To determine this, get the index of the block as if the whole 
+            // page memory space were blocks of this size.
+            uint64_t p_idx = (reinterpret_cast<uint64_t>(p) - firstPageAddr())/
+                             ((1 << bucket)*PAGESIZE);
+            if(0 != (p_idx % 2))  // odd index
+            {
+                first_page[bucket].push(p);  // can't merge
+            }
+            else // it's even
+            {
+                // If p can be merged then the next block in pq will be the
+                // match.  The address of p also can't be greater than what's
+                // in pq or something is really messed up, therefore if
+                // pq.remove_if() returns something then it's a match.
+                page_t * p_seek = (page_t*)((uint64_t)p + 
+                                            (1 << bucket)*PAGESIZE);
+                page_t * p_next = pq.remove_if(p_seek);
+                if(p_next == p_seek)
+                {
+                    // new block is twice the size and goes into the next
+                    // bucket size
+                    push_bucket(p,bucket+1);
+                    ++cv_coalesce_count;
+                }
+                else
+                {
+                    // Can't merge p
+                    first_page[bucket].push(p);
+
+                    if(p_next) // This should be null - if then overlaping mem
+                    {
+                        first_page[bucket].push(p_next);
+                        printk("pagemgr::coalesce Expected %p, got %p\n",
+                               p_seek, p_next);
+                    }
+                }
+            }
+        }
+    }
+    printkd("PAGEMGR coalesced total %ld\n", cv_coalesce_count);
+}
+
 

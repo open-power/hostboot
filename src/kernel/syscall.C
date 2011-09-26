@@ -38,6 +38,7 @@
 #include <kernel/msghandler.H>
 #include <kernel/vmmmgr.H>
 #include <kernel/stacksegment.H>
+#include <kernel/heapmgr.H>
 
 extern "C"
 void kernel_execute_decrementer()
@@ -47,8 +48,17 @@ void kernel_execute_decrementer()
     TimeManager::checkReleaseTasks(s);
     s->returnRunnable();
 
+    CpuManager::executePeriodics(c);//TODO is there still a potential deadlock?
+
     if (CpuManager::isShutdownRequested())
     {
+        // The code below could cause a hang during shutdown
+        // The stats can be retrieved from global variables as needed.
+        // This can be uncommented for debug if desired
+#ifdef __MEMSTATS__
+        if(c->master)
+            HeapManager::stats();
+#endif
         KernelMisc::shutdown();
     }
 

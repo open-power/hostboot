@@ -34,10 +34,14 @@
 #include <sys/sync.h>
 #include <kernel/cpuid.H>
 #include <kernel/ptmgr.H>
+#include <kernel/heapmgr.H>
 
 cpu_t* CpuManager::cv_cpus[CpuManager::MAXCPUS] = { NULL };
 bool CpuManager::cv_shutdown_requested = false;
 uint64_t CpuManager::cv_shutdown_status = 0;
+Barrier CpuManager::cv_barrier;
+bool CpuManager::cv_defrag = false;
+size_t CpuManager::cv_cpuCount = 0;
 
 CpuManager::CpuManager()
 {
@@ -150,6 +154,7 @@ void CpuManager::startCPU(ssize_t i)
     if (currentCPU)
     {
         setDEC(TimeManager::getTimeSliceCount());
+        activateCPU(cv_cpus[i]);
     }
     return;
 }
@@ -157,8 +162,16 @@ void CpuManager::startCPU(ssize_t i)
 void CpuManager::startSlaveCPU(cpu_t* cpu)
 {
     setDEC(TimeManager::getTimeSliceCount());
+    activateCPU(cpu);
 
     return;
+}
+
+void CpuManager::activateCPU(cpu_t * i_cpu)
+{
+    i_cpu->active = true;
+    ++cv_cpuCount;
+    lwsync();
 }
 
 void CpuManager::executePeriodics(cpu_t * i_cpu)
@@ -169,11 +182,11 @@ void CpuManager::executePeriodics(cpu_t * i_cpu)
         if(0 == (i_cpu->periodic_count % CPU_PERIODIC_CHECK_MEMORY))
         {
             uint64_t pcntAvail = PageManager::queryAvail();
-            if(pcntAvail < 16) // Less than 16% pages left TODO 16 ok?
+            if(pcntAvail < 16)
             {
                 VmmManager::flushPageTable();
                 ++(i_cpu->periodic_count);   // prevent another flush below
-                if(pcntAvail < 5) // TODO 5% ok
+                if(pcntAvail < 5)
                 {
                     VmmManager::castOutPages(VmmManager::CRITICAL);
                 }
@@ -187,6 +200,31 @@ void CpuManager::executePeriodics(cpu_t * i_cpu)
         {
             VmmManager::flushPageTable();
         }
+        if(0 == (i_cpu->periodic_count % CPU_PERIODIC_DEFRAG))
+        {
+            // set up barrier based on # cpus cv_barrier;
+            // TODO whatif other cpus become active?
+            isync();
+            cv_barrier.init(cv_cpuCount);
+            if(!cv_shutdown_requested)
+            {
+                cv_defrag = true;
+                lwsync();
+            }
+        }
+    }
+    if(cv_defrag)
+    {
+        cv_barrier.wait();
+
+        if(i_cpu->master)
+        {
+            HeapManager::coalesce();
+            PageManager::coalesce();
+            cv_defrag = false;
+        }
+
+        cv_barrier.wait();
     }
 }
 

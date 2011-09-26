@@ -58,10 +58,13 @@ struct cpu_t
     struct
     {
         /** If the CPU is the master */
-        bool master;
+        bool master:1;
+
+        /** If the CPU is active */
+        bool active:1;
 
         /** Ensure alignment of master attribute for asm code. */
-        uint64_t __reserved_master:24;
+        uint64_t __reserved_master:30;
     } PACKED;
 
     /** Pointer to the scheduler for this CPU (may not be unique) */

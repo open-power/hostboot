@@ -35,6 +35,7 @@
 /******************************************************************************/
 #include <trace/interface.H>
 #include <stdarg.h>
+#include <stdlib.h>
 #include <arch/ppc.H>
 #include <kernel/console.H>
 #include <kernel/pagemgr.H>
@@ -66,9 +67,6 @@ const uint32_t COMP_NAME_SIZE   = 16; // NULL terminated string
 // Initial implementation is to allocate a fixed 2KB buffer to each
 // component on request.
 // NOTE: any change to this value will require change to Trace::initBuffer()
-// since currently malloc() does not work for large allocations/fragmentations
-// and we are using PageManager::allocatePage() to allocate space for two
-// buffers at a time.  Once malloc() works, we can remove this constraint.
 const uint64_t TRAC_DEFAULT_BUFFER_SIZE = 0x0800;  //2KB
 
 // NOTE: This constant should only be changed to an even number for now.
@@ -189,17 +187,14 @@ void Trace::initBuffer(trace_desc_t **o_td, const char* i_comp,
                 {
                     //printk("Trace::initBuffer - allocate memory\n");
 
-                    // Allocate memory for two buffers.
-                    // Once malloc() works, we can allocate memory for one
-                    // one buffer at a time.
-                    l_td = static_cast<char *>(PageManager::allocatePage());
-
+                    // Allocate memory
+                    // TODO can't handle i_size yet - everything is coded
+                    // around TRAC_DEFAULT_BUFFER_SIZE
+                    l_td = static_cast<char *>(malloc(TRAC_DEFAULT_BUFFER_SIZE));
+                    
                     g_desc_array[i].td_entry =
                         reinterpret_cast<trace_desc_t *>(l_td);
 
-                    g_desc_array[i+1].td_entry =
-                        reinterpret_cast<trace_desc_t *>(
-                            l_td + TRAC_DEFAULT_BUFFER_SIZE);
                 }
 
                 // Initialize the buffer header
@@ -235,12 +230,8 @@ void Trace::initBuffer(trace_desc_t **o_td, const char* i_comp,
                     //printk("Trace::initBuffer - allocate memory\n");
 
                     // Allocate memory for buffer
-                    l_td = static_cast<char *>(PageManager::allocatePage());
+                    l_td = static_cast<char *>(malloc(TRAC_DEFAULT_BUFFER_SIZE));
 
-                    // Throw away the last 2KB for now to keep code simple
-                    // until we decide to add support for variable-sized
-                    // buffers.  Also, once we change to use malloc(),
-                    // we won't have this problem.
                     g_desc_array[i].td_entry =
                         reinterpret_cast<trace_desc_t *>(l_td);
                 }
