@@ -79,6 +79,12 @@ namespace DeviceFW
      #define DEVICE_PNOR_ADDRESS( i_chip, i_addr )  \
         DeviceFW::PNOR, ((static_cast<uint64_t>(i_chip)<<32)|static_cast<uint64_t>(i_addr))
     
+    /** Construct the device addressing parameters for FSI device ops.
+     *  @param[in] i_address - FSI address to operate on.
+     */
+    #define DEVICE_FSI_ADDRESS(i_address) \
+        DeviceFW::FSI, static_cast<uint64_t>((i_address))
+
 
     /** 
      *  @brief Perform a hardware read operation.

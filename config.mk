@@ -258,7 +258,7 @@ clean: ${SUBDIRS:.d=.clean}
 	       ${IMAGES:.bin=.bin.modinfo} ${IMAGES:.ruhx=.lid} \
 	       ${IMAGES:.ruhx=.lidhdr} ${IMAGES:.bin=_extended.bin} \
 	       ${IMAGE_EXTRAS} ${EXTRA_LIDS_} \
-	       ${EXTRA_OBJS} ${_GENFILES} ${EXTRA_PARTS})
+	       ${EXTRA_OBJS} ${_GENFILES} ${EXTRA_PARTS} ${EXTRA_CLEAN}) 
 
 cscope: code_pass
 	mkdir -p ${ROOTPATH}/obj/cscope

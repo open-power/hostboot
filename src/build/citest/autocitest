@@ -114,7 +114,8 @@ export SHELL="/bin/bash"        ##  Needed to fool workon to launch a bash
                                 ##  shell, which autosim expects.
 NOWIN="--nowin"                 ##  remote execution does not have a display
 
-MACHINE="SALERNO"
+MACHINE=${MACHINE:-$DEFAULT_MACHINE}
+export MACHINE
 HBOT_SIMICS_SETUP="/gsa/ausgsa/home/a/n/andrewg/web/public/hostboot/simics/hbot_simics_setup.pl"
 
 ##  jenkins creates a new workspace for every compile.

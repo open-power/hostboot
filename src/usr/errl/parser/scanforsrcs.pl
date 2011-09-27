@@ -352,6 +352,7 @@ sub extractTags
             $tmp = stripWhitespace( $tmp );
             debugMsg( "Tmp trimmed: $tmp" );
             $hash{$key} = $tmp;
+	    debugMsg( "Assigning '$key' = '$tmp'" );
         }
 
         push @{$Comps{$comp}}, \%hash;

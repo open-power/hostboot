@@ -36,6 +36,7 @@ namespace DeviceFW
     {
         DEVFW_RC_INVALID_REGISTRATION   = DEVFW_COMP_ID | 0x01,
         DEVFW_RC_NO_ROUTE_FOUND         = DEVFW_COMP_ID | 0x02,
+        DEVFW_RC_NULL_TARGET            = DEVFW_COMP_ID | 0x03,
     };
 };
 

@@ -149,6 +149,29 @@ namespace DeviceFW
                                      void* io_buffer, size_t& io_buflen,
                                      int64_t i_accessType, va_list i_addr) 
     {
+        errlHndl_t l_errl = NULL;
+        
+        if( NULL == i_target )
+        {
+	    TRACFCOMP(g_traceBuffer, "A device driver operation was attempted on a NULL target : i_opType=%d, i_accessType=%d", i_opType, i_accessType );
+            /*@
+             *  @errortype
+             *  @moduleid       DEVFW_MOD_ASSOCIATOR
+             *  @reasoncode     DEVFW_RC_NULL_TARGET
+             *  @userdata1      OpType
+             *  @userdata2      AccessType
+             *
+             *  @devdesc        A device driver operation on a NULL target.
+             */
+            l_errl = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
+                                   DEVFW_MOD_ASSOCIATOR,
+                                   DEVFW_RC_NULL_TARGET,
+                                   i_opType,
+                                   i_accessType);
+            return l_errl;
+        }
+
+
         TARGETING::TYPE l_devType = 
             (i_target == MASTER_PROCESSOR_CHIP_TARGET_SENTINEL) ? 
             TYPE_PROC : i_target->getAttr<ATTR_TYPE>();
@@ -159,8 +182,6 @@ namespace DeviceFW
         // The ranges of the parameters should all be verified by the
         // compiler due to the template specializations in driverif.H.  
         // No assert-checks will be done here.
-        
-        errlHndl_t l_errl = NULL;
         
         mutex_lock(&iv_mutex);
 
@@ -240,7 +261,7 @@ namespace DeviceFW
              *  @moduleid       DEVFW_MOD_ASSOCIATOR
              *  @reasoncode     DEVFW_RC_NO_ROUTE_FOUND
              *  @userdata1      (OpType << 32) | (AccessType)
-             *  @userdata1      TargetType
+             *  @userdata2      TargetType
              *
              *  @devdesc        A device driver operation was attempted for
              *                  which no driver has been registered.

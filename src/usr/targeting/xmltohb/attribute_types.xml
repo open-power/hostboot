@@ -1,0 +1,562 @@
+<!--  IBM_PROLOG_BEGIN_TAG
+     This is an automatically generated prolog.
+   
+     $Source: src/usr/targeting/xmltohb/attribute_types.xml $
+   
+     IBM CONFIDENTIAL
+   
+     COPYRIGHT International Business Machines Corp. 2011
+   
+     p1
+   
+     Object Code Only (OCO) source materials
+     Licensed Internal Code Source Materials
+     IBM HostBoot Licensed Internal Code
+   
+     The source code for this program is not published or other-
+     wise divested of its trade secrets, irrespective of what has
+     been deposited with the U.S. Copyright Office.
+   
+     Origin: 30
+   
+     IBM_PROLOG_END -->
+
+<attributes>
+
+<!-- =====================================================================
+     HOST BOOT ATTRIBUTE TYPES 
+     Contains the definition of all hostboot attributes
+     ================================================================= -->
+
+<attribute>
+    <id>CLASS</id>
+    <description>Attribute indicating the target's class</description>
+    <simpleType>
+        <enumeration>
+            <description>Enumeration indicating the target's class</description>
+            <enumerator>
+                <name>NA</name>
+                <value>0</value>
+            </enumerator>
+            <enumerator>
+                <name>CARD</name>
+                <value>1</value>
+            </enumerator>
+            <enumerator>
+                <name>ENC</name>
+                <value>2</value>
+            </enumerator>
+            <enumerator>
+                <name>CHIP</name>
+                <value>3</value>
+            </enumerator>
+            <enumerator>
+                <name>UNIT</name>
+                <value>4</value>
+            </enumerator>            
+            <enumerator>
+                <name>DEV</name>
+                <value>5</value>
+            </enumerator>             
+            <enumerator>
+                <name>SYS</name>
+                <value>6</value>
+            </enumerator>             
+            <enumerator>
+                <name>MAX</name>
+                <value>7</value>
+            </enumerator>             
+            <default>NA</default>
+        </enumeration>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hasStringConversion/>
+</attribute>
+
+<attribute>
+    <id>TYPE</id>
+    <description>Attribute indicating the target's type</description>
+    <simpleType>
+        <enumeration>
+            <description>Attribute indicating the target's type</description>
+            <enumerator>
+                <name>NA</name>
+                <value>0</value>
+            </enumerator>
+            <enumerator>
+                <name>SYS</name>
+            </enumerator>
+            <enumerator>
+                <name>NODE</name>
+            </enumerator>
+            <enumerator>
+                <name>DIMM</name>
+            </enumerator>
+            <enumerator>
+                <name>SCM</name>
+            </enumerator>
+            <enumerator>
+                <name>DCM</name>
+            </enumerator>
+            <enumerator>
+                <name>MEMBUF</name>
+            </enumerator>
+            <enumerator>
+                <name>PROC</name>
+            </enumerator>
+            <enumerator>
+                <name>MEMVRM</name>
+            </enumerator>
+            <enumerator>
+                <name>PROCVRM</name>
+            </enumerator>
+            <enumerator>
+                <name>EX</name>
+            </enumerator>
+            <enumerator>
+                <name>CORE</name>
+            </enumerator>
+            <enumerator>
+                <name>L2</name>
+            </enumerator>
+            <enumerator>
+                <name>L3</name>
+            </enumerator>
+            <enumerator>
+                <name>L4</name>
+            </enumerator>
+            <enumerator>
+                <name>MCS</name>
+            </enumerator>
+            <enumerator>
+                <name>MBS</name>
+            </enumerator>
+            <enumerator>
+                <name>MBA</name>
+            </enumerator>
+            <enumerator>
+                <name>MEM_PORT</name>
+            </enumerator>
+            <enumerator>
+                <name>PERVASIVE</name>
+            </enumerator>
+            <enumerator>
+                <name>POWERBUS</name>
+            </enumerator>
+            <enumerator>
+                <name>XBUS</name>
+            </enumerator>
+            <enumerator>
+                <name>ABUS</name>
+            </enumerator>
+            <enumerator>
+                <name>PCI</name>
+            </enumerator>
+            <enumerator>
+                <name>LAST_IN_RANGE</name>
+            </enumerator>
+            <default>NA</default>
+        </enumeration>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hasStringConversion/>
+</attribute>
+
+<attribute>
+    <id>MODEL</id>
+    <description>Attribute indicating the target's model</description>
+    <simpleType>
+        <enumeration>
+            <description>Enumeration indicating the target's model</description>
+            <enumerator>
+                <name>NA</name>
+                <value>0</value>
+            </enumerator>
+            <enumerator>
+                <name>SALERNO</name>
+                <value>16</value>
+            </enumerator>
+            <enumerator>
+                <name>VENICE</name>
+            </enumerator>
+            <enumerator>
+                <name>CENTAUR</name>
+                <value>48</value>
+            </enumerator>
+            <enumerator>
+                <name>JEDEC</name>
+                <value>80</value>
+            </enumerator>
+            <enumerator>
+                <name>CDIMM</name>
+            </enumerator>
+            <enumerator>
+                <name>POWER8</name>
+                <value>112</value>
+            </enumerator>            
+            <default>NA</default>
+        </enumeration>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hasStringConversion/>
+</attribute>
+
+<attribute>
+    <id>ENGINE_TYPE</id>
+    <description>Attribute indicating the target's engine type</description>
+    <simpleType>
+        <enumeration>
+            <description>Enumeration indicating the target's engine type</description>
+            <enumerator>
+                <name>NA</name>
+                <value>0</value>
+            </enumerator>
+            <enumerator>
+                <name>ENGINE_IIC</name>
+                <value>1</value>
+            </enumerator>
+            <enumerator>
+                <name>ENGINE_SCOM</name>
+                <value>2</value>
+            </enumerator>
+            <default>NA</default>
+        </enumeration>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hasStringConversion/>
+</attribute>    
+
+<attribute>
+    <id>DUMMY_RW</id>
+    <description>Dummy attribute with read/write permissions</description>
+    <simpleType>
+        <uint8_t>
+            <default>5</default>
+        </uint8_t>
+        <array>1,3,5</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_DUMMY_SCRATCH_PLAT_INIT_UINT8</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>DUMMY_WO</id>
+    <description>Dummy attribute with write-only permissions</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>DUMMY_RO</id>
+    <description>Dummy attribute with read-only permissions</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>DUMMY_HEAP_ZERO_DEFAULT</id>
+    <description>Dummy attribute on the heap with zero initialization</description>
+    <simpleType>
+        <uint8_t>
+            <default>5</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>PHYS_PATH</id>
+    <description>Physical hierarchical path to the target</description>
+    <nativeType>
+        <name>EntityPath</name>
+    </nativeType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>AFFINITY_PATH</id>
+    <description>Hierarchical path to the target with respect to logical affinity</description>
+    <nativeType>
+        <name>EntityPath</name>
+    </nativeType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>POWER_PATH</id>
+    <description>Hierarchical path to the target with respect to power</description>
+    <nativeType>
+        <name>EntityPath</name>
+    </nativeType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>PRIMARY_CAPABILITIES</id>
+    <description>Attribute which describes capabilities of a target</description>
+    <complexType>
+        <description>Structure which defines a target's primary capabilities.  
+        A target can only support at most FSI SCOM and one of the other two SCOM 
+        types.  Applicable for all targets.  Structure is read-only.
+        </description>
+        <field>
+            <name>supportsFsiScom</name>
+            <description>0b0: Target does not support FSI SCOM; 
+            0b1: Target supports FSI SCOM
+            </description>
+            <type>uint8_t</type>
+            <bits>1</bits>
+            <default>0</default> 
+        </field>
+        <field>
+            <name>supportsXscom</name>
+            <description>0b0: Target does not support XSCOM;
+            0b1: Target supports FSI XSCOM</description>
+            <type>uint8_t</type>
+            <bits>1</bits>
+            <default>0</default>
+        </field>
+        <field>
+            <name>supportsInbandScom</name>
+            <description>0b0: Target does not support inband SCOM</description>
+            <type>uint8_t</type>
+            <bits>1</bits>
+            <default>0</default>
+        </field>
+        <field>
+            <name>reserved</name>
+            <description>Reserved for future use</description>
+            <type>uint8_t</type>
+            <bits>5</bits>
+            <default>0</default>
+        </field>        
+        </complexType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>SCOM_SWITCHES</id>
+    <description>Attribute storing information about which SCOM path to use</description>
+    <complexType>
+        <description>Structure which defines which SCOM to use at a point in 
+        time.  Only applicable if target supports one or more SCOM types.  Only 
+        one bit (of the first three) can ever be set at any one time.  
+        </description>
+        <field>
+            <name>useFsiScom</name>
+            <description>0b0: Do not use FSI SCOM at this time.  0b1: Use FSI 
+            SCOM at this time</description>
+            <type>uint8_t</type>
+            <bits>1</bits>
+            <default>0</default>
+        </field>
+        <field>
+            <name>useXscom</name>
+            <description>0b0: Do not use XSCOM at this time.  0b1: Use XSCOM at 
+            this time</description>
+            <type>uint8_t</type>
+            <bits>1</bits>
+            <default>0</default>
+        </field>
+        <field>
+            <name>useInbandScom</name>
+            <description>0b0: Do not use inband SCOM at this time.  0b1: Use 
+            inband SCOM at this time</description>
+            <type>uint8_t</type>
+            <bits>1</bits>
+            <default>0</default>
+        </field>
+        <field>
+            <name>reserved</name>
+            <description>Reserved for future expansion</description>
+            <type>uint8_t</type>
+            <bits>5</bits>
+            <default>0</default>
+        </field>
+    </complexType>
+    <persistency>volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>XSCOM_BASE_ADDRESS</id>
+    <description>System XSCOM base address</description>
+    <simpleType>
+        <uint64_t>
+            <default>0x300000000000</default>
+        </uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>XSCOM_CHIP_INFO</id>
+    <description>Attribute which describes XSCOM chip info</description>
+    <complexType>
+        <description>Structure which defines chip info necessary for XSCOM.  
+        Only applicable for chip targets which support XSCOM.  Structure is 
+        read-only</description>
+        <field>
+            <name>nodeId</name>
+            <description>Unique ID of node containing the chip</description>
+            <type>uint8_t</type>
+            <default>0</default>
+        </field>
+        <field>
+            <name>chipId</name>
+            <description>Unique ID of chip, relative to node</description>
+            <type>uint8_t</type>
+            <default>0</default>
+        </field>
+    </complexType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>I2C_CHIP_INFO</id>
+    <description>Attribute which describes I2C chip info</description>
+    <complexType>
+        <description>Structure which defines info necessary for I2C.  Only 
+        applicable for chip targets which support I2C.  Structure is 
+        read-only.</description>
+        <field>
+            <name>busSpeed</name>
+            <description>Slave device bus speed</description>
+            <type>uint32_t</type>
+            <default>0</default>
+        </field>
+        <field>
+            <name>deviceAddr</name>
+            <description>Slave device address</description>
+            <type>uint32_t</type>
+            <default>0</default>
+        </field>
+        <field>
+            <name>devicePort</name>
+            <description>Slave device port location</description>
+            <type>uint32_t</type>
+            <default>0</default>
+        </field>
+        <field>
+            <name>deviceMasterEng</name>
+            <description>Master I2C engine slave is hung off of</description>
+            <type>uint32_t</type>
+            <default>0</default>
+        </field>
+        </complexType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>FSI_MASTER_CHIP</id>
+    <description>Chip which contains the FSI master logic that drives this slave</description>
+    <nativeType>
+        <name>EntityPath</name>
+    </nativeType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>FSI_MASTER_TYPE</id>
+    <description>Type of Master FSI connection to this slave (MFSI or cMFSI)</description>
+    <simpleType>
+        <enumeration>
+            <description>Enumeration indicating the master's FSI type</description>
+            <enumerator>
+                <name>MFSI</name>
+                <value>0</value>
+            </enumerator>
+            <enumerator>
+                <name>CMFSI</name>
+                <value>1</value>
+            </enumerator>
+            <enumerator>
+                <name>NO_MASTER</name>
+                <value>2</value>
+            </enumerator>
+            <default>NO_MASTER</default>
+        </enumeration>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>FSI_MASTER_PORT</id>
+    <description>Which port is this chip hanging off of</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>FSI_SLAVE_CASCADE</id>
+    <description>Slave cascade position</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>FSI_OPTION_FLAGS</id>
+    <description>Reserved for any special flags we might need to access FSI</description>
+    <simpleType>
+        <uint16_t>
+            <default>0</default>
+        </uint16_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>VPO_MODE</id>
+    <description>Are we running against the hardware simulator? 1=yes</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+
+</attributes>
+

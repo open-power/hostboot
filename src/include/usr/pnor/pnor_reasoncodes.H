@@ -43,11 +43,12 @@ namespace PNOR
 
     enum PNORReasonCode
     {
-        RC_INVALID_MESSAGE           = PNOR_COMP_ID | 0x01, 
+        RC_INVALID_MESSAGE_TYPE      = PNOR_COMP_ID | 0x01, 
         RC_INVALID_ADDRESS           = PNOR_COMP_ID | 0x02,
         RC_INVALID_SECTION           = PNOR_COMP_ID | 0x03,
         RC_EXTERNAL_ERROR            = PNOR_COMP_ID | 0x04,
         RC_STARTUP_FAIL              = PNOR_COMP_ID | 0x05,
+        RC_INVALID_ASYNC_MESSAGE     = PNOR_COMP_ID | 0x06,
     };
 };
 

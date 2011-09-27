@@ -32,41 +32,33 @@ namespace FSI
 {
 
 /**
- * Master or Cascaded Master
- */
-enum MasterType {
-    MFSI_TYPE  = 0,
-    CMFSI_TYPE = 1,
-    NO_MASTER  = 2
-};
-
-
-//@todo - move this into attributes
-/**
- * @brief Structure which defines info necessary to access a chip via FSI
- *
- * Structure which defines info necessary for FSI access.  Only applicable
- * for chip targets.  Structure is read-only.  Each chip will have 2 copies
- * of this data, depending on which chip we boot from.
- */
-struct FsiChipInfo_t
-{
-    TARGETING::Target* master; ///< FSI Master  @fixme - convert to EntityPath
-    MasterType type; ///< Master or Cascaded Master
-    uint8_t port; ///< Which port is this chip hanging off of  
-    uint8_t cascade; ///< Slave cascade position
-    uint64_t attributes; ///< Reserved for any special flags we might need
-};
-
-/**
  * @brief Initialize the FSI hardware
- *
- * @param[out] o_numPorts  Number of FSI ports that were
- *    successfully initialized
  *
  * @return errlHndl_t  NULL on success
  */
-errlHndl_t initializeHardware( uint64_t& o_numPorts );
+errlHndl_t initializeHardware();
+
+
+/**
+ * FSI Slave Registers for P8
+ *   These registers are repeated for every master+port+cascade combo 
+ */
+enum SlaveRegistersP8
+{
+    // Local FSI Space
+    SLAVE_CFG_TABLE  = 0x000000, /**< Configuration Table of CFAM */
+    SLAVE_PEEK_TABLE = 0x000400, /**< Peek Table */
+
+    SLAVE_REGS       = 0x000800, /**< FSI Slave Register */
+    SLAVE_MODE_00    = SLAVE_REGS|0x00,
+
+    FSI_SHIFT_ENGINE = 0x000C00, /**< FSI Shift Engine (SCAN) */
+    FSI2PIB_ENGINE   = 0x001000, /**< FSI2PIB Engine (SCOM) */
+    FSI_SCRATCHPAD   = 0x001400, /**< FSI Scratchpad */
+    FSI_I2C_MASTER   = 0x001800, /**< FSI I2C-Master */
+    FSI_GEMINI_MBOX  = 0x002800, /**< FSI Gemini Mailbox with FSI GPx Registers */
+};
+
 
 
 }

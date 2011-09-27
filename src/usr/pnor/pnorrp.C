@@ -413,14 +413,14 @@ void PnorRP::waitForMessage()
                         /*@
                          * @errortype
                          * @moduleid     PNOR::MOD_PNORRP_WAITFORMESSAGE
-                         * @reasoncode   PNOR::RC_INVALID_MESSAGE
+                         * @reasoncode   PNOR::RC_INVALID_MESSAGE_TYPE
                          * @userdata1    Message type
                          * @userdata2    Requested Virtual Address
                          * @devdesc      PnorRP::waitForMessage> Unrecognized message type
                          */
                         l_errhdl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                                         PNOR::MOD_PNORRP_WAITFORMESSAGE,
-                                                        PNOR::RC_INVALID_MESSAGE,
+                                                        PNOR::RC_INVALID_MESSAGE_TYPE,
                                                         TO_UINT64(message->type),
                                                         (uint64_t)eff_addr);
                         status_rc = -EINVAL; /* Invalid argument */
@@ -433,14 +433,14 @@ void PnorRP::waitForMessage()
                 /*@
                  * @errortype
                  * @moduleid     PNOR::MOD_PNORRP_WAITFORMESSAGE
-                 * @reasoncode   PNOR::RC_INVALID_MESSAGE
+                 * @reasoncode   PNOR::RC_INVALID_ASYNC_MESSAGE
                  * @userdata1    Message type
                  * @userdata2    Requested Virtual Address
                  * @devdesc      PnorRP::waitForMessage> Unrecognized message type
                  */
                 l_errhdl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                                    PNOR::MOD_PNORRP_WAITFORMESSAGE,
-                                                   PNOR::RC_INVALID_MESSAGE,
+                                                   PNOR::RC_INVALID_ASYNC_MESSAGE,
                                                    TO_UINT64(message->type),
                                                    (uint64_t)eff_addr);
                 status_rc = -EINVAL; /* Invalid argument */
@@ -602,7 +602,7 @@ errlHndl_t PnorRP::computeDeviceAddr( void* i_vaddr,
         /*@
          * @errortype
          * @moduleid     PNOR::MOD_PNORRP_WAITFORMESSAGE
-         * @reasoncode   PNOR::RC_INVALID_MESSAGE
+         * @reasoncode   PNOR::RC_INVALID_ADDRESS
          * @userdata1    Virtual Address
          * @userdata2    Base PNOR Address
          * @devdesc      PnorRP::computeDeviceAddr> Virtual Address outside

@@ -305,6 +305,22 @@ class EntityPath
             uint32_t i_index) const;
 
         /**
+         *  @brief Returns the first path element of the given type
+         *
+         *  Returns the first occurrence of a path element that matches the
+         *  selected type.  Will return a PathElement with type=TYPE_NA if
+         *  no match is found.
+         *
+         *  @param[in] i_type Element type to return
+         *
+         *  @pre N/A
+         *
+         *  @return PathElement of the given type else invalid PathElement
+         */
+        const PathElement pathElementOfType(
+            const TYPE i_type) const;
+
+        /**
          *  @brief Returns the number of path elements
          *
          *  Returns the number of path elements for the entity path.

@@ -83,6 +83,7 @@ namespace DeviceFW
     #define DEVICE_I2C_ADDRESS( i_address )\
         DeviceFW::I2C, static_cast<uint64_t>(( i_address ))
 
+
     /** @class InvalidParameterType
      *  @brief Unused type to cause compiler fails for invalid template types.
      *

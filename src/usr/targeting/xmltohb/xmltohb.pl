@@ -55,6 +55,7 @@ my $cfgSrcOutputDir = ".";
 my $cfgImgOutputDir = ".";
 my $cfgHbXmlFile = "./hb.xml";
 my $cfgFapiAttributesXmlFile = "../../hwpf/hwp/fapiHwpAttributeInfo.xml";
+my $cfgImgOutputFile = "./targeting.bin";
 my $cfgHelp = 0;
 my $cfgMan = 0;
 my $cfgVerbose = 0;
@@ -63,6 +64,7 @@ GetOptions("hb-xml-file:s" => \$cfgHbXmlFile,
            "src-output-dir:s" =>  \$cfgSrcOutputDir,
            "img-output-dir:s" =>  \$cfgImgOutputDir,
            "fapi-attributes-xml-file:s" => \$cfgFapiAttributesXmlFile,
+           "img-output-file:s" =>  \$cfgImgOutputFile,
            "help" => \$cfgHelp,
            "man" => \$cfgMan,
            "verbose" => \$cfgVerbose ) || pod2usage(-verbose => 0);
@@ -107,74 +109,80 @@ validateTargetInstances($attributes);
 validateTargetTypes($attributes);
 
 # Open the output files and write them
-open(TRAIT_FILE,">$cfgSrcOutputDir"."attributetraits.H") 
-    or fatal ("Trait file: \"$cfgSrcOutputDir"
-        . "attributetraits.H\" could not be opened.");
-my $traitFile = *TRAIT_FILE;
-writeTraitFileHeader($traitFile);
-writeTraitFileTraits($attributes,$traitFile);
-writeTraitFileFooter($traitFile);
-close $traitFile;
+if( !($cfgSrcOutputDir =~ "none") )
+{
+    open(TRAIT_FILE,">$cfgSrcOutputDir"."attributetraits.H") 
+      or fatal ("Trait file: \"$cfgSrcOutputDir"
+		. "attributetraits.H\" could not be opened.");
+    my $traitFile = *TRAIT_FILE;
+    writeTraitFileHeader($traitFile);
+    writeTraitFileTraits($attributes,$traitFile);
+    writeTraitFileFooter($traitFile);
+    close $traitFile;
 
-open(ATTR_FILE,">$cfgSrcOutputDir"."attributeenums.H")
-    or fatal ("Attribute enum file: \"$cfgSrcOutputDir"
-        . "attributeenums.H\" could not be opened.");
-my $enumFile = *ATTR_FILE;
-writeEnumFileHeader($enumFile);
-writeEnumFileAttrIdEnum($attributes,$enumFile);
-writeEnumFileAttrEnums($attributes,$enumFile);
-writeEnumFileFooter($enumFile);
-close $enumFile;
+    open(ATTR_FILE,">$cfgSrcOutputDir"."attributeenums.H")
+      or fatal ("Attribute enum file: \"$cfgSrcOutputDir"
+		. "attributeenums.H\" could not be opened.");
+    my $enumFile = *ATTR_FILE;
+    writeEnumFileHeader($enumFile);
+    writeEnumFileAttrIdEnum($attributes,$enumFile);
+    writeEnumFileAttrEnums($attributes,$enumFile);
+    writeEnumFileFooter($enumFile);
+    close $enumFile;
 
-open(STRING_HEADER_FILE,">$cfgSrcOutputDir"."attributestrings.H")
-    or fatal ("Attribute string header file: \"$cfgSrcOutputDir"
-        . "attributestrings.H\" could not be opened.");
-my $stringHeaderFile = *STRING_HEADER_FILE;
-writeStringHeaderFileHeader($stringHeaderFile);
-writeStringHeaderFileStrings($attributes,$stringHeaderFile);
-writeStringHeaderFileFooter($stringHeaderFile);
-close $stringHeaderFile;
+    open(STRING_HEADER_FILE,">$cfgSrcOutputDir"."attributestrings.H")
+      or fatal ("Attribute string header file: \"$cfgSrcOutputDir"
+		. "attributestrings.H\" could not be opened.");
+    my $stringHeaderFile = *STRING_HEADER_FILE;
+    writeStringHeaderFileHeader($stringHeaderFile);
+    writeStringHeaderFileStrings($attributes,$stringHeaderFile);
+    writeStringHeaderFileFooter($stringHeaderFile);
+    close $stringHeaderFile;
 
-open(STRING_IMPLEMENTATION_FILE,">$cfgSrcOutputDir"."attributestrings.C")
-    or fatal ("Attribute string source file: \"$cfgSrcOutputDir"
-        . "attributestrings.C\" could not be opened.");
-my $stringImplementationFile = *STRING_IMPLEMENTATION_FILE;
-writeStringImplementationFileHeader($stringImplementationFile);
-writeStringImplementationFileStrings($attributes,$stringImplementationFile);
-writeStringImplementationFileFooter($stringImplementationFile);
-close $stringImplementationFile;
+    open(STRING_IMPLEMENTATION_FILE,">$cfgSrcOutputDir"."attributestrings.C")
+      or fatal ("Attribute string source file: \"$cfgSrcOutputDir"
+		. "attributestrings.C\" could not be opened.");
+    my $stringImplementationFile = *STRING_IMPLEMENTATION_FILE;
+    writeStringImplementationFileHeader($stringImplementationFile);
+    writeStringImplementationFileStrings($attributes,$stringImplementationFile);
+    writeStringImplementationFileFooter($stringImplementationFile);
+    close $stringImplementationFile;
 
-open(STRUCTS_HEADER_FILE,">$cfgSrcOutputDir"."attributestructs.H")
-    or fatal ("Attribute struct file: \"$cfgSrcOutputDir"
-        . "attributestructs.H\" could not be opened.");
-my $structFile = *STRUCTS_HEADER_FILE;
-writeStructFileHeader($structFile);
-writeStructFileStructs($attributes,$structFile);
-writeStructFileFooter($structFile);
-close $structFile;
+    open(STRUCTS_HEADER_FILE,">$cfgSrcOutputDir"."attributestructs.H")
+      or fatal ("Attribute struct file: \"$cfgSrcOutputDir"
+		. "attributestructs.H\" could not be opened.");
+    my $structFile = *STRUCTS_HEADER_FILE;
+    writeStructFileHeader($structFile);
+    writeStructFileStructs($attributes,$structFile);
+    writeStructFileFooter($structFile);
+    close $structFile;
 
-open(PNOR_HEADER_DEF_FILE,">$cfgSrcOutputDir"."pnortargeting.H")
-    or fatal ("Targeting header definition header file: \"$cfgSrcOutputDir"
-        . "pnortargeting.H\" could not be opened.");
-my $pnorHeaderDefFile = *PNOR_HEADER_DEF_FILE;
-writeHeaderFormatHeaderFile($pnorHeaderDefFile);
-close $pnorHeaderDefFile;
+    open(PNOR_HEADER_DEF_FILE,">$cfgSrcOutputDir"."pnortargeting.H")
+      or fatal ("Targeting header definition header file: \"$cfgSrcOutputDir"
+		. "pnortargeting.H\" could not be opened.");
+    my $pnorHeaderDefFile = *PNOR_HEADER_DEF_FILE;
+    writeHeaderFormatHeaderFile($pnorHeaderDefFile);
+    close $pnorHeaderDefFile;
 
-open(FAPI_PLAT_ATTR_MACROS_FILE,">$cfgSrcOutputDir"."fapiplatattrmacros.H")
-    or fatal ("FAPI platform attribute macro header file: \"$cfgSrcOutputDir"
-        . "fapiplatattrmacros.H\" could not be opened.");
-my $fapiPlatAttrMacrosHeaderFile = *FAPI_PLAT_ATTR_MACROS_FILE;
-writeFapiPlatAttrMacrosHeaderFileHeader ($fapiPlatAttrMacrosHeaderFile);
-writeFapiPlatAttrMacrosHeaderFileContent($attributes,$fapiAttributes,$fapiPlatAttrMacrosHeaderFile);
-writeFapiPlatAttrMacrosHeaderFileFooter ($fapiPlatAttrMacrosHeaderFile);
-close $fapiPlatAttrMacrosHeaderFile;
+    open(FAPI_PLAT_ATTR_MACROS_FILE,">$cfgSrcOutputDir"."fapiplatattrmacros.H")
+      or fatal ("FAPI platform attribute macro header file: \"$cfgSrcOutputDir"
+		. "fapiplatattrmacros.H\" could not be opened.");
+    my $fapiPlatAttrMacrosHeaderFile = *FAPI_PLAT_ATTR_MACROS_FILE;
+    writeFapiPlatAttrMacrosHeaderFileHeader ($fapiPlatAttrMacrosHeaderFile);
+    writeFapiPlatAttrMacrosHeaderFileContent($attributes,$fapiAttributes,$fapiPlatAttrMacrosHeaderFile);
+    writeFapiPlatAttrMacrosHeaderFileFooter ($fapiPlatAttrMacrosHeaderFile);
+    close $fapiPlatAttrMacrosHeaderFile;
+}
 
-open(PNOR_TARGETING_FILE,">$cfgImgOutputDir"."targeting.bin")
-    or fatal ("Targeting image file: \"$cfgSrcOutputDir"
-        . "targeting.bin\" could not be opened.");
-my $pnorFile = *PNOR_TARGETING_FILE;
-writeTargetingImage($pnorFile,$attributes);
-close $pnorFile;
+if( !($cfgImgOutputDir =~ "none") )
+{
+    open(PNOR_TARGETING_FILE,">$cfgImgOutputDir".$cfgImgOutputFile)
+      or fatal ("Targeting image file: \"$cfgImgOutputDir"
+		. "$cfgImgOutputFile\" could not be opened.");
+    my $pnorFile = *PNOR_TARGETING_FILE;
+    writeTargetingImage($pnorFile,$attributes);
+    close $pnorFile;
+}
 
 exit(0);
 
@@ -1396,7 +1404,7 @@ sub simpleTypeProperties {
     # Intentionally didn't wrap these to 80 columns to keep them lined up and
     # more readable/editable 
     $typesHoH{"uint8_t"}     = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "uint8_t"                    , bytes => 1, bits => 8 , packfmt => "C" };
-    $typesHoH{"uint16_t"}    = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "uint16t"                    , bytes => 2, bits => 16, packfmt => "S" };
+    $typesHoH{"uint16_t"}    = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "uint16_t"                    , bytes => 2, bits => 16, packfmt => "S" };
     $typesHoH{"uint32_t"}    = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "uint32_t"                   , bytes => 4, bits => 32, packfmt => "L" };
     $typesHoH{"uint64_t"}    = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "uint64_t"                   , bytes => 8, bits => 64, packfmt =>\&packQuad };
     $typesHoH{"enumeration"} = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 0, typeName => "XMLTOHB_USE_PARENT_ATTR_ID" , bytes => 0, bits => 0 , packfmt => "packEnumeration" };

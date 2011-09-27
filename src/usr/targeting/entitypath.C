@@ -236,6 +236,29 @@ const EntityPath::PathElement& EntityPath::operator[](
 }
 
 //******************************************************************************
+// EntityPath::pathElementOfType
+//******************************************************************************
+
+const EntityPath::PathElement EntityPath::pathElementOfType(
+    const TYPE i_type) const
+{
+    #define TARG_FN "pathElementOfType(...)"
+
+    for( uint32_t x = 0; x < iv_size; x++ )
+    {
+        if( i_type == iv_pathElement[x].type )
+        {
+            return iv_pathElement[x];
+        }
+    }    
+
+    PathElement na_path = { TYPE_NA, 0 };
+    return na_path;
+
+    #undef TARG_FN
+}
+
+//******************************************************************************
 // EntityPath::size
 //******************************************************************************
 

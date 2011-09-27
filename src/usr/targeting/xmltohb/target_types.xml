@@ -1,0 +1,267 @@
+<!--  IBM_PROLOG_BEGIN_TAG
+     This is an automatically generated prolog.
+   
+     $Source: src/usr/targeting/xmltohb/target_types.xml $
+   
+     IBM CONFIDENTIAL
+   
+     COPYRIGHT International Business Machines Corp. 2011
+   
+     p1
+   
+     Object Code Only (OCO) source materials
+     Licensed Internal Code Source Materials
+     IBM HostBoot Licensed Internal Code
+   
+     The source code for this program is not published or other-
+     wise divested of its trade secrets, irrespective of what has
+     been deposited with the U.S. Copyright Office.
+   
+     Origin: 30
+   
+     IBM_PROLOG_END -->
+
+<attributes>
+
+<!-- =====================================================================
+     HOST BOOT TARGETS 
+     Contains the definition of the different types of targets
+     ================================================================= -->
+
+<targetType>
+    <id>base</id>
+    <attribute><id>CLASS</id></attribute>
+    <attribute><id>TYPE</id></attribute>
+    <attribute><id>MODEL</id></attribute>
+    <attribute><id>PHYS_PATH</id></attribute>
+    <attribute><id>AFFINITY_PATH</id></attribute>
+    <attribute>
+        <id>PRIMARY_CAPABILITIES</id>
+    </attribute>
+</targetType>
+
+<targetType>
+    <id>sys-sys-power8</id>
+    <parent>base</parent>
+    <attribute><id>CLASS</id><default>SYS</default></attribute>
+    <attribute><id>TYPE</id><default>SYS</default></attribute>
+    <attribute><id>MODEL</id><default>POWER8</default></attribute>  
+    <attribute><id>DUMMY_RW</id></attribute>
+    <attribute>
+        <id>XSCOM_BASE_ADDRESS</id>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0</default>
+    </attribute>   
+    <attribute>
+        <id>VPO_MODE</id>
+        <default>0</default>
+    </attribute> 
+</targetType>
+
+<targetType>
+    <id>chip</id>
+    <parent>base</parent>
+    <attribute>
+        <id>CLASS</id>
+        <default>CHIP</default>
+    </attribute>
+    <attribute>
+        <id>FSI_MASTER_CHIP</id>
+        <!-- Default to a non-sensical value -->
+        <default>physical:na-0</default>
+    </attribute>
+    <attribute>
+        <id>FSI_MASTER_TYPE</id>
+    </attribute>
+    <attribute>
+        <id>FSI_MASTER_PORT</id>
+    </attribute>
+    <attribute>
+        <id>FSI_SLAVE_CASCADE</id>
+    </attribute>
+    <attribute>
+        <id>FSI_OPTION_FLAGS</id>
+    </attribute>
+</targetType>
+
+<targetType>
+    <id>chip-processor</id>
+    <parent>chip</parent>
+    <attribute>
+        <id>TYPE</id>
+        <default>PROC</default>
+    </attribute>
+    <attribute>
+        <id>PRIMARY_CAPABILITIES</id>
+        <default>
+            <field><id>supportsFsiScom</id><value>1</value></field>
+            <field><id>supportsXscom</id><value>1</value></field>
+            <field><id>supportsInbandScom</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>SCOM_SWITCHES</id>
+    </attribute>
+</targetType>
+
+<targetType>
+    <id>chip-processor-salerno</id>
+    <parent>chip-processor</parent>
+    <attribute>
+        <id>MODEL</id>
+        <default>SALERNO</default>
+    </attribute>
+    <attribute>
+        <id>XSCOM_CHIP_INFO</id>
+    </attribute>
+    <attribute><id>DUMMY_RW</id></attribute>
+    <attribute><id>DUMMY_HEAP_ZERO_DEFAULT</id></attribute>
+</targetType>
+
+<targetType>
+    <id>unit</id>
+    <parent>base</parent>
+    <attribute>
+        <id>CLASS</id>
+        <default>UNIT</default>
+    </attribute>
+    <attribute>
+        <id>PRIMARY_CAPABILITIES</id>
+        <default>
+            <field><id>supportsFsiScom</id><value>1</value></field>
+            <field><id>supportsXscom</id><value>1</value></field>
+            <field><id>supportsInbandScom</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
+    </attribute>
+</targetType>
+
+<targetType>
+    <id>unit-ex-salerno</id>
+    <parent>unit</parent>
+    <attribute>
+        <id>TYPE</id>
+        <default>EX</default>
+    </attribute>
+    <attribute>
+        <id>MODEL</id>
+        <default>SALERNO</default>
+    </attribute>    
+</targetType>
+
+<targetType>
+    <id>unit-core-salerno</id>
+    <parent>unit</parent>
+    <attribute>
+        <id>TYPE</id>
+        <default>CORE</default>
+    </attribute>
+    <attribute>
+        <id>MODEL</id>
+        <default>SALERNO</default>
+    </attribute>    
+</targetType>
+
+<targetType>
+    <id>unit-mba-salerno</id>
+    <parent>unit</parent>
+    <attribute>
+        <id>TYPE</id>
+        <default>MBA</default>
+    </attribute>
+    <attribute>
+        <id>MODEL</id>
+        <default>SALERNO</default>
+    </attribute>    
+</targetType>
+
+<targetType>
+    <id>unit-pervasive-salerno</id>
+    <parent>unit</parent>
+    <attribute>
+        <id>TYPE</id>
+        <default>PERVASIVE</default>
+    </attribute>
+    <attribute>
+        <id>MODEL</id>
+        <default>SALERNO</default>
+    </attribute>    
+</targetType>
+
+<targetType>
+    <id>unit-pci-salerno</id>
+    <parent>unit</parent>
+    <attribute>
+        <id>TYPE</id>
+        <default>PCI</default>
+    </attribute>
+    <attribute>
+        <id>MODEL</id>
+        <default>SALERNO</default>
+    </attribute>    
+</targetType>
+
+<targetType>
+    <id>unit-powerbus-salerno</id>
+    <parent>unit</parent>
+    <attribute>
+        <id>TYPE</id>
+        <default>POWERBUS</default>
+    </attribute>
+    <attribute>
+        <id>MODEL</id>
+        <default>SALERNO</default>
+    </attribute>    
+</targetType>
+
+<targetType>
+    <id>unit-memport-salerno</id>
+    <parent>unit</parent>
+    <attribute>
+        <id>TYPE</id>
+        <default>MEM_PORT</default>
+    </attribute>
+    <attribute>
+        <id>MODEL</id>
+        <default>SALERNO</default>
+    </attribute>    
+</targetType>
+
+<targetType>
+    <id>unit-mcs-salerno</id>
+    <parent>unit</parent>
+    <attribute>
+        <id>TYPE</id>
+        <default>MCS</default>
+    </attribute>
+    <attribute>
+        <id>MODEL</id>
+        <default>SALERNO</default>
+    </attribute>
+</targetType>
+
+<targetType>
+    <id>enc-node-power8</id>
+    <parent>base</parent>
+    <attribute>
+        <id>CLASS</id>
+        <default>ENC</default>
+    </attribute>
+    <attribute>
+        <id>TYPE</id>
+        <default>NODE</default>
+    </attribute>
+    <attribute>
+        <id>MODEL</id>
+        <default>POWER8</default>
+    </attribute>    
+</targetType>
+
+</attributes>

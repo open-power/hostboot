@@ -69,7 +69,9 @@ my @files = ("src/build/tools/hb-parsedump.pl",
              "img/hbicore_extended.bin",
              "img/hbicore_test_extended.bin",
              "img/pnor.toc",
-             "img/targeting.bin",
+             "img/simics_SALERNO_targeting.bin",
+             "img/simics_VENICE_targeting.bin",
+             "img/vbu_targeting.bin",
              );
 
 #Directories in base git repository
@@ -128,6 +130,8 @@ my $simicsDir = "";
 my $imgDir = "";
 
 my $sandbox = $ENV{'SANDBOXBASE'};
+my $machine = $ENV{'MACHINE'};
+#print "machine = $machine\n";
 
 if ($inDir ne "")
 {
@@ -260,8 +264,27 @@ foreach (@files)
     {
         print "$command\n";
         `$command`;
+	if( $? != 0 )
+	{
+	    print "ERROR : exiting\n";
+	    exit(-1);
+	}
     }
+
 }
+
+# create a sym-link to the appropriate targeting binary
+print "Linking in simics_".$machine.".targeting.bin\n";
+$command = sprintf("ln -sf %s/simics_%s_targeting.bin %s/targeting.bin", $imgDir, $machine, $imgDir );
+print "$command\n";
+`$command`;
+if( $? != 0 )
+{
+    print "ERROR : exiting\n";
+    exit(-1);
+}
+
+
 
 chdir $cwd;
 #print "cwd: ", getcwd()."\n";
