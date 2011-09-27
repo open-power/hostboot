@@ -26,6 +26,11 @@
 
 ROOTPATH=../../../..
 
+GENFILES = ${ROOTPATH}/obj/genfiles
+
+SRCPARSE_HEADER_TARGET = \
+	${GENFILES}/hostBootSrcParse.H
+
 CC=g++ -m32
 CFLAGS:=-g -O0   -I $(ROOTPATH)/src/include/usr 
 BIN:=bin
@@ -35,10 +40,11 @@ all: code_pass
 
 gen_pass:
 
-code_pass: $(BIN)/errlparser 
+code_pass: $(BIN)/errlparser ${SRCPARSE_HEADER_TARGET}
 
 clean:
 	rm -fr $(BIN)
+	rm -fr ${SRCPARSE_HEADER_TARGET}
 
 beam: 
 
@@ -49,11 +55,14 @@ $(BIN)/comps.C: $(ROOTPATH)/src/include/usr/hbotcompid.H
 	sed 's/const compId_t \([A-Z0-9]*\)_COMP_ID[ =\t]*\(0[xX][0-9a-fA-F]*\).*/{ "\1", \2 },/' \
 	> $@
 
-$(BIN)/errlparser.o: errlparser.C $(ROOTPATH)/src/include/usr/errl/errltypes.H $(BIN)/comps.C
+$(BIN)/errlparser.o: errlparser.C $(ROOTPATH)/src/include/usr/errl/errltypes.H $(BIN)/comps.C \
+	${SRCPARSE_HEADER_TARGET}
 	mkdir -p $(BIN)
-	$(CC) -c  $(CFLAGS) -I bin -o $@  $<
+	$(CC) -c  $(CFLAGS) -I bin -I${ROOTPATH}/obj/genfiles -o $@  $<
 
 $(BIN)/errlparser: $(BIN)/errlparser.o
 	$(CC) -o  $@ $<
 
+${SRCPARSE_HEADER_TARGET} :
+	./scanforsrcs.pl -b ${ROOTPATH} -o ${GENFILES}
 

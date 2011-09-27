@@ -42,6 +42,7 @@ using namespace std;
 
 #include <errl/errltypes.H>
 #include <hbotcompid.H>
+#include <hostBootSrcParse.H>
 using namespace ERRORLOG;
 
 
@@ -490,6 +491,10 @@ void PrintErrlDetail(  errl_header_t * perrlog  )
 
     // print the summary line
     PrintErrlSummary(  perrlog  );
+
+    // print the Errorlog tags
+    printErrorTags( perrlog->reasonCode,
+                    perrlog->modId );
 
     // print sections if any
     if( perrlog->csections )
