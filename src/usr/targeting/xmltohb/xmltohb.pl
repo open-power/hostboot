@@ -956,7 +956,7 @@ VERBATIM
 
     format ATTRENUMFORMAT =
     ATTR_@<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< = @<<<<<<<<<<
-    $attrId                                                          $hexVal .","
+    $attrId,                                                         $hexVal .","
 .
     select($outFile);
     $~ = 'ATTRENUMFORMAT';
@@ -984,7 +984,7 @@ sub writeEnumFileAttrEnums {
 
     format ENUMFORMAT =
     @<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< = @<<<<<<<<<<
-    $enumName                                                        $enumHex .","
+    $enumName,                                                       $enumHex .","
 .
     select($outFile);
     $~ = 'ENUMFORMAT';
