@@ -34,11 +34,16 @@ extern "C"
 
 /**
  * Page removal operations
+ *
+ * RELEASE : Writes dirty&write-tracked pages out to a storage device
+ *           and removes other pages
+ * FLUSH   : Only writes dirty&write-tracked pages out to a storage
+ *           device
  */
 enum PAGE_REMOVAL_OPS
 {
-    RELEASE,
-    FLUSH,
+    RELEASE = 0,
+    FLUSH = 1,
 };
 
 /**
@@ -60,7 +65,8 @@ enum PAGE_PERMISSIONS
  *  @brief System call to allocate virtual memory block in the base segment
  *
  *  @param[in] mq - Message queue to be associated with the block
- *  @param[in] va - Base virtual address of the block to be allocated
+ *  @param[in] va - Page aligned base virtual address of the block
+ *                  to be allocated
  *  @param[in] size - Requested virtual memory size of the block
  *
  *  @return int - 0 for successful block allocation, non-zero otherwise

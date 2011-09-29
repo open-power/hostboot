@@ -147,9 +147,16 @@ bool VmmManager::_pteMiss(task_t* t, uint64_t effAddr)
 
 int VmmManager::mmAllocBlock(MessageQueue* i_mq,void* i_va,uint64_t i_size)
 {
-    return BaseSegment::mmAllocBlock(i_mq,i_va,i_size);
+    return Singleton<VmmManager>::instance()._mmAllocBlock(i_mq,i_va,i_size);
 }
 
+int VmmManager::_mmAllocBlock(MessageQueue* i_mq,void* i_va,uint64_t i_size)
+{
+    lock.lock();
+    int rc = BaseSegment::mmAllocBlock(i_mq,i_va,i_size);
+    lock.unlock();
+    return rc;
+}
 
 Spinlock* VmmManager::getLock()
 {
@@ -169,12 +176,21 @@ uint64_t VmmManager::_findPhysicalAddress(uint64_t i_vaddr)
     return paddr;
 }
 
-int VmmManager::mmRemovePages(PAGE_REMOVAL_OPS i_op, void* i_vaddr,
-                              uint64_t i_size)
+int VmmManager::mmRemovePages(VmmManager::PAGE_REMOVAL_OPS i_op, void* i_vaddr,
+                              uint64_t i_size, task_t* i_task)
 {
-    return 0;
+    return Singleton<VmmManager>::instance()._mmRemovePages(i_op,i_vaddr,
+                                                            i_size,i_task);
 }
 
+int VmmManager::_mmRemovePages(VmmManager::PAGE_REMOVAL_OPS i_op,void* i_vaddr,
+                               uint64_t i_size,task_t* i_task)
+{
+    lock.lock();
+    int rc = BaseSegment::mmRemovePages(i_op,i_vaddr,i_size,i_task);
+    lock.unlock();
+    return rc;
+}
 
 int VmmManager::mmSetPermission(void* i_va, uint64_t i_size, uint64_t i_access_type)
 {

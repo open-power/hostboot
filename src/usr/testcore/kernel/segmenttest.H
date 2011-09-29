@@ -1,7 +1,7 @@
 //  IBM_PROLOG_BEGIN_TAG
 //  This is an automatically generated prolog.
 //
-//  $Source: src/usr/testcore/kernel/slbtest.H $
+//  $Source: src/usr/testcore/kernel/segmenttest.H $
 //
 //  IBM CONFIDENTIAL
 //
@@ -20,25 +20,23 @@
 //  Origin: 30
 //
 //  IBM_PROLOG_END
-#ifndef __SLBTEST_H
-#define __SLBTEST_H
+#ifndef __SEGMENTTEST_H
+#define __SEGMENTTEST_H
 /**
- *  @file slbtest.H
+ *  @file segmenttest.H
  *
- *  @brief Test cases for the segment lookaside buffers
+ *  @brief Test cases for the virtual memory segments
 */
 #include <cxxtest/TestSuite.H>
 #include <arch/ppc.H>
 #include <sys/time.h>
 #include <sys/task.h>
 #include <sys/mmio.h>
-#include <sys/mm.h>
+#include <usr/vmmconst.h>
 
-class slbtest: public CxxTest::TestSuite
+class segmenttest: public CxxTest::TestSuite
 {
     public:
-
-        static volatile int rc;
 
         void testDevSeg()
         {
@@ -96,67 +94,6 @@ class slbtest: public CxxTest::TestSuite
             }
         }
 
-        void testPageRemoval()
-        {
-            int rc = -1;
-            uint64_t va = 0xC800000000; //800GB
-            uint64_t size = 0x100000; //1MB
-            rc = mm_remove_pages(FLUSH,reinterpret_cast<void*>(va),size);
-            if (rc != 0)
-            {
-                TS_FAIL("Failed to remove pages\n");
-	    }
-	}
-
-        void testSetPerm()
-        {
-            int rc = 1;
-            uint64_t va = 0xC800000000; //800GB
-            uint64_t size = 0x0;
-            uint64_t access = (uint64_t)(WRITABLE | ALLOCATE_FROM_ZERO); //Access value
-            printkd("Update Page Permissions. Writable/Allocate from zero to addr 800Gb and size = 0 \n");
-            rc = mm_set_permission(reinterpret_cast<void*>(va), size, access);
-            if (rc != 0)
-            {
-                TS_FAIL(" 1   Failed to Update permissions.\n");
-            }
-
-            rc = 1;
-            size = PAGESIZE * 3;
-            access = (uint64_t)(WRITE_TRACKED); //Access value
-            printkd("Update Page Permissions. write_tracked to addr 800Gb and size = 3 pages\n");
-            rc = mm_set_permission(reinterpret_cast<void*>(va), size, access);
-            if (rc != 0)
-            {
-                TS_FAIL("2    Failed to Update permissions.\n");
-            }
-            rc = 1;
-            va = 0xC800000000 + (PAGESIZE * 10);
-            size = PAGESIZE * 2;
-            access = (uint64_t)(EXECUTABLE); //Access value
-            printkd("Update Page Permissions. executable to addr C800A000 and size = 2 pages\n");
-            rc = mm_set_permission(reinterpret_cast<void*>(va), size, access);
-            if (rc != 0)
-            {
-                TS_FAIL("3   Failed to Update permissions.\n");
-            }
-            rc = 0;
-            va = 0xC800000000; //800GB
-            size = 0x0;
-            access = (uint64_t)(WRITABLE | EXECUTABLE); //Access value
-            printkd("Update Page Permissions. Writable/executable to addr 800Gb and size = 0 \n");
-            rc = mm_set_permission(reinterpret_cast<void*>(va), size, access);
-            if (rc == 0)
-            {
-                printk("Error .. invalid combination that did not get detected\n");
-                TS_FAIL(" 4   Failed to detect a bad parm condition.\n");
-            }
-
-	}
-
-    private:
-
 };
-volatile int slbtest::rc = 0;
 
 #endif

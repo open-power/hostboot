@@ -27,6 +27,8 @@
 
 #include <sys/msg.h>
 
+#include <util/align.H>
+
 #include <kernel/block.H>
 #include <kernel/spte.H>
 #include <kernel/vmmmgr.H>
@@ -39,6 +41,9 @@ Block::~Block()
 {
     // Release shadow PTE array.
     delete[] iv_ptes;
+    //Release message handlers
+    delete iv_readMsgHdlr;
+    delete iv_writeMsgHdlr;
 
     // Delete next block in the chain.
     if (iv_nextBlock)
@@ -51,11 +56,14 @@ void Block::init(MessageQueue* i_msgQ)
 {
     // Create a shadow PTE for each page.
     iv_ptes = new ShadowPTE[iv_size / PAGESIZE];
-    this->iv_msgHdlr = NULL;
     if (i_msgQ != NULL)
     {
-        //Create message handler attribute for this block with this msgq
-        this->iv_msgHdlr = new BlockMsgHdlr(VmmManager::getLock(),i_msgQ,this);
+        //Create message handler to handle read operations for this block
+        this->iv_readMsgHdlr =
+                new BlockReadMsgHdlr(VmmManager::getLock(),i_msgQ,this);
+        //Create message handler to handle write operations for this block
+        this->iv_writeMsgHdlr =
+                new BlockWriteMsgHdlr(VmmManager::getLock(),i_msgQ,this);
     }
 }
 
@@ -80,7 +88,7 @@ bool Block::handlePageFault(task_t* i_task, uint64_t i_addr)
 
     if (!pte->isPresent())
     {
-        if (this->iv_msgHdlr != NULL)
+        if (this->iv_readMsgHdlr != NULL)
         {
             void* l_page = reinterpret_cast<void*>(pte->getPageAddr());
             //If the page data is zero, create the page
@@ -94,7 +102,7 @@ bool Block::handlePageFault(task_t* i_task, uint64_t i_addr)
                 pte->setWritable(true);
             }
             //Send message to handler to read page
-            this->iv_msgHdlr->sendMessage(MSG_MM_RP_READ,
+            this->iv_readMsgHdlr->sendMessage(MSG_MM_RP_READ,
                     reinterpret_cast<void*>(l_addr_palign),l_page,i_task);
             //Done(waiting for response)
             return true;
@@ -406,7 +414,6 @@ size_t Block::castOutPages(uint64_t i_type)
     return cast_out;
 }
 
-
 int Block::mmSetPermission(uint64_t i_va, uint64_t i_size,uint64_t i_access_type)
 {
  int l_rc = 0;
@@ -508,5 +515,75 @@ int Block::mmSetPermission(uint64_t i_va, uint64_t i_size,uint64_t i_access_type
 
  }
  return l_rc;
+}
 
+int Block::removePages(VmmManager::PAGE_REMOVAL_OPS i_op, void* i_vaddr,
+                                 uint64_t i_size, task_t* i_task)
+{
+    uint64_t l_vaddr = reinterpret_cast<uint64_t>(i_vaddr);
+    //Align virtual address & size to page boundary
+    /*The given virtual address will be 'rounded' down to the nearest page
+      boundary, along with the given size will be 'rounded' up to the
+      nearest divisible page size.*/
+    uint64_t l_aligned_va = ALIGN_PAGE_DOWN(l_vaddr);
+    uint64_t l_aligned_size = ALIGN_PAGE(i_size);
+    //Find block containing virtual address
+    if(!this->isContained(l_aligned_va))
+    {
+        return (iv_nextBlock ?
+                iv_nextBlock->removePages(i_op,i_vaddr,i_size,i_task):-EINVAL);
+    }
+    else if ((l_aligned_va+l_aligned_size) > (this->iv_baseAddr+this->iv_size))
+    {
+        return -EINVAL;
+    }
+
+    //Perform requested page removal operation
+    for (l_vaddr = l_aligned_va;l_vaddr < (l_aligned_va+l_aligned_size);
+         l_vaddr+= PAGESIZE)
+    {
+        ShadowPTE* pte = getPTE(l_vaddr);
+        uint64_t pageAddr = pte->getPageAddr();
+        if (pte->isPresent() && (0 != pageAddr))
+        {
+            //Delete from HW page table immediately
+            PageTableManager::delEntry(l_vaddr);
+            if (pte->isDirty() && pte->isWriteTracked() &&
+                this->iv_writeMsgHdlr != NULL)
+            {
+                releasePTE(pte);
+                //Send write msg with the page address
+                if (i_task != NULL)
+                {
+                    this->iv_writeMsgHdlr->incMsgCount(i_task);
+                }
+                this->iv_writeMsgHdlr->addVirtAddr(
+                        reinterpret_cast<void*>(l_vaddr),pageAddr);
+                this->iv_writeMsgHdlr->sendMessage(MSG_MM_RP_WRITE,
+                        reinterpret_cast<void*>(l_vaddr),
+                        reinterpret_cast<void*>(pageAddr),i_task);
+            }
+            else if (pte->isDirty() && !pte->isWriteTracked() &&
+                     i_op == VmmManager::EVICT)
+            {
+                //Leave as 'printk' to note page was skipped
+                printk("Block::removePages >> Unable to EVICT ");
+                printk("dirty page thats not write tracked: ");
+                printk("va: 0x%.16lX, pa: 0x%.16lX \n",l_vaddr, pageAddr);
+            }
+            else if (i_op != VmmManager::FLUSH)
+            {
+                //'Release' page entry
+                releasePTE(pte);
+                PageManager::freePage(reinterpret_cast<void*>(pageAddr));
+            }
+        }
+    }
+    return 0;
+}
+
+void Block::releasePTE(ShadowPTE* i_pte)
+{
+    i_pte->setPresent(false);
+    i_pte->setPageAddr(NULL);
 }

@@ -68,7 +68,7 @@ class BaseSegment : public Segment
 
         /**
          * @brief Implementation of the pure-virtual function from Segment.
-         *        Update LRU statistics on the block that owns the address         *
+         *        Update LRU statistics on the block that owns the address
          *
          * @param[in] i_vaddr - Virtual Address of page
          * @param[in] i_stats - Usage statistics
@@ -79,7 +79,8 @@ class BaseSegment : public Segment
         /**
          * @brief Allocates a block of virtual memory of the given size
          * @param i_mq[in] - Message queue to be associated with the block
-         * @param i_va[in] - Base virtual address of the block to be allocated
+         * @param i_va[in] - Page aligned base virtual address of the block
+         *                   to be allocated
          * @param i_size[in] - Requested virtual memory size of the block
          * @return int - 0 for successful block allocation, non-zero otherwise
          */
@@ -92,7 +93,18 @@ class BaseSegment : public Segment
          * @return the physical address bound to the virtual address, or
          *         -EFAULT if i_vaddr not found. @see errno.h
          */
-         virtual uint64_t findPhysicalAddress(uint64_t i_vaddr) const;
+        virtual uint64_t findPhysicalAddress(uint64_t i_vaddr) const;
+
+        /**
+         * @brief Remove pages by a specified operation of the given size
+         * @param[in] i_op - Page removal operation to perform
+         * @param[in] i_vaddr - Virtual address associated to page(s)
+         * @param[in] i_size - Size of memory to perform page removal on
+         * @param[in] i_task - Task requesting page removal.
+         * @return int - 0 for successful page removal, non-zero otherwise
+         */
+        static int mmRemovePages(VmmManager::PAGE_REMOVAL_OPS i_op,
+                void* i_vaddr, uint64_t i_size, task_t* i_task);
 
         /**
          * @brief Sets the page permissions for a given virtual address and size.
@@ -146,6 +158,16 @@ class BaseSegment : public Segment
                                  uint64_t i_size,
                                  uint64_t i_access_type);
 
+        /**
+         * @brief Remove pages by a specified operation of the given size
+         * @param[in] i_op - Page removal operation to perform
+         * @param[in] i_vaddr - Virtual address associated to page(s)
+         * @param[in] i_size - Size of memory to perform page removal on
+         * @param[in] i_task - Task requesting page removal.
+         * @return int - 0 for successful page removal, non-zero otherwise
+         */
+        int _mmRemovePages(VmmManager::PAGE_REMOVAL_OPS i_op, void* i_vaddr,
+                uint64_t i_size, task_t* i_task);
 
 };
 

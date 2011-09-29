@@ -118,7 +118,8 @@ int BaseSegment::_mmAllocBlock(MessageQueue* i_mq,void* i_va,uint64_t i_size)
     //Verify input address and size falls within this segment's address range
     if (l_vaddr < this->getBaseAddress() ||
         l_vaddr >= (this->getBaseAddress() + (1ull << SLBE_s)) ||
-        (l_blockSizeTotal + ALIGN_PAGE(i_size)) >= (1ull << SLBE_s))
+        (l_blockSizeTotal + ALIGN_PAGE(i_size)) >= (1ull << SLBE_s) ||
+        (l_vaddr != ALIGN_PAGE_DOWN(l_vaddr)))
     {
         return -EINVAL;
     }
@@ -197,4 +198,26 @@ void BaseSegment::castOutPages(uint64_t i_type)
     cast_out = iv_block->castOutPages(i_type);
     // Could try again with a more agressive constraint if cast_out == 0 ????
     if(cast_out) printkd("Cast out %ld pages,Type=%ld\n",cast_out,i_type);
+}
+/**
+ * STATIC
+ * Remove pages by a specified operation of the given size
+ */
+int BaseSegment::mmRemovePages(VmmManager::PAGE_REMOVAL_OPS i_op,
+                               void* i_vaddr, uint64_t i_size, task_t* i_task)
+{
+    return Singleton<BaseSegment>::instance()._mmRemovePages(i_op,i_vaddr,
+                                                             i_size,i_task);
+}
+
+/**
+ * Remove pages by a specified operation of the given size
+ */
+int BaseSegment::_mmRemovePages(VmmManager::PAGE_REMOVAL_OPS i_op,
+                                void* i_vaddr, uint64_t i_size, task_t* i_task)
+{
+    //Don't allow removal of pages for base block
+    return (iv_block->iv_nextBlock ?
+            iv_block->iv_nextBlock->removePages(i_op,i_vaddr,i_size,i_task):
+            -EINVAL);
 }

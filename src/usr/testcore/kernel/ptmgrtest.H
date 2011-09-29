@@ -96,7 +96,7 @@ class ptmgrtest : public CxxTest::TestSuite
     void test_hash40( void )
     {
         TS_TRACE( ">> ptmgrtest::test_hash40 <<" );
-        uint64_t fails, total = 0;
+        uint64_t fails = 0, total = 0;
 
         // Initialize the Page Table
         PageTableManager* ptmgr = new PageTableManager(true);

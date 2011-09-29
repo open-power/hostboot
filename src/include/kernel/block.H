@@ -72,7 +72,7 @@ class Block
               MessageQueue* i_msgQueue = NULL) :
                 iv_baseAddr(i_baseAddr), iv_size(i_size),
                 iv_parent(NULL), iv_nextBlock(NULL), iv_ptes(NULL),
-                iv_msgHdlr(NULL)
+                iv_readMsgHdlr(NULL), iv_writeMsgHdlr(NULL)
             { init(i_msgQueue); };
 
         /**
@@ -117,23 +117,6 @@ class Block
         bool handlePageFault(task_t* i_task, uint64_t i_addr);
 
         /**
-         * @brief Sets the 'present' bit within the Shadow page table
-         *
-         * @param[in] i_vaddr - Virtual address within the Shadow page table
-         */
-        void setIsPresent(void* i_vaddr);
-
-        /**
-         * @brief Adds the page table entry for the given address
-         *
-         * @param[in] i_vaddr - Virtual address to add to the page table
-         *
-         * The permissions set within the Shadow page table are used for
-         * this address
-         */
-        void addPTE(void* i_vaddr);
-
-        /**
          * @brief Locate the physical address of the given virtual address
          *
          * @param[in] i_vaddr virtual address
@@ -171,9 +154,22 @@ class Block
          */
         bool evictPage(ShadowPTE* i_pte);
 
+        /**
+         * @brief Removes a range of pages within a block of virtual memory
+         * @param[in] i_op - Page removal operation to perform
+         * @param[in] i_vaddr - Virtual address associated to page(s)
+         * @param[in] i_size - Size of memory to perform page removal on
+         * @param[in] i_task - Task requesting page removal.
+         * @return int - 0 for successful page removal, non-zero otherwise
+         */
+        int removePages(VmmManager::PAGE_REMOVAL_OPS i_op, void* i_vaddr,
+                        uint64_t i_size, task_t* i_task);
+
         friend class Segment;
         friend class BaseSegment;
         friend class StackSegment;
+        friend class BlockReadMsgHdlr;
+        friend class BlockWriteMsgHdlr;
 
     protected:
         /**
@@ -248,6 +244,30 @@ class Block
          */
         int mmSetPermission(uint64_t i_va, uint64_t i_size, uint64_t i_access_type);
 
+        /**
+         * @brief Adds the page table entry for the given address
+         *
+         * @param[in] i_vaddr - Virtual address to add to the page table
+         *
+         * The permissions set within the Shadow page table are used for
+         * this address
+         */
+        void addPTE(void* i_vaddr);
+
+        /**
+         * @brief Sets the 'present' bit within the Shadow page table
+         *
+         * @param[in] i_vaddr - Virtual address within the Shadow page table
+         */
+        void setIsPresent(void* i_vaddr);
+
+        /**
+         * @brief Effectively removes the given page table entry from the
+         * shadow page table
+         * @param[in] i_pte - Shadow page table entry to release
+         */
+        void releasePTE(ShadowPTE* i_pte);
+
     private:
             /** Base address of the block */
         const uint64_t iv_baseAddr;
@@ -261,8 +281,10 @@ class Block
 
             /** Pointer to the Shadow PTE entries. */
         ShadowPTE* iv_ptes;
-            /** Pointer to the message handler */
-        BlockMsgHdlr* iv_msgHdlr;
+            /** Pointer to message handler(read) */
+        BlockReadMsgHdlr* iv_readMsgHdlr;
+            /** Pointer to message handler(write) */
+        BlockWriteMsgHdlr* iv_writeMsgHdlr;
 
         /**
          * @brief Finish initialization of block.
@@ -285,7 +307,6 @@ class Block
          * @note This function does no bounds checking.
          */
         ShadowPTE* getPTE(uint64_t i_addr) const;
-
 
         Block(const Block&);  // prohibit copy.
         Block& operator=(const Block&);  // prohibit assignment.

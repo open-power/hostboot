@@ -61,6 +61,23 @@ class VmmManager
             CRITICAL,
         };
 
+        /**
+         * Kernel mapped page removal operations
+         *
+         * RELEASE : Writes dirty&write-tracked pages out to a storage device
+         *           and removes other pages
+         * FLUSH   : Only writes dirty&write-tracked pages out to a storage
+         *           device
+         * EVICT   : (Kernel) Writes dirty&write-tracked pages out to a storage
+         *           device and removes other pages
+         */
+        enum PAGE_REMOVAL_OPS
+        {
+            RELEASE = 0,
+            FLUSH = 1,
+            EVICT = 2,
+        };
+
         static void init();
         static void init_slb();
 
@@ -98,7 +115,8 @@ class VmmManager
         /**
          * @brief Allocates a block of virtual memory of the given size
          * @param i_mq[in] - Message queue to be associated with the block
-         * @param i_va[in] - Base virtual address of the block to be allocated
+         * @param i_va[in] - Page aligned base virtual address of the block
+         *                   to be allocated
          * @param i_size[in] - Requested virtual memory size of the block
          * @return int - 0 for successful block allocation, non-zero otherwise
          */
@@ -127,14 +145,19 @@ class VmmManager
          * @param[in] i_op - Page removal operation to perform
          * @param[in] i_vaddr - Virtual address associated to page(s)
          * @param[in] i_size - Size of memory to perform page removal on
+         * @param[in] i_task - OPTIONAL:Task requesting page removal.
          * @return int - 0 for successful page removal, non-zero otherwise
          *
          * The given virtual address will be 'rounded' down to the nearest page
          * boundary, along with the given size will be 'rounded' up to the
          * nearest divisible page size.
+         *
+         * When a task is given, it will be deferred until all pages requested
+         * for removal have completed.
          */
-        static int mmRemovePages(PAGE_REMOVAL_OPS i_op, void* i_vaddr,
-                                 uint64_t i_size);
+        static int mmRemovePages(VmmManager::PAGE_REMOVAL_OPS i_op,
+                                 void* i_vaddr, uint64_t i_size,
+                                 task_t* i_task = NULL);
         /**
          * @brief Sets the permissions for a given page or range of pages
          * @param i_va[in] - Virtual address of the page to update permission
@@ -179,6 +202,13 @@ class VmmManager
 
         /** See flushPageTable */
         void _flushPageTable( void );
+
+        /** See mmAllocBlock */
+        int _mmAllocBlock(MessageQueue* i_mq,void* i_va,uint64_t i_size);
+
+        /** See mmRemovePages */
+        int _mmRemovePages(VmmManager::PAGE_REMOVAL_OPS i_op,void* i_vaddr,
+                           uint64_t i_size,task_t* i_task);
 
     public:
         friend class Block;

@@ -516,11 +516,12 @@ namespace Systemcalls
      */
     void MmRemovePages(task_t* t)
     {
-        PAGE_REMOVAL_OPS oper = (PAGE_REMOVAL_OPS)TASK_GETARG0(t);
+        VmmManager::PAGE_REMOVAL_OPS oper =
+                (VmmManager::PAGE_REMOVAL_OPS)TASK_GETARG0(t);
         void* vaddr = (void*)TASK_GETARG1(t);
         uint64_t size = (uint64_t)TASK_GETARG2(t);
 
-        TASK_SETRTN(t, VmmManager::mmRemovePages(oper,vaddr,size));
+        TASK_SETRTN(t, VmmManager::mmRemovePages(oper,vaddr,size,t));
     }
 
      /**
