@@ -672,7 +672,7 @@ void PageTableManager::writePTE( PageTableEntry* i_pte,
         asm volatile("ptesync" ::: "memory");
 
         // tlbie, eieio, tlbsync, ptesync
-        invalidateTLB(i_pte);
+        invalidateTLB(i_dest);
 
         // if we're removing an entry we can ignore the other fields
         if( i_valid )
@@ -987,11 +987,15 @@ void PageTableManager::invalidateTLB( PageTableEntry* i_pte )
 
     if( ivTABLE == NULL )
     {
+        // TLBIE's AVA is 14:65 of the original VA (!= pte->AVA)
+        uint64_t tlbie_ava = EXTRACT_RJ_LEN(
+                              getVirtAddrFromPTE(i_pte), 78, 14, 65 );
+
         /*invalidate old translation*/
         //tlbie(old_B,old_VA[14:77-b],old_L,old_LP,old_AP,old_LPID);
         // TLBIE isn't correct in gcc, hand code asm.
         register uint64_t rS = 0, rB = 0;
-        rB = (i_pte->AVA * 0x000FFFFFFFFFFFFF) << 12; // Put in rB[0:51]
+        rB = (tlbie_ava & 0x000FFFFFFFFFFFFF) << 12; // Put in rB[0:51]
         rB |= 0x0100; // B = 01 (1TB).
         asm volatile(".long 0x7c000264 | (%0 << 11) | (%1 << 21)" ::
                      "r"(rB), "r"(rS) : "memory");
