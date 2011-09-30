@@ -36,6 +36,7 @@
 enum
 {
     ERRL_FIRST_MODULE_ID        = 0x00,
+    ERRL_USERDETAILS_MODULE_ID,
     //........
     ERRL_LAST_MODULE_ID         = 0xFF
 };
@@ -44,6 +45,8 @@ enum
 enum errlReasonCode
 {
     ERRL_FIRST_ERR          = ERRL_COMP_ID | 0x01,
+    ERRL_ADDTOLOG_FAIL      = ERRL_COMP_ID | 0x02,
+    ERRL_APPENDTOLOG_FAIL   = ERRL_COMP_ID | 0x03,
     //........
     ERRL_LAST_ERR           = ERRL_COMP_ID | 0xFF
 };

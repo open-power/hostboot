@@ -31,6 +31,16 @@
  *  is used to log errors from all firmware running in Host Boot environment.
  *
  */
+/**
+ * @page    errlog  Error Log
+ *
+ * @section Base Error Log
+ *  See Host Boot Error Logging LLDD, Version 0.7  09/01/2011
+ *
+ * @section Adding User-Defined error blocks
+ *
+ *
+ */
 
 /*****************************************************************************/
 // I n c l u d e s
@@ -44,6 +54,7 @@
 #include <errl/errlsrc.H>
 #include <errl/errlud.H>
 #include <hbotcompid.H>
+
 
 namespace ERRORLOG
 {
@@ -278,7 +289,7 @@ public:
 
 
    /**
-     * @brief Allows the caller to add a chunk of data in a log
+     * @brief Allows the caller to add a chunk of FFDC data in a log
      *
      * @param[in]   i_compId         Component Id of the caller
      * @param[in]   i_dataPtr        Pointer to FFDC data
@@ -314,7 +325,6 @@ public:
     void appendToFFDC( ErrlUD * i_pErrlUD,
                        const void *i_dataPtr,
                        const uint32_t i_dataLen);
-
 
 
     /**

@@ -36,19 +36,18 @@ DIRECT_BOOT_OBJECTS = start.o kernel.o taskmgr.o cpumgr.o syscall.o \
                       syscall_msg.o syscall_mmio.o syscall_time.o \
                       syscall_mm.o init_main.o vfs_main.o sync.o futexmgr.o \
                       ptmgr.o segmentmgr.o basesegment.o devicesegment.o \
-		      block.o cxxtest_data.o cpuid.o misc.o msghandler.o \
-		      blockmsghdlr.o stacksegment.o softpatch_p7.o
+                      block.o cxxtest_data.o cpuid.o misc.o msghandler.o \
+                      blockmsghdlr.o stacksegment.o softpatch_p7.o
 
 ## STUB_TESTCASE_OBJECT = cxxtest_stub.o
 
 RUNTIME_OBJECTS =
 
-BASE_MODULES = trace errl devicefw scom xscom initservice taskargs pnor i2c \
-               vfs 
-
+BASE_MODULES = trace errl devicefw scom xscom initservice taskargs \
+               pnor i2c  fsi vfs
 
 EXTENDED_MODULES = targeting ecmddatabuffer hwpf fapi hwp plat	\
-                   extinitsvc istepdisp hwas fsiscom fsi
+                   extinitsvc istepdisp hwas fsiscom
 
 DIRECT_BOOT_MODULES = example
 RUNTIME_MODULES =

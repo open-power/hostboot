@@ -38,6 +38,7 @@
 #include <trace/interface.H>
 #include <arch/ppc.H>
 
+
 namespace ERRORLOG
 {
 
@@ -59,6 +60,7 @@ ErrlEntry::ErrlEntry(const errlSeverity_t i_sev,
     iv_Src( SRC_ERR_INFO, i_modId, i_reasonCode, i_user1, i_user2 ),
     iv_termState(TERM_STATE_UNKNOWN)
 {
+
 
 }
 
@@ -131,8 +133,6 @@ void ErrlEntry::appendToFFDC(ErrlUD * i_pErrlUD,
 }
 
 
-
-
 ///////////////////////////////////////////////////////////////////////////////
 // Return a Boolean indication of success.
 
@@ -143,8 +143,8 @@ bool ErrlEntry::collectTrace(const char i_name[], const uint32_t i_max)
     do
     {
         // By passing nil arguments, obtain the size of the buffer.
-        uint64_t l_cbFull = TRACE::Trace::getTheInstance().getBuffer( i_name, 
-                                                                      NULL, 
+        uint64_t l_cbFull = TRACE::Trace::getTheInstance().getBuffer( i_name,
+                                                                      NULL,
                                                                       0 );
         if( 0 == l_cbFull )
         {
@@ -153,14 +153,14 @@ bool ErrlEntry::collectTrace(const char i_name[], const uint32_t i_max)
             break;
         }
 
-        if( 0 == i_max ) 
+        if( 0 == i_max )
         {
             // Full trace buffer desired. Allocate the buffer.
             char l_traceBuffer[ l_cbFull ];
 
             // Get the data into the buffer.
-            TRACE::Trace::getTheInstance().getBuffer( i_name, 
-                                                      l_traceBuffer, 
+            TRACE::Trace::getTheInstance().getBuffer( i_name,
+                                                      l_traceBuffer,
                                                       l_cbFull );
 
             // Save the trace buffer as a UD section on this.
@@ -170,7 +170,7 @@ bool ErrlEntry::collectTrace(const char i_name[], const uint32_t i_max)
                                                ERRL_UDV_DEFAULT_VER_1,
                                                ERRL_UDT_TRACE );
 
-            // Add the trace section to the vector of sections 
+            // Add the trace section to the vector of sections
             // for this error log.
             iv_SectionVector.push_back( l_udSection );
 

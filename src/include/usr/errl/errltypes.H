@@ -34,6 +34,7 @@
  *  on pool machines, so the stuff in here needs to be generic.
  *
  */
+#include <hbotcompid.H>             // compId_t
 
 /**
  * @brief Pointer to an ErrlEntry object
@@ -83,7 +84,7 @@ namespace ERRORLOG
 
 /**
  *    @brief Scope is found in user header section.
- 
+
  */
 enum errlScope_t
 {
@@ -157,10 +158,10 @@ enum errlSectionId_t
 /**
  * @brief Enumeration of error log severity.
  * Needs to fit into 1 byte for flattening purposes.
- * 
+ *
  * Severity resides in the user header of the PEL log.
- * 
- * Refer to this ErrlEntry setter: 
+ *
+ * Refer to this ErrlEntry setter:
  * void ErrlEntry::setSev(const errlSeverity_t i_sev)
  */
 enum errlSeverity_t
@@ -177,9 +178,9 @@ enum errlSeverity_t
 /**
  * @brief Event (error) type
  * Needs to fit into 1 byte for flattening purposes.
- * 
+ *
  * Event type resides in user header of PEL log.
- * 
+ *
  * Refer to this ErrlEntry setter:
  * void ErrlEntry::setEventType(const errlEventType_t i_eventType)
  */
@@ -200,10 +201,10 @@ enum errlEventType_t
 /**
  * @brief SRC type definitions
  * Needs to fit into 1 byte for flattening purposes.
- * 
+ *
  * This represents the byte in an SRC in position
  * XX......  such as B1 in B181F00B.
- * 
+ *
  * Refer to errlentry.H and this setter:
  * void ErrlEntry::setSrcType(const srcType_t i_srcType)
  *
@@ -224,8 +225,8 @@ enum srcType_t
  * Needs to fit into 1 byte for flattening purposes.
  * This represents the byte in an SRC in position
  * ..XX....  such as 81 in B181F00B.
- * 
- * Refer to errentry.H and this setter: 
+ *
+ * Refer to errentry.H and this setter:
  * void ErrlEntry::setSubSys(const epubSubSystem_t i_subSys);
  */
 enum epubSubSystem_t
@@ -297,9 +298,22 @@ enum errlUserDataVersion
  */
 const uint32_t ERRL_STORAGE_SIZE = 65536;
 
+/**
+ *
+ *  @typedef    version number
+ *      version number of the user data
+ */
+typedef uint8_t errlver_t;
+
+/**
+ * @typedef errlsubsec_t
+ *      errorlog subsection id of the user data
+ */
+typedef uint8_t errlsubsec_t;
 
 
 /**
+
  * @brief The RAM storage for committed error logs starts with this
  * header.  This structure is org'ed at &g_ErrlStorage[0].  All
  * offsets are based from &g_achErrlStorage[0], so the first

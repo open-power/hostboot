@@ -73,9 +73,9 @@ public:
         // the two 64-bit user data parameters in the error log.
         // l_userData1 = 16bit(0):l_bit8_1:l_bit8_2:l_32bit_1
         uint8_t l_8bit_1 = TEST_USR_8BIT_1;      // 0x80
-        uint8_t l_8bit_2 = TEST_USR_8BIT_2;      // 0x93 
+        uint8_t l_8bit_2 = TEST_USR_8BIT_2;      // 0x93
         uint32_t l_32bit_1 = TEST_USR_32BIT_1;   // 0x80000001
-        uint64_t l_userData1 = 
+        uint64_t l_userData1 =
           TWO_UINT32_TO_UINT64( TO_UINT32(TWO_UINT8_TO_UINT16(l_8bit_1, l_8bit_2)), l_32bit_1);
             // yields 0x0000809380000001
 
@@ -114,14 +114,14 @@ public:
             TS_FAIL("testErrl1: addFFDC() output NULL pointer");
         }
 
-        pch = "george washington"; 
+        pch = "george washington";
         pffdc = l_err->addFFDC( DEVFW_COMP_ID, pch, strlen( pch ), 3, 4 );
         if ( NULL == pffdc )
         {
             TS_FAIL("testErrl1: addFFDC() output NULL pointer");
         }
 
-        pch = "dwight eisenhour";  
+        pch = "dwight eisenhour";
         pffdc = l_err->addFFDC( SCOM_COMP_ID, pch, strlen( pch ), 5, 6 );
         if ( NULL == pffdc )
         {
