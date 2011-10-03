@@ -276,7 +276,7 @@ tracepp replaces trace_adal_hash() with hash value and reduced format string
  * buffer to write to.
  *
  * @param des This is assigned by this function.
- * @param comp_name This is the four character name of the component requesting
+ * @param comp_name This is the 15 character name of the component requesting
  *                  the trace buffer.
  * @param bufferSize Requested length of the buffer, if 0 is entered the user will
  *                   get default buffer size.

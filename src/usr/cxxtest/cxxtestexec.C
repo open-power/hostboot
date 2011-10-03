@@ -70,9 +70,13 @@ void _start(void *io_pArgs)
     TaskArgs::TaskArgs *pTaskArgs  =
             reinterpret_cast<TaskArgs::TaskArgs *>(io_pArgs);
 
+    // output a blank line so that it's easier to find the beginning of
+    //  CxxTest
+    TRACDCOMP( g_trac_cxxtest, " ");
+    TRACDCOMP( g_trac_cxxtest, " ");
 
     // count up the number of viable modules ahead of time
-    TRACDCOMP( g_trac_cxxtest, "Counting CxxTextExec modules:" );
+    TRACDCOMP( g_trac_cxxtest, "Counting CxxTestExec modules:" );
 
     VFS::find_test_modules(module_list);
 
@@ -80,8 +84,10 @@ void _start(void *io_pArgs)
 
 
     //  start executing the CxxTest modules
+
     TRACDCOMP( g_trac_cxxtest, ENTER_MRK "Execute CxxTestExec, totalmodules=%d.",
             totalmodules);
+    printkd( "\n Begin CxxTest...\n");
 
     // set barrier for all the modules being started, plus this module
     barrier_init( &CxxTest::g_CxxTestBarrier, totalmodules+1 );

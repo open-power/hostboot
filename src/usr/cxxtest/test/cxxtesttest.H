@@ -58,6 +58,7 @@ public:
         uint64_t    l_bighex =  0x1234567890abcdef;
         l_bighex--; l_bighex++;
 
+        TS_TRACE( "CxxTest Trace" );
         TS_TRACE( "CxxTest Trace dec=%d",      l_dec );
         TS_TRACE( "CxxTest Trace hex=0x%x",    l_hex );
         TS_TRACE( "CxxTest Trace bighex=0x%llx",  l_bighex );

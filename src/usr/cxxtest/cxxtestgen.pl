@@ -654,15 +654,15 @@ sub writeHostBootSuites() {
   my  ( $suitecount, $suitevar, $testcount );
 
   $suitecount   =   1;                          #   initialize suite count
-  $testcount    =   0;                          #   initialize test count
+
   
   ## $$TODO print   "\tTaskArgs    *pTaskArgs  = (TaskArgs *)ptr;\n";
 
   foreach (@suites) {
     $suite = $_;
-
     $suitevar   =   "l_ex$suitecount";          #   Make up the suite variable name
-
+    $testcount  =   0;                          #   0 test count between each suite
+  
     ## writeInclude(fileName());
 
     if ( $debug )   {
@@ -693,7 +693,7 @@ sub writeHostBootSuites() {
     ##  run each of the tests in the list
     foreach (@{suiteTests()}) {
         $test = $_;
-        if ( $debug )   {   print   "\tprintk(\"Executing test module ", testName(), ".\\n\");\n";  }
+        print   "\tprintkd(\"CxxTest: Executing ", suiteName(), " ", testName(), ".\\n\");\n";
         printf "\t$suitevar->%s();\n\n", testName();
         $testcount++;
     }
@@ -712,8 +712,9 @@ sub writeHostBootSuites() {
     print "\tCxxTest::reportTotalTests( \"", suiteName(), "\", $testcount );\n";
     print   "\n";
 
+
     $suitecount++;                            # bump to the next suite
-  }
+  } ## end foreach
 }
 
 ##
