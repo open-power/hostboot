@@ -56,6 +56,30 @@ struct context_fp_t
     uint64_t fpscr;
 };
 
+enum task_states
+{
+        /** Task is currently running. */
+    TASK_STATE_RUNNING          = 'R',
+        /** Task is on scheduler queue ready to run. */
+    TASK_STATE_READY            = 'r',
+        /** Task has ended or crashed. */
+    TASK_STATE_ENDED            = 'E',
+
+        /** Task is blocked on a futex. */
+    TASK_STATE_BLOCK_FUTEX      = 'f',
+        /** Task is blocked on a message queue. */
+    TASK_STATE_BLOCK_MSG        = 'M',
+        /** Task is defered due to a kernel->userspace request. */
+    TASK_STATE_BLOCK_USRSPACE   = 'u',
+        /** Task is blocked sleeping. */
+    TASK_STATE_BLOCK_SLEEP      = 's',
+        /** Task is blocked on join. */
+    TASK_STATE_BLOCK_JOIN       = 'j',
+};
+
+    // Forward declaration.
+struct task_tracking_t;
+
 /** @struct task_t
  *  @brief The kernel-level task structure.
  */
@@ -76,12 +100,23 @@ struct task_t
          *  as been requested, so pinning can be used recursively. */
     uint64_t affinity_pinned;
 
+        /** State of task */
+    task_states state;
+        /** Extra info about the state.
+         *  This is used when the task is blocked to give a pointer to the
+         *  object the task is blocked on. */
+    void* state_info;
+
+        /** Pointer to tracking tree for joining, parent info, etc. */
+    task_tracking_t* tracker;
+
+        /** Detached state of the task. */
+    bool detached;
+
         // Pointers for queue containers.
     task_t* prev;
     task_t* next;
 };
-
-enum { TASK_DEFAULT_STACK_SIZE = 4 };
 
 // Macros for manipulating task's saved contexts.
 #define TASK_GETARGN(t, n) (t->context.gprs[n+4])

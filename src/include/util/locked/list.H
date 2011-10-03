@@ -46,6 +46,9 @@ namespace Util
 
 		_T* find(_K& key) const;
 
+                bool empty();
+                _T* begin();
+
 	    protected:
 		_T* head;
 		_T* tail;
@@ -55,6 +58,31 @@ namespace Util
 		void __lock() const;
 		void __unlock() const;
 	};
+
+        // SFINAE template to ensure compile fails if functions which are not
+        // SMP-safe are used on a 'locked' instance.
+        template<bool locked>
+        class __verify_list_is_smp_safe
+        {
+            public:
+                __verify_list_is_smp_safe()
+                {
+                    class __util_locked_list_is_not_smp_safe;
+                    __util_locked_list_is_not_smp_safe();
+                }
+        };
+
+        // SFINAE template implementation to allow certain functions when the
+        // instance is not 'locked', assuming that caller is ensuring safety
+        // in some other way.
+        template<>
+        class __verify_list_is_smp_safe<false>
+        {
+            public:
+                __verify_list_is_smp_safe()
+                {
+                }
+        };
 
 	template <typename _T, typename _K, bool locked, typename _S>
 	_T* List<_T,_K,locked,_S>::remove()
@@ -169,6 +197,31 @@ namespace Util
 
 	    return node;
 	}
+
+        template <typename _T, typename _K, bool locked, typename _S>
+        bool List<_T, _K,locked,_S>::empty()
+        {
+            bool isEmpty = false;
+
+            __lock();
+            isEmpty = (head == NULL);
+            __unlock();
+
+            return isEmpty;
+        }
+
+        template <typename _T, typename _K, bool locked, typename _S>
+        _T* List<_T, _K,locked,_S>::begin()
+        {
+            // Entirely not SMP-safe to return a pointer to a node if
+            // we are a locking instance.  If we aren't locking we
+            // have to assume that the caller is ensuring SMP-safety
+            // globally in some other way.  Use SFINAE technique to
+            // ensure begin() fails on locked lists.
+            __verify_list_is_smp_safe<locked>();
+            return head;
+        }
+
     }
 }
 

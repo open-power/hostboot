@@ -23,6 +23,7 @@
 #include <kernel/timemgr.H>
 #include <kernel/scheduler.H>
 #include <util/singleton.H>
+#include <kernel/task.H>
 
 uint64_t TimeManager::iv_timebaseFreq = 0xFFFFFFFF;
 
@@ -40,7 +41,7 @@ uint64_t TimeManager::convertSecToTicks(uint64_t i_sec, uint64_t i_nsec)
 {
     // This code will handle times almost up to a year without overflowing a
     // uint64.  This should be more than sufficient for our purposes.
-    
+
     // Result = ((sec * 10^9 + nsec) * tb) / 10^9.
     uint64_t result = ((i_sec * 1000000000ULL) + i_nsec);
     result *= (iv_timebaseFreq / 1000000);
@@ -57,9 +58,12 @@ void TimeManager::_delayTask(task_t* t, uint64_t i_sec, uint64_t i_nsec)
 {
     _TimeManager_Delay_t* node = new _TimeManager_Delay_t();
 
-    node->key = this->getCurrentTimeBase() + 
+    node->key = this->getCurrentTimeBase() +
 		this->convertSecToTicks(i_sec, i_nsec);
     node->task = t;
+
+    t->state = TASK_STATE_BLOCK_SLEEP;
+    t->state_info = (void*)node->key;
 
     iv_taskList[getPIR()].insert(node);
 }

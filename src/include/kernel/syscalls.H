@@ -49,6 +49,8 @@ namespace Systemcalls
         TASK_END = 2,
             /** task_affinity_migrate_to_master() */
         TASK_MIGRATE_TO_MASTER = 3,
+            /** task_wait() / task_wait_tid() */
+        TASK_WAIT,
 
             /** msgq_create() */
         MSGQ_CREATE,

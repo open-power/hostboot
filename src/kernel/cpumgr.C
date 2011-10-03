@@ -149,7 +149,6 @@ void CpuManager::startCPU(ssize_t i)
 
     if (currentCPU)
     {
-	setSPRG3((uint64_t) cv_cpus[i]->idle_task);
         setDEC(TimeManager::getTimeSliceCount());
     }
     return;
@@ -157,7 +156,6 @@ void CpuManager::startCPU(ssize_t i)
 
 void CpuManager::startSlaveCPU(cpu_t* cpu)
 {
-    setSPRG3((uint64_t) cpu->idle_task);
     setDEC(TimeManager::getTimeSliceCount());
 
     return;

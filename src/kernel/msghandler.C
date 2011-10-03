@@ -29,8 +29,6 @@
 #include <kernel/taskmgr.H>
 #include <kernel/console.H>
 
-namespace Systemcalls { void TaskEnd(task_t*); };
-
 void MessageHandler::sendMessage(msg_sys_types_t i_type, void* i_key,
                                  void* i_data, task_t* i_task)
 {
@@ -74,6 +72,11 @@ void MessageHandler::sendMessage(msg_sys_types_t i_type, void* i_key,
     // Defer task while waiting for message response.
     if ((NULL != i_task) && (TaskManager::getCurrentTask() == i_task))
     {
+        // Set block status.
+        i_task->state = TASK_STATE_BLOCK_USRSPACE;
+        i_task->state_info = i_key;
+
+        // Select next task off scheduler.
         i_task->cpu->scheduler->setNextRunnable();
     }
 
@@ -138,7 +141,7 @@ int MessageHandler::recvMessage(msg_t* i_msg)
             // Unsuccessful, unhandled response.  Kill task.
             printk("Unhandled msg rc %d for key %p on task %d @ %p\n",
                    msg_rc, key, deferred_task->tid, deferred_task->context.nip);
-            Systemcalls::TaskEnd(deferred_task);
+            TaskManager::endTask(deferred_task, NULL, TASK_STATUS_CRASHED);
         }
         else if (CONTINUE_DEFER == rc)
         {

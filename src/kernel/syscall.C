@@ -62,6 +62,7 @@ namespace Systemcalls
     void TaskStart(task_t*);
     void TaskEnd(task_t*);
     void TaskMigrateToMaster(task_t*);
+    void TaskWait(task_t*);
     void MsgQCreate(task_t*);
     void MsgQDestroy(task_t*);
     void MsgQRegisterRoot(task_t*);
@@ -91,6 +92,7 @@ namespace Systemcalls
         &TaskStart,  // TASK_START
         &TaskEnd,  // TASK_END
         &TaskMigrateToMaster, // TASK_MIGRATE_TO_MASTER
+        &TaskWait, // TASK_WAIT
 
         &MsgQCreate,  // MSGQ_CREATE
         &MsgQDestroy,  // MSGQ_DESTROY
@@ -163,19 +165,8 @@ namespace Systemcalls
 
     void TaskEnd(task_t* t)
     {
-        // Make sure task pointers are updated before we delete this task.
-        t->cpu->scheduler->setNextRunnable();
-
-        // TODO: Deal with join.
-
-        // Clean up task memory.
-            // Delete FP context.
-        if (t->fp_context)
-            delete t->fp_context;
-            // Delete stack.
-        StackSegment::deleteStack(t->tid);
-            // Delete task struct.
-        delete t;
+        TaskManager::endTask(t, (void*)TASK_GETARG0(t),
+                             TASK_STATUS_EXITED_CLEAN);
     }
 
     void TaskMigrateToMaster(task_t* t)
@@ -192,6 +183,46 @@ namespace Systemcalls
         // Move task to master CPU and pick a new task.
         t->cpu->scheduler->addTaskMasterCPU(t);
         t->cpu->scheduler->setNextRunnable();
+    }
+
+    void TaskWait(task_t* t)
+    {
+        int64_t tid = static_cast<int64_t>(TASK_GETARG0(t));
+        int* status = reinterpret_cast<int*>(TASK_GETARG1(t));
+        void** retval = reinterpret_cast<void**>(TASK_GETARG2(t));
+
+        // Validate status address and convert to kernel address.
+        if (status != NULL)
+        {
+            uint64_t addr =
+                VmmManager::findPhysicalAddress(
+                    reinterpret_cast<uint64_t>(status));
+
+            if (addr == (static_cast<uint64_t>(-EFAULT)))
+            {
+                TASK_SETRTN(t, -EFAULT);
+                return;
+            }
+            status = reinterpret_cast<int*>(addr);
+        }
+
+        // Validate retval address and convert to kernel address.
+        if (retval != NULL)
+        {
+            uint64_t addr =
+                VmmManager::findPhysicalAddress(
+                    reinterpret_cast<uint64_t>(retval));
+
+            if (addr == (static_cast<uint64_t>(-EFAULT)))
+            {
+                TASK_SETRTN(t, -EFAULT);
+                return;
+            }
+            retval = reinterpret_cast<void**>(addr);
+        }
+
+        // Perform wait.
+        TaskManager::waitTask(t, tid, status, retval);
     }
 
     void MsgQCreate(task_t* t)
@@ -281,6 +312,8 @@ namespace Systemcalls
         MessagePending* mp = new MessagePending();
         mp->key = m;
         mp->task = t;
+        t->state = TASK_STATE_BLOCK_MSG;
+        t->state_info = mq;
 
         mq->lock.lock();
 
@@ -355,6 +388,8 @@ namespace Systemcalls
         if (NULL == mp)
         {
             mq->waiting.insert(t);
+            t->state = TASK_STATE_BLOCK_MSG;
+            t->state_info = mq;
             t->cpu->scheduler->setNextRunnable();
         }
         else
@@ -414,8 +449,7 @@ namespace Systemcalls
         TimeManager::delayTask(t, TASK_GETARG0(t), TASK_GETARG1(t));
         TASK_SETRTN(t, 0);
 
-        Scheduler* s = t->cpu->scheduler;
-        s->setNextRunnable();
+        t->cpu->scheduler->setNextRunnable();
     }
 
     /**
@@ -445,7 +479,7 @@ namespace Systemcalls
         {
             printk("Task %d terminated. No physical address found for address 0x%p",
                    t->tid, (void *) uaddr);
-            TaskEnd(t);
+            TaskManager::endTask(t, NULL, TASK_STATUS_CRASHED);
         }
     }
 
@@ -470,7 +504,7 @@ namespace Systemcalls
         {
             printk("Task %d terminated. No physical address found for address 0x%p",
                    t->tid, (void *) uaddr);
-            TaskEnd(t);
+            TaskManager::endTask(t, NULL, TASK_STATUS_CRASHED);
         }
     }
 
@@ -529,12 +563,12 @@ namespace Systemcalls
      * @param[in] t: The task used to set Page Permissions for a given block
      */
     void MmSetPermission(task_t* t)
-    {   
+    {
         void* va = (void*)TASK_GETARG0(t);
         uint64_t size = (uint64_t)TASK_GETARG1(t);
         PAGE_PERMISSIONS access_type = (PAGE_PERMISSIONS)TASK_GETARG2(t);
-        
+
         TASK_SETRTN(t, VmmManager::mmSetPermission(va,size, access_type));
     }
-    
+
 };

@@ -31,6 +31,7 @@
 #define	EFAULT          14      // Bad address
 #define EINVAL          22      // Invalid argument
 #define ENFILE          23      // Too many open files in system
+#define EDEADLK         35      // Operation would cause deadlock.
 
 #define EWOULDBLOCK     EAGAIN  // operation would block
 

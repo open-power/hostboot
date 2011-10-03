@@ -131,7 +131,14 @@ int BaseSegment::_mmAllocBlock(MessageQueue* i_mq,void* i_va,uint64_t i_size)
 
 uint64_t BaseSegment::findPhysicalAddress(uint64_t i_vaddr) const
 {
-    if(i_vaddr < iv_physMemSize) return i_vaddr;
+    if(i_vaddr < iv_physMemSize)
+    {
+        // Anything in the physical address size is valid (and linear mapped)
+        // except NULL.
+        if (i_vaddr >= PAGE_SIZE)
+            return i_vaddr;
+        else return -EFAULT;
+    }
     return (iv_block ? iv_block->findPhysicalAddress(i_vaddr) : -EFAULT);
 }
 
@@ -170,7 +177,7 @@ int BaseSegment::_mmSetPermission(void* i_va, uint64_t i_size, uint64_t i_access
       // Check to see if there is a next block
       if (l_block->iv_nextBlock)
       {
-	// set local block to the next block 
+	// set local block to the next block
 	l_block = l_block->iv_nextBlock;
       }
       else

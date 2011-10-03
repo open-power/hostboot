@@ -314,8 +314,8 @@ void VfsRp::_load_unload(msg_t * i_msg)
     {
         // Module does not exist in extended image.
         // If it exists then it is in the base image and it's already
-        // initialized, however, we still should not be here, so put out a 
-        // trace msg; 
+        // initialized, however, we still should not be here, so put out a
+        // trace msg;
         // If it does not exist anywhere then also create an error log
         TRACFCOMP(g_trac_vfs, ERR_MRK"load Module not found: %s",
                  (const char *) i_msg->data[0]);
@@ -362,11 +362,9 @@ void VfsRp::_exec(msg_t * i_msg)
                                             VFS_EXTENDED_MODULE_TABLE_OFFSET),
                         (const char*) msg1->data[0]);
 
-    tid_t child = vfs_exec(module, (void*) msg1->data[1]);
-
     msg_q_t vfsRmsgQ = (msg_q_t) i_msg->data[1];
 
-    msg1->data[0] = child;
+    msg1->data[0] = (uint64_t) vfs_start_entrypoint(module);
 
     msg_respond(vfsRmsgQ,msg1);
     msg_free(i_msg);

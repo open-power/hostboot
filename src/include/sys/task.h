@@ -27,6 +27,7 @@
 #define __SYS_TASK_H
 
 #include <stdint.h>
+#include <builtins.h>
 #include <kernel/types.h>
 
 #ifdef __cplusplus
@@ -64,7 +65,17 @@ tid_t task_create(void(*start_routine)(void*), void* arg);
  *        function.  Therefore, returning from the entry point function will
  *        also cause the task to end cleanly using this function.
  */
-void task_end();
+void task_end() NO_RETURN;
+
+/** @fn task_end2
+ *  @brief End the calling task with a return value.
+ *
+ *  See POSIX pthread_exit.
+ *
+ *  @param[in] retval - A pointer to return to the task performing task_join /
+ *                      task_wait on this task.
+ */
+void task_end2(void* retval) NO_RETURN;
 
 /** @fn task_gettid
  *  @brief Get task ID of calling task.
@@ -129,6 +140,75 @@ void task_affinity_unpin();
  *  prior to this call.
  */
 void task_affinity_migrate_to_master();
+
+/** @enum task_status
+ *  @brief Status of how a task exited.
+ */
+enum task_status
+{
+        /** Task called task_end cleanly. */
+    TASK_STATUS_EXITED_CLEAN,
+        /** Task crashed.  Ended by the kernel due to error. */
+    TASK_STATUS_CRASHED,
+};
+
+/** @fn task_detach
+ *  @brief Sets the calling task to the 'detached' state, meaning no parent
+ *         may task_wait_tid on it.
+ */
+void task_detach();
+
+/** @fn task_wait_tid
+ *  @brief Block calling task until a requested child process exits.
+ *
+ *  See also: POSIX 'waitid' / Linux 'waitpid'.
+ *
+ *  @param[in] tid - Task to wait for completion.
+ *
+ *  @param[out] status - Optional address to write child status.
+ *  @param[out] retval - Optional address to write return-value.
+ *
+ *  Status values come from task_status enumeration.
+ *  Retval values come from child's 'task_end2' parameter.
+ *
+ *  @note All non-detached tasks must be waited on by their parent to ensure
+ *        there are not kernel memory-leaks.
+ *
+ *  @note If a parent task ends prior to waiting on its children, the children
+ *        become parented by their grand-parents, who must do the wait.
+ *
+ *  @return tid of child waited on or negative number on error.
+ *
+ *  @retval EDEADLK - Performing this wait would deadlock the caller such as
+ *                    when it has no children.
+ *  @retval EFAULT - Bad memory address given for status or retval parameter.
+ */
+tid_t task_wait_tid(tid_t tid, int* status, void** retval);
+
+/** @fn task_wait
+ *  @brief Block calling task until any child process exits.
+ *
+ *  See also: Linux 'wait'.
+ *
+ *  @param[out] status - Optional address to write child status.
+ *  @param[out] retval - Optional address to write return-value.
+ *
+ *  Status values come from task_status enumeration.
+ *  Retval values come from child's 'task_end2' parameter.
+ *
+ *  @note All non-detached tasks must be waited on by their parent to ensure
+ *        there are not kernel memory-leaks.
+ *
+ *  @note If a parent task ends prior to waiting on its children, the children
+ *        become parented by their grand-parents, who must do the wait.
+ *
+ *  @return tid of child waited on or negative number on error.
+ *
+ *  @retval EDEADLK - Performing this wait would deadlock the caller such as
+ *                    when it has no children.
+ *  @retval EFAULT - Bad memory address given for status or retval parameter.
+ */
+tid_t task_wait(int* status, void** retval);
 
 #ifdef __cplusplus
 }

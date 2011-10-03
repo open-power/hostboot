@@ -102,14 +102,13 @@ extern uint64_t VFS_LAST_ADDRESS;
 VfsSystemModule * vfs_find_module(VfsSystemModule * i_table, const char * i_name);
 
 /**
- * Call the module start routine
+ * Get the module's start routine
  * @param[in] i_module VfsSystemModule data for the module
- * @param[in] i_param parameter to pass to task_create() for this module
- * @return tid_t of started task or negative value on error.
+ * @return Function pointer of module's start or negative value on error.
  * @retval -ENOENT if i_module is NULL
  * @retval -ENOEXEC if there is no start()
  */
-tid_t vfs_exec(VfsSystemModule * i_module, void* i_param);
+void* vfs_start_entrypoint(VfsSystemModule * i_module);
 
 /**
  * Change permissions on the virtual pages associated with the module

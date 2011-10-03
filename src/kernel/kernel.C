@@ -43,7 +43,7 @@ extern uint64_t kernel_other_thread_spinlock;
 class Kernel
 {
     public:
-	void cppBootstrap();	
+	void cppBootstrap();
 	void memBootstrap();
 	void cpuBootstrap();
 	void inittaskBootstrap();
@@ -56,19 +56,22 @@ extern "C"
 int main()
 {
     printk("Booting %s kernel...\n\n", "Hostboot");
-    
+
+    // Erase task-pointer so that TaskManager::getCurrentTask() returns NULL.
+    setSPRG3(NULL);
+
     Kernel& kernel = Singleton<Kernel>::instance();
     kernel.cppBootstrap();
-    kernel.memBootstrap(); 
+    kernel.memBootstrap();
     kernel.cpuBootstrap();
 
     kernel.inittaskBootstrap();
-    
+
     // Ready to let the other CPUs go.
     lwsync();
     kernel_other_thread_spinlock = 1;
 
-    kernel_dispatch_task(); // no return.    
+    kernel_dispatch_task(); // no return.
     while(1);
     return 0;
 }
@@ -76,6 +79,9 @@ int main()
 extern "C"
 int smp_slave_main(cpu_t* cpu)
 {
+    // Erase task-pointer so that TaskManager::getCurrentTask() returns NULL.
+    setSPRG3(NULL);
+
     CpuManager::init_slave_smp(cpu);
     VmmManager::init_slb();
     cpu->scheduler->setNextRunnable();

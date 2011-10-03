@@ -23,13 +23,21 @@
 #ifndef __SYS_SYSCALL_H
 #define __SYS_SYSCALL_H
 
+/** @file syscall.h
+ *  @brief Defines syscall wrapper functions to get C-caller to put syscall
+ *         parameters in the correct spots for ABI so kernel can pull them
+ *         from the right position in the task structs.
+ */
+
 #ifdef __cplusplus
-extern "C" 
+extern "C"
 {
 #endif
 
 #include <stdint.h>
+#include <builtins.h>
 
+// Normal system calls.
 void* _syscall0(uint64_t);
 void* _syscall1(uint64_t, void*);
 void* _syscall2(uint64_t, void*, void*);
@@ -38,6 +46,19 @@ void* _syscall4(uint64_t, void*, void*, void*, void*);
 void* _syscall5(uint64_t, void*, void*, void*, void*, void*);
 void* _syscall6(uint64_t, void*, void*, void*, void*, void*, void*);
 void* _syscall7(uint64_t, void*, void*, void*, void*, void*, void*, void*);
+
+// System calls which never return.  Marked NO_RETURN so the compiler
+// can make additional optimizations.
+void* _syscall0_nr(uint64_t) NO_RETURN;
+void* _syscall1_nr(uint64_t, void*) NO_RETURN;
+void* _syscall2_nr(uint64_t, void*, void*) NO_RETURN;
+void* _syscall3_nr(uint64_t, void*, void*, void*) NO_RETURN;
+void* _syscall4_nr(uint64_t, void*, void*, void*, void*) NO_RETURN;
+void* _syscall5_nr(uint64_t, void*, void*, void*, void*, void*) NO_RETURN;
+void* _syscall6_nr(uint64_t, void*, void*, void*, void*, void*, void*)
+            NO_RETURN;
+void* _syscall7_nr(uint64_t, void*, void*, void*, void*, void*, void*, void*)
+            NO_RETURN;
 
 #ifdef __cplusplus
 }

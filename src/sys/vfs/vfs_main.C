@@ -39,16 +39,6 @@ const char* VFS_ROOT_MSG_VFS = "/msg/vfs";
 
 void vfs_module_init();
 
-/**
- * Call the module start routine
- * @param[in] i_module VfsSystemModule data for the module
- * @param[in] i_param parameter to pass to task_create() for this module
- * @return tid_t of started task or negative value on error.
- * @retval -ENOENT if i_module is NULL
- * @retval -ENOEXEC if there is no start()
- */
-tid_t vfs_exec(VfsSystemModule * i_module, void* i_param);
-
 struct VfsPath
 {
     char key[64];
@@ -123,13 +113,14 @@ void vfs_main(void* i_barrier)
                         vfs_find_module(VFS_MODULES,
                                         (const char *) msg->data[0]);
 
-		    tid_t child = vfs_exec(module,(void*) msg->data[1]);
+		    void* fnptr = vfs_start_entrypoint(module);
 
                     // child == -ENOENT means module not found in base image
                     // so send a message to VFS_MSG queue to look in the
                     // extended image VFS_MSG queue will handle the
                     // msg_respond()
-                    if( child == (tid_t)-ENOENT ) // forward msg to usr vfs
+                    if( fnptr == reinterpret_cast<void*>(-ENOENT) )
+                        // forward msg to usr vfs
                     {
                         VfsEntry::key_type k;
                         strcpy(k.key, VFS_ROOT_MSG_VFS);
@@ -144,13 +135,13 @@ void vfs_main(void* i_barrier)
                         }
                         else  // Cant find VFS_MSG queue - not started yet
                         {
-                            msg->data[0] =  child;
+                            msg->data[0] = (uint64_t) fnptr;
                             msg_respond(vfsMsgQ, msg);
                         }
                     }
                     else // send back child (or errno)
                     {
-                        msg->data[0] = child;
+                        msg->data[0] = (uint64_t) fnptr;
                         msg_respond(vfsMsgQ, msg);
                     }
 		}
@@ -165,21 +156,22 @@ void vfs_main(void* i_barrier)
 
 // ----------------------------------------------------------------------------
 
-tid_t vfs_exec(VfsSystemModule * i_module, void* i_param)
+void* vfs_start_entrypoint(VfsSystemModule * i_module)
 {
-    tid_t child = -ENOENT;
+    void* ptr = reinterpret_cast<void*>(-ENOENT);
     if(i_module != NULL)
     {
         if (i_module->start == NULL)
         {
-            child = -ENOEXEC;  // module has no start() routine
+            // module has no start() routine
+            ptr = reinterpret_cast<void*>(-ENOEXEC);
         }
         else
         {
-            child = task_create(i_module->start, i_param);
+            ptr = reinterpret_cast<void*>(i_module->start);
         }
     }
-    return child;
+    return ptr;
 }
 
 

@@ -31,6 +31,8 @@
 
 void Scheduler::addTask(task_t* t)
 {
+    t->state = TASK_STATE_READY;
+
     if (t->cpu->idle_task != t)
     {
         // If task is pinned to this CPU, add to the per-CPU queue.
@@ -53,6 +55,8 @@ void Scheduler::addTask(task_t* t)
 
 void Scheduler::addTaskMasterCPU(task_t* t)
 {
+    t->state = TASK_STATE_READY;
+
     if (t->cpu->idle_task != t)
     {
         cpu_t* master = CpuManager::getMasterCPU();

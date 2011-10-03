@@ -68,6 +68,10 @@ uint64_t FutexManager::_wait(task_t* i_task, uint64_t * i_addr, uint64_t i_val)
         waiter->key = i_addr;
         waiter->task = i_task;
 
+        // Set blocked state.
+        i_task->state = TASK_STATE_BLOCK_FUTEX;
+        i_task->state_info = i_addr;
+
         // Now add the futex/task it to the wait queue
         iv_list.insert(waiter);
         iv_lock.unlock();

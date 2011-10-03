@@ -29,7 +29,6 @@
 #include <kernel/vmmmgr.H>
 #include <kernel/cpuid.H>
 
-namespace Systemcalls { void TaskEnd(task_t*); }
 namespace ExceptionHandles
 {
     bool HvEmulation(task_t*);
@@ -54,7 +53,7 @@ void kernel_execute_prog_ex()
     if (!handled)
     {
 	printk("Program exception, killing task %d\n", t->tid);
-	Systemcalls::TaskEnd(t);
+	TaskManager::endTask(t, NULL, TASK_STATUS_CRASHED);
     }
 }
 
@@ -78,7 +77,7 @@ void kernel_execute_data_storage()
     {
 	printk("Data Storage exception on %d: %lx, %lx\n",
 	       t->tid, getDAR(), getDSISR());
-	Systemcalls::TaskEnd(t);
+	TaskManager::endTask(t, NULL, TASK_STATUS_CRASHED);
     }
 }
 
@@ -87,7 +86,7 @@ void kernel_execute_data_segment()
 {
     task_t* t = TaskManager::getCurrentTask();
     printk("Data Segment exception, killing task %d\n", t->tid);
-    Systemcalls::TaskEnd(t);
+    TaskManager::endTask(t, NULL, TASK_STATUS_CRASHED);
 }
 
 const uint64_t EXCEPTION_SRR1_INSTR_MASK    = 0x0000000040000000;
@@ -110,7 +109,7 @@ void kernel_execute_inst_storage()
     {
         printk("Inst Storage exception on %d: %lx, %lx\n",
                t->tid, getSRR0(), getSRR1());
-        Systemcalls::TaskEnd(t);
+	TaskManager::endTask(t, NULL, TASK_STATUS_CRASHED);
     }
 }
 
@@ -119,7 +118,7 @@ void kernel_execute_inst_segment()
 {
     task_t* t = TaskManager::getCurrentTask();
     printk("Inst Segment exception, killing task %d\n", t->tid);
-    Systemcalls::TaskEnd(t);
+    TaskManager::endTask(t, NULL, TASK_STATUS_CRASHED);
 }
 
 extern "C"
@@ -127,7 +126,7 @@ void kernel_execute_alignment()
 {
     task_t* t = TaskManager::getCurrentTask();
     printk("Alignment exception, killing task %d\n", t->tid);
-    Systemcalls::TaskEnd(t);
+    TaskManager::endTask(t, NULL, TASK_STATUS_CRASHED);
 }
 
 extern "C"
@@ -136,7 +135,7 @@ void kernel_execute_hype_emu_assist()
     task_t* t = TaskManager::getCurrentTask();
     printk("HypeEmu: Illegal instruction in task %d\n"
            "\tHSSR0 = %lx, HEIR = %lx\n", t->tid, getHSRR0(), getHEIR());
-    Systemcalls::TaskEnd(t);
+    TaskManager::endTask(t, NULL, TASK_STATUS_CRASHED);
 }
 
 namespace ExceptionHandles

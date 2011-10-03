@@ -49,8 +49,12 @@ tid_t task_create(void(*fn)(void*), void* ptr)
 
 void task_end()
 {
-    _syscall0(TASK_END); // no return.
-    return;
+    _syscall1_nr(TASK_END, NULL); // no return.
+}
+
+void task_end2(void* retval)
+{
+    _syscall1_nr(TASK_END, retval); // no return.
 }
 
 tid_t task_gettid()
@@ -69,8 +73,8 @@ cpuid_t task_getcpuid()
 
 tid_t task_exec(const char* file, void* ptr)
 {
-    // The VFS process is responsible for finding the module and creating the
-    // new process.  So, we send a message over to that process.
+    // The VFS process is responsible for finding the module and entry point
+    // address, so we send a message over to that process.
 
     tid_t child = 0;
     int rc = 0;
@@ -80,7 +84,6 @@ tid_t task_exec(const char* file, void* ptr)
     msg_t* msg = msg_allocate();
     msg->type = VFS_MSG_EXEC;
     msg->data[0] = (uint64_t) file;
-    msg->data[1] = (uint64_t) ptr;
     if (vfsQ)
     {
         msg_sendrecv(vfsQ, msg);
@@ -93,8 +96,17 @@ tid_t task_exec(const char* file, void* ptr)
 
     if (0 == rc)
     {
-        // Get child ID from message data 0.
-        child = (tid_t) msg->data[0];
+        // Get fn ptr or error from message data 0.
+        int64_t value = *reinterpret_cast<int64_t*>(&msg->data[0]);
+        if (value < 0)
+        {
+            child = value;
+        }
+        else
+        {
+            child = task_create(reinterpret_cast<void(*)(void*)>(msg->data[0]),
+                                ptr);
+        }
     }
     else
     {
@@ -129,3 +141,30 @@ void task_affinity_migrate_to_master()
 {
     _syscall0(TASK_MIGRATE_TO_MASTER);
 }
+
+void task_detach()
+{
+    // Get task structure.
+    register task_t* task;
+    asm volatile("mr %0, 13" : "=r"(task));
+
+    task->detached = true;
+        // This does not need any sync instruction because the setting is
+        // only used by the kernel and it requires a context-sync operation
+        // to enter kernel mode.
+}
+
+tid_t task_wait_tid(tid_t tid, int* status, void** retval)
+{
+    return static_cast<tid_t>(
+               reinterpret_cast<uint64_t>(
+                   _syscall3(TASK_WAIT,(void*)tid,status,retval)));
+}
+
+tid_t task_wait(int* status, void** retval)
+{
+    return static_cast<tid_t>(
+               reinterpret_cast<uint64_t>(
+                   _syscall3(TASK_WAIT,(void*)-1,status,retval)));
+}
+
