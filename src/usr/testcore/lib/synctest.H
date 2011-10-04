@@ -33,6 +33,11 @@
 #include <sys/task.h>
 #include <sys/time.h>
 
+#include <kernel/timemgr.H>
+
+#define NS_PER_SEC (1000000ull)
+#define TEN_CTX_SWITCHES ((NS_PER_SEC/TimeManager::TIMESLICE_PER_SEC)*10)
+
 class SyncTest: public CxxTest::TestSuite
 {
     public:
@@ -61,7 +66,7 @@ class SyncTest: public CxxTest::TestSuite
             mutex_lock(&mutex);
             task_create(func2, this);
             task_create(func2, this);
-            nanosleep(1,0);
+            nanosleep(0,TEN_CTX_SWITCHES);
             mutex_unlock(&mutex);
             barrier_wait(&barrier);
             TS_TRACE("ALL THREADS ENDED");

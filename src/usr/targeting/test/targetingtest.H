@@ -63,7 +63,6 @@ class TargetingTestSuite: public CxxTest::TestSuite
          */
         void testTargetServiceClass()
         {
-            nanosleep(1,0);
             TS_TRACE(ENTER_MRK "testTargetServiceClass" );
 
             using namespace TARGETING;
@@ -507,7 +506,7 @@ class TargetingTestSuite: public CxxTest::TestSuite
             {
                 TS_FAIL("ATTR_DUMMY_RW read should have matched prior write");
             }
-            
+
             memset(l_setWo,0x05,sizeof(l_setWo));
             l_pTarget->setAttr<ATTR_DUMMY_RW>(l_setWo);
 
@@ -601,13 +600,13 @@ class TargetingTestSuite: public CxxTest::TestSuite
 
             PredicateCTM l_ctmCtor(l_ctmRhs);
             #endif
-            
+
             PredicateBase* l_pBase = new PredicateCTM(CLASS_SYS);
             delete l_pBase;
             l_pBase = NULL;
 
             TS_TRACE(EXIT_MRK "testPredicateCtm" );
-                
+
         }
 
         void testPredicatePostfixExpr()
@@ -632,8 +631,8 @@ class TargetingTestSuite: public CxxTest::TestSuite
                 TS_FAIL("Always true filter should have matched system");
             }
 
-            #if 0 
-            // Triggers NULL assertion check on push 
+            #if 0
+            // Triggers NULL assertion check on push
             l_alwaysTrueExpr.push(NULL);
             #endif
 
@@ -722,7 +721,7 @@ class TargetingTestSuite: public CxxTest::TestSuite
             l_pExpr->push(&l_sysClass).push(&l_sysType).And();
             l_pExpr->push(&l_power8Model).And();
             delete (static_cast<PredicateBase*>(l_pExpr));
-            
+
             #if 0
             PredicatePostfixExpr l_lhs;
             PredicatePostfixExpr l_rhs;
@@ -775,7 +774,7 @@ class TargetingTestSuite: public CxxTest::TestSuite
                 TS_FAIL("Top level handle was NULL when initialization "
                         "complete");
             }
-       
+
             l_pIt = l_targetService.begin();
             if((*l_pIt) == NULL)
             {
@@ -820,7 +819,7 @@ class TargetingTestSuite: public CxxTest::TestSuite
             {
                TS_FAIL("Iterators should be equal, but aren't");
             }
- 
+
             if(l_pIt != l_pItClone++)
             {
                TS_FAIL("Iterators should be equal, but aren't");
@@ -862,7 +861,7 @@ class TargetingTestSuite: public CxxTest::TestSuite
             delete l_pRangeFilter;
             l_pRangeFilter = NULL;
 
-            
+
             TargetRangeFilter l_f1(
                 targetService().begin(),
                 targetService().end(),
@@ -896,7 +895,7 @@ class TargetingTestSuite: public CxxTest::TestSuite
                         "different than the original");
             }
 
-            PredicateCTM l_ctm1(CLASS_CHIP,TYPE_PROC); 
+            PredicateCTM l_ctm1(CLASS_CHIP,TYPE_PROC);
 
             TargetRangeFilter l_f3(
                 targetService().begin(),
@@ -910,7 +909,7 @@ class TargetingTestSuite: public CxxTest::TestSuite
                     break;
                 }
             }
-              
+
             TargetIterator l_pIt = targetService().begin();
             ++l_pIt;
             ++l_pIt;
@@ -930,7 +929,7 @@ class TargetingTestSuite: public CxxTest::TestSuite
             {
                 i++;
             }
-                    
+
             if(i != 2)
             {
                 TS_FAIL("Should have gotten 2 elements %d",i);
@@ -946,9 +945,9 @@ class TargetingTestSuite: public CxxTest::TestSuite
             using namespace TARGETING;
 
             TargetService& l_targetService = targetService();
-            
-            TargetRangeFilter f(l_targetService.begin(), 
-                                l_targetService.end(), 
+
+            TargetRangeFilter f(l_targetService.begin(),
+                                l_targetService.end(),
                                 NULL);
             int l_count = 0;
             for(; f; ++f, l_count++)
@@ -956,7 +955,7 @@ class TargetingTestSuite: public CxxTest::TestSuite
             }
 
             TS_TRACE(INF_MRK "Found %d total targets", l_count);
-            
+
             PredicateCTM l_procs(CLASS_CHIP);
             PredicateCTM l_enclosures(CLASS_ENC);
             PredicatePostfixExpr l_query;
@@ -970,11 +969,11 @@ class TargetingTestSuite: public CxxTest::TestSuite
             {
                 EntityPath l_path = f->getAttr<ATTR_PHYS_PATH>();
                 l_path.dump();
-            }            
+            }
 
             TS_TRACE(INF_MRK "Found %d targets that are chips or enclosures ",
                       l_count);
-    
+
             l_query.Not();
             f.reset();
 
@@ -1025,7 +1024,7 @@ class TargetingTestSuite: public CxxTest::TestSuite
             TS_TRACE(ENTER_MRK "testFapiToHbMacros" );
 
             TS_TRACE(INF_MRK "Now using direct access macros");
-    
+
             using namespace TARGETING;
             using namespace fapi;
 
@@ -1048,7 +1047,7 @@ class TargetingTestSuite: public CxxTest::TestSuite
                         "attribute access",l_dummyRw[0][1][2]);
             }
 
-            TARGETING::CLASS l_class = 
+            TARGETING::CLASS l_class =
                 l_pTarget->getAttr<TARGETING::ATTR_CLASS>();
             if(l_class != TARGETING::CLASS_SYS)
             {
@@ -1063,7 +1062,7 @@ class TargetingTestSuite: public CxxTest::TestSuite
                         "attribute access",l_type,TARGETING::TYPE_SYS);
             }
 
-            uint64_t l_xscom = 
+            uint64_t l_xscom =
                 l_pTarget->getAttr<TARGETING::ATTR_XSCOM_BASE_ADDRESS>();
             if(l_xscom != 0x300000000000)
             {
@@ -1087,10 +1086,10 @@ class TargetingTestSuite: public CxxTest::TestSuite
                     l_dummyRw[0][2][4]);
             }
 
-            TS_TRACE(INF_MRK "Now using FAPI set macros");              
+            TS_TRACE(INF_MRK "Now using FAPI set macros");
 
             l_dummyRw[0][2][3] = 6;
-            l_rc = FAPI_ATTR_SET(ATTR_DUMMY_SCRATCH_PLAT_INIT_UINT8, NULL, 
+            l_rc = FAPI_ATTR_SET(ATTR_DUMMY_SCRATCH_PLAT_INIT_UINT8, NULL,
                 l_dummyRw);
             if(l_rc != 0)
             {
@@ -1098,7 +1097,7 @@ class TargetingTestSuite: public CxxTest::TestSuite
             }
 
             memset(l_dummyRw,0x00,sizeof(l_dummyRw));
-            l_rc = FAPI_ATTR_GET(ATTR_DUMMY_SCRATCH_PLAT_INIT_UINT8, NULL, 
+            l_rc = FAPI_ATTR_GET(ATTR_DUMMY_SCRATCH_PLAT_INIT_UINT8, NULL,
                 l_dummyRw);
             if(l_rc != 0)
             {
@@ -1110,8 +1109,8 @@ class TargetingTestSuite: public CxxTest::TestSuite
                 TS_FAIL("l_dummyRw value is %d, not 6 as expected due to a "
                         "prior write",l_dummyRw[0][2][3]);
             }
-       
-            TS_TRACE(INF_MRK "Now using targets without the attribute");  
+
+            TS_TRACE(INF_MRK "Now using targets without the attribute");
 
             memset(l_dummyRw,0x00,sizeof(l_dummyRw));
             EntityPath l_realPath(EntityPath::PATH_PHYSICAL);
@@ -1124,7 +1123,7 @@ class TargetingTestSuite: public CxxTest::TestSuite
 
             fapi::Target* l_pFapiTarget = new fapi::Target(
                  fapi::TARGET_TYPE_PROC_CHIP, l_pTarget);
-            l_rc = FAPI_ATTR_GET(ATTR_DUMMY_SCRATCH_PLAT_INIT_UINT8, 
+            l_rc = FAPI_ATTR_GET(ATTR_DUMMY_SCRATCH_PLAT_INIT_UINT8,
                 l_pFapiTarget , l_dummyRw);
             if(l_rc == 0)
             {
@@ -1135,7 +1134,7 @@ class TargetingTestSuite: public CxxTest::TestSuite
             {
                 TS_FAIL("Should have been a platform handled error");
             }
-            else 
+            else
             {
                 errlHndl_t l_pErrLog = static_cast<ERRORLOG::ErrlEntry*>(
                     l_rc.releasePlatData());
