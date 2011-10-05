@@ -130,6 +130,25 @@ public:
    */
   uint32_t flushTo0();
 
+  /**
+   * @brief Set a word of data in buffer
+   * @param i_wordoffset Offset of word to set
+   * @param i_value 32 bits of data to put into word
+   * @retval ECMD_DBUF_SUCCESS on success
+   * @retval ECMD_DBUF_BUFFER_OVERFLOW i_wordoffset is not contained in the size of this buffer
+   *
+   * NOTE : If the buffer length != word boundary, when setting the last word
+   *        data in i_value past the buffer length is cleared before being stored in the buffer
+   */
+  uint32_t setWord(uint32_t i_wordoffset, uint32_t i_value);
+
+  /**
+   * @brief Fetch a word from ecmdDataBuffer
+   * @param i_wordoffset Offset of word to fetch
+   * @retval Value of word requested
+   */
+  uint32_t getWord(uint32_t i_wordoffset) const;
+
 protected:
   uint32_t iv_Capacity;         ///< Actual buffer capacity - always >= getNumWords()
   uint32_t iv_NumBits;          ///< Specified buffer size in bits

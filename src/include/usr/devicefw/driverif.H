@@ -83,13 +83,6 @@ namespace DeviceFW
     #define DEVICE_I2C_ADDRESS( i_address )\
         DeviceFW::I2C, static_cast<uint64_t>(( i_address ))
 
-    /** Construct the device addressing parameters for FSI device ops.
-     *  @param[in] i_address - FSI address to operate on.
-     */
-    #define DEVICE_FSI_ADDRESS(i_address) \
-        DeviceFW::FSI, static_cast<uint64_t>((i_address))
-
-
     /** @class InvalidParameterType
      *  @brief Unused type to cause compiler fails for invalid template types.
      *

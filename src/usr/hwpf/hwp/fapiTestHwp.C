@@ -41,7 +41,7 @@
  */
 
 #include <fapiTestHwp.H>
-
+#include <fapiHwAccess.H>
 extern "C"
 {
 
@@ -56,25 +56,214 @@ fapi::ReturnCode hwpInitialTest(const fapi::Target & i_chip)
     char l_string[fapi::MAX_ECMD_STRING_LEN] = {0};
     i_chip.toString(l_string);
     FAPI_INF("hwpInitialTest: Chip: %s", l_string);
-
     fapi::ReturnCode l_rc;
+    uint32_t l_ecmdRc = ECMD_DBUF_SUCCESS;
 
-    // Figure out the scom address and create a 64 bit data buffer
-    ecmdDataBufferBase l_data(64);
-
-    const uint64_t l_addr = 0x13010002;
-
-    // Perform a GetScom operation on the chip
-    l_rc = fapiGetScom(i_chip, l_addr, l_data);
-
-    if (l_rc != fapi::FAPI_RC_SUCCESS)
+    do
     {
-        FAPI_ERR("hwpInitialTest: Error from fapiGetScom");
-    }
-    else
-    {
-        FAPI_INF("hwpInitialTest: Data from SCOM:0x%lld", l_data.getDoubleWord(0));
-    }
+        // Use this SCOM register for testing
+        const uint64_t l_addr = 0x13010002;
+        ecmdDataBufferBase l_ScomData(64);
+        uint64_t l_originalScomData = 0;
+
+        // --------------------------------------------------------
+        // 1. fapiGetScom test
+        // --------------------------------------------------------
+        l_rc = fapiGetScom(i_chip, l_addr, l_ScomData);
+        if (l_rc != fapi::FAPI_RC_SUCCESS)
+        {
+            FAPI_ERR("hwpInitialTest: Error from fapiGetScom");
+            break;
+        }
+        else
+        {
+            // Save the original data so we can restore it later
+            l_originalScomData = l_ScomData.getDoubleWord(0);
+            FAPI_INF("hwpInitialTest: GetScom data 0x%.16llX", l_originalScomData);
+        }
+
+        // --------------------------------------------------------
+        // 2. fapiPutScom test
+        // --------------------------------------------------------
+        uint64_t l_scomWriteValue = 0x9000000000000000;
+
+        l_ecmdRc = l_ScomData.setDoubleWord(0, l_scomWriteValue);
+        if (l_ecmdRc != ECMD_DBUF_SUCCESS)
+        {
+            FAPI_ERR("hwpInitialTest: fapiPutScom test, error from ecmdDataBuffer setDoubleWord() - rc 0x%.8X", l_ecmdRc);
+            l_rc = fapi::FAPI_RC_ECMD_MASK;
+            break;
+        }
+
+        l_rc = fapiPutScom(i_chip, l_addr, l_ScomData);
+        if (l_rc != fapi::FAPI_RC_SUCCESS)
+        {
+            FAPI_ERR("hwpInitialTest: Error from fapiPutScom");
+            break;
+        }
+        else
+        {
+            FAPI_INF("hwpInitialTest: PutScom data 0x%.16llX", l_scomWriteValue);
+        }
+
+        // --------------------------------------------------------
+        // 3. fapiPutScomUnderMask test
+        // --------------------------------------------------------
+        l_scomWriteValue = 0xA000000000000000;
+        uint64_t l_mask  = 0x3000000000000000;
+        ecmdDataBufferBase l_maskData(64);
+
+        l_ecmdRc = l_ScomData.setDoubleWord(0, l_scomWriteValue);
+        l_ecmdRc |= l_maskData.setDoubleWord(0, l_mask);
+        if (l_ecmdRc != ECMD_DBUF_SUCCESS)
+        {
+            FAPI_ERR("hwpInitialTest: fapiPutScomUnderMask test, error from ecmdDataBuffer setDoubleWord() - rc 0x%.8X", l_ecmdRc);
+            l_rc = fapi::FAPI_RC_ECMD_MASK;
+            break;
+        }
+
+
+        l_rc = fapiPutScomUnderMask(i_chip, l_addr, l_ScomData, l_maskData);
+        if (l_rc != fapi::FAPI_RC_SUCCESS)
+        {
+            FAPI_ERR("hwpInitialTest: Error from fapiPutScomUnderMask");
+            break;
+        }
+        else
+        {
+            FAPI_INF("hwpInitialTest: fapiPutScomUnderMask data 0x%.16llX, mask 0x%.16llX",
+                     l_scomWriteValue, l_mask);
+        }
+
+        // --------------------------------------------------------
+        // 4. fapiPutScom to restore original value
+        // --------------------------------------------------------
+        l_ecmdRc = l_ScomData.setDoubleWord(0, l_originalScomData);
+        if (l_ecmdRc != ECMD_DBUF_SUCCESS)
+        {
+            FAPI_ERR("hwpInitialTest: fapiPutScom to restore, error from ecmdDataBuffer setDoubleWord() - rc 0x%.8X", l_ecmdRc);
+            l_rc = fapi::FAPI_RC_ECMD_MASK;
+            break;
+        }
+
+        l_rc = fapiPutScom(i_chip, l_addr, l_ScomData);
+        if (l_rc != fapi::FAPI_RC_SUCCESS)
+        {
+            FAPI_ERR("hwpInitialTest: Error from fapiPutScom");
+            break;
+        }
+        else
+        {
+            FAPI_INF("hwpInitialTest: PutScom data 0x%.16llX", l_originalScomData);
+        }
+
+#if 0
+// @todo
+// Per Dean, there's no access to the CFAM engines on the master processor, therefore,
+// we *should not* allow access to them on any processor in any position
+// from a FAPI standpoint.
+// This means that get/put/modifyCfamRegister can't not be called on any of the processors.
+// These functions, therefore, can only be called on the Centaur, which is not available
+// at this time.
+// When Centaur is supported:
+//  - Don't use i_chip (a processor) as a target. Set the target as one of the Centaurs.
+//  - Enable this block of code and test the cfam access functions on the Centaur.
+
+        // --------------------------------------------------------
+        // 5. fapiGetCfamRegister test
+        // --------------------------------------------------------
+        ecmdDataBufferBase l_cfamData(32); // 32-bit cfam data holder
+        uint32_t l_originalCfamData = 0;
+        const uint32_t l_cfamAddr = 0x100A; // ChipID register
+        l_rc = fapiGetCfamRegister(i_chip, l_cfamAddr, l_cfamData);
+        if (l_rc != fapi::FAPI_RC_SUCCESS)
+        {
+            FAPI_ERR("hwpInitialTest: Error from fapiGetCfamRegister");
+            break;
+        }
+        else
+        {
+            l_originalCfamData = l_cfamData.getWord(0);
+            FAPI_INF("hwpInitialTest: fapiGetCfamRegister data 0x%.8X",
+                    l_originalCfamData);
+        }
+
+        // --------------------------------------------------------
+        // 6. fapiPutCfamRegister test
+        // --------------------------------------------------------
+        uint32_t l_cfamWriteValue = 0x90000000;
+        l_ecmdRc = l_cfamData.setWord(0, l_cfamWriteValue);
+        if (l_ecmdRc != ECMD_DBUF_SUCCESS)
+        {
+            FAPI_ERR("hwpInitialTest: fapiPutCfamRegister test, error from ecmdDataBuffer setWord() - rc 0x%.8X", l_ecmdRc);
+            l_rc = fapi::FAPI_RC_ECMD_MASK;
+            break;
+        }
+
+
+        l_rc = fapiPutCfamRegister(i_chip, l_cfamAddr, l_cfamData);
+        if (l_rc != fapi::FAPI_RC_SUCCESS)
+        {
+            FAPI_ERR("hwpInitialTest: Error from fapiPutCfamRegister");
+            break;
+        }
+        else
+        {
+            FAPI_INF("hwpInitialTest: fapiPutCfamRegister data 0x%.8X",
+                    l_cfamData.getWord(0));
+        }
+
+        // --------------------------------------------------------
+        // 7. fapiModifyCfamRegister test
+        // --------------------------------------------------------
+        l_cfamWriteValue = 0xA0000000;
+        l_ecmdRc = l_cfamData.setWord(0, l_cfamWriteValue);
+        if (l_ecmdRc != ECMD_DBUF_SUCCESS)
+        {
+            FAPI_ERR("hwpInitialTest: fapiModifyCfamRegister test, error from ecmdDataBuffer setWord() - rc 0x%.8X", l_ecmdRc);
+            l_rc = fapi::FAPI_RC_ECMD_MASK;
+            break;
+        }
+
+        l_rc = fapiModifyCfamRegister(i_chip, l_cfamAddr,
+                l_cfamData, fapi::CHIP_OP_MODIFY_MODE_AND);
+        if (l_rc != fapi::FAPI_RC_SUCCESS)
+        {
+            FAPI_ERR("hwpInitialTest: Error from fapiPutCfamRegister");
+            break;
+        }
+        else
+        {
+            FAPI_INF("hwpInitialTest: fapiPutCfamRegister data 0x%.8X",
+                    l_cfamData.getWord(0));
+        }
+
+        // --------------------------------------------------------
+        // 8. fapiPutCfamRegister to restore original CFAM value
+        // --------------------------------------------------------
+        l_ecmdRc = l_cfamData.setWord(0, l_originalCfamData);
+        if (l_ecmdRc != ECMD_DBUF_SUCCESS)
+        {
+            FAPI_ERR("hwpInitialTest: fapiPutCfamRegister to restore, error from ecmdDataBuffer setWord() - rc 0x%.8X", l_ecmdRc);
+            l_rc = fapi::FAPI_RC_ECMD_MASK;
+            break;
+        }
+
+        l_rc = fapiPutCfamRegister(i_chip, l_cfamAddr, l_cfamData);
+        if (l_rc != fapi::FAPI_RC_SUCCESS)
+        {
+            FAPI_ERR("hwpInitialTest: Error from fapiPutCfamRegister to restore");
+            break;
+        }
+        else
+        {
+            FAPI_INF("hwpInitialTest: fapiPutCfamRegister data 0x%.8X",
+                    l_cfamData.getWord(0));
+        }
+
+#endif
+
+    } while (0);
 
     return l_rc;
 }

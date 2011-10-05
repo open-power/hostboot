@@ -68,7 +68,7 @@ fapi::ReturnCode fapiGetScom(const fapi::Target& i_target,
                    i_address ); 
     }
 
-    // call the platform implemenation  
+    // call the platform implementation
     l_rc = platGetScom( i_target, i_address, o_data );
 
 

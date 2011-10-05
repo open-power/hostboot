@@ -547,11 +547,11 @@ errlHndl_t xscomPerformOp(DeviceFW::OperationType i_opType,
         // Done, un-pin
         task_affinity_unpin();
 
-        TRACFCOMP(g_trac_xscom, "xscomPerformOp: OpType 0x%.16llX, Address 0x%llX, MMIO Address 0x%llX",
+        TRACDCOMP(g_trac_xscom, "xscomPerformOp: OpType 0x%.16llX, Address 0x%llX, MMIO Address 0x%llX",
                        static_cast<uint64_t>(i_opType),
                        l_addr,
                        static_cast<uint64_t>(l_mmioAddr));
-        TRACFCOMP(g_trac_xscom, "xscomPerformOp: l_offset 0x%.16llX; VirtAddr %p; l_virtAddr+l_offset %p",
+        TRACDCOMP(g_trac_xscom, "xscomPerformOp: l_offset 0x%.16llX; VirtAddr %p; l_virtAddr+l_offset %p",
                        l_offset,
                        l_virtAddr,
                        l_virtAddr + l_offset);

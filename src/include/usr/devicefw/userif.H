@@ -62,6 +62,12 @@ namespace DeviceFW
     #define DEVICE_PRESENT_ADDRESS() \
         DeviceFW::PRESENT
 
+    /** Construct the device addressing parameters for FSI device ops.
+     *  @param[in] i_address - FSI address to operate on.
+     */
+    #define DEVICE_FSI_ADDRESS(i_address) \
+        DeviceFW::FSI, static_cast<uint64_t>((i_address))
+
     /**
      * Construct a PNOR DD address
      *    address = 0000_0000_0000_000c_aaaa_aaaa_aaaa_aaaa

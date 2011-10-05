@@ -235,3 +235,42 @@ uint64_t ecmdDataBufferBase::getDoubleWord(uint32_t i_doublewordoffset) const
     return ret;
 }
 
+uint32_t ecmdDataBufferBase::setWord(uint32_t i_wordOffset, uint32_t i_value)
+{
+    uint32_t rc = ECMD_DBUF_SUCCESS;
+
+    if (i_wordOffset >= getWordLength())
+    {
+        TRACFCOMP(g_trac_ecmd, "**** ERROR : ecmdDataBuffer::setWord: wordoffset %d >= NumWords (%d)", i_wordOffset, getWordLength());
+        return (ECMD_DBUF_BUFFER_OVERFLOW);
+    }
+
+    // Create mask if part of this word is not in the valid part of the ecmdDataBuffer
+    if (((i_wordOffset + 1) == getWordLength()) && (iv_NumBits % 32))
+    {
+        /* Create my mask */
+        uint32_t bitMask = 0xFFFFFFFF;
+        /* Shift it left by the amount of unused bits */
+        bitMask <<= ((32 * getWordLength()) - iv_NumBits);
+        /* Clear the unused bits */
+        i_value &= bitMask;
+    }
+
+    iv_Data[i_wordOffset] = i_value;
+
+    return rc;
+}
+
+uint32_t ecmdDataBufferBase::getWord(uint32_t i_wordOffset) const
+{
+    if (i_wordOffset >= getWordLength())
+    {
+        TRACFCOMP(g_trac_ecmd,"**** ERROR : ecmdDataBuffer::getWord: i_wordOffset %d >= NumWords (%d)",
+                i_wordOffset, getWordLength());
+        return 0;
+    }
+
+    return this->iv_Data[i_wordOffset];
+}
+
+

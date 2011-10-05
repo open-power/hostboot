@@ -33,6 +33,8 @@ namespace fapi
         MOD_FAPI_GET_CHILD_CHIPLETS                = 0x02,
         MOD_FAPI_GET_PARENT_CHIP                   = 0x03,
         MOD_PLAT_ATTR_SVC_CREATE_ATTR_ACCESS_ERROR = 0x04,
+        MOD_HANDLE_ECMD_BUF_RC                     = 0x05,
+        MOD_VERIFY_CFAM_ACCESS_TARGET              = 0x06,
     };
 
     enum hwpfReasonCode
@@ -43,6 +45,8 @@ namespace fapi
         RC_UNSUPPORTED_REQUEST        = HWPF_COMP_ID | 0x04,
         RC_NO_SINGLE_PARENT           = HWPF_COMP_ID | 0x05,
         RC_FAILED_TO_ACCESS_ATTRIBUTE = HWPF_COMP_ID | 0x06,
+        RC_ECMD_OPERATION_FAILURE     = HWPF_COMP_ID | 0x07,
+        RC_CFAM_ACCESS_ON_PROC_ERR    = HWPF_COMP_ID | 0x08,
     };
 };
 
