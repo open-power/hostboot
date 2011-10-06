@@ -42,10 +42,9 @@
 /**
  * @brief HWP Executor macro
  *
- * By default, this macro just calls the HWP directly. If this cannot be done
- * then the platform needs to modify
+ * Call the HWP directly.
  */
-#define FAPI_PLAT_EXEC_HWP(RC, FUNC, TARGET, _args_...) \
-    RC = FUNC(TARGET, ##_args_)
+#define FAPI_PLAT_EXEC_HWP(RC, FUNC, _args_...) \
+    RC = FUNC(_args_)
 
 #endif // FAPIPLATHWPEXECUTOR_H_

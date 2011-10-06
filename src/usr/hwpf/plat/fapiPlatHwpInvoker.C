@@ -31,206 +31,89 @@
 #include <fapiPlatTrace.H>
 #include <fapiErrorInfo.H>
 #include <fapiPlatReasonCodes.H>
-#include <fapiCollectFfdc.H>
 #include <errl/errlentry.H>
 
 namespace fapi
 {
 
 //******************************************************************************
-// findErrInfoTarget. Finds a target identified by an error information record
-// (for callout, garding or FFDC collection).
+// processEIFfdcs.
+// Processes any FFDC in the ReturnCode Error Information
 //******************************************************************************
-Target findErrInfoTarget(const TargetType i_targetType,
-                         const uint32_t i_targetPos,
-                         const Target & i_errorTarget)
+void processEIFfdcs(const ErrorInfo & i_errInfo,
+                    errlHndl_t io_pError)
 {
-    Target l_target;
+    // Iterate through the FFDCs, adding each to the error log
+    // TODO Should all of the FFDC sections be added as a single blob? There is
+    // overhead to adding lots of different sections.
+    uint32_t l_size;
+    const void * l_pFfdc;
 
-    // Note that the Error Target is the target of the failed HWP
-    if (i_targetType == i_errorTarget.getType())
+    for (ErrorInfo::ErrorInfoFfdcCItr_t l_itr = i_errInfo.iv_ffdcs.begin();
+         l_itr != i_errInfo.iv_ffdcs.end(); ++l_itr)
     {
-         // The error info target type is the same as the Error Target.
-         // Therefore the error info target IS the error target
-         l_target = i_errorTarget;
-    }
-    else
-    {
-        // The error info target type is different from the Error Target. Figure
-        // out the error info target from the target type and pos (relative to
-        // the Error Target
-        // TODO
-        FAPI_ERR("findErrInfoTarget: Error Info Target determination TBD");
-    }
+        l_pFfdc = (*l_itr)->getData(l_size);
 
-    return l_target;
-}
+        FAPI_ERR("processEIFfdcs: Adding %d bytes of FFDC to errlog",
+                 l_size);
 
-//******************************************************************************
-// processErrInfoCallouts. Looks at the callout information in an error
-// information record and adds callouts to the supplied error log
-//******************************************************************************
-void processErrInfoCallouts(ErrorInfoRecord & i_errInfoRecord,
-                            const Target & i_errorTarget,
-                            errlHndl_t o_pError)
-{
-    // Iterate through callouts, adding each callout to the error log
-    for (ErrorInfoRecord::ErrorInfoCalloutItr_t l_itr =
-             i_errInfoRecord.iv_callouts.begin();
-         l_itr != i_errInfoRecord.iv_callouts.end(); ++l_itr)
-    {
-        // Find the Target to callout
-        Target l_target = findErrInfoTarget((*l_itr).iv_targetType,
-                                            (*l_itr).iv_targetPos,
-                                            i_errorTarget);
-
-        if (l_target.getType() == TARGET_TYPE_NONE)
-        {
-            FAPI_ERR("processErrInfoCallouts: Callout target not found");
-        }
-        else
-        {
-            // TODO Add callout to error log
-            FAPI_ERR("processErrInfoCallouts: Adding callout TBD");
-        }
+        // TODO Which comp id and section numbers should be used and how will
+        // FFDC be parsed?
+        io_pError->addFFDC(HWPF_COMP_ID, l_pFfdc, l_size);
     }
 }
 
 //******************************************************************************
-// processErrInfoGards. Looks at the gard information in an error information
-// record and gards targets
+// processEICallouts
+// Processes any Callout requests in the ReturnCode Error Information
 //******************************************************************************
-void processErrInfoGards(ErrorInfoRecord & i_errInfoRecord,
-                         const Target & i_errorTarget,
-                         errlHndl_t o_pError)
+void processEICallouts(const ErrorInfo & i_errInfo,
+                          errlHndl_t io_pError)
 {
-    // Iterate through gard requests garding each target
-    for (ErrorInfoRecord::ErrorInfoGardItr_t l_itr =
-             i_errInfoRecord.iv_gards.begin();
-         l_itr != i_errInfoRecord.iv_gards.end(); ++l_itr)
+    // Iterate through the callout requestss, adding each  to the error log
+    for (ErrorInfo::ErrorInfoCalloutCItr_t l_itr =
+             i_errInfo.iv_callouts.begin();
+         l_itr != i_errInfo.iv_callouts.end(); ++l_itr)
     {
-        // Find the Target to gard
-        Target l_target = findErrInfoTarget((*l_itr).iv_targetType,
-                                            (*l_itr).iv_targetPos,
-                                            i_errorTarget);
-
-        if (l_target.getType() == TARGET_TYPE_NONE)
-        {
-            FAPI_ERR("processErrInfoGards: Gard target not found");
-        }
-        else
-        {
-            // TODO gard Target
-            FAPI_ERR("processErrInfoGards: Garding TBD");
-        }
+        // TODO Add callout to error log
+        FAPI_ERR("processEICallouts: Adding target callout to errlog (TODO). Type: 0x%x. Pri: 0x%x",
+                 (*l_itr)->iv_target.getType(), (*l_itr)->iv_priority);
     }
 }
 
 //******************************************************************************
-// processErrInfoFfdcs. Looks at the FFDC information in an error information
-// record, collects the FFDC and adds it to the supplied error log
+// processEIDeconfigs
+// Processes any Deconfig requests in the ReturnCode Error Information
 //******************************************************************************
-void processErrInfoFfdcs(ErrorInfoRecord & i_errInfoRecord,
-                         const Target & i_errorTarget,
-                         errlHndl_t o_pError)
+void processEIDeconfigs(const ErrorInfo & i_errInfo,
+                           errlHndl_t io_pError)
 {
-    // Iterate through FFDC info, collecting and adding FFDC to the error log
-    for(ErrorInfoRecord::ErrorInfoFfdcItr_t l_itr =
-            i_errInfoRecord.iv_ffdcs.begin();
-        l_itr != i_errInfoRecord.iv_ffdcs.end(); ++l_itr)
+    // Iterate through the deconfigure requests, deconfiguring each target
+    for (ErrorInfo::ErrorInfoDeconfigCItr_t l_itr =
+             i_errInfo.iv_deconfigs.begin();
+         l_itr != i_errInfo.iv_deconfigs.end(); ++l_itr)
     {
-        // Find the Target to collect FFDC from
-        Target l_target = findErrInfoTarget((*l_itr).iv_targetType,
-                                            (*l_itr).iv_targetPos,
-                                            i_errorTarget);
-
-        if (l_target.getType() == TARGET_TYPE_NONE)
-        {
-            FAPI_ERR("processErrInfoFfdcs: FFDC target not found");
-        }
-        else
-        {
-            // Collect FFDC. The token identifies the HWP to call to get FFDC
-            FfdcHwpToken l_token = (*l_itr).iv_ffdcHwpToken;
-            uint8_t * l_pFfdc = NULL;
-            uint32_t l_size = 0;
-
-            ReturnCode l_rc = fapiCollectFfdc(l_token, l_target, l_pFfdc,
-                                              l_size);
-
-            if (l_rc)
-            {
-                // Error collecting FFDC, just ignore
-                FAPI_ERR("processErrInfoFfdcs: Error collecting FFDC. Token: %d",
-                         l_token);
-            }
-            else
-            {
-                // Add FFDC to error log and delete
-                // TODO Which comp id and section numbers should be used and how
-                // will FFDC be parsed?
-                FAPI_ERR("processErrInfoFfdcs: Adding %d bytes of FFDC to log. Token: %d",
-                         l_size, l_token);
-                o_pError->addFFDC(HWPF_COMP_ID, l_pFfdc, l_size);
-                delete [] l_pFfdc;
-                l_pFfdc = NULL;
-            }
-
-        }
+        // TODO Deconfigure target
+        FAPI_ERR("processEIDeconfigs: Deconfiguring target (TODO). Type: 0x%x",
+                 (*l_itr)->iv_target.getType());
     }
 }
 
+
 //******************************************************************************
-// processErrInfo. Looks for an error information record associated with the
-// specified HWP generated return code and processes it
+// processEiGards
+// Processes any Gard requests in the ReturnCode Error Information
 //******************************************************************************
-void processErrInfo(const ReturnCode & i_rc,
-                    errlHndl_t o_pError)
+void processEiGards(const ErrorInfo & i_errInfo,
+                       errlHndl_t io_pError)
 {
-    // Get the error info record from the Error Info Repository
-    ErrorInfoRecord l_record;
-    ErrorInfoRepository::Instance().find(i_rc, l_record);
-
-    if (l_record.iv_rc != i_rc)
+    // Iterate through gard requests, creating a GARD record for each target
+    for (ErrorInfo::ErrorInfoGardCItr_t l_itr = i_errInfo.iv_gards.begin();
+         l_itr != i_errInfo.iv_gards.end(); ++l_itr)
     {
-        // Error Info Record not found. This should not happen
-        FAPI_ERR("processErrInfo: No record found for 0x%x",
-                 static_cast<uint32_t>(i_rc));
-    }
-    else
-    {
-        // Error Info Record found
-        const char * l_pDescription = l_record.getDescription();
-
-        if (l_pDescription)
-        {
-            FAPI_ERR("processErrInfo: Record found for 0x%x: %s",
-                     static_cast<uint32_t>(i_rc), l_pDescription);
-        }
-        else
-        {
-            FAPI_ERR("processErrInfo: Record found for 0x%x: (no description)",
-                     static_cast<uint32_t>(i_rc));
-        }
-
-        // Extract the Error Target (the Target of the failing HWP)
-        Target * l_pErrTarget = i_rc.getErrTarget();
-
-        if (l_pErrTarget == NULL)
-        {
-            FAPI_ERR("processErrInfo: Record contains no error target");
-        }
-        else
-        {
-            // Process the Error Info Record callout information
-            processErrInfoCallouts(l_record, *l_pErrTarget, o_pError);
-
-            // Process the Error Info Record gard information
-            processErrInfoGards(l_record, *l_pErrTarget, o_pError);
-
-            // Process the Error Info Record FFDC information
-            processErrInfoFfdcs(l_record, *l_pErrTarget, o_pError);
-        }
+        // TODO Create GARD record for target
+        FAPI_ERR("processEIGards: Garding target (TODO). Type: 0x%x",
+                 (*l_itr)->iv_target.getType());
     }
 }
 
@@ -274,21 +157,23 @@ errlHndl_t fapiRcToErrl(ReturnCode & io_rc)
                                                RC_HWP_ERROR,
                                                static_cast<uint32_t>(io_rc));
 
-            // Add any HWP FFDC stored in the ReturnCode to the error log
-            uint32_t l_sz = 0;
-            const void * l_pHwpFfdc = io_rc.getHwpFfdc(l_sz);
+            // Get the Error Information Pointer
+            const ErrorInfo * l_pErrorInfo = NULL;
 
-            if (l_sz)
+            l_pErrorInfo = io_rc.getErrorInfo();
+
+            if (l_pErrorInfo)
             {
-                // TODO Which comp id and section numbers should be used and how
-                // will FFDC be parsed?
-                FAPI_ERR("fapiRcToErrl: Adding %d bytes of HWP FFDC to errlog",
-                         l_sz);
-                l_pError->addFFDC(HWPF_COMP_ID, l_pHwpFfdc, l_sz);
+                // There is error information associated with the ReturnCode
+                processEIFfdcs(*l_pErrorInfo, l_pError);
+                processEICallouts(*l_pErrorInfo, l_pError);
+                processEIDeconfigs(*l_pErrorInfo, l_pError);
+                processEiGards(*l_pErrorInfo, l_pError);
             }
-
-            // Process the error info record for this error
-            processErrInfo(io_rc, l_pError);
+            else
+            {
+                FAPI_ERR("fapiRcToErrl: No Error Information");
+            }
         }
         else
         {
@@ -308,7 +193,7 @@ errlHndl_t fapiRcToErrl(ReturnCode & io_rc)
                                                static_cast<uint32_t>(io_rc));
         }
 
-        // Set the ReturnCode to success, this will delete any HWP FFDC or PLAT
+        // Set the ReturnCode to success, this will delete any ErrorInfo or PLAT
         // DATA associated with the ReturnCode
         io_rc = FAPI_RC_SUCCESS;
     }

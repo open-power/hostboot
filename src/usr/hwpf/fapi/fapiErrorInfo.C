@@ -23,7 +23,7 @@
 /**
  *  @file fapiErrorInfo.C
  *
- *  @brief Implements the Error Info structs and classes
+ *  @brief Implements the ErrorInfo structs and classes
  */
 
 /*
@@ -32,6 +32,7 @@
  * ------   --------------  ----------  ----------- ----------------------------
  *                          mjjones     08/05/2011  Created
  *                          mjjones     08/24/2011  Added ErrorInfoGard.
+ *                          mjjones     09/22/2011  Major updates
  */
 
 #include <fapiErrorInfo.H>
@@ -41,14 +42,72 @@ namespace fapi
 {
 
 //******************************************************************************
+// ErrorInfoFfdc Constructor
+//******************************************************************************
+ErrorInfoFfdc::ErrorInfoFfdc(const void * i_pFfdc,
+                             const uint32_t i_size)
+: iv_size(i_size)
+{
+    iv_pFfdc = new uint8_t[i_size];
+    memcpy(iv_pFfdc, i_pFfdc, i_size);
+}
+
+//******************************************************************************
+// ErrorInfoFfdc Copy Constructor
+//******************************************************************************
+ErrorInfoFfdc::ErrorInfoFfdc(const ErrorInfoFfdc & i_right)
+: iv_size(i_right.iv_size)
+{
+    iv_pFfdc = new uint8_t[i_right.iv_size];
+    memcpy(iv_pFfdc, i_right.iv_pFfdc, i_right.iv_size);
+}
+
+//******************************************************************************
+// ErrorInfoFfdc Destructor
+//******************************************************************************
+ErrorInfoFfdc::~ErrorInfoFfdc()
+{
+    delete [] iv_pFfdc;
+    iv_pFfdc = NULL;
+}
+
+//******************************************************************************
+// ErrorInfoFfdc Assignment Operator
+//******************************************************************************
+ErrorInfoFfdc & ErrorInfoFfdc::operator=(const ErrorInfoFfdc & i_right)
+{
+    delete [] iv_pFfdc;
+    iv_pFfdc = new uint8_t[i_right.iv_size];
+    memcpy(iv_pFfdc, i_right.iv_pFfdc, i_right.iv_size);
+    iv_size = i_right.iv_size;
+    return *this;
+}
+
+//******************************************************************************
+// ErrorInfoFfdc getData function
+//******************************************************************************
+const void * ErrorInfoFfdc::getData(uint32_t & o_size) const
+{
+    o_size = iv_size;
+    return iv_pFfdc;
+}
+
+//******************************************************************************
 // ErrorInfoCallout Constructor
 //******************************************************************************
-ErrorInfoCallout::ErrorInfoCallout(const TargetType i_targetType,
-                                   const uint32_t i_targetPos,
+ErrorInfoCallout::ErrorInfoCallout(const Target & i_target,
                                    const CalloutPriority i_priority)
-: iv_targetType(i_targetType),
-  iv_targetPos(i_targetPos),
+: iv_target(i_target),
   iv_priority(i_priority)
+{
+
+}
+
+//******************************************************************************
+// ErrorInfoDeconfig Constructor
+//******************************************************************************
+ErrorInfoDeconfig::ErrorInfoDeconfig(const Target & i_target)
+: iv_target(i_target)
 {
 
 }
@@ -56,122 +115,44 @@ ErrorInfoCallout::ErrorInfoCallout(const TargetType i_targetType,
 //******************************************************************************
 // ErrorInfoGard Constructor
 //******************************************************************************
-ErrorInfoGard::ErrorInfoGard(const TargetType i_targetType,
-                             const uint32_t i_targetPos)
-: iv_targetType(i_targetType),
-  iv_targetPos(i_targetPos)
+ErrorInfoGard::ErrorInfoGard(const Target & i_target)
+: iv_target(i_target)
 {
 
 }
 
 //******************************************************************************
-// ErrorInfoFfdc Constructor
+// ErrorInfo Destructor
 //******************************************************************************
-ErrorInfoFfdc::ErrorInfoFfdc(const TargetType i_targetType,
-                             const uint32_t i_targetPos,
-                             const FfdcHwpToken i_ffdcHwpToken)
-: iv_targetType(i_targetType),
-  iv_targetPos(i_targetPos),
-  iv_ffdcHwpToken(i_ffdcHwpToken)
+ErrorInfo::~ErrorInfo()
 {
-
-}
-
-//******************************************************************************
-// ErrorInfoRecord Default Constructor
-//******************************************************************************
-ErrorInfoRecord::ErrorInfoRecord()
-: iv_rc(FAPI_RC_SUCCESS),
-  iv_pDescription(NULL)
-{
-
-}
-
-//******************************************************************************
-// ErrorInfoRecord Copy constructor
-//******************************************************************************
-ErrorInfoRecord::ErrorInfoRecord(const ErrorInfoRecord & i_right)
-: iv_rc(i_right.iv_rc),
-  iv_callouts(i_right.iv_callouts),
-  iv_gards(i_right.iv_gards),
-  iv_ffdcs(i_right.iv_ffdcs),
-  iv_pDescription(NULL)
-{
-    // Perform deep copy of the description string
-    if (i_right.iv_pDescription)
+    for (ErrorInfo::ErrorInfoFfdcItr_t l_itr = iv_ffdcs.begin();
+         l_itr != iv_ffdcs.end(); ++l_itr)
     {
-        iv_pDescription = new char[strlen(i_right.iv_pDescription) + 1];
-        strcpy(iv_pDescription, i_right.iv_pDescription);
+        delete (*l_itr);
+        (*l_itr) = NULL;
     }
-}
 
-//******************************************************************************
-// ErrorInfoRecord Destructor
-//******************************************************************************
-ErrorInfoRecord::~ErrorInfoRecord()
-{
-    delete [] iv_pDescription;
-}
-
-//******************************************************************************
-// ErrorInfoRecord Assignment operator
-//******************************************************************************
-ErrorInfoRecord & ErrorInfoRecord::operator=(const ErrorInfoRecord & i_right)
-{
-    // Test for self assignment
-    if (this != &i_right)
+    for (ErrorInfo::ErrorInfoCalloutItr_t l_itr = iv_callouts.begin();
+         l_itr != iv_callouts.end(); ++l_itr)
     {
-        iv_rc = i_right.iv_rc;
-        iv_callouts = i_right.iv_callouts;
-        iv_gards = i_right.iv_gards;
-        iv_ffdcs = i_right.iv_ffdcs;
-
-        // Perform deep copy of the description string
-        delete [] iv_pDescription;
-        iv_pDescription = NULL;
-
-        if (i_right.iv_pDescription)
-        {
-            iv_pDescription = new char[strlen(i_right.iv_pDescription) + 1];
-            strcpy(iv_pDescription, i_right.iv_pDescription);
-        }
+        delete (*l_itr);
+        (*l_itr) = NULL;
     }
-    return *this;
-}
 
-//******************************************************************************
-// ErrorInfoRecord setDescription function
-//******************************************************************************
-void ErrorInfoRecord::setDescription(const char * i_pDescription)
-{
-    delete [] iv_pDescription;
-    iv_pDescription = new char[strlen(i_pDescription) + 1];
-    strcpy(iv_pDescription, i_pDescription);
-}
+    for (ErrorInfo::ErrorInfoDeconfigItr_t l_itr = iv_deconfigs.begin();
+         l_itr != iv_deconfigs.end(); ++l_itr)
+    {
+        delete (*l_itr);
+        (*l_itr) = NULL;
+    }
 
-//******************************************************************************
-// ErrorInfoRecord getDescription function
-//******************************************************************************
-const char * ErrorInfoRecord::getDescription()
-{
-    return iv_pDescription;
-}
-
-
-//******************************************************************************
-// ErrorInfoRepository Default Constructor
-//******************************************************************************
-ErrorInfoRepository::ErrorInfoRepository()
-{
-    // Does nothing
-}
-
-//******************************************************************************
-// ErrorInfoRepository Destructor
-//******************************************************************************
-ErrorInfoRepository::~ErrorInfoRepository()
-{
-    // Does nothing
+    for (ErrorInfo::ErrorInfoGardItr_t l_itr = iv_gards.begin();
+         l_itr != iv_gards.end(); ++l_itr)
+    {
+        delete (*l_itr);
+        (*l_itr) = NULL;
+    }
 }
 
 }

@@ -32,6 +32,7 @@
  * ------   --------------  ----------  ----------- ----------------------------
  *                          mjjones     04/13/2011  Created.
  *                          mjjones     07/26/2011  Added more tests
+ *                          mjjones     09/23/2011  Updated test for ErrorInfo
  *
  */
 
@@ -72,6 +73,10 @@ uint32_t rcTest1()
             {
                 FAPI_ERR("rcTest1. testing rc returned true");
                 l_result = 3;
+            }
+            else
+            {
+                FAPI_INF("rcTest1. Success!");
             }
         }
     }
@@ -126,6 +131,10 @@ uint32_t rcTest2()
                 FAPI_ERR("rcTest2. Creator is 0x%x, expected HWP", l_creator);
                 l_result = 3;
             }
+            else
+            {
+                FAPI_INF("rcTest2. Success!");
+            }
         }
     }
 
@@ -149,8 +158,7 @@ uint32_t rcTest3()
 
     if (l_codeCheck != l_code)
     {
-        FAPI_ERR("rcTest3. Code is 0x%x, expected 0x%x", l_codeCheck,
-                l_code);
+        FAPI_ERR("rcTest3. Code is 0x%x, expected 0x%x", l_codeCheck, l_code);
         l_result = 1;
     }
     else
@@ -168,6 +176,10 @@ uint32_t rcTest3()
             {
                 FAPI_ERR("rcTest3. testing rc returned false");
                 l_result = 3;
+            }
+            else
+            {
+                FAPI_INF("rcTest3. Success!");
             }
         }
     }
@@ -192,7 +204,7 @@ uint32_t rcTest4()
     // Ensure that the equality comparison returns true
     if (!(l_rc == l_rc2))
     {
-        FAPI_ERR("rcTest5. 1. Equality comparison false");
+        FAPI_ERR("rcTest4. 1. Equality comparison false");
         l_result = 1;
     }
     else
@@ -200,7 +212,7 @@ uint32_t rcTest4()
         // Ensure that the inequality comparison returns false
         if (l_rc != l_rc2)
         {
-            FAPI_ERR("rcTest5. 2. Inequality comparison true");
+            FAPI_ERR("rcTest4. 2. Inequality comparison true");
             l_result = 2;
         }
         else
@@ -211,7 +223,7 @@ uint32_t rcTest4()
             // Ensure that the equality comparison returns false
             if (l_rc == l_rc2)
             {
-                FAPI_ERR("rcTest5. 3. Equality comparison true");
+                FAPI_ERR("rcTest4. 3. Equality comparison true");
                 l_result = 3;
             }
             else
@@ -219,8 +231,12 @@ uint32_t rcTest4()
                 // Ensure that the inequality comparison returns true
                 if (!(l_rc != l_rc2))
                 {
-                    FAPI_ERR("rcTest5. 4. Inequality comparison false");
+                    FAPI_ERR("rcTest4. 4. Inequality comparison false");
                     l_result = 4;
+                }
+                else
+                {
+                    FAPI_INF("rcTest4. Success!");
                 }
             }
         }
@@ -246,7 +262,7 @@ uint32_t rcTest5()
     // same return code value
     if (!(l_rc == l_code))
     {
-        FAPI_ERR("rcTest6. 1. Equality comparison false");
+        FAPI_ERR("rcTest5. 1. Equality comparison false");
         l_result = 1;
     }
     else
@@ -255,7 +271,7 @@ uint32_t rcTest5()
         // the same return code value
         if (l_rc != l_code)
         {
-            FAPI_ERR("rcTest6. 2. Inequality comparison true");
+            FAPI_ERR("rcTest5. 2. Inequality comparison true");
             l_result = 2;
         }
         else
@@ -264,7 +280,7 @@ uint32_t rcTest5()
             // to a different return code value
             if (l_rc == l_code2)
             {
-                FAPI_ERR("rcTest6. 3. Equality comparison true");
+                FAPI_ERR("rcTest5. 3. Equality comparison true");
                 l_result = 3;
             }
             else
@@ -273,8 +289,12 @@ uint32_t rcTest5()
                 // comparing to a different return code value
                 if (!(l_rc != l_code2))
                 {
-                    FAPI_ERR("rcTest6. 4. Inequality comparison false");
+                    FAPI_ERR("rcTest5. 4. Inequality comparison false");
                     l_result = 4;
+                }
+                else
+                {
+                    FAPI_INF("rcTest5. Success!");
                 }
             }
         }
@@ -302,7 +322,7 @@ uint32_t rcTest6()
 
     if (l_pData != NULL)
     {
-        FAPI_ERR("rcTest7. getPlatData did not return NULL");
+        FAPI_ERR("rcTest6. getPlatData did not return NULL");
         l_result = 1;
     }
     else
@@ -314,8 +334,12 @@ uint32_t rcTest6()
 
         if (l_pData != NULL)
         {
-            FAPI_ERR("rcTest7. releasePlatData did not return NULL");
+            FAPI_ERR("rcTest6. releasePlatData did not return NULL");
             l_result = 2;
+        }
+        else
+        {
+            FAPI_INF("rcTest6. Success!");
         }
     }
 
@@ -347,7 +371,7 @@ uint32_t rcTest7()
 
     if (l_pMyDataCheck != l_pMyData)
     {
-        FAPI_ERR("rcTest8. 1. getPlatData returned unexpected data ptr");
+        FAPI_ERR("rcTest7. 1. getPlatData returned unexpected data ptr");
         l_result = 1;
     }
     else
@@ -358,8 +382,12 @@ uint32_t rcTest7()
 
         if (l_pMyDataCheck != l_pMyData)
         {
-            FAPI_ERR("rcTest8. 2. getPlatData returned unexpected data ptr");
+            FAPI_ERR("rcTest7. 2. getPlatData returned unexpected data ptr");
             l_result = 2;
+        }
+        else
+        {
+            FAPI_INF("rcTest7. Success!");
         }
     }
 
@@ -394,7 +422,7 @@ uint32_t rcTest8()
 
     if (l_pMyDataCheck != l_pMyData)
     {
-        FAPI_ERR("rcTest9. getPlatData returned unexpected data ptr");
+        FAPI_ERR("rcTest8. getPlatData returned unexpected data ptr");
         l_result = 1;
     }
     else
@@ -405,8 +433,12 @@ uint32_t rcTest8()
 
         if (l_pMyDataCheck != NULL)
         {
-            FAPI_ERR("rcTest9. 2. getPlatData returned non NULL ptr");
+            FAPI_ERR("rcTest8. 2. getPlatData returned non NULL ptr");
             l_result = 2;
+        }
+        else
+        {
+            FAPI_INF("rcTest8. Success!");
         }
     }
 
@@ -439,7 +471,7 @@ uint32_t rcTest9()
     // Ensure that the two ReturnCodes are the same
     if (l_rc != l_rc2)
     {
-        FAPI_ERR("rcTest10. ReturnCodes differ");
+        FAPI_ERR("rcTest9. ReturnCodes differ");
         l_result = 1;
     }
     else
@@ -449,7 +481,7 @@ uint32_t rcTest9()
 
         if (l_pMyDataCheck != l_pMyData)
         {
-            FAPI_ERR("rcTest10. 1. getPlatData returned unexpected data ptr");
+            FAPI_ERR("rcTest9. 1. getPlatData returned unexpected data ptr");
             l_result = 2;
         }
         else
@@ -460,8 +492,12 @@ uint32_t rcTest9()
 
             if (l_pMyDataCheck != l_pMyData)
             {
-                FAPI_ERR("rcTest10. 2. getPlatData returned unexpected data ptr");
+                FAPI_ERR("rcTest9. 2. getPlatData returned unexpected data ptr");
                 l_result = 3;
+            }
+            else
+            {
+                FAPI_INF("rcTest9. Success!");
             }
         }
     }
@@ -500,7 +536,7 @@ uint32_t rcTest10()
     // Ensure that the two ReturnCodes are the same
     if (l_rc != l_rc2)
     {
-        FAPI_ERR("rcTest11. ReturnCodes differ");
+        FAPI_ERR("rcTest10. ReturnCodes differ");
         l_result = 1;
     }
     else
@@ -510,7 +546,7 @@ uint32_t rcTest10()
 
         if (l_pMyDataCheck != l_pMyData)
         {
-            FAPI_ERR("rcTest11. releasePlatData returned unexpected data ptr");
+            FAPI_ERR("rcTest10. releasePlatData returned unexpected data ptr");
             l_result = 2;
         }
         else
@@ -521,8 +557,12 @@ uint32_t rcTest10()
 
             if (l_pMyDataCheck != NULL)
             {
-                FAPI_ERR("rcTest11. releasePlatData returned non NULL ptr");
+                FAPI_ERR("rcTest10. releasePlatData returned non NULL ptr");
                 l_result = 3;
+            }
+            else
+            {
+                FAPI_INF("rcTest10. Success!");
             }
         }
     }
@@ -531,206 +571,321 @@ uint32_t rcTest10()
 }
 
 //******************************************************************************
-// rcTest11. Ensures that the getHwpFfdc functions works when there is no FFDC
+// rcTest11. Ensures that the getErrorInfo function works when there is no
+//           ErrorInfo
 //******************************************************************************
 uint32_t rcTest11()
 {
     uint32_t l_result = 0;
 
     // Create a ReturnCode
-    uint32_t l_code = 6;
-    ReturnCode l_rc(l_code);
+    ReturnCode l_rc;
 
-    // Ensure that the getHwpFfdc function returns NULL
-    const void * l_pFfdc = reinterpret_cast<const void *> (0x12345678);
+    // Ensure that the getErrorInfo function returns NULL
+    const ErrorInfo * l_pErrInfo =
+        reinterpret_cast<const ErrorInfo *> (0x12345678);
 
-    // Get FFDC pointer
-    uint32_t l_size = 0;
-    l_pFfdc = l_rc.getHwpFfdc(l_size);
+    l_pErrInfo = l_rc.getErrorInfo();
 
-    if (l_pFfdc != NULL)
+    if (l_pErrInfo != NULL)
     {
-        FAPI_ERR("rcTest11. getHwpFfdc did not return NULL");
-        l_result = 1;
-    }
-
-    return l_result;
-}
-
-//******************************************************************************
-// rcTest12. Ensures that the getHwpFfdc function works when there is FFDC
-//******************************************************************************
-uint32_t rcTest12()
-{
-    uint32_t l_result = 0;
-    uint32_t l_code = 10;
-
-    // Create a ReturnCode
-    ReturnCode l_rc(l_code);
-
-    // Add HwpFfdc.
-    uint32_t l_myData[2] = {4, 5};
-    void * l_pMyData = reinterpret_cast<void *> (l_myData);
-    (void) l_rc.setHwpFfdc(l_pMyData, sizeof(l_myData));
-
-    // Ensure that getHwpFfdc returns a pointer to the same data
-    uint32_t l_size = 0;
-    const uint32_t * l_pMyDataCheck = reinterpret_cast<const uint32_t *>
-        (l_rc.getHwpFfdc(l_size));
-
-    if (l_size != sizeof(l_myData))
-    {
-        FAPI_ERR("rcTest12. getHwpFfdc returned bad size %d", l_size);
-        l_result = 1;
-    }
-    else if ((l_pMyDataCheck[0] != 4) || (l_pMyDataCheck[1] != 5))
-    {
-        FAPI_ERR("rcTest12. getHwpFfdc returned bad data");
-        l_result = 2;
-    }
-
-    return l_result;
-}
-
-//******************************************************************************
-// rcTest13. Ensures that the copy constructor works when there is FFDC and that
-//           the getHwpFfdc function works
-//******************************************************************************
-uint32_t rcTest13()
-{
-    uint32_t l_result = 0;
-    uint32_t l_code = 10;
-
-    // Create a ReturnCode
-    ReturnCode l_rc(l_code);
-
-    // Add HwpFfdc.
-    uint32_t l_myData[2] = {4, 5};
-    void * l_pMyData = reinterpret_cast<void *> (l_myData);
-    (void) l_rc.setHwpFfdc(l_pMyData, sizeof(l_myData));
-
-    // Create a ReturnCode using the copy constructor
-    ReturnCode l_rc2(l_rc);
-
-    // Ensure that the two ReturnCodes are the same
-    if (l_rc != l_rc2)
-    {
-        FAPI_ERR("rcTest13. ReturnCodes differ");
+        FAPI_ERR("rcTest11. getErrorInfo did not return NULL");
         l_result = 1;
     }
     else
     {
-        // Ensure that getHwpFfdc returns a pointer to the same data from l_rc
-        uint32_t l_size = 0;
-        const uint32_t * l_pMyDataCheck = reinterpret_cast<const uint32_t *>
-            (l_rc.getHwpFfdc(l_size));
-
-        if (l_size != sizeof(l_myData))
-        {
-            FAPI_ERR("rcTest13. getHwpFfdc returned bad size %d", l_size);
-            l_result = 2;
-        }
-        else if ((l_pMyDataCheck[0] != 4) || (l_pMyDataCheck[1] != 5))
-        {
-            FAPI_ERR("rcTest13. getHwpFfdc returned bad data");
-            l_result = 3;
-        }
-        else
-        {
-            // Ensure that getHwpFfdc returns a pointer to the same data from
-            // l_rc2
-            uint32_t l_size2 = 0;
-            const uint32_t * l_pMyDataCheck2 = reinterpret_cast<const uint32_t *>
-                (l_rc2.getHwpFfdc(l_size2));
-
-            if (l_size2 != sizeof(l_myData))
-            {
-                FAPI_ERR("rcTest13. getHwpFfdc(2) returned bad size %d",
-                         l_size2);
-                l_result = 4;
-            }
-            else if ((l_pMyDataCheck2[0] != 4) || (l_pMyDataCheck2[1] != 5))
-            {
-                FAPI_ERR("rcTest13. getHwpFfdc(2) returned bad data");
-                l_result = 5;
-            }
-        }
+        FAPI_INF("rcTest11. Success!");
     }
 
     return l_result;
 }
 
 //******************************************************************************
-// rcTest14. Ensures that the assignment operator works when there is FFDC and
-//           that the getHwpFfdc function works
+// rcTest12. Ensures that the getErrorInfo function works when there is
+//           ErrorInfo
+//******************************************************************************
+uint32_t rcTest12()
+{
+    uint32_t l_result = 0;
+
+    // Create a ReturnCode
+    ReturnCode l_rc;
+    l_rc = 5;
+
+    // Create a DIMM target
+    uint32_t l_targetHandle = 3;
+    Target l_target(TARGET_TYPE_DIMM, &l_targetHandle);
+    
+    // Create some FFDC
+    uint8_t l_ffdc = 0x12;
+
+    // Add error information to the ReturnCode
+    const void * l_objects[] = {&l_ffdc, &l_target};
+    fapi::ReturnCode::ErrorInfoEntry l_entries[] =
+        {{fapi::ReturnCode::EI_TYPE_FFDC, 0,
+          fapi::ReturnCodeFfdc::getErrorInfoFfdcSize(l_ffdc)},
+         {fapi::ReturnCode::EI_TYPE_CALLOUT, 1, fapi::PRI_MEDIUM},
+         {fapi::ReturnCode::EI_TYPE_DECONF, 1},
+         {fapi::ReturnCode::EI_TYPE_GARD, 1}};
+    l_rc.addErrorInfo(l_objects, l_entries, 4);
+
+    do
+    {
+        // Check that the Error Info can be retrieved
+        const ErrorInfo * l_pErrInfo = NULL;
+        l_pErrInfo = l_rc.getErrorInfo();
+
+        if (l_pErrInfo == NULL)
+        {
+            FAPI_ERR("rcTest12. getErrorInfo returned NULL");
+            l_result = 1;
+            break;
+        }
+
+        // Check the FFDC error information
+        if (l_pErrInfo->iv_ffdcs.size() != 1)
+        {
+            FAPI_ERR("rcTest12. %d FFDCs", l_pErrInfo->iv_ffdcs.size());
+            l_result = 2;
+            break;
+        }
+
+        uint32_t l_size = 0;
+        const void * l_pFfdc = NULL;
+
+        l_pFfdc = l_pErrInfo->iv_ffdcs[0]->getData(l_size);
+
+        if (l_size != sizeof(l_ffdc))
+        {
+            FAPI_ERR("rcTest12. FFDC size is %d", l_size);
+            l_result = 3;
+            break;
+        }
+
+        const uint8_t * l_pFfdcCheck = static_cast<const uint8_t *>(l_pFfdc);
+        if (*l_pFfdcCheck != 0x12)
+        {
+            FAPI_ERR("rcTest12. FFDC is 0x%x", *l_pFfdcCheck);
+            l_result = 4;
+            break;
+        }
+
+        // Check the callout error information
+        if (l_pErrInfo->iv_callouts.size() != 1)
+        {
+            FAPI_ERR("rcTest12. %d callouts", l_pErrInfo->iv_ffdcs.size());
+            l_result = 5;
+            break;
+        }
+
+        if (l_pErrInfo->iv_callouts[0]->iv_target != l_target)
+        {
+            FAPI_ERR("rcTest12. callout target mismatch");
+            l_result = 6;
+            break;
+        }
+
+        if (l_pErrInfo->iv_callouts[0]->iv_priority != PRI_MEDIUM)
+        {
+            FAPI_ERR("rcTest12. callout priority mismatch");
+            l_result = 7;
+            break;
+        }
+
+        // Check the deconfig error information
+        if (l_pErrInfo->iv_deconfigs.size() != 1)
+        {
+            FAPI_ERR("rcTest12. %d deconfigs", l_pErrInfo->iv_deconfigs.size());
+            l_result = 8;
+            break;
+        }
+
+        if (l_pErrInfo->iv_deconfigs[0]->iv_target != l_target)
+        {
+            FAPI_ERR("rcTest12. deconfig target mismatch");
+            l_result = 9;
+            break;
+        }
+
+        // Check the GARD error information
+        if (l_pErrInfo->iv_gards.size() != 1)
+        {
+            FAPI_ERR("rcTest12. %d gards", l_pErrInfo->iv_gards.size());
+            l_result = 10;
+            break;
+        }
+
+        if (l_pErrInfo->iv_gards[0]->iv_target != l_target)
+        {
+            FAPI_ERR("rcTest12. gard target mismatch");
+            l_result = 11;
+            break;
+        }
+
+        FAPI_INF("rcTest12. Success!");
+    }
+    while(0);
+
+    return l_result;
+}
+
+//******************************************************************************
+// rcTest13. Ensures that the copy constructor works when there is ErrorInfo
+//******************************************************************************
+uint32_t rcTest13()
+{
+    uint32_t l_result = 0;
+
+    // Create a ReturnCode
+    ReturnCode l_rc;
+    l_rc = 5;
+
+    // Create a DIMM target
+    uint32_t l_targetHandle = 3;
+    Target l_target(TARGET_TYPE_DIMM, &l_targetHandle);
+
+    // Add error information to the ReturnCode
+    const void * l_objects[] = {&l_target};
+    fapi::ReturnCode::ErrorInfoEntry l_entries[] =
+        {{fapi::ReturnCode::EI_TYPE_GARD, 0}};
+    l_rc.addErrorInfo(l_objects, l_entries, 1);
+
+    // Create a ReturnCode using the copy constructor
+    ReturnCode l_rc2(l_rc);
+
+    do
+    {
+        // Ensure that the two ReturnCodes are the same
+        if (l_rc != l_rc2)
+        {
+            FAPI_ERR("rcTest13. ReturnCodes differ");
+            l_result = 1;
+            break;
+        }
+
+        // Ensure that getErrorInfo returns correct information from l_rc
+        const ErrorInfo * l_pErrInfo = NULL;
+
+        l_pErrInfo = l_rc.getErrorInfo();
+
+        if (l_pErrInfo == NULL)
+        {
+            FAPI_ERR("rcTest13. getErrorInfo returned NULL");
+            l_result = 2;
+            break;
+        }
+       
+        if (l_pErrInfo->iv_gards.size() != 1)
+        {
+            FAPI_ERR("rcTest13. %d gards", l_pErrInfo->iv_gards.size());
+            l_result = 3;
+            break;
+        }
+
+        if (l_pErrInfo->iv_gards[0]->iv_target != l_target)
+        {
+            FAPI_ERR("rcTest13. gard target mismatch");
+            l_result = 4;
+            break;
+        }
+
+        // Ensure that getErrorInfo from l_rc2 returns the same pointer
+        const ErrorInfo * l_pErrInfo2 = l_rc2.getErrorInfo();
+
+        if (l_pErrInfo != l_pErrInfo2)
+        {
+            FAPI_ERR("rcTest13. error info mismatch");
+            l_result = 5;
+            break;
+        }
+
+        FAPI_INF("rcTest13. Success!");
+    }
+    while(0);
+
+    return l_result;
+}
+
+//******************************************************************************
+// rcTest14. Ensures that the assignment operator works when there ErrorInfo
 //******************************************************************************
 uint32_t rcTest14()
 {
     uint32_t l_result = 0;
-    uint32_t l_code = 10;
 
     // Create a ReturnCode
-    ReturnCode l_rc(l_code);
+    ReturnCode l_rc;
+    l_rc = 5;
 
-    // Add HwpFfdc.
-    uint32_t l_myData[2] = {4, 5};
-    void * l_pMyData = reinterpret_cast<void *> (l_myData);
-    (void) l_rc.setHwpFfdc(l_pMyData, sizeof(l_myData));
+    // Create a DIMM target
+    uint32_t l_targetHandle = 3;
+    Target l_target(TARGET_TYPE_DIMM, &l_targetHandle);
+
+    // Add error information to the ReturnCode
+    const void * l_objects[] = {&l_target};
+    fapi::ReturnCode::ErrorInfoEntry l_entries[] =
+        {{fapi::ReturnCode::EI_TYPE_GARD, 0}};
+    l_rc.addErrorInfo(l_objects, l_entries, 1);
 
     // Create a ReturnCode using the assignment operator
     ReturnCode l_rc2;
     l_rc2 = l_rc;
 
-    // Ensure that the two ReturnCodes are the same
-    if (l_rc != l_rc2)
+    do
     {
-        FAPI_ERR("rcTest14. ReturnCodes differ");
-        l_result = 1;
-    }
-    else
-    {
-        // Ensure that getHwpFfdc returns a pointer to the same data from l_rc
-        uint32_t l_size = 0;
-        const uint32_t * l_pMyDataCheck = reinterpret_cast<const uint32_t *>
-            (l_rc.getHwpFfdc(l_size));
-
-        if (l_size != sizeof(l_myData))
+        // Ensure that the two ReturnCodes are the same
+        if (l_rc != l_rc2)
         {
-            FAPI_ERR("rcTest14. getHwpFfdc returned bad size %d", l_size);
+            FAPI_ERR("rcTest14. ReturnCodes differ");
+            l_result = 1;
+            break;
+        }
+
+        // Ensure that getErrorInfo returns correct information from l_rc
+        const ErrorInfo * l_pErrInfo = NULL;
+
+        l_pErrInfo = l_rc.getErrorInfo();
+
+        if (l_pErrInfo == NULL)
+        {
+            FAPI_ERR("rcTest14. getErrorInfo returned NULL");
             l_result = 2;
+            break;
         }
-        else if ((l_pMyDataCheck[0] != 4) || (l_pMyDataCheck[1] != 5))
-        {
-            FAPI_ERR("rcTest14. getHwpFfdc returned bad data");
-            l_result = 3;
-        }
-        else
-        {
-            // Ensure that getHwpFfdc returns a pointer to the same data from
-            // l_rc2
-            uint32_t l_size2 = 0;
-            const uint32_t * l_pMyDataCheck2 = reinterpret_cast<const uint32_t *>
-                (l_rc2.getHwpFfdc(l_size2));
 
-            if (l_size2 != sizeof(l_myData))
-            {
-                FAPI_ERR("rcTest14. getHwpFfdc(2) returned bad size %d",
-                         l_size2);
-                l_result = 4;
-            }
-            else if ((l_pMyDataCheck2[0] != 4) || (l_pMyDataCheck2[1] != 5))
-            {
-                FAPI_ERR("rcTest14. getHwpFfdc(2) returned bad data");
-                l_result = 5;
-            }
+        if (l_pErrInfo->iv_gards.size() != 1)
+        {
+            FAPI_ERR("rcTest14. %d gards", l_pErrInfo->iv_gards.size());
+            l_result = 3;
+            break;
         }
+
+        if (l_pErrInfo->iv_gards[0]->iv_target != l_target)
+        {
+            FAPI_ERR("rcTest14. gard target mismatch");
+            l_result = 4;
+            break;
+        }
+
+        // Ensure that getErrorInfo from l_rc2 returns the same pointer
+        const ErrorInfo * l_pErrInfo2 = l_rc2.getErrorInfo();
+
+        if (l_pErrInfo != l_pErrInfo2)
+        {
+            FAPI_ERR("rcTest14. error info mismatch");
+            l_result = 5;
+            break;
+        }
+
+        FAPI_INF("rcTest14. Success!");
     }
+    while(0);
 
     return l_result;
 }
 
 //******************************************************************************
-// rcTest15. Ensures that the setErrTarget function works when there is no error
+// rcTest15. Ensures that setting the ReturnCode to success clears ErrorInfo
 //******************************************************************************
 uint32_t rcTest15()
 {
@@ -738,102 +893,242 @@ uint32_t rcTest15()
 
     // Create a ReturnCode
     ReturnCode l_rc;
+    l_rc = 5;
 
-    // Create a Target
-    uint8_t l_handle = 7;
-    void * l_pHandle = reinterpret_cast<void *>(&l_handle);
-    Target l_target(TARGET_TYPE_DIMM, l_pHandle);
+    // Create a DIMM target
+    uint32_t l_targetHandle = 3;
+    Target l_target(TARGET_TYPE_DIMM, &l_targetHandle);
 
-    // Set the error target
-    l_rc.setErrTarget(l_target);
+    // Add error information to the ReturnCode
+    const void * l_objects[] = {&l_target};
+    fapi::ReturnCode::ErrorInfoEntry l_entries[] =
+        {{fapi::ReturnCode::EI_TYPE_GARD, 0}};
+    l_rc.addErrorInfo(l_objects, l_entries, 1);
 
-    // Retreive the Error target (should be null because no error)
-    Target * l_pTarget = l_rc.getErrTarget();
+    // Set the ReturnCode to success
+    l_rc = FAPI_RC_SUCCESS;
 
-    if (l_pTarget != NULL)
+    // Check that there is no ErrorInfo
+    const ErrorInfo * l_pErrInfo = NULL;
+
+    l_pErrInfo = l_rc.getErrorInfo();
+
+    if (l_pErrInfo != NULL)
     {
-        FAPI_ERR("rcTest15. getErrTarget returned non-null pointer");
+        FAPI_ERR("rcTest15. getErrorInfo returned NULL");
         l_result = 1;
     }
-
-    // Set the handle pointer to NULL to prevent any problem on destruction
-    l_target.set(NULL);
+    else
+    {
+        FAPI_INF("rcTest15. Success!");
+    }
 
     return l_result;
 }
 
 //******************************************************************************
-// rcTest16. Ensures that the setErrTarget function works when there is an error
+// rcTest16. Ensures that multiple Error Info of each type can be added
 //******************************************************************************
 uint32_t rcTest16()
 {
     uint32_t l_result = 0;
 
-    // Create a ReturnCode with an error
-    ReturnCode l_rc(8);
+    // Create a ReturnCode
+    ReturnCode l_rc;
+    l_rc = 5;
 
-    // Create a Target
-    uint8_t l_handle = 7;
-    void * l_pHandle = reinterpret_cast<void *>(&l_handle);
-    Target l_target(TARGET_TYPE_DIMM, l_pHandle);
+    // Create 2 targets
+    uint32_t l_targetHandle = 3;
+    Target l_target(TARGET_TYPE_DIMM, &l_targetHandle);
 
-    // Set the error target
-    l_rc.setErrTarget(l_target);
+    uint32_t l_targetHandle2 = 4;
+    Target l_target2(TARGET_TYPE_MCS_CHIPLET, &l_targetHandle2);
 
-    // Retreive the Error target
-    Target * l_pTarget = l_rc.getErrTarget();
+    // Create 2 FFDCs
+    uint8_t l_ffdc = 0x12;
+    uint32_t l_ffdc2 = 0x12345678;
 
-    if (*l_pTarget != l_target)
+    // Add error information to the ReturnCode
+    const void * l_objects[] = {&l_ffdc, &l_ffdc2, &l_target, &l_target2};
+    fapi::ReturnCode::ErrorInfoEntry l_entries[] =
+        {{fapi::ReturnCode::EI_TYPE_FFDC, 0,
+          fapi::ReturnCodeFfdc::getErrorInfoFfdcSize(l_ffdc)},
+         {fapi::ReturnCode::EI_TYPE_FFDC, 1,
+          fapi::ReturnCodeFfdc::getErrorInfoFfdcSize(l_ffdc2)},
+         {fapi::ReturnCode::EI_TYPE_CALLOUT, 2, fapi::PRI_HIGH},
+         {fapi::ReturnCode::EI_TYPE_CALLOUT, 3, fapi::PRI_LOW},
+         {fapi::ReturnCode::EI_TYPE_DECONF, 2},
+         {fapi::ReturnCode::EI_TYPE_DECONF, 3},
+         {fapi::ReturnCode::EI_TYPE_GARD, 2},
+         {fapi::ReturnCode::EI_TYPE_GARD, 3}};
+    l_rc.addErrorInfo(l_objects, l_entries, 8);
+
+    do
     {
-        FAPI_ERR("rcTest16. getErrTarget returned bad target");
-        l_result = 1;
-    }
+        // Check that the Error Info can be retrieved
+        const ErrorInfo * l_pErrInfo = NULL;
+        l_pErrInfo = l_rc.getErrorInfo();
 
-    // Set the handle pointer to NULL to prevent any problem on destruction
-    l_target.set(NULL);
+        if (l_pErrInfo == NULL)
+        {
+            FAPI_ERR("rcTest16. getErrorInfo returned NULL");
+            l_result = 1;
+            break;
+        }
+
+        // Check the FFDC error information
+        if (l_pErrInfo->iv_ffdcs.size() != 2)
+        {
+            FAPI_ERR("rcTest16. %d FFDCs", l_pErrInfo->iv_ffdcs.size());
+            l_result = 2;
+            break;
+        }
+
+        uint32_t l_size = 0;
+        const void * l_pFfdc = NULL;
+
+        l_pFfdc = l_pErrInfo->iv_ffdcs[0]->getData(l_size);
+
+        if (l_size != sizeof(l_ffdc))
+        {
+            FAPI_ERR("rcTest16. FFDC[0] size is %d", l_size);
+            l_result = 3;
+            break;
+        }
+
+        const uint8_t * l_pFfdcCheck = static_cast<const uint8_t *>(l_pFfdc);
+        if (*l_pFfdcCheck != 0x12)
+        {
+            FAPI_ERR("rcTest16. FFDC[0] is 0x%x", *l_pFfdcCheck);
+            l_result = 4;
+            break;
+        }
+
+        l_pFfdc = l_pErrInfo->iv_ffdcs[1]->getData(l_size);
+
+        if (l_size != sizeof(l_ffdc2))
+        {
+            FAPI_ERR("rcTest16. FFDC[1] size is %d", l_size);
+            l_result = 5;
+            break;
+        }
+
+        const uint32_t * l_pFfdc2Check = static_cast<const uint32_t *>(l_pFfdc);
+        if (*l_pFfdc2Check != 0x12345678)
+        {
+            FAPI_ERR("rcTest16. FFDC[1] is 0x%x", *l_pFfdc2Check);
+            l_result = 6;
+            break;
+        }
+
+        // Check the callout error information
+        if (l_pErrInfo->iv_callouts.size() != 2)
+        {
+            FAPI_ERR("rcTest16. %d callouts", l_pErrInfo->iv_ffdcs.size());
+            l_result = 7;
+            break;
+        }
+
+        if (l_pErrInfo->iv_callouts[0]->iv_target != l_target)
+        {
+            FAPI_ERR("rcTest16. callout[0] target mismatch");
+            l_result = 8;
+            break;
+        }
+
+        if (l_pErrInfo->iv_callouts[0]->iv_priority != PRI_HIGH)
+        {
+            FAPI_ERR("rcTest16. callout[0] priority mismatch");
+            l_result = 9;
+            break;
+        }
+
+        if (l_pErrInfo->iv_callouts[1]->iv_target != l_target2)
+        {
+            FAPI_ERR("rcTest16. callout[1] target mismatch");
+            l_result = 10;
+            break;
+        }
+
+        if (l_pErrInfo->iv_callouts[1]->iv_priority != PRI_LOW)
+        {
+            FAPI_ERR("rcTest16. callout[1] priority mismatch");
+            l_result = 11;
+            break;
+        }
+
+        // Check the deconfig error information
+        if (l_pErrInfo->iv_deconfigs.size() != 2)
+        {
+            FAPI_ERR("rcTest16. %d deconfigs", l_pErrInfo->iv_deconfigs.size());
+            l_result = 12;
+            break;
+        }
+
+        if (l_pErrInfo->iv_deconfigs[0]->iv_target != l_target)
+        {
+            FAPI_ERR("rcTest16. deconfig[0] target mismatch");
+            l_result = 13;
+            break;
+        }
+
+        if (l_pErrInfo->iv_deconfigs[1]->iv_target != l_target2)
+        {
+            FAPI_ERR("rcTest16. deconfig[1] target mismatch");
+            l_result = 13;
+            break;
+        }
+
+        // Check the GARD error information
+        if (l_pErrInfo->iv_gards.size() != 2)
+        {
+            FAPI_ERR("rcTest16. %d gards", l_pErrInfo->iv_gards.size());
+            l_result = 14;
+            break;
+        }
+
+        if (l_pErrInfo->iv_gards[0]->iv_target != l_target)
+        {
+            FAPI_ERR("rcTest16. gard[0] target mismatch");
+            l_result = 15;
+            break;
+        }
+
+        if (l_pErrInfo->iv_gards[1]->iv_target != l_target2)
+        {
+            FAPI_ERR("rcTest16. gard[1] target mismatch");
+            l_result = 16;
+            break;
+        }
+
+        FAPI_INF("rcTest16. Success!");
+    }
+    while(0);
 
     return l_result;
 }
 
 //******************************************************************************
-// rcTest17. Ensures that the setErrTarget function works when there is an error
-//           and an existing Target
+// rcTest17. Ensures that static_cast can be applied to a ReturnCode
 //******************************************************************************
 uint32_t rcTest17()
 {
     uint32_t l_result = 0;
 
-    // Create a ReturnCode with an error
-    ReturnCode l_rc(8);
+    // Create a ReturnCode
+    ReturnCode l_rc;
+    l_rc = 5;
 
-    // Create a Target
-    uint8_t l_handle = 7;
-    void * l_pHandle = reinterpret_cast<void *>(&l_handle);
-    Target l_target(TARGET_TYPE_DIMM, l_pHandle);
+    uint32_t l_check = static_cast<uint32_t>(l_rc);
 
-    // Create another Target
-    uint8_t l_handle2 = 8;
-    void * l_pHandle2 = reinterpret_cast<void *>(&l_handle2);
-    Target l_target2(TARGET_TYPE_DIMM, l_pHandle2);
-
-    // Set the error target
-    l_rc.setErrTarget(l_target);
-
-    // Attempt to set the error target again (should not be set because there is
-    // already an error target)
-    l_rc.setErrTarget(l_target2);
-
-    // Retreive the Error target
-    Target * l_pTarget = l_rc.getErrTarget();
-
-    if (*l_pTarget != l_target)
+    if (l_check != 5)
     {
-        FAPI_ERR("rcTest17. getErrTarget returned bad target");
-        l_result = 1;
+        FAPI_ERR("rcTest17. RC is not 5, it is 0x%x", l_check);
     }
-
-    // Set the handle pointer to NULL to prevent any problem on destruction
-    l_target.set(NULL);
+    else
+    {
+        FAPI_INF("rcTest17. Success!");
+    }
 
     return l_result;
 }

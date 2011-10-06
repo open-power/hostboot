@@ -38,10 +38,12 @@
  *                                                  and Error Target if
  *                                                  FAPI_RC_SUCCESS is assigned to
  *                                                  ReturnCode
+ *                          mjjones     09/22/2011  Added ErrorInfo Support
  */
 
 #include <fapiReturnCode.H>
 #include <fapiReturnCodeDataRef.H>
+#include <fapiPlatTrace.H>
 
 namespace fapi
 {
@@ -50,8 +52,7 @@ namespace fapi
 // Default Constructor
 //******************************************************************************
 ReturnCode::ReturnCode() :
-    iv_rcValue(FAPI_RC_SUCCESS), iv_pPlatDataRef(NULL), iv_pHwpFfdcRef(NULL),
-    iv_pErrTarget(NULL)
+    iv_rcValue(FAPI_RC_SUCCESS), iv_pDataRef(NULL)
 {
 
 }
@@ -60,8 +61,7 @@ ReturnCode::ReturnCode() :
 // Constructor
 //******************************************************************************
 ReturnCode::ReturnCode(const uint32_t i_rcValue) :
-    iv_rcValue(i_rcValue), iv_pPlatDataRef(NULL), iv_pHwpFfdcRef(NULL),
-    iv_pErrTarget(NULL)
+    iv_rcValue(i_rcValue), iv_pDataRef(NULL)
 {
 
 }
@@ -70,26 +70,13 @@ ReturnCode::ReturnCode(const uint32_t i_rcValue) :
 // Copy Constructor
 //******************************************************************************
 ReturnCode::ReturnCode(const ReturnCode & i_right) :
-    iv_rcValue(i_right.iv_rcValue), iv_pPlatDataRef(i_right.iv_pPlatDataRef),
-    iv_pHwpFfdcRef(i_right.iv_pHwpFfdcRef), iv_pErrTarget(NULL)
+    iv_rcValue(i_right.iv_rcValue), iv_pDataRef(i_right.iv_pDataRef)
 {
-    // Note shallow copy of data ref pointers. Both ReturnCodes now point to the
-    // same data
-
-    // Increment the data ref counts and create a new copy of the error target
-    if (iv_pPlatDataRef)
+    // Note shallow copy of data ref pointer. Both ReturnCodes now point to any
+    // associated data. If there is data, increment the data ref count
+    if (iv_pDataRef)
     {
-        (void) iv_pPlatDataRef->incRefCount();
-    }
-
-    if (iv_pHwpFfdcRef)
-    {
-        (void) iv_pHwpFfdcRef->incRefCount();
-    }
-
-    if (i_right.iv_pErrTarget)
-    {
-        iv_pErrTarget = new Target(*i_right.iv_pErrTarget);
+        iv_pDataRef->incRefCount();
     }
 }
 
@@ -98,11 +85,8 @@ ReturnCode::ReturnCode(const ReturnCode & i_right) :
 //******************************************************************************
 ReturnCode::~ReturnCode()
 {
-    // Remove interest in any data references and delete any Error Target
-    (void) removePlatData();
-    (void) removeHwpFfdc();
-    delete iv_pErrTarget;
-    iv_pErrTarget = NULL;
+    // Forget about any associated data
+    forgetData();
 }
 
 //******************************************************************************
@@ -113,34 +97,20 @@ ReturnCode & ReturnCode::operator=(const ReturnCode & i_right)
     // Test for self assignment
     if (this != &i_right)
     {
-        // Remove interest in any data references and delete any Error Target
-        (void) removePlatData();
-        (void) removeHwpFfdc();
-        delete iv_pErrTarget;
-        iv_pErrTarget = NULL;
+        // Forget about any associated data
+        forgetData();
 
-        // Copy instance variables. Note shallow copy of data ref pointers. Both
-        // ReturnCodes now point to the same data
+        // Note shallow copy of data ref pointer. Both ReturnCodes now point to
+        // any associated data. If there is data, increment the data ref count
         iv_rcValue = i_right.iv_rcValue;
-        iv_pPlatDataRef = i_right.iv_pPlatDataRef;
-        iv_pHwpFfdcRef = i_right.iv_pHwpFfdcRef;
+        iv_pDataRef = i_right.iv_pDataRef;
 
-        // Increment the data ref counts and create a new copy of the error tgt
-        if (iv_pPlatDataRef)
+        if (iv_pDataRef)
         {
-            (void) iv_pPlatDataRef->incRefCount();
-        }
-
-        if (iv_pHwpFfdcRef)
-        {
-            (void) iv_pHwpFfdcRef->incRefCount();
-        }
-
-        if (i_right.iv_pErrTarget)
-        {
-            iv_pErrTarget = new Target(*i_right.iv_pErrTarget);
+            iv_pDataRef->incRefCount();
         }
     }
+
     return *this;
 }
 
@@ -151,16 +121,24 @@ ReturnCode & ReturnCode::operator=(const uint32_t i_rcValue)
 {
     iv_rcValue = i_rcValue;
 
-    if (ok())
+    if (iv_rcValue == FAPI_RC_SUCCESS)
     {
-        // Remove interest in any data references and delete any Error Target
-        (void) removePlatData();
-        (void) removeHwpFfdc();
-        delete iv_pErrTarget;
-        iv_pErrTarget = NULL;
+        // Forget about any associated data
+        forgetData();
     }
 
     return *this;
+}
+
+//******************************************************************************
+// resetError function
+//******************************************************************************
+void ReturnCode::resetError(const uint32_t i_rcValue)
+{
+    iv_rcValue = i_rcValue;
+
+    // Forget about any associated data
+    forgetData();
 }
 
 //******************************************************************************
@@ -180,16 +158,24 @@ ReturnCode::operator uint32_t() const
 }
 
 //******************************************************************************
+// setPlatData function
+//******************************************************************************
+void ReturnCode::setPlatData(void * i_pData)
+{
+    ensureDataRefExists();
+    iv_pDataRef->setPlatData(i_pData);
+}
+
+//******************************************************************************
 // getPlatData function
 //******************************************************************************
 void * ReturnCode::getPlatData() const
 {
     void * l_pData = NULL;
 
-    if (iv_pPlatDataRef)
+    if (iv_pDataRef)
     {
-        // Get the data
-        l_pData = iv_pPlatDataRef->getData();
+        l_pData = iv_pDataRef->getPlatData();
     }
 
     return l_pData;
@@ -202,56 +188,120 @@ void * ReturnCode::releasePlatData()
 {
     void * l_pData = NULL;
 
-    if (iv_pPlatDataRef)
+    if (iv_pDataRef)
     {
-        // Release the data
-        l_pData = iv_pPlatDataRef->releaseData();
-
-        // Remove interest in ReturnCodePlatDataRef
-        (void) removePlatData();
+        l_pData = iv_pDataRef->releasePlatData();
     }
 
     return l_pData;
 }
 
 //******************************************************************************
-// setPlatData function
+// addErrorInfo function
 //******************************************************************************
-void ReturnCode::setPlatData(void * i_pData)
+void ReturnCode::addErrorInfo(const void * const * i_pObjects,
+                              const ErrorInfoEntry * i_pEntries,
+                              const uint8_t i_count)
 {
-    // Remove interest in ReturnCodePlatDataRef
-    (void) removePlatData();
+    for (uint32_t i = 0; i < i_count; i++)
+    {
+        // Figure out the object of this entry
+        const void * l_pObject = i_pObjects[i_pEntries[i].iv_object];
 
-    // Create a new ReturnCodePlatDataRef which points to the data
-    iv_pPlatDataRef = new ReturnCodePlatDataRef(i_pData);
+        if (i_pEntries[i].iv_type == EI_TYPE_FFDC)
+        {
+            // Get the size of the object to add as FFDC
+            int8_t l_size = i_pEntries[i].iv_data1;
+
+            if (l_size > 0)
+            {
+                // This is a regular FFDC data object that can be directly
+                // memcopied
+                FAPI_ERR("addErrorInfo: Adding FFDC, size: %d", l_size);
+                addEIFfdc(l_pObject, l_size);
+            }
+            else
+            {
+                // This is a special FFDC data object
+                if (l_size == ReturnCodeFfdc::EI_FFDC_SIZE_ECMDDB)
+                {
+                    // The FFDC is a ecmdDataBufferBase
+                    FAPI_ERR("addErrorInfo: Adding ecmdDB FFDC");
+                    const ecmdDataBufferBase * l_pDb =
+                        static_cast<const ecmdDataBufferBase *>(l_pObject);
+                    ReturnCodeFfdc::addEIFfdc(*this, *l_pDb);
+                }
+                else
+                {
+                    FAPI_ERR("addErrorInfo: Unrecognized FFDC data: %d",
+                             l_size);
+                }
+            }
+        }
+        else if (i_pEntries[i].iv_type == EI_TYPE_CALLOUT)
+        {
+            // Get a pointer to the Target to callout and the priority
+            const Target * l_pTarget = static_cast<const Target *>(l_pObject);
+            CalloutPriority l_pri =
+                static_cast<CalloutPriority>(i_pEntries[i].iv_data1);
+
+            // Add the ErrorInfo
+            FAPI_ERR("addErrorInfo: Adding callout, pri: %d", l_pri);
+            addEICallout(*l_pTarget, l_pri);
+        }
+        else if (i_pEntries[i].iv_type == EI_TYPE_DECONF)
+        {
+            // Get a pointer to the Target to deconfigure
+            const Target * l_pTarget = static_cast<const Target *>(l_pObject);
+
+            // Add the ErrorInfo
+            FAPI_ERR("addErrorInfo: Adding deconfigure");
+            addEIDeconfigure(*l_pTarget);
+        }
+        else if (i_pEntries[i].iv_type == EI_TYPE_GARD)
+        {
+            // Get a pointer to the Target to create a GARD record for
+            const Target * l_pTarget = static_cast<const Target *>(l_pObject);
+
+            // Add the ErrorInfo
+            FAPI_ERR("addErrorInfo: Adding GARD");
+            addEIGard(*l_pTarget);
+        }
+        else
+        {
+            FAPI_ERR("addErrorInfo: Unrecognized EI type: %d",
+                     i_pEntries[i].iv_type);
+        }
+    }
 }
 
 //******************************************************************************
-// getHwpFfdc function
+// addEIFfdc function
 //******************************************************************************
-const void * ReturnCode::getHwpFfdc(uint32_t & o_size) const
+void ReturnCode::addEIFfdc(const void * i_pFfdc,
+                           const uint32_t i_size)
 {
-    const void * l_pFfdc = NULL;
+    // Create a ErrorInfoFfdc object and add it to the Error Information
+    FAPI_ERR("addEIFfdc: Adding FFDC, size: %d", i_size);
+    ensureDataRefExists();
+    ErrorInfoFfdc * l_pFfdc = new ErrorInfoFfdc(i_pFfdc, i_size);
+    iv_pDataRef->getCreateErrorInfo().iv_ffdcs.push_back(l_pFfdc);
+}
 
-    if (iv_pHwpFfdcRef)
+
+//******************************************************************************
+// getErrorInfo function
+//******************************************************************************
+const ErrorInfo * ReturnCode::getErrorInfo() const
+{
+    ErrorInfo * l_pErrorInfo = NULL;
+
+    if (iv_pDataRef != NULL)
     {
-        // Get the HwpFfdc
-        l_pFfdc = iv_pHwpFfdcRef->getData(o_size);
+        l_pErrorInfo = iv_pDataRef->getErrorInfo();
     }
 
-    return l_pFfdc;
-}
-
-//******************************************************************************
-// setHwpFfdc function
-//******************************************************************************
-void ReturnCode::setHwpFfdc(const void * i_pFfdc, const uint32_t i_size)
-{
-    // Remove interest in ReturnCodeHwpFfdcRef
-    (void) removeHwpFfdc();
-
-    // Create a new ReturnCodeHwpFfdcRef which contains the HwpFfdc
-    iv_pHwpFfdcRef = new ReturnCodeHwpFfdcRef(i_pFfdc, i_size);
+    return l_pErrorInfo;
 }
 
 //******************************************************************************
@@ -274,59 +324,66 @@ ReturnCode::returnCodeCreator ReturnCode::getCreator() const
 }
 
 //******************************************************************************
-// setErrTarget function
+// ensureDataRefExists function
 //******************************************************************************
-void ReturnCode::setErrTarget(const Target & i_target)
+void ReturnCode::ensureDataRefExists()
 {
-    if ((iv_rcValue != FAPI_RC_SUCCESS) && (iv_pErrTarget == NULL))
+    if (!iv_pDataRef)
     {
-        // Create a copy of the target
-        iv_pErrTarget = new Target(i_target);
+        iv_pDataRef = new ReturnCodeDataRef();
     }
 }
 
 //******************************************************************************
-// getErrTarget function
+// forgetData function
 //******************************************************************************
-Target * ReturnCode::getErrTarget() const
+void ReturnCode::forgetData()
 {
-    return iv_pErrTarget;
-}
-
-//******************************************************************************
-// removePlatData function
-//******************************************************************************
-void ReturnCode::removePlatData()
-{
-    if (iv_pPlatDataRef)
+    if (iv_pDataRef)
     {
-        // Decrement the ReturnCodePlatDataRef refcount
-        if (iv_pPlatDataRef->decRefCountCheckZero())
+        // Decrement the refcount
+        if (iv_pDataRef->decRefCountCheckZero())
         {
             // Refcount decremented to zero. No other ReturnCode points to the
-            // ReturnCodePlatDataRef object, delete it
-            delete iv_pPlatDataRef;
+            // ReturnCodeDataRef object, delete it
+            delete iv_pDataRef;
         }
-        iv_pPlatDataRef = NULL;
+        iv_pDataRef = NULL;
     }
 }
 
 //******************************************************************************
-// removeHwpFfdc function
+// addEICallout function
 //******************************************************************************
-void ReturnCode::removeHwpFfdc()
+void ReturnCode::addEICallout(const Target & i_target,
+                              const CalloutPriority i_priority)
 {
-    if (iv_pHwpFfdcRef)
-    {
-        // Decrement the ReturnCodeHwpFfdcRef refcount
-        if (iv_pHwpFfdcRef->decRefCountCheckZero())
-        {
-            // Refcount decremented to zero. No other ReturnCode points to the
-            // ReturnCodeHwpFfdcRef object, delete it
-            delete iv_pHwpFfdcRef;
-        }
-        iv_pHwpFfdcRef = NULL;
-    }
+    // Create a ErrorInfoCallout object and add it to the Error Information
+    ensureDataRefExists();
+    ErrorInfoCallout * l_pCallout = new ErrorInfoCallout(i_target, i_priority);
+    iv_pDataRef->getCreateErrorInfo().iv_callouts.push_back(l_pCallout);
+}
+
+//******************************************************************************
+// addEIDeconfigure function
+//******************************************************************************
+void ReturnCode::addEIDeconfigure(const Target & i_target)
+{
+    // Create a ErrorInfoDeconfig object and add it to the Error Information
+    ensureDataRefExists();
+    ErrorInfoDeconfig * l_pDeconfig = new ErrorInfoDeconfig(i_target);
+    iv_pDataRef->getCreateErrorInfo().iv_deconfigs.push_back(l_pDeconfig);
+}
+
+//******************************************************************************
+// addEIGard function
+//******************************************************************************
+void ReturnCode::addEIGard(const Target & i_target)
+{
+    // Create a ErrorInfoGard object and add it to the Error Information
+    ensureDataRefExists();
+    ErrorInfoGard * l_pGard = new ErrorInfoGard(i_target);
+    iv_pDataRef->getCreateErrorInfo().iv_gards.push_back(l_pGard);
 }
 
 }

@@ -31,6 +31,7 @@
  * Flag     Defect/Feature  User        Date        Description
  * ------   --------------  ----------  ----------- ----------------------------
  *                          mjjones     04/13/2011  Created.
+ *                          mjjones     09/23/2011  Added Success traces
  *
  */
 
@@ -67,6 +68,10 @@ uint32_t targetTest1()
             FAPI_ERR("targetTest1. Type is 0x%x, expected NONE", l_type);
             l_result = 2;
         }
+        else
+        {
+            FAPI_INF("targetTest1. Success!");
+        }
     }
 
     return l_result;
@@ -101,6 +106,10 @@ uint32_t targetTest2()
         {
             FAPI_ERR("targetTest2. Type is 0x%x, expected DIMM", l_type);
             l_result = 2;
+        }
+        else
+        {
+            FAPI_INF("targetTest2. Success!");
         }
     }
 
@@ -146,6 +155,10 @@ uint32_t targetTest3()
             FAPI_ERR("targetTest3. Type is 0x%x, expected DIMM", l_type);
             l_result = 2;
         }
+        else
+        {
+            FAPI_INF("targetTest3. Success!");
+        }
     }
 
     return l_result;
@@ -186,6 +199,10 @@ uint32_t targetTest4()
         {
             FAPI_ERR("targetTest4. Handles are not the same");
             l_result = 2;
+        }
+        else
+        {
+            FAPI_INF("targetTest4. Success!");
         }
     }
 
@@ -228,6 +245,10 @@ uint32_t targetTest5()
         {
             FAPI_ERR("targetTest5. Handles are not the same");
             l_result = 2;
+        }
+        else
+        {
+            FAPI_INF("targetTest5. Success!");
         }
     }
 
@@ -304,6 +325,10 @@ uint32_t targetTest6()
                             FAPI_ERR("targetTest6. 6. Inequality comparison "
                                     "false");
                             l_result = 6;
+                        }
+                        else
+                        {
+                            FAPI_INF("targetTest6. Success!");
                         }
                     }
                 }

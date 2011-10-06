@@ -23,8 +23,7 @@
 ROOTPATH = ../../..
 MODULE = hwpf
 
-FAPI_ERROR_TARGETS = fapiHwpReturnCodes.H fapiCollectFfdc.C \
-		     fapiErrorInfoMemInit.C
+FAPI_ERROR_TARGETS = fapiHwpReturnCodes.H fapiHwpErrorInfo.H
 FAPI_ATTR_TARGETS = fapiAttributeIds.H
 GENFILES = ${FAPI_ERROR_TARGETS} ${FAPI_ATTR_TARGETS}
 

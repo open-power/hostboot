@@ -23,8 +23,8 @@
 /**
  *  @file fapiReturnCodeDataRef.H
  *
- *  @brief Defines the ReturnCodeDataRef class that provides a pointer and a
- *         reference count to a platform specific ReturnCodeData object.
+ *  @brief Defines the ReturnCodeDataRef class that manages the data associated
+ *         with a ReturnCode
  */
 
 /*
@@ -34,6 +34,7 @@
  *                          mjjones     04/13/2011  Created.
  *                          mjjones     07/05/2011. Removed const from data
  *                          mjjones     07/25/2011  Added support for FFDC
+ *                          mjjones     09/22/2100  Added support for Error Info
  */
 
 #ifndef FAPIRETURNCODEDATAREF_H_
@@ -41,6 +42,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <fapiErrorInfo.H>
 
 namespace fapi
 {
@@ -48,9 +50,13 @@ namespace fapi
 /**
  * @class ReturnCodeDataRef
  *
- * This class is a simple reference counter. Derived classes are used by a
- * ReturnCode object in order to maintain a count of how many ReturnCode objects
- * have a reference to the object.
+ * This class manages the data associated with a ReturnCode. A ReturnCode
+ * contains a pointer to a ReturnCodeDataRef. When a ReturnCode is copied or
+ * assigned, both ReturnCodes point to the same ReturnCodeDataRef (the data is
+ * not copied) and the ReturnCodeDataRef reference count is incremented. When a
+ * ReturnCode is destructed, the ReturnCodeDataRef reference count is
+ * decremented and if zero, the ReturnCodeDataRef is deleted which deletes the
+ * the data
  *
  * A ReturnCodeDataRef object is not thread safe, multiple threads must not use
  * the same ReturnCodeDataRef object concurrently.
@@ -81,58 +87,24 @@ public:
      */
     bool decRefCountCheckZero();
 
-private:
-
-    // Copy constructor and assignment operator disabled
-    ReturnCodeDataRef(const ReturnCodeDataRef & i_right);
-    ReturnCodeDataRef & operator=(const ReturnCodeDataRef & i_right);
-
-    // The reference count (how many ReturnCodes are pointing to this object)
-    uint32_t iv_refCount;
-};
-
-/**
- * @class ReturnCodePlatDataRef
- *
- * This class contains a pointer to PlatData and inherits from ReturnCodeDataRef
- * for a reference count recording how many ReturnCodes have a pointer to it.
- *
- * It is used exclusively by the ReturnCode class. Multiple copies of a
- * ReturnCode will all point to the same ReturnCodePlatDataRef. The ReturnCodes
- * maintain the reference count, the last ReturnCode to remove its reference
- * will delete the ReturnCodePlatDataRef which in turn deletes the PlatData.
- * The PlatData pointer is maintained in this class so that releasing the data
- * releases it from all ReturnCode copies.
- *
- * A ReturnCodePlatDataRef object is not thread safe, multiple threads must not
- * use the same ReturnCodePlatDataRef object concurrently.
- */
-class ReturnCodePlatDataRef : public ReturnCodeDataRef
-{
-public:
-
     /**
-     * @brief Constructor
+     * @brief Associate heap based PlatData (use-case is platform error log)
      *
-     * @param[in] i_pData Pointer to PlatData to associate
+     * Any existing PlatData is deleted
+     *
+     * @param[in] i_pPlatData Pointer to PlatData to associate
      */
-    explicit ReturnCodePlatDataRef(void * i_pData);
+    void setPlatData(void * i_pPlatData);
 
     /**
-     * @brief Destructor
-     */
-    virtual ~ReturnCodePlatDataRef();
-
-    /**
-     * @brief Get a pointer to any PlatData. ReturnCodePlatDataRef is still
+     * @brief Get a pointer to any PlatData. ReturnCodeDataRef is still
      *        responsible for deletion of the data. The caller must not delete
      *
      * The pointer is only meaningful to platform code.
      *
-     * @return void *. Pointer to PlatData. If NULL then no data (must have been
-     *                 released)
+     * @return void *. Pointer to PlatData. If NULL then no data
      */
-    void * getData() const;
+    void * getPlatData() const;
 
     /**
      * @brief Get a pointer to any PlatData and release ownership from
@@ -140,82 +112,45 @@ public:
      *
      * The pointer is only meaningful to platform code.
      *
-     * @return void *. Pointer to PlatData. If NULL then no data (must have been
-     *                 released)
+     * @return void *. Pointer to PlatData. If NULL then no data
      */
-    void * releaseData();
+    void * releasePlatData();
+
+    /**
+     * @brief Get a pointer to any ErrorInfo
+     *
+     * @return ErrorInfo *. Pointer to ErrorInfo. If NULL then no info
+     */
+    ErrorInfo * getErrorInfo();
+
+    /**
+     * @brief Get a reference to the ErrorInfo. If there is no info then
+     *        it is created (empty)
+     *
+     * @return ErrorInfo &. Reference to ErrorInfo.
+     */
+    ErrorInfo & getCreateErrorInfo();
 
 private:
 
-    // Copy constructor and assignment operator disabled
-    ReturnCodePlatDataRef(const ReturnCodePlatDataRef & i_right);
-    ReturnCodePlatDataRef & operator=(const ReturnCodePlatDataRef & i_right);
-
     /**
-     * @brief Deletes the PlatData
-     *
-     * @note Implemented by platform code because only platform code knows the
-     *       type of the data and how to delete it.
+     * @brief Delete any associated PlatData. Implemented by platform code
+     *        because only platform code knows the type of the data.
      */
-    void deleteData();
-
-    // Pointer to PlatData
-    void * iv_pData;
-};
-
-/**
- * @class ReturnCodeHwpFfdcRef
- *
- * This class contains HwpFfdc and inherits from ReturnCodeDataRef for a
- * reference count recording how many ReturnCodes have a pointer to it.
- *
- * It is used exclusively by the ReturnCode class. Multiple copies of a
- * ReturnCode will all point to the same ReturnCodeHwpFfdcRef. The ReturnCodes
- * maintain the reference count, the last ReturnCode to remove its reference
- * will delete the ReturnCodeHwpFfdcRef which in turn deletes the contained
- * HwpFfdc.
- *
- * A ReturnCodeHwpFfdcRef object is not thread safe, multiple threads must not
- * use the same ReturnCodeHwpFfdcRef object concurrently.
- */
-class ReturnCodeHwpFfdcRef : public ReturnCodeDataRef
-{
-public:
-
-    /**
-     * @brief Constructor
-     *
-     * @param[in] i_pFfdc Pointer to the FFDC to copy
-     * @param[in] i_size  Size of the FFDC to copy
-     */
-    ReturnCodeHwpFfdcRef(const void * i_pFfdc,
-                         const uint32_t i_size);
-
-    /**
-     * @brief Destructor
-     */
-    virtual ~ReturnCodeHwpFfdcRef();
-
-    /**
-     * @brief Get a pointer to the HwpFfdc.
-     *
-     * @param[out] o_size Size of the FFDC data in bytes.
-     *
-     * @return void *. Pointer to HwpFfdc.
-     */
-    const void * getData(uint32_t & o_size) const;
-
-private:
+    void deletePlatData();
 
     // Copy constructor and assignment operator disabled
-    ReturnCodeHwpFfdcRef(const ReturnCodeHwpFfdcRef & i_right);
-    ReturnCodeHwpFfdcRef & operator=(const ReturnCodeHwpFfdcRef & i_right);
+    ReturnCodeDataRef(const ReturnCodeDataRef & i_right);
+    ReturnCodeDataRef & operator=(const ReturnCodeDataRef & i_right);
 
-    // Pointer to HwpFfdc
-    uint8_t * iv_pFfdc;
+    // The reference count (how many ReturnCodes are pointing to this object)
+    uint32_t iv_refCount;
 
-    // Size of HwpFfdc
-    uint32_t iv_size;
+    // Pointer to associated PlatData
+    void * iv_pPlatData;
+
+    // Pointer to HWP Error Information 
+    ErrorInfo * iv_pErrorInfo;
 };
 
 }

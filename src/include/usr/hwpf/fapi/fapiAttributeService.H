@@ -35,6 +35,7 @@
  *                          mjjones     06/06/2011  Created.
  *                          mjjones     06/22/2011  Major updates
  *                          mjjones     09/06/2011  Remove support for strings
+ *                          mjjones     09/22/2011  Fixed example
  */
 
 #ifndef FAPIATTRIBUTESERVICE_H_
@@ -49,17 +50,16 @@
  * Code must have a pointer to a Target and an attribute ID (from XML file):
  *   fapi::ReturnCode l_rc;
  *   fapi::Target * l_pTarget = ????;
- *   AttributeId l_id = ????;
  *
  * To get a copy of an integer attribute and set the attribute
  *   uint64_t l_val = 0;
- *   l_rc = FAPI_ATTR_GET(l_id, l_pTarget, l_val);
- *   l_rc = FAPI_ATTR_SET(l_id, l_pTarget, l_val);
+ *   l_rc = FAPI_ATTR_GET(<ID>, l_pTarget, l_val);
+ *   l_rc = FAPI_ATTR_SET(<ID>, l_pTarget, l_val);
  *
  * To get a copy of an integer array attribute and set the attribute
  *   uint32_t l_pVal[4] = {0};
- *   l_rc = FAPI_ATTR_GET(l_id, l_pTarget, l_pVal);
- *   l_rc = FAPI_ATTR_SET(l_id, l_pTarget, l_pVal);
+ *   l_rc = FAPI_ATTR_GET(<ID>, l_pTarget, l_pVal);
+ *   l_rc = FAPI_ATTR_SET(<ID>, l_pTarget, l_pVal);
  *
  * The first part of these macros is a call to checkIdType that will cause a
  * compile failure if the ID or VAL parameters are incorrect.

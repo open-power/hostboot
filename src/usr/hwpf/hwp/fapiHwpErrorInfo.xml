@@ -27,29 +27,30 @@
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_TEST_ERROR_A</rc>
-    <description>Test Error A for a HWP operating on a PROC_CHIP</description>
+    <description>Test Error A</description>
+    <!-- Call hwpTestFfdc1 to collect FFDC from the master chip -->
+    <collectFfdc>hwpTestFfdc1, MASTER_CHIP</collectFfdc>
+    <!-- Collect local FFDC FFDC_DATA_1 -->
+    <ffdc>FFDC_DATA_1</ffdc>
+    <!-- Callout MASTER_CHIP HIGH -->
     <callout>
-        <!-- The callout is the PROC_CHIP itself -->
-        <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-        <targetPos>0</targetPos>
+        <target>MASTER_CHIP</target>
         <priority>HIGH</priority>
     </callout>
+    <!-- Deconfigure MASTER_CHIP -->
+    <deconfigure>
+        <target>MASTER_CHIP</target>
+    </deconfigure>
+    <!-- Create GARD record for MASTER_CHIP -->
     <gard>
-        <!-- The PROC_CHIP itself should be garded -->
-        <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-        <targetPos>0</targetPos>
+        <target>MASTER_CHIP</target>
     </gard>
-    <ffdc>
-        <!-- FFDC needs to be collected from the PROC_CHIP itself -->
-        <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-        <targetPos>0</targetPos>
-        <ffdcHwp>hwpTestFfdc1</ffdcHwp>
-        <ffdcHwpData>TestFfdc1</ffdcHwpData>
-    </ffdc>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_TEST_ERROR_B</rc>
     <description>Test Error B</description>
+    <!-- Call hwpTestAnalyzeError on MASTER_CHIP to analyze the error -->
+    <callFunc>hwpTestAnalyzeError, MASTER_CHIP</callFunc>
   </hwpError>
 </hwpErrors>

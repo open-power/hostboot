@@ -33,6 +33,8 @@
  *                          mjjones     08/08/2011  Created.
  *                          camvanng    09/06/2011  Added code to test
  *                                                  fapiLogError
+ *                          mjjones     10/06/2011  Major updates due to new
+ *                                                  ErrorInfo design
  *
  */
 
@@ -42,54 +44,60 @@ extern "C"
 {
 
 //******************************************************************************
+// hwpTestAnalyzeError function
+//******************************************************************************
+fapi::ReturnCode hwpTestAnalyzeError(const fapi::Target & i_target)
+{
+    FAPI_INF("hwpTestAnalyzeError: Start HWP (analysis HWP)");
+
+    // This HWP analyses an error condition to decide what the error actually is
+    // In real life, this HWP may look at chip error registers
+    fapi::ReturnCode l_rc;
+
+    // Local FFDC that needs to be captured
+    uint32_t l_ffdc = 0x12345678;
+
+    // Analysis reveals that the error is RC_TEST_ERROR_A
+    FAPI_ERR("hwpTestAnalyzeError: Generating RC_TEST_ERROR_A");
+
+    const fapi::Target & MASTER_CHIP = i_target;
+    uint32_t & FFDC_DATA_1 = l_ffdc;
+    FAPI_SET_HWP_ERROR(l_rc, RC_TEST_ERROR_A);
+
+    FAPI_INF("hwpTestAnalyzeError: End HWP");
+    return l_rc;
+}
+
+//******************************************************************************
 // hwpTestError function
 //******************************************************************************
 fapi::ReturnCode hwpTestError(const fapi::Target & i_target)
 {
-    FAPI_INF("Performing HWP: hwpTestError");
+    FAPI_INF("hwpTestError: Start HWP");
 
-    fapi::ReturnCode l_rc = fapi::RC_TEST_ERROR_A;
+    fapi::ReturnCode l_rc;
 
-    // Add some local FFDC to the ReturnCode
-    uint32_t l_ffdc = 0x12345678;
-    l_rc.setHwpFfdc(l_ffdc);
+    // Error RC_TEST_ERROR_B encountered, the error information requests that
+    // hwpTestAnalyzeError be called to analyze the error condition
+    FAPI_ERR("hwpTestError: Generating RC_TEST_ERROR_B");
+    const fapi::Target & MASTER_CHIP = i_target;
+    FAPI_SET_HWP_ERROR(l_rc, RC_TEST_ERROR_B);
 
     // Log the error
     fapiLogError(l_rc);
 
-    // Check that the return code is set to success and any data or Error
-    // Target references are cleared
+    // Check that the return code is set to success
     if (!l_rc.ok())
     {
         FAPI_ERR("Performing HWP: hwpTestError: rc is 0x%x, " \
                  "expected success", static_cast<uint32_t>(l_rc));
     }
 
-    if (l_rc.getErrTarget() != NULL)
-    {
-        FAPI_ERR("Performing HWP: hwpTestError: getErrTarget " \
-                 "returned non-null pointer");
-    }
-
-    if (l_rc.getPlatData() != NULL)
-    {
-        FAPI_ERR("Performing HWP: hwpTestError: getPlatData " \
-                 "returned non-null pointer");
-    }
-
-    uint32_t l_size = 0;
-    if (l_rc.getHwpFfdc(l_size) != NULL)
-    {
-        FAPI_ERR("Performing HWP: hwpTestError: getHwpFFDC " \
-                 "returned non-null pointer");
-    }
-
     // Reset the return code
-    l_rc = fapi::RC_TEST_ERROR_A;
+    FAPI_ERR("hwpTestError: Generating RC_TEST_ERROR_B");
+    FAPI_SET_HWP_ERROR(l_rc, RC_TEST_ERROR_B);
 
-    // Add some local FFDC to the ReturnCode
-    l_rc.setHwpFfdc(reinterpret_cast<void *>(&l_ffdc), sizeof(uint32_t));
-
+    FAPI_INF("hwpTestError: End HWP");
     return l_rc;
 }
 

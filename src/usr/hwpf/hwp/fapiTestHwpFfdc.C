@@ -31,6 +31,8 @@
  * Flag     Defect/Feature  User        Date        Description
  * ------   --------------  ----------  ----------- ----------------------------
  *                          mjjones     08/08/2011  Created.
+ *                          mjjones     10/06/2011  Updated due to new ErrorInfo
+ *                                                  design.
  *
  */
 
@@ -43,17 +45,17 @@ extern "C"
 // hwpTestFfdc1 function
 //******************************************************************************
 fapi::ReturnCode hwpTestFfdc1(const fapi::Target & i_target,
-                              fapi::TestFfdc1 & o_ffdc)
+                              fapi::ReturnCode & o_rc)
 {
-    FAPI_INF("Performing FFDC HWP: hwpTestFfdc1");
+    FAPI_INF("hwpTestFfdc1: Start HWP (FFDC HWP)");
 
-    // Just set data to output structure. A real FFDC HWP would do a hardware
-    // access to get FFDC
-    fapi::ReturnCode l_rc;
+    // Collect a uint64_t worth of FFDC
+    uint64_t l_ffdc = 0x1122334455667788ULL;
 
-    o_ffdc.iv_data = 0x11223344;
+    fapi::ReturnCodeFfdc::addEIFfdc(o_rc, l_ffdc);
 
-    return l_rc;
+    FAPI_INF("hwpTestFfdc1: End HWP");
+    return fapi::FAPI_RC_SUCCESS;
 }
 
 } // extern "C"

@@ -44,13 +44,14 @@
  *
  * ERRHNDL    - errlHndl_t
  * FUNC       - HWP function name
- * FAPITARGET - fapi::Target (first parameter of all HWPs)
  * _args_...  - Any additional arguments that the HWP requires
  */
-#define FAPI_INVOKE_HWP(ERRHNDL, FUNC, FAPITARGET, _args_...) \
+#define FAPI_INVOKE_HWP(ERRHNDL, FUNC, _args_...) \
+    {\
     fapi::ReturnCode l_rc; \
-    FAPI_EXEC_HWP(l_rc, FUNC, FAPITARGET, ##_args_); \
-    ERRHNDL = fapi::fapiRcToErrl(l_rc)
+    FAPI_EXEC_HWP(l_rc, FUNC, ##_args_); \
+    ERRHNDL = fapi::fapiRcToErrl(l_rc); \
+    }
 
 namespace fapi
 {

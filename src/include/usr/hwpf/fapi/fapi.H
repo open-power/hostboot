@@ -33,6 +33,7 @@
  *                          mjjones     04/13/2011  Created.
  *                          mjjones     06/07/2011  Added new includes.
  *                          mjjones     08/08/2011  Updated Executor include
+ *                          mjjones     09/23/2011  Added fapiHwpErrorInfo.H
  *
  */
 
@@ -48,6 +49,7 @@
 #include <fapiHwpExecutor.H>
 #include <fapiAttributeService.H>
 #include <fapiHwpReturnCodes.H> // Generated file
+#include <fapiHwpErrorInfo.H>   // Generated file
 #include <fapiAttributeIds.H>   // Generated file
 #include <ecmdDataBuffer.H>
 

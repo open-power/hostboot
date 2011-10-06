@@ -32,6 +32,7 @@
  * Flag     Defect/Feature  User        Date        Description
  * ------   --------------  ----------  ----------- ----------------------------
  *                          mjjones     09/12/2011  Created.
+ *                          mjjones     10/06/2011  Updated traces.
  *
  */
 
@@ -45,7 +46,7 @@ extern "C"
 //******************************************************************************
 fapi::ReturnCode hwpTestConfig(const fapi::Target & i_chip)
 {
-    FAPI_INF("Performing HWP: hwpTestConfig");
+    FAPI_INF("hwpTestConfig: Start HWP");
 
     // Print the ecmd string of the chip
     char l_string[fapi::MAX_ECMD_STRING_LEN] = {0};
@@ -110,6 +111,7 @@ fapi::ReturnCode hwpTestConfig(const fapi::Target & i_chip)
         }
     }
 
+    FAPI_INF("hwpTestConfig: End HWP");
     return l_rc;
 }
 

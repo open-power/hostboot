@@ -33,6 +33,7 @@
  * ------   --------------  ----------  ----------- ----------------------------
  *                          mjjones     06/30/2011  Created.
  *                          mjjones     09/07/2011  Update to test scratch attrs
+ *                          mjjones     10/06/2011  Updates traces
  *
  */
 
@@ -46,7 +47,7 @@ extern "C"
 //******************************************************************************
 fapi::ReturnCode hwpTestAttributes(const fapi::Target & i_target)
 {
-    FAPI_INF("Performing HWP: hwpTestAttributes");
+    FAPI_INF("hwpTestAttributes: Start HWP");
 
     // Attempt to call the attribute get/set macros for the scratch attributes
     fapi::ReturnCode l_rc;
@@ -996,6 +997,7 @@ fapi::ReturnCode hwpTestAttributes(const fapi::Target & i_target)
 
     } while (0);
 
+    FAPI_INF("hwpTestAttributes: End HWP");
     return l_rc;
 }
 

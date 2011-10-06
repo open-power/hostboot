@@ -38,7 +38,6 @@
 #define FAPITESTHWPFFDC_H_
 
 #include <fapi.H>
-#include <fapiFfdcHwpData.H>
 
 // HWPs are defined as C functions because platforms may wish to package them
 // in linux shared libraries which are DL-Opened
@@ -48,13 +47,13 @@ extern "C"
 /**
  * @brief Simple FFDC HWP that collects TestFfdc1 data
  *
- * @param[in]  i_target Reference to target (unused by HWP)
- * @param[out] o_ffdc   Reference to TestFfdc1 that is filled in with FFDC
+ * @param[in]  i_target Reference to target (unused by this HWP)
+ * @param[out] o_rc     Reference to ReturnCode that is updated with FFDC
  *
  * @return ReturnCode
  */
 fapi::ReturnCode hwpTestFfdc1(const fapi::Target & i_target,
-                              fapi::TestFfdc1 & o_ffdc);
+                              fapi::ReturnCode & o_rc);
 
 } // extern "C"
 

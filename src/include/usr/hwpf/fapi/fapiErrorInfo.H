@@ -23,8 +23,7 @@
 /**
  *  @file fapiErrorInfo.H
  *
- *  @brief Defines the ErrorInfoRepository, ErrorInfoRecord and associated
- *         classes.
+ *  @brief Defines the Error Information structures and classes
  */
 
 /*
@@ -33,19 +32,75 @@
  * ------   --------------  ----------  ----------- ----------------------------
  *                          mjjones     08/09/2011  Created.
  *                          mjjones     08/24/2011  Added ErrorInfoGard.
+ *                          mjjones     09/22/2011  Major updates
  */
 
 #ifndef FAPIERRORINFO_H_
 #define FAPIERRORINFO_H_
 
 #include <stdint.h>
-#include <fapiTarget.H>
-#include <fapiReturnCode.H>
-#include <fapiHwpReturnCodes.H>
 #include <vector>
+#include <fapiTarget.H>
 
 namespace fapi
 {
+
+/**
+ * @class ErrorInfoFfdc
+ *
+ * This class contains a copy of some FFDC data
+ */
+class ErrorInfoFfdc
+{
+public:
+    /**
+     * @brief Constructor
+     *
+     * @param[in] i_pFfdc Pointer to the FFDC to copy
+     * @param[in] i_size  Size of the FFDC to copy
+     */
+    ErrorInfoFfdc(const void * i_pFfdc,
+                  const uint32_t i_size);
+
+    /**
+     * @brief Copy Constructor
+     *
+     * @param[in] i_right Reference to ErrorInfoFfdc to copy from
+     */
+    ErrorInfoFfdc(const ErrorInfoFfdc & i_right);
+
+    /**
+     * @brief Destructor
+     */
+    ~ErrorInfoFfdc();
+
+    /**
+     * @brief Assignment Operator
+     *
+     * @param[in] i_right Reference to ErrorInfoFfdc to assign from
+     *
+     * @return ErrorInfoFfdc &. Reference to this ErrorInfoFfdc
+     */
+    ErrorInfoFfdc & operator=(const ErrorInfoFfdc & i_right);
+
+    /**
+     * @brief Get a pointer to the FfdcData
+     *
+     * @param[out] o_size Reference to uint32_t that is filled in with the FFDC
+     *                    size
+     *
+     * @return void *. Pointer to the FFDC
+     */
+    const void * getData(uint32_t & o_size) const;
+
+private:
+
+    // Pointer to the FFDC
+    uint8_t * iv_pFfdc;
+
+    // Size of the FFDC
+    uint32_t iv_size;
+};
 
 /**
  * @enum CalloutPriority
@@ -54,221 +109,101 @@ namespace fapi
  */
 enum CalloutPriority
 {
-    HIGH = 1,
-    MEDIUM = 2,
-    LOW = 3,
+    PRI_HIGH = 1,
+    PRI_MEDIUM = 2,
+    PRI_LOW = 3,
 };
 
 /**
  * @struct ErrorInfoCallout
  *
- * This struct defines a target callout. An ErrorInfoRecord can contain a number
- * of these.
+ * This struct contains a target to callout
  */
 struct ErrorInfoCallout
 {
     /**
      * @brief Constructor.
      *
-     * @param[in] i_targetType The type of the target to callout. If the same as
-     *                         the target of the HWP that generated the error
-     *                         then that is the target
-     * @param[in] i_targetPos  The position of the target to callout. Relative
-     *                         to the target of the HWP that generated the error
-     * @param[in] i_priority   The priority of the callout
+     * @param[in] i_target   Reference to the target to callout
+     * @param[in] i_priority The priority of the callout
      */
-    ErrorInfoCallout(const TargetType i_targetType,
-                     const uint32_t i_targetPos,
+    ErrorInfoCallout(const Target & i_target,
                      const CalloutPriority i_priority);
 
-    // The type of the target to call out. See ctor for details
-    TargetType iv_targetType;
-
-    // The position of the target to call out. See ctor for details
-    uint32_t iv_targetPos;
+    // The target to call out
+    Target iv_target;
 
     // The priority of the callout
     CalloutPriority iv_priority;
 };
 
 /**
+ * @struct ErrorInfoDeconfig
+ *
+ * This struct contains a target to deconfigure
+ */
+struct ErrorInfoDeconfig
+{
+    /**
+     * @brief Constructor.
+     *
+     * @param[in] i_target Reference to the target to deconfigure
+     */
+    ErrorInfoDeconfig(const Target & i_target);
+
+    // The target to deconfigure
+    Target iv_target;
+};
+
+/**
  * @struct ErrorInfoGard
  *
- * This struct defines a target gard request. An ErrorInfoRecord can contain a
- * number of these.
+ * This struct contains a target to create a GARD record for
  */
 struct ErrorInfoGard
 {
     /**
      * @brief Constructor.
      *
-     * @param[in] i_targetType The type of the target to gard. If the same as
-     *                         the target of the HWP that generated the error
-     *                         then that is the target
-     * @param[in] i_targetPos  The position of the target to gard. Relative to
-     *                         the target of the HWP that generated the error
+     * @param[in] i_target Reference to the target to create a GARD record for
      */
-    ErrorInfoGard(const TargetType i_targetType,
-                  const uint32_t i_targetPos);
+    ErrorInfoGard(const Target & i_target);
 
-    // The type of the target to gard. See ctor for details
-    TargetType iv_targetType;
-
-    // The position of the target to gard. See ctor for details
-    uint32_t iv_targetPos;
+    // The target to create a GARD record for
+    Target iv_target;
 };
 
 /**
- * @struct ErrorInfoFfdc
+ * @struct ErrorInfo
  *
- * This struct defines FFDC collection information.  An ErrorInfoRecord can
- * contain a number of these.
+ * This struct defines the error information
  */
-struct ErrorInfoFfdc
+struct ErrorInfo
 {
     /**
-     * @brief Constructor.
-     *
-     * @param[in] i_targetType   The type of the target to collect FFDC from. If
-     *                           the same as the target of the HWP that
-     *                           generated the error then that is the target
-     * @param[in] i_targetPos    The position of the target to collect FFDC
-     *                           from. Relative to the target of the HWP that
-     *                           generated the error
-     * @param[in] i_ffdcHwpToken The token used to identify the HWP to call to
-     *                           collect FFDC
+     * @brief Destructor.
      */
-    ErrorInfoFfdc(const TargetType i_targetType,
-                  const uint32_t i_targetPos,
-                  const FfdcHwpToken i_ffdcHwpToken);
+    ~ErrorInfo();
 
-    // The type of the target to collect FFDC from. See ctor for details
-    TargetType iv_targetType;
-
-    // The position of the target to collect FFDC from. See ctor for details
-    uint32_t iv_targetPos;
-
-    // The token used to identify the HWP to call to collect FFDC
-    FfdcHwpToken iv_ffdcHwpToken;
-};
-
-/**
- * @struct ErrorInfoRecord
- *
- * This struct defines the error information record. This gives information
- * about a specific HWP generated ReturnCode value.
- */
-struct ErrorInfoRecord
-{
-    /**
-     * @brief Default constructor.
-     */
-    ErrorInfoRecord();
-
-    /**
-     * @brief Copy constructor.
-     *
-     * @param[in] i_right Reference to ErrorInfoRecord to copy
-     */
-    ErrorInfoRecord(const ErrorInfoRecord & i_right);
-
-    /**
-     * @brief Destructor
-     */
-    ~ErrorInfoRecord();
-
-    /**
-     * @brief Assignment operator
-     *
-     * @param[in] i_right Reference to ErrorInfoRecord to copy
-     *
-     * @return Reference to 'this' ErrorInfoRecord
-     */
-    ErrorInfoRecord & operator=(const ErrorInfoRecord & i_right);
-
-    /**
-     * @brief Set Description function
-     *
-     * @param[in] i_pDesc Pointer to C string that is copied
-     */
-    void setDescription(const char * i_pDescription);
-
-    /**
-     * @brief Get Description function
-     *
-     * @return pointer to description (NULL if no description set)
-     */
-    const char * getDescription();
-
-    // The Return Code value
-    uint32_t iv_rc;
+    // Vector of FFDC Data
+    std::vector<ErrorInfoFfdc *> iv_ffdcs;
+    typedef std::vector<ErrorInfoFfdc *>::iterator ErrorInfoFfdcItr_t;
+    typedef std::vector<ErrorInfoFfdc *>::const_iterator ErrorInfoFfdcCItr_t;
 
     // Vector of targets to callout
-    std::vector<ErrorInfoCallout> iv_callouts;
-    typedef std::vector<ErrorInfoCallout>::iterator ErrorInfoCalloutItr_t;
+    std::vector<ErrorInfoCallout *> iv_callouts;
+    typedef std::vector<ErrorInfoCallout *>::iterator ErrorInfoCalloutItr_t;
+    typedef std::vector<ErrorInfoCallout *>::const_iterator ErrorInfoCalloutCItr_t;
 
-    // Vector of targets to gard
-    std::vector<ErrorInfoGard> iv_gards;
-    typedef std::vector<ErrorInfoGard>::iterator ErrorInfoGardItr_t;
+    // Vector of targets to deconfigure
+    std::vector<ErrorInfoDeconfig *> iv_deconfigs;
+    typedef std::vector<ErrorInfoDeconfig *>::iterator ErrorInfoDeconfigItr_t;
+    typedef std::vector<ErrorInfoDeconfig *>::const_iterator ErrorInfoDeconfigCItr_t;
 
-    // Vector of FFDC collection information
-    std::vector<ErrorInfoFfdc> iv_ffdcs;
-    typedef std::vector<ErrorInfoFfdc>::iterator ErrorInfoFfdcItr_t;
-
-private:
-    // C-String containing the description of the error
-    char * iv_pDescription;
-};
-
-/**
- * @class ErrorInfoRepository
- *
- * This class defines the error information repository. It provides an
- * ErrorInfoRecord given a ReturnCode value. This is an abstract class that a
- * concrete class must derive from.
- */
-class ErrorInfoRepository
-{
-public:
-
-    /**
-     * @brief Get the singleton instance.
-     *
-     * This function must be implemented by a concrete derived class
-     */
-    static ErrorInfoRepository& Instance();
-
-    /**
-     * @brief Default constructor.
-     */
-    ErrorInfoRepository();
-
-    /**
-     * @brief Destructor
-     */
-    virtual ~ErrorInfoRepository();
-
-    /**
-     * @brief Find Error Information Record for given ReturnCode value
-     *
-     * This is a pure virtual function that must be implemented by a concrete
-     * derived class
-     *
-     * @param[in]  i_rc     The ReturnCode value. User can pass in a ReturnCode
-     *                      object and it will be implicitly converted to a
-     *                      uint32_t using the ReturnCode conversion operator
-     * @param[out] o_record Reference to a ErrorInfoRecord. If the record is
-     *                      found then it is assigned to o_record, else it is
-     *                      not. User should pass an ErrorInfoRecord with a good
-     *                      ReturnCode value and then look to see if the value
-     *                      was changed to the ReturnCode value to figure out if
-     *                      the record was found.
-     *
-     * @return ReturnCode. Zero on success else error accessing the repository
-     */
-    virtual ReturnCode find(const uint32_t i_rc,
-                            ErrorInfoRecord & o_record) = 0;
-
+    // Vector of targets to create a GARD record for
+    std::vector<ErrorInfoGard *> iv_gards;
+    typedef std::vector<ErrorInfoGard *>::iterator ErrorInfoGardItr_t;
+    typedef std::vector<ErrorInfoGard *>::const_iterator ErrorInfoGardCItr_t;
 };
 
 }

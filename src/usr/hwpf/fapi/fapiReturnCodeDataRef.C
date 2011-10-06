@@ -35,6 +35,7 @@
  *                          mjjones     06/30/2011  Added #include
  *                          mjjones     07/05/2011  Removed const from data
  *                          mjjones     07/25/2011  Added support for FFDC
+ *                          mjjones     09/22/2100  Added support for Error Info
  */
 
 #include <string.h>
@@ -46,28 +47,35 @@ namespace fapi
 {
 
 //******************************************************************************
-// ReturnCodeDataRef Constructor
+// Constructor
 //******************************************************************************
-ReturnCodeDataRef::ReturnCodeDataRef() :
-    iv_refCount(1)
+ReturnCodeDataRef::ReturnCodeDataRef()
+: iv_refCount(1),
+  iv_pPlatData(NULL),
+  iv_pErrorInfo(NULL)
 {
 
 }
 
 //******************************************************************************
-// ReturnCodeDataRef Destructor
+// Destructor
 //******************************************************************************
 ReturnCodeDataRef::~ReturnCodeDataRef()
 {
     if (iv_refCount != 0)
     {
-        FAPI_ERR("ReturnCodeDataRef. Bug. Destruct with refcount");
+        FAPI_ERR("ReturnCodeDataRef. Bug. Destruct with refcount: %d",
+                 iv_refCount);
         fapiAssert(false);
     }
+
+    deletePlatData();
+    delete iv_pErrorInfo;
+    iv_pErrorInfo = NULL;
 }
 
 //******************************************************************************
-// ReturnCodeDataRef incRefCount function
+// incRefCount function
 //******************************************************************************
 void ReturnCodeDataRef::incRefCount()
 {
@@ -77,7 +85,7 @@ void ReturnCodeDataRef::incRefCount()
 }
 
 //******************************************************************************
-// ReturnCodeDataRef decRefCountCheckZero function
+// decRefCountCheckZero function
 //******************************************************************************
 bool ReturnCodeDataRef::decRefCountCheckZero()
 {
@@ -97,68 +105,57 @@ bool ReturnCodeDataRef::decRefCountCheckZero()
 }
 
 //******************************************************************************
-// ReturnCodePlatDataRef Constructor
+// setPlatData function
 //******************************************************************************
-ReturnCodePlatDataRef::ReturnCodePlatDataRef(void * i_pData) :
-    iv_pData(i_pData)
+void ReturnCodeDataRef::setPlatData(void * i_pPlatData)
 {
+    // Delete any current PlatData
+    if (iv_pPlatData)
+    {
+        FAPI_ERR("ReturnCodeDataRef. setPlatData when existing data");
+        deletePlatData();
+    }
 
+    iv_pPlatData = i_pPlatData;
 }
 
 //******************************************************************************
-// ReturnCodePlatDataRef Destructor
+// getPlatData function
 //******************************************************************************
-ReturnCodePlatDataRef::~ReturnCodePlatDataRef()
+void * ReturnCodeDataRef::getPlatData() const
 {
-    // Call platform implemented deleteData
-    (void) deleteData();
+    return iv_pPlatData;
 }
 
 //******************************************************************************
-// ReturnCodePlatDataRef getData function
+// releasePlatData function
 //******************************************************************************
-void * ReturnCodePlatDataRef::getData() const
+void * ReturnCodeDataRef::releasePlatData()
 {
-    return iv_pData;
+    void * l_pPlatData = iv_pPlatData;
+    iv_pPlatData = NULL;
+    return l_pPlatData;
 }
 
 //******************************************************************************
-// ReturnCodePlatDataRef releaseData function
+// getErrorInfo function
 //******************************************************************************
-void * ReturnCodePlatDataRef::releaseData()
+ErrorInfo * ReturnCodeDataRef::getErrorInfo()
 {
-    void * l_pData = iv_pData;
-    iv_pData = NULL;
-    return l_pData;
+    return iv_pErrorInfo;
 }
 
 //******************************************************************************
-// ReturnCodeHwpFfdcRef Constructor
+// getCreateErrorInfo function
 //******************************************************************************
-ReturnCodeHwpFfdcRef::ReturnCodeHwpFfdcRef(const void * i_pFfdc,
-                                           const uint32_t i_size)
-: iv_size(i_size)
+ErrorInfo & ReturnCodeDataRef::getCreateErrorInfo()
 {
-    iv_pFfdc = new uint8_t[i_size];
-    memcpy(iv_pFfdc, i_pFfdc, i_size);
-}
+    if (iv_pErrorInfo == NULL)
+    {
+        iv_pErrorInfo = new ErrorInfo();
+    }
 
-//******************************************************************************
-// ReturnCodeHwpFfdcRef Destructor
-//******************************************************************************
-ReturnCodeHwpFfdcRef::~ReturnCodeHwpFfdcRef()
-{
-    delete [] iv_pFfdc;
-    iv_pFfdc = NULL;
-}
-
-//******************************************************************************
-// ReturnCodeHwpFfdcRef getData function
-//******************************************************************************
-const void * ReturnCodeHwpFfdcRef::getData(uint32_t & o_size) const
-{
-    o_size = iv_size;
-    return iv_pFfdc;
+    return *iv_pErrorInfo;
 }
 
 }

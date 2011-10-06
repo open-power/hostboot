@@ -36,6 +36,7 @@
  *                          mjjones     07/05/2011  Removed rogue tab
  *                          camvanng    09/06/2011  Added fapiLogError
  *                          mjjones     09/14/2011  Prepended fapi to delay
+ *                          mjjones     10/05/2011  Added fapiCheckType
  *
  */
 
@@ -123,6 +124,14 @@ bool platIsScanTraceEnabled();
  *   @return  void
  */
 void platSetScanTrace( bool i_enable );
+
+/**
+ * @brief Check the type of a variable
+ *
+ * This function can be called to check that a variable type is as expected
+ */
+template<typename T>
+void fapiCheckType(const T &) {}
 
 }
 

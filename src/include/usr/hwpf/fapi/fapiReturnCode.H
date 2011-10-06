@@ -36,6 +36,7 @@
  *                                                  Error Target
  *                          camvanng    09/06/2011  Added function template for
  *                                                  setHwpFfdc
+ *                          mjjones     09/22/2011  Added ErrorInfo Support
  */
 
 #ifndef FAPIRETURNCODE_H_
@@ -43,15 +44,31 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <ecmdDataBuffer.H>
 #include <fapiTarget.H>
 #include <fapiReturnCodes.H>
+#include <fapiErrorInfo.H>
+#include <fapiHwpErrorInfo.H>
+#include <fapiPlatTrace.H>
+
+/**
+ * @brief Set HWP Error macro
+ *
+ * This macro should be used by a HWP to set an error code if there is
+ * associated Error Information (in the Error Information XML file) that
+ * needs to be processed
+ */
+#define FAPI_SET_HWP_ERROR(RC, ERROR) \
+    RC.resetError(fapi::ERROR); \
+    ERROR##_CALL_FUNC_TO_ANALYZE_ERROR(RC); \
+    ERROR##_CALL_FUNCS_TO_COLLECT_FFDC(RC); \
+    ERROR##_ADD_ERROR_INFO(RC)
 
 namespace fapi
 {
 
 // Forward declarations
-class ReturnCodePlatDataRef;
-class ReturnCodeHwpFfdcRef;
+class ReturnCodeDataRef;
 
 /**
  * @class ReturnCode
@@ -62,17 +79,14 @@ class ReturnCodeHwpFfdcRef;
  *
  * FAPI, PLAT and HWP code can all create a ReturnCode.
  * PLAT can associate PlatData to it (use-case is an error log).
- * HWP can add HwpFfdc to it.
- * FAPI can add an error target to it (use-case is to record which target was
- *   the subject of a HWP that generated an error)
+ * HWPs can add ErrorInfo to it (via FAPI_SET_HWP_ERROR macro).
+ * FFDC HWPs can add FFDC ErrorInfo to it (via addEIFfdc member function)
  *
  * A ReturnCode is copyable and assignable. Therefore, it cannot be subclassed.
  *
- * When a ReturnCode is copied, any PlatData or HwpFfdc is not copied because it
- * may be heavyweight. Both ReturnCodes will refer to the same data. Data is
- * only deleted when the last ReturnCode with a reference to it is deleted. It
- * is possible for PLAT to get a pointer to the PlatData and to optionally
- * release the data (ReturnCode no longer responsible for deleting).
+ * When a ReturnCode is copied, any PlatData or ErrorInfo is not copied
+ * because it may be heavyweight. Both ReturnCodes will refer to the same data.
+ * this is achieved with the ReturnCodeDataRef class.
  *
  * A ReturnCode object is not thread safe, multiple threads must not use the
  * same ReturnCode object concurrently.
@@ -80,16 +94,6 @@ class ReturnCodeHwpFfdcRef;
 class ReturnCode
 {
 public:
-
-    /**
-     * @brief Enumeration of return code creators
-     */
-    enum returnCodeCreator
-    {
-        CREATOR_FAPI = 1,
-        CREATOR_PLAT = 2,
-        CREATOR_HWP = 3,
-    };
 
     /**
      * @brief Default constructor. Sets rcValue to success
@@ -133,11 +137,20 @@ public:
     /**
      * @brief Assignment Operator.
      *
-     * @param[in] i_rc Reference to rcValue to assign
+     * @param[in] i_rc rcValue to assign
+     *
+     * If FAPI_RC_SUCCESS (zero) is assigned then any associated data is deleted
      *
      * @return Reference to 'this' ReturnCode
      */
     ReturnCode & operator=(const uint32_t i_rcValue);
+
+    /**
+     * @brief Any associated data is deleted and the specified rcValue is set
+     *
+     * @param[in] i_rc rcValue to set
+     */
+    void resetError(const uint32_t i_rcValue);
 
     /**
      * @brief Returns if the return code indicates success
@@ -156,12 +169,25 @@ public:
     operator uint32_t() const;
 
     /**
+     * @brief Associates heap based PlatData with the ReturnCode. The ReturnCode
+     *        object takes responsibility for deleting the data (platform code
+     *        actually implements the delete function and must know the type and
+     *        how to delete it). Any existing PlatData is deleted.
+     *
+     * This is called by PLAT. The expected use-case is to associate a platform
+     * error log with the ReturnCode.
+     *
+     * @param[in] i_pData Pointer to PlatData (on the heap)
+     */
+    void setPlatData(void * i_pData);
+
+    /**
      * @brief Get a pointer to any PlatData. ReturnCode is still responsible for
      *        deletion of the data. The caller must not delete
      *
-     * The data pointed to is only meaningful to platform code. The data pointer
-     * should be used immediately in the same thread because it may be deleted
-     * in the future.
+     * This is called by PLAT. The expected use-case is to get a pointer to a
+     * platform error log. The data pointer should be used immediately in the
+     * same thread.
      *
      * @return void *. Pointer to any PlatData. If NULL then no data
      */
@@ -171,59 +197,93 @@ public:
      * @brief Get a pointer to any PlatData and release ownership from
      *        ReturnCode. The caller is responsible for deletion.
      *
-     * The data pointed to is only meaningful to platform code.
+     * This is called by PLAT. The expected use-case is to retrieve a platform
+     * error log.
      *
      * @return void *. Pointer to any PlatData. If NULL then no data
      */
     void * releasePlatData();
 
     /**
-     * @brief Associates heap based PlatData with the ReturnCode. The ReturnCode
-     *        object takes responsibility for deleting the data (platform code
-     *        actually implements the delete function and must know the type and
-     *        how to delete it).
-     *
-     * The data pointed to is only meaningful to platform code. This is expected
-     * to be used to associate a platform error log with the ReturnCode.
-     *
-     * param[in] i_pData Pointer to PlatData (on the heap)
+     * @brief Enumeration of ErrorInfo types
      */
-    void setPlatData(void * i_pData);
-
-    /**
-     * @brief Get a pointer to any stored HwpFfdc.
-     *
-     * The data pointer should be used immediately in the same thread because it
-     * is a pointer to internal object data.
-     *
-     * param[out] o_size Size of the FFDC data in bytes.
-     *
-     * @return void *. Pointer to any HwpFfdc. If NULL then no data
-     */
-    const void * getHwpFfdc(uint32_t & o_size) const;
-
-    /**
-     * @brief Stores a copy of the provided HwpFfdc
-     *
-     * param[in] i_pFfdc Pointer to HwpFfdc
-     * param[in] i_size  Size of the FFDC data in bytes
-     */
-    void setHwpFfdc(const void * i_pFfdc, const uint32_t i_size);
-
-    /**
-     * @brief Stores a copy of the provided HwpFfdc
-     *
-     * param[in] i_data  FFDC data, which can be any type
-     *
-     * Example usage:
-     *     uint32_t l_data = 0x12345678;
-     *     fapi::ReturnCode l_rc;
-     *     l_rc.setHwpFfdc(l_data);
-     */
-    template<class T> void setHwpFfdc(const T & i_data)
+    enum ErrorInfoType
     {
-        setHwpFfdc(&i_data, sizeof(T));
-    }
+        EI_TYPE_FFDC    = 1,
+        EI_TYPE_CALLOUT = 2,
+        EI_TYPE_DECONF  = 3,
+        EI_TYPE_GARD    = 4,
+    };
+
+    /**
+     * @brief Structure representing a single ErrorInfo entry.
+     *
+     * An array of these is passed to the addErrorInfo function when a HWP
+     * generates an error by calling the FAPI_SET_HWP_ERROR macro
+     */
+    struct ErrorInfoEntry
+    {
+        uint8_t iv_type  : 3; // The type of ErrorInfo (from ErrorInfoType enum)
+        uint8_t iv_object: 5; // Which object in the i_pObjects array passed to
+                              // addErrorInfo the ErrorInfoEntry is for
+        int16_t  iv_data1;    // EI_TYPE_FFDC   : Size of FFDC
+                              // EI_TYPE_CALLOUT: CalloutPriority
+    };
+
+    /**
+     * @brief Add ErrorInfo
+     *
+     * This is called by the FAPI_SET_HWP_ERROR macro to add ErrorInfo to the
+     * ReturnCode when a HWP generates an error. The function is designed to add
+     * all the ErrorInfo at once rather than the FAPI_SET_HWP_ERROR macro making
+     * multiple function calls to add each piece of ErrorInfo individually in
+     * order to minimize code size
+     *
+     * @param[in] i_pObjects Pointer to array of const pointers to const objects
+     *                       that are referred to by ErrorInfoEntry objects
+     *                       (object type is dependent on ErrorInfoEntry type)
+     * @param[in] i_pEntries Pointer to array of ErrorInfoEntry objects defining
+     *                       the ErrorInfo that needs to be added
+     * @param[in] i_count    Number of ErrorInfoEntry structures
+     */
+    void addErrorInfo(const void * const * i_pObjects,
+                      const ErrorInfoEntry * i_pEntries,
+                      const uint8_t i_count);
+
+    /**
+     * @brief Add a copy of FFDC to the ErrorInfo
+     *
+     * This is called by:
+     * - addErrorInfo
+     * - ReturnCodeFfdc::addEIFfdc (function template)
+     * - FFDC HWPs (HWPs written to collect FFDC)
+     *
+     * Use ReturnCodeFfdc::addEIFfdc to add FFDC data using the data identifier
+     *
+     * @param[in] i_pFfdc Pointer to the FFDC to copy
+     * @param[in] i_size  Size of the FFDC to copy
+     */
+    void addEIFfdc(const void * i_pFfdc,
+                   const uint32_t i_size);
+
+    /**
+     * @brief Get a pointer to any ErrorInfo 
+     *
+     * This is called by PLAT to find information about an error
+     *
+     * @return ErrorInfo *. Pointer to any ErrorInfo. If NULL then no info
+     */
+    const ErrorInfo * getErrorInfo() const;
+
+    /**
+     * @brief Enumeration of return code creators
+     */
+    enum returnCodeCreator
+    {
+        CREATOR_FAPI = 1,
+        CREATOR_PLAT = 2,
+        CREATOR_HWP = 3,
+    };
 
     /**
      * @brief Gets the creator of the return code
@@ -232,48 +292,158 @@ public:
      */
     returnCodeCreator getCreator() const;
 
-    /**
-     * @brief Stores a copy of the provided Target if there is an error and no
-     *        Target is already stored
-     *
-     * This is intended to be used by FAPI_EXEC_HWP to record which target was
-     * the subject of a HWP that generated an error.
-     *
-     * param[in] i_target Reference to Target
-     */
-    void setErrTarget(const Target & i_target);
-
-    /**
-     * @brief Gets the error target
-     *
-     * @return Target *. Pointer to Target. If NULL then no error Target
-     */
-    Target * getErrTarget() const;
-
 private:
 
     /**
-     * @brief Removes interest in pointed to ReturnCodePlatDataRef
+     * @brief If iv_pDataRef is NULL then a new ReturnCodeDataRef is created
      */
-    void removePlatData();
+    void ensureDataRefExists();
 
     /**
-     * @brief Removes interest in pointed to ReturnCodeHwpFfdcRef
+     * @brief Forgets about any associated data (PlatData and ErrorInfo)
+     *
+     * If this is the only ReturnCode pointing to the data then the data is
+     * deleted
      */
-    void removeHwpFfdc();
+    void forgetData();
+
+    /**
+     * @brief Add a target to callout to the ErrorInfo
+     *
+     * This is called by addErrorInfo
+     *
+     * @param[in] i_target   Reference to the target to callout.
+     * @param[in] i_priority The priority of the callout
+     */
+     void addEICallout(const Target & i_target,
+                       const CalloutPriority i_priority);
+
+    /**
+     * @brief Add a target to deconfigure to the ErrorInfo
+     *
+     * This is called by addErrorInfo
+     *
+     * @param[in] i_target Reference to the target to deconfigure.
+     */
+    void addEIDeconfigure(const Target & i_target);
+
+    /**
+     * @brief Add a target to create a GARD record for to the ErrorInfo
+     *
+     * This is called by addErrorInfo
+     *
+     * @param[in] i_target Reference to the target to create a GARD record for
+     */
+    void addEIGard(const Target & i_target);
 
     // The rcValue
     uint32_t iv_rcValue;
 
-    // Pointer to ReturnCodePlatDataRef
-    ReturnCodePlatDataRef * iv_pPlatDataRef;
-
-    // Pointer to ReturnCodeHwpFfdcRef
-    ReturnCodeHwpFfdcRef * iv_pHwpFfdcRef;
-
-    // Pointer to error Target
-    Target * iv_pErrTarget;
+    // Pointer to ReturnCodeDataRef (manages associated data)
+    ReturnCodeDataRef * iv_pDataRef;
 };
+
+/**
+ * @namespace ReturnCodeFfdc
+ *
+ * This namespace contains a template functions for adding FFDC data to a
+ * ReturnCode. They cannot be a ReturnCode member functions because a function
+ * template cannot be specialized within a class
+ */
+namespace ReturnCodeFfdc
+{
+    /**
+     * @brief Enumeration of ErrorInfo FFDC sizes that are used to indicate a
+     *        special type that cannot simply be memcopied
+     */
+    enum ErrorInfoFfdcSize
+    {
+        EI_FFDC_SIZE_ECMDDB = -1,   // ecmdDataBufferBase
+    };
+
+    /**
+     * @brief Get FFDC Size
+     *
+     * This is called by the FAPI_SET_HWP_ERROR macro to find out the size of
+     * FFDC data. If the data is of a special type that is handled differently
+     * than types that are simply memcopied then it is handled by a template
+     * specialization
+     *
+     * @return int8_t. Size of the FFDC data
+     */
+    template<typename T>
+    int16_t getErrorInfoFfdcSize(const T &)
+    {
+        return sizeof(T);
+    }
+
+    /**
+     * @brief Get FFDC Size specialization for ecmdDataBufferBase
+     */
+    template<>
+    inline int16_t getErrorInfoFfdcSize<ecmdDataBufferBase>(
+        const ecmdDataBufferBase &)
+    {
+        return EI_FFDC_SIZE_ECMDDB;
+    }
+
+    /**
+     * @brief Compile error if caller tries to get the FFDC size of a pointer
+     *
+     * If this function template is instantiated, the compile will fail due to
+     * the construction of an undefined class.
+     */
+    class Error_PtrPassedToGetErrorInfoFfdcSize;
+    template<typename T>
+    int16_t getErrorInfoFfdcSize(const T *)
+    {
+        Error_PtrPassedToGetErrorInfoFfdcSize();
+        return 0;
+    }
+
+    /**
+     * @brief Add a copy of FFDC to the ErrorInfo in a ReturnCode
+     *
+     * This is called by FFDC HWPs
+     *
+     * @param[out] o_rc   Reference to ReturnCode to copy FFDC to
+     * @param[in]  i_ffdc Reference to FFDC to copy
+     */
+    template<typename T>
+    void addEIFfdc(ReturnCode & o_rc,
+                   const T & i_ffdc)
+    {
+        o_rc.addEIFfdc(&i_ffdc, sizeof(T));
+    }
+
+    /**
+     * @brief Specialization of addEIFfdc for ecmdDataBufferBase
+     *
+     * @param[out] o_rc   Reference to ReturnCode to copy FFDC to
+     * @param[in]  i_ffdc Reference to ecmdDataBufferBase to copy
+     */
+    template<>
+    inline void addEIFfdc<ecmdDataBufferBase>(ReturnCode & o_rc,
+                                              const ecmdDataBufferBase & i_ffdc)
+    {
+        // TODO. When real ecmdDataBufferBase is available
+        FAPI_ERR("Adding ecmdDataBufferBase as FFDC TBD");
+    }
+
+    /**
+     * @brief Compile error if caller tries to add a pointer as FFDC
+     *
+     * If this function template is instantiated, the compile will fail due to
+     * the construction of an undefined class.
+     */
+    class Error_PtrPassedToAddEIFfdc;
+    template<typename T>
+    void addEIFfdc(ReturnCode &,
+                   const T *)
+    {
+        Error_PtrPassedToAddEIFfdc();
+    }
+}
 
 }
 
