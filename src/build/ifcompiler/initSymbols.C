@@ -14,10 +14,11 @@
 // IBM_PROLOG_END_TAG
 // Change Log *************************************************************************************
 //                                                                      
-//  Flag Track    Userid   Date       Description                
-//  ---- -------- -------- --------   -------------------------------------------------------------
-//       D754106  dgilbert 06/14/10   Create
-//                dgilbert 10/22/10   Add spies_are_in()
+//  Flag Track     Userid   Date     Description                
+//  ---- --------  -------- -------- -------------------------------------------------------------
+//       D754106   dgilbert 06/14/10 Create
+//                 dgilbert 10/22/10 Add spies_are_in()
+//                 andrewg  09/19/11 Updates based on review
 // End Change Log *********************************************************************************
 
 /**
@@ -69,36 +70,40 @@ Symbols::Symbols(FILELIST & i_filenames)
             //printf("def: %s\n",def.c_str());
             if(def == "enum")
             {
-
-                // We've now found the beginning of the attribute enum definition
-                // Read and skip the { on the next line
-                getline(infs,fileline);
-                getline(infs,fileline);
-
-                // We're just parsing the enum in order so values start
-                // at 0 and increment by 1 after that.
-                uint32_t value = 0;
-
-                while(fileline[0] != '}')
+                // Make sure it's the AttributeId enum
+                iss >> def;
+                if(def == "AttributeId")
                 {
-                    istringstream attr_stream(fileline);
-                    string attr;
-                    attr_stream >> attr;
-
-                    // Strip off the "," at the end.
-                    size_t pos = attr.find(',');
-                    if(pos != string::npos)
-                    {
-                        attr = attr.substr(0,attr.length()-1);
-                    }
-
-                    //printf("Attribute String:%s\n",attr.c_str());
-                    // We now have the first attribute loaded into attr
-                    // Get a value for the string
-
-                    iv_symbols[attr] = MAP_DATA(value,NOT_USED);
-                    value++;
+                    // We've now found the beginning of the attribute enum definition
+                    // Read and skip the { on the next line
                     getline(infs,fileline);
+                    getline(infs,fileline);
+
+                    // We're just parsing the enum in order so values start
+                    // at 0 and increment by 1 after that.
+                    uint32_t value = 0;
+
+                    while(fileline[0] != '}')
+                    {
+                        istringstream attr_stream(fileline);
+                        string attr;
+                        attr_stream >> attr;
+
+                        // Strip off the "," at the end.
+                        size_t pos = attr.find(',');
+                        if(pos != string::npos)
+                        {
+                            attr = attr.substr(0,attr.length()-1);
+                        }
+
+                        //printf("Attribute String:%s\n",attr.c_str());
+                        // We now have the first attribute loaded into attr
+                        // Get a value for the string
+
+                        iv_symbols[attr] = MAP_DATA(value,NOT_USED);
+                        value++;
+                        getline(infs,fileline);
+                    }
                 }
             }
             else if(def == "typedef")
@@ -106,6 +111,8 @@ Symbols::Symbols(FILELIST & i_filenames)
                  string type;
                  string attribute_name;
                  string find_type = "_Type";
+                 string find_array = "[";
+                 bool array = false;
                  iss >> type;
                  iss >> attribute_name;
                  if(attribute_name == "*")
@@ -116,11 +123,18 @@ Symbols::Symbols(FILELIST & i_filenames)
                  }
                  //printf("typedef: type:%s  attribute_name:%s\n",type.c_str(),attribute_name.c_str());
 
-                 // Now strip off the _type in the name
-                 size_t pos = attribute_name.find(find_type);
+                 // Check if there's a "[" in the string, which would indicate it's an array
+                 size_t pos = attribute_name.find(find_array);
                  if(pos != string::npos)
                  {
-                     attribute_name = attribute_name.substr(0,attribute_name.length()- strlen("_Type") - 1);
+                     array = true;
+                 }
+
+                 // Now strip off the _type in the name
+                 pos = attribute_name.find(find_type);
+                 if(pos != string::npos)
+                 {
+                     attribute_name = attribute_name.substr(0,pos);
                  }
                  else
                  {
@@ -128,10 +142,8 @@ Symbols::Symbols(FILELIST & i_filenames)
                      exit(1);
                  }
 
-                 //printf("typedef: type:%s  attribute_name:%s\n",type.c_str(),attribute_name.c_str());
-
-                 iv_attr_type[attribute_name] = get_attr_type(type);
-                 //printf("Type for %s is %u\n",type.c_str(),get_attr_type(type));
+                 iv_attr_type[attribute_name] = get_attr_type(type,array);
+                 //printf("Attribute %s Type for %s is %u\n",attribute_name.c_str(),type.c_str(),get_attr_type(type,array));
             }
         }
         infs.close();
@@ -140,29 +152,48 @@ Symbols::Symbols(FILELIST & i_filenames)
     iv_rpn_map[Rpn::SYMBOL | INIT_ANY_LIT]  = RPN_DATA("ANY",CINI_LIT_MASK);
 }
 
-uint32_t Symbols::get_attr_type(const string &i_type)
+uint32_t Symbols::get_attr_type(const string &i_type, bool i_array)
 {
 
     if (i_type == "uint8_t")
     {
-        return(SYM_ATTR_UINT8_TYPE);
+        if(i_array == true)
+        {
+            return(SYM_ATTR_UINT8_ARRAY_TYPE);
+        }
+        else
+        {
+            return(SYM_ATTR_UINT8_TYPE);
+        }
     }
     else if(i_type == "uint32_t")
     {
-        return(SYM_ATTR_UINT32_TYPE);
+        if(i_array == true)
+        {
+            return(SYM_ATTR_UINT32_ARRAY_TYPE);
+        }
+        else
+        {
+            return(SYM_ATTR_UINT32_TYPE);
+        }
     }
     else if(i_type == "uint64_t")
     {
-        return(SYM_ATTR_UINT64_TYPE);
+        if(i_array == true)
+        {
+            return(SYM_ATTR_UINT64_ARRAY_TYPE);
+        }
+        else
+        {
+            return(SYM_ATTR_UINT64_TYPE);
+        }
     }
-    else if(i_type == "char*")
-    {
-        return(SYM_ATTR_STRING_TYPE);
-    }
+    //else if(i_type == "uint64_t")
+    // TODO - Add attribute array support
     else
     {
         // TODO - Need to ensure all attributes have data type at the end of processing
-        //printf("Unknown data type: %s\n",i_type.c_str());
+        printf("Unknown data type: %s\n",i_type.c_str());
         return(0);
     }
 
@@ -398,6 +429,24 @@ uint32_t Symbols::find_numeric_lit(uint64_t i_data, int32_t byte_size)
     return offset | Rpn::NUMBER;
 }
 
+uint32_t Symbols::find_numeric_array_lit(uint64_t i_data, int32_t byte_size)
+{
+    uint32_t offset = 0;
+    LIT_LIST::iterator i = iv_lits.begin();
+    for(; i != iv_lits.end(); ++i,++offset)
+    {
+        if(i_data == i->first && (uint32_t)byte_size == i->second)
+            break;
+    }
+    if(i == iv_lits.end())
+    {
+        iv_lits.push_back(LIT_DATA(i_data,byte_size));
+    }
+    //printf("Symbols::find_numeric_lit: i_data:0x%llX byte_size:%d Tag:0x%X\n",
+    //      i_data,byte_size, offset | Rpn::NUMBER);
+    return offset | Rpn::ARRAY_INDEX;
+}
+
 // ------------------------------------------------------------------------------------------------
 
 uint16_t Symbols::get_numeric_tag(uint32_t i_rpn_id)
@@ -416,6 +465,29 @@ uint16_t Symbols::get_numeric_tag(uint32_t i_rpn_id)
         ostringstream err;
         err << hex;
         err << "ERROR! - Symbols::get_numeric_tag() invalid arg rpn_id = " << i_rpn_id << endl;
+        throw invalid_argument(err.str());
+    }
+    return  (uint16_t)tag;
+}
+
+// ------------------------------------------------------------------------------------------------
+
+uint16_t Symbols::get_numeric_array_tag(uint32_t i_rpn_id)
+{
+    uint32_t tag = NOT_FOUND;
+    uint32_t offset = i_rpn_id - Rpn::ARRAY_INDEX;
+    string any("ANY");
+    if(iv_used_lit.size() == 0) get_tag(use_symbol(any));
+    if(offset < iv_lits.size())
+    {
+        // numeric lits are numbered after enum lits, but with different TYPE
+        tag = (iv_used_lit.size() + offset) | NUM_TYPE;
+    }
+    else
+    {
+        ostringstream err;
+        err << hex;
+        err << "ERROR! - Symbols::get_numeric_array_tag() invalid arg rpn_id = " << i_rpn_id << endl;
         throw invalid_argument(err.str());
     }
     return  (uint16_t)tag;
@@ -455,6 +527,7 @@ string Symbols::find_text(uint32_t i_cini_id)
     {
         for(SYMBOL_MAP::const_iterator i = iv_symbols.begin(); i != iv_symbols.end(); ++i)
         {
+            //printf("SYMBOL:%s\n",i->first.c_str());
             if((i->second).first == i_cini_id)
             {
                 name = i->first;
@@ -516,8 +589,8 @@ uint32_t Symbols::use_enum(const string & enumname)
     }
     else
     {
-        rpn_id = Rpn::SPY_ENUM | iv_rpn_id++;
-        iv_enums[s] = rpn_id;
+        printf("Error!\n");
+        exit(0);
     }
     return rpn_id;
 }
@@ -568,7 +641,7 @@ string Symbols::full_listing()
     }
 
     ostringstream title;
-    title << "\n--------------- Variable Symbol Table ---------------\n\n"
+    title << "\n--------------- Attribute Symbol Table ---------------\n\n"
           << "0x" << hex << setfill('0') << setw(8) << count << '\t' 
           << "Number of variables\n" << oss.str();
 
@@ -616,7 +689,7 @@ string Symbols::listing()
 
     oss << hex << setfill('0');
 
-    oss << "\n--------------- Variable Symbol Table ---------------\n\n"
+    oss << "\n--------------- Attribute Symbol Table ---------------\n\n"
         << "0x" << setw(4) << iv_used_var.size()-1 << '\t' << "Number of variables\n";
 
     for(SYMBOL_USED::iterator i = iv_used_var.begin() + 1; i != iv_used_var.end(); ++i)
@@ -624,19 +697,13 @@ string Symbols::listing()
         ++count;
         oss << "Type:" << setw(2) << iv_attr_type[find_text(*i)] << " Value:0x" << setw(8) << (*i) << '\t' << "ID 0X" << setw(4) << (count | VAR_TYPE)
             << '\t' << '[' << find_text(*i) << ']' << endl;
+
+        //printf("ATTRIBUTE: %s  Value:0x%02X\n",(find_text(*i)).c_str(),iv_attr_type[find_text(*i)]);
     }
 
     count = 0;
 
-    oss << "\n--------------- Literal Symbol Table -----------------\n\n"
-        << "0x" << setw(4) << iv_used_lit.size()-1 << '\t' << "Number of enumerated literals\n";
-
-    for(SYMBOL_USED::iterator i = iv_used_lit.begin() + 1; i != iv_used_lit.end(); ++i)
-    {
-        ++count;
-        oss << "0x" << setw(8) << (*i) << '\t' << "ID 0x" << setw(4) << (count | LIT_TYPE)
-            << '\t' << '[' << find_text(*i) << ']' << endl;
-    }
+    oss << "\n--------------- Literal Symbol Table -----------------\n\n";
 
     oss << "\n0x" << setw(4) << iv_lits.size() << '\t' << "Number of numeric literals\n";
 
@@ -702,18 +769,8 @@ uint32_t Symbols::bin_lits(BINSEQ & blist)
     string any = "ANY";
     get_tag(use_symbol(any));
 
-    uint32_t total = 0;
-    uint32_t count = iv_used_lit.size() - 1; // First lit is "ANY' and is not stored
-
-    Rpn::set16(blist,(uint16_t)count);
-
-    for(SYMBOL_USED::iterator i = iv_used_lit.begin() + 1; i != iv_used_lit.end(); ++i)
-    {
-        Rpn::set32(blist,(*i));
-    }
-
-    total += count;
-    count = iv_lits.size();
+    uint32_t count = iv_lits.size();
+    uint32_t total = count;
 
     Rpn::set16(blist,(uint16_t)count);
 
@@ -757,14 +814,8 @@ uint32_t Symbols::restore_var_bseq(BINSEQ::const_iterator & bli)
 
 uint32_t Symbols::restore_lit_bseq(BINSEQ::const_iterator & bli)
 {
-    uint32_t enum_count = Rpn::extract16(bli);
     iv_used_lit.clear();
     iv_used_lit.push_back(iv_rpn_map[Rpn::SYMBOL|INIT_ANY_LIT].second);  // ANY lit always first
-
-    for(uint32_t i = 0; i < enum_count; ++i)
-    {
-        iv_used_lit.push_back(Rpn::extract32(bli));
-    }
 
     iv_lits.clear();
     uint32_t num_count = Rpn::extract16(bli);
@@ -792,7 +843,7 @@ uint32_t Symbols::restore_lit_bseq(BINSEQ::const_iterator & bli)
         iv_lits.push_back( LIT_DATA(data, size) );
     }
 
-    return enum_count + num_count;
+    return num_count;
 }
 
 //-------------------------------------------------------------------------------------------------

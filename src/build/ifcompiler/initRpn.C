@@ -20,6 +20,7 @@
 //  dg002 SW039868 dgilbert 10/15/10 Add support to filter unneeded inits by EC
 //  dg003 SW047506 dgilbert 12/09/10 SERIES filtering
 //                 andrewg  05/24/11 Port over for VPL/PgP
+//                 andrewg  09/19/11 Updates based on review
 // End Change Log *********************************************************************************
 
 /**
@@ -65,7 +66,7 @@ std::string Rpn::cv_empty_str;
 //-------------------------------------------------------------------------------------------------
 
 Rpn::Rpn(uint32_t i_uint,Symbols * symbols) : iv_symbols(symbols)
-{ push_int(i_uint); }
+{ push_int(i_uint);}
 
 //-------------------------------------------------------------------------------------------------
 
@@ -139,7 +140,6 @@ bool Rpn::operator==(const Rpn & r)
                             if(data1 != data2) result = false;
                         }
                         break;
-                    case SPY_ENUM:    // independent of symbol table - just compare
                     case OPERATION:   // independent of symbol table - just compare
                     default:          // just compare
                         if(*c1 != *c2) result = false;
@@ -176,17 +176,11 @@ void Rpn::push_id(std::string & i_id, TYPE i_type)
     std::string s(i_id);
 
     for (std::string::iterator c = s.begin(); c != s.end(); ++c)
+    {
         *c = toupper(*c);
+    }
 
-    if (i_type == SPY_ENUM)
-    {
-        // don't always have complete spyname at this point
-        rpn_id = iv_symbols->use_enum(s);
-    }
-    else
-    {
-        rpn_id = iv_symbols->use_symbol(s);
-    }
+    rpn_id = iv_symbols->use_symbol(s);
 
     if (rpn_id & DEFINE)
     {
@@ -203,7 +197,16 @@ void Rpn::push_id(std::string & i_id, TYPE i_type)
 
 void Rpn::push_array_index(std::string &i_array_idx)
 {
-    printf("Array Index: %s\n",i_array_idx.c_str());
+    string l_idx = i_array_idx;
+    // strip of leading "[" and last "]"
+    l_idx = l_idx.substr(1,(l_idx.length() - 2));
+    uint32_t l_array_val = atoi(l_idx.c_str());
+
+    uint32_t rpn_id = iv_symbols->find_numeric_array_lit(l_array_val,4);
+    iv_rpnstack.push_back(rpn_id);
+
+    //printf("Array Index: %s  decimal:%u  rpn_id:0x%8X\n",l_idx.c_str(),l_array_val,rpn_id);
+
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -468,9 +471,12 @@ Rpn * Rpn::merge(Rpn * i_rpn)
 // See header file for contract
 void Rpn::bin_read(BINSEQ::const_iterator & bli, Symbols * symbols)
 {
+
+    uint32_t size = 2;  // Size is always 2 for symbols
+
     if(symbols) iv_symbols = symbols;
     iv_rpnstack.clear();
-    uint32_t size = *bli++;
+
     while(size)
     {
         uint32_t v = *bli++;
@@ -602,19 +608,6 @@ std::string  Rpn::listing(const char * i_desc, const std::string & spyname, bool
                 oss << "0x" << std::setw(size * 2) << data << '\t' << "Numerica Literal" << std::endl;
             }
         }
-        else if((*i) & SPY_ENUM)
-        {
-            if(i_final)
-            {
-                oss << "0x" << std::setw(8) << iv_symbols->get_spy_enum_id(*i,spyname)
-                    << '\t' << iv_symbols->get_enum_name(*i) << std::endl;
-            }
-            else
-            {
-                //oss << "0x" << std::setw(8) << *i << '\t' 
-                oss << iv_symbols->get_enum_name(*i) << std::endl;
-            }
-        }
         else if((*i) & SYMBOL)
         {
             std::string name = iv_symbols->find_name(*i);
@@ -650,14 +643,14 @@ std::string  Rpn::listing(const char * i_desc, const std::string & spyname, bool
         }
     }
 
-    if((iv_rpnstack.size() == 1) && ((iv_rpnstack.front() & SPY_ENUM) || (iv_rpnstack.front() & SYMBOL))) // skip size and desc
+    if((iv_rpnstack.size() == 1) && (iv_rpnstack.front() & SYMBOL)) // skip size and desc
     {
         odesc << oss.str();
     }
     else
     {
         odesc << std::hex << std::setfill('0')
-            << "0x" << std::setw(2) << rpn_byte_size << "\t\t";
+            << "0x" << std::setw(4) << rpn_byte_size << "\t\t";
         if(i_desc) odesc << i_desc;
         else odesc << std::dec << rpn_byte_size << " BYTES";
         odesc << std::endl;
@@ -703,23 +696,18 @@ void Rpn::bin_str(BINSEQ & o_blist, bool i_prepend_count)  // binary version to 
                                 blist.push_back((uint8_t) tag);
                                 count += 2;
                                 break;
-// Not supported
-#if 0
-            case SPY_ENUM:      v = iv_symbols->get_spy_enum_id(v,spyname);
-                                blist.push_back((uint8_t)(v >> 24));
-                                blist.push_back((uint8_t)(v >> 16));
-                                blist.push_back((uint8_t)(v >>  8));
-                                blist.push_back((uint8_t) v);
-                                count += 4;
+            case ARRAY_INDEX:  
+                                tag = iv_symbols->get_numeric_array_tag(v);
+                                blist.push_back((uint8_t)(tag >> 8));
+                                blist.push_back((uint8_t) tag);
+                                count += 2;
                                 break;
-#endif
+
             default:
                     std::cerr << "ERROR! Rpn::bit_str() Invalid Rpn type: " << v << std::endl;
                     break;
         }
     }
-
-    if(iv_rpnstack.size() == 1 && (iv_rpnstack.front() & SPY_ENUM)) i_prepend_count = false; // never for SPY ENUMS
 
     if (i_prepend_count)
     {
@@ -1019,10 +1007,6 @@ bool Rpn::resolve(SYMBOL_VAL_LIST & i_varlist)
             uint32_t size = 0;
             uint64_t data = iv_symbols->get_numeric_data(*i,size);
             stack.push_back(RPN_VALUE(data,RPN_NUMBER));
-        }
-        else if((*i) & SPY_ENUM)
-        {
-            //TODO - don't care about spy enums for now
         }
         else if((*i) & SYMBOL)  // variables and cini enums
         {

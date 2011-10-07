@@ -17,9 +17,10 @@
 
 // Change Log *************************************************************************************
 //                                                                      
-//  Flag Track    Userid   Date       Description                
-//  ---- -------- -------- --------   -------------------------------------------------------------
-//       D754106  dgilbert 06/14/10   Create
+//  Flag Track     Userid   Date     Description                
+//  ---- --------  -------- -------- -------------------------------------------------------------
+//       D754106   dgilbert 06/14/10 Create
+//                 andrewg  09/19/11 Updates based on review
 // End Change Log *********************************************************************************
 
 /**
@@ -65,9 +66,11 @@ namespace init
             enum
             {
                 SYM_ATTR_UINT8_TYPE = 0x00,
-                SYM_ATTR_UINT32_TYPE,
-                SYM_ATTR_UINT64_TYPE,
-                SYM_ATTR_STRING_TYPE,
+                SYM_ATTR_UINT32_TYPE = 0x01,
+                SYM_ATTR_UINT64_TYPE = 0x02,
+                SYM_ATTR_UINT8_ARRAY_TYPE = 0x03,
+                SYM_ATTR_UINT32_ARRAY_TYPE = 0x04,
+                SYM_ATTR_UINT64_ARRAY_TYPE = 0x05,
             };
 
             enum 
@@ -121,6 +124,14 @@ namespace init
              */
             uint32_t find_numeric_lit(uint64_t i_data, int32_t byte_size);
 
+             /**
+             * Find the tag for the numeric array lit
+             * @param data
+             * @param number of significant bytes in the data [1-8]
+             * @returns Rpn id
+             */
+            uint32_t find_numeric_array_lit(uint64_t i_data, int32_t byte_size);
+
             /**
              * Convert a numeric literal Rpn tag to an initfile tag
              * @param Rpn id returned by find_numeric_lit
@@ -129,6 +140,16 @@ namespace init
              *      in the initfile.
              */
             uint16_t get_numeric_tag(uint32_t i_rpn_id);
+
+            /**
+             * Convert a numeric array literal Rpn tag to an initfile tag
+             * @param Rpn id returned by find_numeric_lit
+             * @return tag
+             * @pre Must not be called until find_numeric_array_lit() has been called for all numbers
+             *      in the initfile.
+             */
+            uint16_t get_numeric_array_tag(uint32_t i_rpn_id);
+
             /**
              * Get the literal data value from the Rpn id returned by find_numeric_lit()
              * @param uint32_t Rpn id
@@ -201,7 +222,7 @@ namespace init
 
             string find_text(uint32_t i_cini_id);
             uint32_t add_undefined(const string & s);
-            uint32_t get_attr_type(const string &i_type);
+            uint32_t get_attr_type(const string &i_type, bool i_array);
 
         private: //data
 

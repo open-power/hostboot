@@ -19,6 +19,7 @@
 # Flag  Reason   Userid    Date      Description
 # ----  -------  --------  --------  -----------
 #                andrewg   05/24/11  Updated for VPL/PgP
+#                andrewg   10/07/11  Update based on review
 #
 
 # To execute initCompiler against sample.initfile, run the following:
@@ -28,9 +29,11 @@
 # process it.
 #
 # sample.if.list will be a listing file describing the binary content of the initfile
+#
+# add a "-d" to flex command line to get debug output.
 
 all:
-	yacc -d initCompiler.y; flex -d initCompiler.lex; g++  initCompiler.C lex.yy.c y.tab.c initRpn.C initScom.C initSymbols.C -I./ -o initCompiler
+	yacc -d initCompiler.y; flex initCompiler.lex; g++  initCompiler.C lex.yy.c y.tab.c initRpn.C initScom.C initSymbols.C -I./ -o initCompiler
 
 clean:
-	rm -f initCompiler lex.yy.c *.if *.list y.tab.*
+	rm -f initCompiler lex.yy.c *.if *.list y.tab.* *.dbg

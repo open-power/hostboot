@@ -23,6 +23,7 @@
 //                 dgilbert 10/15/10 Add support to filter unneeded inits by EC
 //  dg002 SW039868 dgilbert 10/15/10 Add support to filter unneeded inits by EC
 //  dg003 SW047506 dgilbert 12/09/10 SERIES filtering
+//                 andrewg  09/19/11 Updates based on review
 // End Change Log *********************************************************************************
 
 /**
@@ -51,13 +52,13 @@ namespace init
 
         enum TYPE
         {
-            DEFINE    = 0x08000000,
-            SYMBOL    = 0x10000000,
-            NUMBER    = 0x20000000,
-            SPY_ENUM  = 0x40000000,
-            OPERATION = 0x80000000,
-            TYPE_MASK = 0xF8000000,
-            OP_MASK   = 0x000000FF
+            DEFINE       = 0x08000000,
+            SYMBOL       = 0x10000000,
+            NUMBER       = 0x20000000,
+            ARRAY_INDEX  = 0x40000000,
+            OPERATION    = 0x80000000,
+            TYPE_MASK    = 0xF8000000,
+            OP_MASK      = 0x000000FF
 
         };
 
@@ -189,13 +190,15 @@ namespace init
         std::string symbol_names() const;  //<<< Return a string of all the SYMBOL names in the Rpn
 
         /**
-         * binary string of RPN to write to file
-         * @return blist appended with binary string of this Rpn
-         * @param  flag to prepend rpn count to binary string
+         * @brief Push all RPN stack entries of object as numerical values onto input blist
+         *
+         * @param blist Binary string of RPN to write to file
+         * @param i_prepend_count Flag to indicate prepend rpn count to binary string
          * @PRE should never be called until all symbols in the initfile have been
          * "looked up" or the binary tags for Symbols and Numbers may not be accurate
+         * @return void
          */
-        void bin_str(BINSEQ & blist, bool i_prepend_count = true);
+        void bin_str(BINSEQ & blist, bool i_prepend_count = false);
 
         /**
          * Read binary sequence to recreate this Rpn sequence

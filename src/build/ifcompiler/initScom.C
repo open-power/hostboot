@@ -22,6 +22,7 @@
 //  dg002 SW039868 dgilbert 10/15/10 Add support to filter unneeded inits by EC
 //  dg003 SW047506 dgilbert 12/09/10 More filtering enhancements
 //                 andrewg  05/24/11 Port over for VPL/PgP
+//                 andrewg  09/19/11 Updates based on review
 // End Change Log *********************************************************************************
 
 /**
@@ -67,15 +68,11 @@ Scom::Scom(BINSEQ::const_iterator & bli, Symbols * i_symbols):
     uint32_t id      = Rpn::extract16(bli);
     uint32_t numcols = Rpn::extract16(bli);
     uint32_t numrows = Rpn::extract16(bli);
-    //uint32_t hier    = *bli++;
-    ++bli;      // don't need hier
 
-    //iv_when |= numcols & SUBTYPE_MASK;
     numcols &= ~SUBTYPE_MASK;
 
     // Get our SCOM address
     uint32_t l_addr_size = 0;
-    //iv_scom_addr[0] = iv_symbols->get_numeric_data(iv_symbols->get_rpn_id(id),l_addr_size);
     iv_scom_addr_hex = iv_symbols->get_numeric_data(iv_symbols->get_rpn_id(id),l_addr_size);
 
 
@@ -94,10 +91,6 @@ Scom::Scom(BINSEQ::const_iterator & bli, Symbols * i_symbols):
         }
     }
 
-    // when Rpn iv_when_rpn
-    //iv_when_rpn.bin_read(bli);
-
-    //
     for(size_t i = 0; i < numrows; ++i)
     {
         Rpn rpn(bli,iv_symbols);
@@ -324,18 +317,6 @@ string Scom::list_one(RANGE range)
     }
     else numrows = allrows; // else select all the rows
 
-    uint32_t hierarchy = 0xFF;
-#if 0
-    for(SPY_NAMES::iterator hier = cv_hier_list.begin(); hier != cv_hier_list.end(); ++hier)
-    {
-        if((spyname.length() > hier->length()) && (spyname.compare(0,hier->length(),*hier) == 0))
-        {
-            char c = spyname[hier->length()];
-            if(isdigit(c)) hierarchy = c - '0';
-            break;
-        }
-    }
-#endif
     oss << hex << setfill('0');
     oss << "------------";
     oss << " Scom Address: 0x" << setw(16) << iv_scom_addr_hex;
@@ -354,9 +335,7 @@ string Scom::list_one(RANGE range)
     //oss << "0x" << setw(8) << iv_symbols->get_spy_id(spyname) << '\t';
 
     oss << "0x" << setw(4) << numcols << "\t\t" << "Number of columns" << endl
-        << "0x" << setw(4) << numrows << "\t\t" << "Number of rows" << endl
-        << "0x" << setw(2) << hierarchy << "\t\t" << "Hierarchy Instance\n" << endl;
-        //<< iv_when_rpn.listing("Length of when RPN",spyname,true) << endl;
+        << "0x" << setw(4) << numrows << "\t\t" << "Number of rows" << endl;
 
     // If there is a bit range we need to select only the spyv rows that apply to this spyname
 
@@ -380,11 +359,11 @@ string Scom::list_one(RANGE range)
     }
     oss << endl;
 
-#if 0
+
     // list the column names that are really CINI VARS
     for(RPN_LIST::iterator i = iv_col_vars.begin(); i != iv_col_vars.end(); ++i)
     {
-        oss << i->listing("",spyname,true);
+        oss << i->listing("",Rpn::cv_empty_str,true);
         //Rpn col_rpn = *i;
         //string desc = iv_symbols->find_name(rpn_id);
         //if(desc.size() == 0) desc = "Variable not found!";
@@ -393,7 +372,7 @@ string Scom::list_one(RANGE range)
     }
     oss << endl << endl;
 
-#endif
+
 
     uint32_t usedrows = 0;
     if(iv_cols_rpn.size() == 0)
@@ -466,6 +445,7 @@ uint32_t Scom::bin_listing(BINSEQ & blist)
 
     for(; i != iv_scom_addr.end(); ++i)
     {
+        //printf("scom address:%s\n",(*i).c_str());
         if(ranges.size())
         {
             for(set<RANGE>::iterator r = ranges.begin(); r != ranges.end(); ++r)
@@ -525,21 +505,6 @@ void Scom::bin_list_one(BINSEQ & blist,uint64_t i_addr, RANGE range)
     }
     else numrows = allrows; // else select all the rows
 
-
-    uint32_t hierarchy = 0xFF;
-// No hierarchy support
-#if 0
-    for(SPY_NAMES::iterator hier = cv_hier_list.begin(); hier != cv_hier_list.end(); ++hier)
-    {
-        if((spyname.length() > hier->length()) && (spyname.compare(0,hier->length(),*hier) == 0))
-        {
-            char c = spyname[hier->length()];
-            if(isdigit(c)) hierarchy = c - '0';
-            break;
-        }
-    }
-#endif
-
     // If every row rpn in a column is unconditionally true then remove the col.
     if(iv_col_vars.size())
     {
@@ -588,22 +553,8 @@ void Scom::bin_list_one(BINSEQ & blist,uint64_t i_addr, RANGE range)
     delete l_scom_addr;
 
 
-// TODO - No Array support
-#if 0
-    if(iv_spy_type == ARRAY)
-    {
-        Rpn::set32(blist,iv_array_addr);
-    }
-#endif
-
     Rpn::set16(blist,(uint16_t)numcols);
     Rpn::set16(blist,(uint16_t)numrows);
-    blist.push_back((uint8_t) hierarchy);
-
-#if 0
-
-    iv_when_rpn.bin_str(blist,spyname);
-#endif
 
     // If there is a bit range we need to select only the spyv rows that apply to this spyname
     if(bitlen)
@@ -613,7 +564,7 @@ void Scom::bin_list_one(BINSEQ & blist,uint64_t i_addr, RANGE range)
         {
             if ((*r) == range)
             {
-                i->bin_str(blist);
+                i->bin_str(blist,false);
             }
         }
     }
@@ -621,7 +572,7 @@ void Scom::bin_list_one(BINSEQ & blist,uint64_t i_addr, RANGE range)
     {
         for(RPN_LIST::iterator i = iv_scom_rpn.begin(); i != iv_scom_rpn.end(); ++i)
         {
-            i->bin_str(blist);
+            i->bin_str(blist,false);
         }
     }
 
@@ -650,7 +601,7 @@ void Scom::bin_list_one(BINSEQ & blist,uint64_t i_addr, RANGE range)
             {
                 rpn.append(i->at(n));
             }
-            rpn.bin_str(blist);
+            rpn.bin_str(blist,true);
         }
     }
 }
@@ -1038,10 +989,7 @@ void ScomList::set_syntax_version(uint32_t v)
 
 void ScomList::compile(BINSEQ & bin_seq)
 {
-    uint32_t count_l = 0;
     uint32_t count_s = 0;
-    uint32_t count_c = 0;
-    uint32_t count_d = 0;
     uint32_t section_count = 0;
     size_t   offset = 0;
 
@@ -1113,25 +1061,13 @@ void ScomList::compile(BINSEQ & bin_seq)
             continue;
         }
 
-        if     (i->second->do_when(LONG_SCAN))  count_l += i->second->bin_listing(blist_l);
-        else if(i->second->do_when(SCOM))       count_s += i->second->bin_listing(blist_s);
-        else if(i->second->do_when(CFAMINIT))   count_c += i->second->bin_listing(blist_c);
-        else if(i->second->do_when(DRAMINIT))   count_d += i->second->bin_listing(blist_d);
-        else
-        {
-            ostringstream oss;
-            oss << "ERROR: Invalid 'when=' type:\n" 
-                << i->second->listing();
-            throw range_error(oss.str());
-        }
+        count_s += i->second->bin_listing(blist_s);
 
     }
-    if(count_l) ++section_count;
     if(count_s) ++section_count;
-    if(count_c) ++section_count;
-    if(count_d) ++section_count;
 
-    offset = bin_seq.size() + 12 + (12 * section_count);   // offset to the end of the header section
+    // 28 bytes of File Header Data
+    offset = 28;
     stats << '*' << setw(20) << "Sections:" << setw(6) << section_count << endl;
    
     // for verion 2 add offset to CVS versions section
@@ -1150,34 +1086,11 @@ void ScomList::compile(BINSEQ & bin_seq)
     offset += blist_v.size();             // offset += var table byte size
     Rpn::set32(bin_seq,offset);           // Offset to Literal Symbol Table
     offset += blist_i.size();             // offset += lit table byte size
-    Rpn::set32(bin_seq,section_count);    // Number of Spy Sections
 
-    if(count_l)
-    {
-        Rpn::set32(bin_seq,LONG_SCAN);          // Spy Section Type (L)
-        Rpn::set32(bin_seq,offset);             // Spy Section Type L Offset
-        Rpn::set32(bin_seq,count_l);            // Number of L spies
-        offset += blist_l.size();               // offset += byte size of when=L tables
-    }
-    if(count_c)
-    {
-        Rpn::set32(bin_seq,CFAMINIT);           // Spy Section Type (C)
-        Rpn::set32(bin_seq,offset);             // Spy Section Type L Offset
-        Rpn::set32(bin_seq,count_c);            // Number of L spies
-        offset += blist_c.size();               // offset += byte size of when=L tables
-    }
-    if(count_d)
-    {
-        Rpn::set32(bin_seq,DRAMINIT);           // Spy Section Type (D)
-        Rpn::set32(bin_seq,offset);             // Spy Section Type L Offset
-        Rpn::set32(bin_seq,count_d);            // Number of L spies
-        offset += blist_d.size();               // offset += byte size of when=L tables
-    }
     if(count_s)
     {
-        Rpn::set32(bin_seq,SCOM);               // Spy Section Type (S)
-        Rpn::set32(bin_seq,offset);             // Spy Section Type S Offset
-        Rpn::set32(bin_seq,count_s);            // Number of S spies
+        Rpn::set32(bin_seq,offset);             // SCOM Section offset
+        Rpn::set32(bin_seq,count_s);            // Number of SCOM's
     }
 
     if(iv_syntax_version == 2) // Add Sub-version section
@@ -1188,24 +1101,10 @@ void ScomList::compile(BINSEQ & bin_seq)
 
     bin_seq.insert(bin_seq.end(), blist_v.begin(), blist_v.end());      // add var table section
     bin_seq.insert(bin_seq.end(), blist_i.begin(), blist_i.end());      // add lit table section
-    if(count_l) 
-    {
-        bin_seq.insert(bin_seq.end(), blist_l.begin(), blist_l.end());  // add when=L spies
-        stats << '*' << setw(20) << "L scoms:" << setw(6) << count_l << endl;
-    }
-    if(count_c)
-    {
-        bin_seq.insert(bin_seq.end(), blist_c.begin(), blist_c.end());  // add when=C spies
-        stats << '*' << setw(20) << "C scoms:" << setw(6) << count_c << endl;
-    }
-    if(count_d)
-    {
-        bin_seq.insert(bin_seq.end(), blist_d.begin(), blist_d.end());  // add when=D spies
-        stats << '*' << setw(20) << "D scoms:" << setw(6) << count_d << endl;
-    }
+    
     if(count_s)
     {
-        bin_seq.insert(bin_seq.end(), blist_s.begin(), blist_s.end());  // add when=S spies
+        bin_seq.insert(bin_seq.end(), blist_s.begin(), blist_s.end());  // add SCOM section
         stats << '*' << setw(20) << "S scoms:" << setw(6) << count_s << endl;
     }
     dbg << "======================== End compile ============================" << endl;
@@ -1276,11 +1175,9 @@ void ScomList::listing(BINSEQ & bin_seq,ostream & olist)
   
     uint32_t var_table_offset = Rpn::extract32(bli);
     uint32_t lit_table_offset = Rpn::extract32(bli);
-    uint32_t section_count    = Rpn::extract32(bli);
 
-    olist << fmt8(var_table_offset)             << "[Offset to Variable Symbol Table]\n";
+    olist << fmt8(var_table_offset)             << "[Offset to Attribute Symbol Table]\n";
     olist << fmt8(lit_table_offset)             << "[Offset to Literal Symbol Table]\n";
-    olist << fmt8(section_count)                << "[Number of Scom Sections]\n";
 
 
     b = bin_seq.begin() + var_table_offset;
@@ -1289,29 +1186,14 @@ void ScomList::listing(BINSEQ & bin_seq,ostream & olist)
     b =  bin_seq.begin() + lit_table_offset;
     iv_symbols->restore_lit_bseq(b);
 
-    if(section_count > LAST_WHEN_TYPE)
-    {
-        throw range_error("ERROR: ScomList::listing - Inalid # of sections");
-    }
-
     b = bli;  // save
 
-    for(size_t i = 0; i < section_count; ++i)
-    {
-        size_t spy_type = Rpn::extract32(bli);        // type
-        size_t offset   = Rpn::extract32(bli);        // offset
-        size_t count    = Rpn::extract32(bli);        // Number of spies
+    size_t offset   = Rpn::extract32(bli);        // offset
+    size_t count    = Rpn::extract32(bli);        // Number of spies
 
-        if(spy_type == 0 || spy_type > LAST_WHEN_TYPE)
-        {
-            throw range_error("ERROR: ScomList::listing - when= type out of range");
-        }
-        char t = when_char[spy_type];
+    olist << fmt8(offset)   << "[Scom Section Offset]\n";
+    olist << fmt8(count)    << "[Number of scoms]\n";
 
-        olist << fmt8(spy_type) << "[Scom Section Type (" << t << ")]\n";
-        olist << fmt8(offset)   << "[Scom Section Type (" << t << ") Offset]\n";
-        olist << fmt8(count)    << "[Number of " << t << " scoms]\n";
-    }
     olist << endl;
 
     if(syntax_version == 2)
@@ -1329,34 +1211,20 @@ void ScomList::listing(BINSEQ & bin_seq,ostream & olist)
           << endl;
 
     bli = b;   // restore
-    for(size_t i = 0; i < section_count; ++i)
+
+    olist << "------------ Scoms -----------\n\n";
+
+    b = bin_seq.begin() + offset;
+    if(!(b < bin_seq.end()))
     {
-
-        size_t scom_type = Rpn::extract32(bli);        // type
-        size_t offset   = Rpn::extract32(bli);        // offset
-        size_t count    = Rpn::extract32(bli);        // Number of scoms
-
-
-        if(scom_type == 0 || scom_type > LAST_WHEN_TYPE)
-        {
-            throw range_error("ERROR: ScomList::listing - when= type out of range");
-        }
-        char t = when_char[scom_type];
-
-        olist << "------------ " << t << " Scoms -----------\n\n";
-
-        b = bin_seq.begin() + offset;
-        if(!(b < bin_seq.end()))
-        {
-            throw overflow_error("ERROR: ScomList::listing - iterator overflowed sequence");
-        }
-        while(count--)
-        {
-            Scom s(b,iv_symbols);
-            s.set_when((SCOM_WHEN)scom_type);
-            olist << s.listing() << endl;
-        }
+        throw overflow_error("ERROR: ScomList::listing - iterator overflowed sequence");
     }
+    while(count--)
+    {
+        Scom s(b,iv_symbols);
+        olist << s.listing() << endl;
+    }
+
     dbg << "======================= End Listing ========================" << endl;
 }
 
@@ -1367,7 +1235,7 @@ string ScomList::fmt8(uint32_t val)
     ostringstream oss;
     oss << setfill('0');
     oss << "0x" << hex << setw(8) << val << "\t   " << '[' << dec << val << ']' << '\t';
-    if(val < 100) oss  << '\t';
+    if(val < 1000) oss  << '\t';
     return oss.str();
 }
 

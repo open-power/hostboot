@@ -74,24 +74,16 @@ int scom;
 %token <uint64>  INIT_SCOM_DATA
 %token <str_ptr> INIT_ID
 %token <str_ptr> INIT_VERSIONS
-%token <str_ptr> INIT_SPY_NAME
 %token <str_ptr> ATTRIBUTE_INDEX
 
 
     /* Define terminal symbols that don't have any associated data */
 
-%token INIT_WHEN
 %token INIT_VERSION
 %token INIT_ENDINITFILE
-%token INIT_ESPY
-%token INIT_ISPY
-%token INIT_ARRAY
-%token INIT_SPYV
-%token INIT_ARRAYV
 %token INIT_BITS
 %token INIT_EXPR
 %token INIT_TARG
-%token INIT_HIER
 %token INIT_DEFINE
 %token INIT_EQ
 %token INIT_NE
@@ -107,13 +99,12 @@ int scom;
 
 %type <str_ptr> bitsrows
 %type <rpn_ptr> expr id_col num_list
-%type <str_ptr> hier_list
 
 
 
 
 
-   /* top is lowest precedent - done last */
+/* top is lowest precedent - done last */
 %left INIT_LOGIC_OR
 %left INIT_LOGIC_AND
 %left '|'     /* bitwise OR */
@@ -124,9 +115,8 @@ int scom;
 %left INIT_SHIFT_RIGHT INIT_SHIFT_LEFT
 %left '-' '+'
 %left '*' '/' '%'
-%right '!' '~'   /* logic negation  bitwise complemnet*/
-
-  /* bottom is highest precedent - done first */
+%right '!' '~'   /* logic negation  bitwise complement*/
+/* bottom is highest precedent - done first */
 
 
 
@@ -142,7 +132,6 @@ line:   scom
         | cvs_versions
         | syntax_version
         | define 
-        | hierarchy
         | INIT_ENDINITFILE   { yyscomlist->clear_defines(); }
 ;
 
@@ -160,7 +149,7 @@ syntax_version: INIT_VERSION '=' INIT_INTEGER
 ;
 
 scom:       INIT_SCOM {current_scom = new init::Scom(yyscomlist->get_symbols(),yyline);}
-            | scom scomaddr '[' when_expr ']' '{' scombody '}'
+            | scom scomaddr '{' scombody '}'
 		{
                      /* printf("Found an INIT_SCOM!\n"); */
                     /* current_scom = new init::Scom(yyscomlist->get_symbols(),yyline); */
@@ -182,18 +171,8 @@ scom_list:       INIT_INT64_STR                { current_scom->dup_scom_address(
                 | scom_list ',' INIT_INT64_STR  { current_scom->dup_scom_address(*($3));delete $3;}
 ;
 
-when_expr:      INIT_WHEN '=' INIT_ID   { current_scom->set_when($3); delete $3; }
-                | INIT_WHEN '=' INIT_ID INIT_LOGIC_AND expr
-                    {
-                        init::dbg << $5->listing("Length of when RPN");
-                        current_scom->set_when($3); 
-                        current_scom->set_when_rpn($5);
-                        delete $3; 
-                    }
 
-;
-
-    /* The spybody was reformatted by the scanner
+    /* The scombody was reformatted by the scanner
      * colname1 , row1 , row 2, ... , row n ;
      * colname2 , row1 , row 2, ... , row n ;
      */
@@ -215,7 +194,7 @@ scombodyline:   INIT_SCOMD  ',' scomdrows  {}
 
 
 scomdrows:      expr  {
-                          /* printf("scomdrows - RPN Address:0x%X\n",$1); */
+                          /*printf("scomdrows - RPN Address:0x%X\n",$1);*/
                           init::dbg << $1->listing("Length scom RPN");
                           current_scom->add_scom_rpn($1);
                        }
@@ -263,11 +242,6 @@ num_list:       INIT_INTEGER { $$ = new init::Rpn($1,yyscomlist->get_symbols());
 ;
 
 
-
- /* first col is spyv/arrayv and is special from the other rowcols */
-
-
-
 define: INIT_DEFINE INIT_ID '=' expr  ';'
             {
                 init::dbg << $2 << ':' << endl << $4->listing("Length of rpn for Define");
@@ -276,23 +250,10 @@ define: INIT_DEFINE INIT_ID '=' expr  ';'
             }
 ;
 
-
-hierarchy:  INIT_HIER '=' hier_list
-            | INIT_HIER '[' INIT_ID ']' '=' hier_list  { delete $3; } // not supported
-;
-
-hier_list:  INIT_SPY_NAME { delete $1; }
-            | INIT_ID     { delete $1; }  // not supported
-            | hier_list ',' INIT_SPY_NAME { delete $3; }
-            | hier_list ',' INIT_ID { delete $3; } // not supported
-;
-
-
  /* expr should return an RPN string of some kind */
 expr:   INIT_INTEGER                    { $$= new init::Rpn($1,yyscomlist->get_symbols()); }
         | INIT_ID                       { $$= new init::Rpn(*($1),yyscomlist->get_symbols()); delete $1; }
         | INIT_INT64                    { $$=new init::Rpn($1,yyscomlist->get_symbols()); }
-        | INIT_SPY_NAME                 { $$=new init::Rpn(*($1),yyscomlist->get_symbols(),init::Rpn::SPY_ENUM);  delete $1; }
         | expr INIT_LOGIC_OR expr       { $$ = $1->push_merge($3,init::Rpn::OR); }
         | expr INIT_LOGIC_AND expr      { $$ = $1->push_merge($3,init::Rpn::AND); }
         | expr ATTRIBUTE_INDEX          { $1->push_array_index(*($2));}

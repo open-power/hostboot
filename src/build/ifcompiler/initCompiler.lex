@@ -42,7 +42,7 @@
 
 uint64_t bits2int( const char * bitString);
 uint64_t hexs2int(const char * hexString, int32_t size);
-void pushBackSpyBody();
+void pushBackScomBody();
 void push_col(const char *s);
 void lex_err(const char *s );
 
@@ -56,12 +56,12 @@ inline void clear_colstream()
 { for( OSS_LIST::iterator i = g_colstream.begin(); i != g_colstream.end(); ++i) delete *i;
   g_colstream.clear();
 }
-uint32_t g_spycol;
+uint32_t g_scomcol;
 uint32_t g_coltype = 0;
-uint32_t g_spytype = 0;
+uint32_t g_scomtype = 0;
 uint32_t g_paren_level = 0;
-bool g_equation = false;   // equation inside spyv col
-std::string g_spyname;     // dg02
+bool g_equation = false;   // equation inside scomv col
+std::string g_scomname;     // dg02
 
 extern int yyline;
 
@@ -84,6 +84,7 @@ SCOM_DATA [ ]*[scom_data][ ]+
 HEX     0[xX][A-Fa-f0-9]+
 SINGLE_HEX [A-Fa-f0-9]
 ATTRIBUTE [\[[A-Fa-f0-9]\]]
+MULTI_DIGIT [0-9]+
 
 %x      scomop 
 %x      scomop_array
@@ -96,7 +97,6 @@ ATTRIBUTE [\[[A-Fa-f0-9]\]]
 %x      list
 %x      enumcol
 %x      fnames
-%x      hier
 %x      target
 %x      attribute
 %x      array
@@ -154,57 +154,56 @@ scom              { BEGIN(scomop); oss.str("");  return INIT_SCOM; }
                                  return INIT_SCOM_SUFFIX; 
                              }
 
-
 <scomop>[:;\[]    { BEGIN(INITIAL); g_coltype = 0; return yytext[0]; }
 <scomop>{NEWLINE} { BEGIN(INITIAL); ++yyline; }
 
+<scomop,scomop_suffix>[\{]   {  
+                                 oss.str("");
+                                 BEGIN(scomcolname);
+                                 return yytext[0];
+                             }
 
-when                    { BEGIN(when_expr); return INIT_WHEN; }
-<when_expr>[\{]         { oss.str("");
-                          BEGIN(scomcolname);
-                          return yytext[0];
-                        }
 
-            /* The column & row format is really hard to handle in the parser,
-               especially since each column can have different parsing rules.
-                So fix it here in the scanner by converting the format to
-                coltitle1 , row1, row2, ..., row n ;
-                coltitle2 , row1, row2, ..., row n ;
-                then push it all back into the input stream and scan the new format
-            */
 
-<scomcolname>{COMMENT}     ++yyline;
-<scomcolname>\n            ++yyline;
-<scomcolname>{ID}          {
-                              g_colstream.push_back(new std::ostringstream());
-                              *(g_colstream.back()) << yytext;
-                           }
-<scomcolname>,             {}
-<scomcolname>;             { BEGIN(scomrow); g_spycol = 0; }
+                         /* The column & row format is really hard to handle in the parser,
+                          * especially since each column can have different parsing rules.
+                          * So fix it here in the scanner by converting the format to
+                          * coltitle1 , row1, row2, ..., row n ;
+                          * coltitle2 , row1, row2, ..., row n ;
+                          * then push it all back into the input stream and scan the new format
+                          */	
+
+<scomcolname>{COMMENT}   ++yyline;
+<scomcolname>\n          ++yyline;
+<scomcolname>{ID}        {
+                            g_colstream.push_back(new std::ostringstream());
+                            *(g_colstream.back()) << yytext;
+                         }
+<scomcolname>,           {}
+<scomcolname>;           { BEGIN(scomrow); g_scomcol = 0; }
 
 <scomrow>{COMMENT}       ++yyline;
 <scomrow>{NEWLINE}       ++yyline;
 <scomrow>[^,;\n#\{\}]+   push_col(yytext);
-<scomrow>[,]             ++g_spycol;
-<scomrow>[;]             g_spycol = 0;
+<scomrow>[,]             ++g_scomcol;
+<scomrow>[;]             g_scomcol = 0;
 <scomrow>[\}]            {
-                            pushBackSpyBody();  // create new format and put it back on yyin
-                            BEGIN(INITIAL); // spybody);
-                          }
+                            pushBackScomBody();  // create new format and put it back on yyin
+                            BEGIN(INITIAL);
+                         }
 
 
-
-                /* The spybody is the modified format - don't track yyline as it's already
-                 * accounted for. Any errors in here will point back to the last line in the
-                 * 'real' spybody */
+                        /* The scombody is the modified format - don't track yyline as it's already
+                         * accounted for. Any errors in here will point back to the last line in the
+                         * 'real' scombody 
+                         */
               
-arrayv           { g_coltype = INIT_SPYV;  return INIT_SPYV;}
-bits             { g_coltype = INIT_BITS;  return INIT_BITS;}
-expr             { g_coltype = INIT_EXPR;  return INIT_EXPR;}
-scom_data        { g_coltype = INIT_SCOMD; return INIT_SCOMD;}
+bits                    { g_coltype = INIT_BITS;  return INIT_BITS;}
+expr                    { g_coltype = INIT_EXPR;  return INIT_EXPR;}
+scom_data               { g_coltype = INIT_SCOMD; return INIT_SCOMD;}
 
-                    /*HEX and Binary nubers in the spybody can be up to 64bit, 
-                     * decimal numbers will always fit in 32bit int */
+                        /*HEX and Binary nubers in the scombody can be up to 64bit, 
+                        * decimal numbers will always fit in 32bit int */
 
 {BINARY}                { yylval.uint64 = bits2int(yytext); return INIT_INT64; }
 
@@ -240,9 +239,9 @@ END_INITFILE            return INIT_ENDINITFILE;
 <*>[\(]                 { ++g_paren_level; return yytext[0]; }
 <*>[\)]                 { --g_paren_level; return yytext[0]; }
 
-<*>\[{SINGLE_HEX}\]            { yylval.str_ptr = new std::string(yytext);  return ATTRIBUTE_INDEX; }
+<*>\[{MULTI_DIGIT}\]    { yylval.str_ptr = new std::string(yytext);  return ATTRIBUTE_INDEX; }
 
-<*>[\[\]\{\},:]         { g_equation = false; return yytext[0]; }
+<*>[\[\]\{\},:]         {g_equation = false; return yytext[0]; }
 
 <*>[ \t\r]+             /* Eat up whitespace */
 [\n]                    { BEGIN(INITIAL);++yyline;}
@@ -308,7 +307,7 @@ uint64_t hexs2int(const char * hexString, int32_t size)
     return val;
 }
 
-void pushBackSpyBody()
+void pushBackScomBody()
 {
     std::ostringstream ost;
     for(OSS_LIST::iterator i = g_colstream.begin(); i != g_colstream.end(); ++i)
@@ -336,18 +335,18 @@ void pushBackSpyBody()
 void push_col(const char * s)
 {
     //dg02a begin
-    while(g_spycol >= g_colstream.size())  // more data cols than headers cols
+    while(g_scomcol >= g_colstream.size())  // more data cols than headers cols
     {
         // This will force an error in the parser where it can stop the compile.
         g_colstream.push_back(new std::ostringstream());
         *(g_colstream.back()) << "MISSING_COLUMN_HEADER";
-        lex_err(g_spyname.c_str());
-        lex_err("Invalid number of spy cols");
+        lex_err(g_scomname.c_str());
+        lex_err("Invalid number of scom cols");
     }
     //dgxxa end
     //dgxxd remove if(g_colstream < g_colstream.size() 
 
-    std::ostringstream & o = *(g_colstream[g_spycol]);
+    std::ostringstream & o = *(g_colstream[g_scomcol]);
     std::ostringstream token;
     std::istringstream iss(s);
     std::string t;

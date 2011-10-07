@@ -24,14 +24,14 @@ SyntaxVersion = 1
 #--******************************************************************************
 #-- -----------------------------------------------------------------------------
 
-define def_equal_test     =  (ATTR_TEST_UINT32 == ATTR_TEST_UINT64);
-define def_not_equal_test =  (ATTR_TEST_UINT32 != ATTR_TEST_UINT64);
+define def_equal_test     =  (ATTR_SCRATCH_UINT32_1 == ATTR_SCRATCH_UINT32_2);
+define def_not_equal_test =  (ATTR_SCRATCH_UINT64_1 != ATTR_SCRATCH_UINT64_2);
 
 
 #--******************************************************************************
 #-- Basic SCOM
 #--******************************************************************************
-scom 0x0000000000000001     [when=L]            {
+scom 0x0000000000000001              {
   scom_data                 ;
   0x0000000000000181        ;
 }
@@ -40,16 +40,16 @@ scom 0x0000000000000001     [when=L]            {
 #-- Basic SCOM with Expression and Attribute
 #--******************************************************************************
 
-scom 0x0000000000000002     [when=C]            {
+scom 0x0000000000000002              {
   scom_data,            expr                 ;
-  0x0000000000000182,   ATTR_TEST_UINT8 == ATTR_TEST_UINT32    ;
+  0x0000000000000182,   ATTR_SCRATCH_UINT8_1 == ATTR_SCRATCH_UINT8_2    ;
 }
 
 #--******************************************************************************
 #-- Basic SCOM with Array In Middle
 #--******************************************************************************
 
-scom 0x000000000(ABC,BCD)0003     [when=D]            {
+scom 0x000000000(ABC,BCD)0003        {
   scom_data             ;
   0x0000000000000183    ;
 }
@@ -58,16 +58,25 @@ scom 0x000000000(ABC,BCD)0003     [when=D]            {
 #-- Basic SCOM with define used
 #--******************************************************************************
 
-scom 0x0000000000000004     [when=S]            {
+scom 0x0000000000000004              {
   scom_data,            expr                 ;
   0x0000000000000184,   def_equal_test       ;
+}
+
+#--******************************************************************************
+#-- Basic SCOM with a single bit set
+#--******************************************************************************
+
+scom 0x0000000000000005              {
+    bits ,                    scom_data        ;
+    23   ,                    0b1              ;
 }
 
 #--******************************************************************************
 #-- Basic SCOM with bits
 #--******************************************************************************
 
-scom 0x0000000000000005  [when=S]           {
+scom 0x0000000000000006              {
     bits ,                    scom_data        ;
     0:11 ,                    0b001111001001   ;
     12   ,                    0b1              ;
@@ -79,40 +88,46 @@ scom 0x0000000000000005  [when=S]           {
 #-- Complext SCOM with Bit Support, define, and attributes
 #--******************************************************************************
 
-scom 0x0000000000000006  [when=S]           {
+scom 0x0000000000000007              {
     bits ,                    scom_data,        expr                                  ;
     0:11 ,                    0b001111001001,   any                                   ;
     12   ,                    0b1,              def_equal_test                        ;
     12   ,                    0b0,              def_not_equal_test                    ;
-    13   ,                    0b1,              ATTR_TEST_UINT32 > ATTR_TEST_UINT64   ;
-    14:59, 0b0000001100000110010000000000010000010010000000, ATTR_TEST_UINT8 == ATTR_TEST_UINT32 ;
+    13   ,                    0b1,              ATTR_SCRATCH_UINT8_1 > ATTR_SCRATCH_UINT8_2   ;
+    14:59, 0b0000001100000110010000000000010000010010000000, ATTR_SCRATCH_UINT64_1 == ATTR_SCRATCH_UINT64_2 ;
 }
 
 #--******************************************************************************
-#-- Basic SCOM with Expression and Attribute (array)
+#-- Complex SCOM with Bit Support, and logical operators
 #--******************************************************************************
 
-scom 0x0000000000000007     [when=C]            {
-  scom_data,            expr                 ;
-  0x0000000000000182,   ATTR_TEST_UINT8_ARRAY[2] == ATTR_TEST_UINT32    ;
-}
-
-#--******************************************************************************
-#-- Complext SCOM with Bit Support, and logical operators
-#--******************************************************************************
-
-scom 0x0000000000000008  [when=S]           {
+scom 0x0000000000000009              {
     bits ,                    scom_data,        expr                                  ;
     12   ,                    0b1,              def_equal_test && def_not_equal_test  ;
     12   ,                    0b0,              def_equal_test || def_not_equal_test  ;
-    14   ,                    0b1,              ATTR_TEST_UINT32 < ATTR_TEST_UINT64   ;
-    15   ,                    0b1,              ATTR_TEST_UINT32 > ATTR_TEST_UINT64   ;
-    16   ,                    0b1,              ATTR_TEST_UINT32 >= ATTR_TEST_UINT64  ;
-    17   ,                    0b1,              ATTR_TEST_UINT32 <= ATTR_TEST_UINT64  ;
-    18   ,                    0b1,              ATTR_TEST_UINT32 == ATTR_TEST_UINT64  ;
-    19   ,                    0b1,              ATTR_TEST_UINT32 != ATTR_TEST_UINT64  ;
-    20   ,                    0b1,              (ATTR_TEST_UINT32 + ATTR_TEST_UINT64) == 4;
-    21:59, 0b000000110000011001000000000001000001001, ATTR_TEST_UINT8 == ATTR_TEST_UINT32 ;
+    14   ,                    0b1,              ATTR_SCRATCH_UINT32_1 < ATTR_SCRATCH_UINT32_2   ;
+    15   ,                    0b1,              ATTR_SCRATCH_UINT32_1 > ATTR_SCRATCH_UINT32_2   ;
+    16   ,                    0b1,              ATTR_SCRATCH_UINT32_1 >= ATTR_SCRATCH_UINT32_2  ;
+    17   ,                    0b1,              ATTR_SCRATCH_UINT32_1 <= ATTR_SCRATCH_UINT32_2  ;
+    18   ,                    0b1,              ATTR_SCRATCH_UINT32_1 == ATTR_SCRATCH_UINT32_2  ;
+    19   ,                    0b1,              ATTR_SCRATCH_UINT32_1 != ATTR_SCRATCH_UINT32_2  ;
+    20   ,                    0b1,              (ATTR_SCRATCH_UINT32_1 + ATTR_SCRATCH_UINT32_2) == 4 ;
+    21:59, 0b000000110000011001000000000001000001001, ATTR_SCRATCH_UINT8_1 == ATTR_SCRATCH_UINT8_2 ;
 }
 
+#--******************************************************************************
+#-- SCOM with 'ec' column - Use scratch for now since all attributes work
+#--******************************************************************************
 
+scom 0x000000000000000A              {
+  scom_data,            ATTR_SCRATCH_UINT32_1        ;
+  0x0000000000000192,   1       ;
+}
+
+#--******************************************************************************
+#-- Basic SCOM with an array
+#--******************************************************************************
+scom 0x000000000000000B              {
+  scom_data,            expr                 ;
+  0x0000000000000182,   ATTR_SCRATCH_UINT8_ARRAY_1[2] == ATTR_SCRATCH_UINT8_1    ;
+}

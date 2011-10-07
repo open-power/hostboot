@@ -23,6 +23,7 @@
 //  dg002 SW039868 dgilbert 10/15/10 Add support to filter unneeded inits by EC
 //  dg003 SW047506 dgilbert 12/09/10 More filtering enhancements
 //                 andrewg  05/24/11 Port over for VPL/PgP
+//                 andrewg  09/19/11 Updates based on review
 // End Change Log *********************************************************************************
 
 /**

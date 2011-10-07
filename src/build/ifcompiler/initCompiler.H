@@ -23,6 +23,7 @@
 //  dg002 SW039868 dgilbert 10/15/10 Add support to filter unneeded inits by EC
 //  dg003 D779902  dgilbert 12/08/10 Ability to specify output if file
 //                 andrewg  05/24/11 Port over for VPL/PgP
+//                 andrewg  09/19/11 Updates based on review
 // End Change Log *********************************************************************************
 
 /**
