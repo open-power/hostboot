@@ -1,0 +1,187 @@
+#!/usr/bin/perl
+#  IBM_PROLOG_BEGIN_TAG
+#  This is an automatically generated prolog.
+#
+#  $Source: src/build/debug/hb-dump-debug $
+#
+#  IBM CONFIDENTIAL
+#
+#  COPYRIGHT International Business Machines Corp. 2011
+#
+#  p1
+#
+#  Object Code Only (OCO) source materials
+#  Licensed Internal Code Source Materials
+#  IBM HostBoot Licensed Internal Code
+#
+#  The source code for this program is not published or other-
+#  wise divested of its trade secrets, irrespective of what has
+#  been deposited with the U.S. Copyright Office.
+#
+#  Origin: 30
+#
+#  IBM_PROLOG_END
+
+use strict;
+
+use Getopt::Long;
+use Pod::Usage;
+use IO::Seekable;
+
+use Hostboot::DebugFramework;
+
+my $tool = "";
+my $dumpfile = "";
+my $testImage = 0;
+my $imgPath = "";
+my $toolOptions = "";
+my $cfgHelp = 0;
+my $cfgMan = 0;
+my $toolHelp = 0;
+
+GetOptions("tool:s" => \$tool,
+           "tool-options:s" => \$toolOptions,
+           "file:s" => \$dumpfile,
+           "test" => \$testImage,
+           "img-path:s" => \$imgPath,
+           "help" => \$cfgHelp,
+           "toolhelp" => \$toolHelp,
+           "man" => \$cfgMan) || pod2usage(-verbose => 0);
+pod2usage(-verbose => 1) if $cfgHelp;
+pod2usage(-verbose => 2) if $cfgMan;
+pod2usage(-verbose => 0) if (($tool eq "") || 
+                             (($dumpfile eq "") && (!$toolHelp)));
+
+if ($toolHelp)
+{
+    callToolModuleHelp($tool);
+}
+else
+{
+    # Open dump file.
+    open(DUMPFILE, "< $dumpfile") or die "Can't open dump file.\n";
+    binmode(DUMPFILE);
+
+    # Determine the full image path.
+    $imgPath = determineImagePath($imgPath);
+
+    # Parse tool options and call module.
+    parseToolOpts($toolOptions);
+    callToolModule($tool);
+}
+
+sub usage
+{
+    pod2usage(-verbose => 2);
+}
+
+# @sub readData
+#
+# Reads a data blob from the dump file.
+#
+# @param integer - Address to read at.
+# @param size - Size (in bytes) to read.
+# 
+# @return The blob of data requested.
+#
+sub readData
+{
+    my $addr = shift;
+    my $size = shift;
+
+    seek DUMPFILE, $addr, SEEK_SET;
+
+    my $result = "";
+    read DUMPFILE, $result, $size;
+
+    return $result;
+}
+
+# @sub userDisplay
+#
+# Display parameters to the user.
+#
+# @param varargs - Items to display to the user.
+#
+sub userDisplay
+{
+    foreach my $value (@_)
+    {
+        print $value;
+    }
+}
+
+# @sub getImgPath
+#
+# Return file-system path to .../img/ subdirectory containin debug files.
+#
+sub getImgPath
+{
+    return $imgPath;
+}
+
+# @sub getIsTest
+#
+# Return boolean to determine if tools should look at test debug files or
+# normal debug files.
+#
+sub getIsTest
+{
+    return $testImage;
+}
+
+
+
+__END__
+
+=head1 NAME
+
+hb-dump-debug
+
+=head1 SYNOPSIS
+
+hb-dump-debug [options] --tool=<module> --file=<dumpfile>
+
+=head1 OPTIONS
+
+=over 8
+
+=item B<--tool>=MODULE
+
+Identify the tool module to execute.
+
+=item B<--tool-options>="OPTIONS"
+
+List of arguments to pass to the tool as options.
+
+=item B<--toolhelp>
+
+Displays the help message for a specific debug tool.
+
+=item B<--file>=FILE
+
+File containing a memory dump of hostboot.
+
+=item B<--test>
+
+Use the hbicore_test.syms file instead of the default.
+
+=item B<--img-path>=PATH
+
+The path to the "img" directory where the syms file, etc is located.
+
+=item B<--help>
+
+Print a brief help message and exits.
+
+=item B<--man>
+
+Prints the manual page and exits.
+
+=back
+
+=head1 DESCRIPTION
+
+Executes a debug tool module against a memory dump file.
+
+=cut
