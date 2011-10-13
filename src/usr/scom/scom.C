@@ -29,16 +29,22 @@
 /*****************************************************************************/
 // I n c l u d e s
 /*****************************************************************************/
+#include <assert.h>
 #include <devicefw/driverif.H>
 #include <trace/interface.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include "scom.H"
 
+// Trace definition
+trace_desc_t* g_trac_scom = NULL;
+TRAC_INIT(&g_trac_scom, "SCOM", 1024); //1K
+
+
 namespace SCOM
 {
 
-// Register SCom access functions to DD framework
+// Register Scom access functions to DD framework
 DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
                       DeviceFW::SCOM,
                       TARGETING::TYPE_PROC,
@@ -55,14 +61,40 @@ errlHndl_t scomPerformOp(DeviceFW::OperationType i_opType,
 {
     errlHndl_t l_err = NULL;
 
-    //@todo - For now, just call XSCOM
-    l_err = deviceOp(i_opType,
-                     i_target,
-                     io_buffer,
-                     io_buflen,
-                     DEVICE_XSCOM_ADDRESS(va_arg(i_args,uint64_t)));
+    do{
+        //Always XSCOM the Master Sentinel
+        if((TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL == i_target) ||
+            (i_target->getAttr<TARGETING::ATTR_SCOM_SWITCHES>().useXscom))
+        {  //do XSCOM
+
+            l_err = deviceOp(i_opType,
+                             i_target,
+                             io_buffer,
+                             io_buflen,
+                             DEVICE_XSCOM_ADDRESS(va_arg(i_args,uint64_t)));
+            break;
+        }
+        else if(i_target->getAttr<TARGETING::ATTR_SCOM_SWITCHES>().useFsiScom)
+        {   //do FSISCOM
+            l_err = deviceOp(i_opType,
+                             i_target,
+                             io_buffer,
+                             io_buflen,
+                             DEVICE_FSISCOM_ADDRESS(va_arg(i_args,uint64_t)));
+            if( l_err ) { break; }
+        }
+        else
+        {
+            //@todo - add target info to assert trace
+            assert(0,"SCOM::scomPerformOp> ATTR_SCOM_SWITCHES does not indicate Xscom or FSISCOM is supported");
+            break;
+        }
+
+    }while(0);
 
     return l_err;
 }
+
+
 
 } // end namespace

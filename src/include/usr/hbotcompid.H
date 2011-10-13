@@ -146,4 +146,13 @@ const compId_t HWAS_COMP_ID = 0x0C00;
 const char HWAS_COMP_NAME[] = "hwas";
 //@}
 
+/** @name FSISCOM
+ *  FSI SCOM component
+ */
+//@{
+const compId_t FSISCOM_COMP_ID = 0x0D00;
+const char FSISCOM_COMP_NAME[] = "fsiscom";
+//@}
+
+
 #endif

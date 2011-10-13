@@ -133,6 +133,32 @@ const TaskInfo g_exttaskinfolist[]   =   {
             }
         },
 
+        /**
+         * @brief   FSI Device Driver
+         */
+        {
+            "libfsi.so" ,                         // taskname
+            NULL,                                       // no pointer to fn
+            {
+                INIT_TASK,                         // task type
+                EXT_IMAGE,                          // Extended Module
+                START_FSIDD_ERRL_ID,             // module id
+            }
+        },
+
+        /**
+         * @brief   FSI Device Driver
+         */
+        {
+            "libfsiscom.so" ,                         // taskname
+            NULL,                                       // no pointer to fn
+            {
+                INIT_TASK,                         // task type
+                EXT_IMAGE,                          // Extended Module
+                START_FSISCOM_ERRL_ID,             // module id
+            }
+        },
+
         
         //  ---------------------------------------------------------------
         //  -----   END OF LIST!!!  ---------------------------------------

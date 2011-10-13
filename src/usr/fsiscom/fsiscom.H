@@ -1,7 +1,7 @@
 //  IBM_PROLOG_BEGIN_TAG
 //  This is an automatically generated prolog.
 //
-//  $Source: src/usr/scom/scom.H $
+//  $Source: src/usr/fsiscom/fsiscom.H $
 //
 //  IBM CONFIDENTIAL
 //
@@ -20,21 +20,27 @@
 //  Origin: 30
 //
 //  IBM_PROLOG_END
-#ifndef __SCOM_H
-#define __SCOM_H
+#ifndef __FSISCOM_H
+#define __FSISCOM_H
 
-#include <devicefw/driverif.H>
-
-/** @file  scom.H
- *  @brief Provides the interfaces to perform a SCom
+/** @file  fsiscom.H
+ *  @brief Provides the interfaces to perform a FSI SCOM
  */
 
-namespace SCOM
+namespace FSISCOM
 {
 
+  enum {
+    //FSI addresses are byte offsets, so need to multiply by 4 since each register is 4 bytes long.
+    //prefix with 0x10xx for engine offset
+    DATA0_REG   = 0x1000,  /* SCOM Data Register 0 (0x00) */
+    DATA1_REG   = 0x1004,  /* SCOM Data Register 1 (0x01) */
+    COMMAND_REG = 0x1008,  /* SCOM Command Register (0x02) */
+    STATUS_REG  = 0x101C,  /* STATUS Register (0x07) */
+  };
 
 /**
- * @brief Performs an SCom operation
+ * @brief Performs an FSI SCOM operation
  * This function performs an SCom Read/Write operation. It follows a
  * pre-defined prototype functions in order to be registered with the
  * device-driver framework.
@@ -55,12 +61,15 @@ namespace SCOM
  *
  * @return  errlHndl_t
  */
-errlHndl_t scomPerformOp(DeviceFW::OperationType i_opType,
+errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
                          TARGETING::Target* i_target,
                          void* io_buffer,
                          size_t& io_buflen,
                          int64_t i_accessType,
                          va_list i_args);
+
+
+
 
 
 

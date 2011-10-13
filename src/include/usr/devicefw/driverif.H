@@ -71,6 +71,12 @@ namespace DeviceFW
         WILDCARD = -1,
     };
 
+    /** Construct the device addressing parameters for FSISCOM device ops.
+     *  @param[in] i_address - FSISCOM address to operate on.
+     */
+    #define DEVICE_FSISCOM_ADDRESS(i_address) \
+        DeviceFW::FSISCOM, static_cast<uint64_t>((i_address))
+
     /** Construct the device addressing parameters for XSCOM device ops.
      *  @param[in] i_address - XSCom address to operate on.
      */
