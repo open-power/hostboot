@@ -29,6 +29,7 @@
 
 #include <kernel/types.h>
 #include <kernel/segment.H>
+#include <kernel/spinlock.H>
 #include <util/locked/list.H>
 #include <usr/vmmconst.h>
 
@@ -123,7 +124,8 @@ class StackSegment : public Segment
          *  This list is therefore indexed by the low address of the
          *  range (tid*8MB + 1TB).
          */
-        Util::Locked::List<StackBlockNode, uint64_t> iv_blockList;
+        Util::Locked::List<StackBlockNode, uint64_t,
+                           true, Spinlock> iv_blockList;
 
             /** Internal implementation of init function. */
         void _init();
