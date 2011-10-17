@@ -1,0 +1,137 @@
+// IBM_PROLOG_BEGIN_TAG
+// This is an automatically generated prolog.
+//
+// $Source: src/include/utility $
+//
+// IBM CONFIDENTIAL
+//
+// COPYRIGHT International Business Machines Corp. 2011
+//
+// p1
+//
+// Object Code Only (OCO) source materials
+// Licensed Internal Code Source Materials
+// IBM HostBoot Licensed Internal Code
+//
+// The source code for this program is not published or other-
+// wise divested of its trade secrets, irrespective of what has
+// been deposited with the U.S. Copyright Office.
+//
+// Origin: 30
+//
+// IBM_PROLOG_END
+#ifndef STL_UTILITY
+#define STL_UTILITY
+
+
+namespace std
+{
+    /**
+     * Standard template pair
+     * See the C++ spec
+     */
+    template <typename T1, typename T2>
+        struct pair
+        {
+            typedef T1 first_type;
+            typedef T2 second_type;
+
+            T1 first;
+            T2 second;
+            pair() : first(T1()), second(T2()) {}
+            pair(const T1 & x, const T2 & y) : first(x), second(y) {}
+
+            template <typename U, typename V>
+                pair (const pair<U,V> & p) : first(p.first), second(p.second) {}
+        };
+
+
+    /**
+     * Wrapper for creating a pair
+     * @param[in] x The first object
+     * @param[in] y The second object
+     * @return a newly-constructed pair<> object
+     */
+    template <typename T1, typename T2> __attribute__ ((always_inline))
+        pair<T1,T2> make_pair (T1 x, T2 y)
+        {
+            return ( pair<T1,T2>(x,y) );
+        }
+
+    /**
+     * pair eq comparison
+     * @param[in] x The first object
+     * @param[in] y The second object
+     * @return true if x is strictly eq y
+     */
+    template <typename T1, typename T2> __attribute__ ((always_inline))
+        bool operator==(const pair<T1, T2>& x, const pair<T1, T2>& y)
+        {
+            return x.first == y.first && x.second == y.second;
+        }
+
+    /**
+     * pair lt comparison
+     * @param[in] x The first object
+     * @param[in] y The second object
+     * @return true if x < y
+     */
+    template<typename T1, typename T2> __attribute__ ((always_inline))
+        bool operator<(const pair<T1, T2>& x, const pair<T1, T2>& y)
+        { 
+            return (x.first < y.first) ||
+                (!(y.first < x.first) && x.second < y.second);
+        }
+
+    /**
+     * pair ne comparison
+     * @param[in] x The first object
+     * @param[in] y The second object
+     * @return true if x != y
+     */
+    template<typename T1, typename T2> __attribute__ ((always_inline))
+        bool operator!=(const pair<T1, T2>& x, const pair<T1, T2>& y)
+        { 
+            return !(x == y);
+        }
+
+
+    /**
+     * pair gt comparison
+     * @param[in] x The first object
+     * @param[in] y The second object
+     * @return true if x > y
+     */
+    template<typename T1, typename T2> __attribute__ ((always_inline))
+        bool operator>(const pair<T1, T2>& x, const pair<T1, T2>& y)
+        {
+            return y < x;
+        }
+
+    /**
+     * pair le comparison
+     * @param[in] x The first object
+     * @param[in] y The second object
+     * @return true if x <= y
+     */
+    template<typename T1, typename T2> __attribute__ ((always_inline))
+        bool operator<=(const pair<T1, T2>& x, const pair<T1, T2>& y)
+        {
+            return !(y < x);
+        }
+
+    /**
+     * pair >= comparison
+     * @param[in] x The first object
+     * @param[in] y The second object
+     * @return true if x >= y
+     */
+    template<typename T1, typename T2> __attribute__ ((always_inline))
+        bool operator>=(const pair<T1, T2>& x, const pair<T1, T2>& y)
+        {
+            return !(x < y);
+        }
+};
+
+
+#endif

@@ -1,0 +1,71 @@
+//  IBM_PROLOG_BEGIN_TAG
+//  This is an automatically generated prolog.
+//
+//  $Source: src/include/functional $
+//
+//  IBM CONFIDENTIAL
+//
+//  COPYRIGHT International Business Machines Corp. 2011
+//
+//  p1
+//
+//  Object Code Only (OCO) source materials
+//  Licensed Internal Code Source Materials
+//  IBM HostBoot Licensed Internal Code
+//
+//  The source code for this program is not published or other-
+//  wise divested of its trade secrets, irrespective of what has
+//  been deposited with the U.S. Copyright Office.
+//
+//  Origin: 30
+//
+//  IBM_PROLOG_END
+#ifndef _FUNCTIONAL_H
+#define _FUNCTIONAL_H
+
+// See C++ spec
+
+namespace std
+{
+    template<typename A1, typename A2, typename R>
+        struct binary_function
+        {
+            typedef A1 first_argument_type;   ///< type of the first argument
+            typedef A2 second_argument_type;  ///< type of the second argument
+            typedef R result_type;            ///< type of the return type
+        };
+
+    /**
+     * less template
+     */
+    template<typename T>
+        struct less : public binary_function<T, T, bool>
+    {
+        /**
+         * operator()
+         * @param[in] x first object
+         * @param[in] y second object
+         * @return true if x < y otherwise false
+         */
+        bool operator()(const T& x, const T& y) const
+        {
+            return x < y;
+        }
+    };
+
+    template<typename T>
+        struct greater : public binary_function<T, T, bool>
+    {
+        /**
+         * operator()
+         * @param[in] x first object
+         * @param[in] y second object
+         * @return true if x > y otherwise false
+         */
+        bool operator()(const T& x, const T& y) const
+            { return x > y; }
+    };
+
+
+};
+#endif

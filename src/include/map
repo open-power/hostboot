@@ -1,0 +1,446 @@
+//  IBM_PROLOG_BEGIN_TAG
+//  This is an automatically generated prolog.
+//
+//  $Source: src/include/map $
+//
+//  IBM CONFIDENTIAL
+//
+//  COPYRIGHT International Business Machines Corp. 2011
+//
+//  p1
+//
+//  Object Code Only (OCO) source materials
+//  Licensed Internal Code Source Materials
+//  IBM HostBoot Licensed Internal Code
+//
+//  The source code for this program is not published or other-
+//  wise divested of its trade secrets, irrespective of what has
+//  been deposited with the U.S. Copyright Office.
+//
+//  Origin: 30
+//
+//  IBM_PROLOG_END
+#ifndef stl_map
+#define stl_map
+
+#include <stddef.h>
+
+// Need this to compile outside hostboot env.
+#if !defined( __STDC_LIMIT_MACROS)
+#define __STDC_LIMIT_MACROS
+#endif
+#include <stdint.h>
+#include <new>
+#include <utility>
+#include <list>
+#include <functional>
+
+namespace std
+{
+
+    /**
+     * Simple map template class based on list
+     * @Note  value_comp not supported.
+     */
+    template <typename Key, typename T, typename Compare = std::less<Key> >
+        class map
+    {
+        public:
+
+            typedef     Key                             key_type;
+            typedef     T                               mapped_type;
+            typedef     pair<const Key, T>              value_type;
+            typedef     T&                              reference;
+            typedef     const T&                        const_reference;
+            typedef     ListIterator_t< value_type >   iterator;
+            typedef     ListConstIterator_t< value_type > const_iterator;
+//            typedef     MapIterator_t<Key,T>            iterator;
+//            typedef     MapConstIterator_t<Key,T>       const_iterator;
+            typedef     size_t                          size_type;
+            typedef     Compare                         key_compare;
+            
+
+            /**
+             * Default constructor
+             */
+            __attribute__ ((always_inline))
+            explicit map(const key_compare& c = Compare()) : iv_comp(c) {}
+
+            /**
+             * Constructor
+             * @param[in] first InputIterator
+             * @param[in] last InputIterator
+             */
+            template <typename InputIterator> __attribute__ ((always_inline))
+                map( InputIterator first, InputIterator last, const key_compare& c = Compare())
+                    : iv_comp(c)
+                { iv_list(first, last); }
+
+            /**
+             * Copy Constructor
+             * @param i_x Source map
+             */ 
+            __attribute__ ((always_inline))
+            map (const map<Key,T,Compare>& i_x)
+            {
+                iv_list(i_x.iv_list);
+                iv_comp(i_x.iv_comp);
+            }
+
+            /**
+             * Destructor
+             */
+            __attribute__ ((always_inline))
+            ~map () {}
+
+            /**
+             * operator=
+             * @param[in] x Source map
+             */
+            __attribute__ ((always_inline))
+            map<Key,T, Compare> & operator= (const map<Key, T, Compare>& x)
+            {
+                iv_list = x.iv_list;
+                iv_comp = x.iv_comp;
+                return *this;
+            }
+
+            /**
+             * Get iterator to the beginning element
+             * @return iterator
+             */
+            __attribute__ ((always_inline))
+            iterator begin() { return iv_list.begin(); }
+
+            /**
+             * Get iterator to the beginning element
+             * @return const_iterator
+             */
+            __attribute__ ((always_inline))
+            const_iterator begin() const { return iv_list.begin(); }
+
+            /**
+             * Get iterator to the last element + 1
+             * @return iterator
+             */
+            __attribute__ ((always_inline))
+            iterator end() { return iv_list.end(); }
+
+            /**
+             * Get iterator to the last element + 1
+             * @return const_iterator
+             */
+            __attribute__ ((always_inline))
+            const_iterator end() const { return iv_list.end(); }
+
+            /**
+             * Query empty container
+             * @return true if container is empty otherwise false
+             */
+            __attribute__ ((always_inline))
+            bool empty() const { return iv_list.empty(); }
+
+            /**
+             * Query number of elements in the container
+             * @return number of elements in the container
+             */
+            __attribute__ ((always_inline))
+            size_type size() const { return iv_list.size(); }
+
+            /**
+             * Max size of container
+             * @return theoretical maximum size based on cpu word size
+             */
+            __attribute__ ((always_inline))
+            size_type max_size() const { return UINT64_MAX/sizeof(T); }
+
+            /**
+             * operator[]
+             * @param[in] x key, if it does not exist the it will be added
+             * @return a reference to the element whos key is x
+             */
+            __attribute__ ((always_inline))
+            T& operator[] (const key_type& k)
+            {
+                pair<iterator,bool> result = insert(value_type(k,T()));
+                return (result.first)->second;
+            }
+
+
+            /**
+             * Insert element
+             * @param[in] x map key/value pair
+             * @return std::pair.first is iterator pointing to new or existing element,
+             *         std::pair.second is true if new element inserted, false if already existing.
+             * @note won't add element if it's key already exists in the map
+             */
+            pair<iterator,bool> 
+                insert (const value_type& x )
+                {
+                    iterator i = lower_bound(x.first);  // x.first <= i->first
+                    if(i != end() && !key_comp()(x.first,i->first))      // x.first == i->first
+                    {
+                        return make_pair(i,false);
+                    }
+
+                    i = insert(i,x);
+                    return make_pair(i,true);
+                }
+
+
+            /**
+             * Insert element
+             * @param[in] hint bidi iterator that is a hint to where to insert the element
+             * @param[in] x map key/value to insert (copy in)
+             * @return an iterator pointing to either the new or existing element
+             * @note A good hint makes this very efficient.  A bad hint slows it down. An element
+             * will never be inserted out of order. Will never insert if key already exists.
+             */
+            iterator 
+                insert ( iterator hint, const value_type& x)
+                {
+                    iterator i = iv_list.begin();
+                    if(hint != i) --hint;
+                    if(hint != end() && key_comp()(hint->first,x.first)) // potential good hint
+                    {
+                        i = hint;
+                    }
+                    while(i != end() && key_comp()(i->first,x.first)) ++i;
+                    // x.first <= i->first
+
+                    if(i == end() || key_comp()(x.first, i->first))
+                    {
+                        i = iv_list.insert(i,x);
+                    }
+                    // else was already in the list
+                    return i;
+                }
+
+            /**
+             * Insert a range of new elements
+             * @param[in] first InputIterator
+             * @param[in] last InputIterator
+             * @post Elements inserted
+             */
+            template <typename InputIterator>
+                void insert( InputIterator first, InputIterator last )
+                {
+                    while(first != last)
+                    {
+                        insert(*first);
+                        ++first;
+                    }
+                }
+
+            /**
+             * Remove an element from the container
+             * @param position iterator
+             * @post element pointed to by iterator is removed from the container
+             */
+            __attribute__ ((always_inline))
+            void erase (iterator position )
+            {
+                iv_list.erase(position);
+            }
+
+            /**
+             * Remove an element from the container by key
+             * @param x key of element to remove
+             * @return Number of elements removed. For map, 0 or 1.
+             */
+            size_type erase (const key_type& k)
+            {
+                size_type result = 0;
+                iterator i = find(k);
+                if(i != end())
+                {
+                    erase(i);
+                    result = 1;
+                }
+                return result;
+            }
+
+            /**
+             * Remove a range of elements from the container
+             * @param first iterator of elment to remove
+             * @param last iterator of element to remove + 1
+             */
+            __attribute__ ((always_inline))
+            void erase (iterator first, iterator last)
+            {
+                iv_list.erase(first,last);
+            }
+
+            /**
+             * Swap this container with another
+             * @param[in] mp the other container
+             */
+            __attribute__ ((always_inline))
+            void swap(map<Key,T, Compare>& mp)
+            {
+                iv_list.swap(mp.iv_list);
+                std::swap(iv_comp,mp.iv_comp);               
+            }
+
+            /**
+             * clear the map
+             */
+            __attribute__ ((always_inline))
+            void clear() { iv_list.clear(); }
+            
+            //Observers
+            /**
+             * Returns the key comparison object from which the map was constructed
+             * @return Compare
+             */
+            key_compare key_comp() const { return iv_comp; }
+
+            /**
+             * returns a value comparison object, built from the key comparison
+             * @return value_compare
+             * @note not supported!
+             */
+            // value_compare value_comp () const;
+
+            /**
+             * Find an element
+             * @param[in] k element key
+             * @return iterator to element or end() if not found
+             */
+            iterator find (const key_type& k)
+            {
+                iterator i = lower_bound(k);
+                if(i != end())
+                {
+                    if(key_comp()(k, i->first))
+                    {
+                        i = end();
+                    }
+                }
+                return i;
+            }
+
+            /**
+             * Find an element
+             * @param[in] k element key
+             * @return const_iterator to element or end() if not found
+             */
+            __attribute__ ((always_inline))
+            const_iterator find( const key_type& k) const
+            {
+                const_iterator i = lower_bound(k);
+                if(i != end())
+                {
+                    if(key_comp()(k, i->first))
+                    {
+                        i = end();
+                    }
+                }
+                return i;
+            }
+
+            /**
+             * Number of elements in the container with the given key
+             * @param[in] k key
+             * @return number of elements that match key. For map this is 0 or 1
+             */
+            __attribute__ ((always_inline))
+            size_type count (const key_type& k) const
+            {
+                if(find(k) != end())
+                    return 1;
+                return 0;
+            }
+
+            /**
+             * Return an iterator pointing to the first element in the
+             *   container whose key does not compare less than k.
+             * @param[in] k key
+             * @return iterator
+             */
+            iterator lower_bound (const key_type& k)
+            {
+                iterator i = iv_list.begin();
+                while(i != end() && key_comp()(i->first,k)) ++i;
+                return i;
+            }
+
+
+
+            /**
+             * Return a const_iterator pointing to the first element in the
+             *   container whose key does not compare less than k.
+             * @param[in] k key
+             * @return const_iterator
+             */
+            __attribute__ ((always_inline))
+            const_iterator lower_bound (const key_type& k) const
+            {
+                const_iterator i = iv_list.begin();
+                while( i != end() && key_comp()(i->first,k)) ++i;
+                return i;
+            }
+
+            /**
+             * Returns an iterator pointing to the first element in the
+             *   container whose key compares > k
+             * @param[in] k key
+             * @return iterator
+             */
+            iterator upper_bound (const key_type& k)
+            {
+                iterator i = lower_bound(k);  // k <= i->first
+                if(i != end() && !key_comp()(k,i->first)) ++i; // k == i->first
+                return i;
+            }
+
+            /**
+             * Returns a const_iterator pointing to the first element in the
+             *   container whose key compares > k
+             * @param[in] k key
+             * @return const_iterator
+             */
+            __attribute__ ((always_inline))
+            const_iterator upper_bound (const key_type& k) const
+            {
+                const_iterator i = lower_bound(); // k <= i->first
+                if(i != end() && !key_comp()(k,i->first)) ++i;     // k == i->first
+                return i;
+            }
+
+            /**
+             * Return the bounds of a range that includes all the elements in
+             *   the continer with a key that compares equal to k.
+             * @param k key
+             * @return pair of iterators
+             * @note map does not allow duplicate keys, so
+             * the range returned will contain at most one element
+             */
+            pair<iterator,iterator>
+                equal_range( const key_type& k)
+                {
+                    return make_pair(lower_bound(k),upper_bound(k));
+                }
+
+            /**
+             * Const verstion of equal_range - see equal_range above
+             */
+            pair<const_iterator, const_iterator>
+                equal_range( const key_type& k) const
+                {
+                    return make_pair(lower_bound(k),upper_bound(k));
+                }
+
+        protected:
+
+            key_compare iv_comp;    //!< Compare function/class
+
+        private:  // data
+
+            list<value_type> iv_list;           //!< The implementation
+    };
+};
+
+#endif    
+    
+
