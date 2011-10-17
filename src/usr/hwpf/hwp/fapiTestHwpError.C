@@ -35,6 +35,7 @@
  *                                                  fapiLogError
  *                          mjjones     10/06/2011  Major updates due to new
  *                                                  ErrorInfo design
+ *                          mjjones     10/17/2011  Moved AnalyzeError to new file
  *
  */
 
@@ -42,31 +43,6 @@
 
 extern "C"
 {
-
-//******************************************************************************
-// hwpTestAnalyzeError function
-//******************************************************************************
-fapi::ReturnCode hwpTestAnalyzeError(const fapi::Target & i_target)
-{
-    FAPI_INF("hwpTestAnalyzeError: Start HWP (analysis HWP)");
-
-    // This HWP analyses an error condition to decide what the error actually is
-    // In real life, this HWP may look at chip error registers
-    fapi::ReturnCode l_rc;
-
-    // Local FFDC that needs to be captured
-    uint32_t l_ffdc = 0x12345678;
-
-    // Analysis reveals that the error is RC_TEST_ERROR_A
-    FAPI_ERR("hwpTestAnalyzeError: Generating RC_TEST_ERROR_A");
-
-    const fapi::Target & MASTER_CHIP = i_target;
-    uint32_t & FFDC_DATA_1 = l_ffdc;
-    FAPI_SET_HWP_ERROR(l_rc, RC_TEST_ERROR_A);
-
-    FAPI_INF("hwpTestAnalyzeError: End HWP");
-    return l_rc;
-}
 
 //******************************************************************************
 // hwpTestError function
@@ -93,7 +69,7 @@ fapi::ReturnCode hwpTestError(const fapi::Target & i_target)
                  "expected success", static_cast<uint32_t>(l_rc));
     }
 
-    // Reset the return code
+    // Generate the same error again
     FAPI_ERR("hwpTestError: Generating RC_TEST_ERROR_B");
     FAPI_SET_HWP_ERROR(l_rc, RC_TEST_ERROR_B);
 
@@ -101,4 +77,4 @@ fapi::ReturnCode hwpTestError(const fapi::Target & i_target)
     return l_rc;
 }
 
-} // extern "C"
+}

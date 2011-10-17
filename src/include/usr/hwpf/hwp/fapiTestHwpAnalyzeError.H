@@ -1,7 +1,7 @@
 //  IBM_PROLOG_BEGIN_TAG
 //  This is an automatically generated prolog.
 //
-//  $Source: src/include/usr/hwpf/hwp/fapiTestHwp.H $
+//  $Source: src/include/usr/hwpf/hwp/fapiTestHwpAnalyzeError.H $
 //
 //  IBM CONFIDENTIAL
 //
@@ -21,39 +21,38 @@
 //
 //  IBM_PROLOG_END
 /**
- *  @file fapiTestHwp.H
+ *  @file fapiTestHwpAnalyzeError.H
  *
- *  @brief Defines a simple test Hardware Procedure
+ *  @brief Defines a simple test Hardware Procedure that returns an error
  */
 
 /*
  * Change Log ******************************************************************
  * Flag     Defect/Feature  User        Date        Description
  * ------   --------------  ----------  ----------- ----------------------------
- *                          mjjones     04/21/2011  Created.
- *                          mjjones     06/28/2011  Updated comment
- *                          mjjones     08/11/2011  Removed Clock HWP
- *                          mjjones     10/17/2011  Added func pointer
+ *                          mjjones     08/08/2011  Created. Moved from other file
+ *
  */
 
-#ifndef FAPITESTHW_H_
-#define FAPITESTHW_H_
+#ifndef FAPITESTHWPANALYZEERROR_H_
+#define FAPITESTHWPANALYZEERROR_H_
 
 #include <fapi.H>
 
-typedef fapi::ReturnCode (*hwpInitialTest_FP_t)(const fapi::Target &);
+typedef fapi::ReturnCode (*hwpTestAnalyzeError_FP_t)(const fapi::Target &);
 
 extern "C"
 {
 
 /**
- * @brief A simple HWP. Can easily be modified by HW dev team for test
+ * @brief Simple HWP that analyzes an error and returns an error describing the
+ *        problem (RC_TEST_ERROR_B)
  *
- * @param[in] i_chip Reference to target chip
+ * @param[in] i_target Reference to target (unused by HWP)
  *
  * @return ReturnCode
  */
-fapi::ReturnCode hwpInitialTest(const fapi::Target & i_chip);
+fapi::ReturnCode hwpTestAnalyzeError(const fapi::Target & i_target);
 
 }
 

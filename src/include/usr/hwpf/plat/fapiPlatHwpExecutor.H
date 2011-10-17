@@ -36,6 +36,7 @@
 
 #include <fapiTestHwp.H>
 #include <fapiTestHwpError.H>
+#include <fapiTestHwpAnalyzeError.H>
 #include <fapiTestHwpFfdc.H>
 #include <fapiTestHwpConfig.H>
 #include <fapiTestHwpAttr.H>

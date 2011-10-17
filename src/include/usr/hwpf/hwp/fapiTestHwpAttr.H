@@ -32,6 +32,7 @@
  * ------   --------------  ----------  ----------- ----------------------------
  *                          mjjones     06/30/2011  Created.
  *                          mjjones     10/07/2011  Removed target param
+ *                          mjjones     10/17/2011  Added func pointer
  */
 
 #ifndef FAPITESTHWPATTR_H_
@@ -39,8 +40,8 @@
 
 #include <fapi.H>
 
-// HWPs are defined as C functions because platforms may wish to package them
-// in linux shared libraries which are DL-Opened
+typedef fapi::ReturnCode (*hwpTestAttributes_FP_t)();
+
 extern "C"
 {
 
@@ -51,6 +52,6 @@ extern "C"
  */
 fapi::ReturnCode hwpTestAttributes();
 
-} // extern "C"
+}
 
-#endif // FAPITESTHWPATTR_H_
+#endif

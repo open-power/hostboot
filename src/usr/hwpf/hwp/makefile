@@ -30,6 +30,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/plat
 
 OBJS = fapiTestHwp.o \
        fapiTestHwpError.o \
+       fapiTestHwpAnalyzeError.o \
        fapiTestHwpFfdc.o \
        fapiTestHwpConfig.o \
        fapiTestHwpAttr.o

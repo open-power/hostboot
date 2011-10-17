@@ -31,7 +31,7 @@
  * Flag     Defect/Feature  User        Date        Description
  * ------   --------------  ----------  ----------- ----------------------------
  *                          mjjones     08/08/2011  Created.
- *
+ *                          mjjones     10/17/2011  Added func pointer
  */
 
 #ifndef FAPITESTHWPERROR_H_
@@ -39,8 +39,8 @@
 
 #include <fapi.H>
 
-// HWPs are defined as C functions because platforms may wish to package them
-// in linux shared libraries which are DL-Opened
+typedef fapi::ReturnCode (*hwpTestError_FP_t)(const fapi::Target &);
+
 extern "C"
 {
 
@@ -53,6 +53,6 @@ extern "C"
  */
 fapi::ReturnCode hwpTestError(const fapi::Target & i_target);
 
-} // extern "C"
+}
 
-#endif // FAPITESTHWPERROR_H_
+#endif
