@@ -70,6 +70,7 @@
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>Scratch uint64_t attribute 2</description>
     <valueType>uint64</valueType>
+    <enum>VAL_A = 3, VAL_B = 5, VAL_C = 0x23</enum>
     <writeable/>
   </attribute>
   <!-- ********************************************************************* -->
@@ -105,7 +106,7 @@
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>Scratch uint32_t array ([2][3]) attribute 2</description>
     <valueType>uint32</valueType>
-    <array>2 3</array>
+    <array>2,3</array>
     <writeable/>
   </attribute>
   <!-- ********************************************************************* -->
@@ -123,7 +124,8 @@
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>Scratch uint64_t array ([2][2]) attribute 2</description>
     <valueType>uint64</valueType>
-    <array>2 2</array>
+    <array> 2, 2 </array>
+    <enum>VAL_A, VAL_B, VAL_C</enum>
     <writeable/>
   </attribute>
   <!-- ********************************************************************* -->
@@ -134,6 +136,6 @@
     <valueType>uint8</valueType>
     <platInit/>
     <writeable/>
-    <array>1 3 5</array>
+    <array>1, 3, 5</array>
   </attribute>
 </attributes>

@@ -35,8 +35,8 @@
  *                          mjjones     09/07/2011  Update to test scratch attrs
  *                          mjjones     10/06/2011  Updates traces
  *                          mjjones     10/07/2011  Removed target param
- *                                                  Test scratch attributes
- *
+ *                          mjjones     10/15/2011  Test scratch attributes
+ *                          mjjones     10/17/2011  Update scratch test
  */
 
 #include <fapiTestHwpAttr.H>
@@ -962,6 +962,48 @@ fapi::ReturnCode hwpTestAttributes()
         }
 
         //----------------------------------------------------------------------
+        // Test setting and getting an enum value from a scratch attribute
+        //----------------------------------------------------------------------
+        {
+        uint64_t l_uint64 = fapi::ATTR_SCRATCH_UINT64_2_VAL_C;
+
+        // Test set
+        l_rc = FAPI_ATTR_SET(ATTR_SCRATCH_UINT64_2, NULL, l_uint64);
+        if (l_rc)
+        {
+            FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT64_2. Error from SET (enum)");
+            break;
+        }
+
+        // Test get
+        l_uint64 = 0;
+        l_rc = FAPI_ATTR_GET(ATTR_SCRATCH_UINT64_2, NULL, l_uint64);
+        if (l_rc)
+        {
+            FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT64_2. Error from GET (enum)");
+            break;
+        }
+
+        // Check value
+        if (l_uint64 != fapi::ATTR_SCRATCH_UINT64_2_VAL_C)
+        {
+            l_rc = fapi::FAPI_RC_ATTR_UNIT_TEST_FAIL;
+            FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT64_2. GET returned %d (enum)",
+                     static_cast<uint32_t>(l_uint64));
+            break;
+        }
+
+        // Set to zero
+        l_uint64 = 0;
+        l_rc = FAPI_ATTR_SET(ATTR_SCRATCH_UINT64_2, NULL, l_uint64);
+        if (l_rc)
+        {
+            FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT64_2. Error from SET (enum2)");
+            break;
+        }
+        }
+
+        //----------------------------------------------------------------------
         // Test getting scratch attributes with the fapiGetInitFileAttr function
         //----------------------------------------------------------------------
         uint64_t l_val = 0;
@@ -1007,7 +1049,8 @@ fapi::ReturnCode hwpTestAttributes()
         }
 
         //----------------------------------------------------------------------
-        // Test getting an invalid scratch attribute
+        // Test getting an invalid scratch attribute with the
+        // fapiGetInitFileAttr function
         //----------------------------------------------------------------------
         fapi::AttributeId l_badId = static_cast<fapi::AttributeId>(0xff);
         l_rc = fapiGetInitFileAttr(l_badId, NULL, l_val);

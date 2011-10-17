@@ -41,6 +41,7 @@
 #                  mjjones   07/05/11  Take output dir as parameter
 #                  mjjones   09/06/11  Remove string/defaultVal support 
 #                  mjjones   10/07/11  Create fapiAttributeService.C
+#                  mjjones   10/17/11  Support enums with values
 #
 # End Change Log ******************************************************
 
@@ -174,14 +175,20 @@ foreach my $argnum (1 .. $#ARGV)
         }
 
         #----------------------------------------------------------------------
-        # Figure out the attribute array dimensions (if arry)
+        # Figure out the attribute array dimensions (if array)
         #----------------------------------------------------------------------
         my $arrayDimensions = "";
         my $numArrayDimensions = 0;
         if ($attr->{array})
         {
             # Figure out the array dimensions
-            my @vals = split(' ', $attr->{array});
+
+            # Remove leading whitespace
+            my $dimText = $attr->{array};
+            $dimText =~ s/^\s+//;
+
+            # Split on commas or whitespace
+            my @vals = split(/\s*,\s*|\s+/, $dimText);
 
             foreach my $val (@vals)
             {
@@ -237,11 +244,14 @@ foreach my $argnum (1 .. $#ARGV)
         {
             print AIFILE "enum $attr->{id}_Enum\n{\n";
 
-            # Values must be separated by white space
-            my @vals = split(' ', $attr->{enum});
+            # Values must be separated by commas to allow for values to be
+            # specified: <enum>VAL_A = 3, VAL_B = 5, VAL_C = 0x23</enum>
+            my @vals = split(',', $attr->{enum});
 
             foreach my $val (@vals)
             {
+                # Remove leading spaces
+                $val =~ s/^\s+//; 
                 print AIFILE "    $attr->{id}_${val},\n";
             }
 
