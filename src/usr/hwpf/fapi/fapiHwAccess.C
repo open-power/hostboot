@@ -37,6 +37,7 @@
  *                          copelanm    09/13/2011  new for common scan traces
  *                          mjjones     09/14/2011  Prepended fapi to functions
  *                                                  and enabled all functions
+ *                          mjjones     10/13/2011  util namespace change
  */
 
 #include <fapi.H>
@@ -54,7 +55,7 @@ fapi::ReturnCode fapiGetScom(const fapi::Target& i_target,
 {
     fapi::ReturnCode l_rc;
     char l_string[fapi::MAX_ECMD_STRING_LEN] = {0};
-    bool l_traceit = fapi::platIsScanTraceEnabled(); 
+    bool l_traceit = platIsScanTraceEnabled(); 
 
 
     if( l_traceit )
@@ -93,7 +94,7 @@ fapi::ReturnCode fapiPutScom(const fapi::Target& i_target,
 {
     fapi::ReturnCode l_rc;
     char l_string[fapi::MAX_ECMD_STRING_LEN] = {0};
-    bool l_traceit = fapi::platIsScanTraceEnabled(); 
+    bool l_traceit = platIsScanTraceEnabled(); 
 
     if( l_traceit )
     {
@@ -130,7 +131,7 @@ fapi::ReturnCode fapiPutScomUnderMask(const fapi::Target& i_target,
 {
     fapi::ReturnCode l_rc;
     char l_string[fapi::MAX_ECMD_STRING_LEN] = {0};
-    bool l_traceit = fapi::platIsScanTraceEnabled(); 
+    bool l_traceit = platIsScanTraceEnabled(); 
 
     if( l_traceit )
     {
@@ -165,7 +166,7 @@ fapi::ReturnCode fapiGetCfamRegister(const fapi::Target& i_target,
 {
     fapi::ReturnCode l_rc;
     char l_string[fapi::MAX_ECMD_STRING_LEN] = {0};
-    bool l_traceit = fapi::platIsScanTraceEnabled();
+    bool l_traceit = platIsScanTraceEnabled();
 
     if( l_traceit )
     {
@@ -200,7 +201,7 @@ fapi::ReturnCode fapiPutCfamRegister(const fapi::Target& i_target,
 {
     fapi::ReturnCode l_rc;
     char l_string[fapi::MAX_ECMD_STRING_LEN] = {0};
-    bool l_traceit = fapi::platIsScanTraceEnabled(); 
+    bool l_traceit = platIsScanTraceEnabled(); 
 
     if( l_traceit )
     {
@@ -236,7 +237,7 @@ fapi::ReturnCode fapiModifyCfamRegister(const fapi::Target& i_target,
 {
     fapi::ReturnCode l_rc;
     char l_string[fapi::MAX_ECMD_STRING_LEN] = {0};
-    bool l_traceit = fapi::platIsScanTraceEnabled(); 
+    bool l_traceit = platIsScanTraceEnabled(); 
     const char * l_pMode = NULL;
 
     if( l_traceit )

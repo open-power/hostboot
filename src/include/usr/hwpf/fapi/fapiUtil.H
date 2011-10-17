@@ -37,7 +37,7 @@
  *                          camvanng    09/06/2011  Added fapiLogError
  *                          mjjones     09/14/2011  Prepended fapi to delay
  *                          mjjones     10/05/2011  Added fapiCheckType
- *
+ *                          mjjones     10/13/2011  Added extern "C" to functions
  */
 
 #ifndef FAPIUTIL_H_
@@ -45,10 +45,13 @@
 
 #include <stdint.h>
 #include <stddef.h>
-#include <fapi.H>
+#include <fapiReturnCode.H>
 
-namespace fapi
+// It is an eCMD requirement that these functions have a "C" symbol
+// because they may be used from a dynamically linked shared library
+extern "C"
 {
+
 /**
  * @brief Assert that an expression is true. Aborting the process if false.
  *
@@ -108,7 +111,7 @@ fapi::ReturnCode fapiDelay(uint64_t i_nanoSeconds, uint64_t i_simCycles);
  *     FAPI_EXEC_HWP(l_rc, function2, i_target)
  *     return rc;
  */
-void fapiLogError(ReturnCode & io_rc);
+void fapiLogError(fapi::ReturnCode & io_rc);
 
 /**  @brief This function answers the question, is scand tracing turned on?
  *   The implementation of this function is specific to the platform.
@@ -123,7 +126,12 @@ bool platIsScanTraceEnabled();
  *   @param[in] True to enable or false to disable scan trace.
  *   @return  void
  */
-void platSetScanTrace( bool i_enable );
+void platSetScanTrace(bool i_enable);
+
+}
+
+namespace fapi
+{
 
 /**
  * @brief Check the type of a variable

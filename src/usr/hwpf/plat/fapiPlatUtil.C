@@ -54,7 +54,7 @@ TRAC_INIT(&g_fapiErrTd, FAPI_ERR_TRACE_NAME, 4096);
 TRAC_INIT(&g_fapiDbgTd, FAPI_DBG_TRACE_NAME, 4096);
 TRAC_INIT(&g_fapiScanTd, FAPI_SCAN_TRACE_NAME, 4096);
 
-namespace fapi
+extern "C"
 {
 
 //******************************************************************************
@@ -92,7 +92,7 @@ fapi::ReturnCode fapiDelay(uint64_t i_nanoSeconds, uint64_t i_simCycles)
 //******************************************************************************
 // fapiLogError
 //******************************************************************************
-void fapiLogError(ReturnCode & io_rc)
+void fapiLogError(fapi::ReturnCode & io_rc)
 {
     errlHndl_t l_pError = NULL;
 
@@ -108,12 +108,6 @@ void fapiLogError(ReturnCode & io_rc)
     errlCommit(l_pError);
 }
 
-
-
-
-
-
-
 //****************************************************************************
 // platform-level implementation 
 
@@ -127,14 +121,11 @@ bool platIsScanTraceEnabled()
 //****************************************************************************
 // platform-level implementation 
 
-void platSetScanTrace( bool i_enable )
+void platSetScanTrace(bool i_enable)
 {
   // TODO: enable or disable scan trace via the SCAN trace buffer.  Camvan
   // has not pushed the code yet.
   return;
 }
 
-
-
-
-} // namespace fapi
+}
