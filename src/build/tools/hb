@@ -44,6 +44,13 @@ execute_in_sandbox()
     rm ${SANDBOXBASE}/src/sandbox_execute_cmd
 }
 
+needs_machine_variable()
+{
+    MACHINE=${MACHINE:-$DEFAULT_MACHINE}
+    export MACHINE
+    echo "Setting up for Machine = $MACHINE"
+}
+
 hb_helptext()
 {
     echo "Hostboot Utility Script"
@@ -228,6 +235,7 @@ hb_prime()
             echo "Sandbox does not exist.  Create with 'hb simsetup."
             exit -1
         fi
+        needs_machine_variable
         cpfiles.pl $*
     else
         echo "SANDBOXBASE not set."
@@ -259,7 +267,8 @@ hb_simsetup()
     mksb -rc ${SANDBOXRC} -dir ${SANDBOXROOT} -back $DRIVER \
          -sb ${SANDBOXNAME} -m ppc
 
-    execute_in_sandbox "start_simics -no_start -machine ${MACHINE:-$DEFAULT_MACHINE}"
+    needs_machine_variable
+    execute_in_sandbox "start_simics -no_start -machine ${MACHINE}"
 
     echo "Running workarounds."
     cp ${HOSTBOOTROOT}/src/build/citest/etc/workarounds ${SANDBOXBASE}/src
@@ -290,8 +299,9 @@ hb_startsimics()
         exit -1
     fi
 
+    needs_machine_variable
     execute_in_sandbox \
-        "start_simics -machine ${MACHINE:-$DEFAULT_MACHINE} ${SIMICSOPTIONS} $*"
+        "start_simics -machine ${MACHINE} ${SIMICSOPTIONS} $*"
 }
 
 hb_rsync()
@@ -335,10 +345,6 @@ fi
 
 FIRST_PARAM=$1
 shift
-
-MACHINE=${MACHINE:-$DEFAULT_MACHINE}
-export MACHINE
-echo "Setting up for Machine = $MACHINE"
 
 case ${FIRST_PARAM} in
 workon)
