@@ -34,6 +34,8 @@
  *                          mjjones     06/30/2011  Created.
  *                          mjjones     09/07/2011  Update to test scratch attrs
  *                          mjjones     10/06/2011  Updates traces
+ *                          mjjones     10/07/2011  Removed target param
+ *                                                  Test scratch attributes
  *
  */
 
@@ -45,7 +47,7 @@ extern "C"
 //******************************************************************************
 // hwpTestAttributes function
 //******************************************************************************
-fapi::ReturnCode hwpTestAttributes(const fapi::Target & i_target)
+fapi::ReturnCode hwpTestAttributes()
 {
     FAPI_INF("hwpTestAttributes: Start HWP");
 
@@ -957,6 +959,71 @@ fapi::ReturnCode hwpTestAttributes(const fapi::Target & i_target)
             FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT64_ARRAY_2. Error from SET (2)");
             break;
         }
+        }
+
+        //----------------------------------------------------------------------
+        // Test getting scratch attributes with the fapiGetInitFileAttr function
+        //----------------------------------------------------------------------
+        uint64_t l_val = 0;
+        fapi::AttributeId l_id;
+        fapi::AttributeId l_ids[] = {fapi::ATTR_SCRATCH_UINT8_1,
+                                     fapi::ATTR_SCRATCH_UINT8_2,
+                                     fapi::ATTR_SCRATCH_UINT32_1,
+                                     fapi::ATTR_SCRATCH_UINT32_2,
+                                     fapi::ATTR_SCRATCH_UINT64_1,
+                                     fapi::ATTR_SCRATCH_UINT64_2,
+                                     fapi::ATTR_SCRATCH_UINT8_ARRAY_1,
+                                     fapi::ATTR_SCRATCH_UINT8_ARRAY_2,
+                                     fapi::ATTR_SCRATCH_UINT32_ARRAY_1,
+                                     fapi::ATTR_SCRATCH_UINT32_ARRAY_2,
+                                     fapi::ATTR_SCRATCH_UINT64_ARRAY_1,
+                                     fapi::ATTR_SCRATCH_UINT64_ARRAY_2};
+
+        for (uint32_t i = 0; i < 12; i++)
+        {
+            l_val = 7;
+            l_id = l_ids[i];
+            l_rc = fapiGetInitFileAttr(l_id, NULL, l_val);
+
+            if (l_rc)
+            {
+                FAPI_ERR("hwpTestAttributes: ID: %d. Error 0x%x from fapiGetInitFileAttr",
+                         l_ids[i], static_cast<uint32_t>(l_rc));
+                break;
+            }
+
+            if (l_val != 0)
+            {
+                l_rc = fapi::FAPI_RC_ATTR_UNIT_TEST_FAIL;
+                FAPI_ERR("hwpTestAttributes: ID: %d. Get returned %d",
+                         l_ids[i], static_cast<uint32_t>(l_val));
+                break;
+            }
+        }
+
+        if (l_rc)
+        {
+            break;
+        }
+
+        //----------------------------------------------------------------------
+        // Test getting an invalid scratch attribute
+        //----------------------------------------------------------------------
+        fapi::AttributeId l_badId = static_cast<fapi::AttributeId>(0xff);
+        l_rc = fapiGetInitFileAttr(l_badId, NULL, l_val);
+
+        if (l_rc)
+        {
+            FAPI_INF("hwpTestAttributes: Logging expected error 0x%x from fapiGetInitFileAttr",
+                     static_cast<uint32_t>(l_rc));
+            fapiLogError(l_rc);
+            break;
+        }
+        else
+        {
+            FAPI_ERR("hwpTestAttributes: Did not get error from fapiGetInitFileAttr");
+            l_rc = fapi::FAPI_RC_ATTR_UNIT_TEST_FAIL;
+            break;
         }
 
         //----------------------------------------------------------------------

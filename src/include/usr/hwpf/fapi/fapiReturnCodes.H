@@ -35,7 +35,7 @@
  *                          mjjones     06/30/2011  Add FAPI_RC_ATTR_UNIT_TEST_FAIL
  *                          mjjones     08/10/2011  Add FAPI_RC_FFDC_HWP_NOT_FOUND
  *                          mjjones     09/23/2011  Remove FAPI_RC_FFDC_HWP_NOT_FOUND
- *
+ *                          mjjones     10/07/2011  Add FAPI_RC_INVALID_ATTR_GET
  */
 
 #ifndef FAPIRETURNCODES_H_
@@ -62,6 +62,7 @@ enum
     // FAPI generated return codes
     FAPI_RC_NOT_IMPLEMENTED     = FAPI_RC_FAPI_MASK | 0x01,
     FAPI_RC_ATTR_UNIT_TEST_FAIL = FAPI_RC_FAPI_MASK | 0x02,
+    FAPI_RC_INVALID_ATTR_GET    = FAPI_RC_FAPI_MASK | 0x03,
 
     // PLAT generated return codes
     FAPI_RC_PLAT_ERR_SEE_DATA    = FAPI_RC_PLAT_MASK | 0x01,

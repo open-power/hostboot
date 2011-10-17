@@ -400,11 +400,25 @@ sub writeFapiPlatAttrMacrosHeaderFileContent {
             foreach my $fapiAttr (@{$fapiAttributes->{attribute}})
             {
                 if(   (exists $fapiAttr->{id}) 
-                   && ($fapiAttr->{id} eq $hwpfToHbAttrMap->{id})
-                   && (exists $fapiAttr->{platInit}) )
+                   && ($fapiAttr->{id} eq $hwpfToHbAttrMap->{id}) )
                 {
-                    # FAPI doesn't have a 'readable' element, so assume FAPI
-                    # attribute is always readable
+                    # Check that non-platInit attributes are in the
+                    # volatile-zeroed section and have a direct mapping
+                    if (! exists $fapiAttr->{platInit})
+                    {
+                        if ($hwpfToHbAttrMap->{macro} ne "DIRECT")
+                        {
+                            fatal("FAPI platInit attr '$hwpfToHbAttrMap->{id}' is '$hwpfToHbAttrMap->{macro}', it must be DIRECT");
+                        }
+
+                        # TODO Until kernel patch, they are in the volatile section
+                        if ($attribute->{persistency} ne "volatile")
+                        {
+                           fatal("FAPI platInit attr '$hwpfToHbAttrMap->{id}' is '$attribute->{persistency}', it must be volatile-zeroed");
+                        }
+                    }
+
+                    # All FAPI attributes are readable
                     $fapiReadable = 1;
                     
                     if(exists $fapiAttr->{writeable})

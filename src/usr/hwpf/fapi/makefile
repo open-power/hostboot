@@ -32,7 +32,8 @@ OBJS =  fapiReturnCode.o \
         fapiReturnCodeDataRef.o \
         fapiTarget.o \
         fapiHwAccess.o \
-        fapiErrorInfo.o
+        fapiErrorInfo.o \
+        fapiAttributeService.o
 
 include ${ROOTPATH}/config.mk
 

@@ -46,6 +46,18 @@
     <attribute><id>CLASS</id><default>SYS</default></attribute>
     <attribute><id>TYPE</id><default>SYS</default></attribute>
     <attribute><id>MODEL</id><default>POWER8</default></attribute>  
+    <attribute><id>SCRATCH_UINT8_1</id></attribute>
+    <attribute><id>SCRATCH_UINT8_2</id></attribute>
+    <attribute><id>SCRATCH_UINT32_1</id></attribute>
+    <attribute><id>SCRATCH_UINT32_2</id></attribute>
+    <attribute><id>SCRATCH_UINT64_1</id></attribute>
+    <attribute><id>SCRATCH_UINT64_2</id></attribute>
+    <attribute><id>SCRATCH_UINT8_ARRAY_1</id></attribute>
+    <attribute><id>SCRATCH_UINT8_ARRAY_2</id></attribute>
+    <attribute><id>SCRATCH_UINT32_ARRAY_1</id></attribute>
+    <attribute><id>SCRATCH_UINT32_ARRAY_2</id></attribute>
+    <attribute><id>SCRATCH_UINT64_ARRAY_1</id></attribute>
+    <attribute><id>SCRATCH_UINT64_ARRAY_2</id></attribute>
     <attribute><id>DUMMY_RW</id></attribute>
     <attribute>
         <id>XSCOM_BASE_ADDRESS</id>

@@ -24,7 +24,7 @@ ROOTPATH = ../../..
 MODULE = hwpf
 
 FAPI_ERROR_TARGETS = fapiHwpReturnCodes.H fapiHwpErrorInfo.H
-FAPI_ATTR_TARGETS = fapiAttributeIds.H
+FAPI_ATTR_TARGETS = fapiAttributeIds.H fapiAttributeService.C
 GENFILES = ${FAPI_ERROR_TARGETS} ${FAPI_ATTR_TARGETS}
 
 SUBDIRS = fapi.d hwp.d plat.d test.d
@@ -36,7 +36,7 @@ $(call GENTARGET, $(FAPI_ERROR_TARGETS)) : \
 	    fapi/fapiParseErrorInfo.pl hwp/fapiHwpErrorInfo.xml
 	$< $(dir $@) $(filter-out $<,$^)
 
-# fapiParseAttributeInfo.pl produces a single output file: FAPI_ATTR_TARGETS
+# fapiParseAttributeInfo.pl produces multiple output files: FAPI_ATTR_TARGETS
 $(call GENTARGET, $(FAPI_ATTR_TARGETS)) : \
 	    fapi/fapiParseAttributeInfo.pl hwp/fapiHwpAttributeInfo.xml 
 	$< $(dir $@) $(filter-out $<,$^)

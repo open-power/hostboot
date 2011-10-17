@@ -130,7 +130,28 @@ public:
         }
         else
         {
-            TS_TRACE("testHwpf3: Unit Test failed. hwpTestConfig passed. Error logged");
+            TS_TRACE("testHwpf3: Unit Test passed. hwpTestConfig passed. Error logged");
+        }
+    }
+
+    /**
+     * @brief Test HWPF Attributes: call a test procedure that exercises the FAPI
+     *        scratch attributes
+     */
+    void testHwpf4()
+    {
+        errlHndl_t l_err = NULL;
+
+        FAPI_INVOKE_HWP(l_err, hwpTestAttributes);
+
+        if (l_err)
+        {
+            TS_FAIL("testHwpf4: Unit Test failed. hwpTestAttributes failed. Error logged");
+            errlCommit(l_err);
+        }
+        else
+        {
+            TS_TRACE("testHwpf4: Unit Test passed. hwpTestAttributes passed. Error logged");
         }
     }
 

@@ -231,6 +231,217 @@
 </attribute>    
 
 <attribute>
+    <id>SCRATCH_UINT8_1</id>
+    <description>Scratch attribute that can be used for dev/test</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <!-- TODO All scratch attributes should be volatile-zeroed. Need Patrick kernel fix -->
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SCRATCH_UINT8_1</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>SCRATCH_UINT8_2</id>
+    <description>Scratch attribute that can be used for dev/test</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SCRATCH_UINT8_2</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>SCRATCH_UINT32_1</id>
+    <description>Scratch attribute that can be used for dev/test</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SCRATCH_UINT32_1</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>SCRATCH_UINT32_2</id>
+    <description>Scratch attribute that can be used for dev/test</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SCRATCH_UINT32_2</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>SCRATCH_UINT64_1</id>
+    <description>Scratch attribute that can be used for dev/test</description>
+    <simpleType>
+        <uint64_t>
+            <default>0</default>
+        </uint64_t>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SCRATCH_UINT64_1</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>SCRATCH_UINT64_2</id>
+    <description>Scratch attribute that can be used for dev/test</description>
+    <simpleType>
+        <uint64_t>
+            <default>0</default>
+        </uint64_t>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SCRATCH_UINT64_2</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>SCRATCH_UINT8_ARRAY_1</id>
+    <description>Scratch attribute that can be used for dev/test</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>32</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SCRATCH_UINT8_ARRAY_1</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>SCRATCH_UINT8_ARRAY_2</id>
+    <description>Scratch attribute that can be used for dev/test</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2, 3, 4</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SCRATCH_UINT8_ARRAY_2</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>SCRATCH_UINT32_ARRAY_1</id>
+    <description>Scratch attribute that can be used for dev/test</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+        <array>8</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SCRATCH_UINT32_ARRAY_1</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>SCRATCH_UINT32_ARRAY_2</id>
+    <description>Scratch attribute that can be used for dev/test</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+        <array>2,3</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SCRATCH_UINT32_ARRAY_2</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>SCRATCH_UINT64_ARRAY_1</id>
+    <description>Scratch attribute that can be used for dev/test</description>
+    <simpleType>
+        <uint64_t>
+            <default>0</default>
+        </uint64_t>
+        <array>4</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SCRATCH_UINT64_ARRAY_1</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>SCRATCH_UINT64_ARRAY_2</id>
+    <description>Scratch attribute that can be used for dev/test</description>
+    <simpleType>
+        <uint64_t>
+            <default>0</default>
+        </uint64_t>
+        <array>2,2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SCRATCH_UINT64_ARRAY_2</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
     <id>DUMMY_RW</id>
     <description>Dummy attribute with read/write permissions</description>
     <simpleType>

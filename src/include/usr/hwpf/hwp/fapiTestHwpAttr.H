@@ -31,6 +31,7 @@
  * Flag     Defect/Feature  User        Date        Description
  * ------   --------------  ----------  ----------- ----------------------------
  *                          mjjones     06/30/2011  Created.
+ *                          mjjones     10/07/2011  Removed target param
  */
 
 #ifndef FAPITESTHWPATTR_H_
@@ -46,11 +47,9 @@ extern "C"
 /**
  * @brief HWP that exercises attributes
  *
- * @param[in] i_target Reference to target (unused by HWP)
- *
  * @return ReturnCode
  */
-fapi::ReturnCode hwpTestAttributes(const fapi::Target & i_target);
+fapi::ReturnCode hwpTestAttributes();
 
 } // extern "C"
 
