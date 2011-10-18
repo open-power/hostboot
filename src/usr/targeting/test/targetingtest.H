@@ -140,7 +140,6 @@ class TargetingTestSuite: public CxxTest::TestSuite
         // Test: void exists(
         //           const EntityPath& i_entityPath,
         //               bool&       o_exists) const;
-
         bool l_exists = false;
         (void) l_targetService.exists(
                                       l_pTopLevel->getAttr<ATTR_PHYS_PATH> (), l_exists);

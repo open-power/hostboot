@@ -321,7 +321,7 @@ errlHndl_t PnorRP::readTOC()
     iv_TOC[PNOR::SIDE_A][PNOR::TOC].size = 8 + 8 + PNOR::NUM_SECTIONS*sizeof(TOCEntry_t);
     iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].size = 500*1024; //500K
     iv_TOC[PNOR::SIDE_A][PNOR::GLOBAL_DATA].size = PAGESIZE; //4K
-    iv_TOC[PNOR::SIDE_A][PNOR::HB_DATA].size = 4*PAGESIZE; //16K
+    iv_TOC[PNOR::SIDE_A][PNOR::HB_DATA].size = 128*KILOBYTE; //128K
 
     // fake PNOR will look like this:  TOC::HB_EXT_CODE:GLOBAL_DATA:HB_DATA
     // virtual addresses

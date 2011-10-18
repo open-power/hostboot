@@ -41,6 +41,7 @@
 
 extern trace_desc_t* g_trac_fsi;
 
+using namespace TARGETING;
 
 class FsiDDTest : public CxxTest::TestSuite
 {
@@ -52,7 +53,7 @@ class FsiDDTest : public CxxTest::TestSuite
     void test_init(void)
     {
         TRACFCOMP( g_trac_fsi, "FsiDDTest::test_init> Start" );
-        TRACFCOMP( g_trac_fsi, "FsiDDTest::test_init> Skipping due to simics issues" ); return;
+        return; //istep is calling this now
         uint64_t fails = 0;
         uint64_t total = 0; 
         errlHndl_t l_err = NULL;
@@ -72,14 +73,46 @@ class FsiDDTest : public CxxTest::TestSuite
     };
 
 
+    //testcode for Simics verification
+    void test_blah(void)
+    {
+        return;
+        errlHndl_t l_err = NULL;
+        TARGETING::Target* fsi_target = NULL;
+
+        // master processor target
+        TARGETING::EntityPath epath(TARGETING::EntityPath::PATH_PHYSICAL);
+        epath.addLast(TARGETING::TYPE_SYS,0);
+        epath.addLast(TARGETING::TYPE_NODE,0);
+        epath.addLast(TARGETING::TYPE_PROC,0);
+        fsi_target = TARGETING::targetService().toTarget(epath);
+
+        uint32_t read_data = 0;
+        size_t op_size = sizeof(read_data);
+
+        while(1)
+        {
+            nanosleep( 1, 0 );
+            op_size = sizeof(read_data);
+            l_err = DeviceFW::deviceRead( fsi_target, 
+                                          &read_data,
+                                          op_size,
+                                          DEVICE_FSI_ADDRESS(0x3418) );
+            if( l_err )
+            {
+                TRACFCOMP(g_trac_fsi, "FsiDDTest::test_blah> Error from device : RC=%X", l_err->reasonCode() );
+                delete l_err;
+            }
+        }
+    };
+
     /**
      * @brief FSI DD test - Read/Write
      *        Perform basic read/write operations
      */
     void test_readWrite(void)
     {
-        TRACFCOMP( g_trac_fsi, "FsiDDTest::test_readWrite> Start" );        
-        TRACFCOMP( g_trac_fsi, "FsiDDTest::test_init> Skipping due to simics issues" ); return;
+        TRACFCOMP( g_trac_fsi, "FsiDDTest::test_readWrite> Start" );
         uint64_t fails = 0;
         uint64_t total = 0;
         errlHndl_t l_err = NULL;
@@ -87,9 +120,10 @@ class FsiDDTest : public CxxTest::TestSuite
         // Setup some targets to use
         enum {
             PROC0,
-            PROC1,
+            PROCWRAP,
+            PROC2,
             CENTAUR0,
-            NULL_TARGET,
+            CENTAUR8,
             SENTINEL,
             NUM_TARGETS
         };
@@ -109,17 +143,29 @@ class FsiDDTest : public CxxTest::TestSuite
         fsi_target = TARGETING::targetService().toTarget(epath);
         fsi_targets[PROC0] = fsi_target;
 
-        // other (wrap) processor target (physical:sys-0/node-0/proc-1)
+        // other (wrap) processor target (physical:sys-0/node-0/proc-9)
         epath.removeLast();
-        epath.addLast(TARGETING::TYPE_PROC,1);
+        epath.addLast(TARGETING::TYPE_PROC,9);
         fsi_target = TARGETING::targetService().toTarget(epath);
-        fsi_targets[PROC1] = fsi_target;
+        fsi_targets[PROCWRAP] = fsi_target;
+
+        // other (wrap) processor target (physical:sys-0/node-0/proc-2)
+        epath.removeLast();
+        epath.addLast(TARGETING::TYPE_PROC,2);
+        fsi_target = TARGETING::targetService().toTarget(epath);
+        fsi_targets[PROC2] = fsi_target;
 
         // centaur target (physical:sys-0/node-0/membuf-0)
         epath.removeLast();
         epath.addLast(TARGETING::TYPE_MEMBUF,0);
         fsi_target = TARGETING::targetService().toTarget(epath);
         fsi_targets[CENTAUR0] = fsi_target;
+
+        // centaur target (physical:sys-0/node-0/membuf-8)
+        epath.removeLast();
+        epath.addLast(TARGETING::TYPE_MEMBUF,8);
+        fsi_target = TARGETING::targetService().toTarget(epath);
+        fsi_targets[CENTAUR8] = fsi_target;
 
         
 
@@ -129,39 +175,42 @@ class FsiDDTest : public CxxTest::TestSuite
             uint64_t addr;
             uint32_t data;
             bool writeable;
+            bool present;
         } test_data[] = {
             //** Master Control Space
             // version number
-            { PROC0, 0x003074, 0x91010800, false }, //CMFSI MVER
-            { PROC0, 0x003474, 0x91010800, false }, //MFSI MVER
+            { PROC0, 0x003074, 0x91010800, false, true }, //CMFSI MVER
+            { PROC0, 0x003474, 0x91010800, false, true }, //MFSI MVER
 
             // clock rate delay for ports 32-63 (unused ports)
-            { PROC0, 0x00340C, 0x11111111, true }, //MFSI MCRSP32
-            { PROC0, 0x00300C, 0x22222222, true }, //CMFSI MCRSP32
-
-            // port static levels
-            { PROC0, 0x003418, 0x80000000, false }, //MFSI MLEVP32 (port0 present)
-            { PROC0, 0x00341C, 0x00000000, false }, //MFSI MLEVP32
-            { PROC0, 0x003018, 0x80000000, false }, //CMFSI MLEVP0
-            { PROC0, 0x00301C, 0x00000000, false }, //CMFSI MLEVP32
+            { PROC0, 0x00340C, 0x11111111, true, true }, //MFSI MCRSP32
+            { PROC0, 0x00300C, 0x22222222, true, true }, //CMFSI MCRSP32
 
             //** Slave Regs (cheating)
-            { PROC0, 0x080000, 0xC0010EA0, false }, //Config Table entry for slave0 off MFSI-0 
-            { PROC0, 0x081000, 0x12345678, true }, //DATA_0 from FSI2PIB off MFSI-0 
-            //@fixme-simics { PROC0, 0x041000, 0x88776655, true }, //DATA_0 from FSI2PIB off cMFSI-0 
+            { PROC0, 0x080000, 0xC0010EA0, false, false }, //Config Table entry for slave0 off MFSI-0 
+            { PROC0, 0x081000, 0x12345678, true, false }, //DATA_0 from FSI2PIB off MFSI-0 
+            { PROC0, 0x041028, 0xC6EE9049 /*fixme 0x160E9049*/, false, false }, //CHIPID from SHIFT off cMFSI-0
+            { PROC0, 0x103074, 0x91010800, false, false }, //CMFSI MVER from Proc off MFSI-2
 
             //** Slave Regs
-            { PROC1, 0x000000, 0xC0010EA0, false }, //Config Table entry for slave0 off MFSI-0 
-            { PROC1, 0x001000, 0x12345678, false }, //DATA_0 from FSI2PIB off MFSI-0 
-            { PROC1, 0x001004, 0xA5A5A5A5, true }, //DATA_1 from FSI2PIB off MFSI-0
-            { PROC1, 0x001028, 0x120EA049, false }, //CHIPID from FSI2PIB off MFSI-0 
+            { PROCWRAP, 0x000000, 0xC0010EA0, false, false }, //Config Table entry for slave0 off MFSI-0 
+            { PROCWRAP, 0x001000, 0x12345678, false, false }, //DATA_0 from FSI2PIB off MFSI-0 
+            { PROCWRAP, 0x001004, 0xA5A5A5A5, true, false }, //DATA_1 from FSI2PIB off MFSI-0
+            //SW106529 { PROCWRAP, 0x001028, 0x120EA049, false, false }, //CHIPID from FSI2PIB off MFSI-0 
 
             //** Slave Regs
-            { CENTAUR0, 0x000000, 0xC31CEE9C, false }, //Config Table entry for slave0 off cMFSI-0 
-            //@fixme-simics { CENTAUR0, 0x001000, 0x88776655, false }, //DATA_0 from FSI2PIB off cMFSI-0 
-            //@fixme-simics { CENTAUR0, 0x001004, 0xB0B0B0B0, true }, //DATA_1 from FSI2PIB off cMFSI-0
-            { CENTAUR0, 0x001028, 0xC6EE9049 /*@fixme-simics 0x160E9049*/, true }, //CHIPID from FSI2PIB off cMFSI-0
-            { CENTAUR0, 0x000C08, 0x12344321, true }, //FEL from SHIFT off cMFSI-0
+            { PROC2, 0x000000, 0xC0010EA0, false, false }, //Config Table entry for slave0 off MFSI-2
+            { PROC2, 0x001000, 0x12345678, true, false }, //FEL from SHIFT off MFSI-2
+            { PROC2, 0x001028, 0x120EA049, false, false }, //CHIPID from FSI2PIB off MFSI-2
+
+            //** Slave Regs
+            { CENTAUR0, 0x000000, 0xC31CEE9C, false, false }, //Config Table entry for slave0 off cMFSI-0 
+            { CENTAUR0, 0x001028, 0xC6EE9049 /*fixme 0x160E9049*/, false, false }, //CHIPID from FSI2PIB off cMFSI-0
+            { CENTAUR0, 0x000C08, 0x12344321, true, false }, //FEL from SHIFT off cMFSI-0
+
+            //** Slave Regs
+            { CENTAUR8, 0x001000, 0x33333333, true, false }, //FEL from SHIFT off cMFSI-0 of MFSI-7
+            { CENTAUR8, 0x001028, /*0xC6EE9049*/ 0x160E9049, false, false }, //CHIPID from FSI2PIB off cMFSI-0 of MFSI-7
         };
         const uint64_t NUM_ADDRS = sizeof(test_data)/sizeof(test_data[0]);
 
@@ -169,29 +218,55 @@ class FsiDDTest : public CxxTest::TestSuite
         uint32_t read_data[NUM_ADDRS];
         size_t op_size = sizeof(uint32_t);
 
+        // figure out which ports are valid to test in the current config
+        uint64_t patterns_to_run = 0;
+        for( uint64_t x = 0; x < NUM_ADDRS; x++ )
+        {
+            // direct writes to slave regs
+            if( test_data[x].fsitarget == PROC0 )
+            {
+                if( ((0xFF0000 & test_data[x].addr) == 0x080000)
+                    && FSI::isSlavePresent(fsi_targets[PROCWRAP]) )
+                {
+                    test_data[x].present = true;
+                }
+                else if( ((0xFF0000 & test_data[x].addr) == 0x040000)
+                         && FSI::isSlavePresent(fsi_targets[CENTAUR0]) )
+                {
+                    test_data[x].present = true;
+                }
+                else if( ((0xFF0000 & test_data[x].addr) == 0x100000)
+                         && FSI::isSlavePresent(fsi_targets[PROC2]) )
+                {
+                    test_data[x].present = true;
+                }
+            }
+            // otherwise only talk to chips that we see
+            else if( FSI::isSlavePresent(fsi_targets[test_data[x].fsitarget]) )
+            {
+                test_data[x].present = true;
+            }
+            else
+            {
+                test_data[x].present = false;
+            }
+
+            if( test_data[x].present )
+            {
+                patterns_to_run |= (0x8000000000000000 >> x);
+            }
+        }
 
         // read address X,Y,Z
         for( uint64_t x = 0; x < NUM_ADDRS; x++ )
         {
-            op_size = sizeof(uint32_t);
-
-            if( (NULL == fsi_targets[test_data[x].fsitarget])
-                || (test_data[x].addr >= 0x040000) )
+            if( !test_data[x].present )
             {
-                TARGETING::EntityPath syspath(TARGETING::EntityPath::PATH_PHYSICAL);
-                syspath.addLast(TARGETING::TYPE_SYS,0);
-                TARGETING::Target* sys = TARGETING::targetService().toTarget(syspath);
-                uint8_t vpo_mode = 0;
-                if( sys
-                    && sys->tryGetAttr<TARGETING::ATTR_VPO_MODE>(vpo_mode)
-                    && (vpo_mode == 1) )
-                {
-                    // skip targets that aren't part of the VPO configs
-                    continue;
-                }
+                continue;
             }
 
             total++;
+            op_size = sizeof(uint32_t);
             l_err = DeviceFW::deviceRead( fsi_targets[test_data[x].fsitarget], 
                                           &(read_data[x]),
                                           op_size,
@@ -211,11 +286,15 @@ class FsiDDTest : public CxxTest::TestSuite
         // write X=A, Y=B, Z=C
         for( uint64_t x = 0; x < NUM_ADDRS; x++ )
         {
-            op_size = sizeof(uint32_t);
+            if( !test_data[x].present )
+            {
+                continue;
+            }
 
             if( test_data[x].writeable )
             {
                 total++;
+                op_size = sizeof(uint32_t);
                 l_err = DeviceFW::deviceWrite( fsi_targets[test_data[x].fsitarget], 
                                                &(test_data[x].data),
                                                op_size,
@@ -234,9 +313,13 @@ class FsiDDTest : public CxxTest::TestSuite
         // read X,Y,Z
         for( uint64_t x = 0; x < NUM_ADDRS; x++ )
         {
-            op_size = sizeof(uint32_t);
+            if( !test_data[x].present )
+            {
+                continue;
+            }
 
             total++;
+            op_size = sizeof(uint32_t);
             l_err = DeviceFW::deviceRead( fsi_targets[test_data[x].fsitarget], 
                                           &(read_data[x]),
                                           op_size,
@@ -254,6 +337,11 @@ class FsiDDTest : public CxxTest::TestSuite
         // verify X==A, Y==B, Z==C
         for( uint64_t x = 0; x < NUM_ADDRS; x++ )
         {
+            if( !test_data[x].present )
+            {
+                continue;
+            }
+
             total++;
             if( read_data[x] != test_data[x].data )
             {
@@ -289,7 +377,7 @@ class FsiDDTest : public CxxTest::TestSuite
 #endif
 
 
-        TRACFCOMP( g_trac_fsi, "FsiDDTest::test_readWrite> %d/%d fails", fails, total );
+        TRACFCOMP( g_trac_fsi, "FsiDDTest::test_readWrite> %d/%d fails (patterns=%.16X)", fails, total, patterns_to_run );
     };
 
     /**

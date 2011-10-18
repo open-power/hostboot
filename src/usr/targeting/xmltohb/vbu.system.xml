@@ -58,6 +58,9 @@
     </attribute>  
 </targetInstance>
 
+
+
+<!-- Salerno n0p0 : start -->
 <targetInstance>
     <id>sys0node0proc0</id>
     <type>chip-processor-salerno</type>
@@ -371,6 +374,7 @@
         <default>affinity:sys-0/node-0/proc-0/pci-2</default>
     </attribute>  
 </targetInstance>
+<!-- Salerno n0p0 : finish -->
 
 
 </attributes>

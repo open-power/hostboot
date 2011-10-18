@@ -27,6 +27,8 @@
      HOST BOOT TARGET INSTANCES 
      Contains target instance declarations for the Simics SALERNO 
      configuration
+
+     * Config has 1-8 Salerno chips
      ================================================================= -->
 
 <targetInstance>
@@ -55,6 +57,9 @@
     </attribute>  
 </targetInstance>
 
+
+
+<!-- Salerno n0p0 : start -->
 <targetInstance>
     <id>sys0node0proc0</id>
     <type>chip-processor-salerno</type>
@@ -368,6 +373,9 @@
         <default>affinity:sys-0/node-0/proc-0/pci-2</default>
     </attribute>  
 </targetInstance>
+<!-- Salerno n0p0 : finish -->
+
+
 
 <!-- Temporary target used for FSI wrap-back testing -->
 <targetInstance>
@@ -383,11 +391,11 @@
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-1</default>
+        <default>physical:sys-0/node-0/proc-9</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1</default>
+        <default>affinity:sys-0/node-0/proc-9</default>
     </attribute>  
 
     <!-- FSI is connected via wrapback to itself over MFSI-0 -->

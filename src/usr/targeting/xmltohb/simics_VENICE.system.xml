@@ -26,6 +26,9 @@
      HOST BOOT TARGET INSTANCES 
      Contains target instance declarations for the Simics VENICE 
      configuration
+
+     * Config has 1-8 Venice chips
+     * 1 Centaur hanging beneath each Venice     
      ================================================================= -->
 
 <targetInstance>
@@ -54,6 +57,9 @@
     </attribute>  
 </targetInstance>
 
+
+
+<!-- Venice n0p0 : start -->
 <targetInstance>
     <id>sys0node0proc0</id>
     <type>chip-processor-salerno</type>
@@ -367,11 +373,2388 @@
         <default>affinity:sys-0/node-0/proc-0/pci-2</default>
     </attribute>  
 </targetInstance>
+<!-- Venice n0p0 : finish -->
 
-<!-- This is not complete, but useful for testing FSI -->
+
+
+<!-- Venice n0p1 : start -->
+<targetInstance>
+    <id>sys0node0proc1</id>
+    <type>chip-processor-salerno</type>
+    <attribute><id>SCOM_SWITCHES</id>
+        <default>
+            <field><id>useFsiScom</id><value>1</value></field>
+            <field><id>useXscom</id><value>0</value></field>
+            <field><id>useInbandScom</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>XSCOM_CHIP_INFO</id>
+        <default>
+            <field><id>nodeId</id><value>0</value></field>
+            <field><id>chipId</id><value>0</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1</default>
+    </attribute>  
+    <!-- FSI is connected via proc0:MFSI-1 -->
+    <attribute>
+        <id>FSI_MASTER_CHIP</id>
+        <default>physical:sys-0/node-0/proc-0</default>
+    </attribute>
+    <attribute>
+        <id>FSI_MASTER_TYPE</id>
+        <default>MFSI</default>
+    </attribute>
+    <attribute>
+        <id>FSI_MASTER_PORT</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>FSI_SLAVE_CASCADE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FSI_OPTION_FLAGS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc1ex0</id>
+    <type>unit-ex-salerno</type>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/ex-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/ex-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc1ex1</id>
+    <type>unit-ex-salerno</type>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/ex-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/ex-1</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc1ex2</id>
+    <type>unit-ex-salerno</type>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/ex-2</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/ex-2</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc1ex3</id>
+    <type>unit-ex-salerno</type>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/ex-3</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/ex-3</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc1ex4</id>
+    <type>unit-ex-salerno</type>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/ex-4</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/ex-4</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc1ex5</id>
+    <type>unit-ex-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/ex-5</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/ex-5</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc1ex0core0</id>
+    <type>unit-core-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/ex-0/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/ex-0/core-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc1ex1core0</id>
+    <type>unit-core-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/ex-1/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/ex-1/core-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc1ex2core0</id>
+    <type>unit-core-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/ex-2/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/ex-2/core-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc1ex3core0</id>
+    <type>unit-core-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/ex-3/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/ex-3/core-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc1ex4core0</id>
+    <type>unit-core-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/ex-4/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/ex-4/core-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc1ex5core0</id>
+    <type>unit-core-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/ex-5/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/ex-5/core-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc1mcs0</id>
+    <type>unit-mcs-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/mcs-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mcs-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc1mcs0mba0</id>
+    <type>unit-mba-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/mcs-0/mba-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mcs-0/mba-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc1mcs0mba1</id>
+    <type>unit-mba-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/mcs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mcs-0/mba-1</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc1mcs0mba0port0</id>
+    <type>unit-memport-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/mcs-0/mba-0/mem_port-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mcs-0/mba-0/mem_port-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc1mcs0mba1port0</id>
+    <type>unit-memport-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/mcs-0/mba-1/mem_port-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mcs-0/mba-1/mem_port-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc1pervasive0</id>
+    <type>unit-pervasive-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/pervasive-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/pervasive-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc1powerbus0</id>
+    <type>unit-powerbus-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/powerbus-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/powerbus-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc1pci0</id>
+    <type>unit-pci-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/pci-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/pci-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc1pci1</id>
+    <type>unit-pci-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/pci-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/pci-1</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc1pci2</id>
+    <type>unit-pci-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/pci-2</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/pci-2</default>
+    </attribute>  
+</targetInstance>
+<!-- Venice n0p1 : finish -->
+
+
+
+<!-- Venice n0p2 : start -->
+<targetInstance>
+    <id>sys0node0proc2</id>
+    <type>chip-processor-salerno</type>
+    <attribute><id>SCOM_SWITCHES</id>
+        <default>
+            <field><id>useFsiScom</id><value>1</value></field>
+            <field><id>useXscom</id><value>0</value></field>
+            <field><id>useInbandScom</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>XSCOM_CHIP_INFO</id>
+        <default>
+            <field><id>nodeId</id><value>0</value></field>
+            <field><id>chipId</id><value>0</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-2</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-2</default>
+    </attribute>  
+    <!-- FSI is connected via proc0:MFSI-2 -->
+    <attribute>
+        <id>FSI_MASTER_CHIP</id>
+        <default>physical:sys-0/node-0/proc-0</default>
+    </attribute>
+    <attribute>
+        <id>FSI_MASTER_TYPE</id>
+        <default>MFSI</default>
+    </attribute>
+    <attribute>
+        <id>FSI_MASTER_PORT</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
+        <id>FSI_SLAVE_CASCADE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FSI_OPTION_FLAGS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc2ex0</id>
+    <type>unit-ex-salerno</type>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-2/ex-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-2/ex-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc2ex1</id>
+    <type>unit-ex-salerno</type>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-2/ex-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-2/ex-1</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc2ex2</id>
+    <type>unit-ex-salerno</type>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-2/ex-2</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-2/ex-2</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc2ex3</id>
+    <type>unit-ex-salerno</type>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-2/ex-3</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-2/ex-3</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc2ex4</id>
+    <type>unit-ex-salerno</type>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-2/ex-4</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-2/ex-4</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc2ex5</id>
+    <type>unit-ex-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-2/ex-5</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-2/ex-5</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc2ex0core0</id>
+    <type>unit-core-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-2/ex-0/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-2/ex-0/core-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc2ex1core0</id>
+    <type>unit-core-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-2/ex-1/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-2/ex-1/core-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc2ex2core0</id>
+    <type>unit-core-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-2/ex-2/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-2/ex-2/core-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc2ex3core0</id>
+    <type>unit-core-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-2/ex-3/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-2/ex-3/core-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc2ex4core0</id>
+    <type>unit-core-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-2/ex-4/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-2/ex-4/core-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc2ex5core0</id>
+    <type>unit-core-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-2/ex-5/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-2/ex-5/core-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc2mcs0</id>
+    <type>unit-mcs-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-2/mcs-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-2/mcs-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc2mcs0mba0</id>
+    <type>unit-mba-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-2/mcs-0/mba-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-2/mcs-0/mba-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc2mcs0mba1</id>
+    <type>unit-mba-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-2/mcs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-2/mcs-0/mba-1</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc2mcs0mba0port0</id>
+    <type>unit-memport-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-2/mcs-0/mba-0/mem_port-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-2/mcs-0/mba-0/mem_port-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc2mcs0mba1port0</id>
+    <type>unit-memport-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-2/mcs-0/mba-1/mem_port-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-2/mcs-0/mba-1/mem_port-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc2pervasive0</id>
+    <type>unit-pervasive-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-2/pervasive-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-2/pervasive-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc2powerbus0</id>
+    <type>unit-powerbus-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-2/powerbus-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-2/powerbus-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc2pci0</id>
+    <type>unit-pci-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-2/pci-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-2/pci-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc2pci1</id>
+    <type>unit-pci-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-2/pci-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-2/pci-1</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc2pci2</id>
+    <type>unit-pci-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-2/pci-2</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-2/pci-2</default>
+    </attribute>  
+</targetInstance>
+<!-- Venice n0p2 : finish -->
+
+
+
+<!-- Venice n0p3 : start -->
+<targetInstance>
+    <id>sys0node0proc3</id>
+    <type>chip-processor-salerno</type>
+    <attribute><id>SCOM_SWITCHES</id>
+        <default>
+            <field><id>useFsiScom</id><value>1</value></field>
+            <field><id>useXscom</id><value>0</value></field>
+            <field><id>useInbandScom</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>XSCOM_CHIP_INFO</id>
+        <default>
+            <field><id>nodeId</id><value>0</value></field>
+            <field><id>chipId</id><value>0</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-3</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-3</default>
+    </attribute>  
+    <!-- FSI is connected via proc0:MFSI-3 -->
+    <attribute>
+        <id>FSI_MASTER_CHIP</id>
+        <default>physical:sys-0/node-0/proc-0</default>
+    </attribute>
+    <attribute>
+        <id>FSI_MASTER_TYPE</id>
+        <default>MFSI</default>
+    </attribute>
+    <attribute>
+        <id>FSI_MASTER_PORT</id>
+        <default>3</default>
+    </attribute>
+    <attribute>
+        <id>FSI_SLAVE_CASCADE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FSI_OPTION_FLAGS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc3ex0</id>
+    <type>unit-ex-salerno</type>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-3/ex-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-3/ex-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc3ex1</id>
+    <type>unit-ex-salerno</type>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-3/ex-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-3/ex-1</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc3ex2</id>
+    <type>unit-ex-salerno</type>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-3/ex-2</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-3/ex-2</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc3ex3</id>
+    <type>unit-ex-salerno</type>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-3/ex-3</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-3/ex-3</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc3ex4</id>
+    <type>unit-ex-salerno</type>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-3/ex-4</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-3/ex-4</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc3ex5</id>
+    <type>unit-ex-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-3/ex-5</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-3/ex-5</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc3ex0core0</id>
+    <type>unit-core-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-3/ex-0/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-3/ex-0/core-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc3ex1core0</id>
+    <type>unit-core-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-3/ex-1/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-3/ex-1/core-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc3ex2core0</id>
+    <type>unit-core-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-3/ex-2/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-3/ex-2/core-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc3ex3core0</id>
+    <type>unit-core-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-3/ex-3/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-3/ex-3/core-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc3ex4core0</id>
+    <type>unit-core-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-3/ex-4/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-3/ex-4/core-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc3ex5core0</id>
+    <type>unit-core-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-3/ex-5/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-3/ex-5/core-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc3mcs0</id>
+    <type>unit-mcs-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-3/mcs-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-3/mcs-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc3mcs0mba0</id>
+    <type>unit-mba-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-3/mcs-0/mba-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-3/mcs-0/mba-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc3mcs0mba1</id>
+    <type>unit-mba-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-3/mcs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-3/mcs-0/mba-1</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc3mcs0mba0port0</id>
+    <type>unit-memport-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-3/mcs-0/mba-0/mem_port-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-3/mcs-0/mba-0/mem_port-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc3mcs0mba1port0</id>
+    <type>unit-memport-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-3/mcs-0/mba-1/mem_port-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-3/mcs-0/mba-1/mem_port-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc3pervasive0</id>
+    <type>unit-pervasive-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-3/pervasive-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-3/pervasive-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc3powerbus0</id>
+    <type>unit-powerbus-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-3/powerbus-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-3/powerbus-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc3pci0</id>
+    <type>unit-pci-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-3/pci-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-3/pci-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc3pci1</id>
+    <type>unit-pci-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-3/pci-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-3/pci-1</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc3pci2</id>
+    <type>unit-pci-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-3/pci-2</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-3/pci-2</default>
+    </attribute>  
+</targetInstance>
+<!-- Venice n0p3 : finish -->
+
+
+
+<!-- Venice n0p4 : start -->
+<targetInstance>
+    <id>sys0node0proc4</id>
+    <type>chip-processor-salerno</type>
+    <attribute><id>SCOM_SWITCHES</id>
+        <default>
+            <field><id>useFsiScom</id><value>1</value></field>
+            <field><id>useXscom</id><value>0</value></field>
+            <field><id>useInbandScom</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>XSCOM_CHIP_INFO</id>
+        <default>
+            <field><id>nodeId</id><value>0</value></field>
+            <field><id>chipId</id><value>0</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-4</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-4</default>
+    </attribute>  
+    <!-- FSI is connected via proc0:MFSI-4 -->
+    <attribute>
+        <id>FSI_MASTER_CHIP</id>
+        <default>physical:sys-0/node-0/proc-0</default>
+    </attribute>
+    <attribute>
+        <id>FSI_MASTER_TYPE</id>
+        <default>MFSI</default>
+    </attribute>
+    <attribute>
+        <id>FSI_MASTER_PORT</id>
+        <default>4</default>
+    </attribute>
+    <attribute>
+        <id>FSI_SLAVE_CASCADE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FSI_OPTION_FLAGS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc4ex0</id>
+    <type>unit-ex-salerno</type>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-4/ex-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-4/ex-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc4ex1</id>
+    <type>unit-ex-salerno</type>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-4/ex-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-4/ex-1</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc4ex2</id>
+    <type>unit-ex-salerno</type>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-4/ex-2</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-4/ex-2</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc4ex3</id>
+    <type>unit-ex-salerno</type>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-4/ex-3</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-4/ex-3</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc4ex4</id>
+    <type>unit-ex-salerno</type>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-4/ex-4</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-4/ex-4</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc4ex5</id>
+    <type>unit-ex-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-4/ex-5</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-4/ex-5</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc4ex0core0</id>
+    <type>unit-core-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-4/ex-0/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-4/ex-0/core-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc4ex1core0</id>
+    <type>unit-core-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-4/ex-1/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-4/ex-1/core-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc4ex2core0</id>
+    <type>unit-core-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-4/ex-2/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-4/ex-2/core-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc4ex3core0</id>
+    <type>unit-core-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-4/ex-3/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-4/ex-3/core-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc4ex4core0</id>
+    <type>unit-core-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-4/ex-4/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-4/ex-4/core-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc4ex5core0</id>
+    <type>unit-core-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-4/ex-5/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-4/ex-5/core-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc4mcs0</id>
+    <type>unit-mcs-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-4/mcs-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-4/mcs-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc4mcs0mba0</id>
+    <type>unit-mba-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-4/mcs-0/mba-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-4/mcs-0/mba-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc4mcs0mba1</id>
+    <type>unit-mba-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-4/mcs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-4/mcs-0/mba-1</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc4mcs0mba0port0</id>
+    <type>unit-memport-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-4/mcs-0/mba-0/mem_port-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-4/mcs-0/mba-0/mem_port-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc4mcs0mba1port0</id>
+    <type>unit-memport-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-4/mcs-0/mba-1/mem_port-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-4/mcs-0/mba-1/mem_port-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc4pervasive0</id>
+    <type>unit-pervasive-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-4/pervasive-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-4/pervasive-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc4powerbus0</id>
+    <type>unit-powerbus-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-4/powerbus-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-4/powerbus-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc4pci0</id>
+    <type>unit-pci-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-4/pci-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-4/pci-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc4pci1</id>
+    <type>unit-pci-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-4/pci-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-4/pci-1</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc4pci2</id>
+    <type>unit-pci-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-4/pci-2</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-4/pci-2</default>
+    </attribute>  
+</targetInstance>
+<!-- Venice n0p4 : finish -->
+
+
+
+<!-- Venice n0p5 : start -->
+<targetInstance>
+    <id>sys0node0proc5</id>
+    <type>chip-processor-salerno</type>
+    <attribute><id>SCOM_SWITCHES</id>
+        <default>
+            <field><id>useFsiScom</id><value>1</value></field>
+            <field><id>useXscom</id><value>0</value></field>
+            <field><id>useInbandScom</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>XSCOM_CHIP_INFO</id>
+        <default>
+            <field><id>nodeId</id><value>0</value></field>
+            <field><id>chipId</id><value>0</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-5</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-5</default>
+    </attribute>  
+    <!-- FSI is connected via proc0:MFSI-5 -->
+    <attribute>
+        <id>FSI_MASTER_CHIP</id>
+        <default>physical:sys-0/node-0/proc-0</default>
+    </attribute>
+    <attribute>
+        <id>FSI_MASTER_TYPE</id>
+        <default>MFSI</default>
+    </attribute>
+    <attribute>
+        <id>FSI_MASTER_PORT</id>
+        <default>5</default>
+    </attribute>
+    <attribute>
+        <id>FSI_SLAVE_CASCADE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FSI_OPTION_FLAGS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc5ex0</id>
+    <type>unit-ex-salerno</type>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-5/ex-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-5/ex-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc5ex1</id>
+    <type>unit-ex-salerno</type>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-5/ex-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-5/ex-1</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc5ex2</id>
+    <type>unit-ex-salerno</type>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-5/ex-2</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-5/ex-2</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc5ex3</id>
+    <type>unit-ex-salerno</type>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-5/ex-3</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-5/ex-3</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc5ex4</id>
+    <type>unit-ex-salerno</type>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-5/ex-4</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-5/ex-4</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc5ex5</id>
+    <type>unit-ex-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-5/ex-5</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-5/ex-5</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc5ex0core0</id>
+    <type>unit-core-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-5/ex-0/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-5/ex-0/core-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc5ex1core0</id>
+    <type>unit-core-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-5/ex-1/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-5/ex-1/core-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc5ex2core0</id>
+    <type>unit-core-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-5/ex-2/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-5/ex-2/core-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc5ex3core0</id>
+    <type>unit-core-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-5/ex-3/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-5/ex-3/core-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc5ex4core0</id>
+    <type>unit-core-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-5/ex-4/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-5/ex-4/core-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc5ex5core0</id>
+    <type>unit-core-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-5/ex-5/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-5/ex-5/core-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc5mcs0</id>
+    <type>unit-mcs-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-5/mcs-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-5/mcs-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc5mcs0mba0</id>
+    <type>unit-mba-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-5/mcs-0/mba-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-5/mcs-0/mba-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc5mcs0mba1</id>
+    <type>unit-mba-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-5/mcs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-5/mcs-0/mba-1</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc5mcs0mba0port0</id>
+    <type>unit-memport-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-5/mcs-0/mba-0/mem_port-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-5/mcs-0/mba-0/mem_port-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc5mcs0mba1port0</id>
+    <type>unit-memport-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-5/mcs-0/mba-1/mem_port-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-5/mcs-0/mba-1/mem_port-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc5pervasive0</id>
+    <type>unit-pervasive-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-5/pervasive-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-5/pervasive-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc5powerbus0</id>
+    <type>unit-powerbus-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-5/powerbus-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-5/powerbus-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc5pci0</id>
+    <type>unit-pci-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-5/pci-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-5/pci-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc5pci1</id>
+    <type>unit-pci-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-5/pci-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-5/pci-1</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc5pci2</id>
+    <type>unit-pci-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-5/pci-2</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-5/pci-2</default>
+    </attribute>  
+</targetInstance>
+<!-- Venice n0p5 : finish -->
+
+
+
+<!-- Venice n0p6 : start -->
+<targetInstance>
+    <id>sys0node0proc6</id>
+    <type>chip-processor-salerno</type>
+    <attribute><id>SCOM_SWITCHES</id>
+        <default>
+            <field><id>useFsiScom</id><value>1</value></field>
+            <field><id>useXscom</id><value>0</value></field>
+            <field><id>useInbandScom</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>XSCOM_CHIP_INFO</id>
+        <default>
+            <field><id>nodeId</id><value>0</value></field>
+            <field><id>chipId</id><value>0</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-6</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-6</default>
+    </attribute>  
+    <!-- FSI is connected via proc0:MFSI-6 -->
+    <attribute>
+        <id>FSI_MASTER_CHIP</id>
+        <default>physical:sys-0/node-0/proc-0</default>
+    </attribute>
+    <attribute>
+        <id>FSI_MASTER_TYPE</id>
+        <default>MFSI</default>
+    </attribute>
+    <attribute>
+        <id>FSI_MASTER_PORT</id>
+        <default>6</default>
+    </attribute>
+    <attribute>
+        <id>FSI_SLAVE_CASCADE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FSI_OPTION_FLAGS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc6ex0</id>
+    <type>unit-ex-salerno</type>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-6/ex-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-6/ex-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc6ex1</id>
+    <type>unit-ex-salerno</type>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-6/ex-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-6/ex-1</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc6ex2</id>
+    <type>unit-ex-salerno</type>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-6/ex-2</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-6/ex-2</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc6ex3</id>
+    <type>unit-ex-salerno</type>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-6/ex-3</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-6/ex-3</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc6ex4</id>
+    <type>unit-ex-salerno</type>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-6/ex-4</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-6/ex-4</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc6ex5</id>
+    <type>unit-ex-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-6/ex-5</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-6/ex-5</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc6ex0core0</id>
+    <type>unit-core-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-6/ex-0/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-6/ex-0/core-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc6ex1core0</id>
+    <type>unit-core-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-6/ex-1/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-6/ex-1/core-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc6ex2core0</id>
+    <type>unit-core-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-6/ex-2/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-6/ex-2/core-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc6ex3core0</id>
+    <type>unit-core-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-6/ex-3/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-6/ex-3/core-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc6ex4core0</id>
+    <type>unit-core-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-6/ex-4/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-6/ex-4/core-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc6ex5core0</id>
+    <type>unit-core-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-6/ex-5/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-6/ex-5/core-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc6mcs0</id>
+    <type>unit-mcs-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-6/mcs-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-6/mcs-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc6mcs0mba0</id>
+    <type>unit-mba-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-6/mcs-0/mba-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-6/mcs-0/mba-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc6mcs0mba1</id>
+    <type>unit-mba-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-6/mcs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-6/mcs-0/mba-1</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc6mcs0mba0port0</id>
+    <type>unit-memport-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-6/mcs-0/mba-0/mem_port-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-6/mcs-0/mba-0/mem_port-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc6mcs0mba1port0</id>
+    <type>unit-memport-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-6/mcs-0/mba-1/mem_port-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-6/mcs-0/mba-1/mem_port-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc6pervasive0</id>
+    <type>unit-pervasive-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-6/pervasive-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-6/pervasive-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc6powerbus0</id>
+    <type>unit-powerbus-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-6/powerbus-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-6/powerbus-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc6pci0</id>
+    <type>unit-pci-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-6/pci-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-6/pci-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc6pci1</id>
+    <type>unit-pci-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-6/pci-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-6/pci-1</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc6pci2</id>
+    <type>unit-pci-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-6/pci-2</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-6/pci-2</default>
+    </attribute>  
+</targetInstance>
+<!-- Venice n0p6 : finish -->
+
+
+
+<!-- Venice n0p7 : start -->
+<targetInstance>
+    <id>sys0node0proc7</id>
+    <type>chip-processor-salerno</type>
+    <attribute><id>SCOM_SWITCHES</id>
+        <default>
+            <field><id>useFsiScom</id><value>1</value></field>
+            <field><id>useXscom</id><value>0</value></field>
+            <field><id>useInbandScom</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>XSCOM_CHIP_INFO</id>
+        <default>
+            <field><id>nodeId</id><value>0</value></field>
+            <field><id>chipId</id><value>0</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-7</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-7</default>
+    </attribute>  
+    <!-- FSI is connected via proc0:MFSI-7 -->
+    <attribute>
+        <id>FSI_MASTER_CHIP</id>
+        <default>physical:sys-0/node-0/proc-0</default>
+    </attribute>
+    <attribute>
+        <id>FSI_MASTER_TYPE</id>
+        <default>MFSI</default>
+    </attribute>
+    <attribute>
+        <id>FSI_MASTER_PORT</id>
+        <default>7</default>
+    </attribute>
+    <attribute>
+        <id>FSI_SLAVE_CASCADE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FSI_OPTION_FLAGS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc7ex0</id>
+    <type>unit-ex-salerno</type>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-7/ex-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-7/ex-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc7ex1</id>
+    <type>unit-ex-salerno</type>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-7/ex-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-7/ex-1</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc7ex2</id>
+    <type>unit-ex-salerno</type>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-7/ex-2</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-7/ex-2</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc7ex3</id>
+    <type>unit-ex-salerno</type>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-7/ex-3</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-7/ex-3</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc7ex4</id>
+    <type>unit-ex-salerno</type>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-7/ex-4</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-7/ex-4</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc7ex5</id>
+    <type>unit-ex-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-7/ex-5</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-7/ex-5</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc7ex0core0</id>
+    <type>unit-core-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-7/ex-0/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-7/ex-0/core-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc7ex1core0</id>
+    <type>unit-core-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-7/ex-1/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-7/ex-1/core-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc7ex2core0</id>
+    <type>unit-core-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-7/ex-2/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-7/ex-2/core-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc7ex3core0</id>
+    <type>unit-core-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-7/ex-3/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-7/ex-3/core-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc7ex4core0</id>
+    <type>unit-core-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-7/ex-4/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-7/ex-4/core-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc7ex5core0</id>
+    <type>unit-core-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-7/ex-5/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-7/ex-5/core-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc7mcs0</id>
+    <type>unit-mcs-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-7/mcs-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-7/mcs-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc7mcs0mba0</id>
+    <type>unit-mba-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-7/mcs-0/mba-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-7/mcs-0/mba-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc7mcs0mba1</id>
+    <type>unit-mba-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-7/mcs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-7/mcs-0/mba-1</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc7mcs0mba0port0</id>
+    <type>unit-memport-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-7/mcs-0/mba-0/mem_port-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-7/mcs-0/mba-0/mem_port-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc7mcs0mba1port0</id>
+    <type>unit-memport-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-7/mcs-0/mba-1/mem_port-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-7/mcs-0/mba-1/mem_port-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc7pervasive0</id>
+    <type>unit-pervasive-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-7/pervasive-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-7/pervasive-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc7powerbus0</id>
+    <type>unit-powerbus-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-7/powerbus-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-7/powerbus-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc7pci0</id>
+    <type>unit-pci-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-7/pci-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-7/pci-0</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc7pci1</id>
+    <type>unit-pci-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-7/pci-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-7/pci-1</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc7pci2</id>
+    <type>unit-pci-salerno</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-7/pci-2</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-7/pci-2</default>
+    </attribute>  
+</targetInstance>
+<!-- Venice n0p7 : finish -->
+
+
+
+<!-- Centaur n0p0 : start -->
+<!-- @todo This is not complete, but useful for testing FSI -->
 <targetInstance>
     <id>sys0node0membuf0</id>
-    <type>chip-processor-salerno</type>
+    <type>chip-processor-salerno</type><!-- @todo wrong type -->
     <attribute><id>SCOM_SWITCHES</id>
         <default>
             <field><id>useFsiScom</id><value>1</value></field>
@@ -389,7 +2772,7 @@
         <default>affinity:sys-0/node-0/membuf-0</default>
     </attribute>  
 
-    <!-- FSI is connected via local cMFSI-0 -->
+    <!-- FSI is connected via proc0:cMFSI-0 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-0</default>
@@ -411,9 +2794,348 @@
         <default>0</default>
     </attribute>
 </targetInstance>
+<!-- Centaur n0p0 : finish -->
 
 
-<!-- Temporary targets used for FSI wrap-back testing -->
+
+<!-- Centaur n0p8 : start -->
+<!-- @todo This is not complete, but useful for testing FSI -->
+<targetInstance>
+    <id>sys0node0membuf8</id>
+    <type>chip-processor-salerno</type><!-- @todo wrong type -->
+    <attribute><id>SCOM_SWITCHES</id>
+        <default>
+            <field><id>useFsiScom</id><value>1</value></field>
+            <field><id>useXscom</id><value>0</value></field>
+            <field><id>useInbandScom</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/membuf-8</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/membuf-8</default>
+    </attribute>  
+
+    <!-- FSI is connected via proc1:cMFSI-0 -->
+    <attribute>
+        <id>FSI_MASTER_CHIP</id>
+        <default>physical:sys-0/node-0/proc-1</default>
+    </attribute>
+    <attribute>
+        <id>FSI_MASTER_TYPE</id>
+        <default>NO_MASTER</default><!-- @fixme Simics is busted (SW107421), should be CMFSI -->
+    </attribute>
+    <attribute>
+        <id>FSI_MASTER_PORT</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FSI_SLAVE_CASCADE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FSI_OPTION_FLAGS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+<!-- Centaur n0p8 : finish -->
+
+
+
+
+<!-- Centaur n0p16 : start -->
+<!-- @todo This is not complete, but useful for testing FSI -->
+<targetInstance>
+    <id>sys0node0membuf16</id>
+    <type>chip-processor-salerno</type><!-- @todo wrong type -->
+    <attribute><id>SCOM_SWITCHES</id>
+        <default>
+            <field><id>useFsiScom</id><value>1</value></field>
+            <field><id>useXscom</id><value>0</value></field>
+            <field><id>useInbandScom</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/membuf-16</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/membuf-16</default>
+    </attribute>  
+
+    <!-- FSI is connected via proc2:cMFSI-0 -->
+    <attribute>
+        <id>FSI_MASTER_CHIP</id>
+        <default>physical:sys-0/node-0/proc-2</default>
+    </attribute>
+    <attribute>
+        <id>FSI_MASTER_TYPE</id>
+        <default>NO_MASTER</default><!-- @fixme Simics is busted, should be CMFSI -->
+    </attribute>
+    <attribute>
+        <id>FSI_MASTER_PORT</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FSI_SLAVE_CASCADE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FSI_OPTION_FLAGS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+<!-- Centaur n0p16 : finish -->
+
+
+
+<!-- Centaur n0p24 : start -->
+<!-- @todo This is not complete, but useful for testing FSI -->
+<targetInstance>
+    <id>sys0node0membuf24</id>
+    <type>chip-processor-salerno</type><!-- @todo wrong type -->
+    <attribute><id>SCOM_SWITCHES</id>
+        <default>
+            <field><id>useFsiScom</id><value>1</value></field>
+            <field><id>useXscom</id><value>0</value></field>
+            <field><id>useInbandScom</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/membuf-24</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/membuf-24</default>
+    </attribute>  
+
+    <!-- FSI is connected via proc3:cMFSI-0 -->
+    <attribute>
+        <id>FSI_MASTER_CHIP</id>
+        <default>physical:sys-0/node-0/proc-3</default>
+    </attribute>
+    <attribute>
+        <id>FSI_MASTER_TYPE</id>
+        <default>NO_MASTER</default><!-- @fixme Simics is busted, should be CMFSI -->
+    </attribute>
+    <attribute>
+        <id>FSI_MASTER_PORT</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FSI_SLAVE_CASCADE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FSI_OPTION_FLAGS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+<!-- Centaur n0p24 : finish -->
+
+
+
+<!-- Centaur n0p32 : start -->
+<!-- @todo This is not complete, but useful for testing FSI -->
+<targetInstance>
+    <id>sys0node0membuf32</id>
+    <type>chip-processor-salerno</type><!-- @todo wrong type -->
+    <attribute><id>SCOM_SWITCHES</id>
+        <default>
+            <field><id>useFsiScom</id><value>1</value></field>
+            <field><id>useXscom</id><value>0</value></field>
+            <field><id>useInbandScom</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/membuf-32</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/membuf-32</default>
+    </attribute>  
+
+    <!-- FSI is connected via proc4:cMFSI-0 -->
+    <attribute>
+        <id>FSI_MASTER_CHIP</id>
+        <default>physical:sys-0/node-0/proc-4</default>
+    </attribute>
+    <attribute>
+        <id>FSI_MASTER_TYPE</id>
+        <default>NO_MASTER</default><!-- @fixme Simics is busted, should be CMFSI -->
+    </attribute>
+    <attribute>
+        <id>FSI_MASTER_PORT</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FSI_SLAVE_CASCADE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FSI_OPTION_FLAGS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+<!-- Centaur n0p32 : finish -->
+
+
+
+<!-- Centaur n0p40 : start -->
+<!-- @todo This is not complete, but useful for testing FSI -->
+<targetInstance>
+    <id>sys0node0membuf40</id>
+    <type>chip-processor-salerno</type><!-- @todo wrong type -->
+    <attribute><id>SCOM_SWITCHES</id>
+        <default>
+            <field><id>useFsiScom</id><value>1</value></field>
+            <field><id>useXscom</id><value>0</value></field>
+            <field><id>useInbandScom</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/membuf-40</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/membuf-40</default>
+    </attribute>  
+
+    <!-- FSI is connected via proc5:cMFSI-0 -->
+    <attribute>
+        <id>FSI_MASTER_CHIP</id>
+        <default>physical:sys-0/node-0/proc-5</default>
+    </attribute>
+    <attribute>
+        <id>FSI_MASTER_TYPE</id>
+        <default>NO_MASTER</default><!-- @fixme Simics is busted, should be CMFSI -->
+    </attribute>
+    <attribute>
+        <id>FSI_MASTER_PORT</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FSI_SLAVE_CASCADE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FSI_OPTION_FLAGS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+<!-- Centaur n0p40 : finish -->
+
+
+
+<!-- Centaur n0p48 : start -->
+<!-- @todo This is not complete, but useful for testing FSI -->
+<targetInstance>
+    <id>sys0node0membuf48</id>
+    <type>chip-processor-salerno</type><!-- @todo wrong type -->
+    <attribute><id>SCOM_SWITCHES</id>
+        <default>
+            <field><id>useFsiScom</id><value>1</value></field>
+            <field><id>useXscom</id><value>0</value></field>
+            <field><id>useInbandScom</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/membuf-48</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/membuf-48</default>
+    </attribute>  
+
+    <!-- FSI is connected via proc6:cMFSI-0 -->
+    <attribute>
+        <id>FSI_MASTER_CHIP</id>
+        <default>physical:sys-0/node-0/proc-6</default>
+    </attribute>
+    <attribute>
+        <id>FSI_MASTER_TYPE</id>
+        <default>NO_MASTER</default><!-- @fixme Simics is busted, should be CMFSI -->
+    </attribute>
+    <attribute>
+        <id>FSI_MASTER_PORT</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FSI_SLAVE_CASCADE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FSI_OPTION_FLAGS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+<!-- Centaur n0p48 : finish -->
+
+
+
+<!-- Centaur n0p56 : start -->
+<!-- @todo This is not complete, but useful for testing FSI -->
+<targetInstance>
+    <id>sys0node0membuf56</id>
+    <type>chip-processor-salerno</type><!-- @todo wrong type -->
+    <attribute><id>SCOM_SWITCHES</id>
+        <default>
+            <field><id>useFsiScom</id><value>1</value></field>
+            <field><id>useXscom</id><value>0</value></field>
+            <field><id>useInbandScom</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/membuf-56</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/membuf-56</default>
+    </attribute>  
+
+    <!-- FSI is connected via proc7:cMFSI-0 -->
+    <attribute>
+        <id>FSI_MASTER_CHIP</id>
+        <default>physical:sys-0/node-0/proc-7</default>
+    </attribute>
+    <attribute>
+        <id>FSI_MASTER_TYPE</id>
+        <default>NO_MASTER</default><!-- @fixme Simics is busted, should be CMFSI -->
+    </attribute>
+    <attribute>
+        <id>FSI_MASTER_PORT</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FSI_SLAVE_CASCADE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FSI_OPTION_FLAGS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+<!-- Centaur n0p56 : finish -->
+
+
+
+<!-- @fixme : Temporary target used for FSI wrap-back testing -->
 <targetInstance>
     <id>sys0node0proc0wrap</id>
     <type>chip-processor-salerno</type>
@@ -427,11 +3149,11 @@
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-1</default>
+        <default>physical:sys-0/node-0/proc-9</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1</default>
+        <default>affinity:sys-0/node-0/proc-9</default>
     </attribute>  
 
     <!-- FSI is connected via wrapback to itself over MFSI-0 -->
@@ -457,48 +3179,5 @@
     </attribute>
 </targetInstance>
 
-<!-- This is totally wrong, but useful for testing FSI -->
-<targetInstance>
-    <id>sys0node0membuf2</id>
-    <type>chip-processor-salerno</type>
-    <attribute><id>SCOM_SWITCHES</id>
-        <default>
-            <field><id>useFsiScom</id><value>1</value></field>
-            <field><id>useXscom</id><value>0</value></field>
-            <field><id>useInbandScom</id><value>0</value></field>
-            <field><id>reserved</id><value>0</value></field>
-        </default>
-    </attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/membuf-2</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/membuf-2</default>
-    </attribute>  
-
-    <!-- FSI is connected via local cMFSI-2 -->
-    <attribute>
-        <id>FSI_MASTER_CHIP</id>
-        <default>physical:sys-0/node-0/proc-0</default>
-    </attribute>
-    <attribute>
-        <id>FSI_MASTER_TYPE</id>
-        <default>CMFSI</default>
-    </attribute>
-    <attribute>
-        <id>FSI_MASTER_PORT</id>
-        <default>2</default>
-    </attribute>
-    <attribute>
-        <id>FSI_SLAVE_CASCADE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
-    </attribute>
-</targetInstance>
 
 </attributes>

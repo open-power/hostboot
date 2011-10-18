@@ -57,7 +57,7 @@ TRAC_INIT(&g_trac_fsir, "FSIR", 4096); //4K
 
 
 //@todo - This should come from the target/attribute code somewhere
-uint64_t target_to_uint64(TARGETING::Target* i_target)
+uint64_t target_to_uint64(const TARGETING::Target* i_target)
 {
     uint64_t id = 0;
     if( i_target == NULL )
@@ -249,18 +249,55 @@ DEVICE_REGISTER_ROUTE(DeviceFW::WRITE,
                       ddOp);
 
 
-// Initialize all visible FSI masters
+/**
+ * @brief Initialize the FSI hardware
+ */
 errlHndl_t initializeHardware()
 {
     return Singleton<FsiDD>::instance().initializeHardware();
 }
 
+/**
+ * @brief Retrieves the status of a given port
+ */
+bool isSlavePresent( const TARGETING::Target* i_fsiMaster,
+                     TARGETING::FSI_MASTER_TYPE i_type,
+                     uint8_t i_port )
+{
+    if( i_fsiMaster == NULL )
+    {
+        // NULL target means it isn't present
+        return false;
+    }
+    else
+    {
+        return Singleton<FsiDD>::instance().isSlavePresent(i_fsiMaster,
+                                                           i_type,
+                                                           i_port);
+    }
+}
+
+/**
+ * @brief Retrieves the FSI status of a given chip
+ */
+bool isSlavePresent( const TARGETING::Target* i_target )
+{
+    if( i_target == NULL )
+    {
+        // NULL target means it isn't present
+        return false;
+    }
+    else
+    {
+        return Singleton<FsiDD>::instance().isSlavePresent(i_target);
+    }
+}
 
 }; //end FSI namespace
 
 
 /**
- * @brief   set up _start() task entry procedure for PNOR daemon
+ * @brief   set up _start() task entry procedure for FSI daemon
  */
 TASK_ENTRY_MACRO( FsiDD::init );
 
@@ -285,7 +322,7 @@ void FsiDD::init( void* i_taskArgs )
 /**
  * @brief Performs an FSI Read Operation to a relative address
  */
-errlHndl_t FsiDD::read(TARGETING::Target* i_target,
+errlHndl_t FsiDD::read(const TARGETING::Target* i_target,
                        uint64_t i_address,
                        uint32_t* o_buffer)
 {
@@ -310,7 +347,7 @@ errlHndl_t FsiDD::read(TARGETING::Target* i_target,
 /**
  * @brief Performs an FSI Write Operation to a relative address
  */
-errlHndl_t FsiDD::write(TARGETING::Target* i_target,
+errlHndl_t FsiDD::write(const TARGETING::Target* i_target,
                         uint64_t i_address,
                         uint32_t* o_buffer)
 {
@@ -339,11 +376,11 @@ errlHndl_t FsiDD::write(TARGETING::Target* i_target,
  ********************/
 
 
-// local type used inside FsiDD::initializeHardware()
+// local types used inside FsiDD::initializeHardware()
 //  must be declared outside the function to make compiler happy
-struct remote_info_t {
-    TARGETING::Target* master;
-    uint8_t slave_port;
+struct remote_master_t {
+    TARGETING::Target* cmfsi_master;
+    uint8_t mfsi_port;
 };
 
 /**
@@ -356,16 +393,21 @@ errlHndl_t FsiDD::initializeHardware()
 
     do{
         // list of ports off of local MFSI
-        std::list<uint64_t> local_mfsi;
+        std::list<remote_master_t> local_mfsi;
 
-        // list of ports off of local cMFSI
-        std::list<uint64_t> local_cmfsi;
+        // list of possible ports off of local cMFSI
+        bool local_cmfsi[MAX_SLAVE_PORTS];
+        for( uint8_t cmfsi=0; cmfsi<MAX_SLAVE_PORTS; cmfsi++ ) {
+            local_cmfsi[cmfsi] = false;
+        }
 
-        // list of ports off of remote cMFSI
-        std::list<TARGETING::Target*> remote_masters;
-
-        // list of ports off of remote cMFSI
-        std::list<remote_info_t> remote_cmfsi;
+        // array of possible ports to initialize : [mfsi port][cmfsi port]
+        bool remote_cmfsi[MAX_SLAVE_PORTS][MAX_SLAVE_PORTS];
+        for( uint8_t mfsi=0; mfsi<MAX_SLAVE_PORTS; mfsi++ ) {
+            for( uint8_t cmfsi=0; cmfsi<MAX_SLAVE_PORTS; cmfsi++ ) {
+                remote_cmfsi[mfsi][cmfsi] = false;
+            }
+        }
 
         FsiChipInfo_t info;
 
@@ -386,27 +428,19 @@ errlHndl_t FsiDD::initializeHardware()
 
                 if( info.type == TARGETING::FSI_MASTER_TYPE_MFSI )
                 {
-                    local_mfsi.push_back(info.port);
+                    remote_master_t tmp = {*t_itr,info.port};
+                    local_mfsi.push_back(tmp);
                 }
                 else if( info.type == TARGETING::FSI_MASTER_TYPE_CMFSI )
                 {
                       if( info.master == iv_master )
                       {
-                          local_cmfsi.push_back(info.port);
+                          local_cmfsi[info.port] = true;
                       }
                       else
                       {
-                          // add all unique masters to the list
-                          if( remote_masters.end() ==
-                              std::find(remote_masters.begin(),
-                                        remote_masters.end(),
-                                        info.master) )
-                          {
-                              remote_masters.push_back( info.master );
-                          }
-
-                          remote_info_t tmp = {info.master,info.port};
-                          remote_cmfsi.push_back( tmp );
+                          FsiChipInfo_t info2 = getFsiInfo(info.master);
+                          remote_cmfsi[info2.port][info.port] = true;
                       }
                 }
             }
@@ -423,13 +457,15 @@ errlHndl_t FsiDD::initializeHardware()
         else
         {
             // initialize all of the local MFSI ports
-            for( std::list<uint64_t>::iterator itr = local_mfsi.begin();
+            for( std::list<remote_master_t>::iterator itr = local_mfsi.begin();
                  itr != local_mfsi.end();
                  ++itr )
             {
+                bool slave_present = false;
                 l_err = initPort( iv_master,
                                   TARGETING::FSI_MASTER_TYPE_MFSI,
-                                  *itr );
+                                  itr->mfsi_port,
+                                  slave_present );
                 if( l_err )
                 {
                     //@todo - append the actual slave target to FFDC
@@ -439,7 +475,54 @@ errlHndl_t FsiDD::initializeHardware()
                     //if this fails then some of the slaves below won't init,
                     //  but that is okay because the detected ports will be
                     //  zero which will cause the initPort call to be a NOOP
+                    continue;
                 }
+
+                // the slave wasn't present so we can't do anything with the
+                //   downstream ports
+                if( !slave_present )
+                {
+                    continue;
+                }
+
+                // initialize all of the remote cMFSI ports off the master
+                //   we just initialized
+                bool master_init_done = false;
+                for( uint8_t cmfsi=0; cmfsi<MAX_SLAVE_PORTS; cmfsi++ )
+                {
+                    // skip ports that have no possible slaves
+                    if( remote_cmfsi[itr->mfsi_port][cmfsi] == false )
+                    {
+                        continue;
+                    }
+
+                    if( !master_init_done )
+                    {
+                        // initialize the remote cMFSI master on this MFSI slave
+                        l_err = initMasterControl( itr->cmfsi_master,
+                                                   TARGETING::FSI_MASTER_TYPE_CMFSI );
+                        if( l_err )
+                        {
+                            // commit the log here so that we can move on to next port               
+                            errlCommit(l_err);
+                            break;
+                        }
+                        master_init_done = true;
+                    }
+
+                    // initialize the port/slave
+                    l_err = initPort( itr->cmfsi_master,
+                                      TARGETING::FSI_MASTER_TYPE_CMFSI,
+                                      cmfsi,
+                                      slave_present );
+                    if( l_err )
+                    {
+                        //@todo - append the actual slave target to FFDC
+                        // commit the log here so that we can move on to next port               
+                        errlCommit(l_err);
+                    }
+                }
+
             }
         }
 
@@ -452,47 +535,25 @@ errlHndl_t FsiDD::initializeHardware()
         else
         {
             // initialize all of the local cMFSI ports
-            for( std::list<uint64_t>::iterator itr = local_cmfsi.begin();
-                 itr != local_cmfsi.end();
-                 ++itr )
+            for( uint8_t cmfsi=0; cmfsi<MAX_SLAVE_PORTS; cmfsi++ )
             {
-                l_err = initPort( iv_master, TARGETING::FSI_MASTER_TYPE_CMFSI, *itr );
+                // skip ports that have no possible slaves
+                if( local_cmfsi[cmfsi] == false )
+                {
+                    continue;
+                }
+
+                bool slave_present = false;
+                l_err = initPort( iv_master,
+                                  TARGETING::FSI_MASTER_TYPE_CMFSI,
+                                  cmfsi,
+                                  slave_present );
                 if( l_err )
                 {
                     //@todo - append the actual slave target to FFDC
                     // commit the log here so that we can move on to next port               
                     errlCommit(l_err);
                 }
-            }
-        }
-
-        // initialize all of the remote cMFSI masters
-        for( std::list<TARGETING::Target*>::iterator itr
-             = remote_masters.begin();
-             itr != remote_masters.end();
-             ++itr )
-        {
-            l_err = initMasterControl( *itr, TARGETING::FSI_MASTER_TYPE_CMFSI );
-            if( l_err )
-            {
-                // commit the log here so that we can move on to next port               
-                errlCommit(l_err);
-            }
-        }
-
-        // initialize all of the remote cMFSI ports
-        for( std::list<remote_info_t>::iterator itr = remote_cmfsi.begin();
-             itr != remote_cmfsi.end();
-             ++itr )
-        {
-            l_err = initPort( itr->master,
-                              TARGETING::FSI_MASTER_TYPE_CMFSI,
-                              itr->slave_port );
-            if( l_err )
-            {
-                //@todo - append the actual slave target to FFDC
-                // commit the log here so that we can move on to next port               
-                errlCommit(l_err);
             }
         }
 
@@ -667,7 +728,7 @@ errlHndl_t FsiDD::write(uint64_t i_address,
 /**
  * @brief Analyze error bits and recover hardware as needed
  */
-errlHndl_t FsiDD::handleOpbErrors(TARGETING::Target* i_target,
+errlHndl_t FsiDD::handleOpbErrors(const TARGETING::Target* i_target,
                                   uint64_t i_address,
                                   uint32_t i_opbStatReg)
 {
@@ -804,9 +865,25 @@ errlHndl_t FsiDD::pollForComplete(uint64_t i_address,
  * @brief Generate a complete FSI address based on the target and the
  *    FSI offset within that target
  */
-uint64_t FsiDD::genFullFsiAddr(TARGETING::Target* i_target,
+uint64_t FsiDD::genFullFsiAddr(const TARGETING::Target* i_target,
                                uint64_t i_address)
 {
+    /* @todo - See Task 4086
+     once xscoms are enabled on the remote processors it will
+     more efficient to use xscoms to drive the CMFSI engine directly
+     versus using the master's FSI logic
+
+     Changes to make:
+     - change this function to return the master to xscom to
+         if fsi_info.master != iv_master
+             AND fsi_info.master:useXscom=true
+                 set xscom target to fsi_info.master
+                 do not add on the MFSI offset to the address
+         else
+             use the code as it currently is setup
+     - that master target has to be passed through the other functions
+     */
+
     //target matches master so the address is correct as-is
     if( i_target == iv_master )
     {
@@ -838,7 +915,12 @@ uint64_t FsiDD::genFullFsiAddr(TARGETING::Target* i_target,
         //find this port's master and then get its port information
         FsiChipInfo_t mfsi_info = getFsiInfo(fsi_info.master);
         assert( mfsi_info.master == iv_master ); //invalid topology
-        assert( TARGETING::FSI_MASTER_TYPE_MFSI == fsi_info.type ); //invalid topology
+        if( TARGETING::FSI_MASTER_TYPE_MFSI != mfsi_info.type )
+        {
+            TRACFCOMP( g_trac_fsi, "target=%llX : master=%llX, type=%d, port=%d", target_to_uint64(i_target), target_to_uint64(fsi_info.master), fsi_info.type, fsi_info.port );
+            TRACFCOMP( g_trac_fsi, "Master: target=%llX : master=%llX, type=%d, port=%d", target_to_uint64(fsi_info.master), target_to_uint64(mfsi_info.master), mfsi_info.type, mfsi_info.port );
+        }
+        assert( TARGETING::FSI_MASTER_TYPE_MFSI == mfsi_info.type ); //invalid topology
 
         //append the MFSI port
         l_addr += getPortOffset(mfsi_info.type,mfsi_info.port);
@@ -854,6 +936,8 @@ uint64_t FsiDD::genFullFsiAddr(TARGETING::Target* i_target,
 uint64_t FsiDD::genOpbScomAddr(uint64_t i_opbOffset)
 {
     //@todo: handle redundant FSI ports, always using zero for now (Story 3853)
+    //       this might be needed to handle multi-chip config in simics because
+    //       proc2 is connected to port B
     uint64_t opbaddr = FSI2OPB_OFFSET_0 | i_opbOffset;
     return opbaddr;
 }
@@ -862,12 +946,14 @@ uint64_t FsiDD::genOpbScomAddr(uint64_t i_opbOffset)
 /** 
  * @brief Initializes the FSI link to allow slave access
  */
-errlHndl_t FsiDD::initPort(TARGETING::Target* i_master,
+errlHndl_t FsiDD::initPort(const TARGETING::Target* i_master,
                            TARGETING::FSI_MASTER_TYPE i_type,
-                           uint64_t i_port)
+                           uint64_t i_port,
+                           bool& o_enabled)
 {
     errlHndl_t l_err = NULL;
     TRACFCOMP( g_trac_fsi, ENTER_MRK"FsiDD::initPort> Initializing %llX:%d, port %llX", target_to_uint64(i_master), i_type, i_port );
+    o_enabled = false;
 
     do {
         uint32_t databuf = 0;
@@ -894,11 +980,10 @@ errlHndl_t FsiDD::initPort(TARGETING::Target* i_master,
         slave_offset += master_offset;
 
         // nothing was detected on this port so this is just a NOOP
-        uint64_t slave_index = getSlaveEnableIndex(i_master,i_type);
-        if( !(iv_slaves[slave_index] & portbit) )
+        if( !isSlavePresent(i_master,i_type,i_port) )
         {
-            TRACFCOMP( g_trac_fsi, "FsiDD::initPort> Slave %llX:%d:%d is not present", target_to_uint64(i_master), i_type, i_port );
-            TRACFCOMP( g_trac_fsi, " : sensebits=%.2X, portbit=%.2X", iv_slaves[slave_index], portbit );
+            TRACDCOMP( g_trac_fsi, "FsiDD::initPort> Slave %llX:%d:%d is not present", target_to_uint64(i_master), i_type, i_port );
+            TRACDCOMP( g_trac_fsi, " : sensebits=%.2X, portbit=%.2X", iv_slaves[getSlaveEnableIndex(i_master,i_type)], portbit );
             break;
         }
         TRACFCOMP( g_trac_fsi, "FsiDD::initPort> Slave %llX:%d:%d is present", target_to_uint64(i_master), i_type, i_port );
@@ -926,14 +1011,18 @@ errlHndl_t FsiDD::initPort(TARGETING::Target* i_master,
              * @moduleid     FSI::MOD_FSIDD_INITPORT
              * @reasoncode   FSI::RC_ERROR_ENABLING_SLAVE
              * @userdata1    Target Id of Master
-             * @userdata2    Port | MAEB from master
+             * @userdata2[0:15]   Type
+             * @userdata2[16:31]  Port
+             * @userdata2[32:63]  MAEB from master
              * @devdesc      FsiDD::initPort> Error after sending BREAK
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                        FSI::MOD_FSIDD_INITPORT,
                        FSI::RC_ERROR_ENABLING_SLAVE,
                        target_to_uint64(i_master),
-                       TWO_UINT32_TO_UINT64(TO_UINT32(i_port),databuf));
+                       TWO_UINT16_ONE_UINT32_TO_UINT64(i_type,
+                                                       i_port,
+                                                       databuf) );
             break;
         }
 
@@ -942,6 +1031,10 @@ errlHndl_t FsiDD::initPort(TARGETING::Target* i_master,
         if( TARGETING::FSI_MASTER_TYPE_CMFSI == i_type )
         {
             slave_offset |= CMFSI_SLAVE_3;
+        }
+        else if( TARGETING::FSI_MASTER_TYPE_MFSI == i_type )
+        {
+            slave_offset |= MFSI_SLAVE_3;
         }
 
         //Setup the FSI slave to enable HW recovery, lbus ratio 
@@ -983,7 +1076,7 @@ errlHndl_t FsiDD::initPort(TARGETING::Target* i_master,
 #endif
 
         // No support for slave cascades so we're done
-
+        o_enabled = true;
     } while(0);
 
     TRACDCOMP( g_trac_fsi, EXIT_MRK"FsiDD::initPort" );
@@ -993,7 +1086,7 @@ errlHndl_t FsiDD::initPort(TARGETING::Target* i_master,
 /**
  * @brief Initializes the FSI master control registers
  */
-errlHndl_t FsiDD::initMasterControl(TARGETING::Target* i_master,
+errlHndl_t FsiDD::initMasterControl(const TARGETING::Target* i_master,
                                     TARGETING::FSI_MASTER_TYPE i_type)
 {
     errlHndl_t l_err = NULL;
@@ -1131,7 +1224,7 @@ uint64_t FsiDD::getPortOffset(TARGETING::FSI_MASTER_TYPE i_type,
 /**
  * @brief Retrieve the slave enable index
  */
-uint64_t FsiDD::getSlaveEnableIndex( TARGETING::Target* i_master,
+uint64_t FsiDD::getSlaveEnableIndex( const TARGETING::Target* i_master,
                                      TARGETING::FSI_MASTER_TYPE i_type )
 {
     //default to local slave ports
@@ -1148,7 +1241,7 @@ uint64_t FsiDD::getSlaveEnableIndex( TARGETING::Target* i_master,
  * @brief Retrieve the connection information needed to access FSI
  *        registers within the given chip target
  */
-FsiDD::FsiChipInfo_t FsiDD::getFsiInfo( TARGETING::Target* i_target )
+FsiDD::FsiChipInfo_t FsiDD::getFsiInfo( const TARGETING::Target* i_target )
 {
     FsiChipInfo_t info;
     info.master = NULL;
@@ -1223,6 +1316,36 @@ FsiDD::FsiChipInfo_t FsiDD::getFsiInfo( TARGETING::Target* i_target )
     TRACUCOMP( g_trac_fsi, "getFsiInfo> i_target=%llX : master=%llX, type=%X", target_to_uint64(i_target), target_to_uint64(info.master), info.type );
     TRACUCOMP( g_trac_fsi, "getFsiInfo> port=%X, cascade=%X, flags=%X, linkid=%.8X", info.port, info.cascade, info.flags, info.port );
     return info;
+}
+
+/**
+ * @brief Retrieves the status of a given port
+ */
+bool FsiDD::isSlavePresent( const TARGETING::Target* i_fsiMaster,
+                            TARGETING::FSI_MASTER_TYPE i_type,
+                            uint8_t i_port )
+{
+    if( (i_port < MAX_SLAVE_PORTS)
+        && (TARGETING::FSI_MASTER_TYPE_NO_MASTER != i_type)
+        && (NULL != i_fsiMaster) )
+    {
+        uint64_t slave_index = getSlaveEnableIndex(i_fsiMaster,i_type);
+        return ( iv_slaves[slave_index] & (0x80 >> i_port) );
+    }
+    else
+    {
+        return false;
+    }
+}
+
+/**
+ * @brief Retrieves the FSI status of a given chip
+ */
+bool FsiDD::isSlavePresent( const TARGETING::Target* i_target )
+{
+    // look up the FSI information for this target
+    FsiChipInfo_t info = getFsiInfo(i_target);
+    return isSlavePresent( info.master, info.type, info.port );
 }
 
 /*@

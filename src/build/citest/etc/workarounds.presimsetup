@@ -29,17 +29,23 @@
 
 echo "+++ Copy desired SALERNO config file to sandbox and modify L3 to 8MB."
 mkdir -p $sb/simu/configs
-cp $BACKING_BUILD/src/simu/configs/P8_SALERNO.config $sb/simu/configs
+cp --update $BACKING_BUILD/src/simu/configs/P8_SALERNO.config $sb/simu/configs
 sed -i -e's/SETENV GFW_P8_SALERNO_L3_MB_SIZE.*/SETENV GFW_P8_SALERNO_L3_MB_SIZE 8/' $sb/simu/configs/P8_SALERNO.config
 # Backing build already contains 910431.  Leave this workaround here for future scomdef files
 #sed -i -e's/SETENV GFW_P8_SALERNO_MODEL_EC.*/SETENV GFW_P8_SALERNO_MODEL_EC 910431/' $sb/simu/configs/P8_SALERNO.config
 
 echo "+++ Copy desired VENICE config file to sandbox and modify L3 to 8MB."
 mkdir -p $sb/simu/configs
-cp $BACKING_BUILD/src/simu/configs/P8_VENICE.config $sb/simu/configs
+cp --update $BACKING_BUILD/src/simu/configs/P8_VENICE.config $sb/simu/configs
 sed -i -e's/SETENV GFW_P8_VENICE_L3_MB_SIZE.*/SETENV GFW_P8_VENICE_L3_MB_SIZE 8/' $sb/simu/configs/P8_VENICE.config
 # Backing build already contains 910431.  Leave this workaround here for future scomdef files
 #sed -i -e's/SETENV GFW_P8_VENICE_MODEL_EC.*/SETENV GFW_P8_VENICE_MODEL_EC 910431/' $sb/simu/configs/P8_VENICE.config
+
+echo "+++ Update Chip EC levels."
+sed -i -e's/SETENV GFW_P8_VENICE_PROC_EC.*/SETENV GFW_P8_VENICE_PROC_EC 10/' $sb/simu/configs/P8_VENICE.config
+sed -i -e's/SETENV GFW_P8_VENICE_CENTAUR_EC.*/SETENV GFW_P8_VENICE_CENTAUR_EC 10/' $sb/simu/configs/P8_VENICE.config
+sed -i -e's/SETENV GFW_P8_SALERNO_PROC_EC.*/SETENV GFW_P8_SALERNO_PROC_EC 10/' $sb/simu/configs/P8_SALERNO.config
+
 
 echo "+++ Update to new simics build."
 mkdir -p $sb/simu/data

@@ -40,6 +40,28 @@ errlHndl_t initializeHardware();
 
 
 /**
+ * @brief Retrieves the status of a given port
+ *
+ * @param[in] i_fsiMaster  FSI Master chip
+ * @param[in] i_type  FSI Master Type (MFSI or cMFSI)
+ * @param[in] i_port  Slave port number
+ * 
+ * @return bool  true if port sensed as active during FSI initialization
+ */
+bool isSlavePresent( const TARGETING::Target* i_fsiMaster,
+                     TARGETING::FSI_MASTER_TYPE i_type,
+                     uint8_t i_port );
+
+/**
+ * @brief Retrieves the FSI status of a given chip
+ *
+ * @param[in] i_target
+ * 
+ * @return bool  true if port sensed as active during FSI initialization
+ */
+bool isSlavePresent( const TARGETING::Target* i_target );
+
+/**
  * FSI Slave Registers for P8
  *   These registers are repeated for every master+port+cascade combo 
  */

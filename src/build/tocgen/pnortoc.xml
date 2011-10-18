@@ -136,11 +136,11 @@
             <length>8</length>
             <format>number</format>
         </field>
-        <field type="logical_size">16384
+        <field type="logical_size">0x20000
             <length>8</length>
             <format>number</format>
         </field>
-        <field type="physical_size">16384
+        <field type="physical_size">0x20000
             <length>8</length>
             <format>number</format>
         </field>

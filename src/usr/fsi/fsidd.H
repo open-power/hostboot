@@ -64,7 +64,7 @@ class FsiDD
      *
      * @return errlHndl_t  NULL on success
      */
-    errlHndl_t read(TARGETING::Target* i_target,
+    errlHndl_t read(const TARGETING::Target* i_target,
                     uint64_t i_address,
                     uint32_t* o_buffer);
 
@@ -77,10 +77,32 @@ class FsiDD
      *
      * @return errlHndl_t  NULL on success
      */
-    errlHndl_t write(TARGETING::Target* i_target,
+    errlHndl_t write(const TARGETING::Target* i_target,
                      uint64_t i_address,
                      uint32_t* i_buffer);
 
+
+    /**
+     * @brief Retrieves the status of a given port
+     *
+     * @param[in] i_fsiMaster  FSI Master chip
+     * @param[in] i_type  FSI Master Type (MFSI or cMFSI)
+     * @param[in] i_port  Slave port number
+     * 
+     * @return bool  true if port sensed as active during FSI initialization
+     */
+    bool isSlavePresent( const TARGETING::Target* i_fsiMaster,
+                         TARGETING::FSI_MASTER_TYPE i_type,
+                         uint8_t i_port );
+
+    /**
+     * @brief Retrieves the FSI status of a given chip
+     *
+     * @param[in] i_target
+     * 
+     * @return bool  true if port sensed as active during FSI initialization
+     */
+    bool isSlavePresent( const TARGETING::Target* i_target );
 
   protected:
     /**
@@ -124,22 +146,24 @@ class FsiDD
      *
      * @return errlHndl_t  NULL on success
      */
-    errlHndl_t initMasterControl(TARGETING::Target* i_master,
+    errlHndl_t initMasterControl(const TARGETING::Target* i_master,
                                  TARGETING::FSI_MASTER_TYPE i_type);
 
 
     /**
      * @brief Initializes the FSI link to allow slave access
      *
-     * @param[in]  Chip target of FSI-Master 
-     * @param[in]  Type of FSI-Master
-     * @param[in]  FSI port (0-7) being initialized (relative to master)
+     * @param[in] i_master  Chip target of FSI-Master 
+     * @param[in] i_type  Type of FSI-Master
+     * @param[in] i_port  FSI port (0-7) being initialized (relative to master)
+     * @param[out] o_enabled  true if the port is successfully enabled  
      *
      * @return errlHndl_t  NULL on success
      */
-    errlHndl_t initPort(TARGETING::Target* i_master,
+    errlHndl_t initPort(const TARGETING::Target* i_master,
                         TARGETING::FSI_MASTER_TYPE i_type,
-                        uint64_t i_port);
+                        uint64_t i_port,
+                        bool& o_enabled);
 
     /**
      * @brief Analyze error bits and recover hardware as needed
@@ -150,7 +174,7 @@ class FsiDD
      *
      * @return errlHndl_t  NULL on success
      */
-    errlHndl_t handleOpbErrors(TARGETING::Target* i_target,
+    errlHndl_t handleOpbErrors(const TARGETING::Target* i_target,
                                uint64_t i_address,
                                uint32_t i_opbStatReg);
 
@@ -175,7 +199,7 @@ class FsiDD
      *
      * @return uint64_t  Fully qualified FSI address
      */
-    uint64_t genFullFsiAddr(TARGETING::Target* i_target,
+    uint64_t genFullFsiAddr(const TARGETING::Target* i_target,
                             uint64_t i_address);
 
     /**
@@ -328,7 +352,7 @@ class FsiDD
     {
         TARGETING::Target* master; ///< FSI Master  
         TARGETING::FSI_MASTER_TYPE type; ///< Master or Cascaded Master
-        uint8_t port; ///< Which port is this chip hanging off of  
+        uint8_t port; ///< Which port is this chip hanging off of 
         uint8_t cascade; ///< Slave cascade position
         uint16_t flags; ///< Reserved for any special flags we might need
         FsiLinkId_t linkid; ///< Id for traces and error logs
@@ -356,7 +380,7 @@ class FsiDD
      * @param[in] i_type  Type of FSI interface
      * @return uint64_t  Index into iv_slaves array
      */
-    uint64_t getSlaveEnableIndex( TARGETING::Target* i_master,
+    uint64_t getSlaveEnableIndex( const TARGETING::Target* i_master,
                                   TARGETING::FSI_MASTER_TYPE i_type );
 
     /**
@@ -367,7 +391,7 @@ class FsiDD
      *
      * @return FsiChipInfo_t  FSI Chip Information
      */
-    FsiChipInfo_t getFsiInfo( TARGETING::Target* i_target );
+    FsiChipInfo_t getFsiInfo( const TARGETING::Target* i_target );
 
 
 
