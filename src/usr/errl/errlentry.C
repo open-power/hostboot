@@ -37,6 +37,7 @@
 #include <errl/errlmanager.H>
 #include <trace/interface.H>
 #include <arch/ppc.H>
+#include <errl/backtrace.H>
 
 
 namespace ERRORLOG
@@ -60,8 +61,36 @@ ErrlEntry::ErrlEntry(const errlSeverity_t i_sev,
     iv_Src( SRC_ERR_INFO, i_modId, i_reasonCode, i_user1, i_user2 ),
     iv_termState(TERM_STATE_UNKNOWN)
 {
+    // Collect the Backtrace
+    std::vector<uint64_t> bt;
+    collectBacktrace( bt );
 
+    // Add Backtrace to user data section
+    ErrlUD * ffdcPtr = NULL;
+    for( uint32_t i = 0; i < bt.size(); i++ )
+    {
+        if( 0 == i )
+        {
+            ffdcPtr = addFFDC( ERRL_COMP_ID,
+                               &bt[i],
+                               sizeof(bt[i]),
+                               0, 0 );
 
+            // Make sure we got a pointer to the user details
+            if( NULL == ffdcPtr )
+            {
+                TRACFCOMP( g_trac_errl,
+                           ERR_MRK"NULL FFDC pointer!" );
+                break;
+            }
+        }
+        else
+        {
+            appendToFFDC( ffdcPtr,
+                          &bt[i],
+                          sizeof(bt[i]) );
+        }
+    }
 }
 
 
@@ -145,7 +174,7 @@ bool ErrlEntry::collectTrace(const char i_name[], const uint64_t i_max)
     do
     {
         // By passing nil arguments 2 and 3, obtain the size of the buffer.
-        // Besides getting buffer size, it validates i_name. 
+        // Besides getting buffer size, it validates i_name.
         uint64_t l_cbFull = TRACE::Trace::getTheInstance().getBuffer( i_name,
                                                                       NULL,
                                                                       0 );
@@ -168,11 +197,11 @@ bool ErrlEntry::collectTrace(const char i_name[], const uint64_t i_max)
             l_cbBuffer = i_max;
         }
 
-        // allocate the buffer 
-        l_pBuffer = new char[ l_cbBuffer ]; 
+        // allocate the buffer
+        l_pBuffer = new char[ l_cbBuffer ];
 
         // Get the data into the buffer.
-        l_cbOutput = 
+        l_cbOutput =
         TRACE::Trace::getTheInstance().getBuffer( i_name,
                                                   l_pBuffer,
                                                   l_cbBuffer );
@@ -181,7 +210,7 @@ bool ErrlEntry::collectTrace(const char i_name[], const uint64_t i_max)
         {
             // Problem.
             TRACFCOMP( g_trac_errl,
-                "ErrlEntry::collectTrace(): getBuffer(%s,%ld) rets zero.", 
+                "ErrlEntry::collectTrace(): getBuffer(%s,%ld) rets zero.",
                 i_name,
                 l_cbBuffer );
             break;

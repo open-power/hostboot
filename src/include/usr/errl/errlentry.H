@@ -466,6 +466,7 @@ private:
     ErrlUH          iv_User;       // user header object
     ErrlSrc         iv_Src;        // primary SRC section
     std::vector<ErrlUD*> iv_SectionVector;  // list of user defined sections
+    std::vector<uint64_t> iv_btAddrs;       // list of addresses for the backtrace
 
     // TODO need to interpret term state and terminate accordingly.
     // TODO termstate is presently not being flattend into PEL
@@ -554,9 +555,6 @@ inline void ErrlEntry::setSrcType(const srcType_t i_srcType)
     iv_Src.iv_srcType = i_srcType;
     return;
 }
-
-
-
 
 } // End namespace
 
