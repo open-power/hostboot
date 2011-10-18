@@ -42,6 +42,8 @@
 #                  mjjones   09/06/11  Remove string/defaultVal support 
 #                  mjjones   10/07/11  Create fapiAttributeService.C
 #                  mjjones   10/17/11  Support enums with values
+#                  mjjones   10/18/11  Support multiple attr files and
+#                                      multi-line descriptions
 #
 # End Change Log ******************************************************
 
@@ -146,18 +148,29 @@ foreach my $argnum (1 .. $#ARGV)
 
         print AIFILE "    ", $attr->{id}, ",\n";
     };
+}
 
-    #--------------------------------------------------------------------------
-    # Print AttributeId enumeration end to fapiAttributeIds.H
-    #--------------------------------------------------------------------------
-    print AIFILE "};\n\n";
+#------------------------------------------------------------------------------
+# Print AttributeId enumeration end to fapiAttributeIds.H
+#------------------------------------------------------------------------------
+print AIFILE "};\n\n";
 
-    #--------------------------------------------------------------------------
-    # Print Attribute Information comment to fapiAttributeIds.H
-    #--------------------------------------------------------------------------
-    print AIFILE "\/**\n";
-    print AIFILE " * \@brief Attribute Information\n";
-    print AIFILE " *\/\n";
+#------------------------------------------------------------------------------
+# Print Attribute Information comment to fapiAttributeIds.H
+#------------------------------------------------------------------------------
+print AIFILE "\/**\n";
+print AIFILE " * \@brief Attribute Information\n";
+print AIFILE " *\/\n";
+
+#------------------------------------------------------------------------------
+# For each XML file
+#------------------------------------------------------------------------------
+foreach my $argnum (1 .. $#ARGV)
+{
+    my $infile = $ARGV[$argnum];
+
+    # read XML file
+    my $attributes = $xml->XMLin($infile);
 
     #--------------------------------------------------------------------------
     # For each Attribute
@@ -171,7 +184,7 @@ foreach my $argnum (1 .. $#ARGV)
         #----------------------------------------------------------------------
         if ($attr->{description})
         {
-            print AIFILE "// $attr->{id}: $attr->{description}\n";
+            print AIFILE "/* $attr->{id}: $attr->{description} */\n";
         }
 
         #----------------------------------------------------------------------
