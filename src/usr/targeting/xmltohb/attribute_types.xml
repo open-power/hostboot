@@ -238,8 +238,7 @@
             <default>0</default>
         </uint8_t>
     </simpleType>
-    <!-- TODO All scratch attributes should be volatile-zeroed. Need Patrick kernel fix -->
-    <persistency>volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
@@ -256,7 +255,7 @@
             <default>0</default>
         </uint8_t>
     </simpleType>
-    <persistency>volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
@@ -273,7 +272,7 @@
             <default>0</default>
         </uint32_t>
     </simpleType>
-    <persistency>volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
@@ -290,7 +289,7 @@
             <default>0</default>
         </uint32_t>
     </simpleType>
-    <persistency>volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
@@ -307,7 +306,7 @@
             <default>0</default>
         </uint64_t>
     </simpleType>
-    <persistency>volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
@@ -324,7 +323,7 @@
             <default>0</default>
         </uint64_t>
     </simpleType>
-    <persistency>volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
@@ -342,7 +341,7 @@
         </uint8_t>
         <array>32</array>
     </simpleType>
-    <persistency>volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
@@ -360,7 +359,7 @@
         </uint8_t>
         <array>2, 3, 4</array>
     </simpleType>
-    <persistency>volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
@@ -378,7 +377,7 @@
         </uint32_t>
         <array>8</array>
     </simpleType>
-    <persistency>volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
@@ -396,7 +395,7 @@
         </uint32_t>
         <array>2,3</array>
     </simpleType>
-    <persistency>volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
@@ -414,7 +413,7 @@
         </uint64_t>
         <array>4</array>
     </simpleType>
-    <persistency>volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
@@ -432,7 +431,7 @@
         </uint64_t>
         <array>2,2</array>
     </simpleType>
-    <persistency>volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
@@ -767,7 +766,6 @@
     <persistency>non-volatile</persistency>
     <readable/>
 </attribute>
-
 <attribute>
     <id>HWAS_STATE</id>
     <description>HardWare Availability Service State Attribute.  
@@ -820,7 +818,22 @@
     <persistency>volatile</persistency>
     <readable/>
 </attribute>
-
-
+<attribute>
+    <id>MSS_EFF_PRIMARY_RANK</id>
+    <description>The effective rank group on each port (0 to 3) for each group 0-3</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>4, 4</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/> 
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_EFF_PRIMARY_RANK</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
 </attributes>
 

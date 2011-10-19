@@ -193,7 +193,7 @@ int BaseSegment::_mmSetPermission(void* i_va, uint64_t i_size, uint64_t i_access
        return(l_block->mmSetPermission(l_va, i_size, i_access_type));
 
     }
-  } while (l_block->iv_nextBlock);
+  } while (l_block);
 
   return l_rc;
 

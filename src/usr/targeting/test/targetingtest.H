@@ -56,1093 +56,1162 @@
 
 class TargetingTestSuite: public CxxTest::TestSuite
 {
-    public:
+  public:
 
-        /**
-         *  @brief Test the TargetService class (except debug cases)
-         */
-        void testTargetServiceClass()
+    /**
+     *  @brief Test the TargetService class (except debug cases)
+     */
+    void testTargetServiceClass()
+    {
+        TS_TRACE(ENTER_MRK "testTargetServiceClass" );
+
+        using namespace TARGETING;
+
+        TargetService& l_targetService = targetService();
+
+        l_targetService.init();
+
+        // Post init
+        // Test: void masterProcChipTarget(
+        //          TargetHandleList& o_masterProcChipTarget) const;
+
+        Target* l_pMasterProcChipTargetHandle = NULL;
+        (void) l_targetService.masterProcChipTargetHandle(
+                                                          l_pMasterProcChipTargetHandle);
+
+        if (   l_pMasterProcChipTargetHandle
+               == MASTER_PROCESSOR_CHIP_TARGET_SENTINEL)
         {
-            TS_TRACE(ENTER_MRK "testTargetServiceClass" );
-
-            using namespace TARGETING;
-
-            TargetService& l_targetService = targetService();
-
-            l_targetService.init();
-
-            // Post init
-            // Test: void masterProcChipTarget(
-            //          TargetHandleList& o_masterProcChipTarget) const;
-
-            Target* l_pMasterProcChipTargetHandle = NULL;
-            (void) l_targetService.masterProcChipTargetHandle(
-                l_pMasterProcChipTargetHandle);
-
-            if (   l_pMasterProcChipTargetHandle
-                == MASTER_PROCESSOR_CHIP_TARGET_SENTINEL)
-            {
-                TS_FAIL("Post init; master proc chip target handle should not "
-                        "be the sentinel value");
-            }
-
-            if (l_pMasterProcChipTargetHandle == NULL)
-            {
-                TS_FAIL("Post init; master proc chip target handle should not "
-                        "be the NULL value");
-            }
-
-            ScomSwitches l_switches = {0};
-            l_switches =
-                l_pMasterProcChipTargetHandle->getAttr<ATTR_SCOM_SWITCHES>();
-            if(   l_switches.useFsiScom != 0
-               || l_switches.useXscom != 1
-               || l_switches.useInbandScom != 0
-               || l_switches.reserved != 0)
-            {
-                TS_FAIL("SCOM Switches stuct was not correct (%d, %d, %d, %d)",
-                   l_switches.useFsiScom, l_switches.useXscom,
-                   l_switches.useInbandScom ,
-                   l_switches.reserved);
-            }
-
-            if (   l_pMasterProcChipTargetHandle->getAttr<ATTR_CLASS> ()
-                != CLASS_CHIP)
-            {
-                TS_FAIL("Post init; master proc chip target handle was not of "
-                        "chip class");
-            }
-
-            if (   l_pMasterProcChipTargetHandle->getAttr<ATTR_TYPE> ()
-                != TYPE_PROC)
-            {
-                TS_FAIL("Post init; master proc chip target handle was not of "
-                        "proc type");
-            }
-
-            // Post init
-            // Test: void getTopLevelTarget(Target*& o_targetHandle) const;
-
-            Target* l_pTopLevel = NULL;
-            (void) l_targetService.getTopLevelTarget(l_pTopLevel);
-            if (l_pTopLevel == NULL)
-            {
-                TS_FAIL("Top level handle was NULL when initialization "
-                        "complete");
-            }
-
-            if (l_pTopLevel->getAttr<ATTR_CLASS> () != CLASS_SYS)
-            {
-                TS_FAIL("Post init; top level target class != CLASS_SYS");
-            }
-
-            // Post init
-            // Test: void exists(
-            //           const EntityPath& i_entityPath,
-            //               bool&       o_exists) const;
-
-            bool l_exists = false;
-            (void) l_targetService.exists(
-                l_pTopLevel->getAttr<ATTR_PHYS_PATH> (), l_exists);
-
-            if (l_exists != true)
-            {
-                TS_FAIL("Expected top level target to exist");
-            }
-
-            // Post init
-            // Test: Target* toTarget(
-            //     const EntityPath& i_entityPath) const;
-
-            Target* l_pInverseTarget = NULL;
-            l_pInverseTarget = l_targetService.toTarget(
-                l_pTopLevel->getAttr<ATTR_PHYS_PATH> ());
-
-            if (l_pInverseTarget != l_pTopLevel)
-            {
-                TS_FAIL("Expected to get the original target");
-            }
-
-            // Post init
-            // Test: void getAssociated(
-            // const Target*           i_pTarget,
-            //      ASSOCIATION_TYPE  i_type,
-            //      RECURSION_LEVEL   i_recursionLevel,
-            //      TargetHandleList& o_list) const;
-
-            TargetHandleList l_list;
-            (void) l_targetService.getAssociated(
-                l_list,
-                l_pTopLevel,
-                TARGETING::TargetService::CHILD,
-                TARGETING::TargetService::IMMEDIATE);
-            if (!l_list.size())
-            {
-                TS_FAIL("Should have found some child elements" );
-            }
-
-            // Verify child of given target has a parent that is the original
-            // target
-
-            TargetHandleList l_parentList;
-            (void) l_targetService.getAssociated(
-                l_parentList,
-                l_list[0],
-                TARGETING::TargetService::PARENT,
-                TARGETING::TargetService::IMMEDIATE);
-
-            if (l_parentList.size() != 1)
-            {
-                TS_FAIL("Should have found a parent element" );
-            }
-
-            if (l_parentList[0] != l_pTopLevel)
-            {
-                TS_FAIL("Parent handle should have matched original target "
-                        "handle" );
-            }
-
-            (void) l_targetService.getAssociated(
-                l_list,
-                l_pTopLevel,
-                TARGETING::TargetService::CHILD_BY_AFFINITY,
-                TARGETING::TargetService::IMMEDIATE);
-
-            if (!l_list.size())
-            {
-                TS_FAIL("Should have found some child elements" );
-            }
-
-            (void) l_targetService.getAssociated(
-                l_list,
-                l_pTopLevel,
-                TARGETING::TargetService::CHILD_BY_AFFINITY,
-                TARGETING::TargetService::ALL);
-
-            if (!l_list.size())
-            {
-                TS_FAIL("Should have found more child elements" );
-            }
-
-            l_targetService.dump();
-
-            TS_TRACE(EXIT_MRK "testTargetServiceClass" );
+            TS_FAIL("Post init; master proc chip target handle should not "
+                    "be the sentinel value");
         }
 
-        /**
-         *  @test Tests the EntityPath class (except debug cases)
-         */
-        void testEntityPathClass(void)
+        if (l_pMasterProcChipTargetHandle == NULL)
         {
-            TS_TRACE(ENTER_MRK "testEntityPathClass" );
-
-            using namespace TARGETING;
-
-            EntityPath l_defaultPath;
-            if(l_defaultPath.size() != 0)
-            {
-                TS_FAIL("Default entity path's size was not 0");
-            }
-
-            if(l_defaultPath.type() != EntityPath::PATH_NA)
-            {
-                TS_FAIL("Default entity path's type was not PATH_NA");
-            }
-
-            EntityPath l_nonDefaultPath(EntityPath::PATH_PHYSICAL);
-            if(l_nonDefaultPath.size() != 0)
-            {
-                TS_FAIL("Non-default entity path's size was not 0");
-            }
-
-            if(l_nonDefaultPath.type() != EntityPath::PATH_PHYSICAL)
-            {
-                TS_FAIL("Non-default entity path's type was not "
-                        "EntityPath::PATH_PHYSICAL");
-            }
-
-            l_defaultPath.setType(EntityPath::PATH_AFFINITY);
-            if(l_defaultPath.type() != EntityPath::PATH_AFFINITY)
-            {
-                TS_FAIL("Default entity path's type was not "
-                        "EntityPath::PATH_AFFINITY after setting");
-            }
-
-            l_defaultPath.setType(EntityPath::PATH_PHYSICAL);
-            if(!(l_defaultPath == l_nonDefaultPath))
-            {
-                TS_FAIL("Default entity path should have been equal to "
-                        "the non-default entity path");
-            }
-
-            if(!l_defaultPath.equals(l_nonDefaultPath,0))
-            {
-                TS_FAIL("Default entity path should have been equal to "
-                        "the non-default entity path (equals API)");
-            }
-
-            l_defaultPath.addLast(TYPE_PROC,0);
-            if(l_defaultPath == l_nonDefaultPath)
-            {
-                TS_FAIL("Default entity path should NOT have been equal to "
-                        "the non-default entity path");
-            }
-
-            if(l_defaultPath.equals(l_nonDefaultPath,1))
-            {
-                TS_FAIL("Default entity path should NOT have been equal to "
-                        "the non-default entity path (equals API, comparing 1 "
-                        "element)");
-            }
-
-            if(l_defaultPath.size() != 1)
-            {
-                TS_FAIL("Default entity path should have had one path element"
-                        "after adding PROC0");
-            }
-
-            l_nonDefaultPath.addLast(TYPE_PROC,0);
-            if(! (l_defaultPath == l_nonDefaultPath) )
-            {
-                TS_FAIL("Default entity path should have been equal to "
-                        "the non-default entity path since they now"
-                        "both have the same 1 path element");
-            }
-
-            l_defaultPath.addLast(TYPE_MBA,1).addLast(TYPE_MBS,2);
-            if(l_defaultPath.size() != 3)
-            {
-                TS_FAIL("Default entity path should have had two path elements"
-                        "after adding MBA1 and MBS2");
-            }
-
-            if( (l_defaultPath[0].type != TYPE_PROC)
-                || (l_defaultPath[0].instance != 0)
-                || (l_defaultPath[1].type != TYPE_MBA)
-                || (l_defaultPath[1].instance != 1)
-                || (l_defaultPath[2].type != TYPE_MBS)
-                || (l_defaultPath[2].instance != 2))
-            {
-                TS_FAIL("Default entity path should have had correct 3 path "
-                        "elements");
-            }
-
-            l_defaultPath.removeLast();
-            if(l_defaultPath.size() != 2)
-            {
-                TS_FAIL("Default entity path should have had two path elements"
-                        "after removing MBS2");
-            }
-
-            if( (l_defaultPath[0].type != TYPE_PROC)
-                || (l_defaultPath[0].instance != 0)
-                || (l_defaultPath[1].type != TYPE_MBA)
-                || (l_defaultPath[1].instance != 1))
-            {
-                TS_FAIL("Default entity path should have had correct 2 path "
-                        "elements");
-            }
-
-            l_nonDefaultPath.addLast(TYPE_MBA,1).addLast(TYPE_MBS,2);
-
-            // Default now has proc/mba/
-            // Non-default now has proc/mba/mbs
-            if(l_defaultPath == l_nonDefaultPath)
-            {
-                TS_FAIL("Default entity path should NOT have been equal to "
-                        "the non-default entity path since they now"
-                        "have different number of path elements");
-            }
-
-            if( !l_defaultPath.equals(l_nonDefaultPath,2) )
-            {
-                TS_FAIL("Default entity path should have been equal to "
-                        "the non-default entity path since they have the same"
-                        "first two path elements");
-            }
-
-            l_defaultPath.removeLast().removeLast();
-            if(l_defaultPath.size() != 0)
-            {
-                TS_FAIL("Default entity path should have had no path element"
-                        "after removing MBA1 and PROC0");
-            }
-
-            TargetService& l_targetService = targetService();
-            l_targetService.init();
-
-            EntityPath l_realPath(EntityPath::PATH_PHYSICAL);
-            l_realPath.addLast(TYPE_SYS,0).addLast(TYPE_NODE,0)
-                .addLast(TYPE_PROC,0);
-
-            Target* l_pTarget = l_realPath.operator->();
-            if(l_pTarget == NULL)
-            {
-                TS_FAIL("Real entity path should have mapped to an existing "
-                        "target");
-            }
-
-            EntityPath l_path(EntityPath::PATH_PHYSICAL);
-            l_path.addLast(TYPE_SYS,0);
-            EntityPath l_changedPath = l_path.copyRemoveLast();
-            if(   (l_changedPath.size() != 0)
-               || (l_path.size() != 1))
-            {
-                TS_FAIL("Const entity path should not have been altered in "
-                        "const add test");
-            }
-
-            l_changedPath = l_path.copyAddLast(TYPE_NODE,0);
-            if(   (l_changedPath.size() != 2)
-               || (l_path.size() != 1))
-            {
-                TS_FAIL("Const entity path should not have been altered "
-                        "in const add test");
-            }
-
-            TS_TRACE(EXIT_MRK "testEntityPathClass" );
+            TS_FAIL("Post init; master proc chip target handle should not "
+                    "be the NULL value");
         }
 
-        /**
-         *  @test Tests the EntityPath class (except debug cases)
-         */
-        void testTargetClass(void)
+        ScomSwitches l_switches = {0};
+        l_switches =
+          l_pMasterProcChipTargetHandle->getAttr<ATTR_SCOM_SWITCHES>();
+        if(   l_switches.useFsiScom != 0
+              || l_switches.useXscom != 1
+              || l_switches.useInbandScom != 0
+              || l_switches.reserved != 0)
         {
-            TS_TRACE(ENTER_MRK "testTargetClass" );
-
-            using namespace TARGETING;
-            TargetService& l_targetService = targetService();
-            l_targetService.init();
-
-            EntityPath l_realPath(EntityPath::PATH_PHYSICAL);
-            l_realPath.addLast(TYPE_SYS,0).addLast(TYPE_NODE,0)
-                .addLast(TYPE_PROC,0);
-            l_realPath.dump();
-
-            Target* l_pTarget = l_realPath.operator->();
-            if(l_pTarget == NULL)
-            {
-                TS_FAIL("Failed to convert entity path to initial target");
-            }
-
-            CLASS l_class = l_pTarget->getAttr<ATTR_CLASS>();
-            if(l_class != CLASS_CHIP)
-            {
-                TS_FAIL("Failed to get the class attribute");
-            }
-
-            l_class = CLASS_NA;
-            if( !l_pTarget->tryGetAttr<ATTR_CLASS>(l_class) )
-            {
-                TS_FAIL("Failed to get the class attribute");
-            }
-
-            if(l_class != CLASS_CHIP)
-            {
-                TS_FAIL("Failed to try/get the class attribute");
-            }
-
-            attrToString<ATTR_CLASS>(l_class);
-
-            uint8_t l_scom = 0;
-            if( l_pTarget->tryGetAttr<ATTR_DUMMY_RO>(l_scom) )
-            {
-                TS_FAIL("ATTR_DUMMY_RO attribute should not have been available "
-                        "to read");
-            }
-
-            if(l_scom != 0)
-            {
-                TS_FAIL("Failed ! try/get should not have set the SCOM attribute");
-            }
-
-            l_scom = 5;
-            if( l_pTarget->trySetAttr<ATTR_DUMMY_WO>(l_scom) )
-            {
-                TS_FAIL("ATTR_DUMMY_WO attribute should not have been available "
-                        "to write");
-            }
-
-            if(l_scom != 5)
-            {
-                TS_FAIL("SCOM attribute should not have been altered in the "
-                        "failed write");
-            }
-
-            DUMMY_RW_ATTR l_wo;
-            memset(l_wo,0x00,sizeof(l_wo));
-            l_wo[0][1][2] = 6;
-            if( !l_pTarget->trySetAttr<ATTR_DUMMY_RW>(l_wo) )
-            {
-                TS_FAIL("ATTR_DUMMY_RW should have been available for write");
-            }
-
-            if(l_wo[0][1][2] != 6)
-            {
-                TS_FAIL("ATTR_DUMMY_RW local attribute should not have been "
-                        "altered in the successful write");
-            }
-
-            DUMMY_RW_ATTR l_read;
-            l_pTarget->tryGetAttr<ATTR_DUMMY_RW>(l_read);
-            if(memcmp(l_read,l_wo,sizeof(l_read)))
-            {
-                TS_FAIL("Failed to read back the correct ATTR_DUMMY_RW");
-            }
-
-            DUMMY_RW_ATTR l_setWo;
-            memset(l_setWo,0x00,sizeof(l_setWo));
-            l_setWo[0][2][4] = 9;
-            l_pTarget->setAttr<ATTR_DUMMY_RW>(l_setWo);
-            if(l_setWo[0][2][4] != 9)
-            {
-                TS_FAIL("ATTR_DUMMY_RW local attribute should not have been "
-                        "altered in the successful setAttr");
-            }
-
-            DUMMY_RW_ATTR l_setWoVerify;
-            l_pTarget->tryGetAttr<ATTR_DUMMY_RW>(l_setWoVerify);
-            if(memcmp(l_setWoVerify,l_setWo,sizeof(l_setWoVerify)))
-            {
-                TS_FAIL("ATTR_DUMMY_RW read should have matched prior write");
-            }
-
-            memset(l_setWo,0x05,sizeof(l_setWo));
-            l_pTarget->setAttr<ATTR_DUMMY_RW>(l_setWo);
-
-            TS_TRACE(EXIT_MRK "testTargetClass" );
+            TS_FAIL("SCOM Switches stuct was not correct (%d, %d, %d, %d)",
+                    l_switches.useFsiScom, l_switches.useXscom,
+                    l_switches.useInbandScom ,
+                    l_switches.reserved);
         }
 
-        void testPredicateCtm()
+        if (   l_pMasterProcChipTargetHandle->getAttr<ATTR_CLASS> ()
+               != CLASS_CHIP)
         {
-            TS_TRACE(ENTER_MRK "testPredicateCtm" );
-
-            using namespace TARGETING;
-            TargetService& l_targetService = targetService();
-
-            // Get top level (system) target
-            Target* l_pTopLevel = NULL;
-            (void) l_targetService.getTopLevelTarget(l_pTopLevel);
-            if (l_pTopLevel == NULL)
-            {
-                TS_FAIL("Top level handle was NULL when initialization "
-                        "complete");
-            }
-
-            PredicateCTM l_allWild;
-            if( ! l_allWild(l_pTopLevel) )
-            {
-                TS_FAIL("CTM all wildcards filter should have matched system "
-                        "target");
-            }
-
-            PredicateCTM l_typeModelWild(CLASS_SYS);
-            if( ! l_typeModelWild(l_pTopLevel) )
-            {
-                TS_FAIL("CTM class sys, remaining wildcards filter should have "
-                        "matched system ");
-            }
-
-            PredicateCTM l_modelWild(CLASS_SYS,TYPE_SYS);
-            if( ! l_modelWild(l_pTopLevel) )
-            {
-                TS_FAIL("CTM class sys, type sys, remaining wildcards filter "
-                        "should have matched system ");
-            }
-
-            PredicateCTM l_noWild(CLASS_SYS,TYPE_SYS,MODEL_POWER8);
-            if( ! l_noWild(l_pTopLevel) )
-            {
-                TS_FAIL("CTM class sys, type sys, model power8 should have "
-                        "matched system ");
-            }
-
-            PredicateCTM l_classWild(CLASS_NA,TYPE_SYS,MODEL_POWER8);
-            if( ! l_classWild(l_pTopLevel) )
-            {
-                TS_FAIL("CTM class wild, type sys, model power8 should have "
-                        "matched system ");
-            }
-
-            PredicateCTM l_typeWild(CLASS_SYS,TYPE_NA,MODEL_POWER8);
-            if( ! l_typeWild(l_pTopLevel) )
-            {
-                TS_FAIL("CTM class sys, wild, model power8 should have "
-                        "matched system ");
-            }
-
-            PredicateCTM l_classModelWild(CLASS_NA,TYPE_SYS,MODEL_NA);
-            if( ! l_classModelWild(l_pTopLevel) )
-            {
-                TS_FAIL("CTM wild, type sys, wild should have "
-                        "matched system ");
-            }
-
-            PredicateCTM l_classTypeWild(CLASS_NA,TYPE_NA,MODEL_NA);
-            if( ! l_classTypeWild(l_pTopLevel) )
-            {
-                TS_FAIL("CTM wild, wild, model should have "
-                        "matched system ");
-            }
-
-            PredicateCTM l_chipClass(CLASS_CHIP,TYPE_NA,MODEL_NA);
-            if(  l_chipClass(l_pTopLevel) )
-            {
-                TS_FAIL("CTM of class chip, wild, wild should not have matched "
-                        "matched system ");
-            }
-
-            #if 0 // Prove copy CTOR/assignment operator is disabled
-            PredicateCTM l_ctmLhs;
-            PredicateCTM l_ctmRhs;
-
-            l_ctmLhs = l_ctmRhs;
-
-            PredicateCTM l_ctmCtor(l_ctmRhs);
-            #endif
-
-            PredicateBase* l_pBase = new PredicateCTM(CLASS_SYS);
-            delete l_pBase;
-            l_pBase = NULL;
-
-            TS_TRACE(EXIT_MRK "testPredicateCtm" );
-
+            TS_FAIL("Post init; master proc chip target handle was not of "
+                    "chip class");
         }
 
-        void testPredicatePostfixExpr()
+        if (   l_pMasterProcChipTargetHandle->getAttr<ATTR_TYPE> ()
+               != TYPE_PROC)
         {
-            TS_TRACE(ENTER_MRK "testPredicatePostfixExpr" );
-
-            using namespace TARGETING;
-            TargetService& l_targetService = targetService();
-
-            // Get top level (system) target
-            Target* l_pTopLevel = NULL;
-            (void) l_targetService.getTopLevelTarget(l_pTopLevel);
-            if (l_pTopLevel == NULL)
-            {
-                TS_FAIL("Top level handle was NULL when initialization "
-                        "complete");
-            }
-
-            PredicatePostfixExpr l_alwaysTrueExpr;
-            if(!l_alwaysTrueExpr(l_pTopLevel) )
-            {
-                TS_FAIL("Always true filter should have matched system");
-            }
-
-            #if 0
-            // Triggers NULL assertion check on push
-            l_alwaysTrueExpr.push(NULL);
-            #endif
-
-            #if 0
-            // Triggers not enough stack elements assertion when evaluating Not
-            l_alwaysTrueExpr.Not();
-            if(l_alwaysTrueExpr(l_pTopLevel) )
-            {
-                TS_FAIL("Negated always true filter should not have matched "
-                        "system");
-            }
-            #endif
-
-            #if 0
-            // Triggers illegal target assertion
-            l_alwaysTrueExpr(NULL);
-            #endif
-
-            #if 0
-            // Triggers formatting assertion
-            l_alwaysTrueExpr.And();
-            l_alwaysTrueExpr(l_pTopLevel);
-            #endif
-
-            #if 0
-            // Triggers formatting assertion
-            l_alwaysTrueExpr.Or();
-            l_alwaysTrueExpr(l_pTopLevel);
-            #endif
-
-            PredicateCTM l_sysClass(CLASS_SYS);
-
-            #if 0
-            // Triggers formatting assertion
-            l_alwaysTrueExpr.push(&l_sysClass);
-            l_alwaysTrueExpr.And();
-            l_alwaysTrueExpr(l_pTopLevel);
-            #endif
-
-            #if 0
-            // Triggers formatting assertion
-            l_alwaysTrueExpr.push(&l_sysClass);
-            l_alwaysTrueExpr.Or();
-            l_alwaysTrueExpr(l_pTopLevel);
-            #endif
-
-            #if 0
-            // Triggers illegal formatting exception
-            // != 1 results on stack
-            l_alwaysTrueExpr.push(&l_sysClass);
-            l_alwaysTrueExpr.push(&l_sysClass);
-            l_alwaysTrueExpr.Not();
-            l_alwaysTrueExpr(l_pTopLevel);
-            #endif
-
-            PredicateCTM l_sysType(CLASS_NA,TYPE_SYS);
-            PredicateCTM l_power8Model(CLASS_NA,TYPE_NA,MODEL_POWER8);
-            PredicatePostfixExpr l_expr;
-            l_expr.push(&l_sysClass).push(&l_sysType).And();
-            l_expr.push(&l_power8Model).And();
-
-            if(!l_expr(l_pTopLevel) )
-            {
-                TS_FAIL("CTM of class sys && type sys && model power8 should "
-                        "have matched system");
-            }
-
-            l_expr.Not();
-
-            if(l_expr(l_pTopLevel) )
-            {
-                TS_FAIL("CTM of class sys && type sys && model power8 should "
-                        "npt have matched system after negation");
-            }
-
-            l_expr.push(&l_sysClass);
-            l_expr.Or();
-
-            if(!l_expr(l_pTopLevel) )
-            {
-                TS_FAIL("CTM of class sys && type sys && model power8 should "
-                        "have matched system after negation then || sys class");
-            }
-
-            PredicatePostfixExpr* l_pExpr = new PredicatePostfixExpr;
-            l_pExpr->push(&l_sysClass).push(&l_sysType).And();
-            l_pExpr->push(&l_power8Model).And();
-            delete (static_cast<PredicateBase*>(l_pExpr));
-
-            #if 0
-            PredicatePostfixExpr l_lhs;
-            PredicatePostfixExpr l_rhs;
-
-            l_lhs = l_rhs;
-
-            PredicatePostfixExpr l_cpCtor(l_rhs);
-            #endif
-
-
-            TS_TRACE(EXIT_MRK "testPredicatePostfixExpr" );
+            TS_FAIL("Post init; master proc chip target handle was not of "
+                    "proc type");
         }
 
-        void testTargetIterator()
+        // Post init
+        // Test: void getTopLevelTarget(Target*& o_targetHandle) const;
+
+        Target* l_pTopLevel = NULL;
+        (void) l_targetService.getTopLevelTarget(l_pTopLevel);
+        if (l_pTopLevel == NULL)
         {
-            TS_TRACE(ENTER_MRK "testTargetIterator");
-
-            using namespace TARGETING;
-            TargetService& l_targetService = targetService();
-
-
-            TargetIterator l_pIt;
-            if( l_pIt != l_targetService.end() )
-            {
-                TS_FAIL("Default TargetIterator should point to past the end "
-                        "of container");
-            }
-
-            ++l_pIt;
-            if( l_pIt != l_targetService.end() )
-            {
-                TS_FAIL("Default TargetIterator preincremented should point to "
-                        "past the end of container");
-            }
-
-            TargetIterator* l_pItNew = new TargetIterator;
-            delete l_pItNew;
-            l_pItNew = NULL;
-
-            if(*l_pIt != NULL)
-            {
-               TS_FAIL("Default TargetIterator dereference should return NULL");
-            }
-
-            // Get top level (system) target to verify at least 1 target
-            Target* l_pTopLevel = NULL;
-            (void) l_targetService.getTopLevelTarget(l_pTopLevel);
-            if (l_pTopLevel == NULL)
-            {
-                TS_FAIL("Top level handle was NULL when initialization "
-                        "complete");
-            }
-
-            l_pIt = l_targetService.begin();
-            if((*l_pIt) == NULL)
-            {
-               TS_FAIL("TargetService begin() should return !NULL");
-            }
-
-            CLASS l_class = CLASS_NA;
-            if( !l_pIt->tryGetAttr<ATTR_CLASS>(l_class) )
-            {
-               TS_FAIL("Failed to get expected class attribute");
-            }
-
-            TargetIterator l_rhs = l_targetService.begin();
-            if( ! (l_pIt == l_rhs) )
-            {
-               TS_FAIL("Iterators should be equal, but aren't");
-            }
-
-            l_rhs = l_targetService.begin();
-            if( l_pIt != l_rhs )
-            {
-               TS_FAIL("Iterators should be equal, but aren't");
-            }
-
-            TargetIterator l_rhs2 = l_targetService.begin();
-            ++l_rhs2;
-            ++l_pIt;
-            if( l_pIt != l_rhs2 )
-            {
-               TS_FAIL("Iterators should be equal, but aren't");
-            }
-
-            l_rhs2++;
-            l_pIt++;
-            if( l_pIt != l_rhs2 )
-            {
-               TS_FAIL("Iterators should be equal, but aren't");
-            }
-
-            TargetIterator l_pItClone(l_rhs2);
-            if( l_pIt != l_pItClone)
-            {
-               TS_FAIL("Iterators should be equal, but aren't");
-            }
-
-            if(l_pIt != l_pItClone++)
-            {
-               TS_FAIL("Iterators should be equal, but aren't");
-            }
-
-            if( (++l_pIt) != l_pItClone)
-            {
-               TS_FAIL("Iterators should be equal, but aren't");
-            }
-
-            const TargetService& l_constTargetService = targetService();
-
-            ConstTargetIterator l_pConstIt;
-            if( l_pConstIt != l_constTargetService.end() )
-            {
-                TS_FAIL("Default ConstTargetIterator should point to past the "
-                        "end of container");
-            }
-
-            l_pConstIt = l_constTargetService.begin();
-            if( (*l_pConstIt) == NULL)
-            {
-                TS_FAIL("Iterator does not point to valid Target as expected");
-            }
-
-            TS_TRACE(EXIT_MRK "testTargetIterator" );
+            TS_FAIL("Top level handle was NULL when initialization "
+                    "complete");
         }
 
-        void testRangeFilter(void)
+        if (l_pTopLevel->getAttr<ATTR_CLASS> () != CLASS_SYS)
         {
-            TS_TRACE(ENTER_MRK "testRangeFilters" );
-
-            using namespace TARGETING;
-
-            TargetRangeFilter* l_pRangeFilter = new TargetRangeFilter(
-                targetService().begin(),
-                targetService().end(),
-                NULL);
-            delete l_pRangeFilter;
-            l_pRangeFilter = NULL;
-
-
-            TargetRangeFilter l_f1(
-                targetService().begin(),
-                targetService().end(),
-                NULL);
-
-            Target* l_pBegin = (*l_f1);
-            ++l_f1;
-            Target* l_pNext = (*l_f1);
-            if(   (l_pBegin == NULL)
-               || (l_pNext == NULL)
-               || (l_pBegin == l_pNext)
-               )
-            {
-                TS_FAIL("Target* pointed to by Begin/next NULL -or- begin =="
-                        "next");
-            }
-
-            l_f1.reset();
-            if( *l_f1 != l_pBegin )
-            {
-                TS_FAIL("Target* after reset should be equal to original");
-            }
-
-            l_f1.reset();
-            TargetRangeFilter l_f2 = l_f1;
-            PredicateCTM l_ctm(CLASS_SYS,TYPE_CORE); // Nonsense CTM
-            l_f1.setPredicate(&l_ctm);
-            if( *l_f1 == l_pBegin )
-            {
-                TS_FAIL("Target* after reset and change of predicate should be"
-                        "different than the original");
-            }
-
-            PredicateCTM l_ctm1(CLASS_CHIP,TYPE_PROC);
-
-            TargetRangeFilter l_f3(
-                targetService().begin(),
-                targetService().end(),
-                &l_ctm1);
-            for(;l_f3;++l_f3)
-            {
-                if(l_f3->getAttr<ATTR_TYPE>() != TYPE_PROC)
-                {
-                    TS_FAIL("Should only have returned type proc");
-                    break;
-                }
-            }
-
-            TargetIterator l_pIt = targetService().begin();
-            ++l_pIt;
-            ++l_pIt;
-
-            if(l_pIt == targetService().end())
-            {
-                TS_FAIL("Not enough elements for test");
-            }
-
-            TargetRangeFilter l_partial(
-                targetService().begin(),
-                l_pIt,
-                NULL);
-            int i=0;
-
-            for(; l_partial; ++l_partial)
-            {
-                i++;
-            }
-
-            if(i != 2)
-            {
-                TS_FAIL("Should have gotten 2 elements %d",i);
-            }
-
-            TS_TRACE(EXIT_MRK "testRangeFilter" );
+            TS_FAIL("Post init; top level target class != CLASS_SYS");
         }
 
-        void testComplexFilter(void)
+        // Post init
+        // Test: void exists(
+        //           const EntityPath& i_entityPath,
+        //               bool&       o_exists) const;
+
+        bool l_exists = false;
+        (void) l_targetService.exists(
+                                      l_pTopLevel->getAttr<ATTR_PHYS_PATH> (), l_exists);
+
+        if (l_exists != true)
         {
-            TS_TRACE(ENTER_MRK "testComplexFilter" );
-
-            using namespace TARGETING;
-
-            TargetService& l_targetService = targetService();
-
-            TargetRangeFilter f(l_targetService.begin(),
-                                l_targetService.end(),
-                                NULL);
-            int l_count = 0;
-            for(; f; ++f, l_count++)
-            {
-            }
-
-            TS_TRACE(INF_MRK "Found %d total targets", l_count);
-
-            PredicateCTM l_procs(CLASS_CHIP);
-            PredicateCTM l_enclosures(CLASS_ENC);
-            PredicatePostfixExpr l_query;
-            l_query.push(&l_procs).push(&l_enclosures).Or();
-
-            f.setPredicate(&l_query);
-            f.reset();
-
-            l_count = 0;
-            for(; f; ++f, ++l_count)
-            {
-                EntityPath l_path = f->getAttr<ATTR_PHYS_PATH>();
-                l_path.dump();
-            }
-
-            TS_TRACE(INF_MRK "Found %d targets that are chips or enclosures ",
-                      l_count);
-
-            l_query.Not();
-            f.reset();
-
-            l_count = 0;
-            for(; f; ++f, ++l_count)
-            {
-            }
-
-            TS_TRACE(INF_MRK "Found %d targets that are not chips or "
-                     "enclosures",l_count);
-
-            Target* l_pMasterProcChipTargetHandle = NULL;
-            (void) l_targetService.masterProcChipTargetHandle(
-                l_pMasterProcChipTargetHandle);
-            if(l_pMasterProcChipTargetHandle == NULL)
-            {
-                TS_FAIL("Master processor chip target not found");
-            }
-
-            PredicateCTM l_ex(CLASS_UNIT,TYPE_EX);
-            PredicateCTM l_mba(CLASS_UNIT,TYPE_MBA);
-            PredicatePostfixExpr l_procquery;
-            l_procquery.push(&l_ex).push(&l_mba).Or();
-
-            TargetHandleList l_list;
-            (void) targetService().getAssociated(
-                    l_list,
-                    l_pMasterProcChipTargetHandle,
-                    TARGETING::TargetService::CHILD,
-                    TARGETING::TargetService::ALL,
-                    &l_procquery);
-
-            l_count = 0;
-            for(uint32_t i=0; i<l_list.size(); ++i, ++l_count)
-            {
-                 EntityPath l_path = l_list[i]->getAttr<ATTR_PHYS_PATH>();
-                l_path.dump();
-            }
-
-            TS_TRACE(INF_MRK "Found %d targets that are ex/mba units off "
-                     "master processor",l_count);
-
-            TS_TRACE(EXIT_MRK "testComplexFilter" );
+            TS_FAIL("Expected top level target to exist");
         }
 
-        void testFapiToHbMacros ()
+        // Post init
+        // Test: Target* toTarget(
+        //     const EntityPath& i_entityPath) const;
+
+        Target* l_pInverseTarget = NULL;
+        l_pInverseTarget = l_targetService.toTarget(
+                                                    l_pTopLevel->getAttr<ATTR_PHYS_PATH> ());
+
+        if (l_pInverseTarget != l_pTopLevel)
         {
-            TS_TRACE(ENTER_MRK "testFapiToHbMacros" );
+            TS_FAIL("Expected to get the original target");
+        }
 
-            TS_TRACE(INF_MRK "Now using direct access macros");
+        // Post init
+        // Test: void getAssociated(
+        // const Target*           i_pTarget,
+        //      ASSOCIATION_TYPE  i_type,
+        //      RECURSION_LEVEL   i_recursionLevel,
+        //      TargetHandleList& o_list) const;
 
-            using namespace TARGETING;
-            using namespace fapi;
+        TargetHandleList l_list;
+        (void) l_targetService.getAssociated(
+                                             l_list,
+                                             l_pTopLevel,
+                                             TARGETING::TargetService::CHILD,
+                                             TARGETING::TargetService::IMMEDIATE);
+        if (!l_list.size())
+        {
+            TS_FAIL("Should have found some child elements" );
+        }
 
-            TargetService& l_targetService = targetService();
+        // Verify child of given target has a parent that is the original
+        // target
 
-            TARGETING::Target* l_pTarget = NULL;
-            (void) l_targetService.getTopLevelTarget(l_pTarget);
-            if (l_pTarget == NULL)
+        TargetHandleList l_parentList;
+        (void) l_targetService.getAssociated(
+                                             l_parentList,
+                                             l_list[0],
+                                             TARGETING::TargetService::PARENT,
+                                             TARGETING::TargetService::IMMEDIATE);
+
+        if (l_parentList.size() != 1)
+        {
+            TS_FAIL("Should have found a parent element" );
+        }
+
+        if (l_parentList[0] != l_pTopLevel)
+        {
+            TS_FAIL("Parent handle should have matched original target "
+                    "handle" );
+        }
+
+        (void) l_targetService.getAssociated(
+                                             l_list,
+                                             l_pTopLevel,
+                                             TARGETING::TargetService::CHILD_BY_AFFINITY,
+                                             TARGETING::TargetService::IMMEDIATE);
+
+        if (!l_list.size())
+        {
+            TS_FAIL("Should have found some child elements" );
+        }
+
+        (void) l_targetService.getAssociated(
+                                             l_list,
+                                             l_pTopLevel,
+                                             TARGETING::TargetService::CHILD_BY_AFFINITY,
+                                             TARGETING::TargetService::ALL);
+
+        if (!l_list.size())
+        {
+            TS_FAIL("Should have found more child elements" );
+        }
+
+        l_targetService.dump();
+
+        TS_TRACE(EXIT_MRK "testTargetServiceClass" );
+    }
+
+    /**
+     *  @test Tests the EntityPath class (except debug cases)
+     */
+    void testEntityPathClass(void)
+    {
+        TS_TRACE(ENTER_MRK "testEntityPathClass" );
+
+        using namespace TARGETING;
+
+        EntityPath l_defaultPath;
+        if(l_defaultPath.size() != 0)
+        {
+            TS_FAIL("Default entity path's size was not 0");
+        }
+
+        if(l_defaultPath.type() != EntityPath::PATH_NA)
+        {
+            TS_FAIL("Default entity path's type was not PATH_NA");
+        }
+
+        EntityPath l_nonDefaultPath(EntityPath::PATH_PHYSICAL);
+        if(l_nonDefaultPath.size() != 0)
+        {
+            TS_FAIL("Non-default entity path's size was not 0");
+        }
+
+        if(l_nonDefaultPath.type() != EntityPath::PATH_PHYSICAL)
+        {
+            TS_FAIL("Non-default entity path's type was not "
+                    "EntityPath::PATH_PHYSICAL");
+        }
+
+        l_defaultPath.setType(EntityPath::PATH_AFFINITY);
+        if(l_defaultPath.type() != EntityPath::PATH_AFFINITY)
+        {
+            TS_FAIL("Default entity path's type was not "
+                    "EntityPath::PATH_AFFINITY after setting");
+        }
+
+        l_defaultPath.setType(EntityPath::PATH_PHYSICAL);
+        if(!(l_defaultPath == l_nonDefaultPath))
+        {
+            TS_FAIL("Default entity path should have been equal to "
+                    "the non-default entity path");
+        }
+
+        if(!l_defaultPath.equals(l_nonDefaultPath,0))
+        {
+            TS_FAIL("Default entity path should have been equal to "
+                    "the non-default entity path (equals API)");
+        }
+
+        l_defaultPath.addLast(TYPE_PROC,0);
+        if(l_defaultPath == l_nonDefaultPath)
+        {
+            TS_FAIL("Default entity path should NOT have been equal to "
+                    "the non-default entity path");
+        }
+
+        if(l_defaultPath.equals(l_nonDefaultPath,1))
+        {
+            TS_FAIL("Default entity path should NOT have been equal to "
+                    "the non-default entity path (equals API, comparing 1 "
+                    "element)");
+        }
+
+        if(l_defaultPath.size() != 1)
+        {
+            TS_FAIL("Default entity path should have had one path element"
+                    "after adding PROC0");
+        }
+
+        l_nonDefaultPath.addLast(TYPE_PROC,0);
+        if(! (l_defaultPath == l_nonDefaultPath) )
+        {
+            TS_FAIL("Default entity path should have been equal to "
+                    "the non-default entity path since they now"
+                    "both have the same 1 path element");
+        }
+
+        l_defaultPath.addLast(TYPE_MBA,1).addLast(TYPE_MBS,2);
+        if(l_defaultPath.size() != 3)
+        {
+            TS_FAIL("Default entity path should have had two path elements"
+                    "after adding MBA1 and MBS2");
+        }
+
+        if( (l_defaultPath[0].type != TYPE_PROC)
+            || (l_defaultPath[0].instance != 0)
+            || (l_defaultPath[1].type != TYPE_MBA)
+            || (l_defaultPath[1].instance != 1)
+            || (l_defaultPath[2].type != TYPE_MBS)
+            || (l_defaultPath[2].instance != 2))
+        {
+            TS_FAIL("Default entity path should have had correct 3 path "
+                    "elements");
+        }
+
+        l_defaultPath.removeLast();
+        if(l_defaultPath.size() != 2)
+        {
+            TS_FAIL("Default entity path should have had two path elements"
+                    "after removing MBS2");
+        }
+
+        if( (l_defaultPath[0].type != TYPE_PROC)
+            || (l_defaultPath[0].instance != 0)
+            || (l_defaultPath[1].type != TYPE_MBA)
+            || (l_defaultPath[1].instance != 1))
+        {
+            TS_FAIL("Default entity path should have had correct 2 path "
+                    "elements");
+        }
+
+        l_nonDefaultPath.addLast(TYPE_MBA,1).addLast(TYPE_MBS,2);
+
+        // Default now has proc/mba/
+        // Non-default now has proc/mba/mbs
+        if(l_defaultPath == l_nonDefaultPath)
+        {
+            TS_FAIL("Default entity path should NOT have been equal to "
+                    "the non-default entity path since they now"
+                    "have different number of path elements");
+        }
+
+        if( !l_defaultPath.equals(l_nonDefaultPath,2) )
+        {
+            TS_FAIL("Default entity path should have been equal to "
+                    "the non-default entity path since they have the same"
+                    "first two path elements");
+        }
+
+        l_defaultPath.removeLast().removeLast();
+        if(l_defaultPath.size() != 0)
+        {
+            TS_FAIL("Default entity path should have had no path element"
+                    "after removing MBA1 and PROC0");
+        }
+
+        TargetService& l_targetService = targetService();
+        l_targetService.init();
+
+        EntityPath l_realPath(EntityPath::PATH_PHYSICAL);
+        l_realPath.addLast(TYPE_SYS,0).addLast(TYPE_NODE,0)
+          .addLast(TYPE_PROC,0);
+
+        Target* l_pTarget = l_realPath.operator->();
+        if(l_pTarget == NULL)
+        {
+            TS_FAIL("Real entity path should have mapped to an existing "
+                    "target");
+        }
+
+        EntityPath l_path(EntityPath::PATH_PHYSICAL);
+        l_path.addLast(TYPE_SYS,0);
+        EntityPath l_changedPath = l_path.copyRemoveLast();
+        if(   (l_changedPath.size() != 0)
+              || (l_path.size() != 1))
+        {
+            TS_FAIL("Const entity path should not have been altered in "
+                    "const add test");
+        }
+
+        l_changedPath = l_path.copyAddLast(TYPE_NODE,0);
+        if(   (l_changedPath.size() != 2)
+              || (l_path.size() != 1))
+        {
+            TS_FAIL("Const entity path should not have been altered "
+                    "in const add test");
+        }
+
+        TS_TRACE(EXIT_MRK "testEntityPathClass" );
+    }
+
+    /**
+     *  @test Tests the EntityPath class (except debug cases)
+     */
+    void testTargetClass(void)
+    {
+        TS_TRACE(ENTER_MRK "testTargetClass" );
+
+        using namespace TARGETING;
+        TargetService& l_targetService = targetService();
+        l_targetService.init();
+
+        EntityPath l_realPath(EntityPath::PATH_PHYSICAL);
+        l_realPath.addLast(TYPE_SYS,0).addLast(TYPE_NODE,0)
+          .addLast(TYPE_PROC,0);
+        l_realPath.dump();
+
+        Target* l_pTarget = l_realPath.operator->();
+        if(l_pTarget == NULL)
+        {
+            TS_FAIL("Failed to convert entity path to initial target");
+        }
+
+        CLASS l_class = l_pTarget->getAttr<ATTR_CLASS>();
+        if(l_class != CLASS_CHIP)
+        {
+            TS_FAIL("Failed to get the class attribute");
+        }
+
+        l_class = CLASS_NA;
+        if( !l_pTarget->tryGetAttr<ATTR_CLASS>(l_class) )
+        {
+            TS_FAIL("Failed to get the class attribute");
+        }
+
+        if(l_class != CLASS_CHIP)
+        {
+            TS_FAIL("Failed to try/get the class attribute");
+        }
+
+        attrToString<ATTR_CLASS>(l_class);
+
+        uint8_t l_scom = 0;
+        if( l_pTarget->tryGetAttr<ATTR_DUMMY_RO>(l_scom) )
+        {
+            TS_FAIL("ATTR_DUMMY_RO attribute should not have been available "
+                    "to read");
+        }
+
+        if(l_scom != 0)
+        {
+            TS_FAIL("Failed ! try/get should not have set the SCOM attribute");
+        }
+
+        l_scom = 5;
+        if( l_pTarget->trySetAttr<ATTR_DUMMY_WO>(l_scom) )
+        {
+            TS_FAIL("ATTR_DUMMY_WO attribute should not have been available "
+                    "to write");
+        }
+
+        if(l_scom != 5)
+        {
+            TS_FAIL("SCOM attribute should not have been altered in the "
+                    "failed write");
+        }
+
+        DUMMY_RW_ATTR l_wo;
+        memset(l_wo,0x00,sizeof(l_wo));
+        l_wo[0][1][2] = 6;
+        if( !l_pTarget->trySetAttr<ATTR_DUMMY_RW>(l_wo) )
+        {
+            TS_FAIL("ATTR_DUMMY_RW should have been available for write");
+        }
+
+        if(l_wo[0][1][2] != 6)
+        {
+            TS_FAIL("ATTR_DUMMY_RW local attribute should not have been "
+                    "altered in the successful write");
+        }
+
+        DUMMY_RW_ATTR l_read;
+        l_pTarget->tryGetAttr<ATTR_DUMMY_RW>(l_read);
+        if(memcmp(l_read,l_wo,sizeof(l_read)))
+        {
+            TS_FAIL("Failed to read back the correct ATTR_DUMMY_RW");
+        }
+
+        DUMMY_RW_ATTR l_setWo;
+        memset(l_setWo,0x00,sizeof(l_setWo));
+        l_setWo[0][2][4] = 9;
+        l_pTarget->setAttr<ATTR_DUMMY_RW>(l_setWo);
+        if(l_setWo[0][2][4] != 9)
+        {
+            TS_FAIL("ATTR_DUMMY_RW local attribute should not have been "
+                    "altered in the successful setAttr");
+        }
+
+        DUMMY_RW_ATTR l_setWoVerify;
+        l_pTarget->tryGetAttr<ATTR_DUMMY_RW>(l_setWoVerify);
+        if(memcmp(l_setWoVerify,l_setWo,sizeof(l_setWoVerify)))
+        {
+            TS_FAIL("ATTR_DUMMY_RW read should have matched prior write");
+        }
+
+        memset(l_setWo,0x05,sizeof(l_setWo));
+        l_pTarget->setAttr<ATTR_DUMMY_RW>(l_setWo);
+
+        TS_TRACE(EXIT_MRK "testTargetClass" );
+    }
+
+    void testPredicateCtm()
+    {
+        TS_TRACE(ENTER_MRK "testPredicateCtm" );
+
+        using namespace TARGETING;
+        TargetService& l_targetService = targetService();
+
+        // Get top level (system) target
+        Target* l_pTopLevel = NULL;
+        (void) l_targetService.getTopLevelTarget(l_pTopLevel);
+        if (l_pTopLevel == NULL)
+        {
+            TS_FAIL("Top level handle was NULL when initialization "
+                    "complete");
+        }
+
+        PredicateCTM l_allWild;
+        if( ! l_allWild(l_pTopLevel) )
+        {
+            TS_FAIL("CTM all wildcards filter should have matched system "
+                    "target");
+        }
+
+        PredicateCTM l_typeModelWild(CLASS_SYS);
+        if( ! l_typeModelWild(l_pTopLevel) )
+        {
+            TS_FAIL("CTM class sys, remaining wildcards filter should have "
+                    "matched system ");
+        }
+
+        PredicateCTM l_modelWild(CLASS_SYS,TYPE_SYS);
+        if( ! l_modelWild(l_pTopLevel) )
+        {
+            TS_FAIL("CTM class sys, type sys, remaining wildcards filter "
+                    "should have matched system ");
+        }
+
+        PredicateCTM l_noWild(CLASS_SYS,TYPE_SYS,MODEL_POWER8);
+        if( ! l_noWild(l_pTopLevel) )
+        {
+            TS_FAIL("CTM class sys, type sys, model power8 should have "
+                    "matched system ");
+        }
+
+        PredicateCTM l_classWild(CLASS_NA,TYPE_SYS,MODEL_POWER8);
+        if( ! l_classWild(l_pTopLevel) )
+        {
+            TS_FAIL("CTM class wild, type sys, model power8 should have "
+                    "matched system ");
+        }
+
+        PredicateCTM l_typeWild(CLASS_SYS,TYPE_NA,MODEL_POWER8);
+        if( ! l_typeWild(l_pTopLevel) )
+        {
+            TS_FAIL("CTM class sys, wild, model power8 should have "
+                    "matched system ");
+        }
+
+        PredicateCTM l_classModelWild(CLASS_NA,TYPE_SYS,MODEL_NA);
+        if( ! l_classModelWild(l_pTopLevel) )
+        {
+            TS_FAIL("CTM wild, type sys, wild should have "
+                    "matched system ");
+        }
+
+        PredicateCTM l_classTypeWild(CLASS_NA,TYPE_NA,MODEL_NA);
+        if( ! l_classTypeWild(l_pTopLevel) )
+        {
+            TS_FAIL("CTM wild, wild, model should have "
+                    "matched system ");
+        }
+
+        PredicateCTM l_chipClass(CLASS_CHIP,TYPE_NA,MODEL_NA);
+        if(  l_chipClass(l_pTopLevel) )
+        {
+            TS_FAIL("CTM of class chip, wild, wild should not have matched "
+                    "matched system ");
+        }
+
+#if 0 // Prove copy CTOR/assignment operator is disabled
+        PredicateCTM l_ctmLhs;
+        PredicateCTM l_ctmRhs;
+
+        l_ctmLhs = l_ctmRhs;
+
+        PredicateCTM l_ctmCtor(l_ctmRhs);
+#endif
+
+        PredicateBase* l_pBase = new PredicateCTM(CLASS_SYS);
+        delete l_pBase;
+        l_pBase = NULL;
+
+        TS_TRACE(EXIT_MRK "testPredicateCtm" );
+
+    }
+
+    void testPredicatePostfixExpr()
+    {
+        TS_TRACE(ENTER_MRK "testPredicatePostfixExpr" );
+
+        using namespace TARGETING;
+        TargetService& l_targetService = targetService();
+
+        // Get top level (system) target
+        Target* l_pTopLevel = NULL;
+        (void) l_targetService.getTopLevelTarget(l_pTopLevel);
+        if (l_pTopLevel == NULL)
+        {
+            TS_FAIL("Top level handle was NULL when initialization "
+                    "complete");
+        }
+
+        PredicatePostfixExpr l_alwaysTrueExpr;
+        if(!l_alwaysTrueExpr(l_pTopLevel) )
+        {
+            TS_FAIL("Always true filter should have matched system");
+        }
+
+#if 0 
+        // Triggers NULL assertion check on push 
+        l_alwaysTrueExpr.push(NULL);
+#endif
+
+#if 0
+        // Triggers not enough stack elements assertion when evaluating Not
+        l_alwaysTrueExpr.Not();
+        if(l_alwaysTrueExpr(l_pTopLevel) )
+        {
+            TS_FAIL("Negated always true filter should not have matched "
+                    "system");
+        }
+#endif
+
+#if 0
+        // Triggers illegal target assertion
+        l_alwaysTrueExpr(NULL);
+#endif
+
+#if 0
+        // Triggers formatting assertion
+        l_alwaysTrueExpr.And();
+        l_alwaysTrueExpr(l_pTopLevel);
+#endif
+
+#if 0
+        // Triggers formatting assertion
+        l_alwaysTrueExpr.Or();
+        l_alwaysTrueExpr(l_pTopLevel);
+#endif
+
+        PredicateCTM l_sysClass(CLASS_SYS);
+
+#if 0
+        // Triggers formatting assertion
+        l_alwaysTrueExpr.push(&l_sysClass);
+        l_alwaysTrueExpr.And();
+        l_alwaysTrueExpr(l_pTopLevel);
+#endif
+
+#if 0
+        // Triggers formatting assertion
+        l_alwaysTrueExpr.push(&l_sysClass);
+        l_alwaysTrueExpr.Or();
+        l_alwaysTrueExpr(l_pTopLevel);
+#endif
+
+#if 0
+        // Triggers illegal formatting exception
+        // != 1 results on stack
+        l_alwaysTrueExpr.push(&l_sysClass);
+        l_alwaysTrueExpr.push(&l_sysClass);
+        l_alwaysTrueExpr.Not();
+        l_alwaysTrueExpr(l_pTopLevel);
+#endif
+
+        PredicateCTM l_sysType(CLASS_NA,TYPE_SYS);
+        PredicateCTM l_power8Model(CLASS_NA,TYPE_NA,MODEL_POWER8);
+        PredicatePostfixExpr l_expr;
+        l_expr.push(&l_sysClass).push(&l_sysType).And();
+        l_expr.push(&l_power8Model).And();
+
+        if(!l_expr(l_pTopLevel) )
+        {
+            TS_FAIL("CTM of class sys && type sys && model power8 should "
+                    "have matched system");
+        }
+
+        l_expr.Not();
+
+        if(l_expr(l_pTopLevel) )
+        {
+            TS_FAIL("CTM of class sys && type sys && model power8 should "
+                    "npt have matched system after negation");
+        }
+
+        l_expr.push(&l_sysClass);
+        l_expr.Or();
+
+        if(!l_expr(l_pTopLevel) )
+        {
+            TS_FAIL("CTM of class sys && type sys && model power8 should "
+                    "have matched system after negation then || sys class");
+        }
+
+        PredicatePostfixExpr* l_pExpr = new PredicatePostfixExpr;
+        l_pExpr->push(&l_sysClass).push(&l_sysType).And();
+        l_pExpr->push(&l_power8Model).And();
+        delete (static_cast<PredicateBase*>(l_pExpr));
+
+#if 0
+        PredicatePostfixExpr l_lhs;
+        PredicatePostfixExpr l_rhs;
+
+        l_lhs = l_rhs;
+
+        PredicatePostfixExpr l_cpCtor(l_rhs);
+#endif
+
+        TS_TRACE(EXIT_MRK "testPredicatePostfixExpr" );
+    }
+
+    void testTargetIterator()
+    {
+        TS_TRACE(ENTER_MRK "testTargetIterator");
+
+        using namespace TARGETING;
+        TargetService& l_targetService = targetService();
+
+
+        TargetIterator l_pIt;
+        if( l_pIt != l_targetService.end() )
+        {
+            TS_FAIL("Default TargetIterator should point to past the end "
+                    "of container");
+        }
+
+        ++l_pIt;
+        if( l_pIt != l_targetService.end() )
+        {
+            TS_FAIL("Default TargetIterator preincremented should point to "
+                    "past the end of container");
+        }
+
+        TargetIterator* l_pItNew = new TargetIterator;
+        delete l_pItNew;
+        l_pItNew = NULL;
+
+        if(*l_pIt != NULL)
+        {
+            TS_FAIL("Default TargetIterator dereference should return NULL");
+        }
+
+        // Get top level (system) target to verify at least 1 target
+        Target* l_pTopLevel = NULL;
+        (void) l_targetService.getTopLevelTarget(l_pTopLevel);
+        if (l_pTopLevel == NULL)
+        {
+            TS_FAIL("Top level handle was NULL when initialization "
+                    "complete");
+        }
+
+        l_pIt = l_targetService.begin();
+        if((*l_pIt) == NULL)
+        {
+            TS_FAIL("TargetService begin() should return !NULL");
+        }
+
+        CLASS l_class = CLASS_NA;
+        if( !l_pIt->tryGetAttr<ATTR_CLASS>(l_class) )
+        {
+            TS_FAIL("Failed to get expected class attribute");
+        }
+
+        TargetIterator l_rhs = l_targetService.begin();
+        if( ! (l_pIt == l_rhs) )
+        {
+            TS_FAIL("Iterators should be equal, but aren't");
+        }
+
+        l_rhs = l_targetService.begin();
+        if( l_pIt != l_rhs )
+        {
+            TS_FAIL("Iterators should be equal, but aren't");
+        }
+
+        TargetIterator l_rhs2 = l_targetService.begin();
+        ++l_rhs2;
+        ++l_pIt;
+        if( l_pIt != l_rhs2 )
+        {
+            TS_FAIL("Iterators should be equal, but aren't");
+        }
+
+        l_rhs2++;
+        l_pIt++;
+        if( l_pIt != l_rhs2 )
+        {
+            TS_FAIL("Iterators should be equal, but aren't");
+        }
+
+        TargetIterator l_pItClone(l_rhs2);
+        if( l_pIt != l_pItClone)
+        {
+            TS_FAIL("Iterators should be equal, but aren't");
+        }
+
+        if(l_pIt != l_pItClone++)
+        {
+            TS_FAIL("Iterators should be equal, but aren't");
+        }
+
+        if( (++l_pIt) != l_pItClone)
+        {
+            TS_FAIL("Iterators should be equal, but aren't");
+        }
+
+        const TargetService& l_constTargetService = targetService();
+
+        ConstTargetIterator l_pConstIt;
+        if( l_pConstIt != l_constTargetService.end() )
+        {
+            TS_FAIL("Default ConstTargetIterator should point to past the "
+                    "end of container");
+        }
+
+        l_pConstIt = l_constTargetService.begin();
+        if( (*l_pConstIt) == NULL)
+        {
+            TS_FAIL("Iterator does not point to valid Target as expected");
+        }
+
+        TS_TRACE(EXIT_MRK "testTargetIterator" );
+    }
+
+    void testRangeFilter(void)
+    {
+        TS_TRACE(ENTER_MRK "testRangeFilters" );
+
+        using namespace TARGETING;
+
+        TargetRangeFilter* l_pRangeFilter = new TargetRangeFilter(
+                                                                  targetService().begin(),
+                                                                  targetService().end(),
+                                                                  NULL);
+        delete l_pRangeFilter;
+        l_pRangeFilter = NULL;
+
+
+        TargetRangeFilter l_f1(
+                               targetService().begin(),
+                               targetService().end(),
+                               NULL);
+
+        Target* l_pBegin = (*l_f1);
+        ++l_f1;
+        Target* l_pNext = (*l_f1);
+        if(   (l_pBegin == NULL)
+              || (l_pNext == NULL)
+              || (l_pBegin == l_pNext)
+              )
+        {
+            TS_FAIL("Target* pointed to by Begin/next NULL -or- begin =="
+                    "next");
+        }
+
+        l_f1.reset();
+        if( *l_f1 != l_pBegin )
+        {
+            TS_FAIL("Target* after reset should be equal to original");
+        }
+
+        l_f1.reset();
+        TargetRangeFilter l_f2 = l_f1;
+        PredicateCTM l_ctm(CLASS_SYS,TYPE_CORE); // Nonsense CTM
+        l_f1.setPredicate(&l_ctm);
+        if( *l_f1 == l_pBegin )
+        {
+            TS_FAIL("Target* after reset and change of predicate should be"
+                    "different than the original");
+        }
+
+        PredicateCTM l_ctm1(CLASS_CHIP,TYPE_PROC); 
+
+        TargetRangeFilter l_f3(
+                               targetService().begin(),
+                               targetService().end(),
+                               &l_ctm1);
+        for(;l_f3;++l_f3)
+        {
+            if(l_f3->getAttr<ATTR_TYPE>() != TYPE_PROC)
             {
-                TS_FAIL("Top level handle was NULL when initialization "
-                        "complete");
+                TS_FAIL("Should only have returned type proc");
+                break;
             }
+        }
 
-            DUMMY_RW_ATTR l_dummyRw;
-            memset(l_dummyRw,0x00,sizeof(l_dummyRw));
-            l_pTarget->tryGetAttr<TARGETING::ATTR_DUMMY_RW>(l_dummyRw);
-            if(l_dummyRw[0][1][2] != 5)
-            {
-                TS_FAIL("l_dummyRw value is %d, not 5 as expected in direct "
-                        "attribute access",l_dummyRw[0][1][2]);
-            }
+        TargetIterator l_pIt = targetService().begin();
+        ++l_pIt;
+        ++l_pIt;
 
-            TARGETING::CLASS l_class =
-                l_pTarget->getAttr<TARGETING::ATTR_CLASS>();
-            if(l_class != TARGETING::CLASS_SYS)
-            {
-                TS_FAIL("l_class value is %d, not %d as expected in direct "
-                        "attribute access",l_class,TARGETING::CLASS_SYS);
-            }
+        if(l_pIt == targetService().end())
+        {
+            TS_FAIL("Not enough elements for test");
+        }
 
-            TARGETING::TYPE l_type = l_pTarget->getAttr<TARGETING::ATTR_TYPE>();
-            if(l_type != TARGETING::TYPE_SYS)
-            {
-                TS_FAIL("l_type value is %d, not %d as expected in direct "
-                        "attribute access",l_type,TARGETING::TYPE_SYS);
-            }
+        TargetRangeFilter l_partial(
+                                    targetService().begin(),
+                                    l_pIt,
+                                    NULL);
+        int i=0;
 
-            uint64_t l_xscom =
-                l_pTarget->getAttr<TARGETING::ATTR_XSCOM_BASE_ADDRESS>();
-            if(l_xscom != 0x300000000000)
-            {
-                TS_FAIL("l_xscom value is %x, not %x as expected in direct "
-                        "attribute access",l_xscom,0x300000000000);
-            }
+        for(; l_partial; ++l_partial)
+        {
+            i++;
+        }
 
-            TS_TRACE(INF_MRK "Now using FAPI get macros");
+        if(i != 2)
+        {
+            TS_FAIL("Should have gotten 2 elements %d",i);
+        }
 
-            memset(l_dummyRw,0x00,sizeof(l_dummyRw));
-            fapi::ReturnCode l_rc = FAPI_ATTR_GET(
-                ATTR_DUMMY_SCRATCH_PLAT_INIT_UINT8, NULL, l_dummyRw);
-            if(l_rc != 0)
-            {
-                TS_FAIL("Failed to get dummy RW attribute on system target");
-            }
+        TS_TRACE(EXIT_MRK "testRangeFilter" );
+    }
 
-            if(l_dummyRw[0][2][4] != 5)
-            {
-                TS_FAIL("l_dummyRw value is %d, not 5 as expected",
+    void testComplexFilter(void)
+    {
+        TS_TRACE(ENTER_MRK "testComplexFilter" );
+
+        using namespace TARGETING;
+
+        TargetService& l_targetService = targetService();
+
+        TargetRangeFilter f(l_targetService.begin(), 
+                            l_targetService.end(), 
+                            NULL);
+        int l_count = 0;
+        for(; f; ++f, l_count++)
+        {
+        }
+
+        TS_TRACE(INF_MRK "Found %d total targets", l_count);
+
+        PredicateCTM l_procs(CLASS_CHIP);
+        PredicateCTM l_enclosures(CLASS_ENC);
+        PredicatePostfixExpr l_query;
+        l_query.push(&l_procs).push(&l_enclosures).Or();
+
+        f.setPredicate(&l_query);
+        f.reset();
+
+        l_count = 0;
+        for(; f; ++f, ++l_count)
+        {
+            EntityPath l_path = f->getAttr<ATTR_PHYS_PATH>();
+            l_path.dump();
+        }            
+
+        TS_TRACE(INF_MRK "Found %d targets that are chips or enclosures ",
+                 l_count);
+
+        l_query.Not();
+        f.reset();
+
+        l_count = 0;
+        for(; f; ++f, ++l_count)
+        {
+        }
+
+        TS_TRACE(INF_MRK "Found %d targets that are not chips or "
+                 "enclosures",l_count);
+
+        Target* l_pMasterProcChipTargetHandle = NULL;
+        (void) l_targetService.masterProcChipTargetHandle(
+                                                          l_pMasterProcChipTargetHandle);
+        if(l_pMasterProcChipTargetHandle == NULL)
+        {
+            TS_FAIL("Master processor chip target not found");
+        }
+
+        PredicateCTM l_ex(CLASS_UNIT,TYPE_EX);
+        PredicateCTM l_mba(CLASS_UNIT,TYPE_MBA);
+        PredicatePostfixExpr l_procquery;
+        l_procquery.push(&l_ex).push(&l_mba).Or();
+
+        TargetHandleList l_list;
+        (void) targetService().getAssociated(
+                                             l_list,
+                                             l_pMasterProcChipTargetHandle,
+                                             TARGETING::TargetService::CHILD,
+                                             TARGETING::TargetService::ALL,
+                                             &l_procquery);
+
+        l_count = 0;
+        for(uint32_t i=0; i<l_list.size(); ++i, ++l_count)
+        {
+            EntityPath l_path = l_list[i]->getAttr<ATTR_PHYS_PATH>();
+            l_path.dump();
+        }
+
+        TS_TRACE(INF_MRK "Found %d targets that are ex/mba units off "
+                 "master processor",l_count);
+
+        TS_TRACE(EXIT_MRK "testComplexFilter" );
+    }
+
+    void testFapiToHbMacros ()
+    {
+        TS_TRACE(ENTER_MRK "testFapiToHbMacros" );
+
+        TS_TRACE(INF_MRK "Now using direct access macros");
+
+        using namespace TARGETING;
+        using namespace fapi;
+
+        TargetService& l_targetService = targetService();
+
+        TARGETING::Target* l_pTarget = NULL;
+        (void) l_targetService.getTopLevelTarget(l_pTarget);
+        if (l_pTarget == NULL)
+        {
+            TS_FAIL("Top level handle was NULL when initialization "
+                    "complete");
+        }
+
+        DUMMY_RW_ATTR l_dummyRw;
+        memset(l_dummyRw,0x00,sizeof(l_dummyRw));
+        l_pTarget->tryGetAttr<TARGETING::ATTR_DUMMY_RW>(l_dummyRw);
+        if(l_dummyRw[0][1][2] != 5)
+        {
+            TS_FAIL("l_dummyRw value is %d, not 5 as expected in direct "
+                    "attribute access",l_dummyRw[0][1][2]);
+        }
+
+        TARGETING::CLASS l_class = 
+          l_pTarget->getAttr<TARGETING::ATTR_CLASS>();
+        if(l_class != TARGETING::CLASS_SYS)
+        {
+            TS_FAIL("l_class value is %d, not %d as expected in direct "
+                    "attribute access",l_class,TARGETING::CLASS_SYS);
+        }
+
+        TARGETING::TYPE l_type = l_pTarget->getAttr<TARGETING::ATTR_TYPE>();
+        if(l_type != TARGETING::TYPE_SYS)
+        {
+            TS_FAIL("l_type value is %d, not %d as expected in direct "
+                    "attribute access",l_type,TARGETING::TYPE_SYS);
+        }
+
+        uint64_t l_xscom = 
+          l_pTarget->getAttr<TARGETING::ATTR_XSCOM_BASE_ADDRESS>();
+        if(l_xscom != 0x300000000000)
+        {
+            TS_FAIL("l_xscom value is %x, not %x as expected in direct "
+                    "attribute access",l_xscom,0x300000000000);
+        }
+
+        TS_TRACE(INF_MRK "Now using FAPI get macros");
+
+        memset(l_dummyRw,0x00,sizeof(l_dummyRw));
+        fapi::ReturnCode l_rc = FAPI_ATTR_GET(
+                                              ATTR_DUMMY_SCRATCH_PLAT_INIT_UINT8, NULL, l_dummyRw);
+        if(l_rc != 0)
+        {
+            TS_FAIL("Failed to get dummy RW attribute on system target");
+        }
+
+        if(l_dummyRw[0][2][4] != 5)
+        {
+            TS_FAIL("l_dummyRw value is %d, not 5 as expected",
                     l_dummyRw[0][2][4]);
-            }
+        }
 
-            TS_TRACE(INF_MRK "Now using FAPI set macros");
+        TS_TRACE(INF_MRK "Now using FAPI set macros");       
 
-            l_dummyRw[0][2][3] = 6;
-            l_rc = FAPI_ATTR_SET(ATTR_DUMMY_SCRATCH_PLAT_INIT_UINT8, NULL,
-                l_dummyRw);
-            if(l_rc != 0)
+        l_dummyRw[0][2][3] = 6;
+        l_rc = FAPI_ATTR_SET(ATTR_DUMMY_SCRATCH_PLAT_INIT_UINT8, NULL, 
+                             l_dummyRw);
+        if(l_rc != 0)
+        {
+            TS_FAIL("Failed to write dummy RW attribute on system target");
+        }
+
+        memset(l_dummyRw,0x00,sizeof(l_dummyRw));
+        l_rc = FAPI_ATTR_GET(ATTR_DUMMY_SCRATCH_PLAT_INIT_UINT8, NULL, 
+                             l_dummyRw);
+        if(l_rc != 0)
+        {
+            TS_FAIL("Failed to get dummy RW attribute on system target");
+        }
+
+        if(l_dummyRw[0][2][3] != 6)
+        {
+            TS_FAIL("l_dummyRw value is %d, not 6 as expected due to a "
+                    "prior write",l_dummyRw[0][2][3]);
+        }
+
+        TS_TRACE(INF_MRK "Now using targets without the attribute");  
+
+        memset(l_dummyRw,0x00,sizeof(l_dummyRw));
+        EntityPath l_realPath(EntityPath::PATH_PHYSICAL);
+        l_realPath.addLast(TYPE_SYS,0).addLast(TYPE_NODE,0);
+        l_pTarget = l_realPath.operator->();
+        if (l_pTarget == NULL)
+        {
+            TS_FAIL("Node 0 target handle should not be NULL");
+        }
+
+        fapi::Target* l_pFapiTarget = new fapi::Target(
+                                                       fapi::TARGET_TYPE_PROC_CHIP, l_pTarget);
+        l_rc = FAPI_ATTR_GET(ATTR_DUMMY_SCRATCH_PLAT_INIT_UINT8, 
+                             l_pFapiTarget , l_dummyRw);
+        if(l_rc == 0)
+        {
+            TS_FAIL("Should have failed getting the attribute on "
+                    "non-supporting target");
+        }
+        else if(l_rc != FAPI_RC_PLAT_ERR_SEE_DATA)
+        {
+            TS_FAIL("Should have been a platform handled error");
+        }
+        else 
+        {
+            errlHndl_t l_pErrLog = static_cast<ERRORLOG::ErrlEntry*>(
+                                                                     l_rc.releasePlatData());
+            ERRORLOG::errlCommit(l_pErrLog);
+        }
+
+        delete l_pFapiTarget;
+        l_pFapiTarget = NULL;
+
+        TS_TRACE(EXIT_MRK "testFapiToHbMacros" );
+    }
+
+    void testFapiAttributes ()
+    {
+        TS_TRACE(ENTER_MRK "testFapiAttributes" );
+
+        using namespace TARGETING;
+        using namespace fapi;
+
+        fapi::ReturnCode l_rc = 0;
+
+        //----------------------------------------------------------------------
+        // Test ATTR_MSS_EFF_PRIMARY_RANK
+        //----------------------------------------------------------------------
+
+// @TODO ATTR_MSS_EFF_PRIMARY_RANK - Enable once we pull in XML file with this attribute.
+#if ATTR_MSS_EFF_PRIMARY_RANK
+        // Find all MBA's in this system
+        PredicateCTM l_mba_pred(CLASS_UNIT,TYPE_MBA);
+        TargetRangeFilter l_mba_filter(
+                                       targetService().begin(),
+                                       targetService().end(),
+                                       &l_mba_pred);
+        // Loop through all MBA's and validate the attribute
+        for(;l_mba_filter;++l_mba_filter)
+        {
+            if(l_mba_filter->getAttr<ATTR_TYPE>() != TYPE_MBA)
             {
-                TS_FAIL("Failed to write dummy RW attribute on system target");
-            }
-
-            memset(l_dummyRw,0x00,sizeof(l_dummyRw));
-            l_rc = FAPI_ATTR_GET(ATTR_DUMMY_SCRATCH_PLAT_INIT_UINT8, NULL,
-                l_dummyRw);
-            if(l_rc != 0)
-            {
-                TS_FAIL("Failed to get dummy RW attribute on system target");
-            }
-
-            if(l_dummyRw[0][2][3] != 6)
-            {
-                TS_FAIL("l_dummyRw value is %d, not 6 as expected due to a "
-                        "prior write",l_dummyRw[0][2][3]);
-            }
-
-            TS_TRACE(INF_MRK "Now using targets without the attribute");
-
-            memset(l_dummyRw,0x00,sizeof(l_dummyRw));
-            EntityPath l_realPath(EntityPath::PATH_PHYSICAL);
-            l_realPath.addLast(TYPE_SYS,0).addLast(TYPE_NODE,0);
-            l_pTarget = l_realPath.operator->();
-            if (l_pTarget == NULL)
-            {
-                TS_FAIL("Node 0 target handle should not be NULL");
-            }
-
-            fapi::Target* l_pFapiTarget = new fapi::Target(
-                 fapi::TARGET_TYPE_PROC_CHIP, l_pTarget);
-            l_rc = FAPI_ATTR_GET(ATTR_DUMMY_SCRATCH_PLAT_INIT_UINT8,
-                l_pFapiTarget , l_dummyRw);
-            if(l_rc == 0)
-            {
-                TS_FAIL("Should have failed getting the attribute on "
-                        "non-supporting target");
-            }
-            else if(l_rc != FAPI_RC_PLAT_ERR_SEE_DATA)
-            {
-                TS_FAIL("Should have been a platform handled error");
+                TS_FAIL("Should only have returned type MBA!");
+                break;
             }
             else
             {
-                errlHndl_t l_pErrLog = static_cast<ERRORLOG::ErrlEntry*>(
-                    l_rc.releasePlatData());
-                ERRORLOG::errlCommit(l_pErrLog);
-            }
+                uint8_t l_uint8_mss_eff_primary_rank[4][4];
 
-            TS_TRACE(EXIT_MRK "testFapiToHbMacros" );
+                fapi::Target* l_pFapiTarget = new fapi::Target(TARGET_TYPE_MBA_CHIPLET, *l_mba_filter);
+
+                // Test get
+                l_rc = FAPI_ATTR_GET(ATTR_MSS_EFF_PRIMARY_RANK, l_pFapiTarget,l_uint8_mss_eff_primary_rank);
+                if (l_rc)
+                {
+                    TS_FAIL("hwpTestAttributes: ATTR_MSS_EFF_PRIMARY_RANK. Error from GET");
+                    break;
+                }
+
+                // Test set
+                l_rc = FAPI_ATTR_SET(ATTR_MSS_EFF_PRIMARY_RANK, l_pFapiTarget, l_uint8_mss_eff_primary_rank);
+                if (l_rc)
+                {
+                    TS_FAIL("hwpTestAttributes: ATTR_MSS_EFF_PRIMARY_RANK. Error from SET");
+                    break;
+                }
+
+                delete l_pFapiTarget;
+                l_pFapiTarget = NULL;
+                TS_TRACE("hwpTestAttributes: Test of ATTR_MSS_EFF_PRIMARY_RANK Passed!");
+            }
         }
+#endif
+        TS_TRACE(EXIT_MRK "testFapiAttributes" );
+
+        if(l_rc)
+        {
+            errlHndl_t l_pErrLog = static_cast<ERRORLOG::ErrlEntry*>(l_rc.releasePlatData());
+            ERRORLOG::errlCommit(l_pErrLog);
+        }
+
+    }
 
 };
 

@@ -408,15 +408,15 @@ sub writeFapiPlatAttrMacrosHeaderFileContent {
                     {
                         if ($hwpfToHbAttrMap->{macro} ne "DIRECT")
                         {
-                            fatal("FAPI platInit attr '$hwpfToHbAttrMap->{id}' is '$hwpfToHbAttrMap->{macro}', it must be DIRECT");
+                            fatal("FAPI non-platInit attr '$hwpfToHbAttrMap->{id}' is '$hwpfToHbAttrMap->{macro}', it must be DIRECT");
                         }
 
-                        # TODO Until kernel patch, they are in the volatile section
-                        if ($attribute->{persistency} ne "volatile")
-                        {
-                           fatal("FAPI platInit attr '$hwpfToHbAttrMap->{id}' is '$attribute->{persistency}', it must be volatile-zeroed");
-                        }
-                    }
+			if ($attribute->{persistency} ne "volatile-zeroed")		
+			{		
+			    fatal("FAPI non-platInit attr '$hwpfToHbAttrMap->{id}' is '$attribute->{persistency}', it must be volatile-zeroed");		
+			}
+
+		    }
 
                     # All FAPI attributes are readable
                     $fapiReadable = 1;

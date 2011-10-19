@@ -193,6 +193,7 @@
         <id>MODEL</id>
         <default>SALERNO</default>
     </attribute>    
+    <attribute><id>MSS_EFF_PRIMARY_RANK</id></attribute>   
 </targetType>
 
 <targetType>
