@@ -48,7 +48,7 @@ class DeviceSegment : public Segment
          * @brief Add the device segment
          */
         static void init();
-        
+
         /**
          * @brief Handle a page fault for a device address access
          * @param i_task[in] - Task pointer to the task requiring the page
@@ -74,7 +74,7 @@ class DeviceSegment : public Segment
          * @param i_devDataSize[in] - Size of device segment block
          * @return void* - Pointer to beginning virtual address, NULL otherwise
          */
-        static void* devMap(void* ra, SEG_DATA_SIZES i_devDataSize);
+        static void* devMap(void* ra, uint64_t i_devDataSize);
 
         /**
          * @brief Unmap a device from the device segment(2TB)
@@ -90,7 +90,7 @@ class DeviceSegment : public Segment
         struct devSegData
         {
             uint64_t addr; /* Real address assigned to device */
-            SEG_DATA_SIZES size; /* A particular device's segment block size */
+            uint64_t size; /* A particular device's segment block size */
             devSegData(): addr(0),size(THIRTYTWO_GB){};
         };
 
@@ -125,7 +125,7 @@ class DeviceSegment : public Segment
          * @param i_devDataSize[in] - Size of device segment block
          * @return void* - Pointer to beginning virtual address, NULL otherwise
          */
-        void* _devMap(void* ra, SEG_DATA_SIZES i_devDataSize);
+        void* _devMap(void* ra, uint64_t i_devDataSize);
 
         /**
          * @brief Unmap a device from the device segment(2TB)

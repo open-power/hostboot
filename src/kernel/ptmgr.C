@@ -635,9 +635,9 @@ void PageTableManager::writePTE( PageTableEntry* i_pte,
         // If the AVAs match then we're just modifying permissions or something
         if( i_pte->AVA != i_dest->AVA )
         {
-            // this should never happen because we should always go 
+            // this should never happen because we should always go
             //   through the delEntry() path instead
-            printPTE( "Stealing", i_dest );
+            printPTE( "Stealing", i_dest );  /*no effect*/ // BEAM Fix.
             Eprintk( "**ERROR** PageTableManager::writePTE> Trying to steal a PTE\n" );
             kassert(false);
         }
@@ -755,7 +755,7 @@ void PageTableManager::_printPT( void )
     {
         if( pte->V == 1 )
         {
-            printPTE( NULL, pte );
+            printPTE( NULL, pte );  /*no effect*/ // BEAM Fix.
         }
 
         pte++;
@@ -843,7 +843,7 @@ VmmManager::ACCESS_TYPES PageTableManager::getAccessType( const PageTableEntry* 
     }
 
     Eprintk( "I don't recognize this PTE : WIMG=%ld, pp1_2=%ld\n", i_pte->WIMG, i_pte->pp1_2 );
-    printPTE( "getAccessType", i_pte);
+    printPTE( "getAccessType", i_pte); /*no effect*/ // BEAM Fix.
     kassert(false);
     return VmmManager::NO_USER_ACCESS;
 }

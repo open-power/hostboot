@@ -58,7 +58,7 @@ StackSegment::~StackSegment()
             delete l_node->block;
             delete l_node;
         }
-    } while (l_node != NULL);
+    } while (l_node != NULL);   /*using deallocated*/ // BEAM invalid error.
 }
 
 bool StackSegment::handlePageFault(task_t* i_task, uint64_t i_addr)

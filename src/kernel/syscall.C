@@ -141,7 +141,7 @@ void kernel_execute_system_call()
     task_t* t = TaskManager::getCurrentTask();
 
     uint64_t syscall = t->context.gprs[3];
-    if (syscall > SYSCALL_MAX)
+    if (syscall >= SYSCALL_MAX)
     {
         // TODO : kill task.
         printk("Invalid syscall : %ld\n", syscall);
@@ -437,7 +437,7 @@ namespace Systemcalls
     void DevMap(task_t *t)
     {
         void *ra = (void*)TASK_GETARG0(t);
-        SEG_DATA_SIZES devDataSize = (SEG_DATA_SIZES)TASK_GETARG1(t);
+        uint64_t devDataSize = TASK_GETARG1(t);
 
         kassert(TASK_SETRTN(t, (uint64_t)VmmManager::devMap(ra,devDataSize)) !=
                 NULL);

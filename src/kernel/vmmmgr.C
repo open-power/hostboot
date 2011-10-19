@@ -49,7 +49,7 @@ void VmmManager::init()
     SegmentManager::initSLB();
 
     v.initPTEs();
-    v.initSDR1();
+    v.initSDR1(); /*no effect*/ // BEAM Fix.
 
     printk("...done.\n");
 };
@@ -59,7 +59,7 @@ void VmmManager::init_slb()
     VmmManager& v = Singleton<VmmManager>::instance();
     SegmentManager::initSLB();
 
-    v.initSDR1();
+    v.initSDR1(); /*no effect*/ // BEAM Fix.
 }
 
 bool VmmManager::pteMiss(task_t* t, uint64_t effAddr)
@@ -104,7 +104,7 @@ int VmmManager::mmioUnmap(void* ea, size_t pages)
  * STATIC
  * @brief A facade to map a device into the device segment(2TB)
  */
-void* VmmManager::devMap(void* ra, SEG_DATA_SIZES i_devDataSize)
+void* VmmManager::devMap(void* ra, uint64_t i_devDataSize)
 {
     return DeviceSegment::devMap(ra, i_devDataSize);
 }
@@ -168,7 +168,7 @@ uint64_t VmmManager::_findPhysicalAddress(uint64_t i_vaddr)
     uint64_t paddr = 0;
 
     lock.lock();
-    
+
     paddr = SegmentManager::findPhysicalAddress(i_vaddr);
 
     lock.unlock();
@@ -210,7 +210,7 @@ int VmmManager::_mmSetPermission(void* i_va, uint64_t i_size, uint64_t i_access_
 
     return rc;
 }
-    
+
 void VmmManager::_castOutPages(VmmManager::castout_t i_ct)
 {
     lock.lock();

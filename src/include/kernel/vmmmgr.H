@@ -103,7 +103,7 @@ class VmmManager
          * @param i_devDataSize[in] - Size of device segment block
          * @return void* - Pointer to beginning virtual address, NULL otherwise
          */
-        static void* devMap(void* ra, SEG_DATA_SIZES i_devDataSize);
+        static void* devMap(void* ra, uint64_t i_devDataSize);
 
         /**
          * @brief Unmap a device from the device segment(2TB)
@@ -139,7 +139,7 @@ class VmmManager
          * @brief Flush pagetable, Update shadow page info
          */
         static void flushPageTable( void);
-        
+
         /**
          * @brief Remove pages by a specified operation of the given size
          * @param[in] i_op - Page removal operation to perform
@@ -162,7 +162,7 @@ class VmmManager
          * @brief Sets the permissions for a given page or range of pages
          * @param i_va[in] - Virtual address of the page to update permission
          * @param i_size[in] - range of memory that needs permissions updated...
-         *             if i_size equals 0 then we only need to update an 
+         *             if i_size equals 0 then we only need to update an
          *            individual page.
          * @return int - 0 for successful permission update, non-zero otherwise
          *

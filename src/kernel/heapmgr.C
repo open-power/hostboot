@@ -63,8 +63,8 @@ const size_t HeapManager::cv_chunk_size[BUCKETS] =
 };
 
 size_t HeapManager::cv_coalesce_count = 0;
-size_t HeapManager::cv_free_bytes;          
-size_t HeapManager::cv_free_chunks;         
+size_t HeapManager::cv_free_bytes;
+size_t HeapManager::cv_free_chunks;
 
 
 void HeapManager::init()
@@ -129,7 +129,7 @@ void* HeapManager::_realloc(void* i_ptr, size_t i_sz)
 {
     void* new_ptr = _reallocBig(i_ptr,i_sz);
     if(new_ptr) return new_ptr;
-    
+
     new_ptr = i_ptr;
     chunk_t* chunk = reinterpret_cast<chunk_t*>(((size_t*)i_ptr)-1);
     size_t asize = bucketByteSize(chunk->bucket)-8;
@@ -146,7 +146,7 @@ void* HeapManager::_reallocBig(void* i_ptr, size_t i_sz)
 {
     // Currently all large allocations fall on a page boundry,
     // but small allocatoins never do
-    if(ALIGN_PAGE(reinterpret_cast<uint64_t>(i_ptr)) != 
+    if(ALIGN_PAGE(reinterpret_cast<uint64_t>(i_ptr)) !=
        reinterpret_cast<uint64_t>(i_ptr))
     {
         return NULL;
@@ -282,7 +282,7 @@ size_t HeapManager::bucketIndex(size_t i_sz)
 
     // A simple linear search loop is unrolled by the compiler
     // and generates large asm code.
-    // 
+    //
     // A manual unrole of a binary search using "if" statements is 160 bytes
     // for this function and 160 bytes for the bucketByteSize() function
     // but does not need the 96 byte cv_chunk_size array. Total 320 bytes
@@ -346,7 +346,7 @@ void HeapManager::_coalesce()
             chunk_t * c_find = reinterpret_cast<chunk_t*>(((uint8_t*)c) + s);
 
             // c_find must be in same page
-            if(reinterpret_cast<uint64_t>(c_find) < 
+            if(reinterpret_cast<uint64_t>(c_find) <
                ALIGN_PAGE(reinterpret_cast<uint64_t>(c)))
             {
                 if(c_find->free)
@@ -395,13 +395,13 @@ void HeapManager::_coalesce()
         c = c_next;
     }
     printkd("HeapMgr coalesced total %ld\n",cv_coalesce_count);
-    test_pages();
+    test_pages(); /*no effect*/ // BEAM fix.
 }
 
 void HeapManager::stats()
 {
     coalesce();        // collects some  of the stats
-   
+
     printkd("Memory Heap Stats:\n");
     printkd("  %d Large heap pages allocated.\n",g_big_chunks);
     printkd("  %d Large heap max allocated.\n",g_bigheap_highwater);
@@ -503,7 +503,7 @@ bool HeapManager::_freeBig(void* i_ptr)
 {
     // Currently all large allocations fall on a page boundry,
     // but small allocations never do
-    if(ALIGN_PAGE(reinterpret_cast<uint64_t>(i_ptr)) != 
+    if(ALIGN_PAGE(reinterpret_cast<uint64_t>(i_ptr)) !=
        reinterpret_cast<uint64_t>(i_ptr))
         return false;
 

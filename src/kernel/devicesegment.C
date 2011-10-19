@@ -59,7 +59,7 @@ int DeviceSegment::mmioUnmap(void* ea, size_t pages)
  * STATIC
  * @brief Map a device into the device segment(2TB)
  */
-void* DeviceSegment::devMap(void *ra, SEG_DATA_SIZES i_devDataSize)
+void* DeviceSegment::devMap(void *ra, uint64_t i_devDataSize)
 {
     return Singleton<DeviceSegment>::instance()._devMap(ra,i_devDataSize);
 }
@@ -161,7 +161,7 @@ int DeviceSegment::_mmioUnmap(void* ea, size_t pages)
  * @param i_devDataSize[in] - Size of device segment block
  * @return void* - Pointer to beginning virtual address, NULL otherwise
  */
-void *DeviceSegment::_devMap(void *ra, SEG_DATA_SIZES i_devDataSize)
+void *DeviceSegment::_devMap(void *ra, uint64_t i_devDataSize)
 {
     void *segBlock = NULL;
     if (i_devDataSize <= THIRTYTWO_GB)
