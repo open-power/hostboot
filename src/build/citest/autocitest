@@ -240,14 +240,21 @@ waitkb
 export sb=$SBXHOME/$TEST_SANDBOX/src
 echo "sandbox dir = $sb"
 
+echo "Running workarounds (presimsetup)."
+if [ -f ${SBXHOME}/src/build/citest/etc/workarounds.presimsetup ] ; then
+    ${SBXHOME}/src/build/citest/etc/workarounds.presimsetup 
+fi
+
 echo "** Set up simics directories **"
-echo "start_simics -no_start -machine $MACHINE" > $sb/my_simics_env_setup
+echo "start_simics -no_start -machine $MACHINE  -batch_mode " > $sb/my_simics_env_setup
+
+# Do a workon and immediately execute the above commands
 chmod 775 $sb/my_simics_env_setup
 workon -sb $TEST_SANDBOX -mppc -c ./my_simics_env_setup
 
-echo "** Executing workarounds **"
-if [ -f ${SBXHOME}/src/build/citest/etc/workarounds ] ; then
-    ${SBXHOME}/src/build/citest/etc/workarounds
+echo "** Executing workarounds (postsimsetup) **"
+if [ -f ${SBXHOME}/src/build/citest/etc/workarounds.postsimsetup ] ; then
+    ${SBXHOME}/src/build/citest/etc/workarounds.postsimsetup
 fi
 
 echo "** Create img directory for hbicore.bin **"

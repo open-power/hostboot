@@ -267,13 +267,18 @@ hb_simsetup()
     mksb -rc ${SANDBOXRC} -dir ${SANDBOXROOT} -back $DRIVER \
          -sb ${SANDBOXNAME} -m ppc
 
+    echo "Running workarounds (presimsetup)."
+    cp ${HOSTBOOTROOT}/src/build/citest/etc/workarounds.presimsetup ${SANDBOXBASE}/src
+    execute_in_sandbox "export BACKING_BUILD=\$bb && ./workarounds.presimsetup"
+    rm ${SANDBOXBASE}/src/workarounds.presimsetup
+
     needs_machine_variable
     execute_in_sandbox "start_simics -no_start -machine ${MACHINE}"
 
-    echo "Running workarounds."
-    cp ${HOSTBOOTROOT}/src/build/citest/etc/workarounds ${SANDBOXBASE}/src
-    execute_in_sandbox "export BACKING_BUILD=\$bb && ./workarounds"
-    rm ${SANDBOXBASE}/src/workarounds
+    echo "Running workarounds (postsimsetup)."
+    cp ${HOSTBOOTROOT}/src/build/citest/etc/workarounds.postsimsetup ${SANDBOXBASE}/src
+    execute_in_sandbox "export BACKING_BUILD=\$bb && ./workarounds.postsimsetup"
+    rm ${SANDBOXBASE}/src/workarounds.postsimsetup
 
     mkdir ${SANDBOXBASE}/img
 }

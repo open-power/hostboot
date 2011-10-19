@@ -2,7 +2,7 @@
 #  IBM_PROLOG_BEGIN_TAG
 #  This is an automatically generated prolog.
 #
-#  $Source: src/build/citest/etc/workarounds $
+#  $Source: src/build/citest/etc/workarounds.presim $
 #
 #  IBM CONFIDENTIAL
 #
@@ -22,6 +22,11 @@
 #
 #  IBM_PROLOG_END
 
+##
+## Workarounds that are run before start_simics is executed for the first time
+##    to setup the sandbox
+##
+
 echo "+++ Copy desired SALERNO config file to sandbox and modify L3 to 8MB."
 mkdir -p $sb/simu/configs
 cp $BACKING_BUILD/src/simu/configs/P8_SALERNO.config $sb/simu/configs
@@ -36,12 +41,14 @@ sed -i -e's/SETENV GFW_P8_VENICE_L3_MB_SIZE.*/SETENV GFW_P8_VENICE_L3_MB_SIZE 8/
 # Backing build already contains 910431.  Leave this workaround here for future scomdef files
 #sed -i -e's/SETENV GFW_P8_VENICE_MODEL_EC.*/SETENV GFW_P8_VENICE_MODEL_EC 910431/' $sb/simu/configs/P8_VENICE.config
 
-#echo "+++ Update to new simics build."
-#mkdir -p $sb/simu/data
-#grep -v "WSALIAS HOSTBOOT_LEVEL FIPSLEVEL" $BACKING_BUILD/src/simu/data/simicsInfo > $sb/simu/data/simicsInfo
-#echo "WSALIAS HOSTBOOT_LEVEL FIPSLEVEL env/gfwa/simics-4.2.0/simics-4.2.77/fips/fld36/fi110919b700.42" >> $sb/simu/data/simicsInfo
+echo "+++ Update to new simics build."
+mkdir -p $sb/simu/data
+grep -v "WSALIAS HOSTBOOT_LEVEL FIPSLEVEL" $BACKING_BUILD/src/simu/data/simicsInfo > $sb/simu/data/simicsInfo
+echo "WSALIAS HOSTBOOT_LEVEL FIPSLEVEL env/gfwa/simics-4.2.0/simics-4.2.77/fips/fld36/fi111019b700.42" >> $sb/simu/data/simicsInfo
+grep -v "WSALIAS HOSTBOOT_LEVEL SIMICSLEVEL" $BACKING_BUILD/src/simu/data/simicsInfo > $sb/simu/data/simicsInfo
+echo "WSALIAS HOSTBOOT_LEVEL SIMICSLEVEL env/vtechb/simics-4.2.0/simics-4.2.82/bin" >> $sb/simu/data/simicsInfo
 
+echo "+++ New simics build (fi111013b700.42) needs some new files."
+mkdir -p $sb/simu/data/cec-chip
+cp $BACKING_BUILD/src/simu/data/cec-chip/p8.por $sb/simu/data/cec-chip/p8_master.por
 
-echo "+++ Patch for PHYP flight recorder."
-sed -i -e's/.*PHYPLEVEL.*//' $sb/../simics/.simics_flightrecorder
-sed -i -e's/.*PHYP_PATCH_LEVEL.*//' $sb/../simics/.simics_flightrecorder

@@ -1,0 +1,32 @@
+#!/bin/sh
+#  IBM_PROLOG_BEGIN_TAG
+#  This is an automatically generated prolog.
+#
+#  $Source: src/build/citest/etc/workarounds.postsim $
+#
+#  IBM CONFIDENTIAL
+#
+#  COPYRIGHT International Business Machines Corp. 2011
+#
+#  p1
+#
+#  Object Code Only (OCO) source materials
+#  Licensed Internal Code Source Materials
+#  IBM HostBoot Licensed Internal Code
+#
+#  The source code for this program is not published or other-
+#  wise divested of its trade secrets, irrespective of what has
+#  been deposited with the U.S. Copyright Office.
+#
+#  Origin: 30
+#
+#  IBM_PROLOG_END
+
+##
+## Workarounds that are run after start_simics is executed for the first time
+##    to setup the sandbox
+##
+
+echo "+++ Patch for PHYP flight recorder."
+sed -i -e's/.*PHYPLEVEL.*//' $sb/../simics/.simics_flightrecorder
+sed -i -e's/.*PHYP_PATCH_LEVEL.*//' $sb/../simics/.simics_flightrecorder
