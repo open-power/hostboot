@@ -356,7 +356,9 @@ namespace TARGETING
             {
                 int rc = 0;
 
-                rc = mm_alloc_block(iv_msgQ,
+                rc = mm_alloc_block((iv_sections[i].type ==
+                                        SECTION_TYPE_HEAP_ZERO_INIT ?
+                                     NULL : iv_msgQ),
                                     reinterpret_cast<void*>(
                                             iv_sections[i].vmmAddress),
                                     iv_sections[i].size);
