@@ -29,13 +29,16 @@
 #include <cxxtest/TestSuite.H>
 #include <sys/task.h>
 #include <kernel/console.H>
+#include <kernel/pagemgr.H>
 #include <arch/ppc.H>
 #include <sys/mm.h>
+#include <usr/vmmconst.h>
 
 class VmmBaseTest : public CxxTest::TestSuite
 {
     public:
         static volatile int rc;
+        static msg_q_t iv_mq;
 
         void testNullAccess()
         {
@@ -90,21 +93,35 @@ class VmmBaseTest : public CxxTest::TestSuite
 
         void testCastOutPages()
         {
-            //uint64_t vmemaddr = (1ul * 1024 * 1024 * 1024)/2;
-            //uint64_t vmsize = 4ul * 1024 * 500;
-            //printk("Test case: cast out pages\n");
-            //printk("Set up virtual block at %p\n",(void*)vmemaddr);
-            //size_t rc = mm_alloc_block(NULL, // need a msgq?
-            //                           (void*)vmemaddr,
-            //                           vmsize);
-            //if(rc) printk("RC=%ld\n",rc);
-            // touch something on every page
-            //for(uint64_t i = vmemaddr; i < (vmemaddr + vmsize); i += PAGESIZE)
-            //{
-            //    if(*((char *)i) != 'U') printk("Yiks %p is %c\n",(void*)i,*((char *)i));
-            //}
-
-            // see printk buffer for cast out pages
+            uint64_t l_testAddr = VMM_VADDR_RMVPAGE_TEST;
+            uint64_t l_testSize = VMM_SIZE_RMVPAGE_TEST;
+            uint64_t vaddr = l_testAddr+l_testSize;
+            uint64_t vsize = PageManager::availPages()*PAGESIZE;
+            rc = mm_alloc_block(iv_mq,reinterpret_cast<void*>(vaddr),vsize);
+            if (rc != 0)
+            {
+                TS_FAIL("Unable to allocate block.\n");
+            }
+            //TODO - Mix READ_ONLY and WRITE_TRACKED pages to cast out test
+            rc = mm_set_permission(reinterpret_cast<void*>(vaddr),vsize,
+                                   (uint64_t)(READ_ONLY));
+            if (rc != 0)
+            {
+                TS_FAIL("Failed to set block permissions to READ_ONLY.\n");
+            }
+            task_create(msgDaemon, NULL);
+            //Touch each page until less than 10% free pages remain
+            //printk("Page Percent Avail: 0x%lX\n",PageManager::queryAvail());
+            for(uint64_t i = vaddr; i < (vaddr + vsize); i += PAGESIZE)
+            {
+                if (PageManager::queryAvail() < 10)
+                {
+                    printkd("Less than 10 percent pages remain\n");
+                    break;
+                }
+                (*(volatile uint64_t *)i); sync();
+            }
+            nanosleep(1,0);
         }
 
     private:
@@ -133,7 +150,26 @@ class VmmBaseTest : public CxxTest::TestSuite
             task_end();
         }
 
+        static void msgDaemon(void* unused)
+        {
+            msg_t* message = NULL;
+            uint64_t ea = 0;
+            while (1)
+            {
+                message = msg_wait(iv_mq);
+                if (message)
+                {
+                    ea = message->data[0];
+                    /*printkd("Effective Addr: 0x%lX, %s\n",ea,
+                            message->type==MSG_MM_RP_READ?"READ":"WRITE");*/
+                    message->data[1] = 0;
+                    rc = msg_respond(iv_mq, message);
+                }
+            }
+        }
+
 };
 volatile int VmmBaseTest::rc = 0;
+msg_q_t VmmBaseTest::iv_mq = msg_q_create();
 
 #endif

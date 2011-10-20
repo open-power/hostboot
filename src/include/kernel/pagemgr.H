@@ -39,6 +39,7 @@
 class PageManager
 {
     public:
+
         static void init();
 
         static void* allocatePage(size_t n = 1);
@@ -57,53 +58,63 @@ class PageManager
          */
         static void coalesce( void );
 
-        enum 
-        { 
-            MEMLEN = VmmManager::HTABORG,
+        /**
+         * Retrieve the number of available pages
+         * @returns Number of free pages
+         */
+        static uint64_t availPages();
 
-	    BUCKETS = 16,
-	};
+        enum
+        {
+            MEMLEN = VmmManager::HTABORG,
+            BUCKETS = 16,
+        };
 
     protected:
-	PageManager();
-	~PageManager() {};
+
+        PageManager();
+        ~PageManager() {};
 
     private:
-	void* _allocatePage(size_t);
-	void _freePage(void*, size_t);
+
+        void* _allocatePage(size_t);
+        void _freePage(void*, size_t);
         void _coalesce( void );         //!< see coalesce()
 
         /** see queryAvail() */
-        ALWAYS_INLINE
-        uint64_t _queryAvail() const 
+        ALWAYS_INLINE uint64_t _queryAvail() const
         {
             return (100*iv_pagesAvail)/iv_pagesTotal;
         }
 
-        ALWAYS_INLINE
-        uint64_t firstPageAddr( void )
+        ALWAYS_INLINE uint64_t firstPageAddr( void )
         {
             return ALIGN_PAGE(VFS_LAST_ADDRESS);
         }
-            
 
-            /** Statistics on number of free pages (for debug) */
+        /** see availPages() */
+        ALWAYS_INLINE uint64_t _availPages() const
+        {
+            return iv_pagesAvail;
+        }
+
+        /** Statistics on number of free pages (for debug) */
         uint64_t iv_pagesAvail;
-            /** Total number of pages */
+        /** Total number of pages */
         uint64_t iv_pagesTotal;
 
-	struct page_t
-	{
-	    page_t* next;       //!< Next block of pages
+        static size_t cv_coalesce_count;        //!< running coalesced counter
+
+        struct page_t
+        {
+            page_t* next;       //!< Next block of pages
             page_t* prev;       //!< Prev block of pages
             page_t* key;        //!< Key for pqueue
-	};
-	Util::Lockfree::Stack<page_t> first_page[BUCKETS];
+        };
+        Util::Lockfree::Stack<page_t> first_page[BUCKETS];
 
-	page_t* pop_bucket(size_t);
-	void push_bucket(page_t*, size_t);
-
-        static size_t cv_coalesce_count;        //!< running coalesced counter
+        page_t* pop_bucket(size_t);
+        void push_bucket(page_t*, size_t);
 };
 
 #endif

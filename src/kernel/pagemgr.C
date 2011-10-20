@@ -51,6 +51,11 @@ uint64_t PageManager::queryAvail()
     return Singleton<PageManager>::instance()._queryAvail();
 }
 
+uint64_t PageManager::availPages()
+{
+    return Singleton<PageManager>::instance()._availPages();
+}
+
 PageManager::PageManager() : iv_pagesAvail(0), iv_pagesTotal(0)
 {
     // Determine first page of un-allocated memory

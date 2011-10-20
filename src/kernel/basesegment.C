@@ -201,10 +201,7 @@ int BaseSegment::_mmSetPermission(void* i_va, uint64_t i_size, uint64_t i_access
 
 void BaseSegment::castOutPages(uint64_t i_type)
 {
-    size_t cast_out = 0;
-    cast_out = iv_block->castOutPages(i_type);
-    // Could try again with a more agressive constraint if cast_out == 0 ????
-    if(cast_out) printkd("Cast out %ld pages,Type=%ld\n",cast_out,i_type);
+    iv_block->castOutPages(i_type);
 }
 /**
  * STATIC

@@ -143,16 +143,8 @@ class Block
         /**
          * @brief Cast out older phyiscal memory pages
          * @param[in] i_type - Castout contraint @see VmmManager::castOutPages()
-         * @return number of pages cast out
          */
-        size_t castOutPages(uint64_t i_type);
-
-        /**
-         * @brief Evict a memory page
-         * @param[in] i_pte shadow page table entry
-         * @return true of page was evicted
-         */
-        bool evictPage(ShadowPTE* i_pte);
+        void castOutPages(uint64_t i_type);
 
         /**
          * @brief Removes a range of pages within a block of virtual memory

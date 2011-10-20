@@ -61,7 +61,7 @@ void kernel_execute_decrementer()
 #endif
         KernelMisc::shutdown();
     }
-
+    CpuManager::executePeriodics(c);
     s->setNextRunnable();
 }
 

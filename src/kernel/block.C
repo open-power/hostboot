@@ -117,15 +117,6 @@ bool Block::handlePageFault(task_t* i_task, uint64_t i_addr)
         }
         else
         {
-            // Test code  @TODO remove - SET up ro pages to test cast out pages
-            //if(pte->getPage() == 0)
-            //{
-            //    void* l_page = PageManager::allocatePage();
-            //    memset(l_page,'U',PAGESIZE);
-            //    pte->setPageAddr(reinterpret_cast<uint64_t>(l_page));
-            //    pte->setPresent(true);
-            //    pte->setWritable(false);
-            //}
             return false; //TODO - Swap kernel base block pages for user pages
         }
     }
@@ -319,50 +310,25 @@ void Block::updateRefCount( uint64_t i_vaddr,
     }
 
     // track the changed/dirty bit
-    spte->setDirty( i_stats.C );
-
+    if (i_stats.C)
+    {
+        spte->setDirty( i_stats.C );
+    }
 }
 
-
-bool Block::evictPage(ShadowPTE* i_pte)
+void Block::castOutPages(uint64_t i_type)
 {
-    ShadowPTE* pte = i_pte;
-    bool do_cast_out = false;
-
-    if(!pte->isWritable())  // ro, executable
-    {
-        do_cast_out = true;
-    }
-    else  // is writable...
-    {
-        // if pte->isWriteTracked() flush then cast out
-    }
-
-    if(do_cast_out)
-    {
-        PageTableManager::delEntry(pte->getPageAddr());
-        PageManager::freePage(reinterpret_cast<void*>(pte->getPageAddr()));
-        pte->setPresent(false);
-        pte->setPageAddr(NULL);
-    }
-
-    return do_cast_out;
-}
-
-size_t Block::castOutPages(uint64_t i_type)
-{
-    size_t cast_out = 0;
+    void* l_vaddr = NULL;
     // drill down
     if(iv_nextBlock)
     {
-        cast_out += iv_nextBlock->castOutPages(i_type);
+        iv_nextBlock->castOutPages(i_type);
     }
 
     // TODO We will eventually need to skip other blocks as well, such as
     // when the memory space grows.
     if(iv_baseAddr != 0) // Skip base area
     {
-        bool is_cast_out = false;
         size_t rw_constraint = 5;
         size_t ro_constraint = 3;
 
@@ -386,9 +352,12 @@ size_t Block::castOutPages(uint64_t i_type)
 
                 if(pte->isWritable())
                 {
-                    if((pte->getLRU() > rw_constraint) && pte->isWriteTracked())
+                    if(pte->getLRU() > rw_constraint && pte->isWriteTracked())
                     {
-                        is_cast_out = evictPage(pte);
+                        //'EVICT' single page
+                        l_vaddr = reinterpret_cast<void*>(page);
+                        this->removePages(VmmManager::EVICT,l_vaddr,
+                                          PAGESIZE,NULL);
                         //printk("+");
                     }
                 }
@@ -396,22 +365,15 @@ size_t Block::castOutPages(uint64_t i_type)
                 {
                     if(pte->getLRU() > ro_constraint)
                     {
-                        is_cast_out = evictPage(pte);
+                        //'EVICT' single page
+                        l_vaddr = reinterpret_cast<void*>(page);
+                        this->removePages(VmmManager::EVICT,l_vaddr,
+                                          PAGESIZE,NULL);
                     }
-                }
-                
-                if(is_cast_out)
-                {
-                    //printk("-");
-                    ++cast_out;
-                    is_cast_out = false;
                 }
             }
         }
-        //printk("\n");
     }
-
-    return cast_out;
 }
 
 int Block::mmSetPermission(uint64_t i_va, uint64_t i_size,uint64_t i_access_type)
@@ -566,10 +528,7 @@ int Block::removePages(VmmManager::PAGE_REMOVAL_OPS i_op, void* i_vaddr,
             else if (pte->isDirty() && !pte->isWriteTracked() &&
                      i_op == VmmManager::EVICT)
             {
-                //Leave as 'printk' to note page was skipped
-                printk("Block::removePages >> Unable to EVICT ");
-                printk("dirty page thats not write tracked: ");
-                printk("va: 0x%.16lX, pa: 0x%.16lX \n",l_vaddr, pageAddr);
+                //Skip page
             }
             else if (i_op != VmmManager::FLUSH)
             {
@@ -584,6 +543,7 @@ int Block::removePages(VmmManager::PAGE_REMOVAL_OPS i_op, void* i_vaddr,
 
 void Block::releasePTE(ShadowPTE* i_pte)
 {
+    i_pte->setDirty(false);
     i_pte->setPresent(false);
     i_pte->setPageAddr(NULL);
 }
