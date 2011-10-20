@@ -206,6 +206,7 @@ public:
      */
     ErrlUserDetails()
     {
+
     }
 
     /**

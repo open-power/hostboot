@@ -29,7 +29,7 @@
 #include <sys/sync.h>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
-
+#
 #include <initservice/taskargs.H>
 #include <cxxtest/TestSuite.H>
 
@@ -138,6 +138,9 @@ void _start(void *io_pArgs)
             CxxTest::g_Warnings    );
     TRACFCOMP( g_trac_cxxtest, "    trace calls:   %d",
             CxxTest::g_TraceCalls  );
+
+    //  dump out an informational errorlog
+    assert(l_errl == NULL);
 
 
     TASKARGS_WAIT_AND_ENDTASK();

@@ -132,7 +132,6 @@ void ErrlEntry::appendToFFDC(ErrlUD * i_pErrlUD,
     return;
 }
 
-
 ///////////////////////////////////////////////////////////////////////////////
 // Return a Boolean indication of success.
 
@@ -240,8 +239,6 @@ void ErrlEntry::setSubSys(const epubSubSystem_t i_subSys)
     iv_User.iv_ssid = i_subSys;
     return;
 }
-
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // for use by ErrlManager

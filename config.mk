@@ -25,11 +25,16 @@ all:
 	${MAKE} gen_pass
 	${MAKE} code_pass
 
+## output libs, objs for userdetails parsers
+UD_DIR = ${ROOTPATH}/obj/modules/userdetails
+UD_OBJS = ${UD_DIR}*.o ${UD_DIR}/*.so ${UD_DIR}/*.a
+
 ifdef MODULE
 OBJDIR = ${ROOTPATH}/obj/modules/${MODULE}
 BEAMDIR = ${ROOTPATH}/obj/beam/${MODULE}
 GENDIR = ${ROOTPATH}/obj/genfiles
 IMGDIR = ${ROOTPATH}/img
+
 EXTRACOMMONFLAGS += -fPIC -Bsymbolic -Bsymbolic-functions 
 ifdef STRICT
         EXTRACOMMONFLAGS += -Weffc++
@@ -268,14 +273,17 @@ ${BEAMDIR}/%.beam : %.S
 BEAMOBJS = $(addprefix ${BEAMDIR}/, ${OBJS:.o=.beam})
 beam: ${SUBDIRS:.d=.beamdir} ${BEAMOBJS}
 
-clean: ${SUBDIRS:.d=.clean}
+cleanud :
+	rm -f ${UD_OBJS}
+
+clean: cleanud ${SUBDIRS:.d=.clean}
 	(rm -f ${OBJECTS} ${OBJECTS:.o=.dep} ${OBJECTS:.o=.list} \
 	       ${OBJECTS:.o=.o.hash} ${BEAMOBJS} ${LIBRARIES} \
 	       ${IMAGES} ${IMAGES:.bin=.list} ${IMAGES:.bin=.syms} \
 	       ${IMAGES:.bin=.bin.modinfo} ${IMAGES:.ruhx=.lid} \
 	       ${IMAGES:.ruhx=.lidhdr} ${IMAGES:.bin=_extended.bin} \
 	       ${IMAGE_EXTRAS} ${EXTRA_LIDS_} \
-	       ${EXTRA_OBJS} ${_GENFILES} ${EXTRA_PARTS} ${EXTRA_CLEAN}) 
+	       ${EXTRA_OBJS} ${_GENFILES} ${EXTRA_PARTS} ${EXTRA_CLEAN} )
 
 cscope: ${SUBDIRS}
 	mkdir -p ${ROOTPATH}/obj/cscope

@@ -26,27 +26,52 @@
 /**
  *  @file errluserdetailstest.H
  *
- *  @brief Test user data plugin for errorlog.
+ *  @brief Test user data plugins for errorlog.
  *
  */
 
 #include    <cxxtest/TestSuite.H>
 #include    <errl/errlentry.H>
 #include    <errl/errluserdetails.H>
+#include    <errl/errlreasoncodes.H>
 
 using   namespace   ERRORLOG;
 
-// dummy version and subsection values.
-const   errlver_t       TEST_FILENAME_VER           =   1;
-const   errlsubsec_t    TEST_FILENAME_SUBSECT       =   4;
-const   errlver_t       TEST_STACKDUMP_VER          =   2;
-const   errlsubsec_t    TEST_STACKDUMP_SUBSECT      =   5;
+
+enum
+{
+    UTIL_COMP_ID                = 0x8A00,
+
+};
+// Subsection values, copied from FIPS.
+enum
+{
+    UTIL_UDT_STREAM_PERC        = 0x0001,///< Perc Data for Streams
+    UTIL_UDT_MEM_ALLOC          = 0x0002,///< Memory Allocation Failure
+    UTIL_UDT_REG_KEYS           = 0x0003,///< Registry key name, with data
+    UTIL_UDT_FILENAME           = 0x0004,///< A null terminated filename
+    UTIL_UDT_FLOCK              = 0x0005,///< An flock struct
+    UTIL_UDT_SEMAPHORE          = 0x0006,///< A semaphore object
+    UTIL_UDT_LIBNAME            = 0x0007,///< Name of the library
+    UTIL_UDT_REG_DATA           = 0x0008,///< Payload data for UtilReg::write
+    UTIL_UDT_ERR_MSG            = 0x0009,///< An error message string
+    UTIL_UDT_INOTIFY_PATH       = 0x000a,///< The path name in error
+    UTIL_UDT_XML_TOKEN          = 0x000b,///< The XML token in error
+    //
+    //  dummy one for Stackdump
+    TEST_STACKDUMP_SUBSECT  = 0x0055   // dummy subsection # for stackdump
+};
 
 
 /**
  * Declare a test UserDetails derived class to post a filename string to
- * the errorlog
+ * the errorlog.
+ * These are canned routines that are handled by the errl tool.
+ *
  * This is just for test purposes, it will not show up in production code.
+ * The values for version and subsection should match the actual filename
+ * UD section parser routing in the errl tool - you should see it parse it
+ * correctly.
  */
 class TestFilename : public ErrlUserDetails
 {
@@ -54,9 +79,10 @@ public:
 
     TestFilename(const char *i_filename)
     {
-        iv_CompId     = ERRL_COMP_ID;
-        iv_Version    = TEST_FILENAME_VER;
-        iv_SubSection = TEST_FILENAME_SUBSECT;
+
+        iv_CompId       = UTIL_COMP_ID;
+        iv_Version    = 1;
+        iv_SubSection = UTIL_UDT_FILENAME;
 
         // Store the string in the internal buffer
         char * l_pString = (char *)allocUsrBuf( strlen(i_filename)+1 );
@@ -76,56 +102,89 @@ private:
     TestFilename & operator=(const TestFilename &);
 };
 
+
 /**
- * Declare a test User Details "StackDump" class to store an array of (32-bit)
- * Stack Addresses.  the first 32-bit number will be the number of following
- * Stack Addresses.
+ * Declare a test UserDetails derived class to post an error message
+ * filename string to the errorlog
+ * These are canned routines that are handled by the errl tool.
  *
- *  This is just a test program, it will not be used in production code.
- *  64-bit stack addrs will need other support
+ * This is just for test purposes, it will not show up in production code.
+ * The values for version and subsection should match the actual filename
+ * UD section parser routing in the errl tool - you should see it parse it
+ * correctly.
  */
-class TestStackDump : public ErrlUserDetails
+class TestErrorMsg : public ErrlUserDetails
 {
 public:
 
-
-    TestStackDump( const uint64_t i_numAddrs,  const uint64_t * i_paddrs )
+    TestErrorMsg(const char *i_filename)
     {
 
-        iv_CompId     = ERRL_COMP_ID;
-        iv_Version    = TEST_STACKDUMP_VER;
-        iv_SubSection = TEST_STACKDUMP_SUBSECT;
+        iv_CompId       = UTIL_COMP_ID;
+        iv_Version    = 1;
+        iv_SubSection = UTIL_UDT_ERR_MSG;
 
-        // allocUsrBuf returns a buffer of uint8_t
-        uint64_t *l_pList   =
-                reinterpret_cast<uint64_t *>( allocUsrBuf( (i_numAddrs+1)*sizeof(void*) ) );
-
-        l_pList[0]  =   i_numAddrs;
-        for (uint64_t i=0; i<i_numAddrs; i++ )
-        {
-            l_pList[i+1]    =   i_paddrs[i];
-        }
+        // Store the string in the internal buffer
+        char * l_pString = (char *)allocUsrBuf( strlen(i_filename)+1 );
+        strcpy(l_pString, i_filename );
     }
 
     /**
      *  @brief Destructor
      *
      */
-    virtual ~TestStackDump() {}
+    virtual ~TestErrorMsg() {}
 
 private:
 
     // Disabled
-    TestStackDump(const TestStackDump &);
-    TestStackDump & operator=(const TestStackDump &);
+    TestErrorMsg(const TestErrorMsg &);
+    TestErrorMsg & operator=(const TestErrorMsg &);
+};
+
+/**
+ * Declare a test UserDetails derived class to post an XML token in error
+ * to the errorlog
+ * These are canned routines that are handled by the errl tool.
+ *
+ * This is just for test purposes, it will not show up in production code.
+ * The values for version and subsection should match the actual filename
+ * UD section parser routing in the errl tool - you should see it parse it
+ * correctly.
+ */
+class TestXMLToken : public ErrlUserDetails
+{
+public:
+
+    TestXMLToken(const char *i_filename)
+    {
+
+        iv_CompId       = UTIL_COMP_ID;
+        iv_Version    = 1;
+        iv_SubSection = UTIL_UDT_XML_TOKEN;
+
+        // Store the string in the internal buffer
+        char * l_pString = (char *)allocUsrBuf( strlen(i_filename)+1 );
+        strcpy(l_pString, i_filename );
+    }
+
+    /**
+     *  @brief Destructor
+     *
+     */
+    virtual ~TestXMLToken() {}
+
+private:
+
+    // Disabled
+    TestXMLToken(const TestXMLToken &);
+    TestXMLToken & operator=(const TestXMLToken &);
 };
 
 
-
-
-//
+//  --------------------------------------------------------------------------
 //  begin actual test code..
-//
+//  --------------------------------------------------------------------------
 class UtilErrlUsrDataTest: public CxxTest::TestSuite
 {
 public:
@@ -139,13 +198,21 @@ public:
         errlHndl_t  l_errl      =   NULL;
 
         TS_TRACE( "testFILENAME user data buffer for errorlog");
-
+        /*@
+        * @errortype
+        * @severity ERRORLOG_SEV_INFORMATIONAL
+        * @moduleid ERRL_USERDETAILS_MODULE_ID
+        * @reasoncode ERRL_FILENAME_TEST
+        * @userdata1 <UNUSED>
+        * @userdata2 <UNUSED>
+        * @devdesc  User Details unit test - post a filename user data section
+        */
         l_errl = new ERRORLOG::ErrlEntry(
                 ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                TEST_MOD_ID,
-                ERRL_COMP_ID | 0x55,        //  compid/reasoncode
-                0x1234567890,               //  user1
-                0x9876543210 );             //  user2
+                ERRL_USERDETAILS_MODULE_ID,
+                ERRL_FILENAME_TEST,             //  compid/reasoncode
+                0x1234567890,                   //  user1
+                0x9876543210 );                 //  user2
         if( l_errl   ==   NULL )
         {
             TS_FAIL("Could not create errlog.\n");
@@ -153,15 +220,13 @@ public:
         }
 
         // create the filename userdata object
-        //
-        TestFilename l_FN_userdata( "foobar.txt" );
+        TestFilename l_FN_userdata( "/path/to/myfile.txt" );
 
         //  Add filename user data block to errorlog.  this should add
         //  the original constructor string, and the second string passed
         //  in here.
-        const   char  testfnstr1[]   =   "secondfilename.txt";
+        const   char  testfnstr1[]   =   "addedfilename.txt";
         l_FN_userdata.addToLog( l_errl, testfnstr1, sizeof(testfnstr1) );
-
 
         //
         // Add another string.
@@ -178,59 +243,90 @@ public:
     }
 
     /**
-     * @test    testStackDump - dump a User Data section of a stackdump.
-     *
-     * first 32-bit entry is the # of following 32-bit addresses, followed
-     * by the list of addresses.
-     *
+     * @test testErrorMsg - create a simple UD section in the errorlog
+     * that stores an error message
      */
-    void testStackDump(void)
+    void testErrorMsg(void)
     {
         errlHndl_t  l_errl      =   NULL;
-        uint64_t    l_addrs[]   =
-        {
-                0x01234567,
-                0xDEADBEEF,
-                0x5555aaaa,
-                0x69696969,
-                0x34920781,
-                0xaaaa5555,
-                0x68392090,
-                0x95720856,
-                0xabcdef01,
-                0x12345670
-        };
 
-        TS_TRACE( "testStackDump add Userdata Section ot errorlog");
-
-
+        TS_TRACE( "testErrorMsg user data buffer for errorlog");
+        /*@
+        * @errortype
+        * @severity ERRORLOG_SEV_INFORMATIONAL
+        * @moduleid ERRL_USERDETAILS_MODULE_ID
+        * @reasoncode ERRL_ERRORMSG_TEST
+        * @userdata1 <UNUSED>
+        * @userdata2 <UNUSED>
+        * @devdesc  User Details unit test - post an error message in a
+        * user data section
+        */
         l_errl = new ERRORLOG::ErrlEntry(
                 ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                TEST_MOD_ID,
-                ERRL_COMP_ID | 0x56,        //  compid/reasoncode
-                0x0101010101,               //  user1
-                0x0202020202 );             //  user2
+                ERRL_USERDETAILS_MODULE_ID,
+                ERRL_ERRORMSG_TEST,             //  compid/reasoncode
+                0x1212121212,                   //  user1
+                0x3434343434 );                 //  user2
         if( l_errl   ==   NULL )
         {
             TS_FAIL("Could not create errlog.\n");
             return;
         }
 
-        TS_TRACE("Create Stackdump object. ");
-        TestStackDump   l_stackDump(
-                            (sizeof(l_addrs)/sizeof(uint64_t)),
-                            &(l_addrs[0]) );
+        // create the filename userdata object
+        TestErrorMsg l_userdata( "The UserData library has failed to fail." );
 
-        TS_TRACE("run addToLog");
-        l_stackDump.addToLog( l_errl  );
+        // add it to the log
+        l_userdata.addToLog( l_errl );
 
-        errlCommit( l_errl );
+        // commit the errorlog
+        errlCommit(l_errl );
+
+    }
+
+    /**
+     * @test testXMLToken - create a simple UD section in the errorlog
+     * that stores the name of an xml token in error.
+     */
+    void testXMLToken(void)
+    {
+        errlHndl_t  l_errl      =   NULL;
+
+        TS_TRACE( "testXMLToken user data buffer for errorlog");
+        /*@
+        * @errortype
+        * @severity ERRORLOG_SEV_INFORMATIONAL
+        * @moduleid ERRL_USERDETAILS_MODULE_ID
+        * @reasoncode ERRL_XMLTOKEN_TEST
+        * @userdata1 <UNUSED>
+        * @userdata2 <UNUSED>
+        * @devdesc  User Details unit test - post an XML token in error as
+        * a user data section
+        */
+        l_errl = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                ERRL_USERDETAILS_MODULE_ID,
+                ERRL_XMLTOKEN_TEST,             //  compid/reasoncode
+                0xa5a5a5a5a5,                   //  user1
+                0xd2d2d2d2d2 );                 //  user2
+        if( l_errl   ==   NULL )
+        {
+            TS_FAIL("Could not create errlog.\n");
+            return;
+        }
+
+        // create the filename userdata object
+        TestXMLToken l_userdata( "HWAS_STATE" );
+
+        // add it to the log
+         l_userdata.addToLog( l_errl );
+
+        // commit the errorlog
+        errlCommit(l_errl );
 
     }
 
 };
-
-
 
 #endif
 

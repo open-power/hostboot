@@ -45,8 +45,10 @@ enum
 enum errlReasonCode
 {
     ERRL_FIRST_ERR          = ERRL_COMP_ID | 0x01,
-    ERRL_ADDTOLOG_FAIL      = ERRL_COMP_ID | 0x02,
-    ERRL_APPENDTOLOG_FAIL   = ERRL_COMP_ID | 0x03,
+    ERRL_FILENAME_TEST      = ERRL_COMP_ID | 0x02,
+    ERRL_ERRORMSG_TEST      = ERRL_COMP_ID | 0x03,
+    ERRL_XMLTOKEN_TEST      = ERRL_COMP_ID | 0x04,
+
     //........
     ERRL_LAST_ERR           = ERRL_COMP_ID | 0xFF
 };

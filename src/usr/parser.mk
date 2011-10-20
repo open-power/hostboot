@@ -1,7 +1,7 @@
 #  IBM_PROLOG_BEGIN_TAG
 #  This is an automatically generated prolog.
 #
-#  $Source: src/usr/cxxtest/makefile $
+#  $Source: src/usr/parser.mk $
 #
 #  IBM CONFIDENTIAL
 #
@@ -20,12 +20,11 @@
 #  Origin: 30
 #
 #  IBM_PROLOG_END
+# Common file for x86 parser files
 
-ROOTPATH = ../../..
-MODULE = cxxtest
+GENDIR = ${ROOTPATH}/obj/genfiles
+IMGDIR = ${ROOTPATH}/img
+OBJDIR = ${ROOTPATH}/obj/modules/parser
+UD_DIR = ${ROOTPATH}/obj/modules/userdetails
 
-SUBDIRS=test.d 
-
-OBJS = TestSuite.o cxxtestexec.o
-
-include ${ROOTPATH}/config.mk
+## UD_FILES = ${UD_DIR}/*.o
