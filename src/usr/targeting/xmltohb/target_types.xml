@@ -59,6 +59,7 @@
     <attribute><id>SCRATCH_UINT32_ARRAY_2</id></attribute>
     <attribute><id>SCRATCH_UINT64_ARRAY_1</id></attribute>
     <attribute><id>SCRATCH_UINT64_ARRAY_2</id></attribute>
+    <attribute><id>NUMERIC_POD_TYPE_TEST</id></attribute>
     <attribute><id>DUMMY_RW</id></attribute>
     <attribute>
         <id>XSCOM_BASE_ADDRESS</id>

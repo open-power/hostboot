@@ -46,6 +46,8 @@ use Text::Wrap;
 use Data::Dumper;
 use POSIX;
 
+
+
 ################################################################################
 # Process command line parameters, issue help text if needed
 ################################################################################
@@ -54,6 +56,7 @@ sub main{ }
 my $cfgSrcOutputDir = ".";
 my $cfgImgOutputDir = ".";
 my $cfgHbXmlFile = "./hb.xml";
+my $cfgVmmConstsFile = "../../../include/usr/vmmconst.h";
 my $cfgFapiAttributesXmlFile = "../../hwpf/hwp/fapiHwpAttributeInfo.xml";
 my $cfgImgOutputFile = "./targeting.bin";
 my $cfgHelp = 0;
@@ -65,6 +68,7 @@ GetOptions("hb-xml-file:s" => \$cfgHbXmlFile,
            "img-output-dir:s" =>  \$cfgImgOutputDir,
            "fapi-attributes-xml-file:s" => \$cfgFapiAttributesXmlFile,
            "img-output-file:s" =>  \$cfgImgOutputFile,
+           "vmm-consts-file:s" =>  \$cfgVmmConstsFile,
            "help" => \$cfgHelp,
            "man" => \$cfgMan,
            "verbose" => \$cfgVerbose ) || pod2usage(-verbose => 0);
@@ -89,6 +93,7 @@ if($cfgVerbose)
     print STDOUT "Fapi attributes XML file = $cfgFapiAttributesXmlFile\n";
     print STDOUT "Source output dir = $cfgSrcOutputDir\n";
     print STDOUT "Image output dir = $cfgImgOutputDir\n";
+    print STDOUT "VMM constants file = $cfgVmmConstsFile\n";
 }
 
 ################################################################################
@@ -100,7 +105,7 @@ my $xml = new XML::Simple (KeyAttr=>[]);
 # Until full machine parseable workbook parsing splits out all the input files, 
 # use the intermediate representation containing the full host boot model.
 # Aborts application if file name not found.
-my $attributes = $xml->XMLin($cfgHbXmlFile, forcearray => ['attribute','hwpfToHbAttrMap']);
+my $attributes = $xml->XMLin($cfgHbXmlFile, forcearray => ['enumerationType','attribute','hwpfToHbAttrMap']);
 my $fapiAttributes = $xml->XMLin($cfgFapiAttributesXmlFile, forcearray => ['attribute']);
 
 # Perform some sanity validation of the model (so we don't have to later)
@@ -180,7 +185,7 @@ if( !($cfgImgOutputDir =~ "none") )
       or fatal ("Targeting image file: \"$cfgImgOutputDir"
 		. "$cfgImgOutputFile\" could not be opened.");
     my $pnorFile = *PNOR_TARGETING_FILE;
-    writeTargetingImage($pnorFile,$attributes);
+    writeTargetingImage($pnorFile,$cfgVmmConstsFile,$attributes);
     close $pnorFile;
 }
 
@@ -677,8 +682,9 @@ sub writeStringImplementationFileStrings {
                 print $outFile "{\n";
                 print $outFile "    switch(i_attrValue)\n";
                 print $outFile "    {\n";
+                my $enumerationType = getEnumerationType($attributes,$enumeration->{id});
                     
-                foreach my $enumerator (@{$enumeration->{enumerator}})
+                foreach my $enumerator (@{$enumerationType->{enumerator}})
                 {
                     print $outFile "        case ", $attribute->{id}, "_",
                         $enumerator->{name},":\n";
@@ -694,6 +700,32 @@ sub writeStringImplementationFileStrings {
            }
         }
     }
+}
+
+################################################################################
+# Locate generic attribute definition, given an enumeration ID
+################################################################################
+
+sub getEnumerationType {
+
+    my($attributes,$id) = @_;
+    my $matchingEnumeration;
+
+    foreach my $enumerationType (@{$attributes->{enumerationType}})
+    {
+        if($id eq $enumerationType->{id})
+        {
+            $matchingEnumeration = $enumerationType;
+            last;
+        }
+    }
+
+    if(!exists $matchingEnumeration->{id})
+    {
+        fatal("Could not find enumeration with ID of " . $id . "\n");
+    }
+
+    return $matchingEnumeration;
 }
 
 ################################################################################
@@ -1011,31 +1043,23 @@ sub writeEnumFileAttrEnums {
     select($outFile);
     $~ = 'ENUMFORMAT';
  
-    foreach my $attribute (@{$attributes->{attribute}})
+    foreach my $enumerationType (@{$attributes->{enumerationType}})
     {
-        if(exists $attribute->{simpleType})
+        print $outFile "/**\n";
+        print $outFile wrapBrief( $enumerationType->{description} );
+        print $outFile " */\n";
+        print $outFile "enum ", $enumerationType->{id}, "\n";
+        print $outFile "{\n";
+
+        foreach my $enumerator (@{$enumerationType->{enumerator}})
         {
-            my $simpleType = $attribute->{simpleType};
-            if(exists $simpleType->{enumeration})
-            {      
-                my $enumeration = $simpleType->{enumeration};
-                print $outFile "/**\n";
-                print $outFile wrapBrief( $enumeration->{description} );
-                print $outFile " */\n";
-                print $outFile "enum ", $attribute->{id}, "\n";
-                print $outFile "{\n";
-
-                foreach my $enumerator (@{$enumeration->{enumerator}})
-                {
-                    $enumHex = sprintf "0x%08X", 
-                        enumNameToValue($enumeration,$enumerator->{name});
-                    $enumName = $attribute->{id} . "_" . $enumerator->{name};
-                    write; 
-                }
-
-                print $outFile "};\n\n";
-            }
+            $enumHex = sprintf "0x%08X", 
+                enumNameToValue($enumerationType,$enumerator->{name});
+            $enumName = $enumerationType->{id} . "_" . $enumerator->{name};
+            write; 
         }
+
+        print $outFile "};\n\n";
     }
 }
 
@@ -1265,7 +1289,7 @@ sub getAttributeIdEnumeration {
 
 sub unhexify {
     my($val) = @_;
-    if($val =~ m/^0[xX][0123456790A-Fa-f]+$/)
+    if($val =~ m/^0[xX][01234567890A-Fa-f]+$/)
     {
         $val = hex($val);
     }
@@ -1279,9 +1303,9 @@ sub unhexify {
 sub packQuad{
     my($quad) = @_;
     
-    unhexify($quad);
+    my $value = unhexify($quad);
 
-    return pack("NN" , $quad >> 32, $quad);
+    return pack("NN" , (($value >> 32) & 0xFFFFFFFF), ($value & 0xFFFFFFFF));
 }
 
 ################################################################################
@@ -1408,6 +1432,35 @@ sub getInstantiatedTargetTypes {
 }
 
 ################################################################################
+# Return default value of zero for an attribute which is a POD numerical type
+################################################################################
+
+sub defaultZero {
+    my($attributes,$typeInstance) = @_;
+
+    # print STDOUT "Attribute's default value is 0\n";
+
+    return 0;
+}
+
+################################################################################
+# Return default value for an attribute whose type is 'enumeration'
+################################################################################
+
+sub defaultEnum {
+    my($attributes,$enumerationInstance) = @_;
+
+    my $enumerationType = getEnumerationType(
+        $attributes,$enumerationInstance->{id});
+
+    # print STDOUT "Attribute enumeration's " .
+    #    "(\"$enumerationType->{id}\") default is: " . 
+    #        $enumerationType->{default} . "\n";
+
+    return $enumerationType->{default};
+}
+
+################################################################################
 # Get hash ref to supported simple types and their properties
 ################################################################################
 
@@ -1417,11 +1470,15 @@ sub simpleTypeProperties {
     
     # Intentionally didn't wrap these to 80 columns to keep them lined up and
     # more readable/editable 
-    $typesHoH{"uint8_t"}     = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "uint8_t"                    , bytes => 1, bits => 8 , packfmt => "C" };
-    $typesHoH{"uint16_t"}    = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "uint16_t"                    , bytes => 2, bits => 16, packfmt => "S" };
-    $typesHoH{"uint32_t"}    = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "uint32_t"                   , bytes => 4, bits => 32, packfmt => "L" };
-    $typesHoH{"uint64_t"}    = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "uint64_t"                   , bytes => 8, bits => 64, packfmt =>\&packQuad };
-    $typesHoH{"enumeration"} = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 0, typeName => "XMLTOHB_USE_PARENT_ATTR_ID" , bytes => 0, bits => 0 , packfmt => "packEnumeration" };
+    $typesHoH{"int8_t"}      = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "int8_t"                     , bytes => 1, bits => 8 , default => \&defaultZero, packfmt => "C" };
+    $typesHoH{"int16_t"}     = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "int16_t"                    , bytes => 2, bits => 16, default => \&defaultZero, packfmt => "n" };
+    $typesHoH{"int32_t"}     = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "int32_t"                    , bytes => 4, bits => 32, default => \&defaultZero, packfmt => "N" };
+    $typesHoH{"int64_t"}     = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "int64_t"                    , bytes => 8, bits => 64, default => \&defaultZero, packfmt =>\&packQuad};
+    $typesHoH{"uint8_t"}     = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "uint8_t"                    , bytes => 1, bits => 8 , default => \&defaultZero, packfmt => "C" };
+    $typesHoH{"uint16_t"}    = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "uint16_t"                   , bytes => 2, bits => 16, default => \&defaultZero, packfmt => "n" };
+    $typesHoH{"uint32_t"}    = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "uint32_t"                   , bytes => 4, bits => 32, default => \&defaultZero, packfmt => "N" };
+    $typesHoH{"uint64_t"}    = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "uint64_t"                   , bytes => 8, bits => 64, default => \&defaultZero, packfmt =>\&packQuad};
+    $typesHoH{"enumeration"} = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 0, typeName => "XMLTOHB_USE_PARENT_ATTR_ID" , bytes => 0, bits => 0 , default => \&defaultEnum, packfmt => "packEnumeration"};
 
     return \%typesHoH; 
 }
@@ -1446,10 +1503,18 @@ sub getAttributeDefault {
                 {
                     # Note: must check for 'type' before 'default', otherwise
                     # might add value to the hash
-                    if(   exists $attribute->{simpleType}->{$type}
-                       && exists $attribute->{simpleType}->{$type}->{default})
+                    if(exists $attribute->{simpleType}->{$type} )
                     {
-                        $default = $attribute->{simpleType}->{$type}->{default};
+                        if(exists $attribute->{simpleType}->{$type}->{default})
+                        {
+                            $default = 
+                                $attribute->{simpleType}->{$type}->{default};
+                        }
+                        else
+                        {
+                           $default = $simpleTypeProperties->{$type}{default}->(
+                                $attributes,$attribute->{simpleType}->{$type} );
+                        }
                         last;
                     }
                 }
@@ -1730,7 +1795,7 @@ sub releaseAndClear {
 ################################################################################
   
 sub packComplexType {
-    my ($complexType,$attributeDefault) = @_;
+    my ($attributes,$complexType,$attributeDefault) = @_;
    
     my $binaryData;
     my $simpleTypeProperties = simpleTypeProperties();
@@ -1761,10 +1826,23 @@ sub packComplexType {
                 else
                 {
                     $binaryData .= $accumulator->releaseAndClear();
-
+        
+                    # If native "EntityPath" type, process accordingly
+                    if($field->{type} eq "EntityPath")
+                    {
+                         $binaryData .= packEntityPath($attributes,$default->{value});
+                    }
+                    # If not a defined simple type, process as an enumeration
+                    elsif(!exists $simpleTypeProperties->{$field->{type}})
+                    {
+                        my $enumerationType = getEnumerationType(
+                            $attributes,$field->{type});
+                        my $enumeratorValue = enumNameToValue($enumerationType,$default->{value});
+                        $binaryData .= packEnumeration($enumerationType,$enumeratorValue);
+                    }
                     # Pack easy types using 'pack', otherwise invoke appropriate
                     # (possibly workaround) callback function
-                    if(exists $simpleTypeProperties->{$field->{type}}
+                    elsif(exists $simpleTypeProperties->{$field->{type}}
                        && $simpleTypeProperties->{$field->{type}}
                             {complexTypeSupport})
                     {
@@ -1811,6 +1889,68 @@ sub packComplexType {
 }
 
 ################################################################################
+# Pack an entity path into a binary data stream
+################################################################################
+
+sub packEntityPath {
+    my($attributes,$value) = @_;
+
+    my $binaryData;
+
+    my $maxPathElements = 8;
+    my ($typeStr,$path) = split(/:/,$value);
+    my (@paths) = split(/\//,$path);
+
+    my $type = 0;
+    if($typeStr eq "physical")
+    {
+        $type = 2;
+    }
+    elsif($typeStr eq "affinity")
+    {
+        $type = 1;
+    }
+    else
+    {
+        fatal("Unsupported enity path type.");
+    }
+
+    if( (scalar @paths) > $maxPathElements)
+    {
+        fatal("Path elements cannot be greater than $maxPathElements.");
+    }
+  
+    $binaryData .= pack("C", (0xF0 & ($type << 4)) + 
+        (0x0F & (scalar @paths)));
+
+    foreach my $pathElement (@paths)
+    {
+        my ($pathType,$pathInstance) = split(/-/,$pathElement);
+        $pathType = uc($pathType);
+
+        foreach my $attr (@{$attributes->{attribute}})
+        {
+            if($attr->{id} eq "TYPE")
+            {
+                $pathType =
+                enumNameToValue(
+                  getEnumerationType($attributes,
+                   $attr->{simpleType}->{enumeration}->{id}),$pathType);
+                $binaryData .= pack ("CC", $pathType, $pathInstance);
+                last;
+            }
+        }
+    }
+
+    if($maxPathElements > (scalar @paths))
+    {
+        $binaryData .= pack("C".(($maxPathElements - scalar @paths)*2));
+    }
+
+    return $binaryData;
+}
+
+################################################################################
 # Pack an attribute into a binary data stream
 ################################################################################
                            
@@ -1830,7 +1970,7 @@ sub packAttribute {
             {
                 if($typeName eq "enumeration")
                 {
-                    my $enumeration = $simpleType->{enumeration};
+                    my $enumeration = getEnumerationType($attributes,$simpleType->{enumeration}->{id});
 
                     # Here $value is the enumerator name
                     my $enumeratorValue = enumNameToValue($enumeration,$value);
@@ -1887,7 +2027,7 @@ sub packAttribute {
     {
         if(ref ($value) eq "HASH" )
         {
-            $binaryData = packComplexType($attribute->{complexType},$value);
+            $binaryData = packComplexType($attributes,$attribute->{complexType},$value);
         }
         else
         {
@@ -1898,54 +2038,7 @@ sub packAttribute {
     {
         if($attribute->{nativeType}->{name} eq "EntityPath")
         {
-            my $maxPathElements = 8;
-            my ($typeStr,$path) = split(/:/,$value);
-            my (@paths) = split(/\//,$path);
-
-            my $type = 0;
-            if($typeStr eq "physical")
-            {
-                $type = 2;
-            }
-            elsif($typeStr eq "affinity")
-            {
-                $type = 1;
-            }
-            else
-            {
-                fatal("Unsupported enity path type.");
-            }
-
-            if( (scalar @paths) > $maxPathElements)
-            {
-                fatal("Path elements cannot be greater than $maxPathElements.");
-            }
-  
-            $binaryData .= pack("C", (0xF0 & ($type << 4)) + 
-                (0x0F & (scalar @paths)));
-
-            foreach my $pathElement (@paths)
-            {
-                my ($pathType,$pathInstance) = split(/-/,$pathElement);
-                $pathType = uc($pathType);
-
-                foreach my $attr (@{$attributes->{attribute}})
-                {
-                    if($attr->{id} eq "TYPE")
-                    {
-                        $pathType =
-                        enumNameToValue(
-                            $attr->{simpleType}->{enumeration},$pathType);
-                        $binaryData .= pack ("CC", $pathType, $pathInstance);
-                        last;
-                    }
-                }
-            }
-
-            if($maxPathElements > (scalar @paths))
-            {
-                $binaryData .= pack("C".(($maxPathElements - scalar @paths)*2));
-            }
+            $binaryData = packEntityPath($attributes,$value);
         }
         else
         {
@@ -1967,11 +2060,41 @@ sub packAttribute {
 }
 
 ################################################################################
+# Get the PNOR base address from host boot code
+################################################################################
+
+sub getPnorBaseAddress {
+    my($vmmConstsFile) = @_;
+    my $pnorBaseAddress = 0;
+
+    open(VMM_CONSTS_FILE,"<$vmmConstsFile") 
+      or fatal ("VMM Constants file: \"$vmmConstsFile\" could not be opened.");
+
+    foreach my $line (<VMM_CONSTS_FILE>)
+    {
+        chomp($line);
+        if( $line =~ /VMM_VADDR_ATTR_RP/)
+        {
+            $line =~ s/[^0-9\*]//g;
+            $pnorBaseAddress = eval $line;
+            last;
+        }
+    }
+
+    if($pnorBaseAddress == 0)
+    {
+        fatal("PNOR base address was zero!");
+    }
+    
+    return $pnorBaseAddress;
+}
+
+################################################################################
 # Write the PNOR targeting image 
 ################################################################################
 
 sub writeTargetingImage {
-    my($outFile, $attributes) = @_;
+    my($outFile, $vmmConstsFile, $attributes) = @_;
 
     # 128 MB virtual memory offset between sections
     #@TODO Need the final value after full host boot support is implemented.
@@ -1980,9 +2103,7 @@ sub writeTargetingImage {
 
     # Virtual memory addresses corresponding to the start of the targeting image
     # PNOR/heap sections
-    #@TODO Need the final value of the base address after full host boot support
-    # is implemented. 
-    my $pnorRoBaseAddress    = 0xC0000000;  # 3GB - See vmmconst.H.
+    my $pnorRoBaseAddress    = getPnorBaseAddress($vmmConstsFile); 
     my $pnorRwBaseAddress    = $pnorRoBaseAddress    + $vmmSectionOffset;  
     my $heapPnorInitBaseAddr = $pnorRwBaseAddress    + $vmmSectionOffset; 
     my $heapZeroInitBaseAddr = $heapPnorInitBaseAddr + $vmmSectionOffset; 
@@ -2068,7 +2189,7 @@ sub writeTargetingImage {
 
     # Reserve # pointers * sizeof(pointer)
     my $startOfAttributePointers = $offset;
-    print "Total attributes = $numAttributes\n";
+    # print "Total attributes = $numAttributes\n";
     $offset += ($numAttributes * (length packQuad(0) ));
 
     # Now we can determine the pointer to the number of targets
@@ -2197,8 +2318,9 @@ sub writeTargetingImage {
                         my $rwdata = packAttribute($attributes,$attributeDef,
                             $attrhash{$attributeId}->{default});
 
-                        print "Wrote to pnor-rw value ",$attributeDef->{id}, ",
-                        ", $attrhash{$attributeId}->{default}," \n"; 
+                        #print "Wrote to pnor-rw value ",$attributeDef->{id}, ",
+                        #", $attrhash{$attributeId}->{default}," \n"; 
+
                         $attributePointerBinData .= packQuad(
                             $rwOffset + $pnorRwBaseAddress);
                         
@@ -2255,7 +2377,6 @@ sub writeTargetingImage {
     }
 
     # Build header data
-    #@TODO Need header file for host boot which lays out the header
     
     my $headerBinData;
     my $blockSize = 4*1024;
@@ -2390,6 +2511,17 @@ directory)
 
 Sets the output directory for generated binary files 
 (default is the current directory)
+
+=item B<--img-output-file>=FILE
+
+Sets the file to receive the PNOR targeting image output (default
+./targeting.bin).  Only used when generating the PNOR targeting image
+
+=item B<--vmm-consts-file>=FILE
+
+Indicates the file containing the base virtual address of the attributes
+(default is src/include/usr/vmmconst.h).  Only used when generating the PNOR
+targeting image 
 
 =item B<--verbose>
 

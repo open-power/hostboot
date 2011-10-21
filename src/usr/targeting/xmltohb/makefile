@@ -48,6 +48,9 @@ XMLTOHB_GENERIC_SOURCES = attribute_types.xml target_types.xml
 XMLTOHB_FAPIATTR_SOURCES = \
     ${ROOTPATH}/src/usr/hwpf/hwp/fapiHwpAttributeInfo.xml
 
+VMM_CONSTS_FILE = \
+    ${ROOTPATH}/src/include/usr/vmmconst.h
+
 GENFILES = ${XMLTOHB_TARGETS} 
 
 EXTRA_PARTS = $(addprefix $(IMGDIR)/, $(XMLTOHB_SYSTEM_BINARIES))
@@ -81,14 +84,14 @@ $(call GENTARGET,$(XMLTOHB_TARGETS)) : \
 ${GENDIR}/%.hb.xml: %.system.xml ${XMLTOHB_GENERIC_SOURCES}
 	./mergexml.sh $^ > $@
 
-
 # create the binary files
-${GENDIR}/%_targeting.bin: xmltohb.pl ${GENDIR}/%.hb.xml ${XMLTOHB_FAPIATTR_SOURCES}
+${GENDIR}/%_targeting.bin: xmltohb.pl ${GENDIR}/%.hb.xml ${XMLTOHB_FAPIATTR_SOURCES} ${VMM_CONSTS_FILE}
 	./$< $(addprefix --hb-xml-file=,${GENDIR}/$*.hb.xml) \
 	     $(addprefix --fapi-attributes-xml-file=,\
 			 ${XMLTOHB_FAPIATTR_SOURCES}) \
 	     --src-output-dir=none --img-output-dir=$(dir $@) \
-	     --img-output-file=$(notdir $@)
+	     --img-output-file=$(notdir $@) \
+         --vmm-consts-file=$(VMM_CONSTS_FILE)
 
 
 

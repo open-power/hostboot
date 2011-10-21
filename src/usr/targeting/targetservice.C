@@ -40,7 +40,7 @@
 #include <sys/task.h>
 #include <trace/interface.H>
 #include <initservice/taskargs.H>
-#include <pnor/pnorif.H>
+#include <vmmconst.h>
 
 // This component
 #include <targeting/targetservice.H>
@@ -178,19 +178,8 @@ void TargetService::init()
 
     // Get+save pointer to beginning of targeting's swappable config in
     // PNOR.
-    //@TODO Fully account for the attribute resource provider
-    PNOR::SectionInfo_t l_sectionInfo;
-    errlHndl_t l_pElog = PNOR::getSectionInfo(
-        PNOR::HB_DATA, PNOR::SIDE_A, l_sectionInfo );
-    if(l_pElog)
-    {
-        l_pElog->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
-        errlCommit(l_pElog);
-        assert("Failed to get handle to targeting data");
-    }
-
     TargetingHeader* l_pHdr = reinterpret_cast<TargetingHeader*>(
-        l_sectionInfo.vaddr);
+        VMM_VADDR_ATTR_RP);
     assert(l_pHdr->eyeCatcher == PNOR_TARG_EYE_CATCHER);
 
     iv_pPnor = reinterpret_cast<uint32_t*>(

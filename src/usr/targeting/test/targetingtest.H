@@ -1210,9 +1210,87 @@ class TargetingTestSuite: public CxxTest::TestSuite
             errlHndl_t l_pErrLog = static_cast<ERRORLOG::ErrlEntry*>(l_rc.releasePlatData());
             ERRORLOG::errlCommit(l_pErrLog);
         }
-
     }
 
+    void testPodNumericalTypes()
+    {
+        TS_TRACE(ENTER_MRK "testPodNumericalTypes" );
+
+        using namespace TARGETING;
+        using namespace fapi;
+
+        TargetService& l_targetService = targetService();
+
+        TARGETING::Target* l_pTarget = NULL;
+        (void) l_targetService.getTopLevelTarget(l_pTarget);
+        if (l_pTarget == NULL)
+        {
+            TS_FAIL("Top level handle was NULL when initialization "
+                    "complete");
+        }
+
+        NUMERIC_POD_TYPE_TEST_ATTR l_pod;
+        memset(&l_pod,0x00,sizeof(l_pod));
+        if(!l_pTarget->tryGetAttr<TARGETING::ATTR_NUMERIC_POD_TYPE_TEST>(l_pod))
+        {
+            TS_FAIL("Numeric POD type not found");
+        }
+        if(   (l_pod.fsiPath.type() != EntityPath::PATH_PHYSICAL)
+           || (l_pod.fsiPath[0].type != TYPE_SYS)
+           || (l_pod.fsiPath[0].instance != 0)
+           || (l_pod.fsiPath.size() != 1 ) )
+        {
+            TS_FAIL("Expected physical:sys-0, got a different result");
+            
+        }
+        if(l_pod.className != CLASS_CHIP)
+        {
+            TS_FAIL("Expected CLASS value of 0x%08X, got 0x%08X",
+                    CLASS_CHIP,l_pod.className);
+        }
+        if(l_pod.uint8 != 0xAB)
+        {
+             TS_FAIL("Expected uint8_t value of 0xAB, got 0x%02X",
+                  l_pod.uint8);  
+        }
+        if (l_pod.uint16 != 0xABCD)
+        {
+            TS_FAIL("Expected uint16_t value of 0xABCD, got 0x%04X",
+                l_pod.uint16); 
+        }
+        if (l_pod.uint32 != 0xABCDEF01)
+        {
+            TS_FAIL("Expected uint32_t value of 0xABCDEF01, got 0x%08X",
+                l_pod.uint32);
+        }
+        if (l_pod.uint64 != 0xABCDEF0123456789ULL)
+        {
+            TS_FAIL("Expected uint64_t value of 0xABCDEF0123456789, got 0x%016lX",
+                l_pod.uint64);
+        }  
+        if(l_pod.int8 != -124)
+        {
+             TS_FAIL("Expected int8_t value of -124, got %d",
+                  l_pod.int8);  
+        }
+        if (l_pod.int16 != -32764)
+        {
+            TS_FAIL("Expected int16_t value of -32764, got %d",
+                l_pod.int16); 
+        }
+        if (l_pod.int32 != -2147483644)
+        {
+            TS_FAIL("Expected int32_t value of -2147483644, got %d",
+                l_pod.int32);
+        }
+        if (l_pod.int64 != -9223372036854775804LL)
+        {
+            TS_FAIL("Expected int64_t value of -9223372036854775804, got %ld",
+                l_pod.int64);
+        }    
+
+        TS_TRACE(EXIT_MRK "testPodNumericalTypes" );
+    }
 };
 
 #endif // End __TESTTARGETING_H

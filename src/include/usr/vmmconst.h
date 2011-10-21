@@ -53,7 +53,9 @@
 #define VMM_VADDR_PNOR_RP  (2 * GIGABYTE)
 
 /** Attribute Resource Provider */
-#define VMM_VADDR_ATTR_RP  (3 * GIGABYTE)
+// Note: Not simplified to make it easier to extract with the PNOR targeting
+// image generator script 
+#define VMM_VADDR_ATTR_RP  (3ul * 1024ul * 1024ul * 1024ul)
 
 
 /**

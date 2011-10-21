@@ -28,45 +28,200 @@
      Contains the definition of all hostboot attributes
      ================================================================= -->
 
+<enumerationType>
+    <id>CLASS</id>
+    <description>Enumeration indicating the target's class</description>
+    <enumerator>
+        <name>NA</name>
+        <value>0</value>
+    </enumerator>
+    <enumerator>
+        <name>CARD</name>
+        <value>1</value>
+    </enumerator>
+    <enumerator>
+        <name>ENC</name>
+        <value>2</value>
+    </enumerator>
+    <enumerator>
+        <name>CHIP</name>
+        <value>3</value>
+    </enumerator>
+    <enumerator>
+        <name>UNIT</name>
+        <value>4</value>
+    </enumerator>            
+    <enumerator>
+        <name>DEV</name>
+        <value>5</value>
+    </enumerator>             
+    <enumerator>
+        <name>SYS</name>
+        <value>6</value>
+    </enumerator>             
+    <enumerator>
+        <name>MAX</name>
+        <value>7</value>
+    </enumerator>             
+    <default>NA</default>
+</enumerationType>
+
+<enumerationType>
+    <id>TYPE</id>
+    <description>Enumeration indicating the target's type</description>
+    <enumerator>
+        <name>NA</name>
+        <value>0</value>
+    </enumerator>
+    <enumerator>
+        <name>SYS</name>
+    </enumerator>
+    <enumerator>
+        <name>NODE</name>
+    </enumerator>
+    <enumerator>
+        <name>DIMM</name>
+    </enumerator>
+    <enumerator>
+        <name>SCM</name>
+    </enumerator>
+    <enumerator>
+        <name>DCM</name>
+    </enumerator>
+    <enumerator>
+        <name>MEMBUF</name>
+    </enumerator>
+    <enumerator>
+        <name>PROC</name>
+    </enumerator>
+    <enumerator>
+        <name>MEMVRM</name>
+    </enumerator>
+    <enumerator>
+        <name>PROCVRM</name>
+    </enumerator>
+    <enumerator>
+        <name>EX</name>
+    </enumerator>
+    <enumerator>
+        <name>CORE</name>
+    </enumerator>
+    <enumerator>
+        <name>L2</name>
+    </enumerator>
+    <enumerator>
+        <name>L3</name>
+    </enumerator>
+    <enumerator>
+        <name>L4</name>
+    </enumerator>
+    <enumerator>
+        <name>MCS</name>
+    </enumerator>
+    <enumerator>
+        <name>MBS</name>
+    </enumerator>
+    <enumerator>
+        <name>MBA</name>
+    </enumerator>
+    <enumerator>
+        <name>MEM_PORT</name>
+    </enumerator>
+    <enumerator>
+        <name>PERVASIVE</name>
+    </enumerator>
+    <enumerator>
+        <name>POWERBUS</name>
+    </enumerator>
+    <enumerator>
+        <name>XBUS</name>
+    </enumerator>
+    <enumerator>
+        <name>ABUS</name>
+    </enumerator>
+    <enumerator>
+        <name>PCI</name>
+    </enumerator>
+    <enumerator>
+        <name>LAST_IN_RANGE</name>
+    </enumerator>
+    <default>NA</default>
+</enumerationType>
+
+<enumerationType>
+    <id>MODEL</id>
+    <description>Enumeration indicating the target's model</description>
+    <enumerator>
+        <name>NA</name>
+        <value>0</value>
+    </enumerator>
+    <enumerator>
+        <name>SALERNO</name>
+        <value>16</value>
+    </enumerator>
+    <enumerator>
+        <name>VENICE</name>
+    </enumerator>
+    <enumerator>
+        <name>CENTAUR</name>
+        <value>48</value>
+    </enumerator>
+    <enumerator>
+        <name>JEDEC</name>
+        <value>80</value>
+    </enumerator>
+    <enumerator>
+        <name>CDIMM</name>
+    </enumerator>
+    <enumerator>
+        <name>POWER8</name>
+        <value>112</value>
+    </enumerator>            
+    <default>NA</default>
+</enumerationType>
+
+<enumerationType>
+    <id>ENGINE_TYPE</id>
+    <description>Enumeration indicating the target's engine type</description>
+    <enumerator>
+        <name>NA</name>
+        <value>0</value>
+    </enumerator>
+    <enumerator>
+        <name>ENGINE_IIC</name>
+        <value>1</value>
+    </enumerator>
+    <enumerator>
+        <name>ENGINE_SCOM</name>
+        <value>2</value>
+    </enumerator>
+    <default>NA</default>
+</enumerationType>
+
+<enumerationType>
+    <id>FSI_MASTER_TYPE</id>
+    <description>Enumeration indicating the master's FSI type</description>
+    <enumerator>
+        <name>MFSI</name>
+        <value>0</value>
+    </enumerator>
+    <enumerator>
+        <name>CMFSI</name>
+        <value>1</value>
+    </enumerator>
+    <enumerator>
+        <name>NO_MASTER</name>
+        <value>2</value>
+    </enumerator>
+    <default>NO_MASTER</default>
+</enumerationType>
+
 <attribute>
     <id>CLASS</id>
     <description>Attribute indicating the target's class</description>
     <simpleType>
         <enumeration>
-            <description>Enumeration indicating the target's class</description>
-            <enumerator>
-                <name>NA</name>
-                <value>0</value>
-            </enumerator>
-            <enumerator>
-                <name>CARD</name>
-                <value>1</value>
-            </enumerator>
-            <enumerator>
-                <name>ENC</name>
-                <value>2</value>
-            </enumerator>
-            <enumerator>
-                <name>CHIP</name>
-                <value>3</value>
-            </enumerator>
-            <enumerator>
-                <name>UNIT</name>
-                <value>4</value>
-            </enumerator>            
-            <enumerator>
-                <name>DEV</name>
-                <value>5</value>
-            </enumerator>             
-            <enumerator>
-                <name>SYS</name>
-                <value>6</value>
-            </enumerator>             
-            <enumerator>
-                <name>MAX</name>
-                <value>7</value>
-            </enumerator>             
-            <default>NA</default>
+            <id>CLASS</id>
         </enumeration>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -79,84 +234,7 @@
     <description>Attribute indicating the target's type</description>
     <simpleType>
         <enumeration>
-            <description>Attribute indicating the target's type</description>
-            <enumerator>
-                <name>NA</name>
-                <value>0</value>
-            </enumerator>
-            <enumerator>
-                <name>SYS</name>
-            </enumerator>
-            <enumerator>
-                <name>NODE</name>
-            </enumerator>
-            <enumerator>
-                <name>DIMM</name>
-            </enumerator>
-            <enumerator>
-                <name>SCM</name>
-            </enumerator>
-            <enumerator>
-                <name>DCM</name>
-            </enumerator>
-            <enumerator>
-                <name>MEMBUF</name>
-            </enumerator>
-            <enumerator>
-                <name>PROC</name>
-            </enumerator>
-            <enumerator>
-                <name>MEMVRM</name>
-            </enumerator>
-            <enumerator>
-                <name>PROCVRM</name>
-            </enumerator>
-            <enumerator>
-                <name>EX</name>
-            </enumerator>
-            <enumerator>
-                <name>CORE</name>
-            </enumerator>
-            <enumerator>
-                <name>L2</name>
-            </enumerator>
-            <enumerator>
-                <name>L3</name>
-            </enumerator>
-            <enumerator>
-                <name>L4</name>
-            </enumerator>
-            <enumerator>
-                <name>MCS</name>
-            </enumerator>
-            <enumerator>
-                <name>MBS</name>
-            </enumerator>
-            <enumerator>
-                <name>MBA</name>
-            </enumerator>
-            <enumerator>
-                <name>MEM_PORT</name>
-            </enumerator>
-            <enumerator>
-                <name>PERVASIVE</name>
-            </enumerator>
-            <enumerator>
-                <name>POWERBUS</name>
-            </enumerator>
-            <enumerator>
-                <name>XBUS</name>
-            </enumerator>
-            <enumerator>
-                <name>ABUS</name>
-            </enumerator>
-            <enumerator>
-                <name>PCI</name>
-            </enumerator>
-            <enumerator>
-                <name>LAST_IN_RANGE</name>
-            </enumerator>
-            <default>NA</default>
+            <id>TYPE</id>
         </enumeration>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -169,34 +247,7 @@
     <description>Attribute indicating the target's model</description>
     <simpleType>
         <enumeration>
-            <description>Enumeration indicating the target's model</description>
-            <enumerator>
-                <name>NA</name>
-                <value>0</value>
-            </enumerator>
-            <enumerator>
-                <name>SALERNO</name>
-                <value>16</value>
-            </enumerator>
-            <enumerator>
-                <name>VENICE</name>
-            </enumerator>
-            <enumerator>
-                <name>CENTAUR</name>
-                <value>48</value>
-            </enumerator>
-            <enumerator>
-                <name>JEDEC</name>
-                <value>80</value>
-            </enumerator>
-            <enumerator>
-                <name>CDIMM</name>
-            </enumerator>
-            <enumerator>
-                <name>POWER8</name>
-                <value>112</value>
-            </enumerator>            
-            <default>NA</default>
+            <id>MODEL</id>
         </enumeration>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -209,20 +260,7 @@
     <description>Attribute indicating the target's engine type</description>
     <simpleType>
         <enumeration>
-            <description>Enumeration indicating the target's engine type</description>
-            <enumerator>
-                <name>NA</name>
-                <value>0</value>
-            </enumerator>
-            <enumerator>
-                <name>ENGINE_IIC</name>
-                <value>1</value>
-            </enumerator>
-            <enumerator>
-                <name>ENGINE_SCOM</name>
-                <value>2</value>
-            </enumerator>
-            <default>NA</default>
+            <id>ENGINE_TYPE</id>
         </enumeration>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -235,7 +273,7 @@
     <description>Scratch attribute that can be used for dev/test</description>
     <simpleType>
         <uint8_t>
-            <default>0</default>
+            <default>0</default> 
         </uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -699,23 +737,11 @@
     <description>Type of Master FSI connection to this slave (MFSI or cMFSI)</description>
     <simpleType>
         <enumeration>
-            <description>Enumeration indicating the master's FSI type</description>
-            <enumerator>
-                <name>MFSI</name>
-                <value>0</value>
-            </enumerator>
-            <enumerator>
-                <name>CMFSI</name>
-                <value>1</value>
-            </enumerator>
-            <enumerator>
-                <name>NO_MASTER</name>
-                <value>2</value>
-            </enumerator>
-            <default>NO_MASTER</default>
+            <id>FSI_MASTER_TYPE</id>
         </enumeration>
     </simpleType>
     <persistency>non-volatile</persistency>
+    <hasStringConversion/>
     <readable/>
 </attribute>
 
@@ -766,6 +792,7 @@
     <persistency>non-volatile</persistency>
     <readable/>
 </attribute>
+
 <attribute>
     <id>HWAS_STATE</id>
     <description>HardWare Availability Service State Attribute.  
@@ -818,6 +845,7 @@
     <persistency>volatile</persistency>
     <readable/>
 </attribute>
+
 <attribute>
     <id>MSS_EFF_PRIMARY_RANK</id>
     <description>The effective rank group on each port (0 to 3) for each group 0-3</description>
@@ -835,5 +863,77 @@
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
+
+<!-- For POD Testing -->
+<attribute>
+    <id>NUMERIC_POD_TYPE_TEST</id>
+    <description>Attribute which tests numeric POD types</description>
+    <complexType>
+        <description>Numeric POD type test structure</description>
+        <field>
+            <name>fsiPath</name>
+            <description>Entity path for testing purposes</description>
+            <type>EntityPath</type>
+            <default>physical:sys-0</default> 
+        </field>
+        <field>
+            <name>className</name>
+            <description>Class for testing purposes</description>
+            <type>CLASS</type>
+            <default>CHIP</default> 
+        </field>
+        <field>
+            <name>uint8</name>
+            <description>Test uint8</description>
+            <type>uint8_t</type>
+            <default>0xAB</default> 
+        </field>
+        <field>
+            <name>uint16</name>
+            <description>Test uint16</description>
+            <type>uint16_t</type>
+            <default>0xABCD</default> 
+        </field>
+        <field>
+            <name>uint32</name>
+            <description>Test uint32</description>
+            <type>uint32_t</type>
+            <default>0xABCDEF01</default> 
+        </field>
+        <field>
+            <name>uint64</name>
+            <description>Test uint64</description>
+            <type>uint64_t</type>
+            <default>0xABCDEF0123456789</default> 
+        </field>
+        <field>
+            <name>int8</name>
+            <description>Test int8</description>
+            <type>int8_t</type>
+            <default>-124</default> 
+        </field>
+        <field>
+            <name>int16</name>
+            <description>Test int16</description>
+            <type>int16_t</type>
+            <default>-32764</default> 
+        </field>
+        <field>
+            <name>int32</name>
+            <description>Test int32</description>
+            <type>int32_t</type>
+            <default>-2147483644</default> 
+        </field>
+        <field>
+            <name>int64</name>
+            <description>Test int64</description>
+            <type>int64_t</type>
+            <default>-9223372036854775804</default> 
+        </field>
+        </complexType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
 </attributes>
 
