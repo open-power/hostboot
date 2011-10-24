@@ -37,13 +37,20 @@
  *                          mjjones     08/10/2011  Removed clock HWP
  *                          mjjones     09/01/2011  Call toString in InitialTest
  *                          mjjones     09/14/2011  Update to scom function name
+ *                          camvanng    09/28/2011  Added test for initfile
  *
  */
 
 #include <fapiTestHwp.H>
 #include <fapiHwAccess.H>
+#include <fapiHwpExecInitFile.H>
 extern "C"
 {
+
+//******************************************************************************
+// Forward Declaration
+//******************************************************************************
+fapi::ReturnCode testExecInitFile(const fapi::Target & i_chip);
 
 //******************************************************************************
 // hwpInitialTest function - Override with whatever you want here
@@ -91,7 +98,7 @@ fapi::ReturnCode hwpInitialTest(const fapi::Target & i_chip)
         if (l_ecmdRc != ECMD_DBUF_SUCCESS)
         {
             FAPI_ERR("hwpInitialTest: fapiPutScom test, error from ecmdDataBuffer setDoubleWord() - rc 0x%.8X", l_ecmdRc);
-            l_rc = fapi::FAPI_RC_ECMD_MASK;
+            l_rc = l_ecmdRc;
             break;
         }
 
@@ -118,7 +125,7 @@ fapi::ReturnCode hwpInitialTest(const fapi::Target & i_chip)
         if (l_ecmdRc != ECMD_DBUF_SUCCESS)
         {
             FAPI_ERR("hwpInitialTest: fapiPutScomUnderMask test, error from ecmdDataBuffer setDoubleWord() - rc 0x%.8X", l_ecmdRc);
-            l_rc = fapi::FAPI_RC_ECMD_MASK;
+            l_rc = l_ecmdRc;
             break;
         }
 
@@ -142,7 +149,7 @@ fapi::ReturnCode hwpInitialTest(const fapi::Target & i_chip)
         if (l_ecmdRc != ECMD_DBUF_SUCCESS)
         {
             FAPI_ERR("hwpInitialTest: fapiPutScom to restore, error from ecmdDataBuffer setDoubleWord() - rc 0x%.8X", l_ecmdRc);
-            l_rc = fapi::FAPI_RC_ECMD_MASK;
+            l_rc = l_ecmdRc;
             break;
         }
 
@@ -196,7 +203,7 @@ fapi::ReturnCode hwpInitialTest(const fapi::Target & i_chip)
         if (l_ecmdRc != ECMD_DBUF_SUCCESS)
         {
             FAPI_ERR("hwpInitialTest: fapiPutCfamRegister test, error from ecmdDataBuffer setWord() - rc 0x%.8X", l_ecmdRc);
-            l_rc = fapi::FAPI_RC_ECMD_MASK;
+            l_rc = l_ecmdRc;
             break;
         }
 
@@ -221,7 +228,7 @@ fapi::ReturnCode hwpInitialTest(const fapi::Target & i_chip)
         if (l_ecmdRc != ECMD_DBUF_SUCCESS)
         {
             FAPI_ERR("hwpInitialTest: fapiModifyCfamRegister test, error from ecmdDataBuffer setWord() - rc 0x%.8X", l_ecmdRc);
-            l_rc = fapi::FAPI_RC_ECMD_MASK;
+            l_rc = l_ecmdRc;
             break;
         }
 
@@ -245,7 +252,7 @@ fapi::ReturnCode hwpInitialTest(const fapi::Target & i_chip)
         if (l_ecmdRc != ECMD_DBUF_SUCCESS)
         {
             FAPI_ERR("hwpInitialTest: fapiPutCfamRegister to restore, error from ecmdDataBuffer setWord() - rc 0x%.8X", l_ecmdRc);
-            l_rc = fapi::FAPI_RC_ECMD_MASK;
+            l_rc = l_ecmdRc;
             break;
         }
 
@@ -263,9 +270,218 @@ fapi::ReturnCode hwpInitialTest(const fapi::Target & i_chip)
 
 #endif
 
+        // --------------------------------------------------------
+        // 9. hwpExecInitFile test
+        // --------------------------------------------------------
+
+        l_rc = testExecInitFile(i_chip);
+        if (l_rc != fapi::FAPI_RC_SUCCESS)
+        {
+            FAPI_ERR("hwpInitialTest: Error from testExecInitFile");
+            break;
+        }
+        else
+        {
+            FAPI_INF("hwpInitialTest: Test testExecInitFile passed");
+        }
+
     } while (0);
 
     return l_rc;
 }
+
+
+//******************************************************************************
+// testExecInitFile function - function to test sample initfile
+//******************************************************************************
+fapi::ReturnCode testExecInitFile(const fapi::Target & i_chip)
+{
+    typedef struct ifScom {
+        uint64_t addr;
+        uint64_t origData;
+        uint64_t writtenData;
+    }ifScom_t;
+
+    //Note:  this data is based on the sample.initfile.
+    //If the initfile changes, this data will also need to be changed.
+    ifScom_t l_ifScomData[] =
+    {
+        {0x000000000006002b, 0, 0x0000000000000183},
+        {0x000000000006002c, 0, 0x0000000000000183},
+        {0x000000000006800b, 0, 0},
+        {0x000000000006800c, 0, 0x8000000000000000 >> 0x17},
+        {0x0000000013010002, 0, 0x0000000000000181},
+        {0x0000000013013283, 0, 0x3c90000000000000 |
+                                0x8000000000000000 >> 0x0c |
+                                0x8000000000000000 >> 0x0d |
+                                0x0306400412000000 >> 0x0e},
+        {0x0000000013013284, 0, 0x3c90000000000000},
+        {0x0000000013013285, 0, 0x8000000000000000 >> 0x0f |
+                                0x8000000000000000 >> 0x10 |
+                                0x8000000000000000 >> 0x13 |
+                                0x0306400412000000 >> 0x15 },
+        {0x0000000013013286, 0, 0},
+        {0x0000000013013287, 0, 0x0000000000000182},
+        {0x0000000013013288, 0, 0x0000000000000192},
+        {0x0000000013013289, 0, 0x8000000000000000 >> 0x17},
+        {0x0000000013030007, 0, 0x0000000000000182}
+    };
+
+    fapi::ReturnCode l_rc = fapi::FAPI_RC_SUCCESS;
+    uint32_t l_ecmdRc = ECMD_DBUF_SUCCESS;
+    ecmdDataBufferBase l_ScomData(64);
+
+    do {
+        // Set up some attributes for testing
+        uint8_t l_uint8 = 1;
+        l_rc = FAPI_ATTR_SET(ATTR_SCRATCH_UINT8_1, NULL, l_uint8);
+        if (l_rc != fapi::FAPI_RC_SUCCESS)
+        {
+            FAPI_ERR("hwpInitialTest: testExecInitFile: "
+                     "ATTR_SCRATCH_UINT8_1. Error from SET");
+            break;
+        }
+
+        l_rc = FAPI_ATTR_SET(ATTR_SCRATCH_UINT8_2, NULL, l_uint8);
+        if (l_rc != fapi::FAPI_RC_SUCCESS)
+        {
+            FAPI_ERR("hwpInitialTest: testExecInitFile: "
+                     "ATTR_SCRATCH_UINT8_2. Error from SET");
+            break;
+        }
+
+        uint32_t l_uint32 = 3;
+        l_rc = FAPI_ATTR_SET(ATTR_SCRATCH_UINT32_1, NULL, l_uint32);
+        if (l_rc != fapi::FAPI_RC_SUCCESS)
+        {
+            FAPI_ERR("hwpInitialTest: testExecInitFile: "
+                     "ATTR_SCRATCH_UINT32_1. Error from SET");
+            break;
+        }
+
+        uint64_t l_uint64 = 2;
+        l_rc = FAPI_ATTR_SET(ATTR_SCRATCH_UINT64_1, NULL, l_uint64);
+        if (l_rc != fapi::FAPI_RC_SUCCESS)
+        {
+            FAPI_ERR("hwpInitialTest: testExecInitFile: "
+                     "ATTR_SCRATCH_UINT64_1. Error from SET");
+            break;
+        }
+
+        uint8_t l_uint8array1[32];
+        l_uint8array1[2] = 1;
+        l_rc = FAPI_ATTR_SET(ATTR_SCRATCH_UINT8_ARRAY_1, NULL, l_uint8array1);
+        if (l_rc != fapi::FAPI_RC_SUCCESS)
+        {
+            FAPI_ERR("hwpInitialTest: testExecInitFile: "
+                     "ATTR_SCRATCH_UINT8_ARRAY_1. Error from SET");
+            break;
+        }
+
+        // Save original scom data to restore at end of test
+        for (uint32_t i = 0; i < sizeof(l_ifScomData)/sizeof(ifScom_t); i++)
+        {
+            l_rc = fapiGetScom(i_chip, l_ifScomData[i].addr, l_ScomData);
+            if (l_rc != fapi::FAPI_RC_SUCCESS)
+            {
+                FAPI_ERR("hwpInitialTest: testExecInitFile: Error from "
+                         "fapiGetScom");
+                break;
+            }
+
+            l_ifScomData[i].origData = l_ScomData.getDoubleWord(0);
+        }
+
+        if (l_rc != fapi::FAPI_RC_SUCCESS)
+        {
+            break;
+        }
+
+        // Set scom data to 0 to start from known state for bit ops
+        l_ScomData.setDoubleWord(0, 0ll);
+        for (uint32_t i = 0; i < sizeof(l_ifScomData)/sizeof(ifScom_t); i++)
+        {
+            l_rc = fapiPutScom(i_chip, l_ifScomData[i].addr, l_ScomData);
+            if (l_rc != fapi::FAPI_RC_SUCCESS)
+            {
+                FAPI_ERR("hwpInitialTest: testExecInitFile: Error from "
+                         "fapiPutScom");
+                break;
+            }
+        }
+
+        if (l_rc != fapi::FAPI_RC_SUCCESS)
+        {
+            break;
+        }
+
+        //Call Hwp to execute the initfile
+        FAPI_EXEC_HWP(l_rc, hwpExecInitFile, i_chip, "sample.if");
+        
+        if (l_rc != fapi::FAPI_RC_SUCCESS)
+        {
+            FAPI_ERR("hwpInitialTest: Error from hwpExecInitFile");
+            break;
+        }
+
+        //Verify the data written
+        for (uint32_t i = 0; i < sizeof(l_ifScomData)/sizeof(ifScom_t); i++)
+        {
+            l_rc = fapiGetScom(i_chip, l_ifScomData[i].addr, l_ScomData);
+            if (l_rc != fapi::FAPI_RC_SUCCESS)
+            {
+                FAPI_ERR("hwpInitialTest: testExecInitFile: Error from "
+                         "fapiGetScom");
+                break;
+            }
+
+            if (l_ScomData.getDoubleWord(0) != l_ifScomData[i].writtenData)
+            {
+                FAPI_ERR("hwpInitialTest: testExecInitFile: GetScom addr "
+                         "0x%.16llX data read 0x%.16llX data expected 0x%.16llX",
+                         l_ifScomData[i].addr, l_ScomData.getDoubleWord(0),
+                         l_ifScomData[i].writtenData);
+                l_rc = fapi::RC_HWP_EXEC_INITFILE_TEST_FAILED;
+                break;
+            }
+        }
+
+        if (l_rc != fapi::FAPI_RC_SUCCESS)
+        {
+            break;
+        }
+
+        // Restore the original Scom data
+        for (uint32_t i = 0; i < sizeof(l_ifScomData)/sizeof(ifScom_t); i++)
+        {
+            l_ecmdRc = l_ScomData.setDoubleWord(0, l_ifScomData[i].origData);
+            if (l_ecmdRc != ECMD_DBUF_SUCCESS)
+            {
+                FAPI_ERR("hwpInitialTest: testExecInitFile: fapiPutScom to "
+                         "restore, error from ecmdDataBuffer setDoubleWord() - "
+                         "rc 0x%.8X", l_ecmdRc);
+                l_rc = l_ecmdRc;
+                break;
+            }
+
+            l_rc = fapiPutScom(i_chip, l_ifScomData[i].addr, l_ScomData);
+            if (l_rc != fapi::FAPI_RC_SUCCESS)
+            {
+                FAPI_ERR("hwpInitialTest: testExecInitFile: Error from "
+                         "fapiGetScom");
+                break;
+            }
+        }
+
+        if (l_rc != fapi::FAPI_RC_SUCCESS)
+        {
+            break;
+        }
+
+    } while (0);
+
+    return l_rc;
+}
+
 
 } // extern "C"

@@ -42,6 +42,7 @@
 #                  mjjones   08/08/11  Large update to create more code
 #                  mjjones   08/24/11  Parse GARD info
 #                  mjjones   09/22/11  New Error Info Design
+#                  camvanng  10/20/11  Fix bug
 #
 # End Change Log ******************************************************
 
@@ -362,8 +363,9 @@ foreach my $argnum (1 .. $#ARGV)
         if ($eiEntryCount > 0)
         {
             print EIFILE "{$eiObjectStr $eiEntryStr ";
-            print EIFILE "RC.addErrorInfo(l_objects, l_entries, $eiEntryCount);}\n\n";
+            print EIFILE "RC.addErrorInfo(l_objects, l_entries, $eiEntryCount);}";
         }
+        print EIFILE "\n\n";
     }
 }
 

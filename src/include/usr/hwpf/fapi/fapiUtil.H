@@ -38,6 +38,8 @@
  *                          mjjones     09/14/2011  Prepended fapi to delay
  *                          mjjones     10/05/2011  Added fapiCheckType
  *                          mjjones     10/13/2011  Added extern "C" to functions
+ *                          camvanng    10/14/2011  Added fapiLoadInitFile &
+ *                                                  fapiUnloadInitFile
  */
 
 #ifndef FAPIUTIL_H_
@@ -127,6 +129,42 @@ bool platIsScanTraceEnabled();
  *   @return  void
  */
 void platSetScanTrace(bool i_enable);
+
+/**  @brief Load the initfile
+ *
+ * This function can be called by a HWP to load an initfile.
+ *
+ * @note Implemented by platform code.  Platform code is
+ * responsible for allocating any memory needed to load 
+ * the initfile.
+ *
+ * @param[in]  the .if filename:  <initfile>.if
+ * @param[out] address in memory where initfile is loaded
+ * @param[out] size of memory allocated for initfile
+ *
+ * @return ReturnCode. Zero on success, else platform specified error.
+ */
+
+fapi::ReturnCode fapiLoadInitFile(const char * i_file, const char *& o_addr, 
+    size_t & o_size);
+
+/**  @brief Unload the initfile
+ *
+ * This function can be called by a HWP to unload an initfile.
+ *
+ * @note Implemented by platform code.  Platform code is
+ * responsible for deleting any allocated memory.
+ *
+ * @param[in] the .if filename:  <initfile>.if
+ * @param[in,out] address in memory where initfile is loaded
+ *                set to NULL on exit
+ * @param[in,out] size of memory allocated for initfile
+ *                set to 0 on exit
+ *
+ * @return ReturnCode. Zero on success, else platform specified error.
+ */
+fapi::ReturnCode fapiUnloadInitFile(const char * i_file, const char *& io_addr, 
+    size_t & io_size);
 
 }
 

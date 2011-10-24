@@ -34,6 +34,7 @@
 #include <sys/time.h>
 #include <errl/errlmanager.H>
 #include <fapiPlatHwpInvoker.H>
+#include <vfs/vfs.H>
 
 
 //******************************************************************************
@@ -126,6 +127,77 @@ void platSetScanTrace(bool i_enable)
   // TODO: enable or disable scan trace via the SCAN trace buffer.  Camvan
   // has not pushed the code yet.
   return;
+}
+
+//******************************************************************************
+// fapiLoadInitFile
+//******************************************************************************
+fapi::ReturnCode fapiLoadInitFile(const char * i_file, const char *& o_addr, 
+    size_t & o_size)
+{
+    fapi::ReturnCode l_rc = fapi::FAPI_RC_SUCCESS;
+    errlHndl_t l_pError = NULL;
+    o_size = 0;
+    o_addr = NULL;
+
+    FAPI_INF("fapiLoadInitFile: %s", i_file);
+
+    l_pError = VFS::module_load(i_file);
+    if(l_pError)
+    {
+        // Add the error log pointer as data to the ReturnCode
+        FAPI_ERR("fapiLoadInitFile: module_load failed");
+        l_rc = fapi::FAPI_RC_PLAT_ERR_SEE_DATA;
+        l_rc.setPlatData(reinterpret_cast<void *> (l_pError));
+    }
+    else
+    {
+        l_pError = VFS::module_address(i_file, o_addr, o_size);
+        if(l_pError)
+        {
+            // Add the error log pointer as data to the ReturnCode
+            FAPI_ERR("fapiLoadInitFile: module_address failed");
+            l_rc = fapi::FAPI_RC_PLAT_ERR_SEE_DATA;
+            l_rc.setPlatData(reinterpret_cast<void *> (l_pError));
+        }
+        else
+        {
+            FAPI_DBG("fapiLoadInitFile: data module addr = %p, size = %ld",
+                      o_addr, o_size);
+            FAPI_DBG("fapiLoadInitFile: *addr = 0x%llX",
+                      *(reinterpret_cast<const uint64_t*>(o_addr)));
+        }
+    }
+
+    return l_rc;
+}
+
+//******************************************************************************
+// fapiUnloadInitFile
+//******************************************************************************
+fapi::ReturnCode fapiUnloadInitFile(const char * i_file, const char *& io_addr, 
+    size_t & io_size)
+{
+    fapi::ReturnCode l_rc = fapi::FAPI_RC_SUCCESS;
+    errlHndl_t l_pError = NULL;
+
+    FAPI_INF("fapiUnloadInitFile: %s", i_file);
+
+    l_pError = VFS::module_unload(i_file);
+    if(l_pError)
+    {
+        // Add the error log pointer as data to the ReturnCode
+        FAPI_ERR("fapiUnloadInitFile: module_unload failed %s", i_file);
+        l_rc = fapi::FAPI_RC_PLAT_ERR_SEE_DATA;
+        l_rc.setPlatData(reinterpret_cast<void *> (l_pError));
+    }
+    else
+    {
+        io_addr = NULL;
+        io_size = 0;
+    }
+
+    return l_rc;
 }
 
 }

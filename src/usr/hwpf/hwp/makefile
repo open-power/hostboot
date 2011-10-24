@@ -33,6 +33,7 @@ OBJS = fapiTestHwp.o \
        fapiTestHwpAnalyzeError.o \
        fapiTestHwpFfdc.o \
        fapiTestHwpConfig.o \
-       fapiTestHwpAttr.o
+       fapiTestHwpAttr.o \
+       fapiHwpExecInitFile.o
 
 include ${ROOTPATH}/config.mk

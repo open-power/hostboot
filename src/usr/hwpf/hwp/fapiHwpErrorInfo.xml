@@ -53,4 +53,28 @@
     <!-- Call hwpTestAnalyzeError on MASTER_CHIP to analyze the error -->
     <callFunc>hwpTestAnalyzeError, MASTER_CHIP</callFunc>
   </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_INITFILE_INCORRECT_VER</rc>
+    <description>InitFile has incorrect version</description>
+    <!-- Collect local FFDC FFDC_IF_VER -->
+    <ffdc>FFDC_IF_VER</ffdc>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_INITFILE_ATTR_ID_OUT_OF_RANGE</rc>
+    <description>InitFile's attribute id is out of range </description>
+    <!-- Collect local FFDC FFDC_IF_ATTR_ID_OUT_OF_RANGE -->
+    <ffdc>FFDC_IF_ATTR_ID_OUT_OF_RANGE</ffdc>
+  </hwpError>
+  <hwpError>
+    <rc>RC_INITFILE_LIT_ID_OUT_OF_RANGE</rc>
+    <description>InitFile's literal id is out of range </description>
+    <!-- Collect local FFDC FFDC_IF_LIT_ID_OUT_OF_RANGE -->
+    <ffdc>FFDC_IF_LIT_ID_OUT_OF_RANGE</ffdc>
+  </hwpError>
+  <hwpError>
+    <rc>RC_HWP_EXEC_INITFILE_TEST_FAILED</rc>
+    <description>HWP Exec InitFile test case failed </description>
+  </hwpError>
 </hwpErrors>

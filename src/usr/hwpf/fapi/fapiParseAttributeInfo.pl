@@ -44,6 +44,7 @@
 #                  mjjones   10/17/11  Support enums with values
 #                  mjjones   10/18/11  Support multiple attr files and
 #                                      multi-line descriptions
+#                  camvanng  10/20/11  Changed i_pTarget to "const" ptr
 #
 # End Change Log ******************************************************
 
@@ -110,7 +111,7 @@ print ASFILE "#include <fapiAttributeService.H>\n\n";
 print ASFILE "namespace fapi\n";
 print ASFILE "{\n\n";
 print ASFILE "ReturnCode fapiGetInitFileAttr(const AttributeId i_id,\n";
-print ASFILE "                               Target * i_pTarget,\n";
+print ASFILE "                               const Target * i_pTarget,\n";
 print ASFILE "                               uint64_t & o_val,\n";
 print ASFILE "                               const uint32_t i_arrayIndex1,\n";
 print ASFILE "                               const uint32_t i_arrayIndex2,\n";

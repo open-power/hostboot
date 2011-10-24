@@ -37,6 +37,8 @@
  *                          mjjones     09/06/2011  Remove support for strings
  *                          mjjones     09/22/2011  Fixed example
  *                          mjjones     10/13/2011  Added fapiGetInitFileAttr
+ *                          camvanng    10/20/2011  Changed i_pTarget to "const"
+ *                                                  ptr
  */
 
 #ifndef FAPIATTRIBUTESERVICE_H_
@@ -102,7 +104,7 @@ namespace fapi
  * @return ReturnCode. Zero if success
  */
 ReturnCode fapiGetInitFileAttr(const AttributeId i_id,
-                               Target * i_pTarget,
+                               const Target * i_pTarget,
                                uint64_t & o_val,
                                const uint32_t i_arrayIndex1 = 0,
                                const uint32_t i_arrayIndex2 = 0,
