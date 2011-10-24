@@ -67,8 +67,6 @@ public:
      */
     void testHWASdefaultPresence()
     {
-
-        nanosleep(1,0);
         TS_TRACE(ENTER_MRK "testHWASdefaultPresence" );
 
         using namespace TARGETING;
