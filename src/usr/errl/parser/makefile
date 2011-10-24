@@ -20,49 +20,59 @@
 #  Origin: 30
 #
 #  IBM_PROLOG_END
+
+
 # makefile for errlparser,
-# a 32-bit x86 linux binary suitable for running on GFW pool machines. 
+# a 32-bit x86 linux binary suitable for running on GFW pool machines.
 
 
 ROOTPATH=../../../..
 
-GENFILES = ${ROOTPATH}/obj/genfiles
+GENDIR = ${ROOTPATH}/obj/genfiles
+IMGDIR = ${ROOTPATH}/img
+
+OBJDIR = ${ROOTPATH}/obj/modules/errlparser
 
 SRCPARSE_HEADER_TARGET = \
-	${GENFILES}/hostBootSrcParse.H
+	${GENDIR}/hostBootSrcParse.H
 
-CC=g++ -m32
+CC=i686-mcp6-g++ -m32
 CFLAGS:=-g -O0   -I $(ROOTPATH)/src/include/usr  -D PARSER
-BIN:=bin
 
 
 all: gen_pass code_pass
 
 gen_pass:
 
-code_pass: $(BIN)/errlparser ${SRCPARSE_HEADER_TARGET}
+code_pass: makeobjdir ${IMGDIR}/errlparser ${SRCPARSE_HEADER_TARGET}
 
 clean:
-	rm -fr $(BIN)
 	rm -fr ${SRCPARSE_HEADER_TARGET}
+	rm -fr ${OBJDIR}/errlparser.o
+	rm -fr ${GENDIR}/errlparser
+	rm -fr ${GENDIR}/comps.C
 
-beam: 
+beam:
 
-$(BIN)/comps.C: $(ROOTPATH)/src/include/usr/hbotcompid.H
-	mkdir -p $(BIN)
+
+makeobjdir:
+	mkdir -p ${OBJDIR}
+
+${GENDIR}/comps.C: $(ROOTPATH)/src/include/usr/hbotcompid.H
 	grep "const compId_t [A-Z0-9]*_COMP_ID" $^ | \
 	grep -v MY_COMP_ID | \
 	sed 's/const compId_t \([A-Z0-9]*\)_COMP_ID[ =\t]*\(0[xX][0-9a-fA-F]*\).*/{ "\1", \2 },/' \
 	> $@
 
-$(BIN)/errlparser.o: errlparser.C $(ROOTPATH)/src/include/usr/errl/errltypes.H $(BIN)/comps.C \
+${OBJDIR}/errlparser.o: errlparser.C $(ROOTPATH)/src/include/usr/errl/errltypes.H ${GENDIR}/comps.C \
 	${SRCPARSE_HEADER_TARGET}
-	mkdir -p $(BIN)
-	$(CC) -c  $(CFLAGS) -I bin -I${ROOTPATH}/obj/genfiles -o $@  $<
+	$(CC) -c  $(CFLAGS) -I${ROOTPATH}/obj/genfiles -o $@  $<
 
-$(BIN)/errlparser: $(BIN)/errlparser.o
+${IMGDIR}/errlparser: ${OBJDIR}/errlparser.o
 	$(CC) -o  $@ $<
 
+
 ${SRCPARSE_HEADER_TARGET} :
-	./scanforsrcs.pl -b ${ROOTPATH} -o ${GENFILES}
+	./scanforsrcs.pl -b ${ROOTPATH} -o ${GENDIR}
+
 

@@ -39,6 +39,10 @@
 #include <sys/sync.h>
 #include <vector>
 #include <kernel/timemgr.H>
+#include <hbotcompid.H>
+
+
+
 
 namespace ERRORLOG
 {
@@ -59,11 +63,14 @@ namespace ERRORLOG
  *  linker issue in HostBoot (linker can't find singleton outside of
  *  a module).
  *
- *  @param[in,out] io_err  Error log handle to be committed
+ *  @param[in,out] io_err          Error log handle to be committed
+ *  @param[in]     i_comitterComp  Component committing the error log
  *
  *  @return None
  */
-void errlCommit(errlHndl_t& io_err);
+
+// TODO Work item 4104 to make comitter comp required, no default.
+void errlCommit(errlHndl_t& io_err, compId_t i_committerComp = 0 );
 
 /*****************************************************************************/
 // Forward class declarations
@@ -100,7 +107,7 @@ public:
       *
       *  @return None
       */
-     void commitErrLog(errlHndl_t& io_err);
+     void commitErrLog(errlHndl_t& io_err, compId_t i_committerComp );
 
      /**
       * @brief  Returns a unique error log ID
@@ -139,10 +146,10 @@ private:
     ErrlManager(const ErrlManager& i_right);
     ErrlManager& operator=(const ErrlManager& i_right);
 
+
     /**
-      * @brief
-      * Current log ID: increment this when assigning log ID to a new errlog
-      * as it is being committed.
+      * @brief    Current log ID.  As new error logs are created,
+      * this value will be used to assign the new error log its ID.
       */
     uint32_t    iv_currLogId;
 

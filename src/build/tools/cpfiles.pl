@@ -58,7 +58,7 @@ sub printUsage;
 my @files = ("src/build/tools/hb-parsedump.pl",
              "src/build/simics/hb-simdebug.py",
              "src/build/simics/post_model_hook.simics",
-             "src/usr/errl/parser/bin/errlparser", 
+             "img/errlparser", 
              "img/hbotStringFile",
              "img/hbicore.syms",
              "img/hbicore_test.syms",

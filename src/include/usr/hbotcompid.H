@@ -53,10 +53,20 @@ const char MY_COMP_NAME[] = "myname";
 //@}
 
 /** @name ERRL
- *  Error Logging component
+ *  Error Logging component.
+ * 
+ *  Oct 2011:  Temporarily set ERRL component ID to the
+ *  same as FSP ERRL in order to make the FSP x86 errl tool 
+ *  format Hostboot error logs with traces.  For user-defined
+ *  trace sections, that tools expects component 0x3100,
+ *  section ID  0x0C, and version 1. 
+ * 
+ *  Requirement SW105241 is opened for fips8xx errl tool
+ *  to start becoming Hostboot aware.  TODO When errl becomes
+ *  Hostboot aware, ERRL comp id can revert to 0x0100.  Monte
  */
 //@{
-const compId_t ERRL_COMP_ID = 0x0100;
+const compId_t ERRL_COMP_ID = 0x3100;
 const char ERRL_COMP_NAME[] = "errl";
 //@}
 

@@ -31,11 +31,10 @@
 /*****************************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <hbotcompid.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
-#include "errlsctn.H"
-#include "errlffdc.H"
 #include <trace/interface.H>
 #include <arch/ppc.H>
 
@@ -53,70 +52,81 @@ ErrlEntry::ErrlEntry(const errlSeverity_t i_sev,
                      const uint16_t i_reasonCode,
                      const uint64_t i_user1,
                      const uint64_t i_user2) :
-    iv_reasonCode(i_reasonCode),
-    iv_sev(i_sev),
-    iv_eventType(ERRL_ETYPE_NOT_APPLICABLE),
-    iv_subSys(EPUB_RESERVED_0),
-    iv_srcType(SRC_ERR_INFO),
-    iv_termState(TERM_STATE_UNKNOWN),
-    iv_modId(i_modId),
-    iv_user1(i_user1),
-    iv_user2(i_user2),
-    iv_logId(0)
+    iv_Private( static_cast<compId_t>(i_reasonCode & 0xFF00)),
+    iv_User( i_sev ),
+    // The SRC_ERR_INFO becomes part of the SRC; example, B1 in SRC B180xxxx
+    // iv_Src assigns the epubSubSystem_t; example, 80 in SRC B180xxxx
+    iv_Src( SRC_ERR_INFO, i_modId, i_reasonCode, i_user1, i_user2 ),
+    iv_termState(TERM_STATE_UNKNOWN)
 {
 
-    // record time of creation
-    iv_CreationTime = getTB();
 }
+
+
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 ErrlEntry::~ErrlEntry()
 {
     // Free memory of all sections
-    for (std::vector<ErrlSctn*>::iterator l_itr = iv_SectionVector.begin();
+    for (std::vector<ErrlUD*>::iterator l_itr = iv_SectionVector.begin();
          l_itr != iv_SectionVector.end(); ++l_itr)
     {
         delete (*l_itr);
     }
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-ErrlFFDC* ErrlEntry::addFFDC(const compId_t i_compId,
+// add a new UD section to the list of optional sections
+
+ErrlUD * ErrlEntry::addFFDC(const compId_t i_compId,
              const void * i_dataPtr,
              const uint32_t i_ffdcLen,
              const uint8_t i_ffdcVer,
              const uint8_t i_ffdcSubSect)
 {
-    ErrlFFDC* l_ffdcSection = NULL;
+    ErrlUD * l_ffdcSection = NULL;
 
     if ( (i_dataPtr == NULL) || (i_ffdcLen == 0) )
     {
-        TRACFCOMP( ERRORLOG::g_trac_errl,
-                   "Invalid FFDC data pointer or size, no add");
+        TRACFCOMP( g_trac_errl,
+        "ErrlEntry::addFFDC(): Invalid FFDC data pointer or size, no add");
     }
     else
     {
-        // Create
-        l_ffdcSection = new ErrlFFDC(i_compId, i_dataPtr, i_ffdcLen,
-                                     i_ffdcVer, i_ffdcSubSect);
+        // Create a user-defined section.
+        l_ffdcSection = new ErrlUD(  i_dataPtr,
+                                     i_ffdcLen,
+                                     i_compId,
+                                     i_ffdcVer,
+                                     i_ffdcSubSect );
 
-        // Add to the end of the vector of sections for this error log.
+        // Add to the vector of sections for this error log.
         iv_SectionVector.push_back( l_ffdcSection );
     }
 
     return l_ffdcSection;
 }
 
+
+
+
+
+
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-void ErrlEntry::appendToFFDC(ErrlFFDC* i_ffdcPtr,
+void ErrlEntry::appendToFFDC(ErrlUD * i_pErrlUD,
                   const void *i_dataPtr,
                   const uint32_t i_dataLen)
 {
-    // class ErrlFFDC inherits addData() from its parent class ErrlSctn
-    i_ffdcPtr->addData( i_dataPtr, i_dataLen );
+    uint64_t l_rc;
+
+    l_rc = i_pErrlUD->addData( i_dataPtr, i_dataLen );
+    if( 0 == l_rc )
+    {
+        TRACFCOMP( g_trac_errl, "ErrlEntry::appendToFFDC() rets zero" );
+    }
     return;
 }
 
@@ -124,39 +134,164 @@ void ErrlEntry::appendToFFDC(ErrlFFDC* i_ffdcPtr,
 
 
 ///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
+// Return a Boolean indication of success.
 
-uint64_t ErrlEntry::flattenedSize()
+bool ErrlEntry::collectTrace(const char i_name[], const uint32_t i_max)
 {
-    uint64_t l_bytecount = sizeof( errl_header_t );
+    bool l_rc = false;
 
-    // add the bytes in the sections, if any
-    std::vector<ErrlSctn*>::iterator it;
-    for( it = iv_SectionVector.begin(); it != iv_SectionVector.end(); it++ )
+    do
     {
-        l_bytecount += (*it)->flattenedSize();
-    }
+        // By passing nil arguments, obtain the size of the buffer.
+        uint64_t l_cbFull = TRACE::Trace::getTheInstance().getBuffer( i_name, 
+                                                                      NULL, 
+                                                                      0 );
+        if( 0 == l_cbFull )
+        {
+            TRACFCOMP( g_trac_errl,
+                "ErrlEntry::collectTrace(): getBuffer(%s) rets zero.", i_name );
+            break;
+        }
 
-    return l_bytecount;
+        if( 0 == i_max ) 
+        {
+            // Full trace buffer desired. Allocate the buffer.
+            char l_traceBuffer[ l_cbFull ];
+
+            // Get the data into the buffer.
+            TRACE::Trace::getTheInstance().getBuffer( i_name, 
+                                                      l_traceBuffer, 
+                                                      l_cbFull );
+
+            // Save the trace buffer as a UD section on this.
+            ErrlUD * l_udSection = new ErrlUD( l_traceBuffer,
+                                               l_cbFull,
+                                               ERRL_COMP_ID,
+                                               ERRL_UDV_DEFAULT_VER_1,
+                                               ERRL_UDT_TRACE );
+
+            // Add the trace section to the vector of sections 
+            // for this error log.
+            iv_SectionVector.push_back( l_udSection );
+
+            l_rc = true;
+            break;
+        }
+
+        // else partial buffer desired... future sprint
+        TRACFCOMP( g_trac_errl,
+                "ErrlEntry::collectTrace(): partial buffer not impl'd" );
+        break;
+    }
+    while(0);
+
+    return l_rc;
+}
+
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+errlSeverity_t ErrlEntry::sev() const
+{
+    return iv_User.iv_severity;
 }
 
 
 
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+void ErrlEntry::setSev(const errlSeverity_t i_sev)
+{
+    iv_User.iv_severity = i_sev;
+    return;
+}
+
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+errlEventType_t ErrlEntry::eventType() const
+{
+    return iv_User.iv_etype;
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+void ErrlEntry::setEventType(const errlEventType_t i_eventType)
+{
+    iv_User.iv_etype = i_eventType;
+    return;
+}
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+epubSubSystem_t ErrlEntry::subSys() const
+{
+    return iv_User.iv_ssid;
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+void ErrlEntry::setSubSys(const epubSubSystem_t i_subSys)
+{
+    iv_User.iv_ssid = i_subSys;
+    return;
+}
+
+
 
 ///////////////////////////////////////////////////////////////////////////////
-// Flatten object instance data into a packed structure.
-// See errl/erltypes.H and the errl_header_t  struct.
+// for use by ErrlManager
+void ErrlEntry::commit( compId_t  i_committerComponent )
+{
+    // TODO need a better timepiece, or else apply a transform onto timebase
+    // for an approximation of real time.
+    iv_Private.iv_committed = getTB();
 
-uint64_t ErrlEntry::flatten( void * io_pBuffer,  uint64_t i_bufsize )
+    // User header contains the component ID of the committer.
+    iv_User.setComponentId( i_committerComponent );
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+// for use by ErrlManager
+
+uint64_t ErrlEntry::flattenedSize()
+{
+    uint64_t l_bytecount = iv_Private.flatSize() +
+                           iv_User.flatSize() +
+                           iv_Src.flatSize();
+
+    // plus the sizes of the other optional sections
+
+    std::vector<ErrlUD*>::iterator it;
+    for( it = iv_SectionVector.begin(); it != iv_SectionVector.end(); it++ )
+    {
+        l_bytecount += (*it)->flatSize();
+    }
+    return l_bytecount;
+}
+
+
+/////////////////////////////////////////////////////////////////////////////
+// Flatten this object and all its sections into PEL
+// for use by ErrlManager. Return how many bytes flattened to the output
+// buffer, or else zero on error.
+
+uint64_t ErrlEntry::flatten( void * o_pBuffer,  uint64_t i_bufsize )
 {
     uint64_t  l_flatCount = 0;
+    uint64_t  l_cb = 0;
 
     do
     {
         l_flatCount = flattenedSize();
         if ( i_bufsize < l_flatCount )
         {
-            // error path; return zero
+            // buffer is not big enough; return zero
             TRACFCOMP( ERRORLOG::g_trac_errl, "Invalid buffer size");
             l_flatCount = 0;
             break;
@@ -165,57 +300,75 @@ uint64_t ErrlEntry::flatten( void * io_pBuffer,  uint64_t i_bufsize )
         // The CPPASSERT() macro will cause the compile to abend
         // when the expression given evaluates to false.  If ever
         // these cause the compile to fail, then perhaps the size
-        // of enum'ed types has grown unexpectedly.  At any rate,
-        // errl_header_t defined in errl/errltypes.H will need to
-        // be adjusted for the changes in size of these instance
-        // variables.    Monte
-        CPPASSERT( 1 == sizeof(iv_sev));
-        CPPASSERT( 1 == sizeof(iv_eventType));
-        CPPASSERT( 1 == sizeof(iv_subSys));
-        CPPASSERT( 1 == sizeof(iv_srcType));
-        CPPASSERT( 2 == sizeof(iv_reasonCode));
+        // of enum'ed types has grown unexpectedly.
+        CPPASSERT( 1 == sizeof(iv_Src.iv_srcType));
+        CPPASSERT( 2 == sizeof(iv_Src.iv_reasonCode));
         CPPASSERT( 2 == sizeof(compId_t));
-        CPPASSERT( 1 == sizeof(iv_modId));
-        CPPASSERT( 0 == (sizeof(errl_header_t) % sizeof(uint32_t)));
+        CPPASSERT( 1 == sizeof(iv_Src.iv_modId));
 
+        // Inform the private header how many sections there are,
+        // counting the PH, UH, PS, and the optionals.
+        iv_Private.iv_sctns = 3 + iv_SectionVector.size();
 
-        // Marshall the instance var data into a struct.
-        errl_header_t l_hdr;
-        memset( &l_hdr, 0, sizeof( l_hdr ));
-        l_hdr.cbytes       = sizeof( l_hdr );
-        l_hdr.csections    = iv_SectionVector.size();
-        l_hdr.reasonCode   = iv_reasonCode;
-        l_hdr.modId        = iv_modId;
-        l_hdr.sev          = iv_sev;
-        l_hdr.eventType    = iv_eventType;
-        l_hdr.subSys       = iv_subSys;
-        l_hdr.srcType      = iv_srcType;
-        l_hdr.termState    = iv_termState;
-        l_hdr.logId        = iv_logId;
-        l_hdr.user1        = iv_user1;
-        l_hdr.user2        = iv_user2;
-        l_hdr.CreationTime = iv_CreationTime;
-
-
-        // Write the flat data.
-        char * l_pchar = reinterpret_cast<char*>(io_pBuffer);
-        memcpy( l_pchar, &l_hdr, sizeof( l_hdr ));
-        l_pchar += sizeof( l_hdr );
-
-        // Append all the sections.
-        std::vector<ErrlSctn*>::iterator it;
-        for(it=iv_SectionVector.begin(); it != iv_SectionVector.end(); it++ )
+        // Flatten the PH private header section
+        char * pBuffer = static_cast<char *>(o_pBuffer);
+        l_cb = iv_Private.flatten( pBuffer, i_bufsize );
+        if( 0 == l_cb )
         {
-            uint64_t l_countofbytes = (*it)->flattenedSize();
-            (*it)->flatten( l_pchar, l_countofbytes );
-            l_pchar += l_countofbytes;
+            // Rare.
+            TRACFCOMP( g_trac_errl, "ph.flatten error");
+            l_flatCount = 0;
+            break;
+        }
+
+        pBuffer += l_cb;
+        i_bufsize -= l_cb;
+
+        // flatten the UH user header section
+        l_cb = iv_User.flatten( pBuffer,  i_bufsize );
+        if( 0 == l_cb )
+        {
+            // Rare.
+            TRACFCOMP( g_trac_errl, "uh.flatten error");
+            l_flatCount = 0;
+            break;
+        }
+        pBuffer += l_cb;
+        i_bufsize -= l_cb;
+
+        // flatten the PS primary SRC section
+        l_cb = iv_Src.flatten( pBuffer, i_bufsize );
+        if( 0 == l_cb )
+        {
+            // Rare.
+            TRACFCOMP( g_trac_errl, "ps.flatten error");
+            l_flatCount = 0;
+            break;
+        }
+        pBuffer += l_cb;
+        i_bufsize -= l_cb;
+
+
+        // flatten the optional user-defined sections
+        std::vector<ErrlUD*>::iterator it;
+        for(it = iv_SectionVector.begin(); it != iv_SectionVector.end(); it++)
+        {
+            l_cb = (*it)->flatten( pBuffer, i_bufsize );
+            if( 0 == l_cb )
+            {
+                // Rare.
+                TRACFCOMP( g_trac_errl, "ud.flatten error");
+                l_flatCount = 0;
+                break;
+            }
+            pBuffer += l_cb;
+            i_bufsize -= l_cb;
         }
     }
     while( 0 );
 
     return l_flatCount;
 }
-
 
 
 

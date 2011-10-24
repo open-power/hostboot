@@ -79,25 +79,114 @@ typedef ERRORLOG::ErrlEntry* errlHndl_t;
 namespace ERRORLOG
 {
 
+
+
+/**
+ *    @brief Scope is found in user header section.
+ 
+ */
+enum errlScope_t
+{
+    ERRL_SCOPE_PLATFORM            = 0x03, ///< Entire Platform
+};
+
+
+
+/**
+ *   @brief Domain as found in user header section.
+ */
+enum errlDomain_t
+{
+    ERRL_DOMAIN_DEFAULT     = 0xFF  // Field based on Subsystem ID
+};
+
+
+/**
+ *   @brief Vector as found in user header section.
+ */
+enum errlVector_t
+{
+    ERRL_VECTOR_DEFAULT      = 0xFF  // Vector that triggered the base class
+                                     // of problem in Problem Domain Field.
+                                     // Unique field based on Subsystem ID
+};
+
+
+
+/**
+ *  @brief Platform Event Log actions
+ *
+ *  Several action flags used to trigger various
+ *  handling mechanisms for an event log such as
+ *  calling home and sending to the hypervisor.
+ */
+enum errlActions_t
+{
+    ERRL_ACTION_NONE             = 0x0000, // No action required
+};
+
+
+
+
+/**
+ *  @brief Creator types.
+ */
+enum errlCreator_t
+{
+    ERRL_CID_HOSTBOOT                       = 'B',
+};
+
+
+
+
+/**
+ * @brief Enumeration of PEL section eyecatchers. These are
+ * usually handled as a uint16_t.  See
+ * "eCLipz and P7 Platform Event Log and SRC PLDD" documentation
+ * https://mcdoc.boeblingen.de.ibm.com/out/out.ViewDocument.php?documentid=1675
+ */
+enum errlSectionId_t
+{
+    ERRL_SID_PRIVATE_HEADER                 = 0x5048, // PH private header
+    ERRL_SID_USER_HEADER                    = 0x5548, // UH user header
+    ERRL_SID_PRIMARY_SRC                    = 0x5053, // PS
+    ERRL_SID_USER_DEFINED                   = 0x5544  // UD user defined
+};
+
+
 /**
  * @brief Enumeration of error log severity.
  * Needs to fit into 1 byte for flattening purposes.
+ * 
+ * Severity resides in the user header of the PEL log.
+ * 
+ * Refer to this ErrlEntry setter: 
+ * void ErrlEntry::setSev(const errlSeverity_t i_sev)
  */
 enum errlSeverity_t
 {
-    ERRL_SEV_INFORMATIONAL = 0x00,
-    ERRL_SEV_UNRECOVERABLE = 0x10,
+    ERRL_SEV_INFORMATIONAL     = 0x00,
+    ERRL_SEV_UNRECOVERABLE     = 0x10,
     ERRL_SEV_CRITICAL_SYS_TERM = 0x20,
-    ERRL_SEV_UNKNOWN = 0xFF
+    ERRL_SEV_UNKNOWN           = 0xFF
 };
+
+
+
 
 /**
  * @brief Event (error) type
  * Needs to fit into 1 byte for flattening purposes.
+ * 
+ * Event type resides in user header of PEL log.
+ * 
+ * Refer to this ErrlEntry setter:
+ * void ErrlEntry::setEventType(const errlEventType_t i_eventType)
  */
 enum errlEventType_t
 {
     ERRL_ETYPE_NOT_APPLICABLE           = 0x00,
+    ERRL_ETYPE_MISCELLANEOUS            = 0x01,
     ERRL_ETYPE_DUMP_NOTIFICATION        = 0x08,
     ERRL_ETYPE_USER_DECONFIG            = 0x20,
     ERRL_ETYPE_SYS_DECONFIG             = 0x21,
@@ -105,39 +194,54 @@ enum errlEventType_t
     ERRL_ETYPE_CAPACITY_UPGRADE         = 0x60,
 };
 
-/**
- * @brief Error log call out priority
- * Needs to fit into 1 byte for flattening purposes.
- */
-enum callOutPriority_t
-{
-    CALLOUT_PRIORITY_LOW    = 1,
-    CALLOUT_PRIORITY_MED    = 2,
-    CALLOUT_PRIORITY_HIGH   = 3,
-};
+
+
 
 /**
- * @brief Error log procedure Id
+ * @brief SRC type definitions
  * Needs to fit into 1 byte for flattening purposes.
+ * 
+ * This represents the byte in an SRC in position
+ * XX......  such as B1 in B181F00B.
+ * 
+ * Refer to errlentry.H and this setter:
+ * void ErrlEntry::setSrcType(const srcType_t i_srcType)
+ *
  */
-enum epubProcedureId_t
+enum srcType_t
 {
-    EPUB_PRC_NONE   = 0x00,
+    SRC_INTERVENTION_REQ   = 0xA1,
+    SRC_ERR_INFO           = 0xB1,
+    SRC_IPL_STATUS         = 0xC1,
+    SRC_GENERAL_STATUS     = 0xD1,
 };
+
+
+
 
 /**
  * @brief Sub system definitions
  * Needs to fit into 1 byte for flattening purposes.
+ * This represents the byte in an SRC in position
+ * ..XX....  such as 81 in B181F00B.
+ * 
+ * Refer to errentry.H and this setter: 
+ * void ErrlEntry::setSubSys(const epubSubSystem_t i_subSys);
  */
 enum epubSubSystem_t
 {
-    EPUB_RESERVED_0 = 0x00,
-    EPUB_UNKNOWN    = 0xFF,
+    EPUB_RESERVED_0          = 0x00,
+    EPUB_FIRMWARE_SUBSYS     = 0x80,
+    EPUB_FIRMWARE_SP         = 0x81,
+    EPUB_UNKNOWN             = 0xFF,
 };
+
+
 
 /**
  * @brief Terminating flag definitions
  * Needs to fit into 1 word (32-bits) for flattening purposes.
+ * TODO Termination state and termination action.
  */
 enum errlTermState_t
 {
@@ -146,16 +250,41 @@ enum errlTermState_t
 };
 
 
-/**
- * @brief SRC type definitions
- * Needs to fit into 1 byte for flattening purposes.
- */
-enum srcType_t
+
+
+/** @enum  errlUserDataType_t
+  *
+  * These are section type identifiers for the ERRL component for
+  * user-defined data sections. For example, if somebody calls
+  *           errl->collectTrace("INITSVC")
+  * then the resulting UD PEL section header will be tagged with
+  *     component id:       ERRL_COMP_ID
+  *     section type:       ERRL_UDT_TRACE
+  *     version:            ERRL_UDV_DEFAULT_VER_1
+  *
+  * Other components will have to code a similar enum so that
+  * the the errl parser/pretty printer can "dispatch" a user-defined
+  * PEL section to them for printing based on the three values in
+  * the UD PEL section: component id, section type, and version.
+  *
+  * The section type field in the PEL header is one byte long.
+  */
+enum errlUserDataType_t
 {
-    SRC_INTERVENTION_REQ   = 0xA1,
-    SRC_ERR_INFO           = 0xB1,
-    SRC_IPL_STATUS         = 0xC1,
-    SRC_GENERAL_STATUS     = 0xD1,
+    ERRL_UDT_TRACE          = 0x0C,   // A trace buffer
+};
+
+
+/** @enum  errlUserDataVersion
+  *
+  * Identifier for the version of user data in an error log.
+  * This value is used in conjuction with the type field to format
+  * of the additional data in an error log.  Versions and type should
+  * be unique across subcomponents of the errl component.
+*/
+enum errlUserDataVersion
+{
+    ERRL_UDV_DEFAULT_VER_1      = 0x0001,   // Version 1, default info
 };
 
 
@@ -168,47 +297,6 @@ enum srcType_t
  */
 const uint32_t ERRL_STORAGE_SIZE = 65536;
 
-
-
-/**
- * @brief Flattened error log header structure contains the basic
- * instance variables of the ErrlEntry class.  Note the
- * alignment of the fields, and that the structure is packed.
- */
-typedef struct errl_header
-{
-    uint32_t cbytes;           // count of bytes in this struct
-    uint32_t csections;        // count of sections in this error log
-    uint16_t reasonCode;       // reason code
-    uint8_t  unused1;          // need this for alignment
-    uint8_t  modId;            // module id
-    uint8_t  sev;              // severity
-    uint8_t  eventType;        // event type
-    uint8_t  subSys;           // subsystem
-    uint8_t  srcType;          // SRC type
-    uint32_t termState;        // Terminate state
-    uint32_t logId;            // This log's unique ID
-    uint64_t user1;            // Optional user data 1
-    uint64_t user2;            // Optional user data 2
-    uint64_t CreationTime;     // time error log was created
-} __attribute__((packed)) errl_header_t;
-
-
-
-/**
- * @brief Error logs may have a number of sections/FFDC sections added.
- * This is a section header that preceeds the user-defined
- * data that follows this header.  Note the alignment of the fields,
- * and that this structure is packed.
- */
-typedef struct section_header
-{
-    uint32_t  cbHeader;    // count of bytes in this struct (flattening)
-    uint32_t  cbSection;   // count of bytes in the user-added data
-    uint16_t  compId;      // component id
-    uint8_t   sctnVer;     // section version
-    uint8_t   subSect;     // subsection
-} __attribute__((packed)) section_header_t;
 
 
 /**
@@ -239,6 +327,152 @@ typedef struct marker
     uint32_t    offsetNext;
     uint32_t    length;
 } __attribute__((packed)) marker_t;
+
+
+
+
+
+
+/**
+ * @brief pelSectionHeader_t
+ *
+ * A PEL structure used to flatten error logs to PEL format.
+ *
+ * This structure represents the first 8 bytes of any PEL section.
+ * Populated by the flatten code of class ErrlSctnHdr for any PEL
+ * section.  Classes ErrlUH, ErrlPrvt, and ErrlSctn each have a
+ * ErrlSctnHdr.  User-defined sections derive from ErrlSctn, so
+ * their section header works though ErrlSctn parent class.
+ *
+ * When parsing a PEL data set, start at offset 0 (the
+ * first section).  Then add "len" to know the starting offset
+ * of the second section, and so on.
+ *
+ * When pretty-printing a user-defined PEL section, the
+ * controlling logic will "dispatch" a PEL section to a
+ * user-supplied printing function based on the component ID,
+ * section type, and version.
+ */
+typedef struct pelsectionheader
+{
+  uint16_t   sid;     // section identifier
+  uint16_t   len;     // overall length of this section
+  uint8_t    ver;     // section version
+  uint8_t    sst;     // section type
+  uint16_t   compId;  // component ID
+} __attribute__((packed))  pelSectionHeader_t;
+
+
+
+/**
+ * @brief pelPrivateHeaderSection_t
+ *
+ * A PEL structure used to flatten error logs to PEL format.
+ *
+ * This structure represents an entire Private Header (PH)
+ * PEL section. This section is a fixed overall
+ * length of 48 bytes including the PEL section header.
+ * This the first section found in a flat PEL dataset.
+ * Populated by the flatten code of class ErrlPrvt.
+ *
+ * The component named in the section header is the
+ * creating component of the error log.
+ */
+typedef struct pelprivateheadersection
+{
+  pelSectionHeader_t  sectionheader;
+  uint64_t   creationTime;
+  uint64_t   commitTime;
+  uint8_t    creatorId;   // 'B' for Hostboot
+  uint8_t    reserved0;
+  uint8_t    reserved1;
+  uint8_t    sectionCount;
+  uint32_t   reserved2;
+  uint64_t   creatorImplementation;
+  uint32_t   plid;
+  uint32_t   eid;
+} __attribute__((packed)) pelPrivateHeaderSection_t;
+
+
+
+/**
+ * @brief pelUserHeaderSection_t
+ *
+ * A PEL structure used to flatten error logs to PEL format.
+ *
+ * This structure represents an entire User Header (UH)
+ * PEL section. This section is a fixed overall
+ * length of 0x18 bytes including the PEL section header.
+ * This the second section found in a flat PEL dataset.
+ * Populated by the flatten code of class ErrlUH.
+ *
+ * The component named in the section header is the
+ * committing component of the error log.
+ */
+typedef struct peluserheadersection
+{
+  pelSectionHeader_t sectionheader;
+  uint8_t    ssid;   // subsystem id
+  uint8_t    scope;  // event scope
+  uint8_t    sev;    // severity
+  uint8_t    etype;  // event type
+  uint32_t   reserved0;  // for error log return code
+  uint8_t    domain;     // TODO not used in Hostboot
+  uint8_t    vector;     // TODO not used in Hostboot
+  uint16_t   actions;    // TODO not used in Hostboot
+  uint32_t   reserved1;
+} __attribute__((packed)) pelUserHeaderSection_t;
+
+
+
+
+/**
+ * @brief pelSRCSection_t
+ *
+ * A PEL structure used to flatten error logs to PEL format.
+ *
+ * This structure represents an entire Primary SRC (PS)
+ * PEL section. This section is a fixed overall
+ * length of 80 bytes including the PEL section header.
+ * This the usually the third section found in a flat PEL dataset.
+ * Populated by the flatten code of class ErrlSRC.
+ *
+ * Hostboot generates a minimal SRC as described under
+ * "Common Usage of the SRC Structure" (p.69) in the PEL
+ * reference (mcdoc 1675). The page numbers below refer
+ * to version 0.8 of that document.
+ */
+
+typedef struct pelsrcsection
+{
+  pelSectionHeader_t sectionheader;
+  uint8_t    ver;        // src version, usually a 2
+  uint8_t    flags;      // src flags
+  uint8_t    reserved0;
+  uint8_t    wordcount;  // usually 9
+  uint16_t   reserved1;  // usually 0, but I put reasonCode here
+  uint16_t   srcLength;  // usually 72
+  // "Hex word 2" is the legacy nomenclature. p. 71.
+  // Low byte of this word is SRC format 0xF0.
+  uint32_t   word2;
+  // "Hex word 3" p. 71
+  uint16_t   word3;
+  uint8_t    moduleId;
+  uint8_t    reserved2;
+  // "Hex word 4" p. 71  last progress code
+  uint32_t   word4;
+  // "Hex word 5" p. 72  error status flags, etc.
+  uint32_t   word5;
+  // "Hex word 6-7" p. 72  optional, iv_user1
+  uint64_t   word6;
+  // "Hex word 8-9" p. 72  optional, iv_user2
+  uint64_t   word8;
+  char       srcString[32];
+} __attribute__((packed)) pelSRCSection_t;
+
+
+
+
 
 
 

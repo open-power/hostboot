@@ -785,46 +785,63 @@ trace_desc_t * Trace::getTd(const char *i_comp)
     return(l_td);
 }
 
-/******************************************************************************/
-// getBuffer - TODO
-/******************************************************************************/
-int32_t Trace::getBuffer(const trace_desc_t *i_td_ptr,
-                    void *o_data)
+
+
+
+/*****************************************************************************/
+// getBuffer() called by ErrlEntry.CollectTrace()
+// Return how many bytes copied, or if given a null pointer or zero buffer
+// size, then return the size of the buffer.
+//
+// Otherwise return zero on error; perhaps the component name/trace buffer
+// name is not found.
+
+uint64_t Trace::getBuffer( const char * i_pComp,
+                           void *       o_data,
+                           uint64_t     i_bufferSize )
 {
-    /*------------------------------------------------------------------------*/
-    /*  Local Variables                                                       */
-    /*------------------------------------------------------------------------*/
-    int64_t            l_rc = 0;
+    int64_t l_rc = 0;
+    trace_desc_t * l_pDescriptor = NULL;
 
-    /*------------------------------------------------------------------------*/
-    /*  Code                                                                  */
-    /*------------------------------------------------------------------------*/
-
-    if((i_td_ptr) && (o_data != NULL))
+    do
     {
+        l_pDescriptor = getTd( i_pComp );
+        if( NULL == l_pDescriptor )
+        {
+            break;
+        }
+
+        if( ( NULL == o_data ) ||  ( 0 == i_bufferSize ))
+        {
+            // return how big is the buffer.
+            l_rc = TRAC_DEFAULT_BUFFER_SIZE;
+            break;
+        }
+
+        // Not to exceed buffer size.
+        uint64_t l_copyCount = i_bufferSize;
+        if( i_bufferSize > TRAC_DEFAULT_BUFFER_SIZE )
+        {
+            l_copyCount = TRAC_DEFAULT_BUFFER_SIZE;
+        }
+
         // Get the lock
-        // TODO Mutex
-#if 0
-        l_rc = UTIL_MUTEX_GET(&iv_trac_mutex,TRAC_INTF_MUTEX_TIMEOUT);
-        if(l_rc != 0)
-        {
-            // Badness
-        }
-        else
-        {
-            l_rc = SUCCESS;
-        }
-#endif
-        // Copy it's buffer into temp one
-        memcpy(o_data,i_td_ptr,(size_t)TRAC_DEFAULT_BUFFER_SIZE);
+        mutex_lock(&iv_trac_mutex);
 
-        // Always try to release even if error above
-        // TODO - mutex
-        //UTIL_MUTEX_PUT(&iv_trac_mutex);
+        // Copy buffer to caller's space
+        memcpy( o_data, l_pDescriptor, (size_t)l_copyCount );
+
+        mutex_unlock(&iv_trac_mutex);
+
+        l_rc = l_copyCount;
     }
+    while( 0 );
 
-    return(l_rc);
+    return l_rc;
 }
+
+
+
 
 #if 0
 /******************************************************************************/

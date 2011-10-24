@@ -23,31 +23,36 @@
 /**
  *  @file errlsctnhdr.C
  *
- *  @brief  Abstract header of all error log's sections
- *
- *  This header file contains the definition of common section header in
- *  each error log's section
+ *  @brief Header data for any/all sections in an error log.
  *
  */
 
-/*****************************************************************************/
-// I n c l u d e s
-/*****************************************************************************/
-#include "errlsctnhdr.H"
+
+
+
+#include <assert.h>
+#include <errl/errlsctnhdr.H>
 
 namespace ERRORLOG
 {
 
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-ErrlSctnHdr::ErrlSctnHdr(const compId_t i_compId,
-                                 const uint8_t i_sctnVer,
-                                 const uint8_t i_subSect)
-:iv_compId(i_compId),
-iv_sctnVer(i_sctnVer),
-iv_subSect(i_subSect)
-{
+extern trace_desc_t* g_trac_errl;
 
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+ErrlSctnHdr::ErrlSctnHdr( const uint16_t     i_sid,
+                          const uint16_t     i_slen,
+                          const uint8_t      i_ver,
+                          const uint8_t      i_sst,
+                          const compId_t     i_compId ) :
+iv_sid( i_sid ),
+iv_ver( i_ver ),
+iv_sst( i_sst ),
+iv_compId(i_compId)
+{
+    // Caller/owner of this instance has provided the slen (section length)
+    // for its data, but does not include the size of its ErrlSctnHdr.
+    iv_slen =  i_slen + flatSize();
 }
 
 
@@ -57,5 +62,48 @@ ErrlSctnHdr::~ErrlSctnHdr()
 {
 
 }
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Flatten the data to the output pointer given as PEL as defined in
+// eCLipz and P7 Platform Event Log and SRC PLDD  mcdoc 1675
+
+uint64_t ErrlSctnHdr::flatten( void * o_pBuffer, const uint64_t i_cbBuffer )
+{
+    uint64_t   l_rc = 0;
+
+    // Compile-time assertions
+    CPPASSERT( 8 == sizeof( pelSectionHeader_t ));
+    CPPASSERT( 2 == sizeof( iv_sid ));
+    CPPASSERT( 2 == sizeof( iv_slen ));
+    CPPASSERT( 1 == sizeof( iv_ver ));
+    CPPASSERT( 1 == sizeof( iv_sst ));
+    CPPASSERT( 2 == sizeof( iv_compId ));
+
+    if( i_cbBuffer >= sizeof( pelSectionHeader_t ))
+    {
+        // See errltypes.H for pelSectionHeader_t. Flatten to
+        // local, temporary l_header because it will be word aligned,
+        // whereas caller's output address is not guaranteed to be.
+        pelSectionHeader_t  l_header;
+
+        l_header.sid      = iv_sid;
+        l_header.len      = iv_slen;
+        l_header.ver      = iv_ver;
+        l_header.sst      = iv_sst;
+        l_header.compId   = iv_compId;
+
+        // memcpy out to callers buffer
+        memcpy( o_pBuffer, &l_header, sizeof( pelSectionHeader_t ));
+        l_rc = sizeof( pelSectionHeader_t );
+    }
+    else
+    {
+        TRACFCOMP( g_trac_errl, "ErrlSctnHdr::flatten: buffer too small");
+    }
+
+    return l_rc;
+};
+
 
 } // End namespace

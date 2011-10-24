@@ -23,7 +23,7 @@
 ROOTPATH = ../../..
 MODULE = errl
 
-OBJS = errlentry.o errlmanager.o errlsctn.o errlffdc.o errlsctnhdr.o
+OBJS = errlentry.o errlmanager.o errlsctn.o errlsctnhdr.o errlprvt.o errluh.o errlud.o errlsrc.o
 
 SUBDIRS = test.d  parser.d
 

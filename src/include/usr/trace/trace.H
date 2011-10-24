@@ -40,6 +40,7 @@
 #include <sys/sync.h>
 #include <stdarg.h>
 
+
 /******************************************************************************/
 // Globals/Constants
 /******************************************************************************/
@@ -137,6 +138,9 @@ typedef Singleton<Trace> theTrace;
 */
 class Trace
 {
+    /* ErrlEntry will call getBuffer()  */
+    friend class ErrlEntry;
+
 
 public:
     /**
@@ -200,6 +204,31 @@ public:
                               const uint32_t i_size,
                               const int32_t i_type);
 
+
+    /**
+     *  @brief  Retrieve full trace buffer for component i_comp.
+     *
+     *  Caller must allocate memory for the output buffer.  Caller may
+     *  first query the size of the buffer by calling with the desired
+     *  component/trace buffer name and with o_data null and with i_bufferSize
+     *  zero. The value returned will be the buffer size.  Caller then
+     *  allocates the buffer and calls again.
+     *
+     *  @param [in]  i_pComp      pointer to name string
+     *  @param [out] o_data       pointer to where data will be stored
+     *  @param [in]  i_bufferSize size of buffer in bytes
+     *
+     *  @return Count of bytes copied, or if given null parameters,
+     *  the size of the buffer, or else zero for error, perhaps the
+     *  component name/trace buffer name is not found.
+     */
+    uint64_t getBuffer( const char * i_pComp,
+                        void *       o_data,
+                        uint64_t     i_bufferSize );
+
+
+
+
 protected:
 
     /**
@@ -211,6 +240,10 @@ protected:
      * @brief Destructor for the trace object.
      */
     ~Trace();
+
+
+
+
 
 private:
 
@@ -248,21 +281,6 @@ private:
                    const uint32_t i_size);
 
 
-    /**
-     *  @brief  Retrieve full trace buffer for component i_comp
-     *
-     *  This function assumes memory has already been allocated for
-     *  the full trace buffer in o_data.
-     *
-     *  @param [in] i_td_ptr Trace descriptor of buffer to retrieve.
-     *  @param [out] o_data Pre-allocated pointer to where data will be stored.
-     *
-     *  TODO - Not Supported Yet
-     *
-     *  @return Non-zero return code on error
-     */
-    int32_t getBuffer(const trace_desc_t * i_td_ptr,
-                      void *o_data);
 
     /**
      *  @brief  Retrieve partial trace buffer for component i_comp

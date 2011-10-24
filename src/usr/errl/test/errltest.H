@@ -66,15 +66,16 @@ public:
      */
     void testErrl1(void)
     {
-        ERRORLOG::ErrlFFDC * pffdc;
+        bool fOK;
+        ERRORLOG::ErrlUD * pffdc;
 
         // An example that shows how to use macros to stuff data into
         // the two 64-bit user data parameters in the error log.
         // l_userData1 = 16bit(0):l_bit8_1:l_bit8_2:l_32bit_1
         uint8_t l_8bit_1 = TEST_USR_8BIT_1;      // 0x80
-        uint8_t l_8bit_2 = TEST_USR_8BIT_2;      // 0x93
+        uint8_t l_8bit_2 = TEST_USR_8BIT_2;      // 0x93 
         uint32_t l_32bit_1 = TEST_USR_32BIT_1;   // 0x80000001
-        uint64_t l_userData1 =
+        uint64_t l_userData1 = 
           TWO_UINT32_TO_UINT64( TO_UINT32(TWO_UINT8_TO_UINT16(l_8bit_1, l_8bit_2)), l_32bit_1);
             // yields 0x0000809380000001
 
@@ -86,8 +87,6 @@ public:
         uint64_t l_userData2 = TWO_UINT16_ONE_UINT32_TO_UINT64(l_16bit_1, l_16bit_2, l_32bit_2);
             // yields 0x8000900390000003
 
-        TRACDCOMP( g_trac_test, "testErrl1");
-        TS_TRACE( "testErrl1, Create error log...");
         // Create an error log
         errlHndl_t l_err = new ERRORLOG::ErrlEntry(
                                 ERRORLOG::ERRL_SEV_INFORMATIONAL,
@@ -108,7 +107,6 @@ public:
         // but errlffdc.H is not publicly includable to give me the definition
         // for it.  addFFDC() should return a Boolean indication of success.
 
-        TS_TRACE( "Add ffdc1");
         const char * pch = "martha washington";
         pffdc = l_err->addFFDC( ERRL_COMP_ID, pch, strlen( pch ), 1, 2 );
         if ( NULL == pffdc )
@@ -116,23 +114,20 @@ public:
             TS_FAIL("testErrl1: addFFDC() output NULL pointer");
         }
 
-        TS_TRACE( "Add ffdc2");
-        pch = "george washington";
+        pch = "george washington"; 
         pffdc = l_err->addFFDC( DEVFW_COMP_ID, pch, strlen( pch ), 3, 4 );
         if ( NULL == pffdc )
         {
             TS_FAIL("testErrl1: addFFDC() output NULL pointer");
         }
 
-        TS_TRACE( "Add ffdc3");
-        pch = "dwight eisenhour";
+        pch = "dwight eisenhour";  
         pffdc = l_err->addFFDC( SCOM_COMP_ID, pch, strlen( pch ), 5, 6 );
         if ( NULL == pffdc )
         {
             TS_FAIL("testErrl1: addFFDC() output NULL pointer");
         }
 
-        TS_TRACE( "Add ffdc4");
         pch = "ronald ";
         pffdc = l_err->addFFDC( ERRL_COMP_ID, pch, strlen( pch ), 7, 8 );
         if ( NULL == pffdc )
@@ -140,27 +135,35 @@ public:
             TS_FAIL("testErrl1: addFFDC() output NULL pointer");
         }
 
-        TS_TRACE( "Append ffdc1");
         // Append data to something already added.
         pch = "reagan";
         l_err->appendToFFDC( pffdc, pch, strlen(pch) );
 
+        // Collect trace
+        fOK = l_err->collectTrace(  "INITSVC"  );
+        if( !fOK )
+        {
+            TS_FAIL( "collectTrace(INITSVC) rets false." );
+        }
+
+        fOK = l_err->collectTrace(  "XSCOM"  );
+        if( !fOK )
+        {
+            TS_FAIL( "collectTrace(XSCOM) rets false." );
+        }
+
+        fOK = l_err->collectTrace(  "UNK"  );
+        if( fOK )
+        {
+            TS_FAIL( "collectTrace(UNK) rets true" );
+        }
 
         // Add null data.
-        TS_TRACE( "Append ffdc2");
         pffdc = l_err->addFFDC( ERRL_COMP_ID, NULL, 0,  9, 10 );
         if ( NULL != pffdc )
         {
             TS_FAIL("testErrl1: addFFDC() returned non null");
         }
-
-
-
-
-
-
-
-
         // Verify log data
         else if (l_err->sev() != ERRORLOG::ERRL_SEV_INFORMATIONAL)
         {
@@ -174,7 +177,7 @@ public:
         {
              TS_FAIL("testErrl1: createErrlLog() returns incorrect event type!");
         }
-        else if (l_err->subSys() != ERRORLOG::EPUB_RESERVED_0)
+        else if (l_err->subSys() != ERRORLOG::EPUB_FIRMWARE_SUBSYS )
         {
              TS_FAIL("testErrl1: createErrlLog() returns incorrect sub system!");
         }
@@ -188,8 +191,8 @@ public:
         }
         else
         {
-            // Commit error log
-            errlCommit(l_err);
+            // Commit error log with different component ID.
+            errlCommit(l_err, FSI_COMP_ID);
             // Make sure error log has been deleted by manager
             if (l_err != NULL)
             {
@@ -216,7 +219,6 @@ public:
         uint64_t l_userData2 =
                 TWO_UINT32_TO_UINT64(TO_UINT32(l_8bit_1), TO_UINT32(l_16bit_1));
 
-        TS_TRACE( "testErrl2");
         // Create an error log
         errlHndl_t l_err = new ERRORLOG::ErrlEntry(
                                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,

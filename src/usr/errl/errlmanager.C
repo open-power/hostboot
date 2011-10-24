@@ -105,6 +105,7 @@ ErrlManager::ErrlManager()
     // marker_t* l_pMarker = OFFSET2MARKER( iv_pStorage->offsetStart );
     // l_pMarker->offsetNext = 0;
     // l_pMarker->length     = 0;
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -117,7 +118,7 @@ ErrlManager::~ErrlManager()
 //
 //  Save and delete this error log. On output, io_err will be nul.
 //
-void ErrlManager::commitErrLog(errlHndl_t& io_err)
+void ErrlManager::commitErrLog(errlHndl_t& io_err, compId_t i_committerComp )
 {
     do
     {
@@ -132,9 +133,8 @@ void ErrlManager::commitErrLog(errlHndl_t& io_err)
         // lock sem
         mutex_lock(&iv_mutex);
 
-        //  Assign a unique error ID to the committed log
-        uint32_t l_errId = getUniqueErrId();
-        io_err->setLogId(l_errId);
+        // Ask the ErrlEntry to assign commit component, commit time, etc.
+        io_err->commit( i_committerComp  );
 
         // Get flattened count of bytes.
         uint32_t l_cbActualFlat = io_err->flattenedSize();
@@ -185,20 +185,18 @@ void ErrlManager::commitErrLog(errlHndl_t& io_err)
 
 
 ///////////////////////////////////////////////////////////////////////////////
-// This operation is protected by the callers use of a mutex.
+// Atomically increment log id and return it.
 uint32_t ErrlManager::getUniqueErrId()
 {
-    /*  return (__sync_add_and_fetch(&iv_currLogId, 1));  */
-    iv_currLogId++;
-    return iv_currLogId;
+    return (__sync_add_and_fetch(&iv_currLogId, 1));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 // Global function (not a method on an object) to commit the error log.
-void errlCommit(errlHndl_t& io_err)
+void errlCommit(errlHndl_t& io_err, compId_t i_committerComp )
 {
-    ERRORLOG::theErrlManager::instance().commitErrLog(io_err);
+    ERRORLOG::theErrlManager::instance().commitErrLog(io_err, i_committerComp );
     return;
 }
 

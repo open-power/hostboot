@@ -446,7 +446,7 @@ def istepHB( str_arg1, inList):
 #------------------------------------------------------------------------------
 # Function to dump error logs
 #------------------------------------------------------------------------------
-def errlHB(symsFile, errlParser, flag, logid):
+def errlHB(symsFile, errlParser, flag, logid, stringFile):
 
     # "constants"
     L3_SIZE = 0x800000
@@ -461,9 +461,9 @@ def errlHB(symsFile, errlParser, flag, logid):
     #print result
 
     if logid == "all":
-        string = "./%s %s %s %s| tee Errorlogs"%(errlParser,dumpFile,symsFile,flag)
+        string = "./%s %s %s %s -t %s| tee Errorlogs"%(errlParser,dumpFile,symsFile,flag,stringFile)
     else:
-        string = "./%s %s %s %s %s| tee Errorlogs"%(errlParser,dumpFile,symsFile,flag,logid)
+        string = "./%s %s %s %s %s -t %s| tee Errorlogs"%(errlParser,dumpFile,symsFile,flag,logid,stringFile)
     #print string
     os.system(string)
     os.system("rm hbdump.out")
@@ -656,7 +656,7 @@ def hb_errl(logid, logidStr, flg_list, flg_detail):
     print "syms=%s" % str(syms)
     print "errlParser=%s" % str(errlParser)
     #print "logid=%s" % str(id)
-    errlHB(syms, errlParser, flag, id)
+    errlHB(syms, errlParser, flag, id, default_stringFile)
     return None
 
 new_command("hb-errl",
