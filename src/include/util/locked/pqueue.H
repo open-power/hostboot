@@ -45,7 +45,7 @@ namespace Util
 	void PQueue<_T,_K,locked,_S>::insert(_T* item)
 	{
 	    this->__lock();
-	    
+
 	    if (this->head == NULL)
 	    {
 		item->next = item->prev = NULL;
@@ -59,7 +59,7 @@ namespace Util
 
 		bubbleUp(item);
 	    }
-	    
+
 	    this->__unlock();
 	}
 
@@ -69,7 +69,7 @@ namespace Util
 	    _T* item = NULL;
 
 	    this->__lock();
-	    
+
 	    if ((this->tail != NULL) && (this->tail->key <= key))
 	    {
 		item = this->tail;
@@ -77,10 +77,13 @@ namespace Util
 		    this->head = this->tail = NULL;
 		else
 		    this->tail = item->prev;
+
+                if (item->prev)
+                    item->prev->next = NULL;
 	    }
 
 	    this->__unlock();
-	    
+
 	    return item;
 	}
 
@@ -90,7 +93,7 @@ namespace Util
 	{
 	    if (!item->next)
 		return;
-	    
+
 	    if (item->next->key <= item->key)
 		return;
 
@@ -98,7 +101,7 @@ namespace Util
 		this->head = item->next;
 	    if (this->tail == item->next)
 		this->tail = item;
-	    
+
 	    _T* temp = item->next;
 
 	    if (temp->next)
