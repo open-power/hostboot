@@ -140,23 +140,6 @@ class Block
         void updateRefCount( uint64_t i_vaddr,
 			     PageTableManager::UsageStats_t i_stats );
 
-        /**
-         * @brief Cast out older phyiscal memory pages
-         * @param[in] i_type - Castout contraint @see VmmManager::castOutPages()
-         */
-        void castOutPages(uint64_t i_type);
-
-        /**
-         * @brief Removes a range of pages within a block of virtual memory
-         * @param[in] i_op - Page removal operation to perform
-         * @param[in] i_vaddr - Virtual address associated to page(s)
-         * @param[in] i_size - Size of memory to perform page removal on
-         * @param[in] i_task - Task requesting page removal.
-         * @return int - 0 for successful page removal, non-zero otherwise
-         */
-        int removePages(VmmManager::PAGE_REMOVAL_OPS i_op, void* i_vaddr,
-                        uint64_t i_size, task_t* i_task);
-
         friend class Segment;
         friend class BaseSegment;
         friend class StackSegment;
@@ -194,14 +177,7 @@ class Block
          *       mode is still set.
          */
         void setPhysicalPage(uint64_t i_vAddr, uint64_t i_pAddr,
-                             VmmManager::ACCESS_TYPES i_access);
-
-        /**
-         * @brief Set up a virtual address to be "allocate-from-zero".
-         *
-         * @param[in] i_vAddr - The virtual address of the page.
-         */
-        void setPageAllocateFromZero(uint64_t i_vAddr);
+                               uint64_t i_access);
 
         /**
          * @brief Adds up the total size of all blocks within the segment
@@ -231,7 +207,7 @@ class Block
          *          individual page.
          * @param i_access_type[in] - type of permission to set using
          *             PAGE_PERMISSION enum values OR'd together
-         * @return int - 0 for successful block allocation,
+         * @return int - 0 for successful permission update,
          *             non-zero otherwise
          */
         int mmSetPermission(uint64_t i_va, uint64_t i_size, uint64_t i_access_type);
@@ -259,6 +235,50 @@ class Block
          * @param[in] i_pte - Shadow page table entry to release
          */
         void releasePTE(ShadowPTE* i_pte);
+
+        /**
+         * @brief Cast out older phyiscal memory pages
+         * @param[in] i_type - Castout contraint @see VmmManager::castOutPages()
+         */
+        void castOutPages(uint64_t i_type);
+
+        /**
+         * @brief Evict a memory page
+         * @param[in] i_pte shadow page table entry
+         * @return true of page was evicted
+         */
+        bool evictPage(ShadowPTE* i_pte);
+
+        /**
+         * @brief Sets the page permissions for a given SPTE
+         * @param i_spte[in] - i_pte shadow page table entry
+         * @param i_access_type[in] - type of permission to set using
+         *             PAGE_PERMISSION enum values OR'd together
+         * @return int - 0 for successful update
+         *               non-zero otherwise
+         */
+        int setPermSPTE( ShadowPTE* i_spte, uint64_t i_access_type);
+
+        /**
+         * @brief Gets the page permissions for a given SPTE
+         * @param i_spte[in] - i_pte shadow page table entry
+         * @return uint64_t - type of permission for that SPTE using
+         *             PAGE_PERMISSION enum values OR'd together
+         */
+        uint64_t getPermission( ShadowPTE* i_spte);
+
+        /**
+         * @brief Removes a range of pages within a block of virtual memory
+         * @param[in] i_op - Page removal operation to perform
+         * @param[in] i_vaddr - Virtual address associated to page(s)
+         * @param[in] i_size - Size of memory to perform page removal on
+         * @param[in] i_task - Task requesting page removal.
+         * @return int - 0 for successful page removal, non-zero otherwise
+         */
+        int removePages(VmmManager::PAGE_REMOVAL_OPS i_op, void* i_vaddr,
+                        uint64_t i_size, task_t* i_task);
+
+
 
     private:
             /** Base address of the block */

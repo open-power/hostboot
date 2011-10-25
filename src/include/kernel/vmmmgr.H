@@ -46,15 +46,6 @@ class VmmManager
             HTABORG = (FULL_MEM_SIZE - PTSIZE),
         };
 
-        enum ACCESS_TYPES
-        {
-            NO_USER_ACCESS,
-            READ_O_ACCESS,
-            NORMAL_ACCESS,
-            CI_ACCESS,
-            RO_EXE_ACCESS,
-        };
-
         enum castout_t
         {
             NORMAL,

@@ -80,14 +80,14 @@ void BaseSegment::_init()
         // Set pages in kernel text section to be read-only / executable.
         if (((uint64_t)&data_load_address) > i)
         {
-            iv_block->setPhysicalPage(i, i, VmmManager::RO_EXE_ACCESS);
+            // Set the Text section to Excutable (implies read)
+            iv_block->setPhysicalPage(i, i, EXECUTABLE);
         }
         // Set all other pages to initially be read/write.  VFS will set
         // permissions on pages outside kernel.
-        // (@TODO: Future Sprint, for now keep NORMAL_ACCESS as RWX, not RW.)
         else
         {
-            iv_block->setPhysicalPage(i, i, VmmManager::NORMAL_ACCESS);
+            iv_block->setPhysicalPage(i, i, WRITABLE);
         }
     }
 }
@@ -164,39 +164,10 @@ int BaseSegment::mmSetPermission(void* i_va, uint64_t i_size, uint64_t i_access_
  */
 int BaseSegment::_mmSetPermission(void* i_va, uint64_t i_size, uint64_t i_access_type)
 {
-  int l_rc = 0;
-  Block *l_block = iv_block;
-  uint64_t l_va = reinterpret_cast<uint64_t>(i_va);
+    Block *l_block = iv_block;
+    uint64_t l_va = reinterpret_cast<uint64_t>(i_va);
 
-
-  do
-  {
-    // If the va is not part of this block
-    if (!(l_block->isContained(l_va)))
-    {
-      // Check to see if there is a next block
-      if (l_block->iv_nextBlock)
-      {
-	// set local block to the next block
-	l_block = l_block->iv_nextBlock;
-      }
-      else
-      {
-	// address passed in does not fall into a block
-	return -EINVAL;
-      }
-    }
-    // The virtual address falls within this block
-    else
-    {
-        // Set the permission on the the current block.
-       return(l_block->mmSetPermission(l_va, i_size, i_access_type));
-
-    }
-  } while (l_block);
-
-  return l_rc;
-
+    return (l_block->mmSetPermission(l_va, i_size, i_access_type));
 }
 
 void BaseSegment::castOutPages(uint64_t i_type)

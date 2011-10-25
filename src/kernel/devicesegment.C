@@ -111,7 +111,7 @@ bool DeviceSegment::handlePageFault(task_t* i_task, uint64_t i_addr)
 
     PageTableManager::addEntry((i_addr / PAGESIZE) * PAGESIZE,
                               (iv_mmioMap[idx].addr + device_offset) / PAGESIZE,
-                               VmmManager::CI_ACCESS);
+			       SegmentManager::CI_ACCESS);
     return true;
 }
 

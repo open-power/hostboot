@@ -44,11 +44,12 @@ class PageTableManager
         PTE_UNKNOWN         = 0x0000000000000000, /**< Entry wasn't found */
         PTE_PRESENT         = 0x0000000000000001, /**< Entry is present in table */
         PTE_VALID           = 0x0000000000000002, /**< Entry is valid */
-        PTE_READ_ONLY       = 0x0000000000000004, /**< Read-Only */
-        PTE_EXECUTE         = 0x0000000000000008, /**< Execute permission */
-        PTE_CACHE_INHIBITED = 0x0000000000000010, /**< Cache-Inhibited Access */
-        PTE_MODIFIED        = 0x0000000000000020, /**< Page has been modified */
-        PTE_ACCESSED        = 0x0000000000000040, /**< Page has been accessed */
+        PTE_READ            = 0x0000000000000004, /**< Read permission */
+        PTE_WRITABLE        = 0x0000000000000008, /**< Write permission */
+        PTE_EXECUTE         = 0x0000000000000010, /**< Execute permission */
+        PTE_CACHE_INHIBITED = 0x0000000000000020, /**< Cache-Inhibited Access */
+        PTE_MODIFIED        = 0x0000000000000040, /**< Page has been modified */
+        PTE_ACCESSED        = 0x0000000000000080, /**< Page has been accessed */
     };
 
     /**
@@ -96,7 +97,7 @@ class PageTableManager
      */
     static void addEntry( uint64_t i_vAddr,
                           uint64_t i_page,
-                          VmmManager::ACCESS_TYPES i_accessType );
+                          uint64_t i_accessType );
 
     /**
      * @brief Remove an entry from the hardware page table
@@ -315,7 +316,7 @@ class PageTableManager
      */
     void _addEntry( uint64_t i_vAddr,
                     uint64_t i_page,
-                    VmmManager::ACCESS_TYPES i_accessType );
+                    uint64_t i_accessType );
 
     /**
      * @brief Remove an entry from the hardware page table
@@ -423,16 +424,16 @@ class PageTableManager
      * @param[in] i_accessType  Access parameter to apply to PTE
      */
     void setAccessBits( PageTableEntry* o_pte,
-                        VmmManager::ACCESS_TYPES i_accessType );
+                          uint64_t i_accessType );
 
     /**
      * @brief  Convert the bits from a PTE into a ACCESS_TYPES
      *
      * @param[in] i_pte  PTE to examine
      *
-     * @return ACCESS_TYPES  Access parameters of given PTE
+     * @return uint64_t  Access parameters of given PTE
      */
-    VmmManager::ACCESS_TYPES getAccessType( const PageTableEntry* i_pte );
+    uint64_t getAccessType( const PageTableEntry* i_pte );
 
     /**
      * @brief  Calculate the original Virtual Address from a PTE

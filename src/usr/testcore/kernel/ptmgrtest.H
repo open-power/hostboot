@@ -144,7 +144,7 @@ class ptmgrtest : public CxxTest::TestSuite
         for( uint64_t x = 0; x < (sizeof(TEST_DATA)/sizeof(TEST_DATA[0])); x++ )
         {
             // 2) Add some PTEs
-            ptmgr->_addEntry( TEST_DATA[x].va, TEST_DATA[x].page, VmmManager::NORMAL_ACCESS );
+            ptmgr->_addEntry( TEST_DATA[x].va, TEST_DATA[x].page, WRITABLE );
 
             // 3) Verify the PTE we just added is in the Page Table
             status = ptmgr->_getStatus( TEST_DATA[x].va, pn );
@@ -406,7 +406,7 @@ class ptmgrtest : public CxxTest::TestSuite
         for( uint64_t x = 0; x < (sizeof(TEST_DATA)/sizeof(TEST_DATA[0])); x++ )
         {
             // 2) Add some PTEs
-            ptmgr->_addEntry( TEST_DATA[x].va, TEST_DATA[x].page, VmmManager::NORMAL_ACCESS );
+	  ptmgr->_addEntry( TEST_DATA[x].va, TEST_DATA[x].page, WRITABLE );
         }
     }
 

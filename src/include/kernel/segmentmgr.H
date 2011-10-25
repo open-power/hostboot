@@ -57,6 +57,12 @@ class SegmentManager
             MAX_SEGMENTS = 4
         };
 
+        enum
+        {
+            CI_ACCESS = 0xFFFFFFFF
+            // Set to all F's to identify this type
+        }; 
+
         /**
          * Constructor.  Initializes instance variables.
          */

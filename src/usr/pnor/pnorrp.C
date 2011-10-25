@@ -193,6 +193,14 @@ void PnorRP::initDaemon()
             break;
         }
 
+
+        // Need to set permissions to R/W
+	rc = mm_set_permission((void*) BASE_VADDR,
+			       TOTAL_SIZE ,
+			       WRITABLE);
+
+
+
         // start task to wait on the queue
         task_create( wait_for_message, NULL );
 

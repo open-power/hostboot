@@ -23,7 +23,7 @@
 #include <kernel/blockmsghdlr.H>
 #include <kernel/block.H>
 #include <kernel/pagemgr.H>
-
+#include <kernel/basesegment.H>
 MessageHandler::HandleResult BlockReadMsgHdlr::handleResponse(
         msg_sys_types_t i_type, void* i_key, task_t* i_task, int i_rc)
 {
@@ -37,6 +37,13 @@ MessageHandler::HandleResult BlockReadMsgHdlr::handleResponse(
     {
         //Set the present bit for the address associated with this block
         iv_block->setIsPresent(i_key);
+
+        // TODO.. Add this call here and test
+        // update permission for the page that corresponds
+        // to the physical page addr.  
+        // BaseSegment::mmSetPermission(i_key, 0, NO_ACCESS);
+
+
         //Add the address into the page table associated with this block
         iv_block->addPTE(i_key);
         return SUCCESS;

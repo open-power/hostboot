@@ -39,6 +39,7 @@ class vmmpagetest: public CxxTest::TestSuite
     public:
 
         static volatile int rc;
+        static volatile int iv_rc;
         //Testing page removal variables
         static msg_q_t iv_mq;
         static uint64_t iv_va;
@@ -63,8 +64,15 @@ class vmmpagetest: public CxxTest::TestSuite
 
         void testReadPageRelease()
         {
+            rc = mm_set_permission(reinterpret_cast<void*>(iv_va+2*PAGESIZE),0,
+                                   WRITABLE);
+
             //Dependent on block being initialized to READ_ONLY
             (*(volatile uint64_t *)(iv_va+2*PAGESIZE)) = 0x11111111; sync();
+
+            rc = mm_set_permission(reinterpret_cast<void*>(iv_va+2*PAGESIZE),0,
+                                   READ_ONLY);
+
             rc = mm_remove_pages(RELEASE,
                     reinterpret_cast<void*>(iv_va),iv_size);
             if (rc != 0)
@@ -75,17 +83,19 @@ class vmmpagetest: public CxxTest::TestSuite
 
         void testWriteTrackPageFlush()
         {
-            (*(volatile uint64_t *)iv_va) = 0x12345678; sync();
-            (*(volatile uint64_t *)(iv_va+PAGESIZE)) = 0x87654321; sync();
-            (*(volatile uint64_t *)(iv_va+2*PAGESIZE)) = 0x22222222; sync();
-            uint64_t updPerm = (uint64_t)(WRITE_TRACKED);
-            rc = mm_set_permission(reinterpret_cast<void*>(iv_va),0,updPerm);
+            rc = mm_set_permission(reinterpret_cast<void*>(iv_va),3*PAGESIZE,WRITABLE|WRITE_TRACKED);
             if (rc != 0)
             {
                 TS_FAIL(
                 "Failed to set WRITE_TRACKED permissions on first page.\n");
             }
-            rc = mm_set_permission(reinterpret_cast<void*>((iv_va+PAGESIZE)),0,
+
+            (*(volatile uint64_t *)iv_va) = 0x12345678; sync();
+            (*(volatile uint64_t *)(iv_va+PAGESIZE)) = 0x87654321; sync();
+            (*(volatile uint64_t *)(iv_va+2*PAGESIZE)) = 0x22222222; sync();
+            uint64_t updPerm = (uint64_t)(READ_ONLY);
+
+            rc = mm_set_permission(reinterpret_cast<void*>((iv_va+2*PAGESIZE)),0,
                                    updPerm);
             if (rc != 0)
             {
@@ -102,8 +112,24 @@ class vmmpagetest: public CxxTest::TestSuite
 
         void testWriteTrackPageRelease()
         {
+            rc = mm_set_permission(reinterpret_cast<void*>(iv_va+2*PAGESIZE),0 ,WRITABLE);
+            if (rc != 0)
+            {
+                TS_FAIL(
+                "Failed to set WRITE_TRACKED permissions on first page.\n");
+            }
+
             (*(volatile uint64_t *)(iv_va+2*PAGESIZE)) = 0x33333333; sync();
             (*(volatile uint64_t *)iv_va) = 0x12121212; sync();
+
+            uint64_t updPerm = (uint64_t)(READ_ONLY);
+            rc = mm_set_permission(reinterpret_cast<void*>(iv_va+2*PAGESIZE),0,updPerm);
+            if (rc != 0)
+            {
+                TS_FAIL(
+                "Failed to set WRITE_TRACKED permissions on first page.\n");
+            }
+
             rc = mm_remove_pages(RELEASE,
                     reinterpret_cast<void*>(iv_va),iv_size);
             if (rc != 0)
@@ -114,48 +140,80 @@ class vmmpagetest: public CxxTest::TestSuite
 
         void testSetPerm()
         {
-            int rc = 1;
-            uint64_t va = 0xC800000000; //800GB
-            uint64_t size = 0x0;
-            uint64_t access = (uint64_t)(WRITABLE | ALLOCATE_FROM_ZERO); //Access value
-            printkd("Update Page Permissions. Writable/Allocate from zero to addr 800Gb and size = 0 \n");
-            rc = mm_set_permission(reinterpret_cast<void*>(va), size, access);
+
+            rc = mm_set_permission(reinterpret_cast<void*>(iv_va+4*PAGESIZE), 3*PAGESIZE, READ_ONLY);
             if (rc != 0)
             {
                 TS_FAIL(" 1   Failed to Update permissions.\n");
             }
 
-            rc = 1;
-            size = PAGESIZE * 3;
-            access = (uint64_t)(WRITE_TRACKED); //Access value
-            printkd("Update Page Permissions. write_tracked to addr 800Gb and size = 3 pages\n");
-            rc = mm_set_permission(reinterpret_cast<void*>(va), size, access);
+            // try to write to a read_only page
+            iv_rc = 0; sync();
+            printk("\nTest case1: Expect to see uncaught exception! ");
+            task_create(writeAddrWithNoPerm, NULL);
+            while (iv_rc == 0) task_yield();
+            task_yield();
+            if (iv_rc == -1)
+            {
+                TS_FAIL("ERROR! Write to READ_ONLY address not caught.");
+            }
+
+	    rc = mm_set_permission(reinterpret_cast<void*>(iv_va+4*PAGESIZE), 3*PAGESIZE, EXECUTABLE);
             if (rc != 0)
             {
                 TS_FAIL("2    Failed to Update permissions.\n");
             }
-            rc = 1;
-            va = 0xC800000000 + (PAGESIZE * 10);
-            size = PAGESIZE * 2;
-            access = (uint64_t)(EXECUTABLE); //Access value
-            printkd("Update Page Permissions. executable to addr C800A000 and size = 2 pages\n");
-            rc = mm_set_permission(reinterpret_cast<void*>(va), size, access);
+
+            // try to write to an executable page
+            iv_rc = 0; sync();
+            printk("\nTest case2: Expect to see uncaught exception! ");
+            task_create(writeAddrWithNoPerm2, NULL);
+            while (iv_rc == 0) task_yield();
+            task_yield();
+            if (iv_rc == -1)
+            {
+                TS_FAIL("ERROR! Write to EXECUTABLE address not caught.");
+            }
+
+            rc = mm_set_permission(reinterpret_cast<void*>(iv_va+4*PAGESIZE), 3*PAGESIZE, NO_ACCESS);
             if (rc != 0)
             {
                 TS_FAIL("3   Failed to Update permissions.\n");
             }
-            rc = 0;
-            va = 0xC800000000; //800GB
-            size = 0x0;
-            access = (uint64_t)(WRITABLE | EXECUTABLE); //Access value
-            printkd("Update Page Permissions. Writable/executable to addr 800Gb and size = 0 \n");
-            rc = mm_set_permission(reinterpret_cast<void*>(va), size, access);
+
+            // try to write to a no access page
+            iv_rc = 0; sync();
+            printk("\nTest case3: Expect to see uncaught exception! ");
+            task_create(writeAddrWithNoPerm, NULL);
+            while (iv_rc == 0) task_yield();
+            task_yield();
+            if (iv_rc == -1)
+            {
+                TS_FAIL("ERROR!  write to a NO_ACCESS addr not caught.\n");
+            }
+
+            // test that you cannot set WRITABLE and EXECUTABLE permissions
+            rc = mm_set_permission(reinterpret_cast<void*>(iv_va+4*PAGESIZE), 3*PAGESIZE, WRITABLE|EXECUTABLE);
             if (rc == 0)
             {
                 printk("Error .. invalid combination that did not get detected\n");
+                TS_FAIL(" ERROR..Failed to detect a bad parm condition.\n");
+            }
+
+            rc = mm_set_permission(reinterpret_cast<void*>(iv_va+4*PAGESIZE), 3*PAGESIZE, WRITABLE);
+            if (rc != 0)
+            {
                 TS_FAIL(" 4   Failed to detect a bad parm condition.\n");
             }
-        }
+
+
+           (*(volatile uint64_t *)(iv_va+4*PAGESIZE)) = 0x34343434;
+
+
+            printk("\n%lx\n", (*(volatile uint64_t *)(iv_va+4*PAGESIZE)));
+            //printkd(" Successfully read from a WRITABLE page\n");
+
+         }
 
     private:
 
@@ -177,8 +235,27 @@ class vmmpagetest: public CxxTest::TestSuite
             }
         }
 
+
+        static void writeAddrWithNoPerm(void* unused)
+        {
+            iv_rc = 1; sync();
+            (*(volatile uint64_t *)(iv_va+4*PAGESIZE)) = 0x11111111; sync();
+            iv_rc = -1; sync();
+            task_end();
+        }
+
+        static void writeAddrWithNoPerm2(void* unused)
+        {
+            iv_rc = 1; sync();
+            (*(volatile uint64_t *)(iv_va+4*PAGESIZE+2*PAGESIZE)) = 0x22222222; sync();
+            iv_rc = -1; sync();
+            task_end();
+        }
+
+
 };
 volatile int vmmpagetest::rc = 0;
+volatile int vmmpagetest::iv_rc = 0;
 msg_q_t vmmpagetest::iv_mq = msg_q_create();
 uint64_t vmmpagetest::iv_va = VMM_VADDR_RMVPAGE_TEST;
 uint64_t vmmpagetest::iv_size = VMM_SIZE_RMVPAGE_TEST;

@@ -134,8 +134,7 @@ void* StackSegment::_createStack(tid_t i_task)
         // Set pages to be allocate-from-zero.
     for(uint64_t i = l_addr_bottom; i <= l_addr_top; i += PAGE_SIZE)
     {
-        l_block->setPhysicalPage(i, 0, VmmManager::NORMAL_ACCESS);
-        l_block->setPageAllocateFromZero(i);
+        l_block->setPhysicalPage(i, 0, WRITABLE | ALLOCATE_FROM_ZERO);
     }
 
         // Insert block to list.

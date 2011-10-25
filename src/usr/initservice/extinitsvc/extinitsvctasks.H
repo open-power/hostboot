@@ -106,32 +106,24 @@ const TaskInfo g_exttaskinfolist[]   =   {
                         START_PLAT_ERRL_ID,                 // module id
                 }
         },
-        
-        /**
-         * @brief   targeting task,
-         */
-        {
-            "libtargeting.so" ,                         // taskname
-            NULL,                                       // no pointer to fn
-            {
-                START_TASK,                         // task type
-                EXT_IMAGE,                          // Extended Module
-                START_TARGETING_ERRL_ID,            // module id
-            }
-        },
 
+// TODO: Added this in order to successfull init.. Need to remove this and put
+// the module load and unload from a the istep dispatcher
         /**
-         * @brief   IStep Dispatcher task, runs ISteps
+         * @brief   HWAS, 
          */
+
+
         {
-            "libistepdisp.so" ,                         // taskname
+            "libhwas.so" ,                         // taskname
             NULL,                                       // no pointer to fn
             {
-                START_TASK,                         // task type
+                INIT_TASK,                         // task type
                 EXT_IMAGE,                          // Extended Module
                 EXECUTE_ISTEPS_ERRL_ID,             // module id
             }
         },
+// end TODO
 
         /**
          * @brief   FSI Device Driver
@@ -159,6 +151,32 @@ const TaskInfo g_exttaskinfolist[]   =   {
             }
         },
 
+        /**
+         * @brief   targeting task,
+         */
+        {
+            "libtargeting.so" ,                         // taskname
+            NULL,                                       // no pointer to fn
+            {
+                START_TASK,                         // task type
+                EXT_IMAGE,                          // Extended Module
+                START_TARGETING_ERRL_ID,            // module id
+            }
+        },
+
+        /**
+         * @brief   IStep Dispatcher task, runs ISteps
+         */
+        {
+            "libistepdisp.so" ,                         // taskname
+            NULL,                                       // no pointer to fn
+            {
+                START_TASK,                         // task type
+                EXT_IMAGE,                          // Extended Module
+                EXECUTE_ISTEPS_ERRL_ID,             // module id
+            }
+        },
+        // NOTE: libistepdisp.so needs to always be last in this list!!
         
         //  ---------------------------------------------------------------
         //  -----   END OF LIST!!!  ---------------------------------------

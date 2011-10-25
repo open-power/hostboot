@@ -36,6 +36,7 @@
 #include <kernel/pagemgr.H>
 #include <kernel/console.H>
 #include <util/align.H>
+#include <kernel/basesegment.H>
 
 Block::~Block()
 {
@@ -86,6 +87,20 @@ bool Block::handlePageFault(task_t* i_task, uint64_t i_addr)
 
     ShadowPTE* pte = getPTE(l_addr_palign);
 
+    // TODO... have this commented out at this point because
+    // checking this here causes the vmmbasetest.H testcases
+    // to fail... Need to determine how you want the
+    // NULL condition and the printk testcases handled in the
+    // testcase or change their default values.
+
+    // If the page table entry has default permission settings
+/*    if (getPermission(pte) == NO_ACCESS)
+    {
+      printk("NO_ACCESS permission for addr 0x%.lX\n", i_addr);
+      return -EINVAL;
+    } */
+
+
     if (!pte->isPresent())
     {
         if (this->iv_readMsgHdlr != NULL)
@@ -97,11 +112,9 @@ bool Block::handlePageFault(task_t* i_task, uint64_t i_addr)
                 l_page = PageManager::allocatePage();
                 //Add to ShadowPTE
                 pte->setPageAddr(reinterpret_cast<uint64_t>(l_page));
-                //TODO - Update to correct permissions requested
-                pte->setExecutable(false);
-                pte->setWritable(true);
             }
-            //Send message to handler to read page
+
+
             this->iv_readMsgHdlr->sendMessage(MSG_MM_RP_READ,
                     reinterpret_cast<void*>(l_addr_palign),l_page,i_task);
             //Done(waiting for response)
@@ -114,6 +127,12 @@ bool Block::handlePageFault(task_t* i_task, uint64_t i_addr)
 
             pte->setPageAddr(reinterpret_cast<uint64_t>(l_page));
             pte->setPresent(true);
+
+         // TODO.. add this and test it..
+	  /*    if (BaseSegment::mmSetPermission(reinterpret_cast<void*>(l_page), 0, NO_ACCESS))
+	    {
+	      printk("             Got an error trying to set permissions in handle page fault\n");
+	    } */
         }
         else
         {
@@ -125,16 +144,16 @@ bool Block::handlePageFault(task_t* i_task, uint64_t i_addr)
     PageTableManager::addEntry(
             l_addr_palign,
             pte->getPage(),
-            (pte->isExecutable() ? VmmManager::RO_EXE_ACCESS :
-                (pte->isWritable() ? VmmManager::NORMAL_ACCESS :
-                                     VmmManager::READ_O_ACCESS)));
+            (pte->isExecutable() ? EXECUTABLE :
+                (pte->isWritable() ? WRITABLE :
+                                     READ_ONLY)));
 
     return true;
 
 }
 
 void Block::setPhysicalPage(uint64_t i_vAddr, uint64_t i_pAddr,
-                            VmmManager::ACCESS_TYPES i_access)
+                              uint64_t i_access)
 {
     // Check containment, call down chain if address isn't in this block.
     if (!isContained(i_vAddr))
@@ -168,31 +187,16 @@ void Block::setPhysicalPage(uint64_t i_vAddr, uint64_t i_pAddr,
         PageTableManager::delEntry(i_vAddr);
     }
 
-    switch(i_access)
+
+    // make a call that sets the permssions on a
+    // shadow page table entry
+    if (setPermSPTE(pte, i_access))
     {
-        case VmmManager::READ_O_ACCESS:
-            pte->setReadable(true);
-            pte->setExecutable(false);
-            pte->setWritable(false);
-            break;
-
-        case VmmManager::NORMAL_ACCESS:
-            pte->setReadable(true);
-            pte->setExecutable(false);
-            pte->setWritable(true);
-            break;
-
-        case VmmManager::RO_EXE_ACCESS:
-            pte->setReadable(true);
-            pte->setExecutable(true);
-            pte->setWritable(false);
-            break;
-
-        default:
-            kassert(false);
-            break;
+        kassert(false);
     }
+     
 }
+
 
 void Block::setIsPresent(void* i_vaddr)
 {
@@ -208,10 +212,10 @@ void Block::addPTE(void* i_vaddr)
     ShadowPTE* l_pte = getPTE(l_vaddr);
     //Add page table entry
     PageTableManager::addEntry((l_vaddr / PAGESIZE) * PAGESIZE,
-                      l_pte->getPage(),
-                      (l_pte->isExecutable() ? VmmManager::RO_EXE_ACCESS :
-                      (l_pte->isWritable() ? VmmManager::NORMAL_ACCESS :
-                       VmmManager::READ_O_ACCESS)));
+                                l_pte->getPage(),
+                                (l_pte->isExecutable() ? EXECUTABLE :
+                                 (l_pte->isWritable() ? WRITABLE :
+                                  READ_ONLY)));
 }
 
 uint64_t Block::findPhysicalAddress(uint64_t i_vaddr) const
@@ -235,28 +239,6 @@ uint64_t Block::findPhysicalAddress(uint64_t i_vaddr) const
     return paddr;
 }
 
-void Block::setPageAllocateFromZero(uint64_t i_vAddr)
-{
-    // Check containment, call down chain if address isn't in this block.
-    if (!isContained(i_vAddr))
-    {
-        if (iv_nextBlock)
-        {
-            iv_nextBlock->setPageAllocateFromZero(i_vAddr);
-        }
-        else
-        {
-            // No block owns this address.  Code bug.
-            printk("setPageAllocateFromZero> i_vaddr=0x%.lX\n", i_vAddr );
-            kassert(iv_nextBlock);
-        }
-        return;
-    }
-
-    // Set page to allocate-from-zero.
-    ShadowPTE* pte = getPTE(i_vAddr);
-    pte->setAllocateFromZero(true);
-}
 
 void Block::releaseAllPages()
 {
@@ -272,6 +254,14 @@ void Block::releaseAllPages()
         if (pte->isPresent() && (0 != pte->getPageAddr()))
         {
             PageManager::freePage(reinterpret_cast<void*>(pte->getPageAddr()));
+
+/*  TODO.. add this into code and test.
+        if (BaseSegment::mmSetPermission(reinterpret_cast<void*>(pte->getPageAddr()),
+                                         0, WRITABLE))
+        {
+         printk("Got an error trying to set permissions in release all pages\n");
+        }    
+*/
             pte->setPresent(false);
             pte->setPageAddr(NULL);
         }
@@ -314,6 +304,40 @@ void Block::updateRefCount( uint64_t i_vaddr,
     {
         spte->setDirty( i_stats.C );
     }
+}
+
+bool Block::evictPage(ShadowPTE* i_pte)
+{
+    ShadowPTE* pte = i_pte;
+    bool do_cast_out = false;
+
+    if(!pte->isWritable())  // ro, executable
+    {
+        do_cast_out = true;
+    }
+    else  // is writable...
+    {
+        // if pte->isWriteTracked() flush then cast out
+    }
+
+    if(do_cast_out)
+    {
+        PageTableManager::delEntry(pte->getPageAddr());
+        PageManager::freePage(reinterpret_cast<void*>(pte->getPageAddr()));
+
+/*  TODO.. Add this back in and test
+        // Need to set the permissions of the heap back to R/W
+        if (BaseSegment::mmSetPermission(reinterpret_cast<void*>(pte->getPageAddr()),
+                                         0, WRITABLE))
+        {
+          printk("              EVICT Got an error trying to set permissions in evict page\n");
+        }
+*/
+        pte->setPresent(false);
+        pte->setPageAddr(NULL);
+    }
+
+    return do_cast_out;
 }
 
 void Block::castOutPages(uint64_t i_type)
@@ -378,106 +402,195 @@ void Block::castOutPages(uint64_t i_type)
 
 int Block::mmSetPermission(uint64_t i_va, uint64_t i_size,uint64_t i_access_type)
 {
- int l_rc = 0;
+    int l_rc = 0;
 
- // Need to align the page address and the size on a page boundary. before I get the page.
- uint64_t l_aligned_va = ALIGN_PAGE_DOWN(i_va);
- uint64_t l_aligned_size = ALIGN_PAGE(i_size);
-//printk("aligned VA = 0x%.lX aligned size = %ld\n", l_aligned_va, l_aligned_size);
+    // Need to align the page address and the size on a page boundary. 
+    uint64_t l_aligned_va = ALIGN_PAGE_DOWN(i_va);
+    uint64_t l_aligned_size = ALIGN_PAGE(i_size);
 
- // if size is zero..we are only updating 1 page.. so need to increment the size to 1 page
- if (i_size == 0)
- {
-   l_aligned_size+=PAGESIZE;
- }
 
-  // loop through all the pages asked for based on passed aligned
-  // Virtual address and passed in aligned size.
- for(uint64_t cur_page_addr = l_aligned_va;
-     cur_page_addr < (l_aligned_va + l_aligned_size);
-     cur_page_addr += PAGESIZE)
- {
-//printk("aligned VA = 0x%.lX aligned size = %ld\n", l_aligned_va, l_aligned_size);
-   ShadowPTE* spte = getPTE(cur_page_addr);
+    if(!isContained(l_aligned_va))
+    {
+      return (iv_nextBlock ?
+              iv_nextBlock->mmSetPermission(i_va,i_size,i_access_type):-EINVAL);
+    }
 
-   // if the page present need to delete the hardware
-   // page table entry before we set permissions.
-   if (spte->isPresent())
-   {
-     // delete the hardware page table entry
-      PageTableManager::delEntry(cur_page_addr);
-   }
+//printk("\n             aligned VA = 0x%.lX aligned size = %ld access_type = 0x%.lX\n", l_aligned_va,	l_aligned_size, i_access_type);
 
-   // If read_only
-   if ( i_access_type & READ_ONLY)
-   {
-     spte->setReadable(true);
-     spte->setExecutable(false);
-     spte->setWritable(false);
+    // if i_size is zero..we are only updating 1 page..inncrement the size to 1 page
+    if (i_size == 0)
+    {
+      l_aligned_size+=PAGESIZE;
+    }
 
-     // If the writable or executable access bits
-     // are set.. invalid combination.. return error
-     if ((i_access_type & WRITABLE) || (i_access_type & EXECUTABLE))
-     { 
-       return -EINVAL;
-     }
-   }
-   // if writable
-   else if ( i_access_type & WRITABLE)
-   {
-     spte->setReadable(true);
-     spte->setWritable(true);
-     spte->setExecutable(false);
+    // loop through all the pages asked for based on passed aligned
+    // Virtual address and passed in aligned size.
+    for(uint64_t cur_page_addr = l_aligned_va;
+	cur_page_addr < (l_aligned_va + l_aligned_size);
+	cur_page_addr += PAGESIZE)
+    {
 
-     if (i_access_type & EXECUTABLE)
-     {
-       // error condition.. not valid to be
-       // writable and executable
-       return -EINVAL;
-     }
-   }
-   // if executable
-   else if ( i_access_type & EXECUTABLE)
-   {
-     spte->setReadable(true);
-     spte->setExecutable(true);
-     spte->setWritable(false);
-   }
+      ShadowPTE* spte = getPTE(cur_page_addr);
 
-   // if write_tracked
-   if ( i_access_type & WRITE_TRACKED)
-   {
-     spte->setWriteTracked(true);
-   }
-   else
-   {
-     spte->setWriteTracked(false);
-   }
+      // if the page present need to delete the hardware
+      // page table entry before we set permissions.
+      if (spte->isPresent())
+      {
+        // delete the hardware page table entry
+        PageTableManager::delEntry(cur_page_addr);
+      }
 
-   // if Allocate from zero
-   if ( i_access_type & ALLOCATE_FROM_ZERO)
-   {
-     spte->setAllocateFromZero(true);
-   }
-   // not allocated from zero
-   else
-   {
-     spte->setAllocateFromZero(false);
-   }
+      if (setPermSPTE(spte, i_access_type))
+      {
+	printkd("               SET PERMISSIONS.. FAILED \n");
+	return -EINVAL;
+      }
+    }
 
-   // if no access
-   if ( i_access_type & NO_ACCESS)
-   {
-     spte->setReadable(false);
-     spte->setExecutable(false);
-     spte->setWritable(false);
-     spte->setAllocateFromZero(false);
-     spte->setWriteTracked(false);
-   }
-
- }
- return l_rc;
+    return l_rc;
 }
+
+int Block::setPermSPTE( ShadowPTE* i_spte, uint64_t i_access_type)
+{
+
+    // If read_only
+    if ( i_access_type & READ_ONLY)
+    {
+      // If the writable, executable, write_tracked
+      // or allocate from zero access bits are set 
+      // we have an invalid combination.. return error
+      if ((i_access_type & WRITABLE) ||
+          (i_access_type & EXECUTABLE) ||
+          (i_access_type & WRITE_TRACKED) ||
+          (i_access_type & ALLOCATE_FROM_ZERO))
+      {
+       return -EINVAL;
+      }
+
+      // Set the bits after we have verified
+      // the valid combinations so if we are setting
+      // permissions on a range only the first page would
+      // get set to READ_ONLY before we fail.
+      i_spte->setReadable(true);
+      i_spte->setExecutable(false);
+      i_spte->setWritable(false);
+    }
+    // if writable
+    else if ( i_access_type & WRITABLE)
+    {
+      if (i_access_type & EXECUTABLE)
+      {
+        return -EINVAL;
+      }
+      
+      i_spte->setReadable(true);
+      i_spte->setWritable(true);
+      i_spte->setExecutable(false);
+
+    }
+    // if executable
+    else if ( i_access_type & EXECUTABLE)
+    {
+      i_spte->setReadable(true);
+      i_spte->setExecutable(true);
+      i_spte->setWritable(false);
+    }
+
+    // if write_tracked
+    if ( i_access_type & WRITE_TRACKED)
+    {
+      // TODO.. fail if no message handler when trying to
+      //    set a page to write tracked.
+
+      // If the page is already READ_ONLY
+      // you cannot set to WRITE_TRACKED
+      if (getPermission(i_spte) == READ_ONLY)
+      {
+        return -EINVAL;
+      }
+      i_spte->setWriteTracked(true);
+    }
+    else
+    {
+      i_spte->setWriteTracked(false);
+    }
+
+    // if Allocate from zero
+    if ( i_access_type & ALLOCATE_FROM_ZERO)
+    {
+      // If the page is already READ_ONLY
+      // you cannot set to ALLOCATE_FROM_ZERO
+      if (getPermission(i_spte) == READ_ONLY)
+      {
+        return -EINVAL;
+      }
+
+      i_spte->setAllocateFromZero(true);
+    }
+    // not allocated from zero
+    else
+    {
+      i_spte->setAllocateFromZero(false);
+    }
+
+    // if no access
+    if ( i_access_type & NO_ACCESS)
+    {
+      i_spte->setReadable(false);
+      i_spte->setExecutable(false);
+      i_spte->setWritable(false);
+      i_spte->setAllocateFromZero(false);
+      i_spte->setWriteTracked(false);
+    }
+
+    return 0;
+}
+
+uint64_t Block::getPermission( ShadowPTE* i_spte)
+{
+
+    uint64_t l_accessType = 0;
+
+    if ((!i_spte->isReadable())&&
+             (!i_spte->isExecutable())&&
+             (!i_spte->isWritable())&&
+             (!i_spte->isAllocateFromZero())&&
+             (!i_spte->isWriteTracked()))
+    {
+       return NO_ACCESS;
+    }
+
+    if (i_spte->isReadable()&&
+             (!i_spte->isExecutable())&&
+             (!i_spte->isWritable()))
+    {
+       return READ_ONLY;
+    }
+
+    if (i_spte->isWritable())
+    {
+      l_accessType |= WRITABLE;
+    }
+
+    if (i_spte->isExecutable())
+     {
+      l_accessType |= EXECUTABLE;
+     }
+
+    if (i_spte->isWriteTracked())
+    {
+      l_accessType |= WRITE_TRACKED;
+     }
+
+    if (i_spte->isAllocateFromZero())
+    {
+      l_accessType |= ALLOCATE_FROM_ZERO;
+    }
+
+    return l_accessType;
+}
+
+
 
 int Block::removePages(VmmManager::PAGE_REMOVAL_OPS i_op, void* i_vaddr,
                                  uint64_t i_size, task_t* i_task)
@@ -519,6 +632,9 @@ int Block::removePages(VmmManager::PAGE_REMOVAL_OPS i_op, void* i_vaddr,
                 {
                     this->iv_writeMsgHdlr->incMsgCount(i_task);
                 }
+
+// TODO.. Need to map the physical page here before sending the message because
+// the RP uses the physical page off the message queue.. (comment from patrick)
                 this->iv_writeMsgHdlr->addVirtAddr(
                         reinterpret_cast<void*>(l_vaddr),pageAddr);
                 this->iv_writeMsgHdlr->sendMessage(MSG_MM_RP_WRITE,
@@ -535,6 +651,13 @@ int Block::removePages(VmmManager::PAGE_REMOVAL_OPS i_op, void* i_vaddr,
                 //'Release' page entry
                 releasePTE(pte);
                 PageManager::freePage(reinterpret_cast<void*>(pageAddr));
+
+/*  TODO.. Add this back in and test.
+printk("       \nInside flush.. setting all permissions back to writable on the heap\n");
+// Need to set the permissions of the heap back to R/W
+            BaseSegment::mmSetPermission(reinterpret_cast<void*>(pte->getPageAddr()),
+                                            0, WRITABLE);
+*/
             }
         }
     }

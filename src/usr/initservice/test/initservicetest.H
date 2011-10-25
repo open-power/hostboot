@@ -63,7 +63,7 @@ const   INITSERVICE::TaskInfo    TASK_TEST2  =  {
         NULL,                                           // ptr to fn
         {
                 INITSERVICE::START_TASK,                // startflag=true, try to start
-                INITSERVICE::BASE_IMAGE,                // Base Module
+                INITSERVICE::EXT_IMAGE,                 // Ext Inmage Module
                 INITSERVICE::INIT_SVC_TEST2_ERRL_ID,    // module id for errorlog
         },
 };

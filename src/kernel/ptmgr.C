@@ -175,7 +175,7 @@ void PageTableManager::init()
  */
 void PageTableManager::addEntry( uint64_t i_vAddr,
                                  uint64_t i_page,
-                                 VmmManager::ACCESS_TYPES i_accessType )
+                                 uint64_t i_accessType )
 {
     return Singleton<PageTableManager>::instance()._addEntry( i_vAddr, i_page, i_accessType );
 }
@@ -308,7 +308,7 @@ PageTableManager::~PageTableManager()
  */
 void PageTableManager::_addEntry( uint64_t i_vAddr,
                                   uint64_t i_page,
-                                  VmmManager::ACCESS_TYPES i_accessType )
+                                  uint64_t i_accessType )
 {
     Tprintk( ">> PageTableManager::_addEntry( i_vAddr=0x%.16lX, i_page=%ld, i_accessType=%d )\n", i_vAddr, i_page, i_accessType );
 
@@ -381,7 +381,7 @@ void PageTableManager::_addEntry( uint64_t i_vAddr,
     Dprintk( "<< PageTableManager::_addEntry()\n" );
 }
 
-/**
+/**.
  * @brief Remove an entry from the hardware page table
  */
 void PageTableManager::_delEntry( uint64_t i_vAddr )
@@ -475,24 +475,31 @@ uint64_t PageTableManager::getStatus( PageTableEntry* i_pte )
         status |= PTE_VALID;
     }
 
-    VmmManager::ACCESS_TYPES access = getAccessType(i_pte);
-    switch( access ) {
-        case( VmmManager::CI_ACCESS ):
-            status |= PTE_CACHE_INHIBITED;
-            break;
-        case( VmmManager::READ_O_ACCESS ):
-            status |= PTE_READ_ONLY;
-            break;
-        case( VmmManager::NORMAL_ACCESS ):
-            status |= PTE_EXECUTE; //@fixme?
-            break;
-        case( VmmManager::RO_EXE_ACCESS ):
-            status |= PTE_READ_ONLY;
-            status |= PTE_EXECUTE;
-            break;
-        default:
-            break;
-    };
+    uint64_t access = getAccessType(i_pte);
+
+    switch (access)
+    {
+      case SegmentManager::CI_ACCESS:
+	status |= PTE_CACHE_INHIBITED;
+	break;
+  
+      case READ_ONLY:
+	status |= PTE_READ;
+	break;
+
+      case WRITABLE:
+	status |= PTE_WRITABLE;
+	status |= PTE_READ;
+        break;
+
+      case  EXECUTABLE: 
+	status |= PTE_EXECUTE;
+	status |= PTE_READ;
+        break;
+
+      default:
+	break;
+    }
 
     if( i_pte->C == 1 ) {
         status |= PTE_MODIFIED;
@@ -788,66 +795,98 @@ inline uint64_t PageTableManager::getSize( void )
  * @brief  Set bits in PTE for the given ACCESS_TYPES
  */
 void PageTableManager::setAccessBits( PageTableEntry* o_pte,
-                                      VmmManager::ACCESS_TYPES i_accessType )
+                                           uint64_t i_accessType )
 {
     o_pte->dword1 &= ~PTE_ACCESS_BITS;
-    if( VmmManager::NO_USER_ACCESS == i_accessType ) {
-        o_pte->WIMG = 0b0010; // Memory Coherency Required
-        o_pte->N = 0b1;       // No Execute
-    } else if( VmmManager::READ_O_ACCESS == i_accessType ) {
-        o_pte->WIMG = 0b0010; // Memory Coherency Required
-        o_pte->pp1_2 = 0b01;  // PP=001
-        o_pte->N = 0b1;       // No Execute
-    } else if( VmmManager::NORMAL_ACCESS == i_accessType ) {
-        o_pte->WIMG = 0b0010; // Memory Coherency Required
-        o_pte->pp1_2 = 0b10;  // PP=010
-        o_pte->N = 0b0;       // @TODO Change to 'No Execute' when VFS supports.
-    } else if( VmmManager::CI_ACCESS == i_accessType ) {
-        o_pte->WIMG = 0b0101; // Cache Inhibited, Guarded
-        o_pte->pp1_2 = 0b10;  // PP=010
-        o_pte->N = 0b1;       // No Execute
-    } else if( VmmManager::RO_EXE_ACCESS == i_accessType ) {
-        o_pte->WIMG = 0b0010; // Memory Coherency Required
-        o_pte->pp1_2 = 0b01;  // PP=001
-        o_pte->N = 0b0;       // Execute
-    } else {
-        //@fixme - add RO_EXE_ACCESS
-        Eprintk( "** unrecognized access=%d\n", i_accessType );
+
+/*  Description of the WIMG bits.
+    W1,3 0 - not Write Through Required
+         1 - Write Through Required
+    I3   0 - not Caching Inhibited
+         1 - Caching Inhibited
+    M2   0 - not Memory Coherence Required
+         1 - Memory Coherence Required
+     G   0 - not Guarded
+         1 - Guarded
+*/
+    if( SegmentManager::CI_ACCESS == i_accessType )
+    {
+      o_pte->WIMG = 0b0101; // Cache Inhibited, Guarded
+      o_pte->pp1_2 = 0b10;  // PP=010
+      o_pte->N = 0b1;       // No Execute
+    }
+    else
+    {
+      // Only setting that changes WIMG is CI_ACCESSS
+      // All others are set to 0b0010
+      o_pte->WIMG = 0b0010; // Memory Coherency Required
+
+	if (i_accessType & READ_ONLY)
+	{
+	  o_pte->pp1_2 = 0b01;  // PP=001
+	  o_pte->N = 0b1;       // No Execute
+	}
+        // if writable (implied readable)
+	else if (i_accessType & WRITABLE)
+	{
+	  o_pte->pp1_2 = 0b10;  // PP=010
+	  o_pte->N = 0b1;       // No Execute
+	}
+        // if executable (implied readable)
+	else if (i_accessType & EXECUTABLE)
+	{
+	  o_pte->pp1_2 = 0b01;  // PP=001
+	  o_pte->N = 0b0;       // Execute
+	}
+	else {
+	  //@fixme - add RO_EXE_ACCESS
+	    Eprintk( "** unrecognized access=%ld\n", i_accessType );
+	}
     }
 }
 
 /**
  * @brief  Convert the bits from a PTE into a ACCESS_TYPES
  */
-VmmManager::ACCESS_TYPES PageTableManager::getAccessType( const PageTableEntry* i_pte )
+uint64_t PageTableManager::getAccessType( const PageTableEntry* i_pte )
 {
-    if( i_pte->pp0 == 0b0 )
+
+  if( i_pte->pp0 == 0b0 )
+  {
+    // If set to Cache Inhibited.
+    if( (i_pte->WIMG == 0b0101) && (i_pte->pp1_2 == 0b10) )
     {
-        if( (i_pte->WIMG == 0b0101) && (i_pte->pp1_2 == 0b10) )
-        {
-            return VmmManager::CI_ACCESS;
-        }
-        else if( (i_pte->WIMG == 0b0010) && (i_pte->pp1_2 == 0b00) )
-        {
-            return VmmManager::NO_USER_ACCESS;
-        }
-        else if( (i_pte->WIMG == 0b0010) && (i_pte->pp1_2 == 0b01) )
-        {
-            return VmmManager::READ_O_ACCESS;
-        }
-        else if( (i_pte->WIMG == 0b0010) && (i_pte->pp1_2 == 0b10) )
-        {
-            return VmmManager::NORMAL_ACCESS;
-        }
-        //@fixme - add RO_EXE_ACCESS
+      return SegmentManager::CI_ACCESS;
     }
-
-    Eprintk( "I don't recognize this PTE : WIMG=%ld, pp1_2=%ld\n", i_pte->WIMG, i_pte->pp1_2 );
-    printPTE( "getAccessType", i_pte); /*no effect*/ // BEAM Fix.
-    kassert(false);
-    return VmmManager::NO_USER_ACCESS;
+    else if (i_pte->WIMG == 0b0010)
+      {
+	if (i_pte->pp1_2 == 0b00)
+	{ 
+	  return NO_ACCESS;
+	}
+	// If read and no execute 
+	else if ((i_pte->pp1_2 == 0b01) && (i_pte->N == 0b1))
+	{
+	  return READ_ONLY;
+	}
+	// if writeable and no executable
+	else if ((i_pte->pp1_2 == 0b10) && (i_pte->N == 0b1))
+	{
+	  return WRITABLE;
+	}
+	// if readably and executable.. 
+	else if  ((i_pte->pp1_2 == 0b01) && (i_pte->N == 0b0))
+	{
+	  return EXECUTABLE;         
+	}
+      }
+  }
+  Eprintk( "I don't recognize this PTE : WIMG=%ld, pp1_2=%ld\n", i_pte->WIMG, i_pte->pp1_2 );
+  printPTE( "getAccessType", i_pte);
+  kassert(false);
+  return NO_ACCESS;
+    
 }
-
 /**
  * @brief  Fill in default values for the PTE
  */
