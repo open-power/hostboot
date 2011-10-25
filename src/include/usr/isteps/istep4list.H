@@ -121,6 +121,15 @@ const   TaskInfo    g_istep4[]  =   {
                         EXT_IMAGE,                      // Extended Module
                         HWAS_8_ERRL_ID,                 // module id
                 }
+        },
+        {
+                "testHWP" ,                  // substep name
+                HWAS::testHWP,                       // pointer to fn
+                {
+                        START_FN,                       // task type
+                        EXT_IMAGE,                      // Extended Module
+                        HWAS_9_ERRL_ID,                 // module id
+                }
         }
 
         //  END OF LIST!

@@ -93,6 +93,7 @@ enum    InitServiceModuleID
     HWAS_6_ERRL_ID,
     HWAS_7_ERRL_ID,
     HWAS_8_ERRL_ID,
+    HWAS_9_ERRL_ID,
 
     //  reserve some tasks for my unit tests...
     START_CXXTEST_ERRL_ID       =   0xf0,

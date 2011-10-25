@@ -132,6 +132,15 @@ namespace   HWAS
      */
     void    apply_gard( void *io_pArgs );
 
+    /**
+     * @brief   testHWP
+     *
+     * test Hardware procedure.  Althought this is called a test, we want it
+     * to run even in non-test builds.  Thus it is added here at the end of
+     * HWAS inititialization.
+     */
+    void    testHWP( void * io_pArgs );
+
 
 };   // end namespace
 

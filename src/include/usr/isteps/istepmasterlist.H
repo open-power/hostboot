@@ -62,10 +62,11 @@ namespace   INITSERVICE
 
 // initialize an array of ExtTaskInfo
 const  ExtTaskInfo  g_isteps[]    =   {
+        { NULL, 0 },                                //  dummy IStep 0
         { NULL, 0 },                                //  dummy IStep 1
         { NULL, 0 },                                //  dummy IStep 2
         { NULL, 0 },                                //  dummy IStep 3
-        INITSERVICE::g_istep4TaskList,              //  HWAS
+        INITSERVICE::g_istep4TaskList,              //  HWAS  IStep 4
 
         //
         // add further istep lists at the end.
