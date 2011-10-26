@@ -1,7 +1,7 @@
 #  IBM_PROLOG_BEGIN_TAG
 #  This is an automatically generated prolog.
 #
-#  $Source: src/usr/hwpf/hwp/makefile $
+#  $Source: src/usr/hwpf/hwp/initfiles/makefile $
 #
 #  IBM CONFIDENTIAL
 #
@@ -20,21 +20,25 @@
 #  Origin: 30
 #
 #  IBM_PROLOG_END
-SUBDIRS = initfiles.d
-ROOTPATH = ../../../..
-MODULE = hwp
+ROOTPATH = ../../../../../
 
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/plat
+INITFILES_INPUT = sample.initfile
+INITFILES_OUTPUT = sample.if
 
-OBJS = fapiTestHwp.o \
-       fapiTestHwpError.o \
-       fapiTestHwpAnalyzeError.o \
-       fapiTestHwpFfdc.o \
-       fapiTestHwpConfig.o \
-       fapiTestHwpAttr.o \
-       fapiHwpExecInitFile.o
+INITCOMPILER = ${ROOTPATH}/src/build/ifcompiler/bin/initCompiler
+ATTR_HEADER = ${ROOTPATH}/obj/genfiles/fapiAttributeIds.H
+
+EXTRA_PARTS = $(addprefix ${IMGDIR}/, ${INITFILES_OUTPUT})
 
 include ${ROOTPATH}/config.mk
+
+${EXTRA_PARTS}: ${IMGDIR}/% : ${GENDIR}/%
+	cp -f $^ $@
+
+${GENDIR}/%.if: ${INITCOMPILER} ${ATTR_HEADER} %.initfile
+	${INITCOMPILER} -init ${INITFILES_INPUT} -outdir ${GENDIR} -attr ${ATTR_HEADER}
+
+
+
+
+
