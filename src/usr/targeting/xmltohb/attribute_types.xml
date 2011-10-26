@@ -844,6 +844,7 @@
     </complexType>    
     <persistency>volatile</persistency>
     <readable/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -931,6 +932,18 @@
             <default>-9223372036854775804</default> 
         </field>
         </complexType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>DECONFIG_GARDABLE</id>
+    <description>If the Target is Deconfigurable and GARDable</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
 </attribute>

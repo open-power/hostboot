@@ -97,7 +97,7 @@ void mutex_init(mutex_t * o_mutex)
 
 //-----------------------------------------------------------------------------
 
-void mutex_destroy(mutex_t *& i_mutex)
+void mutex_destroy(mutex_t * i_mutex)
 {
     i_mutex->iv_val = ~0;
     return;
