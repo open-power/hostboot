@@ -96,17 +96,17 @@ extern uint64_t g_ModulesCompleted;
 #define _TS_CATCH_ABORT(b)
 
 // TS_TRACE
-#define  TS_TRACE(...)  TRACDCOMP( g_trac_test, "TS_TRACE> "__VA_ARGS__ );           \
+#define  TS_TRACE(...)  TRACDCOMP( g_trac_test, "TS_TRACE> "__VA_ARGS__ );     \
     CxxTest::doTrace( )
 
 
 // TS_WARN
-#define TS_WARN(...)    TRACDCOMP( g_trac_test, "!TS_WARN> " __VA_ARGS__ ); \
+#define TS_WARN(...)    TRACFCOMP( g_trac_test, "!TS_WARN> " __VA_ARGS__ );    \
     CxxTest::doWarn( )
 
 
 // TS_FAIL
-#define TS_FAIL(...)    TRACFCOMP( g_trac_test, "!!!TS_FAIL> " __VA_ARGS__); \
+#define TS_FAIL(...)    TRACFCOMP( g_trac_test, "!!!TS_FAIL> " __VA_ARGS__);   \
     CxxTest::doFailTest( __FILE__, __LINE__ )
 
 }
