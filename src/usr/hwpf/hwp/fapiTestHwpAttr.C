@@ -37,6 +37,7 @@
  *                          mjjones     10/07/2011  Removed target param
  *                          mjjones     10/15/2011  Test scratch attributes
  *                          mjjones     10/17/2011  Update scratch test
+ *                          camvanng    10/26/2011  Update scratch test
  */
 
 #include <fapiTestHwpAttr.H>
@@ -60,27 +61,9 @@ fapi::ReturnCode hwpTestAttributes()
         // Test ATTR_SCRATCH_UINT8_1
         //----------------------------------------------------------------------
         {
-        uint8_t l_uint8 = 1;
-
-        // Test get
-        l_rc = FAPI_ATTR_GET(ATTR_SCRATCH_UINT8_1, NULL, l_uint8);
-        if (l_rc)
-        {
-            FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT8_1. Error from GET");
-            break;
-        }
-
-        // Check value
-        if (l_uint8 != 0)
-        {
-            l_rc = fapi::FAPI_RC_ATTR_UNIT_TEST_FAIL;
-            FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT8_1. GET returned %d",
-                     l_uint8);
-            break;
-        }
+        uint8_t l_uint8 = 7;
 
         // Test set
-        l_uint8 = 7;
         l_rc = FAPI_ATTR_SET(ATTR_SCRATCH_UINT8_1, NULL, l_uint8);
         if (l_rc)
         {
@@ -93,7 +76,7 @@ fapi::ReturnCode hwpTestAttributes()
         l_rc = FAPI_ATTR_GET(ATTR_SCRATCH_UINT8_1, NULL, l_uint8);
         if (l_rc)
         {
-            FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT8_1. Error from GET (2)");
+            FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT8_1. Error from GET");
             break;
         }
 
@@ -101,7 +84,7 @@ fapi::ReturnCode hwpTestAttributes()
         if (l_uint8 != 7)
         {
             l_rc = fapi::FAPI_RC_ATTR_UNIT_TEST_FAIL;
-            FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT8_1. GET returned %d (2)",
+            FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT8_1. GET returned %d",
                      l_uint8);
             break;
         }
@@ -120,9 +103,18 @@ fapi::ReturnCode hwpTestAttributes()
         // Test ATTR_SCRATCH_UINT8_2
         //----------------------------------------------------------------------
         {
-        uint8_t l_uint8 = 8;
+        uint8_t l_uint8 = 6;
+
+        // Test set
+        l_rc = FAPI_ATTR_SET(ATTR_SCRATCH_UINT8_2, NULL, l_uint8);
+        if (l_rc)
+        {
+            FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT8_2. Error from SET");
+            break;
+        }
 
         // Test get
+        l_uint8 = 8;
         l_rc = FAPI_ATTR_GET(ATTR_SCRATCH_UINT8_2, NULL, l_uint8);
         if (l_rc)
         {
@@ -131,7 +123,7 @@ fapi::ReturnCode hwpTestAttributes()
         }
 
         // Check value
-        if (l_uint8 != 0)
+        if (l_uint8 != 6)
         {
             l_rc = fapi::FAPI_RC_ATTR_UNIT_TEST_FAIL;
             FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT8_2. GET returned %d",
@@ -140,10 +132,11 @@ fapi::ReturnCode hwpTestAttributes()
         }
 
         // Set to zero
+        l_uint8 = 0;
         l_rc = FAPI_ATTR_SET(ATTR_SCRATCH_UINT8_2, NULL, l_uint8);
         if (l_rc)
         {
-            FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT8_2. Error from SET");
+            FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT8_2. Error from SET (2)");
             break;
         }
         }
@@ -152,27 +145,9 @@ fapi::ReturnCode hwpTestAttributes()
         // Test ATTR_SCRATCH_UINT32_1
         //----------------------------------------------------------------------
         {
-        uint32_t l_uint32 = 1;
-
-        // Test get
-        l_rc = FAPI_ATTR_GET(ATTR_SCRATCH_UINT32_1, NULL, l_uint32);
-        if (l_rc)
-        {
-            FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT32_1. Error from GET");
-            break;
-        }
-
-        // Check value
-        if (l_uint32 != 0)
-        {
-            l_rc = fapi::FAPI_RC_ATTR_UNIT_TEST_FAIL;
-            FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT32_1. GET returned %d",
-                     l_uint32);
-            break;
-        }
+        uint32_t l_uint32 = 5;
 
         // Test set
-        l_uint32 = 7;
         l_rc = FAPI_ATTR_SET(ATTR_SCRATCH_UINT32_1, NULL, l_uint32);
         if (l_rc)
         {
@@ -185,15 +160,15 @@ fapi::ReturnCode hwpTestAttributes()
         l_rc = FAPI_ATTR_GET(ATTR_SCRATCH_UINT32_1, NULL, l_uint32);
         if (l_rc)
         {
-            FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT32_1. Error from GET (2)");
+            FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT32_1. Error from GET");
             break;
         }
 
         // Check value
-        if (l_uint32 != 7)
+        if (l_uint32 != 5)
         {
             l_rc = fapi::FAPI_RC_ATTR_UNIT_TEST_FAIL;
-            FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT32_1. GET returned %d (2)",
+            FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT32_1. GET returned %d",
                      l_uint32);
             break;
         }
@@ -212,9 +187,18 @@ fapi::ReturnCode hwpTestAttributes()
         // Test ATTR_SCRATCH_UINT32_2
         //----------------------------------------------------------------------
         {
-        uint32_t l_uint32 = 1;
+        uint32_t l_uint32 = 4;
+
+        // Test set
+        l_rc = FAPI_ATTR_SET(ATTR_SCRATCH_UINT32_2, NULL, l_uint32);
+        if (l_rc)
+        {
+            FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT32_2. Error from SET");
+            break;
+        }
 
         // Test get
+        l_uint32 = 8;
         l_rc = FAPI_ATTR_GET(ATTR_SCRATCH_UINT32_2, NULL, l_uint32);
         if (l_rc)
         {
@@ -223,7 +207,7 @@ fapi::ReturnCode hwpTestAttributes()
         }
 
         // Check value
-        if (l_uint32 != 0)
+        if (l_uint32 != 4)
         {
             l_rc = fapi::FAPI_RC_ATTR_UNIT_TEST_FAIL;
             FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT32_2. GET returned %d",
@@ -232,10 +216,11 @@ fapi::ReturnCode hwpTestAttributes()
         }
 
         // Set to zero
+        l_uint32 = 0;
         l_rc = FAPI_ATTR_SET(ATTR_SCRATCH_UINT32_2, NULL, l_uint32);
         if (l_rc)
         {
-            FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT32_2. Error from SET");
+            FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT32_2. Error from SET (2)");
             break;
         }
         }
@@ -244,27 +229,9 @@ fapi::ReturnCode hwpTestAttributes()
         // Test ATTR_SCRATCH_UINT64_1
         //----------------------------------------------------------------------
         {
-        uint64_t l_uint64 = 1;
-
-        // Test get
-        l_rc = FAPI_ATTR_GET(ATTR_SCRATCH_UINT64_1, NULL, l_uint64);
-        if (l_rc)
-        {
-            FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT64_1. Error from GET");
-            break;
-        }
-
-        // Check value
-        if (l_uint64 != 0)
-        {
-            l_rc = fapi::FAPI_RC_ATTR_UNIT_TEST_FAIL;
-            FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT64_1. GET returned %d",
-                     static_cast<uint32_t>(l_uint64));
-            break;
-        }
+        uint64_t l_uint64 = 3;
 
         // Test set
-        l_uint64 = 7;
         l_rc = FAPI_ATTR_SET(ATTR_SCRATCH_UINT64_1, NULL, l_uint64);
         if (l_rc)
         {
@@ -277,15 +244,15 @@ fapi::ReturnCode hwpTestAttributes()
         l_rc = FAPI_ATTR_GET(ATTR_SCRATCH_UINT64_1, NULL, l_uint64);
         if (l_rc)
         {
-            FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT64_1. Error from GET (2)");
+            FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT64_1. Error from GET");
             break;
         }
 
         // Check value
-        if (l_uint64 != 7)
+        if (l_uint64 != 3)
         {
             l_rc = fapi::FAPI_RC_ATTR_UNIT_TEST_FAIL;
-            FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT64_1. GET returned %d (2)",
+            FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT64_1. GET returned %d",
                      static_cast<uint32_t>(l_uint64));
             break;
         }
@@ -304,9 +271,18 @@ fapi::ReturnCode hwpTestAttributes()
         // Test ATTR_SCRATCH_UINT64_2
         //----------------------------------------------------------------------
         {
-        uint64_t l_uint64 = 1;
+        uint64_t l_uint64 = 2;
+
+        // Test set
+        l_rc = FAPI_ATTR_SET(ATTR_SCRATCH_UINT64_2, NULL, l_uint64);
+        if (l_rc)
+        {
+            FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT64_2. Error from SET");
+            break;
+        }
 
         // Test get
+        l_uint64 = 8;
         l_rc = FAPI_ATTR_GET(ATTR_SCRATCH_UINT64_2, NULL, l_uint64);
         if (l_rc)
         {
@@ -315,7 +291,7 @@ fapi::ReturnCode hwpTestAttributes()
         }
 
         // Check value
-        if (l_uint64 != 0)
+        if (l_uint64 != 2)
         {
             l_rc = fapi::FAPI_RC_ATTR_UNIT_TEST_FAIL;
             FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT64_2. GET returned %d",
@@ -324,10 +300,11 @@ fapi::ReturnCode hwpTestAttributes()
         }
 
         // Set to zero
+        l_uint64 = 0;
         l_rc = FAPI_ATTR_SET(ATTR_SCRATCH_UINT64_2, NULL, l_uint64);
         if (l_rc)
         {
-            FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT64_2. Error from SET");
+            FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT64_2. Error from SET (2)");
             break;
         }
         }
@@ -337,31 +314,6 @@ fapi::ReturnCode hwpTestAttributes()
         //----------------------------------------------------------------------
         {
         uint8_t l_uint8array1[32];
-
-        // Test get
-        l_rc = FAPI_ATTR_GET(ATTR_SCRATCH_UINT8_ARRAY_1, NULL, l_uint8array1);
-        if (l_rc)
-        {
-            FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT8_ARRAY_1. Error from GET");
-            break;
-        }
-
-        // Check value
-        for (uint32_t i = 0; i < 32; i++)
-        {
-            if (l_uint8array1[i] != 0)
-            {
-                l_rc = fapi::FAPI_RC_ATTR_UNIT_TEST_FAIL;
-                FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT8_ARRAY1. GET [%d] returned %d",
-                          i, l_uint8array1[i]);
-                break;
-            }
-        }
-
-        if (l_rc)
-        {
-            break;
-        }
 
         // Test set
         for (uint32_t i = 0; i < 32; i++)
@@ -385,7 +337,7 @@ fapi::ReturnCode hwpTestAttributes()
         l_rc = FAPI_ATTR_GET(ATTR_SCRATCH_UINT8_ARRAY_1, NULL, l_uint8array1);
         if (l_rc)
         {
-            FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT8_ARRAY_1. Error from GET (2)");
+            FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT8_ARRAY_1. Error from GET");
             break;
         }
 
@@ -395,7 +347,7 @@ fapi::ReturnCode hwpTestAttributes()
             if (l_uint8array1[i] != (i + 1))
             {
                 l_rc = fapi::FAPI_RC_ATTR_UNIT_TEST_FAIL;
-                FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT8_ARRAY1. GET [%d] returned %d (2)",
+                FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT8_ARRAY_1. GET [%d] returned %d",
                           i, l_uint8array1[i]);
                 break;
             }
@@ -426,45 +378,6 @@ fapi::ReturnCode hwpTestAttributes()
         {
         uint8_t l_uint8 = 1;
         uint8_t l_uint8array2[2][3][4];
-
-        // Test get
-        l_rc = FAPI_ATTR_GET(ATTR_SCRATCH_UINT8_ARRAY_2, NULL, l_uint8array2);
-        if (l_rc)
-        {
-            FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT8_ARRAY_2. Error from GET");
-            break;
-        }
-
-        // Check value
-        for (uint32_t i = 0; i < 2; i++)
-        {
-            for (uint32_t j = 0; j < 3; j++)
-            {
-                for (uint32_t k = 0; k < 4; k++)
-                {
-                    if (l_uint8array2[i][j][k] != 0)
-                    {
-                        l_rc = fapi::FAPI_RC_ATTR_UNIT_TEST_FAIL;
-                        FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT8_ARRAY2. GET [%d:%d:%d] returned %d",
-                                 i, j, k, l_uint8array2[i][j][k]);
-                        break;
-                    }
-                }
-                if (l_rc)
-                {
-                    break;
-                }
-            }
-            if (l_rc)
-            {
-                break;
-            }
-        }
-
-        if (l_rc)
-        {
-            break;
-        }
 
         // Test set
         l_uint8 = 1;
@@ -501,7 +414,7 @@ fapi::ReturnCode hwpTestAttributes()
         l_rc = FAPI_ATTR_GET(ATTR_SCRATCH_UINT8_ARRAY_2, NULL, l_uint8array2);
         if (l_rc)
         {
-            FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT8_ARRAY_2. Error from GET (2)");
+            FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT8_ARRAY_2. Error from GET");
             break;
         }
 
@@ -516,7 +429,7 @@ fapi::ReturnCode hwpTestAttributes()
                     if (l_uint8array2[i][j][k] != l_uint8++)
                     {
                         l_rc = fapi::FAPI_RC_ATTR_UNIT_TEST_FAIL;
-                        FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT8_ARRAY2. GET [%d:%d:%d] returned %d",
+                        FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT8_ARRAY_2. GET [%d:%d:%d] returned %d",
                                  i, j, k, l_uint8array2[i][j][k]);
                         break;
                     }
@@ -563,31 +476,6 @@ fapi::ReturnCode hwpTestAttributes()
         {
         uint32_t l_uint32array1[8];
 
-        // Test get
-        l_rc = FAPI_ATTR_GET(ATTR_SCRATCH_UINT32_ARRAY_1, NULL, l_uint32array1);
-        if (l_rc)
-        {
-            FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT32_ARRAY_1. Error from GET");
-            break;
-        }
-
-        // Check value
-        for (uint32_t i = 0; i < 8; i++)
-        {
-            if (l_uint32array1[i] != 0)
-            {
-                l_rc = fapi::FAPI_RC_ATTR_UNIT_TEST_FAIL;
-                FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT32_ARRAY1. GET [%d] returned %d",
-                          i, l_uint32array1[i]);
-                break;
-            }
-        }
-
-        if (l_rc)
-        {
-            break;
-        }
-
         // Test set
         for (uint32_t i = 0; i < 8; i++)
         {
@@ -610,7 +498,7 @@ fapi::ReturnCode hwpTestAttributes()
         l_rc = FAPI_ATTR_GET(ATTR_SCRATCH_UINT32_ARRAY_1, NULL, l_uint32array1);
         if (l_rc)
         {
-            FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT32_ARRAY_1. Error from GET (2)");
+            FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT32_ARRAY_1. Error from GET");
             break;
         }
 
@@ -620,7 +508,7 @@ fapi::ReturnCode hwpTestAttributes()
             if (l_uint32array1[i] != (i + 1))
             {
                 l_rc = fapi::FAPI_RC_ATTR_UNIT_TEST_FAIL;
-                FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT32_ARRAY1. GET [%d] returned %d (2)",
+                FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT32_ARRAY_1. GET [%d] returned %d",
                           i, l_uint32array1[i]);
                 break;
             }
@@ -652,38 +540,6 @@ fapi::ReturnCode hwpTestAttributes()
         uint32_t l_uint32 = 1;
         uint32_t l_uint32array2[2][3];
 
-        // Test get
-        l_rc = FAPI_ATTR_GET(ATTR_SCRATCH_UINT32_ARRAY_2, NULL, l_uint32array2);
-        if (l_rc)
-        {
-            FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT8_ARRAY_2. Error from GET");
-            break;
-        }
-
-        // Check value
-        for (uint32_t i = 0; i < 2; i++)
-        {
-            for (uint32_t j = 0; j < 3; j++)
-            {
-                if (l_uint32array2[i][j] != 0)
-                {
-                    l_rc = fapi::FAPI_RC_ATTR_UNIT_TEST_FAIL;
-                    FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT32_ARRAY2. GET [%d:%d] returned %d",
-                             i, j, l_uint32array2[i][j]);
-                    break;
-                }
-            }
-            if (l_rc)
-            {
-                break;
-            }
-        }
-
-        if (l_rc)
-        {
-            break;
-        }
-
         // Test set
         l_uint32 = 1;
         for (uint32_t i = 0; i < 2; i++)
@@ -713,7 +569,7 @@ fapi::ReturnCode hwpTestAttributes()
         l_rc = FAPI_ATTR_GET(ATTR_SCRATCH_UINT32_ARRAY_2, NULL, l_uint32array2);
         if (l_rc)
         {
-            FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT32_ARRAY_2. Error from GET (2)");
+            FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT32_ARRAY_2. Error from GET");
             break;
         }
 
@@ -726,7 +582,7 @@ fapi::ReturnCode hwpTestAttributes()
                 if (l_uint32array2[i][j] != l_uint32++)
                 {
                     l_rc = fapi::FAPI_RC_ATTR_UNIT_TEST_FAIL;
-                    FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT32_ARRAY2. GET [%d:%d] returned %d",
+                    FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT32_ARRAY_2. GET [%d:%d] returned %d",
                              i, j, l_uint32array2[i][j]);
                     break;
                 }
@@ -765,31 +621,6 @@ fapi::ReturnCode hwpTestAttributes()
         {
         uint64_t l_uint64array1[4];
 
-        // Test get
-        l_rc = FAPI_ATTR_GET(ATTR_SCRATCH_UINT64_ARRAY_1, NULL, l_uint64array1);
-        if (l_rc)
-        {
-            FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT64_ARRAY_1. Error from GET");
-            break;
-        }
-
-        // Check value
-        for (uint32_t i = 0; i < 4; i++)
-        {
-            if (l_uint64array1[i] != 0)
-            {
-                l_rc = fapi::FAPI_RC_ATTR_UNIT_TEST_FAIL;
-                FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT64_ARRAY1. GET [%d] returned %d",
-                          i, static_cast<uint32_t>(l_uint64array1[i]));
-                break;
-            }
-        }
-
-        if (l_rc)
-        {
-            break;
-        }
-
         // Test set
         for (uint32_t i = 0; i < 4; i++)
         {
@@ -812,7 +643,7 @@ fapi::ReturnCode hwpTestAttributes()
         l_rc = FAPI_ATTR_GET(ATTR_SCRATCH_UINT64_ARRAY_1, NULL, l_uint64array1);
         if (l_rc)
         {
-            FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT64_ARRAY_1. Error from GET (2)");
+            FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT64_ARRAY_1. Error from GET");
             break;
         }
 
@@ -822,7 +653,7 @@ fapi::ReturnCode hwpTestAttributes()
             if (l_uint64array1[i] != (i + 1))
             {
                 l_rc = fapi::FAPI_RC_ATTR_UNIT_TEST_FAIL;
-                FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT64_ARRAY1. GET [%d] returned %d (2)",
+                FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT64_ARRAY_1. GET [%d] returned %d",
                           i, static_cast<uint32_t>(l_uint64array1[i]));
                 break;
             }
@@ -854,38 +685,6 @@ fapi::ReturnCode hwpTestAttributes()
         uint64_t l_uint64 = 1;
         uint64_t l_uint64array2[2][2];
 
-        // Test get
-        l_rc = FAPI_ATTR_GET(ATTR_SCRATCH_UINT64_ARRAY_2, NULL, l_uint64array2);
-        if (l_rc)
-        {
-            FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT8_ARRAY_2. Error from GET");
-            break;
-        }
-
-        // Check value
-        for (uint32_t i = 0; i < 2; i++)
-        {
-            for (uint32_t j = 0; j < 2; j++)
-            {
-                if (l_uint64array2[i][j] != 0)
-                {
-                    l_rc = fapi::FAPI_RC_ATTR_UNIT_TEST_FAIL;
-                    FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT64_ARRAY2. GET [%d:%d] returned %d",
-                             i, j, static_cast<uint32_t>(l_uint64array2[i][j]));
-                    break;
-                }
-            }
-            if (l_rc)
-            {
-                break;
-            }
-        }
-
-        if (l_rc)
-        {
-            break;
-        }
-
         // Test set
         l_uint64 = 1;
         for (uint32_t i = 0; i < 2; i++)
@@ -915,7 +714,7 @@ fapi::ReturnCode hwpTestAttributes()
         l_rc = FAPI_ATTR_GET(ATTR_SCRATCH_UINT64_ARRAY_2, NULL, l_uint64array2);
         if (l_rc)
         {
-            FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT64_ARRAY_2. Error from GET (2)");
+            FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT64_ARRAY_2. Error from GET");
             break;
         }
 
@@ -928,7 +727,7 @@ fapi::ReturnCode hwpTestAttributes()
                 if (l_uint64array2[i][j] != l_uint64++)
                 {
                     l_rc = fapi::FAPI_RC_ATTR_UNIT_TEST_FAIL;
-                    FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT64_ARRAY2. GET [%d:%d] returned %d",
+                    FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT64_ARRAY_2. GET [%d:%d] returned %d",
                              i, j, static_cast<uint32_t>(l_uint64array2[i][j]));
                     break;
                 }

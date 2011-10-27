@@ -33,6 +33,7 @@
  * ------   --------------  ----------  ----------- ----------------------------
  *                          mjjones     09/12/2011  Created.
  *                          mjjones     10/06/2011  Updated traces.
+ *                          camvang     10/26/2011  Updated traces.
  *
  */
 
@@ -51,7 +52,7 @@ fapi::ReturnCode hwpTestConfig(const fapi::Target & i_chip)
     // Print the ecmd string of the chip
     char l_string[fapi::MAX_ECMD_STRING_LEN] = {0};
     i_chip.toString(l_string);
-    FAPI_INF("hwpInitialTest: Chip: %s", l_string);
+    FAPI_INF("hwpTestConfig: Chip: %s", l_string);
 
     fapi::ReturnCode l_rc;
     std::vector<fapi::Target> l_targets;
