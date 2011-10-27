@@ -3180,6 +3180,24 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>EEPROM_ADDR_INFO0</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0</value></field>
+            <field><id>port</id><value>0</value></field>
+            <field><id>devAddr</id><value>0x51</value></field>
+            <field><id>engine</id><value>0</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_ADDR_INFO1</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0</value></field>
+            <field><id>port</id><value>0</value></field>
+            <field><id>devAddr</id><value>0x53</value></field>
+            <field><id>engine</id><value>0</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf0 -->

@@ -23,7 +23,7 @@
 ROOTPATH = ../../..
 MODULE = i2c
 
-OBJS = i2c.o
+OBJS = i2c.o eepromdd.o
 
 SUBDIRS = test.d
 

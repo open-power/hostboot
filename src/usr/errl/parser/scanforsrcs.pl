@@ -373,7 +373,6 @@ sub getFiles
     opendir(DH, $l_input_dir) or die("Cannot open $l_input_dir: $!");
     # skip the dots
     @dir_entry = grep { !/^\./ } readdir(DH);
-    #@dir_entry = readdir(DH);
     closedir(DH);
     while (@dir_entry)
     {
@@ -382,12 +381,6 @@ sub getFiles
 
         debugMsg( "getFiles: Full Path: $full_path" );
 
-#        if ($full_path =~ /\/$comp\/test/g)  # skip the test dirs
-#        {
-#            debugMsg( "Found test dir - next!!" );
-#            next;
-#        }
-#        elsif ($l_entry =~ /\.[H|C]$/)
         if ($l_entry =~ /\.[H|C]$/)
         {
             $l_input_files{$l_entry} = $full_path;
@@ -466,18 +459,6 @@ sub includeReasonCodes
     {
         debugMsg( "includeReasonCodes file: $file" );
         my @allDirs = split( '/', $file );
-#        $tmpParent = pop @allDirs;
-
-#        if( $parentDir ne "" )
-#        {
-#            $parentDir = $parentDir."/$tmpParent";
-#        }
-#        else
-#        {
-#            $parentDir = $tmpParent;
-#        }
-#        debugMsg( "includeReasonCodes parent dir: $parentDir" );
-#        debugMsg( "includeReasonCodes tmpparent: $tmpParent" );
 
         if( $file =~ m/reasoncodes/i )
         {
@@ -498,10 +479,13 @@ sub includeReasonCodes
             debugMsg( "Include string: $incFileName" );
 
             print $fh "#include <$incFileName>\n";
-#            print $fh "#include <$parentDir>\n";
 
             # Find the namespace of the reason codes
-            findNameSpace( $file )
+            findNameSpace( $file );
+
+            # Clear out incFileName, in case there are 2 reason code files
+            # in the same directory
+            $incFileName = "";
         }
         elsif( -d $file )
         {
@@ -509,9 +493,6 @@ sub includeReasonCodes
             # Recursion is done here.
             includeReasonCodes( $fh, $file."/*", ($level+1) );
         }
-
-#        $parentDir = "";
-#        $tmpParent = "";
     }
 }
 

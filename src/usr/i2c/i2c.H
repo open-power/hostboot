@@ -110,8 +110,10 @@ typedef struct
     uint64_t fifo;
     uint64_t command;
     uint64_t mode;
-    // TODO - More to add for Interrupts when Bad Machine path is started
+    uint64_t intmask;       // Not Currently used
+    uint64_t interrupt;
     uint64_t status;
+    uint64_t reset;
 } i2c_addrs_t;
 
 // Addresses for each of the registers in each engine.
@@ -121,19 +123,28 @@ static i2c_addrs_t masterAddrs[] =
         I2C_MASTER0_ADDR | 0x4,         // FIFO
         I2C_MASTER0_ADDR | 0x5,         // Command Register
         I2C_MASTER0_ADDR | 0x6,         // Mode Register
-        I2C_MASTER0_ADDR | 0xB,         // Status Register
+        I2C_MASTER0_ADDR | 0x8,         // Interrupt Mask Register
+        I2C_MASTER0_ADDR | 0xA,         // Interrupt Register
+        I2C_MASTER0_ADDR | 0xB,         // Status Register (Read)
+        I2C_MASTER0_ADDR | 0xB,         // Reset (Write)
     },
     { /* Master 1 */
         I2C_MASTER1_ADDR | 0x4,         // FIFO
         I2C_MASTER1_ADDR | 0x5,         // Command Register
         I2C_MASTER1_ADDR | 0x6,         // Mode Register
-        I2C_MASTER1_ADDR | 0xB,         // Status Register
+        I2C_MASTER1_ADDR | 0x8,         // Interrupt Mask Register
+        I2C_MASTER1_ADDR | 0xA,         // Interrupt Register
+        I2C_MASTER1_ADDR | 0xB,         // Status Register (Read)
+        I2C_MASTER1_ADDR | 0xB,         // Reset (Write)
     },
     { /* Master 2 */
         I2C_MASTER2_ADDR | 0x4,         // FIFO
         I2C_MASTER2_ADDR | 0x5,         // Command Register
         I2C_MASTER2_ADDR | 0x6,         // Mode Register
-        I2C_MASTER2_ADDR | 0xB,         // Status Register
+        I2C_MASTER2_ADDR | 0x8,         // Interrupt Mask Register
+        I2C_MASTER2_ADDR | 0xA,         // Interrupt Register
+        I2C_MASTER2_ADDR | 0xB,         // Status Register (Read)
+        I2C_MASTER2_ADDR | 0xB,         // Reset (Write)
     }
 };
 
@@ -383,7 +394,6 @@ union residuallengthreg
 
 typedef struct
 {
-    uint64_t addr;
     uint64_t port;
     uint64_t engine;
     uint64_t devAddr;
@@ -415,9 +425,9 @@ typedef struct
 *       usrif.H
 *
 * @param [in] i_args - This is an argument list for the device driver
-*       framework.  In this function there is only one argument, which
-*       is the I2C Address that is needed for bits 8:14 of the I2C
-*       Command register.
+*       framework.  This list of arguments consists of the I2C Master
+*       engine, which port from the I2C master to use, and the slave's
+*       device address.
 *
 * @return errlHndl_t - NULL if successful, otherwise a pointer to the
 *       error log.
@@ -508,11 +518,14 @@ errlHndl_t i2cSetup ( TARGETING::Target * i_target,
  *
  * @param[in] i_target - The I2C master target.
  *
+ * @param[in] i_args - Structure containing arguments needed for a command
+ *  transaction.
+ *
  * @return errlHndl_t - NULL if successful, otherwise a pointer to
  *      the error log.
  */
 errlHndl_t i2cWaitForCmdComp ( TARGETING::Target * i_target,
-                               uint64_t i_engine );
+                               input_args_t i_args );
 
 /**
  * @brief This function will read the I2C Master engine status register
@@ -520,7 +533,8 @@ errlHndl_t i2cWaitForCmdComp ( TARGETING::Target * i_target,
  *
  * @param[in] i_target - The I2C master target.
  *
- * @param[in] i_engine - The I2C Master engine that is to be read.
+ * @param[in] i_args - Structure containing arguments needed for a command
+ *      transaction.
  *
  * @param[out] o_statusReg - The value of the status register read.
  *
@@ -528,7 +542,7 @@ errlHndl_t i2cWaitForCmdComp ( TARGETING::Target * i_target,
  *      the error log.
  */
 errlHndl_t i2cReadStatusReg ( TARGETING::Target * i_target,
-                              uint64_t i_engine,
+                              input_args_t i_args,
                               statusreg & o_statusReg );
 
 /**
@@ -537,28 +551,17 @@ errlHndl_t i2cReadStatusReg ( TARGETING::Target * i_target,
  *
  * @param[in] i_target - The I2C master target.
  *
+ * @param[in] i_args - Structure containing arguments needed for a command
+ *      transaction.
+ *
  * @param[in] i_statusVal - The value of the Status Register.
  *
  * @return errlHndl_t - NULL if successful, otherwise a pointer to
  *      the error log.
  */
 errlHndl_t i2cCheckForErrors ( TARGETING::Target * i_target,
+                               input_args_t i_args,
                                statusreg i_statusVal );
-
-/**
- * @brief This function will take the 2 byte address to be accessed
- *      on the slave and write it to the FIFO.
- *
- * @param[in] i_target - The I2C master target.
- *
- * @param[in] i_args - Structure containing arguments needed for a command
- *      transaction.
- *
- * @return errlHndl_t - NULL if successful, otherwise a pointer to
- *      the error log.
- */
-errlHndl_t i2cWriteByteAddr ( TARGETING::Target * i_target,
-                              input_args_t i_args );
 
 /**
  * @brief This function will read the status register and not return
@@ -576,6 +579,56 @@ errlHndl_t i2cWriteByteAddr ( TARGETING::Target * i_target,
  */
 errlHndl_t i2cWaitForFifoSpace ( TARGETING::Target * i_target,
                                  input_args_t i_args );
+
+/**
+ * @brief This function will reset the I2C Master engine specified
+ *      by the args.  It will also then initiate a Stop cmd to the
+ *      slave device.
+ *
+ * @param[in] i_target - The I2C master target.
+ *
+ * @param[in] i_args - Structure containing arguments needed for a command
+ *      transaction.
+ *
+ * @return errHndl_t - NULL if successful, otherwise a pointer to
+ *      the error log.
+ */
+errlHndl_t i2cReset ( TARGETING::Target * i_target,
+                      input_args_t i_args );
+
+/**
+ * @brief This function will send the Stop command to the slave device
+ *      defined by the args passed in.
+ *
+ * @param[in] i_target - The I2C master target.
+ *
+ * @param[in] i_args - Structure containing arguments needed for a command
+ *      transaction.
+ *
+ * @return errHndl_t - NULL if successful, otherwise a pointer to
+ *      the error log.
+ */
+errlHndl_t i2cSendSlaveStop ( TARGETING::Target * i_target,
+                              input_args_t i_args );
+
+/**
+ * @brief This function will read the interrupt register and return the
+ *      value.
+ *
+ * @param[in] i_target - The I2C master target.
+ *
+ * @param[in] i_args - Structure containing arguments needed for a command
+ *      transaction.
+ *
+ * @param[out] o_intRegValue - The value of the Interrupt register that
+ *      was read.
+ *
+ * @return errHndl_t - NULL if successful, otherwise a pointer to
+ *      the error log.
+ */
+errlHndl_t i2cGetInterrupts ( TARGETING::Target * i_target,
+                              input_args_t i_args,
+                              uint64_t & o_intRegValue );
 
 }; // end I2C namespace
 

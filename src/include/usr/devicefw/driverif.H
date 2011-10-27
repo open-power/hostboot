@@ -46,6 +46,7 @@ namespace DeviceFW
         XSCOM                   = LAST_ACCESS_TYPE,
         I2C,
         FSISCOM,
+        EEPROM,
 
         LAST_DRIVER_ACCESS_TYPE
     };
@@ -85,17 +86,23 @@ namespace DeviceFW
 
     /**
      * Construct the device addressing parameters for the I2C device ops.
-     * @param[in] i_address - I2C address to access on slave device.
      * @param[in] i_port - Which port to use from the I2C master.
      * @param[in] i_engine - Which I2C master engine to use.
      * @param[in] i_devAddr - The device address on a given engine/port.
      */
-    #define DEVICE_I2C_ADDRESS( i_address, i_port, i_engine, i_devAddr )\
-        DeviceFW::I2C, static_cast<uint64_t>(( i_address )),\
-        static_cast<uint64_t>(( i_port )),\
-        static_cast<uint64_t>(( i_engine )),\
-        static_cast<uint64_t>(( i_devAddr ))
+    #define DEVICE_I2C_ADDRESS( i_port, i_engine, i_devAddr )\
+        DeviceFW::I2C, static_cast<uint64_t>(( i_port )),\
+            static_cast<uint64_t>(( i_engine )),\
+            static_cast<uint64_t>(( i_devAddr ))
 
+    /**
+     * Construct the device addressing parameters for the EEPROM device ops.
+     * @param[in] i_address - The address of the I2C slave device.
+     * @param[in] i_chip - The chip number of the EEPROM to access.
+     */
+    #define DEVICE_EEPROM_ADDRESS( i_address, i_chip )\
+        DeviceFW::EEPROM, static_cast<uint64_t>(( i_address )),\
+            static_cast<uint64_t>(( i_chip ))
 
     /** @class InvalidParameterType
      *  @brief Unused type to cause compiler fails for invalid template types.

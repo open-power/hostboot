@@ -154,6 +154,26 @@
         <id>MODEL</id>
         <default>SALERNO</default>
     </attribute>
+    <!-- Defaulting this info to the one Simics Dummy device that we have -->
+    <attribute>
+        <id>EEPROM_ADDR_INFO0</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0</value></field>
+            <field><id>port</id><value>0</value></field>
+            <field><id>devAddr</id><value>0x50</value></field>
+            <field><id>engine</id><value>0</value></field>
+        </default>
+    </attribute>
+    <!-- Defaulting this info to the one Simics Dummy device that we have -->
+    <attribute>
+        <id>EEPROM_ADDR_INFO1</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0</value></field>
+            <field><id>port</id><value>0</value></field>
+            <field><id>devAddr</id><value>0x50</value></field>
+            <field><id>engine</id><value>0</value></field>
+        </default>
+    </attribute>
  </targetType>
 
 <targetType>
@@ -162,6 +182,28 @@
     <attribute>
         <id>MODEL</id>
         <default>VENICE</default>
+    </attribute>
+    <attribute><id>DUMMY_RW</id></attribute>
+    <attribute><id>DUMMY_HEAP_ZERO_DEFAULT</id></attribute>
+    <!-- Defaulting this info to the one Simics Dummy device that we have -->
+    <attribute>
+        <id>EEPROM_ADDR_INFO0</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0</value></field>
+            <field><id>port</id><value>0</value></field>
+            <field><id>devAddr</id><value>0x50</value></field>
+            <field><id>engine</id><value>0</value></field>
+        </default>
+    </attribute>
+    <!-- Defaulting this info to the one Simics Dummy device that we have -->
+    <attribute>
+        <id>EEPROM_ADDR_INFO1</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0</value></field>
+            <field><id>port</id><value>0</value></field>
+            <field><id>devAddr</id><value>0x50</value></field>
+            <field><id>engine</id><value>0</value></field>
+        </default>
     </attribute>
 </targetType>
 
@@ -485,6 +527,24 @@
             <field><id>reserved</id><value>0</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>EEPROM_ADDR_INFO0</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0</value></field>
+            <field><id>port</id><value>0</value></field>
+            <field><id>devAddr</id><value>0x51</value></field>
+            <field><id>engine</id><value>0</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_ADDR_INFO1</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0</value></field>
+            <field><id>port</id><value>0</value></field>
+            <field><id>devAddr</id><value>0x53</value></field>
+            <field><id>engine</id><value>0</value></field>
+        </default>
+    </attribute>
 </targetType>
 
 <!-- Centaur MBS -->
@@ -546,5 +606,34 @@
         <default>CENTAUR</default> 
     </attribute>    
 </targetType>   
+
+<!--Dummy card to use as a DIMM for initial I2C/EEPROM testing -->
+<targetType>
+    <id>card</id>
+    <parent>base</parent>
+    <attribute>
+        <id>CLASS</id>
+        <default>CARD</default>
+    </attribute>
+</targetType>
+
+<targetType>
+    <id>card-dimm</id>
+    <parent>card</parent>
+    <attribute>
+        <id>TYPE</id>
+        <default>DIMM</default>
+    </attribute>
+    <!-- Defaulting this info to the one Simics Dummy device that we have -->
+    <attribute>
+        <id>EEPROM_ADDR_INFO0</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0</value></field>
+            <field><id>port</id><value>0</value></field>
+            <field><id>devAddr</id><value>0x50</value></field>
+            <field><id>engine</id><value>0</value></field>
+        </default>
+    </attribute>
+</targetType>
 
 </attributes>

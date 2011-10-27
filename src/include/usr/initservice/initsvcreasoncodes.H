@@ -62,6 +62,7 @@ enum    InitServiceModuleID
     START_FSIDD_ERRL_ID                 =   0x16,
     START_FSISCOM_ERRL_ID               =   0x17,
     START_TARGETING_ERRL_ID             =   0x18,
+    START_I2C_ERRL_ID                   =   0x19,
 
 
     //  Internal InitService codes

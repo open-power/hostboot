@@ -690,42 +690,6 @@
 </attribute>
 
 <attribute>
-    <id>I2C_CHIP_INFO</id>
-    <description>Attribute which describes I2C chip info</description>
-    <complexType>
-        <description>Structure which defines info necessary for I2C.  Only 
-        applicable for chip targets which support I2C.  Structure is 
-        read-only.</description>
-        <field>
-            <name>busSpeed</name>
-            <description>Slave device bus speed</description>
-            <type>uint32_t</type>
-            <default>0</default>
-        </field>
-        <field>
-            <name>deviceAddr</name>
-            <description>Slave device address</description>
-            <type>uint32_t</type>
-            <default>0</default>
-        </field>
-        <field>
-            <name>devicePort</name>
-            <description>Slave device port location</description>
-            <type>uint32_t</type>
-            <default>0</default>
-        </field>
-        <field>
-            <name>deviceMasterEng</name>
-            <description>Master I2C engine slave is hung off of</description>
-            <type>uint32_t</type>
-            <default>0</default>
-        </field>
-        </complexType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
     <id>FSI_MASTER_CHIP</id>
     <description>Chip which contains the FSI master logic that drives this slave</description>
     <nativeType>
@@ -975,6 +939,76 @@
     <persistency>non-volatile</persistency>
     <readable/>
     <writeable/>
+</attribute>
+
+<attribute>
+    <id>EEPROM_ADDR_INFO0</id>
+    <description>Information needed to address the EEPROM slaves</description>
+    <complexType>
+        <description>Structure to define the addressing for an I2C slave device.</description>
+        <field>
+            <name>i2cMasterPath</name>
+            <description>Entity path to the processor containing the I2C master (FOR DIMMS
+                ONLY)</description>
+            <type>EntityPath</type>
+            <default>physical:sys-0</default>
+        </field>
+        <field>
+            <name>port</name>
+            <description>Port from the I2C Master device.  This is a 6-bit value.</description>
+            <type>uint8_t</type>
+            <default>0</default>
+        </field>
+        <field>
+            <name>devAddr</name>
+            <description>Device address on the I2C bus. This is a 7-bit value.</description>
+            <type>uint8_t</type>
+            <default>0</default>
+        </field>
+        <field>
+            <name>engine</name>
+            <description>I2C master engine.  This is a 2-bit value.</description>
+            <type>uint8_t</type>
+            <default>0</default>
+        </field>
+    </complexType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>EEPROM_ADDR_INFO1</id>
+    <description>Information needed to address the EERPROM slaves</description>
+    <complexType>
+        <description>Structure to define the addressing for an I2C slave device.</description>
+        <field>
+            <name>i2cMasterPath</name>
+            <description>Entity path to the processor containing the I2C master (FOR DIMMS
+                ONLY)</description>
+            <type>EntityPath</type>
+            <default>physical:sys-0</default>
+        </field>
+        <field>
+            <name>port</name>
+            <description>Port from the I2C Master device.  This is a 6-bit value.</description>
+            <type>uint8_t</type>
+            <default>0</default>
+        </field>
+        <field>
+            <name>devAddr</name>
+            <description>Device address on the I2C bus. This is a 7-bit value.</description>
+            <type>uint8_t</type>
+            <default>0</default>
+        </field>
+        <field>
+            <name>engine</name>
+            <description>I2C master engine.  This is a 2-bit value.</description>
+            <type>uint8_t</type>
+            <default>0</default>
+        </field>
+    </complexType>
+    <persistency>non-volatile</persistency>
+    <readable/>
 </attribute>
 
 </attributes>

@@ -56,20 +56,6 @@ const TaskInfo g_exttaskinfolist[]   =   {
         },
 
         /**
-         * @brief   targeting task,
-         *
-         */
-        {
-            "libtargeting.so" ,                             // taskname
-            NULL,                                           // no pointer to fn
-            {
-                START_TASK,                                 // task type
-                EXT_IMAGE,                                  // Extended Module
-                START_TARGETING_ERRL_ID,                    // module id
-            }
-        },
-
-        /**
          * @brief   fapi task,
          */
         {
@@ -153,6 +139,32 @@ const TaskInfo g_exttaskinfolist[]   =   {
                 }
         },
 
+        /**
+         * @brief   I2C Device Driver
+         */
+        {
+            "libi2c.so" ,                       // taskname
+            NULL,                               // no pointer to fn
+            {
+                INIT_TASK,                      // task type
+                EXT_IMAGE,                      // Extended Module
+                START_I2C_ERRL_ID,              // module id
+            }
+        },
+
+        /**
+         * @brief   targeting task,
+         */
+        {
+            "libtargeting.so" ,                         // taskname
+            NULL,                                       // no pointer to fn
+            {
+                START_TASK,                         // task type
+                EXT_IMAGE,                          // Extended Module
+                START_TARGETING_ERRL_ID,            // module id
+            }
+        },
+
 
         //  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         // NOTE: libistepdisp.so needs to always be last in this list!!
@@ -171,7 +183,7 @@ const TaskInfo g_exttaskinfolist[]   =   {
                 EXECUTE_ISTEPS_ERRL_ID,                     // module id
             }
         },
-
+        // NOTE: libistepdisp.so needs to always be last in this list!!
 
         //  ---------------------------------------------------------------
         //  -----   END OF LIST!!!  ---------------------------------------

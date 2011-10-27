@@ -164,6 +164,14 @@ const compId_t FSISCOM_COMP_ID = 0x0D00;
 const char FSISCOM_COMP_NAME[] = "fsiscom";
 //@}
 
+/** @name EEPROM
+ *  EEPROM device driver component
+ */
+//@{
+const compId_t EEPROM_COMP_ID = 0x0E00;
+const char EEPROM_COMP_NAME[] = "eeprom";
+//@}
+
 //  ----------------------------------------------------------
 //  CXXTEST Unit Test, reserve compid near the end...
 /** @name CXXTEST

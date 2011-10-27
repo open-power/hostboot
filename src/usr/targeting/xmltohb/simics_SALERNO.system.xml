@@ -421,5 +421,26 @@
     </attribute>
 </targetInstance>
 
+<targetInstance>
+    <id>sys0node0proc0dimm0</id>
+    <type>card-dimm</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_ADDR_INFO0</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>port</id><value>0</value></field>
+            <field><id>devAddr</id><value>0x50</value></field>
+            <field><id>engine</id><value>0</value></field>
+        </default>
+    </attribute>
+</targetInstance>
 
 </attributes>

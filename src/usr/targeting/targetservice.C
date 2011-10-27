@@ -545,19 +545,6 @@ void TargetService::dump() const
             TARG_INF("XSCOM Node ID = 0x%X",l_xscomChipInfo.nodeId);
             TARG_INF("XSCOM Chip ID = 0x%X",l_xscomChipInfo.chipId);
         }
-
-        I2cChipInfo l_i2cChipInfo = {0};
-        if( (*iv_targets)[i].tryGetAttr<ATTR_I2C_CHIP_INFO>( l_i2cChipInfo ) )
-        {
-            TARG_INF( "I2C Bus Speed = 0x%X",
-                      l_i2cChipInfo.busSpeed );
-            TARG_INF( "I2C Device Address = 0x%X",
-                      l_i2cChipInfo.deviceAddr );
-            TARG_INF( "I2C Device Port = 0x%X",
-                      l_i2cChipInfo.devicePort );
-            TARG_INF( "I2C Master Engine = 0x%X",
-                      l_i2cChipInfo.deviceMasterEng );
-        }
     }
 
     return;
