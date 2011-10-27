@@ -134,17 +134,31 @@
 </targetType>
 
 <targetType>
-    <id>chip-processor-salerno</id>
+    <id>chip-processor-power8</id>
     <parent>chip-processor</parent>
-    <attribute>
-        <id>MODEL</id>
-        <default>SALERNO</default>
-    </attribute>
     <attribute>
         <id>XSCOM_CHIP_INFO</id>
     </attribute>
     <attribute><id>DUMMY_RW</id></attribute>
     <attribute><id>DUMMY_HEAP_ZERO_DEFAULT</id></attribute>
+</targetType>
+
+<targetType>
+    <id>chip-processor-salerno</id>
+    <parent>chip-processor-power8</parent>
+    <attribute>
+        <id>MODEL</id>
+        <default>SALERNO</default>
+    </attribute>
+ </targetType>
+
+<targetType>
+    <id>chip-processor-venice</id>
+    <parent>chip-processor-power8</parent>
+    <attribute>
+        <id>MODEL</id>
+        <default>VENICE</default>
+    </attribute>
 </targetType>
 
 <targetType>
@@ -170,12 +184,17 @@
 </targetType>
 
 <targetType>
-    <id>unit-ex-salerno</id>
+    <id>unit-ex-power8</id>
     <parent>unit</parent>
     <attribute>
         <id>TYPE</id>
         <default>EX</default>
     </attribute>
+</targetType>
+
+<targetType>
+    <id>unit-ex-salerno</id>
+    <parent>unit-ex-power8</parent>
     <attribute>
         <id>MODEL</id>
         <default>SALERNO</default>
@@ -183,12 +202,26 @@
 </targetType>
 
 <targetType>
-    <id>unit-core-salerno</id>
+    <id>unit-ex-venice</id>
+    <parent>unit-ex-power8</parent>
+    <attribute>
+        <id>MODEL</id>
+        <default>VENICE</default>
+    </attribute>    
+</targetType>
+
+<targetType>
+    <id>unit-core-power8</id>
     <parent>unit</parent>
     <attribute>
         <id>TYPE</id>
         <default>CORE</default>
     </attribute>
+</targetType>
+
+<targetType>
+    <id>unit-core-salerno</id>
+    <parent>unit-core-power8</parent>
     <attribute>
         <id>MODEL</id>
         <default>SALERNO</default>
@@ -196,26 +229,26 @@
 </targetType>
 
 <targetType>
-    <id>unit-mba-salerno</id>
-    <parent>unit</parent>
-    <attribute>
-        <id>TYPE</id>
-        <default>MBA</default>
-    </attribute>
+    <id>unit-core-venice</id>
+    <parent>unit-core-power8</parent>
     <attribute>
         <id>MODEL</id>
-        <default>SALERNO</default>
+        <default>VENICE</default>
     </attribute>    
-    <attribute><id>MSS_EFF_PRIMARY_RANK</id></attribute>   
 </targetType>
 
 <targetType>
-    <id>unit-pervasive-salerno</id>
+    <id>unit-pervasive-power8</id>
     <parent>unit</parent>
     <attribute>
         <id>TYPE</id>
         <default>PERVASIVE</default>
     </attribute>
+</targetType>
+
+<targetType>
+    <id>unit-pervasive-salerno</id>
+    <parent>unit-pervasive-power8</parent>
     <attribute>
         <id>MODEL</id>
         <default>SALERNO</default>
@@ -223,12 +256,26 @@
 </targetType>
 
 <targetType>
-    <id>unit-pci-salerno</id>
+    <id>unit-pervasive-venice</id>
+    <parent>unit-pervasive-power8</parent>
+    <attribute>
+        <id>MODEL</id>
+        <default>VENICE</default>
+    </attribute>    
+</targetType>
+
+<targetType>
+    <id>unit-pci-power8</id>
     <parent>unit</parent>
     <attribute>
         <id>TYPE</id>
         <default>PCI</default>
     </attribute>
+</targetType>
+
+<targetType>
+    <id>unit-pci-salerno</id>
+    <parent>unit-pci-power8</parent>
     <attribute>
         <id>MODEL</id>
         <default>SALERNO</default>
@@ -236,12 +283,26 @@
 </targetType>
 
 <targetType>
-    <id>unit-powerbus-salerno</id>
+    <id>unit-pci-venice</id>
+    <parent>unit-pci-power8</parent>
+    <attribute>
+        <id>MODEL</id>
+        <default>VENICE</default>
+    </attribute>    
+</targetType>
+
+<targetType>
+    <id>unit-powerbus-power8</id>
     <parent>unit</parent>
     <attribute>
         <id>TYPE</id>
         <default>POWERBUS</default>
     </attribute>
+</targetType>
+
+<targetType>
+    <id>unit-powerbus-salerno</id>
+    <parent>unit-powerbus-power8</parent>
     <attribute>
         <id>MODEL</id>
         <default>SALERNO</default>
@@ -249,29 +310,12 @@
 </targetType>
 
 <targetType>
-    <id>unit-memport-salerno</id>
-    <parent>unit</parent>
-    <attribute>
-        <id>TYPE</id>
-        <default>MEM_PORT</default>
-    </attribute>
+    <id>unit-powerbus-venice</id>
+    <parent>unit-powerbus-power8</parent>
     <attribute>
         <id>MODEL</id>
-        <default>SALERNO</default>
+        <default>VENICE</default>
     </attribute>    
-</targetType>
-
-<targetType>
-    <id>unit-mcs-salerno</id>
-    <parent>unit</parent>
-    <attribute>
-        <id>TYPE</id>
-        <default>MCS</default>
-    </attribute>
-    <attribute>
-        <id>MODEL</id>
-        <default>SALERNO</default>
-    </attribute>
 </targetType>
 
 <targetType>
@@ -290,5 +334,213 @@
         <default>POWER8</default>
     </attribute>    
 </targetType>
+
+<!-- Hybrid targets -->
+
+<targetType>
+    <id>unit-memport-power8</id>
+    <parent>unit</parent>
+    <attribute>
+        <id>TYPE</id>
+        <default>MEM_PORT</default>
+    </attribute>
+</targetType>
+
+<targetType>
+    <id>unit-mbs-power8</id>
+    <parent>unit</parent>
+    <attribute>
+        <id>TYPE</id>
+        <default>MBS</default>
+    </attribute>
+</targetType>
+
+<targetType>
+    <id>unit-mba-power8</id>
+    <parent>unit</parent>
+    <attribute>
+        <id>TYPE</id>
+        <default>MBA</default>
+    </attribute>
+    <attribute><id>MSS_EFF_PRIMARY_RANK</id></attribute>   
+</targetType>
+
+<targetType>
+    <id>unit-mcs-power8</id> 
+    <parent>unit</parent>
+    <attribute>
+        <id>TYPE</id>
+        <default>MCS</default>
+    </attribute>
+</targetType>
+
+<targetType>
+    <id>unit-mcs-venice</id> 
+    <parent>unit-mcs-power8</parent>
+    <attribute>
+        <id>MODEL</id>
+        <default>VENICE</default> 
+    </attribute>
+</targetType>
+
+<targetType>
+    <id>unit-mcs-salerno</id> 
+    <parent>unit-mcs-power8</parent>
+    <attribute>
+        <id>MODEL</id>
+        <default>SALERNO</default> 
+    </attribute>
+</targetType>
+
+<!-- Processor target types -->
+
+<targetType>
+    <id>unit-mba-venice</id>
+    <parent>unit-mba-power8</parent>
+    <attribute>
+        <id>MODEL</id>
+        <default>VENICE</default>
+    </attribute>  
+</targetType>
+
+<targetType>
+    <id>unit-mba-salerno</id>
+    <parent>unit-mba-power8</parent>
+    <attribute>
+        <id>MODEL</id>
+        <default>SALERNO</default>
+    </attribute>  
+</targetType>
+
+<targetType>
+    <id>unit-mbs-venice</id>
+    <parent>unit-mbs-power8</parent>
+    <attribute>
+        <id>MODEL</id>
+        <default>VENICE</default>
+    </attribute>
+</targetType>
+
+<targetType>
+    <id>unit-mbs-salerno</id>
+    <parent>unit-mbs-power8</parent>
+    <attribute>
+        <id>MODEL</id>
+        <default>SALERNO</default>
+    </attribute>
+</targetType>
+
+<targetType>
+    <id>unit-memport-salerno</id> 
+    <parent>unit-memport-power8</parent>
+    <attribute>
+        <id>MODEL</id>
+        <default>SALERNO</default> 
+    </attribute>    
+</targetType>    
+
+<targetType>
+    <id>unit-memport-venice</id> 
+    <parent>unit-memport-power8</parent>
+    <attribute>
+        <id>MODEL</id>
+        <default>VENICE</default> 
+    </attribute>    
+</targetType>   
+
+<!-- Memory Buffer Target Types -->
+
+<!-- Centaur chip/DMI -->
+
+<targetType>
+    <id>chip-membuf-centaur</id>
+    <parent>chip</parent>
+    <attribute>
+        <id>TYPE</id>
+        <default>MEMBUF</default>
+    </attribute>
+    <attribute>
+        <id>MODEL</id>
+        <default>CENTAUR</default>
+    </attribute>
+    <attribute>
+        <id>PRIMARY_CAPABILITIES</id>
+        <default>
+            <field><id>supportsFsiScom</id><value>1</value></field>
+            <field><id>supportsXscom</id><value>0</value></field>
+            <field><id>supportsInbandScom</id><value>1</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>SCOM_SWITCHES</id>
+        <default>
+            <field><id>useFsiScom</id><value>1</value></field>
+            <field><id>useXscom</id><value>0</value></field>
+            <field><id>useInbandScom</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
+    </attribute>
+</targetType>
+
+<!-- Centaur MBS -->
+
+<targetType>
+    <id>unit-mbs-centaur</id>
+    <parent>unit-mbs-power8</parent>
+    <attribute>
+        <id>PRIMARY_CAPABILITIES</id>
+        <default>
+            <field><id>supportsFsiScom</id><value>1</value></field>
+            <field><id>supportsXscom</id><value>0</value></field>
+            <field><id>supportsInbandScom</id><value>1</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>MODEL</id>
+        <default>CENTAUR</default>
+    </attribute>
+</targetType>
+
+<!-- Centaur MBA -->
+
+<targetType>
+    <id>unit-mba-centaur</id>
+    <parent>unit-mba-power8</parent>
+    <attribute>
+        <id>PRIMARY_CAPABILITIES</id>
+        <default>
+            <field><id>supportsFsiScom</id><value>1</value></field>
+            <field><id>supportsXscom</id><value>0</value></field>
+            <field><id>supportsInbandScom</id><value>1</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>MODEL</id>
+        <default>CENTAUR</default>
+    </attribute>  
+</targetType>
+
+<!-- Centaur memory port -->
+
+<targetType>
+    <id>unit-memport-centaur</id> 
+    <parent>unit-memport-power8</parent>
+    <attribute>
+        <id>PRIMARY_CAPABILITIES</id>
+        <default>
+            <field><id>supportsFsiScom</id><value>0</value></field>
+            <field><id>supportsXscom</id><value>0</value></field>
+            <field><id>supportsInbandScom</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>MODEL</id>
+        <default>CENTAUR</default> 
+    </attribute>    
+</targetType>   
 
 </attributes>

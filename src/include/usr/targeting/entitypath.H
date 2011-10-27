@@ -68,7 +68,7 @@ class EntityPath
          */
         enum
         {
-            MAX_PATH_ELEMENTS = 8,
+            MAX_PATH_ELEMENTS = 10,
         };
 
         /**

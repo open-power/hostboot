@@ -1897,7 +1897,7 @@ sub packEntityPath {
 
     my $binaryData;
 
-    my $maxPathElements = 8;
+    my $maxPathElements = 10;
     my ($typeStr,$path) = split(/:/,$value);
     my (@paths) = split(/\//,$path);
 

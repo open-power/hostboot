@@ -343,5 +343,9 @@ DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
                       TARGETING::TYPE_PROC,
                       fsiScomPerformOp);
 
+DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
+                      DeviceFW::FSISCOM,
+                      TARGETING::TYPE_MEMBUF,
+                      fsiScomPerformOp);
 
 } // end namespace

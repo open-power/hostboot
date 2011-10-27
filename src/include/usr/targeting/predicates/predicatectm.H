@@ -87,11 +87,7 @@ class PredicateCTM : public PredicateBase
         /**
          *  @brief Destroy a class, type, model predicate 
          */
-        virtual ~PredicateCTM() 
-        {
-            #define TARG_FUNC "~PredicateCTM()"
-            #undef TARG_FUNC
-        }
+        virtual ~PredicateCTM();
 
         /**
          *  @brief Set the class

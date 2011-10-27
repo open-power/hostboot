@@ -1290,6 +1290,52 @@ class TargetingTestSuite: public CxxTest::TestSuite
 
         TS_TRACE(EXIT_MRK "testPodNumericalTypes" );
     }
+
+    void testCentaurs()
+    {
+        TS_TRACE(ENTER_MRK "testCentaurs" );
+
+        using namespace TARGETING;
+
+        PredicateCTM l_procChip(CLASS_CHIP,TYPE_PROC,MODEL_VENICE);
+        TargetRangeFilter l_filter(
+            targetService().begin(),
+            targetService().end(),
+            &l_procChip);
+        
+        PredicateCTM l_mbs(CLASS_UNIT,TYPE_MBS);
+        uint32_t l_count = 0;
+        uint32_t l_procs = 0;
+
+        // For each processor
+        for(;l_filter;++l_filter)
+        {
+            l_procs++;
+
+            TargetHandleList l_list;
+            (void) targetService().getAssociated(
+                l_list,
+                *l_filter,
+                TARGETING::TargetService::CHILD_BY_AFFINITY,
+                TARGETING::TargetService::ALL,
+                &l_mbs);
+            l_count += l_list.size();
+        }
+
+        if(l_procs)
+        {
+            if(l_count <= 0)
+            {
+                TS_FAIL("Did not find any Centaur chips connected to processors");
+            }
+            else
+            {
+                TS_TRACE("Found %d Centaur chips connected to processors",l_count);
+            }
+        }
+
+        TS_TRACE(EXIT_MRK "testCentaurs" );
+    }
 };
 
 #endif // End __TESTTARGETING_H

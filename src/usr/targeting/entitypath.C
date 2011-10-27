@@ -352,6 +352,10 @@ const char* EntityPath::pathElementTypeAsString(
             return "L3";
         case TYPE_PERVASIVE:
             return "Pervasive";
+        case TYPE_MEMBUF:
+            return "Membuf";
+        case TYPE_DMI:
+            return "DMI";
         case TYPE_POWERBUS:
             return "Powerbus";
         case TYPE_SCM:

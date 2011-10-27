@@ -143,6 +143,9 @@
         <name>PCI</name>
     </enumerator>
     <enumerator>
+        <name>DMI</name>
+    </enumerator>
+    <enumerator>
         <name>LAST_IN_RANGE</name>
     </enumerator>
     <default>NA</default>

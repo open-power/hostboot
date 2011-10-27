@@ -58,12 +58,11 @@
     </attribute>  
 </targetInstance>
 
+<!-- Venice n0p0 processor chip -->
 
-
-<!-- Salerno n0p0 : start -->
 <targetInstance>
     <id>sys0node0proc0</id>
-    <type>chip-processor-salerno</type>
+    <type>chip-processor-venice</type>
     <attribute><id>SCOM_SWITCHES</id>
         <default>
             <field><id>useFsiScom</id><value>0</value></field>
@@ -89,9 +88,11 @@
     </attribute>  
 </targetInstance>
 
+<!-- Venice n0p0 EX units -->
+
 <targetInstance>
     <id>sys0node0proc0ex0</id>
-    <type>unit-ex-salerno</type>
+    <type>unit-ex-venice</type>
         <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/ex-0</default>
@@ -104,7 +105,7 @@
 
 <targetInstance>
     <id>sys0node0proc0ex1</id>
-    <type>unit-ex-salerno</type>
+    <type>unit-ex-venice</type>
         <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/ex-1</default>
@@ -117,7 +118,7 @@
 
 <targetInstance>
     <id>sys0node0proc0ex2</id>
-    <type>unit-ex-salerno</type>
+    <type>unit-ex-venice</type>
         <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/ex-2</default>
@@ -130,7 +131,7 @@
 
 <targetInstance>
     <id>sys0node0proc0ex3</id>
-    <type>unit-ex-salerno</type>
+    <type>unit-ex-venice</type>
         <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/ex-3</default>
@@ -143,7 +144,7 @@
 
 <targetInstance>
     <id>sys0node0proc0ex4</id>
-    <type>unit-ex-salerno</type>
+    <type>unit-ex-venice</type>
         <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/ex-4</default>
@@ -156,7 +157,7 @@
 
 <targetInstance>
     <id>sys0node0proc0ex5</id>
-    <type>unit-ex-salerno</type>
+    <type>unit-ex-venice</type>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/ex-5</default>
@@ -167,9 +168,11 @@
     </attribute>  
 </targetInstance>
 
+<!-- Venice n0p0 core units -->
+
 <targetInstance>
     <id>sys0node0proc0ex0core0</id>
-    <type>unit-core-salerno</type>
+    <type>unit-core-venice</type>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/ex-0/core-0</default>
@@ -182,7 +185,7 @@
 
 <targetInstance>
     <id>sys0node0proc0ex1core0</id>
-    <type>unit-core-salerno</type>
+    <type>unit-core-venice</type>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/ex-1/core-0</default>
@@ -195,7 +198,7 @@
 
 <targetInstance>
     <id>sys0node0proc0ex2core0</id>
-    <type>unit-core-salerno</type>
+    <type>unit-core-venice</type>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/ex-2/core-0</default>
@@ -208,7 +211,7 @@
 
 <targetInstance>
     <id>sys0node0proc0ex3core0</id>
-    <type>unit-core-salerno</type>
+    <type>unit-core-venice</type>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/ex-3/core-0</default>
@@ -221,7 +224,7 @@
 
 <targetInstance>
     <id>sys0node0proc0ex4core0</id>
-    <type>unit-core-salerno</type>
+    <type>unit-core-venice</type>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/ex-4/core-0</default>
@@ -234,7 +237,7 @@
 
 <targetInstance>
     <id>sys0node0proc0ex5core0</id>
-    <type>unit-core-salerno</type>
+    <type>unit-core-venice</type>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/ex-5/core-0</default>
@@ -245,9 +248,11 @@
     </attribute>  
 </targetInstance>
 
+<!-- Venice n0p0 MCS units -->
+
 <targetInstance>
     <id>sys0node0proc0mcs0</id>
-    <type>unit-mcs-salerno</type>
+    <type>unit-mcs-venice</type>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/mcs-0</default>
@@ -259,60 +264,101 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0proc0mcs0mba0</id>
-    <type>unit-mba-salerno</type>
+    <id>sys0node0proc0mcs1</id>
+    <type>unit-mcs-venice</type>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/mcs-0/mba-0</default>
+        <default>physical:sys-0/node-0/proc-0/mcs-1</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-0/mba-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-1</default>
     </attribute>  
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0proc0mcs0mba1</id>
-    <type>unit-mba-salerno</type>
+    <id>sys0node0proc0mcs2</id>
+    <type>unit-mcs-venice</type>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/mcs-0/mba-1</default>
+        <default>physical:sys-0/node-0/proc-0/mcs-2</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-0/mba-1</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-2</default>
     </attribute>  
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0proc0mcs0mba0port0</id>
-    <type>unit-memport-salerno</type>
+    <id>sys0node0proc0mcs3</id>
+    <type>unit-mcs-venice</type>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/mcs-0/mba-0/mem_port-0</default>
+        <default>physical:sys-0/node-0/proc-0/mcs-3</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-0/mba-0/mem_port-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-3</default>
     </attribute>  
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0proc0mcs0mba1port0</id>
-    <type>unit-memport-salerno</type>
+    <id>sys0node0proc0mcs4</id>
+    <type>unit-mcs-venice</type>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/mcs-0/mba-1/mem_port-0</default>
+        <default>physical:sys-0/node-0/proc-0/mcs-4</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-0/mba-1/mem_port-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-4</default>
     </attribute>  
 </targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0mcs5</id>
+    <type>unit-mcs-venice</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/mcs-5</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-5</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0mcs6</id>
+    <type>unit-mcs-venice</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/mcs-6</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-6</default>
+    </attribute>  
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0mcs7</id>
+    <type>unit-mcs-venice</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/mcs-7</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-7</default>
+    </attribute>  
+</targetInstance>
+
+<!-- Venice n0p0 pervasive unit -->
 
 <targetInstance>
     <id>sys0node0proc0pervasive0</id>
-    <type>unit-pervasive-salerno</type>
+    <type>unit-pervasive-venice</type>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/pervasive-0</default>
@@ -323,9 +369,11 @@
     </attribute>  
 </targetInstance>
 
+<!-- Venice n0p0 powerbus unit -->
+
 <targetInstance>
     <id>sys0node0proc0powerbus0</id>
-    <type>unit-powerbus-salerno</type>
+    <type>unit-powerbus-venice</type>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/powerbus-0</default>
@@ -336,9 +384,11 @@
     </attribute>  
 </targetInstance>
 
+<!-- Venice n0p0 PCI units -->
+
 <targetInstance>
     <id>sys0node0proc0pci0</id>
-    <type>unit-pci-salerno</type>
+    <type>unit-pci-venice</type>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/pci-0</default>
@@ -351,7 +401,7 @@
 
 <targetInstance>
     <id>sys0node0proc0pci1</id>
-    <type>unit-pci-salerno</type>
+    <type>unit-pci-venice</type>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/pci-1</default>
@@ -364,7 +414,7 @@
 
 <targetInstance>
     <id>sys0node0proc0pci2</id>
-    <type>unit-pci-salerno</type>
+    <type>unit-pci-venice</type>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/pci-2</default>
@@ -374,7 +424,173 @@
         <default>affinity:sys-0/node-0/proc-0/pci-2</default>
     </attribute>  
 </targetInstance>
-<!-- Salerno n0p0 : finish -->
 
+
+
+<!-- Centaur n0p0 : start -->
+
+<targetInstance>
+    <id>sys0node0membuf0</id>
+    <type>chip-membuf-centaur</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/membuf-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-0/membuf-0</default>
+    </attribute>  
+
+    <!-- FSI is connected via proc0:cMFSI-0 -->
+    <attribute>
+        <id>FSI_MASTER_CHIP</id>
+        <default>physical:sys-0/node-0/proc-0</default>
+    </attribute>
+    <attribute>
+        <id>FSI_MASTER_TYPE</id>
+        <default>CMFSI</default>
+    </attribute>
+    <attribute>
+        <id>FSI_MASTER_PORT</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FSI_SLAVE_CASCADE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FSI_OPTION_FLAGS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<!-- Centaur MBS affiliated with membuf0 -->
+
+<targetInstance>
+    <id>sys0node0membuf0mbs0</id>
+    <type>unit-mbs-centaur</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/membuf-0/mbs-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-0/membuf-0/mbs-0</default>
+    </attribute>
+</targetInstance>
+
+<!-- Centaur MBAs affiliated with membuf0 -->
+
+<targetInstance>
+    <id>sys0node0membuf0mbs0mba0</id>
+    <type>unit-mba-centaur</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/membuf-0/mbs-0/mba-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-0/membuf-0/mbs-0/mba-0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0membuf0mbs0mba1</id>
+    <type>unit-mba-centaur</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-0/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+</targetInstance>
+
+<!-- Centaur n0p0 : end -->
+
+
+
+<!-- Centaur n0p1 : start -->
+
+<targetInstance>
+    <id>sys0node0membuf1</id>
+    <type>chip-membuf-centaur</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/membuf-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-1/membuf-0</default>
+    </attribute>  
+
+    <!-- FSI is connected via proc0:cMFSI-1 -->
+    <attribute>
+        <id>FSI_MASTER_CHIP</id>
+        <default>physical:sys-0/node-0/proc-0</default>
+    </attribute>
+    <attribute>
+        <id>FSI_MASTER_TYPE</id>
+        <default>CMFSI</default>
+    </attribute>
+    <attribute>
+        <id>FSI_MASTER_PORT</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>FSI_SLAVE_CASCADE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FSI_OPTION_FLAGS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<!-- Centaur MBS affiliated with membuf1 -->
+
+<targetInstance>
+    <id>sys0node0membuf1mbs0</id>
+    <type>unit-mbs-centaur</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/membuf-1/mbs-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-1/membuf-0/mbs-0</default>
+    </attribute>
+</targetInstance>
+
+<!-- Centaur MBAs affiliated with membuf1 -->
+
+<targetInstance>
+    <id>sys0node0membuf1mbs0mba0</id>
+    <type>unit-mba-centaur</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/membuf-1/mbs-0/mba-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-1/membuf-0/mbs-0/mba-0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0membuf1mbs0mba1</id>
+    <type>unit-mba-centaur</type>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/membuf-1/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-1/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+</targetInstance>
+
+<!-- Centaur n0p1 : end -->
 
 </attributes>

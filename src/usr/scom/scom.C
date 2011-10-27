@@ -50,6 +50,11 @@ DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
                       TARGETING::TYPE_PROC,
                       scomPerformOp);
 
+DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
+                      DeviceFW::SCOM,
+                      TARGETING::TYPE_MEMBUF,
+                      scomPerformOp);
+
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 errlHndl_t scomPerformOp(DeviceFW::OperationType i_opType,
