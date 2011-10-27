@@ -46,8 +46,25 @@ IMGDIR = ${ROOTPATH}/img
 EXTRAINCDIR += ${GENDIR}
 endif
 
+__internal__comma= ,
+__internal__empty=
+__internal__space=$(__internal__empty) $(__internal__empty)
+MAKE_SPACE_LIST = $(subst $(__internal__comma),$(__internal__space),$(1))
+
 ifdef HOSTBOOT_DEBUG
-CUSTOMFLAGS += -DHOSTBOOT_DEBUG=1
+ifeq ($(HOSTBOOT_DEBUG),1)
+    CUSTOMFLAGS += -DHOSTBOOT_DEBUG=1
+else
+ifndef MODULE
+ifneq (,$(filter kernel,$(call MAKE_SPACE_LIST, $(HOSTBOOT_DEBUG))))
+    CUSTOMFLAGS += -DHOSTBOOT_DEBUG=kernel
+endif
+else
+ifneq (,$(filter $(MODULE), $(call MAKE_SPACE_LIST, $(HOSTBOOT_DEBUG))))
+    CUSTOMFLAGS += -DHOSTBOOT_DEBUG=$(MODULE)
+endif
+endif
+endif
 endif
 
 TRACEPP = ${ROOTPATH}/src/build/trace/tracepp
@@ -260,13 +277,13 @@ clean: ${SUBDIRS:.d=.clean}
 	       ${IMAGE_EXTRAS} ${EXTRA_LIDS_} \
 	       ${EXTRA_OBJS} ${_GENFILES} ${EXTRA_PARTS} ${EXTRA_CLEAN}) 
 
-cscope: code_pass
+cscope: ${SUBDIRS}
 	mkdir -p ${ROOTPATH}/obj/cscope
 	(cd ${ROOTPATH}/obj/cscope ; rm -f cscope.* ; \
 	    find ../../ -name '*.[CHchS]' -type f -fprint cscope.files; \
 	    cscope -bqk)
 
-ctags: code_pass
+ctags: ${SUBDIRS}
 	mkdir -p ${ROOTPATH}/obj/cscope
 	(cd ${ROOTPATH}/obj/cscope ; rm -f tags ; \
 	    ctags --recurse=yes --fields=+S ../../src)
@@ -274,7 +291,7 @@ ctags: code_pass
 ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(MAKECMDGOALS),gen_pass)
 ifneq ($(MAKECMDGOALS),GEN_PASS)
-    include $(OBJECTS:.o=.dep)
+    -include $(OBJECTS:.o=.dep)
 endif
 endif
 endif
