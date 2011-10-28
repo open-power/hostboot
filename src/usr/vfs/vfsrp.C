@@ -90,6 +90,7 @@ void VfsRp::msg_handler(void * unused)
 
 void VfsRp::load_unload(void * i_msg)
 {
+    task_detach();
     Singleton<VfsRp>::instance()._load_unload((msg_t*)i_msg);
     task_end();
 }
@@ -98,6 +99,7 @@ void VfsRp::load_unload(void * i_msg)
 
 void VfsRp::exec(void * i_msg)
 {
+    task_detach();
     Singleton<VfsRp>::instance()._exec((msg_t*)i_msg);
     task_end();
 }

@@ -33,6 +33,7 @@
 #include <arch/ppc.H>
 #include <string.h>
 #include <limits.h>
+#include <assert.h>
 
 extern "C" void userspace_task_entry();
 
@@ -169,12 +170,12 @@ void TaskManager::_endTask(task_t* t, void* retval, int status)
     if (getCurrentTask() == t)
         t->cpu->scheduler->setNextRunnable();
 
+    iv_spinlock.lock();
+
     // Update status in tracker.
     t->tracker->status = status;
     t->tracker->retval = retval;
     t->tracker->task = NULL; // NULL signifies task is complete for now.
-
-    iv_spinlock.lock();
 
     if (t->detached) // If detached, just clean up the tracker.
     {
@@ -205,6 +206,19 @@ void TaskManager::_endTask(task_t* t, void* retval, int status)
                 TASK_SETRTN(parent->task, t->tid);
                 removeTracker(t->tracker);
                 parent->task->cpu->scheduler->addTask(parent->task);
+            }
+        }
+        else if (!t->tracker->parent) // Parented by kernel.
+        {
+            if (status == TASK_STATUS_CRASHED)
+            {
+                printk("Critical: Parentless task %d crashed.\n",
+                       t->tid);
+                kassert(status != TASK_STATUS_CRASHED);
+            }
+            else
+            {
+                removeTracker(t->tracker);
             }
         }
     }
@@ -326,7 +340,27 @@ void TaskManager::removeTracker(task_tracking_t* t)
     while(task_tracking_t* child = t->children.remove())
     {
         child->parent = parent;
-        trackingList->insert(child);
+        if ((!parent) && (!child->task)) // Deal with finished children
+                                         // becoming parented by the kernel.
+        {
+            if (child->status == TASK_STATUS_CRASHED)
+            {
+                trackingList->insert(child); // Insert into kernel list so it
+                                             // is there for debug.
+
+                printk("Critical: Parentless task %d crashed.\n",
+                       child->key);
+                kassert(child->status != TASK_STATUS_CRASHED);
+            }
+            else
+            {
+                removeTracker(child);
+            }
+        }
+        else
+        {
+            trackingList->insert(child);
+        }
     }
 
     // Delete tracker object.

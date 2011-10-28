@@ -37,27 +37,25 @@
 class VmmBaseTest : public CxxTest::TestSuite
 {
     public:
-        static volatile int rc;
         static msg_q_t iv_mq;
 
         void testNullAccess()
         {
-            rc = 0; sync();
+            int status;
+
             printk("Test case: Expect to see uncaught exception! ");
-            task_create(readFromNULL, NULL);
-            while (rc == 0) task_yield();
-            task_yield();
-            if (rc == -1)
+            tid_t child = task_create(readFromNULL, NULL);
+
+            if ((child != task_wait_tid(child, &status, NULL)) ||
+                (status != TASK_STATUS_CRASHED))
             {
                 TS_FAIL("Write to NULL not caught.");
             }
 
-            rc = 0; sync();
             printk("Test case: Expect to see uncaught exception! ");
-            task_create(writeToNULL, NULL);
-            while (rc == 0) task_yield();
-            task_yield();
-            if (rc == -1)
+            child = task_create(writeToNULL, NULL);
+            if ((child != task_wait_tid(child, &status, NULL)) ||
+                (status != TASK_STATUS_CRASHED))
             {
                 TS_FAIL("Write to NULL not caught.");
             }
@@ -65,12 +63,12 @@ class VmmBaseTest : public CxxTest::TestSuite
 
         void testWriteToKernelCode()
         {
-            rc = 0; sync();
+            int status;
+
             printk("Test case: Expect to see uncaught exception! ");
-            task_create(writeToKernelCode, NULL);
-            while (rc == 0) task_yield();
-            task_yield();
-            if (rc == -1)
+            tid_t child = task_create(writeToKernelCode, NULL);
+            if ((child != task_wait_tid(child, &status, NULL)) ||
+                (status != TASK_STATUS_CRASHED))
             {
                 TS_FAIL("Write to kernel code not caught.");
             }
@@ -97,7 +95,7 @@ class VmmBaseTest : public CxxTest::TestSuite
             uint64_t l_testSize = VMM_SIZE_RMVPAGE_TEST;
             uint64_t vaddr = l_testAddr+l_testSize;
             uint64_t vsize = PageManager::availPages()*PAGESIZE;
-            rc = mm_alloc_block(iv_mq,reinterpret_cast<void*>(vaddr),vsize);
+            int rc = mm_alloc_block(iv_mq,reinterpret_cast<void*>(vaddr),vsize);
             if (rc != 0)
             {
                 TS_FAIL("Unable to allocate block.\n");
@@ -128,25 +126,19 @@ class VmmBaseTest : public CxxTest::TestSuite
 
         static void readFromNULL(void* unused)
         {
-            rc = 1; sync();
-            printk("%lx", (*(uint64_t*)NULL)); sync();
-            rc = -1; sync();
+            printk("%lx", (*(uint64_t*)NULL));
             task_end();
         }
 
         static void writeToNULL(void* unused)
         {
-            rc = 1; sync();
-            (*(uint64_t*)NULL) = 0x12345678; sync();
-            rc = -1; sync();
+            (*(uint64_t*)NULL) = 0x12345678;
             task_end();
         }
 
         static void writeToKernelCode(void* unused)
         {
-            rc = 1; sync();
-            (*(*(uint64_t**)&printk)) = 0x12345678; sync();
-            rc = -1; sync();
+            (*(*(uint64_t**)&printk)) = 0x12345678;
             task_end();
         }
 
@@ -163,13 +155,12 @@ class VmmBaseTest : public CxxTest::TestSuite
                     /*printkd("Effective Addr: 0x%lX, %s\n",ea,
                             message->type==MSG_MM_RP_READ?"READ":"WRITE");*/
                     message->data[1] = 0;
-                    rc = msg_respond(iv_mq, message);
+                    msg_respond(iv_mq, message);
                 }
             }
         }
 
 };
-volatile int VmmBaseTest::rc = 0;
 msg_q_t VmmBaseTest::iv_mq = msg_q_create();
 
 #endif

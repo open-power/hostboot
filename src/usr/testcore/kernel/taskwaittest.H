@@ -171,7 +171,7 @@ class TaskWaitTest : public CxxTest::TestSuite
 
         static void TaskThatCrashes(void* unused)
         {
-            printk("Test case: Expect to see uncaught exception!");
+            printk("Test case: Expect to see uncaught exception! ");
             *(int64_t*)(0) = 0xDEADC0DE;
         }
 };

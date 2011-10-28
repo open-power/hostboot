@@ -39,7 +39,6 @@ class vmmpagetest: public CxxTest::TestSuite
     public:
 
         static volatile int rc;
-        static volatile int iv_rc;
         //Testing page removal variables
         static msg_q_t iv_mq;
         static uint64_t iv_va;
@@ -148,12 +147,11 @@ class vmmpagetest: public CxxTest::TestSuite
             }
 
             // try to write to a read_only page
-            iv_rc = 0; sync();
+            int status;
             printk("\nTest case1: Expect to see uncaught exception! ");
-            task_create(writeAddrWithNoPerm, NULL);
-            while (iv_rc == 0) task_yield();
-            task_yield();
-            if (iv_rc == -1)
+            tid_t child = task_create(writeAddrWithNoPerm, NULL);
+            if ((child != task_wait_tid(child, &status, NULL)) ||
+                (status != TASK_STATUS_CRASHED))
             {
                 TS_FAIL("ERROR! Write to READ_ONLY address not caught.");
             }
@@ -165,12 +163,10 @@ class vmmpagetest: public CxxTest::TestSuite
             }
 
             // try to write to an executable page
-            iv_rc = 0; sync();
             printk("\nTest case2: Expect to see uncaught exception! ");
-            task_create(writeAddrWithNoPerm2, NULL);
-            while (iv_rc == 0) task_yield();
-            task_yield();
-            if (iv_rc == -1)
+            child = task_create(writeAddrWithNoPerm2, NULL);
+            if ((child != task_wait_tid(child, &status, NULL)) ||
+                (status != TASK_STATUS_CRASHED))
             {
                 TS_FAIL("ERROR! Write to EXECUTABLE address not caught.");
             }
@@ -182,12 +178,10 @@ class vmmpagetest: public CxxTest::TestSuite
             }
 
             // try to write to a no access page
-            iv_rc = 0; sync();
             printk("\nTest case3: Expect to see uncaught exception! ");
-            task_create(writeAddrWithNoPerm, NULL);
-            while (iv_rc == 0) task_yield();
-            task_yield();
-            if (iv_rc == -1)
+            child = task_create(writeAddrWithNoPerm, NULL);
+            if ((child != task_wait_tid(child, &status, NULL)) ||
+                (status != TASK_STATUS_CRASHED))
             {
                 TS_FAIL("ERROR!  write to a NO_ACCESS addr not caught.\n");
             }
@@ -238,24 +232,19 @@ class vmmpagetest: public CxxTest::TestSuite
 
         static void writeAddrWithNoPerm(void* unused)
         {
-            iv_rc = 1; sync();
             (*(volatile uint64_t *)(iv_va+4*PAGESIZE)) = 0x11111111; sync();
-            iv_rc = -1; sync();
             task_end();
         }
 
         static void writeAddrWithNoPerm2(void* unused)
         {
-            iv_rc = 1; sync();
             (*(volatile uint64_t *)(iv_va+4*PAGESIZE+2*PAGESIZE)) = 0x22222222; sync();
-            iv_rc = -1; sync();
             task_end();
         }
 
 
 };
 volatile int vmmpagetest::rc = 0;
-volatile int vmmpagetest::iv_rc = 0;
 msg_q_t vmmpagetest::iv_mq = msg_q_create();
 uint64_t vmmpagetest::iv_va = VMM_VADDR_RMVPAGE_TEST;
 uint64_t vmmpagetest::iv_size = VMM_SIZE_RMVPAGE_TEST;
