@@ -70,10 +70,10 @@ fapi::ReturnCode createAttrAccessError(
     const fapi::AttributeId       i_fapiAttrId,
     const fapi::Target* const     i_pFapiTarget)
 {
-    /*
+    /*@
      *  @errortype
-     *  @moduleid   fapi::MOD_PLAT_ATTR_SVC_CREATE_ATTR_ACCESS_ERROR
-     *  @reasoncode fapi::RC_FAILED_TO_ACCESS_ATTRIBUTE
+     *  @moduleid   MOD_PLAT_ATTR_SVC_CREATE_ATTR_ACCESS_ERROR
+     *  @reasoncode RC_FAILED_TO_ACCESS_ATTRIBUTE
      *  @userdata1  Top 32 bits = platform attribute ID, lower 32 bits = 
      *                  FAPI attribute ID
      *  @userdata2  FAPI target type, or NULL if system target

@@ -299,7 +299,6 @@ sub extractTags
     my $data;
     my ($file, $comp) = @_;
     debugMsg( "extractTags: Component: $comp" );
-    my $found = 0;
     local *FH;
 
     debugMsg( "Processing: $file" );
@@ -326,12 +325,6 @@ sub extractTags
     {
         debugMsg( "Found New Error Tag!" );
 
-        if( !$found )
-        {
-            findNameSpace( $file )
-        }
-
-        $found = 1;
         my $text = $1;
         debugMsg( "Text1: $text" );
         my %hash = $text =~ /\@(\S+)(?:\s+|\.+)\b(.+?)$/gm;
@@ -506,6 +499,9 @@ sub includeReasonCodes
 
             print $fh "#include <$incFileName>\n";
 #            print $fh "#include <$parentDir>\n";
+
+            # Find the namespace of the reason codes
+            findNameSpace( $file )
         }
         elsif( -d $file )
         {
@@ -565,10 +561,6 @@ EOF
         my $namespace = $_;
         print $fh "using namespace $namespace;\n"
     }
-
-    # VFS namespace is defined in header file with no errors, so we didn't
-    # find it...
-    print $fh "using namespace VFS;\n";
 
     print $fh <<EOF;
 
