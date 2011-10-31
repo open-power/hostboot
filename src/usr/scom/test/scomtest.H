@@ -51,26 +51,11 @@ public:
      */
     void test_FSISCOMreadWrite(void)
     {
-
         TRACFCOMP( g_trac_scom, "ScomTest::test_FSISCOMreadWrite> Start" );
-
-        TRACFCOMP( g_trac_scom, "ScomTest::test_FSISCOMreadWrite> Disabled due to simics stability issues" );
-        return;  //@todo - enable when simics is stable
 
         uint64_t fails = 0;
         uint64_t total = 0;
         errlHndl_t l_err = NULL;
-
-        //make sure the FSI hardware is initailized (ordering of test cases is not currently guaranteed)
-        l_err = FSI::initializeHardware();
-        if( l_err )
-        {
-            TRACFCOMP(g_trac_scom, "ScomTest::test_FSISCOMreadWrite> FSI::initializeHardware failed, RC=0x%X", l_err->reasonCode() );
-            TS_FAIL( "ScomTest::test_FSISCOMreadWrite> FsiDD::initializeHardware failed, aborting test case." );
-            errlCommit(l_err);
-            return;
-        }
-
 
         TARGETING::Target* fsi_target = NULL;
 
@@ -78,8 +63,26 @@ public:
         TARGETING::EntityPath epath(TARGETING::EntityPath::PATH_PHYSICAL);
         epath.addLast(TARGETING::TYPE_SYS,0);
         epath.addLast(TARGETING::TYPE_NODE,0);
-        epath.addLast(TARGETING::TYPE_PROC,1);
+        epath.addLast(TARGETING::TYPE_PROC,9);
         fsi_target = TARGETING::targetService().toTarget(epath);
+
+        //only run if the target exists and has FSI enabled.
+        if(fsi_target == NULL)
+        {
+            TRACFCOMP( g_trac_scom, "ScomTest::test_FSISCOMreadWrite> FSI Target not found, exiting test" );
+            return;
+        }
+        else if((TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL == fsi_target) ||
+                (fsi_target->getAttr<TARGETING::ATTR_SCOM_SWITCHES>().useXscom))
+        {
+            TRACFCOMP( g_trac_scom, "ScomTest::test_FSISCOMreadWrite> Target is the MASTER Sentinal or is set to use Xscom, exiting test" );
+            return;
+        }
+        else if(0 == fsi_target->getAttr<TARGETING::ATTR_SCOM_SWITCHES>().useFsiScom)
+        {
+            TRACFCOMP( g_trac_scom, "ScomTest::test_FSISCOMreadWrite> useFsiScom set to zero, exiting test" );
+            return;
+        }
 
         // scratch data to use
         //@fixme: Need to either fabricate some fake registers to use or save off data before modifying SCOMs to avoid
