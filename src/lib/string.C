@@ -22,7 +22,7 @@
 //  IBM_PROLOG_END
 #include <string.h>
 
-extern "C" void *memset(void *vdest, int64_t ch, size_t len)
+extern "C" void *memset(void *vdest, int ch, size_t len)
 {
     // TODO: align to an 8-byte boundary
     // Loop, storing 8 bytes every 3 instructions
@@ -105,7 +105,7 @@ extern "C" void *memmove(void *vdest, const void *vsrc, size_t len)
     return vdest;
 }
 
-extern "C" int64_t memcmp(const void *p1, const void *p2, size_t len)
+extern "C" int memcmp(const void *p1, const void *p2, size_t len)
 {
     const char *c1 = reinterpret_cast<const char *>(p1);
     const char *c2 = reinterpret_cast<const char *>(p2);
