@@ -1,4 +1,26 @@
 #!/bin/sh
+#  IBM_PROLOG_BEGIN_TAG
+#  This is an automatically generated prolog.
+#
+#  $Source: src/build/hwpf/prcd_compile.tcl $
+#
+#  IBM CONFIDENTIAL
+#
+#  COPYRIGHT International Business Machines Corp. 2011
+#
+#  p1
+#
+#  Object Code Only (OCO) source materials
+#  Licensed Internal Code Source Materials
+#  IBM HostBoot Licensed Internal Code
+#
+#  The source code for this program is not published or other-
+#  wise divested of its trade secrets, irrespective of what has
+#  been deposited with the U.S. Copyright Office.
+#
+#  Origin: 30
+#
+#  IBM_PROLOG_END
 # The next line is executed by /bin/sh, but not tcl \
 exec tclsh "$0" "$@" 
 
@@ -227,11 +249,11 @@ foreach arg $argv {
 # NOT SUPPORTED -p    { set state portflag }
                 -v    { set verbose 1 }
                 -o    { set state outputflag }
-		-*h* { puts {prcd_compile.tcl [--help] [-d <drivername>] [-o <ouput dir> ] fapiTestHwp.C fapiTestHwp.H }
+		-*h* { puts {prcd_compile.tcl [--help] [-d <drivername>] [-o <ouput dir> ] fapiTestHwp.C fapiTestHwp.H sample.initfile}
                        puts {}
-                       puts {Note that currently this tool only supports the 2 files listed above as input }
+                       puts {Note that currently this tool only supports the 3 files listed above as input }
                        puts {}
-		       puts {example: > prcd_compile.tcl -d b0621a_2001_Sprint2 -o ./output/ fapiTestHwp.C fapiTestHwp.C }
+		       puts {example: > prcd_compile.tcl -d b0621a_2001_Sprint2 -o ./output/ fapiTestHwp.C fapiTestHwp.C sample.initfile}
                        puts {}
 		       puts {On success, 5 files (hbicore.bin and hbicore_test.bin, hbicore.syms }
                        puts { hbicore_test.syms and hbotStringFile) will be placed in the output dir. }
@@ -244,6 +266,7 @@ foreach arg $argv {
                        exit
                      }
                  *fapiTestHwp\.* { lappend files $arg }
+                 *\.initfile     { lappend files $arg }
 		default { puts "Unsupported File or Argument: $arg "
                           exit
                         }

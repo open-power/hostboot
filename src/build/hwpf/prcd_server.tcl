@@ -1,3 +1,25 @@
+#  IBM_PROLOG_BEGIN_TAG
+#  This is an automatically generated prolog.
+#
+#  $Source: src/build/hwpf/prcd_server.tcl $
+#
+#  IBM CONFIDENTIAL
+#
+#  COPYRIGHT International Business Machines Corp. 2011
+#
+#  p1
+#
+#  Object Code Only (OCO) source materials
+#  Licensed Internal Code Source Materials
+#  IBM HostBoot Licensed Internal Code
+#
+#  The source code for this program is not published or other-
+#  wise divested of its trade secrets, irrespective of what has
+#  been deposited with the U.S. Copyright Office.
+#
+#  Origin: 30
+#
+#  IBM_PROLOG_END
 # the next line restarts using tclsh\
 exec tclsh "$0" "$@"
 
@@ -77,6 +99,7 @@ proc AquireData { sock } {
             ################################################################
 
             set sbname($sock) "sb[string range [clock seconds] 4 end]"
+
             puts $sock "$sbname($sock)"
             puts $log "$sock: $sbname($sock)"
 
@@ -114,7 +137,8 @@ proc AquireData { sock } {
             ################################################################
             # Create the path to the file in the git sandbox
             # If it's a .C file it goes to src/usr/hwpf/hwp/ otherwise
-            # it's a .H and needs to go to src/include/usr/hwpf/hwp/
+            # it's a .H and needs to go to src/include/usr/hwpf/hwp/ otherwise
+            # it's an initfile and needs to go to src/usr/hwpf/hwp/initfiles/
             # Note that I can't get /* to work correctly in the regexp so I had to
             # hard code in the fapi which should be ok, but annoying.
             ################################################################
@@ -123,8 +147,10 @@ proc AquireData { sock } {
                 set filen "$sb_dir/$sbname($sock)/src/usr/hwpf/hwp/$file"	
             } elseif {[regexp {.*/*(fapi.+\.H)} $b -> file] } {
                 set filen "$sb_dir/$sbname($sock)/src/include/usr/hwpf/hwp/$file"
+            } elseif {[regexp {(.*\.initfile)} $b -> file] } {
+                set filen "$sb_dir/$sbname($sock)/src/usr/hwpf/hwp/initfiles/$file"
             } else {
-                puts $sock "Invalid Input File - $b"
+                puts $sock "error: Invalid Input File - $b"
                 puts $log "$sock: Invalid Input File - $b"
                 CloseOut $sock
                 return
@@ -208,7 +234,7 @@ proc CloseOut { sock } {
     unset socklist(addr,$sock)
     if {[info exists git_sh($sock)] } {
         # Comment out next line to avoid deleting the /tmp/hwp/ sandbox
-        # eval {exec} "rm -rf $sb_dir/$sbname($sock)"
+        eval {exec} "rm -rf $sb_dir/$sbname($sock)"
         unset git_sh($sock)
         #unset sandbox($sbname($sock))
     }
@@ -317,7 +343,7 @@ proc SendSandbox { sock git_sh} {
 # Start Compile
 ##################################################################
 
-    puts $git_sh "source env.bash; make -j4"
+    puts $git_sh "source env.bash; make -j4" 
 
 ##################################################################
 # tell the workon shell to terminate
