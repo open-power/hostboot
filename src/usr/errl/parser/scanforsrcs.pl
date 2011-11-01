@@ -548,6 +548,10 @@ EOF
     my $startDir = $sandBase."/src/include/usr/*";
     includeReasonCodes( $fh, $startDir, 1 );
 
+    # Also include reason codes from generated files
+    $startDir = $sandBase."/obj/genfiles";
+    includeReasonCodes( $fh, $startDir, 0 );
+
     print $fh <<EOF;
 
 

@@ -341,6 +341,7 @@ print AIFILE "#endif\n";
 print ASFILE "    else\n";
 print ASFILE "    {\n";
 print ASFILE "        FAPI_ERR(\"fapiGetInitFileAttr: Unrecognized attr: %d\", i_id);\n";
+print ASFILE "        ReturnCodeFfdc::addEIFfdc(l_rc, static_cast<uint32_t>(i_id));";
 print ASFILE "        l_rc = FAPI_RC_INVALID_ATTR_GET;\n";
 print ASFILE "    }\n\n";
 print ASFILE "    if (l_rc)\n";

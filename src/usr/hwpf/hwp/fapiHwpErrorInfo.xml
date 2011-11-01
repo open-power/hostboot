@@ -27,7 +27,7 @@
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_TEST_ERROR_A</rc>
-    <description>Test Error A</description>
+    <description>HWP Unit Test expected error A</description>
     <!-- Call hwpTestFfdc1 to collect FFDC from the master chip -->
     <collectFfdc>hwpTestFfdc1, MASTER_CHIP</collectFfdc>
     <!-- Collect local FFDC FFDC_DATA_1 -->
@@ -49,7 +49,7 @@
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_TEST_ERROR_B</rc>
-    <description>Test Error B</description>
+    <description>HWP Unit Test expected error B</description>
     <!-- Call hwpTestAnalyzeError on MASTER_CHIP to analyze the error -->
     <callFunc>hwpTestAnalyzeError, MASTER_CHIP</callFunc>
   </hwpError>
@@ -76,5 +76,9 @@
   <hwpError>
     <rc>RC_HWP_EXEC_INITFILE_TEST_FAILED</rc>
     <description>HWP Exec InitFile test case failed </description>
+  </hwpError>
+  <hwpError>
+    <rc>RC_HWP_ATTR_UNIT_TEST_FAIL</rc>
+    <description>HWP Attribute Unit Test failed</description>
   </hwpError>
 </hwpErrors>

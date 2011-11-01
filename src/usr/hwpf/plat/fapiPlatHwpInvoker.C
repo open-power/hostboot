@@ -143,24 +143,22 @@ errlHndl_t fapiRcToErrl(ReturnCode & io_rc)
             FAPI_ERR("fapiRcToErrl: HWP error: 0x%x",
                      static_cast<uint32_t>(io_rc));
 
-            // TODO What should the severity be? Should it be in the error
-            // record
-            /*@
-             * @errortype
-             * @moduleid     MOD_RC_TO_ERRL
-             * @reasoncode   RC_HWP_ERROR
-             * @userdata1    Return Code Value
-             * @devdesc      Error from HWP
-             */
+            // TODO What should the severity be? Should it be in the error info?
+
+            // The errlog reason code is the HWPF compID and the rcValue LSB
+            uint32_t l_rcValue = static_cast<uint32_t>(io_rc);
+            uint16_t l_reasonCode = l_rcValue;
+            l_reasonCode &= 0xff;
+            l_reasonCode |= HWPF_COMP_ID;
+
+            // HostBoot errlog tags for HWP errors are in generated file
+            // fapiHwpReasonCodes.H
             l_pError = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                               MOD_RC_TO_ERRL,
-                                               RC_HWP_ERROR,
-                                               static_cast<uint32_t>(io_rc));
+                                               MOD_HWP_RC_TO_ERRL,
+                                               l_reasonCode);
 
             // Get the Error Information Pointer
-            const ErrorInfo * l_pErrorInfo = NULL;
-
-            l_pErrorInfo = io_rc.getErrorInfo();
+            const ErrorInfo * l_pErrorInfo = io_rc.getErrorInfo();
 
             if (l_pErrorInfo)
             {
@@ -180,17 +178,26 @@ errlHndl_t fapiRcToErrl(ReturnCode & io_rc)
             // FAPI error. Create an error log
             FAPI_ERR("fapiRcToErrl: FAPI error: 0x%x",
                      static_cast<uint32_t>(io_rc));
-            /*@
-             * @errortype
-             * @moduleid     MOD_RC_TO_ERRL
-             * @reasoncode   RC_FAPI_ERROR
-             * @userdata1    Return Code Value
-             * @devdesc      FAPI Error
-             */
+
+            // The errlog reason code is the HWPF compID and the rcValue LSB
+            uint32_t l_rcValue = static_cast<uint32_t>(io_rc);
+            uint16_t l_reasonCode = l_rcValue;
+            l_reasonCode &= 0xff;
+            l_reasonCode |= HWPF_COMP_ID;
+
+            // HostBoot errlog tags for FAPI errors are in fapiPlatReasonCodes.H
             l_pError = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                               MOD_RC_TO_ERRL,
-                                               RC_FAPI_ERROR,
-                                               static_cast<uint32_t>(io_rc));
+                                               MOD_FAPI_RC_TO_ERRL,
+                                               l_reasonCode);
+
+            // FAPI may have added FFDC Error Information.
+            // Get the Error Information Pointer
+            const ErrorInfo * l_pErrorInfo = io_rc.getErrorInfo();
+
+            if (l_pErrorInfo)
+            {
+                processEIFfdcs(*l_pErrorInfo, l_pError);
+            }
         }
 
         // Set the ReturnCode to success, this will delete any ErrorInfo or PLAT

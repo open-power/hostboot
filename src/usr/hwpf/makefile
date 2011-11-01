@@ -25,7 +25,9 @@ MODULE = hwpf
 
 FAPI_ERROR_TARGETS = fapiHwpReturnCodes.H fapiHwpErrorInfo.H
 FAPI_ATTR_TARGETS = fapiAttributeIds.H fapiAttributeService.C
-GENFILES = ${FAPI_ERROR_TARGETS} ${FAPI_ATTR_TARGETS}
+FAPI_HWP_ERROR_TAGS = fapiHwpReasonCodes.H
+
+GENFILES = ${FAPI_ERROR_TARGETS} ${FAPI_ATTR_TARGETS} ${FAPI_HWP_ERROR_TAGS}
 
 SUBDIRS = fapi.d hwp.d plat.d test.d
 
@@ -40,3 +42,8 @@ $(call GENTARGET, $(FAPI_ERROR_TARGETS)) : \
 $(call GENTARGET, $(FAPI_ATTR_TARGETS)) : \
 	    fapi/fapiParseAttributeInfo.pl hwp/fapiHwpAttributeInfo.xml 
 	$< $(dir $@) $(filter-out $<,$^)
+
+$(call GENTARGET, $(FAPI_HWP_ERROR_TAGS)) : \
+		plat/fapiCreateHwpErrorTags.pl hwp/fapiHwpErrorInfo.xml
+	$< $(dir $@) $(filter-out $<,$^)
+
