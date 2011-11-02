@@ -108,7 +108,7 @@ namespace TARGETING
                 TRACFCOMP(g_trac_targeting,
                           ERR_MRK "AttrRP: Critical error in startup and no "
                                   "TaskArgs given by init-service.");
-                errlCommit(l_errl);
+                errlCommit(l_errl,TARG_COMP_ID);
             }
         }
     }
@@ -248,7 +248,7 @@ namespace TARGETING
                                                         msg->type,
                                                         section)
                                                   );
-                errlCommit(l_errl);
+                errlCommit(l_errl,TARG_COMP_ID);
 
             }
 

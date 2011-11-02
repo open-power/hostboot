@@ -223,7 +223,7 @@ void DeconfigGard::_deconfigureTarget(TARGETING::Target & i_target,
         l_pErr = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
                                          MOD_DECONFIG_GARD,
                                          RC_TARGET_NOT_DECONFIGURABLE);
-        errlCommit(l_pErr);
+        errlCommit(l_pErr,HWAS_COMP_ID);
     }
     else
     {
@@ -402,7 +402,7 @@ errlHndl_t DeconfigGard::_createGardRecord(const TARGETING::Target & i_target,
         l_pErr = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                          MOD_DECONFIG_GARD,
                                          RC_TARGET_NOT_GARDABLE);
-        errlCommit(l_pErr);
+        errlCommit(l_pErr,HWAS_COMP_ID);
     }
     else
     {

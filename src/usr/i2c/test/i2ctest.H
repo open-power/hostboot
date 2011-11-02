@@ -133,7 +133,7 @@ class I2CTest: public CxxTest::TestSuite
             if ( err )
             {
                 TS_FAIL( "testI2C1 failed!  Error committed." );
-                errlCommit( err );
+                errlCommit( err, I2C_COMP_ID );
             }
             else
             {

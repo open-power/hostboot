@@ -50,7 +50,7 @@ namespace CxxTest
 using namespace INITSERVICE;
 
 trace_desc_t *g_trac_cxxtest = NULL;
-TRAC_INIT(&g_trac_cxxtest, "CXXTEST", 1024 );
+TRAC_INIT(&g_trac_cxxtest, CXXTEST_COMP_NAME, 1024 );
 
 
 /**
@@ -112,7 +112,7 @@ void _start(void *io_pArgs)
             //  move on.
             TS_FAIL( "ERROR: Task %s could not be loaded, committing errorlog",
                     *i );
-            errlCommit( l_errl );
+            errlCommit( l_errl, CXXTEST_COMP_ID );
             continue;
         }
 

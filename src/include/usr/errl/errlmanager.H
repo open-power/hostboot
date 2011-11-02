@@ -70,7 +70,7 @@ namespace ERRORLOG
  */
 
 // TODO Work item 4104 to make comitter comp required, no default.
-void errlCommit(errlHndl_t& io_err, compId_t i_committerComp = 0 );
+void errlCommit(errlHndl_t& io_err, compId_t i_committerComp );
 
 /*****************************************************************************/
 // Forward class declarations

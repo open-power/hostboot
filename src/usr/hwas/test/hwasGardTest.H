@@ -59,7 +59,7 @@ public:
         
         if (l_pErr)
         {
-            errlCommit(l_pErr);
+            errlCommit(l_pErr,HWAS_COMP_ID);
             TS_FAIL("testDeconfigure1: Error from getDeconfigureRecords");
         }
         else
@@ -91,7 +91,7 @@ public:
         
         if (l_pErr)
         {
-            errlCommit(l_pErr);
+            errlCommit(l_pErr,HWAS_COMP_ID);
             TS_FAIL("testDeconfigure2: Error from getDeconfigureRecords");
         }
         else
@@ -226,7 +226,7 @@ public:
         
         if (l_pErr)
         {
-            errlCommit(l_pErr);
+            errlCommit(l_pErr,HWAS_COMP_ID);
         }
     }
     
@@ -338,7 +338,7 @@ public:
         
         if (l_pErr)
         {
-            errlCommit(l_pErr);
+            errlCommit(l_pErr,HWAS_COMP_ID);
         }
     }
 
@@ -356,7 +356,7 @@ public:
         
         if (l_pErr)
         {
-            errlCommit(l_pErr);
+            errlCommit(l_pErr,HWAS_COMP_ID);
             TS_FAIL("testGard1: Error from getGardRecords");
         }
         else
@@ -380,7 +380,7 @@ public:
         
         if (l_pErr)
         {
-            errlCommit(l_pErr);
+            errlCommit(l_pErr,HWAS_COMP_ID);
             TS_FAIL("testGard2: Error from getGardRecords");
         }
         else
@@ -419,7 +419,7 @@ public:
         
         if (l_pErr)
         {
-            errlCommit(l_pErr);
+            errlCommit(l_pErr,HWAS_COMP_ID);
             TS_FAIL("testGard3: Error from getGardRecords");
         }
         else
@@ -542,7 +542,7 @@ public:
                 
         if (l_pErr)
         {
-            errlCommit(l_pErr);
+            errlCommit(l_pErr,HWAS_COMP_ID);
         }
     }
     
@@ -661,7 +661,7 @@ public:
                 
         if (l_pErr)
         {
-            errlCommit(l_pErr);
+            errlCommit(l_pErr,HWAS_COMP_ID);
         }
     }
     
@@ -809,7 +809,7 @@ public:
                 
         if (l_pErr)
         {
-            errlCommit(l_pErr);
+            errlCommit(l_pErr,HWAS_COMP_ID);
         }
     }
     
@@ -912,7 +912,7 @@ public:
                 
         if (l_pErr)
         {
-            errlCommit(l_pErr);
+            errlCommit(l_pErr,HWAS_COMP_ID);
         }
     }
 };

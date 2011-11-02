@@ -162,7 +162,7 @@ void ExtInitSvc::init( void *i_ptr )
         TRACFCOMP( g_trac_initsvc,
                    "ERROR:  extra errorlog found: %p",
                    l_errl );
-        errlCommit( l_errl );
+        errlCommit( l_errl, INITSVC_COMP_ID );
         assert( 0 );
     }
 
@@ -218,7 +218,7 @@ void ExtInitSvc::init( void *i_ptr )
         {
             TRACFCOMP( g_trac_initsvc,
                        "Committing error from cxxtask launch" );
-            errlCommit( l_cxxerrl );
+            errlCommit( l_cxxerrl, INITSVC_COMP_ID );
             break;      // ERROR, break out of do-while.
         }
 
@@ -235,7 +235,7 @@ void ExtInitSvc::init( void *i_ptr )
                        " Child task returned 0x%llx, errlog=0x%p",
                        l_cxxchildrc,
                        l_cxxchilderrl );
-            errlCommit( l_cxxchilderrl );
+            errlCommit( l_cxxchilderrl, INITSVC_COMP_ID );
         }
         else
         {
@@ -266,7 +266,7 @@ void ExtInitSvc::init( void *i_ptr )
                         INITSERVICE::CXXTEST_FAILED_NO_ERRLOG,
                         l_cxxchildrc,
                         0 );
-                errlCommit( l_cxxerrl );
+                errlCommit( l_cxxerrl, INITSVC_COMP_ID );
             }   // end if
         }   //  end else
 

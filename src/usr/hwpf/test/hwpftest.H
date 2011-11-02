@@ -97,7 +97,7 @@ public:
         if (l_err)
         {
             TS_TRACE("testHwpf2: Unit Test passed. hwpTestError failed. Error logged");
-            errlCommit(l_err);
+            errlCommit(l_err,HWPF_COMP_ID);
         }
         else
         {
@@ -127,7 +127,7 @@ public:
         if (l_err)
         {
             TS_FAIL("testHwpf3: Unit Test failed. hwpTestConfig failed. Error logged");
-            errlCommit(l_err);
+            errlCommit(l_err,HWPF_COMP_ID);
         }
         else
         {
@@ -148,7 +148,7 @@ public:
         if (l_err)
         {
             TS_FAIL("testHwpf4: Unit Test failed. hwpTestAttributes failed. Error logged");
-            errlCommit(l_err);
+            errlCommit(l_err,HWPF_COMP_ID);
         }
         else
         {

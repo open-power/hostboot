@@ -91,7 +91,7 @@ class PnorRpTest : public CxxTest::TestSuite
                     TRACFCOMP(g_trac_pnor, "PnorRpTest::test_getSectionInfo> ERROR : getSectionInfo returned error for %d : RC=%X", id, errhdl->reasonCode() );
                     TS_FAIL( "PnorRpTest::test_getSectionInfo> ERROR : Unexpected error log" );
                     fails++;
-                    errlCommit(errhdl);
+                    errlCommit(errhdl,PNOR_COMP_ID);
                 }
                 else
                 {

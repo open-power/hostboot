@@ -208,7 +208,7 @@ void PnorRP::initDaemon()
 
     if( l_errhdl )
     {
-        errlCommit(l_errhdl);
+        errlCommit(l_errhdl,PNOR_COMP_ID);
         iv_startupRC = l_errhdl->reasonCode();
     }
 
@@ -456,7 +456,7 @@ void PnorRP::waitForMessage()
 
             if( l_errhdl )
             {
-                errlCommit(l_errhdl);
+                errlCommit(l_errhdl,PNOR_COMP_ID);
             }
 
 

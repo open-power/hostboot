@@ -106,7 +106,7 @@ void fapiLogError(fapi::ReturnCode & io_rc)
 
     // Commit the error log. This will delete the error log and set the handle
     // to NULL.
-    errlCommit(l_pError);
+    errlCommit(l_pError,HWPF_COMP_ID);
 }
 
 //****************************************************************************

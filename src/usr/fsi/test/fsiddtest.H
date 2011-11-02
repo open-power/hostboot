@@ -65,7 +65,7 @@ class FsiDDTest : public CxxTest::TestSuite
             fails++;
             TRACFCOMP(g_trac_fsi, "FsiDDTest::test_init> Error from device : RC=%X", l_err->reasonCode() );
             TS_FAIL( "FsiDDTest::test_init> ERROR : Unexpected error log from initMaster" );
-            errlCommit(l_err);
+            errlCommit(l_err,FSI_COMP_ID);
             delete l_err;
         }
 
@@ -276,7 +276,7 @@ class FsiDDTest : public CxxTest::TestSuite
                 TRACFCOMP(g_trac_fsi, "FsiDDTest::test_readWrite> Error from device : [%d] addr=0x%X, RC=%X", x, test_data[x].addr, l_err->reasonCode() );
                 TS_FAIL( "FsiDDTest::test_readWrite> ERROR : Unexpected error log from read1" );
                 fails++;
-                errlCommit(l_err);
+                errlCommit(l_err,FSI_COMP_ID);
                 delete l_err;
             }
 
@@ -304,7 +304,7 @@ class FsiDDTest : public CxxTest::TestSuite
                     TRACFCOMP(g_trac_fsi, "FsiDDTest::test_readWrite> Error from device : [%d] addr=0x%X, RC=%X", x, test_data[x].addr, l_err->reasonCode() );
                     TS_FAIL( "FsiDDTest::test_readWrite> ERROR : Unexpected error log from write1" );
                     fails++;
-                    errlCommit(l_err);
+                    errlCommit(l_err,FSI_COMP_ID);
                     delete l_err;
                 }
             }
@@ -329,7 +329,7 @@ class FsiDDTest : public CxxTest::TestSuite
                 TRACFCOMP(g_trac_fsi, "FsiDDTest::test_readWrite> Error from device : [%d] addr=0x%X, RC=%X", x, test_data[x].addr, l_err->reasonCode() );
                 TS_FAIL( "FsiDDTest::test_readWrite> ERROR : Unexpected error log from read2" );
                 fails++;
-                errlCommit(l_err);
+                errlCommit(l_err,FSI_COMP_ID);
                 delete l_err;
             }
         }
@@ -369,7 +369,7 @@ class FsiDDTest : public CxxTest::TestSuite
                     TRACFCOMP(g_trac_fsi, "FsiDDTest::test_readWrite> Error from device : addr=0x%X, RC=%X", test_data[x].addr, l_err->reasonCode() );
                     TS_FAIL( "FsiDDTest::test_readWrite> ERROR : Unexpected error log from write1" );
                     fails++;
-                    errlCommit(l_err);
+                    errlCommit(l_err,FSI_COMP_ID);
                     delete l_err;
                 }
             }
@@ -411,7 +411,7 @@ class FsiDDTest : public CxxTest::TestSuite
 
             if( l_err )
             {
-                errlCommit(l_err);
+                errlCommit(l_err,FSI_COMP_ID);
                 delete l_err;
             }
         }

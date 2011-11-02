@@ -596,7 +596,7 @@ errlHndl_t xscomPerformOp(DeviceFW::OperationType i_opType,
                 {
                     l_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
                     // Commit/delete error
-                    errlCommit(l_err);
+                    errlCommit(l_err,XSCOM_COMP_ID);
                 }
             }
         }

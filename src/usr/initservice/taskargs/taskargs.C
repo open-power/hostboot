@@ -135,7 +135,7 @@ void    TaskArgs::clear()
                 ERR_MRK "ERROR: errorlog %p was left in TaskArgs",
                 iv_errl );
 
-        errlCommit(iv_errl);
+        errlCommit(iv_errl,INITSVC_COMP_ID);
     }
 
 }

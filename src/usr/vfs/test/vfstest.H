@@ -47,14 +47,14 @@ class VfsTest: public CxxTest::TestSuite
             if(err)
             {
                 TS_FAIL("module_load failed");
-                ERRORLOG::errlCommit(err);
+                ERRORLOG::errlCommit(err,VFS_COMP_ID);
             }
 
             err = VFS::module_address("testdata",addr,size);
             if(err)
             {
                 TS_FAIL("module_address failed");
-                ERRORLOG::errlCommit(err);
+                ERRORLOG::errlCommit(err,VFS_COMP_ID);
             }
             else
             {

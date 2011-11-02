@@ -172,7 +172,7 @@ public:
         if (l_err)
         {
             TS_FAIL("testXscom1 failed!  Error committed.");
-            errlCommit(l_err);
+            errlCommit(l_err,XSCOM_COMP_ID);
         }
         else
         {

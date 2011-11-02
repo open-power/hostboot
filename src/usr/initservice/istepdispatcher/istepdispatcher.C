@@ -337,7 +337,7 @@ void    IStepDispatcher::singleStepISteps( void *  io_ptr )   const
                     TRACFCOMP( g_trac_initsvc,
                                "ERROR 0x%x:  function launch FAIL",
                                l_taskStatus );
-                    errlCommit( l_errl );
+                    errlCommit( l_errl, INITSVC_COMP_ID );
                 }
                 else
                 {
@@ -359,7 +359,7 @@ void    IStepDispatcher::singleStepISteps( void *  io_ptr )   const
                         //  tell the user that the IStep returned an errorlog
                         l_taskStatus    =   SPLESS_TASKRC_RETURNED_ERRLOG;
                         // go ahead and commit the child errorlog
-                        errlCommit( l_errl);
+                        errlCommit( l_errl, INITSVC_COMP_ID);
                     }
 
                     //  massage the return code from the IStep -
@@ -422,7 +422,7 @@ void    IStepDispatcher::singleStepISteps( void *  io_ptr )   const
     if ( l_errl )
     {
         // if we do then commit it and stop here.
-        errlCommit( l_errl );
+        errlCommit( l_errl, INITSVC_COMP_ID );
         assert(0);
     }
 
@@ -563,7 +563,7 @@ void    IStepDispatcher::runAllISteps( void * io_ptr )   const
                    l_IStep,
                    l_SubStep,
                    l_errl );
-        errlCommit( l_errl );
+        errlCommit( l_errl, INITSVC_COMP_ID );
         assert( 0 );
     }
 

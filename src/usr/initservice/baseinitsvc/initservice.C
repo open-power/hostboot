@@ -327,7 +327,7 @@ void InitService::init( void *i_ptr )
         TRACFCOMP( g_trac_initsvc,
                    "ERROR:  extra errorlog found: %p",
                    l_errl );
-        errlCommit( l_errl );
+        errlCommit( l_errl, INITSVC_COMP_ID );
         assert( 0 );
     }
 

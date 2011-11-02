@@ -85,7 +85,7 @@ void    testHWP( void * io_pArgs )
     if (l_err)
     {
         TRACFCOMP( g_trac_hwas, "testHWP failed, committing errorlog");
-        errlCommit(l_err);
+        errlCommit(l_err,HWAS_COMP_ID);
     }
 
     TASKARGS_WAIT_AND_ENDTASK();

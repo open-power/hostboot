@@ -235,7 +235,7 @@ public:
         l_FN_userdata.addToLog( l_errl, testfnstr2, sizeof(testfnstr2) );
 
         // commit the errorlog
-        errlCommit(l_errl );
+        errlCommit(l_errl, ERRL_COMP_ID );
 
         //  Maybe do some stuff here to find the committed errorlog back and
         //  see if it is still correct?  Later.
@@ -280,7 +280,7 @@ public:
         l_userdata.addToLog( l_errl );
 
         // commit the errorlog
-        errlCommit(l_errl );
+        errlCommit(l_errl, ERRL_COMP_ID );
 
     }
 
@@ -322,7 +322,7 @@ public:
          l_userdata.addToLog( l_errl );
 
         // commit the errorlog
-        errlCommit(l_errl );
+        errlCommit( l_errl, ERRL_COMP_ID );
 
     }
 

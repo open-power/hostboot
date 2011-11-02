@@ -1136,7 +1136,7 @@ class TargetingTestSuite: public CxxTest::TestSuite
         {
             errlHndl_t l_pErrLog = static_cast<ERRORLOG::ErrlEntry*>(
                                                                      l_rc.releasePlatData());
-            ERRORLOG::errlCommit(l_pErrLog);
+            ERRORLOG::errlCommit(l_pErrLog,TARG_COMP_ID);
         }
 
         delete l_pFapiTarget;
@@ -1207,7 +1207,7 @@ class TargetingTestSuite: public CxxTest::TestSuite
         if(l_rc)
         {
             errlHndl_t l_pErrLog = static_cast<ERRORLOG::ErrlEntry*>(l_rc.releasePlatData());
-            ERRORLOG::errlCommit(l_pErrLog);
+            ERRORLOG::errlCommit(l_pErrLog,TARG_COMP_ID);
         }
     }
 

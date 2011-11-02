@@ -116,7 +116,7 @@ namespace DeviceFW
                               TWO_UINT32_TO_UINT64(i_opType, i_accType),
                               TO_UINT64(i_targetType)
                              );
-            errlCommit(l_errl);
+            errlCommit(l_errl,DEVFW_COMP_ID);
         }
 
         // Index offset to proper target type.  This is now lowest level of map.

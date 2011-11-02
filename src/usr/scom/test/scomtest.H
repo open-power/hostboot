@@ -118,7 +118,7 @@ public:
                 TRACFCOMP(g_trac_scom, "ScomTest::test_FSISCOMreadWrite> Write: Error from device : addr=0x%X, RC=%X", test_data[x].addr, l_err->reasonCode() );
                 TS_FAIL( "ScomTest::test_FSISCOMreadWrite> ERROR : Unexpected error log from write1" );
                 fails++;
-                errlCommit(l_err);
+                errlCommit(l_err,SCOM_COMP_ID);
                 delete l_err;
             }
         }
@@ -138,7 +138,7 @@ public:
                 TRACFCOMP(g_trac_scom, "ScomTest::test_FSISCOMreadWrite> read: Error from device : addr=0x%X, RC=%X", test_data[x].addr, l_err->reasonCode() );
                 TS_FAIL( "ScomTest::test_FSISCOMreadWrite> ERROR : Unexpected error log from write1" );
                 fails++;
-                errlCommit(l_err);
+                errlCommit(l_err,SCOM_COMP_ID);
                 delete l_err;
             }
             else if(read_data[x] != test_data[x].data)

@@ -452,7 +452,7 @@ errlHndl_t FsiDD::initializeHardware()
         l_err = initMasterControl(iv_master,TARGETING::FSI_MASTER_TYPE_MFSI);
         if( l_err )
         {
-            errlCommit(l_err);
+            errlCommit(l_err,FSI_COMP_ID);
         }
         else
         {
@@ -470,7 +470,7 @@ errlHndl_t FsiDD::initializeHardware()
                 {
                     //@todo - append the actual slave target to FFDC
                     // commit the log here so that we can move on to next port               
-                    errlCommit(l_err);
+                    errlCommit(l_err,FSI_COMP_ID);
 
                     //if this fails then some of the slaves below won't init,
                     //  but that is okay because the detected ports will be
@@ -504,7 +504,7 @@ errlHndl_t FsiDD::initializeHardware()
                         if( l_err )
                         {
                             // commit the log here so that we can move on to next port               
-                            errlCommit(l_err);
+                            errlCommit(l_err,FSI_COMP_ID);
                             break;
                         }
                         master_init_done = true;
@@ -519,7 +519,7 @@ errlHndl_t FsiDD::initializeHardware()
                     {
                         //@todo - append the actual slave target to FFDC
                         // commit the log here so that we can move on to next port               
-                        errlCommit(l_err);
+                        errlCommit(l_err,FSI_COMP_ID);
                     }
                 }
 
@@ -530,7 +530,7 @@ errlHndl_t FsiDD::initializeHardware()
         l_err = initMasterControl(iv_master,TARGETING::FSI_MASTER_TYPE_CMFSI);
         if( l_err )
         {
-            errlCommit(l_err);
+            errlCommit(l_err,FSI_COMP_ID);
         }
         else
         {
@@ -552,7 +552,7 @@ errlHndl_t FsiDD::initializeHardware()
                 {
                     //@todo - append the actual slave target to FFDC
                     // commit the log here so that we can move on to next port               
-                    errlCommit(l_err);
+                    errlCommit(l_err,FSI_COMP_ID);
                 }
             }
         }
