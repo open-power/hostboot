@@ -35,6 +35,7 @@
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <targeting/targetservice.H>
+#include <fapiHwpExecInitFile.H>
 
 using namespace fapi;
 using namespace TARGETING;
@@ -152,6 +153,208 @@ public:
         else
         {
             TS_TRACE("testHwpf4: Unit Test passed. hwpTestAttributes passed. Error logged");
+        }
+    }
+
+    /**
+     * @brief Test HWPF InitFile: call the procedure that exercises a sample initfile
+     */
+    void testHwpf5()
+    {
+        typedef struct ifScom {
+            uint64_t addr;
+            uint64_t origData;
+            uint64_t writtenData;
+        }ifScom_t;
+
+        //Note:  this data is based on the sample.initfile.
+        //If the initfile changes, this data will also need to be changed.
+        ifScom_t l_ifScomData[] =
+        {
+            {0x000000000006002b, 0, 0x0000000000000183},
+            {0x000000000006002c, 0, 0x0000000000000183},
+            {0x000000000006800b, 0, 0},
+            {0x000000000006800c, 0, 0x8000000000000000 >> 0x17},
+            {0x0000000013010002, 0, 0x0000000000000181},
+            {0x0000000013013283, 0, 0x3c90000000000000 |
+                                    0x8000000000000000 >> 0x0c |
+                                    0x8000000000000000 >> 0x0d |
+                                    0x0306400412000000 >> 0x0e},
+            {0x0000000013013284, 0, 0x3c90000000000000},
+            {0x0000000013013285, 0, 0x8000000000000000 >> 0x0f |
+                                    0x8000000000000000 >> 0x10 |
+                                    0x8000000000000000 >> 0x13 |
+                                    0x0306400412000000 >> 0x15 },
+            {0x0000000013013286, 0, 0},
+            {0x0000000013013287, 0, 0x0000000000000182},
+            {0x0000000013013288, 0, 0x0000000000000192},
+            {0x0000000013013289, 0, 0x8000000000000000 >> 0x17},
+            {0x0000000013030007, 0, 0x0000000000000182}
+        };
+
+        fapi::ReturnCode l_rc = fapi::FAPI_RC_SUCCESS;
+        ecmdDataBufferBase l_ScomData(64);
+
+        do {
+            // Set up some attributes for testing
+            uint8_t l_uint8 = 1;
+            l_rc = FAPI_ATTR_SET(ATTR_SCRATCH_UINT8_1, NULL, l_uint8);
+            if (l_rc != fapi::FAPI_RC_SUCCESS)
+            {
+                TS_FAIL("testHwpf5: ATTR_SCRATCH_UINT8_1. Error from SET");
+                break;
+            }
+
+            l_rc = FAPI_ATTR_SET(ATTR_SCRATCH_UINT8_2, NULL, l_uint8);
+            if (l_rc != fapi::FAPI_RC_SUCCESS)
+            {
+                TS_FAIL("testHwpf5: ATTR_SCRATCH_UINT8_2. Error from SET");
+                break;
+            }
+
+            uint32_t l_uint32 = 3;
+            l_rc = FAPI_ATTR_SET(ATTR_SCRATCH_UINT32_1, NULL, l_uint32);
+            if (l_rc != fapi::FAPI_RC_SUCCESS)
+            {
+                TS_FAIL("testHwpf5: ATTR_SCRATCH_UINT32_1. Error from SET");
+                break;
+            }
+
+            uint64_t l_uint64 = 2;
+            l_rc = FAPI_ATTR_SET(ATTR_SCRATCH_UINT64_1, NULL, l_uint64);
+            if (l_rc != fapi::FAPI_RC_SUCCESS)
+            {
+                TS_FAIL("testHwpf5: ATTR_SCRATCH_UINT64_1. Error from SET");
+                break;
+            }
+
+            uint8_t l_uint8array1[32];
+            l_uint8array1[2] = 1;
+            l_rc = FAPI_ATTR_SET(ATTR_SCRATCH_UINT8_ARRAY_1, NULL, l_uint8array1);
+            if (l_rc != fapi::FAPI_RC_SUCCESS)
+            {
+                TS_FAIL("testHwpf5: ATTR_SCRATCH_UINT8_ARRAY_1. Error from SET");
+                break;
+            }
+
+            // Get the master processor chip
+            TARGETING::Target* l_pTarget = NULL;
+            TARGETING::targetService().masterProcChipTargetHandle(l_pTarget);
+
+            // Create a FAPI Target and invoke the hwpInitialTest HWP
+            fapi::Target l_fapiTarget(TARGET_TYPE_PROC_CHIP,
+                                      reinterpret_cast<void *> (l_pTarget));
+
+            /*
+            // Save original scom data to restore at end of test
+            for (uint32_t i = 0; i < sizeof(l_ifScomData)/sizeof(ifScom_t); i++)
+            {
+                l_rc = fapiGetScom(l_fapiTarget, l_ifScomData[i].addr, l_ScomData);
+                if (l_rc != fapi::FAPI_RC_SUCCESS)
+                {
+                    TS_FAIL("testHwpf5: Error from fapiGetScom");
+                    break;
+                }
+
+                l_ifScomData[i].origData = l_ScomData.getDoubleWord(0);
+            }
+
+            if (l_rc != fapi::FAPI_RC_SUCCESS)
+            {
+                break;
+            }
+            */
+
+            // Set scom data to 0 to start from known state for bit ops
+            l_ScomData.setDoubleWord(0, 0ll);
+            for (uint32_t i = 0; i < sizeof(l_ifScomData)/sizeof(ifScom_t); i++)
+            {
+                l_rc = fapiPutScom(l_fapiTarget, l_ifScomData[i].addr, l_ScomData);
+                if (l_rc != fapi::FAPI_RC_SUCCESS)
+                {
+                    TS_FAIL("testHwpf5: Error from fapiPutScom");
+                    break;
+                }
+            }
+
+            if (l_rc != fapi::FAPI_RC_SUCCESS)
+            {
+                break;
+            }
+
+            //Call Hwp to execute the initfile
+            FAPI_EXEC_HWP(l_rc, hwpExecInitFile, l_fapiTarget, "sample.if");
+            
+            if (l_rc != fapi::FAPI_RC_SUCCESS)
+            {
+                TS_FAIL("testHwpf5: Error from hwpExecInitFile");
+                break;
+            }
+
+            //Verify the data written
+            for (uint32_t i = 0; i < sizeof(l_ifScomData)/sizeof(ifScom_t); i++)
+            {
+                l_rc = fapiGetScom(l_fapiTarget, l_ifScomData[i].addr, l_ScomData);
+                if (l_rc != fapi::FAPI_RC_SUCCESS)
+                {
+                    TS_FAIL("testHwpf5: Error from fapiGetScom");
+                    break;
+                }
+
+                if (l_ScomData.getDoubleWord(0) != l_ifScomData[i].writtenData)
+                {
+                    TS_FAIL("testHwpf5: GetScom addr 0x%.16llX data read 0x%.16llX "
+                             "data expected 0x%.16llX",
+                             l_ifScomData[i].addr, l_ScomData.getDoubleWord(0),
+                             l_ifScomData[i].writtenData);
+                    l_rc = fapi::RC_HWP_EXEC_INITFILE_TEST_FAILED;
+                    break;
+                }
+            }
+
+            if (l_rc != fapi::FAPI_RC_SUCCESS)
+            {
+                break;
+            }
+
+            /*
+            // Restore the original Scom data
+            //uint32_t l_ecmdRc = ECMD_DBUF_SUCCESS;
+            for (uint32_t i = 0; i < sizeof(l_ifScomData)/sizeof(ifScom_t); i++)
+            {
+                l_ecmdRc = l_ScomData.setDoubleWord(0, l_ifScomData[i].origData);
+                if (l_ecmdRc != ECMD_DBUF_SUCCESS)
+                {
+                    TS_FAIL("testHwpf5: fapiPutScom to restore, error from "
+                             "ecmdDataBuffer setDoubleWord() - rc 0x%.8X", l_ecmdRc);
+                    l_rc = l_ecmdRc;
+                    break;
+                }
+
+                l_rc = fapiPutScom(l_fapiTarget, l_ifScomData[i].addr, l_ScomData);
+                if (l_rc != fapi::FAPI_RC_SUCCESS)
+                {
+                    TS_FAIL("testHwpf5: Error from fapiGetScom");
+                    break;
+                }
+            }
+
+            if (l_rc != fapi::FAPI_RC_SUCCESS)
+            {
+                break;
+            }
+            */
+
+        } while (0);
+
+        if (l_rc != fapi::FAPI_RC_SUCCESS)
+        {
+            fapiLogError(l_rc);
+            TS_FAIL("testHwpf5: Unit Test failed. Error logged");
+        }
+        else
+        {
+            TS_TRACE("testHwpf5: Unit Test passed. hwpExecInitFile passed.");
         }
     }
 

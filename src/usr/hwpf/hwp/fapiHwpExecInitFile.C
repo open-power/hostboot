@@ -248,8 +248,9 @@ fapi::ReturnCode hwpExecInitFile(const fapi::Target & i_Target,
 
         if (IF_SYNTAX_VERSION != *(reinterpret_cast<const uint32_t *>(l_offset)))
         {
-            FAPI_ERR("hwpExecInitFile: Syntax version 0x%x Expected version 0x%x",
-                *(const uint32_t *)l_offset, IF_SYNTAX_VERSION);
+            FAPI_ERR("hwpExecInitFile: %s Syntax version %u Expected version 0x%x",
+                i_file, *(reinterpret_cast<const uint32_t *>(l_offset)),
+                IF_SYNTAX_VERSION);
 
             uint32_t l_ffdc = *(const uint32_t *)l_offset;
             uint32_t & FFDC_IF_VER = l_ffdc; // GENERIC IDENTIFIER
@@ -265,6 +266,10 @@ fapi::ReturnCode hwpExecInitFile(const fapi::Target & i_Target,
         }
         else
         {
+            FAPI_IMP("hwpExecInitFile: %s Syntax version %u CVS version %s",
+                i_file, *(reinterpret_cast<const uint32_t *>(l_offset)),
+                (l_offset + 4));
+
             //Save the data
             ifInfo_t l_ifInfo;
             memset(&l_ifInfo, 0, sizeof(ifInfo_t));
@@ -1239,7 +1244,7 @@ fapi::ReturnCode writeScom(const ifData_t & i_ifData, const uint32_t i_scomNum,
         {
             //Perform a PutScomUnderMask operation on the target
 
-            #ifdef HOSTBOOT_DEBUG
+            #ifdef HWPEXECINITFILE_DEBUG 
             l_rc = fapiGetScom(l_target, l_addr, l_scomData);
             FAPI_DBG("hwpExecInitFile: writeScom: Data read 0x%.16llX",
                      l_scomData.getDoubleWord(0));
@@ -1291,7 +1296,7 @@ fapi::ReturnCode writeScom(const ifData_t & i_ifData, const uint32_t i_scomNum,
                 FAPI_ERR("hwpExecInitFile: Error from fapiPutScomUnderMask");
                 break;
             }
-            #ifdef HOSTBOOT_DEBUG
+            #ifdef HWPEXECINITFILE_DEBUG
             else
             {
                 l_rc = fapiGetScom(l_target, l_addr, l_scomData);
@@ -1304,7 +1309,7 @@ fapi::ReturnCode writeScom(const ifData_t & i_ifData, const uint32_t i_scomNum,
         {
            //Perform a PutScom operation on the target
 
-            #ifdef HOSTBOOT_DEBUG
+            #ifdef HWPEXECINITFILE_DEBUG
             l_rc = fapiGetScom(l_target, l_addr, l_scomData);
             FAPI_DBG("hwpExecInitFile: writeScom: Data read 0x%.16llX",
                      l_scomData.getDoubleWord(0));
@@ -1331,7 +1336,7 @@ fapi::ReturnCode writeScom(const ifData_t & i_ifData, const uint32_t i_scomNum,
             {
                 FAPI_ERR("hwpExecInitFile: Error from fapiPutScom");
             }
-            #ifdef HOSTBOOT_DEBUG
+            #ifdef HWPEXECINITFILE_DEBUG
             else
             {
                 l_rc = fapiGetScom(l_target, l_addr, l_scomData);
