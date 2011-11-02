@@ -26,7 +26,7 @@
 #include <stdint.h>
 
 #ifdef __cplusplus
-extern "C" 
+extern "C"
 {
 #endif
     void *memset(void* s, int c, size_t n);
@@ -38,6 +38,8 @@ extern "C"
     char* strcpy(char* d, const char* s);
     int strcmp(const char* s1, const char* s2);
     size_t strlen(const char* s1);
+
+    char* strchr(const char* s, int c);
 
 #ifdef __cplusplus
 };

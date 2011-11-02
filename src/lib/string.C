@@ -164,3 +164,14 @@ extern "C" size_t strlen(const char* a)
     }
     return length;
 }
+
+extern "C" char* strchr(const char* s, int c)
+{
+    while((*s != '\0') && (*s != c))
+    {
+        s++;
+    }
+
+    if (*s == c) return (char*)s;
+    return NULL;
+}
