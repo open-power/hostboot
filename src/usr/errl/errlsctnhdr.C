@@ -82,19 +82,14 @@ uint64_t ErrlSctnHdr::flatten( void * o_pBuffer, const uint64_t i_cbBuffer )
 
     if( i_cbBuffer >= sizeof( pelSectionHeader_t ))
     {
-        // See errltypes.H for pelSectionHeader_t. Flatten to
-        // local, temporary l_header because it will be word aligned,
-        // whereas caller's output address is not guaranteed to be.
-        pelSectionHeader_t  l_header;
+        // See errltypes.H for pelSectionHeader_t
+        pelSectionHeader_t * p  = static_cast<pelSectionHeader_t *>(o_pBuffer);
+        p->sid      = iv_sid;
+        p->len      = iv_slen;
+        p->ver      = iv_ver;
+        p->sst      = iv_sst;
+        p->compId   = iv_compId;
 
-        l_header.sid      = iv_sid;
-        l_header.len      = iv_slen;
-        l_header.ver      = iv_ver;
-        l_header.sst      = iv_sst;
-        l_header.compId   = iv_compId;
-
-        // memcpy out to callers buffer
-        memcpy( o_pBuffer, &l_header, sizeof( pelSectionHeader_t ));
         l_rc = sizeof( pelSectionHeader_t );
     }
     else

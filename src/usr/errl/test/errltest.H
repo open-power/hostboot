@@ -114,6 +114,14 @@ public:
             TS_FAIL("testErrl1: addFFDC() output NULL pointer");
         }
 
+        // really short user data
+        pch = "A";
+        pffdc = l_err->addFFDC( DEVFW_COMP_ID, pch, strlen( pch ), 3, 4 );
+        if ( NULL == pffdc )
+        {
+            TS_FAIL("testErrl1: addFFDC() output NULL pointer");
+        }
+
         pch = "george washington";
         pffdc = l_err->addFFDC( DEVFW_COMP_ID, pch, strlen( pch ), 3, 4 );
         if ( NULL == pffdc )

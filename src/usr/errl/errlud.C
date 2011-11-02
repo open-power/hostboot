@@ -108,9 +108,6 @@ uint64_t ErrlUD::addData(const void *i_data, const uint64_t i_size)
         // be what this method returns.
         iv_Size = l_newsize;
         l_rc = iv_Size;
-
-        // Tell the PEL header what is the new length.
-        iv_header.iv_slen = iv_header.flatSize() + iv_Size;
     }
     else
     {
@@ -131,6 +128,9 @@ uint64_t ErrlUD::flatSize()
 
     l_rc = iv_header.flatSize() + iv_Size;
 
+    // Round up to next nearest 4-byte boundary.
+    l_rc = ( l_rc + 3 ) & ~3; 
+
     return l_rc;
 }
 
@@ -141,20 +141,24 @@ uint64_t ErrlUD::flatSize()
 uint64_t ErrlUD::flatten( void * o_pBuffer, const uint64_t i_cbBuffer )
 {
     uint64_t  l_rc = 0;
-    uint64_t  cb = 0;
+    uint64_t  l_cb = 0;
     uint8_t * pBuffer = static_cast<uint8_t *>(o_pBuffer);
+    uint64_t  l_cbFlat = this->flatSize();
 
-    if ( i_cbBuffer >= this->flatSize() )
+    if ( i_cbBuffer >= l_cbFlat )
     {
-        // flatten the section header
-        cb = iv_header.flatten( pBuffer, i_cbBuffer );
-        pBuffer += cb;
+        // Tell the PEL section header what is the new length.
+        iv_header.iv_slen = l_cbFlat;
 
-        // followed by the user data
+        // Flatten the PEL section header
+        l_cb = iv_header.flatten( pBuffer, i_cbBuffer );
+        pBuffer += l_cb;
+
+        // Followed by the user data
         memcpy( pBuffer, iv_pData, iv_Size );
 
         // return how many bytes were flattened
-        l_rc = iv_Size + cb;
+        l_rc = l_cbFlat;
     }
     else
     {
