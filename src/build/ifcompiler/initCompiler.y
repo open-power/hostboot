@@ -106,6 +106,7 @@ int scom;
 
 
 /* top is lowest precedent - done last */
+%left ATTRIBUTE_INDEX /* irrelevant precedence, but needed for clean compile */
 %left INIT_LOGIC_OR
 %left INIT_LOGIC_AND
 %left '|'     /* bitwise OR */
@@ -255,9 +256,9 @@ define: INIT_DEFINE INIT_ID '=' expr  ';'
 expr:   INIT_INTEGER                    { $$= new init::Rpn($1,yyscomlist->get_symbols()); }
         | INIT_ID                       { $$= new init::Rpn(*($1),yyscomlist->get_symbols()); delete $1; }
         | INIT_INT64                    { $$=new init::Rpn($1,yyscomlist->get_symbols()); }
+        | expr ATTRIBUTE_INDEX          { $1->push_array_index(*($2)); }
         | expr INIT_LOGIC_OR expr       { $$ = $1->push_merge($3,init::Rpn::OR); }
         | expr INIT_LOGIC_AND expr      { $$ = $1->push_merge($3,init::Rpn::AND); }
-        | expr ATTRIBUTE_INDEX          { $1->push_array_index(*($2));}
         | expr INIT_EQ expr             { $$ = $1->push_merge($3,init::Rpn::EQ); }
         | expr INIT_NE expr             { $$ = $1->push_merge($3,init::Rpn::NE); }
         | expr INIT_LE expr             { $$ = $1->push_merge($3,init::Rpn::LE); }
