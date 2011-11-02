@@ -2,6 +2,7 @@
 *.bin.modinfo
 *.elf
 *.fips
+*.if
 *.lid
 *.lidhdr
 *.ruhx
