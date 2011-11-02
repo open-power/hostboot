@@ -52,8 +52,8 @@ class FsiDDTest : public CxxTest::TestSuite
      */
     void test_init(void)
     {
+#if 0  //istep is calling this now
         TRACFCOMP( g_trac_fsi, "FsiDDTest::test_init> Start" );
-        return; //istep is calling this now
         uint64_t fails = 0;
         uint64_t total = 0; 
         errlHndl_t l_err = NULL;
@@ -70,12 +70,14 @@ class FsiDDTest : public CxxTest::TestSuite
         }
 
         TRACFCOMP( g_trac_fsi, "FsiDDTest::test_init> %d/%d fails", fails, total );
+#endif
     };
 
 
     //testcode for Simics verification
     void test_blah(void)
     {
+#if 0 
         return;
         errlHndl_t l_err = NULL;
         TARGETING::Target* fsi_target = NULL;
@@ -104,6 +106,7 @@ class FsiDDTest : public CxxTest::TestSuite
                 delete l_err;
             }
         }
+#endif
     };
 
     /**

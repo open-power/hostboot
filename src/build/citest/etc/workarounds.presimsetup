@@ -41,11 +41,22 @@ sed -i -e's/SETENV GFW_P8_VENICE_L3_MB_SIZE.*/SETENV GFW_P8_VENICE_L3_MB_SIZE 8/
 # Backing build already contains 910431.  Leave this workaround here for future scomdef files
 #sed -i -e's/SETENV GFW_P8_VENICE_MODEL_EC.*/SETENV GFW_P8_VENICE_MODEL_EC 910431/' $sb/simu/configs/P8_VENICE.config
 
-echo "+++ Update Chip EC levels."
+echo "+++ Update Chip EC levels (SW106529)."
 sed -i -e's/SETENV GFW_P8_VENICE_PROC_EC.*/SETENV GFW_P8_VENICE_PROC_EC 10/' $sb/simu/configs/P8_VENICE.config
 sed -i -e's/SETENV GFW_P8_VENICE_CENTAUR_EC.*/SETENV GFW_P8_VENICE_CENTAUR_EC 10/' $sb/simu/configs/P8_VENICE.config
 sed -i -e's/SETENV GFW_P8_SALERNO_PROC_EC.*/SETENV GFW_P8_SALERNO_PROC_EC 10/' $sb/simu/configs/P8_SALERNO.config
 
+echo "+++ Add some scom regs to centaur.chip (SW106529)."
+mkdir -p $sb/simu/data/cec-chip/
+cp --update $BACKING_BUILD/src/simu/data/cec-chip/centaur.chip $sb/simu/data/cec-chip/centaur.chip.orig
+grep -v DONE $sb/simu/data/cec-chip/centaur.chip.orig > $sb/simu/data/cec-chip/centaur.chip
+echo "SCOMREGS           # List all scom registers" >> $sb/simu/data/cec-chip/centaur.chip
+echo "  0x00012345    #fake register for testing" >> $sb/simu/data/cec-chip/centaur.chip
+echo "  0x0FFFFFFF    #fake register for testing" >> $sb/simu/data/cec-chip/centaur.chip
+echo "  0x02011672    #MBU.MBS.MCBISTS01.SCOMFIR.MCBCMA1Q" >> $sb/simu/data/cec-chip/centaur.chip
+echo "  0x02011403    #MBU.MBS.MBS_FIR_MASK_REG" >> $sb/simu/data/cec-chip/centaur.chip
+echo "END" >> $sb/simu/data/cec-chip/centaur.chip
+echo "DONE" >> $sb/simu/data/cec-chip/centaur.chip
 
 echo "+++ Update to new simics build."
 mkdir -p $sb/simu/data
