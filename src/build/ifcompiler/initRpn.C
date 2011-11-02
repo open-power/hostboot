@@ -7,14 +7,14 @@
 //
 // COPYRIGHT International Business Machines Corp. 2010,2010
 //
-//UNDEFINED 
+//UNDEFINED
 //
 // Origin: UNDEFINED
 //
 // IBM_PROLOG_END_TAG
 // Change Log *************************************************************************************
-//                                                                      
-//  Flag   Reason  Userid   Date     Description                
+//
+//  Flag   Reason  Userid   Date     Description
 //  ----- -------- -------- -------- -------------------------------------------------------------
 //         D754106 dgilbert 06/14/10 Create
 //  dg002 SW039868 dgilbert 10/15/10 Add support to filter unneeded inits by EC
@@ -30,6 +30,7 @@
 #include <initRpn.H>
 #include <initSymbols.H>
 //#include <initSpy.H>
+#include <stdlib.h>
 #include <sstream>
 #include <iomanip>
 #include <iostream>
@@ -565,7 +566,7 @@ std::string  Rpn::listing(const char * i_desc, const std::string & spyname, bool
 
 
     oss << std::hex << std::setfill('0');
- 
+
     //oss << "0x" << std::setw(2) << iv_rpnstack.size() << '\t' << i_desc << std::endl;
     for(RPNSTACK::iterator i = iv_rpnstack.begin(); i != iv_rpnstack.end(); ++i)
     {
@@ -612,12 +613,12 @@ std::string  Rpn::listing(const char * i_desc, const std::string & spyname, bool
         {
             std::string name = iv_symbols->find_name(*i);
 
-            if(i_final) 
+            if(i_final)
             {
                 uint32_t val = iv_symbols->get_tag(*i);
-                uint32_t type = val & Symbols::TYPE_MASK; 
+                uint32_t type = val & Symbols::TYPE_MASK;
 
-                if (type == Symbols::LIT_TYPE || 
+                if (type == Symbols::LIT_TYPE ||
                     type == Symbols::VAR_TYPE)
                 {
                     rpn_byte_size += 2;
@@ -696,7 +697,7 @@ void Rpn::bin_str(BINSEQ & o_blist, bool i_prepend_count)  // binary version to 
                                 blist.push_back((uint8_t) tag);
                                 count += 2;
                                 break;
-            case ARRAY_INDEX:  
+            case ARRAY_INDEX:
                                 tag = iv_symbols->get_numeric_array_tag(v);
                                 blist.push_back((uint8_t)(tag >> 8));
                                 blist.push_back((uint8_t) tag);
@@ -729,7 +730,7 @@ void Rpn::pop_bool(EVAL_STACK & i_stack, RPN_VALUE & o_value) //dg002a
         if(o_value.type == RPN_NUMBER)
         {
             if(o_value.data == 0) o_value.type = RPN_FALSE;
-            else 
+            else
             {
                 o_value.type = RPN_TRUE;
                 if(o_value.data != 1)
@@ -751,7 +752,7 @@ void Rpn::pop_bool(EVAL_STACK & i_stack, RPN_VALUE & o_value) //dg002a
 
 void Rpn::pop_number(EVAL_STACK & i_stack, RPN_VALUE & o_value) //dg002a
 {
-    // Convert bools to ANY if a number is expected (eg true == 1) 
+    // Convert bools to ANY if a number is expected (eg true == 1)
     if(i_stack.size())
     {
         o_value = i_stack.back();
@@ -771,7 +772,7 @@ void Rpn::pop_number(EVAL_STACK & i_stack, RPN_VALUE & o_value) //dg002a
         cerr << "Empty stack!" << endl;
     }
 }
-    
+
 //-------------------------------------------------------------------------------------------------
 
 bool Rpn::resolve_ec(uint32_t i_ec)  //dg002a
@@ -871,12 +872,12 @@ bool Rpn::resolve(SYMBOL_VAL_LIST & i_varlist)
                             (r1.type == RPN_FALSE && r2.type == RPN_TRUE)) stack.push_back(rpn_false);
                     else stack.push_back(rpn_true);
                     break;
-                    
+
                 case NE:
                     pop_number(stack,r1);
                     pop_number(stack,r2);
                     if(r1.type == RPN_ANY || r2.type == RPN_ANY) stack.push_back(rpn_true);
-                    else 
+                    else
                     {
                         if(r1.data != r2.data) stack.push_back(rpn_true);
                         else stack.push_back(rpn_false);
@@ -887,7 +888,7 @@ bool Rpn::resolve(SYMBOL_VAL_LIST & i_varlist)
                     pop_number(stack,r1);
                     pop_number(stack,r2);
                     if(r1.type == RPN_ANY || r2.type == RPN_ANY) stack.push_back(rpn_true);
-                    else 
+                    else
                     {
                         if(r2.data > r1.data) stack.push_back(rpn_true);
                         else stack.push_back(rpn_false);
@@ -898,7 +899,7 @@ bool Rpn::resolve(SYMBOL_VAL_LIST & i_varlist)
                     pop_number(stack,r1);
                     pop_number(stack,r2);
                     if(r1.type == RPN_ANY || r2.type == RPN_ANY) stack.push_back(rpn_true);
-                    else 
+                    else
                     {
                         if(r2.data >= r1.data) stack.push_back(rpn_true);
                         else stack.push_back(rpn_false);
@@ -1014,7 +1015,7 @@ bool Rpn::resolve(SYMBOL_VAL_LIST & i_varlist)
             SYMBOL_VAL_LIST::iterator vvi = i_varlist.begin();
             for(; vvi != i_varlist.end(); ++vvi)
             {
-                if(name == vvi->first) 
+                if(name == vvi->first)
                 {
                     // cerr << name << " = " << vvi->second << endl;
                     stack.push_back(RPN_VALUE((uint64_t)vvi->second,RPN_NUMBER));

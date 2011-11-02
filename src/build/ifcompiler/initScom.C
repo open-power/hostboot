@@ -7,15 +7,15 @@
 //
 // COPYRIGHT International Business Machines Corp. 2010,2010
 //
-//UNDEFINED 
+//UNDEFINED
 //
 // Origin: UNDEFINED
 //
 // IBM_PROLOG_END_TAG
 
 // Change Log *************************************************************************************
-//                                                                      
-//  Flag  Track    Userid   Date     Description                
+//
+//  Flag  Track    Userid   Date     Description
 //  ----- -------- -------- -------- -------------------------------------------------------------
 //         D754106 dgilbert 06/14/10 Create
 //  dg001  D774126 dgilbert 09/30/10 Check that colname EXPR is last column in spytable
@@ -34,6 +34,7 @@
 #include <initScom.H>
 #include <initSymbols.H>
 #include <initCompiler.H>
+#include <stdlib.h>
 #include <iostream>
 #include <iomanip>
 #include <sstream>
@@ -60,7 +61,7 @@ Scom::Scom(BINSEQ::const_iterator & bli, Symbols * i_symbols):
              iv_scom_length(0),
              iv_scom_offset(0),
              iv_when_rpn(i_symbols)
-             
+
 {
 
     iv_scom_length   = Rpn::extract16(bli);
@@ -120,7 +121,7 @@ Scom::Scom(BINSEQ::const_iterator & bli, Symbols * i_symbols):
             // The next len bytes belong to this row
             // Simple cols are divided by OPs
             // LIST op has two additional bytes (len,op)
-            while(bli < bli_end) 
+            while(bli < bli_end)
             {
                 // Last col rpn is not limited to one op if it's "expr" - it gets the rest of the RPN
                 if(cli == (iv_cols_rpn.end() - 1))
@@ -191,7 +192,7 @@ void Scom::add_col(const string & i_colname)
     string s(i_colname);
     for(string::iterator i = s.begin(); i != s.end(); ++i) *i = toupper(*i);
     Rpn col_rpn(s,iv_symbols); // = iv_symbols->use_symbol(s);
-    
+
     // add check - Can't add any more cols after EXPR column dg001a
     if(iv_col_vars.size() && s != "EXPR")
     {
@@ -295,7 +296,7 @@ string Scom::list_one(RANGE range)
 
     uint32_t numcols = iv_col_vars.size() | (iv_when & SUBTYPE_MASK);  // WHEN subtype goes in numcols
     uint32_t bitlen = range.second + 1 - range.first;
-    if (bitlen) 
+    if (bitlen)
     {
         iv_scom_length = bitlen;         // don't overwrite iv_scom_length if bitlen == 0
         iv_scom_offset = range.first;    // don't overwrite iv_scom_offset if bitlen == 0
@@ -441,7 +442,7 @@ uint32_t Scom::bin_listing(BINSEQ & blist)
 
     SCOM_ADDR::iterator i = iv_scom_addr.begin();
     // if more than one spyname, the first is just the stem of the name - skip it
-    if(iv_scom_addr.size() > 1) ++i; 
+    if(iv_scom_addr.size() > 1) ++i;
 
     for(; i != iv_scom_addr.end(); ++i)
     {
@@ -483,7 +484,7 @@ void Scom::bin_list_one(BINSEQ & blist,uint64_t i_addr, RANGE range)
 // No range support
     uint32_t bitlen = range.second + 1 - range.first;
 
-    if (bitlen) 
+    if (bitlen)
     {
         iv_scom_length = bitlen;         // don't overwrite iv_scom_length if bitlen == 0
         iv_scom_offset = range.first;    // don't overwrite iv_scom_offset if bitlen == 0
@@ -743,7 +744,7 @@ bool Scom::compare(Scom & that)
             }
         }
     }
-    
+
     // column names
     if(iv_col_vars.size() != that.iv_col_vars.size())
     {
@@ -775,7 +776,7 @@ bool Scom::compare(Scom & that)
             }
         }
     }
-    
+
     // row Rpns
     Rpn r1(iv_symbols);
     Rpn r2(that.iv_symbols);
@@ -843,7 +844,7 @@ ScomList::ScomList(const string & initfile, FILELIST & defines, ostream & stats,
             ers.append(initfile);
             throw invalid_argument(ers);
         }
- 
+
         // In Syntax version 1 the first or second line contains the CVS version
         fgets(line,100,yyin);
         first_line = line;
@@ -913,7 +914,7 @@ ScomList::ScomList(const string & initfile, FILELIST & defines, ostream & stats,
             // offset to CVS sub version section
             b = bin_seq.begin() + Rpn::extract32(bli);
             size_t size = Rpn::extract16(b);
-            while(size--) iv_cvs_versions.push_back(*b++); 
+            while(size--) iv_cvs_versions.push_back(*b++);
         }
 
         b = bin_seq.begin() + Rpn::extract32(bli);
@@ -921,7 +922,7 @@ ScomList::ScomList(const string & initfile, FILELIST & defines, ostream & stats,
 
         b =  bin_seq.begin() + Rpn::extract32(bli);
         iv_symbols->restore_lit_bseq(b);
-        
+
         size_t section_count    = Rpn::extract32(bli);
         if(section_count > LAST_WHEN_TYPE)
         {
@@ -1014,7 +1015,7 @@ void ScomList::compile(BINSEQ & bin_seq)
     Rpn::set32(bin_seq,iv_syntax_version);      //  bytes[0:3]
 
     // bytes [4:12]
-    if(iv_syntax_version == 2) 
+    if(iv_syntax_version == 2)
     {
         const char * s = "SEE SUBV";
         for(; *s != 0; ++s) bin_seq.push_back(*s);
@@ -1069,9 +1070,9 @@ void ScomList::compile(BINSEQ & bin_seq)
     // 28 bytes of File Header Data
     offset = 28;
     stats << '*' << setw(20) << "Sections:" << setw(6) << section_count << endl;
-   
+
     // for verion 2 add offset to CVS versions section
-    if(iv_syntax_version == 2) 
+    if(iv_syntax_version == 2)
     {
         offset += 4;
         Rpn::set32(bin_seq,offset);
@@ -1081,7 +1082,7 @@ void ScomList::compile(BINSEQ & bin_seq)
 
     iv_symbols->bin_vars(blist_v);         // get Var table
     iv_symbols->bin_lits(blist_i);         // Get Lit table
-    
+
     Rpn::set32(bin_seq,offset);           // Offset to Variable Symbol Table
     offset += blist_v.size();             // offset += var table byte size
     Rpn::set32(bin_seq,offset);           // Offset to Literal Symbol Table
@@ -1101,7 +1102,7 @@ void ScomList::compile(BINSEQ & bin_seq)
 
     bin_seq.insert(bin_seq.end(), blist_v.begin(), blist_v.end());      // add var table section
     bin_seq.insert(bin_seq.end(), blist_i.begin(), blist_i.end());      // add lit table section
-    
+
     if(count_s)
     {
         bin_seq.insert(bin_seq.end(), blist_s.begin(), blist_s.end());  // add SCOM section
@@ -1131,7 +1132,7 @@ bool Scom::valid_when(ostream & msg, uint32_t i_ec)    //dg002a dg003c
         msg << hex;
         SPY_NAMES::iterator i = iv_spy_names.begin();
         // if more than one spyname, the first is just the stem of the name - skip it
-        if(iv_spy_names.size() > 1) ++i; 
+        if(iv_spy_names.size() > 1) ++i;
 
         for(; i != iv_spy_names.end(); ++i)
         {
@@ -1172,7 +1173,7 @@ void ScomList::listing(BINSEQ & bin_seq,ostream & olist)
         size_t offset = Rpn::extract32(bli);
         olist << fmt8(offset)    << "[Offset to Sub-Version Section]\n";
     }
-  
+
     uint32_t var_table_offset = Rpn::extract32(bli);
     uint32_t lit_table_offset = Rpn::extract32(bli);
 
@@ -1286,7 +1287,7 @@ bool ScomList::compare(ScomList & that)
         if(i->second->compare(*(j->second)) == false)
         {
             cout << "E> Spy: " << l_addr << " does not match!" << endl;
-            result = false;   
+            result = false;
         }
     }
 

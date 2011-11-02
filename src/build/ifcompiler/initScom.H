@@ -7,7 +7,7 @@
 //
 // COPYRIGHT International Business Machines Corp. 2010,2010
 //
-//UNDEFINED 
+//UNDEFINED
 //
 // Origin: UNDEFINED
 //
@@ -16,8 +16,8 @@
 #define INITSPY_H
 
 // Change Log *************************************************************************************
-//                                                                      
-//  Flag Track     Userid   Date     Description                
+//
+//  Flag Track     Userid   Date     Description
 //  ----- -------- -------- -------- -------------------------------------------------------------
 //         D754106 dgilbert 06/14/10 Create
 //  dg002 SW039868 dgilbert 10/15/10 Add support to filter unneeded inits by EC
@@ -33,6 +33,7 @@
  */
 
 #include <stdint.h>
+#include <stdlib.h>
 #include <string>
 #include <vector>
 #include <map>
@@ -91,7 +92,7 @@ namespace init
             };
 
 
-            Scom(Symbols * i_symbols,uint32_t i_line = 0) :   
+            Scom(Symbols * i_symbols,uint32_t i_line = 0) :
                 iv_symbols(i_symbols),
                 iv_line(i_line),
                 iv_scom_length(0),
@@ -126,7 +127,7 @@ namespace init
             /**
              * Add a row rpn to the current column
              * @param pointer to Rpn object
-             * @pre add_col() 
+             * @pre add_col()
              */
             void add_row_rpn(Rpn * i_rpn);
 
@@ -209,7 +210,7 @@ namespace init
             void listing(BINSEQ & bin_seq, ostream & out);
 
             /**
-             * Compare two spylists for equivalance 
+             * Compare two spylists for equivalance
              * @returns true if equal
              * @note Both spylists should have been built from a binary sequence
              *    not directly from an initfile
