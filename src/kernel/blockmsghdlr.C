@@ -35,17 +35,11 @@ MessageHandler::HandleResult BlockReadMsgHdlr::handleResponse(
     }
     else
     {
-        //Set the present bit for the address associated with this block
-        iv_block->setIsPresent(i_key);
+        // Call the function that attaches PTE and sets the
+        // sPTE entry to present while updating permissions
+        // on the sPTE entry of the physical addr.
+        iv_block->attachSPTE(i_key); 
 
-        // TODO.. Add this call here and test
-        // update permission for the page that corresponds
-        // to the physical page addr.  
-        // BaseSegment::mmSetPermission(i_key, 0, NO_ACCESS);
-
-
-        //Add the address into the page table associated with this block
-        iv_block->addPTE(i_key);
         return SUCCESS;
     }
 }

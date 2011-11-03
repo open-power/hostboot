@@ -212,29 +212,26 @@ class Block
          */
         int mmSetPermission(uint64_t i_va, uint64_t i_size, uint64_t i_access_type);
 
+
         /**
          * @brief Adds the page table entry for the given address
+         *  along with setting the shadow PTE entry to present
+         *  and setting the base block heap SPTE page entry
+         *  permissions to NO_ACCESS
          *
          * @param[in] i_vaddr - Virtual address to add to the page table
          *
          * The permissions set within the Shadow page table are used for
          * this address
          */
-        void addPTE(void* i_vaddr);
-
-        /**
-         * @brief Sets the 'present' bit within the Shadow page table
-         *
-         * @param[in] i_vaddr - Virtual address within the Shadow page table
-         */
-        void setIsPresent(void* i_vaddr);
+        void attachSPTE(void* i_vaddr);
 
         /**
          * @brief Effectively removes the given page table entry from the
          * shadow page table
          * @param[in] i_pte - Shadow page table entry to release
          */
-        void releasePTE(ShadowPTE* i_pte);
+        void releaseSPTE(ShadowPTE* i_pte);
 
         /**
          * @brief Cast out older phyiscal memory pages

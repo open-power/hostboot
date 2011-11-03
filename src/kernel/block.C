@@ -87,18 +87,13 @@ bool Block::handlePageFault(task_t* i_task, uint64_t i_addr)
 
     ShadowPTE* pte = getPTE(l_addr_palign);
 
-    // TODO... have this commented out at this point because
-    // checking this here causes the vmmbasetest.H testcases
-    // to fail... Need to determine how you want the
-    // NULL condition and the printk testcases handled in the
-    // testcase or change their default values.
-
     // If the page table entry has default permission settings
-/*    if (getPermission(pte) == NO_ACCESS)
+    if (getPermission(pte) == NO_ACCESS)
     {
-      printk("NO_ACCESS permission for addr 0x%.lX\n", i_addr);
-      return -EINVAL;
-    } */
+      printkd("handle page fault.. Permission not set for addr =  0x%.lX\n", (uint64_t)l_addr_palign);
+      // return false because permission have not been set.
+      return false;
+    }
 
 
     if (!pte->isPresent())
@@ -123,16 +118,20 @@ bool Block::handlePageFault(task_t* i_task, uint64_t i_addr)
         else if (pte->isAllocateFromZero())
         {
             void* l_page = PageManager::allocatePage();
+
+            // set the permission of the physical address pte entry to NO_ACCESS now that
+            // we have handled the page fault and have a SPTE entry for that VA.
+            if (BaseSegment::mmSetPermission(reinterpret_cast<void*>(l_page), 0, NO_ACCESS))
+            {
+               // Did not set permission..
+               printkd("handle page fault.. Set Permission failed for physical addr =  0x%.lX\n", (uint64_t)l_page);
+            }
+
             memset(l_page, '\0', PAGESIZE);
 
             pte->setPageAddr(reinterpret_cast<uint64_t>(l_page));
             pte->setPresent(true);
 
-         // TODO.. add this and test it..
-	  /*    if (BaseSegment::mmSetPermission(reinterpret_cast<void*>(l_page), 0, NO_ACCESS))
-	    {
-	      printk("             Got an error trying to set permissions in handle page fault\n");
-	    } */
         }
         else
         {
@@ -140,7 +139,6 @@ bool Block::handlePageFault(task_t* i_task, uint64_t i_addr)
         }
     }
 
-    // Add page table entry.
     PageTableManager::addEntry(
             l_addr_palign,
             pte->getPage(),
@@ -197,26 +195,32 @@ void Block::setPhysicalPage(uint64_t i_vAddr, uint64_t i_pAddr,
      
 }
 
-
-void Block::setIsPresent(void* i_vaddr)
+void Block::attachSPTE(void *i_vaddr)
 {
+
     uint64_t l_vaddr = reinterpret_cast<uint64_t>(i_vaddr);
     ShadowPTE* l_pte = getPTE(l_vaddr);
-    //Set present bit
+
+    //Set the present bit for the address associated with this block
     l_pte->setPresent(true);
-}
 
-void Block::addPTE(void* i_vaddr)
-{
-    uint64_t l_vaddr = reinterpret_cast<uint64_t>(i_vaddr);
-    ShadowPTE* l_pte = getPTE(l_vaddr);
     //Add page table entry
     PageTableManager::addEntry((l_vaddr / PAGESIZE) * PAGESIZE,
                                 l_pte->getPage(),
                                 (l_pte->isExecutable() ? EXECUTABLE :
                                  (l_pte->isWritable() ? WRITABLE :
                                   READ_ONLY)));
+
+    // update permission for the page that corresponds to the physical page addr.
+    // now that we have handled the page fault.
+    if (BaseSegment::mmSetPermission(reinterpret_cast<void*>(l_pte->getPageAddr()), 0, NO_ACCESS))
+    {
+       printkd("Got an error trying to set permissions in handle Response msg handler \n");
+    }
+
 }
+
+
 
 uint64_t Block::findPhysicalAddress(uint64_t i_vaddr) const
 {
@@ -253,18 +257,21 @@ void Block::releaseAllPages()
         ShadowPTE* pte = getPTE(page);
         if (pte->isPresent() && (0 != pte->getPageAddr()))
         {
+
+            // set the permission of the physical address pte entry back to writable now that
+            // the associated VA Spte has been released.
+            if (BaseSegment::mmSetPermission(reinterpret_cast<void*>(pte->getPageAddr()),
+                                         0, WRITABLE))
+            {
+                printkd("Got an error trying to set permissions in release all pages\n");
+            }
+
+
             PageManager::freePage(reinterpret_cast<void*>(pte->getPageAddr()));
 
-/*  TODO.. add this into code and test.
-        if (BaseSegment::mmSetPermission(reinterpret_cast<void*>(pte->getPageAddr()),
-                                         0, WRITABLE))
-        {
-         printk("Got an error trying to set permissions in release all pages\n");
-        }    
-*/
             pte->setPresent(false);
             pte->setPageAddr(NULL);
-        }
+	}
     }
 }
 
@@ -306,39 +313,6 @@ void Block::updateRefCount( uint64_t i_vaddr,
     }
 }
 
-bool Block::evictPage(ShadowPTE* i_pte)
-{
-    ShadowPTE* pte = i_pte;
-    bool do_cast_out = false;
-
-    if(!pte->isWritable())  // ro, executable
-    {
-        do_cast_out = true;
-    }
-    else  // is writable...
-    {
-        // if pte->isWriteTracked() flush then cast out
-    }
-
-    if(do_cast_out)
-    {
-        PageTableManager::delEntry(pte->getPageAddr());
-        PageManager::freePage(reinterpret_cast<void*>(pte->getPageAddr()));
-
-/*  TODO.. Add this back in and test
-        // Need to set the permissions of the heap back to R/W
-        if (BaseSegment::mmSetPermission(reinterpret_cast<void*>(pte->getPageAddr()),
-                                         0, WRITABLE))
-        {
-          printk("              EVICT Got an error trying to set permissions in evict page\n");
-        }
-*/
-        pte->setPresent(false);
-        pte->setPageAddr(NULL);
-    }
-
-    return do_cast_out;
-}
 
 void Block::castOutPages(uint64_t i_type)
 {
@@ -486,7 +460,6 @@ int Block::setPermSPTE( ShadowPTE* i_spte, uint64_t i_access_type)
       i_spte->setReadable(true);
       i_spte->setWritable(true);
       i_spte->setExecutable(false);
-
     }
     // if executable
     else if ( i_access_type & EXECUTABLE)
@@ -626,7 +599,7 @@ int Block::removePages(VmmManager::PAGE_REMOVAL_OPS i_op, void* i_vaddr,
             if (pte->isDirty() && pte->isWriteTracked() &&
                 this->iv_writeMsgHdlr != NULL)
             {
-                releasePTE(pte);
+                releaseSPTE(pte);
                 //Send write msg with the page address
                 if (i_task != NULL)
                 {
@@ -649,24 +622,27 @@ int Block::removePages(VmmManager::PAGE_REMOVAL_OPS i_op, void* i_vaddr,
             else if (i_op != VmmManager::FLUSH)
             {
                 //'Release' page entry
-                releasePTE(pte);
+                releaseSPTE(pte);
                 PageManager::freePage(reinterpret_cast<void*>(pageAddr));
 
-/*  TODO.. Add this back in and test.
-printk("       \nInside flush.. setting all permissions back to writable on the heap\n");
-// Need to set the permissions of the heap back to R/W
-            BaseSegment::mmSetPermission(reinterpret_cast<void*>(pte->getPageAddr()),
-                                            0, WRITABLE);
-*/
-            }
+	    }
         }
     }
     return 0;
 }
 
-void Block::releasePTE(ShadowPTE* i_pte)
+void Block::releaseSPTE(ShadowPTE* i_pte)
 {
     i_pte->setDirty(false);
     i_pte->setPresent(false);
+
+    // set the permission of the physical address pte entry back to writable now that
+    // the associated VA Spte has been released.
+    if (BaseSegment::mmSetPermission(reinterpret_cast<void*>(i_pte->getPageAddr()),
+                                     0, WRITABLE))
+    {
+        printkd("Got an error setting permission during Flush\n");
+    }
+
     i_pte->setPageAddr(NULL);
 }
