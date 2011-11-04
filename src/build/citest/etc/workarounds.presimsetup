@@ -56,3 +56,10 @@ echo "INTERNALREGS           # List all scom registers" >> $sb/simu/data/cec-chi
 echo "   0xFF00000F, 64       # Simics workaround" >> $sb/simu/data/cec-chip/centaur.chip
 echo "END" >> $sb/simu/data/cec-chip/centaur.chip
 echo "DONE" >> $sb/simu/data/cec-chip/centaur.chip
+
+echo "+++ Update to new phyp and mambo level."
+mkdir -p $sb/simu/data
+cp --update $BACKING_BUILD/src/simu/data/simicsInfo $sb/simu/data/simicsInfo
+sed -i -e's/^WSALIAS HOSTBOOT_LEVEL MAMBOLEVEL.*/WSALIAS HOSTBOOT_LEVEL MAMBOLEVEL env\/mamboa\/2011_11_10__4.2/' $sb/simu/data/simicsInfo
+sed -i -e's/^WSALIAS HOSTBOOT_LEVEL PHYPLEVEL.*/WSALIAS HOSTBOOT_LEVEL PHYPLEVEL env\/phypa\/simics-4.2.0\/simics-4.2.82\/ph111111a700.42/' $sb/simu/data/simicsInfo
+sed -i -e's/^WSALIAS HOSTBOOT_LEVEL PHYP_PATCH_LEVEL.*/WSALIAS HOSTBOOT_LEVEL PHYP_PATCH_LEVEL env\/phypa\/simics-4.2.0\/simics-4.2.82\/patches\/ph111111a700.42/' $sb/simu/data/simicsInfo

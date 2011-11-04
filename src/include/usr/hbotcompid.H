@@ -172,6 +172,14 @@ const compId_t EEPROM_COMP_ID = 0x0E00;
 const char EEPROM_COMP_NAME[] = "eeprom";
 //@}
 
+/** @name INTR
+ *  Interrupt presenter component
+ */
+//@{
+const compId_t INTR_COMP_ID = 0x0F00;
+const char INTR_COMP_NAME[] = "intr";
+//@}
+
 //  ----------------------------------------------------------
 //  CXXTEST Unit Test, reserve compid near the end...
 /** @name CXXTEST

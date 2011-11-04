@@ -38,6 +38,7 @@ extern "C"
  */
 enum SEG_DATA_SIZES
 {
+    THIRTYTWO_MB = (32*MEGABYTE),
     THIRTYTWO_GB = (32*GIGABYTE),
 };
 

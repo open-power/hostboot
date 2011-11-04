@@ -1,11 +1,11 @@
 #  IBM_PROLOG_BEGIN_TAG
 #  This is an automatically generated prolog.
 #
-#  $Source: src/kernel/makefile $
+#  $Source: src/usr/intr/test/makefile $
 #
 #  IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2010 - 2011
+#  COPYRIGHT International Business Machines Corp. 2011
 #
 #  p1
 #
@@ -20,13 +20,10 @@
 #  Origin: 30
 #
 #  IBM_PROLOG_END
-ROOTPATH = ../..
+ROOTPATH = ../../../..
 
-OBJS = start.o kernel.o console.o pagemgr.o heapmgr.o taskmgr.o cpumgr.o
-OBJS += syscall.o scheduler.o spinlock.o exception.o vmmmgr.o timemgr.o 
-OBJS += futexmgr.o ptmgr.o segmentmgr.o devicesegment.o basesegment.o
-OBJS += block.o cpuid.o misc.o msghandler.o blockmsghdlr.o stacksegment.o
-OBJS += softpatch_p7.o barrier.o idebug.o intmsghandler.o
+MODULE = testintr
+TESTS = *.H
 
 include ${ROOTPATH}/config.mk
 

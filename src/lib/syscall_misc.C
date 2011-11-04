@@ -43,3 +43,25 @@ uint8_t cpu_dd_level()
     return reinterpret_cast<uint64_t>(_syscall0(MISC_CPUDDLEVEL));
 }
 
+size_t cpu_thread_count()
+{
+    size_t threads = 0;
+    ProcessorCoreType core_type = cpu_core_type();
+    switch(core_type)
+    {
+        case CORE_POWER7:
+        case CORE_POWER7_PLUS:
+            threads = 4;
+            break;
+
+        case CORE_POWER8_SALERNO:
+        case CORE_POWER8_VENICE:
+            threads = 8;
+            break;
+
+        default:
+            break;
+    }
+    return threads;
+}
+

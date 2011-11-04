@@ -64,12 +64,12 @@ class PnorRpTest : public CxxTest::TestSuite
         };
         const ExpVals_t exp_data[] = {
             /* TOC */ { 0x690, 0x80000000 },
-            /* GLOBAL_DATA */ { PAGESIZE, 0x8007D690 },
+            /* GLOBAL_DATA */ { PAGESIZE, 0x800AF690 },
             /* SBE_IPL */ { 0, 0 },
             /* HB_BASE_CODE */ { 0, 0 },
-            /* HB_DATA */ { 128*KILOBYTE, 0x8007E690 },
+            /* HB_DATA */ { 128*KILOBYTE, 0x800B0690 },
             /* HB_ERRLOGS */ { 0, 0 },
-            /* HB_EXT_CODE */ { 0x7D000, 0x80000690 },
+            /* HB_EXT_CODE */ { 0xAF000, 0x80000690 },
             /* HB_RUNTIME */ { 0, 0 }, 
             /* PAYLOAD */ { 0, 0 },
             /* PFW_LITE_CODE */ { 0, 0 },

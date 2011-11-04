@@ -29,7 +29,7 @@ EXTRA_LIDS = dslid
 
 BASE_OBJECTS = console.o spinlock.o string.o string_ext.o stdlib.o ctype.o \
                assert.o stdio.o builtins.o vfs_init.o heapmgr.o pagemgr.o \
-               math.o barrier.o idebug.o
+               math.o barrier.o idebug.o intmsghandler.o
 
 DIRECT_BOOT_OBJECTS = start.o kernel.o taskmgr.o cpumgr.o syscall.o \
                       scheduler.o exception.o vmmmgr.o timemgr.o \
@@ -48,14 +48,14 @@ BASE_MODULES = trace errl devicefw scom xscom initservice taskargs \
                pnor vfs
 
 EXTENDED_MODULES = targeting ecmddatabuffer fapi hwp plat 	\
-                   extinitsvc istepdisp hwas fsi fsiscom i2c
+                   extinitsvc istepdisp hwas fsi fsiscom i2c intr
 
 DIRECT_BOOT_MODULES = example
 RUNTIME_MODULES =
 TESTCASE_MODULES = cxxtest testerrl testdevicefw testsyslib \
                    testscom testxscom testtargeting testinitservice testkernel \
                    testhwpf testecmddatabuffer initsvctasktest2 testcxxtest \
-                   testpnor testi2c testfsi testvfs testhwas
+                   testpnor testi2c testfsi testvfs testhwas testintr
 
 RELOCATABLE_IMAGE_LDFLAGS = -pie --export-dynamic
 

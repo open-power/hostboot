@@ -86,6 +86,12 @@ ProcessorCoreType cpu_core_type();
  */
 uint8_t cpu_dd_level();
 
+/** @fn cpu_thread_count()
+ *  @breif Get the number of threads per cpu for this proctype
+ *  @return # of threads per cpu
+ */
+size_t cpu_thread_count();
+
 #ifdef __cplusplus
 }
 #endif

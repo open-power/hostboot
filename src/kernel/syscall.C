@@ -39,6 +39,7 @@
 #include <kernel/vmmmgr.H>
 #include <kernel/stacksegment.H>
 #include <kernel/heapmgr.H>
+#include <kernel/intmsghandler.H>
 
 extern "C"
 void kernel_execute_decrementer()
@@ -121,8 +122,8 @@ namespace Systemcalls
         &FutexWait,  // FUTEX_WAIT
         &FutexWake,  // FUTEX_WAKE
 
-        &Shutdown,  // MISC_SHUTDOWN
-        &CpuCoreType,  // MISC_CPUCORETYPE
+        &Shutdown,    // MISC_SHUTDOWN
+        &CpuCoreType, // MISC_CPUCORETYPE
         &CpuDDLevel,  // MISC_CPUDDLEVEL
 
         &MmAllocBlock, // MM_ALLOC_BLOCK
@@ -246,16 +247,47 @@ namespace Systemcalls
     }
 
     static MessageQueue* msgQRoot = NULL;
+    static MessageQueue* msgQIntr = NULL;
 
     void MsgQRegisterRoot(task_t* t)
     {
-        msgQRoot = (MessageQueue*) TASK_GETARG0(t);
-        TASK_SETRTN(t, 0);
+        switch(TASK_GETARG0(t))
+        {
+            case MSGQ_ROOT_VFS:
+                msgQRoot = (MessageQueue*) TASK_GETARG1(t);
+                TASK_SETRTN(t,0);
+                break;
+
+            case MSGQ_ROOT_INTR:
+                msgQIntr = (MessageQueue*) TASK_GETARG1(t);
+                InterruptMsgHdlr::create(msgQIntr);
+                TASK_SETRTN(t,0);
+                break;
+
+            default:
+                printk("ERROR MsgRegisterRoot invalid type %ld\n",
+                       TASK_GETARG0(t));
+                TASK_SETRTN(t,-EINVAL);
+        }
     }
 
     void MsgQResolveRoot(task_t* t)
     {
-        TASK_SETRTN(t, (uint64_t) msgQRoot);
+        switch(TASK_GETARG0(t))
+        {
+            case MSGQ_ROOT_VFS:
+                TASK_SETRTN(t, (uint64_t) msgQRoot);
+                break;
+
+            case MSGQ_ROOT_INTR:
+                TASK_SETRTN(t, (uint64_t) msgQIntr);
+                break;
+
+            default:
+                printk("ERROR MsgQResolveRoot invalid type %ld\n",
+                       TASK_GETARG0(t));
+                TASK_SETRTN(t,0);
+        }
     }
 
     void MsgSend(task_t* t)
@@ -563,3 +595,4 @@ namespace Systemcalls
     }
 
 };
+

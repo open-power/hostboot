@@ -74,11 +74,11 @@
             <length>8</length>
             <format>number</format>
         </field>
-        <field type="logical_size">0x7D000
+        <field type="logical_size">0xAF000
             <length>8</length>
             <format>number</format>
         </field>
-        <field type="physical_size">0x7D000
+        <field type="physical_size">0xAF000
             <length>8</length>
             <format>number</format>
         </field>
@@ -97,11 +97,11 @@
             <length>8</length>
             <format>string</format>
         </field>
-        <field type="logical_offset">0x7D690
+        <field type="logical_offset">0xAF690
             <length>8</length>
             <format>number</format>
         </field>
-        <field type="physical_offset">0x7D690
+        <field type="physical_offset">0xAF690
             <length>8</length>
             <format>number</format>
         </field>
@@ -128,11 +128,11 @@
             <length>8</length>
             <format>string</format>
     	</field>
-        <field type="logical_offset">0x7E690
+        <field type="logical_offset">0xB0690
             <length>8</length>
             <format>number</format>
         </field>
-        <field type="physical_offset">0x7E690
+        <field type="physical_offset">0xB0690
             <length>8</length>
             <format>number</format>
         </field>

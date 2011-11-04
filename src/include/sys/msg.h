@@ -57,6 +57,19 @@ enum msg_sys_types_t
     MSG_MM_RP_READ,
     MSG_MM_RP_WRITE,
     MSG_MM_RP_PERM,
+
+    MSG_INTR_EXTERN,    //!< Msg sent from kernel to user space on ext intr
+    MSG_INTR_ADD_CPU,   //!< Add cpu core, data[0] = cpuid (PIR)
+};
+
+// System-defined root queue types
+/** @enum msg_root_queue_types_t
+ * @brief Message queue types that the kernel tracks
+ */
+enum msg_root_queue_types_t
+{
+    MSGQ_ROOT_VFS,
+    MSGQ_ROOT_INTR,
 };
 
 /** @var msg_sys_types_t::MSG_MM_RP_READ
@@ -229,9 +242,10 @@ msg_t* msg_wait(msg_q_t q);
   *
   * @return true if asynchronous message
   */
-ALWAYS_INLINE
-    inline uint32_t msg_is_async(msg_t* msg)
-	{ return 0 == msg->__reserved__async; }
+    ALWAYS_INLINE
+inline uint32_t msg_is_async(msg_t* msg)
+{ return 0 == msg->__reserved__async; }
+
 
 #ifdef __cplusplus
 }

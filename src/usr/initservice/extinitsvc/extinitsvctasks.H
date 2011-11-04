@@ -170,6 +170,19 @@ const TaskInfo g_exttaskinfolist[]   =   {
         // NOTE: libistepdisp.so needs to always be last in this list!!
         //  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         /**
+         * @brief External interrupt resource provider
+         */
+        {
+            "libintr.so",                               // tasknmae
+            NULL,                                       // no ptr to fnct
+            {
+                START_TASK,                             // task type
+                EXT_IMAGE,                              // Extended Module
+                START_INTR_ERRL_ID,                     // module id
+            }
+        },
+
+        /**
          * @brief   IStep Dispatcher task, runs ISteps
          *
          *

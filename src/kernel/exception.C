@@ -28,6 +28,7 @@
 #include <arch/ppc.H>
 #include <kernel/vmmmgr.H>
 #include <kernel/cpuid.H>
+#include <kernel/intmsghandler.H>
 
 namespace ExceptionHandles
 {
@@ -221,6 +222,16 @@ void kernel_execute_machine_check()
            "\tSRR0 = %lx, SRR1 = %lx\n"
            "\tDSISR = %lx, DAR = %lx\n",
            t->tid, getPIR(),
-           getSRR0(), getSRR0(), getDSISR(), getDAR());
+           getSRR0(), getSRR1(), getDSISR(), getDAR());
     kassert(false);
+}
+
+extern "C"
+void kernel_execute_external()
+{
+    // SRR0 set to the effective addr the thread
+    // would have attempted to execute next
+    // SRR1 [33:36,42:47] set to zero
+    //      all others copied from MSR
+    InterruptMsgHdlr::handleInterrupt();
 }

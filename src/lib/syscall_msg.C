@@ -21,6 +21,7 @@
 //
 //  IBM_PROLOG_END
 #include <sys/msg.h>
+#include <sys/interrupt.h>
 #include <sys/syscall.h>
 #include <sys/vfs.h>
 
@@ -42,11 +43,20 @@ int msg_q_register(msg_q_t q, const char* name)
 {
     if (0 == strcmp(VFS_ROOT, name))
     {
-	return (int64_t)_syscall1(MSGQ_REGISTER_ROOT, q);
+	return (int64_t)_syscall2(MSGQ_REGISTER_ROOT,
+                                  reinterpret_cast<void*>(MSGQ_ROOT_VFS),
+                                  q);
+    }
+    else if (0 == strcmp(INTR_MSGQ, name))
+    {
+        return (int64_t)_syscall2(MSGQ_REGISTER_ROOT,
+                                  reinterpret_cast<void*>(MSGQ_ROOT_INTR),
+                                  q);
     }
     else
     {
-	msg_q_t vfsQ = (msg_q_t)_syscall0(MSGQ_RESOLVE_ROOT);
+	msg_q_t vfsQ = (msg_q_t)_syscall1(MSGQ_RESOLVE_ROOT,
+                                reinterpret_cast<void*>(MSGQ_ROOT_VFS));
 	msg_t* msg = msg_allocate();
 	msg->type = VFS_MSG_REGISTER_MSGQ;
 	msg->data[0] = (uint64_t) q;
@@ -61,11 +71,18 @@ msg_q_t msg_q_resolve(const char* name)
 {
     if (0 == strcmp(VFS_ROOT, name))
     {
-	return (msg_q_t)_syscall0(MSGQ_RESOLVE_ROOT);
+	return (msg_q_t)_syscall1(MSGQ_RESOLVE_ROOT,
+                                  reinterpret_cast<void*>(MSGQ_ROOT_VFS));
+    }
+    else if (0 == strcmp(INTR_MSGQ, name))
+    {
+        return (msg_q_t)_syscall1(MSGQ_RESOLVE_ROOT,
+                                  reinterpret_cast<void*>(MSGQ_ROOT_INTR));
     }
     else
     {
-	msg_q_t vfsQ = (msg_q_t)_syscall0(MSGQ_RESOLVE_ROOT);
+	msg_q_t vfsQ = (msg_q_t)_syscall1(MSGQ_RESOLVE_ROOT,
+                                reinterpret_cast<void*>(MSGQ_ROOT_VFS));
 	msg_t* msg = msg_allocate();
 	msg->type = VFS_MSG_RESOLVE_MSGQ;
 	msg->extra_data = (void*) name;

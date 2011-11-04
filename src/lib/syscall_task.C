@@ -80,7 +80,8 @@ tid_t task_exec(const char* file, void* ptr)
     int rc = 0;
 
     // Create message, send.
-    msg_q_t vfsQ = (msg_q_t)_syscall0(MSGQ_RESOLVE_ROOT);
+    msg_q_t vfsQ = (msg_q_t)_syscall1(MSGQ_RESOLVE_ROOT,
+                                      reinterpret_cast<void*>(MSGQ_ROOT_VFS));
     msg_t* msg = msg_allocate();
     msg->type = VFS_MSG_EXEC;
     msg->data[0] = (uint64_t) file;

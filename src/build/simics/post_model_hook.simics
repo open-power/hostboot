@@ -29,6 +29,7 @@
 ################################################################################
 
 
+#setup traces
 run-python-file simics-debug-framework.py
 run-python-file hb-simdebug.py
 
@@ -36,5 +37,5 @@ run-python-file hb-simdebug.py
 #This will be merged into once the proper tools are written.
 phys_mem.load-file ../img/hbicore_extended.bin 0x500690
 phys_mem.load-file ../img/pnor.toc 0x500000
-phys_mem.load-file ../img/targeting.bin 0x57E690
+phys_mem.load-file ../img/targeting.bin 0x5B0690
 
