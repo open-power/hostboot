@@ -94,6 +94,10 @@ enum    ModuleType
  *  - module_id for errorlog if task fails
  *
  */
+/**
+ * @todo    module_id is fairly useless, we should use the taskname string
+ *          to id the module.  Schedule for termination....
+ */
 struct  TaskFlags
 {
     TaskType            task_type;          // task execution flags
@@ -109,6 +113,10 @@ struct  TaskFlags
  *      - taskname
  *      - execution flags, see TaskFlags above
  *
+ */
+/**
+ * @todo    store a pointer to the taskname string here instead of allocating
+ *          64 bytes for each entry?
  */
 struct  TaskInfo
 {

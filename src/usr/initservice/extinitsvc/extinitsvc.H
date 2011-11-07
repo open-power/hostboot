@@ -57,17 +57,6 @@ namespace   INITSERVICE
 // Typedef/Enumerations
 /******************************************************************************/
 
-/**
- * @enum ShutdownStatus
- */
-enum ShutdownStatus
-{
-    SHUTDOWN_STATUS_GOOD         = 0x01230000,
-    SHUTDOWN_STATUS_UT_FAILED    = 0x01230001,
-    SHUTDOWN_STATUS_ISTEP_FAILED = 0x01230002,
-};
-
-
 /******************************************************************************/
 // ExtInitSvc Class
 /******************************************************************************/

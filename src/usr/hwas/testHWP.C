@@ -69,7 +69,8 @@ extern trace_desc_t *g_trac_hwas;
 
 void    testHWP( void * io_pArgs )
 {
-    TASKARGS_INIT_TASKARGS(io_pArgs);
+    INITSERVICE::TaskArgs *pTaskArgs =
+            static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
     errlHndl_t l_err = NULL;
 
     // Get the master processor chip
@@ -86,9 +87,12 @@ void    testHWP( void * io_pArgs )
     {
         TRACFCOMP( g_trac_hwas, "testHWP failed, committing errorlog");
         errlCommit(l_err,HWAS_COMP_ID);
+        pTaskArgs->postReturnCode( 0x1234 );
     }
 
-    TASKARGS_WAIT_AND_ENDTASK();
+    //  wait here on the barrier, then end the task.
+    pTaskArgs->waitChildSync();
+    task_end();
 }
 
 

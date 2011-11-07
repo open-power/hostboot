@@ -33,6 +33,7 @@
 #include    <sys/vfs.h>
 #include    <vfs/vfs.H>
 #include    <sys/task.h>
+#include    <sys/misc.h>
 #include    <trace/interface.H>
 #include    <errl/errlentry.H>
 #include    <errl/errlmanager.H>
@@ -77,21 +78,20 @@ errlHndl_t InitService::startTask( const TaskInfo       *i_ptask,
             // task failed to launch, post an errorlog and dump some trace
             /*@     errorlog tag
              *  @errortype      ERRL_SEV_CRITICAL_SYS_TERM
-             *  @moduleid       see task list
+             *  @moduleid       INITSVC_START_TASK_MOD_ID
              *  @reasoncode     START_TASK_FAILED
-             *  @userdata1      task id or task return code
-             *  @userdata2      0
+             *  @userdata1      task module id
+             *  @userdata2      task id or task return code
              *
              *  @devdesc        Initialization Service failed to start a task.
-             *                  The module id will identify the task.
              *
              */
             l_errl = new ERRORLOG::ErrlEntry(
                     ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
-                    i_ptask->taskflags.module_id,
+                    INITSERVICE::INITSVC_START_TASK_MOD_ID,
                     INITSERVICE::START_TASK_FAILED,
-                    l_tidrc,
-                    0 );
+                    i_ptask->taskflags.module_id,
+                    l_tidrc );
         } // endif tidrc
         else
         {
@@ -123,22 +123,21 @@ errlHndl_t InitService::executeFn( const TaskInfo   *i_ptask,
     {
         /*@     errorlog tag
          *  @errortype      ERRL_SEV_CRITICAL_SYS_TERM
-         *  @moduleid       see task list
+         *  @moduleid       INITSVC_START_FN_MOD_ID
          *  @reasoncode     START_FN_FAILED
-         *  @userdata1      task id or task return code
-         *  @userdata2      0
+         *  @userdata1      task module id
+         *  @userdata2      task id or task return code
          *
          *  @devdesc        Initialization Service attempted to start a
          *                  function within a module but the function
          *                  failed to launch
-         *                  The module id will identify the task.
          */
         l_errl = new ERRORLOG::ErrlEntry(
                 ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
-                i_ptask->taskflags.module_id,
+                INITSERVICE::INITSVC_START_FN_MOD_ID,
                 INITSERVICE::START_FN_FAILED,
-                l_tidrc,
-                0 );
+                i_ptask->taskflags.module_id,
+                l_tidrc );
 
     } // endif tidrc
     else
@@ -224,7 +223,7 @@ errlHndl_t  InitService::dispatchTask( const TaskInfo   *i_ptask,
 }
 
 
-void InitService::init( void *i_ptr )
+void InitService::init( void *io_ptr )
 {
     errlHndl_t          l_errl      =   NULL;
     uint64_t            l_task      =   0;
@@ -232,10 +231,8 @@ void InitService::init( void *i_ptr )
     TaskArgs::TaskArgs  l_args;
     uint64_t            l_childrc   =   0;
 
-
     TRACFCOMP( g_trac_initsvc,
                ENTER_MRK "Initialization Service is starting." );
-
 
     //  loop through the task list and start up any tasks necessary
     for ( l_task=0;
@@ -247,7 +244,7 @@ void InitService::init( void *i_ptr )
         if ( l_ptask->taskflags.task_type == END_TASK_LIST )
         {
             TRACDCOMP( g_trac_initsvc,
-                    "End of Initialization Service task list.\n" );
+                    "End of Initialization Service task list." );
             break;
         }
 
@@ -289,28 +286,28 @@ void InitService::init( void *i_ptr )
             //  Check child results for a valid nonzero return code.
             //  If we have one, and no errorlog, then we create and
             //  post our own errorlog here.
-            if (    ( l_childrc != TASKARGS_UNDEFINED64 )
-                 && ( l_childrc != 0 )
-                )
+            if (  l_childrc != 0 )
             {
                 TRACFCOMP( g_trac_initsvc,
-                           "Child task returned 0x%llx, no errlog",
+                           "IS: Child task %s returned 0x%llx, no errlog",
+                           l_ptask->taskname,
                            l_childrc );
 
                 /*@     errorlog tag
                  *  @errortype      ERRL_SEV_CRITICAL_SYS_TERM
-                 *  @moduleid       see task list
+                 *  @moduleid       INITSVC_TASK_RETURNED_ERROR_ID
                  *  @reasoncode     INITSVC_FAILED_NO_ERRLOG
                  *  @userdata1      returncode from task
                  *  @userdata2      0
                  *
                  *  @devdesc        The task returned with an error,
                  *                  but there was no errorlog returned.
+                 *                  See userdata1 for the return code.
                  *
                  */
                 l_errl = new ERRORLOG::ErrlEntry(
                         ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
-                        l_ptask->taskflags.module_id,
+                        INITSVC_TASK_RETURNED_ERROR_ID,
                         INITSERVICE::INITSVC_FAILED_NO_ERRLOG,
                         l_childrc,
                         0 );
@@ -323,12 +320,13 @@ void InitService::init( void *i_ptr )
     //  die if we drop out with an error
     if ( l_errl )
     {
-        //  commit the log first, then stop right here.
-        TRACFCOMP( g_trac_initsvc,
-                   "ERROR:  extra errorlog found: %p",
-                   l_errl );
+        //  commit the log first, then shutdown.
+        TRACFCOMP( g_trac_initsvc, "InitService: Committing errorlog." );
         errlCommit( l_errl, INITSVC_COMP_ID );
-        assert( 0 );
+
+        // Tell the kernel to shutdown.
+        shutdown( SHUTDOWN_STATUS_INITSVC_FAILED );
+
     }
 
     TRACFCOMP( g_trac_initsvc,

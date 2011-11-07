@@ -342,7 +342,7 @@ fapi::ReturnCode hwpExecInitFile(const fapi::Target & i_Target,
 
         // Unload the initfile
         l_tmpRc = fapiUnloadInitFile(i_file, l_ifAddr, l_ifSize);
-        
+
         // return code from executeScoms takes precedence
         if (l_rc.ok())
         {
@@ -1244,7 +1244,7 @@ fapi::ReturnCode writeScom(const ifData_t & i_ifData, const uint32_t i_scomNum,
         {
             //Perform a PutScomUnderMask operation on the target
 
-            #ifdef HWPEXECINITFILE_DEBUG 
+            #ifdef HWPEXECINITFILE_DEBUG
             l_rc = fapiGetScom(l_target, l_addr, l_scomData);
             FAPI_DBG("hwpExecInitFile: writeScom: Data read 0x%.16llX",
                      l_scomData.getDoubleWord(0));

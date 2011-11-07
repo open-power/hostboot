@@ -77,7 +77,7 @@ void    TaskArgs::postReturnCode( const uint64_t i_returncode )
 {
     iv_taskreturncode  =   i_returncode;
 
-    return;
+     return;
 }
 
 
@@ -124,8 +124,8 @@ errlHndl_t  TaskArgs::getErrorLog( )
 
 void    TaskArgs::clear()
 {
-    iv_taskreturncode   =   TASKARGS_UNDEFINED64;   //  init iv_returncode to undefined
-    iv_taskcommand      =   TASKARGS_UNDEFINED64;   //  init iv_command to undefined
+    iv_taskreturncode   =   0;   //  init iv_returncode
+    iv_taskcommand      =   0;   //  init iv_command
 
     //  this should not happen, should have been handled by the caller(s)
     //  commit the errorlog here just to get rid of it
@@ -143,8 +143,8 @@ void    TaskArgs::clear()
 
 TaskArgs::TaskArgs()
 :   iv_errl( NULL ),                                //  init errorlog handle to NULL
-    iv_taskreturncode(TASKARGS_UNDEFINED64),        //  init iv_returncode to undefined
-    iv_taskcommand(TASKARGS_UNDEFINED64)            //  init iv_command to undefined
+    iv_taskreturncode(0),        //  init iv_returncode to undefined
+    iv_taskcommand(0)            //  init iv_command to undefined
 {
     // set barrier to wait for 2 tasks before releasing,
     //  see notes above.

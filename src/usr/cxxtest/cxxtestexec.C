@@ -67,7 +67,8 @@ void _start(void *io_pArgs)
     errlHndl_t  l_errl  =   NULL;
     std::vector<const char *> module_list;
     tid_t       tidrc           =   0;
-    TASKARGS_INIT_TASKARGS( io_pArgs );
+    INITSERVICE::TaskArgs *pTaskArgs =
+            static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
 
 
     // output a blank line so that it's easier to find the beginning of
@@ -142,6 +143,7 @@ void _start(void *io_pArgs)
     //  dump out an informational errorlog
     assert(l_errl == NULL);
 
-
-    TASKARGS_WAIT_AND_ENDTASK();
+    //  wait here on the barrier, then end the task.
+    pTaskArgs->waitChildSync();
+    task_end();
 }

@@ -25,6 +25,22 @@
 
 #include <stdint.h>
 
+/**
+ * @enum ShutdownStatus
+ *
+ * Shutdown values for shutdown command.
+ */
+
+enum ShutdownStatus
+{
+    SHUTDOWN_STATUS_GOOD                = 0x01230000,
+    SHUTDOWN_STATUS_UT_FAILED           = 0x01230001,
+    SHUTDOWN_STATUS_ISTEP_FAILED        = 0x01230002,
+    SHUTDOWN_STATUS_EXTINITSVC_FAILED   = 0x01230003,
+    SHUTDOWN_STATUS_INITSVC_FAILED      = 0x01230004,
+};
+
+
 #ifdef __cplusplus
 extern "C"
 {

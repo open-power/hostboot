@@ -42,66 +42,58 @@ namespace   INITSERVICE
  */
 enum    InitServiceModuleID
 {
-    UNDEFINED_MODULE_ERRL_ID     =   0x00,
-    BASE_INITSVC_ERRL_ID,
-    START_TRACE_ERRL_ID,
-    START_ERRL_ERRL_ID,
-    START_XSCOMDD_ERRL_ID,
-    START_PNORDD_ERRL_ID,
-    START_EXTINITSVC_ERRL_ID,
-    START_TARGETING_ERRL_ID,
-    GET_MASTER_CHIP_TARGET_ERRL_ID,
-    START_MAILBOXDD_ERRL_ID,
-    START_SP_COMM_ERRL_ID,
-    ENABLE_STREAMING_TRACE_ERRL_ID,
-    START_PROGRESS_CODES_ERRL_ID,
-    START_FSIDD_ERRL_ID,
-    SETUP_SLAVE_LINKS_ERRL_ID,
-    START_FSISCOM_ERRL_ID,
-    START_FSI_II2C_ERRL_ID,
-    START_HWP_ERRL_ID,
-    READ_MAX_CONFIG_FROM_PNOR_ERRL_ID,
-    APPLY_PRESENCE_DETECT_ERRL_ID,
-    APPLY_PARTIAL_BAD_ERRL_ID,
-    APPLY_GARD_ERRL_ID,
-    COLLECT_HW_ERRL_IDEC_ERRL_ID,
-    VERIFY_ERRL_IDEC_ERRL_ID,
-    DISABLE_WATCHDOG_ERRL_ID,
-    EXECUTE_ISTEPS_ERRL_ID,
-    START_VFS_ERRL_ID,
-    START_ECMDDATABUFFER_ERRL_ID,
-    START_HWPF_ERRL_ID,
-    START_FAPI_ERRL_ID,
-    START_PLAT_ERRL_ID,
+    UNDEFINED_MODULE_ERRL_ID            =   0x00,
 
-    ISTEP_1_ERRL_ID,
-    ISTEP_2_ERRL_ID,
-    ISTEP_3_ERRL_ID,
-    ISTEP_4_ERRL_ID,
-    ISTEP_5_ERRL_ID,
+    //  base image modules
+    BASE_INITSVC_ERRL_ID                =   0x01,
+    START_TRACE_ERRL_ID                 =   0x02,
+    START_ERRL_ERRL_ID                  =   0x03,
+    START_PNORDD_ERRL_ID                =   0x04,
+    START_VFS_ERRL_ID                   =   0x05,
+    START_EXTINITSVC_ERRL_ID            =   0x06,
+
+    // extended image modules
+    START_ECMDDATABUFFER_ERRL_ID        =   0x10,
+    START_HWPF_ERRL_ID                  =   0x11,
+    START_FAPI_ERRL_ID                  =   0x12,
+    START_HWP_ERRL_ID                   =   0x13,
+    START_PLAT_ERRL_ID                  =   0x14,
+    EXECUTE_ISTEPS_ERRL_ID              =   0x15,
+    START_FSIDD_ERRL_ID                 =   0x16,
+    START_FSISCOM_ERRL_ID               =   0x17,
+    START_TARGETING_ERRL_ID             =   0x18,
+
+
+    //  Internal InitService codes
+    INITSVC_START_TASK_MOD_ID           =   0x20,
+    INITSVC_START_FN_MOD_ID             =   0x21,
+    INITSVC_TASK_RETURNED_ERROR_ID      =   0x22,
+    EXTINITSVC_TASK_RETURNED_ERROR_ID   =   0x23,
+    CXXTEST_TASK_RETURNED_ERROR_ID      =   0x24,
+    ISTEP_RETURNED_ERROR_ID             =   0x25,
 
     //
     //  HWAS:  ISTEP 4
     //  HWAS named isteps (substeps)
     //  @todo sync these names up with Dean's document later
     //
-    HWAS_1_ERRL_ID,
-    HWAS_2_ERRL_ID,
-    HWAS_3_ERRL_ID,
-    HWAS_4_ERRL_ID,
-    HWAS_5_ERRL_ID,
-    HWAS_6_ERRL_ID,
-    HWAS_7_ERRL_ID,
-    HWAS_8_ERRL_ID,
-    HWAS_9_ERRL_ID,
+    HWAS_1_ERRL_ID                      =   0x30,
+    HWAS_2_ERRL_ID                      =   0x31,
+    HWAS_3_ERRL_ID                      =   0x32,
+    HWAS_4_ERRL_ID                      =   0x33,
+    HWAS_5_ERRL_ID                      =   0x34,
+    HWAS_6_ERRL_ID                      =   0x35,
+    HWAS_7_ERRL_ID                      =   0x36,
+    HWAS_8_ERRL_ID                      =   0x37,
+    HWAS_9_ERRL_ID                      =   0x38,
 
     //  reserve some tasks for my unit tests...
     START_CXXTEST_ERRL_ID       =   0xf0,
-    INIT_SVC_TEST1_ERRL_ID,
-    INIT_SVC_TEST2_ERRL_ID,
-    INIT_SVC_TEST3_ERRL_ID,
-    INIT_SVC_TEST4_ERRL_ID,
-    INIT_SVC_TEST5_ERRL_ID,
+    INIT_SVC_TEST1_ERRL_ID      =   0xf1,
+    INIT_SVC_TEST2_ERRL_ID      =   0xf2,
+    INIT_SVC_TEST3_ERRL_ID      =   0xf3,
+    INIT_SVC_TEST4_ERRL_ID      =   0xf4,
+    INIT_SVC_TEST5_ERRL_ID      =   0xf5,
 
 };
 

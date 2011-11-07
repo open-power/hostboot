@@ -38,14 +38,15 @@
 #include    <stdio.h>
 #include    <string.h>
 
-#include    <sys/task.h>                    // tid_t, task_create, etc
-#include    <sys/time.h>                    // nanosleep
+#include    <sys/task.h>                    //  tid_t, task_create, etc
+#include    <sys/time.h>                    //  nanosleep
+#include    <sys/misc.h>                    //  shutdown
 #include    <trace/interface.H>             //  trace support
 #include    <errl/errlentry.H>              //  errlHndl_t
 #include    <devicefw/userif.H>             //  targeting
 #include    <sys/mmio.h>                    //  mmio_scratch_read()
 #include    <initservice/taskargs.H>        //  TaskArgs    structs
-
+#include    <errl/errluserdetails.H>        //  ErrlUserDetails base class
 
 #include    "istepdispatcher.H"
 
@@ -54,8 +55,61 @@
 #include    <isteps/istepmasterlist.H>
 
 
+namespace   ERRORLOG
+{
+/**
+ * @class IStepNameUserDetail
+ *
+ * report the failing IStepName.
+ *
+ * @todo:   get rid of magic numbers in version and subsection.
+ *          set up tags, plugins, include files, etc.
+ *          For now we just want to report the failing istep string for debug.
+ * @todo:   Expand this to report the istep / substep, error returned, etc.
+ */
+
+class   IStepNameUserDetail : public ErrlUserDetails
+{
+
+public:
+
+    IStepNameUserDetail(
+            const char *i_istepname,
+            const uint16_t  i_istep     =   0,
+            const uint16_t  i_substep   =   0,
+            const uint64_t  i_isteprc   =   0   )
+    {
+
+    iv_CompId     = INITSVC_COMP_ID;
+    iv_Version    = 1;
+    iv_SubSection = 1;
+
+    // Store the string in the internal buffer
+    char * l_pString = (char *)allocUsrBuf( strlen(i_istepname)+1 );
+    strcpy(l_pString, i_istepname );
+    }
+
+/**
+ *  @brief Destructor
+ *
+ */
+virtual ~IStepNameUserDetail() {}
+
+private:
+
+// Disabled
+IStepNameUserDetail(const IStepNameUserDetail &);
+IStepNameUserDetail & operator=(const IStepNameUserDetail &);
+};
+
+}   //  end namespace   ERRORLOG
+
+
+
 namespace   INITSERVICE
 {
+
+using   namespace   ERRORLOG;           // IStepNameUserDetails
 
 /******************************************************************************/
 // Globals/Constants
@@ -89,6 +143,9 @@ enum    {
 
 const   uint64_t    SINGLESTEP_PAUSE_S     =   1;
 const   uint64_t    SINGLESTEP_PAUSE_NS    =   100000000;
+
+
+
 
 
 /**
@@ -167,10 +224,7 @@ const TaskInfo *IStepDispatcher::findTaskInfo( const uint16_t i_IStep,
 
 void IStepDispatcher::init( void * io_ptr )
 {
-
-    TRACFCOMP( g_trac_initsvc,
-               ENTER_MRK "starting IStepDispatcher, io_ptr=%p ",
-               io_ptr );
+    // note, io_ptr will pass the TaskArgs struct through to runAllSteps, etc.
 
     if ( getIStepMode() )
     {
@@ -362,19 +416,9 @@ void    IStepDispatcher::singleStepISteps( void *  io_ptr )   const
                         errlCommit( l_errl, INITSVC_COMP_ID);
                     }
 
-                    //  massage the return code from the IStep -
-                    //  If the istep did not set an errorcode,
-                    //  then we report 0
-                    if ( l_isteprc == TASKARGS_UNDEFINED64 )
-                    {
-                        l_istepStatus   =   0;
-                    }
-                    else
-                    {
-                        //  truncate IStep return status to 16 bits.
-                        l_isteprc   &= 0x000000000000ffff;
-                        l_istepStatus =   static_cast<uint16_t>(l_isteprc);
-                    }
+                    //  truncate IStep return status to 16 bits.
+                    l_isteprc   &= 0x000000000000ffff;
+                    l_istepStatus =   static_cast<uint16_t>(l_isteprc);
 
                 }   // end else parent errlog
 
@@ -435,9 +479,15 @@ void    IStepDispatcher::runAllISteps( void * io_ptr )   const
     uint16_t            l_IStep         =   0;
     uint16_t            l_SubStep       =   0;
     const TaskInfo      *l_pistep       =   NULL;
-    TaskArgs::TaskArgs  l_args;
     uint64_t            l_progresscode  =   0;
     uint64_t            l_isteprc       =   0;
+
+    // taskargs struct for children
+    TaskArgs::TaskArgs  l_args;
+
+    // set up pointer to our taskargs, passed in from caller
+    INITSERVICE::TaskArgs *pTaskArgs =
+            static_cast<INITSERVICE::TaskArgs *>( io_ptr );
 
     for (   l_IStep=0;
             l_IStep<INITSERVICE::MAX_ISTEPS;
@@ -469,12 +519,6 @@ void    IStepDispatcher::runAllISteps( void * io_ptr )   const
 
             l_args.clear();
 
-            TRACFCOMP( g_trac_initsvc,
-                       INFO_MRK "Run IStep 0x%x / Substep 0x%x %s",
-                       l_IStep,
-                       l_SubStep,
-                       l_pistep->taskname );
-
             l_errl = InitService::getTheInstance().executeFn( l_pistep,
                                                               &l_args );
             if ( l_errl )
@@ -494,12 +538,14 @@ void    IStepDispatcher::runAllISteps( void * io_ptr )   const
             l_isteprc   =   l_args.getReturnCode();
             l_errl      =   l_args.getErrorLog();
 
-             TRACDCOMP( g_trac_initsvc,
-                       "IStep TaskArgs returned 0x%llx, errlog=%p",
-                       l_isteprc,
-                       l_errl  );
+
              if ( l_errl )
              {
+                 TRACFCOMP( g_trac_initsvc,
+                     "ISD: istep %s returned 0x%llx, errlog=%p",
+                     l_pistep->taskname,
+                     l_isteprc,
+                     l_errl  );
                  // if we have an errorlog, break out of the inner loop
                  // and handle it.
                  break;
@@ -509,31 +555,36 @@ void    IStepDispatcher::runAllISteps( void * io_ptr )   const
                  //  Check child results for a valid nonzero return code.
                  //  If we have one, and no errorlog, then we create an
                  //  errorlog here.
-                 if (    ( l_isteprc != TASKARGS_UNDEFINED64 )
-                      && ( l_isteprc != 0 )
-                     )
+                 if ( l_isteprc != 0 )
                  {
                      TRACFCOMP( g_trac_initsvc,
-                                "istep returned 0x%llx, no errlog",
+                                "ISD:  istep %s returned 0x%llx, no errlog",
+                                l_pistep->taskname,
                                 l_isteprc );
 
                      /*@     errorlog tag
                       *  @errortype      ERRL_SEV_CRITICAL_SYS_TERM
-                      *  @moduleid       see task list
+                      *  @moduleid       ISTEP_RETURNED_ERROR_ID
                       *  @reasoncode     ISTEP_FAILED_NO_ERRLOG
-                      *  @userdata1      returncode from istep
-                      *  @userdata2      0
+                      *  @userdata1      istep / substep
+                      *  @userdata2      returncode from istep
                       *
                       *  @devdesc        The Istep returned with an error,
                       *                  but there was no errorlog posted
-                      *                  from the IStep.
+                      *                  from the IStep. Look at user1 data
+                      *                  for the istep / substep, and
+                      *                  user2 data for the returned errorcode.
                       */
                      l_errl = new ERRORLOG::ErrlEntry(
                              ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
-                             l_pistep->taskflags.module_id,
+                             ISTEP_RETURNED_ERROR_ID,
                              INITSERVICE::ISTEP_FAILED_NO_ERRLOG,
-                             l_isteprc,
-                             0 );
+                             ( l_IStep << 8 | l_SubStep ),
+                             l_isteprc );
+                     // attach the istep name to the error log
+                     // @todo
+                     IStepNameUserDetail   l_istepud( l_pistep->taskname );
+                     l_istepud.addToLog( l_errl );
                      // drop out of inner loop with errlog set.
                      break;
                  }   // end if ( )
@@ -559,12 +610,17 @@ void    IStepDispatcher::runAllISteps( void * io_ptr )   const
     if  ( l_errl )
     {
         TRACFCOMP( g_trac_initsvc,
-                   "ERROR:  istep=0x%x, substep=0x%x, committing errorlog %p",
+                   "ERROR:  istep=0x%x, substep=0x%x, isteprc=0x%x, committing errorlog and shutting down.",
                    l_IStep,
                    l_SubStep,
-                   l_errl );
+                   l_isteprc );
         errlCommit( l_errl, INITSVC_COMP_ID );
-        assert( 0 );
+
+        // pass an error code on to extinitsvc that we are shutting down.
+        pTaskArgs->postReturnCode( TASKARGS_SHUTDOWN_RC );
+        // Tell the kernel to shutdown.
+        shutdown( SHUTDOWN_STATUS_ISTEP_FAILED );
+
     }
 
 }

@@ -57,14 +57,16 @@ extern  trace_desc_t *g_trac_initsvc;
 TASK_ENTRY_MACRO( ExtInitSvc::getTheInstance().init );
 
 
-void ExtInitSvc::init( void *i_ptr )
+void ExtInitSvc::init( void *io_ptr )
 {
     errlHndl_t          l_errl      =   NULL;
     uint64_t            l_task      =   0;
     const TaskInfo      *l_ptask    =   NULL;
     TaskArgs::TaskArgs  l_args;
     uint64_t            l_childrc   =   0;
-
+    //  set up pointer to our taskargs
+    INITSERVICE::TaskArgs *pTaskArgs =
+            static_cast<INITSERVICE::TaskArgs *>( io_ptr );
 
     TRACFCOMP( g_trac_initsvc,
             "Extended Initialization Service is starting." );
@@ -95,8 +97,8 @@ void ExtInitSvc::init( void *i_ptr )
         if ( l_errl )
         {
             TRACFCOMP( g_trac_initsvc,
-                       "ERROR: dispatching task, errlog=0x%p",
-                       l_errl );
+                    "ERROR: dispatching task, errlog=0x%p",
+                    l_errl );
             //  break out of loop with error.
             break;
         }
@@ -106,12 +108,13 @@ void ExtInitSvc::init( void *i_ptr )
         //  this also clears the errorlog from the TaskArgs struct, so
         //  use it or lose it ( see taskargs.H for details ).
         l_childrc   =   l_args.getReturnCode();
-        l_errl =   l_args.getErrorLog();
+        l_errl      =   l_args.getErrorLog();
 
         if  ( l_errl )
         {
             TRACFCOMP( g_trac_initsvc,
-                    " Child task returned 0x%llx, errlog=0x%p",
+                    " Child task %s returned 0x%llx, errlog=0x%p",
+                    l_ptask->taskname,
                     l_childrc,
                     l_errl );
             //  break out of loop with error
@@ -122,17 +125,16 @@ void ExtInitSvc::init( void *i_ptr )
             //  Check child results for a valid nonzero return code.
             //  If we have one, and no errorlog, then we create and
             //  post our own errorlog here.
-            if (    ( l_childrc != TASKARGS_UNDEFINED64 )
-                 && ( l_childrc != 0 )
-                )
+            if ( l_childrc != 0 )
             {
                 TRACFCOMP( g_trac_initsvc,
-                           "Child task returned 0x%llx, no errlog",
-                           l_childrc );
+                        "EIS: Child task %s returned 0x%llx, no errlog",
+                        l_ptask->taskname,
+                        l_childrc );
 
                 /*@     errorlog tag
                  *  @errortype      ERRL_SEV_CRITICAL_SYS_TERM
-                 *  @moduleid       see task list
+                 *  @moduleid       EXTINITSVC_TASK_RETURNED_ERROR_ID
                  *  @reasoncode     EXTINITSVC_FAILED_NO_ERRLOG
                  *  @userdata1      returncode from task
                  *  @userdata2      0
@@ -143,7 +145,7 @@ void ExtInitSvc::init( void *i_ptr )
                  */
                 l_errl = new ERRORLOG::ErrlEntry(
                         ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
-                        l_ptask->taskflags.module_id,
+                        EXTINITSVC_TASK_RETURNED_ERROR_ID,
                         INITSERVICE::EXTINITSVC_FAILED_NO_ERRLOG,
                         l_childrc,
                         0 );
@@ -160,122 +162,131 @@ void ExtInitSvc::init( void *i_ptr )
         //  dropped out of loop with error.
         //  Commit the log first, then stop right here.
         TRACFCOMP( g_trac_initsvc,
-                   "ERROR:  extra errorlog found: %p",
-                   l_errl );
+                "ExtInitSvc: Committing errorlog..." );
         errlCommit( l_errl, INITSVC_COMP_ID );
-        assert( 0 );
+
+        //  pass an error code to initsvc that we are shutting down.
+        pTaskArgs->postReturnCode( TASKARGS_SHUTDOWN_RC );
+        // Tell the kernel to shutdown.
+        shutdown( SHUTDOWN_STATUS_EXTINITSVC_FAILED );
     }
 
     TRACFCOMP( g_trac_initsvc,
             EXIT_MRK "ExtInitSvc finished.");
 
-
-
-    //  =====================================================================
-    //  -----   Unit Tests  -------------------------------------------------
-    //  =====================================================================
-    /**
-     *  @note run all of the unit tests after we finish the rest
-     *      There are 2 images generated in the build:
-     *      hbicore.bin         (HostBoot shippable image)
-     *      hbicore_test.bin    (runs all unit tests)
-     *      Only hbicore_test.bin has the libcxxtest.so module, so when
-     *      we execute startTask() below on hbicore.bin, it will return -ENOENT,
-     *      no module present.  This is OK.
-     *
-     *  @todo can we call call module_load() to see if libcxxtest.so exists?
-     *          ask Doug or Patrick
-     *
-     */
-
-    //  add a do-while loop so there is only one return at the bottom....
-    do
+    //  Test if the child posted an errorcode.  If so, don't
+    //  bother to run the unit tests.
+    if ( pTaskArgs->getReturnCode() == 0 )
     {
-        //  Pass it a set of args so we can wait on the barrier
-        errlHndl_t          l_cxxerrl       =   NULL;
-        TaskArgs::TaskArgs  l_cxxtestargs;
-        const TaskInfo      *l_pcxxtask     =   &CXXTEST_TASK;
-        uint64_t            l_cxxchildrc    =   0;
-        errlHndl_t          l_cxxchilderrl  =   NULL;
+        //  =====================================================================
+        //  -----   Unit Tests  -------------------------------------------------
+        //  =====================================================================
+        /**
+         *  @note run all of the unit tests after we finish the rest
+         *      There are 2 images generated in the build:
+         *      hbicore.bin         (HostBoot shippable image)
+         *      hbicore_test.bin    (runs all unit tests)
+         *      Only hbicore_test.bin has the libcxxtest.so module, so when
+         *      we execute startTask() below on hbicore.bin, it will return -ENOENT,
+         *      no module present.  This is OK.
+         *
+         *  @todo can we call call module_load() to see if libcxxtest.so exists?
+         *          ask Doug or Patrick
+         *
+         */
 
-        l_cxxtestargs.clear();
-
-        TRACDCOMP( g_trac_initsvc,
-                   ENTER_MRK "Run Unit Tests (if libcxxtests.so is present): %s",
-                   l_pcxxtask->taskname );
-
-        // If the test task does not exist then don't run it.
-        if(!VFS::module_exists(l_pcxxtask->taskname)) break;
-
-        l_cxxerrl = InitService::getTheInstance().startTask( l_pcxxtask,
-                                                             &l_cxxtestargs );
-
-        //  process errorlogs returned from the task that was launched
-        //  @TODO   if we are running the non-test version of HostBoot, this
-        //          will always post an extra errorlog.  We need a way to know
-        //          if we are running the _test version or not.
-        if ( l_cxxerrl )
+        //  add a do-while loop so there is only one return at the bottom....
+        do
         {
-            TRACFCOMP( g_trac_initsvc,
-                       "Committing error from cxxtask launch" );
-            errlCommit( l_cxxerrl, INITSVC_COMP_ID );
-            break;      // ERROR, break out of do-while.
-        }
+            //  Pass it a set of args so we can wait on the barrier
+            errlHndl_t          l_cxxerrl       =   NULL;
+            TaskArgs::TaskArgs  l_cxxtestargs;
+            const TaskInfo      *l_pcxxtask     =   &CXXTEST_TASK;
+            uint64_t            l_cxxchildrc    =   0;
+            errlHndl_t          l_cxxchilderrl  =   NULL;
 
-        //  make local copies of the values in TaskArgs that are returned from
-        //  the child.
-        //  this also clears the errorlog from the TaskArgs struct, so
-        //  use it or lose it ( see taskargs.H for details ).
-        l_cxxchildrc    =   l_cxxtestargs.getReturnCode();
-        l_cxxchilderrl  =   l_cxxtestargs.getErrorLog();
+            l_cxxtestargs.clear();
 
-        if  ( l_cxxchilderrl )
-        {
-            TRACFCOMP( g_trac_initsvc,
-                       " Child task returned 0x%llx, errlog=0x%p",
-                       l_cxxchildrc,
-                       l_cxxchilderrl );
-            errlCommit( l_cxxchilderrl, INITSVC_COMP_ID );
-        }
-        else
-        {
-            //  Check child results for a valid nonzero return code.
-            //  If we have one, and no errorlog, then we create and
-            //  post our own errorlog here.
-            if (    ( l_cxxchildrc != TASKARGS_UNDEFINED64 )
-                 && ( l_cxxchildrc != 0 )
-                )
+            TRACDCOMP( g_trac_initsvc,
+                    ENTER_MRK "Run Unit Tests (if libcxxtests.so is present): %s",
+                    l_pcxxtask->taskname );
+
+            // If the test task does not exist then don't run it.
+            if(!VFS::module_exists(l_pcxxtask->taskname)) break;
+
+            l_cxxerrl = InitService::getTheInstance().startTask( l_pcxxtask,
+                    &l_cxxtestargs );
+
+            //  process errorlogs returned from the task that was launched
+            //  @TODO   if we are running the non-test version of HostBoot, this
+            //          will always post an extra errorlog.  We need a way to know
+            //          if we are running the _test version or not.
+            if ( l_cxxerrl )
             {
                 TRACFCOMP( g_trac_initsvc,
-                        "Child task returned 0x%llx, no errlog",
-                        l_cxxchildrc );
-
-                /*@     errorlog tag
-                 *  @errortype      ERRL_SEV_CRITICAL_SYS_TERM
-                 *  @moduleid       see task list
-                 *  @reasoncode     CXXTEST_FAILED_NO_ERRLOG
-                 *  @userdata1      returncode from istep
-                 *  @userdata2      0
-                 *
-                 *  @devdesc        The unit test dispatcher returned with an
-                 *                  error, but there was no errorlog returned.
-                 */
-                l_cxxerrl = new ERRORLOG::ErrlEntry(
-                        ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
-                        l_pcxxtask->taskflags.module_id,
-                        INITSERVICE::CXXTEST_FAILED_NO_ERRLOG,
-                        l_cxxchildrc,
-                        0 );
+                        "Committing error from cxxtask launch" );
                 errlCommit( l_cxxerrl, INITSVC_COMP_ID );
-            }   // end if
-        }   //  end else
+                break;      // ERROR, break out of do-while.
+            }
 
-    }   while(0);   //  end do-while
+            //  make local copies of the values in TaskArgs that are returned from
+            //  the child.
+            //  this also clears the errorlog from the TaskArgs struct, so
+            //  use it or lose it ( see taskargs.H for details ).
+            l_cxxchildrc    =   l_cxxtestargs.getReturnCode();
+            l_cxxchilderrl  =   l_cxxtestargs.getErrorLog();
+
+            if  ( l_cxxchilderrl )
+            {
+                TRACFCOMP( g_trac_initsvc,
+                        " Child task returned 0x%llx, errlog=0x%p",
+                        l_cxxchildrc,
+                        l_cxxchilderrl );
+                errlCommit( l_cxxchilderrl, INITSVC_COMP_ID );
+            }
+            else
+            {
+                //  Check child results for a valid nonzero return code.
+                //  If we have one, and no errorlog, then we create and
+                //  post our own errorlog here.
+                if (  l_cxxchildrc != 0 )
+                {
+                    TRACFCOMP( g_trac_initsvc,
+                            "Child task returned 0x%llx, no errlog",
+                            l_cxxchildrc );
+
+                    /*@     errorlog tag
+                     *  @errortype      ERRL_SEV_CRITICAL_SYS_TERM
+                     *  @moduleid       CXXTEST_TASK_RETURNED_ERROR_ID
+                     *  @reasoncode     CXXTEST_FAILED_NO_ERRLOG
+                     *  @userdata1      returncode from istep
+                     *  @userdata2      0
+                     *
+                     *  @devdesc        The unit test dispatcher returned with an
+                     *                  error, but there was no errorlog returned.
+                     */
+                    l_cxxerrl = new ERRORLOG::ErrlEntry(
+                            ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
+                            CXXTEST_TASK_RETURNED_ERROR_ID,
+                            INITSERVICE::CXXTEST_FAILED_NO_ERRLOG,
+                            l_cxxchildrc,
+                            0 );
+                    errlCommit( l_cxxerrl, INITSVC_COMP_ID );
+
+                }   // end if
+            }   //  end else
+
+        }   while(0);   //  end do-while
+
+    }
 
 
     //  =====================================================================
     //  -----   Shutdown all CPUs   -----------------------------------------
     //  =====================================================================
+    TRACFCOMP( g_trac_initsvc,
+            EXIT_MRK "CxxTests finished.");
+
     uint64_t l_shutdownStatus = SHUTDOWN_STATUS_GOOD;
 
     if (CxxTest::g_FailedTests)

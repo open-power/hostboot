@@ -46,111 +46,127 @@
 
 namespace   HWAS
 {
-    trace_desc_t *g_trac_hwas = NULL;
-    TRAC_INIT(&g_trac_hwas, "HWAS", 1024 );     // yah.
+trace_desc_t *g_trac_hwas = NULL;
+TRAC_INIT(&g_trac_hwas, "HWAS", 1024 );
 
-    using   namespace   TARGETING;      //
+using   namespace   TARGETING;
 
-    void    init_target_states( void *io_pArgs )
-    {
-        TASKARGS_INIT_TASKARGS( io_pArgs );
+void    init_target_states( void *io_pArgs )
+{
+    INITSERVICE::TaskArgs *pTaskArgs =
+            static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
 
-        TRACDCOMP( g_trac_hwas, "init_target_states entry" );
-        // printkd("init_target_states\n");
+    TRACDCOMP( g_trac_hwas, "init_target_states entry" );
 
 
-        TASKARGS_WAIT_AND_ENDTASK();
-    }
+    //  wait here on the barrier, then end the task.
+    pTaskArgs->waitChildSync();
+    task_end();
+}
 
-    void    init_fsi( void *io_pArgs )
-    {
-        errlHndl_t  l_errl      =   NULL;
-        TASKARGS_INIT_TASKARGS( io_pArgs );
+void    init_fsi( void *io_pArgs )
+{
+    errlHndl_t  l_errl      =   NULL;
+    INITSERVICE::TaskArgs *pTaskArgs =
+            static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
 
-        TRACDCOMP( g_trac_hwas, "init_fsi entry" );
-        // printkd("init_fsi\n");
+    TRACDCOMP( g_trac_hwas, "init_fsi entry" );
 
-        //@todo
-        //@VBU workaround - Disable init_fsi
-        //Temporarily disable the FSI initialization in VBU because of
-        //an MFSI/CFSI XSCOM hardware bug.
-        TARGETING::EntityPath syspath(TARGETING::EntityPath::PATH_PHYSICAL);
-        syspath.addLast(TARGETING::TYPE_SYS,0);
-        TARGETING::Target* sys = TARGETING::targetService().toTarget(syspath);
-        uint8_t vpo_mode = 0;
-        if( sys
+    //@todo
+    //@VBU workaround - Disable init_fsi
+    //Temporarily disable the FSI initialization in VBU because of
+    //an MFSI/CFSI XSCOM hardware bug.
+    TARGETING::EntityPath syspath(TARGETING::EntityPath::PATH_PHYSICAL);
+    syspath.addLast(TARGETING::TYPE_SYS,0);
+    TARGETING::Target* sys = TARGETING::targetService().toTarget(syspath);
+    uint8_t vpo_mode = 0;
+    if( sys
             && sys->tryGetAttr<TARGETING::ATTR_VPO_MODE>(vpo_mode)
             && (vpo_mode == 1) )
-        {
-            TASKARGS_WAIT_AND_ENDTASK();
-            TRACFCOMP( g_trac_hwas, "HWBUG Workaround - No FSI initialization");
-            return;
-        }
-
-        l_errl  =   FSI::initializeHardware( );
-        if ( l_errl )
-        {
-            TRACFCOMP( g_trac_hwas, "ERROR: failed to init FSI hardware" );
-            POST_ERROR_LOG( l_errl );
-        }
-
-        TASKARGS_WAIT_AND_ENDTASK();
-    }
-
-    void    apply_fsi_info( void *io_pArgs )
     {
-        TASKARGS_INIT_TASKARGS( io_pArgs );
-
-        TRACDCOMP( g_trac_hwas, "apply_fsi_info entry" );
-        //printkd("apply_fsi_info\n");
-
-
-        TASKARGS_WAIT_AND_ENDTASK();
+        //  wait here on the barrier, then end the task.
+        pTaskArgs->waitChildSync();
+        task_end();
+        TRACFCOMP( g_trac_hwas, "HWBUG Workaround - No FSI initialization");
+        return;
     }
 
-    void    apply_dd_presence( void *io_pArgs )
+    l_errl  =   FSI::initializeHardware( );
+    if ( l_errl )
     {
-        TASKARGS_INIT_TASKARGS( io_pArgs );
-
-        TRACDCOMP( g_trac_hwas, "apply_dd_presence entry" );
-        //printkd("apply_dd_presence\n");
-
-
-        TASKARGS_WAIT_AND_ENDTASK();
+        TRACFCOMP( g_trac_hwas, "ERROR: failed to init FSI hardware" );
+        pTaskArgs->postErrorLog( l_errl );
     }
 
-    void    apply_pr_keyword_data( void *io_pArgs )
-    {
-        TASKARGS_INIT_TASKARGS( io_pArgs );
+    //  wait here on the barrier, then end the task.
+    pTaskArgs->waitChildSync();
+    task_end();
+}
 
-        TRACDCOMP( g_trac_hwas, "apply_pr_keyword_data" );
-        //printkd("apply_pr_keyword_data\n");
+void    apply_fsi_info( void *io_pArgs )
+{
+    INITSERVICE::TaskArgs *pTaskArgs =
+            static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
 
-
-        TASKARGS_WAIT_AND_ENDTASK();
-    }
-
-    void    apply_partial_bad( void *io_pArgs )
-    {
-        TASKARGS_INIT_TASKARGS( io_pArgs );
-
-        TRACDCOMP( g_trac_hwas, "apply_partial_bad entry" );
-        //printkd("apply_partial_bad\n");
+    TRACDCOMP( g_trac_hwas, "apply_fsi_info entry" );
 
 
-        TASKARGS_WAIT_AND_ENDTASK();
-    }
+    //  wait here on the barrier, then end the task.
+    pTaskArgs->waitChildSync();
+    task_end();
+}
 
-    void    apply_gard( void *io_pArgs )
-    {
-        TASKARGS_INIT_TASKARGS( io_pArgs );
+void    apply_dd_presence( void *io_pArgs )
+{
+    INITSERVICE::TaskArgs *pTaskArgs =
+            static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
 
-        TRACDCOMP( g_trac_hwas, "apply_gard entry" );
-        //printkd("apply_gard\n");
+    TRACDCOMP( g_trac_hwas, "apply_dd_presence entry" );
 
 
-        TASKARGS_WAIT_AND_ENDTASK();
-    }
+    //  wait here on the barrier, then end the task.
+    pTaskArgs->waitChildSync();
+    task_end();
+}
+
+void    apply_pr_keyword_data( void *io_pArgs )
+{
+    INITSERVICE::TaskArgs *pTaskArgs =
+            static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
+
+    TRACDCOMP( g_trac_hwas, "apply_pr_keyword_data" );
+
+
+    //  wait here on the barrier, then end the task.
+    pTaskArgs->waitChildSync();
+    task_end();
+}
+
+void    apply_partial_bad( void *io_pArgs )
+{
+    INITSERVICE::TaskArgs *pTaskArgs =
+            static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
+
+    TRACDCOMP( g_trac_hwas, "apply_partial_bad entry" );
+
+
+    //  wait here on the barrier, then end the task.
+    pTaskArgs->waitChildSync();
+    task_end();
+}
+
+void    apply_gard( void *io_pArgs )
+{
+    INITSERVICE::TaskArgs *pTaskArgs =
+            static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
+
+    TRACDCOMP( g_trac_hwas, "apply_gard entry" );
+
+
+    //  wait here on the barrier, then end the task.
+    pTaskArgs->waitChildSync();
+    task_end();
+}
 
 
 };   // end namespace

@@ -36,10 +36,24 @@
 #include    <assert.h>
 #include    <sys/sync.h>
 #include    <trace/interface.H>
-#include    <sys/task.h>  //needed to make macro work
+#include    <sys/task.h>                // needed to make macro work
 
 #include    <errl/errlentry.H>
 #include    <errl/errlmanager.H>
+
+/**
+ * @enum
+ *
+ *  Return codes that are passed from ISTEP dispatcher to extinitsvc to initsvc
+ *  thru TASKARGS
+ *
+ *  -   TASKARGS_SHUTDOWN_RC - task or istep has returned an error,
+ *      initsvc has initiated a shutdown
+ */
+enum
+{
+    TASKARGS_SHUTDOWN_RC    =   0xf0000001,
+};
 
 
 /**
@@ -50,6 +64,7 @@
         INITSERVICE::TaskArgs *pTaskArgs =                                  \
         static_cast<INITSERVICE::TaskArgs *>(P_ARGS)
 
+
 /**
  * @note    macro to wait on the TaskArgs barrier and end the task
  */
@@ -58,13 +73,7 @@
         {                                                                   \
             pTaskArgs->waitChildSync();                                     \
         }                                                                   \
-        task_end()                                                          \
-
-/**
- * @note    macro to post an error log to IStepDispatcher
- */
-#define POST_ERROR_LOG( MyErrl )                                           \
-        pTaskArgs->postErrorLog( MyErrl )
+        task_end()
 
 
 /**
@@ -76,7 +85,7 @@
         {                                                                   \
             TASKARGS_INIT_TASKARGS(io_pArgs);                               \
                                                                             \
-            MyInitFn( pTaskArgs );                                          \
+            MyInitFn( io_pArgs );                                           \
                                                                             \
             TASKARGS_WAIT_AND_ENDTASK();                                    \
         }
@@ -84,15 +93,6 @@
 
 namespace   INITSERVICE
 {
-
-/**
- * @def   TASKARGS_UNDEFINED64
- *  iv_taskreturncode and iv_taskcommand are initialized to this value -
- *  if parent or child change them, it can be easily recognized
- *
- *
- */
-const   uint64_t    TASKARGS_UNDEFINED64  =   0xbadc0ffee0ddf00d;
 
 /**
  *  @class TaskArgs
