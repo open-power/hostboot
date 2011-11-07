@@ -56,9 +56,6 @@ proc mysend { chan val } {
     puts $chan $val
 }
 
-#---------------------------------------------------------
-# TBD - No Support Yet 
-#---------------------------------------------------------
 proc telnetResult { telnet } {
     global telnet_out
     #puts "Reading $telnet"
@@ -74,7 +71,6 @@ proc telnetResult { telnet } {
         append telnet_out $dat
     }
 }
-
 
 # Wait for p to showup in telnet_out
 # return 1 if timout else returns 0
@@ -96,7 +92,7 @@ proc get_fsp_info { fspip fsppassword} {
     set telnet_out {}
 
     # Open telnet session
-    if {[catch {set telnet [open "|telnet $fspip" r+]} res]} {
+    if {[catch {set telnet [open "|telnet $fspip" r+]} res]} {    
         puts "Could not telnet to $fspip"
         return {}
     }
@@ -148,6 +144,45 @@ proc get_fsp_info { fspip fsppassword} {
     after cancel $timeoutid
 
     return "$driver:$companion_ip:$nfs_dir"
+}
+
+proc check_bso { server } {
+    global telnet_out
+    set telnet_out {}
+
+    #puts "Input server is $server"
+
+    # Open telnet session
+    if {[catch {set telnet [open "|telnet $server" r+]} res]} {
+        puts "Could not telnet to $server"
+        return {}
+    }
+    fconfigure $telnet -buffering none -blocking 0
+
+    # all output from telnet session captured by telnetResult procedure
+    # put into telnet_out variable
+    fileevent $telnet readable [list telnetResult $telnet]
+
+    # Set a timeout of 3 seconds
+    set timeoutid [after 3000 {
+        set telnet_out {timeout}
+        close $telnet
+    } ]
+
+    while { 1 } {
+        vwait telnet_out
+        #puts "OUTPUT: $telnet_out"
+        if { [string last {BSO} $telnet_out] > 0 } {
+            puts "BSO Firewall Detected for $server, please authenticate first!"
+            after cancel $timeoutid
+            return 1;
+        }
+        if { [string compare $telnet_out {timeout}] == 0 } { break }
+    }
+
+    set telnet_out {}
+
+    return 0
 }
 
 #---------------------------------------------------------
@@ -379,6 +414,12 @@ if {[llength $cmds] > 0 } {
     foreach server $servers {
         set result ""
         puts "Trying $server ..."
+
+        # Check for BSO firewall
+        if {[check_bso $server]} {
+            exit -1
+        }       
+
         if {[catch {set sockid [socket $server 7779] } res ] } {
             set result "    $res"
             puts $result
@@ -390,7 +431,7 @@ if {[llength $cmds] > 0 } {
     # to the server, waiting for a :DONE between each one.
     ##########################################################
     # Note that currently we only support fapiTestHwp.C and .H as input
-    if {$result == ""} {
+    if {$result == ""} {   
         puts "Connected to $server - Starting Compile"
         foreach cmd $cmds {
             if {[info exists verbose]}  {puts "Send to hw procedure compiler:  $cmd"}
