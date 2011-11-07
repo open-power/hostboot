@@ -28,7 +28,7 @@ use Getopt::Long;
 use Pod::Usage;
 use IO::Seekable;
 
-use Hostboot::DebugFramework;
+use Hostboot::_DebugFramework;
 
 my $tool = "";
 my $dumpfile = "";

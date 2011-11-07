@@ -28,7 +28,7 @@ package Hostboot::Ps;
 use Exporter;
 our @EXPORT_OK = ('main');
 
-use constant PS_TASKMGR_SYMBOLNAME => 
+use constant PS_TASKMGR_SYMBOLNAME =>
                 "Singleton<TaskManager>::instance()::instance";
 use constant PS_TASKMGR_TRACKER_LIST_OFFSET => 8 * 4;
 use constant PS_TRACKER_LIST_HEAD_OFFSET => 0;
@@ -39,7 +39,7 @@ use constant PS_TRACKER_PREV_OFFSET => 0;
 use constant PS_TRACKER_NEXT_OFFSET => 8 + PS_TRACKER_PREV_OFFSET;
 use constant PS_TRACKER_PARENT_OFFSET => 8 + PS_TRACKER_NEXT_OFFSET;
 use constant PS_TRACKER_CHILDREN_LIST_OFFSET => 8 + PS_TRACKER_PARENT_OFFSET;
-use constant PS_TRACKER_TID_OFFSET => 
+use constant PS_TRACKER_TID_OFFSET =>
                 PS_TRACKER_CHILDREN_LIST_OFFSET + PS_TRACKER_LIST_SIZE;
 use constant PS_TRACKER_TASK_OFFSET => 8 + PS_TRACKER_TID_OFFSET;
 use constant PS_TRACKER_STATUS_OFFSET => 8 + PS_TRACKER_TASK_OFFSET;
@@ -55,9 +55,9 @@ sub main
     # Find symbol containing kernel list of task objects.
     #   (Tasks who's parent is the kernel)
     my ($symAddr, $symSize) = ::findSymbolAddress(PS_TASKMGR_SYMBOLNAME);
-    if (not defined $symAddr) 
-    { 
-        ::userDisplay "Couldn't find ".PS_TASKMGR_SYMBOLNAME; 
+    if (not defined $symAddr)
+    {
+        ::userDisplay "Couldn't find ".PS_TASKMGR_SYMBOLNAME;
         die;
     }
 
@@ -96,7 +96,7 @@ sub displayList
 sub displayTracker
 {
     my ($trackAddr, $level) = @_;
-    
+
     # Read TID.
     my $tid = ::read16(PS_TRACKER_TID_OFFSET + $trackAddr);
 
@@ -121,7 +121,7 @@ sub displayTracker
     if (($state ne "R") and ($state ne "r") and
         ($state ne "E") and ($state ne "Z"))
     {
-        $stateExtra = sprintf "(0x%x)", 
+        $stateExtra = sprintf "(0x%x)",
                               ::read64(PS_TASK_STATEEXTRA_OFFSET + $taskAddr);
     }
     elsif ($state eq "Z")
@@ -163,7 +163,7 @@ sub makeTabs
         $result = $result." |";
         $level = $level - 1;
     }
-    
+
     return $result;
 }
 

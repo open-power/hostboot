@@ -66,11 +66,11 @@ sub main
 
         if ((not defined $traceBuffers) or ($traceBuffers =~ m/$compName/))
         {
-            $foundBuffer = 1;            
+            $foundBuffer = 1;
             print $fh (::readData($buffAddr, TRAC_DEFAULT_BUFFER_SIZE));
         }
     }
-    
+
     if ($foundBuffer)
     {
         open TRACE, ($args->{"fsp-trace"}." -s ".

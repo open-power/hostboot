@@ -85,7 +85,7 @@ function    runtraceHB()
     #    exit 1
     #fi
     
-    autosim $NOWIN --simcmd   "hb-trace"
+    autosim $NOWIN --simcmd   "hb-trace" --timeout 120
     if [ $? -ne 0 ] ; then
         echo "ERROR 4 : Unable to run $?"
         stopsim
@@ -150,12 +150,6 @@ HBICORE_TEST_SYMS="${HBICORE_TEST%%.*}.syms"
 
 HBICORE_TEST_EXTENDED="${HBICORE_TEST%%.*}_extended.bin"
 
-##  Find the hbotStringfile for traceHB.
-HBICORE_TEST_STRINGFILE="${SBXHOME}/img/hbotStringFile"
-
-##  Set the path to the hb-simdebug.py script 
-SIMDEBUG_PYTHON_FILE="${SBXHOME}/src/build/simics/hb-simdebug.py"
-
 CPFILES="${SBXHOME}/src/build/tools/cpfiles.pl"
 
 
@@ -170,8 +164,6 @@ echo    "TEST_SANDBOX               = $TEST_SANDBOX"
 echo    "HBICORE_TEST               = $HBICORE_TEST"
 echo    "HBICORE_TEST_EXTENDED      = $HBICORE_TEST_EXTENDED"
 echo    "HBICORE_TEST_SYMS          = $HBICORE_TEST_SYMS"
-echo    "HBICORE_TEST_STRINGFILE    = $HBICORE_TEST_STRINGFILE"
-echo    "SIMDEBUG_PYTHON_FILE       = $SIMDEBUG_PYTHON_FILE"
 echo    "SANDBOXRC                  = $SANDBOXRC"
 echo    "SBXHOME                    = $SBXHOME"
 echo    "current directory is " `pwd`
@@ -325,12 +317,6 @@ mods_started_addr=`grep "CxxTest::g_ModulesStarted" \
 mods_completed_addr=`grep "CxxTest::g_ModulesCompleted" \
         ${SBXHOME}/${HBICORE_TEST_SYMS} | awk '{split($0,a,","); print a[2]}'`
         
-##  borrowed from CamVan's python script        
-trace_buffer_addr=`grep "g_desc_array" \
-        ${SBXHOME}/${HBICORE_TEST_SYMS} | awk '{split($0,a,","); print a[2]}'`
-trace_buffer_size=`grep "g_desc_array" \
-        ${SBXHOME}/${HBICORE_TEST_SYMS} | awk '{split($0,a,","); print a[4]}'`
-
 ##  note, don't use $VERBOSE here or you get all sorts of extra junk in the output file.
 echo "Wait for unit test completion."
 declare -i timeout=0

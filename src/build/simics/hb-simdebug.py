@@ -20,19 +20,6 @@
 #  Origin: 30
 #
 #  IBM_PROLOG_END
-# *** hb-simdebug.py
-#
-# Script to extract and display formatted trace in simics
-
-# *** Usage
-#
-# On simics console:
-# 1. Load file
-# simics> run-python-file <gitrepo>/src/build/trace/traceHB.py
-# 2. Display global trace buffer
-# simics> @traceHB("<compName1>,<compName2>,...", <git.repo>/img/hbicore.syms", <git.repo>/img/hbotStringFile")
-# 3. Display kernel printk buffer
-# simics> @printkHB("<git.repo>/img/hbicore.syms")
 
 import os,sys
 import conf
@@ -41,206 +28,6 @@ import cli
 import binascii
 import datetime
 import commands     ## getoutput, getstatusoutput
-
-#------------------------------------------------------------------------------
-# Function to dump the trace buffers
-#------------------------------------------------------------------------------
-def traceHB(compStr, symsFile, stringFile):
-
-    # "constants"
-    DESC_ARRAY_ENTRY_SIZE = 24
-    DESC_ARRAY_ENTRY_ADDR_SIZE = 8
-    DESC_ARRAY_ENTRY_COMP_NAME_SIZE = 16
-    MAX_NUM_BUFFERS = 24
-    MAX_COMP_NAME_SIZE = DESC_ARRAY_ENTRY_COMP_NAME_SIZE - 1 #minus null termination
-
-    print
-
-    gDescArraySym = "g_desc_array"
-
-    #Find location of g_desc_array variable from the image's .syms file
-    for line in open(symsFile):
-
-        if gDescArraySym in line:                #if found
-
-            #print line
-            x = line.split(",")
-            array_addr = int(x[1],16)             #address of g_desc_array
-            #print "g_desc_array addr = 0x%x"%(array_addr)
-            array_size = int(x[3],16)             #size of g_desc_array
-            #print "g_desc_array size = 0x%x"%(array_size)
-
-            # content of g_desc_array
-            #string = "phys_mem.x 0x%x 0x%x"%(array_addr,array_size)
-            #print string
-            #result,message = quiet_run_command(string)
-            #print message
-
-            #flag to indicate if we found any buffer
-            buffer_found = 0;
-
-            #Parse the compStr argument for the list of component buffers requested
-            compList = compStr.split(",")
-            #print compList
-            for compName in compList:
-
-                # Strip all whitespaces and limit to 15 bytes max
-                compName = compName.strip()
-                if (len(compName) > MAX_COMP_NAME_SIZE):
-                    compName = compName[0:MAX_COMP_NAME_SIZE]
-                #print compName
-
-                #pointer to first entry of g_desc_array
-                entry_addr = array_addr
-
-                #find the component trace buffer
-                for entry in range (1, MAX_NUM_BUFFERS + 1):
-
-                    #print "entry = 0x%x"%(entry)
-                    string = "phys_mem.x 0x%x 0x%x"%(entry_addr,DESC_ARRAY_ENTRY_COMP_NAME_SIZE)
-                    #print string
-                    #example output of phys_mem.x is:
-                    #simics> phys_mem.x 0x263c8 0x10
-                    #p:0x000263c0                      4465 7646 5700 0000 0         DevFW...
-                    #p:0x000263d0  0000 0000 0000 0000                     0 ........
-                    result,message = quiet_run_command(string)
-                    #print message
-                    lst = message.split()
-                    #print lst
-                    #example output of lst (lst[1] = '4465'):
-                    #['p:0x000263c0', '4465', '7646', '5700', '0000', '0', 'DevFW...', 
-                    #'p:0x000263d0', '0000', '0000', '0000', '0000', '0', '........']
-
-                    # no more entry to search
-                    if lst[1]=='0000':
-                        break
-
-                    # get component name from entry
-                    name_str = lst[1]
-                    count = 1
-                    i = 2
-                    while (count < (DESC_ARRAY_ENTRY_COMP_NAME_SIZE/2)):
-                        if (lst[i] == '0000'):
-                            break
-                        if len(lst[i]) == 4:
-                            name_str += lst[i]
-                            count +=1
-                        i += 1
-
-                    #1st method:
-                    #str = name_str.strip('00')
-                    #if (compName.encode("hex")==str):
-                    #    print "we found the buffer"
-                    #2nd method: 
-                    name_str = binascii.unhexlify(name_str)
-                    #print name_str
-                    str = name_str.strip('\0')
-
-                    #We found the component buffer
-                    if ((str == compName) or (len(compName) == 0)): 
-
-                        #get address of component trace buffer
-                        string = "phys_mem.x 0x%x 0x%x"%(entry_addr + DESC_ARRAY_ENTRY_COMP_NAME_SIZE, DESC_ARRAY_ENTRY_ADDR_SIZE)
-                        #print string
-                        result,message = quiet_run_command(string)
-                        #print message
-                        lst = message.split()
-                        #print lst
-
-                        addr_str = ""
-                        for i in range(1,(DESC_ARRAY_ENTRY_ADDR_SIZE/2) + 1):
-                            addr_str += lst[i]
-                        #print addr_str
-                        addr_trace_buffer = int(addr_str,16)
-
-                        #save trace buffer to <sandbox>/simics/tracBIN
-                        string = "memory_image_ln0.save tmp.out 0x%x 0x800"%(addr_trace_buffer)
-                        #print string
-                        result = run_command(string)
-                        #print result
-
-                        if (buffer_found == 0): 
-                            fd1 = open('tracBIN','wb')
-                            buffer_found = 1
-                        else:
-                            fd1 = open('tracBIN','ab')
-                        fd2 = open('tmp.out', 'rb')
-                        fd1.write(fd2.read())
-                        fd1.close()
-                        fd2.close()
-
-                        if (str == compName):
-                            break
-
-                    # Increment address to next entry in g_desc_array
-                    entry_addr += DESC_ARRAY_ENTRY_SIZE
-
-            if (buffer_found == 1):
-                #display formatted trace & save it to <sandbox>/simics/tracMERG
-                string = 'fsp-trace -s %s tracBIN | tee tracMERG'%(stringFile)
-                #print string
-                os.system(string)
-                #remove tmp.out & tracBIN
-                os.system('rm tmp.out tracBIN')
-
-                print "\n\n\nData saved to %s/tracMERG."%(os.getcwd())
-            else:
-                print "\nNo component trace buffers found."
-
-            print
-            break
-
-    #print line
-    if gDescArraySym not in line:  #if not found
-        print "\nCannot find %s in %s"%(gDescArraySym,symsFile)
-
-    return
-
-
-#------------------------------------------------------------------------------
-# Function to dump the kernel printk buffer
-#------------------------------------------------------------------------------
-def printkHB(symsFile):
-
-    print
-
-    printkSym = "kernel_printk_buffer"
-
-    #Find location of the kernel_printk_buffer variable from the image's .syms file
-    #i.e. grep kernel_printk_buffer <gitrepo>/img/hbicore.syms
-    for line in open(symsFile):
-        if printkSym in line:  #if found
-            #print line
-            x = line.split(",")
-            addr = int(x[1],16)             #address of kernel_printk_buffer
-            #print "addr = 0x%x"%(addr)
-            size = int(x[3],16)             #size of kernel_printk_buffer
-            #print "size = 0x%x"%(size)
-
-            #save kernel printk buffer to <sandbox>/simics/printk.out
-            string = "memory_image_ln0.save %s 0x%x 0x%x"%(printkSym,addr,size)
-            #print string
-            result = run_command(string)
-            #print result
-
-            #display buffer
-            #for line in open(printkSym):
-            #    print line
-            #file = open(printkSym)
-            #print file.read()
-            string = "cat %s"%(printkSym)
-            os.system(string)
-
-            print "\n\nData saved to %s/%s."%(os.getcwd(),printkSym)
-
-            break
-
-    #print line
-    if printkSym not in line:  #if not found
-        print "\nCannot find %s in %s"%(printkSym,symsFile)
-
-    return
-
 
 #------------------------------------------------------------------------------
 # Function to dump L3
@@ -476,29 +263,14 @@ def errlHB(symsFile, errlParser, flag, logid, stringFile):
 #===============================================================================
 #   HOSTBOOT Commands
 #===============================================================================
-default_comp = ""
 default_syms  = "hbicore.syms"
 default_stringFile = "hbotStringFile"
-#traceHB_relative_path  = "../tools"    # relative to $sb
 
 #------------------------------------------------
 #------------------------------------------------
-def hb_trace(comp):
-    syms = default_syms
-    stringFile = default_stringFile
-
-    if comp == None:
-            comp = default_comp
-            
-    print "comp=%s" % str(comp)
-            
-    print "syms=%s" % str(syms)
-    print "StringFile=%s" % str(stringFile)
-    traceHB(comp, syms, stringFile)
-    return None
-    
 new_command("hb-trace",
-    hb_trace,
+    (lambda comp: run_hb_debug_framework("Trace", 
+                                         ("components="+comp) if comp else "")),
     [arg(str_t, "comp", "?", None),
     ],
     #alias = "hbt",
@@ -523,15 +295,8 @@ Examples: \n
 
 #------------------------------------------------
 #------------------------------------------------
-def hb_printk():
-    syms = default_syms
-
-    print "syms=%s" % str(syms)
-    printkHB(syms)
-    return None
-    
 new_command("hb-printk",
-    hb_printk,
+    lambda: run_hb_debug_framework("Printk"),
     #alias = "hbt",
     type = ["hostboot-commands"],
     #see_also = ["hb-trace"],

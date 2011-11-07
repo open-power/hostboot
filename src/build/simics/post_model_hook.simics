@@ -29,7 +29,7 @@
 ################################################################################
 
 
-#setup traces
+run-python-file simics-debug-framework.py
 run-python-file hb-simdebug.py
 
 #Load extended image and pnor.toc into phys_mem

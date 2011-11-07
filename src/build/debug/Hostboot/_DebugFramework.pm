@@ -1,8 +1,30 @@
 #!/usr/bin/perl
-
-# DebugFramework.pm
+#  IBM_PROLOG_BEGIN_TAG
+#  This is an automatically generated prolog.
 #
-# This module is a set of utility functions for the debug framework, which 
+#  $Source: src/build/debug/Hostboot/_DebugFramework.pm $
+#
+#  IBM CONFIDENTIAL
+#
+#  COPYRIGHT International Business Machines Corp. 2011
+#
+#  p1
+#
+#  Object Code Only (OCO) source materials
+#  Licensed Internal Code Source Materials
+#  IBM HostBoot Licensed Internal Code
+#
+#  The source code for this program is not published or other-
+#  wise divested of its trade secrets, irrespective of what has
+#  been deposited with the U.S. Copyright Office.
+#
+#  Origin: 30
+#
+#  IBM_PROLOG_END
+
+# _DebugFramework.pm
+#
+# This module is a set of utility functions for the debug framework, which
 # should be common across all debug framework environments.
 #
 # The module provides the functions listed below in @EXPORT.
@@ -17,7 +39,7 @@
 
 use strict;
 
-package Hostboot::DebugFramework;
+package Hostboot::_DebugFramework;
 use Exporter 'import';
 
 our @EXPORT = ( 'callToolModule', 'callToolModuleHelp',
@@ -47,7 +69,7 @@ BEGIN
 return 1;
 
 # @sub callToolModule
-# 
+#
 # Executes the 'main' function of the requested tool module.
 #
 # @param string - Tool to call.
@@ -59,14 +81,15 @@ sub callToolModule
     my $tool = shift;
     my $package = "Hostboot::$tool";
 
-    eval("use lib '.'; use $package; return 1;") or 
-            die "Couldn't load tool \"$tool\"";
+    eval("use lib '.'; use $package; return 1;") or
+            die "Couldn't load tool \"$tool\":\n\t$@";
     eval("$package->main(\\%toolOpts);");
+    die $@ if $@;
 }
 
 # @sub callToolModuleHelp
 #
-# Executes the 'help' function of the requested tool module to display 
+# Executes the 'help' function of the requested tool module to display
 # tool usage.
 #
 # @param string - Tool to call.
@@ -76,9 +99,10 @@ sub callToolModuleHelp
     my $tool = shift;
     my $package = "Hostboot::$tool";
 
-    eval("use lib '.'; use $package; return 1;") or 
-            die "Couldn't load tool \"$tool\"";
+    eval("use lib '.'; use $package; return 1;") or
+            die "Couldn't load tool \"$tool\":\n\t$@";
     eval("$package->help(\\%toolOpts);");
+    die $@ if $@;
 }
 
 # @sub parseToolOpts
@@ -131,7 +155,7 @@ sub determineImagePath
             $imgPath = $ENV{"HOSTBOOTROOT"} . "/img/";
         }
     }
-    
+
     return $imgPath;
 }
 
@@ -144,24 +168,24 @@ sub parseSymbolFile
     if ($parsedSymbolFile) { return; }
 
     my $symsFile = ::getImgPath();
-    if (::getIsTest()) 
-    { 
+    if (::getIsTest())
+    {
         $symsFile = $symsFile."hbicore_test.syms";
     }
     else
     {
         $symsFile = $symsFile."hbicore.syms";
     }
-    
-    open(FILE, "< $symsFile") or die;
+
+    open(FILE, "< $symsFile") or die "Cannot open symbol file $symsFile";
     while (my $line = <FILE>)
     {
         $line =~ m/(.*?),(.*?),(.*?),(.*?),(.*)/;
-        my $name = $5;        
+        my $name = $5;
         my $addr = hex $2;
         my $tocAddr = hex $3;
         my $size = hex $4;
-        
+
         $symbolAddress{$name} = $addr;
         $symbolSize{$name} = $size;
         $addressSymbol{$addr} = $name;
@@ -222,7 +246,7 @@ sub parseModuleFile
         $modFile = $modFile."hbicore.bin.modinfo";
     }
 
-    open(FILE, "< $modFile") or die;
+    open(FILE, "< $modFile") or die "Cannot open module-info file $modFile";
     while (my $line = <FILE>)
     {
         $line =~ m/(.*?),(.*)/;
@@ -337,7 +361,7 @@ sub read8
     my $addr = shift;
 
     my $result = ::readData($addr, 1);
-    
+
     return unpack("C", $result);
 }
 

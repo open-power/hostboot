@@ -58,6 +58,9 @@ sub printUsage;
 my @files = ("src/build/tools/hb-parsedump.pl",
              "src/build/simics/hb-simdebug.py",
              "src/build/simics/post_model_hook.simics",
+             "src/build/debug/Hostboot",
+             "src/build/debug/simics-debug-framework.pl",
+             "src/build/debug/simics-debug-framework.py",
              "img/errlparser", 
              "img/hbotStringFile",
              "img/hbicore.syms",
@@ -68,6 +71,8 @@ my @files = ("src/build/tools/hb-parsedump.pl",
              "img/hbicore_test.list",
              "img/hbicore_extended.bin",
              "img/hbicore_test_extended.bin",
+             "img/hbicore.bin.modinfo",
+             "img/hbicore_test.bin.modinfo",
              "img/pnor.toc",
              "img/simics_SALERNO_targeting.bin",
              "img/simics_VENICE_targeting.bin",
@@ -216,6 +221,8 @@ foreach (@files)
     my($filename, $directories, $suffix) = fileparse($_, qr{\..*});
     #print "$filename, $directories, $suffix\n";
 
+    my $recursive = (-d $_) ? "-r" : "";
+
     #Copy .bin to the img dir
     if (($suffix eq ".bin") ||
 	($suffix eq ".toc"))
@@ -228,7 +235,8 @@ foreach (@files)
     }
 
     #Delete the old file first (handles copying over symlinks)
-    $command = sprintf("rm -f %s/%s%s", $copyDir, $filename, $suffix);
+    $command = sprintf("rm -f %s %s/%s%s", $recursive, 
+                                           $copyDir, $filename, $suffix);
     if ($command ne "")
     {
         print "$command\n";
@@ -243,20 +251,23 @@ foreach (@files)
         #Copy test versions to hbicore.<syms|bin|list>
         if ($filename eq "hbicore_test")
         {
-            $command = sprintf("cp %s %s", $_, $copyDir."/hbicore".$suffix);
+            $command = sprintf("cp %s %s %s", $recursive,
+                                              $_, $copyDir."/hbicore".$suffix);
         }
         elsif ($filename eq "hbicore_test_extended")
         {
-            $command = sprintf("cp %s %s", $_, $copyDir."/hbicore_extended".$suffix);
+            $command = sprintf("cp %s %s %s", $recursive,
+                                              $_, $copyDir."/hbicore_extended".$suffix);
         }
         elsif ($filename ne "hbicore" and $filename ne "hbicore_extended")
         {
-            $command = sprintf("cp %s %s", $_, $copyDir);
+            $command = sprintf("cp %s %s %s", $recursive,
+                                              $_, $copyDir);
         }
     }
     else
     {
-        $command = sprintf("cp %s %s", $_, $copyDir);
+        $command = sprintf("cp %s %s %s", $recursive, $_, $copyDir);
     }
 
     # Copy the file

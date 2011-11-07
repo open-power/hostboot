@@ -32,7 +32,7 @@ sub main
 {
     ::userDisplay "------------Kernel Printk Parser------------\n";
     my ($symAddr, $symSize) = ::findSymbolAddress("kernel_printk_buffer");
-    if (not defined $symAddr) { ::userDisplay "Cannot find symbol.\n"; die; }   
+    if (not defined $symAddr) { ::userDisplay "Cannot find symbol.\n"; die; }
     ::userDisplay ::readData($symAddr,$symSize);
     ::userDisplay "--------------------------------------------\n";
 }
