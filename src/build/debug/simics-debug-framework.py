@@ -214,6 +214,7 @@ def register_hb_debug_framework_tools():
                         lambda options:
                             run_hb_debug_framework(toolname, options))(tool),
                     args = [arg(str_t, "options", "?", "")],
+                    alias = "hb-debug-" + tool,
                     type = ["hostboot-commands"],
                     short = "Runs the debug framework for tool " + tool,
                     doc = usage)
