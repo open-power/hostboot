@@ -45,6 +45,8 @@
 #                  mjjones   10/18/11  Support multiple attr files and
 #                                      multi-line descriptions
 #                  camvanng  10/20/11  Changed i_pTarget to "const" ptr
+#                  camvanng  11/09/11  Prepend "ENUM_" to attribute
+#                                      enums
 #
 # End Change Log ******************************************************
 
@@ -266,7 +268,7 @@ foreach my $argnum (1 .. $#ARGV)
             {
                 # Remove leading spaces
                 $val =~ s/^\s+//; 
-                print AIFILE "    $attr->{id}_${val},\n";
+                print AIFILE "    ENUM_$attr->{id}_${val},\n";
             }
 
             print AIFILE "};\n";

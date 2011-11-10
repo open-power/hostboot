@@ -24,6 +24,7 @@
 //  dg002 SW039868 dgilbert 10/15/10 Add support to filter unneeded inits by EC
 //  dg003 SW047506 dgilbert 12/09/10 SERIES filtering
 //                 andrewg  09/19/11 Updates based on review
+//                 camvanng 11/08/11  Added support for attribute enums
 // End Change Log *********************************************************************************
 
 /**
@@ -134,6 +135,15 @@ namespace init
          * @return Void
          */
         void push_array_index(std::string &i_array_idx);
+
+        /**
+         * @brief Add an attribute enum
+         *
+         * @param[in] i_attr_enum attribute enum name
+         *
+         * @return Void
+         */
+        void push_attr_enum(std::string &i_attr_enum);
 
         Rpn * push_op(RPN_OP op);                   //<<< Add an operation to the Rpn sequence
 

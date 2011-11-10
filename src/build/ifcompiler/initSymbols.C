@@ -19,6 +19,7 @@
 //       D754106   dgilbert 06/14/10 Create
 //                 dgilbert 10/22/10 Add spies_are_in()
 //                 andrewg  09/19/11 Updates based on review
+//                 camvanng 11/08/11 Added support for attribute enums
 // End Change Log *********************************************************************************
 
 /**
@@ -75,7 +76,7 @@ Symbols::Symbols(FILELIST & i_filenames)
                 if(def == "AttributeId")
                 {
                     // We've now found the beginning of the attribute enum definition
-                    // Read and skip the { on the next line
+                    // Read and skip the '{' on the next line
                     getline(infs,fileline);
                     getline(infs,fileline);
 
@@ -103,6 +104,72 @@ Symbols::Symbols(FILELIST & i_filenames)
                         iv_symbols[attr] = MAP_DATA(value,NOT_USED);
                         value++;
                         getline(infs,fileline);
+                    }
+                }
+                else
+                {
+                    // Make sure it's an attribute enum
+
+                    string attribute_enum_name;
+                    string find_enum = "_Enum";
+
+                    // Check for _Enum in the name
+                    size_t pos = def.find(find_enum);
+                    if(pos != string::npos)
+                    {
+                        // We've now found the beginning of the attribute enum definition
+                        // Read and skip the '{' on the next line
+                        getline(infs,fileline);
+                        getline(infs,fileline);
+
+                        // We're just parsing the enum in order so values start
+                        // at 0 and increment by 1 after that unless they are
+                        // explicitly assigned.
+                        uint64_t value = 0;
+
+                        while(fileline[0] != '}')
+                        {
+                            istringstream attr_enum_stream(fileline);
+                            string attr_enum;
+                            string tmp;
+                         
+                            // Get the attribute enum name
+                            attr_enum_stream >> attr_enum;
+
+                            // Strip off the "," at the end.
+                            pos = attr_enum.find(',');
+                            if(pos != string::npos)
+                            {
+                                attr_enum = attr_enum.substr(0,attr_enum.length()-1);
+                            }
+                            else
+                            {
+                                // Is a value for the enum specified?
+                                attr_enum_stream >> tmp;
+
+                                if (!attr_enum_stream.eof())
+                                {
+                                    //Make sure it's an '='
+                                    if ("=" != tmp)
+                                    {
+                                        printf ("ERROR: Unknown attribute enum! %s\n",attr_enum.c_str());
+                                        exit(1);
+                                    }
+                                    else
+                                    {
+                                        attr_enum_stream >> tmp;
+                                        value = strtoll(tmp.c_str(), NULL, 0);
+                                    }
+                                }
+                            }
+
+                            //printf("Attribute Enum String:%s Value %u\n",attr_enum.c_str(), value);
+
+                            // Get a value for the string
+                            iv_attr_enum[attr_enum] = value;
+                            value++;
+                            getline(infs,fileline);
+                        }
                     }
                 }
             }
@@ -517,6 +584,12 @@ uint64_t Symbols::get_numeric_data(uint32_t i_rpn_id, uint32_t & o_size)
 }
 
 // ------------------------------------------------------------------------------------------------
+uint64_t Symbols::get_attr_enum_val(string & i_attr_enum)
+{
+    return iv_attr_enum[i_attr_enum];
+}
+
+// ------------------------------------------------------------------------------------------------
 
 string Symbols::find_text(uint32_t i_cini_id)
 {
@@ -729,7 +802,7 @@ string Symbols::not_found_listing()
     ostringstream oss;
     if(iv_not_found.size())
     {
-        oss << "\n------------- Symbols reqested that were NOT FOUND ---------------\n\n";
+        oss << "\n------------- Symbols requested that were NOT FOUND ---------------\n\n";
         for(SYMBOL_MAP::iterator i = iv_not_found.begin(); i != iv_not_found.end(); ++i)
         {
             //if(i->first == "SPY_NOTFOUND" || (i->first).compare(0,13,"ENUM_NOTFOUND") == 0) continue;

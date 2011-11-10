@@ -22,6 +22,7 @@
 //        D754106  dgilbert 06/14/10  Create
 //        D774126  dgilbert 09/30/10  Add ERROR: to yyerror message
 //                 andrewg  09/19/11  Updates based on review
+//                 camvanng 11/08/11  Added support for attribute enums
 // End Change Log *********************************************************************************
 /**
  * @file initCompiler.y
@@ -76,6 +77,7 @@ int scom;
 %token <str_ptr> INIT_ID
 %token <str_ptr> INIT_VERSIONS
 %token <str_ptr> ATTRIBUTE_INDEX
+%token <str_ptr> ATTRIBUTE_ENUM
 
 
     /* Define terminal symbols that don't have any associated data */
@@ -233,6 +235,7 @@ idrows:         id_col  { init::dbg << $1->listing(NULL); current_scom->add_row_
 id_col:         INIT_ID { $$ = new init::Rpn(*($1),yyscomlist->get_symbols()); $$->push_op(init::Rpn::EQ); delete $1; }  
                 | INIT_INTEGER { $$ = new init::Rpn($1,yyscomlist->get_symbols()); $$->push_op(init::Rpn::EQ); }
                 | '{' num_list '}' { $$ = $2; $2->push_op(init::Rpn::LIST); $2->push_op(init::Rpn::EQ); }
+                | ATTRIBUTE_ENUM { $$ = new init::Rpn((yyscomlist->get_symbols())->get_attr_enum_val(*($1)),yyscomlist->get_symbols()); $$->push_op(init::Rpn::EQ); delete $1; }  
 ;
 
 
@@ -241,6 +244,7 @@ num_list:       INIT_INTEGER { $$ = new init::Rpn($1,yyscomlist->get_symbols());
                 | INIT_ID    { $$ = new init::Rpn(*($1),yyscomlist->get_symbols()); }
                 | num_list ',' INIT_INTEGER { $$ = $1; $1->merge(new init::Rpn($3,yyscomlist->get_symbols())); }
                 | num_list ',' INIT_ID { $$ = $1; $1->merge(new init::Rpn(*($3),yyscomlist->get_symbols())); }
+                | ATTRIBUTE_ENUM { $$ = new init::Rpn((yyscomlist->get_symbols())->get_attr_enum_val(*($1)),yyscomlist->get_symbols()); }
 ;
 
 
@@ -255,6 +259,7 @@ define: INIT_DEFINE INIT_ID '=' expr  ';'
  /* expr should return an RPN string of some kind */
 expr:   INIT_INTEGER                    { $$= new init::Rpn($1,yyscomlist->get_symbols()); }
         | INIT_ID                       { $$= new init::Rpn(*($1),yyscomlist->get_symbols()); delete $1; }
+        | ATTRIBUTE_ENUM                { $$= new init::Rpn((yyscomlist->get_symbols())->get_attr_enum_val(*($1)),yyscomlist->get_symbols()); delete $1; }
         | INIT_INT64                    { $$=new init::Rpn($1,yyscomlist->get_symbols()); }
         | expr ATTRIBUTE_INDEX          { $1->push_array_index(*($2)); }
         | expr INIT_LOGIC_OR expr       { $$ = $1->push_merge($3,init::Rpn::OR); }

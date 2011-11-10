@@ -21,6 +21,7 @@
 //  ---- --------  -------- -------- -------------------------------------------------------------
 //       D754106   dgilbert 06/14/10 Create
 //                 andrewg  09/19/11 Updates based on review
+//                 camvanng 11/08/11 Added support for attribute enums
 // End Change Log *********************************************************************************
 
 /**
@@ -98,7 +99,7 @@ namespace init
             /**
              * Lookup the tag id from the rpn_id provided by use_symbol()
              * @returns tag id
-             * @param prn_id
+             * @param rpn_id
              * @pre  all the symbols have been marked used (no new symbols)
              * @post tag table built if not already built.
              * @note  tag bits 0bttxxxxxx xxxxxxxx
@@ -157,6 +158,13 @@ namespace init
              * @returns uint64_t data
              */
             uint64_t get_numeric_data(uint32_t i_rpn_id, uint32_t & o_size);
+
+            /**
+             * Get the attribute enum value for the attr enum
+             * @param string attribute enum name
+             * @returns uint64_t value
+             */
+            uint64_t get_attr_enum_val(string & i_attr_enum);
 
 
             /**
@@ -231,6 +239,7 @@ namespace init
             typedef map<string,MAP_DATA > SYMBOL_MAP;
             typedef map<string,uint32_t> SPY_MAP;
             typedef map<string,uint32_t> SYMBOL_ATTR_TYPE;
+            typedef map<string,uint64_t> SYMBOL_ATTR_ENUM;
 
             typedef pair<Rpn,uint32_t> DEF_DATA;
             typedef map<string,DEF_DATA> DEF_MAP;
@@ -245,6 +254,7 @@ namespace init
 
             SYMBOL_MAP  iv_symbols;     ///< From ciniIfSymbols.H all vars and enumerated lits
             SYMBOL_ATTR_TYPE iv_attr_type;
+            SYMBOL_ATTR_ENUM iv_attr_enum;
             SYMBOL_MAP  iv_not_found;   ///< List of symbols not found
             RPN_MAP     iv_rpn_map;     ///< Map rpn_id to symbol name/cini_id of used Symbols
             SYMBOL_USED iv_used_var;    ///< List of cini_ids of used vars ordered by name

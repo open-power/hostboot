@@ -21,6 +21,7 @@
 //  dg003 SW047506 dgilbert 12/09/10 SERIES filtering
 //                 andrewg  05/24/11 Port over for VPL/PgP
 //                 andrewg  09/19/11 Updates based on review
+//                 camvanng 11/08/11  Added support for attribute enums
 // End Change Log *********************************************************************************
 
 /**
@@ -208,6 +209,17 @@ void Rpn::push_array_index(std::string &i_array_idx)
 
     //printf("Array Index: %s  decimal:%u  rpn_id:0x%8X\n",l_idx.c_str(),l_array_val,rpn_id);
 
+}
+
+//-------------------------------------------------------------------------------------------------
+void Rpn::push_attr_enum(std::string &i_attr_enum)
+{
+    uint64_t l_attr_enum_val = iv_symbols->get_attr_enum_val(i_attr_enum);
+
+    uint32_t rpn_id = iv_symbols->find_numeric_lit(l_attr_enum_val,8);
+    iv_rpnstack.push_back(rpn_id);
+
+    //printf("Attribute Enum name: %s  Value:%u  rpn_id:0x%8X\n",i_attr_enum.c_str(),l_attr_enum_val,rpn_id);
 }
 
 //-------------------------------------------------------------------------------------------------

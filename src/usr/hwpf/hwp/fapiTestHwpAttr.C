@@ -39,6 +39,7 @@
  *                          mjjones     10/17/2011  Update scratch test
  *                          camvanng    10/26/2011  Update scratch test
  *                          mjjones     10/28/2011  Fix error generation
+ *                          camvanng    11/09/2011  Update attr enum test
  */
 
 #include <fapiTestHwpAttr.H>
@@ -765,7 +766,7 @@ fapi::ReturnCode hwpTestAttributes()
         // Test setting and getting an enum value from a scratch attribute
         //----------------------------------------------------------------------
         {
-        uint64_t l_uint64 = fapi::ATTR_SCRATCH_UINT64_2_VAL_C;
+        uint64_t l_uint64 = fapi::ENUM_ATTR_SCRATCH_UINT64_2_VAL_C;
 
         // Test set
         l_rc = FAPI_ATTR_SET(ATTR_SCRATCH_UINT64_2, NULL, l_uint64);
@@ -785,7 +786,7 @@ fapi::ReturnCode hwpTestAttributes()
         }
 
         // Check value
-        if (l_uint64 != fapi::ATTR_SCRATCH_UINT64_2_VAL_C)
+        if (l_uint64 != fapi::ENUM_ATTR_SCRATCH_UINT64_2_VAL_C)
         {
             FAPI_SET_HWP_ERROR(l_rc, RC_HWP_ATTR_UNIT_TEST_FAIL);
             FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT64_2. GET returned %d (enum)",

@@ -23,6 +23,7 @@
 //  dg01 D766229  dgilbert 08/03/10   add check for hex/bin data > 64 bits
 //  dg02 SW058986 dgilbert 02/28/11   More noticeable fail for missing col headers
 //                andrewg  09/19/11   Updates based on review
+//                camvanng 11/08/11   Added support for attribute enums
 // End Change Log *********************************************************************************/
 /**
  * @file initCompiler.lex
@@ -202,15 +203,18 @@ bits                    { g_coltype = INIT_BITS;  return INIT_BITS;}
 expr                    { g_coltype = INIT_EXPR;  return INIT_EXPR;}
 scom_data               { g_coltype = INIT_SCOMD; return INIT_SCOMD;}
 
-                        /*HEX and Binary nubers in the scombody can be up to 64bit, 
+                        /*HEX and Binary numbers in the scombody can be up to 64bit, 
                         * decimal numbers will always fit in 32bit int */
 
 {BINARY}                { yylval.uint64 = bits2int(yytext); return INIT_INT64; }
 
-
 <*>;                    { g_coltype = 0; return ';'; }
                             
 END_INITFILE            return INIT_ENDINITFILE;
+
+<*>ENUM_{ID}            { 
+                            yylval.str_ptr = new std::string(yytext); return ATTRIBUTE_ENUM;
+                        } 
 
 <*>{ID}                 { 
                             yylval.str_ptr = new std::string(yytext); return INIT_ID; 
