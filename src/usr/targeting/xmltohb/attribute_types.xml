@@ -951,5 +951,18 @@
     <readable/>
 </attribute>
 
+<attribute>
+    <id>HB_MUTEX_TEST_LOCK</id>
+    <description>Host boot mutex for testing</description>
+    <simpleType>
+        <hbmutex>
+            <default>0</default>
+        </hbmutex>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency> 
+    <readable/>
+    <writeable/>
+</attribute>
+
 </attributes>
 

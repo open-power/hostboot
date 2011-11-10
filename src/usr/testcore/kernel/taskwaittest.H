@@ -31,9 +31,6 @@
 #include <kernel/console.H>
 #include <kernel/timemgr.H>
 
-#define NS_PER_SEC (1000000ull)
-#define TEN_CTX_SWITCHES ((NS_PER_SEC/TimeManager::TIMESLICE_PER_SEC)*10)
-
 class TaskWaitTest : public CxxTest::TestSuite
 {
     public:
@@ -153,13 +150,13 @@ class TaskWaitTest : public CxxTest::TestSuite
 
         static void WaitSomeTime(void* retval)
         {
-            nanosleep(0,TEN_CTX_SWITCHES);
+            nanosleep(0,TEN_CTX_SWITCHES_NS);
             if (retval) task_end2(retval);
         }
 
         static void WaitSomeLongerTime(void* retval)
         {
-            nanosleep(0, 2*TEN_CTX_SWITCHES);
+            nanosleep(0, 2*TEN_CTX_SWITCHES_NS);
             if (retval) task_end2(retval);
         }
 

@@ -24,6 +24,32 @@
 #define __SYS_TIME_H
 
 #include <stdint.h>
+#include <kernel/timemgr.H>
+
+//******************************************************************************
+// Macros
+//******************************************************************************
+
+/**
+ *  @brief Number of nanoseconds per second
+ */
+#define NS_PER_SEC (1000000ull)
+
+/**
+ *  @brief Duration of one timeslice/context switch in nanoseconds 
+ */
+#define ONE_CTX_SWITCH_NS (NS_PER_SEC/TimeManager::TIMESLICE_PER_SEC)
+
+/**
+ *  @brief Duration of ten context switches, in nanoseconds; used by testcases 
+ *     to guarantee a secondary testcase task/thread will execute
+ */
+#define TEN_CTX_SWITCHES_NS \
+    ((NS_PER_SEC/TimeManager::TIMESLICE_PER_SEC)*ONE_CTX_SWITCH_NS)
+
+//******************************************************************************
+// Interface
+//******************************************************************************
 
 #ifdef __cplusplus
 extern "C"

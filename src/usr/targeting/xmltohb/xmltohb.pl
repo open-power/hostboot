@@ -1162,6 +1162,18 @@ sub writeTraitFileTraits {
                 $traits .= " $trait,";
             }
         }
+
+        # Mark the attribute as being a host boot mutex or non-host boot mutex
+        if(   (exists $attribute->{simpleType})
+           && (exists $attribute->{simpleType}->{hbmutex}) )
+        {
+            $traits .= " hbMutex,";
+        }
+        else
+        {
+            $traits .= " notHbMutex,";
+        }
+
         chop($traits);
 
         # Build value type
@@ -1461,6 +1473,34 @@ sub defaultEnum {
 }
 
 ################################################################################
+# Do nothing
+################################################################################
+
+sub null {
+
+}
+
+################################################################################
+# Enforce special host boot mutex restrictions
+################################################################################
+
+sub enforceHbMutex {
+    my($attribute,$value) = @_;
+
+    if($value != 0)
+    {
+        fatal("HB mutex attribute default must always be 0, "
+              . "was $value instead.");
+    }
+
+    if($attribute->{persistency} ne "volatile-zeroed")
+    {
+        fatal("HB mutex attribute persistency must be volatile-zeroed, "
+              . "was $attribute->{persistency} instead");
+    }
+}
+
+################################################################################
 # Get hash ref to supported simple types and their properties
 ################################################################################
 
@@ -1470,15 +1510,16 @@ sub simpleTypeProperties {
     
     # Intentionally didn't wrap these to 80 columns to keep them lined up and
     # more readable/editable 
-    $typesHoH{"int8_t"}      = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "int8_t"                     , bytes => 1, bits => 8 , default => \&defaultZero, packfmt => "C" };
-    $typesHoH{"int16_t"}     = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "int16_t"                    , bytes => 2, bits => 16, default => \&defaultZero, packfmt => "n" };
-    $typesHoH{"int32_t"}     = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "int32_t"                    , bytes => 4, bits => 32, default => \&defaultZero, packfmt => "N" };
-    $typesHoH{"int64_t"}     = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "int64_t"                    , bytes => 8, bits => 64, default => \&defaultZero, packfmt =>\&packQuad};
-    $typesHoH{"uint8_t"}     = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "uint8_t"                    , bytes => 1, bits => 8 , default => \&defaultZero, packfmt => "C" };
-    $typesHoH{"uint16_t"}    = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "uint16_t"                   , bytes => 2, bits => 16, default => \&defaultZero, packfmt => "n" };
-    $typesHoH{"uint32_t"}    = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "uint32_t"                   , bytes => 4, bits => 32, default => \&defaultZero, packfmt => "N" };
-    $typesHoH{"uint64_t"}    = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "uint64_t"                   , bytes => 8, bits => 64, default => \&defaultZero, packfmt =>\&packQuad};
-    $typesHoH{"enumeration"} = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 0, typeName => "XMLTOHB_USE_PARENT_ATTR_ID" , bytes => 0, bits => 0 , default => \&defaultEnum, packfmt => "packEnumeration"};
+    $typesHoH{"int8_t"}      = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "int8_t"                     , bytes => 1, bits => 8 , default => \&defaultZero, alignment => 1, specialPolicies =>\&null,           packfmt => "C" };
+    $typesHoH{"int16_t"}     = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "int16_t"                    , bytes => 2, bits => 16, default => \&defaultZero, alignment => 1, specialPolicies =>\&null,           packfmt => "n" };
+    $typesHoH{"int32_t"}     = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "int32_t"                    , bytes => 4, bits => 32, default => \&defaultZero, alignment => 1, specialPolicies =>\&null,           packfmt => "N" };
+    $typesHoH{"int64_t"}     = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "int64_t"                    , bytes => 8, bits => 64, default => \&defaultZero, alignment => 1, specialPolicies =>\&null,           packfmt =>\&packQuad};
+    $typesHoH{"uint8_t"}     = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "uint8_t"                    , bytes => 1, bits => 8 , default => \&defaultZero, alignment => 1, specialPolicies =>\&null,           packfmt => "C" };
+    $typesHoH{"uint16_t"}    = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "uint16_t"                   , bytes => 2, bits => 16, default => \&defaultZero, alignment => 1, specialPolicies =>\&null,           packfmt => "n" };
+    $typesHoH{"uint32_t"}    = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "uint32_t"                   , bytes => 4, bits => 32, default => \&defaultZero, alignment => 1, specialPolicies =>\&null,           packfmt => "N" };
+    $typesHoH{"uint64_t"}    = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "uint64_t"                   , bytes => 8, bits => 64, default => \&defaultZero, alignment => 1, specialPolicies =>\&null,           packfmt =>\&packQuad};
+    $typesHoH{"enumeration"} = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 0, typeName => "XMLTOHB_USE_PARENT_ATTR_ID" , bytes => 0, bits => 0 , default => \&defaultEnum, alignment => 1, specialPolicies =>\&null,           packfmt => "packEnumeration"};
+    $typesHoH{"hbmutex"}     = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 0, typeName => "mutex_t*"                   , bytes => 8, bits => 64, default => \&defaultZero, alignment => 8, specialPolicies =>\&enforceHbMutex, packfmt =>\&packQuad};
 
     return \%typesHoH; 
 }
@@ -1959,6 +2000,7 @@ sub packAttribute {
     
     my $binaryData;
 
+    my $alignment = 1;
     if(exists $attribute->{simpleType})
     {
         my $simpleType = $attribute->{simpleType};
@@ -1968,6 +2010,8 @@ sub packAttribute {
         {   
             if(exists $simpleTypeProperties->{$typeName})
             {
+                $alignment = $simpleTypeProperties->{$typeName}{alignment};
+
                 if($typeName eq "enumeration")
                 {
                     my $enumeration = getEnumerationType($attributes,$simpleType->{enumeration}->{id});
@@ -1982,6 +2026,10 @@ sub packAttribute {
                     {
                         $value = unhexify($value);
                     }
+
+                    # Apply special policy enforcement, if any
+                    $simpleTypeProperties->
+                        {$typeName}{specialPolicies}->($attribute,$value);
       
                     if(ref ($simpleTypeProperties->{$typeName}{packfmt}) eq "CODE")
                     {
@@ -2056,7 +2104,7 @@ sub packAttribute {
         fatal("Serialization failed for attribute ID = $attribute->{id}.");
     }
          
-    return $binaryData;
+    return ($binaryData,$alignment);
 }
 
 ################################################################################
@@ -2302,8 +2350,15 @@ sub writeTargetingImage {
     
                     if($section eq "pnor-ro")
                     {
-                        my $rodata = packAttribute($attributes,$attributeDef,
+                        my ($rodata,$alignment) = packAttribute($attributes,
+                            $attributeDef,
                             $attrhash{$attributeId}->{default});
+                        
+                        # Align the data as necessary
+                        my $pads = ($alignment - ($offset % $alignment)) 
+                            % $alignment;
+                        $roAttrBinData .= pack ("@".$pads);
+                        $offset += $pads;
 
                         $attributePointerBinData .= packQuad(
                             $offset + $pnorRoBaseAddress);
@@ -2314,11 +2369,18 @@ sub writeTargetingImage {
                     }
                     elsif($section eq "pnor-rw")
                     {
-                        my $rwdata = packAttribute($attributes,$attributeDef,
+                        my ($rwdata,$alignment) = packAttribute($attributes,
+                            $attributeDef,
                             $attrhash{$attributeId}->{default});
 
                         #print "Wrote to pnor-rw value ",$attributeDef->{id}, ",
                         #", $attrhash{$attributeId}->{default}," \n"; 
+                      
+                        # Align the data as necessary
+                        my $pads = ($alignment - ($rwOffset % $alignment)) 
+                            % $alignment;
+                        $rwAttrBinData .= pack ("@".$pads);
+                        $rwOffset += $pads;
 
                         $attributePointerBinData .= packQuad(
                             $rwOffset + $pnorRwBaseAddress);
@@ -2330,8 +2392,15 @@ sub writeTargetingImage {
                     }
                     elsif($section eq "heap-zero-initialized")
                     {
-                        my $heapZeroInitData = packAttribute($attributes,
+                        my ($heapZeroInitData,$alignment) = packAttribute(
+                            $attributes,
                             $attributeDef,$attrhash{$attributeId}->{default});
+                        
+                        # Align the data as necessary
+                        my $pads = ($alignment - ($heapZeroInitOffset 
+                            % $alignment)) % $alignment;
+                        $heapZeroInitBinData .= pack ("@".$pads);
+                        $heapZeroInitOffset += $pads;
 
                         $attributePointerBinData .= packQuad(
                             $heapZeroInitOffset + $heapZeroInitBaseAddr);
@@ -2343,9 +2412,16 @@ sub writeTargetingImage {
                     }
                     elsif($section eq "heap-pnor-initialized")
                     {
-                        my $heapPnorInitData = packAttribute($attributes,
+                        my ($heapPnorInitData,$alignment) = packAttribute(
+                            $attributes,
                             $attributeDef,$attrhash{$attributeId}->{default});
 
+                        # Align the data as necessary
+                        my $pads = ($alignment - ($heapPnorInitOffset 
+                            % $alignment)) % $alignment;
+                        $heapPnorInitBinData .= pack ("@".$pads);
+                        $heapPnorInitOffset += $pads;
+       
                         $attributePointerBinData .= packQuad(
                             $heapPnorInitOffset + $heapPnorInitBaseAddr);
                         

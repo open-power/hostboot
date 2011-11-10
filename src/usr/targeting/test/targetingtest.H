@@ -44,6 +44,9 @@
 #include <fapiAttributeIds.H>
 #include <fapiAttributeService.H>
 #include <errl/errlmanager.H>
+#include <sys/sync.h>
+#include <sys/task.h>
+#include <sys/time.h>
 
 // This component
 #include <targeting/attributes.H>
@@ -53,6 +56,31 @@
 #include <targeting/iterators/rangefilter.H>
 #include <targeting/predicates/predicatectm.H>
 #include <targeting/predicates/predicatepostfixexpr.H>
+
+/**
+ *  @brief Struct to hold pointers to a mutex / protected value
+ */ 
+struct MutexTestData_t
+{
+    mutex_t* pMutex;         // Pointer to mutex
+    volatile uint32_t* pVar; // Pointer to value protected by mutex
+};
+
+/**
+ *  @brief Function which attempts to write a protected variable
+ *
+ *  @param[in] i_pData Pointer to mutex pointer/value pointer structure
+ *
+ *  @return N/A
+ */
+void funcTestMutex(void* i_pData)
+{
+    MutexTestData_t* l_pData = static_cast<MutexTestData_t*>(i_pData);
+    mutex_lock(l_pData->pMutex);
+    *(l_pData->pVar) = 1;
+    mutex_unlock(l_pData->pMutex);
+    task_end();
+}
 
 class TargetingTestSuite: public CxxTest::TestSuite
 {
@@ -1335,6 +1363,102 @@ class TargetingTestSuite: public CxxTest::TestSuite
         }
 
         TS_TRACE(EXIT_MRK "testCentaurs" );
+    }
+    
+    void testHbMutexAttr()
+    {
+        TS_TRACE(ENTER_MRK "testHbMutexAttr" );
+
+        using namespace TARGETING;
+        using namespace fapi;
+
+        do {
+
+        // Get a reference to the target service
+        TargetService& l_targetService = targetService();
+
+        // Get the system target containing the test mutex
+        TARGETING::Target* l_pTarget = NULL;
+        (void) l_targetService.getTopLevelTarget(l_pTarget);
+        if (l_pTarget == NULL)
+        {
+            TS_FAIL("Top level target handle is NULL");
+            break;
+        }
+
+        // Get the mutex attribute (actually a mutex_t* which points to 
+        // a mutex)
+        HB_MUTEX_TEST_LOCK_ATTR l_pLock 
+            = l_pTarget->getHbMutexAttr<TARGETING::ATTR_HB_MUTEX_TEST_LOCK>();
+
+        // Test: Verify the value pointed to by the mutex_t* is zero
+        if ( (*reinterpret_cast<uint64_t*>(l_pLock)) != 0)
+        {
+            TS_FAIL("Mutex attribute must be initialized to zero, but got %ld",
+                *reinterpret_cast<uint64_t*>(l_pLock));
+            break;
+        }    
+
+        // Try to get the attribute, and ensure it's the same
+        HB_MUTEX_TEST_LOCK_ATTR l_pLockTry = NULL;
+        if(l_pTarget->tryGetHbMutexAttr<TARGETING::ATTR_HB_MUTEX_TEST_LOCK>
+                (l_pLockTry))
+        {
+            if(l_pLockTry != l_pLock)
+            {
+                TS_FAIL("Mutex attributes should match, but dont.  "
+                        "l_pLockTry = %ld, l_pLock = %ld",l_pLockTry,
+                        l_pLock);
+                break;
+            }
+        }
+        else
+        {
+            TS_FAIL("Mutex attribute tryGet failed, even though it exists");
+            break;
+        }
+
+        // Create a structue holding pointers to the mutex and a protected value
+        volatile uint32_t l_var = 0;
+        (void)mutex_lock(l_pLock);
+        MutexTestData_t l_mutexTestData = { l_pLock, &l_var };
+
+        // Spawn off a function which tries to write the protected value to
+        // something unexpected.  If the mutex is working, the for loop will 
+        // always poll the expected value.
+        task_create(funcTestMutex, static_cast<void*>(&l_mutexTestData));
+
+        // Guarantee the child process runs and blocks on the mutex prior to 
+        // modifying the protected value.  isync to ensure the processor doesn't
+        // speculatively perform the comparison prior to the sleep completing
+        nanosleep(0,TEN_CTX_SWITCHES_NS); isync();
+       
+        if(l_var != 0)
+        {
+            TS_FAIL("Protected value must be 0, was %d instead",l_var);
+            break;
+        }
+
+        // Now unlock the mutex, allowing the other thread to overwrite the
+        // protected value; which should happen within 100,000 reads of the
+        // var.  This will confirm the other thread was actively trying to 
+        // write the controlled value
+        (void)mutex_unlock(l_pLock);
+
+        // Guarantee the child process acquires the mutex and modifies the 
+        // protected value; isync to ensure the processor doesn't speculatively
+        // perform the comparison prior to the sleep completing
+        nanosleep(0,TEN_CTX_SWITCHES_NS); isync();
+
+        if(l_var != 1)
+        {
+             TS_FAIL("Protected value must now be 1, was %d instead",l_var);
+             break;
+        }
+
+        } while(0);
+      
+        TS_TRACE(EXIT_MRK "testHbMutexAttr");
     }
 };
 

@@ -125,6 +125,45 @@ void Target::_getAttrPtr(
 }
 
 //******************************************************************************
+// Target::_getHbMutexAttr
+//******************************************************************************
+
+mutex_t* Target::_getHbMutexAttr(
+    const ATTRIBUTE_ID i_attribute) const
+{
+    #define TARG_FN "_getHbMutexAttr()"
+
+    void* l_pAttr = NULL;
+    (void)_getAttrPtr(i_attribute,l_pAttr);
+
+    //@TODO Remove assert once release has stablized 
+    assert(l_pAttr,"TARGETING::Target::_getHbMutexAttr<%d>: _getAttrPtr "
+           "returned NULL",i_attribute);
+
+    return static_cast<mutex_t*>(l_pAttr);
+    
+    #undef TARG_FN
+}
+
+//******************************************************************************
+// Target::_tryGetHbMutexAttr
+//******************************************************************************
+
+bool Target::_tryGetHbMutexAttr(
+    const ATTRIBUTE_ID i_attribute,
+          mutex_t*&    o_pMutex) const
+{
+    #define TARG_FN "_tryGetHbMutexAttr()"
+  
+    void* l_pAttr = NULL;
+    (void)_getAttrPtr(i_attribute,l_pAttr);
+    o_pMutex = static_cast<mutex_t*>(l_pAttr);
+    return (l_pAttr != NULL);
+    
+    #undef TARG_FN
+}
+
+//******************************************************************************
 // Target::Target
 //******************************************************************************
 

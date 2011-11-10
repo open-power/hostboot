@@ -103,6 +103,7 @@ class Target
             // Note: the compiler optimizes the following check (which fails
             // at compile time if the attribute is not readable) away
             if(AttributeTraits<A>::readable) { }
+            if(AttributeTraits<A>::notHbMutex) { }
             return _tryGetAttr(A,sizeof(o_attrValue),&o_attrValue);
         }
 
@@ -173,8 +174,44 @@ class Target
             // Note: the compiler optimizes the following check (which fails
             // at compile time if the attribute is not writable) away
             if(AttributeTraits<A>::writeable) { }
+            if(AttributeTraits<A>::notHbMutex) { }
             return _trySetAttr(A,sizeof(i_attrValue),&i_attrValue);
         }
+
+        /**
+         *  @brief Returns pointer to a mutex attribute associated with the
+         *     target
+         *
+         *  @pre Target service must be initialized and the mutex attribute 
+         *      must exist
+         *
+         *  @post See brief section
+         *
+         *  @return Pointer to the specified mutex attribute
+         */
+        template<const ATTRIBUTE_ID A>
+        mutex_t* getHbMutexAttr() const;
+
+        /**
+         *  @brief Returns pointer to a mutex attribute associated with the
+         *     target, if it exists
+         *
+         *  @param[out] o_pMutex Reference to a mutex pointer, which will be
+         *      updated with the address of the mutex attribute if it exists
+         *      (ignored otherwise)
+         *
+         *  @pre Target service must be initialized 
+         *
+         *  @post See brief section
+         *
+         *  @return bool indicating whether the attribute was found or not
+         *
+         *  @retval true Attribute was found (and returned)
+         *  @retval false Attribute was not found, o_pMutex was not updated
+         */        
+        template<const ATTRIBUTE_ID A>
+        bool tryGetHbMutexAttr(
+            mutex_t*& o_pMutex) const;
 
         /**
          *  @brief Sets the target's specified attribute value
@@ -270,6 +307,44 @@ class Target
             ATTRIBUTE_ID i_attr,
             void*&       o_pAttr) const;
 
+        /**
+         *  @brief Returns pointer to a mutex attribute associated with the
+         *     target
+         *
+         *  @param[in] i_attribute Mutex attribute to return
+         *
+         *  @pre Target service must be initialized and the mutex attribute 
+         *      must exist
+         *
+         *  @post See brief section
+         *
+         *  @return Pointer to the specified mutex attribute
+         */
+        mutex_t* _getHbMutexAttr(
+            const ATTRIBUTE_ID i_attribute) const;
+
+        /**
+         *  @brief Returns pointer to a mutex attribute associated with the
+         *     target, if it exists
+         *
+         *  @param[in]  i_attribute Mutex attribute to return
+         *  @param[out] o_pMutex Reference to a mutex pointer, which will be
+         *      updated with the address of the mutex attribute if it exists
+         *      (ignored otherwise)
+         *
+         *  @pre Target service must be initialized 
+         *
+         *  @post See brief section
+         *
+         *  @return bool indicating whether the attribute was found or not
+         *
+         *  @retval true Attribute was found (and returned)
+         *  @retval false Attribute was not found, o_pMutex was not updated
+         */  
+        bool _tryGetHbMutexAttr(
+            const ATTRIBUTE_ID i_attribute,
+                  mutex_t*&    o_pMutex) const;
+
     private: // Private instance variables
 
         uint32_t       iv_attrs;          ///< Total attributes allowed for this
@@ -312,6 +387,25 @@ typename AttributeTraits<A>::Type Target::getAttr() const
     assert(l_read,"TARGETING::Target::getAttr<%d>: tryGetAttr "
            "returned false",A);
     return l_attrValue;
+}
+
+template<const ATTRIBUTE_ID A>
+mutex_t* Target::getHbMutexAttr() const
+{
+    if(AttributeTraits<A>::hbMutex) { }
+    if(AttributeTraits<A>::readable) { }
+    if(AttributeTraits<A>::writeable) { }
+    return _getHbMutexAttr(A);
+}
+
+template<const ATTRIBUTE_ID A>
+bool Target::tryGetHbMutexAttr(
+    mutex_t*& o_pMutex) const
+{
+    if(AttributeTraits<A>::hbMutex) { }
+    if(AttributeTraits<A>::readable) { }
+    if(AttributeTraits<A>::writeable) { }
+    return _tryGetHbMutexAttr(A,o_pMutex);
 }
 
 template<const ATTRIBUTE_ID A>
