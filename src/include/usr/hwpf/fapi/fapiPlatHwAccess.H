@@ -46,13 +46,14 @@
  * Flag     Defect/Feature  User        Date        Description
  * ------   --------------  ----------  ----------- ----------------------------
  *                          monte       8sep2011    new
+ *                          mjjones     11/10/2011  Use ecmdDataBufferBase
  */
 
 #ifndef FAPIPLATHWACCESS_H_
 #define FAPIPLATHWACCESS_H_
 
 #include <stdint.h>
-#include <ecmdDataBuffer.H>
+#include <ecmdDataBufferBase.H>
 #include <fapiReturnCode.H>
 #include <fapiTarget.H>
 

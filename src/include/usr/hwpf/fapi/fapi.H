@@ -34,7 +34,7 @@
  *                          mjjones     06/07/2011  Added new includes.
  *                          mjjones     08/08/2011  Updated Executor include
  *                          mjjones     09/23/2011  Added fapiHwpErrorInfo.H
- *
+ *                          mjjones     11/10/2011  Use ecmdDataBufferBase
  */
 
 #ifndef FAPI_H_
@@ -51,6 +51,6 @@
 #include <fapiHwpReturnCodes.H> // Generated file
 #include <fapiHwpErrorInfo.H>   // Generated file
 #include <fapiAttributeIds.H>   // Generated file
-#include <ecmdDataBuffer.H>
+#include <ecmdDataBufferBase.H>
 
 #endif // FAPI_H_

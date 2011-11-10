@@ -23,9 +23,14 @@
 ROOTPATH = ../../..
 MODULE = ecmddatabuffer
 
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/plat
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
 
-OBJS = ecmdDataBuffer.o
+CUSTOMFLAGS += -DPRDF_COMPRESSBUFFER_COMPRESS_FUNCTIONS=1
+CUSTOMFLAGS += -DPRDF_COMPRESSBUFFER_UNCOMPRESS_FUNCTIONS=1
+
+OBJS = ecmdDataBufferBase.o
 
 SUBDIRS = test.d
 

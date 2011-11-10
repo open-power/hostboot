@@ -34,6 +34,8 @@ extern "C"
     void *memcpy(void *dest, const void *src, size_t num);
     void *memmove(void *vdest, const void *vsrc, size_t len);
     int memcmp(const void *p1, const void *p2, size_t len);
+    void *memmem(const void *haystack, size_t haystacklen,
+                 const void *needle, size_t needlelen);
 
     char* strcpy(char* d, const char* s);
     int strcmp(const char* s1, const char* s2);

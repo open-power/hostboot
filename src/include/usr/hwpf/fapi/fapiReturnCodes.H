@@ -37,12 +37,13 @@
  *                          mjjones     09/23/2011  Remove FAPI_RC_FFDC_HWP_NOT_FOUND
  *                          mjjones     10/07/2011  Add FAPI_RC_INVALID_ATTR_GET
  *                          mjjones     10/28/2011  Trim FAPI/PLAT errors
+ *                          mjjones     11/10/2011  Use ecmdDataBufferBase
  */
 
 #ifndef FAPIRETURNCODES_H_
 #define FAPIRETURNCODES_H_
 
-#include <ecmdDataBuffer.H>
+#include <ecmdDataBufferBase.H>
 
 namespace fapi
 {

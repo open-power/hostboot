@@ -37,6 +37,7 @@
  *                          camvanng    09/06/2011  Added function template for
  *                                                  setHwpFfdc
  *                          mjjones     09/22/2011  Added ErrorInfo Support
+ *                          mjjones     11/10/2011  Use ecmdDataBufferBase
  */
 
 #ifndef FAPIRETURNCODE_H_
@@ -44,7 +45,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
-#include <ecmdDataBuffer.H>
+#include <ecmdDataBufferBase.H>
 #include <fapiTarget.H>
 #include <fapiReturnCodes.H>
 #include <fapiErrorInfo.H>

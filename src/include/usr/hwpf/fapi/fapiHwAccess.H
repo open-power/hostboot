@@ -38,14 +38,14 @@
  *                                                  use ecmdDataBufferBase
  *                          mjjones     06/30/2011  Updated comment
  *                          mjjones     09/14/2011  Prepended fapi to functions
- *
+ *                          mjjones     11/10/2011  Use ecmdDataBufferBase
  */
 
 #ifndef FAPIHWACCESS_H_
 #define FAPIHWACCESS_H_
 
 #include <stdint.h>
-#include <ecmdDataBuffer.H>
+#include <ecmdDataBufferBase.H>
 #include <fapiReturnCode.H>
 #include <fapiTarget.H>
 

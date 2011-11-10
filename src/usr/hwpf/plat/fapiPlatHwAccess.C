@@ -55,7 +55,7 @@
 #include <errl/errlentry.H>
 #include <targeting/targetservice.H>
 #include <devicefw/userif.H>
-#include <ecmdDataBuffer.H>
+#include <ecmdDataBufferBase.H>
 #include <fapiPlatReasonCodes.H>
 
 extern "C"

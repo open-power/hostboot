@@ -122,6 +122,42 @@ extern "C" int memcmp(const void *p1, const void *p2, size_t len)
     return 0;
 }
 
+extern "C" void *memmem(const void *haystack, size_t haystacklen,
+                        const void *needle, size_t needlelen)
+{
+    const void * result = NULL;
+
+    if (haystacklen >= needlelen)
+    {
+        const char * c_haystack = static_cast<const char *>(haystack);
+        const char * c_needle = static_cast<const char *>(needle);
+        bool match = false;
+
+        for (size_t i = 0; i <= (haystacklen - needlelen); i++)
+        {
+            match = true;
+
+            for (size_t j = 0; j < needlelen; j++)
+            {
+                if (*(c_haystack + i + j) != *(c_needle + j))
+                {
+                    match = false;
+                    break;
+                }
+            }
+
+            if (match)
+            {
+                result = (c_haystack + i);
+                break;
+            }
+        }
+    }
+
+    return const_cast<void *>(result);
+}
+
+
 extern "C" char* strcpy(char* d, const char* s)
 {
     char* d1 = d;
