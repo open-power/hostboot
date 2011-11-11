@@ -195,10 +195,8 @@ namespace PrdfCompressBuffer
 	    {
 		uint8_t * l_tmpMatch = NULL;
 		
-        // MIKE TODO
-        l_tmpMatch = NULL;
-		//l_tmpMatch = (uint8_t *) memmem(l_lookahead, l_laSize, 
-					        //i_buf, i);
+		l_tmpMatch = (uint8_t *) memmem(l_lookahead, l_laSize, 
+					        i_buf, i);
 		
 		if (l_tmpMatch != NULL) // found match.
 		{
