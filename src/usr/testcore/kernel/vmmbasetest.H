@@ -33,6 +33,7 @@
 #include <arch/ppc.H>
 #include <sys/mm.h>
 #include <usr/vmmconst.h>
+#include <targeting/targetservice.H>
 
 class VmmBaseTest : public CxxTest::TestSuite
 {
@@ -91,7 +92,7 @@ class VmmBaseTest : public CxxTest::TestSuite
 
         void testCastOutPages()
         {
-            uint64_t l_testAddr = VMM_VADDR_RMVPAGE_TEST;
+             uint64_t l_testAddr = VMM_VADDR_RMVPAGE_TEST;
             uint64_t l_testSize = VMM_SIZE_RMVPAGE_TEST;
             uint64_t vaddr = l_testAddr+l_testSize;
             uint64_t vsize = PageManager::availPages()*PAGESIZE;
@@ -119,7 +120,19 @@ class VmmBaseTest : public CxxTest::TestSuite
                 }
                 (*(volatile uint64_t *)i); sync();
             }
-            nanosleep(1,0);
+
+            // Don't delay in VPO because it will take VERY long to
+            // run the simulator
+            TARGETING::EntityPath syspath(TARGETING::EntityPath::PATH_PHYSICAL);
+            syspath.addLast(TARGETING::TYPE_SYS,0);
+            TARGETING::Target* sys = TARGETING::targetService().toTarget(syspath);
+            uint8_t vpo_mode = 0;
+            if( sys
+                && sys->tryGetAttr<TARGETING::ATTR_VPO_MODE>(vpo_mode)
+                && (vpo_mode == 0) )
+            {
+                nanosleep(1,0);
+            }
         }
 
     private:

@@ -475,6 +475,11 @@ errlHndl_t xscomPerformOp(DeviceFW::OperationType i_opType,
         // Get the offset
         uint64_t l_offset = l_mmioAddr.offset();
 
+        TRACDCOMP(g_trac_xscom, "xscomPerformOp: OpType 0x%.16llX, Address 0x%llX, l_virtAddr+l_offset %p",
+          static_cast<uint64_t>(i_opType),
+          l_addr,
+          l_virtAddr + l_offset);
+
         // Keep MMIO access until XSCOM successfully done or error
         uint64_t l_data = 0;
         do
@@ -485,6 +490,7 @@ errlHndl_t xscomPerformOp(DeviceFW::OperationType i_opType,
             // The dereferencing should handle Cache inhibited internally
             // Use local variable and memcpy to avoid unaligned memory access
             l_data = 0;
+
             if (i_opType == DeviceFW::READ)
             {
                  l_data = *(l_virtAddr + l_offset);
