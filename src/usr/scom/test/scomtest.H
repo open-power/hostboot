@@ -96,7 +96,6 @@ public:
           { 0x120F0166, 0xFEDCBA9876543210}, 
           { 0x00040005, 0x0000000000000000}, 
           { 0x02040004, 0xFFFFFFFFFFFFFFFF}, 
-
       };
       const uint64_t NUM_ADDRS = sizeof(test_data)/sizeof(test_data[0]);
 
@@ -160,9 +159,7 @@ public:
    */
   void test_FSISCOMreadWrite_centaur(void)
   {
-
       TRACFCOMP( g_trac_scom, "ScomTest::test_FSISCOMreadWrite_centaur> Start" );
-
       uint64_t fails = 0;
       uint64_t total = 0;
       errlHndl_t l_err = NULL;
@@ -203,10 +200,9 @@ public:
           uint64_t data;
       } test_data[] = {
           { 0x00012345 , 0x1111222233334444 }, 
-          /* Simics is chopping off the upper nibble... SW108655
-          { 0x02011403 , 0x123456789ABCDEF0 }, 
+          //@fixme - should be 0x02011403 but simics is adding parity...
+          { 0x02011402 , 0x123456789ABCDEF0 }, 
           { 0x02011672 , 0x1122334455667788 },
-          */
 
       };
       const uint64_t NUM_ADDRS = sizeof(test_data)/sizeof(test_data[0]);
@@ -267,6 +263,8 @@ public:
 
 
   //@todo - write tests to verify connection between XSCOM and FSISCOM
+
+  //@todo - write error path testcase for FSI scom using bad address 
 
 };
 

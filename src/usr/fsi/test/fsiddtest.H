@@ -207,14 +207,14 @@ class FsiDDTest : public CxxTest::TestSuite
             //** Slave Regs (cheating)
             { PROC0, 0x080000, 0xC0010EA0, false, false }, //Config Table entry for slave0 off MFSI-0 
             { PROC0, 0x081000, 0x12345678, true, false }, //DATA_0 from FSI2PIB off MFSI-0 
-            { PROC0, 0x041028, 0xC6EE9049 /*fixme 0x160E9049*/, false, false }, //CHIPID from SHIFT off cMFSI-0
+            { PROC0, 0x041028, 0x160E9049, false, false }, //CHIPID from SHIFT off cMFSI-0
             { PROC0, 0x103074, 0x91010800, false, false }, //CMFSI MVER from Proc off MFSI-2
 
             //** Slave Regs
             { PROCWRAP, 0x000000, 0xC0010EA0, false, false }, //Config Table entry for slave0 off MFSI-0 
             { PROCWRAP, 0x001000, 0x12345678, false, false }, //DATA_0 from FSI2PIB off MFSI-0 
             { PROCWRAP, 0x001004, 0xA5A5A5A5, true, false }, //DATA_1 from FSI2PIB off MFSI-0
-            //SW106529 { PROCWRAP, 0x001028, 0x120EA049, false, false }, //CHIPID from FSI2PIB off MFSI-0 
+            //@fixme SW106529  { PROCWRAP, 0x001028, 0x120EA049, false, false }, //CHIPID from FSI2PIB off MFSI-0 
 
             //** Slave Regs
             { PROC2, 0x000000, 0xC0010EA0, false, false }, //Config Table entry for slave0 off MFSI-2
@@ -222,13 +222,13 @@ class FsiDDTest : public CxxTest::TestSuite
             { PROC2, 0x001028, 0x120EA049, false, false }, //CHIPID from FSI2PIB off MFSI-2
 
             //** Slave Regs
-            { CENTAUR0, 0x000000, 0xC31CEE9C, false, false }, //Config Table entry for slave0 off cMFSI-0 
-            { CENTAUR0, 0x001028, 0xC6EE9049 /*fixme 0x160E9049*/, false, false }, //CHIPID from FSI2PIB off cMFSI-0
+            { CENTAUR0, 0x000000, 0xC0010E9C, false, false }, //Config Table entry for slave0 off cMFSI-0 
+            { CENTAUR0, 0x001028, 0x160E9049, false, false }, //CHIPID from FSI2PIB off cMFSI-0
             { CENTAUR0, 0x000C08, 0x12344321, true, false }, //FEL from SHIFT off cMFSI-0
 
             //** Slave Regs
-            { CENTAUR8, 0x001000, 0x33333333, true, false }, //FEL from SHIFT off cMFSI-0 of MFSI-7
-            { CENTAUR8, 0x001028, /*0xC6EE9049*/ 0x160E9049, false, false }, //CHIPID from FSI2PIB off cMFSI-0 of MFSI-7
+            { CENTAUR8, 0x001000, 0x33333333, true, false }, //FEL from SHIFT off cMFSI-0 of MFSI-1
+            { CENTAUR8, 0x001028, 0x160E9049, false, false }, //CHIPID from FSI2PIB off cMFSI-0 of MFSI-1
         };
         const uint64_t NUM_ADDRS = sizeof(test_data)/sizeof(test_data[0]);
 
