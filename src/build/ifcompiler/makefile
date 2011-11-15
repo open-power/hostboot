@@ -21,6 +21,9 @@
 #
 #  IBM_PROLOG_END
 # add a -d to flex for debug output
+# ./bin/initCompiler -init ./sample.initfile -outdir . --debug -attr ./fapiAttributeIds.H
+
+ROOTPATH = ../../..
 
 y.tab.%: initCompiler.y
 	yacc -d initCompiler.y
@@ -29,7 +32,7 @@ lex.yy.c: initCompiler.lex
 	flex initCompiler.lex
 
 bin/initCompiler: y.tab.c y.tab.h lex.yy.c initCompiler.C initCompiler.H initRpn.C initRpn.H initScom.C initScom.H initSymbols.C initSymbols.H
-	mkdir -p bin; g++ initCompiler.C lex.yy.c y.tab.c initRpn.C initScom.C initSymbols.C -I./ -o ./bin/initCompiler
+	mkdir -p bin; g++ initCompiler.C lex.yy.c y.tab.c initRpn.C initScom.C initSymbols.C -I ./ -I ${ROOTPATH}/src/include/usr/hwpf/hwp/ -o ./bin/initCompiler
 
 ifcompiler: bin/initCompiler
 

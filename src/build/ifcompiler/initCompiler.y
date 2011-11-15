@@ -23,6 +23,7 @@
 //        D774126  dgilbert 09/30/10  Add ERROR: to yyerror message
 //                 andrewg  09/19/11  Updates based on review
 //                 camvanng 11/08/11  Added support for attribute enums
+//                 andrewg  11/09/11  Refactor to use common include with hwp framework.
 // End Change Log *********************************************************************************
 /**
  * @file initCompiler.y
@@ -232,10 +233,10 @@ idrows:         id_col  { init::dbg << $1->listing(NULL); current_scom->add_row_
 
         // TODO num_list could be VARs,LITs, or even ranges eg {1,2..5,7}
 
-id_col:         INIT_ID { $$ = new init::Rpn(*($1),yyscomlist->get_symbols()); $$->push_op(init::Rpn::EQ); delete $1; }  
-                | INIT_INTEGER { $$ = new init::Rpn($1,yyscomlist->get_symbols()); $$->push_op(init::Rpn::EQ); }
-                | '{' num_list '}' { $$ = $2; $2->push_op(init::Rpn::LIST); $2->push_op(init::Rpn::EQ); }
-                | ATTRIBUTE_ENUM { $$ = new init::Rpn((yyscomlist->get_symbols())->get_attr_enum_val(*($1)),yyscomlist->get_symbols()); $$->push_op(init::Rpn::EQ); delete $1; }  
+id_col:         INIT_ID { $$ = new init::Rpn(*($1),yyscomlist->get_symbols()); $$->push_op(EQ); delete $1; }  
+                | INIT_INTEGER { $$ = new init::Rpn($1,yyscomlist->get_symbols()); $$->push_op(EQ); }
+                | '{' num_list '}' { $$ = $2; $2->push_op(LIST); $2->push_op(EQ); }
+                | ATTRIBUTE_ENUM { $$ = new init::Rpn((yyscomlist->get_symbols())->get_attr_enum_val(*($1)),yyscomlist->get_symbols()); $$->push_op(EQ); delete $1; }  
 ;
 
 
@@ -261,24 +262,23 @@ expr:   INIT_INTEGER                    { $$= new init::Rpn($1,yyscomlist->get_s
         | INIT_ID                       { $$= new init::Rpn(*($1),yyscomlist->get_symbols()); delete $1; }
         | ATTRIBUTE_ENUM                { $$= new init::Rpn((yyscomlist->get_symbols())->get_attr_enum_val(*($1)),yyscomlist->get_symbols()); delete $1; }
         | INIT_INT64                    { $$=new init::Rpn($1,yyscomlist->get_symbols()); }
-        | expr ATTRIBUTE_INDEX          { $1->push_array_index(*($2)); }
-        | expr INIT_LOGIC_OR expr       { $$ = $1->push_merge($3,init::Rpn::OR); }
-        | expr INIT_LOGIC_AND expr      { $$ = $1->push_merge($3,init::Rpn::AND); }
-        | expr INIT_EQ expr             { $$ = $1->push_merge($3,init::Rpn::EQ); }
-        | expr INIT_NE expr             { $$ = $1->push_merge($3,init::Rpn::NE); }
-        | expr INIT_LE expr             { $$ = $1->push_merge($3,init::Rpn::LE); }
-        | expr INIT_GE expr             { $$ = $1->push_merge($3,init::Rpn::GE); }
-        | expr '<' expr                 { $$ = $1->push_merge($3,init::Rpn::LT); }
-        | expr '>' expr                 { $$ = $1->push_merge($3,init::Rpn::GT); }
-        | expr INIT_SHIFT_RIGHT expr    { $$ = $1->push_merge($3,init::Rpn::SHIFTRIGHT); }
-        | expr INIT_SHIFT_LEFT expr     { $$ = $1->push_merge($3,init::Rpn::SHIFTLEFT); }
-        | expr '+' expr                 { $$ = $1->push_merge($3,init::Rpn::PLUS); }
-        | expr '-' expr                 { $$ = $1->push_merge($3,init::Rpn::MINUS); }
-        | expr '*' expr                 { $$ = $1->push_merge($3,init::Rpn::MULT); }
-        | expr '/' expr                 { $$ = $1->push_merge($3,init::Rpn::DIVIDE); }
-        | expr '%' expr                 { $$ = $1->push_merge($3,init::Rpn::MOD); }
-        | '!' expr                      { $$ = $2->push_op(init::Rpn::NOT); }
-        /* | '~' expr                      { $$ = $2->push_op("~"); } */
+        | expr ATTRIBUTE_INDEX          { $1->push_array_index(*($2));}
+        | expr INIT_LOGIC_OR expr       { $$ = $1->push_merge($3,OR); }
+        | expr INIT_LOGIC_AND expr      { $$ = $1->push_merge($3,AND); }
+        | expr INIT_EQ expr             { $$ = $1->push_merge($3,EQ); }
+        | expr INIT_NE expr             { $$ = $1->push_merge($3,NE); }
+        | expr INIT_LE expr             { $$ = $1->push_merge($3,LE); }
+        | expr INIT_GE expr             { $$ = $1->push_merge($3,GE); }
+        | expr '<' expr                 { $$ = $1->push_merge($3,LT); }
+        | expr '>' expr                 { $$ = $1->push_merge($3,GT); }
+        | expr INIT_SHIFT_RIGHT expr    { $$ = $1->push_merge($3,SHIFTRIGHT); }
+        | expr INIT_SHIFT_LEFT expr     { $$ = $1->push_merge($3,SHIFTLEFT); }
+        | expr '+' expr                 { $$ = $1->push_merge($3,PLUS); }
+        | expr '-' expr                 { $$ = $1->push_merge($3,MINUS); }
+        | expr '*' expr                 { $$ = $1->push_merge($3,MULT); }
+        | expr '/' expr                 { $$ = $1->push_merge($3,DIVIDE); }
+        | expr '%' expr                 { $$ = $1->push_merge($3,MOD); }
+        | '!' expr                      { $$ = $2->push_op(NOT); }
         | '(' expr ')'                  { $$ = $2; }
 ;
 

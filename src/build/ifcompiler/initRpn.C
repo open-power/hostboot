@@ -22,6 +22,7 @@
 //                 andrewg  05/24/11 Port over for VPL/PgP
 //                 andrewg  09/19/11 Updates based on review
 //                 camvanng 11/08/11  Added support for attribute enums
+//                 andrewg  11/09/11 Multi-dimensional array and move to common fapi include
 // End Change Log *********************************************************************************
 
 /**
@@ -207,7 +208,7 @@ void Rpn::push_array_index(std::string &i_array_idx)
     uint32_t rpn_id = iv_symbols->find_numeric_array_lit(l_array_val,4);
     iv_rpnstack.push_back(rpn_id);
 
-    //printf("Array Index: %s  decimal:%u  rpn_id:0x%8X\n",l_idx.c_str(),l_array_val,rpn_id);
+    // printf("Array Index: %s  decimal:%u  rpn_id:0x%8X\n",l_idx.c_str(),l_array_val,rpn_id);
 
 }
 
@@ -240,10 +241,10 @@ bool Rpn::isFalse() const //dg003a
 
 //-------------------------------------------------------------------------------------------------
 
-Rpn * Rpn::push_op(RPN_OP op)
+Rpn * Rpn::push_op(IfRpnOp op)
 {
     uint32_t v = op;
-    if(op == Rpn::LIST)  // calculate list size
+    if(op == LIST)  // calculate list size
     {
         uint32_t count = 0;
         for(RPNSTACK::const_reverse_iterator r = iv_rpnstack.rbegin(); r != iv_rpnstack.rend(); ++r)
@@ -261,7 +262,7 @@ Rpn * Rpn::push_op(RPN_OP op)
 //-------------------------------------------------------------------------------------------------
 // @post i_rpn is deleted
 
-Rpn *  Rpn::push_merge(Rpn * i_rpn, RPN_OP op)
+Rpn *  Rpn::push_merge(Rpn * i_rpn, IfRpnOp op)
 {
     //dg003a begin
     Rpn * result = this;
@@ -628,10 +629,9 @@ std::string  Rpn::listing(const char * i_desc, const std::string & spyname, bool
             if(i_final)
             {
                 uint32_t val = iv_symbols->get_tag(*i);
-                uint32_t type = val & Symbols::TYPE_MASK;
+                uint32_t type = val & IF_TYPE_MASK;
 
-                if (type == Symbols::LIT_TYPE ||
-                    type == Symbols::VAR_TYPE)
+                if (type == IF_ATTR_TYPE)
                 {
                     rpn_byte_size += 2;
                     oss << "0x" << std::setw(4) << val << "\t\t" << "PUSH " << name << std::endl;

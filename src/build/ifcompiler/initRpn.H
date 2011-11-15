@@ -25,6 +25,7 @@
 //  dg003 SW047506 dgilbert 12/09/10 SERIES filtering
 //                 andrewg  09/19/11 Updates based on review
 //                 camvanng 11/08/11  Added support for attribute enums
+//                 andrewg  11/09/11 Multi-dimensional array and move to common fapi include
 // End Change Log *********************************************************************************
 
 /**
@@ -36,6 +37,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <fapiHwpInitFileInclude.H>
 
 
 namespace init
@@ -59,34 +61,7 @@ namespace init
             ARRAY_INDEX  = 0x40000000,
             OPERATION    = 0x80000000,
             TYPE_MASK    = 0xF8000000,
-            OP_MASK      = 0x000000FF
 
-        };
-
-        // These RPN_OPs are defined in the ciniIfRpnCalculator.C The values must always match
-        enum RPN_OP
-        {
-            PUSH       = 0x00000000,
-            AND        = 0x00000001,
-            OR         = 0x00000002,
-            NOT        = 0x00000003,
-            EQ         = 0x00000004,
-            NE         = 0x00000005,
-            GT         = 0x00000006,
-            GE         = 0x00000007,
-            LT         = 0x00000008,
-            LE         = 0x00000009,
-            PLUS       = 0x0000000A,
-            MINUS      = 0x0000000B,
-            MULT       = 0x0000000C,
-            DIVIDE     = 0x0000000D,
-            MOD        = 0x0000000E,
-            LIST       = 0x0000000F,
-            SHIFTLEFT  = 0x00000010,
-            SHIFTRIGHT = 0x00000011,
-            FALSE_OP   = 0x00000012,    // dg003a
-            TRUE_OP    = 0x00000013,    // dg003a
-            LAST_OP
         };
 
         /**
@@ -145,7 +120,7 @@ namespace init
          */
         void push_attr_enum(std::string &i_attr_enum);
 
-        Rpn * push_op(RPN_OP op);                   //<<< Add an operation to the Rpn sequence
+        Rpn * push_op(IfRpnOp op);                   //<<< Add an operation to the Rpn sequence
 
         /**
          * @brief Merge an Rpn to this Rpn sequence with input operation
@@ -155,7 +130,7 @@ namespace init
          *
          * @return Merged RPN
          */
-        Rpn * push_merge(Rpn * io_rpn, RPN_OP i_op);
+        Rpn * push_merge(Rpn * io_rpn, IfRpnOp i_op);
 
         /**
          * Merge (append) Rpn with this Rpn sequence

@@ -1,0 +1,117 @@
+//  IBM_PROLOG_BEGIN_TAG
+//  This is an automatically generated prolog.
+//
+//  $Source: src/include/usr/hwpf/hwp/fapiHwpInitFileInclude.H $
+//
+//  IBM CONFIDENTIAL
+//
+//  COPYRIGHT International Business Machines Corp. 2011
+//
+//  p1
+//
+//  Object Code Only (OCO) source materials
+//  Licensed Internal Code Source Materials
+//  IBM HostBoot Licensed Internal Code
+//
+//  The source code for this program is not published or other-
+//  wise divested of its trade secrets, irrespective of what has
+//  been deposited with the U.S. Copyright Office.
+//
+//  Origin: 30
+//
+//  IBM_PROLOG_END
+/**
+ *  @file fapiHwpInitFileInclude.H
+ *
+ *  @brief Common defines for Hardware Procedure initfile execution
+ */
+
+/*
+ * Change Log ******************************************************************
+ * Flag     Defect/Feature  User        Date        Description
+ * ------   --------------  ----------  ----------- ----------------------------
+ *                          andrewg     11/09/2011  Created.
+ *
+ */
+
+#ifndef FAPIHWPINITFILEINCLUDE_H_
+#define FAPIHWPINITFILEINCLUDE_H_
+
+/**
+ * @brief Enumeration of RPN ops 
+ */
+enum IfRpnOp
+{
+    AND        = 0x00000001,
+    OR         = 0x00000002,
+    NOT        = 0x00000003,
+    EQ         = 0x00000004,
+    NE         = 0x00000005,
+    GT         = 0x00000006,
+    GE         = 0x00000007,
+    LT         = 0x00000008,
+    LE         = 0x00000009,
+    PLUS       = 0x0000000A,
+    MINUS      = 0x0000000B,
+    MULT       = 0x0000000C,
+    DIVIDE     = 0x0000000D,
+    MOD        = 0x0000000E,
+    LIST       = 0x0000000F,
+    SHIFTLEFT  = 0x00000010,
+    SHIFTRIGHT = 0x00000011,
+    FALSE_OP   = 0x00000012,
+    TRUE_OP    = 0x00000013,
+    LAST_OP    = 0x00000014,
+    PUSH_MASK  = 0x000000C0,
+    OP_MASK    = 0x000000FF
+};
+
+/**
+ * @brief Enumeration of Type Mask
+ */
+enum IfTypeMask
+{
+    IF_ATTR_TYPE       = 0x8000,
+    IF_NUM_TYPE        = 0xC000,
+    IF_TYPE_MASK       = 0xC000,
+};
+
+// Only support up to 4 dimensions for an array
+const uint8_t MAX_ATTRIBUTE_ARRAY_DIMENSION = 4;
+
+// Used for array size parsing
+const uint8_t ATTR_DIMENSION_MASK = 0xF0;
+
+// Most significant nibble in 1 byte attribute type will indicate array dimension
+const uint8_t ATTR_DIMENSION_SIZE_MULT = 0x10;
+
+/**
+ * @brief Enumeration of Attribute types
+ *
+ * Note that the most significant nibble is used to determine dimension size
+ * by the procedure executing the initfile.  
+ */
+enum IfAttrType
+{
+    SYM_ATTR_UINT8_TYPE = 0x00,
+    SYM_ATTR_UINT8_ARRAY1_TYPE = 0x11,
+    SYM_ATTR_UINT8_ARRAY2_TYPE = 0x22,
+    SYM_ATTR_UINT8_ARRAY3_TYPE = 0x33,
+    SYM_ATTR_UINT8_ARRAY4_TYPE = 0x44,
+    SYM_ATTR_UINT32_TYPE = 0x05,
+    SYM_ATTR_UINT32_ARRAY1_TYPE = 0x16,
+    SYM_ATTR_UINT32_ARRAY2_TYPE = 0x27,
+    SYM_ATTR_UINT32_ARRAY3_TYPE = 0x38,
+    SYM_ATTR_UINT32_ARRAY4_TYPE = 0x49,
+    SYM_ATTR_UINT64_TYPE = 0x0A,
+    SYM_ATTR_UINT64_ARRAY1_TYPE = 0x1B,
+    SYM_ATTR_UINT64_ARRAY2_TYPE = 0x2C,
+    SYM_ATTR_UINT64_ARRAY3_TYPE = 0x3D,
+    SYM_ATTR_UINT64_ARRAY4_TYPE = 0x4E,
+};
+
+
+
+
+#endif /* FAPIHWPINITFILEINCLUDE_H_ */
+

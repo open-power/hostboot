@@ -245,6 +245,15 @@ public:
                 break;
             }
 
+            uint8_t l_uint8array2[2][3][4];
+            l_uint8array2[1][2][3] = 0xBE;
+            l_rc = FAPI_ATTR_SET(ATTR_SCRATCH_UINT8_ARRAY_2, NULL, l_uint8array2);
+            if (l_rc != fapi::FAPI_RC_SUCCESS)
+            {
+                FAPI_IMP("testHwpf5: ATTR_SCRATCH_UINT8_ARRAY_2. Error from SET");
+                break;
+            }
+
             // Get the master processor chip
             TARGETING::Target* l_pTarget = NULL;
             TARGETING::targetService().masterProcChipTargetHandle(l_pTarget);

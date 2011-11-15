@@ -23,6 +23,7 @@
 //  dg003 SW047506 dgilbert 12/09/10 More filtering enhancements
 //                 andrewg  05/24/11 Port over for VPL/PgP
 //                 andrewg  09/19/11 Updates based on review
+//                 andrewg  11/09/11 Multi-dimensional array and move to common fapi include
 // End Change Log *********************************************************************************
 
 /**
@@ -221,11 +222,11 @@ void Scom::add_row_rpn(Rpn * i_rpn)
     // Replace the Rpn "ANY" EQ with TRUE   dg003a
     Rpn any_rpn("ANY",iv_symbols);
     Rpn true_rpn(iv_symbols);
-    true_rpn.push_op(Rpn::TRUE_OP);
+    true_rpn.push_op(TRUE_OP);
 
     // The column EXPR can have an lone "ANY" rpn - so add EQ.
-    if(any_rpn == (*i_rpn)) i_rpn->push_op(Rpn::EQ);
-    any_rpn.push_op(Rpn::EQ);
+    if(any_rpn == (*i_rpn)) i_rpn->push_op(EQ);
+    any_rpn.push_op(EQ);
 
     if(any_rpn == (*i_rpn)) iv_row_rpn.push_back(true_rpn); // Replace col == ANY with TRUE
     else
@@ -279,8 +280,8 @@ void Scom::make_target(const char * i_symbol)
                 r.push_int(v);
             }
         }
-        if(rsize > 1) r.push_op(Rpn::LIST);   // if more than one target
-        r.push_op(Rpn::EQ);
+        if(rsize > 1) r.push_op(LIST);   // if more than one target
+        r.push_op(EQ);
     }
 
     iv_row_rpn.push_back(r);

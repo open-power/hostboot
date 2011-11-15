@@ -31,6 +31,7 @@
  * Flag     Defect/Feature  User        Date        Description
  * ------   --------------  ----------  ----------- ----------------------------
  *                          camvanng    09/29/2011  Created.
+ *                          andrewg     11/09/2011  Multi-dimension array support
  */
 
 #include <fapiHwpExecInitFile.H>
@@ -153,10 +154,7 @@ void  unloadAttrSymbolTable(attrTableEntry_t *& io_attrs);
 fapi::ReturnCode getAttr(const ifData_t & i_ifData,
                          const uint16_t i_id,
                          uint64_t & o_val,
-                         const uint32_t i_arrayIndex1 = 0,
-                         const uint32_t i_arrayIndex2 = 0,
-                         const uint32_t i_arrayIndex3 = 0,
-                         const uint32_t i_arrayIndex4 = 0);
+                         const uint16_t i_arrayIndexIds[MAX_ATTRIBUTE_ARRAY_DIMENSION]);
 
 uint64_t * loadLitSymbolTable(ifInfo_t & io_ifInfo,
                               uint16_t & o_numLits);
@@ -189,7 +187,7 @@ uint64_t rpnBinaryOp(IfRpnOp i_op, uint64_t i_val1, uint64_t i_val2,
                      uint32_t i_any);
 
 fapi::ReturnCode rpnDoPush(ifData_t & io_ifData, const uint16_t i_id,
-                           uint32_t & io_any, const uint16_t i_arrayIndex1 = 0);
+                           uint32_t & io_any, const uint16_t i_arrayIndexIds[MAX_ATTRIBUTE_ARRAY_DIMENSION]);
 
 fapi::ReturnCode rpnDoOp(rpnStack_t * io_rpnStack, IfRpnOp i_op,
                          uint32_t i_any);
@@ -494,13 +492,10 @@ void unloadAttrSymbolTable(attrTableEntry_t *& io_attrs)
  * If there are ever attributes with more than 4 dimensions then this function
  * will need to be updated.
  *
- * @param[in]  i_ifData      Reference to ifData_t which contains initfile data
- * @param[in]  i_id          AttributeID
- * @param[out] o_val         Reference to uint64_t where attribute value is set
- * @param[in]  i_arrayIndex1 If array attribute then index1
- * @param[in]  i_arrayIndex2 If at least 2D array attribute then index2
- * @param[in]  i_arrayIndex3 If at least 3D array attribute then index3
- * @param[in]  i_arrayIndex4 If at least 4D array attribute then index4
+ * @param[in]  i_ifData        Reference to ifData_t which contains initfile data
+ * @param[in]  i_id            AttributeID
+ * @param[out] o_val           Reference to uint64_t where attribute value is set
+ * @param[in]  i_arrayIndexIds Array of attribute array index's (when needed)
  *
  * @return ReturnCode. Zero if success.
  */
@@ -508,13 +503,10 @@ void unloadAttrSymbolTable(attrTableEntry_t *& io_attrs)
 fapi::ReturnCode getAttr(const ifData_t & i_ifData,
                          const uint16_t i_id,
                          uint64_t & o_val,
-                         const uint32_t i_arrayIndex1,
-                         const uint32_t i_arrayIndex2,
-                         const uint32_t i_arrayIndex3,
-                         const uint32_t i_arrayIndex4)
+                         const uint16_t i_arrayIndexIds[MAX_ATTRIBUTE_ARRAY_DIMENSION])
 {
-    FAPI_DBG(">> hwpExecInitFile: getAttr: id 0x%x index %d",
-             i_id, i_arrayIndex1);
+    FAPI_DBG(">> hwpExecInitFile: getAttr: id 0x%x",
+             i_id);
 
     fapi::ReturnCode l_rc = fapi::FAPI_RC_SUCCESS;
 
@@ -539,8 +531,8 @@ fapi::ReturnCode getAttr(const ifData_t & i_ifData,
         FAPI_DBG("hwpExecInitFile: getAttr: attrId %u", l_attrId);
 
         l_rc = fapi::fapiGetInitFileAttr(l_attrId, l_pTarget, o_val,
-                                         i_arrayIndex1, i_arrayIndex2,
-                                         i_arrayIndex3, i_arrayIndex4);
+                                         i_arrayIndexIds[0], i_arrayIndexIds[1],
+                                         i_arrayIndexIds[2], i_arrayIndexIds[3]);
 
         if (l_rc)
         {
@@ -1559,46 +1551,34 @@ uint64_t rpnBinaryOp(IfRpnOp i_op, uint64_t i_val1, uint64_t i_val2,
  * Pushes the attribute or literal value specified by i_id onto the RPN stack.
  * It uses the appropriate symbol table to resolve the value first.
  *
- * @param[in,out] io_ifData   Reference to ifData_t which contains initfile data
- * @param[in]     i_id        Id of element to push
- * @param[in,out] io_any      Set if ANY op
- * @param[in] i_arrayIndexId  Set to array index if this is an array attribute,
- *                            support for 1-dimensional array only
- * @return fapi::ReturnCode   Zero on success
+ * @param[in,out] io_ifData    Reference to ifData_t which contains initfile data
+ * @param[in]     i_id         Id of element to push
+ * @param[in,out] io_any       Set if ANY op
+ * @param[in] i_arrayIndexIds  Array of attribute array index's
+                                (when attribute is array type)
+ * @return fapi::ReturnCode    Zero on success
  */
 fapi::ReturnCode rpnDoPush(ifData_t & io_ifData, const uint16_t i_id,
-                           uint32_t & io_any, const uint16_t i_arrayIndexId)
+                           uint32_t & io_any, const uint16_t i_arrayIndexIds[MAX_ATTRIBUTE_ARRAY_DIMENSION])
 {
     FAPI_DBG(">> HwpInitFile: rpnDoPush: id 0x%X", i_id);
 
     fapi::ReturnCode l_rc = fapi::FAPI_RC_SUCCESS;
     uint64_t l_val = 0;
-    uint64_t l_idx = 0;
 
     do
     {
 
-        if ((i_id & IF_TYPE_MASK) == IF_VAR_TYPE) //It's an attribute
+        if ((i_id & IF_TYPE_MASK) == IF_ATTR_TYPE) //It's an attribute
         {
-            if (i_arrayIndexId)
-            {
-                l_rc = getLit(io_ifData, i_arrayIndexId, l_idx);
-
-                if (l_rc)
-                {
-                  break;
-                }
-            }
-
-            l_rc = getAttr(io_ifData, i_id, l_val, l_idx);
-
+            l_rc = getAttr(io_ifData, i_id, l_val, i_arrayIndexIds);
             if (l_rc)
             {
               break;
             }
 
             FAPI_DBG("hwpExecInitFile: rpnDoPush: getAttr: id = 0x%X, "
-                     "value = 0x%llX idx = %u", i_id, l_val, l_idx);
+                     "value = 0x%llX", i_id, l_val);
 
             rpnPush(io_ifData.rpnStack, l_val);
         }
@@ -1747,7 +1727,7 @@ fapi::ReturnCode rpnDoOp(rpnStack_t * io_rpnStack, IfRpnOp i_op, uint32_t i_any)
  *
  * @return fapi::ReturnCode   Zero on success
  */
-fapi::ReturnCode evalRpn(ifData_t & io_ifData, char * i_expr,
+fapi::ReturnCode evalRpn(ifData_t & io_ifData, char *i_expr,
                          uint32_t i_len, const bool i_hasExpr)
 {
     FAPI_DBG(">> hwpExecInitFile: evalRpn");
@@ -1780,24 +1760,50 @@ fapi::ReturnCode evalRpn(ifData_t & io_ifData, char * i_expr,
             FAPI_DBG("hwpExecInitFile: evalRpn: id 0x%.2X", l_id);
 
             //Check for attribute of array type
-            //1 dimensional support only
-            uint16_t l_arrayIndexId = 0;
-            if ((l_id & IF_TYPE_MASK) == IF_VAR_TYPE)
+            uint16_t l_arrayIndexs[MAX_ATTRIBUTE_ARRAY_DIMENSION] = {0};
+
+            if ((l_id & IF_TYPE_MASK) == IF_ATTR_TYPE)
             {
                 //Mask out the type bits and zero-based
                 uint16_t i = (l_id & ~IF_TYPE_MASK) - 1;
 
-                if (SYM_ATTR_UINT8_ARRAY_TYPE <= io_ifData.attrs[i].type)
+                // Get the attribute dimension
+                uint8_t l_attrDimension = io_ifData.attrs[i].type & ATTR_DIMENSION_MASK;
+
+                // Now shift it to the LS nibble
+                l_attrDimension = l_attrDimension >> 4;
+
+                //FAPI_DBG("hwpExecInitFile: evalRpn: Attribute ID:0x%.4X has dimension %u of type 0x%.4X",
+                //         l_id,l_attrDimension,io_ifData.attrs[i].type);
+
+                // Read out all dimensions for the attribute
+                for(uint8_t j=0; j<l_attrDimension; j++)
                 {
-                    l_arrayIndexId = *(const uint16_t *)i_expr;
+                    // Read out array index id
+                    uint16_t l_arrayIdxId = 0;
+                    memcpy(&l_arrayIdxId,i_expr,2);
+
+                    uint64_t l_tmpIdx = 0;
+
+                    // Retrieve the actual value for the array index (using it's id)
+                    l_rc = getLit(io_ifData,l_arrayIdxId,l_tmpIdx);
+                    if (l_rc)
+                    {
+                        break;
+                    }
+                    l_arrayIndexs[j] = l_tmpIdx;
                     i_expr += 2;
                     i_len -= 2;
-                    FAPI_DBG("hwpExecInitFile: evalRpn: array index id 0x%.2X",
-                              l_arrayIndexId);
                 }
             }
 
-            l_rc = rpnDoPush(io_ifData, l_id, l_any, l_arrayIndexId);
+            // Handle error from above for loop
+            if(l_rc)
+            {
+                break;
+            }
+
+            l_rc = rpnDoPush(io_ifData, l_id, l_any, l_arrayIndexs);
         }
         else
         {
@@ -1813,7 +1819,5 @@ fapi::ReturnCode evalRpn(ifData_t & io_ifData, char * i_expr,
     FAPI_DBG("<< hwpExecInitFile: evalRpn");
     return l_rc;
 }
-
-
 
 } // extern "C"

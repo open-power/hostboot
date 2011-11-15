@@ -22,6 +22,7 @@
 //       D754106   dgilbert 06/14/10 Create
 //                 andrewg  09/19/11 Updates based on review
 //                 camvanng 11/08/11 Added support for attribute enums
+//                 andrewg  11/09/11 Multi-dimensional array and move to common fapi include
 // End Change Log *********************************************************************************
 
 /**
@@ -41,6 +42,7 @@
 #include <map>
 #include <set>
 #include <initRpn.H>
+#include <fapiHwpInitFileInclude.H>  // Requires file from hwpf
 
 using namespace std;
 
@@ -55,24 +57,12 @@ namespace init
 
             enum
             {
-                LIT_TYPE        = 0x4000,
-                VAR_TYPE        = 0x8000,
-                NUM_TYPE        = 0xC000,
-                TYPE_MASK       = 0xFFFFC000,
                 CINI_LIT_MASK   = 0xA0000000,
                 INIT_ANY_LIT    = 0x07FFFFFE,
                 INIT_EXPR_VAR   = 0x07FFFFFF,
             };
 
-            enum
-            {
-                SYM_ATTR_UINT8_TYPE = 0x00,
-                SYM_ATTR_UINT32_TYPE = 0x01,
-                SYM_ATTR_UINT64_TYPE = 0x02,
-                SYM_ATTR_UINT8_ARRAY_TYPE = 0x03,
-                SYM_ATTR_UINT32_ARRAY_TYPE = 0x04,
-                SYM_ATTR_UINT64_ARRAY_TYPE = 0x05,
-            };
+
 
             enum 
             {
@@ -230,7 +220,7 @@ namespace init
 
             string find_text(uint32_t i_cini_id);
             uint32_t add_undefined(const string & s);
-            uint32_t get_attr_type(const string &i_type, bool i_array);
+            uint32_t get_attr_type(const string &i_type, const uint32_t i_array);
 
         private: //data
 

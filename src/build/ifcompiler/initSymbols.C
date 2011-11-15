@@ -20,6 +20,7 @@
 //                 dgilbert 10/22/10 Add spies_are_in()
 //                 andrewg  09/19/11 Updates based on review
 //                 camvanng 11/08/11 Added support for attribute enums
+//                 andrewg  11/09/11 Multi-dimensional array and move to common fapi include
 // End Change Log *********************************************************************************
 
 /**
@@ -179,7 +180,7 @@ Symbols::Symbols(FILELIST & i_filenames)
                  string attribute_name;
                  string find_type = "_Type";
                  string find_array = "[";
-                 bool array = false;
+                 uint32_t array = 0;
                  iss >> type;
                  iss >> attribute_name;
                  if(attribute_name == "*")
@@ -190,11 +191,12 @@ Symbols::Symbols(FILELIST & i_filenames)
                  }
                  //printf("typedef: type:%s  attribute_name:%s\n",type.c_str(),attribute_name.c_str());
 
-                 // Check if there's a "[" in the string, which would indicate it's an array
+                 // Determine how many (if any) dimensions this array has
                  size_t pos = attribute_name.find(find_array);
-                 if(pos != string::npos)
+                 while(pos != string::npos)
                  {
-                     array = true;
+                     array++;
+                     pos = attribute_name.find(find_array,pos+1);
                  }
 
                  // Now strip off the _type in the name
@@ -210,7 +212,8 @@ Symbols::Symbols(FILELIST & i_filenames)
                  }
 
                  iv_attr_type[attribute_name] = get_attr_type(type,array);
-                 //printf("Attribute %s Type for %s is %u\n",attribute_name.c_str(),type.c_str(),get_attr_type(type,array));
+                 //printf("Attribute %s Type  with array dimension %u for %s is %u\n",attribute_name.c_str(),array,
+                 //       type.c_str(),get_attr_type(type,array));
             }
         }
         infs.close();
@@ -219,51 +222,38 @@ Symbols::Symbols(FILELIST & i_filenames)
     iv_rpn_map[Rpn::SYMBOL | INIT_ANY_LIT]  = RPN_DATA("ANY",CINI_LIT_MASK);
 }
 
-uint32_t Symbols::get_attr_type(const string &i_type, bool i_array)
+uint32_t Symbols::get_attr_type(const string &i_type, const uint32_t i_array)
 {
+    uint32_t l_type = 0;
 
     if (i_type == "uint8_t")
     {
-        if(i_array == true)
-        {
-            return(SYM_ATTR_UINT8_ARRAY_TYPE);
-        }
-        else
-        {
-            return(SYM_ATTR_UINT8_TYPE);
-        }
+        l_type = SYM_ATTR_UINT8_TYPE;
     }
     else if(i_type == "uint32_t")
     {
-        if(i_array == true)
-        {
-            return(SYM_ATTR_UINT32_ARRAY_TYPE);
-        }
-        else
-        {
-            return(SYM_ATTR_UINT32_TYPE);
-        }
+        l_type = SYM_ATTR_UINT32_TYPE;   
     }
     else if(i_type == "uint64_t")
     {
-        if(i_array == true)
-        {
-            return(SYM_ATTR_UINT64_ARRAY_TYPE);
-        }
-        else
-        {
-            return(SYM_ATTR_UINT64_TYPE);
-        }
+        l_type = SYM_ATTR_UINT64_TYPE;
     }
-    //else if(i_type == "uint64_t")
-    // TODO - Add attribute array support
     else
     {
-        // TODO - Need to ensure all attributes have data type at the end of processing
         printf("Unknown data type: %s\n",i_type.c_str());
-        return(0);
+        exit(-1);
     }
 
+    if(i_array > MAX_ATTRIBUTE_ARRAY_DIMENSION)
+    {
+        printf("Array dimension size for %s %u exceeded maximum dimension of %u\n",
+               i_type.c_str(),i_array,MAX_ATTRIBUTE_ARRAY_DIMENSION);
+        exit(-1);
+    }
+    // See enum definition on why this works
+    l_type += (i_array*ATTR_DIMENSION_SIZE_MULT)+i_array;
+
+    return(l_type);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -429,31 +419,16 @@ uint16_t Symbols::get_tag(uint32_t i_rpn_id)
             break;
         }
 
-
-        if((cini_id & CINI_LIT_MASK) == CINI_LIT_MASK)
+        uint32_t offset = 0;
+        for(SYMBOL_USED::iterator i = iv_used_var.begin(); i != iv_used_var.end(); ++i,++offset)
         {
-            uint32_t offset = 0;
-            for(SYMBOL_USED::iterator i = iv_used_lit.begin(); i != iv_used_lit.end(); ++i,++offset)
+            if(cini_id == *i) 
             {
-                if(cini_id == *i) 
-                {
-                    tag = (uint16_t) (offset | LIT_TYPE);
-                    break;
-                }
+                tag = (uint16_t) (offset | IF_ATTR_TYPE);
+                break;
             }
         }
-        else // vars
-        {
-            uint32_t offset = 0;
-            for(SYMBOL_USED::iterator i = iv_used_var.begin(); i != iv_used_var.end(); ++i,++offset)
-            {
-                if(cini_id == *i) 
-                {
-                    tag = (uint16_t) (offset | VAR_TYPE);
-                    break;
-                }
-            }
-        }
+        
     } while(0);
 
     return tag;
@@ -525,7 +500,7 @@ uint16_t Symbols::get_numeric_tag(uint32_t i_rpn_id)
     if(offset < iv_lits.size())
     {
         // numeric lits are numbered after enum lits, but with different TYPE
-        tag = (iv_used_lit.size() + offset) | NUM_TYPE;
+        tag = (iv_used_lit.size() + offset) | IF_NUM_TYPE;
     }
     else
     {
@@ -548,7 +523,7 @@ uint16_t Symbols::get_numeric_array_tag(uint32_t i_rpn_id)
     if(offset < iv_lits.size())
     {
         // numeric lits are numbered after enum lits, but with different TYPE
-        tag = (iv_used_lit.size() + offset) | NUM_TYPE;
+        tag = (iv_used_lit.size() + offset) | IF_NUM_TYPE;
     }
     else
     {
@@ -768,7 +743,7 @@ string Symbols::listing()
     for(SYMBOL_USED::iterator i = iv_used_var.begin() + 1; i != iv_used_var.end(); ++i)
     {
         ++count;
-        oss << "Type:" << setw(2) << iv_attr_type[find_text(*i)] << " Value:0x" << setw(8) << (*i) << '\t' << "ID 0X" << setw(4) << (count | VAR_TYPE)
+        oss << "Type:" << setw(2) << iv_attr_type[find_text(*i)] << " Value:0x" << setw(8) << (*i) << '\t' << "ID 0X" << setw(4) << (count | IF_ATTR_TYPE)
             << '\t' << '[' << find_text(*i) << ']' << endl;
 
         //printf("ATTRIBUTE: %s  Value:0x%02X\n",(find_text(*i)).c_str(),iv_attr_type[find_text(*i)]);
@@ -960,26 +935,19 @@ string Symbols::get_enumname(uint32_t spy_id)
 uint32_t Symbols::get_rpn_id(uint32_t bin_tag)
 {
     uint32_t rpn_id = NOT_FOUND;
-    uint32_t type = bin_tag & TYPE_MASK;
-    uint32_t offset = bin_tag & ~TYPE_MASK;
+    uint32_t type = bin_tag & IF_TYPE_MASK;
+    uint32_t offset = bin_tag & ~IF_TYPE_MASK;
     uint32_t cini_id = 0;
     switch(type)
     {
-        case LIT_TYPE:  {
-                            cini_id = iv_used_lit[offset];
-                            string name = find_text(cini_id);
-                            rpn_id = use_symbol(name);
-                        }
-                        break;
-
-        case VAR_TYPE:  {
+        case IF_ATTR_TYPE:  {
                             cini_id = iv_used_var[offset];
                             string name = find_text(cini_id);
                             rpn_id = use_symbol(name);
                         }
                         break;
 
-        case NUM_TYPE:  {
+        case IF_NUM_TYPE:  {
                             offset -= iv_used_lit.size();
                             if(offset >= iv_lits.size())
                             {
@@ -993,6 +961,7 @@ uint32_t Symbols::get_rpn_id(uint32_t bin_tag)
                             rpn_id = find_numeric_lit(d.first,d.second);
                         }
                         break;
+
         default:
                         {
                             ostringstream erros;
