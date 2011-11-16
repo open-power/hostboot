@@ -329,19 +329,26 @@ public:
 
     /**
      *  @brief Collect component trace
-     *  The given component's trace is collected (if possible)
-     *  and added to the log's data sections.  The amount of data
-     *  added is the smallest of the log's available space (up to
-     *  1024 bytes of trace) or the given input max.
+     *  The trace buffer named is collected and added to the error
+     *  log.  The amount of traces is controlled by the i_max parameter.
+     *  When zero, or left to default, the full trace buffer is copied.
+     *  Otherwise, i_max size must be big enough to hold a trace buffer
+     *  header (40 bytes) plus some trace data. For example, a trace
+     *  entry with n bytes of data is n+28 bytes in size.
      *
-     *  @param[in]  i_Name          Component Name
-     *  @param[in]  i_Max           Upper limit of trace to capture.
+     *  Note that component names given in hbotcompid.H do not necessarily
+     *  map to the names of trace buffers created by that component.
+     *  Trace buffer names are case insensitive.
+     *
+     *  @param[in]  i_name          Trace buffer name
+     *  @param[in]  i_max           Size of trace to capture.
      *
      *  @return A Boolean indication of success.  False likely means
-     *  the component name input is not found.
+     *  the trace buffer name given is not found. However, check the ERRL
+     *  trace buffer for the cause of the failure.
      */
     bool collectTrace(const char i_name[],
-                      const uint32_t i_max = 0);
+                      const uint64_t i_max = 0);
 
 
 

@@ -32,6 +32,7 @@
 #include <cxxtest/TestSuite.H>
 #include <errl/errlmanager.H>
 #include <errl/errlentry.H>
+#include <trace/trace.H>
 #include <hbotcompid.H>
 
 #define TEST_REASON_CODE    (ERRL_COMP_ID | 0x0F)
@@ -87,126 +88,203 @@ public:
         uint64_t l_userData2 = TWO_UINT16_ONE_UINT32_TO_UINT64(l_16bit_1, l_16bit_2, l_32bit_2);
             // yields 0x8000900390000003
 
-        // Create an error log
-        errlHndl_t l_err = new ERRORLOG::ErrlEntry(
-                                ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                TEST_MOD_ID,
-                                TEST_REASON_CODE,
-                                l_userData1,
-                                l_userData2);
 
 
-        // Make sure log is created
-        if (l_err == NULL)
+        do
         {
-            TS_FAIL("testErrl1: createErrlLog() outputs NULL pointer!");
-        }
+
+            // Create an error log
+            errlHndl_t l_err = new ERRORLOG::ErrlEntry(
+                                    ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                    TEST_MOD_ID,
+                                    TEST_REASON_CODE,
+                                    l_userData1,
+                                    l_userData2);
 
 
-        // These addFFDC() calls return a pointer to class ERRORLOG::ErrlFFDC
-        // but errlffdc.H is not publicly includable to give me the definition
-        // for it.  addFFDC() should return a Boolean indication of success.
+            // Make sure log is created
+            if (l_err == NULL)
+            {
+                TS_FAIL("testErrl1: createErrlLog() outputs NULL pointer!");
+                break;
+            }
 
-        const char * pch = "martha washington";
-        pffdc = l_err->addFFDC( ERRL_COMP_ID, pch, strlen( pch ), 1, 2 );
-        if ( NULL == pffdc )
-        {
-            TS_FAIL("testErrl1: addFFDC() output NULL pointer");
-        }
 
-        // really short user data
-        pch = "A";
-        pffdc = l_err->addFFDC( DEVFW_COMP_ID, pch, strlen( pch ), 3, 4 );
-        if ( NULL == pffdc )
-        {
-            TS_FAIL("testErrl1: addFFDC() output NULL pointer");
-        }
+            // These addFFDC() calls return a pointer to class ERRORLOG::ErrlFFDC
+            // but errlffdc.H is not publicly includable to give me the definition
+            // for it.  addFFDC() should return a Boolean indication of success.
 
-        pch = "george washington";
-        pffdc = l_err->addFFDC( DEVFW_COMP_ID, pch, strlen( pch ), 3, 4 );
-        if ( NULL == pffdc )
-        {
-            TS_FAIL("testErrl1: addFFDC() output NULL pointer");
-        }
+            const char * pch = "martha washington";
+            pffdc = l_err->addFFDC( ERRL_COMP_ID, pch, strlen( pch ), 1, 2 );
+            if ( NULL == pffdc )
+            {
+                TS_FAIL("testErrl1: addFFDC() output NULL pointer");
+                break;
+            }
 
-        pch = "dwight eisenhour";
-        pffdc = l_err->addFFDC( SCOM_COMP_ID, pch, strlen( pch ), 5, 6 );
-        if ( NULL == pffdc )
-        {
-            TS_FAIL("testErrl1: addFFDC() output NULL pointer");
-        }
+            // really short user data
+            pch = "A";
+            pffdc = l_err->addFFDC( DEVFW_COMP_ID, pch, strlen( pch ), 3, 4 );
+            if ( NULL == pffdc )
+            {
+                TS_FAIL("testErrl1: addFFDC() output NULL pointer");
+                break;
+            }
 
-        pch = "ronald ";
-        pffdc = l_err->addFFDC( ERRL_COMP_ID, pch, strlen( pch ), 7, 8 );
-        if ( NULL == pffdc )
-        {
-            TS_FAIL("testErrl1: addFFDC() output NULL pointer");
-        }
+            pch = "george washington";
+            pffdc = l_err->addFFDC( DEVFW_COMP_ID, pch, strlen( pch ), 3, 4 );
+            if ( NULL == pffdc )
+            {
+                TS_FAIL("testErrl1: addFFDC() output NULL pointer");
+                break;
+            }
 
-        // Append data to something already added.
-        pch = "reagan";
-        l_err->appendToFFDC( pffdc, pch, strlen(pch) );
+            pch = "dwight eisenhour";
+            pffdc = l_err->addFFDC( SCOM_COMP_ID, pch, strlen( pch ), 5, 6 );
+            if ( NULL == pffdc )
+            {
+                TS_FAIL("testErrl1: addFFDC() output NULL pointer");
+                break;
+            }
 
-        // Collect trace
-        fOK = l_err->collectTrace(  "INITSVC"  );
-        if( !fOK )
-        {
-            TS_FAIL( "collectTrace(INITSVC) rets false." );
-        }
+            pch = "ronald ";
+            pffdc = l_err->addFFDC( ERRL_COMP_ID, pch, strlen( pch ), 7, 8 );
+            if ( NULL == pffdc )
+            {
+                TS_FAIL("testErrl1: addFFDC() output NULL pointer");
+                break;
+            }
 
-        fOK = l_err->collectTrace(  "XSCOM"  );
-        if( !fOK )
-        {
-            TS_FAIL( "collectTrace(XSCOM) rets false." );
-        }
+            // Append data to something already added.
+            pch = "reagan";
+            l_err->appendToFFDC( pffdc, pch, strlen(pch) );
 
-        fOK = l_err->collectTrace(  "UNK"  );
-        if( fOK )
-        {
-            TS_FAIL( "collectTrace(UNK) rets true" );
-        }
+            // Collect trace
+            fOK = l_err->collectTrace(  "INITSVC" );
+            if( !fOK )
+            {
+                TS_FAIL( "collectTrace(INITSVC) rets false." );
+                break;
+            }
 
-        // Add null data.
-        pffdc = l_err->addFFDC( ERRL_COMP_ID, NULL, 0,  9, 10 );
-        if ( NULL != pffdc )
-        {
-            TS_FAIL("testErrl1: addFFDC() returned non null");
-        }
-        // Verify log data
-        else if (l_err->sev() != ERRORLOG::ERRL_SEV_INFORMATIONAL)
-        {
-            TS_FAIL("testErrl1: createErrlLog() returns incorrect severity!");
-        }
-        else if (l_err->reasonCode() != TEST_REASON_CODE)
-        {
-             TS_FAIL("testErrl1: createErrlLog() returns incorrect reason code!");
-        }
-        else if (l_err->eventType() != ERRORLOG::ERRL_ETYPE_NOT_APPLICABLE)
-        {
-             TS_FAIL("testErrl1: createErrlLog() returns incorrect event type!");
-        }
-        else if (l_err->subSys() != ERRORLOG::EPUB_FIRMWARE_SUBSYS )
-        {
-             TS_FAIL("testErrl1: createErrlLog() returns incorrect sub system!");
-        }
-        else if (l_err->srcType() != ERRORLOG::SRC_ERR_INFO)
-        {
-             TS_FAIL("testErrl1: createErrlLog() returns incorrect SRC type!");
-        }
-        else if (l_err->termState() != ERRORLOG::TERM_STATE_UNKNOWN)
-        {
-             TS_FAIL("testErrl1: termState() returns incorrect term state!");
-        }
-        else
-        {
+            // Assuming trace buffers are 0x800 in size, and you're going
+            // after a trace buffer that has wrapped, then a size almost as
+            // big as the buffer will exercise the wrapping code in
+            // trace::getBuffer()
+            fOK = l_err->collectTrace(  "XSCOM" , 0x7D0 );
+            if( !fOK )
+            {
+                TS_FAIL( "collectTrace(XSCOM) rets false." );
+                break;
+            }
+
+            fOK = l_err->collectTrace(  "UNKNOWN"  );
+            if( fOK )
+            {
+                TS_FAIL( "collectTrace(UNKNOWN) rets true" );
+                break;
+            }
+
+            fOK = l_err->collectTrace( "TARG", sizeof(trace_buf_head_t)-2);
+            if( fOK )
+            {
+                // expect an error, buffer not big enough
+                TS_FAIL( "collectTrace(TARG,38) rets true" );
+                break;
+            }
+
+            fOK = l_err->collectTrace(  "TARG", sizeof( trace_buf_head_t ));
+            if( !fOK )
+            {
+                // Buffer is big enough for the header only. It is
+                // supposed to work, although not terribly useful.
+                TS_FAIL( "collectTrace(TARG,40) rets false" );
+                break;
+            }
+
+            // sizeof( trace_buf_head_t ) + n bytes such that a single trace
+            // entry cannot fit into.
+            uint64_t l_cb = sizeof(trace_buf_head_t) + (sizeof(trace_bin_entry_t)/2);
+            fOK = l_err->collectTrace( "TARG", l_cb );
+            if( !fOK )
+            {
+                // cb is big enough for the header only, but no
+                // room for any entries. 
+                TS_FAIL( "collectTrace(TARG,l_cb) rets false", l_cb );
+                break;
+            }
+
+            // Normal buffer sizes are 0x800 (2048), so passing
+            // something bigger is not expected to be an error.
+            // TODO: maybe after story "user selectable trace buffer sizes"
+            // TRAC_DEFAULT_BUFFER_SIZE (0x800) will be publicly available.
+            fOK = l_err->collectTrace(  "TARG" , 4003 );
+            if( !fOK )
+            {
+                TS_FAIL( "collectTrace(TARG,4003) rets false" );
+                break;
+            }
+
+
+            // Add null data.
+            pffdc = l_err->addFFDC( ERRL_COMP_ID, NULL, 0,  9, 10 );
+            if ( NULL != pffdc )
+            {
+                TS_FAIL("testErrl1: addFFDC() returned non null");
+                break;
+            }
+
+            // Verify log data
+            if (l_err->sev() != ERRORLOG::ERRL_SEV_INFORMATIONAL)
+            {
+                TS_FAIL("testErrl1: createErrlLog() returns incorrect severity!");
+                break;
+            }
+
+            if (l_err->reasonCode() != TEST_REASON_CODE)
+            {
+                TS_FAIL("testErrl1: createErrlLog() returns incorrect reason code!");
+                break;
+            }
+
+            if (l_err->eventType() != ERRORLOG::ERRL_ETYPE_NOT_APPLICABLE)
+            {
+                TS_FAIL("testErrl1: createErrlLog() returns incorrect event type!");
+                break;
+            }
+
+            if (l_err->subSys() != ERRORLOG::EPUB_FIRMWARE_SUBSYS )
+            {
+                TS_FAIL("testErrl1: createErrlLog() returns incorrect sub system!");
+                break;
+            }
+
+            if (l_err->srcType() != ERRORLOG::SRC_ERR_INFO)
+            {
+                TS_FAIL("testErrl1: createErrlLog() returns incorrect SRC type!");
+                break;
+            }
+
+            if (l_err->termState() != ERRORLOG::TERM_STATE_UNKNOWN)
+            {
+                TS_FAIL("testErrl1: termState() returns incorrect term state!");
+                break;
+            }
+
+
+
             // Commit error log with different component ID.
             errlCommit(l_err, FSI_COMP_ID);
+
             // Make sure error log has been deleted by manager
             if (l_err != NULL)
             {
                 TS_FAIL("testErrl1: commitErrLog() did not delete error!");
+                break;
             }
+
         }
+        while(0);
     }
 
     /**

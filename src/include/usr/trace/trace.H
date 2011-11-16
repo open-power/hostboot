@@ -206,26 +206,33 @@ public:
 
 
     /**
-     *  @brief  Retrieve full trace buffer for component i_comp.
+     *  @brief  Retrieve the trace buffer named by i_pName
      *
      *  Caller must allocate memory for the output buffer.  Caller may
      *  first query the size of the buffer by calling with the desired
-     *  component/trace buffer name and with o_data null and with i_bufferSize
-     *  zero. The value returned will be the buffer size.  Caller then
-     *  allocates the buffer and calls again.
+     *  buffer name and with o_data null and i_bufferSize
+     *  zero. The value returned will be the full buffer size.  Caller
+     *  allocates the buffer and calls again. 
+     *  
+     *  The buffer provided can be less than the full size of the desired
+     *  buffer. In that case, this function will copy as many of the most
+     *  recent traces into the output buffer as will fit. The buffer must 
+     *  be big enough to hold a trace buffer header (40 bytes). 
      *
-     *  @param [in]  i_pComp      pointer to name string
-     *  @param [out] o_data       pointer to where data will be stored
-     *  @param [in]  i_bufferSize size of buffer in bytes
+     *  i_bufferSize may be larger that the desired trace buffer. 
+     *
+     *  @param [in]  i_pName      name of trace buffer 
+     *  @param [out] o_data       pointer to output buffer
+     *  @param [in]  i_bufferSize size of output buffer in bytes
      *
      *  @return Count of bytes copied, or if given null parameters,
-     *  the size of the buffer, or else zero for error, perhaps the
-     *  component name/trace buffer name is not found.
+     *  the size of the buffer. Returns zero for error, perhaps the
+     *  component name/trace buffer name is not found, or perhaps
+     *  the size of the provided buffer is unreasonable.  
      */
-    uint64_t getBuffer( const char * i_pComp,
+    uint64_t getBuffer( const char * i_pName,
                         void *       o_data,
                         uint64_t     i_bufferSize );
-
 
 
 
@@ -283,34 +290,20 @@ private:
 
 
     /**
-     *  @brief  Retrieve partial trace buffer for component i_comp
+     *  @brief  Retrieve trace descriptor for input component name.
+     *  If an exact match for the name is not found, then return nul.
+     *  Internally, Trace keeps buffer names in upper case, and i_pName
+     *  will be converted internally to upper case for the search.
      *
-     *  This function assumes memory has already been allocated for
-     *  the trace buffer (size io_size).  This function will copy
-     *  in up to io_size in bytes to the buffer and set io_size
-     *  to the exact size that is copied in.
+     *  @param [in] i_pName  Buffer name to search.
      *
-     *  TODO - Not Supported Yet
-     *
-     *  @param [in] i_td_ptr Trace descriptor of buffer to retrieve.
-     *  @param [out] o_data Pre-allocated pointer to where data will be stored.
-     *  @param [in,out] io_size Size of trace data to retrieve (input)
-     *                 Actual size of trace data stored (output)
-     *
-     *  @return Non-zero return code on error
+     *  @return  trace descriptor for the name, or nul if not found.
      */
-    int32_t getBufferPartial(const trace_desc_t * i_td_ptr,
-                             void *o_data,
-                             uint32_t *io_size);
+    trace_desc_t * findTdByName( const char *i_pName );
 
-    /**
-     *  @brief  Retrieve trace descriptor for input component name
-     *
-     *  @param [in] i_comp Component name to retrieve trace descriptor for.
-     *
-     *  @return Valid trace descriptor on success, NULL on failure.
-     */
-    trace_desc_t * getTd(const char *i_comp);
+
+
+
 
     /**
      *  @brief  Reset all trace buffers

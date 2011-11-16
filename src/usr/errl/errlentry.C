@@ -135,54 +135,74 @@ void ErrlEntry::appendToFFDC(ErrlUD * i_pErrlUD,
 ///////////////////////////////////////////////////////////////////////////////
 // Return a Boolean indication of success.
 
-bool ErrlEntry::collectTrace(const char i_name[], const uint32_t i_max)
+bool ErrlEntry::collectTrace(const char i_name[], const uint64_t i_max)
 {
-    bool l_rc = false;
+    bool l_rc = false;  // assume a problem.
+    char * l_pBuffer = NULL;
+    uint64_t l_cbOutput = 0;
+    uint64_t l_cbBuffer = 0;
 
     do
     {
-        // By passing nil arguments, obtain the size of the buffer.
+        // By passing nil arguments 2 and 3, obtain the size of the buffer.
+        // Besides getting buffer size, it validates i_name. 
         uint64_t l_cbFull = TRACE::Trace::getTheInstance().getBuffer( i_name,
                                                                       NULL,
                                                                       0 );
         if( 0 == l_cbFull )
         {
+            // Problem, likely unknown trace buffer name.
             TRACFCOMP( g_trac_errl,
-                "ErrlEntry::collectTrace(): getBuffer(%s) rets zero.", i_name );
+                "ErrlEntry::collectTrace(): getBuffer(%s) rets zero.",i_name);
             break;
         }
 
-        if( 0 == i_max )
+        if(( 0 == i_max ) || ( i_max >= l_cbFull ))
         {
-            // Full trace buffer desired. Allocate the buffer.
-            char l_traceBuffer[ l_cbFull ];
+            // Full trace buffer desired
+            l_cbBuffer = l_cbFull;
+        }
+        else
+        {
+            // Partial buffer desired
+            l_cbBuffer = i_max;
+        }
 
-            // Get the data into the buffer.
-            TRACE::Trace::getTheInstance().getBuffer( i_name,
-                                                      l_traceBuffer,
-                                                      l_cbFull );
+        // allocate the buffer 
+        l_pBuffer = new char[ l_cbBuffer ]; 
 
-            // Save the trace buffer as a UD section on this.
-            ErrlUD * l_udSection = new ErrlUD( l_traceBuffer,
-                                               l_cbFull,
-                                               ERRL_COMP_ID,
-                                               ERRL_UDV_DEFAULT_VER_1,
-                                               ERRL_UDT_TRACE );
+        // Get the data into the buffer.
+        l_cbOutput = 
+        TRACE::Trace::getTheInstance().getBuffer( i_name,
+                                                  l_pBuffer,
+                                                  l_cbBuffer );
 
-            // Add the trace section to the vector of sections
-            // for this error log.
-            iv_SectionVector.push_back( l_udSection );
-
-            l_rc = true;
+        if( 0 == l_cbOutput )
+        {
+            // Problem.
+            TRACFCOMP( g_trac_errl,
+                "ErrlEntry::collectTrace(): getBuffer(%s,%ld) rets zero.", 
+                i_name,
+                l_cbBuffer );
             break;
         }
 
-        // else partial buffer desired... future sprint
-        TRACFCOMP( g_trac_errl,
-                "ErrlEntry::collectTrace(): partial buffer not impl'd" );
-        break;
+        // Save the trace buffer as a UD section on this.
+        ErrlUD * l_udSection = new ErrlUD( l_pBuffer,
+                                           l_cbOutput,
+                                           ERRL_COMP_ID,
+                                           ERRL_UDV_DEFAULT_VER_1,
+                                           ERRL_UDT_TRACE );
+
+        // Add the trace section to the vector of sections
+        // for this error log.
+        iv_SectionVector.push_back( l_udSection );
+
+        l_rc = true;
     }
     while(0);
+
+    delete[] l_pBuffer;
 
     return l_rc;
 }

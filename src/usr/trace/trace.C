@@ -20,13 +20,19 @@
 //  Origin: 30
 //
 //  IBM_PROLOG_END
+
+/**
+ *  @file trace.C
+ *
+ *  @brief Implementation of class Trace
+ */
+
+
 /* TODO
  *  - Add support in for debug trace enable/disable
  *  - FORMAT_PRINTF support
  *  - %s support
  *  - Multiple buffer support
- *  - Prolog
- *
  *
  */
 
@@ -43,10 +49,13 @@
 #include <stdlib.h>
 #include <sys/task.h>
 #include <sys/sync.h>
-#include <string.h>
+#include <string_ext.h>
 #include <util/align.H>
 
 #include <trace/trace.H>
+
+
+
 
 /******************************************************************************/
 // Namespace
@@ -156,6 +165,9 @@ void Trace::initBuffer(trace_desc_t **o_td, const char* i_comp,
             strcpy(l_comp, i_comp);
         }
 
+        // make string upper case 
+        strupr(l_comp);
+
         // CRITICAL REGION START
         mutex_lock(&iv_trac_mutex);
 
@@ -191,7 +203,7 @@ void Trace::initBuffer(trace_desc_t **o_td, const char* i_comp,
                     // TODO can't handle i_size yet - everything is coded
                     // around TRAC_DEFAULT_BUFFER_SIZE
                     l_td = static_cast<char *>(malloc(TRAC_DEFAULT_BUFFER_SIZE));
-                    
+
                     g_desc_array[i].td_entry =
                         reinterpret_cast<trace_desc_t *>(l_td);
 
@@ -331,9 +343,14 @@ void Trace::_trace_adal_write_all(trace_desc_t *io_td,
     uint32_t num_4byte_args = 0; //fsp-trace counts 8-byte args as 2 4-byte args
     const char* _fmt = i_fmt;
 
-    // Save a copy
+    // Save a copy of input args because calling
+    // va_arg() on a va_list is a one-shot.
     va_list l_args;
     va_copy (l_args, i_args);
+
+
+    // Sum the sizes of the items in i_args in order to know how big to
+    // allocate the entry.
 
     for (size_t i = 0; i <= strlen(_fmt); i++)
     {
@@ -365,7 +382,8 @@ void Trace::_trace_adal_write_all(trace_desc_t *io_td,
                 //printk("Trace: STRING %s: strlen %d num_args %d l_data_size %d\n",
                 //       l_str, static_cast<uint32_t>(l_strLen),
                 //       num_args, l_data_size);
-                //printk("Trace: l_str_map 0x%16llX\n", static_cast<long long>(l_str_map));
+                //printk("Trace: l_str_map 0x%16llX\n",
+                //     static_cast<long long>(l_str_map));
             }
             else if ('c' == _fmt[i])
             {
@@ -412,6 +430,9 @@ void Trace::_trace_adal_write_all(trace_desc_t *io_td,
         }
     }
 
+    va_end( i_args );
+
+
     if((num_4byte_args <= TRAC_MAX_ARGS) && (io_td != NULL))
     {
         // Fill in the entry structure
@@ -427,7 +448,9 @@ void Trace::_trace_adal_write_all(trace_desc_t *io_td,
         // Time stamp
         convertTime(&l_entry.stamp);
 
-        // Calculate total space needed
+        // Calculate total space needed for the entry, which is a
+        // combination of the data size from above, the entry
+        // headers, and an overall length field.
         l_entry_size = l_data_size;
         l_entry_size += sizeof(trace_entry_stamp_t);
         l_entry_size += sizeof(trace_entry_head_t);
@@ -445,7 +468,9 @@ void Trace::_trace_adal_write_all(trace_desc_t *io_td,
         memset(l_buffer, 0, l_data_size);
         char * l_ptr = static_cast<char *> (l_buffer);
 
-        // Now copy the arguments to the buffer
+        // Now copy the arguments to the buffer.
+
+
         for (size_t i = 0; i < num_args; i++)
         {
             uint32_t l_strLen = 0;
@@ -654,12 +679,16 @@ void Trace::writeData(trace_desc_t *io_td,
 
         if(i_size > (io_td->size-sizeof(trace_buf_head_t)))
         {
+            // unreasonable size, caller is asking to write something
+            // that is very nearly the size of the entire buffer
             break;
         }
 
 
         if((io_td->next_free + l_total_size) > io_td->size)
         {
+            // Does not fit entirely, write what fits, and wrap the buffer.
+
             // Get the pointer to current location in buffer
             l_buf_ptr = reinterpret_cast<char *>(io_td) + io_td->next_free;
             // Figure out the alignment
@@ -731,111 +760,382 @@ void Trace::convertTime(trace_entry_stamp_t *o_entry)
 
 }
 
+
+
 /******************************************************************************/
-// getTd
+// findTdByName
 /******************************************************************************/
-trace_desc_t * Trace::getTd(const char *i_comp)
+trace_desc_t * Trace::findTdByName(const char *i_pName)
 {
-    /*------------------------------------------------------------------------*/
-    /*  Local Variables                                                       */
-    /*------------------------------------------------------------------------*/
-    uint32_t            i=0;
     trace_desc_t *      l_td = NULL;
-    char                l_comp[COMP_NAME_SIZE] = {'\0'};
+    char                l_comp[COMP_NAME_SIZE];
 
-    /*------------------------------------------------------------------------*/
-    /*  Code                                                                  */
-    /*------------------------------------------------------------------------*/
 
-    if (strlen(i_comp) != 0)
+    uint64_t i = strlen(i_pName);
+    if ( i  )
     {
-        // Limit component name to 15 characters.
-        if (strlen(i_comp) > (COMP_NAME_SIZE -1))
+        if ( i  > (COMP_NAME_SIZE -1))
         {
-            memcpy(l_comp, i_comp, COMP_NAME_SIZE - 1);
+            // Limit component name.
+            memcpy(l_comp, i_pName, COMP_NAME_SIZE - 1);
+            l_comp[ COMP_NAME_SIZE - 1 ] = 0;
         }
         else
         {
-            strcpy(l_comp, i_comp);
+            strcpy( l_comp, i_pName );
         }
 
-        // Search all allocated component buffers
+        // Use upper case.
+        strupr( l_comp );
+
+        // Search the buffers array
         for(i=0;
             (i < (TRAC_MAX_NUM_BUFFERS - 1)) &&
             (strlen(g_desc_array[i].comp) != 0);
             i++)
         {
-            if(!strcmp(l_comp, g_desc_array[i].comp))
+            if(0 == strcmp(l_comp, g_desc_array[i].comp))
             {
-                // Found the component buffer
+                // Return this one.
                 l_td = g_desc_array[i].td_entry;
                 break;
             }
         }
 
-        if (((TRAC_MAX_NUM_BUFFERS - 1) == i) &&
-            (strlen(g_desc_array[i].comp) != 0))
-
-        {
-            // Must be the default buffer
-            l_td = g_desc_array[i].td_entry;
-        }
     }
 
-    return(l_td);
+    return l_td;
 }
 
 
 
 
 /*****************************************************************************/
-// getBuffer() called by ErrlEntry.CollectTrace()
-// Return how many bytes copied, or if given a null pointer or zero buffer
-// size, then return the size of the buffer.
+// getBuffer() called by ErrlEntry.collectTrace()
+// Return how many bytes copied to output buffer.
+// If given a null pointer or zero buffer then return the full size
+// of the buffer.
 //
 // Otherwise return zero on error; perhaps the component name/trace buffer
-// name is not found.
+// name is not found, or maybe the size of buffer given is too small to even
+// hold a trace buffer header.
 
 uint64_t Trace::getBuffer( const char * i_pComp,
                            void *       o_data,
-                           uint64_t     i_bufferSize )
+                           uint64_t     i_size )
 {
-    int64_t l_rc = 0;
-    trace_desc_t * l_pDescriptor = NULL;
+    const char *        l_pchEntry = NULL;         // use this to walk the entries
+    const char *        l_pchEntryEOL = NULL;      // end of list of entries
+    const char *        l_pchTraceBuffer = NULL;   // source buffer, including header
+    const char *        l_pchTraceData = NULL;     // source data, just past header
+    const char *        l_pchTraceEOB = NULL;      // end of source buffer
+    trace_buf_head_t  * l_pCallerHeader = NULL;    // output buffer, including header
+    trace_desc_t *      l_pDescriptor = NULL;
+    uint64_t            l_cbWrap = 0;
+    uint64_t            l_rc = 0;
 
     do
     {
-        l_pDescriptor = getTd( i_pComp );
+        l_pDescriptor = findTdByName( i_pComp );
         if( NULL == l_pDescriptor )
         {
+            // trace buffer name not found
             break;
         }
 
-        if( ( NULL == o_data ) ||  ( 0 == i_bufferSize ))
+        if( (o_data == NULL) || (i_size == 0 ))
         {
             // return how big is the buffer.
-            l_rc = TRAC_DEFAULT_BUFFER_SIZE;
+            l_rc = l_pDescriptor->size;
             break;
         }
 
-        // Not to exceed buffer size.
-        uint64_t l_copyCount = i_bufferSize;
-        if( i_bufferSize > TRAC_DEFAULT_BUFFER_SIZE )
+        // Round size down to nearest 4-byte boundary.
+        i_size = ALIGN_DOWN_4(i_size);
+
+
+        if( i_size < sizeof(trace_buf_head_t))
         {
-            l_copyCount = TRAC_DEFAULT_BUFFER_SIZE;
+            // Need at least enough space for the header.
+            // printk("trace_get_buffer_partial: i_size too small");
+            break;
         }
 
-        // Get the lock
+
+        // Caller's destination buffer starts with a trace_buf_head_t.
+        l_pCallerHeader = static_cast<trace_buf_head_t*>(o_data);
+
+
+
+        if( i_size >= l_pDescriptor->size )
+        {
+            // Caller's buffer is big enough to hold the whole buffer.
+            uint64_t l_copyCount = l_pDescriptor->size;
+
+            // Get the lock
+            mutex_lock(&iv_trac_mutex);
+
+            // If the buffer is not full, then the unused
+            // portion is just zeroes. Avoid copying the zeroes.
+            if( 0 == l_pDescriptor->times_wrap )
+            {
+                // Buffer has never wrapped, so copy the
+                // data up to the next-free offset.
+                l_copyCount = l_pDescriptor->next_free;
+            }
+
+            // Copy source buffer to caller's destination buffer
+            memcpy( o_data, l_pDescriptor, l_copyCount );
+
+            mutex_unlock(&iv_trac_mutex);
+
+            // Update the header in the output buffer.
+            l_pCallerHeader->size = l_copyCount;
+
+            l_rc = l_copyCount;
+            break;
+        }
+
+
+
+        // Input buffer size is smaller than source buffer size.
+
         mutex_lock(&iv_trac_mutex);
 
-        // Copy buffer to caller's space
-        memcpy( o_data, l_pDescriptor, (size_t)l_copyCount );
+        if((i_size >= l_pDescriptor->next_free) && (0 == l_pDescriptor->times_wrap))
+        {
+            // The source buffer has not wrapped,
+            // and what is there fits into caller's buffer.
+            l_rc = l_pDescriptor->next_free;
+            memcpy( o_data, l_pDescriptor, l_rc );
 
+            mutex_unlock(&iv_trac_mutex);
+
+            // Update the header in the output buffer.
+            l_pCallerHeader->size = l_rc;
+            break;
+        }
+
+
+        // Otherwise, walk the entries backwards because the word
+        // just prior to any entry is the length of the previous entry.
+        // Subtract this length from the current entry pointer to
+        // point to the previous entry. Wrap around as required.
+
+
+        // Trace descriptor points to base of source trace buffer.
+        l_pchTraceBuffer = reinterpret_cast<const char*>(l_pDescriptor);
+
+        // Source trace data resides just past the header.
+        l_pchTraceData = reinterpret_cast<const char *>(l_pDescriptor+1);
+
+        // EOB (end of buffer) of source trace buffer
+        l_pchTraceEOB = l_pchTraceBuffer + l_pDescriptor->size;
+
+        // useful when calculating locations of wrapped data
+        l_cbWrap = l_pDescriptor->size  -  sizeof(trace_buf_head_t);
+
+        // This is how much trace data caller's buffer can hold.
+        int l_cbToFill = i_size - sizeof(trace_buf_head_t);
+
+
+
+        // Start at next_free, which is not an actual entry.
+        // It is where the next entry write will go when it comes.
+        // It also marks the end of the list (EOL).
+        l_pchEntryEOL = l_pchTraceBuffer + l_pDescriptor->next_free;
+
+
+        // Walk backwards through the entries, looking for a point
+        // such that when walking the source entries from that
+        // point forward, those entries will fit into the
+        // destination buffer. Because of the cases handled above,
+        // this walking will not loop around back to where we started
+        // within the source buffer. Otherwise there would have to be
+        // tests made for wrapping and sensing when l_pchEntry passes
+        // l_pchEntryEOL.  Note that trace entry structures and payload
+        // data may be wrapped anywhere on a 4-byte bound.
+
+
+        // Start here and work backwards.
+        l_pchEntry = l_pchEntryEOL;
+
+
+        do
+        {
+
+            if(( l_pchEntry == l_pchTraceData ) && (0 == l_pDescriptor->times_wrap))
+            {
+                // Exit from this do loop with l_pchEntry the starting point.
+                // Probably not going to happen, because the non-wrap short
+                // buffer case was handled above.
+                // massert( 0 );
+                break;
+            }
+
+
+            // Determine the size of the entry prior to l_pchEntry.  Normally,
+            // this length is found in the 4-byte word just before the start of any
+            // entry.  However, trace code may wrap any given trace entry
+            // anywhere on a 4-byte word.
+
+            // massert( l_pchEntry >= l_pchTraceData );
+            // massert( l_pchEntry <  l_pchTraceEOB );
+            // massert( 0 ==  (((uint64_t)(l_pchEntry)) & 3)  );
+
+            // Length of previous entry is in prior 32-bit word.
+            const char * l_pchPreviousLength = l_pchEntry - sizeof(uint32_t);
+
+            if( l_pchPreviousLength  < l_pchTraceData )
+            {
+                // I am at the start of the source data. Apply wrap byte count
+                // to find length up at the end of the buffer.
+                l_pchPreviousLength += l_cbWrap;
+
+                // Source buffer must have wrapped.
+                // massert( l_pDescriptor->times_wrap );
+            }
+
+            // Dereference and get the length of previous entry.
+            const uint32_t * l_p32;
+            l_p32 = reinterpret_cast<const uint32_t*>(l_pchPreviousLength);
+            int l_cbPrevious = *l_p32;
+
+
+
+            if(( l_cbToFill - l_cbPrevious ) < 0 )
+            {
+              // This one is too much. l_pchEntry is the starting point.
+              // This is the regular exit point from this loop.
+              break;
+            }
+
+
+            // Given the length of the previous one,
+            // assign a new value to l_pchEntry
+            l_pchEntry -= l_cbPrevious;
+
+            if( l_pchEntry < l_pchTraceData )
+            {
+                // Wrap.
+                l_pchEntry += l_cbWrap;
+            }
+
+            l_cbToFill -= l_cbPrevious;
+            // massert( l_cbToFill >= 0 );
+        }
+        while( 1 );
+
+
+
+        // Having walked backwards, l_pchEntry is the starting point,
+        // All the entries forward of this point are supposed to fit
+        // into caller's data buffer.
+
+        // Count how many copied from source to destination buffer.
+        int  l_entriesCopied = 0;
+        int  l_bytesCopied = sizeof( trace_buf_head_t );
+
+        // Set up destination header.
+        memcpy( l_pCallerHeader, l_pDescriptor, sizeof(trace_buf_head_t));
+
+        // Caller's destination area for trace entry data, just past the
+        // buffer header.
+        char * l_pchDest = reinterpret_cast<char*>(l_pCallerHeader+1);
+
+
+        while( l_pchEntry != l_pchEntryEOL )
+        {
+            const trace_bin_entry_t *  l_pEntry;
+
+            // Calculate how many bytes make up this entry. Value
+            // goes into l_cbEntry;
+            int l_cbEntry;
+
+            if( (l_pchEntry + sizeof(trace_bin_entry_t))   >  l_pchTraceEOB )
+            {
+                // This entry wraps.  Copy this split-up
+                // trace_bin_entry_t to the callers destination buffer
+                // (save a malloc) then reference entry->head.length.
+
+                // Copy this much from the end of the source trace buffer.
+                int l_cb = l_pchTraceEOB - l_pchEntry;
+                memcpy( l_pchDest, l_pchEntry, l_cb );
+
+                // Copy the rest from the start of data in the trace buffer.
+                int l_cbTheRest = sizeof( trace_bin_entry_t ) - l_cb;
+                memcpy( l_pchDest+l_cb, l_pchTraceData, l_cbTheRest   );
+
+                // I just copied one of these into callers destination buffer.
+                l_pEntry = reinterpret_cast<trace_bin_entry_t*>(l_pchDest);
+            }
+            else
+            {
+                // Otherwise, point the entry into the source buffer.
+                l_pEntry = reinterpret_cast<const trace_bin_entry_t*>(l_pchEntry);
+            }
+
+            // Compute length of this entry. entry->head.length is the actual
+            // length of the trace data, and has to rounded up to next 4-byte
+            // boundary. The extra uint32 is where the size is stored.
+            l_cbEntry =  ALIGN_4(l_pEntry->head.length) +
+                         sizeof( trace_bin_entry_t )  +
+                         sizeof( uint32_t );
+
+
+            if( (l_pchEntry + l_cbEntry)  >  l_pchTraceEOB )
+            {
+                // It wraps.  Copy this split-up entry to the
+                // callers buffer.
+                int l_cb = l_pchTraceEOB - l_pchEntry;
+                memcpy( l_pchDest, l_pchEntry, l_cb );
+
+                // Copy the rest
+                int l_cbTheRest = l_cbEntry - l_cb;
+                memcpy( l_pchDest + l_cb,  l_pchTraceData,  l_cbTheRest );
+
+                // Assign l_pchEntry to next entry
+                l_pchEntry = l_pchTraceData + l_cbTheRest;
+            }
+            else
+            {
+                // Copy to destination buffer in one go.
+                memcpy( l_pchDest, l_pchEntry, l_cbEntry );
+
+                // Assign l_pchEntry to next entry
+                l_pchEntry += l_cbEntry;
+            }
+
+            l_bytesCopied += l_cbEntry;
+            // massert( 0 == ( l_bytesCopied & 3 ));
+
+            // massert( l_pchEntry >= l_pchTraceData );
+            // massert( l_pchEntry < l_pchTraceEOB );
+            // massert( 0 ==  (((uint64_t)(l_pchEntry)) & 3)  );
+
+
+            // Increment new data destination pointer.
+            l_pchDest  +=  l_cbEntry;
+            // massert( l_pchDest <= ((char*)l_pCallerHeader) + i_size );
+
+            // This will eventually go into destination header.
+            l_entriesCopied++;
+
+        }
+
+        // Done looking at source buffer stuff.
         mutex_unlock(&iv_trac_mutex);
 
-        l_rc = l_copyCount;
+        // Finish the caller's trace buffer header.
+        l_pCallerHeader->times_wrap = 0;
+        l_pCallerHeader->te_count   = l_entriesCopied;
+        l_pCallerHeader->next_free  = l_bytesCopied;
+        l_pCallerHeader->size       = l_bytesCopied;
+
+        // Return how many bytes written to output buffer.
+        l_rc = l_bytesCopied;
     }
-    while( 0 );
+    while(0);
 
     return l_rc;
 }
@@ -843,165 +1143,6 @@ uint64_t Trace::getBuffer( const char * i_pComp,
 
 
 
-#if 0
-/******************************************************************************/
-// getBufferPartial - TODO
-/******************************************************************************/
-// TODO
-int32_t Trace::getBufferPartial(const trace_desc_t *i_td_ptr,
-                    void *o_data,
-                    uint32_t *io_size)
-{
-    /*------------------------------------------------------------------------*/
-    /*  Local Variables                                                       */
-    /*------------------------------------------------------------------------*/
-    int32_t            l_rc = 0;
-    char            *l_full_buf = NULL;
-    trace_desc_t    *l_head = NULL;
-    uint32_t            l_part_size = 0;
-
-    /*------------------------------------------------------------------------*/
-    /*  Code                                                                  */
-    /*------------------------------------------------------------------------*/
-
-    do
-    {
-
-        if((i_td_ptr == NULL) || (o_data == NULL) || (io_size == NULL))
-        {
-            printk("trace_get_buffer_partial: Invalid parameter passed by caller");
-            l_rc = TRAC_INVALID_PARM;
-            if(io_size != NULL)
-            {
-                *io_size = 0;
-            }
-            break;
-        }
-
-        if(*io_size < sizeof(trace_buf_head_t))
-        {
-            // Need to at least have enough space for the header
-            printk("trace_get_buffer_partial: *io_size to small");
-            l_rc = TRAC_MEM_BUFF_TO_SMALL;
-            *io_size = 0;
-            break;
-        }
-
-        // First get the full buffer
-        l_rc = tx_byte_allocate(&tpmd_trac_debug_byte_pool,
-                                (void **)&l_full_buf,
-                                TPMD_TRACE_BUFFER_SIZE,
-                                TX_NO_WAIT);
-        if(l_rc != TX_SUCCESS)
-        {
-            printk("trace_get_buffer_partial: Failure allocating memory for temp buffer");
-            *io_size = 0;
-            l_rc = TRAC_MEM_ALLOC_FAIL;
-            break;
-        }
-
-        l_rc = trace_get_buffer(i_td_ptr,
-                               l_full_buf);
-        if(l_rc != 0)
-        {
-            printk("trace_get_buffer_partial: Failure in call to TRAC_get_buffer()");
-            *io_size = 0;
-            break;
-        }
-
-        // Now that we have full buffer, adjust it to be requested size
-        memset(o_data,0,(size_t)*io_size);
-
-        if(*io_size > TPMD_TRACE_BUFFER_SIZE)
-        {
-            // It fits
-            *io_size = TPMD_TRACE_BUFFER_SIZE;
-            memcpy(o_data,l_full_buf,(size_t)*io_size);
-            break;
-        }
-
-        l_head = (trace_desc_t *)l_full_buf;
-        memcpy(o_data,l_full_buf,(size_t)(l_head->hdr_len));
-        l_head = (trace_desc_t *)o_data;
-        l_head->size = *io_size;
-
-        if((l_head->next_free == l_head->hdr_len) && (l_head->times_wrap == 0))
-        {
-            // No data in buffer so just return what we have
-            break;
-        }
-
-        if(l_head->next_free > *io_size)
-        {
-            // We can't even fit in first part of buffer
-            // Make sure data size is larger than header length
-            // Otherwise, we will be accessing beyond memory
-            if(*io_size < l_head->hdr_len)
-            {
-                l_rc = TRAC_DATA_SIZE_LESS_THAN_HEADER_SIZE;
-                break;
-            }
-            l_part_size = *io_size - l_head->hdr_len;
-
-            memcpy((UCHAR *)o_data+l_head->hdr_len,
-                   l_full_buf+l_head->next_free-l_part_size,
-                   (size_t)l_part_size);
-
-            // Set pointer at beginning because this will be a
-            // "just wrapped" buffer.
-            l_head->next_free = l_head->hdr_len;
-
-            // Buffer is now wrapped because we copied max data into it.
-            if(!l_head->times_wrap)
-            {
-                l_head->times_wrap = 1;
-            }
-        }
-        else
-        {
-            // First part of buffer fits fine
-            memcpy((UCHAR *)o_data+l_head->hdr_len,
-                   l_full_buf+l_head->hdr_len,
-                   (size_t)(l_head->next_free - l_head->hdr_len));
-
-
-            // If it's wrapped then pick up some more data
-            if(l_head->times_wrap)
-            {
-                // Figure out how much room we have left
-                l_part_size = *io_size - l_head->next_free;
-
-                memcpy((UCHAR *)o_data+l_head->next_free,
-                       l_full_buf+TPMD_TRACE_BUFFER_SIZE-l_part_size,
-                       (size_t)l_part_size);
-
-            }
-            else
-            {
-                // No more data to get, make buffer look as small
-                // as possible
-                // add '+4' to avoid the need to mark it as wrapped
-                // (if the last byte of the buffer is filled
-                // next_free has to pointer to the first byte)
-
-                l_head->size = l_head->next_free + 4;
-
-            }
-
-        }
-
-        *io_size = l_head->size;
-
-    }while(0);
-
-    if(l_full_buf != NULL)
-    {
-        tx_byte_release(l_full_buf);
-    }
-
-    return(l_rc);
-}
-#endif
 
 /******************************************************************************/
 // resetBuf - TODO

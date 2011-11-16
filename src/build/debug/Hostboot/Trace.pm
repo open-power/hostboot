@@ -70,7 +70,7 @@ sub main
         my $buffAddr = ::read64($symAddr);
         $symAddr += DESC_ARRAY_ENTRY_ADDR_SIZE;
 
-        if ((not defined $traceBuffers) or ($traceBuffers =~ m/$compName/))
+        if ((not defined $traceBuffers) or (uc($traceBuffers) =~ m/$compName/))
         {
             $foundBuffer = 1;
             print $fh (::readData($buffAddr, TRAC_DEFAULT_BUFFER_SIZE));
