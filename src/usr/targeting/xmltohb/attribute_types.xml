@@ -959,7 +959,20 @@
             <default>0</default>
         </hbmutex>
     </simpleType>
-    <persistency>volatile-zeroed</persistency> 
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+    
+<attribute>
+    <id>ISTEP_MODE</id>
+    <description>If True, puts HostBoot into SPLess SingleStep mode.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
     <readable/>
     <writeable/>
 </attribute>

@@ -41,7 +41,13 @@
 /******************************************************************************/
 // Globals/Constants
 /******************************************************************************/
-const   uint64_t    ISTEP_MODE_SIGNATURE    =   0x4057b0074057b007;
+/**
+ * @note    Since ISTEP_MODE attribute is nonvolitile (persists across boots),
+ *          we must have a way to turn the attribute both ON and OFF - we
+ *          cannot depend on the FSP to do it since we may not have a FSP.
+ */
+const   uint64_t    ISTEP_MODE_ON_SIGNATURE     =   0x4057b0074057b007;
+const   uint64_t    ISTEP_MODE_OFF_SIGNATURE    =   0x700b7504700b7504;
 
 /******************************************************************************/
 //  SPLESS Command Prototypes

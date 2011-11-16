@@ -59,7 +59,7 @@
 
 /**
  *  @brief Struct to hold pointers to a mutex / protected value
- */ 
+ */
 struct MutexTestData_t
 {
     mutex_t* pMutex;         // Pointer to mutex
@@ -658,8 +658,8 @@ class TargetingTestSuite: public CxxTest::TestSuite
             TS_FAIL("Always true filter should have matched system");
         }
 
-#if 0 
-        // Triggers NULL assertion check on push 
+#if 0
+        // Triggers NULL assertion check on push
         l_alwaysTrueExpr.push(NULL);
 #endif
 
@@ -921,7 +921,7 @@ class TargetingTestSuite: public CxxTest::TestSuite
                     "different than the original");
         }
 
-        PredicateCTM l_ctm1(CLASS_CHIP,TYPE_PROC); 
+        PredicateCTM l_ctm1(CLASS_CHIP,TYPE_PROC);
 
         TargetRangeFilter l_f3(
                                targetService().begin(),
@@ -972,8 +972,8 @@ class TargetingTestSuite: public CxxTest::TestSuite
 
         TargetService& l_targetService = targetService();
 
-        TargetRangeFilter f(l_targetService.begin(), 
-                            l_targetService.end(), 
+        TargetRangeFilter f(l_targetService.begin(),
+                            l_targetService.end(),
                             NULL);
         int l_count = 0;
         for(; f; ++f, l_count++)
@@ -995,7 +995,7 @@ class TargetingTestSuite: public CxxTest::TestSuite
         {
             EntityPath l_path = f->getAttr<ATTR_PHYS_PATH>();
             l_path.dump();
-        }            
+        }
 
         TS_TRACE(INF_MRK "Found %d targets that are chips or enclosures ",
                  l_count);
@@ -1073,7 +1073,7 @@ class TargetingTestSuite: public CxxTest::TestSuite
                     "attribute access",l_dummyRw[0][1][2]);
         }
 
-        TARGETING::CLASS l_class = 
+        TARGETING::CLASS l_class =
           l_pTarget->getAttr<TARGETING::ATTR_CLASS>();
         if(l_class != TARGETING::CLASS_SYS)
         {
@@ -1088,7 +1088,7 @@ class TargetingTestSuite: public CxxTest::TestSuite
                     "attribute access",l_type,TARGETING::TYPE_SYS);
         }
 
-        uint64_t l_xscom = 
+        uint64_t l_xscom =
           l_pTarget->getAttr<TARGETING::ATTR_XSCOM_BASE_ADDRESS>();
         if(l_xscom != 0x300000000000)
         {
@@ -1112,10 +1112,10 @@ class TargetingTestSuite: public CxxTest::TestSuite
                     l_dummyRw[0][2][4]);
         }
 
-        TS_TRACE(INF_MRK "Now using FAPI set macros");       
+        TS_TRACE(INF_MRK "Now using FAPI set macros");
 
         l_dummyRw[0][2][3] = 6;
-        l_rc = FAPI_ATTR_SET(ATTR_DUMMY_SCRATCH_PLAT_INIT_UINT8, NULL, 
+        l_rc = FAPI_ATTR_SET(ATTR_DUMMY_SCRATCH_PLAT_INIT_UINT8, NULL,
                              l_dummyRw);
         if(l_rc != 0)
         {
@@ -1123,7 +1123,7 @@ class TargetingTestSuite: public CxxTest::TestSuite
         }
 
         memset(l_dummyRw,0x00,sizeof(l_dummyRw));
-        l_rc = FAPI_ATTR_GET(ATTR_DUMMY_SCRATCH_PLAT_INIT_UINT8, NULL, 
+        l_rc = FAPI_ATTR_GET(ATTR_DUMMY_SCRATCH_PLAT_INIT_UINT8, NULL,
                              l_dummyRw);
         if(l_rc != 0)
         {
@@ -1136,7 +1136,7 @@ class TargetingTestSuite: public CxxTest::TestSuite
                     "prior write",l_dummyRw[0][2][3]);
         }
 
-        TS_TRACE(INF_MRK "Now using targets without the attribute");  
+        TS_TRACE(INF_MRK "Now using targets without the attribute");
 
         memset(l_dummyRw,0x00,sizeof(l_dummyRw));
         EntityPath l_realPath(EntityPath::PATH_PHYSICAL);
@@ -1149,7 +1149,7 @@ class TargetingTestSuite: public CxxTest::TestSuite
 
         fapi::Target* l_pFapiTarget = new fapi::Target(
                                                        fapi::TARGET_TYPE_PROC_CHIP, l_pTarget);
-        l_rc = FAPI_ATTR_GET(ATTR_DUMMY_SCRATCH_PLAT_INIT_UINT8, 
+        l_rc = FAPI_ATTR_GET(ATTR_DUMMY_SCRATCH_PLAT_INIT_UINT8,
                              l_pFapiTarget , l_dummyRw);
         if(l_rc == 0)
         {
@@ -1160,7 +1160,7 @@ class TargetingTestSuite: public CxxTest::TestSuite
         {
             TS_FAIL("Should have been a platform handled error");
         }
-        else 
+        else
         {
             errlHndl_t l_pErrLog = static_cast<ERRORLOG::ErrlEntry*>(
                                                                      l_rc.releasePlatData());
@@ -1268,7 +1268,7 @@ class TargetingTestSuite: public CxxTest::TestSuite
            || (l_pod.fsiPath.size() != 1 ) )
         {
             TS_FAIL("Expected physical:sys-0, got a different result");
-            
+
         }
         if(l_pod.className != CLASS_CHIP)
         {
@@ -1278,12 +1278,12 @@ class TargetingTestSuite: public CxxTest::TestSuite
         if(l_pod.uint8 != 0xAB)
         {
              TS_FAIL("Expected uint8_t value of 0xAB, got 0x%02X",
-                  l_pod.uint8);  
+                  l_pod.uint8);
         }
         if (l_pod.uint16 != 0xABCD)
         {
             TS_FAIL("Expected uint16_t value of 0xABCD, got 0x%04X",
-                l_pod.uint16); 
+                l_pod.uint16);
         }
         if (l_pod.uint32 != 0xABCDEF01)
         {
@@ -1294,16 +1294,16 @@ class TargetingTestSuite: public CxxTest::TestSuite
         {
             TS_FAIL("Expected uint64_t value of 0xABCDEF0123456789, got 0x%016lX",
                 l_pod.uint64);
-        }  
+        }
         if(l_pod.int8 != -124)
         {
              TS_FAIL("Expected int8_t value of -124, got %d",
-                  l_pod.int8);  
+                  l_pod.int8);
         }
         if (l_pod.int16 != -32764)
         {
             TS_FAIL("Expected int16_t value of -32764, got %d",
-                l_pod.int16); 
+                l_pod.int16);
         }
         if (l_pod.int32 != -2147483644)
         {
@@ -1314,7 +1314,7 @@ class TargetingTestSuite: public CxxTest::TestSuite
         {
             TS_FAIL("Expected int64_t value of -9223372036854775804, got %ld",
                 l_pod.int64);
-        }    
+        }
 
         TS_TRACE(EXIT_MRK "testPodNumericalTypes" );
     }
@@ -1330,7 +1330,7 @@ class TargetingTestSuite: public CxxTest::TestSuite
             targetService().begin(),
             targetService().end(),
             &l_procChip);
-        
+
         PredicateCTM l_mbs(CLASS_UNIT,TYPE_MBS);
         uint32_t l_count = 0;
         uint32_t l_procs = 0;
@@ -1364,7 +1364,7 @@ class TargetingTestSuite: public CxxTest::TestSuite
 
         TS_TRACE(EXIT_MRK "testCentaurs" );
     }
-    
+
     void testHbMutexAttr()
     {
         TS_TRACE(ENTER_MRK "testHbMutexAttr" );
@@ -1386,9 +1386,9 @@ class TargetingTestSuite: public CxxTest::TestSuite
             break;
         }
 
-        // Get the mutex attribute (actually a mutex_t* which points to 
+        // Get the mutex attribute (actually a mutex_t* which points to
         // a mutex)
-        HB_MUTEX_TEST_LOCK_ATTR l_pLock 
+        HB_MUTEX_TEST_LOCK_ATTR l_pLock
             = l_pTarget->getHbMutexAttr<TARGETING::ATTR_HB_MUTEX_TEST_LOCK>();
 
         // Test: Verify the value pointed to by the mutex_t* is zero
@@ -1397,7 +1397,7 @@ class TargetingTestSuite: public CxxTest::TestSuite
             TS_FAIL("Mutex attribute must be initialized to zero, but got %ld",
                 *reinterpret_cast<uint64_t*>(l_pLock));
             break;
-        }    
+        }
 
         // Try to get the attribute, and ensure it's the same
         HB_MUTEX_TEST_LOCK_ATTR l_pLockTry = NULL;
@@ -1424,15 +1424,15 @@ class TargetingTestSuite: public CxxTest::TestSuite
         MutexTestData_t l_mutexTestData = { l_pLock, &l_var };
 
         // Spawn off a function which tries to write the protected value to
-        // something unexpected.  If the mutex is working, the for loop will 
+        // something unexpected.  If the mutex is working, the for loop will
         // always poll the expected value.
         task_create(funcTestMutex, static_cast<void*>(&l_mutexTestData));
 
-        // Guarantee the child process runs and blocks on the mutex prior to 
+        // Guarantee the child process runs and blocks on the mutex prior to
         // modifying the protected value.  isync to ensure the processor doesn't
         // speculatively perform the comparison prior to the sleep completing
         nanosleep(0,TEN_CTX_SWITCHES_NS); isync();
-       
+
         if(l_var != 0)
         {
             TS_FAIL("Protected value must be 0, was %d instead",l_var);
@@ -1441,11 +1441,11 @@ class TargetingTestSuite: public CxxTest::TestSuite
 
         // Now unlock the mutex, allowing the other thread to overwrite the
         // protected value; which should happen within 100,000 reads of the
-        // var.  This will confirm the other thread was actively trying to 
+        // var.  This will confirm the other thread was actively trying to
         // write the controlled value
         (void)mutex_unlock(l_pLock);
 
-        // Guarantee the child process acquires the mutex and modifies the 
+        // Guarantee the child process acquires the mutex and modifies the
         // protected value; isync to ensure the processor doesn't speculatively
         // perform the comparison prior to the sleep completing
         nanosleep(0,TEN_CTX_SWITCHES_NS); isync();
@@ -1457,9 +1457,10 @@ class TargetingTestSuite: public CxxTest::TestSuite
         }
 
         } while(0);
-      
+
         TS_TRACE(EXIT_MRK "testHbMutexAttr");
     }
+
 };
 
 #endif // End __TESTTARGETING_H

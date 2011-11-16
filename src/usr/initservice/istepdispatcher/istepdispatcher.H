@@ -222,7 +222,6 @@ private:
 
 
     //  -----   internal vars   -----------------------------
-    bool        iv_istepmodeflag;
 
 };  //  class IStepDispatcher
 

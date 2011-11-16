@@ -46,7 +46,13 @@
 #include    <devicefw/userif.H>             //  targeting
 #include    <sys/mmio.h>                    //  mmio_scratch_read()
 #include    <initservice/taskargs.H>        //  TaskArgs    structs
+
 #include    <errl/errluserdetails.H>        //  ErrlUserDetails base class
+
+#include    <targeting/attributes.H>        //  ISTEP_MODE attribute
+#include    <targeting/entitypath.H>
+#include    <targeting/target.H>
+#include    <targeting/targetservice.H>
 
 #include    "istepdispatcher.H"
 
@@ -143,10 +149,6 @@ enum    {
 
 const   uint64_t    SINGLESTEP_PAUSE_S     =   1;
 const   uint64_t    SINGLESTEP_PAUSE_NS    =   100000000;
-
-
-
-
 
 /**
  * @brief   set up _start() task entry procedure using the macro in taskargs.H
@@ -249,34 +251,64 @@ void IStepDispatcher::init( void * io_ptr )
 
 bool IStepDispatcher::getIStepMode( )   const
 {
+    using namespace TARGETING;
+    Target* l_pTopLevel     =   NULL;
+    bool    l_istepmodeflag =   false;
+    TargetService& l_targetService = targetService();
 
-    return  iv_istepmodeflag;
+    (void) l_targetService.getTopLevelTarget(l_pTopLevel);
+    if (l_pTopLevel == NULL)
+    {
+        TRACFCOMP( g_trac_initsvc, "Top level handle was NULL" );
+        l_istepmodeflag =   false;
+    }
+    else
+    {
+        l_istepmodeflag = l_pTopLevel->getAttr<ATTR_ISTEP_MODE> ();
+    }
+
+
+    return  l_istepmodeflag;
 }
 
 
-/**
- * @todo    revisit this when PNOR Driver is implemented
- *
- */
 void IStepDispatcher::initIStepMode( )
 {
-    uint64_t l_readData = 0;
+    using namespace TARGETING;
+    uint64_t    l_readData      =   0;
+    Target      *l_pTopLevel    =   NULL;
+    TargetService& l_targetService = targetService();
 
-    l_readData  =   mmio_scratch_read( MMIO_SCRATCH_IPLSTEP_CONFIG );
-
-    TRACDCOMP( g_trac_initsvc,
-               "SCOM ScratchPad read, Offset 0x%x, Data 0x%llx",
-               MMIO_SCRATCH_IPLSTEP_CONFIG,
-               l_readData );
-
-    // check for IStep Mode signature
-    if ( l_readData == ISTEP_MODE_SIGNATURE )
+    (void) l_targetService.getTopLevelTarget(l_pTopLevel);
+    if (l_pTopLevel == NULL)
     {
-        iv_istepmodeflag    =   true;
-     }
+        TRACFCOMP( g_trac_initsvc, "Top level handle was NULL" );
+        // drop through, default of attribute is is false
+    }
     else
     {
-        iv_istepmodeflag    =   false;
+        // got a pointer to Targeting, complete setting the flag
+        l_readData  =   mmio_scratch_read( MMIO_SCRATCH_IPLSTEP_CONFIG );
+
+        TRACDCOMP( g_trac_initsvc,
+                "SCOM ScratchPad read, Offset 0x%x, Data 0x%llx",
+                MMIO_SCRATCH_IPLSTEP_CONFIG,
+                l_readData );
+
+        // check for IStep Mode signature(s)
+        if ( l_readData == ISTEP_MODE_ON_SIGNATURE )
+        {
+            l_pTopLevel->setAttr<ATTR_ISTEP_MODE> (true );
+            TRACDCOMP( g_trac_initsvc,
+                    "ISTEP_MODE attribute set to TRUE." );
+        }
+
+        if ( l_readData == ISTEP_MODE_OFF_SIGNATURE )
+        {
+            l_pTopLevel->setAttr<ATTR_ISTEP_MODE> ( false );
+            TRACDCOMP( g_trac_initsvc,
+                    "ISTEP_MODE attribute set to FALSE." );
+        }
     }
 
 }

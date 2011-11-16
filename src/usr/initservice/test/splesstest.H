@@ -263,7 +263,7 @@ private:
         l_readData  =   mmio_scratch_read( MMIO_SCRATCH_IPLSTEP_CONFIG );
 
         // check for IStep Mode signature, this is temporary
-        if ( l_readData == ISTEP_MODE_SIGNATURE )
+        if ( l_readData == ISTEP_MODE_ON_SIGNATURE )
         {
             l_flag    =   true;
          }

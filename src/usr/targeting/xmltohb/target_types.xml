@@ -81,6 +81,9 @@
         <id>VPO_MODE</id>
         <default>0</default>
     </attribute> 
+    <attribute>
+        <id>ISTEP_MODE</id>
+    </attribute>    
 </targetType>
 
 <targetType>

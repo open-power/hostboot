@@ -59,32 +59,31 @@ def dumpL3():
 #------------------------------------------------------------------------------
 def print_istep_list( inList ):
 
-    zinList  =   [  "i0_sub0             0   CG  F   IStep0 substep0",   \
-                   "i0_sub1             0   CG  F   IStep1 substep1",   \
-                   "i1_sub0             1   CG  F   IStep1  substep1",  \
-                   "i55sub55            55  CG  F   bogus istep",       \
-                   ]
     print
     print   "istep commands:."
-    print   "   istepmode - set IStep Mode flag in SCOM reg"
+    print   "   istepmode   -   enable IStep Mode.  Must be executed before simics run command"
+    print   "   normalmode  -   disable IStep Mode. "
+    print   "   list        -   list all named isteps"
+    print   "   sN          -   execute IStep N"
+    print   "   sN..M       -   execute IStep N through M"
+    print   "   <name1>     -   excute named istep name1"
+    print   "   <name1>..<name2>  - execute named isteps name1 through name2"
     print
     print   "-----------------------------------------------------------"
-    print   " StepName                  Num   Who  Mode  Description    "
-    print   "-----------------------------------------------------------"
-    for line in zinList:
-        print line.strip()
-    print
-    print   " Key:"
-    print   " Who ----  "
-    print   "    C = Cronus"
-    print   "    G = GFW"
-    print   " Mode ---- "
-    print   "    F = Fast Mode"
-    print   "    S = Slow Mode (Fast Mode + more)"
-    print   "    M = Manufacturing Mode"
-    return
+    print   " Supported ISteps:                                         "
+    print   " IStep\tSubStep\tStepName                                  "
+    print   "-----------------------------------------------------------"    
 
-#   normally this would be a loop to watch for the runningbit.
+    ## print   len(inList)
+    for i in range(0,len(inList)) :
+        ##print len(inList[i])
+        for j in range( 0, len(inList[i])) :
+            print "%d\t%d\t%s"%( i, j, inList[i][j] )
+                
+    return None
+
+
+#   normally this would be a loop to watch for the runningbit.  
 #   currently simics dumps all sorts of error lines every time a SCOM is
 #   read, so HostBoot only updates every 1 sec.  at that rate we only
 #   need to sleep for 2 sec and we are sure to get it.
@@ -92,24 +91,17 @@ def print_istep_list( inList ):
 def getStatusReg():
     ##StatusStr   = "salerno_chip.regdump SCOM 0x13012685"
     ##  -f <file> dumps the output to <file>_SCOM_0X13012685
-    StatusStr   = "salerno_chip.regdump SCOM 0x13012685 -f ./scom.out"
-
+    ## StatusStr   = "salerno_chip.regdump SCOM 0x13012685 -f ./scom.out"   
+    StatusStr   = "cpu0_0_0_2->scratch"   
+    
     ##  get response
-    (result, statusOutput)  =   quiet_run_command( StatusStr, output_modes.regular )
-    ##  HACK:  quiet_run_command() only returns the first line of a 4-line
-    ##  output, pipe all lines to a file and then read it back.
-    file    =   open( "./scom.out_SCOM_0X13012685", "rU" )
-    statusOutput    =   file.readlines()
-    file.close()
+    # (result, statusOutput)  =   quiet_run_command( StatusStr, output_modes.regular )
+    result  =   conf.cpu0_0_0_2.scratch
+    print "0x%x"%(result)  
 
-    #print result
-    #print   "............"
-    #print statusOutput[0]
-    #print statusOutput[1]
-    #print statusOutput[2]
-    #print   "..........."
-
-    (j1, j2, j3, j4, hiword, loword) = statusOutput[2].split()
+    hiword  = ( ( result & 0xffffffff00000000) >> 32 )
+    loword  = ( result & 0x00000000ffffffff )
+    
     return (hiword, loword)
 
 
@@ -124,7 +116,8 @@ def runIStep( istep, substep, inList ):
     print   "run  %s :"%( inList[istep][substep] )
     print   "   istep # = 0x%x / substep # = 0x%x :"%(istep, substep)
 
-    CommandStr  = "salerno_chip.regwrite SCOM 0x13012684 \"0x80000000_%4.4x%4.4x\" 64"%(istep,substep)
+    ## CommandStr  = "salerno_chip.regwrite SCOM 0x13012684 \"0x80000000_%4.4x%4.4x\" 64"%(istep,substep)
+    CommandStr  = "cpu0_0_0_1->scratch=0x80000000_%4.4x%4.4x"%(istep,substep)
 
     #result  =   run_command( "run" )
 
@@ -138,20 +131,23 @@ def runIStep( istep, substep, inList ):
     # result  =   run_command( "stop" )
 
     (hiword, loword) =   getStatusReg()
-    print hiword + " " + loword
-    runningbit  =   ( ( int(hiword,16) & 0x80000000 ) >> 31 )
-    readybit    =   ( ( int(hiword,16) & 0x40000000 ) >> 30 )
-    stsIStep    =   ( ( int(hiword,16) & 0x3fff0000 ) >> 16 )
-    stsSubstep  =   ( ( int(hiword,16) & 0x0000ffff ) )
-    taskStatus  =   ( ( int(loword,16) & 0xffff0000 ) >> 16 )
-    istepStatus =   ( ( int(loword,16) & 0x0000ffff )  )
-    print
-    print   "%s : returned Status : "%( inList[istep][substep] )
+    
+    runningbit  =   ( ( hiword & 0x80000000 ) >> 31 )
+    readybit    =   ( ( hiword & 0x40000000 ) >> 30 ) 
+    stsIStep    =   ( ( hiword & 0x3fff0000 ) >> 16 )
+    stsSubstep  =   ( ( hiword & 0x0000ffff ) )
+    
+    taskStatus  =   ( ( loword & 0xffff0000 ) >> 16 )
+    istepStatus =   ( ( loword & 0x0000ffff )  )   
+    print 
+    print   "%s : returned Status 0x%8.8x_%8.8x : "%( inList[istep][substep], hiword, loword )
     print "runningbit = 0x%x, readybit=0x%x"%(runningbit, readybit)
     print "Istep 0x%x / Substep 0x%x Status: 0x%x 0x%x"%( stsIStep, stsSubstep, taskStatus, istepStatus )
-    print   "-----------------------------------------------------------------"
-
-##  run command = "sN"
+    print   "-----------------------------------------------------------------"    
+    
+    # result  =   run_command( "run" )
+    
+##  run command = "sN"    
 def sCommand( inList, scommand ) :
     i   =   int(scommand)
     j   =   0
@@ -182,7 +178,8 @@ def find_in_inList( inList, substepname) :
 ##      sN..M
 ##      <substepname1>..<substepname2>
 def istepHB( str_arg1, inList):
-    IStepModeStr = "salerno_chip.regwrite SCOM 0x13012686 \"0x4057b007_4057b007\" 64"
+    IStepModeStr    = "cpu0_0_0_3->scratch=0x4057b007_4057b007"
+    NormalModeStr   = "cpu0_0_0_3->scratch=0x700b7504_700b7504"
 
     print   "run isteps...."
 
@@ -195,6 +192,12 @@ def istepHB( str_arg1, inList):
         (result, out)  =   quiet_run_command(IStepModeStr, output_modes.regular )
         # print result
         return
+        
+    if ( str_arg1 == "normalmode"  ):    ## set Normal Mode in SCOM reg
+        print   "Set Normal Mode"
+        (result, out)  =   quiet_run_command(NormalModeStr, output_modes.regular )
+        # print result
+        return       
 
     ## check to see if we have an 's' command (string starts with 's')
     if ( str_arg1.startswith('s') ):
@@ -211,23 +214,30 @@ def istepHB( str_arg1, inList):
             for x in range( (int(M,16)), (int(N,16)+1) ) :
                 sCommand( inList, x )
         return
-    else:
-        ## substep name .. substep name
-        (ss_nameM, ss_nameN) = str_arg1.split("..")
-        (istepM, substepM, foundit) = find_in_inList( inList, ss_nameM )
-        if ( not foundit ) :
-            print( "Invalid substep %s"%(ss_nameM) )
-            return
-
-        (istepN, substepN, foundit) = find_in_inList( inList, ss_nameN )
-        if ( not foundit ) :
-            print( "Invalid substep %s"%(ss_nameN) )
-            return
-
-        for x in range( istepM, istepN+1 ) :
+    else:  
+        ## substep name
+        ## (ss_nameM, ss_nameN) = str_arg1.split("..")
+        namelist    =   str_arg1.split("..")
+        if ( len(namelist) ==  1 ) :
+            (istepM, substepM, foundit) = find_in_inList( inList, namelist[0] )
+            if ( not foundit ) :
+                print "Invalid substep %s"%( namelist[0] )
+                return
+            runIStep( istepM, substepM, inList )
+        else:       
+            ## substep name .. substep name 
+            (istepM, substepM, foundit) = find_in_inList( inList, namelist[0] )
+            if ( not foundit ) :
+                print "Invalid substep %s"%( namelist[0] )
+                return    
+            (istepN, substepN, foundit) = find_in_inList( inList, namelist[1] )
+            if ( not foundit ) :
+                print( "Invalid substep %s"%( namelist[1]) )
+                return
+            for x in range( istepM, istepN+1 ) :
                 for y in range( substepM, substepN+1) :
                     runIStep( x, y, inList )
-        return
+    return  
 
 
 #===============================================================================
@@ -318,13 +328,24 @@ def hb_istep(str_arg1):
     #   TODO inFile.close()
 
     ## set up demo inlist
-    inList  =   [   [ "i0_sub0", "i0_sub1" ],
-                    [ "i1_sub0" ],
-                ]
-
-    ## print   flag_t
-
-    if str_arg1 == None:
+    inList  =   [   [ "na" ],              ## istep 0
+                    [ "na" ],              ## istep 1
+                    [ "na" ],              ## istep 2
+                    [ "na" ],              ## istep 3
+                    [ "init_target_states",     ## istep 4
+                      "init_fsi", 
+                      "apply_fsi_info", 
+                      "apply_dd_presence", 
+                      "apply_pr_keyword_data",
+                      "apply_partial_bad",
+                      "apply_gard",
+                      "testHWP"
+                    ],
+                ]  
+                          
+    ## print   flag_t                   
+    
+    if str_arg1 == None: 
         print_istep_list( inList )
     else:
         print "args=%s" % str(str_arg1)
