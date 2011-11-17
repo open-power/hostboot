@@ -47,10 +47,15 @@ namespace   HWAS
      * @brief   init_target_states
      *
      *  Currently the state of every target is held in one bitmapped attribute
-     *  called HWAS_STATE.  HWAS_STATES is a read-only attribute - defaults are
-     *  stored in flash, so they are already initialized.
-     *  See src/user/errl/targeting/xmltohb/hb.xml for the settings.
-     *  This is left as a placeholder when/if we add more attributes.
+     *  called HWAS_STATE.
+     *
+     *  This routine will walk through all the targets and initialize HWAS STATE
+     *  to a known default value.  This is useful if the developer wishes to
+     *  clean everything up to an known state - as such it is the very first
+     *  istep to run.
+     *
+     *  Currently everything is initialized to to powered off, etc. - init_fsi
+     *  and apply_fsi_info (the next isteps) will change this almost immediately.
      *
      *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
      *                              or NULL.

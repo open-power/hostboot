@@ -47,22 +47,48 @@
 namespace   HWAS
 {
 trace_desc_t *g_trac_hwas = NULL;
-TRAC_INIT(&g_trac_hwas, "HWAS", 1024 );
+TRAC_INIT(&g_trac_hwas, "HWAS", 2048 );
 
 using   namespace   TARGETING;
+
 
 void    init_target_states( void *io_pArgs )
 {
     INITSERVICE::TaskArgs *pTaskArgs =
             static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
 
-    TRACDCOMP( g_trac_hwas, "init_target_states entry" );
+    TRACDCOMP( g_trac_hwas, "init_target_states entry: set default HWAS state:" );
+
+    //  loop through all the targets and set HWAS_STATE to a known default
+    TARGETING::TargetIterator l_pTarget = TARGETING::targetService().begin();
+    for(    ;
+            l_pTarget != TARGETING::targetService().end();
+            ++l_pTarget
+            )
+    {
+        // HWAS_STATE attribute definition in the attribute_types.xml file
+        //  gets translated into TARGETING::HwasState .
+        //  fetch it from targeting - this is not strictly necessary (right now)
+        //  but makes debug easier later.
+        TARGETING::HwasState l_hwasState =
+            l_pTarget->getAttr<ATTR_HWAS_STATE>();
+
+        l_hwasState.poweredOn             =   false;
+        l_hwasState.present               =   false;
+        l_hwasState.functional            =   false;
+        l_hwasState.changedSinceLastIPL   =   false;
+        l_hwasState.gardLevel             =   0;
+
+        //  Now write the modified value back to Targeting.
+        l_pTarget->setAttr<ATTR_HWAS_STATE>( l_hwasState );
+    }
 
 
     //  wait here on the barrier, then end the task.
     pTaskArgs->waitChildSync();
     task_end();
 }
+
 
 void    init_fsi( void *io_pArgs )
 {
