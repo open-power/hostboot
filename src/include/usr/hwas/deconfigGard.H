@@ -165,14 +165,13 @@ public:
      * Targets by association. Any errors deconfiguring targets are committed
      * and the function continues. The only errors returned are usage errors.
      *
-     * @param[in] i_target Reference to Target to deconfigure.
-     * @param[in] i_pErr   Pointer to error log that will shortly be committed
-     *                     by the caller.
+     * @param[in] i_target   Reference to Target to deconfigure.
+     * @param[in] i_errlPlid Error log PLID to store in Deconfigure Record.
      *
      * @return errlHndl_t. Error log handle.
      */
     errlHndl_t deconfigureTarget(TARGETING::Target & i_target,
-                                 errlHndl_t i_pErr);
+                                 const uint32_t i_errlPlid);
 
     /**
      * @brief Creates a GARD Record for a Target.
@@ -185,14 +184,13 @@ public:
      * Any error creating the GARD Record will be returned to the user.
      *
      * @param[in] i_target   Reference to Target to create GARD Record for.
-     * @param[in] i_pErr     Pointer to error log that will shortly be committed
-     *                       by the caller.
+     * @param[in] i_errlPlid Error log PLID to store in GARD Record.
      * @param[in] i_severity Severity of the GARD Record.
      *
      * @return errlHndl_t. Error log handle.
      */
     errlHndl_t createGardRecord(const TARGETING::Target & i_target,
-                                errlHndl_t i_pErr,
+                                const uint32_t i_errlPlid,
                                 const GardSeverity i_severity);
 
     /**
@@ -302,12 +300,11 @@ private:
     /**
      * @brief Deconfigures Targets by association.
      *
-     * @param[in] i_target Reference to base Target.
-     * @param[in] i_pErr   Pointer to error log that will shortly be committed
-     *                     by the caller.
+     * @param[in] i_target   Reference to base Target.
+     * @param[in] i_errlPlid Error log PLID to store in Deconfigure Record.
      */
     void _deconfigureByAssoc(TARGETING::Target & i_target,
-                             errlHndl_t i_pErr);
+                             const uint32_t i_errlPlid);
     
     /**
      * @brief Deconfigures a Target.
@@ -315,13 +312,12 @@ private:
      * This will Deconfigure the Target (set state to non-functional, do any
      * Deconfigure actions and create a Deconfigure Record).
      *
-     * @param[in] i_target Reference to Target to deconfigure.
-     * @param[in] i_pErr   Pointer to error log that will shortly be committed
-     *                     by the caller.
-     * @param[in] i_cause  Deconfigure cause.
+     * @param[in] i_target   Reference to Target to deconfigure.
+     * @param[in] i_errlPlid Error log PLID to store in Deconfigure Record.
+     * @param[in] i_cause    Deconfigure cause.
      */
     void _deconfigureTarget(TARGETING::Target & i_target,
-                            errlHndl_t i_pErr,
+                            const uint32_t i_errlPlid,
                             const DeconfigCause i_cause);
     
     /**
@@ -334,13 +330,12 @@ private:
     /**
      * @brief Creates a Deconfigure Record
      *
-     * @param[in] i_target Reference to Target to create record for.
-     * @param[in] i_pErr   Pointer to error log that will shortly be committed
-     *                     by the caller.
-     * @param[in] i_cause  Deconfigure cause.
+     * @param[in] i_target   Reference to Target to create record for.
+     * @param[in] i_errlPlid Error log PLID to store in Deconfigure Record.
+     * @param[in] i_cause    Deconfigure cause.
      */
     void _createDeconfigureRecord(const TARGETING::Target & i_target,
-                                  errlHndl_t i_pErr,
+                                  const uint32_t i_errlPlid,
                                   const DeconfigCause i_cause);
     
 public:
@@ -374,14 +369,13 @@ private:
      * @brief Creates a GARD Record for a Target.
      * 
      * @param[in] i_target   Reference to Target to create GARD Record for.
-     * @param[in] i_pErr     Pointer to error log that will shortly be committed
-     *                       by the caller.
+     * @param[in] i_errlPlid Error log PLID to store in GARD Record.
      * @param[in] i_severity Severity of the GARD Record.
      *
      * @return errlHndl_t. Error log handle.
      */
     errlHndl_t _createGardRecord(const TARGETING::Target & i_target,
-                                 errlHndl_t i_pErr,
+                                 const uint32_t i_errlPlid,
                                  const GardSeverity i_severity);
     
     /**

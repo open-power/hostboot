@@ -34,9 +34,10 @@ namespace HWAS
 
     enum HwasReasonCode
     {
-        RC_TARGET_NOT_DECONFIGURABLE = HWAS_COMP_ID | 0x01,
-        RC_TARGET_NOT_GARDABLE       = HWAS_COMP_ID | 0x02,
-        RC_GARD_REPOSITORY_FULL      = HWAS_COMP_ID | 0x03,
+        RC_TARGET_NOT_DECONFIGURABLE        = HWAS_COMP_ID | 0x01,
+        RC_TARGET_NOT_GARDABLE              = HWAS_COMP_ID | 0x02,
+        RC_GARD_REPOSITORY_FULL             = HWAS_COMP_ID | 0x03,
+        RC_TARGET_NOT_FOUND_FOR_GARD_RECORD = HWAS_COMP_ID | 0x04,
     };
 };
 

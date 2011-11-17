@@ -37,13 +37,19 @@
 trace_desc_t* g_trac_deconf = NULL;
 #define __COMP_TD__ g_trac_deconf
 
-// The DeconfigGard code needs to trace a target. The current recommended way is
-// to get the Target's PHYS_PATH attribute and do a binary trace. However, the
-// size of a TARGETING::EntityPath is 17 bytes. This code will trace only the
-// first 16 bytes to avoid a multi-line binary trace. This all seems a little
-// convoluted. Is there a better way to trace a Target
+// TODO The DeconfigGard code needs to trace a target. The current recommended
+// way is to get the Target's PHYS_PATH attribute and do a binary trace.
+// However, the size of a TARGETING::EntityPath is more than 16 bytes. This code
+// will trace only the first 16 bytes (which in most cases is enough) to avoid a
+// multi-line binary trace. This all seems a little convoluted. Is there a
+// better way to trace a Target
 #define DG_TRAC_TARGET(string, pPath) \
     TRACFBIN(g_trac_deconf, string, pPath, sizeof(TARGETING::EntityPath) - 1)
+
+// TODO There are a number of error logs created in this file. Most of them
+// should include the target identifier (PHYS_PATH). There is a plan in RTC
+// story 4110 to provide a way to easily add a target to an error log. When that
+// is done need to update the error logs
 
 namespace HWAS
 {
@@ -88,11 +94,63 @@ errlHndl_t DeconfigGard::clearGardRecordsForReplacedTargets()
 //******************************************************************************
 errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl()
 {
-    TRAC_INF("****TBD****Usr Request: Deconfigure Targets from GARD Records for IPL");
+    TRAC_INF("Usr Request: Deconfigure Targets from GARD Records for IPL");
     mutex_lock(&iv_mutex);
     errlHndl_t l_pErr = NULL;
+    GardRecords_t l_gardRecords;
     
-    // TODO
+    // TODO If deconfiguring all Targets with a GARD Record will result in a
+    //      configuration that cannot IPL then need to figure out which
+    //      subset of Targets to deconfigure to give the best chance of IPL
+    //      This is known as Resource Recovery
+
+    // Get all GARD Records
+    l_pErr = _getGardRecords(0, l_gardRecords);
+
+    if (l_pErr)
+    {
+        TRAC_ERR("Error from _getGardRecords");
+    }
+    else
+    {
+        TRAC_INF("%d GARD Records found", l_gardRecords.size());
+        
+        // For each GARD Record        
+        for (GardRecordsCItr_t l_itr = l_gardRecords.begin();
+             l_itr != l_gardRecords.end(); ++l_itr)
+        {
+            // Find the associated Target
+            TARGETING::Target * l_pTarget =
+                TARGETING::targetService().toTarget((*l_itr).iv_targetId);
+
+            if (l_pTarget == NULL)
+            {
+                DG_TRAC_TARGET(ERR_MRK "Could not find Target for",
+                               &((*l_itr).iv_targetId));
+
+                /*@
+                 * @errortype
+                 * @moduleid     MOD_DECONFIG_GARD
+                 * @reasoncode   RC_TARGET_NOT_FOUND_FOR_GARD_RECORD
+                 * @devdesc      GARD Record could not be mapped to a Target
+                 */
+                l_pErr = new ERRORLOG::ErrlEntry(
+                    ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                    MOD_DECONFIG_GARD,
+                    RC_TARGET_NOT_FOUND_FOR_GARD_RECORD);
+                errlCommit(l_pErr, HWAS_COMP_ID);
+            }
+            else
+            {
+                // Deconfigure the Target
+                _deconfigureTarget(*l_pTarget, (*l_itr).iv_errlogPlid,
+                                   DECONFIG_CAUSE_GARD_RECORD);
+
+                // Deconfigure other Targets by association
+                _deconfigureByAssoc(*l_pTarget, (*l_itr).iv_errlogPlid);
+            }
+        }
+    }
 
     mutex_unlock(&iv_mutex);
     return l_pErr;
@@ -100,19 +158,16 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl()
 
 //******************************************************************************
 errlHndl_t DeconfigGard::deconfigureTarget(TARGETING::Target & i_target,
-                                           errlHndl_t i_pErr)
+                                           const uint32_t i_errlPlid)
 {
     TRAC_ERR("Usr Request: Deconfigure Target");
     mutex_lock(&iv_mutex);
-
-    // Caller must pass a valid errlHndl_t
-    assert(i_pErr != NULL);
     
     // Deconfigure the Target
-    _deconfigureTarget(i_target, i_pErr, DECONFIG_CAUSE_FIRMWARE_REQ);
+    _deconfigureTarget(i_target, i_errlPlid, DECONFIG_CAUSE_FIRMWARE_REQ);
         
     // Deconfigure other Targets by association
-    _deconfigureByAssoc(i_target, i_pErr);
+    _deconfigureByAssoc(i_target, i_errlPlid);
         
     mutex_unlock(&iv_mutex);
     return NULL;
@@ -120,12 +175,12 @@ errlHndl_t DeconfigGard::deconfigureTarget(TARGETING::Target & i_target,
 
 //******************************************************************************
 errlHndl_t DeconfigGard::createGardRecord(const TARGETING::Target & i_target,
-                                          errlHndl_t i_pErr,
+                                          const uint32_t i_errlPlid,
                                           const GardSeverity i_severity)
 {
     TRAC_ERR("Usr Request: Create GARD Record");
     mutex_lock(&iv_mutex);
-    errlHndl_t l_pErr = _createGardRecord(i_target, i_pErr, i_severity);
+    errlHndl_t l_pErr = _createGardRecord(i_target, i_errlPlid, i_severity);
     mutex_unlock(&iv_mutex);
     return l_pErr;
 }
@@ -190,7 +245,7 @@ errlHndl_t DeconfigGard::getGardRecords(
 
 //******************************************************************************
 void DeconfigGard::_deconfigureByAssoc(TARGETING::Target & i_target,
-                                       errlHndl_t i_pErr)
+                                       const uint32_t i_errlPlid)
 {
     TARGETING::EntityPath l_id = i_target.getAttr<TARGETING::ATTR_PHYS_PATH>();
     DG_TRAC_TARGET(ERR_MRK "****TBD****: Deconfiguring by Association for: ",
@@ -201,7 +256,7 @@ void DeconfigGard::_deconfigureByAssoc(TARGETING::Target & i_target,
 
 //******************************************************************************
 void DeconfigGard::_deconfigureTarget(TARGETING::Target & i_target,
-                                      errlHndl_t i_pErr,
+                                      const uint32_t i_errlPlid,
                                       const DeconfigCause i_cause)
 {
     TARGETING::EntityPath l_id = i_target.getAttr<TARGETING::ATTR_PHYS_PATH>();
@@ -248,7 +303,7 @@ void DeconfigGard::_deconfigureTarget(TARGETING::Target & i_target,
         _doDeconfigureActions(i_target);
 
         // Create a Deconfigure Record
-        _createDeconfigureRecord(i_target, i_pErr, i_cause);
+        _createDeconfigureRecord(i_target, i_errlPlid, i_cause);
     }
 }
 
@@ -261,7 +316,7 @@ void DeconfigGard::_doDeconfigureActions(TARGETING::Target & i_target)
 //******************************************************************************
 void DeconfigGard::_createDeconfigureRecord(
     const TARGETING::Target & i_target,
-    errlHndl_t i_pErr,
+    const uint32_t i_errlPlid,
     const DeconfigCause i_cause)
 {
     // Get the Target's ID
@@ -289,7 +344,7 @@ void DeconfigGard::_createDeconfigureRecord(
         
         DeconfigureRecord l_record;
         l_record.iv_targetId = l_id;
-        l_record.iv_errlogPlid = 0; // TODO Get PLID from ErrorLog
+        l_record.iv_errlogPlid = i_errlPlid;
         l_record.iv_cause = i_cause;
         l_record.iv_padding[0] = 0;
         l_record.iv_padding[1] = 0;
@@ -380,7 +435,7 @@ void DeconfigGard::_getDeconfigureRecords(
 
 //******************************************************************************
 errlHndl_t DeconfigGard::_createGardRecord(const TARGETING::Target & i_target,
-                                           errlHndl_t i_pErr,
+                                           const uint32_t i_errlPlid,
                                            const GardSeverity i_severity)
 {
     errlHndl_t l_pErr = NULL;
@@ -447,7 +502,7 @@ errlHndl_t DeconfigGard::_createGardRecord(const TARGETING::Target & i_target,
                 l_pRecord->iv_recordId = iv_nextGardRecordId++;
                 l_pRecord->iv_targetId = l_id;
                 // TODO Setup iv_cardMruSn or iv_chipMruEcid    
-                l_pRecord->iv_errlogPlid = 0; // TODO Get PLID from ErrorLog
+                l_pRecord->iv_errlogPlid = i_errlPlid;
                 l_pRecord->iv_severity = i_severity;
                 l_pRecord->iv_padding[0] = 0;
                 l_pRecord->iv_padding[1] = 0;

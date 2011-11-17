@@ -126,13 +126,6 @@ public:
         TARGETING::EntityPath l_id =
             l_pTarget->getAttr<TARGETING::ATTR_PHYS_PATH>();
 
-        // Create an error log to pass to the deconfigureTarget function, this
-        // will never be committed.
-        errlHndl_t l_pNewErr = new ERRORLOG::ErrlEntry(
-            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-            HWAS::MOD_DECONFIG_GARD,
-            HWAS::RC_TARGET_NOT_DECONFIGURABLE);
-        
         do
         {
             // Get any existing Deconfigure Record for the chip
@@ -155,9 +148,8 @@ public:
             TARGETING::HwasState l_origState =
                 l_pTarget->getAttr<TARGETING::ATTR_HWAS_STATE>();
  
-            // Deconfigure the chip
-            l_pErr = HWAS::theDeconfigGard().deconfigureTarget(*l_pTarget,
-                                                               l_pNewErr);
+            // Deconfigure the chip. Production code will pass a valid PLID
+            l_pErr = HWAS::theDeconfigGard().deconfigureTarget(*l_pTarget, 0);
         
             if (l_pErr)
             {
@@ -221,9 +213,6 @@ public:
         }
         while (0);
         
-        delete l_pNewErr;
-        l_pNewErr = NULL;
-        
         if (l_pErr)
         {
             errlCommit(l_pErr,HWAS_COMP_ID);
@@ -246,13 +235,6 @@ public:
         TARGETING::EntityPath l_id =
             l_pTarget->getAttr<TARGETING::ATTR_PHYS_PATH>();
 
-        // Create an error log to pass to the deconfigureTarget function, this
-        // will never be committed.
-        errlHndl_t l_pNewErr = new ERRORLOG::ErrlEntry(
-            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-            HWAS::MOD_DECONFIG_GARD,
-            HWAS::RC_TARGET_NOT_DECONFIGURABLE);
-        
         do
         {
             // Get any existing Deconfigure Record for the chip
@@ -275,9 +257,8 @@ public:
             TARGETING::HwasState l_origState =
                 l_pTarget->getAttr<TARGETING::ATTR_HWAS_STATE>();
  
-            // Deconfigure the chip
-            l_pErr = HWAS::theDeconfigGard().deconfigureTarget(*l_pTarget,
-                                                               l_pNewErr);
+            // Deconfigure the chip. Production code will pass a valid PLID
+            l_pErr = HWAS::theDeconfigGard().deconfigureTarget(*l_pTarget, 0);
         
             if (l_pErr)
             {
@@ -286,8 +267,7 @@ public:
             }
             
             // Deconfigure the chip again
-            l_pErr = HWAS::theDeconfigGard().deconfigureTarget(*l_pTarget,
-                                                               l_pNewErr);
+            l_pErr = HWAS::theDeconfigGard().deconfigureTarget(*l_pTarget, 0);
         
             if (l_pErr)
             {
@@ -332,9 +312,6 @@ public:
             TS_TRACE(INFO_MRK "testDeconfigure4: Success");
         }
         while (0);
-        
-        delete l_pNewErr;
-        l_pNewErr = NULL;
         
         if (l_pErr)
         {
@@ -446,13 +423,6 @@ public:
         TARGETING::EntityPath l_id =
             l_pTarget->getAttr<TARGETING::ATTR_PHYS_PATH>();
 
-        // Create an error log to pass to the createGardRecord function, this
-        // will never be committed.
-        errlHndl_t l_pNewErr = new ERRORLOG::ErrlEntry(
-            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-            HWAS::MOD_DECONFIG_GARD,
-            HWAS::RC_TARGET_NOT_DECONFIGURABLE);
-        
         do
         {
             // Get any existing GARD Records for the chip
@@ -471,9 +441,10 @@ public:
                 break;
             }
             
-            // Create a GARD Record for the chip
+            // Create a GARD Record for the chip. Production code will pass a
+            // valid PLID
             l_pErr = HWAS::theDeconfigGard().
-                createGardRecord(*l_pTarget, l_pNewErr,
+                createGardRecord(*l_pTarget, 0,
                                  HWAS::DeconfigGard::GARD_SEVERITY_PREDICTIVE);
         
             if (l_pErr)
@@ -537,9 +508,6 @@ public:
         }
         while (0);
                 
-        delete l_pNewErr;
-        l_pNewErr = NULL;
-                
         if (l_pErr)
         {
             errlCommit(l_pErr,HWAS_COMP_ID);
@@ -562,13 +530,6 @@ public:
         TARGETING::EntityPath l_id =
             l_pTarget->getAttr<TARGETING::ATTR_PHYS_PATH>();
 
-        // Create an error log to pass to the createGardRecord function, this
-        // will never be committed.
-        errlHndl_t l_pNewErr = new ERRORLOG::ErrlEntry(
-            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-            HWAS::MOD_DECONFIG_GARD,
-            HWAS::RC_TARGET_NOT_DECONFIGURABLE);
-        
         do
         {
             // Get any existing GARD Records for the chip
@@ -587,9 +548,10 @@ public:
                 break;
             }
             
-            // Create a GARD Record for the chip
+            // Create a GARD Record for the chip. Production code will pass a
+            // valid PLID
             l_pErr = HWAS::theDeconfigGard().
-                createGardRecord(*l_pTarget, l_pNewErr,
+                createGardRecord(*l_pTarget, 0,
                                  HWAS::DeconfigGard::GARD_SEVERITY_PREDICTIVE);
         
             if (l_pErr)
@@ -600,7 +562,7 @@ public:
             
             // Create another GARD Record for the chip
             l_pErr = HWAS::theDeconfigGard().
-                createGardRecord(*l_pTarget, l_pNewErr,
+                createGardRecord(*l_pTarget, 0,
                                  HWAS::DeconfigGard::GARD_SEVERITY_FATAL);
         
             if (l_pErr)
@@ -656,9 +618,6 @@ public:
         }
         while (0);
                 
-        delete l_pNewErr;
-        l_pNewErr = NULL;
-                
         if (l_pErr)
         {
             errlCommit(l_pErr,HWAS_COMP_ID);
@@ -680,13 +639,6 @@ public:
         TARGETING::targetService().masterProcChipTargetHandle(l_pTarget);
         TARGETING::EntityPath l_id =
             l_pTarget->getAttr<TARGETING::ATTR_PHYS_PATH>();
-
-        // Create an error log to pass to the createGardRecord function, this
-        // will never be committed.
-        errlHndl_t l_pNewErr = new ERRORLOG::ErrlEntry(
-            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-            HWAS::MOD_DECONFIG_GARD,
-            HWAS::RC_TARGET_NOT_DECONFIGURABLE);
         
         do
         {
@@ -706,9 +658,10 @@ public:
                 break;
             }
             
-            // Create a GARD Record for the chip
+            // Create a GARD Record for the chip. Production code will pass a
+            // valid PLID
             l_pErr = HWAS::theDeconfigGard().
-                createGardRecord(*l_pTarget, l_pNewErr,
+                createGardRecord(*l_pTarget, 0,
                                  HWAS::DeconfigGard::GARD_SEVERITY_PREDICTIVE);
         
             if (l_pErr)
@@ -719,7 +672,7 @@ public:
             
             // Create another GARD Record for the chip
             l_pErr = HWAS::theDeconfigGard().
-                createGardRecord(*l_pTarget, l_pNewErr,
+                createGardRecord(*l_pTarget, 0,
                                  HWAS::DeconfigGard::GARD_SEVERITY_FATAL);
         
             if (l_pErr)
@@ -804,9 +757,6 @@ public:
         }
         while (0);
                 
-        delete l_pNewErr;
-        l_pNewErr = NULL;
-                
         if (l_pErr)
         {
             errlCommit(l_pErr,HWAS_COMP_ID);
@@ -829,13 +779,6 @@ public:
         TARGETING::EntityPath l_id =
             l_pTarget->getAttr<TARGETING::ATTR_PHYS_PATH>();
 
-        // Create an error log to pass to the createGardRecord function, this
-        // will never be committed.
-        errlHndl_t l_pNewErr = new ERRORLOG::ErrlEntry(
-            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-            HWAS::MOD_DECONFIG_GARD,
-            HWAS::RC_TARGET_NOT_DECONFIGURABLE);
-        
         do
         {
             // Get all existing GARD Records
@@ -854,9 +797,10 @@ public:
                 break;
             }
             
-            // Create a GARD Record for the chip
+            // Create a GARD Record for the chip. Production code will pass a
+            // valid PLID
             l_pErr = HWAS::theDeconfigGard().
-                createGardRecord(*l_pTarget, l_pNewErr,
+                createGardRecord(*l_pTarget, 0,
                                  HWAS::DeconfigGard::GARD_SEVERITY_PREDICTIVE);
         
             if (l_pErr)
@@ -867,7 +811,7 @@ public:
             
             // Create another GARD Record for the chip
             l_pErr = HWAS::theDeconfigGard().
-                createGardRecord(*l_pTarget, l_pNewErr,
+                createGardRecord(*l_pTarget, 0,
                                  HWAS::DeconfigGard::GARD_SEVERITY_FATAL);
         
             if (l_pErr)
@@ -906,9 +850,6 @@ public:
             TS_TRACE(INFO_MRK "testGard7: Success");
         }
         while (0);
-                
-        delete l_pNewErr;
-        l_pNewErr = NULL;
                 
         if (l_pErr)
         {

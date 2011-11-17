@@ -42,7 +42,7 @@
 #include    <targeting/targetservice.H>
 #include    <fsi/fsiif.H>
 #include    <hwas/hwas.H>
-
+#include    <hwas/deconfigGard.H>
 
 namespace   HWAS
 {
@@ -162,6 +162,27 @@ void    apply_gard( void *io_pArgs )
 
     TRACDCOMP( g_trac_hwas, "apply_gard entry" );
 
+    errlHndl_t l_errl = theDeconfigGard().clearGardRecordsForReplacedTargets();
+
+    if (l_errl)
+    {
+        TRACFCOMP(g_trac_hwas, "ERROR: apply_gard failed to clear GARD Records for replaced Targets");
+        pTaskArgs->postErrorLog(l_errl);
+    }
+    else
+    {
+        l_errl = theDeconfigGard().deconfigureTargetsFromGardRecordsForIpl();
+
+        if (l_errl)
+        {
+            TRACFCOMP(g_trac_hwas, "ERROR: apply_gard failed to deconfigure Targets from GARD Records for IPL");
+            pTaskArgs->postErrorLog(l_errl);
+        }
+        else
+        {
+            TRACFCOMP(g_trac_hwas, "apply_gard completed successfully");
+        }
+    }
 
     //  wait here on the barrier, then end the task.
     pTaskArgs->waitChildSync();
