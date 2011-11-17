@@ -44,12 +44,12 @@ const TaskInfo    g_taskinfolist[]   =   {
          *  @brief  Errorlog    Task
          */
         {
-                "liberrl.so" ,                  // taskname
-                NULL,                           // no ptr to fn
+                "liberrl.so" ,                      // taskname
+                NULL,                               // no ptr to fn
                 {
-                        NONE,                        // don't start
-                        BASE_IMAGE,             // Base Module
-                        START_ERRL_ERRL_ID,     // module id for errorlog
+                        NONE,                       // don't start
+                        BASE_IMAGE,                 // Base Module
+                        START_ERRL_ERRL_ID,         // module id for errorlog
 
                 }
         },
@@ -59,12 +59,12 @@ const TaskInfo    g_taskinfolist[]   =   {
          * @brief   PNOR    Driver  Task
          */
         {
-                "libpnor.so" ,                        // taskname
-                NULL,                                   // no pointer to fn
+                "libpnor.so" ,                      // taskname
+                NULL,                               // no pointer to fn
                 {
-                        START_TASK,                      // start
-                        BASE_IMAGE,                     // Base Module
-                        START_PNORDD_ERRL_ID,                // module id for errorlog
+                        START_TASK,                 // start
+                        BASE_IMAGE,                 // Base Module
+                        START_PNORDD_ERRL_ID,       // module id for errorlog
                 }
         },
 
@@ -72,12 +72,12 @@ const TaskInfo    g_taskinfolist[]   =   {
          * @brief  Extended VFS module
          */
         {
-                "libvfs.so",                            // taskname
+                "libvfs.so",                        // taskname
                 NULL,
                 {
-                        START_TASK,                     // start task
-                        BASE_IMAGE,                     // Base Module
-                        START_VFS_ERRL_ID,              // module id for error log
+                        START_TASK,                 // start task
+                        BASE_IMAGE,                 // Base Module
+                        START_VFS_ERRL_ID,          // module id for error log
                 }
         },
 
@@ -87,12 +87,12 @@ const TaskInfo    g_taskinfolist[]   =   {
          * @brief   extinitsvc, initializes extended module area
          */
         {
-                "libextinitsvc.so" ,                    // taskname
-                NULL,                                   // no pointer to fn
+                "libextinitsvc.so" ,                // taskname
+                NULL,                               // no pointer to fn
                 {
-                        START_TASK,                     // call start()
-                        EXT_IMAGE,                      // EXT_IMAGE
-                        START_EXTINITSVC_ERRL_ID,       // module id for errorlog
+                        START_TASK,                 // call start()
+                        EXT_IMAGE,                  // EXT_IMAGE
+                        START_EXTINITSVC_ERRL_ID,   // module id for errorlog
                 }
         },
 
@@ -105,12 +105,12 @@ const TaskInfo    g_taskinfolist[]   =   {
          * @brief   last task in the list
          */
         {
-                "end" ,                                 // dummy string
-                NULL,                                   // pointer to fn
+                "end" ,                             // dummy string
+                NULL,                               // pointer to fn
                 {
-                        END_TASK_LIST,                       // end of list
-                        UNDEFINED_MT,                   // dummy module type
-                        UNDEFINED_MODULE_ERRL_ID,            // dummy errorlog
+                        END_TASK_LIST,              // end of list
+                        UNDEFINED_MT,               // dummy module type
+                        UNDEFINED_MODULE_ERRL_ID,   // dummy errorlog
                 }
         },
 

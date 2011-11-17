@@ -43,7 +43,7 @@ const TaskInfo g_exttaskinfolist[]   =   {
         //  -----   Extended Image  ------------------------------------------
 
         /**
-         * @brief   ecmddatabuffer task, 
+         * @brief   ecmddatabuffer task,
          */
         {
                 "libecmddatabuffer.so" ,                    // taskname
@@ -56,7 +56,21 @@ const TaskInfo g_exttaskinfolist[]   =   {
         },
 
         /**
-         * @brief   fapi task, 
+         * @brief   targeting task,
+         *
+         */
+        {
+            "libtargeting.so" ,                             // taskname
+            NULL,                                           // no pointer to fn
+            {
+                START_TASK,                                 // task type
+                EXT_IMAGE,                                  // Extended Module
+                START_TARGETING_ERRL_ID,                    // module id
+            }
+        },
+
+        /**
+         * @brief   fapi task,
          */
         {
                 "libfapi.so" ,                              // taskname
@@ -67,9 +81,9 @@ const TaskInfo g_exttaskinfolist[]   =   {
                         START_FAPI_ERRL_ID,                 // module id
                 }
         },
-        
+
         /**
-         * @brief   hwp task, 
+         * @brief   hwp task,
          */
         {
                 "libhwp.so" ,                               // taskname
@@ -80,9 +94,9 @@ const TaskInfo g_exttaskinfolist[]   =   {
                         START_HWP_ERRL_ID,                  // module id
                 }
         },
-        
+
         /**
-         * @brief   plat task, 
+         * @brief   plat task,
          */
         {
                 "libplat.so" ,                              // taskname
@@ -97,17 +111,17 @@ const TaskInfo g_exttaskinfolist[]   =   {
 // TODO: Added this in order to successfull init.. Need to remove this and put
 // the module load and unload from a the istep dispatcher
         /**
-         * @brief   HWAS, 
+         * @brief   HWAS,
          */
 
 
         {
-            "libhwas.so" ,                         // taskname
-            NULL,                                       // no pointer to fn
+            "libhwas.so" ,                                  // taskname
+            NULL,                                           // no pointer to fn
             {
-                INIT_TASK,                         // task type
-                EXT_IMAGE,                          // Extended Module
-                EXECUTE_ISTEPS_ERRL_ID,             // module id
+                INIT_TASK,                                  // task type
+                EXT_IMAGE,                                  // Extended Module
+                EXECUTE_ISTEPS_ERRL_ID,                     // module id
             }
         },
 // end TODO
@@ -115,56 +129,50 @@ const TaskInfo g_exttaskinfolist[]   =   {
         /**
          * @brief   FSI Device Driver
          */
+
         {
-            "libfsi.so" ,                         // taskname
-            NULL,                                       // no pointer to fn
-            {
-                INIT_TASK,                         // task type
-                EXT_IMAGE,                          // Extended Module
-                START_FSIDD_ERRL_ID,             // module id
-            }
+                "libfsi.so" ,                               // taskname
+                NULL,                                       // no pointer to fn
+                {
+                        INIT_TASK,                          // task type
+                        EXT_IMAGE,                          // Extended Module
+                        START_FSIDD_ERRL_ID,                // module id
+                }
         },
 
         /**
-         * @brief   FSI Device Driver
+         * @brief   FSI SCOM Device Driver
          */
         {
-            "libfsiscom.so" ,                         // taskname
-            NULL,                                       // no pointer to fn
-            {
-                INIT_TASK,                         // task type
-                EXT_IMAGE,                          // Extended Module
-                START_FSISCOM_ERRL_ID,             // module id
-            }
+                "libfsiscom.so" ,                           // taskname
+                NULL,                                       // no pointer to fn
+                {
+                        INIT_TASK,                          // task type
+                        EXT_IMAGE,                          // Extended Module
+                        START_FSISCOM_ERRL_ID,              // module id
+                }
         },
 
-        /**
-         * @brief   targeting task,
-         */
-        {
-            "libtargeting.so" ,                         // taskname
-            NULL,                                       // no pointer to fn
-            {
-                START_TASK,                         // task type
-                EXT_IMAGE,                          // Extended Module
-                START_TARGETING_ERRL_ID,            // module id
-            }
-        },
 
+        //  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        // NOTE: libistepdisp.so needs to always be last in this list!!
+        //  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         /**
          * @brief   IStep Dispatcher task, runs ISteps
+         *
+         *
          */
         {
-            "libistepdisp.so" ,                         // taskname
-            NULL,                                       // no pointer to fn
+            "libistepdisp.so" ,                             // taskname
+            NULL,                                           // no pointer to fn
             {
-                START_TASK,                         // task type
-                EXT_IMAGE,                          // Extended Module
-                EXECUTE_ISTEPS_ERRL_ID,             // module id
+                START_TASK,                                 // task type
+                EXT_IMAGE,                                  // Extended Module
+                EXECUTE_ISTEPS_ERRL_ID,                     // module id
             }
         },
-        // NOTE: libistepdisp.so needs to always be last in this list!!
-        
+
+
         //  ---------------------------------------------------------------
         //  -----   END OF LIST!!!  ---------------------------------------
         //  ---------------------------------------------------------------
@@ -173,19 +181,20 @@ const TaskInfo g_exttaskinfolist[]   =   {
          * @brief   last task in the list
          */
         {
-                "end" ,                                 // dummy string
-                NULL,                                   // pointer to fn
+                "end" ,                                     // dummy string
+                NULL,                                       // pointer to fn
                 {
-                        END_TASK_LIST,                       // end of list
-                        UNDEFINED_MT,                   // dummy module type
-                        UNDEFINED_MODULE_ERRL_ID,            // dummy errorlog
+                        END_TASK_LIST,                      // end of list
+                        UNDEFINED_MT,                       // dummy module type
+                        UNDEFINED_MODULE_ERRL_ID,           // dummy errorlog
                 }
         },
 
 };
 
-
+//  -------------------------------------------------------------------------
 //  -----   UNIT    TESTS   -------------------------------------------------
+//  -------------------------------------------------------------------------
 const   TaskInfo    CXXTEST_TASK    =   {
                 "libcxxtest.so" ,                           // taskname
                 NULL,                                       // no pointer to fn
