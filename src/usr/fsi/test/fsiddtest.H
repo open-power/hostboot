@@ -139,6 +139,7 @@ class FsiDDTest : public CxxTest::TestSuite
         enum {
             PROC0,
             PROCWRAP,
+            PROC1,
             PROC2,
             CENTAUR0,
             CENTAUR8,
@@ -167,19 +168,25 @@ class FsiDDTest : public CxxTest::TestSuite
         fsi_target = TARGETING::targetService().toTarget(epath);
         fsi_targets[PROCWRAP] = fsi_target;
 
-        // other (wrap) processor target (physical:sys-0/node-0/proc-2)
+        // other processor target (physical:sys-0/node-0/proc-1)
+        epath.removeLast();
+        epath.addLast(TARGETING::TYPE_PROC,1);
+        fsi_target = TARGETING::targetService().toTarget(epath);
+        fsi_targets[PROC1] = fsi_target;
+
+        // alt-master processor target (physical:sys-0/node-0/proc-2)
         epath.removeLast();
         epath.addLast(TARGETING::TYPE_PROC,2);
         fsi_target = TARGETING::targetService().toTarget(epath);
         fsi_targets[PROC2] = fsi_target;
 
-        // centaur target (physical:sys-0/node-0/membuf-0)
+        // local centaur target (physical:sys-0/node-0/membuf-0)
         epath.removeLast();
         epath.addLast(TARGETING::TYPE_MEMBUF,0);
         fsi_target = TARGETING::targetService().toTarget(epath);
         fsi_targets[CENTAUR0] = fsi_target;
 
-        // centaur target (physical:sys-0/node-0/membuf-8)
+        // remote centaur target (physical:sys-0/node-0/membuf-8)
         epath.removeLast();
         epath.addLast(TARGETING::TYPE_MEMBUF,8);
         fsi_target = TARGETING::targetService().toTarget(epath);
@@ -215,6 +222,9 @@ class FsiDDTest : public CxxTest::TestSuite
             { PROCWRAP, 0x001000, 0x12345678, false, false }, //DATA_0 from FSI2PIB off MFSI-0 
             { PROCWRAP, 0x001004, 0xA5A5A5A5, true, false }, //DATA_1 from FSI2PIB off MFSI-0
             //@fixme SW106529  { PROCWRAP, 0x001028, 0x120EA049, false, false }, //CHIPID from FSI2PIB off MFSI-0 
+
+            //** Slave Regs
+            { PROC1, 0x001000, 0x88776655, true, false }, //FEL from SHIFT off MFSI-1
 
             //** Slave Regs
             { PROC2, 0x000000, 0xC0010EA0, false, false }, //Config Table entry for slave0 off MFSI-2
