@@ -250,7 +250,8 @@ default_stringFile = "hbotStringFile"
 #------------------------------------------------
 new_command("hb-trace",
     (lambda comp: run_hb_debug_framework("Trace",
-                                         ("components="+comp) if comp else "")),
+                                         ("components="+comp) if comp else "",
+                                         outputFile = "hb-trace.output")),
     [arg(str_t, "comp", "?", None),
     ],
     #alias = "hbt",
@@ -276,7 +277,7 @@ Examples: \n
 #------------------------------------------------
 #------------------------------------------------
 new_command("hb-printk",
-    lambda: run_hb_debug_framework("Printk"),
+    lambda: run_hb_debug_framework("Printk", outputFile = "hb-printk.output"),
     #alias = "hbt",
     type = ["hostboot-commands"],
     #see_also = ["hb-trace"],
@@ -380,7 +381,8 @@ new_command("hb-errl",
     (lambda logid, logidStr, flg_l, flg_d:
         run_hb_debug_framework("Errl",
                 ("display="+(str(logid) if logid else logidStr) if flg_d else ""
-                ))),
+                ),
+                outputFile = "hb-errl.output")),
     [ arg(int_t, "logid", "?", None),
      arg(str_t, "logidStr", "?", None),
      arg(flag_t, "-l"),

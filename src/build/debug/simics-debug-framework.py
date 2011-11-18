@@ -89,9 +89,10 @@ class DebugFrameworkProcess:
     usage = None;               # mode - Usage output instead of Execution.
     imgPath = "./";             # Image dir path override.
     result = "";                # Result string for Usage-mode.
+    outputFile = None;          # Output file for results in addition to STDOUT
 
     def __init__(self, tool = "Printk", toolOptions = "",
-                       usage = None, imgPath = "./"):
+                       usage = None, imgPath = "./",outputFile = None):
         # Determine sub-process arguments.
         process_args = ["./simics-debug-framework.pl"];
         if (usage): # Pass --usage if Usage mode selected.
@@ -105,6 +106,7 @@ class DebugFrameworkProcess:
         self.toolOptions = toolOptions;
         self.usage = usage;
         self.imgPath = imgPath;
+        self.outputFile = open(outputFile, 'w') if outputFile else None;
 
     # Read a message from the process pipe.
     def recvMsg(self):
@@ -131,6 +133,8 @@ class DebugFrameworkProcess:
             self.result += data
         else:
             print data,
+            if self.outputFile:
+                print >>self.outputFile,data,
 
     # Read data from memory.
     #    This message has data of the format "0xADDRESS,0xSIZE".
@@ -164,9 +168,9 @@ class DebugFrameworkProcess:
 # @param usage - Usage mode or Execute mode.
 # @param imgPath - Image path override.
 def run_hb_debug_framework(tool = "Printk", toolOpts = "",
-                           usage = None, imgPath = "./"):
+                           usage = None, imgPath = "./", outputFile = None):
     # Create debug sub-process.
-    fp = DebugFrameworkProcess(tool,toolOpts,usage,imgPath)
+    fp = DebugFrameworkProcess(tool,toolOpts,usage,imgPath,outputFile)
 
     # Read / handle messages until there are no more.
     msg = fp.recvMsg()
@@ -212,7 +216,9 @@ def register_hb_debug_framework_tools():
         new_command("hb-" + tool,
                     (lambda toolname:
                         lambda options:
-                            run_hb_debug_framework(toolname, options))(tool),
+                            run_hb_debug_framework(toolname, options,
+                                outputFile="hb-debug-"+toolname+".output"))
+                    (tool),
                     args = [arg(str_t, "options", "?", "")],
                     alias = "hb-debug-" + tool,
                     type = ["hostboot-commands"],
