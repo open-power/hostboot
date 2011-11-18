@@ -24,6 +24,7 @@
 //  dg003 SW047506 dgilbert 12/09/10 More filtering enhancements
 //                 andrewg  05/24/11 Port over for VPL/PgP
 //                 andrewg  09/19/11 Updates based on review
+//                 mjjones  11/17/11 Output attribute listing
 // End Change Log *********************************************************************************
 
 /**
@@ -208,6 +209,7 @@ namespace init
             void compile(BINSEQ & bin_seq);
 
             void listing(BINSEQ & bin_seq, ostream & out);
+            void attr_listing(BINSEQ & bin_seq, ostream & out);
 
             /**
              * Compare two spylists for equivalance

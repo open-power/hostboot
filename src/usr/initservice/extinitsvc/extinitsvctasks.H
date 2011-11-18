@@ -56,20 +56,7 @@ const TaskInfo g_exttaskinfolist[]   =   {
         },
 
         /**
-         * @brief   hwpf task, 
-         */
-        {
-                "libhwpf.so" ,                              // taskname
-                NULL,                                       // no pointer to fn
-                {
-                        INIT_TASK,                          // task type
-                        EXT_IMAGE,                          // Extended Module
-                        START_HWPF_ERRL_ID,                 // module id
-                }
-        },
-
-        /**
-         * @brief   fabi task, 
+         * @brief   fapi task, 
          */
         {
                 "libfapi.so" ,                              // taskname

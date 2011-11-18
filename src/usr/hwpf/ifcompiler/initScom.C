@@ -24,6 +24,7 @@
 //                 andrewg  05/24/11 Port over for VPL/PgP
 //                 andrewg  09/19/11 Updates based on review
 //                 andrewg  11/09/11 Multi-dimensional array and move to common fapi include
+//                 mjjones  11/17/11 Output attribute listing
 // End Change Log *********************************************************************************
 
 /**
@@ -1228,6 +1229,13 @@ void ScomList::listing(BINSEQ & bin_seq,ostream & olist)
     }
 
     dbg << "======================= End Listing ========================" << endl;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+void ScomList::attr_listing(BINSEQ & bin_seq,ostream & olist)
+{
+    olist << iv_symbols->attr_listing();
 }
 
 //-------------------------------------------------------------------------------------------------

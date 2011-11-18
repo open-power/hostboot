@@ -22,6 +22,6 @@
 #  IBM_PROLOG_END
 ROOTPATH = ../..
 
-SUBDIRS = linker.d tocgen.d ifcompiler.d
+SUBDIRS = linker.d tocgen.d
 
 include ${ROOTPATH}/config.mk

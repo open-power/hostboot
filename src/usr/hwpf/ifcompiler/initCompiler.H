@@ -24,6 +24,7 @@
 //  dg003 D779902  dgilbert 12/08/10 Ability to specify output if file
 //                 andrewg  05/24/11 Port over for VPL/PgP
 //                 andrewg  09/19/11 Updates based on review
+//                 mjjones  11/17/11 Output attribute listing
 // End Change Log *********************************************************************************
 
 /**
@@ -72,12 +73,14 @@ namespace init
             ~Parser();
 
             string listing_fn() { return (binseq_fn()).append(".list"); }
+            string attr_listing_fn() { return (binseq_fn()).append(".attr"); }
             string source_fn()  { return iv_source_path; }
             string binseq_fn()  { return iv_outfile; }  //dg003a
             //{ string s(iv_outdir); s.append(iv_initfile); s.append(".if"); return s; } //dg003d
             uint32_t get_source_type() { return iv_type; }
 
             ostream & listing_ostream() { return iv_list_ostream; }
+            ostream & attr_listing_ostream() { return iv_attr_list_ostream; }
 
             ScomList * get_scomlist() { return iv_scomlist; }  // TODO refactor this out
             bool debug_mode() { return iv_dbg; }
@@ -91,6 +94,7 @@ namespace init
             string iv_outdir;
             string iv_outfile;    //dg003a
             ofstream iv_list_ostream;
+            ofstream iv_attr_list_ostream;
             uint32_t iv_type;
             ScomList * iv_scomlist;
             bool iv_dbg;

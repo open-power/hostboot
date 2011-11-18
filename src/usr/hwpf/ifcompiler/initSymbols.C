@@ -21,6 +21,7 @@
 //                 andrewg  09/19/11 Updates based on review
 //                 camvanng 11/08/11 Added support for attribute enums
 //                 andrewg  11/09/11 Multi-dimensional array and move to common fapi include
+//                 mjjones  11/17/11 Output attribute listing
 // End Change Log *********************************************************************************
 
 /**
@@ -766,6 +767,24 @@ string Symbols::listing()
     }
 
     oss << not_found_listing();
+
+    return oss.str();
+}
+
+// ------------------------------------------------------------------------------------------------
+
+string Symbols::attr_listing()
+{
+    ostringstream oss;
+
+    // Set up tag table if not already setup
+    string any = "ANY";
+    get_tag(use_symbol(any));
+
+    for(SYMBOL_USED::iterator i = iv_used_var.begin() + 1; i != iv_used_var.end(); ++i)
+    {
+        oss << find_text(*i) << endl;
+    }
 
     return oss.str();
 }

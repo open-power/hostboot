@@ -46,7 +46,7 @@ RUNTIME_OBJECTS =
 BASE_MODULES = trace errl devicefw scom xscom initservice taskargs \
                pnor i2c  fsi vfs
 
-EXTENDED_MODULES = targeting ecmddatabuffer hwpf fapi hwp plat	\
+EXTENDED_MODULES = targeting ecmddatabuffer fapi hwp plat \
                    extinitsvc istepdisp hwas fsiscom
 
 DIRECT_BOOT_MODULES = example

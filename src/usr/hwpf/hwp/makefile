@@ -20,7 +20,6 @@
 #  Origin: 30
 #
 #  IBM_PROLOG_END
-SUBDIRS = initfiles.d
 ROOTPATH = ../../../..
 MODULE = hwp
 

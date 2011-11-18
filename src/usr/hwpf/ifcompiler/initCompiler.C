@@ -21,6 +21,7 @@
 //  dg003  D779902 dgilbert 12/08/10 Add ability to specify ouput if file
 //                 andrewg  05/24/11 Port over for VPL/PgP
 //                 andrewg  09/19/11 Updates based on review
+//                 mjjones  11/17/11 Output attribute listing
 // End Change Log *********************************************************************************
 
 /**
@@ -144,6 +145,7 @@ int main(int narg, char ** argv)
             printf("Generate Listing\n");
             // This builds a listing from the compiled binary sequence
             yyscomlist->listing(bin_seq, parsed.listing_ostream());
+            yyscomlist->attr_listing(bin_seq, parsed.attr_listing_ostream());
 
             // open if file and read in to new SpyList
             
@@ -248,6 +250,7 @@ Parser::Parser(int narg, char ** argv)
     stats << "*********************************************************" << endl;
     stats << "* source:  " << iv_source_path << endl;
     stats << "* listing: " << listing_fn() << endl;
+    stats << "* attr: " << attr_listing_fn() << endl;
     stats << "* binary:  " << binseq_fn() << endl;
 
     iv_scomlist = new ScomList(iv_source_path, header_files, stats, iv_ec);   //dg002c
@@ -270,11 +273,17 @@ Parser::Parser(int narg, char ** argv)
         throw invalid_argument(string("ERROR! Could not open ") + listing_fn());
     }
 
+    iv_attr_list_ostream.open(attr_listing_fn().c_str());
+    if(!iv_attr_list_ostream)
+    {
+        throw invalid_argument(string("ERROR! Could not open ") + attr_listing_fn());
+    }
 }
 
 Parser::~Parser()
 {
     iv_list_ostream.close();
+    iv_attr_list_ostream.close();
 }
 
 void Parser::capture_dbg()

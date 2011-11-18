@@ -23,6 +23,7 @@
 //                 andrewg  09/19/11 Updates based on review
 //                 camvanng 11/08/11 Added support for attribute enums
 //                 andrewg  11/09/11 Multi-dimensional array and move to common fapi include
+//                 mjjones  11/17/11 Output attribute listing
 // End Change Log *********************************************************************************
 
 /**
@@ -178,6 +179,7 @@ namespace init
 
 
             string listing();              ///< listing of used vars & lits
+            string attr_listing();         ///< listing of used HWPF attributes
             uint32_t bin_vars(BINSEQ & blist);  ///< binary byte output of used vars. ret # vars
             uint32_t bin_lits(BINSEQ & blist);  ///< binary byte sequence of used lits ret # lits
 
