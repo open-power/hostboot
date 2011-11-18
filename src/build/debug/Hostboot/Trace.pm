@@ -44,6 +44,12 @@ sub main
         $args->{"fsp-trace"} = "fsp-trace";
     }
 
+    my $fsptrace_options = "";
+    if (defined $args->{"with-file-names"})
+    {
+        $fsptrace_options = $fsptrace_options."-f ";
+    }
+
     my $traceBuffers = $args->{"components"};
 
     my ($symAddr, $symSize) = ::findSymbolAddress("TRACE::g_desc_array");
@@ -74,7 +80,7 @@ sub main
     if ($foundBuffer)
     {
         open TRACE, ($args->{"fsp-trace"}." -s ".
-                    ::getImgPath()."hbotStringFile -f $fname |");
+                    ::getImgPath()."hbotStringFile $fsptrace_options $fname |");
         while (my $line = <TRACE>)
         {
             ::userDisplay $line;
@@ -97,4 +103,6 @@ sub help
                       "fsp-trace utility.\n";
     ::userDisplay "\tcomponents=<list> - Comma separated list of components\n".
                   "\t                    to display trace buffers for.\n";
+    ::userDisplay "\twith-file-names - Trace statements will include file\n".
+                  "\t                  name of place the trace was defined.\n";
 }
