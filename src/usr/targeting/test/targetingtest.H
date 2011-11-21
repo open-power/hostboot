@@ -1160,12 +1160,10 @@ class TargetingTestSuite: public CxxTest::TestSuite
         {
             TS_FAIL("Should have been a platform handled error");
         }
-        else
-        {
-            errlHndl_t l_pErrLog = static_cast<ERRORLOG::ErrlEntry*>(
-                                                                     l_rc.releasePlatData());
-            ERRORLOG::errlCommit(l_pErrLog,TARG_COMP_ID);
-        }
+
+        // The error log will get deleted when the ReturnCode is destructed. The
+        // error log is not committed here to avoid it getting interpreted as a
+        // real problem
 
         delete l_pFapiTarget;
         l_pFapiTarget = NULL;

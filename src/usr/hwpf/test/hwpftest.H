@@ -96,8 +96,11 @@ public:
 
         if (l_err)
         {
-            TS_TRACE("testHwpf2: Unit Test passed. hwpTestError failed. Error logged");
-            errlCommit(l_err,HWPF_COMP_ID);
+            // Delete the error rather than committing it to avoid it getting
+            // interpreted as a real problem
+            TS_TRACE("testHwpf2: Unit Test passed. hwpTestError failed. Error deleted");
+            delete l_err;
+            l_err = NULL;
         }
         else
         {

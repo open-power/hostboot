@@ -820,9 +820,11 @@ fapi::ReturnCode hwpTestAttributes()
 
         if (l_rc)
         {
-            FAPI_INF("hwpTestAttributes: Logging expected error 0x%x from fapiGetInitFileAttr",
+            // Delete the error rather than logging it to avoid it getting
+            // interpreted as a real problem
+            FAPI_INF("hwpTestAttributes: Deleting expected error 0x%x from fapiGetInitFileAttr",
                      static_cast<uint32_t>(l_rc));
-            fapiLogError(l_rc);
+            l_rc = fapi::FAPI_RC_SUCCESS;
             break;
         }
         else
