@@ -303,11 +303,11 @@ public:
             }
 
             //Call Hwp to execute the initfile
-            FAPI_EXEC_HWP(l_rc, hwpExecInitFile, l_fapiTarget, "sample.if");
+            FAPI_EXEC_HWP(l_rc, fapiHwpExecInitFile, l_fapiTarget, "sample.if");
             
             if (l_rc != fapi::FAPI_RC_SUCCESS)
             {
-                TS_FAIL("testHwpf5: Error from hwpExecInitFile");
+                TS_FAIL("testHwpf5: Error from fapiHwpExecInitFile");
                 break;
             }
 
@@ -374,7 +374,7 @@ public:
         }
         else
         {
-            TS_TRACE("testHwpf5: Unit Test passed. hwpExecInitFile passed.");
+            TS_TRACE("testHwpf5: Unit Test passed. fapiHwpExecInitFile passed.");
         }
     }
 

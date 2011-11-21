@@ -21,7 +21,7 @@
 //
 //  IBM_PROLOG_END
 /**
- *  @file platUtil.C
+ *  @file fapiPlatUtil.C
  *
  *  @brief Implements the fapiUtil.H utility functions.
  *
@@ -132,8 +132,8 @@ void platSetScanTrace(bool i_enable)
 //******************************************************************************
 // fapiLoadInitFile
 //******************************************************************************
-fapi::ReturnCode fapiLoadInitFile(const char * i_file, const char *& o_addr, 
-    size_t & o_size)
+fapi::ReturnCode fapiLoadInitFile(const fapi::Target & i_Target,
+    const char * i_file, const char *& o_addr, size_t & o_size)
 {
     fapi::ReturnCode l_rc = fapi::FAPI_RC_SUCCESS;
     errlHndl_t l_pError = NULL;

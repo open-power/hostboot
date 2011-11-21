@@ -22,6 +22,7 @@
 //                 camvanng 11/08/11 Added support for attribute enums
 //                 andrewg  11/09/11 Multi-dimensional array and move to common fapi include
 //                 mjjones  11/17/11 Output attribute listing
+//                 camvanng 11/17/11 Support for system & target attributes
 // End Change Log *********************************************************************************
 
 /**
@@ -43,6 +44,7 @@ using namespace init;
 ostringstream errss;
 
 #define SYM_EXPR 0x10000000
+const string SYS_ATTR = "SYS.";
 
 // ------------------------------------------------------------------------------------------------
 
@@ -82,9 +84,9 @@ Symbols::Symbols(FILELIST & i_filenames)
                     getline(infs,fileline);
                     getline(infs,fileline);
 
-                    // We're just parsing the enum in order so values start
+                    // We're just parsing the enum in order so attribute id start
                     // at 0 and increment by 1 after that.
-                    uint32_t value = 0;
+                    uint32_t attrId = 0;
 
                     while(fileline[0] != '}')
                     {
@@ -101,11 +103,25 @@ Symbols::Symbols(FILELIST & i_filenames)
 
                         //printf("Attribute String:%s\n",attr.c_str());
                         // We now have the first attribute loaded into attr
-                        // Get a value for the string
+                        // Get an index for the string
 
-                        iv_symbols[attr] = MAP_DATA(value,NOT_USED);
-                        value++;
+                        iv_symbols[attr] = MAP_DATA(attrId,NOT_USED);
+
+                        attrId++;
                         getline(infs,fileline);
+                    }
+
+                    //Create system attribute for each of the attribute found
+                    //Assign them unique attribute ids
+                    SYMBOL_MAP::iterator itr = iv_symbols.begin();
+                    uint32_t size = iv_symbols.size();
+                    for(uint32_t j = 0; j < size; ++j)
+                    {
+                        string sysAttr = SYS_ATTR + (*itr).first;
+                        //printf("\n\n\nsysAttr %s", sysAttr.c_str());
+                        iv_symbols[sysAttr] = MAP_DATA(attrId,NOT_USED);
+                        attrId++;
+                        itr++;
                     }
                 }
                 else
@@ -213,6 +229,7 @@ Symbols::Symbols(FILELIST & i_filenames)
                  }
 
                  iv_attr_type[attribute_name] = get_attr_type(type,array);
+                 iv_attr_type[SYS_ATTR + attribute_name] = iv_attr_type[attribute_name];
                  //printf("Attribute %s Type  with array dimension %u for %s is %u\n",attribute_name.c_str(),array,
                  //       type.c_str(),get_attr_type(type,array));
             }
@@ -372,7 +389,9 @@ uint16_t Symbols::get_tag(uint32_t i_rpn_id)
         iv_used_var.reserve(iv_used_var_count); // makes if faster
         iv_used_lit.reserve(iv_used_lit_count);
 
-        iv_used_var.push_back(iv_rpn_map[Rpn::SYMBOL|INIT_EXPR_VAR].second); // EXPR var always first
+        //To differentiate between system and target attributes which have the same attribute id,
+        //save the attribute name also.
+        iv_used_var.push_back(RPN_DATA("EXPR",SYM_EXPR));                    // EXPR var always first
         iv_used_lit.push_back(iv_rpn_map[Rpn::SYMBOL|INIT_ANY_LIT].second);  // ANY lit always first
 
         for(SYMBOL_MAP::iterator i = iv_symbols.begin(); i != iv_symbols.end(); ++i)
@@ -385,7 +404,7 @@ uint16_t Symbols::get_tag(uint32_t i_rpn_id)
                 }
                 else  //VAR
                 {
-                    iv_used_var.push_back(i->second.first);
+                    iv_used_var.push_back(RPN_DATA(find_text(i->second.first), i->second.first));
                 }
             }
         }
@@ -393,7 +412,6 @@ uint16_t Symbols::get_tag(uint32_t i_rpn_id)
 
     do
     {
-
         RPN_MAP::iterator rm = iv_rpn_map.find(i_rpn_id);
         if(rm != iv_rpn_map.end())
         {
@@ -421,11 +439,18 @@ uint16_t Symbols::get_tag(uint32_t i_rpn_id)
         }
 
         uint32_t offset = 0;
-        for(SYMBOL_USED::iterator i = iv_used_var.begin(); i != iv_used_var.end(); ++i,++offset)
+        for(VAR_SYMBOL_USED::iterator i = iv_used_var.begin(); i != iv_used_var.end(); ++i,++offset)
         {
-            if(cini_id == *i) 
+            if(cini_id == (*i).second)
             {
                 tag = (uint16_t) (offset | IF_ATTR_TYPE);
+
+                if ((*i).first.compare(0, 4, SYS_ATTR) == 0)
+                {
+                    tag |= IF_SYS_ATTR_MASK;
+                    //printf ("get tag: %s tag 0x%x\n", (*i).first.c_str(), tag);
+                }
+
                 break;
             }
         }
@@ -741,13 +766,23 @@ string Symbols::listing()
     oss << "\n--------------- Attribute Symbol Table ---------------\n\n"
         << "0x" << setw(4) << iv_used_var.size()-1 << '\t' << "Number of variables\n";
 
-    for(SYMBOL_USED::iterator i = iv_used_var.begin() + 1; i != iv_used_var.end(); ++i)
+    for(VAR_SYMBOL_USED::iterator i = iv_used_var.begin() + 1; i != iv_used_var.end(); ++i)
     {
         ++count;
-        oss << "Type:" << setw(2) << iv_attr_type[find_text(*i)] << " Value:0x" << setw(8) << (*i) << '\t' << "ID 0X" << setw(4) << (count | IF_ATTR_TYPE)
-            << '\t' << '[' << find_text(*i) << ']' << endl;
+        uint32_t id = count | IF_ATTR_TYPE;
 
-        //printf("ATTRIBUTE: %s  Value:0x%02X\n",(find_text(*i)).c_str(),iv_attr_type[find_text(*i)]);
+        string name = (*i).first;
+        uint32_t attrId = (*i).second;
+        if(name.compare(0, 4, SYS_ATTR) == 0)
+        {
+            id |= IF_SYS_ATTR_MASK;
+            attrId = iv_symbols[name.substr(4)].first;
+        }
+
+        oss << "Type:" << setw(2) << iv_attr_type[name] << " Value:0x" << setw(8) << attrId << '\t' << "ID 0X" << setw(4) << id
+            << '\t' << '[' << name << ']' << endl;
+
+        //printf("ATTRIBUTE: %s  Value:0x%02X\n",name,iv_attr_type[name]);
     }
 
     count = 0;
@@ -781,9 +816,15 @@ string Symbols::attr_listing()
     string any = "ANY";
     get_tag(use_symbol(any));
 
-    for(SYMBOL_USED::iterator i = iv_used_var.begin() + 1; i != iv_used_var.end(); ++i)
+    for(VAR_SYMBOL_USED::iterator i = iv_used_var.begin() + 1; i != iv_used_var.end(); ++i)
     {
-        oss << find_text(*i) << endl;
+        string name = (*i).first;
+        if (name.compare(0, 4, SYS_ATTR) == 0)
+        {
+            name = name.substr(4);
+        }
+
+        oss << name << endl;
     }
 
     return oss.str();
@@ -818,12 +859,23 @@ uint32_t Symbols::bin_vars(BINSEQ & blist)
 
     Rpn::set16(blist,(uint16_t)count);
 
-    for(SYMBOL_USED::iterator i = iv_used_var.begin() + 1; i != iv_used_var.end(); ++i)
+    for(VAR_SYMBOL_USED::iterator i = iv_used_var.begin() + 1; i != iv_used_var.end(); ++i)
     {
-        // Write out the attribute type (i.e. uint8_t, uint16_t, ...) and it's index number
-        Rpn::set8(blist,iv_attr_type[find_text(*i)]);
-        Rpn::set32(blist,(*i));
-        //printf("Symbols::bin_vars: Just wrote out type:%u value:%u\n",iv_attr_type[find_text(*i)],*i);
+        // Write out the attribute type (i.e. uint8_t, uint16_t, ...) and it's attribute id number
+
+        string name = (*i).first;
+        uint32_t attrId = (*i).second;
+
+        // If sys attribute, use same attribute id as target attribute
+        if (name.compare(0, 4, SYS_ATTR) == 0)
+        {
+            attrId = iv_symbols[name.substr(4)].first;
+        }
+
+        Rpn::set8(blist,iv_attr_type[name]);
+
+        Rpn::set32(blist,attrId);
+        //printf("Symbols::bin_vars: Just wrote out type:%u index:%u\n",iv_attr_type[name],attrId);
     }
     return count;
 }
@@ -864,16 +916,35 @@ uint32_t Symbols::restore_var_bseq(BINSEQ::const_iterator & bli)
 {
     uint32_t count = Rpn::extract16(bli);
 
-    iv_used_var.clear();
-    iv_used_var.push_back(iv_rpn_map[Rpn::SYMBOL|INIT_EXPR_VAR].second); // EXPR var always first
-
     for(uint32_t i = 0; i < count; ++i)
     {
         uint8_t type = Rpn::extract8(bli);
-        uint32_t attribute = Rpn::extract32(bli);
-        iv_attr_type[find_text(attribute)] = type;
-        iv_used_var.push_back(attribute);
+        uint32_t attrId = Rpn::extract32(bli);
+
+        string name = find_text(attrId);
+        string used_var_name = iv_used_var.at(i+1).first;
+
+        // Account for system attributes
+        if (name != used_var_name)
+        {
+            if (name == used_var_name.substr(4))
+            {
+                attrId = iv_symbols[used_var_name].first;
+            }
+            else
+            {
+                ostringstream errs;
+                errs << "ERROR! Symbols::restore_var_bseq().  Invalid attribute id ["
+                    << attrId << ']' << endl;
+                throw invalid_argument(errs.str());
+            }
+
+        }
+
+        iv_attr_type[used_var_name] = type;
+        iv_used_var.at(i+1).second = attrId;
     }
+
     return count;
 }
 
@@ -900,7 +971,7 @@ uint32_t Symbols::restore_lit_bseq(BINSEQ::const_iterator & bli)
             default:
                     {
                         ostringstream errs;
-                        errs << "ERROR! Symbols::restore_var_bseq().  Invalid literal data size ["
+                        errs << "ERROR! Symbols::restore_lit_bseq().  Invalid literal data size ["
                             << size << ']' << endl;
                         throw invalid_argument(errs.str());
                     }
@@ -960,7 +1031,8 @@ uint32_t Symbols::get_rpn_id(uint32_t bin_tag)
     switch(type)
     {
         case IF_ATTR_TYPE:  {
-                            cini_id = iv_used_var[offset];
+                            offset &= ~IF_SYS_ATTR_MASK;
+                            cini_id = iv_used_var[offset].second;
                             string name = find_text(cini_id);
                             rpn_id = use_symbol(name);
                         }

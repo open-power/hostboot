@@ -38,6 +38,8 @@
  *                          mjjones     09/01/2011  Call toString in InitialTest
  *                          mjjones     09/14/2011  Update to scom function name
  *                          camvanng    09/28/2011  Added test for initfile
+ *                          camvanng    11/16/2011  Change function name
+ *                                                  fapiHwpExecInitFile() 
  *
  */
 
@@ -271,19 +273,19 @@ fapi::ReturnCode hwpInitialTest(const fapi::Target & i_chip)
 #endif
 
         // --------------------------------------------------------
-        // 9. hwpExecInitFile test
+        // 9. fapiHwpExecInitFile test
         // --------------------------------------------------------
 
         //Call Hwp to execute the sample initfile
-        FAPI_EXEC_HWP(l_rc, hwpExecInitFile, i_chip, "sample.if");
+        FAPI_EXEC_HWP(l_rc, fapiHwpExecInitFile, i_chip, "sample.if");
         if (l_rc != fapi::FAPI_RC_SUCCESS)
         {
-            FAPI_ERR("hwpInitialTest: Error from hwpExecInitFile");
+            FAPI_ERR("hwpInitialTest: Error from fapiHwpExecInitFile");
             break;
         }
         else
         {
-            FAPI_INF("hwpInitialTest: hwpExecInitFile passed");
+            FAPI_INF("hwpInitialTest: fapiHwpExecInitFile passed");
         }
 
     } while (0);

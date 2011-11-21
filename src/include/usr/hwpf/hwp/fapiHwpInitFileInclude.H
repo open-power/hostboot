@@ -31,6 +31,8 @@
  * Flag     Defect/Feature  User        Date        Description
  * ------   --------------  ----------  ----------- ----------------------------
  *                          andrewg     11/09/2011  Created.
+ *                          camvanng    11/16/2011  Support for system & target
+ *                                                  attributes
  *
  */
 
@@ -75,6 +77,12 @@ enum IfTypeMask
     IF_NUM_TYPE        = 0xC000,
     IF_TYPE_MASK       = 0xC000,
 };
+
+// System or Target attribute
+const uint16_t IF_SYS_ATTR_MASK = 0x2000;
+
+// Attribute Id mask
+const uint16_t IF_ATTR_ID_MASK = 0x1FFF;
 
 // Only support up to 4 dimensions for an array
 const uint8_t MAX_ATTRIBUTE_ARRAY_DIMENSION = 4;

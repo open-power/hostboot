@@ -24,6 +24,7 @@
 //  dg02 SW058986 dgilbert 02/28/11   More noticeable fail for missing col headers
 //                andrewg  09/19/11   Updates based on review
 //                camvanng 11/08/11   Added support for attribute enums
+//                camvanng 11/16/11   Support system & target attributes
 // End Change Log *********************************************************************************/
 /**
  * @file initCompiler.lex
@@ -211,6 +212,8 @@ scom_data               { g_coltype = INIT_SCOMD; return INIT_SCOMD;}
 <*>;                    { g_coltype = 0; return ';'; }
                             
 END_INITFILE            return INIT_ENDINITFILE;
+
+<*>SYS\.                yymore();
 
 <*>ENUM_{ID}            { 
                             yylval.str_ptr = new std::string(yytext); return ATTRIBUTE_ENUM;

@@ -24,6 +24,7 @@
 //                 camvanng 11/08/11 Added support for attribute enums
 //                 andrewg  11/09/11 Multi-dimensional array and move to common fapi include
 //                 mjjones  11/17/11 Output attribute listing
+//                 camvanng 11/17/11 Support for system & target attributes
 // End Change Log *********************************************************************************
 
 /**
@@ -239,6 +240,7 @@ namespace init
             typedef pair<string,uint32_t>  RPN_DATA;
             typedef map<uint32_t,RPN_DATA> RPN_MAP;
 
+            typedef vector<RPN_DATA> VAR_SYMBOL_USED;
             typedef vector<uint32_t>  SYMBOL_USED;
 
             typedef pair<uint64_t,uint32_t> LIT_DATA;
@@ -249,7 +251,7 @@ namespace init
             SYMBOL_ATTR_ENUM iv_attr_enum;
             SYMBOL_MAP  iv_not_found;   ///< List of symbols not found
             RPN_MAP     iv_rpn_map;     ///< Map rpn_id to symbol name/cini_id of used Symbols
-            SYMBOL_USED iv_used_var;    ///< List of cini_ids of used vars ordered by name
+            VAR_SYMBOL_USED iv_used_var; ///< List of used attributes and their ids ordered by name
             SYMBOL_USED iv_used_lit;    ///< List of cini_ids of used enum lits ordered by name
 
             LIT_LIST iv_lits;           ///< Numeric literals
