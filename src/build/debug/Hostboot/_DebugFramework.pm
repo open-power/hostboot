@@ -44,13 +44,16 @@ use Exporter 'import';
 
 our @EXPORT = ( 'callToolModule', 'callToolModuleHelp',
                 'parseToolOpts', 'determineImagePath',
-                'findSymbolAddress', 'findSymbolByAddress',
+                'findSymbolAddress', 'findSymbolTOCAddress',
+                'findSymbolByAddress',
                 'findModuleByAddress',
                 'littleendian',
-                'read64', 'read32', 'read16', 'read8', 'readStr'
+                'read64', 'read32', 'read16', 'read8', 'readStr',
+                'write64', 'write32', 'write16', 'write8'
               );
 
-our ($parsedSymbolFile, %symbolAddress, %addressSymbol, %symbolSize);
+our ($parsedSymbolFile, %symbolAddress, %symbolTOC,
+     %addressSymbol, %symbolSize);
 our ($parsedModuleFile, %moduleAddress);
 our (%toolOpts);
 
@@ -58,6 +61,7 @@ BEGIN
 {
     $parsedSymbolFile = 0;
     %symbolAddress = ();
+    %symbolTOC = ();
     %addressSymbol = ();
     %symbolSize = ();
 
@@ -109,18 +113,50 @@ sub callToolModuleHelp
 #
 # Parses a space deliminated string of options for use by the tool.
 #
+# Allows an option to contain spaces itself by wrapping the value in a
+# single quote.
+#
 # @param string - Tool option list.
 #
-# Example: "foo bar=/abcd/efg" --> { "foo" => 1 , "bar" => "/abcd/efg" }
+# Example:
+#     "foo bar=/abcd/efg" --> { "foo" => 1 , "bar" => "/abcd/efg" }
+#     "foo='bar nil'" --> { "foo" => "bar nil" }
 #
 sub parseToolOpts
 {
     my $toolOptions = shift;
+    my $partial = "";
     foreach my $opt (split / /, $toolOptions)
     {
+        # Search for a single-quoted word in the option string.
+        if (($opt =~ m/'/) and (not ($opt =~ m/'.*'/)))
+        {
+            # If partial is not empty, this single-quote terminates the string.
+            if ($partial ne "")
+            {
+                $opt = $partial." ".$opt;
+                $partial = "";
+            }
+            # Otherwise, append it to the partial string.
+            else
+            {
+                $partial = $opt;
+                next;
+            }
+        }
+        # Append a word to a partially completed string in progress.
+        elsif ($partial ne "")
+        {
+            $partial = $partial." ".$opt;
+            next;
+        }
+
+        # At this point "opt" is either a free-standing argument set or a
+        # fully complete single-quote deliminated string.
         if ($opt =~ m/=/)
         {
             my ($name,$value) = split /=/, $opt;
+            $value =~ s/^'([^']*)'$/$1/;        # Trim out the 's.
             $toolOpts{$name} = $value;
         }
         else
@@ -185,11 +221,26 @@ sub parseSymbolFile
         my $addr = hex $2;
         my $tocAddr = hex $3;
         my $size = hex $4;
+        my $type = $1;
 
-        $symbolAddress{$name} = $addr;
-        $symbolSize{$name} = $size;
         $addressSymbol{$addr} = $name;
         $addressSymbol{$tocAddr} = $name;
+
+        # Use only the first definition of a symbol.
+        #    This is useful for constructors where we only want to call the
+        #    'in-charge' version of the constructor.
+        if (defined $symbolAddress{$name})
+        {
+            next;
+        }
+
+        $symbolAddress{$name} = $addr;
+        if ($type eq "F")
+        {
+            $symbolTOC{$name} = $tocAddr;
+        }
+        $symbolSize{$name} = $size;
+
     }
     close(FILE);
 
@@ -210,6 +261,21 @@ sub findSymbolAddress
     parseSymbolFile();
 
     return ($symbolAddress{$name}, $symbolSize{$name} );
+}
+
+# @sub findSymbolTOCAddress
+# Searches a syms file for the address of the TOC of a symbol.
+#
+# @param string - Symbol to search for.
+# @return TOC address or 'not-defined'.
+#
+sub findSymbolTOCAddress
+{
+    my $name = shift;
+
+    parseSymbolFile();
+
+    return $symbolTOC{$name};
 }
 
 # @sub findSymbolByAddress
@@ -391,6 +457,77 @@ sub readStr
     } while ($byte != 0);
 
     return $result;
+}
+
+# @sub write64
+#
+# Write a 64-bit unsigned integer to an address.
+#
+# @param Address to write to.
+# @param Value to write
+#
+sub write64
+{
+    my $addr = shift;
+    my $value = shift;
+
+    $value = pack("Q", $value);
+    if (littleendian()) { $value = reverse($value); }
+
+    my $result = ::writeData($addr, 8, $value);
+}
+
+# @sub write32
+#
+# Write a 32-bit unsigned integer to an address.
+#
+# @param Address to write to.
+# @param Value to write
+#
+sub write32
+{
+    my $addr = shift;
+    my $value = shift;
+
+    $value = pack("L", $value);
+    if (littleendian()) { $value = reverse($value); }
+
+    my $result = ::writeData($addr, 4, $value);
+}
+
+# @sub write16
+#
+# Write a 16-bit unsigned integer to an address.
+#
+# @param Address to write to.
+# @param Value to write
+#
+sub write16
+{
+    my $addr = shift;
+    my $value = shift;
+
+    $value = pack("S", $value);
+    if (littleendian()) { $value = reverse($value); }
+
+    my $result = ::writeData($addr, 2, $value);
+}
+
+# @sub write8
+#
+# Write a 8-bit unsigned integer to an address.
+#
+# @param Address to write to.
+# @param Value to write
+#
+sub write8
+{
+    my $addr = shift;
+    my $value = shift;
+
+    $value = pack("C", $value);
+
+    my $result = ::writeData($addr, 1, $value);
 }
 
 __END__

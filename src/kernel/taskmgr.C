@@ -68,9 +68,11 @@ task_t* TaskManager::createIdleTask()
     return Singleton<TaskManager>::instance()._createIdleTask();
 }
 
-task_t* TaskManager::createTask(TaskManager::task_fn_t t, void* p)
+task_t* TaskManager::createTask(TaskManager::task_fn_t t, void* p,
+                                bool kernelParent)
 {
-    return Singleton<TaskManager>::instance()._createTask(t, p, true);
+    return Singleton<TaskManager>::instance()._createTask(t, p, true,
+                                                          kernelParent);
 }
 
 void TaskManager::endTask(task_t* t, void* retval, int status)
@@ -85,11 +87,11 @@ void TaskManager::waitTask(task_t* t, int64_t tid, int* status, void** retval)
 
 task_t* TaskManager::_createIdleTask()
 {
-    return this->_createTask(&TaskManager::idleTaskLoop, NULL, false);
+    return this->_createTask(&TaskManager::idleTaskLoop, NULL, false, true);
 }
 
 task_t* TaskManager::_createTask(TaskManager::task_fn_t t,
-				 void* p, bool withStack)
+				 void* p, bool withStack, bool kernelParent)
 {
     task_t* task = new task_t;
     memset(task, '\0', sizeof(task_t));
@@ -144,7 +146,7 @@ task_t* TaskManager::_createTask(TaskManager::task_fn_t t,
 
     // Assign parent for tracker instance, add to task tree.
     iv_spinlock.lock();
-    task_t* parent = getCurrentTask();
+    task_t* parent = kernelParent ? NULL : getCurrentTask();
     if (NULL == parent)
     {
         tracker->parent = NULL;

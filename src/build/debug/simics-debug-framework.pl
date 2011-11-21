@@ -106,6 +106,43 @@ sub readData
     return "";
 }
 
+# @sub writeData
+# @brief Send a 'write-data' type message to Python.
+sub writeData
+{
+    my $addr = shift;
+    my $size = shift;
+    my $value = shift;
+
+    my $value = unpack("H*", $value);
+    sendIPCMsg("write-data", "$addr,$size,$value");
+
+    return;
+}
+
+# @sub executeInstrCycles
+# @brief Send a 'execute-instrs' type message to Python.
+sub executeInstrCycles
+{
+    my $cycles = shift;
+    sendIPCMsg("execute-instrs", "$cycles");
+}
+
+# @sub readyForInstructions
+# @brief Send a 'ready-for-instr' type message to Python.
+# @returns 0 - Not ready or 1 - Ready
+sub readyForInstructions
+{
+    sendIPCMsg("ready-for-instr", "");
+
+    my ($type, $data) = recvIPCMsg();
+    if ("1" eq $data)
+    {
+        return 1;
+    }
+    return 0;
+}
+
 # Image path global.
 my $imgPath = "";
 sub getImgPath

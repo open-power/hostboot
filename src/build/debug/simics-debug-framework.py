@@ -86,17 +86,19 @@ class DebugFrameworkProcess:
     process = "";               # subprocess object.
     tool = "";                  # string - tool module name.
     toolOptions = "";           # string - tool options
-    usage = None;               # mode - Usage output instead of Execution.
+    outputToString = None;      # mode - String output instead of STDOUT.
     imgPath = "./";             # Image dir path override.
     result = "";                # Result string for Usage-mode.
     outputFile = None;          # Output file for results in addition to STDOUT
 
     def __init__(self, tool = "Printk", toolOptions = "",
-                       usage = None, imgPath = "./",outputFile = None):
+                       outputToString = None, usage = None,
+                       imgPath = "./",outputFile = None):
         # Determine sub-process arguments.
         process_args = ["./simics-debug-framework.pl"];
         if (usage): # Pass --usage if Usage mode selected.
             process_args = process_args + [ "--usage" ];
+            outputToString = True;
 
         # Spawn sub-process
         self.process = subprocess.Popen(process_args,
@@ -104,7 +106,7 @@ class DebugFrameworkProcess:
         # Update instance variables.
         self.tool = tool;
         self.toolOptions = toolOptions;
-        self.usage = usage;
+        self.outputToString = outputToString;
         self.imgPath = imgPath;
         self.outputFile = open(outputFile, 'w') if outputFile else None;
 
@@ -129,7 +131,7 @@ class DebugFrameworkProcess:
 
     # Display string (or save to result in Usage mode).
     def display(self,data):
-        if (self.usage):
+        if (self.outputToString):
             self.result += data
         else:
             print data,
@@ -137,16 +139,42 @@ class DebugFrameworkProcess:
                 print >>self.outputFile,data,
 
     # Read data from memory.
-    #    This message has data of the format "0xADDRESS,0xSIZE".
+    #    This message has data of the format "0dADDRESS,0dSIZE".
     def read_data(self,data):
         pattern = re.compile("([0-9]+),([0-9]+)")
-        match = pattern.search(data);
+        match = pattern.search(data)
 
         addr = int(match.group(1))
         size = int(match.group(2))
 
         data = "".join(map(chr, conf.phys_mem.memory[[addr , addr+size-1]]))
         self.sendMsg("data-response", data)
+
+    # Write data to memory.
+    #    This message has data of the format "0dADDR,0dSIZE,hDATA".
+    def write_data(self,data):
+        pattern = re.compile("([0-9]+),([0-9]+),([0-9A-Fa-f]+)")
+        match = pattern.search(data)
+
+        addr = int(match.group(1))
+        size = int(match.group(2))
+        data = map(ord, match.group(3).decode("hex"));
+
+        conf.phys_mem.memory[[addr, addr+size-1]] = data;
+
+    # Clock forward the model.
+    #    This message had data of the format "0dCYCLES".
+    def execute_instrs(self,data):
+        pattern = re.compile("([0-9]+)")
+        match = pattern.search(data)
+
+        cycles = int(match.group(1))
+
+        if (not SIM_simics_is_running()):
+            SIM_continue(cycles)
+
+    def ready_for_instr(self,data):
+        self.sendMsg("data-response", "0" if SIM_simics_is_running() else "1")
 
     # Get tool module name.
     def get_tool(self,data):
@@ -168,15 +196,20 @@ class DebugFrameworkProcess:
 # @param usage - Usage mode or Execute mode.
 # @param imgPath - Image path override.
 def run_hb_debug_framework(tool = "Printk", toolOpts = "",
-                           usage = None, imgPath = "./", outputFile = None):
+                           outputToString = None, usage = None,
+                           imgPath = "./", outputFile = None):
     # Create debug sub-process.
-    fp = DebugFrameworkProcess(tool,toolOpts,usage,imgPath,outputFile)
+    fp = DebugFrameworkProcess(tool,toolOpts,outputToString,
+                               usage,imgPath,outputFile)
 
     # Read / handle messages until there are no more.
     msg = fp.recvMsg()
     while msg[0] != "":
         operations = { "display" :  DebugFrameworkProcess.display,
             "read-data" :           DebugFrameworkProcess.read_data,
+            "write-data" :          DebugFrameworkProcess.write_data,
+            "execute-instrs" :      DebugFrameworkProcess.execute_instrs,
+            "ready-for-instr" :     DebugFrameworkProcess.ready_for_instr,
             "get-tool" :            DebugFrameworkProcess.get_tool,
             "get-tool-options" :    DebugFrameworkProcess.get_tool_options,
             "get-img-path" :        DebugFrameworkProcess.get_img_path,
@@ -186,9 +219,10 @@ def run_hb_debug_framework(tool = "Printk", toolOpts = "",
         msg = fp.recvMsg()
 
     # If in Usage mode, return result string.
-    if (usage):
+    if (usage or outputToString):
         return fp.result
     return None
+
 
 # @fn register_hb_debug_framework_tools
 # @brief Create a simics command wrapper for each debug tool module.

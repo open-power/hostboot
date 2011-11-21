@@ -42,11 +42,14 @@ uint64_t CpuManager::cv_shutdown_status = 0;
 Barrier CpuManager::cv_barrier;
 bool CpuManager::cv_defrag = false;
 size_t CpuManager::cv_cpuCount = 0;
+InteractiveDebug CpuManager::cv_interactive_debug;
 
 CpuManager::CpuManager()
 {
     for (int i = 0; i < MAXCPUS; i++)
 	cv_cpus[i] = NULL;
+
+    memset(&cv_interactive_debug, '\0', sizeof(cv_interactive_debug));
 }
 
 cpu_t* CpuManager::getCurrentCPU()
@@ -178,6 +181,11 @@ void CpuManager::executePeriodics(cpu_t * i_cpu)
 {
     if(i_cpu->master)
     {
+        if (cv_interactive_debug.isReady())
+        {
+            cv_interactive_debug.startDebugTask();
+        }
+
         ++(i_cpu->periodic_count);
         if(0 == (i_cpu->periodic_count % CPU_PERIODIC_CHECK_MEMORY))
         {

@@ -26,12 +26,13 @@
 #include <kernel/types.h>
 #include <kernel/cpu.H>
 #include <kernel/barrier.H>
+#include <kernel/idebug.H>
 
 class CpuManager
 {
     public:
-        enum 
-        { 
+        enum
+        {
             MAXCPUS = KERNEL_MAX_SUPPORTED_CPUS,
             CPU_PERIODIC_CHECK_MEMORY = 64,
             CPU_PERIODIC_FLUSH_PAGETABLE = 512, //TODO 1024 not currently hit
@@ -105,6 +106,8 @@ class CpuManager
 
         // The status code that needs to be posted during shutdown
         static uint64_t cv_shutdown_status;
+
+        static InteractiveDebug cv_interactive_debug;
 };
 
 #endif

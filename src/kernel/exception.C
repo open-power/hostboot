@@ -75,8 +75,8 @@ void kernel_execute_data_storage()
     }
     if (!handled)
     {
-	printk("Data Storage exception on %d: %lx, %lx\n",
-	       t->tid, getDAR(), getDSISR());
+	printk("Data Storage exception on %d: %lx, %lx @ %p\n",
+	       t->tid, getDAR(), getDSISR(), t->context.nip);
 	TaskManager::endTask(t, NULL, TASK_STATUS_CRASHED);
     }
 }

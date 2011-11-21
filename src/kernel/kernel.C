@@ -117,7 +117,7 @@ void Kernel::cpuBootstrap()
 
 void Kernel::inittaskBootstrap()
 {
-    task_t * t = TaskManager::createTask(&init_main, NULL);
+    task_t * t = TaskManager::createTask(&init_main, NULL, true);
     t->cpu = CpuManager::getCurrentCPU();
     TaskManager::setCurrentTask(t);
 }

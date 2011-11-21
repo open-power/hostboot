@@ -21,7 +21,7 @@
 //
 //  IBM_PROLOG_END
 #ifndef __KERNEL_TASKMGR_H
-#define __KENREL_TASKMGR_H
+#define __KERNEL_TASKMGR_H
 
 #include <kernel/types.h>
 #include <util/lockfree/counter.H>
@@ -114,8 +114,11 @@ class TaskManager
          *
          *  @param[in] t - The entry point to start the task at.
          *  @param[in] p - An argument pointer to pass to the task.
+         *  @param[in] kernelParent - Should the kernel be assigned the parent
+         *                            of the new task.
          */
-	static task_t* createTask(task_fn_t t, void* p);
+	static task_t* createTask(task_fn_t t, void* p,
+                                  bool kernelParent = false);
 
         /** @brief End / destroy a task object.
          *
@@ -156,7 +159,7 @@ class TaskManager
 
             // Internal implementations of non-static / non-_ functions.
 	task_t* _createIdleTask();
-	task_t* _createTask(task_fn_t, void*, bool);
+	task_t* _createTask(task_fn_t, void*, bool, bool);
         void _endTask(task_t*, void*, int);
         void _waitTask(task_t*, int64_t, int*, void**);
 

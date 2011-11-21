@@ -72,18 +72,18 @@ def print_istep_list( inList ):
     print   "-----------------------------------------------------------"
     print   " Supported ISteps:                                         "
     print   " IStep\tSubStep\tStepName                                  "
-    print   "-----------------------------------------------------------"    
+    print   "-----------------------------------------------------------"
 
     ## print   len(inList)
     for i in range(0,len(inList)) :
         ##print len(inList[i])
         for j in range( 0, len(inList[i])) :
             print "%d\t%d\t%s"%( i, j, inList[i][j] )
-                
+
     return None
 
 
-#   normally this would be a loop to watch for the runningbit.  
+#   normally this would be a loop to watch for the runningbit.
 #   currently simics dumps all sorts of error lines every time a SCOM is
 #   read, so HostBoot only updates every 1 sec.  at that rate we only
 #   need to sleep for 2 sec and we are sure to get it.
@@ -91,17 +91,17 @@ def print_istep_list( inList ):
 def getStatusReg():
     ##StatusStr   = "salerno_chip.regdump SCOM 0x13012685"
     ##  -f <file> dumps the output to <file>_SCOM_0X13012685
-    ## StatusStr   = "salerno_chip.regdump SCOM 0x13012685 -f ./scom.out"   
-    StatusStr   = "cpu0_0_0_2->scratch"   
-    
+    ## StatusStr   = "salerno_chip.regdump SCOM 0x13012685 -f ./scom.out"
+    StatusStr   = "cpu0_0_0_2->scratch"
+
     ##  get response
     # (result, statusOutput)  =   quiet_run_command( StatusStr, output_modes.regular )
     result  =   conf.cpu0_0_0_2.scratch
-    print "0x%x"%(result)  
+    print "0x%x"%(result)
 
     hiword  = ( ( result & 0xffffffff00000000) >> 32 )
     loword  = ( result & 0x00000000ffffffff )
-    
+
     return (hiword, loword)
 
 
@@ -131,23 +131,23 @@ def runIStep( istep, substep, inList ):
     # result  =   run_command( "stop" )
 
     (hiword, loword) =   getStatusReg()
-    
+
     runningbit  =   ( ( hiword & 0x80000000 ) >> 31 )
-    readybit    =   ( ( hiword & 0x40000000 ) >> 30 ) 
+    readybit    =   ( ( hiword & 0x40000000 ) >> 30 )
     stsIStep    =   ( ( hiword & 0x3fff0000 ) >> 16 )
     stsSubstep  =   ( ( hiword & 0x0000ffff ) )
-    
+
     taskStatus  =   ( ( loword & 0xffff0000 ) >> 16 )
-    istepStatus =   ( ( loword & 0x0000ffff )  )   
-    print 
+    istepStatus =   ( ( loword & 0x0000ffff )  )
+    print
     print   "%s : returned Status 0x%8.8x_%8.8x : "%( inList[istep][substep], hiword, loword )
     print "runningbit = 0x%x, readybit=0x%x"%(runningbit, readybit)
     print "Istep 0x%x / Substep 0x%x Status: 0x%x 0x%x"%( stsIStep, stsSubstep, taskStatus, istepStatus )
-    print   "-----------------------------------------------------------------"    
-    
+    print   "-----------------------------------------------------------------"
+
     # result  =   run_command( "run" )
-    
-##  run command = "sN"    
+
+##  run command = "sN"
 def sCommand( inList, scommand ) :
     i   =   int(scommand)
     j   =   0
@@ -192,12 +192,12 @@ def istepHB( str_arg1, inList):
         (result, out)  =   quiet_run_command(IStepModeStr, output_modes.regular )
         # print result
         return
-        
+
     if ( str_arg1 == "normalmode"  ):    ## set Normal Mode in SCOM reg
         print   "Set Normal Mode"
         (result, out)  =   quiet_run_command(NormalModeStr, output_modes.regular )
         # print result
-        return       
+        return
 
     ## check to see if we have an 's' command (string starts with 's')
     if ( str_arg1.startswith('s') ):
@@ -214,7 +214,7 @@ def istepHB( str_arg1, inList):
             for x in range( (int(M,16)), (int(N,16)+1) ) :
                 sCommand( inList, x )
         return
-    else:  
+    else:
         ## substep name
         ## (ss_nameM, ss_nameN) = str_arg1.split("..")
         namelist    =   str_arg1.split("..")
@@ -224,12 +224,12 @@ def istepHB( str_arg1, inList):
                 print "Invalid substep %s"%( namelist[0] )
                 return
             runIStep( istepM, substepM, inList )
-        else:       
-            ## substep name .. substep name 
+        else:
+            ## substep name .. substep name
             (istepM, substepM, foundit) = find_in_inList( inList, namelist[0] )
             if ( not foundit ) :
                 print "Invalid substep %s"%( namelist[0] )
-                return    
+                return
             (istepN, substepN, foundit) = find_in_inList( inList, namelist[1] )
             if ( not foundit ) :
                 print( "Invalid substep %s"%( namelist[1]) )
@@ -237,7 +237,7 @@ def istepHB( str_arg1, inList):
             for x in range( istepM, istepN+1 ) :
                 for y in range( substepM, substepN+1) :
                     runIStep( x, y, inList )
-    return  
+    return
 
 
 #===============================================================================
@@ -334,19 +334,19 @@ def hb_istep(str_arg1):
                     [ "na" ],              ## istep 2
                     [ "na" ],              ## istep 3
                     [ "init_target_states",     ## istep 4
-                      "init_fsi", 
-                      "apply_fsi_info", 
-                      "apply_dd_presence", 
+                      "init_fsi",
+                      "apply_fsi_info",
+                      "apply_dd_presence",
                       "apply_pr_keyword_data",
                       "apply_partial_bad",
                       "apply_gard",
                       "testHWP"
                     ],
-                ]  
-                          
-    ## print   flag_t                   
-    
-    if str_arg1 == None: 
+                ]
+
+    ## print   flag_t
+
+    if str_arg1 == None:
         print_istep_list( inList )
     else:
         print "args=%s" % str(str_arg1)
@@ -420,3 +420,36 @@ new_command("hb-singlethread",
     alias = "hb-st",
     type = ["hostboot-commands"],
     short = "Disable all threads except cpu0_0_0_0.")
+
+
+#------------------------------------------------
+#------------------------------------------------
+new_command("hb-callfunc",
+    (lambda function, args:
+        eval(run_hb_debug_framework("CallFunc",
+                ("function='"+function+"' arguments="+
+                 (",".join(map(str, args)))),
+                outputToString = 1))),
+    [
+     arg(str_t, "function"),
+     arg(list_t, "args", "?", [])
+    ],
+    type = ["hostboot-commands"],
+    see_also = ["hb-debug-CallFunc"],
+    short = "Interactively call a hostboot function.",
+    doc = """
+Parameters: \n
+        function = Function to execute.\n
+        args = List of arguments.\n
+
+Defaults: \n
+        args = [0]\n
+
+Examples: \n
+        hb-callfunc "malloc" [8]\n
+        hb-callfunc "free" [0x1234]\n
+
+Note:
+        This function may only be called with simics stopped.
+    """)
+
