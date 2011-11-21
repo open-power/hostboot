@@ -264,7 +264,7 @@ proc ExtractSandbox { sock git_sh} {
     puts $git_sh {git init}
     puts $git_sh {git remote add gerrit ssh://gfw160.austin.ibm.com:29418/hostboot}
     puts $git_sh {unlog}
-    puts $git_sh {git fetch gerrit}
+    puts $git_sh {git fetch gerrit --tags}
 
     if {[string compare $driver "master"] == 0} {
         puts $log "$sock: Using master branch"

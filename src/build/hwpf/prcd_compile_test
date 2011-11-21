@@ -25,8 +25,7 @@
 #Note that this test case assumes 2 files present in the PWD (along with prcd_compile.tcl)
 # - fapiTestHwp.C and fapiTestHwp.H
 
-#BUILD="b0923a_2011_Sprint5"
-BUILD="master"
+BUILD="b1109a_2011_Sprint6"
 
 ###############################################################
 # Validate return code, exit on failure
