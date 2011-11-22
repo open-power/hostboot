@@ -41,6 +41,7 @@
  *                          mjjones     10/28/2011  Fix error generation
  *                          camvanng    11/09/2011  Update attr enum test
  *                          mjjones     11/17/2011  Removed some initfile attr tests
+ *                          mjjones     11/22/2011  Demonstrate use of heap based array
  */
 
 #include <fapiTestHwpAttr.H>
@@ -622,7 +623,8 @@ fapi::ReturnCode hwpTestAttributes()
         // Test ATTR_SCRATCH_UINT64_ARRAY_1
         //----------------------------------------------------------------------
         {
-        uint64_t l_uint64array1[4];
+        // Demonstrate the use of a heap based array
+        uint64_t (&l_uint64array1)[4] = *(reinterpret_cast<uint64_t(*)[4]>(new uint64_t[4]));
 
         // Test set
         for (uint32_t i = 0; i < 4; i++)
@@ -679,6 +681,8 @@ fapi::ReturnCode hwpTestAttributes()
             FAPI_ERR("hwpTestAttributes: ATTR_SCRATCH_UINT64_ARRAY_1. Error from SET (2)");
             break;
         }
+
+        delete [] &l_uint64array1;
         }
 
         //----------------------------------------------------------------------
