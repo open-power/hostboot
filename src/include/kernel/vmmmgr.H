@@ -85,9 +85,6 @@ class VmmManager
          */
         static bool pteMiss(task_t* t, uint64_t effAddr);
 
-        static void* mmioMap(void*, size_t);
-        static int mmioUnmap(void*, size_t);
-
         /**
          * @brief Map a device into the device segment(2TB)
          * @param ra[in] - Void pointer to real address to be mapped in

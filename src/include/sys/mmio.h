@@ -42,15 +42,6 @@ enum SEG_DATA_SIZES
 };
 
 /**
- * @brief DEPRECATED
- */
-void* mmio_map(void* ra, size_t pages);
-/**
- * @brief DEPRECATED
- */
-int mmio_unmap(void* ea, size_t pages);
-
-/**
  * @brief System call to map a device into the device segment(2TB)
  * @param ra[in] - Void pointer to real address to be mapped in
  * @param i_devDataSize[in] - Size of device segment block

@@ -29,16 +29,6 @@
 
 using namespace Systemcalls;
 
-void* mmio_map(void* ra, size_t pages)
-{
-    return _syscall2(MMIO_MAP, ra, (void*)pages);
-}
-
-int mmio_unmap(void* ea, size_t pages)
-{
-    return (int64_t) _syscall2(MMIO_UNMAP, ea, (void*)pages);
-}
-
 void* mmio_dev_map(void *ra, SEG_DATA_SIZES i_devDataSize)
 {
     return _syscall2(DEV_MAP, ra, (void*)i_devDataSize);

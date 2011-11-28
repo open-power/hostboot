@@ -58,15 +58,6 @@ class DeviceSegment : public Segment
          */
         bool handlePageFault(task_t* i_task, uint64_t i_addr);
 
-        /**
-         * @brief DEPRECATED
-         */
-        static void* mmioMap(void* ra, size_t pages);
-
-        /**
-         * @brief DEPRECATED
-         */
-        static int mmioUnmap(void* ea, size_t pages);
 
         /**
          * @brief Map a device into the device segment(2TB)
@@ -108,16 +99,6 @@ class DeviceSegment : public Segment
          * @brief Add the device segment
          */
         void _init();
-
-        /**
-         * @brief DEPRECATED
-         */
-        void* _mmioMap(void* ra, size_t pages);
-
-        /**
-         * @brief DEPRECATED
-         */
-        int _mmioUnmap(void* ea, size_t pages);
 
         /**
          * @brief Map a device into the device segment(2TB)

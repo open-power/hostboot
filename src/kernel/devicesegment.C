@@ -40,22 +40,6 @@ void DeviceSegment::init()
 }
 
 /**
- * @brief DEPRECATED
- */
-void* DeviceSegment::mmioMap(void* ra, size_t pages)
-{
-    return Singleton<DeviceSegment>::instance()._mmioMap(ra, pages);
-}
-
-/**
- * @brief DEPRECATED
- */
-int DeviceSegment::mmioUnmap(void* ea, size_t pages)
-{
-    return Singleton<DeviceSegment>::instance()._mmioUnmap(ea, pages);
-}
-
-/**
  * STATIC
  * @brief Map a device into the device segment(2TB)
  */
@@ -115,45 +99,6 @@ bool DeviceSegment::handlePageFault(task_t* i_task, uint64_t i_addr)
     return true;
 }
 
-/**
- * @brief DEPRECATED
- */
-void* DeviceSegment::_mmioMap(void* ra, size_t pages)
-{
-    for (size_t i = 0; i < MMIO_MAP_DEVICES; i++)
-    {
-        if (0 == iv_mmioMap[i].addr)
-        {
-            iv_mmioMap[i].size = THIRTYTWO_GB;
-            iv_mmioMap[i].addr = reinterpret_cast<uint64_t>(ra);
-            return reinterpret_cast<void*>(i *
-                                      ((1ull << SLBE_s) / MMIO_MAP_DEVICES) +
-                                      this->getBaseAddress());
-        }
-    }
-
-    return NULL;
-}
-
-/**
- * @brief DEPRECATED
- */
-int DeviceSegment::_mmioUnmap(void* ea, size_t pages)
-{
-    uint64_t segment_ea = reinterpret_cast<uint64_t>(ea) -
-                          this->getBaseAddress();
-    size_t idx = segment_ea / ((1ull << SLBE_s) / MMIO_MAP_DEVICES);
-    if (0 != iv_mmioMap[idx].addr)
-    {
-        PageTableManager::delRangePN(iv_mmioMap[idx].addr / PAGESIZE,
-                                     iv_mmioMap[idx].addr / PAGESIZE +
-                                        pages);
-        iv_mmioMap[idx].addr = 0;
-        return 0;
-    }
-
-    return -EINVAL;
-}
 
 /**
  * @brief Map a device into the device segment(2TB)

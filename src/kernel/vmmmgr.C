@@ -82,23 +82,6 @@ void VmmManager::flushPageTable( void )
     Singleton<VmmManager>::instance()._flushPageTable();
 }
 
-/**
- * STATIC
- * @brief DEPRECATED
- */
-void* VmmManager::mmioMap(void* ra, size_t pages)
-{
-    return DeviceSegment::mmioMap(ra, pages);
-}
-
-/**
- * STATIC
- * @brief DEPRECATED
- */
-int VmmManager::mmioUnmap(void* ea, size_t pages)
-{
-    return DeviceSegment::mmioUnmap(ea, pages);
-}
 
 /**
  * STATIC

@@ -113,9 +113,6 @@ namespace Systemcalls
         &MsgSendRecv,  // MSG_SENDRECV
         &MsgRespond,  // MSG_RESPOND
         &MsgWait,  // MSG_WAIT
-
-        &MmioMap,  // MMIO_MAP
-        &MmioUnmap,  // MMIO_UNMAP
         &DevMap,  // DEV_MAP
         &DevUnmap,  // DEV_UNMAP
 
@@ -412,22 +409,6 @@ namespace Systemcalls
             TASK_SETRTN(t, (uint64_t) m);
         }
         mq->lock.unlock();
-    }
-
-    void MmioMap(task_t* t)
-    {
-        void* ra = (void*)TASK_GETARG0(t);
-        size_t pages = TASK_GETARG1(t);
-
-        TASK_SETRTN(t, (uint64_t) VmmManager::mmioMap(ra,pages));
-    }
-
-    void MmioUnmap(task_t* t)
-    {
-        void* ea = (void*)TASK_GETARG0(t);
-        size_t pages = TASK_GETARG1(t);
-
-        TASK_SETRTN(t, VmmManager::mmioUnmap(ea,pages));
     }
 
     /**

@@ -42,19 +42,6 @@ class segmenttest: public CxxTest::TestSuite
         {
             int rc = 0;
             uint64_t ra = 2*1024*1024;
-            printkd("Map Device @ ra = 0x%lX using mmio_map\n",ra);
-            uint64_t* virtAddrMMIO = static_cast<uint64_t*>
-                                (mmio_map(reinterpret_cast<void*>(ra), 1));
-            if (virtAddrMMIO == NULL)
-            {
-                TS_FAIL("Failed to map using mmio_map\n");
-            }
-            printkd("Unmap Device @ va = %p using mmio_unmap\n",virtAddrMMIO);
-            rc = mmio_unmap(reinterpret_cast<void*>(virtAddrMMIO), 1);
-            if (rc != 0)
-            {
-                TS_FAIL("Failed to unmap using mmio_unmap\n");
-            }
 
             printkd("Map Device @ ra = 0x%lX using dev_map\n",ra);
             uint64_t* virtAddrDEV = static_cast<uint64_t*>
@@ -63,6 +50,7 @@ class segmenttest: public CxxTest::TestSuite
             {
                 TS_FAIL("Failed to map using mmio_dev_map\n");
             }
+
             printkd("Unmap Device @ va = %p using dev_unmap\n",virtAddrDEV);
             rc = mmio_dev_unmap(reinterpret_cast<void*>(virtAddrDEV));
             if (rc != 0)

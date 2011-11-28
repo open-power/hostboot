@@ -69,11 +69,6 @@ namespace Systemcalls
         MSG_RESPOND,
             /** msg_wait() */
         MSG_WAIT,
-
-            /** mmio_map() */
-        MMIO_MAP,
-            /** mmio_unmap() */
-        MMIO_UNMAP,
             /** dev_map() */
         DEV_MAP,
             /** dev_unmap() */
