@@ -34,11 +34,24 @@ function check_good_rc {
 
     if [ $1 -eq 0 ]; then
         echo SUCCESS
-        rm -f hbicore*
-        rm -f hbotStringFile
         echo
     else
-        echo FAIL; exit -1
+        echo FAIL: Bad RC Returned:$1; exit -1
+    fi
+}
+
+###############################################################
+# Validate return code and that binary was generated, exit on failure
+###############################################################
+function check_good_rc_and_bin {
+
+    if [ -f $2/hbicore.bin ] && [ -f $2/hbicore_extended.bin ] && [ -f $2/hbotStringFile ]; then
+        check_good_rc $1        
+        rm -f $2/hbicore*    
+        rm -f $2/*.bin
+        rm -f $2/hbotStringFile
+    else
+        echo FAIL: Missing File; exit -1
     fi
 }
 
@@ -88,51 +101,46 @@ sleep 20
 echo
 echo "TEST - Good Path - 1 C File"
 ./prcd_compile.tcl -d $BUILD ./fapiTestHwp.C
-check_good_rc $?
+check_good_rc_and_bin $? ./
 
 echo
 echo "TEST - Good Path - 1 H File with -o Param"
 ./prcd_compile.tcl -d $BUILD -o ./ ./fapiTestHwp.H
-check_good_rc $?
+check_good_rc_and_bin $? ./
 
 echo
 echo "TEST - Good Path - 2 Files"
 ./prcd_compile.tcl -d $BUILD ./fapiTestHwp.H ./fapiTestHwp.C
-check_good_rc $?
+check_good_rc_and_bin $? ./
 
 echo
 echo "TEST - Good Path - Directory Path and Output Directory"
 cp fapiTestHwp.H /tmp/
-mkdir output
 ./prcd_compile.tcl -d $BUILD -o ./output/ /tmp/fapiTestHwp.H fapiTestHwp.C
-check_good_rc $?
-rm -rf output
+check_good_rc_and_bin $? ./output/
 rm /tmp/fapiTestHwp.H
 
 echo
 echo "TEST - Good Path - No Files"
 ./prcd_compile.tcl -d $BUILD
-check_good_rc $?
+check_good_rc_and_bin $? ./
 
 echo
 echo "TEST - Good Path - Initfile"
 ./prcd_compile.tcl -o ./output/ sample.initfile
-check_good_rc $?
-rm -rf ./output
+check_good_rc_and_bin $? ./output/
 
 echo
 echo "TEST - Good Path - All Files"
 ./prcd_compile.tcl -o ./output/ sample.initfile fapiTestHwp.H ./fapiTestHwp.C
-check_good_rc $?
-rm -rf ./output
+check_good_rc_and_bin $? ./output/
 
 echo
-echo "TEST - Bad Path - Compile Failure"
-rm -f hbicore*; 
+echo "TEST - Bad Path - Compile Failure" 
 cp fapiTestHwp.H /tmp/
 echo COMPILE_FAIL >> /tmp/fapiTestHwp.H
 ./prcd_compile.tcl -d $BUILD /tmp/fapiTestHwp.H fapiTestHwp.C
 check_bad_rc $?
-rm /tmp/fapiTestHwp.H
 rm *.bin
+rm /tmp/fapiTestHwp.H
 
