@@ -56,6 +56,8 @@
 namespace   INITSERVICE
 {
 
+// using namespace SPLESS;
+
 /******************************************************************************/
 // Globals/Constants
 /******************************************************************************/
@@ -157,6 +159,18 @@ private:
      */
     const TaskInfo *findTaskInfo( uint16_t  i_IStep,
                                   uint16_t  i_SubStep ) const;
+
+    /**
+     * @brief   Command 0: Run the requested IStep/SubStep
+     *
+     * param[in]    i_rcmd  -   ref to a filled in SPLessCmd struct
+     * param[out]   o_sts   -   ref to a SPLessSts struct to be filled in
+     *
+     * @return  none
+     */
+    void    processSingleIStepCmd(
+                        SPLESS::SPLessCmd &i_rcmd,
+                        SPLESS::SPLessSts &o_rsts ) const;
 
 
      /**

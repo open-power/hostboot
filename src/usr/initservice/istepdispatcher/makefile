@@ -24,7 +24,7 @@
 ROOTPATH = ../../../..
 MODULE = istepdisp
 
-OBJS =  istepdispatcher.o splesscommand.o splessstatus.o     
+OBJS =  istepdispatcher.o  
 
 ## SUBDIRS = test.d
 

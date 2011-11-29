@@ -55,110 +55,251 @@ def dumpL3():
 
 
 #------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # Functions to run isteps
 #------------------------------------------------------------------------------
-def print_istep_list( inList ):
-
-    print
-    print   "istep commands:."
+#------------------------------------------------------------------------------
+def hb_istep_usage():
+    print   "hb-istep usage:"
     print   "   istepmode   -   enable IStep Mode.  Must be executed before simics run command"
     print   "   normalmode  -   disable IStep Mode. "
     print   "   list        -   list all named isteps"
     print   "   sN          -   execute IStep N"
     print   "   sN..M       -   execute IStep N through M"
-    print   "   <name1>     -   excute named istep name1"
     print   "   <name1>..<name2>  - execute named isteps name1 through name2"
-    print
-    print   "-----------------------------------------------------------"
-    print   " Supported ISteps:                                         "
-    print   " IStep\tSubStep\tStepName                                  "
-    print   "-----------------------------------------------------------"
+    print   "   debug       -   enable debugging messages"
+    return  None  
+    
+## declare GLOBAL g_SeqNum var, & a routine to manipulate it.  
+##  TODO:  make this into a class, etc. to do it The Python Way.   
+g_SeqNum  = 0    
+def bump_g_SeqNum() :
+    global  g_SeqNum
+    g_SeqNum    = ( (g_SeqNum +1) & 0x3f) 
+    return  None
 
-    ## print   len(inList)
-    for i in range(0,len(inList)) :
-        ##print len(inList[i])
-        for j in range( 0, len(inList[i])) :
-            print "%d\t%d\t%s"%( i, j, inList[i][j] )
+##  clock a certain amount of CPU cycles so the IStep will run (this will be 
+##  different for each simulation environment) and then return.
+##  simics clock is a somewhat arbitrary value, may need to be adjusted.
+##
+##  Handle following environments:
+##  1.  [x] simics value    =   100,000     (from Patrick)
+##  2.  VPO value       =   ???         (don't know yet)
+##  3.  hardware value  =   ???         ( ditto)
+##
+def runClocks() :
+
+    SIM_continue( 100000 )
+    return  None
+         
+##    
+##  send a command to the SPLess Command register (scratchpad reg 1) 
+##  cmd is passed in as a 64-bit ppc formatted hex string, i.e.
+##          "0x80000000_00000000"  
+## 
+##  Handle following environments:
+##  1.  [x] simics
+##  2.  VPO
+##  3.  hardware  
+def sendCommand( cmd ):
+    global g_IStep_DEBUG
+    CommandStr  =   "cpu0_0_0_1->scratch=%s"%(cmd)
+    
+    ##  send command to Hostboot
+    ## print CommandStr
+    (result, out) = quiet_run_command(CommandStr, output_modes.regular )
+
+    if ( g_IStep_DEBUG ) :
+        print "sendCommand( 0x%x ) returns : " + "0x%x"%(cmd, result) + " : " + out
+    
+    return  result
+
+def printStsHdr( status ):
+
+    runningbit  =   ( ( status & 0x8000000000000000 ) >> 63 )
+    readybit    =   ( ( status & 0x4000000000000000 ) >> 62 ) 
+    seqnum      =   ( ( status & 0x3f00000000000000 ) >> 56 )
+    taskStatus  =   ( ( status & 0x00ff000000000000 ) >> 48 )
+
+    print "runningbit = 0x%x, readybit=0x%x, seqnum=0x%x, taskStatus=0x%x"%(runningbit, readybit, seqnum, taskStatus )
+    return  None
+
+##  get status from the SPLess Status Register (scratchpad reg 2)
+##  returns a 64-bit int.  
+##
+##  Handle following environments:
+##  1.  [x] simics
+##  2.  VPO
+##  3.  hardware
+##
+def getStatus(): 
+    global  g_IStep_DEBUG
+    StatusStr   =   "cpu0_0_0_2->scratch"
+      
+    ( result, out )  =   quiet_run_command( StatusStr, output_modes.regular )
+    if  ( g_IStep_DEBUG ) :
+        print ">> getStatus(): " + "0x%x"%(result) + " : " + out
+    ## printStsHdr(result)
+    
+    return result
+
+
+##  check for status, waiting for the readybit and the sent g_SeqNum.
+##  default is to check the readybit, in rare cases we want to skip this.
+def getSyncStatus( ) :
+    # set # of retries
+    count = 100
+    
+    ##  get response.  sendCmd() should have bumped g_SeqNum, so we will sit
+    ##  here for a reasonable amount of time waiting for the correct sequence
+    ##  number to come back.  
+    while True :
+    
+        ##  advance HostBoot code by a certain # of cycles, then check the 
+        ##  sequence number to see if it has changed.  rinse and repeat.
+        runClocks()
+        
+        ##  print a dot (with no carriage return) so that the user knows that
+        ##  it's still doing something    
+        print "." ,
+
+        result = getStatus()
+        seqnum  = ( ( result & 0x3f00000000000000 ) >> 56 )
+        if ( seqnum == g_SeqNum ) :
+            print                   # print a final carriage return
+            return result
+        
+        if ( count <= 0 ):
+            print                   # print a final carriage return
+            print "TIMEOUT waiting for seqnum=%d"%( g_SeqNum )
+            return -1
+        count -= 1    
+        
+##  write to scratch reg 3 to set istep or normal mode, check return status        
+def setMode( cmd ) :
+    IStepModeStr    = "cpu0_0_0_3->scratch=0x4057b007_4057b007"
+    NormalModeStr   = "cpu0_0_0_3->scratch=0x700b7504_700b7504"
+    
+    
+    count   =   10
+    
+    if ( cmd == "istep" ) :
+        (result, out)  =   quiet_run_command( IStepModeStr )
+        # print "set istepmode returned 0x%x"%(result) + " : " + out 
+        expected    =   1    
+    elif   ( cmd == "normal" ) :
+        (result, out)  =   quiet_run_command( NormalModeStr )
+        # print "set normalmode returned 0x%x"%(result) + " : " + out 
+        expected    =   0
+    else :     
+        print "invalid setMode command: %s"%(cmd) 
+        return  None
+ 
+    ##  Loop, advancing clock, and wait for readybit
+    while True :
+        runClocks()
+
+        result = getStatus()
+        readybit    =   ( ( result & 0x4000000000000000 ) >> 62 )
+        print   "Setting %s mode, readybit=%d..."%( cmd, readybit )   
+        if ( readybit == expected ) :
+            print   "Set %s Mode success."%(cmd)
+            return 0
+            
+        if ( count <= 0 ):
+            print "TIMEOUT waiting for readybit, status=0x%x"%( result )
+            return -1
+        count -= 1 
+        
+    
+##  read in file with csv istep list and store in inList
+def get_istep_list( inList ):
+    istep_file = open('./isteplist.csv')
+    for line in istep_file.readlines():
+        ( istep, substep, name) =   line.split(',')
+        i = int(istep)
+        j = int(substep)
+        
+        ## print ":: %d %d %s"%(i, j, name)
+        if ( name.strip() != "" ):
+            inList[i][j]  =   name.strip()     
+          
+    istep_file.close()
 
     return None
 
+        
 
-#   normally this would be a loop to watch for the runningbit.
-#   currently simics dumps all sorts of error lines every time a SCOM is
-#   read, so HostBoot only updates every 1 sec.  at that rate we only
-#   need to sleep for 2 sec and we are sure to get it.
-#   redo later after simics is fixed ...
-def getStatusReg():
-    ##StatusStr   = "salerno_chip.regdump SCOM 0x13012685"
-    ##  -f <file> dumps the output to <file>_SCOM_0X13012685
-    ## StatusStr   = "salerno_chip.regdump SCOM 0x13012685 -f ./scom.out"
-    StatusStr   = "cpu0_0_0_2->scratch"
+def print_istep_list( inList ):
+    print   "IStep\tSubStep\tName"
+    print   "---------------------------------------------------"
+    for i in range(0,len(inList)) :
+        for j in range( 0, len(inList[i])) :
+            # print "%d %d"%(i,j)
+            if ( inList[i][j] != None ) :
+                print "%d\t%d\t%s"%( i,j, inList[i][j] )   
+                
+    print   " "                 
+    return None
+            
 
-    ##  get response
-    # (result, statusOutput)  =   quiet_run_command( StatusStr, output_modes.regular )
-    result  =   conf.cpu0_0_0_2.scratch
-    print "0x%x"%(result)
-
-    hiword  = ( ( result & 0xffffffff00000000) >> 32 )
-    loword  = ( result & 0x00000000ffffffff )
-
-    return (hiword, loword)
-
-
-
-#   normally this would be a loop to watch for the runningbit.
-#   currently simics dumps all sorts of error lines every time a SCOM is
-#   read, so HostBoot only updates every 1 sec.  at that rate we only
-#   need to sleep for 2 sec and we are sure to get it.
-#   redo later after simics is fixed ...
 def runIStep( istep, substep, inList ):
-    print   "------------------------------------------------------------------"
-    print   "run  %s :"%( inList[istep][substep] )
-    print   "   istep # = 0x%x / substep # = 0x%x :"%(istep, substep)
+    
+    bump_g_SeqNum()
+    
+    print   "run  %d.%d %s :"%( istep, substep, inList[istep][substep] )
+    ## print   "   istep # = 0x%x / substep # = 0x%x :"%(istep, substep)
+    
+    byte0   =   0x80 + g_SeqNum      ## gobit + seqnum
+    command =   0x00
+    cmd = "0x%2.2x%2.2x%2.2x%2.2x_00000000"%(byte0, command, istep, substep );
+    sendCommand( cmd )
+    
+    result  =   getSyncStatus()
+    
+    ## if result is -1 we have a timeout
+    if ( result == -1 ) :
+        print   "-----------------------------------------------------------------"
+    else :
+        taskStatus  =   ( ( result & 0x00ff000000000000 ) >> 48 )
+        stsIStep    =   ( ( result & 0x0000ff0000000000 ) >> 40 )
+        stsSubstep  =   ( ( result & 0x000000ff00000000 ) >> 32 )
+        istepStatus =   ( ( result & 0x00000000ffffffff )  )
 
-    ## CommandStr  = "salerno_chip.regwrite SCOM 0x13012684 \"0x80000000_%4.4x%4.4x\" 64"%(istep,substep)
-    CommandStr  = "cpu0_0_0_1->scratch=0x80000000_%4.4x%4.4x"%(istep,substep)
-
-    #result  =   run_command( "run" )
-
-    ##  send command to Hostboot
-    # print CommandStr
-    (result, out) = quiet_run_command(CommandStr, output_modes.regular )
-    #print result
-
-    time.sleep(2)
-
-    # result  =   run_command( "stop" )
-
-    (hiword, loword) =   getStatusReg()
-
-    runningbit  =   ( ( hiword & 0x80000000 ) >> 31 )
-    readybit    =   ( ( hiword & 0x40000000 ) >> 30 )
-    stsIStep    =   ( ( hiword & 0x3fff0000 ) >> 16 )
-    stsSubstep  =   ( ( hiword & 0x0000ffff ) )
-
-    taskStatus  =   ( ( loword & 0xffff0000 ) >> 16 )
-    istepStatus =   ( ( loword & 0x0000ffff )  )
-    print
-    print   "%s : returned Status 0x%8.8x_%8.8x : "%( inList[istep][substep], hiword, loword )
-    print "runningbit = 0x%x, readybit=0x%x"%(runningbit, readybit)
-    print "Istep 0x%x / Substep 0x%x Status: 0x%x 0x%x"%( stsIStep, stsSubstep, taskStatus, istepStatus )
-    print   "-----------------------------------------------------------------"
-
-    # result  =   run_command( "run" )
-
-##  run command = "sN"
+        print   "-----------------------------------------------------------------"
+        ## printStsHdr(result)
+        ## print "Istep 0x%x / Substep 0x%x Status: 0x%x"%( stsIStep, stsSubstep, istepStatus ) 
+        if ( taskStatus != 0 ) :
+            print "Istep %d.%d FAILED to launch, task status is %d"%( taskStatus )
+        else:            
+            print "Istep %d.%d returned Status: 0x%x"%( stsIStep, stsSubstep, istepStatus ) 
+        print   "-----------------------------------------------------------------"
+        
+    return    
+    
+    
+##  run command = "sN"    
 def sCommand( inList, scommand ) :
+    
     i   =   int(scommand)
     j   =   0
+    
+    # sanity check
+    if ( inList[i][0] == None ) :
+        print "IStep %d.0 does not exist."%( i )
+        return
+        
+    #   execute all the substeps in the IStep
     for substep in inList[i] :
-        ## print   "-----------------"
+        ## print   "-----------------" 
         ##print "run IStep %d %s  ..."%(i, substep)
-        ##print   "-----------------"
-        runIStep( i, j, inList )
+        ##print   "-----------------" 
+        if ( inList[i][j] != None ) :
+            runIStep( i, j, inList )
         j = j+1
-    return
-
+    return    
+    
+    
 def find_in_inList( inList, substepname) :
     for i in range(0,len(inList)) :
         for j in range( 0, len(inList[i])) :
@@ -166,78 +307,120 @@ def find_in_inList( inList, substepname) :
             if ( inList[i][j] == substepname ) :
                 #print "%s %d %d"%( inList[i][j], i, j )
                 return (i,j, True )
-                break;
-
-    return ( len(inList), len(inList[i]), False )
-
-
+                break;  
+                  
+    return ( len(inList), len(inList[i]), False )   
+    
+##  ---------------------------------------------------------------------------
+##  High Level Routine for ISteps.       
+##  ---------------------------------------------------------------------------
 ##  possible commands:
 ##      list
 ##      istepmode
+##      normalmode
 ##      sN
 ##      sN..M
 ##      <substepname1>..<substepname2>
-def istepHB( str_arg1, inList):
-    IStepModeStr    = "cpu0_0_0_3->scratch=0x4057b007_4057b007"
-    NormalModeStr   = "cpu0_0_0_3->scratch=0x700b7504_700b7504"
 
-    print   "run isteps...."
+##  declare GLOBAL g_IStep_DEBUG
+g_IStep_DEBUG   =   0
+def istepHB( str_arg1 ):
+        
+    ## simics cannot be running when we start, or SIM_continue() will not work
+    ##  and the Status reg will not be updated.          
+    if ( SIM_simics_is_running() ) :
+        print "simics must be halted before issuing an istep command."
+        return;     
+        
+          
+    ## start with empty inList.  Put some dummy isteps in istep4 for debug.        
+    n   =   10                                      ## size of inlist array
+    inList  =   [[None]*n for x in xrange(n)]       ## init to nothing
+    inList[4][0] =   "i1"
+    inList[4][1] =   "i2"
+    inList[4][2] =   "i3"
+    inList[4][3] =   "i4"
+   
+      
+    ## bump seqnum
+    bump_g_SeqNum() 
 
-    if ( str_arg1 == "list"  ):         ## dump command list
-        print_istep_list( inList)
+    ## print   "run istepHB...."
+    
+    if ( str_arg1 == "debug" ) :
+        print "enable istep debug - restart simics to reset"
+        g_IStep_DEBUG   =   1
         return
-
+    
     if ( str_arg1 == "istepmode"  ):    ## set IStep Mode in SCOM reg
-        print   "Set Istep Mode"
-        (result, out)  =   quiet_run_command(IStepModeStr, output_modes.regular )
-        # print result
+        # print   "Set Istep Mode"
+        setMode( "istep" )
         return
-
+        
     if ( str_arg1 == "normalmode"  ):    ## set Normal Mode in SCOM reg
-        print   "Set Normal Mode"
-        (result, out)  =   quiet_run_command(NormalModeStr, output_modes.regular )
-        # print result
+        # print   "Set Normal Mode"
+        setMode( "normal" )
         return
-
-    ## check to see if we have an 's' command (string starts with 's')
-    if ( str_arg1.startswith('s') ):
+        
+        
+    ## get readybit to see if we are running in IStep Mode.
+    StatusReg  =   getStatus()
+    readybit    =   ( ( StatusReg & 0x4000000000000000 ) >> 62 )     
+    if ( not readybit ):
+        print   "ERROR:  HostBoot Status reg is 0x%16.16x"%( StatusReg )
+        print   "   Ready bit is not on, did you remember to run hb-istep istepmode ??"
+        print   " "
+        hb_istep_usage()
+        return None
+       
+    ##  get the list of isteps from HostBoot...
+    # print"get istep list"
+    get_istep_list( inList )
+             
+    if ( str_arg1 == "list"  ):         ## dump command list
+        print_istep_list( inList )          
+        return         
+           
+    ## check to see if we have an 's' command (string starts with 's' and a number)    
+    if ( re.match("^s+[0-9].*", str_arg1 ) ):
         ## run "s" command
+        # print "s command"
         scommand    =   str_arg1.lstrip('s')
+        
         if scommand.isdigit():
             # command = "sN"
+            # print "single IStep: " + scommand
             sCommand( inList, scommand )
         else:
-            print "multiple ISteps:" + scommand
             #   list of substeps = "sM..N"
             (M, N)  =   scommand.split('..')
-            #print M + "-" + N
+            # print "multiple ISteps: " + M + "-" + N 
             for x in range( (int(M,16)), (int(N,16)+1) ) :
                 sCommand( inList, x )
         return
-    else:
-        ## substep name
+    else:  
+        ## substep name .. substep name
+        ## print   "named istep(s) : " + str_arg1 
         ## (ss_nameM, ss_nameN) = str_arg1.split("..")
-        namelist    =   str_arg1.split("..")
-        if ( len(namelist) ==  1 ) :
-            (istepM, substepM, foundit) = find_in_inList( inList, namelist[0] )
+        ss_list =   str_arg1.split("..")
+        
+        (istepM, substepM, foundit) = find_in_inList( inList, ss_list[0] )
+        istepN      =   istepM
+        substepN    =   substepM
+        if ( not foundit ) :
+            print( "Invalid substep %s"%(ss_list[0] ) )
+            return
+            
+        if ( len(ss_list) > 1 ) :    
+            (istepN, substepN, foundit) = find_in_inList( inList, ss_list[1] )
             if ( not foundit ) :
-                print "Invalid substep %s"%( namelist[0] )
-                return
-            runIStep( istepM, substepM, inList )
-        else:
-            ## substep name .. substep name
-            (istepM, substepM, foundit) = find_in_inList( inList, namelist[0] )
-            if ( not foundit ) :
-                print "Invalid substep %s"%( namelist[0] )
-                return
-            (istepN, substepN, foundit) = find_in_inList( inList, namelist[1] )
-            if ( not foundit ) :
-                print( "Invalid substep %s"%( namelist[1]) )
-                return
-            for x in range( istepM, istepN+1 ) :
-                for y in range( substepM, substepN+1) :
+               print( "Invalid substep %s"%(ss_list[1] ) )
+               return
+ 
+        for x in range( istepM, istepN+1 ) :
+                for y in range( substepM, substepN+1 ) :
                     runIStep( x, y, inList )
-    return
+    return  
 
 
 #===============================================================================
@@ -245,6 +428,7 @@ def istepHB( str_arg1, inList):
 #===============================================================================
 default_syms  = "hbicore.syms"
 default_stringFile = "hbotStringFile"
+
 
 #------------------------------------------------
 #------------------------------------------------
@@ -318,42 +502,16 @@ Examples: \n
 #------------------------------------------------
 #   implement isteps
 #------------------------------------------------
-def hb_istep(str_arg1):
-
-    ##  preprocess inputs,
-    ##  read in a file and translate to an inList
-    ##  TODO read in default file
-    #   TODO inPath  =   "istep_list.txt"
-    #   TODO inFile = open( inPath, 'rU')
-    #   TODO inList = inFile.readlines()
-    #   TODO inFile.close()
-
-    ## set up demo inlist
-    inList  =   [   [ "na" ],              ## istep 0
-                    [ "na" ],              ## istep 1
-                    [ "na" ],              ## istep 2
-                    [ "na" ],              ## istep 3
-                    [ "init_target_states",     ## istep 4
-                      "init_fsi",
-                      "apply_fsi_info",
-                      "apply_dd_presence",
-                      "apply_pr_keyword_data",
-                      "apply_partial_bad",
-                      "apply_gard",
-                      "testHWP"
-                    ],
-                ]
-
-    ## print   flag_t
-
-    if str_arg1 == None:
-        print_istep_list( inList )
+def hb_istep(str_arg1): 
+ 
+    if ( str_arg1 == None): 
+        hb_istep_usage()
     else:
-        print "args=%s" % str(str_arg1)
-        istepHB( str_arg1, inList, )
-
+        ## print "args=%s" % str(str_arg1)       
+        istepHB( str_arg1 )
+                    
     return None
-
+    
 new_command("hb-istep",
     hb_istep,
     [ arg(str_t, "syms", "?", None),
@@ -364,17 +522,19 @@ new_command("hb-istep",
     short = "Run IStep commands using the SPLess HostBoot interface",
     doc = """
 Parameters: \n
-
+ 
 Defaults: \n
 
 Examples: \n
     hb-istep \n
-    hb-istep -s0 \n
-    hb-istep -s0..4
-    hb-istep poweron
-    hb-istep poweron..clock_frequency_set
-    """)
-
+    hb-istep -s4 \n
+    hb-istep -s4..N
+    hb-istep -4.1
+    hb-istep -4.1..4.3 \n
+    hb-istep poweron \n
+    hb-istep poweron..clock_frequency_set /n
+    """)    
+    
 #------------------------------------------------
 #------------------------------------------------
 new_command("hb-errl",
@@ -420,36 +580,3 @@ new_command("hb-singlethread",
     alias = "hb-st",
     type = ["hostboot-commands"],
     short = "Disable all threads except cpu0_0_0_0.")
-
-
-#------------------------------------------------
-#------------------------------------------------
-new_command("hb-callfunc",
-    (lambda function, args:
-        eval(run_hb_debug_framework("CallFunc",
-                ("function='"+function+"' arguments="+
-                 (",".join(map(str, args)))),
-                outputToString = 1))),
-    [
-     arg(str_t, "function"),
-     arg(list_t, "args", "?", [])
-    ],
-    type = ["hostboot-commands"],
-    see_also = ["hb-debug-CallFunc"],
-    short = "Interactively call a hostboot function.",
-    doc = """
-Parameters: \n
-        function = Function to execute.\n
-        args = List of arguments.\n
-
-Defaults: \n
-        args = [0]\n
-
-Examples: \n
-        hb-callfunc "malloc" [8]\n
-        hb-callfunc "free" [0x1234]\n
-
-Note:
-        This function may only be called with simics stopped.
-    """)
-

@@ -116,11 +116,20 @@ namespace   INITSERVICE
 {
 
 using   namespace   ERRORLOG;           // IStepNameUserDetails
+using   namespace   SPLESS;
 
 /******************************************************************************/
 // Globals/Constants
 /******************************************************************************/
 extern trace_desc_t *g_trac_initsvc;
+
+/**
+ * @note    Since ISTEP_MODE attribute is nonvolatile (persists across boots),
+ *          we must have a way to turn the attribute both ON and OFF - we
+ *          cannot depend on the FSP to do it since we may not have a FSP.
+ */
+const   uint64_t    ISTEP_MODE_ON_SIGNATURE     =   0x4057b0074057b007;
+const   uint64_t    ISTEP_MODE_OFF_SIGNATURE    =   0x700b7504700b7504;
 
 /**
  * @enum
@@ -136,6 +145,8 @@ enum    {
     SPLESS_TASKRC_LAUNCH_FAIL       =   -4,     // failed to launch the task
     SPLESS_TASKRC_RETURNED_ERRLOG   =   -5,     // istep returned an errorlog
     SPLESS_TASKRC_TERMINATED        =   -6,     // terminated the polling loop
+
+    SPLESS_INVALID_COMMAND          =   10,    // invalid command from user console
 };
 
 /**
@@ -146,7 +157,6 @@ enum    {
  * @debug  simics "feature" - set polling time to 1 sec for demo
  *
  */
-
 const   uint64_t    SINGLESTEP_PAUSE_S     =   1;
 const   uint64_t    SINGLESTEP_PAUSE_NS    =   100000000;
 
@@ -314,32 +324,167 @@ void IStepDispatcher::initIStepMode( )
 }
 
 
+
+
+/**
+ * @brief   Command 0: Run the requested IStep/SubStep
+ *
+ * param[in]    i_rcmd  -   ref to a filled in SPLessCmd struct
+ * param[out]   o_sts   -   ref to a SPLessSts struct to be filled in
+ *
+ * @return  none
+ */
+void    IStepDispatcher::processSingleIStepCmd(
+                                    SPLessCmd &i_rrawcmd,
+                                    SPLessSts &o_rrawsts ) const
+{
+    errlHndl_t              l_errl          =   NULL;
+    uint64_t                l_isteprc       =   NULL;
+    TaskArgs::TaskArgs      l_taskargs;
+    const TaskInfo          *l_pistep       =   NULL;
+    //  init the command 0x00 struct to the incoming command reg values
+    SPLessSingleIStepCmd    l_cmd( i_rrawcmd );
+    //  create a cleared status 0x00 reg
+    SPLessSingleIStepSts    l_sts;
+
+    //  look up istep+substep
+    l_pistep  =   IStepDispatcher::getTheInstance().findTaskInfo(
+                                                        l_cmd.istep,
+                                                        l_cmd.substep );
+
+    do
+    {
+        if ( l_pistep == NULL )
+        {
+            // invalid istep, return error
+            l_sts.hdr.runningbit    =   false;
+            l_sts.hdr.readybit      =   true;
+            l_sts.hdr.status        =   SPLESS_TASKRC_INVALID_ISTEP;
+            l_sts.istep             =   l_cmd.istep;
+            l_sts.substep           =   l_cmd.substep;
+            l_sts.istepStatus       =   0;
+
+            //  return to caller to write back to user console
+            o_rrawsts.val64 =   l_sts.val64;
+            break;
+        }
+
+
+        //  set running bit, fill in istep and substep
+        l_sts.hdr.runningbit    =   true;
+        l_sts.hdr.readybit      =   true;
+        l_sts.hdr.status        =   0;
+        l_sts.istep             =   l_cmd.istep;
+        l_sts.substep           =   l_cmd.substep;
+        l_sts.istepStatus       =   0;
+
+        //  write intermediate value back to user console
+        o_rrawsts.val64 =   l_sts.val64;
+        writeSts( o_rrawsts );
+
+        /**
+         * @todo   placeholder - set progress code before starting
+         * This will not be finalized until the progress code driver
+         * is designed and implemented.
+         */
+        uint64_t l_progresscode  =  ( (l_cmd.istep<<16) | l_cmd.substep );
+        InitService::getTheInstance().setProgressCode( l_progresscode );
+
+
+        // clear the TaskArgs struct
+        l_taskargs.clear();
+
+        // clear the status struct for the next step
+        l_sts.val64 =   0;
+
+        //  launch the istep
+        l_errl = InitService::getTheInstance().executeFn( l_pistep,
+                &l_taskargs );
+        //  filter errors returning from executeFn
+        if ( l_errl )
+        {
+            //  handle an errorlog from the parent.  This means the
+            //  launch failed, set the task Status to Bad.
+            //  no need to process child info, thus the else.
+            //  set the taskStatus to LAUNCH_FAIL; this will fall
+            //  out the bottom and be written to SPLESS Status
+            l_sts.hdr.status  =   SPLESS_TASKRC_LAUNCH_FAIL;
+            errlCommit( l_errl, INITSVC_COMP_ID );
+        }
+        else
+        {
+            //  process information returned from the IStep.
+            //  make local copies of the info; this has a secondary
+            //  effect of clearing the errorlog pointer inside
+            //  the TaskArgs  struct.
+            l_isteprc   =   l_taskargs.getReturnCode();     // local copy
+            l_errl      =   l_taskargs.getErrorLog();       // local copy
+
+            //  check for child errorlog
+            if ( l_errl )
+            {
+                //  tell the user that the IStep returned an errorlog
+                l_sts.hdr.status    =   SPLESS_TASKRC_RETURNED_ERRLOG;
+                // go ahead and commit the child errorlog
+                errlCommit( l_errl, INITSVC_COMP_ID );
+            }
+
+            //  truncate IStep return status to 32 bits.
+            l_isteprc   &= SPLESS_SINGLE_STEP_STS_MASK;
+            l_sts.istepStatus =   static_cast<uint32_t>(l_isteprc);
+        }   // end else parent errlog
+
+        //  task status and  istepStatus should be set correctly now,
+        //  send it to the user console.
+        //  clear runningbit, report status
+        //  set running bit, fill in istep and substep
+        l_sts.hdr.runningbit    =   false;
+        l_sts.hdr.readybit      =   true;
+        // l_sts.hdr.seqnum        =   i_seqnum;
+        // task status set above
+        l_sts.istep             =   l_cmd.istep;
+        l_sts.substep           =   l_cmd.substep;
+        // istepStatus set above
+
+        //  write to status reg, return to caller to write to user console
+        o_rrawsts.val64 =   l_sts.val64;
+
+        break;
+
+    } while(0);
+
+}
+
+
+/**
+ * @brief  singleStepISteps
+ *
+ * Stop and wait for SP to send the next IStep to run.  Run that, then
+ * wait for the next one.
+ * This is not expected to return - errors etc are sent to the user to
+ * handle.
+ *
+ * @param[in,out] io_ptr   -   pointer to any args passed in from
+ *                             ExtInitSvc.  This may be a pointer to an
+ *                             TaskArgs struct (or something else) which
+ *                             can be filled out on return
+ *
+ * @return none
+ */
 void    IStepDispatcher::singleStepISteps( void *  io_ptr )   const
 {
-    errlHndl_t          l_errl          =   NULL;
-    TaskArgs::TaskArgs  l_args;
-    const TaskInfo      *l_pistep       =   NULL;
-    bool                l_gobit         =   false;
-    uint16_t            l_nextIStep     =   0;
-    uint16_t            l_nextSubstep   =   0;
-    uint16_t            l_taskStatus    =   0;
-    uint16_t            l_istepStatus   =   0;
-    uint32_t            l_progresscode  =   0;
-    uint64_t            l_isteprc       =   0;
-
-    TRACFCOMP( g_trac_initsvc, "Start IStep single-step.\n" );
+    SPLessCmd           l_cmd;
+    SPLessSts           l_sts;
+    uint8_t             l_seqnum        =   0;
 
     // initialize command reg
-    SPLESSCMD::write( false,            //  go bit is false
-                      0,                //  istep = 0
-                      0 );              //  substep = 0
+    l_cmd.val64 =   0;
+    writeCmd( l_cmd );
 
-    SPLESSSTS::write( false,            //  running bit
-                      true,             //  ready bit
-                      0,                //  istep running
-                      0,                //  substep running
-                      0,                //  task status
-                      0 );              //  istep status
+    //  init status reg, enable ready bit
+    l_sts.val64 =   0;
+    l_sts.hdr.readybit  =   true;
+    writeSts( l_sts );
 
     //
     //  @note Start the polling loop.
@@ -349,134 +494,59 @@ void    IStepDispatcher::singleStepISteps( void *  io_ptr )   const
     //
     while( 1 )
     {
-        //  read command reg, updates l_gobit, l_nextIStep, l_nextSubstep
-        SPLESSCMD::read( l_gobit,
-                         l_nextIStep,
-                         l_nextSubstep );
 
-        //  process any commands
-        if ( l_gobit )
+        //  read command register from user console
+        readCmd( l_cmd );
+
+        // get the sequence number
+        l_seqnum    =   l_cmd.hdr.seqnum;
+
+        //  process any pending commands
+        if ( l_cmd.hdr.gobit )
         {
-            TRACDCOMP( g_trac_initsvc,
-                       "gobit turned on, istep=0x%x, substep=0x%x",
-                       l_nextIStep,
-                       l_nextSubstep );
-
-            //  look up istep+substep
-            l_pistep  =   findTaskInfo( l_nextIStep,
-                                        l_nextSubstep );
-            if ( l_pistep == NULL )
+            switch( l_cmd.hdr.cmdnum )
             {
-                //  no istep TaskInfo returned, update status & drop to end.
-                TRACFCOMP( g_trac_initsvc,
-                           "Invalid IStep 0x%x / substep 0x%x, try again.",
-                           l_nextIStep,
-                           l_nextSubstep );
-                SPLESSSTS::write( false,
-                                  true,
-                                  l_nextIStep,
-                                  l_nextSubstep,
-                                  SPLESS_TASKRC_INVALID_ISTEP,
-                                  0 );
-            }
-            else
-            {
-                //  set running bit, fill in istep and substep
-                SPLESSSTS::write( true,          //  set running bit
-                                  true,          //  ready bit
-                                  l_nextIStep,   //  running istep
-                                  l_nextSubstep, //  running substep
-                                  0,             //  task status (=0)
-                                  0 );           //  istep status(=0)
+            case SPLESS_SINGLE_ISTEP_CMD:
+                // command 0:  run istep/substep
+                processSingleIStepCmd( l_cmd, l_sts  );
+                break;
 
-                /**
-                 * @todo   placeholder - set progress code before starting
-                 * This will not be finalized until the progress code driver
-                 * is designed and implemented.
-                 */
-                l_progresscode  =  ( (l_nextIStep<<16) | l_nextSubstep );
-                InitService::getTheInstance().setProgressCode( l_progresscode );
+            default:
+                l_sts.hdr.status    =   SPLESS_INVALID_COMMAND;
+            }   // endif switch
 
-                //  launch the istep
-                TRACDCOMP( g_trac_initsvc,
-                           "execute Istep=0x%x / Substep=0x%x",
-                           l_nextIStep,
-                           l_nextSubstep );
+            l_sts.hdr.seqnum    =   l_seqnum;
+            //  status should be set now, write to Status Reg.
+            writeSts( l_sts );
 
-                //  clear status, etc for the next istep
-                l_taskStatus    =   0;
-                l_istepStatus   =   0;
-                l_args.clear();
-
-                //  launch the istep
-                l_errl = InitService::getTheInstance().executeFn( l_pistep,
-                                                                  &l_args );
-                //  filter errors returning from executeFn
-                if ( l_errl )
-                {
-                    //  handle an errorlog from the parent.  This means the
-                    //  launch failed, set the task Status to Bad.
-                    //  no need to process child info, thus the else.
-                    //  set the taskStatus to LAUNCH_FAIL; this will fall
-                    //  out the bottom and be written to SPLESS Status
-                    l_taskStatus    =   SPLESS_TASKRC_LAUNCH_FAIL;
-                    TRACFCOMP( g_trac_initsvc,
-                               "ERROR 0x%x:  function launch FAIL",
-                               l_taskStatus );
-                    errlCommit( l_errl, INITSVC_COMP_ID );
-                }
-                else
-                {
-                    //  process information returned from the IStep.
-                    //  make local copies of the info; this has a secondary
-                    //  effect of clearing the errorlog pointer inside
-                    //  the TaskArgs  struct.
-                    l_isteprc   =   l_args.getReturnCode();     // local copy
-                    l_errl      =   l_args.getErrorLog();       // local copy
-
-                    TRACDCOMP( g_trac_initsvc,
-                               "IStep TaskArgs return 0x%llx, errlog=%p",
-                               l_isteprc,
-                               l_errl );
-
-                    //  check for child errorlog
-                    if ( l_errl )
-                    {
-                        //  tell the user that the IStep returned an errorlog
-                        l_taskStatus    =   SPLESS_TASKRC_RETURNED_ERRLOG;
-                        // go ahead and commit the child errorlog
-                        errlCommit( l_errl, INITSVC_COMP_ID);
-                    }
-
-                    //  truncate IStep return status to 16 bits.
-                    l_isteprc   &= 0x000000000000ffff;
-                    l_istepStatus =   static_cast<uint16_t>(l_isteprc);
-
-                }   // end else parent errlog
-
-                //  l_taskStatus and l_istepStatus should be set correctly now,
-                //  send it to the user.
-                //  clear runningbit, report status
-                TRACDCOMP( g_trac_initsvc,
-                           "Write IStep Status: istep=0x%x, substep=0x%x, taskstatus=0x%x, istepstatus=0x%x",
-                           l_nextIStep,
-                           l_nextSubstep,
-                           l_taskStatus,
-                           l_istepStatus );
-                SPLESSSTS::write( false,                 // clear running bit
-                                  true,                  // ready bit
-                                  l_nextIStep,           //  running istep
-                                  l_nextSubstep,         //  running substep
-                                  l_taskStatus,          //  task status
-                                  l_istepStatus          //  istepStatus
-                                );
-
-                SPLESSCMD::setgobit( false );            //  clear gobit
-            }   // end else  l_pistep
+            // clear command reg, including go bit (i.e. set to false)
+            l_cmd.val64 =   0;
+            writeCmd( l_cmd );
         }   //  endif   gobit
 
+
         // sleep, and wait for user to give us something else to do.
-        nanosleep( SINGLESTEP_PAUSE_S, SINGLESTEP_PAUSE_NS );
+        /**
+         * @todo Need a common method of doing delays in HostBoot
+         * @VBU workaround
+         */
+        // Don't delay as long in VBU because it will take VERY long to
+        // run the simulator
+        TARGETING::EntityPath syspath(TARGETING::EntityPath::PATH_PHYSICAL);
+        syspath.addLast(TARGETING::TYPE_SYS,0);
+        TARGETING::Target* sys = TARGETING::targetService().toTarget(syspath);
+        uint8_t vpo_mode = 0;
+        if( sys
+                && sys->tryGetAttr<TARGETING::ATTR_VPO_MODE>(vpo_mode)
+                && (vpo_mode == 0) )
+        {
+            nanosleep( SINGLESTEP_PAUSE_S, SINGLESTEP_PAUSE_NS );
+        }
+        else
+        {
+            // VBU delay per Patrick
+            nanosleep(0,TEN_CTX_SWITCHES_NS);
+        }
     }   //  endwhile
 
 
@@ -485,22 +555,10 @@ void    IStepDispatcher::singleStepISteps( void *  io_ptr )   const
     //  Currently this will never be reached.  Later there may be
     //  a reason to break out of the loop, if this happens we want to
     //  disable the ready bit so the user knows.
-    SPLESSSTS::write( false,
-                      false,
-                      0,
-                      0,
-                      SPLESS_TASKRC_TERMINATED,
-                      0
-                    );
-
-    //  all errorlogs should have been committed in the loop, we should
-    //  not have any errorlogs still set.
-    if ( l_errl )
-    {
-        // if we do then commit it and stop here.
-        errlCommit( l_errl, INITSVC_COMP_ID );
-        assert(0);
-    }
+    l_sts.val64 =   0;
+    l_sts.hdr.status    =   SPLESS_TASKRC_TERMINATED;
+    l_sts.hdr.seqnum    =   l_seqnum;
+    writeSts( l_sts );
 
 }
 

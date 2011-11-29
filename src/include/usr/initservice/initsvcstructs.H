@@ -33,7 +33,9 @@
 // Includes
 /******************************************************************************/
 #include <stdint.h>
-#include <sys/vfs.h>            // VFS_MODULE_MAX
+#include <sys/vfs.h>            // VFS_MODULE_NAME_MAX
+
+#include <initservice/initsvcreasoncodes.H>
 
 
 namespace   INITSERVICE
@@ -47,6 +49,23 @@ namespace   INITSERVICE
 /******************************************************************************/
 // Typedef/Enumerations
 /******************************************************************************/
+
+/**
+ * @note    istepname tag - this is a way to call out the istep, substep, and
+ *          istep name for spless operation.    scanistepnames.pl will run
+ *          through this, find the istepnames, and publish it as a CVS file
+ *          for use by the SPLess user console (python) code.
+ *          Usage:
+ *          @ISTEPNAME( 4, 0, "init_target_states" )
+ *
+ *          This will be picked up by scanistepnames.pl and put in as the line
+ *              4,0,init_target_states
+ *
+ *          HostBoot will see it as the string "init_target_states" in the
+ *          istepNlist.H file
+ */
+#define ISTEPNAME( ISTEP, SUBSTEP, NAME )      NAME
+
 
 /**
  * @enum    TaskType

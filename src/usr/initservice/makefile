@@ -29,6 +29,6 @@ ROOTPATH = ../../..
 # NOTE:	initsvctasktest2 is a dummy module that is executed by 
 #		unit test 2 in the test directory.  Please do not rename.
 SUBDIRS = baseinitsvc.d	extinitsvc.d taskargs.d	istepdispatcher.d	\
-			test.d initsvctasktest2.d
+			test.d initsvctasktest2.d build.d
 
 include ${ROOTPATH}/config.mk

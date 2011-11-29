@@ -29,6 +29,9 @@
  *  Prototypes for routines to access SPLESS Command and
  *  and SPLESS Status interfaces
  *
+ *  Currently SPLess only supports the one command 0x00, this rewrite will
+ *  allow support of other SPLess commands.
+ *
  */
 
 /******************************************************************************/
@@ -38,11 +41,9 @@
 #include    <stdio.h>
 #include    <string.h>
 
-/******************************************************************************/
-// Globals/Constants
-/******************************************************************************/
+
 /**
- * @note    Since ISTEP_MODE attribute is nonvolitile (persists across boots),
+ * @note    Since ISTEP_MODE attribute is nonvolatile (persists across boots),
  *          we must have a way to turn the attribute both ON and OFF - we
  *          cannot depend on the FSP to do it since we may not have a FSP.
  */
@@ -57,115 +58,123 @@ const   uint64_t    ISTEP_MODE_OFF_SIGNATURE    =   0x700b7504700b7504;
  * @namespace   SPLESSCMD
  *
  * Contains functions to manipulate the SPLESS Command Register
- * @todo    overload these later to get command and seq fields
  *
  */
-namespace   SPLESSCMD
+namespace   SPLESS
 {
 
-/**
- * @union   InternalCommand
- *
- * define the fields within the 64-bit Command Register
- *
+const   uint8_t     SPLESS_SINGLE_ISTEP_CMD         =   0x00;
+const   uint64_t    SPLESS_SINGLE_STEP_STS_MASK     =   0x00000000ffffffff;
 
+
+/**
+ * @struct  CommandHdr
+ *
+ * Command Header for all SPless commands.  2 bytes long.
  * Bit numbers are in ppc notation, where bit 0 is the most significant bit.
  *      Go Bit : bit 0 (ppc notation, msbit)
  *          - set to 1 by the user to start the IStep
  *          - cleared to 0 by HostBoot
  *      Reserved: bit 1: always 0
  *      Sequence #: bits 2-7
- *      Command Number: bits 8:15 - always 0 (for now)
- *      Reserved: bits 16:31
- *      Reserved: bits 32:39 - always 0
- *      IStep Number: bits 40:47
- *      Substep Number: bits 48:63gobit:
+ *      Command Number: bits 8:15
+ *
  *
  */
-union   InternalCommand
+struct  CommandHdr
+{
+    bool            gobit:1;
+    uint8_t         reserved0:1;
+    uint8_t         seqnum:6;
+    uint8_t         cmdnum;
+
+}   __attribute__((packed));
+
+
+/**
+ * @union   SPLessCmd
+ *
+ *  64-bit "template" struct for the SPLess command.
+ *  This will be read in and used to extract the header info, then "cast"
+ *  to the correct command.
+ */
+union   SPLessCmd
 {
     uint64_t    val64;
     struct
     {
-        bool            gobit:1;
-        uint8_t         reserved0:1;
-        uint8_t         seqnum:6;
-        uint8_t         cmdnum;
-
-        uint16_t        reserved2;
-
-        uint16_t        reserved3:2;
-        uint16_t        istep:14;
-
-        uint16_t        substep;
-    }   f   PACKED;
+        CommandHdr      hdr;
+        uint16_t        reserved1;
+        uint32_t        reserved2;
+    }   __attribute__((packed));
 
     //  init struct to 0
-    InternalCommand() : val64(0) {};
+    SPLessCmd() : val64(0) {};
 } ;
 
 
 /**
- * @brief   Read the command register and return the necessary fields.
+ * @union   SPLessSingleIStepCmd
  *
- *  @param[in,out] io_rgobit    - ref to a gobit var that will be filled in
- *                                  on return
- *  @param[in,out] io_ristep    - ref to a istep var that will be filled in
- *                                  on return
- *  @param[in,out] io_rsubstep  - ref to a substep var that will be filled
- *                                  in on return
+ * Implement Command 0x00,  run Istep/Substep
  *
- *  @return pointer to errorlog
- *  @retval NULL if success, filled-in errorlog if failure
+ * Send IStep and SubStep number(s) to run.
  *
  */
-void    read( bool      &io_rgobit,
-              uint16_t  &io_ristep,
-              uint16_t  &io_rsubstep );
+union   SPLessSingleIStepCmd
+{
+    uint64_t    val64;
+    struct
+    {
+        CommandHdr      hdr;
+        uint8_t         istep;
+        uint8_t         substep;
+        uint32_t        reserved;
+    }   __attribute__((packed));
+
+    SPLessSingleIStepCmd() : val64(0)  {};
+
+
+    SPLessSingleIStepCmd( const SPLessCmd &i_cmd )
+    :   val64(i_cmd.val64)  { };
+
+private:
+    // disable assignment constructor
+    SPLessSingleIStepCmd& operator=(const SPLessSingleIStepCmd& i_right);
+
+} ;
 
 
 /**
-    * @brief   Write all the necessary fields to the command reg.
+ * @brief   Read the command register and return a filled-in SPLessCmd struct
+ *
+ *  @param[in,out] io_rcmd  -   reference to a SPLessCmd struct
+ *
+ *  @return none
+ */
+inline  void    readCmd( SPLessCmd   &io_rcmd )
+{
+
+    io_rcmd.val64 = mmio_scratch_read(MMIO_SCRATCH_IPLSTEP_COMMAND);
+}
+
+
+/**
+    * @brief   Write a filled-in command struct to the command reg.
     *
     *  Normally the user writes the command reg; this is only used to
     *  init the command reg at the beginning
     *
-    *  @param[in] i_gobit   -   gobit value to write
-    *  @param[in] i_istep   -   istep value to write
-    *  @param[in] i_substep -   substep value to write
+    *  @param[in] i_rcmd    -   reference to a filled-in SPLessCmd reg
     *
-    *  @return errorlog pointer
-    *  @retval  NULL if success, filled-in errorlog if failure
-    *
+    *  @return none
     */
-void    write( const    bool        i_gobit,
-               const    uint16_t    i_istep,
-               const    uint16_t    i_substep );
+inline  void    writeCmd( SPLessCmd    &io_rcmd )
+{
 
+    mmio_scratch_write( MMIO_SCRATCH_IPLSTEP_COMMAND, io_rcmd.val64 );
+}
 
-/**
- * @brief   Read the gobit from the command register
- *
- * @param   o_rgobit    -   ref to a gobit var that will be filled in
- *                          on return.
- *
- *  @return errorlog pointer
- *  @retval NULL if success, filled-in errorlog on failure
- */
-void    getgobit( bool &o_rgobit );
-
-
-/**
- * @brief   Write the gobit to the command register
- *
- * @param   i_gobit    -   gobit value to be written
- *
- *  @return pointer to errlog
- *  @retval NULL if success, filled-in errorlog on failure
- */
-void    setgobit( const bool    i_gobit ) ;
-
-}   //  namespace
 
 
 /******************************************************************************/
@@ -173,20 +182,12 @@ void    setgobit( const bool    i_gobit ) ;
 /******************************************************************************/
 
 /**
- * @namespace   SPLESSSTS
+ * @struct  StatusHdr
  *
- * Contains functions to manipulate the SPLESS Status Register
- * @todo    overload these to get seq # later
+ * header for the Status Reg returned by all SPLess Commands.
  *
- */
-namespace   SPLESSSTS
-{
-
-/**
- * @union   InternalStatus
- *
- * define the fields within the 64-bit status register
- *  Running bit, bit 0 (ppc notation, msbit):
+ * Bit numbers are in ppc notation, where bit 0 is the most significant bit.
+ *  *  Running bit, bit 0 (ppc notation, msbit):
  *      = 1  when IStep is running
  *      = 0   when IStep is finished
  *  Ready bit, bit 1:
@@ -196,80 +197,86 @@ namespace   SPLESSSTS
  *          - IStep Mode Flag   =   0
  *  Sequence # : bits 2-7 - echoes the sequence number in the associated
  *      command frame.
- *  IStep Running, bits 8:15 - the IStep number that is currently running.
- *  Sub-step Running, bits 16:31 - the substep that is currently running.
- *  Task Status, bits 32:47 -  the status that IStep Dispatcher returns when
- *      trying to run the task.  For example:
+ *  Status :    returned status for the command, from IStepDisp.
+ *  For example:
  *      -EINVAL IStep number is invalid
  *      -ENOENT, -ENOEXEC   (return code from kernel)  IStep could not
  *          be launched as a task or as a function within a task
- *  IStep Status, bits 48:63 - status returned from the IStep.
+ */
+struct  StatusHdr
+{
+    bool            runningbit:1;
+    bool            readybit:1;
+    uint8_t         seqnum:6;
+    int8_t          status;
+
+}   __attribute__((packed));
+
+/**
+ * @union   SPLessSts
+ *
+ *  Send HostBoot Status to the user console
  *
  */
-union   InternalStatus  {
+union   SPLessSts  {
     uint64_t    val64;
     struct      {
-        bool            runningbit:1;       //  |
-        bool            readybit:1;         //  |
-        uint8_t         seqnum:6;           //  |
-        uint8_t         istep;              //  |   16 bits
-        uint16_t        substep;            // 16 bits
-        uint16_t        taskStatus;         // 16 bits
-        uint16_t        istepStatus;        // 16 bits
-    }   f   PACKED;
+        StatusHdr       hdr;
+        uint16_t        reserved1;
+        uint32_t        reserved2;
+    }   __attribute__((packed));
 
     //  init struct to 0
-    InternalStatus()    : val64(0)  {};
+    SPLessSts()    : val64(0)  {};
 }   ;
 
 
+/**
+ * @union   SPLessSts0x00
+ *
+ *  Return  Status from IStep/Substep
+ *
+ */
+union   SPLessSingleIStepSts  {
+    uint64_t    val64;
+    struct      {
+        StatusHdr       hdr;
+        uint8_t         istep;
+        uint8_t         substep;
+        uint32_t        istepStatus;
+    }   __attribute__((packed));
+
+    SPLessSingleIStepSts() :   val64(0)    {};
+}   ;
+
 
 /**
- * @brief   Read the SPLess Status SCOM Reg and return all its fields
+ * @brief   Read the SPLess Status reg and return a filled in struct.
  *
- * @param[in,out]   io_rrunningbit  -   ref to runningbit var, to be
- *                                    filled in on return
- * @param[in,out]   io_rreadybit    -   ref to readybit var, to be filled in
- *                                     on return
- * @param[in,out]   io_ristep       -   ref to istep var, to be filled in on
- *                                    return
- * @param[in,out]   io_rsubstep     -   ref to substep var, to be filled in
- *                                     on return
- * @param[in,out]   io_rtaskStatus  -   ref to taskStatus var, to be filled
- *                                    in on return
- * @param[in,out]   io_ristepStatus -   ref to istepStatus var, to be filled
- *                                    in on return
+ * @param[in,out]   io_rsts -   ref SPLessSts struct
  *
  * @return  none.
  */
-void    read( bool      &io_rrunningbit,
-              bool      &io_rreadybit,
-              uint16_t  &io_ristep,
-              uint16_t  &io_rsubstep,
-              uint16_t  &io_rtaskStatus,
-              uint16_t  &io_ristepStatus );
+inline  void    readSts(   SPLessSts   &io_rsts )
+{
+
+    io_rsts.val64 = mmio_scratch_read(MMIO_SCRATCH_IPLSTEP_STATUS);
+}
 
 /**
- * @brief   write
+ * @brief   Write a filled in SPLessSts struct to the SPLess Status Reg
  *
- * Read the SPLess Status SCOM Reg and return all its fields
- *
- * @param[in]   i_runningbit  -   runningbit val to write
- * @param[in]   i_readybit    -   readybit val to write
- * @param[in]   i_istep       -   istep val to write
- * @param[in]   i_substep     -   substep val to write
- * @param[in]   i_taskStatus  -   taskStatus val to write
- * @param[in]   i_istepStatus -   istepStatus val to write
+ * @param[in,out]   io_rsts
  *
  * @return  none
  */
-void    write( const bool       i_runningbit,
-               const bool       i_readybit,
-               const uint16_t   i_istep,
-               const uint16_t   i_substep,
-               const uint16_t   i_taskStatus,
-               const uint16_t   i_istepStatus );
+inline  void    writeSts(  SPLessSts   &io_rsts )
+{
+    mmio_scratch_write( MMIO_SCRATCH_IPLSTEP_STATUS, io_rsts.val64 );
+
+}
 
 }   // namespace
+
 
 #endif

@@ -77,6 +77,7 @@ my @files = ("src/build/tools/hb-parsedump.pl",
              "img/simics_SALERNO_targeting.bin",
              "img/simics_VENICE_targeting.bin",
              "img/vbu_targeting.bin",
+             "img/isteplist.csv",
              );
 
 #Directories in base git repository

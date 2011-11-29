@@ -28,8 +28,10 @@
  *
  *  list of functions called by HWAS (ISTEP 4) - "named isteps"
  *
+ *  Please see the note in initsvcstructs.H for description of
+ *      the ISTEPNAME macro.
+ *
  */
-
 
 #include    <initservice/initsvcstructs.H>
 #include    <initservice/initsvcreasoncodes.H>
@@ -60,7 +62,7 @@ namespace   INITSERVICE
 const   TaskInfo    g_istep4[]  =   {
 
         {
-                "init_target_states" ,          // substep name
+                ISTEPNAME(4,0,"init_target_states"),    // substep name
                 HWAS::init_target_states,               // pointer to fn
                 {
                         START_FN,                       // task type
@@ -69,7 +71,7 @@ const   TaskInfo    g_istep4[]  =   {
                 }
         },
         {
-                "init_fsi" ,                    // substep name
+                ISTEPNAME(4,1,"init_fsi"),              // substep name
                 HWAS::init_fsi,                         // pointer to fn
                 {
                         START_FN,                       // task type
@@ -78,7 +80,7 @@ const   TaskInfo    g_istep4[]  =   {
                 }
         },
         {
-                "apply_fsi_info" ,                   // substep name
+                ISTEPNAME(4,2,"apply_fsi_info"),        // substep name
                 HWAS::apply_fsi_info,                   // pointer to fn
                 {
                         START_FN,                       // task type
@@ -87,7 +89,7 @@ const   TaskInfo    g_istep4[]  =   {
                 }
         },
         {
-                "apply_dd_presence" ,           // substep name
+                ISTEPNAME(4,3,"apply_dd_presence"),     // substep name
                 HWAS::apply_dd_presence,                // pointer to fn
                 {
                         START_FN,                       // task type
@@ -96,7 +98,7 @@ const   TaskInfo    g_istep4[]  =   {
                 }
         },
         {
-                "apply_pr_keyword_data" ,       // substep name
+                ISTEPNAME(4,4,"apply_pr_keyword_data"), // substep name
                 HWAS::apply_pr_keyword_data,            // pointer to fn
                 {
                         START_FN,                       // task type
@@ -105,7 +107,7 @@ const   TaskInfo    g_istep4[]  =   {
                 }
         },
         {
-                "apply_partial_bad" ,           // substep name
+                ISTEPNAME(4,5,"apply_partial_bad"),     // substep name
                 HWAS::apply_partial_bad,                // pointer to fn
                 {
                         START_FN,                       // task type
@@ -114,7 +116,7 @@ const   TaskInfo    g_istep4[]  =   {
                 }
         },
         {
-                "apply_gard" ,                  // substep name
+                ISTEPNAME(4, 6, "apply_gard"),            // substep name
                 HWAS::apply_gard,                       // pointer to fn
                 {
                         START_FN,                       // task type
@@ -123,8 +125,8 @@ const   TaskInfo    g_istep4[]  =   {
                 }
         },
         {
-                "testHWP" ,                  // substep name
-                HWAS::testHWP,                       // pointer to fn
+                ISTEPNAME(4,7,"testHWP"),               // substep name
+                HWAS::testHWP,                          // pointer to fn
                 {
                         START_FN,                       // task type
                         EXT_IMAGE,                      // Extended Module
