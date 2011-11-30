@@ -93,13 +93,18 @@ public:
           else if((TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL == scom_targets[x]) ||
                   (scom_targets[x]->getAttr<TARGETING::ATTR_SCOM_SWITCHES>().useXscom))
           {
-              TRACFCOMP( g_trac_scom, "ScomTest::test_FSISCOMreadWrite_proc> Target is the MASTER Sentinal or is set to use Xscom, exiting test" );
+              TRACFCOMP( g_trac_scom, "ScomTest::test_FSISCOMreadWrite_proc> Target %d is the MASTER Sentinal or is set to use Xscom, exiting test", x );
               scom_targets[x] = NULL; //remove from our list
           }
           // skip if fsi scom is not enabled
           else if(0 == scom_targets[x]->getAttr<TARGETING::ATTR_SCOM_SWITCHES>().useFsiScom)
           {
-              TRACFCOMP( g_trac_scom, "ScomTest::test_FSISCOMreadWrite_proc> useFsiScom set to zero, exiting test" );
+              TRACFCOMP( g_trac_scom, "ScomTest::test_FSISCOMreadWrite_proc> useFsiScom set to zero on target %d", x );
+              scom_targets[x] = NULL; //remove from our list
+          }
+          else if( !FSI::isSlavePresent(scom_targets[x]) )
+          {
+              TRACFCOMP( g_trac_scom, "ScomTest::test_FSISCOMreadWrite_proc> Target %d is not present", x );
               scom_targets[x] = NULL; //remove from our list
           }
       }
@@ -233,12 +238,17 @@ public:
                   (scom_targets[x]->getAttr<TARGETING::ATTR_SCOM_SWITCHES>().useXscom) ||
                   (scom_targets[x]->getAttr<TARGETING::ATTR_SCOM_SWITCHES>().useInbandScom))
           {
-              TRACFCOMP( g_trac_scom, "ScomTest::test_FSISCOMreadWrite_centaur> Target is the MASTER Sentinal or is set to use Xscom or Inband Scom, exiting test" );
+              TRACFCOMP( g_trac_scom, "ScomTest::test_FSISCOMreadWrite_centaur> Target %d is the MASTER Sentinal or is set to use Xscom or Inband Scom, exiting test", x );
               scom_targets[x] = NULL; //remove from our list
           }
           else if(0 == scom_targets[x]->getAttr<TARGETING::ATTR_SCOM_SWITCHES>().useFsiScom)
           {
-              TRACFCOMP( g_trac_scom, "ScomTest::test_FSISCOMreadWrite_centaur> useFsiScom set to zero, exiting test" );
+              TRACFCOMP( g_trac_scom, "ScomTest::test_FSISCOMreadWrite_centaur> useFsiScom set to zero on target %d", x );
+              scom_targets[x] = NULL; //remove from our list
+          }
+          else if( !FSI::isSlavePresent(scom_targets[x]) )
+          {
+              TRACFCOMP( g_trac_scom, "ScomTest::test_FSISCOMreadWrite_centaur> Target %d is not present", x );
               scom_targets[x] = NULL; //remove from our list
           }
       }

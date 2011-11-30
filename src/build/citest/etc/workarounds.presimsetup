@@ -33,8 +33,6 @@ cp --update $BACKING_BUILD/src/simu/configs/P8_SALERNO.config $sb/simu/configs
 sed -i -e's/SETENV GFW_P8_SALERNO_L3_MB_SIZE.*/SETENV GFW_P8_SALERNO_L3_MB_SIZE 8/' $sb/simu/configs/P8_SALERNO.config
 # Backing build already contains 910431.  Leave this workaround here for future scomdef files
 #sed -i -e's/SETENV GFW_P8_SALERNO_MODEL_EC.*/SETENV GFW_P8_SALERNO_MODEL_EC 910431/' $sb/simu/configs/P8_SALERNO.config
-echo "SETENV GFW_SIMICS_ENV_TEST_MODE             no" >> $sb/simu/configs/P8_SALERNO.config
-echo "SETENV GFW_P8_SALERNO_ENABLE_P8_PROC         no" >> $sb/simu/configs/P8_SALERNO.config
 
 echo "+++ Copy desired VENICE config file to sandbox and modify L3 to 8MB."
 mkdir -p $sb/simu/configs
@@ -42,33 +40,19 @@ cp --update $BACKING_BUILD/src/simu/configs/P8_VENICE.config $sb/simu/configs
 sed -i -e's/SETENV GFW_P8_VENICE_L3_MB_SIZE.*/SETENV GFW_P8_VENICE_L3_MB_SIZE 8/' $sb/simu/configs/P8_VENICE.config
 # Backing build already contains 910431.  Leave this workaround here for future scomdef files
 #sed -i -e's/SETENV GFW_P8_VENICE_MODEL_EC.*/SETENV GFW_P8_VENICE_MODEL_EC 910431/' $sb/simu/configs/P8_VENICE.config
-echo "SETENV GFW_SIMICS_ENV_TEST_MODE             no" >> $sb/simu/configs/P8_VENICE.config
-echo "SETENV GFW_P8_VENICE_ENABLE_P8_PROC         no" >> $sb/simu/configs/P8_VENICE.config
 
 
-echo "+++ Update Chip EC levels (SW106529)."
-sed -i -e's/SETENV GFW_P8_VENICE_PROC_EC.*/SETENV GFW_P8_VENICE_PROC_EC 10/' $sb/simu/configs/P8_VENICE.config
-sed -i -e's/SETENV GFW_P8_VENICE_CENTAUR_EC.*/SETENV GFW_P8_VENICE_CENTAUR_EC 10/' $sb/simu/configs/P8_VENICE.config
-sed -i -e's/SETENV GFW_P8_SALERNO_PROC_EC.*/SETENV GFW_P8_SALERNO_PROC_EC 10/' $sb/simu/configs/P8_SALERNO.config
+#echo "+++ Update to new simics build."
+#mkdir -p $sb/simu/data
+#egrep -v "WSALIAS HOSTBOOT_LEVEL FIPSLEVEL|WSALIAS HOSTBOOT_LEVEL SIMICSLEVEL" $BACKING_BUILD/src/simu/data/simicsInfo > $sb/simu/data/simicsInfo
+#echo "WSALIAS HOSTBOOT_LEVEL FIPSLEVEL env/gfwa/simics-4.2.0/simics-4.2.82/fips/fld36/fi111110b700.42" >> $sb/simu/data/simicsInfo
+#echo "WSALIAS HOSTBOOT_LEVEL SIMICSLEVEL env/vtechb/simics-4.2.0/simics-4.2.82/bin" >> $sb/simu/data/simicsInfo
 
-echo "+++ Add some scom regs to centaur.chip (SW106529)."
+echo "+++ Add some logic regs for Simics workaround."
 mkdir -p $sb/simu/data/cec-chip/
 cp --update $BACKING_BUILD/src/simu/data/cec-chip/centaur.chip $sb/simu/data/cec-chip/centaur.chip.orig
 grep -v DONE $sb/simu/data/cec-chip/centaur.chip.orig > $sb/simu/data/cec-chip/centaur.chip
-echo "SCOMREGS           # List all scom registers" >> $sb/simu/data/cec-chip/centaur.chip
-echo "  0x00012345    #fake register for testing" >> $sb/simu/data/cec-chip/centaur.chip
-echo "  0x02011672    #MBU.MBS.MCBISTS01.SCOMFIR.MCBCMA1Q" >> $sb/simu/data/cec-chip/centaur.chip
-echo "  0x02011403    #MBU.MBS.MBS_FIR_MASK_REG" >> $sb/simu/data/cec-chip/centaur.chip
+echo "INTERNALREGS           # List all scom registers" >> $sb/simu/data/cec-chip/centaur.chip
+echo "   0xFF00000F, 64       # Simics workaround" >> $sb/simu/data/cec-chip/centaur.chip
 echo "END" >> $sb/simu/data/cec-chip/centaur.chip
 echo "DONE" >> $sb/simu/data/cec-chip/centaur.chip
-
-echo "+++ Update to new simics build."
-mkdir -p $sb/simu/data
-egrep -v "WSALIAS HOSTBOOT_LEVEL FIPSLEVEL|WSALIAS HOSTBOOT_LEVEL SIMICSLEVEL" $BACKING_BUILD/src/simu/data/simicsInfo > $sb/simu/data/simicsInfo
-echo "WSALIAS HOSTBOOT_LEVEL FIPSLEVEL env/gfwa/simics-4.2.0/simics-4.2.82/fips/fld36/fi111110b700.42" >> $sb/simu/data/simicsInfo
-echo "WSALIAS HOSTBOOT_LEVEL SIMICSLEVEL env/vtechb/simics-4.2.0/simics-4.2.82/bin" >> $sb/simu/data/simicsInfo
-
-echo "+++ New simics build (fi111013b700.42) needs some new files."
-mkdir -p $sb/simu/data/cec-chip
-cp $BACKING_BUILD/src/simu/data/cec-chip/p8.por $sb/simu/data/cec-chip/p8_master.por
-
