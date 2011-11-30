@@ -37,18 +37,19 @@ namespace FSI
         MOD_FSIDD_DDOP                = 0x05, /**< fsidd.C : ddOp */
         MOD_FSIDD_POLLFORCOMPLETE     = 0x06, /**< fsidd.C : FsiDD::pollForComplete */
         MOD_FSIDD_INITPORT            = 0x07, /**< fsidd.C : FsiDD::initPort */
+        MOD_FSIPRES_PRESENCEDETECT    = 0x08, /**< fsipres.C : presenceDetect */
     };
 
     enum FSIReasonCode
     {
-        RC_INVALID_LENGTH            = FSI_COMP_ID | 0x01, 
+        RC_INVALID_LENGTH            = FSI_COMP_ID | 0x01,
         RC_INVALID_ADDRESS           = FSI_COMP_ID | 0x02,
         RC_OPB_TIMEOUT               = FSI_COMP_ID | 0x03,
         RC_OPB_ERROR                 = FSI_COMP_ID | 0x04,
         RC_INVALID_TARGET            = FSI_COMP_ID | 0x05,
         RC_OPB_NO_READ_VALID         = FSI_COMP_ID | 0x06,
         RC_ERROR_ENABLING_SLAVE      = FSI_COMP_ID | 0x07,
-        RC_INVALID_OPERATION         = FSI_COMP_ID | 0x08, 
+        RC_INVALID_OPERATION         = FSI_COMP_ID | 0x08,
         RC_NULL_TARGET               = FSI_COMP_ID | 0x09,
         RC_MASTER_TARGET             = FSI_COMP_ID | 0x0A,
     };

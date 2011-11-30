@@ -23,7 +23,7 @@
 ROOTPATH = ../../..
 MODULE = fsi
 
-OBJS = fsidd.o
+OBJS = fsidd.o fsipres.o
 
 SUBDIRS = test.d
 
