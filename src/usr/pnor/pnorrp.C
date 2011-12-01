@@ -32,7 +32,7 @@
 #include <string.h>
 #include <sys/mm.h>
 #include <errno.h>
-
+#include <initservice/initserviceif.H>
 
 // Trace definition
 trace_desc_t* g_trac_pnor = NULL;
@@ -193,11 +193,13 @@ void PnorRP::initDaemon()
             break;
         }
 
+        //Register this memory range to be FLUSHed during a shutdown.
+        INITSERVICE::registerBlock(reinterpret_cast<void*>(BASE_VADDR),
+                                   TOTAL_SIZE,PNOR_PRIORITY);
 
         // Need to set permissions to R/W
-	rc = mm_set_permission((void*) BASE_VADDR,
-			       TOTAL_SIZE ,
-			       WRITABLE);
+        rc = mm_set_permission((void*) BASE_VADDR,TOTAL_SIZE,
+                               WRITABLE | WRITE_TRACKED);
 
 
 

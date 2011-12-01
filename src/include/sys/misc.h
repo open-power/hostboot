@@ -46,11 +46,13 @@ extern "C"
 {
 #endif
 
+#ifdef __HIDDEN_SYSCALL_SHUTDOWN
 /** @fn shutdown()
  *  @brief Shutdown all CPUs (hardware threads)
  *  @param[in] i_status The status code to post
  */
-void shutdown(uint64_t i_status);
+extern "C" void shutdown(uint64_t i_status);
+#endif
 
 /** @enum ProcessorCoreType
  *  @brief Enumeration of the different supported processor cores.

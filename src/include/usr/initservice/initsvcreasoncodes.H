@@ -72,6 +72,7 @@ enum    InitServiceModuleID
     EXTINITSVC_TASK_RETURNED_ERROR_ID   =   0x23,
     CXXTEST_TASK_RETURNED_ERROR_ID      =   0x24,
     ISTEP_RETURNED_ERROR_ID             =   0x25,
+    INITSVC_DO_SHUTDOWN_MOD_ID          =   0x26,
 
     //
     //  HWAS:  ISTEP 4
@@ -109,8 +110,7 @@ enum    InitServiceReasonCode
     INITSVC_FAILED_NO_ERRLOG    =   INITSVC_COMP_ID | 0x06,
     EXTINITSVC_FAILED_NO_ERRLOG =   INITSVC_COMP_ID | 0x07,
     CXXTEST_FAILED_NO_ERRLOG    =   INITSVC_COMP_ID | 0x08,
-
-
+    SHUTDOWN_FLUSH_FAILED       =   INITSVC_COMP_ID | 0x09,
 
 };
 

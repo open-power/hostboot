@@ -27,10 +27,12 @@
 #include <errno.h>
 #include <string.h>
 #include <algorithm>
+#include <vmmconst.h>
 
 #include <targeting/targreasoncodes.H>
 #include "attrrp.H"
 #include "trace.H"
+#include <initservice/initserviceif.H>
 
 using namespace INITSERVICE;
 using namespace ERRORLOG;
@@ -392,6 +394,13 @@ namespace TARGETING
 
                     case SECTION_TYPE_PNOR_RW:
                         l_perm = WRITABLE | WRITE_TRACKED;
+                        /*
+                         * Register this memory range to be FLUSHed during
+                         * a shutdown.
+                         */
+                        INITSERVICE::registerBlock(
+                            reinterpret_cast<void*>(iv_sections[i].vmmAddress),
+                            iv_sections[i].size,ATTR_PRIORITY);
                         break;
 
                     case SECTION_TYPE_HEAP_PNOR_INIT:

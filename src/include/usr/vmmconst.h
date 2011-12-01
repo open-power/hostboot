@@ -57,6 +57,13 @@
 // image generator script 
 #define VMM_VADDR_ATTR_RP  (3ul * 1024ul * 1024ul * 1024ul)
 
+/** Virtual memory block priorities */
+enum BlockPriority
+{
+    PNOR_PRIORITY = 0, //No dependencies
+    VFS_PRIORITY  = (PNOR_PRIORITY + 1), //Dependent on PNOR
+    ATTR_PRIORITY = (PNOR_PRIORITY + 1), //Dependent on PNOR
+};
 
 /**
  * Other Constants

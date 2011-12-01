@@ -45,8 +45,8 @@
 #include <errl/errlentry.H>
 #include <initservice/initsvcreasoncodes.H>
 #include <initservice/taskargs.H>
-
 #include <initservice/initsvcstructs.H>
+#include <vmmconst.h>
 
 namespace   INITSERVICE
 {
@@ -181,6 +181,27 @@ public:
     errlHndl_t  dispatchTask( const TaskInfo    *i_ptask,
                               TaskArgs          *io_pargs ) const;
 
+    /**
+     * @brief Registry a block/range of vitual memory to be handled during a
+     *        shutdown.
+     *
+     * @param[in] i_vaddr - Base virtual address
+     * @param[in] i_size - Size of virtual memory from base address
+     * @param[in] i_priority - Order to handle given block(0-Lowest Priority)
+     *
+     * @return Nothing
+     */
+    void registerBlock(void* i_vaddr, uint64_t i_size, BlockPriority i_priority);
+
+    /**
+     * @brief Perform necessary steps, such as FLUSHing, to registered blocks.
+     *
+     * @param[in] i_status - Shutdown status to be passed along on shutdown
+     *
+     * @return Nothing
+     */
+    void doShutdown(uint64_t i_status);
+
 
 protected:
 
@@ -201,6 +222,30 @@ private:
      */
     InitService(const InitService& i_right);
     InitService& operator=(const InitService& i_right);
+
+    /**
+     * @struct regBlock_t
+     * @brief Attributes stored for virtual memory ranges that must be handled
+     *        during a shutdown.
+     */
+    struct regBlock_t
+    {
+        //Base virtual address
+        void* vaddr;
+        //Size of virtual memory from base address
+        uint64_t size;
+        //Priority order in which to handle the given block
+        uint64_t priority;
+
+        /**
+         * @brief Constructor to initialize a registered block object
+         */
+        regBlock_t(void* i_vaddr, uint64_t i_size, uint64_t i_priority) :
+            vaddr(i_vaddr), size(i_size), priority(i_priority) {}
+    };
+
+    //Store a list of registered blocks
+    std::vector<regBlock_t*> iv_regBlock;
 
 };  //  class InitService
 

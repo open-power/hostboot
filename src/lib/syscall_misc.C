@@ -20,9 +20,10 @@
 //  Origin: 30
 //
 //  IBM_PROLOG_END
+#define __HIDDEN_SYSCALL_SHUTDOWN
+
 #include <sys/misc.h>
 #include <sys/syscall.h>
-#include <sys/mmio.h>
 
 using namespace Systemcalls;
 

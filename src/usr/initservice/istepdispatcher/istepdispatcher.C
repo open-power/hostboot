@@ -708,8 +708,8 @@ void    IStepDispatcher::runAllISteps( void * io_ptr )   const
 
         // pass an error code on to extinitsvc that we are shutting down.
         pTaskArgs->postReturnCode( TASKARGS_SHUTDOWN_RC );
-        // Tell the kernel to shutdown.
-        shutdown( SHUTDOWN_STATUS_ISTEP_FAILED );
+        //Tell initservice to perform shutdown sequence
+        InitService::getTheInstance().doShutdown( SHUTDOWN_STATUS_ISTEP_FAILED );
 
     }
 

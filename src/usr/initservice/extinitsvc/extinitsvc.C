@@ -167,8 +167,9 @@ void ExtInitSvc::init( void *io_ptr )
 
         //  pass an error code to initsvc that we are shutting down.
         pTaskArgs->postReturnCode( TASKARGS_SHUTDOWN_RC );
-        // Tell the kernel to shutdown.
-        shutdown( SHUTDOWN_STATUS_EXTINITSVC_FAILED );
+        //Tell initservice to perform shutdown sequence
+        InitService::getTheInstance().doShutdown(
+                                      SHUTDOWN_STATUS_EXTINITSVC_FAILED);
     }
 
     TRACFCOMP( g_trac_initsvc,
@@ -294,7 +295,8 @@ void ExtInitSvc::init( void *io_ptr )
         l_shutdownStatus = SHUTDOWN_STATUS_UT_FAILED;
     }
 
-    shutdown(l_shutdownStatus);
+    //Tell initservice to perform shutdown sequence
+    InitService::getTheInstance().doShutdown(l_shutdownStatus);
 
     // return to _start(), which may end the task or die.
     return;

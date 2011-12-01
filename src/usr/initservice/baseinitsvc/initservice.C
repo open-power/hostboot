@@ -28,6 +28,7 @@
  *  See initservice.H for details
  *
  */
+#define __HIDDEN_SYSCALL_SHUTDOWN
 
 #include    <kernel/console.H>
 #include    <sys/vfs.h>
@@ -38,6 +39,8 @@
 #include    <errl/errlentry.H>
 #include    <errl/errlmanager.H>
 #include    <sys/sync.h>
+#include    <sys/mm.h>
+#include    <vmmconst.h>
 
 #include    "initservice.H"
 #include    "initsvctasks.H"
@@ -324,8 +327,8 @@ void InitService::init( void *io_ptr )
         TRACFCOMP( g_trac_initsvc, "InitService: Committing errorlog." );
         errlCommit( l_errl, INITSVC_COMP_ID );
 
-        // Tell the kernel to shutdown.
-        shutdown( SHUTDOWN_STATUS_INITSVC_FAILED );
+        //Tell initservice to perform shutdown sequence
+        doShutdown( SHUTDOWN_STATUS_INITSVC_FAILED );
 
     }
 
@@ -348,5 +351,68 @@ InitService::InitService( )
 
 InitService::~InitService( )
 { }
+
+void registerBlock(void* i_vaddr, uint64_t i_size, BlockPriority i_priority)
+{
+    Singleton<InitService>::instance().registerBlock(i_vaddr,i_size,i_priority);
+}
+
+void InitService::registerBlock(void* i_vaddr, uint64_t i_size,
+                                BlockPriority i_priority)
+{
+    //Order priority from largest to smallest upon inserting
+    std::vector<regBlock_t*>::iterator regBlock_iter = iv_regBlock.begin();
+    for (; regBlock_iter!=iv_regBlock.end(); ++regBlock_iter)
+    {
+        if ((uint64_t)i_priority >= (*regBlock_iter)->priority)
+        {
+            iv_regBlock.insert(regBlock_iter,
+                               new regBlock_t(i_vaddr,i_size,
+                                              (uint64_t)i_priority));
+            regBlock_iter=iv_regBlock.begin();
+            break;
+        }
+    }
+    if (regBlock_iter == iv_regBlock.end())
+    {
+        iv_regBlock.push_back(new regBlock_t(i_vaddr,i_size,
+                                             (uint64_t)i_priority));
+    }
+}
+
+void InitService::doShutdown(uint64_t i_status)
+{
+    int l_rc = 0;
+    errlHndl_t l_err = NULL;
+    std::vector<regBlock_t*>::iterator l_rb_iter = iv_regBlock.begin();
+    //FLUSH each registered block in order
+    while (l_rb_iter!=iv_regBlock.end())
+    {
+        l_rc = mm_remove_pages(FLUSH,(*l_rb_iter)->vaddr,(*l_rb_iter)->size);
+        if (l_rc)
+        {
+            /*
+             * @errorlog tag
+             * @errortype       ERRL_SEV_CRITICAL_SYS_TERM
+             * @moduleid        INITSVC_DO_SHUTDOWN_MOD_ID
+             * @reasoncode      SHUTDOWN_FLUSH_FAILED
+             * @userdata1       returncode from mm_remove_pages()
+             * @userdata2       0
+             *
+             * @defdesc         Could not FLUSH virtual memory.
+             *
+             */
+            l_err = new ERRORLOG::ErrlEntry(
+                        ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
+                        INITSERVICE::INITSVC_DO_SHUTDOWN_MOD_ID,
+                        INITSERVICE::SHUTDOWN_FLUSH_FAILED,l_rc,0);
+            //Commit and attempt flushing other registered blocks
+            errlCommit( l_err, INITSVC_COMP_ID );
+            l_err = NULL;
+        }
+        l_rb_iter++;
+    }
+    shutdown(i_status);
+}
 
 } // namespace

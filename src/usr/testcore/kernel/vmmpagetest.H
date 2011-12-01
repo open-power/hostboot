@@ -204,7 +204,7 @@ class vmmpagetest: public CxxTest::TestSuite
            (*(volatile uint64_t *)(iv_va+4*PAGESIZE)) = 0x34343434;
 
 
-            printk("\n%lx\n", (*(volatile uint64_t *)(iv_va+4*PAGESIZE)));
+            printkd("\n%lx\n", (*(volatile uint64_t *)(iv_va+4*PAGESIZE)));
             //printkd(" Successfully read from a WRITABLE page\n");
 
          }
