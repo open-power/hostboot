@@ -1,4 +1,26 @@
 #!/usr/bin/perl
+#  IBM_PROLOG_BEGIN_TAG
+#  This is an automatically generated prolog.
+#
+#  $Source: src/build/tools/gensyms $
+#
+#  IBM CONFIDENTIAL
+#
+#  COPYRIGHT International Business Machines Corp. 2011
+#
+#  p1
+#
+#  Object Code Only (OCO) source materials
+#  Licensed Internal Code Source Materials
+#  IBM HostBoot Licensed Internal Code
+#
+#  The source code for this program is not published or other-
+#  wise divested of its trade secrets, irrespective of what has
+#  been deposited with the U.S. Copyright Office.
+#
+#  Origin: 30
+#
+#  IBM_PROLOG_END
 
 use strict;
 
@@ -18,25 +40,33 @@ if (not $image_offset) { $image_offset = "0x0"; };
 $image_offset = hex $image_offset;
 
 my $image;
+my $extimage;
+my $extoffset;
 my $all_modules = 0;
 my @modules = ();
 
-if ($#ARGV == -1)
+if ($#ARGV <= 1)
 {
-    die "gensyms <image> [modules]\n";
+    die "gensyms <image> <extimage> <extoffset> [modules]\n";
 }
-if ($#ARGV == 0)
+
+if ($#ARGV == 2)
 {
     $all_modules = 1;
 }
 else
 {
-    @modules = @ARGV[1..$#ARGV];
+    @modules = @ARGV[3..$#ARGV];
 }
+
+my $extoffset = hex $ARGV[2];
 
 $image = add_image_subdir($ARGV[0]);
 open IMAGE, "< $image";
 binmode(IMAGE);
+$extimage = add_image_subdir($ARGV[1]);
+open EXTIMAGE, "< $extimage";
+binmode(EXTIMAGE);
 
 my %module_offsets = ();
 open MODINFO, "< $image.modinfo";
@@ -80,8 +110,17 @@ foreach my $module (@modules)
 	my $code_loc = 0;
 	if ($is_function)
 	{
-            seek IMAGE, ($address - $image_offset), SEEK_SET;
-            read IMAGE, $code_loc, 8;
+            if (($address - $image_offset) > $extoffset)
+            {
+                seek EXTIMAGE,
+                     ($address - ($image_offset + $extoffset)), SEEK_SET;
+                read EXTIMAGE, $code_loc, 8;
+            }
+            else
+            {
+                seek IMAGE, ($address - $image_offset), SEEK_SET;
+                read IMAGE, $code_loc, 8;
+            }
             if ($littleendian)
             {
                 $code_loc = unpack("Q", reverse($code_loc)) + $image_offset;
@@ -102,6 +141,7 @@ foreach my $module (@modules)
 }
 
 close IMAGE;
+close EXTIMAGE;
 
 foreach my $outstring (sort { substr($a,2) cmp substr($b,2) } @output)
 {

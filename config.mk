@@ -207,7 +207,7 @@ ${IMGDIR}/%.bin ${IMGDIR}/%.list ${IMGDIR}/%.syms: ${IMGDIR}/%.elf \
 	      > ${IMGDIR}/.$*.lnkout
 	${ROOTPATH}/src/build/tools/addimgid $@ $<
 	(cd ${ROOTPATH}; \
-	    src/build/tools/gensyms $*.bin > ./img/$*.syms ; \
+	    src/build/tools/gensyms $*.bin $*_extended.bin 0x40000000 > ./img/$*.syms ; \
 	    src/build/tools/genlist $*.bin > ./img/$*.list)
 
 
