@@ -9,3 +9,4 @@ customrc
 my.sandboxrc
 cxxtest_sb/
 testdata
+*.csv

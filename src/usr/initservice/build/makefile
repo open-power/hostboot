@@ -50,3 +50,6 @@ debug:
 	ls -l ${GENDIR}
 	ls -l ${OBJDIR} 
 	ls -l ${IMGDIR}
+	
+beam:
+	## dummy

@@ -80,3 +80,6 @@ debug:
 	ls -l	${OBJDIR} 
 	ls -l	${IMGDIR}
 	ls -l	${UD_DIR}
+	
+beam:
+	# dummy
