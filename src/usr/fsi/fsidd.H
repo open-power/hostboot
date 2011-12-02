@@ -117,9 +117,11 @@ class FsiDD
     ~FsiDD();
 
     /**
-     * @brief Performs an FSI Read Operation
+     * @brief Performs an FSI Read Operation to an absolute address
+     *   using the master processor chip to drive it
      *
-     * @param[in] i_address  Address to read (relative to FSI Master chip)
+     * @param[in] i_address  Absolute FSI address to read relative to
+     *     the master processor chip
      * @param[out] o_buffer  Destination buffer for data
      *
      * @return errlHndl_t  NULL on success
@@ -129,13 +131,62 @@ class FsiDD
 
     /**
      * @brief Performs an FSI Write Operation to an absolute address
+     *   using the master processor chip to drive it
      *
-     * @param[in] i_address  Absolute address to write
+     * @param[in] i_address  Absolute FSI address to write relative to
+     *     the master processor chip
      * @param[out] i_buffer  Source buffer for data
      *
      * @return errlHndl_t  NULL on success
      */
     errlHndl_t write(uint64_t i_address,
+                     uint32_t* i_buffer);
+
+    /**
+     * @brief Holds a set of addressomg information to describe the 
+     *   current FSI operation 
+     */
+    struct FsiAddrInfo_t {
+        const TARGETING::Target* fsiTarg; ///< Target of FSI operation
+        TARGETING::Target* opbTarg; ///< OPB control reg target
+        uint32_t relAddr; ///< Input FSI address (relative to fsiTarg)
+        uint32_t absAddr; ///< Absolute FSI address (relative to opbTarg)
+
+        /** Input Arg Constructor */
+        FsiAddrInfo_t( const TARGETING::Target* i_target,
+                       uint64_t i_address ) :
+          fsiTarg(i_target), opbTarg(NULL),
+        relAddr(i_address), absAddr(0xFFFFFFFF)
+        {};
+
+      private:
+        /** Default Constructor is not allowed */
+        FsiAddrInfo_t() :
+          fsiTarg(NULL), opbTarg(NULL), 
+        relAddr(0xFFFFFFFF),absAddr(0xFFFFFFFF)
+        {};        
+    };
+
+    /**
+     * @brief Performs an FSI Read Operation
+     *
+     * @param[in] i_addrInfo  Addressing information
+     * @param[out] o_buffer  Destination buffer for data
+     *
+     * @return errlHndl_t  NULL on success
+     */
+    errlHndl_t read(const FsiAddrInfo_t& i_addrInfo,
+                    uint32_t* o_buffer);
+
+    /**
+     * @brief Performs an FSI Write Operation to an absolute address
+     *
+     * @param[in] i_addrInfo  Addressing information
+     * @param[out] i_buffer  Source buffer for data
+     *
+     * @return errlHndl_t  NULL on success
+     */
+    errlHndl_t write(const FsiAddrInfo_t& i_addrInfo,
                      uint32_t* i_buffer);
 
     /**
@@ -149,69 +200,93 @@ class FsiDD
     errlHndl_t initMasterControl(const TARGETING::Target* i_master,
                                  TARGETING::FSI_MASTER_TYPE i_type);
 
+    /**
+     * Common id to identify a FSI position to use in error logs and traces
+     */
+    union FsiLinkId_t
+    {
+        uint32_t id;
+        struct
+        {
+            uint8_t node; ///< Physical Node of FSI Master processor
+            uint8_t proc; ///< Physical Position of FSI Master processor
+            uint8_t type; ///< FSI Master type (FSI_MASTER_TYPE)
+            uint8_t port; ///< Slave link/port number
+        };
+    };
+
+    /**
+     * @brief Structure which defines info necessary to access a chip via FSI
+     */
+    struct FsiChipInfo_t
+    {
+        TARGETING::Target* master; ///< FSI Master  
+        TARGETING::FSI_MASTER_TYPE type; ///< Master or Cascaded Master
+        uint8_t port; ///< Which port is this chip hanging off of 
+        uint8_t cascade; ///< Slave cascade position
+        uint16_t flags; ///< Reserved for any special flags we might need
+        FsiLinkId_t linkid; ///< Id for traces and error logs
+    };
+
 
     /**
      * @brief Initializes the FSI link to allow slave access
      *
-     * @param[in] i_master  Chip target of FSI-Master 
-     * @param[in] i_type  Type of FSI-Master
-     * @param[in] i_port  FSI port (0-7) being initialized (relative to master)
-     * @param[out] o_enabled  true if the port is successfully enabled  
+     * @param[in] i_fsiInfo  FSI Chip Information for the slave port
+     *    that is being initialized
      *
      * @return errlHndl_t  NULL on success
      */
-    errlHndl_t initPort(const TARGETING::Target* i_master,
-                        TARGETING::FSI_MASTER_TYPE i_type,
-                        uint64_t i_port,
+    errlHndl_t initPort(FsiChipInfo_t i_fsiInfo,
                         bool& o_enabled);
 
     /**
      * @brief Analyze error bits and recover hardware as needed
      *
-     * @param[in] i_target  Target of SCOM operation
-     * @param[in] i_address  Address of FSI register being accessed
+     * @param[in] i_addrInfo  FSI addressing information
      * @param[in] i_opbStatReg  OPB Status bits (OPB_REG_STAT[0:31])
      *
      * @return errlHndl_t  NULL on success
      */
-    errlHndl_t handleOpbErrors(const TARGETING::Target* i_target,
-                               uint64_t i_address,
+    errlHndl_t handleOpbErrors(const FsiAddrInfo_t& i_addrInfo,
                                uint32_t i_opbStatReg);
 
     /**
      * @brief  Poll for completion of a FSI operation, return data on read
      *
-     * @param[in] i_address  Address of FSI register being accessed
+     * @param[in] i_addrInfo  FSI addressing information
      * @param[out] o_readData  buffer to copy read data into, set to NULL
      *       for write operations
      *
      * @return errlHndl_t  NULL on success
      */
-    errlHndl_t pollForComplete(uint64_t i_address,
+    errlHndl_t pollForComplete(const FsiAddrInfo_t& i_addrInfo,
                                uint32_t* o_readData);
 
     /**
-     * @brief Generate a complete FSI address based on the target and the
-     *    FSI offset within that target
+     * @brief Figure out the optimal OPB Master to use and generate a
+     *    complete FSI address relative to that master based on the target
+     *    and the FSI offset within that target
      *
-     * @param[in] i_target  Target of FSI-slave, or master for control regs
-     * @param[in] i_address  Address of FSI register relative to slave space
+     * @param[inout] io_addrInfo  FSI addressing information,
+     *     expects fsiTarg and relAddr to be populated as input
      *
-     * @return uint64_t  Fully qualified FSI address
+     * @return errlHndl_t  NULL on success
      */
-    uint64_t genFullFsiAddr(const TARGETING::Target* i_target,
-                            uint64_t i_address);
+    errlHndl_t genFullFsiAddr(FsiAddrInfo_t& io_addrInfo);
 
     /**
      * @brief Generate a valid SCOM address to access the OPB, this will
-     *    choosing the correct master
+     *    choose the correct master
      *
+     * @param[in] i_addrInfo  FSI  data
      * @param[in] i_address  Address of OPB register relative to OPB space,
      *      e.g. OPB_REG_CMD
      *
      * @return uint64_t  Fully qualified OPB SCOM address
      */
-    uint64_t genOpbScomAddr(uint64_t i_opbOffset);
+    uint64_t genOpbScomAddr(const FsiAddrInfo_t& i_addrInfo,
+                            uint64_t i_opbOffset);
 
 
     /**
@@ -328,36 +403,8 @@ class FsiDD
         MAX_SLAVE_PORTS = 8, /**< Maximum of 8 slave ports */
         LOCAL_MFSI_PORT_SELECT = MAX_SLAVE_PORTS + TARGETING::FSI_MASTER_TYPE_MFSI,
         LOCAL_CMFSI_PORT_SELECT = MAX_SLAVE_PORTS + TARGETING::FSI_MASTER_TYPE_CMFSI,
+        INVALID_SLAVE_INDEX = 0x12345678
     };
-
-    /**
-     * Common id to identify a FSI position to use in error logs and traces
-     */
-    union FsiLinkId_t
-    {
-        uint32_t id;
-        struct
-        {
-            uint8_t node; ///< Physical Node of FSI Master processor
-            uint8_t proc; ///< Physical Position of FSI Master processor
-            uint8_t type; ///< FSI Master type (FSI_MASTER_TYPE)
-            uint8_t port; ///< Slave link/port number
-        };
-    };
-
-    /**
-     * @brief Structure which defines info necessary to access a chip via FSI
-     */
-    struct FsiChipInfo_t
-    {
-        TARGETING::Target* master; ///< FSI Master  
-        TARGETING::FSI_MASTER_TYPE type; ///< Master or Cascaded Master
-        uint8_t port; ///< Which port is this chip hanging off of 
-        uint8_t cascade; ///< Slave cascade position
-        uint16_t flags; ///< Reserved for any special flags we might need
-        FsiLinkId_t linkid; ///< Id for traces and error logs
-    };
-
 
     /**
      * @brief Retrieve the control register address based on type
@@ -398,11 +445,6 @@ class FsiDD
     /********************************************
      * VARIABLES
      ********************************************/
-
-    /**
-     * Global mutex   
-     */
-    mutex_t iv_fsiMutex;
 
     /**
      * Active slaves, 1 bit per port, 1=active,

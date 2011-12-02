@@ -135,6 +135,9 @@
     <attribute>
         <id>SCOM_SWITCHES</id>
     </attribute>
+    <attribute>
+        <id>FSI_MASTER_MUTEX</id>
+    </attribute>
 </targetType>
 
 <targetType>

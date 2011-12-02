@@ -37,7 +37,9 @@ namespace FSI
         MOD_FSIDD_DDOP                = 0x05, /**< fsidd.C : ddOp */
         MOD_FSIDD_POLLFORCOMPLETE     = 0x06, /**< fsidd.C : FsiDD::pollForComplete */
         MOD_FSIDD_INITPORT            = 0x07, /**< fsidd.C : FsiDD::initPort */
-        MOD_FSIPRES_PRESENCEDETECT    = 0x08, /**< fsipres.C : presenceDetect */
+        MOD_FSIDD_GENFULLFSIADDR      = 0x09, /**< fsidd.C : FsiDD::genFullFsiAddr */
+
+        MOD_FSIPRES_PRESENCEDETECT    = 0x20, /**< fsipres.C : presenceDetect */
     };
 
     enum FSIReasonCode
@@ -52,6 +54,10 @@ namespace FSI
         RC_INVALID_OPERATION         = FSI_COMP_ID | 0x08,
         RC_NULL_TARGET               = FSI_COMP_ID | 0x09,
         RC_MASTER_TARGET             = FSI_COMP_ID | 0x0A,
+        RC_FSI_NOT_SUPPORTED         = FSI_COMP_ID | 0x0B,
+        RC_INVALID_FSI_PATH_1        = FSI_COMP_ID | 0x0C,
+        RC_INVALID_FSI_PATH_2        = FSI_COMP_ID | 0x0D,
+        RC_TARGET_NEVER_DETECTED     = FSI_COMP_ID | 0x0E,
     };
 };
 

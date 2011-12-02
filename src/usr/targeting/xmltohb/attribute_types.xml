@@ -749,6 +749,19 @@
 </attribute>
 
 <attribute>
+    <id>FSI_MASTER_MUTEX</id>
+    <description>Mutex for FSI Master Operations</description>
+    <simpleType>
+        <hbmutex>
+            <default>0</default>
+        </hbmutex>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
     <id>VPO_MODE</id>
     <description>Are we running against the hardware simulator? 1=yes</description>
     <simpleType>

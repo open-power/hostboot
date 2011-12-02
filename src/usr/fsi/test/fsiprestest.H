@@ -42,6 +42,7 @@ using namespace DeviceFW;
 extern trace_desc_t* g_trac_fsi;
 uint64_t target_to_uint64(const TARGETING::Target* i_target);
 
+
 class FSIPresTest : public CxxTest::TestSuite
 {
     public:
@@ -55,12 +56,20 @@ class FSIPresTest : public CxxTest::TestSuite
          */
         void testPresence()
         {
-
-            //@VBU workaround @todo
-            // This test causes an issue with sprint 7 VBU code as well as
-            // SIMICS VENICE model.
-            // Temporarily disable it
-            return;
+          //@todo
+          //@VBU workaround - Disable test case
+          //Temporarily disable this test case in VBU because of
+          //an MFSI/CFSI XSCOM hardware bug.
+          TARGETING::EntityPath syspath(TARGETING::EntityPath::PATH_PHYSICAL);
+          syspath.addLast(TARGETING::TYPE_SYS,0);
+          TARGETING::Target* sys = TARGETING::targetService().toTarget(syspath);
+          uint8_t vpo_mode = 0;
+          if( sys
+              && sys->tryGetAttr<TARGETING::ATTR_VPO_MODE>(vpo_mode)
+              && (vpo_mode == 1) )
+          {
+              return;
+          }
 
             Target* l_masterChip = NULL;
             targetService().masterProcChipTargetHandle(l_masterChip);
@@ -79,7 +88,7 @@ class FSIPresTest : public CxxTest::TestSuite
             while(target)
             {
                 TS_TRACE("FSI-PRES: Testing target %x",
-                         target_to_uint64(*target));
+                         target_to_uint64(*target)); 
 
                 // Read presence detect.
                 errlHndl_t l_errl = NULL;
@@ -128,6 +137,9 @@ class FSIPresTest : public CxxTest::TestSuite
                                   "FSI-PRES: FSI-read failed with %d on %x",
                                   l_errl->reasonCode(),
                                   target_to_uint64(*target));
+                        // commit this log for debug
+                        l_errl->collectTrace("UNIT_TEST",512);
+                        errlCommit(l_errl,FSI_COMP_ID);                        
                     }
                     else if (!present && !l_errl)
                     {
@@ -142,6 +154,12 @@ class FSIPresTest : public CxxTest::TestSuite
                     {
                         TS_TRACE("FSI-PRES: Read chip-id %x on %x",
                                  fsi_data, target_to_uint64(*target));
+                    }
+
+                    // Delete any logs that got produced
+                    if( l_errl )
+                    {
+                        delete l_errl;
                     }
                 }
 
