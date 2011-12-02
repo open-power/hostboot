@@ -80,6 +80,21 @@ class EEPROMTest: public CxxTest::TestSuite
 
             const uint32_t NUM_CMDS = sizeof(testData)/sizeof(testData[0]);
 
+            //@TODO
+            //@VBU workaround - Disable I2C test case on fake target
+            //Test case use fake targets, which will fail when running
+            //on VBU.  Need to fix this.
+            TARGETING::EntityPath syspath(TARGETING::EntityPath::PATH_PHYSICAL);
+            syspath.addLast(TARGETING::TYPE_SYS,0);
+            TARGETING::Target* sys = TARGETING::targetService().toTarget(syspath);
+            uint8_t vpo_mode = 0;
+            if( sys
+                && sys->tryGetAttr<TARGETING::ATTR_VPO_MODE>(vpo_mode)
+                && (vpo_mode == 1) )
+            {
+                return;
+            }
+
             do
             {
                 // Get a processor Target

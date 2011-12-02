@@ -53,9 +53,6 @@ void collectBacktrace ( std::vector<uint64_t> & o_addrVector )
     {
         if ((0 != *frame) && (!first))
         {
-            TRACDCOMP( g_trac_back,
-                       "Addr: %016llx",
-                       frame[2] );
             o_addrVector.push_back( frame[2] );
         }
 

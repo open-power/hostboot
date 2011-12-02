@@ -58,7 +58,6 @@ class I2CTest: public CxxTest::TestSuite
          */
         void testI2CReadWrite ( void )
         {
-            return;
             errlHndl_t err = NULL;
             int cmds = 0;
             int fails = 0;

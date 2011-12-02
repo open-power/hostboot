@@ -317,10 +317,6 @@ errlHndl_t eepromWrite ( TARGETING::Target * i_target,
         newBuffer = static_cast<uint8_t*>(malloc( newBufLen ));
         needFree = true;
 
-        TRACFCOMP( g_trac_eeprom,
-                   "OPIET: byteAddrSize: %d, io_buflen: %d, newBufLen: %d",
-                   byteAddrSize, io_buflen, newBufLen );
-
         // If we have an address to add to the buffer, do it now.
         // Add the byte address to the buffer
         memcpy( newBuffer, byteAddr, byteAddrSize );
