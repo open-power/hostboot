@@ -518,16 +518,6 @@ bool Object::write_object()
             cout << strerror(error) << endl;
         }
 
-        // make file end on 8 byte boundary
-        uint64_t eof = ftell(iv_output);
-        if (0 != (eof % 8))
-        {
-            char zero = 0;
-            fwrite(&zero, 0, 8 - (eof % 8), iv_output);
-        }
-
-        modinfo << &name[(name.find_last_of("/")+1)] << ",0x"
-            << std::hex << offset + base_addr << endl;
     }
     else // binary blob
     {
@@ -541,6 +531,18 @@ bool Object::write_object()
         delete [] buffer;
         fclose(file);
     }
+
+    // make file end on 8 byte boundary
+    uint64_t eof = ftell(iv_output);
+    if (0 != (eof % 8))
+    {
+        char zero = 0;
+        fwrite(&zero, 1, 8 - (eof % 8), iv_output);
+    }
+
+    modinfo << &name[(name.find_last_of("/")+1)] << ",0x"
+        << std::hex << offset + base_addr << endl;
+
 }
 
 //-----------------------------------------------------------------------------
