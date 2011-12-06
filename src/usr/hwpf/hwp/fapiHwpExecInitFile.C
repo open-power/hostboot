@@ -35,6 +35,8 @@
  *                          camvanng    11/16/2011  Support endianness &
  *                                                  32-bit platforms.  Support
  *                                                  system & target attributes.
+ *                          camvanng    12/06/2011  Optimize code to check for
+ *                                                  endianness at compile time
  */
 
 #include <fapiHwpExecInitFile.H>
@@ -42,6 +44,7 @@
 #include <fapiAttributeService.H>
 #include <string.h>
 #include <vector>
+#include <endian.h>
 
 extern "C"
 {
@@ -104,7 +107,6 @@ typedef struct ifInfo
     const char * addr;
     size_t size;
     size_t offset;
-    bool   little_endian;
 }ifInfo_t;
 
 //Attribute Symbol Table entry
@@ -244,21 +246,18 @@ fapi::ReturnCode fapiHwpExecInitFile(const fapi::Target & i_Target,
         l_ifInfo.offset = IF_VERSION_LOC;
 
         //Check endianness
-        {
-            uint64_t l_uint64 = 0x123456789ABCDEF0ll;
-            char * l_pChar = reinterpret_cast<char*>(&l_uint64);
-            if (0x12 == *l_pChar)
-            {
-                l_ifInfo.little_endian = false;
+        #ifdef __BYTE_ORDER
+            #if (__BYTE_ORDER == __BIG_ENDIAN)
                 FAPI_INF("fapiHwpExecInitFile: big endian mode");
-            }
-            else
-            {
-                l_ifInfo.little_endian = true;
+            #elif (__BYTE_ORDER == __LITTLE_ENDIAN)
                 FAPI_INF("fapiHwpExecInitFile: little endian mode");
-            }
-        }
-
+            #else
+            #error "Unknown byte order"
+            #endif
+        #else
+        #error "Byte order not defined"
+        #endif
+        
         //Check the version
         uint32_t l_version;
         ifRead(l_ifInfo, reinterpret_cast<void*>(&l_version), IF_VERSION_SIZE);
@@ -422,7 +421,8 @@ void ifRead(ifInfo_t & io_ifInfo, void * o_data, uint32_t i_size, bool i_swap)
     }
 
     //Copy the data
-    if ((1 < i_size) && (true == io_ifInfo.little_endian) && (true == i_swap))
+    #if (__BYTE_ORDER == __LITTLE_ENDIAN)
+    if ((1 < i_size) && (true == i_swap))
     {
         //Account for endianness
         const char * l_pSrc = io_ifInfo.addr + io_ifInfo.offset + i_size - 1;
@@ -438,6 +438,9 @@ void ifRead(ifInfo_t & io_ifInfo, void * o_data, uint32_t i_size, bool i_swap)
     {
         memcpy(o_data, io_ifInfo.addr + io_ifInfo.offset, i_size);
     }
+    #else
+    memcpy(o_data, io_ifInfo.addr + io_ifInfo.offset, i_size);
+    #endif
 
     //Advance the offset
     io_ifInfo.offset += i_size;
@@ -645,14 +648,13 @@ uint64_t * loadLitSymbolTable(ifInfo_t & io_ifInfo,
                 //Read the literal value
                 ifRead(io_ifInfo, &(l_numericLits[i]), l_litSize);
 
-                if (false == io_ifInfo.little_endian)
-                {
-                    //In big endian mode, if the literal is less then 8 bytes,
-                    //need to right justify so it is a regular 64-byte number.
-                    //In little endian mode, the bytes are swapped by ifRead()
-                    //so the literal is already justified.
-                    l_numericLits[i] >>= (64 - (l_litSize * 8));
-                }
+                #if (__BYTE_ORDER == __BIG_ENDIAN)
+                //In big endian mode, if the literal is less then 8 bytes,
+                //need to right justify so it is a regular 64-byte number.
+                //In little endian mode, the bytes are swapped by ifRead()
+                //so the literal is already justified.
+                l_numericLits[i] >>= (64 - (l_litSize * 8));
+                #endif
 
                 FAPI_DBG("loadLitSymbolTable: lit[%u]: size 0x%x, value 0x%016llx",
                          i, l_litSize, l_numericLits[i]);
