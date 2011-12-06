@@ -148,6 +148,18 @@
     </attribute>
     <attribute><id>DUMMY_RW</id></attribute>
     <attribute><id>DUMMY_HEAP_ZERO_DEFAULT</id></attribute>
+    <attribute>
+        <id>I2C_ENGINE_MUTEX_0</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>I2C_ENGINE_MUTEX_1</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>I2C_ENGINE_MUTEX_2</id>
+        <default>0</default>
+    </attribute>
 </targetType>
 
 <targetType>

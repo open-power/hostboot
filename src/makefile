@@ -45,10 +45,10 @@ DIRECT_BOOT_OBJECTS = start.o kernel.o taskmgr.o cpumgr.o syscall.o \
 RUNTIME_OBJECTS =
 
 BASE_MODULES = trace errl devicefw scom xscom initservice taskargs \
-               pnor vfs i2c
+               pnor vfs
 
-EXTENDED_MODULES = targeting ecmddatabuffer fapi hwp plat	\
-                   extinitsvc istepdisp hwas fsi fsiscom
+EXTENDED_MODULES = targeting ecmddatabuffer fapi hwp plat 	\
+                   extinitsvc istepdisp hwas fsi fsiscom i2c
 
 DIRECT_BOOT_MODULES = example
 RUNTIME_MODULES =

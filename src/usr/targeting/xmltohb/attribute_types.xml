@@ -1024,5 +1024,44 @@
     <readable/>
 </attribute>
 
+<attribute>
+    <id>I2C_ENGINE_MUTEX_0</id>
+    <description>Mutex for I2C Master engine 0</description>
+    <simpleType>
+        <hbmutex>
+            <default>0</default>
+        </hbmutex>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>I2C_ENGINE_MUTEX_1</id>
+    <description>Mutex for I2C Master engine 1</description>
+    <simpleType>
+        <hbmutex>
+            <default>0</default>
+        </hbmutex>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>I2C_ENGINE_MUTEX_2</id>
+    <description>Mutex for I2C Master engine 2</description>
+    <simpleType>
+        <hbmutex>
+            <default>0</default>
+        </hbmutex>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
 </attributes>
 

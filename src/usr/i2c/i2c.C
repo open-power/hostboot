@@ -44,11 +44,6 @@
 // ----------------------------------------------
 // Globals
 // ----------------------------------------------
-// TODO - These are temporary until we get some sort of locking mutex
-// in the attributes for each master target.  All operations will be
-// sequential no matter what target or what engine.
-mutex_t g_i2cMutex;
-bool g_initI2CMutex = true;
 
 // ----------------------------------------------
 // Trace definitions
@@ -58,6 +53,7 @@ TRAC_INIT( & g_trac_i2c, "I2C", 4096 );
 
 trace_desc_t* g_trac_i2cr = NULL;
 TRAC_INIT( & g_trac_i2cr, "I2CR", 4096 );
+
 // Easy macro replace for unit testing
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
 #define TRACUCOMP(args...)
@@ -67,6 +63,7 @@ TRAC_INIT( & g_trac_i2cr, "I2CR", 4096 );
 // ----------------------------------------------
 #define I2C_COMMAND_ATTEMPTS 2      // 1 Retry on failure
 #define I2C_RETRY_DELAY 10000000    // Sleep for 10 ms before retrying
+#define MAX_I2C_ENGINES 3           // Maximum of 3 engines per I2C Master
 // ----------------------------------------------
 
 namespace I2C
@@ -108,12 +105,6 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
 
     do
     {
-        if( g_initI2CMutex )
-        {
-            mutex_init( &g_i2cMutex );
-            g_initI2CMutex = false;
-        }
-
         // Check for Master Sentinel chip
         if( TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL == i_target )
         {
@@ -140,13 +131,38 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
             break;
         }
 
-        // TODO - Locking needs to be implemented for each engine on each
-        // possible chip.  The details of this still need to be worked out.
-        // This will be implemented with the bad machine path story (3629).
-        // TODO - Locking will be waiting on Story 4158 to see how we can
-        // handle the mutexes in the attributes...  Use the global mutex
-        // until then.
-        mutex_lock( &g_i2cMutex );
+        // Get the mutex for the requested engine
+        mutex_t * engineLock = NULL;
+        switch( args.engine )
+        {
+            case 0:
+                engineLock = i_target->getHbMutexAttr<TARGETING::ATTR_I2C_ENGINE_MUTEX_0>();
+                break;
+
+            case 1:
+                engineLock = i_target->getHbMutexAttr<TARGETING::ATTR_I2C_ENGINE_MUTEX_1>();
+                break;
+
+            case 2:
+                engineLock = i_target->getHbMutexAttr<TARGETING::ATTR_I2C_ENGINE_MUTEX_2>();
+                break;
+
+            default:
+                TRACFCOMP( g_trac_i2c,
+                           ERR_MRK"Invalid engine for getting Mutex!" );
+                // TODO - Create an error here
+                break;
+        };
+
+        // Lock on this engine
+        TRACUCOMP( g_trac_i2c,
+                   INFO_MRK"Obtaining lock for engine: %d",
+                   args.engine );
+        (void)mutex_lock( engineLock );
+        TRACUCOMP( g_trac_i2c,
+                   INFO_MRK"Locked on engine: %d",
+                   args.engine );
+
         for( int attempt = 0; attempt < I2C_COMMAND_ATTEMPTS; attempt++ )
         {
             if( err )
@@ -222,7 +238,12 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
                 break;
             }
         }
-        mutex_unlock( &g_i2cMutex );
+
+        // Unlock
+        (void) mutex_unlock( engineLock );
+        TRACUCOMP( g_trac_i2c,
+                   INFO_MRK"Unlocked engine: %d",
+                   args.engine );
 
         if( err )
         {

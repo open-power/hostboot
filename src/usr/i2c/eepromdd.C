@@ -46,8 +46,7 @@
 // ----------------------------------------------
 // Globals
 // ----------------------------------------------
-mutex_t g_eepromMutex;
-bool g_initEepromMutex = true;
+mutex_t g_eepromMutex = MUTEX_INITIALIZER;
 
 // ----------------------------------------------
 // Trace definitions
@@ -111,12 +110,6 @@ errlHndl_t eepromPerformOp( DeviceFW::OperationType i_opType,
 
     do
     {
-        if( g_initEepromMutex )
-        {
-            mutex_init( &g_eepromMutex );
-            g_initEepromMutex = false;
-        }
-
         // Read Attributes needed to complete the operation
         err = eepromReadAttributes( i_target,
                                     i2cInfo );
