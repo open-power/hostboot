@@ -34,10 +34,9 @@ namespace SCOM
 
 
 /**
- * @brief Performs an SCom operation
- * This function performs an SCom Read/Write operation. It follows a
- * pre-defined prototype functions in order to be registered with the
- * device-driver framework.
+ * @brief Performs a SCom operation
+ * This function performs a SCOM operation by calling doScomOP.  It
+ * handles whether the address a regular or an indirect SCOM address
  *
  * @param[in]   i_opType        Operation type, see DeviceFW::OperationType
  *                              in driverif.H
@@ -62,6 +61,35 @@ errlHndl_t scomPerformOp(DeviceFW::OperationType i_opType,
                          int64_t i_accessType,
                          va_list i_args);
 
+
+/**
+ * @brief Performs a SCom operation
+ * This function performs an SCom Read/Write operation. It follows a
+ * pre-defined prototype functions in order to be registered with the
+ * device-driver framework.
+ *
+ * @param[in]   i_opType        Operation type, see DeviceFW::OperationType
+ *                              in driverif.H
+ * @param[in]   i_target        SCom target
+ * @param[in/out] io_buffer     Read: pointer to output data storage
+ *                              Write: pointer to data to be written
+ * @param[in/out] io_buflen     Input: size of io_buffer (in bytes)
+ *                              Output: Read: size of output data
+ *                                      Write: size of data written
+ * @param[in]   i_accessType    Select from DeviceFW::AccessType enum
+ *                              (usrif.H)
+ * @param[in]   i_args          This is an argument list for DD framework.
+ *                              In this function, there's only one argument,
+ *                              which is the SCom address value.
+ *
+ * @return  errlHndl_t
+ */
+errlHndl_t doScomOp(DeviceFW::OperationType i_opType,
+                    TARGETING::Target* i_target,
+                    void* io_buffer,
+                    size_t& io_buflen,
+                    int64_t i_accessType,
+                    uint64_t i_addr);
 
 
 }; // End namespace

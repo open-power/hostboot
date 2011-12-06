@@ -144,6 +144,10 @@
     <attribute>
         <id>FSI_SCOM_MUTEX</id>
     </attribute>
+    <attribute>
+        <id>SCOM_IND_MUTEX</id>
+    </attribute>
+
 </targetType>
 
 <targetType>
@@ -685,6 +689,10 @@
     <attribute>
         <id>FSI_SCOM_MUTEX</id>
     </attribute>
+    <attribute>
+        <id>SCOM_IND_MUTEX</id>
+    </attribute>
+
 </targetType>
 
 <!-- Centaur MBS -->

@@ -2768,4 +2768,17 @@
     </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+    <id>SCOM_IND_MUTEX</id>
+    <description>Mutex for Indirect SCOM read operation</description>
+    <simpleType>
+        <hbmutex>
+            <default>0</default>
+        </hbmutex>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
 </attributes>
