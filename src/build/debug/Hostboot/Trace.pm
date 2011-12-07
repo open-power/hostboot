@@ -28,10 +28,10 @@ package Hostboot::Trace;
 use Exporter;
 our @EXPORT_OK = ('main');
 
-use constant MAX_NUM_TRACE_BUFFERS => 24;
-use constant DESC_ARRAY_ENTRY_ADDR_SIZE => 8;
-use constant DESC_ARRAY_ENTRY_COMP_NAME_SIZE => 16;
-use constant TRAC_DEFAULT_BUFFER_SIZE => 0x0800;
+use constant MAX_NUM_TRACE_BUFFERS => 48;
+use constant DESC_ARRAY_ENTRY_SIZE => 24;
+use constant OFFSET_TRAC_BUFFER_SIZE => 20;
+use constant OFFSET_BUFFER_ADDRESS => 16;
 
 use File::Temp ('tempfile');
 
@@ -62,19 +62,24 @@ sub main
 
     for (my $i = 0; $i < MAX_NUM_TRACE_BUFFERS; $i++)
     {
+        # component name is first in g_desc_array[$i]
         my $compName = ::readStr($symAddr);
         last if ($compName eq "");
 
-        $symAddr += DESC_ARRAY_ENTRY_COMP_NAME_SIZE;
+        # get the pointer to its trace buffer
+        my $buffAddr = ::read64($symAddr  + OFFSET_BUFFER_ADDRESS);
 
-        my $buffAddr = ::read64($symAddr);
-        $symAddr += DESC_ARRAY_ENTRY_ADDR_SIZE;
+        # get the size of this trace buffer 
+        my $buffSize = ::read32($buffAddr + OFFSET_TRAC_BUFFER_SIZE);
 
         if ((not defined $traceBuffers) or (uc($traceBuffers) =~ m/$compName/))
         {
             $foundBuffer = 1;
-            print $fh (::readData($buffAddr, TRAC_DEFAULT_BUFFER_SIZE));
+            print $fh (::readData($buffAddr, $buffSize ));
         }
+
+        # increment to next item in g_desc_array[]
+        $symAddr += DESC_ARRAY_ENTRY_SIZE;
     }
 
     if ($foundBuffer)

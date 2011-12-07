@@ -149,7 +149,12 @@ public:
     static Trace& getTheInstance();
 
     /**
-     *  @brief  Initialize a trace buffer
+     *  @brief  Initialize a trace buffer. 
+     *
+     *  Size is capped at 2KB. You can request larger, but
+     *  the code in src/usr/trace/trace.C imposes 
+     *  a maximum size of 2KB. Sizes smaller than 2KB
+     *  will save space.  
      *
      *  @param [out] o_td Trace descriptor to initialize
      *  @param [in] i_comp Component name for trace buffer
@@ -159,7 +164,7 @@ public:
      */
     void initBuffer(trace_desc_t **o_td,
                     const char* i_comp,
-                    const size_t i_size );
+                    size_t i_size );
 
     /**
      *  @brief  Write component trace out to input buffer
@@ -261,13 +266,15 @@ private:
      * trace buffer.
      *
      * @param [out] o_buf Trace descriptor of component buffer to initialize.
-     * @param [in] i_comp Component name
+     * @param [in]  i_comp Component name
+     * @param [in]  i_size Size of buffer
      *
      * @return void
      *
      */
     void initValuesBuffer(trace_desc_t *o_buf,
-                          const char *i_comp);
+                          const char *i_comp,
+                          size_t i_size);
 
 
     /**
@@ -308,11 +315,11 @@ private:
     /**
      *  @brief  Reset all trace buffers
      *
-     *  TODO - Not Supported Yet
+     *  TODO - Not Supported, may have no need in Hostboot for it.
      *
      *  @return Non-zero return code on error
      */
-    int32_t resetBuf(void);
+    // int32_t resetBuf(void);
 
     /**
      *  @brief  Convert timestamp

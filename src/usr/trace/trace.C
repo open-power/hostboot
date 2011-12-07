@@ -71,27 +71,40 @@ const uint32_t TRAC_TIME_REAL   = 0;  // upper 32 = seconds, lower 32 = microsec
 const uint32_t TRAC_TIME_50MHZ  = 1;
 const uint32_t TRAC_TIME_200MHZ = 2;
 const uint32_t TRAC_TIME_167MHZ = 3;  // 166666667Hz
-const uint32_t COMP_NAME_SIZE   = 16; // NULL terminated string
 
-// Initial implementation is to allocate a fixed 2KB buffer to each
-// component on request.
-// NOTE: any change to this value will require change to Trace::initBuffer()
-const uint64_t TRAC_DEFAULT_BUFFER_SIZE = 0x0800;  //2KB
 
-// NOTE: This constant should only be changed to an even number for now.
-// Same reason as above.
-const uint64_t TRAC_MAX_NUM_BUFFERS = 24;
 
+
+// WARNING: Changing the size of the trace buffer name string requires a 
+// changing OFFSET_BUFFER_ADDRESS in src/build/debug/Hostboot/Trace.pm.
+const uint32_t COMP_NAME_SIZE   = 16; // includes NULL terminator, so 15 max
+
+
+// Settings for the default buffer.  Name must be upper case.
 const char * const TRAC_DEFAULT_BUFFER_NAME = "DEFAULT";
+const uint64_t     TRAC_DEFAULT_BUFFER_SIZE = 0x0800;  //2KB
 
-// Global component trace buffer array.  Initially allow for 24 buffers max.
-// Keep global so it can be found in syms file
-typedef struct trace_desc_array {
+
+// The number of trace buffers.
+// NOTE: This constant should only be changed to an even number for now.
+// WARNING: Changing the count of buffers requires a co-req change 
+// in src/build/debug/Hostboot/Trace.pm  which has this count hard coded.
+const uint64_t TRAC_MAX_NUM_BUFFERS = 48;
+
+// An array of these structs accounts for all the trace buffers in Hostboot.
+// WARNING: Changing the size of trace_desc_array requires a co-req change 
+// in src/build/debug/Hostboot/Trace.pm  which has hard-coded the size of
+// this structure. 
+typedef struct trace_desc_array 
+{
     char comp[COMP_NAME_SIZE];        // the buffer name
     trace_desc_t * td_entry;          // pointer to the buffer
 }trace_desc_array_t;
 
+// Global: found in syms file and thus the dump.
 trace_desc_array_t g_desc_array[TRAC_MAX_NUM_BUFFERS];
+
+
 
 /******************************************************************************/
 // TracInit::TracInit()
@@ -124,7 +137,8 @@ Trace::Trace()
 {
     mutex_init(&iv_trac_mutex);
 
-    memset(g_desc_array, 0, sizeof(g_desc_array));
+    // compiler inits global vars to zero
+    // memset(g_desc_array, 0, sizeof(g_desc_array));
 }
 
 /******************************************************************************/
@@ -139,128 +153,101 @@ Trace::~Trace()
 /******************************************************************************/
 // trace_adal_init_buffer
 /******************************************************************************/
-void Trace::initBuffer(trace_desc_t **o_td, const char* i_comp,
-                            const size_t i_size )
+void Trace::initBuffer( trace_desc_t **o_td,
+                        const char* i_comp,
+                        size_t i_size )
 {
     /*------------------------------------------------------------------------*/
     /*  Local Variables                                                       */
     /*------------------------------------------------------------------------*/
-    uint32_t i = 0;
-    char * l_td = NULL;
+    unsigned int i = 0;
     char l_comp[COMP_NAME_SIZE] = {'\0'};
 
     /*------------------------------------------------------------------------*/
     /*  Code                                                                  */
     /*------------------------------------------------------------------------*/
-    if(*o_td == NULL)
+
+
+    // Limit buffer sizes to 2KB
+    if( i_size > TRAC_DEFAULT_BUFFER_SIZE )
     {
-        // Limit component name to 15 characters.
-        // Too bad we don't have strncpy(), strncmp()
-        if (strlen(i_comp) > (COMP_NAME_SIZE -1))
-        {
-            memcpy(l_comp, i_comp, COMP_NAME_SIZE - 1);
-        }
-        else
-        {
-            strcpy(l_comp, i_comp);
-        }
-
-        // make string upper case 
-        strupr(l_comp);
-
-        // CRITICAL REGION START
-        mutex_lock(&iv_trac_mutex);
-
-        // Search through the descriptor array for the first unallocated buffer.
-        // The last buffer is the reserved default buffer for any component
-        // which didn't get its own buffer.
-        for (i = 0; i < (TRAC_MAX_NUM_BUFFERS - 1); i++)
-        {
-            if(!strcmp(l_comp, g_desc_array[i].comp))
-            {
-                //printk("Trace::initBuffer - buffer already allocated %d\n", i);
-
-                // Buffer is already allocated.  Return the buffer.
-                *o_td = g_desc_array[i].td_entry;
-
-                break;
-            }
-            else if (strlen(g_desc_array[i].comp) == 0)
-            {
-                //printk("Trace::initBuffer - found unallocated buffer %d\n", i);
-
-                // Found the first unallocated buffer; use this one.
-
-                // Set the component name for the buffer
-                strcpy(g_desc_array[i].comp, l_comp);
-
-                // Allocate memory if needed
-                if (NULL == g_desc_array[i].td_entry)
-                {
-                    //printk("Trace::initBuffer - allocate memory\n");
-
-                    // Allocate memory
-                    // TODO can't handle i_size yet - everything is coded
-                    // around TRAC_DEFAULT_BUFFER_SIZE
-                    l_td = static_cast<char *>(malloc(TRAC_DEFAULT_BUFFER_SIZE));
-
-                    g_desc_array[i].td_entry =
-                        reinterpret_cast<trace_desc_t *>(l_td);
-
-                }
-
-                // Initialize the buffer header
-                initValuesBuffer(g_desc_array[i].td_entry,
-                                 g_desc_array[i].comp);
-
-                // Return the newly allocated buffer
-                *o_td = g_desc_array[i].td_entry;
-
-                break;
-            }
-        }
-
-        if ((TRAC_MAX_NUM_BUFFERS - 1) == i)
-        {
-            //printk("Trace::initBuffer - allocate default buffer %d\n", i);
-
-            // We're out of buffers to allocate.
-            // Use the default buffer reserved for everyone else.
-            // Initialize only once
-            if (strlen(g_desc_array[i].comp) == 0)
-            {
-                // Set the component name for the buffer
-                strcpy(g_desc_array[i].comp, TRAC_DEFAULT_BUFFER_NAME);
-
-                // Allocate memory if needed
-                // Memory should have already been reserved if
-                // TRAC_MAX_NUM_BUFFERS is an even # and we're using
-                // PageManager::allocatePage().  Add check just in
-                // case TRAC_MAC_NUM_BUFFERS is set to an odd number.
-                if (NULL == g_desc_array[i].td_entry)
-                {
-                    //printk("Trace::initBuffer - allocate memory\n");
-
-                    // Allocate memory for buffer
-                    l_td = static_cast<char *>(malloc(TRAC_DEFAULT_BUFFER_SIZE));
-
-                    g_desc_array[i].td_entry =
-                        reinterpret_cast<trace_desc_t *>(l_td);
-                }
-
-                // Initialize the buffer header
-                initValuesBuffer(g_desc_array[i].td_entry,
-                                 g_desc_array[i].comp);
-            }
-
-            // Return the default buffer
-            *o_td = g_desc_array[i].td_entry;
-        }
-
-        mutex_unlock(&iv_trac_mutex);
-        // CRITICAL REGION END
-
+        i_size = TRAC_DEFAULT_BUFFER_SIZE;
     }
+
+    // Limit component name to 15 characters.
+    if (strlen(i_comp) > (COMP_NAME_SIZE -1))
+    {
+        memcpy(l_comp, i_comp, COMP_NAME_SIZE - 1);
+    }
+    else
+    {
+        strcpy(l_comp, i_comp);
+    }
+
+    // Store buffer name internally in upper case
+    strupr(l_comp);
+
+    // CRITICAL REGION START
+    mutex_lock(&iv_trac_mutex);
+
+    // Search through the descriptor array for the first unallocated buffer.
+    // The last buffer is the reserved default buffer for any component
+    // which didn't get its own buffer.
+    for (i = 0; i < (TRAC_MAX_NUM_BUFFERS - 1); i++)
+    {
+        if( 0 == strcmp(l_comp, g_desc_array[i].comp))
+        {
+            // Buffer is already allocated for the given buffer name.
+            // Return the pointer to the buffer.
+            *o_td = g_desc_array[i].td_entry;
+            break;
+        }
+        else if ( '\0' == g_desc_array[i].comp[0] )
+        {
+            // Found an unallocated buffer; use this one.
+            // Set the component name for the buffer
+            strcpy(g_desc_array[i].comp, l_comp);
+
+            // Allocate memory for the trace buffer.
+            *o_td = g_desc_array[i].td_entry =
+                reinterpret_cast<trace_desc_t *>(malloc(i_size));
+
+            // Initialize the trace buffer.
+            initValuesBuffer( g_desc_array[i].td_entry,
+                              g_desc_array[i].comp,
+                              i_size );
+
+            break;
+        }
+    }
+
+
+    if ((TRAC_MAX_NUM_BUFFERS - 1) == i)
+    {
+        // We're out of buffers to allocate.
+        // Use the default buffer reserved for everyone else.
+        // Initialize only once
+        if ( '\0' == g_desc_array[i].comp[0] )
+        {
+            // Set the component name for the buffer
+            strcpy(g_desc_array[i].comp, TRAC_DEFAULT_BUFFER_NAME);
+
+            // Allocate memory for buffer
+            g_desc_array[i].td_entry =
+                reinterpret_cast<trace_desc_t *>(malloc(TRAC_DEFAULT_BUFFER_SIZE));
+
+            // Initialize the buffer header
+            initValuesBuffer(g_desc_array[i].td_entry,
+                             g_desc_array[i].comp,
+                             TRAC_DEFAULT_BUFFER_SIZE);
+        }
+
+        // Return the default buffer
+        *o_td = g_desc_array[i].td_entry;
+    }
+
+    mutex_unlock(&iv_trac_mutex);
+    // CRITICAL REGION END
 
     return;
 }
@@ -268,30 +255,26 @@ void Trace::initBuffer(trace_desc_t **o_td, const char* i_comp,
 /******************************************************************************/
 // initValuesBuffer
 /******************************************************************************/
-void Trace::initValuesBuffer(trace_desc_t *o_buf,const char *i_comp)
+void Trace::initValuesBuffer( trace_desc_t *o_buf,
+                              const char *i_comp,
+                              size_t i_size )
 {
-    /*------------------------------------------------------------------------*/
-    /*  Local Variables                                                       */
-    /*------------------------------------------------------------------------*/
-
-    /*------------------------------------------------------------------------*/
-    /*  Code                                                                  */
-    /*------------------------------------------------------------------------*/
-
     // Initialize it to all 0's
-    memset(o_buf,0,(size_t)TRAC_DEFAULT_BUFFER_SIZE);
+    memset(o_buf,0,i_size);
 
     o_buf->ver = TRACE_BUF_VERSION;
     o_buf->hdr_len = sizeof(trace_buf_head_t);
     o_buf->time_flg = TRAC_TIME_REAL;
     o_buf->endian_flg = 'B';  // Big Endian
     strcpy(o_buf->comp,i_comp);
-    o_buf->size = TRAC_DEFAULT_BUFFER_SIZE;
+    o_buf->size = i_size;
     o_buf->times_wrap = 0;
     o_buf->next_free = sizeof(trace_buf_head_t);
 
     return;
 }
+
+
 
 /******************************************************************************/
 // trace_adal_write_all
@@ -1149,7 +1132,7 @@ uint64_t Trace::getBuffer( const char * i_pComp,
 
 
 
-
+#if 0
 /******************************************************************************/
 // resetBuf - TODO
 /******************************************************************************/
@@ -1167,7 +1150,7 @@ int32_t Trace::resetBuf()
     /*------------------------------------------------------------------------*/
 
     // Get mutex so no one traces
-#if 0
+
     // TODO
     l_rc = UTIL_MUTEX_GET(&iv_trac_mutex,TRAC_INTF_MUTEX_TIMEOUT);
     if(l_rc != TX_SUCCESS)
@@ -1192,12 +1175,13 @@ int32_t Trace::resetBuf()
         }
     }
 
-#endif
+
     // Always try to release even if fail above
     // TODO - mutex
     //UTIL_MUTEX_PUT(&iv_trac_mutex);
 
     return(l_rc);
 }
+#endif
 
 } // namespace

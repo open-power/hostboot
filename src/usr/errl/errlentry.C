@@ -45,7 +45,7 @@ namespace ERRORLOG
 
 // Trace definition
 trace_desc_t* g_trac_errl = NULL;
-TRAC_INIT(&g_trac_errl, "ERRL", 4096);
+TRAC_INIT(&g_trac_errl, "ERRL", 1024);
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -80,7 +80,7 @@ ErrlEntry::ErrlEntry(const errlSeverity_t i_sev,
             if( NULL == ffdcPtr )
             {
                 TRACFCOMP( g_trac_errl,
-                           ERR_MRK"NULL FFDC pointer!" );
+                           ERR_MRK"NULL FFDC pointer" );
                 break;
             }
         }
@@ -122,7 +122,7 @@ ErrlUD * ErrlEntry::addFFDC(const compId_t i_compId,
     if ( (i_dataPtr == NULL) || (i_ffdcLen == 0) )
     {
         TRACFCOMP( g_trac_errl,
-        "ErrlEntry::addFFDC(): Invalid FFDC data pointer or size, no add");
+        ERR_MRK"ErrlEntry::addFFDC(): Invalid FFDC data pointer or size, no add");
     }
     else
     {
@@ -156,7 +156,7 @@ void ErrlEntry::appendToFFDC(ErrlUD * i_pErrlUD,
     l_rc = i_pErrlUD->addData( i_dataPtr, i_dataLen );
     if( 0 == l_rc )
     {
-        TRACFCOMP( g_trac_errl, "ErrlEntry::appendToFFDC() rets zero" );
+        TRACFCOMP( g_trac_errl, ERR_MRK"ErrlEntry::appendToFFDC() rets zero" );
     }
     return;
 }
@@ -182,7 +182,7 @@ bool ErrlEntry::collectTrace(const char i_name[], const uint64_t i_max)
         {
             // Problem, likely unknown trace buffer name.
             TRACFCOMP( g_trac_errl,
-                "ErrlEntry::collectTrace(): getBuffer(%s) rets zero.",i_name);
+                ERR_MRK"ErrlEntry::collectTrace(): getBuffer(%s) rets zero.",i_name);
             break;
         }
 
@@ -210,7 +210,7 @@ bool ErrlEntry::collectTrace(const char i_name[], const uint64_t i_max)
         {
             // Problem.
             TRACFCOMP( g_trac_errl,
-                "ErrlEntry::collectTrace(): getBuffer(%s,%ld) rets zero.",
+                ERR_MRK"ErrlEntry::collectTrace(): getBuffer(%s,%ld) rets zero.",
                 i_name,
                 l_cbBuffer );
             break;
@@ -338,7 +338,7 @@ uint64_t ErrlEntry::flatten( void * o_pBuffer,  uint64_t i_bufsize )
         if ( i_bufsize < l_flatCount )
         {
             // buffer is not big enough; return zero
-            TRACFCOMP( ERRORLOG::g_trac_errl, "Invalid buffer size");
+            TRACFCOMP( ERRORLOG::g_trac_errl, ERR_MRK"Invalid buffer size");
             l_flatCount = 0;
             break;
         }
@@ -362,7 +362,7 @@ uint64_t ErrlEntry::flatten( void * o_pBuffer,  uint64_t i_bufsize )
         if( 0 == l_cb )
         {
             // Rare.
-            TRACFCOMP( g_trac_errl, "ph.flatten error");
+            TRACFCOMP( g_trac_errl, ERR_MRK"ph.flatten error");
             l_flatCount = 0;
             break;
         }
@@ -375,7 +375,7 @@ uint64_t ErrlEntry::flatten( void * o_pBuffer,  uint64_t i_bufsize )
         if( 0 == l_cb )
         {
             // Rare.
-            TRACFCOMP( g_trac_errl, "uh.flatten error");
+            TRACFCOMP( g_trac_errl, ERR_MRK"uh.flatten error");
             l_flatCount = 0;
             break;
         }
@@ -387,7 +387,7 @@ uint64_t ErrlEntry::flatten( void * o_pBuffer,  uint64_t i_bufsize )
         if( 0 == l_cb )
         {
             // Rare.
-            TRACFCOMP( g_trac_errl, "ps.flatten error");
+            TRACFCOMP( g_trac_errl, ERR_MRK"ps.flatten error");
             l_flatCount = 0;
             break;
         }
@@ -403,7 +403,7 @@ uint64_t ErrlEntry::flatten( void * o_pBuffer,  uint64_t i_bufsize )
             if( 0 == l_cb )
             {
                 // Rare.
-                TRACFCOMP( g_trac_errl, "ud.flatten error");
+                TRACFCOMP( g_trac_errl, ERR_MRK"ud.flatten error");
                 l_flatCount = 0;
                 break;
             }
