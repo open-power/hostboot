@@ -788,6 +788,9 @@ trace_desc_t * Trace::findTdByName(const char *i_pName)
         // Use upper case.
         strupr( l_comp );
 
+        // Lock critical section to access g_desc_array
+        mutex_lock(&iv_trac_mutex);
+
         // Search the buffers array
         for(i=0;
             (i < (TRAC_MAX_NUM_BUFFERS - 1)) &&
@@ -801,6 +804,9 @@ trace_desc_t * Trace::findTdByName(const char *i_pName)
                 break;
             }
         }
+
+        // Unlock cretical section
+        mutex_unlock(&iv_trac_mutex);
 
     }
 
