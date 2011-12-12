@@ -33,6 +33,8 @@
 #  Flag  Track#    Userid    Date      Description
 #  ----  --------  --------  --------  -----------
 #                  mjjones   11/15/11  Copied from fapiParseAttributeInfo
+#                  mjjones   12/12/11  Support all attributes if no if-attr
+#                                      files specified (for Cronus)
 #
 # End Change Log ******************************************************
 
@@ -42,14 +44,18 @@ use strict;
 # Print Command Line Help
 #------------------------------------------------------------------------------
 my $numArgs = $#ARGV + 1;
-if ($numArgs < 4)
+if ($numArgs < 3)
 {
     print ("Usage: fapiCreateIfAttrService.pl <output dir>\n");
-    print ("           <if-attr-file1> [<if-attr-file2> ...]\n");
+    print ("           [<if-attr-file1> <if-attr-file2> ...]\n");
     print ("           -a <attr-xml-file1> [<attr-xml-file2> ...]\n");
-    print ("  This perl script will parse initfile attr files and attribute XML\n");
-    print ("  files and create the fapiGetInitFileAttr() function in a file\n");
-    print ("  called fapiAttributeService.C\n");
+    print ("  This perl script will parse if-attr files (containing the\n");
+    print ("  attributes used by the initfile) and attribute XML files\n");
+    print ("  (containing all HWPF attributes) and create the\n");
+    print ("  fapiGetInitFileAttr() function in a file called\n");
+    print ("  fapiAttributeService.C. Only the attributes specified in\n");
+    print ("  the if-attr files are supported. If no if-attr files are\n");
+    print ("  specified then all attributes are supported\n");
     exit(1);
 }
 
@@ -90,6 +96,7 @@ print ASFILE "    ReturnCode l_rc;\n\n";
 
 my $xmlFiles = 0;
 my $attCount = 0;
+my $numIfAttrFiles = 0;
 my @attrIds;
 
 #------------------------------------------------------------------------------
@@ -112,6 +119,7 @@ foreach my $argnum (1 .. $#ARGV)
         # Process initfile attr file. This file contains the HWPF attributes
         # that the initfile uses.
         #----------------------------------------------------------------------
+        $numIfAttrFiles++;
         open(ATTRFILE, "<", $infile);
         
         # Read each line of the file (each line contains an attribute)
@@ -162,17 +170,25 @@ foreach my $argnum (1 .. $#ARGV)
             }
 
             #------------------------------------------------------------------
-            # Find if the attribute is used by any initfile
+            # Find if the attribute is used by any initfile. If no if-attr
+            # files were specified then support all attributes
             #------------------------------------------------------------------
             my $match = 0;
 
-            foreach my $attrId (@attrIds)
+            if ($numIfAttrFiles)
             {
-                if ($attr->{id} eq $attrId)
+                foreach my $attrId (@attrIds)
                 {
-                    $match = 1;
-                    last;
+                    if ($attr->{id} eq $attrId)
+                    {
+                        $match = 1;
+                        last;
+                    }
                 }
+            }
+            else
+            {
+                $match = 1;
             }
 
             if (!($match))
