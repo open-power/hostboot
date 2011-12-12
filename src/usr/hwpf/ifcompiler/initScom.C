@@ -25,6 +25,8 @@
 //                 andrewg  09/19/11 Updates based on review
 //                 andrewg  11/09/11 Multi-dimensional array and move to common fapi include
 //                 mjjones  11/17/11 Output attribute listing
+//                 camvanng 12/12/11 Support multiple address ranges within a SCOM address
+//                                   Use strtoull vs strtoul for 32-bit platforms
 // End Change Log *********************************************************************************
 
 /**
@@ -443,8 +445,6 @@ uint32_t Scom::bin_listing(BINSEQ & blist)
     ranges.insert(iv_range_list.begin(),iv_range_list.end());
 
     SCOM_ADDR::iterator i = iv_scom_addr.begin();
-    // if more than one spyname, the first is just the stem of the name - skip it
-    if(iv_scom_addr.size() > 1) ++i;
 
     for(; i != iv_scom_addr.end(); ++i)
     {
@@ -460,16 +460,16 @@ uint32_t Scom::bin_listing(BINSEQ & blist)
                 //   - Recreate the spy from the bytecode
                 //   - Compile the recreated spy back into bytecode.
                 BINSEQ temp;
-                bin_list_one(temp,strtoul((*i).c_str(),NULL,16), *r);
+                bin_list_one(temp,strtoull((*i).c_str(),NULL,16), *r);
                 BINSEQ::const_iterator bi = temp.begin();
                 Scom s(bi,iv_symbols);
-                s.bin_list_one(blist,strtoul((*i).c_str(),NULL,16), RANGE(1,0));
+                s.bin_list_one(blist,strtoull((*i).c_str(),NULL,16), RANGE(1,0));
             }
         }
         else
         {
             ++scom_count;
-            bin_list_one(blist,strtoul((*i).c_str(),NULL,16), RANGE(1,0));
+            bin_list_one(blist,strtoull((*i).c_str(),NULL,16), RANGE(1,0));
         }
     }
 
@@ -1339,15 +1339,61 @@ void Scom::set_scom_address(const string & i_scom_addr)
 void Scom::dup_scom_address(const string & i_scom_addr)
 {
 
-
-    if(iv_scom_addr.size())
+    if (iv_scom_addr.size() == 0)
     {
-        iv_scom_addr.push_back(iv_scom_addr.front() + i_scom_addr);
+        yyerror("No base scom address to dulicate for append!");
+    }
+
+    // cout << "I>Scom::dup_scom_address: "<< i_scom_addr << " is the output string!" << endl;
+
+    size_t l_pos = i_scom_addr.find("..");
+    if (l_pos != string::npos)
+    {
+        uint64_t l_num1 = strtoull((i_scom_addr.substr(0,l_pos)).c_str(), NULL, 16);
+        uint64_t l_num2 = strtoull((i_scom_addr.substr(l_pos + 2)).c_str(), NULL, 16);
+        // cout << "I>Scom:dup_scom_address: " <<  l_num1 << " - " << l_num2 << endl;
+        if (l_num1 >= l_num2)
+        {
+            std::ostringstream oss;
+            oss << "Invalid scom address range: " << i_scom_addr;
+            yyerror(oss.str().c_str());
+        }
+
+        for (uint64_t num = l_num1; num <= l_num2; num++)
+        {
+            for (size_t i = 0; i < iv_scom_addr.size(); i++)
+            {
+                stringstream l_ss;
+                l_ss << hex << num;
+                iv_dup_scom_addr.push_back(iv_scom_addr.at(i) + l_ss.str());
+                // cout << "I>Scom::dup_scom_address: iv_dup_scom_addr " << iv_dup_scom_addr.back() << endl;
+            }
+        }
     }
     else
-        yyerror("No base scom address to dulicate for append!");
+    {
+        for (size_t i = 0; i < iv_scom_addr.size(); i++)
+        {
+            iv_dup_scom_addr.push_back(iv_scom_addr.at(i) + i_scom_addr);
+            // cout << "I>Scom::dup_scom_address: iv_dup_scom_addr " << iv_dup_scom_addr.back() << endl;
+        }
+    }
 
-        // cout << "I>Scom::dup_scom_address: "<< i_scom_addr << " is the output string!" << endl;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+void Scom::copy_dup_scom_address()
+{
+    // cout << "I>Scom::copy_dup_scom_address: iv_scom_addr size "<< iv_scom_addr.size() 
+    //      << " iv_dup_scom_addr size " << iv_dup_scom_addr.size() << endl;
+
+    iv_scom_addr.clear();
+    iv_scom_addr = iv_dup_scom_addr;
+    iv_dup_scom_addr.clear();
+
+    // cout << "I>Scom::copy_dup_scom_address: iv_scom_addr size "<< iv_scom_addr.size() 
+    //      << " iv_dup_scom_addr size " << iv_dup_scom_addr.size() << endl;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -1355,18 +1401,17 @@ void Scom::dup_scom_address(const string & i_scom_addr)
 void Scom::set_scom_suffix(const string & i_scom_addr)
 {
 
-    if(iv_scom_addr.size() == 1) iv_scom_addr[0] = iv_scom_addr[0] + i_scom_addr;
-    else if(iv_scom_addr.size() > 1)
+    if(iv_scom_addr.size() == 0)
     {
-        SCOM_ADDR::iterator i = iv_scom_addr.begin();
-        ++i;
-        for(;i != iv_scom_addr.end(); ++i)
-        {
-            *i += i_scom_addr;
-        }
+        yyerror("No base scom address to append suffix");
     }
     else
-        yyerror("No base scom address to append suffix");
+    {
+        for(size_t i = 0; i < iv_scom_addr.size(); ++i)
+        {
+            iv_scom_addr.at(i) = iv_scom_addr.at(i) + i_scom_addr;
+        }
+    }
 
-        // cout << "I>Scom::set_scom_suffix: "<< i_scom_addr << " is the output string!" << endl;
+    // cout << "I>Scom::set_scom_suffix: "<< i_scom_addr << " is the output string!" << endl;
 }

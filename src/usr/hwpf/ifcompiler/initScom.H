@@ -25,6 +25,8 @@
 //                 andrewg  05/24/11 Port over for VPL/PgP
 //                 andrewg  09/19/11 Updates based on review
 //                 mjjones  11/17/11 Output attribute listing
+//                 camvanng 12/12/11 Support multiple address ranges within a SCOM address
+//                                   Use strtoull vs strtoul for 32-bit platforms
 // End Change Log *********************************************************************************
 
 /**
@@ -137,7 +139,7 @@ namespace init
             void make_target(const char * i_symbol);
 
 
-            uint64_t get_address(void) {return(strtoul(iv_scom_addr[0].c_str(),NULL,16));}
+            uint64_t get_address(void) {return(strtoull(iv_scom_addr[0].c_str(),NULL,16));}
             // string name();
             string listing();
 
@@ -151,6 +153,7 @@ namespace init
 
             void set_scom_address(const string & i_scom_addr);
             void dup_scom_address(const string & i_scom_addr);
+            void copy_dup_scom_address();
             void set_scom_suffix(const string & i_scom_addr);
 
         private:  // functions
@@ -169,6 +172,7 @@ namespace init
           typedef map<string,SCOM_WHEN> WHEN_SUBTYPE_MAP;
 
             SCOM_ADDR   iv_scom_addr;
+            SCOM_ADDR   iv_dup_scom_addr;      ///< contains the duplicate scom addresses
             uint64_t    iv_scom_addr_hex;
             uint32_t    iv_scom_length;
             uint32_t    iv_scom_offset;

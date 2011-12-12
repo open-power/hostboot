@@ -25,6 +25,7 @@
 //                andrewg  09/19/11   Updates based on review
 //                camvanng 11/08/11   Added support for attribute enums
 //                camvanng 11/16/11   Support system & target attributes
+//                camvanng 12/12/11   Support multiple address ranges within a SCOM address
 // End Change Log *********************************************************************************/
 /**
  * @file initCompiler.lex
@@ -141,6 +142,12 @@ scom              { BEGIN(scomop); oss.str("");  return INIT_SCOM; }
 
 <scomop>[\(]        {BEGIN(scomop_array); return yytext[0];}
 
+<scomop_array>{SINGLE_HEX}+\.\.{SINGLE_HEX}+ {
+	                         yylval.str_ptr = new std::string(yytext);
+                               oss.str("");  
+                               return INIT_INT64_STR; 
+                           }
+
 <scomop_array>{SINGLE_HEX}+ {
 	                         yylval.str_ptr = new std::string(yytext);
                                oss.str("");  
@@ -155,6 +162,8 @@ scom              { BEGIN(scomop); oss.str("");  return INIT_SCOM; }
                                  BEGIN(scomop);
                                  return INIT_SCOM_SUFFIX; 
                              }
+
+<scomop_suffix>[\(]      { BEGIN(scomop_array); return yytext[0]; }
 
 <scomop>[:;\[]    { BEGIN(INITIAL); g_coltype = 0; return yytext[0]; }
 <scomop>{NEWLINE} { BEGIN(INITIAL); ++yyline; }
