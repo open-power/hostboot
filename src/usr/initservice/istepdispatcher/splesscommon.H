@@ -41,17 +41,25 @@
 #include    <stdio.h>
 #include    <string.h>
 
+//  undefine this before checking in....
+// #define SPLESS_DEBUG    1
 
-/**
- * @note    Since ISTEP_MODE attribute is nonvolatile (persists across boots),
- *          we must have a way to turn the attribute both ON and OFF - we
- *          cannot depend on the FSP to do it since we may not have a FSP.
- */
-const   uint64_t    ISTEP_MODE_ON_SIGNATURE     =   0x4057b0074057b007;
-const   uint64_t    ISTEP_MODE_OFF_SIGNATURE    =   0x700b7504700b7504;
+#ifdef  SPLESS_DEBUG
+    #include    <kernel/console.H>                 // printk DEBUG
+#endif
+
+#include    <sys/mmio.h>                    //  mmio_scratch_read()
+
+
+// external reference
+namespace   INITSERVICE
+{
+    extern trace_desc_t *g_trac_initsvc;
+}   // end namespace    INITSERVICE
+
 
 /******************************************************************************/
-//  SPLESS Command Prototypes
+//  SPLESS Command and Status Prototypes
 /******************************************************************************/
 
 /**
@@ -63,9 +71,130 @@ const   uint64_t    ISTEP_MODE_OFF_SIGNATURE    =   0x700b7504700b7504;
 namespace   SPLESS
 {
 
+/**
+ * @note    Since ISTEP_MODE attribute is nonvolatile (persists across boots),
+ *          we must have a way to turn the attribute both ON and OFF - we
+ *          cannot depend on the FSP to do it since we may not have a FSP.
+ */
+const   uint64_t    ISTEP_MODE_ON_SIGNATURE     =   0x4057b0074057b007;
+const   uint64_t    ISTEP_MODE_OFF_SIGNATURE    =   0x700b7504700b7504;
+
+/**
+ * @enum
+ *  SPLess Task return codes
+ *
+ * task return codes for SPless single step
+ * @note    future errors will be passed from task_create() and task_exec()
+ *          and should be documented in errno.h
+ *
+ */
+enum    {
+    SPLESS_TASKRC_INVALID_ISTEP     =   -3,     // invalid istep or substep
+    SPLESS_TASKRC_LAUNCH_FAIL       =   -4,     // failed to launch the task
+    SPLESS_TASKRC_RETURNED_ERRLOG   =   -5,     // istep returned an errorlog
+    SPLESS_TASKRC_TERMINATED        =   -6,     // terminated the polling loop
+
+    SPLESS_INVALID_COMMAND          =   10,    // invalid command from user console
+};
+
+/**
+ * @note declare global regs to implement SPLess.
+ *  These replace the SCOM regs that are accessed by mmio; the reason we
+ *  are changing this is that there is no support at present for read/writing
+ *  SCOM in the Debug Framework.
+ *  This will have to be modified again when we get to Secure Boot
+ *
+ *  @todo An review issue came up about when and how these are updated -
+ *  While hostboot is running in SIMICS or VBU, the user console (i.e. a
+ *  perl script, see src/build/vpo/hb_istep) will stop the instruction clock,
+ *  write a command to g_SPLess_Command_Reg, and then restart the clock.
+ *
+ *  Q1) In non-VPO mode (real FSP) are we always going to stop instructions
+ *      to the processor to modify these variables?
+ *  A:  Yes, at this writing.  If this changes, we should revisit this
+ *      implementation.
+ *
+ *  Q1a) Do these memory locations need to be accessed atomically (i.e. using
+ *      __sync_add_and_fetch() and/or isync()/sync() )?
+ *  A:  No, not at this writing.
+ *
+ *  Q2) When we stop instructions to the processor is the instruction pipeline
+ *      and load/store queues flushed?
+ *
+ *  A:  No.  The stop commands used in the simulator user console should
+ *      quiesce the processor; this should guarantee that there are no
+ *      outstanding loads or stores.
+ */
+extern  uint64_t    g_SPLess_Command_Reg;
+extern  uint64_t    g_SPLess_Status_Reg;
+extern  uint64_t    g_SPLess_IStepMode_Reg;
+
+/**
+ * @note    SPLess commands, and masks for the status.  Currently we only
+ *  support one command through the SPLess interface.
+ *
+ */
 const   uint8_t     SPLESS_SINGLE_ISTEP_CMD         =   0x00;
 const   uint64_t    SPLESS_SINGLE_STEP_STS_MASK     =   0x00000000ffffffff;
 
+/**
+ * @brief   init ISTEP_MODE attribute
+ *
+ *  @return nothing
+ *
+ */
+inline  void initIStepMode( )
+{
+    using namespace TARGETING;
+    uint64_t    l_readData      =   0;
+    Target      *l_pTopLevel    =   NULL;
+    TargetService& l_targetService = targetService();
+
+    (void) l_targetService.getTopLevelTarget(l_pTopLevel);
+    if (l_pTopLevel == NULL)
+    {
+        TRACFCOMP( INITSERVICE::g_trac_initsvc, "Top level handle was NULL" );
+        // drop through, default of attribute is is false
+    }
+    else
+    {
+        // got a pointer to Targeting, complete setting the flag
+        // $$ save l_readData  =   mmio_scratch_read( MMIO_SCRATCH_IPLSTEP_CONFIG );
+        l_readData  =   g_SPLess_IStepMode_Reg;
+
+#ifdef  SPLESS_DEBUG
+        printk( "IStepMode Reg  = 0x%p, 0x%lx\n",   &g_SPLess_IStepMode_Reg, l_readData );
+        printk( "Status Reg     = 0x%p\n",          &g_SPLess_Status_Reg );
+        printk( "Command Reg    = 0x%p\n",          &g_SPLess_Command_Reg );
+#endif
+        TRACDCOMP( INITSERVICE::g_trac_initsvc,
+                "IStepMode Reg = 0x%llx",
+                l_readData );
+
+        // check for IStep Mode signature(s)
+        if ( l_readData == ISTEP_MODE_ON_SIGNATURE )
+        {
+            l_pTopLevel->setAttr<ATTR_ISTEP_MODE> (true );
+
+            TRACDCOMP( INITSERVICE::g_trac_initsvc,
+                    "ISTEP_MODE attribute set to TRUE." );
+        }
+        else if ( l_readData == ISTEP_MODE_OFF_SIGNATURE )
+        {
+            l_pTopLevel->setAttr<ATTR_ISTEP_MODE> ( false );
+
+            TRACDCOMP( INITSERVICE::g_trac_initsvc,
+                    "ISTEP_MODE attribute set to FALSE." );
+        }
+        else
+        {
+            TRACFCOMP( INITSERVICE::g_trac_initsvc,
+                    "unknown ISTEP_MODE signature: 0x%llx",
+                    l_readData );
+        }
+    }
+
+}
 
 /**
  * @struct  CommandHdr
@@ -155,7 +284,11 @@ private:
 inline  void    readCmd( SPLessCmd   &io_rcmd )
 {
 
-    io_rcmd.val64 = mmio_scratch_read(MMIO_SCRATCH_IPLSTEP_COMMAND);
+    // $$ save io_rcmd.val64 = mmio_scratch_read(MMIO_SCRATCH_IPLSTEP_COMMAND);
+    io_rcmd.val64   =   g_SPLess_Command_Reg;
+#ifdef  SPLESS_DEBUG
+    printk( "readCmd 0x%lx\n", g_SPLess_Command_Reg );
+#endif
 }
 
 
@@ -172,7 +305,11 @@ inline  void    readCmd( SPLessCmd   &io_rcmd )
 inline  void    writeCmd( SPLessCmd    &io_rcmd )
 {
 
-    mmio_scratch_write( MMIO_SCRATCH_IPLSTEP_COMMAND, io_rcmd.val64 );
+    // $$ save mmio_scratch_write( MMIO_SCRATCH_IPLSTEP_COMMAND, io_rcmd.val64 );
+    g_SPLess_Command_Reg    =   io_rcmd.val64;
+#ifdef  SPLESS_DEBUG
+    printk( "writeCmd 0x%lx\n", g_SPLess_Command_Reg );
+#endif
 }
 
 
@@ -260,7 +397,11 @@ union   SPLessSingleIStepSts  {
 inline  void    readSts(   SPLessSts   &io_rsts )
 {
 
-    io_rsts.val64 = mmio_scratch_read(MMIO_SCRATCH_IPLSTEP_STATUS);
+    // $$ save io_rsts.val64 = mmio_scratch_read(MMIO_SCRATCH_IPLSTEP_STATUS);
+    io_rsts.val64   =   g_SPLess_Status_Reg;
+#ifdef  SPLESS_DEBUG
+    printk( "readSts 0x%lx\n", g_SPLess_Status_Reg );
+#endif
 }
 
 /**
@@ -272,8 +413,11 @@ inline  void    readSts(   SPLessSts   &io_rsts )
  */
 inline  void    writeSts(  SPLessSts   &io_rsts )
 {
-    mmio_scratch_write( MMIO_SCRATCH_IPLSTEP_STATUS, io_rsts.val64 );
-
+    // $$ save mmio_scratch_write( MMIO_SCRATCH_IPLSTEP_STATUS, io_rsts.val64 );
+    g_SPLess_Status_Reg =   io_rsts.val64;
+#ifdef  SPLESS_DEBUG
+    printk( "writeSts 0x%lx\n", g_SPLess_Status_Reg );
+#endif
 }
 
 }   // namespace

@@ -45,6 +45,17 @@
 #include    "initservice.H"
 #include    "initsvctasks.H"
 
+
+//  -----   namespace   SPLESS  -----------------------------------------------
+namespace   SPLESS
+{
+    //  allocate space for SPLess Command regs
+    uint64_t    g_SPLess_Command_Reg    =   0;
+    uint64_t    g_SPLess_Status_Reg     =   0;
+    uint64_t    g_SPLess_IStepMode_Reg  =   0x123456789abcdef0;
+
+}   //  -----   end namespace   SPLESS  ---------------------------------------
+
 namespace   INITSERVICE
 {
 

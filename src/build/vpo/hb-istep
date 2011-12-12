@@ -1,0 +1,565 @@
+#!/usr/bin/perl
+#  IBM_PROLOG_BEGIN_TAG
+#  This is an automatically generated prolog.
+#
+#  $Source: src/build/vpo/hb-istep $
+#
+#  IBM CONFIDENTIAL
+#
+#  COPYRIGHT International Business Machines Corp. 2011
+#
+#  p1
+#
+#  Object Code Only (OCO) source materials
+#  Licensed Internal Code Source Materials
+#  IBM HostBoot Licensed Internal Code
+#
+#  The source code for this program is not published or other-
+#  wise divested of its trade secrets, irrespective of what has
+#  been deposited with the U.S. Copyright Office.
+#
+#  Origin: 30
+#
+#  IBM_PROLOG_END
+#
+# Purpose:  This perl script works in concert with do_p8vbu_script_hbi_* to 
+#           implement isteps on AWAN.
+#
+# Description:
+#           The do.. script will run first to set up the AWAN environment, 
+#           then call hb_istep  twice:
+#           1) hb_istep --istepmode
+#               called after loading but before starting HostBoot
+#               this will check to see if the user has set istep mode, if so
+#               it will write the Istep_mode signature to L3 memory to put 
+#               HostBoot mode into single-step mode.
+#           2) hb_istep --command
+#               Periodically call RunClocks() to step through HostBoot.
+#               Checks for status from previous Isteps, and reports status.
+#            
+# Comments:
+#               
+#
+# Author: Mark Wenning
+#
+
+#------------------------------------------------------------------------------
+# Specify perl modules to use
+#------------------------------------------------------------------------------
+use strict;
+use warnings;
+use POSIX;
+use Getopt::Long;
+
+## 64-bit input
+##  argh, not compatable with GetOpt!! use bigint;
+no  warnings    'portable';
+
+#   read/write cachelines to L3
+use VBU_Cacheline;
+
+#------------------------------------------------------------------------------
+# Forward Declaration
+#------------------------------------------------------------------------------
+sub printUsage;
+sub get_istep_list;
+sub print_istep_list;
+sub find_in_inlist;
+sub parse_command;
+sub setMode;
+
+#------------------------------------------------------------------------------
+#   Constants
+#------------------------------------------------------------------------------
+my $CSVfile     =   "isteplist.csv";
+my $hbSymsFile  =   "hbicore.syms";                #Use hbicore.syms
+my  $CORE       =   "-c3";
+
+
+#------------------------------------------------------------------------------
+# Globals
+#------------------------------------------------------------------------------
+my  $opt_debug      =   0;
+my  $opt_istepmode  =   0;
+my  $opt_normalmode =   0;
+my  $opt_command    =   "";
+my  $opt_list       =   0;
+my  $opt_help       =   0;
+my  $opt_cmdfile    =   0;          ## batchmode, later
+
+my  @inList;
+$inList[10][10]     =   ();
+##  initialize inList to "undefined"
+for( my $i = 0; $i <= $#inList; $i++)
+{
+    for(my $j = 0; $j <= $#inList; $j++)
+    {
+        undef( $inList[$i][$j] );
+    }
+}    
+
+my  $g_SeqNum   =   0; 
+
+
+#==============================================================================
+# MAIN
+#==============================================================================
+##  get any environment variables
+
+my $hbDir = $ENV{'HBDIR'};
+if (defined ($hbDir))
+{
+    unless ($hbDir ne "")
+    {
+        $hbDir = '.';             #Set to current directory
+    }
+}
+else
+{
+    $hbDir = '.';                 #Set to current directory
+}
+
+# print   $#ARGV;       
+if ( ($#ARGV < 0) or ($opt_help) )
+{
+    printUsage();
+    exit    0 ;
+}   
+
+
+#------------------------------------------------------------------------------
+# Parse optional input arguments
+#------------------------------------------------------------------------------
+GetOptions( "help"          =>  \$opt_help,
+            "istepmode"     =>  \$opt_istepmode,
+            "normalmode"    =>  \$opt_normalmode,
+            "list"          =>  \$opt_list,
+            "command=s"     =>  \$opt_command,
+            "cmdfile"       =>  \$opt_cmdfile,            
+            
+            "debug"         =>  \$opt_debug,
+          );  
+             
+##
+## find the istep mode, command, and status registers in the syms file
+##
+my $istepmodereg = `grep "SPLESS::g_SPLess_IStepMode_Reg" $hbDir/$hbSymsFile | awk -F"," '{print \$2}'`;
+chomp   $istepmodereg;
+
+my  $commandreg = `grep "SPLESS::g_SPLess_Command_Reg" $hbDir/$hbSymsFile | awk -F"," '{print \$2}'`;
+chomp   $commandreg;
+
+my $statusreg = `grep "SPLESS::g_SPLess_Status_Reg" $hbDir/$hbSymsFile | awk -F"," '{print \$2}'` ;
+chomp   $statusreg;
+
+if  ( $opt_debug )
+{
+    print   STDOUT  "istepmode      =   $opt_istepmode\n";
+    print   STDOUT  "normalmode     =   $opt_normalmode\n";    
+    print   STDOUT  "command        =   $opt_command\n";
+    print   STDOUT  "debug          =   $opt_debug\n";
+    
+    print   STDOUT  "hbDir          =   $hbDir\n"; 
+    print   STDOUT  "hbSymsFile     =   $hbSymsFile\n";   
+    print   STDOUT  "istepmodereg   =   $istepmodereg\n";
+    print   STDOUT  "commandreg     =   $commandreg\n";
+    print   STDOUT  "statusreg      =   $statusreg\n";
+    
+    VBU_Cacheline::SetFlags( 1, 0 );
+    
+}    
+
+
+##  fetch the ISTEP csv list
+get_istep_list();       
+
+if ( $opt_list )
+{
+    print_istep_list();
+    exit;
+}
+
+    ## VPO cannot be running when we start.
+    my  $qstr   =   VBU_Cacheline::P8_Ins_Query();
+    if ( $qstr  ne "STOPPED" )
+    {
+        print STDOUT "VPO is \"$qstr\", setting to STOPPED.\n";
+        VBU_Cacheline::P8_Ins_Stop();
+    }
+    
+##
+##  process --Istep Mode command
+##      IStepModeStr    = "cpu0_0_0_3->scratch=0x4057b007_4057b007"
+##      NormalModeStr   = "cpu0_0_0_3->scratch=0x700b7504_700b7504"
+##
+if ( $opt_istepmode ==  1   )
+{
+    print STDOUT  "ENable istepmode\n";
+    setMode( "istep" );
+}
+
+if  ( $opt_normalmode ==  1 )
+{
+    print STDOUT  "DISable istepmode\n";
+    setMode( "normal" );
+}
+
+##
+##  Process other commands
+##
+if ( $opt_command ne "" )
+{
+    if ( $opt_debug ) {   print   STDOUT  "== process command \"$opt_command\" \n"; }
+    parse_command( $opt_command ); 
+}
+        
+
+#==============================================================================
+# SUBROUTINES
+#==============================================================================
+
+#------------------------------------------------------------------------------
+# Print command line help
+#------------------------------------------------------------------------------
+sub printUsage()
+{
+    print STDOUT "\nUsage: hb-istep   [--help]\n";
+    print STDOUT "    [--istepmode]             (enable istep mode)\n" ;
+    print STDOUT "    [--normalmode]            (disable istep mode)\n" ;
+    print STDOUT "    [--command sN]            (run istep N)\n" ;
+    print STDOUT "    [--command sN..M]         (run isteps N through M)\n" ;
+    print STDOUT "    [--command <foo>]         (run named istep \"foo\")\n" ;
+    print STDOUT "    [--command <foo>..<bar>]  (run named isteps \"foo\" through \"bar\")\n" ;
+    
+    print STDOUT "\n" ;
+
+}
+
+
+##  read in file with csv istep list and store in inList
+sub get_istep_list()
+{
+    my $istep, my $substep, my $name ;
+   
+    open( FH, "< $hbDir/$CSVfile") or die "can't open $hbDir/$CSVfile : $!";
+
+    while( <FH> )
+    {
+        chomp;
+
+        ( $istep, $substep, $name) =   split( ",", $_ ); 
+        ## print STDERR    "$_, $istep, $substep, $name\n" ;
+         
+        $inList[$istep][$substep]    =   $name; 
+    }         
+    
+    close( FH );     
+}
+
+sub print_istep_list( )
+{
+    my  $hdrflag    =   1;
+
+    ##  print   STDOUT  "IStep\tSubStep\tName\n";
+    print   STDOUT  " IStep Name\n";    
+    print   STDOUT  "---------------------------------------------------\n";
+    
+    for(my $i = 4; $i <= $#inList; $i++)
+    {
+        for(my $j = 0; $j <= $#inList; $j++)
+        {
+            ## print all substeps
+            # print "==$inList[$i][$j] \n";
+            if ( defined( $inList[$i][$j] ) )
+            {
+                if ( $hdrflag )  
+                { 
+                    printf  STDOUT  " -- IStep $i --  \n"; 
+                    $hdrflag = 0;
+                }
+                ## printf  STDOUT  "%d\t%d\t%s\n", $i, $j, $inList[$i][$j] ; 
+                printf  STDOUT  " %s\n", $inList[$i][$j] ; 
+            }  
+        }   ## end for $j
+        $hdrflag=1;
+    }   ##  end for $i     
+}
+
+sub find_in_inList( $ ) 
+{
+    my  ( $substepname )    =   @_;
+    
+    for(my $i = 0; $i <= $#inList; $i++)
+    {
+        for(my $j = 0; $j <= $#inList; $j++)
+        {
+            ## if ( defined($inList[$i][$j]) ) {   print ".$inList[$i][$j]?$substepname. \n";   }
+            
+            if ( defined($inList[$i][$j]) && ($inList[$i][$j] eq $substepname ) )
+            {
+                ## print "== $i $j $inList[$i][$j] \n";
+                return  ($i, $j, 1 );
+            }  
+        }
+    }     
+
+    return ( $#inList, $#inList, 0 )  
+} 
+
+##
+##  keep trying to get status until seqnum syncs up 
+
+sub getSyncStatus( )
+{
+    # set # of retries
+    my  $count  =   100;
+    my  $result =   0; 
+    my  $seqnum =   0;  
+    
+    ##  get response.  sendCmd() should have bumped g_SeqNum, so we will sit
+    ##  here for a reasonable amount of time waiting for the correct sequence
+    ##  number to come back.  
+    while(1)
+    {
+    
+        ##  advance HostBoot code by a certain # of cycles, then check the 
+        ##  sequence number to see if it has changed.  rinse and repeat.
+        VBU_Cacheline::RunClocks();
+        
+        ##  dump printk similar to the Jim McGuire's script
+        ##  dumpPrintk();
+
+        $result = CLread( $statusreg );
+        $seqnum  = ( ( $result & 0x3f00000000000000 ) >> 56 );
+        if ( $seqnum == $g_SeqNum )
+        {
+            return $result;
+        }
+        
+        if ( $count <= 0 )
+        {
+            print STDOUT    "TIMEOUT waiting for seqnum=$g_SeqNum\n";
+            return -1;
+        }
+        $count--;
+    }   ##  endwhile    
+          
+} 
+
+sub runIStep( $$ )
+{
+    my  ( $istep, $substep)  = @_;
+    my  $byte0, my $command;
+    my  $cmd;
+    my  $result;
+    
+    
+    ##  bump the seqnum
+    $g_SeqNum++;
+    
+    printf   STDOUT  "run  %d.%d %s:\n", $istep, $substep, $inList[$istep][$substep];
+    
+    $byte0   =   0x80 + $g_SeqNum;      ## gobit + seqnum
+    $command =   0x00;
+    $cmd = sprintf( "0x%2.2x%2.2x%2.2x%2.2x00000000", $byte0, $command, $istep, $substep );
+    VBU_Cacheline::CLwrite( $commandreg, $cmd );
+    
+    $result  =   getSyncStatus();
+    
+    ## if result is -1 we have a timeout
+    if ( $result == -1 )
+    {
+        print   "-----------------------------------------------------------------\n";
+    }
+    else
+    {
+        my $taskStatus  =   ( ( $result & 0x00ff000000000000 ) >> 48 );
+        my $stsIStep    =   ( ( $result & 0x0000ff0000000000 ) >> 40 );
+        my $stsSubstep  =   ( ( $result & 0x000000ff00000000 ) >> 32 );
+        my $istepStatus =   ( ( $result & 0x00000000ffffffff )  );
+
+        print   STDOUT "-----------------------------------------------------------------\n";
+        ## printf STDOUT "Istep %d.%d Status: 0x%x\n", $stsIStep, $stsSubstep, $istepStatus ; 
+        if ( $taskStatus != 0 )
+        {
+            printf STDOUT "Istep %d.%d FAILED to launch, task status is %d\n", $stsIStep, $stsSubstep, $taskStatus ;
+        }
+        else
+        {            
+            printf STDOUT "Istep %d.%d returned Status: 0x%x\n", $stsIStep, $stsSubstep, $istepStatus ;
+        }
+        print STDOUT "-----------------------------------------------------------------\n";
+    }
+        
+}   
+    
+    
+##  run command = "sN"    
+sub sCommand( $ )
+{
+    my  ( $scommand )   =   @_;
+    
+    my  $i   =   $scommand;
+    my  $j   =   0;
+    
+    # sanity check
+    if ( !defined($inList[$i][0]) )
+    {
+        printf  STDOUT  "IStep %d.0 does not exist.\n", $i;
+        return -1;
+    }
+        
+    #   execute all the substeps in the IStep
+    for( $j=0; $j<$#inList; $j++ )
+    {
+        ## print   "-----------------" 
+        ##print STDOUT  "run IStep %d %s  ...\n", $i, $inList[$i][$j] );
+        ##print   "-----------------" 
+        if ( defined( $inList[$i][$j] ) )
+        {
+            runIStep( $i, $j );
+        }
+    }
+}
+     
+
+sub parse_command()
+{
+    my  ( $command ) =   @_;
+    my  @execlist;
+    my  $istepM, my $substepM, my $foundit, my $istepN, my $substepN;
+    my  $M, my $N, my $scommand;
+    my  @ss_list;
+    
+    ## check to see if we have an 's' command (string starts with 's' and a number) 
+    chomp( $command);   
+    if ( $command =~ m/^s+[0-9].*/ )
+    {
+        ## run "s" command
+        if ($opt_debug) {   print STDOUT "===== s command : ", $command, ":\n";   } 
+        substr( $command, 0, 1, "" );
+ 
+        if ( isdigit( $command ) )
+        {
+            # command = "sN"
+            if ($opt_debug) {   print STDOUT "===== single IStep: ", $command, "\n";  }
+            sCommand( $command ); 
+        }
+        else
+        {
+            #   list of substeps = "sM..N"
+            ( $M, $N )  =   split( /\.\./, $command );
+            
+            if ($opt_debug) {   print STDOUT "===== multiple ISteps: ", $M, "-", $N, "\n";    } 
+            for ( my $x=$M; $x<$N+1; $x++ )
+            {
+                sCommand( $x );
+            }          
+        }                   
+    }
+    else
+    {  
+        ## <substep name>, or <substep name>..<substep name>
+        @ss_list    =   split( /\.\./, $command );        
+        
+        if ($opt_debug) {   print STDOUT "===== named commands : ", @ss_list, "\n";    } 
+            
+        ( $istepM, $substepM, $foundit) = find_in_inList( $ss_list[0] );
+        $istepN      =   $istepM;
+        $substepN    =   $substepM;
+        if ( ! $foundit )
+        {
+            print STDOUT "Invalid substep ", $ss_list[0], "\n" ;
+            return -1;
+        }
+        
+            
+        if ( $#ss_list > 0 )
+        {    
+            ( $istepN, $substepN, $foundit) = find_in_inList( $ss_list[1] );
+            if ( ! $foundit )
+            {
+                print STDOUT "Invalid substep %s", $ss_list[1], "\n" ;
+                return -1;
+            }
+        }
+        
+        ## print "got it, running isteps:\n";
+        for( my $x=$istepM; $x<$istepN+1; $x++ )
+        {
+            for( my $y=$substepM; $y<$substepN+1; $y++ )
+            {
+                ## print STDOUT "run $x $y $inList[$x][$y]\n";
+                runIStep( $x, $y );
+            }
+        }
+        
+    }   
+}
+
+##  write to scratch reg 3 to set istep or normal mode, check return status        
+sub setMode( )
+{
+    my  ( $cmd )    =   @_;
+    my  $count      =   0;
+    my  $expected   =   0;
+    my  $readybit   =   0;
+    my  $result     =   0;
+   
+
+    if ( $cmd eq "istep" )
+    {
+        VBU_Cacheline::CLwrite( $istepmodereg, "0x4057b0074057b007" );
+        $expected    =   1;    
+    }
+    elsif   ( $cmd eq "normal" )
+    {
+        VBU_Cacheline::CLwrite( $istepmodereg, "0x700b7504700b7504" );
+        $expected    =   0;
+    }
+    else
+    {      
+        print "invalid setMode command: %s\n", $cmd ;
+        return  -1;
+    }        
+    
+    if ( $opt_debug )   
+    {
+        ##  readback and display 
+        $result = CLread( $istepmodereg );
+        printf STDOUT   "=====  istepmodereg readback:  0x%lx\n", $result ;
+    }
+ 
+
+    ##  Loop, advancing clock, and wait for readybit
+    $count  =   30;
+    while(1)
+    {
+        ##  advance HostBoot code by a certain # of cycles, then check the 
+        ##  sequence number to see if it has changed.  rinse and repeat.
+        VBU_Cacheline::RunClocks();
+        
+        $result = CLread( $statusreg );
+        
+        $readybit    =   ( ( $result & 0x4000000000000000 ) >> 62 );
+        
+        if ($opt_debug)   
+            { printf  STDOUT  "===== setMode:  count=%d, result=0x%lx, readybit=0x%x\n", $count, $result, $readybit  } 
+
+        if ( $readybit == $expected )
+        {
+            print STDOUT "Set $cmd Mode success.\n" ;
+            return 0;
+        }
+            
+        if ( $count <= 0 )
+        {
+            print STDOUT "TIMEOUT waiting for readybit, status=0x%x\n", $result ;
+            return -1;
+        }
+            
+        $count--;
+    } 
+}
+
+__END__

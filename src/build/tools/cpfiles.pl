@@ -79,6 +79,16 @@ my @files = ("src/build/tools/hb-parsedump.pl",
              "img/vbu_targeting.bin",
              "img/isteplist.csv",
              );
+             
+# copy vpo files into working dir for AWAN
+my @vpofiles = ("src/build/vpo/hb-dump",
+                "src/build/vpo/hb-errl",
+                "src/build/vpo/hb-istep",
+                "src/build/vpo/hb-printk",
+                "src/build/vpo/hb-trace", 
+                "src/build/vpo/hb-virtdebug.pl",
+                "src/build/vpo/VBU_Cacheline.pm",   
+             );
 
 #Directories in base git repository
 my @gitRepoDirs = ("img",
@@ -98,8 +108,9 @@ my $numArgs = $#ARGV + 1;
 
 my $test = 0;   #Flag to overwrite hbicore.<syms|bin|list> with the test versions
 my $inDir = ""; #User specified directory to copy files to
+my $vpo = 0;    # copy extra vpo files to inDir
 
-if ($numArgs > 2)
+if ($numArgs > 3)
 {
     #Print command line help
     print ("ERROR: Too many arguments entered.\n");
@@ -120,6 +131,11 @@ else
         {
             #Set flag to copy hbicore_test.<syms|bin> to hbcore_test.<syms|bin>
             $test = 1;
+        }
+        elsif ($_ eq "--vpo")
+        {
+            #Set flag to copy list of vpo files to $inDir
+            $vpo = 1;
         }
         else
         {
@@ -184,6 +200,14 @@ else
     print 'ERROR: No path specified and env $SANDBBOXBASE not set.'."\n";
     printUsage();
     exit(1);
+}
+
+#------------------------------------------------------------------------------
+# If vpo flag is set, add the vpo files to the @files array
+#------------------------------------------------------------------------------
+if ( $vpo )
+{
+    push( @files, @vpofiles );
 }
 
 #------------------------------------------------------------------------------
@@ -322,5 +346,6 @@ sub printUsage()
     print ("          if it is defined.\n\n");
     print ("  --help: prints usage information\n");
     print ("  --test: Copy hbicore_test.<syms|bin|list> to hbicore.<syms|bin|list>\n");
+    print ("  --vpo:  Copy files in src/build/vpo to support vpo operation\n");
 }
 

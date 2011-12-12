@@ -44,7 +44,7 @@
 #include    <trace/interface.H>             //  trace support
 #include    <errl/errlentry.H>              //  errlHndl_t
 #include    <devicefw/userif.H>             //  targeting
-#include    <sys/mmio.h>                    //  mmio_scratch_read()
+
 #include    <initservice/taskargs.H>        //  TaskArgs    structs
 
 #include    <errl/errluserdetails.H>        //  ErrlUserDetails base class
@@ -61,12 +61,13 @@
 #include    <isteps/istepmasterlist.H>
 
 
+//  -----   namespace   ERRORLOG    -------------------------------------------
 namespace   ERRORLOG
 {
 /**
  * @class IStepNameUserDetail
  *
- * report the failing IStepName.
+ * report the failing IStepName to an errorlog
  *
  * @todo:   get rid of magic numbers in version and subsection.
  *          set up tags, plugins, include files, etc.
@@ -108,15 +109,15 @@ IStepNameUserDetail(const IStepNameUserDetail &);
 IStepNameUserDetail & operator=(const IStepNameUserDetail &);
 };
 
-}   //  end namespace   ERRORLOG
+}   //  -----   end namespace   ERRORLOG    -----------------------------------
 
 
-
+//  -----   namespace   INITSERVICE -------------------------------------------
 namespace   INITSERVICE
 {
 
 using   namespace   ERRORLOG;           // IStepNameUserDetails
-using   namespace   SPLESS;
+using   namespace   SPLESS;             // SingleStepMode
 
 /******************************************************************************/
 // Globals/Constants
@@ -124,41 +125,13 @@ using   namespace   SPLESS;
 extern trace_desc_t *g_trac_initsvc;
 
 /**
- * @note    Since ISTEP_MODE attribute is nonvolatile (persists across boots),
- *          we must have a way to turn the attribute both ON and OFF - we
- *          cannot depend on the FSP to do it since we may not have a FSP.
- */
-const   uint64_t    ISTEP_MODE_ON_SIGNATURE     =   0x4057b0074057b007;
-const   uint64_t    ISTEP_MODE_OFF_SIGNATURE    =   0x700b7504700b7504;
-
-/**
- * @enum
- *  SPLess Task return codes
- *
- * task return codes for SPless single step
- * @note    future errors will be passed from task_create() and task_exec()
- *          and should be documented in errno.h
- *
- */
-enum    {
-    SPLESS_TASKRC_INVALID_ISTEP     =   -3,     // invalid istep or substep
-    SPLESS_TASKRC_LAUNCH_FAIL       =   -4,     // failed to launch the task
-    SPLESS_TASKRC_RETURNED_ERRLOG   =   -5,     // istep returned an errorlog
-    SPLESS_TASKRC_TERMINATED        =   -6,     // terminated the polling loop
-
-    SPLESS_INVALID_COMMAND          =   10,    // invalid command from user console
-};
-
-/**
  * @note    SPLess PAUSE - These two constants are used in a nanosleep() call
  *          below to sleep between polls of the StatusReg.  Typically this will
- *          be about 100 ms - the actual value will be determined empirically.
- *
- * @debug  simics "feature" - set polling time to 1 sec for demo
+ *          be about 10 ms - the actual value will be determined empirically.
  *
  */
-const   uint64_t    SINGLESTEP_PAUSE_S     =   1;
-const   uint64_t    SINGLESTEP_PAUSE_NS    =   100000000;
+const   uint64_t    SINGLESTEP_PAUSE_S     =   0;
+const   uint64_t    SINGLESTEP_PAUSE_NS    =   10000000;
 
 /**
  * @brief   set up _start() task entry procedure using the macro in taskargs.H
@@ -241,7 +214,7 @@ void IStepDispatcher::init( void * io_ptr )
     if ( getIStepMode() )
     {
         TRACFCOMP( g_trac_initsvc,
-                   "IStep single-step" );
+                   "IStep single-step enable" );
         // IStep single-step
         singleStepISteps( io_ptr );
     }
@@ -275,55 +248,12 @@ bool IStepDispatcher::getIStepMode( )   const
     else
     {
         l_istepmodeflag = l_pTopLevel->getAttr<ATTR_ISTEP_MODE> ();
+        // printk( "IStep Mode flag = 0x%x\n", l_istepmodeflag );
     }
 
 
     return  l_istepmodeflag;
 }
-
-
-void IStepDispatcher::initIStepMode( )
-{
-    using namespace TARGETING;
-    uint64_t    l_readData      =   0;
-    Target      *l_pTopLevel    =   NULL;
-    TargetService& l_targetService = targetService();
-
-    (void) l_targetService.getTopLevelTarget(l_pTopLevel);
-    if (l_pTopLevel == NULL)
-    {
-        TRACFCOMP( g_trac_initsvc, "Top level handle was NULL" );
-        // drop through, default of attribute is is false
-    }
-    else
-    {
-        // got a pointer to Targeting, complete setting the flag
-        l_readData  =   mmio_scratch_read( MMIO_SCRATCH_IPLSTEP_CONFIG );
-
-        TRACDCOMP( g_trac_initsvc,
-                "SCOM ScratchPad read, Offset 0x%x, Data 0x%llx",
-                MMIO_SCRATCH_IPLSTEP_CONFIG,
-                l_readData );
-
-        // check for IStep Mode signature(s)
-        if ( l_readData == ISTEP_MODE_ON_SIGNATURE )
-        {
-            l_pTopLevel->setAttr<ATTR_ISTEP_MODE> (true );
-            TRACDCOMP( g_trac_initsvc,
-                    "ISTEP_MODE attribute set to TRUE." );
-        }
-
-        if ( l_readData == ISTEP_MODE_OFF_SIGNATURE )
-        {
-            l_pTopLevel->setAttr<ATTR_ISTEP_MODE> ( false );
-            TRACDCOMP( g_trac_initsvc,
-                    "ISTEP_MODE attribute set to FALSE." );
-        }
-    }
-
-}
-
-
 
 
 /**
@@ -364,6 +294,14 @@ void    IStepDispatcher::processSingleIStepCmd(
             l_sts.substep           =   l_cmd.substep;
             l_sts.istepStatus       =   0;
 
+            /**
+             * @todo    post informational errl here.
+             */
+            TRACFCOMP( g_trac_initsvc,
+                     "processSingleIStepCmd: ERROR: Cannot find IStep=%d, SubStep=%d",
+                     l_cmd.istep,
+                     l_cmd.substep );
+
             //  return to caller to write back to user console
             o_rrawsts.val64 =   l_sts.val64;
             break;
@@ -377,6 +315,12 @@ void    IStepDispatcher::processSingleIStepCmd(
         l_sts.istep             =   l_cmd.istep;
         l_sts.substep           =   l_cmd.substep;
         l_sts.istepStatus       =   0;
+
+        TRACFCOMP( g_trac_initsvc,
+                 "processSingleIStepCmd: Running IStep=%d, SubStep=%d",
+                 l_cmd.istep,
+                 l_cmd.substep );
+
 
         //  write intermediate value back to user console
         o_rrawsts.val64 =   l_sts.val64;
@@ -445,6 +389,11 @@ void    IStepDispatcher::processSingleIStepCmd(
         l_sts.istep             =   l_cmd.istep;
         l_sts.substep           =   l_cmd.substep;
         // istepStatus set above
+
+
+        /**
+         * @todo    post informational errl here.
+         */
 
         //  write to status reg, return to caller to write to user console
         o_rrawsts.val64 =   l_sts.val64;

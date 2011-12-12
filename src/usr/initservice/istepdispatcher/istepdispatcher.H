@@ -122,20 +122,6 @@ private:
 
 
     /**
-     * @brief   init iv_istepmode flag, called in constructor
-     *
-     *  Call into PNOR and fetch the "IStepMode flag" .
-     *
-     *  @todo currently this calls into the kernel to get the value of
-     *  an SCOM Scratch Reg - this will change when PNOR is finished
-     *
-     *  @return nothing
-     *
-     */
-    void initIStepMode( );
-
-
-    /**
      * @brief   getIStepMode - return value of IStep Mode
      *
      *  @return bool - value of iv_istepmodeflag

@@ -59,6 +59,30 @@ def dumpL3():
 # Functions to run isteps
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
+
+def findAddr( symsFile, symName ):
+    
+
+    #Find location of the variable from the image's .syms file
+    for line in open(symsFile):
+        if symName in line :  #if found
+            #print line
+            x = line.split(",")
+            addr = int(x[1],16)             
+            #print "addr = 0x%x"%(addr)
+            size = int(x[3],16)            
+            #print "size = 0x%x"%(size)
+            break
+
+    #print line
+    if symName not in line:  #if not found
+        print "\nCannot find %s in %s"%( symName,symsFile)
+        return "0"
+        
+    ##  returns an int        
+    return  addr
+
+
 def hb_istep_usage():
     print   "hb-istep usage:"
     print   "   istepmode   -   enable IStep Mode.  Must be executed before simics run command"
@@ -89,7 +113,7 @@ def bump_g_SeqNum() :
 ##
 def runClocks() :
 
-    SIM_continue( 100000 )
+    SIM_continue( 250000 )
     return  None
          
 ##    
@@ -103,14 +127,16 @@ def runClocks() :
 ##  3.  hardware  
 def sendCommand( cmd ):
     global g_IStep_DEBUG
-    CommandStr  =   "cpu0_0_0_1->scratch=%s"%(cmd)
+    ## CommandStr  =   "cpu0_0_0_1->scratch=%s"%(cmd)
+    CommandStr  =   "phys_mem.write 0x%8.8x %s 8"%(g_SPLess_Command_Reg, cmd )
     
     ##  send command to Hostboot
-    ## print CommandStr
+    if ( g_IStep_DEBUG ) :
+        print CommandStr
     (result, out) = quiet_run_command(CommandStr, output_modes.regular )
 
     if ( g_IStep_DEBUG ) :
-        print "sendCommand( 0x%x ) returns : " + "0x%x"%(cmd, result) + " : " + out
+        print "sendCommand( \"%s\" ) returns : "%(cmd) + "0x%x"%(result) + " : " + out
     
     return  result
 
@@ -134,7 +160,9 @@ def printStsHdr( status ):
 ##
 def getStatus(): 
     global  g_IStep_DEBUG
-    StatusStr   =   "cpu0_0_0_2->scratch"
+    
+    ## StatusStr   =   "cpu0_0_0_2->scratch"
+    StatusStr   =   "phys_mem.read 0x%8.8x 8"%(g_SPLess_Status_Reg )
       
     ( result, out )  =   quiet_run_command( StatusStr, output_modes.regular )
     if  ( g_IStep_DEBUG ) :
@@ -177,14 +205,20 @@ def getSyncStatus( ) :
         
 ##  write to scratch reg 3 to set istep or normal mode, check return status        
 def setMode( cmd ) :
-    IStepModeStr    = "cpu0_0_0_3->scratch=0x4057b007_4057b007"
-    NormalModeStr   = "cpu0_0_0_3->scratch=0x700b7504_700b7504"
+    global  g_IStep_DEBUG
+    global  g_SPLess_IStepMode_Reg
     
+    ##IStepModeStr    = "cpu0_0_0_3->scratch=0x4057b007_4057b007"
+    ##NormalModeStr   = "cpu0_0_0_3->scratch=0x700b7504_700b7504"
     
-    count   =   10
+    IStepModeStr    = "phys_mem.write 0x%8.8x 0x4057b007_4057b007 8"%(g_SPLess_IStepMode_Reg)
+    NormalModeStr   = "phys_mem.write 0x%8.8x 0x700b7504_700b7504 8"%(g_SPLess_IStepMode_Reg)    
+    
+    count   =   50
     
     if ( cmd == "istep" ) :
         (result, out)  =   quiet_run_command( IStepModeStr )
+        # print   IStepModeStr
         # print "set istepmode returned 0x%x"%(result) + " : " + out 
         expected    =   1    
     elif   ( cmd == "normal" ) :
@@ -201,7 +235,8 @@ def setMode( cmd ) :
 
         result = getStatus()
         readybit    =   ( ( result & 0x4000000000000000 ) >> 62 )
-        print   "Setting %s mode, readybit=%d..."%( cmd, readybit )   
+        if ( g_IStep_DEBUG ) :
+            print   "Setting %s mode, readybit=%d..."%( cmd, readybit )   
         if ( readybit == expected ) :
             print   "Set %s Mode success."%(cmd)
             return 0
@@ -229,7 +264,6 @@ def get_istep_list( inList ):
     return None
 
         
-
 def print_istep_list( inList ):
     print   "IStep\tSubStep\tName"
     print   "---------------------------------------------------"
@@ -322,17 +356,28 @@ def find_in_inList( inList, substepname) :
 ##      sN..M
 ##      <substepname1>..<substepname2>
 
-##  declare GLOBAL g_IStep_DEBUG
+##  declare GLOBAL g_IStep_DEBUG & SPLess memory mapped regs
 g_IStep_DEBUG   =   0
-def istepHB( str_arg1 ):
-        
+g_SPLess_IStepMode_Reg  =   ""
+g_SPLess_Command_Reg    =   ""
+g_SPLess_Status_Reg     =   ""
+def istepHB( symsFile, str_arg1 ):
+    global  g_IStep_DEBUG
+    global  g_SPLess_IStepMode_Reg
+    global  g_SPLess_Command_Reg
+    global  g_SPLess_Status_Reg
+    
+    ##  find addresses of the memory-mapped SPLess regs in the image   
+    g_SPLess_IStepMode_Reg = findAddr( symsFile, "SPLESS::g_SPLess_IStepMode_Reg" )
+    g_SPLess_Command_Reg = findAddr( symsFile, "SPLESS::g_SPLess_Command_Reg" )
+    g_SPLess_Status_Reg = findAddr( symsFile, "SPLESS::g_SPLess_Status_Reg" )
+                
     ## simics cannot be running when we start, or SIM_continue() will not work
     ##  and the Status reg will not be updated.          
     if ( SIM_simics_is_running() ) :
         print "simics must be halted before issuing an istep command."
-        return;     
-        
-          
+        return;  
+             
     ## start with empty inList.  Put some dummy isteps in istep4 for debug.        
     n   =   10                                      ## size of inlist array
     inList  =   [[None]*n for x in xrange(n)]       ## init to nothing
@@ -503,12 +548,14 @@ Examples: \n
 #   implement isteps
 #------------------------------------------------
 def hb_istep(str_arg1): 
+
+    syms = default_syms
  
     if ( str_arg1 == None): 
         hb_istep_usage()
     else:
         ## print "args=%s" % str(str_arg1)       
-        istepHB( str_arg1 )
+        istepHB( syms, str_arg1 )
                     
     return None
     
