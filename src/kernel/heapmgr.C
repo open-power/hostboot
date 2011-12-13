@@ -39,11 +39,8 @@ void * g_smallHeapPages[SMALL_HEAP_PAGES_TRACKED];
 uint16_t g_bucket_counts[HeapManager::BUCKETS];
 uint32_t g_smallheap_allocated = 0;  // sum of currently allocated
 uint32_t g_smallheap_alloc_hw  = 0;  // allocated high water
-uint32_t g_smallheap_pages = 0;  // total bytes high water (pages used)
 uint32_t g_smallheap_count = 0;     // # of chunks allocated
 
-uint32_t g_big_chunks = 0;
-uint32_t g_bigheap_highwater = 0;
 #endif
 
 const size_t HeapManager::cv_chunk_size[BUCKETS] =
@@ -62,9 +59,12 @@ const size_t HeapManager::cv_chunk_size[BUCKETS] =
     HeapManager::BUCKET_SIZE11
 };
 
-size_t HeapManager::cv_coalesce_count = 0;
-size_t HeapManager::cv_free_bytes;
-size_t HeapManager::cv_free_chunks;
+uint32_t HeapManager::cv_coalesce_count = 0;
+uint32_t HeapManager::cv_free_bytes;
+uint32_t HeapManager::cv_free_chunks;
+uint32_t HeapManager::cv_smallheap_page_count = 0;
+uint32_t HeapManager::cv_largeheap_page_count = 0;
+uint32_t HeapManager::cv_largeheap_page_max = 0;
 
 
 void HeapManager::init()
@@ -161,11 +161,10 @@ void* HeapManager::_reallocBig(void* i_ptr, size_t i_sz)
            size_t new_size = ALIGN_PAGE(i_sz)/PAGESIZE;
            if(new_size > bc->page_count)
            {
-#ifdef HOSTBOOT_DEBUG
-               __sync_add_and_fetch(&g_big_chunks,new_size-bc->page_count);
-               if(g_bigheap_highwater < g_big_chunks)
-                   g_bigheap_highwater = g_big_chunks;
-#endif
+               __sync_add_and_fetch(&cv_largeheap_page_count,new_size-bc->page_count);
+               if(cv_largeheap_page_max < cv_largeheap_page_count)
+                   cv_largeheap_page_max = cv_largeheap_page_count;
+
                new_ptr = PageManager::allocatePage(new_size);
 
                memcpy(new_ptr,i_ptr,bc->page_count*PAGESIZE);
@@ -251,7 +250,10 @@ void HeapManager::newPage()
     size_t remaining = PAGESIZE;
 
 #ifdef HOSTBOOT_DEBUG
-    uint32_t idx = __sync_fetch_and_add(&g_smallheap_pages,1);
+    uint32_t idx = 
+#endif
+        __sync_fetch_and_add(&cv_smallheap_page_count,1);
+#ifdef HOSTBOOT_DEBUG
     if(idx < SMALL_HEAP_PAGES_TRACKED)
         g_smallHeapPages[idx] = page;
 #endif
@@ -394,7 +396,7 @@ void HeapManager::_coalesce()
         cv_free_bytes += bucketByteSize(c->bucket) - 8;
         c = c_next;
     }
-    printkd("HeapMgr coalesced total %ld\n",cv_coalesce_count);
+    printkd("HeapMgr coalesced total %d\n",cv_coalesce_count);
     test_pages(); /*no effect*/ // BEAM fix.
 }
 
@@ -403,14 +405,14 @@ void HeapManager::stats()
     coalesce();        // collects some  of the stats
 
     printkd("Memory Heap Stats:\n");
-    printkd("  %d Large heap pages allocated.\n",g_big_chunks);
-    printkd("  %d Large heap max allocated.\n",g_bigheap_highwater);
-    printkd("  %d Small heap pages.\n",g_smallheap_pages);
+    printkd("  %d Large heap pages allocated.\n",cv_largeheap_page_count);
+    printkd("  %d Large heap max allocated.\n",cv_largeheap_page_max);
+    printkd("  %d Small heap pages.\n",cv_smallheap_page_count);
     printkd("  %d Small heap bytes max allocated\n",g_smallheap_alloc_hw);
     printkd("  %d Small heap bytes allocated in %d chunks\n",
            g_smallheap_allocated,g_smallheap_count);
-    printkd("  %ld Small heap free bytes in %ld chunks\n",cv_free_bytes,cv_free_chunks);
-    printkd("  %ld Small heap total chunks coalesced\n",cv_coalesce_count);
+    printkd("  %d Small heap free bytes in %d chunks\n",cv_free_bytes,cv_free_chunks);
+    printkd("  %d Small heap total chunks coalesced\n",cv_coalesce_count);
     printkd("Small heap bucket profile:\n");
     for(size_t i = 0; i < BUCKETS; ++i)
     {
@@ -429,7 +431,7 @@ void HeapManager::test_pages()
     for(size_t i = 0; i < BUCKETS; ++i)
         g_bucket_counts[i] = 0;
 
-    size_t max_idx = g_smallheap_pages;
+    size_t max_idx = cv_smallheap_page_count;
     if(max_idx > SMALL_HEAP_PAGES_TRACKED) max_idx = SMALL_HEAP_PAGES_TRACKED;
     for(size_t i = 0; i < max_idx; ++i)
     {
@@ -468,12 +470,10 @@ void* HeapManager::_allocateBig(size_t i_sz)
 {
     size_t pages = ALIGN_PAGE(i_sz)/PAGESIZE;
     void* v = PageManager::allocatePage(pages);
-#ifdef HOSTBOOT_DEBUG
-    //printk("HEAPAB %p:%ld:%ld wasted %ld\n",v,pages,i_sz, pages*PAGESIZE - i_sz);
-    __sync_add_and_fetch(&g_big_chunks,pages);
-    if(g_bigheap_highwater < g_big_chunks)
-        g_bigheap_highwater = g_big_chunks;
-#endif
+
+    __sync_add_and_fetch(&cv_largeheap_page_count,pages);
+    if(cv_largeheap_page_max < cv_largeheap_page_count)
+        cv_largeheap_page_max = cv_largeheap_page_count;
 
     // If already have unused big_chunk_t object available then use it
     // otherwise create a new one.
@@ -513,9 +513,8 @@ bool HeapManager::_freeBig(void* i_ptr)
     {
         if(bc->addr == i_ptr)
         {
-#ifdef HOSTBOOT_DEBUG
-            __sync_sub_and_fetch(&g_big_chunks,bc->page_count);
-#endif
+            __sync_sub_and_fetch(&cv_largeheap_page_count,bc->page_count);
+
             size_t page_count = bc->page_count;
             bc->page_count = 0;
             bc->addr = NULL;

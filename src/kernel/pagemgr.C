@@ -28,6 +28,7 @@
 #include <util/locked/pqueue.H>
 
 size_t PageManager::cv_coalesce_count = 0;
+size_t PageManager::cv_low_page_count = -1;
 
 void PageManager::init()
 {
@@ -67,6 +68,7 @@ PageManager::PageManager() : iv_pagesAvail(0), iv_pagesTotal(0)
     iv_pagesTotal = length;
     // Update statistics.
     __sync_add_and_fetch(&iv_pagesAvail, length);
+    cv_low_page_count = iv_pagesAvail;
 
     // Display.
     printk("Initializing PageManager with %zd pages starting at %lx...",
@@ -122,6 +124,10 @@ void* PageManager::_allocatePage(size_t n)
 
     // Update statistics.
     __sync_sub_and_fetch(&iv_pagesAvail, n);
+    if(iv_pagesAvail < cv_low_page_count)
+    {
+        cv_low_page_count = iv_pagesAvail;
+    }
 
     return page;
 }
@@ -237,6 +243,7 @@ void PageManager::_coalesce( void )
         }
     }
     printkd("PAGEMGR coalesced total %ld\n", cv_coalesce_count);
+    printkd("PAGEMGR low page count %ld\n",cv_low_page_count);
 }
 
 

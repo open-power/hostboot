@@ -211,8 +211,11 @@ class HeapManager
         Util::Lockfree::Stack<big_chunk_t> big_chunk_stack;  //!< big chunk dir
 
         static const size_t cv_chunk_size[BUCKETS];//!< The bucket sizes
-        static size_t cv_coalesce_count;       //!< coalesced chunk count
-        static size_t cv_free_bytes;           //!< Only valid after coalesce()
-        static size_t cv_free_chunks;          //!< Only valid after coalesce()
+        static uint32_t cv_coalesce_count;       //!< coalesced chunk count
+        static uint32_t cv_free_bytes;           //!< Only valid after coalesce()
+        static uint32_t cv_free_chunks;          //!< Only valid after coalesce()
+        static uint32_t cv_smallheap_page_count; //!< # of pages being used
+        static uint32_t cv_largeheap_page_count; //!< # of pages being used
+        static uint32_t cv_largeheap_page_max;   //!< Max # of pages used
 };
 #endif

@@ -39,6 +39,10 @@
 #include <util/align.H>
 #include <kernel/basesegment.H>
 
+// Track eviction requests due to aging pages
+uint32_t Block::cv_ro_evict_req = 0;
+uint32_t Block::cv_rw_evict_req = 0;
+
 Block::~Block()
 {
     // Release shadow PTE array.
@@ -356,6 +360,7 @@ void Block::castOutPages(uint64_t i_type)
                         this->removePages(VmmManager::EVICT,l_vaddr,
                                           PAGESIZE,NULL);
                         //printk("+");
+                        ++cv_rw_evict_req;
                     }
                 }
                 else  // ro and/or executable
@@ -366,6 +371,7 @@ void Block::castOutPages(uint64_t i_type)
                         l_vaddr = reinterpret_cast<void*>(page);
                         this->removePages(VmmManager::EVICT,l_vaddr,
                                           PAGESIZE,NULL);
+                        ++cv_ro_evict_req;
                     }
                 }
             }

@@ -295,6 +295,8 @@ class Block
             /** Pointer to message handler(write) */
         BlockWriteMsgHdlr* iv_writeMsgHdlr;
 
+        static uint32_t cv_ro_evict_req;   //!< memstat ro eviction requests
+        static uint32_t cv_rw_evict_req;   //!< memstat rw eviction requests
         /**
          * @brief Finish initialization of block.
          *

@@ -104,6 +104,7 @@ class PageManager
         uint64_t iv_pagesTotal;
 
         static size_t cv_coalesce_count;        //!< running coalesced counter
+        static size_t cv_low_page_count;        //!< lowest page count
 
         struct page_t
         {
