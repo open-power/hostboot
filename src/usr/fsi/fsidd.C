@@ -826,7 +826,7 @@ errlHndl_t FsiDD::write(const FsiAddrInfo_t& i_addrInfo,
         mutex_unlock(l_mutex);
     }
 
-    TRACDCOMP(g_trac_fsi, "< FsiDD::write() ", i_address);
+    //TRACDCOMP(g_trac_fsi, "< FsiDD::write() ", i_address); //TODO BUG!
 
     return l_err;
 }
@@ -1177,7 +1177,7 @@ errlHndl_t FsiDD::initPort(FsiChipInfo_t i_fsiInfo,
         if( !isSlavePresent(i_fsiInfo.master,i_fsiInfo.type,i_fsiInfo.port) )
         {
             TRACDCOMP( g_trac_fsi, "FsiDD::initPort> Slave %.8X is not present", i_fsiInfo.linkid.id );
-            TRACDCOMP( g_trac_fsi, " : sensebits=%.2X, portbit=%.2X", iv_slaves[getSlaveEnableIndex(i_fsiInfo.master,i_fsiInfo.type)], portbit );
+            //TRACDCOMP( g_trac_fsi, " : sensebits=%.2X, portbit=%.2X", iv_slaves[getSlaveEnableIndex(i_fsiInfo.master,i_fsiInfo.type)], portbit ); TODO BUG!!
             break;
         }
         TRACFCOMP( g_trac_fsi, "FsiDD::initPort> Slave %.8X is present", i_fsiInfo.linkid.id );

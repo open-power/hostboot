@@ -255,23 +255,15 @@ void Block::releaseAllPages()
         page += PAGESIZE)
     {
         ShadowPTE* pte = getPTE(page);
-        if (pte->isPresent() && (0 != pte->getPageAddr()))
+        if (pte->isPresent())
         {
-
-            // set the permission of the physical address pte entry back to writable now that
-            // the associated VA Spte has been released.
-            if (BaseSegment::mmSetPermission(reinterpret_cast<void*>(pte->getPageAddr()),
-                                         0, WRITABLE))
+            uint64_t addr = pte->getPageAddr();
+            if (0 != addr)
             {
-                printkd("Got an error trying to set permissions in release all pages\n");
+                releaseSPTE(pte);
+                PageManager::freePage(reinterpret_cast<void*>(addr));
             }
-
-
-            PageManager::freePage(reinterpret_cast<void*>(pte->getPageAddr()));
-
-            pte->setPresent(false);
-            pte->setPageAddr(NULL);
-	}
+        }
     }
 }
 
