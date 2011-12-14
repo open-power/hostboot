@@ -100,6 +100,7 @@ uint64_t FutexManager::_wake(uint64_t * i_addr, uint64_t i_count)
 
         task_t * wait_task = waiter->task;
         iv_list.erase(waiter);
+        delete waiter;
 
         // This means we had a waiter in the queue, but that waiter had
         // a Null task assigned to it.  This should NEVER happen

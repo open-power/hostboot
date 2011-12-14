@@ -40,6 +40,111 @@
 using namespace fapi;
 using namespace TARGETING;
 
+struct ifScom_t {
+    uint64_t addr;
+    uint64_t data;
+};
+
+struct hwpfTestArgs_t {
+    ifScom_t      ifScom;
+    fapi::Target  fapiTarget;
+    uint32_t      count;
+    tid_t	  tid;
+    struct {
+        uint64_t  Write:1;    // 1 = Write
+        uint64_t  AttrTest:1; // 1 = run Attr access test
+        uint64_t  ScomTest:1; // 1 = run Scom register access test
+    };
+};
+
+static const uint32_t ATTR_TEST_VALUE   = 10;
+static const uint32_t MAX_TEST_TASKS    = 30;
+static const uint32_t CREATE_TASK_PAIRS = 6;
+static const uint32_t MAX_TEST_COUNT    = 0x000001FF;
+
+/**
+ * @brief repeated Scom access and Attrubute access through Fapi until
+ *        MAX_TEST_COUNT accesses has been done or an error occurs.
+ */
+void testHwpScomAcc( void *i_phwpTestArgs )
+{
+    fapi::ReturnCode l_rc = fapi::FAPI_RC_SUCCESS;
+    ecmdDataBufferBase l_ScomData(64);
+
+    hwpfTestArgs_t * l_args = static_cast<hwpfTestArgs_t *>(i_phwpTestArgs);
+
+    // repeat as long as no error and in running mode until count reaches
+    // at MAX_TEST_COUNT or an error occurs
+    for (l_args->count = 0; l_args->count != MAX_TEST_COUNT; ++l_args->count)
+    {
+        if (l_args->Write)
+        {
+            if (l_args->ScomTest)
+            {
+                // set up ecmdDataBuffer with written data
+                l_ScomData.setDoubleWord(0, (l_args->ifScom).data);
+                l_rc = fapiPutScom( l_args->fapiTarget,
+                                    (l_args->ifScom).addr, l_ScomData );
+
+                if (l_rc != fapi::FAPI_RC_SUCCESS)
+                {
+                    TS_TRACE("testHwpScomAcc: Error from fapiPutScom");
+                    break;
+                }
+            }
+
+            if (l_args->AttrTest)
+            {
+                uint8_t l_uint8_1 = ATTR_TEST_VALUE;
+                l_rc = FAPI_ATTR_SET(ATTR_SCRATCH_UINT8_1, NULL, l_uint8_1);
+                if (l_rc != fapi::FAPI_RC_SUCCESS)
+                {
+                    TS_TRACE("testHwpScomAcc: ATTR_SCRATCH_UINT8_1. "
+                             "Error from SET");
+                    break;
+                }
+            }
+        }
+        else
+        {
+            if (l_args->ScomTest)
+            {
+                l_rc = fapiGetScom( l_args->fapiTarget,
+                                    (l_args->ifScom).addr, l_ScomData );
+                if (l_rc != fapi::FAPI_RC_SUCCESS)
+                {
+                    TS_TRACE("testHwpScomAcc: Error RC from fapiGetScom");
+                    break;
+                }
+                if ((l_args->ifScom).data != l_ScomData.getDoubleWord(0))
+                {
+                    (l_args->ifScom).data = l_ScomData.getDoubleWord(0);
+                    TS_TRACE("testHwpScomAcc: Error Data from fapiGetScom");
+                    break;
+                }
+            }
+
+            if (l_args->AttrTest)
+            {
+                uint8_t l_uint8_2 = 0xff;
+                l_rc = FAPI_ATTR_GET(ATTR_SCRATCH_UINT8_1, NULL, l_uint8_2);
+                if (l_rc != fapi::FAPI_RC_SUCCESS)
+                {
+                    TS_TRACE("testHwpScomAcc: ATTR_SCRATCH_UINT8_1."
+                            "  Error RC from GET");
+                    break;
+                }
+                if (l_uint8_2 != ATTR_TEST_VALUE)
+                {
+                    TS_TRACE("testHwpScomAcc: ATTR_SCRATCH_UINT8_1."
+                            " Error data %d from GET", l_uint8_2);
+                    break;
+                }
+            }
+        }
+    }
+}
+
 class HwpfTest: public CxxTest::TestSuite
 {
 public:
@@ -98,13 +203,15 @@ public:
         {
             // Delete the error rather than committing it to avoid it getting
             // interpreted as a real problem
-            TS_TRACE("testHwpf2: Unit Test passed. hwpTestError failed. Error deleted");
+            TS_TRACE("testHwpf2: Unit Test passed. "
+                     "hwpTestError failed. Error deleted");
             delete l_err;
             l_err = NULL;
         }
         else
         {
-            TS_FAIL("testHwpf2: Unit Test failed. hwpTestError passed. Error logged");
+            TS_FAIL("testHwpf2: Unit Test failed. "
+                    "hwpTestError passed. Error logged");
         }
     }
 
@@ -129,18 +236,20 @@ public:
 
         if (l_err)
         {
-            TS_FAIL("testHwpf3: Unit Test failed. hwpTestConfig failed. Error logged");
+            TS_FAIL("testHwpf3: Unit Test failed. "
+                    "hwpTestConfig failed. Error logged");
             errlCommit(l_err,HWPF_COMP_ID);
         }
         else
         {
-            TS_TRACE("testHwpf3: Unit Test passed. hwpTestConfig passed. Error logged");
+            TS_TRACE("testHwpf3: Unit Test passed. "
+                     "hwpTestConfig passed. Error logged");
         }
     }
 
     /**
-     * @brief Test HWPF Attributes: call a test procedure that exercises the FAPI
-     *        scratch attributes
+     * @brief Test HWPF Attributes: call a test procedure that exercises
+     *        the FAPI scratch attributes
      */
     void testHwpf4()
     {
@@ -150,17 +259,20 @@ public:
 
         if (l_err)
         {
-            TS_FAIL("testHwpf4: Unit Test failed. hwpTestAttributes failed. Error logged");
+            TS_FAIL("testHwpf4: Unit Test failed. "
+                    "hwpTestAttributes failed. Error logged");
             errlCommit(l_err,HWPF_COMP_ID);
         }
         else
         {
-            TS_TRACE("testHwpf4: Unit Test passed. hwpTestAttributes passed. Error logged");
+            TS_TRACE("testHwpf4: Unit Test passed. "
+                     "hwpTestAttributes passed. Error logged");
         }
     }
 
     /**
-     * @brief Test HWPF InitFile: call the procedure that exercises a sample initfile
+     * @brief Test HWPF InitFile: call the procedure that exercises a
+     *        sample initfile
      */
     void testHwpf5()
     {
@@ -184,10 +296,11 @@ public:
             /*
              * @todo
              * @VBU workaround
-             * All SCR reg addresses below are only supported from chip release 052 and beyond.
-             * Release 051, which is used by current VBU model, contain different addresses for
-             * these registers.
-             * Disable them for now, needs to re-enable them when VBU upgrade to use chip release 052
+             * All SCR reg addresses below are only supported from chip release
+             * 052 and beyond. Release 051, which is used by current VBU model,
+             * contain different addresses for these registers.
+             * Disable them for now, needs to re-enable them when VBU upgrade
+             * to use chip release 052
                         {0x0000000013013283, 0, 0x3c90000000000000 |
                                                 (0x8000000000000000 >> 0x0c) |
                                                 (0x8000000000000000 >> 0x0d) |
@@ -242,19 +355,23 @@ public:
 
             uint8_t l_uint8array1[32];
             l_uint8array1[2] = 1;
-            l_rc = FAPI_ATTR_SET(ATTR_SCRATCH_UINT8_ARRAY_1, NULL, l_uint8array1);
+            l_rc = FAPI_ATTR_SET(ATTR_SCRATCH_UINT8_ARRAY_1,
+                                                       NULL, l_uint8array1);
             if (l_rc != fapi::FAPI_RC_SUCCESS)
             {
-                TS_FAIL("testHwpf5: ATTR_SCRATCH_UINT8_ARRAY_1. Error from SET");
+                TS_FAIL("testHwpf5: ATTR_SCRATCH_UINT8_ARRAY_1. "
+                        " Error from SET");
                 break;
             }
 
             uint8_t l_uint8array2[2][3][4];
             l_uint8array2[1][2][3] = 0xBE;
-            l_rc = FAPI_ATTR_SET(ATTR_SCRATCH_UINT8_ARRAY_2, NULL, l_uint8array2);
+            l_rc = FAPI_ATTR_SET(ATTR_SCRATCH_UINT8_ARRAY_2,
+                                                       NULL, l_uint8array2);
             if (l_rc != fapi::FAPI_RC_SUCCESS)
             {
-                FAPI_IMP("testHwpf5: ATTR_SCRATCH_UINT8_ARRAY_2. Error from SET");
+                FAPI_IMP("testHwpf5: ATTR_SCRATCH_UINT8_ARRAY_2. "
+                         "Error from SET");
                 break;
             }
 
@@ -270,7 +387,8 @@ public:
             // Save original scom data to restore at end of test
             for (uint32_t i = 0; i < sizeof(l_ifScomData)/sizeof(ifScom_t); i++)
             {
-                l_rc = fapiGetScom(l_fapiTarget, l_ifScomData[i].addr, l_ScomData);
+                l_rc = fapiGetScom(l_fapiTarget, l_ifScomData[i].addr,
+                                                                   l_ScomData);
                 if (l_rc != fapi::FAPI_RC_SUCCESS)
                 {
                     TS_FAIL("testHwpf5: Error from fapiGetScom");
@@ -290,7 +408,8 @@ public:
             l_ScomData.setDoubleWord(0, 0ll);
             for (uint32_t i = 0; i < sizeof(l_ifScomData)/sizeof(ifScom_t); i++)
             {
-                l_rc = fapiPutScom(l_fapiTarget, l_ifScomData[i].addr, l_ScomData);
+                l_rc = fapiPutScom(l_fapiTarget, l_ifScomData[i].addr,
+                                                                   l_ScomData);
                 if (l_rc != fapi::FAPI_RC_SUCCESS)
                 {
                     TS_FAIL("testHwpf5: Error from fapiPutScom");
@@ -315,7 +434,8 @@ public:
             //Verify the data written
             for (uint32_t i = 0; i < sizeof(l_ifScomData)/sizeof(ifScom_t); i++)
             {
-                l_rc = fapiGetScom(l_fapiTarget, l_ifScomData[i].addr, l_ScomData);
+                l_rc = fapiGetScom(l_fapiTarget, l_ifScomData[i].addr,
+                                                                   l_ScomData);
                 if (l_rc != fapi::FAPI_RC_SUCCESS)
                 {
                     TS_FAIL("testHwpf5: Error from fapiGetScom");
@@ -324,8 +444,8 @@ public:
 
                 if (l_ScomData.getDoubleWord(0) != l_ifScomData[i].writtenData)
                 {
-                    TS_FAIL("testHwpf5: GetScom addr 0x%.16llX data read 0x%.16llX "
-                             "data expected 0x%.16llX",
+                    TS_FAIL("testHwpf5: GetScom addr 0x%.16llX "
+                            "data read 0x%.16llX data expected 0x%.16llX",
                              l_ifScomData[i].addr, l_ScomData.getDoubleWord(0),
                              l_ifScomData[i].writtenData);
                     l_rc = fapi::RC_HWP_EXEC_INITFILE_TEST_FAILED;
@@ -343,16 +463,18 @@ public:
             //uint32_t l_ecmdRc = ECMD_DBUF_SUCCESS;
             for (uint32_t i = 0; i < sizeof(l_ifScomData)/sizeof(ifScom_t); i++)
             {
-                l_ecmdRc = l_ScomData.setDoubleWord(0, l_ifScomData[i].origData);
+                l_ecmdRc = l_ScomData.setDoubleWord(0,l_ifScomData[i].origData);
                 if (l_ecmdRc != ECMD_DBUF_SUCCESS)
                 {
                     TS_FAIL("testHwpf5: fapiPutScom to restore, error from "
-                             "ecmdDataBuffer setDoubleWord() - rc 0x%.8X", l_ecmdRc);
+                            "ecmdDataBuffer setDoubleWord() - rc 0x%.8X",
+                            l_ecmdRc);
                     l_rc = l_ecmdRc;
                     break;
                 }
 
-                l_rc = fapiPutScom(l_fapiTarget, l_ifScomData[i].addr, l_ScomData);
+                l_rc = fapiPutScom(l_fapiTarget, l_ifScomData[i].addr,
+                                                                   l_ScomData);
                 if (l_rc != fapi::FAPI_RC_SUCCESS)
                 {
                     TS_FAIL("testHwpf5: Error from fapiGetScom");
@@ -375,10 +497,106 @@ public:
         }
         else
         {
-            TS_TRACE("testHwpf5: Unit Test passed. fapiHwpExecInitFile passed.");
+            TS_TRACE("testHwpf5: Unit Test passed. "
+                     "fapiHwpExecInitFile passed.");
         }
     }
 
+    /**
+     * @brief Test case for stressing the taskmgr, memory usage, and HWPF API
+     *        It starts (CREATE_TASK_PAIRS * 2) tasks.
+     */
+    void testHwpf6()
+    {
+        fapi::ReturnCode l_rc = fapi::FAPI_RC_SUCCESS;
+
+        // Get the sys target handle
+        TARGETING::Target* l_pTarget = NULL;
+        TARGETING::targetService().getTopLevelTarget(l_pTarget);
+
+        uint8_t l_vpoMode = 0;
+
+        if (l_pTarget &&
+            l_pTarget->tryGetAttr<TARGETING::ATTR_VPO_MODE>(l_vpoMode) &&
+            l_vpoMode == 0)
+        {
+            static const uint32_t NUM_OF_SCOMREGS = 6;
+            ifScom_t l_ifScom[NUM_OF_SCOMREGS] =
+            {
+                {0x000000000006002b, 0x0000000000000183},
+                {0x000000000006002c, 0x0000000000000183},
+                {0x000000000006800b, 0},
+                {0x000000000006800c, 0x8000000000000000 >> 0x17},
+                {0x0000000013010002, 0xAABBC00000000000},
+                {0x0000000013030007, 0x00000CDE00000000},
+            };
+
+            // Get the master processor chip
+            l_pTarget = NULL;
+            TARGETING::targetService().masterProcChipTargetHandle(l_pTarget);
+
+            // Create a FAPI Target of the master processor
+            fapi::Target l_fapiTarget(TARGET_TYPE_PROC_CHIP,
+                                          reinterpret_cast<void *> (l_pTarget));
+
+            hwpfTestArgs_t l_args[MAX_TEST_TASKS] = {{{0},},};
+
+            uint8_t l_index = 0;
+            uint32_t i;
+
+            for (i = 0; i < (CREATE_TASK_PAIRS * 2); i++)
+            {
+                // start one task
+                l_args[i].ifScom      = l_ifScom[l_index];
+                l_args[i].fapiTarget  = l_fapiTarget;
+                l_args[i].Write       = (i % 2) ? 0 : 1;
+                l_args[i].AttrTest    = 1;
+                l_args[i].ScomTest    = 1;
+                l_args[i].tid = task_create(testHwpScomAcc,
+                                            static_cast<void *>(&l_args[i]));
+                // Change ifScom register after a pair of tasks started
+                l_index = (i % 2) ? (l_index + 1) % NUM_OF_SCOMREGS : l_index;
+            }
+
+            int status;
+
+            for (i = 0; i < MAX_TEST_TASKS; i++)
+            {
+                if (l_args[i].ifScom.addr != 0)
+                {
+                    task_wait_tid( l_args[i].tid, &status,  NULL );
+                }
+            }
+
+            for (i = 0; i < NUM_OF_SCOMREGS; i++)
+            {
+                ecmdDataBufferBase l_ScomData(64);
+                l_rc = fapiGetScom( l_fapiTarget, l_ifScom[i].addr,
+                                                             l_ScomData );
+                if (l_rc != fapi::FAPI_RC_SUCCESS ||
+                    l_ScomData.getDoubleWord(0) != l_ifScom[i].data)
+                {
+                    TS_FAIL("testHwpf6: Scom register has unexpected data");
+                    break;
+                }
+            }
+
+            if (l_rc.ok() && i == NUM_OF_SCOMREGS)
+            {
+                uint8_t l_uint8 = 0;
+                l_rc = FAPI_ATTR_GET(ATTR_SCRATCH_UINT8_1, NULL, l_uint8);
+                if (l_rc != fapi::FAPI_RC_SUCCESS || l_uint8 != ATTR_TEST_VALUE)
+                {
+                    TS_FAIL("testHwpf6: ATTR_SCRATCH_UINT8_1"
+                             " has unexpected data");
+                }
+                else
+                {
+                    TS_TRACE("testHwpf6: Unit Test passed.");
+                }
+            }
+        }
+    }
 };
 
 #endif
