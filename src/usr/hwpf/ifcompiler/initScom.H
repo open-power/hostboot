@@ -27,6 +27,7 @@
 //                 mjjones  11/17/11 Output attribute listing
 //                 camvanng 12/12/11 Support multiple address ranges within a SCOM address
 //                                   Use strtoull vs strtoul for 32-bit platforms
+//                 camvanng 12/15/11 Support for multiple duplicate addresses setting different bits
 // End Change Log *********************************************************************************
 
 /**
@@ -140,6 +141,25 @@ namespace init
 
 
             uint64_t get_address(void) {return(strtoull(iv_scom_addr[0].c_str(),NULL,16));}
+
+            /**
+             * @brief Get the SCOM address
+             * @return iv_scom_addr_hex  the SCOM address
+             */
+            uint64_t get_address_hex(void) {return iv_scom_addr_hex;}
+
+            /**
+             * @brief Get the bit offset to start writing the SCOM data
+             * @return iv_scom_offset  the starting bit within the SCOM to write the data
+             */
+            uint32_t get_scom_offset(void) {return iv_scom_offset;}
+
+            /**
+             * @brief Get the total number of bits to write
+             * @return iv_scom_length  the number of bits to write
+             */
+            uint32_t get_scom_length(void) {return iv_scom_length;}
+
             // string name();
             string listing();
 
@@ -197,7 +217,7 @@ namespace init
     //  SpyList Class declarations
     //=================================================================================================
     // Container to track scoms
-    typedef map<uint64_t, init::Scom *> SCOM_LIST;
+    typedef multimap<uint64_t, init::Scom *> SCOM_LIST;
 
     class ScomList
     {

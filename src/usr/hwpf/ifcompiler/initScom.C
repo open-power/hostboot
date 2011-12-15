@@ -27,6 +27,7 @@
 //                 mjjones  11/17/11 Output attribute listing
 //                 camvanng 12/12/11 Support multiple address ranges within a SCOM address
 //                                   Use strtoull vs strtoul for 32-bit platforms
+//                 camvanng 12/15/11 Support for multiple duplicate addresses setting different bits
 // End Change Log *********************************************************************************
 
 /**
@@ -1222,11 +1223,87 @@ void ScomList::listing(BINSEQ & bin_seq,ostream & olist)
     {
         throw overflow_error("ERROR: ScomList::listing - iterator overflowed sequence");
     }
-    while(count--)
+
+    SCOM_LIST l_scom_list;
+    SCOM_LIST::const_iterator i;
+    pair<SCOM_LIST::const_iterator, SCOM_LIST::const_iterator> ret;
+    while (count --)
     {
-        Scom s(b,iv_symbols);
-        olist << s.listing() << endl;
+        Scom * s = new Scom(b,iv_symbols);
+        olist << s->listing() << endl;
+
+        uint64_t l_addr = s->get_address_hex();
+        //cout << "ScomList::listing: iv_scom_address_hex 0x" << hex << l_addr << endl;
+
+        //Check for duplicate scom statements
+        bool l_dup_scoms = false;
+        ret = l_scom_list.equal_range(l_addr);
+        if (ret.first != ret.second)
+        {
+            //cout << "ScomList::listing: Duplicate scom addresses found" << endl;
+
+            uint32_t l_length = s->get_scom_length();
+
+            //If writing all bits
+            if (l_length == 0)
+            {
+                l_dup_scoms = true;
+            }
+            else
+            {
+                uint32_t l_start = s->get_scom_offset();    //start bit
+                uint32_t l_end = l_start + l_length - 1;    //end bit
+                //cout << "ScomList::listing: offset " << dec << l_start
+                //     << " end " << l_end << " length " << l_length << endl;
+
+                //loop through all the matches and check for duplicate bits
+                for (i = ret.first; i != ret.second; ++i)
+                {
+                    uint32_t l_length2 = i->second->get_scom_length();
+
+                    //If writing all bits
+                    if (l_length2 == 0)
+                    {
+                        l_dup_scoms = true;
+                        break;
+                    }
+
+                    uint32_t l_start2 = i->second->get_scom_offset(); //start bit
+                    uint32_t l_end2 = l_start2 + l_length2 - 1;       //end bit
+                    //cout << "ScomList::listing: offset2 " << l_start2
+                    //     << " end2 " << l_end2 << " length2 " << l_length2 << endl;
+
+                    // check for duplicate bits
+                    if ((l_start <= l_end2) && (l_start2 <= l_end))
+                    {
+                        // ranges overlap
+                        l_dup_scoms = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (false == l_dup_scoms)
+        {
+            l_scom_list.insert(pair<uint64_t,Scom *>(l_addr, s));
+            //cout << "ScomList::listing: l_scom_list size " << l_scom_list.size() << endl;
+        }
+        else
+        {
+            ostringstream oss;
+            oss << "ScomList::listing: Duplicate scom statements found: "
+                   "Address 0x" << hex << l_addr << endl;
+            throw invalid_argument(oss.str());
+        }
     }
+
+    //Free memory
+    for (i = l_scom_list.begin(); i != l_scom_list.end(); ++i)
+    {
+        delete i->second;
+    }
+    l_scom_list.clear();
 
     dbg << "======================= End Listing ========================" << endl;
 }
@@ -1255,18 +1332,7 @@ string ScomList::fmt8(uint32_t val)
 void ScomList::insert(Scom * i_scom)
 {
     uint64_t l_addr = i_scom->get_address();
-    SCOM_LIST::iterator i = iv_scom_list.find(l_addr);
-    if(i == iv_scom_list.end())
-    {
-        iv_scom_list[l_addr] = i_scom;
-    }
-    else
-    {
-        ostringstream oss;
-        oss << "Duplicate scom statement found on line " << i_scom->get_line() << endl;
-        oss << "First instance found on line " << i->second->get_line() << "Address: " << i_scom->get_address() << endl;
-        yyerror(oss.str().c_str());
-    }
+    iv_scom_list.insert(pair<uint64_t, Scom *>(l_addr, i_scom));
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -1341,7 +1407,7 @@ void Scom::dup_scom_address(const string & i_scom_addr)
 
     if (iv_scom_addr.size() == 0)
     {
-        yyerror("No base scom address to dulicate for append!");
+        yyerror("No base scom address to duplicate!");
     }
 
     // cout << "I>Scom::dup_scom_address: "<< i_scom_addr << " is the output string!" << endl;
