@@ -762,8 +762,8 @@
 </attribute>
 
 <attribute>
-    <id>VPO_MODE</id>
-    <description>Are we running against the hardware simulator? 1=yes</description>
+    <id>IS_SIMULATION</id>
+    <description>env: 1 = Awan/HWSimulator. 0 = Simics/RealHW.</description>
     <simpleType>
         <uint8_t>
             <default>0</default>
@@ -771,6 +771,10 @@
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_IS_SIMULATION</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>

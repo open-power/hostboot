@@ -537,15 +537,15 @@ void    IStepDispatcher::singleStepISteps( void *  io_ptr )   const
         TARGETING::Target* sys = TARGETING::targetService().toTarget(syspath);
         uint8_t vpo_mode = 0;
         if( sys
-                && sys->tryGetAttr<TARGETING::ATTR_VPO_MODE>(vpo_mode)
-                && (vpo_mode == 0) )
-        {
-            nanosleep( SINGLESTEP_PAUSE_S, SINGLESTEP_PAUSE_NS );
-        }
-        else
+                && sys->tryGetAttr<TARGETING::ATTR_IS_SIMULATION>(vpo_mode)
+                && (vpo_mode == 1) )
         {
             // VBU delay per Patrick
             nanosleep(0,TEN_CTX_SWITCHES_NS);
+        }
+        else
+        {
+            nanosleep( SINGLESTEP_PAUSE_S, SINGLESTEP_PAUSE_NS );
         }
     }   //  endwhile
 

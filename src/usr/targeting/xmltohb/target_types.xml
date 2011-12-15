@@ -78,7 +78,7 @@
         <default>affinity:sys-0</default>
     </attribute>   
     <attribute>
-        <id>VPO_MODE</id>
+        <id>IS_SIMULATION</id>
         <default>0</default>
     </attribute> 
     <attribute>

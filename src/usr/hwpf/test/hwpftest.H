@@ -375,6 +375,18 @@ public:
                 break;
             }
 
+            uint8_t l_vpoMode;
+            l_rc = FAPI_ATTR_GET(ATTR_IS_SIMULATION, NULL, l_vpoMode);
+            if (l_rc != fapi::FAPI_RC_SUCCESS)
+            {
+                FAPI_IMP("testHwpf5: ATTR_IS_SIMULATION. Error from GET");
+                break;
+            }
+            else
+            {
+                //printk("VPO = %d\n", l_vpoMode);
+            }
+
             // Get the master processor chip
             TARGETING::Target* l_pTarget = NULL;
             TARGETING::targetService().masterProcChipTargetHandle(l_pTarget);
@@ -517,7 +529,7 @@ public:
         uint8_t l_vpoMode = 0;
 
         if (l_pTarget &&
-            l_pTarget->tryGetAttr<TARGETING::ATTR_VPO_MODE>(l_vpoMode) &&
+            l_pTarget->tryGetAttr<TARGETING::ATTR_IS_SIMULATION>(l_vpoMode) &&
             l_vpoMode == 0)
         {
             static const uint32_t NUM_OF_SCOMREGS = 6;

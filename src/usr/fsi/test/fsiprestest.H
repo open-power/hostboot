@@ -65,7 +65,7 @@ class FSIPresTest : public CxxTest::TestSuite
           TARGETING::Target* sys = TARGETING::targetService().toTarget(syspath);
           uint8_t vpo_mode = 0;
           if( sys
-              && sys->tryGetAttr<TARGETING::ATTR_VPO_MODE>(vpo_mode)
+              && sys->tryGetAttr<TARGETING::ATTR_IS_SIMULATION>(vpo_mode)
               && (vpo_mode == 1) )
           {
               return;
