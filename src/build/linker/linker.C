@@ -956,6 +956,7 @@ void ModuleTable::write_table(vector<Object> & i_objects)
             text_offset  = i->text.vma_offset + i->offset + i->base_addr;
             data_offset  = i->data.vma_offset + i->offset + i->base_addr;
             module_size  = i->data.vma_offset + i->data.size;
+            module_size  = page_align(module_size);
         }
         else // binary blob
         {
@@ -966,7 +967,7 @@ void ModuleTable::write_table(vector<Object> & i_objects)
             fclose(f);
         }
 
-        module_size = page_align(module_size)/4096;
+        //module_size = page_align(module_size)/4096;
 
         char data[sizeof(uint64_t)];
 

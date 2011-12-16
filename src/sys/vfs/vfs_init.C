@@ -28,6 +28,7 @@
 #include <kernel/console.H>
 #include <limits.h>
 #include <sys/mm.h>
+#include <util/align.H>
 
 VfsSystemModule VFS_MODULES[VFS_MODULE_MAX];
 uint64_t VFS_LAST_ADDRESS;
@@ -36,7 +37,7 @@ uint64_t VFS_LAST_ADDRESS;
 int vfs_module_perms(VfsSystemModule* module)
 {
     int rc = 0;
-    uint64_t memsize = (module->page_count*PAGESIZE);
+    uint64_t memsize = ALIGN_PAGE(module->byte_count);
     uint64_t textsize= (uint64_t)module->data - (uint64_t)module->text;
 
     uint64_t datasize = memsize - textsize;

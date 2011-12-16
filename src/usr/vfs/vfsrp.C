@@ -283,12 +283,12 @@ void VfsRp::_load_unload(msg_t * i_msg)
             }
 
             rc = mm_set_permission(module->text,
-                                   module->page_count*PAGESIZE,
+                                   ALIGN_PAGE(module->byte_count),
                                    NO_ACCESS);
 
             rc = mm_remove_pages(RELEASE,
                                  module->text,
-                                 module->page_count*PAGESIZE);
+                                 ALIGN_PAGE(module->byte_count));
         }
         if(rc)
         {
@@ -513,7 +513,7 @@ errlHndl_t VFS::module_address(const char * i_name, const char *& o_address, siz
     else
     {
         o_address = (const char *)vfs->data;
-        o_size = vfs->page_count * PAGESIZE;
+        o_size = vfs->byte_count;
     }
     return err;
 }
