@@ -39,6 +39,11 @@
 #include <hwpf/plat/fapiPlatAttributeService.H>
 #include <hwpf/plat/fapiPlatReasonCodes.H>
 
+// The following file checks at compile time that all HWPF attributes are
+// handled by Hostboot. This is done to ensure that the HTML file listing
+// supported HWPF attributes lists attributes handled by Hostboot
+#include <fapiAttributePlatCheck.H>
+
 //******************************************************************************
 // Implementation
 //******************************************************************************

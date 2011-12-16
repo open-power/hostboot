@@ -57,6 +57,12 @@ PLAT_ERROR_TAG_TARGET = fapiHwpReasonCodes.H
 # The FAPI attribute id file generated from Attribute XML files
 FAPI_ATTR_ID_TARGET = fapiAttributeIds.H
 
+# The FAPI attribute platform check file generated from Attribute XML files
+FAPI_ATTR_PLAT_CHECK_TARGET = fapiAttributePlatCheck.H
+
+# The FAPI attributes supported HTML file generated from Attribute XML files
+FAPI_ATTRS_SUPPORTED_TARGET = fapiAttributesSupported.html
+
 # The binary, list and attr files generated from Initfiles
 # Generation depends on ifcompiler and fapiAttributeIds.H
 HWP_IF_NAMES = $(notdir ${HWP_INITFILES})
@@ -78,6 +84,8 @@ GENFILES = ${IF_CMP_YACC_C_TARGET} \
            ${FAPI_ERROR_TARGETS} \
            ${PLAT_ERROR_TAG_TARGET} \
            ${FAPI_ATTR_ID_TARGET} \
+           ${FAPI_ATTR_PLAT_CHECK_TARGET} \
+           ${FAPI_ATTRS_SUPPORTED_TARGET} \
            ${HWP_IF_ALL_TARGETS} \
            ${FAPI_ATTR_IF_TARGET}
 
@@ -131,9 +139,11 @@ $(call GENTARGET, ${PLAT_ERROR_TAG_TARGET}) : \
 	$< $(dir $@) ${HWP_ERROR_XML_FILES}
 
 #------------------------------------------------------------------------------
-# The FAPI attribute id file generated from Attribute XML files
+# The FAPI attribute id file, the FAPI attribute platform check file and the
+# FAPI attributes supported file generated from Attribute XML files
 #------------------------------------------------------------------------------
-$(call GENTARGET, ${FAPI_ATTR_ID_TARGET}) : \
+$(call GENTARGET, ${FAPI_ATTR_ID_TARGET} ${FAPI_ATTR_PLAT_CHECK_TARGET} \
+                  ${FAPI_ATTRS_SUPPORTED_TARGET}) : \
         fapi/fapiParseAttributeInfo.pl ${HWP_ATTR_XML_FILES}
 	$< $(dir $@) ${HWP_ATTR_XML_FILES}
 

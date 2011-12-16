@@ -43,6 +43,7 @@
 #                  mjjones   08/24/11  Parse GARD info
 #                  mjjones   09/22/11  New Error Info Design
 #                  camvanng  10/20/11  Fix bug
+#                  mjjones   12/16/11  Improved usage statement
 #
 # End Change Log ******************************************************
 
@@ -92,7 +93,10 @@ if ($numArgs < 2)
 {
     print ("Usage: fapiParseErrorInfo.pl <output dir> <filename1> <filename2> ...\n");
     print ("  This perl script will parse HWP Error XML files and create\n");
-    print ("  required FAPI code\n");
+    print ("  the following files:\n");
+    print ("  - fapiHwpReturnCodes.H. HwpReturnCode enumeration (HWP generated errors)\n");
+    print ("  - fapiHwpErrorInfo.H.   Error information (used by FAPI_SET_HWP_ERROR\n");
+    print ("                          when a HWP generates an error)\n");
     exit(1);
 }
 
