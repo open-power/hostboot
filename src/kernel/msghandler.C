@@ -22,6 +22,7 @@
 //  IBM_PROLOG_END
 #include <assert.h>
 #include <errno.h>
+#include <util/locked/queue.H>
 #include <kernel/msghandler.H>
 #include <kernel/task.H>
 #include <kernel/cpu.H>
@@ -96,6 +97,11 @@ int MessageHandler::recvMessage(msg_t* i_msg)
     // Lock subsystem spinlock.
     if (iv_lock) iv_lock->lock();
 
+    // List of tasks to end due to errors.
+    //     Ending the task must happen outside of the spinlock due to
+    //     requirements of TaskManager::endTask.
+    Util::Locked::Queue<task_t> endTaskList;
+
     // Get <key, rc> from response.
     MessageHandler_Pending::key_type key =
         reinterpret_cast<MessageHandler_Pending::key_type>(i_msg->data[0]);
@@ -141,7 +147,7 @@ int MessageHandler::recvMessage(msg_t* i_msg)
             // Unsuccessful, unhandled response.  Kill task.
             printk("Unhandled msg rc %d for key %p on task %d @ %p\n",
                    msg_rc, key, deferred_task->tid, deferred_task->context.nip);
-            TaskManager::endTask(deferred_task, NULL, TASK_STATUS_CRASHED);
+            endTaskList.insert(deferred_task);
         }
         else if (CONTINUE_DEFER == rc)
         {
@@ -156,6 +162,11 @@ int MessageHandler::recvMessage(msg_t* i_msg)
 
     // Finished handling the response, unlock subsystem.
     if (iv_lock) iv_lock->unlock();
+
+    while(task_t* end_task = endTaskList.remove())
+    {
+        TaskManager::endTask(end_task, NULL, TASK_STATUS_CRASHED);
+    }
 
     // Release memory for message (created from sendMsg).
     delete(i_msg);

@@ -125,6 +125,9 @@ class TaskManager
          *  @param[in] t - The task to end.
          *  @param[in] retval - Return value from the task.
          *  @param[in] status - TASK_STATUS_* enumeration of how the task ended.
+         *
+         *  @note This function obtains the VMM-subsystem spinlock as part of
+         *        releasing the task stack.
          */
         static void endTask(task_t* t, void* retval, int status);
 

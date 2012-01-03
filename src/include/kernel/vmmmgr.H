@@ -200,6 +200,7 @@ class VmmManager
 
     public:
         friend class Block;
+        friend class StackSegment;
 
 };
 

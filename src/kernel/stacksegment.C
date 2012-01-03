@@ -149,6 +149,8 @@ void* StackSegment::_createStack(tid_t i_task)
 
 void StackSegment::_deleteStack(tid_t i_task)
 {
+    VmmManager::getLock()->lock();
+
     uint64_t l_addr_8mb = i_task * (8*MEGABYTE) + VMM_VADDR_STACK_SEGMENT;
 
     StackBlockNode* l_node = iv_blockList.find(l_addr_8mb);
@@ -158,6 +160,8 @@ void StackSegment::_deleteStack(tid_t i_task)
     l_node->block->releaseAllPages();
     delete l_node->block;
     delete l_node;
+
+    VmmManager::getLock()->unlock();
 
     return;
 }

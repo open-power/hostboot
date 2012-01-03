@@ -108,6 +108,8 @@ class StackSegment : public Segment
          * @brief Delete previously created stack for a task.
          *
          * @param i_task - Task ID of task owning the stack.
+         *
+         * @note This function obtains the VMM-subsystem spinlock.
          */
         static void deleteStack(tid_t i_task);
 
