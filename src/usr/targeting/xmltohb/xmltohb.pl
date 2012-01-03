@@ -230,7 +230,7 @@ sub validateSubElements {
 
     # print keys %{$element} . "\n";
     
-    for my $subElementName (keys %{$element})
+    for my $subElementName (sort(keys %{$element}))
     {
         if(!exists $criteria->{$subElementName})
         {
@@ -239,7 +239,7 @@ sub validateSubElements {
         }
     }
 
-    for my $subElementName (keys %{$criteria})
+    for my $subElementName (sort(keys %{$criteria}))
     {
         if(   ($criteria->{$subElementName}{required} == 1)
            && (!exists $element->{$subElementName}))
@@ -1184,7 +1184,7 @@ sub writeTraitFileTraits {
         {
             my $simpleType = $attribute->{simpleType};
             my $simpleTypeProperties = simpleTypeProperties();
-            for my $typeName (keys %{$simpleType}) 
+            for my $typeName (sort(keys %{$simpleType}))
             { 
                 if(exists $simpleTypeProperties->{$typeName})
                 {
@@ -1215,7 +1215,7 @@ sub writeTraitFileTraits {
             {     
                 fatal("Unsupported simpleType child element for "
                  . "attribute $attribute->{id}.  Keys are (" 
-                 . join(',',keys %{$simpleType}) . ")");
+                 . join(',',sort(keys %{$simpleType})) . ")");
             }
         }
         elsif(exists $attribute->{nativeType})
@@ -1540,7 +1540,7 @@ sub getAttributeDefault {
         {
             if(exists $attribute->{simpleType})
             {   
-                for my $type (keys %{$simpleTypeProperties}) 
+                for my $type (sort(keys %{$simpleTypeProperties}))
                 {
                     # Note: must check for 'type' before 'default', otherwise
                     # might add value to the hash
@@ -2006,7 +2006,7 @@ sub packAttribute {
         my $simpleType = $attribute->{simpleType};
         my $simpleTypeProperties = simpleTypeProperties();
 
-        for my $typeName (keys %{$simpleType})
+        for my $typeName (sort(keys %{$simpleType}))
         {   
             if(exists $simpleTypeProperties->{$typeName})
             {
@@ -2068,7 +2068,7 @@ sub packAttribute {
         if( (length $binaryData) < 1)
         {
             fatal("Error requested simple type not supported.  Keys are ("
-                . join(',',keys %{$simpleType}) . ")");
+                . join(',',sort(keys %{$simpleType})) . ")");
         }
     }
     elsif(exists $attribute->{complexType})
@@ -2188,7 +2188,7 @@ sub writeTargetingImage {
 
         # Serialize per target type attribute list
         my $perTargetTypeAttrBinData;
-        for my $attributeId (keys %attrhash) 
+        for my $attributeId (sort(keys %attrhash))
         {
             $perTargetTypeAttrBinData .= packEnumeration(
                 $attributeIdEnumeration,
@@ -2318,7 +2318,7 @@ sub writeTargetingImage {
             }
         }
 
-        for my $attributeId (keys %attrhash) 
+        for my $attributeId (sort(keys %attrhash))
         {
             foreach my $attributeDef (@{$attributes->{attribute}})
             {
@@ -2533,15 +2533,6 @@ sub writeTargetingImage {
     print $outFile $heapPnorInitBinData;
     print $outFile pack("@".($sectionHoH{heapPnorInit}{size} 
         - $heapPnorInitOffset));
-
-    # Serialize 0 initiated heap section to multiple of 4k page size (pad if
-    # necessary)
-    #@TODO: Once host boot support 0 initialization of heap pages for targeting,
-    # remove the contents of this section, since it will be a "virtual" section.
-    # Until then, zero out the section and map it into memory
-    print $outFile pack("@".(length $heapZeroInitBinData));
-    print $outFile pack("@".($sectionHoH{heapZeroInit}{size} 
-        - $heapZeroInitOffset));
 } 
 
 __END__

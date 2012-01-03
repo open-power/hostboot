@@ -423,7 +423,90 @@
         <id>TYPE</id>
         <default>MBA</default>
     </attribute>
-    <attribute><id>MSS_EFF_PRIMARY_RANK</id></attribute>   
+    <attribute><id>MSS_DIMM_MFG_ID_CODE</id></attribute>
+    <attribute><id>EFF_DIMM_RANKS_CONFIGED</id></attribute>
+    <attribute><id>EFF_NUM_RANKS_PER_DIMM</id></attribute>
+    <attribute><id>EFF_DIMM_TYPE</id></attribute>
+    <attribute><id>EFF_DRAM_WIDTH</id></attribute>
+    <attribute><id>EFF_DRAM_GEN</id></attribute>
+    <attribute><id>EFF_PRIMARY_RANK_GROUP0</id></attribute>
+    <attribute><id>EFF_PRIMARY_RANK_GROUP1</id></attribute>
+    <attribute><id>EFF_PRIMARY_RANK_GROUP2</id></attribute>
+    <attribute><id>EFF_PRIMARY_RANK_GROUP3</id></attribute>
+    <attribute><id>EFF_SECONDARY_RANK_GROUP0</id></attribute>
+    <attribute><id>EFF_SECONDARY_RANK_GROUP1</id></attribute>
+    <attribute><id>EFF_SECONDARY_RANK_GROUP2</id></attribute>
+    <attribute><id>EFF_SECONDARY_RANK_GROUP3</id></attribute>
+    <attribute><id>EFF_TERTIARY_RANK_GROUP0</id></attribute>
+    <attribute><id>EFF_TERTIARY_RANK_GROUP1</id></attribute>
+    <attribute><id>EFF_TERTIARY_RANK_GROUP2</id></attribute>
+    <attribute><id>EFF_TERTIARY_RANK_GROUP3</id></attribute>
+    <attribute><id>EFF_QUATERNARY_RANK_GROUP0</id></attribute>
+    <attribute><id>EFF_QUATERNARY_RANK_GROUP1</id></attribute>
+    <attribute><id>EFF_QUATERNARY_RANK_GROUP2</id></attribute>
+    <attribute><id>EFF_QUATERNARY_RANK_GROUP3</id></attribute>
+    <attribute><id>EFF_ODT_RD</id></attribute>
+    <attribute><id>EFF_ODT_WR</id></attribute>
+    <attribute><id>EFF_DRAM_RON</id></attribute>
+    <attribute><id>EFF_DRAM_RTT_NOM</id></attribute>
+    <attribute><id>EFF_DRAM_RTT_WR</id></attribute>
+    <attribute><id>EFF_DRAM_WR_VREF</id></attribute>
+    <attribute><id>EFF_CEN_DRV_IMP_DQ_DQS</id></attribute>
+    <attribute><id>EFF_CEN_DRV_IMP_CMD</id></attribute>
+    <attribute><id>EFF_CEN_DRV_IMP_CNTL</id></attribute>
+    <attribute><id>EFF_CEN_RCV_IMP_DQ_DQS</id></attribute>
+    <attribute><id>EFF_CEN_SLEW_RATE_DQ</id></attribute>
+    <attribute><id>EFF_CEN_SLEW_RATE_DQS</id></attribute>
+    <attribute><id>EFF_CEN_SLEW_RATE_CMD</id></attribute>
+    <attribute><id>EFF_CEN_SLEW_RATE_CNTL</id></attribute>
+    <attribute><id>EFF_CEN_RD_VREF</id></attribute>
+    <attribute><id>EFF_DIMM_SIZE</id></attribute>
+    <attribute><id>EFF_DRAM_BANKS</id></attribute>
+    <attribute><id>EFF_DRAM_ROWS</id></attribute>
+    <attribute><id>EFF_DRAM_COLS</id></attribute>
+    <attribute><id>EFF_DRAM_DENSITY</id></attribute>
+    <attribute><id>EFF_DRAM_TRCD</id></attribute>
+    <attribute><id>EFF_DRAM_TRRD</id></attribute>
+    <attribute><id>EFF_DRAM_TRP</id></attribute>
+    <attribute><id>EFF_DRAM_TRAS</id></attribute>
+    <attribute><id>EFF_DRAM_TRC</id></attribute>
+    <attribute><id>EFF_DRAM_TRFC</id></attribute>
+    <attribute><id>EFF_DRAM_TWTR</id></attribute>
+    <attribute><id>EFF_DRAM_TRTP</id></attribute>
+    <attribute><id>EFF_DRAM_TFAW</id></attribute>
+    <attribute><id>EFF_DRAM_BL</id></attribute>
+    <attribute><id>EFF_DRAM_CL</id></attribute>
+    <attribute><id>EFF_DRAM_AL</id></attribute>
+    <attribute><id>EFF_DRAM_CWL</id></attribute>
+    <attribute><id>EFF_DRAM_RBT</id></attribute>
+    <attribute><id>EFF_DRAM_TM</id></attribute>
+    <attribute><id>EFF_DRAM_DLL_RESET</id></attribute>
+    <attribute><id>EFF_DRAM_WR</id></attribute>
+    <attribute><id>EFF_DRAM_DLL_PPD</id></attribute>
+    <attribute><id>EFF_DRAM_DLL_ENABLE</id></attribute>
+    <attribute><id>EFF_DRAM_TDQS</id></attribute>
+    <attribute><id>EFF_DRAM_WR_LVL_ENABLE</id></attribute>
+    <attribute><id>EFF_DRAM_OUTPUT_BUFFER</id></attribute>
+    <attribute><id>EFF_DRAM_PASR</id></attribute>
+    <attribute><id>EFF_DRAM_ASR</id></attribute>
+    <attribute><id>EFF_DRAM_SRT</id></attribute>
+    <attribute><id>EFF_MPR_LOC</id></attribute>
+    <attribute><id>EFF_MPR_MODE</id></attribute>
+    <attribute><id>EFF_DIMM_RCD_CNTL_WORD_0_15</id></attribute>
+    <attribute><id>MSS_THROTTLE_NUMERATOR</id></attribute>
+    <attribute><id>MSS_THROTTLE_DENOMINATOR</id></attribute>
+    <attribute><id>MSS_THROTTLE_CHANNEL_NUMERATOR</id></attribute>
+    <attribute><id>MSS_THROTTLE_CHANNEL_DENOMINATOR</id></attribute>
+    <attribute><id>MSS_WATT_TARGET</id></attribute>
+    <attribute><id>MSS_POWER_SLOPE</id></attribute>
+    <attribute><id>MSS_POWER_INT</id></attribute>
+    <attribute><id>MSS_DIMM_MAXBANDWIDTH_GBS</id></attribute>
+    <attribute><id>MSS_DIMM_MAXBANDWIDTH_MRS</id></attribute>
+    <attribute><id>MSS_CHANNEL_MAXBANDWIDTH_GBS</id></attribute>
+    <attribute><id>MSS_CHANNEL_MAXBANDWIDTH_MRS</id></attribute>
+    <attribute><id>MSS_DIMM_MAXPOWER</id></attribute>
+    <attribute><id>MSS_CHANNEL_MAXPOWER</id></attribute>
+    <attribute><id>MSS_MEMSIZE_MBA</id></attribute>
 </targetType>
 
 <targetType>
@@ -433,6 +516,7 @@
         <id>TYPE</id>
         <default>MCS</default>
     </attribute>
+    <attribute><id>MSS_MEMSIZE</id></attribute>
 </targetType>
 
 <targetType>
@@ -560,6 +644,8 @@
             <field><id>engine</id><value>0</value></field>
         </default>
     </attribute>
+    <attribute><id>MSS_VOLT</id></attribute>
+    <attribute><id>MSS_FREQ</id></attribute>
 </targetType>
 
 <!-- Centaur MBS -->

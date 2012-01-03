@@ -331,7 +331,7 @@ errlHndl_t PnorRP::readTOC()
     iv_TOC[PNOR::SIDE_A][PNOR::TOC].size = 8 + 8 + PNOR::NUM_SECTIONS*sizeof(TOCEntry_t);
     iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].size = 700*KILOBYTE; //700K
     iv_TOC[PNOR::SIDE_A][PNOR::GLOBAL_DATA].size = PAGESIZE; //4K
-    iv_TOC[PNOR::SIDE_A][PNOR::HB_DATA].size = 128*KILOBYTE; //128K
+    iv_TOC[PNOR::SIDE_A][PNOR::HB_DATA].size = 512*KILOBYTE; //512K
 
     // fake PNOR will look like this:  TOC::HB_EXT_CODE:GLOBAL_DATA:HB_DATA
     // virtual addresses
@@ -576,7 +576,7 @@ errlHndl_t PnorRP::writeToDevice( uint64_t i_offset,
                                                     DEVICE_PNOR_ADDRESS(i_chip,i_offset) );
         if( l_errhdl )
         {
-            TRACFCOMP(g_trac_pnor, "PnorRP::readFromDevice> Error from device : RC=%X", l_errhdl->reasonCode() );
+            TRACFCOMP(g_trac_pnor, "PnorRP::writeToDevice> Error from device : RC=%X", l_errhdl->reasonCode() );
             break;
         }
     } while(0);

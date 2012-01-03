@@ -133,7 +133,7 @@ namespace TARGETING
             void*    pAddr = reinterpret_cast<void*>(msg->data[1]);
 
             TRACFCOMP(g_trac_targeting, INFO_MRK "AttrRP: Message recv'd: "
-                      "%d, %lx %p", msg->type, vAddr, pAddr);
+                      "0x%x, 0x%lx 0x%p", msg->type, vAddr, pAddr);
 
             // Locate corresponding attribute section for message.
             ssize_t section = -1;
@@ -329,8 +329,8 @@ namespace TARGETING
                                              l_section->sectionOffset;
                 iv_sections[i].size = l_section->sectionSize;
 
-                TRACDCOMP(g_trac_targeting,
-                          "Decoded Attribute Section: %d, %lx %lx %d",
+                TRACFCOMP(g_trac_targeting,
+                          "Decoded Attribute Section: %d, 0x%lx 0x%lx 0x%lx",
                           iv_sections[i].type,
                           iv_sections[i].vmmAddress,
                           iv_sections[i].pnorAddress,

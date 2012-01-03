@@ -46,7 +46,8 @@ XMLTOHB_TARGETS = \
 XMLTOHB_GENERIC_SOURCES = attribute_types.xml target_types.xml
 
 XMLTOHB_FAPIATTR_SOURCES = \
-    ${ROOTPATH}/src/usr/hwpf/hwp/fapiHwpAttributeInfo.xml
+    ${ROOTPATH}/src/usr/hwpf/hwp/fapiHwpAttributeInfo.xml \
+    ${ROOTPATH}/src/usr/hwpf/hwp/memory_attributes.xml
 
 VMM_CONSTS_FILE = \
     ${ROOTPATH}/src/include/usr/vmmconst.h
@@ -57,7 +58,7 @@ EXTRA_PARTS = $(addprefix $(IMGDIR)/, $(XMLTOHB_SYSTEM_BINARIES))
 
 EXTRA_CLEAN = $(addprefix $(GENDIR)/, ${XMLTOHB_SYSTEM_BINARIES}) \
 	      $(addprefix $(GENDIR)/, ${XMLTOHB_SYSTEM_BINARIES:.bin=.xml}) \
-              ${GENDIR}/generic.xml
+              ${GENDIR}/generic.xml ${GENDIR}/fapiattrs.xml
 
 include ${ROOTPATH}/config.mk
 
@@ -71,12 +72,15 @@ ${EXTRA_PARTS}: ${IMGDIR}/% : ${GENDIR}/%
 ${GENDIR}/generic.xml: ${XMLTOHB_GENERIC_SOURCES}
 	./mergexml.sh $^ > $@
 
+# merge all FAPI attribute files into one
+${GENDIR}/fapiattrs.xml: ${XMLTOHB_FAPIATTR_SOURCES}
+	./mergexml.sh $^ > $@
+
 # create the header files, only needs generic xml
 $(call GENTARGET,$(XMLTOHB_TARGETS)) : \
-		xmltohb.pl ${GENDIR}/generic.xml ${XMLTOHB_FAPIATTR_SOURCES}
+		xmltohb.pl ${GENDIR}/generic.xml ${GENDIR}/fapiattrs.xml
 	./$< $(addprefix --hb-xml-file=,${GENDIR}/generic.xml) \
-	     $(addprefix --fapi-attributes-xml-file=,\
-			 ${XMLTOHB_FAPIATTR_SOURCES}) \
+	     $(addprefix --fapi-attributes-xml-file=,${GENDIR}/fapiattrs.xml) \
 	     --src-output-dir=$(dir $@) --img-output-dir=none \
 	     --img-output-file=none
 
@@ -85,14 +89,10 @@ ${GENDIR}/%.hb.xml: %.system.xml ${XMLTOHB_GENERIC_SOURCES}
 	./mergexml.sh $^ > $@
 
 # create the binary files
-${GENDIR}/%_targeting.bin: xmltohb.pl ${GENDIR}/%.hb.xml ${XMLTOHB_FAPIATTR_SOURCES} ${VMM_CONSTS_FILE}
+${GENDIR}/%_targeting.bin: xmltohb.pl ${GENDIR}/%.hb.xml ${GENDIR}/fapiattrs.xml ${VMM_CONSTS_FILE}
 	./$< $(addprefix --hb-xml-file=,${GENDIR}/$*.hb.xml) \
-	     $(addprefix --fapi-attributes-xml-file=,\
-			 ${XMLTOHB_FAPIATTR_SOURCES}) \
+	     $(addprefix --fapi-attributes-xml-file=,${GENDIR}/fapiattrs.xml) \
 	     --src-output-dir=none --img-output-dir=$(dir $@) \
 	     --img-output-file=$(notdir $@) \
          --vmm-consts-file=$(VMM_CONSTS_FILE)
-
-
-
 

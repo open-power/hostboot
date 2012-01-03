@@ -31,7 +31,8 @@ SUBDIRS = fapi.d hwp.d plat.d test.d
 # Source XML files
 #------------------------------------------------------------------------------
 HWP_ERROR_XML_FILES = hwp/fapiHwpErrorInfo.xml
-HWP_ATTR_XML_FILES = hwp/fapiHwpAttributeInfo.xml
+HWP_ATTR_XML_FILES = hwp/fapiHwpAttributeInfo.xml \
+                     hwp/memory_attributes.xml
 
 #------------------------------------------------------------------------------
 # Initfiles

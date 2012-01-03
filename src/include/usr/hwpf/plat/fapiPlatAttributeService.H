@@ -102,7 +102,7 @@ namespace platAttrSvc
      *      attribute to the equivalent host boot request 
      */
     #define FAPI_PLAT_ATTR_SVC_GETMACRO_DIRECT(ID, PTARGET, VAL) \
-        ( ((PTARGET) ? \
+        ( ((PTARGET > 0) ? \
             static_cast<TARGETING::Target*>( \
                 static_cast<const fapi::Target*>(PTARGET)->get()) \
         : fapi::platAttrSvc::getSystemTarget())->tryGetAttr< \
@@ -114,7 +114,7 @@ namespace platAttrSvc
      *      attribute to the equivalent host boot request 
      */
     #define FAPI_PLAT_ATTR_SVC_SETMACRO_DIRECT(ID, PTARGET, VAL) \
-        ( ((PTARGET) ? \
+        ( ((PTARGET > 0) ? \
             static_cast<TARGETING::Target*>( \
                 static_cast<const fapi::Target*>(PTARGET)->get()) \
         : fapi::platAttrSvc::getSystemTarget())->trySetAttr< \

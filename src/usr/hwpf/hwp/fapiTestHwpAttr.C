@@ -45,6 +45,9 @@
  */
 
 #include <fapiTestHwpAttr.H>
+#include <targeting/targetservice.H>
+#include <targeting/predicates/predicatectm.H>
+#include <targeting/iterators/rangefilter.H>
 
 extern "C"
 {
@@ -55,12 +58,42 @@ extern "C"
 fapi::ReturnCode hwpTestAttributes()
 {
     FAPI_INF("hwpTestAttributes: Start HWP");
-
-    // Attempt to call the attribute get/set macros for the scratch attributes
     fapi::ReturnCode l_rc;
 
     do
     {
+        //----------------------------------------------------------------------
+        // Test ATTR_MSS_DIMM_MFG_ID_CODE
+        //----------------------------------------------------------------------
+        {
+            uint32_t l_data[2][2];
+
+            TARGETING::PredicateCTM l_pred(TARGETING::CLASS_UNIT, TARGETING::TYPE_MBA);
+            TARGETING::TargetRangeFilter l_filter(TARGETING::targetService().begin(),
+                                                  TARGETING::targetService().end(),
+                                                  &l_pred);
+
+            // Just look at the first MBA chiplet
+            if (l_filter)
+            {
+                fapi::Target l_target(fapi::TARGET_TYPE_MBA_CHIPLET, *l_filter); 
+
+                l_rc = FAPI_ATTR_GET(ATTR_MSS_DIMM_MFG_ID_CODE, &l_target, l_data);
+
+                if (l_rc)
+                {
+                    FAPI_ERR("hwpTestAttributes: ATTR_MSS_DIMM_MFG_ID_CODE. Error from GET");
+                    break;
+                }
+            }
+            else
+            {
+                FAPI_ERR("hwpTestAttributes: ATTR_MSS_DIMM_MFG_ID_CODE. No MBAs found");
+                FAPI_SET_HWP_ERROR(l_rc, RC_HWP_ATTR_UNIT_TEST_FAIL);
+                break;
+            }
+        }
+
         //----------------------------------------------------------------------
         // Test ATTR_SCRATCH_UINT8_1
         //----------------------------------------------------------------------

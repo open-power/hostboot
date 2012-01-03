@@ -22,5 +22,5 @@
 #
 #  IBM_PROLOG_END
 echo "<attributes>" 
-cat $* | grep -v "attributes" | grep -v "</attributes>" 
+cat $* | grep -v "<attributes>" | grep -v "</attributes>" 
 echo "</attributes>" 

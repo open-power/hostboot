@@ -1,0 +1,1231 @@
+<!--  IBM_PROLOG_BEGIN_TAG
+     This is an automatically generated prolog.
+   
+     $Source: src/usr/hwpf/hwp/memory_attributes.xml $
+   
+     IBM CONFIDENTIAL
+   
+     COPYRIGHT International Business Machines Corp. 2012
+   
+     p1
+   
+     Object Code Only (OCO) source materials
+     Licensed Internal Code Source Materials
+     IBM HostBoot Licensed Internal Code
+   
+     The source code for this program is not published or other-
+     wise divested of its trade secrets, irrespective of what has
+     been deposited with the U.S. Copyright Office.
+   
+     Origin: 30
+   
+     IBM_PROLOG_END -->
+<attributes>
+
+<attribute>
+    <id>ATTR_MSS_VOLT</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>DRAM Voltage, each voltage rail would need to have a value.  Computed in mss_volt C code - in millivolts
+creator: mss_volt
+consumer: mss_eff_cnfg, others
+firmware notes: none</description>
+    <valueType>uint32</valueType>
+    <writeable/>
+    <odmVisable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MSS_FREQ</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>Frequency of this memory channel in MHz, comprising of three DIMMs.  Computed in mss_freq
+creator: mss_freq
+consumer: mss_eff_cnfg, others
+firmware notes: none</description>
+    <valueType>uint32</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <persistRuntime/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MSS_DIMM_MFG_ID_CODE</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Manufacturer ID Code RCD: bits(31:16), Module: bits(15:0)</description>
+    <valueType>uint32</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_DIMM_RANKS_CONFIGED</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Bit wise representation of master ranks in each DIMM that are used for reads and writes. Used in various locations and is computed in mss_eff_cnfg. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+creator: mss_eff_cnfg
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2 2</array>
+    <persistRuntime/>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_NUM_RANKS_PER_DIMM</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Number of ranks in each DIMM. Used in various locations and is computed in mss_eff_cnfg. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+creator: mss_eff_cnfg
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2 2</array>
+    <persistRuntime/>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_DIMM_TYPE</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Type of DIMM: CDIMM, RDIMM, UDIMM, LRDIMM. Used in various locations and is computed in mss_eff_cnfg. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+creator: mss_eff_cnfg
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <enum>CDIMM = 0, RDIMM = 1, UDIMM = 2, LRDIMM = 3,</enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <persistRuntime/>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_DRAM_WIDTH</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>DRAM Device Width: X4, X8, X16, X32. Used in various locations and is computed in mss_eff_cnfg.
+creator: mss_eff_cnfg
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <enum>X4 = 0, X8 = 1, X16 = 2, X32 = 3, </enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_DRAM_GEN</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Generation of memory: DDR3, DDR4. Used in various locations and is computed in mss_eff_cnfg.
+creator: mss_eff_cnfg
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <enum>EMPTY = 0, DDR3 = 1, DDR4 = 2,</enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_PRIMARY_RANK_GROUP0</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+creator: mss_eff_cnfg_rank_group
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <enum>INVALID = 255,</enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_PRIMARY_RANK_GROUP1</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+creator: mss_eff_cnfg_rank_group
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <enum>INVALID = 255,</enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_PRIMARY_RANK_GROUP2</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+creator: mss_eff_cnfg_rank_group
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <enum>INVALID = 255,</enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_PRIMARY_RANK_GROUP3</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+creator: mss_eff_cnfg_rank_group
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <enum>INVALID = 255,</enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_SECONDARY_RANK_GROUP0</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+creator: mss_eff_cnfg_rank_group
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <enum>INVALID = 255,</enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_SECONDARY_RANK_GROUP1</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+creator: mss_eff_cnfg_rank_group
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <enum>INVALID = 255,</enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_SECONDARY_RANK_GROUP2</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+creator: mss_eff_cnfg_rank_group
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <enum>INVALID = 255,</enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_SECONDARY_RANK_GROUP3</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+creator: mss_eff_cnfg_rank_group
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <enum>INVALID = 255,</enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_TERTIARY_RANK_GROUP0</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+creator: mss_eff_cnfg_rank_group
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <enum>INVALID = 255,</enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_TERTIARY_RANK_GROUP1</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+creator: mss_eff_cnfg_rank_group
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <enum>INVALID = 255,</enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_TERTIARY_RANK_GROUP2</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+creator: mss_eff_cnfg_rank_group
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <enum>INVALID = 255,</enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_TERTIARY_RANK_GROUP3</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+creator: mss_eff_cnfg_rank_group
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <enum>INVALID = 255,</enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_QUATERNARY_RANK_GROUP0</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+creator: mss_eff_cnfg_rank_group
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <enum>INVALID = 255,</enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_QUATERNARY_RANK_GROUP1</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+creator: mss_eff_cnfg_rank_group
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <enum>INVALID = 255,</enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_QUATERNARY_RANK_GROUP2</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+creator: mss_eff_cnfg_rank_group
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <enum>INVALID = 255,</enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_QUATERNARY_RANK_GROUP3</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+creator: mss_eff_cnfg_rank_group
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <enum>INVALID = 255,</enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_ODT_RD</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Read ODT. Used in various locations and is computed in mss_eff_cnfg_termination. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+creator: mss_eff_cnfg_termination
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2 2 4</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_ODT_WR</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Write ODT. Used in various locations and is computed in mss_eff_cnfg_termination. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+creator: mss_eff_cnfg_termination
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2 2 4</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_DRAM_RON</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>DRAM Ron. Used in various locations and is computed in mss_eff_cnfg_termination. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+creator: mss_eff_cnfg_termination
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <enum>OHM34 = 34, OHM40 = 40,</enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_DRAM_RTT_NOM</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>DRAM Rtt_Nom. Used in various locations and is computed in mss_eff_cnfg_termination. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+creator: mss_eff_cnfg_termination
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <enum>DISABLED = 0, OHM20 = 20, OHM30 = 30, OHM34 = 34, OHM40 = 40, OHM48 = 48, OHM60 = 60, OHM80 = 80, OHM120 = 120, OHM240 = 240,</enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2 2 4</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_DRAM_RTT_WR</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>DRAM Rtt_WR. Used in various locations and is computed in mss_eff_cnfg_termination. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+creator: mss_eff_cnfg_termination
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <enum>DISABLED = 0, OHM60 = 60, OHM120 = 120,</enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2 2 4</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_DRAM_WR_VREF</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>DRAM Write Vref. Used in various locations and is computed in mss_eff_cnfg_termination. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+creator: mss_eff_cnfg_termination
+consumer: various
+firmware notes: none</description>
+    <valueType>uint32</valueType>
+    <enum>VDD420 = 420, VDD425 = 425, VDD430 = 430, VDD435 = 435, VDD440 = 440, VDD445 = 445, VDD450 = 450, VDD455 = 455, VDD460 = 460, VDD465 = 465, VDD470 = 470, VDD475 = 475, VDD480 = 480, VDD485 = 485, VDD490 = 490, VDD495 = 495, VDD500 = 500, VDD505 = 505, VDD510 = 510, VDD515 = 515, VDD520 = 520, VDD525 = 525, VDD530 = 530, VDD535 = 535, VDD540 = 540, VDD545 = 545, VDD550 = 550, VDD555 = 555, VDD560 = 560, VDD565 = 565, VDD570 = 570, VDD575 = 575</enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_DRV_IMP_DQ_DQS</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Centaur DQ and DQS Drive Impedance Used in various locations and is computed in mss_eff_cnfg_termination. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+creator: mss_eff_cnfg_termination
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <enum>OHM24 = 24, OHM30 = 30, OHM34 = 34, OHM40 = 40,</enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_DRV_IMP_CMD</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Centaur Command Drive Impedance Used in various locations and is computed in mss_eff_cnfg_termination. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+creator: mss_eff_cnfg_termination
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <enum>OHM15 = 15, OHM20 = 20, OHM30 = 30, OHM40 = 40,</enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_DRV_IMP_CNTL</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Centaur Control Drive Impedance Used in various locations and is computed in mss_eff_cnfg_termination. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+creator: mss_eff_cnfg_termination
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <enum>OHM15 = 15, OHM20 = 20, OHM30 = 30, OHM40 = 40,</enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_RCV_IMP_DQ_DQS</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Centaur DQ and DQS Receiver Impedance Used in various locations and is computed in mss_eff_cnfg_termination. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+creator: mss_eff_cnfg_termination
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <enum>OHM15 = 15, OHM20 = 20, OHM30 = 30, OHM40 = 40, OHM48 = 48, OHM60 = 60, OHM120 = 120,</enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_SLEW_RATE_DQ</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Centaur DQ Slew Rate Used in various locations and is computed in mss_eff_cnfg_termination. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+creator: mss_eff_cnfg_termination
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <enum>SLOW = 0x00, FAST = 0x01,</enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_SLEW_RATE_DQS</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Centaur DQS Slew Rate Used in various locations and is computed in mss_eff_cnfg_termination. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+creator: mss_eff_cnfg_termination
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <enum>SLOW = 0x00, FAST = 0x01,</enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_SLEW_RATE_CMD</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Centaur Command Slew Rate Used in various locations and is computed in mss_eff_cnfg_termination. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+creator: mss_eff_cnfg_termination
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <enum>SLOW = 0x00, FAST = 0x01,</enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_SLEW_RATE_CNTL</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Centaur Control Slew Rate Used in various locations and is computed in mss_eff_cnfg_termination. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+creator: mss_eff_cnfg_termination
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <enum>SLOW = 0x00, FAST = 0x01,</enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_RD_VREF</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Centaur Read Vref. Used in various locations and is computed in mss_eff_cnfg_termination. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+creator: mss_eff_cnfg_termination
+consumer: various
+firmware notes: none</description>
+    <valueType>uint32</valueType>
+    <enum>VDD40375 = 40375, VDD41750 = 41750, VDD43125 = 43125, VDD44500 = 44500, VDD45875 = 45875, VDD47250 = 47250, VDD48625 = 48625, VDD50000 = 50000, VDD51375 = 51375, VDD52750 = 52750, VDD54125 = 54125, VDD55500 = 55500, VDD56875 = 56875, VDD58250 = 58250, VDD59625 = 59625, VDD61000 = 61000, VDD60375 = 60375, VDD61750 = 61750, VDD63125 = 63125, VDD64500 = 64500, VDD65875 = 65875, VDD67250 = 67250, VDD68625 = 68625, VDD70000 = 70000, VDD71375 = 71375, VDD72750 = 72750, VDD74125 = 74125, VDD75500 = 75500, VDD76875 = 76875, VDD78250 = 78250, VDD79625 = 79625, VDD81000 = 81000</enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_DIMM_SIZE</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>DIMM Size.  Used in various locations and is computed in mss_eff_cnfg. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.  Each memory channel will have a value.
+creator: mss_eff_cnfg
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2 2</array>
+    <persistRuntime/>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_DRAM_BANKS</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Number of DRAM banks.  Used in various locations and is computed in mss_eff_cnfg. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.  Each memory channel will have a value.
+creator: mss_eff_cnfg
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_DRAM_ROWS</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Number of DRAM rows.  Used in various locations and is computed in mss_eff_cnfg. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.  Each memory channel will have a value.
+creator: mss_eff_cnfg
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_DRAM_COLS</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Number of DRAM columns.  Used in various locations and is computed in mss_eff_cnfg. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.  Each memory channel will have a value.
+creator: mss_eff_cnfg
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_DRAM_DENSITY</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>DRAM Density.  Used in various locations and is computed in mss_eff_cnfg. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.  Each memory channel will have a value.
+creator: mss_eff_cnfg
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_DRAM_TRCD</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>RAS to CAS Delay.  Used in various locations and is computed in mss_eff_cnfg_timing. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.  Each memory channel will have a value.
+creator: mss_eff_cnfg_timing
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_DRAM_TRRD</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Row ACT to Row ACT Delay.  Used in various locations and is computed in mss_eff_cnfg_timing. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.  Each memory channel will have a value.
+creator: mss_eff_cnfg_timing
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_DRAM_TRP</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Row Precharge Delay.  Used in various locations and is computed in mss_eff_cnfg_timing. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.  Each memory channel will have a value.
+creator: mss_eff_cnfg_timing
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_DRAM_TRAS</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>ACT to Precharge Delay.  Used in various locations and is computed in mss_eff_cnfg_timing. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.  Each memory channel will have a value.
+creator: mss_eff_cnfg_timing
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_DRAM_TRC</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>ACT to ACT/Refresh Delay.  Used in various locations and is computed in mss_eff_cnfg_timing. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.  Each memory channel will have a value.
+creator: mss_eff_cnfg_timing
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_DRAM_TRFC</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Refresh Recovery Delay. Used in various locations and is computed in mss_eff_cnfg_timing. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.  Each memory channel will have a value.
+creator: mss_eff_cnfg_timing
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_DRAM_TWTR</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Internal Write to Read Delay. Used in various locations and is computed in mss_eff_cnfg_timing. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.  Each memory channel will have a value.
+creator: mss_eff_cnfg_timing
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_DRAM_TRTP</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Internal Read to Precharge Delay. Used in various locations and is computed in mss_eff_cnfg_timing. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.  Each memory channel will have a value.
+creator: mss_eff_cnfg_timing
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_DRAM_TFAW</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Four ACT Window Delay. Used in various locations and is computed in mss_eff_cnfg_timing. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.  Each memory channel will have a value.
+creator: mss_eff_cnfg_timing
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_DRAM_BL</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Burst Length.  Used in various locations and is computed in mss_eff_cnfg. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.  Each memory channel will have a value.
+creator: mss_eff_cnfg
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <enum>BL8 = 0, OTF = 1, BC4 = 2,</enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_DRAM_CL</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>CAS Latency.  Used in various locations and is computed in mss_eff_cnfg_timing. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.  Each memory channel will have a value.
+creator: mss_eff_cnfg_timing
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_DRAM_AL</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Additive Latency.  Used in various locations and is computed in mss_eff_cnfg_timing. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.  Each memory channel will have a value.
+creator: mss_eff_cnfg_timing
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <enum>DISABLE = 0, CL_MINUS_1 = 1, CL_MUNUS_2 = 2,</enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_DRAM_CWL</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>CAS Write Latency.  Used in various locations and is computed in mss_eff_cnfg_timing. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.  Each memory channel will have a value.
+creator: mss_eff_cnfg_timing
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_DRAM_RBT</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Read Burst Type.  Used in various locations and is computed in mss_eff_cnfg. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.  Each memory channel will have a value.
+creator: mss_eff_cnfg
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <enum>SEQUENTIAL = 0, INTERLEAVE = 1,</enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_DRAM_TM</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Test Mode.  Used in various locations and is computed in mss_eff_cnfg. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.  Each memory channel will have a value.
+creator: mss_eff_cnfg
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <enum>NORMAL= 0, TEST = 1,</enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_DRAM_DLL_RESET</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>DLL Reset.  Used in various locations and is computed in mss_eff_cnfg. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.  Each memory channel will have a value.
+creator: mss_eff_cnfg
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <enum>NO = 0, YES = 1,</enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_DRAM_WR</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Write Recovery.  Used in various locations and is computed in mss_eff_cnfg_timing. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.  Each memory channel will have a value.
+creator: mss_eff_cnfg_timing
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_DRAM_DLL_PPD</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>DLL Precharge PD.  Used in various locations and is computed in mss_eff_cnfg. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.  Each memory channel will have a value.
+creator: mss_eff_cnfg
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <enum>SLOWEXIT = 0, FASTEXIT = 1,</enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_DRAM_DLL_ENABLE</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>DLL Enable.  Used in various locations and is computed in mss_eff_cnfg. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.  Each memory channel will have a value.
+creator: mss_eff_cnfg
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <enum>ENABLE = 0, DISABLE = 1,</enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_DRAM_TDQS</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>TDQS. Used in various locations and is computed in mss_eff_cnfg. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.  Each memory channel will have a value.
+creator: mss_eff_cnfg
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <enum>DISABLE = 0, ENABLE = 1,</enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_DRAM_WR_LVL_ENABLE</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Write Level Enable. Used in various locations and is computed in mss_eff_cnfg. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.  Each memory channel will have a value.
+creator: mss_eff_cnfg
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <enum>DISABLE = 0, ENABLE = 1,</enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_DRAM_OUTPUT_BUFFER</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>DRAM Qoff. Enables or disables DRAM output. Used in various locations and is computed in mss_eff_cnfg. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.  Each memory channel will have a value.
+creator: mss_eff_cnfg
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <enum>ENABLE = 0, DISABLE = 1,</enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_DRAM_PASR</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Partial Array Self-Refresh. Used in various locations and is computed in mss_eff_cnfg. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.  Each memory channel will have a value.
+creator: mss_eff_cnfg
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <enum>FULL = 0, FIRST_HALF = 1, FIRST_QUARTER = 2, FIRST_EIGHTH = 3, LAST_THREE_FOURTH = 4, LAST_HALF = 5, LAST_QUARTER = 6, LAST_EIGHTH = 7,</enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_DRAM_ASR</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Auto Self-Refresh. Used in various locations and is computed in mss_eff_cnfg. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.  Each memory channel will have a value.
+creator: mss_eff_cnfg
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <enum>SRT = 0, ASR = 1,</enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_DRAM_SRT</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Self-Refresh Temperature Range. Used in various locations and is computed in mss_eff_cnfg. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.  Each memory channel will have a value.
+creator: mss_eff_cnfg
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <enum>NORMAL = 0, EXTEND = 1,</enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_MPR_LOC</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Multi Purpose Register Location. Used in various locations and is computed in mss_eff_cnfg. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.  Each memory channel will have a value.
+creator: mss_eff_cnfg
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_MPR_MODE</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Multi Purpose Register Mode. Used in various locations and is computed in mss_eff_cnfg. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.  Each memory channel will have a value.
+creator: mss_eff_cnfg
+consumer: various
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <enum>DISABLE = 0, ENABLE = 1,</enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_DIMM_RCD_CNTL_WORD_0_15</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>RCD Control Word. Used in mss_dram_init and is computed in mss_eff_cnfg. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.  Each memory channel will have a value.
+creator: mss_eff_cnfg
+consumer: mss_dram_init
+firmware notes: none</description>
+    <valueType>uint64</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_MSS_THROTTLE_NUMERATOR</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Each DIMM can have a throttle amount.  This is the numerator
+creator: mss_eff_cnfg
+consumer: mc_config
+firmware notes: none</description>
+    <valueType>uint32</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2 2</array>
+    <persistRuntime/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MSS_THROTTLE_DENOMINATOR</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Each DIMM can have a throttle amount.  This is the denominator
+creator: mss_eff_cnfg
+consumer: mc_config
+firmware notes: none</description>
+    <valueType>uint32</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2 2</array>
+    <persistRuntime/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MSS_THROTTLE_CHANNEL_NUMERATOR</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>This is a channel throttle amount
+this is the numerator
+creator: mss_eff_cnfg
+consumer: mc config
+firmware notes:none</description>
+    <valueType>uint32</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+    <persistRuntime/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MSS_THROTTLE_CHANNEL_DENOMINATOR</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>This is a channel throttle amount
+this is the denominator
+creator: mss_eff_cnfg
+consumer: mc config
+firmware notes:none</description>
+    <valueType>uint32</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+    <persistRuntime/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MSS_WATT_TARGET</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Total memory watts upper limit for this memory channel. Used to compute the throttles on the channel and/or dimms
+creator: unknown
+consumer: mss_eff_config
+firmware notes: none</description>
+    <valueType>uint32</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+    <persistRuntime/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MSS_POWER_SLOPE</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Power slope value for dimm in double drop config</description>
+    <valueType>uint32</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2 2</array>
+    <persistRuntime/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MSS_POWER_INT</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Power intercept value for dimm in double drop config</description>
+    <valueType>uint32</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2 2</array>
+    <persistRuntime/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MSS_DIMM_MAXBANDWIDTH_GBS</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>DIMM Max Bandwidth in GBs output from thermal procedures</description>
+    <valueType>uint32</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2 2</array>
+    <persistRuntime/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MSS_DIMM_MAXBANDWIDTH_MRS</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>DIMM Max Bandwidth in MRs output from thermal procedures</description>
+    <valueType>uint32</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2 2</array>
+    <persistRuntime/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MSS_CHANNEL_MAXBANDWIDTH_GBS</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Channel Max Bandwidth in GBs output from thermal procedures</description>
+    <valueType>uint32</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+    <persistRuntime/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MSS_CHANNEL_MAXBANDWIDTH_MRS</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Channel Max Bandwidth MRs output from thermal procedures</description>
+    <valueType>uint32</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+    <persistRuntime/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MSS_DIMM_MAXPOWER</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>DIMM Max Power output from thermal procedures</description>
+    <valueType>uint32</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2 2</array>
+    <persistRuntime/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MSS_CHANNEL_MAXPOWER</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Channel Max Power output from thermal procedures</description>
+    <valueType>uint32</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+    <persistRuntime/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MSS_MEMSIZE</id>
+    <targetType>TARGET_TYPE_MCS_CHIPLET</targetType>
+    <description>The amount of memory to set aside for this memory controller.  There maybe gaps in the complete range, but this memory controller does not have any more memory than this amount.
+creator: extent
+consumer: firmware
+firmware notes: firmware uses this to know where the base address of the next centaur should configured to such that there is not any memory gaps</description>
+    <valueType>uint64</valueType>
+    <writeable/>
+    <odmVisable/>
+    <array>8</array>
+    <persistRuntime/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MSS_MEMSIZE_MBA</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>At the MBA level, how much memory is available</description>
+    <valueType>uint64</valueType>
+    <writeable/>
+    <odmVisable/>
+    <persistRuntime/>
+</attribute>
+
+</attributes>

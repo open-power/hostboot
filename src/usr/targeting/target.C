@@ -117,6 +117,7 @@ void Target::_getAttrPtr(
         if ((*iv_pAttrNames)[i] == i_attr)
         {
             l_pAttr = (*iv_pAttrValues)[i];
+            break;
         }
     }
     o_pAttr = l_pAttr;
