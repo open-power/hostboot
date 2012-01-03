@@ -64,6 +64,7 @@ enum    InitServiceModuleID
     START_TARGETING_ERRL_ID             =   0x18,
     START_I2C_ERRL_ID                   =   0x19,
     START_INTR_ERRL_ID                  =   0x1A,
+    START_SPD_ERRL_ID                   =   0x1B,
 
 
     //  Internal InitService codes

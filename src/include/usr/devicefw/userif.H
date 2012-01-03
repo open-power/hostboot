@@ -21,8 +21,8 @@
 //
 //  IBM_PROLOG_END
 /** @file userif.H
- *  @brief Provides the user application interfaces for performing device 
- *         access.  
+ *  @brief Provides the user application interfaces for performing device
+ *         access.
  *
  *  @note These interfaces should not be used directly by device drivers.
  *        Use driverif.H instead.
@@ -47,16 +47,17 @@ namespace DeviceFW
         MAILBOX,
         PRESENT,
         FSI,
+        SPD,
 
         LAST_ACCESS_TYPE,
     };
-    
-    /** Construct the device addressing parameters for SCOM device ops. 
+
+    /** Construct the device addressing parameters for SCOM device ops.
      *  @param[in] i_address - Scom address to operate on.
      */
     #define DEVICE_SCOM_ADDRESS(i_address) \
         DeviceFW::SCOM, static_cast<uint64_t>((i_address))
-    
+
     /** Construct the device addressing parameters for the PRESENT device ops.
      */
     #define DEVICE_PRESENT_ADDRESS() \
@@ -78,15 +79,23 @@ namespace DeviceFW
      */
      #define DEVICE_PNOR_ADDRESS( i_chip, i_addr )  \
         DeviceFW::PNOR, ((static_cast<uint64_t>(i_chip)<<32)|static_cast<uint64_t>(i_addr))
-    
+
     /** Construct the device addressing parameters for FSI device ops.
      *  @param[in] i_address - FSI address to operate on.
      */
     #define DEVICE_FSI_ADDRESS(i_address) \
         DeviceFW::FSI, static_cast<uint64_t>((i_address))
 
+    /**
+     * Construct the device addressing parameters for the SPD device ops.
+     * @param[in] i_keyword - The keyword enumeration value to be accessed
+     *      by the device driver.
+     */
+    #define DEVICE_SPD_ADDRESS( i_keyword )\
+        DeviceFW::SPD, static_cast<uint64_t>(( i_keyword ))
 
-    /** 
+
+    /**
      *  @brief Perform a hardware read operation.
      *
      *  @param[in]     i_target     Device target to operate on.
@@ -112,11 +121,11 @@ namespace DeviceFW
      *  </PRE>
      *
      */
-    errlHndl_t deviceRead(TARGETING::Target* i_target, 
+    errlHndl_t deviceRead(TARGETING::Target* i_target,
                           void* o_buffer, size_t& io_buflen,
                           AccessType i_accessType, ...);
 
-    /** 
+    /**
      *  @brief Perform a hardware write operation.
      *
      *  @param[in]     i_target     Device target to operate on.

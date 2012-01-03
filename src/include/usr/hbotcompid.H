@@ -180,6 +180,14 @@ const compId_t INTR_COMP_ID = 0x0F00;
 const char INTR_COMP_NAME[] = "intr";
 //@}
 
+/** @name SPD
+ *  EEPROM device driver component
+ */
+//@{
+const compId_t SPD_COMP_ID = 0x1000;
+const char SPD_COMP_NAME[] = "spd";
+//@}
+
 //  ----------------------------------------------------------
 //  CXXTEST Unit Test, reserve compid near the end...
 /** @name CXXTEST

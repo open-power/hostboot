@@ -1,11 +1,11 @@
 #  IBM_PROLOG_BEGIN_TAG
 #  This is an automatically generated prolog.
 #
-#  $Source: src/usr/makefile $
+#  $Source: src/usr/spd/makefile $
 #
 #  IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2010 - 2011
+#  COPYRIGHT International Business Machines Corp. 2012
 #
 #  p1
 #
@@ -20,13 +20,17 @@
 #  Origin: 30
 #
 #  IBM_PROLOG_END
-ROOTPATH = ../..
+ROOTPATH = ../../..
+MODULE = spd
 
-OBJS = module_init.o
+OBJS = spd.o
 
-SUBDIRS = example.d trace.d cxxtest.d testcore.d errl.d devicefw.d  \
-          scom.d xscom.d targeting.d initservice.d hwpf.d \
-          ecmddatabuffer.d pnor.d i2c.d vfs.d fsi.d hwas.d fsiscom.d \
-	      intr.d spd.d
+SUBDIRS = test.d
+
+DIMM_SPD_DATA = dimmspd.dat
+EXTRA_PARTS = $(addprefix $(IMGDIR)/, $(DIMM_SPD_DATA))
 
 include ${ROOTPATH}/config.mk
+
+${EXTRA_PARTS}: ${IMGDIR}/% : ./%
+	cp -f $^ $@

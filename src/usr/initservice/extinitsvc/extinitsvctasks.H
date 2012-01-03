@@ -56,6 +56,19 @@ const TaskInfo g_exttaskinfolist[]   =   {
         },
 
         /**
+         * @brief spd task
+         */
+        {
+            "libspd.so",                                    // taskname
+            NULL,                                           // no pointer to fn
+            {
+                INIT_TASK,                                  // task type
+                EXT_IMAGE,                                  // Extended module
+                START_SPD_ERRL_ID                           // module id
+            }
+        },
+
+        /**
          * @brief   fapi task,
          */
         {

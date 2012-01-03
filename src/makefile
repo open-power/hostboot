@@ -48,21 +48,22 @@ BASE_MODULES = trace errl devicefw scom xscom initservice taskargs \
                pnor vfs
 
 EXTENDED_MODULES = targeting ecmddatabuffer fapi hwp plat 	\
-                   extinitsvc istepdisp hwas fsi fsiscom i2c intr
+                   extinitsvc istepdisp hwas fsi fsiscom i2c intr \
+				   spd
 
 DIRECT_BOOT_MODULES = example
 RUNTIME_MODULES =
 TESTCASE_MODULES = cxxtest testerrl testdevicefw testsyslib \
                    testscom testxscom testtargeting testinitservice testkernel \
                    testhwpf testecmddatabuffer initsvctasktest2 testcxxtest \
-                   testpnor testi2c testfsi testvfs testhwas testintr
+                   testpnor testi2c testfsi testvfs testhwas testintr testspd
 
 RELOCATABLE_IMAGE_LDFLAGS = -pie --export-dynamic
 
 hbicore_OBJECTS = ${BASE_OBJECTS} ${DIRECT_BOOT_OBJECTS} ${STUB_TESTCASE_OBJECT}
 hbicore_MODULES = ${BASE_MODULES} ${DIRECT_BOOT_MODULES}
 hbicore_EXTENDED_MODULES = ${EXTENDED_MODULES}
-hbicore_DATA_MODULES =  sample.if
+hbicore_DATA_MODULES = sample.if dimmspd.dat
 
 hbicore_LIDNUMBER = 80f00100
 
