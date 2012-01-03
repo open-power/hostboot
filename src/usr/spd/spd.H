@@ -256,6 +256,36 @@ errlHndl_t spdReadBinaryFile ( uint64_t i_byteAddr,
                                size_t i_numBytes,
                                void * o_data );
 
+/**
+ * @brief This function performs the presence detect for all DIMMs.
+ *
+ * @param[in] i_opType - Operation type, see DeviceFW::OperationType
+ *      in driverif.H
+ *
+ * @param[in] i_target - The target to query.
+ *
+ * @param[in/out] io_buffer - Buffer to contain the boolean for presence
+ *      detect.
+ *
+ * @param[in/out] io_buflen - Size of buffer provided for doing the presence
+ *      detect.  Will always be 1.  If size returned equals 0, the request
+ *      failed.
+ *
+ * @param[in] i_accessType - DeviceFW::AccessType enum.
+ *
+ * @param[in] i_args - An arguement for the Device Driver framework.  There
+ *      are no args for this function.
+ *
+ * @return errlHndl_t - NULL if successful, otherwise a pointer to the
+ *      error log.
+ */
+errlHndl_t dimmPresenceDetect( DeviceFW::OperationType i_opType,
+                               TARGETING::Target * i_target,
+                               void * io_buffer,
+                               size_t & io_buflen,
+                               int64_t i_accessType,
+                               va_list i_args );
+
 }; // end SPD namespace
 
 #endif  // __SPD_H

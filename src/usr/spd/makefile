@@ -23,7 +23,7 @@
 ROOTPATH = ../../..
 MODULE = spd
 
-OBJS = spd.o
+OBJS = spd.o dimmPres.o
 
 SUBDIRS = test.d
 

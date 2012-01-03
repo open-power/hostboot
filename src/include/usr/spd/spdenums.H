@@ -101,6 +101,7 @@ enum
     MODULE_THERMAL_SENSOR               = 0x3c,
     SDRAM_OPTIONAL_FEATURES             = 0x3d,
     SDRAM_THERMAL_REFRESH_OPTIONS       = 0x3e,
+    DIMM_BAD_DQ_DATA                    = 0x3f,
 
     // This keyword should be last in the list
     SPD_LAST_KEYWORD,

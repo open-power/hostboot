@@ -52,6 +52,7 @@ enum spdModuleId
     SPD_READ_BINARY_FILE                = 0x04,
     SPD_WRITE_KEYWORD_VALUE             = 0x05,
     SPD_SPECIAL_CASES                   = 0x06,
+    SPD_PRESENCE_DETECT                 = 0x07,
 };
 
 /**

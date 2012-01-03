@@ -144,18 +144,18 @@ errlHndl_t spdGetKeywordValue ( uint64_t i_keyword,
                    INFO_MRK"Mem Type: %04x",
                    memType );
 
-        // If the user wanted the Basic Memory Type, return this now
-        if( BASIC_MEMORY_TYPE == i_keyword )
-        {
-            io_buflen = MEM_TYPE_ADDR_SZ;
-            memcpy( io_buffer, &memType, io_buflen );
-            break;
-        }
-
         // Check the Basic Memory Type to be sure its valid before
         // continuing.
         if( SPD_DDR3 == memType )
         {
+            // If the user wanted the Basic memory type, return this now.
+            if( BASIC_MEMORY_TYPE == i_keyword )
+            {
+                io_buflen = MEM_TYPE_ADDR_SZ;
+                memcpy( io_buffer, &memType, io_buflen );
+                break;
+            }
+
             // Read the keyword value
             err = spdGetValue( i_keyword,
                                    io_buffer,
@@ -596,13 +596,6 @@ errlHndl_t spdSpecialCases ( uint64_t i_keyword,
 
                     if( err ) break;
 
-                    // Mask and shift if needed
-                    if( ddr3Data[i_entry].useBitMask )
-                    {
-                        tmpBuffer[0] = tmpBuffer[0] & ddr3Data[i_entry].bitMask;
-                        tmpBuffer[0] = tmpBuffer[0] >> ddr3Data[i_entry].shift;
-                    }
-
                     // Get LSB
                     err = spdFetchData( 0x18,
                                         1, /* Read 1 byte at a time */
@@ -659,7 +652,6 @@ errlHndl_t spdSpecialCases ( uint64_t i_keyword,
                     // Byte 0x75 [7:0]
                     // Byte 0x76 [7:0] - MSB
 
-
                     // Check size of buffer
                     err = spdCheckSize( io_buflen,
                                         2,
@@ -675,15 +667,40 @@ errlHndl_t spdSpecialCases ( uint64_t i_keyword,
 
                     if( err ) break;
 
-                    // Mask and shift if needed
-                    if( ddr3Data[i_entry].useBitMask )
-                    {
-                        tmpBuffer[0] = tmpBuffer[0] & ddr3Data[i_entry].bitMask;
-                        tmpBuffer[0] = tmpBuffer[0] >> ddr3Data[i_entry].shift;
-                    }
-
                     // Get LSB
                     err = spdFetchData( 0x75,
+                                        1, /* Read 1 byte at a time */
+                                        &tmpBuffer[1],
+                                        i_target );
+
+                    if( err ) break;
+
+                    // Set number of bytes read
+                    io_buflen = 2;
+                    break;
+
+                case DRAM_MANUFACTURER_ID:
+                    // Length 2 bytes
+                    // Byte 0x94 [7:0]
+                    // Byte 0x95 [7:0] - MSB
+
+                    // Check size of buffer
+                    err = spdCheckSize( io_buflen,
+                                        2,
+                                        i_keyword );
+
+                    if( err ) break;
+
+                    // Get MSB
+                    err = spdFetchData( ddr3Data[i_entry].offset,
+                                        1, /*Read 1 byte at a time */
+                                        &tmpBuffer[0],
+                                        i_target );
+
+                    if( err ) break;
+
+                    // Get LSB
+                    err = spdFetchData( 0x94,
                                         1, /* Read 1 byte at a time */
                                         &tmpBuffer[1],
                                         i_target );

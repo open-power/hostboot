@@ -114,8 +114,9 @@ KeywordData ddr3Data[] =
     { MODULE_CRC,                           0x7e,   0x02,   false,  0x00,   0x00, false },
     { MODULE_PART_NUMBER,                   0x80,   0x12,   false,  0x00,   0x00, false },
     { MODULE_REVISION_CODE,                 0x92,   0x02,   false,  0x00,   0x00, false },
-    { DRAM_MANUFACTURER_ID,                 0x94,   0x02,   false,  0x00,   0x00, false },
+    { DRAM_MANUFACTURER_ID,                 0x95,   0x02,   false,  0x00,   0x00, true  },
     { MANUFACTURER_SPECIFIC_DATA,           0x96,   0x1a,   false,  0x00,   0x00, false },
+    { DIMM_BAD_DQ_DATA,                     0xb0,   0x50,   false,  0x00,   0x00, false },
     // ----------------------------------------------------------------------------------
 };
 

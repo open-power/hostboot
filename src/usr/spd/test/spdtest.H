@@ -62,7 +62,7 @@ void getDIMMTargets ( TargetHandleList & o_dimmList )
                       TARGETING::TargetService::CHILD,
                       TARGETING::TargetService::ALL,
                       &predDimm );
-    TRACFCOMP( g_trac_spd,
+    TRACDCOMP( g_trac_spd,
                "getDIMMTargets() - found %d DIMMs",
                o_dimmList.size() );
     return;
