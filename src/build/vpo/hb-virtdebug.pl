@@ -42,11 +42,13 @@ use Cwd;
 #------------------------------------------------------------------------------
 # Constants
 #------------------------------------------------------------------------------
-use constant MAX_NUM_TRACE_BUFFERS => 24;
+use constant MAX_NUM_TRACE_BUFFERS => 48;
 use constant DESC_ARRAY_ENTRY_ADDR_SIZE => 8;
 use constant DESC_ARRAY_ENTRY_COMP_NAME_SIZE => 16;
 use constant TRAC_DEFAULT_BUFFER_SIZE => 0x0800;
 use constant CACHE_LINE_SIZE => 128;
+use constant TRAC_BUFFER_SIZE_OFFSET => 20;
+use constant TRAC_BUFFER_SIZE_SIZE => 4;
 
 
 #------------------------------------------------------------------------------
@@ -399,8 +401,29 @@ if ($dumpTrace)
                 print "$command\n";
                 die if (system("$command") != 0);
 
+                # Get the length of the buffer from the component trace header 
+                $buffer = readBinFile( "$outDir/trace.out", 
+                                       $offset+TRAC_BUFFER_SIZE_OFFSET, 
+                                       TRAC_BUFFER_SIZE_SIZE );
+
+                my $compBufferSize=unpack('H*',$buffer);
+                $compBufferSize = hex $compBufferSize;
+
+                # Re-read trace buffer using correct buffer size 
+                $offset = $compBufAddr % CACHE_LINE_SIZE;
+                $cacheLines = ceil( $compBufferSize / CACHE_LINE_SIZE);
+                if ($offset != 0)
+                {
+                    $cacheLines += 1;
+                }
+                #print "$compName, addr $compBufAddr, offset $offset, cacheLines $cacheLines\n";
+                $command = sprintf ("p8_dump_l3 %x $cacheLines -f $outDir/trace.out -b @ecmdOpt",
+                                   $compBufAddr);
+                print "$command\n";
+                die if (system("$command") != 0);
+
                 #Extract just the component trace
-                $buffer = readBinFile("$outDir/trace.out", $offset, TRAC_DEFAULT_BUFFER_SIZE);
+                $buffer = readBinFile("$outDir/trace.out", $offset, $compBufferSize);
 
                 #Append to tracBIN
                 appendBinFile("$outDir/tracBIN", $buffer);

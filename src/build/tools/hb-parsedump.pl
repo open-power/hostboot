@@ -49,10 +49,12 @@ use File::Copy;
 #------------------------------------------------------------------------------
 # Constants
 #------------------------------------------------------------------------------
-use constant MAX_NUM_TRACE_BUFFERS => 24;
+use constant MAX_NUM_TRACE_BUFFERS => 48;
 use constant DESC_ARRAY_ENTRY_ADDR_SIZE => 8;
 use constant DESC_ARRAY_ENTRY_COMP_NAME_SIZE => 16;
 use constant TRAC_DEFAULT_BUFFER_SIZE => 0x0800;
+use constant TRAC_BUFFER_SIZE_OFFSET => 20;
+use constant TRAC_BUFFER_SIZE_SIZE => 4;
 
 
 #------------------------------------------------------------------------------
@@ -287,9 +289,17 @@ if ((0 != $addr) && (0 != $size))
         #print "Component: $compName, $buffer, $compBufAddr\n";
         $addr += DESC_ARRAY_ENTRY_ADDR_SIZE;
 
+        # read a portion of the buffer header to get its size
+        $buffer = readBinFile($hbDumpFile,
+                              $compBufAddr+TRAC_BUFFER_SIZE_OFFSET,
+                              TRAC_BUFFER_SIZE_SIZE);
+        my $compBufferSize = unpack('H*',$buffer);
+        $compBufferSize = hex $compBufferSize;
+
+
         #read the component trace buffer and save to file
         #read the component trace buffer
-        $buffer = readBinFile($hbDumpFile, $compBufAddr, TRAC_DEFAULT_BUFFER_SIZE);
+        $buffer = readBinFile($hbDumpFile, $compBufAddr, $compBufferSize );
 
         chdir "$extDir";
 
