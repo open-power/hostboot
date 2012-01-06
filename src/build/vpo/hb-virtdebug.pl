@@ -49,6 +49,7 @@ use constant TRAC_DEFAULT_BUFFER_SIZE => 0x0800;
 use constant CACHE_LINE_SIZE => 128;
 use constant TRAC_BUFFER_SIZE_OFFSET => 20;
 use constant TRAC_BUFFER_SIZE_SIZE => 4;
+use constant NUMTHREADS => 8;
 
 
 #------------------------------------------------------------------------------
@@ -89,6 +90,7 @@ my @symsLines;                    #Array to store the .syms file data
 my $outDir = getcwd();            #Default = current working directory
 my @ecmdOpt;                      #Array of ecmd options
 my $core = "3";                   #Default is core 3
+my @threadState = ();             #Array to store the thread states
 
 my $hbDir = $ENV{'HBDIR'};
 if (defined ($hbDir))
@@ -267,11 +269,10 @@ if (!$dumpAll)
 }
 
 #------------------------------------------------------------------------------
-# Output reminder to stop instructions
+# Save the original thread states and stop instructions
 #------------------------------------------------------------------------------
-print "\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
-print "\nREMINDER:  User need to stop instructions prior to running this program.\n";
-print "\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n\n";
+saveThreadStates();
+stopInstructions("all");
 
 #------------------------------------------------------------------------------
 #Flush L2 - this step is needed in order to dump L3 quickly
@@ -279,8 +280,8 @@ print "\n+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 my $command = "";
 $command = "/afs/awd.austin.ibm.com/projects/eclipz/lab/p8/compiled_procs/procs/p8_l2_flush_wrap.x86 ";
 $command .= "@ecmdOpt -quiet";
-print "$command\n";
-die if (system("$command") != 0);
+#print "$command\n";
+die "ERROR: cannot flush L2" if (system("$command") != 0);
 
 
 #------------------------------------------------------------------------------
@@ -321,16 +322,16 @@ if ($dumpPrintk)
 
         if (-s $string)
         {
-	    #Extract and save just the kernel printk buffer
-	    $buffer = readStringBinFile($string, $offset);
+            #Extract and save just the kernel printk buffer
+            $buffer = readStringBinFile($string, $offset);
 
-	    writeBinFile($string, $buffer);
+            writeBinFile($string, $buffer);
 
-	    #Output to screen
-	    print "\nKernel printk buffer:";
-	    print "\n=====================\n\n$buffer\n";
-	    print "\n=====================\n\n";
-	    print "Data saved to file $string\n\n";
+            #Output to screen
+            print "\nKernel printk buffer:";
+            print "\n=====================\n\n$buffer\n";
+            print "\n=====================\n\n";
+            print "Data saved to file $string\n\n";
         }
         else
         {
@@ -551,8 +552,8 @@ if ($dumpAll)
     #Dump L3 to file
     my $hbDumpFile = "$outDir/hbdump.$timeStamp";
     $command = "p8_dump_l3 0 65536 -f $hbDumpFile -b @ecmdOpt";
-    print "$command\n";
-    die if (system("$command") != 0);
+    #print "$command\n";
+    die "ERROR: cannot dump L3" if (system("$command") != 0);
 
     #Check if hbDumpFile exists and is not empty
     if (-s "$hbDumpFile")
@@ -567,12 +568,102 @@ if ($dumpAll)
     }
 }
 
+#------------------------------------------------------------------------------
+# Restore the original thread states
+#------------------------------------------------------------------------------
+restoreThreadStates();
 
 
 
 #==============================================================================
 # SUBROUTINES
 #==============================================================================
+
+#------------------------------------------------------------------------------
+# Stop instructions
+#------------------------------------------------------------------------------
+sub stopInstructions
+{
+    my $thread = shift;
+
+    #todo Change to a hostboot dir where a copy of the tool will be kept
+    #Stopping all threads
+    my $command = "/afs/awd/projects/eclipz/lab/p8/u/karm/ekb/eclipz/chips/p8/working/procedures/utils/p8_thread_control.x86";
+    $command .= " @ecmdOpt -stop -t$thread -quiet";
+    die "ERROR: cannot stop instructions" if (system("$command") != 0);
+}
+
+#------------------------------------------------------------------------------
+# Start instructions
+#------------------------------------------------------------------------------
+sub startInstructions
+{
+    my $thread = shift;
+
+    #todo Change to a hostboot dir where a copy of the tool will be kept
+    #Starting all threads
+    my $command = "/afs/awd/projects/eclipz/lab/p8/u/karm/ekb/eclipz/chips/p8/working/procedures/utils/p8_thread_control.x86";
+    $command .= " @ecmdOpt -start -t$thread -quiet";
+    die "ERROR: cannot start instructions" if (system("$command") != 0);
+}
+
+#------------------------------------------------------------------------------
+# Query thread state
+# @brief query whether thread state is quiesced or running
+#------------------------------------------------------------------------------
+sub queryThreadState
+{
+    my $thread = shift;
+    #print "thread $thread\n";
+
+    #todo Change to a hostboot dir where a copy of the tool will be kept
+    my $command = "/afs/awd/projects/eclipz/lab/p8/u/karm/ekb/eclipz/chips/p8/working/procedures/utils/p8_thread_control.x86";
+    $command .= " @ecmdOpt -query -t$thread --quiet";
+    my $result = `$command`;
+    #print "result:\n $result";
+    if ($result =~ m/Quiesced/)
+    {
+	    #print "Thread $thread is quiesced\n";
+        return "Quiesced";
+    }
+    #print "Thread $thread is running\n";
+    return "Running";
+}
+
+#------------------------------------------------------------------------------
+# Save thread states
+# @brief Save the thread states
+#------------------------------------------------------------------------------
+sub saveThreadStates
+{
+    for (my $i = 0; $i < NUMTHREADS; $i++)
+    {
+        push (@threadState, queryThreadState($i));
+    }
+}
+
+#------------------------------------------------------------------------------
+# Restore thread states
+# @brief Restore the thread states
+#------------------------------------------------------------------------------
+sub restoreThreadStates
+{
+    for (my $i = 0; $i < NUMTHREADS; $i++)
+    {
+        my $curState = queryThreadState($i);
+        if ($threadState[$i] ne $curState)
+        {
+            if ("Quiesced" eq $curState)
+            {
+                startInstructions($i);
+            }
+            else
+            {
+                stopInstructions($i);
+            }
+        }
+    }
+}
 
 #------------------------------------------------------------------------------
 # Parse the .syms data to find the relevant address and size for the data
@@ -720,7 +811,5 @@ sub printUsage()
     print ("  -s#               Specify which slot to act on (default = 0)\n");
     print ("  -p#               Specify which chip position to act on (default = 0)\n");
     print ("  -c#               Specify which core/chipUnit to act on (default = 3)\n");
-    print ("\n  NOTE:  This program will not work if user has not stopped instructions\n");
-    print ("         prior to running this program.\n");
 }
 

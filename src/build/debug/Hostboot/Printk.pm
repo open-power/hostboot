@@ -30,15 +30,19 @@ our @EXPORT_OK = ('main');
 
 sub main
 {
-    ::userDisplay "------------Kernel Printk Parser------------\n";
     my ($symAddr, $symSize) = ::findSymbolAddress("kernel_printk_buffer");
     if (not defined $symAddr) { ::userDisplay "Cannot find symbol.\n"; die; }
-    ::userDisplay ::readData($symAddr,$symSize);
-    ::userDisplay "--------------------------------------------\n";
+    my $data = ::readData($symAddr,$symSize);
+    $data =~ s/\0+//g; #strip off nulls
+    ::userDisplay "------------Kernel Printk Parser------------\n";
+    ::userDisplay $data;
+    ::userDisplay "\n--------------------------------------------\n";
 }
 
-sub help
+sub helpInfo
 {
-    ::userDisplay "Tool: Printk\n";
-    ::userDisplay "\tDisplays the printk buffer.\n";
+    my %info = (
+        name => "Printk",
+        intro => ["Displays the printk buffer."],
+    );
 }

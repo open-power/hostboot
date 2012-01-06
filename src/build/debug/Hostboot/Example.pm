@@ -38,8 +38,10 @@ sub main
     return 0;
 }
 
-sub help
+sub helpInfo
 {
-    ::userDisplay "Tool: Example\n";
-    ::userDisplay "\tDoesn't really do anything special.\n";
+    my %info = (
+        name => "Example",
+        intro => ["Doesn't really do anything special."],
+    );
 }

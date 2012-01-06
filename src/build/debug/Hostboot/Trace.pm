@@ -32,6 +32,7 @@ use constant MAX_NUM_TRACE_BUFFERS => 48;
 use constant DESC_ARRAY_ENTRY_SIZE => 24;
 use constant OFFSET_TRAC_BUFFER_SIZE => 20;
 use constant OFFSET_BUFFER_ADDRESS => 16;
+use constant BUFFER_ADDRESS_SIZE => 8;
 
 use File::Temp ('tempfile');
 
@@ -58,22 +59,29 @@ sub main
     my ($fh,$fname) = tempfile();
     binmode($fh);
 
+    # read the entire g_desc_array instead of reading each entry which is much slower in VBU
+    my $result = ::readData($symAddr, $symSize);
+
+    $symAddr = 0;
     my $foundBuffer = 0;
 
     for (my $i = 0; $i < MAX_NUM_TRACE_BUFFERS; $i++)
     {
         # component name is first in g_desc_array[$i]
-        my $compName = ::readStr($symAddr);
+        my $compName = substr $result, $symAddr, OFFSET_BUFFER_ADDRESS;
+        # strip off null paddings
+        $compName = unpack('A*', $compName);
         last if ($compName eq "");
-
-        # get the pointer to its trace buffer
-        my $buffAddr = ::read64($symAddr  + OFFSET_BUFFER_ADDRESS);
-
-        # get the size of this trace buffer 
-        my $buffSize = ::read32($buffAddr + OFFSET_TRAC_BUFFER_SIZE);
 
         if ((not defined $traceBuffers) or (uc($traceBuffers) =~ m/$compName/))
         {
+            # get the pointer to its trace buffer
+            my $buffAddr = substr $result, $symAddr + OFFSET_BUFFER_ADDRESS, BUFFER_ADDRESS_SIZE;
+            $buffAddr= hex (unpack('H*',$buffAddr));
+
+            # get the size of this trace buffer
+            my $buffSize = ::read32($buffAddr + OFFSET_TRAC_BUFFER_SIZE);
+
             $foundBuffer = 1;
             print $fh (::readData($buffAddr, $buffSize ));
         }
@@ -99,15 +107,17 @@ sub main
     unlink($fname);
 }
 
-sub help
+sub helpInfo
 {
-    ::userDisplay "Tool: Trace\n";
-    ::userDisplay "\tDisplays the trace buffer.\n";
-    ::userDisplay "\n    Options:\n";
-    ::userDisplay "\tfsp-trace=<path> - Path to non-default ".
-                      "fsp-trace utility.\n";
-    ::userDisplay "\tcomponents=<list> - Comma separated list of components\n".
-                  "\t                    to display trace buffers for.\n";
-    ::userDisplay "\twith-file-names - Trace statements will include file\n".
-                  "\t                  name of place the trace was defined.\n";
+    my %info = (
+        name => "Trace",
+        intro => ["Displays the trace buffer."],
+        options => {
+                    "fsp-trace=<path>" => ["Path to non-default fsp-trace utility."],
+                    "components=<list>" =>["Comma separated list of components to display trace",
+                                           "buffers for."],
+                    "with-file-names" => ["Trace statements will include file name of place the",
+                                          "trace was defined."],
+                   },
+    );
 }

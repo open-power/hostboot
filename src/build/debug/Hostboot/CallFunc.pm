@@ -143,17 +143,18 @@ sub main
     ::userDisplay ::read64($address + CALLFUNC_DEBUG_RETVAL_OFFSET)."\n";
 }
 
-sub help
+sub helpInfo
 {
-    ::userDisplay "Tool: CallFunc\n";
-    ::userDisplay "\tInteractively execute a function.\n";
-    ::userDisplay "\n    Options:\n";
-    ::userDisplay "\tfunction='function name' - Function to execute.\n";
-    ::userDisplay "\targuments=arg0,arg1... - List of arguments to pass.\n";
-    ::userDisplay "\tforce - Run command even if state doesn't not appear ".
-                  "correct.\n";
-    ::userDisplay "\n\tfunc can be used as a short-name for 'function'.\n";
-    ::userDisplay "\targs, parameters, or parms can be used as a short-name ";
-    ::userDisplay "for arguments.\n";
+    my %info = (
+        name => "CallFunc",
+        intro => ["Interactively execute a function."],
+        options => {
+                    "function='function name'" => ["Function to execute."],
+                    "arguments=arg0,arg1..." =>["List of arguments to pass function."],
+                    "force" => ["Run command even if state does not appear correct."],
+                   },
+        notes => ["func can be used as a short-name for 'function'.",
+                  "args, parameters, or parms can be used as a short-name for arguments."]
+    );
 }
 

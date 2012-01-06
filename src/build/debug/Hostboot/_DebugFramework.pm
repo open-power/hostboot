@@ -42,7 +42,7 @@ use strict;
 package Hostboot::_DebugFramework;
 use Exporter 'import';
 
-our @EXPORT = ( 'callToolModule', 'callToolModuleHelp',
+our @EXPORT = ( 'callToolModule', 'callToolModuleHelp', 'callToolModuleHelpInfo',
                 'parseToolOpts', 'determineImagePath',
                 'findSymbolAddress', 'findSymbolTOCAddress',
                 'findSymbolByAddress',
@@ -93,20 +93,64 @@ sub callToolModule
 
 # @sub callToolModuleHelp
 #
-# Executes the 'help' function of the requested tool module to display
-# tool usage.
+# Display the tool usage.
 #
 # @param string - Tool to call.
 #
 sub callToolModuleHelp
 {
     my $tool = shift;
+    my %info = callToolModuleHelpInfo($tool);
+
+    ::userDisplay("\nTool: $tool\n");
+
+    for my $i ( 0 .. $#{ $info{intro} } )
+    {
+        ::userDisplay("\t$info{intro}[$i]\n");
+    }
+
+    if (defined $info{options})
+    {
+        ::userDisplay("\nOptions:\n");
+
+        for my $key ( keys %{$info{options}} )
+        {
+            ::userDisplay("\t$key\n");
+
+            for my $i (0 .. $#{ $info{options}{$key} } )
+            {
+                ::userDisplay("\t\t$info{options}{$key}[$i]\n");
+            }
+        }
+    }
+
+    if (defined $info{notes})
+    {
+        ::userDisplay("\n");
+        for my $i (0 .. $#{ $info{notes} } )
+        {
+            ::userDisplay("$info{notes}[$i]\n");
+        }
+    }
+}
+
+# @sub callToolModuleHelpInfo
+#
+# Executes the 'helpInfo' function of the requested tool module to get
+# the tool usage info.
+#
+# @param string - Tool to call.
+#
+sub callToolModuleHelpInfo
+{
+    my $tool = shift;
     my $package = "Hostboot::$tool";
 
     eval("use lib '.'; use $package; return 1;") or
             die "Couldn't load tool \"$tool\":\n\t$@";
-    eval("$package->help(\\%toolOpts);");
+    my %info = eval("$package->helpInfo(\\%toolOpts);");
     die $@ if $@;
+    return %info;
 }
 
 # @sub parseToolOpts

@@ -142,19 +142,17 @@ sub main
     return 0;
 }
 
-sub help
+sub helpInfo
 {
-
-    ::userDisplay "Tool: Errl\n";
-    ::userDisplay "\tList or display the error log entries.\n";
-    ::userDisplay "\n";
-    ::userDisplay "    Options:\n";
-    ::userDisplay "\tdisplay=<id> - Display a specific error log by id.\n";
-    ::userDisplay "\tdisplay=all - Display all error logs in the repository.\n";
-    ::userDisplay "\n";
-    ::userDisplay "    The default behavior is to list all the committed error\n";
-    ::userDisplay "    logs unless requested to display a specific error log\n";
-    ::userDisplay "    or all error logs.\n";
-
+    my %info = (
+        name => "Errl",
+        intro => ["List or display the error log entries."],
+        options => {
+                    "display=<id>|all" => ["<id> - Display a specific error log by id.",
+                                           "all - Display all error logs in the repository."],
+                   },
+        notes => ["The default behavior is to list all the committed error logs unless",
+                  "requested to display a specific error log or all error logs."]
+    );
 }
 

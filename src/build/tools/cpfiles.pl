@@ -26,14 +26,14 @@
 # Purpose:  This perl script needs to be executed from the
 # git repository.  It will copy all relevant files, including
 # scripts, hbotStringFile, .list, .syms and .bin files needed for debug
-# to the user specified directory.
+# or to release Hostboot code to the user specified directory.
 #
 # Author: CamVan Nguyen 07/07/2011
 #
 
 #
 # Usage:
-# cpfiles.pl <path>
+# cpfiles.pl <path> [--test] [--release | --vpo | --simics]
 
 
 #------------------------------------------------------------------------------
@@ -55,41 +55,44 @@ sub printUsage;
 #------------------------------------------------------------------------------
 
 #List of files to copy.  Path is relative to git repository.
-my @files = ("src/build/tools/hb-parsedump.pl",
-             "src/build/simics/hb-simdebug.py",
-             "src/build/simics/post_model_hook.simics",
-             "src/build/debug/Hostboot",
-             "src/build/debug/simics-debug-framework.pl",
-             "src/build/debug/simics-debug-framework.py",
-             "img/errlparser", 
-             "img/hbotStringFile",
-             "img/hbicore.syms",
-             "img/hbicore_test.syms",
-             "img/hbicore.bin",
-             "img/hbicore_test.bin",
-             "img/hbicore.list",
-             "img/hbicore_test.list",
-             "img/hbicore_extended.bin",
-             "img/hbicore_test_extended.bin",
-             "img/hbicore.bin.modinfo",
-             "img/hbicore_test.bin.modinfo",
-             "img/pnor.toc",
-             "img/simics_SALERNO_targeting.bin",
-             "img/simics_VENICE_targeting.bin",
-             "img/vbu_targeting.bin",
-             "img/isteplist.csv",
+# r = copy to Hostboot release dir
+# s = copy to simics sandbox
+# v = copy to vpo/vbu dir
+my %files = ("src/build/tools/hb-parsedump.pl" => "rsv",
+             "src/build/simics/hb-simdebug.py" => "s",
+             "src/build/simics/post_model_hook.simics" => "s",
+             "src/build/debug/Hostboot" => "rsv",
+             "src/build/debug/simics-debug-framework.pl" => "s",
+             "src/build/debug/simics-debug-framework.py" => "s",
+             "src/build/debug/vpo-debug-framework.pl" => "rv",
+             "src/build/debug/hb-dump-debug" => "rsv",
+             "src/build/vpo/hb-dump" => "rv",
+             "src/build/vpo/hb-istep" => "rv",
+             "src/build/vpo/hb-virtdebug.pl" => "rv",
+             "src/build/vpo/VBU_Cacheline.pm" => "rv",
+             "src/build/hwpf/prcd_compile.tcl" => "r",
+             "img/errlparser" => "rsv",
+             "img/hbotStringFile" => "rsv",
+             "img/hbicore.syms" => "rsv",
+             "img/hbicore_test.syms" => "rsv",
+             "img/hbicore.bin" => "rsv",
+             "img/hbicore_test.bin" => "rsv",
+             "img/hbicore.list" => "rsv",
+             "img/hbicore_test.list" => "rsv",
+             "img/hbicore_extended.bin" => "rsv",
+             "img/hbicore_test_extended.bin" => "rsv",
+             "img/hbicore.bin.modinfo" => "rsv",
+             "img/hbicore_test.bin.modinfo" => "rsv",
+             "img/pnor.toc" => "rsv",
+             "img/simics_SALERNO_targeting.bin" => "rs",
+             "img/simics_VENICE_targeting.bin" => "rs",
+             "img/vbu_targeting.bin" => "rv",
+             "img/isteplist.csv" => "rsv",
+             "src/usr/hwpf/hwp/fapiTestHwp.C" => "r",
+             "src/include/usr/hwpf/hwp/fapiTestHwp.H" => "r",
+             "src/usr/hwpf/hwp/initfiles/sample.initfile" => "r",
              );
              
-# copy vpo files into working dir for AWAN
-my @vpofiles = ("src/build/vpo/hb-dump",
-                "src/build/vpo/hb-errl",
-                "src/build/vpo/hb-istep",
-                "src/build/vpo/hb-printk",
-                "src/build/vpo/hb-trace", 
-                "src/build/vpo/hb-virtdebug.pl",
-                "src/build/vpo/VBU_Cacheline.pm",   
-             );
-
 #Directories in base git repository
 my @gitRepoDirs = ("img",
                     "obj",
@@ -108,7 +111,7 @@ my $numArgs = $#ARGV + 1;
 
 my $test = 0;   #Flag to overwrite hbicore.<syms|bin|list> with the test versions
 my $inDir = ""; #User specified directory to copy files to
-my $vpo = 0;    # copy extra vpo files to inDir
+my $env = "s";  #Flag to indicate which environment; simics by default
 
 if ($numArgs > 3)
 {
@@ -132,10 +135,20 @@ else
             #Set flag to copy hbicore_test.<syms|bin> to hbcore_test.<syms|bin>
             $test = 1;
         }
+        elsif ($_ eq "--release")
+        {
+            #Set flag to indicate environment
+            $env = "r";
+        }
         elsif ($_ eq "--vpo")
         {
-            #Set flag to copy list of vpo files to $inDir
-            $vpo = 1;
+            #Set flag to indicate environment
+            $env = "v";
+        }
+        elsif ($_ eq "--simics")
+        {
+            #Set flag to indicate environment
+            $env = "s";
         }
         else
         {
@@ -203,14 +216,6 @@ else
 }
 
 #------------------------------------------------------------------------------
-# If vpo flag is set, add the vpo files to the @files array
-#------------------------------------------------------------------------------
-if ( $vpo )
-{
-    push( @files, @vpofiles );
-}
-
-#------------------------------------------------------------------------------
 # Get the base dir of the git repository
 #------------------------------------------------------------------------------
 my $cwd = getcwd();
@@ -239,16 +244,18 @@ my $copyDir = "";
 chdir $gitRepo;
 #print "cwd: ", getcwd()."\n";
 
-foreach (@files)
+# There is no guarantee of the order of the elements of a hash (%files), so
+# delete the files first so we don't accidentally delete them after copying when
+# the --test option is used.
+while ( my ($key, $value) = each(%files) )
 {
-    $command = "";
+    #Skip file if not correct env
+    next if (!($value =~ m/$env/));
 
-    my($filename, $directories, $suffix) = fileparse($_, qr{\..*});
-    #print "$filename, $directories, $suffix\n";
+    my($filename, $directories, $suffix) = fileparse($key, qr{\..*});
+    my $recursive = (-d $key) ? "-r" : "";
 
-    my $recursive = (-d $_) ? "-r" : "";
-
-    #Copy .bin to the img dir
+    #Is file in img dir?
     if (($suffix eq ".bin") ||
 	($suffix eq ".toc"))
     {
@@ -262,37 +269,57 @@ foreach (@files)
     #Delete the old file first (handles copying over symlinks)
     $command = sprintf("rm -f %s %s/%s%s", $recursive, 
                                            $copyDir, $filename, $suffix);
-    if ($command ne "")
-    {
-        print "$command\n";
-        `$command`;
-    }
+    print "$command\n";
+    die if (system("$command") != 0);
+}
+
+# Now copy files
+while ( my ($key, $value) = each(%files) )
+{
+    #Skip file if not correct env
+    next if (!($value =~ m/$env/));
+
     $command = "";
 
+    my($filename, $directories, $suffix) = fileparse($key, qr{\..*});
+    #print "$filename, $directories, $suffix\n";
+
+    my $recursive = (-d $key) ? "-r" : "";
+
+    #Copy .bin to the img dir
+    if (($suffix eq ".bin") ||
+	($suffix eq ".toc"))
+    {
+        $copyDir = $imgDir;
+    }
+    else
+    {
+        $copyDir = $simicsDir;
+    }
 
     #Check if user wants to copy test versions to hbicore.<syms|bin|list>
-    if ($test == 1)
+    if (($test == 1) && ("r" ne $env))
     {
         #Copy test versions to hbicore.<syms|bin|list>
         if ($filename eq "hbicore_test")
         {
             $command = sprintf("cp %s %s %s", $recursive,
-                                              $_, $copyDir."/hbicore".$suffix);
+                                              $key, $copyDir."/hbicore".$suffix);
         }
         elsif ($filename eq "hbicore_test_extended")
         {
             $command = sprintf("cp %s %s %s", $recursive,
-                                              $_, $copyDir."/hbicore_extended".$suffix);
+                                              $key, $copyDir."/hbicore_extended".$suffix);
         }
         elsif ($filename ne "hbicore" and $filename ne "hbicore_extended")
         {
             $command = sprintf("cp %s %s %s", $recursive,
-                                              $_, $copyDir);
+                                              $key, $copyDir);
         }
     }
     else
     {
-        $command = sprintf("cp %s %s %s", $recursive, $_, $copyDir);
+        $command = sprintf("cp %s %s %s", $recursive, $key, $copyDir);
     }
 
     # Copy the file
@@ -300,27 +327,56 @@ foreach (@files)
     {
         print "$command\n";
         `$command`;
-	if( $? != 0 )
-	{
-	    print "ERROR : exiting\n";
-	    exit(-1);
-	}
+        if( $? != 0 )
+        {
+            print "ERROR : exiting\n";
+            exit(-1);
+        }
     }
-
 }
 
-# create a sym-link to the appropriate targeting binary
-print "Linking in simics_".$machine.".targeting.bin\n";
-$command = sprintf("ln -sf %s/simics_%s_targeting.bin %s/targeting.bin", $imgDir, $machine, $imgDir );
-print "$command\n";
-`$command`;
-if( $? != 0 )
+if ("s" eq $env) #simics
 {
-    print "ERROR : exiting\n";
-    exit(-1);
+    # create a sym-link to the appropriate targeting binary
+    print "Linking in simics_".$machine.".targeting.bin\n";
+    $command = sprintf("ln -sf %s/simics_%s_targeting.bin %s/targeting.bin", $imgDir, $machine, $imgDir );
+    print "$command\n";
+    `$command`;
+    if( $? != 0 )
+    {
+        print "ERROR : exiting\n";
+        exit(-1);
+    }
 }
+else #release or vpo
+{
+    # create sym-links for vpo-debug-framework.pl for each perl module
+    # in the debug framework
+    my $debugFrameworkDir = "src/build/debug/Hostboot";
+    opendir (my $dh, $debugFrameworkDir) or
+        die "Can't open dir '$debugFrameworkDir': $!";
+    my @files = readdir $dh;
+    closedir $dh;
 
+    #need to create symlinks for old tool names as well
+    push(@files, "errl");
+    push(@files, "printk");
+    push(@files, "trace");
 
+    foreach (@files)
+    {
+        # filter out any file prefixed with '_' or '.'
+        next if ($_ =~ m/^[._]/);
+
+        my($filename, $directories, $suffix) = fileparse($_, qr{\..*});
+
+        # create sym-link
+        $filename = "hb-$filename";
+        $command = "ln -sf $inDir/vpo-debug-framework.pl $inDir/$filename";
+        print "$command\n";
+        die if (system("$command") != 0);
+    }
+}
 
 chdir $cwd;
 #print "cwd: ", getcwd()."\n";
@@ -335,17 +391,20 @@ chdir $cwd;
 #------------------------------------------------------------------------------
 sub printUsage()
 {
-    print ("\nUsage: cpfiles.pl [--help] | [<path>] [--test]\n\n");
+    print ("\nUsage: cpfiles.pl [--help] | [<path>] [--test]\n");
+    print ("                   [--release| --vpo| --simics]\n\n");
     print ("  This program needs to be executed from the git repository.\n");
     print ("  It will copy all relevant files, scripts, hbotStringFile,\n");
-    print ("  .list, .syms and .bin files needed for debug to one of two\n");
-    print ("  locations:\n");
+    print ("  .list, .syms and .bin files needed for debug or release of\n");
+    print ("  Hostboot code to one of two locations:\n");
     print ("      1.  <path> if one is specified by the user\n");
     print ("      2.  if <path> is not specified, then the files will be\n");
     print ('          copied to the path specified by env variable $SANDBOXBASE'."\n");
     print ("          if it is defined.\n\n");
     print ("  --help: prints usage information\n");
     print ("  --test: Copy hbicore_test.<syms|bin|list> to hbicore.<syms|bin|list>\n");
-    print ("  --vpo:  Copy files in src/build/vpo to support vpo operation\n");
+    print ("  --release: Copy files needed to release Hostboot code\n");
+    print ("  --vpo: Copy files needed to debug in vpo\n");
+    print ("  --simics: <default> Copy files needed to debug in simics\n");
 }
 

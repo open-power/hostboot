@@ -167,8 +167,10 @@ sub makeTabs
     return $result;
 }
 
-sub help
+sub helpInfo
 {
-    ::userDisplay "Tool: Ps\n";
-    ::userDisplay "\tDisplays a tree of all tasks and their current state.\n";
+    my %info = (
+        name => "Ps",
+        intro => ["Displays a tree of all tasks and their current state."],
+    );
 }
