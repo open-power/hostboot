@@ -114,6 +114,9 @@
         <id>DECONFIG_GARDABLE</id>
         <default>1</default>
     </attribute>
+    <attribute>
+        <id>EC</id>
+    </attribute>
 </targetType>
 
 <targetType>

@@ -2581,4 +2581,21 @@
     <writeable/>
 </attribute>
 
+<attribute>
+    <id>EC</id>
+    <description>attribute indicating the chip target's EC level</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+       <id>ATTR_EC</id>
+       <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
 </attributes>

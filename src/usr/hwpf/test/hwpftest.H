@@ -370,21 +370,22 @@ public:
                                                        NULL, l_uint8array2);
             if (l_rc != fapi::FAPI_RC_SUCCESS)
             {
-                FAPI_IMP("testHwpf5: ATTR_SCRATCH_UINT8_ARRAY_2. "
-                         "Error from SET");
+                TS_FAIL("testHwpf5: ATTR_SCRATCH_UINT8_ARRAY_2. "
+                        "Error from SET");
                 break;
             }
 
-            uint8_t l_vpoMode;
-            l_rc = FAPI_ATTR_GET(ATTR_IS_SIMULATION, NULL, l_vpoMode);
+            // Test ATTR_IS_SIMULATION access through FAPI
+            uint8_t l_flag;
+            l_rc = FAPI_ATTR_GET(ATTR_IS_SIMULATION, NULL, l_flag);
             if (l_rc != fapi::FAPI_RC_SUCCESS)
             {
-                FAPI_IMP("testHwpf5: ATTR_IS_SIMULATION. Error from GET");
+                TS_FAIL("testHwpf5: ATTR_IS_SIMULATION. Error from GET");
                 break;
             }
             else
             {
-                //printk("VPO = %d\n", l_vpoMode);
+                //printk("ATTR_IS_SIMULATION = %d\n", l_flag);
             }
 
             // Get the master processor chip
@@ -394,6 +395,19 @@ public:
             // Create a FAPI Target and invoke the hwpInitialTest HWP
             fapi::Target l_fapiTarget(TARGET_TYPE_PROC_CHIP,
                                       reinterpret_cast<void *> (l_pTarget));
+
+            // Test ATTR_EC attribute access through FAPI
+            uint8_t l_EC_R = 0xFF;
+            fapi::Target *l_pfapiTarget = &l_fapiTarget;
+
+            l_rc = FAPI_ATTR_GET(ATTR_EC, l_pfapiTarget, l_EC_R);
+            if (l_rc != fapi::FAPI_RC_SUCCESS)
+            {
+                TS_FAIL("testHwpf5: ATTR_EC. Error from GET");
+                break;
+            }
+
+            //printk("EC = %d\n", l_EC_R);
 
             /*
             // Save original scom data to restore at end of test
