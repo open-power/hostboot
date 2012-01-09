@@ -2568,4 +2568,17 @@
     </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+    <id>FSI_SCOM_MUTEX</id>
+    <description>Mutex for FSI-based SCOM Operations</description>
+    <simpleType>
+        <hbmutex>
+            <default>0</default>
+        </hbmutex>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
 </attributes>

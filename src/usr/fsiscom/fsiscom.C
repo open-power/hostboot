@@ -32,8 +32,6 @@
 #include "fsiscom.H"
 
 //Globals/Constants
-// @todo - change to target-specific MUTEX so devices can be accessed in parallel.
-static mutex_t g_fsiScomMutex = MUTEX_INITIALIZER;
 
 // Trace definition
 trace_desc_t* g_trac_fsiscom = NULL;
@@ -76,6 +74,7 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
     uint32_t l_status = 0;
     bool need_unlock = false;
     size_t op_size = sizeof(uint32_t);
+    mutex_t* l_mutex = NULL;
 
     do{
 
@@ -123,6 +122,8 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
 
         l_command = static_cast<uint32_t>(l_scomAddr & 0x000000007FFFFFFF);
 
+        // use the chip-specific mutex attribute
+        l_mutex = i_target->getHbMutexAttr<TARGETING::ATTR_FSI_SCOM_MUTEX>();
 
         if(i_opType == DeviceFW::WRITE)
         {
@@ -132,7 +133,7 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
 
 
             // atomic section >>
-            mutex_lock(&g_fsiScomMutex);
+            mutex_lock(l_mutex);
             need_unlock = true;
 
 
@@ -184,7 +185,7 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
 
             // atomic section <<
             need_unlock = false;
-            mutex_unlock(&g_fsiScomMutex);
+            mutex_unlock(l_mutex);
 
             //bits 17-19 indicates PCB/PIB error
             if(l_status & 0x00007000)
@@ -219,7 +220,7 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
             TRACUCOMP( g_trac_fsiscom, "fsiScomPerformOp: Read(l_scomAddr=0x%.8X)", l_scomAddr);  
 
             // atomic section >>
-            mutex_lock(&g_fsiScomMutex);
+            mutex_lock(l_mutex);
             need_unlock = true;
 
 
@@ -295,7 +296,7 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
 
             // atomic section <<
             need_unlock = false;
-            mutex_unlock(&g_fsiScomMutex);
+            mutex_unlock(l_mutex);
 
             TRACUCOMP( g_trac_fsiscom, "fsiScomPerformOp: Read: l_scomAddr=0x%X, l_data0=0x%X, l_data1=0x%X", l_scomAddr, scratchData.data32_0, scratchData.data32_1);  
 
@@ -327,9 +328,9 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
 
     }while(0);
 
-    if( need_unlock )
+    if( need_unlock && l_mutex )
     {
-        mutex_unlock(&g_fsiScomMutex);
+        mutex_unlock(l_mutex);
     }
 
 

@@ -766,7 +766,7 @@ errlHndl_t FsiDD::read(const FsiAddrInfo_t& i_addrInfo,
 errlHndl_t FsiDD::write(const FsiAddrInfo_t& i_addrInfo,
                         uint32_t* i_buffer)
 {
-    TRACDCOMP(g_trac_fsi, "FsiDD::write(relAddr=0x%llx,absAddr=0x%11x)> ", i_addrInfo.relAddr, i_addrInfo.absAddr );
+    TRACDCOMP(g_trac_fsi, "FsiDD::write(relAddr=0x%.llX,absAddr=0x%.11X)> ", i_addrInfo.relAddr, i_addrInfo.absAddr );
     errlHndl_t l_err = NULL;
     bool need_unlock = false;
     mutex_t* l_mutex = NULL;
@@ -826,7 +826,7 @@ errlHndl_t FsiDD::write(const FsiAddrInfo_t& i_addrInfo,
         mutex_unlock(l_mutex);
     }
 
-    //TRACDCOMP(g_trac_fsi, "< FsiDD::write() ", i_address); //TODO BUG!
+    TRACDCOMP(g_trac_fsi, "< FsiDD::write() " ); 
 
     return l_err;
 }
@@ -1177,7 +1177,13 @@ errlHndl_t FsiDD::initPort(FsiChipInfo_t i_fsiInfo,
         if( !isSlavePresent(i_fsiInfo.master,i_fsiInfo.type,i_fsiInfo.port) )
         {
             TRACDCOMP( g_trac_fsi, "FsiDD::initPort> Slave %.8X is not present", i_fsiInfo.linkid.id );
-            //TRACDCOMP( g_trac_fsi, " : sensebits=%.2X, portbit=%.2X", iv_slaves[getSlaveEnableIndex(i_fsiInfo.master,i_fsiInfo.type)], portbit ); TODO BUG!!
+#ifdef HOSTBOOT_DEBUG
+            uint64_t slave_index = getSlaveEnableIndex(i_fsiInfo.master,i_fsiInfo.type);
+            if( slave_index != INVALID_SLAVE_INDEX )
+            {
+                TRACDCOMP( g_trac_fsi, " : sensebits=%.2X, portbit=%.2X", iv_slaves[slave_index], portbit );
+            }
+#endif
             break;
         }
         TRACFCOMP( g_trac_fsi, "FsiDD::initPort> Slave %.8X is present", i_fsiInfo.linkid.id );
@@ -1423,6 +1429,11 @@ uint64_t FsiDD::getPortOffset(TARGETING::FSI_MASTER_TYPE i_type,
 uint64_t FsiDD::getSlaveEnableIndex( const TARGETING::Target* i_master,
                                      TARGETING::FSI_MASTER_TYPE i_type )
 {
+    if( i_master == NULL )
+    {
+        return INVALID_SLAVE_INDEX;
+    }
+
     //default to local slave ports
     uint64_t slave_index = MAX_SLAVE_PORTS+i_type;
     if( i_master != iv_master )
@@ -1458,7 +1469,8 @@ FsiDD::FsiChipInfo_t FsiDD::getFsiInfo( const TARGETING::Target* i_target )
 
     EntityPath epath;
 
-    if( i_target->tryGetAttr<ATTR_FSI_MASTER_TYPE>(info.type) )
+    if( (i_target != NULL) &&
+        i_target->tryGetAttr<ATTR_FSI_MASTER_TYPE>(info.type) )
     {
         if( info.type != FSI_MASTER_TYPE_NO_MASTER )
         {

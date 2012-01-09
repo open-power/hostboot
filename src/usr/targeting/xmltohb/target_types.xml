@@ -138,6 +138,9 @@
     <attribute>
         <id>FSI_MASTER_MUTEX</id>
     </attribute>
+    <attribute>
+        <id>FSI_SCOM_MUTEX</id>
+    </attribute>
 </targetType>
 
 <targetType>
@@ -646,6 +649,9 @@
     </attribute>
     <attribute><id>MSS_VOLT</id></attribute>
     <attribute><id>MSS_FREQ</id></attribute>
+    <attribute>
+        <id>FSI_SCOM_MUTEX</id>
+    </attribute>
 </targetType>
 
 <!-- Centaur MBS -->
