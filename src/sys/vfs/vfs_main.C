@@ -65,10 +65,11 @@ void vfs_main(void* i_barrier)
 
     printk("done.\n");
 
-    barrier_wait(barrier);
-
     // Initalize modules.
     vfs_module_init();
+
+    // Signal with sys/init to continue on.
+    barrier_wait(barrier);
 
     Util::Locked::List<VfsEntry, VfsEntry::key_type> vfsContents;
 
