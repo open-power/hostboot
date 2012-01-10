@@ -260,6 +260,83 @@ def register_hb_debug_framework_tools():
                     doc = usage)
         print "Hostboot Debug Framework: Registered tool:", "hb-" + tool
 
+
+# Return a number/address built from the input list elements. Each element
+# in the input is a string representation of a byte-sized hex number, for 
+# example '0x2b' or '0x0' or '0xa'.  This does no endian conversion, thus
+# the input needs to be big endian.  The length of the input list can be 
+# any size, usually 2, 4, or 8.
+def hexDumpToNumber(hexlist):
+    strNumber=""
+    for i in range(len(hexlist)):
+        # take away 0x for this byte
+        hexlist[i] = hexlist[i][2:]
+        # zero-fill leading zeroes to make a 2-char string
+        hexlist[i] = hexlist[i].zfill(2)
+        # concatenate onto addr
+        strNumber += hexlist[i]
+    return int(strNumber,16)
+
+
+# Read simics memory and return a list of strings such as ['0x0','0x2b','0x8']
+# representing the data read from simics. The list returned may be handed
+# to hexDumpToNumber() to turn the list into a number. 
+def dumpSimicsMemory(address,bytecount):
+    hexlist = map(hex,conf.phys_mem.memory[[address,address+bytecount-1]])
+    return hexlist
+
+
+# Read the 64-bit big endian at the address given, return it as a number.
+def readLongLong(address):
+    hexlist = dumpSimicsMemory(address,8)
+    return hexDumpToNumber(hexlist)
+
+
+# MAGIC_INSTRUCTION hap handler 
+# arg contains the integer parameter n passed to MAGIC_INSTRUCTION(n)
+# See src/include/arch/ppc.H for the definitions of the magic args.
+# Hostboot magic args should range 7000..7999.
+def magic_instruction_callback(user_arg, cpu, arg):
+    if arg == 7006:   # MAGIC_SHUTDOWN
+        # KernelMisc::shutdown()
+        print "KernelMisc::shutdown() called."
+        # Could break/stop/pause the simics run, but presently 
+        # shutdown() is called four times. --Monte Jan 2012
+        # SIM_break_simulation( "Shutdown. Simulation stopped." )
+
+    if arg == 7007:   # MAGIC_BREAK
+        # Stop the simulation, much like a hard-coded breakpoint 
+        SIM_break_simulation( "Simulation stopped. (hap 7007)"  )
+
+    if arg == 7055:   # MAGIC_CONTINUOUS_TRACE 
+        # Continuous trace.
+        # Residing at tracBinaryInfoAddr is the pointer to the tracBinary buffer
+        pTracBinaryBuffer = readLongLong(tracBinaryInfoAddr)
+        # Read the count of bytes used in the tracBinary buffer
+        cbUsed = readLongLong(tracBinaryInfoAddr+8)
+        # Save the tracBinary buffer to a file named tracBINARY in current dir
+        saveCommand = "memory_image_ln0.save tracBINARY 0x%x %d"%(pTracBinaryBuffer,cbUsed)
+        SIM_run_alone(run_command, saveCommand )
+        # Run fsp-trace on tracBINARY file (implied), append output to tracMERG
+        os.system( "fsp-trace ./ -s hbotStringFile >>tracMERG  2>/dev/null" )
+
+
+# Continuous trace:  Open the symbols and find the address for 
+# "g_tracBinaryInfo"  Convert to a number and save in tracBinaryInfoAddr
+for line in open('hbicore.syms'):
+    if "g_tracBinaryInfo" in line:
+        words=line.split(",")
+        tracBinaryInfoAddr=int(words[1],16)
+        break
+
+# Continuous trace: Clear these files.
+rc = os.system( "rm -f tracMERG" )
+rc = os.system( "rm -f tracBINARY" )
+
+# Register the magic instruction hap handler (a callback).
+SIM_hap_add_callback_range( "Core_Magic_Instruction", magic_instruction_callback, None, 7000, 7999 )
+
+
 # Run the registration automatically whenever this script is loaded.
 register_hb_debug_framework_tools()
 

@@ -75,7 +75,7 @@ const uint32_t TRAC_TIME_167MHZ = 3;  // 166666667Hz
 
 
 
-// WARNING: Changing the size of the trace buffer name string requires a 
+// WARNING: Changing the size of the trace buffer name string requires a
 // changing OFFSET_BUFFER_ADDRESS in src/build/debug/Hostboot/Trace.pm.
 const uint32_t COMP_NAME_SIZE   = 16; // includes NULL terminator, so 15 max
 
@@ -87,15 +87,15 @@ const uint64_t     TRAC_DEFAULT_BUFFER_SIZE = 0x0800;  //2KB
 
 // The number of trace buffers.
 // NOTE: This constant should only be changed to an even number for now.
-// WARNING: Changing the count of buffers requires a co-req change 
+// WARNING: Changing the count of buffers requires a co-req change
 // in src/build/debug/Hostboot/Trace.pm  which has this count hard coded.
 const uint64_t TRAC_MAX_NUM_BUFFERS = 48;
 
 // An array of these structs accounts for all the trace buffers in Hostboot.
-// WARNING: Changing the size of trace_desc_array requires a co-req change 
+// WARNING: Changing the size of trace_desc_array requires a co-req change
 // in src/build/debug/Hostboot/Trace.pm  which has hard-coded the size of
-// this structure. 
-typedef struct trace_desc_array 
+// this structure.
+typedef struct trace_desc_array
 {
     char comp[COMP_NAME_SIZE];        // the buffer name
     trace_desc_t * td_entry;          // pointer to the buffer
@@ -104,6 +104,21 @@ typedef struct trace_desc_array
 // Global: found in syms file and thus the dump.
 trace_desc_array_t g_desc_array[TRAC_MAX_NUM_BUFFERS];
 
+
+// Set up a structure to hold information about the mixed-trace
+// or continuous-trace buffer, aka tracBINARY.
+
+// WARNING: Changes to this structure will require co-req changes to 
+// src/build/debug/simics-debug-framework.py which contains the simics
+// hap handler for extracting this buffer.
+struct mixed_trace_info
+{
+    char *     pBuffer;
+    uint64_t   cbUsed;
+};
+typedef struct mixed_trace_info mixed_trace_info_t; 
+const uint64_t TRAC_BINARY_SIZE = 4096;
+mixed_trace_info_t g_tracBinaryInfo;
 
 
 /******************************************************************************/
@@ -139,6 +154,17 @@ Trace::Trace()
 
     // compiler inits global vars to zero
     // memset(g_desc_array, 0, sizeof(g_desc_array));
+
+    g_tracBinaryInfo.pBuffer  =  static_cast<char*>(malloc(TRAC_BINARY_SIZE));
+
+    // fsp-trace convention expects a 2 in the first byte of tracBINARY
+    g_tracBinaryInfo.pBuffer[0] = 2;
+    g_tracBinaryInfo.cbUsed     = 1;  
+
+    // tracBINARY buffer appending is always on.
+    // TODO figure a way to control continuous trace on/off, perhaps
+    // unregister the hap handler for it. 
+    iv_ContinuousTrace = 1;
 }
 
 /******************************************************************************/
@@ -428,22 +454,18 @@ void Trace::_trace_adal_write_all(trace_desc_t *io_td,
         l_entry.head.hash = i_hash;
         l_entry.head.line = i_line;
 
-        // Time stamp
-        convertTime(&l_entry.stamp);
 
         // Calculate total space needed for the entry, which is a
         // combination of the data size from above, the entry
         // headers, and an overall length field.
-        l_entry_size = l_data_size;
-        l_entry_size += sizeof(trace_entry_stamp_t);
-        l_entry_size += sizeof(trace_entry_head_t);
+        l_entry_size = l_data_size +
+                       sizeof(trace_entry_stamp_t) +
+                       sizeof(trace_entry_head_t)  +
+                       // Allow for a uint32 at the end of the trace entry
+                       // so parsers may walk the trace buffer backwards
+                       sizeof(uint32_t);
 
-        // We always add the size of the entry at the end of the trace entry
-        // so the parsing tool can easily walk the trace buffer stack so we
-        // need to add that on to total size
-        l_entry_size += sizeof(uint32_t);
-
-        // Word align the entry
+        // Round up the size to the next word boundary
         l_entry_size = ALIGN_4(l_entry_size);
 
         // Allocate buffer for the arguments we're tracing
@@ -502,11 +524,13 @@ void Trace::_trace_adal_write_all(trace_desc_t *io_td,
 
         va_end(l_args);
 
-        // We now have total size and need to reserve a part of the trace
-        // buffer for this
+        // Write entry to the trace buffer.
 
         // CRITICAL REGION START
         mutex_lock(&iv_trac_mutex);
+
+        // time stamp the entry with time-base register
+        convertTime(&l_entry.stamp);
 
         // Update the entry count
         io_td->te_count++;
@@ -526,6 +550,46 @@ void Trace::_trace_adal_write_all(trace_desc_t *io_td,
         writeData(io_td,
                   static_cast<void *>(&l_entry_size),
                   sizeof(l_entry_size));
+
+
+
+        // Write to the combined trace buffer, a stream of traces.
+        if( iv_ContinuousTrace )
+        {
+            // This entry requires this many bytes to fit.
+            uint64_t l_cbCompName = 1 + strlen( io_td->comp );
+            uint64_t l_cbRequired = l_cbCompName +
+                                    sizeof( l_entry ) +
+                                    l_data_size;
+
+            if( (g_tracBinaryInfo.cbUsed + l_cbRequired) >  TRAC_BINARY_SIZE  )
+            {
+                // does not fit, so call somebody to collect it.
+                // TODO how to do this in VBU
+                MAGIC_INSTRUCTION(MAGIC_CONTINUOUS_TRACE);
+
+                // start over
+                g_tracBinaryInfo.cbUsed = 1;
+            }
+
+            // Copy the entry piecemeal to the destination.
+            char * l_pchDest = g_tracBinaryInfo.pBuffer + g_tracBinaryInfo.cbUsed;
+
+            // component name and its trailing nil byte
+            strcpy( l_pchDest, io_td->comp );
+            l_pchDest += l_cbCompName;
+
+            // trace entry
+            memcpy( l_pchDest, &l_entry, sizeof(l_entry));
+            l_pchDest += sizeof(l_entry);
+
+            // trace entry data
+            memcpy( l_pchDest, l_buffer, l_data_size );
+
+            // adjust for next time
+            g_tracBinaryInfo.cbUsed += l_cbRequired;
+        }
+
 
         mutex_unlock(&iv_trac_mutex);
         // CRITICAL REGION END
@@ -606,11 +670,12 @@ void Trace::_trace_adal_write_bin(trace_desc_t *io_td,const trace_hash_val i_has
         // We now have total size and need to reserve a part of the trace
         // buffer for this
 
-        // Time stamp
-        convertTime(&l_entry.stamp);
-
         // CRITICAL REGION START
         mutex_lock(&iv_trac_mutex);
+
+
+        // time stamp the entry with time-base register
+        convertTime(&l_entry.stamp);
 
         // Increment trace counter
         io_td->te_count++;
@@ -629,6 +694,58 @@ void Trace::_trace_adal_write_bin(trace_desc_t *io_td,const trace_hash_val i_has
         writeData(io_td,
                   static_cast<void *>(&l_entry_size),
                   sizeof(l_entry_size));
+
+        // Write to the combined trace buffer, a stream of traces.
+        // A while() here affords use of break to break out on
+        // an error condition.
+        while( iv_ContinuousTrace )
+        {
+            // This entry requires this many bytes to fit.
+            uint64_t l_cbCompName = 1 + strlen( io_td->comp );
+            uint64_t l_cbRequired = l_cbCompName +
+                                    sizeof( l_entry ) +
+                                    i_size;
+
+            if( l_cbRequired > TRAC_BINARY_SIZE )
+            {
+                // caller is logging more binary data than the
+                // size of the tracBinary buffer.
+                // TODO need to increase the buffer size, or else
+                // document its limits.
+                break;
+            }
+
+            if( (g_tracBinaryInfo.cbUsed + l_cbRequired) >  TRAC_BINARY_SIZE  )
+            {
+                // does not fit, so call somebody to collect it.
+                // TODO
+                MAGIC_INSTRUCTION(MAGIC_CONTINUOUS_TRACE);
+
+                // start over
+                g_tracBinaryInfo.cbUsed = 1;
+            }
+
+            // Copy the entry piecemeal to the destination.
+            char * l_pchDest = g_tracBinaryInfo.pBuffer + g_tracBinaryInfo.cbUsed;
+
+            // component name and its trailing nil byte
+            strcpy( l_pchDest, io_td->comp );
+            l_pchDest += l_cbCompName;
+
+            // trace entry
+            memcpy( l_pchDest, &l_entry, sizeof(l_entry));
+            l_pchDest += sizeof(l_entry);
+
+            // trace entry data
+            memcpy( l_pchDest, i_ptr, i_size );
+
+            // adjust for next time
+            g_tracBinaryInfo.cbUsed += l_cbRequired;
+
+            // break from while() which was used much like an if()
+            break;
+        }
+
 
         // CRITICAL REGION END
         mutex_unlock(&iv_trac_mutex);
@@ -742,6 +859,7 @@ void Trace::convertTime(trace_entry_stamp_t *o_entry)
     o_entry->tbl = ((l_time - (o_entry->tbh * 512000000)) / 512);
 
 }
+
 
 
 

@@ -57,6 +57,14 @@ namespace KernelMisc
                          :: "r" (scratch_address), "r" (status));
         }
 
+        // dump whatever is left in g_tracBinary
+        MAGIC_INSTRUCTION(MAGIC_CONTINUOUS_TRACE);
+
+        // See magic_instruction_callback() in 
+        // src/build/debug/simics-debug-framework.py 
+        // for exactly how this is handled.
+        MAGIC_INSTRUCTION(MAGIC_SHUTDOWN);
+
         while(1)
         {
             doze();

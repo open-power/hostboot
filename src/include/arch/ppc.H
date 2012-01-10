@@ -258,4 +258,64 @@ inline void doze()
     asm volatile("doze");
 }
 
+/** @brief  This is a special assembler instruction that is a nop on 
+ *  regular hardware, but has special meaning to Simics.  Code that
+ *  executes this instruction in Simics will cause a "hap," a 
+ *  Simics term.  If there is no hap handler registered, and magic
+ *  breakpoints have not been enabled with
+ *      simics> enable-magic-breakpoint 
+ *  then this instruction is also a nop in Simics. 
+ * 
+ *  If magic breakpoints are enabled, and there is no hap handler, then
+ *  when Hostboot code executes this instruction in Simics, Simics will
+ *  stop the simulation. (Prompt changes from running> to simics> )
+ * 
+ *  If a hap is registered, then Simics will call the hap handler.  Hap
+ *  handlers are written in Python, and the best place for them is
+ * 
+ *     src/build/debug/simics-debug-framework.py
+ *
+ *  Sample code to register the hap handler:
+ *        # arg contains the integer parameter n passed to MAGIC_INSTRUCTION(n)
+ *        def magic_instruction_callback(user_arg, cpu, arg):
+ *            # print to console works...
+ *            print "Hit magic instruction ", arg
+ *            # Or else stop the simulation...
+ *            SIM_break_simulation( "Stopped at magic instruction" )
+ * 
+ *        # Register the magic instruction callback.
+ *        SIM_hap_add_callback( "Core_Magic_Instruction", magic_instruction_callback, None )
+ *
+ *        # Better to register the Hostboot range 7000-7999
+ *        # so that PHYP and others won't be affected.
+ *        SIM_hap_add_callback_range( "Core_Magic_Instruction", magic_instruction_callback, None, 7000, 7999 )
+ * 
+ *  The argument n is an integer from 0..8191 which Simics passes to the hap
+ *  handler in parameter 3, or "arg" in the sample code above. 
+ */ 
+ALWAYS_INLINE
+inline void MAGIC_INSTRUCTION(int _n)
+{
+    register int n = _n;
+    asm volatile("rlwimi %0,%0,0,%1,%2"       \
+        :: "i" (((n) >> 8) & 0x1f),           \
+        "i" (((n) >> 4) & 0xf),               \
+        "i" ((((n) >> 0) & 0xf) | 16));
+}
+
+// Arguments to MAGIC_INSTRUCTION(). 
+// To ensure they do not conflict with haps from other groups (PHYP 
+// for example), assign hap numbers in the range 7000..7999 (decimal).
+// Presently, the hap handler for magic instruction is found in 
+// src/build/debug/simics-debug-framework.py
+// Jan 2012 Monte
+
+enum
+{
+    MAGIC_SHUTDOWN            =  7006, // KernelMisc::shutdown() called.
+    MAGIC_BREAK               =  7007, // hard-code a breakpoint
+    MAGIC_CONTINUOUS_TRACE    =  7055  // extract mixed trace buffer 
+};
+
+
 #endif

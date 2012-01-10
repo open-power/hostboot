@@ -372,8 +372,11 @@ private:
                               const int32_t i_type);
 
 
-    // Global Mutex
-    mutex_t    iv_trac_mutex;
+    // Mutex protecting/serializing writes to trace buffers.
+    mutex_t iv_trac_mutex;
+
+    // Controls writing to tracBinary
+    bool iv_ContinuousTrace; 
 
 };
 
