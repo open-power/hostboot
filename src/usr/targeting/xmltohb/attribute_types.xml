@@ -2598,4 +2598,174 @@
     </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+    <id>L2_R_T0_EPS</id>
+    <description>L2 tier0 read epsilon register value.</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_L2_R_T0_EPS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>L2_R_T1_EPS</id>
+    <description>L2 tier1 read epsilon register value.</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_L2_R_T1_EPS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>L2_R_T2_EPS</id>
+    <description>L2 tier2 read epsilon register value.</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_L2_R_T2_EPS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>L2_FORCE_R_T2_EPS</id>
+    <description>L2 force tier2 read epsilon protect (all tiers).</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_L2_FORCE_R_T2_EPS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>L2_W_EPS</id>
+    <description>L2 write epsilon register value.</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_L2_W_EPS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>L3_R_T0_EPS</id>
+    <description>L3 tier0 read epsilon register value.</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_L3_R_T0_EPS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>L3_R_T1_EPS</id>
+    <description>L3 tier1 read epsilon register value.</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_L3_R_T1_EPS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>L3_R_T2_EPS</id>
+    <description>L3 tier2 read epsilon register value.</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_L3_R_T2_EPS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>L3_FORCE_R_T2_EPS</id>
+    <description>L3 force tier2 read epsilon protect (all tiers).</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_L3_FORCE_R_T2_EPS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>L3_W_EPS</id>
+    <description>L3 write epsilon register value.</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_L3_W_EPS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
 </attributes>

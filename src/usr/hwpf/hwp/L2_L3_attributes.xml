@@ -1,0 +1,116 @@
+<!--  IBM_PROLOG_BEGIN_TAG
+     This is an automatically generated prolog.
+   
+     $Source: src/usr/hwpf/hwp/L2_L3_attributes.xml $
+   
+     IBM CONFIDENTIAL
+   
+     COPYRIGHT International Business Machines Corp. 2012
+   
+     p1
+   
+     Object Code Only (OCO) source materials
+     Licensed Internal Code Source Materials
+     IBM HostBoot Licensed Internal Code
+   
+     The source code for this program is not published or other-
+     wise divested of its trade secrets, irrespective of what has
+     been deposited with the U.S. Copyright Office.
+   
+     Origin: 30
+   
+     IBM_PROLOG_END -->
+<attributes>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_L2_R_T0_EPS</id>
+    <targetType>TARGET_TYPE_EX_CHIPLET</targetType>
+    <description>L2 tier0 read epsilon register value.</description>
+    <valueType>uint32</valueType>
+    <writeable/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_L2_R_T1_EPS</id>
+    <targetType>TARGET_TYPE_EX_CHIPLET</targetType>
+    <description>L2 tier1 read epsilon register value.</description>
+    <valueType>uint32</valueType>
+    <writeable/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_L2_R_T2_EPS</id>
+    <targetType>TARGET_TYPE_EX_CHIPLET</targetType>
+    <description>L2 tier2 read epsilon register value.</description>
+    <valueType>uint32</valueType>
+    <writeable/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_L2_FORCE_R_T2_EPS</id>
+    <targetType>TARGET_TYPE_EX_CHIPLET</targetType>
+    <description>L2 force tier2 read epsilon protect (all tiers).</description>
+    <valueType>uint8</valueType>
+    <enum>OFF = 0x00, ON = 0x01</enum>
+    <writeable/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_L2_W_EPS</id>
+    <targetType>TARGET_TYPE_EX_CHIPLET</targetType>
+    <description>L2 write epsilon register value.</description>
+    <valueType>uint32</valueType>
+    <writeable/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_L3_R_T0_EPS</id>
+    <targetType>TARGET_TYPE_EX_CHIPLET</targetType>
+    <description>L3 tier0 read epsilon register value.</description>
+    <valueType>uint32</valueType>
+    <writeable/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_L3_R_T1_EPS</id>
+    <targetType>TARGET_TYPE_EX_CHIPLET</targetType>
+    <description>L3 tier1 read epsilon register value.</description>
+    <valueType>uint32</valueType>
+    <writeable/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_L3_R_T2_EPS</id>
+    <targetType>TARGET_TYPE_EX_CHIPLET</targetType>
+    <description>L3 tier2 read epsilon register value.</description>
+    <valueType>uint32</valueType>
+    <writeable/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_L3_FORCE_R_T2_EPS</id>
+    <targetType>TARGET_TYPE_EX_CHIPLET</targetType>
+    <description>L3 force tier2 read epsilon protect (all tiers).</description>
+    <valueType>uint8</valueType>
+    <enum>OFF = 0x00, ON = 0x01</enum>
+    <writeable/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_L3_W_EPS</id>
+    <targetType>TARGET_TYPE_EX_CHIPLET</targetType>
+    <description>L3 write epsilon register value.</description>
+    <valueType>uint32</valueType>
+    <writeable/>
+    <persistRuntime/>
+  </attribute>
+</attributes>

@@ -257,6 +257,36 @@
         <id>TYPE</id>
         <default>EX</default>
     </attribute>
+    <attribute>
+        <id>L2_R_T0_EPS</id>
+    </attribute>
+    <attribute>
+        <id>L2_R_T1_EPS</id>
+    </attribute>
+    <attribute>
+        <id>L2_R_T2_EPS</id>
+    </attribute>
+    <attribute>
+        <id>L2_FORCE_R_T2_EPS</id>
+    </attribute>
+    <attribute>
+        <id>L2_W_EPS</id>
+    </attribute>
+    <attribute>
+        <id>L3_R_T0_EPS</id>
+    </attribute>
+    <attribute>
+        <id>L3_R_T1_EPS</id>
+    </attribute>
+    <attribute>
+        <id>L3_R_T2_EPS</id>
+    </attribute>
+    <attribute>
+        <id>L3_FORCE_R_T2_EPS</id>
+    </attribute>
+    <attribute>
+        <id>L3_W_EPS</id>
+    </attribute>
 </targetType>
 
 <targetType>

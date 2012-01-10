@@ -95,6 +95,31 @@ fapi::ReturnCode hwpTestAttributes()
         }
 
         //----------------------------------------------------------------------
+        // Test ATTR_L2_R_T0_EPS
+        //----------------------------------------------------------------------
+        {
+            TARGETING::PredicateCTM l_pred(TARGETING::CLASS_UNIT,
+                                                      TARGETING::TYPE_EX);
+            TARGETING::TargetRangeFilter l_filter(
+                                    TARGETING::targetService().begin(),
+                                    TARGETING::targetService().end(), &l_pred);
+            // Use the first EX chiplet
+            if (l_filter)
+            {
+                uint32_t l_tmp;
+                fapi::Target l_target(fapi::TARGET_TYPE_EX_CHIPLET, *l_filter);
+                fapi::Target * l_pTarget = &l_target;
+
+                l_rc = FAPI_ATTR_GET(ATTR_L2_R_T0_EPS, l_pTarget, l_tmp);
+                if (l_rc)
+                {
+                    FAPI_ERR("hwpTestAttributes: L2/L3 ATTR. Error from GET");
+                    break;
+                }
+            }
+        }
+
+        //----------------------------------------------------------------------
         // Test ATTR_SCRATCH_UINT8_1
         //----------------------------------------------------------------------
         {
