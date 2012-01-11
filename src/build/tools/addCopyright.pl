@@ -252,7 +252,7 @@ sub filetype
     if ( ( $filename =~ m/\.pl$/ )
        ||( $filename =~ m/\.perl$/ )
        ||( $filename =~ m/\.pm$/ )
-       ||( $fileinfo =~ m/perl.*script text executable/i) )
+       ||( $fileinfo =~ m/perl.*script.*text executable/i) )
     {
         return "Perl";
     }

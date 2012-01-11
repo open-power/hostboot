@@ -85,6 +85,14 @@ while (my $modline = <MODINFO>)
 my @output = ();
 foreach my $module (@modules)
 {
+    # Only search modules that are likely to be ELF files.
+    if (not (($module =~ m/\.o/) or
+             ($module =~ m/\.elf/) or
+             ($module =~ m/\.so/)))
+    {
+        next;
+    }
+
     open OBJDUMP, ("ppc64-mcp6-objdump --syms -C ".add_image_subdir($module)."|");
     while (my $line = <OBJDUMP>)
     {
