@@ -86,7 +86,7 @@ void _start(void* io_pArgs)
     TARG_ENTER();
 
     AttrRP::init(pTaskArgs);
-    if (( pTaskArgs ) && (!pTaskArgs->getErrorLog()))
+    if (( pTaskArgs ) && (!pTaskArgs->queryErrorLog()))
     {
         TargetService& l_targetService = targetService();
         (void)l_targetService.init();

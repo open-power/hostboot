@@ -229,6 +229,16 @@ public:
 
 
     /**
+     * @brief   queryErrorLog
+     *
+     * Tasks can use this to determine if an error log has been posted.
+     *
+     * @return bool - True if postErrorLog called with non-NULL value.
+     */
+    bool queryErrorLog( ) { return (iv_errl != NULL); };
+
+
+    /**
      * @brief   clear taskargs struct between uses
      *          - barrier is left alone,
      *          - if iv_errl is non zero, we commit it here just to avoid
