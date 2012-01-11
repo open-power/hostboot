@@ -329,7 +329,7 @@ errlHndl_t PnorRP::readTOC()
 
     // put some random sizes in here
     iv_TOC[PNOR::SIDE_A][PNOR::TOC].size = 8 + 8 + PNOR::NUM_SECTIONS*sizeof(TOCEntry_t);
-    iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].size = 700*KILOBYTE; //700K
+    iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].size = 1024*KILOBYTE; //1MB
     iv_TOC[PNOR::SIDE_A][PNOR::GLOBAL_DATA].size = PAGESIZE; //4K
     iv_TOC[PNOR::SIDE_A][PNOR::HB_DATA].size = 512*KILOBYTE; //512K
 

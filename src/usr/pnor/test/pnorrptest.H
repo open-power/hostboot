@@ -64,13 +64,13 @@ class PnorRpTest : public CxxTest::TestSuite
         };
         const ExpVals_t exp_data[] = {
             /* TOC */ { 0x690, 0x80000000 },
-            /* GLOBAL_DATA */ { PAGESIZE, 0x800AF690 },
+            /* GLOBAL_DATA */ { PAGESIZE, 0x80100690 },
             /* SBE_IPL */ { 0, 0 },
             /* HB_BASE_CODE */ { 0, 0 },
-            /* HB_DATA */ { 512*KILOBYTE, 0x800B0690 },
+            /* HB_DATA */ { 512*KILOBYTE, 0x80101690 },
             /* HB_ERRLOGS */ { 0, 0 },
-            /* HB_EXT_CODE */ { 0xAF000, 0x80000690 },
-            /* HB_RUNTIME */ { 0, 0 }, 
+            /* HB_EXT_CODE */ { 1024*KILOBYTE, 0x80000690 },
+            /* HB_RUNTIME */ { 0, 0 },
             /* PAYLOAD */ { 0, 0 },
             /* PFW_LITE_CODE */ { 0, 0 },
             /* OCC_CODE */ { 0, 0 },
@@ -107,7 +107,7 @@ class PnorRpTest : public CxxTest::TestSuite
                 TS_FAIL( "PnorRpTest::test_getSectionInfo> ERROR : Mismatched Size" );
                 fails++;
             }
-           
+
             // Look for expected vaddr
             total++;
             if( info.vaddr != exp_data[id].vaddr )
@@ -118,7 +118,7 @@ class PnorRpTest : public CxxTest::TestSuite
             }
         }
 
-        
+
         TRACFCOMP(g_trac_pnor, "PnorRpTest::test_getSectionInfo> %d/%d fails", fails, total );
     };
 
@@ -135,7 +135,7 @@ class PnorRpTest : public CxxTest::TestSuite
         int rc = 0;
 
         msg_q_t mq = PnorRP::getInstance().iv_msgQ;
-        
+
 
         // allocate some space to play with
         uint64_t data1_r[PAGESIZE/sizeof(uint64_t)];
@@ -148,7 +148,7 @@ class PnorRpTest : public CxxTest::TestSuite
 
         msg_t* msg = msg_allocate();
 
-        // read the first page        
+        // read the first page
         total++;
         msg->type = MSG_MM_RP_READ;
         msg->data[1] = (uint64_t)data1_r; //data[1] = address to copy into (user buffer)
@@ -158,7 +158,7 @@ class PnorRpTest : public CxxTest::TestSuite
         {
             TRACFCOMP(g_trac_pnor, "PnorRpTest::test_messageReadWrite> ERROR : error from msg_sendrecv(READ):1" );
             TS_FAIL( "PnorRpTest::test_messageReadWrite> ERROR : error from msg_sendrecv(READ):1, rc=%d", rc );
-            fails++;            
+            fails++;
         }
 
         // read the second page
@@ -171,7 +171,7 @@ class PnorRpTest : public CxxTest::TestSuite
         {
             TRACFCOMP(g_trac_pnor, "PnorRpTest::test_messageReadWrite> ERROR : error from msg_sendrecv(READ):2" );
             TS_FAIL( "PnorRpTest::test_messageReadWrite> ERROR : error from msg_sendrecv(READ):2, rc=%d", rc );
-            fails++;            
+            fails++;
         }
 
         // put some data into the first page
@@ -190,7 +190,7 @@ class PnorRpTest : public CxxTest::TestSuite
         {
             TRACFCOMP(g_trac_pnor, "PnorRpTest::test_messageReadWrite> ERROR : error from msg_sendrecv(WRITE):1" );
             TS_FAIL( "PnorRpTest::test_messageReadWrite> ERROR : error from msg_sendrecv(WRITE):1, rc=%d", rc );
-            fails++;            
+            fails++;
         }
 
         // read the first page again
@@ -203,7 +203,7 @@ class PnorRpTest : public CxxTest::TestSuite
         {
             TRACFCOMP(g_trac_pnor, "PnorRpTest::test_messageReadWrite> ERROR : error from msg_sendrecv(READ):3" );
             TS_FAIL( "PnorRpTest::test_messageReadWrite> ERROR : error from msg_sendrecv(READ):3, rc=%d", rc );
-            fails++;            
+            fails++;
         }
 
         // compare to what we wrote
@@ -212,7 +212,7 @@ class PnorRpTest : public CxxTest::TestSuite
         {
             TRACFCOMP(g_trac_pnor, "PnorRpTest::test_messageReadWrite> ERROR : Data mismatch in page0" );
             TS_FAIL( "PnorRpTest::test_messageReadWrite> ERROR : Data mismatch in page0" );
-            fails++;            
+            fails++;
             uint64_t* act_data = data1_r;
             for( uint64_t x = 0; x < 4; x++ )
             {
@@ -231,7 +231,7 @@ class PnorRpTest : public CxxTest::TestSuite
         {
             TRACFCOMP(g_trac_pnor, "PnorRpTest::test_messageReadWrite> ERROR : error from msg_sendrecv(READ):4" );
             TS_FAIL( "PnorRpTest::test_messageReadWrite> ERROR : error from msg_sendrecv(READ):4, rc=%d", rc );
-            fails++;            
+            fails++;
         }
 
         // compare to what we read the first time
@@ -240,7 +240,7 @@ class PnorRpTest : public CxxTest::TestSuite
         {
             TRACFCOMP(g_trac_pnor, "PnorRpTest::test_messageReadWrite> ERROR : Data mismatch in page1" );
             TS_FAIL( "PnorRpTest::test_messageReadWrite> ERROR : Data mismatch in page1" );
-            fails++;            
+            fails++;
             uint64_t* act_data = data_tmp;
             for( uint64_t x = 0; x < 4; x++ )
             {
@@ -260,7 +260,7 @@ class PnorRpTest : public CxxTest::TestSuite
      */
     void test_AddrReadWrite(void)
     {
-        return; //@todo - enable this after Task 3445 
+        return; //@todo - enable this after Task 3445
         TRACFCOMP( g_trac_pnor, "PnorRpTest::test_AddrReadWrite> Start" );
         uint64_t fails = 0;
         uint64_t total = 0;
@@ -277,7 +277,7 @@ class PnorRpTest : public CxxTest::TestSuite
             memcpy( ptr, (void*)(0x80000000+addr), 16*sizeof(uint64_t) );
         }
         delete[] ptr;
-        
+
         // setup a bunch of interesting addresses to read/write from
         uint64_t test_addrs[] = {
             0x8007E690,  // chip0-HB_DATA
@@ -327,7 +327,7 @@ class PnorRpTest : public CxxTest::TestSuite
     //@todo - import config data from build and compare to section info
 
 
-};     
+};
 
 
 #endif
