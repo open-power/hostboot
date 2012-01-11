@@ -51,17 +51,18 @@ class SegmentManager
             BASE_SEGMENT_ID = 0,
             /** Task Stack Segment (1-2TB). */
             STACK_SEGMENT_ID = 1,
-            /** MMIO Space Segment (2-3TB). */
-            MMIO_SEGMENT_ID = 2,
+            /** MMIO Space Segments (2-11TB). */
+            MMIO_FIRST_SEGMENT_ID = 2,
+            MMIO_LAST_SEGMENT_ID = MMIO_FIRST_SEGMENT_ID + 8,
 
-            MAX_SEGMENTS = 4
+            MAX_SEGMENTS = 16
         };
 
         enum
         {
             CI_ACCESS = 0xFFFFFFFF
             // Set to all F's to identify this type
-        }; 
+        };
 
         /**
          * Constructor.  Initializes instance variables.
@@ -130,12 +131,30 @@ class SegmentManager
          */
         static void castOutPages(uint64_t i_type);
 
+        /**
+         * @brief Map a device into the device segment
+         * @param ra[in] - Void pointer to real address to be mapped in
+         * @param i_devDataSize[in] - Size of device segment block
+         * @return void* - Pointer to beginning virtual address, NULL otherwise
+         */
+        static void* devMap(void* ra, uint64_t i_devDataSize);
+
+        /**
+         * @brief Unmap a device from the device segment
+         * @param ea[in] - Void pointer to effective address
+         * @return int - 0 for successful unmap, non-zero otherwise
+         */
+        static int devUnmap(void* ea);
+
+
 
     private:
         /** See handlePageFault. */
         bool _handlePageFault(task_t* i_task, uint64_t i_addr);
         /** See addSegment. */
         void _addSegment(Segment* i_segment, size_t i_segId);
+        /** See getSegment. */
+        Segment* _getSegment(size_t i_segId);
         /** See initSLB. */
         void _initSLB();
             /** See updateRefCount. */
@@ -143,14 +162,19 @@ class SegmentManager
 			      PageTableManager::UsageStats_t i_stats );
         /** See castOutPages */
         void _castOutPages(uint64_t i_type);
+        /** See devMap */
+        void* _devMap(void* ra, uint64_t i_devDataSize);
+        /** See devUnmap */
+        int _devUnmap(void* ea);
+
 
         /** See findPhysicalAddress */
         uint64_t _findPhysicalAddress(uint64_t i_vaddr) const;
 
         ALWAYS_INLINE
-        size_t getSegmentIdFromAddress(uint64_t i_addr) const
+        static size_t getSegmentIdFromAddress(uint64_t i_addr)
         {
-            return i_addr >> SLBE_s;  
+            return i_addr >> SLBE_s;
         }
 
         /** Array of segment objects to associated segment IDs. */

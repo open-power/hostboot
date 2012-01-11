@@ -34,6 +34,8 @@
 #include <sys/mmio.h>
 #include <usr/vmmconst.h>
 
+#include <list>
+
 class segmenttest: public CxxTest::TestSuite
 {
     public:
@@ -79,6 +81,33 @@ class segmenttest: public CxxTest::TestSuite
             if (rc != 0)
             {
                 TS_FAIL("Failed to create BaseSegment block\n");
+            }
+        }
+
+        // Verify we can allocate a block from the second device segment.
+        void testManyDeviceBlocks()
+        {
+            std::list<void*> blocks;
+
+            void* block = NULL;
+            while (reinterpret_cast<uint64_t>(block)
+                    < (VMM_VADDR_DEVICE_SEGMENT_FIRST + TERABYTE))
+            {
+                block = mmio_dev_map(reinterpret_cast<void*>(10 * TERABYTE),
+                                     THIRTYTWO_GB);
+
+                if (block == NULL)
+                {
+                    TS_FAIL("Unable to allocate device block.");
+                    break;
+                }
+                blocks.push_back(block);
+            }
+
+            while(!blocks.empty())
+            {
+                mmio_dev_unmap(blocks.front());
+                blocks.pop_front();
             }
         }
 

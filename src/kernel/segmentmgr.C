@@ -24,9 +24,11 @@
 #include <errno.h>
 #include <arch/ppc.H>
 #include <util/singleton.H>
+#include <kernel/console.H>
 
 #include <kernel/segmentmgr.H>
 #include <kernel/segment.H>
+#include <kernel/devicesegment.H>
 
 bool SegmentManager::handlePageFault(task_t* i_task, uint64_t i_addr)
 {
@@ -58,6 +60,16 @@ void SegmentManager::updateRefCount( uint64_t i_vaddr,
 void SegmentManager::castOutPages(uint64_t i_type)
 {
     Singleton<SegmentManager>::instance()._castOutPages(i_type);
+}
+
+void* SegmentManager::devMap(void* ra, uint64_t i_devDataSize)
+{
+    return Singleton<SegmentManager>::instance()._devMap(ra, i_devDataSize);
+}
+
+int SegmentManager::devUnmap(void* ea)
+{
+    return Singleton<SegmentManager>::instance()._devUnmap(ea);
 }
 
 bool SegmentManager::_handlePageFault(task_t* i_task, uint64_t i_addr)
@@ -146,3 +158,39 @@ void SegmentManager::_castOutPages(uint64_t i_type)
         }
     }
 }
+
+void* SegmentManager::_devMap(void* ra, uint64_t i_devDataSize)
+{
+    void* ea = NULL;
+    for (size_t i = MMIO_FIRST_SEGMENT_ID; i <= MMIO_LAST_SEGMENT_ID; i++)
+    {
+        if (NULL == iv_segments[i]) continue;
+
+        ea = reinterpret_cast<DeviceSegment*>(iv_segments[i])->
+                devMap(ra, i_devDataSize);
+
+        if (ea != NULL) break;
+    }
+
+    if (ea == NULL)
+    {
+        printk("SegmentManager: Ran out of device segment blocks.\n");
+    }
+
+    return ea;
+}
+
+int SegmentManager::_devUnmap(void* ea)
+{
+    size_t segId = getSegmentIdFromAddress(reinterpret_cast<uint64_t>(ea));
+    if ((segId < MMIO_FIRST_SEGMENT_ID) ||
+        (segId > MMIO_LAST_SEGMENT_ID) ||
+        (NULL == iv_segments[segId]))
+    {
+        return -EINVAL;
+    }
+
+    return reinterpret_cast<DeviceSegment*>(iv_segments[segId])->devUnmap(ea);
+}
+
+

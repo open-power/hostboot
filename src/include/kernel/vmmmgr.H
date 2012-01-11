@@ -86,7 +86,7 @@ class VmmManager
         static bool pteMiss(task_t* t, uint64_t effAddr);
 
         /**
-         * @brief Map a device into the device segment(2TB)
+         * @brief Map a device into the device segment
          * @param ra[in] - Void pointer to real address to be mapped in
          * @param i_devDataSize[in] - Size of device segment block
          * @return void* - Pointer to beginning virtual address, NULL otherwise
@@ -94,7 +94,7 @@ class VmmManager
         static void* devMap(void* ra, uint64_t i_devDataSize);
 
         /**
-         * @brief Unmap a device from the device segment(2TB)
+         * @brief Unmap a device from the device segment
          * @param ea[in] - Void pointer to effective address
          * @return int - 0 for successful unmap, non-zero otherwise
          */
@@ -197,6 +197,11 @@ class VmmManager
         /** See mmRemovePages */
         int _mmRemovePages(VmmManager::PAGE_REMOVAL_OPS i_op,void* i_vaddr,
                            uint64_t i_size,task_t* i_task);
+
+        /** See devMap */
+        void* _devMap(void* ra, uint64_t i_devDataSize);
+        /** See devUnmap */
+        int _devUnmap(void* ea);
 
     public:
         friend class Block;

@@ -45,7 +45,11 @@ void VmmManager::init()
 
     BaseSegment::init();
     StackSegment::init();
-    DeviceSegment::init();
+    for (size_t i = SegmentManager::MMIO_FIRST_SEGMENT_ID;
+                i < SegmentManager::MMIO_LAST_SEGMENT_ID; ++i)
+    {
+        new DeviceSegment(i); // Self-registers with SegmentManager.
+    }
     SegmentManager::initSLB();
 
     v.initPTEs();
@@ -82,23 +86,14 @@ void VmmManager::flushPageTable( void )
     Singleton<VmmManager>::instance()._flushPageTable();
 }
 
-
-/**
- * STATIC
- * @brief A facade to map a device into the device segment(2TB)
- */
 void* VmmManager::devMap(void* ra, uint64_t i_devDataSize)
 {
-    return DeviceSegment::devMap(ra, i_devDataSize);
+    return Singleton<VmmManager>::instance()._devMap(ra, i_devDataSize);
 }
 
-/**
- * STATIC
- * @brief A facade to unmap a device from the device segment(2TB)
- */
 int VmmManager::devUnmap(void* ea)
 {
-    return DeviceSegment::devUnmap(ea);
+    return Singleton<VmmManager>::instance()._devUnmap(ea);
 }
 
 void VmmManager::initPTEs()
@@ -211,3 +206,26 @@ void VmmManager::_flushPageTable( void )
 
     lock.unlock();
 }
+
+void* VmmManager::_devMap(void* ra, uint64_t i_devDataSize)
+{
+    void* ea = NULL;
+
+    lock.lock();
+    ea = SegmentManager::devMap(ra, i_devDataSize);
+    lock.unlock();
+
+    return ea;
+}
+
+int VmmManager::_devUnmap(void* ea)
+{
+    int rc = 0;
+
+    lock.lock();
+    rc = SegmentManager::devUnmap(ea);
+    lock.unlock();
+
+    return rc;
+}
+

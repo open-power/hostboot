@@ -22,6 +22,7 @@
 //  IBM_PROLOG_END
 #include <util/singleton.H>
 #include <limits.h>
+#include <assert.h>
 
 #include <kernel/vmmmgr.H>
 #include <kernel/ptmgr.H>
@@ -31,38 +32,14 @@
 #include <kernel/console.H>
 
 /**
- * STATIC
- * @brief Add the device segment
+ * @brief Add the device segment to the SegmentManager.
  */
-void DeviceSegment::init()
+void DeviceSegment::init(size_t segId)
 {
-    Singleton<DeviceSegment>::instance()._init();
-}
+    kassert((segId >= SegmentManager::MMIO_FIRST_SEGMENT_ID) &&
+            (segId <= SegmentManager::MMIO_LAST_SEGMENT_ID));
 
-/**
- * STATIC
- * @brief Map a device into the device segment(2TB)
- */
-void* DeviceSegment::devMap(void *ra, uint64_t i_devDataSize)
-{
-    return Singleton<DeviceSegment>::instance()._devMap(ra,i_devDataSize);
-}
-
-/**
- * STATIC
- * @brief Unmap a device from the device segment(2TB)
- */
-int DeviceSegment::devUnmap(void *ea)
-{
-    return Singleton<DeviceSegment>::instance()._devUnmap(ea);
-}
-
-/**
- * @brief Add the device segment
- */
-void DeviceSegment::_init()
-{
-    SegmentManager::addSegment(this, SegmentManager::MMIO_SEGMENT_ID);
+    SegmentManager::addSegment(this, segId);
 }
 
 /**
@@ -101,12 +78,12 @@ bool DeviceSegment::handlePageFault(task_t* i_task, uint64_t i_addr)
 
 
 /**
- * @brief Map a device into the device segment(2TB)
+ * @brief Map a device into the device segment.
  * @param ra[in] - Void pointer to real address to be mapped in
  * @param i_devDataSize[in] - Size of device segment block
  * @return void* - Pointer to beginning virtual address, NULL otherwise
  */
-void *DeviceSegment::_devMap(void *ra, uint64_t i_devDataSize)
+void *DeviceSegment::devMap(void *ra, uint64_t i_devDataSize)
 {
     void *segBlock = NULL;
     if (i_devDataSize <= THIRTYTWO_GB)
@@ -125,10 +102,6 @@ void *DeviceSegment::_devMap(void *ra, uint64_t i_devDataSize)
                 break;
             }
         }
-        if (segBlock == NULL)
-        {
-            printk("Unable to map device, no empty segment blocks found\n");
-        }
     }
     else
     {
@@ -139,12 +112,7 @@ void *DeviceSegment::_devMap(void *ra, uint64_t i_devDataSize)
     return segBlock;
 }
 
-/**
- * @brief Unmap a device from the device segment(2TB)
- * @param ea[in] - Void pointer to effective address
- * @return int - 0 for successful unmap, non-zero otherwise
- */
-int DeviceSegment::_devUnmap(void *ea)
+int DeviceSegment::devUnmap(void *ea)
 {
     int rc = -EINVAL;
     uint64_t segment_ea = reinterpret_cast<uint64_t>(ea);

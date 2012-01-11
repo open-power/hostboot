@@ -54,7 +54,7 @@ void IntrRp::init( void * i_taskArgs )
 {
     errlHndl_t err = NULL;
     err = Singleton<IntrRp>::instance()._init();
-    INITSERVICE::TaskArgs* args = 
+    INITSERVICE::TaskArgs* args =
         static_cast<INITSERVICE::TaskArgs*>(i_taskArgs);
     if(err)
     {
@@ -68,7 +68,7 @@ void IntrRp::init( void * i_taskArgs )
 //  BaseAddress:
 //  BA[18:43] = ICPBAR  (P8 says [14:43] (30 bits))
 //  BA[47:49] = COREid (0-7)
-//  BA[50:51] = cpu thread (0-3) 
+//  BA[50:51] = cpu thread (0-3)
 //
 //  BA+0  = XIRR (poll - Read/Write has no side effects))
 //  BA+4  = XIRR (Read locks HW, Write -> EOI to HW))
@@ -108,7 +108,7 @@ errlHndl_t IntrRp::_init()
     //targetService.masterProcChipTargetHandle( procTarget );
     //
     // TODO What if this does not jive with with the PIR?
-    
+
     // TODO Does this need to be read here?
     //err = deviceRead(procTarget,
     //                 &realAddr,
@@ -116,7 +116,7 @@ errlHndl_t IntrRp::_init()
     //                 DEVICE_SCOM_ADDRESS(ICPBAR_SCOM_ADDR));
     //if(err) return err;
 
-    if(realAddr == 0) 
+    if(realAddr == 0)
     {
         realAddr = (static_cast<uint64_t>(ICPBAR_VAL)) << 34;
     }
@@ -132,7 +132,7 @@ errlHndl_t IntrRp::_init()
 
 
     // The realAddr is the base address for the whole system.
-    // Therefore the realAddr must be based on the processor with 
+    // Therefore the realAddr must be based on the processor with
     // lowest BAR value in the system. (usually n0p0)
     // TODO Adjust the realAddr if the BAR came from a processor other
     // than cpuid 0
@@ -151,7 +151,7 @@ errlHndl_t IntrRp::_init()
 
         // Set up the interrupt provider registers
         // NOTE: Simics only supports 4 threads, and two cores per proc chip.
-        //       
+        //
         // NOTE: P7 register address format only supports 4 threads per core.
         //       This will change for P8
         //
@@ -178,7 +178,7 @@ errlHndl_t IntrRp::_init()
 
         // Get the kernel msg queue for ext intr
         // Create a task to handle the messages
-        iv_msgQ = msg_q_create(); 
+        iv_msgQ = msg_q_create();
         msg_q_register(iv_msgQ, INTR_MSGQ);
 
         task_create(IntrRp::msg_handler, NULL);
@@ -384,7 +384,7 @@ errlHndl_t IntrRp::registerInterrupt(msg_q_t i_msgQ, ext_intr_t i_type)
                  0
                 );
         }
-        
+
     }
     return err;
 }
@@ -427,11 +427,11 @@ void IntrRp::initInterruptPresenter(const PIR_t i_pir) const
     // where it started, it gets rejected by hardware.
     //
     // According to BOOK IV, The links regs are setup by firmware.
-    // 
+    //
     // Should be possible to link all interrupt forwarding directly to
     // the master core and either make them direct (lspec = 0) or by setting
     // the LOOPTRIP bit to stop the forwarding at the masterProc.
-    // 
+    //
     LinkReg_t linkReg;
     linkReg.word = 0;
     linkReg.loopTrip = 1;   // needed?
@@ -450,7 +450,7 @@ errlHndl_t IntrRp::checkAddress(uint64_t i_addr)
 {
     errlHndl_t err = NULL;
 
-    if(i_addr < VMM_VADDR_DEVICE_SEGMENT)
+    if(i_addr < VMM_VADDR_DEVICE_SEGMENT_FIRST)
     {
         /*@ errorlog tag
          * @errortype       ERRL_SEV_INFORMATIONAL
@@ -480,7 +480,7 @@ errlHndl_t IntrRp::checkAddress(uint64_t i_addr)
 errlHndl_t INTR::registerMsgQ(msg_q_t i_msgQ, ext_intr_t i_type)
 {
     errlHndl_t err = NULL;
-    // Can't add while handling an interrupt, so 
+    // Can't add while handling an interrupt, so
     // send msg instead of direct call
     msg_q_t intr_msgQ = msg_q_resolve(INTR_MSGQ);
     if(intr_msgQ)

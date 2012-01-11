@@ -35,9 +35,14 @@ class DeviceSegment : public Segment
 {
     public:
         /**
-         * @brief Constructor (Device segment at 2TB)
+         * @brief Constructor (Device segment at 2TB + N)
+         *
+         * @param[in] segId - Segment ID to map this device segment at.
+         *
+         * Associates itself with the SegmentManager.
          */
-        DeviceSegment() : Segment(VMM_VADDR_DEVICE_SEGMENT) {};
+        explicit DeviceSegment(size_t segId) : Segment(segId * TERABYTE)
+                { init(segId); };
 
         /**
          * @brief Destructor
@@ -45,9 +50,9 @@ class DeviceSegment : public Segment
         ~DeviceSegment() {};
 
         /**
-         * @brief Add the device segment
+         * @brief Add the device segment to the SegmentManager.
          */
-        static void init();
+        void init(size_t segId);
 
         /**
          * @brief Handle a page fault for a device address access
@@ -60,19 +65,19 @@ class DeviceSegment : public Segment
 
 
         /**
-         * @brief Map a device into the device segment(2TB)
+         * @brief Map a device into the device segment.
          * @param ra[in] - Void pointer to real address to be mapped in
          * @param i_devDataSize[in] - Size of device segment block
          * @return void* - Pointer to beginning virtual address, NULL otherwise
          */
-        static void* devMap(void* ra, uint64_t i_devDataSize);
+        void* devMap(void* ra, uint64_t i_devDataSize);
 
         /**
-         * @brief Unmap a device from the device segment(2TB)
+         * @brief Unmap a device from the device segment.
          * @param ea[in] - Void pointer to effective address
          * @return int - 0 for successful unmap, non-zero otherwise
          */
-        static int devUnmap(void* ea);
+        int devUnmap(void* ea);
 
     private:
         /**
@@ -100,20 +105,6 @@ class DeviceSegment : public Segment
          */
         void _init();
 
-        /**
-         * @brief Map a device into the device segment(2TB)
-         * @param ra[in] - Void pointer to real address to be mapped in
-         * @param i_devDataSize[in] - Size of device segment block
-         * @return void* - Pointer to beginning virtual address, NULL otherwise
-         */
-        void* _devMap(void* ra, uint64_t i_devDataSize);
-
-        /**
-         * @brief Unmap a device from the device segment(2TB)
-         * @param ea[in] - Void pointer to effective address
-         * @return int - 0 for successful unmap, non-zero otherwise
-         */
-        int _devUnmap(void* ea);
 };
 
 #endif

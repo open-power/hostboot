@@ -37,8 +37,10 @@
 /** Stack Segment is at 1 TB */
 #define VMM_VADDR_STACK_SEGMENT  (1 * TERABYTE)
 
-/** Device Segment is at 2 TB */
-#define VMM_VADDR_DEVICE_SEGMENT  (2 * TERABYTE)
+/** Device Segments are at 2 TB - 10 TB */
+#define VMM_VADDR_DEVICE_SEGMENT_FIRST  (2 * TERABYTE)
+#define VMM_VADDR_DEVICE_SEGMENT_LAST   (VMM_VADDR_DEVICE_SEGMENT_FIRST + \
+                                         (8 * TERABYTE))
 
 
 /**
@@ -54,7 +56,7 @@
 
 /** Attribute Resource Provider */
 // Note: Not simplified to make it easier to extract with the PNOR targeting
-// image generator script 
+// image generator script
 #define VMM_VADDR_ATTR_RP  (3ul * 1024ul * 1024ul * 1024ul)
 
 /** Virtual memory block priorities */
