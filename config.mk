@@ -34,12 +34,16 @@ OBJDIR = ${ROOTPATH}/obj/modules/${MODULE}
 BEAMDIR = ${ROOTPATH}/obj/beam/${MODULE}
 GENDIR = ${ROOTPATH}/obj/genfiles
 IMGDIR = ${ROOTPATH}/img
-
+GCOVNAME = ${MODULE}.lcov
 EXTRACOMMONFLAGS += -fPIC -Bsymbolic -Bsymbolic-functions 
 ifdef STRICT
         EXTRACOMMONFLAGS += -Weffc++
 endif
 CUSTOMFLAGS += -D__HOSTBOOT_MODULE=${MODULE}
+ifdef HOSTBOOT_PROFILE
+vpath %.C ${ROOTPATH}/src/sys/prof
+OBJS += gcov.o
+endif
 LIBS += $(addsuffix .so, $(addprefix lib, ${MODULE}))
 MODULE_INIT = ${ROOTPATH}/obj/core/module_init.o
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr ${GENDIR}
@@ -49,7 +53,9 @@ BEAMDIR = ${ROOTPATH}/obj/beam/core
 GENDIR = ${ROOTPATH}/obj/genfiles
 IMGDIR = ${ROOTPATH}/img
 EXTRAINCDIR += ${GENDIR}
+GCOVNAME = $(notdir $(shell pwd)).lcov
 endif
+GCOVDIR = ${ROOTPATH}/obj/gcov
 
 __internal__comma= ,
 __internal__empty=
@@ -72,6 +78,10 @@ endif
 endif
 endif
 
+ifdef HOSTBOOT_PROFILE
+CUSTOMFLAGS += --coverage
+endif
+
 TRACEPP = ${ROOTPATH}/src/build/trace/tracepp
 CUSTOM_LINKER_EXE = ${ROOTPATH}/src/build/linker/linker
 CUSTOM_LINKER = i686-mcp6-jail ${CUSTOM_LINKER_EXE}
@@ -83,6 +93,7 @@ CXX = ${TRACEPP} ${CXX_RAW}
 
 LD = ppc64-mcp6-ld
 OBJDUMP = ppc64-mcp6-objdump
+GCOV = ppc64-mcp6-gcov
 APYFIPSHDR = apyfipshdr
 APYRUHHDR = apyruhhdr
 
@@ -102,6 +113,16 @@ CFLAGS = ${COMMONFLAGS} -mcpu=power7 -nostdinc -g -mno-vsx -mno-altivec\
 ASMFLAGS = ${COMMONFLAGS} -mcpu=power7
 CXXFLAGS = ${CFLAGS} -nostdinc++ -fno-rtti -fno-exceptions -Wall
 LDFLAGS = --nostdlib --sort-common ${COMMONFLAGS}
+
+ifdef HOSTBOOT_PROFILE
+    PROFILE_FLAGS_FILTER = $(if $(findstring gcov,$(2)),\
+				$(filter-out --coverage,$(1)),\
+				$(1))
+else
+    PROFILE_FLAGS_FILTER = $(1)
+endif
+
+FLAGS_FILTER = $(call PROFILE_FLAGS_FILTER, $(1), $(2))
 
 ifdef USE_PYTHON
     TESTGEN = ${ROOTPATH}/src/usr/cxxtest/cxxtestgen.py
@@ -142,7 +163,8 @@ endif
 
 ${OBJDIR}/%.o ${OBJDIR}/%.list : %.C
 	mkdir -p ${OBJDIR}
-	${CXX} -c ${CXXFLAGS} $< -o $@ ${INCFLAGS} -iquote .
+	${CXX} -c $(call FLAGS_FILTER, ${CXXFLAGS}, $<) $< \
+	       -o $@ ${INCFLAGS} -iquote .
 	${OBJDUMP} -dCS $@ > $(basename $@).list	
 
 # Compiling *.cc files
@@ -156,9 +178,11 @@ ${OBJDIR}/%.o ${OBJDIR}/%.list : %.c
     # Override to use C++ compiler in place of C compiler
     # CC_OVERRIDE is set in the makefile of the component
 ifndef CC_OVERRIDE
-	${CC} -c ${CFLAGS} $< -o $@ ${INCFLAGS} -iquote .
+	${CC} -c $(call FLAGS_FILTER, ${CFLAGS}, $<) $< \
+	      -o $@ ${INCFLAGS} -iquote .
 else
-	${CXX} -c ${CXXFLAGS} $< -o $@ ${INCFLAGS} -iquote .
+	${CXX} -c $(call FLAGS_FILTER, ${CXXFLAGS}, $<) $< \
+	      -o $@ ${INCFLAGS} -iquote .
 endif
 	${OBJDUMP} -dCS $@ > $(basename $@).list
 
@@ -169,7 +193,8 @@ ${OBJDIR}/%.o : %.S
 ${OBJDIR}/%.dep : %.C
 	mkdir -p ${OBJDIR}; \
 	rm -f $@; \
-	${CXX_RAW} -M ${CXXFLAGS} $< -o $@.$$$$ ${INCFLAGS} -iquote .; \
+	${CXX_RAW} -M $(call FLAGS_FILTER, ${CXXFLAGS}, $<) $< \
+	           -o $@.$$$$ ${INCFLAGS} -iquote .; \
 	sed 's,\($*\)\.o[ :]*,${OBJDIR}/\1.o $@ : ,g' < $@.$$$$ > $@; \
 	rm -f $@.$$$$
 
@@ -183,7 +208,8 @@ ${OBJDIR}/%.dep : %.cc
 ${OBJDIR}/%.dep : %.c
 	mkdir -p ${OBJDIR}; \
 	rm -f $@; \
-	${CC_RAW} -M ${CFLAGS} $< -o $@.$$$$ ${INCFLAGS} -iquote .; \
+	${CC_RAW} -M $(call FLAGS_FILTER, ${CFLAGS}, $<) $< \
+		  -o $@.$$$$ ${INCFLAGS} -iquote .; \
 	sed 's,\($*\)\.o[ :]*,${OBJDIR}/\1.o $@ : ,g' < $@.$$$$ > $@; \
 	rm -f $@.$$$$
 
@@ -257,6 +283,9 @@ ${IMGDIR}/hbotStringFile : ${IMAGES}
 %.gen_pass:
 	cd ${basename $@} && ${MAKE} gen_pass
 
+%.gcov_pass:
+	cd ${basename $@} && ${MAKE} gcov_pass -ik
+
 %.clean:
 	cd ${basename $@} && ${MAKE} clean
 
@@ -298,12 +327,25 @@ ${BEAMDIR}/%.beam : %.S
 BEAMOBJS = $(addprefix ${BEAMDIR}/, ${OBJS:.o=.beam})
 beam: ${SUBDIRS:.d=.beamdir} ${BEAMOBJS}
 
+gcov_pass:
+	mkdir -p ${GCOVDIR}
+	${MAKE} GCOV_PASS
+
+GCOV_PASS: ${SUBDIRS:.d=.gcov_pass}
+ifdef OBJS
+	cp ${OBJECTS:.o=.gcno} ${OBJECTS:.o=.gcda} .
+	lcov --directory . -c -o ${GCOVDIR}/${GCOVNAME} \
+	     --gcov-tool ${GCOV} --ignore-errors source
+	rm ${OBJS:.o=.gcno} ${OBJS:.o=.gcda} -f
+endif
+
 cleanud :
 	rm -f ${UD_OBJS}
 
 clean: cleanud ${SUBDIRS:.d=.clean}
 	(rm -f ${OBJECTS} ${OBJECTS:.o=.dep} ${OBJECTS:.o=.list} \
-	       ${OBJECTS:.o=.o.hash} ${BEAMOBJS} ${LIBRARIES} \
+	       ${OBJECTS:.o=.o.hash} ${OBJECTS:.o=.gcno} ${OBJECTS:.o=.gcda} \
+	       ${BEAMOBJS} ${LIBRARIES} \
 	       ${IMAGES} ${IMAGES:.bin=.list} ${IMAGES:.bin=.syms} \
 	       ${IMAGES:.bin=.bin.modinfo} ${IMAGES:.ruhx=.lid} \
 	       ${IMAGES:.ruhx=.lidhdr} ${IMAGES:.bin=_extended.bin} \

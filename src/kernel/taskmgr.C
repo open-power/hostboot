@@ -36,14 +36,7 @@
 #include <assert.h>
 
 extern "C" void userspace_task_entry();
-
-void TaskManager::idleTaskLoop(void* unused)
-{
-    while(1)
-    {
-	setThreadPriorityLow();
-    }
-}
+extern "C" void task_end_stub();
 
 task_t* TaskManager::getCurrentTask()
 {
@@ -103,10 +96,9 @@ task_t* TaskManager::_createTask(TaskManager::task_fn_t t,
     task->context.nip = reinterpret_cast<void*>(&userspace_task_entry);
     task->context.gprs[4] = reinterpret_cast<uint64_t>(t);
 
-    // Set up LR to be the entry point for task_end in case a task
-    // 'returns' from its entry point.  By the Power ABI, the entry
-    // point address is in (func_ptr)[0].
-    task->context.lr = reinterpret_cast<uint64_t*>(&task_end)[0];
+    // Set up LR to be the entry point for task_end_stub in case a task
+    // 'returns' from its entry point.
+    task->context.lr = reinterpret_cast<uint64_t>(&task_end_stub);
 
     // Set up GRP[13] as task structure reserved.
     task->context.gprs[13] = (uint64_t)task;

@@ -46,7 +46,7 @@ our @EXPORT = ( 'callToolModule', 'callToolModuleHelp', 'callToolModuleHelpInfo'
                 'parseToolOpts', 'determineImagePath',
                 'findSymbolAddress', 'findSymbolTOCAddress',
                 'findSymbolByAddress',
-                'findModuleByAddress',
+                'findModuleByAddress', 'listModules',
                 'littleendian',
                 'read64', 'read32', 'read16', 'read8', 'readStr',
                 'write64', 'write32', 'write16', 'write8'
@@ -394,6 +394,18 @@ sub findModuleByAddress
     }
 
     return $modName;
+}
+
+# @sub listModules
+#
+# Returns a list of all module names.
+#
+# @return list of modules found in the modinfo file.
+sub listModules
+{
+    parseModuleFile();
+
+    return keys %moduleAddress;
 }
 
 # @sub littleendian

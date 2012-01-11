@@ -1,7 +1,7 @@
 #  IBM_PROLOG_BEGIN_TAG
 #  This is an automatically generated prolog.
 #
-#  $Source: src/sys/makefile $
+#  $Source: src/sys/vfs/makefile $
 #
 #  IBM CONFIDENTIAL
 #
@@ -20,8 +20,20 @@
 #  Origin: 30
 #
 #  IBM_PROLOG_END
-ROOTPATH = ../..
 
-SUBDIRS = init.d vfs.d prof.d
+ROOTPATH = ../../..
+
+# If code coverage profiling is enabled we need to add the gcov object to the
+# build list.  This is triggered via the HOSTBOOT_PROFILE variable.  We then
+# undefine that variable to ensure that none of the code in this directory is
+# instrumented itself.  This is the directory where code which is unsafe to
+# instrument should go.
+
+ifdef HOSTBOOT_PROFILE
+OBJS = gcov.o
+undefine HOSTBOOT_PROFILE
+endif
+
+OBJS += idletask.o
 
 include ${ROOTPATH}/config.mk

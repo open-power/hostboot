@@ -614,6 +614,17 @@ userspace_task_entry:
     ld r2, 8(r4)
     bctr
 
+    ;// @fn task_end_stub
+    ;// Stub to call a TASK_END syscall in the event that a task 'returns' from
+    ;// its entry point.  We cannot call task_end() directly because profiling
+    ;// inserts garbage code into the task_end C function.
+.global task_end_stub
+task_end_stub:
+    li r3, 2  ;// TASK_END -> r3 (syscall number)
+    li r4, 0  ;// NULL -> r4 (status value)
+    sc
+
+
 STD_INTERRUPT_NOADDR(hype_emu_assist)
 
 .section .data

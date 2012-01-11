@@ -29,7 +29,11 @@ EXTRA_LIDS = dslid
 
 BASE_OBJECTS = console.o spinlock.o string.o string_ext.o stdlib.o ctype.o \
                assert.o stdio.o builtins.o vfs_init.o heapmgr.o pagemgr.o \
-               math.o barrier.o idebug.o intmsghandler.o
+               math.o barrier.o idebug.o intmsghandler.o idletask.o
+
+ifdef HOSTBOOT_PROFILE
+BASE_OBJECTS += gcov.o
+endif
 
 DIRECT_BOOT_OBJECTS = start.o kernel.o taskmgr.o cpumgr.o syscall.o \
                       scheduler.o exception.o vmmmgr.o timemgr.o \

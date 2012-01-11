@@ -38,6 +38,7 @@ namespace Systemcalls
      *  appropriate system call handler.
      *
      *  @note TASK_MIGRATE_TO_MASTER value must be kept in sync with start.S.
+     *  @note TASK_END value must be kept in sync with start.S.
      */
     enum SysCalls
     {

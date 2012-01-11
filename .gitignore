@@ -2,6 +2,9 @@
 *.list
 *.dep
 *.o.hash
+*.gcno
+*.gcda
+*.gcov
 *.swp
 customrc
 *.CKP
