@@ -53,12 +53,18 @@ class FutexManager
         static uint64_t wait(task_t * i_task, uint64_t * i_addr, uint64_t i_val);
 
         /**
-         * Wakeup threads
-         * @param[in] i_addr pointer to a futex
-         * @param[in] i_count The max number of threads to wake
-         * @returns The number of threads awoken
+         * Wakeup and optionally move waiting processes.
+         * @param[in] i_futex1 pointer to a futex
+         * @param[in] i_count1 The max number of tasks to wake
+         * @param[in] i_futex2 pointer to a futex, (default NULL) Optional
+         *                     futex to move i_count_2 unwoken tasks to.
+         * @param[in] i_count2 The max number of theads to move from futex1 to 
+         *                     futex2. (default 0)
+         *
+         * @returns The number of tasks awoken
          */
-        static uint64_t wake(uint64_t * i_addr, uint64_t i_count);
+        static uint64_t wake(uint64_t * i_futex1, uint64_t i_count1,
+                             uint64_t * i_futex2 = NULL, uint64_t i_count2 = 0);
 
     protected:
 
@@ -74,22 +80,12 @@ class FutexManager
 
     private: // functions
 
-        /**
-         * Put the current processes on a wait queue
-         * @param[in] i_task  pointer to the current task structure
-         * @param[in] i_addr  Futex address 
-         * @param[in] i_val   Value that *i_addr should contain
-         * @returns [0 | error code]  if *i_addr != i_val returns EWOULDBLOCK
-         */
+        /** see wait(...) */
         uint64_t _wait(task_t * i_task, uint64_t * i_addr, uint64_t i_val);
 
-        /**
-         * Wakeup threads
-         * @param[in] i_addr pointer to a futex
-         * @param[in] i_count The max number of threads to wake
-         * @returns The number of threads awoken
-         */
-        uint64_t _wake(uint64_t * i_addr, uint64_t i_count);
+        /** see wake(...) */
+        uint64_t _wake(uint64_t * i_futex1, uint64_t i_count1,
+                       uint64_t * i_futex2, uint64_t i_count2);
 
     private: // data
 

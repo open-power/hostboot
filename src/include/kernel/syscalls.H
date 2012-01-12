@@ -77,10 +77,8 @@ namespace Systemcalls
             /** nanosleep() */
         TIME_NANOSLEEP,
 
-            /** futex_wait() */
-        FUTEX_WAIT,
-            /** futex_wake() */
-        FUTEX_WAKE,
+            /** futex_wake() futex_wait() futex_requeue() */
+        SYS_FUTEX,
 
             /** shutdown() */
         MISC_SHUTDOWN,

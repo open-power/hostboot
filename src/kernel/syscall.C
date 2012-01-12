@@ -40,6 +40,7 @@
 #include <kernel/stacksegment.H>
 #include <kernel/heapmgr.H>
 #include <kernel/intmsghandler.H>
+#include <sys/sync.h>
 
 extern "C"
 void kernel_execute_decrementer()
@@ -87,8 +88,7 @@ namespace Systemcalls
     void DevMap(task_t*);
     void DevUnmap(task_t*);
     void TimeNanosleep(task_t*);
-    void FutexWait(task_t *t);
-    void FutexWake(task_t *t);
+    void Futex(task_t *t);
     void Shutdown(task_t *t);
     void CpuCoreType(task_t *t);
     void CpuDDLevel(task_t *t);
@@ -119,8 +119,7 @@ namespace Systemcalls
 
         &TimeNanosleep,  // TIME_NANOSLEEP
 
-        &FutexWait,  // FUTEX_WAIT
-        &FutexWake,  // FUTEX_WAKE
+        &Futex,      // SYS_FUTEX operations
 
         &Shutdown,    // MISC_SHUTDOWN
         &CpuCoreType, // MISC_CPUCORETYPE
@@ -475,61 +474,77 @@ namespace Systemcalls
         t->cpu->scheduler->setNextRunnable();
     }
 
-    /**
-     * Put task on wait queue based on futex
-     * @param[in] t:  The task to block
-     */
-    void FutexWait(task_t * t)
+
+    void Futex(task_t * t)
     {
-        uint64_t uaddr = (uint64_t) TASK_GETARG0(t);
-        uint64_t val   = (uint64_t) TASK_GETARG1(t);
+        uint64_t op = static_cast<uint64_t>(TASK_GETARG0(t));
+        uint64_t futex = static_cast<uint64_t>(TASK_GETARG1(t));
+        uint64_t val = static_cast<uint64_t>(TASK_GETARG2(t));
+        uint64_t val2 = static_cast<uint64_t>(TASK_GETARG3(t));
+        uint64_t futex2 = static_cast<uint64_t>(TASK_GETARG4(t));
+        uint64_t rc = 0;
 
         // Set RC to success initially.
         TASK_SETRTN(t,0);
 
-        //translate uaddr from user space to kernel space
-        uaddr = VmmManager::findPhysicalAddress(uaddr);
-        if(uaddr != (uint64_t)(-EFAULT))
+        futex = VmmManager::findPhysicalAddress(futex);
+        if(futex == (static_cast<uint64_t>(-EFAULT)))
         {
-            uint64_t rc = FutexManager::wait(t,(uint64_t *)uaddr,val);
-            if (rc != 0) // Can only set rc if we still have control of the task,
-                         // which is only (for certain) on error rc's.
-            {
+            printk("Task %d terminated. No physical address found for address 0x%p",
+                   t->tid,
+                   reinterpret_cast<void *>(futex));
+
+            TaskManager::endTask(t, NULL, TASK_STATUS_CRASHED);
+            return;
+        }
+
+        uint64_t * futex_p = reinterpret_cast<uint64_t *>(futex);
+
+        switch(op)
+        {
+            case FUTEX_WAIT: // Put task on wait queue based on futex
+
+                rc = FutexManager::wait(t, futex_p, val);
+
+                // Can only be set rc if control of the task is still had,
+                // which is only, for certain, on error rc's
+                if(rc != 0)
+                {
+                    TASK_SETRTN(t,rc);
+                }
+                break;
+
+            case FUTEX_WAKE: // Wake task(s) on the futex wait queue
+
+                rc = FutexManager::wake(futex_p, val);
                 TASK_SETRTN(t,rc);
-            }
-        }
-        else
-        {
-            printk("Task %d terminated. No physical address found for address 0x%p",
-                   t->tid, (void *) uaddr);
-            TaskManager::endTask(t, NULL, TASK_STATUS_CRASHED);
-        }
+                break;
+
+            case FUTEX_REQUEUE:
+                // Wake (val) task(s) on futex && requeue remaining tasks on futex2
+
+                futex2 = VmmManager::findPhysicalAddress(futex2);
+                if(futex2 == (static_cast<uint64_t>(-EFAULT)))
+                {
+                    printk("Task %d terminated. No physical address found for address 0x%p",
+                           t->tid,
+                           reinterpret_cast<void *>(futex2));
+
+                    TaskManager::endTask(t, NULL, TASK_STATUS_CRASHED);
+                    return;
+                }
+
+                rc = FutexManager::wake(futex_p, val,
+                                        reinterpret_cast<uint64_t *>(futex2),
+                                        val2);
+                break;
+
+            default:
+                printk("ERROR Futex invalid op %ld\n",op);
+                TASK_SETRTN(t,static_cast<uint64_t>(-EINVAL));
+        };
     }
 
-    /**
-     * Wake tasks on futex wait queue
-     * @param[in] t:  The current task
-     */
-    void FutexWake(task_t * t)
-    {
-        uint64_t uaddr = (uint64_t) TASK_GETARG0(t);
-        uint64_t count = (uint64_t) TASK_GETARG1(t);
-
-        // translate uaddr from user space to kernel space
-        uaddr = VmmManager::findPhysicalAddress(uaddr);
-        if(uaddr != (uint64_t)(-EFAULT))
-        {
-            uint64_t started = FutexManager::wake((uint64_t *)uaddr,count);
-
-            TASK_SETRTN(t,started);
-        }
-        else
-        {
-            printk("Task %d terminated. No physical address found for address 0x%p",
-                   t->tid, (void *) uaddr);
-            TaskManager::endTask(t, NULL, TASK_STATUS_CRASHED);
-        }
-    }
 
     /**
      * Shutdown all CPUs

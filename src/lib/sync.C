@@ -24,6 +24,8 @@
 #include <sys/sync.h>
 #include <sys/syscall.h>
 #include <assert.h>
+#include <errno.h>
+#include <kernel/console.H>
 
 using namespace Systemcalls;
 
@@ -31,14 +33,39 @@ using namespace Systemcalls;
 
 uint64_t futex_wait(uint64_t * i_addr, uint64_t i_val)
 {
-    return (uint64_t) _syscall2(FUTEX_WAIT,i_addr, (void *)i_val);
+    return (uint64_t) _syscall5(SYS_FUTEX,
+                                (void *)FUTEX_WAIT,
+                                i_addr,
+                                (void *)i_val,
+                                NULL,
+                                NULL);
 }
 
 //-----------------------------------------------------------------------------
 
 uint64_t futex_wake(uint64_t * i_addr, uint64_t i_count)
 {
-    return (uint64_t) _syscall2(FUTEX_WAKE, i_addr, (void *)i_count);
+    return (uint64_t) _syscall5(SYS_FUTEX,
+                                (void *)FUTEX_WAKE,
+                                i_addr,
+                                (void *)i_count,
+                                NULL,
+                                NULL);
+}
+
+//-----------------------------------------------------------------------------
+
+uint64_t futex_requeue(uint64_t * i_addr,
+                       uint64_t i_count1,
+                       uint64_t i_count2,
+                       uint64_t * i_futex2)
+{
+    return (uint64_t) _syscall5(SYS_FUTEX,
+                                (void *)FUTEX_REQUEUE,
+                                i_addr,
+                                (void *)i_count1,
+                                (void *)i_count2,
+                                i_futex2);
 }
 
 //-----------------------------------------------------------------------------
@@ -127,7 +154,7 @@ void mutex_lock(mutex_t * i_mutex)
         {
             futex_wait( &(i_mutex->iv_val), 2);
             l_count = __sync_lock_test_and_set(&(i_mutex->iv_val),2);
-            // if more than one thread gets out - one continues while
+            // if more than one task gets out - one continues while
             // the rest get blocked again.
         }
     }
@@ -151,10 +178,71 @@ void mutex_unlock(mutex_t * i_mutex)
     if(unlikely(2 <= l_count))
     {
         i_mutex->iv_val = 0;
-        futex_wake(&(i_mutex->iv_val), 1); // wake one thread
+        futex_wake(&(i_mutex->iv_val), 1); // wake one task
     }
 
     return;
 }
 
+void sync_cond_init(sync_cond_t * i_cond)
+{
+    i_cond->mutex = NULL;
+    i_cond->sequence = 0;
+}
+
+void sync_cond_destroy(sync_cond_t * i_cond)
+{
+    // don't need to do anything
+}
+
+int sync_cond_wait(sync_cond_t * i_cond, mutex_t * i_mutex)
+{
+    uint64_t seq = i_cond->sequence;
+    if(i_cond->mutex != i_mutex)
+    {
+        if(i_cond->mutex) return EINVAL;
+
+        // Atomically set mutex
+        __sync_bool_compare_and_swap(&i_cond->mutex, NULL, i_mutex);
+        if(i_cond->mutex != i_mutex) return EINVAL;
+    }
+
+    mutex_unlock(i_mutex);
+
+    futex_wait( &(i_cond->sequence), seq);
+
+
+    // Can't continue until i_mutex lock is obtained.
+    //mutex_lock(i_mutex);  <--- Does not work - Havn't figure out why
+    // but the followin code does work.
+    // this code locks the mutex and makes sure it's contended.
+    while(0 != __sync_lock_test_and_set(&(i_mutex->iv_val), 2))
+    {
+        futex_wait(&(i_mutex->iv_val),2);
+    }
+
+    return 0;
+}
+
+void sync_cond_signal(sync_cond_t * i_cond)
+{
+    __sync_fetch_and_add(&(i_cond->sequence),1);
+    // Wake up one
+    futex_wake(&(i_cond->sequence), 1);
+}
+
+void sync_cond_broadcast(sync_cond_t * i_cond)
+{
+    mutex_t * m = i_cond->mutex;
+
+    // no mutex means no waiters
+    if(!m) return;
+
+    // wake up all
+    __sync_fetch_and_add(&(i_cond->sequence),1);
+
+    // need to wake up one on the sequence and 
+    // re-queue the rest onto the mutex m;
+    futex_requeue(&(i_cond->sequence),1,UINT64_MAX,&(m->iv_val));
+}
 

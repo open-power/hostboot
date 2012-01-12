@@ -42,9 +42,11 @@ uint64_t FutexManager::wait(task_t* i_task, uint64_t * i_addr, uint64_t i_val)
 
 //-----------------------------------------------------------------------------
 
-uint64_t FutexManager::wake(uint64_t * i_addr, uint64_t i_count)
+uint64_t FutexManager::wake(uint64_t * i_futex1, uint64_t i_count1,
+                            uint64_t * i_futex2, uint64_t i_count2)
 {
-    return Singleton<FutexManager>::instance()._wake(i_addr, i_count);
+    return Singleton<FutexManager>::instance()._wake(i_futex1, i_count1,
+                                                     i_futex2, i_count2);
 }
 
 //-----------------------------------------------------------------------------
@@ -57,7 +59,7 @@ uint64_t FutexManager::_wait(task_t* i_task, uint64_t * i_addr, uint64_t i_val)
 
     if(unlikely(*i_addr != i_val))
     {
-        // some other thread has modified the futex
+        // some other task has modified the futex
         // bail-out retry required.
         iv_lock.unlock();
         rc = EWOULDBLOCK;
@@ -81,18 +83,22 @@ uint64_t FutexManager::_wait(task_t* i_task, uint64_t * i_addr, uint64_t i_val)
     return rc;
 }
 
-//-----------------------------------------------------------------------------
 
-uint64_t FutexManager::_wake(uint64_t * i_addr, uint64_t i_count)
+//  Wake processes. Any number of processes in excess of count1 are not
+// woken up but moved to futex2.  the number of processes to move
+// is capped by count2.
+uint64_t FutexManager::_wake(uint64_t * i_futex1, uint64_t i_count1,
+                             uint64_t * i_futex2, uint64_t i_count2
+                            )
 {
     uint64_t started = 0;
 
-    // Remove task(s) from futex queue
-    // Put it/them on the run queue
     iv_lock.lock();
-    while(started < i_count)
+    
+    // First start up to i_count1 task(s)
+    while(started < i_count1)
     {
-        _FutexWait_t * waiter = iv_list.find(i_addr);
+        _FutexWait_t * waiter = iv_list.find(i_futex1);
         if(waiter == NULL)
         {
             break;
@@ -109,6 +115,36 @@ uint64_t FutexManager::_wake(uint64_t * i_addr, uint64_t i_count)
         wait_task->cpu->scheduler->addTask(wait_task);
         ++started;
     }
+
+    if(i_futex2 && i_count2)
+    {
+        uint64_t moved = 0;
+
+        // Move up to i_count2 tasks to futex2
+        while(moved < i_count2)
+        {
+            // What if *i_futex2 got modified !!!! TODO
+            // Do we need a safety check here (another val param) ????
+            _FutexWait_t * waiter = iv_list.find(i_futex1);
+            if(waiter == NULL)
+            {
+                break;
+            }
+
+            task_t * wait_task = waiter->task;
+            iv_list.erase(waiter);
+
+            kassert(wait_task != NULL); // should never happen, but...
+
+            waiter->key = i_futex2;
+            wait_task->state_info = i_futex2;
+
+            iv_list.insert(waiter);
+            ++moved;
+        }
+    }
+
+
     iv_lock.unlock();
 
     return started;
