@@ -254,7 +254,11 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-0</default>
-    </attribute>  
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>

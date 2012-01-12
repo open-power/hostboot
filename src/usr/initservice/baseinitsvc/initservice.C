@@ -131,6 +131,12 @@ errlHndl_t InitService::executeFn( const TaskInfo   *i_ptask,
     assert( i_ptask != NULL );
     assert( i_ptask->taskfn != NULL ) ;
 
+    /**
+     * @todo:   add Doug Gilbert's code here to look up the module based on
+     *          the function pointer and then load the module.
+     *          For now we just blindly load the module in istepdispatcher
+     */
+
     //  valid function, launch it
     l_tidrc = task_create( i_ptask->taskfn, io_pargs);
     if (static_cast<int16_t> (l_tidrc) < 0)

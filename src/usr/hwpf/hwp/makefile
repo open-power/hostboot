@@ -35,5 +35,8 @@ OBJS = fapiTestHwp.o \
        fapiTestHwpConfig.o \
        fapiTestHwpAttr.o \
        fapiHwpExecInitFile.o
+       
+SUBDIRS	=	dmi_training.d       
+       
 
 include ${ROOTPATH}/config.mk

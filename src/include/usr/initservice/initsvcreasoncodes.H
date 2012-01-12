@@ -77,19 +77,10 @@ enum    InitServiceModuleID
     INITSVC_DO_SHUTDOWN_MOD_ID          =   0x26,
 
     //
-    //  HWAS:  ISTEP 4
-    //  HWAS named isteps (substeps)
-    //  @todo sync these names up with Dean's document later
+    //  ISTEP   module id's
     //
-    HWAS_1_ERRL_ID                      =   0x30,
-    HWAS_2_ERRL_ID                      =   0x31,
-    HWAS_3_ERRL_ID                      =   0x32,
-    HWAS_4_ERRL_ID                      =   0x33,
-    HWAS_5_ERRL_ID                      =   0x34,
-    HWAS_6_ERRL_ID                      =   0x35,
-    HWAS_7_ERRL_ID                      =   0x36,
-    HWAS_8_ERRL_ID                      =   0x37,
-    HWAS_9_ERRL_ID                      =   0x38,
+    HWAS_ERRL_ID                =   0x30,
+    DMI_TRAINING_ERRL_ID,
 
     //  reserve some tasks for my unit tests...
     START_CXXTEST_ERRL_ID       =   0xf0,

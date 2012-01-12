@@ -1,0 +1,91 @@
+<!--  IBM_PROLOG_BEGIN_TAG
+     This is an automatically generated prolog.
+   
+     $Source: src/usr/HWPs/dmi_training/proc_cen_framelock_errors.xml $
+   
+     IBM CONFIDENTIAL
+   
+     COPYRIGHT International Business Machines Corp. 2012
+   
+     p1
+   
+     Object Code Only (OCO) source materials
+     Licensed Internal Code Source Materials
+     IBM HostBoot Licensed Internal Code
+   
+     The source code for this program is not published or other-
+     wise divested of its trade secrets, irrespective of what has
+     been deposited with the U.S. Copyright Office.
+   
+     Origin: 30
+   
+     IBM_PROLOG_END -->
+<!-- Error definitions for proc_cen_framelock procedure -->
+<hwpErrors>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_CEN_FRAMELOCK_INVALID_ARGS</rc>
+    <description>Invalid or out-of-range argument value(s) presented to proc_cen_framelock HWP.</description>
+    <ffdc>ARGS</ffdc>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_CEN_FRAMELOCK_INTERNAL_ERR</rc>
+    <description>Unexpected internal program logic error.</description>
+    <ffdc>ERR_DATA</ffdc>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_CEN_FRAMELOCK_FL_CEN_FIR_ERR</rc>
+    <description>Framelock sequence set FIR bit in Centaur MBI FIR Register.</description>
+    <ffdc>FIR_REG</ffdc>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_CEN_FRAMELOCK_FL_P8_FIR_ERR</rc>
+    <description>Framelock sequence set FIR bit in P8 MCI FIR Register.</description>
+    <ffdc>FIR_REG</ffdc>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_CEN_FRAMELOCK_FL_CEN_FAIL_ERR</rc>
+    <description>Framelock sequence fail reported in Centaur MBI Status Register.</description>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_CEN_FRAMELOCK_FL_P8_FAIL_ERR</rc>
+    <description>Framelock sequence fail reported in P8 MCI Status Register.</description>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_CEN_FRAMELOCK_FL_TIMEOUT_ERR</rc>
+    <description>Framelock sequence timed out waiting for pass/fail indication in Centaur MBI Status Register or P8 MCI Status Register.</description>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_CEN_FRAMELOCK_FRTL_CEN_FIR_ERR</rc>
+    <description>FRTL sequence set FIR bit in Centaur MBI FIR Register.</description>
+    <ffdc>FIR_REG</ffdc>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_CEN_FRAMELOCK_FRTL_P8_FIR_ERR</rc>
+    <description>FRTL sequence set FIR bit in P8 MCI FIR Register.</description>
+    <ffdc>FIR_REG</ffdc>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_CEN_FRAMELOCK_FRTL_CEN_FAIL_ERR</rc>
+    <description>FRTL sequence fail reported in Centaur MBI Status Register.</description>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_CEN_FRAMELOCK_FRTL_P8_FAIL_ERR</rc>
+    <description>FRTL sequence fail reported in P8 MCI Status Register.</description>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_CEN_FRAMELOCK_FRTL_TIMEOUT_ERR</rc>
+    <description>FRTL sequence timed out waiting for pass/fail indication in Centaur MBI Status Register or P8 MCI Status Register.</description>
+  </hwpError>
+</hwpErrors>

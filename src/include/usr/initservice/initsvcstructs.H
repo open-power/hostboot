@@ -37,6 +37,8 @@
 
 #include <initservice/initsvcreasoncodes.H>
 
+#define MAX_DEPENDENT_MODULES   5
+
 
 namespace   INITSERVICE
 {
@@ -147,6 +149,23 @@ struct  TaskInfo
 
 
 /**
+ * @struct  DepModInfo
+ *
+ * Holds information on other modules that need to be loaded so that this
+ * istep will run.
+ *
+ *  @todo   This is a placeholder right now
+ */
+struct  DepModInfo
+{
+    const char  modulename[MAX_DEPENDENT_MODULES][VFS_MODULE_NAME_MAX];
+
+};
+
+
+
+
+/**
  * @struct  ExtTaskInfo
  *
  * struct to store the TaskInfo for the ISteps, plus the number of items in
@@ -154,8 +173,9 @@ struct  TaskInfo
  */
 struct  ExtTaskInfo
 {
-    const TaskInfo  *const pti;
-    const uint64_t  numitems;
+    const TaskInfo      *const pti;
+    const uint64_t      numitems;
+    const DepModInfo    *const depModules;
 };
 
 } // namespace

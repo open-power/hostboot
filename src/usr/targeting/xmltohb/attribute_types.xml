@@ -2780,5 +2780,16 @@
     <readable/>
     <writeable/>
 </attribute>
+<attribute>
+    <id>CHIP_UNIT</id>
+    <description>A unit (chiplet) 's  offset number within the chip. </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>    
 
 </attributes>

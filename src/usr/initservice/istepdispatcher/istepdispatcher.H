@@ -148,16 +148,18 @@ private:
      * @brief   Find a TaskInfo struct in the global istep list(s),
      *          addressed by { IStep, SubStep }
      *
-     *
-     * @param[in]   i_IStep     -   IStepNumber
-     * @param[in]   i_SubStep   -   SubStepNumber
+     * @param[in]       i_IStep         -   IStepNumber
+     * @param[in]       i_SubStep       -   SubStepNumber
+     * @param[in,out]   io_rmodulename  - return name of module to load
      *
      * @return  pointer to a TaskInfo struct
      * @retval  pointer to a TaskInfo struct, or NULL
      *
      */
-    const TaskInfo *findTaskInfo( uint16_t  i_IStep,
-                                  uint16_t  i_SubStep ) const;
+    const TaskInfo *findTaskInfo(
+                                    const uint16_t i_IStep,
+                                    const uint16_t i_SubStep,
+                                    const char     *&io_rmodulename ) const;
 
     /**
      * @brief   Command 0: Run the requested IStep/SubStep

@@ -30,7 +30,11 @@ SUBDIRS = fapi.d hwp.d plat.d test.d
 #------------------------------------------------------------------------------
 # Source XML files
 #------------------------------------------------------------------------------
-HWP_ERROR_XML_FILES = hwp/fapiHwpErrorInfo.xml
+HWP_ERROR_XML_FILES = hwp/fapiHwpErrorInfo.xml   \
+    hwp/dmi_training/proc_cen_framelock/proc_cen_framelock_errors.xml \
+    hwp/dmi_training/dmi_io_run_training/io_run_training_errors.xml
+
+
 HWP_ATTR_XML_FILES = hwp/fapiHwpAttributeInfo.xml \
                      hwp/memory_attributes.xml \
                      hwp/L2_L3_attributes.xml

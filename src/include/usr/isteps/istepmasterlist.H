@@ -23,12 +23,14 @@
 #ifndef __ISTEPS_ISTEPMASTERLIST_H
 #define __ISTEPS_ISTEPMASTERLIST_H
 
+
 /**
- * @file    isteplist.H
+ * @file    istepmasterlist.H
  *
  *  ExtTaskInfo structs for each IStep that will run.
  *
  *  This is the master list of ISTeps.
+ *
  *  To add a new IStep,  make a new file in the isteps directory and name
  *  it "istepNlist.H", where N is the IStep number.
  *  The file will have 2 const arrays of structs defined (see initsvcstructs.H)
@@ -53,8 +55,9 @@
 #include    <vector>
 #include    <initservice/initsvcstructs.H>
 
-// include list for IStep 4 (HWAS)
+//  -----   istep include files   -----
 #include    "istep4list.H"
+#include    "istep11list.H"
 
 
 namespace   INITSERVICE
@@ -62,11 +65,23 @@ namespace   INITSERVICE
 
 // initialize an array of ExtTaskInfo
 const  ExtTaskInfo  g_isteps[]    =   {
-        { NULL, 0 },                                //  dummy IStep 0
-        { NULL, 0 },                                //  dummy IStep 1
-        { NULL, 0 },                                //  dummy IStep 2
-        { NULL, 0 },                                //  dummy IStep 3
-        INITSERVICE::g_istep4TaskList,              //  HWAS  IStep 4
+        { NULL, 0, NULL },                                //  dummy IStep 0
+        { NULL, 0, NULL },                                //  dummy IStep 1
+        { NULL, 0, NULL },                                //  dummy IStep 2
+        { NULL, 0, NULL },                                //  dummy IStep 3
+        INITSERVICE::g_istep4TaskList,                    //  HWAS  IStep 4
+        { NULL, 0, NULL },                                //  dummy IStep 5
+        { NULL, 0, NULL },                                //  dummy IStep 6
+        { NULL, 0, NULL },                                //  dummy IStep 7
+        { NULL, 0, NULL },                                //  dummy IStep 8
+        { NULL, 0, NULL },                                //  dummy IStep 9
+        { NULL, 0, NULL },                                //  dummy IStep 10
+        INITSERVICE::g_istep11TaskList,                   //  DMI_TRAINING
+        { NULL, 0, NULL },                                //  dummy IStep 12
+        { NULL, 0, NULL },                                //  dummy IStep 13
+        { NULL, 0, NULL },                                //  dummy IStep 14
+        { NULL, 0, NULL },                                //  dummy IStep 15
+        { NULL, 0, NULL },                                //  dummy IStep 16
 
         //
         // add further istep lists at the end.

@@ -1,0 +1,98 @@
+<!--  IBM_PROLOG_BEGIN_TAG
+     This is an automatically generated prolog.
+   
+     $Source: src/usr/hwpf/hwp/io_run_training_errors.xml $
+   
+     IBM CONFIDENTIAL
+   
+     COPYRIGHT International Business Machines Corp. 2012
+   
+     p1
+   
+     Object Code Only (OCO) source materials
+     Licensed Internal Code Source Materials
+     IBM HostBoot Licensed Internal Code
+   
+     The source code for this program is not published or other-
+     wise divested of its trade secrets, irrespective of what has
+     been deposited with the U.S. Copyright Office.
+   
+     Origin: 30
+   
+     IBM_PROLOG_END -->
+<!-- Error definitions for io_run_training procedure -->
+<hwpErrors>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>IO_RUN_TRAINING_INVALID_ARGS_RC</rc>
+    <description>Invalid or out-of-range argument value(s) presented to IO_RUN_TRAINING HWP.</description>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>IO_RUN_TRAINING_INTERNAL_ERR_RC</rc>
+    <description>Unexpected internal program logic error.</description>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>IO_RUN_TRAINING_FAIL_ERR_RC</rc>
+    <description>Training fail was reported in a P8 or Centaur status register</description>
+  </hwpError>
+    <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>IO_RUN_TRAINING_FAIL_WIRETEST_RC</rc>
+    <description>Wiretest Training fail was reported in a P8 or Centaur status register</description>
+  </hwpError>
+    <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>IO_RUN_TRAINING_FAIL_DESKEW_RC</rc>
+    <description>Deskew Training fail was reported in a P8 or Centaur status register</description>
+  </hwpError>
+    <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>IO_RUN_TRAINING_FAIL_EYE_OPT_RC</rc>
+    <description>Eye Optimization Training fail was reported in a P8 or Centaur status register</description>
+  </hwpError>
+    <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>IO_RUN_TRAINING_FAIL_REPAIR_RC</rc>
+    <description>Static Repair Training fail was reported in a P8 or Centaur status register</description>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>IO_RUN_TRAINING_FAIL_FUNC_MODE_RC</rc>
+    <description>Functional mode Training fail was reported in a P8 or Centaur status register</description>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>IO_RUN_TRAINING_WIRETEST_TIMEOUT_RC</rc>
+    <description>io run training wiretest timed out waiting for pass/fail indication in the p8 or centaur Status Registers</description>
+  </hwpError>
+   <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>IO_RUN_TRAINING_DESKEW_TIMEOUT_RC</rc>
+    <description>io run training deskew timed out waiting for pass/fail indication in the p8 or centaur Status Registers</description>
+  </hwpError>
+   <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>IO_RUN_TRAINING_EYE_OPT_TIMEOUT_RC</rc>
+    <description>io run training eye opt timed out waiting for pass/fail indication in the p8 or centaur Status Registers</description>
+  </hwpError>
+   <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>IO_RUN_TRAINING_REPAIR_TIMEOUT_RC</rc>
+    <description>io run training repair timed out waiting for pass/fail indication in the p8 or centaur Status Registers</description>
+  </hwpError>
+   <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>IO_RUN_TRAINING_FUNC_MODE_TIMEOUT_RC</rc>
+    <description>io run training functional mode timed out waiting for pass/fail indication in the p8 or centaur Status Registers</description>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>IO_GCR_WRITE_MISMATCH_RC</rc>
+    <description>IO GCR write operation failed to readback data that was written</description>
+    <ffdc>READ_BUF</ffdc>
+    <ffdc>WRITE_BUF</ffdc>
+  </hwpError>
+
+</hwpErrors>

@@ -38,6 +38,7 @@
 #include    <stdio.h>
 #include    <string.h>
 
+#include    <vfs/vfs.H>                     //  load_module
 #include    <sys/task.h>                    //  tid_t, task_create, etc
 #include    <sys/time.h>                    //  nanosleep
 #include    <sys/misc.h>                    //  shutdown
@@ -126,6 +127,7 @@ using   namespace   SPLESS;             // SingleStepMode
 extern trace_desc_t *g_trac_initsvc;
 
 /**
+
  * @note    SPLess PAUSE - These two constants are used in a nanosleep() call
  *          below to sleep between polls of the StatusReg.  Typically this will
  *          be about 10 ms - the actual value will be determined empirically.
@@ -140,37 +142,52 @@ const   uint64_t    SINGLESTEP_PAUSE_NS    =   10000000;
 TASK_ENTRY_MACRO( IStepDispatcher::getTheInstance().init );
 
 
-const TaskInfo *IStepDispatcher::findTaskInfo( const uint16_t i_IStep,
-                                               const uint16_t i_SubStep ) const
+const TaskInfo *IStepDispatcher::findTaskInfo(
+                                const uint16_t i_IStep,
+                                const uint16_t i_SubStep,
+                                const char     *&io_rmodulename ) const
 {
     const TaskInfo      *l_pistep       =   NULL;
+    /**
+     * @todo
+     *  everything calling this should feed into the "real" istep/substep
+     *  numbers ( starting at 1 ) - this routine will translate to index into
+     *  the isteplists ( starting at 0 )
+     *
+     */
+    //int16_t     l_istepIndex    =   i_IStep-1;
+    //int16_t     l_substepIndex  =   i_SubStep-1;
 
+    //assert( l_istepIndex >= 0 );
+    //assert( l_substepIndex >= 0 );
 
     //  apply filters
     do
     {
-
         //  Sanity check / dummy IStep
         if ( g_isteps[i_IStep].pti == NULL)
         {
             TRACDCOMP( g_trac_initsvc,
-                       "g_isteps[%d].pti == NULL",
-                       i_IStep );
+                       "g_isteps[0x%x].pti == NULL (substep=0x%x)",
+                       i_IStep,
+                       i_SubStep );
             break;
         }
 
         TRACDCOMP( g_trac_initsvc,
-                   "g_isteps[%d].numitems = 0x%x",
+                   "g_isteps[0x%x].numitems = 0x%x (substep=0x%x)",
                    i_IStep,
-                   g_isteps[i_IStep].numitems );
+                   g_isteps[i_IStep].numitems,
+                   i_SubStep );
 
 
         // check input range - IStep
         if  (   i_IStep >= MAX_ISTEPS   )
         {
             TRACDCOMP( g_trac_initsvc,
-                       "IStep 0x%x out of range.",
-                       i_IStep );
+                       "IStep 0x%x out of range. (substep=0x%x) ",
+                       i_IStep,
+                       i_SubStep );
             break;      // break out with l_pistep set to NULL
         }
 
@@ -195,12 +212,31 @@ const TaskInfo *IStepDispatcher::findTaskInfo( const uint16_t i_IStep,
             break;
         }
 
+        //  check to see if the pointer to the function is NULL.
+        //  This is possible if some of the substeps aren't working yet
+        //  and are just placeholders.
+        if  (  g_isteps[i_IStep].pti[i_SubStep].taskfn == NULL )
+        {
+            TRACDCOMP( g_trac_initsvc,
+                    "IStep 0x%x SubSStep 0x%x fn ptr is NULL.",
+                    i_IStep,
+                    i_SubStep );
+            break;
+        }
+
+
+        l_pistep        =   &( g_isteps[i_IStep].pti[i_SubStep] );
+        // find the name of the module that contains this function,
+        io_rmodulename  =   VFS::module_find_name(
+                                    reinterpret_cast<void*>(l_pistep->taskfn) );
         // looks good, send it back to the caller
         TRACDCOMP( g_trac_initsvc,
-                   "Found TaskInfo 0x%x 0x%x",
+                   "Found TaskInfo 0x%p 0x%x 0x%x in module %s",
+                   l_pistep,
                    i_IStep,
-                   i_SubStep );
-        l_pistep    =   &( g_isteps[i_IStep].pti[i_SubStep] );
+                   i_SubStep,
+                   ((io_rmodulename!=NULL)?io_rmodulename:"NULL???") );
+
 
     }   while ( 0 );
 
@@ -277,11 +313,15 @@ void    IStepDispatcher::processSingleIStepCmd(
     SPLessSingleIStepCmd    l_cmd( i_rrawcmd );
     //  create a cleared status 0x00 reg
     SPLessSingleIStepSts    l_sts;
+    const char                    *l_modulename   =   NULL;
+
+
 
     //  look up istep+substep
     l_pistep  =   IStepDispatcher::getTheInstance().findTaskInfo(
                                                         l_cmd.istep,
-                                                        l_cmd.substep );
+                                                        l_cmd.substep,
+                                                        l_modulename);
 
     do
     {
@@ -326,6 +366,46 @@ void    IStepDispatcher::processSingleIStepCmd(
         //  write intermediate value back to user console
         o_rrawsts.val64 =   l_sts.val64;
         writeSts( o_rrawsts );
+
+
+        /**
+         * @todo    temporary - executeFn will eventually figure out and
+         * load the correct module
+         */
+        if (    ( l_modulename != NULL )
+             && ( !VFS::module_is_loaded( l_modulename ) )
+             )
+        {
+            TRACDCOMP( g_trac_initsvc,
+                    "loading module %s",
+                    l_modulename );
+            l_errl = VFS::module_load( l_modulename );
+            if ( l_errl )
+            {
+                //  can't load module for istep, break out of inner loop
+                //  with errl set
+                TRACFCOMP( g_trac_initsvc,
+                    "Could not load module %s",
+                    l_modulename );
+
+                l_sts.hdr.status    =   SPLESS_TASKRC_RETURNED_ERRLOG;
+                // go ahead and commit the errorlog
+                errlCommit( l_errl, INITSVC_COMP_ID );
+
+                // failed to load module, return error
+                 l_sts.hdr.runningbit    =   false;
+                 l_sts.hdr.readybit      =   true;
+                 l_sts.hdr.status        =   SPLESS_TASKRC_FAIL_LOADMODULE;
+                 l_sts.istep             =   l_cmd.istep;
+                 l_sts.substep           =   l_cmd.substep;
+                 l_sts.istepStatus       =   0;
+
+                 //  return to caller to write back to user console
+                 o_rrawsts.val64 =   l_sts.val64;
+
+                break;
+            }
+        }
 
         /**
          * @todo   placeholder - set progress code before starting
@@ -524,6 +604,7 @@ void    IStepDispatcher::runAllISteps( void * io_ptr )   const
     const TaskInfo      *l_pistep       =   NULL;
     uint64_t            l_progresscode  =   0;
     uint64_t            l_isteprc       =   0;
+    const   char        *l_modulename   =   NULL;
 
     // taskargs struct for children
     TaskArgs::TaskArgs  l_args;
@@ -540,19 +621,37 @@ void    IStepDispatcher::runAllISteps( void * io_ptr )   const
                 l_SubStep < INITSERVICE::MAX_SUBSTEPS;
                 l_SubStep++)
         {
-            TRACDCOMP( g_trac_initsvc,
-                       "Find IStep=%d, SubStep=%d",
-                       l_IStep,
-                       l_SubStep );
-
             l_pistep    =   findTaskInfo( l_IStep,
-                                          l_SubStep );
+                                          l_SubStep,
+                                          l_modulename );
             if ( l_pistep == NULL )
             {
 
-                TRACDCOMP( g_trac_initsvc,
-                           "End of ISubStep 0x%x list.", l_SubStep );
                 break;  // break out of inner for loop
+            }
+
+            /**
+             * @todo    temporary - executeFn will eventually figure out and
+             * load the correct module
+             */
+            if (    ( l_modulename != NULL )
+                 && ( !VFS::module_is_loaded( l_modulename ) )
+                 )
+            {
+                TRACDCOMP( g_trac_initsvc,
+                        "loading module %s",
+                        l_modulename );
+                l_errl = VFS::module_load( l_modulename );
+                if ( l_errl )
+                {
+                    //  can't load module for istep, break out of inner loop
+                    //  with errl set
+                    TRACFCOMP( g_trac_initsvc,
+                        "Could not load module %s",
+                        l_modulename );
+
+                    break;
+                }
             }
 
             //  @todo   placeholder until progress codes are defined and
@@ -560,8 +659,13 @@ void    IStepDispatcher::runAllISteps( void * io_ptr )   const
             l_progresscode  =  ( (l_IStep<<16) | l_SubStep );
             InitService::getTheInstance().setProgressCode( l_progresscode );
 
-            l_args.clear();
+            //  print out what we are running
+            TRACFCOMP( g_trac_initsvc,
+                "Running IStep %s",
+                l_pistep->taskname );
 
+
+            l_args.clear();
             l_errl = InitService::getTheInstance().executeFn( l_pistep,
                                                               &l_args );
             if ( l_errl )

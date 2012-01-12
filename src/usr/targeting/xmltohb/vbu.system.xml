@@ -260,7 +260,11 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-0</default>
-    </attribute>  
+    </attribute> 
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute> 
 </targetInstance>
 
 <targetInstance>
@@ -273,6 +277,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>  
 </targetInstance>
 
@@ -287,6 +295,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-2</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>2</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -300,6 +312,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-3</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>3</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -313,6 +329,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-4</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>4</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -326,6 +346,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-5</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>5</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -339,6 +363,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-6</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>6</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -352,6 +380,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-7</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>7</default>
+    </attribute>
 </targetInstance>
 
 <!-- Venice n0p0 pervasive unit -->

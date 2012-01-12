@@ -49,7 +49,7 @@ BASE_MODULES = trace errl devicefw scom xscom initservice taskargs \
 
 EXTENDED_MODULES = targeting ecmddatabuffer fapi hwp plat 	\
                    extinitsvc istepdisp hwas fsi fsiscom i2c intr \
-				   spd
+				   spd dmi_training
 
 DIRECT_BOOT_MODULES = example
 RUNTIME_MODULES =

@@ -264,6 +264,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-0</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -277,6 +281,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-1</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -290,6 +298,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-2</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>2</default>
+    </attribute>  
 </targetInstance>
 
 <targetInstance>
@@ -302,6 +314,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-3</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>3</default>
     </attribute>  
 </targetInstance>
 
@@ -316,6 +332,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-4</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>4</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -329,6 +349,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-5</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>5</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -342,6 +366,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-6</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>6</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -355,6 +383,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-7</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>7</default>
+    </attribute>
 </targetInstance>
 
 <!-- Venice n0p0 pervasive unit -->
@@ -652,6 +684,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-1/mcs-0</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -664,6 +700,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-1/mcs-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>  
 </targetInstance>
 
@@ -677,6 +717,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-1/mcs-2</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>2</default>
     </attribute>  
 </targetInstance>
 
@@ -691,6 +735,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-1/mcs-3</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>3</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -704,6 +752,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-1/mcs-4</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>4</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -716,6 +768,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-1/mcs-5</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>5</default>
     </attribute>  
 </targetInstance>
 
@@ -730,6 +786,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-1/mcs-6</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>6</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -743,6 +803,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-1/mcs-7</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>7</default>
+    </attribute>
 </targetInstance>
 
 <!-- Venice n0p1 pervasive unit -->
@@ -1041,6 +1105,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-2/mcs-0</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -1053,6 +1121,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-2/mcs-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>  
 </targetInstance>
 
@@ -1067,6 +1139,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-2/mcs-2</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>2</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -1080,6 +1156,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-2/mcs-3</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>3</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -1093,6 +1173,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-2/mcs-4</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>4</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -1106,6 +1190,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-2/mcs-5</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>5</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -1119,6 +1207,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-2/mcs-6</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>6</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -1132,6 +1224,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-2/mcs-7</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>7</default>
+    </attribute>
 </targetInstance>
 
 <!-- Venice n0p2 pervasive unit -->
@@ -1428,6 +1524,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-3/mcs-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
     </attribute>  
 </targetInstance>
 
@@ -1441,6 +1541,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-3/mcs-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>  
 </targetInstance>
 
@@ -1455,6 +1559,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-3/mcs-2</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>2</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -1468,6 +1576,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-3/mcs-3</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>3</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -1481,6 +1593,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-3/mcs-4</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>4</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -1494,6 +1610,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-3/mcs-5</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>5</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -1507,6 +1627,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-3/mcs-6</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>6</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -1520,6 +1644,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-3/mcs-7</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>7</default>
+    </attribute>
 </targetInstance>
 
 <!-- Venice n0p3 pervasive unit -->
@@ -1817,6 +1945,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-4/mcs-0</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -1829,6 +1961,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-4/mcs-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>  
 </targetInstance>
 
@@ -1843,6 +1979,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-4/mcs-2</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>2</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -1856,6 +1996,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-4/mcs-3</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>3</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -1869,6 +2013,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-4/mcs-4</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>4</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -1882,6 +2030,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-4/mcs-5</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>5</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -1895,6 +2047,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-4/mcs-6</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>6</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -1908,9 +2064,13 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-4/mcs-7</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>7</default>
+    </attribute>
 </targetInstance>
 
-<!-- Vencie n0p4 pervasive unit -->
+<!-- Venice n0p4 pervasive unit -->
 
 <targetInstance>
     <id>sys0node0proc4pervasive0</id>
@@ -2204,7 +2364,11 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-5/mcs-0</default>
-    </attribute>  
+    </attribute> 
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute> 
 </targetInstance>
 
 <targetInstance>
@@ -2217,6 +2381,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-5/mcs-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>  
 </targetInstance>
 
@@ -2231,6 +2399,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-5/mcs-2</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>2</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -2244,6 +2416,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-5/mcs-3</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>3</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -2257,6 +2433,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-5/mcs-4</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>4</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -2270,6 +2450,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-5/mcs-5</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>5</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -2283,6 +2467,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-5/mcs-6</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>6</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -2296,6 +2484,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-5/mcs-7</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>7</default>
+    </attribute>
 </targetInstance>
 
 <!-- Venice n0p5 pervasive unit -->
@@ -2592,7 +2784,11 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-6/mcs-0</default>
-    </attribute>  
+    </attribute> 
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute> 
 </targetInstance>
 
 <targetInstance>
@@ -2605,6 +2801,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-6/mcs-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>  
 </targetInstance>
 
@@ -2619,6 +2819,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-6/mcs-2</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>2</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -2632,6 +2836,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-6/mcs-3</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>3</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -2645,6 +2853,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-6/mcs-4</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>4</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -2658,6 +2870,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-6/mcs-5</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>5</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -2671,6 +2887,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-6/mcs-6</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>6</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -2684,6 +2904,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-6/mcs-7</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>7</default>
+    </attribute>
 </targetInstance>
 
 <!-- Venice n0p6 pervasive unit -->
@@ -2981,6 +3205,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-7/mcs-0</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -2993,6 +3221,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-7/mcs-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>  
 </targetInstance>
 
@@ -3007,6 +3239,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-7/mcs-2</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>2</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -3020,6 +3256,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-7/mcs-3</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>3</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -3033,6 +3273,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-7/mcs-4</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>4</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -3045,7 +3289,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-7/mcs-5</default>
-    </attribute>  
+    </attribute>  <attribute>
+        <id>CHIP_UNIT</id>
+        <default>5</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -3059,6 +3306,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-7/mcs-6</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>6</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -3072,6 +3323,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-7/mcs-7</default>
     </attribute>  
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>7</default>
+    </attribute>
 </targetInstance>
 
 <!-- Venice n0p7 pervasive unit -->

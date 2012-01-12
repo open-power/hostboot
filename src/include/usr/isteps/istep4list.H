@@ -67,7 +67,7 @@ const   TaskInfo    g_istep4[]  =   {
                 {
                         START_FN,                       // task type
                         EXT_IMAGE,                      // Extended Module
-                        HWAS_1_ERRL_ID,                 // module id
+                        HWAS_ERRL_ID,                 // module id
                 }
         },
         {
@@ -76,7 +76,7 @@ const   TaskInfo    g_istep4[]  =   {
                 {
                         START_FN,                       // task type
                         EXT_IMAGE,                      // Extended Module
-                        HWAS_2_ERRL_ID,                 // module id
+                        HWAS_ERRL_ID,                 // module id
                 }
         },
         {
@@ -85,7 +85,7 @@ const   TaskInfo    g_istep4[]  =   {
                 {
                         START_FN,                       // task type
                         EXT_IMAGE,                      // Extended Module
-                        HWAS_3_ERRL_ID,                 // module id
+                        HWAS_ERRL_ID,                 // module id
                 }
         },
         {
@@ -94,7 +94,7 @@ const   TaskInfo    g_istep4[]  =   {
                 {
                         START_FN,                       // task type
                         EXT_IMAGE,                      // Extended Module
-                        HWAS_5_ERRL_ID,                 // module id
+                        HWAS_ERRL_ID,                 // module id
                 }
         },
         {
@@ -103,7 +103,7 @@ const   TaskInfo    g_istep4[]  =   {
                 {
                         START_FN,                       // task type
                         EXT_IMAGE,                      // Extended Module
-                        HWAS_6_ERRL_ID,                 // module id
+                        HWAS_ERRL_ID,                 // module id
                 }
         },
         {
@@ -112,7 +112,7 @@ const   TaskInfo    g_istep4[]  =   {
                 {
                         START_FN,                       // task type
                         EXT_IMAGE,                      // Extended Module
-                        HWAS_7_ERRL_ID,                 // module id
+                        HWAS_ERRL_ID,                 // module id
                 }
         },
         {
@@ -121,7 +121,7 @@ const   TaskInfo    g_istep4[]  =   {
                 {
                         START_FN,                       // task type
                         EXT_IMAGE,                      // Extended Module
-                        HWAS_8_ERRL_ID,                 // module id
+                        HWAS_ERRL_ID,                 // module id
                 }
         },
         {
@@ -130,7 +130,7 @@ const   TaskInfo    g_istep4[]  =   {
                 {
                         START_FN,                       // task type
                         EXT_IMAGE,                      // Extended Module
-                        HWAS_9_ERRL_ID,                 // module id
+                        HWAS_ERRL_ID,                 // module id
                 }
         }
 
@@ -139,8 +139,9 @@ const   TaskInfo    g_istep4[]  =   {
 
 // make a struct from the above with the number of items included
 const   ExtTaskInfo g_istep4TaskList    =   {
-        g_istep4,
-        ( sizeof(g_istep4)/sizeof(TaskInfo) )
+        &(g_istep4[0]),
+        ( sizeof(g_istep4)/sizeof(TaskInfo) ),
+        NULL
 };
 
 };  // end namespace

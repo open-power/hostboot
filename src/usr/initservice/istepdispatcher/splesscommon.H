@@ -93,6 +93,7 @@ enum    {
     SPLESS_TASKRC_LAUNCH_FAIL       =   -4,     // failed to launch the task
     SPLESS_TASKRC_RETURNED_ERRLOG   =   -5,     // istep returned an errorlog
     SPLESS_TASKRC_TERMINATED        =   -6,     // terminated the polling loop
+    SPLESS_TASKRC_FAIL_LOADMODULE   =   -7,     // failed to load module
 
     SPLESS_INVALID_COMMAND          =   10,    // invalid command from user console
     SPLESS_AT_BREAK_POINT           =   11,    // invalid command at breakpoint

@@ -557,6 +557,7 @@
         <default>MCS</default>
     </attribute>
     <attribute><id>MSS_MEMSIZE</id></attribute>
+    <attribute><id>CHIP_UNIT</id></attribute>
 </targetType>
 
 <targetType>
@@ -566,6 +567,7 @@
         <id>MODEL</id>
         <default>VENICE</default> 
     </attribute>
+    <attribute><id>CHIP_UNIT</id></attribute>
 </targetType>
 
 <targetType>
@@ -575,6 +577,7 @@
         <id>MODEL</id>
         <default>SALERNO</default> 
     </attribute>
+    <attribute><id>CHIP_UNIT</id></attribute>
 </targetType>
 
 <!-- Processor target types -->
