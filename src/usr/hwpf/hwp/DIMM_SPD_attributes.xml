@@ -1,0 +1,543 @@
+<!--  IBM_PROLOG_BEGIN_TAG
+     This is an automatically generated prolog.
+   
+     $Source: src/usr/hwpf/hwp/DIMM_SPD_attributes.xml $
+   
+     IBM CONFIDENTIAL
+   
+     COPYRIGHT International Business Machines Corp. 2012
+   
+     p1
+   
+     Object Code Only (OCO) source materials
+     Licensed Internal Code Source Materials
+     IBM HostBoot Licensed Internal Code
+   
+     The source code for this program is not published or other-
+     wise divested of its trade secrets, irrespective of what has
+     been deposited with the U.S. Copyright Office.
+   
+     Origin: 30
+   
+     IBM_PROLOG_END -->
+<attributes>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SPD_DRAM_DEVICE_TYPE</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        DRAM Device Type.
+        Located in DDR3/DDR4 SPD byte 2.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>DDR3 = 0x0b, DDR4 = 0x0c</enum>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SPD_MODULE_TYPE</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Module Type.
+        Located in DDR3 SPD byte 3, bits 3-0.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>CDIMM = 0x00, RDIMM = 0x01, UDIMM = 0x02, LRDIMM = 0x0b</enum>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SPD_SDRAM_BANKS</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Number of banks.
+        Located in DDR3 SPD byte 4, bits 6-4.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>B8 = 0x00, B16 = 0x01, B32 = 0x02, B64 = 0x03</enum>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SPD_SDRAM_DENSITY</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        DRAM Density.
+        Located in DDR3 SPD byte 4, bits 3-0.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>
+        D256MB = 0x00, D512Mb = 0x01, D1GB = 0x02, D2GB = 0x03, D4GB = 0x04,
+        D8GB = 0x05, D16GB = 0x06
+    </enum>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SPD_SDRAM_ROWS</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Number of Rows.
+        Located in DDR3 SPD byte 5, bits 5-3.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>R12 = 0x00, R13 = 0x01, R14 = 0x02, R15 = 0x03, R16 = 0x04</enum>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SPD_SDRAM_COLUMNS</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Number of Columns.
+        Located in DDR3 SPD byte 5, bits 2-0.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>C9 = 0x00, C10 = 0x01, C11 = 0x02, C12 = 0x03</enum>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SPD_MODULE_NOMINAL_VOLTAGE</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Nominal voltage (bitmap).
+        Located in DDR3 SPD byte 6, bits 2-0.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>NOTOP1_5 = 0x01, OP1_35 = 0x02, OP1_2X = 0x04</enum>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SPD_NUM_RANKS</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Number of ranks.
+        Located in DDR3 SPD byte 7, bits 5-3.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>R1 = 0x00, R2 = 0x01, R3 = 0x02, R4 = 0x03</enum>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SPD_DRAM_WIDTH</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        DRAM Width.
+        Located in DDR3 SPD byte 7, bits 2-0.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>W4 = 0x00, W8 = 0x01, W16 = 0x02, W32 = 0x03</enum>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SPD_MODULE_MEMORY_BUS_WIDTH</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Module Memory Bus Width.
+        Located in DDR3 SPD byte 8, bits 2-0.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>W8 = 0x00, W16 = 0x01, W32 = 0x02, W64 = 0x03</enum>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SPD_FTB_DIVIDEND</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Fine Timebase Dividend.
+        Located in DDR3 SPD byte 9, bits 7-4.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SPD_FTB_DIVISOR</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Fine Timebase Divisor.
+        Located in DDR3 SPD byte 9, bits 3-0.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SPD_MTB_DIVIDEND</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Medium Timebase Dividend.
+        Located in DDR3 SPD byte 10.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SPD_MTB_DIVISOR</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Medium Timebase Divisor.
+        Located in DDR3 SPD byte 11.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SPD_TCKMIN</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Minimum cycle time (tCKmin).
+        Located in DDR3 SPD byte 12.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SPD_CAS_LATENCIES_SUPPORTED</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        CAS Latencies supported (bitmap).
+        Located in DDR3 SPD byte 14 (LSB) and byte 15.
+    </description>
+    <valueType>uint32</valueType>
+    <enum>
+        CL_18 = 0x00004000,
+        CL_17 = 0x00002000,
+        CL_16 = 0x00001000,
+        CL_15 = 0x00000800,
+        CL_14 = 0x00000400,
+        CL_13 = 0x00000200,
+        CL_12 = 0x00000100,
+        CL_11 = 0x00000080,
+        CL_10 = 0x00000040,
+        CL_9  = 0x00000020,
+        CL_8  = 0x00000010,
+        CL_7  = 0x00000008,
+        CL_6  = 0x00000004,
+        CL_5  = 0x00000002,
+        CL_4  = 0x00000001,
+    </enum>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SPD_TAAMIN</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Minimum CAS Latency Time (tAAmin).
+        Located in DDR3 SPD byte 16.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SPD_TWRMIN</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Minimum Write Recovery Time (tWRmin).
+        Located in DDR3 SPD byte 17.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SPD_TRCDMIN</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Minimum RAS# to CAS# Delay Time (tRCDmin).
+        Located in DDR3 SPD byte 18.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SPD_TRRDMIN</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Minimum Row Active to Row Active Delay Time (tRRDmin).
+        Located in DDR3 SPD byte 19.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SPD_TRPMIN</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Minimum Row Precharge Delay Time (tRPmin).
+        Located in DDR3 SPD byte 20.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SPD_TRASMIN</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Minimum Active to Precharge Delay Time (tRASmin).
+        Located in DDR3 SPD byte 21, bits 3-0 and byte 22 (LSB).
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SPD_TRCMIN</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Minimum Active to Active/Refresh Delay Time (tRCmin).
+        Located in DDR3 SPD byte 21, bits 7-4 and byte 23 (LSB).
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SPD_TRFCMIN</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Minimum Refresh Recovery Delay Time (tRFCmin).
+        Located in DDR3 SPD byte 24 (LSB) and byte 25.
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SPD_TWTRMIN</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Minimum Internal Write to Read Command Delay Time (tWTRmin).
+        Located in DDR3 SPD byte 26.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SPD_TRTPMIN</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Minimum Internal Read to Precharge Command Delay Time (tRTPmin).
+        Located in DDR3 SPD byte 27.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SPD_TFAWMIN</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Minimum Four Activate Window Delay Time (tFAWmin).
+        Located in DDR3 SPD byte 28, bits 3-0 and byte 29 (LSB).
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SPD_SDRAM_OPTIONAL_FEATURES</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        SDRAM Optional Features (bitmap).
+        Located in DDR3 SPD byte 30.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>DLL_OFF = 0x80, RZQ7 = 0x02, RZQ6 = 0x01</enum>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SPD_SDRAM_THERMAL_AND_REFRESH_OPTIONS</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        SDRAM Thermal and Refresh Options (bitmap).
+        Located in DDR3 SPD byte 31.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>PASR = 0x80, ODTS = 0x08, ASR = 0x05, ETRR = 0x02, ETR = 0x01</enum>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SPD_MODULE_THERMAL_SENSOR</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Module Thermal Sensor.
+        Located in DDR3 SPD byte 32.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>PRESENT = 0x80, ACCURACY_MASK = 0x7F</enum>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SPD_FINE_OFFSET_TCKMIN</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Fine Offset for SDRAM Minimum Cycle Time (tCKmin).
+        Located in DDR3 SPD byte 34.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SPD_FINE_OFFSET_TAAMIN</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Fine Offset for Minimum CAS Latency Time (tAAmin).
+        Located in DDR3 SPD byte 35.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SPD_FINE_OFFSET_TRCDMIN</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Fine Offset for Minimum RAS# to CAS# Delay Time (tRCDmin).
+        Located in DDR3 SPD byte 36.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SPD_FINE_OFFSET_TRPMIN</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Fine Offset for Minimum Row Precharge Delay Time (tRPmin).
+        Located in DDR3 SPD byte 37.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SPD_FINE_OFFSET_TRCMIN</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Fine Offset for Minimum Active to Active/Refresh Delay Time (tRCmin).
+        Located in DDR3 SPD byte 38.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SPD_MODULE_SPECIFIC_SECTION</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Module Specific Section.
+        Located in DDR3 SPD bytes 60d - 116d.
+    </description>
+    <valueType>uint8</valueType>
+    <array>57</array>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SPD_MODULE_ID_MODULE_MANUFACTURERS_JEDEC_ID_CODE</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Module ID: Module Manufacturer's JEDEC ID Code.
+        Located in DDR3 SPD bytes 117 (LSB) to 118.
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SPD_MODULE_ID_MODULE_MANUFACTURING_LOCATION</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Module ID: Module Manufacturing Location.
+        Located in DDR3 SPD byte 119.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SPD_MODULE_ID_MODULE_MANUFACTURING_DATE</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Module ID: Module Manufacturing Date.
+        Located in DDR3 SPD bytes 120 (BCD year) to byte 121 (BCD week) (LSB).
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SPD_MODULE_ID_MODULE_SERIAL_NUMBER</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Module ID: Module Serial Number.
+        Located in DDR3 SPD bytes 122 (LSB) to 125.
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SPD_CYCLICAL_REDUNDANCY_CODE</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Cyclical Redundancy Code.
+        Located in DDR3 SPD bytes 126 (LSB) to 127.
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SPD_MODULE_PART_NUMBER</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Module Part Number.
+        Located in DDR3 SPD bytes 128 - 145.
+    </description>
+    <valueType>uint8</valueType>
+    <array>18</array>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SPD_MODULE_REVISION_CODE</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Module Revision Code.
+        Located in DDR3 SPD bytes 146 (LSB) to 147.
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SPD_DRAM_MANUFACTURER_JEDEC_ID_CODE</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        DRAM Manufacturer JEDEC ID Code.
+        Located in DDR3 SPD bytes 148 (LSB) to 149.
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+</attributes>

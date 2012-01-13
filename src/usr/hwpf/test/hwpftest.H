@@ -36,6 +36,8 @@
 #include <errl/errlmanager.H>
 #include <targeting/targetservice.H>
 #include <fapiHwpExecInitFile.H>
+#include <spd/spdenums.H>
+#include <targeting/predicates/predicatectm.H>
 
 using namespace fapi;
 using namespace TARGETING;
@@ -624,7 +626,6 @@ public:
         }
     }
 
-
 //    // unit test breakpoint
 //    void testHwpf7()
 //    {
@@ -637,6 +638,61 @@ public:
 //        FAPI_INF("RESUME from breakpoint");
 //    }
 
+    /**
+     * @brief Test case Accessing DIMM SPD Attribute from FAPI
+     *
+     */
+    void testHwpf8()
+    {
+        fapi::ReturnCode l_rc;
+
+        do
+        {
+            // Get top level system target
+            TARGETING::TargetService& tS = TARGETING::targetService();
+            TARGETING::Target * sysTarget = NULL;
+            tS.getTopLevelTarget( sysTarget );
+
+            if (sysTarget == NULL)
+            {
+                FAPI_ERR("testHwpf8: Can't obtain system target");
+                break;
+            }
+
+            // Get a DIMM Target
+            TARGETING::PredicateCTM predDimm( TARGETING::CLASS_CARD,
+                                              TARGETING::TYPE_DIMM );
+            TargetHandleList dimmList;
+
+            tS.getAssociated( dimmList,
+                              sysTarget,
+                              TARGETING::TargetService::CHILD,
+                              TARGETING::TargetService::ALL,
+                              &predDimm );
+ 
+            if (dimmList.size())
+            {
+                fapi::Target l_dTarget(TARGET_TYPE_DIMM,
+                                       static_cast<void *> (dimmList[0]));
+
+                uint8_t opt[18] = { 0, };
+
+                l_rc = FAPI_ATTR_GET(ATTR_SPD_MODULE_PART_NUMBER,
+                                                       &l_dTarget, opt);
+
+                if (l_rc.ok())
+                {
+                    FAPI_INF("testHwpf8: PN = %s", opt);
+                }
+                else
+                {
+                    TS_FAIL("testHwpf8: ATTR_SPD_MODULE_PART_NUMBER GET fails");
+                }
+            }
+
+        } while(0);
+
+    }
 
 };
 

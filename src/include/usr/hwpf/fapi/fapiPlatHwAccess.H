@@ -159,7 +159,6 @@ fapi::ReturnCode platModifyCfamRegister(const fapi::Target& i_target,
                                   ecmdDataBufferBase & i_data,
                                   const fapi::ChipOpModifyMode i_modifyMode);
 
-
 } // extern "C"
 
 #endif // FAPIPLATHWACCESS_H_
