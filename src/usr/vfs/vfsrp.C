@@ -263,33 +263,56 @@ void VfsRp::_load_unload(msg_t * i_msg)
     {
         int rc = 0;
 
+        // don't want the possibility of a function called in this module
+        // until it's completely loaded and inited, so hold
+        // off any query or other operation.
+        mutex_lock(&iv_mutex);
+
+        ModuleList_t::iterator mod_itr =
+            std::find(iv_loaded.begin(),iv_loaded.end(),module);
+
         if(i_msg->type == VFS_MSG_LOAD)
         {
-            rc = vfs_module_perms(module);
-
-            if(!rc)
+            if(mod_itr == iv_loaded.end()) // make sure it's not already loaded
             {
-                if(module->init)
+                // Set mem access parms
+                rc = vfs_module_perms(module);
+                if(!rc)
                 {
-                    (module->init)(NULL);
+                    iv_loaded.push_back(module);
+
+                    if(module->init)
+                    {
+                        (module->init)(NULL);
+                    }
+
                 }
             }
         }
         else // unload
         {
-            if(module->fini)
+            if(mod_itr != iv_loaded.end()) // Loaded
             {
-                (module->fini)(NULL);
+                iv_loaded.erase(mod_itr);
+
+                if(module->fini)
+                {
+                    (module->fini)(NULL);
+                }
+
+                rc = mm_set_permission(module->text,
+                                       ALIGN_PAGE(module->byte_count),
+                                       NO_ACCESS);
+
+                rc = mm_remove_pages(RELEASE,
+                                     module->text,
+                                     ALIGN_PAGE(module->byte_count));
             }
-
-            rc = mm_set_permission(module->text,
-                                   ALIGN_PAGE(module->byte_count),
-                                   NO_ACCESS);
-
-            rc = mm_remove_pages(RELEASE,
-                                 module->text,
-                                 ALIGN_PAGE(module->byte_count));
+            // else module was not loaded
         }
+
+        mutex_unlock(&iv_mutex);
+
         if(rc)
         {
             /*@ errorlog tag
@@ -395,6 +418,57 @@ const VfsSystemModule * VfsRp::get_vfs_info(const char * i_name) const
     return vfs_find_module((VfsSystemModule *)(iv_pnor_vaddr +
                                              VFS_EXTENDED_MODULE_TABLE_OFFSET),
                            i_name);
+}
+
+// ----------------------------------------------------------------------------
+
+const char * VfsRp::get_name_from_address(const void * i_vaddr) const
+{
+    const char * result = NULL;
+
+    VfsSystemModule * module = vfs_find_address
+        ((VfsSystemModule *)(iv_pnor_vaddr + VFS_EXTENDED_MODULE_TABLE_OFFSET),
+         i_vaddr);
+
+    if(!module) // look in the base modules
+    {
+        module = vfs_find_address(VFS_MODULES,i_vaddr);
+    }
+    if(module) 
+    {
+        result = module->module;
+    }
+    return result;
+}
+
+// ----------------------------------------------------------------------------
+
+bool VfsRp::is_module_loaded(const char * i_name)
+{
+    bool result = false;
+    const VfsSystemModule * module = get_vfs_info(i_name);
+    if(module)
+    {
+        mutex_lock(&iv_mutex);
+        ModuleList_t::const_iterator i =
+            std::find(iv_loaded.begin(),iv_loaded.end(),module);
+        if(i != iv_loaded.end())
+        {
+            result = true;
+        }
+        mutex_unlock(&iv_mutex);
+    }
+    if(!result)  // look in the base
+    {
+        module = vfs_find_module(VFS_MODULES,i_name);
+        if(module)
+        {
+            // all base modules are always loaded
+            result = true;
+        }
+    }
+
+    return result;
 }
 
 // ----------------------------------------------------------------------------
@@ -517,4 +591,15 @@ errlHndl_t VFS::module_address(const char * i_name, const char *& o_address, siz
     }
     return err;
 }
+
+const char * VFS::module_find_name(const void * i_vaddr)
+{
+    return Singleton<VfsRp>::instance().get_name_from_address(i_vaddr);
+}
+
+bool VFS::module_is_loaded(const char * i_name)
+{
+    return Singleton<VfsRp>::instance().is_module_loaded(i_name);
+}
+
 

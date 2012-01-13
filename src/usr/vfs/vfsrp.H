@@ -27,6 +27,8 @@
 #include <builtins.h>
 #include <errl/errltypes.H>
 #include <sys/msg.h>
+#include <vector>
+#include <sys/sync.h>
 
 struct msg_t;
 
@@ -68,11 +70,28 @@ namespace VFS
              */
             const VfsSystemModule * get_vfs_info(const char * i_name) const;
 
+            /**
+             * Get the module name that contains the given address
+             * @param[in] i_vaddr The virtual address
+             * @return ptr to the module name or NULL if it's not found
+             */
+            const char * get_name_from_address(const void * i_vaddr) const;
+
+            /**
+             * Query if a module is loaded
+             * @param[in] i_name  The module name
+             * @return [true|false]
+             */
+            bool is_module_loaded(const char * i_name);
+
         protected:
             /**
              * Ctor
              */
-            VfsRp() : iv_msgQ(NULL), iv_pnor_vaddr(0) {}
+            VfsRp() : iv_msgQ(NULL), iv_pnor_vaddr(0)
+            {
+                mutex_init(&iv_mutex);
+            }
 
             /**
              * Dtor
@@ -127,6 +146,11 @@ namespace VFS
 
             msg_q_t iv_msgQ;         //!< message queue
             uint64_t iv_pnor_vaddr;  //!< virtual address of ext image in PFNOR
+
+            typedef std::vector<VfsSystemModule *> ModuleList_t;
+
+            mutex_t iv_mutex;       //!< lock for iv_loaded
+            ModuleList_t iv_loaded; //!< Loaded modules
     };
 
 }; // VFS namepsace

@@ -71,6 +71,38 @@ class VfsTest: public CxxTest::TestSuite
                 TS_FAIL("module_unload failed");
             }
         }
+
+        void test_findModule(void)
+        {
+            size_t size = 0;
+            const char * addr = NULL;
+            const char * name = "testdata";
+
+            errlHndl_t err = VFS::module_address(name , addr, size);
+            if (err)
+            {
+                TS_FAIL("module_address failed");
+                ERRORLOG::errlCommit(err,VFS_COMP_ID);
+            }
+
+            name = VFS::module_find_name(addr);
+            TS_TRACE("VFS module @ %p is %s",addr,name);
+
+            if(strcmp(name,"testdata") != 0)
+            {
+                TS_FAIL("VFS find module by address failed!");
+            }
+
+            if(VFS::module_is_loaded(name))
+            {
+                TS_TRACE("VFS module %s is loaded",name);
+                TS_FAIL("VFS module should NOT be loaded");
+            }
+            else
+            {
+                TS_TRACE("VFS module %s is not loaded",name);
+            }
+        }
 };
 
 

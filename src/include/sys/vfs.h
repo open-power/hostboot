@@ -69,8 +69,8 @@ enum VfsMessages
     VFS_MSG_REGISTER_MSGQ, //!< Message to VFS_ROOT to register a message queue
     VFS_MSG_RESOLVE_MSGQ,  //!< Message to VFS_ROOT to find a message queue
     VFS_MSG_EXEC,          //!< Message to VFS_ROOT execute a module
-    VFS_MSG_LOAD,          //!< Message to VFS_MSG to load a module
-    VFS_MSG_UNLOAD,        //!< Message to VFS_MSG to unload a module
+    VFS_MSG_LOAD,          //!< Message to vfsrp to load a module
+    VFS_MSG_UNLOAD,        //!< Message to vfsrp to unload a module
 };
 
 struct VfsSystemModule
@@ -81,7 +81,7 @@ struct VfsSystemModule
     void  (*fini)(void*);                       //!< ptr to fini()
     uint64_t * text;                            //!< ptr to text (code) section
     uint64_t * data;                            //!< ptr to data section
-    uint64_t byte_count;                        //!< no. of memory pages used
+    uint64_t byte_count;                        //!< no. of bytes in module
 };
 
 extern VfsSystemModule VFS_MODULES[VFS_MODULE_MAX];
@@ -100,6 +100,15 @@ extern uint64_t VFS_LAST_ADDRESS;
  * @return VfsSystemModule ptr to data | NULL if not found
  */
 VfsSystemModule * vfs_find_module(VfsSystemModule * i_table, const char * i_name);
+
+/**
+ * Find the VfsSystemModule for the given address
+ * @param[in] i_table The VFS module table to look in
+ * @param[in] i_vaddr The virtual address
+ * @return VrsSytemModule ptr for the module | NULL if not found
+ */
+VfsSystemModule * vfs_find_address(VfsSystemModule * i_table,
+                                   const void * i_vaddr);
 
 /**
  * Get the module's start routine

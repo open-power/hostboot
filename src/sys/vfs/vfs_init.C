@@ -119,4 +119,28 @@ VfsSystemModule * vfs_find_module(VfsSystemModule * i_table,
     return ret;
 }
 
+// ----------------------------------------------------------------------------
+
+VfsSystemModule * vfs_find_address(VfsSystemModule * i_table,
+                                   const void * i_vaddr)
+{
+    VfsSystemModule * module = i_table;
+    VfsSystemModule * ret = NULL;
+
+    const uint8_t * vaddr = reinterpret_cast<const uint8_t *>(i_vaddr);
+
+    while('\0' != module->module[0])
+    {
+        const uint8_t * first = reinterpret_cast<const uint8_t *>(module->text);
+        const uint8_t * last = first + module->byte_count;
+
+        if(vaddr >= first && vaddr < last)
+        {
+            ret = module;
+            break;
+        }
+        ++module;
+    }
+    return ret;
+}
 

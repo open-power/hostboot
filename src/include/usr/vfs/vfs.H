@@ -83,6 +83,20 @@ namespace VFS
      */
     errlHndl_t module_address(const char * i_name, const char *& o_address, size_t & o_size);
 
+    /**
+     * Get the module name associated with an address
+     * @param[in] i_vaddr, The virtual address
+     * @returns ptr to module name or NULL if not found
+     */
+    const char * module_find_name(const void * i_vaddr);
+
+    /**
+     * Query if module is loaded
+     * @param[in] module name
+     * @returns [true|false]
+     */
+    bool module_is_loaded(const char * i_name);
+
 };
 
 #endif
