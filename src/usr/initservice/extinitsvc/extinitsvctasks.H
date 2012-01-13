@@ -178,15 +178,11 @@ const TaskInfo g_exttaskinfolist[]   =   {
             }
         },
 
-
-        //  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        // NOTE: libistepdisp.so needs to always be last in this list!!
-        //  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         /**
          * @brief External interrupt resource provider
          */
         {
-            "libintr.so",                               // tasknmae
+            "libintr.so",                               // taskname
             NULL,                                       // no ptr to fnct
             {
                 START_TASK,                             // task type
@@ -195,6 +191,35 @@ const TaskInfo g_exttaskinfolist[]   =   {
             }
         },
 
+        /**
+         * @brief VSBE FAPI interface code library.
+         */
+        {
+            "libfapiporeve.so" ,                   // taskname
+            NULL,                                  // no pointer to fn
+            {
+                INIT_TASK,                         // task type
+                EXT_IMAGE,                         // Extended Module
+                START_FAPIPOREVE_ERRL_ID           // module id
+            }
+        },
+
+        /**
+         * @brief VSBE code library
+         */
+        {
+            "libporeve.so" ,                    // taskname
+            NULL,                                  // no pointer to fn
+            {
+               INIT_TASK,                         // task type
+               EXT_IMAGE,                         // Extended Module
+               START_POREVE_ERRL_ID               // module id
+            }
+        },
+
+        //  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        // NOTE: libistepdisp.so needs to always be last in this list!!
+        //  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         /**
          * @brief   IStep Dispatcher task, runs ISteps
          *

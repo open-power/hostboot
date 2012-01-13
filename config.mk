@@ -76,10 +76,11 @@ TRACEPP = ${ROOTPATH}/src/build/trace/tracepp
 CUSTOM_LINKER_EXE = ${ROOTPATH}/src/build/linker/linker
 CUSTOM_LINKER = i686-mcp6-jail ${CUSTOM_LINKER_EXE}
 
-CC_RAW = ppc64-mcp6-gcc
+CC_RAW = ppc64-mcp6-gcc -std=c99
 CXX_RAW = ppc64-mcp6-g++
 CC = ${TRACEPP} ${CC_RAW}
 CXX = ${TRACEPP} ${CXX_RAW}
+
 LD = ppc64-mcp6-ld
 OBJDUMP = ppc64-mcp6-objdump
 APYFIPSHDR = apyfipshdr
@@ -144,9 +145,21 @@ ${OBJDIR}/%.o ${OBJDIR}/%.list : %.C
 	${CXX} -c ${CXXFLAGS} $< -o $@ ${INCFLAGS} -iquote .
 	${OBJDUMP} -dCS $@ > $(basename $@).list	
 
+# Compiling *.cc files
+${OBJDIR}/%.o ${OBJDIR}/%.list : %.cc
+	mkdir -p ${OBJDIR}
+	${CXX} -c ${CXXFLAGS} $< -o $@ ${INCFLAGS} -iquote .
+	${OBJDUMP} -dCS $@ > $(basename $@).list	
+
 ${OBJDIR}/%.o ${OBJDIR}/%.list : %.c
 	mkdir -p ${OBJDIR}
-	${CC} -c ${CFLAGS} -std=c99 $< -o $@ ${INCFLAGS} -iquote .
+    # Override to use C++ compiler in place of C compiler
+    # CC_OVERRIDE is set in the makefile of the component
+ifndef CC_OVERRIDE
+	${CC} -c ${CFLAGS} $< -o $@ ${INCFLAGS} -iquote .
+else
+	${CXX} -c ${CXXFLAGS} $< -o $@ ${INCFLAGS} -iquote .
+endif
 	${OBJDUMP} -dCS $@ > $(basename $@).list
 
 ${OBJDIR}/%.o : %.S
@@ -160,10 +173,17 @@ ${OBJDIR}/%.dep : %.C
 	sed 's,\($*\)\.o[ :]*,${OBJDIR}/\1.o $@ : ,g' < $@.$$$$ > $@; \
 	rm -f $@.$$$$
 
+${OBJDIR}/%.dep : %.cc
+	mkdir -p ${OBJDIR}; \
+	rm -f $@; \
+	${CXX_RAW} -M ${CXXFLAGS} $< -o $@.$$$$ ${INCFLAGS} -iquote .; \
+	sed 's,\($*\)\.o[ :]*,${OBJDIR}/\1.o $@ : ,g' < $@.$$$$ > $@; \
+	rm -f $@.$$$$
+
 ${OBJDIR}/%.dep : %.c
 	mkdir -p ${OBJDIR}; \
 	rm -f $@; \
-	${CC_RAW} -M ${CFLAGS} -std=c99 $< -o $@.$$$$ ${INCFLAGS} -iquote .; \
+	${CC_RAW} -M ${CFLAGS} $< -o $@.$$$$ ${INCFLAGS} -iquote .; \
 	sed 's,\($*\)\.o[ :]*,${OBJDIR}/\1.o $@ : ,g' < $@.$$$$ > $@; \
 	rm -f $@.$$$$
 
@@ -262,9 +282,14 @@ ${BEAMDIR}/%.beam : %.C
 	${BEAMCMD} -I ${INCDIR} ${CXXFLAGS} ${BEAMFLAGS} $< \
 	    --beam::complaint_file=$@ --beam::parser_file=/dev/null
 
-${BEAMDIR}/%.beam : %.c
+${BEAMDIR}/%.beam : %.cc
 	mkdir -p ${BEAMDIR}
 	${BEAMCMD} -I ${INCDIR} ${CXXFLAGS} ${BEAMFLAGS} $< \
+	    --beam::complaint_file=$@ --beam::parser_file=/dev/null
+
+${BEAMDIR}/%.beam : %.c
+	mkdir -p ${BEAMDIR}
+	${BEAMCMD} -I ${INCDIR} ${CFLAGS} ${BEAMFLAGS} $< \
 	    --beam::complaint_file=$@ --beam::parser_file=/dev/null
 
 ${BEAMDIR}/%.beam : %.S

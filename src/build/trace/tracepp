@@ -163,7 +163,7 @@ while(defined($opt = shift @ARGV)) {
 		# an object or archive, ignore this but give it to cc
 		push @ccopts, $opt;
 		print "found object/archive '$opt'\n" if $debug;
-	} elsif ($opt =~ m/\.c[xp]*$/i) {
+	} elsif ($opt =~ m/\.c[cxp]*$/i) {
 		# the source file(s). we should only get one
 		if (defined $source) {
 			print STDERR "don't know to handle two source files, aborting\n";
