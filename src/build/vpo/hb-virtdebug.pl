@@ -277,8 +277,8 @@ print "\n+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #Flush L2 - this step is needed in order to dump L3 quickly
 #------------------------------------------------------------------------------
 my $command = "";
-$command = "/afs/awd.austin.ibm.com/projects/eclipz/lab/p8/gsiexe/p8_l2_flush.x86 ";
-$command .= "@ecmdOpt -loop ex -debug5.6";
+$command = "/afs/awd.austin.ibm.com/projects/eclipz/lab/p8/compiled_procs/procs/p8_l2_flush_wrap.x86 ";
+$command .= "@ecmdOpt -quiet";
 print "$command\n";
 die if (system("$command") != 0);
 
