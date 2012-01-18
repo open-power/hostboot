@@ -40,19 +40,15 @@
 //******************************************************************************
 // Trace descriptors
 //******************************************************************************
-trace_desc_t* g_fapiInfTd;
+trace_desc_t* g_fapiTd;
 trace_desc_t* g_fapiImpTd;
-trace_desc_t* g_fapiErrTd;
-trace_desc_t* g_fapiDbgTd;
 trace_desc_t* g_fapiScanTd;
 
 //******************************************************************************
 // Global TracInit objects. Construction will initialize the trace buffer
 //******************************************************************************
-TRAC_INIT(&g_fapiInfTd, FAPI_INF_TRACE_NAME, 4096);
+TRAC_INIT(&g_fapiTd, FAPI_TRACE_NAME, 4096);
 TRAC_INIT(&g_fapiImpTd, FAPI_IMP_TRACE_NAME, 4096);
-TRAC_INIT(&g_fapiErrTd, FAPI_ERR_TRACE_NAME, 4096);
-TRAC_INIT(&g_fapiDbgTd, FAPI_DBG_TRACE_NAME, 4096);
 TRAC_INIT(&g_fapiScanTd, FAPI_SCAN_TRACE_NAME, 4096);
 
 extern "C"

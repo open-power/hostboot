@@ -40,32 +40,28 @@
 //******************************************************************************
 // Trace buffer names
 //******************************************************************************
-const char * const FAPI_INF_TRACE_NAME = "FAPI_T";
+const char * const FAPI_TRACE_NAME = "FAPI";
 const char * const FAPI_IMP_TRACE_NAME = "FAPI_I";
-const char * const FAPI_ERR_TRACE_NAME = "FAPI_E";
-const char * const FAPI_DBG_TRACE_NAME = "FAPI_D";
 const char * const FAPI_SCAN_TRACE_NAME = "SCAN";
 
 //******************************************************************************
 // Trace descriptors that are defined in a C file
 //******************************************************************************
-extern trace_desc_t* g_fapiInfTd;
+extern trace_desc_t* g_fapiTd;
 extern trace_desc_t* g_fapiImpTd;
-extern trace_desc_t* g_fapiErrTd;
-extern trace_desc_t* g_fapiDbgTd;
 extern trace_desc_t* g_fapiScanTd;
 
-// Information traces (standard flight recorder that can wrap often)
-#define FAPI_INF(_fmt_, _args_...) TRACFCOMP(g_fapiInfTd, _fmt_, ##_args_ )
+// Information traces (go into fast trace buffer that can wrap often)
+#define FAPI_INF(_fmt_, _args_...) TRACFCOMP(g_fapiTd, _fmt_, ##_args_ )
 
-// Important traces (should not wrap often)
+// Important traces (go into slow trace buffer that should not wrap often)
 #define FAPI_IMP(_fmt_, _args_...) TRACFCOMP(g_fapiImpTd, _fmt_, ##_args_ )
 
-// Error traces (should not wrap often)
-#define FAPI_ERR(_fmt_, _args_...) TRACFCOMP(g_fapiErrTd, _fmt_, ##_args_ )
+// Error traces (go into slow trace buffer that should not wrap often)
+#define FAPI_ERR(_fmt_, _args_...) TRACFCOMP(g_fapiImpTd, _fmt_, ##_args_ )
 
-// Debug traces (can wrap often)
-#define FAPI_DBG(_fmt_, _args_...) TRACDCOMP(g_fapiDbgTd, _fmt_, ##_args_)
+// Debug traces (go into fast trace buffer that can wrap often)
+#define FAPI_DBG(_fmt_, _args_...) TRACDCOMP(g_fapiTd, _fmt_, ##_args_)
 
 // Scan traces
 #define FAPI_SCAN(_fmt_, _args_...) TRACFCOMP(g_fapiScanTd, _fmt_, ##_args_)
