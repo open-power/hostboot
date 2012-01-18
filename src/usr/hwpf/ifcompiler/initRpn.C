@@ -21,8 +21,9 @@
 //  dg003 SW047506 dgilbert 12/09/10 SERIES filtering
 //                 andrewg  05/24/11 Port over for VPL/PgP
 //                 andrewg  09/19/11 Updates based on review
-//                 camvanng 11/08/11  Added support for attribute enums
+//                 camvanng 11/08/11 Added support for attribute enums
 //                 andrewg  11/09/11 Multi-dimensional array and move to common fapi include
+//                 camvanng 01/06/12 Support for writing an attribute to a SCOM register
 // End Change Log *********************************************************************************
 
 /**
@@ -37,6 +38,7 @@
 #include <iomanip>
 #include <iostream>
 #include <stdexcept>
+#include <fapiHwpInitFileInclude.H>  // Requires file from hwpf
 
 using namespace init;
 
@@ -515,7 +517,22 @@ void Rpn::bin_read(BINSEQ::const_iterator & bli, Symbols * symbols)
                 throw std::invalid_argument(errss.str());
             }
             --size;
-           iv_rpnstack.push_back(iv_symbols->get_rpn_id(v));
+            uint32_t l_rpn_id = iv_symbols->get_rpn_id(v);
+            iv_rpnstack.push_back(l_rpn_id);
+           
+            //Check for attribute of array type
+            if ((v & IF_TYPE_MASK) == IF_ATTR_TYPE)
+            {
+                //Get the attribute dimension & shift it to the LS nibble
+                uint32_t l_type = iv_symbols->get_attr_type(l_rpn_id);
+                uint8_t l_attrDimension = (static_cast<uint8_t>(l_type) & ATTR_DIMENSION_MASK) >> 4;
+                for(uint8_t i=0; i < l_attrDimension; i++)
+                {
+                    v = *bli++;
+                    v = (v << 8) + (*bli++);
+                    iv_rpnstack.push_back(iv_symbols->get_rpn_id(v));
+                }
+            }
         }
     }
 }

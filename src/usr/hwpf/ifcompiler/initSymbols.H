@@ -25,6 +25,7 @@
 //                 andrewg  11/09/11 Multi-dimensional array and move to common fapi include
 //                 mjjones  11/17/11 Output attribute listing
 //                 camvanng 11/17/11 Support for system & target attributes
+//                 camvanng 01/07/12 Support for writing an attribute to a SCOM register
 // End Change Log *********************************************************************************
 
 /**
@@ -218,6 +219,13 @@ namespace init
                        (*i) == '$')                      *i = '_';
                     else *i = toupper(*i);
             }
+
+            /**
+             * @brief Get the attribute type
+             * @param[in] i_rpn_id RPN id of the attribute
+             * @return uint32_t Attribute type
+             */
+            uint32_t get_attr_type(const uint32_t i_rpn_id);
 
         private:  // functions
 

@@ -23,6 +23,7 @@
 //                 andrewg  11/09/11 Multi-dimensional array and move to common fapi include
 //                 mjjones  11/17/11 Output attribute listing
 //                 camvanng 11/17/11 Support for system & target attributes
+//                 camvanng 01/07/12 Support for writing an attribute to a SCOM register
 // End Change Log *********************************************************************************
 
 /**
@@ -272,6 +273,12 @@ uint32_t Symbols::get_attr_type(const string &i_type, const uint32_t i_array)
     l_type += (i_array*ATTR_DIMENSION_SIZE_MULT)+i_array;
 
     return(l_type);
+}
+
+uint32_t Symbols::get_attr_type(const uint32_t i_rpn_id)
+{
+    string l_attr_name = find_name(i_rpn_id);
+    return(iv_attr_type[l_attr_name]);
 }
 
 // ------------------------------------------------------------------------------------------------

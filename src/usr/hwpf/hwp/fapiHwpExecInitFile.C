@@ -37,6 +37,8 @@
  *                                                  system & target attributes.
  *                          camvanng    12/06/2011  Optimize code to check for
  *                                                  endianness at compile time
+ *                          camvanng    01/06/2012  Support for writing an
+ *                                                  attribute to a SCOM register
  */
 
 #include <fapiHwpExecInitFile.H>
@@ -45,6 +47,7 @@
 #include <string.h>
 #include <vector>
 #include <endian.h>
+#include <stdlib.h>
 
 extern "C"
 {
@@ -101,6 +104,9 @@ enum IfHeader
 //RPN stack
 typedef std::vector<uint64_t> rpnStack_t;
 
+//Array Index Id container for scom data of array attribute type
+typedef std::vector<uint64_t> dataArrayIdxId_t;
+
 //InitFile address, size and current offset
 typedef struct ifInfo
 {
@@ -124,7 +130,7 @@ typedef struct scomData
     uint16_t   addrId;  //numeric literal
     uint16_t   numCols;
     uint16_t   numRows;
-    uint16_t * dataId;  //numeric literal
+    uint16_t * dataId;  //attribute or numeric literal
     bool       hasExpr;
     char *     colId;   //expr or an attribute
     char **    rowData;
@@ -140,6 +146,7 @@ typedef struct ifData
     attrTableEntry_t *       attrs;
     uint64_t *               numericLits;
     scomData_t *             scoms;
+    dataArrayIdxId_t *       dataArrayIdxId;
     rpnStack_t *             rpnStack;
 }ifData_t;
 
@@ -152,29 +159,29 @@ void ifSeek(ifInfo_t & io_ifInfo, size_t i_offset);
 void ifRead(ifInfo_t & io_ifInfo, void * o_data, uint32_t i_size,
             bool i_swap = true);
 
-attrTableEntry_t * loadAttrSymbolTable(ifInfo_t & io_ifInfo,
-                                       uint16_t & o_numAttrs);
+void loadAttrSymbolTable(ifInfo_t & io_ifInfo,
+                         ifData_t & io_ifData);
 
-void  unloadAttrSymbolTable(attrTableEntry_t *& io_attrs);
+void  unloadAttrSymbolTable(ifData_t & io_ifData);
 
 fapi::ReturnCode getAttr(const ifData_t & i_ifData,
                          const uint16_t i_id,
                          uint64_t & o_val,
                          const uint16_t i_arrayIndexIds[MAX_ATTRIBUTE_ARRAY_DIMENSION]);
 
-uint64_t * loadLitSymbolTable(ifInfo_t & io_ifInfo,
-                              uint16_t & o_numLits);
+void loadLitSymbolTable(ifInfo_t & io_ifInfo,
+                        ifData_t & io_ifData);
 
-void unloadLitSymbolTable(uint64_t *& io_numericLits);
+void unloadLitSymbolTable(ifData_t & io_ifData);
 
 fapi::ReturnCode getLit(const ifData_t & i_ifData,
                         const uint16_t i_id,
                         uint64_t & o_val);
 
-scomData_t * loadScomSection(ifInfo_t & io_ifInfo,
-                             uint32_t & o_numScoms);
+void loadScomSection(ifInfo_t & io_ifInfo,
+                     ifData_t & io_ifData);
 
-void unloadScomSection(scomData_t *& io_scoms, uint32_t i_numScoms);
+void unloadScomSection(ifData_t & io_ifData);
 
 fapi::ReturnCode executeScoms(ifData_t & io_ifData);
 
@@ -289,44 +296,29 @@ fapi::ReturnCode fapiHwpExecInitFile(const fapi::Target & i_Target,
             ifData_t l_ifData;
             memset(&l_ifData, 0, sizeof(ifData_t));
 
+            dataArrayIdxId_t l_dataArrayIdxId;
+            l_ifData.dataArrayIdxId = &l_dataArrayIdxId;
+
             //--------------------------------
             // Load the Attribute Symbol Table
             //--------------------------------
-            attrTableEntry_t * l_attrs = NULL;
-            uint16_t l_numAttrs = 0;
-
-            l_attrs = loadAttrSymbolTable(l_ifInfo, l_numAttrs);
+            loadAttrSymbolTable(l_ifInfo, l_ifData);
             FAPI_DBG("fapiHwpExecInitFile: Addr of attribute struct %p, "
-                     "num attrs %u", l_attrs, l_numAttrs);
-
-            l_ifData.attrs = l_attrs;
-            l_ifData.numAttrs = l_numAttrs;
+                     "num attrs %u", l_ifData.attrs, l_ifData.numAttrs);
 
             //--------------------------------
             // Load the Literal Symbol Table
             //--------------------------------
-            uint64_t * l_numericLits = NULL;
-            uint16_t l_numLits = 0;
-
-            l_numericLits = loadLitSymbolTable(l_ifInfo, l_numLits);
+            loadLitSymbolTable(l_ifInfo, l_ifData);
             FAPI_DBG("fapiHwpExecInitFile: Addr of literal struct %p, "
-                     "num lits %u", l_numericLits, l_numLits);
-
-            l_ifData.numericLits = l_numericLits;
-            l_ifData.numLits = l_numLits;
+                     "num lits %u", l_ifData.numericLits, l_ifData.numLits);
 
             //--------------------------------
             // Load the SCOM Section
             //--------------------------------
-            scomData_t * l_scoms = NULL;
-            uint32_t l_numScoms = 0;
-
-            l_scoms = loadScomSection(l_ifInfo, l_numScoms);
+            loadScomSection(l_ifInfo, l_ifData);
             FAPI_DBG("fapiHwpExecInitFile: Addr of scom struct %p, "
-                     "num scoms %u", l_scoms, l_numScoms);
-
-            l_ifData.scoms = l_scoms;
-            l_ifData.numScoms = l_numScoms;
+                     "num scoms %u", l_ifData.scoms, l_ifData.numScoms);
 
             //--------------------------------
             // Execute SCOMs
@@ -339,14 +331,18 @@ fapi::ReturnCode fapiHwpExecInitFile(const fapi::Target & i_Target,
             // Unload
             //--------------------------------
 
+            // Unload the data array index id container
+            l_dataArrayIdxId.clear();
+            l_ifData.dataArrayIdxId = NULL;
+
             // Unload the Attribute Symbol Table
-            unloadAttrSymbolTable(l_attrs);
+            unloadAttrSymbolTable(l_ifData);
 
             // Unload the Literal Symbol Table
-            unloadLitSymbolTable(l_numericLits);
+            unloadLitSymbolTable(l_ifData);
 
-            // Unload the Literal Symbol Table
-            unloadScomSection(l_scoms, l_numScoms);
+            // Unload the Scom Section
+            unloadScomSection(l_ifData);
         }
 
         // Unload the initfile
@@ -456,16 +452,15 @@ void ifRead(ifInfo_t & io_ifInfo, void * o_data, uint32_t i_size, bool i_swap)
  *
  * @param[in,out] io_ifInfo   Reference to ifInfo_t which contains addr, size,
  *                            and current offset of the initfile
- * @param[out] o_numAttrs     Number of Attribute entries read
- *
- * @return attrTableEntry_t * ptr to the Attribute Symbol Table
+ * @param[in,out] io_ifData   Reference to ifData_t which contains initfile data
  */
-attrTableEntry_t * loadAttrSymbolTable(ifInfo_t & io_ifInfo,
-                                       uint16_t & o_numAttrs)
+void loadAttrSymbolTable(ifInfo_t & io_ifInfo,
+                         ifData_t & io_ifData)
 {
     FAPI_DBG(">> fapiHwpExecInitFile: loadAttrSymbolTable");
 
     attrTableEntry_t * l_attrs = NULL;
+    uint16_t l_numAttrs = 0;
     uint32_t l_attrTableOffset = 0;
 
     //Seek to the Attribute Symbol Table offset
@@ -478,19 +473,19 @@ attrTableEntry_t * loadAttrSymbolTable(ifInfo_t & io_ifInfo,
     ifSeek(io_ifInfo, l_attrTableOffset);
 
     //Read the number of attributes
-    ifRead(io_ifInfo, &o_numAttrs, sizeof(o_numAttrs));
+    ifRead(io_ifInfo, &l_numAttrs, sizeof(l_numAttrs));
     FAPI_DBG("loadAttrSymbolTable: Offset of Attr Symbol Table 0x%X "
-             "num attrs %u", l_attrTableOffset, o_numAttrs);
+             "num attrs %u", l_attrTableOffset, l_numAttrs);
 
     //Now read the individual attribute entry
-    if (0 < o_numAttrs)
+    if (0 < l_numAttrs)
     {
         //Allocate memory to hold the attribute data
         l_attrs = reinterpret_cast<attrTableEntry_t *>
-            (malloc(o_numAttrs * sizeof(attrTableEntry_t)));
-        memset(l_attrs, 0, o_numAttrs * sizeof(attrTableEntry_t));
+            (malloc(l_numAttrs * sizeof(attrTableEntry_t)));
+        memset(l_attrs, 0, l_numAttrs * sizeof(attrTableEntry_t));
 
-        for (uint16_t i = 0; i < o_numAttrs; i++)
+        for (uint16_t i = 0; i < l_numAttrs; i++)
         {
             //Read the attribute type
             ifRead(io_ifInfo, &(l_attrs[i].type), sizeof(l_attrs[i].type));
@@ -503,22 +498,24 @@ attrTableEntry_t * loadAttrSymbolTable(ifInfo_t & io_ifInfo,
         }
     }
 
+    io_ifData.attrs = l_attrs;
+    io_ifData.numAttrs = l_numAttrs;
+
     FAPI_DBG("<< fapiHwpExecInitFile: loadAttrSymbolTable");
-    return l_attrs;
 }
 
 /**  @brief Unloads the Attribue Symbol Table from memory
  *
  * Unloads the Attribute Symbol Table from memory
  *
- * @param[in,out] io_attrs  Reference to ptr to the Attribute Symbol Table
+ * @param[in, out] i_ifData   Reference to ifData_t which contains initfile data
  */
-void unloadAttrSymbolTable(attrTableEntry_t *& io_attrs)
+void unloadAttrSymbolTable(ifData_t & io_ifData)
 {
     FAPI_DBG("fapiHwpExecInitFile: unloadAttrSymbolTable");
     // Deallocate memory
-    free(io_attrs);
-    io_attrs = NULL;
+    free(io_ifData.attrs);
+    io_ifData.attrs = NULL;
 }
 
 /**  @brief Get an InitFile attribute value
@@ -602,16 +599,15 @@ fapi::ReturnCode getAttr(const ifData_t & i_ifData,
  *
  * @param[in,out] io_ifInfo   Reference to ifInfo_t which contains addr, size,
  *                            and current offset of the initfile
- * @param[out] o_numLits      Reference to number of Literal entries read
- *
- * @return uint64_t *         Ptr to the Literal Symbol Table
+ * @param[in,out] io_ifData   Reference to ifData_t which contains initfile data
  */
-uint64_t * loadLitSymbolTable(ifInfo_t & io_ifInfo,
-                              uint16_t & o_numLits)
+void loadLitSymbolTable(ifInfo_t & io_ifInfo,
+                        ifData_t & io_ifData)
 {
     FAPI_DBG(">> fapiHwpExecInitFile: loadLitSymbolTable");
 
     uint64_t * l_numericLits = NULL;
+    uint16_t l_numLits = 0;
     uint32_t l_litTableOffset = 0;
 
     //Seek to the Literal Symbol Table offset
@@ -624,21 +620,21 @@ uint64_t * loadLitSymbolTable(ifInfo_t & io_ifInfo,
     ifSeek(io_ifInfo, l_litTableOffset);
 
     //Read the number of literals
-    ifRead(io_ifInfo, &o_numLits, sizeof(o_numLits));
+    ifRead(io_ifInfo, &l_numLits, sizeof(l_numLits));
     FAPI_DBG("loadLitSymbolTable: Offset of Literal Symbol Table 0x%X "
-             "num literals %u", l_litTableOffset, o_numLits);
+             "num literals %u", l_litTableOffset, l_numLits);
 
-    if (0 < o_numLits)
+    if (0 < l_numLits)
     {
         //Now read the individual literal entry
 
         uint8_t l_litSize = 0;
 
         l_numericLits =
-            reinterpret_cast<uint64_t *>(malloc(o_numLits * sizeof(uint64_t)));
-        memset(l_numericLits, 0, o_numLits * sizeof(uint64_t));
+            reinterpret_cast<uint64_t *>(malloc(l_numLits * sizeof(uint64_t)));
+        memset(l_numericLits, 0, l_numLits * sizeof(uint64_t));
 
-        for (uint16_t i = 0; i < o_numLits; i++)
+        for (uint16_t i = 0; i < l_numLits; i++)
         {
             //Read the literal size in bytes
             ifRead(io_ifInfo, &l_litSize, sizeof(l_litSize));
@@ -669,23 +665,25 @@ uint64_t * loadLitSymbolTable(ifInfo_t & io_ifInfo,
         }
     }
 
+    io_ifData.numericLits = l_numericLits;
+    io_ifData.numLits = l_numLits;
+
     FAPI_DBG("<< fapiHwpExecInitFile: loadLitSymbolTable");
-    return l_numericLits;
 }
 
 /**  @brief Unloads the Literal Symbol Table from memory
  *
  * Unloads the Literal Symbol Table from memory
  *
- * @param[in,out] io_numericLits  Reference to ptr to the Literal Symbol Table
+ * @param[in, out] i_ifData   Reference to ifData_t which contains initfile data
  */
-void unloadLitSymbolTable(uint64_t *& io_numericLits)
+void unloadLitSymbolTable(ifData_t & io_ifData)
 {
     FAPI_DBG("fapiHwpExecInitFile: unloadLitSymbolTable");
 
     // Deallocate memory
-    free(io_numericLits);
-    io_numericLits = NULL;
+    free(io_ifData.numericLits);
+    io_ifData.numericLits = NULL;
 }
 
 /**  @brief Get an InitFile numeric literal value
@@ -738,16 +736,15 @@ fapi::ReturnCode getLit(const ifData_t & i_ifData,
  *
  * @param[in,out] io_ifInfo   Reference to ifInfo_t which contains addr, size,
  *                            and current offset of the initfile
- * @param[out] o_numScoms     Reference to number of Scom entries read
- *
- * @return scomData_t *       Ptr to the Scom Section
+ * @param[in,out] io_ifData   Reference to ifData_t which contains initfile data
  */
-scomData_t * loadScomSection(ifInfo_t & io_ifInfo,
-                             uint32_t & o_numScoms)
+void loadScomSection(ifInfo_t & io_ifInfo,
+                     ifData_t & io_ifData)
 {
     FAPI_DBG(">> fapiHwpExecInitFile: loadScomSection");
 
     scomData_t * l_scoms = NULL;
+    uint32_t l_numScoms = 0;
     uint32_t l_scomSectionOffset = 0;
 
     //Seek to the Scom Section offset
@@ -757,24 +754,24 @@ scomData_t * loadScomSection(ifInfo_t & io_ifInfo,
     ifRead(io_ifInfo, &l_scomSectionOffset, IF_SCOM_SECTION_OFFSET_SIZE);
 
     //Read the number of Scoms
-    ifRead(io_ifInfo, &o_numScoms, sizeof(o_numScoms));
+    ifRead(io_ifInfo, &l_numScoms, sizeof(l_numScoms));
     FAPI_DBG("loadScomSection: Offset of Scom Section 0x%X "
-             "num scoms %u", l_scomSectionOffset, o_numScoms);
+             "num scoms %u", l_scomSectionOffset, l_numScoms);
 
     //Seek to the Scom Section
     ifSeek(io_ifInfo, l_scomSectionOffset);
 
-    if (0 < o_numScoms)
+    if (0 < l_numScoms)
     {
         //------------------------------------
         //Now read the individual SCOM entry
         //------------------------------------
 
         //Allocate memory to hold the data
-        l_scoms = reinterpret_cast<scomData_t *>(malloc(o_numScoms * sizeof(scomData_t)));
-        memset(l_scoms, 0, o_numScoms * sizeof(scomData_t));
+        l_scoms = reinterpret_cast<scomData_t *>(malloc(l_numScoms * sizeof(scomData_t)));
+        memset(l_scoms, 0, l_numScoms * sizeof(scomData_t));
 
-        for (uint32_t i = 0; i < o_numScoms; i++)
+        for (uint32_t i = 0; i < l_numScoms; i++)
         {
             //Read the SCOM len
             ifRead(io_ifInfo, &(l_scoms[i].len), sizeof(l_scoms[i].len));
@@ -818,7 +815,7 @@ scomData_t * loadScomSection(ifInfo_t & io_ifInfo,
             //Read the scom data ids
             //-----------------------------------
 
-            //Allocate memory to hold the data ids; i.e. numeric literal ids
+            //Allocate memory to hold the data ids; i.e. attribute or numeric literal ids
             l_scoms[i].dataId =
                 reinterpret_cast<uint16_t*>(malloc(l_scoms[i].numRows * sizeof(uint16_t*)));
             memset(l_scoms[i].dataId, 0,
@@ -832,6 +829,41 @@ scomData_t * loadScomSection(ifInfo_t & io_ifInfo,
 
                 FAPI_DBG("loadScomSection: scom[%u]: dataId[%u] 0x%02x",
                          i, j, l_scoms[i].dataId[j]);
+
+                //Check for attribute of array type
+                if ((l_scoms[i].dataId[j] & IF_TYPE_MASK) == IF_ATTR_TYPE)
+                {
+                    //Mask out the type & system bits and zero-based
+                    uint16_t l_id = (l_scoms[i].dataId[j] & IF_ATTR_ID_MASK) - 1;
+                    if (l_id < io_ifData.numAttrs)
+                    {
+                        // Get the attribute dimension & shift it to the LS nibble
+                        uint8_t l_attrDimension =
+                            io_ifData.attrs[l_id].type & ATTR_DIMENSION_MASK;
+                        l_attrDimension = l_attrDimension >> 4;
+
+                        FAPI_DBG("loadScomSection: data is an attribute of "
+                                 "dimension %u", l_attrDimension);
+
+                        // Read out all dimensions for the attribute
+                        for(uint8_t k = 0; k < l_attrDimension; k++)
+                        {
+                            // Save the array index id
+                            uint16_t l_idxId = 0;
+                            ifRead(io_ifInfo, &l_idxId, sizeof(uint16_t));
+                            io_ifData.dataArrayIdxId->push_back(static_cast<uint64_t>(l_idxId));
+                            FAPI_DBG("loadScomSection: array index id %u",
+                                     io_ifData.dataArrayIdxId->back());
+                        }
+                    }
+                    else
+                    {
+                        FAPI_ERR("loadScomSection: scom[%u]: dataId[%u] 0x%02x:"
+                                 " index id 0x%02x out of range", i, j,
+                                 l_scoms[i].dataId[j], l_id);
+                        fapiAssert(false);
+                    }
+                }
             }
 
             // Set to default
@@ -978,43 +1010,44 @@ scomData_t * loadScomSection(ifInfo_t & io_ifInfo,
         }
     }
 
+    io_ifData.scoms = l_scoms;
+    io_ifData.numScoms = l_numScoms;
+
     FAPI_DBG("<< fapiHwpExecInitFile: loadScomSection");
-    return l_scoms;
 }
 
 /**  @brief Unloads the Scom Section from memory
  *
- * @param[in, out] io_scoms    Reference to ptr to the Scom Section
- * @param[in]      i_numScoms  Number of Scom entries
+ * @param[in, out] i_ifData   Reference to ifData_t which contains initfile data
  */
-void unloadScomSection(scomData_t *& io_scoms, uint32_t i_numScoms)
+void unloadScomSection(ifData_t & io_ifData)
 {
     FAPI_DBG(">> fapiHwpExecInitFile: unloadScomSection");
 
     //Deallocate memory
-    for (uint32_t i = 0; i < i_numScoms; i++)
+    for (uint32_t i = 0; i < io_ifData.numScoms; i++)
     {
-        free(io_scoms[i].dataId);
-        io_scoms[i].dataId = NULL;
+        free(io_ifData.scoms[i].dataId);
+        io_ifData.scoms[i].dataId = NULL;
 
-        free(io_scoms[i].colId);
-        io_scoms[i].colId = NULL;
+        free(io_ifData.scoms[i].colId);
+        io_ifData.scoms[i].colId = NULL;
 
-        if (NULL != io_scoms[i].rowData)
+        if (NULL != io_ifData.scoms[i].rowData)
         {
-            for (uint16_t j = 0; j < io_scoms[i].numRows; j++)
+            for (uint16_t j = 0; j < io_ifData.scoms[i].numRows; j++)
             {
-                free(io_scoms[i].rowData[j]);
-                io_scoms[i].rowData[j] = NULL;
+                free(io_ifData.scoms[i].rowData[j]);
+                io_ifData.scoms[i].rowData[j] = NULL;
             }
 
-            free(io_scoms[i].rowData);
-            io_scoms[i].rowData = NULL;
+            free(io_ifData.scoms[i].rowData);
+            io_ifData.scoms[i].rowData = NULL;
         }
     }
 
-    free(io_scoms);
-    io_scoms = NULL;
+    free(io_ifData.scoms);
+    io_ifData.scoms = NULL;
 
     FAPI_DBG("<< fapiHwpExecInitFile: unloadScomSection");
 }
@@ -1250,7 +1283,7 @@ fapi::ReturnCode writeScom(const ifData_t & i_ifData, const uint32_t i_scomNum,
     {
         //Get the the scom address
         uint64_t l_addr = 0;
-        uint64_t l_id = i_ifData.scoms[i_scomNum].addrId;
+        uint16_t l_id = i_ifData.scoms[i_scomNum].addrId;
         l_rc = getLit(i_ifData, l_id, l_addr);
 
         if (l_rc)
@@ -1261,7 +1294,65 @@ fapi::ReturnCode writeScom(const ifData_t & i_ifData, const uint32_t i_scomNum,
         //Get the scom data
         uint64_t l_data = 0;
         l_id = i_ifData.scoms[i_scomNum].dataId[i_row];
-        l_rc = getLit(i_ifData, l_id, l_data);
+
+        if ((l_id & IF_TYPE_MASK) == IF_ATTR_TYPE) //It's an attribute
+        {
+            //Check for attribute of array type
+            uint16_t l_arrayIndexs[MAX_ATTRIBUTE_ARRAY_DIMENSION] = {0};
+
+            //Mask out the type & system bits and zero-based
+            uint16_t l_tmpId = (l_id & IF_ATTR_ID_MASK) - 1;
+            if (l_tmpId < i_ifData.numAttrs)
+            {
+                // Get the attribute dimension & shift it to the LS nibble
+                uint8_t l_attrDimension =
+                    (i_ifData.attrs[l_tmpId].type & ATTR_DIMENSION_MASK) >> 4;
+
+                if (l_attrDimension)
+                {
+                    // Read out all dimensions for the attribute
+                    for(uint8_t i = 0; i < l_attrDimension; i++)
+                    {
+                        // Get the array index id
+                        uint64_t l_arrayIdxId = i_ifData.dataArrayIdxId->at(i);
+
+                        // Retrieve the actual value for the array index (using it's id)
+                        uint64_t l_tmpIdx = 0;
+                        l_rc = getLit(i_ifData,l_arrayIdxId,l_tmpIdx);
+                        if (l_rc)
+                        {
+                            break;
+                        }
+                        l_arrayIndexs[i] = l_tmpIdx;
+                    }
+
+                    if (l_rc)
+                    {
+                        break;
+                    }
+
+                    // Remove the array index id(s)
+                    i_ifData.dataArrayIdxId->erase(i_ifData.dataArrayIdxId->begin(),
+                        i_ifData.dataArrayIdxId->begin() + l_attrDimension);
+                }
+            }
+            else
+            {
+                FAPI_ERR("fapiHwpExecInitFile: getAttr: id out of range");
+
+                //Set l_rc
+                uint32_t l_ffdc = l_id;
+                uint32_t & FFDC_IF_ATTR_ID_OUT_OF_RANGE = l_ffdc; // GENERIC IDENTIFIER
+                FAPI_SET_HWP_ERROR(l_rc, RC_INITFILE_ATTR_ID_OUT_OF_RANGE);
+                break;
+            }
+
+            l_rc = getAttr(i_ifData, l_id, l_data, l_arrayIndexs);
+        }
+        else // It's a numeric literal
+        {
+            l_rc = getLit(i_ifData, l_id, l_data);
+        }
 
         if (l_rc)
         {
@@ -1292,8 +1383,18 @@ fapi::ReturnCode writeScom(const ifData_t & i_ifData, const uint32_t i_scomNum,
             uint16_t l_offset = i_ifData.scoms[i_scomNum].offset;
             uint16_t l_len = i_ifData.scoms[i_scomNum].len;
 
-            //Shift data to the right offset
-            l_data >>= l_offset;
+            if ((l_id & IF_TYPE_MASK) == IF_ATTR_TYPE) //It's an attribute
+            {
+                //Attribute data of different sizes is returned from getAttr
+                //as a 64bit right-justified number.
+                //Shift data to the right offset
+                l_data <<= (64 - (l_offset + l_len));
+            }
+            else // It's a numerical literal
+            {
+                //Shift data to the right offset
+                l_data >>= l_offset;
+            }
 
             //Create mask
             uint64_t l_mask = 0;
