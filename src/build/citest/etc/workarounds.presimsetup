@@ -42,6 +42,7 @@ sed -i -e's/SETENV GFW_P8_VENICE_L3_MB_SIZE.*/SETENV GFW_P8_VENICE_L3_MB_SIZE 8/
 #sed -i -e's/SETENV GFW_P8_VENICE_MODEL_EC.*/SETENV GFW_P8_VENICE_MODEL_EC 910431/' $sb/simu/configs/P8_VENICE.config
 
 
+#Note: Leave this here as an example
 #echo "+++ Update to new simics build."
 #mkdir -p $sb/simu/data
 #egrep -v "WSALIAS HOSTBOOT_LEVEL FIPSLEVEL|WSALIAS HOSTBOOT_LEVEL SIMICSLEVEL" $BACKING_BUILD/src/simu/data/simicsInfo > $sb/simu/data/simicsInfo
@@ -56,6 +57,25 @@ echo "INTERNALREGS           # List all scom registers" >> $sb/simu/data/cec-chi
 echo "   0xFF00000F, 64       # Simics workaround" >> $sb/simu/data/cec-chip/centaur.chip
 echo "END" >> $sb/simu/data/cec-chip/centaur.chip
 echo "DONE" >> $sb/simu/data/cec-chip/centaur.chip
+
+echo "+++ OPB SCOM Address workaround (fixed with 821496)."
+mkdir -p $sb/simu/data/cec-chip/
+cp --update $BACKING_BUILD/src/simu/data/cec-chip/p8.chip $sb/simu/data/cec-chip/p8.chip.orig
+grep -v DONE $sb/simu/data/cec-chip/p8.chip.orig > $sb/simu/data/cec-chip/p8.chip
+echo "SCOMREGS           # List all scom registers" >> $sb/simu/data/cec-chip/p8.chip
+echo "     # cMFSI 0 and MFSI FSI2OPB for Host" >> $sb/simu/data/cec-chip/p8.chip
+echo "     0x00020000  # OPB Command Register" >> $sb/simu/data/cec-chip/p8.chip
+echo "     0x00020001  # OPB Status Register " >> $sb/simu/data/cec-chip/p8.chip
+echo "     0x00020002  # OPB Locked Status " >> $sb/simu/data/cec-chip/p8.chip
+echo "     0x00020004  # OPB Reset " >> $sb/simu/data/cec-chip/p8.chip
+echo "     0x00020005  # OPB cMFSI Remote Slave Interrupt Condition " >> $sb/simu/data/cec-chip/p8.chip
+echo "     0x00020006  # OPB cMFSI Remote Slave Interrupt Mask " >> $sb/simu/data/cec-chip/p8.chip
+echo "     0x00020007  # OPB cMFSI Remote Slave Interrupt Status " >> $sb/simu/data/cec-chip/p8.chip
+echo "     0x00020008  # OPB MFSI Remote Slave Interrupt Condition " >> $sb/simu/data/cec-chip/p8.chip
+echo "     0x00020009  # OPB MFSI Remote Slave Interrupt Mask " >> $sb/simu/data/cec-chip/p8.chip
+echo "     0x0002000A  # OPB MFSI Remote Slave Interrupt Status " >> $sb/simu/data/cec-chip/p8.chip
+echo "END" >> $sb/simu/data/cec-chip/p8.chip
+echo "DONE" >> $sb/simu/data/cec-chip/p8.chip
 
 echo "+++ Update to new phyp and mambo level."
 mkdir -p $sb/simu/data

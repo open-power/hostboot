@@ -121,7 +121,7 @@ class FsiDD
      *   using the master processor chip to drive it
      *
      * @param[in] i_address  Absolute FSI address to read relative to
-     *     the master processor chip
+     *     the OPB master processor chip
      * @param[out] o_buffer  Destination buffer for data
      *
      * @return errlHndl_t  NULL on success
@@ -134,7 +134,7 @@ class FsiDD
      *   using the master processor chip to drive it
      *
      * @param[in] i_address  Absolute FSI address to write relative to
-     *     the master processor chip
+     *     the OPB master processor chip
      * @param[out] i_buffer  Source buffer for data
      *
      * @return errlHndl_t  NULL on success
@@ -362,7 +362,7 @@ class FsiDD
         OPB_REG_RSIS  = 0x000A, /**< MFSI Remote Slave Interrupt Status */
 
         // Offsets for cMFSI
-        FSI2OPB_OFFSET_0 = 0x00020010, /**< cMFSI 0 and MFSI */
+        FSI2OPB_OFFSET_0 = 0x00020000, /**< cMFSI 0 and MFSI */
         FSI2OPB_OFFSET_1 = 0x00030000, /**< cMFSI 1 */
 
         // Bit masks

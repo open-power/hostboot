@@ -843,7 +843,7 @@ errlHndl_t FsiDD::handleOpbErrors(const FsiAddrInfo_t& i_addrInfo,
     if( (i_opbStatReg & OPB_STAT_ERR_ANY) 
         || (i_opbStatReg & OPB_STAT_BUSY) )
     {
-        TRACFCOMP( g_trac_fsi, "FsiDD::handleOpbErrors> Error during FSI access : relAddr=0x%X, absAddr, OPB Status=0x%.8X", i_addrInfo.relAddr, i_addrInfo.absAddr, i_opbStatReg );
+        TRACFCOMP( g_trac_fsi, "FsiDD::handleOpbErrors> Error during FSI access : relAddr=0x%X, absAddr=0x%X, OPB Status=0x%.8X", i_addrInfo.relAddr, i_addrInfo.absAddr, i_opbStatReg );
 
         /*@
          * @errortype
