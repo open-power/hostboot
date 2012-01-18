@@ -101,7 +101,7 @@ EntityPath& EntityPath::removeLast()
 
     assert(size() >= 1, TARG_LOC "EntityPath empty (size = %d); cannot remove "
            "any path elements", size());
-    
+
     iv_pathElement[size() - 1].type = TYPE_NA;
     iv_pathElement[size() - 1].instance = 0;
     --iv_size;
@@ -229,7 +229,7 @@ const EntityPath::PathElement& EntityPath::operator[](
 
     assert(i_index < size(), TARG_LOC "Caller specified invalid entity path "
            "subscript of %d when size is only %d",i_index,size());
-    
+
     return iv_pathElement[i_index];
 
     #undef TARG_FN
@@ -250,7 +250,7 @@ const EntityPath::PathElement EntityPath::pathElementOfType(
         {
             return iv_pathElement[x];
         }
-    }    
+    }
 
     PathElement na_path = { TYPE_NA, 0 };
     return na_path;
@@ -429,6 +429,43 @@ void EntityPath::dump() const
     #undef TARG_FN
 }
 
+//******************************************************************************
+// EntityPath::toString
+//******************************************************************************
+
+char * EntityPath::toString() const
+{
+    #define TARG_FN "toString()"
+
+    void* l_ptr = NULL;
+    char* l_pString = NULL;
+    const char* l_ptr1 = NULL;
+    size_t l_len1, l_len2;
+
+    l_ptr1 = pathTypeAsString();
+    l_len1 = strlen( l_ptr1 ) + 1;  // add 1 for the ':' char
+    // allocate extra 1 bytes for the nul char
+    l_pString = static_cast<char*>( malloc( l_len1 + 1 ) );
+    sprintf( l_pString, "%s:", l_ptr1 );
+
+    for (uint32_t i=0; i < size(); ++i)
+    {
+        l_ptr1 = pathElementTypeAsString( operator[](i).type );
+        l_len2 = strlen( l_ptr1 ) + 1;  // add 1 for '/' char
+        // realloc with extra 33 bytes (more than enough)
+        // for the %d conversion and the nul char.
+        l_ptr = realloc( l_pString, (l_len1 + l_len2 + 33) );
+        l_pString = static_cast<char*>( l_ptr );
+        // append at the nul char of previous string
+        l_len2 = sprintf( l_pString + l_len1, "/%s%d",
+                          l_ptr1, operator[](i).instance );
+        l_len1 += l_len2;
+    }
+
+    return (l_pString);
+
+    #undef TARG_FN
+}
 #undef TARG_CLASS
 
 #undef TARG_NAMESPACE

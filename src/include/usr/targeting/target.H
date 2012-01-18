@@ -236,6 +236,18 @@ class Target
                    "returned false",A);
         }
 
+        /**
+         *  @brief Perform FFDC for the target instance
+         *
+         *  @param[out] io_size
+         *              number of bytes of buffer filled with FFDC
+         *
+         *  @return pointer to dynamically allocated FFDC buffer
+         *
+         *  @post caller must call free() to release the buffer
+         */
+        char * targetFFDC( uint32_t & o_size ) const;
+
     private: // Private helper interfaces
 
         /**

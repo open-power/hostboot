@@ -421,6 +421,15 @@ class EntityPath
          */
         void dump() const;
 
+        /**
+         *  @brief Save the entity path as a c-string
+         *
+         *  @return    the dynamic buffer pointer of the c-string
+         *
+         *  @note      caller must call free() to release the buffer
+         */
+        char * toString() const;
+
     private:
 
         PATH_TYPE   iv_type : 4; ///< Entity path type (4 bits)

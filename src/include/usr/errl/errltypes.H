@@ -273,6 +273,7 @@ enum errlTermState_t
 enum errlUserDataType_t
 {
     ERRL_UDT_TRACE          = 0x0C,   // A trace buffer
+    ERRL_UDT_TARGET_FFDC    = 0x0D,   // A target FFDC buffer
 };
 
 

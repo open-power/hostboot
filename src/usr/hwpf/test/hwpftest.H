@@ -49,7 +49,7 @@ struct hwpfTestArgs_t {
     ifScom_t      ifScom;
     fapi::Target  fapiTarget;
     uint32_t      count;
-    tid_t	  tid;
+    tid_t         tid;
     struct {
         uint64_t  Write:1;    // 1 = Write
         uint64_t  AttrTest:1; // 1 = run Attr access test
@@ -393,15 +393,13 @@ public:
             TARGETING::Target* l_pTarget = NULL;
             TARGETING::targetService().masterProcChipTargetHandle(l_pTarget);
 
-            // Create a FAPI Target and invoke the hwpInitialTest HWP
             fapi::Target l_fapiTarget(TARGET_TYPE_PROC_CHIP,
                                       reinterpret_cast<void *> (l_pTarget));
 
             // Test ATTR_EC attribute access through FAPI
             uint8_t l_EC_R = 0xFF;
-            fapi::Target *l_pfapiTarget = &l_fapiTarget;
 
-            l_rc = FAPI_ATTR_GET(ATTR_EC, l_pfapiTarget, l_EC_R);
+            l_rc = FAPI_ATTR_GET(ATTR_EC, &l_fapiTarget, l_EC_R);
             if (l_rc != fapi::FAPI_RC_SUCCESS)
             {
                 TS_FAIL("testHwpf5: ATTR_EC. Error from GET");

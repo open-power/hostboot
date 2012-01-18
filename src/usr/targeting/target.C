@@ -178,6 +178,59 @@ Target::Target()
     #undef TARG_FN
 }
 
+//******************************************************************************
+// Target::targetFFDC()
+//******************************************************************************
+
+char * Target::targetFFDC( uint32_t & o_size ) const
+{
+    #define TARG_FN "targetFFDC(...)"
+
+    char l_buff[128];
+    char *l_pFFDC = NULL;
+    char *l_ptr   = NULL;
+    void *l_ptr1  = NULL;
+    uint32_t l_len;
+
+    o_size = sprintf( l_buff, "Class = 0x%X, Type = 0x%X, Model = 0x%X",
+                       getAttr<ATTR_CLASS>(),
+                       getAttr<ATTR_TYPE>(),
+                       getAttr<ATTR_MODEL>() );
+
+    l_pFFDC = static_cast<char*>( malloc( ++o_size ) );
+    memcpy( l_pFFDC, l_buff, o_size );
+
+    l_ptr = getAttr<ATTR_PHYS_PATH>().toString();
+    if (l_ptr)
+    {
+         l_len = strlen( l_ptr ) + 1;
+         l_ptr1 = realloc( l_pFFDC, o_size + l_len );
+         l_pFFDC = static_cast<char*>( l_ptr1 );
+         memcpy( l_pFFDC + o_size, l_ptr, l_len );
+         o_size += l_len;
+         free( l_ptr );
+    }
+
+    EntityPath l_entityPath;
+    if( tryGetAttr<ATTR_AFFINITY_PATH>(l_entityPath) )
+    {
+        l_ptr = l_entityPath.toString();
+        if (l_ptr)
+        {
+            l_len = strlen( l_ptr ) + 1;
+            l_ptr1 = realloc( l_pFFDC, o_size + l_len );
+            l_pFFDC = static_cast<char*>( l_ptr1 );
+            memcpy( l_pFFDC + o_size, l_ptr, l_len );
+            o_size += l_len;
+            free( l_ptr );
+        }
+    }
+
+    return l_pFFDC;
+
+    #undef TARG_FN
+}
+
 #undef TARG_CLASS
 
 #undef TARG_NAMESPACE

@@ -56,6 +56,7 @@
 #include <targeting/iterators/rangefilter.H>
 #include <targeting/predicates/predicatectm.H>
 #include <targeting/predicates/predicatepostfixexpr.H>
+#include <errl/errlUserDetailsTarget.H>
 
 #include <kernel/console.H> //@fixme
 
@@ -1462,6 +1463,39 @@ class TargetingTestSuite: public CxxTest::TestSuite
         TS_TRACE(EXIT_MRK "testHbMutexAttr");
     }
 
+    void testErrlTargetFFDC()
+    {
+        TS_TRACE(ENTER_MRK "testErrlTargetFFDC" );
+
+        using namespace ERRORLOG;
+        using namespace TARGETING;
+        using namespace fapi;
+
+        // Get a reference to the target service
+        TargetService& l_service = targetService();
+
+        // Get the master proc target
+        TARGETING::Target* l_pTarget1 = NULL;
+        TARGETING::Target* l_pTarget2 = MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
+        l_service.masterProcChipTargetHandle( l_pTarget1);
+
+        ErrlUserDetailsTarget l_errlUdTarget1( l_pTarget1 );
+        ErrlUserDetailsTarget l_errlUdTarget2( l_pTarget2 ); 
+
+        // Create errorlogs to test FFDC capture of a target
+        errlHndl_t l_err1, l_err2;
+        l_err1 = new ErrlEntry( ERRL_SEV_UNRECOVERABLE, 1, 2, 3, 4);
+        l_err2 = new ErrlEntry( ERRL_SEV_UNRECOVERABLE, 5, 6, 7, 8);
+
+        l_errlUdTarget1.addToLog( l_err1, NULL, 0 );
+        l_errlUdTarget2.addToLog( l_err2, NULL, 0 );
+        l_errlUdTarget1.addToLog( l_err1, NULL, 0 );
+         
+        ERRORLOG::errlCommit( l_err1, TARG_COMP_ID );
+        ERRORLOG::errlCommit( l_err2, TARG_COMP_ID );
+
+        TS_TRACE(EXIT_MRK "testErrlTargetFFDC");
+    }
 };
 
 #endif // End __TESTTARGETING_H
