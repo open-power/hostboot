@@ -55,6 +55,8 @@ TRAC_INIT(&g_trac_fsir, "FSIR", 4096); //4K
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
 #define TRACUCOMP(args...)  
 
+//@fixme - VPO Debug
+bool INSIDE_DEBUG = false;
 
 //@todo - This should come from the target/attribute code somewhere
 uint64_t target_to_uint64(const TARGETING::Target* i_target)
@@ -844,7 +846,6 @@ errlHndl_t FsiDD::handleOpbErrors(const FsiAddrInfo_t& i_addrInfo,
         || (i_opbStatReg & OPB_STAT_BUSY) )
     {
         TRACFCOMP( g_trac_fsi, "FsiDD::handleOpbErrors> Error during FSI access : relAddr=0x%X, absAddr=0x%X, OPB Status=0x%.8X", i_addrInfo.relAddr, i_addrInfo.absAddr, i_opbStatReg );
-
         /*@
          * @errortype
          * @moduleid     FSI::MOD_FSIDD_HANDLEOPBERRORS
@@ -861,6 +862,18 @@ errlHndl_t FsiDD::handleOpbErrors(const FsiAddrInfo_t& i_addrInfo,
                                             i_addrInfo.relAddr,
                                             i_addrInfo.absAddr),
                                         TWO_UINT32_TO_UINT64(i_opbStatReg,0));
+
+        if( !INSIDE_DEBUG )
+        {
+            INSIDE_DEBUG = true;
+            uint32_t data = 0;
+            read( 0x31D0, &data ); TRACFCOMP( g_trac_fsi, "MESRB0(1D0) = %.8X", data );
+            read( 0x31D4, &data ); TRACFCOMP( g_trac_fsi, "MCSCSB0(1D4) = %.8X", data );
+            read( 0x31D8, &data ); TRACFCOMP( g_trac_fsi, "MATRB0(1D8) = %.8X", data );
+            read( 0x31DC, &data ); TRACFCOMP( g_trac_fsi, "MDTRB0(1DC) = %.8X", data );
+            INSIDE_DEBUG = false;
+        }
+
         l_err->collectTrace("FSI");
         l_err->collectTrace("FSIR");
         //@todo - figure out best data to log
@@ -1188,6 +1201,20 @@ errlHndl_t FsiDD::initPort(FsiChipInfo_t i_fsiInfo,
         }
         TRACFCOMP( g_trac_fsi, "FsiDD::initPort> Slave %.8X is present", i_fsiInfo.linkid.id );
 
+        // Do not initialize slave in VBU because they are already done
+        // before we run
+        TARGETING::EntityPath syspath(TARGETING::EntityPath::PATH_PHYSICAL);
+        syspath.addLast(TARGETING::TYPE_SYS,0);
+        TARGETING::Target* sys = TARGETING::targetService().toTarget(syspath);
+        uint8_t vpo_mode = 0;
+        if( sys
+            && sys->tryGetAttr<TARGETING::ATTR_IS_SIMULATION>(vpo_mode)
+            && (vpo_mode == 1) )
+        {
+            TRACFCOMP( g_trac_fsi, "FsiDD::initPort> Skipping Init for VPO" );
+            o_enabled = true;
+            break;
+        }
 
         //Write the port enable (enables clocks for FSI link)
         databuf = static_cast<uint32_t>(portbit) << 24;
