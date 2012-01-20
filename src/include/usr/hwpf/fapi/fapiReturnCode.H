@@ -427,8 +427,17 @@ namespace ReturnCodeFfdc
     inline void addEIFfdc<ecmdDataBufferBase>(ReturnCode & o_rc,
                                               const ecmdDataBufferBase & i_ffdc)
     {
-        // TODO. When real ecmdDataBufferBase is available
-        FAPI_ERR("Adding ecmdDataBufferBase as FFDC TBD");
+        uint32_t * l_pData = new uint32_t[i_ffdc.getWordLength()];
+
+        // getWordLength rounds up to the next 32bit boundary, ensure that after
+        // extracting, any unset bits are zero
+        l_pData[i_ffdc.getWordLength() - 1] = 0;
+
+        // Deliberately not checking return code from extract to save code space
+        i_ffdc.extract(l_pData, 0, i_ffdc.getBitLength());
+
+        o_rc.addEIFfdc(l_pData, (i_ffdc.getWordLength() * 4));
+        delete [] l_pData;
     }
 
     /**

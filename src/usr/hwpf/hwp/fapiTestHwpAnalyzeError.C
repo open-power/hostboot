@@ -52,12 +52,18 @@ fapi::ReturnCode hwpTestAnalyzeError(const fapi::Target & i_target)
     // Local FFDC that needs to be captured
     uint32_t l_ffdc = 0x12345678;
 
+    // Local ecmdDataBufferBase that needs to be captured
+    ecmdDataBufferBase l_buf(65);
+    l_buf.setBit(1);
+    l_buf.setBit(64);
+
     // Analysis reveals that the error is RC_TEST_ERROR_A
     FAPI_ERR("hwpTestAnalyzeError: Generating RC_TEST_ERROR_A");
 
     // Generate error
     const fapi::Target & MASTER_CHIP = i_target;
     uint32_t & FFDC_DATA_1 = l_ffdc;
+    ecmdDataBufferBase & FFDC_DATA_BUF = l_buf;
     FAPI_SET_HWP_ERROR(l_rc, RC_TEST_ERROR_A);
 
     FAPI_INF("hwpTestAnalyzeError: End HWP");

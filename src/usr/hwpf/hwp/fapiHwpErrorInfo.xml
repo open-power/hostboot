@@ -32,6 +32,8 @@
     <collectFfdc>hwpTestFfdc1, MASTER_CHIP</collectFfdc>
     <!-- Collect local FFDC FFDC_DATA_1 -->
     <ffdc>FFDC_DATA_1</ffdc>
+    <!-- Collect local FFDC FFDC_DATA_BUF -->
+    <ffdc>FFDC_DATA_BUF</ffdc>
     <!-- Callout MASTER_CHIP HIGH -->
     <callout>
         <target>MASTER_CHIP</target>
