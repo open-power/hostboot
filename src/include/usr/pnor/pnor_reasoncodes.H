@@ -29,16 +29,26 @@ namespace PNOR
 {
     enum PNORModuleId
     {
-        MOD_PNORRP_WAITFORMESSAGE      = 0x01, /**< pnorrp.C : PnorRP::waitForMessage */
-        MOD_PNORRP_COMPUTEDEVICEADDR   = 0x02, /**< pnorrp.C : PnorRP::computeDeviceAddr */
-        MOD_PNORRP_GETSECTIONINFO      = 0x03, /**< pnorrp.C : PnorRP::getSectionInfo */
-        MOD_PNORRP_COMPUTESECTION      = 0x04, /**< pnorrp.C : PnorRP::computeSection */
-        MOD_PNORRP_INITDAEMON          = 0x05, /**< pnorrp.C : PnorRP::initDaemon */
-        MOD_PNORRP_READTOC             = 0x06, /**< pnorrp.C : PnorRP::readTOC */
-        MOD_PNORRP_READFROMDEVICE      = 0x07, /**< pnorrp.C : PnorRP::readFromDevice */
-        MOD_PNORRP_WRITETODEVICE       = 0x08, /**< pnorrp.C : PnorRP::writeToDevice */
+        MOD_PNORRP_WAITFORMESSAGE       = 0x01, /**< pnorrp.C : PnorRP::waitForMessage */
+        MOD_PNORRP_COMPUTEDEVICEADDR    = 0x02, /**< pnorrp.C : PnorRP::computeDeviceAddr */
+        MOD_PNORRP_GETSECTIONINFO       = 0x03, /**< pnorrp.C : PnorRP::getSectionInfo */
+        MOD_PNORRP_COMPUTESECTION       = 0x04, /**< pnorrp.C : PnorRP::computeSection */
+        MOD_PNORRP_INITDAEMON           = 0x05, /**< pnorrp.C : PnorRP::initDaemon */
+        MOD_PNORRP_READTOC              = 0x06, /**< pnorrp.C : PnorRP::readTOC */
+        MOD_PNORRP_READFROMDEVICE       = 0x07, /**< pnorrp.C : PnorRP::readFromDevice */
+        MOD_PNORRP_WRITETODEVICE        = 0x08, /**< pnorrp.C : PnorRP::writeToDevice */
 
-        MOD_PNORDD_VERIFYADDRESSRANGE  = 0x11  /**< pnordd.C : PnorDD::verifyAddressRange */
+        MOD_PNORDD_VERIFYADDRESSRANGE   = 0x11, /**< pnordd.C : PnorDD::verifyAddressRange */
+        MOD_PNORDD_READFLASH            = 0x12, /**< pnordd.C : PnorDD::readFlash */
+        MOD_PNORDD_WRITEFLASH           = 0x13, /**< pnordd.C : PnorDD::writeFlash */
+        MOD_PNORDD_READREGLPC           = 0x14, /**< pnordd.C : PnorDD::readRegLPC */
+        MOD_PNORDD_WRITEREGLPC          = 0x15, /**< pnordd.C : PnorDD::writeRegLPC */
+        MOD_PNORDD_READREGSPI           = 0x16, /**< pnordd.C : PnorDD::readRegSPI */
+        MOD_PNORDD_WRITEREGSPI          = 0x17, /**< pnordd.C : PnorDD::writeRegSPI */
+        MOD_PNORDD_READLPC              = 0x18, /**< pnordd.C : PnorDD::readLPC */
+        MOD_PNORDD_WRITELPC             = 0x19, /**< pnordd.C : PnorDD::writeLPC */
+        MOD_PNORDD_ERASEFLASH           = 0x1A, /**< pnordd.C : PnorDD::eraseFlash */
+        MOD_PNORDD_COMPAREANDWRITEBLOCK = 0x1B, /**< pnordd.C : PnorDD::compareAndWriteBlock */
     };
 
     enum PNORReasonCode
@@ -49,6 +59,8 @@ namespace PNOR
         RC_EXTERNAL_ERROR            = PNOR_COMP_ID | 0x04,
         RC_STARTUP_FAIL              = PNOR_COMP_ID | 0x05,
         RC_INVALID_ASYNC_MESSAGE     = PNOR_COMP_ID | 0x06,
+        RC_UNSUPPORTED_OPERATION     = PNOR_COMP_ID | 0x07,
+        RC_LPC_ERROR                 = PNOR_COMP_ID | 0x08,
     };
 };
 

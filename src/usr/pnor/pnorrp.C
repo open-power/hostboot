@@ -33,6 +33,7 @@
 #include <sys/mm.h>
 #include <errno.h>
 #include <initservice/initserviceif.H>
+#include "pnordd.H"
 
 // Trace definition
 trace_desc_t* g_trac_pnor = NULL;
@@ -313,8 +314,7 @@ errlHndl_t PnorRP::readTOC()
             iv_TOC[side][id].id = id;
             iv_TOC[side][id].side = (PNOR::SideSelect)side;
             iv_TOC[side][id].chip = 0;
-            iv_TOC[side][id].mmrdAddr = 0;
-            iv_TOC[side][id].pmrwAddr = 0;
+            iv_TOC[side][id].flashAddr = 0;
             iv_TOC[side][id].virtAddr = 0;
             iv_TOC[side][id].size = 0;
             iv_TOC[side][id].eccProtected = 0;
@@ -322,10 +322,10 @@ errlHndl_t PnorRP::readTOC()
     }
 
     //@todo - Add in some dummy values for now
-    //  Will update under Story 3547
+    //  Will update under Story 3871
 
     // assume 1 chip with only 1 side for now, no sideless
-    // TOC starts at offset zero in MMRD mode
+    // TOC starts at offset zero 
 
     // put some random sizes in here
     iv_TOC[PNOR::SIDE_A][PNOR::TOC].size = 8 + 8 + PNOR::NUM_SECTIONS*sizeof(TOCEntry_t);
@@ -339,21 +339,16 @@ errlHndl_t PnorRP::readTOC()
     iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].virtAddr = iv_TOC[PNOR::SIDE_A][PNOR::TOC].virtAddr + iv_TOC[PNOR::SIDE_A][PNOR::TOC].size;
     iv_TOC[PNOR::SIDE_A][PNOR::GLOBAL_DATA].virtAddr = iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].virtAddr + iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].size;
     iv_TOC[PNOR::SIDE_A][PNOR::HB_DATA].virtAddr = iv_TOC[PNOR::SIDE_A][PNOR::GLOBAL_DATA].virtAddr + iv_TOC[PNOR::SIDE_A][PNOR::GLOBAL_DATA].size;
-    // MMRD offsets
-    iv_TOC[PNOR::SIDE_A][PNOR::TOC].mmrdAddr = 0;
-    iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].mmrdAddr = iv_TOC[PNOR::SIDE_A][PNOR::TOC].mmrdAddr + iv_TOC[PNOR::SIDE_A][PNOR::TOC].size;
-    iv_TOC[PNOR::SIDE_A][PNOR::GLOBAL_DATA].mmrdAddr = iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].mmrdAddr + iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].size;
-    iv_TOC[PNOR::SIDE_A][PNOR::HB_DATA].mmrdAddr = iv_TOC[PNOR::SIDE_A][PNOR::GLOBAL_DATA].mmrdAddr + iv_TOC[PNOR::SIDE_A][PNOR::GLOBAL_DATA].size;
-    // PMRW offsets - no ECC support yet so just equal to MMRD
-    iv_TOC[PNOR::SIDE_A][PNOR::TOC].pmrwAddr = iv_TOC[PNOR::SIDE_A][PNOR::TOC].mmrdAddr;
-    iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].pmrwAddr = iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].mmrdAddr;
-    iv_TOC[PNOR::SIDE_A][PNOR::GLOBAL_DATA].pmrwAddr = iv_TOC[PNOR::SIDE_A][PNOR::GLOBAL_DATA].mmrdAddr;
-    iv_TOC[PNOR::SIDE_A][PNOR::HB_DATA].pmrwAddr = iv_TOC[PNOR::SIDE_A][PNOR::HB_DATA].mmrdAddr;
+    // flash 
+    iv_TOC[PNOR::SIDE_A][PNOR::TOC].flashAddr = 0;
+    iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].flashAddr = iv_TOC[PNOR::SIDE_A][PNOR::TOC].flashAddr + iv_TOC[PNOR::SIDE_A][PNOR::TOC].size;
+    iv_TOC[PNOR::SIDE_A][PNOR::GLOBAL_DATA].flashAddr = iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].flashAddr + iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].size;
+    iv_TOC[PNOR::SIDE_A][PNOR::HB_DATA].flashAddr = iv_TOC[PNOR::SIDE_A][PNOR::GLOBAL_DATA].flashAddr + iv_TOC[PNOR::SIDE_A][PNOR::GLOBAL_DATA].size;
 
     //@todo - end fake data
 
     //@todo - load flash layout (how many chips)
-    //@todo - read TOC on each chip/bank/whatever
+    //@todo - read TOC on each chip/bank/whatever  
 
     TRACUCOMP(g_trac_pnor, "< PnorRP::readTOC" );
     return l_errhdl;
@@ -391,17 +386,14 @@ void PnorRP::waitForMessage()
             eff_addr = (uint8_t*)message->data[0];
             user_addr = (uint8_t*)message->data[1];
 
-            //@todo - assuming MMRD mode for now  (Story 3548)
-            l_errhdl = computeDeviceAddr( eff_addr, PNOR::MMRD, dev_offset, chip_select, needs_ecc );
+            //figure out the real pnor offset 
+            l_errhdl = computeDeviceAddr( eff_addr, dev_offset, chip_select, needs_ecc );
             if( l_errhdl )
             {
                 status_rc = -EFAULT; /* Bad address */
             }
             else
             {
-                //@todo - handle MMRD/PMRW mode
-                //  if MMRD then needs_ecc = false
-
                 switch(message->type)
                 {
                     case( MSG_MM_RP_READ ):
@@ -594,7 +586,6 @@ errlHndl_t PnorRP::writeToDevice( uint64_t i_offset,
  * @brief  Convert a virtual address into the PNOR device address
  */
 errlHndl_t PnorRP::computeDeviceAddr( void* i_vaddr,
-                                      PNOR::lscMode i_mode,
                                       uint64_t& o_offset,
                                       uint64_t& o_chip,
                                       bool& o_ecc )
@@ -639,14 +630,7 @@ errlHndl_t PnorRP::computeDeviceAddr( void* i_vaddr,
     o_chip = iv_TOC[side][id].chip;
     o_ecc = iv_TOC[side][id].eccProtected;
     o_offset = l_vaddr - iv_TOC[side][id].virtAddr; //offset into pnor
-    if( PNOR::MMRD == i_mode )
-    {
-        o_offset += iv_TOC[side][id].mmrdAddr;
-    }
-    else
-    {
-        o_offset += iv_TOC[side][id].pmrwAddr;
-    }
+    o_offset += iv_TOC[side][id].flashAddr;
 
     TRACUCOMP( g_trac_pnor, "< PnorRP::computeDeviceAddr: o_offset=0x%X, o_chip=%d", o_offset, o_chip );
     return l_errhdl;

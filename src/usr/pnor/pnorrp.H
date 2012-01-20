@@ -29,7 +29,6 @@
 #include <builtins.h>
 #include <errl/errlentry.H>
 #include <vmmconst.h>
-#include "pnordd.H"
 
 /**
  * PNOR Resource Provider
@@ -116,8 +115,7 @@ class PnorRP
 
         uint64_t virtAddr;  /**< Virtual address for the start of the section */
 
-        uint32_t mmrdAddr;  /**< Address in MMRD mode (no ECC) */
-        uint32_t pmrwAddr;  /**< Address in PMRW mode (with ECC) */
+        uint32_t flashAddr;  /**< Address in flash */
 
         uint32_t size;  /**< Actual size of content in bytes (not including ECC) */
         uint8_t chip;  /**< Chip Select */
@@ -192,7 +190,6 @@ class PnorRP
      * @brief  Convert a virtual address into the PNOR device address
      *
      * @param[in] i_vaddr  Virtual address of page
-     * @param[in] i_mode  PNOR Controller mode
      * @param[out] o_offset  Offset into PNOR chip
      * @param[out] o_chip  Which PNOR chip
      * @param[out] o_ecc  true=data is ECC-protected
@@ -200,7 +197,6 @@ class PnorRP
      * @return Error if VA is bad
      */
     errlHndl_t computeDeviceAddr( void* i_vaddr,
-                                  PNOR::lscMode i_mode,
                                   uint64_t& o_offset,
                                   uint64_t& o_chip,
                                   bool& o_ecc );
