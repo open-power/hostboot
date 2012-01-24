@@ -102,10 +102,14 @@ void Target::toString(char (&o_ecmdString)[MAX_ECMD_STRING_LEN]) const
 
             // This function returns the ecmd string for chips and chiplets. The
             // output string is:
-            // Chiplet: <chip>.<unit>:kX:nX:sX:pXX:cX
-            // Chip:    <chip>:kX:nX:sX:pXX
+            // Chiplet: <chip>.<unit> kX:nX:sX:pXX:cX
+            // Chip:    <chip> kX:nX:sX:pXX
+            // There is officially a tab character between ">" and "k", this is
+            // replaced with the number of spaces seen in the Cronus trace
+            // If the k.. string is less than 18 chars, it is padded to 18 chars
+            // and a single space is added
             //
-            // <chip> = chip type ("pu" = processor, "memb" = memory buffer)
+            // <chip> = chip type ("p8" = processor, "centaur" = memory buffer)
             // <unit> = unit type ("ex", "mcs", "mbs", "mba")
             // kX     = cage number. Always zero
             // nX     = node number. Always zero in HostBoot (right now)
@@ -114,14 +118,16 @@ void Target::toString(char (&o_ecmdString)[MAX_ECMD_STRING_LEN]) const
             // cX     = unit position
             //
             // Examples:
-            //   pu:k0:n0:s0:p01
-            //   pu.ex:k0:n0:s0:p01:c0
-            const char * const ECMD_CHIP_PROC = "pu";
-            const char * const ECMD_CHIP_MEMBUF = "memb";
-            const char * const ECMD_CHIPLET_EX = "ex";
-            const char * const ECMD_CHIPLET_MCS = "mcs";
-            const char * const ECMD_CHIPLET_MBS = "mbs";
-            const char * const ECMD_CHIPLET_MBA = "mba";
+            //   "p8 k0:n0:s0:p01       "
+            //   "p8.ex      k0:n0:s0:p01:c0    "
+            //   "p8.mcs     k0:n0:s0:p01:c0    "
+            //   "centaur    k0:n0:s0:p01       "
+            const char * const ECMD_CHIP_PROC = "p8 ";
+            const char * const ECMD_CHIP_MEMBUF = "centaur    ";
+            const char * const ECMD_CHIPLET_EX =  "ex      ";
+            const char * const ECMD_CHIPLET_MCS = "mcs     ";
+            const char * const ECMD_CHIPLET_MBS = "mbs     ";
+            const char * const ECMD_CHIPLET_MBA = "mba     ";
 
             // Look for a chip in the path
             const char * l_pChipType = NULL;
@@ -196,8 +202,8 @@ void Target::toString(char (&o_ecmdString)[MAX_ECMD_STRING_LEN]) const
                 }
 
                 // Middle of the string
-                strcpy(l_pStr, ":k0:n0:s0:p");
-                l_pStr += strlen(":k0:n0:s0:p");
+                strcpy(l_pStr, "k0:n0:s0:p");
+                l_pStr += strlen("k0:n0:s0:p");
 
                 // Chip Pos (Note that %02d does not appear to work)
                 if (l_chipPos >= 10)
@@ -219,6 +225,15 @@ void Target::toString(char (&o_ecmdString)[MAX_ECMD_STRING_LEN]) const
                     strcpy(l_pStr, ":c");
                     l_pStr += strlen(":c");
                     sprintf(l_pStr, "%d", l_chipletPos);
+                    l_pStr++;
+
+                    // Pad to 18 chars and add a space
+                    sprintf(l_pStr, "    ");
+                }
+                else
+                {
+                    // Pad to 18 chars and add a space
+                    sprintf(l_pStr, "       ");
                 }
             }
         }
