@@ -35,6 +35,7 @@
 #include <errl/errlmanager.H>
 #include <fapiPlatHwpInvoker.H>
 #include <vfs/vfs.H>
+#include <initservice/initsvcbreakpoint.H>
 
 
 //******************************************************************************
@@ -191,6 +192,11 @@ fapi::ReturnCode fapiUnloadInitFile(const char * i_file, const char *& io_addr,
     }
 
     return l_rc;
+}
+
+void fapiBreakPoint(const fapi::Target & i_target, uint64_t i_info)
+{
+    INITSERVICE::iStepBreakPoint(i_target, i_info);
 }
 
 }

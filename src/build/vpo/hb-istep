@@ -67,6 +67,7 @@ sub print_istep_list;
 sub find_in_inlist;
 sub parse_command;
 sub setMode;
+sub resume_istep;
 
 #------------------------------------------------------------------------------
 #   Constants
@@ -86,6 +87,7 @@ my  $opt_command    =   "";
 my  $opt_list       =   0;
 my  $opt_help       =   0;
 my  $opt_cmdfile    =   0;          ## batchmode, later
+my  $opt_resume     =   0;          ## resume istep from break point
 
 my  @inList;
 $inList[10][10]     =   ();
@@ -135,7 +137,8 @@ GetOptions( "help"          =>  \$opt_help,
             "normalmode"    =>  \$opt_normalmode,
             "list"          =>  \$opt_list,
             "command=s"     =>  \$opt_command,
-            "cmdfile"       =>  \$opt_cmdfile,            
+            "cmdfile"       =>  \$opt_cmdfile,
+            "resume"        =>  \$opt_resume,            
             
             "debug"         =>  \$opt_debug,
           );  
@@ -188,6 +191,15 @@ if ( $opt_list )
     }
     
 ##
+## Process resume
+##
+if ( $opt_resume )
+{
+    resume_istep();
+    ## exit; ??
+}
+
+##
 ##  process --Istep Mode command
 ##      IStepModeStr    = "cpu0_0_0_3->scratch=0x4057b007_4057b007"
 ##      NormalModeStr   = "cpu0_0_0_3->scratch=0x700b7504_700b7504"
@@ -212,7 +224,8 @@ if ( $opt_command ne "" )
     if ( $opt_debug ) {   print   STDOUT  "== process command \"$opt_command\" \n"; }
     parse_command( $opt_command ); 
 }
-        
+
+
 
 #==============================================================================
 # SUBROUTINES
@@ -230,6 +243,7 @@ sub printUsage()
     print STDOUT "    [--command sN..M]         (run isteps N through M)\n" ;
     print STDOUT "    [--command <foo>]         (run named istep \"foo\")\n" ;
     print STDOUT "    [--command <foo>..<bar>]  (run named isteps \"foo\" through \"bar\")\n" ;
+    print STDOUT "    [--resume]                (resume an istep that is at a break point)\n" ;
     
     print STDOUT "\n" ;
 
@@ -560,6 +574,47 @@ sub setMode( )
             
         $count--;
     } 
+}
+
+sub resume_istep()
+{
+    my $byte0;
+    my $command;
+    my $cmd;
+    my $result;
+
+    $g_SeqNum++;        ## bump
+
+    printf STDOUT "resume istep\n";
+
+    $byte0 = 0x80 + $g_SeqNum;      ## gobit + seqnum
+    $command = 0x01;
+    $cmd = sprintf( "0x%2.2x%2.2x000000000000", $byte0, $command );
+    VBU_Cacheline::CLwrite( $commandreg, $cmd );
+
+    $result = getSyncStatus();
+
+    ## if result is -1 we have a timeout
+    if ( $result == -1 )
+    {
+        print   "-----------------------------------------------------------------\n";
+    }
+    else
+    {
+        my $taskStatus  =   ( ( $result & 0x00ff000000000000 ) >> 48 );
+
+        print   STDOUT "-----------------------------------------------------------------\n";
+        if ( $taskStatus != 0 )
+        {
+            # This probably means istep was not at a breakpoint.
+            printf STDOUT "resume istep FAILED, task status is %d\n", $taskStatus ;
+        }
+        else
+        {            
+            printf STDOUT "resume istep returned success\n" ;
+        }
+        print STDOUT "-----------------------------------------------------------------\n";
+    }
 }
 
 __END__

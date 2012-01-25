@@ -92,6 +92,7 @@ def hb_istep_usage():
     print   "   sN..M       -   execute IStep N through M"
     print   "   <name1>..<name2>  - execute named isteps name1 through name2"
     print   "   debug       -   enable debugging messages"
+    print   "   resume      -   Resume istep execution from break point"
     return  None  
     
 ## declare GLOBAL g_SeqNum var, & a routine to manipulate it.  
@@ -310,7 +311,35 @@ def runIStep( istep, substep, inList ):
         print   "-----------------------------------------------------------------"
         
     return    
-    
+   
+def resume_istep():
+
+    bump_g_SeqNum()
+
+    print "resume from breakpoint"
+
+    byte0 = 0x80 + g_SeqNum   ## gobit + seqnum
+    command = 0x01
+    cmd = "0x%2.2x%2.2x_000000000000"%(byte0, command)
+    sendCommand( cmd )
+    result = getSyncStatus()
+
+    ## if result is -1 we have a timeout
+    if ( result == -1 ) :
+        print   "-----------------------------------------------------------------"
+    else :
+        taskStatus  =   ( ( result & 0x00ff000000000000 ) >> 48 )
+
+        print   "-----------------------------------------------------------------"
+        if ( taskStatus != 0 ) :
+            print "resume Istep FAILED, task status is %d"%( taskStatus )
+        else:            
+            print "resume Istep was successful"
+        print   "-----------------------------------------------------------------"
+        
+    return    
+
+
     
 ##  run command = "sN"    
 def sCommand( inList, scommand ) :
@@ -355,6 +384,7 @@ def find_in_inList( inList, substepname) :
 ##      sN
 ##      sN..M
 ##      <substepname1>..<substepname2>
+##      resume
 
 ##  declare GLOBAL g_IStep_DEBUG & SPLess memory mapped regs
 g_IStep_DEBUG   =   0
@@ -425,7 +455,11 @@ def istepHB( symsFile, str_arg1 ):
     if ( str_arg1 == "list"  ):         ## dump command list
         print_istep_list( inList )          
         return         
-           
+       
+    if ( str_arg1 == "resume" ):    ## resume from break point
+        resume_istep()
+        return None
+
     ## check to see if we have an 's' command (string starts with 's' and a number)    
     if ( re.match("^s+[0-9].*", str_arg1 ) ):
         ## run "s" command

@@ -169,6 +169,17 @@ fapi::ReturnCode fapiLoadInitFile(const fapi::Target & i_Target,
 fapi::ReturnCode fapiUnloadInitFile(const char * i_file, const char *& io_addr, 
     size_t & io_size);
 
+/**  @brief Set a break point in the current procedure
+ *
+ * This function will suspend the calling istep/procedure.
+ * The procedure can be signaled to resume via a cmd through the
+ * istep dispatcher.
+ * @param[in] i_target reference to the target
+ * @param[in] i_info  location/info @TODO of the breakpoint
+ */
+
+void fapiBreakPoint(const fapi::Target & i_target, uint64_t i_info);
+
 }
 
 namespace fapi

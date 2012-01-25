@@ -622,6 +622,21 @@ public:
             }
         }
     }
+
+
+//    // unit test breakpoint
+//    void testHwpf7()
+//    {
+//        fapi::Target  fapiTarget;
+//        FAPI_INF("AT breakpoint");
+//        fapiBreakPoint(fapiTarget,__LINE__);
+//
+//        // requires outside hb-istep resume  command to continue
+//
+//        FAPI_INF("RESUME from breakpoint");
+//    }
+
+
 };
 
 #endif

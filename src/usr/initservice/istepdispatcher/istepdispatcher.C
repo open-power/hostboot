@@ -420,11 +420,13 @@ void    IStepDispatcher::processSingleIStepCmd(
  *
  * @return none
  */
-void    IStepDispatcher::singleStepISteps( void *  io_ptr )   const
+void    IStepDispatcher::singleStepISteps( void *  io_ptr )
 {
     SPLessCmd           l_cmd;
     SPLessSts           l_sts;
     uint8_t             l_seqnum        =   0;
+
+    mutex_lock(&iv_poll_mutex);  // make sure this is only poller
 
     // initialize command reg
     l_cmd.val64 =   0;
@@ -455,13 +457,19 @@ void    IStepDispatcher::singleStepISteps( void *  io_ptr )   const
         {
             switch( l_cmd.hdr.cmdnum )
             {
-            case SPLESS_SINGLE_ISTEP_CMD:
-                // command 0:  run istep/substep
-                processSingleIStepCmd( l_cmd, l_sts  );
-                break;
+                case SPLESS_SINGLE_ISTEP_CMD:
+                    mutex_unlock(&iv_poll_mutex);
+                    // command 0:  run istep/substep
+                    processSingleIStepCmd( l_cmd, l_sts  );
+                    mutex_lock(&iv_poll_mutex);
+                    break;
 
-            default:
-                l_sts.hdr.status    =   SPLESS_INVALID_COMMAND;
+                case SPLESS_RESUME_ISTEP_CMD: // not at break point here
+                    l_sts.hdr.status    =   SPLESS_NOT_AT_BREAK_POINT;
+                    break;
+
+                default:
+                    l_sts.hdr.status    =   SPLESS_INVALID_COMMAND;
             }   // endif switch
 
             l_sts.hdr.seqnum    =   l_seqnum;
@@ -508,6 +516,7 @@ void    IStepDispatcher::singleStepISteps( void *  io_ptr )   const
     l_sts.hdr.status    =   SPLESS_TASKRC_TERMINATED;
     l_sts.hdr.seqnum    =   l_seqnum;
     writeSts( l_sts );
+    mutex_unlock(&iv_poll_mutex);
 
 }
 
@@ -692,5 +701,90 @@ IStepDispatcher::IStepDispatcher()
 
 IStepDispatcher::~IStepDispatcher()
 { }
+
+void IStepDispatcher::handleBreakPoint(const fapi::Target & i_target, uint64_t i_info)
+{
+    SPLessCmd   l_cmd;
+    SPLessSts   l_sts;
+    uint8_t     l_seqnum        = 0;
+
+    // need to be the only poller
+    mutex_lock(&iv_poll_mutex);
+
+    // init command reg
+    l_cmd.val64 = 0;
+    writeCmd ( l_cmd );
+
+    // init status reg, enable ready bit
+    l_sts.val64 = 0;
+    l_sts.hdr.readybit = true;
+    writeSts( l_sts );
+
+    // TODO Tell the outside world that a break point has been hit?
+    // TODO send i_target & i_info 
+
+    // Poll for cmd to resume
+    while(1)
+    {
+        readCmd( l_cmd );
+        l_seqnum = l_cmd.hdr.seqnum;
+
+        if( l_cmd.hdr.gobit)
+        {
+            // only expect this command
+            if (l_cmd.hdr.cmdnum == SPLESS_RESUME_ISTEP_CMD)
+            {
+                l_sts.hdr.seqnum = l_seqnum;
+                writeSts( l_sts );
+                l_cmd.val64 = 0;
+                writeCmd( l_cmd );
+                break; // return to continue istep
+            }
+            else // all other commands are not valid here.
+            {
+                l_sts.hdr.status = SPLESS_AT_BREAK_POINT;
+
+                // write status
+                l_sts.hdr.seqnum = l_seqnum;
+                writeSts( l_sts );
+
+                // clear cmd reg, including go bit
+                l_cmd.val64 = 0;
+                writeCmd( l_cmd );
+            }
+        }
+
+
+
+        // TODO want to do the same kind fo delay as IStepDispatcher::singleStepISteps()
+        /**
+         * @todo Need a common method of doing delays in HostBoot
+         * @VBU workaround
+         */
+        // Don't delay as long in VBU because it will take VERY long to
+        // run the simulator
+        TARGETING::EntityPath syspath(TARGETING::EntityPath::PATH_PHYSICAL);
+        syspath.addLast(TARGETING::TYPE_SYS,0);
+        TARGETING::Target* sys = TARGETING::targetService().toTarget(syspath);
+        uint8_t vpo_mode = 0;
+        if( sys
+                && sys->tryGetAttr<TARGETING::ATTR_IS_SIMULATION>(vpo_mode)
+                && (vpo_mode == 1) )
+        {
+            // VBU delay per Patrick
+            nanosleep(0,TEN_CTX_SWITCHES_NS);
+        }
+        else
+        {
+            nanosleep( SINGLESTEP_PAUSE_S, SINGLESTEP_PAUSE_NS );
+        }
+    }
+    mutex_unlock(&iv_poll_mutex);
+}
+
+void iStepBreakPoint(const fapi::Target & i_target, uint64_t i_info)
+{
+    IStepDispatcher::getTheInstance().handleBreakPoint(i_target, i_info);
+}
 
 } // namespace

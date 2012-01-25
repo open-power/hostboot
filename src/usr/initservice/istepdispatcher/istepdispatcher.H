@@ -53,6 +53,11 @@
 #include    "splesscommon.H"
 
 
+namespace fapi
+{
+    class Target;
+};
+
 namespace   INITSERVICE
 {
 
@@ -98,6 +103,14 @@ public:
      *  @return nothing
      */
     void            init( void *i_pargs);
+
+    /**
+     * @brief Handle an istep break point
+     * @param[in] i_target, the target
+     * @param[in] i_info, @TODO - location/info
+     * @note blocks until an outside istep cmd to resume is recieved. 
+     */
+    void handleBreakPoint(const fapi::Target & i_target, uint64_t info);
 
 protected:
 
@@ -174,7 +187,7 @@ private:
       *
       * @return none
       */
-     void   singleStepISteps( void *  io_ptr )  const;
+     void   singleStepISteps( void *  io_ptr );
 
 
      /**
@@ -222,6 +235,8 @@ private:
 
 
     //  -----   internal vars   -----------------------------
+
+    mutex_t iv_poll_mutex;      //!< protect who's polling istep cmds
 
 };  //  class IStepDispatcher
 
