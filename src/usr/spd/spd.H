@@ -33,7 +33,7 @@
 // ----------------------------------------------
 // Includes
 // ----------------------------------------------
-#include <errl/errltypes.H>
+#include <errl/errlentry.H>
 
 namespace SPD
 {

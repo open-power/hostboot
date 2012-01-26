@@ -48,22 +48,21 @@
 /*****************************************************************************/
 // I n c l u d e s
 /*****************************************************************************/
+
+
+// safe to include these, PARSER or no PARSER
 #include    <hbotcompid.H>      // list of compid's supported
+#include    <errl/hberrltypes.H>  //  errlver_t, errlsubsec_t
 
-#include    <errl/errltypes.H>  //  errlver_t, errlsubsec_t
+
+
+
+#ifndef PARSER
 #include    <errl/errlentry.H>  //  addFFDC, appendFFDC
-
-
-
-/*****************************************************************************/
-//  Typedefs
-/*****************************************************************************/
-
 
 namespace ERRORLOG
 {
 
-#ifndef PARSER
 
 /**
  * @brief ERRL User Data Details
@@ -179,6 +178,7 @@ private:
     uint32_t  iv_BufLen;        // Length of internal buffer
 
 };
+} // namespace 
 
 #else // (if PARSER defined)
 
@@ -196,6 +196,10 @@ private:
  *  These will compile and run in the errl tool.
  *
 */
+namespace ERRORLOG
+{
+
+
 class ErrlUserDetails
 {
 public:
@@ -251,8 +255,9 @@ private:
     ErrlUserDetails & operator=(const ErrlUserDetails &);
 };
 
-#endif //PARSER
+} // namespace
 
-} // end namespace
+
+#endif //PARSER
 
 #endif

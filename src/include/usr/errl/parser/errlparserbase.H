@@ -49,7 +49,7 @@
 // Unavoidable include for va_list
 #include <cstdarg>
 
-#include <errl/errltypes.H>
+#include <errl/hberrltypes.H>
 
 /*****************************************************************************/
 //  Typedefs

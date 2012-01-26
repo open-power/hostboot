@@ -550,8 +550,9 @@ EOF
     print $fh <<EOF;
 
 
-static void printErrorTags ( uint64_t i_src,
-                             uint64_t i_modId )
+static void printErrorTags (  ErrlUsrParser & i_parser,
+                              uint64_t i_src,
+                              uint64_t i_modId )
 {
     uint64_t error = (i_src << 8) | i_modId;
 
@@ -710,28 +711,13 @@ sub writePrintStatement
         # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
         print $fh "         case \(\($reasonCode \<\< 8\) \| $modId\) \:\n";
-        print $fh "             printf( \"\\n\" \)\;\n";
+
         foreach my $tag ( sort keys %$href )
         {
             $href->{$tag} =~ s/\"/\\\"/g;
-            my @lines = split /^/, $href->{$tag};
-
-            if( scalar( @lines ) > 1 )
-            {
-                print $fh "             printf( \"\%-20s";
-                foreach my $line( @lines )
-                {
-                    $line =~ s/\n//g;
-                    print $fh "$line";
-                }
-                print $fh "\\n\"\, \"$tag\" \)\;\n";
-            }
-            else
-            {
-                my $line = $href->{$tag};
-                $line =~ s/\n//g;
-                print $fh "             printf( \"\%-20s$line\\n\"\, \"$tag\" \)\;\n";
-            }
+            my $line = $href->{$tag};
+            $line =~ s/\n//g;
+            print $fh "             i_parser.PrintString( \"$tag\" \, \"$line\"  )\;\n";
         }
         print $fh "             break;\n\n";
     }

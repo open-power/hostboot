@@ -35,7 +35,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <util/singleton.H>
-#include <errl/errltypes.H>
+#include <errl/errlentry.H>
 #include <sys/sync.h>
 #include <vector>
 #include <kernel/timemgr.H>

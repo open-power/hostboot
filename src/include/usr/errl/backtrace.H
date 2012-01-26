@@ -35,7 +35,6 @@
 // I n c l u d e s
 /*****************************************************************************/
 #include <stdint.h>
-#include <errl/errltypes.H>
 #include <vector>
 
 

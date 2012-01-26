@@ -20,11 +20,13 @@
 #  Origin: 30
 #
 #  IBM_PROLOG_END
-# Common file for x86 parser files
+
+#  This file used by initservice/build/makefile
+#  Not used by errlparser nor plugins as of sprint 9.
+
 
 GENDIR = ${ROOTPATH}/obj/genfiles
 IMGDIR = ${ROOTPATH}/img
 OBJDIR = ${ROOTPATH}/obj/modules/parser
 UD_DIR = ${ROOTPATH}/obj/modules/userdetails
 
-## UD_FILES = ${UD_DIR}/*.o

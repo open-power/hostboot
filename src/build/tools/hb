@@ -34,7 +34,7 @@ execute_in_sandbox()
     fi
 
     SANDBOXRC="${SANDBOXROOT}/hbsandboxrc"
-    WORKON_CMD="workon -rc ${SANDBOXRC} -sb ${SANDBOXNAME} -m ppc "
+    WORKON_CMD="workon -rc ${SANDBOXRC} -sb ${SANDBOXNAME} -m $2 "
 
     echo $1 > ${SANDBOXBASE}/src/sandbox_execute_cmd
     chmod 700 ${SANDBOXBASE}/src/sandbox_execute_cmd
@@ -166,6 +166,15 @@ hb_helptext()
         echo "  recent commit in your repository to ensure the prologs are"
         echo "  all added properly."
         ;;
+    errlparser)
+        echo "  Topic 'errlparser'"
+        echo
+        echo "  Usage:"
+        echo "      hb errlparser"
+        echo
+        echo "  Prepares a copy of FipS errl tool that is hostboot aware,"
+        echo "  places it in simics directory."
+        ;;
     customrc)
         echo "  Topic 'customrc'"
         echo
@@ -196,7 +205,7 @@ hb_helptext()
         echo
         echo "  Available Commands:"
         echo "      workon, simsetup, prime, startsimics, rsync, objsizes,"
-        echo "      copyright_check"
+        echo "      copyright_check, errlparser"
         echo
         echo "  Additional Help Topics:"
         echo "      customrc"
@@ -269,18 +278,23 @@ hb_simsetup()
 
     echo "Running workarounds (presimsetup)."
     cp ${HOSTBOOTROOT}/src/build/citest/etc/workarounds.presimsetup ${SANDBOXBASE}/src
-    execute_in_sandbox "export BACKING_BUILD=\$bb && ./workarounds.presimsetup"
+    execute_in_sandbox "export BACKING_BUILD=\$bb && ./workarounds.presimsetup"  "ppc"
     rm ${SANDBOXBASE}/src/workarounds.presimsetup
 
     needs_machine_variable
-    execute_in_sandbox "start_simics -no_start -machine ${MACHINE}"
+    execute_in_sandbox "start_simics -no_start -machine ${MACHINE}"  "ppc"
 
     echo "Running workarounds (postsimsetup)."
     cp ${HOSTBOOTROOT}/src/build/citest/etc/workarounds.postsimsetup ${SANDBOXBASE}/src
-    execute_in_sandbox "export BACKING_BUILD=\$bb && ./workarounds.postsimsetup"
+    execute_in_sandbox "export BACKING_BUILD=\$bb && ./workarounds.postsimsetup"  "ppc"
     rm ${SANDBOXBASE}/src/workarounds.postsimsetup
 
     mkdir ${SANDBOXBASE}/img
+
+    # Put a starter copy of errl to simics directory; refresh w/ "hb errlparser"
+    cd ${SANDBOXBASE}/simics
+    ln -sf  ${DRIVER}/obj/x86.nfp/errl/nfp/tool/errl
+
 }
 
 hb_startsimics()
@@ -306,7 +320,7 @@ hb_startsimics()
 
     needs_machine_variable
     execute_in_sandbox \
-        "start_simics -machine ${MACHINE} ${SIMICSOPTIONS} $*"
+        "start_simics -machine ${MACHINE} ${SIMICSOPTIONS} $*"  "ppc"
 }
 
 hb_rsync()
@@ -343,6 +357,130 @@ hb_copyright_check()
     git diff HEAD~1 --name-only | xargs addCopyright.pl validate
 }
 
+
+hb_errlparser()
+{
+    [ -z "${HOSTBOOTROOT}" ] && echo "Missing HOSTBOOTROOT." && exit -1
+    [ -z "${SANDBOXBASE}" ] && echo "Missing SANDBOXBASE." && exit -1
+    [ -z "${SANDBOXNAME}" ] && echo "Missing SANDBOXNAME." && exit -1
+    [ -z "${SANDBOXROOT}" ] && echo "Missing SANDBOXROOT." && exit -1
+
+    DRIVER=`cat ${HOSTBOOTROOT}/src/build/citest/etc/bbuild`
+
+    # sanity checks 
+    if [ ! -f ${DRIVER}/src/makefile ]; then
+        echo "Cannot reach backing build: $DRIVER. You may need tokens."
+        exit -1
+    fi
+
+    if [ !  -f  ${HOSTBOOTROOT}/src/include/usr/hbotcompid.H ]; then 
+        echo "Missing \$HOSTBOOTROOT/src/include/usr/hbotcompid.H"
+        exit -1
+    fi
+
+    if [ !  -f  ${HOSTBOOTROOT}/src/include/usr/errl/hberrltypes.H ]; then 
+        echo "Missing \$HOSTBOOTROOT/src/include/usr/errl/hberrltypes.H"
+        exit -1
+    fi
+
+    if [ !  -f  ${HOSTBOOTROOT}/obj/genfiles/hostBootSrcParse.H ]; then 
+        echo "Missing \$HOSTBOOTROOT/obj/genfiles/hostBootSrcParse.H"
+        echo "This is a generated file produced during a Hostboot build."
+        exit -1
+    fi
+
+    # Copy hbotcompid.H to $sb/src/fstp/fsp
+    mkdir -p ${SANDBOXBASE}/src/fstp/fsp
+    cp ${HOSTBOOTROOT}/src/include/usr/hbotcompid.H  ${SANDBOXBASE}/src/fstp/fsp
+
+    # Symlink hbotcompid.H into the export trees. 
+    # TODO: Eventually, this will be done by src/fstp/nfp/makefile, and when 
+    # that's ready, it will require a mk of fstp instead of this.
+    mkdir -p  ${SANDBOXBASE}/export/x86.nfp/fips/include 
+    cd  ${SANDBOXBASE}/export/x86.nfp/fips/include 
+    ln -sf ../../../../src/fstp/fsp/hbotcompid.H
+
+    mkdir -p  ${SANDBOXBASE}/export/ppc/fips/include 
+    cd  ${SANDBOXBASE}/export/ppc/fips/include 
+    ln -sf ../../../../src/fstp/fsp/hbotcompid.H
+
+    # One-time preparation and x86.nfp full build of epub and errl. 
+    if [ !  -f  ${SANDBOXBASE}/src/errl/makefile  ]; then 
+        # First time running 'hb errlparser' 
+        echo "Preparing sandbox ..."
+        rm -fr  ${SANDBOXBASE}/src/epub ;  mkdir -p ${SANDBOXBASE}/src/epub
+        rm -fr  ${SANDBOXBASE}/src/errl ;  mkdir -p ${SANDBOXBASE}/src/errl
+
+        # TODO When the backing build has Hostboot awareness, remove this
+        # copying from Monte's public directory. Requirement SW105241.
+        if [ -d /gsa/ausgsa/home/c/o/copelanm/public/mamatha/errl ]; then
+            # Copy patch version of epub_service_codes.H 
+            cp -a ${DRIVER}/src/epub/*   ${SANDBOXBASE}/src/epub
+            cp  /gsa/ausgsa/home/c/o/copelanm/public/mamatha/epub/fsp/epub_service_codes.H   ${SANDBOXBASE}/src/epub/fsp
+
+            # Copy errl patch.
+            cp -a /gsa/ausgsa/home/c/o/copelanm/public/mamatha/errl/* ${SANDBOXBASE}/src/errl
+        else
+            # Populate with stuff from backing build.
+            cp -a ${DRIVER}/src/epub/*   ${SANDBOXBASE}/src/epub
+            cp -a ${DRIVER}/src/errl/*   ${SANDBOXBASE}/src/errl
+        fi    
+
+        # Trigger a full local build this one time.  
+        # Next time can be a partial build.
+        execute_in_sandbox "cd ${SANDBOXBASE}/src/epub && mk -a"  "x86.nfp"
+        execute_in_sandbox "cd ${SANDBOXBASE}/src/errl && mk -a"  "x86.nfp"
+    fi
+
+    # (Re-)Copy Hostboot plugins sources so they are up to date. 
+    rm -fr ${SANDBOXBASE}/src/plugins
+    mkdir -p ${SANDBOXBASE}/src/plugins
+
+    # Locate and copy plugins directories for Hostboot components.
+    PLUGDIRS=`find  ${HOSTBOOTROOT}/src/usr -name plugins -type d`
+    ALLCOMPS=""
+
+    for D in $PLUGDIRS; do 
+        COMP=`echo $D | sed 's/^.*\/src\/usr\///' | awk '-F/' '{print $1}' `
+        mkdir  ${SANDBOXBASE}/src/plugins/$COMP
+        cp -a  ${HOSTBOOTROOT}/src/usr/$COMP/plugins/*   ${SANDBOXBASE}/src/plugins/$COMP
+        ALLCOMPS="$ALLCOMPS $COMP"
+    done
+
+    # Build a src/plugins/makefile with the component names found above.
+    echo "# This file auto-generated from  ${HOSTBOOTROOT}/src/usr/errl/plugins/makefile.fips" >${SANDBOXBASE}/src/plugins/makefile
+    echo "HBCOMPS=$ALLCOMPS"  >>${SANDBOXBASE}/src/plugins/makefile
+    grep -v "^ *#"  ${HOSTBOOTROOT}/src/usr/errl/plugins/fips.mk >>${SANDBOXBASE}/src/plugins/makefile
+
+    # Copy common plugins.mk included by all plugins makefiles.
+    cp  ${HOSTBOOTROOT}/src/usr/errl/plugins/plugins.mk ${SANDBOXBASE}/src/plugins
+
+    # Clean any libB* symlinks in the export tree.
+    find  ${SANDBOXBASE}/export/x86.nfp/fips/lib -name "libB*" -exec rm {} \;  2>/dev/null
+
+    # Build all libB* plugins from scratch every time. This should not take long.
+    execute_in_sandbox "cd ${SANDBOXBASE}/src/plugins && mk -a" "x86.nfp"
+    
+    # Ensure the errl binary is gone in order to trigger 
+    # a relink to pick up changed libB*.a files 
+    mkdir -p ${SANDBOXBASE}/src/errl
+    mkdir -p ${SANDBOXBASE}/obj/x86.nfp/errl/nfp/tool
+    rm -f ${SANDBOXBASE}/obj/x86.nfp/errl/nfp/tool/errl
+    execute_in_sandbox "cd ${SANDBOXBASE}/src/errl && mk"  "x86.nfp"
+   
+    # Get the x86 errl tool to simics directory 
+    # cp  $SANDBOXBASE/obj/x86.nfp/errl/nfp/tool/errl   $SANDBOXBASE/simics
+    cd ${SANDBOXBASE}/simics
+    ln -sf ../obj/x86.nfp/errl/nfp/tool/errl
+}
+
+
+
+
+
+
+
+
 if [ 0 == $# ]; then
     hb_helptext
     exit -1
@@ -372,6 +510,9 @@ objsizes)
     ;;
 copyright_check)
     hb_copyright_check $*
+    ;;
+errlparser)
+    hb_errlparser $*
     ;;
 *)
     hb_helptext $*

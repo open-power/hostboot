@@ -87,7 +87,7 @@ ErrlSrc::~ErrlSrc()
 // Flatten the PS primary SRC data to a minimum standard 72-byte structure.
 // Page numbers refer to Platform Event Log and SRC PLDD
 // https://mcdoc.boeblingen.de.ibm.com/out/out.ViewDocument.php?documentid=1675
-// Version 0.8 (markup). See also src/include/usr/errl/errltypes.H
+// Version 0.8 (markup). See also src/include/usr/errl/hberrltypes.H
 // for the typedef pelSRCSection_t.
 
 uint64_t ErrlSrc::flatten( void * o_pBuffer, const uint64_t i_cbBuffer )

@@ -53,7 +53,7 @@ void ErrlUserDetailsTarget::addToLog( errlHndl_t i_errl,
         if (iv_pTarget == TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL)
         {
             const char *l_bufPtr = "MASTER_PROCESSOR_CHIP_TARGET_SENTINEL";
-            iv_pErrlFFDC = i_errl->addFFDC( ERRL_COMP_ID,
+            iv_pErrlFFDC = i_errl->addFFDC( HBERRL_COMP_ID,
                                             l_bufPtr, strlen(l_bufPtr)+1,
                                             ERRL_UDV_DEFAULT_VER_1,
                                             ERRL_UDT_TARGET_FFDC );
@@ -66,7 +66,7 @@ void ErrlUserDetailsTarget::addToLog( errlHndl_t i_errl,
             l_bufPtr = iv_pTarget->targetFFDC( l_bufSize );
             if (l_bufPtr)
             {
-                iv_pErrlFFDC = i_errl->addFFDC( ERRL_COMP_ID,
+                iv_pErrlFFDC = i_errl->addFFDC( HBERRL_COMP_ID,
                                                 l_bufPtr, l_bufSize,
                                                 ERRL_UDV_DEFAULT_VER_1,
                                                 ERRL_UDT_TARGET_FFDC );

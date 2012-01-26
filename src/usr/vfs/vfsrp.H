@@ -25,7 +25,7 @@
 
 #include <stdint.h>
 #include <builtins.h>
-#include <errl/errltypes.H>
+#include <errl/errlentry.H>
 #include <sys/msg.h>
 #include <vector>
 #include <sys/sync.h>

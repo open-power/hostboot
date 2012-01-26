@@ -33,7 +33,6 @@
 #include <cxxtest/TestSuite.H>
 #include <errl/errlmanager.H>
 #include <errl/errlentry.H>
-#include <errl/errltypes.H>
 #include <devicefw/driverif.H>
 #include <i2c/eepromddreasoncodes.H>
 #include <targeting/predicates/predicatectm.H>

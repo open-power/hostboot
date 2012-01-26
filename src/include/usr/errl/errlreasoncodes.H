@@ -35,22 +35,23 @@
 // Module IDs for ERRL component
 enum
 {
-    ERRL_FIRST_MODULE_ID        = 0x00,
-    ERRL_USERDETAILS_MODULE_ID,
+    HBERRL_FIRST_MODULE_ID        = 0x00,
+    HBERRL_USERDETAILS_MODULE_ID  = 1,
+    HBERRL_TEST_MOD_ID            = 2,
     //........
-    ERRL_LAST_MODULE_ID         = 0xFF
+    HBERRL_LAST_MODULE_ID         = 0xFF
 };
 
 // Reason codes for ERRL component
 enum errlReasonCode
 {
-    ERRL_FIRST_ERR          = ERRL_COMP_ID | 0x01,
-    ERRL_FILENAME_TEST      = ERRL_COMP_ID | 0x02,
-    ERRL_ERRORMSG_TEST      = ERRL_COMP_ID | 0x03,
-    ERRL_XMLTOKEN_TEST      = ERRL_COMP_ID | 0x04,
-
+    HBERRL_FIRST_ERR          = HBERRL_COMP_ID | 0x01,
+    HBERRL_FILENAME_TEST      = HBERRL_COMP_ID | 0x02,
+    HBERRL_ERRORMSG_TEST      = HBERRL_COMP_ID | 0x03,
+    HBERRL_XMLTOKEN_TEST      = HBERRL_COMP_ID | 0x04,
+    HBERRL_TEST_REASON_CODE   = HBERRL_COMP_ID | 0x0F,
     //........
-    ERRL_LAST_ERR           = ERRL_COMP_ID | 0xFF
+    HBERRL_LAST_ERR           = HBERRL_COMP_ID | 0xFF
 };
 
 

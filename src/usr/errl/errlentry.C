@@ -71,10 +71,10 @@ ErrlEntry::ErrlEntry(const errlSeverity_t i_sev,
     {
         if( 0 == i )
         {
-            ffdcPtr = addFFDC( ERRL_COMP_ID,
+            ffdcPtr = addFFDC( HBERRL_COMP_ID,
                                &bt[i],
                                sizeof(bt[i]),
-                               0, 0 );
+                               0, HBERRL_SST_BACKTRACE );
 
             // Make sure we got a pointer to the user details
             if( NULL == ffdcPtr )
@@ -164,12 +164,23 @@ void ErrlEntry::appendToFFDC(ErrlUD * i_pErrlUD,
 ///////////////////////////////////////////////////////////////////////////////
 // Return a Boolean indication of success.
 
+// Use these to tag the UD section containing the trace. 
+const int FIPS_ERRL_UDT_TRACE              = 0x0c; 
+const int FIPS_ERRL_COMP_ID                = 0x3100;
+const int FIPS_ERRL_UDV_DEFAULT_VER_1      = 1; 
+
 bool ErrlEntry::collectTrace(const char i_name[], const uint64_t i_max)
 {
     bool l_rc = false;  // assume a problem.
     char * l_pBuffer = NULL;
     uint64_t l_cbOutput = 0;
     uint64_t l_cbBuffer = 0;
+
+    // Trying to enforce a rule that no Hostboot component
+    // use the same component ID as FIPS Errl due to our
+    // use of the errl tool and its ability to format
+    // FSP traces attached to Hostboot error logs.
+    CPPASSERT( FIPS_ERRL_COMP_ID == RESERVED_COMP_ID );
 
     do
     {
@@ -219,9 +230,9 @@ bool ErrlEntry::collectTrace(const char i_name[], const uint64_t i_max)
         // Save the trace buffer as a UD section on this.
         ErrlUD * l_udSection = new ErrlUD( l_pBuffer,
                                            l_cbOutput,
-                                           ERRL_COMP_ID,
-                                           ERRL_UDV_DEFAULT_VER_1,
-                                           ERRL_UDT_TRACE );
+                                           FIPS_ERRL_COMP_ID,
+                                           FIPS_ERRL_UDV_DEFAULT_VER_1,
+                                           FIPS_ERRL_UDT_TRACE );
 
         // Add the trace section to the vector of sections
         // for this error log.

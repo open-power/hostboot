@@ -38,7 +38,7 @@
 /*****************************************************************************/
 #include <stdint.h>
 #include <stdlib.h>
-#include <errl/errltypes.H>
+#include <errl/hberrltypes.H>
 #include <hbotcompid.H>
 #include <string.h>
 

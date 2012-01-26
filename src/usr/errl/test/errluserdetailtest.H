@@ -201,16 +201,16 @@ public:
         /*@
         * @errortype
         * @severity ERRORLOG_SEV_INFORMATIONAL
-        * @moduleid ERRL_USERDETAILS_MODULE_ID
-        * @reasoncode ERRL_FILENAME_TEST
+        * @moduleid HBERRL_USERDETAILS_MODULE_ID
+        * @reasoncode HBERRL_FILENAME_TEST
         * @userdata1 <UNUSED>
         * @userdata2 <UNUSED>
         * @devdesc  User Details unit test - post a filename user data section
         */
         l_errl = new ERRORLOG::ErrlEntry(
                 ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                ERRL_USERDETAILS_MODULE_ID,
-                ERRL_FILENAME_TEST,             //  compid/reasoncode
+                HBERRL_USERDETAILS_MODULE_ID,
+                HBERRL_FILENAME_TEST,             //  compid/reasoncode
                 0x1234567890,                   //  user1
                 0x9876543210 );                 //  user2
         if( l_errl   ==   NULL )
@@ -235,7 +235,7 @@ public:
         l_FN_userdata.addToLog( l_errl, testfnstr2, sizeof(testfnstr2) );
 
         // commit the errorlog
-        errlCommit(l_errl, ERRL_COMP_ID );
+        errlCommit(l_errl, HBERRL_COMP_ID );
 
         //  Maybe do some stuff here to find the committed errorlog back and
         //  see if it is still correct?  Later.
@@ -254,8 +254,8 @@ public:
         /*@
         * @errortype
         * @severity ERRORLOG_SEV_INFORMATIONAL
-        * @moduleid ERRL_USERDETAILS_MODULE_ID
-        * @reasoncode ERRL_ERRORMSG_TEST
+        * @moduleid HBERRL_USERDETAILS_MODULE_ID
+        * @reasoncode HBERRL_ERRORMSG_TEST
         * @userdata1 <UNUSED>
         * @userdata2 <UNUSED>
         * @devdesc  User Details unit test - post an error message in a
@@ -263,8 +263,8 @@ public:
         */
         l_errl = new ERRORLOG::ErrlEntry(
                 ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                ERRL_USERDETAILS_MODULE_ID,
-                ERRL_ERRORMSG_TEST,             //  compid/reasoncode
+                HBERRL_USERDETAILS_MODULE_ID,
+                HBERRL_ERRORMSG_TEST,             //  compid/reasoncode
                 0x1212121212,                   //  user1
                 0x3434343434 );                 //  user2
         if( l_errl   ==   NULL )
@@ -280,7 +280,7 @@ public:
         l_userdata.addToLog( l_errl );
 
         // commit the errorlog
-        errlCommit(l_errl, ERRL_COMP_ID );
+        errlCommit(l_errl, HBERRL_COMP_ID );
 
     }
 
@@ -296,8 +296,8 @@ public:
         /*@
         * @errortype
         * @severity ERRORLOG_SEV_INFORMATIONAL
-        * @moduleid ERRL_USERDETAILS_MODULE_ID
-        * @reasoncode ERRL_XMLTOKEN_TEST
+        * @moduleid HBERRL_USERDETAILS_MODULE_ID
+        * @reasoncode HBERRL_XMLTOKEN_TEST
         * @userdata1 <UNUSED>
         * @userdata2 <UNUSED>
         * @devdesc  User Details unit test - post an XML token in error as
@@ -305,8 +305,8 @@ public:
         */
         l_errl = new ERRORLOG::ErrlEntry(
                 ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                ERRL_USERDETAILS_MODULE_ID,
-                ERRL_XMLTOKEN_TEST,             //  compid/reasoncode
+                HBERRL_USERDETAILS_MODULE_ID,
+                HBERRL_XMLTOKEN_TEST,             //  compid/reasoncode
                 0xa5a5a5a5a5,                   //  user1
                 0xd2d2d2d2d2 );                 //  user2
         if( l_errl   ==   NULL )
@@ -322,7 +322,7 @@ public:
          l_userdata.addToLog( l_errl );
 
         // commit the errorlog
-        errlCommit( l_errl, ERRL_COMP_ID );
+        errlCommit( l_errl, HBERRL_COMP_ID );
 
     }
 

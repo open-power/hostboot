@@ -24,7 +24,7 @@
 #define INTERRUPT_H
 
 #include <sys/msg.h>
-#include <errl/errltypes.H>
+#include <errl/errlentry.H>
 #include <sys/interrupt.h>
 
 namespace INTR

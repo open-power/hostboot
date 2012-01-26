@@ -26,7 +26,7 @@
 #include <stdint.h>
 #include <builtins.h>
 #include <limits.h>
-#include <errl/errltypes.H>
+#include <errl/errlentry.H>
 #include <sys/msg.h>
 #include <intr/interrupt.H>
 #include <map>

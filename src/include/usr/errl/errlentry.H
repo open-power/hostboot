@@ -47,7 +47,7 @@
 /*****************************************************************************/
 #include <stdint.h>
 #include <vector>
-#include <errl/errltypes.H>
+#include <errl/hberrltypes.H>
 #include <errl/errlsctn.H>
 #include <errl/errlprvt.H>
 #include <errl/errluh.H>
@@ -557,5 +557,9 @@ inline void ErrlEntry::setSrcType(const srcType_t i_srcType)
 }
 
 } // End namespace
+
+
+typedef ERRORLOG::ErrlEntry* errlHndl_t;
+
 
 #endif //ERRLENTRY_H

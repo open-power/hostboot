@@ -1,7 +1,7 @@
 //  IBM_PROLOG_BEGIN_TAG
 //  This is an automatically generated prolog.
 //
-//  $Source: src/include/usr/errl/errltypes.H $
+//  $Source: src/include/usr/errl/hberrltypes.H $
 //
 //  IBM CONFIDENTIAL
 //
@@ -20,8 +20,8 @@
 //  Origin: 30
 //
 //  IBM_PROLOG_END
-#ifndef ERRLTYPES_H
-#define ERRLTYPES_H
+#ifndef HBERRLTYPES_H
+#define HBERRLTYPES_H
 /**
  *  @file errltypes.H
  *
@@ -40,7 +40,28 @@
  * @brief Pointer to an ErrlEntry object
  */
 namespace ERRORLOG { class ErrlEntry; };
-typedef ERRORLOG::ErrlEntry* errlHndl_t;
+
+
+
+// Identifiers for Hostboot ERRL user-defined data sections.
+// Range: 0 .. 255
+enum
+{
+    HBERRL_SST_NOFORMAT         = 0,
+    HBERRL_SST_DEFAULT          = 0,
+        HBERRL_VER_DEFAULT           = 0, // 0,0 not handled
+    HBERRL_SST_PRESIDENT        = 1, // testing
+    HBERRL_SST_FIRSTLADY        = 2, // testing
+    HBERRL_SST_STRING           = 3, // null-ended string
+        HBERRL_VER_STRINGNAME        = 0, // label: "Name"
+        HBERRL_VER_STRINGTASK        = 1, // label: "Task"
+        HBERRL_VER_STRINGTASKNAME    = 2, // label: "Task name"
+        HBERRL_VER_STRINGATTRNAME    = 3, // label: "Attribute name"
+        HBERRL_VER_STRINGFILENAME    = 4, // label: "File name"
+        HBERRL_VER_STRINGPROCNAME    = 5, // label: "Procedure name"
+    HBERRL_SST_BACKTRACE        = 4, // backtrace
+};
+
 
 /**
  * @brief Macros to store different numbers into uint64_t
@@ -493,4 +514,4 @@ typedef struct pelsrcsection
 
 } // End namespace
 
-#endif // ERRLTYPES_H
+#endif // HBERRLTYPES_H

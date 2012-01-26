@@ -52,22 +52,12 @@ const compId_t MY_COMP_ID = 0x0000;
 const char MY_COMP_NAME[] = "myname";
 //@}
 
-/** @name ERRL
+/** @name HBERRL
  *  Error Logging component.
- *
- *  Oct 2011:  Temporarily set ERRL component ID to the
- *  same as FSP ERRL in order to make the FSP x86 errl tool
- *  format Hostboot error logs with traces.  For user-defined
- *  trace sections, that tools expects component 0x3100,
- *  section ID  0x0C, and version 1.
- *
- *  Requirement SW105241 is opened for fips8xx errl tool
- *  to start becoming Hostboot aware.  TODO When errl becomes
- *  Hostboot aware, ERRL comp id can revert to 0x0100.  Monte
  */
 //@{
-const compId_t ERRL_COMP_ID = 0x3100;
-const char ERRL_COMP_NAME[] = "errl";
+const compId_t HBERRL_COMP_ID = 0x0100;
+const char HBERRL_COMP_NAME[] = "hberrl";
 //@}
 
 /** @name DEVFW
@@ -180,12 +170,24 @@ const compId_t INTR_COMP_ID = 0x0F00;
 const char INTR_COMP_NAME[] = "intr";
 //@}
 
+
 /** @name SPD
  *  EEPROM device driver component
  */
 //@{
 const compId_t SPD_COMP_ID = 0x1000;
 const char SPD_COMP_NAME[] = "spd";
+//@}
+
+/** @name RESERVED
+ *  Reserved component ID. x3100 is the component ID
+ *  of FipS ERRL component. Due to our use of 
+ *  of the FipS errl tool, let no Hostboot component
+ *  use this component ID. 
+ */
+//@{
+const compId_t RESERVED_COMP_ID = 0x3100;
+const char RESERVED_COMP_NAME[] = "reserved";
 //@}
 
 //  ----------------------------------------------------------

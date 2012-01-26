@@ -32,7 +32,7 @@
 #define __DEVICEFW_USERIF
 
 #include <stdint.h>
-#include <errl/errltypes.H>
+#include <errl/errlentry.H>
 #include <targeting/targetservice.H>
 
 namespace DeviceFW

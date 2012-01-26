@@ -32,12 +32,13 @@
 #include <cxxtest/TestSuite.H>
 #include <errl/errlmanager.H>
 #include <errl/errlentry.H>
+#include <errl/errlreasoncodes.H>
 #include <trace/trace.H>
 #include <hbotcompid.H>
 
-#define TEST_REASON_CODE    (ERRL_COMP_ID | 0x0F)
+
 #define TEST_SEVERITY       ERRORLOG::ERRL_SEV_INFORMATIONAL
-#define TEST_MOD_ID         0x0022
+
 
 #define TEST_USR_8BIT_1    0x80
 #define TEST_USR_8BIT_2    0x93
@@ -92,12 +93,19 @@ public:
 
         do
         {
+            /*@
+             * @errortype
+             * @reasoncode  HBERRL_TEST_REASON_CODE
+             * @severity    ERRORLOG::ERRL_SEV_INFORMATIONAL
+             * @moduleid    HBERRL_TEST_MOD_ID
+             * @devdesc     Errl test, errl log the first.
+             */
 
             // Create an error log
             errlHndl_t l_err = new ERRORLOG::ErrlEntry(
                                     ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                    TEST_MOD_ID,
-                                    TEST_REASON_CODE,
+                                    HBERRL_TEST_MOD_ID,
+                                    HBERRL_TEST_REASON_CODE,
                                     l_userData1,
                                     l_userData2);
 
@@ -115,7 +123,7 @@ public:
             // for it.  addFFDC() should return a Boolean indication of success.
 
             const char * pch = "martha washington";
-            pffdc = l_err->addFFDC( ERRL_COMP_ID, pch, strlen( pch ), 1, 2 );
+            pffdc = l_err->addFFDC( HBERRL_COMP_ID, pch, strlen( pch ), 0, HBERRL_SST_FIRSTLADY );
             if ( NULL == pffdc )
             {
                 TS_FAIL("testErrl1: addFFDC() output NULL pointer");
@@ -124,7 +132,7 @@ public:
 
             // really short user data
             pch = "A";
-            pffdc = l_err->addFFDC( DEVFW_COMP_ID, pch, strlen( pch ), 3, 4 );
+            pffdc = l_err->addFFDC( DEVFW_COMP_ID, pch, strlen( pch ));
             if ( NULL == pffdc )
             {
                 TS_FAIL("testErrl1: addFFDC() output NULL pointer");
@@ -132,7 +140,7 @@ public:
             }
 
             pch = "george washington";
-            pffdc = l_err->addFFDC( DEVFW_COMP_ID, pch, strlen( pch ), 3, 4 );
+            pffdc = l_err->addFFDC( DEVFW_COMP_ID, pch, strlen( pch ), 0, HBERRL_SST_PRESIDENT  );
             if ( NULL == pffdc )
             {
                 TS_FAIL("testErrl1: addFFDC() output NULL pointer");
@@ -140,7 +148,7 @@ public:
             }
 
             pch = "dwight eisenhour";
-            pffdc = l_err->addFFDC( SCOM_COMP_ID, pch, strlen( pch ), 5, 6 );
+            pffdc = l_err->addFFDC( SCOM_COMP_ID, pch, strlen( pch ), 1, 12 );
             if ( NULL == pffdc )
             {
                 TS_FAIL("testErrl1: addFFDC() output NULL pointer");
@@ -148,7 +156,7 @@ public:
             }
 
             pch = "ronald ";
-            pffdc = l_err->addFFDC( ERRL_COMP_ID, pch, strlen( pch ), 7, 8 );
+            pffdc = l_err->addFFDC( HBERRL_COMP_ID, pch, strlen( pch ), 0, HBERRL_SST_PRESIDENT );
             if ( NULL == pffdc )
             {
                 TS_FAIL("testErrl1: addFFDC() output NULL pointer");
@@ -209,7 +217,7 @@ public:
             if( !fOK )
             {
                 // cb is big enough for the header only, but no
-                // room for any entries. 
+                // room for any entries.
                 TS_FAIL( "collectTrace(TARG,l_cb) rets false", l_cb );
                 break;
             }
@@ -227,7 +235,7 @@ public:
 
 
             // Add null data.
-            pffdc = l_err->addFFDC( ERRL_COMP_ID, NULL, 0,  9, 10 );
+            pffdc = l_err->addFFDC( HBERRL_COMP_ID, NULL, 0,  9, 10 );
             if ( NULL != pffdc )
             {
                 TS_FAIL("testErrl1: addFFDC() returned non null");
@@ -241,7 +249,7 @@ public:
                 break;
             }
 
-            if (l_err->reasonCode() != TEST_REASON_CODE)
+            if (l_err->reasonCode() != HBERRL_TEST_REASON_CODE)
             {
                 TS_FAIL("testErrl1: createErrlLog() returns incorrect reason code!");
                 break;
@@ -308,8 +316,8 @@ public:
         // Create an error log
         errlHndl_t l_err = new ERRORLOG::ErrlEntry(
                                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                TEST_MOD_ID,
-                                TEST_REASON_CODE,
+                                HBERRL_TEST_MOD_ID,
+                                HBERRL_TEST_REASON_CODE,
                                 l_userData1,
                                 l_userData2);
 

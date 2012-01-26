@@ -32,7 +32,6 @@
 #include <cxxtest/TestSuite.H>
 #include <errl/errlmanager.H>
 #include <errl/errlentry.H>
-#include <errl/errltypes.H>
 #include <pnor/pnorif.H>
 #include <devicefw/userif.H>
 

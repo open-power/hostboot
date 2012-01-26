@@ -35,7 +35,6 @@
 
 #include <targeting/targetservice.H>
 #include <errl/errlentry.H>
-#include <errl/errltypes.H>
 #include <hwpf/plat/fapiPlatAttributeService.H>
 #include <hwpf/plat/fapiPlatReasonCodes.H>
 

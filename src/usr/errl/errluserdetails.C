@@ -55,7 +55,7 @@ namespace ERRORLOG
 // ErrlUserDetails default constructor
 /*****************************************************************************/
 ErrlUserDetails::ErrlUserDetails()
-: iv_CompId(ERRL_COMP_ID),
+: iv_CompId(HBERRL_COMP_ID),
   iv_Version(0),
   iv_SubSection(0),
   iv_pErrlFFDC(NULL),

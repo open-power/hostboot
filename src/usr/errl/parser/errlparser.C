@@ -25,28 +25,21 @@
 /**
  *  @file errlparser.C
  *
- *  @brief Builds a program to display committed Hostboot error logs.
+ *  @brief This program spawns the FipS x86 errl tool to display  
+ *  a Hostboot error log in full detail.  This program can also show a 
+ *  brief list of error logs without the detail.  When the user 
+ *  wants the full detail, this program extracts the error log from
+ *  the Hostboot image (or dump) and puts it into a temporary file. When
+ *  saved to file, then this program execs "errl -d..."  to display
+ *  the error log PEL data. 
+ * 
+ *  There are other options, such as "-p" which writes all the PEL files
+ *  and does not exec errl. This is useful for debugging. 
+ * 
  *  Enter errlparser ? (or -? or -h or --help)   to print help.
  *  This program can be run standalone using a Simics
  *  L3 memory image and the HB syms file, however it is more likely
- *  spawned as "simcis> hb-errl" from the Hostboot/Simics python
- *  script.
- *
- *  This program spawns the FSP x86 version of errl and fsp-trace
- *  which may or may not be in your $PATH.  Candidates are:
- *
- *  Classic FSP errl:
- *      /esw/fips730/Builds/b0829a_1130.730/obj/x86.nfp/errl/nfp/tool/errl
- *
- *  Or this version in Monte's sandbox which is more Hostboot aware:
- *      /gsa/ausgsa/home/c/o/copelanm/public/bin/errl
- *
- *  Building Blocks version of fsp-trace:
- *      /opt/mcp/shared/fr_DEV-37/opt/fsp/usr/bin/fsp-trace
- *
- *  Camvan has a solution for PATHing to fsp-trace when in Simics.
- *  TODO Will need a copy of FSP x86 errl too in the near future.
- *
+ *  spawned via "simics> hb-errl" 
  */
 
 
@@ -62,14 +55,12 @@
 #include <vector>
 using namespace std;
 
-#include <errl/errltypes.H>
+#include <errl/hberrltypes.H>
 #include <hbotcompid.H>
 
-// userdetail
-#include <errl/parser/errlusrparser.H>
-
-// this should be last, otherwise it will not find all the namespaces
-#include <hostBootSrcParse.H>
+// These should be included from plugin code.
+// #include <errl/parser/errlusrparser.H>
+// #include <hostBootSrcParse.H>
 
 
 using namespace ERRORLOG;
@@ -753,9 +744,8 @@ int main( int argc,  char *argv[] )
         exit(1);
     }
 
-    // TODO Need to put a copy of FSP x86 errl tool in the simics path.
-    // Try for Monte's sandbox copy, temporary for Sprint 6.
-    pszErrlTool = "/gsa/ausgsa/home/c/o/copelanm/public/bin/errl";
+    // There is a copy of FSP x86 errl tool in the simics dir.
+    pszErrlTool = "./errl";
 
     rc = stat( pszErrlTool, &statbuffer );
     if(  -1 == rc )
@@ -972,13 +962,6 @@ int main( int argc,  char *argv[] )
             // I have cheated and put reasonCode here:
             l_reasonCode = pSRCSection->reserved1;
 #endif
-
-            printf( "%-20s%s\n",
-                    "Component",
-                    FindComp(pPrivateHdr->sectionheader.compId));
-
-            // print the Errorlog tags from scanforsrcs.pl
-            printErrorTags( l_reasonCode, pSRCSection->moduleId );
 
             // done with this tmp file
             unlink( szTmpFilename );
