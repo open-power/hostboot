@@ -55,6 +55,8 @@
 #define INFO_MRK  "I>"
 #define ARG_MRK   "A>"
 
+#define TRACE_FILENAME "TRACEPP_INSERT_FILENAME"
+
 const uint32_t TRACE_DEBUG   = 1;       //Indicates trace is debug
 const uint32_t TRACE_FIELD   = 0;       //Indicates trace is field
 
