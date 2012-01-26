@@ -34,7 +34,7 @@
  *                          mjjones     09/12/2011  Created.
  *                          mjjones     10/06/2011  Updated traces.
  *                          camvang     10/26/2011  Updated traces.
- *
+ *                          mjjones     01/13/2012  Use new ReturnCode interfaces
  */
 
 #include <fapiTestHwpConfig.H>
@@ -72,7 +72,7 @@ fapi::ReturnCode hwpTestConfig(const fapi::Target & i_chip)
         if (l_targets.size() == 0)
         {
             FAPI_ERR("hwpTestConfig: No MCS chiplets");
-            l_rc = fapi::RC_TEST_ERROR_A;
+            FAPI_SET_HWP_ERROR(l_rc, RC_TEST_CONFIG_NO_MCS_CHIPLETS);
         }
         else
         {
@@ -105,7 +105,8 @@ fapi::ReturnCode hwpTestConfig(const fapi::Target & i_chip)
                     if (i_chip != l_chip)
                     {
                         FAPI_ERR("hwpTestConfig: Chip mismatch");
-                        l_rc = fapi::RC_TEST_ERROR_B;
+                        FAPI_SET_HWP_ERROR(l_rc,
+                            RC_TEST_CONFIG_PARENT_CHIP_MISMATCH);
                     }
                 }
             }

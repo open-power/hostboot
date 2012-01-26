@@ -475,7 +475,7 @@ public:
                             "data read 0x%.16llX data expected 0x%.16llX",
                              l_ifScomData[i].addr, l_ScomData.getDoubleWord(0),
                              l_ifScomData[i].writtenData);
-                    l_rc = fapi::RC_HWP_EXEC_INITFILE_TEST_FAILED;
+                    FAPI_SET_HWP_ERROR(l_rc, RC_HWP_EXEC_INITFILE_TEST_FAILED);
                     break;
                 }
             }
@@ -496,7 +496,7 @@ public:
                     TS_FAIL("testHwpf5: fapiPutScom to restore, error from "
                             "ecmdDataBuffer setDoubleWord() - rc 0x%.8X",
                             l_ecmdRc);
-                    l_rc = l_ecmdRc;
+                    l_rc.setEcmdError(l_ecmdRc);
                     break;
                 }
 

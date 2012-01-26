@@ -90,8 +90,7 @@ fapi::ReturnCode platGetScom(const fapi::Target& i_target,
     {
         // Add the error log pointer as data to the ReturnCode
         FAPI_ERR("platGetScom: deviceRead() returns error");
-        l_rc = fapi::FAPI_RC_PLAT_ERR_SEE_DATA;
-        l_rc.setPlatData(reinterpret_cast<void *> (l_err));
+        l_rc.setPlatError(reinterpret_cast<void *> (l_err));
     }
     else
     {
@@ -106,7 +105,7 @@ fapi::ReturnCode platGetScom(const fapi::Target& i_target,
         {
             FAPI_ERR("platGetScom: ecmdDataBufferBase setBitLength() or setDoubleWord() returns error, ecmdRc 0x%.8X",
                     l_ecmdRc);
-            l_rc = l_ecmdRc;
+            l_rc.setEcmdError(l_ecmdRc);
         }
     }
 
@@ -140,8 +139,7 @@ fapi::ReturnCode platPutScom(const fapi::Target& i_target,
     {
         // Add the error log pointer as data to the ReturnCode
         FAPI_ERR("platPutScom: deviceWrite() returns error");
-        l_rc = fapi::FAPI_RC_PLAT_ERR_SEE_DATA;
-        l_rc.setPlatData(reinterpret_cast<void *> (l_err));
+        l_rc.setPlatError(reinterpret_cast<void *> (l_err));
     }
 
     FAPI_DBG(EXIT_MRK "platPutScom");
@@ -177,8 +175,7 @@ fapi::ReturnCode platPutScomUnderMask(const fapi::Target& i_target,
         {
             // Add the error log pointer as data to the ReturnCode
             FAPI_ERR("platPutScomUnderMask: deviceRead() returns error");
-            l_rc = fapi::FAPI_RC_PLAT_ERR_SEE_DATA;
-            l_rc.setPlatData(reinterpret_cast<void *> (l_err));
+            l_rc.setPlatError(reinterpret_cast<void *> (l_err));
             break;
         }
 
@@ -203,8 +200,7 @@ fapi::ReturnCode platPutScomUnderMask(const fapi::Target& i_target,
         {
             // Add the error log pointer as data to the ReturnCode
             FAPI_ERR("platPutScomUnderMask: deviceWrite() returns error");
-            l_rc = fapi::FAPI_RC_PLAT_ERR_SEE_DATA;
-            l_rc.setPlatData(reinterpret_cast<void *> (l_err));
+            l_rc.setPlatError(reinterpret_cast<void *> (l_err));
             break;
         }
 
@@ -274,8 +270,7 @@ fapi::ReturnCode platGetCfamRegister(const fapi::Target& i_target,
         {
             // Add the error log pointer as data to the ReturnCode
              FAPI_ERR("platGetCfamRegister: verifyCfamAccessTarget() returns error");
-             l_rc = fapi::FAPI_RC_PLAT_ERR_SEE_DATA;
-             l_rc.setPlatData(reinterpret_cast<void *> (l_err));
+             l_rc.setPlatError(reinterpret_cast<void *> (l_err));
              break;
         }
 
@@ -297,8 +292,7 @@ fapi::ReturnCode platGetCfamRegister(const fapi::Target& i_target,
         {
             // Add the error log pointer as data to the ReturnCode
             FAPI_ERR("platGetCfamRegister: deviceRead() returns error");
-            l_rc = fapi::FAPI_RC_PLAT_ERR_SEE_DATA;
-            l_rc.setPlatData(reinterpret_cast<void *> (l_err));
+            l_rc.setPlatError(reinterpret_cast<void *> (l_err));
             break;
         }
 
@@ -312,7 +306,7 @@ fapi::ReturnCode platGetCfamRegister(const fapi::Target& i_target,
         {
             FAPI_ERR("platGetCfamRegister: ecmdDataBufferBase setBitLength() or setWord() returns error, ecmdRc 0x%.8X",
                      l_ecmdRc);
-            l_rc = l_ecmdRc;
+            l_rc.setEcmdError(l_ecmdRc);
         }
 
     } while(0);
@@ -340,8 +334,7 @@ fapi::ReturnCode platPutCfamRegister(const fapi::Target& i_target,
         {
             // Add the error log pointer as data to the ReturnCode
              FAPI_ERR("platPutCfamRegister: verifyCfamAccessTarget() returns error");
-             l_rc = fapi::FAPI_RC_PLAT_ERR_SEE_DATA;
-             l_rc.setPlatData(reinterpret_cast<void *> (l_err));
+             l_rc.setPlatError(reinterpret_cast<void *> (l_err));
              break;
         }
 
@@ -363,8 +356,7 @@ fapi::ReturnCode platPutCfamRegister(const fapi::Target& i_target,
         {
             // Add the error log pointer as data to the ReturnCode
             FAPI_ERR("platPutCfamRegister: deviceWrite() returns error");
-            l_rc = fapi::FAPI_RC_PLAT_ERR_SEE_DATA;
-            l_rc.setPlatData(reinterpret_cast<void *> (l_err));
+            l_rc.setPlatError(reinterpret_cast<void *> (l_err));
             break;
         }
 
@@ -432,8 +424,7 @@ fapi::ReturnCode platModifyCfamRegister(const fapi::Target& i_target,
         {
             // Add the error log pointer as data to the ReturnCode
              FAPI_ERR("platModifyCfamRegister: verifyCfamAccessTarget() returns error");
-             l_rc = fapi::FAPI_RC_PLAT_ERR_SEE_DATA;
-             l_rc.setPlatData(reinterpret_cast<void *> (l_err));
+             l_rc.setPlatError(reinterpret_cast<void *> (l_err));
              break;
         }
 
@@ -455,8 +446,7 @@ fapi::ReturnCode platModifyCfamRegister(const fapi::Target& i_target,
         {
             // Add the error log pointer as data to the ReturnCode
             FAPI_ERR("platModifyCfamRegister: deviceRead() returns error");
-            l_rc = fapi::FAPI_RC_PLAT_ERR_SEE_DATA;
-            l_rc.setPlatData(reinterpret_cast<void *> (l_err));
+            l_rc.setPlatError(reinterpret_cast<void *> (l_err));
             break;
         }
 
@@ -472,8 +462,7 @@ fapi::ReturnCode platModifyCfamRegister(const fapi::Target& i_target,
         {
             // Add the error log pointer as data to the ReturnCode
             FAPI_ERR("platModifyCfamRegister: deviceWrite() returns error");
-            l_rc = fapi::FAPI_RC_PLAT_ERR_SEE_DATA;
-            l_rc.setPlatData(reinterpret_cast<void *> (l_err));
+            l_rc.setPlatError(reinterpret_cast<void *> (l_err));
             break;
         }
 

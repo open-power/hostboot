@@ -39,6 +39,7 @@
  *                                                  endianness at compile time
  *                          camvanng    01/06/2012  Support for writing an
  *                                                  attribute to a SCOM register
+ *                          mjjones     01/13/2012  Use new ReturnCode interfaces
  */
 
 #include <fapiHwpExecInitFile.H>
@@ -1415,7 +1416,7 @@ fapi::ReturnCode writeScom(const ifData_t & i_ifData, const uint32_t i_scomNum,
                           "ecmdDataBuffer setDoubleWord() - rc 0x%.8X",
                           l_ecmdRc);
 
-                 l_rc = l_ecmdRc;
+                 l_rc.setEcmdError(l_ecmdRc);
                  break;
             }
 

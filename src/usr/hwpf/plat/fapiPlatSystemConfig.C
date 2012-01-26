@@ -78,8 +78,7 @@ fapi::ReturnCode fapiGetChildChiplets(
             i_chip.getType());
 
         // Attach the error log to the fapi::ReturnCode
-        l_rc = fapi::FAPI_RC_PLAT_ERR_SEE_DATA;
-        l_rc.setPlatData(reinterpret_cast<void *> (l_pError));
+        l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
     }
     else
     {
@@ -120,8 +119,7 @@ fapi::ReturnCode fapiGetChildChiplets(
                 i_chipletType);
 
             // Attach the error log to the fapi::ReturnCode
-            l_rc = fapi::FAPI_RC_PLAT_ERR_SEE_DATA;
-            l_rc.setPlatData(reinterpret_cast<void *> (l_pError));
+            l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
         }
     }
 
@@ -228,8 +226,7 @@ fapi::ReturnCode fapiGetParentChip(
             i_chiplet.getType());
 
         // Attach the error log to the fapi::ReturnCode
-        l_rc = fapi::FAPI_RC_PLAT_ERR_SEE_DATA;
-        l_rc.setPlatData(reinterpret_cast<void *> (l_pError));
+        l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
     }
     else
     {
@@ -269,8 +266,7 @@ fapi::ReturnCode fapiGetParentChip(
                 l_chipList.size());
 
             // Attach the error log to the fapi::ReturnCode
-            l_rc = fapi::FAPI_RC_PLAT_ERR_SEE_DATA;
-            l_rc.setPlatData(reinterpret_cast<void *> (l_pError));
+            l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
         }
         else
         {

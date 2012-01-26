@@ -33,7 +33,7 @@
  *                          mjjones     04/13/2011  Created.
  *                          mjjones     07/26/2011  Added more tests
  *                          mjjones     09/23/2011  Updated test for ErrorInfo
- *
+ *                          mjjones     01/13/2012  Use new ReturnCode interfaces
  */
 
 #include <fapi.H>
@@ -95,7 +95,7 @@ uint32_t rcTest2()
     ReturnCode l_rc;
 
     // Set the return code to a FAPI code
-    l_rc = FAPI_RC_FAPI_MASK | 0x05;
+    l_rc.setFapiError(FAPI_RC_INVALID_ATTR_GET);
 
     // Ensure that the creator is FAPI
     ReturnCode::returnCodeCreator l_creator = l_rc.getCreator();
@@ -108,7 +108,7 @@ uint32_t rcTest2()
     else
     {
         // Set the return code to a PLAT code
-        l_rc = FAPI_RC_PLAT_ERR_SEE_DATA;
+        l_rc.setPlatError(NULL);
 
         // Ensure that the creator is PLAT
         l_creator = l_rc.getCreator();
@@ -120,8 +120,9 @@ uint32_t rcTest2()
         }
         else
         {
-            // Set the return code to a HWP code
-            l_rc = 5;
+            // Set the return code to a HWP code (intentionally use function
+            // that does not add error information).
+            l_rc._setHwpError(RC_TEST_ERROR_A);
 
             // Ensure that the creator is HWP
             l_creator = l_rc.getCreator();
@@ -150,15 +151,15 @@ uint32_t rcTest3()
     uint32_t l_result = 0;
 
     // Create ReturnCode specifying a return code
-    uint32_t l_code = 4;
-    ReturnCode l_rc(l_code);
+    ReturnCode l_rc(FAPI_RC_INVALID_ATTR_GET);
 
     // Ensure that the embedded return code is as expected
     uint32_t l_codeCheck = l_rc;
 
-    if (l_codeCheck != l_code)
+    if (l_codeCheck != FAPI_RC_INVALID_ATTR_GET)
     {
-        FAPI_ERR("rcTest3. Code is 0x%x, expected 0x%x", l_codeCheck, l_code);
+        FAPI_ERR("rcTest3. Code is 0x%x, expected FAPI_RC_INVALID_ATTR_GET",
+                 l_codeCheck);
         l_result = 1;
     }
     else
@@ -196,10 +197,8 @@ uint32_t rcTest4()
     uint32_t l_result = 0;
 
     // Create similar ReturnCodes
-    uint32_t l_code = 6;
-    uint32_t l_code2 = 7;
-    ReturnCode l_rc(l_code);
-    ReturnCode l_rc2(l_code);
+    ReturnCode l_rc(FAPI_RC_INVALID_ATTR_GET);
+    ReturnCode l_rc2(FAPI_RC_INVALID_ATTR_GET);
 
     // Ensure that the equality comparison returns true
     if (!(l_rc == l_rc2))
@@ -218,7 +217,7 @@ uint32_t rcTest4()
         else
         {
             // Change the code of l_rc2
-            l_rc2 = l_code2;
+            l_rc2.setFapiError(FAPI_RC_PLAT_ERR_SEE_DATA);
 
             // Ensure that the equality comparison returns false
             if (l_rc == l_rc2)
@@ -254,13 +253,11 @@ uint32_t rcTest5()
     uint32_t l_result = 0;
 
     // Create a ReturnCode
-    uint32_t l_code = 6;
-    uint32_t l_code2 = 7;
-    ReturnCode l_rc(l_code);
+    ReturnCode l_rc(FAPI_RC_INVALID_ATTR_GET);
 
     // Ensure that the equality comparison returns true when comparing to the
     // same return code value
-    if (!(l_rc == l_code))
+    if (!(l_rc == FAPI_RC_INVALID_ATTR_GET))
     {
         FAPI_ERR("rcTest5. 1. Equality comparison false");
         l_result = 1;
@@ -269,7 +266,7 @@ uint32_t rcTest5()
     {
         // Ensure that the inequality comparison returns false when comparing to
         // the same return code value
-        if (l_rc != l_code)
+        if (l_rc != FAPI_RC_INVALID_ATTR_GET)
         {
             FAPI_ERR("rcTest5. 2. Inequality comparison true");
             l_result = 2;
@@ -278,7 +275,7 @@ uint32_t rcTest5()
         {
             // Ensure that the equality comparison returns false when comparing
             // to a different return code value
-            if (l_rc == l_code2)
+            if (l_rc == FAPI_RC_PLAT_ERR_SEE_DATA)
             {
                 FAPI_ERR("rcTest5. 3. Equality comparison true");
                 l_result = 3;
@@ -287,7 +284,7 @@ uint32_t rcTest5()
             {
                 // Ensure that the inequality comparison returns true when
                 // comparing to a different return code value
-                if (!(l_rc != l_code2))
+                if (!(l_rc != FAPI_RC_PLAT_ERR_SEE_DATA))
                 {
                     FAPI_ERR("rcTest5. 4. Inequality comparison false");
                     l_result = 4;
@@ -312,8 +309,7 @@ uint32_t rcTest6()
     uint32_t l_result = 0;
 
     // Create a ReturnCode
-    uint32_t l_code = 6;
-    ReturnCode l_rc(l_code);
+    ReturnCode l_rc(FAPI_RC_INVALID_ATTR_GET);
 
     // Ensure that the getPlatData function returns NULL
     void * l_pData = reinterpret_cast<void *> (0x12345678);
@@ -355,8 +351,7 @@ uint32_t rcTest7()
     uint32_t l_result = 0;
 
     // Create a ReturnCode
-    uint32_t l_code = 10;
-    ReturnCode l_rc(l_code);
+    ReturnCode l_rc;
 
     // Assign PlatData. Note that this should really be an errlHndl_t, because
     // the FSP deleteData function will attempt to delete an error log, but this
@@ -364,7 +359,7 @@ uint32_t rcTest7()
     // destructed.
     uint32_t l_myData = 6;
     void * l_pMyData = reinterpret_cast<void *> (&l_myData);
-    (void) l_rc.setPlatData(l_pMyData);
+    (void) l_rc.setPlatError(l_pMyData);
 
     // Ensure that getPlatData retrieves the PlatData
     void * l_pMyDataCheck = l_rc.getPlatData();
@@ -406,8 +401,7 @@ uint32_t rcTest8()
     uint32_t l_result = 0;
 
     // Create a ReturnCode
-    uint32_t l_code = 10;
-    ReturnCode l_rc(l_code);
+    ReturnCode l_rc;
 
     // Assign PlatData. Note that this should really be an errlHndl_t, because
     // the FSP deleteData function will attempt to delete an error log, but this
@@ -415,7 +409,7 @@ uint32_t rcTest8()
     // destructed.
     uint32_t l_myData = 6;
     void * l_pMyData = reinterpret_cast<void *> (&l_myData);
-    (void) l_rc.setPlatData(l_pMyData);
+    (void) l_rc.setPlatError(l_pMyData);
 
     // Ensure that releasePlatData retrieves the PlatData
     void * l_pMyDataCheck = l_rc.releasePlatData();
@@ -454,8 +448,7 @@ uint32_t rcTest9()
     uint32_t l_result = 0;
 
     // Create a ReturnCode
-    uint32_t l_code = 10;
-    ReturnCode l_rc(l_code);
+    ReturnCode l_rc;
 
     // Assign PlatData. Note that this should really be an errlHndl_t, because
     // the FSP deleteData function will attempt to delete an error log, but this
@@ -463,7 +456,7 @@ uint32_t rcTest9()
     // destructed.
     uint32_t l_myData = 6;
     void * l_pMyData = reinterpret_cast<void *> (&l_myData);
-    (void) l_rc.setPlatData(l_pMyData);
+    (void) l_rc.setPlatError(l_pMyData);
 
     // Create a ReturnCode using the copy constructor
     ReturnCode l_rc2(l_rc);
@@ -518,8 +511,7 @@ uint32_t rcTest10()
     uint32_t l_result = 0;
 
     // Create a ReturnCode
-    uint32_t l_code = 10;
-    ReturnCode l_rc(l_code);
+    ReturnCode l_rc;
 
     // Assign PlatData. Note that this should really be an errlHndl_t, because
     // the PLAT deleteData function will attempt to delete an error log, but
@@ -527,7 +519,7 @@ uint32_t rcTest10()
     // destructed.
     uint32_t l_myData = 6;
     void * l_pMyData = reinterpret_cast<void *> (&l_myData);
-    (void) l_rc.setPlatData(l_pMyData);
+    (void) l_rc.setPlatError(l_pMyData);
 
     // Create a ReturnCode using the assignment operator
     ReturnCode l_rc2;
@@ -610,7 +602,7 @@ uint32_t rcTest12()
 
     // Create a ReturnCode
     ReturnCode l_rc;
-    l_rc = 5;
+    l_rc.setFapiError(FAPI_RC_INVALID_ATTR_GET);
 
     // Create a DIMM target
     uint32_t l_targetHandle = 3;
@@ -738,7 +730,7 @@ uint32_t rcTest13()
 
     // Create a ReturnCode
     ReturnCode l_rc;
-    l_rc = 5;
+    l_rc.setFapiError(FAPI_RC_INVALID_ATTR_GET);
 
     // Create a DIMM target
     uint32_t l_targetHandle = 3;
@@ -815,7 +807,7 @@ uint32_t rcTest14()
 
     // Create a ReturnCode
     ReturnCode l_rc;
-    l_rc = 5;
+    l_rc.setFapiError(FAPI_RC_INVALID_ATTR_GET);
 
     // Create a DIMM target
     uint32_t l_targetHandle = 3;
@@ -893,7 +885,7 @@ uint32_t rcTest15()
 
     // Create a ReturnCode
     ReturnCode l_rc;
-    l_rc = 5;
+    l_rc.setFapiError(FAPI_RC_INVALID_ATTR_GET);
 
     // Create a DIMM target
     uint32_t l_targetHandle = 3;
@@ -935,7 +927,7 @@ uint32_t rcTest16()
 
     // Create a ReturnCode
     ReturnCode l_rc;
-    l_rc = 5;
+    l_rc.setFapiError(FAPI_RC_INVALID_ATTR_GET);
 
     // Create 2 targets
     uint32_t l_targetHandle = 3;
@@ -1116,14 +1108,15 @@ uint32_t rcTest17()
     uint32_t l_result = 0;
 
     // Create a ReturnCode
-    ReturnCode l_rc;
-    l_rc = 5;
+    ReturnCode l_rc(FAPI_RC_INVALID_ATTR_GET);
 
     uint32_t l_check = static_cast<uint32_t>(l_rc);
 
-    if (l_check != 5)
+    if (l_check != FAPI_RC_INVALID_ATTR_GET)
     {
-        FAPI_ERR("rcTest17. RC is not 5, it is 0x%x", l_check);
+        FAPI_ERR("rcTest17. RC is not FAPI_RC_INVALID_ATTR_GET, it is 0x%x",
+        l_check);
+        l_result = 1;
     }
     else
     {

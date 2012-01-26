@@ -38,6 +38,7 @@
  *                          mjjones     10/07/2011  Add FAPI_RC_INVALID_ATTR_GET
  *                          mjjones     10/28/2011  Trim FAPI/PLAT errors
  *                          mjjones     11/10/2011  Use ecmdDataBufferBase
+ *                          mjjones     01/13/2012  Name enumeration
  */
 
 #ifndef FAPIRETURNCODES_H_
@@ -50,8 +51,11 @@ namespace fapi
 
 /**
  * @brief Enumeration of return codes
+ *
+ * @note HWP return codes are in the HwpReturnCode enumeration in the
+ *       generated fapiHwpReturnCodes.H file
  */
-enum
+enum ReturnCodes
 {
     FAPI_RC_SUCCESS = 0,
 

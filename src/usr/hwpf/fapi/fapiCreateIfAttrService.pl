@@ -35,6 +35,7 @@
 #                  mjjones   11/15/11  Copied from fapiParseAttributeInfo
 #                  mjjones   12/12/11  Support all attributes if no if-attr
 #                                      files specified (for Cronus)
+#                  mjjones   01/13/12  Use new ReturnCode interfaces
 #
 # End Change Log ******************************************************
 
@@ -262,8 +263,8 @@ if ($attCount > 0)
 }
 print ASFILE "    {\n";
 print ASFILE "        FAPI_ERR(\"fapiGetInitFileAttr: Unrecognized attr: %d\", i_id);\n";
+print ASFILE "        l_rc.setFapiError(FAPI_RC_INVALID_ATTR_GET);\n";
 print ASFILE "        ReturnCodeFfdc::addEIFfdc(l_rc, static_cast<uint32_t>(i_id));\n";
-print ASFILE "        l_rc = FAPI_RC_INVALID_ATTR_GET;\n";
 print ASFILE "    }\n\n";
 print ASFILE "    if (l_rc)\n";
 print ASFILE "    {\n";

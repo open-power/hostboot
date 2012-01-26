@@ -57,6 +57,16 @@
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
+    <rc>RC_TEST_CONFIG_NO_MCS_CHIPLETS</rc>
+    <description>HWP Config Unit Test found no MCS chiplets</description>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_TEST_CONFIG_PARENT_CHIP_MISMATCH</rc>
+    <description>HWP Config Unit Test found a parent chip mismatch</description>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
     <rc>RC_INITFILE_INCORRECT_VER</rc>
     <description>InitFile has incorrect version</description>
     <!-- Collect local FFDC FFDC_IF_VER -->

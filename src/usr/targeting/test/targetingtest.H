@@ -1181,7 +1181,7 @@ class TargetingTestSuite: public CxxTest::TestSuite
         using namespace TARGETING;
         using namespace fapi;
 
-        fapi::ReturnCode l_rc = 0;
+        fapi::ReturnCode l_rc;
 
         //----------------------------------------------------------------------
         // Test ATTR_MSS_EFF_PRIMARY_RANK

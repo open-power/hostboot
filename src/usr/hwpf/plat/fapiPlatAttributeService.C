@@ -95,8 +95,8 @@ fapi::ReturnCode createAttrAccessError(
         | (static_cast<uint64_t>(i_fapiAttrId)),
         i_pFapiTarget ? i_pFapiTarget->getType(): NULL);
 
-    fapi::ReturnCode l_rc = fapi::FAPI_RC_PLAT_ERR_SEE_DATA;
-    l_rc.setPlatData(reinterpret_cast<void *>(l_pError));
+    fapi::ReturnCode l_rc;
+    l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
     return l_rc;
 }
 

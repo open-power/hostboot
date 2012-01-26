@@ -143,8 +143,7 @@ fapi::ReturnCode fapiLoadInitFile(const fapi::Target & i_Target,
     {
         // Add the error log pointer as data to the ReturnCode
         FAPI_ERR("fapiLoadInitFile: module_load failed");
-        l_rc = fapi::FAPI_RC_PLAT_ERR_SEE_DATA;
-        l_rc.setPlatData(reinterpret_cast<void *> (l_pError));
+        l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
     }
     else
     {
@@ -153,8 +152,7 @@ fapi::ReturnCode fapiLoadInitFile(const fapi::Target & i_Target,
         {
             // Add the error log pointer as data to the ReturnCode
             FAPI_ERR("fapiLoadInitFile: module_address failed");
-            l_rc = fapi::FAPI_RC_PLAT_ERR_SEE_DATA;
-            l_rc.setPlatData(reinterpret_cast<void *> (l_pError));
+            l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
         }
         else
         {
@@ -184,8 +182,7 @@ fapi::ReturnCode fapiUnloadInitFile(const char * i_file, const char *& io_addr,
     {
         // Add the error log pointer as data to the ReturnCode
         FAPI_ERR("fapiUnloadInitFile: module_unload failed %s", i_file);
-        l_rc = fapi::FAPI_RC_PLAT_ERR_SEE_DATA;
-        l_rc.setPlatData(reinterpret_cast<void *> (l_pError));
+        l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
     }
     else
     {

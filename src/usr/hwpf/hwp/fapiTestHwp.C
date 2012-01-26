@@ -40,6 +40,7 @@
  *                          camvanng    09/28/2011  Added test for initfile
  *                          camvanng    11/16/2011  Change function name
  *                                                  fapiHwpExecInitFile() 
+ *                          mjjones     01/13/2012  Use new ReturnCode interfaces
  *
  */
 
@@ -100,7 +101,7 @@ fapi::ReturnCode hwpInitialTest(const fapi::Target & i_chip)
         if (l_ecmdRc != ECMD_DBUF_SUCCESS)
         {
             FAPI_ERR("hwpInitialTest: fapiPutScom test, error from ecmdDataBuffer setDoubleWord() - rc 0x%.8X", l_ecmdRc);
-            l_rc = l_ecmdRc;
+            l_rc.setEcmdError(l_ecmdRc);
             break;
         }
 
@@ -127,7 +128,7 @@ fapi::ReturnCode hwpInitialTest(const fapi::Target & i_chip)
         if (l_ecmdRc != ECMD_DBUF_SUCCESS)
         {
             FAPI_ERR("hwpInitialTest: fapiPutScomUnderMask test, error from ecmdDataBuffer setDoubleWord() - rc 0x%.8X", l_ecmdRc);
-            l_rc = l_ecmdRc;
+            l_rc.setEcmdError(l_ecmdRc);;
             break;
         }
 
@@ -151,7 +152,7 @@ fapi::ReturnCode hwpInitialTest(const fapi::Target & i_chip)
         if (l_ecmdRc != ECMD_DBUF_SUCCESS)
         {
             FAPI_ERR("hwpInitialTest: fapiPutScom to restore, error from ecmdDataBuffer setDoubleWord() - rc 0x%.8X", l_ecmdRc);
-            l_rc = l_ecmdRc;
+            l_rc.setEcmdError(l_ecmdRc);
             break;
         }
 
@@ -205,7 +206,7 @@ fapi::ReturnCode hwpInitialTest(const fapi::Target & i_chip)
         if (l_ecmdRc != ECMD_DBUF_SUCCESS)
         {
             FAPI_ERR("hwpInitialTest: fapiPutCfamRegister test, error from ecmdDataBuffer setWord() - rc 0x%.8X", l_ecmdRc);
-            l_rc = l_ecmdRc;
+            l_rc.setEcmdError(l_ecmdRc);;
             break;
         }
 
@@ -230,7 +231,7 @@ fapi::ReturnCode hwpInitialTest(const fapi::Target & i_chip)
         if (l_ecmdRc != ECMD_DBUF_SUCCESS)
         {
             FAPI_ERR("hwpInitialTest: fapiModifyCfamRegister test, error from ecmdDataBuffer setWord() - rc 0x%.8X", l_ecmdRc);
-            l_rc = l_ecmdRc;
+            l_rc.setEcmdError(l_ecmdRc);;
             break;
         }
 
@@ -254,7 +255,7 @@ fapi::ReturnCode hwpInitialTest(const fapi::Target & i_chip)
         if (l_ecmdRc != ECMD_DBUF_SUCCESS)
         {
             FAPI_ERR("hwpInitialTest: fapiPutCfamRegister to restore, error from ecmdDataBuffer setWord() - rc 0x%.8X", l_ecmdRc);
-            l_rc = l_ecmdRc;
+            l_rc.setEcmdError(l_ecmdRc);;
             break;
         }
 
