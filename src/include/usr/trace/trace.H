@@ -166,6 +166,8 @@ public:
                     const char* i_comp,
                     size_t i_size );
 
+
+
     /**
      *  @brief  Write component trace out to input buffer
      *
@@ -238,6 +240,21 @@ public:
     uint64_t getBuffer( const char * i_pName,
                         void *       o_data,
                         uint64_t     i_bufferSize );
+
+
+#if !defined(__HIDDEN_TRACEIF_CLEARBUFFER)
+private:
+#endif    
+
+
+
+    /**
+     *  @brief  Clear all component trace buffers.  This has
+     *  no effect on the merged buffer, aka tracBINARY.
+     *
+     *  @return void
+     */
+    void clearAllBuffers( );
 
 
 

@@ -277,15 +277,27 @@ tracepp replaces trace_adal_hash() with hash value and reduced format string
  * descriptor which is used by the trace calls to find the correct
  * buffer to write to.
  *
- * @param des This is assigned by this function.
+ * @param des       A trac_desc_t * initialized to null by the using code.
  * @param comp_name This is the 15 character name of the component requesting
- *                  the trace buffer.
+ *                  the trace buffer. Will be stored internally in upper case.
  * @param bufferSize Requested length of the buffer, if 0 is entered the user will
- *                   get default buffer size.
+ *                   get default buffer size. Subject to maximum allowable size.
  * @return void
 */
 #define TRAC_INIT_BUFFER(des,comp_name, bufferSize) \
         TRACE::Trace::getTheInstance().initBuffer((des), (comp_name), (bufferSize))
+
+
+#ifdef __HIDDEN_TRACEIF_CLEARBUFFER
+/**
+ * @fn void TRAC_CLEAR_BUFFERS()
+ * @brief For all in-use component trace buffers, clear their contents.
+ *
+ * @return void
+*/
+#define TRAC_CLEAR_BUFFERS() TRACE::Trace::getTheInstance().clearAllBuffers()
+#endif 
+
 
 /*******************************************************************************
   TRAC_INIT: Class for creating trace descriptor object.

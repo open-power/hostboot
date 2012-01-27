@@ -108,7 +108,7 @@ trace_desc_array_t g_desc_array[TRAC_MAX_NUM_BUFFERS];
 // Set up a structure to hold information about the mixed-trace
 // or continuous-trace buffer, aka tracBINARY.
 
-// WARNING: Changes to this structure will require co-req changes to 
+// WARNING: Changes to this structure will require co-req changes to
 // src/build/debug/simics-debug-framework.py which contains the simics
 // hap handler for extracting this buffer.
 struct mixed_trace_info
@@ -116,7 +116,7 @@ struct mixed_trace_info
     char *     pBuffer;
     uint64_t   cbUsed;
 };
-typedef struct mixed_trace_info mixed_trace_info_t; 
+typedef struct mixed_trace_info mixed_trace_info_t;
 const uint64_t TRAC_BINARY_SIZE = 4096;
 mixed_trace_info_t g_tracBinaryInfo;
 
@@ -159,11 +159,11 @@ Trace::Trace()
 
     // fsp-trace convention expects a 2 in the first byte of tracBINARY
     g_tracBinaryInfo.pBuffer[0] = 2;
-    g_tracBinaryInfo.cbUsed     = 1;  
+    g_tracBinaryInfo.cbUsed     = 1;
 
     // tracBINARY buffer appending is always on.
     // TODO figure a way to control continuous trace on/off, perhaps
-    // unregister the hap handler for it. 
+    // unregister the hap handler for it.
     iv_ContinuousTrace = 1;
 }
 
@@ -906,7 +906,7 @@ trace_desc_t * Trace::findTdByName(const char *i_pName)
             }
         }
 
-        // Unlock cretical section
+        // Unlock critical section
         mutex_unlock(&iv_trac_mutex);
 
     }
@@ -1245,6 +1245,36 @@ uint64_t Trace::getBuffer( const char * i_pComp,
     while(0);
 
     return l_rc;
+}
+
+
+/******************************************************************************/
+// clearAllBuffers()
+/******************************************************************************/
+void Trace::clearAllBuffers()
+{
+
+    // obtain the big trace lock
+    mutex_lock(&iv_trac_mutex);
+
+    // Walk the buffers array
+    for( unsigned int i=0; i < TRAC_MAX_NUM_BUFFERS; i++ )
+    {
+        if( g_desc_array[i].comp[0] )
+        {
+            // Named, thus in use.
+
+            // Buffer sizes are variable, save the size of it.
+            uint32_t l_saveSize = g_desc_array[i].td_entry->size;
+
+            initValuesBuffer( g_desc_array[i].td_entry,
+                              g_desc_array[i].comp,
+                              l_saveSize );
+        }
+    }
+
+    // release the lock
+    mutex_unlock(&iv_trac_mutex);
 }
 
 
