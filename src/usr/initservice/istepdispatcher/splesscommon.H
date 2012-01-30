@@ -182,18 +182,16 @@ inline  void initIStepMode( )
             TRACDCOMP( INITSERVICE::g_trac_initsvc,
                     "ISTEP_MODE attribute set to TRUE." );
         }
-        else if ( l_readData == ISTEP_MODE_OFF_SIGNATURE )
+        else
         {
+            //  make sure it's set to one or the other after istepdispatcher starts.
+            //  This makes it easier for hb-istep to find HostBoot's state.
+            l_readData = ISTEP_MODE_OFF_SIGNATURE;
+            // $$ save mmio_scratch_write( MMIO_SCRATCH_IPLSTEP_CONFIG, l_readData );
             l_pTopLevel->setAttr<ATTR_ISTEP_MODE> ( false );
 
             TRACDCOMP( INITSERVICE::g_trac_initsvc,
                     "ISTEP_MODE attribute set to FALSE." );
-        }
-        else
-        {
-            TRACFCOMP( INITSERVICE::g_trac_initsvc,
-                    "unknown ISTEP_MODE signature: 0x%llx",
-                    l_readData );
         }
     }
 

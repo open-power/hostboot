@@ -39,8 +39,13 @@ gen_pass:
 
 code_pass: ${IMGDIR}/isteplist.csv
 
+## find all the ISTEPNAME( #,#,name ) macros in the istep lists and generate 
+##	the isteplist.csv file for hb-istep 
+## 	
 ${IMGDIR}/isteplist.csv : ${ROOTPATH}/src/include/usr/isteps/*.H
-	./scanistepnames.pl -b $(ROOTPATH)/src/include/usr/isteps -d -o $@
+	grep -rh "ISTEPNAME(\ *[0-9]"  $^ | sed -e 's/^.*ISTEPNAME(//; s/).*//; s/"//g;s/ //g' | sort --numeric > $@
+	 
+	
 
 clean:
 	rm -fr ${IMGDIR}/isteplist.csv

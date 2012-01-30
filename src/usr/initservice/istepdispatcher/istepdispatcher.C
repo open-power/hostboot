@@ -793,7 +793,8 @@ IStepDispatcher& IStepDispatcher::getTheInstance()
 
 IStepDispatcher::IStepDispatcher()
 {
-    initIStepMode();            // set up internal flag
+    //  set up IStep Mode
+    initIStepMode();
 
 }
 

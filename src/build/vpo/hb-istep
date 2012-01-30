@@ -50,6 +50,8 @@ use strict;
 use warnings;
 use POSIX;
 use Getopt::Long;
+use File::Basename;
+use lib dirname (__FILE__);
 
 ## 64-bit input
 ##  argh, not compatable with GetOpt!! use bigint;
@@ -61,6 +63,7 @@ use VBU_Cacheline;
 #------------------------------------------------------------------------------
 # Forward Declaration
 #------------------------------------------------------------------------------
+sub main;
 sub printUsage;
 sub get_istep_list;
 sub print_istep_list;
@@ -72,9 +75,9 @@ sub resume_istep;
 #------------------------------------------------------------------------------
 #   Constants
 #------------------------------------------------------------------------------
-my $CSVfile     =   "isteplist.csv";
-my $hbSymsFile  =   "hbicore.syms";                #Use hbicore.syms
 my  $CORE       =   "-c3";
+my  $ISTEP_MODE_ON_SIGNATURE    =   "4057b0074057b007";
+my  $ISTEP_MODE_OFF_SIGNATURE   =   "700b7504700b7504";
 
 
 #------------------------------------------------------------------------------
@@ -86,8 +89,10 @@ my  $opt_normalmode =   0;
 my  $opt_command    =   "";
 my  $opt_list       =   0;
 my  $opt_help       =   0;
-my  $opt_cmdfile    =   0;          ## batchmode, later
 my  $opt_resume     =   0;          ## resume istep from break point
+my  $opt_clear_trace    =   0;          ##  submit command 01    
+my  $opt_cmdfile    =   0;          ## batchmode, later   
+my  $opt_setup          =   "";         ##  run Jim's script to start up the model         
 
 my  @inList;
 $inList[10][10]     =   ();
@@ -108,79 +113,123 @@ my  $g_SeqNum   =   0;
 #==============================================================================
 ##  get any environment variables
 
-my $hbDir = $ENV{'HBDIR'};
-if (defined ($hbDir))
-{
-    unless ($hbDir ne "")
-    {
-        $hbDir = '.';             #Set to current directory
-    }
-}
-else
-{
-    $hbDir = '.';                 #Set to current directory
-}
+## Assume that all the tools, files, etc are in the same directory that 
+##  we are in.
 
-# print   $#ARGV;       
-if ( ($#ARGV < 0) or ($opt_help) )
+
+my  $pgmDir  =   `dirname $0`;
+chomp( $pgmDir );
+
+my $hbDir = $ENV{'HBDIR'};
+if ( ! defined( $hbDir) || ( $hbDir eq "" ) )
+{
+    $hbDir = $pgmDir;               ##  Set to tool directory
+}     
+
+my $CSVfile     =   "$hbDir/isteplist.csv";
+my $hbSymsFile  =   "$hbDir/hbicore.syms";                #Use hbicore.syms
+    
+## print   $#ARGV;       
+if ( $#ARGV < 0 )
 {
     printUsage();
     exit    0 ;
 }   
-
-
 #------------------------------------------------------------------------------
 # Parse optional input arguments
 #------------------------------------------------------------------------------
-GetOptions( "help"          =>  \$opt_help,
+GetOptions( "help|?"        =>  \$opt_help,
             "istepmode"     =>  \$opt_istepmode,
             "normalmode"    =>  \$opt_normalmode,
             "list"          =>  \$opt_list,
             "command=s"     =>  \$opt_command,
-            "cmdfile"       =>  \$opt_cmdfile,
-            "resume"        =>  \$opt_resume,            
-            
+            "resume"        =>  \$opt_resume,
+            "clear-trace"   =>  \$opt_clear_trace, 
+            "cmdfile"       =>  \$opt_cmdfile,           
+            "setup=s"       =>  \$opt_setup,
+
             "debug"         =>  \$opt_debug,
           );  
-             
+          
+##----------------------------------------------------------------------------- 
+##  check for access to the files we need.
+##-----------------------------------------------------------------------------
+if ( ! -e "$hbSymsFile" )  { die "Can't find symbols file $hbSymsFile\n";   }
+if ( ! -e "$CSVfile" )  { die "Can't find isteplist file $hbSymsFile\n";   }   
+
 ##
-## find the istep mode, command, and status registers in the syms file
+##  find the istep mode, command, and status registers in the syms file
+##  find the location of clear_trace in HostBoot
 ##
-my $istepmodereg = `grep "SPLESS::g_SPLess_IStepMode_Reg" $hbDir/$hbSymsFile | awk -F"," '{print \$2}'`;
+my $istepmodereg = `grep "SPLESS::g_SPLess_IStepMode_Reg" $hbSymsFile | awk -F"," '{print \$2}'`;
 chomp   $istepmodereg;
 
-my  $commandreg = `grep "SPLESS::g_SPLess_Command_Reg" $hbDir/$hbSymsFile | awk -F"," '{print \$2}'`;
+my  $commandreg = `grep "SPLESS::g_SPLess_Command_Reg" $hbSymsFile | awk -F"," '{print \$2}'`;
 chomp   $commandreg;
 
-my $statusreg = `grep "SPLESS::g_SPLess_Status_Reg" $hbDir/$hbSymsFile | awk -F"," '{print \$2}'` ;
+my $statusreg = `grep "SPLESS::g_SPLess_Status_Reg" $hbSymsFile | awk -F"," '{print \$2}'` ;
 chomp   $statusreg;
 
+
+##-----------------------------------------------------------------------------
+##  Start processing options
+##-----------------------------------------------------------------------------          
 if  ( $opt_debug )
 {
-    print   STDOUT  "istepmode      =   $opt_istepmode\n";
-    print   STDOUT  "normalmode     =   $opt_normalmode\n";    
-    print   STDOUT  "command        =   $opt_command\n";
-    print   STDOUT  "debug          =   $opt_debug\n";
+    print   STDERR  "\n-----    DEBUG:  ----------------------------------- \n";
+    print   STDERR  "help           =   $opt_help\n";
+    print   STDERR  "istepmode      =   $opt_istepmode\n";
+    print   STDERR  "normalmode     =   $opt_normalmode\n"; 
+    print   STDERR  "list           =   $opt_list\n";   
+    print   STDERR  "command        =   $opt_command\n";
+    print   STDERR  "cmdfile        =   $opt_cmdfile\n";
+    print   STDERR  "setup          =   $opt_setup\n";
+    print   STDERR  "clear-trace    =   $opt_clear_trace\n";
+    print   STDERR  "debug          =   $opt_debug\n";
     
-    print   STDOUT  "hbDir          =   $hbDir\n"; 
-    print   STDOUT  "hbSymsFile     =   $hbSymsFile\n";   
-    print   STDOUT  "istepmodereg   =   $istepmodereg\n";
-    print   STDOUT  "commandreg     =   $commandreg\n";
-    print   STDOUT  "statusreg      =   $statusreg\n";
+    print   STDERR  "pgmDir         =   $pgmDir\n";
+    print   STDERR  "hbDir          =   $hbDir\n"; 
+    print   STDERR  "hbSymsFile     =   $hbSymsFile\n";   
+    print   STDERR  "istepmodereg   =   $istepmodereg\n";
+    print   STDERR  "commandreg     =   $commandreg\n";
+    print   STDERR  "statusreg      =   $statusreg\n";
     
     VBU_Cacheline::SetFlags( 1, 0 );
     
-}    
+}
 
-
-##  fetch the ISTEP csv list
-get_istep_list();       
-
-if ( $opt_list )
+if  ( $opt_help )
 {
-    print_istep_list();
+    printUsage();
     exit;
 }
+
+##
+##  run the main loop.  Yes, I did this on purpose.  
+##  Idea is (later) to pass this an array / hash of options and use 
+##  GetOptionsFromArray() to parse them.
+##  That way I can either pass it @ARGV or an array processed from the cmdfile 
+##
+main();         
+
+
+
+#==============================================================================
+# SUBROUTINES
+#==============================================================================
+sub main()
+{
+    print   STDOUT  "\n";
+
+    ##  fetch the ISTEP csv list
+    get_istep_list();       
+
+    if ( $opt_list )
+    {
+        print_istep_list();
+        exit;
+    }
+
 
     ## VPO cannot be running when we start.
     my  $qstr   =   VBU_Cacheline::P8_Ins_Query();
@@ -190,46 +239,54 @@ if ( $opt_list )
         VBU_Cacheline::P8_Ins_Stop();
     }
     
-##
-## Process resume
-##
-if ( $opt_resume )
-{
-    resume_istep();
-    ## exit; ??
-}
 
-##
-##  process --Istep Mode command
-##      IStepModeStr    = "cpu0_0_0_3->scratch=0x4057b007_4057b007"
-##      NormalModeStr   = "cpu0_0_0_3->scratch=0x700b7504_700b7504"
-##
-if ( $opt_istepmode ==  1   )
-{
-    print STDOUT  "ENable istepmode\n";
-    setMode( "istep" );
-}
+    ##
+    ## Process resume
+    ##
+    if ( $opt_resume )
+    {
+        resume_istep();
+        ## exit; ??
+    }
 
-if  ( $opt_normalmode ==  1 )
-{
-    print STDOUT  "DISable istepmode\n";
-    setMode( "normal" );
-}
+    ##
+    ##  process --Istep Mode command
+    ##      IStepModeStr    = "cpu0_0_0_3->scratch=0x4057b007_4057b007"
+    ##      NormalModeStr   = "cpu0_0_0_3->scratch=0x700b7504_700b7504"
+    ##
+    if ( $opt_istepmode ==  1   )
+    {
+        my $result = VBU_Cacheline::CLread( $istepmodereg );
+        if ( $opt_debug )   { print STDERR __LINE__, "-- Entry:   IStep Mode Reg = $result";  }
+        if  ( $result =~ /^.*$ISTEP_MODE_OFF_SIGNATURE/ )
+        {
+            print STDOUT "Sorry, HostBoot has already started in automatic mode.  Please restart and then try again.\n";
+            exit;
+        }     
 
-##
-##  Process other commands
-##
-if ( $opt_command ne "" )
-{
-    if ( $opt_debug ) {   print   STDOUT  "== process command \"$opt_command\" \n"; }
-    parse_command( $opt_command ); 
-}
+        print STDOUT  "ENable istepmode\n";
+        setMode( "istep" );
+    }
 
 
+    if  ( $opt_normalmode ==  1 )
+    {
+        print STDOUT  "DISable istepmode\n";
+        setMode( "normal" );
+    }
 
-#==============================================================================
-# SUBROUTINES
-#==============================================================================
+
+    ##
+    ##  Process other commands
+    ##
+    if ( $opt_command ne "" )
+    {
+        if ( $opt_debug ) {   print   STDERR  "== __LINE__ process command \"$opt_command\" \n"; }
+        parse_command( $opt_command ); 
+    }
+        
+}   ##  end main
+
 
 #------------------------------------------------------------------------------
 # Print command line help
@@ -244,18 +301,23 @@ sub printUsage()
     print STDOUT "    [--command <foo>]         (run named istep \"foo\")\n" ;
     print STDOUT "    [--command <foo>..<bar>]  (run named isteps \"foo\" through \"bar\")\n" ;
     print STDOUT "    [--resume]                (resume an istep that is at a break point)\n" ;
-    
     print STDOUT "\n" ;
+##    print STDOUT "  [--cmdfile]                 (get commands from a batchfile)\n";
+##    print STDOUT "  [--setup]                   (bring up AWAN and wait for further commands)\n";
+##    print STDOUT "  [--clear-trace]             (clear trace buffers before starting)\n";    
+##    print STDOUT "\n" ;
 
 }
 
 
+##
 ##  read in file with csv istep list and store in inList
+##
 sub get_istep_list()
 {
     my $istep, my $substep, my $name ;
    
-    open( FH, "< $hbDir/$CSVfile") or die "can't open $hbDir/$CSVfile : $!";
+    open( FH, "< $CSVfile") or die "can't open $CSVfile : $!";
 
     while( <FH> )
     {
@@ -270,6 +332,9 @@ sub get_istep_list()
     close( FH );     
 }
 
+##
+##  print the istep list to the screen.
+##
 sub print_istep_list( )
 {
     my  $hdrflag    =   1;
@@ -299,6 +364,10 @@ sub print_istep_list( )
     }   ##  end for $i     
 }
 
+
+##
+##  
+##
 sub find_in_inList( $ ) 
 {
     my  ( $substepname )    =   @_;
@@ -322,7 +391,7 @@ sub find_in_inList( $ )
 
 ##
 ##  keep trying to get status until seqnum syncs up 
-
+##
 sub getSyncStatus( )
 {
     # set # of retries
@@ -343,7 +412,7 @@ sub getSyncStatus( )
         ##  dump printk similar to the Jim McGuire's script
         ##  dumpPrintk();
 
-        $result = CLread( $statusreg );
+        $result = VBU_Cacheline::CLread( $statusreg );
         $seqnum  = ( ( $result & 0x3f00000000000000 ) >> 56 );
         if ( $seqnum == $g_SeqNum )
         {
@@ -360,6 +429,9 @@ sub getSyncStatus( )
           
 } 
 
+##
+##  Run an istep
+##
 sub runIStep( $$ )
 {
     my  ( $istep, $substep)  = @_;
@@ -403,12 +475,12 @@ sub runIStep( $$ )
             printf STDOUT "Istep %d.%d returned Status: 0x%x\n", $stsIStep, $stsSubstep, $istepStatus ;
         }
         print STDOUT "-----------------------------------------------------------------\n";
-    }
-        
+    }     
 }   
     
-    
-##  run command = "sN"    
+##    
+##  run command = "sN"
+##    
 sub sCommand( $ )
 {
     my  ( $scommand )   =   @_;
@@ -436,8 +508,10 @@ sub sCommand( $ )
     }
 }
      
-
-sub parse_command()
+##
+##  parse --command [command] option and execute it.
+##
+sub parse_command( $ )
 {
     my  ( $command ) =   @_;
     my  @execlist;
@@ -450,13 +524,13 @@ sub parse_command()
     if ( $command =~ m/^s+[0-9].*/ )
     {
         ## run "s" command
-        if ($opt_debug) {   print STDOUT "===== s command : ", $command, ":\n";   } 
+        if ($opt_debug) {   print STDERR __LINE__, "===== s command : ", $command, ":\n";   } 
         substr( $command, 0, 1, "" );
  
         if ( isdigit( $command ) )
         {
             # command = "sN"
-            if ($opt_debug) {   print STDOUT "===== single IStep: ", $command, "\n";  }
+            if ($opt_debug) {   print STDERR __LINE__, "===== single IStep: ", $command, "\n";  }
             sCommand( $command ); 
         }
         else
@@ -464,7 +538,7 @@ sub parse_command()
             #   list of substeps = "sM..N"
             ( $M, $N )  =   split( /\.\./, $command );
             
-            if ($opt_debug) {   print STDOUT "===== multiple ISteps: ", $M, "-", $N, "\n";    } 
+            if ($opt_debug) {   print STDERR "===== multiple ISteps: ", $M, "-", $N, "\n";    } 
             for ( my $x=$M; $x<$N+1; $x++ )
             {
                 sCommand( $x );
@@ -476,7 +550,7 @@ sub parse_command()
         ## <substep name>, or <substep name>..<substep name>
         @ss_list    =   split( /\.\./, $command );        
         
-        if ($opt_debug) {   print STDOUT "===== named commands : ", @ss_list, "\n";    } 
+        if ($opt_debug) {   print STDERR __LINE__, "===== named commands : ", @ss_list, "\n";    } 
             
         ( $istepM, $substepM, $foundit) = find_in_inList( $ss_list[0] );
         $istepN      =   $istepM;
@@ -511,8 +585,10 @@ sub parse_command()
     }   
 }
 
-##  write to scratch reg 3 to set istep or normal mode, check return status        
-sub setMode( )
+##
+##  write to scratch reg 3 to set istep or normal mode, check return status 
+##       
+sub setMode( $ )
 {
     my  ( $cmd )    =   @_;
     my  $count      =   0;
@@ -540,8 +616,8 @@ sub setMode( )
     if ( $opt_debug )   
     {
         ##  readback and display 
-        $result = CLread( $istepmodereg );
-        printf STDOUT   "=====  istepmodereg readback:  0x%lx\n", $result ;
+        $result = VBU_Cacheline::CLread( $istepmodereg );
+        printf STDERR __LINE__,   "=====  istepmodereg readback:  0x%lx\n", $result ;
     }
  
 
@@ -553,12 +629,12 @@ sub setMode( )
         ##  sequence number to see if it has changed.  rinse and repeat.
         VBU_Cacheline::RunClocks();
         
-        $result = CLread( $statusreg );
+        $result = VBU_Cacheline::CLread( $statusreg );
         
         $readybit    =   ( ( $result & 0x4000000000000000 ) >> 62 );
         
         if ($opt_debug)   
-            { printf  STDOUT  "===== setMode:  count=%d, result=0x%lx, readybit=0x%x\n", $count, $result, $readybit  } 
+            { printf  STDERR __LINE__,  "===== setMode:  count=%d, result=0x%lx, readybit=0x%x\n", $count, $result, $readybit  } 
 
         if ( $readybit == $expected )
         {
@@ -575,6 +651,7 @@ sub setMode( )
         $count--;
     } 
 }
+
 
 sub resume_istep()
 {
@@ -618,3 +695,4 @@ sub resume_istep()
 }
 
 __END__
+

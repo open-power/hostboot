@@ -75,26 +75,9 @@ sub SetFlags;
 ############################################
 my  $CLfile     =   "./istepmodereg.dma";
 my  $CORE       =   "-c3";
-my  $SIM_CLOCKS =   "4000000"; 
+## my  $SIM_CLOCKS =   "4000000"; 
+my  $SIM_CLOCKS =   "2000000"; 
 
-##  later...
-my  $vbuToolsDir    =   "/gsa/ausgsa/projects/h/hostboot/vbutools";
-
-
-my  $DUMPCMD    =   "/afs/awd/projects/eclipz/lab/p8/gsiexe/p8_dump_l3";
-my  $LOADCMD    =   "/afs/awd/projects/eclipz/lab/p8/gsiexe/p8_load_l3";
-## my  $FLUSHCMD   =   "/afs/awd/projects/eclipz/lab/p8/gsiexe/p8_l2_flush.x86 $CORE";
-my  $FLUSHCMD   =   "/afs/awd/projects/eclipz/lab/p8/compiled_procs/procs/p8_l2_flush_wrap.x86 $CORE -quiet";
-my  $FLUSHQUERY =   "/afs/awd.austin.ibm.com/projects/eclipz/lab/p8/gsiexe/p8_check_l3";
-my  $RUNCLKSCMD =   "simclock";
-
-my  $QUERYCMD   =   "/gsa/pokgsa/home/m/c/mcguirej/public/auto/rel/P8bin/p8_ins_query";  
-my  $STOPCMD    =   "/gsa/pokgsa/home/m/c/mcguirej/public/auto/rel/P8bin/p8_ins_stop";
-my  $STARTCMD   =   "/gsa/pokgsa/home/m/c/mcguirej/public/auto/rel/P8bin/p8_ins_start";
-##  ##  later...
-##  ##  my  $QUERYCMD   =   "/afs/awd/projects/eclipz/lab/p8/u/karm/ekb/eclipz/chips/p8/working/procedures/utils/p8_thread_control.x86 -query";  
-##  ##  my  $STOPCMD    =   "/afs/awd/projects/eclipz/lab/p8/u/karm/ekb/eclipz/chips/p8/working/procedures/utils/p8_thread_control.x86 -stop";
-##  ##  my  $STARTCMD   =   "/afs/awd/projects/eclipz/lab/p8/u/karm/ekb/eclipz/chips/p8/working/procedures/utils/p8_thread_control.x86 -start";
 
 #############################################
 ##  Internal Globals
@@ -105,6 +88,42 @@ my  $CLtest     =   0;
 ##  flushed Flag, if 0, it means the L2 cache has not been flushed. 
 ##  It must be flushed once before doing L3 reads
 my  $L2_Flushed =   0;
+
+
+my  $vbuToolsDir    =   "/gsa/ausgsa/projects/h/hostboot/vbutools/latest";
+
+
+my  $DUMPCMD    =   "$vbuToolsDir/p8_dump_l3";
+my  $LOADCMD    =   "$vbuToolsDir/p8_load_l3";
+my  $FLUSHCMD   =   "$vbuToolsDir/p8_l2_flush_wrap.x86 $CORE -quiet";
+my  $FLUSHQUERY =   "$vbuToolsDir/p8_check_l3";
+my  $RUNCLKSCMD =   "simclock";
+
+##  @todo $$$$$
+##  NOTE:   need to be able to specify thread (-t ) and core (-c ), they 
+##  should not be hardwired 
+my  $QUERYCMD   =   "$vbuToolsDir/p8_thread_control.x86 -query  $CORE -t0";  
+my  $STOPCMD    =   "$vbuToolsDir/p8_thread_control.x86 -stop   $CORE -tall";
+my  $STARTCMD   =   "$vbuToolsDir/p8_thread_control.x86 -start  $CORE -tall";
+
+my  $RESETCMD   =   "$vbuToolsDir/p8_thread_control.x86 -sreset_auto $CORE";
+
+
+##  old dirs and tools, SAVE
+## my  $DUMPCMD    =   "/afs/awd/projects/eclipz/lab/p8/gsiexe/p8_dump_l3";
+## my  $LOADCMD    =   "/afs/awd/projects/eclipz/lab/p8/gsiexe/p8_load_l3";
+## ## my  $FLUSHCMD   =   "/afs/awd/projects/eclipz/lab/p8/gsiexe/p8_l2_flush.x86 $CORE";
+## my  $FLUSHCMD   =   "/afs/awd/projects/eclipz/lab/p8/compiled_procs/procs/p8_l2_flush_wrap.x86 $CORE -quiet";
+## my  $FLUSHQUERY =   "/afs/awd.austin.ibm.com/projects/eclipz/lab/p8/gsiexe/p8_check_l3";
+## my  $RUNCLKSCMD =   "simclock";
+
+## my  $QUERYCMD   =   "/gsa/pokgsa/home/m/c/mcguirej/public/auto/rel/P8bin/p8_ins_query";  
+## my  $STOPCMD    =   "/gsa/pokgsa/home/m/c/mcguirej/public/auto/rel/P8bin/p8_ins_stop";
+## my  $STARTCMD   =   "/gsa/pokgsa/home/m/c/mcguirej/public/auto/rel/P8bin/p8_ins_start";
+## ##  ##  later...
+## ##  ##  my  $QUERYCMD   =   "/afs/awd/projects/eclipz/lab/p8/u/karm/ekb/eclipz/chips/p8/working/procedures/utils/p8_thread_control.x86 -query";  
+## ##  ##  my  $STOPCMD    =   "/afs/awd/projects/eclipz/lab/p8/u/karm/ekb/eclipz/chips/p8/working/procedures/utils/p8_thread_control.x86 -stop";
+## ##  ##  my  $STARTCMD   =   "/afs/awd/projects/eclipz/lab/p8/u/karm/ekb/eclipz/chips/p8/working/procedures/utils/p8_thread_control.x86 -start";
 
 
 ## 
@@ -124,7 +143,7 @@ sub readcacheline( $ )
     ##  my  $hexaddr    =   sprintf( "0x%x", $addr );
     my  $hexaddr    =   sprintf( "%x", $addr );    
     
-    if ( $CLdebug )   { print  STDOUT  "--  Read cacheline at $hexaddr...\n"; }
+    if ( $CLdebug )   { print  STDERR __LINE__,  "--  Read cacheline at $hexaddr...\n"; }
     
     ##  Stop simulation so we can read L3 properly
     P8_Ins_Stop();
@@ -133,7 +152,7 @@ sub readcacheline( $ )
     P8_Flush_L2();
   
     $cmd    =   "$DUMPCMD $hexaddr 1 -f $CLfile -b $CORE";
-    if ( $CLdebug )   {   print STDOUT  "-- run $cmd ...\n";   } 
+    if ( $CLdebug )   {   print STDERR __LINE__,  "-- run $cmd ...\n";   } 
     ( system( $cmd ) == 0 ) 
         or die "$cmd failed $? : $! \n";
         
@@ -194,7 +213,7 @@ sub writecacheline( $ )
     P8_Ins_Stop();
     
     $cmd    =   "$LOADCMD -o $hexaddr -f $CLfile -b $CORE";
-    if ( $CLdebug )   {   print STDOUT  "-- run $cmd ...\n";   } 
+    if ( $CLdebug )   {   print STDERR __LINE__,  "-- run $cmd ...\n";   } 
     ( system( $cmd ) == 0 ) 
         or die "$cmd failed, $? : $! \n";
     
@@ -212,24 +231,24 @@ sub P8_Ins_Query()
     my  $cmd    =   "$QUERYCMD";
     my  $retstr =   "";
     
-    if ( $CLdebug ) {   print STDOUT  "--   run $cmd ...\n";   } 
+    if ( $CLdebug ) {   print STDERR __LINE__,  "--   run $cmd ...\n";   } 
     
     ## execute it with backticks so we can get the output.
     $retstr = `$cmd`; 
     if ( $? != 0 )  { die "$cmd failed $? : $! \n"; }
     
-    chomp( $retstr );
-               
-    if ( $CLdebug )   {   print STDOUT  "-- P8_Ins_Query returned $retstr\n"; }
-    
-    if (    ($retstr ne "STOPPED" )
-        &&  ($retstr ne "RUNNING" )
-       )
+    if ( $retstr =~ m/Quiesced/ )
+    {
+        return "STOPPED";
+    }
+    elsif   ( $retstr =~    m/Running/ )
+    {
+        return "RUNNING";
+    }
+    else
     {
         die "invalid string \"$retstr\" from P8_Ins_Query\n";
-    } 
-
-    return  $retstr;      
+    }       
 }
 
 
@@ -242,7 +261,10 @@ sub P8_Ins_Start()
     
     if ( P8_Ins_Query() eq "STOPPED" )
     {
-        if ( $CLdebug ) {   print STDOUT  "--   run $cmd ...\n";   } 
+        if ( !$CLdebug ) 
+        {   $cmd    .=  " -quiet";  }
+        else
+        {   print STDERR __LINE__,  "--   run $cmd ...\n";   } 
 
         ( system( $cmd ) == 0 ) 
             or die "$cmd failed $? : $! \n";
@@ -253,7 +275,7 @@ sub P8_Ins_Start()
     }
     else
     {
-        if ($CLdebug)   { print STDOUT    "--   P8_Ins_Start: already RUNNING\n";  }
+        if ($CLdebug)   { print STDERR __LINE__,    "--   P8_Ins_Start: already RUNNING\n";  }
     }       
               
 }
@@ -268,14 +290,18 @@ sub P8_Ins_Stop()
     
     if ( P8_Ins_Query() eq "RUNNING" )
     {    
-        if ( $CLdebug ) {   print STDOUT  "--   run $cmd ...\n";   }
+        if ( ! $CLdebug )
+        {   $cmd    .=  " -quiet";  }
+        else
+        {   print STDERR __LINE__,  "--   run $cmd ...\n";  }
+        
        ( system( $cmd ) == 0 ) 
             or die "$cmd failed $? : $! \n";
       
     }
     else
     {
-        if ($CLdebug)   {   print STDOUT    "-- P8_Ins_Stop: already STOPPED\n"; }
+        if ($CLdebug)   {   print STDERR __LINE__,    "-- P8_Ins_Stop: already STOPPED\n"; }
     }       
                
 }
@@ -323,7 +349,7 @@ sub P8_Flush_L2()
     
     if ( !$L2_Flushed ) 
     {
-        if ( $CLdebug )   {   print STDOUT  "-- run $cmd ...\n";   } 
+        if ( $CLdebug )   {   print STDERR __LINE__,  "-- run $cmd ...\n";   } 
         ( system( $cmd ) == 0 ) 
             or die "$cmd failed $? : $! \n";
             
@@ -331,7 +357,7 @@ sub P8_Flush_L2()
         $L2_Flushed =   1;      
     }    
 
-    if ($CLdebug)   {   print STDOUT    "-- P8_FLush_L2 : $L2_Flushed\n"; }
+    if ($CLdebug)   {   print STDERR __LINE__,    "-- P8_FLush_L2 : $L2_Flushed\n"; }
 }
 
 
@@ -343,7 +369,7 @@ sub RunClocks()
 {
     my  $cmd    =   0;
     
-    if ( $CLdebug ) {   printf STDOUT "-- RunClocks()\n"; }
+    if ( $CLdebug ) {   printf STDERR __LINE__, "-- RunClocks()\n"; }
     
     ##  Check, and start instructions if necessary
     if  ( P8_Ins_Query( ) ne "RUNNING" )
@@ -353,7 +379,7 @@ sub RunClocks()
     }
 
     $cmd    =   "$RUNCLKSCMD $SIM_CLOCKS   -quiet";
-    if ( $CLdebug )   {   print STDOUT  "-- run $cmd ...\n";   } 
+    if ( $CLdebug )   {   print STDERR __LINE__,  "-- run $cmd ...\n";   } 
     ( system( $cmd ) == 0 ) 
         or die "$cmd failed, $? : $! \n";  
           
@@ -372,7 +398,7 @@ sub CLread( $ )
     my  $CLoffset   =   ( hex($addr) & (~0xffffff80) );
     my  $result     =   0;     ## 64-bit hex
                
-    if ( $CLdebug ) {   printf STDOUT "-- CLread( %s ) : CLbase=0x%x, CLoffset=0x%x\n", $addr, $CLbase, $CLoffset }
+    if ( $CLdebug ) {   printf STDERR __LINE__, "-- CLread( %s ) : CLbase=0x%x, CLoffset=0x%x\n", $addr, $CLbase, $CLoffset }
     
     readcacheline( $CLbase );
 
@@ -393,7 +419,7 @@ sub CLread( $ )
     
     if ( $CLdebug ) 
     { 
-        printf STDOUT "-- CLread( %s ) = 0x%lx  ", $addr, $result; 
+        printf STDERR __LINE__, "-- CLread( %s ) = 0x%lx  ", $addr, $result; 
         dumpcacheline(" " );
     }
 
@@ -412,7 +438,7 @@ sub CLwrite( $$ )
     my  $CLdata     =   hex($data);
     my  $result     =   0;
     
-    if ( $CLdebug ) {   printf STDOUT "-- CLwrite( %s, %s ) : CLbase=0x%x, CLoffset=0x%x, CLdata=0x%lx\n", 
+    if ( $CLdebug ) {   printf STDERR __LINE__, "-- CLwrite( %s, %s ) : CLbase=0x%x, CLoffset=0x%x, CLdata=0x%lx\n", 
                                 $addr, $data, $CLbase, $CLoffset, $CLdata;   }
 
     ##  clear the cacheline file
@@ -448,7 +474,7 @@ sub dumpcacheline()
     
     if ( $CLdebug )   
     { 
-        print STDOUT "--    $comment, dump cache file :\n"; 
+        print STDERR __LINE__, "--    $comment, dump cache file :\n"; 
         system( "xxd $CLfile" ); 
     }   
     
@@ -463,7 +489,7 @@ sub SetFlags( $$ )
   
     if ( $CLdebug )   
     { 
-        print STDOUT "-- CLdebug=$CLdebug, CLtest=$CLtest\n"; 
+        print STDERR __LINE__, "-- CLdebug=$CLdebug, CLtest=$CLtest\n"; 
     }       
 }
 
