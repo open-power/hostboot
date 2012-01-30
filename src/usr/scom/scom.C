@@ -35,6 +35,7 @@
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include "scom.H"
+#include <scom/scomreasoncodes.H>
 
 // Trace definition
 trace_desc_t* g_trac_scom = NULL;
@@ -56,7 +57,6 @@ DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
                       scomPerformOp);
 
 
-
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 errlHndl_t scomPerformOp(DeviceFW::OperationType i_opType,
@@ -67,19 +67,45 @@ errlHndl_t scomPerformOp(DeviceFW::OperationType i_opType,
                          va_list i_args)
 {
     errlHndl_t l_err = NULL;
-    mutex_t* l_mutex = NULL;
+   
 
     uint64_t l_scomAddr = va_arg(i_args,uint64_t);
 
+
+
+    l_err = checkIndirectAndDoScom(i_opType,
+                                   i_target,
+                                   io_buffer,
+                                   io_buflen,
+                                   i_accessType,
+                                   l_scomAddr);
+
+    return l_err;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
+                                  TARGETING::Target* i_target,
+                                  void* io_buffer,
+                                  size_t& io_buflen,
+                                  int64_t i_accessType,
+                                  uint64_t i_addr)
+{
+
+    errlHndl_t l_err = NULL;
+    mutex_t* l_mutex = NULL;
+
     // If the indirect scom bit is 0, then doing a regular scom 
-    if( (l_scomAddr & 0x8000000000000000) == 0)
+    if( (i_addr & 0x8000000000000000) == 0)
     {
         l_err = doScomOp(i_opType,
                          i_target,
                          io_buffer,
                          io_buflen,
                          i_accessType,
-                         l_scomAddr);
+                         i_addr);
      }
     // We are performing an indirect scom.
     else
@@ -88,7 +114,7 @@ errlHndl_t scomPerformOp(DeviceFW::OperationType i_opType,
         uint64_t temp_scomAddr;
 
         memcpy(&l_io_buffer, io_buffer, 8);
-        memcpy(&temp_scomAddr, &l_scomAddr, 8);
+        memcpy(&temp_scomAddr, &i_addr, 8);
 
         // Get the 20bit indirect scom address
         temp_scomAddr = temp_scomAddr & 0x001FFFFF00000000;
@@ -100,7 +126,7 @@ errlHndl_t scomPerformOp(DeviceFW::OperationType i_opType,
         l_io_buffer = l_io_buffer | temp_scomAddr;
 
         // zero out the indirect address from the buffer.. 
-        l_scomAddr = l_scomAddr & 0x00000000EFFFFFFFF;
+        i_addr = i_addr & 0x00000000EFFFFFFFF;
 
         // If we are doing a read. We need to do a write first.. 
         if(i_opType == DeviceFW::READ)
@@ -121,7 +147,7 @@ errlHndl_t scomPerformOp(DeviceFW::OperationType i_opType,
                              & l_io_buffer,
                              io_buflen,
                              i_accessType,
-                             l_scomAddr);
+                             i_addr);
 
             if (l_err != NULL)
 	    {
@@ -136,7 +162,7 @@ errlHndl_t scomPerformOp(DeviceFW::OperationType i_opType,
                              io_buffer,
                              io_buflen,
                              i_accessType,
-                             l_scomAddr);
+                             i_addr);
 
             mutex_unlock(l_mutex);
 
@@ -154,7 +180,7 @@ errlHndl_t scomPerformOp(DeviceFW::OperationType i_opType,
                              & l_io_buffer,
                              io_buflen,
                              i_accessType,
-                             l_scomAddr);
+                             i_addr);
         }
     }
 

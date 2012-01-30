@@ -23,7 +23,7 @@
 ROOTPATH = ../../..
 MODULE = scom
 
-OBJS = scom.o
+OBJS = scom.o scomtrans.o
 
 SUBDIRS = test.d
 
