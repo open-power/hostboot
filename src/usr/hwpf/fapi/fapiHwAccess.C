@@ -54,28 +54,18 @@ fapi::ReturnCode fapiGetScom(const fapi::Target& i_target,
                              ecmdDataBufferBase & o_data)
 {
     fapi::ReturnCode l_rc;
-    char l_string[fapi::MAX_ECMD_STRING_LEN] = {0};
     bool l_traceit = platIsScanTraceEnabled(); 
-
-
-    if( l_traceit )
-    {
-        // get the string representation of the target  
-        i_target.toString(l_string);
-
-
-        FAPI_SCAN( "TRACE : GETSCOM     : START : %s : %.16llX", 
-                   l_string,
-                   i_address ); 
-    }
 
     // call the platform implementation
     l_rc = platGetScom( i_target, i_address, o_data );
 
-
     if( l_traceit )
     {
-        FAPI_SCAN( "TRACE : GETSCOM     : END   : %s : %.16llX %.16llX", 
+        // get the string representation of the target
+        char l_string[fapi::MAX_ECMD_STRING_LEN] = {0};
+        i_target.toString(l_string);
+
+        FAPI_SCAN( "TRACE : GETSCOM     : %s : %.16llX %.16llX", 
                    l_string,
                    i_address,
                    o_data.getDoubleWord( 0 ) ); 
@@ -93,29 +83,21 @@ fapi::ReturnCode fapiPutScom(const fapi::Target& i_target,
                              ecmdDataBufferBase & i_data)
 {
     fapi::ReturnCode l_rc;
-    char l_string[fapi::MAX_ECMD_STRING_LEN] = {0};
     bool l_traceit = platIsScanTraceEnabled(); 
-
-    if( l_traceit )
-    {
-        // get the string representation of the target  
-        i_target.toString(l_string);
-
-        FAPI_SCAN( "TRACE : PUTSCOM     : START : %s : %.16llX %.16llX", 
-                   l_string,
-                   i_address,
-                   i_data.getDoubleWord( 0 )  ); 
-    }
 
     // call the platform implemenation  
     l_rc = platPutScom( i_target, i_address, i_data );
 
-
     if( l_traceit )
     {
-        FAPI_SCAN( "TRACE : PUTSCOM     : END   : %s : %.16llX", 
+        // get the string representation of the target
+        char l_string[fapi::MAX_ECMD_STRING_LEN] = {0};
+        i_target.toString(l_string);
+
+        FAPI_SCAN( "TRACE : PUTSCOM     : %s : %.16llX %.16llX",
                    l_string,
-                   i_address );
+                   i_address,
+                   i_data.getDoubleWord( 0 )  );
     }
 
     return l_rc;
@@ -130,30 +112,24 @@ fapi::ReturnCode fapiPutScomUnderMask(const fapi::Target& i_target,
                                       ecmdDataBufferBase & i_mask)
 {
     fapi::ReturnCode l_rc;
-    char l_string[fapi::MAX_ECMD_STRING_LEN] = {0};
     bool l_traceit = platIsScanTraceEnabled(); 
-
-    if( l_traceit )
-    {
-        // get the string representation of the target
-        i_target.toString(l_string);
-
-        FAPI_SCAN( "TRACE : PUTSCOMMASK : START : %s : %.16llX %.16llX %.16llX", 
-               l_string,
-               i_address,
-               i_data.getDoubleWord(0),
-               i_mask.getDoubleWord(0));
-    }
 
     // call the platform implementation
     l_rc = platPutScomUnderMask( i_target, i_address, i_data, i_mask );
 
     if( l_traceit )
     {
-        FAPI_SCAN( "TRACE : PUTSCOMMASK : END   : %s : %.16llX", 
+        // get the string representation of the target
+        char l_string[fapi::MAX_ECMD_STRING_LEN] = {0};
+        i_target.toString(l_string);
+
+        FAPI_SCAN( "TRACE : PUTSCOMMASK : %s : %.16llX %.16llX %.16llX",
                l_string,
-               i_address );
+               i_address,
+               i_data.getDoubleWord(0),
+               i_mask.getDoubleWord(0));
     }
+
     return l_rc;
 }
 
@@ -165,25 +141,18 @@ fapi::ReturnCode fapiGetCfamRegister(const fapi::Target& i_target,
                                      ecmdDataBufferBase & o_data)
 {
     fapi::ReturnCode l_rc;
-    char l_string[fapi::MAX_ECMD_STRING_LEN] = {0};
     bool l_traceit = platIsScanTraceEnabled();
-
-    if( l_traceit )
-    {
-        // get the string representation of the target
-        i_target.toString(l_string);
-
-        FAPI_SCAN( "TRACE : GETCFAMREG  : START : %s : %.16llX", 
-               l_string,
-               i_address ); 
-    }
 
     // call the platform implementation
     l_rc = platGetCfamRegister( i_target, i_address, o_data );
 
     if( l_traceit )
     {
-        FAPI_SCAN( "TRACE : GETCFAMREG  : END   : %s : %.16llX %.16llX", 
+        // get the string representation of the target
+        char l_string[fapi::MAX_ECMD_STRING_LEN] = {0};
+        i_target.toString(l_string);
+
+        FAPI_SCAN( "TRACE : GETCFAMREG  : %s : %.8X %.16llX", 
                l_string,
                i_address,
                o_data.getDoubleWord(0) ); 
@@ -200,30 +169,23 @@ fapi::ReturnCode fapiPutCfamRegister(const fapi::Target& i_target,
                                      ecmdDataBufferBase & i_data)
 {
     fapi::ReturnCode l_rc;
-    char l_string[fapi::MAX_ECMD_STRING_LEN] = {0};
     bool l_traceit = platIsScanTraceEnabled(); 
-
-    if( l_traceit )
-    {
-        // get the string representation of the target  
-        i_target.toString(l_string);
-
-        FAPI_SCAN( "TRACE : PUTCFAMREG  : START : %s : %.16llX %.16llX", 
-               l_string,
-               i_address,
-               i_data.getDoubleWord(0) );
-    } 
 
     // call the platform implementation
     l_rc = platPutCfamRegister( i_target, i_address, i_data );
 
-
     if( l_traceit )
     {
-        FAPI_SCAN( "TRACE : PUTCFAMREG  : END   : %s : %.16llX", 
+        // get the string representation of the target
+        char l_string[fapi::MAX_ECMD_STRING_LEN] = {0};
+        i_target.toString(l_string);
+
+        FAPI_SCAN( "TRACE : PUTCFAMREG  : %s : %.8X %.16llX",
                l_string,
-               i_address ); 
+               i_address,
+               i_data.getDoubleWord(0) );
     }
+
     return l_rc;
 }
 
@@ -236,16 +198,20 @@ fapi::ReturnCode fapiModifyCfamRegister(const fapi::Target& i_target,
                                         const fapi::ChipOpModifyMode i_modifyMode)
 {
     fapi::ReturnCode l_rc;
-    char l_string[fapi::MAX_ECMD_STRING_LEN] = {0};
     bool l_traceit = platIsScanTraceEnabled(); 
-    const char * l_pMode = NULL;
+
+    // call the platform implementation
+    l_rc = platModifyCfamRegister( i_target, i_address, i_data, i_modifyMode );
 
     if( l_traceit )
     {
-        // get the string representation of the target  
+        // get the string representation of the target
+        char l_string[fapi::MAX_ECMD_STRING_LEN] = {0};
         i_target.toString(l_string);
 
         // get string representation of the modify mode
+        const char * l_pMode = NULL;
+
         if (i_modifyMode == fapi::CHIP_OP_MODIFY_MODE_OR)
         {
             l_pMode = "OR";
@@ -263,22 +229,11 @@ fapi::ReturnCode fapiModifyCfamRegister(const fapi::Target& i_target,
             l_pMode = "?";
         }
 
-        FAPI_SCAN( "TRACE : MODCFAMREG  : START : %s : %.16llX %.16llX %s", 
+        FAPI_SCAN( "TRACE : MODCFAMREG  : %s : %.8X %.16llX %s",
                l_string,
                i_address,
                i_data.getDoubleWord(0),
-               l_pMode ); 
-    }
-
-    // call the platform implementation
-    l_rc = platModifyCfamRegister( i_target, i_address, i_data, i_modifyMode );
-
-    if( l_traceit )
-    {
-        FAPI_SCAN( "TRACE : MODCFAMREG  : END   : %s : %llX %s", 
-               l_string,
-               i_address,
-               l_pMode ); 
+               l_pMode );
     }
 
     return l_rc;
