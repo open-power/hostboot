@@ -46,12 +46,14 @@ scom 0x0000000013030007              {
 }
 
 #--******************************************************************************
-#-- Basic SCOM with Array In Middle & Scom Data of Array Attribute Type
+#-- SCOM with Address and Data of Array Type, Range of Index, Bit Support
 #--******************************************************************************
 
 scom 0x000000000006002(B,C)        {
-  scom_data             ;
-  SYS.ATTR_SCRATCH_UINT8_ARRAY_1[2] ;
+  bits, scom_data             ,              expr;
+  0:7,  SYS.ATTR_SCRATCH_UINT8_ARRAY_1[2],   SYS.ATTR_SCRATCH_UINT8_ARRAY_1[2,31] > SYS.ATTR_SCRATCH_UINT8_1;
+  24:31, SYS.ATTR_SCRATCH_UINT8_ARRAY_1[2,31], SYS.ATTR_SCRATCH_UINT8_1 == SYS.ATTR_SCRATCH_UINT8_ARRAY_1[3,7];
+  32:39, SYS.ATTR_SCRATCH_UINT8_ARRAY_2[0..1][1,2][2,3], SYS.ATTR_SCRATCH_UINT8_ARRAY_1[0,17] < SYS.ATTR_SCRATCH_UINT8_ARRAY_1[1,18];
 }
 
 #--******************************************************************************
@@ -85,85 +87,78 @@ scom 0x000000000006800c              {
 #--******************************************************************************
 #-- Basic SCOM with bits
 #--******************************************************************************
-#@todo
-#@VBU workaround - Disable sample addresses
-#All SCR reg addresses below are only supported from chip release 052 and beyond.
-#Release 051, which is used by current VBU model, contain different addresses for
-#these registers.
-#Disable them for now, needs to re-enable them when VBU upgrade to use chip release 052
-
-#scom 0x0000000013013283              {
-#    bits ,                    scom_data        ;
-#    0:11 ,                    0b001111001001   ;
-#    12   ,                    0b1              ;
-#    13   ,                    0b1              ;
-#    14:59, 0b0000001100000110010000000000010000010010000000 ;
-#}
+scom 0x0000000013013283              {
+    bits ,                    scom_data        ;
+    0:11 ,                    0b001111001001   ;
+    12   ,                    0b1              ;
+    13   ,                    0b1              ;
+    14:59, 0b0000001100000110010000000000010000010010000000 ;
+}
 
 #--******************************************************************************
 #-- Complext SCOM with Bit Support, define, and attributes
 #--******************************************************************************
 
-#scom 0x0000000013013284              {
-#    bits ,                    scom_data,        expr                                  ;
-#    0:11 ,                    0b001111001001,   any                                   ;
-#    12   ,                    0b1,              def_equal_test                        ;
-#    12   ,                    0b0,              def_not_equal_test                    ;
-#    13   ,                    0b1,              SYS.ATTR_SCRATCH_UINT8_1 > SYS.ATTR_SCRATCH_UINT8_2   ;
-#    14:59, 0b0000001100000110010000000000010000010010000000,  SYS.ATTR_SCRATCH_UINT64_2 == ENUM_ATTR_SCRATCH_UINT64_2_VAL_C;
-#}
+scom 0x0000000013013284              {
+    bits ,                    scom_data,        expr                                  ;
+    0:11 ,                    0b001111001001,   any                                   ;
+    12   ,                    0b1,              def_equal_test                        ;
+    12   ,                    0b0,              def_not_equal_test                    ;
+    13   ,                    0b1,              SYS.ATTR_SCRATCH_UINT8_1 > SYS.ATTR_SCRATCH_UINT8_2   ;
+    14:59, 0b0000001100000110010000000000010000010010000000,  SYS.ATTR_SCRATCH_UINT64_2 == ENUM_ATTR_SCRATCH_UINT64_2_VAL_C;
+}
 
 #--******************************************************************************
 #-- Complex SCOM with Bit Support, and logical operators
 #--******************************************************************************
 
-#scom 0x0000000013013285              {
-#    bits ,                    scom_data,        expr                                  ;
-#    12   ,                    0b1,              def_equal_test && def_not_equal_test  ;
-#    12   ,                    0b0,              def_equal_test || def_not_equal_test  ;
-#    14   ,                    0b1,              SYS.ATTR_SCRATCH_UINT32_1 < SYS.ATTR_SCRATCH_UINT32_2   ;
-#    15   ,                    0b1,              SYS.ATTR_SCRATCH_UINT32_1 > SYS.ATTR_SCRATCH_UINT32_2   ;
-#    16   ,                    0b1,              SYS.ATTR_SCRATCH_UINT32_1 >= SYS.ATTR_SCRATCH_UINT32_2  ;
-#    17   ,                    0b1,              SYS.ATTR_SCRATCH_UINT32_1 <= SYS.ATTR_SCRATCH_UINT32_2  ;
-#    18   ,                    0b1,              SYS.ATTR_SCRATCH_UINT32_1 == SYS.ATTR_SCRATCH_UINT32_2  ;
-#    19   ,                    0b1,              SYS.ATTR_SCRATCH_UINT32_1 != SYS.ATTR_SCRATCH_UINT32_2  ;
-#    20   ,                    0b1,              (SYS.ATTR_SCRATCH_UINT32_1 + SYS.ATTR_SCRATCH_UINT32_2) == 4 ;
-#    21:59, 0b000000110000011001000000000001000001001, SYS.ATTR_SCRATCH_UINT8_1 == SYS.ATTR_SCRATCH_UINT8_2 ;
-#}
+scom 0x0000000013013285              {
+    bits ,                    scom_data,        expr                                  ;
+    12   ,                    0b1,              def_equal_test && def_not_equal_test  ;
+    12   ,                    0b0,              def_equal_test || def_not_equal_test  ;
+    14   ,                    0b1,              SYS.ATTR_SCRATCH_UINT32_1 < SYS.ATTR_SCRATCH_UINT32_2   ;
+    15   ,                    0b1,              SYS.ATTR_SCRATCH_UINT32_1 > SYS.ATTR_SCRATCH_UINT32_2   ;
+    16   ,                    0b1,              SYS.ATTR_SCRATCH_UINT32_1 >= SYS.ATTR_SCRATCH_UINT32_2  ;
+    17   ,                    0b1,              SYS.ATTR_SCRATCH_UINT32_1 <= SYS.ATTR_SCRATCH_UINT32_2  ;
+    18   ,                    0b1,              SYS.ATTR_SCRATCH_UINT32_1 == SYS.ATTR_SCRATCH_UINT32_2  ;
+    19   ,                    0b1,              SYS.ATTR_SCRATCH_UINT32_1 != SYS.ATTR_SCRATCH_UINT32_2  ;
+    20   ,                    0b1,              (SYS.ATTR_SCRATCH_UINT32_1 + SYS.ATTR_SCRATCH_UINT32_2) == 4 ;
+    21:59, 0b000000110000011001000000000001000001001, SYS.ATTR_SCRATCH_UINT8_1 == SYS.ATTR_SCRATCH_UINT8_2 ;
+}
 
 #--******************************************************************************
 #-- SCOM with 'ec' column - Use scratch for now since all attributes work
 #--******************************************************************************
 
-#scom 0x0000000013013286              {
-#  scom_data,            SYS.ATTR_SCRATCH_UINT32_1,  SYS.ATTR_SCRATCH_UINT32_2        ;
-#  0x0000000000000192,   1,                      ENUM_ATTR_SCRATCH_UINT64_ARRAY_2_VAL_B       ;
-#}
+scom 0x0000000013013286              {
+  scom_data,            SYS.ATTR_SCRATCH_UINT32_1,  SYS.ATTR_SCRATCH_UINT32_2        ;
+  0x0000000000000192,   1,                      ENUM_ATTR_SCRATCH_UINT64_ARRAY_2_VAL_B       ;
+}
 
 #--******************************************************************************
 #-- Basic SCOM with an array
 #--******************************************************************************
-#scom 0x0000000013013287              {
-#  scom_data,            expr                 ;
-#  0x0000000000000182,   SYS.ATTR_SCRATCH_UINT8_ARRAY_1[2] == SYS.ATTR_SCRATCH_UINT8_1    ;
-#}
+scom 0x0000000013013287              {
+  scom_data,            expr                 ;
+  0x0000000000000182,   SYS.ATTR_SCRATCH_UINT8_ARRAY_1[2] == SYS.ATTR_SCRATCH_UINT8_1    ;
+}
 
 #--******************************************************************************
 #-- SCOM with 'ec' & expr column - Use scratch for now since all attributes work
 #--******************************************************************************
-#scom 0x0000000013013288              {
-#  scom_data,            SYS.ATTR_SCRATCH_UINT32_1        expr;
-#  0x0000000000000192,   3,                           SYS.ATTR_SCRATCH_UINT8_ARRAY_2[1][2][3] == 0x00000000000000BE;
-#}
+scom 0x0000000013013288              {
+  scom_data,            SYS.ATTR_SCRATCH_UINT32_1        expr;
+  0x0000000000000192,   3,                           SYS.ATTR_SCRATCH_UINT8_ARRAY_2[1][2][3] == 0x00000000000000BE;
+}
 
 #--******************************************************************************
 #-- Complex SCOM with Bit Support, logical operators and 'ec' column
 #--******************************************************************************
-#scom 0x0000000013013289              {
-#  bits ,                    scom_data        SYS.ATTR_SCRATCH_UINT32_1        expr;
-#  23   ,                    0b1,             any,                         SYS.ATTR_SCRATCH_UINT8_ARRAY_1[2] == SYS.ATTR_SCRATCH_UINT8_1;
-#  23   ,                    0b0,             1,                           any;
-#}
+scom 0x0000000013013289              {
+  bits ,                    scom_data        SYS.ATTR_SCRATCH_UINT32_1        expr;
+  23   ,                    0b1,             any,                         SYS.ATTR_SCRATCH_UINT8_ARRAY_1[2] == SYS.ATTR_SCRATCH_UINT8_1;
+  23   ,                    0b0,             1,                           any;
+}
 
 #--******************************************************************************
 #-- Basic SCOM with Multiple Arrays/Address Ranges

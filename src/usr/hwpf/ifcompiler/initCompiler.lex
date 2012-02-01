@@ -26,6 +26,7 @@
 //                camvanng 11/08/11   Added support for attribute enums
 //                camvanng 11/16/11   Support system & target attributes
 //                camvanng 12/12/11   Support multiple address ranges within a SCOM address
+//                camvanng 01/20/12   Support for using a range of indexes for array attributes
 // End Change Log *********************************************************************************/
 /**
  * @file initCompiler.lex
@@ -75,8 +76,8 @@ extern int yyline;
 
 NEWLINE  \n
 FILENAME [A-Za-z][A-Za-z0-9_\.]*
-ID       [A-Za-z][A-Za-z0-9_]*
-ID2      [A-Za-z][A-Za-z0-9_]*
+ID      [A-Za-z][A-Za-z0-9_]*
+ID2     [A-Za-z][A-Za-z0-9_]*(\[[0-9]+(..[0-9]+)?(,[0-9]+(..[0-9]+)?)*\]){0,4}
 ID3      [0-9]+[A-Za-z_]+[0-9]*
 DIGIT    [0-9]
 COMMENT  #.*\n
@@ -186,7 +187,7 @@ scom              { BEGIN(scomop); oss.str("");  return INIT_SCOM; }
 
 <scomcolname>{COMMENT}   ++yyline;
 <scomcolname>\n          ++yyline;
-<scomcolname>{ID}        {
+<scomcolname>{ID2}        {
                             g_colstream.push_back(new std::ostringstream());
                             *(g_colstream.back()) << yytext;
                          }
@@ -195,7 +196,7 @@ scom              { BEGIN(scomop); oss.str("");  return INIT_SCOM; }
 
 <scomrow>{COMMENT}       ++yyline;
 <scomrow>{NEWLINE}       ++yyline;
-<scomrow>[^,;\n#\{\}]+   push_col(yytext);
+<scomrow>([^,;\n#\{\}]+{ID2}*)+ push_col(yytext);
 <scomrow>[,]             ++g_scomcol;
 <scomrow>[;]             g_scomcol = 0;
 <scomrow>[\}]            {
@@ -255,7 +256,7 @@ END_INITFILE            return INIT_ENDINITFILE;
 <*>[\(]                 { ++g_paren_level; return yytext[0]; }
 <*>[\)]                 { --g_paren_level; return yytext[0]; }
 
-<*>\[{MULTI_DIGIT}\]    { yylval.str_ptr = new std::string(yytext);  return ATTRIBUTE_INDEX; }
+<*>\[({MULTI_DIGIT}[,.]*)+\]    { yylval.str_ptr = new std::string(yytext);  return ATTRIBUTE_INDEX; }
 
 <*>[\[\]\{\},:]         {g_equation = false; return yytext[0]; }
 

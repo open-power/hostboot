@@ -24,8 +24,9 @@
 //  dg002 SW039868 dgilbert 10/15/10 Add support to filter unneeded inits by EC
 //  dg003 SW047506 dgilbert 12/09/10 SERIES filtering
 //                 andrewg  09/19/11 Updates based on review
-//                 camvanng 11/08/11  Added support for attribute enums
+//                 camvanng 11/08/11 Added support for attribute enums
 //                 andrewg  11/09/11 Multi-dimensional array and move to common fapi include
+//                 camvanng 01/20/12 Support for using a range of indexes for array attributes
 // End Change Log *********************************************************************************
 
 /**
@@ -178,12 +179,15 @@ namespace init
          * @brief Push all RPN stack entries of object as numerical values onto input blist
          *
          * @param blist Binary string of RPN to write to file
+         * @param i_num_addrs number of Scom addresses for this Scom
+         * @param i_addr_num the nth addr with the range of Scom addresses
          * @param i_prepend_count Flag to indicate prepend rpn count to binary string
          * @PRE should never be called until all symbols in the initfile have been
          * "looked up" or the binary tags for Symbols and Numbers may not be accurate
          * @return void
          */
-        void bin_str(BINSEQ & blist, bool i_prepend_count = false);
+        void bin_str(BINSEQ & blist, uint32_t i_num_addrs, uint32_t i_addr_num,
+                     bool i_prepend_count = false);
 
         /**
          * Read binary sequence to recreate this Rpn sequence
@@ -262,9 +266,11 @@ namespace init
 
       private: // types and data
         typedef std::vector<uint32_t> RPNSTACK;
+        typedef std::vector<uint32_t> INDEXRANGE;
 
         RPNSTACK iv_rpnstack;       ///< Rpn sequence
         Symbols * iv_symbols;       ///< Symbol table to use
+        INDEXRANGE iv_array_idx_range; ///< indicates range of indexes for an array attribute
 
 
 

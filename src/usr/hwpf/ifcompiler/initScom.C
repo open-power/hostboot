@@ -28,6 +28,7 @@
 //                 camvanng 12/12/11 Support multiple address ranges within a SCOM address
 //                                   Use strtoull vs strtoul for 32-bit platforms
 //                 camvanng 12/15/11 Support for multiple duplicate addresses setting different bits
+//                 camvanng 01/20/12 Support for using a range of indexes for array attributes
 // End Change Log *********************************************************************************
 
 /**
@@ -440,6 +441,7 @@ uint32_t Scom::bin_listing(BINSEQ & blist)
 {
     set<RANGE> ranges;
     uint32_t scom_count = 0;
+    uint32_t addr_num = 0;
 
     row_optimize();   // delete any rows that are unconditionally false. + merge rows
 
@@ -447,7 +449,7 @@ uint32_t Scom::bin_listing(BINSEQ & blist)
 
     SCOM_ADDR::iterator i = iv_scom_addr.begin();
 
-    for(; i != iv_scom_addr.end(); ++i)
+    for(; i != iv_scom_addr.end(); ++i, ++addr_num)
     {
         //printf("scom address:%s\n",(*i).c_str());
         if(ranges.size())
@@ -461,16 +463,16 @@ uint32_t Scom::bin_listing(BINSEQ & blist)
                 //   - Recreate the spy from the bytecode
                 //   - Compile the recreated spy back into bytecode.
                 BINSEQ temp;
-                bin_list_one(temp,strtoull((*i).c_str(),NULL,16), *r);
+                bin_list_one(temp,strtoull((*i).c_str(),NULL,16), addr_num, *r);
                 BINSEQ::const_iterator bi = temp.begin();
                 Scom s(bi,iv_symbols);
-                s.bin_list_one(blist,strtoull((*i).c_str(),NULL,16), RANGE(1,0));
+                s.bin_list_one(blist,strtoull((*i).c_str(),NULL,16), addr_num, RANGE(1,0));
             }
         }
         else
         {
             ++scom_count;
-            bin_list_one(blist,strtoull((*i).c_str(),NULL,16), RANGE(1,0));
+            bin_list_one(blist,strtoull((*i).c_str(),NULL,16), addr_num, RANGE(1,0));
         }
     }
 
@@ -479,9 +481,10 @@ uint32_t Scom::bin_listing(BINSEQ & blist)
 
 //-------------------------------------------------------------------------------------------------
 
-void Scom::bin_list_one(BINSEQ & blist,uint64_t i_addr, RANGE range)
+void Scom::bin_list_one(BINSEQ & blist,uint64_t i_addr, uint32_t i_addr_num, RANGE range)
 {
 
+    uint32_t numaddrs = iv_scom_addr.size(); //Number of Scom addresses for this Scom
     uint32_t numcols = iv_col_vars.size() | (iv_when & SUBTYPE_MASK); // WHEN subtype goes in numcols
 
 // No range support
@@ -553,7 +556,7 @@ void Scom::bin_list_one(BINSEQ & blist,uint64_t i_addr, RANGE range)
     //Rpn::set32(blist,(uint32_t)iv_address);
 
     Rpn *l_scom_addr = new init::Rpn(i_addr,yyscomlist->get_symbols());
-    l_scom_addr->bin_str(blist,false);
+    l_scom_addr->bin_str(blist,numaddrs,i_addr_num,false);
     delete l_scom_addr;
 
 
@@ -568,7 +571,7 @@ void Scom::bin_list_one(BINSEQ & blist,uint64_t i_addr, RANGE range)
         {
             if ((*r) == range)
             {
-                i->bin_str(blist,false);
+                i->bin_str(blist,numaddrs,i_addr_num,false);
             }
         }
     }
@@ -576,14 +579,14 @@ void Scom::bin_list_one(BINSEQ & blist,uint64_t i_addr, RANGE range)
     {
         for(RPN_LIST::iterator i = iv_scom_rpn.begin(); i != iv_scom_rpn.end(); ++i)
         {
-            i->bin_str(blist,false);
+            i->bin_str(blist,numaddrs,i_addr_num,false);
         }
     }
 
     // list the column names that are really CINI VARS
     for(RPN_LIST::iterator i = iv_col_vars.begin(); i != iv_col_vars.end(); ++i)
     {
-        i->bin_str(blist,false);  // false means don't prepend an RPN byte count to the binary rpn appended.
+        i->bin_str(blist,numaddrs,i_addr_num,false);  // false means don't prepend an RPN byte count to the binary rpn appended.
         //uint16_t tag = iv_symbols->get_tag(*i);
         //blist.push_back((uint8_t)(tag >> 8));
         //blist.push_back((uint8_t) tag);
@@ -605,7 +608,7 @@ void Scom::bin_list_one(BINSEQ & blist,uint64_t i_addr, RANGE range)
             {
                 rpn.append(i->at(n));
             }
-            rpn.bin_str(blist,true);
+            rpn.bin_str(blist,numaddrs,i_addr_num,true);
         }
     }
 }
@@ -1050,7 +1053,7 @@ void ScomList::compile(BINSEQ & bin_seq)
     }
     else // syntax version already validated to be 1 or 2 - so if we get here it was never set.
     {
-        throw range_error("ERROR: No sytax version specified!");
+        throw range_error("ERROR: No syntax version specified!");
     }
     stats << '*' << setw(20) << "Syntax Version:" << setw(6) << iv_syntax_version << endl;
 

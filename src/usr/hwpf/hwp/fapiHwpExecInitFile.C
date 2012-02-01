@@ -40,6 +40,8 @@
  *                          camvanng    01/06/2012  Support for writing an
  *                                                  attribute to a SCOM register
  *                          mjjones     01/13/2012  Use new ReturnCode interfaces
+ *                          camvanng    01/20/2012  Support for using a range
+ *                                                  indexes for array attributes
  */
 
 #include <fapiHwpExecInitFile.H>
@@ -189,6 +191,9 @@ fapi::ReturnCode executeScoms(ifData_t & io_ifData);
 fapi::ReturnCode writeScom(const ifData_t & i_ifData, const uint32_t i_scomNum,
                            const uint16_t i_row);
 
+void deleteDataArrayIdx(const ifData_t & ifData, const uint32_t i_scomNum,
+                        const uint16_t i_row);
+
 void rpnPush(rpnStack_t * io_rpnStack, uint64_t i_val);
 
 uint64_t rpnPop(rpnStack_t * io_rpnStack);
@@ -320,6 +325,13 @@ fapi::ReturnCode fapiHwpExecInitFile(const fapi::Target & i_Target,
             loadScomSection(l_ifInfo, l_ifData);
             FAPI_DBG("fapiHwpExecInitFile: Addr of scom struct %p, "
                      "num scoms %u", l_ifData.scoms, l_ifData.numScoms);
+
+            #ifdef HWPEXECINITFILE_DEBUG
+            for (size_t i = 0; i < l_dataArrayIdxId.size(); i++)
+            {
+                FAPI_DBG ("dataArrayIdxId[%u] 0x%02x", i, l_dataArrayIdxId.at(i));
+            }
+            #endif
 
             //--------------------------------
             // Execute SCOMs
@@ -853,7 +865,7 @@ void loadScomSection(ifInfo_t & io_ifInfo,
                             uint16_t l_idxId = 0;
                             ifRead(io_ifInfo, &l_idxId, sizeof(uint16_t));
                             io_ifData.dataArrayIdxId->push_back(static_cast<uint64_t>(l_idxId));
-                            FAPI_DBG("loadScomSection: array index id %u",
+                            FAPI_DBG("loadScomSection: array index id 0x%02x",
                                      io_ifData.dataArrayIdxId->back());
                         }
                     }
@@ -1188,6 +1200,10 @@ fapi::ReturnCode executeScoms(ifData_t & i_ifData)
             if (l_goToNextRow)
             {
                 FAPI_DBG("fapiHwpExecInitFile: executeScoms: check next row");
+
+                //Delete any data array indices stored for this row
+                deleteDataArrayIdx(i_ifData, i, l_row);
+
                 l_goToNextRow = false;
                 continue;
             }
@@ -1220,6 +1236,11 @@ fapi::ReturnCode executeScoms(ifData_t & i_ifData)
                 {
                   FAPI_DBG("fapiHwpExecInitFile: executeScoms: Expr: found valid row");
                   break;
+                }
+                else
+                {
+                    //Delete any data array indices stored for this row
+                    deleteDataArrayIdx(i_ifData, i, l_row);
                 }
             }
             else
@@ -1335,6 +1356,13 @@ fapi::ReturnCode writeScom(const ifData_t & i_ifData, const uint32_t i_scomNum,
                     // Remove the array index id(s)
                     i_ifData.dataArrayIdxId->erase(i_ifData.dataArrayIdxId->begin(),
                         i_ifData.dataArrayIdxId->begin() + l_attrDimension);
+
+                    #ifdef HWPEXECINITFILE_DEBUG
+                    for (size_t i = 0; i < i_ifData.dataArrayIdxId->size(); i++)
+                    {
+                        FAPI_DBG ("dataArrayIdxId[%u] 0x%02x", i, i_ifData.dataArrayIdxId->at(i));
+                    }
+                    #endif
                 }
             }
             else
@@ -1489,6 +1517,52 @@ fapi::ReturnCode writeScom(const ifData_t & i_ifData, const uint32_t i_scomNum,
     return l_rc;
 }
 
+/**  @brief Delete any data array indices for specified Scom and row
+ *
+ * @param[in] i_ifData   Reference to ifData_t which contains initfile data
+ * @param[in] i_scomNum  Scom entry number
+ * @param[in] i_row      Scom entry row number
+ *
+ * @return void
+ */
+void deleteDataArrayIdx(const ifData_t & i_ifData,
+                        const uint32_t i_scomNum,
+                        const uint16_t i_row)
+{
+    //Get the scom data
+    uint16_t l_id = i_ifData.scoms[i_scomNum].dataId[i_row];
+    if ((l_id & IF_TYPE_MASK) == IF_ATTR_TYPE) //It's an attribute
+    {
+        //Mask out the type & system bits and zero-based
+        uint16_t l_tmpId = (l_id & IF_ATTR_ID_MASK) - 1;
+        if (l_tmpId < i_ifData.numAttrs)
+        {
+            // Get the attribute dimension & shift it to the LS nibble
+            uint8_t l_attrDimension =
+                (i_ifData.attrs[l_tmpId].type & ATTR_DIMENSION_MASK) >> 4;
+            if (l_attrDimension)
+            {
+                FAPI_DBG("fapiHwpExecInitFile: deleteDataArrayIdx: "
+                         "Delete data array indices for scom[%u] row[%u]",
+                         i_scomNum, i_row);
+
+                // Remove the array index id(s)
+                i_ifData.dataArrayIdxId->erase(i_ifData.dataArrayIdxId->begin(),
+                    i_ifData.dataArrayIdxId->begin() + l_attrDimension);
+            }
+        }
+    }
+
+    #ifdef HWPEXECINITFILE_DEBUG
+    for (size_t i = 0; i < i_ifData.dataArrayIdxId->size(); i++)
+    {
+        FAPI_DBG ("dataArrayIdxId[%u] 0x%02x", i, i_ifData.dataArrayIdxId->at(i));
+    }
+    #endif
+
+    return;
+}
+
 //******************************************************************************
 // RPN Calculator functions
 //******************************************************************************
@@ -1500,7 +1574,7 @@ fapi::ReturnCode writeScom(const ifData_t & i_ifData, const uint32_t i_scomNum,
  */
 void rpnPush(rpnStack_t * io_rpnStack, uint64_t i_val)
 {
-    FAPI_DBG("fapiHwpExecInitFile: rpnPush");
+    FAPI_DBG("fapiHwpExecInitFile: rpnPush 0x%llX", i_val);
 
     io_rpnStack->push_back(i_val);
 }
@@ -1706,7 +1780,7 @@ uint64_t rpnBinaryOp(IfRpnOp i_op, uint64_t i_val1, uint64_t i_val2,
 fapi::ReturnCode rpnDoPush(ifData_t & io_ifData, const uint16_t i_id,
                            uint32_t & io_any, const uint16_t i_arrayIndexIds[MAX_ATTRIBUTE_ARRAY_DIMENSION])
 {
-    FAPI_DBG(">> HwpInitFile: rpnDoPush: id 0x%X", i_id);
+    FAPI_DBG(">> fapiHwpExecInitFile: rpnDoPush: id 0x%X", i_id);
 
     fapi::ReturnCode l_rc = fapi::FAPI_RC_SUCCESS;
     uint64_t l_val = 0;
@@ -1769,7 +1843,7 @@ fapi::ReturnCode rpnDoPush(ifData_t & io_ifData, const uint16_t i_id,
 
     } while(0);
 
-    FAPI_DBG("<< HwpInitFile: rpnDoPush");
+    FAPI_DBG("<< fapiHwpExecInitFile: rpnDoPush");
     return l_rc;
 }
 

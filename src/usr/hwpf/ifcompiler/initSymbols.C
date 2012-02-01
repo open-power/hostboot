@@ -177,7 +177,7 @@ Symbols::Symbols(FILELIST & i_filenames)
                                     else
                                     {
                                         attr_enum_stream >> tmp;
-                                        value = strtoll(tmp.c_str(), NULL, 0);
+                                        value = strtoull(tmp.c_str(), NULL, 0);
                                     }
                                 }
                             }

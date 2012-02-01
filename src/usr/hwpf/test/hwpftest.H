@@ -286,36 +286,29 @@ public:
         //If the initfile changes, this data will also need to be changed.
         ifScom_t l_ifScomData[] =
         {
-            {0x000000000006002b, 0, 0x0000000000000001},
-            {0x000000000006002c, 0, 0x0000000000000001},
+            {0x000000000006002b, 0, 0x0000000000000000 |
+                                    (0x00000000000000C4ll << (64 - (32 + 8)))},
+            {0x000000000006002c, 0, (0x0000000000000001ll << (64 - 8)) |
+                                    (0x0000000000000008ll << (64 - (24 + 8)))},
             {0x000000000006800b, 0, 0},
             {0x000000000006800c, 0, (0x8000000000000000 >> 0x17) |
                                     (0x00000000000000BEll << (64 - (24 + 8))) |
                                     0x0000000000000003},
             {0x0000000013010002, 0, 0xAABBC00000000000},
             {0x0000000013030007, 0, 0x00000CDE00000000},
-            /*
-             * @todo
-             * @VBU workaround
-             * All SCR reg addresses below are only supported from chip release
-             * 052 and beyond. Release 051, which is used by current VBU model,
-             * contain different addresses for these registers.
-             * Disable them for now, needs to re-enable them when VBU upgrade
-             * to use chip release 052
-                        {0x0000000013013283, 0, 0x3c90000000000000 |
-                                                (0x8000000000000000 >> 0x0c) |
-                                                (0x8000000000000000 >> 0x0d) |
-                                                (0x0306400412000000 >> 0x0e)},
-                        {0x0000000013013284, 0, 0x3c90000000000000},
-                        {0x0000000013013285, 0, (0x8000000000000000 >> 0x0f) |
-                                                (0x8000000000000000 >> 0x10) |
-                                                (0x8000000000000000 >> 0x13) |
-                                                (0x0306400412000000 >> 0x15) },
-                        {0x0000000013013286, 0, 0},
-                        {0x0000000013013287, 0, 0x0000000000000182},
-                        {0x0000000013013288, 0, 0x0000000000000192},
-                        {0x0000000013013289, 0, 0x8000000000000000 >> 0x17}
-            */
+            {0x0000000013013283, 0, 0x3c90000000000000 |
+                                    (0x8000000000000000 >> 0x0c) |
+                                    (0x8000000000000000 >> 0x0d) |
+                                    (0x0306400412000000 >> 0x0e)},
+            {0x0000000013013284, 0, 0x3c90000000000000},
+            {0x0000000013013285, 0, (0x8000000000000000 >> 0x0f) |
+                                    (0x8000000000000000 >> 0x10) |
+                                    (0x8000000000000000 >> 0x13) |
+                                    (0x0306400412000000 >> 0x15) },
+            {0x0000000013013286, 0, 0},
+            {0x0000000013013287, 0, 0x0000000000000182},
+            {0x0000000013013288, 0, 0x0000000000000192},
+            {0x0000000013013289, 0, 0x8000000000000000 >> 0x17}
         };
 
         fapi::ReturnCode l_rc = fapi::FAPI_RC_SUCCESS;
@@ -355,7 +348,14 @@ public:
             }
 
             uint8_t l_uint8array1[32];
+            l_uint8array1[0] = 1;
+            l_uint8array1[1] = 4;
             l_uint8array1[2] = 1;
+            l_uint8array1[3] = 2;
+            l_uint8array1[7] = 1;
+            l_uint8array1[17] = 6;
+            l_uint8array1[18] = 6;
+            l_uint8array1[31] = 8;
             l_rc = FAPI_ATTR_SET(ATTR_SCRATCH_UINT8_ARRAY_1,
                                                        NULL, l_uint8array1);
             if (l_rc != fapi::FAPI_RC_SUCCESS)
@@ -366,6 +366,7 @@ public:
             }
 
             uint8_t l_uint8array2[2][3][4];
+            l_uint8array2[0][1][2] = 0xC4;
             l_uint8array2[1][2][3] = 0xBE;
             l_rc = FAPI_ATTR_SET(ATTR_SCRATCH_UINT8_ARRAY_2,
                                                        NULL, l_uint8array2);

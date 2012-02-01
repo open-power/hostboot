@@ -24,6 +24,7 @@
 //                 camvanng 11/08/11 Added support for attribute enums
 //                 andrewg  11/09/11 Multi-dimensional array and move to common fapi include
 //                 camvanng 01/06/12 Support for writing an attribute to a SCOM register
+//                 camvanng 01/20/12 Support for using a range of indexes for array attributes
 // End Change Log *********************************************************************************
 
 /**
@@ -39,6 +40,8 @@
 #include <iostream>
 #include <stdexcept>
 #include <fapiHwpInitFileInclude.H>  // Requires file from hwpf
+
+extern void yyerror(const char * s);
 
 using namespace init;
 
@@ -71,7 +74,7 @@ std::string Rpn::cv_empty_str;
 //-------------------------------------------------------------------------------------------------
 
 Rpn::Rpn(uint32_t i_uint,Symbols * symbols) : iv_symbols(symbols)
-{ push_int(i_uint);}
+{ push_int(i_uint); }
 
 //-------------------------------------------------------------------------------------------------
 
@@ -205,13 +208,77 @@ void Rpn::push_array_index(std::string &i_array_idx)
     string l_idx = i_array_idx;
     // strip of leading "[" and last "]"
     l_idx = l_idx.substr(1,(l_idx.length() - 2));
-    uint32_t l_array_val = atoi(l_idx.c_str());
+    uint32_t l_num_idx = 0;
+    std::vector<string> l_idxstr;
 
-    uint32_t rpn_id = iv_symbols->find_numeric_array_lit(l_array_val,4);
-    iv_rpnstack.push_back(rpn_id);
+    // find index strings in comma separated list and save in vector
+    size_t l_pos = 0;
+    l_pos = l_idx.find(',');
+    while(l_pos != string::npos)
+    {
+        l_idxstr.push_back(l_idx.substr(0, l_pos));
+        l_idx = l_idx.substr(l_pos+1);
+        l_pos = l_idx.find(',');
+    }
 
-    // printf("Array Index: %s  decimal:%u  rpn_id:0x%8X\n",l_idx.c_str(),l_array_val,rpn_id);
+    // Push back the original idx string or the last string in the list
+    l_idxstr.push_back(l_idx);
 
+    uint32_t l_array_val = 0, l_array_val2 = 0;
+    uint32_t rpn_id = 0;
+    for (size_t i = 0; i < l_idxstr.size(); i++)
+    {
+        //Is it a range?
+        l_pos = l_idxstr.at(i).find("..");
+        if (l_pos != string::npos)
+        {
+            l_array_val = atoi(l_idxstr.at(i).substr(0,l_pos).c_str());
+            l_array_val2 = atoi(l_idxstr.at(i).substr(l_pos + 2).c_str());
+            //printf("I>Rpn::push_array_index: %u..%u\n", l_array_val, l_array_val2);
+            if (l_array_val >= l_array_val2)
+            {
+                std::ostringstream oss;
+                oss << "Invalid attribute array index range: " << l_idxstr.at(i);
+                yyerror(oss.str().c_str());
+            }
+
+            for (uint32_t val = l_array_val; val <= l_array_val2; val++)
+            {
+                l_num_idx++;
+                rpn_id = iv_symbols->find_numeric_array_lit(val,4);
+                iv_rpnstack.push_back(rpn_id);
+                //printf("Array Index: %u  rpn_id:0x%8X\n", val, rpn_id);
+            }
+        }
+        else
+        {
+            l_num_idx++;
+            l_array_val = atoi(l_idxstr.at(i).c_str());
+            rpn_id = iv_symbols->find_numeric_array_lit(l_array_val,4);
+            iv_rpnstack.push_back(rpn_id);
+
+            //printf("Array Index: %s  decimal:%u  rpn_id:0x%8X\n",l_idxstr.at(i).c_str(),l_array_val,rpn_id);
+        }
+    }
+
+    // Save the index range for this rpn
+    if (iv_array_idx_range.size())
+    {
+        if (iv_array_idx_range.back() != l_num_idx)
+        {
+            std::ostringstream oss;
+            oss << "Array attribute has different range of index for each dimension: "
+                << i_array_idx << " iv_array_idx_range: " << iv_array_idx_range.back()
+                << " l_num_idx: " << l_num_idx;
+            yyerror(oss.str().c_str());
+        }
+    }
+    else
+    {
+       iv_array_idx_range.push_back(l_num_idx);
+    }
+
+    //printf("Rpn::push_array_index: %s, iv_array_idx_range.size %u\n", i_array_idx.c_str(), iv_array_idx_range.size());
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -284,11 +351,13 @@ Rpn *  Rpn::push_merge(Rpn * i_rpn, IfRpnOp op)
         if(this->isTrue())
         {
             iv_rpnstack.clear();
+            iv_array_idx_range.clear();
             return merge(i_rpn); // merge deletes i_rpn
         }
         if(i_rpn->isFalse() || this->isFalse())
         {
             iv_rpnstack.clear();
+            iv_array_idx_range.clear();
             delete i_rpn;
             push_op(FALSE_OP);
             return result;
@@ -304,11 +373,13 @@ Rpn *  Rpn::push_merge(Rpn * i_rpn, IfRpnOp op)
         if(this->isFalse())
         {
             iv_rpnstack.clear();
+            iv_array_idx_range.clear();
             return merge(i_rpn);  // merge deletes i_rpn
         }
         if(i_rpn->isTrue() || this->isTrue())
         {
             iv_rpnstack.clear();
+            iv_array_idx_range.clear();
             delete i_rpn;
             push_op(TRUE_OP);
             return result;
@@ -327,6 +398,7 @@ Rpn *  Rpn::push_merge(Rpn * i_rpn, IfRpnOp op)
         if((op == EQ && *i_rpn == r2) || (op == NE && *i_rpn == r3))
         {
             iv_rpnstack.clear();
+            iv_array_idx_range.clear();
             push_op(TRUE_OP);
             delete i_rpn;
             return result;
@@ -334,6 +406,7 @@ Rpn *  Rpn::push_merge(Rpn * i_rpn, IfRpnOp op)
         if((op == EQ && *i_rpn == r3) || (op == NE && *i_rpn == r2))
         {
             iv_rpnstack.clear();
+            iv_array_idx_range.clear();
             push_op(FALSE_OP);
             delete i_rpn;
             return result;
@@ -467,6 +540,10 @@ Rpn *  Rpn::push_merge(Rpn * i_rpn, IfRpnOp op)
     //dg003a end
 
     iv_rpnstack.insert(iv_rpnstack.end(), i_rpn->iv_rpnstack.begin(), i_rpn->iv_rpnstack.end());
+    for (size_t i = 0; i < i_rpn->iv_array_idx_range.size(); i++)
+    {
+        iv_array_idx_range.push_back(i_rpn->iv_array_idx_range.at(i));
+    }
     result = push_op(op);
 
     delete i_rpn;
@@ -479,6 +556,10 @@ Rpn *  Rpn::push_merge(Rpn * i_rpn, IfRpnOp op)
 Rpn * Rpn::merge(Rpn * i_rpn)
 {
     iv_rpnstack.insert(iv_rpnstack.end(), i_rpn->iv_rpnstack.begin(), i_rpn->iv_rpnstack.end());
+    for (size_t i = 0; i < i_rpn->iv_array_idx_range.size(); i++)
+    {
+        iv_array_idx_range.push_back(i_rpn->iv_array_idx_range.at(i));
+    }
     delete i_rpn;
     return this;
 }
@@ -492,6 +573,7 @@ void Rpn::bin_read(BINSEQ::const_iterator & bli, Symbols * symbols)
 
     if(symbols) iv_symbols = symbols;
     iv_rpnstack.clear();
+    iv_array_idx_range.clear();
 
     while(size)
     {
@@ -568,6 +650,10 @@ BINSEQ::const_iterator Rpn::bin_read_one_op(BINSEQ::const_iterator & bli, Symbol
 void Rpn::append(const Rpn & i_rpn)
 {
     iv_rpnstack.insert(iv_rpnstack.end(), i_rpn.iv_rpnstack.begin(), i_rpn.iv_rpnstack.end());
+    for (size_t i = 0; i < i_rpn.iv_array_idx_range.size(); i++)
+    {
+        iv_array_idx_range.push_back(i_rpn.iv_array_idx_range.at(i));
+    }
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -692,11 +778,13 @@ std::string  Rpn::listing(const char * i_desc, const std::string & spyname, bool
 
 //-------------------------------------------------------------------------------------------------
 
-void Rpn::bin_str(BINSEQ & o_blist, bool i_prepend_count)  // binary version to write to file
+// binary version to write to file
+void Rpn::bin_str(BINSEQ & o_blist, uint32_t i_num_addrs, uint32_t i_addr_num, bool i_prepend_count)
 {
     BINSEQ blist;
     uint32_t count = 0;
-
+    uint32_t l_num_idx = 0; //number of array index in the range
+    uint32_t l_num_array_attrs = 0;
 
     for(RPNSTACK::iterator i = iv_rpnstack.begin(); i != iv_rpnstack.end(); ++i)
     {
@@ -713,24 +801,68 @@ void Rpn::bin_str(BINSEQ & o_blist, bool i_prepend_count)  // binary version to 
                                     ++count;
                                     blist.push_back((uint8_t)(v >> 8));
                                 }
+                                l_num_idx = 0;  //reset
                                 break;
 
             case SYMBOL:        tag = iv_symbols->get_tag(v);
                                 blist.push_back((uint8_t)(tag >> 8));
                                 blist.push_back((uint8_t) tag);
                                 count += 2;
+                                l_num_idx = 0;  //reset
                                 break;
 
             case NUMBER:        tag = iv_symbols->get_numeric_tag(v);
                                 blist.push_back((uint8_t)(tag >> 8));
                                 blist.push_back((uint8_t) tag);
                                 count += 2;
+                                l_num_idx = 0;  //reset
                                 break;
             case ARRAY_INDEX:
+                                //Check if this rpn has any array attribute with a range of index specified
+                                if ((0 == l_num_idx) && iv_array_idx_range.size())
+                                {
+                                    if (iv_array_idx_range.size() > l_num_array_attrs)
+                                    {
+                                        l_num_idx = iv_array_idx_range.at(l_num_array_attrs);
+                                        l_num_array_attrs++;
+
+                                        //Error if index range is not equal to address range
+                                        if ((1 < l_num_idx) && (l_num_idx != i_num_addrs))
+                                        {
+                                            std::ostringstream errss;
+                                            errss << "Rpn::bin_str: Index range " << l_num_idx 
+                                                  << " != Address range " << i_num_addrs << endl;
+                                            throw std::invalid_argument(errss.str());
+                                        }
+                                    }
+                                }
+
+                                if (0 == l_num_idx)
+                                {
+                                    //Error if no index range specified
+                                    std::ostringstream errss;
+                                    errss << "Rpn::bin_str: No index range specified for array attribute\n";
+                                    throw std::invalid_argument(errss.str());
+                                }
+
+                                if (1 < l_num_idx)
+                                {
+                                    v = *(i + i_addr_num);
+                                    if ((v & TYPE_MASK) != ARRAY_INDEX)
+                                    {
+                                        std::ostringstream errss;
+                                        errss << "Rpn::bin_str: Rpn is not array index " << endl;
+                                        throw std::invalid_argument(errss.str());
+                                    }
+                                }
                                 tag = iv_symbols->get_numeric_array_tag(v);
                                 blist.push_back((uint8_t)(tag >> 8));
                                 blist.push_back((uint8_t) tag);
                                 count += 2;
+                                if (1 < l_num_idx)      //Skip the other indexes in the range
+                                {
+                                    i += l_num_idx - 1;
+                                }
                                 break;
 
             default:

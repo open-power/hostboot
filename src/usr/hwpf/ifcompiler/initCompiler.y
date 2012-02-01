@@ -24,7 +24,8 @@
 //                 andrewg  09/19/11  Updates based on review
 //                 camvanng 11/08/11  Added support for attribute enums
 //                 andrewg  11/09/11  Refactor to use common include with hwp framework.
-//                 camvanng 12/12/11   Support multiple address ranges within a SCOM address
+//                 camvanng 12/12/11  Support multiple address ranges within a SCOM address
+//                 camvanng 01/20/12  Support for using a range indexes for array attributes
 // End Change Log *********************************************************************************
 /**
  * @file initCompiler.y
@@ -110,7 +111,6 @@ int scom;
 
 
 /* top is lowest precedent - done last */
-%left ATTRIBUTE_INDEX /* irrelevant precedence, but needed for clean compile */
 %left INIT_LOGIC_OR
 %left INIT_LOGIC_AND
 %left '|'     /* bitwise OR */
@@ -122,6 +122,7 @@ int scom;
 %left '-' '+'
 %left '*' '/' '%'
 %right '!' '~'   /* logic negation  bitwise complement*/
+%left ATTRIBUTE_INDEX /* highest precedence */
 /* bottom is highest precedent - done first */
 
 
@@ -191,12 +192,11 @@ scombody:        scombodyline ';' {}
 scombodyline:   INIT_SCOMD  ',' scomdrows  {}
                 | INIT_BITS ',' bitsrows  {}
                 | INIT_EXPR ',' exprrows  { init::dbg << "Add col EXPR" << endl; current_scom->add_col("EXPR"); }
-                | INIT_ID   ',' idrows  {   
+                | INIT_ID   ',' idrows  {
                                             current_scom->add_col(*($1));
                                             init::dbg << "Add col " << *($1) << endl;
                                             delete $1;
                                         }
-
 ;
 
 
@@ -264,7 +264,7 @@ expr:   INIT_INTEGER                    { $$= new init::Rpn($1,yyscomlist->get_s
         | INIT_ID                       { $$= new init::Rpn(*($1),yyscomlist->get_symbols()); delete $1; }
         | ATTRIBUTE_ENUM                { $$= new init::Rpn((yyscomlist->get_symbols())->get_attr_enum_val(*($1)),yyscomlist->get_symbols()); delete $1; }
         | INIT_INT64                    { $$=new init::Rpn($1,yyscomlist->get_symbols()); }
-        | expr ATTRIBUTE_INDEX          { $1->push_array_index(*($2));}
+        | expr ATTRIBUTE_INDEX          { $1->push_array_index(*($2)); delete $2; }
         | expr INIT_LOGIC_OR expr       { $$ = $1->push_merge($3,OR); }
         | expr INIT_LOGIC_AND expr      { $$ = $1->push_merge($3,AND); }
         | expr INIT_EQ expr             { $$ = $1->push_merge($3,EQ); }

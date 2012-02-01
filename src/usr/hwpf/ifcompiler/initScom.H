@@ -28,6 +28,7 @@
 //                 camvanng 12/12/11 Support multiple address ranges within a SCOM address
 //                                   Use strtoull vs strtoul for 32-bit platforms
 //                 camvanng 12/15/11 Support for multiple duplicate addresses setting different bits
+//                 camvanng 01/20/12 Support for using a range of indexes for array attributes
 // End Change Log *********************************************************************************
 
 /**
@@ -179,7 +180,7 @@ namespace init
         private:  // functions
 
             string list_one(RANGE range);
-            void bin_list_one(BINSEQ & blist,uint64_t i_addr, RANGE range);
+            void bin_list_one(BINSEQ & blist,uint64_t i_addr, uint32_t i_addr_num, RANGE range);
 
             /**
              * Optimize the row RPNs
