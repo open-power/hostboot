@@ -292,6 +292,27 @@ def readLongLong(address):
     return hexDumpToNumber(hexlist)
 
 
+
+# Write simics memory. address is an integer.
+# data is a list of byte-sized integers.
+def writeSimicsMemory(address,data):
+    size = len(data)
+    conf.phys_mem.memory[[address, address+size-1]] = data;
+
+# Convert an integer to a byte list <size> bytes long.
+def intToList(n,size):
+    lst = []
+    for i in range(size):
+        b = n & 0xFF;
+        lst.insert(0,b)
+        n = n >> 8
+    return lst
+
+# Write the 64-bit big endian n at the address given.
+def writeLongLong(address,n):
+    writeSimicsMemory(address,intToList(n,8))
+
+
 # MAGIC_INSTRUCTION hap handler 
 # arg contains the integer parameter n passed to MAGIC_INSTRUCTION(n)
 # See src/include/arch/ppc.H for the definitions of the magic args.
@@ -319,10 +340,16 @@ def magic_instruction_callback(user_arg, cpu, arg):
         SIM_run_alone(run_command, saveCommand )
         # Run fsp-trace on tracBINARY file (implied), append output to tracMERG
         os.system( "fsp-trace ./ -s hbotStringFile >>tracMERG  2>/dev/null" )
+        # Reset the buffer byte count in Simics memory to 1, preserving the byte
+        # at offset 0 of the buffer which contains a 0x02 in fsp-trace style.
+        writeLongLong(tracBinaryInfoAddr+8, 1 )
 
 
 # Continuous trace:  Open the symbols and find the address for 
 # "g_tracBinaryInfo"  Convert to a number and save in tracBinaryInfoAddr
+# The layout of g_tracBinaryInfo is a 64-bit pointer to the mixed buffer
+# followed by a 64-bit count of bytes used in the buffer.  See 
+# src/usr/trace/trace.C and mixed_trace_info_t.
 for line in open('hbicore.syms'):
     if "g_tracBinaryInfo" in line:
         words=line.split(",")
