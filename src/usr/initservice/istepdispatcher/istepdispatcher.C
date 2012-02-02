@@ -59,6 +59,7 @@
 #include    "splesscommon.H"
 
 #include    <isteps/istepmasterlist.H>
+#include    <targeting/util.H>
 
 
 //  -----   namespace   ERRORLOG    -------------------------------------------
@@ -489,13 +490,7 @@ void    IStepDispatcher::singleStepISteps( void *  io_ptr )
          */
         // Don't delay as long in VBU because it will take VERY long to
         // run the simulator
-        TARGETING::EntityPath syspath(TARGETING::EntityPath::PATH_PHYSICAL);
-        syspath.addLast(TARGETING::TYPE_SYS,0);
-        TARGETING::Target* sys = TARGETING::targetService().toTarget(syspath);
-        uint8_t vpo_mode = 0;
-        if( sys
-                && sys->tryGetAttr<TARGETING::ATTR_IS_SIMULATION>(vpo_mode)
-                && (vpo_mode == 1) )
+        if( TARGETING::is_vpo() )
         {
             // VBU delay per Patrick
             nanosleep(0,TEN_CTX_SWITCHES_NS);
@@ -721,7 +716,7 @@ void IStepDispatcher::handleBreakPoint(const fapi::Target & i_target, uint64_t i
     writeSts( l_sts );
 
     // TODO Tell the outside world that a break point has been hit?
-    // TODO send i_target & i_info 
+    // TODO send i_target & i_info
 
     // Poll for cmd to resume
     while(1)
@@ -763,13 +758,7 @@ void IStepDispatcher::handleBreakPoint(const fapi::Target & i_target, uint64_t i
          */
         // Don't delay as long in VBU because it will take VERY long to
         // run the simulator
-        TARGETING::EntityPath syspath(TARGETING::EntityPath::PATH_PHYSICAL);
-        syspath.addLast(TARGETING::TYPE_SYS,0);
-        TARGETING::Target* sys = TARGETING::targetService().toTarget(syspath);
-        uint8_t vpo_mode = 0;
-        if( sys
-                && sys->tryGetAttr<TARGETING::ATTR_IS_SIMULATION>(vpo_mode)
-                && (vpo_mode == 1) )
+        if( TARGETING::is_vpo() )
         {
             // VBU delay per Patrick
             nanosleep(0,TEN_CTX_SWITCHES_NS);

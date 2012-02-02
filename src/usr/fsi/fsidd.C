@@ -42,6 +42,7 @@
 #include <sys/time.h>
 #include <string.h>
 #include <algorithm>
+#include <targeting/util.H>
 
 // FSI : General driver traces
 trace_desc_t* g_trac_fsi = NULL;
@@ -1203,13 +1204,8 @@ errlHndl_t FsiDD::initPort(FsiChipInfo_t i_fsiInfo,
 
         // Do not initialize slave in VBU because they are already done
         // before we run
-        TARGETING::EntityPath syspath(TARGETING::EntityPath::PATH_PHYSICAL);
-        syspath.addLast(TARGETING::TYPE_SYS,0);
-        TARGETING::Target* sys = TARGETING::targetService().toTarget(syspath);
-        uint8_t vpo_mode = 0;
-        if( sys
-            && sys->tryGetAttr<TARGETING::ATTR_IS_SIMULATION>(vpo_mode)
-            && (vpo_mode == 1) )
+        //@todo - switch to SP-Capabilities Attribute (See Issue 35817)
+        if( TARGETING::is_vpo() )
         {
             TRACFCOMP( g_trac_fsi, "FsiDD::initPort> Skipping Init for VPO" );
             o_enabled = true;

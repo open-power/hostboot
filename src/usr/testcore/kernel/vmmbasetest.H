@@ -33,7 +33,7 @@
 #include <arch/ppc.H>
 #include <sys/mm.h>
 #include <usr/vmmconst.h>
-#include <targeting/targetservice.H>
+#include <targeting/util.H>
 
 class VmmBaseTest : public CxxTest::TestSuite
 {
@@ -123,13 +123,7 @@ class VmmBaseTest : public CxxTest::TestSuite
 
             // Don't delay in VPO because it will take VERY long to
             // run the simulator
-            TARGETING::EntityPath syspath(TARGETING::EntityPath::PATH_PHYSICAL);
-            syspath.addLast(TARGETING::TYPE_SYS,0);
-            TARGETING::Target* sys = TARGETING::targetService().toTarget(syspath);
-            uint8_t vpo_mode = 0;
-            if( sys
-                && sys->tryGetAttr<TARGETING::ATTR_IS_SIMULATION>(vpo_mode)
-                && (vpo_mode == 0) )
+            if( TARGETING::is_vpo() )
             {
                 nanosleep(1,0);
             }

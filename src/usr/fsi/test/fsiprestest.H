@@ -35,6 +35,7 @@
 #include <targeting/predicates/predicatectm.H>
 #include <targeting/predicates/predicatepostfixexpr.H>
 #include <targeting/iterators/rangefilter.H>
+#include <targeting/util.H>
 
 using namespace TARGETING;
 using namespace DeviceFW;
@@ -56,20 +57,14 @@ class FSIPresTest : public CxxTest::TestSuite
          */
         void testPresence()
         {
-          //@todo
-          //@VBU workaround - Disable test case
-          //Temporarily disable this test case in VBU because of
-          //an MFSI/CFSI XSCOM hardware bug.
-          TARGETING::EntityPath syspath(TARGETING::EntityPath::PATH_PHYSICAL);
-          syspath.addLast(TARGETING::TYPE_SYS,0);
-          TARGETING::Target* sys = TARGETING::targetService().toTarget(syspath);
-          uint8_t vpo_mode = 0;
-          if( sys
-              && sys->tryGetAttr<TARGETING::ATTR_IS_SIMULATION>(vpo_mode)
-              && (vpo_mode == 1) )
-          {
-              return;
-          }
+            //@todo - Issue 35803 
+            //@VBU workaround - Disable test case
+            //Temporarily disable this test case in VBU because of
+            //an MFSI/CFSI XSCOM hardware bug.
+            if( TARGETING::is_vpo() )
+            {
+               return;
+            }
 
             Target* l_masterChip = NULL;
             targetService().masterProcChipTargetHandle(l_masterChip);

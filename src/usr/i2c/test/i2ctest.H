@@ -36,6 +36,7 @@
 #include <devicefw/driverif.H>
 #include <i2c/i2creasoncodes.H>
 #include <targeting/predicates/predicatectm.H>
+#include <targeting/util.H>
 
 extern trace_desc_t* g_trac_i2c;
 
@@ -114,13 +115,7 @@ class I2CTest: public CxxTest::TestSuite
             //@VBU workaround - Disable I2C test case on fake target
             //Test case use fake targets, which will fail when running
             //on VBU.  Need to fix this.
-            TARGETING::EntityPath syspath(TARGETING::EntityPath::PATH_PHYSICAL);
-            syspath.addLast(TARGETING::TYPE_SYS,0);
-            TARGETING::Target* sys = TARGETING::targetService().toTarget(syspath);
-            uint8_t vpo_mode = 0;
-            if( sys
-                && sys->tryGetAttr<TARGETING::ATTR_IS_SIMULATION>(vpo_mode)
-                && (vpo_mode == 1) )
+            if( TARGETING::is_vpo() )
             {
                 return;
             }

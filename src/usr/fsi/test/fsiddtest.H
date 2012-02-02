@@ -37,6 +37,7 @@
 #include <fsi/fsiif.H>
 #include <fsi/fsi_reasoncodes.H>
 #include <sys/time.h>
+#include <targeting/util.H>
 
 extern trace_desc_t* g_trac_fsi;
 
@@ -114,17 +115,11 @@ class FsiDDTest : public CxxTest::TestSuite
      */
     void test_readWrite(void)
     {
-        //@todo
+        //@todo - Issue 35803 
         //@VBU workaround - Disable test case
         //Temporarily disable this test case in VBU because of
         //an MFSI/CFSI XSCOM hardware bug.
-        TARGETING::EntityPath syspath(TARGETING::EntityPath::PATH_PHYSICAL);
-        syspath.addLast(TARGETING::TYPE_SYS,0);
-        TARGETING::Target* sys = TARGETING::targetService().toTarget(syspath);
-        uint8_t vpo_mode = 0;
-        if( sys
-            && sys->tryGetAttr<TARGETING::ATTR_IS_SIMULATION>(vpo_mode)
-            && (vpo_mode == 1) )
+        if( TARGETING::is_vpo() )
         {
             return;
         }
@@ -414,17 +409,11 @@ class FsiDDTest : public CxxTest::TestSuite
     void test_badTargets(void)
     {
 
-        //@todo
+        //@todo - Issue 35803 
         //@VBU workaround - Disable test case
         //Temporarily disable this test case in VBU because of
         //an MFSI/CFSI XSCOM hardware bug.
-        TARGETING::EntityPath syspath(TARGETING::EntityPath::PATH_PHYSICAL);
-        syspath.addLast(TARGETING::TYPE_SYS,0);
-        TARGETING::Target* sys = TARGETING::targetService().toTarget(syspath);
-        uint8_t vpo_mode = 0;
-        if( sys
-            && sys->tryGetAttr<TARGETING::ATTR_IS_SIMULATION>(vpo_mode)
-            && (vpo_mode == 1) )
+        if( TARGETING::is_vpo() )
         {
             return;
         }

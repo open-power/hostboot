@@ -43,6 +43,7 @@
 #include    <fsi/fsiif.H>
 #include    <hwas/hwas.H>
 #include    <hwas/deconfigGard.H>
+#include    <targeting/util.H>
 
 namespace   HWAS
 {
@@ -97,25 +98,6 @@ void    init_fsi( void *io_pArgs )
             static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
 
     TRACDCOMP( g_trac_hwas, "init_fsi entry" );
-
-    //@todo
-    //@VBU workaround - Disable init_fsi
-    //Temporarily disable the FSI initialization in VBU because of
-    //an MFSI/CFSI XSCOM hardware bug.
-    TARGETING::EntityPath syspath(TARGETING::EntityPath::PATH_PHYSICAL);
-    syspath.addLast(TARGETING::TYPE_SYS,0);
-    TARGETING::Target* sys = TARGETING::targetService().toTarget(syspath);
-    uint8_t vpo_mode = 0;
-    if( sys
-            && sys->tryGetAttr<TARGETING::ATTR_IS_SIMULATION>(vpo_mode)
-            && (vpo_mode == 1) )
-    {
-        //  wait here on the barrier, then end the task.
-        pTaskArgs->waitChildSync();
-        task_end();
-        TRACFCOMP( g_trac_hwas, "HWBUG Workaround - No FSI initialization");
-        return;
-    }
 
     l_errl  =   FSI::initializeHardware( );
     if ( l_errl )

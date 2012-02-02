@@ -29,6 +29,7 @@
 #include <errl/errlmanager.H>
 #include <kernel/console.H>
 #include <targeting/targetservice.H>
+#include <targeting/util.H>
 
 
 class IntrTest: public CxxTest::TestSuite
@@ -41,13 +42,7 @@ class IntrTest: public CxxTest::TestSuite
         {
 
             // TODO Temporaritly DISABLE in VBU until P8 support is added
-            TARGETING::EntityPath syspath(TARGETING::EntityPath::PATH_PHYSICAL);
-            syspath.addLast(TARGETING::TYPE_SYS,0);
-            TARGETING::Target* sys = TARGETING::targetService().toTarget(syspath);
-            uint8_t vpo_mode = 0;
-            if( sys
-                && sys->tryGetAttr<TARGETING::ATTR_IS_SIMULATION>(vpo_mode)
-                && (vpo_mode == 1) )
+            if( TARGETING::is_vpo() )
             {
                 return;
             }
@@ -114,13 +109,7 @@ class IntrTest: public CxxTest::TestSuite
         void test_enableDisable( void )
         {
             // TODO Temporaritly DISABLE in VBU until P8 support is added
-            TARGETING::EntityPath syspath(TARGETING::EntityPath::PATH_PHYSICAL);
-            syspath.addLast(TARGETING::TYPE_SYS,0);
-            TARGETING::Target* sys = TARGETING::targetService().toTarget(syspath);
-            uint8_t vpo_mode = 0;
-            if( sys
-                && sys->tryGetAttr<TARGETING::ATTR_IS_SIMULATION>(vpo_mode)
-                && (vpo_mode == 1) )
+            if( TARGETING::is_vpo() )
             {
                 return;
             }
@@ -167,13 +156,7 @@ class IntrTest: public CxxTest::TestSuite
             // TODO need to investigate.
 #ifdef __NOT_NOW__
             // TODO Temporaritly DISABLE in VBU until P8 support is added
-            TARGETING::EntityPath syspath(TARGETING::EntityPath::PATH_PHYSICAL);
-            syspath.addLast(TARGETING::TYPE_SYS,0);
-            TARGETING::Target* sys = TARGETING::targetService().toTarget(syspath);
-            uint8_t vpo_mode = 0;
-            if( sys
-                && sys->tryGetAttr<TARGETING::ATTR_IS_SIMULATION>(vpo_mode)
-                && (vpo_mode == 1) )
+            if( TARGETING::is_vpo() )
             {
                 return;
             }

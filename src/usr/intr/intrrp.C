@@ -37,6 +37,7 @@
 #include <sys/task.h>
 #include <targeting/targetservice.H>
 #include <vmmconst.h>
+#include <targeting/util.H>
 
 using namespace INTR;
 
@@ -81,13 +82,7 @@ errlHndl_t IntrRp::_init()
     errlHndl_t err = NULL;
 
     // TODO Temporaritly DISABLE in VBU until P8 support is added
-    TARGETING::EntityPath syspath(TARGETING::EntityPath::PATH_PHYSICAL);
-    syspath.addLast(TARGETING::TYPE_SYS,0);
-    TARGETING::Target* sys = TARGETING::targetService().toTarget(syspath);
-    uint8_t vpo_mode = 0;
-    if( sys
-        && sys->tryGetAttr<TARGETING::ATTR_IS_SIMULATION>(vpo_mode)
-        && (vpo_mode == 1) )
+    if( TARGETING::is_vpo() )
     {
         iv_isVBU = true;
     }
@@ -394,13 +389,8 @@ void IntrRp::initInterruptPresenter(const PIR_t i_pir) const
     // TODO Temporaritly DISABLE in VBU until P8 support is added
     if(iv_isVBU) return;
 
-    TARGETING::EntityPath syspath(TARGETING::EntityPath::PATH_PHYSICAL);
-    syspath.addLast(TARGETING::TYPE_SYS,0);
-    TARGETING::Target* sys = TARGETING::targetService().toTarget(syspath);
-    uint8_t vpo_mode = 0;
-    if( sys
-        && sys->tryGetAttr<TARGETING::ATTR_IS_SIMULATION>(vpo_mode)
-        && (vpo_mode == 1) )
+    //@fixme - this seems redundant...
+    if( TARGETING::is_vpo() )
     {
         return;
     }
