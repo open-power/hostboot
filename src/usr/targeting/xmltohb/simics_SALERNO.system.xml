@@ -427,7 +427,7 @@
 
 <targetInstance>
     <id>sys0node0proc0dimm0</id>
-    <type>card-dimm</type>
+    <type>lcard-dimm</type>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/dimm-0</default>

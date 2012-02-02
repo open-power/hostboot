@@ -769,12 +769,26 @@
 </targetType>
 
 <targetType>
-    <id>card-dimm</id>
+    <id>lcard-dimm</id>
     <parent>card</parent>
     <attribute>
         <id>TYPE</id>
         <default>DIMM</default>
     </attribute>
+    <attribute>
+        <id>CLASS</id>
+        <default>LOGICAL_CARD</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+    </attribute>
+    <attribute>
+        <id>MBA_PORT</id>
+    </attribute>
+    <attribute>
+        <id>MBA_SLOT</id>
+    </attribute>
+
     <!-- Defaulting this info to the one Simics Dummy device that we have -->
     <attribute>
         <id>EEPROM_ADDR_INFO0</id>
@@ -785,6 +799,18 @@
             <field><id>engine</id><value>0</value></field>
         </default>
     </attribute>
+</targetType>
+
+<targetType>
+    <id>lcard-dimm-jedec</id>
+    <parent>lcard-dimm</parent>
+    <attribute><id>MODEL</id><default>JEDEC</default></attribute>
+</targetType>
+
+<targetType>
+    <id>lcard-dimm-cdimm</id>
+    <parent>lcard-dimm</parent>
+    <attribute><id>MODEL</id><default>CDIMM</default></attribute>
 </targetType>
 
 </attributes>

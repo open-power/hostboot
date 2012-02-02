@@ -58,11 +58,15 @@
     <enumerator>
         <name>SYS</name>
         <value>6</value>
-    </enumerator>             
+    </enumerator> 
+    <enumerator>
+        <name>LOGICAL_CARD</name>
+        <value>7</value>
+    </enumerator>            
     <enumerator>
         <name>MAX</name>
-        <value>7</value>
-    </enumerator>             
+        <value>8</value>
+    </enumerator>        
     <default>NA</default>
 </enumerationType>
 
@@ -2791,5 +2795,41 @@
     <persistency>non-volatile</persistency>
     <readable/>
 </attribute>    
+
+<attribute>
+    <id>POSITION</id>
+    <description>Position of target relative to node</description>
+    <simpleType>
+        <uint16_t>
+            <default>0</default>
+        </uint16_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>MBA_PORT</id>
+    <description>MBA port this DIMM is connected to</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>MBA_SLOT</id>
+    <description>MBA slot this DIMM is connected to</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
 
 </attributes>

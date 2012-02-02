@@ -85,8 +85,9 @@ $(call GENTARGET,$(XMLTOHB_TARGETS)) : \
 	     --src-output-dir=$(dir $@) --img-output-dir=none \
 	     --img-output-file=none
 
-# system-specific XML needs the generic plus the xxx.system.xml file
-${GENDIR}/%.hb.xml: %.system.xml ${XMLTOHB_GENERIC_SOURCES}
+# system-specific XML needs the generic plus the xxx.system.xml file + the
+# MRW file
+${GENDIR}/%.hb.xml: %.system.xml ${XMLTOHB_GENERIC_SOURCES} %.mrw.xml
 	./mergexml.sh $^ > $@
 
 # create the binary files

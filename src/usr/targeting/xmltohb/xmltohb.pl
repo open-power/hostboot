@@ -1943,6 +1943,9 @@ sub packEntityPath {
     my (@paths) = split(/\//,$path);
 
     my $type = 0;
+
+    # Trim whitespace from the type
+    $typeStr =~ s/^\s+|\s+$//g;
     if($typeStr eq "physical")
     {
         $type = 2;
@@ -1953,7 +1956,7 @@ sub packEntityPath {
     }
     else
     {
-        fatal("Unsupported enity path type.");
+        fatal("Unsupported enity path type of [$value], [$typeStr], [$path].");
     }
 
     if( (scalar @paths) > $maxPathElements)
