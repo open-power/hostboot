@@ -100,7 +100,7 @@ sub main
     close( ERRLDATA );
 
     my $imagePath;
-    $imagePath = ::determineImagePath();
+    $imagePath = ::getImgPath();
     if (not defined $imagePath)
     {
         ::userDisplay "Can not find img path to errlparser binary.\n";

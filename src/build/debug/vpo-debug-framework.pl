@@ -33,6 +33,8 @@ use Getopt::Long;
 use Pod::Usage;
 use File::Temp ('tempfile');
 use File::Basename;
+use lib dirname (__FILE__);
+#print __FILE__."\n";
 
 use Hostboot::_DebugFramework;
 
@@ -47,15 +49,17 @@ use constant NUMTHREADS => 8;
 # Common options for the different tools in VPO environment
 #------------------------------------------------------------
 my %optionInfo = (
-    "--test" => "Use the hbicore_test.syms file instead of the default.",
-	"--img-path=<path>" => "The path to the \"img\" directory where the syms file, etc is located.",
-	"--out-path=<path>" => "The path to the directory where the output will be saved.",
-    "--debug" => "Enable debug tracing.",
-	"-k#" => "The cage to act on.",
-	"-n#" => "The node to act on.",
-	"-s#" => "The slot to act on.",
-	"-p#" => "The chip position to act on.",
-	"-c#" => "The core/chipUnit to act on.",
+    "--test" => ["Use the hbicore_test.syms file instead of the default."],
+    "--img-path=<path>" => ["The path to the \"img\" directory where the syms file, etc is located.",
+                            "User can also set the env variable HBDIR to the path of  the \"img\"",
+                            "directory instead of using this option."],
+    "--out-path=<path>" => ["The path to the directory where the output will be saved."],
+    "--debug" => ["Enable debug tracing."],
+    "-k#" => ["The cage to act on."],
+    "-n#" => ["The node to act on."],
+    "-s#" => ["The slot to act on."],
+    "-p#" => ["The chip position to act on."],
+    "-c#" => ["The core/chipUnit to act on."],
 );
 
 #--------------------------------------------------------------------------------
@@ -76,6 +80,7 @@ my @ecmdOpt = ("-c3");
 my @threadState = ();
 my $l2Flushed = 0;
 my $fh;
+my $vbuToolDir = "/gsa/ausgsa/projects/h/hostboot/vbutools/latest";
 
 my $imgPath = "";
 my $hbDir = $ENV{'HBDIR'};
@@ -240,8 +245,7 @@ sub flushL2
         #stop instructions
         stopInstructions("all");
 
-        my $command = "/afs/awd.austin.ibm.com/projects/eclipz/lab/p8/compiled_procs/procs/p8_l2_flush_wrap.x86 ";
-        $command .= "@ecmdOpt $flag";
+        my $command = "$vbuToolDir/p8_l2_flush_wrap.x86 @ecmdOpt $flag";
         die "ERROR: cannot flush L2" if (system("$command") != 0);
 
         $l2Flushed = 1;
@@ -277,7 +281,7 @@ sub readData
 
     #Read the cache lines from L3 and save to temp file
     my (undef, $fname) = tempfile("tmpXXXXX");
-    my $command = sprintf ("p8_dump_l3 %x $numCacheLines -f $fname -b @ecmdOpt",
+    my $command = sprintf ("$vbuToolDir/p8_dump_l3 %x $numCacheLines -f $fname -b @ecmdOpt",
                             $addr);
 
     if ($debug)
@@ -344,8 +348,7 @@ sub writeData
     }
 
     #write the cachelines
-    my $command = sprintf("/afs/awd/projects/eclipz/lab/p8/gsiexe/p8_load_l3 -f $fname -o 0x%x -b @ecmdOpt",
-                          $base);
+    my $command = sprintf("$vbuToolDir/p8_load_l3 -f $fname -o 0x%x -b @ecmdOpt", $base);
     die "ERROR: cannot write L3" if (system("$command") != 0);
 
     unlink($fname);
@@ -369,10 +372,8 @@ sub stopInstructions
 {
     my $thread = shift;
 
-    #todo Change to a hostboot dir where a copy of the tool will be kept
     #Stopping all threads
-    my $command = "/afs/awd/projects/eclipz/lab/p8/u/karm/ekb/eclipz/chips/p8/working/procedures/utils/p8_thread_control.x86";
-    $command .= " @ecmdOpt -stop -t$thread $flag";
+    my $command = "$vbuToolDir/p8_thread_control.x86 @ecmdOpt -stop -t$thread $flag";
 
     if ($debug)
     {
@@ -387,10 +388,8 @@ sub startInstructions
 {
     my $thread = shift;
 
-    #todo Change to a hostboot dir where a copy of the tool will be kept
     #Starting all threads
-    my $command = "/afs/awd/projects/eclipz/lab/p8/u/karm/ekb/eclipz/chips/p8/working/procedures/utils/p8_thread_control.x86";
-    $command .= " @ecmdOpt -start -t$thread $flag";
+    my $command = "$vbuToolDir/p8_thread_control.x86 @ecmdOpt -start -t$thread $flag";
 
     if ($debug)
     {
@@ -409,9 +408,7 @@ sub queryThreadState
 {
     my $thread = shift;
 
-    #todo Change to a hostboot dir where a copy of the tool will be kept
-    my $command = "/afs/awd/projects/eclipz/lab/p8/u/karm/ekb/eclipz/chips/p8/working/procedures/utils/p8_thread_control.x86";
-    $command .= " @ecmdOpt -query -t$thread $flag";
+    my $command = "$vbuToolDir/p8_thread_control.x86 @ecmdOpt -query -t$thread";
     my $result = `$command`;
 
     if ($debug)
@@ -591,7 +588,11 @@ sub displayToolModuleHelp
         for my $key ( keys %optionInfo )
         {
             print "\t$key\n";
-            print "\t\t$optionInfo{$key}\n";
+
+            for my $i (0 .. $#{ $optionInfo{$key} } )
+            {
+                print "\t\t$optionInfo{$key}[$i]\n";
+            }
         }
 
         if (defined $info{notes})

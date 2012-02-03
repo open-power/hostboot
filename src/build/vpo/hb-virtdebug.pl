@@ -91,6 +91,7 @@ my $outDir = getcwd();            #Default = current working directory
 my @ecmdOpt;                      #Array of ecmd options
 my $core = "3";                   #Default is core 3
 my @threadState = ();             #Array to store the thread states
+my $vbuToolDir = "/gsa/ausgsa/projects/h/hostboot/vbutools/latest";
 
 my $hbDir = $ENV{'HBDIR'};
 if (defined ($hbDir))
@@ -113,20 +114,20 @@ for (my $i=0; $i<$numArgs; $i++)
         printUsage();
         exit (0);
     }
-    elsif ($ARGV[$i] eq "--in")
+    elsif ($ARGV[$i] eq "--img-path")
     {
         if (($i + 1) >= $numArgs)
         {
-            die "No value given for --in parameter.\n";
+            die "No value given for --img-path parameter.\n";
         }
         $i++;
         $hbDir = $ARGV[$i];
     }
-    elsif ($ARGV[$i] eq "--out")
+    elsif ($ARGV[$i] eq "--out-path")
     {
         if (($i + 1) >= $numArgs)
         {
-            die "No value given for --out parameter.\n";
+            die "No value given for --out-path parameter.\n";
         }
         $i++;
         $outDir = $ARGV[$i];
@@ -278,8 +279,7 @@ stopInstructions("all");
 #Flush L2 - this step is needed in order to dump L3 quickly
 #------------------------------------------------------------------------------
 my $command = "";
-$command = "/afs/awd.austin.ibm.com/projects/eclipz/lab/p8/compiled_procs/procs/p8_l2_flush_wrap.x86 ";
-$command .= "@ecmdOpt -quiet";
+$command = "$vbuToolDir/p8_l2_flush_wrap.x86 @ecmdOpt -quiet";
 #print "$command\n";
 die "ERROR: cannot flush L2" if (system("$command") != 0);
 
@@ -315,7 +315,7 @@ if ($dumpPrintk)
         #print "addr $addr, offset $offset, size $size, cacheLines $cacheLines\n";
 
         #Read the kernel printk buffer from L3 and save to file
-        $command = sprintf ("p8_dump_l3 %x $cacheLines -f $string -b @ecmdOpt",
+        $command = sprintf ("$vbuToolDir/p8_dump_l3 %x $cacheLines -f $string -b @ecmdOpt",
                             $addr);
         print "$command\n";
         die if (system("$command") != 0);
@@ -365,7 +365,7 @@ if ($dumpTrace)
         }
         #print "addr $addr, offset $offset, size $size, cacheLines $cacheLines\n";
 
-        $command = sprintf ("p8_dump_l3 %x $cacheLines -f $string -b @ecmdOpt",
+        $command = sprintf ("$vbuToolDir/p8_dump_l3 %x $cacheLines -f $string -b @ecmdOpt",
                             $addr);
         print "$command\n";
         die if (system("$command") != 0);
@@ -397,7 +397,7 @@ if ($dumpTrace)
                 }
                 #print "$compName, addr $compBufAddr, offset $offset, cacheLines $cacheLines\n";
 
-                $command = sprintf ("p8_dump_l3 %x $cacheLines -f $outDir/trace.out -b @ecmdOpt",
+                $command = sprintf ("$vbuToolDir/p8_dump_l3 %x $cacheLines -f $outDir/trace.out -b @ecmdOpt",
                                    $compBufAddr);
                 print "$command\n";
                 die if (system("$command") != 0);
@@ -418,7 +418,7 @@ if ($dumpTrace)
                     $cacheLines += 1;
                 }
                 #print "$compName, addr $compBufAddr, offset $offset, cacheLines $cacheLines\n";
-                $command = sprintf ("p8_dump_l3 %x $cacheLines -f $outDir/trace.out -b @ecmdOpt",
+                $command = sprintf ("$vbuToolDir/p8_dump_l3 %x $cacheLines -f $outDir/trace.out -b @ecmdOpt",
                                    $compBufAddr);
                 print "$command\n";
                 die if (system("$command") != 0);
@@ -500,7 +500,7 @@ if ($dumpErrl)
         }
         #print "addr $addr, offset $offset, size $size, cacheLines $cacheLines\n";
 
-        $command = sprintf ("p8_dump_l3 %x $cacheLines -f $string -b @ecmdOpt",
+        $command = sprintf ("$vbuToolDir/p8_dump_l3 %x $cacheLines -f $string -b @ecmdOpt",
                             $addr);
         print "$command\n";
         die if (system("$command") != 0);
@@ -531,7 +531,7 @@ if ($dumpErrl)
         }
         else
         {
-	    print "\nWARNING: Cannot read the error logs.\n";
+            print "\nWARNING: Cannot read the error logs.\n";
         }
     }
 }
@@ -551,7 +551,7 @@ if ($dumpAll)
 
     #Dump L3 to file
     my $hbDumpFile = "$outDir/hbdump.$timeStamp";
-    $command = "p8_dump_l3 0 65536 -f $hbDumpFile -b @ecmdOpt";
+    $command = "$vbuToolDir/p8_dump_l3 0 65536 -f $hbDumpFile -b @ecmdOpt";
     #print "$command\n";
     die "ERROR: cannot dump L3" if (system("$command") != 0);
 
@@ -564,7 +564,7 @@ if ($dumpAll)
     else
     {
         print "\nWARNING: Cannot dump L3.  Did you stop instructions?\n\n";
-	unlink $hbDumpFile;
+        unlink $hbDumpFile;
     }
 }
 
@@ -586,9 +586,8 @@ sub stopInstructions
 {
     my $thread = shift;
 
-    #todo Change to a hostboot dir where a copy of the tool will be kept
     #Stopping all threads
-    my $command = "/afs/awd/projects/eclipz/lab/p8/u/karm/ekb/eclipz/chips/p8/working/procedures/utils/p8_thread_control.x86";
+    my $command = "$vbuToolDir/p8_thread_control.x86";
     $command .= " @ecmdOpt -stop -t$thread -quiet";
     die "ERROR: cannot stop instructions" if (system("$command") != 0);
 }
@@ -600,9 +599,8 @@ sub startInstructions
 {
     my $thread = shift;
 
-    #todo Change to a hostboot dir where a copy of the tool will be kept
     #Starting all threads
-    my $command = "/afs/awd/projects/eclipz/lab/p8/u/karm/ekb/eclipz/chips/p8/working/procedures/utils/p8_thread_control.x86";
+    my $command = "$vbuToolDir/p8_thread_control.x86";
     $command .= " @ecmdOpt -start -t$thread -quiet";
     die "ERROR: cannot start instructions" if (system("$command") != 0);
 }
@@ -616,14 +614,12 @@ sub queryThreadState
     my $thread = shift;
     #print "thread $thread\n";
 
-    #todo Change to a hostboot dir where a copy of the tool will be kept
-    my $command = "/afs/awd/projects/eclipz/lab/p8/u/karm/ekb/eclipz/chips/p8/working/procedures/utils/p8_thread_control.x86";
-    $command .= " @ecmdOpt -query -t$thread --quiet";
+    my $command = "$vbuToolDir/p8_thread_control.x86 @ecmdOpt -query -t$thread";
     my $result = `$command`;
     #print "result:\n $result";
     if ($result =~ m/Quiesced/)
     {
-	    #print "Thread $thread is quiesced\n";
+        #print "Thread $thread is quiesced\n";
         return "Quiesced";
     }
     #print "Thread $thread is running\n";
@@ -777,8 +773,9 @@ sub appendBinFile($$)
 #------------------------------------------------------------------------------
 sub printUsage()
 {
-    print ("\nUsage: hb-virtdebug.pl [--help] | [--in <path to .syms file, hbotStringFile & errlparser>]\n");
-    print ("                  [--out <path to save output data>]\n");
+    print ("\nUsage: hb-virtdebug.pl [--help] |\n");
+    print ("                  [--img-path <path to .syms file, hbotStringFile & errlparser>]\n");
+    print ("                  [--out-path <path to save output data>]\n");
     print ("                  [--test] [--errl [-l | -d [<logid>|all]] [--printk]\n");
     print ("                  [--trace [<compName1 compName2 compName3 ...>]]\n");
     print ("                  [-k#] [-n#] [-s#] [-p#] [-c#]\n\n");
@@ -790,14 +787,14 @@ sub printUsage()
     print ("  of the files.\n\n");
     print ("  User should also set the env variable PATH to include the path to the fsp-trace program.\n\n");
     print ("  --help            Prints usage information\n");
-    print ("  --in              Overrides the automatically detected .syms file,\n");
+    print ("  --img-path        Overrides the automatically detected .syms file,\n");
     print ("                    hbotStringFile & errlparser in HBDIR or the current\n");
     print ("                    directory.  This program will search for the files in\n");
     print ("                    the following order:\n");
     print ("                        1.  from the path specified by user\n");
     print ("                        2.  from HBDIR if it is defined\n");
     print ("                        3.  from the current directory\n");
-    print ("  --out             Directory where the output data will be saved\n");
+    print ("  --out-path        Directory where the output data will be saved\n");
     print ("                    Default path is the current directory\n");
     print ("  --test            Use the hbicore_test.syms file vs the hbicore.syms file\n");
     print ("  --errl            Dumps the error logs\n");

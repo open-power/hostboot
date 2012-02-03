@@ -33,8 +33,8 @@
 #
 # Usage:
 # hb-parsedump.pl <dumpfile> [--test]
-#             [--in <path to .syms file, hbotStringFile, & errlparser>]
-#             [--out <path to save output data>]\n");
+#             [--img-path <path to .syms file, hbotStringFile, & errlparser>]
+#             [--out-path <path to save output data>]\n");
 
 
 #------------------------------------------------------------------------------
@@ -143,20 +143,20 @@ if (!(-s $hbDumpFile))
 # Save the optional user specified arguments
 for (my $i=1; $i<$numArgs; $i++)
 {
-    if ($ARGV[$i] eq "--in")
+    if ($ARGV[$i] eq "--img-path")
     {
         if (($i + 1) >= $numArgs)
         {
-            die "No value given for --in parameter.\n";
+            die "No value given for --img-path parameter.\n";
         }
         $i++;
         $hbDir = $ARGV[$i];
     }
-    elsif ($ARGV[$i] eq "--out")
+    elsif ($ARGV[$i] eq "--out-path")
     {
         if (($i + 1) >= $numArgs)
         {
-            die "No value given for --out parameter.\n";
+            die "No value given for --out-path parameter.\n";
         }
         $i++;
         $outDir = $ARGV[$i];
@@ -473,8 +473,8 @@ sub appendBinFile($$)
 sub printUsage()
 {
     print ("\nUsage: hb-parsedump.pl [--help] | <dumpfile> [--test]\n");
-    print ("                       [--in <path to .syms file, hbotStringFile & errlparser>]\n");
-    print ("                       [--out <path to save output data>]\n\n");
+    print ("                       [--img-path <path to .syms file, hbotStringFile & errlparser>]\n");
+    print ("                       [--out-path <path to save output data>]\n\n");
     print ("  This program will parse the hostboot dump file specified\n");
     print ("  and extract the code version, kernel printk buffer, component\n");
     print ("  traces & error logs.\n\n");
@@ -483,13 +483,13 @@ sub printUsage()
     print ("  of the files.\n\n");
     print ("  User should also set the env variable PATH to include the path to the fsp-trace");
     print (" program.\n\n");
-    print ("  --in:    Override the automatically detected .syms file, hbotStringFile\n");
-    print ("           and errlparser in HBDIR or the current directory.\n");
-    print ("           This program will search for the files in the following order:\n");
-    print ("           1.  from the path specified by user\n");
-    print ("           2.  from HBDIR if it is defined\n");
-    print ("           3.  from the current directory\n");
-    print ("  --out:   Directory where the output data will be saved.\n");
-    print ("           Default path is the current directory.\n");
-    print ("  --test:  Use the hbicore_test.syms file vs the hbicore.syms file\n");
+    print ("  --img-path:  Overrides the automatically detected .syms file, hbotStringFile\n");
+    print ("               and errlparser in HBDIR or the current directory.\n");
+    print ("               This program will search for the files in the following order:\n");
+    print ("               1.  from the path specified by user\n");
+    print ("               2.  from HBDIR if it is defined\n");
+    print ("               3.  from the current directory\n");
+    print ("  --out-path:  Directory where the output data will be saved.\n");
+    print ("               Default path is the current directory.\n");
+    print ("  --test:      Use the hbicore_test.syms file vs the hbicore.syms file\n");
 }

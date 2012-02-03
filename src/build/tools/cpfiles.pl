@@ -363,16 +363,17 @@ else #release or vpo
     push(@files, "printk");
     push(@files, "trace");
 
+    chdir $inDir;
     foreach (@files)
     {
-        # filter out any file prefixed with '_' or '.'
-        next if ($_ =~ m/^[._]/);
+        # filter out Example.pm  & any file prefixed with '_' or '.'
+        next if ( ($_ =~ m/^[._]/) || ($_ =~ m/Example/) );
 
         my($filename, $directories, $suffix) = fileparse($_, qr{\..*});
 
         # create sym-link
         $filename = "hb-$filename";
-        $command = "ln -sf $inDir/vpo-debug-framework.pl $inDir/$filename";
+        $command = "ln -sf vpo-debug-framework.pl $filename";
         print "$command\n";
         die if (system("$command") != 0);
     }

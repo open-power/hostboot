@@ -34,7 +34,7 @@
 #------------------------------------------------------------------------------
 use strict;
 use warnings;
-
+use File::Basename;
 
 #------------------------------------------------------------------------------
 # Forward Declaration
@@ -53,18 +53,8 @@ my $numArgs = $#ARGV + 1;
 #print "num args = $numArgs\n";
 #print "argument list = @ARGV\n";
 
-my $hbDir = $ENV{'HBDIR'};
-if (defined ($hbDir))
-{
-    unless ($hbDir ne "")
-    {
-        $hbDir = '.';             #Set to current directory
-    }
-}
-else
-{
-    $hbDir = '.';                 #Set to current directory
-}
+my $toolDir = dirname (__FILE__);
+#print "$toolDir\n";
 
 for (my $i=0; $i<$numArgs; $i++)
 {
@@ -74,20 +64,11 @@ for (my $i=0; $i<$numArgs; $i++)
         printUsage();
         exit (0);
     }
-    elsif ($ARGV[$i] eq "--in")
+    elsif ($ARGV[$i] eq "--out-path")
     {
         if (($i + 1) >= $numArgs)
         {
-            die "No value given for --in parameter.\n";
-        }
-        $i++;
-        $hbDir = $ARGV[$i];
-    }
-    elsif ($ARGV[$i] eq "--out")
-    {
-        if (($i + 1) >= $numArgs)
-        {
-            die "No value given for --out parameter.\n";
+            die "No value given for --out-path parameter.\n";
         }
         $i++;
     }
@@ -103,7 +84,7 @@ for (my $i=0; $i<$numArgs; $i++)
 #------------------------------------------------------------------------------
 # Dump L3
 #------------------------------------------------------------------------------
-my $command = "$hbDir/hb-virtdebug.pl @ARGV";
+my $command = "$toolDir/hb-virtdebug.pl @ARGV";
 system($command);
 
 
@@ -116,29 +97,20 @@ system($command);
 #------------------------------------------------------------------------------
 sub printUsage()
 {
-    print ("\nUsage: hb-dump [--help] | [--in <path to hb-virtdebug.pl>]\n");
-    print ("               [--out <path to save output data>]\n");
+    print ("\nUsage: hb-dump [--help] |\n");
+    print ("               [--out-path <path to save output data>]\n");
     print ("               [-k#] [-n#] [-s#] [-p#] [-c#]\n\n");
     print ("  This program dumps the entire L3 to a file.\n");
     print ("  Use the hb-parsedump.pl program to expand and view data in the file.\n\n");
     print ("  User should copy hb-virtdebug.pl to the current directory or set\n");
     print ("  the env variable HBDIR to the path of the file.\n\n");
     print ("  --help            Prints usage information.\n");
-    print ("  --in              Overrides the automatically detected hb-virtdebug.pl file\n");
-    print ("                    in HBDIR or the current directory.\n");
-    print ("                    This program will search for the file in the ");
-    print ("following order:\n");
-    print ("                        1.  from the path specified by the user\n");
-    print ("                        2.  from HBDIR if it is defined\n");
-    print ("                        3.  from the current directory\n");
-    print ("  --out             Directory where the output data will be saved.\n");
+    print ("  --out-path        Directory where the output data will be saved.\n");
     print ("                    Default path is the current directory.\n");
     print ("  -k#               Specify which cage to act on (default = 0).\n");
     print ("  -n#               Specify which node to act on (default = 0).\n");
     print ("  -s#               Specify which slot to act on (default = 0).\n");
     print ("  -p#               Specify which chip position to act on (default = 0).\n");
     print ("  -c#               Specify which core/chipUnit to act on (default = 3).\n");
-    print ("\n  NOTE:  This program will not work if user has not stopped instructions\n");
-    print ("         prior to running this program.\n");
 }
 

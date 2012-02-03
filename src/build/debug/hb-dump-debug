@@ -27,17 +27,28 @@ use strict;
 use Getopt::Long;
 use Pod::Usage;
 use IO::Seekable;
+use File::Basename;
+use lib dirname (__FILE__);
 
 use Hostboot::_DebugFramework;
 
 my $tool = "";
 my $dumpfile = "";
 my $testImage = 0;
-my $imgPath = "";
 my $toolOptions = "";
 my $cfgHelp = 0;
 my $cfgMan = 0;
 my $toolHelp = 0;
+
+my $imgPath = "";
+my $hbDir = $ENV{'HBDIR'};
+if (defined ($hbDir))
+{
+    if ($hbDir ne "")
+    {
+        $imgPath = "$hbDir/";
+    }
+}
 
 GetOptions("tool:s" => \$tool,
            "tool-options:s" => \$toolOptions,
@@ -169,6 +180,8 @@ Use the hbicore_test.syms file instead of the default.
 =item B<--img-path>=PATH
 
 The path to the "img" directory where the syms file, etc is located.
+User can also set the env variable HBDIR to the path of the "img"
+directory instead of using this option.
 
 =item B<--help>
 
