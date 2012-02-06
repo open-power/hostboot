@@ -56,9 +56,6 @@ TRAC_INIT(&g_trac_fsir, "FSIR", 4096); //4K
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
 #define TRACUCOMP(args...)  
 
-//@fixme - VPO Debug
-bool INSIDE_DEBUG = false;
-
 //@todo - This should come from the target/attribute code somewhere
 uint64_t target_to_uint64(const TARGETING::Target* i_target)
 {
@@ -864,15 +861,54 @@ errlHndl_t FsiDD::handleOpbErrors(const FsiAddrInfo_t& i_addrInfo,
                                             i_addrInfo.absAddr),
                                         TWO_UINT32_TO_UINT64(i_opbStatReg,0));
 
-        if( !INSIDE_DEBUG )
+        // Collect some FFDC but avoid an infinite loop
+        if( !iv_ffdcCollection )
         {
-            INSIDE_DEBUG = true;
+            iv_ffdcCollection = true;
             uint32_t data = 0;
-            read( 0x31D0, &data ); TRACFCOMP( g_trac_fsi, "MESRB0(1D0) = %.8X", data );
-            read( 0x31D4, &data ); TRACFCOMP( g_trac_fsi, "MCSCSB0(1D4) = %.8X", data );
-            read( 0x31D8, &data ); TRACFCOMP( g_trac_fsi, "MATRB0(1D8) = %.8X", data );
-            read( 0x31DC, &data ); TRACFCOMP( g_trac_fsi, "MDTRB0(1DC) = %.8X", data );
-            INSIDE_DEBUG = false;
+            errlHndl_t l_err2 = NULL;
+
+            l_err2 = read( 0x31D0, &data );
+            if( l_err2 )
+            {
+                delete l_err2;
+            }
+            else
+            {
+                TRACFCOMP( g_trac_fsi, "MESRB0(1D0) = %.8X", data );
+            }
+
+            l_err2 = read( 0x31D4, &data );
+            if( l_err2 )
+            {
+                delete l_err2;
+            }
+            else
+            {
+                TRACFCOMP( g_trac_fsi, "MCSCSB0(1D4) = %.8X", data );
+            }
+
+            l_err2 = read( 0x31D8, &data );
+            if( l_err2 )
+            {
+                delete l_err2;
+            }
+            else
+            {
+                TRACFCOMP( g_trac_fsi, "MATRB0(1D8) = %.8X", data );
+            }
+
+            l_err2 = read( 0x31DC, &data );
+            if( l_err2 )
+            {
+                delete l_err2;
+            }
+            else
+            {
+                TRACFCOMP( g_trac_fsi, "MDTRB0(1DC) = %.8X", data );
+            }
+
+            iv_ffdcCollection = false;
         }
 
         l_err->collectTrace("FSI");

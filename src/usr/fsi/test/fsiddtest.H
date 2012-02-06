@@ -200,10 +200,7 @@ class FsiDDTest : public CxxTest::TestSuite
             // version number
             { PROC0, 0x003074, 0x91010800, false, true }, //CMFSI MVER
             { PROC0, 0x003474, 0x91010800, false, true }, //MFSI MVER
-
-            // clock rate delay for ports 32-63 (unused ports)
-            { PROC0, 0x00340C, 0x11111111, true, true }, //MFSI MCRSP32
-            { PROC0, 0x00300C, 0x22222222, true, true }, //CMFSI MCRSP32
+            //@fixme - should be 0x92010800 but Simics is wrong
 
             //** Slave Regs (cheating)
             { PROC0, 0x080000, 0xC0010EA0, false, false }, //Config Table entry for slave0 off MFSI-0 
@@ -215,7 +212,7 @@ class FsiDDTest : public CxxTest::TestSuite
             { PROCWRAP, 0x000000, 0xC0010EA0, false, false }, //Config Table entry for slave0 off MFSI-0 
             { PROCWRAP, 0x001000, 0x12345678, false, false }, //DATA_0 from FSI2PIB off MFSI-0 
             { PROCWRAP, 0x001004, 0xA5A5A5A5, true, false }, //DATA_1 from FSI2PIB off MFSI-0
-            //@fixme SW106529  { PROCWRAP, 0x001028, 0x120EA049, false, false }, //CHIPID from FSI2PIB off MFSI-0 
+            { PROCWRAP, 0x001028, 0x120EA049, false, false }, //CHIPID from FSI2PIB off MFSI-0 
 
             //** Slave Regs
             { PROC1, 0x001000, 0x88776655, true, false }, //FEL from SHIFT off MFSI-1
@@ -226,7 +223,8 @@ class FsiDDTest : public CxxTest::TestSuite
             { PROC2, 0x001028, 0x120EA049, false, false }, //CHIPID from FSI2PIB off MFSI-2
 
             //** Slave Regs
-            { CENTAUR0, 0x000000, 0xC0010E9C, false, false }, //Config Table entry for slave0 off cMFSI-0 
+            { CENTAUR0, 0x000000, 0xC0010E9C, false, false }, //Config Table entry for slave0 off cMFSI-0
+            //@fixme - should be 0xC0010E95 but Simics is wrong
             { CENTAUR0, 0x001028, 0x160E9049, false, false }, //CHIPID from FSI2PIB off cMFSI-0
             { CENTAUR0, 0x000C08, 0x12344321, true, false }, //FEL from SHIFT off cMFSI-0
 

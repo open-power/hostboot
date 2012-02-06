@@ -46,7 +46,7 @@ public:
 
   /**
    * @brief SCOM test via FSISCOM to Venice
-   *     
+   *
    */
   void test_FSISCOMreadWrite_proc(void)
   {
@@ -116,12 +116,12 @@ public:
           uint64_t addr;
           uint64_t data;
       } test_data[] = {
-          { scom_targets[PROCWRAP], 0x120F0000 ,0xFEEDB0B000001234}, 
-          { scom_targets[PROCWRAP], 0x120F0166, 0xFEDCBA9876543210}, 
-          { scom_targets[PROCWRAP], 0x00040005, 0x0000000000000000}, 
-          { scom_targets[PROCWRAP], 0x02040004, 0xFFFFFFFFFFFFFFFF}, 
-          { scom_targets[PROC1],    0x00040005, 0x1234567887654321}, 
-          { scom_targets[PROC1],    0x02040004, 0x1122334455667788}, 
+          { scom_targets[PROCWRAP], 0x120F0000 ,0xFEEDB0B000001234},
+          { scom_targets[PROCWRAP], 0x120F0166, 0xFEDCBA9876543210},
+          { scom_targets[PROCWRAP], 0x00040005, 0x0000000000000000},
+          { scom_targets[PROCWRAP], 0x02040004, 0xFFFFFFFFFFFFFFFF},
+          { scom_targets[PROC1],    0x00040005, 0x1234567887654321},
+          { scom_targets[PROC1],    0x02040004, 0x1122334455667788},
       };
       const uint64_t NUM_ADDRS = sizeof(test_data)/sizeof(test_data[0]);
 
@@ -130,7 +130,7 @@ public:
       size_t op_size = sizeof(uint32_t);
 
       // write all the test registers
-      for( uint64_t x = 0; x < NUM_ADDRS; x++ )   
+      for( uint64_t x = 0; x < NUM_ADDRS; x++ )
       {
           //only run if the target exists
           if(test_data[x].target == NULL)
@@ -156,7 +156,7 @@ public:
       }
 
       // read all the test registers
-      for( uint64_t x = 0; x < NUM_ADDRS; x++ )   
+      for( uint64_t x = 0; x < NUM_ADDRS; x++ )
       {
           //only run if the target exists
           if(test_data[x].target == NULL)
@@ -193,7 +193,7 @@ public:
 
   /**
    * @brief SCOM test via FSISCOM to Centaur
-   *     
+   *
    */
   void test_FSISCOMreadWrite_centaur(void)
   {
@@ -204,7 +204,7 @@ public:
 
       // Setup some targets to use
       enum {
-          CENTAUR0, //local 
+          CENTAUR0, //local
           CENTAUR8, //remote (off PROC1)
           NUM_TARGETS
       };
@@ -260,8 +260,7 @@ public:
           uint64_t addr;
           uint64_t data;
       } test_data[] = {
-          //@fixme - address should be 0x02011403 but simics is adding parity...
-          { scom_targets[CENTAUR0], 0x02011402 , 0x123456789ABCDEF0 }, 
+          { scom_targets[CENTAUR0], 0x02011403 , 0x123456789ABCDEF0 },
           { scom_targets[CENTAUR0], 0x02011672 , 0x1122334455667788 },
           { scom_targets[CENTAUR8], 0x02011672 , 0x9E9E9E9E9E9E9E9E },
       };
@@ -272,7 +271,7 @@ public:
       size_t op_size = sizeof(uint32_t);
 
       // write all the test registers
-      for( uint64_t x = 0; x < NUM_ADDRS; x++ )   
+      for( uint64_t x = 0; x < NUM_ADDRS; x++ )
       {
           //only run if the target exists
           if(test_data[x].target == NULL)
@@ -298,7 +297,7 @@ public:
       }
 
       // read all the test registers
-      for( uint64_t x = 0; x < NUM_ADDRS; x++ )   
+      for( uint64_t x = 0; x < NUM_ADDRS; x++ )
       {
           //only run if the target exists
           if(test_data[x].target == NULL)
@@ -336,7 +335,7 @@ public:
 
   /**
    * @brief SCOM test Indirect SCOM
-   *     
+   *
    */
 
   void test_IndirectScom(void)
@@ -409,8 +408,8 @@ public:
           uint64_t addr;
           uint64_t data;
       } test_data[] = {
-          { scom_targets[myPROC9], 0x80040C0102011A3F ,0x1234432112344321}, 
-          { scom_targets[myPROC9], 0x800C140002011E3F, 0x123443211234ABAB}, 
+          { scom_targets[myPROC9], 0x80040C0102011A3F ,0x1234432112344321},
+          { scom_targets[myPROC9], 0x800C140002011E3F, 0x123443211234ABAB},
       };
       const uint64_t NUM_ADDRS = sizeof(test_data)/sizeof(test_data[0]);
 
@@ -418,7 +417,7 @@ public:
       size_t op_size = sizeof(uint32_t);
 
       // write all the test registers
-      for( uint64_t x = 0; x < NUM_ADDRS; x++ )   
+      for( uint64_t x = 0; x < NUM_ADDRS; x++ )
       {
           //only run if the target exists
           if(test_data[x].target == NULL)
@@ -449,7 +448,7 @@ public:
       memset(read_data, 0, sizeof read_data);
 
       // read all the test registers
-      for( uint64_t x = 0; x < NUM_ADDRS; x++ )   
+      for( uint64_t x = 0; x < NUM_ADDRS; x++ )
       {
           //only run if the target exists
           if(test_data[x].target == NULL)
@@ -599,7 +598,7 @@ public:
             // last 2 writes have expected failure conditions.
             if ((x == NUM_ADDRS-1) || (x == NUM_ADDRS-2))
 	    {
-                TRACDCOMP( g_trac_scom, "ScomTest::test_translate_EX.. Expected Error log returned> " );            
+                TRACDCOMP( g_trac_scom, "ScomTest::test_translate_EX.. Expected Error log returned> " );
             }
             else
             {
@@ -620,7 +619,7 @@ public:
 
 
       // read all the test registers
-      for( uint64_t x = 0; x < NUM_ADDRS-2; x++ )   
+      for( uint64_t x = 0; x < NUM_ADDRS-2; x++ )
       {
           //only run if the target exists
           if(test_data[x].target == NULL)
@@ -666,7 +665,7 @@ public:
 
       uint64_t fails = 0;
       uint64_t total = 0;
-     
+
 
 
       //@VBU workaround - Disable Indirect SCOM test case o
@@ -730,7 +729,7 @@ public:
           // add MCS4 target.
           epath.addLast(TARGETING::TYPE_MCS,4);
           scom_targets[myMCS4] = TARGETING::targetService().toTarget(epath);
-   
+
           // remote MCS4 target (off of sys-0/node-0/proc-0/MCS4)
           epath.removeLast();
 
@@ -762,7 +761,7 @@ public:
                                                                     // Unit for
                                                                     // the
                                                                     // target
-	  { scom_targets[myMCS4], 0x0601184A, 0x0101010101010101},  // invalid address range 
+	  { scom_targets[myMCS4], 0x0601184A, 0x0101010101010101},  // invalid address range
 	  { scom_targets[myMCS4], 0x0200184A, 0x2323232323232323},  // Invalid address range for target
       };
       const uint64_t NUM_ADDRS = sizeof(test_data)/sizeof(test_data[0]);
@@ -1025,7 +1024,7 @@ public:
 
   //@todo - write error path testcase for FSI scom using bad address
 
- 
+
 
   //@todo - address translation
 

@@ -457,6 +457,11 @@ class FsiDD
      */
     TARGETING::Target* iv_master;
 
+    /**
+     * Flag to avoid infinite recursion
+     */
+    bool iv_ffdcCollection;
+
   private:
 
     // let my testcase poke around
