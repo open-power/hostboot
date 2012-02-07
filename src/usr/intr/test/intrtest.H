@@ -30,6 +30,10 @@
 #include <kernel/console.H>
 #include <targeting/targetservice.H>
 #include <targeting/util.H>
+#include <sys/time.h>
+#include <sys/mmio.h>
+
+extern trace_desc_t * g_trac_intr;
 
 
 class IntrTest: public CxxTest::TestSuite
@@ -67,7 +71,7 @@ class IntrTest: public CxxTest::TestSuite
                     uint64_t offset = (chip << 20) | (thread << 12);
 
                     uint32_t * addr =
-                        reinterpret_cast<uint32_t *>(cv_baseAddr + offset);
+                        reinterpret_cast<uint32_t *>(iv_baseAddr + offset);
 
                     if(offset == 0) // Master cpu
                     {
@@ -114,7 +118,7 @@ class IntrTest: public CxxTest::TestSuite
                 return;
             }
 
-            uint32_t * addr = reinterpret_cast<uint32_t *>(cv_baseAddr);
+            uint32_t * addr = reinterpret_cast<uint32_t *>(iv_baseAddr);
 
             errlHndl_t err = INTR::disableExternalInterrupts();
 
@@ -161,8 +165,6 @@ class IntrTest: public CxxTest::TestSuite
                 return;
             }
 
-            extern trace_desc_t * g_trac_intr;
-
             errlHndl_t err = NULL;
 
             // Need to register a msgq
@@ -177,7 +179,7 @@ class IntrTest: public CxxTest::TestSuite
 
             // Force an interrupt by writing to the MFFR on master
             volatile uint8_t * mfrr = 
-                reinterpret_cast<uint8_t *>(cv_baseAddr+12);
+                reinterpret_cast<uint8_t *>(iv_baseAddr+12);
             *(mfrr) = 0x55;
             *(mfrr) = 0xff;
 
@@ -192,12 +194,28 @@ class IntrTest: public CxxTest::TestSuite
         }
 
 
+      IntrTest() : CxxTest::TestSuite()
+      {
+          iv_baseAddr = reinterpret_cast<uint64_t>
+            (mmio_dev_map(reinterpret_cast<void*>(cv_realAddr),THIRTYTWO_MB));
+          TRACDCOMP(g_trac_intr,"IntrTest()> iv_baseAddr=0x%.X",iv_baseAddr);
+      };
+
+
+      ~IntrTest()
+      {
+          mmio_dev_unmap(reinterpret_cast<void*>(iv_baseAddr));
+      };
+
     private:
 
-        static uint64_t cv_baseAddr;
+      uint64_t iv_baseAddr;
+      static const uint64_t cv_realAddr;
 };
 
-uint64_t IntrTest::cv_baseAddr = 0x20000000000ul;
+//note: this must be changed if the BAR changes
+const uint64_t IntrTest::cv_realAddr = 0x3fbff9000000ul;
+
 
 
 #endif

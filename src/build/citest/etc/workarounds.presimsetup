@@ -43,24 +43,29 @@ sed -i -e's/SETENV GFW_P8_VENICE_L3_MB_SIZE.*/SETENV GFW_P8_VENICE_L3_MB_SIZE 8/
 
 
 #Note: Leave this here as an example
-#echo "+++ Update to new simics build."
+#echo "+++ Update to new simics build for ECCB support."
 #mkdir -p $sb/simu/data
 #egrep -v "WSALIAS HOSTBOOT_LEVEL FIPSLEVEL|WSALIAS HOSTBOOT_LEVEL SIMICSLEVEL" $BACKING_BUILD/src/simu/data/simicsInfo > $sb/simu/data/simicsInfo
-#echo "WSALIAS HOSTBOOT_LEVEL FIPSLEVEL env/gfwa/simics-4.2.0/simics-4.2.82/fips/fld36/fi111110b700.42" >> $sb/simu/data/simicsInfo
-#echo "WSALIAS HOSTBOOT_LEVEL SIMICSLEVEL env/vtechb/simics-4.2.0/simics-4.2.82/bin" >> $sb/simu/data/simicsInfo
+#echo "WSALIAS HOSTBOOT_LEVEL FIPSLEVEL env/gfwb/simics-4.2.0/simics-4.2.83/fips/fld36/fi120201a700.42" >> $sb/simu/data/simicsInfo
+#echo "WSALIAS HOSTBOOT_LEVEL SIMICSLEVEL env/vtechb/simics-4.2.0/simics-4.2.83/bin" >> $sb/simu/data/simicsInfo
 
-echo "+++ Add some logic regs for Simics workaround."
+echo "+++ Add some scom regs and actions for ECCB fakeout."
 mkdir -p $sb/simu/data/cec-chip/
-cp --update $BACKING_BUILD/src/simu/data/cec-chip/centaur.chip $sb/simu/data/cec-chip/centaur.chip.orig
-grep -v DONE $sb/simu/data/cec-chip/centaur.chip.orig > $sb/simu/data/cec-chip/centaur.chip
-echo "INTERNALREGS           # List all scom registers" >> $sb/simu/data/cec-chip/centaur.chip
-echo "   0xFF00000F, 64       # Simics workaround" >> $sb/simu/data/cec-chip/centaur.chip
-echo "END" >> $sb/simu/data/cec-chip/centaur.chip
-echo "DONE" >> $sb/simu/data/cec-chip/centaur.chip
+cp --update $BACKING_BUILD/src/simu/data/cec-chip/p8.chip $sb/simu/data/cec-chip/p8.chip.orig
+grep -v DONE $sb/simu/data/cec-chip/p8.chip.orig > $sb/simu/data/cec-chip/p8.chip
+echo "ACTIONS=p8_pnor.act   #workarounds.presimsetup" >> $sb/simu/data/cec-chip/p8.chip
+echo "SCOMREGS           #workarounds.presimsetup" >> $sb/simu/data/cec-chip/p8.chip
+echo "  0xDDDD0000,64  # dummy to hold pnor address" >> $sb/simu/data/cec-chip/p8.chip
+echo "  0xDDDD0001,64  # dummy to hold pnor data" >> $sb/simu/data/cec-chip/p8.chip
+echo "END" >> $sb/simu/data/cec-chip/p8.chip
+echo "DONE" >> $sb/simu/data/cec-chip/p8.chip
+cp $HOSTBOOTROOT/src/build/citest/etc/patches/p8_pnor.act $sb/simu/data/cec-chip/
+#fixme
+
 
 echo "+++ Update to new phyp and mambo level."
 mkdir -p $sb/simu/data
 cp --update $BACKING_BUILD/src/simu/data/simicsInfo $sb/simu/data/simicsInfo
 sed -i -e's/^WSALIAS HOSTBOOT_LEVEL MAMBOLEVEL.*/WSALIAS HOSTBOOT_LEVEL MAMBOLEVEL env\/mamboa\/2011_11_10__4.2/' $sb/simu/data/simicsInfo
-sed -i -e's/^WSALIAS HOSTBOOT_LEVEL PHYPLEVEL.*/WSALIAS HOSTBOOT_LEVEL PHYPLEVEL env\/phypa\/simics-4.2.0\/simics-4.2.82\/ph111111a700.42/' $sb/simu/data/simicsInfo
-sed -i -e's/^WSALIAS HOSTBOOT_LEVEL PHYP_PATCH_LEVEL.*/WSALIAS HOSTBOOT_LEVEL PHYP_PATCH_LEVEL env\/phypa\/simics-4.2.0\/simics-4.2.82\/patches\/ph111111a700.42/' $sb/simu/data/simicsInfo
+sed -i -e's/^WSALIAS HOSTBOOT_LEVEL PHYPLEVEL.*/WSALIAS HOSTBOOT_LEVEL PHYPLEVEL env\/phypa\/simics-4.2.0\/simics-4.2.83\/ph120201a700.42/' $sb/simu/data/simicsInfo
+sed -i -e's/^WSALIAS HOSTBOOT_LEVEL PHYP_PATCH_LEVEL.*/WSALIAS HOSTBOOT_LEVEL PHYP_PATCH_LEVEL env\/phypa\/simics-4.2.0\/simics-4.2.82\/patches\/ph120201a700.42/' $sb/simu/data/simicsInfo

@@ -41,24 +41,16 @@
 #include "pnordd.H"
 #include <pnor/pnorif.H>
 #include <pnor/pnor_reasoncodes.H>
-
-// Uncomment this to use the fake PNOR implementation (vs the LPC path)
-//   @todo - Switch with RTC 36901
-#define USE_FAKE_PNOR
-
-// Uncomment this to skip the LPC code and just do page copies
-//#define FAST_FAKE_PNOR
+#include <sys/time.h>
 
 // Uncomment this to enable smart writing
-#define SMART_WRITE
+//#define SMART_WRITE
 
-#ifdef USE_FAKE_PNOR
-#define FAKE_PNOR_START 5*MEGABYTE
-#define FAKE_PNOR_END 8*MEGABYTE
-#define FAKE_PNOR_SIZE 3*MEGABYTE
+// These are used to cheat and use a chunk of our cache as a PNOR
+//   iv_mode == MODEL_MEMCPY,MODEL_LPC_MEM
 void write_fake_pnor( uint64_t i_pnorAddr, void* i_buffer, size_t i_size );
 void read_fake_pnor( uint64_t i_pnorAddr, void* o_buffer, size_t i_size );
-#endif
+void erase_fake_pnor( uint64_t i_pnorAddr, size_t i_size );
 
 extern trace_desc_t* g_trac_pnor;
 
@@ -97,9 +89,10 @@ errlHndl_t ddRead(DeviceFW::OperationType i_opType,
     uint64_t l_addr = va_arg(i_args,uint64_t);
 
     do{
-        //TODO - Fix with Story 34763
+        //@todo (RTC:34763) - add support for unaligned data
         // Ensure we are operating on a 32-bit (4-byte) boundary
         assert( reinterpret_cast<uint64_t>(io_buffer) % 4 == 0 );
+        assert( io_buflen % 4 == 0 );
 
         // Read the flash
         l_err = Singleton<PnorDD>::instance().readFlash(io_buffer,
@@ -147,9 +140,10 @@ errlHndl_t ddWrite(DeviceFW::OperationType i_opType,
     uint64_t l_addr = va_arg(i_args,uint64_t);
 
     do{
-        //TODO - Fix with Story 34763
+        //@todo (RTC:34763) - add support for unaligned data
         // Ensure we are operating on a 32-bit (4-byte) boundary
         assert( reinterpret_cast<uint64_t>(io_buffer) % 4 == 0 );
+        assert( io_buflen % 4 == 0 );
 
         // Write the flash
         l_err = Singleton<PnorDD>::instance().writeFlash(io_buffer,
@@ -165,6 +159,7 @@ errlHndl_t ddWrite(DeviceFW::OperationType i_opType,
     return l_err;
 }
 
+
 // Register PNORDD access functions to DD framework
 DEVICE_REGISTER_ROUTE(DeviceFW::READ,
                       DeviceFW::PNOR,
@@ -175,6 +170,8 @@ DEVICE_REGISTER_ROUTE(DeviceFW::WRITE,
                       DeviceFW::PNOR,
                       TARGETING::TYPE_PROC,
                       ddWrite);
+
+}; //namespace PNOR
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -194,7 +191,7 @@ errlHndl_t PnorDD::readFlash(void* o_buffer,
     do{
         //mask off chip select for now, will probably break up fake PNOR into
         //multiple fake chips eventually
-        uint64_t l_address = i_address & 0x00000000FFFFFFFF;
+        uint64_t l_address = i_address & 0x00000000FFFFFFFF;    
 
         l_err = verifyFlashAddressRange(l_address, io_buflen);
         if(l_err)
@@ -203,10 +200,12 @@ errlHndl_t PnorDD::readFlash(void* o_buffer,
             break;
         }
 
-#ifdef FAST_FAKE_PNOR
-        read_fake_pnor( i_address, o_buffer, io_buflen );
-        break;
-#endif
+        // skip everything in MEMCPY mode
+        if( MODEL_MEMCPY == iv_mode )
+        {
+            read_fake_pnor( l_address, o_buffer, io_buflen );
+            break;
+        }
 
         // LPC is accessed 32-bits at a time...
         uint32_t* word_ptr = static_cast<uint32_t*>(o_buffer);
@@ -215,11 +214,10 @@ errlHndl_t PnorDD::readFlash(void* o_buffer,
              addr < (i_address+io_buflen);
              addr += sizeof(uint32_t) )
         {
-            uint32_t read_data = 0;
-            l_err = readLPC( addr, read_data );
+            // flash is mapped directly in the FW space
+            l_err = readLPC( addr + LPCHC_FW_SPACE,
+                             word_ptr[words_read] );
             if( l_err ) { break; }
-
-            memcpy( word_ptr+words_read, &read_data, sizeof(uint32_t) );
 
             words_read++;           
         }
@@ -251,19 +249,20 @@ errlHndl_t PnorDD::writeFlash(void* i_buffer,
         l_err = verifyFlashAddressRange(l_address, io_buflen);
         if(l_err) { break; }
 
-
-#ifdef FAST_FAKE_PNOR
-        write_fake_pnor( i_address, i_buffer, io_buflen );
-        break;
-#endif
+        // skip everything in MEMCPY mode
+        if( MODEL_MEMCPY == iv_mode )
+        {
+            write_fake_pnor( l_address, i_buffer, io_buflen );
+            break;
+        }
 
         // LPC is accessed 32-bits at a time, but we also need to be
         //   smart about handling erases.  In NOR flash we can set bits
         //   without an erase but we cannot clear them.  When we erase
-        //   we have to erase and entire block of data at a time.
+        //   we have to erase an entire block of data at a time.
         uint32_t* word_ptr = static_cast<uint32_t*>(i_buffer);
-        uint64_t num_blocks = getNumAffectedBlocks(i_address,io_buflen);
-        uint32_t cur_addr = i_address;
+        uint32_t cur_addr = static_cast<uint32_t>(l_address);
+        uint64_t num_blocks = getNumAffectedBlocks(cur_addr,io_buflen);
         uint64_t bytes_left = io_buflen;
 
         // loop through erase blocks until we've gotten through all
@@ -279,7 +278,7 @@ errlHndl_t PnorDD::writeFlash(void* i_buffer,
                                           (bytes_left-1)/sizeof(uint32_t)+1,
                                           word_ptr );
             if( l_err ) { break; }
-            //@todo - How should we handle PNOR errors?
+            //@todo (RTC:37744) - How should we handle PNOR errors?
 
             // move on to the next block
             if( bytes_left > ERASESIZE_BYTES )
@@ -293,9 +292,9 @@ errlHndl_t PnorDD::writeFlash(void* i_buffer,
                 //   align cur_addr to the beginning of the block
                 cur_addr = findEraseBlock(cur_addr+bytes_left);
                 //   figure out the remaining data in the last block
-                bytes_left = (i_address - cur_addr);
+                bytes_left = (l_address + io_buflen - cur_addr);
             }
-            word_ptr += (bytes_left-1)/sizeof(uint32_t);
+            word_ptr += ((bytes_left-1)/sizeof(uint32_t))+1;
         }
         if( l_err ) { break; }
 
@@ -317,19 +316,33 @@ errlHndl_t PnorDD::writeFlash(void* i_buffer,
  Private/Protected Methods
  ********************/
 
-
 /**
  * @brief  Constructor
  */
-PnorDD::PnorDD()
+PnorDD::PnorDD( PnorMode_t i_mode )
+: iv_mode(i_mode)
 {
-    TRACFCOMP(g_trac_pnor, "PnorDD::PnorDD()> ");
     mutex_init(&iv_mutex);
 
     for( uint64_t x=0; x < (PNORSIZE/ERASESIZE_BYTES); x++ )
     {
         iv_erases[x] = 0;
     }
+
+    //In the normal case we will choose the mode for the caller
+    if( MODEL_UNKNOWN == iv_mode )
+    {
+        //Use ECCB scoms to drive LPC, flat memory map behind ECCB, no SPI
+        //iv_mode = MODEL_FLAT_ECCB;
+
+        //Break into 32-bit LPC ops but use memcpy into cache area
+        iv_mode = MODEL_LPC_MEM;
+
+        //Override for VPO, use flat model for performance
+        //@fixme - how?? I can't use targetting yet to tell I'm in VPO...
+    }
+
+    TRACFCOMP(g_trac_pnor, "PnorDD::PnorDD()> Using mode %d", iv_mode);
 }
 
 /**
@@ -351,9 +364,10 @@ errlHndl_t PnorDD::verifyFlashAddressRange(uint64_t i_address,
 
     do{
         //@todo - Do we really need any checking here?
+        //  if so we should be getting the size told to us by the PNOR RP
+        //   based on the TOC or global data
 
-#ifdef USE_FAKE_PNOR
-        if((i_address+i_length) > FAKE_PNOR_SIZE)
+        if((i_address+i_length) > PNORSIZE)
         {
             TRACFCOMP( g_trac_pnor, "PnorDD::verifyAddressRange> Invalid Address Requested : i_address=%d", i_address );
             /*@
@@ -371,8 +385,6 @@ errlHndl_t PnorDD::verifyFlashAddressRange(uint64_t i_address,
                                             TO_UINT64(i_length));
             break;
         }
-#endif
-
 
     }while(0);
 
@@ -387,10 +399,11 @@ errlHndl_t PnorDD::readRegLPC(LpcRegAddr i_addr,
 {
     errlHndl_t l_err = NULL;
 
-    do {
-       //@todo - RTC 36901 or 35728        
-    } while(0);
+    // add the offset into the LPC register space
+    uint32_t lpc_addr = i_addr + LPCHC_REG_SPACE;
 
+    // call the generic LPC function
+    l_err = readLPC( lpc_addr, o_data );
     return l_err;
 }
 
@@ -400,16 +413,23 @@ errlHndl_t PnorDD::readRegLPC(LpcRegAddr i_addr,
 errlHndl_t PnorDD::writeRegLPC(LpcRegAddr i_addr,
                                uint32_t i_data)
 {
-    return NULL; //@todo - RTC 36901 or 35728
+    errlHndl_t l_err = NULL;
+
+    // add the offset into the LPC register space
+    uint32_t lpc_addr = i_addr + LPCHC_REG_SPACE;
+
+    // call the generic LPC function
+    l_err = writeLPC( lpc_addr, i_data );
+    return l_err;
 }
 
 /**
  * @brief Read a SPI Register
  */
-errlHndl_t PnorDD::readRegSPI(uint32_t i_addr,
+errlHndl_t PnorDD::readRegSPI(SpiRegAddr i_addr,
                               uint32_t& o_data)
 {
-    //@todo - Finish with Story 35728
+    //@todo (RTC:35728) - SPI Support
     TRACFCOMP( g_trac_pnor, "PnorDD::readRegSPI> Unsupported Operation : i_addr=%d", i_addr );
     /*@
      * @errortype
@@ -424,16 +444,25 @@ errlHndl_t PnorDD::readRegSPI(uint32_t i_addr,
                                    PNOR::RC_UNSUPPORTED_OPERATION,
                                    TO_UINT64(i_addr),
                                    0);
-    
+
+    /* Anything more than this??
+
+     // add the offset into the LPC register space
+     uint32_t lpc_addr = i_addr + LPC_SPI_REG_OFFSET;
+
+     // call the generic LPC function
+     l_err = readLPC( lpc_addr, o_data );
+
+     */
 }
 
 /**
  * @brief Write a SPI Register
  */
-errlHndl_t PnorDD::writeRegSPI(uint32_t i_addr,
+errlHndl_t PnorDD::writeRegSPI(SpiRegAddr i_addr,
                                uint32_t i_data)
 {
-    //@todo - Finish with Story 35728
+    //@todo (RTC:35728) - SPI Support
     TRACFCOMP( g_trac_pnor, "PnorDD::writeRegSPI> Unsupported Operation : i_addr=%d", i_addr );
     /*@
      * @errortype
@@ -448,6 +477,16 @@ errlHndl_t PnorDD::writeRegSPI(uint32_t i_addr,
                                    PNOR::RC_UNSUPPORTED_OPERATION,
                                    TO_UINT64(i_addr),
                                    0);
+
+    /* Anything more than this??
+
+     // add the offset into the LPC register space
+     uint32_t lpc_addr = i_addr + LPC_SPI_REG_OFFSET;
+
+     // call the generic LPC function
+     l_err = writeLPC( lpc_addr, i_data );
+
+     */
     
 }
 
@@ -462,14 +501,19 @@ errlHndl_t PnorDD::readLPC(uint32_t i_addr,
     bool need_unlock = false;
 
     do {
-#ifdef USE_FAKE_PNOR
-        read_fake_pnor( i_addr, static_cast<void*>(&o_data),
-                        sizeof(uint32_t) );
-#else
-        //@todo - fill in with RTC 36901
+        if( MODEL_LPC_MEM == iv_mode )
+        {
+            read_fake_pnor( i_addr - LPCHC_FW_SPACE,
+                            static_cast<void*>(&o_data),
+                            sizeof(uint32_t) );
+            break;
+        }
 
-        //@fixme - add non-master support  (RTC 36950)
-        TARGETING::Target* xscom_target =
+        // Note: If we got here then iv_mode is
+        //  either MODEL_FLAT_ECCB or MODEL_REAL
+
+        //@todo (RTC:36950) - add non-master support  
+        TARGETING::Target* scom_target =
           TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
 
         // always read/write 64 bits to SCOM
@@ -484,21 +528,23 @@ errlHndl_t PnorDD::readLPC(uint32_t i_addr,
         eccb_cmd.read_op = 1;
         eccb_cmd.address = i_addr;
         l_err = deviceOp( DeviceFW::WRITE,
-                          xscom_target,
+                          scom_target,
                           &(eccb_cmd.data64),
                           scom_size,
-                          DEVICE_XSCOM_ADDRESS(ECCB_CTL_REG) );
+                          DEVICE_SCOM_ADDRESS(ECCB_CTL_REG) );
         if( l_err ) { break; }
 
         // poll for complete and get the data back
         StatusReg_t eccb_stat;
-        while(1) //@fixme - need a timeout value
+        uint64_t poll_time = 0;
+        uint64_t loop = 0;
+        while( poll_time < ECCB_POLL_TIME_NS )
         {
             l_err = deviceOp( DeviceFW::READ,
-                              xscom_target,
+                              scom_target,
                               &(eccb_stat.data64),
                               scom_size,
-                              DEVICE_XSCOM_ADDRESS(ECCB_STAT_REG) );
+                              DEVICE_SCOM_ADDRESS(ECCB_STAT_REG) );
             if( l_err ) { break; }
 
             if( eccb_stat.op_done == 1 )
@@ -506,34 +552,41 @@ errlHndl_t PnorDD::readLPC(uint32_t i_addr,
                 break;
             }
 
-            //@fixme - simics doesn't set the done bit yet  (RTC 36901)
-            break;
+            // want to start out incrementing by small numbers then get bigger
+            //  to avoid a really tight loop in an error case so we'll increase
+            //  the wait each time through
+            nanosleep( 0, ECCB_POLL_INCR_NS*(++loop) );
+            poll_time += ECCB_POLL_INCR_NS*loop;
         }
         if( l_err ) { break; }
 
-        // check for errors
-        if( eccb_stat.data64 & LPC_STAT_REG_ERROR_MASK )
+        // check for errors or timeout
+        if( (eccb_stat.data64 & LPC_STAT_REG_ERROR_MASK)
+            || (eccb_stat.op_done == 0) )
         {
-            TRACFCOMP(g_trac_pnor, "PnorDD::readLPC> Error from LPC Status Register : i_addr=0x%.8X, status=0x%.16X", i_addr, eccb_stat.data64 );
+            TRACFCOMP(g_trac_pnor, "PnorDD::readLPC> Error or timeout from LPC Status Register : i_addr=0x%.8X, status=0x%.16X", i_addr, eccb_stat.data64 );
 
             /*@
              * @errortype
              * @moduleid     PNOR::MOD_PNORDD_READLPC
              * @reasoncode   PNOR::RC_LPC_ERROR
-             * @userdata1    LPC Address
+             * @userdata1[0:31]   LPC Address
+             * @userdata1[32:63]  Total poll time (ns)
              * @userdata2    ECCB Status Register
-             * @devdesc      PnorDD::readLPC> Error from LPC Status Register
+             * @devdesc      PnorDD::readLPC> Error or timeout from
+             *               LPC Status Register
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                             PNOR::MOD_PNORDD_READLPC,
                                             PNOR::RC_LPC_ERROR,
-                                            TWO_UINT32_TO_UINT64(0,i_addr),
+                                            TWO_UINT32_TO_UINT64(i_addr,poll_time),
                                             eccb_stat.data64);
             l_err->collectTrace("PNOR");
             l_err->collectTrace("XSCOM");
-            //@todo - Any cleanup or recovery needed?
+            //@todo (RTC:37744) - Any cleanup or recovery needed?
             break;
         }
+
 
         // atomic section <<
         mutex_unlock(&iv_mutex);
@@ -541,7 +594,7 @@ errlHndl_t PnorDD::readLPC(uint32_t i_addr,
 
         // copy data out to caller's buffer
         o_data = eccb_stat.read_data;
-#endif
+
     } while(0);
 
     if( need_unlock )
@@ -561,16 +614,23 @@ errlHndl_t PnorDD::writeLPC(uint32_t i_addr,
 {
     errlHndl_t l_err = NULL;
     bool need_unlock = false;
+   
+    //TRACFCOMP(g_trac_pnor, "writeLPC> %.8X = %.8X", i_addr, i_data );
 
     do {
-#ifdef USE_FAKE_PNOR        
-        write_fake_pnor( i_addr, static_cast<void*>(&i_data),
-                         sizeof(uint32_t) );
-#else
-        //@todo - fill in with RTC 36901
+        if( MODEL_LPC_MEM == iv_mode )
+        {
+            write_fake_pnor( i_addr - LPCHC_FW_SPACE,
+                             static_cast<void*>(&i_data),
+                             sizeof(uint32_t) );
+            break;
+        }
 
-        //@fixme - add non-master support  (RTC 36950)
-        TARGETING::Target* xscom_target =
+        // Note: If we got here then iv_mode is
+        //  either MODEL_FLAT_ECCB or MODEL_REAL
+
+        //@todo (RTC:36950) - add non-master support  
+        TARGETING::Target* scom_target =
           TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
 
         // always read/write 64 bits to SCOM
@@ -582,11 +642,12 @@ errlHndl_t PnorDD::writeLPC(uint32_t i_addr,
 
         // write data register 
         uint64_t eccb_data = static_cast<uint64_t>(i_data);
+        eccb_data = eccb_data << 32; //left-justify my data
         l_err = deviceOp( DeviceFW::WRITE,
-                          xscom_target,
+                          scom_target,
                           &eccb_data,
                           scom_size,
-                          DEVICE_XSCOM_ADDRESS(ECCB_DATA_REG) );
+                          DEVICE_SCOM_ADDRESS(ECCB_DATA_REG) );
         if( l_err ) { break; }
 
         // write command register with LPC address to write
@@ -594,21 +655,23 @@ errlHndl_t PnorDD::writeLPC(uint32_t i_addr,
         eccb_cmd.read_op = 0;
         eccb_cmd.address = i_addr;
         l_err = deviceOp( DeviceFW::WRITE,
-                          xscom_target,
+                          scom_target,
                           &(eccb_cmd.data64),
                           scom_size,
-                          DEVICE_XSCOM_ADDRESS(ECCB_CTL_REG) );
+                          DEVICE_SCOM_ADDRESS(ECCB_CTL_REG) );
         if( l_err ) { break; }
 
-        // poll for complete and get the data back
+        // poll for complete
         StatusReg_t eccb_stat;
-        while(1) //@fixme - need a timeout value
+        uint64_t poll_time = 0;
+        uint64_t loop = 0;
+        while( poll_time < ECCB_POLL_TIME_NS )
         {
             l_err = deviceOp( DeviceFW::READ,
-                              xscom_target,
+                              scom_target,
                               &(eccb_stat.data64),
                               scom_size,
-                              DEVICE_XSCOM_ADDRESS(ECCB_STAT_REG) );
+                              DEVICE_SCOM_ADDRESS(ECCB_STAT_REG) );
             if( l_err ) { break; }
 
             if( eccb_stat.op_done == 1 )
@@ -616,15 +679,19 @@ errlHndl_t PnorDD::writeLPC(uint32_t i_addr,
                 break;
             }
 
-            //@fixme - simics doesn't set the done bit yet : RTC 36901
-            break;
+            // want to start out incrementing by small numbers then get bigger
+            //  to avoid a really tight loop in an error case so we'll increase
+            //  the wait each time through
+            nanosleep( 0, ECCB_POLL_INCR_NS*(++loop) );
+            poll_time += ECCB_POLL_INCR_NS*loop;
         }
         if( l_err ) { break; }
 
         // check for errors
-        if( eccb_stat.data64 & LPC_STAT_REG_ERROR_MASK )
+        if( (eccb_stat.data64 & LPC_STAT_REG_ERROR_MASK)
+            || (eccb_stat.op_done == 0) )
         {
-            TRACFCOMP(g_trac_pnor, "PnorDD::writeLPC> Error from LPC Status Register : i_addr=0x%.8X, status=0x%.16X", i_addr, eccb_stat.data64 );
+            TRACFCOMP(g_trac_pnor, "PnorDD::writeLPC> Error or timeout from LPC Status Register : i_addr=0x%.8X, status=0x%.16X", i_addr, eccb_stat.data64 );
 
             /*@
              * @errortype
@@ -632,7 +699,8 @@ errlHndl_t PnorDD::writeLPC(uint32_t i_addr,
              * @reasoncode   PNOR::RC_LPC_ERROR
              * @userdata1    LPC Address
              * @userdata2    ECCB Status Register
-             * @devdesc      PnorDD::writeLPC> Error from LPC Status Register
+             * @devdesc      PnorDD::writeLPC> Error or timeout from
+             *               LPC Status Register
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                             PNOR::MOD_PNORDD_WRITELPC,
@@ -641,14 +709,14 @@ errlHndl_t PnorDD::writeLPC(uint32_t i_addr,
                                             eccb_stat.data64);
             l_err->collectTrace("PNOR");
             l_err->collectTrace("XSCOM");
-            //@todo - Any cleanup or recovery needed?
+            //@todo (RTC:37744) - Any cleanup or recovery needed?
             break;
         }
 
         // atomic section <<
         mutex_unlock(&iv_mutex);
         need_unlock = false;
-#endif
+
     } while(0);
 
     if( need_unlock )
@@ -668,7 +736,7 @@ errlHndl_t PnorDD::compareAndWriteBlock(uint32_t i_targetAddr,
                                         uint32_t i_wordsToWrite,
                                         uint32_t* i_data)
 {
-    TRACDCOMP(g_trac_pnor,"compareAndWriteBlock(0x%.8X,%d,%p)", i_targetAddr, i_wordsToWrite, i_data);
+    TRACFCOMP(g_trac_pnor,"compareAndWriteBlock(0x%.8X,%d,%p)", i_targetAddr, i_wordsToWrite, i_data);
     errlHndl_t l_err = NULL;
 
     // remember any data we read so we don't have to reread it later
@@ -681,23 +749,28 @@ errlHndl_t PnorDD::compareAndWriteBlock(uint32_t i_targetAddr,
     readflag_t* read_data = NULL;
 
     do {
-#ifndef SMART_WRITE
-        // LPC is accessed 32-bits at a time...
-        uint64_t words_written = 0;
-        for( uint32_t addr = i_targetAddr;
-             addr < (i_targetAddr+i_wordsToWrite*sizeof(uint32_t));
-             addr += sizeof(uint32_t) )
+        // skip the erase block logic if we're in a memcpy mode
+        if( (MODEL_MEMCPY == iv_mode) || (MODEL_LPC_MEM == iv_mode) )
         {
-            l_err = writeLPC( addr, i_data[words_written] );
+            // LPC is accessed 32-bits at a time...
+            uint64_t words_written = 0;
+            for( uint32_t addr = i_targetAddr;
+                 addr < (i_targetAddr+i_wordsToWrite*sizeof(uint32_t));
+                 addr += sizeof(uint32_t) )
+            {
+                // flash is mapped directly in the FW space
+                l_err = writeLPC( addr + LPCHC_FW_SPACE,
+                                  i_data[words_written] );
+                if( l_err ) { break; }
+
+                words_written++;
+            }
             if( l_err ) { break; }
 
-            words_written++;
+            // all done
+            break;
         }
-        o_bytesWritten = words_written*sizeof(uint32_t);
-        if( l_err ) { break; }
 
-
-#else 
 
         // remember any data we read so we don't have to reread it later
         read_data = new readflag_t[ERASESIZE_WORD32];
@@ -732,7 +805,8 @@ errlHndl_t PnorDD::compareAndWriteBlock(uint32_t i_targetAddr,
             // otherwise we need to compare our data with what is in flash now
             else
             {                
-                l_err = readLPC( block_addr + bword*sizeof(uint32_t),
+                l_err = readLPC( block_addr + bword*sizeof(uint32_t)
+                                 + LPCHC_FW_SPACE,
                                  read_data[bword].data );
                 if( l_err ) { break; }
 
@@ -751,7 +825,15 @@ errlHndl_t PnorDD::compareAndWriteBlock(uint32_t i_targetAddr,
                     // look for any bits that go from 1->0
                     if( read_data[bword].data & ~(i_data[dword]) )
                     {
-                        need_erase = true;                        
+                        need_erase = true;                   
+
+                        // push the user data into the read buffer
+                        //  to get written later
+                        read_data[bword].data = i_data[dword];
+
+                        // skip comparing the rest of the block,
+                        //   just start writing it
+                        break;
                     }
 
                     // push the user data into the read buffer
@@ -786,7 +868,8 @@ errlHndl_t PnorDD::compareAndWriteBlock(uint32_t i_targetAddr,
                 // restore the data before the write section
                 if( (block_addr + bword*sizeof(uint32_t)) < i_targetAddr )
                 {
-                    l_err = readLPC( block_addr + bword*sizeof(uint32_t),
+                    l_err = readLPC( block_addr + bword*sizeof(uint32_t)
+                                     + LPCHC_FW_SPACE,
                                      read_data[bword].data );
                     if( l_err ) { break; }
                 }
@@ -794,7 +877,8 @@ errlHndl_t PnorDD::compareAndWriteBlock(uint32_t i_targetAddr,
                 else if( (block_addr + bword*sizeof(uint32_t)) >=
                          (i_targetAddr + i_wordsToWrite*sizeof(uint32_t)) ) 
                 {
-                    l_err = readLPC( block_addr + bword*sizeof(uint32_t),
+                    l_err = readLPC( block_addr + bword*sizeof(uint32_t)
+                                     + LPCHC_FW_SPACE,
                                      read_data[bword].data );
                     if( l_err ) { break; }
                 }
@@ -824,14 +908,13 @@ errlHndl_t PnorDD::compareAndWriteBlock(uint32_t i_targetAddr,
             }
 
             // write the word out to the flash
-            l_err = writeLPC( block_addr + bword_written*sizeof(uint32_t),
+            l_err = writeLPC( block_addr + bword_written*sizeof(uint32_t)
+                              + LPCHC_FW_SPACE,
                               read_data[bword_written].data );
             if( l_err ) { break; }
-            //@todo - How should we handle PNOR errors?
+            //@todo (RTC:37744) - How should we handle PNOR errors?
         }
         if( l_err ) { break; }
-
-#endif
 
     } while(0);
 
@@ -872,10 +955,27 @@ errlHndl_t PnorDD::eraseFlash(uint32_t i_address)
         // log the erase of this block
         iv_erases[i_address/ERASESIZE_BYTES]++;
         TRACFCOMP(g_trac_pnor, "PnorDD::eraseFlash> Block 0x%.8X has %d erasures", i_address, iv_erases[i_address/ERASESIZE_BYTES] );
-        
-        //@todo - issue some LPC/SPI commands to erase the block RTC 35728
-        char* ptr = (char*)(FAKE_PNOR_START+i_address);
-        memset( ptr, 0, ERASESIZE_BYTES );
+
+        if( MODEL_REAL != iv_mode )
+        {
+            erase_fake_pnor( i_address, ERASESIZE_BYTES );
+            break; //all done
+        }
+
+        //@todo (RTC:35728) - issue some LPC/SPI commands to erase the block 
+        /*@
+         * @errortype
+         * @moduleid     PNOR::MOD_PNORDD_ERASEFLASH
+         * @reasoncode   PNOR::RC_UNSUPPORTED_OPERATION
+         * @userdata1    Model mode
+         * @userdata2    LPC Address to erase
+         * @devdesc      PnorDD::eraseFlash> No support for MODEL_REAL yet
+         */
+        l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                        PNOR::MOD_PNORDD_ERASEFLASH,
+                                        PNOR::RC_UNSUPPORTED_OPERATION,
+                                        static_cast<uint64_t>(iv_mode),
+                                        i_address);
     } while(0);
 
     return l_err;
@@ -883,12 +983,13 @@ errlHndl_t PnorDD::eraseFlash(uint32_t i_address)
 
 
 
+/*
+ This code is used in the MODEL_MEMCPY and MODEL_LPC_MEM modes
+*/
 
-}; //end PNOR namespace
-
-
-
-#ifdef USE_FAKE_PNOR
+#define FAKE_PNOR_START 5*MEGABYTE
+#define FAKE_PNOR_END 8*MEGABYTE
+#define FAKE_PNOR_SIZE 3*MEGABYTE
 void write_fake_pnor( uint64_t i_pnorAddr, void* i_buffer, size_t i_size )
 {
     //create a pointer to the offset start.
@@ -905,4 +1006,13 @@ void read_fake_pnor( uint64_t i_pnorAddr, void* o_buffer, size_t i_size )
     //copy data from memory into the buffer.
     memcpy(o_buffer, srcPtr, i_size);
 }
-#endif
+void erase_fake_pnor( uint64_t i_pnorAddr, size_t i_size )
+{
+    //create a pointer to the offset start.
+    char * srcPtr = (char *)(FAKE_PNOR_START+i_pnorAddr);
+
+    //copy data from memory into the buffer.
+    memset( srcPtr, 0, i_size );
+}
+
+

@@ -132,13 +132,13 @@ errlHndl_t IntrRp::_init()
     // TODO Adjust the realAddr if the BAR came from a processor other
     // than cpuid 0
 
-    TRACDCOMP(g_trac_intr,"INTR: realAddr = %lx",realAddr);
+    TRACFCOMP(g_trac_intr,"INTR: realAddr = %lx",realAddr);
 
     // VADDR_SIZE is 1MB per chip - max 32 -> 32MB
     iv_baseAddr = reinterpret_cast<uint64_t>
         (mmio_dev_map(reinterpret_cast<void*>(realAddr),THIRTYTWO_MB));
 
-    TRACDCOMP(g_trac_intr,"INTR: vAddr = %lx",iv_baseAddr);
+    TRACFCOMP(g_trac_intr,"INTR: vAddr = %lx",iv_baseAddr);
 
     err = checkAddress(iv_baseAddr);
     if(!err)

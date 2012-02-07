@@ -1,0 +1,7 @@
+Enable ECCB-based LPC/PNOR access (temporary)
+-RTC: Story 37972 will be used to remove the patches
+-CQ: No fips defect because these changes are not permanent
+-Files: p8_pnor.act
+-Coreq: associated changes are also in workarounds.presimsetup
+
+

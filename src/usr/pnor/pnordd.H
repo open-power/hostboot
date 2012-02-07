@@ -23,19 +23,16 @@
 #ifndef __PNOR_PNORDD_H
 #define __PNOR_PNORDD_H
 
+#include <limits.h>
+
 /** @file pnordd.H
  *  @brief Provides the interfaces to the PNOR Device Driver
  */
 
-namespace PNOR
-{
-
 /**
- *  @brief  Type definition for PNOR address
+ *  @brief  PNOR Device Driver Class
+ *     Provides access to the PNOR flash via the ECCB/LPC/SPI hardware
  */
-typedef uint64_t PNORAddress_t;
-
-
 class PnorDD
 {
 
@@ -70,10 +67,18 @@ class PnorDD
 
 
   protected:
+    enum PnorMode_t {
+        MODEL_UNKNOWN, //Invalid
+        MODEL_MEMCPY, //No LPC logic, just do memcpy into cache area
+        MODEL_LPC_MEM, //Break into 32-bit LPC ops but use memcpy into cache area
+        MODEL_FLAT_ECCB, //Use ECCB scoms to drive LPC, flat memory map behind ECCB, no SPI
+        MODEL_REAL, //Code for real hardware or complete sim model
+    };
+
     /**
      * @brief Constructor
      */
-    PnorDD();
+    PnorDD( PnorMode_t i_mode = MODEL_UNKNOWN );
 
 
     /**
@@ -128,6 +133,40 @@ class PnorDD
                            uint32_t i_data);
 
     /**
+     * @brief SPI Registers
+     *    These are offsets within the SPI Register Space
+     */
+    enum SpiRegAddr {
+        SPI_REG_CMD     = 0x40, /**< CMD : Command */
+        SPI_REG_ADR     = 0x44, /**< ADR : Address */
+        SPI_REG_ERASMS  = 0x48, /**< ERASMS : Small Erase Block Size */
+        SPI_REG_ERASLGS = 0x4C, /**< ERALGS : Large Erase Block Size */
+        SPI_REG_ADRCBF  = 0x80, /**< ADRCBF : First Intf NOR Addr Offset */
+        SPI_REG_ADRCMF  = 0x84, /**< ADRCMF : First Intf NOR Allocation */
+        SPI_REG_ADRCBS  = 0x88, /**< ADRCBS : Second Intf NOR Addr Offset */
+        SPI_REG_ADRCMS  = 0x8C, /**< ADRCMS : Second Intf NOR Allocation */
+    };
+
+    /**
+     * @brief SPI Op Codes
+     *    OP Codes for the SPI Command Register
+     */
+    enum SpiOpCodes {
+        SPI_OP_READRAW    = 0x03, /**< Read Raw */
+        SPI_OP_WRITERAW   = 0x02, /**< Write Raw */
+        SPI_OP_ERASM      = 0x32, /**< Erase Small */
+        SPI_OP_ERALG      = 0x34, /**< Erase Large */
+        SPI_OP_ENWRITPROT = 0x53, /**< Enable WRite Protect */
+        SPI_OP_CHIPID     = 0x1F, /**< Get Chip ID */
+        SPI_OP_STATUS     = 0x05, /**< Get Status */
+        SPI_OP_TURNOFF    = 0x5E, /**< Turn Off */
+        SPI_OP_TURNON     = 0x50, /**< Turn On */
+        SPI_OP_ABORT      = 0x6F, /**< Super-Abort */
+        SPI_OP_START4BA   = 0x37, /**< Start 4BA */
+        SPI_OP_END4BA     = 0x69, /**< End 4BA */
+    };
+
+    /**
      * @brief Read a SPI Register
      *
      * @parm i_addr  Register address, relative to the SPI engine
@@ -135,7 +174,7 @@ class PnorDD
      *
      * @return Error from operation
      */
-    errlHndl_t readRegSPI(uint32_t i_addr,
+    errlHndl_t readRegSPI(SpiRegAddr i_addr,
                           uint32_t& o_data);
 
     /**
@@ -146,7 +185,7 @@ class PnorDD
      *
      * @return Error from operation
      */
-    errlHndl_t writeRegSPI(uint32_t i_addr,
+    errlHndl_t writeRegSPI(SpiRegAddr i_addr,
                            uint32_t i_data);
 
 
@@ -160,9 +199,16 @@ class PnorDD
         LPCHC_IO_SPACE  = 0xD0010000, /**< LPC Host Controller I/O Space */
         LPCHC_REG_SPACE = 0xC0012000, /**< LPC Host Ctlr Register Space */
 
+        LPC_DIRECT_READ_OFFSET = 0xFC000000,
+        LPC_SPI_REG_OFFSET = 0xF0000C00,
+        LPC_TOP_OF_FLASH_OFFSET = 0xFFFFFFFF,
+
         ECCB_CTL_REG  = 0x000B0020, /**< ECCB Control Reg (FW) */
         ECCB_STAT_REG = 0x000B0022, /**< ECCB Status Reg (FW) */
         ECCB_DATA_REG = 0x000B0023, /**< ECCB Data Reg (FW) */
+        //ECCB_CTL_REG  = 0x00090020, /**< ECCB Control Reg (FW) */
+        //ECCB_STAT_REG = 0x00090022, /**< ECCB Status Reg (FW) */
+        //ECCB_DATA_REG = 0x00090023, /**< ECCB Data Reg (FW) */
 
         // Default Values to set for all operations
         // 1101.0100.0000.000x.0000.0001.0000.0000.<address>
@@ -173,6 +219,9 @@ class PnorDD
         PNORSIZE = 3 * MEGABYTE, //@fixme - read from TOC instead
         ERASESIZE_BYTES = 4 * KILOBYTE, /**< Minimum Erase Block (bytes) */
         ERASESIZE_WORD32 = ERASESIZE_BYTES/(sizeof(uint32_t)), /**< Erase Block (32-bit words) */
+
+        ECCB_POLL_TIME_NS = 400000, /**< max time from Manfred Walz is 400ms */
+        ECCB_POLL_INCR_NS = 10, /**< minimum increment during poll */
     };
 
 
@@ -211,7 +260,7 @@ class PnorDD
      * @brief Compare the existing data in 1 erase block of the flash with
      *   the incoming data and write or erase as needed
      *
-     * @parm i_targetAddr  Starting address to write
+     * @parm i_targetAddr  Starting flash address to write
      * @parm i_wordsToWrite  Number of 32-bit words to write
      * @parm i_data  Buffer of data to write
      *
@@ -309,8 +358,17 @@ class PnorDD
      *    track writes by page (=erase block)
      */
     uint8_t iv_erases[PNORSIZE/ERASESIZE_BYTES];
+
+    /** 
+     * @brief Determine how much of the PNOR logic to use,
+     *   this is required due to different model functionality
+     *   in the current VPO and Simics models
+     */
+    PnorMode_t iv_mode;
+
+    // Needed for testcases
+    friend class PnorDdTest;
 };
 
-}; //end PNOR namespace
 
 #endif

@@ -1,0 +1,45 @@
+#####
+# LPC Actions through ECCB
+
+# Catch LPC Read to flash
+CAUSE_EFFECT {
+  LABEL=[LPC Read]
+  WATCH=[REG(0x000B0020)]  #ECCB Control Reg (FW)
+  # look for a read command
+  CAUSE: TARGET=[REG(0x000B0020)] OP=[EQUALTO,BUF,MASK] DATA=[LITERAL(64,D4010100 F0000000)] MASK=[LITERAL(64,FFFFFFFF F0000000)]
+  # push the address into a dummy reg
+  EFFECT: TARGET=[REG(0xDDDD0000)] OP=[EQUALTO,BUF,MASK] DATA=[REG(0x000B0020)] MASK=[LITERAL(64,00000000 0FFFFFFF)]
+  # move the address into our PNOR space (5 MB)
+  EFFECT: TARGET=[REG(0xDDDD0000)] OP=[INCREMENT,MASK] INCVAL=[5242880] MASK=[LITERAL(64,00000000 FFFFFFFF)]
+  # write the data from mainstore into another dummy reg
+  EFFECT: TARGET=[MODULE(readMainstore, 0xDDDD0000)] OP=[MODULECALL]  DATA=[REG(0xDDDD0001)]
+  # Copy 32-bits into the ECCB Data Reg (FW)  
+  EFFECT: TARGET=[REG(0x000B0023)] OP=[EQUALTO,BUF,MASK] DATA=[REG(0xDDDD0001)] MASK=[LITERAL(64,FFFFFFFF 00000000)]
+  # Copy the data into the ECCB Status Reg (FW) bits 6:37
+  EFFECT: TARGET=[REG(0x000B0022)] OP=[EQUALTO,BUF,MASK,SHIFT] DATA=[REG(0xDDDD0001)] MASK=[LITERAL(64,03FFFFFF FC000000)] SHIFT=[6]
+  #ECCB Status Reg (FW)  done bit
+  EFFECT: TARGET=[REG(0x000B0022)] OP=[BIT,ON] BIT=[52]  
+}
+
+
+# Catch LPC Write to flash
+CAUSE_EFFECT {
+  LABEL=[LPC Write]
+  WATCH=[REG(0x000B0020)]  #ECCB Control Reg (FW)
+  # look for a read command
+  CAUSE: TARGET=[REG(0x000B0020)] OP=[EQUALTO,BUF,MASK] DATA=[LITERAL(64,D4000100 F0000000)] MASK=[LITERAL(64,FFFFFFFF F0000000)]
+  # push the address into a dummy reg
+  EFFECT: TARGET=[REG(0xDDDD0000)] OP=[EQUALTO,BUF,MASK] DATA=[REG(0x000B0020)] MASK=[LITERAL(64,00000000 0FFFFFFF)]
+  # move the address into our PNOR space (5 MB)
+  EFFECT: TARGET=[REG(0xDDDD0000)] OP=[INCREMENT,MASK] INCVAL=[5242880] MASK=[LITERAL(64,00000000 FFFFFFFF)]
+  # copy the data from mainstore into the dummy reg since it reads 64-bits but we only write 32
+  EFFECT: TARGET=[MODULE(readMainstore, 0xDDDD0000)] OP=[MODULECALL]  DATA=[REG(0xDDDD0001)]
+  # Copy 32-bits from the ECCB Data Reg (FW) into a dummy reg
+  EFFECT: TARGET=[REG(0xDDDD0001)] OP=[EQUALTO,BUF,MASK] DATA=[REG(0x000B0023)] MASK=[LITERAL(64,FFFFFFFF 00000000)]
+  # write the data from the dummy reg into mainstore
+  EFFECT: TARGET=[MODULE(writeMainstore, 0xDDDD0000)] OP=[MODULECALL]  DATA=[REG(0xDDDD0001)]
+  #ECCB Status Reg (FW)  done bit
+  EFFECT: TARGET=[REG(0x000B0022)] OP=[BIT,ON] BIT=[52]  
+}
+
+
