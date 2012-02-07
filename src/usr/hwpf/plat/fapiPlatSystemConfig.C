@@ -91,13 +91,17 @@ fapi::ReturnCode fapiGetChildChiplets(
         {
             l_predicate.setType(TARGETING::TYPE_MBA);
         }
-        else if (i_chipletType == fapi::TARGET_TYPE_MBS_CHIPLET)
-        {
-            l_predicate.setType(TARGETING::TYPE_MBS);
-        }
         else if (i_chipletType == fapi::TARGET_TYPE_MCS_CHIPLET)
         {
             l_predicate.setType(TARGETING::TYPE_MCS);
+        }
+        else if (i_chipletType == fapi::TARGET_TYPE_XBUS_ENDPOINT)
+        {
+            l_predicate.setType(TARGETING::TYPE_XBUS);
+        }
+        else if (i_chipletType == fapi::TARGET_TYPE_ABUS_ENDPOINT)
+        {
+            l_predicate.setType(TARGETING::TYPE_ABUS);
         }
         else
         {

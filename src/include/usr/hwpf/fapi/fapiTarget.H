@@ -36,6 +36,8 @@
  *                          mjjones     07/05/2011  Removed const from handle
  *                          mjjones     08/29/2011  Updated toString function
  *                          mjjones     09/12/2011  Added isChip and isChiplet
+ *                          mjjones     02/07/2012  Remove MBS_CHIPLET
+ *                                                  Add XBUS_ENDPOINT ABUS_ENDPOINT
  */
 
 #ifndef FAPITARGET_H_
@@ -52,15 +54,16 @@ namespace fapi
  */
 enum TargetType
 {
-    TARGET_TYPE_NONE        = 0x00000000,
-    TARGET_TYPE_SYSTEM      = 0x00000001,
-    TARGET_TYPE_DIMM        = 0x00000002,
-    TARGET_TYPE_PROC_CHIP   = 0x00000004,
-    TARGET_TYPE_MEMBUF_CHIP = 0x00000008,
-    TARGET_TYPE_EX_CHIPLET  = 0x00000010,
-    TARGET_TYPE_MBA_CHIPLET = 0x00000020,
-    TARGET_TYPE_MBS_CHIPLET = 0x00000040,
-    TARGET_TYPE_MCS_CHIPLET = 0x00000080,
+    TARGET_TYPE_NONE          = 0x00000000,
+    TARGET_TYPE_SYSTEM        = 0x00000001,
+    TARGET_TYPE_DIMM          = 0x00000002,
+    TARGET_TYPE_PROC_CHIP     = 0x00000004,
+    TARGET_TYPE_MEMBUF_CHIP   = 0x00000008,
+    TARGET_TYPE_EX_CHIPLET    = 0x00000010,
+    TARGET_TYPE_MBA_CHIPLET   = 0x00000020,
+    TARGET_TYPE_MCS_CHIPLET   = 0x00000040,
+    TARGET_TYPE_XBUS_ENDPOINT = 0x00000080,
+    TARGET_TYPE_ABUS_ENDPOINT = 0x00000100,
 };
 
 /**
@@ -200,7 +203,9 @@ public:
     /**
      * @brief Returns if the target is a chiplet
      *
-     * @return boolean. true if chiplet else fase
+     * This includes all chip units (e.g. XBUS, ABUS)
+     *
+     * @return boolean. true if chiplet else false
      */
     bool isChiplet() const;
 

@@ -33,6 +33,8 @@
  *                          mjjones     04/13/2011  Created. Based on Hlava prototype
  *                          mjjones     07/05/2011  Removed const from handle
  *                          mjjones     09/12/2011  Added isChip and isChiplet
+ *                          mjjones     02/07/2012  Remove MBS_CHIPLET
+ *                                                  Add XBUS_ENDPOINT ABUS_ENDPOINT
  */
 
 #include <fapiTarget.H>
@@ -151,8 +153,7 @@ void Target::setType(const TargetType i_type)
 //******************************************************************************
 bool Target::isChip() const
 {
-    return ((iv_type == TARGET_TYPE_PROC_CHIP) ||
-            (iv_type == TARGET_TYPE_MEMBUF_CHIP));
+    return ((iv_type & (TARGET_TYPE_PROC_CHIP | TARGET_TYPE_MEMBUF_CHIP)) != 0);
 }
 
 //******************************************************************************
@@ -160,10 +161,11 @@ bool Target::isChip() const
 //******************************************************************************
 bool Target::isChiplet() const
 {
-    return ((iv_type == TARGET_TYPE_EX_CHIPLET) ||
-            (iv_type == TARGET_TYPE_MBA_CHIPLET) ||
-            (iv_type == TARGET_TYPE_MBS_CHIPLET) ||
-            (iv_type == TARGET_TYPE_MCS_CHIPLET));
+    return ((iv_type & (TARGET_TYPE_EX_CHIPLET |
+                        TARGET_TYPE_MBA_CHIPLET |
+                        TARGET_TYPE_MCS_CHIPLET |
+                        TARGET_TYPE_XBUS_ENDPOINT |
+                        TARGET_TYPE_ABUS_ENDPOINT)) != 0);
 }
 
 }
