@@ -213,6 +213,14 @@ void Trace::initBuffer( trace_desc_t **o_td,
     // Store buffer name internally in upper case
     strupr(l_comp);
 
+    // The page containing the trace-descriptor destination might not be
+    // loaded yet, so we write to it outside of the mutex to force a page
+    // fault to bring the page in.  If we don't do this, we can end up with
+    // a dead-lock where this code is blocked due to a page-fault while
+    // holding the trace mutex, which in turn blocks the code that handles
+    // page faults.
+    *o_td = NULL;
+
     // CRITICAL REGION START
     mutex_lock(&iv_trac_mutex);
 
