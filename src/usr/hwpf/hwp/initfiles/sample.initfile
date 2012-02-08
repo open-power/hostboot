@@ -18,6 +18,17 @@ SyntaxVersion = 1
 #--******************************************************************************
 #-- -----------------------------------------------------------------------------
 #--
+#-- Includes
+#-- Note:  Must include the path to the .define file.
+#-- -----------------------------------------------------------------------------
+#--******************************************************************************
+#-- -----------------------------------------------------------------------------
+include ./hwp/initfiles/sample.define
+
+#-- -----------------------------------------------------------------------------
+#--******************************************************************************
+#-- -----------------------------------------------------------------------------
+#--
 #-- Defines
 #--
 #-- -----------------------------------------------------------------------------
@@ -47,6 +58,20 @@ scom 0x0000000013030007              {
 
 #--******************************************************************************
 #-- SCOM with Address and Data of Array Type, Range of Index, Bit Support
+#-- The following Scom is equivalent to:
+#scom 0x000000000006002B           {
+#  bits, scom_data             ,              expr;
+#  0:7,  SYS.ATTR_SCRATCH_UINT8_ARRAY_1[2],   SYS.ATTR_SCRATCH_UINT8_ARRAY_1[2] > SYS.ATTR_SCRATCH_UINT8_1;
+#  24:31, SYS.ATTR_SCRATCH_UINT8_ARRAY_1[2],  SYS.ATTR_SCRATCH_UINT8_1 == SYS.ATTR_SCRATCH_UINT8_ARRAY_1[3];
+#  32:39, SYS.ATTR_SCRATCH_UINT8_ARRAY_2[0][1][2], SYS.ATTR_SCRATCH_UINT8_ARRAY_1[0] < SYS.ATTR_SCRATCH_UINT8_ARRAY_1[1];
+#}
+#
+#scom 0x000000000006002C           {
+#  bits, scom_data             ,              expr;
+#  0:7,  SYS.ATTR_SCRATCH_UINT8_ARRAY_1[2],   SYS.ATTR_SCRATCH_UINT8_ARRAY_1[31] > SYS.ATTR_SCRATCH_UINT8_1;
+#  24:31, SYS.ATTR_SCRATCH_UINT8_ARRAY_1[31], SYS.ATTR_SCRATCH_UINT8_1 == SYS.ATTR_SCRATCH_UINT8_ARRAY_1[7];
+#  32:39, SYS.ATTR_SCRATCH_UINT8_ARRAY_2[1][2][3], SYS.ATTR_SCRATCH_UINT8_ARRAY_1[17] < SYS.ATTR_SCRATCH_UINT8_ARRAY_1[18];
+#}
 #--******************************************************************************
 
 scom 0x000000000006002(B,C)        {
@@ -104,7 +129,7 @@ scom 0x0000000013013284              {
     0:11 ,                    0b001111001001,   any                                   ;
     12   ,                    0b1,              def_equal_test                        ;
     12   ,                    0b0,              def_not_equal_test                    ;
-    13   ,                    0b1,              SYS.ATTR_SCRATCH_UINT8_1 > SYS.ATTR_SCRATCH_UINT8_2   ;
+    13   ,                    0b1,              def_uint8_greater_test                ;
     14:59, 0b0000001100000110010000000000010000010010000000,  SYS.ATTR_SCRATCH_UINT64_2 == ENUM_ATTR_SCRATCH_UINT64_2_VAL_C;
 }
 
@@ -117,7 +142,7 @@ scom 0x0000000013013285              {
     12   ,                    0b1,              def_equal_test && def_not_equal_test  ;
     12   ,                    0b0,              def_equal_test || def_not_equal_test  ;
     14   ,                    0b1,              SYS.ATTR_SCRATCH_UINT32_1 < SYS.ATTR_SCRATCH_UINT32_2   ;
-    15   ,                    0b1,              SYS.ATTR_SCRATCH_UINT32_1 > SYS.ATTR_SCRATCH_UINT32_2   ;
+    15   ,                    0b1,              def_uint32_greater_test                                 ;
     16   ,                    0b1,              SYS.ATTR_SCRATCH_UINT32_1 >= SYS.ATTR_SCRATCH_UINT32_2  ;
     17   ,                    0b1,              SYS.ATTR_SCRATCH_UINT32_1 <= SYS.ATTR_SCRATCH_UINT32_2  ;
     18   ,                    0b1,              SYS.ATTR_SCRATCH_UINT32_1 == SYS.ATTR_SCRATCH_UINT32_2  ;

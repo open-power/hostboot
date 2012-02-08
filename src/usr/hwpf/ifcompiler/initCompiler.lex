@@ -27,6 +27,7 @@
 //                camvanng 11/16/11   Support system & target attributes
 //                camvanng 12/12/11   Support multiple address ranges within a SCOM address
 //                camvanng 01/20/12   Support for using a range of indexes for array attributes
+//                camvanng 02/07/12   Ability to #include common scom initfile defines
 // End Change Log *********************************************************************************/
 /**
  * @file initCompiler.lex
@@ -69,6 +70,10 @@ std::string g_scomname;     // dg02
 
 extern int yyline;
 
+#define MAX_INCLUDE_DEPTH 10
+YY_BUFFER_STATE include_stack[MAX_INCLUDE_DEPTH];
+int include_stack_num = 0;
+
 %}
 
 
@@ -104,6 +109,7 @@ MULTI_DIGIT [0-9]+
 %x      target
 %x      attribute
 %x      array
+%x      incl
 
 
 %%
@@ -112,7 +118,17 @@ MULTI_DIGIT [0-9]+
 \$Id:.*\n               ++yyline;    /* toss this - read by initCompiler.C */
 
  /* Special end-of-file character. */
-<<EOF>>		        { return 0; }
+<<EOF>>		        {
+                        if (--include_stack_num < 0)
+                        {
+                            return 0;
+                        }
+                        else
+                        {
+                            yy_delete_buffer(YY_CURRENT_BUFFER);
+                            yy_switch_to_buffer(include_stack[include_stack_num]);
+                        }
+                    }
 
 SyntaxVersion           return INIT_VERSION;
 
@@ -128,6 +144,34 @@ Versions                BEGIN(fnames);
                             yylval.str_ptr = new std::string(oss.str());
                             BEGIN(INITIAL);
                             return INIT_VERSIONS;
+                        }
+
+include                 { BEGIN(incl); }
+<incl>[ \t]*            /* Eat up whitespace */
+<incl>[^ \t\n]+         {   /* Got the include file name */
+                            /*printf("include file %s\n", yytext);*/
+                            if ( include_stack_num >= MAX_INCLUDE_DEPTH )
+                            {
+                                lex_err("Includes nested too deeply");
+                                exit( 1 );
+                            }
+
+                            /* Save current input buffer */
+                            include_stack[include_stack_num++] =
+                                YY_CURRENT_BUFFER;
+
+                            /* Switch input buffer */
+                            yyin = fopen( yytext, "r" );
+                            if (NULL == yyin)
+                            {
+                                oss.str("");
+                                oss << "Cannot open file: " << yytext;
+                                lex_err(oss.str().c_str());
+                                exit(1);
+                            }
+                            yy_switch_to_buffer(yy_create_buffer(yyin, YY_BUF_SIZE));
+
+                            BEGIN(INITIAL);
                         }
 
 define                  { return INIT_DEFINE;}
