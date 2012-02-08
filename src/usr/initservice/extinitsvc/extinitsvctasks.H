@@ -43,16 +43,69 @@ const TaskInfo g_exttaskinfolist[]   =   {
         //  -----   Extended Image  ------------------------------------------
 
         /**
-         * @brief   ecmddatabuffer task,
+         * @brief   targeting task,
          */
         {
-                "libecmddatabuffer.so" ,                    // taskname
+            "libtargeting.so" ,                         // taskname
+            NULL,                                       // no pointer to fn
+            {
+                START_TASK,                         // task type
+                EXT_IMAGE,                          // Extended Module
+                START_TARGETING_ERRL_ID,            // module id
+            }
+        },
+
+        /**
+         * @brief External interrupt resource provider
+         */
+        {
+            "libintr.so",                               // taskname
+            NULL,                                       // no ptr to fnct
+            {
+                START_TASK,                             // task type
+                EXT_IMAGE,                              // Extended Module
+                START_INTR_ERRL_ID,                     // module id
+            }
+        },
+
+        /**
+         * @brief   FSI Device Driver
+         */
+
+        {
+            "libfsi.so" ,                               // taskname
+            NULL,                                       // no pointer to fn
+            {
+                INIT_TASK,                          // task type
+                EXT_IMAGE,                          // Extended Module
+                START_FSIDD_ERRL_ID,                // module id
+            }
+        },
+
+        /**
+         * @brief   FSI SCOM Device Driver
+         */
+        {
+                "libfsiscom.so" ,                           // taskname
                 NULL,                                       // no pointer to fn
                 {
                         INIT_TASK,                          // task type
                         EXT_IMAGE,                          // Extended Module
-                        START_ECMDDATABUFFER_ERRL_ID,       // module id
+                        START_FSISCOM_ERRL_ID,              // module id
                 }
+        },
+
+        /**
+         * @brief   I2C Device Driver
+         */
+        {
+            "libi2c.so" ,                       // taskname
+            NULL,                               // no pointer to fn
+            {
+                INIT_TASK,                      // task type
+                EXT_IMAGE,                      // Extended Module
+                START_I2C_ERRL_ID,              // module id
+            }
         },
 
         /**
@@ -66,6 +119,39 @@ const TaskInfo g_exttaskinfolist[]   =   {
                 EXT_IMAGE,                                  // Extended module
                 START_SPD_ERRL_ID                           // module id
             }
+        },
+
+// TODO: Added this in order to successfull init.. Need to remove this and put
+// the module load and unload from a the istep dispatcher
+// PW - Is this really TODO?  Don't we need the hwas module from errl to do
+//      gard / deconfig?
+        /**
+         * @brief   HWAS,
+         */
+
+
+        {
+            "libhwas.so" ,                                  // taskname
+            NULL,                                           // no pointer to fn
+            {
+                INIT_TASK,                                  // task type
+                EXT_IMAGE,                                  // Extended Module
+                EXECUTE_ISTEPS_ERRL_ID,                     // module id
+            }
+        },
+// end TODO
+
+        /**
+         * @brief   ecmddatabuffer task,
+         */
+        {
+                "libecmddatabuffer.so" ,                    // taskname
+                NULL,                                       // no pointer to fn
+                {
+                        INIT_TASK,                          // task type
+                        EXT_IMAGE,                          // Extended Module
+                        START_ECMDDATABUFFER_ERRL_ID,       // module id
+                }
         },
 
         /**
@@ -107,90 +193,7 @@ const TaskInfo g_exttaskinfolist[]   =   {
                 }
         },
 
-// TODO: Added this in order to successfull init.. Need to remove this and put
-// the module load and unload from a the istep dispatcher
-        /**
-         * @brief   HWAS,
-         */
-
-
-        {
-            "libhwas.so" ,                                  // taskname
-            NULL,                                           // no pointer to fn
-            {
-                INIT_TASK,                                  // task type
-                EXT_IMAGE,                                  // Extended Module
-                EXECUTE_ISTEPS_ERRL_ID,                     // module id
-            }
-        },
-// end TODO
-
-        /**
-         * @brief   FSI Device Driver
-         */
-
-        {
-                "libfsi.so" ,                               // taskname
-                NULL,                                       // no pointer to fn
-                {
-                        INIT_TASK,                          // task type
-                        EXT_IMAGE,                          // Extended Module
-                        START_FSIDD_ERRL_ID,                // module id
-                }
-        },
-
-        /**
-         * @brief   FSI SCOM Device Driver
-         */
-        {
-                "libfsiscom.so" ,                           // taskname
-                NULL,                                       // no pointer to fn
-                {
-                        INIT_TASK,                          // task type
-                        EXT_IMAGE,                          // Extended Module
-                        START_FSISCOM_ERRL_ID,              // module id
-                }
-        },
-
-        /**
-         * @brief   I2C Device Driver
-         */
-        {
-            "libi2c.so" ,                       // taskname
-            NULL,                               // no pointer to fn
-            {
-                INIT_TASK,                      // task type
-                EXT_IMAGE,                      // Extended Module
-                START_I2C_ERRL_ID,              // module id
-            }
-        },
-
-        /**
-         * @brief   targeting task,
-         */
-        {
-            "libtargeting.so" ,                         // taskname
-            NULL,                                       // no pointer to fn
-            {
-                START_TASK,                         // task type
-                EXT_IMAGE,                          // Extended Module
-                START_TARGETING_ERRL_ID,            // module id
-            }
-        },
-
-        /**
-         * @brief External interrupt resource provider
-         */
-        {
-            "libintr.so",                               // taskname
-            NULL,                                       // no ptr to fnct
-            {
-                START_TASK,                             // task type
-                EXT_IMAGE,                              // Extended Module
-                START_INTR_ERRL_ID,                     // module id
-            }
-        },
-
+// TODO: Should these be automatically loaded / unloaded by istepdispatcher?
         /**
          * @brief VSBE FAPI interface code library.
          */
@@ -216,6 +219,7 @@ const TaskInfo g_exttaskinfolist[]   =   {
                START_POREVE_ERRL_ID               // module id
             }
         },
+// end TODO.
 
         //  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         // NOTE: libistepdisp.so needs to always be last in this list!!
