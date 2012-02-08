@@ -513,7 +513,15 @@ sub runIStep( $$ )
         ## printf STDOUT "Istep %d.%d Status: 0x%x\n", $stsIStep, $stsSubstep, $istepStatus ; 
         if ( $taskStatus != 0 )
         {
-            printf STDOUT "Istep %d.%d FAILED to launch, task status is %d\n", $stsIStep, $stsSubstep, $taskStatus ;
+            if ( $taskStatus == 11 )
+            {
+                printf STDOUT "At breakpoint 0x%x\n", $istepStatus;
+            }
+            else
+            {
+                printf STDOUT "Istep %d.%d FAILED to launch, task status is %d\n",
+                       $stsIStep, $stsSubstep, $taskStatus ;
+            }
         }
         else
         {            
@@ -707,36 +715,71 @@ sub resume_istep()
 
     $g_SeqNum++;        ## bump
 
-    printf STDOUT "resume istep\n";
+    printf STDOUT "resume from breakpoint\n";
 
     $byte0 = 0x80 + $g_SeqNum;      ## gobit + seqnum
     $command = 0x01;
     $cmd = sprintf( "0x%2.2x%2.2x000000000000", $byte0, $command );
     VBU_Cacheline::CLwrite( $commandreg, $cmd );
 
-    $result = getSyncStatus();
+    ## dgxx
+    while(1)
+    {
+        $result = getSyncStatus();
 
-    ## if result is -1 we have a timeout
-    if ( $result == -1 )
-    {
-        print   "-----------------------------------------------------------------\n";
-    }
-    else
-    {
+        ## if result is -1 we have a timeout
+        last if ( $result == -1 );
+
         my $taskStatus  =   ( ( $result & 0x00ff000000000000 ) >> 48 );
+        my $stsIStep    =   ( ( $result & 0x0000ff0000000000 ) >> 40 );
+        my $stsSubstep  =   ( ( $result & 0x000000ff00000000 ) >> 32 );
+        my $istepStatus =   ( ( $result & 0x00000000ffffffff )  );
+        my $running     =   ( ( $result & 0x8000000000000000 ) >> 63 );
 
         print   STDOUT "-----------------------------------------------------------------\n";
+
+        ## At this point the status is:
+        ##  1) hostboot code was not at a breakpoint - resume ignored (result == 12)
+        ##  2) hostboot resumed from breakpoint, but has not reached the end of
+        ##     the istep. (running flag on, result is 0)
+        ##  3) hostboot resumed, but is at a new breakpoint
+        ##  4) hostboot resumed and is at the end of the istep
+        ##     (running flag off, result is rc from istep
+
         if ( $taskStatus != 0 )
         {
-            # This probably means istep was not at a breakpoint.
-            printf STDOUT "resume istep FAILED, task status is %d\n", $taskStatus ;
+            if ( $taskStatus == 11 )  # HB at new break point
+            {
+                printf STDOUT "At breakpoint 0x%x\n", $istepStatus;
+                last;
+            }
+            else if ( $taskStatus == 12 )  # HB not at a break point
+            {
+                printf STDOUT "resume istep ignored, task status is %d\n", $taskStatus ;
+                last;
+            }
+            else
+            {
+                printf STDOUT "Istep %d.%d returned Status: 0x%x\n",
+                      $stsIStep, $stsSubstep, $istepStatus ;
+                last;
+            }
         }
         else
-        {            
-            printf STDOUT "resume istep returned success\n" ;
+        {
+            if( $running == 0 )
+            {
+                printf STDOUT "Istep %d.%d returned Status: 0x%x\n",
+                    $stsIStep, $stsSubstep, $istepStatus ;
+                last;
+            }
+                        
+            ## continue to wait for istep to complete
         }
-        print STDOUT "-----------------------------------------------------------------\n";
+
     }
+    print STDOUT "-----------------------------------------------------------------\n";
+
 }
 
 __END__

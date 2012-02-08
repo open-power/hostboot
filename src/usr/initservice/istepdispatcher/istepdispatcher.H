@@ -53,11 +53,6 @@
 #include    "splesscommon.H"
 
 
-namespace fapi
-{
-    class Target;
-};
-
 namespace   INITSERVICE
 {
 
@@ -106,11 +101,12 @@ public:
 
     /**
      * @brief Handle an istep break point
-     * @param[in] i_target, the target
      * @param[in] i_info, @TODO - location/info
+     * @pre iv_sts contains current istep status + seqnum or 
+     *      0 if not in step mode
      * @note blocks until an outside istep cmd to resume is recieved. 
      */
-    void handleBreakPoint(const fapi::Target & i_target, uint64_t info);
+    void handleBreakPoint( uint32_t info);
 
 protected:
 
@@ -165,13 +161,12 @@ private:
      * @brief   Command 0: Run the requested IStep/SubStep
      *
      * param[in]    i_rcmd  -   ref to a filled in SPLessCmd struct
-     * param[out]   o_sts   -   ref to a SPLessSts struct to be filled in
+     * @post       iv_sts   set to current istep status
      *
      * @return  none
      */
     void    processSingleIStepCmd(
-                        SPLESS::SPLessCmd &i_rcmd,
-                        SPLESS::SPLessSts &o_rsts ) const;
+                        SPLESS::SPLessCmd &i_rcmd);
 
 
      /**
@@ -238,7 +233,8 @@ private:
 
     //  -----   internal vars   -----------------------------
 
-    mutex_t iv_poll_mutex;      //!< protect who's polling istep cmds
+    mutex_t             iv_poll_mutex;  //!< protect who's polling istep cmds
+    SPLESS::SPLessSts   iv_sts;         //!< Current status of istep mode
 
 };  //  class IStepDispatcher
 

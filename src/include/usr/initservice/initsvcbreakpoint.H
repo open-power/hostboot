@@ -25,20 +25,14 @@
 
 #include <stdint.h>
 
-namespace fapi
-{
-    class Target;
-};
-
 namespace       INITSERVICE
 {
     /**
      * Signal that a break point has been hit during an istep
-     * @param[in] i_target,  target information
-     * @param[in] i_info,   other information/location of bp (TBD @TODO)
+     * @param[in] i_info,   tag provided by fapi break point
      * @returns nothing
      * @note Blocks until an outside cmd to resume has been received 
      */
-    void iStepBreakPoint(const fapi::Target & i_target, uint64_t i_info);
+    void iStepBreakPoint( uint32_t i_info );
 };
 #endif

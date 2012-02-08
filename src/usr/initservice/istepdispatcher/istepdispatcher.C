@@ -309,13 +309,12 @@ bool IStepDispatcher::getIStepMode( )   const
  * @brief   Command 0: Run the requested IStep/SubStep
  *
  * param[in]    i_rcmd  -   ref to a filled in SPLessCmd struct
- * param[out]   o_sts   -   ref to a SPLessSts struct to be filled in
+ * @post   iv_sts  set to current istep status
  *
  * @return  none
  */
 void    IStepDispatcher::processSingleIStepCmd(
-                                    SPLessCmd &i_rrawcmd,
-                                    SPLessSts &o_rrawsts ) const
+                                    SPLessCmd &i_rrawcmd )
 {
     errlHndl_t              l_errl          =   NULL;
     uint64_t                l_isteprc       =   NULL;
@@ -356,7 +355,7 @@ void    IStepDispatcher::processSingleIStepCmd(
                      l_cmd.substep );
 
             //  return to caller to write back to user console
-            o_rrawsts.val64 =   l_sts.val64;
+            iv_sts.val64 =   l_sts.val64;
             break;
         }
 
@@ -376,8 +375,11 @@ void    IStepDispatcher::processSingleIStepCmd(
 
 
         //  write intermediate value back to user console
-        o_rrawsts.val64 =   l_sts.val64;
-        writeSts( o_rrawsts );
+        iv_sts.val64 =   l_sts.val64;
+        writeSts( iv_sts );
+
+        // handleBreakPoint will need sequence number
+        iv_sts.hdr.seqnum = l_cmd.hdr.seqnum; 
 
 
         /**
@@ -413,7 +415,7 @@ void    IStepDispatcher::processSingleIStepCmd(
                  l_sts.istepStatus       =   0;
 
                  //  return to caller to write back to user console
-                 o_rrawsts.val64 =   l_sts.val64;
+                 iv_sts = l_sts;
 
                 break;
             }
@@ -494,7 +496,7 @@ void    IStepDispatcher::processSingleIStepCmd(
          */
 
         //  write to status reg, return to caller to write to user console
-        o_rrawsts.val64 =   l_sts.val64;
+        iv_sts = l_sts;
 
         break;
 
@@ -521,7 +523,6 @@ void    IStepDispatcher::processSingleIStepCmd(
 void    IStepDispatcher::singleStepISteps( void *  io_ptr )
 {
     SPLessCmd           l_cmd;
-    SPLessSts           l_sts;
     uint8_t             l_seqnum        =   0;
 
     mutex_lock(&iv_poll_mutex);  // make sure this is only poller
@@ -531,9 +532,9 @@ void    IStepDispatcher::singleStepISteps( void *  io_ptr )
     writeCmd( l_cmd );
 
     //  init status reg, enable ready bit
-    l_sts.val64 =   0;
-    l_sts.hdr.readybit  =   true;
-    writeSts( l_sts );
+    iv_sts.val64 =   0;
+    iv_sts.hdr.readybit  =   true;
+    writeSts( iv_sts );
 
     //
     //  @note Start the polling loop.
@@ -558,21 +559,21 @@ void    IStepDispatcher::singleStepISteps( void *  io_ptr )
                 case SPLESS_SINGLE_ISTEP_CMD:
                     mutex_unlock(&iv_poll_mutex);
                     // command 0:  run istep/substep
-                    processSingleIStepCmd( l_cmd, l_sts  );
+                    processSingleIStepCmd( l_cmd );
                     mutex_lock(&iv_poll_mutex);
                     break;
 
                 case SPLESS_RESUME_ISTEP_CMD: // not at break point here
-                    l_sts.hdr.status    =   SPLESS_NOT_AT_BREAK_POINT;
+                    iv_sts.hdr.status    =   SPLESS_NOT_AT_BREAK_POINT;
                     break;
 
                 default:
-                    l_sts.hdr.status    =   SPLESS_INVALID_COMMAND;
+                    iv_sts.hdr.status    =   SPLESS_INVALID_COMMAND;
             }   // endif switch
 
-            l_sts.hdr.seqnum    =   l_seqnum;
+            iv_sts.hdr.seqnum    =   l_seqnum;
             //  status should be set now, write to Status Reg.
-            writeSts( l_sts );
+            writeSts( iv_sts );
 
             // clear command reg, including go bit (i.e. set to false)
             l_cmd.val64 =   0;
@@ -604,10 +605,10 @@ void    IStepDispatcher::singleStepISteps( void *  io_ptr )
     //  Currently this will never be reached.  Later there may be
     //  a reason to break out of the loop, if this happens we want to
     //  disable the ready bit so the user knows.
-    l_sts.val64 =   0;
-    l_sts.hdr.status    =   SPLESS_TASKRC_TERMINATED;
-    l_sts.hdr.seqnum    =   l_seqnum;
-    writeSts( l_sts );
+    iv_sts.val64 =   0;
+    iv_sts.hdr.status    =   SPLESS_TASKRC_TERMINATED;
+    iv_sts.hdr.seqnum    =   l_seqnum;
+    writeSts( iv_sts );
     mutex_unlock(&iv_poll_mutex);
 
 }
@@ -811,21 +812,23 @@ IStepDispatcher& IStepDispatcher::getTheInstance()
 
 
 IStepDispatcher::IStepDispatcher()
+    : iv_sts()
 {
-    //  set up IStep Mode
+    mutex_init(&iv_poll_mutex);
+    // set up IStep Mode
     initIStepMode();
-
 }
 
 
 IStepDispatcher::~IStepDispatcher()
 { }
 
-void IStepDispatcher::handleBreakPoint(const fapi::Target & i_target, uint64_t i_info)
+void IStepDispatcher::handleBreakPoint( uint32_t i_info )
 {
     SPLessCmd   l_cmd;
-    SPLessSts   l_sts;
+    SPLessSingleIStepSts   l_sts;
     uint8_t     l_seqnum        = 0;
+    bool        l_istepmode     = false;
 
     // need to be the only poller
     mutex_lock(&iv_poll_mutex);
@@ -834,14 +837,22 @@ void IStepDispatcher::handleBreakPoint(const fapi::Target & i_target, uint64_t i
     l_cmd.val64 = 0;
     writeCmd ( l_cmd );
 
-    // init status reg, enable ready bit
-    l_sts.val64 = 0;
+    // write status
+    if(iv_sts.val64 != 0) // istep mode
+    {
+        l_istepmode = true;
+        l_sts = iv_sts;
+        l_sts.hdr.runningbit = false;
+    }
+    // else not in istep mode
+
     l_sts.hdr.readybit = true;
-    writeSts( l_sts );
+    l_sts.hdr.status = SPLESS_AT_BREAK_POINT;
+    l_sts.istepStatus = i_info;
 
-    // TODO Tell the outside world that a break point has been hit?
-    // TODO send i_target & i_info
-
+    iv_sts = l_sts;
+    writeSts( iv_sts );
+    
     // Poll for cmd to resume
     while(1)
     {
@@ -853,26 +864,25 @@ void IStepDispatcher::handleBreakPoint(const fapi::Target & i_target, uint64_t i
             // only expect this command
             if (l_cmd.hdr.cmdnum == SPLESS_RESUME_ISTEP_CMD)
             {
-                l_sts.hdr.seqnum = l_seqnum;
-                writeSts( l_sts );
+                iv_sts.hdr.seqnum = l_seqnum;
+                writeSts( iv_sts );
                 l_cmd.val64 = 0;
                 writeCmd( l_cmd );
                 break; // return to continue istep
             }
             else // all other commands are not valid here.
             {
-                l_sts.hdr.status = SPLESS_AT_BREAK_POINT;
+                iv_sts.hdr.status = SPLESS_AT_BREAK_POINT;
 
                 // write status
-                l_sts.hdr.seqnum = l_seqnum;
-                writeSts( l_sts );
+                iv_sts.hdr.seqnum = l_seqnum;
+                writeSts( iv_sts );
 
                 // clear cmd reg, including go bit
                 l_cmd.val64 = 0;
                 writeCmd( l_cmd );
             }
         }
-
 
 
         // TODO want to do the same kind fo delay as IStepDispatcher::singleStepISteps()
@@ -892,12 +902,35 @@ void IStepDispatcher::handleBreakPoint(const fapi::Target & i_target, uint64_t i
             nanosleep( SINGLESTEP_PAUSE_S, SINGLESTEP_PAUSE_NS );
         }
     }
+
+    l_sts = iv_sts;
+    l_sts.hdr.runningbit = true;
+    l_sts.hdr.status  = 0;
+    l_sts.istepStatus = 0;
+
+    if(l_istepmode)
+    {
+        l_sts.hdr.readybit   = true;
+        l_sts.hdr.seqnum = 0;
+    }
+    else // not in istep mode - unit testing
+    {
+        // For unit test, bp is allowed to run outside of istepmode.
+        // Return this flag to dispatcher not ready.
+        // ie Don't wait for dispatcher of finish the single istep.
+        l_sts.hdr.readybit  = false;
+        // leave seqnum as is
+    }
+
+    iv_sts = l_sts;
+    writeSts( iv_sts );
+
     mutex_unlock(&iv_poll_mutex);
 }
 
-void iStepBreakPoint(const fapi::Target & i_target, uint64_t i_info)
+void iStepBreakPoint(uint32_t i_info)
 {
-    IStepDispatcher::getTheInstance().handleBreakPoint(i_target, i_info);
+    IStepDispatcher::getTheInstance().handleBreakPoint( i_info );
 }
 
 } // namespace

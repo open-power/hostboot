@@ -194,9 +194,9 @@ fapi::ReturnCode fapiUnloadInitFile(const char * i_file, const char *& io_addr,
     return l_rc;
 }
 
-void fapiBreakPoint(const fapi::Target & i_target, uint64_t i_info)
+void fapiBreakPoint( uint32_t i_info)
 {
-    INITSERVICE::iStepBreakPoint(i_target, i_info);
+    INITSERVICE::iStepBreakPoint( i_info );
 }
 
 }

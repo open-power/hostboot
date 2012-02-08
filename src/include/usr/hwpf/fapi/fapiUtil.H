@@ -174,11 +174,9 @@ fapi::ReturnCode fapiUnloadInitFile(const char * i_file, const char *& io_addr,
  * This function will suspend the calling istep/procedure.
  * The procedure can be signaled to resume via a cmd through the
  * istep dispatcher.
- * @param[in] i_target reference to the target
- * @param[in] i_info  location/info @TODO of the breakpoint
+ * @param[in] i_info  Tag to send when at breakpoint
  */
-
-void fapiBreakPoint(const fapi::Target & i_target, uint64_t i_info);
+void fapiBreakPoint( uint32_t i_info);
 
 }
 

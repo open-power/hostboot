@@ -294,7 +294,9 @@ def runIStep( istep, substep, inList ):
     cmd = "0x%2.2x%2.2x%2.2x%2.2x_00000000"%(byte0, command, istep, substep );
     sendCommand( cmd )
     
-    result  =   getSyncStatus()
+    result  =   getSyncStatus()  
+
+    ## getSyncStatus waits for seqNum in status to be what last cmd sent
     
     ## if result is -1 we have a timeout
     if ( result == -1 ) :
@@ -305,11 +307,17 @@ def runIStep( istep, substep, inList ):
         stsSubstep  =   ( ( result & 0x000000ff00000000 ) >> 32 )
         istepStatus =   ( ( result & 0x00000000ffffffff )  )
 
+
         print   "-----------------------------------------------------------------"
+
         ## printStsHdr(result)
         ## print "Istep 0x%x / Substep 0x%x Status: 0x%x"%( stsIStep, stsSubstep, istepStatus ) 
         if ( taskStatus != 0 ) :
-            print "Istep %d.%d FAILED to launch, task status is %d"%( taskStatus )
+            # check for break point
+            if ( taskStatus == 11 ) :
+                print "At breakpoint 0x%x"%( istepStatus )
+            else :
+                print "Istep %d.%d FAILED to launch, task status is %d"%( taskStatus )
         else:            
             print "Istep %d.%d returned Status: 0x%x"%( stsIStep, stsSubstep, istepStatus ) 
         print   "-----------------------------------------------------------------"
@@ -326,20 +334,56 @@ def resume_istep():
     command = 0x01
     cmd = "0x%2.2x%2.2x_000000000000"%(byte0, command)
     sendCommand( cmd )
-    result = getSyncStatus()
 
-    ## if result is -1 we have a timeout
-    if ( result == -1 ) :
-        print   "-----------------------------------------------------------------"
-    else :
-        taskStatus  =   ( ( result & 0x00ff000000000000 ) >> 48 )
+    while  True :
+        result = getSyncStatus()
 
-        print   "-----------------------------------------------------------------"
-        if ( taskStatus != 0 ) :
-            print "resume Istep FAILED, task status is %d"%( taskStatus )
-        else:            
-            print "resume Istep was successful"
-        print   "-----------------------------------------------------------------"
+        ## if result is -1 we have a timeout
+        if ( result == -1 ) :
+            break;
+        else :
+            taskStatus  =   ( ( result & 0x00ff000000000000 ) >> 48 )
+            stsIStep    =   ( ( result & 0x0000ff0000000000 ) >> 40 )
+            stsSubstep  =   ( ( result & 0x000000ff00000000 ) >> 32 )
+            istepStatus =   ( ( result & 0x00000000ffffffff )  )
+            running     =   ( ( result & 0x8000000000000000 ) >> 63 )
+            readybit    =   ( ( result & 0x4000000000000000 ) >> 62 )     
+            print   "-----------------------------------------------------------------"
+
+            ## At this point the status is:
+            ##  1) hostboot code was not at a breakpoint - resume ignored (result == 12)
+            ##  2) hostboot resumed from breakpoint, but has not reached the end of
+            ##     the istep. (running flag on, result is 0)
+            ##  3) hostboot resumed, but is at a new breakpoint
+            ##  4) hostboot resumed and is at the end of the istep
+            ##     (running flag off, result is rc from istep
+
+
+            if ( taskStatus != 0 ) :
+                if (taskStatus == 11 ) :
+                    # at new breakpoint bail-out
+                    print " At breakpoint 0x%x."%( istepStatus )
+                    break
+                elif ( taskStatus == 12 ) :
+                    print "resume Istep ignored. Not at breakpoint"
+                    break
+                else :
+                    # all other errors must have come from the result of the istep
+                    print "Istep %d.%d returned Status: 0x%x"%( stsIStep, stsSubstep, istepStatus )
+                    break
+            else:            
+                if(running == 0) :
+                    print "Istep %d.%d returned Status: 0x%x"%( stsIStep, stsSubstep, istepStatus ) 
+                    break
+                elif (readybit == 0) :
+                    # not in istep mode - leave (mainly for unit testing)
+                    print "Istep resume was successful"
+                    break
+
+                # still waiting for istep to complete
+                # continue
+    print   "-----------------------------------------------------------------"
+
         
     return    
 
@@ -452,6 +496,10 @@ def istepHB( symsFile, str_arg1 ):
         hb_istep_usage()
         return None
        
+    if ( str_arg1 == "resume" ):    ## resume from break point
+        resume_istep()
+        return None
+
     ##  get the list of isteps from HostBoot...
     # print"get istep list"
     get_istep_list( inList )
@@ -460,10 +508,6 @@ def istepHB( symsFile, str_arg1 ):
         print_istep_list( inList )          
         return         
        
-    if ( str_arg1 == "resume" ):    ## resume from break point
-        resume_istep()
-        return None
-
     ## check to see if we have an 's' command (string starts with 's' and a number)    
     if ( re.match("^s+[0-9].*", str_arg1 ) ):
         ## run "s" command

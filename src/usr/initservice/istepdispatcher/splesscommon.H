@@ -96,7 +96,7 @@ enum    {
     SPLESS_TASKRC_FAIL_LOADMODULE   =   -7,     // failed to load module
 
     SPLESS_INVALID_COMMAND          =   10,    // invalid command from user console
-    SPLESS_AT_BREAK_POINT           =   11,    // invalid command at breakpoint
+    SPLESS_AT_BREAK_POINT           =   11,    // at breakpoint
     SPLESS_NOT_AT_BREAK_POINT       =   12,    // resume command w/o breakpoint
 };
 
@@ -350,6 +350,8 @@ struct  StatusHdr
 
 }   __attribute__((packed));
 
+union SPLessSingleIStepSts;
+
 /**
  * @union   SPLessSts
  *
@@ -366,6 +368,7 @@ union   SPLessSts  {
 
     //  init struct to 0
     SPLessSts()    : val64(0)  {};
+    SPLessSts & operator=(const SPLessSingleIStepSts & i_right);
 }   ;
 
 
@@ -385,7 +388,19 @@ union   SPLessSingleIStepSts  {
     }   __attribute__((packed));
 
     SPLessSingleIStepSts() :   val64(0)    {};
+    SPLessSingleIStepSts(const SPLessSts & i_sts ) :   val64(i_sts.val64) {};
+    SPLessSingleIStepSts & operator=(const SPLessSts & i_right)
+    {
+        this->val64 = i_right.val64;
+        return *this;
+    }
 }   ;
+
+SPLessSts & SPLessSts::operator=(const SPLessSingleIStepSts & i_right)
+{
+    this->val64 = i_right.val64;
+    return *this;
+}
 
 
 /**
