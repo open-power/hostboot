@@ -52,16 +52,16 @@ extern trace_desc_t* g_fapiImpTd;
 extern trace_desc_t* g_fapiScanTd;
 
 // Information traces (go into fast trace buffer that can wrap often)
-#define FAPI_INF(_fmt_, _args_...) TRACFCOMP(g_fapiTd, _fmt_, ##_args_ )
+#define FAPI_INF(_fmt_, _args_...) TRACFCOMP(g_fapiTd, TRACE_FILENAME _fmt_, ##_args_ )
 
 // Important traces (go into slow trace buffer that should not wrap often)
-#define FAPI_IMP(_fmt_, _args_...) TRACFCOMP(g_fapiImpTd, _fmt_, ##_args_ )
+#define FAPI_IMP(_fmt_, _args_...) TRACFCOMP(g_fapiImpTd, TRACE_FILENAME _fmt_, ##_args_ )
 
 // Error traces (go into slow trace buffer that should not wrap often)
-#define FAPI_ERR(_fmt_, _args_...) TRACFCOMP(g_fapiImpTd, _fmt_, ##_args_ )
+#define FAPI_ERR(_fmt_, _args_...) TRACFCOMP(g_fapiImpTd, TRACE_FILENAME _fmt_, ##_args_ )
 
 // Debug traces (go into fast trace buffer that can wrap often)
-#define FAPI_DBG(_fmt_, _args_...) TRACDCOMP(g_fapiTd, _fmt_, ##_args_)
+#define FAPI_DBG(_fmt_, _args_...) TRACDCOMP(g_fapiTd, TRACE_FILENAME _fmt_, ##_args_)
 
 // Scan traces
 #define FAPI_SCAN(_fmt_, _args_...) TRACFCOMP(g_fapiScanTd, _fmt_, ##_args_)
