@@ -30,7 +30,8 @@ VPATH =         \
 PREDICATES_OBJS =           \
     predicatebase.o         \
     predicatepostfixexpr.o  \
-    predicatectm.o       
+    predicatectm.o 			\
+    predicateisfunctional.o      
     
 ITERATORS_OBJS =        \
     targetiterator.o    \

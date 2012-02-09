@@ -68,24 +68,49 @@ void    call_<@substepname>( void *io_pArgs )                            // @
             static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
     fapi::ReturnCode    l_fapirc;
 
+    //  Use hwasPredicate to filter only functional chips
+    HWAS::HwasPredicate             l_functionalHwas;
+
+
     TRACDCOMP( g_trac_dmi_training, "call_<@substepname> entry" );       //@
 
 
     //  figure out what targets we need
 
-#if 0
+    // print trace message beginning HWP, listing out input parms
+    TRACFCOMP( g_trac_dmi_training,
+                            "===== Call @substepname HWP( @parm1 0x%x, ..., @parmN 0x%x ) : ",
+                            @parm1,
+                            ...,
+                            @parmN
+                    );
+    //  dump @target1..N Physical path
+    EntityPath l_path;
+    l_path = @target1->getAttr<ATTR_PHYS_PATH>();
+    l_path.dump();
+    //  ...
+    //  dump    @targetN
+    EntityPath l_path;
+    l_path = @targetN->getAttr<ATTR_PHYS_PATH>();
+    l_path.dump();
+
     //  call the HWP with each target   ( if parallel, spin off a task )
     l_fapirc  =   <@substepname>( ? , ?, ? );
-#endif
+
 
     //  process return code.
-    if ( l_fapirc != fapi::FAPI_RC_SUCCESS )
+    if ( l_fapirc == fapi::FAPI_RC_SUCCESS )
+    {
+        TRACFCOMP( g_trac_dmi_training,
+                "SUCCESS :  @substepname HWP( cpu 0x%x, mcs 0x%x, mem 0x%x ) " );
+    }
+    else
     {
         /**
          * @todo fapi error - just print out for now...
          */
         TRACFCOMP( g_trac_dmi_training,
-                "ERROR :  HWP returned %d ",
+                "ERROR %d:  @substepname HWP(  ) ",
                 static_cast<uint32_t>(l_fapirc) );
     }
 

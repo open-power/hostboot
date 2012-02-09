@@ -56,6 +56,43 @@ TRAC_INIT(&g_trac_hwas, "HWAS", 2048 );
 using   namespace   TARGETING;
 
 
+/**
+ * @brief   simple helper fn to clear hwas state
+ *
+ *  @param[in]   -   i_rhwasState - ref to HwasState attribute struct
+ *
+ *  @return      -   none
+ */
+void    clearHwasState( TARGETING::HwasState &i_rhwasState )
+{
+    i_rhwasState.poweredOn             =   false;
+    i_rhwasState.present               =   false;
+    i_rhwasState.functional            =   false;
+    i_rhwasState.changedSinceLastIPL   =   false;
+    i_rhwasState.gardLevel             =   0;
+
+}
+
+
+/**
+ * @brief   simple helper fn to set hwas state to poweredOn, present, functional
+ *
+ *  @param[in]   -   i_rhwasState - ref to HwasState attribute struct
+ *
+ *  @return      -   none
+ *
+ */
+void    enableHwasState( TARGETING::HwasState &i_rhwasState )
+{
+    i_rhwasState.poweredOn             =   true;
+    i_rhwasState.present               =   true;
+    i_rhwasState.functional            =   true;
+    i_rhwasState.changedSinceLastIPL   =   false;
+    i_rhwasState.gardLevel             =   0;
+
+}
+
+
 void    init_target_states( void *io_pArgs )
 {
     INITSERVICE::TaskArgs *pTaskArgs =
@@ -72,11 +109,7 @@ void    init_target_states( void *io_pArgs )
     )
     {
         l_hwasState =   l_TargetItr->getAttr<ATTR_HWAS_STATE>();
-        l_hwasState.poweredOn             =   false;
-        l_hwasState.present               =   false;
-        l_hwasState.functional            =   false;
-        l_hwasState.changedSinceLastIPL   =   false;
-        l_hwasState.gardLevel             =   0;
+        clearHwasState(l_hwasState);
         l_TargetItr->setAttr<ATTR_HWAS_STATE>( l_hwasState );
     }
 
@@ -99,11 +132,7 @@ void    init_target_states( void *io_pArgs )
         //  set master chip to poweredOn, present, functional
 
         l_hwasState =   l_pMasterProcChipTargetHandle->getAttr<ATTR_HWAS_STATE>();
-        l_hwasState.poweredOn             =   true;
-        l_hwasState.present               =   true;
-        l_hwasState.functional            =   true;
-        l_hwasState.changedSinceLastIPL   =   false;
-        l_hwasState.gardLevel             =   0;
+        enableHwasState( l_hwasState );
         l_pMasterProcChipTargetHandle->setAttr<ATTR_HWAS_STATE>( l_hwasState );
 
         //  get the mcs "chiplets" associated with this cpu
@@ -124,11 +153,7 @@ void    init_target_states( void *io_pArgs )
         {
             //  set each MCS to poweredON, present, functional
             l_hwasState =   l_mcsTargetList[i]->getAttr<ATTR_HWAS_STATE>();
-            l_hwasState.poweredOn             =   true;
-            l_hwasState.present               =   true;
-            l_hwasState.functional            =   true;
-            l_hwasState.changedSinceLastIPL   =   false;
-            l_hwasState.gardLevel             =   0;
+            enableHwasState( l_hwasState );
             l_mcsTargetList[i]->setAttr<ATTR_HWAS_STATE>( l_hwasState );
 
 
@@ -153,14 +178,10 @@ void    init_target_states( void *io_pArgs )
 
                 for ( uint8_t ii=0; ii < l_memTargetList.size(); ii++ )
                 {
-                    // set the Centaur(s) connected to MCS0 to poweredOn,
+                    // set the Centaur(s) connected to MCS0&1 to poweredOn,
                     //      present, functional
                     l_hwasState =   l_memTargetList[ii]->getAttr<ATTR_HWAS_STATE>();
-                    l_hwasState.poweredOn             =   true;
-                    l_hwasState.present               =   true;
-                    l_hwasState.functional            =   true;
-                    l_hwasState.changedSinceLastIPL   =   false;
-                    l_hwasState.gardLevel             =   0;
+                    enableHwasState( l_hwasState );
                     l_memTargetList[ii]->setAttr<ATTR_HWAS_STATE>( l_hwasState );
 
                     // look for the dimms on each centaur

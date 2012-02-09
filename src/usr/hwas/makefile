@@ -29,7 +29,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
 
 MODULE = hwas
 
-OBJS =  hwas.o deconfigGard.o testHWP.o  
+OBJS =  hwas.o deconfigGard.o testHWP.o
 
 SUBDIRS=test.d
 
