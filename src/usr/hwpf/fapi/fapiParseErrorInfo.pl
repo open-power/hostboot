@@ -44,6 +44,7 @@
 #                  mjjones   09/22/11  New Error Info Design
 #                  camvanng  10/20/11  Fix bug
 #                  mjjones   12/16/11  Improved usage statement
+#                  mjjones   02/10/12  Allow err file with one element
 #
 # End Change Log ******************************************************
 
@@ -152,6 +153,7 @@ print EIFILE " *\/\n";
 #------------------------------------------------------------------------------
 # Element names
 #------------------------------------------------------------------------------
+my $hwpError = 'hwpError';
 my $collectFfdc = 'collectFfdc';
 my $ffdc = 'ffdc';
 my $callout = 'callout';
@@ -167,13 +169,11 @@ foreach my $argnum (1 .. $#ARGV)
     my $count = 0;
 
     #--------------------------------------------------------------------------
-    # Read XML file. Note that there may be multiple collectFfdc/ffdc/callout/
-    # deconfigure/gard elements so use the ForceArray option with these to
-    # ensure that XML::Simple creates an array even for single elements of
-    # these types
+    # Read XML file. The ForceArray option ensures that there is an array of
+    # elements even if there is only one element
     #--------------------------------------------------------------------------
-    # read XML file
-    my $errors = $xml->XMLin($infile, ForceArray => [$collectFfdc, $ffdc, $callout, $deconfigure, $gard]);
+    my $errors = $xml->XMLin($infile, ForceArray =>
+        [$hwpError, $collectFfdc, $ffdc, $callout, $deconfigure, $gard]);
 
     # Uncomment to get debug output of all errors
     #print "\nFile: ", $infile, "\n", Dumper($errors), "\n";
