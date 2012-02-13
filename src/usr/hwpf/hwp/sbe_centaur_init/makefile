@@ -1,7 +1,7 @@
 #  IBM_PROLOG_BEGIN_TAG
 #  This is an automatically generated prolog.
 #
-#  $Source: src/usr/hwpf/hwp/makefile $
+#  $Source: src/usr/hwas/makefile $
 #
 #  IBM CONFIDENTIAL
 #
@@ -20,27 +20,28 @@
 #  Origin: 30
 #
 #  IBM_PROLOG_END
-ROOTPATH = ../../../..
-MODULE = hwp
 
+ROOTPATH = ../../../../..
+
+MODULE = sbe_centaur_init
+
+##      support for Targeting and fapi
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/plat
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
 
-OBJS = fapiTestHwp.o \
-       fapiTestHwpError.o \
-       fapiTestHwpAnalyzeError.o \
-       fapiTestHwpFfdc.o \
-       fapiTestHwpConfig.o \
-       fapiTestHwpAttr.o \
-       fapiTestHwpDq.o \
-       fapiHwpExecInitFile.o \
-       dimmBadDqBitmapFuncs.o \
-       dimmBadDqBitmapAccessHwp.o
-       
-SUBDIRS	=	dmi_training.d  sbe_centaur_init.d mc_init.d \
-            dram_training.d   
-       
+## pointer to common HWP files
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/include
+
+##  Include sub dirs
+##  NOTE: add a new EXTRAINCDIR when you add a new HWP
+## EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/sbe_centaur_init/????
+
+
+OBJS =  sbe_centaur_init.o
+
+##  NOTE: add a new directory onto the vpaths when you add a new HWP
+## VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/sbe_centaur_init/????
 
 include ${ROOTPATH}/config.mk

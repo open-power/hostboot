@@ -56,8 +56,12 @@
 #include    <initservice/initsvcstructs.H>
 
 //  -----   istep include files   -----
-#include    "istep4list.H"
+#include    "istep04list.H"
+
+#include    "istep10list.H"
 #include    "istep11list.H"
+#include    "istep12list.H"
+#include    "istep13list.H"
 
 
 namespace   INITSERVICE
@@ -65,23 +69,23 @@ namespace   INITSERVICE
 
 // initialize an array of ExtTaskInfo
 const  ExtTaskInfo  g_isteps[]    =   {
-        { NULL, 0, NULL },                                //  dummy IStep 0
-        { NULL, 0, NULL },                                //  dummy IStep 1
-        { NULL, 0, NULL },                                //  dummy IStep 2
-        { NULL, 0, NULL },                                //  dummy IStep 3
-        INITSERVICE::g_istep4TaskList,                    //  HWAS  IStep 4
-        { NULL, 0, NULL },                                //  dummy IStep 5
-        { NULL, 0, NULL },                                //  dummy IStep 6
-        { NULL, 0, NULL },                                //  dummy IStep 7
-        { NULL, 0, NULL },                                //  dummy IStep 8
-        { NULL, 0, NULL },                                //  dummy IStep 9
-        { NULL, 0, NULL },                                //  dummy IStep 10
-        INITSERVICE::g_istep11TaskList,                   //  DMI_TRAINING
-        { NULL, 0, NULL },                                //  dummy IStep 12
-        { NULL, 0, NULL },                                //  dummy IStep 13
-        { NULL, 0, NULL },                                //  dummy IStep 14
-        { NULL, 0, NULL },                                //  dummy IStep 15
-        { NULL, 0, NULL },                                //  dummy IStep 16
+        { NULL, 0, NULL },                              //  dummy IStep 0
+        { NULL, 0, NULL },                              //  dummy IStep 1
+        { NULL, 0, NULL },                              //  dummy IStep 2
+        { NULL, 0, NULL },                              //  dummy IStep 3
+        INITSERVICE::g_istep04TaskList,                  //  HWAS  IStep 4
+        { NULL, 0, NULL },                              //  dummy IStep 5
+        { NULL, 0, NULL },                              //  dummy IStep 6
+        { NULL, 0, NULL },                              //  dummy IStep 7
+        { NULL, 0, NULL },                              //  dummy IStep 8
+        { NULL, 0, NULL },                              //  dummy IStep 9
+        INITSERVICE::g_istep10TaskList,                 //  SBE_CENTAUR_INIT
+        INITSERVICE::g_istep11TaskList,                 //  DMI_TRAINING
+        INITSERVICE::g_istep12TaskList,                 //  MC_INIT
+        INITSERVICE::g_istep13TaskList,                 //  DRAM_TRAINING
+        { NULL, 0, NULL },                              //  dummy IStep 14
+        { NULL, 0, NULL },                              //  dummy IStep 15
+        { NULL, 0, NULL },                              //  dummy IStep 16
 
         //
         // add further istep lists at the end.

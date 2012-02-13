@@ -59,7 +59,7 @@ namespace   INITSERVICE
  *  7.  Apply GARD data (call GARD module)
  *
  */
-const   TaskInfo    g_istep4[]  =   {
+const   TaskInfo    g_istep04[]  =   {
 
         {
                 ISTEPNAME(4,0,"init_target_states"),    // substep name
@@ -67,7 +67,7 @@ const   TaskInfo    g_istep4[]  =   {
                 {
                         START_FN,                       // task type
                         EXT_IMAGE,                      // Extended Module
-                        HWAS_ERRL_ID,                 // module id
+                        ISTEP_ERRL_ID,                   // error id for istep
                 }
         },
         {
@@ -76,7 +76,7 @@ const   TaskInfo    g_istep4[]  =   {
                 {
                         START_FN,                       // task type
                         EXT_IMAGE,                      // Extended Module
-                        HWAS_ERRL_ID,                 // module id
+                        ISTEP_ERRL_ID,                   // error id for istep
                 }
         },
         {
@@ -85,7 +85,7 @@ const   TaskInfo    g_istep4[]  =   {
                 {
                         START_FN,                       // task type
                         EXT_IMAGE,                      // Extended Module
-                        HWAS_ERRL_ID,                 // module id
+                        ISTEP_ERRL_ID,                   // error id for istep
                 }
         },
         {
@@ -94,7 +94,7 @@ const   TaskInfo    g_istep4[]  =   {
                 {
                         START_FN,                       // task type
                         EXT_IMAGE,                      // Extended Module
-                        HWAS_ERRL_ID,                 // module id
+                        ISTEP_ERRL_ID,                 // error id for istep
                 }
         },
         {
@@ -103,7 +103,7 @@ const   TaskInfo    g_istep4[]  =   {
                 {
                         START_FN,                       // task type
                         EXT_IMAGE,                      // Extended Module
-                        HWAS_ERRL_ID,                 // module id
+                        ISTEP_ERRL_ID,                   // error id for istep
                 }
         },
         {
@@ -112,35 +112,38 @@ const   TaskInfo    g_istep4[]  =   {
                 {
                         START_FN,                       // task type
                         EXT_IMAGE,                      // Extended Module
-                        HWAS_ERRL_ID,                 // module id
+                        ISTEP_ERRL_ID,                   // error id for istep
                 }
         },
         {
-                ISTEPNAME(4, 6, "apply_gard"),            // substep name
+                ISTEPNAME(4, 6, "apply_gard"),          // substep name
                 HWAS::apply_gard,                       // pointer to fn
                 {
                         START_FN,                       // task type
                         EXT_IMAGE,                      // Extended Module
-                        HWAS_ERRL_ID,                 // module id
+                        ISTEP_ERRL_ID,                  // error id for istep
                 }
         },
+#if 0
+        // NOT USED ANYMORE
         {
-                ISTEPNAME(4,7,"testHWP"),               // substep name
+                ISTEP#NOTUSED#NAME(4,7,"testHWP"),      // substep name
                 HWAS::testHWP,                          // pointer to fn
                 {
                         START_FN,                       // task type
                         EXT_IMAGE,                      // Extended Module
-                        HWAS_ERRL_ID,                 // module id
+                        ISTEP_ERRL_ID,                  // error id for istep
                 }
         }
+#endif
 
         //  END OF LIST!
 };
 
 // make a struct from the above with the number of items included
-const   ExtTaskInfo g_istep4TaskList    =   {
-        &(g_istep4[0]),
-        ( sizeof(g_istep4)/sizeof(TaskInfo) ),
+const   ExtTaskInfo g_istep04TaskList    =   {
+        &(g_istep04[0]),
+        ( sizeof(g_istep04)/sizeof(TaskInfo) ),
         NULL
 };
 

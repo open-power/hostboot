@@ -79,10 +79,12 @@ enum    InitServiceModuleID
     INITSVC_DO_SHUTDOWN_MOD_ID          =   0x26,
 
     //
-    //  ISTEP   module id's
+    //  ISTEP   module id's.
+    //      ISTEP_ERRL_ID is a generic Error ID for all the HWP's launched
+    //      by an istep.
     //
-    HWAS_ERRL_ID                =   0x30,
-    DMI_TRAINING_ERRL_ID,
+    HWAS_ERRL_ID                    =   0x30,
+    ISTEP_ERRL_ID                    =   0x31,
 
     //  reserve some tasks for my unit tests...
     START_CXXTEST_ERRL_ID       =   0xf0,

@@ -46,6 +46,8 @@
 #include    <errl/errlentry.H>              //  errlHndl_t
 #include    <devicefw/userif.H>             //  targeting
 
+#include    <initservice/isteps_trace.H>    //  ISTEPS_TRACE buffer
+
 #include    <initservice/taskargs.H>        //  TaskArgs    structs
 
 #include    <errl/errluserdetails.H>        //  ErrlUserDetails base class
@@ -62,6 +64,15 @@
 #include    <isteps/istepmasterlist.H>
 #include    <targeting/util.H>
 
+//  -----   namespace   ISTEPS_TRACE    ---------------------------------------
+namespace ISTEPS_TRACE
+{
+
+//  declare storage for isteps_trace!
+trace_desc_t *g_trac_isteps_trace   =   NULL;
+
+}   //  end namespace
+//  -----   end namespace   ISTEPS_TRACE    -----------------------------------
 
 //  -----   namespace   ERRORLOG    -------------------------------------------
 namespace   ERRORLOG
@@ -174,13 +185,6 @@ const TaskInfo *IStepDispatcher::findTaskInfo(
             break;
         }
 
-        TRACDCOMP( g_trac_initsvc,
-                   "g_isteps[0x%x].numitems = 0x%x (substep=0x%x)",
-                   i_IStep,
-                   g_isteps[i_IStep].numitems,
-                   i_SubStep );
-
-
         // check input range - IStep
         if  (   i_IStep >= MAX_ISTEPS   )
         {
@@ -247,6 +251,14 @@ const TaskInfo *IStepDispatcher::findTaskInfo(
 void IStepDispatcher::init( void * io_ptr )
 {
     // note, io_ptr will pass the TaskArgs struct through to runAllSteps, etc.
+
+    // initialize (and declare) ISTEPS_TRACE here, the rest of the isteps will use it.
+    ISTEPS_TRACE::g_trac_isteps_trace = NULL;
+    TRAC_INIT(&ISTEPS_TRACE::g_trac_isteps_trace, "ISTEPS_TRACE", 2048 );
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "ISTEPS_TRACE buffer %p created.",
+                ISTEPS_TRACE::g_trac_isteps_trace );
 
     if ( getIStepMode() )
     {
@@ -357,7 +369,7 @@ void    IStepDispatcher::processSingleIStepCmd(
         l_sts.substep           =   l_cmd.substep;
         l_sts.istepStatus       =   0;
 
-        TRACFCOMP( g_trac_initsvc,
+        TRACDCOMP( g_trac_initsvc,
                  "processSingleIStepCmd: Running IStep=%d, SubStep=%d",
                  l_cmd.istep,
                  l_cmd.substep );
@@ -415,6 +427,11 @@ void    IStepDispatcher::processSingleIStepCmd(
         uint64_t l_progresscode  =  ( (l_cmd.istep<<16) | l_cmd.substep );
         InitService::getTheInstance().setProgressCode( l_progresscode );
 
+        TRACFCOMP( g_trac_initsvc,
+                  "processSingleIStepCmd: Running IStep=%d, SubStep=%d %s",
+                  l_cmd.istep,
+                  l_cmd.substep,
+                  l_pistep->taskname );
 
         // clear the TaskArgs struct
         l_taskargs.clear();
@@ -661,7 +678,9 @@ void    IStepDispatcher::runAllISteps( void * io_ptr )   const
 
             //  print out what we are running
             TRACFCOMP( g_trac_initsvc,
-                "Running IStep %s",
+                "Run IStep %d.%d %s",
+                l_IStep,
+                l_SubStep,
                 l_pistep->taskname );
 
 

@@ -22,15 +22,15 @@
 //  IBM_PROLOG_END
 
 /**
- *  @file dmi_training.C                                                // @
+ *  @file dmi_training.C
  *
  *  Support file for hardware procedure:
- *      DMI Training                                                    // @
+ *      DMI Training
  *
  */
 
 /**
- * @note    "// @" comments denote lines that should be built from the HWP
+ * @note    "" comments denote lines that should be built from the HWP
  *          tag block.  See the preliminary design in dmi_training.H
  *          Please save.
  */
@@ -41,10 +41,11 @@
 /******************************************************************************/
 #include    <stdint.h>
 
-// #include    <kernel/console.H>
 #include    <trace/interface.H>
 #include    <initservice/taskargs.H>
 #include    <errl/errlentry.H>
+
+#include    <initservice/isteps_trace.H>
 
 //  targeting support.
 #include    <targeting/attributes.H>
@@ -62,31 +63,29 @@
 #include    <fapiPlatHwpInvoker.H>
 
 //  --  prototype   includes    --
-#include    "dmi_training.H"                                            // @
-#include    "proc_cen_framelock.H"                                      // @
-#include    "io_run_training.H"                                         // @
+#include    "dmi_training.H"
+#include    "proc_cen_framelock.H"
+#include    "io_run_training.H"
 
 namespace   DMI_TRAINING
 {
-trace_desc_t *g_trac_dmi_training = NULL;                               // @
-TRAC_INIT(&g_trac_dmi_training, "DMI_TRAINING", 2048 );                 // @
 
-using   namespace   fapi;
+
 using   namespace   TARGETING;
-
+using   namespace   fapi;
 
 //
 //  Wrapper function to call 11.1   dmi_scominit
 //
-void    call_dmi_scominit( void *io_pArgs )                            // @
+void    call_dmi_scominit( void *io_pArgs )
 {
     INITSERVICE::TaskArgs *pTaskArgs =
             static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
 
-    TRACDCOMP( g_trac_dmi_training, "call_dmi_scominit entry" );       //@
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_scominit entry" );
 
 
-    TRACDCOMP( g_trac_dmi_training, "dmi_scominit exit" );              //@
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "dmi_scominit exit" );
 
     //  wait here on the barrier, then end the task.
     pTaskArgs->waitChildSync();
@@ -97,15 +96,15 @@ void    call_dmi_scominit( void *io_pArgs )                            // @
 //
 //  Wrapper function to call 11.2 :  dmi_erepair
 //
-void    call_dmi_erepair( void *io_pArgs )                            // @
+void    call_dmi_erepair( void *io_pArgs )
 {
     INITSERVICE::TaskArgs *pTaskArgs =
             static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
 
-    TRACDCOMP( g_trac_dmi_training, "call_dmi_erepair entry" );       //@
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_erepair entry" );
 
 
-    TRACDCOMP( g_trac_dmi_training, "dmi_erepair exit" );       //@
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "dmi_erepair exit" );
 
     //  wait here on the barrier, then end the task.
     pTaskArgs->waitChildSync();
@@ -115,15 +114,15 @@ void    call_dmi_erepair( void *io_pArgs )                            // @
 //
 //  Wrapper function to call 11.3 : dmi_io_dccal
 //
-void    call_dmi_io_dccal( void *io_pArgs )                            // @
+void    call_dmi_io_dccal( void *io_pArgs )
 {
     INITSERVICE::TaskArgs *pTaskArgs =
             static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
 
-    TRACDCOMP( g_trac_dmi_training, "call_dmi_io_dccal entry" );       //@
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_io_dccal entry" );
 
 
-    TRACDCOMP( g_trac_dmi_training, "dmi_io_dccal exit" );       //@
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "dmi_io_dccal exit" );
 
     //  wait here on the barrier, then end the task.
     pTaskArgs->waitChildSync();
@@ -134,7 +133,7 @@ void    call_dmi_io_dccal( void *io_pArgs )                            // @
 //
 //  Wrapper function to call 11.4 : dmi_io_run_training
 //
-void    call_dmi_io_run_training( void *io_pArgs )                      //@
+void    call_dmi_io_run_training( void *io_pArgs )
 {
     INITSERVICE::TaskArgs *pTaskArgs =
             static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
@@ -142,7 +141,7 @@ void    call_dmi_io_run_training( void *io_pArgs )                      //@
     TARGETING::TargetService&   l_targetService = targetService();
     uint8_t                     l_cpuNum        =   0;
 
-    TRACDCOMP( g_trac_dmi_training, "dmi_io_run_training entry" );       //@
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "dmi_io_run_training entry" );
 
     //  Use PredicateIsFunctional to filter only functional chips
     TARGETING::PredicateIsFunctional             l_isFunctional;
@@ -196,7 +195,6 @@ void    call_dmi_io_run_training( void *io_pArgs )                      //@
                 //  make a local copy of the MEMBUF target
                 const TARGETING::Target*  l_mem_target = l_memTargetList[k];
 
-                //@@@@@  Customized block for dmi_io_run_training @@@@@
                 //  struct containing custom parameters that is fed to HWP
                 struct DmiIORunTrainingParms    {
                     io_interface_t master_interface;
@@ -225,7 +223,7 @@ void    call_dmi_io_run_training( void *io_pArgs )                      //@
                 (const_cast<TARGETING::Target*>(l_mem_target))
                 );
 
-                TRACFCOMP( g_trac_dmi_training,
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                         "===== Call dmi_io_run_training HWP( cpu 0x%x, mcs 0x%x, mem 0x%x ) : ",
                         l_cpuNum,
                         l_mcsNum,
@@ -238,7 +236,7 @@ void    call_dmi_io_run_training( void *io_pArgs )                      //@
                 l_path.dump();
                 l_path  =   l_mem_target->getAttr<ATTR_PHYS_PATH>();
                 l_path.dump();
-                TRACFCOMP( g_trac_dmi_training, "===== " );
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "===== " );
 
                 l_fapirc  =   io_run_training(
                         l_fapi_master_target,
@@ -247,12 +245,11 @@ void    call_dmi_io_run_training( void *io_pArgs )                      //@
                         l_fapi_slave_target,
                         l_CustomParms[l_mcsNum].slave_interface,
                         l_CustomParms[l_mcsNum].slave_group    );
-                //@@@@@
 
                 //  process return code.
                 if ( l_fapirc == fapi::FAPI_RC_SUCCESS )
                 {
-                    TRACFCOMP( g_trac_dmi_training,
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                             "SUCCESS :  io_run_training HWP( cpu 0x%x, mcs 0x%x, mem 0x%x ) ",
                             l_cpuNum,
                             l_mcsNum,
@@ -263,7 +260,7 @@ void    call_dmi_io_run_training( void *io_pArgs )                      //@
                     /**
                      * @todo fapi error - just print out for now...
                      */
-                    TRACFCOMP( g_trac_dmi_training,
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                             "ERROR %d :  io_run_training HWP( cpu 0x%x, mcs 0x%x, mem 0x%x ) ",
                             static_cast<uint32_t>(l_fapirc),
                             l_cpuNum,
@@ -277,7 +274,7 @@ void    call_dmi_io_run_training( void *io_pArgs )                      //@
     }   // end for l_cpu_target
 
 
-    TRACDCOMP( g_trac_dmi_training, "call_io_run_training exit" );       //@
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_io_run_training exit" );
 
     //  wait here on the barrier, then end the task.
     pTaskArgs->waitChildSync();
@@ -288,15 +285,15 @@ void    call_dmi_io_run_training( void *io_pArgs )                      //@
 //
 //  Wrapper function to call 11.5 : host_startPRD_dmi
 //
-void    call_host_startPRD_dmi( void *io_pArgs )                            // @
+void    call_host_startPRD_dmi( void *io_pArgs )
 {
     INITSERVICE::TaskArgs *pTaskArgs =
             static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
 
-    TRACDCOMP( g_trac_dmi_training, "call_host_startPRD_dmi entry" );       //@
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_startPRD_dmi entry" );
 
 
-    TRACDCOMP( g_trac_dmi_training, "host_startPRD_dmi exit" );       //@
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_startPRD_dmi exit" );
 
     //  wait here on the barrier, then end the task.
     pTaskArgs->waitChildSync();
@@ -307,15 +304,15 @@ void    call_host_startPRD_dmi( void *io_pArgs )                            // @
 //
 //  Wrapper function to call 11.6 : host_attnlisten_cen
 //
-void    call_host_attnlisten_cen( void *io_pArgs )                            // @
+void    call_host_attnlisten_cen( void *io_pArgs )
 {
     INITSERVICE::TaskArgs *pTaskArgs =
             static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
 
-    TRACDCOMP( g_trac_dmi_training, "call_host_attnlisten_cen entry" );       //@
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_attnlisten_cen entry" );
 
 
-    TRACDCOMP( g_trac_dmi_training, "<host_attnlisten_cen exit" );       //@
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "<host_attnlisten_cen exit" );
 
     //  wait here on the barrier, then end the task.
     pTaskArgs->waitChildSync();
@@ -325,7 +322,7 @@ void    call_host_attnlisten_cen( void *io_pArgs )                            //
 //
 //  Wrapper function to call 11.7 : proc_cen_framelock
 //
-void    call_proc_cen_framelock( void *io_pArgs )                       // @
+void    call_proc_cen_framelock( void *io_pArgs )
 {
     INITSERVICE::TaskArgs *pTaskArgs =
             static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
@@ -338,7 +335,7 @@ void    call_proc_cen_framelock( void *io_pArgs )                       // @
     TARGETING::PredicateIsFunctional    l_isFunctional;
 
 
-    TRACDCOMP( g_trac_dmi_training, "call_proc_cen_framework entry" );       //@
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_cen_framework entry" );
 
     TARGETING::PredicateCTM         l_procChipFilter( CLASS_CHIP, TYPE_PROC );
     TARGETING::PredicatePostfixExpr l_functionalAndProcChipFilter;
@@ -388,7 +385,6 @@ void    call_proc_cen_framelock( void *io_pArgs )                       // @
                 //  make a local copy of the MEMBUF target
                 const TARGETING::Target*  l_mem_target = l_memTargetList[k];
 
-                //@@@@@  Customized block for proc_cen_framelock    @@@@@@
 
                 // fill out the args struct.
                  l_args.mcs_pu               =   l_mcsNum;
@@ -411,7 +407,7 @@ void    call_proc_cen_framelock( void *io_pArgs )                       // @
                             (const_cast<TARGETING::Target*>(l_mem_target))
                         );
 
-                TRACFCOMP( g_trac_dmi_training,
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                         "===== Call proc_cen_framelock HWP( cpu 0x%x, mcs 0x%x, mem 0x%x ) : ",
                         l_cpuNum,
                         l_mcsNum,
@@ -423,7 +419,7 @@ void    call_proc_cen_framelock( void *io_pArgs )                       // @
                 l_path.dump();
                 l_path  =   l_mem_target->getAttr<ATTR_PHYS_PATH>();
                 l_path.dump();
-                TRACFCOMP( g_trac_dmi_training, "===== " );
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "===== " );
 
                 // finally!
                 l_fapirc =  proc_cen_framelock(
@@ -431,10 +427,9 @@ void    call_proc_cen_framelock( void *io_pArgs )                       // @
                                     l_fapiMemTarget,
                                     l_args );
 
-                //@@@@@
                 if ( l_fapirc == fapi::FAPI_RC_SUCCESS )
                 {
-                    TRACFCOMP( g_trac_dmi_training,
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                             "SUCCESS :  proc_cen_framelock HWP( cpu 0x%x, mcs 0x%x, mem 0x%x ) ",
                             l_cpuNum,
                             l_mcsNum,
@@ -445,7 +440,7 @@ void    call_proc_cen_framelock( void *io_pArgs )                       // @
                     /**
                      * @todo fapi error - just print out for now...
                      */
-                    TRACFCOMP( g_trac_dmi_training,
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                     "ERROR %d : proc_cen_framelock HWP( cpu 0x%x, mcs 0x%x, mem 0x%x )",
                     static_cast<uint32_t>(l_fapirc),
                     l_cpuNum,
@@ -456,8 +451,7 @@ void    call_proc_cen_framelock( void *io_pArgs )                       // @
         }   // end mcs
     }   //  end cpu
 
-    //@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-    TRACDCOMP( g_trac_dmi_training, "call_proc_cen_framework exit" );       //@
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_cen_framework exit" );
 
     //  wait here on the barrier, then end the task.
     pTaskArgs->waitChildSync();
@@ -468,15 +462,15 @@ void    call_proc_cen_framelock( void *io_pArgs )                       // @
 //
 //  Wrapper function to call 11.8 : cen_set_inband_addr
 //
-void    call_cen_set_inband_addr( void *io_pArgs )                            // @
+void    call_cen_set_inband_addr( void *io_pArgs )
 {
     INITSERVICE::TaskArgs *pTaskArgs =
             static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
 
-    TRACDCOMP( g_trac_dmi_training, "call_cen_set_inband_addr entry" );       //@
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_set_inband_addr entry" );
 
 
-    TRACDCOMP( g_trac_dmi_training, "cen_set_inband_addr exit" );       //@
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "cen_set_inband_addr exit" );
 
     //  wait here on the barrier, then end the task.
     pTaskArgs->waitChildSync();

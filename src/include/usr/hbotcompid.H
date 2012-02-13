@@ -179,11 +179,12 @@ const compId_t SPD_COMP_ID = 0x1000;
 const char SPD_COMP_NAME[] = "spd";
 //@}
 
+
 /** @name RESERVED
  *  Reserved component ID. x3100 is the component ID
- *  of FipS ERRL component. Due to our use of 
+ *  of FipS ERRL component. Due to our use of
  *  of the FipS errl tool, let no Hostboot component
- *  use this component ID. 
+ *  use this component ID.
  */
 //@{
 const compId_t RESERVED_COMP_ID = 0x3100;

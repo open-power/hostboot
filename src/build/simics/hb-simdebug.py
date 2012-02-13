@@ -269,11 +269,15 @@ def print_istep_list( inList ):
     print   "IStep\tSubStep\tName"
     print   "---------------------------------------------------"
     for i in range(0,len(inList)) :
+        if ( inList[i][0] != None ) :
+            print   "-- %d"%(i)
         for j in range( 0, len(inList[i])) :
             # print "%d %d"%(i,j)
             if ( inList[i][j] != None ) :
-                print "%d\t%d\t%s"%( i,j, inList[i][j] )   
-                
+                ##    print "%d\t%d\t%s"%( i,j, inList[i][j] )   
+                print "%s"%( inList[i][j] )
+
+               
     print   " "                 
     return None
             
@@ -409,7 +413,7 @@ def istepHB( symsFile, str_arg1 ):
         return;  
              
     ## start with empty inList.  Put some dummy isteps in istep4 for debug.        
-    n   =   10                                      ## size of inlist array
+    n   =   25                                      ## size of inlist array
     inList  =   [[None]*n for x in xrange(n)]       ## init to nothing
     inList[4][0] =   "i1"
     inList[4][1] =   "i2"
