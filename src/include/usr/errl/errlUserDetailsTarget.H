@@ -59,7 +59,7 @@ public:
      *  @brief Constructor
      *
      */
-    ErrlUserDetailsTarget(TARGETING::Target * i_target);
+    ErrlUserDetailsTarget(const TARGETING::Target * i_target);
 
     /**
      *  @brief Destructor
@@ -90,7 +90,7 @@ private:
     ErrlUserDetailsTarget(const ErrlUserDetailsTarget &);
     ErrlUserDetailsTarget & operator=(const ErrlUserDetailsTarget &);
 
-    TARGETING::Target *iv_pTarget;
+    const TARGETING::Target *iv_pTarget;
 };
 
 #else // (if PARSER defined)

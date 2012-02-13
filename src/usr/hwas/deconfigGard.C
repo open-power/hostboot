@@ -29,6 +29,7 @@
 #include <string.h>
 #include <targeting/targetservice.H>
 #include <errl/errlmanager.H>
+#include <errl/errlUserDetailsTarget.H>
 #include <hwas/deconfigGard.H>
 #include <hwas/hwas_reasoncodes.H>
 #include <pnor/pnorif.H>
@@ -278,6 +279,8 @@ void DeconfigGard::_deconfigureTarget(TARGETING::Target & i_target,
         l_pErr = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
                                          MOD_DECONFIG_GARD,
                                          RC_TARGET_NOT_DECONFIGURABLE);
+        ERRORLOG::ErrlUserDetailsTarget l_errlUdTarget( &i_target );
+        l_errlUdTarget.addToLog( l_pErr, NULL, 0 );
         errlCommit(l_pErr,HWAS_COMP_ID);
     }
     else
@@ -457,6 +460,9 @@ errlHndl_t DeconfigGard::_createGardRecord(const TARGETING::Target & i_target,
         l_pErr = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                          MOD_DECONFIG_GARD,
                                          RC_TARGET_NOT_GARDABLE);
+        
+        ERRORLOG::ErrlUserDetailsTarget l_errlUdTarget( &i_target );
+        l_errlUdTarget.addToLog( l_pErr, NULL, 0 );
         errlCommit(l_pErr,HWAS_COMP_ID);
     }
     else
@@ -496,6 +502,8 @@ errlHndl_t DeconfigGard::_createGardRecord(const TARGETING::Target & i_target,
                                                  MOD_DECONFIG_GARD,
                                                  RC_GARD_REPOSITORY_FULL,
                                                  iv_maxGardRecords);
+                ERRORLOG::ErrlUserDetailsTarget l_errlUdTarget( &i_target );
+                l_errlUdTarget.addToLog( l_pErr, NULL, 0 );
             }
             else
             {

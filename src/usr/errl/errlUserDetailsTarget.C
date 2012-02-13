@@ -34,7 +34,7 @@ namespace ERRORLOG
 //#ifndef PARSER
 
 // Constructor
-ErrlUserDetailsTarget::ErrlUserDetailsTarget( TARGETING::Target * i_target ) :
+ErrlUserDetailsTarget::ErrlUserDetailsTarget(const TARGETING::Target * i_target ) :
     ErrlUserDetails()
 {
     iv_pTarget = i_target;
