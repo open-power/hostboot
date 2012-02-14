@@ -63,8 +63,8 @@ namespace Util
 // hide the template implementation in.
 namespace UTIL_TRAIT_COMPARISON_MAKENAME(__Util_Trait_Impl_)
 {
-    // If "T op S" is valid, it is going to return some type (likely bool).  If
-    // it is not valid, we still need it to compile cleanly.  So what we do is
+    // If "T op S" is valid, it is going to return a type R.  If it is not
+    // valid, we still need it to compile cleanly.  So what we do is
     // create a type (convert_from_any_type) that causes implicit type
     // conversion from any other type.  We ensure that the operator against
     // convert_from_any_type returns a special type (bad_type).
@@ -84,7 +84,7 @@ namespace UTIL_TRAIT_COMPARISON_MAKENAME(__Util_Trait_Impl_)
                                                 const convert_from_any_type&);
 
 
-    // Now, "T op T" is going to return either bad_type or something else.  We
+    // Now, "T op S" is going to return either bad_type or something else.  We
     // define a function 'has_comparison' that returns a character array of
     // different size based on the input parameter type.  Then the "sizeof"
     // can be used to tell if "T op S" returns bad_type or something else.
@@ -92,14 +92,14 @@ namespace UTIL_TRAIT_COMPARISON_MAKENAME(__Util_Trait_Impl_)
     // The only additional oddity is the get_instance function.  Since some
     // classes cannot be directly constructed, this is a level of indirection
     // to get a type of T and S to apply the operator against.
-    template <typename _T, typename _S>
+    template <typename _T, typename _S, typename _R>
     struct UTIL_TRAIT_COMPARISON_MAKENAME(has_)
     {
         typedef char yes[1];
         typedef char no[2];
 
         static no& has_comparison(bad_type);
-        static yes& has_comparison(...);
+        static yes& has_comparison(_R);
 
         template <typename C> static C& get_instance();
 
@@ -117,10 +117,13 @@ namespace UTIL_TRAIT_COMPARISON_MAKENAME(__Util_Trait_Impl_)
 // the __Util_Trait_Impl_OPERATOR_NAME namespace.
 namespace Traits
 {
-    template <typename _T, typename _S = _T>
+    template <typename _T, typename _S = _T,
+              typename _R = typename
+                UTIL_TRAIT_COMPARISON_MAKENAME(Util::__Util_Trait_Impl_)::
+                convert_from_any_type>
     struct UTIL_TRAIT_COMPARISON_MAKENAME(has_) :
         public UTIL_TRAIT_COMPARISON_MAKENAME(Util::__Util_Trait_Impl_)::
-               UTIL_TRAIT_COMPARISON_MAKENAME(has_)<_T,_S>
+               UTIL_TRAIT_COMPARISON_MAKENAME(has_)<_T,_S,_R>
     {};
 };
 

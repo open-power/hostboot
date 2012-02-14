@@ -1,0 +1,107 @@
+//  IBM_PROLOG_BEGIN_TAG
+//  This is an automatically generated prolog.
+//
+//  $Source: src/include/iterator $
+//
+//  IBM CONFIDENTIAL
+//
+//  COPYRIGHT International Business Machines Corp. 2012
+//
+//  p1
+//
+//  Object Code Only (OCO) source materials
+//  Licensed Internal Code Source Materials
+//  IBM HostBoot Licensed Internal Code
+//
+//  The source code for this program is not published or other-
+//  wise divested of its trade secrets, irrespective of what has
+//  been deposited with the U.S. Copyright Office.
+//
+//  Origin: 30
+//
+//  IBM_PROLOG_END
+
+#ifndef __STL_ITERATOR
+#define __STL_ITERATOR
+
+#include <stdint.h>
+
+#ifdef __cplusplus
+
+#include <util/impl/iterator.h>
+
+namespace std
+{
+
+/** @struct iterator_traits
+ *  Template class defining a mapping typenames to ones defined in an iterator.
+ */
+template <typename Iterator>
+struct iterator_traits
+{
+    typedef typename Iterator::value_type value_type;
+    typedef typename Iterator::difference_type difference_type;
+    typedef typename Iterator::pointer pointer;
+    typedef typename Iterator::reference reference;
+};
+
+/** @struct iterator_traits
+ *  Template specialization of iterator traits for treating pointer types
+ *  as an iterator.
+ */
+template <typename T>
+struct iterator_traits<T*>
+{
+    typedef T value_type;
+    typedef ptrdiff_t difference_type;
+    typedef T* pointer;
+    typedef T& reference;
+};
+
+/** Advance an iterator.
+ *
+ * @param[in] i - The iterator to advance.
+ * @param[in] n - The distance to advance the iterator.
+ *
+ * This function is equivalent to calling (++i) n times.  
+ *
+ * If the iterator supports random access then this function will be 
+ * implemented in linear time with respect to n.
+ * 
+ */
+template <typename InputIterator, typename Distance>
+void advance(InputIterator& i, Distance n)
+{
+    Util::__Util_Iterator_Impl::advance<InputIterator, Distance>(i, n);
+}
+
+/** Determine the distance between two iterators.
+ *
+ *  @param[in] first - The first iterator.
+ *  @param[in] last - The last iterator.
+ *
+ *  @return The distance between the two iterators.
+ *
+ *  The distance between two iterators is the number of times first would
+ *  need to be incremented so that it is equal to last.
+ *
+ *  If the iterator supports random access then this function will be
+ *  implemented in linear time with respect to the distance between the
+ *  two iterators.  A negative distance can only be obtained with random
+ *  access iterators.
+ */
+template <typename InputIterator>
+typename iterator_traits<InputIterator>::difference_type 
+    distance(InputIterator first, InputIterator last)
+{
+    return Util::__Util_Iterator_Impl::distance<
+                InputIterator, 
+                typename iterator_traits<InputIterator>::difference_type>
+        (first, last);
+}
+
+}; // namespace std.
+#endif
+
+#endif
+/* vim: set filetype=cpp : */

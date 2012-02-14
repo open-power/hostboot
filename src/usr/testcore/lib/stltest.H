@@ -27,6 +27,8 @@
 #include <vector>
 #include <list>
 #include <map>
+#include <algorithm>
+#include <iterator>
 
 class STLTest : public CxxTest::TestSuite
 {
@@ -166,6 +168,98 @@ class STLTest : public CxxTest::TestSuite
                 }
                 --i;
             }
+        }
+
+
+        void testAdvance()
+        {
+            // Test for a non-random-access iterator, such as list.
+            std::list<int> list;
+
+            for(int i = 0; i < 100; i++)
+                list.push_back(i);
+
+            for (int i = 0; i < 100; i++)
+            {
+                std::list<int>::iterator itr = list.begin();
+                std::advance(itr, i);
+                if (*itr != i)
+                {
+                    TS_FAIL("List iterator value mismatch %d:%d.", *itr, i);
+                }
+            }
+
+            // Test for a random-access iterator, such as vector.
+            std::vector<int> vector;
+
+            for (int i = 0; i < 100; i++)
+                vector.push_back(i);
+
+            for (int i = 0; i < 100; i++)
+            {
+                std::vector<int>::iterator itr = vector.begin();
+                std::advance(itr, i);
+                if (*itr != i)
+                {
+                    TS_FAIL("Vector iterator value mismatch %d:%d.", *itr, i);
+                }
+            }
+        }
+
+        void testDistance()
+        {
+            // Test for a non-random-access iterator, such as list.
+            std::list<int> list;
+
+            for (int i = 0; i < 100; i++)
+                list.push_back(i);
+
+            for (int i = 0; i < 100; i++)
+                for (int j = 0; j < 100; j++)
+                {
+                    // distance isn't defined for non-random-access iterator
+                    // when "first" is greater than "last".
+                    if (i > j) continue;
+
+                    std::list<int>::iterator itr_i = list.begin(),
+                                             itr_j = list.begin();
+
+                    std::advance(itr_i, i);
+                    std::advance(itr_j, j);
+
+                    ssize_t d = std::distance(itr_i, itr_j);
+
+                    if (d != (j-i))
+                    {
+                        TS_FAIL("List distance incorrect %d:%d:%d",
+                                i, j, d);
+                    }
+                }
+
+            // Test for a random-access iterator, such as vector.
+            std::vector<int> vector;
+
+            for (int i = 0; i < 100; i++)
+                vector.push_back(i);
+
+            for (int i = 0; i < 100; i++)
+                for (int j = 0; j < 100; j++)
+                {
+                    std::vector<int>::iterator itr_i = vector.begin(),
+                                               itr_j = vector.begin();
+
+                    std::advance(itr_i, i);
+                    std::advance(itr_j, j);
+
+                    ssize_t d = std::distance(itr_i, itr_j);
+
+                    if (d != (j-i))
+                    {
+                        TS_FAIL("Vector distance incorrect %d:%d:%d",
+                                i, j, d);
+                    }
+                }
+
         }
 };
 #endif

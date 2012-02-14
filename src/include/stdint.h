@@ -38,6 +38,8 @@ typedef unsigned long int 	uint64_t;
 typedef uint64_t 		size_t;
 typedef int64_t 		ssize_t;
 
+typedef ssize_t                 ptrdiff_t;
+
 #define UINT8_MAX	(255U)
 #define UINT16_MAX	(65535U)
 #define UINT32_MAX	(4294967295U)
