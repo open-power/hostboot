@@ -176,6 +176,68 @@ namespace std
 
         return last;
     }
+
+
+    /**
+     * Find the minimum element within a range.
+     * @param[in] first - FwdIterator to the first position in the range.
+     * @param[in] last - FwdIterator to the last position in the range.
+     *
+     * Returns the first element (i) such that (*j) < (*i) is false for all
+     * other iterators.
+     *
+     * The iterator last is returned only when the range contains no elements.
+     *
+     * @return An iterator in [first, last) containing the minimum element.
+     *
+     */
+    template <typename FwdIterator>
+    inline FwdIterator min_element(FwdIterator first, FwdIterator last)
+    {
+        if (first == last) return last;
+        FwdIterator e = first++;
+        while(first != last)
+        {
+            if ((*first) < (*e)) 
+            {
+                e = first;
+            }
+            first++;
+        }
+        return e;
+    }
+
+    /**
+     * Find the minimum element within a range.
+     * @param[in] first - FwdIterator to the first position in the range.
+     * @param[in] last - FwdIterator to the last position in the range.
+     * @param[in] comp - BinaryPredicate used to perform comparison.
+     *
+     * Returns the first element (i) such that comp(*j,*i) is false for all
+     * other iterators.
+     *
+     * The iterator last is returned only when the range contains no elements.
+     *
+     * @return An iterator in [first, last) containing the minimum element.
+     *
+     */
+    template <typename FwdIterator, typename BinaryPredicate>
+    inline FwdIterator min_element(FwdIterator first, FwdIterator last, 
+                                   BinaryPredicate comp)
+    {
+        if (first == last) return last;
+        FwdIterator e = first++;
+        while(first != last)
+        {
+            if (comp((*first),(*e)))
+            {
+                e = first;
+            }
+            first++;
+        }
+        return e;
+    }
+
 };
 #endif
 

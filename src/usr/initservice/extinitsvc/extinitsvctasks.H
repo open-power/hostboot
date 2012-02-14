@@ -43,6 +43,19 @@ const TaskInfo g_exttaskinfolist[]   =   {
         //  -----   Extended Image  ------------------------------------------
 
         /**
+         * @brief  util library.
+         */
+        {
+            "libutil.so",                          // library name
+            NULL,                                  // no function to run
+            {
+                INIT_TASK,                         // init only
+                EXT_IMAGE,                         // extended image module
+                START_UTIL_ERRL_ID,                // error module id
+            }
+        },
+
+        /**
          * @brief   targeting task,
          */
         {
