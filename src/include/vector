@@ -839,4 +839,4 @@ void std::vector<T>::resize(size_type n, T x)
 }
 
 #endif    
-
+/* vim: set filetype=cpp : */

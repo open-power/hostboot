@@ -441,6 +441,6 @@ namespace std
     };
 };
 
-#endif    
-    
+#endif
 
+/* vim: set filetype=cpp : */
