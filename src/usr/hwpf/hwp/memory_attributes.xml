@@ -20,6 +20,12 @@
      Origin: 30
    
      IBM_PROLOG_END -->
+
+<!--
+    XML file specifying HWPF attributes.
+    These are non-platInit attributes used by memory HWPs.
+-->
+
 <attributes>
 
 <attribute>

@@ -20,8 +20,12 @@
      Origin: 30
    
      IBM_PROLOG_END -->
-<!-- XML file specifying HW Procedure requested attributes. -->
-<!-- Attributes that every platform must support for HWP development -->
+<!--
+    XML file specifying HWPF attributes.
+    These are scratch attributes that can be used by PLAT FW for  unit test.
+    They can also be used temporarily by a HWP while waiting for an official
+    attribute to be supported.
+-->
 
 <attributes>
   <!-- ********************************************************************* -->
@@ -175,22 +179,5 @@
     <platInit/>
     <writeable/>
     <array>1, 3, 5</array>
-  </attribute>
-  <!-- ********************************************************************* -->
-  <attribute>
-    <id>ATTR_IS_SIMULATION</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>env: 1 = Awan/HWSimulator. 0 = Simics/RealHW.</description>
-    <valueType>uint8</valueType>
-    <platInit/>
-  </attribute>
-  <!-- ********************************************************************* -->
-  <attribute>
-    <id>ATTR_EC</id>
-    <targetType>TARGET_TYPE_PROC_CHIP,TARGET_TYPE_MEMBUF_CHIP</targetType>
-    <description>EC level of a chip target</description>
-    <valueType>uint8</valueType>
-    <platInit/>
-    <persistRuntime/>
   </attribute>
 </attributes>

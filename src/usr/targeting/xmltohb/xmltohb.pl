@@ -57,7 +57,7 @@ my $cfgSrcOutputDir = ".";
 my $cfgImgOutputDir = ".";
 my $cfgHbXmlFile = "./hb.xml";
 my $cfgVmmConstsFile = "../../../include/usr/vmmconst.h";
-my $cfgFapiAttributesXmlFile = "../../hwpf/hwp/fapiHwpAttributeInfo.xml";
+my $cfgFapiAttributesXmlFile = "";
 my $cfgImgOutputFile = "./targeting.bin";
 my $cfgHelp = 0;
 my $cfgMan = 0;
@@ -2568,8 +2568,7 @@ to compilation down to images and source files (Default is ./hb.xml)
 =item B<--fapi-attributes-xml-file>
 
 File containing the FAPI HWP attributes, for purposes of configuring the
-attribute mappings between FAPI and targeting code (Default is
-../../hwpf/hwp/fapiHwpAttributeInfo.xml)
+attribute mappings between FAPI and targeting code
 
 =item B<--src-output-dir>=DIRECTORY
 

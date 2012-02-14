@@ -36,6 +36,7 @@
 #                  mjjones   12/12/11  Support all attributes if no if-attr
 #                                      files specified (for Cronus)
 #                  mjjones   01/13/12  Use new ReturnCode interfaces
+#                  mjjones   02/08/12  Handle attribute files with 1 entry
 #
 # End Change Log ******************************************************
 
@@ -101,6 +102,11 @@ my $numIfAttrFiles = 0;
 my @attrIds;
 
 #------------------------------------------------------------------------------
+# Element names
+#------------------------------------------------------------------------------
+my $attribute = 'attribute';
+
+#------------------------------------------------------------------------------
 # For each argument
 #------------------------------------------------------------------------------
 foreach my $argnum (1 .. $#ARGV)
@@ -152,9 +158,10 @@ foreach my $argnum (1 .. $#ARGV)
     else
     {
         #----------------------------------------------------------------------
-        # Process XML file
+        # Process XML file. The ForceArray option ensures that there is an
+        # array of attributes even if there is only one attribute in the file
         #----------------------------------------------------------------------
-        my $attributes = $xml->XMLin($infile);
+        my $attributes = $xml->XMLin($infile, ForceArray => [$attribute]);
 
         #----------------------------------------------------------------------
         # For each Attribute

@@ -46,9 +46,11 @@ XMLTOHB_TARGETS = \
 XMLTOHB_GENERIC_SOURCES = attribute_types.xml target_types.xml
 
 XMLTOHB_FAPIATTR_SOURCES = \
-    ${ROOTPATH}/src/usr/hwpf/hwp/fapiHwpAttributeInfo.xml \
     ${ROOTPATH}/src/usr/hwpf/hwp/memory_attributes.xml \
     ${ROOTPATH}/src/usr/hwpf/hwp/L2_L3_attributes.xml \
+    ${ROOTPATH}/src/usr/hwpf/hwp/scratch_attributes.xml \
+    ${ROOTPATH}/src/usr/hwpf/hwp/system_attributes.xml \
+    ${ROOTPATH}/src/usr/hwpf/hwp/chip_attributes.xml \
     ${ROOTPATH}/src/usr/hwpf/hwp/DIMM_SPD_attributes.xml
 
 VMM_CONSTS_FILE = \

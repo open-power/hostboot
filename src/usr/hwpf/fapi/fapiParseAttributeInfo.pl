@@ -51,6 +51,7 @@
 #                                      to a different file
 #                  mjjones   12/16/11  Generate fapiAttributePlatCheck.H
 #                                      Generate fapiAttributesSupported.html
+#                  mjjones   02/08/12  Handle attribute files with 1 entry
 #
 # End Change Log ******************************************************
 
@@ -135,14 +136,20 @@ print ASFILE "<table border=\"4\">\n";
 print ASFILE "<tr><th>Attribute ID</th><th>Attribute Description</th></tr>";
 
 #------------------------------------------------------------------------------
+# Element names
+#------------------------------------------------------------------------------
+my $attribute = 'attribute';
+
+#------------------------------------------------------------------------------
 # For each XML file
 #------------------------------------------------------------------------------
 foreach my $argnum (1 .. $#ARGV)
 {
     my $infile = $ARGV[$argnum];
 
-    # read XML file
-    my $attributes = $xml->XMLin($infile);
+    # read XML file. The ForceArray option ensures that there is an array of
+    # attributes even if there is only one attribute in the file
+    my $attributes = $xml->XMLin($infile, ForceArray => [$attribute]);
 
     # Uncomment to get debug output of all attributes
     #print "\nFile: ", $infile, "\n", Dumper($attributes), "\n";
@@ -184,8 +191,9 @@ foreach my $argnum (1 .. $#ARGV)
 {
     my $infile = $ARGV[$argnum];
 
-    # read XML file
-    my $attributes = $xml->XMLin($infile);
+    # read XML file. The ForceArray option ensures that there is an array of
+    # attributes even if there is only one attribute in the file
+    my $attributes = $xml->XMLin($infile, ForceArray => [$attribute]);
 
     #--------------------------------------------------------------------------
     # For each Attribute

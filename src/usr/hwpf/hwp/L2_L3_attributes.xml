@@ -20,6 +20,12 @@
      Origin: 30
    
      IBM_PROLOG_END -->
+<!--
+    XML file specifying HWPF attributes.
+    These are L2/L3 non-platInit attributes associated with proc EX chiplets
+-->
+
+
 <attributes>
   <!-- ********************************************************************* -->
   <attribute>
