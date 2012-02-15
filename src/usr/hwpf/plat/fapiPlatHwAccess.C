@@ -280,8 +280,9 @@ fapi::ReturnCode platGetCfamRegister(const fapi::Target& i_target,
 
         // Perform CFAM read via FSI
         // Address needs to be multiply by 4 because register addresses are word
-        // offsets but the FSI addresses are byte offsets
-        uint64_t l_addr = (i_address << 2);
+        // offsets but the FSI addresses are byte offsets.
+        // However, we need to preserve the engine's offset of 0x0C00 and 0x1000.
+        uint64_t l_addr = ((i_address & 0x003F) << 2) | (i_address & 0xFF00);
         uint32_t l_data = 0;
         size_t l_size = sizeof(uint32_t);
         l_err = deviceRead(l_target,
@@ -345,7 +346,8 @@ fapi::ReturnCode platPutCfamRegister(const fapi::Target& i_target,
         // Perform CFAM write via FSI
         // Address needs to be multiply by 4 because register addresses are word
         // offsets but the FSI addresses are byte offsets
-        uint64_t l_addr = (i_address << 2);
+        // However, we need to preserve the engine's offset of 0x0C00 and 0x1000.
+        uint64_t l_addr = ((i_address & 0x003F) << 2) | (i_address & 0xFF00);
         uint32_t l_data = i_data.getWord(0);
         size_t l_size = sizeof(uint32_t);
         l_err = deviceWrite(l_target,
@@ -434,8 +436,9 @@ fapi::ReturnCode platModifyCfamRegister(const fapi::Target& i_target,
 
         // Read current value
         // Address needs to be multiply by 4 because register addresses are word
-        // offsets but the FSI addresses are byte offsets
-        uint64_t l_addr = (i_address << 2);
+        // offsets but the FSI addresses are byte offsets.
+        // However, we need to preserve the engine's offset of 0x0C00 and 0x1000.
+        uint64_t l_addr = ((i_address & 0x003F) << 2) | (i_address & 0xFF00);
         uint32_t l_data = 0;
         size_t l_size = sizeof(uint32_t);
         l_err = deviceRead(l_target,

@@ -564,10 +564,10 @@ errlHndl_t xscomPerformOp(DeviceFW::OperationType i_opType,
 
         if (i_opType == DeviceFW::READ)
         {
-            TRACFCOMP(g_trac_xscom, "xscomPerformOp: Read data: %.16llx", l_data);        }
+            TRACDCOMP(g_trac_xscom, "xscomPerformOp: Read data: %.16llx", l_data);        }
         else
         {
-            TRACFCOMP(g_trac_xscom, "xscomPerformOp: Write data: %.16llx", l_data);
+            TRACDCOMP(g_trac_xscom, "xscomPerformOp: Write data: %.16llx", l_data);
         }
 
         // Handle error

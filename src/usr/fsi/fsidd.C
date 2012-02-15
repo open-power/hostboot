@@ -748,7 +748,7 @@ errlHndl_t FsiDD::read(const FsiAddrInfo_t& i_addrInfo,
         need_unlock = false;
         mutex_unlock(l_mutex);
 
-        TRACSCOMP(g_trac_fsir, "FSI READ  : %.6X = %.8X", i_addrInfo.absAddr, *o_buffer );
+        TRACDCOMP(g_trac_fsir, "FSI READ  : %.6X = %.8X", i_addrInfo.absAddr, *o_buffer );
     } while(0);
 
     if( need_unlock )
@@ -772,7 +772,7 @@ errlHndl_t FsiDD::write(const FsiAddrInfo_t& i_addrInfo,
     mutex_t* l_mutex = NULL;
 
     do {
-        TRACSCOMP(g_trac_fsir, "FSI WRITE : %.6X = %.8X", i_addrInfo.absAddr, *i_buffer );
+        TRACDCOMP(g_trac_fsir, "FSI WRITE : %.6X = %.8X", i_addrInfo.absAddr, *i_buffer );
 
         // pull out the data to write (length has been verified)
         uint32_t fsidata = *i_buffer;
