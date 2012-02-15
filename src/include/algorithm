@@ -23,6 +23,8 @@
 #ifndef ALGORITHM
 #define ALGORITHM
 
+#include <iterator>
+
 #ifdef __cplusplus
 namespace std
 {
@@ -177,7 +179,6 @@ namespace std
         return last;
     }
 
-
     /**
      * Find the minimum element within a range.
      * @param[in] first - FwdIterator to the first position in the range.
@@ -236,6 +237,90 @@ namespace std
             first++;
         }
         return e;
+    }
+
+    /**
+     * Find the element value in an ordered range [first, last].  Specifically,
+     * it returns the first position where value could be inserted without
+     * violating the ordering.
+     *
+     * @param[in] first ForwardIterator to the first position in the range.
+     * @param[in] last  ForwardIterator to the last position in the range.
+     * @param[in] value Value to use for comparison.
+     */
+
+    template <class ForwardIterator, class LessThanComparable>
+    inline ForwardIterator
+    lower_bound ( ForwardIterator first,
+                  ForwardIterator last,
+                  const LessThanComparable& value )
+    {
+        ForwardIterator it;
+        int num = 0x0;
+        int range = std::distance<ForwardIterator>( first,
+                                                    last );
+
+        while( range > 0 )
+        {
+            it = first;
+            num = range / 2;
+            std::advance( it, num );
+
+            if( (*it) < value )
+            {
+                first = ++it;
+                range = (range - (num+1));
+            }
+            else
+            {
+                range = num;
+            }
+        }
+
+        return first;
+    }
+
+    /**
+     * Find the element value in an ordered range [first, last].  Specifically,
+     * it returns the first position where value could be inserted without
+     * violating the ordering.  This is done using the comparison function
+     * parameter that is passed in.
+     *
+     * @param[in] first ForwardIterator to the first position in the range.
+     * @param[in] last  ForwardIterator to the last position in the range.
+     * @param[in] value Value to use for comparison.
+     * @param[in] comp  Function to do the comparison
+     */
+    template <class ForwardIterator, class T, class StrictWeakOrdering>
+    inline ForwardIterator
+    lower_bound ( ForwardIterator first,
+                  ForwardIterator last,
+                  const T& value,
+                  StrictWeakOrdering comp )
+    {
+        ForwardIterator it;
+        int num = 0x0;
+        int range = std::distance<ForwardIterator>( first,
+                                                    last );
+
+        while( range > 0 )
+        {
+            it = first;
+            num = range / 2;
+            std::advance( it, num );
+
+            if( comp( (*it), value ) )
+            {
+                first = ++it;
+                range = (range - (num+1));
+            }
+            else
+            {
+                range = num;
+            }
+        }
+
+        return first;
     }
 
 };

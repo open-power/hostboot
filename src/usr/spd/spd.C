@@ -41,7 +41,7 @@
 #include <vfs/vfs.H>
 #include <spd/spdreasoncodes.H>
 #include <spd/spdenums.H>
-
+#include <algorithm>
 #include "spd.H"
 #include "spdDDR3.H"
 
@@ -69,8 +69,26 @@ TRAC_INIT( & g_trac_spd, "SPD", 4096 );
 // Defines
 // ----------------------------------------------
 
+
 namespace SPD
 {
+
+/**
+* @brief Compare two values and return whether e2 is greater than
+*       the e1 value.  This is used during lower_bound to cut
+*       search time down.
+*
+* @param[in] e1 - Structure to be searched, using the Keyword
+*       value in that structure.
+*
+* @param[in] e2 - Structure to be searched, using the Keyword
+*       value in that structure.
+*
+* @return boolean - Whether or not e2.keyword is larger than
+*       e1.keyword.
+*/
+bool compareEntries ( const KeywordData e1,
+                      const KeywordData e2 );
 
 // Register the perform Op with the routing code for DIMMs.
 DEVICE_REGISTER_ROUTE( DeviceFW::WILDCARD,
@@ -305,9 +323,9 @@ errlHndl_t spdGetValue ( uint64_t i_keyword,
     {
         if( SPD_DDR3 == i_DDRRev )
         {
-            kwdData = ddr3Data;
+            // Put the table into an array
             arraySize = (sizeof(ddr3Data)/sizeof(ddr3Data[0]));
-
+            kwdData = ddr3Data;
         }
         else
         {
@@ -333,76 +351,18 @@ errlHndl_t spdGetValue ( uint64_t i_keyword,
             break;
         }
 
-        // TODO - A binary_search algorithm will be implemented with
-        //      Story 4709.
-        // Loop through the lookup table.
-        bool keywordFound = false;
-        for( uint32_t i = 0; i < arraySize; i++ )
-        {
-            if( kwdData[i].keyword == i_keyword )
-            {
-                keywordFound = true;
+        // Set the searching structure equal to the keyword we're looking for.
+        KeywordData tmpKwdData;
+        tmpKwdData.keyword = i_keyword;
+        KeywordData * entry = std::lower_bound( kwdData,
+                                              &kwdData[arraySize],
+                                              tmpKwdData,
+                                              compareEntries );
 
-                if( kwdData[i].isSpecialCase )
-                {
-                    // Handle special cases where data isn't sequential
-                    // or is in reverse order from what would be read.
-                    err = spdSpecialCases( i_keyword,
-                                           io_buffer,
-                                           io_buflen,
-                                           i_target,
-                                           i,
-                                           i_DDRRev );
-
-                    break;
-                }
-
-                // Check io_buflen versus size in table
-                err = spdCheckSize( io_buflen,
-                                    kwdData[i].length,
-                                    i_keyword );
-
-                if( err )
-                {
-                    break;
-                }
-
-                // Read length requested
-                err = spdFetchData( kwdData[i].offset,
-                                    kwdData[i].length,
-                                    tmpBuffer,
-                                    i_target );
-
-                if( err )
-                {
-                    break;
-                }
-
-                // if useBitmask set, mask and then shift data
-                if( kwdData[i].useBitMask )
-                {
-                    // Any bit mask/shifting will always be on a <1 Byte value
-                    // thus, we touch only byte 0.
-                    tmpBuffer[0] = tmpBuffer[0] & kwdData[i].bitMask;
-                    tmpBuffer[0] = tmpBuffer[0] >> kwdData[i].shift;
-                }
-
-                // Set length read
-                io_buflen = kwdData[i].length;
-                break;
-            }
-        }
-
-        if( err )
-        {
-            break;
-        }
-
-        if( !keywordFound )
+        if( entry == &kwdData[arraySize] )
         {
             TRACFCOMP( g_trac_spd,
-                       ERR_MRK"Could not find keyword (0x%04x) in lookup table!",
-                       i_keyword );
+                       ERR_MRK"No matching keyword entry found!" );
 
             /*@
              * @errortype
@@ -418,8 +378,55 @@ errlHndl_t spdGetValue ( uint64_t i_keyword,
                                            SPD_KEYWORD_NOT_FOUND,
                                            i_keyword,
                                            0x0 );
+
             break;
         }
+
+        if( entry->isSpecialCase )
+        {
+            // Handle special cases where data isn't sequential
+            // or is in reverse order from what would be read.
+            err = spdSpecialCases( (*entry),
+                                   io_buffer,
+                                   io_buflen,
+                                   i_target,
+                                   i_DDRRev );
+
+            break;
+        }
+
+        // Check io_buflen versus size in table
+        err = spdCheckSize( io_buflen,
+                            (*entry).length,
+                            i_keyword );
+
+        if( err )
+        {
+            break;
+        }
+
+        // Read length requested
+        err = spdFetchData( (*entry).offset,
+                            (*entry).length,
+                            tmpBuffer,
+                            i_target );
+
+        if( err )
+        {
+            break;
+        }
+
+        // if useBitmask set, mask and then shift data
+        if( (*entry).useBitMask )
+        {
+            // Any bit mask/shifting will always be on a <1 Byte value
+            // thus, we touch only byte 0.
+            tmpBuffer[0] = tmpBuffer[0] & (*entry).bitMask;
+            tmpBuffer[0] = tmpBuffer[0] >> (*entry).shift;
+        }
+
+        // Set length read
+        io_buflen = (*entry).length;
     } while( 0 );
 
     if( err )
@@ -439,11 +446,10 @@ errlHndl_t spdGetValue ( uint64_t i_keyword,
 // ------------------------------------------------------------------
 // spdSpecialCases
 // ------------------------------------------------------------------
-errlHndl_t spdSpecialCases ( uint64_t i_keyword,
+errlHndl_t spdSpecialCases ( KeywordData i_kwdData,
                              void * io_buffer,
                              size_t & io_buflen,
                              TARGETING::Target * i_target,
-                             uint64_t i_entry,
                              uint64_t i_DDRRev )
 {
     errlHndl_t err = NULL;
@@ -457,7 +463,7 @@ errlHndl_t spdSpecialCases ( uint64_t i_keyword,
         // Handle each of the special cases here
         if( SPD_DDR3 == i_DDRRev )
         {
-            switch( i_keyword )
+            switch( i_kwdData.keyword )
             {
                 case CAS_LATENCIES_SUPPORTED:
                     // Length 2 bytes
@@ -467,12 +473,12 @@ errlHndl_t spdSpecialCases ( uint64_t i_keyword,
                     // Check Size of buffer
                     err = spdCheckSize( io_buflen,
                                         2,
-                                        i_keyword );
+                                        i_kwdData.keyword );
 
                     if( err ) break;
 
                     // Get MSB
-                    err = spdFetchData( ddr3Data[i_entry].offset,
+                    err = spdFetchData( i_kwdData.offset,
                                         1, /* Read 1 byte at a time */
                                         &tmpBuffer[0],
                                         i_target );
@@ -480,10 +486,10 @@ errlHndl_t spdSpecialCases ( uint64_t i_keyword,
                     if( err ) break;
 
                     // Mask and shift if needed
-                    if( ddr3Data[i_entry].useBitMask )
+                    if( i_kwdData.useBitMask )
                     {
-                        tmpBuffer[0] = tmpBuffer[0] & ddr3Data[i_entry].bitMask;
-                        tmpBuffer[0] = tmpBuffer[0] >> ddr3Data[i_entry].shift;
+                        tmpBuffer[0] = tmpBuffer[0] & i_kwdData.bitMask;
+                        tmpBuffer[0] = tmpBuffer[0] >> i_kwdData.shift;
                     }
 
                     // Get LSB
@@ -506,12 +512,12 @@ errlHndl_t spdSpecialCases ( uint64_t i_keyword,
                     // Check Size of buffer
                     err = spdCheckSize( io_buflen,
                                         2,
-                                        i_keyword );
+                                        i_kwdData.keyword );
 
                     if( err ) break;
 
                     // Get MSB
-                    err = spdFetchData( ddr3Data[i_entry].offset,
+                    err = spdFetchData( i_kwdData.offset,
                                         1, /* Read 1 byte at a time */
                                         &tmpBuffer[0],
                                         i_target );
@@ -519,10 +525,10 @@ errlHndl_t spdSpecialCases ( uint64_t i_keyword,
                     if( err ) break;
 
                     // Mask and shift if needed
-                    if( ddr3Data[i_entry].useBitMask )
+                    if( i_kwdData.useBitMask )
                     {
-                        tmpBuffer[0] = tmpBuffer[0] & ddr3Data[i_entry].bitMask;
-                        tmpBuffer[0] = tmpBuffer[0] >> ddr3Data[i_entry].shift;
+                        tmpBuffer[0] = tmpBuffer[0] & i_kwdData.bitMask;
+                        tmpBuffer[0] = tmpBuffer[0] >> i_kwdData.shift;
                     }
 
                     // Get LSB
@@ -545,12 +551,12 @@ errlHndl_t spdSpecialCases ( uint64_t i_keyword,
                     // Check size of buffer
                     err = spdCheckSize( io_buflen,
                                         2,
-                                        i_keyword );
+                                        i_kwdData.keyword );
 
                     if( err ) break;
 
                     // Get MSB
-                    err = spdFetchData( ddr3Data[i_entry].offset,
+                    err = spdFetchData( i_kwdData.offset,
                                         1, /* Read 1 byte at a time */
                                         &tmpBuffer[0],
                                         i_target );
@@ -558,10 +564,10 @@ errlHndl_t spdSpecialCases ( uint64_t i_keyword,
                     if( err ) break;
 
                     // Mask and shift if needed
-                    if( ddr3Data[i_entry].useBitMask )
+                    if( i_kwdData.useBitMask )
                     {
-                        tmpBuffer[0] = tmpBuffer[0] & ddr3Data[i_entry].bitMask;
-                        tmpBuffer[0] = tmpBuffer[0] >> ddr3Data[i_entry].shift;
+                        tmpBuffer[0] = tmpBuffer[0] & i_kwdData.bitMask;
+                        tmpBuffer[0] = tmpBuffer[0] >> i_kwdData.shift;
                     }
 
                     // Get LSB
@@ -584,12 +590,12 @@ errlHndl_t spdSpecialCases ( uint64_t i_keyword,
                     // Check size of buffer
                     err = spdCheckSize( io_buflen,
                                         2,
-                                        i_keyword );
+                                        i_kwdData.keyword );
 
                     if( err ) break;
 
                     // Get MSB
-                    err = spdFetchData( ddr3Data[i_entry].offset,
+                    err = spdFetchData( i_kwdData.offset,
                                         1, /* Read 1 byte at a time */
                                         &tmpBuffer[0],
                                         i_target );
@@ -616,12 +622,12 @@ errlHndl_t spdSpecialCases ( uint64_t i_keyword,
                     // Check size of buffer
                     err = spdCheckSize( io_buflen,
                                         2,
-                                        i_keyword );
+                                        i_kwdData.keyword );
 
                     if( err ) break;
 
                     // Get MSB
-                    err = spdFetchData( ddr3Data[i_entry].offset,
+                    err = spdFetchData( i_kwdData.offset,
                                         1, /* Read 1 byte at a time */
                                         &tmpBuffer[0],
                                         i_target );
@@ -629,10 +635,10 @@ errlHndl_t spdSpecialCases ( uint64_t i_keyword,
                     if( err ) break;
 
                     // Mask and shift if needed
-                    if( ddr3Data[i_entry].useBitMask )
+                    if( i_kwdData.useBitMask )
                     {
-                        tmpBuffer[0] = tmpBuffer[0] & ddr3Data[i_entry].bitMask;
-                        tmpBuffer[0] = tmpBuffer[0] >> ddr3Data[i_entry].shift;
+                        tmpBuffer[0] = tmpBuffer[0] & i_kwdData.bitMask;
+                        tmpBuffer[0] = tmpBuffer[0] >> i_kwdData.shift;
                     }
 
                     // Get LSB
@@ -655,12 +661,12 @@ errlHndl_t spdSpecialCases ( uint64_t i_keyword,
                     // Check size of buffer
                     err = spdCheckSize( io_buflen,
                                         2,
-                                        i_keyword );
+                                        i_kwdData.keyword );
 
                     if( err ) break;
 
                     // Get MSB
-                    err = spdFetchData( ddr3Data[i_entry].offset,
+                    err = spdFetchData( i_kwdData.offset,
                                         1, /* Read 1 byte at a time */
                                         &tmpBuffer[0],
                                         i_target );
@@ -687,12 +693,12 @@ errlHndl_t spdSpecialCases ( uint64_t i_keyword,
                     // Check size of buffer
                     err = spdCheckSize( io_buflen,
                                         2,
-                                        i_keyword );
+                                        i_kwdData.keyword );
 
                     if( err ) break;
 
                     // Get MSB
-                    err = spdFetchData( ddr3Data[i_entry].offset,
+                    err = spdFetchData( i_kwdData.offset,
                                         1, /*Read 1 byte at a time */
                                         &tmpBuffer[0],
                                         i_target );
@@ -714,7 +720,7 @@ errlHndl_t spdSpecialCases ( uint64_t i_keyword,
                 default:
                     TRACFCOMP( g_trac_spd,
                                ERR_MRK"Unknown keyword (0x%04x) for DDR3 special cases!",
-                               i_keyword );
+                               i_kwdData.keyword );
 
                     /*@
                      * @errortype
@@ -722,14 +728,14 @@ errlHndl_t spdSpecialCases ( uint64_t i_keyword,
                      * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
                      * @moduleid         SPD_SPECIAL_CASES
                      * @userdata1        SPD Keyword
-                     * @userdata2        Table Entry
+                     * @userdata2        UNUSED
                      * @devdesc          Keyword is not a special case keyword.
                      */
                     err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                                    SPD_SPECIAL_CASES,
                                                    SPD_INVALID_SPD_KEYWORD,
-                                                   i_keyword,
-                                                   i_entry );
+                                                   i_kwdData.keyword,
+                                                   0x0 );
                     break;
             };
         }
@@ -745,15 +751,14 @@ errlHndl_t spdSpecialCases ( uint64_t i_keyword,
              * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
              * @moduleid         SPD_SPECIAL_CASES
              * @userdata1        SPD Keyword
-             * @userdata2[0:31]  SPD Table entry
-             * @userdata2[32:63] DIMM DDR Revision
+             * @userdata2        DIMM DDR Revision
              * @devdesc          Invalid DDR Revision
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            SPD_SPECIAL_CASES,
                                            SPD_INVALID_BASIC_MEMORY_TYPE,
-                                           i_keyword,
-                                           TWO_UINT32_TO_UINT64( i_entry, i_DDRRev) );
+                                           i_kwdData.keyword,
+                                           i_DDRRev );
 
             break;
         }
@@ -912,6 +917,29 @@ errlHndl_t spdReadBinaryFile ( uint64_t i_byteAddr,
                 EXIT_MRK"spdReadBinaryFile()" );
 
     return err;
+}
+
+
+// ------------------------------------------------------------------
+// compareEntries
+// ------------------------------------------------------------------
+bool compareEntries ( const KeywordData e1,
+                      const KeywordData e2 )
+{
+    // e1 is the iterator value
+    // e2 is the search value
+    TRACUCOMP( g_trac_spd,
+               INFO_MRK"e1: 0x%04x, e2: 0x%04x",
+               e1.keyword,
+               e2.keyword );
+    if( e2.keyword > e1.keyword )
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 

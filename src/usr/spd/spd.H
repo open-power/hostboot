@@ -199,7 +199,7 @@ errlHndl_t spdGetValue ( uint64_t i_keyword,
  *      the data isn't sequential, or is broken up between two different
  *      offsets within the layout.
  *
- * @param[in] i_keyword - The SPD keyword to access.
+ * @param[in] i_kwdData - The SPD keyword to access.
  *
  * @param[in/out] io_buffer - The buffer that will contain the data
  *      read from the SPD data.
@@ -209,16 +209,13 @@ errlHndl_t spdGetValue ( uint64_t i_keyword,
  *
  * @param[in] i_target - The target DIMM to access the data for.
  *
- * @param[in] i_entry - The table entry for the keyword to read.
- *
  * @return errlHndl_t - NULL if successful, otherwise a pointer to the
  *      error log.
  */
-errlHndl_t spdSpecialCases ( uint64_t i_keyword,
+errlHndl_t spdSpecialCases ( KeywordData i_kwdData,
                              void * io_buffer,
                              size_t & io_buflen,
                              TARGETING::Target * i_target,
-                             uint64_t i_entry,
                              uint64_t i_DDRRev );
 
 /**
