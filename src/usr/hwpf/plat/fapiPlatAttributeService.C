@@ -132,7 +132,6 @@ static void platUpdateAttrValue( const uint16_t i_keyword, void * o_data )
         // and reverse the bytes
         case SPD::MODULE_CRC:
         case SPD::MODULE_REVISION_CODE:
-        case SPD::DRAM_MANUFACTURER_ID:
             l_word |= (*l_byte++);
             l_word |= (*l_byte << 8);
             break;
