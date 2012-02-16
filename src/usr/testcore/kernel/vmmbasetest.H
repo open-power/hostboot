@@ -123,7 +123,7 @@ class VmmBaseTest : public CxxTest::TestSuite
 
             // Don't delay in VPO because it will take VERY long to
             // run the simulator
-            if( TARGETING::is_vpo() )
+            if( !TARGETING::is_vpo() )
             {
                 nanosleep(1,0);
             }
