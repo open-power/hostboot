@@ -142,6 +142,7 @@
                 .set SRR0,26
                 .set SRR1,27
                 .set CFAR,28
+                .set HFSCR,190
                 .set TB,268
                 .set SPRG0,272
                 .set SPRG1,273

@@ -188,6 +188,22 @@ UNIMPL_INTERRUPT(perf_monitor, 0xF00)
 UNIMPL_INTERRUPT(vector_unavail, 0xF20)
 UNIMPL_INTERRUPT(vsx_unavail, 0xF40)
 
+UNIMPL_INTERRUPT(fac_unavail, 0xF60)
+
+    ;// P8 has a new HFSCR register which allows the hypervisor to disable
+    ;// access to facilities such as floating point to a partition, even if
+    ;// the partition enables via the MSR bits.  Since the only of these
+    ;// facilities we allow is FP, we'll just set the HFSCR bits here if we
+    ;// get this exception.
+.org _start + 0xF80
+hype_fac_unavail:
+   mtspr HSPRG0, r0     ;// Free up a temporary register.
+   mfspr r0,HFSCR
+   ori r0, r0, 1        ;// Set FP=1 (bit 63).
+   mtspr HFSCR, r0
+   mfspr r0, HSPRG0     ;// Restore temporary
+   hrfid
+
 ;// Softpatch Exception Vector
 ;//
 ;// This exception vector implements the softpatch / denormalization assist
