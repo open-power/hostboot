@@ -171,7 +171,7 @@ fapi::ReturnCode fapiGetAssociatedDimms(
     o_dimms.clear();
 
     // Create a Class/Type/Model predicate to look for dimm cards
-    TARGETING::PredicateCTM l_predicate(TARGETING::CLASS_CARD,
+    TARGETING::PredicateCTM l_predicate(TARGETING::CLASS_LOGICAL_CARD,
                                         TARGETING::TYPE_DIMM);
 
     // Extract the HostBoot Target pointer for the input target

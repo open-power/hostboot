@@ -660,7 +660,7 @@ public:
             }
 
             // Get a DIMM Target
-            TARGETING::PredicateCTM predDimm( TARGETING::CLASS_CARD,
+            TARGETING::PredicateCTM predDimm( TARGETING::CLASS_LOGICAL_CARD,
                                               TARGETING::TYPE_DIMM );
             TargetHandleList dimmList;
 

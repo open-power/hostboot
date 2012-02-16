@@ -162,9 +162,35 @@ void    init_target_states( void *io_pArgs )
                     l_hwasState.changedSinceLastIPL   =   false;
                     l_hwasState.gardLevel             =   0;
                     l_memTargetList[ii]->setAttr<ATTR_HWAS_STATE>( l_hwasState );
-                }   // end for
-            }   // end if
-        }   // end for
+
+                    // look for the dimms on each centaur
+                    TARGETING::PredicateCTM l_dimms(CLASS_LOGICAL_CARD, TYPE_DIMM);
+                    TARGETING::TargetHandleList l_dimmTargetList;
+                    TARGETING::targetService().getAssociated(l_dimmTargetList,
+                            l_memTargetList[ii],
+                            TARGETING::TargetService::CHILD_BY_AFFINITY,
+                            TARGETING::TargetService::ALL, &l_dimms);
+                    //  debug...
+                    TRACDCOMP( g_trac_hwas,
+                            "    %d DIMMs associated with MEM %d",
+                            l_dimmTargetList.size(), ii);
+
+                    // Return fapi::Targets to the caller
+                    for (uint32_t iii = 0; iii < l_dimmTargetList.size(); iii++)
+                    {
+                        // set the dimm(s) connected to MCS0 to poweredOn,
+                        //      present, functional
+                        l_hwasState =   l_dimmTargetList[iii]->getAttr<ATTR_HWAS_STATE>();
+                        l_hwasState.poweredOn             =   true;
+                        l_hwasState.present               =   true;
+                        l_hwasState.functional            =   true;
+                        l_hwasState.changedSinceLastIPL   =   false;
+                        l_hwasState.gardLevel             =   0;
+                        l_dimmTargetList[iii]->setAttr<ATTR_HWAS_STATE>( l_hwasState );
+                    }   // end for iii dimTargets
+                }   // end for ii memTargets
+            }   // end if only 0 and 1
+        }   // end for i mcsTargets
     }   // end else
     //  $$$$$   TEMPORARY   $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 

@@ -55,7 +55,7 @@ void getDIMMTargets ( TargetHandleList & o_dimmList )
     assert( sysTarget != NULL );
 
     // Get a DIMM Target
-    TARGETING::PredicateCTM predDimm( TARGETING::CLASS_CARD,
+    TARGETING::PredicateCTM predDimm( TARGETING::CLASS_LOGICAL_CARD,
                                       TARGETING::TYPE_DIMM );
     tS.getAssociated( o_dimmList,
                       sysTarget,
