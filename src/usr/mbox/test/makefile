@@ -1,11 +1,11 @@
 #  IBM_PROLOG_BEGIN_TAG
 #  This is an automatically generated prolog.
 #
-#  $Source: src/usr/makefile $
+#  $Source: src/usr/mbox/test/makefile $
 #
 #  IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2010 - 2011
+#  COPYRIGHT International Business Machines Corp. 2012
 #
 #  p1
 #
@@ -20,13 +20,9 @@
 #  Origin: 30
 #
 #  IBM_PROLOG_END
-ROOTPATH = ../..
+ROOTPATH = ../../../..
 
-OBJS = module_init.o
-
-SUBDIRS = example.d trace.d cxxtest.d testcore.d errl.d devicefw.d  \
-          scom.d xscom.d targeting.d initservice.d hwpf.d \
-          ecmddatabuffer.d pnor.d i2c.d vfs.d fsi.d hwas.d fsiscom.d \
-          intr.d spd.d pore.d util.d mbox.d
+MODULE = testmbox
+TESTS = *.H
 
 include ${ROOTPATH}/config.mk

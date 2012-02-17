@@ -49,7 +49,7 @@ DIRECT_BOOT_OBJECTS = start.o kernel.o taskmgr.o cpumgr.o syscall.o \
 RUNTIME_OBJECTS =
 
 BASE_MODULES = trace errl devicefw scom xscom initservice taskargs \
-               pnor vfs
+               pnor vfs mbox
 
 EXTENDED_MODULES = targeting ecmddatabuffer fapi hwp plat 	\
                    extinitsvc istepdisp hwas fsi fsiscom i2c intr \
@@ -63,7 +63,7 @@ TESTCASE_MODULES = cxxtest testerrl testdevicefw testsyslib \
                    testscom testxscom testtargeting testinitservice testkernel \
                    testhwpf testecmddatabuffer initsvctasktest2 testcxxtest \
                    testpnor testi2c testfsi testvfs testhwas testintr testspd \
-		   testpore testutil
+                   testpore testutil testmbox
 
 RELOCATABLE_IMAGE_LDFLAGS = -pie --export-dynamic
 

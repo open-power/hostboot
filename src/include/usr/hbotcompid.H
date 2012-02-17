@@ -170,7 +170,6 @@ const compId_t INTR_COMP_ID = 0x0F00;
 const char INTR_COMP_NAME[] = "intr";
 //@}
 
-
 /** @name SPD
  *  EEPROM device driver component
  */
@@ -179,6 +178,13 @@ const compId_t SPD_COMP_ID = 0x1000;
 const char SPD_COMP_NAME[] = "spd";
 //@}
 
+/** @name MBOX
+ *  MBOX component
+ */
+//@{
+const compId_t MBOX_COMP_ID = 0x1100;
+const char MBOX_COMP_NAME[] = "mbox";
+//@}
 
 /** @name RESERVED
  *  Reserved component ID. x3100 is the component ID
@@ -189,7 +195,6 @@ const char SPD_COMP_NAME[] = "spd";
 //@{
 const compId_t RESERVED_COMP_ID = 0x3100;
 const char RESERVED_COMP_NAME[] = "reserved";
-//@}
 
 //  ----------------------------------------------------------
 //  CXXTEST Unit Test, reserve compid near the end...
