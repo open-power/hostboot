@@ -29,11 +29,11 @@ namespace SCOM
 {
     enum scomModuleId
     {
-        MOD_INVALID                = 0x00, /**< Invalid Id */
-        SCOM_TRANSLATE             = 0x01, /**< scomtrans.C : scomTranslate */
-        SCOM_PERFORM_TRANSLATE     = 0x02, /**< scomtrans.C : scomPerformTranslate */
-        SCOM_FIND_PARENT_TARGET    = 0x03, /**< scomtrans.C : scomfindParentTarget */
-
+        SCOM_PERFORM_OP                 = 0x00,
+        SCOM_TRANSLATE                  = 0x01,
+        SCOM_PERFORM_TRANSLATE          = 0x02,
+        SCOM_FIND_PARENT_TARGET         = 0x03,
+        SCOM_CHECK_INDIRECT_AND_DO_SCOM = 0x04,
     };
 
     enum scomReasonCode
@@ -41,8 +41,13 @@ namespace SCOM
         SCOM_INVALID_ADDR           = SCOM_COMP_ID | 0x01,
         SCOM_NO_MATCHING_PARENT     = SCOM_COMP_ID | 0x02,
         SCOM_TRANS_INVALID_TYPE     = SCOM_COMP_ID | 0x03,
-        SCOM_TRANS_UNSUPPORTED_XBUS = SCOM_COMP_ID | 0x04,
-        SCOM_TRANS_UNSUPPORTED_ABUS = SCOM_COMP_ID | 0x05,
+        SCOM_TRANS_UNSUPPORTED      = SCOM_COMP_ID | 0x04,
+        SCOM_INDIRECT_READ_FAIL     = SCOM_COMP_ID | 0x05,
+        SCOM_INDIRECT_READ_TIMEOUT  = SCOM_COMP_ID | 0x06,
+        SCOM_INDIRECT_WRITE_FAIL    = SCOM_COMP_ID | 0x07,
+        SCOM_INDIRECT_WRITE_TIMEOUT = SCOM_COMP_ID | 0x08,
+        SCOM_TRANS_UNSUPPORTED_XBUS = SCOM_COMP_ID | 0x09,
+        SCOM_TRANS_UNSUPPORTED_ABUS = SCOM_COMP_ID | 0x0A,
     };
 };
 

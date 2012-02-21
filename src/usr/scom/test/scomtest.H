@@ -942,8 +942,6 @@ public:
           //only run if the target exists
           if(test_data[x].target == NULL)
           {
-              TRACFCOMP( g_trac_scom, "MBA_MBS ScomTest before device write- TARGET = NULL x = %d", x);
-
               continue;
           }
 

@@ -36,6 +36,8 @@
 #include <errl/errlmanager.H>
 #include "scom.H"
 #include <scom/scomreasoncodes.H>
+#include <sys/time.h>
+
 
 // Trace definition
 trace_desc_t* g_trac_scom = NULL;
@@ -96,6 +98,12 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
 
     errlHndl_t l_err = NULL;
     mutex_t* l_mutex = NULL;
+    uint64_t elapsed_indScom_time_ns = 0;
+    bool l_indScomError = false;
+    uint64_t temp_io_buffer = 0;
+
+    //@todo - determine hwhat an appropriate timeout value 
+    enum { MAX_INDSCOM_TIMEOUT_NS = 100000 }; //=.1ms
 
     // If the indirect scom bit is 0, then doing a regular scom 
     if( (i_addr & 0x8000000000000000) == 0)
@@ -110,8 +118,8 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
     // We are performing an indirect scom.
     else
     {
-        uint64_t l_io_buffer;
-        uint64_t temp_scomAddr;
+        uint64_t l_io_buffer = 0;
+        uint64_t temp_scomAddr = 0;
 
         memcpy(&l_io_buffer, io_buffer, 8);
         memcpy(&temp_scomAddr, &i_addr, 8);
@@ -155,21 +163,112 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
                 return l_err;
 	    }
 
-            // Now perform the op requested using the passed in
-            // IO_Buffer to pass the read data back to caller. 
-            l_err = doScomOp(i_opType,
-                             i_target,
-                             io_buffer,
-                             io_buflen,
-                             i_accessType,
-                             i_addr);
+            // Need to check loop on read until either
+            // bit (32) = 1 or we have exceeded our max
+            // retries. 
+            do
+            {
+                // Now perform the op requested using the passed in
+                // IO_Buffer to pass the read data back to caller. 
+                l_err = doScomOp(i_opType,
+                                 i_target,
+                                 io_buffer,
+                                 io_buflen,
+                                 i_accessType,
+                                 i_addr);
+
+                if (l_err != NULL)
+                {
+                    break;
+                }
+
+                // if bit 32 is on indicating a complete bit
+                if ((*((uint64_t *)io_buffer) & SCOM_IND_COMPLETE_MASK) == SCOM_IND_COMPLETE_MASK)
+                {
+                    // check for bits 37-39 to be 011 indicating the read is valid
+                    if ((*((uint64_t *)io_buffer) & SCOM_IND_ERROR_MASK) == SCOM_IND_READ_SUCCESS_MASK)
+                    {
+                        // Clear out the other bits in the io_buffer
+                        // register to only return the read data to caller
+                        *((uint64_t *)io_buffer) &= 0x00000000000FFFF;
+
+                    }
+                    else
+                    {
+                      // indicate that we do have a indirect scom failure
+                      l_indScomError = true;
+                    }
+
+                    // break out because we got the complete bit.. 
+                    break;
+                }
+
+                nanosleep( 0, 10000 ); //sleep for 10,000 ns
+                elapsed_indScom_time_ns += 10000;
+
+            }while ( elapsed_indScom_time_ns <= MAX_INDSCOM_TIMEOUT_NS);
 
             mutex_unlock(l_mutex);
 
+            if (l_err == NULL)
+            {
+                if (l_indScomError == true)
+                {
+                    // got an indirect read error
+                    // the data buffer is in tempIoData
+                    TRACFCOMP(g_trac_scom,
+                              "INDIRECT SCOM READ= ERROR valid bits are not on..  type=0x%X",
+                              *((uint64_t *)io_buffer));
+
+                    /*@
+                     * @errortype
+                     * @moduleid     SCOM::CHECK_INDIRECT_AND_DO_SCOM
+                     * @reasoncode   SCOM::INDIRECT_SCOM_READ_FAIL
+                     * @userdata1    Address
+                     * @userdata2    io_buffer data 
+                     * @devdesc      Indirect SCOM Read error
+                     */
+                    l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                                    SCOM_CHECK_INDIRECT_AND_DO_SCOM,
+                                                    SCOM_INDIRECT_READ_FAIL,
+                                                    i_addr,
+                                                    *((uint64_t *)io_buffer));
+
+                    //@TODO - add usr details to the errorlog when we have one to
+                    //        give better info regarding the fail..
+
+                }
+                // if we got a timeout, create an errorlog.
+                else  if(  elapsed_indScom_time_ns > MAX_INDSCOM_TIMEOUT_NS )
+                {
+                    // got an indirect read timeout
+                    TRACFCOMP(g_trac_scom,
+                              "INDIRECT SCOM READ=indirect read timout ..  type=0x%X",
+                              *((uint64_t *)io_buffer));
+
+
+                    /*@
+                     * @errortype
+                     * @moduleid     SCOM::CHECK_INDIRECT_AND_DO_SCOM
+                     * @reasoncode   SCOM::INDIRECT_SCOM_READ_TIMEOUT
+                     * @userdata1    Address
+                     * @userdata2    io_buffer data 
+                     * @devdesc      Indirect SCOM complete bit did not come on
+                     */
+                    l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                                    SCOM_CHECK_INDIRECT_AND_DO_SCOM,
+                                                    SCOM_INDIRECT_READ_TIMEOUT,
+                                                    i_addr,
+                                                    *((uint64_t *)io_buffer));
+
+                    //@TODO - add usr details to the errorlog when we have one to
+                    //        give better info regarding the fail..
+
+                }
+            }
         }
         else //write
         {
-
             // Turn the read bit off. 
             l_io_buffer = l_io_buffer & 0x7FFFFFFFFFFFFFFF;
 
@@ -181,9 +280,107 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
                              io_buflen,
                              i_accessType,
                              i_addr);
-        }
-    }
 
+            // Need to check loop on read until either
+            // bit (32) = 1 or we have exceeded our max
+            // retries. 
+            do
+            {
+
+                memcpy(&temp_io_buffer, io_buffer, 8);
+
+                // Now perform the op requested using the passed in
+                // IO_Buffer to pass the read data back to caller. 
+                l_err = doScomOp(DeviceFW::READ,
+                                 i_target,
+                                 & temp_io_buffer,
+                                 io_buflen,
+                                 i_accessType,
+                                 i_addr);
+
+
+                if (l_err != NULL)
+                {
+                    break;
+                }
+
+                // if bit 32 is on indicating a complete bit
+                if ((temp_io_buffer & SCOM_IND_COMPLETE_MASK) == SCOM_IND_COMPLETE_MASK)
+                {
+                    // The write is valid when bits 37-39 are 010.. if not on return error
+                    //  check for bits 37-39 to not be 010 
+                    if ((temp_io_buffer & SCOM_IND_ERROR_MASK) != SCOM_IND_WRITE_SUCCESS_MASK)
+                    {
+                        // bits did not get turned on.. set error to true. 
+                        l_indScomError = true; 
+                    }
+
+                    // break out because we got the complete bit on 
+                    break;
+
+                }
+
+                nanosleep( 0, 10000 ); //sleep for 10,000 ns
+                elapsed_indScom_time_ns += 10000;
+
+            }while ( elapsed_indScom_time_ns <= MAX_INDSCOM_TIMEOUT_NS);
+
+            if (l_err == NULL)
+            {
+                // If the indirect scom has an error.
+                if (l_indScomError == true)
+                {
+                    // got an indirect write error
+                    TRACFCOMP(g_trac_scom, "INDIRECT SCOM WRITE= ERROR valid bits are not on..  type=0x%X", temp_io_buffer);
+
+                    /*@
+                     * @errortype
+                     * @moduleid     SCOM::CHECK_INDIRECT_AND_DO_SCOM
+                     * @reasoncode   SCOM::INDIRECT_SCOM_WRITE_FAIL
+                     * @userdata1    Address
+                     * @userdata2    io_buffer data
+                     * @devdesc      Indirect SCOM Write failed for this address
+                     */
+                    l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                                    SCOM_CHECK_INDIRECT_AND_DO_SCOM,
+                                                    SCOM_INDIRECT_WRITE_FAIL,
+                                                    i_addr,
+                                                    temp_io_buffer);
+
+                    //@TODO - add usr details to the errorlog when we have one to
+                    //        give better info regarding the fail.. 
+
+                }
+                // if we got a timeout, create an errorlog.
+                else  if(  elapsed_indScom_time_ns > MAX_INDSCOM_TIMEOUT_NS )
+                {
+                    // got an indirect write timeout
+                    TRACFCOMP(g_trac_scom,
+                              "INDIRECT SCOM READ=indirect write timout ..  type=0x%X",
+                              temp_io_buffer);
+
+
+                    /*@
+                     * @errortype
+                     * @moduleid     SCOM::CHECK_INDIRECT_AND_DO_SCOM
+                     * @reasoncode   SCOM::INDIRECT_SCOM_WRITE_TIMEOUT
+                     * @userdata1    Address
+                     * @userdata2    io_buffer data 
+                     * @devdesc      Indirect SCOM write timeout, complete bit did not come one
+                     */
+                    l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                                    SCOM_CHECK_INDIRECT_AND_DO_SCOM,
+                                                    SCOM_INDIRECT_WRITE_TIMEOUT,
+                                                    i_addr,
+                                                    temp_io_buffer);
+
+                    //@TODO - add usr details to the errorlog when we have one to
+                    //        give better info regarding the fail..
+
+                }
+            }
+        } // end of write
+    }
     return l_err;
 }
 
