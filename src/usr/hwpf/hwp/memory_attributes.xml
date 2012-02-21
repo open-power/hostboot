@@ -1211,6 +1211,34 @@ firmware notes: none</description>
 </attribute>
 
 <attribute>
+    <id>ATTR_MSS_MEMORY_BASE</id>
+    <targetType>TARGET_TYPE_MCS_CHIPLET</targetType>
+    <description>Base address for memory accesses to this memory buffer.  In a maximum configured centaur, this is 8 Tera Bytes
+creator: firmware
+consumer: extent
+firmware notes: firmware sets this before running extent set up</description>
+    <valueType>uint64</valueType>
+    <platInit/>
+    <odmVisable/>
+    <odmChangeable/>
+    <persistRuntime/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MSS_MIRROR_BASE</id>
+    <targetType>TARGET_TYPE_MCS_CHIPLET</targetType>
+    <description>Base address for memory accesses to this memory buffer for mirroring.  In a maximum configured centaur, this is 4 Tera Bytes
+creator: firmware
+consumer: extent
+firmware notes: firmware sets this before running extent set up</description>
+    <valueType>uint64</valueType>
+    <platInit/>
+    <odmVisable/>
+    <odmChangeable/>
+    <persistRuntime/>
+</attribute>
+
+<attribute>
     <id>ATTR_MSS_MEMSIZE</id>
     <targetType>TARGET_TYPE_MCS_CHIPLET</targetType>
     <description>The amount of memory to set aside for this memory controller.  There maybe gaps in the complete range, but this memory controller does not have any more memory than this amount.

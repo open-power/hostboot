@@ -137,10 +137,35 @@ ReturnCode fapiPlatGetSpdAttr(const Target * i_target,
                               const uint16_t i_keyword, 
                               void * o_data, size_t i_len );
 
-}
+/**
+ * @brief This function is called by the FAPI_ATTR_GET macro when getting
+ * ATTR_MSS_MEMORY_BASE. It should not be called directly
+ *
+ * @param[in]  i_pMcsTarget MCS target pointer
+ * @param[out] o_addr       Address of MCS BAR register
+ * @return ReturnCode.  Zero on success, else platform specified error
+ */
+fapi::ReturnCode fapiPlatGetMemoryBaseAddr(const fapi::Target * i_pMcsTarget,
+                                           uint64_t & o_addr);
+
+/**
+ * @brief This function is called by the FAPI_ATTR_GET macro when getting
+ * ATTR_MSS_MIRROR_BASE. It should not be called directly
+ *
+ * @param[in]  i_pMcsTarget MCS target pointer 
+ * @param[out] o_addr       Address of MCS BAR register
+ * @return ReturnCode.  Zero on success, else platform specified error
+ */
+fapi::ReturnCode fapiPlatGetMirrorBaseAddr(const fapi::Target * i_pMcsTarget,
+                                           uint64_t & o_addr);
 
 }
 
+}
+
+//------------------------------------------------------------------------------
+// MACROs to route each ATTR_SPD access to the Hostboot SPD function
+//------------------------------------------------------------------------------
 #define ATTR_SPD_DRAM_DEVICE_TYPE_GETMACRO(ID, PTARGET, VAL) \
     fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::BASIC_MEMORY_TYPE, &(VAL), sizeof(VAL) )
 #define ATTR_SPD_MODULE_TYPE_GETMACRO(ID, PTARGET, VAL) \
@@ -229,5 +254,13 @@ ReturnCode fapiPlatGetSpdAttr(const Target * i_target,
     fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::MODULE_REVISION_CODE, &(VAL), sizeof(VAL) )
 #define ATTR_SPD_DRAM_MANUFACTURER_JEDEC_ID_CODE_GETMACRO(ID, PTARGET, VAL) \
     fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::DRAM_MANUFACTURER_ID, &(VAL), sizeof(VAL) )
+
+//------------------------------------------------------------------------------
+// MACROs to route ATTR Base Address accesses to the correct Hostboot function
+//------------------------------------------------------------------------------
+#define ATTR_MSS_MEMORY_BASE_GETMACRO(ID, PTARGET, VAL) \
+    fapi::platAttrSvc::fapiPlatGetMemoryBaseAddr(PTARGET, VAL)
+#define ATTR_MSS_MIRROR_BASE_GETMACRO(ID, PTARGET, VAL) \
+    fapi::platAttrSvc::fapiPlatGetMirrorBaseAddr(PTARGET, VAL)
 
 #endif // FAPIPLATATTRIBUTESERVICE_H_

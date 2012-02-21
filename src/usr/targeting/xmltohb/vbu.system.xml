@@ -63,6 +63,7 @@
 <targetInstance>
     <id>sys0node0proc0</id>
     <type>chip-processor-venice</type>
+    <attribute><id>POSITION</id><default>0</default></attribute>
     <attribute><id>SCOM_SWITCHES</id>
         <default>
             <field><id>useFsiScom</id><value>0</value></field>
@@ -464,6 +465,7 @@
 <targetInstance>
     <id>sys0node0membuf0</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>0</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-0</default>
@@ -548,6 +550,7 @@
 <targetInstance>
     <id>sys0node0membuf1</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>1</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-1</default>

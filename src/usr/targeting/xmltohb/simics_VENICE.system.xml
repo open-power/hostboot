@@ -70,6 +70,7 @@
 <targetInstance>
     <id>sys0node0proc0</id>
     <type>chip-processor-venice</type>
+    <attribute><id>POSITION</id><default>0</default></attribute>
     <attribute><id>SCOM_SWITCHES</id>
         <default>
             <field><id>useFsiScom</id><value>0</value></field>
@@ -469,6 +470,7 @@
 <targetInstance>
     <id>sys0node0proc1</id>
     <type>chip-processor-venice</type>
+    <attribute><id>POSITION</id><default>1</default></attribute>
     <attribute><id>SCOM_SWITCHES</id>
         <default>
             <field><id>useFsiScom</id><value>1</value></field>
@@ -889,6 +891,7 @@
 <targetInstance>
     <id>sys0node0proc2</id>
     <type>chip-processor-venice</type>
+    <attribute><id>POSITION</id><default>2</default></attribute>
     <attribute><id>SCOM_SWITCHES</id>
         <default>
             <field><id>useFsiScom</id><value>1</value></field>
@@ -1310,6 +1313,7 @@
 <targetInstance>
     <id>sys0node0proc3</id>
     <type>chip-processor-venice</type>
+    <attribute><id>POSITION</id><default>3</default></attribute>
     <attribute><id>SCOM_SWITCHES</id>
         <default>
             <field><id>useFsiScom</id><value>1</value></field>
@@ -1730,6 +1734,7 @@
 <targetInstance>
     <id>sys0node0proc4</id>
     <type>chip-processor-venice</type>
+    <attribute><id>POSITION</id><default>4</default></attribute>
     <attribute><id>SCOM_SWITCHES</id>
         <default>
             <field><id>useFsiScom</id><value>1</value></field>
@@ -2150,6 +2155,7 @@
 <targetInstance>
     <id>sys0node0proc5</id>
     <type>chip-processor-venice</type>
+    <attribute><id>POSITION</id><default>5</default></attribute>
     <attribute><id>SCOM_SWITCHES</id>
         <default>
             <field><id>useFsiScom</id><value>1</value></field>
@@ -2570,6 +2576,7 @@
 <targetInstance>
     <id>sys0node0proc6</id>
     <type>chip-processor-venice</type>
+    <attribute><id>POSITION</id><default>6</default></attribute>
     <attribute><id>SCOM_SWITCHES</id>
         <default>
             <field><id>useFsiScom</id><value>1</value></field>
@@ -2990,6 +2997,7 @@
 <targetInstance>
     <id>sys0node0proc7</id>
     <type>chip-processor-venice</type>
+    <attribute><id>POSITION</id><default>7</default></attribute>
     <attribute><id>SCOM_SWITCHES</id>
         <default>
             <field><id>useFsiScom</id><value>1</value></field>
@@ -3409,6 +3417,7 @@
 <targetInstance>
     <id>sys0node0membuf0</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>0</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-0</default>
@@ -3511,6 +3520,7 @@
 <targetInstance>
     <id>sys0node0membuf1</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>1</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-1</default>
@@ -3595,6 +3605,7 @@
 <targetInstance>
     <id>sys0node0membuf2</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>2</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-2</default>
@@ -3679,6 +3690,7 @@
 <targetInstance>
     <id>sys0node0membuf3</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>3</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-3</default>
@@ -3763,6 +3775,7 @@
 <targetInstance>
     <id>sys0node0membuf4</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>4</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-4</default>
@@ -3847,6 +3860,7 @@
 <targetInstance>
     <id>sys0node0membuf5</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>5</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-5</default>
@@ -3931,6 +3945,7 @@
 <targetInstance>
     <id>sys0node0membuf6</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>6</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-6</default>
@@ -4015,6 +4030,7 @@
 <targetInstance>
     <id>sys0node0membuf7</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>7</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-7</default>
@@ -4099,6 +4115,7 @@
 <targetInstance>
     <id>sys0node0membuf8</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>8</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-8</default>
@@ -4183,6 +4200,7 @@
 <targetInstance>
     <id>sys0node0membuf9</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>9</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-9</default>
@@ -4267,6 +4285,7 @@
 <targetInstance>
     <id>sys0node0membuf10</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>10</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-10</default>
@@ -4351,6 +4370,7 @@
 <targetInstance>
     <id>sys0node0membuf11</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>11</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-11</default>
@@ -4435,6 +4455,7 @@
 <targetInstance>
     <id>sys0node0membuf12</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>12</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-12</default>
@@ -4519,6 +4540,7 @@
 <targetInstance>
     <id>sys0node0membuf13</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>13</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-13</default>
@@ -4603,6 +4625,7 @@
 <targetInstance>
     <id>sys0node0membuf14</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>14</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-14</default>
@@ -4687,6 +4710,7 @@
 <targetInstance>
     <id>sys0node0membuf15</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>15</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-15</default>
@@ -4771,6 +4795,7 @@
 <targetInstance>
     <id>sys0node0membuf16</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>16</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-16</default>
@@ -4855,6 +4880,7 @@
 <targetInstance>
     <id>sys0node0membuf17</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>17</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-17</default>
@@ -4939,6 +4965,7 @@
 <targetInstance>
     <id>sys0node0membuf18</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>18</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-18</default>
@@ -5023,6 +5050,7 @@
 <targetInstance>
     <id>sys0node0membuf19</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>19</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-19</default>
@@ -5107,6 +5135,7 @@
 <targetInstance>
     <id>sys0node0membuf20</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>20</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-20</default>
@@ -5191,6 +5220,7 @@
 <targetInstance>
     <id>sys0node0membuf21</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>21</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-21</default>
@@ -5275,6 +5305,7 @@
 <targetInstance>
     <id>sys0node0membuf22</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>22</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-22</default>
@@ -5359,6 +5390,7 @@
 <targetInstance>
     <id>sys0node0membuf23</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>23</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-23</default>
@@ -5443,6 +5475,7 @@
 <targetInstance>
     <id>sys0node0membuf24</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>24</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-24</default>
@@ -5527,6 +5560,7 @@
 <targetInstance>
     <id>sys0node0membuf25</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>25</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-25</default>
@@ -5611,6 +5645,7 @@
 <targetInstance>
     <id>sys0node0membuf26</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>26</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-26</default>
@@ -5695,6 +5730,7 @@
 <targetInstance>
     <id>sys0node0membuf27</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>27</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-27</default>
@@ -5779,6 +5815,7 @@
 <targetInstance>
     <id>sys0node0membuf28</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>28</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-28</default>
@@ -5863,6 +5900,7 @@
 <targetInstance>
     <id>sys0node0membuf29</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>29</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-29</default>
@@ -5947,6 +5985,7 @@
 <targetInstance>
     <id>sys0node0membuf30</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>30</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-30</default>
@@ -6031,6 +6070,7 @@
 <targetInstance>
     <id>sys0node0membuf31</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>31</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-31</default>
@@ -6115,6 +6155,7 @@
 <targetInstance>
     <id>sys0node0membuf32</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>32</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-32</default>
@@ -6199,6 +6240,7 @@
 <targetInstance>
     <id>sys0node0membuf33</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>33</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-33</default>
@@ -6283,6 +6325,7 @@
 <targetInstance>
     <id>sys0node0membuf34</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>34</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-34</default>
@@ -6367,6 +6410,7 @@
 <targetInstance>
     <id>sys0node0membuf35</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>35</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-35</default>
@@ -6451,6 +6495,7 @@
 <targetInstance>
     <id>sys0node0membuf36</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>36</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-36</default>
@@ -6535,6 +6580,7 @@
 <targetInstance>
     <id>sys0node0membuf37</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>37</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-37</default>
@@ -6619,6 +6665,7 @@
 <targetInstance>
     <id>sys0node0membuf38</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>38</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-38</default>
@@ -6703,6 +6750,7 @@
 <targetInstance>
     <id>sys0node0membuf39</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>39</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-39</default>
@@ -6787,6 +6835,7 @@
 <targetInstance>
     <id>sys0node0membuf40</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>40</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-40</default>
@@ -6871,6 +6920,7 @@
 <targetInstance>
     <id>sys0node0membuf41</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>41</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-41</default>
@@ -6955,6 +7005,7 @@
 <targetInstance>
     <id>sys0node0membuf42</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>42</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-42</default>
@@ -7039,6 +7090,7 @@
 <targetInstance>
     <id>sys0node0membuf43</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>43</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-43</default>
@@ -7123,6 +7175,7 @@
 <targetInstance>
     <id>sys0node0membuf44</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>44</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-44</default>
@@ -7207,6 +7260,7 @@
 <targetInstance>
     <id>sys0node0membuf45</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>45</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-45</default>
@@ -7291,6 +7345,7 @@
 <targetInstance>
     <id>sys0node0membuf46</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>46</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-46</default>
@@ -7375,6 +7430,7 @@
 <targetInstance>
     <id>sys0node0membuf47</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>47</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-47</default>
@@ -7459,6 +7515,7 @@
 <targetInstance>
     <id>sys0node0membuf48</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>48</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-48</default>
@@ -7543,6 +7600,7 @@
 <targetInstance>
     <id>sys0node0membuf49</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>49</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-49</default>
@@ -7627,6 +7685,7 @@
 <targetInstance>
     <id>sys0node0membuf50</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>50</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-50</default>
@@ -7711,6 +7770,7 @@
 <targetInstance>
     <id>sys0node0membuf51</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>51</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-51</default>
@@ -7795,6 +7855,7 @@
 <targetInstance>
     <id>sys0node0membuf52</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>52</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-52</default>
@@ -7879,6 +7940,7 @@
 <targetInstance>
     <id>sys0node0membuf53</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>53</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-53</default>
@@ -7963,6 +8025,7 @@
 <targetInstance>
     <id>sys0node0membuf54</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>54</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-54</default>
@@ -8047,6 +8110,7 @@
 <targetInstance>
     <id>sys0node0membuf55</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>55</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-55</default>
@@ -8131,6 +8195,7 @@
 <targetInstance>
     <id>sys0node0membuf56</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>56</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-56</default>
@@ -8215,6 +8280,7 @@
 <targetInstance>
     <id>sys0node0membuf57</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>57</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-57</default>
@@ -8299,6 +8365,7 @@
 <targetInstance>
     <id>sys0node0membuf58</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>58</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-58</default>
@@ -8383,6 +8450,7 @@
 <targetInstance>
     <id>sys0node0membuf59</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>59</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-59</default>
@@ -8467,6 +8535,7 @@
 <targetInstance>
     <id>sys0node0membuf60</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>60</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-60</default>
@@ -8551,6 +8620,7 @@
 <targetInstance>
     <id>sys0node0membuf61</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>61</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-61</default>
@@ -8635,6 +8705,7 @@
 <targetInstance>
     <id>sys0node0membuf62</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>62</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-62</default>
@@ -8719,6 +8790,7 @@
 <targetInstance>
     <id>sys0node0membuf63</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>POSITION</id><default>63</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-63</default>

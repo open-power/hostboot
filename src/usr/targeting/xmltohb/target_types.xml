@@ -94,6 +94,9 @@
         <default>CHIP</default>
     </attribute>
     <attribute>
+        <id>POSITION</id>
+    </attribute>
+    <attribute>
         <id>FSI_MASTER_CHIP</id>
         <!-- Default to a non-sensical value -->
         <default>physical:na-0</default>

@@ -41,6 +41,7 @@ namespace fapi
         MOD_PLAT_ATTR_SVC_CREATE_ATTR_ACCESS_ERROR = 0x05,
         MOD_HANDLE_ECMD_BUF_RC                     = 0x06,
         MOD_VERIFY_CFAM_ACCESS_TARGET              = 0x07,
+        MOD_ATTR_BASE_ADDR_GET                     = 0x08,
     };
 
     // Note that for HWP generated errors (MOD_HWP_RC_TO_ERRL), the
@@ -58,6 +59,7 @@ namespace fapi
         RC_FAILED_TO_ACCESS_ATTRIBUTE = HWPF_COMP_ID | 0x13,
         RC_ECMD_OPERATION_FAILURE     = HWPF_COMP_ID | 0x14,
         RC_CFAM_ACCESS_ON_PROC_ERR    = HWPF_COMP_ID | 0x15,
+        RC_ATTR_BASE_BAD_PARAM        = HWPF_COMP_ID | 0x16,
     };
 };
 
