@@ -22,10 +22,12 @@
 #
 #  IBM_PROLOG_END
 
-#Note that this test case assumes 2 files present in the PWD (along with prcd_compile.tcl)
-# - fapiTestHwp.C and fapiTestHwp.H
+#Note that this test case assumes 3 files present in the PWD (along with prcd_compile.tcl)
+# - fapiTestHwp.C fapiTestHwp.H proc_cen_framelock.C
+# and 1 file in a subdirectory
+#  dmi_training/proc_cen_framelock/proc_cen_framelock.H
 
-BUILD="b1109a_2011_Sprint6"
+BUILD="b0218a_2012_Sprint9"
 
 ###############################################################
 # Validate return code, exit on failure
@@ -88,15 +90,26 @@ if [ ! -f "./sample.initfile" ]; then
     check_good_rc $?
 fi
 
+if [ ! -f "./proc_cen_framelock.C" ]; then
+    cp ../../usr/hwpf/hwp/dmi_training/proc_cen_framelock/proc_cen_framelock.H ./
+    check_good_rc $?
+fi
+
+if [ ! -f "./dmi_training/proc_cen_framelock/proc_cen_framelock.H" ]; then
+    mkdir -p dmi_training/proc_cen_framelock
+    cp ../../usr/hwpf/hwp/dmi_training/proc_cen_framelock/proc_cen_framelock.H ./dmi_training/proc_cen_framelock
+    check_good_rc $?
+fi
+
 echo 
 
 echo "TEST - Good Path - Multi Process"
-./prcd_compile.tcl -d $BUILD ./fapiTestHwp.H ./fapiTestHwp.C &
+{ ./prcd_compile.tcl -d $BUILD -o out1 ./fapiTestHwp.H; check_good_rc_and_bin $? ./out1; } &
 sleep 2
-./prcd_compile.tcl -d $BUILD ./fapiTestHwp.H ./fapiTestHwp.C &
+{ ./prcd_compile.tcl -d $BUILD -o out2 ./fapiTestHwp.C; check_good_rc_and_bin $? ./out2; } &
 sleep 2
-./prcd_compile.tcl -d $BUILD ./fapiTestHwp.H ./fapiTestHwp.C &
-sleep 20
+{ ./prcd_compile.tcl -d $BUILD -o out3 ./fapiTestHwp.H ./fapiTestHwp.C; check_good_rc_and_bin $? ./out3; } &
+wait
 
 echo
 echo "TEST - Good Path - 1 C File"
@@ -110,15 +123,13 @@ check_good_rc_and_bin $? ./
 
 echo
 echo "TEST - Good Path - 2 Files"
-./prcd_compile.tcl -d $BUILD ./fapiTestHwp.H ./fapiTestHwp.C
+./prcd_compile.tcl -d $BUILD ./proc_cen_framelock.C ./fapiTestHwp.C
 check_good_rc_and_bin $? ./
 
 echo
-echo "TEST - Good Path - Directory Path and Output Directory"
-cp fapiTestHwp.H /tmp/
-./prcd_compile.tcl -d $BUILD -o ./output/ /tmp/fapiTestHwp.H fapiTestHwp.C
-check_good_rc_and_bin $? ./output/
-rm /tmp/fapiTestHwp.H
+echo "TEST - Good Path - buried File"
+./prcd_compile.tcl -d $BUILD ./dmi_training/proc_cen_framelock/proc_cen_framelock.H
+check_good_rc_and_bin $? ./
 
 echo
 echo "TEST - Good Path - No Files"
@@ -136,11 +147,7 @@ echo "TEST - Good Path - All Files"
 check_good_rc_and_bin $? ./output/
 
 echo
-echo "TEST - Bad Path - Compile Failure" 
-cp fapiTestHwp.H /tmp/
-echo COMPILE_FAIL >> /tmp/fapiTestHwp.H
-./prcd_compile.tcl -d $BUILD /tmp/fapiTestHwp.H fapiTestHwp.C
+echo "TEST - Good Path - Compile Failure" 
+echo COMPILE_FAIL >> fapiTestHwp.H
+./prcd_compile.tcl -d $BUILD fapiTestHwp.H fapiTestHwp.C
 check_bad_rc $?
-rm *.bin
-rm /tmp/fapiTestHwp.H
-

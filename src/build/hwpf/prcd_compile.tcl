@@ -263,7 +263,7 @@ proc start_patch_server_on_fsp { fspip fsppassword } {
 set userid $::env(USER)
 set home $::env(HOME)
 set domain [exec hostname -d]
-set version "1.0"
+set version "1.1"
 
 set files [list]
 set cmds  [list]
@@ -278,40 +278,50 @@ foreach arg $argv {
     switch -- $state {
         flag {
             switch -glob -- $arg {
-		-quit { set cmds [list quit] }
-		-d    { set state driverflag }
+                -quit { set cmds [list quit] }
+                -d    { set state driverflag }
 # NOT SUPPORTED -s    { set state fspflag }
 # NOT SUPPORTED -p    { set state portflag }
                 -v    { set verbose 1 }
                 -o    { set state outputflag }
-		-*h* { puts {prcd_compile.tcl [--help] [-d <drivername>] [-o <ouput dir> ] fapiTestHwp.C fapiTestHwp.H sample.initfile}
+                -*h* { puts {prcd_compile.tcl [--help] [-d <drivername>] [-o <ouput dir> ] <filename> }
                        puts {}
-                       puts {Note that currently this tool only supports the 3 files listed above as input }
+                       puts {Note this tool only supports *.{c,C,h,H,initfile,xml} files in the following directory trees: }
+                       puts {    src/usr/hwpf/hwp }
+                       puts {    src/include/usr/hwpf/hwp }
                        puts {}
-		       puts {example: > prcd_compile.tcl -d b0621a_2001_Sprint2 -o ./output/ fapiTestHwp.C fapiTestHwp.C sample.initfile}
+                       puts {The files can either be in the working directory, or in a sub-directory mirroring the hostboot tree. }
                        puts {}
-		       puts {On success, 5 files (hbicore.bin and hbicore_test.bin, hbicore.syms }
-                       puts { hbicore_test.syms and hbotStringFile) will be placed in the output dir. }
+                       puts {examples }
+                       puts {> prcd_compile.tcl -d b0218a_2012_Sprint9 -o ./output fapiTestHwp.C fapiTestHwp.C sample.initfile}
+                       puts {> prcd_compile.tcl -d b0218a_2012_Sprint9 -o ./output/ proc_cen_framelock.C }
+                       puts {> prcd_compile.tcl -d b0218a_2012_Sprint9 -o output dmi_training/proc_cen_framelock/proc_cen_framelock.H }
+                       puts {}
+                       puts {On success, files from the img/ directory (*.bin *.syms and hbotStringFile) }
+                       puts {will be placed in the output directory. }
                        puts {}
                        puts {The -d and -o parameters are optional.  Default for -d is the master level of code }
-                       puts { and default for -o is the current working directory }
+                       puts {and default for -o is the current working directory }
                        puts {}
                        puts "Version: $version"
                        puts {}
                        exit
                      }
-                 *fapiTestHwp\.* { lappend files $arg }
                  *\.initfile     { lappend files $arg }
-		default { puts "Unsupported File or Argument: $arg "
+                 *\.C            { lappend files $arg }
+                 *\.H            { lappend files $arg }
+                 *\.h            { lappend files $arg }
+                 *\.xml          { lappend files $arg }
+                default { puts "Unsupported File or Argument: $arg "
                           exit
                         }
-	    }
-	}
+            }
+        }
         driverflag {
             #lappend cmds ":DRIVER $arg"
             set driver $arg
             set state flag
-	}
+        }
         fspflag {
             foreach {fspip fsp_port} [split $arg :] break
             set state flag

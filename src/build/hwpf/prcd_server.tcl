@@ -29,7 +29,7 @@ exec tclsh "$0" "$@"
 # Based on if_server.tcl by Doug Gilbert
 
 
-set version "1.0"
+set version "1.1"
 
 ############################################################################
 # Accept is called when a new client request comes in
@@ -46,9 +46,7 @@ proc Accept { sock addr port} {
     set socklist(addr,$sock) [list $addr $port]
     fconfigure $sock -buffering line
     fileevent $sock readable [list AquireData $sock]
-
 }
-
 
 ############################################################################
 # AquireData  is called whenever there is data avaiable from a client.
@@ -78,7 +76,7 @@ proc AquireData { sock } {
     } else {
         if { [string compare $line "quit"] == 0 } {
             close $socklist(main)
-	        puts $sock "hw procedure compiler server is terminating"
+            puts $sock "hw procedure compiler server is terminating"
             puts $log "$sock: hw procedure compiler server is terminating"
             CloseOut $sock
             set forever 0
@@ -125,7 +123,7 @@ proc AquireData { sock } {
             ################################################################
 
             puts $log "$sock: Input File $b $c"
-            flush $log	
+            flush $log
 
             if { ![info exists sbname($sock)] } {
                 puts $sock "No sandbox found"
@@ -135,23 +133,34 @@ proc AquireData { sock } {
 
             }
             ################################################################
-            # Create the path to the file in the git sandbox
-            # If it's a .C file it goes to src/usr/hwpf/hwp/ otherwise
-            # it's a .H and needs to go to src/include/usr/hwpf/hwp/ otherwise
-            # it's an initfile and needs to go to src/usr/hwpf/hwp/initfiles/
-            # Note that I can't get /* to work correctly in the regexp so I had to
-            # hard code in the fapi which should be ok, but annoying.
+            # Find the path to the file in the git sandbox
+            # We will only look in the hwpf/hwp directories (usr and include/usr)
+            # which should be enough. ANY file in there can be replaced, though
+            # the prcd_compile.tcl script inforces *.{c,C,h,H,initfile,xml} files only.
             ################################################################
 
-            if {[regexp {.*/*(fapi.+\.C)} $b -> file] } { 
-                set filen "$sb_dir/$sbname($sock)/src/usr/hwpf/hwp/$file"	
-            } elseif {[regexp {.*/*(fapi.+\.H)} $b -> file] } {
-                set filen "$sb_dir/$sbname($sock)/src/include/usr/hwpf/hwp/$file"
-            } elseif {[regexp {(.*\.initfile)} $b -> file] } {
-                set filen "$sb_dir/$sbname($sock)/src/usr/hwpf/hwp/initfiles/$file"
-            } else {
-                puts $sock "error: Invalid Input File - $b"
-                puts $log "$sock: Invalid Input File - $b"
+            set src_path $sb_dir/$sbname($sock)/src/usr/hwpf/hwp
+            set inc_path $sb_dir/$sbname($sock)/src/include/usr/hwpf/hwp
+            # we can't just find -name $b because that won't find path/filename. -wholename does
+            #  that, but we need the $b to not have any ./ prefix if the user included that.
+            # additionally, find usually outputs the file(s) separated by a newline. if there
+            #  is a filename that's not unique, we need to flag that as an erorr, so we use the
+            #  -printf to force them all onto 1 line.
+            set filen [ exec find $src_path $inc_path -type f -wholename *[ string trimleft $b "./" ] -printf "%p\t" ] 
+            # and then truncate the last \t. yeah, hackish..
+            set filen [ string trimright $filen "\t" ]
+            #puts $log "$sock: find found in sandbox: \"$filen\""
+            # error if filen is not just 1 file
+            set filesfound [regexp -all {[^\t]+} $filen ]
+            if { $filesfound == 0 } {
+                puts $sock "error: Invalid Input File - $b - file not found in sandbox"
+                puts $log "$sock: Invalid Input File - $b - file not found in sandbox"
+                CloseOut $sock
+                return
+            }
+            if { $filesfound > 1 } {
+                puts $sock "error: Invalid Input File - $b - filename NOT unique in sandbox"
+                puts $log "$sock: Invalid Input File - $b - filename NOT unique in sandbox"
                 CloseOut $sock
                 return
             }
@@ -208,9 +217,7 @@ proc AquireData { sock } {
             puts $log "$sock: DONE"
             flush $sock
         }
-
     }
-
 }
 
 ##################################################################
@@ -233,7 +240,7 @@ proc CloseOut { sock } {
     puts "[clock format [clock seconds]]: Close $socklist(addr,$sock)- "
     unset socklist(addr,$sock)
     if {[info exists git_sh($sock)] } {
-        # Comment out next line to avoid deleting the /tmp/hwp/ sandbox
+        # Comment out next line to avoid deleting the sandbox
         eval {exec} "rm -rf $sb_dir/$sbname($sock)"
         unset git_sh($sock)
         #unset sandbox($sbname($sock))
@@ -241,7 +248,6 @@ proc CloseOut { sock } {
 
     if {[info exists sbname($sock)]} { unset sbname($sock) }
     if {[info exists backint($sock)]} { unset backing($sock) }
-
 }
 
 ##################################################################
@@ -335,10 +341,7 @@ proc SendSandbox { sock git_sh} {
     global sandbox
     global running
     global sbname
-    global missing_spies
     global log
-
-    # set missing_spies($sock) {}
 
 ##################################################################
 # Start Compile
@@ -381,10 +384,10 @@ proc SendSandbox { sock git_sh} {
 ##################################################################
 
     if { [string compare $sandbox($sbname($sock)) "crashed"] == 0 } {
-	    if { [catch {close $git_sh} res]} {
-	        puts $sock "Fail: $res\n"
+            if { [catch {close $git_sh} res]} {
+                puts $sock "Fail: $res\n"
             puts $log "$sock: Fail: $res\n"
-	    }
+            }
         set sandbox($sbname($sock)) idle
     } else {
         after cancel $timoutid
@@ -421,16 +424,17 @@ proc IfResult { git_sh sock sbname_sock } {
         if { [catch {close $git_sh} res] } {
             puts $sock "Error is $res\n"
             puts $log "$sock: Error is $res\n"
-	    }
+        }
         set sandbox($sbname_sock) "idle"
     } else {
 
         # Uncomment to send back all compile output
         #puts $sock "$sock $line"
         #puts $log "$sock: $line"
+        #flush $log
 
         if { [string compare $line ":DONE"] == 0 } {
-	        if { [catch {close $git_sh} res]} {
+            if { [catch {close $git_sh} res]} {
                 #res has the stderr
                 # Need to weed out the junk
                 set rlines [split $res "\n"]
@@ -441,13 +445,14 @@ proc IfResult { git_sh sock sbname_sock } {
                         puts $log "$sock: $rline"
                     }
                 }
-	        }
+            }
 
             puts $sock "Exit Sandbox"
             puts $log "$sock: Exit Sandbox"
+            flush $log
             set sandbox($sbname_sock) "idle"
 
-	    } else {
+        } else {
             foreach exp $explist {
                if {[regexp $exp $line a]} {
                    puts $sock $line
@@ -456,11 +461,13 @@ proc IfResult { git_sh sock sbname_sock } {
             }
         }
     }
+    flush $log
 }
 
 
 ##################################################################
-# send the *.if and *.dat files from the compile back to the client
+# send the *.bin, *.sims and hbotStringFile files from the compile 
+#  back to the client
 ##################################################################
 proc SendObjFiles { sock obj_dir } {
 
@@ -494,7 +501,6 @@ proc SendObjFiles { sock obj_dir } {
 
     flush $sock
     flush $log
-
 }
 
 
@@ -524,14 +530,16 @@ proc SendFiles { sock files } {
 # main
 ##################################################################
 set forever 1
-set logfile {/tmp/prcd_server.log}
+#set base_dir "./"
+set base_dir "/tmp"
+set logfile "$base_dir/prcd_server.log"
 set log {}
 
 
 # Where are we running?
 foreach {host site c d} [split [exec hostname] .]  break
 if {[string compare $host {gfw160}] == 0} {
-    set sb_dir {/tmp/hwp/}
+    set sb_dir "$base_dir/hwp/"
     eval {exec} "mkdir -p $sb_dir"
 } else {
     puts "Invalid Location to run server!"
@@ -566,5 +574,5 @@ flush $log
 
 set socklist(main) [socket -server Accept 7779]
 
-# By catching errors from vwait- we can ignore them
-catch {vwait forever}
+        # By catching errors from vwait- we can ignore them
+        catch {vwait forever}
