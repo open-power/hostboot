@@ -140,7 +140,7 @@ fapi::ReturnCode fapiGetChildChiplets(
         TARGETING::targetService().
             getAssociated(l_chipletList, l_pChip,
                           TARGETING::TargetService::CHILD,
-                          TARGETING::TargetService::IMMEDIATE, &l_predicate);
+                          TARGETING::TargetService::ALL, &l_predicate);
 
         // Return fapi::Targets to the caller
         for (uint32_t i = 0; i < l_chipletList.size(); i++)
