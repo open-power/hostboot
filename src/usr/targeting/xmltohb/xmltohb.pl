@@ -1997,7 +1997,44 @@ sub packEntityPath {
 ################################################################################
 # Pack an attribute into a binary data stream
 ################################################################################
-                           
+sub packSingleSimpleTypeAttribute {
+    my($binaryDataRef,$attributesRef,$attributeRef,$typeName,$value) = @_;
+
+    my $simpleType = $$attributeRef->{simpleType};
+    my $simpleTypeProperties = simpleTypeProperties();
+
+    if($typeName eq "enumeration")
+    {
+        my $enumeration = getEnumerationType($$attributesRef,$simpleType->
+            {enumeration}->{id});
+
+        # Here $value is the enumerator name
+        my $enumeratorValue = enumNameToValue($enumeration,$value);
+        $$binaryDataRef .= packEnumeration($enumeration,$enumeratorValue);
+    }
+    else
+    {
+        if($simpleTypeProperties->{$typeName}{canBeHex})
+        {
+            $value = unhexify($value);
+        }
+
+        # Apply special policy enforcement, if any
+        $simpleTypeProperties->{$typeName}{specialPolicies}->($$attributeRef,$value);
+
+        if(ref ($simpleTypeProperties->{$typeName}{packfmt}) eq "CODE")
+        {
+            $$binaryDataRef .= $simpleTypeProperties->{$typeName}{packfmt}->
+                               ($value);
+        }
+        else
+        {
+            $$binaryDataRef .= pack($simpleTypeProperties->{$typeName}{packfmt},
+                                    $value);
+        }
+    }
+}
+
 sub packAttribute {
     my($attributes,$attribute,$value) = @_;
     
@@ -2015,53 +2052,45 @@ sub packAttribute {
             {
                 $alignment = $simpleTypeProperties->{$typeName}{alignment};
 
-                if($typeName eq "enumeration")
+                if (($simpleTypeProperties->{$typeName}{supportsArray}) &&
+                    (exists $simpleType->{array}))
                 {
-                    my $enumeration = getEnumerationType($attributes,$simpleType->{enumeration}->{id});
+                    # This is an array attribute, handle the value parameter as
+                    # an array, if there are not enough values for the whole
+                    # array then use the last value to fill in the remainder
 
-                    # Here $value is the enumerator name
-                    my $enumeratorValue = enumNameToValue($enumeration,$value);
-                    $binaryData = packEnumeration($enumeration,$enumeratorValue);
-                }
-                else
-                {
-                    if($simpleTypeProperties->{$typeName}{canBeHex})
-                    {
-                        $value = unhexify($value);
-                    }
-
-                    # Apply special policy enforcement, if any
-                    $simpleTypeProperties->
-                        {$typeName}{specialPolicies}->($attribute,$value);
-      
-                    if(ref ($simpleTypeProperties->{$typeName}{packfmt}) eq "CODE")
-                    {
-                         $binaryData .= 
-                            $simpleTypeProperties->{$typeName}{packfmt}->($value);
-                    }
-                    else
-                    {
-                         $binaryData .= 
-                            pack($simpleTypeProperties->{$typeName}{packfmt},
-                                $value);
-                    }
-                }
-
-                my $arrayMultiplier = 1;
-                if(   ($simpleTypeProperties->{$typeName}{supportsArray})
-                   && (exists $simpleType->{array}) )
-                {
+                    # Figure out the array size (possibly multidimensional)
+                    my $arraySize = 1;
                     my @bounds = split(/,/,$simpleType->{array});
                     foreach my $bound (@bounds)
                     {
-                        $arrayMultiplier *= $bound;
+                        $arraySize *= $bound;
                     }
 
-                    my $tmpBinaryData = $binaryData;
-                    for( my $i = 1; $i < $arrayMultiplier; ++$i)
+                    # Split the values into an array
+                    my @values = split(/,/,$value);
+                    my $valueArraySize = scalar(@values);
+
+                    # Iterate over the entire array creating values
+                    my $val = "";
+                    for (my $i = 0; $i < $arraySize; $i++)
                     {
-                        $binaryData .= $tmpBinaryData;
+                        if ($i < $valueArraySize)
+                        {
+                            # Get the value from the value array
+                            $val = $values[$i];
+                        }
+                        # else use the last value
+
+                        packSingleSimpleTypeAttribute(\$binaryData, \$attributes,
+                                                      \$attribute, $typeName, $val);
                     }
+                }
+                else
+                {
+                    # Not an array attribute
+                    packSingleSimpleTypeAttribute(\$binaryData, \$attributes,
+                                                  \$attribute,$typeName, $value);
                 }
 
                 last;

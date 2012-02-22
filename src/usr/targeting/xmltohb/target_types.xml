@@ -799,7 +799,7 @@
         <id>MBA_PORT</id>
     </attribute>
     <attribute>
-        <id>MBA_SLOT</id>
+        <id>MBA_DIMM</id>
     </attribute>
 
     <!-- Defaulting this info to the one Simics Dummy device that we have -->
@@ -818,6 +818,7 @@
     <id>lcard-dimm-jedec</id>
     <parent>lcard-dimm</parent>
     <attribute><id>MODEL</id><default>JEDEC</default></attribute>
+    <attribute><id>CEN_DQ_TO_DIMM_CONN_DQ</id></attribute>
 </targetType>
 
 <targetType>

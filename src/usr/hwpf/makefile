@@ -32,14 +32,17 @@ SUBDIRS = fapi.d hwp.d plat.d test.d
 #------------------------------------------------------------------------------
 HWP_ERROR_XML_FILES = hwp/fapiHwpErrorInfo.xml   \
     hwp/dmi_training/proc_cen_framelock/proc_cen_framelock_errors.xml \
-    hwp/dmi_training/dmi_io_run_training/io_run_training_errors.xml
+    hwp/dmi_training/dmi_io_run_training/io_run_training_errors.xml \
+    hwp/dimm_errors.xml
 
 HWP_ATTR_XML_FILES = hwp/memory_attributes.xml \
                      hwp/L2_L3_attributes.xml \
                      hwp/scratch_attributes.xml \
                      hwp/system_attributes.xml \
                      hwp/chip_attributes.xml \
-                     hwp/DIMM_SPD_attributes.xml
+                     hwp/dimm_spd_attributes.xml \
+                     hwp/dimm_attributes.xml \
+                     hwp/unit_attributes.xml
 
 #------------------------------------------------------------------------------
 # Initfiles

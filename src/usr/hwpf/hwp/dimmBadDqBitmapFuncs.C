@@ -1,0 +1,230 @@
+//  IBM_PROLOG_BEGIN_TAG
+//  This is an automatically generated prolog.
+//
+//  $Source: src/usr/hwpf/hwp/dimmBadDqBitmapFuncs.C $
+//
+//  IBM CONFIDENTIAL
+//
+//  COPYRIGHT International Business Machines Corp. 2012
+//
+//  p1
+//
+//  Object Code Only (OCO) source materials
+//  Licensed Internal Code Source Materials
+//  IBM HostBoot Licensed Internal Code
+//
+//  The source code for this program is not published or other-
+//  wise divested of its trade secrets, irrespective of what has
+//  been deposited with the U.S. Copyright Office.
+//
+//  Origin: 30
+//
+//  IBM_PROLOG_END
+/**
+ *  @file dimmBadDqBitmapFuncs.C
+ *
+ *  @brief FW Team Utility functions that accesses the Bad DQ Bitmap.
+ */
+
+/*
+ * Change Log ******************************************************************
+ * Flag     Defect/Feature  User        Date        Description
+ * ------   --------------  ----------  ----------- ----------------------------
+ *                          mjjones     02/17/2012  Created.
+ */
+
+#include <dimmBadDqBitmapFuncs.H>
+#include <string.h>
+
+extern "C"
+{
+
+// TODO
+// For the dimmGetBadDqBitmap and dimmSetBadDqBitmap funcs, the original plan to
+// get/set the bitmap was to get/set a HWPF attribute called ATTR_BAD_DQ_BITMAP.
+// This would automatically call the dimmBadDqBitmapAccessHwp HWP which would
+// access the ATTR_SPD_BAD_DQ_DATA HWPF attribute and decode the data. However,
+// automatically bridging an attribute request to a HWP turns out to be
+// difficult due to the fact that the FAPI_ATTR_GET macro returns a ReturnCode
+// and the FAPI_EXEC_HWP macro takes a ReturnCode as parameter. For now call the
+// HWP directly and revisit later
+
+
+//------------------------------------------------------------------------------
+// Utility function to check parameters and find a DIMM target
+//------------------------------------------------------------------------------
+fapi::ReturnCode dimmBadDqCheckParamFindDimm(const fapi::Target & i_mba,
+                                             const uint8_t i_port,
+                                             const uint8_t i_dimm,
+                                             const uint8_t i_rank,
+                                             fapi::Target & o_dimm)
+{
+    fapi::ReturnCode l_rc;
+
+    if ((i_port >= DIMM_DQ_MAX_MBA_PORTS) ||
+        (i_dimm >= DIMM_DQ_MAX_MBAPORT_DIMMS) ||
+        (i_rank >= DIMM_DQ_MAX_DIMM_RANKS))
+    {
+        FAPI_ERR("dimmBadDqCheckParams: Bad parameter. %d:%d:%d", i_port,
+                 i_dimm, i_rank);
+        const uint8_t & FFDC_PORT = i_port;
+        const uint8_t & FFDC_DIMM = i_dimm;
+        const uint8_t & FFDC_RANK = i_rank;
+        FAPI_SET_HWP_ERROR(l_rc, RC_BAD_DQ_DIMM_BAD_PARAM);
+    }
+    else
+    {
+        std::vector<fapi::Target> l_dimms;
+
+        // Get the functional DIMMs associated with the MBA chiplet
+        l_rc = fapiGetAssociatedDimms(i_mba, l_dimms);
+
+        if (l_rc)
+        {
+            FAPI_ERR("dimmBadDqFindDimm: Error from fapiGetAssociatedDimms");
+        }
+        else
+        {
+            // Find the DIMM with the correct MBA port/dimm
+            uint8_t i = 0;
+            uint8_t l_port = 0;
+            uint8_t l_dimm = 0;
+
+            for (; i < l_dimms.size(); i++)
+            {
+                l_rc = FAPI_ATTR_GET(ATTR_MBA_PORT, &(l_dimms[i]), l_port);
+
+                if (l_rc)
+                {
+                    FAPI_ERR("dimmBadDqFindDimm: Error getting ATTR_MBA_PORT for dimm");
+                    break;
+                }
+                else if (l_port == i_port)
+                {
+                    l_rc = FAPI_ATTR_GET(ATTR_MBA_DIMM, &(l_dimms[i]), l_dimm);
+
+                    if (l_rc)
+                    {
+                        FAPI_ERR("dimmBadDqFindDimm: Error getting ATTR_MBA_DIMM for dimm");
+                        break;
+                    }
+                    else if (l_dimm == i_dimm)
+                    {
+                        o_dimm = l_dimms[i];
+                        break;
+                    }
+                }            
+            }
+
+            if (!l_rc)
+            {
+                if (i == l_dimms.size())
+                {
+                    FAPI_ERR("dimmBadDqFindDimm: Did not find DIMM for %s:%d:%d",
+                             i_mba.toEcmdString(), i_port, i_dimm);
+                    const fapi::Target & FFDC_MBA_TARGET = i_mba;
+                    const uint8_t & FFDC_PORT = i_port;
+                    const uint8_t & FFDC_DIMM = i_dimm;
+                    FAPI_SET_HWP_ERROR(l_rc, RC_BAD_DQ_DIMM_NOT_FOUND);
+                }
+            }
+        }
+    }
+
+    return l_rc;
+}
+
+//------------------------------------------------------------------------------
+fapi::ReturnCode dimmGetBadDqBitmap(const fapi::Target & i_mba,
+                                    const uint8_t i_port,
+                                    const uint8_t i_dimm,
+                                    const uint8_t i_rank,
+                                    uint8_t (&o_data)[DIMM_DQ_RANK_BITMAP_SIZE])
+{
+    FAPI_INF(">>dimmGetBadDqBitmap. %s:%d:%d:%d", i_mba.toEcmdString(), i_port,
+             i_dimm, i_rank);
+
+    fapi::ReturnCode l_rc;
+
+    // Check parameters and find the DIMM Target
+    fapi::Target l_dimm;
+    l_rc = dimmBadDqCheckParamFindDimm(i_mba, i_port, i_dimm, i_rank, l_dimm);
+
+    if (!l_rc)
+    {
+        // Get the Bad DQ bitmap by calling the dimmBadDqBitmapAccessHwp HWP.
+        // Use a heap based array to avoid large stack alloc
+        uint8_t (&l_dqBitmap)[DIMM_DQ_MAX_DIMM_RANKS][DIMM_DQ_RANK_BITMAP_SIZE] =
+            *(reinterpret_cast<uint8_t(*)[DIMM_DQ_MAX_DIMM_RANKS][DIMM_DQ_RANK_BITMAP_SIZE]>
+                (new uint8_t[DIMM_DQ_MAX_DIMM_RANKS*DIMM_DQ_RANK_BITMAP_SIZE]));
+       
+        FAPI_EXEC_HWP(l_rc, dimmBadDqBitmapAccessHwp, l_dimm, l_dqBitmap, true);
+
+        if (l_rc)
+        {
+            FAPI_ERR("dimmGetBadDqBitmap: Error from dimmBadDqBitmapAccessHwp");
+        }
+        else
+        {
+            memcpy(o_data, l_dqBitmap[i_rank], DIMM_DQ_RANK_BITMAP_SIZE);
+        }
+
+        delete [] &l_dqBitmap;
+    }
+
+    FAPI_INF("<<dimmGetBadDqBitmap");
+    return l_rc;
+}
+
+//------------------------------------------------------------------------------
+fapi::ReturnCode dimmSetBadDqBitmap(
+    const fapi::Target & i_mba,
+    const uint8_t i_port,
+    const uint8_t i_dimm,
+    const uint8_t i_rank,
+    const uint8_t (&i_data)[DIMM_DQ_RANK_BITMAP_SIZE])
+{
+    FAPI_INF(">>dimmSetBadDqBitmap. %s:%d:%d:%d", i_mba.toEcmdString(), i_port, i_dimm, i_rank);
+
+    fapi::ReturnCode l_rc;
+
+    // Check parameters and find the DIMM Target
+    fapi::Target l_dimm;
+    l_rc = dimmBadDqCheckParamFindDimm(i_mba, i_port, i_dimm, i_rank, l_dimm);
+
+    if (!l_rc)
+    {
+        // Get the Bad DQ bitmap by calling the dimmBadDqBitmapAccessHwp HWP.
+        // Use a heap based array to avoid large stack alloc
+        uint8_t (&l_dqBitmap)[DIMM_DQ_MAX_DIMM_RANKS][DIMM_DQ_RANK_BITMAP_SIZE] =
+            *(reinterpret_cast<uint8_t(*)[DIMM_DQ_MAX_DIMM_RANKS][DIMM_DQ_RANK_BITMAP_SIZE]>
+                (new uint8_t[DIMM_DQ_MAX_DIMM_RANKS*DIMM_DQ_RANK_BITMAP_SIZE]));
+
+        FAPI_EXEC_HWP(l_rc, dimmBadDqBitmapAccessHwp, l_dimm, l_dqBitmap, true);
+
+        if (l_rc)
+        {
+            FAPI_ERR("dimmSetBadDqBitmap: Error from dimmBadDqBitmapAccessHwp (get)");
+        }
+        else
+        {
+            // Add the rank bitmap to the DIMM bitmap and write the bitmap
+            memcpy(l_dqBitmap[i_rank], i_data, DIMM_DQ_RANK_BITMAP_SIZE);
+
+            FAPI_EXEC_HWP(l_rc, dimmBadDqBitmapAccessHwp, l_dimm, l_dqBitmap, false);
+
+            if (l_rc)
+            {
+                FAPI_ERR("dimmSetBadDqBitmap: Error from dimmBadDqBitmapAccessHwp (set)");
+            }
+        }
+
+        delete [] &l_dqBitmap;
+    }
+
+
+    FAPI_INF("<<dimmSetBadDqBitmap");
+    return l_rc;
+}
+
+} // extern "C"

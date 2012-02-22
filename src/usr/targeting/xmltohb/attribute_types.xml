@@ -2806,6 +2806,10 @@
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_CHIP_UNIT_POS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
 </attribute>    
 
 <attribute>
@@ -2830,11 +2834,15 @@
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MBA_PORT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
-    <id>MBA_SLOT</id>
-    <description>MBA slot this DIMM is connected to</description>
+    <id>MBA_DIMM</id>
+    <description>MBA port DIMM number of this DIMM</description>
     <simpleType>
         <uint8_t>
             <default>0</default>
@@ -2842,6 +2850,35 @@
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MBA_DIMM</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>CEN_DQ_TO_DIMM_CONN_DQ</id>
+    <description>
+        Centaur DQ to DIMM connector DQ mapping for a JEDEC DIMM.
+        Uint8 value for each Centaur DQ (0-79).
+        The value is the corresponding DIMM Connector DQ.
+    </description>
+    <simpleType>
+        <uint8_t>
+            <!-- Default is 1:1 mapping, DQ0-DQ0, DQ1-DQ1 etc -->
+            <!-- Data will eventually come from MRW -->
+            <default>
+                0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,
+                20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,
+                40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,
+                60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79
+            </default>
+        </uint8_t>
+        <array>80</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
 </attribute>
 
 </attributes>

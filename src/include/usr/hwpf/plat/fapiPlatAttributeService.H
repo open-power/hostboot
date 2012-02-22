@@ -53,6 +53,7 @@
 #include <hwpf/fapi/fapiReturnCode.H>
 #include <hwpf/fapi/fapiTarget.H>
 #include <spd/spdenums.H>
+#include <dimmConsts.H>
 
 //******************************************************************************
 // Interface
@@ -125,7 +126,7 @@ namespace platAttrSvc
 
 /**
  * @brief This function is called by the FAPI_ATTR_GET macro when accessing
- * SPD ATTR. IT should not be called directly
+ * SPD ATTR. It should not be called directly
  *
  * @param[in]  i_target Target pointer to operate on
  * @param[in]  i_keyword SPD keyword
@@ -133,9 +134,25 @@ namespace platAttrSvc
  * @param[in]  i_len    Size of storage
  * @return ReturnCode.  Zero on success, else platform specified error
  */
-ReturnCode fapiPlatGetSpdAttr(const Target * i_target,
-                              const uint16_t i_keyword, 
-                              void * o_data, size_t i_len );
+fapi::ReturnCode fapiPlatGetSpdAttr(const fapi::Target * i_target,
+                                    const uint16_t i_keyword, 
+                                    void * o_data,
+                                    size_t i_len );
+
+/**
+ * @brief This function is called by the FAPI_ATTR_SET macro when accessing
+ * SPD ATTR. It should not be called directly
+ *
+ * @param[in] i_target  Target pointer to operate on
+ * @param[in] i_keyword SPD keyword
+ * @param[in] i_data    Pointer to data
+ * @param[in] i_len     Size of data
+ * @return ReturnCode.  Zero on success, else platform specified error
+ */
+fapi::ReturnCode fapiPlatSetSpdAttr(const fapi::Target * i_target,
+                                    const uint16_t i_keyword,
+                                    void * i_data,
+                                    size_t i_len );
 
 /**
  * @brief This function is called by the FAPI_ATTR_GET macro when getting
@@ -158,6 +175,17 @@ fapi::ReturnCode fapiPlatGetMemoryBaseAddr(const fapi::Target * i_pMcsTarget,
  */
 fapi::ReturnCode fapiPlatGetMirrorBaseAddr(const fapi::Target * i_pMcsTarget,
                                            uint64_t & o_addr);
+
+/**
+ * @brief This function is called by the FAPI_ATTR_GET macro when getting
+ * ATTR_CEN_DQ_TO_DIMM_CONN_DQ. It should not be called directly
+ *
+ * @param[in]  i_pDimmTarget DIMM target pointer
+ * @param[out] o_data        Output data
+ * @return ReturnCode.  Zero on success, else platform specified error
+ */
+fapi::ReturnCode fapiPlatGetDqMapping(const fapi::Target * i_pDimmTarget,
+                                      uint8_t (&o_data)[DIMM_DQ_NUM_DQS]);
 
 }
 
@@ -254,6 +282,10 @@ fapi::ReturnCode fapiPlatGetMirrorBaseAddr(const fapi::Target * i_pMcsTarget,
     fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::MODULE_REVISION_CODE, &(VAL), sizeof(VAL) )
 #define ATTR_SPD_DRAM_MANUFACTURER_JEDEC_ID_CODE_GETMACRO(ID, PTARGET, VAL) \
     fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::DRAM_MANUFACTURER_ID, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_BAD_DQ_DATA_GETMACRO(ID, PTARGET, VAL) \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::DIMM_BAD_DQ_DATA, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_BAD_DQ_DATA_SETMACRO(ID, PTARGET, VAL) \
+    fapi::platAttrSvc::fapiPlatSetSpdAttr( PTARGET, SPD::DIMM_BAD_DQ_DATA, &(VAL), sizeof(VAL) )
 
 //------------------------------------------------------------------------------
 // MACROs to route ATTR Base Address accesses to the correct Hostboot function
@@ -262,5 +294,12 @@ fapi::ReturnCode fapiPlatGetMirrorBaseAddr(const fapi::Target * i_pMcsTarget,
     fapi::platAttrSvc::fapiPlatGetMemoryBaseAddr(PTARGET, VAL)
 #define ATTR_MSS_MIRROR_BASE_GETMACRO(ID, PTARGET, VAL) \
     fapi::platAttrSvc::fapiPlatGetMirrorBaseAddr(PTARGET, VAL)
+
+//------------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_DQ_TO_DIMM_CONN_DQ access to the correct Hostboot
+// function
+//------------------------------------------------------------------------------
+#define ATTR_CEN_DQ_TO_DIMM_CONN_DQ_GETMACRO(ID, PTARGET, VAL) \
+    fapi::platAttrSvc::fapiPlatGetDqMapping(PTARGET, VAL)
 
 #endif // FAPIPLATATTRIBUTESERVICE_H_

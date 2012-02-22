@@ -122,8 +122,10 @@ void Target::toString(char (&o_ecmdString)[MAX_ECMD_STRING_LEN]) const
             //   "p8.ex      k0:n0:s0:p01:c0    "
             //   "p8.mcs     k0:n0:s0:p01:c0    "
             //   "centaur    k0:n0:s0:p01       "
-            const char * const ECMD_CHIP_PROC = "p8 ";
-            const char * const ECMD_CHIP_MEMBUF = "centaur    ";
+            const char * const ECMD_CHIP_PROC = "p8";
+            const char * const ECMD_CHIP_PROC_SPC = " ";
+            const char * const ECMD_CHIP_MEMBUF = "centaur";
+            const char * const ECMD_CHIP_MEMBUF_SPC = "    ";
             const char * const ECMD_CHIPLET_EX =  "ex      ";
             const char * const ECMD_CHIPLET_MCS = "mcs     ";
             const char * const ECMD_CHIPLET_MBS = "mbs     ";
@@ -131,6 +133,7 @@ void Target::toString(char (&o_ecmdString)[MAX_ECMD_STRING_LEN]) const
 
             // Look for a chip in the path
             const char * l_pChipType = NULL;
+            const char * l_pChipTypeSpc = NULL;
             uint32_t l_chipPos = 0;
 
             for (uint32_t i = 0; ((i < l_sizePath) && (l_pChipType == NULL));
@@ -139,11 +142,13 @@ void Target::toString(char (&o_ecmdString)[MAX_ECMD_STRING_LEN]) const
                 if (l_path[i].type == TARGETING::TYPE_PROC)
                 {
                     l_pChipType = ECMD_CHIP_PROC;
+                    l_pChipTypeSpc = ECMD_CHIP_PROC_SPC;
                     l_chipPos = l_path[i].instance;
                 }
                 else if (l_path[i].type == TARGETING::TYPE_MEMBUF)
                 {
                     l_pChipType = ECMD_CHIP_MEMBUF;
+                    l_pChipTypeSpc = ECMD_CHIP_MEMBUF_SPC;
                     l_chipPos = l_path[i].instance;
                 }
             }
@@ -199,6 +204,11 @@ void Target::toString(char (&o_ecmdString)[MAX_ECMD_STRING_LEN]) const
 
                     strcpy(l_pStr, l_pChipletType);
                     l_pStr += strlen(l_pChipletType);
+                }
+                else
+                {
+                    strcpy(l_pStr, l_pChipTypeSpc);
+                    l_pStr += strlen(l_pChipTypeSpc);
                 }
 
                 // Middle of the string

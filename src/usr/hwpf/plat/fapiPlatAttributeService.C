@@ -175,22 +175,52 @@ fapi::ReturnCode fapiPlatGetSpdAttr(const fapi::Target * i_target,
 
     errlHndl_t l_err = NULL;
     size_t l_len = i_len;
-    l_err = deviceRead( l_target, o_data, l_len, DEVICE_SPD_ADDRESS(i_keyword));
+    l_err = deviceRead(l_target, o_data, l_len, DEVICE_SPD_ADDRESS(i_keyword));
 
     if (l_err)
     {
         // Add the error log pointer as data to the ReturnCode
-        FAPI_ERR("platGetSpdAttr: deviceOp() returns error");
+        FAPI_ERR("platGetSpdAttr: deviceRead() returns error");
         l_rc.setPlatError(reinterpret_cast<void *> (l_err));
     }
     else
     {
-        platUpdateAttrValue( i_keyword, o_data );
+        platUpdateAttrValue(i_keyword, o_data);
     }
 
     FAPI_DBG(EXIT_MRK "fapiPlatGetSpdAttr");
     return l_rc;
+}
 
+//******************************************************************************
+// fapiPlatSetSpdAttr function.
+// Call SPD device driver to set the SPD attribute
+//******************************************************************************
+fapi::ReturnCode fapiPlatSetSpdAttr(const fapi::Target * i_target,
+                                    const uint16_t i_keyword,
+                                    void * i_data, const size_t i_len)
+{
+    FAPI_DBG(ENTER_MRK "fapiPlatSetSpdAttr");
+
+    fapi::ReturnCode l_rc;
+
+    // Extract the component pointer
+    TARGETING::Target* l_target =
+                         reinterpret_cast<TARGETING::Target*>(i_target->get());
+
+    errlHndl_t l_err = NULL;
+    size_t l_len = i_len;
+    l_err = deviceWrite(l_target, i_data, l_len, DEVICE_SPD_ADDRESS(i_keyword));
+
+    if (l_err)
+    {
+        // Add the error log pointer as data to the ReturnCode
+        FAPI_ERR("platSetSpdAttr: deviceWrite() returns error");
+        l_rc.setPlatError(reinterpret_cast<void *> (l_err));
+    }
+
+    FAPI_DBG(EXIT_MRK "fapiPlatSetSpdAttr");
+    return l_rc;
 }
 
 //******************************************************************************
@@ -352,6 +382,87 @@ fapi::ReturnCode fapiPlatGetMirrorBaseAddr(const fapi::Target * i_pMcsTarget,
     return l_rc;
 }
 
+//******************************************************************************
+// fapiPlatGetDqMapping function.
+//******************************************************************************
+fapi::ReturnCode fapiPlatGetDqMapping(const fapi::Target * i_pDimmTarget,
+                                      uint8_t (&o_data)[DIMM_DQ_NUM_DQS])
+{
+    fapi::ReturnCode l_rc;
+    bool l_error = false;
+
+    // Check that the FAPI Target pointer is not NULL
+    if (i_pDimmTarget == NULL)
+    {
+        FAPI_ERR("fapiPlatGetDqMapping. NULL FAPI Target passed");
+        l_error = true;
+    }
+    else
+    {
+        // Extract the DIMM Hostboot Target pointer
+        TARGETING::Target * l_pDimmTarget =
+            reinterpret_cast<TARGETING::Target*>(i_pDimmTarget->get());
+
+        // Check that the DIMM Hostboot Target pointer is not NULL
+        if (l_pDimmTarget == NULL)
+        {
+            FAPI_ERR("fapiPlatGetDqMapping. NULL HB Target passed");
+            l_error = true;
+        }
+        else
+        {
+            // Check that the Target is a DIMM
+            if (l_pDimmTarget->getAttr<TARGETING::ATTR_TYPE>() !=
+                TARGETING::TYPE_DIMM)
+            {
+                FAPI_ERR("fapiPlatGetDqMapping. Not a DIMM (0x%x)",
+                         l_pDimmTarget->getAttr<TARGETING::ATTR_TYPE>());
+                l_error = true;
+            }
+            else
+            {
+                if (l_pDimmTarget->getAttr<TARGETING::ATTR_MODEL>() ==
+                    TARGETING::MODEL_CDIMM)
+                {
+                    // C-DIMM. There is no DQ mapping from Centaur DQ to DIMM
+                    // Connector DQ because there is no DIMM Connector. Return
+                    // a direct 1:1 map (0->0, 1->1, etc)
+                    for (uint8_t i = 0; i < DIMM_DQ_NUM_DQS; i++)
+                    {
+                        o_data[i] = i;
+                    }
+                }
+                else
+                {
+                    // IS-DIMM. Get the mapping using a Hostboot attribute
+                    // Note that getAttr() cannot be used to get an array
+                    // attribute so using tryGetAttr and ignoring result
+                    l_pDimmTarget->
+                        tryGetAttr<TARGETING::ATTR_CEN_DQ_TO_DIMM_CONN_DQ>
+                            (o_data);
+                }
+            }
+        }
+    }
+
+    if (l_error)
+    {
+        /*@
+         *  @errortype
+         *  @moduleid   MOD_ATTR_DQ_MAP_GET
+         *  @reasoncode RC_ATTR_BASE_BAD_PARAM
+         *  @devdesc    Failed to get DIMM DQ mapping attribute due to
+         *              bad target parameter.
+         */
+        errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
+            ERRORLOG::ERRL_SEV_INFORMATIONAL,
+            fapi::MOD_ATTR_DQ_MAP_GET,
+            fapi::RC_ATTR_BASE_BAD_PARAM);
+        l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
+    }
+
+    return l_rc;
+}
 
 } // End platAttrSvc namespace
 

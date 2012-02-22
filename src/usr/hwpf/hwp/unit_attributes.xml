@@ -1,0 +1,34 @@
+<!--  IBM_PROLOG_BEGIN_TAG
+     This is an automatically generated prolog.
+   
+     $Source: src/usr/hwpf/hwp/unit_attributes.xml $
+   
+     IBM CONFIDENTIAL
+   
+     COPYRIGHT International Business Machines Corp. 2012
+   
+     p1
+   
+     Object Code Only (OCO) source materials
+     Licensed Internal Code Source Materials
+     IBM HostBoot Licensed Internal Code
+   
+     The source code for this program is not published or other-
+     wise divested of its trade secrets, irrespective of what has
+     been deposited with the U.S. Copyright Office.
+   
+     Origin: 30
+   
+     IBM_PROLOG_END -->
+<!-- XML file specifying Unit attributes used by HW Procedures. -->
+<attributes>
+
+<attribute>
+    <id>ATTR_CHIP_UNIT_POS</id>
+    <targetType>TARGET_TYPE_EX_CHIPLET, TARGET_TYPE_MBA_CHIPLET, TARGET_TYPE_MCS_CHIPLET</targetType>
+    <description>A unit's offset number within the chip with respect to similar units. </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+</attribute>
+
+</attributes>

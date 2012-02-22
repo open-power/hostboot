@@ -34,7 +34,10 @@ OBJS = fapiTestHwp.o \
        fapiTestHwpFfdc.o \
        fapiTestHwpConfig.o \
        fapiTestHwpAttr.o \
-       fapiHwpExecInitFile.o
+       fapiTestHwpDq.o \
+       fapiHwpExecInitFile.o \
+       dimmBadDqBitmapFuncs.o \
+       dimmBadDqBitmapAccessHwp.o
        
 SUBDIRS	=	dmi_training.d       
        

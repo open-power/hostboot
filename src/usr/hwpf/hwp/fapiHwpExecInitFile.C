@@ -42,6 +42,7 @@
  *                          mjjones     01/13/2012  Use new ReturnCode interfaces
  *                          camvanng    01/20/2012  Support for using a range
  *                                                  indexes for array attributes
+ *                          mjjones     02/21/2012  Use new Target toEcmdString
  */
 
 #include <fapiHwpExecInitFile.H>
@@ -234,9 +235,7 @@ fapi::ReturnCode fapiHwpExecInitFile(const fapi::Target & i_Target,
     FAPI_INF(">> fapiHwpExecInitFile: Performing HWP for %s", i_file);
 
     // Print the ecmd string of the chip
-    char l_string[fapi::MAX_ECMD_STRING_LEN] = {0};
-    i_Target.toString(l_string);
-    FAPI_INF("fapiHwpExecInitFile: Target: %s", l_string);
+    FAPI_INF("fapiHwpExecInitFile: Target: %s", i_Target.toEcmdString());
 
     fapi::ReturnCode l_rc = fapi::FAPI_RC_SUCCESS;
     fapi::ReturnCode l_tmpRc = fapi::FAPI_RC_SUCCESS;

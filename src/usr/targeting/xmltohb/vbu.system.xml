@@ -1,30 +1,30 @@
 <!--  IBM_PROLOG_BEGIN_TAG
      This is an automatically generated prolog.
-   
+
      $Source: src/usr/targeting/xmltohb/vbu_A.system.xml $
-   
+
      IBM CONFIDENTIAL
-   
+
      COPYRIGHT International Business Machines Corp. 2011
-   
+
      p1
-   
+
      Object Code Only (OCO) source materials
      Licensed Internal Code Source Materials
      IBM HostBoot Licensed Internal Code
-   
+
      The source code for this program is not published or other-
      wise divested of its trade secrets, irrespective of what has
      been deposited with the U.S. Copyright Office.
-   
+
      Origin: 30
-   
+
      IBM_PROLOG_END -->
 
 <attributes>
 
 <!-- =====================================================================
-     HOST BOOT TARGET INSTANCES 
+     HOST BOOT TARGET INSTANCES
      Contains target instance declarations for the VBU configuration
      ================================================================= -->
 
@@ -38,11 +38,11 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0</default>
-    </attribute> 
+    </attribute>
     <attribute>
         <id>IS_SIMULATION</id>
         <default>1</default>
-    </attribute> 
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -55,7 +55,7 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0</default>
-    </attribute>  
+    </attribute>
 </targetInstance>
 
 <!-- Venice n0p0 processor chip -->
@@ -86,7 +86,7 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0</default>
-    </attribute>  
+    </attribute>
 </targetInstance>
 
 <!-- Venice n0p0 EX units -->
@@ -101,7 +101,7 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/ex-0</default>
-    </attribute>  
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -114,7 +114,7 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/ex-1</default>
-    </attribute>  
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -127,7 +127,7 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/ex-2</default>
-    </attribute>  
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -140,7 +140,7 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/ex-3</default>
-    </attribute>  
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -153,7 +153,7 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/ex-4</default>
-    </attribute>  
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -166,7 +166,7 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/ex-5</default>
-    </attribute>  
+    </attribute>
 </targetInstance>
 
 <!-- Venice n0p0 core units -->
@@ -181,7 +181,7 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/ex-0/core-0</default>
-    </attribute>  
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -194,7 +194,7 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/ex-1/core-0</default>
-    </attribute>  
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -207,7 +207,7 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/ex-2/core-0</default>
-    </attribute>  
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -220,7 +220,7 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/ex-3/core-0</default>
-    </attribute>  
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -233,7 +233,7 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/ex-4/core-0</default>
-    </attribute>  
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -246,7 +246,7 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/ex-5/core-0</default>
-    </attribute>  
+    </attribute>
 </targetInstance>
 
 <!-- Venice n0p0 MCS units -->
@@ -261,11 +261,11 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-0</default>
-    </attribute> 
+    </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
-    </attribute> 
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -282,7 +282,7 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>1</default>
-    </attribute>  
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -295,7 +295,7 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-2</default>
-    </attribute>  
+    </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
         <default>2</default>
@@ -312,7 +312,7 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-3</default>
-    </attribute>  
+    </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
         <default>3</default>
@@ -329,7 +329,7 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-4</default>
-    </attribute>  
+    </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
         <default>4</default>
@@ -346,7 +346,7 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-5</default>
-    </attribute>  
+    </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
         <default>5</default>
@@ -363,7 +363,7 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-6</default>
-    </attribute>  
+    </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
         <default>6</default>
@@ -380,7 +380,7 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-7</default>
-    </attribute>  
+    </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
         <default>7</default>
@@ -399,7 +399,7 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/pervasive-0</default>
-    </attribute>  
+    </attribute>
 </targetInstance>
 
 <!-- Venice n0p0 powerbus unit -->
@@ -414,7 +414,7 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/powerbus-0</default>
-    </attribute>  
+    </attribute>
 </targetInstance>
 
 <!-- Venice n0p0 PCI units -->
@@ -429,7 +429,7 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/pci-0</default>
-    </attribute>  
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -442,7 +442,7 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/pci-1</default>
-    </attribute>  
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -455,7 +455,7 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/pci-2</default>
-    </attribute>  
+    </attribute>
 </targetInstance>
 
 
@@ -473,7 +473,7 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-0/membuf-0</default>
-    </attribute>  
+    </attribute>
 
     <!-- FSI is connected via proc0:cMFSI-0 -->
     <attribute>
@@ -558,7 +558,7 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-1/membuf-0</default>
-    </attribute>  
+    </attribute>
 
     <!-- FSI is connected via proc0:cMFSI-1 -->
     <attribute>
@@ -628,8 +628,8 @@
 
 <!-- Centaur n0p1 : end -->
 
-<!-- DIMMS 
-     id/physical is sys-0/node-0/dimm-[i]  
+<!-- DIMMS
+     id/physical is sys-0/node-0/dimm-[i]
             where i=[0-255]
      affinity    is sys-0/node-0/proc-[i]/mcs-[j]/membuf-0/mbs-0/mba-[k]/mem_port-[l]/dimm-[m]
             where i=[0] j=[0-1] k=[0-1] l=[0-1] m=[0-1]
@@ -647,14 +647,14 @@
         <default>affinity:sys-0/node-0/proc-0/mcs-0/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
     </attribute>
     <attribute>
-        <id>MBA_SLOT</id>
+        <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
     <attribute>
         <id>MBA_PORT</id>
         <default>0</default>
     </attribute>
-</targetInstance> 
+</targetInstance>
 
 <targetInstance>
     <id>sys0node0dimm1</id>
@@ -668,14 +668,14 @@
         <default>affinity:sys-0/node-0/proc-0/mcs-0/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
     </attribute>
     <attribute>
-        <id>MBA_SLOT</id>
-        <default>0</default>
+        <id>MBA_DIMM</id>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>MBA_PORT</id>
         <default>0</default>
     </attribute>
-</targetInstance> 
+</targetInstance>
 
 <targetInstance>
     <id>sys0node0dimm2</id>
@@ -689,14 +689,14 @@
         <default>affinity:sys-0/node-0/proc-0/mcs-0/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
     </attribute>
     <attribute>
-        <id>MBA_SLOT</id>
+        <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
     <attribute>
         <id>MBA_PORT</id>
         <default>1</default>
     </attribute>
-</targetInstance> 
+</targetInstance>
 
 <targetInstance>
     <id>sys0node0dimm3</id>
@@ -710,14 +710,14 @@
         <default>affinity:sys-0/node-0/proc-0/mcs-0/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
     </attribute>
     <attribute>
-        <id>MBA_SLOT</id>
-        <default>0</default>
+        <id>MBA_DIMM</id>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>MBA_PORT</id>
         <default>1</default>
     </attribute>
-</targetInstance> 
+</targetInstance>
 
 <targetInstance>
     <id>sys0node0dimm4</id>
@@ -731,14 +731,14 @@
         <default>affinity:sys-0/node-0/proc-0/mcs-0/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
     </attribute>
     <attribute>
-        <id>MBA_SLOT</id>
-        <default>1</default>
+        <id>MBA_DIMM</id>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>MBA_PORT</id>
         <default>0</default>
     </attribute>
-</targetInstance> 
+</targetInstance>
 
 <targetInstance>
     <id>sys0node0dimm5</id>
@@ -752,14 +752,14 @@
         <default>affinity:sys-0/node-0/proc-0/mcs-0/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
     </attribute>
     <attribute>
-        <id>MBA_SLOT</id>
+        <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
     <attribute>
         <id>MBA_PORT</id>
         <default>0</default>
     </attribute>
-</targetInstance> 
+</targetInstance>
 
 <targetInstance>
     <id>sys0node0dimm6</id>
@@ -773,14 +773,14 @@
         <default>affinity:sys-0/node-0/proc-0/mcs-0/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
     </attribute>
     <attribute>
-        <id>MBA_SLOT</id>
-        <default>1</default>
+        <id>MBA_DIMM</id>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>MBA_PORT</id>
         <default>1</default>
     </attribute>
-</targetInstance> 
+</targetInstance>
 
 <targetInstance>
     <id>sys0node0dimm7</id>
@@ -794,14 +794,14 @@
         <default>affinity:sys-0/node-0/proc-0/mcs-0/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
     </attribute>
     <attribute>
-        <id>MBA_SLOT</id>
+        <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
     <attribute>
         <id>MBA_PORT</id>
         <default>1</default>
     </attribute>
-</targetInstance> 
+</targetInstance>
 
 <targetInstance>
     <id>sys0node0dimm8</id>
@@ -815,14 +815,14 @@
         <default>affinity:sys-0/node-0/proc-0/mcs-1/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
     </attribute>
     <attribute>
-        <id>MBA_SLOT</id>
+        <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
     <attribute>
         <id>MBA_PORT</id>
         <default>0</default>
     </attribute>
-</targetInstance> 
+</targetInstance>
 
 <targetInstance>
     <id>sys0node0dimm9</id>
@@ -836,14 +836,14 @@
         <default>affinity:sys-0/node-0/proc-0/mcs-1/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
     </attribute>
     <attribute>
-        <id>MBA_SLOT</id>
-        <default>0</default>
+        <id>MBA_DIMM</id>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>MBA_PORT</id>
         <default>0</default>
     </attribute>
-</targetInstance> 
+</targetInstance>
 
 <targetInstance>
     <id>sys0node0dimm10</id>
@@ -857,14 +857,14 @@
         <default>affinity:sys-0/node-0/proc-0/mcs-1/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
     </attribute>
     <attribute>
-        <id>MBA_SLOT</id>
+        <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
     <attribute>
         <id>MBA_PORT</id>
         <default>1</default>
     </attribute>
-</targetInstance> 
+</targetInstance>
 
 <targetInstance>
     <id>sys0node0dimm11</id>
@@ -878,14 +878,14 @@
         <default>affinity:sys-0/node-0/proc-0/mcs-1/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
     </attribute>
     <attribute>
-        <id>MBA_SLOT</id>
-        <default>0</default>
+        <id>MBA_DIMM</id>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>MBA_PORT</id>
         <default>1</default>
     </attribute>
-</targetInstance> 
+</targetInstance>
 
 <targetInstance>
     <id>sys0node0dimm12</id>
@@ -899,14 +899,14 @@
         <default>affinity:sys-0/node-0/proc-0/mcs-1/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
     </attribute>
     <attribute>
-        <id>MBA_SLOT</id>
-        <default>1</default>
+        <id>MBA_DIMM</id>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>MBA_PORT</id>
         <default>0</default>
     </attribute>
-</targetInstance> 
+</targetInstance>
 
 <targetInstance>
     <id>sys0node0dimm13</id>
@@ -920,14 +920,14 @@
         <default>affinity:sys-0/node-0/proc-0/mcs-1/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
     </attribute>
     <attribute>
-        <id>MBA_SLOT</id>
+        <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
     <attribute>
         <id>MBA_PORT</id>
         <default>0</default>
     </attribute>
-</targetInstance> 
+</targetInstance>
 
 <targetInstance>
     <id>sys0node0dimm14</id>
@@ -941,14 +941,14 @@
         <default>affinity:sys-0/node-0/proc-0/mcs-1/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
     </attribute>
     <attribute>
-        <id>MBA_SLOT</id>
-        <default>1</default>
+        <id>MBA_DIMM</id>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>MBA_PORT</id>
         <default>1</default>
     </attribute>
-</targetInstance> 
+</targetInstance>
 
 <targetInstance>
     <id>sys0node0dimm15</id>
@@ -962,13 +962,13 @@
         <default>affinity:sys-0/node-0/proc-0/mcs-1/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
     </attribute>
     <attribute>
-        <id>MBA_SLOT</id>
+        <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
     <attribute>
         <id>MBA_PORT</id>
         <default>1</default>
     </attribute>
-</targetInstance> 
+</targetInstance>
 
 </attributes>

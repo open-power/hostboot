@@ -38,6 +38,7 @@
  *                          mjjones     09/12/2011  Added isChip and isChiplet
  *                          mjjones     02/07/2012  Remove MBS_CHIPLET
  *                                                  Add XBUS_ENDPOINT ABUS_ENDPOINT
+ *                          mjjones     02/21/2012  Add high performance toEcmdString
  */
 
 #ifndef FAPITARGET_H_
@@ -212,7 +213,21 @@ public:
     /**
      * @brief Convert a target to an ecmd-format target string
      *
-     * This is used in order to trace the target in the common SCAN trace
+     * This is used by HWP/FAPI code to trace the target.
+     *
+     * @return Pointer to NULL terminated character string. The caller must use
+     *         the string before the Target object is destructed.
+     */
+    const char * toEcmdString() const;
+
+private:
+
+    /**
+     * @brief Convert a target to an ecmd-format target string
+     *
+     * This is a private function called by toEcmdString to load the ecmd-format
+     * string into the Target object. Subsequent calls of toEcmdString are high
+     * performance and just return a pointer to the internal string.
      *
      * @note Implemented by platform code
      *
@@ -221,8 +236,6 @@ public:
      *                           null terminated ECMD string.
      */
     void toString(char (&o_ecmdString)[MAX_ECMD_STRING_LEN]) const;
-
-private:
 
     /**
      * @brief Compare the handle
@@ -259,6 +272,9 @@ private:
 
     // Pointer to platform specific Target Handle
     void * iv_pHandle;
+
+    // Pointer to the ecmd-format string representing the Target
+    mutable char * iv_pEcmdString;
 };
 
 }

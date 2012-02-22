@@ -35,6 +35,7 @@
  *                          mjjones     09/12/2011  Added isChip and isChiplet
  *                          mjjones     02/07/2012  Remove MBS_CHIPLET
  *                                                  Add XBUS_ENDPOINT ABUS_ENDPOINT
+ *                          mjjones     02/21/2012  Add high performance toEcmdString
  */
 
 #include <fapiTarget.H>
@@ -46,7 +47,7 @@ namespace fapi
 // Default Constructor
 //******************************************************************************
 Target::Target() :
-    iv_type(TARGET_TYPE_NONE), iv_pHandle(NULL)
+    iv_type(TARGET_TYPE_NONE), iv_pHandle(NULL), iv_pEcmdString(NULL)
 {
 
 }
@@ -56,7 +57,7 @@ Target::Target() :
 //******************************************************************************
 Target::Target(const TargetType i_type,
                void * i_pHandle) :
-    iv_type(i_type), iv_pHandle(i_pHandle)
+    iv_type(i_type), iv_pHandle(i_pHandle), iv_pEcmdString(NULL)
 {
 
 }
@@ -65,7 +66,7 @@ Target::Target(const TargetType i_type,
 // Copy Constructor
 //******************************************************************************
 Target::Target(const Target & i_right) :
-    iv_type(i_right.iv_type)
+    iv_type(i_right.iv_type), iv_pEcmdString(NULL)
 {
     (void) copyHandle(i_right);
 }
@@ -76,6 +77,7 @@ Target::Target(const Target & i_right) :
 Target::~Target()
 {
     (void) deleteHandle();
+    delete [] iv_pEcmdString;
 }
 
 //******************************************************************************
@@ -88,6 +90,8 @@ Target & Target::operator=(const Target & i_right)
     {
         iv_type = i_right.iv_type;
         (void) copyHandle(i_right);
+        delete [] iv_pEcmdString;
+        iv_pEcmdString = NULL;
     }
     return *this;
 }
@@ -166,6 +170,23 @@ bool Target::isChiplet() const
                         TARGET_TYPE_MCS_CHIPLET |
                         TARGET_TYPE_XBUS_ENDPOINT |
                         TARGET_TYPE_ABUS_ENDPOINT)) != 0);
+}
+
+//******************************************************************************
+// Get the ecmd-format string
+//******************************************************************************
+const char * Target::toEcmdString() const
+{
+    if (iv_pEcmdString == NULL)
+    {
+        iv_pEcmdString = new char[fapi::MAX_ECMD_STRING_LEN];
+        char (&l_ecmdString)[fapi::MAX_ECMD_STRING_LEN] =
+            *(reinterpret_cast<char(*)[fapi::MAX_ECMD_STRING_LEN]>
+                (iv_pEcmdString));
+        toString(l_ecmdString);
+    }
+
+    return iv_pEcmdString;
 }
 
 }

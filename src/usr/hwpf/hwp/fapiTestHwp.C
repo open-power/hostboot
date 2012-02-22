@@ -41,7 +41,7 @@
  *                          camvanng    11/16/2011  Change function name
  *                                                  fapiHwpExecInitFile() 
  *                          mjjones     01/13/2012  Use new ReturnCode interfaces
- *
+ *                          mjjones     02/21/2012  Use new Target toEcmdString
  */
 
 #include <fapiTestHwp.H>
@@ -63,9 +63,7 @@ fapi::ReturnCode hwpInitialTest(const fapi::Target & i_chip)
     FAPI_INF("Performing HWP: hwpInitialTest");
 
     // Print the ecmd string of the chip
-    char l_string[fapi::MAX_ECMD_STRING_LEN] = {0};
-    i_chip.toString(l_string);
-    FAPI_INF("hwpInitialTest: Chip: %s", l_string);
+    FAPI_INF("hwpInitialTest: Chip: %s", i_chip.toEcmdString());
     fapi::ReturnCode l_rc;
     uint32_t l_ecmdRc = ECMD_DBUF_SUCCESS;
 

@@ -40,6 +40,8 @@
 #include <fapiTestHwpFfdc.H>
 #include <fapiTestHwpConfig.H>
 #include <fapiTestHwpAttr.H>
+#include <fapiTestHwpDq.H>
+#include <dimmBadDqBitmapAccessHwp.H>
 
 /**
  * @brief HWP Executor macro

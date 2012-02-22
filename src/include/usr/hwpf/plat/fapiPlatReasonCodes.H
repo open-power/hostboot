@@ -42,6 +42,7 @@ namespace fapi
         MOD_HANDLE_ECMD_BUF_RC                     = 0x06,
         MOD_VERIFY_CFAM_ACCESS_TARGET              = 0x07,
         MOD_ATTR_BASE_ADDR_GET                     = 0x08,
+        MOD_ATTR_DQ_MAP_GET                        = 0x09,
     };
 
     // Note that for HWP generated errors (MOD_HWP_RC_TO_ERRL), the

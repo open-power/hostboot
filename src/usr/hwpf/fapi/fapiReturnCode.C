@@ -40,6 +40,7 @@
  *                                                  ReturnCode
  *                          mjjones     09/22/2011  Added ErrorInfo Support
  *                          mjjones     01/12/2012  Enforce correct usage
+ *                          mjjones     02/22/2012  Allow user to add Target FFDC
  */
 
 #include <fapiReturnCode.H>
@@ -243,7 +244,6 @@ void ReturnCode::addErrorInfo(const void * const * i_pObjects,
             {
                 // This is a regular FFDC data object that can be directly
                 // memcopied
-                FAPI_ERR("addErrorInfo: Adding FFDC, size: %d", l_size);
                 addEIFfdc(l_pObject, l_size);
             }
             else
@@ -256,6 +256,14 @@ void ReturnCode::addErrorInfo(const void * const * i_pObjects,
                     const ecmdDataBufferBase * l_pDb =
                         static_cast<const ecmdDataBufferBase *>(l_pObject);
                     ReturnCodeFfdc::addEIFfdc(*this, *l_pDb);
+                }
+                else if (l_size == ReturnCodeFfdc::EI_FFDC_SIZE_TARGET)
+                {
+                    // The FFDC is a fapi::Target
+                    FAPI_ERR("addErrorInfo: Adding fapi::Target FFDC");
+                    const fapi::Target * l_pTarget =
+                        static_cast<const fapi::Target *>(l_pObject);
+                    ReturnCodeFfdc::addEIFfdc(*this, *l_pTarget);
                 }
                 else
                 {

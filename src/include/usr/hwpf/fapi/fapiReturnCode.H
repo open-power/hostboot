@@ -39,6 +39,7 @@
  *                          mjjones     09/22/2011  Added ErrorInfo Support
  *                          mjjones     11/10/2011  Use ecmdDataBufferBase
  *                          mjjones     01/12/2012  Enforce correct usage
+ *                          mjjones     02/22/2012  Allow user to add Target FFDC
  */
 
 #ifndef FAPIRETURNCODE_H_
@@ -46,6 +47,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <string.h>
 #include <ecmdDataBufferBase.H>
 #include <fapiTarget.H>
 #include <fapiReturnCodes.H>
@@ -397,6 +399,7 @@ namespace ReturnCodeFfdc
     enum ErrorInfoFfdcSize
     {
         EI_FFDC_SIZE_ECMDDB = -1,   // ecmdDataBufferBase
+        EI_FFDC_SIZE_TARGET = -2,   // fapi::Target
     };
 
     /**
@@ -423,6 +426,16 @@ namespace ReturnCodeFfdc
         const ecmdDataBufferBase &)
     {
         return EI_FFDC_SIZE_ECMDDB;
+    }
+
+    /**
+     * @brief Get FFDC Size specialization for fapi::Target
+     */
+    template<>
+    inline int16_t getErrorInfoFfdcSize<fapi::Target>(
+        const fapi::Target &)
+    {
+        return EI_FFDC_SIZE_TARGET;
     }
 
     /**
@@ -472,9 +485,22 @@ namespace ReturnCodeFfdc
 
         // Deliberately not checking return code from extract to save code space
         i_ffdc.extract(l_pData, 0, i_ffdc.getBitLength());
-
         o_rc.addEIFfdc(l_pData, (i_ffdc.getWordLength() * 4));
         delete [] l_pData;
+    }
+
+    /**
+     * @brief Specialization of addEIFfdc for fapi::Target
+     *
+     * @param[out] o_rc   Reference to ReturnCode to copy FFDC to
+     * @param[in]  i_ffdc Reference to fapi::Target to add FFDC for
+     */
+    template<>
+    inline void addEIFfdc<fapi::Target>(ReturnCode & o_rc,
+                                        const fapi::Target & i_ffdc)
+    {
+        const char * l_ecmdString = i_ffdc.toEcmdString();
+        o_rc.addEIFfdc(l_ecmdString, (strlen(l_ecmdString) + 1));
     }
 
     /**

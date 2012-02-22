@@ -38,6 +38,7 @@
 #include <fapiHwpExecInitFile.H>
 #include <spd/spdenums.H>
 #include <targeting/predicates/predicatectm.H>
+#include <targeting/iterators/rangefilter.H>
 
 using namespace fapi;
 using namespace TARGETING;
@@ -694,6 +695,43 @@ public:
 
     }
 
+    /**
+     * @brief Call a test procedure that exercises the Bad DQ data
+     */
+    void testHwpf9()
+    {
+        errlHndl_t l_err = NULL;
+
+        // Look for MBA chiplets
+        TARGETING::PredicateCTM l_mbaFilter(CLASS_UNIT, TYPE_MBA);
+        TARGETING::TargetRangeFilter l_filter(
+            TARGETING::targetService().begin(),
+            TARGETING::targetService().end(),
+            &l_mbaFilter);
+
+        // Invoke the HWP on the first one
+        if (l_filter)
+        {
+            fapi::Target l_fapiTarget(TARGET_TYPE_MBA_CHIPLET,
+                static_cast<void *> (*l_filter));
+
+            FAPI_INVOKE_HWP(l_err, fapiTestHwpDq, l_fapiTarget);
+
+            if (l_err)
+            {
+                TS_FAIL("testHwpf9: fapiTestHwpDq failed. Error logged");
+                errlCommit(l_err, HWPF_COMP_ID);
+            }
+            else
+            {
+                TS_TRACE("testHwpf9: Unit Test passed");
+            }
+        }
+        else
+        {
+            TS_TRACE("testHwpf9: No MBAs found, skipping test");
+        }
+    }
 };
 
 #endif

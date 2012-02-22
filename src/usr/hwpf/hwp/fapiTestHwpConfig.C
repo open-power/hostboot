@@ -35,6 +35,7 @@
  *                          mjjones     10/06/2011  Updated traces.
  *                          camvang     10/26/2011  Updated traces.
  *                          mjjones     01/13/2012  Use new ReturnCode interfaces
+ *                          mjjones     02/21/2012  Use new Target toEcmdString
  */
 
 #include <fapiTestHwpConfig.H>
@@ -50,9 +51,7 @@ fapi::ReturnCode hwpTestConfig(const fapi::Target & i_chip)
     FAPI_INF("hwpTestConfig: Start HWP");
 
     // Print the ecmd string of the chip
-    char l_string[fapi::MAX_ECMD_STRING_LEN] = {0};
-    i_chip.toString(l_string);
-    FAPI_INF("hwpTestConfig: Chip: %s", l_string);
+    FAPI_INF("hwpTestConfig: Chip: %s", i_chip.toEcmdString());
 
     fapi::ReturnCode l_rc;
     std::vector<fapi::Target> l_targets;

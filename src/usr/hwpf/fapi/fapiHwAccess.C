@@ -38,6 +38,8 @@
  *                          mjjones     09/14/2011  Prepended fapi to functions
  *                                                  and enabled all functions
  *                          mjjones     10/13/2011  util namespace change
+ *                          mjjones     02/21/2012  Use high performance Target
+ *                                                  toEcmdString
  */
 
 #include <fapi.H>
@@ -61,12 +63,8 @@ fapi::ReturnCode fapiGetScom(const fapi::Target& i_target,
 
     if( l_traceit )
     {
-        // get the string representation of the target
-        char l_string[fapi::MAX_ECMD_STRING_LEN] = {0};
-        i_target.toString(l_string);
-
         FAPI_SCAN( "TRACE : GETSCOM     : %s : %.16llX %.16llX", 
-                   l_string,
+                   i_target.toEcmdString(),
                    i_address,
                    o_data.getDoubleWord( 0 ) ); 
     }
@@ -90,12 +88,8 @@ fapi::ReturnCode fapiPutScom(const fapi::Target& i_target,
 
     if( l_traceit )
     {
-        // get the string representation of the target
-        char l_string[fapi::MAX_ECMD_STRING_LEN] = {0};
-        i_target.toString(l_string);
-
         FAPI_SCAN( "TRACE : PUTSCOM     : %s : %.16llX %.16llX",
-                   l_string,
+                   i_target.toEcmdString(),
                    i_address,
                    i_data.getDoubleWord( 0 )  );
     }
@@ -119,12 +113,8 @@ fapi::ReturnCode fapiPutScomUnderMask(const fapi::Target& i_target,
 
     if( l_traceit )
     {
-        // get the string representation of the target
-        char l_string[fapi::MAX_ECMD_STRING_LEN] = {0};
-        i_target.toString(l_string);
-
         FAPI_SCAN( "TRACE : PUTSCOMMASK : %s : %.16llX %.16llX %.16llX",
-               l_string,
+               i_target.toEcmdString(),
                i_address,
                i_data.getDoubleWord(0),
                i_mask.getDoubleWord(0));
@@ -148,12 +138,8 @@ fapi::ReturnCode fapiGetCfamRegister(const fapi::Target& i_target,
 
     if( l_traceit )
     {
-        // get the string representation of the target
-        char l_string[fapi::MAX_ECMD_STRING_LEN] = {0};
-        i_target.toString(l_string);
-
         FAPI_SCAN( "TRACE : GETCFAMREG  : %s : %.8X %.8X",
-               l_string,
+               i_target.toEcmdString(),
                i_address,
                o_data.getWord(0) );
     }
@@ -176,12 +162,8 @@ fapi::ReturnCode fapiPutCfamRegister(const fapi::Target& i_target,
 
     if( l_traceit )
     {
-        // get the string representation of the target
-        char l_string[fapi::MAX_ECMD_STRING_LEN] = {0};
-        i_target.toString(l_string);
-
         FAPI_SCAN( "TRACE : PUTCFAMREG  : %s : %.8X %.8X",
-               l_string,
+               i_target.toEcmdString(),
                i_address,
                i_data.getWord(0) );
     }
@@ -205,10 +187,6 @@ fapi::ReturnCode fapiModifyCfamRegister(const fapi::Target& i_target,
 
     if( l_traceit )
     {
-        // get the string representation of the target
-        char l_string[fapi::MAX_ECMD_STRING_LEN] = {0};
-        i_target.toString(l_string);
-
         // get string representation of the modify mode
         const char * l_pMode = NULL;
 
@@ -230,7 +208,7 @@ fapi::ReturnCode fapiModifyCfamRegister(const fapi::Target& i_target,
         }
 
         FAPI_SCAN( "TRACE : MODCFAMREG  : %s : %.8X %.8X %s",
-               l_string,
+               i_target.toEcmdString(),
                i_address,
                i_data.getWord(0),
                l_pMode );

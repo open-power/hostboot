@@ -32,6 +32,8 @@
  * Flag     Defect/Feature  User        Date        Description
  * ------   --------------  ----------  ----------- ----------------------------
  *                          mjjones     09/12/2011  Updated with new functions.
+ *                          mjjones     02/17/2012  Updated fapiGetAssociatedDimms
+ *                                                  description to only allow MBA
  *
  */
 
@@ -65,12 +67,9 @@ fapi::ReturnCode fapiGetChildChiplets(
     const fapi::TargetState i_state = fapi::TARGET_STATE_FUNCTIONAL);
 
 /** 
- * @brief Gets the DIMMs that are logically associated with the input target
+ * @brief Gets the DIMMs that are logically associated with the input MBA target
  *
- * The logical association is MCS-MBS-MBA-DIMM. The input target must be a MCS,
- * MBS or MBA chiplet and the output will be the associated DIMMs
- * 
- * @param[in]  i_target Input target 
+ * @param[in]  i_target Input MBA chiplet target
  * @param[out] o_dimms  Reference to vector that is cleared then filled in with
  *                      the associated DIMM Targets
  * @param[in]  i_state  Only return targets of the specified state. Either

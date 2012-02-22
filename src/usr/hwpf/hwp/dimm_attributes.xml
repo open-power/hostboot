@@ -1,0 +1,59 @@
+<!--  IBM_PROLOG_BEGIN_TAG
+     This is an automatically generated prolog.
+   
+     $Source: src/usr/hwpf/hwp/dimm_attributes.xml $
+   
+     IBM CONFIDENTIAL
+   
+     COPYRIGHT International Business Machines Corp. 2012
+   
+     p1
+   
+     Object Code Only (OCO) source materials
+     Licensed Internal Code Source Materials
+     IBM HostBoot Licensed Internal Code
+   
+     The source code for this program is not published or other-
+     wise divested of its trade secrets, irrespective of what has
+     been deposited with the U.S. Copyright Office.
+   
+     Origin: 30
+   
+     IBM_PROLOG_END -->
+<!-- XML file specifying DIMM attributes used by HW Procedures. -->
+<attributes>
+
+<attribute>
+    <id>ATTR_CEN_DQ_TO_DIMM_CONN_DQ</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Centaur DQ to DIMM connector DQ mapping.
+        Uint8 value for each Centaur DQ (0-79).
+        The value is the corresponding DIMM Connector DQ.
+        Therefore if (data[2] == 60) then Centaur DQ 2 maps to DIMM DQ 60
+        If the logical DIMM is on a Centaur-DIMM then the value is the same as the
+        array index because there is no DIMM connector.
+        If the logical DIMM is an IS-DIMM then the value depends on board wiring.
+    </description>
+    <valueType>uint8</valueType>
+    <array>80</array>
+    <platInit/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MBA_PORT</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>MBA Chiplet port this DIMM is connected to</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MBA_DIMM</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>MBA port DIMM number of this DIMM</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+</attribute>
+
+</attributes>
