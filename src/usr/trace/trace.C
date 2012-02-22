@@ -51,6 +51,7 @@
 #include <sys/sync.h>
 #include <string_ext.h>
 #include <util/align.H>
+#include <assert.h>
 
 #include <trace/trace.H>
 
@@ -67,7 +68,7 @@ namespace TRACE
 // Globals/Constants
 /******************************************************************************/
 
-const uint32_t TRAC_TIME_REAL   = 0;  // upper 32 = seconds, lower 32 = microseconds
+const uint32_t TRAC_TIME_REAL   = 0;  // upper 32 = secs, lower 32 = microsecs
 const uint32_t TRAC_TIME_50MHZ  = 1;
 const uint32_t TRAC_TIME_200MHZ = 2;
 const uint32_t TRAC_TIME_167MHZ = 3;  // 166666667Hz
@@ -115,11 +116,32 @@ struct mixed_trace_info
 {
     char *     pBuffer;
     uint64_t   cbUsed;
+    uint32_t   TriggerActive;
+    uint32_t   LostTraceCount;
 };
 typedef struct mixed_trace_info mixed_trace_info_t;
 const uint64_t TRAC_BINARY_SIZE = 4096;
-mixed_trace_info_t g_tracBinaryInfo;
+mixed_trace_info_t g_tracBinaryInfo[2];
 
+struct vpo_con_trigger_t
+{
+    uint64_t trig;  // bit0 = trigger signalling bit1:63 = trace buffer addr
+    uint64_t len;   // length of trace buffer with valid trace data.
+};
+
+struct vpo_cont_support_t
+{
+    vpo_con_trigger_t triggers[2];
+    uint64_t disable;  // clear by VPO script to enable continous trace
+};
+
+// This structure is monitored by VPO script. The disable variable is set
+// at compile time to 1. The VPO script clears the disable variable at thei
+// start to enable the continuous trace support for VPO. It then montiors the
+// trigger active bit of each buffer and take action.
+vpo_cont_support_t g_cont_trace_trigger_info = { { { 0, 0 }, { 0, 0 } }, 1 };
+
+const uint64_t TRIGGER_ACTIVE_BIT = 0x8000000000000000;
 
 /******************************************************************************/
 // TracInit::TracInit()
@@ -155,16 +177,26 @@ Trace::Trace()
     // compiler inits global vars to zero
     // memset(g_desc_array, 0, sizeof(g_desc_array));
 
-    g_tracBinaryInfo.pBuffer  =  static_cast<char*>(malloc(TRAC_BINARY_SIZE));
-
     // fsp-trace convention expects a 2 in the first byte of tracBINARY
-    g_tracBinaryInfo.pBuffer[0] = 2;
-    g_tracBinaryInfo.cbUsed     = 1;
+    for (size_t i = 0; i < 2; i++)
+    {
+        g_tracBinaryInfo[i].pBuffer = 
+                                 static_cast<char*>(malloc(TRAC_BINARY_SIZE));
+        g_tracBinaryInfo[i].pBuffer[0]     = 2;
+        g_tracBinaryInfo[i].cbUsed         = 1;
+        g_tracBinaryInfo[i].TriggerActive  = 0;
+        g_tracBinaryInfo[i].LostTraceCount = 0;
+        g_cont_trace_trigger_info.triggers[i].trig =
+                      reinterpret_cast<uint64_t>(g_tracBinaryInfo[i].pBuffer);
+    }
 
     // tracBINARY buffer appending is always on.
     // TODO figure a way to control continuous trace on/off, perhaps
     // unregister the hap handler for it.
     iv_ContinuousTrace = 1;
+
+    // select buffer0 initially
+    iv_CurBuf = 0;
 }
 
 /******************************************************************************/
@@ -308,6 +340,67 @@ void Trace::initValuesBuffer( trace_desc_t *o_buf,
     return;
 }
 
+/******************************************************************************/
+// ManageContTraceBuffers 
+// This function manages the usage of the two ping-pong buffers for handling
+// the continuous trace support.
+/******************************************************************************/
+void Trace::ManageContTraceBuffers(uint64_t i_cbRequired)
+{
+    uint8_t l_AltBuf = (iv_CurBuf + 1) % 2;
+    
+    // Reset TriggerActive if the buffer has been offloaded by VPO
+    // script when running under VBU Awan environment
+    for (size_t i = 0; (!(g_cont_trace_trigger_info.disable)) && (i < 2); i++)
+    {
+        if ((g_tracBinaryInfo[i].TriggerActive != 0) &&
+             (!(g_cont_trace_trigger_info.triggers[i].trig &
+                                                         TRIGGER_ACTIVE_BIT)))
+        {
+            g_tracBinaryInfo[i].TriggerActive = 0;
+        }
+    }
+
+    // we should never have the current buffer in the trigger state
+    assert (g_tracBinaryInfo[iv_CurBuf].TriggerActive == 0);
+
+    // current buffer is not in trigger state
+    // and adding this trace will exceed the size
+    if ((g_tracBinaryInfo[iv_CurBuf].cbUsed + i_cbRequired)
+                                                          > TRAC_BINARY_SIZE)
+    {
+        // current buffer entering trigger state
+        g_tracBinaryInfo[iv_CurBuf].TriggerActive = 1;
+
+        if (!(g_cont_trace_trigger_info.disable))
+        {
+            // Turn on the current buffer's trigger
+            g_cont_trace_trigger_info.triggers[iv_CurBuf].trig |=
+                                                           TRIGGER_ACTIVE_BIT;
+            // If the alternate buffer's trigger is active and 
+            // the buffer will now be reused, so reset the trigger
+            if (g_cont_trace_trigger_info.triggers[l_AltBuf].trig &
+                                                           TRIGGER_ACTIVE_BIT)
+            {
+                g_cont_trace_trigger_info.triggers[l_AltBuf].trig &=
+                                                          ~TRIGGER_ACTIVE_BIT;
+            }
+        }
+
+        // If the alternate buffer is in trigger state, move it out of
+        // the trigger state and keep track of lost trace count.
+        if (g_tracBinaryInfo[l_AltBuf].TriggerActive == 1)
+        {
+            g_tracBinaryInfo[l_AltBuf].LostTraceCount++;
+            g_tracBinaryInfo[l_AltBuf].TriggerActive = 0;
+        }
+        // Now switching to alternate buffer and reset the usage count
+        iv_CurBuf = l_AltBuf;
+        g_tracBinaryInfo[iv_CurBuf].cbUsed = 1;
+
+        MAGIC_INSTRUCTION(MAGIC_CONTINUOUS_TRACE);
+    }
+}
 
 
 /******************************************************************************/
@@ -562,26 +655,27 @@ void Trace::_trace_adal_write_all(trace_desc_t *io_td,
 
 
         // Write to the combined trace buffer, a stream of traces.
-        if( iv_ContinuousTrace )
+        while (iv_ContinuousTrace)
         {
             // This entry requires this many bytes to fit.
             uint64_t l_cbCompName = 1 + strlen( io_td->comp );
-            uint64_t l_cbRequired = l_cbCompName +
-                                    sizeof( l_entry ) +
-                                    l_data_size;
+            uint64_t l_cbRequired = l_cbCompName + sizeof(l_entry) +
+                                                   l_data_size;
 
-            if( (g_tracBinaryInfo.cbUsed + l_cbRequired) >  TRAC_BINARY_SIZE  )
+            if (l_cbRequired > TRAC_BINARY_SIZE)
             {
-                // does not fit, so call somebody to collect it.
-                // TODO how to do this in VBU
-                MAGIC_INSTRUCTION(MAGIC_CONTINUOUS_TRACE);
-
-                // start over
-                g_tracBinaryInfo.cbUsed = 1;
+                // caller is logging more binary data than the
+                // maximum size of the current tracBinary buffer.
+                // TODO need to increase the buffer size, or else
+                // document its limits.
+                break;
             }
 
+            ManageContTraceBuffers(l_cbRequired);
+
             // Copy the entry piecemeal to the destination.
-            char * l_pchDest = g_tracBinaryInfo.pBuffer + g_tracBinaryInfo.cbUsed;
+            char * l_pchDest = g_tracBinaryInfo[iv_CurBuf].pBuffer +
+                               g_tracBinaryInfo[iv_CurBuf].cbUsed;
 
             // component name and its trailing nil byte
             strcpy( l_pchDest, io_td->comp );
@@ -595,7 +689,17 @@ void Trace::_trace_adal_write_all(trace_desc_t *io_td,
             memcpy( l_pchDest, l_buffer, l_data_size );
 
             // adjust for next time
-            g_tracBinaryInfo.cbUsed += l_cbRequired;
+            g_tracBinaryInfo[iv_CurBuf].cbUsed += l_cbRequired;
+
+            // maintain the buffer's actually used bytes for VPO script 
+            if ((!g_cont_trace_trigger_info.disable))
+            {
+                g_cont_trace_trigger_info.triggers[iv_CurBuf].len =
+                                           g_tracBinaryInfo[iv_CurBuf].cbUsed;
+            }
+
+            // break from while() which was used much like an if()
+            break;
         }
 
 
@@ -710,31 +814,22 @@ void Trace::_trace_adal_write_bin(trace_desc_t *io_td,const trace_hash_val i_has
         {
             // This entry requires this many bytes to fit.
             uint64_t l_cbCompName = 1 + strlen( io_td->comp );
-            uint64_t l_cbRequired = l_cbCompName +
-                                    sizeof( l_entry ) +
-                                    i_size;
+            uint64_t l_cbRequired = l_cbCompName + sizeof( l_entry ) + i_size;
 
             if( l_cbRequired > TRAC_BINARY_SIZE )
             {
                 // caller is logging more binary data than the
-                // size of the tracBinary buffer.
+                // maximum size of the current tracBinary buffer.
                 // TODO need to increase the buffer size, or else
                 // document its limits.
                 break;
             }
 
-            if( (g_tracBinaryInfo.cbUsed + l_cbRequired) >  TRAC_BINARY_SIZE  )
-            {
-                // does not fit, so call somebody to collect it.
-                // TODO
-                MAGIC_INSTRUCTION(MAGIC_CONTINUOUS_TRACE);
-
-                // start over
-                g_tracBinaryInfo.cbUsed = 1;
-            }
+            ManageContTraceBuffers(l_cbRequired);
 
             // Copy the entry piecemeal to the destination.
-            char * l_pchDest = g_tracBinaryInfo.pBuffer + g_tracBinaryInfo.cbUsed;
+            char * l_pchDest = g_tracBinaryInfo[iv_CurBuf].pBuffer +
+                               g_tracBinaryInfo[iv_CurBuf].cbUsed;
 
             // component name and its trailing nil byte
             strcpy( l_pchDest, io_td->comp );
@@ -748,7 +843,14 @@ void Trace::_trace_adal_write_bin(trace_desc_t *io_td,const trace_hash_val i_has
             memcpy( l_pchDest, i_ptr, i_size );
 
             // adjust for next time
-            g_tracBinaryInfo.cbUsed += l_cbRequired;
+            g_tracBinaryInfo[iv_CurBuf].cbUsed += l_cbRequired;
+
+            // maintain the buffer's actually used bytes for VPO script 
+            if ((!g_cont_trace_trigger_info.disable))
+            {
+                g_cont_trace_trigger_info.triggers[iv_CurBuf].len =
+                                            g_tracBinaryInfo[iv_CurBuf].cbUsed;
+            }
 
             // break from while() which was used much like an if()
             break;

@@ -388,6 +388,16 @@ private:
                               const uint32_t i_size,
                               const int32_t i_type);
 
+    /**
+     *  @brief  This function manages the usage of the two ping-pong buffers
+     *          for handling the continuous trace support under VPO/VBU. 
+     *
+     *  @param [in] i_cbRequired number of bytes needed for the trace entry
+     *              to be added to the active continuous trace buffer
+     *
+     *  @return void
+     */
+    void ManageContTraceBuffers(uint64_t i_cbRequired);
 
     // Mutex protecting/serializing writes to trace buffers.
     mutex_t iv_trac_mutex;
@@ -395,6 +405,8 @@ private:
     // Controls writing to tracBinary
     bool iv_ContinuousTrace; 
 
+    // VPO/VBU continuous trace active buffer index
+    uint8_t iv_CurBuf;
 };
 
 } // namespace TRACE

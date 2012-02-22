@@ -234,6 +234,10 @@ def register_hb_debug_framework_tools():
     pattern = re.compile("[^\._]");
     files = [f for f in files if pattern.match(f)]
 
+    # Filter out modules written for vbu only
+    pattern = re.compile("AutoIpl|ContTrace");
+    files = [f for f in files if not pattern.match(f)]
+
     # Remove the .pm extension from the tool modules.
     files = [re.sub("\.pm","",f) for f in files];
 
@@ -291,6 +295,14 @@ def readLongLong(address):
     hexlist = dumpSimicsMemory(address,8)
     return hexDumpToNumber(hexlist)
 
+def readLong(address):
+    hexlist = dumpSimicsMemory(address,4)
+    return hexDumpToNumber(hexlist)
+
+def writeLong(address,datvalue):
+    conf.phys_mem.memory[[address,address+3]] = [0,0,0,datvalue]
+    return
+
 
 
 # Write simics memory. address is an integer.
@@ -335,15 +347,26 @@ def magic_instruction_callback(user_arg, cpu, arg):
         pTracBinaryBuffer = readLongLong(tracBinaryInfoAddr)
         # Read the count of bytes used in the tracBinary buffer
         cbUsed = readLongLong(tracBinaryInfoAddr+8)
+        triggerActive = readLong(tracBinaryInfoAddr+16)
+        if triggerActive == 0 and cbUsed == 1:
+            pTracBinaryBuffer = readLongLong(tracBinaryInfoAddr+24)
+            cbUsed = readLongLong(tracBinaryInfoAddr+32)
+            writeLong(tracBinaryInfoAddr+40,0)
+            # Reset the buffer byte count in Simics memory to 1, preserving
+            # the byte at offset 0 of the buffer which contains a 0x02 in
+            # fsp-trace style.
+            writeLongLong(tracBinaryInfoAddr+32,1)
+        else:
+            writeLong(tracBinaryInfoAddr+16,0)
+            # Reset the buffer byte count in Simics memory to 1, preserving
+            # the byte at offset 0 of the buffer which contains a 0x02 in
+            # fsp-trace style.
+            writeLongLong(tracBinaryInfoAddr+8,1)
         # Save the tracBinary buffer to a file named tracBINARY in current dir
         saveCommand = "memory_image_ln0.save tracBINARY 0x%x %d"%(pTracBinaryBuffer,cbUsed)
         SIM_run_alone(run_command, saveCommand )
         # Run fsp-trace on tracBINARY file (implied), append output to tracMERG
         os.system( "fsp-trace ./ -s hbotStringFile >>tracMERG  2>/dev/null" )
-        # Reset the buffer byte count in Simics memory to 1, preserving the byte
-        # at offset 0 of the buffer which contains a 0x02 in fsp-trace style.
-        writeLongLong(tracBinaryInfoAddr+8, 1 )
-
 
 # Continuous trace:  Open the symbols and find the address for 
 # "g_tracBinaryInfo"  Convert to a number and save in tracBinaryInfoAddr
