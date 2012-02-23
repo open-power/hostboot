@@ -484,6 +484,80 @@
     </attribute>    
 </targetType>
 
+<targetType>
+    <id>unit-abus-power8</id>
+    <parent>unit</parent>
+    <attribute>
+        <id>TYPE</id>
+        <default>ABUS</default>
+    </attribute>
+    <attribute><id>CHIP_UNIT</id></attribute>
+</targetType>
+
+<targetType>
+    <id>unit-abus-salerno</id>
+    <parent>unit-abus-power8</parent>
+    <attribute>
+        <id>MODEL</id>
+        <default>SALERNO</default>
+    </attribute>  
+</targetType>
+
+<targetType>
+    <id>unit-abus-venice</id>
+    <parent>unit-abus-power8</parent>
+    <attribute>
+        <id>MODEL</id>
+        <default>VENICE</default>
+    </attribute>
+</targetType>
+
+<targetType>
+    <id>unit-abus-murano</id>
+    <parent>unit-abus-power8</parent>
+    <attribute>
+        <id>MODEL</id>
+        <default>MURANO</default>
+    </attribute>
+</targetType>
+
+<targetType>
+    <id>unit-xbus-power8</id>
+    <parent>unit</parent>
+    <attribute>
+        <id>TYPE</id>
+        <default>XBUS</default>
+    </attribute>
+    <attribute><id>CHIP_UNIT</id></attribute>
+</targetType>
+
+<targetType>
+    <id>unit-xbus-salerno</id>
+    <parent>unit-xbus-power8</parent>
+    <attribute>
+        <id>MODEL</id>
+        <default>SALERNO</default>
+    </attribute>  
+</targetType>
+
+<targetType>
+    <id>unit-xbus-venice</id>
+    <parent>unit-xbus-power8</parent>
+    <attribute>
+        <id>MODEL</id>
+        <default>VENICE</default>
+    </attribute>
+</targetType>
+
+<targetType>
+    <id>unit-xbus-murano</id>
+    <parent>unit-xbus-power8</parent>
+    <attribute>
+        <id>MODEL</id>
+        <default>MURANO</default>
+    </attribute>
+</targetType>
+
 <!-- Hybrid targets -->
 
 <targetType>

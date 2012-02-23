@@ -35,16 +35,29 @@ namespace SCOM
 
     enum ScomTransMask
     {
-        SCOM_TRANS_EX_MASK =  0x000000007F000000,
-        SCOM_TRANS_MCS_MASK = 0x000000007FFFFF80,
-        SCOM_TRANS_MBA_MASK = 0x000000007FFFF800,
+        SCOM_TRANS_EX_MASK =          0xFFFFFFFF7F000000,
+        SCOM_TRANS_MCS_MASK =         0xFFFFFFFF7FFFFF80,
+        SCOM_TRANS_MBA_MASK =         0xFFFFFFFF7FFFFC00,
+        SCOM_TRANS_XBUS_MASK =        0x00000000FFFFFC00,
+        SCOM_TRANS_IND_MCS_DMI_MASK = 0x80000060FFFFFFFF,
+        SCOM_TRANS_IND_MBA_MASK =     0x80000000FFFFFFFF,
+        SCOM_TRANS_ABUS_MASK =        0x000000FFFFFFFC00,
+        SCOM_TRANS_INDIRECT_MASK =    0x8000000000000000,     
     };
 
     enum ScomTransBaseAddr
     {
-        SCOM_TRANS_EX_BASEADDR =  0x0000000010000000,
-        SCOM_TRANS_MCS_BASEADDR = 0x0000000002011800,
-        SCOM_TRANS_MBA_BASEADDR = 0x0000000003010000,
+        SCOM_TRANS_EX_BASEADDR =          0x0000000010000000,
+        SCOM_TRANS_MCS_BASEADDR =         0x0000000002011800,
+        SCOM_TRANS_MCS_DMI_BASEADDR =     0x0000000002011A00,
+        SCOM_TRANS_IND_MCS_BASEADDR =     0x8000000002011A00,
+        SCOM_TRANS_MBA_BASEADDR =         0x0000000003010400,
+       // SCOM_TRANS_MBS_DPHY_BASEADDR =    0x0000000003011000,
+        SCOM_TRANS_XBUS_BASEADDR =        0x0000000004011000,
+        SCOM_TRANS_ABUS_BASEADDR =        0x0000000008010C00,
+        SCOM_TRANS_IND_MBA_BASEADDR =     0x800000000301143f,
+        SCOM_TRANS_IND_MCS_DMI_BASEADDR = 0x8000000002011A3F,
+        SCOM_TRANS_INDIRECT_ADDRESS =     0x8000000000000000,
     };
 
 
@@ -95,7 +108,7 @@ errlHndl_t scomPerformTranslate(TARGETING::EntityPath i_epath,
                                 TARGETING::TYPE i_ctype,
 		                TARGETING::TYPE i_ptype,
                                 int i_shift,
-                                int i_mask,
+                                uint64_t i_mask,
                                 TARGETING::Target * &o_target,
                                 uint64_t &i_addr );
 

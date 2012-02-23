@@ -88,8 +88,8 @@ errlHndl_t scomTranslate(DeviceFW::OperationType i_opType,
 
 {
     errlHndl_t l_err = NULL;
-
     bool l_invalidAddr = false;
+    uint64_t l_instance = 0;
 
     uint64_t i_addr = va_arg(i_args,uint64_t);
 
@@ -105,22 +105,21 @@ errlHndl_t scomTranslate(DeviceFW::OperationType i_opType,
         {
  
         // Below are the assumptions used for the EX translate
-        /*EX
-         Mask		:  0x1F00_0000
-         Range 1	:  0x1000_0000 -  0x10FF_FFFF
-         ...
-         ...
-         bits 3:7 correspond to what EX chiplet is targeted.
-         where 0x10XXXXXX is for EX0
-         ...
-         where 0x13XXXXXX is for EX3
-         where 0x14XXXXXX is for EX4
-         ...
-         where 0x1CXXXXXX is for EX12
+        // EX
+        // Mask		:  0x1F00_0000
+        // Range 1	:  0x1000_0000 -  0x10FF_FFFF
+        //
+        //  bits 3:7 correspond to what EX chiplet is targeted.
+        //  where 0x10XXXXXX is for EX0
+        // 
+        // where 0x13XXXXXX is for EX3
+        // where 0x14XXXXXX is for EX4
+        //  ...
+        // where 0x1CXXXXXX is for EX12
 
+        // EX Mask = 0x7F000000 to catch other chiplets.
 
-         original mask = 0x000000001F000000
-         change that to be 0x7F000000 to catch other chiplets.*/
+        // no indirect addresses to worry about*/
 
             // check to see that the Address is in the correct range
             if ((i_addr & SCOM_TRANS_EX_MASK) ==  SCOM_TRANS_EX_BASEADDR)
@@ -142,28 +141,25 @@ errlHndl_t scomTranslate(DeviceFW::OperationType i_opType,
         }
         else if (l_type == TARGETING::TYPE_MCS)
         {
-        /* ring  6 = MCL
-                     MC0 MCS0   = 0x02011800   MCS-0    range 0
-                     MC0 MCS1   = 0x02011880   MCS-1    range 0 + remainder
-                     MC1 MCS0   = 0x02011900   MCS-2    range 1
-                     MC1 MCS0   = 0x02011980   MCS-3    range 1 + remainder
-                     IOMC0      = 0x02011A00  -NOT targeting this range..
-           ring  7 = MCR
-                     MC2 MCS0   = 0x02011C00   MCS-4     range 2
-                     MC2 MCS1   = 0x02011C80   MCS-5     range 2 + remainder
-                     MC3 MCS0   = 0x02011D00   MCS-6     range 3
-                     MC3 MCS1   = 0x02011D80   MCS-7     range 3 + remainder
+        
+            // MC0 MCS0   = 0x02011800   MCS-0    range 0
+            // MC0 MCS1   = 0x02011880   MCS-1    range 0 + remainder
+            // MC1 MCS0   = 0x02011900   MCS-2    range 1
+            // MC1 MCS0   = 0x02011980   MCS-3    range 1 + remainder
+            // IOMC0      = 0x02011A00  -NOT targeting this range..
+           
+            // MC2 MCS0   = 0x02011C00   MCS-4     range 2
+            // MC2 MCS1   = 0x02011C80   MCS-5     range 2 + remainder
+            // MC3 MCS0   = 0x02011D00   MCS-6     range 3
+            // MC3 MCS1   = 0x02011D80   MCS-7     range 3 + remainder
 
-            original mask = 0x0000000002011D80
-            Need the mask to be   0x7FFFFF80*/
+            
+            // SCOM_TRANS_MCS_MASK =         0xFFFFFFFF7FFFFF80
 
 
-            uint64_t l_instance;
-
-            // Check that we are working with the correct address range
+            // Check that we are working with the correct MCS direct address range
             if ((i_addr & SCOM_TRANS_MCS_MASK) == SCOM_TRANS_MCS_BASEADDR )
             {
-
                 // Need to extract what instance of the entity we are at
                 l_instance =
                    epath.pathElementOfType(TARGETING::TYPE_MCS).instance;
@@ -197,6 +193,67 @@ errlHndl_t scomTranslate(DeviceFW::OperationType i_opType,
                                              TARGETING::TYPE_PROC,
                                              i_target);
             }
+            // 0x00000000_02011A00      MCS         0-3 # MCS/DMI0 Direct SCOM
+            // 0x00000000_02011E00      MCS         4-7 # MCS/DMI4 Direct SCOM
+            //                 Address translation from DMI0 (A->E)
+            // SCOM_TRANS_MCS_DMI_BASEADDR =     0x0000000002011A00,
+            // If the base address passed in is 0x2011A00 - we are dealing with
+            // MCS/DMI.  Use the instance to determine which one wanted.  If
+            // MCS 4-7 is targeted, translations is required.
+            //
+            // Also if we have a indirect address then we need to update the
+            // same address bits as above whether indirect or not.. for
+            // indirect specifically need to update bits 25-26 to get the
+            // correct address range.
+
+            // MCS Indirect mask = 0x80000060_FFFFFFFF
+            //   0x80000000_02011A3F      MCS      0  # DMI0 Indirect SCOM
+            //   0x80000020_02011A3F      MCS      1  # DMI1 Indirect SCOM
+            //   0x80000040_02011A3F      MCS      2  # DMI2 Indirect SCOM
+            //   0x80000060_02011A3F      MCS      3  # DMI3 Indirect SCOM
+            //   0x80000000_02011E3F      MCS      4  # DMI4 Indirect SCOM
+            //   0x80000020_02011E3F      MCS      5  # DMI5 Indirect SCOM
+            //   0x80000040_02011E3F      MCS      6  # DMI6 Indirect SCOM
+            //   0x80000060_02011E3F      MCS      7  # DMI7 Indirect SCOM
+            //  SCOM_TRANS_IND_MCS_BASEADDR =     0x8000000002011A00,
+
+            // check that we are working with a MCS/DMI address range..
+            // can be indirect or direct.
+            else if (((i_addr & SCOM_TRANS_MCS_MASK) ==
+                     SCOM_TRANS_MCS_DMI_BASEADDR) || ((i_addr & SCOM_TRANS_IND_MCS_DMI_MASK) ==
+                     SCOM_TRANS_IND_MCS_DMI_BASEADDR))
+            {
+
+                // Need to extract what instance of the entity we are at
+                l_instance =
+                   epath.pathElementOfType(TARGETING::TYPE_MCS).instance;
+
+                // If we are dealing with an indirect SCOM MCS address
+                // Need to update the address based on instance
+                if ((i_addr & SCOM_TRANS_IND_MCS_DMI_MASK) ==
+                     SCOM_TRANS_IND_MCS_DMI_BASEADDR)
+                {
+
+                 // Need to update the upper bits of the indirect scom address.
+                   uint64_t temp_instance = l_instance % 4;
+                   temp_instance = temp_instance << 37;
+                   i_addr = i_addr | temp_instance;
+                }
+
+                // Need to update the address whether we are indirect or not
+                // for the MCS/DMI address ranges.
+                // need to do this check after above because we modify the base
+                // address based on instance and the mask check would then fail
+                if (l_instance > 3)
+                {
+                    // or 0x400 to change 0x2011Axx to 0x2011Exx
+                    i_addr = i_addr | 0x400;
+                }
+                // Call to set the target to the parent target type
+                l_err = scomfindParentTarget(epath,
+                                             TARGETING::TYPE_PROC,
+                                             i_target);
+            }
             else
             {
                  l_invalidAddr = true;
@@ -204,58 +261,124 @@ errlHndl_t scomTranslate(DeviceFW::OperationType i_opType,
         }
         else if (l_type == TARGETING::TYPE_XBUS)
         {
-          //*** temporarily put an error log indicating not supported until we
-          // have info from the hardware team
+            // XBUS Direct Address info
+            // XBUS mask = 0xFFFFFC00
+            // default>physical:sys-0/node-0/proc-0/xbus-0</default>
+            //   startAddr   target  
+            //  0x04011000   XBUS 0    # XBUS0 Direct SCOM 
+            //  0x04011400   XBUS 1    # XBUS1 Direct SCOM 
+            //  0x04011C00   XBUS 2    # XBUS2 Direct SCOM
+            //  0x04011800   XBUS 3    # XBUS3 Direct SCOM
+            //
+            // XBUS Indirect Address info
+            //  mask = 0x80000000_FFFFFFFF
+            //   0x800000000401103F   XBUS  0   # XBUS0 Indirect SCOM
+            //   0x800000000401143F   XBUS  1   # XBUS1 Indirect SCOM
+            //   0x8000000004011C3F   XBUS  2   # XBUS2 Indirect SCOM
+            //   0x800000000401183F   XBUS  3   # XBUS3 Indirect SCOM
 
-            TRACFCOMP(g_trac_scom, "SCOM_TRANSLATE-unsupported target type=0x%X", l_type);
 
-            /*@
-             * @errortype
-             * @moduleid     SCOM::SCOM_TRANSLATE
-             * @reasoncode   SCOM::SCOM_TRANS_UNSUPPORTED_XBUS
-             * @userdata1    Address
-             * @userdata2    Target Type that failed
-             * @devdesc      Scom Translate not supported for this type
-             */
-             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                             SCOM_TRANSLATE,
-                                             SCOM_TRANS_UNSUPPORTED_XBUS,
-                                             i_addr,
-                                             l_type);
+            // no differentiation between direct and indirect.. translate the same way
+            // Check that we are working with the correct address range
+            if ((i_addr & SCOM_TRANS_XBUS_MASK) == SCOM_TRANS_XBUS_BASEADDR )
+            {
+
+                // Need to extract what instance of the entity we are at
+                l_instance =
+                  epath.pathElementOfType(TARGETING::TYPE_XBUS).instance;
+
+                // based on the instance, update the address
+                if (l_instance != 0)
+                {
+                    // zero out the address bits that need to change
+                    i_addr = i_addr & 0xFFFFFFFFFFFFF3FF;
+
+                    // range 1 - add 0x400 to the addr
+                    if (l_instance == 1)
+                    {
+                        i_addr += 0x400;
+                    }
+                    // range 2 - add 0xC00 to the addr
+                    else if (l_instance == 2)
+                    {
+                        i_addr += 0xC00;
+                    }
+                    // range 3 - add 0x800 to the addr
+                    else if (l_instance == 3)
+                    {
+                        i_addr += 0x800;
+                    }
+
+                }
+
+                // Call to set the target to the parent target type
+                l_err = scomfindParentTarget(epath,
+                                             TARGETING::TYPE_PROC,
+                                             i_target);
+            }
+            else
+            {
+                 l_invalidAddr = true;
+            }
 
         }
         else if (l_type == TARGETING::TYPE_ABUS)
         {
-          //*** temporarily put an error log indicating not supported until we have info
-          // from the hardware team
-            TRACFCOMP(g_trac_scom, "SCOM_TRANSLATE-unsupported target type=0x%X", l_type);
+           // ABUS
+           // Mask 		: 0xFFFFFC00
+           // Range 1	: 0x08010C00 - 0x08010C3F
 
-            /*@
-             * @errortype
-             * @moduleid     SCOM::SCOM_TRANSLATE
-             * @reasoncode   SCOM::SCOM_TRANS_UNSUPPORTED_ABUS
-             * @userdata1    Address
-             * @userdata2    Target Type that failed
-             * @devdesc      Scom Translate not supported for this type
-             */
-             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                             SCOM_TRANSLATE,
-                                             SCOM_TRANS_UNSUPPORTED_ABUS,
-                                             i_addr,
-                                             l_type);
+           // default>physical:sys-0/node-0/proc-0/abus-0</default>
+           // ABUS Direct addresses
+           // ABUS mask 0x000000FF_FFFFFF80
+           // 0x00000000_08010C00   # ABUS0-2 Direct SCOM
+           //
+           // Abus Indirect Addresses
+           // Abus Indirect MASK =   0x80000060FFFFFFFF
+           //  0x80000000_08010C3F  ABUS 0   # ABUS0 Indirect SCOM
+           //  0x80000020_08010C3F  ABUS 1   # ABUS1 Indirect SCOM 
+           //  0x80000040_08010C3F  ABUS 2   # ABUS2 Indirect SCOM
+
+
+            // Check that we are working with the correct address range
+            // the base address bits 32 to 64 are the same for both
+            if ((i_addr & SCOM_TRANS_ABUS_MASK) == SCOM_TRANS_ABUS_BASEADDR )
+            {
+               // If we have an indirect address.. then need to translate
+               if ((i_addr & SCOM_TRANS_INDIRECT_MASK) == SCOM_TRANS_INDIRECT_ADDRESS)
+               {
+                  
+                   // Need to extract what instance of the entity we are at
+                   l_instance =
+                     epath.pathElementOfType(TARGETING::TYPE_ABUS).instance;
+
+
+                   // Need to update the upper bits of the indirect scom address.
+                   uint64_t temp_instance = l_instance << 37;
+                   i_addr = i_addr | temp_instance;
+
+               }
+                // get the parent.. 
+                l_err = scomfindParentTarget(epath,
+                                             TARGETING::TYPE_PROC,
+                                             i_target);
+            }
+            
+            else
+            {
+                // got and error.. bad address.. write an errorlog..
+                l_invalidAddr = true;
+            }
 
 
         }
         else if (l_type == TARGETING::TYPE_MBS)
         {
-           /*
-            MBS
-            Mask 		: NA
-            Range 1	: 0x02010000 - 0x0201FFFF
+            // MBS
+            //  Mask 		: NA
+            //  Range 1	: 0x02010000 - 0x0201FFFF
+            //  default>physical:sys-0/node-0/membuf-10/mbs-0</default>
 
-            default>physical:sys-0/node-0/membuf-10/mbs-0</default>
-
-            */
             // NO address shifting required.. no mask..
             // just get parent.
             l_err = scomfindParentTarget(epath,
@@ -265,30 +388,35 @@ errlHndl_t scomTranslate(DeviceFW::OperationType i_opType,
         }
         else if (l_type == TARGETING::TYPE_MBA)
         {
-            /*
-               MBA
-               Mask 		: 0x03010800
-               Range	1	: 0x03010400 - 0301043F  # MBA01
-               Range	2	: 0x03010600 - 030106FF  # MBA01 MCBIST
-               Range	4	: 0x03010C00 - 03010C3F  # MBA23
-               Range	5	: 0x03010E00 - 03010EFF  # MBA23 MCBIST
+           // MBA
+           // SCOM_TRANS_MBA_MASK =     0xFFFFFFFF7FFFFC00,
+           // SCOM_TRANS_MBA_BASEADDR = 0x0000000003010400,
+           //
+           //     In the XML.. the
+           //    <default>physical:sys-0/node-0/membuf-10/mbs-0/mba-1</default>
+           //
+           //    Assuming the MBA we are accessing is under the Centaur
+           //    not the processor.. for now.
+           //
+           // 0x00000000_03010400   MBA 0   # MBA01
+           // 0x00000000_03010C00   MBA 1   # MBA23
+           //
+           // 
+           // 0x00000000_03011400   MBA 0   # DPHY01 (indirect addressing)
+           // 0x00000000_03011800   MBA 1   # DPHY23 (indirect addressing)
 
-               Original mask from hdw team is: 03010800
-               The mask needs to be 0x7FFFF800 in order make sure we
-               don't have any other valid address bits on for another
-               chiplet.
+           // 0x80000000_0301143f   MBA  0  # DPHY01 (indirect addressing) 
+           // 0x80000000_0301183f   MBA  1  # DPHY23 (indirect addressing)
 
-               bits 20 correspond to what MBA chiplet is targeted.
-               where 0x03010000 is for MBA01
-               where 0x03010800 is for MBA23
+           // 0x80000000_0701143f   MBA 0   # DPHY01 (indirect addressing) 
+           // 0x80000000_0701183f   MBA 1   # DPHY23 (indirect addressing)
+           //
+           // SCOM_TRANS_IND_MBA_MASK =      0x80000000FFFFFFFF,
+           // SCOM_TRANS_IND_MBA_BASEADDR =  0x800000000301143f,
 
-               In the XML.. the
-              <default>physical:sys-0/node-0/membuf-10/mbs-0/mba-1</default>
 
-               Assuming the MBA we are accessing is under the Centaur
-               not the processor.. for now.
-               */
-            // check to see that the Address is in the correct range
+            // check to see that the Address is in the correct direct
+            // scom MBA address range.
             if ((i_addr & SCOM_TRANS_MBA_MASK) == SCOM_TRANS_MBA_BASEADDR)
             {
 
@@ -300,7 +428,28 @@ errlHndl_t scomTranslate(DeviceFW::OperationType i_opType,
                                              i_target,
                                              i_addr );
             }
-            else
+            // check to see if valid MBA 0 indirect address range
+            else if ((i_addr & SCOM_TRANS_IND_MBA_MASK) ==
+                     SCOM_TRANS_IND_MBA_BASEADDR)
+            {
+               // Need to extract what instance of the entity we are
+                l_instance =
+                  epath.pathElementOfType(TARGETING::TYPE_MBA).instance;
+
+                // If instance is 1 then need to update address
+                if (l_instance == 1)
+                {
+                  // Have address 0301143f need address 0301183f
+                  i_addr = i_addr & 0xFFFFFFFFFFFFFBFF;
+                  i_addr = i_addr | 0x00000800;
+                }
+
+                // Call to set the target to the parent target type
+                l_err = scomfindParentTarget(epath,
+                                             TARGETING::TYPE_MEMBUF,
+                                             i_target);
+            }
+             else
             {
                 // got and error.. bad address.. write an errorlog..
                 l_invalidAddr = true;
@@ -308,8 +457,7 @@ errlHndl_t scomTranslate(DeviceFW::OperationType i_opType,
 	}
         else
 	{
-            //*** temporarily put an error log indicating not supported until we have info
-            // from the hardware team
+            // Send an errorlog because we are called with an unsupported type.
             TRACFCOMP(g_trac_scom, "SCOM_TRANSLATE.. Invalid target type=0x%X", l_type);
 
             /*@
@@ -373,7 +521,7 @@ errlHndl_t scomPerformTranslate(TARGETING::EntityPath i_epath,
                                 TARGETING::TYPE i_ctype,
                                 TARGETING::TYPE i_ptype,
                                 int i_shift,
-                                int i_mask,
+                                uint64_t i_mask,
                                 TARGETING::Target * &o_target,
                                 uint64_t &i_addr )
 {
