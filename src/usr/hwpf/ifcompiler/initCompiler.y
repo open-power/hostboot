@@ -26,6 +26,8 @@
 //                 andrewg  11/09/11  Refactor to use common include with hwp framework.
 //                 camvanng 12/12/11  Support multiple address ranges within a SCOM address
 //                 camvanng 01/20/12  Support for using a range indexes for array attributes
+//                 camvanng 02/14/12  Support binary and hex scom addresses
+//                                    Support for array at beginning of scom address
 // End Change Log *********************************************************************************
 /**
  * @file initCompiler.y
@@ -76,6 +78,9 @@ int scom;
 %token <str_ptr>  INIT_INT64_STR
 %token <str_ptr>  INIT_SCOM_ADDR
 %token <str_ptr>  INIT_SCOM_SUFFIX
+%token <str_ptr>  INIT_BINARY_STR
+%token <str_ptr>  INIT_SCOM_ADDR_BIN
+%token <str_ptr>  INIT_SCOM_SUFFIX_BIN
 %token <uint64>  INIT_SCOM_DATA
 %token <str_ptr> INIT_ID
 %token <str_ptr> INIT_VERSIONS
@@ -160,18 +165,26 @@ scom:       INIT_SCOM {current_scom = new init::Scom(yyscomlist->get_symbols(),y
 		{
                      /* printf("Found an INIT_SCOM!\n"); */
                     /* current_scom = new init::Scom(yyscomlist->get_symbols(),yyline); */
+                    yyscomlist->insert(current_scom);
                 }
 ;	
 
 scomaddr: 
-      | INIT_SCOM_ADDR {
-		           /* printf("Found an INIT_SCOM_ADDR 0x%X %s\n",$1, (*($1)).c_str()); */
-                           current_scom->set_scom_address(*($1)); delete $1;
-                           yyscomlist->insert(current_scom);
-                       }
-      | scomaddr '(' scom_list ')' { current_scom->copy_dup_scom_address(); } 
-      | scomaddr '(' scom_list ')' INIT_SCOM_SUFFIX  { current_scom->copy_dup_scom_address();
-                                                       current_scom->set_scom_suffix(*($5)); delete $5; } 
+      scomaddr_hex { /*printf("Found a hex scom address\n");*/ }
+      | scomaddr_bin { /*printf("Found a binary scom address\n");*/
+                       current_scom->append_scom_address_bin(); }
+      | scomaddr scomaddr_hex { /*printf("Found a hex scom address 2\n");*/ }
+      | scomaddr scomaddr_bin { /*printf("Append binary scom address 2\n");*/
+                                current_scom->append_scom_address_bin(); }
+;
+
+
+
+scomaddr_hex: 
+                | INIT_SCOM_ADDR { /*printf("Found an INIT_SCOM_ADDR %s\n", (*($1)).c_str());*/
+                                   current_scom->set_scom_address(*($1)); delete $1; }
+                | scom_list { current_scom->copy_dup_scom_address(); }
+                | INIT_SCOM_SUFFIX { current_scom->set_scom_suffix(*($1)); delete $1; }
 ;
 
 
@@ -179,6 +192,22 @@ scom_list:       INIT_INT64_STR                { current_scom->dup_scom_address(
                 | scom_list ',' INIT_INT64_STR  { current_scom->dup_scom_address(*($3));delete $3;}
 ;
 
+
+scomaddr_bin:    INIT_SCOM_ADDR_BIN { /*printf("Found an INIT_SCOM_ADDR_BIN %s\n", (*($1)).c_str());*/
+                                      current_scom->set_scom_address_bin(*($1)); delete $1; }
+                | scom_bin_list { /*printf("Found a scom_bin_list\n");*/
+                                  current_scom->copy_dup_scom_address_bin(); }
+                | scomaddr_bin INIT_SCOM_ADDR_BIN { /*printf("Found an INIT_SCOM_ADDR_BIN 2 %s\n", (*($2)).c_str());*/
+                                                    current_scom->set_scom_suffix_bin(*($2)); delete $2;}
+                | scomaddr_bin scom_bin_list { /*printf("Found a scom_bin_list 2\n");*/
+                                               current_scom->copy_dup_scom_address_bin(); }
+                | scomaddr_bin INIT_SCOM_SUFFIX_BIN { /*printf("Found a scom binary suffix %s\n", (*($2)).c_str());*/
+                                                      current_scom->set_scom_suffix_bin(*($2)); delete $2;}
+;
+
+scom_bin_list:   INIT_BINARY_STR { current_scom->dup_scom_address_bin(*($1));delete $1; }
+                | scom_bin_list ',' INIT_BINARY_STR { current_scom->dup_scom_address_bin(*($3));delete $3; }
+;
 
     /* The scombody was reformatted by the scanner
      * colname1 , row1 , row 2, ... , row n ;

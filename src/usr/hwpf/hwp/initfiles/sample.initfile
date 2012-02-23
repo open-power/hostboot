@@ -190,8 +190,17 @@ scom 0x0000000013013289              {
 #-- Note: These are not valid SCOM addresses. Just included here as an example of
 #-- the supported syntax.  Uncomment only for debugging code.
 #--******************************************************************************
-#scom 0x0000006(1E..20,3c)4(A,1)(D..F)56(7,8,9,0)1       {
+#scom 0x0000006(0E..10,3c)4(A,1)(D..F)56(7,8,9,0)1       {
 #  scom_data             ;
 #  0x0000000000000193    ;
 #}
 
+#--******************************************************************************
+#-- Basic SCOM with Bin and Hex Scom Addresses of Multiple Arrays/Address Ranges
+#-- Note: These are not valid SCOM addresses. Just included here as an example of
+#-- the supported syntax.  Uncomment only for debugging code.
+#--******************************************************************************
+#scom 0x(7,8)000001301.0b1(01..10,00)(00,01)0(1,0)1.0xD(8A,8B)C {
+#  scom_data                 ;
+#  0x0000000000000194    ;
+#}

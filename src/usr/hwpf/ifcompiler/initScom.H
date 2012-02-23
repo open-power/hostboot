@@ -29,6 +29,7 @@
 //                                   Use strtoull vs strtoul for 32-bit platforms
 //                 camvanng 12/15/11 Support for multiple duplicate addresses setting different bits
 //                 camvanng 01/20/12 Support for using a range of indexes for array attributes
+//                 camvanng 02/14/12 Support binary and hex scom addresses
 // End Change Log *********************************************************************************
 
 /**
@@ -177,6 +178,48 @@ namespace init
             void copy_dup_scom_address();
             void set_scom_suffix(const string & i_scom_addr);
 
+            /**
+             * @brief Set the binary SCOM address
+             * @param i_scom_addr  binary address string
+             */
+            void set_scom_address_bin(const string & i_scom_addr);
+            
+            /**
+             * @brief Create duplicate binary SCOM addresses and append input address string
+             * @param i_scom_addr  binary address string
+             */
+            void dup_scom_address_bin(const string & i_scom_addr);
+
+            /**
+             * @brief Copy duplicate binary SCOM addresses to main binary address vector
+             */
+            void copy_dup_scom_address_bin();
+
+            /**
+             * @brief Append the input binary address string to the binary address
+             * @param i_scom_addr  binary address string
+             */
+            void set_scom_suffix_bin(const string & i_scom_addr);
+
+            /**
+             * @brief Append the binary address to the hex address
+             */
+            void append_scom_address_bin();
+
+            /**
+             * @brief Convert decimal to hex string
+             * @param i_num  decimal number
+             * @param i_str_size   string size
+             */
+            string dec2hexString(uint64_t i_num, size_t i_str_size);
+
+            /**
+             * @brief Convert decimal to bin string
+             * @param i_num  decimal number
+             * @param i_str_size   string size
+             */
+            string dec2binString(uint64_t i_num, size_t i_str_size);
+
         private:  // functions
 
             string list_one(RANGE range);
@@ -195,6 +238,8 @@ namespace init
             SCOM_ADDR   iv_scom_addr;
             SCOM_ADDR   iv_dup_scom_addr;      ///< contains the duplicate scom addresses
             uint64_t    iv_scom_addr_hex;
+            SCOM_ADDR   iv_scom_addr_bin;      ///< temp storage for binary scom addresses
+            SCOM_ADDR   iv_dup_scom_addr_bin;  ///< contains the duplicate binary scom addresses
             uint32_t    iv_scom_length;
             uint32_t    iv_scom_offset;
             RPN_LIST    iv_scom_rpn;            ///< spyv - for each row

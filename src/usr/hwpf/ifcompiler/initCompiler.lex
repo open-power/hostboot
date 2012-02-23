@@ -28,6 +28,8 @@
 //                camvanng 12/12/11   Support multiple address ranges within a SCOM address
 //                camvanng 01/20/12   Support for using a range of indexes for array attributes
 //                camvanng 02/07/12   Ability to #include common scom initfile defines
+//                camvanng 02/14/12   Support binary and hex scom addresses
+//                                    Support for array at beginning of scom address
 // End Change Log *********************************************************************************/
 /**
  * @file initCompiler.lex
@@ -89,6 +91,7 @@ COMMENT  #.*\n
 OP      "="|"+"|"-"|"|"|"<"|">"|"*"|"/"|"%"
 FLOAT   [0-9]+"."[0-9]*
 BINARY  0[bB][0-1]+
+SINGLE_BIN [0-1]
 SCOM_DATA [ ]*[scom_data][ ]+
 HEX     0[xX][A-Fa-f0-9]+
 SINGLE_HEX [A-Fa-f0-9]
@@ -96,8 +99,12 @@ ATTRIBUTE [\[[A-Fa-f0-9]\]]
 MULTI_DIGIT [0-9]+
 
 %x      scomop 
-%x      scomop_array
-%x      scomop_suffix
+%x      scomop_hex 
+%x      scomop_hex_array
+%x      scomop_hex_suffix
+%x      scomop_bin
+%x      scomop_bin_array
+%x      scomop_bin_suffix
 %x      scomdata
 %x      when_kw
 %x      when_expr
@@ -179,41 +186,91 @@ define                  { return INIT_DEFINE;}
 
 scom              { BEGIN(scomop); oss.str("");  return INIT_SCOM; }
 
-<scomop>{HEX}       { 
-	                  yylval.str_ptr = new std::string(yytext);
-                        oss.str("");  
-                        return INIT_SCOM_ADDR; 
-                    }
+<scomop>{HEX} { /*printf("lex: hex string %s\n", yytext);*/
+                yylval.str_ptr = new std::string(yytext);
+                BEGIN(scomop_hex);
+                return INIT_SCOM_ADDR; 
+              }
 
-<scomop>[\(]        {BEGIN(scomop_array); return yytext[0];}
+<scomop>0[xX] { BEGIN(scomop_hex); }
+<scomop>0[bB] { BEGIN(scomop_bin); }
 
-<scomop_array>{SINGLE_HEX}+\.\.{SINGLE_HEX}+ {
-	                         yylval.str_ptr = new std::string(yytext);
-                               oss.str("");  
-                               return INIT_INT64_STR; 
-                           }
+<scomop_hex,scomop_hex_suffix>[\(] {
+                    /*printf("lex: hex string %s\n", yytext);*/
+                    BEGIN(scomop_hex_array);
+                }
 
-<scomop_array>{SINGLE_HEX}+ {
-	                         yylval.str_ptr = new std::string(yytext);
-                               oss.str("");  
-                               return INIT_INT64_STR; 
-                           }
+<scomop_hex_array>{SINGLE_HEX}+\.\.{SINGLE_HEX}+ {
+                    /*printf("lex: hex string %s\n", yytext);*/
+                    yylval.str_ptr = new std::string(yytext);
+                    return INIT_INT64_STR; 
+                }
 
-<scomop_array>[\)] {BEGIN(scomop_suffix); return(yytext[0]);}
+<scomop_hex_array>{SINGLE_HEX}+ {
+                    /*printf("lex: hex string %s\n", yytext);*/
+                    yylval.str_ptr = new std::string(yytext);
+                    return INIT_INT64_STR; 
+                }
 
-<scomop_suffix>{SINGLE_HEX}+ {
-                                 yylval.str_ptr = new std::string(yytext);
-                                 oss.str("");  
-                                 BEGIN(scomop);
-                                 return INIT_SCOM_SUFFIX; 
-                             }
+<scomop_hex_array>[\)] {
+                    /*printf("lex: hex string %s\n", yytext);*/
+                    BEGIN(scomop_hex_suffix);
+                }
 
-<scomop_suffix>[\(]      { BEGIN(scomop_array); return yytext[0]; }
+<scomop_hex,scomop_hex_suffix>{SINGLE_HEX}+ {
+                    /*printf("lex: hex string %s\n", yytext);*/
+                    yylval.str_ptr = new std::string(yytext);
+                    return INIT_SCOM_SUFFIX; 
+                }
+
+<scomop_hex,scomop_hex_suffix>\.0[bB] { BEGIN(scomop_bin); }
+
+<scomop_bin>{SINGLE_BIN}+ {
+                    /*printf("lex: bin string %s\n", yytext);*/
+                    yylval.str_ptr = new std::string(yytext);
+                    return INIT_SCOM_ADDR_BIN;
+                }
+
+<scomop_bin,scomop_bin_suffix>[\(] {
+                    /*printf("lex: bin string %s\n", yytext);*/
+                    BEGIN(scomop_bin_array);
+                }
+<scomop_bin_array>{SINGLE_BIN}+\.\.{SINGLE_BIN}+ {
+                    /*printf("lex: bin string %s\n", yytext);*/
+                    yylval.str_ptr = new std::string(yytext);
+                    return INIT_BINARY_STR;
+                }
+
+<scomop_bin_array>{SINGLE_BIN}+ {
+                    /*printf("lex: bin string %s\n", yytext);*/
+                    yylval.str_ptr = new std::string(yytext);
+                    return INIT_BINARY_STR;
+                }
+
+<scomop_bin_array>[\)] {
+                    /*printf("lex: bin string %s\n", yytext);*/
+                    BEGIN(scomop_bin_suffix);
+                }
+
+<scomop_bin_suffix>{SINGLE_BIN}+ {
+                    /*printf("lex: bin string %s\n", yytext);*/
+                    yylval.str_ptr = new std::string(yytext);
+                    return INIT_SCOM_SUFFIX_BIN;
+                }
+
+<scomop_bin,scomop_bin_suffix>\.(0[xX])? {
+                    /*printf("lex: bin string %s\n", yytext);*/
+                    BEGIN(scomop_hex);
+                }
+
+<scomop_bin,scomop_bin_suffix>\.0[bB] {
+                    /*printf("lex: bin string %s\n", yytext);*/
+                }
 
 <scomop>[:;\[]    { BEGIN(INITIAL); g_coltype = 0; return yytext[0]; }
 <scomop>{NEWLINE} { BEGIN(INITIAL); ++yyline; }
 
-<scomop,scomop_suffix>[\{]   {  
+<scomop_hex,scomop_hex_suffix,scomop_bin,scomop_bin_suffix>[\{]   {  
                                  oss.str("");
                                  BEGIN(scomcolname);
                                  return yytext[0];

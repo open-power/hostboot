@@ -29,6 +29,9 @@
 //                                   Use strtoull vs strtoul for 32-bit platforms
 //                 camvanng 12/15/11 Support for multiple duplicate addresses setting different bits
 //                 camvanng 01/20/12 Support for using a range of indexes for array attributes
+//                 camvanng 02/14/12 Support binary and hex scom addresses
+//                                   Support for array at beginning of scom address
+//                                   Fix bug in string size when converting decimal to hex string
 // End Change Log *********************************************************************************
 
 /**
@@ -1407,17 +1410,13 @@ void Scom::set_scom_address(const string & i_scom_addr)
 
 void Scom::dup_scom_address(const string & i_scom_addr)
 {
-
-    if (iv_scom_addr.size() == 0)
-    {
-        yyerror("No base scom address to duplicate!");
-    }
-
     // cout << "I>Scom::dup_scom_address: "<< i_scom_addr << " is the output string!" << endl;
 
+    //If we have a range of values
     size_t l_pos = i_scom_addr.find("..");
     if (l_pos != string::npos)
     {
+        // Convert the range specified to decimal values and check for valid range
         uint64_t l_num1 = strtoull((i_scom_addr.substr(0,l_pos)).c_str(), NULL, 16);
         uint64_t l_num2 = strtoull((i_scom_addr.substr(l_pos + 2)).c_str(), NULL, 16);
         // cout << "I>Scom:dup_scom_address: " <<  l_num1 << " - " << l_num2 << endl;
@@ -1430,38 +1429,63 @@ void Scom::dup_scom_address(const string & i_scom_addr)
 
         for (uint64_t num = l_num1; num <= l_num2; num++)
         {
+            // For each value within the range, create a hex string of the correct size
+            string l_scom_addr = dec2hexString(num, l_pos);
+
+            if (iv_scom_addr.size() == 0)
+            {
+                // If there are no base address, create the duplicate addresses by pushing back
+                // each value within the range
+                iv_dup_scom_addr.push_back(l_scom_addr);
+                // cout << "I>Scom::dup_scom_address: iv_dup_scom_addr" << iv_dup_scom_addr.back() << endl;
+            }
+            else
+            {
+                // If there are base addresses, create the dupicate addresses by appending each 
+                // value within the range to the base addresses.
+                for (size_t i = 0; i < iv_scom_addr.size(); i++)
+                {
+                    iv_dup_scom_addr.push_back(iv_scom_addr.at(i) + l_scom_addr);
+                    // cout << "I>Scom::dup_scom_address: iv_dup_scom_addr " << iv_dup_scom_addr.back() << endl;
+                }
+            }
+        }
+    }
+    // Else we have a single value
+    else
+    {
+        // If there are no base address, create the duplicate address by pushing back the specified
+        // value
+        if (iv_scom_addr.size() == 0)
+        {
+            iv_dup_scom_addr.push_back(i_scom_addr);
+            // cout << "I>Scom::dup_scom_address: iv_dup_scom_addr " << iv_dup_scom_addr.back() << endl;
+        }
+        else
+        {
+            // If there are base addresses, create the dupicate addresses by appending the
+            // specified value to the base addresses.
             for (size_t i = 0; i < iv_scom_addr.size(); i++)
             {
-                stringstream l_ss;
-                l_ss << hex << num;
-                iv_dup_scom_addr.push_back(iv_scom_addr.at(i) + l_ss.str());
+                iv_dup_scom_addr.push_back(iv_scom_addr.at(i) + i_scom_addr);
                 // cout << "I>Scom::dup_scom_address: iv_dup_scom_addr " << iv_dup_scom_addr.back() << endl;
             }
         }
     }
-    else
-    {
-        for (size_t i = 0; i < iv_scom_addr.size(); i++)
-        {
-            iv_dup_scom_addr.push_back(iv_scom_addr.at(i) + i_scom_addr);
-            // cout << "I>Scom::dup_scom_address: iv_dup_scom_addr " << iv_dup_scom_addr.back() << endl;
-        }
-    }
-
 }
 
 //-------------------------------------------------------------------------------------------------
 
 void Scom::copy_dup_scom_address()
 {
-    // cout << "I>Scom::copy_dup_scom_address: iv_scom_addr size "<< iv_scom_addr.size() 
+    // cout << "I>Scom::copy_dup_scom_address: iv_scom_addr size "<< iv_scom_addr.size()
     //      << " iv_dup_scom_addr size " << iv_dup_scom_addr.size() << endl;
 
     iv_scom_addr.clear();
     iv_scom_addr = iv_dup_scom_addr;
     iv_dup_scom_addr.clear();
 
-    // cout << "I>Scom::copy_dup_scom_address: iv_scom_addr size "<< iv_scom_addr.size() 
+    // cout << "I>Scom::copy_dup_scom_address: iv_scom_addr size "<< iv_scom_addr.size()
     //      << " iv_dup_scom_addr size " << iv_dup_scom_addr.size() << endl;
 }
 
@@ -1472,15 +1496,200 @@ void Scom::set_scom_suffix(const string & i_scom_addr)
 
     if(iv_scom_addr.size() == 0)
     {
-        yyerror("No base scom address to append suffix");
+        std::ostringstream oss;
+        oss << "No base scom address to append suffix " << i_scom_addr;
+        yyerror(oss.str().c_str());
     }
     else
     {
+        // cout << "I>Scom::set_scom_suffix: iv_scom_addr size " << iv_scom_addr.size() << endl;
         for(size_t i = 0; i < iv_scom_addr.size(); ++i)
         {
+            // cout << "I>Scom::set_scom_suffix: iv_scom_addr " << iv_scom_addr.at(i) << endl;
             iv_scom_addr.at(i) = iv_scom_addr.at(i) + i_scom_addr;
+            // cout << "I>Scom::set_scom_suffix: iv_scom_addr appended " << iv_scom_addr.at(i) << endl;
         }
     }
 
     // cout << "I>Scom::set_scom_suffix: "<< i_scom_addr << " is the output string!" << endl;
 }
+
+//-------------------------------------------------------------------------------------------------
+
+void Scom::set_scom_address_bin(const string & i_scom_addr)
+{
+
+    if(iv_scom_addr_bin.size())
+    {
+        yyerror("Binary SCOM Address already set!");
+    }
+    else
+    {
+        iv_scom_addr_bin.push_back(i_scom_addr);
+    }
+
+    // cout << "I>Scom::set_scom_address_bin: " << i_scom_addr << " is the output string!" << endl;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+void Scom::dup_scom_address_bin(const string & i_scom_addr)
+{
+    // cout << "I>Scom::dup_scom_address_bin: "<< i_scom_addr << " is the output string!" << endl;
+
+    //If we have a range of values
+    size_t l_pos = i_scom_addr.find("..");
+    if (l_pos != string::npos)
+    {
+        // Convert the range specified to decimal values and check for valid range
+        uint64_t l_num1 = strtoull((i_scom_addr.substr(0,l_pos)).c_str(), NULL, 2);
+        uint64_t l_num2 = strtoull((i_scom_addr.substr(l_pos + 2)).c_str(), NULL, 2);
+        // cout << "I>Scom:dup_scom_address_bin: " <<  l_num1 << " - " << l_num2 << endl;
+        if (l_num1 >= l_num2)
+        {
+            std::ostringstream oss;
+            oss << "Invalid binary scom address range: " << i_scom_addr;
+            yyerror(oss.str().c_str());
+        }
+
+        for (uint64_t num = l_num1; num <= l_num2; num++)
+        {
+            // For each value within the range, create a binary string of the correct size
+            string l_scom_addr = dec2binString(num, l_pos);
+
+            if (iv_scom_addr_bin.size() == 0)
+            {
+                // If there are no base address, create the duplicate addresses by pushing back
+                // each value within the range
+                iv_dup_scom_addr_bin.push_back(l_scom_addr);
+                // cout << "I>Scom::dup_scom_address_bin: iv_dup_scom_addr_bin " << iv_dup_scom_addr_bin.back() << endl;
+            }
+            else
+            {
+                // If there are base addresses, create the dupicate addresses by appending each 
+                // value within the range to the base addresses.
+                for (size_t i = 0; i < iv_scom_addr_bin.size(); i++)
+                {
+                    iv_dup_scom_addr_bin.push_back(iv_scom_addr_bin.at(i) + l_scom_addr);
+                    // cout << "I>Scom::dup_scom_address_bin: iv_dup_scom_addr_bin " << iv_dup_scom_addr_bin.back() << endl;
+                }
+            }
+        }
+    }
+    // Else we have a single value
+    else
+    {
+        // If there are no base address, create the duplicate address by pushing back the specified
+        // value
+        if (iv_scom_addr_bin.size() == 0)
+        {
+            iv_dup_scom_addr_bin.push_back(i_scom_addr);
+            // cout << "I>Scom::dup_scom_address_bin: iv_dup_scom_addr_bin " << iv_dup_scom_addr_bin.back() << endl;
+        }
+        else
+        {
+            // If there are base addresses, create the dupicate addresses by appending the
+            // specified value to the base addresses.
+            for (size_t i = 0; i < iv_scom_addr_bin.size(); i++)
+            {
+                iv_dup_scom_addr_bin.push_back(iv_scom_addr_bin.at(i) + i_scom_addr);
+                // cout << "I>Scom::dup_scom_address_bin: iv_dup_scom_addr_bin " << iv_dup_scom_addr_bin.back() << endl;
+            }
+        }
+    }
+}
+
+//-------------------------------------------------------------------------------------------------
+
+void Scom::copy_dup_scom_address_bin()
+{
+    // cout << "I>Scom::copy_dup_scom_address_bin: iv_scom_addr_bin size "<< iv_scom_addr_bin.size()
+    //      << " iv_dup_scom_addr_bin size " << iv_dup_scom_addr_bin.size() << endl;
+
+    iv_scom_addr_bin.clear();
+    iv_scom_addr_bin = iv_dup_scom_addr_bin;
+    iv_dup_scom_addr_bin.clear();
+
+    // cout << "I>Scom::copy_dup_scom_address_bin: iv_scom_addr_bin size "<< iv_scom_addr_bin.size()
+    //      << " iv_dup_scom_addr_bin size " << iv_dup_scom_addr_bin.size() << endl;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+void Scom::set_scom_suffix_bin(const string & i_scom_addr)
+{
+
+    if(iv_scom_addr_bin.size() == 0)
+    {
+        std::ostringstream oss;
+        oss << "No base binary scom address to append suffix " << i_scom_addr;
+        yyerror(oss.str().c_str());
+    }
+    else
+    {
+        for(size_t i = 0; i < iv_scom_addr_bin.size(); ++i)
+        {
+            iv_scom_addr_bin.at(i) = iv_scom_addr_bin.at(i) + i_scom_addr;
+        }
+    }
+
+    // cout << "I>Scom::set_scom_suffix_bin: "<< i_scom_addr << " is the output string!" << endl;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+void Scom::append_scom_address_bin()
+{
+    for (size_t i = 0; i < iv_scom_addr_bin.size(); i++)
+    {
+        if (0 != (iv_scom_addr_bin.at(i).size() % 4))
+        {
+            std::ostringstream oss;
+            oss << "Binary scom address " << iv_scom_addr_bin.at(i) << " is a partial hex!";
+            yyerror(oss.str().c_str());
+            break;
+        }
+        else
+        {
+            // Duplicate the scom addresses
+            uint64_t l_num = strtoull(iv_scom_addr_bin.at(i).c_str(), NULL, 2);
+            string l_scom_addr = dec2hexString(l_num, iv_scom_addr_bin.at(i).size() / 4);
+            dup_scom_address(l_scom_addr);
+        }
+    }
+
+    if (iv_dup_scom_addr.size())
+    {
+        // Copy duplicate scom addresses to the base scom addresses
+        copy_dup_scom_address();
+        iv_scom_addr_bin.clear();
+    }
+}
+
+//-------------------------------------------------------------------------------------------------
+string Scom::dec2hexString(uint64_t i_num, size_t i_str_size)
+{
+    stringstream l_ss;
+    l_ss.width(i_str_size); // Set string width
+    l_ss.fill('0');         // Prefill with '0'
+    l_ss << hex << i_num;
+
+    return l_ss.str();
+}
+
+//-------------------------------------------------------------------------------------------------
+string Scom::dec2binString(uint64_t i_num, size_t i_str_size)
+{
+    size_t l_size = sizeof(i_num) * 8;
+    char l_buf[l_size];
+    size_t l_idx = l_size;
+
+    do
+    {
+        l_buf[--l_idx] = '0' + (i_num & 1);
+        i_num >>= 1;
+    } while (--i_str_size);
+
+    return string(l_buf + l_idx, l_buf + l_size);
+}
+
