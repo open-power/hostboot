@@ -218,7 +218,6 @@ class SPDTest: public CxxTest::TestSuite
          */
         void testSpdWrite ( void )
         {
-            return;
             errlHndl_t err = NULL;
             uint64_t cmds = 0x0;
             uint64_t fails = 0x0;
@@ -284,7 +283,6 @@ class SPDTest: public CxxTest::TestSuite
          */
         void testSpdInvalidKeyword ( void )
         {
-            return;
             errlHndl_t err = NULL;
             uint64_t cmds = 0x0;
             uint64_t fails = 0x0;
@@ -349,7 +347,6 @@ class SPDTest: public CxxTest::TestSuite
          */
         void testSpdInvalidSize ( void )
         {
-            return;
             errlHndl_t err = NULL;
             uint64_t cmds = 0x0;
             uint64_t fails = 0x0;
