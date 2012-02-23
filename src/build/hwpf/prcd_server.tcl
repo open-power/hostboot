@@ -29,18 +29,17 @@ exec tclsh "$0" "$@"
 # Based on if_server.tcl by Doug Gilbert
 
 
-set version "1.1"
+set version "1.2"
 
 ############################################################################
 # Accept is called when a new client request comes in
 # An event is forked that calls AquireData whenever the socket becomes 
 # readable the main thread continues to run looking for more client requests
 ############################################################################
-
 proc Accept { sock addr port} {
-
     global socklist
     global log
+
     puts "[clock format [clock seconds]]: Accept $sock from $addr port $port"
     puts $log "$port: [clock format [clock seconds]]: Accept $sock from $addr port $port"
     set socklist(addr,$sock) [list $addr $port]
@@ -49,13 +48,11 @@ proc Accept { sock addr port} {
 }
 
 ############################################################################
-# AquireData  is called whenever there is data avaiable from a client.
+# AquireData is called whenever there is data avaiable from a client.
 # with line buffering on sock, this means when a line is 
 # Processes commands and collect data from client
 ############################################################################
-
 proc AquireData { sock } {
-
     global socklist
     global sandbox
     global forever
@@ -67,7 +64,6 @@ proc AquireData { sock } {
     global log
     global running
     global driver
-
 
     if { [eof $sock] || [catch {gets $sock line}] } {
         puts "Client closed unexpectedly"
@@ -86,7 +82,6 @@ proc AquireData { sock } {
             # Make a unique sandbox backed to the driver specified
             # Do a workon to the sandbox.
             ################################################################
-
             set driver $b
             set release ""  
             puts $log "$sock: Input driver $driver"
@@ -95,7 +90,6 @@ proc AquireData { sock } {
             ################################################################
             # create git repository
             ################################################################
-
             set sbname($sock) "sb[string range [clock seconds] 4 end]"
 
             puts $sock "$sbname($sock)"
@@ -121,7 +115,6 @@ proc AquireData { sock } {
             ################################################################
             # Open the hw procedure file in the hw procedure directory
             ################################################################
-
             puts $log "$sock: Input File $b $c"
             flush $log
 
@@ -130,8 +123,8 @@ proc AquireData { sock } {
                 puts $log "$sock: No sandbox found"
                 CloseOut $sock
                 return
-
             }
+
             ################################################################
             # Find the path to the file in the git sandbox
             # We will only look in the hwpf/hwp directories (usr and include/usr)
@@ -186,6 +179,79 @@ proc AquireData { sock } {
             fileevent $git_sh($sock) readable [list IfResult $git_sh($sock) $sock $sbname($sock)]
             puts $git_sh($sock) "cd $sb_dir/$sbname($sock)"
             SendSandbox $sock $git_sh($sock)
+            puts $sock ":DONE"
+            puts $log "$sock: DONE"
+            flush $sock
+            flush $log
+        } elseif {[regexp {:HWP_FILE_NEW +(.+) +(.+)} $line a b c] } {
+
+            ################################################################
+            # Open the hw procedure file in the hw procedure directory
+            ################################################################
+            puts $log "$sock: Input New File $b $c"
+            flush $log
+
+            if { ![info exists sbname($sock)] } {
+                puts $sock "No sandbox found"
+                puts $log "$sock: No sandbox found"
+                CloseOut $sock
+                return
+            }
+
+            ################################################################
+            # determine the path to the file in the git sandbox
+            ################################################################
+            set newdir $sb_dir/$sbname($sock)/src/usr/hwpf/hwp/mss_new
+            set filen $newdir/$b
+            if {![file exists $newdir]} {
+                #puts $log "$sock: mkdir \"$newdir\""; flush $log
+                eval {exec} "mkdir -p $newdir"
+            }
+
+            #puts $log "$sock: writing filen: \"$filen\""; flush $log
+            # Open with create/overwrite option
+            if {[catch {set hwpfile($sock) [open "$filen" w+] } res ] } {
+                puts $sock "Server can't open $filen"
+                puts $log "$sock: Server can't open $filen"
+                CloseOut $sock
+            } else {
+                fconfigure $hwpfile($sock) -translation binary
+                fconfigure $sock -translation binary
+                fcopy $sock $hwpfile($sock) -size $c
+                close $hwpfile($sock)
+                fconfigure $sock -translation auto
+                puts $sock ":DONE"
+                puts $log "$sock: DONE"
+                flush $sock
+            }
+        } elseif {[string compare $line ":HWP_COMPILE_NEW"] == 0} {
+            set git_sh($sock) [open "|bash" r+]
+            fconfigure $git_sh($sock) -buffering none
+            fileevent $git_sh($sock) readable [list IfResult $git_sh($sock) $sock $sbname($sock)]
+            puts $git_sh($sock) "cd $sb_dir/$sbname($sock)"
+
+            ##################################################################
+            # create the new tmp makefile
+            ##################################################################
+            set newdir $sb_dir/$sbname($sock)/src/usr/hwpf/hwp/mss_new
+            set new_makefile $newdir/makefile
+            #puts $log "$sock: creating makefile \"$new_makefile\"";flush $log
+          
+            set mkfile {}
+            set mkfile [open "$new_makefile" w 0666]
+            puts $mkfile "ROOTPATH = ../../../../.."
+            puts $mkfile "MODULE = mss_volt"
+            puts $mkfile "EXTRAINCDIR += \${ROOTPATH}/src/include/usr/ecmddatabuffer \${ROOTPATH}/src/include/usr/hwpf/fapi \\"
+            puts $mkfile "\${ROOTPATH}/src/include/usr/hwpf/plat \${ROOTPATH}/src/include/usr/hwpf/hwp \\"
+            puts $mkfile "\${ROOTPATH}/src/usr/hwpf/hwp/include ."
+            puts $mkfile "SRCS_c = \$(wildcard *.c)"
+            puts $mkfile "SRCS_C = \$(wildcard *.C)"
+            puts $mkfile "OBJS = \$(SRCS_c:.c=.o) \$(SRCS_C:.C=.o)"
+            puts $mkfile "include \${ROOTPATH}/config.mk"
+            flush $mkfile
+            close $mkfile
+
+            SendSandboxNew $sock $git_sh($sock)
             puts $sock ":DONE"
             puts $log "$sock: DONE"
             flush $sock
@@ -288,24 +354,21 @@ proc ExtractSandbox { sock git_sh} {
     flush $git_sh
 
     ############################################################
-    ## if the git_sh is not done by 180 sec, it probably crashed
+    ## if the git_sh is not done by 30 sec, it probably crashed
     ## keep a list of running sandboxes
     ## hopefully processes timeout in the same order they were started
-    ## Kick off an event that waits 10 sec then executes
+    ## Kick off an event that waits 30 sec then executes
     ############################################################
-
     lappend running $sbname($sock)
-    set timoutid [after 10000 {
+    set timoutid [after 30000 {
         set sandbox([lindex $running 0]) crashed
         lreplace $running 0 0
     } ]
-
 
     ############################################################
     ## This thread now waits until an event changes sandbox($sbname)
     ##   either the simulator exits or times out
     ############################################################
-
     vwait sandbox($sbname($sock))
 
     ############################################################
@@ -331,7 +394,6 @@ proc ExtractSandbox { sock git_sh} {
     flush $sock
 }
 
-
 ##################################################################
 # Sets up the sandbox for the ifcompiler & sends commands
 # sets up an event to collect the simulation results
@@ -343,46 +405,39 @@ proc SendSandbox { sock git_sh} {
     global sbname
     global log
 
-##################################################################
-# Start Compile
-##################################################################
-
+    ##################################################################
+    # Start Compile
+    ##################################################################
     puts $git_sh "source env.bash; make -j4" 
 
-##################################################################
-# tell the workon shell to terminate
-##################################################################
-
+    ##################################################################
+    # tell the workon shell to terminate
+    ##################################################################
     puts $git_sh {echo :DONE}
     flush $git_sh
 
-##################################################################
-## if the git_sh is not done by 180 sec, it probably crashed
-## keep a list of running sandboxes
-## hopefully processes timeout in the same order they were started
-## Kick off an event that waits 180 sec then executes
-##################################################################
-
+    ##################################################################
+    ## if the git_sh is not done by 360 sec, it probably crashed
+    ## keep a list of running sandboxes
+    ## hopefully processes timeout in the same order they were started
+    ## Kick off an event that waits 360 sec then executes
+    ##################################################################
     lappend running $sbname($sock)
-    set timoutid [after 180000 {
+    set timoutid [after 360000 {
        set sandbox([lindex $running 0]) crashed
        lreplace $running 0 0
-
     } ]
 
-
-##################################################################
-## This thread now waits until an event changes sandbox($sbname)
-##   either the simulator exits or timesout
-##################################################################
-
+    ##################################################################
+    ## This thread now waits until an event changes sandbox($sbname)
+    ##   either the simulator exits or timesout
+    ##################################################################
     vwait sandbox($sbname($sock))
 
-##################################################################
-# If the git_sh workon crashed then close the workon shell else cancel the 
-# timout event
-##################################################################
-
+    ##################################################################
+    # If the git_sh workon crashed then close the workon shell else cancel the 
+    # timout event
+    ##################################################################
     if { [string compare $sandbox($sbname($sock)) "crashed"] == 0 } {
             if { [catch {close $git_sh} res]} {
                 puts $sock "Fail: $res\n"
@@ -397,6 +452,66 @@ proc SendSandbox { sock git_sh} {
     flush $log
 }
 
+##################################################################
+# Sets up the sandbox for the ifcompiler & sends commands
+# create a makefile to build the new HWP and build
+# sets up an event to collect the simulation results
+# closes and deletes the sandbox
+##################################################################
+proc SendSandboxNew { sock git_sh} {
+    global sandbox
+    global running
+    global sbname
+    global log
+
+    ##################################################################
+    # Start Compile
+    ##################################################################
+    set newdir src/usr/hwpf/hwp/mss_new
+    puts $git_sh "source env.bash; make -j4; make -C $newdir"
+
+    ##################################################################
+    # tell the workon shell to terminate
+    ##################################################################
+
+    puts $git_sh {echo :DONE}
+    flush $git_sh
+
+    ##################################################################
+    ## if the git_sh is not done by 360 sec, it probably crashed
+    ## keep a list of running sandboxes
+    ## hopefully processes timeout in the same order they were started
+    ## Kick off an event that waits 360 sec then executes
+    ##################################################################
+    lappend running $sbname($sock)
+    set timoutid [after 360000 {
+       set sandbox([lindex $running 0]) crashed
+       lreplace $running 0 0
+    } ]
+
+    ##################################################################
+    ## This thread now waits until an event changes sandbox($sbname)
+    ##   either the simulator exits or timesout
+    ##################################################################
+    vwait sandbox($sbname($sock))
+
+    ##################################################################
+    # If the git_sh workon crashed then close the workon shell else cancel the 
+    # timout event
+    ##################################################################
+    if { [string compare $sandbox($sbname($sock)) "crashed"] == 0 } {
+            if { [catch {close $git_sh} res]} {
+                puts $sock "Fail: $res\n"
+            puts $log "$sock: Fail: $res\n"
+            }
+        set sandbox($sbname($sock)) idle
+    } else {
+        after cancel $timoutid
+    }
+
+    flush $sock
+    flush $log
+}
 
 ##################################################################
 # This is a list of regular expressions.  Any line sent to stdout during
@@ -411,7 +526,6 @@ set explist [list  {ERROR:.*} {^IfScrub..E>.*} {^Parse Error.*} ]
 ## and sends it back to the client.
 ## The git_sh pipe is closed when the full result has been processed
 ##################################################################
-
 proc IfResult { git_sh sock sbname_sock } {
     global sandbox
     global explist
@@ -470,31 +584,14 @@ proc IfResult { git_sh sock sbname_sock } {
 #  back to the client
 ##################################################################
 proc SendObjFiles { sock obj_dir } {
-
     global log
 
     set hbi_files {}
 
-    # Send the .bin files
-    if {[catch {set hbi_files [glob -dir $obj_dir *.bin]} res]} {
-        puts $sock "ERROR: No *.bin files found in $obj_dir"
-        puts $log "$sock: ERROR: No *.bin files found in $obj_dir"
-    } else {
-        SendFiles $sock $hbi_files
-    }
-
-    # Now send the .syms files
-    if {[catch {set hbi_files [glob -dir $obj_dir *.syms]} res]} {
-        puts $sock "ERROR: No *.syms files found in $obj_dir"
-        puts $log "$sock: ERROR: No *.syms files found in $obj_dir"
-    } else {
-        SendFiles $sock $hbi_files
-    }
-
-    # Now send the hbotStringFile
-    if {[catch {set hbi_files [glob -dir $obj_dir hbotStringFile]} res]} {
-        puts $sock "ERROR: No hbotStringFile files found in $obj_dir"
-        puts $log "$sock: ERROR: No hbotStringFile files found in $obj_dir"
+    # Send the image files
+    if {[catch {set hbi_files [glob -dir $obj_dir simics*.bin vbu*bin hbicore*.bin *.syms hbotStringFile]} res]} {
+        puts $sock "ERROR: Needed image files not found in $obj_dir"
+        puts $log "$sock: ERROR: Needed image files not found in $obj_dir"
     } else {
         SendFiles $sock $hbi_files
     }
@@ -502,7 +599,6 @@ proc SendObjFiles { sock obj_dir } {
     flush $sock
     flush $log
 }
-
 
 ##################################################################
 # Send a file to the client
@@ -524,8 +620,6 @@ proc SendFiles { sock files } {
     flush $log
 }
 
-
-
 ##################################################################
 # main
 ##################################################################
@@ -534,7 +628,6 @@ set forever 1
 set base_dir "/tmp"
 set logfile "$base_dir/prcd_server.log"
 set log {}
-
 
 # Where are we running?
 foreach {host site c d} [split [exec hostname] .]  break
@@ -548,22 +641,18 @@ if {[string compare $host {gfw160}] == 0} {
 
 # array to keep track of ode sandboxes and thier state
 array set sandbox {
-
     sb00000000 idle
-
 }
 
 array set backing {}
 
 puts "Logfile: $logfile"
 
-
 if { [file exists $logfile] } {
     set log [open "$logfile" a]
 } else {
     set log [open "$logfile" w 0666]
 }
-
 
 puts "Logfile: $logfile $log"
 exec chmod 666 $logfile
@@ -574,5 +663,5 @@ flush $log
 
 set socklist(main) [socket -server Accept 7779]
 
-        # By catching errors from vwait- we can ignore them
-        catch {vwait forever}
+# By catching errors from vwait- we can ignore them
+catch {vwait forever}

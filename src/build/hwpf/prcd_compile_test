@@ -147,6 +147,30 @@ echo "TEST - Good Path - All Files"
 check_good_rc_and_bin $? ./output/
 
 echo
+echo "TEST - New working HWP"
+cat >> mss_compile_test.C << EOF
+#include <fapi.H>
+#include <mss_compile_test.H>
+fapi::ReturnCode mss_compile_test(std::vector<fapi::Target> & i_targets_memb)
+{ fapi::ReturnCode l_rc; return l_rc; }   
+EOF
+cat >> mss_compile_test.H << EOF
+#ifndef MSS_COMPILE_TESTHWPB_H_
+#define MSS_COMPILE_TESTHWPB_H_
+#include <fapi.H>
+typedef fapi::ReturnCode (*mss_comile_test_FP_t)(std::vector<fapi::Target> &);
+extern "C" { fapi::ReturnCode mss_comile_test(std::vector<fapi::Target> & l_targets_memb); }
+#endif
+EOF
+./prcd_compile.tcl -n mss_compile_test.C mss_compile_test.H
+check_good_rc $?
+
+echo
+echo "TEST - New working HWP - missing .H file"
+./prcd_compile.tcl -n mss_compile_test.C
+check_bad_rc $?
+
+echo
 echo "TEST - Good Path - Compile Failure" 
 echo COMPILE_FAIL >> fapiTestHwp.H
 ./prcd_compile.tcl -d $BUILD fapiTestHwp.H fapiTestHwp.C

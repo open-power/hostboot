@@ -263,7 +263,7 @@ proc start_patch_server_on_fsp { fspip fsppassword } {
 set userid $::env(USER)
 set home $::env(HOME)
 set domain [exec hostname -d]
-set version "1.1"
+set version "1.2"
 
 set files [list]
 set cmds  [list]
@@ -284,21 +284,30 @@ foreach arg $argv {
 # NOT SUPPORTED -p    { set state portflag }
                 -v    { set verbose 1 }
                 -o    { set state outputflag }
-                -*h* { puts {prcd_compile.tcl [--help] [-d <drivername>] [-o <ouput dir> ] <filename> }
+                -n    { set newfiles 1 }
+                -*h* { puts {prcd_compile.tcl [--help] [-d <drivername>] [-o <ouput dir> ] [-n] <filename> }
                        puts {}
                        puts {Note this tool only supports *.{c,C,h,H,initfile,xml} files in the following directory trees: }
                        puts {    src/usr/hwpf/hwp }
                        puts {    src/include/usr/hwpf/hwp }
                        puts {}
-                       puts {The files can either be in the working directory, or in a sub-directory mirroring the hostboot tree. }
+                       puts {The files can either be in the local current working directory, or in a local sub-directory mirroring the hostboot tree. }
                        puts {}
                        puts {examples }
                        puts {> prcd_compile.tcl -d b0218a_2012_Sprint9 -o ./output fapiTestHwp.C fapiTestHwp.C sample.initfile}
                        puts {> prcd_compile.tcl -d b0218a_2012_Sprint9 -o ./output/ proc_cen_framelock.C }
                        puts {> prcd_compile.tcl -d b0218a_2012_Sprint9 -o output dmi_training/proc_cen_framelock/proc_cen_framelock.H }
                        puts {}
+                       puts {Without the -n parameter, the file are assumed to be existing files in the hostboot sandbox.}
+                       puts {If they are not found in the sandbox, an error will be returned.}
+                       puts {}
                        puts {On success, files from the img/ directory (*.bin *.syms and hbotStringFile) }
                        puts {will be placed in the output directory. }
+                       puts {}
+                       puts {With the -n parameter, the files are assumed to be for a NEW HWP and will be checked to see}
+                       puts {if they compile - no binary image files will be returned.}
+                       puts {examples }
+                       puts {> prcd_compile.tcl -n mss_l3.C mss_l3.H}
                        puts {}
                        puts {The -d and -o parameters are optional.  Default for -d is the master level of code }
                        puts {and default for -o is the current working directory }
@@ -396,23 +405,47 @@ lappend cmds ":INFO userid $userid version $version"
 lappend cmds ":DRIVER $driver"
 
 
-##########################################################
-# Generate command to send each input file
-##########################################################
-foreach filen $files {
+if {[info exists newfiles]}  {
 
-     set file_size [file size $filen]
-     set filesource($filen) $filen
-     lappend cmds ":HWP_FILE $filen $file_size"
+  # NEW HWP file(s)
+
+  ##########################################################
+  # Generate command to send each input file
+  ##########################################################
+  foreach filen $files {
+
+       set file_size [file size $filen]
+       set filesource($filen) $filen
+       lappend cmds ":HWP_FILE_NEW $filen $file_size"
+  }
+
+  ##########################################################
+  # Generate compile and complete directives
+  ##########################################################
+  lappend cmds ":HWP_COMPILE_NEW"
+  lappend cmds ":HWP_DONE"
+
+} else {
+
+  # existing file(s)
+
+  ##########################################################
+  # Generate command to send each input file
+  ##########################################################
+  foreach filen $files {
+
+       set file_size [file size $filen]
+       set filesource($filen) $filen
+       lappend cmds ":HWP_FILE $filen $file_size"
+  }
+
+  ##########################################################
+  # Generate compile, retrieve, and complete directives
+  ##########################################################
+  lappend cmds ":HWP_COMPILE"
+  lappend cmds ":HWP_RETRIEVE"
+  lappend cmds ":HWP_DONE"
 }
-
-##########################################################
-# Generate compile, retrieve, and complete directives
-##########################################################
-lappend cmds ":HWP_COMPILE"
-lappend cmds ":HWP_RETRIEVE"
-lappend cmds ":HWP_DONE"
-
 
 set xfer_file_list {}
 
@@ -440,7 +473,6 @@ if {[llength $cmds] > 0 } {
     # Now send all of the commands we generated sequentially
     # to the server, waiting for a :DONE between each one.
     ##########################################################
-    # Note that currently we only support fapiTestHwp.C and .H as input
     if {$result == ""} {   
         puts "Connected to $server - Starting Compile"
         foreach cmd $cmds {
@@ -448,7 +480,7 @@ if {[llength $cmds] > 0 } {
             if {[string compare $cmd {quit}] == 0 } {
                 puts $sockid {quit}
                 break
-            } elseif {[regexp {^:HWP_FILE +(.+) +(.+)} $cmd a hwpfilename filesize]} {
+            } elseif {[regexp {^:HWP_FILE.* +(.+) +(.+)} $cmd a hwpfilename filesize]} {
                 puts $sockid $cmd
                 set hwpfile [open $filesource($hwpfilename) r]
                 fconfigure $sockid -translation binary
