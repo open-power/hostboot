@@ -71,13 +71,14 @@ sub SetFlags;
 
 ############################################
 ##  constants
-## use constant MAX_NUM_TRACE_BUFFERS => 24;
 ############################################
-my  $CLfile     =   "./istepmodereg.dma";
+my  $curDir      =   getcwd();
+my  $CLfile     =   "$curDir/istepmodereg.dma";
 my  $CORE       =   "-c3";
-## my  $SIM_CLOCKS =   "4000000"; 
-my  $SIM_CLOCKS =   "2000000"; 
 
+## my  $SIM_CLOCKS =   "4000000"; 
+## my  $SIM_CLOCKS =   "2000000"; 
+my  $SIM_CLOCKS =   "3000000"; 
 
 #############################################
 ##  Internal Globals
@@ -102,9 +103,14 @@ my  $RUNCLKSCMD =   "simclock";
 ##  @todo $$$$$
 ##  NOTE:   need to be able to specify thread (-t ) and core (-c ), they 
 ##  should not be hardwired 
-my  $QUERYCMD   =   "$vbuToolsDir/p8_thread_control.x86 -query  $CORE -t0";  
-my  $STOPCMD    =   "$vbuToolsDir/p8_thread_control.x86 -stop   $CORE -tall";
-my  $STARTCMD   =   "$vbuToolsDir/p8_thread_control.x86 -start  $CORE -tall";
+##my  $QUERYCMD   =   "$vbuToolsDir/p8_thread_control.x86 -query  $CORE -t0";  
+##my  $STOPCMD    =   "$vbuToolsDir/p8_thread_control.x86 -stop   $CORE -tall";
+##my  $STARTCMD   =   "$vbuToolsDir/p8_thread_control.x86 -start  $CORE -tall";
+
+##  Jim McGuire's older versions.
+my  $QUERYCMD   =   "/gsa/pokgsa/home/m/c/mcguirej/public/auto/rel/P8bin/p8_ins_query";  
+my  $STOPCMD    =   "/gsa/pokgsa/home/m/c/mcguirej/public/auto/rel/P8bin/p8_ins_stop";
+my  $STARTCMD   =   "/gsa/pokgsa/home/m/c/mcguirej/public/auto/rel/P8bin/p8_ins_start";
 
 my  $RESETCMD   =   "$vbuToolsDir/p8_thread_control.x86 -sreset_auto $CORE";
 
@@ -237,11 +243,15 @@ sub P8_Ins_Query()
     $retstr = `$cmd`; 
     if ( $? != 0 )  { die "$cmd failed $? : $! \n"; }
     
-    if ( $retstr =~ m/Quiesced/ )
+    if  (    ($retstr =~ m/Quiesced/)
+         || ($retstr =~ m/STOPPED/)
+        )  
     {
         return "STOPPED";
     }
-    elsif   ( $retstr =~    m/Running/ )
+    elsif   (   ($retstr =~ m/Running/) 
+              ||($retstr =~ m/RUNNING/)
+            )
     {
         return "RUNNING";
     }

@@ -71,6 +71,7 @@ sub find_in_inlist;
 sub parse_command;
 sub setMode;
 sub resume_istep;
+sub getShutDownStatus;
 
 #------------------------------------------------------------------------------
 #   Constants
@@ -126,6 +127,19 @@ if ( ! defined( $hbDir) || ( $hbDir eq "" ) )
     $hbDir = $pgmDir;               ##  Set to tool directory
 }     
 
+##  Future - VBUTOOLS is not used yet, but will be.  
+##  from Jim McGuire 
+# my  $vbuToolsDir    =   "/gsa/ausgsa/projects/h/hostboot/vbutools/latest";
+my $vbuToolsDir = $ENV{'VBUTOOLS'};
+if (defined ($vbuToolsDir))
+{
+    unless ($vbuToolsDir ne "")
+    {
+        $vbuToolsDir = "/gsa/ausgsa/projects/h/hostboot/vbutools/dev";
+    }
+}
+
+
 my $CSVfile     =   "$hbDir/isteplist.csv";
 my $hbSymsFile  =   "$hbDir/hbicore.syms";                #Use hbicore.syms
     
@@ -170,6 +184,12 @@ chomp   $commandreg;
 my $statusreg = `grep "SPLESS::g_SPLess_Status_Reg" $hbSymsFile | awk -F"," '{print \$2}'` ;
 chomp   $statusreg;
 
+my $shutdownflag = `grep "CpuManager::cv_shutdown_requested" $hbSymsFile | awk -F"," '{print \$2}'` ;
+chomp   $shutdownflag;
+
+my $shutdownsts = `grep "CpuManager::cv_shutdown_status" $hbSymsFile | awk -F"," '{print \$2}'` ;
+chomp   $shutdownsts;
+
 
 ##-----------------------------------------------------------------------------
 ##  Start processing options
@@ -177,22 +197,24 @@ chomp   $statusreg;
 if  ( $opt_debug )
 {
     print   STDERR  "\n-----    DEBUG:  ----------------------------------- \n";
-    print   STDERR  "help           =   $opt_help\n";
-    print   STDERR  "istepmode      =   $opt_istepmode\n";
-    print   STDERR  "normalmode     =   $opt_normalmode\n"; 
-    print   STDERR  "list           =   $opt_list\n";   
-    print   STDERR  "command        =   $opt_command\n";
-    print   STDERR  "cmdfile        =   $opt_cmdfile\n";
-    print   STDERR  "setup          =   $opt_setup\n";
-    print   STDERR  "clear-trace    =   $opt_clear_trace\n";
-    print   STDERR  "debug          =   $opt_debug\n";
+    print   STDERR  "help               =   $opt_help\n";
+    print   STDERR  "istepmode          =   $opt_istepmode\n";
+    print   STDERR  "normalmode         =   $opt_normalmode\n"; 
+    print   STDERR  "list               =   $opt_list\n";   
+    print   STDERR  "command            =   $opt_command\n";
+    print   STDERR  "cmdfile            =   $opt_cmdfile\n";
+    print   STDERR  "setup              =   $opt_setup\n";
+    print   STDERR  "clear-trace        =   $opt_clear_trace\n";
+    print   STDERR  "debug              =   $opt_debug\n";
     
-    print   STDERR  "pgmDir         =   $pgmDir\n";
-    print   STDERR  "hbDir          =   $hbDir\n"; 
-    print   STDERR  "hbSymsFile     =   $hbSymsFile\n";   
-    print   STDERR  "istepmodereg   =   $istepmodereg\n";
-    print   STDERR  "commandreg     =   $commandreg\n";
-    print   STDERR  "statusreg      =   $statusreg\n";
+    print   STDERR  "pgmDir             =   $pgmDir\n";
+    print   STDERR  "hbDir              =   $hbDir\n"; 
+    print   STDERR  "hbSymsFile         =   $hbSymsFile\n";   
+    print   STDERR  "istepmodereg       =   $istepmodereg\n";
+    print   STDERR  "commandreg         =   $commandreg\n";
+    print   STDERR  "statusreg          =   $statusreg\n";
+    print   STDERR  "shutdownflag reg   =   $shutdownflag\n";
+    print   STDERR  "shutdownsts  reg   =   $shutdownsts\n";
     
     VBU_Cacheline::SetFlags( 1, 0 );
     
@@ -235,10 +257,16 @@ sub main()
     my  $qstr   =   VBU_Cacheline::P8_Ins_Query();
     if ( $qstr  ne "STOPPED" )
     {
-        print STDOUT "VPO is \"$qstr\", setting to STOPPED.\n";
+        print STDOUT "Setting P8 Instructions to STOPPED.\n";
         VBU_Cacheline::P8_Ins_Stop();
     }
     
+    ( my $flag, my $sts ) = getShutDownStatus();
+    if ( $flag )
+    {
+        print   STDOUT  "Sorry, HostBoot has already shut down with status $sts, cannot run isteps.\n";
+        exit;
+    }
 
     ##
     ## Process resume
@@ -390,6 +418,23 @@ sub find_in_inList( $ )
 } 
 
 ##
+##  Check if HostBoot has already run and shutdown.  
+sub getShutDownStatus()
+{
+
+    my $flag    =   VBU_Cacheline::CLread( $shutdownflag );
+    my $status  =   VBU_Cacheline::CLread( $shutdownsts );
+    
+    if ( $opt_debug )   
+    {   
+        print   STDERR "Shutdown Flag   =   $flag\n";
+        print   STDERR "Shutdown Status =   $status\n";       
+    }
+
+    return ( $flag, $status );
+}
+
+##
 ##  keep trying to get status until seqnum syncs up 
 ##
 sub getSyncStatus( )
@@ -410,7 +455,7 @@ sub getSyncStatus( )
         VBU_Cacheline::RunClocks();
         
         ##  dump printk similar to the Jim McGuire's script
-        ##  dumpPrintk();
+        ##  NOPE, CRASHES AWAN dumpPrintk();
 
         $result = VBU_Cacheline::CLread( $statusreg );
         $seqnum  = ( ( $result & 0x3f00000000000000 ) >> 56 );
