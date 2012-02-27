@@ -55,6 +55,7 @@ my %optionInfo = (
                             "directory instead of using this option."],
     "--out-path=<path>" => ["The path to the directory where the output will be saved."],
     "--debug" => ["Enable debug tracing."],
+    "--mute" => ["Shut up the 'Data saved ...' message"],
     "-k#" => ["The cage to act on."],
     "-n#" => ["The node to act on."],
     "-s#" => ["The slot to act on."],
@@ -76,6 +77,7 @@ my $cfgHelp = 0;
 my $cfgMan = 0;
 my $toolHelp = 0;
 my $debug = 0;
+my $mute = 0;
 my @ecmdOpt = ("-c3");
 my @threadState = ();
 my $l2Flushed = 0;
@@ -102,6 +104,7 @@ if ($self)
                "img-path:s" => \$imgPath,
                "out-path:s" => \$outPath,
                "debug" => \$debug,
+               "mute" => \$mute,
                "help" => \$cfgHelp,
                "toolhelp" => \$toolHelp,
                "man" => \$cfgMan,
@@ -128,6 +131,7 @@ else
                "img-path:s" => \$imgPath,
                "out-path:s" => \$outPath,
                "debug" => \$debug,
+               "mute" => \$mute,
                "help" => \$cfgHelp,
                "man" => \$cfgMan,
                "k=i" => \&processEcmdOpts,
@@ -178,7 +182,10 @@ callToolModule($tool);
 # Restore thread states
 restoreThreadStates();
 
-print "\n\nData saved to $outFile\n\n";
+if (!$mute)
+{
+    print "\n\nData saved to $outFile\n\n";
+}
 
 # Close the output file
 close $fh if ($outFile ne "");
@@ -396,7 +403,20 @@ sub startInstructions
         print "$command\n";
     }
 
-    die "ERROR: cannot start instructions" if (system("$command") != 0);
+    if (system("$command") != 0)
+    {
+        if (0 == getShutdownRequestStatus())
+        {
+            die "ERROR: cannot start instructions";
+        }
+        else
+        {
+            if ($debug)
+            { 
+                print "Cannot start instructions since Hostboot has shutdown";
+            }
+        }
+    }
 
     #Need to flush L2 the next time we read data from L3
     $l2Flushed = 0;
@@ -454,6 +474,40 @@ sub restoreThreadStates
     }
 }
 
+# @sub CheckXstopAttn
+# @brief Check for a checkstop/special attn
+#        return 1 if checkstop/attn occurs
+sub CheckXstopAttn
+{
+    my $result = `getscom pu 000f001a @ecmdOpt -quiet`;
+    my $chkstop = 0;
+    if ($result !~ m/0x[04]000000000000000/)
+    {
+        $chkstop = 1;
+    }
+    return $chkstop;
+}
+
+# @sub FirCheck
+# @brief Check for FIR
+sub FirCheck
+{
+    my $result = `fircheck @ecmdOpt -quiet 2>&1 | head -30`;
+    $result =~ s/error/ERR*R/gi;
+    $result =~ s/FAIL/F*IL/g;
+    $result =~ s/.*00 SIMDISP.*\n//g;
+    $result =~ s/.*CNFG FILE GLOBAL_DEBUG.*\n//g;
+    print "$result\n";
+}
+
+# @sub getCIA
+# @brief return CIA
+sub getCIA
+{
+    my $cia = `getspy pu EX03.EC.IFU.I.T0_CIA -quiet | paste - -`;
+    return $cia;
+}
+
 # @sub executeInstrCycles
 # @brief Tell the simulator to run for so many clock cycles
 sub executeInstrCycles
@@ -471,7 +525,11 @@ sub executeInstrCycles
     my $cycles = shift;
     $cycles = $cycles * 100;   #increase cycles since VBU takes longer
     my $command = "simclock $cycles $flag";
-    print "$command\n";
+    my $noshow = shift;
+    if (!$noshow)
+    {
+        print "$command\n";
+    }
     die "ERROR: cannot run clock cycles" if (system("$command") != 0);
 }
 
@@ -482,6 +540,19 @@ sub readyForInstructions
 {
     # always return Ready
     return 1;
+}
+
+# @sub getShutdownRequestStatus
+# @brief Check whether shutdown has been requested
+# @returns 0 - Shutdown not requested or 1 - Shutdown requested
+sub getShutdownRequestStatus
+{
+    my ($symAddr, $symSize) = findSymbolAddress("CpuManager::cv_shutdown_requested");
+    if (not defined $symAddr) { print "Cannot find symbol.\n"; die; }
+    my $result = readData($symAddr, $symSize);
+    $result= hex (unpack('H*',$result));
+
+    return $result;
 }
 
 # @sub getImgPath
