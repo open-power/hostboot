@@ -41,7 +41,7 @@
 #include    <errl/errlentry.H>
 #include    <targeting/targetservice.H>
 #include    <targeting/iterators/rangefilter.H>
-#include    <targeting/predicates/predicatectm.H>
+#include    <targeting/predicates/predicates.H>
 #include    <fsi/fsiif.H>
 
 #include    <hwas/hwas.H>
@@ -183,6 +183,27 @@ void    init_target_states( void *io_pArgs )
                     l_hwasState =   l_memTargetList[ii]->getAttr<ATTR_HWAS_STATE>();
                     enableHwasState( l_hwasState );
                     l_memTargetList[ii]->setAttr<ATTR_HWAS_STATE>( l_hwasState );
+
+
+                    // enable MBA's for each centaur
+                    TARGETING::PredicateCTM l_mbaFilter(CLASS_UNIT, TYPE_MBA);
+                    TARGETING::TargetHandleList l_mbaTargetList;
+                    TARGETING::targetService().getAssociated(l_mbaTargetList,
+                            l_memTargetList[ii],
+                            TARGETING::TargetService::CHILD_BY_AFFINITY,
+                            TARGETING::TargetService::ALL, &l_mbaFilter);
+                    TRACDCOMP( g_trac_hwas,
+                                           "%d MBA's with MEMBUF %d",
+                                            l_mbaTargetList.size(),
+                                            ii );
+
+                    for ( uint8_t ij=0; ij < l_mbaTargetList.size(); ij++ )
+                    {
+                        l_hwasState =   l_mbaTargetList[ij]->getAttr<ATTR_HWAS_STATE>();
+                        enableHwasState( l_hwasState );
+                        l_mbaTargetList[ij]->setAttr<ATTR_HWAS_STATE>( l_hwasState );
+                    }
+
 
                     // look for the dimms on each centaur
                     TARGETING::PredicateCTM l_dimms(CLASS_LOGICAL_CARD, TYPE_DIMM);
