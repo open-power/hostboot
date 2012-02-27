@@ -260,7 +260,7 @@ public:
           uint64_t addr;
           uint64_t data;
       } test_data[] = {
-          { scom_targets[CENTAUR0], 0x02011403 , 0x123456789ABCDEF0 },
+          { scom_targets[CENTAUR0], 0x02011403 , 0x1234567800000000 },
           { scom_targets[CENTAUR0], 0x02011672 , 0x1122334455667788 },
           { scom_targets[CENTAUR8], 0x02011672 , 0x9E9E9E9E9E9E9E9E },
       };
