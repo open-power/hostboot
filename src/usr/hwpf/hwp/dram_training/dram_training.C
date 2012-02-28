@@ -20,11 +20,11 @@
 //  Origin: 30
 //
 //  IBM_PROLOG_END
-   
+
 /**
- *  @file dram_training.C                                                
+ *  @file dram_training.C
  *
- *  Support file for IStep: dram_training                                                    
+ *  Support file for IStep: dram_training
  *   Step 13 DRAM Training
  *
  *  *****************************************************************
@@ -64,8 +64,8 @@
 //      "dram_training_custom.C" and include the prototypes here.
 //  #include    "dram_training_custom.H"
 
-#include    "dram_training.H"          
-                                  
+#include    "dram_training.H"
+
 //  Uncomment these files as they become available:
 // #include    "host_disable_vddr/host_disable_vddr.H"
 // #include    "mc_pll_setup/mc_pll_setup.H"
@@ -73,13 +73,13 @@
 // #include    "host_enable_vddr/host_enable_vddr.H"
 // #include    "mss_initf/mss_initf.H"
 // #include    "mss_ddr_phy_reset/mss_ddr_phy_reset.H"
-// #include    "mss_draminit/mss_draminit.H"
+#include    "mss_draminit/mss_draminit.H"
 // #include    "mss_restore_dram_repair/mss_restore_dram_repair.H"
-// #include    "mss_draminit_training/mss_draminit_training.H"
+#include    "mss_draminit_training/mss_draminit_training.H"
 // #include    "mss_draminit_trainadv/mss_draminit_trainadv.H"
-// #include    "mss_draminit_mc/mss_draminit_mc.H"
+#include    "mss_draminit_mc/mss_draminit_mc.H"
 
-namespace   DRAM_TRAINING                                              
+namespace   DRAM_TRAINING
 {
 
 using   namespace   TARGETING;
@@ -98,15 +98,15 @@ void    call_host_disable_vddr( void *io_pArgs )
     fapi::ReturnCode    l_fapirc;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_disable_vddr entry" );
-        
+
 #if 0
-    // @@@@@    CUSTOM BLOCK:   @@@@@    
+    // @@@@@    CUSTOM BLOCK:   @@@@@
     //  figure out what targets we need
     //  customize any other inputs
     //  set up loops to go through all targets (if parallel, spin off a task)
-    
+
     //  print call to hwp and dump physical path of the target(s)
-    TRACFCOMP( ISTEPS_TRACE::ISTEPS_TRACE::g_trac_isteps_traces_trace,
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                     "=====  host_disable_vddr HWP(? ? ? )",
                     ?
                     ?
@@ -115,21 +115,20 @@ void    call_host_disable_vddr( void *io_pArgs )
     EntityPath l_path;
     l_path  =   l_@targetN_target->getAttr<ATTR_PHYS_PATH>();
     l_path.dump();
-    TRACFCOMP( g_trac_mc_init, "===== " );   
 
-    // cast OUR type of target to a FAPI type of target.                         
+    // cast OUR type of target to a FAPI type of target.
     const fapi::Target l_fapi_@targetN_target(
                     TARGET_TYPE_MEMBUF_CHIP,
                     reinterpret_cast<void *>
                         (const_cast<TARGETING::Target*>(l_@targetN_target)) );
-                    
+
     //  call the HWP with each fapi::Target
     l_fapirc  =   host_disable_vddr( ? , ?, ? );
 
     //  process return code.
     if ( l_fapirc== fapi::FAPI_RC_SUCCESS )
     {
-        TRACFCOMP( ISTEPS_TRACE::ISTEPS_TRACE::g_trac_isteps_traces_trace,
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                 "SUCCESS :  host_disable_vddr HWP(? ? ? )" );
     }
     else
@@ -141,7 +140,7 @@ void    call_host_disable_vddr( void *io_pArgs )
                 "ERROR %d:  host_disable_vddr HWP(? ? ?) ",
                 static_cast<uint32_t>(l_fapirc) );
     }
-    // @@@@@    END CUSTOM BLOCK:   @@@@@    
+    // @@@@@    END CUSTOM BLOCK:   @@@@@
 #endif
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_disable_vddr exit" );
@@ -164,15 +163,15 @@ void    call_mc_pll_setup( void *io_pArgs )
     fapi::ReturnCode    l_fapirc;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mc_pll_setup entry" );
-        
+
 #if 0
-    // @@@@@    CUSTOM BLOCK:   @@@@@    
+    // @@@@@    CUSTOM BLOCK:   @@@@@
     //  figure out what targets we need
     //  customize any other inputs
     //  set up loops to go through all targets (if parallel, spin off a task)
-    
+
     //  print call to hwp and dump physical path of the target(s)
-    TRACFCOMP( ISTEPS_TRACE::ISTEPS_TRACE::g_trac_isteps_traces_trace,
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                     "=====  mc_pll_setup HWP(? ? ? )",
                     ?
                     ?
@@ -181,21 +180,20 @@ void    call_mc_pll_setup( void *io_pArgs )
     EntityPath l_path;
     l_path  =   l_@targetN_target->getAttr<ATTR_PHYS_PATH>();
     l_path.dump();
-    TRACFCOMP( g_trac_mc_init, "===== " );   
 
-    // cast OUR type of target to a FAPI type of target.                         
+    // cast OUR type of target to a FAPI type of target.
     const fapi::Target l_fapi_@targetN_target(
                     TARGET_TYPE_MEMBUF_CHIP,
                     reinterpret_cast<void *>
                         (const_cast<TARGETING::Target*>(l_@targetN_target)) );
-                    
+
     //  call the HWP with each fapi::Target
     l_fapirc  =   mc_pll_setup( ? , ?, ? );
 
     //  process return code.
     if ( l_fapirc== fapi::FAPI_RC_SUCCESS )
     {
-        TRACFCOMP( ISTEPS_TRACE::ISTEPS_TRACE::g_trac_isteps_traces_trace,
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                 "SUCCESS :  mc_pll_setup HWP(? ? ? )" );
     }
     else
@@ -207,7 +205,7 @@ void    call_mc_pll_setup( void *io_pArgs )
                 "ERROR %d:  mc_pll_setup HWP(? ? ?) ",
                 static_cast<uint32_t>(l_fapirc) );
     }
-    // @@@@@    END CUSTOM BLOCK:   @@@@@    
+    // @@@@@    END CUSTOM BLOCK:   @@@@@
 #endif
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mc_pll_setup exit" );
@@ -230,15 +228,15 @@ void    call_mba_startclocks( void *io_pArgs )
     fapi::ReturnCode    l_fapirc;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mba_startclocks entry" );
-        
+
 #if 0
-    // @@@@@    CUSTOM BLOCK:   @@@@@    
+    // @@@@@    CUSTOM BLOCK:   @@@@@
     //  figure out what targets we need
     //  customize any other inputs
     //  set up loops to go through all targets (if parallel, spin off a task)
-    
+
     //  print call to hwp and dump physical path of the target(s)
-    TRACFCOMP( ISTEPS_TRACE::ISTEPS_TRACE::g_trac_isteps_traces_trace,
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                     "=====  mba_startclocks HWP(? ? ? )",
                     ?
                     ?
@@ -247,21 +245,20 @@ void    call_mba_startclocks( void *io_pArgs )
     EntityPath l_path;
     l_path  =   l_@targetN_target->getAttr<ATTR_PHYS_PATH>();
     l_path.dump();
-    TRACFCOMP( g_trac_mc_init, "===== " );   
 
-    // cast OUR type of target to a FAPI type of target.                         
+    // cast OUR type of target to a FAPI type of target.
     const fapi::Target l_fapi_@targetN_target(
                     TARGET_TYPE_MEMBUF_CHIP,
                     reinterpret_cast<void *>
                         (const_cast<TARGETING::Target*>(l_@targetN_target)) );
-                    
+
     //  call the HWP with each fapi::Target
     l_fapirc  =   mba_startclocks( ? , ?, ? );
 
     //  process return code.
     if ( l_fapirc== fapi::FAPI_RC_SUCCESS )
     {
-        TRACFCOMP( ISTEPS_TRACE::ISTEPS_TRACE::g_trac_isteps_traces_trace,
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                 "SUCCESS :  mba_startclocks HWP(? ? ? )" );
     }
     else
@@ -273,7 +270,7 @@ void    call_mba_startclocks( void *io_pArgs )
                 "ERROR %d:  mba_startclocks HWP(? ? ?) ",
                 static_cast<uint32_t>(l_fapirc) );
     }
-    // @@@@@    END CUSTOM BLOCK:   @@@@@    
+    // @@@@@    END CUSTOM BLOCK:   @@@@@
 #endif
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mba_startclocks exit" );
@@ -296,15 +293,15 @@ void    call_host_enable_vddr( void *io_pArgs )
     fapi::ReturnCode    l_fapirc;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_enable_vddr entry" );
-        
+
 #if 0
-    // @@@@@    CUSTOM BLOCK:   @@@@@    
+    // @@@@@    CUSTOM BLOCK:   @@@@@
     //  figure out what targets we need
     //  customize any other inputs
     //  set up loops to go through all targets (if parallel, spin off a task)
-    
+
     //  print call to hwp and dump physical path of the target(s)
-    TRACFCOMP( ISTEPS_TRACE::ISTEPS_TRACE::g_trac_isteps_traces_trace,
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                     "=====  host_enable_vddr HWP(? ? ? )",
                     ?
                     ?
@@ -313,21 +310,20 @@ void    call_host_enable_vddr( void *io_pArgs )
     EntityPath l_path;
     l_path  =   l_@targetN_target->getAttr<ATTR_PHYS_PATH>();
     l_path.dump();
-    TRACFCOMP( g_trac_mc_init, "===== " );   
 
-    // cast OUR type of target to a FAPI type of target.                         
+    // cast OUR type of target to a FAPI type of target.
     const fapi::Target l_fapi_@targetN_target(
                     TARGET_TYPE_MEMBUF_CHIP,
                     reinterpret_cast<void *>
                         (const_cast<TARGETING::Target*>(l_@targetN_target)) );
-                    
+
     //  call the HWP with each fapi::Target
     l_fapirc  =   host_enable_vddr( ? , ?, ? );
 
     //  process return code.
     if ( l_fapirc== fapi::FAPI_RC_SUCCESS )
     {
-        TRACFCOMP( ISTEPS_TRACE::ISTEPS_TRACE::g_trac_isteps_traces_trace,
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                 "SUCCESS :  host_enable_vddr HWP(? ? ? )" );
     }
     else
@@ -339,7 +335,7 @@ void    call_host_enable_vddr( void *io_pArgs )
                 "ERROR %d:  host_enable_vddr HWP(? ? ?) ",
                 static_cast<uint32_t>(l_fapirc) );
     }
-    // @@@@@    END CUSTOM BLOCK:   @@@@@    
+    // @@@@@    END CUSTOM BLOCK:   @@@@@
 #endif
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_enable_vddr exit" );
@@ -362,15 +358,15 @@ void    call_mss_initf( void *io_pArgs )
     fapi::ReturnCode    l_fapirc;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_initf entry" );
-        
+
 #if 0
-    // @@@@@    CUSTOM BLOCK:   @@@@@    
+    // @@@@@    CUSTOM BLOCK:   @@@@@
     //  figure out what targets we need
     //  customize any other inputs
     //  set up loops to go through all targets (if parallel, spin off a task)
-    
+
     //  print call to hwp and dump physical path of the target(s)
-    TRACFCOMP( ISTEPS_TRACE::ISTEPS_TRACE::g_trac_isteps_traces_trace,
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                     "=====  mss_initf HWP(? ? ? )",
                     ?
                     ?
@@ -379,21 +375,20 @@ void    call_mss_initf( void *io_pArgs )
     EntityPath l_path;
     l_path  =   l_@targetN_target->getAttr<ATTR_PHYS_PATH>();
     l_path.dump();
-    TRACFCOMP( g_trac_mc_init, "===== " );   
 
-    // cast OUR type of target to a FAPI type of target.                         
+    // cast OUR type of target to a FAPI type of target.
     const fapi::Target l_fapi_@targetN_target(
                     TARGET_TYPE_MEMBUF_CHIP,
                     reinterpret_cast<void *>
                         (const_cast<TARGETING::Target*>(l_@targetN_target)) );
-                    
+
     //  call the HWP with each fapi::Target
     l_fapirc  =   mss_initf( ? , ?, ? );
 
     //  process return code.
     if ( l_fapirc== fapi::FAPI_RC_SUCCESS )
     {
-        TRACFCOMP( ISTEPS_TRACE::ISTEPS_TRACE::g_trac_isteps_traces_trace,
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                 "SUCCESS :  mss_initf HWP(? ? ? )" );
     }
     else
@@ -405,7 +400,7 @@ void    call_mss_initf( void *io_pArgs )
                 "ERROR %d:  mss_initf HWP(? ? ?) ",
                 static_cast<uint32_t>(l_fapirc) );
     }
-    // @@@@@    END CUSTOM BLOCK:   @@@@@    
+    // @@@@@    END CUSTOM BLOCK:   @@@@@
 #endif
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_initf exit" );
@@ -428,15 +423,15 @@ void    call_mss_ddr_phy_reset( void *io_pArgs )
     fapi::ReturnCode    l_fapirc;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_ddr_phy_reset entry" );
-        
+
 #if 0
-    // @@@@@    CUSTOM BLOCK:   @@@@@    
+    // @@@@@    CUSTOM BLOCK:   @@@@@
     //  figure out what targets we need
     //  customize any other inputs
     //  set up loops to go through all targets (if parallel, spin off a task)
-    
+
     //  print call to hwp and dump physical path of the target(s)
-    TRACFCOMP( ISTEPS_TRACE::ISTEPS_TRACE::g_trac_isteps_traces_trace,
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                     "=====  mss_ddr_phy_reset HWP(? ? ? )",
                     ?
                     ?
@@ -445,21 +440,20 @@ void    call_mss_ddr_phy_reset( void *io_pArgs )
     EntityPath l_path;
     l_path  =   l_@targetN_target->getAttr<ATTR_PHYS_PATH>();
     l_path.dump();
-    TRACFCOMP( g_trac_mc_init, "===== " );   
 
-    // cast OUR type of target to a FAPI type of target.                         
+    // cast OUR type of target to a FAPI type of target.
     const fapi::Target l_fapi_@targetN_target(
                     TARGET_TYPE_MEMBUF_CHIP,
                     reinterpret_cast<void *>
                         (const_cast<TARGETING::Target*>(l_@targetN_target)) );
-                    
+
     //  call the HWP with each fapi::Target
     l_fapirc  =   mss_ddr_phy_reset( ? , ?, ? );
 
     //  process return code.
     if ( l_fapirc== fapi::FAPI_RC_SUCCESS )
     {
-        TRACFCOMP( ISTEPS_TRACE::ISTEPS_TRACE::g_trac_isteps_traces_trace,
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                 "SUCCESS :  mss_ddr_phy_reset HWP(? ? ? )" );
     }
     else
@@ -471,7 +465,7 @@ void    call_mss_ddr_phy_reset( void *io_pArgs )
                 "ERROR %d:  mss_ddr_phy_reset HWP(? ? ?) ",
                 static_cast<uint32_t>(l_fapirc) );
     }
-    // @@@@@    END CUSTOM BLOCK:   @@@@@    
+    // @@@@@    END CUSTOM BLOCK:   @@@@@
 #endif
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_ddr_phy_reset exit" );
@@ -494,51 +488,65 @@ void    call_mss_draminit( void *io_pArgs )
     fapi::ReturnCode    l_fapirc;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_draminit entry" );
-        
-#if 0
-    // @@@@@    CUSTOM BLOCK:   @@@@@    
-    //  figure out what targets we need
-    //  customize any other inputs
-    //  set up loops to go through all targets (if parallel, spin off a task)
-    
-    //  print call to hwp and dump physical path of the target(s)
-    TRACFCOMP( ISTEPS_TRACE::ISTEPS_TRACE::g_trac_isteps_traces_trace,
-                    "=====  mss_draminit HWP(? ? ? )",
-                    ?
-                    ?
-                    ? );
-    //  dump physical path to targets
-    EntityPath l_path;
-    l_path  =   l_@targetN_target->getAttr<ATTR_PHYS_PATH>();
-    l_path.dump();
-    TRACFCOMP( g_trac_mc_init, "===== " );   
 
-    // cast OUR type of target to a FAPI type of target.                         
-    const fapi::Target l_fapi_@targetN_target(
-                    TARGET_TYPE_MEMBUF_CHIP,
-                    reinterpret_cast<void *>
-                        (const_cast<TARGETING::Target*>(l_@targetN_target)) );
-                    
-    //  call the HWP with each fapi::Target
-    l_fapirc  =   mss_draminit( ? , ?, ? );
+    // @@@@@    CUSTOM BLOCK:   @@@@@
+    //  mss_draminit wants centaur.mba's
+    //  Use PredicateIsFunctional to filter only functional chips
+    TARGETING::PredicateIsFunctional    l_isFunctional;
+    //  find all the MBA's in the system
+    TARGETING::PredicateCTM             l_mbaFilter(CLASS_UNIT, TYPE_MBA);
+    // declare a postfix expression widget
+    TARGETING::PredicatePostfixExpr l_functionalAndMbaFilter;
+    //  is-a-membuf-chip  is-functional   AND
+    l_functionalAndMbaFilter.push(&l_mbaFilter).push(&l_isFunctional).And();
+    // loop through all the targets, applying the filter,  and put the results in l_pMemBufs
+    TARGETING::TargetRangeFilter    l_pMbas(
+            TARGETING::targetService().begin(),
+            TARGETING::targetService().end(),
+            &l_functionalAndMbaFilter );
 
-    //  process return code.
-    if ( l_fapirc== fapi::FAPI_RC_SUCCESS )
+    for (   uint8_t l_mbaNum=0 ;
+            l_pMbas ;
+            l_mbaNum++, ++l_pMbas
+    )
     {
-        TRACFCOMP( ISTEPS_TRACE::ISTEPS_TRACE::g_trac_isteps_traces_trace,
-                "SUCCESS :  mss_draminit HWP(? ? ? )" );
-    }
-    else
-    {
-        /**
-         * @todo fapi error - just print out for now...
-         */
+        //  make a local copy of the target for ease of use
+        const TARGETING::Target*  l_mba_target = *l_pMbas;
+
+        //  print call to hwp and dump physical path of the target(s)
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR %d:  mss_draminit HWP(? ? ?) ",
-                static_cast<uint32_t>(l_fapirc) );
-    }
-    // @@@@@    END CUSTOM BLOCK:   @@@@@    
-#endif
+                "=====  mss_draminit HWP(  )" );
+        //  dump physical path to targets
+        EntityPath l_path;
+        l_path  =   l_mba_target->getAttr<ATTR_PHYS_PATH>();
+        l_path.dump();
+
+        // cast OUR type of target to a FAPI type of target.
+        const fapi::Target l_fapi_mba_target(
+                TARGET_TYPE_MBA_CHIPLET,
+                reinterpret_cast<void *>
+        (const_cast<TARGETING::Target*>(l_mba_target)) );
+
+        //  call the HWP with each fapi::Target
+        l_fapirc  =   mss_draminit( l_fapi_mba_target );
+
+        //  process return code.
+        if ( l_fapirc== fapi::FAPI_RC_SUCCESS )
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "SUCCESS :  mss_draminit HWP(? ? ? )" );
+        }
+        else
+        {
+            /**
+             * @todo fapi error - just print out for now...
+             */
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "ERROR %d:  mss_draminit HWP( ) ",
+                    static_cast<uint32_t>(l_fapirc) );
+        }
+    }   // endfor   mba's
+    // @@@@@    END CUSTOM BLOCK:   @@@@@
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_draminit exit" );
 
@@ -560,15 +568,15 @@ void    call_mss_restore_dram_repair( void *io_pArgs )
     fapi::ReturnCode    l_fapirc;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_restore_dram_repair entry" );
-        
+
 #if 0
-    // @@@@@    CUSTOM BLOCK:   @@@@@    
+    // @@@@@    CUSTOM BLOCK:   @@@@@
     //  figure out what targets we need
     //  customize any other inputs
     //  set up loops to go through all targets (if parallel, spin off a task)
-    
+
     //  print call to hwp and dump physical path of the target(s)
-    TRACFCOMP( ISTEPS_TRACE::ISTEPS_TRACE::g_trac_isteps_traces_trace,
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                     "=====  mss_restore_dram_repair HWP(? ? ? )",
                     ?
                     ?
@@ -577,21 +585,20 @@ void    call_mss_restore_dram_repair( void *io_pArgs )
     EntityPath l_path;
     l_path  =   l_@targetN_target->getAttr<ATTR_PHYS_PATH>();
     l_path.dump();
-    TRACFCOMP( g_trac_mc_init, "===== " );   
 
-    // cast OUR type of target to a FAPI type of target.                         
+    // cast OUR type of target to a FAPI type of target.
     const fapi::Target l_fapi_@targetN_target(
                     TARGET_TYPE_MEMBUF_CHIP,
                     reinterpret_cast<void *>
                         (const_cast<TARGETING::Target*>(l_@targetN_target)) );
-                    
+
     //  call the HWP with each fapi::Target
     l_fapirc  =   mss_restore_dram_repair( ? , ?, ? );
 
     //  process return code.
     if ( l_fapirc== fapi::FAPI_RC_SUCCESS )
     {
-        TRACFCOMP( ISTEPS_TRACE::ISTEPS_TRACE::g_trac_isteps_traces_trace,
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                 "SUCCESS :  mss_restore_dram_repair HWP(? ? ? )" );
     }
     else
@@ -603,7 +610,7 @@ void    call_mss_restore_dram_repair( void *io_pArgs )
                 "ERROR %d:  mss_restore_dram_repair HWP(? ? ?) ",
                 static_cast<uint32_t>(l_fapirc) );
     }
-    // @@@@@    END CUSTOM BLOCK:   @@@@@    
+    // @@@@@    END CUSTOM BLOCK:   @@@@@
 #endif
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_restore_dram_repair exit" );
@@ -626,51 +633,66 @@ void    call_mss_draminit_training( void *io_pArgs )
     fapi::ReturnCode    l_fapirc;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_draminit_training entry" );
-        
-#if 0
-    // @@@@@    CUSTOM BLOCK:   @@@@@    
-    //  figure out what targets we need
-    //  customize any other inputs
-    //  set up loops to go through all targets (if parallel, spin off a task)
-    
-    //  print call to hwp and dump physical path of the target(s)
-    TRACFCOMP( ISTEPS_TRACE::ISTEPS_TRACE::g_trac_isteps_traces_trace,
-                    "=====  mss_draminit_training HWP(? ? ? )",
-                    ?
-                    ?
-                    ? );
-    //  dump physical path to targets
-    EntityPath l_path;
-    l_path  =   l_@targetN_target->getAttr<ATTR_PHYS_PATH>();
-    l_path.dump();
-    TRACFCOMP( g_trac_mc_init, "===== " );   
 
-    // cast OUR type of target to a FAPI type of target.                         
-    const fapi::Target l_fapi_@targetN_target(
-                    TARGET_TYPE_MEMBUF_CHIP,
-                    reinterpret_cast<void *>
-                        (const_cast<TARGETING::Target*>(l_@targetN_target)) );
-                    
-    //  call the HWP with each fapi::Target
-    l_fapirc  =   mss_draminit_training( ? , ?, ? );
 
-    //  process return code.
-    if ( l_fapirc== fapi::FAPI_RC_SUCCESS )
+    // @@@@@    CUSTOM BLOCK:   @@@@@
+    //  Use PredicateIsFunctional to filter only functional chips
+    TARGETING::PredicateIsFunctional    l_isFunctional;
+    //  find all the MBA's in the system
+    TARGETING::PredicateCTM             l_mbaFilter(CLASS_UNIT, TYPE_MBA);
+    // declare a postfix expression widget
+    TARGETING::PredicatePostfixExpr l_functionalAndMbaFilter;
+    //  is-a-membuf-chip  is-functional   AND
+    l_functionalAndMbaFilter.push(&l_mbaFilter).push(&l_isFunctional).And();
+    // loop through all the targets, applying the filter,  and put the results in l_pMemBufs
+    TARGETING::TargetRangeFilter    l_pMbas(
+            TARGETING::targetService().begin(),
+            TARGETING::targetService().end(),
+            &l_functionalAndMbaFilter );
+
+    for (   uint8_t l_mbaNum=0 ;
+            l_pMbas ;
+            l_mbaNum++, ++l_pMbas
+    )
     {
-        TRACFCOMP( ISTEPS_TRACE::ISTEPS_TRACE::g_trac_isteps_traces_trace,
-                "SUCCESS :  mss_draminit_training HWP(? ? ? )" );
-    }
-    else
-    {
-        /**
-         * @todo fapi error - just print out for now...
-         */
+        //  make a local copy of the target for ease of use
+        const TARGETING::Target*  l_mba_target = *l_pMbas;
+
+        //  print call to hwp and dump physical path of the target(s)
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR %d:  mss_draminit_training HWP(? ? ?) ",
-                static_cast<uint32_t>(l_fapirc) );
+                "=====  mss_draminit_training HWP( )" );
+        //  dump physical path to targets
+        EntityPath l_path;
+        l_path  =   l_mba_target->getAttr<ATTR_PHYS_PATH>();
+        l_path.dump();
+
+        // cast OUR type of target to a FAPI type of target.
+        const fapi::Target l_fapi_mba_target(
+                TARGET_TYPE_MBA_CHIPLET,
+                reinterpret_cast<void *>
+        (const_cast<TARGETING::Target*>(l_mba_target)) );
+
+        //  call the HWP with each fapi::Target
+        l_fapirc  =   mss_draminit_training( l_fapi_mba_target );
+
+        //  process return code.
+        if ( l_fapirc== fapi::FAPI_RC_SUCCESS )
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "SUCCESS :  mss_draminit_training HWP( )" );
+        }
+        else
+        {
+            /**
+             * @todo fapi error - just print out for now...
+             */
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "ERROR %d:  mss_draminit_training HWP( ) ",
+                    static_cast<uint32_t>(l_fapirc) );
+        }
     }
-    // @@@@@    END CUSTOM BLOCK:   @@@@@    
-#endif
+    // @@@@@    END CUSTOM BLOCK:   @@@@@
+
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_draminit_training exit" );
 
@@ -692,15 +714,15 @@ void    call_mss_draminit_trainadv( void *io_pArgs )
     fapi::ReturnCode    l_fapirc;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_draminit_trainadv entry" );
-        
+
 #if 0
-    // @@@@@    CUSTOM BLOCK:   @@@@@    
+    // @@@@@    CUSTOM BLOCK:   @@@@@
     //  figure out what targets we need
     //  customize any other inputs
     //  set up loops to go through all targets (if parallel, spin off a task)
-    
+
     //  print call to hwp and dump physical path of the target(s)
-    TRACFCOMP( ISTEPS_TRACE::ISTEPS_TRACE::g_trac_isteps_traces_trace,
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                     "=====  mss_draminit_trainadv HWP(? ? ? )",
                     ?
                     ?
@@ -709,21 +731,20 @@ void    call_mss_draminit_trainadv( void *io_pArgs )
     EntityPath l_path;
     l_path  =   l_@targetN_target->getAttr<ATTR_PHYS_PATH>();
     l_path.dump();
-    TRACFCOMP( g_trac_mc_init, "===== " );   
 
-    // cast OUR type of target to a FAPI type of target.                         
+    // cast OUR type of target to a FAPI type of target.
     const fapi::Target l_fapi_@targetN_target(
                     TARGET_TYPE_MEMBUF_CHIP,
                     reinterpret_cast<void *>
                         (const_cast<TARGETING::Target*>(l_@targetN_target)) );
-                    
+
     //  call the HWP with each fapi::Target
     l_fapirc  =   mss_draminit_trainadv( ? , ?, ? );
 
     //  process return code.
     if ( l_fapirc== fapi::FAPI_RC_SUCCESS )
     {
-        TRACFCOMP( ISTEPS_TRACE::ISTEPS_TRACE::g_trac_isteps_traces_trace,
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                 "SUCCESS :  mss_draminit_trainadv HWP(? ? ? )" );
     }
     else
@@ -735,7 +756,7 @@ void    call_mss_draminit_trainadv( void *io_pArgs )
                 "ERROR %d:  mss_draminit_trainadv HWP(? ? ?) ",
                 static_cast<uint32_t>(l_fapirc) );
     }
-    // @@@@@    END CUSTOM BLOCK:   @@@@@    
+    // @@@@@    END CUSTOM BLOCK:   @@@@@
 #endif
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_draminit_trainadv exit" );
@@ -758,51 +779,67 @@ void    call_mss_draminit_mc( void *io_pArgs )
     fapi::ReturnCode    l_fapirc;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_draminit_mc entry" );
-        
-#if 0
-    // @@@@@    CUSTOM BLOCK:   @@@@@    
-    //  figure out what targets we need
-    //  customize any other inputs
-    //  set up loops to go through all targets (if parallel, spin off a task)
-    
-    //  print call to hwp and dump physical path of the target(s)
-    TRACFCOMP( ISTEPS_TRACE::ISTEPS_TRACE::g_trac_isteps_traces_trace,
-                    "=====  mss_draminit_mc HWP(? ? ? )",
-                    ?
-                    ?
-                    ? );
-    //  dump physical path to targets
-    EntityPath l_path;
-    l_path  =   l_@targetN_target->getAttr<ATTR_PHYS_PATH>();
-    l_path.dump();
-    TRACFCOMP( g_trac_mc_init, "===== " );   
 
-    // cast OUR type of target to a FAPI type of target.                         
-    const fapi::Target l_fapi_@targetN_target(
-                    TARGET_TYPE_MEMBUF_CHIP,
-                    reinterpret_cast<void *>
-                        (const_cast<TARGETING::Target*>(l_@targetN_target)) );
-                    
-    //  call the HWP with each fapi::Target
-    l_fapirc  =   mss_draminit_mc( ? , ?, ? );
+    // @@@@@    CUSTOM BLOCK:   @@@@@
+    //  Use PredicateIsFunctional to filter only functional chips
+    TARGETING::PredicateIsFunctional    l_isFunctional;
+    //  find all the Centaurs in the system
+    TARGETING::PredicateCTM             l_membufChipFilter(CLASS_CHIP, TYPE_MEMBUF);
+    // declare a postfix expression widget
+    TARGETING::PredicatePostfixExpr l_functionalAndMembufChipFilter;
+    //  is-a-membuf-chip  is-functional   AND
+    l_functionalAndMembufChipFilter.push(&l_membufChipFilter).push(&l_isFunctional).And();
+    // loop through all the targets, applying the filter,  and put the results in l_pMbas
+    TARGETING::TargetRangeFilter    l_pMemBufs(
+            TARGETING::targetService().begin(),
+            TARGETING::targetService().end(),
+            &l_functionalAndMembufChipFilter );
 
-    //  process return code.
-    if ( l_fapirc== fapi::FAPI_RC_SUCCESS )
+    for (   uint8_t l_membufNum=0 ;
+            l_pMemBufs ;
+            l_membufNum++, ++l_pMemBufs
+    )
     {
-        TRACFCOMP( ISTEPS_TRACE::ISTEPS_TRACE::g_trac_isteps_traces_trace,
-                "SUCCESS :  mss_draminit_mc HWP(? ? ? )" );
-    }
-    else
-    {
-        /**
-         * @todo fapi error - just print out for now...
-         */
+        //  make a local copy of the target for ease of use
+        const TARGETING::Target*  l_membuf_target = *l_pMemBufs;
+
+        //  print call to hwp and dump physical path of the target(s)
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR %d:  mss_draminit_mc HWP(? ? ?) ",
-                static_cast<uint32_t>(l_fapirc) );
+                "=====  mss_draminit_mc HWP( %d )",
+                l_membufNum );
+        //  dump physical path to targets
+        EntityPath l_path;
+        l_path  =   l_membuf_target->getAttr<ATTR_PHYS_PATH>();
+        l_path.dump();
+
+        // cast OUR type of target to a FAPI type of target.
+        const fapi::Target l_fapi_membuf_target(
+                TARGET_TYPE_MEMBUF_CHIP,
+                reinterpret_cast<void *>
+        (const_cast<TARGETING::Target*>(l_membuf_target)) );
+
+        //  call the HWP with each fapi::Target
+        l_fapirc  =   mss_draminit_mc( l_fapi_membuf_target );
+
+        //  process return code.
+        if ( l_fapirc== fapi::FAPI_RC_SUCCESS )
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "SUCCESS :  mss_draminit_mc HWP( %d )",
+                    l_membufNum );
+        }
+        else
+        {
+            /**
+             * @todo fapi error - just print out for now...
+             */
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "ERROR %d:  mss_draminit_mc HWP( %d ) ",
+                    static_cast<uint32_t>(l_fapirc),
+                    l_membufNum );
+        }
     }
-    // @@@@@    END CUSTOM BLOCK:   @@@@@    
-#endif
+    // @@@@@    END CUSTOM BLOCK:   @@@@@
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_draminit_mc exit" );
 

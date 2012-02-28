@@ -34,15 +34,29 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
 ## pointer to common HWP files
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/include
 
+##  NOTE: add the base istep dir here. 
+##@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/@istepname
+EXTRAINCDIR	+= ${ROOTPATH}/src/usr/hwpf/hwp/dram_training
+
 ##  Include sub dirs
 ##  NOTE: add a new EXTRAINCDIR when you add a new HWP
-## EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/??
+##@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/???
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dram_training/mss_draminit_training
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dram_training/mss_draminit_mc
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dram_training/mss_draminit
 
-
-OBJS =  dram_training.o
-
-
+##  NOTE: add new object files when you add a new HWP
+OBJS =  dram_training.o \
+        mss_draminit.o \
+        mss_funcs.o \
+        mss_draminit_mc.o \
+        mss_draminit_training.o
+   		
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
-## VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/??
+##@ VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/???
+VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/dram_training/mss_draminit_training
+VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/dram_training/mss_draminit_mc
+VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/dram_training/mss_draminit
+
 
 include ${ROOTPATH}/config.mk
