@@ -503,21 +503,18 @@
     <attribute><id>EFF_CEN_DRV_IMP_CMD</id></attribute>
     <attribute><id>EFF_CEN_DRV_IMP_CNTL</id></attribute>
     <attribute><id>EFF_CEN_RCV_IMP_DQ_DQS</id></attribute>
-    <attribute><id>EFF_CEN_SLEW_RATE_DQ</id></attribute>
-    <attribute><id>EFF_CEN_SLEW_RATE_DQS</id></attribute>
+    <attribute><id>EFF_CEN_SLEW_RATE_DQ_DQS</id></attribute>
     <attribute><id>EFF_CEN_SLEW_RATE_CMD</id></attribute>
     <attribute><id>EFF_CEN_SLEW_RATE_CNTL</id></attribute>
     <attribute><id>EFF_CEN_RD_VREF</id></attribute>
     <attribute><id>EFF_DIMM_SIZE</id></attribute>
-    <attribute><id>EFF_DRAM_BANKS</id></attribute>
-    <attribute><id>EFF_DRAM_ROWS</id></attribute>
-    <attribute><id>EFF_DRAM_COLS</id></attribute>
     <attribute><id>EFF_DRAM_DENSITY</id></attribute>
     <attribute><id>EFF_DRAM_TRCD</id></attribute>
     <attribute><id>EFF_DRAM_TRRD</id></attribute>
     <attribute><id>EFF_DRAM_TRP</id></attribute>
     <attribute><id>EFF_DRAM_TRAS</id></attribute>
     <attribute><id>EFF_DRAM_TRC</id></attribute>
+    <attribute><id>EFF_DRAM_TRFI</id></attribute>
     <attribute><id>EFF_DRAM_TRFC</id></attribute>
     <attribute><id>EFF_DRAM_TWTR</id></attribute>
     <attribute><id>EFF_DRAM_TRTP</id></attribute>
@@ -541,6 +538,11 @@
     <attribute><id>EFF_MPR_LOC</id></attribute>
     <attribute><id>EFF_MPR_MODE</id></attribute>
     <attribute><id>EFF_DIMM_RCD_CNTL_WORD_0_15</id></attribute>
+    <attribute><id>EFF_SCHMOO_MODE</id></attribute>
+    <attribute><id>EFF_SCHMOO_TEST_VALID</id></attribute>
+    <attribute><id>EFF_SCHMOO_PARAM_VALID</id></attribute>
+    <attribute><id>EFF_MEMCAL_INTERVAL</id></attribute>
+    <attribute><id>EFF_ZQCAL_INTERVAL</id></attribute>
     <attribute><id>MSS_THROTTLE_NUMERATOR</id></attribute>
     <attribute><id>MSS_THROTTLE_DENOMINATOR</id></attribute>
     <attribute><id>MSS_THROTTLE_CHANNEL_NUMERATOR</id></attribute>

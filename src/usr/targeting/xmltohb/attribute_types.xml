@@ -1109,9 +1109,9 @@
     <id>EFF_DIMM_RANKS_CONFIGED</id>
     <description>DIMM ranks configured. Initialized and used by HWPs.</description>
     <simpleType>
-        <uint32_t>
+        <uint8_t>
             <default>0</default>
-        </uint32_t>
+        </uint8_t>
         <array>2,2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -1656,8 +1656,8 @@
 </attribute>
 
 <attribute>
-    <id>EFF_CEN_SLEW_RATE_DQ</id>
-    <description>Centaur DQ Slew Rate. Initialized and used by HWPs.</description>
+    <id>EFF_CEN_SLEW_RATE_DQ_DQS</id>
+    <description>Centaur DQ and DQS Slew Rate. Initialized and used by HWPs.</description>
     <simpleType>
         <uint8_t>
             <default>0</default>
@@ -1667,24 +1667,7 @@
     <readable/> 
     <writeable/>
     <hwpfToHbAttrMap>
-        <id>ATTR_EFF_CEN_SLEW_RATE_DQ</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_CEN_SLEW_RATE_DQS</id>
-    <description>Centaur DQS Slew Rate. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/> 
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_CEN_SLEW_RATE_DQS</id>
+        <id>ATTR_EFF_CEN_SLEW_RATE_DQ_DQS</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -1754,57 +1737,6 @@
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_EFF_DIMM_SIZE</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_DRAM_BANKS</id>
-    <description>Number of DRAM banks. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DRAM_BANKS</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_DRAM_ROWS</id>
-    <description>Number of DRAM rows. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DRAM_ROWS</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_DRAM_COLS</id>
-    <description>Number of DRAM columns. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DRAM_COLS</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -1907,6 +1839,23 @@
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_EFF_DRAM_TRC</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_TRFI</id>
+    <description>Refresh Interval. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DRAM_TRFI</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -2299,6 +2248,91 @@
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_EFF_DIMM_RCD_CNTL_WORD_0_15</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_SCHMOO_MODE</id>
+    <description>Specifies the schmoo mode to use during draminit_train_adv. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_SCHMOO_MODE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_SCHMOO_TEST_VALID</id>
+    <description>Specifies the schmoo test to run during draminit_train_adv. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_SCHMOO_TEST_VALID</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_SCHMOO_PARAM_VALID</id>
+    <description>Specifies the schmoo parameters to use during draminit_train_adv. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_SCHMOO_PARAM_VALID</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_MEMCAL_INTERVAL</id>
+    <description>Specifies the memcal interval in clocks. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_MEMCAL_INTERVAL</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_ZQCAL_INTERVAL</id>
+    <description>Specifies the zqcal interval in clocks. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_ZQCAL_INTERVAL</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>

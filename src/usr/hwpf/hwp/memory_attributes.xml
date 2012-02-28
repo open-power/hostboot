@@ -20,13 +20,8 @@
      Origin: 30
    
      IBM_PROLOG_END -->
-
-<!--
-    XML file specifying HWPF attributes.
-    These are non-platInit attributes used by memory HWPs.
--->
-
 <attributes>
+<!-- *********************************************************************** -->
 
 <attribute>
     <id>ATTR_MSS_VOLT</id>
@@ -65,10 +60,32 @@ firmware notes: none</description>
     <array> 2 2</array>
 </attribute>
 
+<!-- TODO Hostboot note:
+          The plan for this attribute has changed, it is now an SPD attribute in
+          the dimm_spd_attributes.xml file. The HW team will eventually remove
+          it from this file
+<attribute>
+    <id>ATTR_MSS_BAD_BIT_MASK</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Structure that records which bits have errors.  It is restored from VPD information.  It can be altered by mss_draminit_training, mss_draminit_training_adv, mss_memorydiags.  Platforms must initialize this from previous values.  Platforms, when seeing a write, will write the value back to the VPD or other structures.
+creator: firmware loads last values
+consumer: mss_dram_init_training/memory diags
+firmware notes: does platform init and actions on writes </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <platActionWrite/>
+    <writeable/>
+    <odmVisable/>
+    <array> 2 2 8 10</array>
+    <persistRuntime/>
+</attribute>
+-->
+
 <attribute>
     <id>ATTR_EFF_DIMM_RANKS_CONFIGED</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
     <description>Bit wise representation of master ranks in each DIMM that are used for reads and writes. Used in various locations and is computed in mss_eff_cnfg. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+Dimensions are [port][dimm]  A/B=Mba_0 C/D=Mba_1 There are only two DIMM ranks: DIMM0 and DIMM1 where DIMM0 is the furthest from the centaur.
 creator: mss_eff_cnfg
 consumer: various
 firmware notes: none</description>
@@ -84,6 +101,7 @@ firmware notes: none</description>
     <id>ATTR_EFF_NUM_RANKS_PER_DIMM</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
     <description>Number of ranks in each DIMM. Used in various locations and is computed in mss_eff_cnfg. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+values are 0,1,2, 4 up to 32
 creator: mss_eff_cnfg
 consumer: various
 firmware notes: none</description>
@@ -429,7 +447,7 @@ creator: mss_eff_cnfg_termination
 consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
-    <enum>DISABLED = 0, OHM20 = 20, OHM30 = 30, OHM34 = 34, OHM40 = 40, OHM48 = 48, OHM60 = 60, OHM80 = 80, OHM120 = 120, OHM240 = 240,</enum>
+    <enum>DISABLE = 0, OHM20 = 20, OHM30 = 30, OHM34 = 34, OHM40 = 40, OHM48 = 48, OHM60 = 60, OHM80 = 80, OHM120 = 120, OHM240 = 240,</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -444,7 +462,7 @@ creator: mss_eff_cnfg_termination
 consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
-    <enum>DISABLED = 0, OHM60 = 60, OHM120 = 120,</enum>
+    <enum>DISABLE = 0, OHM60 = 60, OHM120 = 120,</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -522,28 +540,13 @@ firmware notes: none</description>
 </attribute>
 
 <attribute>
-    <id>ATTR_EFF_CEN_SLEW_RATE_DQ</id>
+    <id>ATTR_EFF_CEN_SLEW_RATE_DQ_DQS</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
-    <description>Centaur DQ Slew Rate Used in various locations and is computed in mss_eff_cnfg_termination. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+    <description>Centaur DQ and DQS Slew Rate Used in various locations and is computed in mss_eff_cnfg_termination. Slowest slew rate is “0”, incrementing by one. The lower the number the slower the slew rate the higher the faster. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
 creator: mss_eff_cnfg_termination
 consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
-    <enum>SLOW = 0x00, FAST = 0x01,</enum>
-    <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
-</attribute>
-
-<attribute>
-    <id>ATTR_EFF_CEN_SLEW_RATE_DQS</id>
-    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
-    <description>Centaur DQS Slew Rate Used in various locations and is computed in mss_eff_cnfg_termination. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
-creator: mss_eff_cnfg_termination
-consumer: various
-firmware notes: none</description>
-    <valueType>uint8</valueType>
-    <enum>SLOW = 0x00, FAST = 0x01,</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -552,12 +555,11 @@ firmware notes: none</description>
 <attribute>
     <id>ATTR_EFF_CEN_SLEW_RATE_CMD</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
-    <description>Centaur Command Slew Rate Used in various locations and is computed in mss_eff_cnfg_termination. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+    <description>Centaur Command Slew Rate Used in various locations and is computed in mss_eff_cnfg_termination. Slowest slew rate is “0”, incrementing by one. The lower the number the slower the slew rate the higher the faster. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
 creator: mss_eff_cnfg_termination
 consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
-    <enum>SLOW = 0x00, FAST = 0x01,</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -566,12 +568,11 @@ firmware notes: none</description>
 <attribute>
     <id>ATTR_EFF_CEN_SLEW_RATE_CNTL</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
-    <description>Centaur Control Slew Rate Used in various locations and is computed in mss_eff_cnfg_termination. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+    <description>Centaur Control Slew Rate Used in various locations and is computed in mss_eff_cnfg_termination. Slowest slew rate is “0”, incrementing by one. The lower the number the slower the slew rate the higher the faster. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
 creator: mss_eff_cnfg_termination
 consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
-    <enum>SLOW = 0x00, FAST = 0x01,</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -604,45 +605,6 @@ firmware notes: none</description>
     <odmChangeable/>
     <array> 2 2</array>
     <persistRuntime/>
-</attribute>
-
-<attribute>
-    <id>ATTR_EFF_DRAM_BANKS</id>
-    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
-    <description>Number of DRAM banks.  Used in various locations and is computed in mss_eff_cnfg. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.  Each memory channel will have a value.
-creator: mss_eff_cnfg
-consumer: various
-firmware notes: none</description>
-    <valueType>uint8</valueType>
-    <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
-</attribute>
-
-<attribute>
-    <id>ATTR_EFF_DRAM_ROWS</id>
-    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
-    <description>Number of DRAM rows.  Used in various locations and is computed in mss_eff_cnfg. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.  Each memory channel will have a value.
-creator: mss_eff_cnfg
-consumer: various
-firmware notes: none</description>
-    <valueType>uint8</valueType>
-    <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
-</attribute>
-
-<attribute>
-    <id>ATTR_EFF_DRAM_COLS</id>
-    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
-    <description>Number of DRAM columns.  Used in various locations and is computed in mss_eff_cnfg. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.  Each memory channel will have a value.
-creator: mss_eff_cnfg
-consumer: various
-firmware notes: none</description>
-    <valueType>uint8</valueType>
-    <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -724,9 +686,22 @@ firmware notes: none</description>
 </attribute>
 
 <attribute>
+    <id>ATTR_EFF_DRAM_TRFI</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Refresh Interval. Used in various locations and is computed in mss_eff_cnfg_timing. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.  In unit clock.
+creator: mss_eff_cnfg_timing
+consumer: various
+firmware notes: none</description>
+    <valueType>uint32</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
     <id>ATTR_EFF_DRAM_TRFC</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
-    <description>Refresh Recovery Delay. Used in various locations and is computed in mss_eff_cnfg_timing. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.  Each memory channel will have a value.
+    <description>Refresh Recovery Delay. Used in various locations and is computed in mss_eff_cnfg_timing. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.  In unit clock.
 creator: mss_eff_cnfg_timing
 consumer: various
 firmware notes: none</description>
@@ -1038,6 +1013,59 @@ firmware notes: none</description>
 </attribute>
 
 <attribute>
+    <id>ATTR_EFF_SCHMOO_MODE</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Specifies the schmoo mode to use during draminit_train_adv.</description>
+    <valueType>uint8</valueType>
+    <enum>FAST = 0, ONE_SLOW = 1, QUARTER_SLOW = 2, HALF_SLOW = 3, FULL_SLOW = 4, ONE_CHAR = 5, QUARTER_CHAR = 6, HALF_CHAR = 7, FULL_CHAR = 8,</enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_SCHMOO_TEST_VALID</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Specifies the schmoo test to run during draminit_train_adv. Bit wise.</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_SCHMOO_PARAM_VALID</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Specifies the schmoo parameters to use during draminit_train_adv. Bit wise.</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_MEMCAL_INTERVAL</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Specifies the memcal interval in clocks.</description>
+    <valueType>uint32</valueType>
+    <enum>DISABLE = 0,</enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_ZQCAL_INTERVAL</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Specifies the zqcal interval in clocks.</description>
+    <valueType>uint32</valueType>
+    <enum>DISABLE = 0,</enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
     <id>ATTR_MSS_THROTTLE_NUMERATOR</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
     <description>Each DIMM can have a throttle amount.  This is the numerator
@@ -1210,6 +1238,24 @@ firmware notes: none</description>
     <persistRuntime/>
 </attribute>
 
+<!-- TODO Hostboot note:
+          The plan for this attribute has changed. It is no longer accessed by a
+          memory HWP. The HW team will eventually remove it from this file.
+<attribute>
+    <id>ATTR_MSS_SCOM_BASE</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>Scom base address 2^37 bit address space needed for scom addresses
+creator: firmware
+consumer: extent
+firmware notes: firmware sets aside 128G for MMIO addresses and sets this up before executing the extent setup procedure</description>
+    <valueType>uint64</valueType>
+    <platInit/>
+    <odmVisable/>
+    <odmChangeable/>
+    <persistRuntime/>
+</attribute>
+-->
+
 <attribute>
     <id>ATTR_MSS_MEMORY_BASE</id>
     <targetType>TARGET_TYPE_MCS_CHIPLET</targetType>
@@ -1261,5 +1307,83 @@ firmware notes: firmware uses this to know where the base address of the next ce
     <odmVisable/>
     <persistRuntime/>
 </attribute>
+
+<!-- TODO Hostboot note:
+          These platInit attributes have not been requested yet. Hostboot does
+          not yet support
+<attribute>
+    <id>ATTR_MSS_MCA_HASH_MODE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>This dial sets up the centaur hash mode policy..   See Centaur workbook chapter 5.
+Hash modes values are 0,1 and 2. Used in the intifile </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MSS_MBA_ADDR_INTERLEAVE_BIT</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>This dial sets the Centaur address bits used to interleave addresses between MBA01 and MBA23.  Valid values are 23 through 32.  See Centaur Spec Chapter 5 for details.   Used in the intifile </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MSS_MBA_CACHELINE_INTERLEAVE_MODE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Value of on or off.  On is 256 bit interleave.  Off, the translation is on 128  bit interleave mode.  See centaur workbook chapter 5.</description>
+    <valueType>uint8</valueType>
+    <enum>OFF = 0, ON = 1</enum>
+    <platInit/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MSS_CACHE_ENABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Value of on or off.  Determines if the L4 is enabled or not. See chapter 6 of the Centaur Workbook.</description>
+    <valueType>uint8</valueType>
+    <enum>OFF = 0, ON = 1</enum>
+    <platInit/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MSS_PREFETCH_ENABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Value of on or off.  Determines if prefetching enabled or not. See chapter 7 of the Centaur Workbook.</description>
+    <valueType>uint8</valueType>
+    <enum>OFF = 0, ON = 1</enum>
+    <platInit/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MSS_CLEANER_ENABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Value of on or off.  Determines if the cleaner of the L4 cache (write modified entries to memory on idle cycles)  enabled or not. See chapter 7 of the Centaur Workbook.</description>
+    <valueType>uint8</valueType>
+    <enum>OFF = 0, ON = 1</enum>
+    <platInit/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MBA_POS</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Which MBA we are working on, either 0 for MBA01 and 1 for MBA23</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <odmVisable/>
+</attribute>
+-->
 
 </attributes>
