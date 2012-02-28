@@ -40,7 +40,8 @@ struct msg_t
     struct
     {
         uint32_t __reserved__async:1;
-        uint32_t __reserved__unused:31;
+        uint32_t __reserved__pseudosync:1;
+        uint32_t __reserved__unused:30;
     };
     uint64_t data[2];
     void* extra_data;
@@ -162,8 +163,7 @@ msg_q_t msg_q_resolve(const char* name);
   * @brief Allocate space for message
   * @return Pointer to message
   */
-ALWAYS_INLINE
-    inline msg_t* msg_allocate() { return (msg_t*)malloc(sizeof(msg_t)); }
+msg_t* msg_allocate();
 
 
 /** @fn msg_free
@@ -206,6 +206,23 @@ int msg_send(msg_q_t q, msg_t* msg);
 int msg_sendrecv(msg_q_t q, msg_t* msg);
 
 
+/** @fn msg_sendrecv_noblk
+ *  @brief Sends a message to a server and get a response without blocking.
+ *
+ *  From the persepective of the calling [client] task, the message
+ *  transaction is asynchronous, but from the perspective of the recipient
+ *  [server] it is synchronous.  When the recipient replies to the message
+ *  the message is relayed onto a secondary message queue that the caller
+ *  provided.
+ *
+ *  @param[in] q - The message queue to send on.
+ *  @param[in] msg - The message.
+ *  @param[in] q2 - The secondary queue for the response.
+ *
+ *  @return Zero on success, else negative.
+ */
+int msg_sendrecv_noblk(msg_q_t q, msg_t* msg, msg_q_t q2);
+
 /** @fn msg_respond
   * @brief Respond to a synchronous message.
   *
@@ -238,14 +255,34 @@ msg_t* msg_wait(msg_q_t q);
 /** @fn msg_is_async
   * @brief  Indicates if message is asynchronous.
   *
-  * Tests the message field "__reserved__async" which appears to be set to 0 to indicate asynchronous, and 1 to indicate synchronous message.
+  * Tests the reserved message fields to determine if the message is
+  * asynchronous or synchronous.  These fields are only manipulated by
+  * system-call or kernel code to maintain the proper state of the fields
+  * based on the msg interfaces used.
   *
   * @return true if asynchronous message
   */
     ALWAYS_INLINE
 inline uint32_t msg_is_async(msg_t* msg)
-{ return 0 == msg->__reserved__async; }
+{
+    return (0 == msg->__reserved__async);
+}
 
+/** @fn msg_is_sync_noblk
+ *  @brief  Indicates if the message is a non-blocking synchronous message.
+ *
+ *  Tests the reserved message fields to determine if the message is
+ *  a blocking synchronous message.  These fields are only manipulated by
+ *  system-call or kernel code to maintain the proper state of the fields
+ *  based on the msg interfaces used.
+ *
+ *  @return true if non-blocking synchronous message.
+ */
+    ALWAYS_INLINE
+inline uint32_t msg_is_sync_noblk(msg_t* msg)
+{
+    return (1 == msg->__reserved__pseudosync);
+}
 
 #ifdef __cplusplus
 }

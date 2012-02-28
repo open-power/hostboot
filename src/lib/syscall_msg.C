@@ -93,6 +93,15 @@ msg_q_t msg_q_resolve(const char* name)
     }
 }
 
+msg_t* msg_allocate()
+{
+    msg_t* msg = reinterpret_cast<msg_t*>(malloc(sizeof(msg_t)));
+
+    memset(msg, 0, sizeof(msg_t));
+
+    return msg;
+}
+
 int msg_send(msg_q_t q, msg_t* msg)
 {
     return (int64_t)_syscall2(MSG_SEND, q, msg);
@@ -100,7 +109,12 @@ int msg_send(msg_q_t q, msg_t* msg)
 
 int msg_sendrecv(msg_q_t q, msg_t* msg)
 {
-    return (int64_t)_syscall2(MSG_SENDRECV, q, msg);
+    return (int64_t)_syscall3(MSG_SENDRECV, q, msg, NULL);
+}
+
+int msg_sendrecv_noblk(msg_q_t q, msg_t* msg, msg_q_t q2)
+{
+    return (int64_t)_syscall3(MSG_SENDRECV, q, msg, q2);
 }
 
 int msg_respond(msg_q_t q, msg_t* msg)

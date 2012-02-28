@@ -336,7 +336,13 @@ namespace Systemcalls
     {
         MessageQueue* mq = (MessageQueue*) TASK_GETARG0(t);
         msg_t* m = (msg_t*) TASK_GETARG1(t);
+        MessageQueue* mq2 = (MessageQueue*) TASK_GETARG2(t);
+
         m->__reserved__async = 1; // set to sync msg.
+        if (NULL != mq2) // set as pseudo-sync if secondary queue given.
+        {
+            m->__reserved__pseudosync = 1;
+        }
 
         if (m->type >= MSG_FIRST_SYS_TYPE)
         {
@@ -349,9 +355,18 @@ namespace Systemcalls
         // Create pending response object.
         MessagePending* mp = new MessagePending();
         mp->key = m;
-        mp->task = t;
-        t->state = TASK_STATE_BLOCK_MSG;
-        t->state_info = mq;
+        if (!m->__reserved__pseudosync) // Normal sync, add task to pending obj.
+        {
+            mp->task = t;
+            t->state = TASK_STATE_BLOCK_MSG;
+            t->state_info = mq;
+        }
+        else // Pseudo-sync, add the secondary queue instead.
+        {
+            mp->task = reinterpret_cast<task_t*>(mq2);
+            TASK_SETRTN(t, 0);  // Need to give good RC for the caller, since
+                                // we are returning immediately.
+        }
 
         mq->lock.lock();
 
@@ -360,14 +375,22 @@ namespace Systemcalls
         if (NULL == waiter) // None found, add to 'messages' queue.
         {
             mq->messages.insert(mp);
-            // Choose next thread to execute, this one is delayed.
-            t->cpu->scheduler->setNextRunnable();
+            if (!m->__reserved__pseudosync)
+            {
+                // Choose next thread to execute, this one is delayed.
+                t->cpu->scheduler->setNextRunnable();
+            } // For pseudo-sync, just keep running the current task.
         }
         else // Context switch to waiter.
         {
             TASK_SETRTN(waiter, (uint64_t) m);
             mq->responses.insert(mp);
             waiter->cpu = t->cpu;
+            if (m->__reserved__pseudosync) // For pseudo-sync, add this task
+                                           // back to scheduler.
+            {
+                t->cpu->scheduler->addTask(t);
+            }
             TaskManager::setCurrentTask(waiter);
         }
 
@@ -389,6 +412,7 @@ namespace Systemcalls
             mq->lock.unlock();
             delete mp;
 
+            // Kernel message types are handled by MessageHandler objects.
             if (m->type >= MSG_FIRST_SYS_TYPE)
             {
                 TASK_SETRTN(t,
@@ -399,6 +423,33 @@ namespace Systemcalls
                     t->cpu->scheduler->addTask(t);
                 }
             }
+            // Pseudo-sync messages are handled by pushing the response onto
+            // a message queue.
+            else if (m->__reserved__pseudosync)
+            {
+                MessageQueue* mq2 = (MessageQueue*) waiter;
+                mq2->lock.lock();
+
+                // See if there is a waiting task (the original client).
+                task_t* client = mq2->waiting.remove();
+                if (NULL == client) // None found, add to queue.
+                {
+                    MessagePending* mp2 = new MessagePending();
+                    mp2->key = m;
+                    mp2->task = t;
+                    mq2->messages.insert(mp2);
+                }
+                else // Add waiting task onto its scheduler.
+                {
+                    TASK_SETRTN(client, (uint64_t) m);
+                    client->cpu->scheduler->addTask(client);
+                }
+
+                mq2->lock.unlock();
+                TASK_SETRTN(t, 0);
+
+            }
+            // Normal-sync messages are handled by releasing the deferred task.
             else
             {
                 waiter->cpu = t->cpu;
