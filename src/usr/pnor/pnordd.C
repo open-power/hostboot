@@ -736,7 +736,7 @@ errlHndl_t PnorDD::compareAndWriteBlock(uint32_t i_targetAddr,
                                         uint32_t i_wordsToWrite,
                                         uint32_t* i_data)
 {
-    TRACFCOMP(g_trac_pnor,"compareAndWriteBlock(0x%.8X,%d,%p)", i_targetAddr, i_wordsToWrite, i_data);
+    TRACDCOMP(g_trac_pnor,"compareAndWriteBlock(0x%.8X,%d,%p)", i_targetAddr, i_wordsToWrite, i_data);
     errlHndl_t l_err = NULL;
 
     // remember any data we read so we don't have to reread it later
