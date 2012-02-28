@@ -29,16 +29,20 @@ namespace INTR
 {
     enum IntrModuleID
     {
-        UNDEFINED_MODULE_ERRL_ID        = 0,
-        INTR_MODULE_ID,
+        MOD_INVALID                  = 0x00, /**< Invalid Module ID */
+        MOD_INTR_ENABLE              = 0x01, /**< intrrp.C : INTR::enableExternalInterrupts */
+        MOD_INTR_DISABLE             = 0x02, /**< intrrp.C : INTR::disableExternalInterrupts */
+        MOD_INTR_REGISTER            = 0x03, /**< intrrp.C : INTR::registerMsgQ */
+        MOD_INTRRP_CHECKADDRESS      = 0x04, /**< intrrp.C : IntrRp::checkAddress */
+        MOD_INTRRP_REGISTERINTERRUPT = 0x05, /**< intrrp.C : IntrRp::registerInterrupt */
     };
 
     enum IntrReasonCode
     {
-        INTR_ALREADY_REGISTERED         = INTR_COMP_ID | 0x01,
-        INTR_REGISTRY_NOT_READY         = INTR_COMP_ID | 0x02,
-        INTR_RP_NOT_INITIALIZED         = INTR_COMP_ID | 0x03,
-        INTR_BAD_VIRTUAL_IO_ADDRESS     = INTR_COMP_ID | 0x04,
+        RC_ALREADY_REGISTERED         = INTR_COMP_ID | 0x01,
+        RC_REGISTRY_NOT_READY         = INTR_COMP_ID | 0x02,
+        RC_RP_NOT_INITIALIZED         = INTR_COMP_ID | 0x03,
+        RC_BAD_VIRTUAL_IO_ADDRESS     = INTR_COMP_ID | 0x04,
     };
 };
 

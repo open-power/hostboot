@@ -362,8 +362,8 @@ errlHndl_t IntrRp::registerInterrupt(msg_q_t i_msgQ, ext_intr_t i_type)
         {
         /*@ errorlog tag
          * @errortype       ERRL_SEV_INFORMATIONAL
-         * @moduleid        INTR_MODULE_ID
-         * @reasoncode      INTR_ALREADY_REGISTERED
+         * @moduleid        INTR::MOD_INTRRP_REGISTERINTERRUPT
+         * @reasoncode      INTR::RC_ALREADY_REGISTERED
          * @userdata1       Interrupt type
          * @userdata2       0
          *
@@ -372,9 +372,9 @@ errlHndl_t IntrRp::registerInterrupt(msg_q_t i_msgQ, ext_intr_t i_type)
          */
             err = new ERRORLOG::ErrlEntry
                 (
-                 ERRORLOG::ERRL_SEV_INFORMATIONAL,      // severity
-                 INTR::INTR_MODULE_ID,                  // moduleid
-                 INTR::INTR_ALREADY_REGISTERED,         // reason code
+                 ERRORLOG::ERRL_SEV_INFORMATIONAL,    // severity
+                 INTR::MOD_INTRRP_REGISTERINTERRUPT,  // moduleid
+                 INTR::RC_ALREADY_REGISTERED,         // reason code
                  i_type,
                  0
                 );
@@ -444,8 +444,8 @@ errlHndl_t IntrRp::checkAddress(uint64_t i_addr)
     {
         /*@ errorlog tag
          * @errortype       ERRL_SEV_INFORMATIONAL
-         * @moduleid        INTR_MODULE_ID
-         * @reasoncode      INTR_BAD_VIRTUAL_IO_ADDRESS
+         * @moduleid        INTR::MOD_INTRRP_CHECKADDRESS
+         * @reasoncode      INTR::RC_BAD_VIRTUAL_IO_ADDRESS
          * @userdata1       The bad virtual address
          * @userdata2       0
          *
@@ -455,8 +455,8 @@ errlHndl_t IntrRp::checkAddress(uint64_t i_addr)
         err = new ERRORLOG::ErrlEntry
             (
              ERRORLOG::ERRL_SEV_INFORMATIONAL,
-             INTR::INTR_MODULE_ID,
-             INTR::INTR_BAD_VIRTUAL_IO_ADDRESS,
+             INTR::MOD_INTRRP_CHECKADDRESS,
+             INTR::RC_BAD_VIRTUAL_IO_ADDRESS,
              i_addr,
              0
             );
@@ -487,8 +487,8 @@ errlHndl_t INTR::registerMsgQ(msg_q_t i_msgQ, ext_intr_t i_type)
     {
         /*@ errorlog tag
          * @errortype       ERRL_SEV_INFORMATIONAL
-         * @moduleid        INTR_MODULE_ID
-         * @reasoncode      INTR_REGISTRY_NOT_READY
+         * @moduleid        INTR::MOD_INTR_REGISTER
+         * @reasoncode      INTR::RC_REGISTRY_NOT_READY
          * @userdata1       Interrupt type to register
          * @userdata2       0
          *
@@ -497,9 +497,9 @@ errlHndl_t INTR::registerMsgQ(msg_q_t i_msgQ, ext_intr_t i_type)
          */
         err = new ERRORLOG::ErrlEntry
             (
-             ERRORLOG::ERRL_SEV_INFORMATIONAL,      // severity
-             INTR::INTR_MODULE_ID,                  // moduleid
-             INTR::INTR_REGISTRY_NOT_READY,         // reason code
+             ERRORLOG::ERRL_SEV_INFORMATIONAL,    // severity
+             INTR::MOD_INTR_REGISTER,             // moduleid
+             INTR::RC_REGISTRY_NOT_READY,         // reason code
              static_cast<uint64_t>(i_type),
              0
             );
@@ -527,8 +527,8 @@ errlHndl_t INTR::enableExternalInterrupts()
     {
         /*@ errorlog tag
          * @errortype       ERRL_SEV_INFORMATIONAL
-         * @moduleid        INTR_MODULE_ID
-         * @reasoncode      INTR_RP_NOT_INITIALIZED
+         * @moduleid        INTR::MOD_INTR_ENABLE
+         * @reasoncode      INTR::RC_RP_NOT_INITIALIZED
          * @userdata1       MSG_INTR_ENABLE
          * @userdata2       0
          *
@@ -538,8 +538,8 @@ errlHndl_t INTR::enableExternalInterrupts()
         err = new ERRORLOG::ErrlEntry
             (
              ERRORLOG::ERRL_SEV_INFORMATIONAL,      // severity
-             INTR::INTR_MODULE_ID,                  // moduleid
-             INTR::INTR_RP_NOT_INITIALIZED,         // reason code
+             INTR::MOD_INTR_ENABLE,                 // moduleid
+             INTR::RC_RP_NOT_INITIALIZED,           // reason code
              static_cast<uint64_t>(MSG_INTR_ENABLE),
              0
             );
@@ -568,8 +568,8 @@ errlHndl_t INTR::disableExternalInterrupts()
     {
         /*@ errorlog tag
          * @errortype       ERRL_SEV_INFORMATIONAL
-         * @moduleid        INTR_MODULE_ID
-         * @reasoncode      INTR_RP_NOT_INITIALIZED
+         * @moduleid        INTR::MOD_INTR_DISABLE
+         * @reasoncode      INTR::RC_RP_NOT_INITIALIZED
          * @userdata1       MSG_INTR_DISABLE
          * @userdata2       0
          *
@@ -579,8 +579,8 @@ errlHndl_t INTR::disableExternalInterrupts()
         err = new ERRORLOG::ErrlEntry
             (
              ERRORLOG::ERRL_SEV_INFORMATIONAL,      // severity
-             INTR::INTR_MODULE_ID,                  // moduleid
-             INTR::INTR_RP_NOT_INITIALIZED,         // reason code
+             INTR::MOD_INTR_DISABLE,                // moduleid
+             INTR::RC_RP_NOT_INITIALIZED,           // reason code
              static_cast<uint64_t>(MSG_INTR_DISABLE),
              0
             );

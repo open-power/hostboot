@@ -309,14 +309,14 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
             /*@
              * @errortype
              * @moduleid     FSISCOM::MOD_FSISCOM_PERFORMOP
-             * @reasoncode   FSISCOM::RC_READ_ERROR
+             * @reasoncode   FSISCOM::RC_INVALID_OPTYPE
              * @userdata1    Operation Type (i_opType) : 0=READ, 1=WRITE
              * @userdata2    0
              * @devdesc      fsiScomPerformOp> Unsupported Operation Type specified
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                             FSISCOM::MOD_FSISCOM_PERFORMOP,
-                                            FSISCOM::RC_READ_ERROR,
+                                            FSISCOM::RC_INVALID_OPTYPE,
                                             TO_UINT64(i_opType),
                                             0);
 

@@ -212,14 +212,14 @@ errlHndl_t scomTranslate(DeviceFW::OperationType i_opType,
             /*@
              * @errortype
              * @moduleid     SCOM::SCOM_TRANSLATE
-             * @reasoncode   SCOM::SCOM_TRANS_UNSUPPORTED
+             * @reasoncode   SCOM::SCOM_TRANS_UNSUPPORTED_XBUS
              * @userdata1    Address
              * @userdata2    Target Type that failed
              * @devdesc      Scom Translate not supported for this type
              */
              l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                              SCOM_TRANSLATE,
-                                             SCOM_TRANS_UNSUPPORTED,
+                                             SCOM_TRANS_UNSUPPORTED_XBUS,
                                              i_addr,
                                              l_type);
 
@@ -233,14 +233,14 @@ errlHndl_t scomTranslate(DeviceFW::OperationType i_opType,
             /*@
              * @errortype
              * @moduleid     SCOM::SCOM_TRANSLATE
-             * @reasoncode   SCOM::SCOM_TRANS_UNSUPPORTED
+             * @reasoncode   SCOM::SCOM_TRANS_UNSUPPORTED_ABUS
              * @userdata1    Address
              * @userdata2    Target Type that failed
              * @devdesc      Scom Translate not supported for this type
              */
              l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                              SCOM_TRANSLATE,
-                                             SCOM_TRANS_UNSUPPORTED,
+                                             SCOM_TRANS_UNSUPPORTED_ABUS,
                                              i_addr,
                                              l_type);
 
