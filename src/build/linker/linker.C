@@ -36,6 +36,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <set>
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>
@@ -56,6 +57,7 @@ using std::setw;
 using std::string;
 using std::vector;
 using std::map;
+using std::set;
 using std::for_each;
 using std::mem_fun_ref;
 using std::bind1st;
@@ -213,7 +215,7 @@ class ModuleTable
         ModuleTable(FILE * i_binfile,
                     const string & i_path,
                     const string & i_mod_table_name)
-            : 
+            :
                 iv_output(i_binfile),
                 iv_path(i_path),
                 iv_vfs_mod_table_name(i_mod_table_name) {}
@@ -264,6 +266,8 @@ ofstream modinfo;
 vector<uint64_t> all_relocations;
 vector<ModuleTable> module_tables;
 map<string,size_t> weak_symbols;
+set<string> all_symbols;
+set<string> weak_symbols_to_check;
 
 //-----------------------------------------------------------------------------
 // MAIN
@@ -342,6 +346,39 @@ int main(int argc, char** argv)
                     }
                     objects.push_back(o);
                     cout << endl;
+                }
+            }
+        }
+
+        // Check weak-symbol collisions for contained values (typically
+        // static member variables).
+        for(set<string>::iterator i = weak_symbols_to_check.begin();
+            i != weak_symbols_to_check.end();
+            ++i)
+        {
+
+            // Need to ignore the first character of the weak symbol.
+            //     In mangled C++ names a symbol is something like _Z3foo.
+            //     A contained member value might be something like
+            //     _ZZ3fooE3bar.
+            string sym_name = string((i->c_str())+1);
+
+            cout << "Checking weak symbol: " << *i << endl;
+
+            for(set<string>::iterator j = all_symbols.begin();
+                j != all_symbols.end();
+                ++j)
+            {
+                if ((string::npos != j->find(sym_name)) &&
+                    (*i != *j))
+                {
+                    cout << "\tDuplicate member found: " << *j << endl;
+                    throw std::runtime_error(
+                                string("Duplicate weak symbol with contained "
+                                       "value member detected: ") +
+                                *i +
+                                string(" with member: ") +
+                                *j);
                 }
             }
         }
@@ -590,6 +627,8 @@ bool Object::read_relocation()
         s.base = syms[i]->section->vma;
         s.type = 0;
 
+        all_symbols.insert(s.name);
+
         cout << "\tSymbol: " << syms[i]->name << endl;
         cout << "\t\tAddress: " << std::hex << syms[i]->value << endl;
 
@@ -606,9 +645,7 @@ bool Object::read_relocation()
             {
                 if (weak_symbols[syms[i]->name]++)
                 {
-                    throw std::runtime_error(
-                                string("Duplicate weak symbol detected: ") +
-                                s.name);
+                    weak_symbols_to_check.insert(syms[i]->name);
                 }
             }
 
