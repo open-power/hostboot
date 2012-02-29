@@ -91,8 +91,8 @@ void Target::toString(char (&o_ecmdString)[MAX_ECMD_STRING_LEN]) const
         // TODO
         // This is a temporary function that constructs the ECMD String from the
         // target's physical path attribute, eventually, the ECMD String will be
-        // its own attribute and this function will be changed to simply get the
-        // attribute
+        // its own attribute (sourced from the MRW) and this function will be
+        // changed to simply get the attribute
 
         // Try to get the physical path attribute
         TARGETING::EntityPath l_path;
@@ -153,35 +153,6 @@ void Target::toString(char (&o_ecmdString)[MAX_ECMD_STRING_LEN]) const
                 }
             }
 
-            // Look for a chiplet in the path
-            const char * l_pChipletType = NULL;
-            uint32_t l_chipletPos = 0;
-
-            for (uint32_t i = 0; ((i < l_sizePath) && (l_pChipletType == NULL));
-                 i++)
-            {
-                if (l_path[i].type == TARGETING::TYPE_EX)
-                {
-                    l_pChipletType = ECMD_CHIPLET_EX;
-                    l_chipletPos = l_path[i].instance;
-                }
-                else if (l_path[i].type == TARGETING::TYPE_MCS)
-                {
-                    l_pChipletType = ECMD_CHIPLET_MCS;
-                    l_chipletPos = l_path[i].instance;
-                }
-                else if (l_path[i].type == TARGETING::TYPE_MBS)
-                {
-                    l_pChipletType = ECMD_CHIPLET_MBS;
-                    l_chipletPos = l_path[i].instance;
-                }
-                else if (l_path[i].type == TARGETING::TYPE_MBA)
-                {
-                    l_pChipletType = ECMD_CHIPLET_MBA;
-                    l_chipletPos = l_path[i].instance;
-                }
-            }
-
             if (l_pChipType == NULL)
             {
                 FAPI_ERR("toString: Physical Path does not contain known chip");
@@ -189,6 +160,37 @@ void Target::toString(char (&o_ecmdString)[MAX_ECMD_STRING_LEN]) const
             }
             else
             {
+                // Look for the last chiplet in the path (some chiplets are
+                // children of other chiplets in PHYS_PATH e.g. MBS->MBA)
+                const char * l_pChipletType = NULL;
+                uint32_t l_chipletPos = 0;
+
+                for (int32_t i = l_sizePath - 1;
+                     ((i >= 0) && (l_pChipletType == NULL));
+                     i--)
+                {
+                    if (l_path[i].type == TARGETING::TYPE_EX)
+                    {
+                        l_pChipletType = ECMD_CHIPLET_EX;
+                        l_chipletPos = l_path[i].instance;
+                    }
+                    else if (l_path[i].type == TARGETING::TYPE_MCS)
+                    {
+                        l_pChipletType = ECMD_CHIPLET_MCS;
+                        l_chipletPos = l_path[i].instance;
+                    }
+                    else if (l_path[i].type == TARGETING::TYPE_MBS)
+                    {
+                        l_pChipletType = ECMD_CHIPLET_MBS;
+                        l_chipletPos = l_path[i].instance;
+                    }
+                    else if (l_path[i].type == TARGETING::TYPE_MBA)
+                    {
+                        l_pChipletType = ECMD_CHIPLET_MBA;
+                        l_chipletPos = l_path[i].instance;
+                    }
+                }
+
                 // Construct the ecmd string
                 char * l_pStr = &o_ecmdString[0];
 

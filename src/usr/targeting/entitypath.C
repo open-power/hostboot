@@ -344,12 +344,16 @@ const char* EntityPath::pathElementTypeAsString(
             return "L2";
         case TYPE_MCS:
             return "MCS";
+        case TYPE_MBS:
+            return "MBS";
         case TYPE_MBA:
             return "MBA";
         case TYPE_MEM_PORT:
             return "MemPort";
         case TYPE_L3:
             return "L3";
+        case TYPE_L4:
+            return "L4";
         case TYPE_PERVASIVE:
             return "Pervasive";
         case TYPE_MEMBUF:
@@ -368,6 +372,16 @@ const char* EntityPath::pathElementTypeAsString(
             return "EX";
         case TYPE_PCI:
             return "PCI";
+        case TYPE_DIMM:
+            return "DIMM";
+        case TYPE_MEMVRM:
+            return "MemVRM";
+        case TYPE_PROCVRM:
+            return "ProcVRM";
+        case TYPE_XBUS:
+            return "XBUS";
+        case TYPE_ABUS:
+            return "ABUS";
 //        case TYPE_FSI_LINK:
 //            return "FSI-link";
 //        case TYPE_CFAM:
