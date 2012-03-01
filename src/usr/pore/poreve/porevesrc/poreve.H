@@ -23,7 +23,7 @@
 #ifndef __VSBE_POREVE_H
 #define __VSBE_POREVE_H
 
-// $Id: poreve.H,v 1.18 2011/12/16 21:47:59 bcbrock Exp $
+// $Id: poreve.H,v 1.20 2012/02/27 22:50:53 jeshua Exp $
 
 /// \file poreve.H
 /// \brief The PORE Virtual Environment
@@ -76,10 +76,11 @@
 #include "poremodel.H"
 #include "pore.H"
 
-#ifdef VBU_HACKS
 #include "pib2cfam.H"
-#include "bsscan.H"
 #include "sbevital.H"
+
+#ifdef VBU_HACKS
+#include "bsscan.H"
 #endif  // VBU_HACKS
 
 #ifndef POREVE_STATISTICS
@@ -119,7 +120,7 @@ namespace vsbe {
     //////////////////////////////////////////////////////////////////////
 
     /// The PIB base address of the OTPROM memory controller
-    const uint32_t OTPROM_PIB_BASE = 0x00010000;
+    const uint32_t OTPROM_PIB_BASE = 0x00018000;
 
     /// The number of PIB \e registers defined by the OTPROM memory controller
     ///
@@ -500,13 +501,13 @@ public:
     OciSlaveWritable iv_pmc;
 #endif  // PM_HACKS
 
-#ifdef VBU_HACKS
-    /// The temporary Pib2Cfam PIB Slave
+    /// The Pib2Cfam PIB Slave
     Pib2Cfam iv_pib2Cfam;
 
-    /// The temporary sbeVital PIB Slave
+    /// The sbeVital PIB Slave
     SbeVital iv_sbeVital;
 
+#ifdef VBU_HACKS
     /// The Broadside Scan components for each EX
   //    Bsscan iv_bsscan_ex00;
     Bsscan iv_bsscan_ex01;

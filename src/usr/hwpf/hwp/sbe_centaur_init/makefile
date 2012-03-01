@@ -34,6 +34,11 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
 ## pointer to common HWP files
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/include
 
+## pointer to fapiporeve files
+EXTRAINCDIR += ${ROOTPATH}/src/usr/pore/fapiporeve
+EXTRAINCDIR += ${ROOTPATH}/src/usr/pore/poreve/model
+EXTRAINCDIR += ${ROOTPATH}/src/usr/pore/poreve/porevesrc
+
 ##  Include sub dirs
 ##  NOTE: add a new EXTRAINCDIR when you add a new HWP
 ## EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/sbe_centaur_init/????

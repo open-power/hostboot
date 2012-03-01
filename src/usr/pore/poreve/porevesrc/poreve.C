@@ -20,7 +20,7 @@
 //  Origin: 30
 //
 //  IBM_PROLOG_END
-// $Id: poreve.C,v 1.15 2011/12/14 22:11:51 bcbrock Exp $
+// $Id: poreve.C,v 1.16 2012/02/27 22:54:15 jeshua Exp $
 
 /// \file poreve.C
 /// \brief The PORE Virtual Environment
@@ -276,190 +276,51 @@ PoreVe::PoreVe(const PoreIbufId i_id,
 #endif  // PM_HACKS
 
 
-#ifdef VBU_HACKS
-    // Configure the temporary Pib2Cfam component
+    // Configure the Pib2Cfam component to remap MBOX scom addresses to cfam addresses
+    uint8_t fsi_gpreg_scom_access;
+    fapi::ReturnCode frc;
 
-    iv_pib2Cfam.configure(&iv_slaveTarget,
-                          &iv_dataBuffer,
-                          PIB2CFAM_PIB_BASE,
-                          PIB2CFAM_PIB_SIZE,
-                          ACCESS_MODE_READ | ACCESS_MODE_WRITE);
+    //JDS TODO - uncomment this when the model actually works
+//     frc = FAPI_ATTR_GET( ATTR_FSI_GP_REG_SCOM_ACCESS, &iv_slaveTarget, fsi_gpreg_scom_access );
+    fsi_gpreg_scom_access = 0;
 
-    iv_pib.attachPrimarySlave(&iv_pib2Cfam);
-
-    // Configure the temporary sbeVital component
-
-    iv_sbeVital.configure(&iv_slaveTarget,
-                          &iv_dataBuffer,
-                          SBEVITAL_PIB_BASE,
-                          SBEVITAL_PIB_SIZE,
-                          ACCESS_MODE_READ | ACCESS_MODE_WRITE);
-
-    iv_pib.attachPrimarySlave(&iv_sbeVital);
-
-#ifndef SIMPLE_VBU_HACKS_ONLY
-
-    // The VBU_HACKS above are simple - they don't require complex eCMD support so
-    // we can test them easily with the poreve/test/fapistub test case.  
-
-    // The VBU hacks below are complicated to emulate, so we don't even try in
-    // the test/fapistub test case.
-
-    // Configure the Broadside scan component if using BROADSIDE scan
-    //JDS TODO - add a check for broadside scan mode
-    ecmdConfigValid_t validOutput;
-    std::string       tmpStr;
-    uint32_t          tmpNum;
-    uint32_t          rc;
-    ecmdChipTarget    e_target;
-
-    //JDS TODO - change this to get attribute
-    fapiTargetToEcmdTarget( iv_slaveTarget, e_target);
-    rc = ecmdGetConfiguration(e_target, "SIM_BROADSIDE_MODE", 
-                              validOutput, tmpStr, tmpNum );
-    if( rc ||
-        validOutput == ECMD_CONFIG_VALID_FIELD_NONE ||
-        validOutput == ECMD_CONFIG_VALID_FIELD_NUMERIC )
-    {
-        FAPI_ERR( "Unable to determine SIM_BROADSIDE_MODE\n" );
+    if(!frc.ok()) {
+      FAPI_ERR( "Unable to get ATTR_FSI_GP_REG_SCOM_ACCESS for target\n" );
+      //JDS TODO - create an actual fapi error
+      //      FAPI_SET_HWP_ERROR( frc, "Unable to get ATTR_FSI_GP_REG_SCOM_ACCESS for target\n" );
     }
-    else
-    {
-        size_t pos = tmpStr.find( "scan" );
-        if( pos != (uint32_t)-1 )
-        {
-//             iv_bsscan_ex00.configure(&iv_slaveTarget,
-//                                      &iv_dataBuffer,
-//                                      BSSCAN_PIB_BASE | EX00_PIB_BASE,
-//                                      BSSCAN_PIB_SIZE,
-//                                      ACCESS_MODE_READ | ACCESS_MODE_WRITE);
-            
-//             iv_pib.attachPrimarySlave(&iv_bsscan_ex00);
+    if( !fsi_gpreg_scom_access ) {
+      iv_pib2Cfam.configure(&iv_slaveTarget,
+                            &iv_dataBuffer,
+                            PIB2CFAM_PIB_BASE,
+                            PIB2CFAM_PIB_SIZE,
+                            ACCESS_MODE_READ | ACCESS_MODE_WRITE);
 
-            iv_bsscan_ex01.configure(&iv_slaveTarget,
-                                     &iv_dataBuffer,
-                                     BSSCAN_PIB_BASE | EX01_PIB_BASE,
-                                     BSSCAN_PIB_SIZE,
-                                     ACCESS_MODE_READ | ACCESS_MODE_WRITE);
-            
-            iv_pib.attachPrimarySlave(&iv_bsscan_ex01);
-            
-            iv_bsscan_ex02.configure(&iv_slaveTarget,
-                                     &iv_dataBuffer,
-                                     BSSCAN_PIB_BASE | EX02_PIB_BASE,
-                                     BSSCAN_PIB_SIZE,
-                                     ACCESS_MODE_READ | ACCESS_MODE_WRITE);
-            
-            iv_pib.attachPrimarySlave(&iv_bsscan_ex02);
-            
-            iv_bsscan_ex03.configure(&iv_slaveTarget,
-                                     &iv_dataBuffer,
-                                     BSSCAN_PIB_BASE | EX03_PIB_BASE,
-                                     BSSCAN_PIB_SIZE,
-                                     ACCESS_MODE_READ | ACCESS_MODE_WRITE);
-            
-            iv_pib.attachPrimarySlave(&iv_bsscan_ex03);
-            
-            iv_bsscan_ex04.configure(&iv_slaveTarget,
-                                     &iv_dataBuffer,
-                                     BSSCAN_PIB_BASE | EX04_PIB_BASE,
-                                     BSSCAN_PIB_SIZE,
-                                     ACCESS_MODE_READ | ACCESS_MODE_WRITE);
-            
-            iv_pib.attachPrimarySlave(&iv_bsscan_ex04);
-            
-            iv_bsscan_ex05.configure(&iv_slaveTarget,
-                                     &iv_dataBuffer,
-                                     BSSCAN_PIB_BASE | EX05_PIB_BASE,
-                                     BSSCAN_PIB_SIZE,
-                                     ACCESS_MODE_READ | ACCESS_MODE_WRITE);
-            
-            iv_pib.attachPrimarySlave(&iv_bsscan_ex05);
-            
-            iv_bsscan_ex06.configure(&iv_slaveTarget,
-                                     &iv_dataBuffer,
-                                     BSSCAN_PIB_BASE | EX06_PIB_BASE,
-                                     BSSCAN_PIB_SIZE,
-                                     ACCESS_MODE_READ | ACCESS_MODE_WRITE);
-            
-            iv_pib.attachPrimarySlave(&iv_bsscan_ex06);
+      iv_pib.attachPrimarySlave(&iv_pib2Cfam);
+    }
 
-//             iv_bsscan_ex07.configure(&iv_slaveTarget,
-//                                      &iv_dataBuffer,
-//                                      BSSCAN_PIB_BASE | EX07_PIB_BASE,
-//                                      BSSCAN_PIB_SIZE,
-//                                      ACCESS_MODE_READ | ACCESS_MODE_WRITE);
-            
-//             iv_pib.attachPrimarySlave(&iv_bsscan_ex07);
-            
-//             iv_bsscan_ex08.configure(&iv_slaveTarget,
-//                                      &iv_dataBuffer,
-//                                      BSSCAN_PIB_BASE | EX08_PIB_BASE,
-//                                      BSSCAN_PIB_SIZE,
-//                                      ACCESS_MODE_READ | ACCESS_MODE_WRITE);
-            
-//             iv_pib.attachPrimarySlave(&iv_bsscan_ex08);
-            
-            iv_bsscan_ex09.configure(&iv_slaveTarget,
-                                     &iv_dataBuffer,
-                                     BSSCAN_PIB_BASE | EX09_PIB_BASE,
-                                     BSSCAN_PIB_SIZE,
-                                     ACCESS_MODE_READ | ACCESS_MODE_WRITE);
-            
-            iv_pib.attachPrimarySlave(&iv_bsscan_ex09);
-            
-            iv_bsscan_ex10.configure(&iv_slaveTarget,
-                                     &iv_dataBuffer,
-                                     BSSCAN_PIB_BASE | EX10_PIB_BASE,
-                                     BSSCAN_PIB_SIZE,
-                                     ACCESS_MODE_READ | ACCESS_MODE_WRITE);
-            
-            iv_pib.attachPrimarySlave(&iv_bsscan_ex10);
-            
-            iv_bsscan_ex11.configure(&iv_slaveTarget,
-                                     &iv_dataBuffer,
-                                     BSSCAN_PIB_BASE | EX11_PIB_BASE,
-                                     BSSCAN_PIB_SIZE,
-                                     ACCESS_MODE_READ | ACCESS_MODE_WRITE);
-            
-            iv_pib.attachPrimarySlave(&iv_bsscan_ex11);
-            
-            iv_bsscan_ex12.configure(&iv_slaveTarget,
-                                     &iv_dataBuffer,
-                                     BSSCAN_PIB_BASE | EX12_PIB_BASE,
-                                     BSSCAN_PIB_SIZE,
-                                     ACCESS_MODE_READ | ACCESS_MODE_WRITE);
-            
-            iv_pib.attachPrimarySlave(&iv_bsscan_ex12);
-            
-            iv_bsscan_ex13.configure(&iv_slaveTarget,
-                                     &iv_dataBuffer,
-                                     BSSCAN_PIB_BASE | EX13_PIB_BASE,
-                                     BSSCAN_PIB_SIZE,
-                                     ACCESS_MODE_READ | ACCESS_MODE_WRITE);
-            
-            iv_pib.attachPrimarySlave(&iv_bsscan_ex13);
-            
-            iv_bsscan_ex14.configure(&iv_slaveTarget,
-                                     &iv_dataBuffer,
-                                     BSSCAN_PIB_BASE | EX14_PIB_BASE,
-                                     BSSCAN_PIB_SIZE,
-                                     ACCESS_MODE_READ | ACCESS_MODE_WRITE);
-            
-            iv_pib.attachPrimarySlave(&iv_bsscan_ex14);
+    // Configure the sbeVital register emulation
+    uint8_t use_hw_sbe_vital_register;
 
-//             iv_bsscan_ex15.configure(&iv_slaveTarget,
-//                                      &iv_dataBuffer,
-//                                      BSSCAN_PIB_BASE | EX15_PIB_BASE,
-//                                      BSSCAN_PIB_SIZE,
-//                                      ACCESS_MODE_READ | ACCESS_MODE_WRITE);
-            
-//             iv_pib.attachPrimarySlave(&iv_bsscan_ex15);
-        } //end SIM_BROADSIDE_MODE has scan
-    } //end was able to read SIM_BROADSIDE_MODE
+    // JDS TODO - this needs to be done with an attribute (ATTR_USE_HW_SBE_VITAL_REGISTER requested)
+//     frc = FAPI_ATTR_GET( ATTR_USE_HW_SBE_VITAL_REGISTER, &iv_slaveTarget, use_hw_sbe_vital_register );
+//     if(!frc.ok()) {
+//       FAPI_ERR( "Unable to get ATTR_USE_HW_SBE_VITAL_REGISTER for target\n" );
+//       //JDS TODO - create an actual fapi error
+//       //      FAPI_SET_HWP_ERROR( frc, "Unable to get ATTR_USE_HW_SBE_VITAL_REGISTER for target\n" );
+//     }
+    use_hw_sbe_vital_register = 0; //JDS TODO - TMP until the attribute is supported and the hardware allows access to the register
 
-#endif  // SIMPLE_VBU_HACKS_ONLY
-#endif  // VBU_HACKS
+    if( !use_hw_sbe_vital_register ) {
+      iv_sbeVital.configure(&iv_slaveTarget,
+                            &iv_dataBuffer,
+                            SBEVITAL_PIB_BASE,
+                            SBEVITAL_PIB_SIZE,
+                            ACCESS_MODE_READ | ACCESS_MODE_WRITE);
+
+      iv_pib.attachPrimarySlave(&iv_sbeVital);
+    }
+
 }
 
 

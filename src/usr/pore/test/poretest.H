@@ -35,7 +35,20 @@
 #include <fapiPoreVeArg.H>
 #include <fapiTarget.H>
 #include <fapi.H>
-#include    <vfs/vfs.H>
+#include <vfs/vfs.H>
+#include <targeting/predicates/predicatectm.H>
+#include <targeting/iterators/rangefilter.H>
+#include <targeting/predicates/predicatepostfixexpr.H>
+#include <targeting/predicates/predicateisfunctional.H>
+
+//@todo - These two include files are to workaround
+//1. Avoid running test case in VBU
+//2. To call isSlavePresent(). Need to be removed when PD works.
+#include <targeting/util.H>
+#include <fsi/fsiif.H>
+
+#define CENTAUR_SBE_PNOR_MRR    0       // Memory Relocation Register for Centaur
+
 
 using namespace TARGETING;
 using namespace vsbe;
@@ -47,7 +60,7 @@ class PoreTest: public CxxTest::TestSuite
 public:
     /**
      * @brief PORE test #1
-     *        Run a sample procedure
+     *        Run a sample procedure on Centaur
      */
     void testPore1(void)
     {
@@ -56,7 +69,6 @@ public:
         bool l_unloadSbePnorImg = false;
         size_t l_sbePnorSize = 0;
         const char * l_sbePnorAddr = NULL;
-
         errlHndl_t  l_errl = NULL;
 
         do
@@ -83,69 +95,134 @@ public:
                     char l_header[10];
                     memcpy (l_header, l_sbePnorAddr, 9);
                     l_header[9] = '\0';
-                    FAPI_INF("Loading sbe_pnor.bin, Addr 0x%llX, Size %d, Header %s",
+                    FAPI_INF("testPore1:Loading sbe_pnor.bin, Addr 0x%llX, Size %d, Header %s",
                               l_sbePnorAddr, l_sbePnorSize, l_header);
                 }
             }
 
-            // Setting up fapi target
-            TARGETING::TargetService& l_targetService =
-                    TARGETING::targetService();
-            TARGETING::Target* l_testTarget = NULL;
-            l_targetService.masterProcChipTargetHandle(l_testTarget);
-            assert(l_testTarget != NULL);
+            // ------------ Setup Centaur targets -------------------
+            // Use PredicateIsFunctional to filter only functional chips
+            TARGETING::PredicateIsFunctional             l_isFunctional;
+            //  filter for functional Centaur Chips
+            TARGETING::PredicateCTM l_membufChipFilter(CLASS_CHIP, TYPE_MEMBUF);
+            // Declare a postfix expression widget
+            TARGETING::PredicatePostfixExpr l_functionalAndMembufChipFilter;
+            //  is-a-membuf-chip  is-functional   AND
+            l_functionalAndMembufChipFilter.push(&l_membufChipFilter).push(&l_isFunctional).And();
+            // loop through all the targets, applying the filter,  and put the results in l_pMemBufs
+            TARGETING::TargetRangeFilter    l_pMemBufs(
+                    TARGETING::targetService().begin(),
+                    TARGETING::targetService().end(),
+                    &l_functionalAndMembufChipFilter );
 
+            // ------------- Setup POREVE arguments -----------------
             // Setup args
             std::list<uint64_t> myArgs;
 
-            // Run unlimited instruction on SBE engine
+            // Set FapiPoreVeOtherArg: run unlimited instructions
             FapiPoreVeOtherArg *l_otherArg =
                     new FapiPoreVeOtherArg(vsbe::RUN_UNLIMITED,
                                            vsbe::PORE_SBE);
-            //Set entry point
-            //l_otherArg->iv_entryPoint = const_cast<char*>("pnor::_sbe_pnor_start");
-            //l_otherArg->iv_entryPoint = const_cast<char*>("pnor::proc_sbe_fabricinit");
-            l_otherArg->iv_entryPoint = const_cast<char*>("pnor::proc_sbe_pb_startclocks");
-
-            l_otherArg->iv_mrr = 0x280000000;
-
+            // Entry point
+            l_otherArg->iv_entryPoint = const_cast<char*>("pnor::_sbe_pnor_start");
+            l_otherArg->iv_mrr = CENTAUR_SBE_PNOR_MRR;
             uint64_t fapiArg = reinterpret_cast<uint64_t> (l_otherArg);
             myArgs.push_back(fapiArg);
 
             // Set FapiPoreVeMemArg for pnor option, base address = 0
             uint32_t base_addr = 0;
             char* l_dataPnor = const_cast<char*>(l_sbePnorAddr);
-            //@todo - Need to somehow avoid manually entering file size here.
             FapiPoreVeMemArg* l_memArg = new FapiPoreVeMemArg(ARG_PNOR,
-                        base_addr, 31360, static_cast<void*>(l_dataPnor));
+                                base_addr, l_sbePnorSize,
+                                static_cast<void*>(l_dataPnor));
             fapiArg = reinterpret_cast<uint64_t> (l_memArg);
-            myArgs.push_back(fapiArg);
+                      myArgs.push_back(fapiArg);
 
             // Create state argument to dump out state for debugging purpose
             FapiPoreVeStateArg *l_stateArg = new FapiPoreVeStateArg(NULL);
-            l_stateArg->iv_installState = false;
-            l_stateArg->iv_extractState = true;
-            fapiArg = reinterpret_cast<uint64_t> (l_stateArg);
-            myArgs.push_back(fapiArg);
+                          l_stateArg->iv_installState = false;
+                          l_stateArg->iv_extractState = true;
+                          fapiArg = reinterpret_cast<uint64_t> (l_stateArg);
+                          myArgs.push_back(fapiArg);
 
-            // Create a FAPI Target
-            fapi::Target l_fapiTarget(fapi::TARGET_TYPE_PROC_CHIP,
-                    reinterpret_cast<void *> (l_testTarget));
 
-            //@todo - Comment out the actual run for now because
-            //        the "halt" instruction causes poreve to scom SBEVITAL cfam reg,
-            //        which causes an error in SIMICs.
-            //        VBU model also has a hack that models this register
-            //l_rc = fapiPoreVe(l_fapiTarget, myArgs);
-            if (l_rc != fapi::FAPI_RC_SUCCESS)
+            // Run loop on all Centaurs
+            for (    ;   l_pMemBufs;    ++l_pMemBufs  )
             {
-                uint32_t val = l_rc;
-                FAPI_ERR("testPore1: Error from fapiPoreVe 0x%llX", val);
-            }
-            else
+                // Create a FAPI Target
+                const TARGETING::Target*  l_membuf_target = *l_pMemBufs;
+                const fapi::Target l_fapiTarget(
+                                  fapi::TARGET_TYPE_MEMBUF_CHIP,
+                                  reinterpret_cast<void *>
+                                  (const_cast<TARGETING::Target*>(l_membuf_target)));
+
+                //  Put out info on target
+                FAPI_INF("testPore1: Running cen_sbe_tp_chiplet_init1 on Centaur entity path...");
+                EntityPath l_path;
+                l_path  =   l_membuf_target->getAttr<ATTR_PHYS_PATH>();
+                l_path.dump();
+
+                //@todo - Make sure target is present
+                //        Temporary hack until PD works
+                if ( !FSI::isSlavePresent(l_membuf_target) )
+                {
+                    FAPI_INF("testPore1: Skip this Centaur because it's not present");
+                    continue;
+                }
+
+                // Run the engine
+                FAPI_INF("testPore1: Start VSBE engine...");
+                //@todo
+                //@VBU workaround - Do not run in VPO since it takes too long
+                //Temporarily disable this test case in VBU because it takes too long to run.
+                //Also, the image used for Centaur is only a temporary image provided by Todd to try out.
+                //When we have an official Centaur sbe_pnor image, use it to create a simple one to run
+                //test case.
+                if ( !TARGETING::is_vpo() )
+                {
+                    // @todo - Must comment out for now because Todd's image will fail test case
+                    // l_rc = fapiPoreVe(l_fapiTarget, myArgs);
+                }
+
+                if (l_rc != fapi::FAPI_RC_SUCCESS)
+                {
+                   uint32_t val = l_rc;
+                   FAPI_INF("testPore1: Error returned from VSBE engine on this Centaur, l_rc 0x%llX",
+                           val);
+                   break;
+                }
+                else
+                {
+                    FAPI_INF("testPore1: VSBE engine runs successfully on this Centaur");
+                }
+
+                // @todo - For now, run only on 1 Centaur to save VPO time
+                break;
+
+
+            }   // end for l_pMemBufs
+
+
+            // Freeing memory
+            if (l_otherArg)
             {
-                FAPI_INF("testPore1: fapiPoreVe runs successfully!");
+                delete l_otherArg;
+                l_otherArg = NULL;
             }
+
+            if (l_memArg)
+            {
+                delete l_memArg;
+                l_memArg = NULL;
+            }
+
+            if (l_stateArg)
+            {
+                delete l_stateArg;
+                l_stateArg = NULL;
+            }
+
+
 
         } while(0);
 
@@ -176,6 +253,18 @@ public:
 
         return;
     }
+
+    /**
+     * @brief PORE test #2
+     *        Run a sample procedure on Proc
+     */
+    void testPore2(void)
+    {
+        // @todo - Add code to run sbe image from Proc when available
+
+        return;
+    }
+
 };
 
 #endif

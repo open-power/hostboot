@@ -21,21 +21,13 @@
 //
 //  IBM_PROLOG_END
 // -*- mode: C++; c-file-style: "linux";  -*-
-// $Id: pib2cfam.C,v 1.9 2012/01/09 21:22:50 jeshua Exp $
+// $Id: pib2cfam.C,v 1.10 2012/02/27 22:52:31 jeshua Exp $
 
 /// \file pib2cfam.C
-/// \brief A temporary hack while waiting for hardware updates - a simple
-/// PibSlave that maps a small range of PIB addresses to CFAM addresses.
-///
-/// \todo Verify the assumption that the high-order 32 bits of the 64-bit data
-/// are the bits that are read and written to the CFAM register.
+/// \brief A simple PibSlave that maps a small range of PIB addresses to CFAM
+///        addresses.
 
 #include "pib2cfam.H"
-//JDS TODO - remove the ECMD headers once we've got attribute support
-#ifndef __HOSTBOOT_MODULE
-#include "fapiSharedUtils.H"
-#include "ecmdUtils.H"
-#endif
 using namespace vsbe;
 
 
@@ -56,30 +48,21 @@ Pib2Cfam::~Pib2Cfam()
 static uint32_t 
 translateAddress(uint32_t address, fapi::Target* i_target)
 {
-    //JDS TODO - change this to get attribute ATTR_FSI_GP_REG_SCOM_ACCESS
-    bool fsi_gpreg_scom_access = false;
-#ifndef __HOSTBOOT_MODULE
-    ecmdChipData chipdata;
-    ecmdChipTarget e_target;
-    uint32_t rc;
-    std::string chip_type;
+    uint8_t fsi_gpreg_scom_access = 0;
+    fapi::ReturnCode frc;
 
-    fapiTargetToEcmdTarget( *i_target, e_target);
-    rc = ecmdGetChipData(e_target, chipdata);
-    if( rc ) printf( "Problem with getchipdata\n" );
-    chip_type = chipdata.chipType;
-
-    if( chip_type == "centaur" ) {
-        fsi_gpreg_scom_access = false;
-    } else {
-        fsi_gpreg_scom_access = true;
+    frc = FAPI_ATTR_GET( ATTR_FSI_GP_REG_SCOM_ACCESS, i_target, fsi_gpreg_scom_access );
+    if(!frc.ok()) {
+        FAPI_ERR( "Unable to get ATTR_FSI_GP_REG_SCOM_ACCESS for target\n" );
+//JDS TODO - create an actual fapi error
+//      FAPI_SET_HWP_ERROR( frc, "Unable to get ATTR_FSI_GP_REG_SCOM_ACCESS for target\n" );
     }
-#endif
+
 
     if( fsi_gpreg_scom_access ) {
-      return (address - 0x00050000) + 0x2800;
+        return (address - 0x00050000) + 0x2800;
     } else {
-      return (address - 0x00050000) + 0x1000;
+        return (address - 0x00050000) + 0x1000;
     }
 }
 
@@ -106,7 +89,7 @@ Pib2Cfam::operation(Transaction& io_transaction)
         case 0x0005001B:
             rc = fapiGetCfamRegister(*iv_target, 
                                      translateAddress(io_transaction.iv_address, iv_target),
-                                 *iv_dataBuffer);
+                                     *iv_dataBuffer);
             if (rc.ok()) {
                 io_transaction.iv_data = 
                     ((uint64_t)iv_dataBuffer->getWord(0)) << 32;
@@ -134,7 +117,7 @@ Pib2Cfam::operation(Transaction& io_transaction)
             iv_dataBuffer->setWord(0, io_transaction.iv_data >> 32);
             rc = fapiPutCfamRegister(*iv_target, 
                                      translateAddress(io_transaction.iv_address, iv_target),
-                                 *iv_dataBuffer);
+                                     *iv_dataBuffer);
             if (rc.ok()) {
                 me = ME_SUCCESS;
             } else {
