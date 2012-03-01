@@ -27,6 +27,3 @@
 ##    to setup the sandbox
 ##
 
-echo "+++ Patch for PHYP flight recorder."
-sed -i -e's/.*PHYPLEVEL.*//' $sb/../simics/.simics_flightrecorder
-sed -i -e's/.*PHYP_PATCH_LEVEL.*//' $sb/../simics/.simics_flightrecorder

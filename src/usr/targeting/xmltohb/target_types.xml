@@ -250,6 +250,15 @@
 </targetType>
 
 <targetType>
+    <id>chip-processor-murano</id>
+    <parent>chip-processor-power8</parent>
+    <attribute>
+        <id>MODEL</id>
+        <default>MURANO</default>
+    </attribute>
+</targetType>
+
+<targetType>
     <id>unit</id>
     <parent>base</parent>
     <attribute>
@@ -268,6 +277,10 @@
     <attribute>
         <id>DECONFIG_GARDABLE</id>
         <default>1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
     </attribute>
 </targetType>
 
@@ -329,6 +342,16 @@
 </targetType>
 
 <targetType>
+    <id>unit-ex-murano</id>
+    <parent>unit-ex-power8</parent>
+    <attribute>
+        <id>MODEL</id>
+        <default>MURANO</default>
+    </attribute>    
+</targetType>
+
+
+<targetType>
     <id>unit-core-power8</id>
     <parent>unit</parent>
     <attribute>
@@ -354,6 +377,16 @@
         <default>VENICE</default>
     </attribute>    
 </targetType>
+
+<targetType>
+    <id>unit-core-murano</id>
+    <parent>unit-core-power8</parent>
+    <attribute>
+        <id>MODEL</id>
+        <default>MURANO</default>
+    </attribute>    
+</targetType>
+
 
 <targetType>
     <id>unit-pervasive-power8</id>
@@ -383,6 +416,16 @@
 </targetType>
 
 <targetType>
+    <id>unit-pervasive-murano</id>
+    <parent>unit-pervasive-power8</parent>
+    <attribute>
+        <id>MODEL</id>
+        <default>MURANO</default>
+    </attribute>    
+</targetType>
+
+
+<targetType>
     <id>unit-pci-power8</id>
     <parent>unit</parent>
     <attribute>
@@ -410,6 +453,16 @@
 </targetType>
 
 <targetType>
+    <id>unit-pci-murano</id>
+    <parent>unit-pci-power8</parent>
+    <attribute>
+        <id>MODEL</id>
+        <default>MURANO</default>
+    </attribute>    
+</targetType>
+
+
+<targetType>
     <id>unit-powerbus-power8</id>
     <parent>unit</parent>
     <attribute>
@@ -435,6 +488,16 @@
         <default>VENICE</default>
     </attribute>    
 </targetType>
+
+<targetType>
+    <id>unit-powerbus-murano</id>
+    <parent>unit-powerbus-power8</parent>
+    <attribute>
+        <id>MODEL</id>
+        <default>MURANO</default>
+    </attribute>    
+</targetType>
+
 
 <targetType>
     <id>enc-node-power8</id>
@@ -576,7 +639,6 @@
         <default>MCS</default>
     </attribute>
     <attribute><id>MSS_MEMSIZE</id></attribute>
-    <attribute><id>CHIP_UNIT</id></attribute>
 </targetType>
 
 <targetType>
@@ -586,7 +648,6 @@
         <id>MODEL</id>
         <default>VENICE</default> 
     </attribute>
-    <attribute><id>CHIP_UNIT</id></attribute>
 </targetType>
 
 <targetType>
@@ -596,7 +657,15 @@
         <id>MODEL</id>
         <default>SALERNO</default> 
     </attribute>
-    <attribute><id>CHIP_UNIT</id></attribute>
+</targetType>
+
+<targetType>
+    <id>unit-mcs-murano</id> 
+    <parent>unit-mcs-power8</parent>
+    <attribute>
+        <id>MODEL</id>
+        <default>MURANO</default> 
+    </attribute>
 </targetType>
 
 <!-- Processor target types -->
@@ -620,6 +689,15 @@
 </targetType>
 
 <targetType>
+    <id>unit-mba-murano</id>
+    <parent>unit-mba-venice</parent>
+    <attribute>
+        <id>MODEL</id>
+        <default>MURANO</default>
+    </attribute>  
+</targetType>
+
+<targetType>
     <id>unit-mbs-venice</id>
     <parent>unit-mbs-power8</parent>
     <attribute>
@@ -638,6 +716,15 @@
 </targetType>
 
 <targetType>
+    <id>unit-mbs-murano</id>
+    <parent>unit-mbs-venice</parent>
+    <attribute>
+        <id>MODEL</id>
+        <default>MURANO</default>
+    </attribute>
+</targetType>
+
+<targetType>
     <id>unit-memport-salerno</id> 
     <parent>unit-memport-power8</parent>
     <attribute>
@@ -652,6 +739,15 @@
     <attribute>
         <id>MODEL</id>
         <default>VENICE</default> 
+    </attribute>    
+</targetType>   
+
+<targetType>
+    <id>unit-memport-murano</id> 
+    <parent>unit-memport-venice</parent>
+    <attribute>
+        <id>MODEL</id>
+        <default>MURANO</default> 
     </attribute>    
 </targetType>   
 

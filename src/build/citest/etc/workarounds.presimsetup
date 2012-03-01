@@ -41,9 +41,16 @@ sed -i -e's/SETENV GFW_P8_VENICE_L3_MB_SIZE.*/SETENV GFW_P8_VENICE_L3_MB_SIZE 8/
 # Backing build already contains 910431.  Leave this workaround here for future scomdef files
 #sed -i -e's/SETENV GFW_P8_VENICE_MODEL_EC.*/SETENV GFW_P8_VENICE_MODEL_EC 910431/' $sb/simu/configs/P8_VENICE.config
 
+echo "+++ Copy desired MURANO config file to sandbox and modify L3 to 8MB."
+mkdir -p $sb/simu/configs
+cp --update $BACKING_BUILD/src/simu/configs/P8_MURANO.config $sb/simu/configs
+sed -i -e's/SETENV GFW_P8_MURANO_L3_MB_SIZE.*/SETENV GFW_P8_MURANO_L3_MB_SIZE 8/' $sb/simu/configs/P8_MURANO.config
+# Backing build already contains 910431.  Leave this workaround here for future scomdef files
+#sed -i -e's/SETENV GFW_P8_MURANO_MODEL_EC.*/SETENV GFW_P8_MURANO_MODEL_EC 910431/' $sb/simu/configs/P8_MURANO.config
+
 
 #Note: Leave this here as an example
-#echo "+++ Update to new simics build for ECCB support."
+#echo "+++ Some message about why you need to do this."
 #mkdir -p $sb/simu/data
 #egrep -v "WSALIAS HOSTBOOT_LEVEL FIPSLEVEL|WSALIAS HOSTBOOT_LEVEL SIMICSLEVEL" $BACKING_BUILD/src/simu/data/simicsInfo > $sb/simu/data/simicsInfo
 #echo "WSALIAS HOSTBOOT_LEVEL FIPSLEVEL env/gfwb/simics-4.2.0/simics-4.2.83/fips/fld36/fi120201a700.42" >> $sb/simu/data/simicsInfo
@@ -69,9 +76,10 @@ cp $HOSTBOOTROOT/src/build/citest/etc/patches/centaur.act $sb/simu/data/cec-chip
 #fixme
 
 
-echo "+++ Update to new phyp and mambo level."
-mkdir -p $sb/simu/data
-cp --update $BACKING_BUILD/src/simu/data/simicsInfo $sb/simu/data/simicsInfo
-sed -i -e's/^WSALIAS HOSTBOOT_LEVEL MAMBOLEVEL.*/WSALIAS HOSTBOOT_LEVEL MAMBOLEVEL env\/mamboa\/2011_11_10__4.2/' $sb/simu/data/simicsInfo
-sed -i -e's/^WSALIAS HOSTBOOT_LEVEL PHYPLEVEL.*/WSALIAS HOSTBOOT_LEVEL PHYPLEVEL env\/phypa\/simics-4.2.0\/simics-4.2.83\/ph120201a700.42/' $sb/simu/data/simicsInfo
-sed -i -e's/^WSALIAS HOSTBOOT_LEVEL PHYP_PATCH_LEVEL.*/WSALIAS HOSTBOOT_LEVEL PHYP_PATCH_LEVEL env\/phypa\/simics-4.2.0\/simics-4.2.82\/patches\/ph120201a700.42/' $sb/simu/data/simicsInfo
+# Leaving this here as an example for the future
+#echo "+++ Update to new phyp and mambo level."
+#mkdir -p $sb/simu/data
+#cp --update $BACKING_BUILD/src/simu/data/simicsInfo $sb/simu/data/simicsInfo
+#sed -i -e's/^WSALIAS HOSTBOOT_LEVEL MAMBOLEVEL.*/WSALIAS HOSTBOOT_LEVEL MAMBOLEVEL env\/mamboa\/2011_11_10__4.2/' $sb/simu/data/simicsInfo
+#sed -i -e's/^WSALIAS HOSTBOOT_LEVEL PHYPLEVEL.*/WSALIAS HOSTBOOT_LEVEL PHYPLEVEL env\/phypa\/simics-4.2.0\/simics-4.2.83\/ph120201a700.42/' $sb/simu/data/simicsInfo
+#sed -i -e's/^WSALIAS HOSTBOOT_LEVEL PHYP_PATCH_LEVEL.*/WSALIAS HOSTBOOT_LEVEL PHYP_PATCH_LEVEL env\/phypa\/simics-4.2.0\/simics-4.2.82\/patches\/ph120201a700.42/' $sb/simu/data/simicsInfo

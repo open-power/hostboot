@@ -347,6 +347,12 @@ errlHndl_t PnorRP::readTOC()
 
     //@todo - end fake data
 
+    //keep these traces here until PNOR is rock-solid
+    TRACFCOMP(g_trac_pnor, "TOC:    size=0x%.8X  flash=0x%.8X  virt=0x%.16X", iv_TOC[PNOR::SIDE_A][PNOR::TOC].size, iv_TOC[PNOR::SIDE_A][PNOR::TOC].flashAddr, iv_TOC[PNOR::SIDE_A][PNOR::TOC].virtAddr );
+    TRACFCOMP(g_trac_pnor, "EXT:    size=0x%.8X  flash=0x%.8X  virt=0x%.16X", iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].size, iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].flashAddr, iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].virtAddr );
+    TRACFCOMP(g_trac_pnor, "GLOBAL: size=0x%.8X  flash=0x%.8X  virt=0x%.16X", iv_TOC[PNOR::SIDE_A][PNOR::GLOBAL_DATA].size, iv_TOC[PNOR::SIDE_A][PNOR::GLOBAL_DATA].flashAddr, iv_TOC[PNOR::SIDE_A][PNOR::GLOBAL_DATA].virtAddr );
+    TRACFCOMP(g_trac_pnor, "DATA:   size=0x%.8X  flash=0x%.8X  virt=0x%.16X", iv_TOC[PNOR::SIDE_A][PNOR::HB_DATA].size, iv_TOC[PNOR::SIDE_A][PNOR::HB_DATA].flashAddr, iv_TOC[PNOR::SIDE_A][PNOR::HB_DATA].virtAddr );
+
     //@todo - load flash layout (how many chips)
     //@todo - read TOC on each chip/bank/whatever  
 

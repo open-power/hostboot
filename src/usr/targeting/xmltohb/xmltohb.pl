@@ -23,7 +23,7 @@
 #  IBM_PROLOG_END
 
 #
-# Purpose: 
+# Purpose:
 # Author: Nick Bofferding
 # Last Updated: 09/09/2011
 #
@@ -39,7 +39,7 @@ use strict;
 # Use of the following packages
 ################################################################################
 
-use Getopt::Long; 
+use Getopt::Long;
 use Pod::Usage;
 use XML::Simple;
 use Text::Wrap;
@@ -51,7 +51,7 @@ use POSIX;
 # bugs that result in XML parse errors that can be fixed by adjusting white-
 # space (i.e. parse errors that do not make sense).
 ################################################################################
-$XML::Simple::PREFERRED_PARSER = 'XML::Parser'; 
+$XML::Simple::PREFERRED_PARSER = 'XML::Parser';
 
 ################################################################################
 # Process command line parameters, issue help text if needed
@@ -68,7 +68,7 @@ my $cfgHelp = 0;
 my $cfgMan = 0;
 my $cfgVerbose = 0;
 
-GetOptions("hb-xml-file:s" => \$cfgHbXmlFile, 
+GetOptions("hb-xml-file:s" => \$cfgHbXmlFile,
            "src-output-dir:s" =>  \$cfgSrcOutputDir,
            "img-output-dir:s" =>  \$cfgImgOutputDir,
            "fapi-attributes-xml-file:s" => \$cfgFapiAttributesXmlFile,
@@ -81,7 +81,7 @@ GetOptions("hb-xml-file:s" => \$cfgHbXmlFile,
 pod2usage(-verbose => 1) if $cfgHelp;
 pod2usage(-verbose => 2) if $cfgMan;
 
-# Remove extraneous '/' from end of path names; use temporary version of $/ for 
+# Remove extraneous '/' from end of path names; use temporary version of $/ for
 # the chomp
 {
     local $/ = '/';
@@ -107,7 +107,7 @@ if($cfgVerbose)
 
 my $xml = new XML::Simple (KeyAttr=>[]);
 
-# Until full machine parseable workbook parsing splits out all the input files, 
+# Until full machine parseable workbook parsing splits out all the input files,
 # use the intermediate representation containing the full host boot model.
 # Aborts application if file name not found.
 my $attributes = $xml->XMLin($cfgHbXmlFile, forcearray => ['enumerationType','attribute','hwpfToHbAttrMap']);
@@ -121,7 +121,7 @@ validateTargetTypes($attributes);
 # Open the output files and write them
 if( !($cfgSrcOutputDir =~ "none") )
 {
-    open(TRAIT_FILE,">$cfgSrcOutputDir"."attributetraits.H") 
+    open(TRAIT_FILE,">$cfgSrcOutputDir"."attributetraits.H")
       or fatal ("Trait file: \"$cfgSrcOutputDir"
 		. "attributetraits.H\" could not be opened.");
     my $traitFile = *TRAIT_FILE;
@@ -197,7 +197,7 @@ if( !($cfgImgOutputDir =~ "none") )
 exit(0);
 
 ################################################################################
-# Report a fatal error and quit 
+# Report a fatal error and quit
 ################################################################################
 
 sub DEBUG_FUNCTIONS { }
@@ -208,7 +208,7 @@ sub fatal {
 
     for(my $caller = 1; ; $caller++)
     {
-        my ($package, $filename, $callerLine, 
+        my ($package, $filename, $callerLine,
             $subr, $has_args, $wantarray )= caller($caller);
         my $line = (caller($caller-1))[2];
         if(!$line) { last; }
@@ -227,14 +227,14 @@ sub VALIDATION_FUNCTIONS { }
 
 sub validateSubElements {
     my($name,$mustBeHash,$element,$criteria) = @_;
- 
+
     if($mustBeHash && (ref($element) ne "HASH"))
     {
         fatal("$name must be in the form of a hash.");
     }
 
     # print keys %{$element} . "\n";
-    
+
     for my $subElementName (sort(keys %{$element}))
     {
         if(!exists $criteria->{$subElementName})
@@ -253,7 +253,7 @@ sub validateSubElements {
                 . "\"$subElementName\".");
         }
 
-        if(exists $element->{$subElementName} 
+        if(exists $element->{$subElementName}
             && ($criteria->{$subElementName}{isscalar} == 1)
             && (ref ($element->{$subElementName}) eq "HASH"))
         {
@@ -279,9 +279,9 @@ sub validateAttributes {
     $elements{"complexType"} = { required => 0, isscalar => 0};
     $elements{"nativeType"}  = { required => 0, isscalar => 0};
     $elements{"writeable"}   = { required => 0, isscalar => 0};
-    $elements{"hasStringConversion"} 
+    $elements{"hasStringConversion"}
                              = { required => 0, isscalar => 0};
-    $elements{"hwpfToHbAttrMap"} 
+    $elements{"hwpfToHbAttrMap"}
                              = { required => 0, isscalar => 0};
 
     foreach my $attribute (@{$attributes->{attribute}})
@@ -318,7 +318,7 @@ sub validateTargetTypes {
     $elements{"id"}          = { required => 1, isscalar => 1};
     $elements{"parent"}      = { required => 0, isscalar => 1};
     $elements{"attribute"}   = { required => 0, isscalar => 0};
-   
+
     foreach my $targetType (@{$attributes->{targetType}})
     {
         validateSubElements("targetType",1,$targetType,\%elements);
@@ -336,7 +336,7 @@ sub validateTargetInstances{
     $elements{"id"}          = { required => 1, isscalar => 1};
     $elements{"type"}        = { required => 1, isscalar => 1};
     $elements{"attribute"}   = { required => 0, isscalar => 0};
-   
+
     foreach my $targetInstance (@{$attributes->{targetInstance}})
     {
         validateSubElements("targetInstance",1,$targetInstance,\%elements);
@@ -360,7 +360,7 @@ sub writeFapiPlatAttrMacrosHeaderFileHeader {
 /**
  *  \@file fapiplatattrmacros.H
  *
- *  \@brief FAPI -> HB attribute mappings.  This file is autogenerated and 
+ *  \@brief FAPI -> HB attribute mappings.  This file is autogenerated and
  *      should not be altered.
  */
 
@@ -384,17 +384,17 @@ VERBATIM
 }
 
 ################################################################################
-# Writes the plat attribute macros 
+# Writes the plat attribute macros
 ################################################################################
 
-sub writeFapiPlatAttrMacrosHeaderFileContent { 
+sub writeFapiPlatAttrMacrosHeaderFileContent {
     my($attributes,$fapiAttributes,$outFile) = @_;
 
     my $macroSection = "";
     my $attrSection = "";
 
     foreach my $attribute (@{$attributes->{attribute}})
-    { 
+    {
         foreach my $hwpfToHbAttrMap (@{$attribute->{hwpfToHbAttrMap}})
         {
             if(   !exists $hwpfToHbAttrMap->{id}
@@ -404,12 +404,12 @@ sub writeFapiPlatAttrMacrosHeaderFileContent {
             }
 
             my $fapiReadable  = 0;
-            my $fapiWriteable = 0; 
+            my $fapiWriteable = 0;
             my $instantiated = 0;
 
             foreach my $fapiAttr (@{$fapiAttributes->{attribute}})
             {
-                if(   (exists $fapiAttr->{id}) 
+                if(   (exists $fapiAttr->{id})
                    && ($fapiAttr->{id} eq $hwpfToHbAttrMap->{id}) )
                 {
                     # Check that non-platInit attributes are in the
@@ -421,16 +421,16 @@ sub writeFapiPlatAttrMacrosHeaderFileContent {
                             fatal("FAPI non-platInit attr '$hwpfToHbAttrMap->{id}' is '$hwpfToHbAttrMap->{macro}', it must be DIRECT");
                         }
 
-			if ($attribute->{persistency} ne "volatile-zeroed")		
-			{		
-			    fatal("FAPI non-platInit attr '$hwpfToHbAttrMap->{id}' is '$attribute->{persistency}', it must be volatile-zeroed");		
+			if ($attribute->{persistency} ne "volatile-zeroed")
+			{
+			    fatal("FAPI non-platInit attr '$hwpfToHbAttrMap->{id}' is '$attribute->{persistency}', it must be volatile-zeroed");
 			}
 
 		    }
 
                     # All FAPI attributes are readable
                     $fapiReadable = 1;
-                    
+
                     if(exists $fapiAttr->{writeable})
                     {
                         $fapiWriteable = 1;
@@ -444,9 +444,9 @@ sub writeFapiPlatAttrMacrosHeaderFileContent {
             {
                 if(exists $attribute->{readable})
                 {
-                    $macroSection .= '    #define ' .  $hwpfToHbAttrMap->{id} . 
+                    $macroSection .= '    #define ' .  $hwpfToHbAttrMap->{id} .
                         "_GETMACRO(ID,PTARGET,VAL) \\\n" .
-                        "        FAPI_PLAT_ATTR_SVC_GETMACRO_" . 
+                        "        FAPI_PLAT_ATTR_SVC_GETMACRO_" .
                         $hwpfToHbAttrMap->{macro} . "(ID,PTARGET,VAL)\n";
                     $instantiated = 1;
                 }
@@ -461,9 +461,9 @@ sub writeFapiPlatAttrMacrosHeaderFileContent {
             {
                 if(exists $attribute->{writeable})
                 {
-                    $macroSection .= '    #define ' .  $hwpfToHbAttrMap->{id} . 
+                    $macroSection .= '    #define ' .  $hwpfToHbAttrMap->{id} .
                         "_SETMACRO(ID,PTARGET,VAL) \\\n" .
-                        "        FAPI_PLAT_ATTR_SVC_SETMACRO_" . 
+                        "        FAPI_PLAT_ATTR_SVC_SETMACRO_" .
                         $hwpfToHbAttrMap->{macro} . "(ID,PTARGET,VAL)\n";
                     $instantiated = 1;
                 }
@@ -476,10 +476,10 @@ sub writeFapiPlatAttrMacrosHeaderFileContent {
 
             if($instantiated)
             {
-                $attrSection .= '    #define FAPI_PLAT_ATTR_SVC_MACRO_' . 
-                    $hwpfToHbAttrMap->{macro} . "_FAPI_" . 
+                $attrSection .= '    #define FAPI_PLAT_ATTR_SVC_MACRO_' .
+                    $hwpfToHbAttrMap->{macro} . "_FAPI_" .
                     $hwpfToHbAttrMap->{id} . " \\\n" .
-                    "        TARGETING::ATTR_" . 
+                    "        TARGETING::ATTR_" .
                     $attribute->{id} . "\n";
             }
         }
@@ -510,7 +510,7 @@ VERBATIM
 }
 
 ################################################################################
-# Writes the pnor targeting header format file 
+# Writes the pnor targeting header format file
 ################################################################################
 
 sub writeHeaderFormatHeaderFile {
@@ -524,7 +524,7 @@ sub writeHeaderFormatHeaderFile {
 /**
  *  \@file pnorheader.H
  *
- *  \@brief Definition for structure of targeting's PNOR image header.  This 
+ *  \@brief Definition for structure of targeting's PNOR image header.  This
  *      file is autogenerated and should not be altered.
  */
 
@@ -549,8 +549,8 @@ namespace TARGETING
     enum SECTION_TYPE
     {
         // Targeting read-only section backed to PNOR.  Always the 0th section.
-        SECTION_TYPE_PNOR_RO        = 0x00, 
-        
+        SECTION_TYPE_PNOR_RO        = 0x00,
+
         // Targeting read-write section backed to PNOR
         SECTION_TYPE_PNOR_RW        = 0x01,
 
@@ -592,8 +592,8 @@ namespace TARGETING
         const uint32_t         headerSize;
 
         // Virtual memory offset from the virtual memory address of the previous
-        // section where the attribute resource provider must load the next 
-        // section.  If there is no previous section, it will represent the 
+        // section where the attribute resource provider must load the next
+        // section.  If there is no previous section, it will represent the
         // offset from the virtual memory base address (typically 0)
         const uint32_t         vmmSectionOffset;
 
@@ -605,25 +605,25 @@ namespace TARGETING
         const uint32_t         sizeOfSection;
 
         // Number of TargetingSection records
-        const uint32_t         numSections;  
-        
+        const uint32_t         numSections;
+
         // Offset to the first TargetingSection record, from the end of this
-        // field 
+        // field
         const uint32_t         offsetToSections;
 
         // Pad, in bytes, given by "offsetToSections"
-        
+
         // const TargetingSection sections[numSections];
 
     } PACKED;
-    
+
 } // End namespace TARGETING
 
 #endif // TARG_PNORHEADER_H
 
 VERBATIM
 
-}        
+}
 
 ################################################################################
 # Writes the string implementation file header
@@ -662,9 +662,9 @@ VERBATIM
 # Writes string implementation
 ################################################################################
 
-sub writeStringImplementationFileStrings { 
+sub writeStringImplementationFileStrings {
     my($attributes,$outFile) = @_;
-  
+
     foreach my $attribute (@{$attributes->{attribute}})
     {
         if(exists $attribute->{simpleType})
@@ -688,12 +688,12 @@ sub writeStringImplementationFileStrings {
                 print $outFile "    switch(i_attrValue)\n";
                 print $outFile "    {\n";
                 my $enumerationType = getEnumerationType($attributes,$enumeration->{id});
-                    
+
                 foreach my $enumerator (@{$enumerationType->{enumerator}})
                 {
                     print $outFile "        case ", $attribute->{id}, "_",
                         $enumerator->{name},":\n";
-                    print $outFile "            return \"", 
+                    print $outFile "            return \"",
                         $enumerator->{name},"\";\n";
                 }
 
@@ -761,7 +761,7 @@ print $outFile <<VERBATIM;
 /**
  *  \@file attributestructs.H
  *
- *  \@brief Complex structures for host boot attributes.  This file is 
+ *  \@brief Complex structures for host boot attributes.  This file is
  *      autogenerated and should not be altered.
  */
 
@@ -782,7 +782,7 @@ print $outFile <<VERBATIM;
 
 namespace TARGETING
 {
-    
+
 VERBATIM
 
 }
@@ -791,11 +791,11 @@ VERBATIM
 # Writes struct header file structs
 ################################################################################
 
-sub writeStructFileStructs { 
+sub writeStructFileStructs {
     my($attributes,$outFile) = @_;
 
     foreach my $attribute (@{$attributes->{attribute}})
-    {    
+    {
         if(exists $attribute->{complexType})
         {
             my $complexType = $attribute->{complexType};
@@ -805,13 +805,13 @@ sub writeStructFileStructs {
             }
 
             print $outFile "/**\n";
-            print $outFile wrapBrief($complexType->{description}); 
+            print $outFile wrapBrief($complexType->{description});
             print $outFile " */\n";
 
-            print $outFile "struct ", 
+            print $outFile "struct ",
                 calculateStructName($attribute->{id}), "\n";
             print $outFile "{\n";
-       
+
             my $complex = $attribute->{complexType};
             foreach my $field (@{$complex->{field}})
             {
@@ -824,10 +824,10 @@ sub writeStructFileStructs {
                 }
 
                 print $outFile wrapComment($field->{description});
-                print $outFile "    ", $field->{type}, " ", $field->{name},     
+                print $outFile "    ", $field->{type}, " ", $field->{name},
                     $bits, "; \n\n";
             }
-            
+
             print $outFile "} PACKED;\n\n";
         }
     }
@@ -864,7 +864,7 @@ print $outFile <<VERBATIM;
 /**
  *  \@file attributestrings.H
  *
- *  \@brief Attribute string conversion routines.  This file is autogenerated 
+ *  \@brief Attribute string conversion routines.  This file is autogenerated
  *      and should not be altered.
  */
 
@@ -898,7 +898,7 @@ const char* attrToString(
 {
     // Default behavior is to fail the compile if caller attempt to print an
     // unsupported string
-    return InvalidAttributeForStringification(); 
+    return InvalidAttributeForStringification();
 }
 
 VERBATIM
@@ -909,7 +909,7 @@ VERBATIM
 # Writes string interfaces
 ################################################################################
 
-sub writeStringHeaderFileStrings { 
+sub writeStringHeaderFileStrings {
     my($attributes,$outFile) = @_;
 
     foreach my $attribute (@{$attributes->{attribute}})
@@ -918,7 +918,7 @@ sub writeStringHeaderFileStrings {
         {
             my $simpleType = $attribute->{simpleType};
             if(exists $simpleType->{enumeration})
-            {        
+            {
                 my $enumeration = $simpleType->{enumeration};
                 print $outFile "/**\n";
                 print $outFile " *  \@brief See "
@@ -995,7 +995,7 @@ VERBATIM
 # Writes the enum file attribute enumeration
 ################################################################################
 
-sub writeEnumFileAttrIdEnum { 
+sub writeEnumFileAttrIdEnum {
     my($attributes,$outFile) = @_;
 
     print $outFile <<VERBATIM;
@@ -1011,7 +1011,7 @@ enum ATTRIBUTE_ID
 VERBATIM
 
     my $attrId;
-    my $hexVal; 
+    my $hexVal;
 
     format ATTRENUMFORMAT =
     ATTR_@<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< = @<<<<<<<<<<
@@ -1035,7 +1035,7 @@ VERBATIM
 # Writes other enumerations to enumeration file
 ################################################################################
 
-sub writeEnumFileAttrEnums { 
+sub writeEnumFileAttrEnums {
     my($attributes,$outFile) = @_;
 
     my $enumName = "";
@@ -1047,7 +1047,7 @@ sub writeEnumFileAttrEnums {
 .
     select($outFile);
     $~ = 'ENUMFORMAT';
- 
+
     foreach my $enumerationType (@{$attributes->{enumerationType}})
     {
         print $outFile "/**\n";
@@ -1058,10 +1058,10 @@ sub writeEnumFileAttrEnums {
 
         foreach my $enumerator (@{$enumerationType->{enumerator}})
         {
-            $enumHex = sprintf "0x%08X", 
+            $enumHex = sprintf "0x%08X",
                 enumNameToValue($enumerationType,$enumerator->{name});
             $enumName = $enumerationType->{id} . "_" . $enumerator->{name};
-            write; 
+            write;
         }
 
         print $outFile "};\n\n";
@@ -1094,7 +1094,7 @@ print $outFile <<VERBATIM;
 
 #ifndef TARG_ATTRIBUTETRAITS_H
 #define TARG_ATTRIBUTETRAITS_H
-    
+
 /**
  *  \@file attributetraits.H
  *
@@ -1150,14 +1150,14 @@ VERBATIM
 # Writes computed traits to trait file
 ################################################################################
 
-sub writeTraitFileTraits { 
+sub writeTraitFileTraits {
     my($attributes,$outFile) = @_;
-    
+
     my $typedefs = "";
-    
+
     foreach my $attribute (@{$attributes->{attribute}})
     {
-        # Build boolean traits 
+        # Build boolean traits
 
         my $traits = "";
         foreach my $trait ("writeable","readable","hasStringConversion")
@@ -1182,7 +1182,7 @@ sub writeTraitFileTraits {
         chop($traits);
 
         # Build value type
-                
+
         my $type = "";
         my $dimensions = "";
         if(exists $attribute->{simpleType})
@@ -1190,10 +1190,10 @@ sub writeTraitFileTraits {
             my $simpleType = $attribute->{simpleType};
             my $simpleTypeProperties = simpleTypeProperties();
             for my $typeName (sort(keys %{$simpleType}))
-            { 
+            {
                 if(exists $simpleTypeProperties->{$typeName})
                 {
-                    if(    $simpleTypeProperties->{$typeName}{typeName} 
+                    if(    $simpleTypeProperties->{$typeName}{typeName}
                        eq "XMLTOHB_USE_PARENT_ATTR_ID")
                     {
                         $type = $attribute->{id};
@@ -1217,9 +1217,9 @@ sub writeTraitFileTraits {
             }
 
             if($type eq "")
-            {     
+            {
                 fatal("Unsupported simpleType child element for "
-                 . "attribute $attribute->{id}.  Keys are (" 
+                 . "attribute $attribute->{id}.  Keys are ("
                  . join(',',sort(keys %{$simpleType})) . ")");
             }
         }
@@ -1236,7 +1236,7 @@ sub writeTraitFileTraits {
             fatal("Could not determine attribute data type for attribute "
                 . "$attribute->{id}.");
         }
- 
+
         # Add traits definition to output
 
         print $outFile "template<>\n";
@@ -1246,7 +1246,7 @@ sub writeTraitFileTraits {
         print $outFile "        enum {",$traits," };\n";
         print $outFile "        typedef ", $type, " Type$dimensions;\n";
         print $outFile "};\n\n";
-       
+
         $typedefs .= "typedef " . $type .
             " $attribute->{id}" . "_ATTR" . $dimensions . ";\n";
     };
@@ -1287,17 +1287,17 @@ sub getAttributeIdEnumeration {
     $enumeration->{default} = "NA";
     $enumeration->{enumerator}->[0]->{name} = "NA";
     $enumeration->{enumerator}->[0]->{value} = 0;
-    
+
     foreach my $attribute (@{$attributes->{attribute}})
     {
         $attributeValue++;
-        $enumeration->{enumerator}->[$attributeValue]->{name} 
+        $enumeration->{enumerator}->[$attributeValue]->{name}
             = $attribute->{id};
-        $enumeration->{enumerator}->[$attributeValue]->{value} 
+        $enumeration->{enumerator}->[$attributeValue]->{value}
             = sprintf "%u",$attributeValue;
     }
 
-    return $enumeration; 
+    return $enumeration;
 }
 
 ################################################################################
@@ -1319,14 +1319,14 @@ sub unhexify {
 
 sub packQuad{
     my($quad) = @_;
-    
+
     my $value = unhexify($quad);
 
     return pack("NN" , (($value >> 32) & 0xFFFFFFFF), ($value & 0xFFFFFFFF));
 }
 
 ################################################################################
-# Get space required to store an enum, based on the max value 
+# Get space required to store an enum, based on the max value
 ################################################################################
 
 sub enumSpace {
@@ -1347,8 +1347,8 @@ sub enumSpace {
 sub sizeBlockAligned {
     my ($size,$blockSize,$oneBlockMinimum) = @_;
 
-    if( (!defined $size) 
-       || (!defined $blockSize) 
+    if( (!defined $size)
+       || (!defined $blockSize)
        || (!defined $oneBlockMinimum) )
     {
         fatal("Caller must specify 'size', 'blockSize', 'oneBlockMinimum' "
@@ -1364,7 +1364,7 @@ sub sizeBlockAligned {
     {
         $size += ($blockSize - ($size % $blockSize));
     }
-    
+
     return $size;
 }
 
@@ -1374,8 +1374,8 @@ sub sizeBlockAligned {
 
 sub optWhiteSpace {
     my($text) = @_;
-   
-    # Remove leading, trailing white space, then collapse excess internal 
+
+    # Remove leading, trailing white space, then collapse excess internal
     # whitespace
     $text =~ s/^\s+|\s+$//g;
     $text =~ s/\s+/ /g;
@@ -1391,18 +1391,18 @@ sub wrapBrief {
     my($text) = @_;
 
     my $brief_start      = " *  \@brief ";
-    my $brief_continue   = " *      ";      
+    my $brief_continue   = " *      ";
 
     return wrap($brief_start,$brief_continue, optWhiteSpace($text))."\n";
 }
 
 ################################################################################
-# Wrap text into a C++ style comment 
+# Wrap text into a C++ style comment
 ################################################################################
 
 sub wrapComment {
     my($text) = @_;
-    
+
     my $comment_start    = "    // ";
     my $comment_continue = "    // ";
 
@@ -1418,7 +1418,7 @@ sub calculateStructName {
 
     my $type = "";
 
-    # Struct name is original ID with underscores removed and first letter of   
+    # Struct name is original ID with underscores removed and first letter of
     # each word capitalized
     my @words = split(/_/,$id);
     foreach my $word (@words)
@@ -1436,13 +1436,13 @@ sub calculateStructName {
 sub getInstantiatedTargetTypes {
     my($attributes) = @_;
 
-    my %seen = (); 
+    my %seen = ();
     my @uniqueTargetTypes = ();
 
     foreach my $targetInstance (@{$attributes->{targetInstance}})
     {
-        push (@uniqueTargetTypes, $targetInstance->{type}) 
-            unless $seen{$targetInstance->{type}}++; 
+        push (@uniqueTargetTypes, $targetInstance->{type})
+            unless $seen{$targetInstance->{type}}++;
     }
 
     return @uniqueTargetTypes;
@@ -1471,7 +1471,7 @@ sub defaultEnum {
         $attributes,$enumerationInstance->{id});
 
     # print STDOUT "Attribute enumeration's " .
-    #    "(\"$enumerationType->{id}\") default is: " . 
+    #    "(\"$enumerationType->{id}\") default is: " .
     #        $enumerationType->{default} . "\n";
 
     return $enumerationType->{default};
@@ -1512,9 +1512,9 @@ sub enforceHbMutex {
 sub simpleTypeProperties {
 
     my %typesHoH = ();
-    
+
     # Intentionally didn't wrap these to 80 columns to keep them lined up and
-    # more readable/editable 
+    # more readable/editable
     $typesHoH{"int8_t"}      = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "int8_t"                     , bytes => 1, bits => 8 , default => \&defaultZero, alignment => 1, specialPolicies =>\&null,           packfmt => "C" };
     $typesHoH{"int16_t"}     = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "int16_t"                    , bytes => 2, bits => 16, default => \&defaultZero, alignment => 1, specialPolicies =>\&null,           packfmt => "n" };
     $typesHoH{"int32_t"}     = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "int32_t"                    , bytes => 4, bits => 32, default => \&defaultZero, alignment => 1, specialPolicies =>\&null,           packfmt => "N" };
@@ -1526,7 +1526,7 @@ sub simpleTypeProperties {
     $typesHoH{"enumeration"} = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 0, typeName => "XMLTOHB_USE_PARENT_ATTR_ID" , bytes => 0, bits => 0 , default => \&defaultEnum, alignment => 1, specialPolicies =>\&null,           packfmt => "packEnumeration"};
     $typesHoH{"hbmutex"}     = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 0, typeName => "mutex_t*"                   , bytes => 8, bits => 64, default => \&defaultZero, alignment => 8, specialPolicies =>\&enforceHbMutex, packfmt =>\&packQuad};
 
-    return \%typesHoH; 
+    return \%typesHoH;
 }
 
 ################################################################################
@@ -1544,7 +1544,7 @@ sub getAttributeDefault {
         if ($attribute->{id} eq $attributeId)
         {
             if(exists $attribute->{simpleType})
-            {   
+            {
                 for my $type (sort(keys %{$simpleTypeProperties}))
                 {
                     # Note: must check for 'type' before 'default', otherwise
@@ -1553,7 +1553,7 @@ sub getAttributeDefault {
                     {
                         if(exists $attribute->{simpleType}->{$type}->{default})
                         {
-                            $default = 
+                            $default =
                                 $attribute->{simpleType}->{$type}->{default};
                         }
                         else
@@ -1575,17 +1575,17 @@ sub getAttributeDefault {
                     $cplxDefault->{field}->[$i]->{value} = $field->{default};
                     $i++;
                 }
-                return $cplxDefault;               
-            }                   
+                return $cplxDefault;
+            }
             elsif(exists $attribute->{nativeType})
-            {                   
+            {
                 if(   exists $attribute->{nativeType}->{name}
                    && ($attribute->{nativeType}->{name} eq "EntityPath"))
-                {               
+                {
                     $default =  "MustBeOverriddenByTargetInstance";
-                }               
-                else            
-                {               
+                }
+                else
+                {
                     fatal("Cannot provide default for unsupported nativeType.");
                 }
             }
@@ -1593,7 +1593,7 @@ sub getAttributeDefault {
             {
                 fatal("Unrecognized value type.");
             }
-            
+
             last;
         }
     }
@@ -1605,9 +1605,9 @@ sub getAttributeDefault {
 # Get target attributes
 ################################################################################
 
-sub getTargetAttributes { 
+sub getTargetAttributes {
     my($type,$attributes,$attrhasha) = @_;
- 
+
     foreach my $targetType (@{$attributes->{targetType}})
     {
         if($targetType->{id} eq $type)
@@ -1617,7 +1617,7 @@ sub getTargetAttributes {
                 getTargetAttributes($targetType->{parent},
                     $attributes,$attrhasha);
             }
-              
+
             foreach my $attr (@{$targetType->{attribute}})
             {
                 $attrhasha->{ $attr->{id} } = $attr;
@@ -1657,7 +1657,7 @@ sub maxEnumValue {
 }
 
 ################################################################################
-# Serialize an enumeration to data buffer 
+# Serialize an enumeration to data buffer
 ################################################################################
 
 sub packEnumeration {
@@ -1671,11 +1671,11 @@ sub packEnumeration {
     $value = unhexify($value);
 
     # Encode the value
-    for (my $count=$bytes-1; $count >= 0; $count--) 
+    for (my $count=$bytes-1; $count >= 0; $count--)
     {
         $binaryData .= pack("C", (0xFF & ($value >> (8*$count))) );
     }
-   
+
     if( (length $binaryData) < 1)
     {
         fatal("Failed to write binary data for enumeration.");
@@ -1692,17 +1692,17 @@ sub packEnumeration {
 ################################################################################
 # Convert enumerator name into equivalent enumerator value for given enumeration
 ################################################################################
- 
+
 sub enumNameToValue {
     my ($enumeration,$enumeratorName) = @_;
- 
-    my $nextEnumeratorValue = 0; 
+
+    my $nextEnumeratorValue = 0;
     my $found = 0;
     my $enumeratorValue;
-    
+
     foreach my $enumerator (@{$enumeration->{enumerator}})
     {
-         my $currentEnumeratorValue;     
+         my $currentEnumeratorValue;
          if(exists $enumerator->{value} )
          {
              $nextEnumeratorValue = unhexify($enumerator->{value}) + 1;
@@ -1721,11 +1721,13 @@ sub enumNameToValue {
              last;
          }
     }
-       
+
     if(!$found)
     {
+        my $enumerationName = $enumeration->{id};
+
         fatal("Could not convert enumerator name \"$enumeratorName\"into "
-            . "enumerator value.");
+            . "enumerator value in \"$enumerationName\".");
     }
 
     return $enumeratorValue;
@@ -1734,9 +1736,9 @@ sub enumNameToValue {
 ################################################################################
 # Object which accumulates/flushes bit field data
 ################################################################################
-  
+
 {
-      
+
 package Accumulator;
 
 ################################################################################
@@ -1752,12 +1754,12 @@ sub new {
 }
 
 ################################################################################
-# Accumulate a new bit field 
+# Accumulate a new bit field
 ################################################################################
-  
+
 sub accumulate {
     my($self,$type,$bits,$value) = @_;
-    
+
     my $binaryData;
     my $simpleTypeProperties = main::simpleTypeProperties();
 
@@ -1833,21 +1835,21 @@ sub releaseAndClear {
 }
 
 1;
- 
+
 }
 
 ################################################################################
 # Pack a complex type into a binary data stream
 ################################################################################
-  
+
 sub packComplexType {
     my ($attributes,$complexType,$attributeDefault) = @_;
-   
+
     my $binaryData;
     my $simpleTypeProperties = simpleTypeProperties();
-     
-    my $accumulator = new Accumulator(); 
-            
+
+    my $accumulator = new Accumulator();
+
     # Build using each field
     foreach my $field (@{$complexType->{field}})
     {
@@ -1855,12 +1857,12 @@ sub packComplexType {
         # print STDERR "Default = ", $field->{default}, "\n";
         # print STDERR "Bits    = ", $field->{bits}, "\n";
         # print STDERR "Type    = ", $field->{type}, "\n";
-        
+
         my $found = 0;
         foreach my $default (@{$attributeDefault->{field}})
         {
             if($default->{id} eq $field->{name})
-            {       
+            {
                 $found = 1;
                 if(exists $field->{bits})
                 {
@@ -1868,11 +1870,11 @@ sub packComplexType {
                         $field->{type},unhexify($field->{bits}),
                            unhexify($default->{value}));
                 }
-                # If non-bitfield 
+                # If non-bitfield
                 else
                 {
                     $binaryData .= $accumulator->releaseAndClear();
-        
+
                     # If native "EntityPath" type, process accordingly
                     if($field->{type} eq "EntityPath")
                     {
@@ -1901,7 +1903,7 @@ sub packComplexType {
                         if(ref ($simpleTypeProperties->{$field->{type}}
                             {packfmt}) eq "CODE")
                         {
-                            $binaryData .= 
+                            $binaryData .=
                                 $simpleTypeProperties->{$field->{type}}
                                     {packfmt}->($defaultValue);
                         }
@@ -1918,7 +1920,7 @@ sub packComplexType {
                             . "complex type.");
                     }
                 }
-                
+
                 last;
             }
         }
@@ -1931,7 +1933,7 @@ sub packComplexType {
 
     $binaryData .= $accumulator->releaseAndClear();
 
-    return $binaryData;        
+    return $binaryData;
 }
 
 ################################################################################
@@ -1968,8 +1970,8 @@ sub packEntityPath {
     {
         fatal("Path elements cannot be greater than $maxPathElements.");
     }
-  
-    $binaryData .= pack("C", (0xF0 & ($type << 4)) + 
+
+    $binaryData .= pack("C", (0xF0 & ($type << 4)) +
         (0x0F & (scalar @paths)));
 
     foreach my $pathElement (@paths)
@@ -2042,7 +2044,7 @@ sub packSingleSimpleTypeAttribute {
 
 sub packAttribute {
     my($attributes,$attribute,$value) = @_;
-    
+
     my $binaryData;
 
     my $alignment = 1;
@@ -2052,7 +2054,7 @@ sub packAttribute {
         my $simpleTypeProperties = simpleTypeProperties();
 
         for my $typeName (sort(keys %{$simpleType}))
-        {   
+        {
             if(exists $simpleTypeProperties->{$typeName})
             {
                 $alignment = $simpleTypeProperties->{$typeName}{alignment};
@@ -2140,7 +2142,7 @@ sub packAttribute {
     {
         fatal("Serialization failed for attribute ID = $attribute->{id}.");
     }
-         
+
     return ($binaryData,$alignment);
 }
 
@@ -2152,7 +2154,7 @@ sub getPnorBaseAddress {
     my($vmmConstsFile) = @_;
     my $pnorBaseAddress = 0;
 
-    open(VMM_CONSTS_FILE,"<$vmmConstsFile") 
+    open(VMM_CONSTS_FILE,"<$vmmConstsFile")
       or fatal ("VMM Constants file: \"$vmmConstsFile\" could not be opened.");
 
     foreach my $line (<VMM_CONSTS_FILE>)
@@ -2170,12 +2172,12 @@ sub getPnorBaseAddress {
     {
         fatal("PNOR base address was zero!");
     }
-    
+
     return $pnorBaseAddress;
 }
 
 ################################################################################
-# Write the PNOR targeting image 
+# Write the PNOR targeting image
 ################################################################################
 
 sub writeTargetingImage {
@@ -2187,11 +2189,11 @@ sub writeTargetingImage {
 
     # Virtual memory addresses corresponding to the start of the targeting image
     # PNOR/heap sections
-    my $pnorRoBaseAddress    = getPnorBaseAddress($vmmConstsFile); 
-    my $pnorRwBaseAddress    = $pnorRoBaseAddress    + $vmmSectionOffset;  
-    my $heapPnorInitBaseAddr = $pnorRwBaseAddress    + $vmmSectionOffset; 
-    my $heapZeroInitBaseAddr = $heapPnorInitBaseAddr + $vmmSectionOffset; 
-   
+    my $pnorRoBaseAddress    = getPnorBaseAddress($vmmConstsFile);
+    my $pnorRwBaseAddress    = $pnorRoBaseAddress    + $vmmSectionOffset;
+    my $heapPnorInitBaseAddr = $pnorRwBaseAddress    + $vmmSectionOffset;
+    my $heapZeroInitBaseAddr = $heapPnorInitBaseAddr + $vmmSectionOffset;
+
     # Reserve 256 bytes for the header, then keep track of PNOR RO offset
     my $headerSize = 256;
     my $offset = $headerSize;
@@ -2206,7 +2208,7 @@ sub writeTargetingImage {
     ############################################################################
 
     # Get an array of only the unique types of targets actually used by the
-    # aggregation of target instances.  
+    # aggregation of target instances.
     my @targetTypes = getInstantiatedTargetTypes($attributes);
 
     my $attributeIdEnumeration = getAttributeIdEnumeration($attributes);
@@ -2235,9 +2237,9 @@ sub writeTargetingImage {
         # Save offset of the attribute list, tied to the type
         $attributeListTypeHoH{$targetType}{offset} = $offset;
         $attributeListTypeHoH{$targetType}{elements} = scalar keys %attrhash;
-        $attributeListTypeHoH{$targetType}{size} = 
+        $attributeListTypeHoH{$targetType}{size} =
             (length $perTargetTypeAttrBinData);
-     
+
         #print "Target type: $targetType\n";
         #print "   elements: $attributeListTypeHoH{$targetType}{elements}\n";
         #print "     offset: $attributeListTypeHoH{$targetType}{offset}\n";
@@ -2251,12 +2253,12 @@ sub writeTargetingImage {
     }
 
     # For each target instance ...
-    
+
     #@TODO Eventually we'll need criteria to order the attributes
     # for code update.  At minimum, ensure that we always process at this level
     # in the given order
     my @targetsAoH = ();
-    my $numTargets = 0;    
+    my $numTargets = 0;
     foreach my $targetInstance (@{$attributes->{targetInstance}})
     {
         push(@targetsAoH, $targetInstance);
@@ -2280,7 +2282,7 @@ sub writeTargetingImage {
     # Don't increment the offset; already accounted for
     $numTargetsPointer = $pnorRoBaseAddress + $offset;
     $numTargetsPointerBinData = packQuad($numTargetsPointer);
-   
+
     my $numTargetsBinData = pack("N",$numTargets);
     $offset += (length $numTargetsBinData);
 
@@ -2293,7 +2295,7 @@ sub writeTargetingImage {
     my $rwOffset = 0;
     my $attributePointerBinData;
     my $targetsBinData;
-      
+
     # Ensure consistent ordering of target instances
     my $attrAddr = $pnorRoBaseAddress + $startOfAttributePointers;
 
@@ -2311,20 +2313,20 @@ sub writeTargetingImage {
         $data .= pack('N',
             $attributeListTypeHoH{$targetInstance->{type}}{elements});
         $data .= packQuad(
-              $attributeListTypeHoH{$targetInstance->{type}}{offset} 
+              $attributeListTypeHoH{$targetInstance->{type}}{offset}
             + $pnorRoBaseAddress);
         $data .= packQuad($attrAddr);
-        $attrAddr += $attributeListTypeHoH{$targetInstance->{type}}{elements} 
+        $attrAddr += $attributeListTypeHoH{$targetInstance->{type}}{elements}
             * (length packQuad(0));
 
         # Increment the offset
         $offset += (length $data);
 
-        # Add it to the target sub-section 
+        # Add it to the target sub-section
         $targetsBinData .= $data;
     }
 
-    my $pnorRoOffset = $offset; 
+    my $pnorRoOffset = $offset;
     my $attributesWritten = 0;
 
     foreach my $targetInstance (@targetsAoH)
@@ -2338,7 +2340,7 @@ sub writeTargetingImage {
         #@TODO Attributes must eventually be ordered correctly for code update
         getTargetAttributes($targetInstance->{type}, $attributes,\%attrhash);
 
-        # Update hash with any per-instance overrides, but only if that 
+        # Update hash with any per-instance overrides, but only if that
         # attribute has already been defined
         foreach my $attr (@{$targetInstance->{attribute}})
         {
@@ -2384,22 +2386,22 @@ sub writeTargetingImage {
                     {
                         fatal("Persistency not supported.");
                     }
-    
+
                     if($section eq "pnor-ro")
                     {
                         my ($rodata,$alignment) = packAttribute($attributes,
                             $attributeDef,
                             $attrhash{$attributeId}->{default});
-                        
+
                         # Align the data as necessary
-                        my $pads = ($alignment - ($offset % $alignment)) 
+                        my $pads = ($alignment - ($offset % $alignment))
                             % $alignment;
                         $roAttrBinData .= pack ("@".$pads);
                         $offset += $pads;
 
                         $attributePointerBinData .= packQuad(
                             $offset + $pnorRoBaseAddress);
-                        
+
                         $offset += (length $rodata);
 
                         $roAttrBinData .= $rodata;
@@ -2411,17 +2413,17 @@ sub writeTargetingImage {
                             $attrhash{$attributeId}->{default});
 
                         #print "Wrote to pnor-rw value ",$attributeDef->{id}, ",
-                        #", $attrhash{$attributeId}->{default}," \n"; 
-                      
+                        #", $attrhash{$attributeId}->{default}," \n";
+
                         # Align the data as necessary
-                        my $pads = ($alignment - ($rwOffset % $alignment)) 
+                        my $pads = ($alignment - ($rwOffset % $alignment))
                             % $alignment;
                         $rwAttrBinData .= pack ("@".$pads);
                         $rwOffset += $pads;
 
                         $attributePointerBinData .= packQuad(
                             $rwOffset + $pnorRwBaseAddress);
-                        
+
                         $rwOffset += (length $rwdata);
 
                         $rwAttrBinData .= $rwdata;
@@ -2432,16 +2434,16 @@ sub writeTargetingImage {
                         my ($heapZeroInitData,$alignment) = packAttribute(
                             $attributes,
                             $attributeDef,$attrhash{$attributeId}->{default});
-                        
+
                         # Align the data as necessary
-                        my $pads = ($alignment - ($heapZeroInitOffset 
+                        my $pads = ($alignment - ($heapZeroInitOffset
                             % $alignment)) % $alignment;
                         $heapZeroInitBinData .= pack ("@".$pads);
                         $heapZeroInitOffset += $pads;
 
                         $attributePointerBinData .= packQuad(
                             $heapZeroInitOffset + $heapZeroInitBaseAddr);
-                        
+
                         $heapZeroInitOffset += (length $heapZeroInitData);
 
                         $heapZeroInitBinData .= $heapZeroInitData;
@@ -2454,14 +2456,14 @@ sub writeTargetingImage {
                             $attributeDef,$attrhash{$attributeId}->{default});
 
                         # Align the data as necessary
-                        my $pads = ($alignment - ($heapPnorInitOffset 
+                        my $pads = ($alignment - ($heapPnorInitOffset
                             % $alignment)) % $alignment;
                         $heapPnorInitBinData .= pack ("@".$pads);
                         $heapPnorInitOffset += $pads;
-       
+
                         $attributePointerBinData .= packQuad(
                             $heapPnorInitOffset + $heapPnorInitBaseAddr);
-                        
+
                         $heapPnorInitOffset += (length $heapPnorInitData);
 
                         $heapPnorInitBinData .= $heapPnorInitData;
@@ -2477,11 +2479,11 @@ sub writeTargetingImage {
                 }
             }
 
-  
+
         } # End attribute loop
-    
+
     } # End target instance loop
-    
+
     if($numAttributes != $attributesWritten)
     {
         fatal("Number of attributes expected, $numAttributes, does not match "
@@ -2489,7 +2491,7 @@ sub writeTargetingImage {
     }
 
     # Build header data
-    
+
     my $headerBinData;
     my $blockSize = 4*1024;
 
@@ -2497,24 +2499,24 @@ sub writeTargetingImage {
     $sectionHoH{ pnorRo }{ offset } = 0;
     $sectionHoH{ pnorRo }{ type   } = 0;
     $sectionHoH{ pnorRo }{ size   } = sizeBlockAligned($offset,$blockSize,1);
-   
-    $sectionHoH{ pnorRw }{ offset } = 
+
+    $sectionHoH{ pnorRw }{ offset } =
         $sectionHoH{pnorRo}{offset} + $sectionHoH{pnorRo}{size};
     $sectionHoH{ pnorRw }{ type   } = 1;
     $sectionHoH{ pnorRw }{ size   } = sizeBlockAligned($rwOffset,$blockSize,1);
-   
-    $sectionHoH{ heapPnorInit }{ offset } = 
+
+    $sectionHoH{ heapPnorInit }{ offset } =
         $sectionHoH{pnorRw}{offset} + $sectionHoH{pnorRw}{size};
     $sectionHoH{ heapPnorInit }{ type   } = 2;
-    $sectionHoH{ heapPnorInit }{ size   } = 
+    $sectionHoH{ heapPnorInit }{ size   } =
         sizeBlockAligned($heapPnorInitOffset,$blockSize,1);
-   
-    $sectionHoH{ heapZeroInit }{ offset } = 
+
+    $sectionHoH{ heapZeroInit }{ offset } =
         $sectionHoH{heapPnorInit}{offset} + $sectionHoH{heapPnorInit}{size};
     $sectionHoH{ heapZeroInit }{ type   } = 3;
-    $sectionHoH{ heapZeroInit }{ size   } = 
+    $sectionHoH{ heapZeroInit }{ size   } =
         sizeBlockAligned($heapZeroInitOffset,$blockSize,1);
-   
+
     my $numSections = keys %sectionHoH;
 
     # Version 1.0 to start with
@@ -2527,11 +2529,11 @@ sub writeTargetingImage {
     $headerBinData .= pack("N",$headerMajorMinorVersion);
     $headerBinData .= pack("N",$headerSize);
     $headerBinData .= pack("N",$vmmSectionOffset);
-    $headerBinData .= packQuad($pnorRoBaseAddress); 
+    $headerBinData .= packQuad($pnorRoBaseAddress);
     $headerBinData .= pack("N",$sizeOfSection);
     $headerBinData .= pack("N",$numSections);
     $headerBinData .= pack("N",$offsetToSections);
-    
+
     foreach my $section ("pnorRo","pnorRw","heapPnorInit","heapZeroInit")
     {
         $headerBinData .= pack("C" , $sectionHoH{$section}{type});
@@ -2540,7 +2542,7 @@ sub writeTargetingImage {
     }
 
     # Serialize PNOR RO section to multiple of 4k page size (pad if necessary)
-    
+
     # First 256 bytes is  RO header (pad if necessary)
     if((length $headerBinData) > $headerSize)
     {
@@ -2548,7 +2550,7 @@ sub writeTargetingImage {
             . "than allocated amount of $headerSize.");
     }
     print $outFile $headerBinData;
-    my $padSize = sizeBlockAligned((length $headerBinData),$headerSize,1) 
+    my $padSize = sizeBlockAligned((length $headerBinData),$headerSize,1)
         - (length $headerBinData);
     print $outFile pack ("@".$padSize);
 
@@ -2560,7 +2562,7 @@ sub writeTargetingImage {
     print $outFile $targetsBinData;
     print $outFile $roAttrBinData;
     print $outFile pack ("@".($sectionHoH{pnorRo}{size} - $offset));
-   
+
     # Serialize PNOR RW section to multiple of 4k page size (pad if necessary)
     print $outFile $rwAttrBinData;
     print $outFile pack("@".($sectionHoH{pnorRw}{size} - $rwOffset));
@@ -2568,9 +2570,9 @@ sub writeTargetingImage {
     # Serialize PNOR initiated heap section to multiple of 4k page size (pad if
     # necessary)
     print $outFile $heapPnorInitBinData;
-    print $outFile pack("@".($sectionHoH{heapPnorInit}{size} 
+    print $outFile pack("@".($sectionHoH{heapPnorInit}{size}
         - $heapPnorInitOffset));
-} 
+}
 
 __END__
 
@@ -2611,7 +2613,7 @@ directory)
 
 =item B<--img-output-dir>=DIRECTORY
 
-Sets the output directory for generated binary files 
+Sets the output directory for generated binary files
 (default is the current directory)
 
 =item B<--img-output-file>=FILE
@@ -2623,7 +2625,7 @@ Sets the file to receive the PNOR targeting image output (default
 
 Indicates the file containing the base virtual address of the attributes
 (default is src/include/usr/vmmconst.h).  Only used when generating the PNOR
-targeting image 
+targeting image
 
 =item B<--verbose>
 

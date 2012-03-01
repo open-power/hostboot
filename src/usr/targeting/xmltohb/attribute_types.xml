@@ -170,6 +170,9 @@
         <name>VENICE</name>
     </enumerator>
     <enumerator>
+        <name>MURANO</name>
+    </enumerator>
+    <enumerator>
         <name>CENTAUR</name>
         <value>48</value>
     </enumerator>
