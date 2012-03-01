@@ -27,10 +27,6 @@ OBJS = spd.o dimmPres.o
 
 SUBDIRS = test.d
 
-DIMM_SPD_DATA = dimmspd.dat
-EXTRA_PARTS = $(addprefix $(IMGDIR)/, $(DIMM_SPD_DATA))
+BINARY_FILES = $(IMGDIR)/dimmspd.dat:70ba15165f78487ed870333891ae983167afd546
 
 include ${ROOTPATH}/config.mk
-
-${EXTRA_PARTS}: ${IMGDIR}/% : ./%
-	cp -f $^ $@

@@ -24,4 +24,6 @@ ROOTPATH = ../../..
 
 SUBDIRS = fapiporeve.d poreve.d test.d
 
+BINARY_FILES = $(IMGDIR)/sbe_pnor.bin:76398b3859c8395b0e73c2df9a76ee28bad185fc
+
 include ${ROOTPATH}/config.mk

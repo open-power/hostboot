@@ -175,6 +175,26 @@ hb_helptext()
         echo "  Prepares a copy of FipS errl tool that is hostboot aware,"
         echo "  places it in simics directory."
         ;;
+    cachesync)
+        echo "  Topic 'cachesync'"
+        echo
+        echo "  Usage:"
+        echo "     hb cachesync"
+        echo
+        echo "  Synchronizes the repository's binary file cache with the"
+        echo "  project repository."
+        ;;
+    cacheadd)
+        echo "  Topic 'cacheadd'"
+        echo
+        echo "  Usage:"
+        echo "     hb cacheadd [--local] <file> \"<msg>\""
+        echo
+        echo "  Inserts a file into the project binary file cache."
+        echo
+        echo "  Options:"
+        echo "     --local: Indicates file should be put only in local cache."
+        ;;
     customrc)
         echo "  Topic 'customrc'"
         echo
@@ -205,7 +225,7 @@ hb_helptext()
         echo
         echo "  Available Commands:"
         echo "      workon, simsetup, prime, startsimics, rsync, objsizes,"
-        echo "      copyright_check, errlparser"
+        echo "      copyright_check, errlparser, cachesync, cacheadd"
         echo
         echo "  Additional Help Topics:"
         echo "      customrc"
@@ -474,10 +494,58 @@ hb_errlparser()
     ln -sf ../obj/x86.nfp/errl/nfp/tool/errl
 }
 
+hb_cachesync()
+{
+    [ -z "${HOSTBOOTROOT}" ] && echo "Missing HOSTBOOTROOT." && exit -1
 
+    rsync -av /gsa/ausgsa/projects/h/hostboot/.binary_cache/ \
+              ${HOSTBOOTROOT}/.git/hb_cache
 
+    failure=0
+    for files in ${HOSTBOOTROOT}/.git/hb_cache/data/*; do
+        echo "`basename $files`  $files" | sha1sum --check >> /dev/null
+        if [ $? -ne 0 ]; then
+            echo "Failed SHA1 verification! $files"
+            failure=-1
+        fi
+    done
 
+    exit $failure
+}
 
+hb_cacheadd()
+{
+    [ -z "${HOSTBOOTROOT}" ] && echo "Missing HOSTBOOTROOT." && exit -1    
+
+    CACHE_PATH=/gsa/ausgsa/projects/h/hostboot/.binary_cache/
+    FILE=$1
+    shift
+
+    if [ $FILE == "--local" ]; then
+        echo "Adding as local copy."
+        CACHE_PATH=${HOSTBOOTROOT}/.git/hb_cache/
+
+        FILE=$1
+        shift
+    fi
+
+    MESSAGE=$*
+
+    [ ! -e "${FILE}" ] && echo "File $FILE does not exist." && exit -1
+    [ -z "${MESSAGE}" ] && echo "No message given." && exit -1
+
+    FILE_BASE=`basename $FILE`
+    SHA1SUM=`sha1sum -b $FILE | sed 's/ .*//'`
+
+    echo $FILE $SHA1SUM
+
+    cp $FILE $CACHE_PATH/data/$SHA1SUM
+    echo $SHA1SUM : `whoami` : `date` : $MESSAGE \
+            >> $CACHE_PATH/files/$FILE_BASE
+
+    echo "Added $FILE_BASE as $SHA1SUM"
+
+}
 
 
 
@@ -513,6 +581,12 @@ copyright_check)
     ;;
 errlparser)
     hb_errlparser $*
+    ;;
+cachesync)
+    hb_cachesync $*
+    ;;
+cacheadd)
+    hb_cacheadd $*
     ;;
 *)
     hb_helptext $*

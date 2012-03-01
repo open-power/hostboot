@@ -97,6 +97,9 @@ GCOV = ppc64-mcp6-gcov
 APYFIPSHDR = apyfipshdr
 APYRUHHDR = apyruhhdr
 
+BINFILE_CACHE_LOCALDIR = ${ROOTPATH}/.git/hb_cache/data/
+BINFILE_CACHE_REMOTEDIR = /gsa/ausgsa/projects/h/hostboot/.binary_cache/data/
+
 BEAMVER = beam-3.5.2
 BEAMPATH = /afs/rch/projects/esw/beam/${BEAMVER}
 BEAMCMD = i686-mcp6-jail ${BEAMPATH}/bin/beam_compile
@@ -233,6 +236,42 @@ ${OBJDIR}/${MODULE}.C: ${TESTS}
 	${TESTGEN} --hostboot -o $@ ${TESTS}
 endif
 
+# Rules for BINARY_FILES directive.
+#
+#    The BINARY_FILES directives are used to include files out of the binary
+#    files cache (see 'hb cacheadd' command).  This cache exists to keep
+#    binary files outside of git, because they take a larger space in the git
+#    database, especially if they change frequently.
+#
+#    The BINARY_FILES variable is a set of <destination>:<hash_value> pairs.
+#    The destination is where the make system should put the file.  The hash
+#    value tells which version of a file to use and it comes from the 
+#    'hb cacheadd' tool when a version of the file is added to the binary
+#    files cache.
+#
+define __BINARY_CACHE_FILE
+_BINARYFILES += $(1)
+
+ifneq "$(wildcard $(addprefix ${BINFILE_CACHE_LOCALDIR},$(2)))" ""
+$(1) : $(addprefix $${BINFILE_CACHE_LOCALDIR},$(2))
+	echo "$(2) $$<" | sha1sum --check
+	cp $$< $$@
+else
+$(1) : $(addprefix $${BINFILE_CACHE_REMOTEDIR},$(2))
+	echo "$(2) $$<" | sha1sum --check
+	cp $$< $$@
+endif
+endef
+ifdef BINARY_FILES
+$(foreach file,$(BINARY_FILES), \
+	  $(eval $(call __BINARY_CACHE_FILE, \
+			    $(firstword $(subst :, ,$(file))), \
+			    $(lastword $(subst :, ,$(file))) \
+	  )) \
+)
+endif
+# end BINARY_FILES rules.
+
 define ELF_template
 $${IMGDIR}/$(1).elf: $$(addprefix $${OBJDIR}/, $$($(1)_OBJECTS)) \
 		    $${ROOTPATH}/src/kernel.ld
@@ -301,8 +340,8 @@ gen_pass:
 	mkdir -p ${GENDIR}
 	${MAKE} GEN_PASS
 
-_GENFILES = $(addprefix ${GENDIR}/, ${GENFILES})
-GEN_PASS: ${_GENFILES} ${SUBDIRS:.d=.gen_pass}
+_GENFILES = $(addprefix ${GENDIR}/, $(GENFILES))
+GEN_PASS: $(_GENFILES) $(_BINARYFILES) ${SUBDIRS:.d=.gen_pass}
 
 GENTARGET = $(addprefix %/, $(1))
 
@@ -350,7 +389,7 @@ clean: cleanud ${SUBDIRS:.d=.clean}
 	       ${IMAGES:.bin=.bin.modinfo} ${IMAGES:.ruhx=.lid} \
 	       ${IMAGES:.ruhx=.lidhdr} ${IMAGES:.bin=_extended.bin} \
 	       ${IMAGE_EXTRAS} ${EXTRA_LIDS_} \
-	       ${EXTRA_OBJS} ${_GENFILES} ${EXTRA_PARTS} ${EXTRA_CLEAN} )
+	       ${EXTRA_OBJS} ${_GENFILES} ${_BINARYFILES} ${EXTRA_PARTS} ${EXTRA_CLEAN} )
 
 cscope: ${SUBDIRS}
 	mkdir -p ${ROOTPATH}/obj/cscope
