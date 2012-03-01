@@ -21,76 +21,68 @@
 //
 //  IBM_PROLOG_END
 
-//
-//  #########################################
-//  THIS WILL BE A GENERATED FILE
-//  #########################################
-//
-
-/*@
- *  @tag isteplist
- *  @docversion     v0.99 (02/10/12)
- *  @istepname      mc_init
- *  @istepnum       12
- *  @istepdesc      Step 12 MC Init
- *
- *  @{
- *      @substepnum     1
- *      @substepname    host_collect_dimm_spd
- *      @substepdesc    : Collect Master dimm SPD
- *          @target_sched   serial
- *  @}
- *
- *  @{
- *      @substepnum     2
- *      @substepname    mss_volt
- *      @substepdesc    : Calc dimm voltage
- *          @target_sched   serial
- *  @}
- *
- *  @{
- *      @substepnum     3
- *      @substepname    mss_freq
- *      @substepdesc    : Calc dimm frequency
- *          @target_sched   serial
- *  @}
- *
- *  @{
- *      @substepnum     4
- *      @substepname    mss_eff_config
- *      @substepdesc    : Determine effective config
- *          @target_sched   serial
- *  @}
- *
- */
-
 #ifndef  __MC_INIT_MC_INIT_H
-#define __MC_INIT_MC_INIT_H
+#define  __MC_INIT_MC_INIT_H
+
 /**
  *  @file mc_init.H
  *
- *  @istepdesc
+ *  Step 12 MC Init
  *
  *  All of the following routines are "named isteps" - they are invoked as
  *  tasks by the @ref IStepDispatcher.
  *
+ *  *****************************************************************
+ *  THIS FILE WAS GENERATED ON 2012-03-01:1032
+ *  *****************************************************************
+ *
  */
 
-
-
+/*@ 
+ * @tag isteplist
+ * @docversion     v0.99 (02/10/12)
+ * @istepname      mc_init
+ * @istepnum       12
+ * @istepdesc      Step 12 MC Init
+ * @{
+ * @substepnum     1
+ * @substepname    host_collect_dimm_spd
+ * @substepdesc    : Collect Master dimm SPD
+ * @target_sched   serial
+ * @}
+ * @{
+ * @substepnum     2
+ * @substepname    mss_volt
+ * @substepdesc    : Calc dimm voltage
+ * @target_sched   serial
+ * @}
+ * @{
+ * @substepnum     3
+ * @substepname    mss_freq
+ * @substepdesc    : Calc dimm frequency
+ * @target_sched   serial
+ * @}
+ * @{
+ * @substepnum     4
+ * @substepname    mss_eff_config
+ * @substepdesc    : Determine effective config
+ * @target_sched   serial
+ * @}
+ */
 /******************************************************************************/
 // Includes
 /******************************************************************************/
 #include    <stdint.h>
 
-
 namespace   MC_INIT
 {
+
+
 
 /**
  *  @brief   host_collect_dimm_spd
  *
- *  12.1 : Collect Master dimm SPD
+ *  12.1 : : Collect Master dimm SPD
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
@@ -98,6 +90,7 @@ namespace   MC_INIT
  *
  */
 void    call_host_collect_dimm_spd( void * io_pArgs );
+
 
 
 /**
@@ -113,10 +106,11 @@ void    call_host_collect_dimm_spd( void * io_pArgs );
 void    call_mss_volt( void * io_pArgs );
 
 
+
 /**
  *  @brief   mss_freq
  *
- *  12.3 : Calc dimm frequency
+ *  12.3 : : Calc dimm frequency
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
@@ -126,10 +120,11 @@ void    call_mss_volt( void * io_pArgs );
 void    call_mss_freq( void * io_pArgs );
 
 
+
 /**
- *  @brief  mss_eff_config
+ *  @brief   mss_eff_config
  *
- *  12.4 : Determine effective config
+ *  12.4 : : Determine effective config
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
@@ -138,6 +133,8 @@ void    call_mss_freq( void * io_pArgs );
  */
 void    call_mss_eff_config( void * io_pArgs );
 
+
 };   // end namespace
 
 #endif
+

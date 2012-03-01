@@ -37,13 +37,19 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/include
 ##  Include sub dirs
 ##  NOTE: add a new EXTRAINCDIR when you add a new HWP
 ##@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/???
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/mc_init/mss_eff_config
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/mc_init/mss_volt
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/mc_init/mss_freq
 
-OBJS =  mc_init.o	\
-        mss_freq.o
-
+OBJS =  mc_init.o			\
+        mss_volt.o 			\
+        mss_freq.o 			\
+        mss_eff_config_sim.o
+	
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 ##@ VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/???
+VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/mc_init/mss_eff_config
+VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/mc_init/mss_volt
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/mc_init/mss_freq
 
 

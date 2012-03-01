@@ -237,7 +237,7 @@ const TaskInfo *IStepDispatcher::findTaskInfo(
                                     reinterpret_cast<void*>(l_pistep->taskfn) );
         // looks good, send it back to the caller
         TRACDCOMP( g_trac_initsvc,
-                   "Found TaskInfo 0x%p 0x%x 0x%x in module %s",
+                   "Found TaskInfo 0x%p %d.%d in module %s",
                    l_pistep,
                    i_IStep,
                    i_SubStep,

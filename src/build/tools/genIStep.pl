@@ -125,12 +125,17 @@
 #
 #   Make up a new directory  src/usr/hwpf/hwp/<@istepname>/<@substepname>
 #   Copy code for new HWP to src/usr/hwpf/hwp/<@istepname>/<@substepname>. using git.
-#       For example, to set up for istep 11.7, proc_gen_framelock :
-#       ## cutNpaste the fetch comand from Gerrit.  See the webpage at
-#       ##  http://gfw160.austin.ibm.com:8080/gerrit/#change,597
-#       git fetch ssh://wenning@gfw160.austin.ibm.com:29418/hwp_review_centaur refs/changes/97/597/3
+#   - Go to the Gerrit page where the HWP is, and select the line to generate
+#       a patch
+#   - run this line and pipe it to a file.
+#   - then run: 
+        git apply --directory=src/usr/hwpf/hwp/@istepname/@substepname <file> 
+#       
+#       Example:  istep 12.2, mss_eff_config:
+#       ## cutNpaste the patch comand from Gerrit and pipe to a file:
+#       git fetch ssh://wenning@gfw160.austin.ibm.com:29418/hwp_review_centaur refs/changes/63/663/3 && git format-patch -1 --stdout FETCH_HEAD > mss_eff_config.patch
 #       ##  then run the git command to put the code in the right directory:
-#       git diff FETCH_HEAD FETCH_HEAD~1 -R | git apply --directory=src/usr/hwpf/hwp/dmi_training/proc_gen_framelock
+#       git apply --directory=src/usr/hwpf/hwp/mc_init/mss_eff_config   mss_eff_config.patch
 #
 #   Add makefile support for the new HWP:
 #   - Scan src/usr/hwpf/hwp/@substepname/makefile for the line:
@@ -354,7 +359,7 @@ void    call_\@substepname( void *io_pArgs )
     //  set up loops to go through all targets (if parallel, spin off a task)
     
     //  print call to hwp and dump physical path of the target(s)
-    TRACFCOMP( ISTEPS_TRACE::ISTEPS_TRACE::g_trac_isteps_traces_trace,
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                     \"=====  \@substepname HWP(? ? ? )\",
                     ?
                     ?
@@ -377,7 +382,7 @@ void    call_\@substepname( void *io_pArgs )
     //  process return code.
     if ( l_fapirc== fapi::FAPI_RC_SUCCESS )
     {
-        TRACFCOMP( ISTEPS_TRACE::ISTEPS_TRACE::g_trac_isteps_traces_trace,
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                 \"SUCCESS :  \@substepname HWP(? ? ? )\" );
     }
     else

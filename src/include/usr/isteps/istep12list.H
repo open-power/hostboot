@@ -24,28 +24,29 @@
 #ifndef __ISTEPS_ISTEP12LIST_H
 #define __ISTEPS_ISTEP12LIST_H
 
-
 /**
- *  @file istep12list.H
+ * @file    istep12list.H
  *
- *  IStep 12        Step 12 MC Init
- *  IPL FLow Doc    v0.99 (02/10/12)
+ *  IStep 12    Step 12 MC Init
+ *  IPL FLow Doc        v0.99 (02/10/12)
  *
- *  12.1    host_collect_dimm_spd   :
- *          : Collect Master dimm SPD
- *  12.2    mss_volt    :
- *          : Calc dimm voltage
- *  12.3    mss_freq    :
- *          : Calc dimm frequency
- *  12.4    mss_eff_config  :
- *          : Determine effective config
+ *  12.1	  host_collect_dimm_spd
+ *  	: Collect Master dimm SPD
+ *  12.2	  mss_volt
+ *  	: Calc dimm voltage
+ *  12.3	  mss_freq
+ *  	: Calc dimm frequency
+ *  12.4	  mss_eff_config
+ *  	: Determine effective config
+ *
+ *  *****************************************************************
+ *  THIS FILE WAS GENERATED ON 2012-03-01:1032
+ *  *****************************************************************
  *
  *  Please see the note in initsvcstructs.H for description of
  *      the ISTEPNAME macro.
  *
  */
-
-
 
 #include    <initservice/initsvcstructs.H>
 #include    <initservice/initsvcreasoncodes.H>
@@ -53,50 +54,55 @@
 //  include prototypes file
 #include    "../../../usr/hwpf/hwp/mc_init/mc_init.H"
 
-
-
 namespace   INITSERVICE
 {
-
-const   TaskInfo    g_istep12[]  =   {
+    const   TaskInfo    g_istep12[]  =   {
+        // NOTE:  IStep indexes start with 0
 
         {
-                ISTEPNAME( 12,00,"host_collect_dimm_spd"),
+                ISTEPNAME(12,0,"host_collect_dimm_spd"),
                 MC_INIT::call_host_collect_dimm_spd,
                 {
                         START_FN,
                         EXT_IMAGE,
                         ISTEP_ERRL_ID,
                 }
-        },
+        },      
+
+
         {
-                ISTEPNAME( 12,01,"mss_volt"),
+                ISTEPNAME(12,1,"mss_volt"),
                 MC_INIT::call_mss_volt,
                 {
                         START_FN,
                         EXT_IMAGE,
                         ISTEP_ERRL_ID,
                 }
-        },
+        },      
+
+
         {
-                ISTEPNAME( 12, 02,"mss_freq"),
+                ISTEPNAME(12,2,"mss_freq"),
                 MC_INIT::call_mss_freq,
                 {
                         START_FN,
                         EXT_IMAGE,
                         ISTEP_ERRL_ID,
                 }
-        },
+        },      
+
+
         {
-                ISTEPNAME( 12, 03, "mss_eff_config"),
+                ISTEPNAME(12,3,"mss_eff_config"),
                 MC_INIT::call_mss_eff_config,
                 {
                         START_FN,
                         EXT_IMAGE,
                         ISTEP_ERRL_ID,
                 }
-        },
+        },      
 
+  
         //  END OF LIST!
 };
 
