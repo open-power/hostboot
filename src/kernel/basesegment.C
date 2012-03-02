@@ -52,13 +52,10 @@ void BaseSegment::_init()
     {
         case CORE_POWER7:
         case CORE_POWER7_PLUS:
+        case CORE_POWER8_MURANO:
         case CORE_POWER8_VENICE:
-            iv_physMemSize = (8*MEGABYTE);
-            break;
-
-        case CORE_POWER8_SALERNO:
         default:
-            iv_physMemSize = (4*MEGABYTE);
+            iv_physMemSize = (8*MEGABYTE);
             break;
     }
     // Base block is L3 cache physical memory size

@@ -205,7 +205,7 @@ void kernel_execute_softpatch()
         {
             case CORE_POWER7:
             case CORE_POWER7_PLUS:
-            case CORE_POWER8_SALERNO: // @TODO: Verify same procedure.
+            case CORE_POWER8_MURANO: // @TODO: Verify same procedure.
             case CORE_POWER8_VENICE:  // @TODO: Verify same procedure.
             case CORE_UNKNOWN:
                 p7_softpatch_denorm_assist(t->fp_context);

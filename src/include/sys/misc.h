@@ -64,8 +64,8 @@ enum ProcessorCoreType
     /** Power7+ */
     CORE_POWER7_PLUS,
 
-    /** Power8 "Salerno" (low-end) core */
-    CORE_POWER8_SALERNO,
+    /** Power8 "Murano" (low-end) core */
+    CORE_POWER8_MURANO,
     /** Power8 "Venice" (high-end) core */
     CORE_POWER8_VENICE,
 

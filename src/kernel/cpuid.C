@@ -40,8 +40,6 @@ namespace CpuID
         //     1 nibble reserved.
         //     1 nibble minor DD.
 
-        // TODO: Salerno PVR support.
-
         switch(l_pvr & 0xFFFF0000)
         {
             case 0x003F0000:
@@ -51,6 +49,9 @@ namespace CpuID
                 return CORE_POWER7_PLUS;
 
             case 0x004B0000:
+                return CORE_POWER8_MURANO;
+
+            case 0x004D0000:
                 return CORE_POWER8_VENICE;
 
             default:

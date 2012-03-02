@@ -39,7 +39,7 @@ namespace KernelMisc
             register uint64_t scratch_address = 0; // Values from PervSpec
             switch(CpuID::getCpuType())
             {
-                case CORE_POWER8_SALERNO:
+                case CORE_POWER8_MURANO:
                 case CORE_POWER8_VENICE:
                     scratch_address = 0x40;
                     break;
@@ -60,8 +60,8 @@ namespace KernelMisc
         // dump whatever is left in g_tracBinary
         MAGIC_INSTRUCTION(MAGIC_CONTINUOUS_TRACE);
 
-        // See magic_instruction_callback() in 
-        // src/build/debug/simics-debug-framework.py 
+        // See magic_instruction_callback() in
+        // src/build/debug/simics-debug-framework.py
         // for exactly how this is handled.
         MAGIC_INSTRUCTION(MAGIC_SHUTDOWN);
 

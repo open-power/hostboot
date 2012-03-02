@@ -33,8 +33,8 @@
 #include <builtins.h>
 #include <sys/sync.h>
 
-// Thread ID support only, Power7 (4 threads).
-#define KERNEL_MAX_SUPPORTED_CPUS (4 * 8 * 4) // Sockets, cores, threads.
+// Thread ID support only, Power8 (8 threads).
+#define KERNEL_MAX_SUPPORTED_CPUS (8 * 16 * 8) // Sockets, cores, threads.
 
 class Scheduler;
 

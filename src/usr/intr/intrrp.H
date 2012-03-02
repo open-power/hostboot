@@ -28,6 +28,7 @@
 #include <limits.h>
 #include <errl/errlentry.H>
 #include <sys/msg.h>
+#include <sys/misc.h>
 #include <intr/interrupt.H>
 #include <map>
 
@@ -50,7 +51,7 @@ namespace INTR
             /**
              * Constructor
              */
-            IntrRp() : 
+            IntrRp() :
                 iv_msgQ(NULL),
                 iv_baseAddr(0),
                 iv_masterCpu(0),
@@ -100,7 +101,7 @@ namespace INTR
 
             /**
              * cpu PIR register
-             * @note TODO P7 bits - thread 2, core 3, chip 2, node 3, 
+             * @note TODO P7 bits - thread 2, core 3, chip 2, node 3,
              *            P8 will be different. Need P8 book IV
              */
             struct PIR_t
@@ -136,7 +137,7 @@ namespace INTR
             errlHndl_t _init();
 
             /**
-             * Message handler 
+             * Message handler
              */
             void msgHandler();
 
@@ -173,7 +174,19 @@ namespace INTR
                 {
                     uint64_t offset = (i_pir.nodeId  * 8) + i_pir.chipId;
                     offset <<= 20;
-                    offset |= static_cast<uint64_t>(i_pir.coreId) << 14;
+                    switch (cpu_core_type())
+                    {
+                        case CORE_POWER7:
+                        case CORE_POWER7_PLUS:
+                            offset |= static_cast<uint64_t>(i_pir.coreId) << 14;
+                            break;
+
+                        case CORE_POWER8_MURANO:
+                        case CORE_POWER8_VENICE:
+                        default:
+                            offset |= static_cast<uint64_t>(i_pir.coreId) << 15;
+                            break;
+                    }
                     offset |= static_cast<uint64_t>(i_pir.threadId) << 12;
                     return offset;
                 }

@@ -48,6 +48,11 @@ sed -i -e's/SETENV GFW_P8_MURANO_L3_MB_SIZE.*/SETENV GFW_P8_MURANO_L3_MB_SIZE 8/
 # Backing build already contains 910431.  Leave this workaround here for future scomdef files
 #sed -i -e's/SETENV GFW_P8_MURANO_MODEL_EC.*/SETENV GFW_P8_MURANO_MODEL_EC 910431/' $sb/simu/configs/P8_MURANO.config
 
+echo "+++ Enable P8 Mambo and 8-threads."
+sed -i -e's/SETENV GFW_P8_VENICE_ENABLE_P8_PROC.*/SETENV GFW_P8_VENICE_ENABLE_P8_PROC yes/' $sb/simu/configs/P8_VENICE.config
+sed -i -e's/SETENV GFW_SIMICS_ENV_THREADS_PER_CORE.*/SETENV GFW_SIMICS_ENV_THREADS_PER_CORE 8/' $sb/simu/configs/P8_VENICE.config
+sed -i -e's/SETENV GFW_P8_MURANO_ENABLE_P8_PROC.*/SETENV GFW_P8_MURANO_ENABLE_P8_PROC yes/' $sb/simu/configs/P8_MURANO.config
+sed -i -e's/SETENV GFW_SIMICS_ENV_THREADS_PER_CORE.*/SETENV GFW_SIMICS_ENV_THREADS_PER_CORE 8/' $sb/simu/configs/P8_MURANO.config
 
 #Note: Leave this here as an example
 #echo "+++ Some message about why you need to do this."

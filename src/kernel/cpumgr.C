@@ -84,7 +84,7 @@ void CpuManager::init()
             break;
 
         case CORE_POWER8_VENICE:
-        case CORE_POWER8_SALERNO:
+        case CORE_POWER8_MURANO:
             threads = 8;
             break;
 

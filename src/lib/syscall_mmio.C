@@ -66,7 +66,7 @@ static uint64_t mmio_scratch_base()
         case CORE_POWER7_PLUS:
             return 0x20;
 
-        case CORE_POWER8_SALERNO:
+        case CORE_POWER8_MURANO:
         case CORE_POWER8_VENICE:
         case CORE_UNKNOWN:
         default:

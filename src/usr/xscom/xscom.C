@@ -215,7 +215,7 @@ uint8_t getMaxChipsPerNode()
     // for both Salerno and Venice
     switch (l_coreType)
     {
-        case CORE_POWER8_SALERNO:
+        case CORE_POWER8_MURANO:
         case CORE_POWER8_VENICE:
         case CORE_UNKNOWN:
         default:

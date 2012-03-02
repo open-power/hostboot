@@ -54,7 +54,7 @@ size_t cpu_thread_count()
             threads = 4;
             break;
 
-        case CORE_POWER8_SALERNO:
+        case CORE_POWER8_MURANO:
         case CORE_POWER8_VENICE:
             threads = 8;
             break;
