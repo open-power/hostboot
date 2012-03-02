@@ -542,7 +542,7 @@ firmware notes: none</description>
 <attribute>
     <id>ATTR_EFF_CEN_SLEW_RATE_DQ_DQS</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
-    <description>Centaur DQ and DQS Slew Rate Used in various locations and is computed in mss_eff_cnfg_termination. Slowest slew rate is “0”, incrementing by one. The lower the number the slower the slew rate the higher the faster. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+    <description>Centaur DQ and DQS Slew Rate Used in various locations and is computed in mss_eff_cnfg_termination. Slowest slew rate is 0, incrementing by one. The lower the number the slower the slew rate the higher the faster. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
 creator: mss_eff_cnfg_termination
 consumer: various
 firmware notes: none</description>
@@ -555,7 +555,7 @@ firmware notes: none</description>
 <attribute>
     <id>ATTR_EFF_CEN_SLEW_RATE_CMD</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
-    <description>Centaur Command Slew Rate Used in various locations and is computed in mss_eff_cnfg_termination. Slowest slew rate is “0”, incrementing by one. The lower the number the slower the slew rate the higher the faster. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+    <description>Centaur Command Slew Rate Used in various locations and is computed in mss_eff_cnfg_termination. Slowest slew rate is 0, incrementing by one. The lower the number the slower the slew rate the higher the faster. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
 creator: mss_eff_cnfg_termination
 consumer: various
 firmware notes: none</description>
@@ -568,7 +568,7 @@ firmware notes: none</description>
 <attribute>
     <id>ATTR_EFF_CEN_SLEW_RATE_CNTL</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
-    <description>Centaur Control Slew Rate Used in various locations and is computed in mss_eff_cnfg_termination. Slowest slew rate is “0”, incrementing by one. The lower the number the slower the slew rate the higher the faster. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+    <description>Centaur Control Slew Rate Used in various locations and is computed in mss_eff_cnfg_termination. Slowest slew rate is 0, incrementing by one. The lower the number the slower the slew rate the higher the faster. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
 creator: mss_eff_cnfg_termination
 consumer: various
 firmware notes: none</description>
