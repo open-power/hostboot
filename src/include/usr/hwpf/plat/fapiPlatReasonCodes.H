@@ -35,7 +35,7 @@ namespace fapi
         // FAPI generated errors
         MOD_FAPI_RC_TO_ERRL                        = 0x02,
 
-        // PLAT generated errros
+        // PLAT generated errors
         MOD_FAPI_GET_CHILD_CHIPLETS                = 0x03,
         MOD_FAPI_GET_PARENT_CHIP                   = 0x04,
         MOD_PLAT_ATTR_SVC_CREATE_ATTR_ACCESS_ERROR = 0x05,

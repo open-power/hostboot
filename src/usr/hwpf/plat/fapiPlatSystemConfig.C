@@ -248,7 +248,7 @@ fapi::ReturnCode fapiGetParentChip(
         TARGETING::targetService().
             getAssociated(l_chipList, l_pChiplet,
                           TARGETING::TargetService::PARENT,
-                          TARGETING::TargetService::IMMEDIATE, &l_predicate);
+                          TARGETING::TargetService::ALL, &l_predicate);
 
         if (l_chipList.size() != 1)
         {
