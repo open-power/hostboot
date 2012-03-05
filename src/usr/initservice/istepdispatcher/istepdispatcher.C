@@ -38,13 +38,18 @@
 #include    <stdio.h>
 #include    <string.h>
 
+
 #include    <kernel/console.H>              // printk status
+//  turn on clearAllBuffers()
+#define     __HIDDEN_TRACEIF_CLEARBUFFER
 
 #include    <vfs/vfs.H>                     //  load_module
 #include    <sys/task.h>                    //  tid_t, task_create, etc
 #include    <sys/time.h>                    //  nanosleep
 #include    <sys/misc.h>                    //  shutdown
+
 #include    <trace/interface.H>             //  trace support
+
 #include    <errl/errlentry.H>              //  errlHndl_t
 #include    <devicefw/userif.H>             //  targeting
 
@@ -519,6 +524,11 @@ void    IStepDispatcher::singleStepISteps( void *  io_ptr )
         {
             switch( l_cmd.hdr.cmdnum )
             {
+                case SPLESS_CLEAR_TRACE_CMD:
+                    TRAC_CLEAR_BUFFERS();
+                    TRACFCOMP( g_trac_initsvc,
+                            "Cleared all trace buffers." );
+                    break;
                 case SPLESS_SINGLE_ISTEP_CMD:
                     mutex_unlock(&iv_poll_mutex);
                     // command 0:  run istep/substep

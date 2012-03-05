@@ -77,22 +77,29 @@ sub getShutDownStatus;
 #   Constants
 #------------------------------------------------------------------------------
 my  $CORE       =   "-c3";
-my  $ISTEP_MODE_ON_SIGNATURE    =   "4057b0074057b007";
-my  $ISTEP_MODE_OFF_SIGNATURE   =   "700b7504700b7504";
+
+
+##  @todo   extract these from splesscommon.H
+use constant    ISTEP_MODE_ON_SIGNATURE     =>  "4057b0074057b007";
+use constant    ISTEP_MODE_OFF_SIGNATURE    =>  "700b7504700b7504";
+
+use constant    SPLESS_SINGLE_ISTEP_CMD     =>  0x00;
+use constant    SPLESS_RESUME_ISTEP_CMD     =>  0x01;
+use constant    SPLESS_CLEAR_TRACE_CMD      =>  0x02;
 
 
 #------------------------------------------------------------------------------
 # Globals
 #------------------------------------------------------------------------------
-my  $opt_debug      =   0;
-my  $opt_istepmode  =   0;
-my  $opt_normalmode =   0;
-my  $opt_command    =   "";
-my  $opt_list       =   0;
-my  $opt_help       =   0;
-my  $opt_resume     =   0;          ## resume istep from break point
+my  $opt_debug          =   0;
+my  $opt_istepmode      =   0;
+my  $opt_normalmode     =   0;
+my  $opt_command        =   "";
+my  $opt_list           =   0;
+my  $opt_help           =   0;
+my  $opt_resume         =   0;          ## resume istep from break point
 my  $opt_clear_trace    =   0;          ##  submit command 01    
-my  $opt_cmdfile    =   0;          ## batchmode, later   
+my  $opt_cmdfile        =   0;          ## batchmode, later   
 my  $opt_setup          =   "";         ##  run Jim's script to start up the model         
 
 my  @inList;
@@ -165,6 +172,8 @@ GetOptions( "help|?"        =>  \$opt_help,
             "debug"         =>  \$opt_debug,
           );  
           
+          
+          
 ##----------------------------------------------------------------------------- 
 ##  check for access to the files we need.
 ##-----------------------------------------------------------------------------
@@ -173,7 +182,6 @@ if ( ! -e "$CSVfile" )  { die "Can't find isteplist file $hbSymsFile\n";   }
 
 ##
 ##  find the istep mode, command, and status registers in the syms file
-##  find the location of clear_trace in HostBoot
 ##
 my $istepmodereg = `grep "SPLESS::g_SPLess_IStepMode_Reg" $hbSymsFile | awk -F"," '{print \$2}'`;
 chomp   $istepmodereg;
@@ -286,7 +294,7 @@ sub main()
     {
         my $result = VBU_Cacheline::CLread( $istepmodereg );
         if ( $opt_debug )   { print STDERR __LINE__, "-- Entry:   IStep Mode Reg = $result";  }
-        if  ( $result =~ /^.*$ISTEP_MODE_OFF_SIGNATURE/ )
+        if  ( $result =~ /^.*ISTEP_MODE_OFF_SIGNATURE/ )
         {
             print STDOUT "Sorry, HostBoot has already started in automatic mode.  Please restart and then try again.\n";
             exit;
@@ -296,13 +304,17 @@ sub main()
         setMode( "istep" );
     }
 
-
     if  ( $opt_normalmode ==  1 )
     {
         print STDOUT  "DISable istepmode\n";
         setMode( "normal" );
     }
 
+    if ( $opt_clear_trace )
+    {
+        print   STDOUT  "Clear Trace Buffers\n";
+        clear_trace();
+    }
 
     ##
     ##  Process other commands
@@ -492,7 +504,7 @@ sub runIStep( $$ )
     printf   STDOUT  "run  %d.%d %s:\n", $istep, $substep, $inList[$istep][$substep];
     
     $byte0   =   0x80 + $g_SeqNum;      ## gobit + seqnum
-    $command =   0x00;
+    $command =   SPLESS_SINGLE_ISTEP_CMD;
     $cmd = sprintf( "0x%2.2x%2.2x%2.2x%2.2x00000000", $byte0, $command, $istep, $substep );
     VBU_Cacheline::CLwrite( $commandreg, $cmd );
     
@@ -721,7 +733,7 @@ sub resume_istep()
     printf STDOUT "resume from breakpoint\n";
 
     $byte0 = 0x80 + $g_SeqNum;      ## gobit + seqnum
-    $command = 0x01;
+    $command = SPLESS_RESUME_ISTEP_CMD;
     $cmd = sprintf( "0x%2.2x%2.2x000000000000", $byte0, $command );
     VBU_Cacheline::CLwrite( $commandreg, $cmd );
 
@@ -756,7 +768,7 @@ sub resume_istep()
                 printf STDOUT "At breakpoint 0x%x\n", $istepStatus;
                 last;
             }
-            else if ( $taskStatus == 12 )  # HB not at a break point
+            elsif ( $taskStatus == 12 )  # HB not at a break point
             {
                 printf STDOUT "resume istep ignored, task status is %d\n", $taskStatus ;
                 last;
@@ -784,6 +796,39 @@ sub resume_istep()
     print STDOUT "-----------------------------------------------------------------\n";
 
 }
+
+sub clear_trace( )
+{
+    my  $byte0, my $command;
+    my  $cmd;
+    my  $result;
+    
+    
+    ##  bump the seqnum
+    $g_SeqNum++;
+    
+    $byte0   =   0x80 + $g_SeqNum;      ## gobit + seqnum
+    $command =   SPLESS_CLEAR_TRACE_CMD;
+    $cmd = sprintf( "0x%2.2x%2.2x%2.2x%2.2x00000000", $byte0, $command, 0, 0 );
+    VBU_Cacheline::CLwrite( $commandreg, $cmd );
+    
+    $result  =   getSyncStatus();
+    
+    ## if result is -1 we have a timeout
+    if ( $result == -1 )
+    {
+        print   "-----------------------------------------------------------------\n";
+    }
+    else
+    {
+        print STDOUT "---------------------------------------------------------------\n";
+        print STDOUT "Trace Buffers Cleared.\n"  ;
+    }
+    
+    print STDOUT "---------------------------------------------------------------\n";
+}   
+
+
 
 __END__
 
