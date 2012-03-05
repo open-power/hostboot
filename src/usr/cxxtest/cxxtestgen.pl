@@ -62,7 +62,7 @@ sub main {
   parseCommandline();
   scanInputFiles();
   writeOutput();
-  
+
 }
 
 #
@@ -655,14 +655,14 @@ sub writeHostBootSuites() {
 
   $suitecount   =   1;                          #   initialize suite count
 
-  
+
   ## $$TODO print   "\tTaskArgs    *pTaskArgs  = (TaskArgs *)ptr;\n";
 
   foreach (@suites) {
     $suite = $_;
     $suitevar   =   "l_ex$suitecount";          #   Make up the suite variable name
     $testcount  =   0;                          #   0 test count between each suite
-  
+
     ## writeInclude(fileName());
 
     if ( $debug )   {
@@ -697,7 +697,7 @@ sub writeHostBootSuites() {
         printf "\t$suitevar->%s();\n\n", testName();
         $testcount++;
     }
-    
+
     ## $$TODO print "\n";
     ## $$TODO print "\tif  ( pTaskArgs )\n";
     ## $$TODO print "\t{\n";
@@ -724,10 +724,10 @@ sub write_start() {
 
   print   "\n";
   ## $$TODO print   "\tusing namespace TASKARGS;\n";
-  
+
   print   "\n";
   print   "trace_desc_t *g_trac_test = NULL;\n";
-##  Use same trace buffer for all unit tests, i.e. "UNIT_TEST"  
+##  Use same trace buffer for all unit tests, i.e. "UNIT_TEST"
 ##  print   "TRAC_INIT(&g_trac_test, \"", suiteName(), "\", 4096);\n";
   print   "TRAC_INIT(&g_trac_test, \"", "UNIT_TEST", "\", 4096);\n";
 
@@ -736,16 +736,13 @@ sub write_start() {
   print   "extern \"C\"\n";
   print   "void _start(void *ptr) ";
   print   "{\n";
-  
-  
+
+
    ## here's where the  magic happens....
   writeHostBootSuites();
 
   print   "\n";
   print "\t__sync_add_and_fetch(&CxxTest::g_ModulesCompleted, 1);\n";
-  print "\n";
-  print "\tbarrier_wait( &CxxTest::g_CxxTestBarrier );\n";
-  
   print "\n";
   print   "\ttask_end();\n";
   print   "}\n";

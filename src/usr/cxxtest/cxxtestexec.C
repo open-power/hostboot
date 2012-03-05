@@ -38,13 +38,6 @@ namespace CxxTest
     extern uint64_t    g_ModulesStarted;
     extern uint64_t    g_ModulesCompleted;
 
-    /**
-     * @var g_CxxTestBarrier    -   barrier for CxxTest modules.
-     *  all test modules will wait on this barrier before returning to the caller
-     *  in cxxtest/cxxtestexec.C .
-     */
-    barrier_t       g_CxxTestBarrier;
-
 }   //  namespace
 
 using namespace INITSERVICE;
@@ -66,6 +59,7 @@ void _start(void *io_pArgs)
 {
     errlHndl_t  l_errl  =   NULL;
     std::vector<const char *> module_list;
+    std::vector<tid_t> tasks;
     tid_t       tidrc           =   0;
     INITSERVICE::TaskArgs *pTaskArgs =
             static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
@@ -81,17 +75,11 @@ void _start(void *io_pArgs)
 
     VFS::find_test_modules(module_list);
 
-    uint64_t totalmodules = module_list.size();
-
-
     //  start executing the CxxTest modules
 
     TRACDCOMP( g_trac_cxxtest, ENTER_MRK "Execute CxxTestExec, totalmodules=%d.",
             totalmodules);
     printkd( "\n Begin CxxTest...\n");
-
-    // set barrier for all the modules being started, plus this module
-    barrier_init( &CxxTest::g_CxxTestBarrier, totalmodules+1 );
 
     __sync_add_and_fetch(&CxxTest::g_ModulesStarted, 1);
 
@@ -120,11 +108,18 @@ void _start(void *io_pArgs)
         tidrc = task_exec( *i, NULL );
         TRACDCOMP( g_trac_cxxtest, "Launched task: %s tidrc=%d",
                    *i, tidrc );
+        tasks.push_back(tidrc);
     }
 
     TRACFCOMP( g_trac_cxxtest,  "Waiting for all tasks to finish....");
+
     //  wait for all the launched tasks to finish
-    barrier_wait( &CxxTest::g_CxxTestBarrier );
+    for (std::vector<tid_t>::iterator t = tasks.begin();
+         t != tasks.end();
+         ++t)
+    {
+        task_wait_tid(*t, NULL, NULL);
+    }
 
     __sync_add_and_fetch(&CxxTest::g_ModulesCompleted, 1);
     TRACFCOMP( g_trac_cxxtest, " ModulesCompleted=%d",
