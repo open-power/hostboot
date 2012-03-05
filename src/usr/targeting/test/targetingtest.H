@@ -66,6 +66,7 @@
 struct MutexTestData_t
 {
     mutex_t* pMutex;         // Pointer to mutex
+    barrier_t* pBarrier;     // Pointer to barrier
     volatile uint32_t* pVar; // Pointer to value protected by mutex
 };
 
@@ -79,9 +80,11 @@ struct MutexTestData_t
 void funcTestMutex(void* i_pData)
 {
     MutexTestData_t* l_pData = static_cast<MutexTestData_t*>(i_pData);
+    barrier_wait(l_pData->pBarrier);
     mutex_lock(l_pData->pMutex);
     *(l_pData->pVar) = 1;
     mutex_unlock(l_pData->pMutex);
+    barrier_wait(l_pData->pBarrier);
     task_end();
 }
 
@@ -1423,7 +1426,9 @@ class TargetingTestSuite: public CxxTest::TestSuite
         // Create a structue holding pointers to the mutex and a protected value
         volatile uint32_t l_var = 0;
         (void)mutex_lock(l_pLock);
-        MutexTestData_t l_mutexTestData = { l_pLock, &l_var };
+        barrier_t l_barrier;
+        (void)barrier_init(&l_barrier, 2);
+        MutexTestData_t l_mutexTestData = { l_pLock, &l_barrier, &l_var };
 
         // Spawn off a function which tries to write the protected value to
         // something unexpected.  If the mutex is working, the for loop will
@@ -1433,6 +1438,7 @@ class TargetingTestSuite: public CxxTest::TestSuite
         // Guarantee the child process runs and blocks on the mutex prior to
         // modifying the protected value.  isync to ensure the processor doesn't
         // speculatively perform the comparison prior to the sleep completing
+        barrier_wait(&l_barrier);
         nanosleep(0,TEN_CTX_SWITCHES_NS); isync();
 
         if(l_var != 0)
@@ -1448,15 +1454,16 @@ class TargetingTestSuite: public CxxTest::TestSuite
         (void)mutex_unlock(l_pLock);
 
         // Guarantee the child process acquires the mutex and modifies the
-        // protected value; isync to ensure the processor doesn't speculatively
-        // perform the comparison prior to the sleep completing
-        nanosleep(0,TEN_CTX_SWITCHES_NS); isync();
+        // protected value.
+        barrier_wait(&l_barrier);
 
         if(l_var != 1)
         {
              TS_FAIL("Protected value must now be 1, was %d instead",l_var);
              break;
         }
+
+        barrier_destroy(&l_barrier);
 
         } while(0);
 
@@ -1480,7 +1487,7 @@ class TargetingTestSuite: public CxxTest::TestSuite
         l_service.masterProcChipTargetHandle( l_pTarget1);
 
         ErrlUserDetailsTarget l_errlUdTarget1( l_pTarget1 );
-        ErrlUserDetailsTarget l_errlUdTarget2( l_pTarget2 ); 
+        ErrlUserDetailsTarget l_errlUdTarget2( l_pTarget2 );
 
         // Create errorlogs to test FFDC capture of a target
         errlHndl_t l_err1, l_err2;
@@ -1490,7 +1497,7 @@ class TargetingTestSuite: public CxxTest::TestSuite
         l_errlUdTarget1.addToLog( l_err1, NULL, 0 );
         l_errlUdTarget2.addToLog( l_err2, NULL, 0 );
         l_errlUdTarget1.addToLog( l_err1, NULL, 0 );
-         
+
         ERRORLOG::errlCommit( l_err1, TARG_COMP_ID );
         ERRORLOG::errlCommit( l_err2, TARG_COMP_ID );
 
