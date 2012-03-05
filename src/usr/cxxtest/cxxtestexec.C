@@ -78,7 +78,7 @@ void _start(void *io_pArgs)
     //  start executing the CxxTest modules
 
     TRACDCOMP( g_trac_cxxtest, ENTER_MRK "Execute CxxTestExec, totalmodules=%d.",
-            totalmodules);
+            module_list.size());
     printkd( "\n Begin CxxTest...\n");
 
     __sync_add_and_fetch(&CxxTest::g_ModulesStarted, 1);
