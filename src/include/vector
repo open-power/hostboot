@@ -505,24 +505,30 @@ namespace std
                 /**
                  * Remove an element from the container
                  * @param[in] position iterator, position of element to remove
+                 * @return new location of the element that followed the last
+                 * element erased, or end() if the operation erased
+                 * the last element in the sequence.
                  * @pre begin() <= position < end()
                  * @post All previously obtained iterators are invalid.
                  */
                 __attribute__ ((always_inline))
-                void erase(iterator position)
+                iterator erase(iterator position)
                 {
-                    erase(position,position+1);
+                    return erase(position,position+1);
                 }
 
                 /**
                  * Remove a slice of elements from the container
                  * @param[in] first iterator, postion of the first element to remove
                  * @param[in] last iterator, postion of the last element + 1 to remove
+                 * @return new location of the element that followed the last
+                 * element erased, or end() if the operation erased
+                 * the last element in the sequence.
                  * @pre begin() <= first,last <= end(), first < last.
                  * @post  All previously obtained iterators are invalid.
                  * @note The element pointed to be last is not deleted.
                  */
-                void erase(iterator first, iterator last) 
+                iterator erase(iterator first, iterator last) 
                 {
                     assert(last >= first);
                     assert(first >= iv_start);
@@ -530,12 +536,13 @@ namespace std
                     assert(last > iv_start);
                     assert(last <= iv_finish);
 
-                    first = copy(last,iv_finish,first);
-                    while(first != iv_finish)
+                    last = copy(last,iv_finish,first);
+                    while(last != iv_finish)
                     {
                         --iv_finish;
                         iv_finish->~T();
                     }
+                    return first;
                 }  
 
 

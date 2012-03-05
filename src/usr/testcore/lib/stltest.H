@@ -261,5 +261,38 @@ class STLTest : public CxxTest::TestSuite
                 }
 
         }
+
+        void testVector()
+        {
+            std::vector<int> v;
+            v.reserve(100);
+
+            for(int i = 0; i < 100; ++i)
+            {
+                v.push_back(i);
+            }
+
+            std::vector<int>::iterator itr = v.begin();
+            std::advance(itr, 50);
+            if(*itr != 50)
+            {
+                TS_FAIL("Vector iterator not pointing at the right value. %d",*itr);
+            }
+
+            itr = v.erase(itr);
+            if(v.size() != 99)
+            {
+                TS_FAIL("Vector is not correct size after erase. %d",v.size());
+            }
+            if(*itr != 51)
+            {
+                TS_FAIL("Vector::erase did not erase the correct element. %d",*itr);
+            }
+            itr = v.erase(itr,v.end());
+            if(itr != v.end())
+            {
+                TS_FAIL("Vector erase to end not at end()");
+            }
+        }
 };
 #endif
