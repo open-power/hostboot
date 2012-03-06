@@ -97,7 +97,16 @@ class STLTest : public CxxTest::TestSuite
             }
 
             mymap2 = mymap;     // map::operator=
+            if (mymap2.size() != mymap.size())
+            {
+                TS_FAIL("map::operator= test failed");
+            }
+
             mymap3.insert(mymap2.begin(),mymap2.end());
+            if (mymap3.size() != mymap2.size())
+            {
+                TS_FAIL("map::insert(itr,itr) test failed");
+            }
 
             mymap.erase(mymap.begin(),mymap.end());     //map::erase(itr,itr)
 
@@ -168,6 +177,34 @@ class STLTest : public CxxTest::TestSuite
                 }
                 --i;
             }
+
+            // Test copy constructor.
+            std::map<V,V> mymap4(mymap);
+
+            if (mymap.size() != mymap4.size())
+            {
+                TS_FAIL("stl::map fail Copy constructor size test.");
+            }
+
+            // Test range constructor.
+            std::map<V,V> mymap5(mymap.begin(), mymap.end());
+
+            if (mymap.size() != mymap5.size())
+            {
+                TS_FAIL("stl::map fail Range constructor size test.");
+            }
+
+            // Test erase by key.
+            mymap5.erase(v2);
+            if (mymap5.end() != mymap5.find(v2))
+            {
+                TS_FAIL("std::map fail Erase by iterator test.");
+            }
+            if (mymap.size() != (mymap5.size() + 1))
+            {
+                TS_FAIL("std::map fail Erase by iterator size test.");
+            }
+
         }
 
 

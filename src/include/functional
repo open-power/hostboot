@@ -35,6 +35,13 @@ namespace std
             typedef R result_type;            ///< type of the return type
         };
 
+    template<typename A, typename R>
+        struct unary_function
+        {
+            typedef A argument_type;
+            typedef R result_type;
+        };
+
     /**
      * less template
      */

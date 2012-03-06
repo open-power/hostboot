@@ -20,8 +20,8 @@
 //  Origin: 30
 //
 //  IBM_PROLOG_END
-#ifndef stl_map
-#define stl_map
+#ifndef __STL_MAP_H
+#define __STL_MAP_H
 
 #include <stddef.h>
 
@@ -29,79 +29,98 @@
 #if !defined( __STDC_LIMIT_MACROS)
 #define __STDC_LIMIT_MACROS
 #endif
+
 #include <stdint.h>
-#include <new>
 #include <utility>
-#include <list>
 #include <functional>
+
+#include <util/impl/stlmap.H>
+
+#ifndef __UTIL_STLMAP_NS
+#define __UTIL_STLMAP_NS ::Util::__Util_StlMap_Impl
+#endif
 
 namespace std
 {
 
     /**
-     * Simple map template class based on list
-     * @Note  value_comp not supported.
+     * STL map template class.
+     * 
+     * @note  value_comp not supported.
+     *
+     * This class inherits from Util::__Util_StlMap_Impl::Map, which hides all
+     * of the implementation details of the map.  Most of the functions here 
+     * are simply a redirection to the Util::...::Map version.
      */
     template <typename Key, typename T, typename Compare = std::less<Key> >
-        class map
+        class map : public __UTIL_STLMAP_NS::Map<Key, T, Compare>
     {
+        private:
+            typedef typename __UTIL_STLMAP_NS::Map<Key, T, Compare> submap;
         public:
 
-            typedef     Key                             key_type;
-            typedef     T                               mapped_type;
-            typedef     pair<const Key, T>              value_type;
-            typedef     T&                              reference;
-            typedef     const T&                        const_reference;
-            typedef     ListIterator_t< value_type >   iterator;
-            typedef     ListConstIterator_t< value_type > const_iterator;
-//            typedef     MapIterator_t<Key,T>            iterator;
-//            typedef     MapConstIterator_t<Key,T>       const_iterator;
-            typedef     size_t                          size_type;
-            typedef     Compare                         key_compare;
-            
+            // Inherit all of the standard typedefs from the Map class.
+#define __STLMAP_INHERIT_TYPEDEF(type) \
+    typedef typename submap::type type
+
+            __STLMAP_INHERIT_TYPEDEF(key_type);
+            __STLMAP_INHERIT_TYPEDEF(data_type);
+            __STLMAP_INHERIT_TYPEDEF(value_type);
+            __STLMAP_INHERIT_TYPEDEF(key_compare);
+            __STLMAP_INHERIT_TYPEDEF(pointer);
+            __STLMAP_INHERIT_TYPEDEF(reference);
+            __STLMAP_INHERIT_TYPEDEF(const_reference);
+            __STLMAP_INHERIT_TYPEDEF(size_type);
+            __STLMAP_INHERIT_TYPEDEF(difference_type);
+            __STLMAP_INHERIT_TYPEDEF(iterator);
+            __STLMAP_INHERIT_TYPEDEF(const_iterator);
+            __STLMAP_INHERIT_TYPEDEF(reverse_iterator);
+            __STLMAP_INHERIT_TYPEDEF(const_reverse_iterator);
+
+#undef __STLMAP_INHERIT_TYPEDEF
 
             /**
              * Default constructor
              */
-            __attribute__ ((always_inline))
-            explicit map(const key_compare& c = Compare()) : iv_comp(c) {}
+            explicit map(const key_compare& c = Compare()) : submap(c) {}
 
             /**
-             * Constructor
+             * Range-Insert Constructor
              * @param[in] first InputIterator
              * @param[in] last InputIterator
+             *
+             * Copies all of the elements from [first, last) into the map.
              */
             template <typename InputIterator> __attribute__ ((always_inline))
-                map( InputIterator first, InputIterator last, const key_compare& c = Compare())
-                    : iv_comp(c)
-                { iv_list(first, last); }
+                map( InputIterator first, InputIterator last, 
+                     const key_compare& c = Compare())
+                    : submap(c)
+                { 
+                    this->insert(first, last);
+                }
 
             /**
              * Copy Constructor
              * @param i_x Source map
              */ 
             __attribute__ ((always_inline))
-            map (const map<Key,T,Compare>& i_x)
-            {
-                iv_list(i_x.iv_list);
-                iv_comp(i_x.iv_comp);
-            }
+            map (const map<Key,T,Compare>& i_x) : submap(i_x) {}
 
             /**
              * Destructor
              */
             __attribute__ ((always_inline))
-            ~map () {}
+            ~map () { }
 
             /**
              * operator=
              * @param[in] x Source map
              */
             __attribute__ ((always_inline))
-            map<Key,T, Compare> & operator= (const map<Key, T, Compare>& x)
+            map<Key,T, Compare>& operator= (const map<Key, T, Compare>& x)
             {
-                iv_list = x.iv_list;
-                iv_comp = x.iv_comp;
+                submap::iv_comp = x.iv_comp;
+                submap::iv_tree = x.iv_tree;
                 return *this;
             }
 
@@ -110,49 +129,88 @@ namespace std
              * @return iterator
              */
             __attribute__ ((always_inline))
-            iterator begin() { return iv_list.begin(); }
+            iterator begin() 
+                    { return submap::begin(); }
 
             /**
              * Get iterator to the beginning element
              * @return const_iterator
              */
             __attribute__ ((always_inline))
-            const_iterator begin() const { return iv_list.begin(); }
+            const_iterator begin() const
+                    { return submap::begin(); }
 
             /**
              * Get iterator to the last element + 1
              * @return iterator
              */
             __attribute__ ((always_inline))
-            iterator end() { return iv_list.end(); }
+            iterator end()
+                    { return submap::end(); }
 
             /**
              * Get iterator to the last element + 1
              * @return const_iterator
              */
             __attribute__ ((always_inline))
-            const_iterator end() const { return iv_list.end(); }
+            const_iterator end() const
+                    { return submap::end(); }
+
+            /**
+             * Get reverse iterator to the last element
+             * @return reverse_iterator
+             */
+            __attribute__ ((always_inline))
+            reverse_iterator rbegin()
+                    { return submap::rbegin(); }
+
+            /**
+             * Get reverse iterator to the last element
+             * @return reverse_const_iterator
+             */
+            __attribute__ ((always_inline))
+            const_reverse_iterator rbegin() const
+                    { return submap::rbegin(); }
+
+            /**
+             * Get reverse iterator to the first element - 1
+             * @return reverse_iterator
+             */
+            __attribute__ ((always_inline))
+            reverse_iterator rend()
+                    { return submap::rend(); }
+
+            /**
+             * Get reverse iterator to the first element - 1
+             * @return reverse_const_iterator
+             */
+            __attribute__ ((always_inline))
+            const_reverse_iterator rend() const
+                    { return submap::rend(); }
 
             /**
              * Query empty container
              * @return true if container is empty otherwise false
              */
             __attribute__ ((always_inline))
-            bool empty() const { return iv_list.empty(); }
+            bool empty() const 
+                    { return submap::empty(); }
 
             /**
              * Query number of elements in the container
              * @return number of elements in the container
              */
             __attribute__ ((always_inline))
-            size_type size() const { return iv_list.size(); }
+            size_type size() const 
+                    { return submap::size(); }
 
             /**
              * Max size of container
              * @return theoretical maximum size based on cpu word size
              */
             __attribute__ ((always_inline))
-            size_type max_size() const { return UINT64_MAX/sizeof(T); }
+            size_type max_size() const 
+                    { return UINT64_MAX/sizeof(T); }
 
             /**
              * operator[]
@@ -160,88 +218,82 @@ namespace std
              * @return a reference to the element whos key is x
              */
             __attribute__ ((always_inline))
-            T& operator[] (const key_type& k)
-            {
-                pair<iterator,bool> result = insert(value_type(k,T()));
-                return (result.first)->second;
-            }
-
+            T& operator[] (const key_type& k) 
+                    { return submap::operator[](k); }
 
             /**
              * Insert element
              * @param[in] x map key/value pair
-             * @return std::pair.first is iterator pointing to new or existing element,
-             *         std::pair.second is true if new element inserted, false if already existing.
+             * @return std::pair.first is iterator pointing to new or existing 
+             *         element, std::pair.second is true if new element 
+             *         inserted, false if already existing.
+             *
              * @note won't add element if it's key already exists in the map
              */
-            pair<iterator,bool> 
-                insert (const value_type& x )
-                {
-                    iterator i = lower_bound(x.first);  // x.first <= i->first
-                    if(i != end() && !key_comp()(x.first,i->first))      // x.first == i->first
-                    {
-                        return make_pair(i,false);
-                    }
-
-                    i = insert(i,x);
-                    return make_pair(i,true);
-                }
-
+            pair<iterator,bool> insert (const value_type& x ) 
+                    { return submap::insert(x); }
 
             /**
              * Insert element
-             * @param[in] hint bidi iterator that is a hint to where to insert the element
+             * @param[in] hint bidi iterator that is a hint to where to insert
+             *                 the element
              * @param[in] x map key/value to insert (copy in)
-             * @return an iterator pointing to either the new or existing element
-             * @note A good hint makes this very efficient.  A bad hint slows it down. An element
-             * will never be inserted out of order. Will never insert if key already exists.
+             *
+             * @return an iterator pointing to either the new or existing 
+             *         element
+             * @note A good hint makes this very efficient.  A bad hint slows
+             *       it down. An element will never be inserted out of order.
+             *       Will never insert if key already exists.
              */
-            iterator 
-                insert ( iterator hint, const value_type& x)
-                {
-                    iterator i = iv_list.begin();
-                    if(hint != i) --hint;
-                    if(hint != end() && key_comp()(hint->first,x.first)) // potential good hint
-                    {
-                        i = hint;
-                    }
-                    while(i != end() && key_comp()(i->first,x.first)) ++i;
-                    // x.first <= i->first
+            iterator insert ( iterator hint, const value_type& x)
+                    { return submap::insert(hint, x); }
 
-                    if(i == end() || key_comp()(x.first, i->first))
-                    {
-                        i = iv_list.insert(i,x);
-                    }
-                    // else was already in the list
-                    return i;
-                }
+            /**
+             * Insert a range of new elements 
+             *
+             * (optimized function for iterator)
+             *
+             * @param[in] first Beginning of the range
+             * @param[in] last End of the range.
+             * @post Elements inserted
+             */
+            void insert( iterator first, iterator last)
+                    { return submap::insert(first, last); }
+
+            /**
+             * Insert a range of new elements 
+             *
+             * (optimized function for const_iterator)
+             *
+             * @param[in] first Beginning of the range
+             * @param[in] last End of the range.
+             * @post Elements inserted
+             */
+            void insert( const_iterator first, const_iterator last)
+                    { return submap::insert(first, last); }
 
             /**
              * Insert a range of new elements
+             *
+             * (generic version for any iterator)
+             *
              * @param[in] first InputIterator
              * @param[in] last InputIterator
              * @post Elements inserted
              */
             template <typename InputIterator>
-                void insert( InputIterator first, InputIterator last )
-                {
-                    while(first != last)
-                    {
-                        insert(*first);
-                        ++first;
-                    }
-                }
+            void insert( InputIterator first, InputIterator last )
+                    { return submap::insert(first, last); }
 
             /**
              * Remove an element from the container
              * @param position iterator
-             * @post element pointed to by iterator is removed from the container
+             * @post element pointed to by iterator is removed from the
+             *       container
              */
             __attribute__ ((always_inline))
             void erase (iterator position )
-            {
-                iv_list.erase(position);
-            }
+                    { submap::erase(position); }
 
             /**
              * Remove an element from the container by key
@@ -249,16 +301,7 @@ namespace std
              * @return Number of elements removed. For map, 0 or 1.
              */
             size_type erase (const key_type& k)
-            {
-                size_type result = 0;
-                iterator i = find(k);
-                if(i != end())
-                {
-                    erase(i);
-                    result = 1;
-                }
-                return result;
-            }
+                    { return submap:: erase(k); }
 
             /**
              * Remove a range of elements from the container
@@ -266,10 +309,8 @@ namespace std
              * @param last iterator of element to remove + 1
              */
             __attribute__ ((always_inline))
-            void erase (iterator first, iterator last)
-            {
-                iv_list.erase(first,last);
-            }
+            void erase (iterator first, iterator last) 
+                    { submap::erase(first,last); }
 
             /**
              * Swap this container with another
@@ -277,23 +318,23 @@ namespace std
              */
             __attribute__ ((always_inline))
             void swap(map<Key,T, Compare>& mp)
-            {
-                iv_list.swap(mp.iv_list);
-                std::swap(iv_comp,mp.iv_comp);               
-            }
+                    { submap::swap(mp); }                
 
             /**
              * clear the map
              */
             __attribute__ ((always_inline))
-            void clear() { iv_list.clear(); }
+            void clear()
+                    { submap::clear();; }
             
             //Observers
             /**
-             * Returns the key comparison object from which the map was constructed
+             * Returns the key comparison object from which the map was 
+             * constructed
              * @return Compare
              */
-            key_compare key_comp() const { return iv_comp; }
+            key_compare key_comp() const
+                    { return submap::key_comp(); }
 
             /**
              * returns a value comparison object, built from the key comparison
@@ -308,17 +349,7 @@ namespace std
              * @return iterator to element or end() if not found
              */
             iterator find (const key_type& k)
-            {
-                iterator i = lower_bound(k);
-                if(i != end())
-                {
-                    if(key_comp()(k, i->first))
-                    {
-                        i = end();
-                    }
-                }
-                return i;
-            }
+                    { return submap::find(k); }
 
             /**
              * Find an element
@@ -326,18 +357,8 @@ namespace std
              * @return const_iterator to element or end() if not found
              */
             __attribute__ ((always_inline))
-            const_iterator find( const key_type& k) const
-            {
-                const_iterator i = lower_bound(k);
-                if(i != end())
-                {
-                    if(key_comp()(k, i->first))
-                    {
-                        i = end();
-                    }
-                }
-                return i;
-            }
+            const_iterator find( const key_type& k) const 
+                    { return submap::find(k); }
 
             /**
              * Number of elements in the container with the given key
@@ -346,11 +367,7 @@ namespace std
              */
             __attribute__ ((always_inline))
             size_type count (const key_type& k) const
-            {
-                if(find(k) != end())
-                    return 1;
-                return 0;
-            }
+                    { return submap::count(k); }
 
             /**
              * Return an iterator pointing to the first element in the
@@ -359,13 +376,7 @@ namespace std
              * @return iterator
              */
             iterator lower_bound (const key_type& k)
-            {
-                iterator i = iv_list.begin();
-                while(i != end() && key_comp()(i->first,k)) ++i;
-                return i;
-            }
-
-
+                    { return submap::lower_bound(k); }
 
             /**
              * Return a const_iterator pointing to the first element in the
@@ -375,11 +386,7 @@ namespace std
              */
             __attribute__ ((always_inline))
             const_iterator lower_bound (const key_type& k) const
-            {
-                const_iterator i = iv_list.begin();
-                while( i != end() && key_comp()(i->first,k)) ++i;
-                return i;
-            }
+                    { return submap::lower_bound(k); }
 
             /**
              * Returns an iterator pointing to the first element in the
@@ -388,11 +395,7 @@ namespace std
              * @return iterator
              */
             iterator upper_bound (const key_type& k)
-            {
-                iterator i = lower_bound(k);  // k <= i->first
-                if(i != end() && !key_comp()(k,i->first)) ++i; // k == i->first
-                return i;
-            }
+                    { return submap::upper_bound(k); }
 
             /**
              * Returns a const_iterator pointing to the first element in the
@@ -402,11 +405,7 @@ namespace std
              */
             __attribute__ ((always_inline))
             const_iterator upper_bound (const key_type& k) const
-            {
-                const_iterator i = lower_bound(); // k <= i->first
-                if(i != end() && !key_comp()(k,i->first)) ++i;     // k == i->first
-                return i;
-            }
+                    { return submap::upper_bound(k); }
 
             /**
              * Return the bounds of a range that includes all the elements in
@@ -416,28 +415,15 @@ namespace std
              * @note map does not allow duplicate keys, so
              * the range returned will contain at most one element
              */
-            pair<iterator,iterator>
-                equal_range( const key_type& k)
-                {
-                    return make_pair(lower_bound(k),upper_bound(k));
-                }
+            pair<iterator,iterator> equal_range( const key_type& k)
+                    { return submap::equal_range(k); }
 
             /**
              * Const verstion of equal_range - see equal_range above
              */
-            pair<const_iterator, const_iterator>
+            pair<const_iterator, const_iterator> 
                 equal_range( const key_type& k) const
-                {
-                    return make_pair(lower_bound(k),upper_bound(k));
-                }
-
-        protected:
-
-            key_compare iv_comp;    //!< Compare function/class
-
-        private:  // data
-
-            list<value_type> iv_list;           //!< The implementation
+                    { return submap::equal_range(k); }
     };
 };
 
