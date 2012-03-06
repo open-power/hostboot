@@ -38,6 +38,8 @@
 #include    <stdio.h>
 #include    <string.h>
 
+#include    <kernel/console.H>              // printk status
+
 #include    <vfs/vfs.H>                     //  load_module
 #include    <sys/task.h>                    //  tid_t, task_create, etc
 #include    <sys/time.h>                    //  nanosleep
@@ -254,23 +256,32 @@ void IStepDispatcher::init( void * io_ptr )
 
     // initialize (and declare) ISTEPS_TRACE here, the rest of the isteps will use it.
     ISTEPS_TRACE::g_trac_isteps_trace = NULL;
+
+    printk( "IstepDispatcher entry.\n" );
+
     TRAC_INIT(&ISTEPS_TRACE::g_trac_isteps_trace, "ISTEPS_TRACE", 2048 );
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ISTEPS_TRACE buffer %p created.",
-                ISTEPS_TRACE::g_trac_isteps_trace );
+    TRACFCOMP( g_trac_initsvc,
+            "IStep Dispatcher is starting %p.", io_ptr );
+
 
     if ( getIStepMode() )
     {
+        printk( "IStep single-step\n" );
+
         TRACFCOMP( g_trac_initsvc,
                    "IStep single-step enable" );
+
         // IStep single-step
         singleStepISteps( io_ptr );
     }
     else
     {
+        printk( "IStep run-all\n" );
+
         TRACFCOMP( g_trac_initsvc,
                    "IStep run all" );
+
         //  Run all the ISteps sequentially
         runAllISteps( io_ptr );
     }   // endelse
@@ -278,6 +289,10 @@ void IStepDispatcher::init( void * io_ptr )
 
     TRACFCOMP( g_trac_initsvc,
                EXIT_MRK "IStepDispatcher finished.");
+
+    printk( "IStepDispatcher exit.\n" );
+
+    //  return to _start()
 }
 
 
@@ -379,7 +394,7 @@ void    IStepDispatcher::processSingleIStepCmd(
         writeSts( iv_sts );
 
         // handleBreakPoint will need sequence number
-        iv_sts.hdr.seqnum = l_cmd.hdr.seqnum; 
+        iv_sts.hdr.seqnum = l_cmd.hdr.seqnum;
 
 
         /**
@@ -852,7 +867,7 @@ void IStepDispatcher::handleBreakPoint( uint32_t i_info )
 
     iv_sts = l_sts;
     writeSts( iv_sts );
-    
+
     // Poll for cmd to resume
     while(1)
     {

@@ -30,7 +30,8 @@
  */
 #define __HIDDEN_SYSCALL_SHUTDOWN
 
-#include    <kernel/console.H>
+#include    <kernel/console.H>                  // printk status
+
 #include    <sys/vfs.h>
 #include    <vfs/vfs.H>
 #include    <sys/task.h>
@@ -251,8 +252,10 @@ void InitService::init( void *io_ptr )
     TaskArgs::TaskArgs  l_args;
     uint64_t            l_childrc   =   0;
 
+    printk( "InitService entry.\n" );
+
     TRACFCOMP( g_trac_initsvc,
-               ENTER_MRK "Initialization Service is starting." );
+               ENTER_MRK "Initialization Service is starting %p.", io_ptr );
 
     //  loop through the task list and start up any tasks necessary
     for ( l_task=0;
@@ -351,6 +354,8 @@ void InitService::init( void *io_ptr )
 
     TRACFCOMP( g_trac_initsvc,
             EXIT_MRK "Initilization Service finished.");
+
+    printk( "InitService exit.\n" );
 
     // return to _start()
 }

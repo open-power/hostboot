@@ -61,8 +61,6 @@ void _start(void *ptr)
     TRACFCOMP( g_trac_initsvc,
             EXIT_MRK "return from Initialization Service module." );
 
-    printk( "Initialization Service terminated.\n" );
-
     task_end();
 }
 

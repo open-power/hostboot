@@ -29,7 +29,8 @@
  *
  */
 
-#include    <kernel/console.H>
+#include    <kernel/console.H>              //  printk status
+
 #include    <vfs/vfs.H>
 #include    <sys/task.h>
 #include    <sys/sync.h>
@@ -68,8 +69,12 @@ void ExtInitSvc::init( void *io_ptr )
     INITSERVICE::TaskArgs *pTaskArgs =
             static_cast<INITSERVICE::TaskArgs *>( io_ptr );
 
+    printk( "ExtInitSvc entry.\n" );
+
     TRACFCOMP( g_trac_initsvc,
-            "Extended Initialization Service is starting." );
+            "Extended Initialization Service is starting %p.", io_ptr );
+
+
 
     //  ----------------------------------------------------------------
     //  loop through the task list and start up any tasks necessary
@@ -196,6 +201,8 @@ void ExtInitSvc::init( void *io_ptr )
          *
          */
 
+        printk( "start CxxTest.\n" );
+
         //  add a do-while loop so there is only one return at the bottom....
         do
         {
@@ -279,12 +286,15 @@ void ExtInitSvc::init( void *io_ptr )
 
         }   while(0);   //  end do-while
 
+        printk( "finish CxxTest.\n" );
+
     }
 
 
     //  =====================================================================
     //  -----   Shutdown all CPUs   -----------------------------------------
     //  =====================================================================
+
     TRACFCOMP( g_trac_initsvc,
             EXIT_MRK "CxxTests finished.");
 
@@ -298,8 +308,10 @@ void ExtInitSvc::init( void *io_ptr )
     //Tell initservice to perform shutdown sequence
     InitService::getTheInstance().doShutdown(l_shutdownStatus);
 
-    // return to _start(), which may end the task or die.
-    return;
+    printk( "ExtInitSvc exit.\n" );
+
+
+    // return to _start()
 }
 
 
