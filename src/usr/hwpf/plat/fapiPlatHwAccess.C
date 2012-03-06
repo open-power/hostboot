@@ -57,6 +57,8 @@
 #include <devicefw/userif.H>
 #include <ecmdDataBufferBase.H>
 #include <fapiPlatReasonCodes.H>
+#include <targeting/predicates/predicatectm.H>
+#include <targeting/targetservice.H>
 
 extern "C"
 {
@@ -89,7 +91,6 @@ fapi::ReturnCode platGetScom(const fapi::Target& i_target,
     if (l_err)
     {
         // Add the error log pointer as data to the ReturnCode
-        FAPI_ERR("platGetScom: deviceRead() returns error");
         l_rc.setPlatError(reinterpret_cast<void *> (l_err));
     }
     else
@@ -138,7 +139,6 @@ fapi::ReturnCode platPutScom(const fapi::Target& i_target,
     if (l_err)
     {
         // Add the error log pointer as data to the ReturnCode
-        FAPI_ERR("platPutScom: deviceWrite() returns error");
         l_rc.setPlatError(reinterpret_cast<void *> (l_err));
     }
 
@@ -174,7 +174,6 @@ fapi::ReturnCode platPutScomUnderMask(const fapi::Target& i_target,
         if (l_err)
         {
             // Add the error log pointer as data to the ReturnCode
-            FAPI_ERR("platPutScomUnderMask: deviceRead() returns error");
             l_rc.setPlatError(reinterpret_cast<void *> (l_err));
             break;
         }
@@ -199,7 +198,6 @@ fapi::ReturnCode platPutScomUnderMask(const fapi::Target& i_target,
         if (l_err)
         {
             // Add the error log pointer as data to the ReturnCode
-            FAPI_ERR("platPutScomUnderMask: deviceWrite() returns error");
             l_rc.setPlatError(reinterpret_cast<void *> (l_err));
             break;
         }
@@ -250,6 +248,63 @@ static errlHndl_t verifyCfamAccessTarget(const fapi::Target& i_target)
     return l_err;
 }
 
+/****************************************************************************
+ *  @brief Get chip target for cfam access
+ *         HW procedures may pass in non-chip targets (such as MBA or
+ *         MBS as a target), so we need to find the parent chip in order
+ *         to pass it to the device driver.
+ *
+ *  @param[in]  i_target        The target as passed in by the procedure.
+ *
+ *  @return errlHndl_t if can't find parent, NULL otherwise.
+ ****************************************************************************/
+static errlHndl_t getCfamChipTarget(const TARGETING::Target* i_target,
+                                    TARGETING::Target*& o_chipTarget)
+{
+    errlHndl_t l_err = NULL;
+
+    // Default to input target
+    o_chipTarget = const_cast<TARGETING::Target*>(i_target);
+
+    // Check to see if this is a chiplet
+    if (i_target->getAttr<TARGETING::ATTR_CLASS>() == TARGETING::CLASS_UNIT)
+    {
+        // Look for its chip parent
+        TARGETING::PredicateCTM l_chipClass(TARGETING::CLASS_CHIP);
+        TARGETING::TargetHandleList l_list;
+        TARGETING::TargetService& l_targetService = TARGETING::targetService();
+        (void) l_targetService.getAssociated(
+                l_list,
+                i_target,
+                TARGETING::TargetService::PARENT,
+                TARGETING::TargetService::ALL,
+                &l_chipClass);
+
+        if ( l_list.size() == 1 )
+        {
+            o_chipTarget = l_list[0];
+        }
+        else
+        {
+            // Something is wrong here, can't have more than one parent chip
+            FAPI_ERR("getCfamChipTarget: Invalid number of parent chip for this target chiplet - # parent chips %d", l_list.size());
+            /*@
+             * @errortype
+             * @moduleid     MOD_GET_CFAM_CHIP_TARGET
+             * @reasoncode   RC_INVALID_NUM_PARENT_CHIP
+             * @userdata1    Number of parent chip found
+             * @devdesc      Invalid num of parent chip found for input CFAM target chiplet
+             */
+            l_err = new ERRORLOG::ErrlEntry(
+                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                        fapi::MOD_GET_CFAM_CHIP_TARGET,
+                        fapi::RC_INVALID_NUM_PARENT_CHIP,
+                        l_list.size());
+        }
+    }
+    return l_err;
+}
+
 //******************************************************************************
 // platGetCfamRegister function
 //******************************************************************************
@@ -269,14 +324,23 @@ fapi::ReturnCode platGetCfamRegister(const fapi::Target& i_target,
         if (l_err)
         {
             // Add the error log pointer as data to the ReturnCode
-             FAPI_ERR("platGetCfamRegister: verifyCfamAccessTarget() returns error");
-             l_rc.setPlatError(reinterpret_cast<void *> (l_err));
-             break;
+            l_rc.setPlatError(reinterpret_cast<void *> (l_err));
+            break;
         }
 
         // Extract the component pointer
         TARGETING::Target* l_target =
                 reinterpret_cast<TARGETING::Target*>(i_target.get());
+
+        // Get the chip target if l_target is not a chip
+        TARGETING::Target* l_myChipTarget = NULL;
+        l_err = getCfamChipTarget(l_target, l_myChipTarget);
+        if (l_err)
+        {
+            // Add the error log pointer as data to the ReturnCode
+            l_rc.setPlatError(reinterpret_cast<void *> (l_err));
+            break;
+        }
 
         // Perform CFAM read via FSI
         // Address needs to be multiply by 4 because register addresses are word
@@ -285,14 +349,13 @@ fapi::ReturnCode platGetCfamRegister(const fapi::Target& i_target,
         uint64_t l_addr = ((i_address & 0x003F) << 2) | (i_address & 0xFF00);
         uint32_t l_data = 0;
         size_t l_size = sizeof(uint32_t);
-        l_err = deviceRead(l_target,
+        l_err = deviceRead(l_myChipTarget,
                            &l_data,
                            l_size,
                            DEVICE_FSI_ADDRESS(l_addr));
         if (l_err)
         {
             // Add the error log pointer as data to the ReturnCode
-            FAPI_ERR("platGetCfamRegister: deviceRead() returns error");
             l_rc.setPlatError(reinterpret_cast<void *> (l_err));
             break;
         }
@@ -334,14 +397,23 @@ fapi::ReturnCode platPutCfamRegister(const fapi::Target& i_target,
         if (l_err)
         {
             // Add the error log pointer as data to the ReturnCode
-             FAPI_ERR("platPutCfamRegister: verifyCfamAccessTarget() returns error");
-             l_rc.setPlatError(reinterpret_cast<void *> (l_err));
-             break;
+            l_rc.setPlatError(reinterpret_cast<void *> (l_err));
+            break;
         }
 
         // Extract the component pointer
         TARGETING::Target* l_target =
                 reinterpret_cast<TARGETING::Target*>(i_target.get());
+
+        TARGETING::Target* l_myChipTarget = NULL;
+        // Get the chip target if l_target is not a chip
+        l_err = getCfamChipTarget(l_target, l_myChipTarget);
+        if (l_err)
+        {
+            // Add the error log pointer as data to the ReturnCode
+            l_rc.setPlatError(reinterpret_cast<void *> (l_err));
+            break;
+        }
 
         // Perform CFAM write via FSI
         // Address needs to be multiply by 4 because register addresses are word
@@ -350,14 +422,13 @@ fapi::ReturnCode platPutCfamRegister(const fapi::Target& i_target,
         uint64_t l_addr = ((i_address & 0x003F) << 2) | (i_address & 0xFF00);
         uint32_t l_data = i_data.getWord(0);
         size_t l_size = sizeof(uint32_t);
-        l_err = deviceWrite(l_target,
+        l_err = deviceWrite(l_myChipTarget,
                             &l_data,
                             l_size,
                             DEVICE_FSI_ADDRESS(l_addr));
         if (l_err)
         {
             // Add the error log pointer as data to the ReturnCode
-            FAPI_ERR("platPutCfamRegister: deviceWrite() returns error");
             l_rc.setPlatError(reinterpret_cast<void *> (l_err));
             break;
         }
@@ -367,7 +438,6 @@ fapi::ReturnCode platPutCfamRegister(const fapi::Target& i_target,
     FAPI_DBG(EXIT_MRK "platPutCfamRegister");
     return l_rc;
 }
-
 
 /****************************************************************************
  * @brief   Modifying input 32-bit data with the specified mode
@@ -425,14 +495,23 @@ fapi::ReturnCode platModifyCfamRegister(const fapi::Target& i_target,
         if (l_err)
         {
             // Add the error log pointer as data to the ReturnCode
-             FAPI_ERR("platModifyCfamRegister: verifyCfamAccessTarget() returns error");
-             l_rc.setPlatError(reinterpret_cast<void *> (l_err));
-             break;
+            l_rc.setPlatError(reinterpret_cast<void *> (l_err));
+            break;
         }
 
         // Extract the component pointer
         TARGETING::Target* l_target =
                 reinterpret_cast<TARGETING::Target*>(i_target.get());
+
+        // Get the chip target if l_target is not a chip
+        TARGETING::Target* l_myChipTarget = NULL;
+        l_err = getCfamChipTarget(l_target, l_myChipTarget);
+        if (l_err)
+        {
+            // Add the error log pointer as data to the ReturnCode
+            l_rc.setPlatError(reinterpret_cast<void *> (l_err));
+            break;
+        }
 
         // Read current value
         // Address needs to be multiply by 4 because register addresses are word
@@ -441,14 +520,13 @@ fapi::ReturnCode platModifyCfamRegister(const fapi::Target& i_target,
         uint64_t l_addr = ((i_address & 0x003F) << 2) | (i_address & 0xFF00);
         uint32_t l_data = 0;
         size_t l_size = sizeof(uint32_t);
-        l_err = deviceRead(l_target,
+        l_err = deviceRead(l_myChipTarget,
                            &l_data,
                            l_size,
                            DEVICE_FSI_ADDRESS(l_addr));
         if (l_err)
         {
             // Add the error log pointer as data to the ReturnCode
-            FAPI_ERR("platModifyCfamRegister: deviceRead() returns error");
             l_rc.setPlatError(reinterpret_cast<void *> (l_err));
             break;
         }
@@ -464,7 +542,6 @@ fapi::ReturnCode platModifyCfamRegister(const fapi::Target& i_target,
         if (l_err)
         {
             // Add the error log pointer as data to the ReturnCode
-            FAPI_ERR("platModifyCfamRegister: deviceWrite() returns error");
             l_rc.setPlatError(reinterpret_cast<void *> (l_err));
             break;
         }

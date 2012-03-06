@@ -61,6 +61,11 @@ fapi::ReturnCode fapiGetScom(const fapi::Target& i_target,
     // call the platform implementation
     l_rc = platGetScom( i_target, i_address, o_data );
 
+    if (l_rc)
+    {
+        FAPI_ERR("fapiGetScom failed - Target %s, Addr %.16llX", i_target.toEcmdString(), i_address);
+    }
+
     if( l_traceit )
     {
         FAPI_SCAN( "TRACE : GETSCOM     : %s : %.16llX %.16llX", 
@@ -83,8 +88,13 @@ fapi::ReturnCode fapiPutScom(const fapi::Target& i_target,
     fapi::ReturnCode l_rc;
     bool l_traceit = platIsScanTraceEnabled(); 
 
-    // call the platform implemenation  
+    // call the platform implementation
     l_rc = platPutScom( i_target, i_address, i_data );
+
+    if (l_rc)
+    {
+        FAPI_ERR("fapiPutScom failed - Target %s, Addr %.16llX", i_target.toEcmdString(), i_address);
+    }
 
     if( l_traceit )
     {
@@ -111,6 +121,11 @@ fapi::ReturnCode fapiPutScomUnderMask(const fapi::Target& i_target,
     // call the platform implementation
     l_rc = platPutScomUnderMask( i_target, i_address, i_data, i_mask );
 
+    if (l_rc)
+    {
+        FAPI_ERR("fapiPutScomUnderMask failed - Target %s, Addr %.16llX", i_target.toEcmdString(), i_address);
+    }
+
     if( l_traceit )
     {
         FAPI_SCAN( "TRACE : PUTSCOMMASK : %s : %.16llX %.16llX %.16llX",
@@ -136,6 +151,11 @@ fapi::ReturnCode fapiGetCfamRegister(const fapi::Target& i_target,
     // call the platform implementation
     l_rc = platGetCfamRegister( i_target, i_address, o_data );
 
+    if (l_rc)
+    {
+        FAPI_ERR("fapiGetCfamRegister failed - Target %s, Addr %.8X", i_target.toEcmdString(), i_address);
+    }
+
     if( l_traceit )
     {
         FAPI_SCAN( "TRACE : GETCFAMREG  : %s : %.8X %.8X",
@@ -159,6 +179,11 @@ fapi::ReturnCode fapiPutCfamRegister(const fapi::Target& i_target,
 
     // call the platform implementation
     l_rc = platPutCfamRegister( i_target, i_address, i_data );
+
+    if (l_rc)
+    {
+        FAPI_ERR("platPutCfamRegister failed - Target %s, Addr %.8X", i_target.toEcmdString(), i_address);
+    }
 
     if( l_traceit )
     {
@@ -184,6 +209,11 @@ fapi::ReturnCode fapiModifyCfamRegister(const fapi::Target& i_target,
 
     // call the platform implementation
     l_rc = platModifyCfamRegister( i_target, i_address, i_data, i_modifyMode );
+
+    if (l_rc)
+    {
+        FAPI_ERR("platModifyCfamRegister failed - Target %s, Addr %.8X", i_target.toEcmdString(), i_address);
+    }
 
     if( l_traceit )
     {
