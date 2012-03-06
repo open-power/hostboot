@@ -177,7 +177,8 @@ def getStatus():
 ##  default is to check the readybit, in rare cases we want to skip this.
 def getSyncStatus( ) :
     # set # of retries
-    count = 100
+    ## @todo revisit 
+    count = 1000
     
     ##  get response.  sendCmd() should have bumped g_SeqNum, so we will sit
     ##  here for a reasonable amount of time waiting for the correct sequence
@@ -215,7 +216,8 @@ def setMode( cmd ) :
     IStepModeStr    = "phys_mem.write 0x%8.8x 0x4057b007_4057b007 8"%(g_SPLess_IStepMode_Reg)
     NormalModeStr   = "phys_mem.write 0x%8.8x 0x700b7504_700b7504 8"%(g_SPLess_IStepMode_Reg)    
     
-    count   =   50
+    ##  @todo   revisit
+    count   =   1000
     
     if ( cmd == "istep" ) :
         (result, out)  =   quiet_run_command( IStepModeStr )

@@ -440,7 +440,8 @@ sub getShutDownStatus()
 sub getSyncStatus( )
 {
     # set # of retries
-    my  $count  =   100;
+    ## @todo revisit
+    my  $count  =   1000;
     my  $result =   0; 
     my  $seqnum =   0;  
     
@@ -644,6 +645,7 @@ sub parse_command( $ )
 sub setMode( $ )
 {
     my  ( $cmd )    =   @_;
+    
     my  $count      =   0;
     my  $expected   =   0;
     my  $readybit   =   0;
@@ -675,7 +677,8 @@ sub setMode( $ )
  
 
     ##  Loop, advancing clock, and wait for readybit
-    $count  =   30;
+    ##  @todo   revisit
+    $count  =   1000;
     while(1)
     {
         ##  advance HostBoot code by a certain # of cycles, then check the 
