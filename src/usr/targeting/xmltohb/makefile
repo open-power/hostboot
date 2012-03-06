@@ -32,6 +32,7 @@ XMLTOHB_HEADER_TARGETS =    \
     fapiplatattrmacros.H
 
 XMLTOHB_SOURCE_TARGETS =    \
+    attributedump.C         \
     attributestrings.C  
 
 XMLTOHB_SYSTEM_BINARIES = \

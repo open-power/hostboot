@@ -2943,6 +2943,7 @@
         </enumeration>
     </simpleType>
     <persistency>non-volatile</persistency>
+    <hasStringConversion/>
     <readable/>
     <hwpfToHbAttrMap>
         <id>ATTR_PROC_EPS_TABLE_TYPE</id>
@@ -2978,6 +2979,7 @@
         </enumeration>
     </simpleType>
     <persistency>non-volatile</persistency>
+    <hasStringConversion/>
     <readable/>
     <hwpfToHbAttrMap>
         <id>ATTR_PROC_FABRIC_PUMP_MODE</id>
@@ -3011,6 +3013,7 @@
         </enumeration>
     </simpleType>
     <persistency>non-volatile</persistency>
+    <hasStringConversion/>
     <readable/>
     <hwpfToHbAttrMap>
         <id>ATTR_PROC_X_BUS_WIDTH</id>

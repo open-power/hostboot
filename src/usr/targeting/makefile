@@ -49,7 +49,10 @@ OTHER_OBJS = \
      util.o
 
 OBJS = ${TARGET_OBJS} ${PREDICATES_OBJS} ${ITERATORS_OBJS} ${ATTR_RP_OBJS} ${OTHER_OBJS}
+OBJS += attributestrings.o attributedump.o
 
 SUBDIRS = test.d xmltohb.d
 
 include ${ROOTPATH}/config.mk
+
+vpath %.C ${GENDIR}

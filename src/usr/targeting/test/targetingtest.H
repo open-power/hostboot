@@ -59,7 +59,14 @@
 #include <targeting/targreasoncodes.H>
 #include <errl/errludtarget.H>
 #include "trace.H"
-#include <kernel/console.H> //@fixme
+
+trace_desc_t* g_trac_targeting = NULL;
+TRAC_INIT(&g_trac_targeting, "TARG", 4096);
+
+
+namespace TARGETING {
+extern void dumpAllAttributes(trace_desc_t*);
+};
 
 /**
  *  @brief Struct to hold pointers to a mutex / protected value
@@ -1755,6 +1762,12 @@ class TargetingTestSuite: public CxxTest::TestSuite
         TS_TRACE(EXIT_MRK "testStringAttributes" );
     }
 
+
+    void testDump()
+    {
+        //fixme-remove this completely when RTC:38386 is done
+        //TARGETING::dumpAllAttributes(g_trac_targeting);
+    }
 };
 
 #endif // End __TESTTARGETING_H
