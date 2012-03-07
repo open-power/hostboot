@@ -101,104 +101,97 @@ class SPDTest: public CxxTest::TestSuite
                     break;
                 }
 
-                for( uint32_t dimm = 0; dimm < dimmList.size(); dimm++ )
-                {
-                    theTarget = dimmList[dimm];
-                    uint8_t * theData = NULL;
-                    size_t theSize = 0;
-                    uint32_t entry = 0x0;
+                // Operate on first DIMM.
+                theTarget = dimmList[0];
+                uint8_t * theData = NULL;
+                size_t theSize = 0;
+                uint32_t entry = 0x0;
 
-                    // Get the DDR revision
-                    uint8_t memType = 0x0;
-                    size_t memTypeSize = 0x1;
+                // Get the DDR revision
+                uint8_t memType = 0x0;
+                size_t memTypeSize = 0x1;
+                err = deviceRead( theTarget,
+                                  &memType,
+                                  memTypeSize,
+                                  DEVICE_SPD_ADDRESS( SPD::BASIC_MEMORY_TYPE ) );
+
+                if( err )
+                {
+                    fails++;
+                    TS_FAIL( "testSpdRead- Failure reading Basic memory type!" );
+                    errlCommit( err,
+                                SPD_COMP_ID );
+                    continue;
+                }
+
+                for( uint64_t keyword = SPD::SPD_FIRST_KEYWORD;
+                     keyword < SPD::SPD_LAST_KEYWORD; keyword++ )
+                {
+                    cmds++;
+                    if( NULL != theData )
+                    {
+                        free( theData );
+                        theData = NULL;
+                    }
+
+                    // Get the required size of the buffer
+                    theSize = 0;
+                    if( SPD_DDR3 == memType )
+                    {
+                        for( entry = 0;
+                             entry < (sizeof(ddr3Data)/sizeof(ddr3Data[0]));
+                             entry++ )
+                        {
+                            if( keyword == ddr3Data[entry].keyword )
+                            {
+                                theSize = ddr3Data[entry].length;
+                                break;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // Nothing else supported yet!
+                        // Not really a fail, just not supported
+                        cmds--;
+                        continue;
+                    }
+
+                    if( 0x0 == theSize )
+                    {
+                        fails++;
+                        TS_FAIL( "testSpdRead - Keyword (0x%04x) size = 0x0",
+                                 entry );
+                        continue;
+                    }
+
+                    // Allocate the buffer
+                    theData = static_cast<uint8_t*>(malloc( theSize ));
+
                     err = deviceRead( theTarget,
-                                      &memType,
-                                      memTypeSize,
-                                      DEVICE_SPD_ADDRESS( SPD::BASIC_MEMORY_TYPE ) );
+                                      theData,
+                                      theSize,
+                                      DEVICE_SPD_ADDRESS( keyword ) );
 
                     if( err )
                     {
                         fails++;
-                        TS_FAIL( "testSpdRead- Failure reading Basic memory type!" );
+                        TS_FAIL( "testSpdRead - Failure on keyword: %04x",
+                                 keyword );
                         errlCommit( err,
                                     SPD_COMP_ID );
                         continue;
                     }
 
-                    for( uint64_t keyword = SPD::SPD_FIRST_KEYWORD;
-                         keyword < SPD::SPD_LAST_KEYWORD; keyword++ )
+                    // Read was successful, print out first 2 bytes of data read
+                    TRACFCOMP( g_trac_spd,
+                               "testSpdRead - kwd: 0x%04x, val: %02x%02x, size: %d",
+                               keyword, theData[0], theData[1], theSize );
+
+                    if( NULL != theData )
                     {
-                        cmds++;
-                        if( NULL != theData )
-                        {
-                            free( theData );
-                            theData = NULL;
-                        }
-
-                        // Get the required size of the buffer
-                        theSize = 0;
-                        if( SPD_DDR3 == memType )
-                        {
-                            for( entry = 0;
-                                 entry < (sizeof(ddr3Data)/sizeof(ddr3Data[0]));
-                                 entry++ )
-                            {
-                                if( keyword == ddr3Data[entry].keyword )
-                                {
-                                    theSize = ddr3Data[entry].length;
-                                    break;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            // Nothing else supported yet!
-                            // Not really a fail, just not supported
-                            cmds--;
-                            continue;
-                        }
-
-                        if( 0x0 == theSize )
-                        {
-                            fails++;
-                            TS_FAIL( "testSpdRead - Keyword (0x%04x) size = 0x0",
-                                     entry );
-                            continue;
-                        }
-
-                        // Allocate the buffer
-                        theData = static_cast<uint8_t*>(malloc( theSize ));
-
-                        err = deviceRead( theTarget,
-                                          theData,
-                                          theSize,
-                                          DEVICE_SPD_ADDRESS( keyword ) );
-
-                        if( err )
-                        {
-                            fails++;
-                            TS_FAIL( "testSpdRead - Failure on keyword: %04x",
-                                     keyword );
-                            errlCommit( err,
-                                        SPD_COMP_ID );
-                            continue;
-                        }
-
-                        // Read was successful, print out first 2 bytes of data read
-                        TRACFCOMP( g_trac_spd,
-                                   "testSpdRead - kwd: 0x%04x, val: %02x%02x, size: %d",
-                                   keyword, theData[0], theData[1], theSize );
-
-                        if( NULL != theData )
-                        {
-                            free( theData );
-                            theData = NULL;
-                        }
-                    }
-
-                    if( err )
-                    {
-                        break;
+                        free( theData );
+                        theData = NULL;
                     }
                 }
 
@@ -241,35 +234,28 @@ class SPDTest: public CxxTest::TestSuite
                     break;
                 }
 
-                for( uint32_t dimm = 0; dimm < dimmList.size(); dimm++ )
+                // Operate on first DIMM
+                theTarget = dimmList[0];
+                uint8_t * theData = NULL;
+                size_t theSize = 0;
+
+                cmds++;
+                err = deviceWrite( theTarget,
+                                   theData,
+                                   theSize,
+                                   DEVICE_SPD_ADDRESS( SPD_FIRST_KEYWORD ) );
+
+                if( NULL == err )
                 {
-                    theTarget = dimmList[dimm];
-                    uint8_t * theData = NULL;
-                    size_t theSize = 0;
-
-                    cmds++;
-                    err = deviceWrite( theTarget,
-                                       theData,
-                                       theSize,
-                                       DEVICE_SPD_ADDRESS( SPD_FIRST_KEYWORD ) );
-
-                    if( NULL == err )
-                    {
-                        // No error returned, failure
-                        fails++;
-                        TS_FAIL( "testSpdWrite - No error returned from deviceWrite()" );
-                        continue;
-                    }
-                    else
-                    {
-                        delete err;
-                        err = NULL;
-                    }
+                    // No error returned, failure
+                    fails++;
+                    TS_FAIL( "testSpdWrite - No error returned from deviceWrite()" );
+                    continue;
                 }
-
-                if( err )
+                else
                 {
-                    break;
+                    delete err;
+                    err = NULL;
                 }
             } while( 0 );
 
@@ -306,34 +292,27 @@ class SPDTest: public CxxTest::TestSuite
                     break;
                 }
 
-                for( uint32_t dimm = 0; dimm < dimmList.size(); dimm++ )
+                // Test on first DIMM only.
+                theTarget = dimmList[0];
+                uint8_t * theData = NULL;
+                size_t theSize = 0x0;
+
+                cmds++;
+                err = deviceRead( theTarget,
+                                  theData,
+                                  theSize,
+                                  DEVICE_SPD_ADDRESS( SPD::SPD_LAST_KEYWORD ) );
+
+                if( NULL == err )
                 {
-                    theTarget = dimmList[dimm];
-                    uint8_t * theData = NULL;
-                    size_t theSize = 0x0;
-
-                    cmds++;
-                    err = deviceRead( theTarget,
-                                      theData,
-                                      theSize,
-                                      DEVICE_SPD_ADDRESS( SPD::SPD_LAST_KEYWORD ) );
-
-                    if( NULL == err )
-                    {
-                        fails++;
-                        TS_FAIL( "testSpdInvalidKeyword - No error returned!" );
-                        continue;
-                    }
-                    else
-                    {
-                        delete err;
-                        err = NULL;
-                    }
+                    fails++;
+                    TS_FAIL( "testSpdInvalidKeyword - No error returned!" );
+                    continue;
                 }
-
-                if( err )
+                else
                 {
-                    break;
+                    delete err;
+                    err = NULL;
                 }
             } while( 0 );
 
@@ -370,34 +349,27 @@ class SPDTest: public CxxTest::TestSuite
                     break;
                 }
 
-                for( uint32_t dimm = 0; dimm < dimmList.size(); dimm++ )
+                // Test on first DIMM only.
+                theTarget = dimmList[0];
+                uint8_t * theData = NULL;
+                size_t theSize = 0x0;   // Invalid size of 0x0
+
+                cmds++;
+                err = deviceRead( theTarget,
+                                  theData,
+                                  theSize,
+                                  DEVICE_SPD_ADDRESS( SPD::SPD_FIRST_KEYWORD ) );
+
+                if( NULL == err )
                 {
-                    theTarget = dimmList[dimm];
-                    uint8_t * theData = NULL;
-                    size_t theSize = 0x0;   // Invalid size of 0x0
-
-                    cmds++;
-                    err = deviceRead( theTarget,
-                                      theData,
-                                      theSize,
-                                      DEVICE_SPD_ADDRESS( SPD::SPD_FIRST_KEYWORD ) );
-
-                    if( NULL == err )
-                    {
-                        fails++;
-                        TS_FAIL( "testSpdInvalidSize - No error for invalid size!" );
-                        continue;
-                    }
-                    else
-                    {
-                        delete err;
-                        err = NULL;
-                    }
+                    fails++;
+                    TS_FAIL( "testSpdInvalidSize - No error for invalid size!" );
+                    continue;
                 }
-
-                if( err )
+                else
                 {
-                    break;
+                    delete err;
+                    err = NULL;
                 }
             } while( 0 );
 

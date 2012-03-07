@@ -54,9 +54,9 @@ BASE_MODULES = trace errl devicefw scom xscom initservice \
 
 EXTENDED_MODULES = targeting ecmddatabuffer fapi hwp plat 	\
                    extinitsvc istepdisp hwas fsi fsiscom i2c intr \
-		           spd dmi_training fapiporeve poreve util	\
-		           sbe_centaur_init mc_init dram_training \
-                   mdia mbox
+		   spd dmi_training fapiporeve poreve util	\
+		   sbe_centaur_init mc_init dram_training \
+                   mdia mbox mvpd
 
 DIRECT_BOOT_MODULES = example
 RUNTIME_MODULES =
@@ -65,7 +65,7 @@ TESTCASE_MODULES = cxxtest testerrl testdevicefw testsyslib \
                    testscom testxscom testtargeting testinitservice testkernel \
                    testhwpf testecmddatabuffer initsvctesttask testcxxtest \
                    testpnor testi2c testfsi testvfs testhwas testintr testspd \
-                   testpore testutil testmbox testmdia
+                   testpore testutil testmbox testmdia testmvpd
 
 RELOCATABLE_IMAGE_LDFLAGS = -pie --export-dynamic
 
@@ -76,7 +76,7 @@ hbicore_EXTENDED_MODULES = ${EXTENDED_MODULES}
 # The sbe_pnor.bin is manually built from CVS SBE procedure files in CVS then copy
 # into HostBoot for now.  HostBoot build team will have a process of building sbe_pnor
 # image later.
-hbicore_DATA_MODULES =  sample.if dimmspd.dat sbe_pnor.bin
+hbicore_DATA_MODULES =  sample.if dimmspd.dat sbe_pnor.bin procmvpd.dat
 
 hbicore_LIDNUMBER = 80f00100
 

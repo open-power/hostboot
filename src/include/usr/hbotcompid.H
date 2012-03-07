@@ -171,7 +171,7 @@ const char INTR_COMP_NAME[] = "intr";
 //@}
 
 /** @name SPD
- *  EEPROM device driver component
+ *  DIMM SPD device driver component
  */
 //@{
 const compId_t SPD_COMP_ID = 0x1000;
@@ -186,9 +186,19 @@ const compId_t HBMBOX_COMP_ID = 0x1100;
 const char HBMBOX_COMP_NAME[] = "mbox";
 //@}
 
-/** @name FIPS_ERRL
- *  Used to add component trace to an error log
- *  so that it can be decoded by the FSP errlog parser
+/** @name MVPD
+ *  MVPD device driver component
+ */
+//@{
+const compId_t MVPD_COMP_ID = 0x1200;
+const char MVPD_COMP_NAME[] = "mvpd";
+//@}
+
+/** @name RESERVED
+ *  Reserved component ID. x3100 is the component ID
+ *  of FipS ERRL component. Due to our use of
+ *  of the FipS errl tool, let no Hostboot component
+ *  use this component ID.
  */
 //@{
 const compId_t FIPS_ERRL_COMP_ID = 0x3100;

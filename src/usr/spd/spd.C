@@ -30,9 +30,6 @@
 // ----------------------------------------------
 // Includes
 // ----------------------------------------------
-//#include <string.h>
-//#include <sys/time.h>
-
 #include <trace/interface.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
@@ -359,7 +356,8 @@ errlHndl_t spdGetValue ( uint64_t i_keyword,
                                               tmpKwdData,
                                               compareEntries );
 
-        if( entry == &kwdData[arraySize] )
+        if( ( entry == &kwdData[arraySize] ) ||
+            ( i_keyword != entry->keyword ) )
         {
             TRACFCOMP( g_trac_spd,
                        ERR_MRK"No matching keyword entry found!" );

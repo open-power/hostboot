@@ -138,6 +138,18 @@ const TaskInfo g_exttaskinfolist[]   =   {
             }
         },
 
+        /**
+         * @brief mvpd task
+         */
+        {
+            "libmvpd.so",                                   // taskname
+            NULL,                                           // no pointer to fn
+            {
+                INIT_TASK,                                  // task type
+                EXT_IMAGE,                                  // Extended module
+            }
+        },
+
 // TODO: Added this in order to successfull init.. Need to remove this and put
 // the module load and unload from a the istep dispatcher
 // PW - Is this really TODO?  Don't we need the hwas module from errl to do

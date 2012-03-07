@@ -80,42 +80,35 @@ class DIMMPresTest: public CxxTest::TestSuite
                     break;
                 }
 
-                for( uint32_t dimm = 0; dimm < dimmList.size(); dimm++ )
-                {
-                    cmds++;
-                    theTarget = dimmList[dimm];
+                // Test only on first DIMM.
+                cmds++;
+                theTarget = dimmList[0];
 
-                    // Check presence
-                    err = deviceRead( theTarget,
-                                      &present,
-                                      presentSize,
-                                      DEVICE_PRESENT_ADDRESS() );
-
-                    if( err )
-                    {
-                        fails++;
-                        TS_FAIL( "testDimmPres() - Error returned from DIMM Presence "
-                                 "Detect call!" );
-                        errlCommit( err,
-                                    SPD_COMP_ID );
-                        continue;
-                    }
-                    else if( presentSize != sizeof(present) )
-                    {
-                        fails++;
-                        TS_FAIL( "testDimmPrs() - Size of Presence buffer is not size "
-                                 "of boolean!" );
-                        continue;
-                    }
-                    else
-                    {
-                        // Test was good.
-                    }
-                }
+                // Check presence
+                err = deviceRead( theTarget,
+                                  &present,
+                                  presentSize,
+                                  DEVICE_PRESENT_ADDRESS() );
 
                 if( err )
                 {
-                    break;
+                    fails++;
+                    TS_FAIL( "testDimmPres() - Error returned from DIMM Presence "
+                             "Detect call!" );
+                    errlCommit( err,
+                                SPD_COMP_ID );
+                    continue;
+                }
+                else if( presentSize != sizeof(present) )
+                {
+                    fails++;
+                    TS_FAIL( "testDimmPrs() - Size of Presence buffer is not size "
+                             "of boolean!" );
+                    continue;
+                }
+                else
+                {
+                    // Test was good.
                 }
             } while( 0 );
 
@@ -156,38 +149,31 @@ class DIMMPresTest: public CxxTest::TestSuite
                     break;
                 }
 
-                for( uint32_t dimm = 0; dimm < dimmList.size(); dimm++ )
+                // Test on first DIMM only
+                cmds++;
+                theTarget = dimmList[0];
+
+                // Check presence
+                err = deviceRead( theTarget,
+                                  &present,
+                                  presentSize,
+                                  DEVICE_PRESENT_ADDRESS() );
+
+                if( !err )
                 {
-                    cmds++;
-                    theTarget = dimmList[dimm];
-
-                    // Check presence
-                    err = deviceRead( theTarget,
-                                      &present,
-                                      presentSize,
-                                      DEVICE_PRESENT_ADDRESS() );
-
-                    if( !err )
-                    {
-                        fails++;
-                        TS_FAIL( "testDimmPresInvalidSize() - Error not flagged for "
-                                 "invalid size!" );
-                        errlCommit( err,
-                                    SPD_COMP_ID );
-                        continue;
-                    }
-                    else
-                    {
-                        // Delete the error and continue
-                        delete err;
-                        err = NULL;
-                        continue;
-                    }
+                    fails++;
+                    TS_FAIL( "testDimmPresInvalidSize() - Error not flagged for "
+                             "invalid size!" );
+                    errlCommit( err,
+                                SPD_COMP_ID );
+                    continue;
                 }
-
-                if( err )
+                else
                 {
-                    break;
+                    // Delete the error and continue
+                    delete err;
+                    err = NULL;
+                    continue;
                 }
             } while( 0 );
 

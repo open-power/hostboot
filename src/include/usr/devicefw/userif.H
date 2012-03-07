@@ -48,6 +48,7 @@ namespace DeviceFW
         PRESENT,
         FSI,
         SPD,
+        MVPD,
 
         LAST_ACCESS_TYPE,
     };
@@ -95,6 +96,16 @@ namespace DeviceFW
      */
     #define DEVICE_MBOX_ADDRESS(o_status) \
         DeviceFW::MAILBOX, static_cast<uint64_t*>((o_status))
+
+    /**
+     * Construct the device addressing parameters for the MVPD device ops.
+     * @param[in] i_record - The enumeration of the MVPD record to access.
+     * @param[in] i_keyword - The enumeration of the MVPD keyword, located
+     *      within the i_record Record to access.
+     */
+    #define DEVICE_MVPD_ADDRESS( i_record, i_keyword )\
+        DeviceFW::MVPD, static_cast<uint64_t>(( i_record )),\
+            static_cast<uint64_t>(( i_keyword ))
 
     /**
      *  @brief Perform a hardware read operation.
