@@ -43,6 +43,34 @@
         <id>IS_SIMULATION</id>
         <default>1</default>
     </attribute>
+    <attribute>
+        <id>PROC_EPS_TABLE_TYPE</id>
+        <default>EPS_TYPE_HE</default>
+    </attribute>
+    <attribute>
+        <id>PROC_FABRIC_PUMP_MODE</id>
+        <default>MODE1</default>
+    </attribute>
+    <attribute>
+        <id>PROC_X_BUS_WIDTH</id>
+        <default>W8BYTE</default>
+    </attribute>
+    <attribute>
+        <id>ALL_MCS_IN_INTERLEAVING_GROUP</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FREQ_PROC_REFCLOCK</id>
+        <default>200</default>
+    </attribute>
+    <attribute>
+        <id>FREQ_MEM_REFCLOCK</id>
+        <default>266</default>
+    </attribute>
+    <attribute>
+        <id>FREQ_CORE_FLOOR</id>
+        <default>2500</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -86,6 +114,14 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0</default>
+    </attribute>
+    <attribute>
+        <id>FABRIC_NODE_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FABRIC_CHIP_ID</id>
+        <default>0</default>
     </attribute>
 </targetInstance>
 

@@ -66,9 +66,7 @@
     <attribute><id>NUMERIC_POD_TYPE_TEST</id></attribute>
     <attribute><id>HB_MUTEX_TEST_LOCK</id></attribute>
     <attribute><id>DUMMY_RW</id></attribute>
-    <attribute>
-        <id>XSCOM_BASE_ADDRESS</id>
-    </attribute>
+    <attribute><id>XSCOM_BASE_ADDRESS</id></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0</default>
@@ -76,14 +74,22 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0</default>
-    </attribute>   
+    </attribute>
     <attribute>
         <id>IS_SIMULATION</id>
         <default>0</default>
-    </attribute> 
-    <attribute>
-        <id>ISTEP_MODE</id>
-    </attribute>    
+    </attribute>
+    <attribute><id>ISTEP_MODE</id></attribute>
+    <attribute><id>PROC_EPS_TABLE_TYPE</id></attribute>
+    <attribute><id>PROC_FABRIC_PUMP_MODE</id></attribute>
+    <attribute><id>PROC_X_BUS_WIDTH</id></attribute>
+    <attribute><id>ALL_MCS_IN_INTERLEAVING_GROUP</id></attribute>
+    <attribute><id>FREQ_PROC_REFCLOCK</id></attribute>
+    <attribute><id>FREQ_MEM_REFCLOCK</id></attribute>
+    <attribute><id>FREQ_CORE_FLOOR</id></attribute>
+    <attribute><id>FREQ_PB</id></attribute>
+    <attribute><id>FREQ_A</id></attribute>
+    <attribute><id>FREQ_X</id></attribute>
 </targetType>
 
 <targetType>
@@ -155,7 +161,10 @@
         <id>FSI_GP_REG_SCOM_ACCESS</id>
         <default>1</default>
     </attribute>
-
+    <attribute><id>FABRIC_NODE_ID</id></attribute>
+    <attribute><id>FABRIC_CHIP_ID</id></attribute>
+    <!-- TODO. MVPD_FREQ_CORE_NOMINAL to be deleted when MVPD available -->
+    <attribute><id>MVPD_FREQ_CORE_NOMINAL</id></attribute>
 </targetType>
 
 <targetType>

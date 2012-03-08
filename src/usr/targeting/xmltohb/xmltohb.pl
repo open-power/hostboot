@@ -46,7 +46,12 @@ use Text::Wrap;
 use Data::Dumper;
 use POSIX;
 
-
+################################################################################
+# Set PREFERRED_PARSER to XML::Parser. Otherwise it uses XML::SAX which contains
+# bugs that result in XML parse errors that can be fixed by adjusting white-
+# space (i.e. parse errors that do not make sense).
+################################################################################
+$XML::Simple::PREFERRED_PARSER = 'XML::Parser'; 
 
 ################################################################################
 # Process command line parameters, issue help text if needed

@@ -42,6 +42,18 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0</default>
     </attribute> 
+    <attribute>
+        <id>PROC_EPS_TABLE_TYPE</id>
+        <default>EPS_TYPE_LE</default>
+    </attribute>
+    <attribute>
+        <id>PROC_FABRIC_PUMP_MODE</id>
+        <default>MODE1</default>
+    </attribute>
+    <attribute>
+        <id>PROC_X_BUS_WIDTH</id>
+        <default>W8BYTE</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>

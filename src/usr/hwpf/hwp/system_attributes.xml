@@ -36,4 +36,60 @@
     <valueType>uint8</valueType>
     <platInit/>
   </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_EPS_TABLE_TYPE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Processor epsilon table type. Used to calculate the processor nest
+      epsilon register values.
+      Provided by the Machine Readable Workbook.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>EPS_TYPE_LE = 0x01, EPS_TYPE_HE = 0x02</enum>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_FABRIC_PUMP_MODE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Processor SMP Fabric broadcast scope configuration.
+      MODE1 = default = chip/group/system/remote group/foreign.
+      MODE2 = group/system/remote group/foreign.
+      Provided by the Machine Readable Workbook.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>MODE1 = 0x01, MODE2 = 0x02</enum>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_X_BUS_WIDTH</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Processor SMP X bus width.
+      Provided by the Machine Readable Workbook.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>W4BYTE = 0x01, W8BYTE = 0x02</enum>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_ALL_MCS_IN_INTERLEAVING_GROUP</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      If all MCS chiplets are in an interleaving group (1=true, 0=false).
+      If true the SMP fabric is setup in normal mode.
+      If false the SMP fabric is setup in checkerboard mode.
+      Provided by the Machine Readable Workbook.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
 </attributes>

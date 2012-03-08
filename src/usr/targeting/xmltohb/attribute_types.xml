@@ -2912,7 +2912,291 @@
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
-    <writeable/>
+</attribute>
+
+<enumerationType>
+    <id>PROC_EPS_TABLE_TYPE</id>
+    <description>Enumeration indicating the PROC_EPS_TABLE_TYPE</description>
+    <enumerator>
+        <name>EPS_TYPE_LE</name>
+        <value>1</value>
+    </enumerator>
+    <enumerator>
+        <name>EPS_TYPE_HE</name>
+        <value>2</value>
+    </enumerator>
+</enumerationType>
+
+<attribute>
+    <id>PROC_EPS_TABLE_TYPE</id>
+    <description>
+        System attribute.
+        Processor epsilon table type. Used to calculate the processor nest
+        epsilon register values.
+    </description>
+    <simpleType>
+        <enumeration>
+            <id>PROC_EPS_TABLE_TYPE</id>
+        </enumeration>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_EPS_TABLE_TYPE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<enumerationType>
+    <id>PROC_FABRIC_PUMP_MODE</id>
+    <description>Enumeration indicating the PROC_FABRIC_PUMP_MODE</description>
+    <enumerator>
+        <name>MODE1</name>
+        <value>1</value>
+    </enumerator>
+    <enumerator>
+        <name>MODE2</name>
+        <value>2</value>
+    </enumerator>
+</enumerationType>
+
+<attribute>
+    <id>PROC_FABRIC_PUMP_MODE</id>
+    <description>
+        System attribute.
+        Processor SMP Fabric broadcast scope configuration.
+        MODE1 = default = chip/group/system/remote group/foreign.
+        MODE2 = group/system/remote group/foreign.
+        Provided by the Machine Readable Workbook.
+    </description>
+    <simpleType>
+        <enumeration>
+            <id>PROC_FABRIC_PUMP_MODE</id>
+        </enumeration>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_FABRIC_PUMP_MODE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<enumerationType>
+    <id>PROC_X_BUS_WIDTH</id>
+    <description>Enumeration indicating the PROC_X_BUS_WIDTH</description>
+    <enumerator>
+        <name>W4BYTE</name>
+        <value>1</value>
+    </enumerator>
+    <enumerator>
+        <name>W8BYTE</name>
+        <value>2</value>
+    </enumerator>
+</enumerationType>
+
+<attribute>
+    <id>PROC_X_BUS_WIDTH</id>
+    <description>
+        System attribute.
+        Processor SMP X bus width.
+        Provided by the Machine Readable Workbook.
+    </description>
+    <simpleType>
+        <enumeration>
+            <id>PROC_X_BUS_WIDTH</id>
+        </enumeration>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_X_BUS_WIDTH</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>ALL_MCS_IN_INTERLEAVING_GROUP</id>
+    <description>
+        System attribute.
+        If all MCS chiplets are in an interleaving group (1=true, 0=false).
+        If true the SMP fabric is setup in normal mode.
+        If false the SMP fabric is setup in checkerboard mode.
+        Provided by the Machine Readable Workbook.
+    </description>
+    <simpleType><uint8_t></uint8_t></simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_ALL_MCS_IN_INTERLEAVING_GROUP</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>FABRIC_NODE_ID</id>
+    <description>
+        Chip attribute.
+        Logical fabric node the chip belongs to.
+        Provided by the Machine Readable Workbook.
+        Can vary across drawers.
+    </description>
+    <simpleType><uint8_t></uint8_t></simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_FABRIC_NODE_ID</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>FABRIC_CHIP_ID</id>
+    <description>
+        Chip attribute.
+        Logical fabric chip id for this chip (position within the fabric).
+        Provided by the Machine Readable Workbook.
+        Can vary across drawers.
+    </description>
+    <simpleType><uint8_t></uint8_t></simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_FABRIC_CHIP_ID</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>FREQ_PROC_REFCLOCK</id>
+    <description>
+        System attribute.
+        The frequency of the processor refclock in MHz.
+        Provided by the Machine Readable Workbook.
+        The corresponding HWPF attribute:
+        - Is read by the set_ref_clock HWP to find out the desired frequency.
+        - Can be overridden to adjust the refclock frequency.
+    </description>
+    <simpleType><uint32_t></uint32_t></simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_FREQ_PROC_REFCLOCK</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>FREQ_MEM_REFCLOCK</id>
+    <description>
+        System attribute.
+        The frequency of the memory refclock in MHz.
+        Provided by the Machine Readable Workbook.
+        The corresponding HWPF attribute:
+        - Is read by the set_ref_clock HWP to find out the desired frequency.
+        - Can be overridden to adjust the refclock frequency.
+    </description>
+    <simpleType><uint32_t></uint32_t></simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_FREQ_MEM_REFCLOCK</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>FREQ_CORE_FLOOR</id>
+    <description>
+        System attribute.
+        The lowest frequency that a core can be set to in MHz.
+        This is the same for all cores in the system.
+        TODO Provided by TBD. Current thinking is MRW or MVPD.
+          If MRW then this attribute will stay here.
+          If MVPD then this attribute will be deleted.
+    </description>
+    <simpleType><uint32_t></uint32_t></simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_FREQ_CORE_FLOOR</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>FREQ_PB</id>
+    <description>
+        System attribute.
+        The frequency of a processor's PB chiplet in MHz.
+        This is the same for all PB chiplets in the system.
+        The corresponding HWPF attribute: 
+        - Is set by a HWP that runs after SBE HWPs setup the PB PLL. It
+          reads ATTR_FREQ_PROC_REFCLOCK and the PB PLL settings.
+    </description>
+    <simpleType><uint32_t></uint32_t></simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_FREQ_PB</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>FREQ_A</id>
+    <description>
+        System attribute.
+        The frequency of a processor's A-bus chiplet in MHz.
+        This is the same for all A-bus chiplets in the system.
+        The corresponding HWPF attribute:
+        - Is set by the HWP that sets up the A-bus PLL.
+    </description>
+    <simpleType><uint32_t></uint32_t></simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_FREQ_A</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>FREQ_X</id>
+    <description>
+        System attribute.
+        The frequency of a processor's X-bus chiplet in MHz.
+        This is the same for all X-bus chiplets in the system.
+        The corresponding HWPF attribute:
+        - Is set by the HWP that sets up the X-bus PLL.
+    </description>
+    <simpleType><uint32_t></uint32_t></simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_FREQ_X</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MVPD_FREQ_CORE_NOMINAL</id>
+    <description>
+        Chip attribute.
+        The nominal frequency of the processor cores in MHz.
+        TODO This attribute should be from MVPD.
+             When MVPD function is present, this attribute should be deleted.
+             The corresponding HWPF attribute request should map to a function
+             that calls the MVPD driver (in the same way as DIMM SPD).
+             For now, just default to 3GHz
+    </description>
+    <simpleType><uint32_t><default>3000</default></uint32_t></simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MVPD_FREQ_CORE_NOMINAL</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
 </attribute>
 
 </attributes>

@@ -30,7 +30,10 @@
   <attribute>
     <id>ATTR_EC</id>
     <targetType>TARGET_TYPE_PROC_CHIP,TARGET_TYPE_MEMBUF_CHIP</targetType>
-    <description>EC level of a chip target</description>
+    <description>
+        EC level of a chip target
+        Read from the chip by the platform
+    </description>
     <valueType>uint8</valueType>
     <platInit/>
     <persistRuntime/>
@@ -39,10 +42,37 @@
   <attribute>
     <id>ATTR_FSI_GP_REG_SCOM_ACCESS</id>
     <targetType>TARGET_TYPE_PROC_CHIP,TARGET_TYPE_MEMBUF_CHIP</targetType>
-    <description>Indicates if the target's FSI GP regs have scom access</description>
+    <description>
+        Indicates if the target's FSI GP regs have scom access
+        Provided by the Machine Readable Workbook.
+    </description>
     <valueType>uint8</valueType>
     <enum>false = 0, true = 1</enum>
     <platInit/>
     <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_FABRIC_NODE_ID</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+        Logical fabric node the chip belongs to.
+        Provided by the Machine Readable Workbook.
+        Can vary across drawers.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_FABRIC_CHIP_ID</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+        Logical fabric chip id for this chip (position within the fabric).
+        Provided by the Machine Readable Workbook.
+        Can vary across drawers.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
   </attribute>
 </attributes>

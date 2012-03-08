@@ -53,7 +53,9 @@ XMLTOHB_FAPIATTR_SOURCES = \
     ${ROOTPATH}/src/usr/hwpf/hwp/chip_attributes.xml \
     ${ROOTPATH}/src/usr/hwpf/hwp/dimm_spd_attributes.xml \
     ${ROOTPATH}/src/usr/hwpf/hwp/dimm_attributes.xml \
-    ${ROOTPATH}/src/usr/hwpf/hwp/unit_attributes.xml
+    ${ROOTPATH}/src/usr/hwpf/hwp/unit_attributes.xml \
+    ${ROOTPATH}/src/usr/hwpf/hwp/freq_attributes.xml \
+    ${ROOTPATH}/src/usr/hwpf/hwp/proc_mvpd_attributes.xml
 
 VMM_CONSTS_FILE = \
     ${ROOTPATH}/src/include/usr/vmmconst.h

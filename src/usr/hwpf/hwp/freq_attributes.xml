@@ -1,0 +1,103 @@
+<!--  IBM_PROLOG_BEGIN_TAG
+     This is an automatically generated prolog.
+   
+     $Source: src/usr/hwpf/hwp/freq_attributes.xml $
+   
+     IBM CONFIDENTIAL
+   
+     COPYRIGHT International Business Machines Corp. 2012
+   
+     p1
+   
+     Object Code Only (OCO) source materials
+     Licensed Internal Code Source Materials
+     IBM HostBoot Licensed Internal Code
+   
+     The source code for this program is not published or other-
+     wise divested of its trade secrets, irrespective of what has
+     been deposited with the U.S. Copyright Office.
+   
+     Origin: 30
+   
+     IBM_PROLOG_END -->
+<!--
+    XML file specifying HWPF attributes.
+    These are frequency attributes.
+-->
+
+<attributes>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_FREQ_PROC_REFCLOCK</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      The frequency of the processor refclock in MHz.
+      Provided by the Machine Readable Workbook.
+      This is read by the set_ref_clock HWP to find out the desired frequency.
+      This can be overridden to adjust the refclock frequency.
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_FREQ_MEM_REFCLOCK</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      The frequency of the memory refclock in MHz.
+      Provided by the Machine Readable Workbook.
+      This is read by the set_ref_clock HWP to find out the desired frequency.
+      This can be overridden to adjust the refclock frequency.
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_FREQ_CORE_FLOOR</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      The lowest frequency that a core can be set to in MHz.
+      This is the same for all cores in the system.
+      TODO Provided by TBD. Current thinking is MRW or MVPD.
+        If MRW then this attribute will stay here as a platInit attribute.
+        If MVPD then this attribute will move to proc_mvpd_attributes.xml.
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_FREQ_PB</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      The frequency of a processor's PB chiplet in MHz.
+      This is the same for all PB chiplets in the system.
+      This is set by a HWP that runs after SBE HWPs setup the PB PLL. It
+        reads ATTR_FREQ_PROC_REFCLOCK and the PB PLL settings.
+    </description>
+    <valueType>uint32</valueType>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_FREQ_A</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      The frequency of a processor's A-bus chiplet in MHz.
+      This is the same for all A-bus chiplets in the system.
+      This is set by the HWP that sets up the A-bus PLL.
+    </description>
+    <valueType>uint32</valueType>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_FREQ_X</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      The frequency of a processor's X-bus chiplet in MHz.
+      This is the same for all X-bus chiplets in the system.
+      This is set by the HWP that sets up the X-bus PLL. 
+    </description>
+    <valueType>uint32</valueType>
+  </attribute>
+</attributes>
