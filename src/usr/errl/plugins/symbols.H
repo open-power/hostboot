@@ -28,6 +28,8 @@
 #ifndef ERRL_PLUGINS_SYMS_H
 #define ERRL_PLUGINS_SYMS_H
 
+#include <vector>
+
 /**
  *  @file symbols.H
  *

@@ -178,23 +178,21 @@ const compId_t SPD_COMP_ID = 0x1000;
 const char SPD_COMP_NAME[] = "spd";
 //@}
 
-/** @name MBOX
+/** @name HBMBOX
  *  MBOX component
  */
 //@{
-const compId_t MBOX_COMP_ID = 0x1100;
-const char MBOX_COMP_NAME[] = "mbox";
+const compId_t HBMBOX_COMP_ID = 0x1100;
+const char HBMBOX_COMP_NAME[] = "mbox";
 //@}
 
-/** @name RESERVED
- *  Reserved component ID. x3100 is the component ID
- *  of FipS ERRL component. Due to our use of
- *  of the FipS errl tool, let no Hostboot component
- *  use this component ID.
+/** @name FIPS_ERRL
+ *  Used to add component trace to an error log
+ *  so that it can be decoded by the FSP errlog parser
  */
 //@{
-const compId_t RESERVED_COMP_ID = 0x3100;
-const char RESERVED_COMP_NAME[] = "reserved";
+const compId_t FIPS_ERRL_COMP_ID = 0x3100;
+const char FIPS_ERRL_COMP_NAME[] = "hb-trace";
 
 //  ----------------------------------------------------------
 //  CXXTEST Unit Test, reserve compid near the end...

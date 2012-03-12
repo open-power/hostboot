@@ -35,31 +35,21 @@
  *
  */
 #include <hbotcompid.H>             // compId_t
+#include <stdint.h>
 
 /**
  * @brief Pointer to an ErrlEntry object
  */
 namespace ERRORLOG { class ErrlEntry; };
 
-
-
 // Identifiers for Hostboot ERRL user-defined data sections.
 // Range: 0 .. 255
-enum
+enum errlUserDataType_t
 {
-    HBERRL_SST_NOFORMAT         = 0,
-    HBERRL_SST_DEFAULT          = 0,
-        HBERRL_VER_DEFAULT           = 0, // 0,0 not handled
-    HBERRL_SST_PRESIDENT        = 1, // testing
-    HBERRL_SST_FIRSTLADY        = 2, // testing
-    HBERRL_SST_STRING           = 3, // null-ended string
-        HBERRL_VER_STRINGNAME        = 0, // label: "Name"
-        HBERRL_VER_STRINGTASK        = 1, // label: "Task"
-        HBERRL_VER_STRINGTASKNAME    = 2, // label: "Task name"
-        HBERRL_VER_STRINGATTRNAME    = 3, // label: "Attribute name"
-        HBERRL_VER_STRINGFILENAME    = 4, // label: "File name"
-        HBERRL_VER_STRINGPROCNAME    = 5, // label: "Procedure name"
-    HBERRL_SST_BACKTRACE        = 4, // backtrace
+    HBERRL_UDT_NOFORMAT         = 0,
+    HBERRL_UDT_STRING           = 1,
+    HBERRL_UDT_TARGET           = 2,
+    HBERRL_UDT_BACKTRACE        = 3,
 };
 
 
@@ -294,7 +284,6 @@ enum errlTermState_t
 enum errlUserDataType_t
 {
     ERRL_UDT_TRACE          = 0x0C,   // A trace buffer
-    ERRL_UDT_TARGET_FFDC    = 0x0D,   // A target FFDC buffer
 };
 
 

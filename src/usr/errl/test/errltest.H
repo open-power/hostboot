@@ -98,7 +98,8 @@ public:
              * @reasoncode  HBERRL_TEST_REASON_CODE
              * @severity    ERRORLOG::ERRL_SEV_INFORMATIONAL
              * @moduleid    HBERRL_TEST_MOD_ID
-             * @devdesc     Errl test, errl log the first.
+             * @devdesc     Errl test. Error with non-decoded string
+             *              and lots of trace buffers.
              */
 
             // Create an error log
@@ -122,16 +123,8 @@ public:
             // but errlffdc.H is not publicly includable to give me the definition
             // for it.  addFFDC() should return a Boolean indication of success.
 
-            const char * pch = "martha washington";
-            pffdc = l_err->addFFDC( HBERRL_COMP_ID, pch, strlen( pch ), 0, HBERRL_SST_FIRSTLADY );
-            if ( NULL == pffdc )
-            {
-                TS_FAIL("testErrl1: addFFDC() output NULL pointer");
-                break;
-            }
-
             // really short user data
-            pch = "A";
+            const char * pch = "A";
             pffdc = l_err->addFFDC( DEVFW_COMP_ID, pch, strlen( pch ));
             if ( NULL == pffdc )
             {
@@ -139,32 +132,8 @@ public:
                 break;
             }
 
-            pch = "george washington";
-            pffdc = l_err->addFFDC( DEVFW_COMP_ID, pch, strlen( pch ), 0, HBERRL_SST_PRESIDENT  );
-            if ( NULL == pffdc )
-            {
-                TS_FAIL("testErrl1: addFFDC() output NULL pointer");
-                break;
-            }
-
-            pch = "dwight eisenhour";
-            pffdc = l_err->addFFDC( SCOM_COMP_ID, pch, strlen( pch ), 1, 12 );
-            if ( NULL == pffdc )
-            {
-                TS_FAIL("testErrl1: addFFDC() output NULL pointer");
-                break;
-            }
-
-            pch = "ronald ";
-            pffdc = l_err->addFFDC( HBERRL_COMP_ID, pch, strlen( pch ), 0, HBERRL_SST_PRESIDENT );
-            if ( NULL == pffdc )
-            {
-                TS_FAIL("testErrl1: addFFDC() output NULL pointer");
-                break;
-            }
-
             // Append data to something already added.
-            pch = "reagan";
+            pch = " test-user-data-string";
             l_err->appendToFFDC( pffdc, pch, strlen(pch) );
 
             // Collect trace

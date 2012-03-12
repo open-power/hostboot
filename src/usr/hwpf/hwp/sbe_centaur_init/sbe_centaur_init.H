@@ -30,8 +30,7 @@
  *
  */
 
-/*@
- *  @tag isteplist
+/*  @tag isteplist
  *  @docversion     v0.99 (02/10/12)
  *  @istepname      sbe_centaur_init
  *  @istepnum       10

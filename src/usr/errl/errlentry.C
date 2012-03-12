@@ -35,10 +35,9 @@
 #include <hbotcompid.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
+#include <errl/errludbacktrace.H>
 #include <trace/interface.H>
 #include <arch/ppc.H>
-#include <errl/backtrace.H>
-
 
 namespace ERRORLOG
 {
@@ -61,39 +60,9 @@ ErrlEntry::ErrlEntry(const errlSeverity_t i_sev,
     iv_Src( SRC_ERR_INFO, i_modId, i_reasonCode, i_user1, i_user2 ),
     iv_termState(TERM_STATE_UNKNOWN)
 {
-    // Collect the Backtrace
-    std::vector<uint64_t> bt;
-    collectBacktrace( bt );
-
-    // Add Backtrace to user data section
-    ErrlUD * ffdcPtr = NULL;
-    for( uint32_t i = 0; i < bt.size(); i++ )
-    {
-        if( 0 == i )
-        {
-            ffdcPtr = addFFDC( HBERRL_COMP_ID,
-                               &bt[i],
-                               sizeof(bt[i]),
-                               0, HBERRL_SST_BACKTRACE );
-
-            // Make sure we got a pointer to the user details
-            if( NULL == ffdcPtr )
-            {
-                TRACFCOMP( g_trac_errl,
-                           ERR_MRK"NULL FFDC pointer" );
-                break;
-            }
-        }
-        else
-        {
-            appendToFFDC( ffdcPtr,
-                          &bt[i],
-                          sizeof(bt[i]) );
-        }
-    }
+    // Collect the Backtrace and add it to the error log
+    ErrlUserDetailsBackTrace().addToLog(this);
 }
-
-
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -166,7 +135,6 @@ void ErrlEntry::appendToFFDC(ErrlUD * i_pErrlUD,
 
 // Use these to tag the UD section containing the trace. 
 const int FIPS_ERRL_UDT_TRACE              = 0x0c; 
-const int FIPS_ERRL_COMP_ID                = 0x3100;
 const int FIPS_ERRL_UDV_DEFAULT_VER_1      = 1; 
 
 bool ErrlEntry::collectTrace(const char i_name[], const uint64_t i_max)
@@ -175,12 +143,6 @@ bool ErrlEntry::collectTrace(const char i_name[], const uint64_t i_max)
     char * l_pBuffer = NULL;
     uint64_t l_cbOutput = 0;
     uint64_t l_cbBuffer = 0;
-
-    // Trying to enforce a rule that no Hostboot component
-    // use the same component ID as FIPS Errl due to our
-    // use of the errl tool and its ability to format
-    // FSP traces attached to Hostboot error logs.
-    CPPASSERT( FIPS_ERRL_COMP_ID == RESERVED_COMP_ID );
 
     do
     {

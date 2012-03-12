@@ -24,7 +24,7 @@
 ROOTPATH = ../../../..
 MODULE = istepdisp
 
-OBJS =  istepdispatcher.o  
+OBJS =  istepdispatcher.o initsvcudistep.o 
 
 ## SUBDIRS = test.d
 

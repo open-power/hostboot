@@ -29,15 +29,17 @@ namespace TARGETING
 {
     enum TargetingModuleId
     {
-        TARG_MOD_ATTRRP         = 0x01,
+        TARG_MOD_TEST           = 0x01,
+        TARG_MOD_ATTRRP         = 0x02,
     };
 
     enum TargetingReasonCode
     {
-        TARG_RC_BAD_EYECATCH            = TARG_COMP_ID | 0x01,
-        TARG_RC_MM_BLOCK_FAIL           = TARG_COMP_ID | 0x02,
-        TARG_RC_MM_PERM_FAIL            = TARG_COMP_ID | 0x03,
-        TARG_RC_ATTR_MSG_FAIL           = TARG_COMP_ID | 0x04,
+        TARG_RC_TEST_TARGET_FFDC        = TARG_COMP_ID | 0x01,
+        TARG_RC_BAD_EYECATCH            = TARG_COMP_ID | 0x02,
+        TARG_RC_MM_BLOCK_FAIL           = TARG_COMP_ID | 0x03,
+        TARG_RC_MM_PERM_FAIL            = TARG_COMP_ID | 0x04,
+        TARG_RC_ATTR_MSG_FAIL           = TARG_COMP_ID | 0x05,
     };
 };
 

@@ -26,51 +26,29 @@
 /**
  *  @file errluserdetails.H
  *
- *  Error Log User Detail Data Helper
+ *  Defines the ErrlUserDetails and ErrlUserDetailsParser base classes
  *
- *  Framework defining how User Detail Data sections of error logs should
- *  be created and parsed.
- *
- *  Creation methods will show up when the PARSER macro is NOT defined.
- *  These will compile and run under HostBoot.
- *
- *  Parsing methods will show up when the PARSER macro IS defined.
- *  These will compile and run in the errl tool.
- *
-*/
-
-//
-//  @page   ErrlUserDetails     Error Log User Details
-//
-//
-
-
-/*****************************************************************************/
-// I n c l u d e s
-/*****************************************************************************/
-
-
-// safe to include these, PARSER or no PARSER
-#include    <hbotcompid.H>      // list of compid's supported
-#include    <errl/hberrltypes.H>  //  errlver_t, errlsubsec_t
-
-
-
+ *  Derive a class from ErrlUserDetails to create user detail data
+ *  Derive a class from ErrlUserDetailsParser to parse user detail data
+ */
+#include <stdint.h>
+#include <errl/hberrltypes.H>  // errlver_t, errlsubsec_t
 
 #ifndef PARSER
-#include    <errl/errlentry.H>  //  addFFDC, appendFFDC
+
+#include <errl/errlentry.H>
 
 namespace ERRORLOG
 {
 
-
 /**
- * @brief ERRL User Data Details
+ * @class ErrlUserDetails
  *
- * HostBoot Support - base class for Errorlog User Details.
+ * This class creates user detail data. If a component creates user detail data
+ * then for each different type of data it should derive a class from this.
  *
- *
-*/
+ * This class is only compiled when PARSER is not defined.
+ */
 class ErrlUserDetails
 {
 public:
@@ -80,7 +58,6 @@ public:
      *
      *  Sets up instance variables. A derived class should set up the instance
      *  variables to reflect a specific format of user detail data
-     *
      */
     ErrlUserDetails();
 
@@ -88,81 +65,55 @@ public:
      *  @brief Destructor
      *
      *  Performs any necessary cleanup
-     *
      */
     virtual ~ErrlUserDetails();
 
     /**
-     *  @brief Adds or appends more user detail data to error log
+     *  @brief Adds user detail data to an error log
      *
-     *  Adds or appends user detail data stored in the internal buffer to
-     *  the error log
-     *  Subclasses should override if the detail data is not stored in the
+     *  Adds the user detail data stored in the internal buffer to the error
+     *  log. Subclasses should override if the detail data is not stored in the
      *  internal buffer.
      *
-     *  @param  i_errl
-     *      Error log handle to add detail data to.
-     *      This will call appendFFDC() in the errorlog.
-     *
-     *  @param  i_pappendBuf
-     *      pointer to the new data buffer to append.
-     *
-     *  @param  i_pappendBufLen
-     *      length of the new data buffer to append in bytes.
-     *
-     *  @return None
-     *
+     *  @param  i_errl Error log handle to add detail data to.
      */
-    virtual void addToLog(
-            errlHndl_t      i_errl,
-            const void      *i_paddBuf=NULL,
-            const uint32_t  i_addBufLen=0 );
+    virtual void addToLog(errlHndl_t i_errl);
 
 protected:
 
     /**
      *  @brief Allocates the internal data buffer for storing detail data
      *
-     *  If the internal buffer is already allocated then it is freed. The
-     *  data buffer is allocated with the specified size.
+     *  If the internal buffer is already allocated then it is reallocated and
+     *  the contents preserved (up to the lesser of the new and old sizes).
      *
-     *  @param  i_size
-     *      Size of buffer
+     *  @param i_size Size of buffer
      *
-     *  @return uint8_t*
-     *      Pointer to the data buffer
-     *
+     *  @return uint8_t* Pointer to the data buffer
      */
-    uint8_t * allocUsrBuf(const uint32_t i_size);
+    uint8_t * reallocUsrBuf(const uint32_t i_size);
 
     /**
      *  @brief Returns the size of the internal data buffer
      *
-     *  @return uint32_t
-     *      Size of the internal data buffer
-     *
+     *  @return uint32_t Size of the internal data buffer
      */
     uint32_t getUsrBufSize() const;
 
     /**
      *  Protected Data: ID of component adding user details
      */
-    compId_t    iv_CompId;
+    compId_t iv_CompId;
 
     /**
      *  Protected Data: Version number of the user details
      */
-    errlver_t    iv_Version;
+    errlver_t iv_Version;
 
     /**
      *  Protected Data: Subsection number of the user details
      */
     errlsubsec_t iv_SubSection;
-
-    /**
-     *  Pointer to the ErrlFFDC  passed back by addFFDC()
-     */
-    ErrlFFDC    *iv_pErrlFFDC;
 
 private:
 
@@ -176,31 +127,27 @@ private:
      */
     uint8_t * iv_pBuffer;       // Pointer to internal buffer
     uint32_t  iv_BufLen;        // Length of internal buffer
-
 };
-} // namespace 
+
+}
 
 #else // (if PARSER defined)
 
-/**
- *
- *  @brief Error Log User Detail Data Helper
- *
- *  Framework defining how User Detail Data sections of error logs should
- *  be created and parsed.
- *
- *  Creation methods will show up when the PARSER macro is NOT defined.
- *  These will compile and run under HostBoot.
- *
- *  Parsing methods will show up when the PARSER macro IS defined.
- *  These will compile and run in the errl tool.
- *
-*/
 namespace ERRORLOG
 {
 
-
-class ErrlUserDetails
+/**
+ *
+ * @class ErrlUserDetailsParser
+ *
+ * This is an abstract base class that defines how user detail error log data
+ * should be parsed. For every different format of user detail data, a
+ * component should create a class that derives from this class.
+ *
+ * This is only compiled when PARSER is defined.
+ *
+*/
+class ErrlUserDetailsParser
 {
 public:
 
@@ -208,16 +155,15 @@ public:
      *  @brief Constructor
      *
      */
-    ErrlUserDetails()
+    ErrlUserDetailsParser()
     {
-
     }
 
     /**
      *  @brief Destructor
      *
      */
-    virtual ~ErrlUserDetails()
+    virtual ~ErrlUserDetailsParser()
     {
     }
 
@@ -245,19 +191,18 @@ public:
      */
     virtual void parse(errlver_t i_version,
                        ErrlUsrParser & i_parser,
-                       const void * i_pBuffer,
+                       void * i_pBuffer,
                        const uint32_t i_buflen) const = 0;
 
 private:
 
     // Disabled
-    ErrlUserDetails(const ErrlUserDetails &);
-    ErrlUserDetails & operator=(const ErrlUserDetails &);
+    ErrlUserDetailsParser(const ErrlUserDetailsParser &);
+    ErrlUserDetailsParser & operator=(const ErrlUserDetailsParser &);
 };
 
-} // namespace
-
-
-#endif //PARSER
+}
 
 #endif
+#endif
+

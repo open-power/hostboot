@@ -38,8 +38,7 @@
  *
  */
 
-/*@ 
- * @tag isteplist
+/* @tag isteplist
  * @docversion     v0.99 (02/10/12)
  * @istepname      mc_init
  * @istepnum       12

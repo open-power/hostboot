@@ -111,6 +111,11 @@ enum    InitServiceReasonCode
 
 };
 
+enum InitServiceUserDetailDataSubSection
+{
+    INIT_SVC_UDT_ISTEP = 0x01,
+};
+
 };  // namespace    INITSERVICE
 
 #endif

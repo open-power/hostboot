@@ -49,10 +49,9 @@
 #include    <devicefw/userif.H>             //  targeting
 
 #include    <initservice/isteps_trace.H>    //  ISTEPS_TRACE buffer
-
+#include    <initservice/initsvcudistep.H>  //  InitSvcUserDetailsIstep
 #include    <initservice/taskargs.H>        //  TaskArgs    structs
 
-#include    <errl/errluserdetails.H>        //  ErrlUserDetails base class
 
 #include    <targeting/attributes.H>        //  ISTEP_MODE attribute
 #include    <targeting/entitypath.H>
@@ -75,57 +74,6 @@ trace_desc_t *g_trac_isteps_trace   =   NULL;
 
 }   //  end namespace
 //  -----   end namespace   ISTEPS_TRACE    -----------------------------------
-
-//  -----   namespace   ERRORLOG    -------------------------------------------
-namespace   ERRORLOG
-{
-/**
- * @class IStepNameUserDetail
- *
- * report the failing IStepName to an errorlog
- *
- * @todo:   get rid of magic numbers in version and subsection.
- *          set up tags, plugins, include files, etc.
- *          For now we just want to report the failing istep string for debug.
- * @todo:   Expand this to report the istep / substep, error returned, etc.
- */
-
-class   IStepNameUserDetail : public ErrlUserDetails
-{
-
-public:
-
-    IStepNameUserDetail(
-            const char *i_istepname,
-            const uint16_t  i_istep     =   0,
-            const uint16_t  i_substep   =   0,
-            const uint64_t  i_isteprc   =   0   )
-    {
-
-    iv_CompId     = INITSVC_COMP_ID;
-    iv_Version    = 1;
-    iv_SubSection = 1;
-
-    // Store the string in the internal buffer
-    char * l_pString = (char *)allocUsrBuf( strlen(i_istepname)+1 );
-    strcpy(l_pString, i_istepname );
-    }
-
-/**
- *  @brief Destructor
- *
- */
-virtual ~IStepNameUserDetail() {}
-
-private:
-
-// Disabled
-IStepNameUserDetail(const IStepNameUserDetail &);
-IStepNameUserDetail & operator=(const IStepNameUserDetail &);
-};
-
-}   //  -----   end namespace   ERRORLOG    -----------------------------------
-
 
 //  -----   namespace   INITSERVICE -------------------------------------------
 namespace   INITSERVICE
@@ -763,10 +711,11 @@ void    IStepDispatcher::runAllISteps( void * io_ptr )   const
                              INITSERVICE::ISTEP_FAILED_NO_ERRLOG,
                              ( l_IStep << 8 | l_SubStep ),
                              l_isteprc );
-                     // attach the istep name to the error log
-                     // @todo
-                     IStepNameUserDetail   l_istepud( l_pistep->taskname );
-                     l_istepud.addToLog( l_errl );
+
+                     // Add IStep user detail data to the error log
+                     InitSvcUserDetailsIstep(l_pistep->taskname, l_IStep,
+                                             l_SubStep).addToLog( l_errl );
+
                      // drop out of inner loop with errlog set.
                      break;
                  }   // end if ( )

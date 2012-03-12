@@ -28,8 +28,7 @@
 .include "../plugins.mk" 
 
 MY_PLUGIN  = libB-0500
-MY_OBJS    = # initserviceParse.o 
-
+MY_OBJS    = initsvcParse.o 
 
 .if ( $(CONTEXT) == "x86.nfp" )
 

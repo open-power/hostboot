@@ -36,10 +36,10 @@ namespace MBOX
 
     enum MBOXReasonCode
     {
-        RC_INVALID_LENGTH            = MBOX_COMP_ID | 0x01,
-        RC_INVALID_MESSAGE_TYPE      = MBOX_COMP_ID | 0x02,
-        RC_NO_PERM_TO_SEND           = MBOX_COMP_ID | 0x03,
-        RC_MSG_PENDING               = MBOX_COMP_ID | 0x04,
+        RC_INVALID_LENGTH            = HBMBOX_COMP_ID | 0x01,
+        RC_INVALID_MESSAGE_TYPE      = HBMBOX_COMP_ID | 0x02,
+        RC_NO_PERM_TO_SEND           = HBMBOX_COMP_ID | 0x03,
+        RC_MSG_PENDING               = HBMBOX_COMP_ID | 0x04,
     };
 };
 

@@ -27,26 +27,8 @@
  *
  *  2011-09-28  mww Forked from /esw/fips740/Builds/b0824a_1135.740/src/util/fsp
  *
-*/
-
-
-/******************************************************************************/
-// I n c l u d e s
-/*****************************************************************************/
-#include    <stdio.h>
-#include    <stdlib.h>
-#include    <string.h>                          // memcpy
-
-#include    <hbotcompid.H>
-#include    <errl/errlentry.H>
-#include    <errl/errlmanager.H>
-#include    <errl/errlreasoncodes.H>
-
+ */
 #include    <errl/errluserdetails.H>
-
-#include    "errlsctn.H"
-#include    <errl/errlud.H>                        // ErrlFFDC
-
 
 namespace ERRORLOG
 {
@@ -58,7 +40,6 @@ ErrlUserDetails::ErrlUserDetails()
 : iv_CompId(HBERRL_COMP_ID),
   iv_Version(0),
   iv_SubSection(0),
-  iv_pErrlFFDC(NULL),
   iv_pBuffer(NULL),
   iv_BufLen(0)
 {
@@ -69,55 +50,27 @@ ErrlUserDetails::ErrlUserDetails()
 /*****************************************************************************/
 ErrlUserDetails::~ErrlUserDetails()
 {
-    if (iv_pBuffer)
-    {
-        delete [] iv_pBuffer;
-        iv_pBuffer = NULL;
-    }
-
+    delete [] iv_pBuffer;
+    iv_pBuffer = NULL;
 }
 
 
 /*****************************************************************************/
 //  ErrlUserDetails  add/appendToLog
 /*****************************************************************************/
-void ErrlUserDetails::addToLog(
-        errlHndl_t      i_errl,
-        const void      *i_paddBuf,
-        const uint32_t  i_addBufLen )
+void ErrlUserDetails::addToLog(errlHndl_t i_errl)
 {
-
-    assert( i_errl != NULL );
-
-    if ( iv_pErrlFFDC == NULL )
+    if((i_errl) && (iv_BufLen))
     {
-        // first time through, do an addFFDC() and save the returned handle
-        iv_pErrlFFDC =   i_errl->addFFDC(
-                                    iv_CompId,
-                                    iv_pBuffer,
-                                    iv_BufLen,
-                                    iv_Version,
-                                    iv_SubSection );
-
-        // assert if fails to addFFDC
-        assert( iv_pErrlFFDC != NULL );
-    }
-
-    // if there is a buffer/len , append it to the existing FFDC.
-    if ( ( i_paddBuf != NULL ) && ( i_addBufLen > 0 ) )
-    {
-        i_errl->appendToFFDC(
-                        iv_pErrlFFDC,
-                        i_paddBuf,
-                        i_addBufLen );
+        i_errl->addFFDC(iv_CompId, iv_pBuffer, iv_BufLen, iv_Version,
+                        iv_SubSection );
     }
 }
 
-
 /*****************************************************************************/
-// ErrlUserDetails allocUsrBuf
+// ErrlUserDetails reallocUsrBuf
 /*****************************************************************************/
-uint8_t * ErrlUserDetails::allocUsrBuf(const uint32_t i_size)
+uint8_t * ErrlUserDetails::reallocUsrBuf(const uint32_t i_size)
 {
     uint8_t * pNewBuffer = new uint8_t[i_size];
     if (iv_pBuffer)

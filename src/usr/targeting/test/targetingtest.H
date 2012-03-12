@@ -56,7 +56,8 @@
 #include <targeting/iterators/rangefilter.H>
 #include <targeting/predicates/predicatectm.H>
 #include <targeting/predicates/predicatepostfixexpr.H>
-#include <errl/errlUserDetailsTarget.H>
+#include <targeting/targreasoncodes.H>
+#include <errl/errludtarget.H>
 
 #include <kernel/console.H> //@fixme
 
@@ -1486,20 +1487,27 @@ class TargetingTestSuite: public CxxTest::TestSuite
         TARGETING::Target* l_pTarget2 = MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
         l_service.masterProcChipTargetHandle( l_pTarget1);
 
-        ErrlUserDetailsTarget l_errlUdTarget1( l_pTarget1 );
-        ErrlUserDetailsTarget l_errlUdTarget2( l_pTarget2 );
+        // Create an errorlog to test FFDC capture of targets
+        /*@
+         * @errortype
+         * @severity ERRORLOG_SEV_INFORMATIONAL
+         * @moduleid TARG_MOD_TEST
+         * @reasoncode TARG_RC_TEST_TARGET_FFDC
+         * @userdata1 Test data 1
+         * @userdata2 Test data 2
+         * @devdesc User Details unit test - create target user detail data
+         */
+        errlHndl_t l_err;
+        l_err = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
+                              TARG_MOD_TEST,
+                              TARG_RC_TEST_TARGET_FFDC,
+                              0x0011223344556677,
+                              0x8899aabbccddeeff);
+                               
+        ErrlUserDetailsTarget(l_pTarget1).addToLog(l_err);
+        ErrlUserDetailsTarget(l_pTarget2).addToLog(l_err);
 
-        // Create errorlogs to test FFDC capture of a target
-        errlHndl_t l_err1, l_err2;
-        l_err1 = new ErrlEntry( ERRL_SEV_UNRECOVERABLE, 1, 2, 3, 4);
-        l_err2 = new ErrlEntry( ERRL_SEV_UNRECOVERABLE, 5, 6, 7, 8);
-
-        l_errlUdTarget1.addToLog( l_err1, NULL, 0 );
-        l_errlUdTarget2.addToLog( l_err2, NULL, 0 );
-        l_errlUdTarget1.addToLog( l_err1, NULL, 0 );
-
-        ERRORLOG::errlCommit( l_err1, TARG_COMP_ID );
-        ERRORLOG::errlCommit( l_err2, TARG_COMP_ID );
+        errlCommit(l_err, TARG_COMP_ID);
 
         TS_TRACE(EXIT_MRK "testErrlTargetFFDC");
     }

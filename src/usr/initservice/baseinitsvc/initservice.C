@@ -43,6 +43,8 @@
 #include    <sys/mm.h>
 #include    <vmmconst.h>
 
+#include    <errl/errludstring.H>
+
 #include    "initservice.H"
 #include    "initsvctasks.H"
 
@@ -91,6 +93,9 @@ errlHndl_t InitService::startTask( const TaskInfo       *i_ptask,
         if ( static_cast<int16_t> (l_tidrc) < 0 )
         {
             // task failed to launch, post an errorlog and dump some trace
+            TRACFCOMP(g_trac_initsvc, "ERROR: starting task '%s'",
+                      i_ptask->taskname);
+
             /*@     errorlog tag
              *  @errortype      ERRL_SEV_CRITICAL_SYS_TERM
              *  @moduleid       INITSVC_START_TASK_MOD_ID
@@ -107,6 +112,9 @@ errlHndl_t InitService::startTask( const TaskInfo       *i_ptask,
                     INITSERVICE::START_TASK_FAILED,
                     i_ptask->taskflags.module_id,
                     l_tidrc );
+
+            // Add the task name as user detail data
+            ERRORLOG::ErrlUserDetailsString(i_ptask->taskname).addToLog(l_errl);
         } // endif tidrc
         else
         {
@@ -142,6 +150,9 @@ errlHndl_t InitService::executeFn( const TaskInfo   *i_ptask,
     l_tidrc = task_create( i_ptask->taskfn, io_pargs);
     if (static_cast<int16_t> (l_tidrc) < 0)
     {
+        TRACFCOMP(g_trac_initsvc, "ERROR: starting function in task'%s'",
+                  i_ptask->taskname);
+
         /*@     errorlog tag
          *  @errortype      ERRL_SEV_CRITICAL_SYS_TERM
          *  @moduleid       INITSVC_START_FN_MOD_ID
@@ -160,6 +171,8 @@ errlHndl_t InitService::executeFn( const TaskInfo   *i_ptask,
                 i_ptask->taskflags.module_id,
                 l_tidrc );
 
+        // Add the task name as user detail data
+        ERRORLOG::ErrlUserDetailsString(i_ptask->taskname).addToLog(l_errl);
     } // endif tidrc
     else
     {
@@ -312,7 +325,7 @@ void InitService::init( void *io_ptr )
             if (  l_childrc != 0 )
             {
                 TRACFCOMP( g_trac_initsvc,
-                           "IS: Child task %s returned 0x%llx, no errlog",
+                           "ERROR: Child task '%s' returned 0x%llx, no errlog",
                            l_ptask->taskname,
                            l_childrc );
 
@@ -413,6 +426,7 @@ void InitService::doShutdown(uint64_t i_status)
         l_rc = mm_remove_pages(FLUSH,(*l_rb_iter)->vaddr,(*l_rb_iter)->size);
         if (l_rc)
         {
+            TRACFCOMP(g_trac_initsvc, "ERROR: flushing virtual memory");
             /*
              * @errorlog tag
              * @errortype       ERRL_SEV_CRITICAL_SYS_TERM
