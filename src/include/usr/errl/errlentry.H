@@ -63,15 +63,7 @@ namespace ERRORLOG
 // Forward class declarations
 /*****************************************************************************/
 class ErrlManager;
-
-
-
-
-// In Sprint 6, the return from errl->addFFDC changed from
-// ErrlFFDC* to ErrlUD*.  This typedef is for compatibility in
-// case anybody previously stored the return from errl->addFFDC() as
-// ErrlFFDC *.
-typedef ErrlUD ErrlFFDC;
+class ErrlUserDetailsBackTrace;
 
 /**
  *  @brief      Host Boot Error log entry class.
@@ -99,6 +91,9 @@ public:
      * To understand the meaning of these values, refer to the
      * Platform Event Log and SRC PLDD at: https://mcdoc.boeblingen.de.
      * ibm.com/out/out.ViewDocument.php?documentid=1675
+     *
+     * The backtrace is captured as user detail data. Use removeBackTrace to
+     * remove
      *
      * The order of parameters is arranged so that Host Boot error log
      * is as close to SP as possible.
@@ -350,9 +345,14 @@ public:
     bool collectTrace(const char i_name[],
                       const uint64_t i_max = 0);
 
-
-
-
+    /**
+     *  @brief Remove the back trace user detail data
+     *  When an error log is constructed, the back trace is automatically
+     *  captured. This function removes the backtrace. This should be used when
+     *  a caller knows that the backtrace is of no use and wants to limit the
+     *  size of the error log.
+     */
+    void removeBackTrace();
 
 private:
     /**
@@ -467,6 +467,7 @@ private:
     ErrlSrc         iv_Src;        // primary SRC section
     std::vector<ErrlUD*> iv_SectionVector;  // list of user defined sections
     std::vector<uint64_t> iv_btAddrs;       // list of addresses for the backtrace
+    ErrlUserDetailsBackTrace * iv_pBackTrace; // Pointer to back trace
 
     // TODO need to interpret term state and terminate accordingly.
     // TODO termstate is presently not being flattend into PEL

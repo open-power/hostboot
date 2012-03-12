@@ -61,7 +61,7 @@ ErrlEntry::ErrlEntry(const errlSeverity_t i_sev,
     iv_termState(TERM_STATE_UNKNOWN)
 {
     // Collect the Backtrace and add it to the error log
-    ErrlUserDetailsBackTrace().addToLog(this);
+    iv_pBackTrace = new ErrlUserDetailsBackTrace();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -75,6 +75,8 @@ ErrlEntry::~ErrlEntry()
         delete (*l_itr);
     }
 
+    delete iv_pBackTrace;
+    iv_pBackTrace = NULL;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -133,9 +135,9 @@ void ErrlEntry::appendToFFDC(ErrlUD * i_pErrlUD,
 ///////////////////////////////////////////////////////////////////////////////
 // Return a Boolean indication of success.
 
-// Use these to tag the UD section containing the trace. 
-const int FIPS_ERRL_UDT_TRACE              = 0x0c; 
-const int FIPS_ERRL_UDV_DEFAULT_VER_1      = 1; 
+// Use these to tag the UD section containing the trace.
+const int FIPS_ERRL_UDT_TRACE              = 0x0c;
+const int FIPS_ERRL_UDV_DEFAULT_VER_1      = 1;
 
 bool ErrlEntry::collectTrace(const char i_name[], const uint64_t i_max)
 {
@@ -209,6 +211,13 @@ bool ErrlEntry::collectTrace(const char i_name[], const uint64_t i_max)
     return l_rc;
 }
 
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+void ErrlEntry::removeBackTrace()
+{
+    delete iv_pBackTrace;
+    iv_pBackTrace = NULL;
+}
 
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
@@ -272,6 +281,14 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
 
     // User header contains the component ID of the committer.
     iv_User.setComponentId( i_committerComponent );
+
+    // Add the captured backtrace to the error log
+    if (iv_pBackTrace)
+    {
+        iv_pBackTrace->addToLog(this);
+        delete iv_pBackTrace;
+        iv_pBackTrace = NULL;
+    }
 }
 
 
