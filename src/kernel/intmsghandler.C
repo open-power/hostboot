@@ -20,12 +20,17 @@
 //  Origin: 30
 //
 //  IBM_PROLOG_END
+
 #include <kernel/intmsghandler.H>
 #include <sys/msg.h>
 #include <util/singleton.H>
 #include <kernel/console.H>
 #include <sys/interrupt.h>
 #include <util/lockfree/atomic_construct.H>
+#include <kernel/task.H>
+#include <kernel/taskmgr.H>
+#include <kernel/cpu.H>
+#include <kernel/scheduler.H>
 
 const char* INTR_MSGQ = "/msg/interrupt";
 
@@ -38,7 +43,7 @@ void InterruptMsgHdlr::create(MessageQueue * i_msgQ)
     {
         // TODO should this be considered an unrecoverable error?
         // i_msgQ has already been changed by the syscall, so we either have to
-        // make a new InterrupMsgHdlr object to match the new queue or we halt 
+        // make a new InterrupMsgHdlr object to match the new queue or we halt
         // the system.
         printk("WARNING replacing existing Interrupt handler!\n");
 
@@ -67,6 +72,9 @@ void InterruptMsgHdlr::create(MessageQueue * i_msgQ)
 
 void InterruptMsgHdlr::handleInterrupt()
 {
+    // Save the current task in case we context-switch away when sending
+    // the message.
+    task_t* t = TaskManager::getCurrentTask();
 
     // TODO will this always be processor 0 core 0 thread 0?
     // Need a way to pass this addr down from user code?
@@ -97,18 +105,34 @@ void InterruptMsgHdlr::handleInterrupt()
     }
 
     // else we got an external interrupt before we got things set up.
-    // TODO Is there anything that can be done other than 
+    // TODO Is there anything that can be done other than
     // leave the interrupt presenter locked.
     // Does the code that sets up the IP registers need to check to see if
     // there is an interrupt sitting there and send an EOI?
+
+    // Return the task to the scheduler queue if we did a context-switch.
+    if (TaskManager::getCurrentTask() != t)
+    {
+        t->cpu->scheduler->addTask(t);
+    }
 }
 
 
 void InterruptMsgHdlr::addCpuCore(uint64_t i_pir)
 {
+    // Save the current task in case we context-switch away when sending
+    // the message.
+    task_t* t = TaskManager::getCurrentTask();
+
     if(cv_instance)
     {
         cv_instance->sendMessage(MSG_INTR_ADD_CPU,(void *)i_pir,NULL,NULL);
+    }
+
+    // Return the task to the scheduler queue if we did a context-switch.
+    if (TaskManager::getCurrentTask() != t)
+    {
+        t->cpu->scheduler->addTask(t);
     }
 }
 
