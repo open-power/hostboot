@@ -68,6 +68,7 @@ enum    InitServiceModuleID
     START_FAPIPOREVE_ERRL_ID            =   0x1C,
     START_POREVE_ERRL_ID                =   0x1D,
     START_UTIL_ERRL_ID                  =   0x1E,
+    START_MDIA_ERRL_ID                  =   0x1F,
 
     //  Internal InitService codes
     INITSVC_START_TASK_MOD_ID           =   0x20,

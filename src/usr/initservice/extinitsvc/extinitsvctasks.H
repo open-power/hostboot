@@ -232,6 +232,20 @@ const TaskInfo g_exttaskinfolist[]   =   {
                START_POREVE_ERRL_ID               // module id
             }
         },
+
+        /**
+         * @brief MDIA code library
+         */
+        {
+            "libmdia.so" ,                        // taskname
+            NULL,                                 // no pointer to fn
+            {
+               INIT_TASK,                         // task type
+               EXT_IMAGE,                         // Extended Module
+               START_MDIA_ERRL_ID                 // module id
+            }
+        },
+
 // end TODO.
 
         //  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
