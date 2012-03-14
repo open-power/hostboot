@@ -25,17 +25,6 @@
 
 namespace MBOX
 {
-    static const uint32_t MBOX_MAX_DATA_BYTES = 64; //16 32-bit Data Registers
-
-    enum MboxReadStatus {
-        MBOX_ABORT_LAST_MSG  = 0x00000040, /* Cancel Timed Out Operation */
-        MBOX_DOORBELL_ERROR  = 0x00000010, /* Error Set In Error Register */
-        MBOX_XDN_ACK         = 0x00000004, /* LBUS Data Acknowledgment */
-        MBOX_DATA_PENDING    = 0x00000001, /* PIB Data Pending */
-        MBOX_ILLEGAL_OP      = 0x08000000, /* Illegal Operation Attempted */
-        MBOX_DATA_WRITE_ERR  = 0x04000000, /* Write Full LBUS Mailbox Error */
-        MBOX_DATA_READ_ERR   = 0x02000000, /* Read Empty LBUS Mailbox Error */
-        MBOX_PARITY_ERR      = 0x01000000, /* LBUS RAM Parity Error Detected */
-    };
+    // TODO add mailbox service interfaces
 };
 #endif

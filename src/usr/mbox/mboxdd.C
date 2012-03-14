@@ -28,6 +28,8 @@
 #include <errl/errlentry.H>
 #include <targeting/targetservice.H>
 
+using namespace MBOX;
+
 trace_desc_t* g_trac_mbox = NULL;
 TRAC_INIT(&g_trac_mbox, "MBOX", 4096); //4K
 
@@ -169,14 +171,17 @@ errlHndl_t MboxDD::read(TARGETING::Target* i_target,void *o_buffer,
     uint64_t l_stat = 0;
     errlHndl_t l_err = NULL;
     uint32_t l_64bitBuf[2] = {0};
+    uint32_t l_StatusReg[2] = {0};
     uint32_t l_IntReg[2] = {0};
     size_t l_64bitSize = sizeof(uint64_t);
+    size_t buflen = io_buflen;
+    io_buflen = 0;
 
     do
     {
-        if (MBOX::MBOX_MAX_DATA_BYTES < io_buflen)
+        if (MBOX_MAX_DATA_BYTES < buflen)
         {
-            TRACFCOMP(g_trac_mbox, ERR_MRK "MBOX::read> Invalid data length : io_buflen=%d", io_buflen);
+            TRACFCOMP(g_trac_mbox, ERR_MRK "MBOX::read> Invalid data length : io_buflen=%d", buflen);
             /*@
              * @errortype
              * @moduleid     MBOX::MOD_MBOXDD_READ
@@ -189,7 +194,7 @@ errlHndl_t MboxDD::read(TARGETING::Target* i_target,void *o_buffer,
                     MBOX::MOD_MBOXDD_READ,
                     MBOX::RC_INVALID_LENGTH,
                     target_to_uint64(i_target),
-                    TO_UINT64(io_buflen));
+                    TO_UINT64(buflen));
             l_err->collectTrace("MBOX",1024);
             break;
         }
@@ -202,8 +207,15 @@ errlHndl_t MboxDD::read(TARGETING::Target* i_target,void *o_buffer,
             TRACFCOMP(g_trac_mbox, ERR_MRK "MBOX::read> Unable to read PIB Interrupt Register");
             break;
         }
-        if ((l_IntReg[0] & MBOX::MBOX_DOORBELL_ERROR) ==
-             MBOX::MBOX_DOORBELL_ERROR)
+
+        /*if nothing on in the interrupt reg -- nothing for this function to do*/
+        if(!(l_IntReg[0]))
+        {
+            break;
+        }
+
+        if ((l_IntReg[0] & MBOX_DOORBELL_ERROR) ==
+             MBOX_DOORBELL_ERROR)
         {
             TRACFCOMP(g_trac_mbox, INFO_MRK "MBOX::read> Found interrupt on error status register");
             l_err = getErrStat(i_target,l_stat);
@@ -237,29 +249,33 @@ errlHndl_t MboxDD::read(TARGETING::Target* i_target,void *o_buffer,
          * Bit7-0 : Data Count PIB Slave B Doorbell 1
          */
         //Check for Abort
-        if ((l_IntReg[0] & MBOX::MBOX_ABORT_LAST_MSG) ==
-             MBOX::MBOX_ABORT_LAST_MSG &&
+        if ((l_IntReg[0] & MBOX_ABORT_LAST_MSG) ==
+            MBOX_ABORT_LAST_MSG &&
             (l_64bitBuf[0] & 0x40000000) == 0x40000000)
         {
-            l_stat |= MBOX::MBOX_ABORT_LAST_MSG;
+            l_stat |= MBOX_ABORT_LAST_MSG;
+            l_StatusReg[0] |= 0x40000000;
         }
         //Check for Xdn
-        if ((l_IntReg[0] & MBOX::MBOX_XDN_ACK) ==
-             MBOX::MBOX_XDN_ACK &&
+        if ((l_IntReg[0] & MBOX_XDN_ACK) ==
+            MBOX_XDN_ACK &&
             (l_64bitBuf[0] & 0x04000000) == 0x04000000)
         {
-            l_stat |= MBOX::MBOX_XDN_ACK;
+            l_stat |= MBOX_XDN_ACK;
+            l_StatusReg[0] |= 0x04000000;
         }
         //Check for PIB Pending
-        if ((l_IntReg[0] & MBOX::MBOX_DATA_PENDING) ==
-             MBOX::MBOX_DATA_PENDING &&
+        if ((l_IntReg[0] & MBOX_DATA_PENDING) ==
+             MBOX_DATA_PENDING &&
             (l_64bitBuf[0] & 0x20000000) == 0x20000000)
         {
-            l_stat |= MBOX::MBOX_DATA_PENDING;
+            l_stat |= MBOX_DATA_PENDING;
             //Read how many bytes are significant
-            if (io_buflen < ((l_64bitBuf[0] & 0x000FF000) >> 12))
+            io_buflen = ((l_64bitBuf[0] & 0x000FF000) >> 12);
+            if (buflen < io_buflen)
             {
                 TRACFCOMP(g_trac_mbox, INFO_MRK "MBOX::read> Data truncated, input buffer length less than number of significant bytes");
+                io_buflen = buflen;
             }
             uint32_t i = 0;
             uint32_t l_data[2];
@@ -290,10 +306,17 @@ errlHndl_t MboxDD::read(TARGETING::Target* i_target,void *o_buffer,
                 break;
             }
 
-            //Write-to-Clear PIB Pending,Xup,and bits 23-12
-            l_64bitBuf[0] = 0x22FFF000;
+            //Write-to-Clear PIB Pending,and bits 23-12 (data and header count)
+            //Write to set Xup
+            l_StatusReg[0] |= 0x22FFF000;
+        }
+
+
+        //Write to clear PIB Pending, Abort, and Xdn (all that apply)
+        if(l_StatusReg[0])
+        {
             l_err = deviceOp(DeviceFW::WRITE,i_target,
-                             l_64bitBuf,l_64bitSize,
+                             l_StatusReg,l_64bitSize,
                              DEVICE_XSCOM_ADDRESS(MBOX_DB_STAT_CNTRL_1));
             if (l_err)
             {
@@ -303,17 +326,21 @@ errlHndl_t MboxDD::read(TARGETING::Target* i_target,void *o_buffer,
         }
 
         //Write-to-Clear 'on' bits of interrupt reg
-        l_err = deviceOp(DeviceFW::WRITE,i_target,
-                l_IntReg,l_64bitSize,
-                DEVICE_XSCOM_ADDRESS(MBOX_DB_INT_REG_PIB));
-        if (l_err)
+        if(l_IntReg[0])
         {
-            TRACFCOMP(g_trac_mbox, ERR_MRK "MBOX::read> Unable to clear PIB Interrupt Register");
-            break;
+            l_err = deviceOp(DeviceFW::WRITE,i_target,
+                             l_IntReg,l_64bitSize,
+                             DEVICE_XSCOM_ADDRESS(MBOX_DB_INT_REG_PIB));
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_mbox, ERR_MRK "MBOX::read> Unable to clear PIB Interrupt Register");
+                break;
+            }
         }
-        (*o_status) = l_stat;
-
     } while(0);
+
+    (*o_status) = l_stat;
+
 
     return l_err;
 }
@@ -331,7 +358,7 @@ errlHndl_t MboxDD::write(TARGETING::Target* i_target,void* i_buffer,
     do
     {
         //Expect size in bytes
-        if (i_buflen > MBOX::MBOX_MAX_DATA_BYTES)
+        if (i_buflen > MBOX_MAX_DATA_BYTES)
         {
             TRACFCOMP(g_trac_mbox, ERR_MRK "MBOX::write> Invalid data length : i_buflen=%d", i_buflen);
             /*@
@@ -343,17 +370,17 @@ errlHndl_t MboxDD::write(TARGETING::Target* i_target,void* i_buffer,
              * @devdesc      MboxDD::write> Invalid data length (> msg_t size)
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                    MBOX::MOD_MBOXDD_WRITE,
-                    MBOX::RC_INVALID_LENGTH,
-                    target_to_uint64(i_target),
-                    TO_UINT64(i_buflen));
+                                            MBOX::MOD_MBOXDD_WRITE,
+                                            MBOX::RC_INVALID_LENGTH,
+                                            target_to_uint64(i_target),
+                                            TO_UINT64(i_buflen));
             l_err->collectTrace("MBOX",1024);
             break;
         }
 
         l_err = deviceOp(DeviceFW::READ,i_target,
-                l_64bitBuf,l_64bitSize,
-                DEVICE_XSCOM_ADDRESS(MBOX_DB_STAT_CNTRL_1));
+                         l_64bitBuf,l_64bitSize,
+                         DEVICE_XSCOM_ADDRESS(MBOX_DB_STAT_CNTRL_1));
         if (l_err)
         {
             TRACFCOMP(g_trac_mbox, ERR_MRK "MBOX::write> Unable to read Doorbell Status/Control Register");
@@ -375,83 +402,60 @@ errlHndl_t MboxDD::write(TARGETING::Target* i_target,void* i_buffer,
          * Bit11-8 : Header Count PIB Slave B Doorbell 1
          * Bit7-0 : Data Count PIB Slave B Doorbell 1
          */
-        //Verify Permission-to-Send
-        if ((l_64bitBuf[0] & 0x80000000) == 0x80000000)
+        //Verify LBUS Pending,
+        if ((l_64bitBuf[0] & 0x10000FFF) == 0)
         {
-            //Verify LBUS Pending,
-            if ((l_64bitBuf[0] & 0x10000FFF) == 0)
+            uint32_t i = 0;
+            uint32_t l_data[2] = {0};
+            uint8_t l_numRegs = (i_buflen*sizeof(uint8_t))/sizeof(uint32_t);
+            if ((i_buflen*sizeof(uint8_t))%sizeof(uint32_t) != 0) l_numRegs++;
+            uint32_t *l_buf = static_cast<uint32_t *>(i_buffer);
+            //Write Data registers
+            while (i < l_numRegs)
             {
-                uint32_t i = 0;
-                uint32_t l_data[2] = {0};
-                uint8_t l_numRegs = (i_buflen*sizeof(uint8_t))/sizeof(uint32_t);
-                if ((i_buflen*sizeof(uint8_t))%sizeof(uint32_t) != 0) l_numRegs++;
-                uint32_t *l_buf = static_cast<uint32_t *>(i_buffer);
-                //Write Data registers
-                while (i < l_numRegs)
-                {
-                    l_data[0] = *(l_buf+i);
-                    l_err = deviceOp(DeviceFW::WRITE,i_target,
-                            l_data,l_64bitSize,
-                            DEVICE_XSCOM_ADDRESS(MBOX_DATA_PIB_START+i));
-                    if (l_err)
-                    {
-                        TRACFCOMP(g_trac_mbox, ERR_MRK "MBOX::write> Unable to write Data Area Register 0x%X",MBOX_DATA_PIB_START+i);
-                        break;
-                    }
-                    i++;
-                }
-                if (l_err)
-                {
-                    break;
-                }
-
-                //Write LBUS Pending(28) and Data Count bits(11-0)
-                l_64bitBuf[0] = 0x10000000 | i_buflen;
+                l_data[0] = *(l_buf+i);
                 l_err = deviceOp(DeviceFW::WRITE,i_target,
-                        l_64bitBuf,l_64bitSize,
-                        DEVICE_XSCOM_ADDRESS(MBOX_DB_STAT_CNTRL_1));
+                                 l_data,l_64bitSize,
+                                 DEVICE_XSCOM_ADDRESS(MBOX_DATA_PIB_START+i));
                 if (l_err)
                 {
-                    TRACFCOMP(g_trac_mbox, ERR_MRK "MBOX::write> Unable to set Doorbell Status/Control Register");
+                    TRACFCOMP(g_trac_mbox, ERR_MRK "MBOX::write> Unable to write Data Area Register 0x%X",MBOX_DATA_PIB_START+i);
                     break;
                 }
+                i++;
             }
-            else
+            if (l_err)
             {
-                TRACFCOMP(g_trac_mbox, ERR_MRK "MBOX::write> Message still pending : MBOX_DB_STAT_CNTRL_1=%X", l_64bitBuf[0]);
-                /*@
-                 * @errortype
-                 * @moduleid     MBOX::MOD_MBOXDD_WRITE
-                 * @reasoncode   MBOX::RC_MSG_PENDING
-                 * @userdata1    Target ID String...
-                 * @userdata2    Status/Control Register
-                 * @devdesc      MboxDD::write> Message still pending
-                 */
-                l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                        MBOX::MOD_MBOXDD_WRITE,
-                        MBOX::RC_MSG_PENDING,
-                        target_to_uint64(i_target),
-                        reinterpret_cast<uint64_t>(l_64bitBuf));
-                l_err->collectTrace("MBOX",1024);
+                break;
+            }
+
+            //Write LBUS Pending(28) and Data Count bits(11-0)
+            l_64bitBuf[0] = 0x10000000 | i_buflen;
+            l_err = deviceOp(DeviceFW::WRITE,i_target,
+                             l_64bitBuf,l_64bitSize,
+                             DEVICE_XSCOM_ADDRESS(MBOX_DB_STAT_CNTRL_1));
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_mbox, ERR_MRK "MBOX::write> Unable to set Doorbell Status/Control Register");
                 break;
             }
         }
         else
         {
-            TRACFCOMP(g_trac_mbox, ERR_MRK "MBOX::write> Permission-to-Send bit not set : MBOX_DB_STAT_CNTRL_1=%X", l_64bitBuf[0]);
+            TRACFCOMP(g_trac_mbox, ERR_MRK "MBOX::write> Message still pending : MBOX_DB_STAT_CNTRL_1=%X", l_64bitBuf[0]);
             /*@
              * @errortype
              * @moduleid     MBOX::MOD_MBOXDD_WRITE
-             * @reasoncode   MBOX::RC_NO_PERM_TO_SEND
+             * @reasoncode   MBOX::RC_MSG_PENDING
              * @userdata1    Target ID String...
              * @userdata2    Status/Control Register
-             * @devdesc      MboxDD::write> Permission-to-Send not set
+             * @devdesc      MboxDD::write> Message still pending
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                    MBOX::MOD_MBOXDD_WRITE,
-                    MBOX::RC_NO_PERM_TO_SEND,
-                    target_to_uint64(i_target),
-                    reinterpret_cast<uint64_t>(l_64bitBuf));
+                                            MBOX::MOD_MBOXDD_WRITE,
+                                            MBOX::RC_MSG_PENDING,
+                                            target_to_uint64(i_target),
+                                            reinterpret_cast<uint64_t>(l_64bitBuf));
             l_err->collectTrace("MBOX",1024);
             break;
         }
@@ -483,28 +487,28 @@ errlHndl_t MboxDD::getErrStat(TARGETING::Target* i_target,uint64_t &o_status)
         else
         {
             //Check for Illegal Op
-            if ((l_64bitBuf[0] & MBOX::MBOX_ILLEGAL_OP) ==
-                 MBOX::MBOX_ILLEGAL_OP)
+            if ((l_64bitBuf[0] & MBOX_ILLEGAL_OP) ==
+                 MBOX_ILLEGAL_OP)
             {
-                o_status |= MBOX::MBOX_ILLEGAL_OP;
+                o_status |= MBOX_ILLEGAL_OP;
             }
             //Check for Write Full
-            if ((l_64bitBuf[0] & MBOX::MBOX_DATA_WRITE_ERR) ==
-                 MBOX::MBOX_DATA_WRITE_ERR)
+            if ((l_64bitBuf[0] & MBOX_DATA_WRITE_ERR) ==
+                 MBOX_DATA_WRITE_ERR)
             {
-                o_status |= MBOX::MBOX_DATA_WRITE_ERR;
+                o_status |= MBOX_DATA_WRITE_ERR;
             }
             //Check for Read Empty
-            if ((l_64bitBuf[0] & MBOX::MBOX_DATA_READ_ERR) ==
-                 MBOX::MBOX_DATA_READ_ERR)
+            if ((l_64bitBuf[0] & MBOX_DATA_READ_ERR) ==
+                 MBOX_DATA_READ_ERR)
             {
-                o_status |= MBOX::MBOX_DATA_READ_ERR;
+                o_status |= MBOX_DATA_READ_ERR;
             }
             //Check for Parity Error & add address of parity error
-            if ((l_64bitBuf[0] & MBOX::MBOX_PARITY_ERR) ==
-                 MBOX::MBOX_PARITY_ERR)
+            if ((l_64bitBuf[0] & MBOX_PARITY_ERR) ==
+                 MBOX_PARITY_ERR)
             {
-                o_status |= MBOX::MBOX_PARITY_ERR;
+                o_status |= MBOX_PARITY_ERR;
                 uint64_t l_temp = (l_64bitBuf[0] & 0x00FF0000);
                 o_status |= (l_temp << 40);
             }
@@ -531,6 +535,30 @@ errlHndl_t MboxDD::getErrStat(TARGETING::Target* i_target,uint64_t &o_status)
 MboxDD::MboxDD()
 {
     TRACFCOMP(g_trac_mbox, "MboxDD::MboxDD()> ");
+}
+
+errlHndl_t MboxDD::init(TARGETING::Target* i_target)
+{
+    errlHndl_t err = NULL;
+    // Setup mailbox intr mask reg
+    // Set bits 6,4,2,0
+    // assume we always use mailbox 1
+    uint64_t scom_data = (static_cast<uint64_t>(MBOX_ABORT_LAST_MSG) |
+                          static_cast<uint64_t>(MBOX_DOORBELL_ERROR) |
+                          static_cast<uint64_t>(MBOX_XDN_ACK) |
+                          static_cast<uint64_t>(MBOX_DATA_PENDING)) << 32;
+
+    size_t scom_len = sizeof(uint64_t);
+
+     
+    err = deviceOp(DeviceFW::WRITE,
+                   i_target,
+                   reinterpret_cast<void*>(&scom_data),
+                   scom_len,
+                   DEVICE_XSCOM_ADDRESS(MBOX_DB_INT_MASK_PIB_RS));
+
+    return err;
+
 }
 
 /**

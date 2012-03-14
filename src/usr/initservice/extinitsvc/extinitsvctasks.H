@@ -79,6 +79,18 @@ const TaskInfo g_exttaskinfolist[]   =   {
         },
 
         /**
+         * @brief Mailbox service provider
+         */
+        {
+            "libmbox.so",                               // taskname
+            NULL,                                       // no ptr to fnct
+            {
+                INIT_TASK,                              // task type
+                EXT_IMAGE,                              // Extended Module
+            }
+        },
+
+        /**
          * @brief   FSI Device Driver
          */
 

@@ -44,7 +44,7 @@ class IntrTest: public CxxTest::TestSuite
          */
         void test_verifyState( void )
         {
-
+#if defined(__INTR_TEST__)
             // TODO Temporaritly DISABLE in VBU until P8 support is added
             if( TARGETING::is_vpo() )
             {
@@ -105,6 +105,7 @@ class IntrTest: public CxxTest::TestSuite
                     }
                 }
             }
+#endif
         }
 
         /**
@@ -112,6 +113,7 @@ class IntrTest: public CxxTest::TestSuite
          */
         void test_enableDisable( void )
         {
+#if defined(__INTR_TEST__)
             // TODO Temporaritly DISABLE in VBU until P8 support is added
             if( TARGETING::is_vpo() )
             {
@@ -148,6 +150,7 @@ class IntrTest: public CxxTest::TestSuite
             {
                 TS_FAIL("INTR not enabled");
             }
+#endif
         }
 
         /**
