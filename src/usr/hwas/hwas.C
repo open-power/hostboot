@@ -34,294 +34,211 @@
 // Includes
 /******************************************************************************/
 #include    <stdint.h>
+#include    <assert.h>
 
-#include    <kernel/console.H>
-#include    <trace/interface.H>
-#include    <initservice/taskargs.H>
-#include    <errl/errlentry.H>
 #include    <targeting/targetservice.H>
 #include    <targeting/iterators/rangefilter.H>
 #include    <targeting/predicates/predicates.H>
-#include    <fsi/fsiif.H>
+#include    <targeting/util.H>
 
 #include    <hwas/hwas.H>
-#include    <hwas/deconfigGard.H>
-#include    <targeting/util.H>
+#include    <hwas/hwasCommon.H>
 
 namespace   HWAS
 {
-trace_desc_t *g_trac_hwas = NULL;
-TRAC_INIT(&g_trac_hwas, "HWAS", 2048 );
 
 using   namespace   TARGETING;
 
 
-/**
- * @brief   simple helper fn to clear hwas state
- *
- *  @param[in]   -   i_rhwasState - ref to HwasState attribute struct
- *
- *  @return      -   none
- */
-void    clearHwasState( TARGETING::HwasState &i_rhwasState )
+//@todo - This should come from the target/attribute code somewhere
+uint64_t target_to_uint64(const Target* i_target)
 {
-    i_rhwasState.poweredOn             =   false;
-    i_rhwasState.present               =   false;
-    i_rhwasState.functional            =   false;
-    i_rhwasState.changedSinceLastIPL   =   false;
-    i_rhwasState.gardLevel             =   0;
-
+    uint64_t id = 0;
+    if (i_target == NULL)
+    {
+        id = 0x0;
+    }
+    else if (i_target == MASTER_PROCESSOR_CHIP_TARGET_SENTINEL)
+    {
+        id = 0xFFFFFFFFFFFFFFFF;
+    }
+    else
+    {
+        // physical path, 3 nibbles per type/instance pair
+        //   TIITIITII... etc.
+        EntityPath epath;
+        i_target->tryGetAttr<ATTR_PHYS_PATH>(epath);
+        for (uint32_t x = 0; x < epath.size(); x++)
+        {
+            id = id << 12;
+            id |= (uint64_t)((epath[x].type << 8) & 0xF00);
+            id |= (uint64_t)(epath[x].instance & 0x0FF);
+        }
+    }
+    return id;
 }
 
 
 /**
- * @brief   simple helper fn to set hwas state to poweredOn, present, functional
+ * @brief       simple helper function to get and set hwas to clear state
  *
- *  @param[in]   -   i_rhwasState - ref to HwasState attribute struct
+ * @param[in]   i_target    pointer to target that we're looking at
  *
- *  @return      -   none
- *
+ * @return      none
  */
-void    enableHwasState( TARGETING::HwasState &i_rhwasState )
+void clearHwasState(Target * i_target)
 {
-    i_rhwasState.poweredOn             =   true;
-    i_rhwasState.present               =   true;
-    i_rhwasState.functional            =   true;
-    i_rhwasState.changedSinceLastIPL   =   false;
-    i_rhwasState.gardLevel             =   0;
-
+    HwasState hwasState             = i_target->getAttr<ATTR_HWAS_STATE>();
+    hwasState.poweredOn             = false;
+    hwasState.present               = false;
+    hwasState.functional            = false;
+    hwasState.changedSinceLastIPL   = false;
+    hwasState.gardLevel             = 0;
+    i_target->setAttr<ATTR_HWAS_STATE>(hwasState);
 }
 
-void    init_target_states( void *io_pArgs )
+/**
+ * @brief       simple helper fn to get and set hwas state to poweredOn,
+ *                  present, functional
+ *
+ * @param[in]   i_target    pointer to target that we're looking at
+ *
+ * @return      none
+ *
+ */
+void enableHwasState(Target *i_target)
 {
-    errlHndl_t  l_errl  =   NULL;
-    TARGETING::HwasState l_hwasState;
+    HwasState hwasState     = i_target->getAttr<ATTR_HWAS_STATE>();
+    hwasState.poweredOn     = true;
+    hwasState.present       = true;
+    hwasState.functional    = true;
+    i_target->setAttr<ATTR_HWAS_STATE>( hwasState );
+}
 
-    TRACDCOMP( g_trac_hwas, "init_target_states entry: set default HWAS state:" );
+errlHndl_t discoverTargets()
+{
+    HWAS_DBG("discoverTargets entry");
+    errlHndl_t errl = NULL;
 
     //  loop through all the targets and set HWAS_STATE to a known default
-    TARGETING::TargetIterator l_TargetItr = TARGETING::targetService().begin();
-    for(    ;
-            l_TargetItr != TARGETING::targetService().end();
-            ++l_TargetItr
-    )
+    for (TargetIterator target = targetService().begin();
+            target != targetService().end();
+            ++target)
     {
-        l_hwasState =   l_TargetItr->getAttr<ATTR_HWAS_STATE>();
-        clearHwasState(l_hwasState);
-        l_TargetItr->setAttr<ATTR_HWAS_STATE>( l_hwasState );
+        clearHwasState(*target);
     }
 
-    /**
-     * @todo    Enable cpu 0 and centaur 0 for now.
-     */
-    //  $$$$$   TEMPORARY   $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-    //  get the master processor, this should be CPU 0
-    TARGETING::Target* l_pMasterProcChipTargetHandle = NULL;
-    (void)TARGETING::targetService().masterProcChipTargetHandle(
-            l_pMasterProcChipTargetHandle);
-    if (l_pMasterProcChipTargetHandle == NULL)
+    // ASSUMPTIONS: Physical hierarchy is:
+    // CLASS_SYS (exactly 1)
+    //  \->children: CLASS_ENC
+    //     \->children: CLASS_* where ALL require hardware query
+    //        \->children: CLASS_* where NONE require hardware query
+
+    // find CLASS_SYS (the top level target)
+    Target* pSys;
+    targetService().getTopLevelTarget(pSys);
+
+    do
     {
-        TRACFCOMP( g_trac_hwas, "FAILED to get master processor target");
-    }
-    else
-    {
-        //  set master chip to poweredOn, present, functional
-
-        l_hwasState =   l_pMasterProcChipTargetHandle->getAttr<ATTR_HWAS_STATE>();
-        enableHwasState( l_hwasState );
-        l_pMasterProcChipTargetHandle->setAttr<ATTR_HWAS_STATE>( l_hwasState );
-
-        //  get the mcs "chiplets" associated with this cpu
-        TARGETING::PredicateCTM l_mcsChipFilter(CLASS_UNIT, TYPE_MCS);
-        TARGETING::TargetHandleList l_mcsTargetList;
-        TARGETING::targetService().getAssociated(
-                l_mcsTargetList,
-                l_pMasterProcChipTargetHandle,
-                TARGETING::TargetService::CHILD,
-                TARGETING::TargetService::IMMEDIATE,
-                &l_mcsChipFilter );
-        //  debug...
-        TRACDCOMP( g_trac_hwas,
-                "%d MCSs for master processor",
-                l_mcsTargetList.size() );
-
-        for ( uint8_t i=0; i < l_mcsTargetList.size(); i++ )
+        if (pSys == NULL)
         {
-            //  set each MCS to poweredON, present, functional
-            l_hwasState =   l_mcsTargetList[i]->getAttr<ATTR_HWAS_STATE>();
-            enableHwasState( l_hwasState );
-            l_mcsTargetList[i]->setAttr<ATTR_HWAS_STATE>( l_hwasState );
+            // shouldn't happen, but if it does, then we're done - nothing present.
+            HWAS_ERR("pSys NULL - nothing present");
+            break; // break out of the do/while so that we can return
+        }
 
+        // mark this as present
+        enableHwasState(pSys);
+        HWAS_DBG("pSys   %x (%p) %x/%x - marked present",
+            target_to_uint64(pSys), pSys,
+            pSys->getAttr<ATTR_CLASS>(), pSys->getAttr<ATTR_TYPE>());
 
-            //  If ATTR_CHIP_UNIT==0 or 1, find the centaur underneath it
-            //  and set it to good as well.
-            if (    ( l_mcsTargetList[i]->getAttr<ATTR_CHIP_UNIT>() == 0 )
-                 || ( l_mcsTargetList[i]->getAttr<ATTR_CHIP_UNIT>() == 1 )
-                )
+        // find CLASS_ENC
+        PredicateCTM predEnc(CLASS_ENC);
+        TargetHandleList pEncList;
+        targetService().getAssociated( pEncList, pSys,
+            TargetService::CHILD, TargetService::ALL, &predEnc );
+
+        for (TargetHandleList::iterator pEnc_it = pEncList.begin();
+                pEnc_it != pEncList.end();
+                pEnc_it++)
+        {
+            TargetHandle_t pEnc = *pEnc_it;
+
+            // mark it as present
+            enableHwasState(pEnc);
+            HWAS_DBG("pEnc   %x (%p) %x/%x - marked present",
+                target_to_uint64(pEnc), pEnc,
+                pEnc->getAttr<ATTR_CLASS>(), pEnc->getAttr<ATTR_TYPE>());
+
+            // now find the physical children
+            TargetHandleList pChildList;
+            targetService().getAssociated(pChildList, pEnc,
+                TargetService::CHILD, TargetService::IMMEDIATE);
+
+            // pass this list of children to the hwas common api
+            // pChildList will be modified to only have present targets
+            HWAS_DBG("pChildList size before %d", pChildList.size());
+            errl = platPresenceDetect(pChildList);
+            HWAS_DBG("pChildList size after %d", pChildList.size());
+
+            if (errl != NULL)
             {
-                TARGETING::PredicateCTM l_membufChips(CLASS_CHIP, TYPE_MEMBUF);
-                TARGETING::TargetHandleList l_memTargetList;
-                TARGETING::targetService().getAssociated(l_memTargetList,
-                        l_mcsTargetList[i],
-                        TARGETING::TargetService::CHILD_BY_AFFINITY,
-                        TARGETING::TargetService::ALL,
-                        &l_membufChips);
-                //  debug...
-                TRACDCOMP( g_trac_hwas,
-                        "%d MEMBUFSs associated with MCS %d",
-                        l_memTargetList.size(),
-                        l_mcsTargetList[i]->getAttr<ATTR_CHIP_UNIT>() );
+                break; // get out of the pEnc loop
+            }
 
-                for ( uint8_t ii=0; ii < l_memTargetList.size(); ii++ )
+            // read Chip ID/EC data from these physical chips, since they
+            //  are present
+            errl = platReadIDEC(pChildList);
+
+            if (errl != NULL)
+            {
+                break; // get out of the pEnc loop
+            }
+
+            // no errors - keep going
+
+            // at this point, pChildList only has present targets
+            // for each, mark them and their descendants as present
+            for (TargetHandleList::iterator pChild_it = pChildList.begin();
+                    pChild_it != pChildList.end();
+                    pChild_it++)
+            {
+                TargetHandle_t pChild = *pChild_it;
+
+                // set HWAS state to show it's present
+                enableHwasState(pChild);
+                HWAS_DBG("pChild %x (%p) %x/%x - detected present",
+                    target_to_uint64(pChild), pChild,
+                    pChild->getAttr<ATTR_CLASS>(),
+                    pChild->getAttr<ATTR_TYPE>());
+
+                // now need to mark all of this target's
+                //  physical descendants as present
+                TargetHandleList pDescList;
+                targetService().getAssociated( pDescList, pChild,
+                    TargetService::CHILD, TargetService::ALL);
+                for (TargetHandleList::iterator pDesc_it = pDescList.begin();
+                        pDesc_it != pDescList.end();
+                        pDesc_it++)
                 {
-                    // set the Centaur(s) connected to MCS0&1 to poweredOn,
-                    //      present, functional
-                    l_hwasState =   l_memTargetList[ii]->getAttr<ATTR_HWAS_STATE>();
-                    enableHwasState( l_hwasState );
-                    l_memTargetList[ii]->setAttr<ATTR_HWAS_STATE>( l_hwasState );
+                    TargetHandle_t pDesc = *pDesc_it;
+                    enableHwasState(pDesc);
+                    HWAS_DBG("pDsnds %x (%p) %x/%x - marked present",
+                        target_to_uint64(pDesc), pDesc,
+                        pDesc->getAttr<ATTR_CLASS>(),
+                        pDesc->getAttr<ATTR_TYPE>());
+                }
+            } // for pChild_it
+        } // for pEnc_it
+    } while (0);
 
-
-                    // enable MBA's for each centaur
-                    TARGETING::PredicateCTM l_mbaFilter(CLASS_UNIT, TYPE_MBA);
-                    TARGETING::TargetHandleList l_mbaTargetList;
-                    TARGETING::targetService().getAssociated(l_mbaTargetList,
-                            l_memTargetList[ii],
-                            TARGETING::TargetService::CHILD_BY_AFFINITY,
-                            TARGETING::TargetService::ALL, &l_mbaFilter);
-                    TRACDCOMP( g_trac_hwas,
-                                           "%d MBA's with MEMBUF %d",
-                                            l_mbaTargetList.size(),
-                                            ii );
-
-                    for ( uint8_t ij=0; ij < l_mbaTargetList.size(); ij++ )
-                    {
-                        l_hwasState =   l_mbaTargetList[ij]->getAttr<ATTR_HWAS_STATE>();
-                        enableHwasState( l_hwasState );
-                        l_mbaTargetList[ij]->setAttr<ATTR_HWAS_STATE>( l_hwasState );
-                    }
-
-
-                    // look for the dimms on each centaur
-                    TARGETING::PredicateCTM l_dimms(CLASS_LOGICAL_CARD, TYPE_DIMM);
-                    TARGETING::TargetHandleList l_dimmTargetList;
-                    TARGETING::targetService().getAssociated(l_dimmTargetList,
-                            l_memTargetList[ii],
-                            TARGETING::TargetService::CHILD_BY_AFFINITY,
-                            TARGETING::TargetService::ALL, &l_dimms);
-                    //  debug...
-                    TRACDCOMP( g_trac_hwas,
-                            "    %d DIMMs associated with MEM %d",
-                            l_dimmTargetList.size(), ii);
-
-                    // Return fapi::Targets to the caller
-                    for (uint32_t iii = 0; iii < l_dimmTargetList.size(); iii++)
-                    {
-                        // set the dimm(s) connected to MCS0 to poweredOn,
-                        //      present, functional
-                        l_hwasState =   l_dimmTargetList[iii]->getAttr<ATTR_HWAS_STATE>();
-                        l_hwasState.poweredOn             =   true;
-                        l_hwasState.present               =   true;
-                        l_hwasState.functional            =   true;
-                        l_hwasState.changedSinceLastIPL   =   false;
-                        l_hwasState.gardLevel             =   0;
-                        l_dimmTargetList[iii]->setAttr<ATTR_HWAS_STATE>( l_hwasState );
-                    }   // end for iii dimTargets
-                }   // end for ii memTargets
-            }   // end if only 0 and 1
-        }   // end for i mcsTargets
-    }   // end else
-    //  $$$$$   TEMPORARY   $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-
-    TRACFCOMP( g_trac_hwas, "$$ init_target_states DEBUG: return %p", l_errl );
-    task_end2( l_errl );
-}
-
-
-void    init_fsi( void *io_pArgs )
-{
-    errlHndl_t  l_errl      =   NULL;
-
-    TRACDCOMP( g_trac_hwas, "init_fsi entry" );
-
-    l_errl  =   FSI::initializeHardware( );
-    if ( l_errl )
+    if (errl != NULL)
     {
-        TRACFCOMP( g_trac_hwas, "ERROR: failed to init FSI hardware" );
-     }
-
-    task_end2( l_errl );
-}
-
-
-void    apply_fsi_info( void *io_pArgs )
-{
-    errlHndl_t  l_errl  =   NULL;
-
-    TRACDCOMP( g_trac_hwas, "apply_fsi_info entry" );
-
-
-    task_end2( l_errl );
-}
-
-void    apply_dd_presence( void *io_pArgs )
-{
-    errlHndl_t  l_errl      =   NULL;
-
-    TRACDCOMP( g_trac_hwas, "apply_dd_presence entry" );
-
-
-    task_end2( l_errl );
-}
-
-void    apply_pr_keyword_data( void *io_pArgs )
-{
-    errlHndl_t  l_errl      =   NULL;
-
-    TRACDCOMP( g_trac_hwas, "apply_pr_keyword_data" );
-
-
-    task_end2( l_errl );
-}
-
-void    apply_partial_bad( void *io_pArgs )
-{
-    errlHndl_t  l_errl      =   NULL;
-
-    TRACDCOMP( g_trac_hwas, "apply_partial_bad entry" );
-
-
-    task_end2( l_errl );
-}
-
-void    apply_gard( void *io_pArgs )
-{
-    errlHndl_t  l_errl      =   NULL;
-
-    TRACDCOMP( g_trac_hwas, "apply_gard entry" );
-
-    l_errl = theDeconfigGard().clearGardRecordsForReplacedTargets();
-
-    if (l_errl)
-    {
-        TRACFCOMP(g_trac_hwas, "ERROR: apply_gard failed to clear GARD Records for replaced Targets");
+        HWAS_ERR("returning errl %p", errl);
     }
-    else
-    {
-        l_errl = theDeconfigGard().deconfigureTargetsFromGardRecordsForIpl();
-
-        if (l_errl)
-        {
-            TRACFCOMP(g_trac_hwas, "ERROR: apply_gard failed to deconfigure Targets from GARD Records for IPL");
-        }
-        else
-        {
-            TRACFCOMP(g_trac_hwas, "apply_gard completed successfully");
-        }
-    }
-
-    task_end2( l_errl );
-}
-
+    return errl;
+} // discoverTargets
 
 };   // end namespace
 

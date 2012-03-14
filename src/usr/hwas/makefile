@@ -20,17 +20,22 @@
 #  Origin: 30
 #
 #  IBM_PROLOG_END
+
 ROOTPATH = ../../..
 
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/plat
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwas
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwas/plat
+
+VPATH += ${ROOTPATH}/src/usr/hwas/plat
 
 MODULE = hwas
 
-OBJS =  hwas.o deconfigGard.o testHWP.o
+# files in this directory
+OBJS =  hwas.o deconfigGard.o
 
-SUBDIRS=test.d
+# files in hwas/plat
+OBJS +=  hwasPlat.o hostbootIstep.o
+
+SUBDIRS = test.d
 
 include ${ROOTPATH}/config.mk

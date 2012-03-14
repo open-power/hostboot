@@ -38,114 +38,42 @@
 /******************************************************************************/
 // Includes
 /******************************************************************************/
-#include    <stdint.h>
+#include <stdint.h>
+#include <errl/errlentry.H>
 
-
-namespace   HWAS
+namespace HWAS
 {
-    /*
-     * @brief   init_target_states
-     *
-     *  Currently the state of every target is held in one bitmapped attribute
-     *  called HWAS_STATE.
-     *
-     *  This routine will walk through all the targets and initialize HWAS STATE
-     *  to a known default value.  This is useful if the developer wishes to
-     *  clean everything up to an known state - as such it is the very first
-     *  istep to run.
-     *
-     *  Currently everything is initialized to to powered off, etc. - init_fsi
-     *  and apply_fsi_info (the next isteps) will change this almost immediately.
-     *
-     *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
-     *                              or NULL.
-     *  return  none
-     *
-     */
-    void    init_target_states( void *io_pArgs );
 
-    /**
-     * @brief   init_fsi
-     *
-     *  Call into the fsi component to "walk the bus" and collect information
-     *  on the hardware configuration.
-     *
-     *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
-     *                              or NULL.
-     *  return  none
-     */
-    void    init_fsi( void *io_pArgs );
+/**
+ * @brief   initHardware   Common HWAS function to setup the hardware
+ *
+ *  It will call into the hwas platform-specific platInitHardware()
+ *  function to init the FSI hardware.
+ *
+ * @param  none
+ *
+ * @return errlHndl_t       valid errlHndl_t handle if there was an error
+ *                          NULL if no errors;
+ */
+errlHndl_t initHardware();
 
-    /**
-     * @brief   apply_fsi_info
-     *
-     * Call into the FSI Component, read the hardware information, and apply
-     * it to the target states.
-     *
-     *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
-     *                              or NULL.
-     *  return  none
-     */
-    void    apply_fsi_info( void *io_pArgs );
-
-    /**
-     * @brief   apply_dd_presence
-     *
-     *  Iterate over all targets and apply presence detect information to the
-     *  target states.
-     *  TBD
-     *
-     *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
-     *                              or NULL.
-     *  return  none
-     */
-    void    apply_dd_presence( void *io_pArgs );
-
-    /**
-     * @brief   apply_pr_keyword_data
-     *
-     * TBD
-     *
-     *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
-     *                              or NULL.
-     *  return  none
-     *
-     */
-    void    apply_pr_keyword_data( void *io_pArgs );
-
-    /**
-     * @brief   apply_partial bad
-     *
-     * Collect Partial Bad information and apply it to the target states.
-     * TBD
-     *
-     *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
-     *                              or NULL.
-     *  return  none
-     */
-    void    apply_partial_bad( void *io_pArgs );
-
-    /**
-     * @brief   apply_gard
-     *
-     * Collect GARD information and apply it to the target states.
-     * TBD
-     *
-     *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
-     *                              or NULL.
-     *  return  none
-     */
-    void    apply_gard( void *io_pArgs );
-
-    /**
-     * @brief   testHWP
-     *
-     * test Hardware procedure.  Althought this is called a test, we want it
-     * to run even in non-test builds.  Thus it is added here at the end of
-     * HWAS inititialization.
-     */
-    void    testHWP( void * io_pArgs );
-
+/**
+ * @brief   discoverTagets   Common HWAS function to build targeting
+ *
+ *  This routine will walk through all the targets and initialize HWAS STATE
+ *  to a known default value (powered off, etc.)
+ *
+ *  Then call into the hwas platform-specific platPresenceDetect() function
+ *  to read the hardware information, and apply it to the target states,
+ *  and call into the hwas platform-specifiction platReadIDEC() function
+ *  to get and set the ChipID and EC values.
+ *
+ * @param  none
+ *
+ * @return errlHndl_t       valid errlHndl_t handle if there was an error
+ *                          NULL if no errors;
+ */
+errlHndl_t discoverTargets();
 
 };   // end namespace
 

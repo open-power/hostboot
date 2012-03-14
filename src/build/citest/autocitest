@@ -335,6 +335,7 @@ while [ $(($modsstarted)) -lt 1 -o $(($modsstarted)) -ne $(($modscompleted)) ]; 
     
     if [ "$loopcount" -gt 60 ];   then
         echo    "ERROR: timed out after 5 minutes"
+        autosim $NOWIN --simcmd   "hb-Ps"
         timeout=$(($modsstarted - $modscompleted))
         break
     fi

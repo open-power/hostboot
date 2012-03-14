@@ -168,13 +168,13 @@ ${OBJDIR}/%.o ${OBJDIR}/%.list : %.C
 	mkdir -p ${OBJDIR}
 	${CXX} -c $(call FLAGS_FILTER, ${CXXFLAGS}, $<) $< \
 	       -o $@ ${INCFLAGS} -iquote .
-	${OBJDUMP} -dCS $@ > $(basename $@).list	
+	${OBJDUMP} -rdlCS $@ > $(basename $@).list	
 
 # Compiling *.cc files
 ${OBJDIR}/%.o ${OBJDIR}/%.list : %.cc
 	mkdir -p ${OBJDIR}
 	${CXX} -c ${CXXFLAGS} $< -o $@ ${INCFLAGS} -iquote .
-	${OBJDUMP} -dCS $@ > $(basename $@).list	
+	${OBJDUMP} -rdlCS $@ > $(basename $@).list	
 
 ${OBJDIR}/%.o ${OBJDIR}/%.list : %.c
 	mkdir -p ${OBJDIR}
@@ -187,7 +187,7 @@ else
 	${CXX} -c $(call FLAGS_FILTER, ${CXXFLAGS}, $<) $< \
 	      -o $@ ${INCFLAGS} -iquote .
 endif
-	${OBJDUMP} -dCS $@ > $(basename $@).list
+	${OBJDUMP} -rdlCS $@ > $(basename $@).list
 
 ${OBJDIR}/%.o : %.S
 	mkdir -p ${OBJDIR}

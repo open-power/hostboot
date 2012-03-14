@@ -28,6 +28,18 @@
 <attributes>
   <!-- ********************************************************************* -->
   <attribute>
+    <id>ATTR_CHIP_ID</id>
+    <targetType>TARGET_TYPE_PROC_CHIP,TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>
+        ID of a chip target
+        Read from the chip by the platform
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
     <id>ATTR_EC</id>
     <targetType>TARGET_TYPE_PROC_CHIP,TARGET_TYPE_MEMBUF_CHIP</targetType>
     <description>

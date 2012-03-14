@@ -130,6 +130,9 @@
     <attribute>
         <id>EC</id>
     </attribute>
+    <attribute>
+        <id>CHIP_ID</id>
+    </attribute>
 </targetType>
 
 <targetType>

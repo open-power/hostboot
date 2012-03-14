@@ -59,13 +59,13 @@
 using namespace fapi;
 using namespace TARGETING;
 
-namespace HWAS
-{
-
 /******************************************************************************/
 // Globals/Constants
 /******************************************************************************/
-extern trace_desc_t *g_trac_hwas;
+extern trace_desc_t *g_trac_imp_hwas;
+
+namespace HWAS
+{
 
 void    testHWP( void * io_pArgs )
 {

@@ -55,6 +55,34 @@ trace_desc_t* g_trac_deconf = NULL;
 namespace HWAS
 {
 
+errlHndl_t collectGard()
+{
+    TRAC_INF("collectGard entry" );
+
+    errlHndl_t errl = theDeconfigGard().clearGardRecordsForReplacedTargets();
+
+    if (errl)
+    {
+        TRAC_ERR("ERROR: collectGard failed to clear GARD Records for "
+                    "replaced Targets");
+    }
+    else
+    {
+        errl = theDeconfigGard().deconfigureTargetsFromGardRecordsForIpl();
+
+        if (errl)
+        {
+            TRAC_ERR("ERROR: collectGard failed to deconfigure Targets "
+                        "from GARD Records for IPL");
+        }
+        else
+        {
+            TRAC_INF("collectGard completed successfully");
+        }
+    }
+    return errl;
+}
+
 //******************************************************************************
 DeconfigGard & theDeconfigGard()
 {

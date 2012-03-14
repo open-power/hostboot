@@ -56,7 +56,7 @@
 #include    <initservice/initsvcstructs.H>
 
 //  -----   istep include files   -----
-#include    "istep04list.H"
+#include    "istep06list.H"
 
 #include    "istep10list.H"
 #include    "istep11list.H"
@@ -73,9 +73,9 @@ const  ExtTaskInfo  g_isteps[]    =   {
         { NULL, 0, NULL },                              //  dummy IStep 1
         { NULL, 0, NULL },                              //  dummy IStep 2
         { NULL, 0, NULL },                              //  dummy IStep 3
-        INITSERVICE::g_istep04TaskList,                  //  HWAS  IStep 4
+        { NULL, 0, NULL },                              //  dummy IStep 4
         { NULL, 0, NULL },                              //  dummy IStep 5
-        { NULL, 0, NULL },                              //  dummy IStep 6
+        INITSERVICE::g_istep06TaskList,                 //  HWAS  IStep 6
         { NULL, 0, NULL },                              //  dummy IStep 7
         { NULL, 0, NULL },                              //  dummy IStep 8
         { NULL, 0, NULL },                              //  dummy IStep 9

@@ -42,6 +42,18 @@ namespace HWAS
 {
 
 /**
+ * @brief   collectGard   Common HWAS function to collect the GARD info
+ *
+ *  It will call into hwas platform-specific functions.
+ *
+ * @param  none
+ *
+ * @return errlHndl_t       valid errlHndl_t handle if there was an error
+ *                          NULL if no errors;
+ */
+errlHndl_t collectGard();
+
+/**
  * @brief Returns a reference to the DeconfigGard singleton.
  */
 class DeconfigGard;
