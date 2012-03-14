@@ -118,7 +118,14 @@ void _start(void *io_pArgs)
          t != tasks.end();
          ++t)
     {
-        task_wait_tid(*t, NULL, NULL);
+        int status = 0;
+        task_wait_tid(*t, &status, NULL);
+
+        if (status != TASK_STATUS_EXITED_CLEAN)
+        {
+            TRACFCOMP( g_trac_cxxtest, "Task %d crashed.", *t );
+            __sync_add_and_fetch(&CxxTest::g_FailedTests, 1);
+        }
     }
 
     __sync_add_and_fetch(&CxxTest::g_ModulesCompleted, 1);
