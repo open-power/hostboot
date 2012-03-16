@@ -125,7 +125,7 @@ public:
 
             // really short user data
             const char * pch = "A";
-            pffdc = l_err->addFFDC( DEVFW_COMP_ID, pch, strlen( pch ));
+            pffdc = l_err->addFFDC( DEVFW_COMP_ID, pch, strlen( pch ), 0, 0);
             if ( NULL == pffdc )
             {
                 TS_FAIL("testErrl1: addFFDC() output NULL pointer");

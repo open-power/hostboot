@@ -1,7 +1,7 @@
 //  IBM_PROLOG_BEGIN_TAG
 //  This is an automatically generated prolog.
 //
-//  $Source: src/usr/initservice/plugins/initsvcParse.C $
+//  $Source: src/usr/hwpf/plugins/hwpfParse.C $
 //
 //  IBM CONFIDENTIAL
 //
@@ -21,11 +21,11 @@
 //
 //  IBM_PROLOG_END
 /**
- *  @file initsvcParse.C
+ *  @file hwpfParse.C
  *
- *  Initservice user data parser
+ *  HWPF user data parser
  */
 #include <errl/errludparser.H>
-#include <initservice/initsvcudparserfactory.H>
-ERRL_MAKE_UD_PARSER(INITSERVICE::InitSvcUserDetailsParserFactory, INITSVC_COMP_ID)
+#include <hwpf/plat/fapiPlatUdParserFactory.H>
+ERRL_MAKE_UD_PARSER(fapi::PlatUserDetailsParserFactory, HWPF_COMP_ID)
 

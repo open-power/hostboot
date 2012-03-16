@@ -43,23 +43,32 @@ namespace fapi
 void processEIFfdcs(const ErrorInfo & i_errInfo,
                     errlHndl_t io_pError)
 {
-    // Iterate through the FFDCs, adding each to the error log
-    // TODO Should all of the FFDC sections be added as a single blob? There is
-    // overhead to adding lots of different sections.
-    uint32_t l_size;
-    const void * l_pFfdc;
+    // Iterate through the FFDC sections, adding each to the error log
+    uint32_t l_size = 0;
+    const void * l_pFfdc = NULL;
+    FfdcType l_type = FFDC_TYPE_NONE;
 
     for (ErrorInfo::ErrorInfoFfdcCItr_t l_itr = i_errInfo.iv_ffdcs.begin();
          l_itr != i_errInfo.iv_ffdcs.end(); ++l_itr)
     {
         l_pFfdc = (*l_itr)->getData(l_size);
+        l_type = (*l_itr)->getType();
 
-        FAPI_ERR("processEIFfdcs: Adding %d bytes of FFDC to errlog",
-                 l_size);
-
-        // TODO Which comp id and section numbers should be used and how will
-        // FFDC be parsed?
-        io_pError->addFFDC(HWPF_COMP_ID, l_pFfdc, l_size);
+        if (l_type == FFDC_TYPE_TARGET)
+        {
+            io_pError->addFFDC(HWPF_COMP_ID, l_pFfdc, l_size, 1,
+                               HWPF_UDT_HWP_TARGET);
+        }
+        else if (l_type == FFDC_TYPE_ECMDDBB)
+        {
+            io_pError->addFFDC(HWPF_COMP_ID, l_pFfdc, l_size, 1,
+                               HWPF_UDT_HWP_ECMDDBB);
+        }
+        else
+        {
+            io_pError->addFFDC(HWPF_COMP_ID, l_pFfdc, l_size, 1,
+                               HWPF_UDT_HWP_DATA);
+        }
     }
 }
 

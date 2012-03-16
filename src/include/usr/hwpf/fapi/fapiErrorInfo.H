@@ -33,6 +33,8 @@
  *                          mjjones     08/09/2011  Created.
  *                          mjjones     08/24/2011  Added ErrorInfoGard.
  *                          mjjones     09/22/2011  Major updates
+ *                          mjjones     03/16/2012  Add FfdcType. Remove copy
+ *                                                  ctor and assignment operator
  */
 
 #ifndef FAPIERRORINFO_H_
@@ -44,6 +46,19 @@
 
 namespace fapi
 {
+
+/**
+ * @enum FfdcType
+ *
+ * This enumeration defines the possible types of FFDC data
+ */
+enum FfdcType
+{
+    FFDC_TYPE_NONE = 0,
+    FFDC_TYPE_TARGET = 1,  // FFDC data is a Target ecmd-string
+    FFDC_TYPE_ECMDDBB = 2, // FFDC data is the contents of an ecmdDataBaseBuffer
+    FFDC_TYPE_DATA = 3,    // FFDC data is just raw data
+};
 
 /**
  * @class ErrorInfoFfdc
@@ -58,30 +73,16 @@ public:
      *
      * @param[in] i_pFfdc Pointer to the FFDC to copy
      * @param[in] i_size  Size of the FFDC to copy
+     * @param[in] i_type  Type of the FFDC to copy
      */
     ErrorInfoFfdc(const void * i_pFfdc,
-                  const uint32_t i_size);
-
-    /**
-     * @brief Copy Constructor
-     *
-     * @param[in] i_right Reference to ErrorInfoFfdc to copy from
-     */
-    ErrorInfoFfdc(const ErrorInfoFfdc & i_right);
+                  const uint32_t i_size,
+                  const FfdcType i_type);
 
     /**
      * @brief Destructor
      */
     ~ErrorInfoFfdc();
-
-    /**
-     * @brief Assignment Operator
-     *
-     * @param[in] i_right Reference to ErrorInfoFfdc to assign from
-     *
-     * @return ErrorInfoFfdc &. Reference to this ErrorInfoFfdc
-     */
-    ErrorInfoFfdc & operator=(const ErrorInfoFfdc & i_right);
 
     /**
      * @brief Get a pointer to the FfdcData
@@ -93,6 +94,13 @@ public:
      */
     const void * getData(uint32_t & o_size) const;
 
+    /**
+     * @brief Get the FfdcData type
+     *
+     * @return FfdcType. FFDC type
+     */
+    FfdcType getType() const;
+
 private:
 
     // Pointer to the FFDC
@@ -100,6 +108,13 @@ private:
 
     // Size of the FFDC
     uint32_t iv_size;
+
+    // Type of the FFDC
+    FfdcType iv_type;
+
+    // Disabled
+    ErrorInfoFfdc(const ErrorInfoFfdc &);
+    ErrorInfoFfdc & operator=(const ErrorInfoFfdc &);
 };
 
 /**

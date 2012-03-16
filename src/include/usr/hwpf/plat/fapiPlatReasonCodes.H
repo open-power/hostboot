@@ -27,6 +27,9 @@
 
 namespace fapi
 {
+    /**
+     * @brief Defines the HWPF::PLAT error log module IDs
+     */
     enum hwpfModuleId
     {
         // HWP generated errors
@@ -47,11 +50,14 @@ namespace fapi
 
     };
 
-    // Note that for HWP generated errors (MOD_HWP_RC_TO_ERRL), the
-    // reason code is in the generated fapiHwpReasonCodes.H file
-
+    /**
+     * @brief Defines the HWPF::PLAT error log reason codes
+     */
     enum hwpfReasonCode
     {
+        // Note that for HWP generated errors (MOD_HWP_RC_TO_ERRL), the
+        // reason code is in the generated fapiHwpReasonCodes.H file
+
         // FAPI generated errors (see fapiReturnCodes.H)
         RC_INVALID_ATTR_GET           = HWPF_COMP_ID | 0x01,
 
@@ -65,15 +71,25 @@ namespace fapi
         RC_ATTR_BASE_BAD_PARAM        = HWPF_COMP_ID | 0x16,
         RC_INVALID_NUM_PARENT_CHIP    = HWPF_COMP_ID | 0x17,
     };
+
+    /**
+     * @brief Defines the HWPF::PLAT (Hostboot) error log user detail data
+     *        sections
+     */
+    enum hwpfUserDetailDataSubSection
+    {
+        HWPF_UDT_HWP_TARGET = 1,
+        HWPF_UDT_HWP_ECMDDBB = 2,
+        HWPF_UDT_HWP_DATA = 3,
+    };
 };
 
-// HostBoot ErrorLog tags for FAPI errors
+// HostBoot ErrorLog tags for FAPI errors (see fapiReturnCodes.H)
 /*@
  * @errortype
  * @moduleid     MOD_FAPI_RC_TO_ERRL
  * @reasoncode   RC_INVALID_ATTR_GET
  * @devdesc      InitFile HW Procedure requested an invalid attribute
  */
-
 
 #endif

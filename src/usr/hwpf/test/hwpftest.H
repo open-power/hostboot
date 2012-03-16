@@ -189,11 +189,11 @@ public:
      */
     void testHwpf2()
     {
-        // Call a test hardware procedure
         errlHndl_t l_err = NULL;
 
-        // Set processor chip to NULL. The target is not used by this HWP
+        // Get the master processor chip
         TARGETING::Target* l_pTarget = NULL;
+        TARGETING::targetService().masterProcChipTargetHandle(l_pTarget);
 
         // Create a FAPI Target and invoke the hwpTestError HWP. The HWP
         // returns an error to test out error handling

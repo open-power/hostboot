@@ -33,6 +33,8 @@
  *                          mjjones     08/05/2011  Created
  *                          mjjones     08/24/2011  Added ErrorInfoGard.
  *                          mjjones     09/22/2011  Major updates
+ *                          mjjones     03/16/2012  Add FfdcType. Remove copy
+ *                                                  ctor and assignment operator
  */
 
 #include <fapiErrorInfo.H>
@@ -45,21 +47,12 @@ namespace fapi
 // ErrorInfoFfdc Constructor
 //******************************************************************************
 ErrorInfoFfdc::ErrorInfoFfdc(const void * i_pFfdc,
-                             const uint32_t i_size)
-: iv_size(i_size)
+                             const uint32_t i_size,
+                             const FfdcType i_type)
+: iv_size(i_size), iv_type(i_type)
 {
     iv_pFfdc = new uint8_t[i_size];
     memcpy(iv_pFfdc, i_pFfdc, i_size);
-}
-
-//******************************************************************************
-// ErrorInfoFfdc Copy Constructor
-//******************************************************************************
-ErrorInfoFfdc::ErrorInfoFfdc(const ErrorInfoFfdc & i_right)
-: iv_size(i_right.iv_size)
-{
-    iv_pFfdc = new uint8_t[i_right.iv_size];
-    memcpy(iv_pFfdc, i_right.iv_pFfdc, i_right.iv_size);
 }
 
 //******************************************************************************
@@ -72,24 +65,20 @@ ErrorInfoFfdc::~ErrorInfoFfdc()
 }
 
 //******************************************************************************
-// ErrorInfoFfdc Assignment Operator
-//******************************************************************************
-ErrorInfoFfdc & ErrorInfoFfdc::operator=(const ErrorInfoFfdc & i_right)
-{
-    delete [] iv_pFfdc;
-    iv_pFfdc = new uint8_t[i_right.iv_size];
-    memcpy(iv_pFfdc, i_right.iv_pFfdc, i_right.iv_size);
-    iv_size = i_right.iv_size;
-    return *this;
-}
-
-//******************************************************************************
 // ErrorInfoFfdc getData function
 //******************************************************************************
 const void * ErrorInfoFfdc::getData(uint32_t & o_size) const
 {
     o_size = iv_size;
     return iv_pFfdc;
+}
+
+//******************************************************************************
+// ErrorInfoFfdc getType function
+//******************************************************************************
+FfdcType ErrorInfoFfdc::getType() const
+{
+    return iv_type;
 }
 
 //******************************************************************************

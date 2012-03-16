@@ -302,8 +302,8 @@ public:
     ErrlUD * addFFDC(const compId_t i_compId,
                      const void * i_dataPtr,
                      const uint32_t i_ffdcLen,
-                     const uint8_t i_ffdcVer = 0,
-                     const uint8_t i_ffdcSubSect = 0);
+                     const uint8_t i_ffdcVer,
+                     const uint8_t i_ffdcSubSect);
 
     /**
      * @brief Append more data to an FFDC section.

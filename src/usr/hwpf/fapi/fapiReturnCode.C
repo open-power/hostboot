@@ -41,6 +41,7 @@
  *                          mjjones     09/22/2011  Added ErrorInfo Support
  *                          mjjones     01/12/2012  Enforce correct usage
  *                          mjjones     02/22/2012  Allow user to add Target FFDC
+ *                          mjjones     03/16/2012  Add type to FFDC data
  */
 
 #include <fapiReturnCode.H>
@@ -65,7 +66,10 @@ ReturnCode::ReturnCode() :
 ReturnCode::ReturnCode(const ReturnCodes i_rcValue) :
     iv_rcValue(i_rcValue), iv_pDataRef(NULL)
 {
-
+    if (i_rcValue != FAPI_RC_SUCCESS)
+    {
+        FAPI_ERR("ctor: Creating error 0x%x", i_rcValue);
+    }
 }
 
 //******************************************************************************
@@ -151,6 +155,7 @@ ReturnCode::operator uint32_t() const
 //******************************************************************************
 void ReturnCode::setFapiError(const ReturnCodes i_rcValue)
 {
+    FAPI_ERR("setFapiError: Creating FAPI error 0x%x", i_rcValue);
     iv_rcValue = i_rcValue;
 
     // Forget about any associated data (this is a new error)
@@ -162,6 +167,7 @@ void ReturnCode::setFapiError(const ReturnCodes i_rcValue)
 //******************************************************************************
 void ReturnCode::setEcmdError(const uint32_t i_rcValue)
 {
+    FAPI_ERR("setEcmdError: Creating ECMD error 0x%x", i_rcValue);
     iv_rcValue = i_rcValue;
 
     // Forget about any associated data (this is a new error)
@@ -173,6 +179,7 @@ void ReturnCode::setEcmdError(const uint32_t i_rcValue)
 //******************************************************************************
 void ReturnCode::setPlatError(void * i_pData)
 {
+    FAPI_ERR("setPlatError: Creating PLAT error");
     iv_rcValue = FAPI_RC_PLAT_ERR_SEE_DATA;
 
     // Forget about any associated data (this is a new error)
@@ -244,7 +251,7 @@ void ReturnCode::addErrorInfo(const void * const * i_pObjects,
             {
                 // This is a regular FFDC data object that can be directly
                 // memcopied
-                addEIFfdc(l_pObject, l_size);
+                addEIFfdc(l_pObject, l_size, FFDC_TYPE_DATA);
             }
             else
             {
@@ -252,7 +259,6 @@ void ReturnCode::addErrorInfo(const void * const * i_pObjects,
                 if (l_size == ReturnCodeFfdc::EI_FFDC_SIZE_ECMDDB)
                 {
                     // The FFDC is a ecmdDataBufferBase
-                    FAPI_ERR("addErrorInfo: Adding ecmdDB FFDC");
                     const ecmdDataBufferBase * l_pDb =
                         static_cast<const ecmdDataBufferBase *>(l_pObject);
                     ReturnCodeFfdc::addEIFfdc(*this, *l_pDb);
@@ -260,7 +266,6 @@ void ReturnCode::addErrorInfo(const void * const * i_pObjects,
                 else if (l_size == ReturnCodeFfdc::EI_FFDC_SIZE_TARGET)
                 {
                     // The FFDC is a fapi::Target
-                    FAPI_ERR("addErrorInfo: Adding fapi::Target FFDC");
                     const fapi::Target * l_pTarget =
                         static_cast<const fapi::Target *>(l_pObject);
                     ReturnCodeFfdc::addEIFfdc(*this, *l_pTarget);
@@ -313,12 +318,12 @@ void ReturnCode::addErrorInfo(const void * const * i_pObjects,
 // addEIFfdc function
 //******************************************************************************
 void ReturnCode::addEIFfdc(const void * i_pFfdc,
-                           const uint32_t i_size)
+                           const uint32_t i_size,
+                           const FfdcType i_type)
 {
     // Create a ErrorInfoFfdc object and add it to the Error Information
-    FAPI_ERR("addEIFfdc: Adding FFDC, size: %d", i_size);
     ensureDataRefExists();
-    ErrorInfoFfdc * l_pFfdc = new ErrorInfoFfdc(i_pFfdc, i_size);
+    ErrorInfoFfdc * l_pFfdc = new ErrorInfoFfdc(i_pFfdc, i_size, i_type);
     iv_pDataRef->getCreateErrorInfo().iv_ffdcs.push_back(l_pFfdc);
 }
 

@@ -40,6 +40,7 @@
  *                          mjjones     11/10/2011  Use ecmdDataBufferBase
  *                          mjjones     01/12/2012  Enforce correct usage
  *                          mjjones     02/22/2012  Allow user to add Target FFDC
+ *                          mjjones     03/16/2012  Add type to FFDC data
  */
 
 #ifndef FAPIRETURNCODE_H_
@@ -296,15 +297,14 @@ public:
      * This is called by:
      * - addErrorInfo
      * - ReturnCodeFfdc::addEIFfdc (function template)
-     * - FFDC HWPs (HWPs written to collect FFDC)
-     *
-     * Use ReturnCodeFfdc::addEIFfdc to add FFDC data using the data identifier
      *
      * @param[in] i_pFfdc Pointer to the FFDC to copy
      * @param[in] i_size  Size of the FFDC to copy
+     * @param[in] i_type  Type of the FFDC to copy
      */
     void addEIFfdc(const void * i_pFfdc,
-                   const uint32_t i_size);
+                   const uint32_t i_size,
+                   const FfdcType i_type);
 
     /**
      * @brief Get a pointer to any ErrorInfo 
@@ -464,7 +464,7 @@ namespace ReturnCodeFfdc
     void addEIFfdc(ReturnCode & o_rc,
                    const T & i_ffdc)
     {
-        o_rc.addEIFfdc(&i_ffdc, sizeof(T));
+        o_rc.addEIFfdc(&i_ffdc, sizeof(T), FFDC_TYPE_DATA);
     }
 
     /**
@@ -485,7 +485,8 @@ namespace ReturnCodeFfdc
 
         // Deliberately not checking return code from extract to save code space
         i_ffdc.extract(l_pData, 0, i_ffdc.getBitLength());
-        o_rc.addEIFfdc(l_pData, (i_ffdc.getWordLength() * 4));
+        o_rc.addEIFfdc(l_pData, (i_ffdc.getWordLength() * 4),
+                       FFDC_TYPE_ECMDDBB);
         delete [] l_pData;
     }
 
@@ -500,7 +501,8 @@ namespace ReturnCodeFfdc
                                         const fapi::Target & i_ffdc)
     {
         const char * l_ecmdString = i_ffdc.toEcmdString();
-        o_rc.addEIFfdc(l_ecmdString, (strlen(l_ecmdString) + 1));
+        o_rc.addEIFfdc(l_ecmdString, (strlen(l_ecmdString) + 1),
+                       FFDC_TYPE_TARGET);
     }
 
     /**

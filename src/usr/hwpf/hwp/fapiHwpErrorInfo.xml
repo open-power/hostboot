@@ -20,8 +20,7 @@
      Origin: 30
    
      IBM_PROLOG_END -->
-<!-- XML file specifying HW Procedure generated errors. -->
-<!-- This is just the initial test version. HWPs will replace with an official version. -->
+<!-- XML file specifying Test HW Procedure generated errors. -->
 
 <hwpErrors>
   <!-- *********************************************************************** -->
@@ -30,10 +29,12 @@
     <description>HWP Unit Test expected error A</description>
     <!-- Call hwpTestFfdc1 to collect FFDC from the master chip -->
     <collectFfdc>hwpTestFfdc1, MASTER_CHIP</collectFfdc>
-    <!-- Collect local FFDC FFDC_DATA_1 -->
+    <!-- Add some data as FFDC -->
     <ffdc>FFDC_DATA_1</ffdc>
-    <!-- Collect local FFDC FFDC_DATA_BUF -->
+    <!-- Add an ecmdDataBufferBase as FFDC -->
     <ffdc>FFDC_DATA_BUF</ffdc>
+    <!-- Add a Target as FFDC -->
+    <ffdc>MASTER_CHIP</ffdc>
     <!-- Callout MASTER_CHIP HIGH -->
     <callout>
         <target>MASTER_CHIP</target>
