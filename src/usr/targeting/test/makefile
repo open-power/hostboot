@@ -27,6 +27,9 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/plat
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
 
+# Allow testcase to access component trace macros
+EXTRAINCDIR += ../
+
 MODULE = testtargeting
 TESTS = *.H
 

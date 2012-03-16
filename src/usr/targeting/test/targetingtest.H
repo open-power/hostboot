@@ -58,7 +58,7 @@
 #include <targeting/predicates/predicatepostfixexpr.H>
 #include <targeting/targreasoncodes.H>
 #include <errl/errludtarget.H>
-
+#include "trace.H"
 #include <kernel/console.H> //@fixme
 
 /**
@@ -1511,6 +1511,250 @@ class TargetingTestSuite: public CxxTest::TestSuite
 
         TS_TRACE(EXIT_MRK "testErrlTargetFFDC");
     }
+
+    /**
+     *  @test Tests string attributes
+     */
+    void testStringAttributes(void)
+    {
+        TS_TRACE(ENTER_MRK "testStringAttributes" );
+
+        using namespace TARGETING;
+       
+        do { 
+
+        TargetService& l_targetService = targetService();
+
+        // Get the top level target for the string attribute tests
+        Target* l_pTopLevel = NULL;
+        (void) l_targetService.getTopLevelTarget(l_pTopLevel);
+        if (l_pTopLevel == NULL)
+        {
+            TS_FAIL("ERROR: Can not find top level target; bypassing "
+                    "remaining string attribute tests");
+            break;
+        }
+
+        // TC1: Test NULL string attribute
+        // TC1.1: String storage size must match the stated size
+        ATTR_TEST_NULL_STRING_type l_nullStringReference = {0};
+        ATTR_TEST_NULL_STRING_type l_nullString = {0};
+        if(sizeof(l_nullString) != ATTR_TEST_NULL_STRING_max_chars+1)
+        {
+            TS_FAIL("ERROR: l_nullString size (%d) "
+                    "does not match stated size (%d)",
+                    sizeof(l_nullString),
+                    ATTR_TEST_NULL_STRING_max_chars+1);
+        }
+
+        // TC1.2: String size must be non-zero
+        if(sizeof(l_nullString) == 0)
+        {
+            TS_FAIL("ERROR: l_nullString size is zero");
+        }
+
+        // TC1.3: Must be able to read the string
+        if(!l_pTopLevel->tryGetAttr<ATTR_TEST_NULL_STRING>(l_nullString))
+        {
+            TS_FAIL("ERROR: Can not read l_nullString attribute");
+        }
+        
+        // TC1.4: All bytes of the string must match the reference version
+        if(memcmp(l_nullStringReference,
+                  l_nullString,
+                  sizeof(l_nullStringReference)))
+        {
+            TS_FAIL("ERROR: l_nullString bytes do not match the reference"
+                    "version");
+            TARG_BIN("Expected (l_nullStringReference)",
+                     l_nullStringReference,sizeof(l_nullStringReference));
+            TARG_BIN("Actual (l_nullString)",
+                     l_nullString,sizeof(l_nullString));
+        }
+
+        // TC1.5: String must equal the empty string by string comparison
+        if(strcmp(l_nullString,"") != 0)
+        {
+            TS_FAIL("ERROR: l_nullString does not strcmp to the empty string");
+            TARG_BIN("Actual (l_nullString)",
+                     l_nullString,sizeof(l_nullString));       
+        }
+ 
+        // TC2: Test string attribute with only 1 character
+        // TC2.1: String storage size must match the stated size
+        ATTR_TEST_MIN_STRING_type l_minStringReference = {0};
+        l_minStringReference[0] = 'Z';
+        ATTR_TEST_MIN_STRING_type l_minString = {0};
+        if(sizeof(l_minString) != ATTR_TEST_MIN_STRING_max_chars+1)
+        {
+            TS_FAIL("ERROR: l_minString size (%d) "
+                    "does not match stated size (%d)",
+                    sizeof(l_minString),
+                    ATTR_TEST_MIN_STRING_max_chars+1);
+        }
+
+        // TC2.2: String size must be non-zero 
+        if(sizeof(l_minString) == 0)
+        {
+            TS_FAIL("ERROR: l_minString size is zero");
+        }
+
+        // TC2.3: Must be able to read the string
+        if(!l_pTopLevel->tryGetAttr<ATTR_TEST_MIN_STRING>(l_minString))
+        {
+            TS_FAIL("ERROR: Can not read l_minString attribute");
+        }
+ 
+        // TC2.4: All bytes in string must match the reference string 
+        if(memcmp(l_minStringReference,
+                  l_minString,
+                  sizeof(l_minStringReference)))
+        {
+            TS_FAIL("ERROR l_minString bytes do not match the reference "
+                    "version");
+            TARG_BIN("Expected (l_minStringReference)",
+                     l_minStringReference,sizeof(l_minStringReference));
+            TARG_BIN("Actual (l_minString)",
+                     l_minString,sizeof(l_minString));
+       }
+
+        // TC2.5: String must equal "Z" by comparison
+        if(strcmp(l_minString,l_minStringReference) != 0)
+        {
+            TS_FAIL("ERROR l_minString does not strcmp to the reference "
+                    "string");
+            TARG_BIN("Actual (l_minString)",
+                     l_minString,sizeof(l_minString));           
+        }
+
+        // TC3: Test string with maximum number of characters (including NULL)
+        // TC3.1: String storage size must match the stated size
+        ATTR_TEST_MAX_STRING_type l_maxStringReference = {0};
+        l_maxStringReference[0] = 'a';
+        l_maxStringReference[1] = 'b';
+        l_maxStringReference[2] = 'c';
+        ATTR_TEST_MAX_STRING_type l_maxString = {0};
+        if(sizeof(l_maxString) != ATTR_TEST_MAX_STRING_max_chars+1)
+        {
+            TS_FAIL("ERROR: l_maxString size (%d) "
+                    "does not match stated size (%d)",
+                    sizeof(l_maxString),
+                    ATTR_TEST_MAX_STRING_max_chars+1);
+        }
+
+        // TC3.2: String storage size must be non-zero
+        if(sizeof(l_maxString) == 0)
+        {
+            TS_FAIL("ERROR: l_maxString storage size is zero");
+        }
+
+        // TC3.3: Must be able to read the string
+        if(!l_pTopLevel->tryGetAttr<ATTR_TEST_MAX_STRING>(l_maxString))
+        {
+            TS_FAIL("ERROR: Could not read l_maxString");
+        }
+
+        // TC3.4: All bytes in string must match the reference
+        if(memcmp(l_maxStringReference,
+                  l_maxString,
+                  sizeof(l_maxStringReference)))
+        {
+            TS_FAIL("ERROR: l_maxString bytes do not match the reference "
+                    "version");
+            TARG_BIN("Expected (l_maxStringReference)",
+                     l_maxStringReference,sizeof(l_maxStringReference));
+            TARG_BIN("Actual (l_maxString)",
+                     l_maxString,sizeof(l_maxString));
+       }
+
+        // TC3.5: String must equal "abc" by comparison
+        if(strcmp(l_maxString,l_maxStringReference) != 0)
+        {
+            TS_FAIL("ERROR: l_maxString does not strcmp to the reference "
+                    "string");
+            TARG_BIN("Actual (l_maxString)",
+                     l_maxString,sizeof(l_maxString));    
+        }
+
+        // TC4: Test string with no supplied default value
+        // TC4.1: String storage size must match stated size
+        ATTR_TEST_NO_DEFAULT_STRING_type l_noDefaultStringReference = {0};
+        ATTR_TEST_NO_DEFAULT_STRING_type l_noDefaultString = {0};
+        if(sizeof(l_noDefaultString) != ATTR_TEST_NO_DEFAULT_STRING_max_chars+1)
+        {
+            TS_FAIL("ERROR: l_noDefaultString size (%d) "
+                    "does not match stated size (%d)",
+                    sizeof(l_noDefaultString),
+                    ATTR_TEST_NO_DEFAULT_STRING_max_chars+1);
+        }
+
+        // TC4.2: String storage size must be non-zero
+        if(sizeof(l_noDefaultString) == 0)
+        {
+            TS_FAIL("ERROR: l_noDefaultString storage size is zero");
+        }
+
+        // TC4.3: Must be able to read the string
+        if(!l_pTopLevel->tryGetAttr<ATTR_TEST_NO_DEFAULT_STRING>(
+                l_noDefaultString))
+        {
+            TS_FAIL("ERROR: Could not read l_noDefaultString");
+        }
+
+        // TC4.4: All bytes in string must match the reference
+        if(memcmp(l_noDefaultStringReference,
+                  l_noDefaultString,
+                  sizeof(l_noDefaultStringReference)))
+        {
+            TS_FAIL("ERROR: l_noDefaultString bytes do not match the "
+                    "reference");
+            TARG_BIN("Expected (l_noDefaultStringReference)",
+                     l_noDefaultStringReference,
+                     sizeof(l_noDefaultStringReference));
+            TARG_BIN("Actual (l_noDefaultString)",
+                     l_noDefaultString,sizeof(l_noDefaultString));
+        }
+
+        // TC4.5: String must equal empty string by comparison
+        if(strcmp(l_noDefaultString,l_noDefaultStringReference) != 0)
+        {
+            TS_FAIL("ERROR: l_noDefaultString does not strcmp to the reference "
+                    "string");
+            TARG_BIN("Actual (l_noDefaultString)",
+                     l_noDefaultString,sizeof(l_noDefaultString));   
+        }
+
+        // TC5: Write string and read back
+        // TC5.1: Must be able to write the string
+        ATTR_TEST_NO_DEFAULT_STRING_type l_writeString = {0};
+        strcpy(l_writeString,"aabbcc");
+        if(!l_pTopLevel->trySetAttr<ATTR_TEST_NO_DEFAULT_STRING>(l_writeString))
+        {
+            TS_FAIL("ERROR: Could not write l_writeString");
+        }
+
+        ATTR_TEST_NO_DEFAULT_STRING_type l_readString = {0};
+        if(!l_pTopLevel->tryGetAttr<ATTR_TEST_NO_DEFAULT_STRING>(l_readString))
+        {
+            TS_FAIL("ERROR: Could not read l_readString");
+        }
+
+        if(strcmp(l_writeString,l_readString) != 0)
+        {
+            TS_FAIL("ERROR: String does not match what was written");
+            TARG_BIN("Expected (l_writeString)",
+                     l_writeString,
+                     sizeof(l_writeString));
+            TARG_BIN("Actual (l_readString)",
+                     l_readString,
+                     sizeof(l_readString));
+        }
+
+        } while(0);
+
+        TS_TRACE(EXIT_MRK "testStringAttributes" );
+    }
+
 };
 
 #endif // End __TESTTARGETING_H

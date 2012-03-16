@@ -1212,6 +1212,15 @@ sub writeTraitFileTraits {
                              $dimensions .= "[$bound]";
                          }
                     }
+                    elsif(exists $simpleType->{string})
+                    {
+                        # Create the string dimension
+                        if(exists $simpleType->{string}->{sizeInclNull})
+                        {
+                            $dimensions .=
+                                "[$simpleType->{string}->{sizeInclNull}]";
+                        }
+                    }
                     last;
                 }
             }
@@ -1247,8 +1256,27 @@ sub writeTraitFileTraits {
         print $outFile "        typedef ", $type, " Type$dimensions;\n";
         print $outFile "};\n\n";
 
+        $typedefs .= "// Type aliases and/or sizes for ATTR_"
+                   . "$attribute->{id} attribute\n";
+
         $typedefs .= "typedef " . $type .
             " $attribute->{id}" . "_ATTR" . $dimensions . ";\n";
+
+        # Append a more friendly type alias for attribute
+        $typedefs .= "typedef " . $type .
+            " ATTR_" . "$attribute->{id}" . "_type" . $dimensions . ";\n";
+
+        # If a string, append max # of characters for the string
+        if(   (exists $attribute->{simpleType})
+           && (exists $attribute->{simpleType}->{string}))
+        {
+            my $size = $attribute->{simpleType}->{string}->{sizeInclNull} - 1;
+            $typedefs .= "const size_t ATTR_"
+                      .  "$attribute->{id}" . "_max_chars = "
+                      .  "$size"
+                      . ";\n";
+        }
+        $typedefs .= "\n";
     };
 
     print $outFile "/**\n";
@@ -1323,6 +1351,36 @@ sub packQuad{
     my $value = unhexify($quad);
 
     return pack("NN" , (($value >> 32) & 0xFFFFFFFF), ($value & 0xFFFFFFFF));
+}
+
+################################################################################
+# Pack string into buffer
+################################################################################
+
+sub packString{
+    my($value,$attribute) = @_;
+
+    # Proper attribute tags already verified, no need to do checking again
+    my $sizeInclNull = $attribute->{simpleType}->{string}->{sizeInclNull};
+
+    # print "String content (before fixup) is [$value]\n";
+
+    # For sanity, remove all white space from front and end of string
+    $value =~ s/^\s+//g;
+    $value =~ s/\s+$//g;
+
+    my $length = length($value);
+
+    # print "String content (after fixup) is [$value]\n";
+    # print "String length is $length\n";
+    # print "String container size is $sizeInclNull\n";
+
+    if(($length + 1) > $sizeInclNull)
+    {
+        fatal("ERROR: Supplied string exceeds allows length");
+    }
+
+    return pack("Z$sizeInclNull",$value);
 }
 
 ################################################################################
@@ -1461,6 +1519,16 @@ sub defaultZero {
 }
 
 ################################################################################
+# Return string default (empty string)
+################################################################################
+
+sub defaultString {
+    my($attributes,$typeInstance) = @_;
+
+    return "";
+}
+
+################################################################################
 # Return default value for an attribute whose type is 'enumeration'
 ################################################################################
 
@@ -1506,6 +1574,37 @@ sub enforceHbMutex {
 }
 
 ################################################################################
+# Enforce string restrictions
+################################################################################
+
+sub enforceString {
+    my($attribute,$value) = @_;
+
+    if(!exists $attribute->{simpleType})
+    {
+        fatal("ERROR: Tried to enforce string policies on a non-simple type");
+    }
+
+    if(!exists $attribute->{simpleType}->{string})
+    {
+        fatal("ERROR: Did not find expected string element");
+    }
+
+    if(!exists $attribute->{simpleType}->{string}->{sizeInclNull})
+    {
+        fatal("ERROR: Did not find expected string sizeInclNull element");
+    }
+
+    my $size = $attribute->{simpleType}->{string}->{sizeInclNull};
+    if($size <= 1)
+    {
+        fatal("ERROR: String size must be > 1 (string of size one is "
+            . "only big enough to hold the empty string, which is not "
+            . "useful)");
+    }
+}
+
+################################################################################
 # Get hash ref to supported simple types and their properties
 ################################################################################
 
@@ -1515,16 +1614,17 @@ sub simpleTypeProperties {
 
     # Intentionally didn't wrap these to 80 columns to keep them lined up and
     # more readable/editable
-    $typesHoH{"int8_t"}      = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "int8_t"                     , bytes => 1, bits => 8 , default => \&defaultZero, alignment => 1, specialPolicies =>\&null,           packfmt => "C" };
-    $typesHoH{"int16_t"}     = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "int16_t"                    , bytes => 2, bits => 16, default => \&defaultZero, alignment => 1, specialPolicies =>\&null,           packfmt => "n" };
-    $typesHoH{"int32_t"}     = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "int32_t"                    , bytes => 4, bits => 32, default => \&defaultZero, alignment => 1, specialPolicies =>\&null,           packfmt => "N" };
-    $typesHoH{"int64_t"}     = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "int64_t"                    , bytes => 8, bits => 64, default => \&defaultZero, alignment => 1, specialPolicies =>\&null,           packfmt =>\&packQuad};
-    $typesHoH{"uint8_t"}     = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "uint8_t"                    , bytes => 1, bits => 8 , default => \&defaultZero, alignment => 1, specialPolicies =>\&null,           packfmt => "C" };
-    $typesHoH{"uint16_t"}    = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "uint16_t"                   , bytes => 2, bits => 16, default => \&defaultZero, alignment => 1, specialPolicies =>\&null,           packfmt => "n" };
-    $typesHoH{"uint32_t"}    = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "uint32_t"                   , bytes => 4, bits => 32, default => \&defaultZero, alignment => 1, specialPolicies =>\&null,           packfmt => "N" };
-    $typesHoH{"uint64_t"}    = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "uint64_t"                   , bytes => 8, bits => 64, default => \&defaultZero, alignment => 1, specialPolicies =>\&null,           packfmt =>\&packQuad};
-    $typesHoH{"enumeration"} = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 0, typeName => "XMLTOHB_USE_PARENT_ATTR_ID" , bytes => 0, bits => 0 , default => \&defaultEnum, alignment => 1, specialPolicies =>\&null,           packfmt => "packEnumeration"};
-    $typesHoH{"hbmutex"}     = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 0, typeName => "mutex_t*"                   , bytes => 8, bits => 64, default => \&defaultZero, alignment => 8, specialPolicies =>\&enforceHbMutex, packfmt =>\&packQuad};
+    $typesHoH{"string"}      = { supportsArray => 0, canBeHex => 0, complexTypeSupport => 0, typeName => "char"                       , bytes => 1, bits => 8 , default => \&defaultString, alignment => 1, specialPolicies =>\&enforceString,  packfmt =>\&packString};
+    $typesHoH{"int8_t"}      = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "int8_t"                     , bytes => 1, bits => 8 , default => \&defaultZero  , alignment => 1, specialPolicies =>\&null,           packfmt => "C" };
+    $typesHoH{"int16_t"}     = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "int16_t"                    , bytes => 2, bits => 16, default => \&defaultZero  , alignment => 1, specialPolicies =>\&null,           packfmt => "n" };
+    $typesHoH{"int32_t"}     = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "int32_t"                    , bytes => 4, bits => 32, default => \&defaultZero  , alignment => 1, specialPolicies =>\&null,           packfmt => "N" };
+    $typesHoH{"int64_t"}     = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "int64_t"                    , bytes => 8, bits => 64, default => \&defaultZero  , alignment => 1, specialPolicies =>\&null,           packfmt =>\&packQuad};
+    $typesHoH{"uint8_t"}     = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "uint8_t"                    , bytes => 1, bits => 8 , default => \&defaultZero  , alignment => 1, specialPolicies =>\&null,           packfmt => "C" };
+    $typesHoH{"uint16_t"}    = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "uint16_t"                   , bytes => 2, bits => 16, default => \&defaultZero  , alignment => 1, specialPolicies =>\&null,           packfmt => "n" };
+    $typesHoH{"uint32_t"}    = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "uint32_t"                   , bytes => 4, bits => 32, default => \&defaultZero  , alignment => 1, specialPolicies =>\&null,           packfmt => "N" };
+    $typesHoH{"uint64_t"}    = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "uint64_t"                   , bytes => 8, bits => 64, default => \&defaultZero  , alignment => 1, specialPolicies =>\&null,           packfmt =>\&packQuad};
+    $typesHoH{"enumeration"} = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 0, typeName => "XMLTOHB_USE_PARENT_ATTR_ID" , bytes => 0, bits => 0 , default => \&defaultEnum  , alignment => 1, specialPolicies =>\&null,           packfmt => "packEnumeration"};
+    $typesHoH{"hbmutex"}     = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 0, typeName => "mutex_t*"                   , bytes => 8, bits => 64, default => \&defaultZero  , alignment => 8, specialPolicies =>\&enforceHbMutex, packfmt =>\&packQuad};
 
     return \%typesHoH;
 }
@@ -1551,7 +1651,13 @@ sub getAttributeDefault {
                     # might add value to the hash
                     if(exists $attribute->{simpleType}->{$type} )
                     {
-                        if(exists $attribute->{simpleType}->{$type}->{default})
+                        # If attribute exists, or is not a HASH val (which can
+                        # occur if the default element is omitted), then just
+                        # grab the supplied value, otherwise use the default for
+                        # the type
+                        if(   (exists $attribute->{simpleType}->{$type}->{default})
+                           && (ref ($attribute->{simpleType}->{$type}->{default})
+                               ne "HASH") )
                         {
                             $default =
                                 $attribute->{simpleType}->{$type}->{default};
@@ -2002,8 +2108,9 @@ sub packEntityPath {
 }
 
 ################################################################################
-# Pack an attribute into a binary data stream
+# Pack a single, simple attribute into a binary data stream
 ################################################################################
+
 sub packSingleSimpleTypeAttribute {
     my($binaryDataRef,$attributesRef,$attributeRef,$typeName,$value) = @_;
 
@@ -2032,7 +2139,7 @@ sub packSingleSimpleTypeAttribute {
         if(ref ($simpleTypeProperties->{$typeName}{packfmt}) eq "CODE")
         {
             $$binaryDataRef .= $simpleTypeProperties->{$typeName}{packfmt}->
-                               ($value);
+                               ($value,$$attributeRef);
         }
         else
         {
@@ -2041,6 +2148,10 @@ sub packSingleSimpleTypeAttribute {
         }
     }
 }
+
+################################################################################
+# Pack generic attribute into a binary data stream
+################################################################################
 
 sub packAttribute {
     my($attributes,$attribute,$value) = @_;

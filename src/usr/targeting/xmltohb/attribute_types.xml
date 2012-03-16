@@ -3202,4 +3202,63 @@
     </hwpfToHbAttrMap>
 </attribute>
 
+<!-- Begin attributes (4) to test string support -->
+
+<attribute>
+    <id>TEST_NULL_STRING</id>
+    <description>Test attribute; string with empty default value</description>
+    <simpleType>
+        <string>
+            <default></default>
+            <sizeInclNull>10</sizeInclNull>
+        </string>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>TEST_MIN_STRING</id>
+    <description>Test attribute; smallest string possible given size</description>
+    <simpleType>
+        <string>
+            <default>a</default>
+            <sizeInclNull>10</sizeInclNull>
+        </string>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>TEST_MAX_STRING</id>
+    <description>Test attribute; largest string possible given size</description>
+    <simpleType>
+        <string>
+            <default>abc</default>
+            <sizeInclNull>4</sizeInclNull>
+        </string>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>TEST_NO_DEFAULT_STRING</id>
+    <description>Test attribute; string with no default supplied</description>
+    <simpleType>
+        <string>
+            <sizeInclNull>10</sizeInclNull>
+        </string>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<!-- End attributes (4) to test string support -->
+
 </attributes>

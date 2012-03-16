@@ -67,6 +67,10 @@
     <attribute><id>HB_MUTEX_TEST_LOCK</id></attribute>
     <attribute><id>DUMMY_RW</id></attribute>
     <attribute><id>XSCOM_BASE_ADDRESS</id></attribute>
+    <attribute><id>TEST_NULL_STRING</id></attribute>
+    <attribute><id>TEST_MIN_STRING</id><default>Z</default></attribute>
+    <attribute><id>TEST_MAX_STRING</id></attribute>
+    <attribute><id>TEST_NO_DEFAULT_STRING</id></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0</default>
