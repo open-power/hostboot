@@ -474,7 +474,6 @@ my  $templateListFileSS  =
                 {
                         START_FN,
                         EXT_IMAGE,
-                        ISTEP_ERRL_ID,
                 }
         },      
 ";        
@@ -729,8 +728,7 @@ sub extractTagBlock( $ )
     # Capture everything from opening '/* @tag isteplist' to end of tags '*/'
     #
     # Example:
-    #   /*@
-    #    *  @tag    isteplist
+    #   /*  @tag    isteplist
     #    *  ...
     #    */
     # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=

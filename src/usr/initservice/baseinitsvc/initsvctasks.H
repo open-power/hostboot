@@ -49,8 +49,6 @@ const TaskInfo    g_taskinfolist[]   =   {
                 {
                         NONE,                       // don't start
                         BASE_IMAGE,                 // Base Module
-                        START_ERRL_ERRL_ID,         // module id for errorlog
-
                 }
         },
 
@@ -64,7 +62,6 @@ const TaskInfo    g_taskinfolist[]   =   {
                 {
                         START_TASK,                 // start
                         BASE_IMAGE,                 // Base Module
-                        START_PNORDD_ERRL_ID,       // module id for errorlog
                 }
         },
 
@@ -77,7 +74,6 @@ const TaskInfo    g_taskinfolist[]   =   {
                 {
                         START_TASK,                 // start task
                         BASE_IMAGE,                 // Base Module
-                        START_VFS_ERRL_ID,          // module id for error log
                 }
         },
 
@@ -92,7 +88,6 @@ const TaskInfo    g_taskinfolist[]   =   {
                 {
                         START_TASK,                 // call start()
                         EXT_IMAGE,                  // EXT_IMAGE
-                        START_EXTINITSVC_ERRL_ID,   // module id for errorlog
                 }
         },
 
@@ -110,7 +105,6 @@ const TaskInfo    g_taskinfolist[]   =   {
                 {
                         END_TASK_LIST,              // end of list
                         UNDEFINED_MT,               // dummy module type
-                        UNDEFINED_MODULE_ERRL_ID,   // dummy errorlog
                 }
         },
 

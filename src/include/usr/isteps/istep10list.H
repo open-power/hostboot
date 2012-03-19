@@ -55,7 +55,6 @@ const   TaskInfo    g_istep10[]  =   {
                 {
                         START_FN,
                         EXT_IMAGE,
-                        ISTEP_ERRL_ID,
                 }
         },
         {
@@ -64,7 +63,6 @@ const   TaskInfo    g_istep10[]  =   {
                 {
                         START_FN,
                         EXT_IMAGE,
-                        ISTEP_ERRL_ID,
                 }
         },
         {
@@ -73,79 +71,78 @@ const   TaskInfo    g_istep10[]  =   {
                 {
                         START_FN,
                         EXT_IMAGE,
-                        ISTEP_ERRL_ID,
                 }
-        },        {
+        },
+        {
                 ISTEPNAME(10,03,"cen_sbe_tp_chiplet_init3"),
                 SBE_CENTAUR_INIT::call_cen_sbe_tp_chiplet_init3,
                 {
                         START_FN,
                         EXT_IMAGE,
-                        ISTEP_ERRL_ID,
                 }
-        },        {
+        },
+        {
                 ISTEPNAME(10,04,"cen_sbe_chiplet_init"),
                 SBE_CENTAUR_INIT::call_cen_sbe_chiplet_init,
                 {
                         START_FN,
                         EXT_IMAGE,
-                        ISTEP_ERRL_ID,
                 }
-        },        {
+        },
+        {
                 ISTEPNAME(10,05,"cen_sbe_arrayinit"),
                 SBE_CENTAUR_INIT::call_cen_sbe_arrayinit,
                 {
                         START_FN,
                         EXT_IMAGE,
-                        ISTEP_ERRL_ID,
                 }
-        },        {
+        },
+        {
                 ISTEPNAME(10,06,"cen_sbe_pll_initf"),
                 SBE_CENTAUR_INIT::call_cen_sbe_pll_initf,
                 {
                         START_FN,
                         EXT_IMAGE,
-                        ISTEP_ERRL_ID,
                 }
-        },        {
+        },
+        {
                 ISTEPNAME(10,07,"cen_sbe_dts_init"),
                 SBE_CENTAUR_INIT::call_cen_sbe_dts_init,
                 {
                         START_FN,
                         EXT_IMAGE,
-                        ISTEP_ERRL_ID,
                 }
-        },        {
+        },
+        {
                 ISTEPNAME(10,08,"cen_sbe_initf"),
                 SBE_CENTAUR_INIT::call_cen_sbe_initf,
                 {
                         START_FN,
                         EXT_IMAGE,
-                        ISTEP_ERRL_ID,
                 }
-        },        {
+        },
+        {
                 ISTEPNAME(10,09,"cen_sbe_do_manual_inits"),
                 SBE_CENTAUR_INIT::call_cen_sbe_do_manual_inits,
                 {
                         START_FN,
                         EXT_IMAGE,
-                        ISTEP_ERRL_ID,
                 }
-        },        {
+        },
+        {
                 ISTEPNAME(10,10,"cen_sbe_startclocks"),
                 SBE_CENTAUR_INIT::call_cen_sbe_startclocks,
                 {
                         START_FN,
                         EXT_IMAGE,
-                        ISTEP_ERRL_ID,
                 }
-        },        {
+        },
+        {
                 ISTEPNAME(10,11,"cen_sbe_scominits"),
                 SBE_CENTAUR_INIT::call_cen_sbe_scominits,
                 {
                         START_FN,
                         EXT_IMAGE,
-                        ISTEP_ERRL_ID,
                 }
         },
 

@@ -43,58 +43,13 @@ namespace   INITSERVICE
 enum    InitServiceModuleID
 {
     UNDEFINED_MODULE_ERRL_ID            =   0x00,
-
-    //  base image modules
-    BASE_INITSVC_ERRL_ID                =   0x01,
-    START_TRACE_ERRL_ID                 =   0x02,
-    START_ERRL_ERRL_ID                  =   0x03,
-    START_PNORDD_ERRL_ID                =   0x04,
-    START_VFS_ERRL_ID                   =   0x05,
-    START_EXTINITSVC_ERRL_ID            =   0x06,
-
-    // extended image modules
-    START_ECMDDATABUFFER_ERRL_ID        =   0x10,
-    START_HWPF_ERRL_ID                  =   0x11,
-    START_FAPI_ERRL_ID                  =   0x12,
-    START_HWP_ERRL_ID                   =   0x13,
-    START_PLAT_ERRL_ID                  =   0x14,
-    EXECUTE_ISTEPS_ERRL_ID              =   0x15,
-    START_FSIDD_ERRL_ID                 =   0x16,
-    START_FSISCOM_ERRL_ID               =   0x17,
-    START_TARGETING_ERRL_ID             =   0x18,
-    START_I2C_ERRL_ID                   =   0x19,
-    START_INTR_ERRL_ID                  =   0x1A,
-    START_SPD_ERRL_ID                   =   0x1B,
-    START_FAPIPOREVE_ERRL_ID            =   0x1C,
-    START_POREVE_ERRL_ID                =   0x1D,
-    START_UTIL_ERRL_ID                  =   0x1E,
-    START_MDIA_ERRL_ID                  =   0x1F,
-
-    //  Internal InitService codes
-    INITSVC_START_TASK_MOD_ID           =   0x20,
-    INITSVC_START_FN_MOD_ID             =   0x21,
-    INITSVC_TASK_RETURNED_ERROR_ID      =   0x22,
-    EXTINITSVC_TASK_RETURNED_ERROR_ID   =   0x23,
-    CXXTEST_TASK_RETURNED_ERROR_ID      =   0x24,
-    ISTEP_RETURNED_ERROR_ID             =   0x25,
-    INITSVC_DO_SHUTDOWN_MOD_ID          =   0x26,
-
-    //
-    //  ISTEP   module id's.
-    //      ISTEP_ERRL_ID is a generic Error ID for all the HWP's launched
-    //      by an istep.
-    //
-    HWAS_ERRL_ID                    =   0x30,
-    ISTEP_ERRL_ID                    =   0x31,
-
-    //  reserve some tasks for my unit tests...
-    START_CXXTEST_ERRL_ID       =   0xf0,
-    INIT_SVC_TEST1_ERRL_ID      =   0xf1,
-    INIT_SVC_TEST2_ERRL_ID      =   0xf2,
-    INIT_SVC_TEST3_ERRL_ID      =   0xf3,
-    INIT_SVC_TEST4_ERRL_ID      =   0xf4,
-    INIT_SVC_TEST5_ERRL_ID      =   0xf5,
-
+    INITSVC_START_TASK_MOD_ID           =   0x01,
+    INITSVC_START_FN_MOD_ID             =   0x02,
+    INITSVC_TASK_RETURNED_ERROR_ID      =   0x03,
+    EXTINITSVC_TASK_RETURNED_ERROR_ID   =   0x04,
+    CXXTEST_TASK_RETURNED_ERROR_ID      =   0x05,
+    ISTEP_RETURNED_ERROR_ID             =   0x06,
+    INITSVC_DO_SHUTDOWN_MOD_ID          =   0x07,
 };
 
 
@@ -109,7 +64,6 @@ enum    InitServiceReasonCode
     EXTINITSVC_FAILED_NO_ERRLOG =   INITSVC_COMP_ID | 0x07,
     CXXTEST_FAILED_NO_ERRLOG    =   INITSVC_COMP_ID | 0x08,
     SHUTDOWN_FLUSH_FAILED       =   INITSVC_COMP_ID | 0x09,
-
 };
 
 enum InitServiceUserDetailDataSubSection

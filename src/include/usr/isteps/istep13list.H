@@ -79,7 +79,6 @@ namespace   INITSERVICE
                 {
                         START_FN,
                         EXT_IMAGE,
-                        ISTEP_ERRL_ID,
                 }
         },      
 
@@ -90,7 +89,6 @@ namespace   INITSERVICE
                 {
                         START_FN,
                         EXT_IMAGE,
-                        ISTEP_ERRL_ID,
                 }
         },      
 
@@ -101,7 +99,6 @@ namespace   INITSERVICE
                 {
                         START_FN,
                         EXT_IMAGE,
-                        ISTEP_ERRL_ID,
                 }
         },      
 
@@ -112,7 +109,6 @@ namespace   INITSERVICE
                 {
                         START_FN,
                         EXT_IMAGE,
-                        ISTEP_ERRL_ID,
                 }
         },      
 
@@ -123,7 +119,6 @@ namespace   INITSERVICE
                 {
                         START_FN,
                         EXT_IMAGE,
-                        ISTEP_ERRL_ID,
                 }
         },      
 
@@ -134,7 +129,6 @@ namespace   INITSERVICE
                 {
                         START_FN,
                         EXT_IMAGE,
-                        ISTEP_ERRL_ID,
                 }
         },      
 
@@ -145,7 +139,6 @@ namespace   INITSERVICE
                 {
                         START_FN,
                         EXT_IMAGE,
-                        ISTEP_ERRL_ID,
                 }
         },      
 
@@ -156,7 +149,6 @@ namespace   INITSERVICE
                 {
                         START_FN,
                         EXT_IMAGE,
-                        ISTEP_ERRL_ID,
                 }
         },      
 
@@ -167,7 +159,6 @@ namespace   INITSERVICE
                 {
                         START_FN,
                         EXT_IMAGE,
-                        ISTEP_ERRL_ID,
                 }
         },      
 
@@ -178,7 +169,6 @@ namespace   INITSERVICE
                 {
                         START_FN,
                         EXT_IMAGE,
-                        ISTEP_ERRL_ID,
                 }
         },      
 
@@ -189,7 +179,6 @@ namespace   INITSERVICE
                 {
                         START_FN,
                         EXT_IMAGE,
-                        ISTEP_ERRL_ID,
                 }
         },      
 

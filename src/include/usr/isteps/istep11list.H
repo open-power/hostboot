@@ -72,7 +72,6 @@ const   TaskInfo    g_istep11[]  =   {
                 {
                         START_FN,                           // task type
                         EXT_IMAGE,                          // Extended Module
-                        ISTEP_ERRL_ID,               // module id
                 }
         },
         {
@@ -81,7 +80,6 @@ const   TaskInfo    g_istep11[]  =   {
                 {
                         START_FN,                           // task type
                         EXT_IMAGE,                          // Extended Module
-                        ISTEP_ERRL_ID,               // module id
                 }
         },
         {
@@ -90,7 +88,6 @@ const   TaskInfo    g_istep11[]  =   {
                 {
                         START_FN,                           // task type
                         EXT_IMAGE,                          // Extended Module
-                        ISTEP_ERRL_ID,               // module id
                 }
         },
         {
@@ -99,7 +96,6 @@ const   TaskInfo    g_istep11[]  =   {
                 {
                         START_FN,                           // task type
                         EXT_IMAGE,                          // Extended Module
-                        ISTEP_ERRL_ID,               // module id
                 }
         },
         {
@@ -108,7 +104,6 @@ const   TaskInfo    g_istep11[]  =   {
                 {
                         START_FN,                           // task type
                         EXT_IMAGE,                          // Extended Module
-                        ISTEP_ERRL_ID,               // module id
                 }
         },
         {
@@ -117,7 +112,6 @@ const   TaskInfo    g_istep11[]  =   {
                 {
                         START_FN,                           // task type
                         EXT_IMAGE,                          // Extended Module
-                        ISTEP_ERRL_ID,               // module id
                 }
         },
 
@@ -128,7 +122,6 @@ const   TaskInfo    g_istep11[]  =   {
                 {
                         START_FN,                           // task type
                         EXT_IMAGE,                          // Extended Module
-                        ISTEP_ERRL_ID,               // module id
                 }
         },
         {
@@ -137,7 +130,6 @@ const   TaskInfo    g_istep11[]  =   {
                 {
                         START_FN,                           // task type
                         EXT_IMAGE,                          // Extended Module
-                        ISTEP_ERRL_ID,               // module id
                 }
         },
 

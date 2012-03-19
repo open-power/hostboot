@@ -48,7 +48,6 @@ const   INITSERVICE::TaskInfo    TASK_TEST1  =  {
         {
                 INITSERVICE::START_TASK,                // startflag=true, try to start
                 INITSERVICE::BASE_IMAGE,                // Base Module
-                INITSERVICE::INIT_SVC_TEST1_ERRL_ID,    // module id for errorlog
         },
 };
 
@@ -64,7 +63,6 @@ const   INITSERVICE::TaskInfo    TASK_TEST2  =  {
         {
                 INITSERVICE::START_TASK,                // startflag=true, try to start
                 INITSERVICE::EXT_IMAGE,                 // Ext Inmage Module
-                INITSERVICE::INIT_SVC_TEST2_ERRL_ID,    // module id for errorlog
         },
 };
 
@@ -81,7 +79,6 @@ const   INITSERVICE::TaskInfo    TASK_TEST3  =  {
         {
                 INITSERVICE::START_TASK,                // startflag=true, try to start
                 INITSERVICE::BASE_IMAGE,                // Base Module
-                INITSERVICE::INIT_SVC_TEST3_ERRL_ID,    // module id for errorlog
         },
 };
 

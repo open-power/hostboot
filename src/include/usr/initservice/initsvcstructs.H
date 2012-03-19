@@ -115,15 +115,10 @@ enum    ModuleType
  *  - module_id for errorlog if task fails
  *
  */
-/**
- * @todo    module_id is fairly useless, we should use the taskname string
- *          to id the module.  Schedule for termination....
- */
 struct  TaskFlags
 {
     TaskType            task_type;          // task execution flags
     ModuleType          module_type;        // BASE_IMAGE or EXT_IMAGE
-    InitServiceModuleID module_id;          // module id for errorlog
 };
 
 

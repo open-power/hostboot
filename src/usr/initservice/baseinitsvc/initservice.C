@@ -100,8 +100,7 @@ errlHndl_t InitService::startTask( const TaskInfo       *i_ptask,
              *  @errortype      ERRL_SEV_CRITICAL_SYS_TERM
              *  @moduleid       INITSVC_START_TASK_MOD_ID
              *  @reasoncode     START_TASK_FAILED
-             *  @userdata1      task module id
-             *  @userdata2      task id or task return code
+             *  @userdata1      task return code
              *
              *  @devdesc        Initialization Service failed to start a task.
              *
@@ -110,7 +109,6 @@ errlHndl_t InitService::startTask( const TaskInfo       *i_ptask,
                     ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
                     INITSERVICE::INITSVC_START_TASK_MOD_ID,
                     INITSERVICE::START_TASK_FAILED,
-                    i_ptask->taskflags.module_id,
                     l_tidrc );
 
             // Add the task name as user detail data
@@ -157,8 +155,7 @@ errlHndl_t InitService::executeFn( const TaskInfo   *i_ptask,
          *  @errortype      ERRL_SEV_CRITICAL_SYS_TERM
          *  @moduleid       INITSVC_START_FN_MOD_ID
          *  @reasoncode     START_FN_FAILED
-         *  @userdata1      task module id
-         *  @userdata2      task id or task return code
+         *  @userdata1      task return code
          *
          *  @devdesc        Initialization Service attempted to start a
          *                  function within a module but the function
@@ -168,7 +165,6 @@ errlHndl_t InitService::executeFn( const TaskInfo   *i_ptask,
                 ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
                 INITSERVICE::INITSVC_START_FN_MOD_ID,
                 INITSERVICE::START_FN_FAILED,
-                i_ptask->taskflags.module_id,
                 l_tidrc );
 
         // Add the task name as user detail data

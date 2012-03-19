@@ -51,7 +51,6 @@ const TaskInfo g_exttaskinfolist[]   =   {
             {
                 INIT_TASK,                         // init only
                 EXT_IMAGE,                         // extended image module
-                START_UTIL_ERRL_ID,                // error module id
             }
         },
 
@@ -64,7 +63,6 @@ const TaskInfo g_exttaskinfolist[]   =   {
             {
                 START_TASK,                         // task type
                 EXT_IMAGE,                          // Extended Module
-                START_TARGETING_ERRL_ID,            // module id
             }
         },
 
@@ -77,7 +75,6 @@ const TaskInfo g_exttaskinfolist[]   =   {
             {
                 START_TASK,                             // task type
                 EXT_IMAGE,                              // Extended Module
-                START_INTR_ERRL_ID,                     // module id
             }
         },
 
@@ -91,7 +88,6 @@ const TaskInfo g_exttaskinfolist[]   =   {
             {
                 INIT_TASK,                          // task type
                 EXT_IMAGE,                          // Extended Module
-                START_FSIDD_ERRL_ID,                // module id
             }
         },
 
@@ -104,7 +100,6 @@ const TaskInfo g_exttaskinfolist[]   =   {
                 {
                         INIT_TASK,                          // task type
                         EXT_IMAGE,                          // Extended Module
-                        START_FSISCOM_ERRL_ID,              // module id
                 }
         },
 
@@ -117,7 +112,6 @@ const TaskInfo g_exttaskinfolist[]   =   {
             {
                 INIT_TASK,                      // task type
                 EXT_IMAGE,                      // Extended Module
-                START_I2C_ERRL_ID,              // module id
             }
         },
 
@@ -130,7 +124,6 @@ const TaskInfo g_exttaskinfolist[]   =   {
             {
                 INIT_TASK,                                  // task type
                 EXT_IMAGE,                                  // Extended module
-                START_SPD_ERRL_ID                           // module id
             }
         },
 
@@ -149,7 +142,6 @@ const TaskInfo g_exttaskinfolist[]   =   {
             {
                 INIT_TASK,                                  // task type
                 EXT_IMAGE,                                  // Extended Module
-                EXECUTE_ISTEPS_ERRL_ID,                     // module id
             }
         },
 // end TODO
@@ -163,7 +155,6 @@ const TaskInfo g_exttaskinfolist[]   =   {
                 {
                         INIT_TASK,                          // task type
                         EXT_IMAGE,                          // Extended Module
-                        START_ECMDDATABUFFER_ERRL_ID,       // module id
                 }
         },
 
@@ -176,7 +167,6 @@ const TaskInfo g_exttaskinfolist[]   =   {
                 {
                         INIT_TASK,                          // task type
                         EXT_IMAGE,                          // Extended Module
-                        START_FAPI_ERRL_ID,                 // module id
                 }
         },
 
@@ -189,7 +179,6 @@ const TaskInfo g_exttaskinfolist[]   =   {
                 {
                         INIT_TASK,                          // task type
                         EXT_IMAGE,                          // Extended Module
-                        START_HWP_ERRL_ID,                  // module id
                 }
         },
 
@@ -202,7 +191,6 @@ const TaskInfo g_exttaskinfolist[]   =   {
                 {
                         INIT_TASK,                          // task type
                         EXT_IMAGE,                          // Extended Module
-                        START_PLAT_ERRL_ID,                 // module id
                 }
         },
 
@@ -216,7 +204,6 @@ const TaskInfo g_exttaskinfolist[]   =   {
             {
                 INIT_TASK,                         // task type
                 EXT_IMAGE,                         // Extended Module
-                START_FAPIPOREVE_ERRL_ID           // module id
             }
         },
 
@@ -229,7 +216,6 @@ const TaskInfo g_exttaskinfolist[]   =   {
             {
                INIT_TASK,                         // task type
                EXT_IMAGE,                         // Extended Module
-               START_POREVE_ERRL_ID               // module id
             }
         },
 
@@ -242,7 +228,6 @@ const TaskInfo g_exttaskinfolist[]   =   {
             {
                INIT_TASK,                         // task type
                EXT_IMAGE,                         // Extended Module
-               START_MDIA_ERRL_ID                 // module id
             }
         },
 
@@ -262,7 +247,6 @@ const TaskInfo g_exttaskinfolist[]   =   {
             {
                 START_TASK,                                 // task type
                 EXT_IMAGE,                                  // Extended Module
-                EXECUTE_ISTEPS_ERRL_ID,                     // module id
             }
         },
         // NOTE: libistepdisp.so needs to always be last in this list!!
@@ -280,7 +264,6 @@ const TaskInfo g_exttaskinfolist[]   =   {
                 {
                         END_TASK_LIST,                      // end of list
                         UNDEFINED_MT,                       // dummy module type
-                        UNDEFINED_MODULE_ERRL_ID,           // dummy errorlog
                 }
         },
 
@@ -295,7 +278,6 @@ const   TaskInfo    CXXTEST_TASK    =   {
                 {
                         START_TASK,                         // task type
                         EXT_IMAGE,                          // Extended Module
-                        START_CXXTEST_ERRL_ID,              // module id
                 }
         };
 
