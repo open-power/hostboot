@@ -129,9 +129,6 @@ errlHndl_t dimmPresenceDetect( DeviceFW::OperationType i_opType,
             TRACUCOMP( g_trac_spd,
                        INFO_MRK"Dimm was found to be NOT present." );
 
-            memcpy( io_buffer, &present, presentSz );
-            io_buflen = 0;
-
             // Delete the error
             delete err;
             err = NULL;
@@ -142,10 +139,12 @@ errlHndl_t dimmPresenceDetect( DeviceFW::OperationType i_opType,
             present = true;
             TRACUCOMP( g_trac_spd,
                        INFO_MRK"Dimm was found to be present." );
-
-            memcpy( io_buffer, &present, presentSz );
-            io_buflen = presentSz;
         }
+
+        // copy present value into output buffer so caller can read it
+        memcpy( io_buffer, &present, presentSz );
+        io_buflen = presentSz;
+
     } while( 0 );
 
     TRACSSCOMP( g_trac_spd,
