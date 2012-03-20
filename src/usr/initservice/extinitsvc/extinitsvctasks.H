@@ -255,6 +255,18 @@ const TaskInfo g_exttaskinfolist[]   =   {
             }
         },
 
+        /**
+         * @brief PRDF code library
+         */
+        {
+            "libprdf.so" ,                        // taskname
+            NULL,                                 // no pointer to fn
+            {
+               INIT_TASK,                         // task type
+               EXT_IMAGE,                         // Extended Module
+            }
+        },
+
 // end TODO.
 
         //  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

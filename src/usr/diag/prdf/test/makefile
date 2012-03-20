@@ -1,7 +1,7 @@
 #  IBM_PROLOG_BEGIN_TAG
 #  This is an automatically generated prolog.
 #
-#  $Source: src/usr/diag/makefile $
+#  $Source: src/usr/diag/prdf/test/makefile $
 #
 #  IBM CONFIDENTIAL
 #
@@ -20,8 +20,18 @@
 #  Origin: 30
 #
 #  IBM_PROLOG_END
-ROOTPATH = ../../..
 
-SUBDIRS = mdia.d prdf.d
+
+ROOTPATH = ../../../../..
+
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/diag/prdf
+EXTRAINCDIR += ${ROOTPATH}/src/usr/diag/prdf
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/errl
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/targeting
+
+MODULE = testprdf
+
+TESTS = *.H
 
 include ${ROOTPATH}/config.mk

@@ -194,6 +194,14 @@ const compId_t MVPD_COMP_ID = 0x1200;
 const char MVPD_COMP_NAME[] = "mvpd";
 //@}
 
+/** @name PRDF
+ *  PRDF component
+ */
+//@{
+const compId_t HBPRDF_COMP_ID = 0x1300; //FIXME working with ERRL owner to resolve errl parsing issue
+const char HBPRDF_COMP_NAME[] = "prdf"; //FIXME
+//@}
+
 /** @name RESERVED
  *  Reserved component ID. x3100 is the component ID
  *  of FipS ERRL component. Due to our use of
@@ -203,6 +211,7 @@ const char MVPD_COMP_NAME[] = "mvpd";
 //@{
 const compId_t FIPS_ERRL_COMP_ID = 0x3100;
 const char FIPS_ERRL_COMP_NAME[] = "hb-trace";
+//@}
 
 //  ----------------------------------------------------------
 //  CXXTEST Unit Test, reserve compid near the end...

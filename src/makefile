@@ -50,13 +50,13 @@ RUNTIME_OBJECTS =
 
 
 BASE_MODULES = trace errl devicefw scom xscom initservice \
-               pnor vfs 
+               pnor vfs
 
-EXTENDED_MODULES = targeting ecmddatabuffer fapi hwp plat 	\
+EXTENDED_MODULES = targeting ecmddatabuffer fapi hwp plat	\
                    extinitsvc istepdisp hwas fsi fsiscom i2c intr \
 		           spd dmi_training fapiporeve poreve util	\
 		           sbe_centaur_init mc_init dram_training \
-                   mdia mbox mvpd \
+                   mdia mbox mvpd prdf \
                    activate_powerbus build_winkle_images \
                    core_activate dram_initialization edi_ei_initialization \
                    establish_system_smp load_payload \
@@ -69,7 +69,7 @@ TESTCASE_MODULES = cxxtest testerrl testdevicefw testsyslib \
                    testscom testxscom testtargeting testinitservice testkernel \
                    testhwpf testecmddatabuffer initsvctesttask testcxxtest \
                    testpnor testi2c testfsi testvfs testhwas testintr testspd \
-                   testpore testutil testmbox testmdia testmvpd
+                   testpore testutil testmbox testmdia testmvpd testprdf
 
 RELOCATABLE_IMAGE_LDFLAGS = -pie --export-dynamic
 
