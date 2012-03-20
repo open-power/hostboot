@@ -21,8 +21,8 @@
 #
 #  IBM_PROLOG_END
 ROOTPATH = ../../../..
-MODULE = initsvctasktest2
+MODULE = initsvctesttask
 
-OBJS =  tasktest2.o           
+OBJS =  tasktest2.o
 
 include ${ROOTPATH}/config.mk

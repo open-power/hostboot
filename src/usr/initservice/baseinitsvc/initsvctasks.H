@@ -33,25 +33,12 @@
 #include    <initservice/initsvcreasoncodes.H>
 #include    "initservice.H"
 
+
 namespace   INITSERVICE
 {
 
-const   uint64_t MAX_TASKS   =   10;
 
 const TaskInfo    g_taskinfolist[]   =   {
-
-        /**
-         *  @brief  Errorlog    Task
-         */
-        {
-                "liberrl.so" ,                      // taskname
-                NULL,                               // no ptr to fn
-                {
-                        NONE,                       // don't start
-                        BASE_IMAGE,                 // Base Module
-                }
-        },
-
 
         /**
          * @brief   PNOR    Driver  Task
@@ -86,7 +73,7 @@ const TaskInfo    g_taskinfolist[]   =   {
                 "libextinitsvc.so" ,                // taskname
                 NULL,                               // no pointer to fn
                 {
-                        START_TASK,                 // call start()
+                        START_TASK,
                         EXT_IMAGE,                  // EXT_IMAGE
                 }
         },

@@ -26,9 +26,9 @@ ROOTPATH = ../../..
 
 # OBJS = 
 
-# NOTE:	initsvctasktest2 is a dummy module that is executed by 
+# NOTE:	initsvctest is a dummy module that is executed by 
 #		unit test 2 in the test directory.  Please do not rename.
-SUBDIRS = baseinitsvc.d	extinitsvc.d taskargs.d	istepdispatcher.d	\
-			test.d initsvctasktest2.d build.d
+SUBDIRS = baseinitsvc.d	extinitsvc.d istepdispatcher.d	\
+			test.d initsvctesttask.d build.d
 
 include ${ROOTPATH}/config.mk

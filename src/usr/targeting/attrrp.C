@@ -54,10 +54,10 @@ namespace TARGETING
         uint64_t        size;
     };
 
-    void AttrRP::init(TaskArgs* i_taskArgs)
+    void AttrRP::init( errlHndl_t   &io_taskRetErrl )
     {
         // Call startup on singleton instance.
-        Singleton<AttrRP>::instance().startup(i_taskArgs);
+        Singleton<AttrRP>::instance().startup( io_taskRetErrl );
     }
 
     void AttrRP::startMsgServiceTask(void* i_instance)
@@ -78,7 +78,7 @@ namespace TARGETING
         assert(false);
     }
 
-    void AttrRP::startup(TaskArgs* i_taskArgs)
+    void AttrRP::startup( errlHndl_t    &io_taskRetErrl )
     {
         errlHndl_t l_errl = NULL;
 
@@ -101,18 +101,10 @@ namespace TARGETING
         if (l_errl)
         {
             l_errl->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
-            if (i_taskArgs)
-            {
-                i_taskArgs->postErrorLog(l_errl);
-            }
-            else
-            {
-                TRACFCOMP(g_trac_targeting,
-                          ERR_MRK "AttrRP: Critical error in startup and no "
-                                  "TaskArgs given by init-service.");
-                errlCommit(l_errl,TARG_COMP_ID);
-            }
         }
+
+        //  return any errlogs to _start()
+        io_taskRetErrl  =   l_errl;
     }
 
     void AttrRP::msgServiceTask() const

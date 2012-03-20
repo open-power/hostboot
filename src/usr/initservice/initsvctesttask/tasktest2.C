@@ -33,12 +33,14 @@
 #include <sys/task.h>
 #include <trace/interface.H>
 #include <initservice/taskargs.H>
+#include    <initservice/initsvcreasoncodes.H>
 
 #include "tasktest2.H"
 
 namespace   INITSERVICE
 {
 
+TASK_ENTRY_MACRO( InitSvcTaskTest2::getTheInstance().init );
 
 /******************************************************************************/
 // Globals/Constants
@@ -53,33 +55,12 @@ InitSvcTaskTest2& InitSvcTaskTest2::getTheInstance()
 }
 
 
-/**
- * @brief   _start() - task entry point for this module
- *
- */
-extern "C"
-void _start( void *io_pArgs )
+void    InitSvcTaskTest2::init( errlHndl_t  &io_taskRetErrl )
 {
-    TaskArgs::TaskArgs *pTaskArgs = (TaskArgs::TaskArgs *)io_pArgs;
+    errlHndl_t  l_errl  =   NULL;
 
-    //  create an instance of InitService
-    InitSvcTaskTest2::InitSvcTaskTest2& tt = InitSvcTaskTest2::getTheInstance();
 
-    // initialize the base modules in Hostboot.
-    tt.init( io_pArgs );
-
-    if  ( pTaskArgs )
-    {
-        pTaskArgs->waitChildSync();
-    }
-
-    task_end();
-}
-
-void    InitSvcTaskTest2::init( void *i_args )
-{
-
-    return;
+    task_end2( l_errl );
 };
 
 } // namespace

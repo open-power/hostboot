@@ -92,11 +92,9 @@ void    enableHwasState( TARGETING::HwasState &i_rhwasState )
 
 }
 
-
 void    init_target_states( void *io_pArgs )
 {
-    INITSERVICE::TaskArgs *pTaskArgs =
-            static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
+    errlHndl_t  l_errl  =   NULL;
     TARGETING::HwasState l_hwasState;
 
     TRACDCOMP( g_trac_hwas, "init_target_states entry: set default HWAS state:" );
@@ -112,8 +110,6 @@ void    init_target_states( void *io_pArgs )
         clearHwasState(l_hwasState);
         l_TargetItr->setAttr<ATTR_HWAS_STATE>( l_hwasState );
     }
-
-
 
     /**
      * @todo    Enable cpu 0 and centaur 0 for now.
@@ -236,17 +232,14 @@ void    init_target_states( void *io_pArgs )
     }   // end else
     //  $$$$$   TEMPORARY   $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
-    //  wait here on the barrier, then end the task.
-    pTaskArgs->waitChildSync();
-    task_end();
+    TRACFCOMP( g_trac_hwas, "$$ init_target_states DEBUG: return %p", l_errl );
+    task_end2( l_errl );
 }
 
 
 void    init_fsi( void *io_pArgs )
 {
     errlHndl_t  l_errl      =   NULL;
-    INITSERVICE::TaskArgs *pTaskArgs =
-            static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
 
     TRACDCOMP( g_trac_hwas, "init_fsi entry" );
 
@@ -254,79 +247,63 @@ void    init_fsi( void *io_pArgs )
     if ( l_errl )
     {
         TRACFCOMP( g_trac_hwas, "ERROR: failed to init FSI hardware" );
-        pTaskArgs->postErrorLog( l_errl );
-    }
+     }
 
-    //  wait here on the barrier, then end the task.
-    pTaskArgs->waitChildSync();
-    task_end();
+    task_end2( l_errl );
 }
+
 
 void    apply_fsi_info( void *io_pArgs )
 {
-    INITSERVICE::TaskArgs *pTaskArgs =
-            static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
+    errlHndl_t  l_errl  =   NULL;
 
     TRACDCOMP( g_trac_hwas, "apply_fsi_info entry" );
 
 
-    //  wait here on the barrier, then end the task.
-    pTaskArgs->waitChildSync();
-    task_end();
+    task_end2( l_errl );
 }
 
 void    apply_dd_presence( void *io_pArgs )
 {
-    INITSERVICE::TaskArgs *pTaskArgs =
-            static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
+    errlHndl_t  l_errl      =   NULL;
 
     TRACDCOMP( g_trac_hwas, "apply_dd_presence entry" );
 
 
-    //  wait here on the barrier, then end the task.
-    pTaskArgs->waitChildSync();
-    task_end();
+    task_end2( l_errl );
 }
 
 void    apply_pr_keyword_data( void *io_pArgs )
 {
-    INITSERVICE::TaskArgs *pTaskArgs =
-            static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
+    errlHndl_t  l_errl      =   NULL;
 
     TRACDCOMP( g_trac_hwas, "apply_pr_keyword_data" );
 
 
-    //  wait here on the barrier, then end the task.
-    pTaskArgs->waitChildSync();
-    task_end();
+    task_end2( l_errl );
 }
 
 void    apply_partial_bad( void *io_pArgs )
 {
-    INITSERVICE::TaskArgs *pTaskArgs =
-            static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
+    errlHndl_t  l_errl      =   NULL;
 
     TRACDCOMP( g_trac_hwas, "apply_partial_bad entry" );
 
 
-    //  wait here on the barrier, then end the task.
-    pTaskArgs->waitChildSync();
-    task_end();
+    task_end2( l_errl );
 }
 
 void    apply_gard( void *io_pArgs )
 {
-    INITSERVICE::TaskArgs *pTaskArgs =
-            static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
+    errlHndl_t  l_errl      =   NULL;
 
     TRACDCOMP( g_trac_hwas, "apply_gard entry" );
 
-    errlHndl_t l_errl = theDeconfigGard().clearGardRecordsForReplacedTargets();
+    l_errl = theDeconfigGard().clearGardRecordsForReplacedTargets();
 
     if (l_errl)
     {
         TRACFCOMP(g_trac_hwas, "ERROR: apply_gard failed to clear GARD Records for replaced Targets");
-        pTaskArgs->postErrorLog(l_errl);
     }
     else
     {
@@ -335,7 +312,6 @@ void    apply_gard( void *io_pArgs )
         if (l_errl)
         {
             TRACFCOMP(g_trac_hwas, "ERROR: apply_gard failed to deconfigure Targets from GARD Records for IPL");
-            pTaskArgs->postErrorLog(l_errl);
         }
         else
         {
@@ -343,9 +319,7 @@ void    apply_gard( void *io_pArgs )
         }
     }
 
-    //  wait here on the barrier, then end the task.
-    pTaskArgs->waitChildSync();
-    task_end();
+    task_end2( l_errl );
 }
 
 

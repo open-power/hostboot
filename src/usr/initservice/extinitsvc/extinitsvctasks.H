@@ -36,7 +36,6 @@
 namespace   INITSERVICE
 {
 
-const   uint64_t MAX_EXT_TASKS   =   25;
 
 const TaskInfo g_exttaskinfolist[]   =   {
 
@@ -284,7 +283,7 @@ const TaskInfo g_exttaskinfolist[]   =   {
 //  -------------------------------------------------------------------------
 //  -----   UNIT    TESTS   -------------------------------------------------
 //  -------------------------------------------------------------------------
-const   TaskInfo    CXXTEST_TASK    =   {
+const   TaskInfo    cxxTestTask    =   {
                 "libcxxtest.so" ,                           // taskname
                 NULL,                                       // no pointer to fn
                 {

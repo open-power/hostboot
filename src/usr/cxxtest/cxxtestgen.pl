@@ -744,7 +744,7 @@ sub write_start() {
   print   "\n";
   print "\t__sync_add_and_fetch(&CxxTest::g_ModulesCompleted, 1);\n";
   print "\n";
-  print   "\ttask_end();\n";
+  print   "\ttask_end2( NULL );\n";
   print   "}\n";
 
 }

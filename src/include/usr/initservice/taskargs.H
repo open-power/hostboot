@@ -27,10 +27,8 @@
 /**
  * @file    taskargs.H
  *
- * common file to hold arguments passed onto tasks.
+ *  Common file to hold arguments passed to and from tasks.
  *
- * will also hold macros, etc to manage arguments
-
  */
 
 #include    <assert.h>
@@ -42,231 +40,43 @@
 #include    <errl/errlmanager.H>
 
 /**
- * @enum
  *
- *  Return codes that are passed from ISTEP dispatcher to extinitsvc to initsvc
- *  thru TASKARGS
+ *  @def TASK_ENTRY_MACRO( MyInitFn )
  *
- *  -   TASKARGS_SHUTDOWN_RC - task or istep has returned an error,
- *      initsvc has initiated a shutdown
+ *  set up a _start() task entry routine.
+ *
+ *  MyInitFn should be declared in your task/namespace with one parameter,
+ *      a reference to an errorlog.
+ *
+ *      Example:
+ *
+ *      static void init( errlHndl_t &io_rtaskRetErrl );
+ *
+ *  Then if you wish to terminate with an error, say
+ *
+ *      io_rtaskRetErrl =   my_errl;
+ *      return;
+ *
+ *  This is not as flexible as the old TaskArgs setup but much simpler.
+ *
+ *  Alternatively you can call task_end2() directly from the MyInitFn:
+ *
+ *      task_end2( l_errl );
+ *
  */
-enum
-{
-    TASKARGS_SHUTDOWN_RC    =   0xf0000001,
-};
 
-
-/**
- * @note    macro to setup the input void * pArgs pointer.
- *          Casts it to a pointer to the incoming TaskArgs struct
- */
-#define TASKARGS_INIT_TASKARGS(P_ARGS)                                      \
-        INITSERVICE::TaskArgs *pTaskArgs =                                  \
-        static_cast<INITSERVICE::TaskArgs *>(P_ARGS)
-
-
-/**
- * @note    macro to wait on the TaskArgs barrier and end the task
- */
-#define TASKARGS_WAIT_AND_ENDTASK()                                         \
-        if  ( pTaskArgs )                                                   \
-        {                                                                   \
-            pTaskArgs->waitChildSync();                                     \
-        }                                                                   \
-        task_end()
-
-
-/**
- * @note macro to set up a _start() task entry routine.
- */
 #define TASK_ENTRY_MACRO( MyInitFn )                                        \
         extern "C"                                                          \
         void _start( void *io_pArgs )                                       \
         {                                                                   \
-            TASKARGS_INIT_TASKARGS(io_pArgs);                               \
+            errlHndl_t  io_rtaskRetErrl =   NULL;                           \
+            void        *ret            =   NULL;                           \
                                                                             \
-            MyInitFn( io_pArgs );                                           \
+            MyInitFn( io_rtaskRetErrl );                                    \
                                                                             \
-            TASKARGS_WAIT_AND_ENDTASK();                                    \
+            ret =   reinterpret_cast<void *>(io_rtaskRetErrl);              \
+                                                                            \
+            task_end2( ret );                                               \
         }
-
-
-namespace   INITSERVICE
-{
-
-/**
- *  @class TaskArgs
- *
- *  passed into a task as a void* pointer
- *  contains:
- *      - barrier to wait on
- *      - data from parent (if used)
- *      - return code from child (if used)
- *      - pointer to errorlog handle
- *
- */
-class  TaskArgs
-{
-
-public:
-
-
-    /**
-     * @brief   TaskArgs    constructor
-     *
-     */
-    TaskArgs();
-
-
-    /**
-     * @brief   TaskArgs    destructor
-     */
-    ~TaskArgs();
-
-
-    /**
-     * @brief   waitParentSync()
-     *
-     * Wait for internal barrier associated with this args struct
-     * This should be called by the task that launches a child task.
-     * Currently there is no difference between parent and child
-     * but this may change.
-     *
-     * @return  none
-     */
-    void    waitParentSync();
-
-
-    /**
-     * @brief   waitChildSync()
-     *
-     * Wait for internal barrier associated with this args struct
-     * This should be called by the child task.
-     * Currently there is no difference between parent and child
-     * but this may change.
-     *
-     * @return none
-     */
-    void    waitChildSync();
-
-
-    /**
-     * @brief   postReturnCode
-     *
-     * Child task can use this to post a return code to InitServices
-     *
-     * @param[in]   i_returncode;
-     *
-     * @return none.
-     */
-    void    postReturnCode( const uint64_t i_returncode );
-
-
-    /**
-     * @brief   getReturnCode
-     *
-     * Parent task can use this to get a return code from the child
-     *
-     * @return value of iv_taskreturncode;
-     *
-     */
-    uint64_t getReturnCode( )   const;
-
-
-    /**
-     * @brief   setCommand
-     *
-     * Parent can pass commands and info to the child using this function
-     *
-     * @param[in]   i_command;
-     *
-     *  @return none
-     */
-    void    setCommand( const uint64_t  i_command );
-
-
-    /**
-     * @brief   getCommand
-     *
-     * Child can get commands from the parent using this function
-     *
-     * @return   value of iv_taskcommand;
-     *
-     * @todo    might overload this later if we need to pass structs,
-     *          buffers, etc.
-     */
-    uint64_t    getCommand( )   const;
-
-
-    /**
-     * @brief   postErrorLog
-     *
-     * Child task can use this to post an errorlog to InitServices
-     * Caller is responsible for creating a new errorlog, etc.
-     * No checking is done.
-     *
-     * @param[in]   i_errl;
-     *
-     * @return   none
-     */
-    void    postErrorLog( errlHndl_t i_errl );
-
-
-    /**
-     * @brief   getErrorLog
-     *
-     * Parent task can use this to get an errorlog from the child
-     *
-     * @note    This routine sets the iv_errl pointer to the errorlog to NULL
-     *          after returning it, so we do not end up with 2 copies of the
-     *          pointer.   The caller must commit or otherwise handle the
-     *          errorlog to avoid a memory leak.
-     *
-     * @return iv_errl
-     *
-     */
-    errlHndl_t getErrorLog( );
-
-
-    /**
-     * @brief   queryErrorLog
-     *
-     * Tasks can use this to determine if an error log has been posted.
-     *
-     * @return bool - True if postErrorLog called with non-NULL value.
-     */
-    bool queryErrorLog( ) { return (iv_errl != NULL); };
-
-
-    /**
-     * @brief   clear taskargs struct between uses
-     *          - barrier is left alone,
-     *          - if iv_errl is non zero, we commit it here just to avoid
-     *              a memory leak.
-     *
-     * @return  none
-     */
-    void    clear();
-
-
-private:
-
-    /**
-     * @note   Disable copy constructor and assignment operator
-     */
-    TaskArgs(const TaskArgs& i_right);
-    TaskArgs& operator=(const TaskArgs& i_right);
-
-
-    errlHndl_t  iv_errl;
-    uint64_t    iv_taskreturncode;
-    uint64_t    iv_taskcommand;
-
-    barrier_t   iv_sync_barrier;
-
-};
-
-};  // namespace
-
 
 #endif

@@ -92,19 +92,19 @@ public:
     /**
      *  @brief  Provide an entry function into the class, called from _start()
      *
-     *  @param[in]  i_pargs  pointer to any arguments passed in from
-     *                      _start().
+     *  @param[in]  io_rtaskRetErrl  -   ref to errlHndl_t passed back to _start().
      *
      *  @return nothing
      */
-    void            init( void *i_pargs);
+    void            init( errlHndl_t    &io_rtaskRetErrl );
+
 
     /**
      * @brief Handle an istep break point
      * @param[in] i_info, @TODO - location/info
-     * @pre iv_sts contains current istep status + seqnum or 
+     * @pre iv_sts contains current istep status + seqnum or
      *      0 if not in step mode
-     * @note blocks until an outside istep cmd to resume is recieved. 
+     * @note blocks until an outside istep cmd to resume is recieved.
      */
     void handleBreakPoint( uint32_t info);
 
@@ -146,7 +146,6 @@ private:
      *
      * @param[in]       i_IStep         -   IStepNumber
      * @param[in]       i_SubStep       -   SubStepNumber
-     * @param[in,out]   io_rmodulename  - return name of module to load
      *
      * @return  pointer to a TaskInfo struct
      * @retval  pointer to a TaskInfo struct, or NULL
@@ -154,8 +153,7 @@ private:
      */
     const TaskInfo *findTaskInfo(
                                     const uint16_t i_IStep,
-                                    const uint16_t i_SubStep,
-                                    const char     *&io_rmodulename ) const;
+                                    const uint16_t i_SubStep ) const;
 
     /**
      * @brief   Command 0: Run the requested IStep/SubStep
@@ -165,8 +163,7 @@ private:
      *
      * @return  none
      */
-    void    processSingleIStepCmd(
-                        SPLESS::SPLessCmd &i_rcmd);
+    void    processSingleIStepCmd( SPLESS::SPLessCmd &i_rcmd);
 
 
      /**
@@ -174,17 +171,12 @@ private:
       *
       * Stop and wait for SP to send the next IStep to run.  Run that, then
       * wait for the next one.
-      * This is not expected to return - errors etc are sent to the user to
-      * handle.
-      *
-      * @param[in,out] io_ptr   -   pointer to any args passed in from
-      *                             ExtInitSvc.  This may be a pointer to an
-      *                             TaskArgs struct (or something else) which
-      *                             can be filled out on return
+      * @param[in,out]  -   ref to an errlHndl_t that can be passed back to
+      *                     ExtInitSvc .
       *
       * @return none
       */
-     void   singleStepISteps( void *  io_ptr );
+     void   singleStepISteps( errlHndl_t    &io_rtaskRetErrl ) ;
 
 
      /**
@@ -194,14 +186,12 @@ private:
       * If an IStep gets an error, report it and stop.
       * Otherwise, return.
       *
-      * @param[in,out] io_ptr   -   pointer to a TaskArgs struct on input
-      *                             command, returncode and errorlog will be
-      *                             clear on input
-      *                             one or more may be filled in on return
+      * @param[in,out]  -   ref to an errlHndl_t that can be passed back to
+      *                     ExtInitSvc .
       *
       * @return none
       */
-     void   runAllISteps( void *  io_ptr )  const;
+     void   runAllISteps( errlHndl_t    &io_rtaskRetErrl )  const;
 
 
     /**
@@ -226,9 +216,10 @@ private:
      *          vague - requirements for Can-Continue behaviour have not been
      *          defined yet.
      */
-    bool getCanContinueProcedure(   const TaskInfo  &i_failingIStep,
-                                    errlHndl_t      &i_failingError,
-                                    TaskInfo        &io_nextIStep  ) const;
+    bool getCanContinueProcedure(
+                            const TaskInfo  &i_failingIStep,
+                            errlHndl_t      &i_failingError,
+                            TaskInfo        &io_nextIStep  ) const;
 
 
     //  -----   internal vars   -----------------------------

@@ -38,9 +38,9 @@ class PnorRP
   public:
     /**
      * @brief Static Initializer
-     * @param[in]  Task Args pointer passed by init service
+     * @param[in]  ref to errlHndl_t
      */
-    static void init( void* i_taskArgs );
+    static void init( errlHndl_t    &io_rtaskRetErrl );
 
     /**
      * @brief  Return the size and address of a given section of PNOR data
@@ -89,7 +89,7 @@ class PnorRP
         LAST_VADDR = BASE_VADDR + TOTAL_SIZE,  /**< End of our VA range */
 
         /** Real number of bytes required to read 1 logical page */
-        PAGESIZE_PLUS_ECC = PAGESIZE * (9/8),  // 8 bytes of data + 1 byte of ECC 
+        PAGESIZE_PLUS_ECC = PAGESIZE * (9/8),  // 8 bytes of data + 1 byte of ECC
     };
 
     /**
@@ -205,7 +205,7 @@ class PnorRP
      * @brief  Figure out which section a VA belongs to
      *
      * @param[in] i_vaddr  Virtual address of page
-     * @param[out] o_side  Which side of the flash 
+     * @param[out] o_side  Which side of the flash
      * @param[out] o_id  Which section of PNOR
      *
      * @return Error if VA is bad
@@ -264,4 +264,4 @@ class PnorRP
 };
 
 
-#endif 
+#endif

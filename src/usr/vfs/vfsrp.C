@@ -64,18 +64,15 @@ VfsRp::~VfsRp()
 /**
  * STATIC initializer of vfs resource provider entry point
  */
-void VfsRp::init( void * i_taskArgs )
+void VfsRp::init( errlHndl_t &io_taskRetErrl )
 {
     errlHndl_t err = NULL;
-    err = Singleton<VfsRp>::instance()._init();
-    INITSERVICE::TaskArgs* args =
-            static_cast<INITSERVICE::TaskArgs*>(i_taskArgs);
-    if(err)
-    {
-        args->postErrorLog(err);
-    }
-}
 
+    err = Singleton<VfsRp>::instance()._init();
+
+
+    task_end2( err );
+}
 // ----------------------------------------------------------------------------
 
 /**
@@ -434,7 +431,7 @@ const char * VfsRp::get_name_from_address(const void * i_vaddr) const
     {
         module = vfs_find_address(VFS_MODULES,i_vaddr);
     }
-    if(module) 
+    if(module)
     {
         result = module->module;
     }

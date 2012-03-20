@@ -44,13 +44,13 @@ namespace TARGETING
     {
         public:
             /** @brief Initializes and starts the AttrRP daemon.
-             *  @param[in] i_taskArgs - Pointer to init service arguments.
+             *  @param[in,out]  -   ref to an errHndl_t
              *
              *  @note If any error occurs during initialization, it will be
              *        reported back through the TaskArgs structure to the init
              *        service.
              */
-            static void init(INITSERVICE::TaskArgs* i_taskArgs);
+            static void init( errlHndl_t &io_taskRetErrl );
 
         protected:
             /** @brief Default constructor.
@@ -75,7 +75,7 @@ namespace TARGETING
              *  init() is a static function that just calls
              *  Singleton<AttrRP>::instance().startup().  See init for behavior.
              */
-            void startup(INITSERVICE::TaskArgs* i_taskArgs);
+            void startup( errlHndl_t    &io_taskRetErrl );
 
             /** @brief Daemon thread processing function.
              *

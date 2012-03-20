@@ -95,9 +95,10 @@ enum    {
     SPLESS_TASKRC_TERMINATED        =   -6,     // terminated the polling loop
     SPLESS_TASKRC_FAIL_LOADMODULE   =   -7,     // failed to load module
 
-    SPLESS_INVALID_COMMAND          =   10,    // invalid command from user console
-    SPLESS_AT_BREAK_POINT           =   11,    // at breakpoint
-    SPLESS_NOT_AT_BREAK_POINT       =   12,    // resume command w/o breakpoint
+    SPLESS_INVALID_COMMAND          =   10,     // invalid command from user console
+    SPLESS_AT_BREAK_POINT           =   11,     // at breakpoint
+    SPLESS_NOT_AT_BREAK_POINT       =   12,     // resume command w/o breakpoint
+    SPLESS_SHUTTING_DOWN            =   13,     // shutdown command issued
 };
 
 /**
@@ -139,6 +140,8 @@ extern  uint64_t    g_SPLess_IStepMode_Reg;
 const   uint8_t     SPLESS_SINGLE_ISTEP_CMD         =   0x00;
 const   uint8_t     SPLESS_RESUME_ISTEP_CMD         =   0x01;
 const   uint8_t     SPLESS_CLEAR_TRACE_CMD          =   0x02;
+const   uint8_t     SPLESS_SHUTDOWN_CMD             =   0x03;
+
 const   uint64_t    SPLESS_SINGLE_STEP_STS_MASK     =   0x00000000ffffffff;
 
 /**

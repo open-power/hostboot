@@ -78,28 +78,23 @@ namespace TARGETING
 extern "C"
 void _start(void* io_pArgs)
 {
-    INITSERVICE::TaskArgs *pTaskArgs  =
-            static_cast<INITSERVICE::TaskArgs *>(io_pArgs);
+    errlHndl_t io_taskRetErrl   =   NULL;
 
     #define TARG_FN "_start(...)"
 
     TARG_ENTER();
 
-    AttrRP::init(pTaskArgs);
-    if (( pTaskArgs ) && (!pTaskArgs->queryErrorLog()))
+    AttrRP::init( io_taskRetErrl );
+
+    if ( io_taskRetErrl == NULL )
     {
         TargetService& l_targetService = targetService();
         (void)l_targetService.init();
     }
 
+    task_end2( io_taskRetErrl );
+
     TARG_EXIT();
-
-    if  ( pTaskArgs )
-    {
-        pTaskArgs->waitChildSync();
-    }
-
-    task_end();
 
     #undef TARG_FN
 }

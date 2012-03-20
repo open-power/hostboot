@@ -45,6 +45,8 @@
 
 #include    <errl/errludstring.H>
 
+#include    <initservice/taskargs.H>        // TASK_ENTRY_MACRO
+
 #include    "initservice.H"
 #include    "initsvctasks.H"
 
@@ -52,131 +54,369 @@
 //  -----   namespace   SPLESS  -----------------------------------------------
 namespace   SPLESS
 {
-    //  allocate space for SPLess Command regs
+    //  allocate space for SPLess Command regs in the base image.
     uint64_t    g_SPLess_Command_Reg    =   0;
     uint64_t    g_SPLess_Status_Reg     =   0;
     uint64_t    g_SPLess_IStepMode_Reg  =   0x123456789abcdef0;
 
-}   //  -----   end namespace   SPLESS  ---------------------------------------
+}
+//  -----   end namespace   SPLESS  ---------------------------------------
+
 
 namespace   INITSERVICE
 {
 
 trace_desc_t *g_trac_initsvc = NULL;
-TRAC_INIT(&g_trac_initsvc, "INITSVC", 4096 );
+TRAC_INIT(&g_trac_initsvc, "INITSVC", 2048 );
 
-
-errlHndl_t InitService::startTask( const TaskInfo       *i_ptask,
-                                   TaskArgs::TaskArgs   *io_pargs ) const
+/**
+ *  @brief  start() task entry procedure
+ *  This one is "special" since we do not return anything to the kernel/vfs
+ */
+extern "C"
+void _start(void *ptr)
 {
-    tid_t       l_tidrc     =   0;
-    errlHndl_t  l_errl      =   NULL;
+    TRACFCOMP( g_trac_initsvc,
+            "Executing Initialization Service module." );
+
+    // initialize the base modules in Hostboot.
+    InitService::getTheInstance().init( ptr );
+
+    TRACFCOMP( g_trac_initsvc,
+            "return from Initialization Service module." );
+
+    task_end();
+}
+
+
+
+errlHndl_t  InitService::checkNLoadModule( const TaskInfo *i_ptask ) const
+{
+    errlHndl_t      l_errl  =   NULL;
+    const   char    *l_modulename   =   NULL;
+
+    assert(i_ptask->taskflags.task_type   ==  START_FN );
+
+    do  {
+
+        //  i_ptask->taskflags.task_type   ==  STARTFN
+        l_modulename  =   VFS::module_find_name(
+                reinterpret_cast<void*>(i_ptask->taskfn) );
+        if  ( l_modulename  ==   NULL )
+        {
+            /*@     errorlog tag
+             *  @errortype      ERRL_SEV_CRITICAL_SYS_TERM
+             *  @moduleid       BASE_INITSVC_MOD_ID
+             *  @reasoncode     INITSVC_LOAD_MODULE_FAILED
+             *  @userdata1      0
+             *  @userdata2      0
+             *
+             *  @devdesc        Initialization Service failed to load a
+             *                  module needed to load a function or task.
+             *                  UserDetails will contain the name of the
+             *                  function or task.
+             */
+            l_errl = new ERRORLOG::ErrlEntry(
+                    ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
+                    INITSERVICE::BASE_INITSVC_MOD_ID,
+                    INITSERVICE::INITSVC_LOAD_MODULE_FAILED,
+                    0,
+                    0 );
+
+            //  error, break out of do block
+            break;
+        }
+
+        TRACDCOMP( g_trac_initsvc,
+                "checkNLoadModule: found %s in module %s",
+                i_ptask->taskname,
+                ((l_modulename!=NULL)?l_modulename:"NULL???") );
+
+        if (  !VFS::module_is_loaded( l_modulename )
+        )
+        {
+            TRACDCOMP( g_trac_initsvc,
+                    "loading module %s",
+                    l_modulename );
+            l_errl = VFS::module_load( l_modulename );
+            if ( l_errl )
+            {
+                //  load module returned with errl set
+                TRACFCOMP( g_trac_initsvc,
+                        "module_load( %s ) returned with an error.",
+                        l_modulename );
+
+                //  break out of do block
+                break;
+            }
+        }
+
+    }   while( 0 );     // end do() block
+
+
+    return  l_errl;
+}
+
+
+errlHndl_t InitService::startTask(
+        const TaskInfo       *i_ptask,
+        void                 *io_pargs ) const
+{
+    tid_t       l_tidlnchrc     =   0;
+    tid_t       l_tidretrc      =   0;
+    errlHndl_t  l_errl          =   NULL;
+    int         l_childsts      =   0;
+    void        *l_childerrl    =   NULL;
+
 
     assert( i_ptask != NULL );
-    assert( i_ptask->taskflags.task_type == START_TASK );
+    // assert( i_ptask->taskflags.task_type == START_TASK );
 
-    // Base modules have already been loaded and initialized,
-    // extended modules have not.
-    if ( i_ptask->taskflags.module_type == EXT_IMAGE )
-    {
-        // load module and call _init()
-        l_errl = VFS::module_load( i_ptask->taskname );
-    }
+    do  {
+        // Base modules have already been loaded and initialized,
+        // extended modules have not.
+        if ( i_ptask->taskflags.module_type == EXT_IMAGE )
+        {
+            // load module if necessary
+            l_errl = VFS::module_load( i_ptask->taskname );
+        }
+        if ( l_errl )
+        {
+            TRACFCOMP(g_trac_initsvc,
+                    "ERROR: failed to load module for task '%s'",
+                    i_ptask->taskname);
 
-    if ( ! l_errl )
-    {
+            // drop out of do block with errl set
+            break;
+        }
+
         // launch a task and wait for it.
-        l_tidrc = task_exec( i_ptask->taskname, io_pargs );
+        l_tidlnchrc = task_exec( i_ptask->taskname, io_pargs );
+        TRACDCOMP( g_trac_initsvc,
+                "launch task %s returned %d",
+                i_ptask->taskname,
+                l_tidlnchrc );
 
         //  process the return - kernel returns a 16-bit signed # as a
         //  threadid/error
-        if ( static_cast<int16_t> (l_tidrc) < 0 )
+        if ( static_cast<int16_t> (l_tidlnchrc) < 0 )
         {
             // task failed to launch, post an errorlog and dump some trace
-            TRACFCOMP(g_trac_initsvc, "ERROR: starting task '%s'",
-                      i_ptask->taskname);
+            TRACFCOMP(g_trac_initsvc,
+                    "ERROR 0x%x: starting task '%s'",
+                    l_tidlnchrc,
+                    i_ptask->taskname);
 
             /*@     errorlog tag
              *  @errortype      ERRL_SEV_CRITICAL_SYS_TERM
-             *  @moduleid       INITSVC_START_TASK_MOD_ID
+             *  @moduleid       BASE_INITSVC_MOD_ID
              *  @reasoncode     START_TASK_FAILED
-             *  @userdata1      task return code
+             *  @userdata1      0
+             *  @userdata2      task id or task return code
              *
              *  @devdesc        Initialization Service failed to start a task.
              *
              */
             l_errl = new ERRORLOG::ErrlEntry(
                     ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
-                    INITSERVICE::INITSVC_START_TASK_MOD_ID,
+                    INITSERVICE::BASE_INITSVC_MOD_ID,
                     INITSERVICE::START_TASK_FAILED,
-                    l_tidrc );
+                    0,
+                    l_tidlnchrc );
 
-            // Add the task name as user detail data
-            ERRORLOG::ErrlUserDetailsString(i_ptask->taskname).addToLog(l_errl);
-        } // endif tidrc
-        else
+            //  break out of do block
+            break;
+        } // endif tidlnchrc
+
+        TRACDCOMP(g_trac_initsvc,
+                            "Wait for tid %d '%s'",
+                            l_tidlnchrc,
+                            i_ptask->taskname);
+
+        //  wait here for the task to end.
+        //  status of the task ( OK or Crashed ) is returned in l_childsts
+        //  if the task returns an errorlog, it will be returned
+        //      (via task_end2) in l_childerrl
+        l_tidretrc  =   task_wait_tid(
+                                l_tidlnchrc,
+                                &l_childsts,
+                                &l_childerrl );
+        if (    ( static_cast<int16_t>(l_tidretrc) < 0 )
+             || ( l_childsts != TASK_STATUS_EXITED_CLEAN )
+        )
         {
-            //  if InitService passed in a taskargs, wait for barrier.
-            if ( io_pargs )
-            {
-                io_pargs->waitParentSync();
-            }
-        }   // endelse
-    }   // endif ! l_errl
+            // the launched task failed or crashed,
+            //  post an errorlog and dump some trace
+            /*@     errorlog tag
+             *  @errortype      ERRL_SEV_CRITICAL_SYS_TERM
+             *  @moduleid       BASE_INITSVC_MOD_ID
+             *  @reasoncode     WAIT_TASK_FAILED
+             *  @userdata1      task id or task return code
+             *  @userdata2      returned status from task
+             *
+             *  @devdesc        Initialization Service launched a task and
+             *                  the task returned an error.
+             *
+             */
+            l_errl = new ERRORLOG::ErrlEntry(
+                                    ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
+                                    INITSERVICE::BASE_INITSVC_MOD_ID,
+                                    INITSERVICE::WAIT_TASK_FAILED,
+                                    l_tidretrc,
+                                    l_childsts );
 
+            //  break out of do block
+            break;
+        } // endif tidretrc
+
+        //  check for returned errorlog
+        if ( l_childerrl != NULL )
+        {
+            // cast to the correct type and return
+            l_errl  =   reinterpret_cast<errlHndl_t>(l_childerrl);
+
+            // break out of do block
+            break;
+        }
+
+    }   while(0);   // end do block
+
+    if ( l_errl )
+    {
+        // Add the task name as user detail data to any errorlog
+        ERRORLOG::ErrlUserDetailsString(i_ptask->taskname).addToLog(l_errl);
+    }
 
     //  return any errorlog to the caller
     return l_errl;
-}
+}   // startTask()
 
-errlHndl_t InitService::executeFn( const TaskInfo   *i_ptask,
-                                   TaskArgs         *io_pargs ) const
+
+errlHndl_t InitService::executeFn(
+                        const TaskInfo  *i_ptask,
+                        void            *io_pargs ) const
 {
-    tid_t       l_tidrc     =   0;
-    errlHndl_t  l_errl      =   NULL;
+    tid_t       l_tidlnchrc     =   0;
+    tid_t       l_tidretrc      =   0;
+    errlHndl_t  l_errl          =   NULL;
+    int         l_childsts      =   0;
+    void        *l_childerrl    =   NULL;
 
     assert( i_ptask != NULL );
     assert( i_ptask->taskfn != NULL ) ;
 
-    /**
-     * @todo:   add Doug Gilbert's code here to look up the module based on
-     *          the function pointer and then load the module.
-     *          For now we just blindly load the module in istepdispatcher
-     */
 
-    //  valid function, launch it
-    l_tidrc = task_create( i_ptask->taskfn, io_pargs);
-    if (static_cast<int16_t> (l_tidrc) < 0)
-    {
-        TRACFCOMP(g_trac_initsvc, "ERROR: starting function in task'%s'",
-                  i_ptask->taskname);
+    do  {
 
-        /*@     errorlog tag
-         *  @errortype      ERRL_SEV_CRITICAL_SYS_TERM
-         *  @moduleid       INITSVC_START_FN_MOD_ID
-         *  @reasoncode     START_FN_FAILED
-         *  @userdata1      task return code
-         *
-         *  @devdesc        Initialization Service attempted to start a
-         *                  function within a module but the function
-         *                  failed to launch
-         */
-        l_errl = new ERRORLOG::ErrlEntry(
-                ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
-                INITSERVICE::INITSVC_START_FN_MOD_ID,
-                INITSERVICE::START_FN_FAILED,
-                l_tidrc );
-
-        // Add the task name as user detail data
-        ERRORLOG::ErrlUserDetailsString(i_ptask->taskname).addToLog(l_errl);
-    } // endif tidrc
-    else
-    {
-        // task launched OK.
-        if ( io_pargs )
+        //
+        l_errl  =   checkNLoadModule( i_ptask );
+        if ( l_errl )
         {
-            io_pargs->waitParentSync(); // sync up parent task
+            TRACFCOMP(g_trac_initsvc,
+                    "ERROR: failed to load module for task '%s'",
+                    i_ptask->taskname);
+
+            //  break out with errorlog set
+            break;
         }
+
+        //  valid function, launch it
+        l_tidlnchrc = task_create( i_ptask->taskfn, io_pargs);
+        if (static_cast<int16_t> (l_tidlnchrc) < 0)
+        {
+            TRACFCOMP(g_trac_initsvc,
+                    "ERROR %d: starting function in task'%s'",
+                    l_tidlnchrc,
+                    i_ptask->taskname);
+
+            /*@     errorlog tag
+             *  @errortype      ERRL_SEV_CRITICAL_SYS_TERM
+             *  @moduleid       BASE_INITSVC_MOD_ID
+             *  @reasoncode     START_FN_FAILED
+             *  @userdata1      task return code
+             *  @userdata2      0
+             *
+             *  @devdesc        Initialization Service attempted to start a
+             *                  function within a module but the function
+             *                  failed to launch
+             */
+            l_errl = new ERRORLOG::ErrlEntry(
+                                    ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
+                                    INITSERVICE::BASE_INITSVC_MOD_ID,
+                                    INITSERVICE::START_FN_FAILED,
+                                    l_tidlnchrc,
+                                    0   );
+
+            //  break out with errorlog set
+            break;
+        } // endif tidlnchrc
+
+        //  wait here for the task to end.
+        //  status of the task ( OK or Crashed ) is returned in l_childsts
+        //  if the task returns an errorlog, it will be returned
+        //      (via task_end2) in l_childerrl
+        l_tidretrc  =   task_wait_tid(
+                                l_tidlnchrc,
+                                &l_childsts,
+                                &l_childerrl );
+        if (    ( static_cast<int16_t>(l_tidretrc) < 0 )
+             || ( l_childsts != TASK_STATUS_EXITED_CLEAN )
+            )
+        {
+            // the launched task failed or crashed
+            //  post an errorlog and dump some trace
+            /*@     errorlog tag
+             *  @errortype      ERRL_SEV_CRITICAL_SYS_TERM
+             *  @moduleid       BASE_INITSVC_MOD_ID
+             *  @reasoncode     WAIT_TASK_FAILED
+             *  @userdata1      task id or task return code
+             *  @userdata2      returned status from task
+             *
+             *  @devdesc        Initialization Service launched a task and the task returned an error.
+             *
+             *
+             */
+            l_errl = new ERRORLOG::ErrlEntry(
+                                    ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
+                                    INITSERVICE::BASE_INITSVC_MOD_ID,
+                                    INITSERVICE::WAIT_TASK_FAILED,
+                                    l_tidretrc,
+                                    l_childsts );
+
+            TRACFCOMP(g_trac_initsvc,
+                    "ERROR : task_wait_tid(0x%x). '%s', l_tidretrc=0x%x, l_childsts=0x%x",
+                    l_tidlnchrc,
+                    i_ptask->taskname,
+                    l_tidretrc,
+                    l_childsts );
+
+            //  break out of do block
+            break;
+        } // endif tidretrc
+
+        //  check for returned errorlog
+        if ( l_childerrl != NULL )
+        {
+            TRACFCOMP(g_trac_initsvc,
+                    "ERROR : task_wait_tid(0x%x). '%s', l_childerrl=%p",
+                    l_tidlnchrc,
+                    i_ptask->taskname,
+                    l_childerrl  );
+
+            // cast to the correct type and return
+            l_errl  =   reinterpret_cast<errlHndl_t>(l_childerrl);
+
+            // break out of do block
+            break;
+        }
+
+    }   while( 0 );     // end do block
+
+    if ( l_errl )
+    {
+        // Add the task name as user detail data to any errorlog that was
+        //  posted.
+        ERRORLOG::ErrlUserDetailsString(i_ptask->taskname).addToLog(l_errl);
     }
 
     return l_errl;
@@ -195,7 +435,7 @@ void InitService::setProgressCode( uint64_t i_progresscode ) const
 
 
 errlHndl_t  InitService::dispatchTask( const TaskInfo   *i_ptask,
-                                       TaskArgs         *io_pargs ) const
+                                       void             *io_pargs ) const
 {
     errlHndl_t   l_errl  =   NULL;
 
@@ -255,20 +495,23 @@ errlHndl_t  InitService::dispatchTask( const TaskInfo   *i_ptask,
 
 void InitService::init( void *io_ptr )
 {
-    errlHndl_t          l_errl      =   NULL;
-    uint64_t            l_task      =   0;
-    const TaskInfo      *l_ptask    =   NULL;
-    TaskArgs::TaskArgs  l_args;
-    uint64_t            l_childrc   =   0;
+    errlHndl_t      l_errl              =   NULL;
+    uint64_t        l_task              =   0;
+    const TaskInfo  *l_ptask            =   NULL;
+    //  init shutdown status to good.
+    uint64_t        l_shutdownStatus    =   SHUTDOWN_STATUS_GOOD;
+
+    //  @todo detach from parent.
+    // $$ task_detach();
 
     printk( "InitService entry.\n" );
 
     TRACFCOMP( g_trac_initsvc,
-               ENTER_MRK "Initialization Service is starting %p.", io_ptr );
+               "Initialization Service is starting, io_ptr=%p.", io_ptr );
 
     //  loop through the task list and start up any tasks necessary
     for ( l_task=0;
-          l_task < INITSERVICE::MAX_TASKS;
+          l_task <  ( sizeof(g_taskinfolist)/sizeof(TaskInfo) ) ;
           l_task++ )
     {
         //  make a local copy of the base image task
@@ -280,11 +523,9 @@ void InitService::init( void *io_ptr )
             break;
         }
 
-        l_args.clear(); // clear args struct for next task
-
         //  dispatch the task and return good or errorlog
-        l_errl  =   dispatchTask( l_ptask,
-                                  &l_args );
+        l_errl  =   dispatchTask( l_ptask ,
+                                  NULL );
 
         //  process errorlogs returned from the task that was launched
         if ( l_errl )
@@ -296,77 +537,35 @@ void InitService::init( void *io_ptr )
             break;
         }
 
-
-        //  make local copies of the values in TaskArgs that are returned from
-        //  the child.
-        //  this also clears the errorlog from the TaskArgs struct, so
-        //  use it or lose it ( see taskargs.H for details ).
-        l_childrc   =   l_args.getReturnCode();
-        l_errl      =   l_args.getErrorLog();
-
-        if  ( l_errl )
-        {
-            TRACFCOMP( g_trac_initsvc,
-                       " ERROR: Child task returned 0x%llx, errlog=0x%p",
-                       l_childrc,
-                       l_errl );
-            //  drop out with the error
-            break;
-        }
-        else
-        {
-            //  Check child results for a valid nonzero return code.
-            //  If we have one, and no errorlog, then we create and
-            //  post our own errorlog here.
-            if (  l_childrc != 0 )
-            {
-                TRACFCOMP( g_trac_initsvc,
-                           "ERROR: Child task '%s' returned 0x%llx, no errlog",
-                           l_ptask->taskname,
-                           l_childrc );
-
-                /*@     errorlog tag
-                 *  @errortype      ERRL_SEV_CRITICAL_SYS_TERM
-                 *  @moduleid       INITSVC_TASK_RETURNED_ERROR_ID
-                 *  @reasoncode     INITSVC_FAILED_NO_ERRLOG
-                 *  @userdata1      returncode from task
-                 *  @userdata2      0
-                 *
-                 *  @devdesc        The task returned with an error,
-                 *                  but there was no errorlog returned.
-                 *                  See userdata1 for the return code.
-                 *
-                 */
-                l_errl = new ERRORLOG::ErrlEntry(
-                        ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
-                        INITSVC_TASK_RETURNED_ERROR_ID,
-                        INITSERVICE::INITSVC_FAILED_NO_ERRLOG,
-                        l_childrc,
-                        0 );
-                // drop out with the error
-                break;
-            }   // end if
-        }   //  end else
     } // endfor
 
     //  die if we drop out with an error
     if ( l_errl )
     {
+
         //  commit the log first, then shutdown.
-        TRACFCOMP( g_trac_initsvc, "InitService: Committing errorlog." );
+        TRACFCOMP( g_trac_initsvc,
+                "InitService: Committing errorlog %p",
+                l_errl );
         errlCommit( l_errl, INITSVC_COMP_ID );
 
-        //Tell initservice to perform shutdown sequence
-        doShutdown( SHUTDOWN_STATUS_INITSVC_FAILED );
-
+        //  post bad shutdown status
+        l_shutdownStatus   = SHUTDOWN_STATUS_INITSVC_FAILED;
     }
 
+    //  =====================================================================
+    //  -----   Shutdown all CPUs   -----------------------------------------
+    //  =====================================================================
+
     TRACFCOMP( g_trac_initsvc,
-            EXIT_MRK "Initilization Service finished.");
+            "InitService finished, shutdown = 0x%x.",
+            l_shutdownStatus );
+
+    //  Tell kernel to perform shutdown sequence
+    InitService::getTheInstance().doShutdown( l_shutdownStatus );
 
     printk( "InitService exit.\n" );
-
-    // return to _start()
+    // return to _start() to exit the task.
 }
 
 
@@ -426,7 +625,7 @@ void InitService::doShutdown(uint64_t i_status)
             /*
              * @errorlog tag
              * @errortype       ERRL_SEV_CRITICAL_SYS_TERM
-             * @moduleid        INITSVC_DO_SHUTDOWN_MOD_ID
+             * @moduleid        BASE_INITSVC_MOD_ID
              * @reasoncode      SHUTDOWN_FLUSH_FAILED
              * @userdata1       returncode from mm_remove_pages()
              * @userdata2       0
@@ -436,7 +635,7 @@ void InitService::doShutdown(uint64_t i_status)
              */
             l_err = new ERRORLOG::ErrlEntry(
                         ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
-                        INITSERVICE::INITSVC_DO_SHUTDOWN_MOD_ID,
+                        INITSERVICE::BASE_INITSVC_MOD_ID,
                         INITSERVICE::SHUTDOWN_FLUSH_FAILED,l_rc,0);
             //Commit and attempt flushing other registered blocks
             errlCommit( l_err, INITSVC_COMP_ID );

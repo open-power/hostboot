@@ -95,8 +95,7 @@ using   namespace   fapi;
 void    call_host_disable_vddr( void *io_pArgs )
 {
     //  @todo   remove when join() merged
-    INITSERVICE::TaskArgs *pTaskArgs =
-            static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
+
     fapi::ReturnCode    l_fapirc;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_disable_vddr entry" );
@@ -148,9 +147,7 @@ void    call_host_disable_vddr( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_disable_vddr exit" );
 
-    //  end the task.
-    pTaskArgs->waitChildSync();     // @todo remove when join() merged
-    task_end();
+    task_end2( NULL );
 }
 
 
@@ -161,8 +158,7 @@ void    call_host_disable_vddr( void *io_pArgs )
 void    call_mc_pll_setup( void *io_pArgs )
 {
     //  @todo   remove when join() merged
-    INITSERVICE::TaskArgs *pTaskArgs =
-            static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
+
     fapi::ReturnCode    l_fapirc;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mc_pll_setup entry" );
@@ -214,9 +210,7 @@ void    call_mc_pll_setup( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mc_pll_setup exit" );
 
-    //  end the task.
-    pTaskArgs->waitChildSync();     // @todo remove when join() merged
-    task_end();
+    task_end2( NULL );
 }
 
 
@@ -227,8 +221,7 @@ void    call_mc_pll_setup( void *io_pArgs )
 void    call_mba_startclocks( void *io_pArgs )
 {
     //  @todo   remove when join() merged
-    INITSERVICE::TaskArgs *pTaskArgs =
-            static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
+
     fapi::ReturnCode    l_fapirc;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mba_startclocks entry" );
@@ -280,9 +273,7 @@ void    call_mba_startclocks( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mba_startclocks exit" );
 
-    //  end the task.
-    pTaskArgs->waitChildSync();     // @todo remove when join() merged
-    task_end();
+    task_end2( NULL );
 }
 
 
@@ -293,8 +284,7 @@ void    call_mba_startclocks( void *io_pArgs )
 void    call_host_enable_vddr( void *io_pArgs )
 {
     //  @todo   remove when join() merged
-    INITSERVICE::TaskArgs *pTaskArgs =
-            static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
+
     fapi::ReturnCode    l_fapirc;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_enable_vddr entry" );
@@ -346,9 +336,7 @@ void    call_host_enable_vddr( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_enable_vddr exit" );
 
-    //  end the task.
-    pTaskArgs->waitChildSync();     // @todo remove when join() merged
-    task_end();
+    task_end2( NULL );
 }
 
 
@@ -359,8 +347,7 @@ void    call_host_enable_vddr( void *io_pArgs )
 void    call_mss_initf( void *io_pArgs )
 {
     //  @todo   remove when join() merged
-    INITSERVICE::TaskArgs *pTaskArgs =
-            static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
+
     fapi::ReturnCode    l_fapirc;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_initf entry" );
@@ -412,9 +399,7 @@ void    call_mss_initf( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_initf exit" );
 
-    //  end the task.
-    pTaskArgs->waitChildSync();     // @todo remove when join() merged
-    task_end();
+    task_end2( NULL );
 }
 
 //
@@ -422,10 +407,9 @@ void    call_mss_initf( void *io_pArgs )
 //
 void  call_mss_ddr_phy_reset( void *io_pArgs )
 {
-    //  @todo   remove when join() merged
-    INITSERVICE::TaskArgs *pTaskArgs =
-            static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
     errlHndl_t l_err = NULL;
+    fapi::ReturnCode    l_fapirc;
+
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_ddr_phy_reset entry" );
 
@@ -486,9 +470,7 @@ void  call_mss_ddr_phy_reset( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_ddr_phy_reset exit" );
 
-    //  end the task.
-    pTaskArgs->waitChildSync();     // @todo remove when join() merged
-    task_end();
+    task_end2( NULL );
 }
 
 
@@ -498,10 +480,8 @@ void  call_mss_ddr_phy_reset( void *io_pArgs )
 //
 void    call_mss_draminit( void *io_pArgs )
 {
-
-    INITSERVICE::TaskArgs *pTaskArgs =
-            static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
     errlHndl_t l_err = NULL;
+    fapi::ReturnCode    l_fapirc;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_draminit entry" );
 
@@ -563,9 +543,7 @@ void    call_mss_draminit( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_draminit exit" );
 
-    //  end the task.
-    pTaskArgs->waitChildSync();     // @todo remove when join() merged
-    task_end();
+    task_end2( NULL );
 }
 
 //
@@ -574,8 +552,7 @@ void    call_mss_draminit( void *io_pArgs )
 void    call_mss_restore_dram_repair( void *io_pArgs )
 {
     //  @todo   remove when join() merged
-    INITSERVICE::TaskArgs *pTaskArgs =
-            static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
+
     fapi::ReturnCode    l_fapirc;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_restore_dram_repair entry" );
@@ -627,9 +604,7 @@ void    call_mss_restore_dram_repair( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_restore_dram_repair exit" );
 
-    //  end the task.
-    pTaskArgs->waitChildSync();     // @todo remove when join() merged
-    task_end();
+    task_end2( NULL );
 }
 
 
@@ -639,11 +614,8 @@ void    call_mss_restore_dram_repair( void *io_pArgs )
 //
 void    call_mss_draminit_training( void *io_pArgs )
 {
-
-    //  @todo   remove when join() merged
-    INITSERVICE::TaskArgs *pTaskArgs =
-            static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
     errlHndl_t l_err = NULL;
+    fapi::ReturnCode    l_fapirc;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_draminit_training entry" );
 
@@ -706,9 +678,7 @@ void    call_mss_draminit_training( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_draminit_training exit" );
 
-    //  end the task.
-    pTaskArgs->waitChildSync();     // @todo remove when join() merged
-    task_end();
+    task_end2( NULL );
 }
 
 //
@@ -717,8 +687,7 @@ void    call_mss_draminit_training( void *io_pArgs )
 void    call_mss_draminit_trainadv( void *io_pArgs )
 {
     //  @todo   remove when join() merged
-    INITSERVICE::TaskArgs *pTaskArgs =
-            static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
+
     fapi::ReturnCode    l_fapirc;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_draminit_trainadv entry" );
@@ -770,9 +739,7 @@ void    call_mss_draminit_trainadv( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_draminit_trainadv exit" );
 
-    //  end the task.
-    pTaskArgs->waitChildSync();     // @todo remove when join() merged
-    task_end();
+    task_end2( NULL );
 }
 
 //
@@ -780,11 +747,8 @@ void    call_mss_draminit_trainadv( void *io_pArgs )
 //
 void    call_mss_draminit_mc( void *io_pArgs )
 {
-
-    //  @todo   remove when join() merged
-    INITSERVICE::TaskArgs *pTaskArgs =
-            static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
     errlHndl_t l_err = NULL;
+    fapi::ReturnCode    l_fapirc;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_draminit_mc entry" );
 
@@ -846,9 +810,7 @@ void    call_mss_draminit_mc( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_draminit_mc exit" );
 
-    //  end the task.
-    pTaskArgs->waitChildSync();     // @todo remove when join() merged
-    task_end();
+    task_end2( NULL );
 }
 
 

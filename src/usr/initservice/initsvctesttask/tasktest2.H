@@ -34,8 +34,9 @@
 /******************************************************************************/
 // Includes
 /******************************************************************************/
-#include <stdint.h>
-#include <util/singleton.H>
+#include    <stdint.h>
+#include    <util/singleton.H>
+
 
 namespace   INITSERVICE
 {
@@ -63,13 +64,13 @@ class InitSvcTaskTest2
 public:
 
     /**
-     * @brief Constructor for the InitService object.
+     * @brief Constructor
      */
     InitSvcTaskTest2()
     {   }
 
     /**
-     * @brief Destructor for the InitService object.
+     * @brief Destructor
      */
     ~InitSvcTaskTest2()
     {   }
@@ -77,20 +78,17 @@ public:
     /**
      * @brief Get singleton instance of this class.
      *
-     *  @return the (one and only) instance of InitService
+     *  @return the (one and only) instance
      */
     static InitSvcTaskTest2& getTheInstance();
 
     /**
       *  @brief  Provide an entry function into the class, called from _start()
       *
-      *  @param[in]  i_args    pointer to any arguments passed in from
-      *                      _start() and by extension the kernel,
-      *                      currently this is NULL .
+      *  @param[in,out]  -  reference to an errlHndl_t
       *
-      *  @todo   document any changes for args
       */
-     void            init( void *i_args);
+     void            init( errlHndl_t &io_taskRetErrl );
 
 
 private:

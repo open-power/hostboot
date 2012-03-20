@@ -82,14 +82,13 @@ public:
      */
     static ExtInitSvc& getTheInstance();
 
+
     /**
      *  @brief  Provide an entry function into the class, called from _start()
      *
-     *  @param[in]  i_args    pointer to any arguments passed in from
-     *                      _start() and by extension the kernel,
-     *                      currently this is NULL .
+     *  @param[in]  io_rtaskRetErrl    ref to an errlHndl_t passed back to _start()
      */
-    void            init( void *i_args);
+    void    init( errlHndl_t  &io_rtaskRetErrl );
 
 
 protected:

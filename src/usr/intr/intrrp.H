@@ -42,9 +42,9 @@ namespace INTR
 
             /**
              * Prepare HW and system to recieve external interrupts
-             * @param[in] task args
+             * @param[in] ref to errlHndl_t
              */
-            static void init(void * i_taskArgs);
+            static void init( errlHndl_t &io_rtaskRetErrl );
 
         protected:
 

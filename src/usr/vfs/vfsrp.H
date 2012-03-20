@@ -47,7 +47,7 @@ namespace VFS
              * static init
              * @param[in] task args
              */
-            static void init(void * i_taskArgs);
+            static void init( errlHndl_t &io_taskRetErrl );
 
             /**
              * Get the list of test modules
@@ -126,7 +126,7 @@ namespace VFS
             errlHndl_t _init();
 
             /**
-             * Message handler 
+             * Message handler
              */
             void msgHandler();
 

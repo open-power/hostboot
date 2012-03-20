@@ -84,8 +84,7 @@ using   namespace   fapi;
 void    call_host_collect_dimm_spd( void *io_pArgs )
 {
     //  @todo   remove when join() merged
-    INITSERVICE::TaskArgs *pTaskArgs =
-            static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
+
     fapi::ReturnCode    l_fapirc;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_collect_dimm_spd entry" );
@@ -136,9 +135,7 @@ void    call_host_collect_dimm_spd( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_collect_dimm_spd exit" );
 
-    //  end the task.
-    pTaskArgs->waitChildSync();     // @todo remove when join() merged
-    task_end();
+    task_end2( NULL );
 }
 
 
@@ -149,8 +146,7 @@ void    call_host_collect_dimm_spd( void *io_pArgs )
 void    call_mss_volt( void *io_pArgs )
 {
     //  @todo   remove when join() merged
-    INITSERVICE::TaskArgs *pTaskArgs =
-            static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
+
     fapi::ReturnCode    l_fapirc;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_volt entry" );
@@ -218,9 +214,7 @@ void    call_mss_volt( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_volt exit" );
 
-    //  end the task.
-    pTaskArgs->waitChildSync();     // @todo remove when join() merged
-    task_end();
+    task_end2( NULL );
 }
 
 //
@@ -229,8 +223,7 @@ void    call_mss_volt( void *io_pArgs )
 void    call_mss_freq( void *io_pArgs )
 {
     //  @todo   remove when join() merged
-    INITSERVICE::TaskArgs *pTaskArgs =
-            static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
+
     fapi::ReturnCode    l_fapirc;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_freq entry" );
@@ -295,9 +288,7 @@ void    call_mss_freq( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_freq exit" );
 
-    //  end the task.
-    pTaskArgs->waitChildSync();     // @todo remove when join() merged
-    task_end();
+    task_end2( NULL );
 }
 
 
@@ -308,8 +299,7 @@ void    call_mss_freq( void *io_pArgs )
 void    call_mss_eff_config( void *io_pArgs )
 {
     //  @todo   remove when join() merged
-    INITSERVICE::TaskArgs *pTaskArgs =
-            static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
+
     fapi::ReturnCode    l_fapirc;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_eff_config entry" );
@@ -378,9 +368,7 @@ void    call_mss_eff_config( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_eff_config exit" );
 
-    //  end the task.
-    pTaskArgs->waitChildSync();     // @todo remove when join() merged
-    task_end();
+    task_end2( NULL );
 }
 
 

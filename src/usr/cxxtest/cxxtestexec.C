@@ -40,30 +40,35 @@ namespace CxxTest
 
 }   //  namespace
 
-using namespace INITSERVICE;
+// prototype
+void    cxxinit( errlHndl_t    &io_taskRetErrl );
+
 
 trace_desc_t *g_trac_cxxtest = NULL;
 TRAC_INIT(&g_trac_cxxtest, CXXTEST_COMP_NAME, 1024 );
 
 
 /**
- *  @brief _start() for CxxTest
+ * _start entry point for this task.
+ */
+TASK_ENTRY_MACRO( cxxinit );
+
+
+/**
+ *  @brief init() for CxxTest
  *  Iterate through all modules in the VFS named "libtest*" and create
  *  children tasks to execute them.
  *
- * * @parms[in,out]   - pointer to TaskArgs struct
+ * * @parms[in,out]   - pointer to any args
  *
  */
-extern "C"
-void _start(void *io_pArgs)
+
+void    cxxinit( errlHndl_t    &io_taskRetErrl )
 {
     errlHndl_t  l_errl  =   NULL;
     std::vector<const char *> module_list;
     std::vector<tid_t> tasks;
     tid_t       tidrc           =   0;
-    INITSERVICE::TaskArgs *pTaskArgs =
-            static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
-
 
     // output a blank line so that it's easier to find the beginning of
     //  CxxTest
@@ -142,10 +147,8 @@ void _start(void *io_pArgs)
     TRACFCOMP( g_trac_cxxtest, "    trace calls:   %d",
             CxxTest::g_TraceCalls  );
 
-    //  dump out an informational errorlog
-    assert(l_errl == NULL);
+    //  @todo dump out an informational errorlog??
 
-    //  wait here on the barrier, then end the task.
-    pTaskArgs->waitChildSync();
-    task_end();
+    // should always return NULL
+    task_end2( l_errl );
 }

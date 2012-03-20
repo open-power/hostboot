@@ -89,16 +89,32 @@ errlHndl_t PNOR::getSectionInfo( PNOR::SectionId i_section,
  * STATIC
  * @brief Static Initializer
  */
-void PnorRP::init( void* i_taskArgs )
+void PnorRP::init( errlHndl_t   &io_rtaskRetErrl )
 {
     TRACUCOMP(g_trac_pnor, "PnorRP::init> " );
-    INITSERVICE::TaskArgs* args =
-            static_cast<INITSERVICE::TaskArgs*>(i_taskArgs);
     uint64_t rc = 0;
+    errlHndl_t  l_errl  =   NULL;
+
     if( Singleton<PnorRP>::instance().didStartupFail(rc) )
     {
-        args->postReturnCode(rc);
+        /*@     errorlog tag
+         *  @errortype      ERRL_SEV_CRITICAL_SYS_TERM
+         *  @moduleid       MOD_PNORRP_DIDSTARTUPFAIL
+         *  @reasoncode     RC_BAD_STARTUP_RC
+         *  @userdata1      return code
+         *  @userdata2      0
+         *
+         *  @devdesc        PNOR startup task returned an error.
+         */
+        l_errl = new ERRORLOG::ErrlEntry(
+                                ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
+                                PNOR::MOD_PNORRP_DIDSTARTUPFAIL,
+                                PNOR::RC_BAD_STARTUP_RC,
+                                rc,
+                                0   );
     }
+
+    task_end2( l_errl );
 }
 
 
@@ -325,7 +341,7 @@ errlHndl_t PnorRP::readTOC()
     //  Will update under Story 3871
 
     // assume 1 chip with only 1 side for now, no sideless
-    // TOC starts at offset zero 
+    // TOC starts at offset zero
 
     // put some random sizes in here
     iv_TOC[PNOR::SIDE_A][PNOR::TOC].size = 8 + 8 + PNOR::NUM_SECTIONS*sizeof(TOCEntry_t);
@@ -339,7 +355,7 @@ errlHndl_t PnorRP::readTOC()
     iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].virtAddr = iv_TOC[PNOR::SIDE_A][PNOR::TOC].virtAddr + iv_TOC[PNOR::SIDE_A][PNOR::TOC].size;
     iv_TOC[PNOR::SIDE_A][PNOR::GLOBAL_DATA].virtAddr = iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].virtAddr + iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].size;
     iv_TOC[PNOR::SIDE_A][PNOR::HB_DATA].virtAddr = iv_TOC[PNOR::SIDE_A][PNOR::GLOBAL_DATA].virtAddr + iv_TOC[PNOR::SIDE_A][PNOR::GLOBAL_DATA].size;
-    // flash 
+    // flash
     iv_TOC[PNOR::SIDE_A][PNOR::TOC].flashAddr = 0;
     iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].flashAddr = iv_TOC[PNOR::SIDE_A][PNOR::TOC].flashAddr + iv_TOC[PNOR::SIDE_A][PNOR::TOC].size;
     iv_TOC[PNOR::SIDE_A][PNOR::GLOBAL_DATA].flashAddr = iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].flashAddr + iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].size;
@@ -354,7 +370,7 @@ errlHndl_t PnorRP::readTOC()
     TRACFCOMP(g_trac_pnor, "DATA:   size=0x%.8X  flash=0x%.8X  virt=0x%.16X", iv_TOC[PNOR::SIDE_A][PNOR::HB_DATA].size, iv_TOC[PNOR::SIDE_A][PNOR::HB_DATA].flashAddr, iv_TOC[PNOR::SIDE_A][PNOR::HB_DATA].virtAddr );
 
     //@todo - load flash layout (how many chips)
-    //@todo - read TOC on each chip/bank/whatever  
+    //@todo - read TOC on each chip/bank/whatever
 
     TRACUCOMP(g_trac_pnor, "< PnorRP::readTOC" );
     return l_errhdl;
@@ -392,7 +408,7 @@ void PnorRP::waitForMessage()
             eff_addr = (uint8_t*)message->data[0];
             user_addr = (uint8_t*)message->data[1];
 
-            //figure out the real pnor offset 
+            //figure out the real pnor offset
             l_errhdl = computeDeviceAddr( eff_addr, dev_offset, chip_select, needs_ecc );
             if( l_errhdl )
             {

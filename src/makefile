@@ -48,21 +48,22 @@ DIRECT_BOOT_OBJECTS = start.o kernel.o taskmgr.o cpumgr.o syscall.o \
 
 RUNTIME_OBJECTS =
 
-BASE_MODULES = trace errl devicefw scom xscom initservice taskargs \
-               pnor vfs
+
+BASE_MODULES = trace errl devicefw scom xscom initservice \
+               pnor vfs 
 
 EXTENDED_MODULES = targeting ecmddatabuffer fapi hwp plat 	\
                    extinitsvc istepdisp hwas fsi fsiscom i2c intr \
 		           spd dmi_training fapiporeve poreve util	\
 		           sbe_centaur_init mc_init dram_training \
-                           mdia mbox
+                   mdia mbox
 
 DIRECT_BOOT_MODULES = example
 RUNTIME_MODULES =
 
 TESTCASE_MODULES = cxxtest testerrl testdevicefw testsyslib \
                    testscom testxscom testtargeting testinitservice testkernel \
-                   testhwpf testecmddatabuffer initsvctasktest2 testcxxtest \
+                   testhwpf testecmddatabuffer initsvctesttask testcxxtest \
                    testpnor testi2c testfsi testvfs testhwas testintr testspd \
                    testpore testutil testmbox testmdia
 

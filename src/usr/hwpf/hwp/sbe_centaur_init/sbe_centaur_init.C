@@ -82,8 +82,7 @@ using   namespace   fapi;
 //
 void    call_cen_sbe_tp_chiplet_init1( void *io_pArgs )
 {
-    INITSERVICE::TaskArgs *pTaskArgs =
-            static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
+
     fapi::ReturnCode    l_fapirc;
     fapi::ReturnCode    l_fapirc2;
 
@@ -285,9 +284,7 @@ void    call_cen_sbe_tp_chiplet_init1( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "cen_sbe_tp_chiplet_init1 exit" );
 
-    //  wait here on the barrier, then end the task.
-    pTaskArgs->waitChildSync();
-    task_end();
+    task_end2( NULL );
 }
 
 
@@ -296,8 +293,7 @@ void    call_cen_sbe_tp_chiplet_init1( void *io_pArgs )
 //
 void    call_cen_sbe_tp_arrayinit( void *io_pArgs )
 {
-    INITSERVICE::TaskArgs *pTaskArgs =
-            static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
+
     fapi::ReturnCode    l_fapirc;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_tp_arrayinit entry" );
@@ -330,9 +326,7 @@ void    call_cen_sbe_tp_arrayinit( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_tp_arrayinit exit" );
 
-    //  wait here on the barrier, then end the task.
-    pTaskArgs->waitChildSync();
-    task_end();
+    task_end2( NULL );
 }
 
 //
@@ -340,8 +334,7 @@ void    call_cen_sbe_tp_arrayinit( void *io_pArgs )
 //
 void    call_cen_sbe_tp_chiplet_init2( void *io_pArgs )
 {
-    INITSERVICE::TaskArgs *pTaskArgs =
-            static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
+
     fapi::ReturnCode    l_fapirc;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_tp_chiplet_init2 entry" );
@@ -374,9 +367,7 @@ void    call_cen_sbe_tp_chiplet_init2( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_tp_chiplet_init2 exit" );
 
-    //  wait here on the barrier, then end the task.
-    pTaskArgs->waitChildSync();
-    task_end();
+    task_end2( NULL );
 }
 
 
@@ -385,8 +376,7 @@ void    call_cen_sbe_tp_chiplet_init2( void *io_pArgs )
 //
 void    call_cen_sbe_tp_chiplet_init3( void *io_pArgs )
 {
-    INITSERVICE::TaskArgs *pTaskArgs =
-            static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
+
     fapi::ReturnCode    l_fapirc;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_tp_chiplet_init3 entry" );
@@ -419,9 +409,7 @@ void    call_cen_sbe_tp_chiplet_init3( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_tp_chiplet_init3 exit" );
 
-    //  wait here on the barrier, then end the task.
-    pTaskArgs->waitChildSync();
-    task_end();
+    task_end2( NULL );
 }
 
 
@@ -430,8 +418,7 @@ void    call_cen_sbe_tp_chiplet_init3( void *io_pArgs )
 //
 void    call_cen_sbe_chiplet_init( void *io_pArgs )
 {
-    INITSERVICE::TaskArgs *pTaskArgs =
-            static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
+
     fapi::ReturnCode    l_fapirc;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_chiplet_init entry" );
@@ -464,9 +451,7 @@ void    call_cen_sbe_chiplet_init( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_chiplet_init exit" );
 
-    //  wait here on the barrier, then end the task.
-    pTaskArgs->waitChildSync();
-    task_end();
+    task_end2( NULL );
 }
 
 
@@ -475,8 +460,7 @@ void    call_cen_sbe_chiplet_init( void *io_pArgs )
 //
 void    call_cen_sbe_arrayinit( void *io_pArgs )
 {
-    INITSERVICE::TaskArgs *pTaskArgs =
-            static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
+
     fapi::ReturnCode    l_fapirc;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_arrayinit entry" );
@@ -509,9 +493,7 @@ void    call_cen_sbe_arrayinit( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_arrayinit exit" );
 
-    //  wait here on the barrier, then end the task.
-    pTaskArgs->waitChildSync();
-    task_end();
+    task_end2( NULL );
 }
 
 
@@ -520,8 +502,7 @@ void    call_cen_sbe_arrayinit( void *io_pArgs )
 //
 void    call_cen_sbe_pll_initf( void *io_pArgs )
 {
-    INITSERVICE::TaskArgs *pTaskArgs =
-            static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
+
     fapi::ReturnCode    l_fapirc;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_pll_initf entry" );
@@ -555,9 +536,7 @@ void    call_cen_sbe_pll_initf( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_pll_initf exit" );
 
-    //  wait here on the barrier, then end the task.
-    pTaskArgs->waitChildSync();
-    task_end();
+    task_end2( NULL );
 }
 
 
@@ -566,8 +545,7 @@ void    call_cen_sbe_pll_initf( void *io_pArgs )
 //
 void    call_cen_sbe_dts_init( void *io_pArgs )
 {
-    INITSERVICE::TaskArgs *pTaskArgs =
-            static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
+
     fapi::ReturnCode    l_fapirc;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_dts_init entry" );
@@ -600,9 +578,7 @@ void    call_cen_sbe_dts_init( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_dts_init exit" );
 
-    //  wait here on the barrier, then end the task.
-    pTaskArgs->waitChildSync();
-    task_end();
+    task_end2( NULL );
 }
 
 
@@ -611,8 +587,7 @@ void    call_cen_sbe_dts_init( void *io_pArgs )
 //
 void    call_cen_sbe_initf( void *io_pArgs )
 {
-    INITSERVICE::TaskArgs *pTaskArgs =
-            static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
+
     fapi::ReturnCode    l_fapirc;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_initf entry" );
@@ -645,9 +620,7 @@ void    call_cen_sbe_initf( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_initf exit" );
 
-    //  wait here on the barrier, then end the task.
-    pTaskArgs->waitChildSync();
-    task_end();
+    task_end2( NULL );
 }
 
 
@@ -656,8 +629,7 @@ void    call_cen_sbe_initf( void *io_pArgs )
 //
 void    call_cen_sbe_do_manual_inits( void *io_pArgs )
 {
-    INITSERVICE::TaskArgs *pTaskArgs =
-            static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
+
     fapi::ReturnCode    l_fapirc;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_do_manual_inits entry" );
@@ -690,9 +662,7 @@ void    call_cen_sbe_do_manual_inits( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_do_manual_inits exit" );
 
-    //  wait here on the barrier, then end the task.
-    pTaskArgs->waitChildSync();
-    task_end();
+    task_end2( NULL );
 }
 
 
@@ -701,8 +671,7 @@ void    call_cen_sbe_do_manual_inits( void *io_pArgs )
 //
 void    call_cen_sbe_startclocks( void *io_pArgs )
 {
-    INITSERVICE::TaskArgs *pTaskArgs =
-            static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
+
     fapi::ReturnCode    l_fapirc;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_startclocks entry" );
@@ -735,9 +704,7 @@ void    call_cen_sbe_startclocks( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_startclocks exit" );
 
-    //  wait here on the barrier, then end the task.
-    pTaskArgs->waitChildSync();
-    task_end();
+    task_end2( NULL );
 }
 
 
@@ -746,8 +713,7 @@ void    call_cen_sbe_startclocks( void *io_pArgs )
 //
 void    call_cen_sbe_scominits( void *io_pArgs )
 {
-    INITSERVICE::TaskArgs *pTaskArgs =
-            static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
+
     fapi::ReturnCode    l_fapirc;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_scominits entry" );
@@ -780,9 +746,7 @@ void    call_cen_sbe_scominits( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_scominits exit" );
 
-    //  wait here on the barrier, then end the task.
-    pTaskArgs->waitChildSync();
-    task_end();
+    task_end2( NULL );
 }
 
 };   // end namespace

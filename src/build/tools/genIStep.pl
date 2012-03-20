@@ -244,8 +244,7 @@ my  $templateHFileSubStep   =
  *
  *  \@istepnum.\@substepnum : \@substepdesc
  *
- *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
- *                              or NULL.
+ *  param[in,out] io_pArgs  -   (normally) a pointer to any args, or NULL.
  *  return  none
  *
  */
@@ -345,9 +344,6 @@ my $templateCFileSubStep =
 //
 void    call_\@substepname( void *io_pArgs )
 {
-    //  \@todo   remove when join() merged
-    INITSERVICE::TaskArgs *pTaskArgs =
-            static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
     fapi::ReturnCode    l_fapirc;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, \"call_\@substepname entry\" );
@@ -399,9 +395,7 @@ void    call_\@substepname( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, \"call_\@substepname exit\" );
 
-    //  end the task.
-    pTaskArgs->waitChildSync();     // \@todo remove when join() merged
-    task_end();
+    task_end2( NULL );
 }
 ";
 #####   end templateCFileSubStep    ################################# 

@@ -43,13 +43,13 @@ namespace   INITSERVICE
 enum    InitServiceModuleID
 {
     UNDEFINED_MODULE_ERRL_ID            =   0x00,
-    INITSVC_START_TASK_MOD_ID           =   0x01,
-    INITSVC_START_FN_MOD_ID             =   0x02,
-    INITSVC_TASK_RETURNED_ERROR_ID      =   0x03,
-    EXTINITSVC_TASK_RETURNED_ERROR_ID   =   0x04,
-    CXXTEST_TASK_RETURNED_ERROR_ID      =   0x05,
-    ISTEP_RETURNED_ERROR_ID             =   0x06,
-    INITSVC_DO_SHUTDOWN_MOD_ID          =   0x07,
+
+    BASE_INITSVC_MOD_ID                 =   0x01,
+    EXT_INITSVC_MOD_ID                  =   0x02,
+    ISTEP_INITSVC_MOD_ID                =   0x03,
+    CXXTEST_MOD_ID                      =   0x04,
+    INITSVC_DO_SHUTDOWN_MOD_ID          =   0x05,
+
 };
 
 
@@ -59,11 +59,15 @@ enum    InitServiceReasonCode
     INVALID_TASK_TYPE           =   INITSVC_COMP_ID | 0x02,
     START_FN_FAILED             =   INITSVC_COMP_ID | 0x03,
     NULL_FN_PTR                 =   INITSVC_COMP_ID | 0x04,
-    ISTEP_FAILED_NO_ERRLOG      =   INITSVC_COMP_ID | 0x05,
-    INITSVC_FAILED_NO_ERRLOG    =   INITSVC_COMP_ID | 0x06,
-    EXTINITSVC_FAILED_NO_ERRLOG =   INITSVC_COMP_ID | 0x07,
-    CXXTEST_FAILED_NO_ERRLOG    =   INITSVC_COMP_ID | 0x08,
-    SHUTDOWN_FLUSH_FAILED       =   INITSVC_COMP_ID | 0x09,
+    FORCE_FAIL                  =   INITSVC_COMP_ID | 0x05,
+    CXXTEST_FAILED_TEST         =   INITSVC_COMP_ID | 0x06,
+    SHUTDOWN_FLUSH_FAILED       =   INITSVC_COMP_ID | 0x07,
+
+    WAIT_TASK_FAILED            =   INITSVC_COMP_ID | 0x08,
+    WAIT_FN_FAILED              =   INITSVC_COMP_ID | 0x09,
+    INITSVC_LOAD_MODULE_FAILED  =   INITSVC_COMP_ID | 0x0a,
+    ISTEP_SINGLESTEP_SHUTDOWN   =   INITSVC_COMP_ID | 0x0b,
+
 };
 
 enum InitServiceUserDetailDataSubSection

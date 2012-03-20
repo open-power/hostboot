@@ -51,16 +51,14 @@ TRAC_INIT(&g_trac_intr, INTR_COMP_NAME, 2 * 1024);
 TASK_ENTRY_MACRO( IntrRp::init );
 
 
-void IntrRp::init( void * i_taskArgs )
+void IntrRp::init( errlHndl_t   &io_errlHndl_t )
 {
     errlHndl_t err = NULL;
+
     err = Singleton<IntrRp>::instance()._init();
-    INITSERVICE::TaskArgs* args =
-        static_cast<INITSERVICE::TaskArgs*>(i_taskArgs);
-    if(err)
-    {
-        args->postErrorLog(err);
-    }
+
+    //  pass task error back to parent
+    task_end2( err );
 }
 
 

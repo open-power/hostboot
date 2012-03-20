@@ -79,17 +79,13 @@ using   namespace   fapi;
 //
 void    call_dmi_scominit( void *io_pArgs )
 {
-    INITSERVICE::TaskArgs *pTaskArgs =
-            static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_scominit entry" );
 
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "dmi_scominit exit" );
 
-    //  wait here on the barrier, then end the task.
-    pTaskArgs->waitChildSync();
-    task_end();
+    task_end2( NULL );
 }
 
 
@@ -98,17 +94,13 @@ void    call_dmi_scominit( void *io_pArgs )
 //
 void    call_dmi_erepair( void *io_pArgs )
 {
-    INITSERVICE::TaskArgs *pTaskArgs =
-            static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_erepair entry" );
 
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "dmi_erepair exit" );
 
-    //  wait here on the barrier, then end the task.
-    pTaskArgs->waitChildSync();
-    task_end();
+    task_end2( NULL );
 }
 
 //
@@ -116,17 +108,13 @@ void    call_dmi_erepair( void *io_pArgs )
 //
 void    call_dmi_io_dccal( void *io_pArgs )
 {
-    INITSERVICE::TaskArgs *pTaskArgs =
-            static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_io_dccal entry" );
 
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "dmi_io_dccal exit" );
 
-    //  wait here on the barrier, then end the task.
-    pTaskArgs->waitChildSync();
-    task_end();
+    task_end2( NULL );
 }
 
 
@@ -135,8 +123,6 @@ void    call_dmi_io_dccal( void *io_pArgs )
 //
 void    call_dmi_io_run_training( void *io_pArgs )
 {
-    INITSERVICE::TaskArgs *pTaskArgs =
-            static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
     fapi::ReturnCode    l_fapirc;
     TARGETING::TargetService&   l_targetService = targetService();
     uint8_t                     l_cpuNum        =   0;
@@ -276,9 +262,7 @@ void    call_dmi_io_run_training( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_io_run_training exit" );
 
-    //  wait here on the barrier, then end the task.
-    pTaskArgs->waitChildSync();
-    task_end();
+    task_end2( NULL );
 }
 
 
@@ -287,17 +271,13 @@ void    call_dmi_io_run_training( void *io_pArgs )
 //
 void    call_host_startPRD_dmi( void *io_pArgs )
 {
-    INITSERVICE::TaskArgs *pTaskArgs =
-            static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_startPRD_dmi entry" );
 
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_startPRD_dmi exit" );
 
-    //  wait here on the barrier, then end the task.
-    pTaskArgs->waitChildSync();
-    task_end();
+    task_end2( NULL );
 }
 
 
@@ -306,17 +286,14 @@ void    call_host_startPRD_dmi( void *io_pArgs )
 //
 void    call_host_attnlisten_cen( void *io_pArgs )
 {
-    INITSERVICE::TaskArgs *pTaskArgs =
-            static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
+
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_attnlisten_cen entry" );
 
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "<host_attnlisten_cen exit" );
 
-    //  wait here on the barrier, then end the task.
-    pTaskArgs->waitChildSync();
-    task_end();
+    task_end2( NULL );
 }
 
 //
@@ -324,8 +301,7 @@ void    call_host_attnlisten_cen( void *io_pArgs )
 //
 void    call_proc_cen_framelock( void *io_pArgs )
 {
-    INITSERVICE::TaskArgs *pTaskArgs =
-            static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
+
     fapi::ReturnCode            l_fapirc;
     proc_cen_framelock_args     l_args;
     TARGETING::TargetService&   l_targetService = targetService();
@@ -453,9 +429,7 @@ void    call_proc_cen_framelock( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_cen_framework exit" );
 
-    //  wait here on the barrier, then end the task.
-    pTaskArgs->waitChildSync();
-    task_end();
+    task_end2( NULL );
 }
 
 
@@ -464,17 +438,14 @@ void    call_proc_cen_framelock( void *io_pArgs )
 //
 void    call_cen_set_inband_addr( void *io_pArgs )
 {
-    INITSERVICE::TaskArgs *pTaskArgs =
-            static_cast<INITSERVICE::TaskArgs *>( io_pArgs );
+
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_set_inband_addr entry" );
 
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "cen_set_inband_addr exit" );
 
-    //  wait here on the barrier, then end the task.
-    pTaskArgs->waitChildSync();
-    task_end();
+    task_end2( NULL );
 }
 
 

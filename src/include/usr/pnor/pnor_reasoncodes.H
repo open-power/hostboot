@@ -37,6 +37,7 @@ namespace PNOR
         MOD_PNORRP_READTOC              = 0x06, /**< pnorrp.C : PnorRP::readTOC */
         MOD_PNORRP_READFROMDEVICE       = 0x07, /**< pnorrp.C : PnorRP::readFromDevice */
         MOD_PNORRP_WRITETODEVICE        = 0x08, /**< pnorrp.C : PnorRP::writeToDevice */
+        MOD_PNORRP_DIDSTARTUPFAIL       = 0x1C,  /** didStartupFail(rc) */
 
         MOD_PNORDD_VERIFYADDRESSRANGE   = 0x11, /**< pnordd.C : PnorDD::verifyAddressRange */
         MOD_PNORDD_READFLASH            = 0x12, /**< pnordd.C : PnorDD::readFlash */
@@ -53,7 +54,7 @@ namespace PNOR
 
     enum PNORReasonCode
     {
-        RC_INVALID_MESSAGE_TYPE      = PNOR_COMP_ID | 0x01, 
+        RC_INVALID_MESSAGE_TYPE      = PNOR_COMP_ID | 0x01,
         RC_INVALID_ADDRESS           = PNOR_COMP_ID | 0x02,
         RC_INVALID_SECTION           = PNOR_COMP_ID | 0x03,
         RC_EXTERNAL_ERROR            = PNOR_COMP_ID | 0x04,
@@ -61,6 +62,7 @@ namespace PNOR
         RC_INVALID_ASYNC_MESSAGE     = PNOR_COMP_ID | 0x06,
         RC_UNSUPPORTED_OPERATION     = PNOR_COMP_ID | 0x07,
         RC_LPC_ERROR                 = PNOR_COMP_ID | 0x08,
+        RC_BAD_STARTUP_RC            = PNOR_COMP_ID | 0x09
     };
 };
 

@@ -23,7 +23,6 @@
 ROOTPATH = ../../../..
 MODULE = initservice
 
-OBJS =  initservice.o            \
-		initservicetaskentry.o   
+OBJS =  initservice.o
 
 include ${ROOTPATH}/config.mk

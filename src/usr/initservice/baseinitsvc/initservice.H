@@ -42,9 +42,9 @@
 #include <sys/vfs.h>            // VFS_MODULE_NAME_MAX
 
 #include <trace/interface.H>
-#include <errl/errlentry.H>
+#include <errl/errlentry.H>     //  errlHndl_t
+#include <errl/errlmanager.H>    //  errlCommit()
 #include <initservice/initsvcreasoncodes.H>
-#include <initservice/taskargs.H>
 #include <initservice/initsvcstructs.H>
 #include <vmmconst.h>
 
@@ -108,47 +108,28 @@ public:
      *          is the name of the compiled and linked targetting module.
      *          The module is expected to have implemented a extern "C"
      *          function called "void _start(void *args)" which is considered
-     *          to be the "task entry point".  When _start is called, its
-     *          parameter will be set to point to a TaskArgs struct which
-     *          can be used to pass information back and forth.  See the
-     *          comments in TaskArgs.H for more info.
-     *          See initsvctasks.H and the unit tests for some examples of
-     *          how this is used.
-     *
+     *          to be the "task entry point".       *
      *
      *  @param[in]      i_ptask     pointer to a TaskInfo struct
-     *  @param[in,out]  io_pargs    pointer to a TaskArgs struct, or NULL
-     *                              On input, TaskArgs struct will have
-     *                              command, returncode, and errlog fields
-     *                              cleared.  task can fill in these values
-     *                              on return.
+     *  @param[in,out]  io_pargs    pointer to any args.  This is usually NULL.
      *
      *  @return pointer to errorlog
      *  @retval NULL if success, filled in errorlog handle for failure
-     *
-     *  @note   startTask() can also be used to launch an asynchronous task
-     *          by calling it with i_pargs set to NULL.   This will disable
-     *          the barrier check.
-     *
      */
     errlHndl_t     startTask(   const TaskInfo      *i_ptask,
-                                TaskArgs::TaskArgs  *io_pargs    ) const;
+                                void                *io_pargs    ) const;
 
     /**
      * @brief   Execute an function
      *
      *  @param[in]      i_ptask -   pointer to an TaskInfo struct
-     *  @param[in,out]  i_pargs -   pointer to a TaskArgs struct
-     *                              On input, TaskArgs struct will have
-     *                              command, returncode, and errlog fields
-     *                              cleared.  Task can fill in these values
-     *                              on return.
+     *  @param[in,out]  i_pargs -   pointer to any args.  This is usually NULL.
      *
      *  @return pointer to errorlog
      *  @retval NULL if success, filled out errorlog if failure
      */
     errlHndl_t executeFn(   const TaskInfo  *i_ptask,
-                            TaskArgs        *i_pargs    ) const;
+                            void            *i_pargs    ) const;
 
 
     /**
@@ -172,14 +153,13 @@ public:
      *
      * @param[in]       i_ptask  -  pointer to a TaskInfo struct, which should
      *                              contain all the info to run the task.
-     * @param[in,out]   io_pargs -  pointer to a TaskArgs struct.  It is
-     *                              possible that this will not be used at all.
+     * @param[in,out]   io_pargs -  pointer to any args.  This is usually NULL.
      *
      * @return  pointer to errlog
      * @retval  returns NULL, or a pointer to a filled out errorlog
      */
     errlHndl_t  dispatchTask( const TaskInfo    *i_ptask,
-                              TaskArgs          *io_pargs ) const;
+                              void              *io_pargs ) const;
 
     /**
      * @brief Registry a block/range of vitual memory to be handled during a
@@ -218,10 +198,23 @@ protected:
 
 private:
     /**
-     * @note   Disable copy constructor and assignment operator
+     *  Disable copy constructor and assignment operator
      */
     InitService(const InitService& i_right);
     InitService& operator=(const InitService& i_right);
+
+
+    /**
+     * Check and load module associated with this task or function
+     *  if necessary.
+     *
+     * @param[in]       i_ptask  -  pointer to a TaskInfo struct, which should
+     *                              contain all the info to run the task.
+     *  @return pointer to errorlog
+     *  @retval NULL if success, filled out errorlog if failure
+     */
+    errlHndl_t  checkNLoadModule( const TaskInfo *i_ptask ) const;
+
 
     /**
      * @struct regBlock_t

@@ -32,6 +32,8 @@
 #define __TEST_INIT_SERVICETEST_H
 
 
+#include <errl/errlentry.H>     //  errlHndl_t
+#include <errl/errlmanager.H>    //  errlCommit()
 
 #include    <cxxtest/TestSuite.H>
 
@@ -58,7 +60,7 @@ const   INITSERVICE::TaskInfo    TASK_TEST1  =  {
  *
  */
 const   INITSERVICE::TaskInfo    TASK_TEST2  =  {
-        "libinitsvctasktest2.so" ,                               // taskname
+        "libinitsvctesttask.so" ,                       // taskname
         NULL,                                           // ptr to fn
         {
                 INITSERVICE::START_TASK,                // startflag=true, try to start
@@ -110,7 +112,7 @@ public:
 
         TS_TRACE( "=====>Run a nonexistent task, expect an ERROR.");
         l_errl = l_is.startTask(  &TASK_TEST1,
-                                NULL );
+                                  NULL );
         if ( l_errl  )
         {
             TS_TRACE( "SUCCESS: startTask returned an errorlog.\n");
