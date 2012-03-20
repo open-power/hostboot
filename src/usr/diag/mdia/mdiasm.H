@@ -49,6 +49,14 @@ class StateMachine
         void executeWorkItem(TARGETING::TargetHandle_t i_target, WorkFlowPhase i_phase) {}
 
         /**
+         * @brief used by Maint cmd monitor to notify that
+         * maint cmd timed out - called in monitor thread context
+         *
+         * @param[in] i_monitorIDs Vector of monitorIDs
+         */
+        virtual void processCommandTimeout(std::vector<uint64_t> i_monitorIDs) {}
+
+        /**
          * @brief ctor
          */
         StateMachine() {}
@@ -56,7 +64,7 @@ class StateMachine
         /**
          * @brief dtor
          */
-        ~StateMachine() {}
+        virtual ~StateMachine() {}
 
     private:
 

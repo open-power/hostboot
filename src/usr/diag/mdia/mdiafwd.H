@@ -34,6 +34,7 @@
 /**
  * @brief forwards
  */
+class MdiaCommandMonitorTest;
 
 namespace MDIA
 {
