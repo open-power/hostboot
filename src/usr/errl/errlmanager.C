@@ -129,6 +129,7 @@ void ErrlManager::commitErrLog(errlHndl_t& io_err, compId_t i_committerComp )
             break;
         }
 
+        TRACFCOMP(g_trac_errl, "commitErrLog() called by %.4X for plid=0x%X, Reasoncode=%.4X", i_committerComp, io_err->plid(), io_err->reasonCode() );
 
         // lock sem
         mutex_lock(&iv_mutex);

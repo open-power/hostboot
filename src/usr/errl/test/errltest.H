@@ -251,7 +251,7 @@ public:
 
 
             // Commit error log with different component ID.
-            errlCommit(l_err, FSI_COMP_ID);
+            errlCommit(l_err, CXXTEST_COMP_ID);
 
             // Make sure error log has been deleted by manager
             if (l_err != NULL)

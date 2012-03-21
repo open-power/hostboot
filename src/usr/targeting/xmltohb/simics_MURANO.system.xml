@@ -111,7 +111,7 @@
         </default>
     </attribute>
     <attribute>
-        <id>XSCOM_CHIP_INFO</id>
+        <id>XSCOM_CHIP_INFO</id><!-- @fixme: Story 35529 -->
         <default>
             <field><id>nodeId</id><value>0</value></field>
             <field><id>chipId</id><value>0</value></field>
@@ -124,6 +124,14 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0</default>
+    </attribute>
+    <attribute>
+        <id>FABRIC_NODE_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FABRIC_CHIP_ID</id>
+        <default>0</default>
     </attribute>
 </targetInstance>
 
@@ -539,7 +547,7 @@
         </default>
     </attribute>
     <attribute>
-        <id>XSCOM_CHIP_INFO</id>
+        <id>XSCOM_CHIP_INFO</id><!-- @fixme: Story 35529 -->
         <default>
             <field><id>nodeId</id><value>0</value></field>
             <field><id>chipId</id><value>0</value></field>
@@ -573,6 +581,14 @@
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FABRIC_NODE_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FABRIC_CHIP_ID</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -953,7 +969,7 @@
         </default>
     </attribute>
     <attribute>
-        <id>XSCOM_CHIP_INFO</id>
+        <id>XSCOM_CHIP_INFO</id><!-- @fixme: Story 35529 -->
         <default>
             <field><id>nodeId</id><value>0</value></field>
             <field><id>chipId</id><value>0</value></field>
@@ -987,6 +1003,14 @@
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FABRIC_NODE_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FABRIC_CHIP_ID</id>
+        <default>2</default>
     </attribute>
 </targetInstance>
 
@@ -1368,7 +1392,7 @@
         </default>
     </attribute>
     <attribute>
-        <id>XSCOM_CHIP_INFO</id>
+        <id>XSCOM_CHIP_INFO</id><!-- @fixme: Story 35529 -->
         <default>
             <field><id>nodeId</id><value>0</value></field>
             <field><id>chipId</id><value>0</value></field>
@@ -1402,6 +1426,14 @@
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FABRIC_NODE_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FABRIC_CHIP_ID</id>
+        <default>3</default>
     </attribute>
 </targetInstance>
 

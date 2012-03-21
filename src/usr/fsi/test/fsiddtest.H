@@ -66,7 +66,6 @@ class FsiDDTest : public CxxTest::TestSuite
             TRACFCOMP(g_trac_fsi, "FsiDDTest::test_init> Error from device : RC=%X", l_err->reasonCode() );
             TS_FAIL( "FsiDDTest::test_init> ERROR : Unexpected error log from initMaster" );
             errlCommit(l_err,FSI_COMP_ID);
-            delete l_err;
         }
 
         TRACFCOMP( g_trac_fsi, "FsiDDTest::test_init> %d/%d fails", fails, total );
@@ -199,8 +198,7 @@ class FsiDDTest : public CxxTest::TestSuite
             //** Master Control Space
             // version number
             { PROC0, 0x003074, 0x91010800, false, true }, //CMFSI MVER
-            { PROC0, 0x003474, 0x91010800, false, true }, //MFSI MVER
-            //@fixme - should be 0x92010800 but Simics is wrong
+            { PROC0, 0x003474, 0x92010800, false, true }, //MFSI MVER
 
             //** Slave Regs (cheating)
             { PROC0, 0x080000, 0xC0010EA0, false, false }, //Config Table entry for slave0 off MFSI-0 
@@ -297,7 +295,6 @@ class FsiDDTest : public CxxTest::TestSuite
                 TS_FAIL( "FsiDDTest::test_readWrite> ERROR : Unexpected error log from read1" );
                 fails++;
                 errlCommit(l_err,FSI_COMP_ID);
-                delete l_err;
             }
 
             TRACDCOMP( g_trac_fsi, "READ Reg 0x%X = 0x%X", test_data[x].addr, read_data[x] );
@@ -325,7 +322,6 @@ class FsiDDTest : public CxxTest::TestSuite
                     TS_FAIL( "FsiDDTest::test_readWrite> ERROR : Unexpected error log from write1" );
                     fails++;
                     errlCommit(l_err,FSI_COMP_ID);
-                    delete l_err;
                 }
             }
         }
@@ -350,7 +346,6 @@ class FsiDDTest : public CxxTest::TestSuite
                 TS_FAIL( "FsiDDTest::test_readWrite> ERROR : Unexpected error log from read2" );
                 fails++;
                 errlCommit(l_err,FSI_COMP_ID);
-                delete l_err;
             }
         }
 
@@ -390,7 +385,6 @@ class FsiDDTest : public CxxTest::TestSuite
                     TS_FAIL( "FsiDDTest::test_readWrite> ERROR : Unexpected error log from write1" );
                     fails++;
                     errlCommit(l_err,FSI_COMP_ID);
-                    delete l_err;
                 }
             }
         }
@@ -443,7 +437,6 @@ class FsiDDTest : public CxxTest::TestSuite
             if( l_err )
             {
                 errlCommit(l_err,FSI_COMP_ID);
-                delete l_err;
             }
         }
 

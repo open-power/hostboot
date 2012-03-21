@@ -36,7 +36,6 @@ XMLTOHB_SOURCE_TARGETS =    \
 
 XMLTOHB_SYSTEM_BINARIES = \
    vbu_targeting.bin \
-   simics_SALERNO_targeting.bin \
    simics_VENICE_targeting.bin \
    simics_MURANO_targeting.bin 
 

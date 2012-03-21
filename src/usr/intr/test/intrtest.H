@@ -44,7 +44,6 @@ class IntrTest: public CxxTest::TestSuite
          */
         void test_verifyState( void )
         {
-
             // TODO Temporaritly DISABLE in VBU until P8 support is verfied
             if( TARGETING::is_vpo() )
             {

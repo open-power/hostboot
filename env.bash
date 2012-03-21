@@ -44,4 +44,4 @@ if [ -n "${SANDBOXROOT}" ]; then
     fi
 fi
 
-export DEFAULT_MACHINE=VENICE
+export DEFAULT_MACHINE=MURANO

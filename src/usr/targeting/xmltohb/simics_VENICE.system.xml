@@ -110,7 +110,7 @@
         </default>
     </attribute>
     <attribute>
-        <id>XSCOM_CHIP_INFO</id>
+        <id>XSCOM_CHIP_INFO</id><!-- @fixme: Story 35529 -->
         <default>
             <field><id>nodeId</id><value>0</value></field>
             <field><id>chipId</id><value>0</value></field>
@@ -518,7 +518,7 @@
         </default>
     </attribute>
     <attribute>
-        <id>XSCOM_CHIP_INFO</id>
+        <id>XSCOM_CHIP_INFO</id><!-- @fixme: Story 35529 -->
         <default>
             <field><id>nodeId</id><value>0</value></field>
             <field><id>chipId</id><value>0</value></field>
@@ -947,7 +947,7 @@
         </default>
     </attribute>
     <attribute>
-        <id>XSCOM_CHIP_INFO</id>
+        <id>XSCOM_CHIP_INFO</id><!-- @fixme: Story 35529 -->
         <default>
             <field><id>nodeId</id><value>0</value></field>
             <field><id>chipId</id><value>0</value></field>
@@ -1377,7 +1377,7 @@
         </default>
     </attribute>
     <attribute>
-        <id>XSCOM_CHIP_INFO</id>
+        <id>XSCOM_CHIP_INFO</id><!-- @fixme: Story 35529 -->
         <default>
             <field><id>nodeId</id><value>0</value></field>
             <field><id>chipId</id><value>0</value></field>
@@ -1806,7 +1806,7 @@
         </default>
     </attribute>
     <attribute>
-        <id>XSCOM_CHIP_INFO</id>
+        <id>XSCOM_CHIP_INFO</id><!-- @fixme: Story 35529 -->
         <default>
             <field><id>nodeId</id><value>0</value></field>
             <field><id>chipId</id><value>0</value></field>
@@ -2235,7 +2235,7 @@
         </default>
     </attribute>
     <attribute>
-        <id>XSCOM_CHIP_INFO</id>
+        <id>XSCOM_CHIP_INFO</id><!-- @fixme: Story 35529 -->
         <default>
             <field><id>nodeId</id><value>0</value></field>
             <field><id>chipId</id><value>0</value></field>
@@ -2664,7 +2664,7 @@
         </default>
     </attribute>
     <attribute>
-        <id>XSCOM_CHIP_INFO</id>
+        <id>XSCOM_CHIP_INFO</id><!-- @fixme: Story 35529 -->
         <default>
             <field><id>nodeId</id><value>0</value></field>
             <field><id>chipId</id><value>0</value></field>
@@ -3093,7 +3093,7 @@
         </default>
     </attribute>
     <attribute>
-        <id>XSCOM_CHIP_INFO</id>
+        <id>XSCOM_CHIP_INFO</id><!-- @fixme: Story 35529 -->
         <default>
             <field><id>nodeId</id><value>0</value></field>
             <field><id>chipId</id><value>0</value></field>
@@ -8962,7 +8962,10 @@
 
 <!-- Centaur n0p63 : end -->
 
-<!-- @fixme : Temporary target used for FSI wrap-back testing -->
+<!-- Remove this until Simics model works again : 
+     @fixme with Task 39187
+
+Target used for FSI wrap-back testing
 <targetInstance>
     <id>sys0node0proc0wrap</id>
     <type>chip-processor-venice</type>
@@ -8983,7 +8986,7 @@
         <default>affinity:sys-0/node-0/proc-9</default>
     </attribute>
 
-    <!-- FSI is connected via wrapback to itself over MFSI-0 -->
+    FSI is connected via wrapback to itself over MFSI-0
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-0</default>
@@ -9005,6 +9008,8 @@
         <default>0</default>
     </attribute>
 </targetInstance>
+
+-->
 
 
 <!-- DIMMS

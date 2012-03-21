@@ -716,8 +716,12 @@ errlHndl_t FsiDD::read(const FsiAddrInfo_t& i_addrInfo,
         l_mutex
             = (i_addrInfo.opbTarg)->getHbMutexAttr<TARGETING::ATTR_FSI_MASTER_MUTEX>();
 
-        mutex_lock(l_mutex);
-        need_unlock = true;
+        // skip the mutex lock if we're already inside a previous operation
+        if( !iv_ffdcCollection )
+        {
+            mutex_lock(l_mutex);
+            need_unlock = true;
+        }
 
         // always read/write 64 bits to SCOM
         size_t scom_size = sizeof(uint64_t);
@@ -790,8 +794,12 @@ errlHndl_t FsiDD::write(const FsiAddrInfo_t& i_addrInfo,
         l_mutex
             = (i_addrInfo.opbTarg)->getHbMutexAttr<TARGETING::ATTR_FSI_MASTER_MUTEX>();
 
-        mutex_lock(l_mutex);
-        need_unlock = true;
+        // skip the mutex lock if we're already inside a previous operation
+        if( !iv_ffdcCollection )
+        {
+            mutex_lock(l_mutex);
+            need_unlock = true;
+        }
 
         // write the OPB command register
         TRACUCOMP(g_trac_fsi, "FsiDD::write> ScomWRITE : opbaddr=%.16llX, data=%.16llX", opbaddr, fsicmd );
@@ -908,6 +916,7 @@ errlHndl_t FsiDD::handleOpbErrors(const FsiAddrInfo_t& i_addrInfo,
                 TRACFCOMP( g_trac_fsi, "MDTRB0(1DC) = %.8X", data );
             }
 
+            //MAGIC_INSTRUCTION(MAGIC_BREAK);
             iv_ffdcCollection = false;
         }
 
@@ -1059,7 +1068,7 @@ errlHndl_t FsiDD::genFullFsiAddr(FsiAddrInfo_t& io_addrInfo)
     //pull the FSI info out for this target
     FsiChipInfo_t fsi_info = getFsiInfo( io_addrInfo.fsiTarg );
 
-    TRACUCOMP( g_trac_fsi, "target=%llX : Link Id=%.8X", target_to_uint64(io_addrInfo.fsiTarg), i_fsiInfo.linkid.id );
+    TRACUCOMP( g_trac_fsi, "target=%llX : Link Id=%.8X", target_to_uint64(io_addrInfo.fsiTarg), fsi_info.linkid.id );
 
     //FSI master is the master proc, find the port
     if( fsi_info.master == iv_master )

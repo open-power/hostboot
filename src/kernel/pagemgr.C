@@ -26,6 +26,8 @@
 #include <kernel/console.H>
 #include <arch/ppc.H>
 #include <util/locked/pqueue.H>
+#include <kernel/task.H>
+#include <kernel/taskmgr.H>
 
 size_t PageManager::cv_coalesce_count = 0;
 size_t PageManager::cv_low_page_count = -1;
@@ -118,7 +120,8 @@ void* PageManager::_allocatePage(size_t n)
     if (NULL == page)
     {
 	// TODO: Add abort instead.
-	printk("Insufficient memory for allocation of size %zd!\n", n);
+        task_t* t = TaskManager::getCurrentTask();
+	printk("Insufficient memory for alloc of size %zd on tid=%d!\n", n, t->tid);
 	while(1);
     }
 

@@ -118,7 +118,7 @@ hb_helptext()
         echo "  Requires the hostboot image to be 'prime'd into the workspace."
         echo
         echo "  Environment Variables:"
-        echo "      MACHINE: Alternate simics machine type (default SALERNO)"
+        echo "      MACHINE: Alternate simics machine type (default VENICE)"
         echo "      SIMICSOPTIONS: Additional options to always pass to the"
         echo "                     start simics script, such as '-nre'."
         echo

@@ -1507,7 +1507,7 @@ class TargetingTestSuite: public CxxTest::TestSuite
         ErrlUserDetailsTarget(l_pTarget1).addToLog(l_err);
         ErrlUserDetailsTarget(l_pTarget2).addToLog(l_err);
 
-        errlCommit(l_err, TARG_COMP_ID);
+        errlCommit(l_err, CXXTEST_COMP_ID);
 
         TS_TRACE(EXIT_MRK "testErrlTargetFFDC");
     }

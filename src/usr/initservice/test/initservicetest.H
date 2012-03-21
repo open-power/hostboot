@@ -114,8 +114,7 @@ public:
         if ( l_errl  )
         {
             TS_TRACE( "SUCCESS: startTask returned an errorlog.\n");
-            //  clean up
-            errlCommit( l_errl, INITSVC_COMP_ID );
+            delete l_errl; //delete expected log
         }
         else
         {
@@ -176,7 +175,7 @@ public:
         if ( l_errl )
         {
             TS_TRACE( "SUCCESS: startTask returned an error log.\n");
-            errlCommit( l_errl, INITSVC_COMP_ID );
+            delete l_errl; //delete expected log
         }
         else
         {

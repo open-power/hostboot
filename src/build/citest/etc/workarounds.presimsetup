@@ -27,13 +27,6 @@
 ##    to setup the sandbox
 ##
 
-echo "+++ Copy desired SALERNO config file to sandbox and modify L3 to 8MB."
-mkdir -p $sb/simu/configs
-cp --update $BACKING_BUILD/src/simu/configs/P8_SALERNO.config $sb/simu/configs
-sed -i -e's/SETENV GFW_P8_SALERNO_L3_MB_SIZE.*/SETENV GFW_P8_SALERNO_L3_MB_SIZE 8/' $sb/simu/configs/P8_SALERNO.config
-# Backing build already contains 910431.  Leave this workaround here for future scomdef files
-#sed -i -e's/SETENV GFW_P8_SALERNO_MODEL_EC.*/SETENV GFW_P8_SALERNO_MODEL_EC 910431/' $sb/simu/configs/P8_SALERNO.config
-
 echo "+++ Copy desired VENICE config file to sandbox and modify L3 to 8MB."
 mkdir -p $sb/simu/configs
 cp --update $BACKING_BUILD/src/simu/configs/P8_VENICE.config $sb/simu/configs
@@ -61,35 +54,20 @@ sed -i -e's/SETENV GFW_SIMICS_ENV_THREADS_PER_CORE.*/SETENV GFW_SIMICS_ENV_THREA
 #echo "WSALIAS HOSTBOOT_LEVEL FIPSLEVEL env/gfwb/simics-4.2.0/simics-4.2.83/fips/fld36/fi120201a700.42" >> $sb/simu/data/simicsInfo
 #echo "WSALIAS HOSTBOOT_LEVEL SIMICSLEVEL env/vtechb/simics-4.2.0/simics-4.2.83/bin" >> $sb/simu/data/simicsInfo
 
-echo "+++ Add some scom regs and actions for ECCB fakeout."
-mkdir -p $sb/simu/data/cec-chip/
-cp --update $BACKING_BUILD/src/simu/data/cec-chip/p8.chip $sb/simu/data/cec-chip/p8.chip.orig
-grep -v DONE $sb/simu/data/cec-chip/p8.chip.orig > $sb/simu/data/cec-chip/p8.chip
-echo "ACTIONS=p8_pnor.act   #workarounds.presimsetup" >> $sb/simu/data/cec-chip/p8.chip
-echo "SCOMREGS           #workarounds.presimsetup" >> $sb/simu/data/cec-chip/p8.chip
-echo "  0xDDDD0000,64  # dummy to hold pnor address" >> $sb/simu/data/cec-chip/p8.chip
-echo "  0xDDDD0001,64  # dummy to hold pnor data" >> $sb/simu/data/cec-chip/p8.chip
-echo "END" >> $sb/simu/data/cec-chip/p8.chip
-echo "DONE" >> $sb/simu/data/cec-chip/p8.chip
-cp $HOSTBOOTROOT/src/build/citest/etc/patches/p8_pnor.act $sb/simu/data/cec-chip/
-#fixme Story 37972
-
-
 echo "+++ Copy new centaur.act for DRAM hardware procedures."
 mkdir -p $sb/simu/data/cec-chip/
 cp $HOSTBOOTROOT/src/build/citest/etc/patches/centaur.act $sb/simu/data/cec-chip/
-#fixme
-
-
-# Leaving this here as an example for the future
-#echo "+++ Update to new phyp and mambo level."
-#mkdir -p $sb/simu/data
-#cp --update $BACKING_BUILD/src/simu/data/simicsInfo $sb/simu/data/simicsInfo
-#sed -i -e's/^WSALIAS HOSTBOOT_LEVEL MAMBOLEVEL.*/WSALIAS HOSTBOOT_LEVEL MAMBOLEVEL env\/mamboa\/2011_11_10__4.2/' $sb/simu/data/simicsInfo
-#sed -i -e's/^WSALIAS HOSTBOOT_LEVEL PHYPLEVEL.*/WSALIAS HOSTBOOT_LEVEL PHYPLEVEL env\/phypa\/simics-4.2.0\/simics-4.2.83\/ph120201a700.42/' $sb/simu/data/simicsInfo
-#sed -i -e's/^WSALIAS HOSTBOOT_LEVEL PHYP_PATCH_LEVEL.*/WSALIAS HOSTBOOT_LEVEL PHYP_PATCH_LEVEL env\/phypa\/simics-4.2.0\/simics-4.2.82\/patches\/ph120201a700.42/' $sb/simu/data/simicsInfo
+#fixme with Story 38362
 
 # added this patch until defect 825800 is integrated and included in a hostboot bbuild.
 echo "+++ Add workaround for p8 Indirect SCOM action files."
 cp --update $HOSTBOOTROOT/src/build/citest/etc/patches/p8_indScom_910431.act $sb/simu/data/cec-chip/p8_indScom_910431.act
 cp --update $HOSTBOOTROOT/src/build/citest/etc/patches/p8_indScom_910520.act $sb/simu/data/cec-chip/p8_indScom_910520.act
+
+# Leaving this here as an example for the future
+echo "+++ Update to new phyp and mambo level."
+mkdir -p $sb/simu/data
+cp --update $BACKING_BUILD/src/simu/data/simicsInfo $sb/simu/data/simicsInfo
+#sed -i -e's/^WSALIAS HOSTBOOT_LEVEL MAMBOLEVEL.*/WSALIAS HOSTBOOT_LEVEL MAMBOLEVEL env\/mamboa\/2011_11_10__4.2/' $sb/simu/data/simicsInfo
+sed -i -e's/^WSALIAS DEFAULT PHYPLEVEL.*/WSALIAS DEFAULT PHYPLEVEL env\/phypa\/simics-4.2.0\/simics-4.2.85\/ph120319a700.42/' $sb/simu/data/simicsInfo
+sed -i -e's/^WSALIAS DEFAULT PHYP_PATCH_LEVEL.*/WSALIAS DEFAULT PHYP_PATCH_LEVEL env\/phypa\/simics-4.2.0\/simics-4.2.85\/patches\/ph120319a700.42/' $sb/simu/data/simicsInfo 

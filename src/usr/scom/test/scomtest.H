@@ -151,7 +151,6 @@ public:
               TS_FAIL( "ScomTest::test_FSISCOMreadWrite_proc> ERROR : Unexpected error log from write1" );
               fails++;
               errlCommit(l_err,SCOM_COMP_ID);
-              delete l_err;
           }
       }
 
@@ -177,7 +176,6 @@ public:
               TS_FAIL( "ScomTest::test_FSISCOMreadWrite_proc> ERROR : Unexpected error log from write1" );
               fails++;
               errlCommit(l_err,SCOM_COMP_ID);
-              delete l_err;
           }
           else if(read_data[x] != test_data[x].data)
           {
@@ -273,6 +271,8 @@ public:
       // write all the test registers
       for( uint64_t x = 0; x < NUM_ADDRS; x++ )
       {
+          TRACFCOMP(g_trac_scom, "ScomTest::test_FSISCOMreadWrite_centaur> x=%d, addr=%.8X, target=%p", x,  test_data[x].addr, test_data[x].target );
+
           //only run if the target exists
           if(test_data[x].target == NULL)
           {
@@ -292,13 +292,14 @@ public:
               TS_FAIL( "ScomTest::test_FSISCOMreadWrite_centaur> ERROR : Unexpected error log from write1" );
               fails++;
               errlCommit(l_err,SCOM_COMP_ID);
-              delete l_err;
           }
       }
 
       // read all the test registers
       for( uint64_t x = 0; x < NUM_ADDRS; x++ )
       {
+          TRACFCOMP(g_trac_scom, "ScomTest::test_FSISCOMreadWrite_centaur> x=%d, addr=%.8X, target=%p", x,  test_data[x].addr, test_data[x].target );
+
           //only run if the target exists
           if(test_data[x].target == NULL)
           {
@@ -318,7 +319,6 @@ public:
               TS_FAIL( "ScomTest::test_FSISCOMreadWrite_centaur> ERROR : Unexpected error log from write1" );
               fails++;
               errlCommit(l_err,SCOM_COMP_ID);
-              delete l_err;
           }
           else if(read_data[x] != test_data[x].data)
           {
@@ -438,7 +438,6 @@ public:
               TS_FAIL( "ScomTest::test_IndirectScom_proc> ERROR : Unexpected error log from write1" );
               fails++;
               errlCommit(l_err,SCOM_COMP_ID);
-              delete l_err;
           }
       }
 
@@ -470,7 +469,6 @@ public:
               TS_FAIL( "ScomTest::test_IndirectScomreadWrite_proc> ERROR : Unexpected error log from write1" );
               fails++;
               errlCommit(l_err,SCOM_COMP_ID);
-              delete l_err;
           }
           else if((read_data[x] & 0x000000000000FFFF) != (test_data[x].data & 0x000000000000FFFF))
           {
@@ -595,18 +593,18 @@ public:
                                DEVICE_SCOM_ADDRESS(test_data[x].addr) );
           if( l_err )
           {
-            // last 2 writes have expected failure conditions.
-            if ((x == NUM_ADDRS-1) || (x == NUM_ADDRS-2))
-	    {
-                TRACDCOMP( g_trac_scom, "ScomTest::test_translate_EX.. Expected Error log returned> " );
-            }
-            else
-            {
-              TRACFCOMP(g_trac_scom, "ScomTest::test_translate_scom_EX> [%d] Write: Error from device : addr=0x%X, RC=%X", x,  test_data[x].addr, l_err->reasonCode() );
-              TS_FAIL( "ScomTest::test_translate_EX> ERROR : Unexpected error log from write1" );
-              fails++;
-              errlCommit(l_err,SCOM_COMP_ID);
-             }
+              // last 2 writes have expected failure conditions.
+              if ((x == NUM_ADDRS-1) || (x == NUM_ADDRS-2))
+              {
+                  TRACDCOMP( g_trac_scom, "ScomTest::test_translate_EX.. Expected Error log returned> " );
+              }
+              else
+              {
+                  TRACFCOMP(g_trac_scom, "ScomTest::test_translate_scom_EX> [%d] Write: Error from device : addr=0x%X, RC=%X", x,  test_data[x].addr, l_err->reasonCode() );
+                  TS_FAIL( "ScomTest::test_translate_EX> ERROR : Unexpected error log from write1" );
+                  fails++;
+                  errlCommit(l_err,SCOM_COMP_ID);
+              }
 
               delete l_err;
           }
@@ -641,7 +639,6 @@ public:
               TS_FAIL( "ScomTest::test_translate_scom_EX> ERROR : Unexpected error log from write1" );
               fails++;
               errlCommit(l_err,SCOM_COMP_ID);
-              delete l_err;
           }
           else if((read_data[x]) != (test_data[x].data))
           {
@@ -786,17 +783,17 @@ public:
                                DEVICE_SCOM_ADDRESS(test_data[x].addr) );
           if( l_err )
           {
-            if ((x == NUM_ADDRS-1) || (x==NUM_ADDRS-2))
-            {
-                TRACDCOMP( g_trac_scom, "ScomTest::test_translate MCS.. Expected Error log returned> x = %d", x );
-            }
-            else
-            {
-              TRACFCOMP(g_trac_scom, "ScomTest::test_translate_Scom_MCS> [%d] Write: Error from device : addr=0x%X, RC=%X", x,  test_data[x].addr, l_err->reasonCode() );
-              TS_FAIL( "ScomTest::test_Translate_SCOM_mcs> ERROR : Unexpected error log from write1" );
-              fails++;
-              errlCommit(l_err,SCOM_COMP_ID);
-             }
+              if ((x == NUM_ADDRS-1) || (x==NUM_ADDRS-2))
+              {
+                  TRACDCOMP( g_trac_scom, "ScomTest::test_translate MCS.. Expected Error log returned> x = %d", x );
+              }
+              else
+              {
+                  TRACFCOMP(g_trac_scom, "ScomTest::test_translate_Scom_MCS> [%d] Write: Error from device : addr=0x%X, RC=%X", x,  test_data[x].addr, l_err->reasonCode() );
+                  TS_FAIL( "ScomTest::test_Translate_SCOM_mcs> ERROR : Unexpected error log from write1" );
+                  fails++;
+                  errlCommit(l_err,SCOM_COMP_ID);
+              }
 
               delete l_err;
           }
@@ -830,7 +827,6 @@ public:
               TS_FAIL( "ScomTest::test_TranslateScom_MCS> ERROR : Unexpected error log from write1" );
               fails++;
               errlCommit(l_err,SCOM_COMP_ID);
-              delete l_err;
           }
           else if((read_data[x]) != (test_data[x].data))
           {
@@ -954,18 +950,18 @@ public:
                                DEVICE_SCOM_ADDRESS(test_data[x].addr) );
           if( l_err )
           {
-            // checking the read of NUM_ADDRs - 1 because the last entry written above failed as expected.
-            if (x == (NUM_ADDRS-1))
-            {
-                TRACDCOMP( g_trac_scom, "ScomTest::test_translate MCS.. Expected Errorlog Returned> x = %d", x );
-            }
-            else
-	    {
-              TRACFCOMP(g_trac_scom, "ScomTest::test_translate_Scom_MBA_MBS> [%d] Write: Error from device : addr=0x%X, RC=%X", x,  test_data[x].addr, l_err->reasonCode() );
-              TS_FAIL( "ScomTest::test_Translate_SCOM_MBA_MBS> ERROR : Unexpected error log from write1" );
-              fails++;
-              errlCommit(l_err,SCOM_COMP_ID);
-             }
+              // checking the read of NUM_ADDRs - 1 because the last entry written above failed as expected.
+              if (x == (NUM_ADDRS-1))
+              {
+                  TRACDCOMP( g_trac_scom, "ScomTest::test_translate MCS.. Expected Errorlog Returned> x = %d", x );
+              }
+              else
+              {
+                  TRACFCOMP(g_trac_scom, "ScomTest::test_translate_Scom_MBA_MBS> [%d] Write: Error from device : addr=0x%X, RC=%X", x,  test_data[x].addr, l_err->reasonCode() );
+                  TS_FAIL( "ScomTest::test_Translate_SCOM_MBA_MBS> ERROR : Unexpected error log from write1" );
+                  fails++;
+                  errlCommit(l_err,SCOM_COMP_ID);
+              }
 
               delete l_err;
           }
@@ -1000,7 +996,6 @@ public:
               TS_FAIL( "ScomTest::test_TranslateScom_MBA_MBS> ERROR : Unexpected error log from write1" );
               fails++;
               errlCommit(l_err,SCOM_COMP_ID);
-              delete l_err;
           }
           else if((read_data[x]) != (test_data[x].data))
           {

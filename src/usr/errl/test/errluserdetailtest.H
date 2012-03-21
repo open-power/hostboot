@@ -73,7 +73,7 @@ public:
         ErrlUserDetailsString(l_pString).addToLog(l_errl);
 
         // commit the errorlog
-        errlCommit(l_errl, HBERRL_COMP_ID);
+        errlCommit(l_errl, CXXTEST_COMP_ID);
     }
 
 };
