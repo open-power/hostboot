@@ -41,7 +41,7 @@ void WorkItem::operator()()
     iv_sm.executeWorkItem(iv_target, iv_workFlowPhase);
 }
 
-int32_t WorkItem::compare(const WorkItem & i_r) const
+int64_t WorkItem::compare(const WorkItem & i_r) const
 {
     // schedule based on state machine computed priority
 
@@ -66,7 +66,7 @@ int32_t WorkItem::compare(const WorkItem & i_r) const
 WorkItem::WorkItem(StateMachine & i_sm,
         WorkFlowPhase i_workFlowPhase,
         TargetHandle_t i_target,
-        uint32_t i_priority) :
+        uint64_t i_priority) :
     iv_sm(i_sm),
     iv_workFlowPhase(i_workFlowPhase),
     iv_target(i_target),

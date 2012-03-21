@@ -38,9 +38,9 @@ extern trace_desc_t * slowTd;
 
 }
 
-#define MDIA_DBG( _fmt_, _args_...) TRACDCOMP( MDIA::fastTd, INFO_MRK" %s: "_fmt_, ##_args_)
-#define MDIA_FAST( _fmt_, _args_...) TRACFCOMP( MDIA::fastTd, INFO_MRK" %s: "_fmt_, ##_args_)
-#define MDIA_SLOW( _fmt_, _args_...) TRACFCOMP( MDIA::slowTd, INFO_MRK" %s: "_fmt_, ##_args_)
-#define MDIA_ERR( _fmt_, _args_...) TRACFCOMP( MDIA::slowTd, ERR_MRK" %s: "_fmt_, ##_args_)
+#define MDIA_DBG( _fmt_, _args_...) TRACDCOMP( MDIA::fastTd, INFO_MRK""_fmt_, ##_args_)
+#define MDIA_FAST( _fmt_, _args_...) TRACFCOMP( MDIA::fastTd, INFO_MRK""_fmt_, ##_args_)
+#define MDIA_SLOW( _fmt_, _args_...) TRACFCOMP( MDIA::slowTd, INFO_MRK""_fmt_, ##_args_)
+#define MDIA_ERR( _fmt_, _args_...) TRACFCOMP( MDIA::slowTd, ERR_MRK""_fmt_, ##_args_)
 
 #endif

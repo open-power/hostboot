@@ -54,7 +54,7 @@ class WorkItem
          * @retval 1 i_rhs < this
          * @retval 0 i_rhs !< this && this !< i_rhs
          */
-        int32_t compare(const WorkItem & i_rhs) const;
+        int64_t compare(const WorkItem & i_rhs) const;
 
         /**
          * @brief ctor
@@ -68,7 +68,7 @@ class WorkItem
          * @param[in] i_priority work item priority
          */
         WorkItem(StateMachine & i_sm, WorkFlowPhase i_phase,
-                TARGETING::TargetHandle_t i_target, uint32_t i_priority);
+                TARGETING::TargetHandle_t i_target, uint64_t i_priority);
 
     private:
 
@@ -90,7 +90,7 @@ class WorkItem
         /**
          * @brief the scheduling priority for the work item
          */
-        uint32_t iv_priority;
+        uint64_t iv_priority;
 
         /**
          * @brief copy disabled

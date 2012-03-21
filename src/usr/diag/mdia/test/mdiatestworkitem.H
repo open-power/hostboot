@@ -43,7 +43,7 @@ class MdiaWorkItemTest : public CxxTest::TestSuite
             using namespace MDIA;
             using namespace TARGETING;
 
-            TS_TRACE(ENTER_MRK __FUNCTION__);
+            TS_TRACE(ENTER_MRK "testWorkItem");
 
             StateMachine s;
 
@@ -52,15 +52,17 @@ class MdiaWorkItemTest : public CxxTest::TestSuite
             WorkItem wi1(s, START_SCRUB, target, 2222),
                      wi2(s, START_SCRUB, target, 1111);
 
-            if(wi2 < wi1) {
+            if(wi2 < wi1)
+            {
                 TS_FAIL("wi2 < wi1");
             }
 
-            if(!(wi1 < wi2)) {
+            if(!(wi1 < wi2))
+            {
                 TS_FAIL("wi1 !< wi2");
             }
 
-            TS_TRACE(EXIT_MRK __FUNCTION__);
+            TS_TRACE(EXIT_MRK "testWorkItem");
         }
 };
 #endif
