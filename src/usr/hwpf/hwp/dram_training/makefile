@@ -44,19 +44,21 @@ EXTRAINCDIR	+= ${ROOTPATH}/src/usr/hwpf/hwp/dram_training
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dram_training/mss_draminit_training
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dram_training/mss_draminit_mc
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dram_training/mss_draminit
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dram_training/mss_ddr_phy_reset
 
 ##  NOTE: add new object files when you add a new HWP
 OBJS =  dram_training.o \
         mss_draminit.o \
         mss_funcs.o \
         mss_draminit_mc.o \
-        mss_draminit_training.o
+        mss_draminit_training.o \
+        mss_ddr_phy_reset.o
    		
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 ##@ VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/???
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/dram_training/mss_draminit_training
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/dram_training/mss_draminit_mc
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/dram_training/mss_draminit
-
+VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/dram_training/mss_ddr_phy_reset
 
 include ${ROOTPATH}/config.mk

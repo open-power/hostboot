@@ -1,7 +1,7 @@
 //  IBM_PROLOG_BEGIN_TAG
 //  This is an automatically generated prolog.
 //
-//  $Source: src/usr/HWPs/dmi_training/cen_scom_addresses.H $
+//  $Source: src/usr/hwpf/hwp/include/cen_scom_addresses.H $
 //
 //  IBM CONFIDENTIAL
 //
@@ -20,7 +20,7 @@
 //  Origin: 30
 //
 //  IBM_PROLOG_END
-// $Id: cen_scom_addresses.H,v 1.11 2012/01/06 22:34:45 jmcgill Exp $
+// $Id: cen_scom_addresses.H,v 1.15 2012/03/06 16:40:00 divyakum Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/cen_scom_addresses.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -37,6 +37,30 @@
 // This will help catch address typos at compile time, and will make it easy
 // to track down which procedures use each address
 //
+//------------------------------------------------------------------------------
+// Don't forget to create CVS comments when you check in your changes!
+//------------------------------------------------------------------------------
+// CHANGE HISTORY:
+//------------------------------------------------------------------------------
+// Version:|  Author: |  Date:  | Comment:
+//---------|----------|---------|-----------------------------------------------
+//         |          |         | 
+//  1.15   | divyakum |06-Mar-12| Added calibration status regs
+//  1.14   | divyakum |22-Feb-12| Added CALIBRATION registers.
+//         |          |         | Added Change history table
+//  1.13   | mfred    |24-Jan-12| Moved common multicast address constants to common_scom_accresses.H
+//  1.12   | mfred    |24-Jan-12| Move multicast group 1 to group 3 for consistency with P8
+//  1.11   | jmcgill  |06-Jan-12| move shared/common addresses to common_scom_addresses.H, general cleanup
+//  1.10   | mfred    |26-Oct-12| Fix error.  Extra space in an address was causing compile failure.
+//  1.9    | mfred    |25-Oct-12| Added MEM chiplet indirect scom addresses (DPHY registers).
+//  1.8    | venton   |20-Sep-12| Add missing SCOMs from P8
+//  1.7    | mfred    |02-Aug-12| added some 8-bit constants for use with P0 and P1
+//  1.6    | mfred    |28-Aug-12| Added more multicast addresses.
+//  1.5    | mfred    |27-Jul-12| Added multicast addresses for OPCG, etc.
+//  1.3    | gweber   |25-Jul-12| moved centaur constants from p8_scom_addresses.H
+//  1.2    | mfred    |13-Jul-12| Get rid of some temp lines and comments.
+//  1.1    | mfred    |07-Jul-12| Adding first version of scom address file.  Was created from P8 version.
+
 
 #ifndef CEN_SCOM_ADDRESSES
 #define CEN_SCOM_ADDRESSES
@@ -312,69 +336,56 @@ CONST_UINT64_T( DPHY01_DDRPHY_PC_IO_PVT_FET_CONTROL_P0_0x8000C0140301143F,      
 CONST_UINT64_T( DPHY01_DDRPHY_PC_IO_PVT_FET_CONTROL_P1_0x8001C0140301143F,           ULL(0x8001C0140301143F) );
 CONST_UINT64_T( DPHY23_DDRPHY_PC_IO_PVT_FET_CONTROL_P0_0x8000C0140301183F,           ULL(0x8000C0140301183F) );
 CONST_UINT64_T( DPHY23_DDRPHY_PC_IO_PVT_FET_CONTROL_P1_0x8001C0140301183F,           ULL(0x8001C0140301183F) );
- 
- 
+
+//------------------------------------------------------------------------------
+//      CALIBRATION SCOM ADDRESSES (DPHY REGISTERS)
+//------------------------------------------------------------------------------
+CONST_UINT64_T( DPHY01_DDRPHY_PC_INIT_CAL_CONFIG0_P0_0x8000C0160301143F,             ULL(0x8000C0160301143F) );
+CONST_UINT64_T( DPHY01_DDRPHY_PC_INIT_CAL_CONFIG0_P1_0x8001C0160301143F,             ULL(0x8001C0160301143F) );
+CONST_UINT64_T( DPHY23_DDRPHY_PC_INIT_CAL_CONFIG0_P0_0x8000C0160301183F,             ULL(0x8000C0160301183F) );
+CONST_UINT64_T( DPHY23_DDRPHY_PC_INIT_CAL_CONFIG0_P1_0x8001C0160301183F,             ULL(0x8000C0160301183F) );
+
+CONST_UINT64_T( DPHY01_DDRPHY_PC_INIT_CAL_CONFIG1_P0_0x8000C0170301143F,             ULL(0x8000C0160301143F) );
+CONST_UINT64_T( DPHY01_DDRPHY_PC_INIT_CAL_CONFIG1_P1_0x8001C0170301143F,             ULL(0x8001C0160301143F) );
+CONST_UINT64_T( DPHY23_DDRPHY_PC_INIT_CAL_CONFIG1_P0_0x8000C0170301183F,             ULL(0x8000C0160301183F) );
+CONST_UINT64_T( DPHY23_DDRPHY_PC_INIT_CAL_CONFIG1_P1_0x8001C0170301183F,             ULL(0x8000C0160301183F) );
+
+CONST_UINT64_T( DPHY01_DDRPHY_PC_INIT_CAL_STATUS_P0_0x8000C0190301143F,              ULL(0x8000C0190301143F) );
+CONST_UINT64_T( DPHY01_DDRPHY_PC_INIT_CAL_STATUS_P1_0x8001C0190301143F,              ULL(0x8001C0190301143F) );
+CONST_UINT64_T( DPHY23_DDRPHY_PC_INIT_CAL_STATUS_P0_0x8000C0190301183F,              ULL(0x8000C0190301183F) );
+CONST_UINT64_T( DPHY23_DDRPHY_PC_INIT_CAL_STATUS_P1_0x8001C0190301183F,              ULL(0x8001C0190301183F) );
+
+CONST_UINT64_T( DPHY01_DDRPHY_PC_INIT_CAL_ERROR_P0_0x8000C0180301143F,               ULL(0x8000C0180301143F) );
+CONST_UINT64_T( DPHY01_DDRPHY_PC_INIT_CAL_ERROR_P1_0x8001C0180301143F,               ULL(0x8001C0180301143F) );
+CONST_UINT64_T( DPHY23_DDRPHY_PC_INIT_CAL_ERROR_P0_0x8000C0180301183F,               ULL(0x8000C0180301183F) );
+CONST_UINT64_T( DPHY23_DDRPHY_PC_INIT_CAL_ERROR_P1_0x8001C0180301183F,               ULL(0x8001C0180301183F) );
+
+CONST_UINT64_T( DPHY01_DDRPHY_PC_INIT_CAL_MASK_P0_0x8000C01A0301143F,                ULL(0x8000C01A0301143F) );
+CONST_UINT64_T( DPHY01_DDRPHY_PC_INIT_CAL_MASK_P1_0x8001C01A0301143F,                ULL(0x8001C01A0301143F) );
+CONST_UINT64_T( DPHY23_DDRPHY_PC_INIT_CAL_MASK_P0_0x8000C01A0301183F,                ULL(0x8000C01A0301183F) );
+CONST_UINT64_T( DPHY23_DDRPHY_PC_INIT_CAL_MASK_P1_0x8001C01A0301183F,                ULL(0x8001C01A0301183F) );
+
+CONST_UINT64_T( DPHY01_DDRPHY_PC_PER_CAL_CONFIG_P0_0x8000C00B0301143F,               ULL(0x8000C00B0301143F) );
+CONST_UINT64_T( DPHY01_DDRPHY_PC_PER_CAL_CONFIG_P1_0x8001C00B0301143F,               ULL(0x8001C00B0301143F) );
+CONST_UINT64_T( DPHY23_DDRPHY_PC_PER_CAL_CONFIG_P0_0x8000C00B0301183F,               ULL(0x8000C00B0301183F) );
+CONST_UINT64_T( DPHY23_DDRPHY_PC_PER_CAL_CONFIG_P1_0x8001C00B0301183F,               ULL(0x8001C00B0301183F) );
+
+CONST_UINT64_T( DPHY01_DDRPHY_PC_PER_ZCAL_CONFIG_P0_0x8000C00F0301143F,              ULL(0x8000C00F0301143F) );
+CONST_UINT64_T( DPHY01_DDRPHY_PC_PER_ZCAL_CONFIG_P1_0x8001C00F0301143F,              ULL(0x8001C00F0301143F) );
+CONST_UINT64_T( DPHY23_DDRPHY_PC_PER_ZCAL_CONFIG_P0_0x8000C00F0301183F,              ULL(0x8000C00F0301183F) );
+CONST_UINT64_T( DPHY23_DDRPHY_PC_PER_ZCAL_CONFIG_P1_0x8001C00F0301183F,              ULL(0x8001C00F0301183F) );
+
+
 /******************************************************************************/
 /*********  MULTICAST REGISTER DEFINITIONS FOR PERVASIVE INITs ****************/
 /******************************************************************************/
-CONST_UINT64_T( READ_OR_ALL_FUNC_GP0_0x41000000         , ULL(0x41000000) ); // group1: all except PRV: GP0
-CONST_UINT64_T( READ_OR_ALL_FUNC_GP1_0x41000001         , ULL(0x41000001) ); // group1: all except PRV: GP1
-CONST_UINT64_T( READ_OR_ALL_FUNC_GP2_0x41000002         , ULL(0x41000002) ); // group1: all except PRV: GP2
-CONST_UINT64_T( READ_OR_ALL_FUNC_GP4_0x41000003         , ULL(0x41000003) ); // group1: all except PRV: GP4
-CONST_UINT64_T( READ_OR_ALL_FUNC_OPCG_CNTL0_0x41030002  , ULL(0x41030002) ); // group1: all except PRV: OPCG_CNTL0
-CONST_UINT64_T( READ_OR_ALL_FUNC_OPCG_CNTL1_0x41030003  , ULL(0x41030003) ); // group1: all except PRV: OPCG_CNTL1
-CONST_UINT64_T( READ_OR_ALL_FUNC_OPCG_CNTL2_0x41030004  , ULL(0x41030004) ); // group1: all except PRV: OPCG_CNTL2
-CONST_UINT64_T( READ_OR_ALL_FUNC_OPCG_CNTL3_0x41030005  , ULL(0x41030005) ); // group1: all except PRV: OPCG_CNTL3
-CONST_UINT64_T( READ_OR_ALL_FUNC_CLK_REGION_0x41030006  , ULL(0x41030006) ); // group1: all except PRV: CLK_REGION
-CONST_UINT64_T( READ_OR_ALL_FUNC_CLK_SCANSEL_0x41030007 , ULL(0x41030007) ); // group1: all except PRV: CLK_SCANSEL
-CONST_UINT64_T( READ_OR_ALL_FUNC_CLK_STATUS_0x41030008  , ULL(0x41030008) ); // group1: all except PRV: CLK_STATUS
-CONST_UINT64_T( READ_OR_ALL_FUNC_GP3_0x410F0012         , ULL(0x410F0012) ); // group1: all except PRV: GP3
-CONST_UINT64_T( READ_OR_ALL_PCB_SLAVE_ERRREG_0x410F001F , ULL(0x410F001F) ); // group1: all except PRV:
+// moved to common_scom_addresses.H       1/24/2010   mfred
 
-CONST_UINT64_T( READ_AND_ALL_FUNC_GP0_0x49000000         , ULL(0x49000000) ); // group1: all except PRV: GP0
-CONST_UINT64_T( READ_AND_ALL_FUNC_GP1_0x49000001         , ULL(0x49000001) ); // group1: all except PRV: GP1
-CONST_UINT64_T( READ_AND_ALL_FUNC_GP2_0x49000002         , ULL(0x49000002) ); // group1: all except PRV: GP2
-CONST_UINT64_T( READ_AND_ALL_FUNC_GP4_0x49000003         , ULL(0x49000003) ); // group1: all except PRV: GP4
-CONST_UINT64_T( READ_AND_ALL_FUNC_OPCG_CNTL0_0x49030002  , ULL(0x49030002) ); // group1: all except PRV: OPCG_CNTL0
-CONST_UINT64_T( READ_AND_ALL_FUNC_OPCG_CNTL1_0x49030003  , ULL(0x49030003) ); // group1: all except PRV: OPCG_CNTL1
-CONST_UINT64_T( READ_AND_ALL_FUNC_OPCG_CNTL2_0x49030004  , ULL(0x49030004) ); // group1: all except PRV: OPCG_CNTL2
-CONST_UINT64_T( READ_AND_ALL_FUNC_OPCG_CNTL3_0x49030005  , ULL(0x49030005) ); // group1: all except PRV: OPCG_CNTL3
-CONST_UINT64_T( READ_AND_ALL_FUNC_CLK_REGION_0x49030006  , ULL(0x49030006) ); // group1: all except PRV: CLK_REGION
-CONST_UINT64_T( READ_AND_ALL_FUNC_CLK_SCANSEL_0x49030007 , ULL(0x49030007) ); // group1: all except PRV: CLK_SCANSEL
-CONST_UINT64_T( READ_AND_ALL_FUNC_CLK_STATUS_0x49030008  , ULL(0x49030008) ); // group1: all except PRV: CLK_STATUS
-CONST_UINT64_T( READ_AND_ALL_FUNC_GP3_0x490F0012         , ULL(0x490F0012) ); // group1: all except PRV: GP3
-CONST_UINT64_T( READ_AND_ALL_PCB_SLAVE_ERRREG_0x490F001F , ULL(0x490F001F) ); // group1: all except PRV:
-
-CONST_UINT64_T( WRITE_ALL_FUNC_GP0_0x69000000            , ULL(0x69000000) ); // group1: all except PRV: GP0
-CONST_UINT64_T( WRITE_ALL_FUNC_GP1_0x69000001            , ULL(0x69000001) ); // group1: all except PRV: GP1
-CONST_UINT64_T( WRITE_ALL_FUNC_GP2_0x69000002            , ULL(0x69000002) ); // group1: all except PRV: GP2
-CONST_UINT64_T( WRITE_ALL_FUNC_GP4_0x69000003            , ULL(0x69000003) ); // group1: all except PRV: GP4
-CONST_UINT64_T( WRITE_ALL_FUNC_GP0_AND_0x69000004        , ULL(0x69000004) ); // group1: all except PRV: GP0 AND (for clearing bits)
-CONST_UINT64_T( WRITE_ALL_FUNC_GP0_OR_0x69000005         , ULL(0x69000005) ); // group1: all except PRV: GP0 OR  (for setting bits)
-CONST_UINT64_T( WRITE_ALL_FUNC_GP4_AND_0x69000006        , ULL(0x69000006) ); // group1: all except PRV: GP4 AND (for clearing bits)
-CONST_UINT64_T( WRITE_ALL_FUNC_GP4_OR_0x69000007         , ULL(0x69000007) ); // group1: all except PRV: GP4 OR  (for setting bits)
-CONST_UINT64_T( WRITE_ALL_FUNC_OPCG_CNTL0_0x69030002     , ULL(0x69030002) ); // group1: all except PRV: OPCG_CNTL0
-CONST_UINT64_T( WRITE_ALL_FUNC_OPCG_CNTL1_0x69030003     , ULL(0x69030003) ); // group1: all except PRV: OPCG_CNTL1
-CONST_UINT64_T( WRITE_ALL_FUNC_OPCG_CNTL2_0x69030004     , ULL(0x69030004) ); // group1: all except PRV: OPCG_CNTL2
-CONST_UINT64_T( WRITE_ALL_FUNC_OPCG_CNTL3_0x69030005     , ULL(0x69030005) ); // group1: all except PRV: OPCG_CNTL3
-CONST_UINT64_T( WRITE_ALL_FUNC_CLK_REGION_0x69030006     , ULL(0x69030006) ); // group1: all except PRV: CLK_REGION
-CONST_UINT64_T( WRITE_ALL_FUNC_CLK_SCANSEL_0x69030007    , ULL(0x69030007) ); // group1: all except PRV: CLK_SCANSEL
-CONST_UINT64_T( WRITE_ALL_FUNC_CLK_STATUS_0x69030008     , ULL(0x69030008) ); // group1: all except PRV: CLK_STATUS
-CONST_UINT64_T( WRITE_ALL_FUNC_GP3_0x690F0012            , ULL(0x690F0012) ); // group1: all except PRV: GP3
-CONST_UINT64_T( WRITE_ALL_FUNC_GP3_AND_0x690F0013        , ULL(0x690F0013) ); // group1: all except PRV: GP3 AND (for clearing bits)
-CONST_UINT64_T( WRITE_ALL_FUNC_GP3_OR_0x690F0014         , ULL(0x690F0014) ); // group1: all except PRV: GP3 OR  (for setting bits)
-CONST_UINT64_T( WRITE_ALL_PCB_SLAVE_ERRREG_0x690F001F    , ULL(0x690F001F) ); // group1: all except PRV:
 
 //******************************************************************************/
 //*********  ADDRESS PREFIXES FOR SUBROUTINE SCAN0_MODULE CALLS ****************/
 //******************************************************************************/
-
-CONST_UINT8_T( READ_OR_ALL_CHIPLETS,              ULL(0x40) );   // group 0: TP, MEM, NEST
-CONST_UINT8_T( READ_OR_ALL_FUNC_CHIPLETS,         ULL(0x41) );   // group 1: MEM, NEST// CONST_UINT8_T( READ_AND_ALL_CHIPLETS,             ULL(0x48) );   // group 0: TP, MEM, NEST
-CONST_UINT8_T( READ_AND_ALL_FUNC_CHIPLETS,        ULL(0x49) );   // group 1: MEM, NEST
-CONST_UINT8_T( WRITE_ALL_CHIPLETS,                ULL(0x68) );   // group 0: TP, MEM, NEST
-CONST_UINT8_T( WRITE_ALL_FUNC_CHIPLETS,           ULL(0x69) );   // group 1: MEM, NEST
-
+// moved to common_scom_addresses.H       1/24/2010   mfred
 
 #endif
 
@@ -385,6 +396,18 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: cen_scom_addresses.H,v $
+Revision 1.15  2012/03/06 16:40:00  divyakum
+Added calibration status regs
+
+Revision 1.14  2012/02/22 22:50:52  divyakum
+Added CALIBRATION registers. Added Change history table.
+
+Revision 1.13  2012/01/24 21:58:33  mfred
+Moved common multicast address constants to common_scom_accresses.H
+
+Revision 1.12  2012/01/24 20:50:01  mfred
+Move multicast group 1 to group 3 for consistency with P8
+
 Revision 1.11  2012/01/06 22:34:45  jmcgill
 move shared/common addresses to common_scom_addresses.H, general cleanup
 
