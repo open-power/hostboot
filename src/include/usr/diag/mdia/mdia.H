@@ -24,6 +24,7 @@
 #define __MDIA_MDIA_H
 
 #include <errl/errlentry.H>
+#include <targeting/target.H>
 
 /**
  * @file mdia.H
@@ -37,7 +38,10 @@ namespace MDIA
 /**
  * @brief runStep istep dispatcher entry point.
  *
- * execute the memory diagnostics ipl step
+ * execute the memory diagnostics ipl step on a single mba
+ * or a list of mbas
+ *
+ * @param[in] i_targetList the targets on which to run diagnostics
  *
  * @return errlHndl_t. Error log handle.
  * @retval 0 no errors
@@ -46,7 +50,7 @@ namespace MDIA
  * @pre memory ready to hold data, node free of attentions
  * @post memory tested and initialized, ready to hold data
  */
-errlHndl_t runStep();
+errlHndl_t runStep(const TARGETING::TargetHandleList & i_targetList);
 
 /**
  * @brief processEvent prd callback

@@ -30,7 +30,8 @@
 
 #include <mdia/mdia.H>
 #include <targeting/target.H>
-
+#include <vector>
+#include <map>
 /**
  * @brief forwards
  */
@@ -39,8 +40,12 @@ class MdiaCommandMonitorTest;
 namespace MDIA
 {
 
+/**
+ * forwards
+ */
 class StateMachine;
 class WorkItem;
+struct Globals;
 
 /**
  * @brief work flow phases
@@ -99,5 +104,56 @@ enum WorkFlowStatus
      */
     COMPLETE,
 };
+
+/**
+* @brief Workflow container of workflow phases
+*/
+typedef std::vector<WorkFlowPhase> WorkFlow;
+
+/**
+* @brief WorkflowAssocList target / workflow association list
+*/
+typedef std::map<TARGETING::TargetHandle_t, WorkFlow> WorkFlowAssocList;
+
+/**
+* @brief WorkflowAssoc target / workflow association list element
+*/
+typedef std::map<TARGETING::TargetHandle_t, WorkFlow>::const_iterator WorkFlowAssoc;
+
+/**
+ * @brief getMbaDiagnosticMode get the mode (scrub, init, one, four, nine)
+ *
+ * @param[in] i_globals policy flags needed to determine the mode
+ * @param[in] i_target the mba target for which the mode is determined
+ * @param[out] o_mode the mode for the target mba
+ *
+ * @retval 0 no error
+ * @retval !0 unexpected error occurred
+ */
+errlHndl_t getMbaDiagnosticMode(
+        const Globals & i_globals,
+        TARGETING::TargetHandle_t i_mba,
+        DiagMode & o_mode);
+
+/**
+ * @brief getMbaWorkFlow get the workflow for an mba target
+ *
+ * @param[in] i_mode the diagnostic mode for the target
+ * @param[out] o_wf the workflow for the mba target
+ *
+ * @retval 0 no error
+ * @retval !0 unexpected error occurred
+ */
+errlHndl_t getMbaWorkFlow(
+        DiagMode i_mode,
+        WorkFlow & o_wf);
+
+/**
+ * @brief doStepCleanup shut down threads and pools on step exit
+ *
+ * @param[in] i_globals contains objects to be cleaned up
+ */
+void doStepCleanup(const Globals & i_globals);
+
 }
 #endif

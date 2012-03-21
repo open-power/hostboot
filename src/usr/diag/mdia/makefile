@@ -26,7 +26,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/diag
 
 MODULE = mdia
 
-OBJS =  mdiamonitor.o mdiatrace.o mdiaworkitem.o
+OBJS =  mdiamonitor.o mdiatrace.o mdiaworkitem.o mdiamba.o mdia.o
 
 SUBDIRS = test.d
 
