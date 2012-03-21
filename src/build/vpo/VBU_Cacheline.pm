@@ -90,47 +90,34 @@ my  $CLtest     =   0;
 ##  It must be flushed once before doing L3 reads
 my  $L2_Flushed =   0;
 
-
-my  $vbuToolsDir    =   "/gsa/ausgsa/projects/h/hostboot/vbutools/latest";
-
+my $vbuToolsDir = $ENV{'HB_VBUTOOLS'};
+if (defined ($vbuToolsDir))
+{
+    unless ($vbuToolsDir ne "")
+    {
+        $vbuToolsDir = "/gsa/ausgsa/projects/h/hostboot/vbutools/latest";
+    }
+}
 
 my  $DUMPCMD    =   "$vbuToolsDir/p8_dump_l3";
 my  $LOADCMD    =   "$vbuToolsDir/p8_load_l3";
-my  $FLUSHCMD   =   "$vbuToolsDir/p8_l2_flush_wrap.x86 $CORE -quiet";
+my  $FLUSHCMD   =   "$vbuToolsDir/proc_l2_flush_wrap.x86 $CORE -quiet";
 my  $FLUSHQUERY =   "$vbuToolsDir/p8_check_l3";
 my  $RUNCLKSCMD =   "simclock";
 
 ##  @todo $$$$$
 ##  NOTE:   need to be able to specify thread (-t ) and core (-c ), they 
 ##  should not be hardwired 
-##my  $QUERYCMD   =   "$vbuToolsDir/p8_thread_control.x86 -query  $CORE -t0";  
-##my  $STOPCMD    =   "$vbuToolsDir/p8_thread_control.x86 -stop   $CORE -tall";
-##my  $STARTCMD   =   "$vbuToolsDir/p8_thread_control.x86 -start  $CORE -tall";
+##my  $QUERYCMD   =   "$vbuToolsDir/proc_thread_control.x86 -query  $CORE -t0";  
+##my  $STOPCMD    =   "$vbuToolsDir/proc_thread_control.x86 -stop   $CORE -tall";
+##my  $STARTCMD   =   "$vbuToolsDir/proc_thread_control.x86 -start  $CORE -tall";
 
 ##  Jim McGuire's older versions.
 my  $QUERYCMD   =   "/gsa/pokgsa/home/m/c/mcguirej/public/auto/rel/P8bin/p8_ins_query";  
 my  $STOPCMD    =   "/gsa/pokgsa/home/m/c/mcguirej/public/auto/rel/P8bin/p8_ins_stop";
 my  $STARTCMD   =   "/gsa/pokgsa/home/m/c/mcguirej/public/auto/rel/P8bin/p8_ins_start";
 
-my  $RESETCMD   =   "$vbuToolsDir/p8_thread_control.x86 -sreset_auto $CORE";
-
-
-##  old dirs and tools, SAVE
-## my  $DUMPCMD    =   "/afs/awd/projects/eclipz/lab/p8/gsiexe/p8_dump_l3";
-## my  $LOADCMD    =   "/afs/awd/projects/eclipz/lab/p8/gsiexe/p8_load_l3";
-## ## my  $FLUSHCMD   =   "/afs/awd/projects/eclipz/lab/p8/gsiexe/p8_l2_flush.x86 $CORE";
-## my  $FLUSHCMD   =   "/afs/awd/projects/eclipz/lab/p8/compiled_procs/procs/p8_l2_flush_wrap.x86 $CORE -quiet";
-## my  $FLUSHQUERY =   "/afs/awd.austin.ibm.com/projects/eclipz/lab/p8/gsiexe/p8_check_l3";
-## my  $RUNCLKSCMD =   "simclock";
-
-## my  $QUERYCMD   =   "/gsa/pokgsa/home/m/c/mcguirej/public/auto/rel/P8bin/p8_ins_query";  
-## my  $STOPCMD    =   "/gsa/pokgsa/home/m/c/mcguirej/public/auto/rel/P8bin/p8_ins_stop";
-## my  $STARTCMD   =   "/gsa/pokgsa/home/m/c/mcguirej/public/auto/rel/P8bin/p8_ins_start";
-## ##  ##  later...
-## ##  ##  my  $QUERYCMD   =   "/afs/awd/projects/eclipz/lab/p8/u/karm/ekb/eclipz/chips/p8/working/procedures/utils/p8_thread_control.x86 -query";  
-## ##  ##  my  $STOPCMD    =   "/afs/awd/projects/eclipz/lab/p8/u/karm/ekb/eclipz/chips/p8/working/procedures/utils/p8_thread_control.x86 -stop";
-## ##  ##  my  $STARTCMD   =   "/afs/awd/projects/eclipz/lab/p8/u/karm/ekb/eclipz/chips/p8/working/procedures/utils/p8_thread_control.x86 -start";
-
+my  $RESETCMD   =   "$vbuToolsDir/proc_thread_control.x86 -sreset_auto $CORE";
 
 ## 
 #==============================================================================

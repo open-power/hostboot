@@ -103,7 +103,7 @@ sub printUsage()
     print ("  This program dumps the entire L3 to a file.\n");
     print ("  Use the hb-parsedump.pl program to expand and view data in the file.\n\n");
     print ("  User should copy hb-virtdebug.pl to the current directory or set\n");
-    print ("  the env variable HBDIR to the path of the file.\n\n");
+    print ("  the env variable HB_IMGDIR to the path of the file.\n\n");
     print ("  --help            Prints usage information.\n");
     print ("  --out-path        Directory where the output data will be saved.\n");
     print ("                    Default path is the current directory.\n");

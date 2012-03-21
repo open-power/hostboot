@@ -93,7 +93,7 @@ my $core = "3";                   #Default is core 3
 my @threadState = ();             #Array to store the thread states
 my $vbuToolDir = "/gsa/ausgsa/projects/h/hostboot/vbutools/latest";
 
-my $hbDir = $ENV{'HBDIR'};
+my $hbDir = $ENV{'HB_IMGDIR'};
 if (defined ($hbDir))
 {
     unless ($hbDir ne "")
@@ -279,7 +279,7 @@ stopInstructions("all");
 #Flush L2 - this step is needed in order to dump L3 quickly
 #------------------------------------------------------------------------------
 my $command = "";
-$command = "$vbuToolDir/p8_l2_flush_wrap.x86 @ecmdOpt -quiet";
+$command = "$vbuToolDir/proc_l2_flush_wrap.x86 @ecmdOpt -quiet";
 #print "$command\n";
 die "ERROR: cannot flush L2" if (system("$command") != 0);
 
@@ -587,7 +587,7 @@ sub stopInstructions
     my $thread = shift;
 
     #Stopping all threads
-    my $command = "$vbuToolDir/p8_thread_control.x86";
+    my $command = "$vbuToolDir/proc_thread_control.x86";
     $command .= " @ecmdOpt -stop -t$thread -quiet";
     die "ERROR: cannot stop instructions" if (system("$command") != 0);
 }
@@ -600,7 +600,7 @@ sub startInstructions
     my $thread = shift;
 
     #Starting all threads
-    my $command = "$vbuToolDir/p8_thread_control.x86";
+    my $command = "$vbuToolDir/proc_thread_control.x86";
     $command .= " @ecmdOpt -start -t$thread -quiet";
     die "ERROR: cannot start instructions" if (system("$command") != 0);
 }
@@ -614,7 +614,7 @@ sub queryThreadState
     my $thread = shift;
     #print "thread $thread\n";
 
-    my $command = "$vbuToolDir/p8_thread_control.x86 @ecmdOpt -query -t$thread";
+    my $command = "$vbuToolDir/proc_thread_control.x86 @ecmdOpt -query -t$thread";
     my $result = `$command`;
     #print "result:\n $result";
     if ($result =~ m/Quiesced/)
@@ -783,16 +783,16 @@ sub printUsage()
     print ("  If no options are specified, this program will dump the entire L3 to a file.\n");
     print ("  Use the hb-parsedump.pl program to expand and view data in the file.\n\n");
     print ("  User should copy the relevant .syms file, hbotStringFile & errlparser\n");
-    print ("  to the current directory or set the env variable HBDIR to the path\n");
+    print ("  to the current directory or set the env variable HB_IMGDIR to the path\n");
     print ("  of the files.\n\n");
     print ("  User should also set the env variable PATH to include the path to the fsp-trace program.\n\n");
     print ("  --help            Prints usage information\n");
     print ("  --img-path        Overrides the automatically detected .syms file,\n");
-    print ("                    hbotStringFile & errlparser in HBDIR or the current\n");
+    print ("                    hbotStringFile & errlparser in HB_IMGDIR or the current\n");
     print ("                    directory.  This program will search for the files in\n");
     print ("                    the following order:\n");
     print ("                        1.  from the path specified by user\n");
-    print ("                        2.  from HBDIR if it is defined\n");
+    print ("                        2.  from HB_IMGDIR if it is defined\n");
     print ("                        3.  from the current directory\n");
     print ("  --out-path        Directory where the output data will be saved\n");
     print ("                    Default path is the current directory\n");

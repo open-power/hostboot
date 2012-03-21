@@ -1,0 +1,483 @@
+################################################################################
+#
+# Setup intialization source script for HostBoot Sprint Release VPO/VBU model testing with cronus tools
+#
+#
+# Version 1.0   Copy from Jim's on 03/21/2012, tested on VBU & VPO
+#
+################################################################################
+
+# Define useful pointers to automated tests/scripts
+
+export JP=/gsa/pokgsa/home/m/c/mcguirej/public
+export JR=$JP/auto/rel
+export JD=$JP/auto/dev
+export JT=$JP/auto/tmp
+export JS=$JP/HBI/scripts
+
+# Local values used in this script
+
+AUTOVBU_HBRELEASE_BASEDIR=/gsa/ausgsa/projects/h/hostboot/release
+AUTOVBU_HBTOOLS_BASEDIR=$JP/HBI/hbtools
+AUTOVBU_HBVBUTOOLS_BASEDIR=$JP/HBI/vbutools
+	
+# Remove any previous test definitions for HostBoot values - force everything to default if not set
+# by Setup_MyEnv function or user specifed argument(s)
+
+unset HB_IMGDIR HB_RELDIR HB_VBUTOOLS DEFAULT_LEVEL
+unset AWAN_CONFIG AWAN_SCRIPT AUTOVBU_ECMD_VER
+unset AUTOVBU_START AUTOVBU_ISTEP_START AUTOVBU_ISTEP_LIST AUTOVBU_ISTEP_CHKPT
+
+################################################################################
+#
+# User customizable environment setup function -- modify as desired for new test defaults
+#
+################################################################################
+
+Setup_MyEnv() {
+	
+	# Default Sprint release
+
+	sprint=Sprint10
+	
+	# Initialize HostBoot environment/cronus/tools - note new naming convention
+	
+	export AUTOVBU_CRONUS_SIM=rel.20120312
+	export HB_TOOLS=$AUTOVBU_HBTOOLS_BASEDIR/rel.20120320
+
+	# Select default model -- choose either VBU or VPO versions
+
+	export VPO_MODEL=m_1_c; unset VBU_MODEL; VBUVPO=VPO
+	#export VBU_MODEL=p1_e8056_c1000_cen1_cen054_unopt_2_gfw; unset VPO_MODEL; VBUVPO=VBU
+	#export VBU_MODEL=p1_e8062_wafer_nomem_c1000_opt_4; unset VPO_MODEL; VBUVPO=VBU
+	#export VBU_MODEL=p1_e8062_c1000_cen1_cen061_unopt_1; unset VPO_MODEL; VBUVPO=VBU
+	
+	# Default AWAN request time - shorter periods get AWAN faster
+
+	export AWAN_TIME_REQ=-h24
+	
+	# Default sprint test case settings
+	
+	export AUTOVBU_CORE=-c3
+	export AUTOVBU_SIMCLOCKS=2000000
+	export AUTOVBU_INITIAL_CHKPT=after_8megzero
+	export AUTOVBU_LOOPS=1200
+	export AUTOVBU_PRINTK_LINES=50
+	
+	# Values used internally by automated tools
+
+	export AUTOVBU_USER_CMD=NO_TEST
+	export AUTOVPO_ROOTDIR=/afs/apd/func/awanng/vpo/vpo1/mur
+
+	test "$MY_BSO_ID" = "" && echo "Warning: Set MY_BSO_ID to IBM intranet ID if BSO firewall required"
+
+	return 0
+}
+
+################################################################################
+#
+# End User Customizable section -- Please do not modify shell functions below
+#
+################################################################################
+
+
+# Parse any user specified arguments
+
+Setup_MyArgs() {
+
+	# Set argument defaults
+
+	get_awan=
+	eval_list=
+	set_usercmd=
+	load_hb_img=
+	
+	# Argument parse loop
+	while [ $# -gt 0 ]
+	do
+		case "$1"
+		in
+			-h|-help|--help)
+				echo "Usage: source Setup_Env	[-get_awan|--get_awan] \\"
+				echo "		[<-time|--time> <awan time>] \\"
+				echo "		[<-model|--model> <model>] \\"
+				echo "		[<-release|--release> <Sprint Release>] \\"
+				echo "		[-load_hb_img|--load_hb_img] \\"
+				echo "		[<-ecmd_ver|--ecmd_ver> <cronusflex|p8s1>] \\"
+				echo "		[<-cronus|--cronus> <cronus version>] \\"
+				echo "		[--] [<test script>] [<test args>]"
+				return 1
+				;;
+			-get_awan|--get_awan)
+				get_awan=YES
+				;;
+			-load_hb_img|--load_hb_img)
+				load_hb_img=YES
+				;;
+			-model|--model)
+				if [ $# -lt 2 ]; then
+					echo "Missing/invalid model"
+					return 1
+				fi
+				export VPO_MODEL=$2
+				shift 1
+				;;
+			-release|--release)
+				if [ $# -lt 2 ]; then
+					echo "Missing/invalid release argument"
+					return 1
+				fi
+				sprint=$2
+				shift 1
+				;;
+			-cronus|--cronus)
+				if [ $# -lt 2 ]; then
+					echo "Missing/invalid cronus"
+					return 1
+				fi
+				export AUTOVBU_CRONUS_SIM=$2
+				shift 1
+				;;
+			-ecmd_ver|--ecmd_ver)
+				if [ $# -lt 2 ]; then
+					echo "Missing/invalid cronus version (cronusflex, p8s1)"
+					return 1
+				fi
+				export AUTOVBU_ECMD_VER=$2
+				shift 1
+				;;
+			-time|--time)
+				if [ $# -lt 2 ]; then
+					echo "Missing/invalid awan time"
+					return 1
+				fi
+				export AWAN_TIME_REQ="-$2"
+				shift 1
+				;;
+			--)
+				;;
+			*=*)
+				eval_list="$eval_list; export $1"
+				;;
+			*)
+				test "$set_usercmd" = "" && AUTOVBU_USER_CMD="$*" && set_usercmd=yes
+				;;
+		esac
+		shift
+	done
+	
+	# Any additional arguments are assumed to be for a user specified test script
+	
+	test "$1" = "--" && shift
+	test "$*" != "" && AUTOVBU_USER_CMD="$*"
+
+	# Now process any command line environmental settings
+
+	test "$eval_list" != "" && eval "$eval_list"
+
+	unset eval_list set_usercmd
+}
+
+# Dynamically set/reset values based upon current model
+
+Setup_MyDynamic() {
+
+	# Set remaining HostBoot variables now that we have all user supplied settings
+
+	export HB_RELDIR=${HB_RELDIR-`echo $AUTOVBU_HBRELEASE_BASEDIR/*$sprint`}
+	if [  ! -d "$HB_RELDIR" ]; then
+		echo "Can not find Sprint Release directory: $HB_RELDIR"
+		return 1
+	fi
+
+	export HB_VBUTOOLS=${HB_VBUTOOLS-$AUTOVBU_HBVBUTOOLS_BASEDIR/$AUTOVBU_CRONUS_SIM}
+	if [ ! -d "$HB_VBUTOOLS" ]; then
+		echo "Can not find HB_VBUTOOLS directory for cronus version $AUTOVBU_CRONUS_SIM"
+		return 1
+	fi
+
+	export HB_IMGDIR=${HB_IMGDIR-$HB_RELDIR}
+
+	# Set old names for backward compatibility
+
+	export HBDIR=$HB_IMGDIR
+	export HBRELDIR=$HB_RELDIR
+	export HBTOOLS=$HB_TOOLS
+	export VBUTOOLS=$HB_VBUTOOLS
+
+	# Dynamically determine if specifed model is for VPO or VBU
+	if [ "$VPO_MODEL" != "" ]; then
+		if [ ! -d $AUTOVPO_ROOTDIR/$VPO_MODEL ]; then
+			export VBU_MODEL=$VPO_MODEL; unset VPO_MODEL
+			VBUVPO=VBU
+		else
+			VBUVPO=VPO; unset VBU_MODEL
+		fi
+	else
+		VBUVPO=VBU
+	fi
+
+	# Set other defaults based upon MODEL
+	case "$VPO_MODEL$VBU_MODEL"
+	in
+		p1_e8062_wafer_nomem_c1000_opt_4)
+			export AUTOVBU_ECMD_VER=${AUTOVBU_ECMD_VER-p8s1}
+			export AWAN_SCRIPT=${AWAN_SCRIPT-run_script_star4b}
+			export AWAN_CONFIG=${AWAN_CONFIG-star4b}
+			;;
+		m_1_c|m_2_a|m_2_e|p1_e8056_c1000_cen1_cen054_unopt_2_gfw|p1_e8062_c1000_cen1_cen061_unopt_1)
+			export AUTOVBU_ECMD_VER=${AUTOVBU_ECMD_VER-cronusflex}
+			export AWAN_SCRIPT=${AWAN_SCRIPT-run_script_star8b_flex}
+			export AWAN_CONFIG=${AWAN_CONFIG-star8b}
+			;;
+		*)
+			export AUTOVBU_ECMD_VER=${AUTOVBU_ECMD_VER-p8s1}
+			export AWAN_SCRIPT=${AWAN_SCRIPT-run_script_star8b_p8s1}
+			export AWAN_CONFIG=${AWAN_CONFIG-star8b}
+			;;
+	esac
+
+	# Try to dynamically set istep list if user did not supply a value
+
+	if [ "$AUTOVBU_ISTEP_LIST" = "" -f $HB_IMGDIR/isteplist.csv ]; then
+		export AUTOVBU_ISTEP_LIST=`cut -d',' -f3 <$HB_IMGDIR/isteplist.csv | tr '\n' ' '`
+	elif [ "$AUTOVBU_ISTEP_LIST" = "" -f $HB_TOOLS/isteplist.csv ]; then
+		export AUTOVBU_ISTEP_LIST=`cut -d',' -f3 <$HB_TOOLS/isteplist.csv | tr '\n' ' '`
+	fi
+
+	# Adjust PATH -- we want our tools at the beginning of the path, release tools at the end
+
+	echo $PATH | grep "$HB_RELDIR" >/dev/null 2>&1
+	if [ $? -ne 0 ]; then
+		PATH=$PATH:$HB_RELDIR
+	fi
+
+	echo $PATH | grep "$HB_TOOLS" >/dev/null 2>&1
+	if [ $? -ne 0 ]; then
+		PATH=$HB_TOOLS:$PATH
+	fi
+}
+
+# Get the AWAN if requested by the user
+
+Setup_MyAWAN() {
+
+	# Allow testing with an Austin based VNC server, but we must run in POK and lower BSO firewall
+	
+	if [ `hostname -d` != "pok.ibm.com" ]; then
+	        echo "ERROR: This script must be sourced on a POK based Linux system (batchl004, vpopok2 or vpopok3)"
+	        return 1
+	fi
+	
+	# Make sure DISPLAY includes our host name
+	
+	test "`expr index "$DISPLAY" ':'`" = "1" && DISPLAY=`hostname`$DISPLAY
+	
+	# Defines used for AWAN communication
+	
+	MY_AWAN_TARGET=/afs/apd.pok.ibm.com/u/${MY_AFS_USER-$USER}/awan/awan.target-$VBU_MODEL$VPO_MODEL-${MY_AWAN_DIR-${MY_AFS_USER-$USER}}-$DISPLAY
+	MY_AWAN_HAVE=/afs/apd.pok.ibm.com/u/${MY_AFS_USER-$USER}/awan/awan.HAVE-$VBU_MODEL$VPO_MODEL-${MY_AWAN_DIR-${MY_AFS_USER-$USER}}-$DISPLAY
+	MY_AWAN_INIT=/afs/apd.pok.ibm.com/u/${MY_AFS_USER-$USER}/awan/awan.init-$VBU_MODEL$VPO_MODEL-${MY_AWAN_DIR-${MY_AFS_USER-$USER}}-$DISPLAY
+	MY_AWAN_KEEP=/afs/apd.pok.ibm.com/u/${MY_AFS_USER-$USER}/awan/awan.KEEP-$VBU_MODEL$VPO_MODEL-${MY_AWAN_DIR-${MY_AFS_USER-$USER}}-$DISPLAY
+		
+	if [ "$get_awan" = "YES" ]; then
+		(
+		# Check to see if we must lower BSO firewall
+	
+		echo $DISPLAY | egrep "pok.ibm.com|boeblingen.de.ibm.com" >/dev/null
+		if [ $? -eq 0 ]; then
+		        # POK/BOE based VNC servers should not need BSO
+			unset MY_BSO_ID
+		elif [ "$MY_BSO_ID" = "" ]; then
+		        echo "ERROR: DISPLAY is set to a system not in the POK domain, but MY_BSO_ID is not set"
+			echo
+		        echo "  export MY_BSO_ID=<ibm_intranet_id>"
+			echo
+			exit 1
+		fi
+	
+		unset my_bso_cmd
+		test "$MY_BSO_ID" != "" && my_bso_cmd="--lower_firewall $MY_BSO_ID"
+	
+		# Pick up SIMDISPATCH level used by this cronus, and pass it to the AWAN request
+		
+		if [ -f "$ECMD_EXE" ]; then
+			cronus_dir=`dirname $ECMD_EXE`
+			if [ -f "$cronus_dir/SIMDISP_RELEASE" ]; then
+				export SIMDISP_RELEASE=`cat $cronus_dir/SIMDISP_RELEASE`
+			else
+				unset SIMDISP_RELEASE
+			fi
+		fi
+
+		# Request AWAN and wait for it to initialize
+		
+		echo
+		echo "Requesting an AWAN:"
+		echo
+		eval export P8_${VBUVPO}DD1_${VPO_MODEL}${VBU_MODEL}_AWAN_SCRIPT="$AWAN_SCRIPT"
+		#export -p | egrep "P8_${VBUVPO}DD1_.*AWAN_SCRIPT"; echo
+		vbuvpo=`echo $VBUVPO | tr '[A-Z]' '[a-z]'`
+		echo "$JR/auto${vbuvpo}test $my_bso_cmd --silent --keep_awan SIMDISP_RELEASE=$SIMDISP_RELEASE -- : $VBU_MODEL$VPO_MODEL:$AWAN_CONFIG:HBI=\\\$AUTOVBU_USER_CMD"
+		echo
+	
+		$JR/auto${vbuvpo}test $my_bso_cmd --silent --keep_awan SIMDISP_RELEASE=$SIMDISP_RELEASE -- : $VBU_MODEL$VPO_MODEL:$AWAN_CONFIG:HBI=\$AUTOVBU_USER_CMD
+		) || return 1
+	fi
+}
+
+# Setup our cronus target if we used the automated tool to acquire the AWAN
+
+Setup_MyTarget() {
+
+	# Check for AWAN using automated tools
+
+	if [ -f "$MY_AWAN_INIT" -o -f "$MY_AWAN_HAVE" ]; then
+		if [ ! -f "$MY_AWAN_TARGET" ]; then
+			# Pause a while for target to initialize
+			for i in 0 1 2 3 4 5
+			do
+				test -f "$MY_AWAN_TARGET" && break
+				echo "Waiting for $MY_AWAN_TARGET"
+				sleep 30
+			done
+		fi
+	fi
+	
+	if [ -f $MY_AWAN_TARGET ]; then
+		my_target=`cat $MY_AWAN_TARGET`
+		touch $MY_AWAN_KEEP
+	else
+		# User is doing things on their own -- target must be set already
+#		my_target=`target query 2>/dev/null | sed -n -e '/Current target/s/.*is "\(.*\)"/\1/p'`
+		my_target=$ECMD_TARGET
+		if [ "$my_target" = "" ]; then
+			echo "*** ERROR: Cronus target has not been set"
+			return 1
+		fi
+	fi
+	echo
+	target $my_target
+	
+	if [ -f "$CRONUS_HOME/cnfgs/${my_target}_cnfg" ]; then
+		# Update target cronus config file
+		ed $CRONUS_HOME/cnfgs/${my_target}_cnfg <<__EOF__ >/dev/null 2>&1
+g/^HW_PROCEDURE_PATH/s,.*,HW_PROCEDURE_PATH = $HB_VBUTOOLS,
+w
+q
+__EOF__
+		egrep "^HW_PROCEDURE_PATH" $CRONUS_HOME/cnfgs/${my_target}_cnfg
+	
+	else
+		echo
+		echo "*** WARNING: AWAN target config file was not found"
+		echo "User must manually set cronus target and update config file"
+	fi
+}
+
+# Load HostBoot image if requested
+
+Setup_MyHBImage() {
+
+	# User requested option?
+
+	if [ "$load_hb_img" = "YES" ]; then
+
+		#  Allow HB_RELDIR setting to adjust load addresses as needed
+
+		vbu_targeting_addr=0x601690
+		echo "$HB_RELDIR" | grep -s "Sprint8" >/dev/null 2>&1
+		test $? -eq 0 && vbu_targeting_addr=0x5B0690
+
+		# Load initial checkpoint first
+
+		set -x
+		siminit ${AUTOVBU_INITIAL_CHKPT-after_8megzero} -quiet || return 1
+
+		/afs/awd/projects/eclipz/lab/p8/gsiexe/p8_load_l3 -f ${HB_IMGDIR}/hbicore${use_test}.bin -b ${AUTOVBU_CORE--c3} || return 1
+		/afs/awd/projects/eclipz/lab/p8/gsiexe/p8_load_l3 -f ${HB_IMGDIR}/vbu_targeting.bin \
+			-o $vbu_targeting_addr -b ${AUTOVBU_CORE--c3} || return 1
+		/afs/awd/projects/eclipz/lab/p8/gsiexe/p8_load_l3 -f ${HB_IMGDIR}/hbicore${use_test}_extended.bin \
+			-o 0x500690 -b ${AUTOVBU_CORE--c3} || return 1
+		/afs/awd/projects/eclipz/lab/p8/gsiexe/p8_load_l3 -f ${HB_IMGDIR}/pnor.toc \
+			-o 0x500000 -b ${AUTOVBU_CORE--c3} || return 1
+		set +x
+	fi
+
+	return 0
+}
+# Define a shell function to clean up and release the AWAN
+
+AWAN_EXIT() {
+	rm -f "$MY_AWAN_KEEP" "$MY_AWAN_HAVE"
+	my_target=`target query 2>/dev/null | sed -n -e '/Current target/s/.*is "\(.*\)"/\1/p'`
+	if [ "$my_target" != "" -a -f "$CRONUS_HOME/cnfgs/${my_target}_cnfg" ]; then
+		simexit -quiet
+		echo "Delay for AWAN exit"
+		sleep 60
+	fi
+}
+
+################################################################################
+#
+# Start performing environment setup
+#
+################################################################################
+
+# Include ECMD aliases
+
+if [ "$CTEPATH" != "" ]; then
+	source $CTEPATH/tools/ecmd/rel/bin/ecmdaliases.ksh
+else
+	echo "ERROR: This script must be sourced while running in a p8lab window"
+	return 1
+fi
+
+# Perform user customizable setup
+
+Setup_MyEnv || return 1
+
+# Now process any argument overrides
+
+Setup_MyArgs $* || return 1
+
+# Perform dynamic adjustments based upon current settings
+
+Setup_MyDynamic || return 1
+
+# Print user banner of what we have setup
+
+echo
+echo "Performing HostBoot setup/initialization for $VBUVPO model $VBU_MODEL$VPO_MODEL"
+echo
+echo "Sprint Release directory:	$HB_RELDIR"
+echo "Using HB_IMGDIR:		$HB_IMGDIR"
+echo "Using ecmdsetup version:	$AUTOVBU_ECMD_VER"
+echo "Using Cronus version:		$AUTOVBU_CRONUS_SIM"
+echo "Using HB_VBUTOOLS version:	`basename $HB_VBUTOOLS`"
+echo "Using HB_TOOLS version:		`basename $HB_TOOLS`"
+echo
+
+sleep 2
+
+# Setup ecmd/cronusflex
+
+ecmdsetup auto cro $AUTOVBU_ECMD_VER $AUTOVBU_CRONUS_SIM sim pok
+
+# Get an AWAN if requested, or reuse an existing connection if found
+
+Setup_MyAWAN || return 1
+
+Setup_MyTarget || return 1
+
+Setup_MyHBImage || return 1
+
+echo
+echo "Current Settings"
+echo
+
+env | egrep "^AUTO|^AWAN|^HB_|^VPO|^VBU|^J[PRS]=" | sort
+
+echo
+echo "To gracefully terminate your AWAN session enter: AWAN_EXIT"
+echo

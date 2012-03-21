@@ -41,7 +41,7 @@ my $cfgMan = 0;
 my $toolHelp = 0;
 
 my $imgPath = "";
-my $hbDir = $ENV{'HBDIR'};
+my $hbDir = $ENV{'HB_IMGDIR'};
 if (defined ($hbDir))
 {
     if ($hbDir ne "")

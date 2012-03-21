@@ -116,7 +116,7 @@ my $hbErrlParser = "errlparser";
 my $cwd = getcwd();
 my $outDir = $cwd;                #Default = current working directory
 
-my $hbDir = $ENV{'HBDIR'};
+my $hbDir = $ENV{'HB_IMGDIR'};
 if (defined ($hbDir))
 {
     unless ($hbDir ne "")
@@ -479,15 +479,15 @@ sub printUsage()
     print ("  and extract the code version, kernel printk buffer, component\n");
     print ("  traces & error logs.\n\n");
     print ("  User should copy the relevant .syms file, hbotStringFile and errlparser\n");
-    print ("  to the current directory or set the env variable HBDIR to the path\n");
+    print ("  to the current directory or set the env variable HB_IMGDIR to the path\n");
     print ("  of the files.\n\n");
     print ("  User should also set the env variable PATH to include the path to the fsp-trace");
     print (" program.\n\n");
     print ("  --img-path:  Overrides the automatically detected .syms file, hbotStringFile\n");
-    print ("               and errlparser in HBDIR or the current directory.\n");
+    print ("               and errlparser in HB_IMGDIR or the current directory.\n");
     print ("               This program will search for the files in the following order:\n");
     print ("               1.  from the path specified by user\n");
-    print ("               2.  from HBDIR if it is defined\n");
+    print ("               2.  from HB_IMGDIR if it is defined\n");
     print ("               3.  from the current directory\n");
     print ("  --out-path:  Directory where the output data will be saved.\n");
     print ("               Default path is the current directory.\n");

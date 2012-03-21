@@ -113,7 +113,8 @@ for( my $i = 0; $i <= $#inList; $i++)
     }
 }    
 
-my  $g_SeqNum   =   0; 
+##  initialize the sequence number - 6 bit field, { 0 - 63 }
+my  $g_SeqNum   =   int(rand(64)); 
 
 
 #==============================================================================
@@ -128,16 +129,13 @@ my  $g_SeqNum   =   0;
 my  $pgmDir  =   `dirname $0`;
 chomp( $pgmDir );
 
-my $hbDir = $ENV{'HBDIR'};
+my $hbDir = $ENV{'HB_IMGDIR'};
 if ( ! defined( $hbDir) || ( $hbDir eq "" ) )
 {
     $hbDir = $pgmDir;               ##  Set to tool directory
 }     
 
-##  Future - VBUTOOLS is not used yet, but will be.  
-##  from Jim McGuire 
-# my  $vbuToolsDir    =   "/gsa/ausgsa/projects/h/hostboot/vbutools/latest";
-my $vbuToolsDir = $ENV{'VBUTOOLS'};
+my $vbuToolsDir = $ENV{'HB_VBUTOOLS'};
 if (defined ($vbuToolsDir))
 {
     unless ($vbuToolsDir ne "")
@@ -349,6 +347,18 @@ sub printUsage()
 
 }
 
+##
+##  Increment the sequence number, rolling over at 64
+##
+sub bumpSeqNum()
+{
+
+    $g_SeqNum++;            
+    
+    $g_SeqNum   %=  64;
+    
+    return  $g_SeqNum;
+}
 
 ##
 ##  read in file with csv istep list and store in inList
@@ -477,11 +487,15 @@ sub getSyncStatus( )
             return $result;
         }
         
+        if ($opt_debug)   
+            {   printf  STDERR __LINE__,  "===== getSyncStatus:  count=%d, result=0x%lx\n", $count, $result  } 
+        
         if ( $count <= 0 )
         {
             print STDOUT    "TIMEOUT waiting for seqnum=$g_SeqNum\n";
             return -1;
         }
+        
         $count--;
     }   ##  endwhile    
           
@@ -499,7 +513,7 @@ sub runIStep( $$ )
     
     
     ##  bump the seqnum
-    $g_SeqNum++;
+    bumpSeqNum();
     
     printf   STDOUT  "run  %d.%d %s:\n", $istep, $substep, $inList[$istep][$substep];
     
@@ -658,7 +672,7 @@ sub setMode( $ )
 {
     my  ( $cmd )    =   @_;
     
-    my  $count      =   0;
+    my  $count      =   1000;
     my  $expected   =   0;
     my  $readybit   =   0;
     my  $result     =   0;
@@ -690,7 +704,6 @@ sub setMode( $ )
 
     ##  Loop, advancing clock, and wait for readybit
     ##  @todo   revisit
-    $count  =   1000;
     while(1)
     {
         ##  advance HostBoot code by a certain # of cycles, then check the 
@@ -715,7 +728,7 @@ sub setMode( $ )
             print STDOUT "TIMEOUT waiting for readybit, status=0x%x\n", $result ;
             return -1;
         }
-            
+           
         $count--;
     } 
 }
@@ -728,7 +741,7 @@ sub resume_istep()
     my $cmd;
     my $result;
 
-    $g_SeqNum++;        ## bump
+    bumpSeqNum();       ## bump
 
     printf STDOUT "resume from breakpoint\n";
 
@@ -805,7 +818,7 @@ sub clear_trace( )
     
     
     ##  bump the seqnum
-    $g_SeqNum++;
+    bumpSeqNum();
     
     $byte0   =   0x80 + $g_SeqNum;      ## gobit + seqnum
     $command =   SPLESS_CLEAR_TRACE_CMD;

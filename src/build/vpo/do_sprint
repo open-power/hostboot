@@ -1,0 +1,635 @@
+#!/bin/sh
+#  IBM_PROLOG_BEGIN_TAG
+#  This is an automatically generated prolog.
+#
+#  $Source: src/build/vpo/do_sprint $
+#
+#  IBM CONFIDENTIAL
+#
+#  COPYRIGHT International Business Machines Corp. 2012
+#
+#  p1
+#
+#  Object Code Only (OCO) source materials
+#  Licensed Internal Code Source Materials
+#  IBM HostBoot Licensed Internal Code
+#
+#  The source code for this program is not published or other-
+#  wise divested of its trade secrets, irrespective of what has
+#  been deposited with the U.S. Copyright Office.
+#
+#  Origin: 30
+#
+#  IBM_PROLOG_END
+
+# Common Sprint Release test case execution
+#
+# NOTE: Execution environment must be intialized prior using source Setup_Env script
+#
+
+#
+# Version 1.0   Copy from Jim's on 03/21/2012, tested on VBU & VPO
+#
+
+
+PGM=`basename $0`
+
+# Include ECMD and autotest aliases
+
+export PGM_DIR=${PGM_DIR-/gsa/pokgsa/home/m/c/mcguirej/public/auto/rel}
+source $CTEPATH/tools/ecmd/rel/bin/ecmdaliases.ksh
+source $PGM_DIR/autofsp.aliases
+source $PGM_DIR/autovbu.aliases
+
+# Scan argument(s)
+
+set +x
+
+use_test=
+test_arg=
+
+while [ $# -gt 0 ]
+do
+	case "$1"
+	in
+	-use_dump_l3| \
+	-use_printk|-use_hb_trace|-use_hb_printk| \
+	-run_hb_istep|-chkpt_after_istep| \
+	-stop_after_hbiload|-start_after_hbiload|-start_after_hbitest|-chkpt_after_loops| \
+	-dump_after_hbitest| \
+	-chkpt_after_ipl|-chkpt_after_hbiload|-chkpt_after_hbitest|-chkpt_after_exception)
+		eval "`echo $1|sed -e 's/-//'`=-$1"
+			shift
+			;;
+	--use_dump_l3| \
+	--use_printk|--use_hb_trace|--use_hb_printk| \
+	--run_hb_istep|--chkpt_after_istep| \
+	--stop_after_hbiload|--start_after_hbiload|--start_after_hbitest|--chkpt_after_loops| \
+	--dump_after_hbitest| \
+	--chkpt_after_ipl|--chkpt_after_hbiload|--chkpt_after_hbitest|--chkpt_after_exception)
+		eval "`echo $1|sed -e 's/--//'`=$1"
+			shift
+			;;
+	-test|--test)
+		use_test="_test"
+		test_arg="--test"
+		shift
+		;;
+	*=*)	# export var=value settings
+		eval "export $1"
+		shift
+		;;
+	*)
+		cat <<__EOF__
+USAGE:	$PGM [flags] [env settings]
+
+Where [flags] can be:
+		-test|--test|
+		-use_dump_l3|--use_dump_l3|
+		-use_printk|--use_printk|
+		-use_hb_trace|--use_hb_trace|
+		-use_hb_printk|--use_hb_printk|
+		-run_hb_istep|--run_hb_istep|
+		-stop_after_hbiload|--stop_after_hbiload|
+		-start_after_hbiload|--start_after_hbiload|
+		-start_after_hbitest|--start_after_hbitest
+		-chkpt_after_loops|--chkpt_after_loops|
+		-chkpt_after_ipl|--chkpt_after_ipl|
+		-chkpt_after_istep|--chkpt_after_istep|
+		-chkpt_after_hbiload|--chkpt_after_hbiload|
+		-chkpt_after_hbitest|--chkpt_after_hbitest|
+		-dump_after_hbitest|--dump_after_hbitest|
+
+Optional environment settings take the form:
+
+			variable=value
+
+Examples of variables used in the test:
+
+		AUTOVBU_SIMCLOCKS=4000000
+		AUTOVBU_LOOPS=5
+		AUTOVBU_PRINTK_LINES=80
+		
+__EOF__
+		exit 1
+		;;
+	esac
+done
+
+# Sanity check our environment
+
+# We force user to set the VBU_MODEL or VPO_MODEL variables, since we use them to select workarounds
+
+if [ "$VBU_MODEL" = "" -a "$VPO_MODEL" = "" ]; then
+	echo
+	echo "ERROR: The VBU_MODEL or VPO_MODEL environment variable must be set before using this script"
+	echo
+	echo "Example: export VBU_MODEL=p1_e8056_c1000_cen1_cen054_unopt_2_gfw"
+	echo "         export VPO_MODEL=m_1_c"
+	exit 1
+fi
+
+if [ "$HB_IMGDIR" = "" -o ! -d "$HB_IMGDIR" ]; then
+	echo "ERROR: Missing/Invalid definition for HB_IMGDIR"
+fi
+
+if [ "$HB_TOOLS" = "" -o ! -d "$HB_TOOLS" ]; then
+	echo "ERROR: Missing/invalid definition for HB_TOOLS"
+	exit 1
+fi
+
+# Temporarily support old names
+
+test "$HB_IMG" = "" && HB_IMG=$HB_IMGDIR
+test "$HB_TOOLS" = "" && HB_TOOLS=$HB_TOOLS
+
+# Temp files for test output
+
+export AUTOCHKPT_VERSION=${AUTOCHKPT_VERSION-"$USER-`hostname -s`"-"`date +%Y-%h-%d-%T`"}
+export AUTOVBU_TEST_DIR=${AUTOVBU_TEST_DIR-/afs/apd.pok.ibm.com/u/${MY_AFS_USER-$USER}/tmp/$AUTOCHKPT_VERSION}
+testloop_stop=/tmp/$PGM-$USER-$$-STOP
+printk_tmp1=/tmp/$PGM-$USER-$$-1
+printk_tmp2=/tmp/$PGM-$USER-$$-2
+printk_tmp3=$AUTOVBU_TEST_DIR/trace_printk
+
+trap "cd; rm -rf $testloop_stop $printk_tmp1 $printk_tmp2 $printk_tmp3; echo; \
+	env | egrep 'AUTO|VBU_MODEL|VPO_MODEL|^HB_' | sed -e 's/^/export /' | sort; \
+	rm -f $AUTOVBU_TEST_DIR/istepmodereg.dma; \
+	rmdir $AUTOVBU_TEST_DIR >/dev/null 2>&1; \
+	exit 0" 0 1 2
+
+#
+# Renew GSA and AFS accesses, both in this cronus window and on the AWAN (if automated tool running)
+#
+
+Get_Access | egrep -v "No access to pwd file|Invalid password"
+simecho "Renew Tokens: `date`" -quiet
+
+sim_clocks=${AUTOVBU_SIMCLOCKS-2000000}
+loopstart=${AUTOVBU_START-0}
+loopmax=`expr $loopstart '+' ${AUTOVBU_LOOPS-2000}`
+lines=${AUTOVBU_PRINTK_LINES-50}
+
+# If we requested checkpoints after loops or isteps, force a checkpoint after the hbitest as well
+test "$chkpt_after_loops" = "--chkpt_after_loops" && chkpt_after_hbitest="--chkpt_after_hbitest"
+test "$chkpt_after_istep" = "--chkpt_after_istep" && chkpt_after_hbitest="--chkpt_after_hbitest"
+
+trace_after_hbitest=""
+
+# Look up symbol addresses
+
+addr=${AUTOVBU_PRINTK_ADDRESS-`grep "kernel_printk_buffer" ${HB_IMGDIR}/hbicore${use_test}.syms | awk -F"," '{print $2}'`}
+testaddr=${AUTOVBU_TOTALTEST-`grep "CxxTest::g_TotalTests" ${HB_IMGDIR}/hbicore${use_test}.syms | awk -F"," '{print $2}'`}
+testaddr1=${AUTOVBU_TESTADDR1-`grep "CxxTest::g_ModulesStarted" ${HB_IMGDIR}/hbicore${use_test}.syms | awk -F"," '{print $2}'`}
+shutdown=${AUTOVBU_SHUTDOWN-`grep "KernelMisc::shutdown" ${HB_IMGDIR}/hbicore${use_test}.syms | awk -F"," '{print $2}'|tr '[a-z]' '[A-Z]'`}
+doze=`echo "ibase=16; $shutdown + 30" | bc | awk ' { printf("0x%16.16X\n", $0); }'`
+
+CORE=${AUTOVBU_CORE--c3}
+
+# Initialize AWAN unless we have been asked to start after load
+
+# Allow HB_RELDIR setting to adjust load addresses as needed
+
+vbu_targeting_addr=0x601690
+echo "$HB_RELDIR" | grep -s "Sprint8" >/dev/null 2>&1
+test $? -eq 0 && vbu_targeting_addr=0x5B0690
+
+set -x
+if [ "$start_after_hbiload" != "--start_after_hbiload" -a "$start_after_hbitest" != "--start_after_hbitest" ]; then
+	siminit ${AUTOVBU_INITIAL_CHKPT-after_8megzero} -quiet || exit 1
+fi
+
+if [ "$start_after_hbiload" != "--start_after_hbiload" -a "$start_after_hbitest" != "--start_after_hbitest" ]; then
+	/afs/awd/projects/eclipz/lab/p8/gsiexe/p8_load_l3 -f ${HB_IMG}/hbicore${use_test}.bin -b ${CORE--c3} || exit 1
+	/afs/awd/projects/eclipz/lab/p8/gsiexe/p8_load_l3 -f ${HB_IMG}/vbu_targeting.bin \
+				-o $vbu_targeting_addr -b ${CORE--c3} || exit 1
+	/afs/awd/projects/eclipz/lab/p8/gsiexe/p8_load_l3 -f ${HB_IMG}/hbicore${use_test}_extended.bin \
+				-o 0x500690 -b ${CORE--c3} || exit 1
+	/afs/awd/projects/eclipz/lab/p8/gsiexe/p8_load_l3 -f ${HB_IMG}/pnor.toc \
+				-o 0x500000 -b ${CORE--c3} || exit 1
+fi
+
+
+if [ "$start_after_hbiload" != "--start_after_hbiload" -a "$start_after_hbitest" != "--start_after_hbitest" ]; then
+	# Adjust timers
+
+	MyEX=EX0`expr substr "${AUTOVBU_CORE--c3}" 3 1`
+	simPUTFAC B0.C0.S0.P0.E8.${MyEX}.EC.PC.PC_NE.FIR.FIRC_SCOM.FIR_MASKQ.ESC.L1 1 1 0 55  -ib -quiet
+	simPUTFAC B0.C0.S0.P0.E8.${MyEX}.EC.PC.PC_NE.FIR.FIRC_SCOM.FIR_MASKQ.ESC.L2 1 1 0 55  -ib -quiet
+	simclock 1 -quiet
+
+	# Start instructions
+	p8_ins_reset || exit 1
+
+	# Make a checkpoint now if requested
+	test "$chkpt_after_hbiload" = "--chkpt_after_hbiload" && simcheckpoint chkpt_after_hbiload-$AUTOCHKPT_VERSION
+
+	# By default, we will run the test unless asked to stop now
+	test "$stop_after_hbiload" = "--stop_after_hbiload" && exit 0
+fi
+
+
+#
+# Set default list of isteps
+#
+set +x
+default_istep_list="
+ init_target_states
+ init_fsi
+ apply_fsi_info
+ apply_dd_presence
+ apply_pr_keyword_data
+ apply_partial_bad
+ apply_gard
+ testHWP
+ cen_sbe_tp_chiplet_init1
+ cen_sbe_tp_arrayinit
+ cen_sbe_tp_chiplet_init2
+ cen_sbe_tp_chiplet_init3
+ cen_sbe_chiplet_init
+ cen_sbe_arrayinit
+ cen_sbe_pll_initf
+ cen_sbe_dts_init
+ cen_sbe_initf
+ cen_sbe_do_manual_inits
+ cen_sbe_startclocks
+ cen_sbe_scominits
+ dmi_scominit
+ dmi_erepair
+ dmi_io_dccal
+ dmi_io_run_training
+ host_startPRD_dmi
+ host_attnlisten_cen
+ proc_cen_framelock
+ cen_set_inband_addr
+ host_collect_dimm_spd
+ mss_volt
+ mss_freq
+ mss_eff_config
+ host_disable_vddr
+ mc_pll_setup
+ mba_startclocks
+ host_enable_vddr
+ mss_initf
+ mss_ddr_phy_reset
+ mss_draminit
+ mss_restore_dram_repair
+ mss_draminit_training
+ mss_draminit_trainadv
+ mss_draminit_mc
+"
+
+#
+# Set default list of isteps to make checkpoints after
+#
+default_istep_chkpt="
+ apply_gard
+ dmi_scominit
+ dmi_io_run_training
+ proc_cen_framelock
+ cen_set_inband_addr
+"
+
+set -x
+if [ "$start_after_hbitest" != "--start_after_hbitest" ]; then
+	mkdir -p $AUTOVBU_TEST_DIR $printk_tmp3
+	chmod a+rx $AUTOVBU_TEST_DIR $printk_tmp3 >/dev/null 2>&1
+	cd $AUTOVBU_TEST_DIR
+	if [ "$run_hb_istep" = "--run_hb_istep" ]; then
+		set +x
+		echo
+		echo "Enter this command in a `hostname` shell window to terminate the test loop:"
+		echo
+		echo "       touch $testloop_stop"
+		echo
+		echo "Test can be restarted using the same version name with:"
+		echo
+		echo "       export AUTOCHKPT_VERSION=$AUTOCHKPT_VERSION"
+		echo
+		
+		echo >$printk_tmp1
+		my_list="${AUTOVBU_ISTEP_LIST-$default_istep_list}"
+		if [ "$AUTOVBU_ISTEP_START" = "" ]; then
+			test -f $printk_tmp3/hb-Trace.output && cp $printk_tmp3/hb-Trace.output $printk_tmp3/tmp.hb-Trace.output-$istep
+			set -x
+			$HB_TOOLS/hb-istep --istepmode | egrep -v "Using deprecated ReturnCode function to assign integer"
+			set +x
+		else
+			expr "$my_list" : ".*$AUTOVBU_ISTEP_START" >/dev/null 2>&1
+			if [ $? -eq 0 ]; then
+				my_list=`echo $my_list | sed -e "s/.*$AUTOVBU_ISTEP_START//"`
+				if [ -d $AUTOVBU_TEST_DIR/trace_after_istep_$AUTOVBU_ISTEP_START ]; then
+					echo
+					echo "Loading restart checkpoint:"
+					set -x
+					siminit chkpt_after_istep_${AUTOVBU_ISTEP_START}-$AUTOCHKPT_VERSION || exit 1
+					set +x
+				fi
+			fi
+		fi
+		for istep in $my_list COMPLETE
+		do
+			if [ $istep = "COMPLETE" ]; then
+				break;
+			fi
+			echo
+			set -x
+			test -f $testloop_stop && break
+			$HB_TOOLS/hb-istep --command $istep | egrep -v "Using deprecated ReturnCode function to assign integer"
+			set +x
+			if [ "$chkpt_after_istep" = "--chkpt_after_istep" ]; then
+				expr "${AUTOVBU_ISTEP_CHKPT-$default_istep_chkpt}" : ".*$istep" >/dev/null
+				if [ $? -eq 0 ]; then
+					simcheckpoint chkpt_after_istep_${istep}-$AUTOCHKPT_VERSION
+					mkdir -p $AUTOVBU_TEST_DIR/trace_after_istep_${istep}
+				fi
+			fi
+
+			if [ "$use_hb_trace" = "--use_hb_trace" ]; then
+				p8_ins_stop
+				$HB_TOOLS/hb-trace $test_arg --out $printk_tmp3 2>&1 | egrep -v "^FAPI DBG>:|^FAPI IMP>:|Using deprecated ReturnCode function to assign integer" >$printk_tmp2
+				test -f $printk_tmp3/hb-Trace.output && cp $printk_tmp3/hb-Trace.output $printk_tmp3/tmp.hb-Trace.output-$istep
+				p8_ins_start
+			elif [ "$use_printk" = "--use_printk" ]; then
+				DUMP_PRINTK ${addr} ${lines} >$printk_tmp2
+			elif [ "$use_dump_l3" = "--use_dump_l3" ]; then
+				DUMP_L3_PRINTK ${addr} ${lines} >$printk_tmp2
+			else
+				p8_ins_stop
+				$HB_TOOLS/hb-printk $test_arg --out $printk_tmp3 2>&1 | egrep -v "^FAPI DBG>:|^FAPI IMP>:|Using deprecated ReturnCode function to assign integer" >$printk_tmp2
+				p8_ins_start
+			fi
+			echo >>$printk_tmp2
+			diff -a $printk_tmp1 $printk_tmp2 | egrep -a "^> " | sed -e 's/[Ee][Rr][Rr][Oo][Rr]/ERR*R/g' -e 's/FAIL/F*IL/g'
+			mv $printk_tmp2 $printk_tmp1
+
+			# Check for a checkstop/special attn
+			getscom pu 000f001a ${CORE--c3} -quiet | egrep -v "0x0000000000000000|0x4000000000000000"
+			if [ "$?" -eq 0 ]; then
+				echo; echo; echo
+				echo "FAIL: checkstop/attn running $PGM"
+				fircheck ${CORE--c3} -quiet 2>&1 | head -30 | sed -e 's/[Ee][Rr][Rr][Oo][Rr]/ERR*R/g' -e 's/FAIL/F*IL/g' | egrep -v "00 SIMDISP|CNFG FILE GLOBAL_DEBUG"
+				break
+			fi
+			Get_Access | egrep -v "No access to pwd file|Invalid password"
+			simecho "Renew Tokens: `date`" -quiet
+		done
+
+		if [ "$use_hb_trace" = "--use_hb_trace" -a -f $printk_tmp3/hb-Trace.output ]; then
+			echo; echo; echo
+			echo "===== COMBINED hb-Trace.output START ====="
+			cat `ls -1rt $printk_tmp3/tmp.hb-Trace.output-* $printk_tmp3/hb-Trace.output` | sort | uniq -c |
+				sed -e 's/[Ee][Rr][Rr][Oo][Rr]/ERR*R/g' -e 's/FAIL/F*IL/g'
+
+			echo "==== COMBINED hb-Trace.output END ====="
+		fi
+
+		test "$chkpt_after_hbitest" = "--chkpt_after_hbitest" && simcheckpoint chkpt_after_hbitest-$AUTOCHKPT_VERSION && mkdir -p $AUTOVBU_TEST_DIR/trace_after_hbitest
+	else
+		set +x
+		#
+		# Loop, printing CIA after each cycle
+		#
+	
+		loopcnt=$loopstart
+	
+	
+		echo >$printk_tmp1
+	
+		if [ $loopcnt -ne 0 -a -d $AUTOVBU_TEST_DIR/trace_after_loop${loopcnt} ]; then
+			echo
+			echo "Loading restart checkpoint:"
+			set -x
+			siminit chkpt_after_loop${loopcnt}-$AUTOCHKPT_VERSION || exit 1
+			set +x
+		fi
+	
+		date
+		echo "Running $loopmax trace loopcnts with $sim_clocks sim clocks each cycle:"
+		GET_CIA
+	
+		echo
+		echo "Enter this command in a `hostname` shell window to terminate the test loop:"
+		echo
+		echo "       touch $testloop_stop"
+		echo
+		echo "Test can be restarted using the same version name with:"
+		echo
+		echo "       export AUTOCHKPT_VERSION=$AUTOCHKPT_VERSION"
+		echo
+	
+		while [ ! -f "$testloop_stop" -a $loopcnt -lt $loopmax ]; do
+			loopcnt=`expr $loopcnt + 1`
+	
+			simclock $sim_clocks  -quiet || exit 1
+			cur_cia=`GET_CIA`
+			echo "$loopcnt:	$cur_cia"
+			if [ "$use_hb_trace" = "--use_hb_trace" ]; then
+				p8_ins_stop
+				$HB_TOOLS/hb-trace $test_arg --out $printk_tmp3 2>&1 | egrep -v "^FAPI DBG>:|^FAPI IMP>:|Using deprecated ReturnCode function to assign integer" >$printk_tmp2
+				test -f $printk_tmp3/hb-Trace.output && cp $printk_tmp3/hb-Trace.output $printk_tmp3/tmp.hb-Trace.output-$loopcnt
+				p8_ins_start
+			elif [ "$use_printk" = "--use_printk" ]; then
+				DUMP_PRINTK ${addr} ${lines} >$printk_tmp2
+			elif [ "$use_dump_l3" = "--use_dump_l3" ]; then
+				DUMP_L3_PRINTK ${addr} ${lines} >$printk_tmp2
+			else
+				p8_ins_stop
+				$HB_TOOLS/hb-printk $test_arg --out $printk_tmp3 2>&1 | egrep -v "^FAPI DBG>:|^FAPI IMP>:|Using deprecated ReturnCode function to assign integer" >$printk_tmp2
+				p8_ins_start
+			fi
+			echo >>$printk_tmp2
+			diff -a $printk_tmp1 $printk_tmp2 | egrep -a "^> " | sed -e 's/[Ee][Rr][Rr][Oo][Rr]/ERR*R/g' -e 's/FAIL/F*IL/g'
+			mv $printk_tmp2 $printk_tmp1
+	
+			grep 'HypeEmu: Illegal instruction' $printk_tmp1 >/dev/null
+			if [ $? -eq 0 ]; then
+				echo "$PGM: Stopping test after exception"
+				test "$chkpt_after_exception" = "--chkpt_after_exception" && simcheckpoint chkpt_after_exception-$AUTOCHKPT_VERSION
+				break
+			fi
+			# Check for a checkstop/special attn
+			getscom pu 000f001a ${CORE--c3} -quiet | egrep -v "0x0000000000000000|0x4000000000000000"
+			if [ "$?" -eq 0 ]; then
+				echo; echo; echo
+				echo "FAIL: checkstop/attn running $PGM"
+				fircheck ${CORE--c3} -quiet 2>&1 | head -30 | sed -e 's/[Ee][Rr][Rr][Oo][Rr]/ERR*R/g' -e 's/FAIL/F*IL/g' | egrep -v "00 SIMDISP|CNFG FILE GLOBAL_DEBUG"
+				break
+
+			fi
+	
+			# Stop on exception loop
+			expr "$cur_cia" : ".*0x0000000000000E4[04]" >/dev/null
+			if [ $? = 0 ]; then
+				if [ "$hypemu_loop" != "" ]; then
+					echo "FAIL: Exception loop"
+					break
+				else
+					hypemu_loop=yes
+				fi
+			else
+				unset hypemu_loop
+			fi
+			if [ "$chkpt_after_loops" = "--chkpt_after_loops" -a `expr "$loopcnt" '%' 50` = "0" ]; then
+				simcheckpoint chkpt_after_loop${loopcnt}-$AUTOCHKPT_VERSION
+				mkdir -p $AUTOVBU_TEST_DIR/trace_after_loop${loopcnt}
+			fi
+
+			# Stop test loop if we reach kernel shutdown
+			expr "$cur_cia" : ".*$doze" >/dev/null
+			if [ $? = 0 ]; then
+				echo
+				echo "Shutdown doze address detected.  Stopping test now"
+				echo
+				break
+			fi
+
+			if [ `expr "$loopcnt" '%' 500` = "0" ]; then
+				Get_Access | egrep -v "No access to pwd file|Invalid password"
+				simecho "Renew Tokens: `date`" -quiet
+			fi
+		done
+		date
+		rm -f $printk_tmp2 $printk_tmp1
+	
+	
+		GET_CIA
+	
+		if [ "$use_hb_trace" = "--use_hb_trace" ]; then
+			echo; echo; echo
+			echo "===== COMBINED hb-Trace.output START ====="
+			cat `ls -1rt $printk_tmp3/tmp.hb-Trace.output-* $printk_tmp3/hb-Trace.output` | sort | uniq -c |
+				sed -e 's/[Ee][Rr][Rr][Oo][Rr]/ERR*R/g' -e 's/FAIL/F*IL/g'
+			echo "==== COMBINED hb-Trace.output END ====="
+		fi
+	
+		test "$chkpt_after_hbitest" = "--chkpt_after_hbitest" && simcheckpoint chkpt_after_hbitest-$AUTOCHKPT_VERSION && mkdir -p $AUTOVBU_TEST_DIR/trace_after_hbitest
+	
+		# Dump test case results
+		if [ "$testaddr" != "" ]; then
+			echo
+			echo "Test Results (CxxTest::g_TotalTests/CxxTest::g_TraceCalls/CxxTest::g_Warnings/CxxTest::g_FailedTests)"
+			if  [ "$use_dump_l3" = "--use_dump_l3" -o "$use_hb_printk" != "--use_hb_printk" ]; then
+				DUMP_L3_DATA $testaddr 1 | head -1
+			else
+				DUMP_DATA $testaddr 1 | head -1
+			fi
+		fi
+		if [ "$testaddr1" != "" ]; then
+			echo "Test Results (CxxTest::g_ModulesStarted/CxxTest::g_ModulesCompleted)"
+			if  [ "$use_dump_l3" = "--use_dump_l3" -o "$use_hb_printk" != "--use_hb_printk" ]; then
+				DUMP_L3_DATA $testaddr1 1 | head -1
+			else
+				DUMP_DATA $testaddr1 1 | head -1
+			fi
+		fi
+	
+	fi
+fi
+
+set -x
+trace_after_loops=`ls -1d $AUTOVBU_TEST_DIR/trace_after_loop* 2>/dev/null | sed -e '/hb-Trace.output/d' -e 's/.*trace_after_loop/ /' | sort -n` 2>/dev/null
+set +x
+if [ "$trace_after_loops" != "" ]; then
+	date
+	echo
+	echo "===== Collecting trace files from after_loop checkpoints ====="
+	echo
+	env | egrep "PGM|AUTO|VBU_MODEL|VPO_MODEL|HB_IMGDIR|HB_TOOLS" | sed -e 's/^/export /' >>$AUTOVBU_TEST_DIR/env_settings
+	chmod a+rx $trace_after_loops >/dev/null 2>&1
+	for loopcnt in $trace_after_loops
+	do
+		if [ -f $AUTOVBU_TEST_DIR/trace_after_loop${loopcnt}/hb-Trace.output ]; then
+			continue
+		fi
+		echo "Loading: chkpt_after_loop${loopcnt}-$AUTOCHKPT_VERSION"
+		siminit chkpt_after_loop${loopcnt}-$AUTOCHKPT_VERSION || exit 1
+		p8_ins_stop
+		$HB_TOOLS/hb-trace $test_arg --out $AUTOVBU_TEST_DIR/trace_after_loop${loopcnt} >/dev/null 2>&1
+		p8_ins_start
+	done
+	cat `ls -1rt $AUTOVBU_TEST_DIR/trace_after_loop*/hb-Trace.output` | sort | uniq -c | 
+		sed -e 's/[Ee][Rr][Rr][Oo][Rr]/ERR*R/g' -e 's/FAIL/F*IL/g' > $AUTOVBU_TEST_DIR/trace_after_loop-hb-Trace.output
+	echo
+	echo "Trace file: $AUTOVBU_TEST_DIR/trace_after_loop-hb-Trace.output"
+	echo
+fi
+if [ -d "$AUTOVBU_TEST_DIR/trace_after_hbitest" -a ! -f $AUTOVBU_TEST_DIR/trace_after_hbitest/hb-Trace.output ]; then
+	date
+	echo
+	echo "===== Collecting trace file from after_hbitest checkpoint ====="
+	echo
+	chmod a+rx $AUTOVBU_TEST_DIR/trace_after_hbitest >/dev/null 2>&1
+	echo "Loading: chkpt_after_hbitest-$AUTOCHKPT_VERSION"
+	siminit chkpt_after_hbitest-$AUTOCHKPT_VERSION || exit 1
+	p8_ins_stop
+	$HB_TOOLS/hb-trace $test_arg --out $AUTOVBU_TEST_DIR/trace_after_hbitest >/dev/null 2>&1
+	p8_ins_start
+	echo
+	echo "Trace file: $AUTOVBU_TEST_DIR/trace_after_hbitest/hb-Trace.output"
+	echo
+fi
+if [ -f $AUTOVBU_TEST_DIR/trace_after_loop-hb-Trace.output -a -f $AUTOVBU_TEST_DIR/trace_after_hbitest/hb-Trace.output ]; then
+	date
+	echo
+	echo "===== Combining trace files ====="
+	echo
+	cat `ls -1rt $AUTOVBU_TEST_DIR/trace_after_loop*/hb-Trace.output` \
+		$AUTOVBU_TEST_DIR/trace_after_hbitest/hb-Trace.output | sort | uniq -c |
+		sed -e 's/[Ee][Rr][Rr][Oo][Rr]/ERR*R/g' -e 's/FAIL/F*IL/g' > $AUTOVBU_TEST_DIR/trace_combined_hb-Trace.output
+	echo "Trace file: AUTOVBU_TEST_DIR/trace_combined_hb-Trace.output"
+	echo
+fi
+
+set -x
+trace_after_istep=`ls -1rtd $AUTOVBU_TEST_DIR/trace_after_istep* 2>/dev/null | sed -e '/hb-Trace.output/d' -e 's/.*trace_after_istep_/ /'` 2>/dev/null
+set +x
+if [ "$trace_after_istep" != "" ]; then
+	date
+	echo
+	echo "===== Collecting trace files from after_istep checkpoints ====="
+	echo
+	env | egrep "PGM|AUTO|VBU_MODEL|VPO_MODEL|HB_IMGDIR|HB_TOOLS" | sed -e 's/^/export /' >>$AUTOVBU_TEST_DIR/env_settings
+	chmod a+rx $trace_after_istep >/dev/null 2>&1
+	for istep in $trace_after_istep
+	do
+		if [ -f $AUTOVBU_TEST_DIR/trace_after_istep_${istep}/hb-Trace.output ]; then
+			continue
+		fi
+		echo "Loading: chkpt_after_istep_${istep}-$AUTOCHKPT_VERSION"
+		siminit chkpt_after_istep_${istep}-$AUTOCHKPT_VERSION || exit 1
+		p8_ins_stop
+		$HB_TOOLS/hb-trace $test_arg --out $AUTOVBU_TEST_DIR/trace_after_istep_${istep} >/dev/null 2>&1
+		p8_ins_start
+	done
+	cat `ls -1rt $AUTOVBU_TEST_DIR/trace_after_istep*/hb-Trace.output` | sort | uniq -c |
+		sed -e 's/[Ee][Rr][Rr][Oo][Rr]/ERR*R/g' -e 's/FAIL/F*IL/g' > $AUTOVBU_TEST_DIR/trace_after_istep-hb-Trace.output
+	echo "Trace file: $AUTOVBU_TEST_DIR/trace_after_istep-hb-Trace.output"
+fi
+
+#
+# Generate an L3 dump before leaving if the user has requested one
+#
+if [ "$dump_after_hbitest" = "--dump_after_hbitest" ]; then
+	date
+	echo
+	echo "===== Dumping L3 data ====="
+	echo
+	mkdir -p $AUTOVBU_TEST_DIR
+	chmod a+rx $AUTOVBU_TEST_DIR  >/dev/null 2>&1
+	cd $AUTOVBU_TEST_DIR
+	rm -rf $AUTOVBU_TEST_DIR/hbdump $AUTOVBU_TEST_DIR/hbparse		# clean up any previous data
+	mkdir -p $AUTOVBU_TEST_DIR/hbdump $AUTOVBU_TEST_DIR/hbparse 
+	$HB_TOOLS/hb-dump --out-path $AUTOVBU_TEST_DIR/hbdump |
+		egrep -v "^FAPI DBG>:|^FAPI IMP>:|Using deprecated ReturnCode function to assign integer" |
+		sed -e 's/[Ee][Rr][Rr][Oo][Rr]/ERR*R/g' -e 's/FAIL/F*IL/g'
+	simclock 10 -quiet
+	use_test=`echo $use_test | sed -e 's/_/--/'`
+	PATH=$HB_IMGDIR:$HB_TOOLS:$HB_RELDIR:$PATH $HB_TOOLS/hb-parsedump.pl $AUTOVBU_TEST_DIR/hbdump/hbdump.* $use_test --out-path $AUTOVBU_TEST_DIR/hbparse |
+		sed -e 's/[Ee][Rr][Rr][Oo][Rr]/ERR*R/g' -e 's/FAIL/F*IL/g'
+	chmod -R a+rx $AUTOVBU_TEST_DIR/hbdump $AUTOVBU_TEST_DIR/hbparse >/dev/null 2>&1
+fi
+date
+
+# Done - return good test status
+exit 0

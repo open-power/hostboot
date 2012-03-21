@@ -51,7 +51,7 @@ use constant NUMTHREADS => 8;
 my %optionInfo = (
     "--test" => ["Use the hbicore_test.syms file instead of the default."],
     "--img-path=<path>" => ["The path to the \"img\" directory where the syms file, etc is located.",
-                            "User can also set the env variable HBDIR to the path of  the \"img\"",
+                            "User can also set the env variable HB_IMGDIR to the path of  the \"img\"",
                             "directory instead of using this option."],
     "--out-path=<path>" => ["The path to the directory where the output will be saved."],
     "--debug" => ["Enable debug tracing."],
@@ -85,7 +85,7 @@ my $fh;
 my $vbuToolDir = "/gsa/ausgsa/projects/h/hostboot/vbutools/latest";
 
 my $imgPath = "";
-my $hbDir = $ENV{'HBDIR'};
+my $hbDir = $ENV{'HB_IMGDIR'};
 if (defined ($hbDir))
 {
     if ($hbDir ne "")
@@ -252,7 +252,7 @@ sub flushL2
         #stop instructions
         stopInstructions("all");
 
-        my $command = "$vbuToolDir/p8_l2_flush_wrap.x86 @ecmdOpt $flag";
+        my $command = "$vbuToolDir/proc_l2_flush_wrap.x86 @ecmdOpt $flag";
         die "ERROR: cannot flush L2" if (system("$command") != 0);
 
         $l2Flushed = 1;
@@ -380,7 +380,7 @@ sub stopInstructions
     my $thread = shift;
 
     #Stopping all threads
-    my $command = "$vbuToolDir/p8_thread_control.x86 @ecmdOpt -stop -t$thread $flag";
+    my $command = "$vbuToolDir/proc_thread_control.x86 @ecmdOpt -stop -t$thread $flag";
 
     if ($debug)
     {
@@ -396,7 +396,7 @@ sub startInstructions
     my $thread = shift;
 
     #Starting all threads
-    my $command = "$vbuToolDir/p8_thread_control.x86 @ecmdOpt -start -t$thread $flag";
+    my $command = "$vbuToolDir/proc_thread_control.x86 @ecmdOpt -start -t$thread $flag";
 
     if ($debug)
     {
@@ -428,7 +428,7 @@ sub queryThreadState
 {
     my $thread = shift;
 
-    my $command = "$vbuToolDir/p8_thread_control.x86 @ecmdOpt -query -t$thread";
+    my $command = "$vbuToolDir/proc_thread_control.x86 @ecmdOpt -query -t$thread";
     my $result = `$command`;
 
     if ($debug)
@@ -710,7 +710,7 @@ Use the hbicore_test.syms file instead of the default.
 =item B<--img-path>=PATH
 
 The path to the "img" directory where the syms file, etc is located.
-User can also set the env variable HBDIR to the path of the "img"
+User can also set the env variable HB_IMGDIR to the path of the "img"
 directory instead of using this option.
 
 =item B<--out-path>=PATH

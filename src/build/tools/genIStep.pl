@@ -509,7 +509,7 @@ const   ExtTaskInfo g_istep\@istepnumTaskList    =   {
 my  $pgmDir  =   `dirname $0`;
 chomp( $pgmDir );
 
-my $hbDir = $ENV{'HBDIR'};
+my $hbDir = $ENV{'HB_IMGDIR'};
 if ( ! defined( $hbDir) || ( $hbDir eq "" ) )
 {
     $hbDir = $pgmDir;               ##  Set to tool directory
