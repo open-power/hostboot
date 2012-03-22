@@ -1,7 +1,0 @@
-Update centaur.act for running DRAM hardware procedures
--RTC: Story 38362 will be used to remove the patch
--CQ: SW127616
--Files: centaur.act
--Coreq: the file is copied in place by the workarounds.presimsetup
-
-

@@ -54,11 +54,6 @@ sed -i -e's/SETENV GFW_SIMICS_ENV_THREADS_PER_CORE.*/SETENV GFW_SIMICS_ENV_THREA
 #echo "WSALIAS HOSTBOOT_LEVEL FIPSLEVEL env/gfwb/simics-4.2.0/simics-4.2.83/fips/fld36/fi120201a700.42" >> $sb/simu/data/simicsInfo
 #echo "WSALIAS HOSTBOOT_LEVEL SIMICSLEVEL env/vtechb/simics-4.2.0/simics-4.2.83/bin" >> $sb/simu/data/simicsInfo
 
-echo "+++ Copy new centaur.act for DRAM hardware procedures."
-mkdir -p $sb/simu/data/cec-chip/
-cp $HOSTBOOTROOT/src/build/citest/etc/patches/centaur.act $sb/simu/data/cec-chip/
-#fixme with Story 38362
-
 # Leaving this here as an example for the future
 echo "+++ Update to new phyp and mambo level."
 mkdir -p $sb/simu/data
