@@ -42,6 +42,7 @@
  *                          mjjones     01/12/2012  Enforce correct usage
  *                          mjjones     02/22/2012  Allow user to add Target FFDC
  *                          mjjones     03/16/2012  Add type to FFDC data
+ *                          mjjones     03/16/2012  Allow different PLAT errors
  */
 
 #include <fapiReturnCode.H>
@@ -177,16 +178,20 @@ void ReturnCode::setEcmdError(const uint32_t i_rcValue)
 //******************************************************************************
 // setPlatError function
 //******************************************************************************
-void ReturnCode::setPlatError(void * i_pData)
+void ReturnCode::setPlatError(void * i_pData,
+                              const ReturnCodes i_rcValue)
 {
-    FAPI_ERR("setPlatError: Creating PLAT error");
-    iv_rcValue = FAPI_RC_PLAT_ERR_SEE_DATA;
+    FAPI_ERR("setPlatError: Creating PLAT error 0x%x", i_rcValue);
+    iv_rcValue = i_rcValue;
 
     // Forget about any associated data (this is a new error)
     forgetData();
 
-    ensureDataRefExists();
-    iv_pDataRef->setPlatData(i_pData);
+    if (i_pData)
+    {
+        ensureDataRefExists();
+        iv_pDataRef->setPlatData(i_pData);
+    }
 }
 
 //******************************************************************************
@@ -194,6 +199,7 @@ void ReturnCode::setPlatError(void * i_pData)
 //******************************************************************************
 void ReturnCode::_setHwpError(const HwpReturnCode i_rcValue)
 {
+    FAPI_ERR("_setHwpError: Creating HWP error 0x%x", i_rcValue);
     iv_rcValue = i_rcValue;
 
     // Forget about any associated data (this is a new error)

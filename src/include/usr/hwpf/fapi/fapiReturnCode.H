@@ -41,6 +41,7 @@
  *                          mjjones     01/12/2012  Enforce correct usage
  *                          mjjones     02/22/2012  Allow user to add Target FFDC
  *                          mjjones     03/16/2012  Add type to FFDC data
+ *                          mjjones     03/16/2012  Allow different PLAT errors
  */
 
 #ifndef FAPIRETURNCODE_H_
@@ -197,18 +198,25 @@ public:
     void setEcmdError(const uint32_t i_rcValue);
 
     /**
-     * @brief Sets a PLAT error. Sets the rcValue to FAPI_RC_PLAT_ERR_SEE_DATA,
-     *        deletes any associated data and associates the supplied heap based
+     * @brief Sets a PLAT error. Sets the rcValue to the supplied value, deletes
+     *        any associated data and associates the supplied heap based
      *        PlatData with the ReturnCode. The ReturnCode object takes
      *        responsibility for deleting the data (platform code implements the
      *        delete function and must know the type and how to delete it).
      *
-     * This is called by PLAT. The expected use-case is to associate a platform
-     * error log with the ReturnCode.
+     * This is called by PLAT code to generate an error. The expected use-case
+     * is to associate a platform error log with the ReturnCode. If the error is
+     * one that a HWP can look for (e.g. the HWP may want to retry in a specific
+     * error) then one of the specific FAPI_RC_PLAT errors in fapiReturnCodes.H
+     * can be used else it defaults to FAPI_RC_PLAT_ERR_SEE_DATA which means
+     * that there is a platform error that the HWP cannot decode.
      *
-     * @param[in] i_pData Pointer to PlatData (on the heap)
+     * @param[in] i_pData   Pointer to PlatData (on the heap). Can be NULL if
+     *                      the platform does not attach data
+     * @param[in] i_rcValue Error value to set
      */
-    void setPlatError(void * i_pData);
+    void setPlatError(void * i_pData,
+                      const ReturnCodes i_rcValue = FAPI_RC_PLAT_ERR_SEE_DATA);
 
     /**
      * @brief Sets a HWP error. Sets the rcValue to the supplied value (from
