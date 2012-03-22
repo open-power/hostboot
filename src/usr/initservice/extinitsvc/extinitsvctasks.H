@@ -84,7 +84,8 @@ const TaskInfo g_exttaskinfolist[]   =   {
             "libmbox.so",                               // taskname
             NULL,                                       // no ptr to fnct
             {
-                INIT_TASK,                              // task type
+                
+                START_TASK,                             // task type
                 EXT_IMAGE,                              // Extended Module
             }
         },

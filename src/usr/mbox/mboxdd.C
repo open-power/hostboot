@@ -237,41 +237,33 @@ errlHndl_t MboxDD::read(TARGETING::Target* i_target,void *o_buffer,
          * DB_STATUS_1A_REG: doorbell status and control 1a
          * Bit31(MSB) : Permission to Send Doorbell 1
          * Bit30 : Abort Doorbell 1
-         * Bit29 : PIB Slave B Pending Doorbell 1
-         * Bit28 : LBUS Slave A Pending Doorbell 1
+         * Bit29 : LBUS Slave B Pending Doorbell 1
+         * Bit28 : PIB Slave A Pending Doorbell 1
          * Bit27 : Reserved
          * Bit26 : Xdn Doorbell 1
          * Bit25 : Xup Doorbell 1
          * Bit24 : Reserved
-         * Bit23-20 : Header Count LBUS Slave A Doorbell 1
-         * Bit19-12 : Data Count LBUS Slave A Doorbell 1
-         * Bit11-8 : Header Count PIB Slave B Doorbell 1
-         * Bit7-0 : Data Count PIB Slave B Doorbell 1
+         * Bit23-20 : Header Count PIB Slave A Doorbell 1
+         * Bit19-12 : Data Count PIB Slave A Doorbell 1
+         * Bit11-8 : Header Count LBUS Slave B Doorbell 1
+         * Bit7-0 : Data Count LBUS Slave B Doorbell 1
          */
-        //Check for Abort
-        if ((l_IntReg[0] & MBOX_ABORT_LAST_MSG) ==
-            MBOX_ABORT_LAST_MSG &&
-            (l_64bitBuf[0] & 0x40000000) == 0x40000000)
+        //Check for Xup
+        if ((l_IntReg[0] & MBOX_HW_ACK) == 
+            MBOX_HW_ACK &&
+            (l_64bitBuf[0] & 0x02000000) == 0x02000000)
         {
-            l_stat |= MBOX_ABORT_LAST_MSG;
-            l_StatusReg[0] |= 0x40000000;
-        }
-        //Check for Xdn
-        if ((l_IntReg[0] & MBOX_XDN_ACK) ==
-            MBOX_XDN_ACK &&
-            (l_64bitBuf[0] & 0x04000000) == 0x04000000)
-        {
-            l_stat |= MBOX_XDN_ACK;
-            l_StatusReg[0] |= 0x04000000;
+            l_stat |= MBOX_HW_ACK;
+            l_StatusReg[0] |= 0x02000000;
         }
         //Check for PIB Pending
         if ((l_IntReg[0] & MBOX_DATA_PENDING) ==
              MBOX_DATA_PENDING &&
-            (l_64bitBuf[0] & 0x20000000) == 0x20000000)
+            (l_64bitBuf[0] & 0x10000000) == 0x10000000)
         {
             l_stat |= MBOX_DATA_PENDING;
             //Read how many bytes are significant
-            io_buflen = ((l_64bitBuf[0] & 0x000FF000) >> 12);
+            io_buflen = (l_64bitBuf[0] & 0x000000FF);
             if (buflen < io_buflen)
             {
                 TRACFCOMP(g_trac_mbox, INFO_MRK "MBOX::read> Data truncated, input buffer length less than number of significant bytes");
@@ -306,13 +298,13 @@ errlHndl_t MboxDD::read(TARGETING::Target* i_target,void *o_buffer,
                 break;
             }
 
-            //Write-to-Clear PIB Pending,and bits 23-12 (data and header count)
+            //Write-to-Clear PIB Pending,and bits 20-32 (data and header count)
             //Write to set Xup
-            l_StatusReg[0] |= 0x22FFF000;
+            l_StatusReg[0] |= 0x14000FFF;
         }
 
 
-        //Write to clear PIB Pending, Abort, and Xdn (all that apply)
+        //Write to clear PIB Pending, Abort, and XUP (all that apply)
         if(l_StatusReg[0])
         {
             l_err = deviceOp(DeviceFW::WRITE,i_target,
@@ -391,19 +383,19 @@ errlHndl_t MboxDD::write(TARGETING::Target* i_target,void* i_buffer,
          * DB_STATUS_1A_REG: doorbell status and control 1a
          * Bit31(MSB) : Permission to Send Doorbell 1
          * Bit30 : Abort Doorbell 1
-         * Bit29 : PIB Slave B Pending Doorbell 1
-         * Bit28 : LBUS Slave A Pending Doorbell 1
+         * Bit29 : LBUS Slave B Pending Doorbell 1
+         * Bit28 : PIB Slave A Pending Doorbell 1
          * Bit27 : Reserved
          * Bit26 : Xdn Doorbell 1
          * Bit25 : Xup Doorbell 1
          * Bit24 : Reserved
-         * Bit23-20 : Header Count LBUS Slave A Doorbell 1
-         * Bit19-12 : Data Count LBUS Slave A Doorbell 1
-         * Bit11-8 : Header Count PIB Slave B Doorbell 1
-         * Bit7-0 : Data Count PIB Slave B Doorbell 1
+         * Bit23-20 : Header Count PIB Slave A Doorbell 1
+         * Bit19-12 : Data Count PIB Slave A Doorbell 1
+         * Bit11-8 : Header Count LBUS Slave B Doorbell 1
+         * Bit7-0 : Data Count LBUS Slave B Doorbell 1
          */
         //Verify LBUS Pending,
-        if ((l_64bitBuf[0] & 0x10000FFF) == 0)
+        if ((l_64bitBuf[0] & 0x20FFF000) == 0)
         {
             uint32_t i = 0;
             uint32_t l_data[2] = {0};
@@ -430,7 +422,7 @@ errlHndl_t MboxDD::write(TARGETING::Target* i_target,void* i_buffer,
             }
 
             //Write LBUS Pending(28) and Data Count bits(11-0)
-            l_64bitBuf[0] = 0x10000000 | i_buflen;
+            l_64bitBuf[0] = 0x20000000 | (0x000FF000 & (i_buflen << 12));
             l_err = deviceOp(DeviceFW::WRITE,i_target,
                              l_64bitBuf,l_64bitSize,
                              DEVICE_XSCOM_ADDRESS(MBOX_DB_STAT_CNTRL_1));
@@ -541,11 +533,10 @@ errlHndl_t MboxDD::init(TARGETING::Target* i_target)
 {
     errlHndl_t err = NULL;
     // Setup mailbox intr mask reg
-    // Set bits 6,4,2,0
+    // Set bits 2,1,0
     // assume we always use mailbox 1
-    uint64_t scom_data = (static_cast<uint64_t>(MBOX_ABORT_LAST_MSG) |
-                          static_cast<uint64_t>(MBOX_DOORBELL_ERROR) |
-                          static_cast<uint64_t>(MBOX_XDN_ACK) |
+    uint64_t scom_data = (static_cast<uint64_t>(MBOX_DOORBELL_ERROR) |
+                          static_cast<uint64_t>(MBOX_HW_ACK) |
                           static_cast<uint64_t>(MBOX_DATA_PENDING)) << 32;
 
     size_t scom_len = sizeof(uint64_t);

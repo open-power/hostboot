@@ -32,6 +32,10 @@ namespace MBOX
         MOD_MBOXDD_INVALID      = 0x00, /**< Zero is an invalid module id */
         MOD_MBOXDD_READ         = 0x01,
         MOD_MBOXDD_WRITE        = 0x02,
+        MOD_MBOXSRV_SEND        = 0x03, // MailboxSp::send
+        MOD_MBOXSRV_HNDLR       = 0x04, // MailboxSp::msgHandler
+        MOD_MBOXSRV_RCV         = 0x05, // MailboxSp::recv_msg
+        MOD_MBOXREGISTER        = 0x06, // MailboxSp::msgq_register
     };
 
     enum MBOXReasonCode
@@ -40,6 +44,15 @@ namespace MBOX
         RC_INVALID_MESSAGE_TYPE      = HBMBOX_COMP_ID | 0x02,
         RC_NO_PERM_TO_SEND           = HBMBOX_COMP_ID | 0x03,
         RC_MSG_PENDING               = HBMBOX_COMP_ID | 0x04,
+        RC_INVALID_QUEUE             = HBMBOX_COMP_ID | 0x05,
+        RC_RETRY_FAILED              = HBMBOX_COMP_ID | 0x06,
+        RC_ALREADY_REGISTERED        = HBMBOX_COMP_ID | 0x07,
+        RC_UNREGISTERED_MSG_QUEUE    = HBMBOX_COMP_ID | 0x08,
+        RC_ILLEGAL_OP                = HBMBOX_COMP_ID | 0x09,
+        RC_DATA_WRITE_ERR            = HBMBOX_COMP_ID | 0x0A,
+        RC_PARITY_ERR                = HBMBOX_COMP_ID | 0x0B,
+        RC_INVALID_MBOX_MSG_TYPE     = HBMBOX_COMP_ID | 0x0C,
+        RC_MBOX_SERVICE_NOT_READY    = HBMBOX_COMP_ID | 0x0D,
     };
 };
 

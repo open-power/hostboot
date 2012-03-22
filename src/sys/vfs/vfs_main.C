@@ -36,6 +36,7 @@ const char* VFS_ROOT_BIN = "/bin/";
 const char* VFS_ROOT_DATA = "/data/";
 const char* VFS_ROOT_MSG = "/msg/";
 const char* VFS_ROOT_MSG_VFS = "/msg/vfs";
+const char* VFS_ROOT_MSG_MBOX = "/msg/mbox";
 
 void vfs_module_init();
 

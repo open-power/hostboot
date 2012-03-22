@@ -27,7 +27,7 @@
 ##    to setup the sandbox
 ##
 
-
 echo "+++ FIXME Temporarily copying cec-chip.so to eliminate verbose errors"
 rm  $sb/../simics/amd64-linux/lib/cec-chip.so
-cp /afs/rch/usr8/dsanner/public/fsi2host.correct/bin/cec-chip.so $sb/../simics/amd64-linux/lib/
+cp /afs/rch/usr8/dsanner/public/quiet.cecchip/cec-chip.so $sb/../simics/amd64-linux/lib/
+

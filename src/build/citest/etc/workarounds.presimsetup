@@ -65,5 +65,7 @@ echo "+++ Update to new phyp and mambo level."
 mkdir -p $sb/simu/data
 cp --update $BACKING_BUILD/src/simu/data/simicsInfo $sb/simu/data/simicsInfo
 #sed -i -e's/^WSALIAS HOSTBOOT_LEVEL MAMBOLEVEL.*/WSALIAS HOSTBOOT_LEVEL MAMBOLEVEL env\/mamboa\/2011_11_10__4.2/' $sb/simu/data/simicsInfo
+# RTC task 39991 - update bbuild and remove this when it gets into a build
+sed -i -e's/^WSALIAS DEFAULT FIPSLEVEL.*/WSALIAS DEFAULT FIPSLEVEL env\/gfwb\/simics-4.2.0\/simics-4.2.85\/fips\/fld36\/fi120327b700.42/' $sb/simu/data/simicsInfo
 sed -i -e's/^WSALIAS DEFAULT PHYPLEVEL.*/WSALIAS DEFAULT PHYPLEVEL env\/phypa\/simics-4.2.0\/simics-4.2.85\/ph120319a700.42/' $sb/simu/data/simicsInfo
 sed -i -e's/^WSALIAS DEFAULT PHYP_PATCH_LEVEL.*/WSALIAS DEFAULT PHYP_PATCH_LEVEL env\/phypa\/simics-4.2.0\/simics-4.2.85\/patches\/ph120319a700.42/' $sb/simu/data/simicsInfo 
