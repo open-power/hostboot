@@ -38,7 +38,7 @@ namespace INTR
     {
         NO_INTERRUPT = 0,       //!< no interrupt present
         INTERPROC = 2,          //!< Inter processor interrupt
-        FSP_MAILBOX = 0x25,     //!< TODO find this value
+        FSP_MAILBOX = 0x1A,     //!< TODO final value??
         ATTENTION = 0x26,       //!< TODO find this value
     };
 
@@ -49,6 +49,7 @@ namespace INTR
     {
         MSG_INTR_ADD_CPU_USR = 1,  //!< Add cpu core, data[0] = cpuid (PIR)
         MSG_INTR_REGISTER_MSGQ,    //!< Register a msgQ
+        MSG_INTR_UNREGISTER_MSGQ,  //!< Un register a msgQ
         MSG_INTR_ENABLE,           //!< Enable external Interrupts
         MSG_INTR_DISABLE,          //!< Disable external interrupts
     };
@@ -61,6 +62,14 @@ namespace INTR
      * @return errlHndl_t on error.
      */
     errlHndl_t registerMsgQ(msg_q_t i_msgQ, ext_intr_t i_type);
+
+    /**
+     * Un register a message queue from the interrupt handler
+     * @param[in] i_type the type of interrupt (XISR value)
+     * @return The message queue that was unregistered with i_type
+     *         | NULL if no queue was not found for i_type
+     */
+    msg_q_t unRegisterMsgQ(ext_intr_t i_type);
 
     /**
      * Enable hardware to report external interrupts

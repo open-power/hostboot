@@ -66,10 +66,15 @@ void IntrRp::init( void * i_taskArgs )
 
 //  ICPBAR = INTP.ICP_BAR[0:25] in P7 = 0x3FBFF90 + (8*node) + procPos
 //  P7 Scom address 0x02011C09 P8 = 0x020109c9
-//  BaseAddress:
+//  BaseAddress P7:
 //  BA[18:43] = ICPBAR  (P8 says [14:43] (30 bits))
-//  BA[47:49] = COREid (0-7)
+//  BA[47:49] = COREid (0-7) 
 //  BA[50:51] = cpu thread (0-3)
+//
+//  BaseAddress P8:
+//  BA[14:43] = ICPBAR (30 bits)
+//  BA[45:48] = coreID (1-6,9-14) (12 cores)
+//  BA[49:51] = thread (0-7)
 //
 //  BA+0  = XIRR (poll - Read/Write has no side effects))
 //  BA+4  = XIRR (Read locks HW, Write -> EOI to HW))
@@ -81,7 +86,7 @@ errlHndl_t IntrRp::_init()
 {
     errlHndl_t err = NULL;
 
-    // TODO Temporaritly DISABLE in VBU until P8 support is added
+    // TODO Temporaritly DISABLE in VBU until P8 support is confirmed
     if( TARGETING::is_vpo() )
     {
         iv_isVBU = true;
@@ -90,8 +95,19 @@ errlHndl_t IntrRp::_init()
     // get the PIR
     // Which ever cpu core this is running on is the MASTER cpu
     // Make master thread 0
-    iv_masterCpu.word = task_getcpuid();
+    uint32_t cpuid = task_getcpuid();
+    iv_masterCpu = cpuid;
+    // If P7 or P7+ core -- need to tweak fields in PIR
+    if(cpu_core_type() < CORE_POWER8_MURANO)
+    {
+        iv_masterCpu = P7PIR_t(cpuid);
+    }
     iv_masterCpu.threadId = 0;
+
+    TRACFCOMP(g_trac_intr,"node[%d], chip[%d], core[%d], thread[%d]",
+              iv_masterCpu.nodeId, iv_masterCpu.chipId, iv_masterCpu.coreId,
+              iv_masterCpu.threadId);
+
 
     uint64_t realAddr = 0;
 
@@ -145,24 +161,12 @@ errlHndl_t IntrRp::_init()
     {
 
         // Set up the interrupt provider registers
-        // NOTE: Simics only supports 4 threads, and two cores per proc chip.
-        //
-        // NOTE: P7 register address format only supports 4 threads per core.
-        //       This will change for P8
-        //
         // NOTE: It's only possible to set up the master core at this point.
         //
         // Set up link registers to forward all intrpts to master cpu.
         //
-        // There is one register set per cpu thread or 1024 register sets max.
+        // There is one register set per cpu thread.
         size_t threads = cpu_thread_count();
-
-        if(threads > 4)   //TODO remove when true P8 support is added
-        {
-            TRACFCOMP(g_trac_intr,
-                      "I>intrrp needs to be updated to handle > 4 threads");
-            threads = 4;
-        }
 
         PIR_t pir = iv_masterCpu;
         for(size_t thread = 0; thread < threads; ++thread)
@@ -186,7 +190,7 @@ errlHndl_t IntrRp::enableInterrupts()
 {
     errlHndl_t err = NULL;
 
-    // TODO Temporarily DISABLE in VBU until P8 support is added
+    // TODO Temporarily DISABLE in VBU until P8 support is confirmed
     if(iv_isVBU) return err;
 
     // Enable the interrupt on master processor core, thread 0
@@ -207,7 +211,7 @@ errlHndl_t IntrRp::disableInterrupts()
     errlHndl_t err = NULL;
 
     // Disable the interrupt on master processor core, thread 0
-    // TODO Temporarily DISABLE in VBU until P8 support is added
+    // TODO Temporarily DISABLE in VBU until P8 support is confirmed
     if(iv_isVBU) return err;
 
     uint64_t baseAddr = iv_baseAddr + cpuOffsetAddr(iv_masterCpu);
@@ -241,10 +245,6 @@ void IntrRp::msgHandler()
         {
             case MSG_INTR_EXTERN:
                 {
-                    // Acknowlege msg
-                    msg->data[1] = 0;
-                    msg_respond(iv_msgQ, msg);
-
                     ext_intr_t type = NO_INTERRUPT;
 
                     // type = XISR = XIRR[8:31]
@@ -259,6 +259,10 @@ void IntrRp::msgHandler()
                     type = static_cast<ext_intr_t>(xirr & 0x00FFFFFF);
 
                     TRACDCOMP(g_trac_intr,"External Interrupt recieved, Type=%x",type);
+
+                    // Acknowlege msg
+                    msg->data[1] = 0;
+                    msg_respond(iv_msgQ, msg);
 
                     Registry_t::iterator r = iv_registry.find(type);
                     if(r != iv_registry.end())
@@ -275,6 +279,7 @@ void IntrRp::msgHandler()
                                       " handler. Ignorming it. rc = %d",
                                       (uint32_t) type, rc);
                         }
+                        msg_free(rmsg);
                     }
                     else  // no queue registered for this interrupt type
                     {
@@ -294,11 +299,36 @@ void IntrRp::msgHandler()
 
             case MSG_INTR_REGISTER_MSGQ:
                 {
-                    msg_q_t l_msgQ= reinterpret_cast<msg_q_t>(msg->data[0]);
-                    ext_intr_t l_t= static_cast<ext_intr_t>(msg->data[1]);
+                    msg_q_t l_msgQ = reinterpret_cast<msg_q_t>(msg->data[0]);
+                    ext_intr_t l_t = static_cast<ext_intr_t>(msg->data[1]);
                     errlHndl_t err = registerInterrupt(l_msgQ,l_t);
 
                     msg->data[1] = reinterpret_cast<uint64_t>(err);
+                    msg_respond(iv_msgQ,msg);
+                }
+                break;
+
+            case MSG_INTR_UNREGISTER_MSGQ:
+                {
+                    TRACDCOMP(g_trac_intr,
+                              "UNREG: msg type = 0x%lx",
+                              msg->data[0]);
+
+                    msg_q_t msgQ = NULL;
+                    ext_intr_t type = static_cast<ext_intr_t>(msg->data[0]);
+                    Registry_t::iterator r = iv_registry.find(type);
+                    if(r != iv_registry.end())
+                    {
+                        msgQ = r->second;
+                        iv_registry.erase(r);
+                    }
+
+                    msg->data[1] = reinterpret_cast<uint64_t>(msgQ);
+
+                    TRACDCOMP(g_trac_intr,
+                              "UNREG: msgQ = 0x%lx",
+                              msg->data[1]);
+
                     msg_respond(iv_msgQ,msg);
                 }
                 break;
@@ -325,6 +355,16 @@ void IntrRp::msgHandler()
             case MSG_INTR_ADD_CPU:
                 {
                     PIR_t pir = msg->data[0];
+                    // If P7 or P7+ core -- need to tweak fields in PIR
+                    if(cpu_core_type() < CORE_POWER8_MURANO)
+                    {
+                        pir = P7PIR_t(msg->data[0]);
+                    }
+
+                    TRACFCOMP(g_trac_intr,"Add CPU node[%d], chip[%d],"
+                              "core[%d], thread[%d]",
+                              pir.nodeId, pir.chipId, pir.coreId,
+                              pir.threadId);
 
                     size_t threads = cpu_thread_count();
 
@@ -386,14 +426,8 @@ errlHndl_t IntrRp::registerInterrupt(msg_q_t i_msgQ, ext_intr_t i_type)
 
 void IntrRp::initInterruptPresenter(const PIR_t i_pir) const
 {
-    // TODO Temporaritly DISABLE in VBU until P8 support is added
+    // TODO Temporaritly DISABLE in VBU until P8 support is confirmed
     if(iv_isVBU) return;
-
-    //@fixme - this seems redundant...
-    if( TARGETING::is_vpo() )
-    {
-        return;
-    }
 
     uint64_t baseAddr = iv_baseAddr + cpuOffsetAddr(i_pir);
     uint8_t * cppr =
@@ -425,9 +459,10 @@ void IntrRp::initInterruptPresenter(const PIR_t i_pir) const
     LinkReg_t linkReg;
     linkReg.word = 0;
     linkReg.loopTrip = 1;   // needed?
-    linkReg.pchip= (iv_masterCpu.nodeId*8)+iv_masterCpu.chipId;
-    linkReg.pcore=  iv_masterCpu.coreId;
-    linkReg.tspec=  iv_masterCpu.threadId;
+    linkReg.node = iv_masterCpu.nodeId;
+    linkReg.pchip= iv_masterCpu.chipId;
+    linkReg.pcore= iv_masterCpu.coreId;
+    linkReg.tspec= iv_masterCpu.threadId;
 
     *(plinkReg) = linkReg.word;
     *(plinkReg + 1) = linkReg.word;
@@ -480,8 +515,20 @@ errlHndl_t INTR::registerMsgQ(msg_q_t i_msgQ, ext_intr_t i_type)
         msg->data[0] = reinterpret_cast<uint64_t>(i_msgQ);
         msg->data[1] = static_cast<uint64_t>(i_type);
 
-        msg_sendrecv(intr_msgQ, msg);
-        err = reinterpret_cast<errlHndl_t>(msg->data[1]);
+        int rc = msg_sendrecv(intr_msgQ, msg);
+        if(!rc)
+        {
+            err = reinterpret_cast<errlHndl_t>(msg->data[1]);
+        }
+        else
+        {
+            TRACFCOMP(g_trac_intr,ERR_MRK
+                      "INTR::registerMsgQ - msg_sendrecv failed. errno = %d",
+                      rc);
+        }
+
+        msg_free(msg);
+
     }
     else
     {
@@ -507,6 +554,36 @@ errlHndl_t INTR::registerMsgQ(msg_q_t i_msgQ, ext_intr_t i_type)
     return err;
 }
 
+// Unregister message queue from interrupt handler
+msg_q_t INTR::unRegisterMsgQ(ext_intr_t i_type)
+{
+    msg_q_t msgQ = NULL;
+    msg_q_t intr_msgQ = msg_q_resolve(INTR_MSGQ);
+    if(intr_msgQ)
+    {
+        msg_t * msg = msg_allocate();
+        msg->type = MSG_INTR_UNREGISTER_MSGQ;
+        msg->data[0] = static_cast<uint64_t>(i_type);
+
+        int rc = msg_sendrecv(intr_msgQ,msg);
+
+        if(!rc)
+        {
+            msgQ = reinterpret_cast<msg_q_t>(msg->data[1]);
+        }
+        else
+        {
+            TRACFCOMP(g_trac_intr,ERR_MRK
+                      "INTR::unRegisterMsgQ - msg_sendrecv failed. errno = %d",
+                      rc);
+        }
+
+        msg_free(msg);
+    }
+    return msgQ;
+}
+
+
 /*
  * Enable hardware to report external interrupts
  */
@@ -522,6 +599,7 @@ errlHndl_t INTR::enableExternalInterrupts()
         msg_sendrecv(intr_msgQ, msg);
 
         err = reinterpret_cast<errlHndl_t>(msg->data[1]);
+        msg_free(msg);
     }
     else
     {
@@ -563,6 +641,7 @@ errlHndl_t INTR::disableExternalInterrupts()
         msg_sendrecv(intr_msgQ, msg);
 
         err = reinterpret_cast<errlHndl_t>(msg->data[1]);
+        msg_free(msg);
     }
     else
     {

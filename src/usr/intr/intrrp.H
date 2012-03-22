@@ -81,6 +81,23 @@ namespace INTR
             // If the interrupt can't be handled by the current chip there are
             // three link registers used provide targets to forward the
             // interrupt to.
+            // P7:
+            // [0] last
+            // [1] LoopTrip
+            // [2:18] Reserved
+            // [19:24] PChip
+            // [25:27] PCore
+            // [28:29] TSpec
+            // [30:31] LSpec
+            //
+            // P8:
+            // [0] last
+            // [1] LoopTrip
+            // [2:18] Reserved
+            // [19:21] NodeId
+            // [22:24] ChipId
+            // [25:28] PCore
+            // [29:31] TSpec
             struct LinkReg_t
             {
                 union
@@ -88,21 +105,42 @@ namespace INTR
                     uint32_t word;
                     struct
                     {
-                        uint32_t        last:1;     //!< RO, 0 means last reg
-                        uint32_t        loopTrip:1; //!< Stop forwarding
-                        uint32_t        reserved:17;//!< Not implemented
-                        uint32_t        pchip:6;    //!< Target chip
-                        uint32_t        pcore:3;    //!< Target core
-                        uint32_t        tspec:2;    //!< Target tread
-                        uint32_t        lspec:2;    //!< Target link register
+                        uint32_t        last:1;       //!< RO, 0 means last reg
+                        uint32_t        loopTrip:1;   //!< Stop forwarding
+                        uint32_t        reserved:17;  //!< Not implemented
+                        uint32_t        node:3;       //!< Target node
+                        uint32_t        pchip:3;      //!< Target chip
+                        uint32_t        pcore:4;      //!<  core(1-6,9-14)
+                        uint32_t        tspec:3;      //!< Target Thread
                     } PACKED;
                 };
             };
 
             /**
+             * cpu P7PIR register
+             * @note      P7 bits - thread 2, core 3, chip 2, node 3,
+             */
+            struct P7PIR_t
+            {
+                union
+                {
+                    uint32_t word;
+                    struct
+                    {
+                        uint32_t        reserved:22;    //!< zeros
+                        uint32_t        nodeId:3;       //!< node (8)
+                        uint32_t        chipId:2;       //!< chip pos on node (4)
+                        uint32_t        coreId:3;       //!< Core number (8)
+                        uint32_t        threadId:2;     //!< thread number (4)
+                    } PACKED;
+                };
+                P7PIR_t(uint32_t i_word) : word(i_word) {}
+            };
+
+
+
+            /**
              * cpu PIR register
-             * @note TODO P7 bits - thread 2, core 3, chip 2, node 3,
-             *            P8 will be different. Need P8 book IV
              */
             struct PIR_t
             {
@@ -111,14 +149,31 @@ namespace INTR
                     uint32_t word;
                     struct
                     {
-                        uint32_t        reserved:22;    //!< zeros
-                        uint32_t        nodeId:3;       //!< node (4)
-                        uint32_t        chipId:2;       //!< chip pos on node (8)
-                        uint32_t        coreId:3;       //!< Core number (12)
-                        uint32_t        threadId:2;     //!< thread number (8)
+                        //P8:
+                        uint32_t        reserved:19;    //!< zeros
+                        uint32_t        nodeId:3;       //!< node (0-3)
+                        uint32_t        chipId:3;       //!< chip pos on node (0-5)
+                        uint32_t        coreId:4;       //!< Core number (1-6,9-14)?
+                        uint32_t        threadId:3;     //!< Thread number (0-7)
                     } PACKED;
                 };
                 PIR_t(uint32_t i_word) : word(i_word) {}
+
+                PIR_t operator = (uint32_t i_word)
+                {
+                    word = i_word;
+                    return word;
+                }
+
+                PIR_t operator = (P7PIR_t i_p7pir)
+                {
+                    nodeId      = i_p7pir.nodeId;
+                    chipId      = i_p7pir.chipId;
+                    coreId      = i_p7pir.coreId;
+                    threadId    = i_p7pir.threadId;
+
+                    return word;
+                }
             };
 
 

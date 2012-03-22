@@ -44,28 +44,33 @@ class IntrTest: public CxxTest::TestSuite
          */
         void test_verifyState( void )
         {
-#if defined(__INTR_TEST__)
-            // TODO Temporaritly DISABLE in VBU until P8 support is added
+
+            // TODO Temporaritly DISABLE in VBU until P8 support is verfied
             if( TARGETING::is_vpo() )
             {
                 return;
             }
 
-            // Add support for second chip (dummy)
-            uint32_t fake_pir = 0x00000001 << 5;   // P7 chip 1 TODO P8=?
-            msg_q_t intr_msgQ = msg_q_resolve(INTR_MSGQ);
-            msg_t * msg = msg_allocate();
-            msg->type = INTR::MSG_INTR_ADD_CPU_USR;
-            msg->data[0] = fake_pir;
+            //// Add support for second chip (dummy)
+            ////uint32_t fake_pir = 0x00000001 << 5;  // P7
+            //uint32_t fake_pir = 0x00000001 << 7;  // P8
+            //msg_q_t intr_msgQ = msg_q_resolve(INTR_MSGQ);
+            //msg_t * msg = msg_allocate();
+            //msg->type = INTR::MSG_INTR_ADD_CPU_USR;
+            //msg->data[0] = fake_pir;
 
-            msg_sendrecv(intr_msgQ, msg);
+            //msg_sendrecv(intr_msgQ, msg);
+            //msg_free(msg);
 
             // all the simics registers
-            for(uint64_t chip = 0; chip < 4; ++chip)
+            for(uint64_t chip = 0; chip < 1; ++chip)
             {
-                // simics P7 only supports 4 threads per core
-                // and 2 cores - let the thread field overflow
-                // into the core field -> 2 cores x 4 threads = 8 threads
+                // simics P8 appears to support 8 threads on 1 core.
+                // simics P7 appears to support 4 threads on 2 cores.
+                // for P7, pretending to have 8 threads works because the
+                // bit fields for cores and threads are contiguous so we can
+                // let the thread count overflow into the core field. so this
+                // works for p7 as well.
                 for(uint64_t thread = 0; thread < 8; ++thread)
                 {
                     uint64_t offset = (chip << 20) | (thread << 12);
@@ -78,17 +83,19 @@ class IntrTest: public CxxTest::TestSuite
                         if(*addr != 0xFF000000)
                         {
                             TS_FAIL
-                                ("INTR:Master cpu not initialized-XIRR=0x%08x",
-                                 *addr);
+                                ("INTR:Master cpu not initialized-XIRR@%p=0x%08x",
+                                 addr,*addr);
                         }
                     }
 
-                    if (chip < 2 && thread < 4) // TODO Change when all threads supported
+                    // TODO remove restriction when/if simics supports
+                    // more than 2 chips and 4 threads each
+                    if (chip < 2 && thread < 4)
                     {
                         if(offset != 0 && *addr != 0)
                         {
-                            TS_FAIL("INTR:Chip %ld Thread %ld bad XIRR=0x%08x",
-                                    chip,thread,*addr);
+                            TS_FAIL("INTR:Chip %ld Thread %ld bad XIRR@%p=0x%08x",
+                                    chip,thread,addr,*addr);
                         }
 
 
@@ -105,7 +112,6 @@ class IntrTest: public CxxTest::TestSuite
                     }
                 }
             }
-#endif
         }
 
         /**
@@ -113,8 +119,7 @@ class IntrTest: public CxxTest::TestSuite
          */
         void test_enableDisable( void )
         {
-#if defined(__INTR_TEST__)
-            // TODO Temporaritly DISABLE in VBU until P8 support is added
+            // TODO Temporaritly DISABLE in VBU until P8 support is confirmed
             if( TARGETING::is_vpo() )
             {
                 return;
@@ -133,7 +138,7 @@ class IntrTest: public CxxTest::TestSuite
 
             if((*addr & 0xFF000000) != 0)
             {
-                TS_FAIL("INTR not disabled");
+                TS_FAIL("INTR not disabled. Addr %p",addr);
             }
 
             err = INTR::enableExternalInterrupts();
@@ -148,9 +153,8 @@ class IntrTest: public CxxTest::TestSuite
 
             if((*addr & 0xFF000000) != 0xFF000000)
             {
-                TS_FAIL("INTR not enabled");
+                TS_FAIL("INTR not enabled. Addr %p", addr);
             }
-#endif
         }
 
         /**
@@ -159,10 +163,7 @@ class IntrTest: public CxxTest::TestSuite
          */
         void test_intr( void )
         {
-            // Injecting interproc interrupt seems to work sometimes and not others
-            // TODO need to investigate.
-#ifdef __NOT_NOW__
-            // TODO Temporaritly DISABLE in VBU until P8 support is added
+            // TODO Temporaritly DISABLE in VBU until P8 support is confirmed
             if( TARGETING::is_vpo() )
             {
                 return;
@@ -193,7 +194,16 @@ class IntrTest: public CxxTest::TestSuite
                 TS_FAIL("INTR::unexpected interrupt type %lx",msg->type);
             }
             msg_respond(msgQ,msg);
-#endif
+
+            msgQ = INTR::unRegisterMsgQ(INTR::INTERPROC);
+            if(msgQ)
+            {
+                msg_q_destroy(msgQ);
+            }
+            else
+            {
+                TS_FAIL("INTR::unRegisterMsgQ failed");
+            }
         }
 
 
