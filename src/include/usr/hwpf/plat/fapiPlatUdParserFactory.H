@@ -52,6 +52,7 @@ public:
      */
     PlatUserDetailsParserFactory()
     {
+        registerParser<PlatUserDetailsParserHwpRcValue>(HWPF_UDT_HWP_RCVALUE);
         registerParser<PlatUserDetailsParserHwpTarget>(HWPF_UDT_HWP_TARGET);
         registerParser<PlatUserDetailsParserHwpEcmddbb>(HWPF_UDT_HWP_ECMDDBB);
         registerParser<PlatUserDetailsParserHwpData>(HWPF_UDT_HWP_DATA);

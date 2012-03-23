@@ -65,8 +65,8 @@ IF_CMP_COMPILER_TARGET = ifcompiler
 # The FAPI return code and error info files generated from Error XML files
 FAPI_ERROR_TARGETS = fapiHwpReturnCodes.H fapiHwpErrorInfo.H
 
-# The PLAT error tag file generated from Error XML files
-PLAT_ERROR_TAG_TARGET = fapiHwpReasonCodes.H
+# The PLAT HWP RC Decoder file generated from Error XML files
+PLAT_ERROR_HWP_RC_DECODER = fapiPlatHwpRcDecode.H
 
 # The FAPI attribute id file generated from Attribute XML files
 FAPI_ATTR_ID_TARGET = fapiAttributeIds.H
@@ -96,7 +96,7 @@ GENFILES = ${IF_CMP_YACC_C_TARGET} \
            ${IF_CMP_FLEX_TARGET} \
            ${IF_CMP_COMPILER_TARGET} \
            ${FAPI_ERROR_TARGETS} \
-           ${PLAT_ERROR_TAG_TARGET} \
+           ${PLAT_ERROR_HWP_RC_DECODER} \
            ${FAPI_ATTR_ID_TARGET} \
            ${FAPI_ATTR_PLAT_CHECK_TARGET} \
            ${FAPI_ATTRS_SUPPORTED_TARGET} \
@@ -146,10 +146,10 @@ $(call GENTARGET, ${FAPI_ERROR_TARGETS}) : \
 	$< $(dir $@) ${HWP_ERROR_XML_FILES}
 
 #------------------------------------------------------------------------------
-# The PLAT error tag file generated from Error XML files
+# The PLAT HWP RC Decoder file generated from Error XML files
 #------------------------------------------------------------------------------
-$(call GENTARGET, ${PLAT_ERROR_TAG_TARGET}) : \
-        plat/fapiCreateHwpErrorTags.pl ${HWP_ERROR_XML_FILES}
+$(call GENTARGET, ${PLAT_ERROR_HWP_RC_DECODER}) : \
+        plat/fapiPlatCreateHwpRcDecoder.pl ${HWP_ERROR_XML_FILES}
 	$< $(dir $@) ${HWP_ERROR_XML_FILES}
 
 #------------------------------------------------------------------------------

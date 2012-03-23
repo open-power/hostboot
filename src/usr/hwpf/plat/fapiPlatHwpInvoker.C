@@ -149,22 +149,24 @@ errlHndl_t fapiRcToErrl(ReturnCode & io_rc)
         else if (l_creator == ReturnCode::CREATOR_HWP)
         {
             // HWP Error. Create an error log
-            FAPI_ERR("fapiRcToErrl: HWP error: 0x%x",
-                     static_cast<uint32_t>(io_rc));
+            uint32_t l_rcValue = static_cast<uint32_t>(io_rc);
+            FAPI_ERR("fapiRcToErrl: HWP error: 0x%x", l_rcValue);
 
             // TODO What should the severity be? Should it be in the error info?
 
-            // The errlog reason code is the HWPF compID and the rcValue LSB
-            uint32_t l_rcValue = static_cast<uint32_t>(io_rc);
-            uint16_t l_reasonCode = l_rcValue;
-            l_reasonCode &= 0xff;
-            l_reasonCode |= HWPF_COMP_ID;
-
-            // HostBoot errlog tags for HWP errors are in generated file
-            // fapiHwpReasonCodes.H
+            /*@
+             * @errortype
+             * @moduleid     MOD_HWP_RC_TO_ERRL
+             * @reasoncode   RC_HWP_GENERATED_ERROR
+             * @devdesc      HW Procedure generated error. See User Data.
+             */
             l_pError = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                                MOD_HWP_RC_TO_ERRL,
-                                               l_reasonCode);
+                                               RC_HWP_GENERATED_ERROR);
+
+            // Add the rcValue as FFDC. This will explain what the error was
+            l_pError->addFFDC(HWPF_COMP_ID, &l_rcValue, sizeof(l_rcValue), 1,
+                              HWPF_UDT_HWP_RCVALUE);
 
             // Get the Error Information Pointer
             const ErrorInfo * l_pErrorInfo = io_rc.getErrorInfo();

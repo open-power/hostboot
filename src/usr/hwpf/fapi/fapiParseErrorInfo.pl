@@ -137,7 +137,7 @@ print RCFILE " * \@brief Enumeration of HWP return codes\n";
 print RCFILE " *\/\n";
 print RCFILE "enum HwpReturnCode\n";
 print RCFILE "{\n";
-print RCFILE "    RC_SUCCESS,\n";
+print RCFILE "    RC_SUCCESS = 0,\n";
 
 #------------------------------------------------------------------------------
 # Print start of file information to fapiHwpErrorInfo.H
@@ -163,6 +163,7 @@ my $gard = 'gard';
 #------------------------------------------------------------------------------
 # For each XML file
 #------------------------------------------------------------------------------
+my $errId = 1;
 foreach my $argnum (1 .. $#ARGV)
 {
     my $infile = $ARGV[$argnum];
@@ -201,7 +202,8 @@ foreach my $argnum (1 .. $#ARGV)
         #----------------------------------------------------------------------
         # Print the return code to fapiHwpReturnCodes.H
         #----------------------------------------------------------------------
-        print RCFILE "    $err->{rc},\n";
+        print RCFILE "    $err->{rc} = $errId,\n";
+        $errId++;
 
         #----------------------------------------------------------------------
         # Print the CALL_FUNC_TO_ANALYZE_ERROR macro to fapiHwpErrorInfo.H

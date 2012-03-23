@@ -93,8 +93,14 @@ fapi::ReturnCode fapiDelay(uint64_t i_nanoSeconds, uint64_t i_simCycles)
 void fapiLogError(fapi::ReturnCode & io_rc)
 {
     errlHndl_t l_pError = NULL;
+    bool l_unitTestError = false;
 
     FAPI_ERR("fapiLogError: logging error");
+
+    if (fapi::RC_TEST_ERROR_A == static_cast<uint32_t>(io_rc))
+    {
+        l_unitTestError = true;
+    }
 
     // Convert the return code to an error log.
     // This will set the return code to FAPI_RC_SUCCESS and clear any PLAT Data,
@@ -103,7 +109,14 @@ void fapiLogError(fapi::ReturnCode & io_rc)
 
     // Commit the error log. This will delete the error log and set the handle
     // to NULL.
-    errlCommit(l_pError,HWPF_COMP_ID);
+    if (l_unitTestError)
+    {
+        errlCommit(l_pError, CXXTEST_COMP_ID);
+    }
+    else
+    {
+        errlCommit(l_pError, HWPF_COMP_ID);
+    }
 }
 
 //****************************************************************************

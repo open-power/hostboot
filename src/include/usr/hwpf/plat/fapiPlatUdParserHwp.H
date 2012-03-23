@@ -36,9 +36,62 @@
  *  fapi::ReturnCode
  */
 #include <errl/errluserdetails.H>
+#include <fapiPlatHwpRcDecode.H>
 
 namespace fapi
 {
+
+/**
+ * @class PlatUserDetailsParserHwpRcValue
+ *
+ * Parses the HWP RcValue in an error log.
+ */
+class PlatUserDetailsParserHwpRcValue : public ERRORLOG::ErrlUserDetailsParser
+{
+public:
+    /**
+     *  @brief Constructor
+     */
+    PlatUserDetailsParserHwpRcValue() {}
+
+    /**
+     *  @brief Destructor
+     */
+    virtual ~PlatUserDetailsParserHwpRcValue() {}
+
+    /**
+     *  @brief Parses the HWP RcValue in an error log.
+     *
+     *  @param  i_version Version of the data
+     *  @param  i_parse   ErrlUsrParser object for outputting information
+     *  @param  i_pBuffer Pointer to buffer containing detail data
+     *  @param  i_buflen  Length of the buffer
+     */
+    virtual void parse(errlver_t i_version,
+                       ErrlUsrParser & i_parser,
+                       void * i_pBuffer,
+                       const uint32_t i_buflen) const
+    {
+        uint32_t l_rcValue = ntohl(*(static_cast<uint32_t *>(i_pBuffer)));
+
+        const char * l_pDesc = fapiDecodeHwpRc(l_rcValue);
+
+        if (l_pDesc)
+        {
+            i_parser.PrintString("HWP Error description", l_pDesc);
+        }
+        else
+        {
+            i_parser.PrintNumber("Unrecognized Error ID", "0x%x", l_rcValue);
+        }
+    }
+
+private:
+    // Disabled
+    PlatUserDetailsParserHwpRcValue(const PlatUserDetailsParserHwpRcValue &);
+    PlatUserDetailsParserHwpRcValue & operator=(
+        const PlatUserDetailsParserHwpRcValue &);
+};
 
 /**
  * @class PlatUserDetailsParserHwpTarget
