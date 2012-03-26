@@ -43,6 +43,7 @@
 #include "xscom.H"
 #include <assert.h>
 
+
 // Trace definition
 trace_desc_t* g_trac_xscom = NULL;
 TRAC_INIT(&g_trac_xscom, "XSCOM", 4096);
@@ -244,14 +245,6 @@ uint8_t getMaxChipsPerNode()
  *              Use virtual addr stored for sentinel (g_masterProcVirtAddr)
  *          Else
  *              Call mmio_dev_map() to get virtual addr for this slave proc
- *              @todo:
- *              Currently virt addr attribute is not supported, so we
- *              must call unmap in xscomPerfomOp function once the
- *              xscom operation is done.
- *              When virt addr attribute is supported, the code that saves
- *              virt addr code in this function will be uncommented,
- *              and the mmio_dev_unmap() call in xscomPerformOp()
- *              function must be removed.
  *          End if
  *          Save virtual addr used to this chip's attribute
  *      Else
@@ -264,7 +257,7 @@ uint8_t getMaxChipsPerNode()
  *
  * @return errlHndl_t
  */
-errlHndl_t getTargetVirtualAddress(const TARGETING::Target* i_target,
+errlHndl_t getTargetVirtualAddress(TARGETING::Target* i_target,
                                    uint64_t*& o_virtAddr)
 {
     errlHndl_t l_err = NULL;
@@ -273,6 +266,7 @@ errlHndl_t getTargetVirtualAddress(const TARGETING::Target* i_target,
 
     do
     {
+
         // Find out if the target pointer is the master processor chip
         bool l_isMasterProcChip = false;
 
@@ -294,9 +288,11 @@ errlHndl_t getTargetVirtualAddress(const TARGETING::Target* i_target,
             }
         }
 
-        // Figure out the virtual address
+
+        // If the target is the master processor chip sentinel
         if (l_isMasterProcChip)
         {
+
             // This is the master processor chip. The virtual address is
             // g_masterProcVirtAddr. If this is NULL then initialize it
 
@@ -344,27 +340,23 @@ errlHndl_t getTargetVirtualAddress(const TARGETING::Target* i_target,
             // Set virtual address to sentinel's value
             o_virtAddr = g_masterProcVirtAddr;
         }
-        else
+        else // This is not the master sentinel
         {
-            // This is not the master processor chip
+   
+            // Get the virtual addr value of the chip from the virtual address
+            // attribute
+             o_virtAddr =  reinterpret_cast<uint64_t*>(i_target->getAttr<TARGETING::ATTR_XSCOM_VIRTUAL_ADDR>());
 
-            // @todo:
-            // We (Nick/Patrick/Thi) agree to review the performance cost of
-            // map/unmap calls for each xscom to determine if it's justified
-            // to add virtual address as one of the chip's attributes.
-            // For now, call map/unmap to get virtual address.
-            // If virtual address attribute is implemented, call the target
-            // to get it
-            // Get the virtual addr value of the chip
-            // l_virtAddr = i_target->getAttr<TARGETING::<ATTR_VIRTUAL_ADDR>();
-
-            // If virtual addr value is NULL, need to calculate it
+            // If the virtual address equals NULL(default) then this is the
+            // first XSCOM to this target so we need to calculate
+            // the virtual address and save it in the xscom address attribute.
             if (o_virtAddr == NULL)
             {
                 // Get the target chip info
                 TARGETING::XscomChipInfo l_xscomChipInfo = {0};
                 l_xscomChipInfo =
                         i_target->getAttr<TARGETING::ATTR_XSCOM_CHIP_INFO>();
+
                 //@todo
                 // Save the node id of the master chip in a global as well and
                 // update it. For Rainer systems the node id of the master chip may
@@ -391,8 +383,9 @@ errlHndl_t getTargetVirtualAddress(const TARGETING::Target* i_target,
                     (mmio_dev_map(reinterpret_cast<void*>(l_XSComBaseAddr),
                       THIRTYTWO_GB));
 
-                // @todo - Save as an attribute if Virtual address attribute
-                // is implemented,
+                // Implemented the virtual address attribute.. 
+
+                // Leaving the comments as a discussion point... 
                 // Technically there is a race condition here. The mutex is
                 // a per-hardware thread mutex, not a mutex for the whole XSCOM
                 // logic. So there is possibility that this same thread is running
@@ -404,7 +397,9 @@ errlHndl_t getTargetVirtualAddress(const TARGETING::Target* i_target,
                 // this attribute, where as if we had a reference to it we could use
                 // the atomic update functions (_sync_bool_compare_and_swap in
                 // this case.
-                // i_target->setAttr<ATTR_VIRTUAL_ADDR>(l_virtAddr);
+
+                // Save the virtual address attribute.
+                i_target->setAttr<TARGETING::ATTR_XSCOM_VIRTUAL_ADDR>(reinterpret_cast<uint64_t>(o_virtAddr));
             }
         }
 
@@ -427,9 +422,6 @@ errlHndl_t xscomPerformOp(DeviceFW::OperationType i_opType,
     HMER l_hmer;
     mutex_t* l_XSComMutex;
     uint64_t l_addr = va_arg(i_args,uint64_t);
-
-    //@todo - Override the target to be the master sentinel
-    i_target = TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
 
     // Retry loop
     bool l_retry = false;
@@ -460,6 +452,7 @@ errlHndl_t xscomPerformOp(DeviceFW::OperationType i_opType,
         // Get the target chip's virtual address
         uint64_t* l_virtAddr = NULL;
         l_err = getTargetVirtualAddress(i_target, l_virtAddr);
+
         if (l_err)
         {
             // Unlock
@@ -506,46 +499,6 @@ errlHndl_t xscomPerformOp(DeviceFW::OperationType i_opType,
             l_hmer = waitForHMERStatus();
 
         } while (l_hmer.mXSComStatus == HMER::XSCOM_BLOCKED);
-
-
-        // @todo: this block of code is to un-map the slave devices.
-        //        It should be removed if Virtual Addr attribute
-        //        is supported (since we only map it once then cache
-        //        the virtual addr value
-        if (i_target != TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL)
-        {
-            TARGETING::Target* l_masterProcTarget = NULL;
-            TARGETING::TargetService& l_targetService =
-                                        TARGETING::targetService();
-            l_targetService.masterProcChipTargetHandle( l_masterProcTarget );
-            if (l_masterProcTarget != i_target)
-            {
-                int rc = 0;
-                rc =  mmio_dev_unmap(reinterpret_cast<void*>(l_virtAddr));
-                if (rc != 0)
-                {
-                    /*@
-                     * @errortype
-                     * @moduleid     XSCOM_PERFORM_OP
-                     * @reasoncode   XSCOM_MMIO_UNMAP_ERR
-                     * @userdata1    Return Code
-                     * @userdata2    Unmap address
-                     * @devdesc      mmio_dev_unmap() returns error
-                     */
-                    l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                            XSCOM_PERFORM_OP,
-                            XSCOM_MMIO_UNMAP_ERR,
-                            rc,
-                            reinterpret_cast<uint64_t>(l_virtAddr));
-
-                    // Unlock
-                    mutex_unlock(l_XSComMutex);
-                    // Done, un-pin
-                    task_affinity_unpin();
-                    break;
-                }
-            }
-        }
 
         // Unlock
         mutex_unlock(l_XSComMutex);

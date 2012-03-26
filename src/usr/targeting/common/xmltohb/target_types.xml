@@ -204,6 +204,9 @@
         <id>I2C_ENGINE_MUTEX_2</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>XSCOM_VIRTUAL_ADDR</id>
+    </attribute>
 </targetType>
 
 <targetType>

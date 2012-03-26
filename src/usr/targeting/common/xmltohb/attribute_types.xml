@@ -709,6 +709,19 @@
 </attribute>
 
 <attribute>
+    <id>XSCOM_VIRTUAL_ADDR</id>
+    <description>Cached Virtual Address of Xscom memory space for this Chip</description>
+    <simpleType>
+        <uint64_t>
+            <default>0</default>
+        </uint64_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
     <id>FSI_MASTER_CHIP</id>
     <description>Chip which contains the FSI master logic that drives this slave</description>
     <nativeType>
