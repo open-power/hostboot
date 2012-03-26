@@ -963,19 +963,19 @@
             <name>port</name>
             <description>Port from the I2C Master device.  This is a 6-bit value.</description>
             <type>uint8_t</type>
-            <default>0</default>
+            <default>0x80</default>
         </field>
         <field>
             <name>devAddr</name>
             <description>Device address on the I2C bus. This is a 7-bit value.</description>
             <type>uint8_t</type>
-            <default>0</default>
+            <default>0x80</default>
         </field>
         <field>
             <name>engine</name>
             <description>I2C master engine.  This is a 2-bit value.</description>
             <type>uint8_t</type>
-            <default>0</default>
+            <default>0x80</default>
         </field>
     </complexType>
     <persistency>non-volatile</persistency>
@@ -998,19 +998,19 @@
             <name>port</name>
             <description>Port from the I2C Master device.  This is a 6-bit value.</description>
             <type>uint8_t</type>
-            <default>0</default>
+            <default>0x80</default>
         </field>
         <field>
             <name>devAddr</name>
             <description>Device address on the I2C bus. This is a 7-bit value.</description>
             <type>uint8_t</type>
-            <default>0</default>
+            <default>0x80</default>
         </field>
         <field>
             <name>engine</name>
             <description>I2C master engine.  This is a 2-bit value.</description>
             <type>uint8_t</type>
-            <default>0</default>
+            <default>0x80</default>
         </field>
     </complexType>
     <persistency>non-volatile</persistency>

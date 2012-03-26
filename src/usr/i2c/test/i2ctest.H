@@ -42,6 +42,29 @@ extern trace_desc_t* g_trac_i2c;
 
 using namespace TARGETING;
 
+bool isI2CAvailable( TARGETING::Target * i_target )
+{
+    bool avail = true;
+    EepromAddrInfo0 eepromData;
+    if( i_target->tryGetAttr<ATTR_EEPROM_ADDR_INFO0>( eepromData ) )
+    {
+        if( ( 0x80 == eepromData.port ) &&
+            ( 0x80 == eepromData.devAddr ) &&
+            ( 0x80 == eepromData.engine ) )
+        {
+            // Default values, thus, not present
+            avail = false;
+        }
+    }
+    else
+    {
+        // Didn't find attribute, thus, not present
+        avail = false;
+    }
+
+    return avail;
+}
+
 class I2CTest: public CxxTest::TestSuite
 {
     public:
@@ -193,6 +216,12 @@ class I2CTest: public CxxTest::TestSuite
                             break;
                     };
 
+                    // Check to see if I2C function is there
+                    if( !isI2CAvailable( theTarget ) )
+                    {
+                        continue;
+                    }
+
                     // do the operation
                     cmds++;
                     err = deviceOp( (testData[i].rnw ? DeviceFW::READ : DeviceFW::WRITE),
@@ -299,6 +328,12 @@ class I2CTest: public CxxTest::TestSuite
                 TARGETING::Target* testTarget = NULL;
                 tS.masterProcChipTargetHandle( testTarget );
                 assert(testTarget != NULL);
+
+                // Check to see if I2C function is there
+                if( !isI2CAvailable( testTarget ) )
+                {
+                    continue;
+                }
 
                 num_ops++;
                 err = deviceOp( DeviceFW::LAST_OP_TYPE,

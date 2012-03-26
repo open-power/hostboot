@@ -38,6 +38,7 @@
 #include <targeting/predicates/predicatectm.H>
 #include <targeting/predicates/predicatepostfixexpr.H>
 #include <targeting/util.H>
+#include "i2ctest.H"
 
 extern trace_desc_t* g_trac_eeprom;
 
@@ -134,6 +135,12 @@ class EEPROMTest: public CxxTest::TestSuite
 
                 for( uint32_t j = 0; j < fullList.size(); j++ )
                 {
+                    // Skip this target if EEPROM isn't available.
+                    if( !isI2CAvailable( fullList[j] ) )
+                    {
+                        continue;
+                    }
+
                     for( uint32_t i = 0; i < NUM_CMDS; i++ )
                     {
                         uint64_t data;
@@ -210,6 +217,12 @@ class EEPROMTest: public CxxTest::TestSuite
                 tS.masterProcChipTargetHandle( testTarget );
                 assert(testTarget != NULL);
 
+                // Skip this target if EEPROM isn't available.
+                if( !isI2CAvailable( testTarget ) )
+                {
+                    continue;
+                }
+
                 num_ops++;
                 err = deviceOp( DeviceFW::LAST_OP_TYPE,
                                 testTarget,
@@ -255,6 +268,12 @@ class EEPROMTest: public CxxTest::TestSuite
                 TARGETING::Target* testTarget = NULL;
                 tS.masterProcChipTargetHandle( testTarget );
                 assert(testTarget != NULL);
+
+                // Skip this target if EEPROM isn't available.
+                if( !isI2CAvailable( testTarget ) )
+                {
+                    continue;
+                }
 
                 num_ops++;
                 err = deviceOp( DeviceFW::WRITE,
