@@ -54,10 +54,6 @@ errlHndl_t getMbaWorkFlow(DiagMode i_mode, WorkFlow & o_wf)
     // add the correct sequences for the mba based
     // on the mode
 
-    // poplulate mba properties first
-
-    o_wf.push_back(POPULATE_MBA_PROPERTIES);
-
     // every mba does restore dram repairs
 
     o_wf.push_back(RESTORE_DRAM_REPAIRS);

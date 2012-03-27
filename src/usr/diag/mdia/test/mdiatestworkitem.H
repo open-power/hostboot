@@ -30,7 +30,6 @@
 
 #include <builtins.h>
 #include <cxxtest/TestSuite.H>
-#include <targeting/common/attributes.H>
 #include "../mdiaworkitem.H"
 #include "../mdiasm.H"
 
@@ -46,11 +45,10 @@ class MdiaWorkItemTest : public CxxTest::TestSuite
             TS_TRACE(ENTER_MRK "testWorkItem");
 
             StateMachine s;
+            WorkFlowProperties * notUsed = 0;
 
-            TargetHandle_t target = 0;
-
-            WorkItem wi1(s, START_SCRUB, target, 2222),
-                     wi2(s, START_SCRUB, target, 1111);
+            WorkItem wi1(s, notUsed, 2222),
+                     wi2(s, notUsed, 1111);
 
             if(wi2 < wi1)
             {

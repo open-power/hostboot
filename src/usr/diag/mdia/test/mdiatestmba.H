@@ -91,7 +91,6 @@ class MdiaMbaTest : public CxxTest::TestSuite
 
             WorkFlow wf, expected;
 
-            expected.push_back(POPULATE_MBA_PROPERTIES);
             expected.push_back(RESTORE_DRAM_REPAIRS);
             expected.push_back(START_PATTERN_0);
 

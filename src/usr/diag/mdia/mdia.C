@@ -28,15 +28,20 @@
 #include "mdiafwd.H"
 #include "mdiaglobals.H"
 #include "mdiatrace.H"
+#include "mdiasm.H"
+#include "mdiasmimpl.H"
+#include <util/singleton.H>
 
 using namespace TARGETING;
+using namespace Util;
 
 namespace MDIA
 {
 
 errlHndl_t runStep(const TargetHandleList & i_targetList)
 {
-    MDIA_FAST("memory diagnostics entry (runStep)");
+    MDIA_FAST("memory diagnostics entry with %d target(s)",
+            i_targetList.size());
 
     // memory diagnostics ipl step entry point
 
@@ -47,7 +52,7 @@ errlHndl_t runStep(const TargetHandleList & i_targetList)
     // get the workflow for each target mba passed in.
     // associate each workflow with the target handle.
 
-    WorkFlowAssocList list;
+    WorkFlowAssocMap list;
 
     TargetHandleList::const_iterator tit;
     DiagMode mode;
@@ -72,6 +77,7 @@ errlHndl_t runStep(const TargetHandleList & i_targetList)
     if(!err)
     {
         // TODO...run the workflow through the state machine
+        err = Singleton<StateMachine>::instance().run(list);
     }
 
     // ensure threads and pools are shutdown when finished
@@ -79,11 +85,15 @@ errlHndl_t runStep(const TargetHandleList & i_targetList)
     doStepCleanup(globals);
 
     return err;
+
 }
 
 void doStepCleanup(const Globals & i_globals)
 {
-    // TODO ... stop the state machine
+    // stop the state machine
+
+    Singleton<StateMachine>::instance().shutdown();
+
     // TODO ... stop the command monitor
 }
 }

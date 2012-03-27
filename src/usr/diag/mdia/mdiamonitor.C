@@ -22,12 +22,28 @@
 //  IBM_PROLOG_END
 #include <sys/time.h>
 #include <targeting/common/util.H>
+#include <targeting/common/target.H>
 #include <vector>
+#include <diag/mdia/mdiamevent.H>
 #include "mdiamonitor.H"
 #include "mdiasm.H"
 
+using namespace TARGETING;
+
 namespace MDIA
 {
+
+void CommandMonitor::startPolling(TargetHandle_t i_target)
+{
+#ifdef MDIA_DO_POLLING
+
+    mutex_lock(&iv_mutex);
+
+    iv_pollingList.push_back(i_target);
+
+    mutex_unlock(&iv_mutex);
+#endif
+}
 
 uint64_t CommandMonitor::addMonitor(uint64_t i_to)
 {
@@ -115,6 +131,10 @@ void CommandMonitor::threadMain(StateMachine & i_sm)
     static const uint64_t singleStepPauseNSecs = 10000000;
     static uint64_t wakeupIntervalNanoSecs = 0;
 
+#ifdef MDIA_DO_POLLING
+    TargetHandleList pollingList;
+#endif
+
     // periodically wakeup and check for any command
     // timeouts
 
@@ -127,7 +147,7 @@ void CommandMonitor::threadMain(StateMachine & i_sm)
         wakeupIntervalNanoSecs = singleStepPauseNSecs;
     }
 
-    bool shutdown = false, callbackNeeded = false;
+    bool shutdown = false;
     std::vector<uint64_t> monitorsTimedout;
 
     while(true)
@@ -165,7 +185,6 @@ void CommandMonitor::threadMain(StateMachine & i_sm)
 
                 else
                 {
-                    callbackNeeded = true;
                     monitorsTimedout.push_back(it->first);
 
                     // remove the monitor
@@ -173,15 +192,34 @@ void CommandMonitor::threadMain(StateMachine & i_sm)
                     iv_monitors.erase(it++);
                 }
             }
+
+#ifdef MDIA_DO_POLLING
+            swap(pollingList, iv_pollingList);
+#endif
         }
 
         mutex_unlock(&iv_mutex);
 
-        if(callbackNeeded)
-        {
+        if(!monitorsTimedout.empty()) {
             i_sm.processCommandTimeout(monitorsTimedout);
-            callbackNeeded = false;
+            monitorsTimedout.clear();
         }
+
+#ifdef MDIA_DO_POLLING
+        // check for polling
+
+        TargetHandleList::iterator pit = pollingList.begin();
+
+        while(pit != pollingList.end())
+        {
+            MaintCommandEvent e;
+
+            e.type = COMMAND_COMPLETE;
+            e.target = *pit;
+            i_sm.processMaintCommandEvent(e);
+            pit = pollingList.erase(pit);
+        }
+#endif
 
         // istep finished...shutdown
 

@@ -31,10 +31,36 @@
  * @brief mdia component interface
  */
 
-class PrdfMdiaMessage;
-
 namespace MDIA
 {
+struct MaintCommandEvent;
+
+/**
+ * @brief MaintCommandEventType - maint command event types
+ */
+enum MaintCommandEventType
+{
+    /**
+     * @brief COMMAND_COMPLETE - command finished at end of last rank
+     */
+    COMMAND_COMPLETE,
+
+    /**
+     * @brief COMMAND_STOPPED - command finished at end of other rank
+     */
+    COMMAND_STOPPED,
+
+    /**
+     * @brief SKIP_MBA - stop testing mba
+     */
+    SKIP_MBA,
+
+    /**
+     * @brief RESET_TIMER - command done but expect long analysis
+     */
+    RESET_TIMER,
+};
+
 /**
  * @brief runStep istep dispatcher entry point.
  *
@@ -67,6 +93,6 @@ errlHndl_t runStep(const TARGETING::TargetHandleList & i_targetList);
  * @pre memory diagnostics ipl step in progress
  * @post message processed
  */
-errlHndl_t processEvent(PrdfMdiaMessage & i_event);
+errlHndl_t processEvent(MaintCommandEvent & i_event);
 }
 #endif

@@ -36,7 +36,12 @@
 /**
  * @brief forwards
  */
+class MdiaSmTest;
+class MdiaTest;
+class MdiaMbaTest;
 class MdiaCommandMonitorTest;
+class MdiaTraceTest;
+class MdiaWorkItemTest;
 
 namespace MDIA
 {
@@ -46,14 +51,15 @@ namespace MDIA
  */
 class StateMachine;
 class WorkItem;
+class CommandMonitor;
 struct Globals;
+struct WorkFlowProperties;
 
 /**
  * @brief work flow phases
  */
 enum WorkFlowPhase
 {
-    POPULATE_MBA_PROPERTIES,
     RESTORE_DRAM_REPAIRS,
     START_PATTERN_0,
     START_PATTERN_1,
@@ -65,7 +71,8 @@ enum WorkFlowPhase
     START_PATTERN_7,
     START_PATTERN_8,
     START_SCRUB,
-    PROCESS_ATTENTION,
+    DUMMY_SYNC_PHASE,
+    DUMMY_ASYNC_PHASE,
 };
 
 /**
@@ -112,14 +119,14 @@ enum WorkFlowStatus
 typedef std::vector<WorkFlowPhase> WorkFlow;
 
 /**
-* @brief WorkflowAssocList target / workflow association list
+* @brief WorkflowAssocMap target / workflow association map
 */
-typedef std::map<TARGETING::TargetHandle_t, WorkFlow> WorkFlowAssocList;
+typedef std::map<TARGETING::TargetHandle_t, WorkFlow> WorkFlowAssocMap;
 
 /**
 * @brief WorkflowAssoc target / workflow association list element
 */
-typedef std::map<TARGETING::TargetHandle_t, WorkFlow>::const_iterator WorkFlowAssoc;
+typedef WorkFlowAssocMap::const_iterator WorkFlowAssoc;
 
 /**
  * @brief getMbaDiagnosticMode get the mode (scrub, init, one, four, nine)

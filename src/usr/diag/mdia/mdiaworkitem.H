@@ -63,12 +63,11 @@ class WorkItem
          * work items with lower i_priority
          *
          * @param[in] i_sm state machine to forward call to
-         * @param[in] i_phase work item phase
-         * @param[in] i_target work item target
+         * @param[in] i_wfp state machine state snapshot
          * @param[in] i_priority work item priority
          */
-        WorkItem(StateMachine & i_sm, WorkFlowPhase i_phase,
-                TARGETING::TargetHandle_t i_target, uint64_t i_priority);
+        WorkItem(StateMachine & i_sm, WorkFlowProperties * i_wfp,
+                uint64_t i_priority);
 
     private:
 
@@ -78,14 +77,9 @@ class WorkItem
         StateMachine & iv_sm;
 
         /**
-         * @brief where the work item is in the state machine
+         * @brief state machine state to be passed back to the state machine
          */
-        WorkFlowPhase iv_workFlowPhase;
-
-        /**
-         * @brief the scope of the work item
-         */
-        TARGETING::TargetHandle_t iv_target;
+        WorkFlowProperties * iv_wfp;
 
         /**
          * @brief the scheduling priority for the work item

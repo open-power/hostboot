@@ -77,6 +77,13 @@ class CommandMonitor
         void shutdown();
 
         /**
+         * @brief start polling for a maint command complete event
+         *
+         * @param[in] i_target the target to poll
+         */
+        void startPolling(TARGETING::TargetHandle_t i_target);
+
+        /**
          * @brief ctor
          */
         CommandMonitor();
@@ -161,6 +168,11 @@ class CommandMonitor
          * @brief maint command monitors
          */
         MonitorMap iv_monitors;
+
+        /**
+         * @brief list of targets to do polling
+         */
+        TARGETING::TargetHandleList iv_pollingList;
 
         /**
          * @brief copy disabled

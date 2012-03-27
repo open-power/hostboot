@@ -27,7 +27,6 @@
 
 #include "mdiaworkitem.H"
 #include "mdiasm.H"
-#include "mdiatrace.H"
 
 using namespace TARGETING;
 
@@ -36,9 +35,7 @@ namespace MDIA
 
 void WorkItem::operator()()
 {
-    MDIA_FAST("executing workitem: %d", iv_workFlowPhase);
-
-    iv_sm.executeWorkItem(iv_target, iv_workFlowPhase);
+    iv_sm.executeWorkItem(iv_wfp);
 }
 
 int64_t WorkItem::compare(const WorkItem & i_r) const
@@ -64,12 +61,10 @@ int64_t WorkItem::compare(const WorkItem & i_r) const
 }
 
 WorkItem::WorkItem(StateMachine & i_sm,
-        WorkFlowPhase i_workFlowPhase,
-        TargetHandle_t i_target,
+        WorkFlowProperties * i_wfp,
         uint64_t i_priority) :
     iv_sm(i_sm),
-    iv_workFlowPhase(i_workFlowPhase),
-    iv_target(i_target),
+    iv_wfp(i_wfp),
     iv_priority(i_priority)
 {
 

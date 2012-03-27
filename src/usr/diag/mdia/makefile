@@ -26,8 +26,12 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/diag
 
 MODULE = mdia
 
-OBJS =  mdiamonitor.o mdiatrace.o mdiaworkitem.o mdiamba.o mdia.o
+OBJS =  mdiamonitor.o mdiatrace.o mdiaworkitem.o mdiamba.o mdia.o mdiasm.o
 
 SUBDIRS = test.d
+
+ifndef MDIA_NO_POLLING
+    CUSTOMFLAGS += -DMDIA_DO_POLLING=1
+endif
 
 include ${ROOTPATH}/config.mk

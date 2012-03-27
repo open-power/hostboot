@@ -202,6 +202,14 @@ const compId_t HBPRDF_COMP_ID = 0x1300; //FIXME working with ERRL owner to resol
 const char HBPRDF_COMP_NAME[] = "prdf"; //FIXME
 //@}
 
+/** @name MDIA
+ *  MDIA memory diagnostics component
+ */
+//@{
+const compId_t HBMDIA_COMP_ID = 0x1400;
+const char HBMDIA_COMP_NAME[] = "mdia";
+//@}
+
 /** @name RESERVED
  *  Reserved component ID. x3100 is the component ID
  *  of FipS ERRL component. Due to our use of
