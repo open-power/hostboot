@@ -28,6 +28,8 @@
 #@del os.environ["HOSTBOOT_SYMS"]
 ################################################################################
 
+# Preload VPD in PNOR
+run-python-file hb-pnor-mvpd-preload.py
 
 #setup traces
 run-python-file simics-debug-framework.py
@@ -35,7 +37,8 @@ run-python-file hb-simdebug.py
 
 #Load PNOR image into phys_mem
 phys_mem.load-file ../img/simics.pnor 0x400000
-
+phys-mem.load-file ./sysmvpd.dat 0x681000
+phys-mem.load-file ./sysspd.dat 0x701000
 
 #Setup the mailbox 
 venice_cec_chip_cmp0.psi_hb->psihb_psihbcr=0x5f00000000000000

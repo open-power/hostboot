@@ -27,6 +27,6 @@ OBJS = spd.o dimmPres.o
 
 SUBDIRS = test.d
 
-BINARY_FILES = $(IMGDIR)/dimmspd.dat:70ba15165f78487ed870333891ae983167afd546
+BINARY_FILES = $(IMGDIR)/dimmspd.dat:4ff2e1b8616d10de13b63f56ca4eaa077ae6cdd8
 
 include ${ROOTPATH}/config.mk
