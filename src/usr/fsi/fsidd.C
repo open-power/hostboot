@@ -626,6 +626,7 @@ errlHndl_t FsiDD::initializeHardware()
  */
 FsiDD::FsiDD()
 :iv_master(NULL)
+,iv_ffdcTask(0)
 {
     TRACFCOMP(g_trac_fsi, "FsiDD::FsiDD()>");
 
@@ -714,10 +715,10 @@ errlHndl_t FsiDD::read(const FsiAddrInfo_t& i_addrInfo,
 
         // atomic section >>
         l_mutex
-            = (i_addrInfo.opbTarg)->getHbMutexAttr<TARGETING::ATTR_FSI_MASTER_MUTEX>();
+          = (i_addrInfo.opbTarg)->getHbMutexAttr<TARGETING::ATTR_FSI_MASTER_MUTEX>();
 
-        // skip the mutex lock if we're already inside a previous operation
-        if( !iv_ffdcCollection )
+        if( (iv_ffdcTask != 0)  // performance hack for typical case
+            && (iv_ffdcTask != task_gettid()) )
         {
             mutex_lock(l_mutex);
             need_unlock = true;
@@ -794,8 +795,8 @@ errlHndl_t FsiDD::write(const FsiAddrInfo_t& i_addrInfo,
         l_mutex
             = (i_addrInfo.opbTarg)->getHbMutexAttr<TARGETING::ATTR_FSI_MASTER_MUTEX>();
 
-        // skip the mutex lock if we're already inside a previous operation
-        if( !iv_ffdcCollection )
+        if( (iv_ffdcTask != 0)  // performance hack for typical case
+            && (iv_ffdcTask != task_gettid()) )
         {
             mutex_lock(l_mutex);
             need_unlock = true;
@@ -870,9 +871,10 @@ errlHndl_t FsiDD::handleOpbErrors(const FsiAddrInfo_t& i_addrInfo,
                                         TWO_UINT32_TO_UINT64(i_opbStatReg,0));
 
         // Collect some FFDC but avoid an infinite loop
-        if( !iv_ffdcCollection )
+        if( iv_ffdcTask != 0 )
         {
-            iv_ffdcCollection = true;
+            iv_ffdcTask = task_gettid();
+
             uint32_t data = 0;
             errlHndl_t l_err2 = NULL;
 
@@ -917,7 +919,8 @@ errlHndl_t FsiDD::handleOpbErrors(const FsiAddrInfo_t& i_addrInfo,
             }
 
             //MAGIC_INSTRUCTION(MAGIC_BREAK);
-            iv_ffdcCollection = false;
+
+            iv_ffdcTask = 0;
         }
 
         l_err->collectTrace("FSI");

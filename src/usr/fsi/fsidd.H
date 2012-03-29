@@ -29,6 +29,7 @@
 #include <errl/errlentry.H>
 #include <usr/devicefw/driverif.H>
 #include <attributestructs.H>
+#include <sys/task.h>
 
 
 /** @file fsidd.H
@@ -245,6 +246,7 @@ class FsiDD
      *
      * @param[in] i_addrInfo  FSI addressing information
      * @param[in] i_opbStatReg  OPB Status bits (OPB_REG_STAT[0:31])
+     * @param[in] i_relFsiAddr  Relative FSI Address that was being accessed
      *
      * @return errlHndl_t  NULL on success
      */
@@ -458,9 +460,9 @@ class FsiDD
     TARGETING::Target* iv_master;
 
     /**
-     * Flag to avoid infinite recursion
+     * Non-zero if a Task is currently collecting FFDC
      */
-    bool iv_ffdcCollection;
+    tid_t iv_ffdcTask;
 
   private:
 
