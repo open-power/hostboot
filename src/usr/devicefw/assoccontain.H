@@ -41,7 +41,7 @@ namespace DeviceFW
      *  @brief  Data about a particular association.
      *
      *  Typically this is a offset (pointer) to another association and an
-     *  optional flag for the associatior to use.  This allows a user to
+     *  optional flag for the associator to use.  This allows a user to
      *  construct a light-weight multi-dimensional sparse array.
      *
      *  The purpose of the flag field is left to the user.

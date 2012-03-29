@@ -113,6 +113,82 @@ public:
     }
 
     /**
+     * @test Verify we catch double registration.
+     */
+    void testDoubleRegistration()
+    {
+        errlHndl_t l_errl = NULL;
+
+        // Register non-sensical SCOM-READ to Nodes
+        Associator as;
+        l_errl = as.registerRoute(READ,
+                                  SCOM,
+                                  TYPE_NODE,
+                                  &performOperation);
+        if (l_errl)
+        {
+            TS_FAIL("testDoubleRegistration> Error received from registerRoute (1).");
+        }
+
+        // Register the exact same thing again
+        l_errl = as.registerRoute(READ,
+                                  SCOM,
+                                  TYPE_NODE,
+                                  &performOperation);
+
+        if (l_errl)
+        {
+            // error log is expected case, delete it
+            delete l_errl;
+        }
+        else
+        {
+            TS_FAIL("testDoubleRegistration> No error from duplicate registration.");
+        }
+
+        // Register a wildcard that overlaps
+        l_errl = as.registerRoute(WILDCARD,
+                                  SCOM,
+                                  TYPE_NODE,
+                                  &performOperation);
+
+        if (l_errl)
+        {
+            // error log is expected case, delete it
+            delete l_errl;
+        }
+        else
+        {
+            TS_FAIL("testDoubleRegistration> No error from wildcard registration.");
+        }
+
+        // Reverse the wildcard test
+        l_errl = as.registerRoute(WILDCARD,
+                                  PNOR,
+                                  TYPE_NODE,
+                                  &performOperation);
+        if (l_errl)
+        {
+            TS_FAIL("testDoubleRegistration> Error received from registerRoute (2).");
+        }
+        l_errl = as.registerRoute(WRITE,
+                                  PNOR,
+                                  TYPE_NODE,
+                                  &performOperation);
+        if (l_errl)
+        {
+            // error log is expected case, delete it
+            delete l_errl;
+        }
+        else
+        {
+            TS_FAIL("testDoubleRegistration> No error from registration after wildcard.");
+        }
+
+
+    }
+
+    /**
      * @test Verify registration with an operator as a WILDCARD.
      */
     void testOpWildcard()

@@ -25,6 +25,7 @@
  */
 #include <devicefw/driverif.H>
 #include <util/singleton.H>
+#include <errl/errlmanager.H>
 
 #include "associator.H"
 
@@ -42,10 +43,15 @@ namespace DeviceFW
                                       int64_t i_targetType,
                                       deviceOp_t i_regRoute)
     {
-        Singleton<Associator>::instance().registerRoute(i_opType,
-                                                        i_accessType,
-                                                        i_targetType,
-                                                        i_regRoute);
+        errlHndl_t errhdl =
+          Singleton<Associator>::instance().registerRoute(i_opType,
+                                                          i_accessType,
+                                                          i_targetType,
+                                                          i_regRoute);
+        if( errhdl )
+        {
+            errlCommit(errhdl,DEVFW_COMP_ID);
+        }
     }
 
     // deviceRegisterRoute:

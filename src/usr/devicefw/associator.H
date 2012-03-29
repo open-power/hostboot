@@ -66,16 +66,31 @@ namespace DeviceFW
             ~Associator();
             
                 /** Register routing interface.  See deviceRegisterRoute. */
-            void registerRoute(int64_t i_opType,
-                               int64_t i_accType,
-                               int64_t i_targetType, 
-                               deviceOp_t i_regRoute);
+            errlHndl_t registerRoute(int64_t i_opType,
+                                     int64_t i_accType,
+                                     int64_t i_targetType, 
+                                     deviceOp_t i_regRoute);
                 
                 /** Perform routing.  See deviceOp. */
             errlHndl_t performOp(OperationType i_opType,
                                  TARGETING::Target* i_target,
                                  void* io_buffer, size_t& io_buflen,
                                  int64_t i_accessType, va_list i_addr);
+
+        private:
+            /**
+             * @brief Find an associated function for the given operation
+             *
+             * @param[in] i_opType  Enumeration specifying the operation type
+             * @param[in] i_accessType  Enumeration specifying the access type
+             * @param[in] i_devType  Enumeration specifying the target type
+             *
+             * @return NULL if none found, else a function pointer
+             */
+            deviceOp_t findDeviceRoute( OperationType i_opType,
+                                        TARGETING::TYPE i_devType,
+                                        int64_t i_accessType );
+
         private:
             typedef std::vector<deviceOp_t> opVector_t;
             

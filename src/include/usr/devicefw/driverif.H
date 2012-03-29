@@ -59,7 +59,8 @@ namespace DeviceFW
         READ = 0,
         WRITE,
 
-        LAST_OP_TYPE
+        LAST_OP_TYPE,
+        FIRST_OP_TYPE = READ
 
     };
 

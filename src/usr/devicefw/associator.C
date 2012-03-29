@@ -50,10 +50,10 @@ namespace DeviceFW
         TRACFCOMP(g_traceBuffer, EXIT_MRK "Associator::~Associator");        
     }
 
-    void Associator::registerRoute(int64_t i_opType,
-                                   int64_t i_accType,
-                                   int64_t i_targetType,
-                                   deviceOp_t i_regRoute)
+    errlHndl_t Associator::registerRoute(int64_t i_opType,
+                                         int64_t i_accType,
+                                         int64_t i_targetType,
+                                         deviceOp_t i_regRoute)
     {
         TRACFCOMP(g_traceBuffer, "Device route registered for (%d, %d, %d)",
                   i_opType, i_accType, i_targetType);
@@ -63,6 +63,43 @@ namespace DeviceFW
         // No assert-checks will be done here.
 
         mutex_lock(&iv_mutex);
+
+        // Make sure we aren't doing a double registration
+        for( OperationType optype = FIRST_OP_TYPE;
+             optype < LAST_OP_TYPE;
+             optype = static_cast<OperationType>(optype+1) )
+        {
+            if( (WILDCARD == i_opType) || (optype == i_opType) )
+            {
+                deviceOp_t l_devRoute = findDeviceRoute( optype,
+                                    static_cast<TARGETING::TYPE>(i_targetType),
+                                    i_accType );
+                if( l_devRoute != NULL )
+                {
+                    TRACFCOMP(g_traceBuffer, "Double registration attempted : i_opType=%d, i_accType=%d, i_targetType=0x%X, existing function=%p", i_opType, i_accType, i_targetType, l_devRoute );
+                    /*@ 
+                     *  @errortype
+                     *  @moduleid         DEVFW_MOD_ASSOCIATOR
+                     *  @reasoncode       DEVFW_RC_DOUBLE_REGISTRATION
+                     *  @userdata1[0:31]  OpType
+                     *  @userdata1[32:63] AccessType
+                     *  @userdata2        TargetType
+                     *
+                     *  @devdesc         A double registration was attempted 
+                     *                   with the routing framework.
+                     */
+                    errlHndl_t l_errl = 
+                      new ErrlEntry(ERRL_SEV_INFORMATIONAL,
+                                    DEVFW_MOD_ASSOCIATOR,
+                                    DEVFW_RC_DOUBLE_REGISTRATION,
+                                    TWO_UINT32_TO_UINT64(i_opType, i_accType),
+                                    TO_UINT64(i_targetType)
+                                    );
+                    mutex_unlock(&iv_mutex);
+                    return l_errl;
+                }
+            }
+        }
         
         size_t ops = 0;
         AssociationData targets = AssociationData();
@@ -71,7 +108,7 @@ namespace DeviceFW
         ops = iv_associations[iv_routeMap][i_accType].offset;
         if (0 == ops)
         {
-                // space for LAST_OP_TYPE plus WILDCARD(-1).
+            // space for LAST_OP_TYPE plus WILDCARD(-1).
             ops = iv_associations.allocate(LAST_OP_TYPE + 1) + 1;
             iv_associations[iv_routeMap][i_accType].offset = ops;
         }
@@ -93,31 +130,6 @@ namespace DeviceFW
             }
             iv_associations[ops][i_opType] = targets;
         }
-            // Ensure the right block size was allocated previously for this
-            // target-type (wildcard vs non-wildcard).
-        if(((targets.flag) && (i_targetType != WILDCARD)) ||
-           ((!targets.flag) && (i_targetType == WILDCARD)))
-        {
-	    TRACFCOMP(g_traceBuffer, "Invalid registration type was given to register a device : i_opType=%d, i_accType=%d, i_targetType=%d", i_opType, i_accType, i_targetType );
-            /*@ 
-             *  @errortype
-             *  @moduleid       DEVFW_MOD_ASSOCIATOR
-             *  @reasoncode     DEVFW_RC_INVALID_REGISTRATION
-             *  @userdata1      (OpType << 32) | (AccessType)
-             *  @userdata2      TargetType
-             *
-             *  @devdesc        An invalid registration type was given to 
-             *                  register a device with the routing framework.
-             */
-            errlHndl_t l_errl = 
-                new ErrlEntry(ERRL_SEV_INFORMATIONAL,
-                              DEVFW_MOD_ASSOCIATOR,
-                              DEVFW_RC_INVALID_REGISTRATION,
-                              TWO_UINT32_TO_UINT64(i_opType, i_accType),
-                              TO_UINT64(i_targetType)
-                             );
-            errlCommit(l_errl,DEVFW_COMP_ID);
-        }
 
         // Index offset to proper target type.  This is now lowest level of map.
         targets.offset += (i_targetType == WILDCARD ? 0 : i_targetType);
@@ -134,14 +146,14 @@ namespace DeviceFW
             opLocation = iv_operations.end() - 1;
         }
 
-        // TODO: Implement std::distance algorithm and change to:
-        //      std::distance(iv_operations.begin(), opLocation);
-        size_t opLoc = opLocation - iv_operations.begin();
+        size_t opLoc = std::distance(iv_operations.begin(), opLocation);
 
         // Set function offset into map.  True flag indicates valid.
         (*iv_associations[targets.offset]) = AssociationData(true, opLoc);
 
         mutex_unlock(&iv_mutex);
+
+        return NULL;
     }
 
     errlHndl_t Associator::performOp(OperationType i_opType,
@@ -179,76 +191,12 @@ namespace DeviceFW
         TRACDCOMP(g_traceBuffer, "Device op requested for (%d, %d, %d)",
                   i_opType, i_accessType, l_devType);
 
-        // The ranges of the parameters should all be verified by the
-        // compiler due to the template specializations in driverif.H.  
-        // No assert-checks will be done here.
-        
         mutex_lock(&iv_mutex);
 
-            // Function pointer found for this route request.
-        deviceOp_t l_devRoute = NULL;
-            // Pointer to root of the map.
-        const AssociationData* routeMap = iv_associations[iv_routeMap];
-
-        do
-        {
-            // Follow first level (access type), verify.
-            if (0 == routeMap[i_accessType].offset)
-            {
-                break;
-            }
-
-            const AssociationData* ops = 
-                iv_associations[routeMap[i_accessType].offset];
-
-            // Check op type = WILDCARD registrations.
-            if (0 != ops[WILDCARD].offset)
-            {
-                // Check access type = WILDCARD registrations.
-                if (ops[WILDCARD].flag)
-                {
-                    l_devRoute = 
-                        iv_operations[
-                            iv_associations[ops[WILDCARD].offset]->offset];
-                    break;
-                }
-                
-                // Check access type = i_target->type registrations.
-                const AssociationData* targets =
-                    iv_associations[ops[WILDCARD].offset];
-                if (targets[l_devType].flag)
-                {
-                    l_devRoute =
-                        iv_operations[
-                            targets[l_devType].offset];
-                    break;
-                }
-            }
-            
-            // Check op type = i_opType registrations.
-            if (0 != ops[i_opType].offset)
-            {
-                // Check access type = WILDCARD registrations.
-                if(ops[i_opType].flag)
-                {
-                    l_devRoute =
-                        iv_operations[
-                            iv_associations[ops[i_opType].offset]->offset];
-                    break;
-                }
-                
-                // Check access type = i_target->type registrations.
-                const AssociationData* targets =
-                    iv_associations[ops[i_opType].offset];
-                if (targets[l_devType].flag)
-                {
-                    l_devRoute =
-                        iv_operations[
-                            targets[l_devType].offset];
-                    break;
-                }
-            }
-        } while(0);
+        // Function pointer found for this route request.
+        deviceOp_t l_devRoute = findDeviceRoute( i_opType,
+                                                 l_devType,
+                                                 i_accessType );
 
         mutex_unlock(&iv_mutex);        
         
@@ -281,6 +229,85 @@ namespace DeviceFW
         }
 
         return l_errl;
+    }
+
+    
+    deviceOp_t Associator::findDeviceRoute( OperationType i_opType,
+                                            TARGETING::TYPE i_devType,
+                                            int64_t i_accessType )
+    {
+        // The ranges of the parameters should all be verified by the
+        // compiler due to the template specializations in driverif.H.
+        // e.g. i_accessType can never be negative
+        // No assert-checks will be done here.
+
+        // Function pointer found for this route request.
+        deviceOp_t l_devRoute = NULL;
+
+        // Pointer to root of the map.
+        const AssociationData* routeMap = iv_associations[iv_routeMap];
+
+        do
+        {
+            // Follow first level (access type), verify.
+            if (0 == routeMap[i_accessType].offset)
+            {
+                break;
+            }
+
+            const AssociationData* ops = 
+              iv_associations[routeMap[i_accessType].offset];
+
+            // Check op type = WILDCARD registrations.
+            if (0 != ops[WILDCARD].offset)
+            {
+                // Check access type = WILDCARD registrations.
+                if (ops[WILDCARD].flag)
+                {
+                    l_devRoute = 
+                      iv_operations[
+                            iv_associations[ops[WILDCARD].offset]->offset];
+                    break;
+                }
+
+                // Check access type = i_target->type registrations.
+                const AssociationData* targets =
+                  iv_associations[ops[WILDCARD].offset];
+                if (targets[i_devType].flag)
+                {
+                    l_devRoute =
+                      iv_operations[
+                                    targets[i_devType].offset];
+                    break;
+                }
+            }
+
+            // Check op type = i_opType registrations.
+            if (0 != ops[i_opType].offset)
+            {
+                // Check access type = WILDCARD registrations.
+                if(ops[i_opType].flag)
+                {
+                    l_devRoute =
+                      iv_operations[
+                            iv_associations[ops[i_opType].offset]->offset];
+                    break;
+                }
+
+                // Check access type = i_target->type registrations.
+                const AssociationData* targets =
+                  iv_associations[ops[i_opType].offset];
+                if (targets[i_devType].flag)
+                {
+                    l_devRoute =
+                      iv_operations[
+                                    targets[i_devType].offset];
+                    break;
+                }
+            }
+        } while(0);
+
+        return l_devRoute;
     }
 }
 
