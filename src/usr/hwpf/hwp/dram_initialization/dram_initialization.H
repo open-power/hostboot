@@ -95,11 +95,6 @@
  *
  */
 
-/******************************************************************************/
-// Includes
-/******************************************************************************/
-#include    <stdint.h>
-
 namespace   DRAM_INITIALIZATION
 {
 
@@ -219,4 +214,3 @@ void    call_proc_exit_cache_contained( void    *io_pArgs );
 };   // end namespace
 
 #endif
-

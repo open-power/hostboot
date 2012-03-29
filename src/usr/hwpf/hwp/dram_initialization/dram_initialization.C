@@ -41,7 +41,7 @@
 #include    <trace/interface.H>
 #include    <initservice/taskargs.H>
 #include    <errl/errlentry.H>
-
+#include    <diag/mdia/mdia.H>
 #include    <initservice/isteps_trace.H>
 
 //  targeting support
@@ -183,43 +183,40 @@ void    call_mss_extent_setup( void    *io_pArgs )
 //
 void    call_mss_memdiag( void    *io_pArgs )
 {
+    using namespace MDIA;
+
     errlHndl_t  l_errl  =   NULL;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
                "call_mss_memdiag entry" );
 
-#if 0
-    // @@@@@    CUSTOM BLOCK:   @@@@@
-    //  figure out what targets we need
-    //  customize any other inputs
-    //  set up loops to go through all targets (if parallel, spin off a task)
+    PredicateIsFunctional l_isFunctional;
 
-    //  dump physical path to targets
-    EntityPath l_path;
-    l_path  =   l_@targetN_target->getAttr<ATTR_PHYS_PATH>();
-    l_path.dump();
+    // To filter MBAs
+    PredicateCTM l_mbaFilter(CLASS_UNIT, TYPE_MBA);
 
-    // cast OUR type of target to a FAPI type of target.
-    const fapi::Target l_fapi_@targetN_target(
-                    TARGET_TYPE_MEMBUF_CHIP,
-                    reinterpret_cast<void *>
-                        (const_cast<TARGETING::Target*>(l_@targetN_target)) );
+    // Filter functional MBAs
+    PredicatePostfixExpr l_functionalAndMbaFilter;
+    l_functionalAndMbaFilter.push(&l_mbaFilter).push(&l_isFunctional).And();
 
-    //  call the HWP with each fapi::Target
-    FAPI_INVOKE_HWP( l_errl, mss_memdiag, _args_...);
-    if ( l_errl )
+    TargetRangeFilter    l_pMbas(
+        targetService().begin(),
+        targetService().end(),
+        &l_functionalAndMbaFilter );
+
+    TargetHandleList l_mbaList;
+
+    // populate MBA TargetHandlelist
+    for(;l_pMbas;++l_pMbas)
     {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, 
-                  "ERROR : .........." );
-        errlCommit( l_errl, HWPF_COMP_ID );
+        l_mbaList.push_back(*l_pMbas);
     }
-    else
+
+    errlHndl_t l_err = runStep(l_mbaList);
+    if(NULL != l_err)
     {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
-                   "SUCCESS : .........." );
+        TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "MDIA subStep failed");
     }
-    // @@@@@    END CUSTOM BLOCK:   @@@@@
-#endif
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
                "call_mss_memdiag exit" );
