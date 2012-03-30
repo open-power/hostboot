@@ -29,6 +29,7 @@
 #define ERRL_PLUGINS_SYMS_H
 
 #include <vector>
+#include <stdint.h>
 
 /**
  *  @file symbols.H

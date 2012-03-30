@@ -69,7 +69,7 @@ errlHndl_t scomPerformOp(DeviceFW::OperationType i_opType,
                          va_list i_args)
 {
     errlHndl_t l_err = NULL;
-   
+
 
     uint64_t l_scomAddr = va_arg(i_args,uint64_t);
 
@@ -102,10 +102,10 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
     bool l_indScomError = false;
     uint64_t temp_io_buffer = 0;
 
-    //@todo - determine hwhat an appropriate timeout value 
+    //@todo - determine hwhat an appropriate timeout value
     enum { MAX_INDSCOM_TIMEOUT_NS = 100000 }; //=.1ms
 
-    // If the indirect scom bit is 0, then doing a regular scom 
+    // If the indirect scom bit is 0, then doing a regular scom
     if( (i_addr & 0x8000000000000000) == 0)
     {
         l_err = doScomOp(i_opType,
@@ -130,7 +130,7 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
         // Zero out the indirect address location.. leave the 16bits of data
         l_io_buffer = l_io_buffer & 0x000000000000FFFF;
 
-        // OR in the 20bit indirect address      
+        // OR in the 20bit indirect address
         l_io_buffer = l_io_buffer | temp_scomAddr;
 
         // zero out the indirect address from the buffer..
@@ -141,7 +141,7 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
         i_addr = i_addr & 0x000000007FFFFFFF;
 
 
-        // If we are doing a read. We need to do a write first.. 
+        // If we are doing a read. We need to do a write first..
         if(i_opType == DeviceFW::READ)
         {
 
@@ -151,7 +151,7 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
 
             mutex_lock(l_mutex);
 
-            // turn the read bit on. 
+            // turn the read bit on.
             l_io_buffer = l_io_buffer | 0x8000000000000000;
 
             // perform write before the read with the new
@@ -171,11 +171,11 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
 
             // Need to check loop on read until either
             // bit (32) = 1 or we have exceeded our max
-            // retries. 
+            // retries.
             do
             {
                 // Now perform the op requested using the passed in
-                // IO_Buffer to pass the read data back to caller. 
+                // IO_Buffer to pass the read data back to caller.
                 l_err = doScomOp(i_opType,
                                  i_target,
                                  io_buffer,
@@ -208,7 +208,7 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
                       l_indScomError = true;
                     }
 
-                    // break out because we got the complete bit.. 
+                    // break out because we got the complete bit..
                     break;
                 }
 
@@ -231,8 +231,8 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
 
                     /*@
                      * @errortype
-                     * @moduleid     SCOM::CHECK_INDIRECT_AND_DO_SCOM
-                     * @reasoncode   SCOM::INDIRECT_SCOM_READ_FAIL
+                     * @moduleid     SCOM::SCOM_CHECK_INDIRECT_AND_DO_SCOM
+                     * @reasoncode   SCOM::SCOM_INDIRECT_READ_FAIL
                      * @userdata1    Address
                      * @userdata2    Scom data read from Address
                      * @devdesc      Indirect SCOM Read error
@@ -259,8 +259,8 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
 
                     /*@
                      * @errortype
-                     * @moduleid     SCOM::CHECK_INDIRECT_AND_DO_SCOM
-                     * @reasoncode   SCOM::INDIRECT_SCOM_READ_TIMEOUT
+                     * @moduleid     SCOM::SCOM_CHECK_INDIRECT_AND_DO_SCOM
+                     * @reasoncode   SCOM::SCOM_INDIRECT_READ_TIMEOUT
                      * @userdata1    Address
                      * @userdata2    Scom data read from Address
                      * @devdesc      Indirect SCOM complete bit did not come on
@@ -272,7 +272,7 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
                                             i_addr,
                                             *((uint64_t *)io_buffer));
 
-                    //@TODO - add usr details to the errorlog when we have 
+                    //@TODO - add usr details to the errorlog when we have
                     //        one to give better info regarding the fail..
 
                 }
@@ -280,7 +280,7 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
         }
         else //write
         {
-            // Turn the read bit off. 
+            // Turn the read bit off.
             l_io_buffer = l_io_buffer & 0x7FFFFFFFFFFFFFFF;
 
             // Now perform the op requested using the
@@ -294,14 +294,14 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
 
             // Need to check loop on read until either
             // bit (32) = 1 or we have exceeded our max
-            // retries. 
+            // retries.
             do
             {
 
                 memcpy(&temp_io_buffer, io_buffer, 8);
 
                 // Now perform the op requested using the passed in
-                // IO_Buffer to pass the read data back to caller. 
+                // IO_Buffer to pass the read data back to caller.
                 l_err = doScomOp(DeviceFW::READ,
                                  i_target,
                                  & temp_io_buffer,
@@ -324,11 +324,11 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
                     if ((temp_io_buffer & SCOM_IND_ERROR_MASK)
                         != SCOM_IND_WRITE_SUCCESS_MASK)
                     {
-                        // bits did not get turned on.. set error to true. 
-                        l_indScomError = true; 
+                        // bits did not get turned on.. set error to true.
+                        l_indScomError = true;
                     }
 
-                    // break out because we got the complete bit on 
+                    // break out because we got the complete bit on
                     break;
 
                 }
@@ -348,8 +348,8 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
 
                     /*@
                      * @errortype
-                     * @moduleid    SCOM::CHECK_INDIRECT_AND_DO_SCOM
-                     * @reasoncode  SCOM::INDIRECT_SCOM_WRITE_FAIL
+                     * @moduleid     SCOM::SCOM_CHECK_INDIRECT_AND_DO_SCOM
+                     * @reasoncode   SCOM::SCOM_INDIRECT_WRITE_FAIL
                      * @userdata1   Address
                      * @userdata2   Scom data read from Address
                      * @devdesc     Indirect SCOM Write failed for this address
@@ -361,8 +361,8 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
                                              i_addr,
                                              temp_io_buffer);
 
-                    //@TODO - add usr details to the errorlog when we have 
-                    //        one to give better info regarding the fail.. 
+                    //@TODO - add usr details to the errorlog when we have
+                    //        one to give better info regarding the fail..
 
                 }
                 // if we got a timeout, create an errorlog.
@@ -376,8 +376,8 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
 
                     /*@
                      * @errortype
-                     * @moduleid     SCOM::CHECK_INDIRECT_AND_DO_SCOM
-                     * @reasoncode   SCOM::INDIRECT_SCOM_WRITE_TIMEOUT
+                     * @moduleid     SCOM::SCOM_CHECK_INDIRECT_AND_DO_SCOM
+                     * @reasoncode   SCOM::SCOM_INDIRECT_WRITE_TIMEOUT
                      * @userdata1    Address
                      * @userdata2    Scom data read from Address
                      * @devdesc      Indirect SCOM write timeout, complete

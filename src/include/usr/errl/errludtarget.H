@@ -30,9 +30,11 @@
  *
  *  ErrlUserDetailsTarget: Adds Target FFDC to an error log as user detail data
  *  ErrlUserDetailsParserTarget: Parses Target FFDC user detail in an error log
-*/
+ */
 
 #include <errl/errluserdetails.H>
+
+#ifndef PARSER
 
 // Forward reference
 namespace TARGETING
@@ -42,8 +44,6 @@ namespace TARGETING
 
 namespace ERRORLOG
 {
-
-#ifndef PARSER
 
 /**
  * @class ErrlUserDetailsTarget
@@ -83,13 +83,20 @@ private:
     ErrlUserDetailsTarget & operator=(const ErrlUserDetailsTarget &);
 };
 
+}
+
 #else // (if PARSER defined)
+
+#include <string.h>
+
+namespace ERRORLOG
+{
 
 /**
  * @class ErrlUserDetailsParserTarget
  *
  * Parses Target FFDC user detail in an error log
-*/
+ */
 class ErrlUserDetailsParserTarget : public ErrlUserDetailsParser
 {
 public:
@@ -133,9 +140,8 @@ private:
         const ErrlUserDetailsParserTarget &);
 };
 
-#endif
-
 }
 
+#endif
 #endif
 
