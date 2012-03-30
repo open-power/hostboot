@@ -66,7 +66,7 @@ class PageManager
 
         enum
         {
-            MEMLEN = VmmManager::HTABORG,
+            MEMLEN = VmmManager::MBOX_DMA_ADDR,
             BUCKETS = 16,
         };
 

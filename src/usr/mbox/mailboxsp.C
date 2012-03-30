@@ -58,6 +58,7 @@ MailboxSp::MailboxSp()
         iv_msgQ(),
         iv_sendq(),
         iv_respondq(),
+        iv_dmaBuffer(),
         iv_trgt(NULL),
         iv_rts(true),
         iv_dma_pend(false)
@@ -99,6 +100,14 @@ errlHndl_t MailboxSp::_init()
 
         task_create(MailboxSp::msg_handler, NULL);
     }
+
+    // Send message to FSP on base DMA buffer zone
+    msg_t * msg = msg_allocate();
+    msg->type = MSG_INITIAL_DMA;
+    msg->data[0] = 0;
+    msg->data[1] = reinterpret_cast<uint64_t>(iv_dmaBuffer.getDmaBufferHead());
+    msg->extra_data = NULL;
+    MBOX::send(FSP_MAILBOX_MSGQ,msg);
 
     return err;
 }
@@ -169,7 +178,24 @@ void MailboxSp::msgHandler()
 
                         if(mbox_status & MBOX_DATA_PENDING)
                         {
-                            recv_msg(mbox_msg);
+                            trace_msg("RECV",mbox_msg);
+                            if(mbox_msg.msg_queue_id == HB_MAILBOX_MSGQ)
+                            {
+                                // msg to hb mailbox from fsp mbox
+                                handle_hbmbox_msg(mbox_msg);
+                            }
+                            else if((mbox_msg.msg_queue_id==FSP_MAILBOX_MSGQ)&&
+                                    (mbox_msg.msg_payload.type ==
+                                     MSG_REQUEST_DMA_BUFFERS))
+                            {
+                                // This is a response from The FSP
+                                handle_hbmbox_resp(mbox_msg);
+                            }
+                            else
+                            {
+                                // anything else
+                                recv_msg(mbox_msg);
+                            }
                         }
 
                         // Look for error status from MB hardware
@@ -407,37 +433,94 @@ void MailboxSp::send_msg(mbox_msg_t * i_msg)
 
     iv_msg_to_send = *mbox_msg; //copy
 
-    // TODO remove the following line when DMA buffer support is available
-    payload->extra_data = NULL;
-
     // Is a DMA buffer needed?
-    if(payload->extra_data != NULL)
+    if((payload->extra_data != NULL) ||
+       ((iv_msg_to_send.msg_queue_id == HB_MAILBOX_MSGQ) &&
+        (payload->type == MSG_REQUEST_DMA_BUFFERS)))
 
     {
-        size_t size = payload->data[1];
-        void * dma_buffer = NULL;
-        // TODO getDMA buffer
+        uint64_t dma_size = payload->data[1];
+
+        if(payload->extra_data == NULL) // DMA req. from FSP.
+        {
+            dma_size = payload->data[0];
+        }
+
+        // getBuffer() returns bit map in dma_size variable.
+        void * dma_buffer = iv_dmaBuffer.getBuffer(dma_size);
 
         if(dma_buffer)
         {
-            memcpy(dma_buffer,payload->extra_data,size);
-            iv_msg_to_send.msg_payload.extra_data = dma_buffer;
+            if(payload->extra_data != NULL)
+            {
+                memcpy(dma_buffer,payload->extra_data,payload->data[1]);
+                iv_msg_to_send.msg_payload.extra_data = dma_buffer;
 
-            free(payload->extra_data);
+                free(payload->extra_data);
+            }
+            else  // DMA buffer request from FSP
+            {
+                iv_msg_to_send.msg_payload.data[0] = dma_size; // bitmap
+                iv_msg_to_send.msg_payload.data[1] = 
+                    reinterpret_cast<uint64_t>(dma_buffer);
+            }
             iv_sendq.pop_front();
         }
         else // can't get buffer
         {
-            //   -- can't send the current message - leave it on the queue
-            //   -- Instead send a message to FSP for more buffers
-            //   TODO set sync flag when  implementing DMA buffer
-            iv_msg_to_send.msg_id = 0;
-            iv_msg_to_send.msg_queue_id = FSP_MAILBOX_MSGQ;
-            iv_msg_to_send.msg_payload.type = MSG_REQUEST_DMA_BUFFERS;
-            iv_msg_to_send.msg_payload.data[0] = 0;
-            iv_msg_to_send.msg_payload.data[1] = 0;
-            iv_msg_to_send.msg_payload.extra_data = NULL;
-            iv_dma_pend = true;
+            if(!iv_dmaBuffer.ownsAllBlocks())
+            {
+                //   -- can't send the current message - leave it on the queue
+                //   -- Instead send a message to FSP for more buffers
+                iv_msg_to_send.msg_id = 0;
+                iv_msg_to_send.msg_queue_id = FSP_MAILBOX_MSGQ;
+                iv_msg_to_send.msg_payload.type = MSG_REQUEST_DMA_BUFFERS;
+                iv_msg_to_send.msg_payload.data[0] = 0;
+                iv_msg_to_send.msg_payload.data[1] = 0;
+                iv_msg_to_send.msg_payload.extra_data = NULL;
+                iv_msg_to_send.msg_payload.__reserved__async = 1;
+                iv_dma_pend = true;
+            }
+            else
+            {
+                // message is asking from more DMA space than exists
+                TRACFCOMP(g_trac_mbox,
+                          ERR_MRK
+                          "MailboxSp::send_msg - Message dropped. "
+                          "Can't get DMA buffer size %d. queueid 0x%x",
+                          payload->data[1],
+                          iv_msg_to_send.msg_queue_id);
+
+                iv_sendq.pop_front();
+                if(payload->extra_data == NULL)  //Request was from FSP
+                {
+                    // just respond with failure
+                    iv_msg_to_send.msg_payload.data[0] = 0;
+                    iv_msg_to_send.msg_payload.data[1] = 0;
+                }
+                else
+                {
+                    /*@ errorlog tag
+                     * @errortype       ERRL_SEV_INFORMATIONAL
+                     * @moduleid        MOD_MBOXSRV_SENDMSG
+                     * @reasoncode      RC_INVALID_DMA_LENGTH
+                     * @userdata1       DMA length requested
+                     * @userdata2       queue_id
+                     * @defdesc         Failed to allocate a DMA buffer.
+                     *                  Message dropped.
+                     */
+                    err = new ERRORLOG::ErrlEntry
+                        (
+                         ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                         MBOX::MOD_MBOXSRV_SENDMSG,
+                         MBOX::RC_INVALID_DMA_LENGTH,      //  reason Code
+                         payload->data[1],                 // DMA data len
+                         iv_msg_to_send.msg_queue_id       // MSG queueid
+                        );
+
+                    send_msg();  // drop this message, but send next message
+                }
+            }
         }
     }
     else // simple message
@@ -445,18 +528,27 @@ void MailboxSp::send_msg(mbox_msg_t * i_msg)
         iv_sendq.pop_front();
     }
 
-    size_t mbox_msg_len = sizeof(mbox_msg_t);
-    iv_rts = false;
+    if(!err)
+    {
+        size_t mbox_msg_len = sizeof(mbox_msg_t);
+        iv_rts = false;
 
-    trace_msg("SEND",iv_msg_to_send);
+        trace_msg("SEND",iv_msg_to_send);
 
-    err = DeviceFW::deviceWrite(iv_trgt,
-                                &iv_msg_to_send,
-                                mbox_msg_len,
-                                DeviceFW::MAILBOX);
+        err = DeviceFW::deviceWrite(iv_trgt,
+                                    &iv_msg_to_send,
+                                    mbox_msg_len,
+                                    DeviceFW::MAILBOX);
+    }
 
     if(err)
     {
+        TRACFCOMP(g_trac_mbox,
+                  ERR_MRK
+                  "MBOX send_msg could not send message. queue:%x type:%x",
+                  iv_msg_to_send.msg_queue_id,
+                  iv_msg_to_send.msg_payload.type);
+
         // If the message that could not be sent was a sync msg
         // originating from HB then there is a task waiting for a response.
         if(!msg_is_async(&(iv_msg_to_send.msg_payload)))
@@ -497,17 +589,10 @@ void MailboxSp::recv_msg(mbox_msg_t & i_mbox_msg)
     errlHndl_t err = NULL;
     int rc = 0;
 
-    // TODO look for response to requests for more DMA buffers
-    // and handle now
-    // add dma buffers
-    // iv_dma_pend = false;
-    // call send_msg to send next message if available and rts
-    //
+    //trace_msg("RECV",i_mbox_msg);
 
     msg_t * msg = msg_allocate();
     *msg = i_mbox_msg.msg_payload;  // copy
-
-    trace_msg("RECV",i_mbox_msg);
 
     // Handle moving data from DMA buffer
     if(msg->extra_data != NULL)
@@ -516,7 +601,7 @@ void MailboxSp::recv_msg(mbox_msg_t & i_mbox_msg)
         void * buf = malloc(msg_sz);
         memcpy(buf,msg->extra_data,msg_sz);
 
-        // DMArelease(msg->extra_data,msg_sz); TODO
+        iv_dmaBuffer.release(msg->extra_data,msg_sz);
         msg->extra_data = buf;
         // receiver of the message frees buffer.
     }
@@ -535,7 +620,11 @@ void MailboxSp::recv_msg(mbox_msg_t & i_mbox_msg)
         // remove from the list
         iv_respondq.erase(response);
 
-        *(response->key) = *msg; // copy
+        // resonse->key points to original carrier msg
+        // reponse->key->extra_data points to the orignal msg
+        // Overwrite original message with response
+
+        *(reinterpret_cast<msg_t *>((response->key)->extra_data)) = *msg; // copy
 
         msg_free(msg);
 
@@ -619,7 +708,7 @@ void MailboxSp::recv_msg(mbox_msg_t & i_mbox_msg)
                 mbox_msg.msg_payload.data[0] = msg->type;
                 mbox_msg.msg_payload.data[1] = i_mbox_msg.msg_queue_id;
                 mbox_msg.msg_payload.extra_data = NULL;
-                mbox_msg.msg_payload.__reserved__async = 1;
+                mbox_msg.msg_payload.__reserved__async = 0; // async
 
 
                 send_msg(&mbox_msg);
@@ -645,7 +734,7 @@ void MailboxSp::recv_msg(mbox_msg_t & i_mbox_msg)
                      MBOX::MOD_MBOXSRV_RCV,
                      MBOX::RC_INVALID_MESSAGE_TYPE  ,    //  reason Code
                      i_mbox_msg.msg_queue_id,            // rc from msg_send
-                     0
+                     i_mbox_msg.msg_payload.type
                     );
 
                 err->collectTrace(HBMBOXMSG_TRACE_NAME);
@@ -655,7 +744,9 @@ void MailboxSp::recv_msg(mbox_msg_t & i_mbox_msg)
                 msg_free(msg);
             }
         }
-        else  // unregistered msg_queue_id
+        // Else unregisteredd msg_queue_id
+        //  For NOW, ignore FSP mailbox stuff bounced back by the echo server
+        else if(i_mbox_msg.msg_queue_id != FSP_MAILBOX_MSGQ)
         {
 
             TRACFCOMP(g_trac_mbox,
@@ -670,10 +761,14 @@ void MailboxSp::recv_msg(mbox_msg_t & i_mbox_msg)
             mbox_msg.msg_payload.type = MSG_INVALID_MSG_QUEUE_ID;
             mbox_msg.msg_payload.data[0] = i_mbox_msg.msg_queue_id;
             mbox_msg.msg_payload.extra_data = NULL;
-            mbox_msg.msg_payload.__reserved__async = 1;
+            mbox_msg.msg_payload.__reserved__async = 0; // async
 
 
-            send_msg(&mbox_msg);
+            // prevent infinite loop with echo mb server
+            if(i_mbox_msg.msg_queue_id != FSP_MAILBOX_MSGQ)
+            {
+                send_msg(&mbox_msg);
+            }
 
 
             /*@ errorlog tag
@@ -701,7 +796,106 @@ void MailboxSp::recv_msg(mbox_msg_t & i_mbox_msg)
 
             free(msg->extra_data);
             msg_free(msg);
-       }
+        }
+        else // This is a bounce-back msg from the echo server - Ignore
+        {
+            free(msg->extra_data);
+            msg_free(msg);
+        }
+    }
+}
+
+void MailboxSp::handle_hbmbox_msg(mbox_msg_t & i_mbox_msg)
+{
+    if(i_mbox_msg.msg_payload.type == MSG_REQUEST_DMA_BUFFERS)
+    {
+        // DMA req. will be resolved by send_msg
+        send_msg(&i_mbox_msg);   // response message
+    }
+    else if(i_mbox_msg.msg_payload.type == MSG_INVALID_MSG_QUEUE_ID)
+    {
+        /*@ errorlog tag
+         * @errortype       ERRL_SEV_INFORMATIONAL
+         * @moduleid        MOD_MBOXSRV_FSP_MSG
+         * @reasoncode      RC_INVALID_QUEUE
+         * @userdata1       msg queue
+         * @defdesc         Message from FSP. A message queue sent to FSP
+         *                  was not within a valid range
+         */
+        errlHndl_t err = new ERRORLOG::ErrlEntry
+            (
+             ERRORLOG::ERRL_SEV_INFORMATIONAL,
+             MBOX::MOD_MBOXSRV_FSP_MSG,
+             MBOX::RC_INVALID_QUEUE,
+             i_mbox_msg.msg_payload.data[0],
+             0
+            );
+
+        err->collectTrace(HBMBOXMSG_TRACE_NAME);
+
+        errlCommit(err,HBMBOX_COMP_ID);
+    }
+    else
+    {
+        /*@ errorlog tag
+         * @errortype       ERRL_SEV_INFORMATIONAL
+         * @moduleid        MOD_MBOXSRV_FSP_MSG
+         * @reasoncode      RC_INVALID_MBOX_MSG_TYPE
+         * @userdata1       msg type
+         * @userdata2       msg queue id
+         * @defdesc         Message from FSP. A message type sent to FSP
+         *                  was not within a valid range
+         */
+        errlHndl_t err = new ERRORLOG::ErrlEntry
+            (
+             ERRORLOG::ERRL_SEV_INFORMATIONAL,
+             MBOX::MOD_MBOXSRV_FSP_MSG,
+             MBOX::RC_INVALID_MBOX_MSG_TYPE,
+             i_mbox_msg.msg_payload.data[0],
+             i_mbox_msg.msg_payload.data[1]
+            );
+
+        err->collectTrace(HBMBOXMSG_TRACE_NAME);
+
+        errlCommit(err,HBMBOX_COMP_ID);
+    }
+}
+
+
+void MailboxSp::handle_hbmbox_resp(mbox_msg_t & i_mbox_msg)
+{
+
+    //Response for more DMA buffers
+    if(i_mbox_msg.msg_payload.data[0] != 0)
+    {
+        iv_dmaBuffer.addBuffers
+            (i_mbox_msg.msg_payload.data[0]);
+        iv_dma_pend = false;
+        send_msg(); // send next message on queue
+    }
+    else // This is not really a response from the FSP
+        // This is an echo back from echo server of a req the HB MBOX sent.
+    {
+        // This message should never come from the real FSP, so it must be
+        // from the echo server. Responding to the echo server will
+        // make the message echo back again as if it were a response from the
+        // FSP. Since it's not possible to know which buffers the FSP owns, for
+        // testing purposes play the role of the FSP and assume the FSP owns
+        // all DMA buffers and will return them all.
+        // TODO This should probably be removed when/if the echo server
+        // is no longer used.
+        TRACFCOMP(g_trac_mbox,"FAKEFSP returning all DMA buffers");
+
+        i_mbox_msg.msg_payload.data[0] = 0xFFFFFFFFFFFFFFFF;
+
+        // Since the HB is waiting for DMA buffers and holding up all other
+        // messages, just sneek this one on the front of the queue, disable
+        // the dma_pending flag to just long enough to send this message.
+        // All other values in the msg should be left as is.
+        iv_dma_pend = false;
+        iv_sendq.push_front(i_mbox_msg);
+        send_msg(); // respond
+        iv_dma_pend = true;
     }
 }
 
@@ -775,7 +969,7 @@ errlHndl_t MailboxSp::msgq_register(queue_id_t i_queue_id, msg_q_t i_msgQ)
     {
         iv_registry[i_queue_id] = i_msgQ;
 
-        TRACFCOMP(g_trac_mbox,INFO_MRK"MailboxSp::msgq_register queue id %d",
+        TRACFCOMP(g_trac_mbox,INFO_MRK"MailboxSp::msgq_register queue id 0x%x",
                   i_queue_id);
     }
     else
@@ -816,7 +1010,7 @@ msg_q_t MailboxSp::msgq_unregister(queue_id_t i_queue_id)
     {
         msgQ = r->second;
         iv_registry.erase(r);
-        TRACFCOMP(g_trac_mbox,INFO_MRK"MailboxSp::msgq_unregister queue id %d",
+        TRACFCOMP(g_trac_mbox,INFO_MRK"MailboxSp::msgq_unregister queue id 0x%x",
                   i_queue_id);
     }
     return msgQ;

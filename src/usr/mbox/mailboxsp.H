@@ -26,6 +26,7 @@
  * @file mailboxrp.C
  * @brief Mailbox service provider declariation
  */
+#include "mbox_dma_buffer.H"
 #include <stdint.h>
 #include <builtins.h>
 #include <mbox/mboxif.H>
@@ -178,6 +179,18 @@ namespace MBOX
             void trace_msg(const char * i_text,
                            const mbox_msg_t & i_mbox_msg) const;
 
+            /**
+             * Handle a message to hbmbox from fspmbox
+             * @param[in] i_mbox_msg, the mbox message
+             */
+            void handle_hbmbox_msg(mbox_msg_t & i_mbox_msg);
+
+            /**
+             * Handle a response from FSP
+             * @param[in] i_mbox_msg, the mbox message
+             */
+            void handle_hbmbox_resp(mbox_msg_t & i_mbox_msg);
+
             enum
             {
                 MAX_RETRY_COUNT = 3,
@@ -218,6 +231,7 @@ namespace MBOX
             respond_q_t iv_respondq;    //!< msg respond pending list
             registry_t  iv_registry;    //!< Registered queue
 
+            DmaBuffer   iv_dmaBuffer;   //!< DMA buffer manager
             TARGETING::Target * iv_trgt;//!< mailbox device driver target
             bool        iv_rts;         //!< ready to send flag
             bool        iv_dma_pend;    //!< Request pending for more DMA buffers

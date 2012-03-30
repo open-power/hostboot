@@ -48,11 +48,11 @@ namespace MBOX
         // FSP mailboxes
         FSP_FIRST_MSGQ          = 0x80000000,
         FSP_MAILBOX_MSGQ        = FSP_FIRST_MSGQ,
-        FSP_ECHO_MSGQ,
         FSP_PROGRESS_CODES_MSGQ,
         FSP_TRACE_MSGQ,
         FSP_ERRL_MSGQ,
         // Add FSP services here:
+        FSP_ECHO_MSGQ = 0xFFFFFFFF,     // Fake FSP for test
     };
 
     // Message types are only unique with in each message queue. Each message queue can
@@ -85,6 +85,7 @@ namespace MBOX
         MSG_INVALID_MSG_QUEUE_ID = FIRST_UNSECURE_MSG + 1,
         MSG_INVALID_MSG_TYPE,
         MSG_REQUEST_DMA_BUFFERS,
+        MSG_INITIAL_DMA,
     };
 
 

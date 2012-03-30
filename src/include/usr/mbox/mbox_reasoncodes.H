@@ -36,6 +36,8 @@ namespace MBOX
         MOD_MBOXSRV_HNDLR       = 0x04, // MailboxSp::msgHandler
         MOD_MBOXSRV_RCV         = 0x05, // MailboxSp::recv_msg
         MOD_MBOXREGISTER        = 0x06, // MailboxSp::msgq_register
+        MOD_MBOXSRV_FSP_MSG     = 0x07, // MailboxSp::handle_hbmbox_msg
+        MOD_MBOXSRV_SENDMSG     = 0x08, // MailboxSp::send_msg
     };
 
     enum MBOXReasonCode
@@ -53,6 +55,7 @@ namespace MBOX
         RC_PARITY_ERR                = HBMBOX_COMP_ID | 0x0B,
         RC_INVALID_MBOX_MSG_TYPE     = HBMBOX_COMP_ID | 0x0C,
         RC_MBOX_SERVICE_NOT_READY    = HBMBOX_COMP_ID | 0x0D,
+        RC_INVALID_DMA_LENGTH        = HBMBOX_COMP_ID | 0x0E,
     };
 };
 

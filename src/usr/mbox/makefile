@@ -23,7 +23,7 @@
 ROOTPATH = ../../..
 MODULE = mbox
 
-OBJS = mboxdd.o mailboxsp.o
+OBJS = mboxdd.o mailboxsp.o mbox_dma_buffer.o
 
 SUBDIRS = test.d
 

@@ -67,23 +67,35 @@ class MboxSPTest : public CxxTest::TestSuite
               errlCommit(err,HBMBOX_COMP_ID);
           }
 
-          // Send some messages
-          for(size_t i = 1; i < 2; ++i)
+          // Send some messages - DMA size will force a request
+          // to be sent to FSP for more buffers.
+          for(size_t i = 1; i < 3; ++i)
           {
               msg_t* msg = msg_allocate();
               msg->type = 1;
-              msg->data[1] = 0xFFFFFFFFFFFFFFFFul;
-              msg->extra_data = NULL;
+              msg->data[1] = 33 * 1024;
+              msg->extra_data = malloc(33 * 1024);
+              memcpy(msg->extra_data,"Message junk",13);
 
               msg->data[0] = i;
-              MBOX::send(MBOX::HB_TEST_MSGQ,msg);
+              err = MBOX::send(MBOX::HB_TEST_MSGQ,msg);
+              if(err)
+              {
+                  TS_FAIL("MBOX::send returned an error log");
+                  errlCommit(err,HBMBOX_COMP_ID);
+              }
           }
 
           // Send last message
           msg_t * msg = msg_allocate();
           msg->type = 3;        // use this to terminate while loop below
           msg->extra_data = NULL;
-          MBOX::send(MBOX::HB_TEST_MSGQ,msg);
+          err = MBOX::send(MBOX::HB_TEST_MSGQ,msg);
+          if(err)
+          {
+              TS_FAIL("MBOX::send returned an error log");
+              errlCommit(err,HBMBOX_COMP_ID);
+          }
 
           // now get the messages - they will look like async messages
           // from FSP, even though they are just the echo of the
@@ -101,18 +113,24 @@ class MboxSPTest : public CxxTest::TestSuite
 
               ++msg_idx;
 
-              if(msg->type != 1 ||
-                 msg->data[0] != msg_idx ||
-                 msg->data[1] != 0xFFFFFFFFFFFFFFFFul)
+              if(msg->type != 1 || 
+                 msg->data[0] != msg_idx || 
+                 msg->data[1] != 33 * 1024)
               {
-                  TS_FAIL("MBOX: Unexpected message from FSP");
+                  TS_FAIL("MBOXTEST: Unexpected message from FSP");
 
                   TRACFCOMP(g_trac_mbox,
-                            "MSG from FSP: %d %lx %lx %p",
+                            "MBOXTEST MSG from FSP: %d %lx %lx %p",
                             msg->type,
                             msg->data[0],
                             msg->data[1],
                             msg->extra_data);
+              }
+              if(msg->extra_data)
+              {
+                  TRACFCOMP(g_trac_mbox,"MBOXTEST Extra data: %s",
+                            static_cast<char *>(msg->extra_data));
+                  ::free(msg->extra_data);
               }
 
               msg_free(msg);
@@ -140,7 +158,13 @@ class MboxSPTest : public CxxTest::TestSuite
           msg->data[1] = 1;
           msg->extra_data = NULL;
 
-          MBOX::sendrecv(MBOX::FSP_ECHO_MSGQ,msg);
+          errlHndl_t err = MBOX::sendrecv(MBOX::FSP_ECHO_MSGQ,msg);
+
+          if(err)
+          {
+              TS_FAIL("MBOX::sendrecv returned an error log %p",err);
+              errlCommit(err,HBMBOX_COMP_ID);
+          }
 
           // TODO eventually the return data will be inverted or modified in
           //      some way.
@@ -151,12 +175,28 @@ class MboxSPTest : public CxxTest::TestSuite
               TS_FAIL("Unexpected mailbox sync message returned");
 
               TRACFCOMP(g_trac_mbox,
-                        "SYNC response: %d %lx %lx %p",
+                        "MBOXTEST SYNC response: %d %lx %lx %p",
                         msg->type,
                         msg->data[0],
                         msg->data[1],
                         msg->extra_data);
           }
+
+          msg->type = 2;
+          msg->data[1] = 128 * 1024;  // too big of message
+          msg->extra_data = malloc(8);  
+          err = MBOX::sendrecv(MBOX::FSP_ECHO_MSGQ,msg);
+
+          if(!err)
+          {
+              TS_FAIL("MBOX::sendrecv should return an error log, extra_data too big");
+          }
+          else
+          {
+              delete err;
+          }
+          free(msg->extra_data);
+
           msg_free(msg);
       }
 };

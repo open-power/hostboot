@@ -44,6 +44,11 @@ class VmmManager
             // put the Page Table at the end of our memory space
             PTSIZE = (1 << 18),
             HTABORG = (FULL_MEM_SIZE - PTSIZE),
+
+            // Put the DMA Pages just under the Page Table
+            MBOX_DMA_PAGES = 64,    // must be <= 64
+            MBOX_DMA_PAGESIZE = (1 * KILOBYTE),
+            MBOX_DMA_ADDR = (HTABORG - (MBOX_DMA_PAGES * MBOX_DMA_PAGESIZE))
         };
 
         enum castout_t
