@@ -10013,11 +10013,11 @@ Target used for FSI wrap-back testing
 -->
 
 <targetInstance>
-    <id>sys0node0dimm</id>
+    <id>sys0node0dimm0</id>
     <type>lcard-dimm-jedec</type>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/dimm-</default>
+        <default>physical:sys-0/node-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
