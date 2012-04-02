@@ -56,13 +56,25 @@
 #include    <initservice/initsvcstructs.H>
 
 //  -----   istep include files   -----
-#include    "istep06list.H"
 
+//  isteps 1-5 run before hostboot
+
+#include    "istep06list.H"
+#include    "istep07list.H"
+#include    "istep08list.H"
+#include    "istep09list.H"
 #include    "istep10list.H"
 #include    "istep11list.H"
 #include    "istep12list.H"
 #include    "istep13list.H"
-
+#include    "istep14list.H"
+#include    "istep15list.H"
+#include    "istep16list.H"
+// istep 17, FSP only
+#include    "istep18list.H"
+// istep 19, FSP only
+#include    "istep20list.H"
+#include    "istep21list.H"
 
 namespace   INITSERVICE
 {
@@ -76,26 +88,29 @@ const  ExtTaskInfo  g_isteps[]    =   {
         { NULL, 0, NULL },                              //  dummy IStep 4
         { NULL, 0, NULL },                              //  dummy IStep 5
         INITSERVICE::g_istep06TaskList,                 //  HWAS  IStep 6
-        { NULL, 0, NULL },                              //  dummy IStep 7
-        { NULL, 0, NULL },                              //  dummy IStep 8
-        { NULL, 0, NULL },                              //  dummy IStep 9
-        INITSERVICE::g_istep10TaskList,                 //  SBE_CENTAUR_INIT
-        INITSERVICE::g_istep11TaskList,                 //  DMI_TRAINING
-        INITSERVICE::g_istep12TaskList,                 //  MC_INIT
-        INITSERVICE::g_istep13TaskList,                 //  DRAM_TRAINING
-        { NULL, 0, NULL },                              //  dummy IStep 14
-        { NULL, 0, NULL },                              //  dummy IStep 15
-        { NULL, 0, NULL },                              //  dummy IStep 16
-
+        INITSERVICE::g_istep07TaskList,                 //        IStep 7
+        INITSERVICE::g_istep08TaskList,                 //        IStep 8
+        INITSERVICE::g_istep09TaskList,                 //        IStep 9
+        INITSERVICE::g_istep10TaskList,                 //        IStep 10
+        INITSERVICE::g_istep11TaskList,                 //        IStep 11
+        INITSERVICE::g_istep12TaskList,                 //        IStep 12
+        INITSERVICE::g_istep13TaskList,                 //        IStep 13
+        INITSERVICE::g_istep14TaskList,                 //        IStep 14
+        INITSERVICE::g_istep15TaskList,                 //        IStep 15
+        INITSERVICE::g_istep16TaskList,                 //        IStep 16
+        { NULL, 0, NULL},                               //  FSP   IStep 17
+        INITSERVICE::g_istep18TaskList,                 //        IStep 18
+        { NULL, 0, NULL },                              //  FSP   IStep 19
+        INITSERVICE::g_istep20TaskList,                 //        IStep 20
+        INITSERVICE::g_istep21TaskList                  //        IStep 21
         //
         // add further istep lists at the end.
 };
 
-
 const   uint64_t    MAX_SUBSTEPS =  25;
 
 // publish the size of the g_isteps array
-const   uint64_t    MAX_ISTEPS   =  sizeof(g_isteps)/sizeof(ExtTaskInfo) ;
+const   uint64_t    MaxISteps   =  sizeof(g_isteps)/sizeof(ExtTaskInfo) ;
 
 
 };  // namespace

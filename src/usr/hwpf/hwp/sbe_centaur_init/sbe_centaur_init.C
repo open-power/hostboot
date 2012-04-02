@@ -289,223 +289,15 @@ void    call_cen_sbe_tp_chiplet_init1( void *io_pArgs )
 
 
 //
-//  Wrapper function to call 10.2 : cen_sbe_tp_arrayinit
+//  Wrapper function to call 10.2 : cen_sbe_npll_initf
 //
-void    call_cen_sbe_tp_arrayinit( void *io_pArgs )
+void    call_cen_sbe_npll_initf( void *io_pArgs )
 {
 
     fapi::ReturnCode    l_fapirc;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_tp_arrayinit entry" );
-
-
-    //  figure out what targets we need
-    //  ADD TARGET CODE HERE
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "=====  cen_sbe_tp_arrayinit HWP(? ? ? )" );
-#if 0
-    //  call the HWP with each target   ( if parallel, spin off a task )
-    l_fapirc  =   cen_sbe_tp_arrayinit( ? , ?, ? );
-#endif
-
-    //  process return code.
-    if ( l_fapirc== fapi::FAPI_RC_SUCCESS )
-    {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "SUCCESS :  cen_sbe_tp_arrayinit HWP(? ? ? )" );
-    }
-    else
-    {
-        /**
-         * @todo fapi error - just print out for now...
-         */
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR %d:  cen_sbe_tp_arrayinit HWP(? ? ?) ",
-                static_cast<uint32_t>(l_fapirc) );
-    }
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_tp_arrayinit exit" );
-
-    task_end2( NULL );
-}
-
-//
-//  Wrapper function to call 10.3 : cen_sbe_tp_chiplet_init2
-//
-void    call_cen_sbe_tp_chiplet_init2( void *io_pArgs )
-{
-
-    fapi::ReturnCode    l_fapirc;
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_tp_chiplet_init2 entry" );
-
-
-    //  figure out what targets we need
-    //  ADD TARGET CODE HERE
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "=====  cen_sbe_tp_chiplet_init2 HWP(? ? ? )" );
-#if 0
-    //  call the HWP with each target   ( if parallel, spin off a task )
-    l_fapirc  =   cen_sbe_tp_chiplet_init2( ? , ?, ? );
-#endif
-
-    //  process return code.
-    if ( l_fapirc== fapi::FAPI_RC_SUCCESS )
-    {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "SUCCESS :  cen_sbe_tp_chiplet_init2 HWP(? ? ? )" );
-    }
-    else
-    {
-        /**
-         * @todo fapi error - just print out for now...
-         */
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR %d:  cen_sbe_tp_chiplet_init2 HWP(? ? ?) ",
-                static_cast<uint32_t>(l_fapirc) );
-    }
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_tp_chiplet_init2 exit" );
-
-    task_end2( NULL );
-}
-
-
-//
-//  Wrapper function to call 10.4 : cen_sbe_tp_chiplet_init3
-//
-void    call_cen_sbe_tp_chiplet_init3( void *io_pArgs )
-{
-
-    fapi::ReturnCode    l_fapirc;
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_tp_chiplet_init3 entry" );
-
-
-    //  figure out what targets we need
-    //  ADD TARGET CODE HERE
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "=====  cen_sbe_tp_chiplet_init3 HWP(? ? ? )" );
-#if 0
-    //  call the HWP with each target   ( if parallel, spin off a task )
-    l_fapirc  =   cen_sbe_tp_chiplet_init3( ? , ?, ? );
-#endif
-
-    //  process return code.
-    if ( l_fapirc== fapi::FAPI_RC_SUCCESS )
-    {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "SUCCESS :  cen_sbe_tp_chiplet_init3 HWP(? ? ? )" );
-    }
-    else
-    {
-        /**
-         * @todo fapi error - just print out for now...
-         */
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR %d:  cen_sbe_tp_chiplet_init3 HWP(? ? ?) ",
-                static_cast<uint32_t>(l_fapirc) );
-    }
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_tp_chiplet_init3 exit" );
-
-    task_end2( NULL );
-}
-
-
-//
-//  Wrapper function to call 10.5 : cen_sbe_chiplet_init
-//
-void    call_cen_sbe_chiplet_init( void *io_pArgs )
-{
-
-    fapi::ReturnCode    l_fapirc;
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_chiplet_init entry" );
-
-
-    //  figure out what targets we need
-    //  ADD TARGET CODE HERE
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "=====  cen_sbe_chiplet_init HWP(? ? ? )" );
-#if 0
-    //  call the HWP with each target   ( if parallel, spin off a task )
-    l_fapirc  =   cen_sbe_chiplet_init( ? , ?, ? );
-#endif
-
-    //  process return code.
-    if ( l_fapirc== fapi::FAPI_RC_SUCCESS )
-    {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "SUCCESS :  cen_sbe_chiplet_init HWP(? ? ? )" );
-    }
-    else
-    {
-        /**
-         * @todo fapi error - just print out for now...
-         */
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR %d:  cen_sbe_chiplet_init HWP(? ? ?) ",
-                static_cast<uint32_t>(l_fapirc) );
-    }
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_chiplet_init exit" );
-
-    task_end2( NULL );
-}
-
-
-//
-//  Wrapper function to call 10.6 : cen_sbe_arrayinit
-//
-void    call_cen_sbe_arrayinit( void *io_pArgs )
-{
-
-    fapi::ReturnCode    l_fapirc;
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_arrayinit entry" );
-
-
-    //  figure out what targets we need
-    //  ADD TARGET CODE HERE
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "=====  cen_sbe_arrayinit HWP(? ? ? )" );
-#if 0
-    //  call the HWP with each target   ( if parallel, spin off a task )
-    l_fapirc  =   cen_sbe_arrayinit( ? , ?, ? );
-#endif
-
-    //  process return code.
-    if ( l_fapirc== fapi::FAPI_RC_SUCCESS )
-    {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "SUCCESS :  cen_sbe_arrayinit HWP(? ? ? )" );
-    }
-    else
-    {
-        /**
-         * @todo fapi error - just print out for now...
-         */
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR %d:  cen_sbe_arrayinit HWP(? ? ?) ",
-                static_cast<uint32_t>(l_fapirc) );
-    }
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_arrayinit exit" );
-
-    task_end2( NULL );
-}
-
-
-//
-//  Wrapper function to call 10.7 : cen_sbe_pll_initf
-//
-void    call_cen_sbe_pll_initf( void *io_pArgs )
-{
-
-    fapi::ReturnCode    l_fapirc;
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_pll_initf entry" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+               "call_cen_sbe_pll_initf entry"  );
 
 
     //  figure out what targets we need
@@ -534,11 +326,232 @@ void    call_cen_sbe_pll_initf( void *io_pArgs )
                 static_cast<uint32_t>(l_fapirc) );
     }
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_pll_initf exit" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+                "call_cen_sbe_pll_initf exit" );
 
     task_end2( NULL );
 }
 
+
+//
+//  Wrapper function to call 10.3 : cen_sbe_tp_chiplet_init2
+//
+void    call_cen_sbe_tp_chiplet_init2( void *io_pArgs )
+{
+
+    fapi::ReturnCode    l_fapirc;
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+    "call_cen_sbe_tp_chiplet_init2" );
+
+
+    //  figure out what targets we need
+    //  ADD TARGET CODE HERE
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "=====  cen_sbe_tp_chiplet_init2 HWP(? ? ? )" );
+#if 0
+    //  call the HWP with each target   ( if parallel, spin off a task )
+    l_fapirc  =   cen_sbe_tp_chiplet_init2( ? , ?, ? );
+#endif
+
+    //  process return code.
+    if ( l_fapirc== fapi::FAPI_RC_SUCCESS )
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "SUCCESS :  cen_sbe_tp_chiplet_init2 HWP(? ? ? )" );
+    }
+    else
+    {
+        /**
+         * @todo fapi error - just print out for now...
+         */
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "ERROR %d:  cen_sbe_tp_chiplet_init2 HWP(? ? ?) ",
+                static_cast<uint32_t>(l_fapirc) );
+    }
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+               "call_cen_sbe_tp_chiplet_init2" );
+
+    task_end2( NULL );
+}
+
+
+//
+//  Wrapper function to call 10.4 : cen_sbe_tp_arrayinit
+//
+void    call_cen_sbe_tp_arrayinit( void *io_pArgs )
+{
+
+    fapi::ReturnCode    l_fapirc;
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+                "call_cen_sbe_tp_arrayinit entry" );
+
+
+    //  figure out what targets we need
+    //  ADD TARGET CODE HERE
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "=====  cen_sbe_tp_arrayinit HWP(? ? ? )" );
+#if 0
+    //  call the HWP with each target   ( if parallel, spin off a task )
+    l_fapirc  =   cen_sbe_tp_arrayinit( ? , ?, ? );
+#endif
+
+    //  process return code.
+    if ( l_fapirc== fapi::FAPI_RC_SUCCESS )
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "SUCCESS :  cen_sbe_tp_arrayinit HWP(? ? ? )" );
+    }
+    else
+    {
+        /**
+         * @todo fapi error - just print out for now...
+         */
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "ERROR %d:  cen_sbe_tp_arrayinit HWP(? ? ?) ",
+                static_cast<uint32_t>(l_fapirc) );
+    }
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+                "call_cen_sbe_tp_arrayinit exit" );
+
+    task_end2( NULL );
+}
+
+
+
+//
+//  Wrapper function to call 10.5 : cen_sbe_tp_chiplet_init3
+//
+void    call_cen_sbe_tp_chiplet_init3( void *io_pArgs )
+{
+
+    fapi::ReturnCode    l_fapirc;
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+                "call_cen_sbe_tp_chiplet_init3 entry" );
+
+
+    //  figure out what targets we need
+    //  ADD TARGET CODE HERE
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "=====  cen_sbe_tp_chiplet_init3 HWP(? ? ? )" );
+#if 0
+    //  call the HWP with each target   ( if parallel, spin off a task )
+    l_fapirc  =   cen_sbe_tp_chiplet_init3( ? , ?, ? );
+#endif
+
+    //  process return code.
+    if ( l_fapirc== fapi::FAPI_RC_SUCCESS )
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "SUCCESS :  cen_sbe_tp_chiplet_init3 HWP(? ? ? )" );
+    }
+    else
+    {
+        /**
+         * @todo fapi error - just print out for now...
+         */
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "ERROR %d:  cen_sbe_tp_chiplet_init3 HWP(? ? ?) ",
+                static_cast<uint32_t>(l_fapirc) );
+    }
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+                "call_cen_sbe_tp_chiplet_init3 exit" );
+
+    task_end2( NULL );
+}
+
+
+//
+//  Wrapper function to call 10.6 : cen_sbe_chiplet_init
+//
+void    call_cen_sbe_chiplet_init( void *io_pArgs )
+{
+
+    fapi::ReturnCode    l_fapirc;
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+                    "call_cen_sbe_chiplet_init entry" );
+
+
+    //  figure out what targets we need
+    //  ADD TARGET CODE HERE
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "=====  cen_sbe_chiplet_init HWP(? ? ? )" );
+#if 0
+    //  call the HWP with each target   ( if parallel, spin off a task )
+    l_fapirc  =   cen_sbe_chiplet_init( ? , ?, ? );
+#endif
+
+    //  process return code.
+    if ( l_fapirc== fapi::FAPI_RC_SUCCESS )
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "SUCCESS :  cen_sbe_chiplet_init HWP(? ? ? )" );
+    }
+    else
+    {
+        /**
+         * @todo fapi error - just print out for now...
+         */
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "ERROR %d:  cen_sbe_chiplet_init HWP(? ? ?) ",
+                static_cast<uint32_t>(l_fapirc) );
+    }
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+                "call_cen_sbe_chiplet_init exit" );
+
+    task_end2( NULL );
+}
+
+
+//
+//  Wrapper function to call 10.7 : cen_sbe_arrayinit
+//
+void    call_cen_sbe_arrayinit( void *io_pArgs )
+{
+
+    fapi::ReturnCode    l_fapirc;
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+                    "call_cen_sbe_arrayinit entry" );
+
+
+    //  figure out what targets we need
+    //  ADD TARGET CODE HERE
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "=====  cen_sbe_arrayinit HWP(? ? ? )" );
+#if 0
+    //  call the HWP with each target   ( if parallel, spin off a task )
+    l_fapirc  =   cen_sbe_arrayinit( ? , ?, ? );
+#endif
+
+    //  process return code.
+    if ( l_fapirc== fapi::FAPI_RC_SUCCESS )
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "SUCCESS :  cen_sbe_arrayinit HWP(? ? ? )" );
+    }
+    else
+    {
+        /**
+         * @todo fapi error - just print out for now...
+         */
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "ERROR %d:  cen_sbe_arrayinit HWP(? ? ?) ",
+                static_cast<uint32_t>(l_fapirc) );
+    }
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+                "call_cen_sbe_arrayinit exit" );
+
+    task_end2( NULL );
+}
 
 //
 //  Wrapper function to call 10.8 : cen_sbe_dts_init
@@ -548,7 +561,8 @@ void    call_cen_sbe_dts_init( void *io_pArgs )
 
     fapi::ReturnCode    l_fapirc;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_dts_init entry" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+                "call_cen_sbe_dts_init entry" );
 
 
     //  figure out what targets we need
@@ -576,7 +590,8 @@ void    call_cen_sbe_dts_init( void *io_pArgs )
                 static_cast<uint32_t>(l_fapirc) );
     }
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_dts_init exit" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+                    "call_cen_sbe_dts_init exit" );
 
     task_end2( NULL );
 }
@@ -590,7 +605,8 @@ void    call_cen_sbe_initf( void *io_pArgs )
 
     fapi::ReturnCode    l_fapirc;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_initf entry" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+                    "call_cen_sbe_initf entry" );
 
 
     //  figure out what targets we need
@@ -618,7 +634,8 @@ void    call_cen_sbe_initf( void *io_pArgs )
                 static_cast<uint32_t>(l_fapirc) );
     }
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_initf exit" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+                "call_cen_sbe_initf exit" );
 
     task_end2( NULL );
 }
@@ -632,7 +649,8 @@ void    call_cen_sbe_do_manual_inits( void *io_pArgs )
 
     fapi::ReturnCode    l_fapirc;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_do_manual_inits entry" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+                "call_cen_sbe_do_manual_inits entry" );
 
 
     //  figure out what targets we need
@@ -660,21 +678,23 @@ void    call_cen_sbe_do_manual_inits( void *io_pArgs )
                 static_cast<uint32_t>(l_fapirc) );
     }
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_do_manual_inits exit" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+                "call_cen_sbe_do_manual_inits exit" );
 
     task_end2( NULL );
 }
 
 
 //
-//  Wrapper function to call 10.11 : cen_sbe_startclocks
+//  Wrapper function to call 10.11 : cen_sbe_nest_startclocks
 //
-void    call_cen_sbe_startclocks( void *io_pArgs )
+void    call_cen_sbe_nest_startclocks( void *io_pArgs )
 {
 
     fapi::ReturnCode    l_fapirc;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_startclocks entry" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+                "call_cen_sbe_startclocks entry" );
 
 
     //  figure out what targets we need
@@ -702,7 +722,8 @@ void    call_cen_sbe_startclocks( void *io_pArgs )
                 static_cast<uint32_t>(l_fapirc) );
     }
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_startclocks exit" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+                "call_cen_sbe_startclocks exit" );
 
     task_end2( NULL );
 }
@@ -716,7 +737,8 @@ void    call_cen_sbe_scominits( void *io_pArgs )
 
     fapi::ReturnCode    l_fapirc;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_scominits entry" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+                "call_cen_sbe_scominits entry" );
 
 
     //  figure out what targets we need
@@ -744,7 +766,8 @@ void    call_cen_sbe_scominits( void *io_pArgs )
                 static_cast<uint32_t>(l_fapirc) );
     }
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_scominits exit" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,                            
+               "call_cen_sbe_scominits exit"  );
 
     task_end2( NULL );
 }

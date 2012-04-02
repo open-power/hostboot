@@ -29,7 +29,7 @@
  * @file    istep10list.H
  *
  *  Step 10 Hostboot SBE Centaur Init
- *  IPL FLow Doc    v0.99 (02/10/12)
+ *  IPL FLow Doc        v1.01 (03/26/12)
  *
  *  Please see the note in initsvcstructs.H for description of
  *      the ISTEPNAME macro.
@@ -50,7 +50,15 @@ namespace   INITSERVICE
 const   TaskInfo    g_istep10[]  =   {
 
         {
-                ISTEPNAME(10,00,"cen_sbe_tp_chiplet_init1"),
+                "",         // dummy, index 0
+                NULL,
+                {
+                        NONE,
+                        EXT_IMAGE,
+                }
+        },
+        {
+                ISTEPNAME(10,01,"cen_sbe_tp_chiplet_init1"),
                 SBE_CENTAUR_INIT::call_cen_sbe_tp_chiplet_init1,
                 {
                         START_FN,
@@ -58,15 +66,15 @@ const   TaskInfo    g_istep10[]  =   {
                 }
         },
         {
-                ISTEPNAME( 10, 01, "cen_sbe_tp_arrayinit"),
-                SBE_CENTAUR_INIT::call_cen_sbe_tp_arrayinit,
+                ISTEPNAME( 10,02, "cen_sbe_npll_initf"),
+                SBE_CENTAUR_INIT::call_cen_sbe_npll_initf,
                 {
                         START_FN,
                         EXT_IMAGE,
                 }
         },
         {
-                ISTEPNAME(10,02,"cen_sbe_tp_chiplet_init2"),
+                ISTEPNAME(10,03,"cen_sbe_tp_chiplet_init2"),
                 SBE_CENTAUR_INIT::call_cen_sbe_tp_chiplet_init2,
                 {
                         START_FN,
@@ -74,7 +82,15 @@ const   TaskInfo    g_istep10[]  =   {
                 }
         },
         {
-                ISTEPNAME(10,03,"cen_sbe_tp_chiplet_init3"),
+                ISTEPNAME(10,04,"cen_sbe_tp_arrayinit"),
+                SBE_CENTAUR_INIT::call_cen_sbe_tp_arrayinit,
+                {
+                        START_FN,
+                        EXT_IMAGE,
+                }
+        },
+        {
+                ISTEPNAME(10,05,"cen_sbe_tp_chiplet_init3"),
                 SBE_CENTAUR_INIT::call_cen_sbe_tp_chiplet_init3,
                 {
                         START_FN,
@@ -82,15 +98,16 @@ const   TaskInfo    g_istep10[]  =   {
                 }
         },
         {
-                ISTEPNAME(10,04,"cen_sbe_chiplet_init"),
+                ISTEPNAME(10,06,"cen_sbe_chiplet_init"),
                 SBE_CENTAUR_INIT::call_cen_sbe_chiplet_init,
                 {
                         START_FN,
                         EXT_IMAGE,
                 }
         },
+
         {
-                ISTEPNAME(10,05,"cen_sbe_arrayinit"),
+                ISTEPNAME(10,07,"cen_sbe_arrayinit"),
                 SBE_CENTAUR_INIT::call_cen_sbe_arrayinit,
                 {
                         START_FN,
@@ -98,15 +115,7 @@ const   TaskInfo    g_istep10[]  =   {
                 }
         },
         {
-                ISTEPNAME(10,06,"cen_sbe_pll_initf"),
-                SBE_CENTAUR_INIT::call_cen_sbe_pll_initf,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                }
-        },
-        {
-                ISTEPNAME(10,07,"cen_sbe_dts_init"),
+                ISTEPNAME(10,08,"cen_sbe_dts_init"),
                 SBE_CENTAUR_INIT::call_cen_sbe_dts_init,
                 {
                         START_FN,
@@ -114,7 +123,7 @@ const   TaskInfo    g_istep10[]  =   {
                 }
         },
         {
-                ISTEPNAME(10,08,"cen_sbe_initf"),
+                ISTEPNAME(10,09,"cen_sbe_initf"),
                 SBE_CENTAUR_INIT::call_cen_sbe_initf,
                 {
                         START_FN,
@@ -122,7 +131,7 @@ const   TaskInfo    g_istep10[]  =   {
                 }
         },
         {
-                ISTEPNAME(10,09,"cen_sbe_do_manual_inits"),
+                ISTEPNAME(10,10,"cen_sbe_do_manual_inits"),
                 SBE_CENTAUR_INIT::call_cen_sbe_do_manual_inits,
                 {
                         START_FN,
@@ -130,15 +139,15 @@ const   TaskInfo    g_istep10[]  =   {
                 }
         },
         {
-                ISTEPNAME(10,10,"cen_sbe_startclocks"),
-                SBE_CENTAUR_INIT::call_cen_sbe_startclocks,
+                ISTEPNAME(10,11,"cen_sbe_nest_startclocks"),
+                SBE_CENTAUR_INIT::call_cen_sbe_nest_startclocks,
                 {
                         START_FN,
                         EXT_IMAGE,
                 }
         },
         {
-                ISTEPNAME(10,11,"cen_sbe_scominits"),
+                ISTEPNAME(10,12,"cen_sbe_scominits"),
                 SBE_CENTAUR_INIT::call_cen_sbe_scominits,
                 {
                         START_FN,

@@ -38,76 +38,77 @@
  *
  */
 
-/* @tag isteplist
- * @docversion     v0.99 (02/10/12)
- * @istepname      dram_training
- * @istepnum       13
- * @istepdesc      Step 13 DRAM Training
- * @{
- * @substepnum     1
- * @substepname    host_disable_vddr
- * @substepdesc    : Disable VDDR on CanContinue loops
- * @target_sched   serial
- * @}
- * @{
- * @substepnum     2
- * @substepname    mc_pll_setup
- * @substepdesc    : Setup PLL for MBAs
- * @target_sched   serial
- * @}
- * @{
- * @substepnum     3
- * @substepname    mba_startclocks
- * @substepdesc    : Start clocks on MBAs
- * @target_sched   serial
- * @}
- * @{
- * @substepnum     4
- * @substepname    host_enable_vddr
- * @substepdesc    : Enable the VDDR3 Voltage Rail
- * @target_sched   serial
- * @}
- * @{
- * @substepnum     5
- * @substepname    mss_initf
- * @substepdesc    : Perform scom inits to MC and PHY
- * @target_sched   serial
- * @}
- * @{
- * @substepnum     6
- * @substepname    mss_ddr_phy_reset
- * @substepdesc    : Soft reset of DDR PHY macros
- * @target_sched   serial
- * @}
- * @{
- * @substepnum     7
- * @substepname    mss_draminit
- * @substepdesc    : Dram initialize
- * @target_sched   serial
- * @}
- * @{
- * @substepnum     8
- * @substepname    mss_restore_dram_repair
- * @substepdesc    : Restore Dram repairs
- * @target_sched   serial
- * @}
- * @{
- * @substepnum     9
- * @substepname    mss_draminit_training
- * @substepdesc    : Dram training
- * @target_sched   serial
- * @}
- * @{
- * @substepnum     10
- * @substepname     mss_draminit_trainadv
- * @substepdesc     : Advanced dram training
- * @target_sched   serial
- * @}
- * @{
- * @substepnum     11
- * @substepname     mss_draminit_mc
- * @substepdesc     : Hand off control to MC
- * @target_sched   serial
+/*  @tag isteplist
+ *  @docversion     v0.99 (02/10/12)
+ *  @istepname      dram_training
+ *  @istepnum       13
+ *  @istepdesc      Step 13 DRAM Training
+ *
+ *  @{
+ *      @substepnum     1
+ *      @substepname    host_disable_vddr
+ *      @substepdesc    : Disable VDDR on CanContinue loops
+ *      @target_sched   serial
+ *  @}
+ *  @{
+ *      @substepnum     2
+ *      @substepname    mc_pll_setup
+ *      @substepdesc    : Setup PLL for MBAs
+ *      @target_sched   serial
+ *  @}
+ *  @{
+ *      @substepnum     3
+ *      @substepname    mba_startclocks
+ *      @substepdesc    : Start clocks on MBAs
+ *      @target_sched   serial
+ *  @}
+ *  @{
+ *      @substepnum     4
+ *      @substepname    host_enable_vddr
+ *      @substepdesc    : Enable the VDDR3 Voltage Rail
+ *      @target_sched   serial
+ *  @}
+ *  @{
+ *      @substepnum     5
+ *      @substepname    mss_initf
+ *      @substepdesc    : Perform scom inits to MC and PHY
+ *      @target_sched   serial
+ *  @}
+ *  @{
+ *      @substepnum     6
+ *      @substepname    mss_ddr_phy_reset
+ *      @substepdesc    : Soft reset of DDR PHY macros
+ *      @target_sched   serial
+ *  @}
+ *  @{
+ *      @substepnum     7
+ *      @substepname    mss_draminit
+ *      @substepdesc    : Dram initialize
+ *      @target_sched   serial
+ *  @}
+ *  @{
+ *      @substepnum     8
+ *      @substepname    mss_restore_dram_repair
+ *      @substepdesc    : Restore Dram repairs
+ *      @target_sched   serial
+ *  @}
+ *  @{
+ *      @substepnum     9
+ *      @substepname    mss_draminit_training
+ *      @substepdesc    : Dram training
+ *      @target_sched   serial
+ *  @}
+ *  @{
+ *      @substepnum     10
+ *      @substepname     mss_draminit_trainadv
+ *      @substepdesc     : Advanced dram training
+ *      @target_sched   serial
+ *  @}
+ *  @{
+ *      @substepnum     11
+ *      @substepname     mss_draminit_mc
+ *      @substepdesc     : Hand off control to MC
+ *      @target_sched   serial
  * @}
  */
 /******************************************************************************/

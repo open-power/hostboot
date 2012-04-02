@@ -57,31 +57,77 @@ namespace   INITSERVICE
  *
  */
 const   TaskInfo    g_istep06[]  =   {
+        {
+                "",         // dummy, index 0
+                NULL,
+                {
+                        NONE,
+                        EXT_IMAGE,
+                }
+        },
+        {
+                ISTEPNAME(06,01,"host_setup"),
+                NULL,
+                {
+                        NONE,
+                        EXT_IMAGE,
+                }
+        },
+        {
+                ISTEPNAME(06,02,"host_istep_enable"),
+                NULL,
+                {
+                        NONE,
+                        EXT_IMAGE,
+                }
+        },
 
-        // @ todo   isteps are numbered wrong to match up with hb-istep -
-        //          need to add stubs for the other substeps
         {
-                ISTEPNAME(06,00,"host_init_fsi"),         // substep name
-                HWAS::host_init_fsi,                    // pointer to fn
+                ISTEPNAME(06,03,"host_init_fsi"),           // substep name
+                HWAS::host_init_fsi,                        // pointer to fn
                 {
-                        START_FN,                       // task type
-                        EXT_IMAGE,                      // Extended Module
+                        START_FN,                           // task type
+                        EXT_IMAGE,                          // Extended Module
                 }
         },
         {
-                ISTEPNAME(06,01,"host_discover_targets"), // substep name
-                HWAS::host_discover_targets,            // pointer to fn
+                ISTEPNAME(06,04,"set_ipl_parms"),
+                NULL,
                 {
-                        START_FN,                       // task type
-                        EXT_IMAGE,                      // Extended Module
+                        NONE,
+                        EXT_IMAGE,
                 }
         },
         {
-                ISTEPNAME(06,02, "host_gard"),           // substep name
+                ISTEPNAME(06,05,"host_discover_targets"),   // substep name
+                HWAS::host_discover_targets,                // pointer to fn
+                {
+                        START_FN,                           // task type
+                        EXT_IMAGE,                          // Extended Module
+                }
+        },
+        {
+                ISTEPNAME(06,06, "host_gard"),           // substep name
                 HWAS::host_gard,                        // pointer to fn
                 {
                         START_FN,                       // task type
                         EXT_IMAGE,                      // Extended Module
+                }
+        },
+        {
+                ISTEPNAME(06,07,"host_cancontinue_clear"),
+                NULL,
+                {
+                        NONE,
+                        EXT_IMAGE,
+                }
+        },
+        {
+                ISTEPNAME(06,08,"proc_check_slave_sbe_seeprom_complete"),
+                NULL,
+                {
+                        NONE,
+                        EXT_IMAGE,
                 }
         },
 

@@ -70,119 +70,107 @@
 
 namespace   INITSERVICE
 {
-    const   TaskInfo    g_istep13[]  =   {
-        // NOTE:  IStep indexes start with 0
+const   TaskInfo    g_istep13[]  =   {
 
         {
-                ISTEPNAME(13,0,"host_disable_vddr"),
+                "",         // dummy, index 0
+                NULL,
+                {
+                        NONE,
+                        EXT_IMAGE,
+                }
+        },
+
+        {
+                ISTEPNAME(13,01,"host_disable_vddr"),
                 DRAM_TRAINING::call_host_disable_vddr,
                 {
                         START_FN,
                         EXT_IMAGE,
                 }
-        },      
-
-
+        },
         {
-                ISTEPNAME(13,1,"mc_pll_setup"),
+                ISTEPNAME(13,02,"mc_pll_setup"),
                 DRAM_TRAINING::call_mc_pll_setup,
                 {
                         START_FN,
                         EXT_IMAGE,
                 }
-        },      
-
-
+        },
         {
-                ISTEPNAME(13,2,"mba_startclocks"),
+                ISTEPNAME(13,03,"mba_startclocks"),
                 DRAM_TRAINING::call_mba_startclocks,
                 {
                         START_FN,
                         EXT_IMAGE,
                 }
-        },      
-
-
+        },
         {
-                ISTEPNAME(13,3,"host_enable_vddr"),
+                ISTEPNAME(13,04,"host_enable_vddr"),
                 DRAM_TRAINING::call_host_enable_vddr,
                 {
                         START_FN,
                         EXT_IMAGE,
                 }
-        },      
-
-
+        },
         {
-                ISTEPNAME(13,4,"mss_initf"),
+                ISTEPNAME(13,05,"mss_initf"),
                 DRAM_TRAINING::call_mss_initf,
                 {
                         START_FN,
                         EXT_IMAGE,
                 }
-        },      
-
-
+        },
         {
-                ISTEPNAME(13,5,"mss_ddr_phy_reset"),
+                ISTEPNAME(13,06,"mss_ddr_phy_reset"),
                 DRAM_TRAINING::call_mss_ddr_phy_reset,
                 {
                         START_FN,
                         EXT_IMAGE,
                 }
-        },      
-
-
+        },
         {
-                ISTEPNAME(13,6,"mss_draminit"),
+                ISTEPNAME(13,07,"mss_draminit"),
                 DRAM_TRAINING::call_mss_draminit,
                 {
                         START_FN,
                         EXT_IMAGE,
                 }
-        },      
-
-
+        },
         {
-                ISTEPNAME(13,7,"mss_restore_dram_repair"),
+                ISTEPNAME(13,08,"mss_restore_dram_repair"),
                 DRAM_TRAINING::call_mss_restore_dram_repair,
                 {
                         START_FN,
                         EXT_IMAGE,
                 }
-        },      
-
-
+        },
         {
-                ISTEPNAME(13,8,"mss_draminit_training"),
+                ISTEPNAME(13,09,"mss_draminit_training"),
                 DRAM_TRAINING::call_mss_draminit_training,
                 {
                         START_FN,
                         EXT_IMAGE,
                 }
-        },      
-
-
+        },
         {
-                ISTEPNAME(13,9,"mss_draminit_trainadv"),
+                ISTEPNAME(13,10,"mss_draminit_trainadv"),
                 DRAM_TRAINING::call_mss_draminit_trainadv,
                 {
                         START_FN,
                         EXT_IMAGE,
                 }
-        },      
-
-
+        },
         {
-                ISTEPNAME(13,10,"mss_draminit_mc"),
+                ISTEPNAME(13,11,"mss_draminit_mc"),
                 DRAM_TRAINING::call_mss_draminit_mc,
                 {
                         START_FN,
                         EXT_IMAGE,
                 }
-        },      
+        },
 
-  
+
         //  END OF LIST!
 };
 

@@ -37,45 +37,55 @@
  *  @istepnum       11
  *  @istepdesc      DMI Training
  *
+ *
+ *  @{
  *      @substepnum     1
  *      @substepname    dmi_scominit
  *      @substepdesc    : Scom setup on centaur
  *          @target_sched   serial
- *
+ *  @}
+ *  @{
  *      @substepnum     2
  *      @substepname    dmi_erepair
  *      @substepdesc    : Restore EDI Bus eRepair data
  *          @target_sched   serial
- *
+ *  @}
+ *  @{
  *      @substepnum     3
  *      @substepname    dmi_io_dccal
  *      @substepdesc    : Calibrate DMI interfaces
  *          @target_sched   serial
- *
+ *  @}
+ *  @{
  *      @substepnum     4
  *      @substepname    dmi_io_run_training
  *      @substepdesc    : Run training on MC buses
  *          @target_sched   serial
- *
+ *  @}
+ *  @{
  *      @substepnum     5
  *      @substepname    host_startPRD_dmi
  *      @substepdesc    : Load PRD for DMI domain
  *          @target_sched   serial
- *
+ *  @}
+ *  @{
  *      @substepnum     6
  *      @substepname    host_attnlisten_cen
  *      @substepdesc    : Start listening for attentions
  *          @target_sched   serial
- *
+ *  @}
+ *  @{
  *      @substepnum     7
  *      @substepname    proc_cen_framelock
  *      @substepdesc    : Initialize EDI Frame
  *          @target_sched   serial
- *
+ *  @}
+ *  @{
  *      @substepnum     8
  *      @substepname    cen_set_inband_addr
  *      @substepdesc    : Set the Inband base addresses
  *          @target_sched   serial
+ *  @}
  *
  */
 

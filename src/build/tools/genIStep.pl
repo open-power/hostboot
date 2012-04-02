@@ -39,56 +39,79 @@
 #        ( or have your perlscript do it from the tag block )
 #
 #   Make up a new directory  src/usr/hwpf/hwp/<@istepname>
-#   cd to that directory.  
+#   cd to that directory.
 #
-#   Make up a blank file src/usr/hwpf/hwp/<@istepname>/<@istepname.H>    
+#   Make up a blank file src/usr/hwpf/hwp/<@istepname>/<@istepname.H>
 #           (use src/usr/hwpf/hwp/template.H as a template)
-#   - add the tag block file detailed below.  
+#   - add the tag block file example detailed below.
+#   - note that each substep is enclosed by "@{  @}"  delimiters
 #
-#   1. [x]  Update the src/usr/hwpf/hwp/<@istepname>/<@istepname.H>   
+#
+#       /*  @tag isteplist
+#        *  @docversion
+#        *  @istepname
+#        *  @istepnum
+#        *  @istepdesc
+#        *
+#        *  @{
+#        *      @substepnum     1
+#        *      @substepname
+#        *      @substepdesc
+#        *          @target_sched   serial
+#        *  @}
+#        *
+#        *      ...
+#        *
+#        *  @{
+#        *      @substepnum     N
+#        *      @substepname
+#        *      @substepdesc
+#        *          @target_sched   serial
+#        *
+#        *  @}
+#        */
+#
+#   Checklist for building a new Istep:  ( [x] means done by this script )
+##
+#   1. [x]  Update the src/usr/hwpf/hwp/<@istepname>/<@istepname.H>
 #           with the prototypes, etc. from the istep/substep.
-#     
-#   2. [x]  Create a new file src/usr/hwpf/hwp/<@istepname>/<@istepname.C>    
+#
+#   2. [x]  Create a new file src/usr/hwpf/hwp/<@istepname>/<@istepname.C>
 #           (use src/usr/hwpf/hwp/template.C as a template)
 #
-#   3. [ ]  Make a new istep<@istepnum>list.H file in /usr/include/isteps/
-#           Add the new istep<@istepnum>list.H file to 
-#           src/include/usr/istepmasterlist.H in the correct place in the 
+#   3. [x]  Make a new istep<@istepnum>list.H file in /usr/include/isteps/
+#           Add the new istep<@istepnum>list.H file to
+#           src/include/usr/istepmasterlist.H in the correct place in the
 #           master istep list.
 #
-#   4. [ ]Make up new makefile src/usr/hwpf/hwp/<@istepname>/makefile to compile 
-#           the HWP and wrapper
-#   Add makefile support for the new HWP:
-#   - Scan src/usr/hwpf/hwp/@substepname/makefile for the line:
-#       ##  NOTE: add a new EXTRAINCDIR when you add a new HWP
-#   - Add new line just after it:
-#       EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/@istepname/@substepname
-#   - Scan further for the line:
-#       ##  NOTE: add a new directory onto the vpaths when you add a new HWP
-#   - Add new line just after it:
-#       VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/@istepname/@substepname
-#   - Scan further for the line:
-#       OBJS = ??
-#   - Append $substepname.o on to the end of it.  May have to wrap at 80 chars  
+#   3.1 [ ] TODO:  if istepnum's are not contiguous, pad out the isteplist
+#                   with { NULL, 0, NULL }
+#   3.2 [ ] TODO:  make sure there are no tabs in output
 #
-#        Make sure you add the lines
-#            ## pointer to common HWP files
-#            EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/include
-#        to the makefiles.
+#   3.3 [x] TODO:  use correct istep #'s in ISTEPNUM() macro $$$$$$$
 #
-#   * Update all the other makefiles:
+#   3.4.[ ] TODO:   check mode - check files (numbering,etc) against tag blocks
+#
+#   3.5 [ ] TODO:   fix mode - rewrite just one type of file: .H, .C,
+#                   makefile, etc.
+#                   useful for updating H and list files without messing up
+#                   code that has been added to C files.
+#
+#   4. [x]  Make up new makefile src/usr/hwpf/hwp/<@istepname>/makefile to
+#           compile the HWP and wrapper
+#
+#   5. [ ] Update all the other makefiles:
 #       src/usr/hwpf/hwp/makefile   ( add SUBDIR )
-#       src/usr/hwpf/makefile       ( add to HWP_ERROR_XML_FILES, see below )
-#       src/usr/makefile            ( add to EXTENDED_MODULES )
+#       src/makefile            ( add to EXTENDED_MODULES )
 #
-
+#
 #   Make a new istep<@istepnum>list.H file in /usr/include/isteps/
 #   Add the new istep<@istepnum>list.H file to src/include/usr/istepmasterlist.H
 #       in the correct place in the master istep list.
 #
 #   Create a tag block, usually in src/usr/hwpf/hwp/<@istepname>/<@istepname.H>
-#       At present this is optional, but the (coming) genIstep.pl script will 
-#       not be able to maintain your istep without it. 
+#       At present this is optional, but the (coming) genIstep.pl script will
+#       not be able to maintain your istep without it.
 #
 #   The tag block keywords, with explanations, are as follows:
 #   *   @tag isteplist
@@ -128,9 +151,9 @@
 #   - Go to the Gerrit page where the HWP is, and select the line to generate
 #       a patch
 #   - run this line and pipe it to a file.
-#   - then run: 
-        git apply --directory=src/usr/hwpf/hwp/@istepname/@substepname <file> 
-#       
+#   - then run:
+#        git apply --directory=src/usr/hwpf/hwp/@istepname/@substepname <file>
+#
 #       Example:  istep 12.2, mss_eff_config:
 #       ## cutNpaste the patch comand from Gerrit and pipe to a file:
 #       git fetch ssh://wenning@gfw160.austin.ibm.com:29418/hwp_review_centaur refs/changes/63/663/3 && git format-patch -1 --stdout FETCH_HEAD > mss_eff_config.patch
@@ -138,6 +161,7 @@
 #       git apply --directory=src/usr/hwpf/hwp/mc_init/mss_eff_config   mss_eff_config.patch
 #
 #   Add makefile support for the new HWP:
+#   -   src/usr/hwpf/makefile       ( add to HWP_ERROR_XML_FILES )
 #   - Scan src/usr/hwpf/hwp/@substepname/makefile for the line:
 #       ##  NOTE: add a new EXTRAINCDIR when you add a new HWP
 #   - Add new line just after it:
@@ -148,8 +172,9 @@
 #       VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/@istepname/@substepname
 #   - Scan further for the line:
 #       OBJS = ??
-#   - Append $substepname.o on to the end of it.  May have to wrap at 80 chars  
-#       
+#   - Append $substepname.o on to the end of it.  May have to wrap at 80 chars
+
+#
 #   Part of the HWP source should (may??) be a <@substep>.xml file .
 #   - Update hwpf/makefile to process the xml file  in the
 #       Source XML files section:
@@ -193,6 +218,7 @@ sub storeTagInHash;
 sub createIstepHFile;
 sub createIstepCFile;
 sub createIstepListFile;
+sub createMakefile;
 
 #------------------------------------------------------------------------------
 # Globals
@@ -221,9 +247,8 @@ my  $templateHFileHdr   =
  *
  */
 
-/*@ 
-\@tag_block
- */
+ \@tag_block
+
 /******************************************************************************/
 // Includes
 /******************************************************************************/
@@ -244,15 +269,16 @@ my  $templateHFileSubStep   =
  *
  *  \@istepnum.\@substepnum : \@substepdesc
  *
- *  param[in,out] io_pArgs  -   (normally) a pointer to any args, or NULL.
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
  *  return  none
  *
  */
-void    call_\@substepname( void * io_pArgs );
+void    call_\@substepname( void    *io_pArgs );
 ";
 #####   end     templateHFileSubStep    #############################
 #####################################################################
-    
+
 
 #####################################################################
 #####   begin   templateHFileTrailer   ##############################
@@ -269,11 +295,11 @@ my  $templateHFileTrailer    =
 #####################################################################
 #####   begin   templateCFileHdr    #################################
 my  $templateCFileHdr   =
-"   
+"
 /**
- *  \@file \@istepname.C                                                
+ *  \@file \@istepname.C
  *
- *  Support file for IStep: \@istepname                                                    
+ *  Support file for IStep: \@istepname
  *   \@istepdesc
  *
  *  *****************************************************************
@@ -307,30 +333,24 @@ my  $templateCFileHdr   =
 #include    <fapi.H>
 #include    <fapiPlatHwpInvoker.H>
 
+#include    \"\@istepname.H\"
 
-//  --  prototype   includes    --
-//  Add any customized routines that you don't want overwritten into
-//      \"\@istepname_custom.C\" and include the prototypes here.
-//  #include    \"\@istepname_custom.H\"
-
-#include    \"\@istepname.H\"          
-                                  
 //  Uncomment these files as they become available:
 ";
 #####   end templateCFileHdr    #####################################
 #####################################################################
 
 
-#####################################################################                                                      
+#####################################################################
 #####   begin templateCFileNSHdr    #####################################
 my  $templateCFileNSHdr  =
 "
-namespace   \@\@istepname                                              
+namespace   \@\@istepname
 {
 
 using   namespace   TARGETING;
 using   namespace   fapi;
-";      
+";
 #####   end templateCFileNSHdr    #####################################
 #####################################################################
 
@@ -340,72 +360,63 @@ using   namespace   fapi;
 my $templateCFileSubStep =
 "
 //
-//  Wrapper function to call \@istepnum.\@substepnum : \@substepname
+//  Wrapper function to call \@istepnum.\@substepnum :
+//      \@substepname
 //
-void    call_\@substepname( void *io_pArgs )
+void    call_\@substepname( void    *io_pArgs )
 {
-    fapi::ReturnCode    l_fapirc;
     errlHndl_t  l_errl  =   NULL;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, \"call_\@substepname entry\" );
-        
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               \"call_\@substepname entry\" );
+
 #if 0
-    // \@\@\@\@\@    CUSTOM BLOCK:   \@\@\@\@\@    
+    // \@\@\@\@\@    CUSTOM BLOCK:   \@\@\@\@\@
     //  figure out what targets we need
     //  customize any other inputs
     //  set up loops to go through all targets (if parallel, spin off a task)
-    
-    //  print call to hwp and dump physical path of the target(s)
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    \"=====  \@substepname HWP(? ? ? )\",
-                    ?
-                    ?
-                    ? );
+
     //  dump physical path to targets
     EntityPath l_path;
     l_path  =   l_\@targetN_target->getAttr<ATTR_PHYS_PATH>();
     l_path.dump();
-    TRACFCOMP( g_trac_mc_init, \"===== \" );   
 
-    // cast OUR type of target to a FAPI type of target.                         
+    // cast OUR type of target to a FAPI type of target
     const fapi::Target l_fapi_\@targetN_target(
                     TARGET_TYPE_MEMBUF_CHIP,
                     reinterpret_cast<void *>
                         (const_cast<TARGETING::Target*>(l_\@targetN_target)) );
-                    
-    //  call the HWP with each fapi::Target
-    l_fapirc  =   \@substepname( ? , ?, ? );
 
-    //  process return code.
-    if ( l_fapirc== fapi::FAPI_RC_SUCCESS )
+    //  call the HWP with each fapi::Target
+    FAPI_INVOKE_HWP( l_errl, \@substepname, _args_...);
+    if ( l_errl )
     {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                \"SUCCESS :  \@substepname HWP(? ? ? )\" );
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  \"ERROR : ..........\" );
+        errlCommit( l_errl, HWPF_COMP_ID );
     }
     else
     {
-        /**
-         * \@todo fapi error - just print out for now...
-         */
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                \"ERROR %d:  \@substepname HWP(? ? ?) \",
-                static_cast<uint32_t>(l_fapirc) );
+                   \"SUCCESS : ..........\" );
     }
-    // \@\@\@\@\@    END CUSTOM BLOCK:   \@\@\@\@\@    
+    // \@\@\@\@\@    END CUSTOM BLOCK:   \@\@\@\@\@
 #endif
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, \"call_\@substepname exit\" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               \"call_\@substepname exit\" );
 
-    task_end2( reinterpret_cast<void*>( l_errl ) );
+    // end task, returning any errorlogs to IStepDisp
+    task_end2( l_errl );
 }
 ";
-#####   end templateCFileSubStep    ################################# 
+#####   end templateCFileSubStep    #################################
 #####################################################################
 
 
 #####################################################################
 #####   begin   templateCfileTrailer    #############################
-my  $templateCFileTrailer    =  
+my  $templateCFileTrailer    =
 "
 };   // end namespace
 ";
@@ -416,7 +427,7 @@ my  $templateCFileTrailer    =
 
 #####################################################################
 #####   begin   templateListFileHdr1   #############################
-my  $templateListFileHdr1 =   
+my  $templateListFileHdr1 =
 "
 #ifndef __ISTEPS_ISTEP\@istepnumLIST_H
 #define __ISTEPS_ISTEP\@istepnumLIST_H
@@ -431,10 +442,10 @@ my  $templateListFileHdr1 =
  #####   end     templateListFileHdr1    #############################
 #####################################################################
 
- 
+
 #####################################################################
 #####   begin   templateListFileHdr2   #############################
- my $templateListFileHdr2    =   
+my $templateListFileHdr2    =
 " *
  *  *****************************************************************
  *  THIS FILE WAS GENERATED ON \@timestamp
@@ -454,7 +465,16 @@ my  $templateListFileHdr1 =
 namespace   INITSERVICE
 {
     const   TaskInfo    g_istep\@istepnum[]  =   {
-        // NOTE:  IStep indexes start with 0
+
+        {
+
+                \"\",         // dummy, index 0
+                NULL,
+                {
+                        NONE,
+                        EXT_IMAGE,
+                }
+        },
 ";
 #####   end     templateListFileHdr2    #############################
 #####################################################################
@@ -462,16 +482,32 @@ namespace   INITSERVICE
 
 #####################################################################
 #####   begin   templateListFileSS  #################################
-my  $templateListFileSS  =   
+my  $templateListFileSS1  =
 "        {
-                ISTEPNAME(\@istepnum,\@-substepnum,\"\@substepname\"),
+                ISTEPNAME(\@istepnum,\@substepnum,\"\@substepname\"),
                 \@\@istepname::call_\@substepname,
                 {
                         START_FN,
                         EXT_IMAGE,
                 }
-        },      
-";        
+        },
+";
+#####   end     templateListFileSS    #############################
+#####################################################################
+
+
+#####################################################################
+#####   begin   templateListFileSS  #################################
+my  $templateListFileSS2  =
+"        {
+                \"\@substepname\",
+                NULL,
+                {
+                        NONE,
+                        EXT_IMAGE,
+                }
+        },
+";
 #####   end     templateListFileSS    #############################
 #####################################################################
 
@@ -479,7 +515,7 @@ my  $templateListFileSS  =
 #####################################################################
 #####   begin   templateListFileTrailer  ############################
 my  $templateListFileTrailer =
-"  
+"
         //  END OF LIST!
 };
 
@@ -496,6 +532,47 @@ const   ExtTaskInfo g_istep\@istepnumTaskList    =   {
 ";
 #####   end     templateListFileTrailer    #############################
 #####################################################################
+
+#####################################################################
+#####   begin   templateMakeFile  ###################################
+my  $templateMakeFile   =
+"
+ROOTPATH = ../../../../..
+
+MODULE = \@istepname
+
+##      support for Targeting and fapi
+EXTRAINCDIR += \${ROOTPATH}/src/include/usr/ecmddatabuffer
+EXTRAINCDIR += \${ROOTPATH}/src/include/usr/hwpf/fapi
+EXTRAINCDIR += \${ROOTPATH}/src/include/usr/hwpf/plat
+EXTRAINCDIR += \${ROOTPATH}/src/include/usr/hwpf/hwp
+
+## pointer to common HWP files
+EXTRAINCDIR += \${ROOTPATH}/src/usr/hwpf/hwp/include
+
+##  NOTE: add the base istep dir here.
+EXTRAINCDIR += \${ROOTPATH}/src/usr/hwpf/hwp/\@istepname
+
+##  Include sub dirs
+##  NOTE: add a new EXTRAINCDIR when you add a new HWP
+##  EXAMPLE:
+##  EXTRAINCDIR += \${ROOTPATH}/src/usr/hwpf/hwp/\@istepname/<HWP_dir>
+
+
+##  NOTE: add new object files when you add a new HWP
+OBJS =  \@istepname.o
+
+
+##  NOTE: add a new directory onto the vpaths when you add a new HWP
+##  EXAMPLE:
+#   VPATH += \${ROOTPATH}/src/usr/hwpf/hwp/\@istepname/<HWP_dir>
+
+
+include \${ROOTPATH}/config.mk
+";
+#####   end     templateMakeFile    #############################
+#####################################################################
+
 
 
 #==============================================================================
@@ -526,43 +603,33 @@ my  $opt_dry_run    =   0;
 my  $opt_debug      =   0;
 my  $istepDir       =   "";
 my  $istepListDir   =   "src/include/usr/isteps";
+my  $opt_gen_C       =   0;
 
-#####
-##  This should work, but doesn't.
-##  my  %optHash    =   (     'help|?'        => \$opt_help,
-##                            'tag-file=s'    => \$opt_tag_file,
-##                            'dry-run'       => \$opt_dry_run,
-##                            'debug'         => \$opt_debug,
-##                            );
-##  GetOptionsFromArray( \%optHash, \@ARGV,
-##            'help|?',
-##            'debug',
-##            'tag-file=s',
-##            'dry-run'
-##            );
-#####
 
 GetOptions( 'help|?'            => \$opt_help,
             'tag-file=s'        => \$opt_tag_file,
             'istep-dir=s'       => \$istepDir,
-            'istep-list-dir=s'  =>  \$istepListDir,
+            'istep-list-dir=s'  => \$istepListDir,
+            'gen-C'             => \$opt_gen_C,
             'dry-run'           => \$opt_dry_run,
             'debug'             => \$opt_debug,
             );
-            
+
 if  ( $opt_debug )
 {
     print   STDERR  "help       =   $opt_help\n";
     print   STDERR  "debug      =   $opt_debug\n";
     print   STDERR  "tag-file   =   $opt_tag_file\n";
     print   STDERR  "dry-run    =   $opt_dry_run\n";
+    print   STDERR  "gen-C      =   $opt_gen_C\n";
     print   STDERR  "istepDir   =   $istepDir\n";
+
 }
 
 
 ##  check for required options
 if ( $opt_tag_file  eq  "" )
-{   
+{
     print   STDOUT  "No tag file specified\n";
     printUsage();
     exit    ERR_NO_TAG_FILE;
@@ -603,88 +670,98 @@ if (    ( ! -e $istepListDir )
 }
 
 ##  extract tag block
-if ( extractTagBlock( $opt_tag_file )  != 0 ) 
+if ( extractTagBlock( $opt_tag_file )  != 0 )
 {
     print   STDOUT  "No Tag block in $opt_tag_file.\n";
     exit    ERR_NO_TAG_BLOCK;
 }
+
+##  save the original to re-insert in the H file
+my  $Extracted_Tag_Block =   $Tag_Block;
+
 
 ##  strip comment junk  from Tag Block
 $Tag_Block =~ s/^(\*|\s)*//gmo;
 
 ##  split cleaned up lines from Tag_block into an array
 my  @tag_lines  =   split /^/, $Tag_Block;
- 
-## print STDERR    "@tag_lines";
-  
-##  check to make sure this is the correct tag file
-if ( $opt_debug )   {   print "--$tag_lines[0]\n";    }
-if (    ( !defined $tag_lines[0] )    
-     || ( ! ($tag_lines[0] =~ m/^(\*|\s)*\@.*tag\s+isteplist/) )
-    )
-{
-    print   STDOUT  "ERROR: The first line of the tag block MUST be \"\@tag isteplist\"\n";  
-    exit    ERR_INVALID_START_TAG;    
-}
-    
+
+## print STDERR    ">>>@tag_lines<<<\n";
+
 ##  OK, start storing tag values
 while ( $_ = shift( @tag_lines ) )
 {
-    if ( ! defined $_ ) 
-    {   
+    if ( ! defined $_ )
+    {
         if ( $opt_debug )   {   print STDERR    "Done.\n";  }
-        last;  
+        last;
     }
-    
+
     ##  strip junk at the beginning
     s/^(\*|\s)*//;
-    
+
     chomp;
-    if ( $opt_debug )   {   print   "-$_\n";    }   
-    
+    if ( $opt_debug )   {   print   "-$_\n";    }
+
     if  ( m/\@\{/ )
     {
         ##  process the tag block
-        processBlock( \@tag_lines );    
-    } 
-    
+        processBlock( \@tag_lines );
+    }
+
     if  ( m/\@docversion/ )
     {
         s/^\@docversion\s+//;
         storeTagInHash( "docversion", $_ );
     }
-    
+
     if  ( m/\@istepname/ )
-    {        
+    {
         s/^\@istepname\s+//;
         storeTagInHash( "istepname", $_ );
     }
-    
+
     if  ( m/\@istepnum/  )
     {
         s/^\@istepnum\s+//;
         storeTagInHash( "istepnum", $_ );
     }
-       
+
     if  ( m/\@istepdesc/ )
-    {        
+    {
         s/^\@istepdesc\s+//;
-        storeTagInHash( "istepdesc", $_ );   
+        storeTagInHash( "istepdesc", $_ );
     }
 }
 
 ##  -----   Begin writing the files.    ---------------------------------
 
-#   Make up (or modify) src/usr/hwpf/hwp/<@istepname>/<@istepname.H>    
+#   Make up (or modify) src/usr/hwpf/hwp/<@istepname>/<@istepname.H>
 #       (use src/usr/hwpf/hwp/template.H as a template)
 createIstepHFile( );
 
+##  The rest of the files can pretty safely be changed; the C file
+##  possibly (probably) contains modifications.
+##  Thus this flag - default is to NOT generate a new C file.
+#
 #   Make up a new file src/usr/hwpf/hwp/<@istepname>/<@istepname.C>
 #      (use src/usr/hwpf/hwp/template.C as a template)
-createIstepCFile( );
-       
+if  ( $opt_gen_C )
+{
+    createIstepCFile( );
+}
+
+#   Make a new istep<@istepnum>list.H file in /usr/include/isteps/
+#   Add the new istep<@istepnum>list.H file to
+#       src/include/usr/istepmasterlist.H in the correct place in the
+#       master istep list.
 createIstepListFile( );
-       
+
+#   Make up new makefile src/usr/hwpf/hwp/<@istepname>/makefile to compile
+#           the HWP and wrapper
+createMakefile();
+
+
 print   STDOUT  "Done.\n";
 
 #==============================================================================
@@ -693,15 +770,16 @@ print   STDOUT  "Done.\n";
 
 ##
 ##  Print the usage (help) message
-##  
+##
 sub printUsage()
 {
     print   STDOUT  "genIStep.pl\n";
     print   STDOUT  "   --tag-file <path>           ( required: file containing tag block )\n";
     print   STDOUT  "   --istep-dir <path>          ( required: directory where istep code will be generated )\n";
-    
-    print   STDOUT  "   [ --istep-list-dir <path> ] ( directory where istepNlist.H will be generated\n"; 
+
+    print   STDOUT  "   [ --istep-list-dir <path> ] ( directory where istepNlist.H will be generated\n";
     print   STDOUT  "                               ( this is usually src/include/usr/isteps )\n";
+    print   STDOUT  "   [ --gen-C                   ( generate the stub C file.  Default is to NOT do this.\n";
     print   STDOUT  "   [ --help ]                  ( prints usage message )\n";
     ## print   STDOUT  "    [ --dry-run ]       ( prints all steps without doing anything )\n";
 }
@@ -714,7 +792,7 @@ sub extractTagBlock( $ )
 {
     my  ( $in_tag_file )    =   @_;
     my  $data   =   "";
-    
+
     open( TAGFH, "< $in_tag_file") or die " $? : can't open $in_tag_file : $!";
     read( TAGFH, $data, -s TAGFH ) or die "Error reading $in_tag_file: $!";
     close TAGFH;
@@ -728,36 +806,35 @@ sub extractTagBlock( $ )
     #    */
     # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
     ##  Extract Tag block
-    while ($data =~ /\/\*\@((.|\n)+?)\*\//mgo )
+    while ($data =~ /(\/\*\s*\@tag\s+isteplist)((.|\n)+?)(\*\/)/mgo )
     {
-        $Tag_Block = $1; 
-    }    
-    
+        ## $Tag_Block = "$2";
+        $Tag_Block = "$1$2$4";
+    }
+
     if ( $Tag_Block eq  "" )
     {
         return  1;
     }
 
-
-    
-    if ( $opt_debug )   
-    { 
-        print STDERR "debug: Extracted Tag Block: \n$Tag_Block\n"; 
+    if ( $opt_debug )
+    {
+        print STDERR "debug: Extracted Tag Block: \n$Tag_Block\n";
     }
-    
+
     return  0;
 }
 
 ##
 ##  Store a tag in the hash table, given a key and value
 ##      @param  $key    -   key
-##      @param  $value  -   value   
+##      @param  $value  -   value
 ##
 sub storeTagInHash( $$ )
 {
     my ( $key, $value ) =   @_;
     my  $rc =   0;
- 
+
     if  ( exists  $Hash{ $key } )
     {
         print   STDOUT  "ERROR: duplicate tag \"$key\" \n";
@@ -767,23 +844,23 @@ sub storeTagInHash( $$ )
     {
         $Hash{ $key } =   $value;
     }
-    
+
     if ( $opt_debug )   {   print STDERR "storetag: $key = $Hash{ $key }\n";  }
-    
+
     return  $rc;
-}    
+}
 
 
 ##
 ##  process a tag block from the caller
-##  Note that this is passed a reference to the 
-##  original array so that we can shift the array 
+##  Note that this is passed a reference to the
+##  original array so that we can shift the array
 ##  as we use up lines.
 sub processBlock( $ )
 {
     my  (@tag_block)    =   @{$_[0]};               # this is actually a copy
     my  %localhash      =   ();
-    
+
     while ( $_  =   shift( @{$_[0]} ) )             ##@tag_block)  )
     {
         chomp;
@@ -793,52 +870,52 @@ sub processBlock( $ )
             if ( $opt_debug )   {   print   "$_ : done.\n"; }
             last;
         }
-        
+
         if  (   m/\@substepnum/  )
         {
             s/^\@substepnum\s+//;
             #storeTagInHash( \%localhash, "substepnum", $_ );
             $localhash{'substepnum'}    =   $_;
         }
-                
+
         if  (   m/\@substepname/ )
         {
             s/^\@substepname\s+//;
             #storeTagInHash( \%localhash, "substepname", $_ );
             $localhash{'substepname'}    =   $_;
-        }        
-        
+        }
+
         if  (   m/\@substepdesc/ )
         {
             s/^\@substepdesc\s+//;
             #storeTagInHash( \%localhash, "substepdesc", $_ );
             $localhash{'substepdesc'}    =   $_;
-        } 
-        
-                      
+        }
+
+
         if  (   m/\@target_sched/    )
         {
             s/^\@target_sched\s+//;
             #storeTagInHash( \%localhash, "target_sched", $_ );
             $localhash{'target_sched'}  =   $_;
-        }        
+        }
     }
-    
+
     ##  Store results in %Hash using keys like "<key>:<substepnum>"
-    ##      Keep it easy and flat.  
+    ##      Keep it easy and flat.
     if (    ( exists $localhash{'substepname'} )
          && ( exists $localhash{'substepnum' } )
         )
     {
-        my  $num    =   sprintf( "%2.2d", int($localhash{'substepnum'}) ); 
+        my  $num    =   sprintf( "%2.2d", int($localhash{'substepnum'}) );
         $Hash{ "substepname:$num"}= $localhash{'substepname'};
         $Hash{ "substepnum:$num"}= $localhash{'substepnum'};
-        
+
         if (exists $localhash{'substepdesc'} )
         {
             $Hash{ "substepdesc:$num"}= $localhash{'substepdesc'};
         }
-                
+
         if (exists $localhash{'target_sched'} )
         {
             $Hash{ "target_sched:$num"}= $localhash{'target_sched'};
@@ -847,8 +924,8 @@ sub processBlock( $ )
     else
     {
         print   STDOUT  "Incomplete tag block for $localhash{'substepname'}\n";
-           
-    }  
+
+    }
 }
 
 ##
@@ -857,23 +934,23 @@ sub processBlock( $ )
 sub backupOldFile( $ )
 {
     my  $backupFileName  =   shift;
-    
-    if ( $opt_debug )   
-    {   
-        print   STDERR  "backing up $backupFileName, if necessary...\n";    
+
+    if ( $opt_debug )
+    {
+        print   STDERR  "backing up $backupFileName, if necessary...\n";
     }
-    
+
     if ( -e $backupFileName )
     {
         my  $ts  =   `date +%Y-%m-%d.%H%M`;
         chomp   $ts;
         my  $old_file   =   "$backupFileName.org_$ts";
-        print   STDOUT  "   $backupFileName exists, renaming to $old_file\n"; 
+        print   STDOUT  "   $backupFileName exists, renaming to $old_file\n";
         rename( $backupFileName, "$old_file" );
     }
 }
 
-##  
+##
 ##  Apply all the tags that belong to the istep to a multiline string
 ##      @docversion
 ##      @istepname
@@ -885,28 +962,28 @@ sub backupOldFile( $ )
 ##  Assumes that the istep tag values stored in the correct place in %Hash
 ##
 sub applyIstepTags
-{   
+{
     my  $str_ref    =   shift;
-    my  $istepname  =  $Hash{'istepname'};  
+    my  $istepname  =  $Hash{'istepname'};
     my  $istepnum   =   $Hash{'istepnum'};
     my  $docversion =   $Hash{'docversion'};
     my  $istepdesc  =   $Hash{'istepdesc'};
     my  $upCaseistepname =   toupper( $istepname );
     my  $timestamp  =   `date +%Y-%m-%d:%H%M`;
     chomp   $timestamp;
-    
+
     ${$str_ref}    =~  s/\@timestamp/$timestamp/gmo;
     #   replace "@@istepname"
     ${$str_ref}    =~  s/\@\@istepname/$upCaseistepname/gmo;
     #   replace "@istepname"
     ${$str_ref}    =~  s/\@istepname/$istepname/gmo;
     #   replace "istepnum"
-    ${$str_ref}    =~  s/\@istepnum/$istepnum/gmo;    
+    ${$str_ref}    =~  s/\@istepnum/$istepnum/gmo;
     #   replace "@istepdesc"
-    ${$str_ref}    =~  s/\@istepdesc/$istepdesc/gmo; 
+    ${$str_ref}    =~  s/\@istepdesc/$istepdesc/gmo;
     #   replace "@docversion"
-    ${$str_ref}    =~  s/\@docversion/$docversion/gmo; 
-    
+    ${$str_ref}    =~  s/\@docversion/$docversion/gmo;
+
 }
 
 ##
@@ -919,57 +996,58 @@ sub createIstepHFile( )
 {
     my  $istepname  =  $Hash{'istepname'};
     my  $istepHfile =   "$istepDir/$istepname.H";
-    
+
     print STDOUT  "Create file $istepHfile...\n";
-    
+
     ## @todo sanity check - $istepDir should be src/usr/hwpf/hwp/<@istepname>/
-    
+
     backupOldFile( $istepHfile );
-    
+
     open( HFH, "> $istepHfile") or die " $? : can't open $istepHfile : $!";
-    
+
     ##  apply all the istep tags to the header
     applyIstepTags( \$templateHFileHdr );
-    
+
     ##  add the original tag block as comments.
-    my  $cleaned_up_tag_block   =   $Tag_Block;
-    chomp   $cleaned_up_tag_block;
-    $cleaned_up_tag_block   =~  s/^/ * /gmo;
-    $templateHFileHdr   =~  s/\@tag_block/$cleaned_up_tag_block/gmo;
-    
+    ##  my  $cleaned_up_tag_block   =   $Tag_Block;
+    ##  chomp   $cleaned_up_tag_block;
+    ## $cleaned_up_tag_block   =~  s/^/ * /gmo;
+    ## $templateHFileHdr   =~  s/\@tag_block/$cleaned_up_tag_block/gmo;
+    $templateHFileHdr   =~  s/\@tag_block/$Extracted_Tag_Block/gmo;
+
     print   HFH "$templateHFileHdr\n";
-    
+
     ##  generate substeps
     my  @substepnames   =   sort grep /substepname/,    ( keys %Hash );
-    my  @substepnums    =   sort grep /substepnum/,     ( keys %Hash ); 
-    my  @substepdescs   =   sort grep /substepdesc/,    ( keys %Hash ); 
+    my  @substepnums    =   sort grep /substepnum/,     ( keys %Hash );
+    my  @substepdescs   =   sort grep /substepdesc/,    ( keys %Hash );
         if ( $opt_debug )
     {
-        
+
         print   "$istepname.H file: @substepnames\n";
         print   STDERR  "substeps last index = $#substepnames.\n";
     }
-    
-    ##  write each substep section 
-    for ( my $i=0; $i<=$#substepnames; $i++ ) 
+
+    ##  write each substep section
+    for ( my $i=0; $i<=$#substepnames; $i++ )
     {
         ##  make a local copy to modify
         my  $templateHSS =   $templateHFileSubStep;
         applyIstepTags( \$templateHSS );
-        
+
         #   replace "@substepname"
         $templateHSS    =~  s/\@substepname/$Hash{$substepnames[$i]}/gmo;
         #   replace "substepnum"
-        $templateHSS    =~  s/\@substepnum/$Hash{$substepnums[$i]}/gmo;    
+        $templateHSS    =~  s/\@substepnum/$Hash{$substepnums[$i]}/gmo;
         #   replace "@substepdesc"
-        $templateHSS    =~  s/\@substepdesc/$Hash{$substepdescs[$i]}/gmo; 
-        
+        $templateHSS    =~  s/\@substepdesc/$Hash{$substepdescs[$i]}/gmo;
+
         print   HFH "\n$templateHSS\n";
     }
-    
-    print   HFH "$templateHFileTrailer\n";  
-    
-    
+
+    print   HFH "$templateHFileTrailer\n";
+
+
     close   HFH;
 }
 
@@ -981,142 +1059,162 @@ sub createIstepHFile( )
 ##  Instead, it will rename the old file to <file>.org_YYYY.MM.DD:HHDD
 ##
 sub createIstepCFile( )
-{    
-    my  $istepname  =  $Hash{'istepname'};  
+{
+    my  $istepname  =  $Hash{'istepname'};
     my  $istepCfile =   "$istepDir/$istepname.C";
-    
-    print STDOUT  "Create file $istepCfile...\n"; 
-    
+
+    print STDOUT  "Create file $istepCfile...\n";
+
     ## sanity check - $istepDir should be src/usr/hwpf/hwp/<@istepname>/
-    
+
     backupOldFile( $istepCfile );
 
     open( CFH, "> $istepCfile") or die " $? : can't open $istepCfile : $!";
-     
+
     applyIstepTags( \$templateCFileHdr );
     print   CFH "$templateCFileHdr";
-    
+
     ##  generate substeps
     my  @substepnames   =   sort grep /substepname/,    ( keys %Hash );
-    my  @substepnums    =   sort grep /substepnum/,     ( keys %Hash ); 
-    my  @substepdescs   =   sort grep /substepdesc/,    ( keys %Hash ); 
+    my  @substepnums    =   sort grep /substepnum/,     ( keys %Hash );
+    my  @substepdescs   =   sort grep /substepdesc/,    ( keys %Hash );
     if ( $opt_debug )
     {
-        
+
         print   "$istepname.C file: @substepnames\n";
         print   STDERR  "substeps last index = $#substepnames\n";
     }
-   
+
     ##  Write the lines to include the hwp h file
-    for ( my $i=0; $i<=$#substepnames; $i++ ) 
+    for ( my $i=0; $i<=$#substepnames; $i++ )
     {
         ##  Write the line to include the hwp h file
-        print   CFH "// #include    \"$Hash{$substepnames[$i]}/$Hash{$substepnames[$i]}.H\"\n"; 
-    } 
-    
+        print   CFH "// #include    \"$Hash{$substepnames[$i]}/$Hash{$substepnames[$i]}.H\"\n";
+    }
+
     applyIstepTags( \$templateCFileNSHdr );
-    print   CFH "$templateCFileNSHdr\n"; 
-    
-    ##  write each substep section 
-    for ( my $i=0; $i<=$#substepnames; $i++ ) 
+    print   CFH "$templateCFileNSHdr\n";
+
+    ##  write each substep section
+    for ( my $i=0; $i<=$#substepnames; $i++ )
     {
         ##  make a local copy to modify
         my  $templateCSS =   $templateCFileSubStep;
         applyIstepTags( \$templateCSS );
-        
+
         #   replace "@substepname"
         $templateCSS    =~  s/\@substepname/$Hash{$substepnames[$i]}/gmo;
         #   replace "substepnum"
-        $templateCSS    =~  s/\@substepnum/$Hash{$substepnums[$i]}/gmo;    
+        $templateCSS    =~  s/\@substepnum/$Hash{$substepnums[$i]}/gmo;
         #   replace "@substepdesc"
-        $templateCSS    =~  s/\@substepdesc/$Hash{$substepdescs[$i]}/gmo; 
-        
+        $templateCSS    =~  s/\@substepdesc/$Hash{$substepdescs[$i]}/gmo;
+
         print   CFH "\n$templateCSS\n";
     }
-    
+
     print   CFH "$templateCFileTrailer";
-    
+
     close( CFH );
 }
 
 ##
-##  3. [ ]  Make a new istep<@istepnum>list.H file in /usr/include/isteps/
-##          Add the new istep<@istepnum>list.H file to 
-##          src/include/usr/istepmasterlist.H in the correct place in the 
-##          master istep list.
+##  Make a new istep<@istepnum>list.H file in /usr/include/isteps/
+##      Add the new istep<@istepnum>list.H file to
+##      src/include/usr/istepmasterlist.H in the correct place in the
+##      master istep list.
 ##
 sub createIstepListFile( )
 {
 
     my  $istepname  =   $Hash{'istepname'};
-    my  $istepnum   =   $Hash{'istepnum'};  
+    my  $istepnum   =   $Hash{'istepnum'};
     my  $istepLfile =   $istepListDir . "/istep" . $istepnum . "list.H";
-    
-    print STDOUT  "Create file $istepLfile...\n"; 
-    
+
+    print STDOUT  "Create file $istepLfile...\n";
+
     ## sanity check - $istepListDir should be src/include/usr/isteps
-    
+
     backupOldFile( $istepLfile );
-    
+
     open( LFH, "> $istepLfile") or die " $? : can't open $istepLfile : $!";
-     
+
     applyIstepTags( \$templateListFileHdr1 );
     print   LFH "$templateListFileHdr1";
-    
+
     ##  generate substeps
     my  @substepnames   =   sort grep /substepname/,    ( keys %Hash );
-    my  @substepnums    =   sort grep /substepnum/,     ( keys %Hash ); 
-    my  @substepdescs   =   sort grep /substepdesc/,    ( keys %Hash ); 
+    my  @substepnums    =   sort grep /substepnum/,     ( keys %Hash );
+    my  @substepdescs   =   sort grep /substepdesc/,    ( keys %Hash );
     if ( $opt_debug )
     {
-        
+
         print   "$istepname.C file: @substepnames\n";
         print   STDERR  "substeps last index = $#substepnames\n";
     }
-    
+
     ##   write the documentation lines in the istepNlist file
-    for ( my $i=0; $i<=$#substepnames; $i++ ) 
+    for ( my $i=0; $i<=$#substepnames; $i++ )
     {
-        print   LFH " *  $istepnum.$Hash{$substepnums[$i]}\t  $Hash{$substepnames[$i]}\n";
-        print   LFH " *  \t$Hash{$substepdescs[$i]}\n";   
+        print   LFH " *    $istepnum.$Hash{$substepnums[$i]}    $Hash{$substepnames[$i]}\n";
+        print   LFH " *          $Hash{$substepdescs[$i]}\n";
     }
-    
+
     applyIstepTags( \$templateListFileHdr2 );
     print   LFH "$templateListFileHdr2";
-    
-   
-    ##  write each substep section 
-    for ( my $i=0; $i<=$#substepnames; $i++ ) 
+
+
+    ##  write each substep section
+    for ( my $i=0; $i<=$#substepnames; $i++ )
     {
         ##  make a local copy to modify
-        my  $templateLSS =   $templateListFileSS;
+        ##  @todo   check for @internal tag and use templateListFileSS2
+        my  $templateLSS =   $templateListFileSS1;
         applyIstepTags( \$templateLSS );
-        
+
         #   replace "@substepname"
         $templateLSS    =~  s/\@substepname/$Hash{$substepnames[$i]}/gmo;
-        #   replace "substepnum"
-        $templateLSS    =~  s/\@substepnum/$Hash{$substepnums[$i]}/gmo;    
+        #   replace "substepnum" with 2 digits & leading 0's
+        my  $pad_substep    =   sprintf( "%02d", $Hash{$substepnums[$i]} );
+        ## $templateLSS    =~  s/\@substepnum/$Hash{$substepnums[$i]}/gmo;
+        $templateLSS    =~  s/\@substepnum/$pad_substep/gmo;
         #   replace "@substepdesc"
         $templateLSS    =~  s/\@substepdesc/$Hash{$substepdescs[$i]}/gmo;
-  
-        ## @todo - the substep indices have to start with 0, but of course
-        ##          the substeps start at 1.  We have to compensate for this
-        ##          with a special tag...
-        ##          This needs to be fixed by modifying lookupTask, etc., in the
-        ##          istepDispatcher
-        #   replace "@-substepnum"
-        my  $hackedSSnum =   $Hash{$substepnums[$i]} - 1; 
-        $templateLSS    =~  s/\@-substepnum/$hackedSSnum/gmo;  
-              
+
         print   LFH "\n$templateLSS\n";
     }
-    
+
     applyIstepTags( \$templateListFileTrailer );
     print   LFH "$templateListFileTrailer";
-    
-    
+
+
     close   LFH;
 }
+
+##
+##  Make up new makefile src/usr/hwpf/hwp/<@istepname>/makefile to
+##      compile the HWP and wrapper
+##
+sub createMakefile( )
+{
+    my  $istepname  =  $Hash{'istepname'};
+    my  $istepMakefile =   "$istepDir/makefile";
+
+    print STDOUT  "Create file $istepMakefile...\n";
+
+    ## @todo sanity check - $istepDir should be src/usr/hwpf/hwp/<@istepname>/
+
+    backupOldFile( $istepMakefile );
+
+    open( MFH, "> $istepMakefile") or die " $? : can't open $istepMakefile : $!";
+
+    ##  apply all the istep tags to the header
+    applyIstepTags( \$templateMakeFile );
+
+    print   MFH "$templateMakeFile\n";
+
+    close   MFH;
+}
+
 
 
 __END__

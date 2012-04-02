@@ -38,35 +38,36 @@
  *
  */
 
-/* @tag isteplist
- * @docversion     v0.99 (02/10/12)
- * @istepname      mc_init
- * @istepnum       12
- * @istepdesc      Step 12 MC Init
- * @{
- * @substepnum     1
- * @substepname    host_collect_dimm_spd
- * @substepdesc    : Collect Master dimm SPD
- * @target_sched   serial
- * @}
- * @{
- * @substepnum     2
- * @substepname    mss_volt
- * @substepdesc    : Calc dimm voltage
- * @target_sched   serial
- * @}
- * @{
- * @substepnum     3
- * @substepname    mss_freq
- * @substepdesc    : Calc dimm frequency
- * @target_sched   serial
- * @}
- * @{
- * @substepnum     4
- * @substepname    mss_eff_config
- * @substepdesc    : Determine effective config
- * @target_sched   serial
- * @}
+/*  @tag isteplist
+ *  @docversion     v0.99 (02/10/12)
+ *  @istepname      mc_init
+ *  @istepnum       12
+ *  @istepdesc      Step 12 MC Init
+ *
+ *  @{
+ *      @substepnum     1
+ *      @substepname    host_collect_dimm_spd
+ *      @substepdesc    : Collect Master dimm SPD
+ *      @target_sched   serial
+ *  @}
+ *  @{
+ *      @substepnum     2
+ *      @substepname    mss_volt
+ *      @substepdesc    : Calc dimm voltage
+ *      @target_sched   serial
+ *  @}
+ *  @{
+ *      @substepnum     3
+ *      @substepname    mss_freq
+ *      @substepdesc    : Calc dimm frequency
+ *      @target_sched   serial
+ *  @}
+ *  @{
+ *      @substepnum     4
+ *      @substepname    mss_eff_config
+ *      @substepdesc    : Determine effective config
+ *      @target_sched   serial
+ *  @}
  */
 /******************************************************************************/
 // Includes

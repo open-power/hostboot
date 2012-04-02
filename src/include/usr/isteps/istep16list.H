@@ -1,7 +1,7 @@
 //  IBM_PROLOG_BEGIN_TAG
 //  This is an automatically generated prolog.
 //
-//  $Source: src/include/usr/isteps/istep12list.H $
+//  $Source: src/include/usr/isteps/istep16list.H $
 //
 //  IBM CONFIDENTIAL
 //
@@ -21,26 +21,24 @@
 //
 //  IBM_PROLOG_END
 
-#ifndef __ISTEPS_ISTEP12LIST_H
-#define __ISTEPS_ISTEP12LIST_H
+#ifndef __ISTEPS_ISTEP16LIST_H
+#define __ISTEPS_ISTEP16LIST_H
 
 /**
- * @file    istep12list.H
+ * @file    istep16list.H
  *
- *  IStep 12    Step 12 MC Init
- *  IPL FLow Doc        v0.99 (02/10/12)
+ *  IStep 16    Core Activate
+ *  IPL FLow Doc        v1.01 (03/26/12)
  *
- *  12.1	  host_collect_dimm_spd
- *  	: Collect Master dimm SPD
- *  12.2	  mss_volt
- *  	: Calc dimm voltage
- *  12.3	  mss_freq
- *  	: Calc dimm frequency
- *  12.4	  mss_eff_config
- *  	: Determine effective config
+ *    16.1    host_activate_master
+ *          : Activate master core
+ *    16.2    host_activate_slave_cores
+ *          : Activate slave cores
+ *    16.3    host_ipl_complete
+ *          : Notify FSP drawer ipl complete
  *
  *  *****************************************************************
- *  THIS FILE WAS GENERATED ON 2012-03-01:1032
+ *  THIS FILE WAS GENERATED ON 2012-04-11:1609
  *  *****************************************************************
  *
  *  Please see the note in initsvcstructs.H for description of
@@ -52,13 +50,14 @@
 #include    <initservice/initsvcreasoncodes.H>
 
 //  include prototypes file
-#include    "../../../usr/hwpf/hwp/mc_init/mc_init.H"
+#include    "../../../usr/hwpf/hwp/core_activate/core_activate.H"
 
 namespace   INITSERVICE
 {
+    const   TaskInfo    g_istep16[]  =   {
 
-const   TaskInfo    g_istep12[]  =   {
         {
+
                 "",         // dummy, index 0
                 NULL,
                 {
@@ -68,45 +67,42 @@ const   TaskInfo    g_istep12[]  =   {
         },
 
         {
-                ISTEPNAME(12,01,"host_collect_dimm_spd"),
-                MC_INIT::call_host_collect_dimm_spd,
+                ISTEPNAME(16,01,"host_activate_master"),
+                CORE_ACTIVATE::call_host_activate_master,
                 {
                         START_FN,
                         EXT_IMAGE,
                 }
         },
+
+
         {
-                ISTEPNAME(12,02,"mss_volt"),
-                MC_INIT::call_mss_volt,
+                ISTEPNAME(16,02,"host_activate_slave_cores"),
+                CORE_ACTIVATE::call_host_activate_slave_cores,
                 {
                         START_FN,
                         EXT_IMAGE,
                 }
         },
+
+
         {
-                ISTEPNAME(12,03,"mss_freq"),
-                MC_INIT::call_mss_freq,
+                ISTEPNAME(16,03,"host_ipl_complete"),
+                CORE_ACTIVATE::call_host_ipl_complete,
                 {
                         START_FN,
                         EXT_IMAGE,
                 }
         },
-        {
-                ISTEPNAME(12,4,"mss_eff_config"),
-                MC_INIT::call_mss_eff_config,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                }
-        },
+
 
         //  END OF LIST!
 };
 
 // make a struct from the above with the number of items included
-const   ExtTaskInfo g_istep12TaskList    =   {
-        &(g_istep12[0]),
-        ( sizeof(g_istep12)/sizeof(TaskInfo) ),
+const   ExtTaskInfo g_istep16TaskList    =   {
+        &(g_istep16[0]),
+        ( sizeof(g_istep16)/sizeof(TaskInfo) ),
         NULL    //  later, depModules struct
 };
 

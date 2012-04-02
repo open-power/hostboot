@@ -87,6 +87,9 @@ use constant    SPLESS_SINGLE_ISTEP_CMD     =>  0x00;
 use constant    SPLESS_RESUME_ISTEP_CMD     =>  0x01;
 use constant    SPLESS_CLEAR_TRACE_CMD      =>  0x02;
 
+use constant    MAX_ISTEPS                  =>  25;
+use constant    MAX_SUBSTEPS                =>  25;
+
 
 #------------------------------------------------------------------------------
 # Globals
@@ -103,11 +106,11 @@ my  $opt_cmdfile        =   0;          ## batchmode, later
 my  $opt_setup          =   "";         ##  run Jim's script to start up the model         
 
 my  @inList;
-$inList[10][10]     =   ();
+$inList[MAX_ISTEPS][MAX_SUBSTEPS]   =   ();
 ##  initialize inList to "undefined"
-for( my $i = 0; $i <= $#inList; $i++)
+for( my $i = 0; $i <    MAX_ISTEPS; $i++)
 {
-    for(my $j = 0; $j <= $#inList; $j++)
+    for(my $j = 0; $j < MAX_SUBSTEPS; $j++)
     {
         undef( $inList[$i][$j] );
     }
@@ -222,8 +225,7 @@ if  ( $opt_debug )
     print   STDERR  "shutdownflag reg   =   $shutdownflag\n";
     print   STDERR  "shutdownsts  reg   =   $shutdownsts\n";
     
-    VBU_Cacheline::SetFlags( 1, 0 );
-    
+    VBU_Cacheline::SetFlags( 1, 0 ); 
 }
 
 if  ( $opt_help )
@@ -265,6 +267,7 @@ sub main()
     {
         print STDOUT "Setting P8 Instructions to STOPPED.\n";
         VBU_Cacheline::P8_Ins_Stop();
+        VBU_Cacheline::P8_Flush_L2();
     }
     
     ( my $flag, my $sts ) = getShutDownStatus();
@@ -340,9 +343,9 @@ sub printUsage()
     print STDOUT "    [--command <foo>..<bar>]  (run named isteps \"foo\" through \"bar\")\n" ;
     print STDOUT "    [--resume]                (resume an istep that is at a break point)\n" ;
     print STDOUT "\n" ;
+    print STDOUT "  [--clear-trace]             (clear trace buffers before starting)\n";    
 ##    print STDOUT "  [--cmdfile]                 (get commands from a batchfile)\n";
 ##    print STDOUT "  [--setup]                   (bring up AWAN and wait for further commands)\n";
-##    print STDOUT "  [--clear-trace]             (clear trace buffers before starting)\n";    
 ##    print STDOUT "\n" ;
 
 }
@@ -374,9 +377,13 @@ sub get_istep_list()
         chomp;
 
         ( $istep, $substep, $name) =   split( ",", $_ ); 
+        chomp $name;
         ## print STDERR    "$_, $istep, $substep, $name\n" ;
          
-        $inList[$istep][$substep]    =   $name; 
+        if ( defined($name) && ( $name ne "" ) )
+        {
+            $inList[$istep][$substep]    =   $name;
+        } 
     }         
     
     close( FH );     
@@ -393,12 +400,12 @@ sub print_istep_list( )
     print   STDOUT  " IStep Name\n";    
     print   STDOUT  "---------------------------------------------------\n";
     
-    for(my $i = 4; $i <= $#inList; $i++)
+    for(my $i = 0; $i < MAX_ISTEPS; $i++)
     {
-        for(my $j = 0; $j <= $#inList; $j++)
+        for(my $j = 0; $j < MAX_SUBSTEPS; $j++)
         {
-            ## print all substeps
-            # print "==$inList[$i][$j] \n";
+
+            ## print "==$i.$j $inList[$i][$j] \n";
             if ( defined( $inList[$i][$j] ) )
             {
                 if ( $hdrflag )  
@@ -422,9 +429,9 @@ sub find_in_inList( $ )
 {
     my  ( $substepname )    =   @_;
     
-    for(my $i = 0; $i <= $#inList; $i++)
+    for(my $i = 0; $i < MAX_ISTEPS; $i++)
     {
-        for(my $j = 0; $j <= $#inList; $j++)
+        for(my $j = 0; $j < MAX_SUBSTEPS; $j++)
         {
             ## if ( defined($inList[$i][$j]) ) {   print ".$inList[$i][$j]?$substepname. \n";   }
             
@@ -436,7 +443,7 @@ sub find_in_inList( $ )
         }
     }     
 
-    return ( $#inList, $#inList, 0 )  
+    return ( MAX_ISTEPS, MAX_SUBSTEPS, 0 )  
 } 
 
 ##
@@ -466,23 +473,46 @@ sub getSyncStatus( )
     my  $count  =   1000;
     my  $result =   0; 
     my  $seqnum =   0;  
+    my  $running =  0;
     
     ##  get response.  sendCmd() should have bumped g_SeqNum, so we will sit
     ##  here for a reasonable amount of time waiting for the correct sequence
     ##  number to come back.  
     while(1)
     {
+
+
     
         ##  advance HostBoot code by a certain # of cycles, then check the 
         ##  sequence number to see if it has changed.  rinse and repeat.
+        ##  Note:  RunClocks will start instructions 
         VBU_Cacheline::RunClocks();
+
+        ##  Stop instructions, flush L2
+        VBU_Cacheline::P8_Ins_Stop();
+        VBU_Cacheline::P8_Flush_L2();
+
         
         ##  dump printk similar to the Jim McGuire's script
         ##  NOPE, CRASHES AWAN dumpPrintk();
 
-        $result = VBU_Cacheline::CLread( $statusreg );
-        $seqnum  = ( ( $result & 0x3f00000000000000 ) >> 56 );
-        if ( $seqnum == $g_SeqNum )
+        ## check for system crash
+        my ( $flag, $status )  =   getShutDownStatus();
+        if ( $flag )
+        {
+            print   STDOUT  "HostBoot has shut down with status $status";
+            return -1;
+        }
+
+        $result      = VBU_Cacheline::CLread( $statusreg );
+
+        printf  STDERR  "===== count=%d, result=0x%lx\n", $count, $result ;
+
+        $seqnum      =   ( ( $result & 0x3f00000000000000 ) >> 56 );
+        $running     =   ( ( $result & 0x8000000000000000 ) >> 63 );
+        ## if (    ( $running == 0 )
+        ##     && ( $seqnum == $g_SeqNum )
+        if  ( $seqnum == $g_SeqNum )
         {
             return $result;
         }
@@ -552,9 +582,18 @@ sub runIStep( $$ )
         }
         else
         {            
-            printf STDOUT "Istep %d.%d returned Status: 0x%x\n", $stsIStep, $stsSubstep, $istepStatus ;
+            printf STDOUT "Istep %d.%d returned Status: 0x%x", $stsIStep, $stsSubstep, $istepStatus ;
+            if ( $istepStatus == 0xa )
+            {
+                printf STDOUT   ": not implemented yet.\n";
+            }
+            else
+            {
+                printf STDOUT   "\n";
+            }
         }
-        print STDOUT "-----------------------------------------------------------------\n";
+           
+        print STDOUT "-------------------------------------------------------------- $g_SeqNum\n";
     }     
 }   
     
@@ -568,13 +607,6 @@ sub sCommand( $ )
     my  $i   =   $scommand;
     my  $j   =   0;
     
-    # sanity check
-    if ( !defined($inList[$i][0]) )
-    {
-        printf  STDOUT  "IStep %d.0 does not exist.\n", $i;
-        return -1;
-    }
-        
     #   execute all the substeps in the IStep
     for( $j=0; $j<$#inList; $j++ )
     {
@@ -658,7 +690,10 @@ sub parse_command( $ )
             for( my $y=$substepM; $y<$substepN+1; $y++ )
             {
                 ## print STDOUT "run $x $y $inList[$x][$y]\n";
-                runIStep( $x, $y );
+                if ( defined( $inList[$x][$y] ) )
+                {
+                    runIStep( $x, $y );
+                }
             }
         }
         
@@ -709,6 +744,20 @@ sub setMode( $ )
         ##  advance HostBoot code by a certain # of cycles, then check the 
         ##  sequence number to see if it has changed.  rinse and repeat.
         VBU_Cacheline::RunClocks();
+
+        ##  Stop instructions, flush L2
+         VBU_Cacheline::P8_Ins_Stop();
+         VBU_Cacheline::P8_Flush_L2();
+
+
+
+        ## check for system crash
+        my ( $flag, $status )  =   getShutDownStatus();
+        if ( $flag )
+        {
+            print   STDOUT  "HostBoot has shut down with status $status";
+            return -1;
+        }
         
         $result = VBU_Cacheline::CLread( $statusreg );
         

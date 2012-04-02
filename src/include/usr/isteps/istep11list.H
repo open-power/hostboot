@@ -67,7 +67,15 @@ namespace   INITSERVICE
 const   TaskInfo    g_istep11[]  =   {
 
         {
-                ISTEPNAME(11,00,"dmi_scominit"),             // substep name
+                "",         // dummy, index 0
+                NULL,
+                {
+                        NONE,
+                        EXT_IMAGE,
+                }
+        },
+        {
+                ISTEPNAME(11,01,"dmi_scominit"),             // substep name
                 DMI_TRAINING::call_dmi_scominit,            // pointer to fn
                 {
                         START_FN,                           // task type
@@ -75,7 +83,7 @@ const   TaskInfo    g_istep11[]  =   {
                 }
         },
         {
-                ISTEPNAME(11,01,"dmi_erepair"),              // substep name
+                ISTEPNAME(11,02,"dmi_erepair"),              // substep name
                 DMI_TRAINING::call_dmi_erepair,             // pointer to fn
                 {
                         START_FN,                           // task type
@@ -83,7 +91,7 @@ const   TaskInfo    g_istep11[]  =   {
                 }
         },
         {
-                ISTEPNAME(11,02,"dmi_io_dccal"),             // substep name
+                ISTEPNAME(11,03,"dmi_io_dccal"),             // substep name
                 DMI_TRAINING::call_dmi_io_dccal,            // pointer to fn
                 {
                         START_FN,                           // task type
@@ -91,7 +99,7 @@ const   TaskInfo    g_istep11[]  =   {
                 }
         },
         {
-                ISTEPNAME(11,03,"dmi_io_run_training"),      // substep name
+                ISTEPNAME(11,04,"dmi_io_run_training"),      // substep name
                 DMI_TRAINING::call_dmi_io_run_training,     // pointer to fn
                 {
                         START_FN,                           // task type
@@ -99,7 +107,7 @@ const   TaskInfo    g_istep11[]  =   {
                 }
         },
         {
-                ISTEPNAME(11,04,"host_startPRD_dmi"),        // substep name
+                ISTEPNAME(11,05,"host_startPRD_dmi"),        // substep name
                 DMI_TRAINING::call_host_startPRD_dmi,       // pointer to fn
                 {
                         START_FN,                           // task type
@@ -107,17 +115,15 @@ const   TaskInfo    g_istep11[]  =   {
                 }
         },
         {
-                ISTEPNAME(11,05,"host_attnlisten_cen"),      // substep name
+                ISTEPNAME(11,06,"host_attnlisten_cen"),      // substep name
                 DMI_TRAINING::call_host_attnlisten_cen,     // pointer to fn
                 {
                         START_FN,                           // task type
                         EXT_IMAGE,                          // Extended Module
                 }
         },
-
-
         {
-                ISTEPNAME(11,06,"proc_cen_framelock"),       // substep name
+                ISTEPNAME(11,07,"proc_cen_framelock"),       // substep name
                 DMI_TRAINING::call_proc_cen_framelock,      // pointer to fn
                 {
                         START_FN,                           // task type
@@ -125,7 +131,7 @@ const   TaskInfo    g_istep11[]  =   {
                 }
         },
         {
-                ISTEPNAME(11,07,"cen_set_inband_addr"),      // substep name
+                ISTEPNAME(11,08,"cen_set_inband_addr"),      // substep name
                 DMI_TRAINING::call_cen_set_inband_addr,          // pointer to fn
                 {
                         START_FN,                           // task type

@@ -102,6 +102,8 @@ extern trace_desc_t *g_trac_initsvc;
 TASK_ENTRY_MACRO( IStepDispatcher::getTheInstance().init );
 
 
+
+
 void IStepDispatcher::init( errlHndl_t  &io_rtaskRetErrl )
 {
     errlHndl_t  l_errl  =   NULL;
@@ -191,11 +193,16 @@ void    IStepDispatcher::runAllISteps( errlHndl_t   &io_rtaskRetErrl )
 
 
     for (   l_IStep=0;
-            l_IStep<INITSERVICE::MAX_ISTEPS;
+            l_IStep<INITSERVICE::MaxISteps;
             l_IStep++ )
     {
+        TRACDCOMP( g_trac_initsvc,
+                        "runAllISteps: IStep %d: %d entries",
+                        l_IStep,
+                        g_isteps[l_IStep].numitems );
+
         for (   l_SubStep=0;
-                l_SubStep < INITSERVICE::MAX_SUBSTEPS;
+                l_SubStep < g_isteps[l_IStep].numitems;
                 l_SubStep++)
         {
             /**
@@ -208,8 +215,8 @@ void    IStepDispatcher::runAllISteps( errlHndl_t   &io_rtaskRetErrl )
                                     l_SubStep );
             if ( l_pistep == NULL )
             {
-
-                break;  // break out of inner for loop
+                // continue to end of list
+                continue;
             }
 
             //  @todo   placeholder until progress codes are defined and
@@ -474,7 +481,6 @@ errlHndl_t  IStepDispatcher::processSingleIStepCmd(
                     i_Substep  );
 
             o_rSts  =   SPLESS_INVALID_COMMAND;
-
             break;
         }
 
@@ -487,7 +493,7 @@ errlHndl_t  IStepDispatcher::processSingleIStepCmd(
         InitService::getTheInstance().setProgressCode( l_progresscode );
 
 
-        TRACDCOMP( g_trac_initsvc,
+        TRACFCOMP( g_trac_initsvc,
                 "processSingleIStepCmd: Run IStep=%d.%d %s",
                 i_IStep,
                 i_Substep,
@@ -545,7 +551,7 @@ const TaskInfo *IStepDispatcher::findTaskInfo(
         }
 
         // check input range - IStep
-        if  (   i_IStep >= MAX_ISTEPS   )
+        if  (   i_IStep >= INITSERVICE::MaxISteps   )
         {
             TRACDCOMP( g_trac_initsvc,
                        "IStep %d out of range. (substep=%d) ",

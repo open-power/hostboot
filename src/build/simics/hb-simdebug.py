@@ -278,16 +278,20 @@ def get_istep_list( inList ):
 
         
 def print_istep_list( inList ):
+    hdrflag =   1
     print   "IStep\tSubStep\tName"
     print   "---------------------------------------------------"
     for i in range(0,len(inList)) :
-        if ( inList[i][0] != None ) :
-            print   "-- %d"%(i)
         for j in range( 0, len(inList[i])) :
             # print "%d %d"%(i,j)
             if ( inList[i][j] != None ) :
+                if ( hdrflag ) :
+                    print   "-- %d"%(i)
+                    hdrflag =   0
                 ##    print "%d\t%d\t%s"%( i,j, inList[i][j] )   
                 print "%s"%( inList[i][j] )
+                
+        hdrflag =   1
 
                
     print   " "                 
@@ -333,6 +337,8 @@ def runIStep( istep, substep, inList ):
                 print "Istep %d.%d FAILED to launch, task status is %d"%( stsIStep, stsSubstep, taskStatus )
         else:            
             print "Istep %d.%d returned Status: 0x%x"%( stsIStep, stsSubstep, istepStatus ) 
+            if ( istepStatus == 0xa ) :
+                print   "                       (not supported yet)"
         print   "-------------------------------------------------------------- %d"%(g_SeqNum)
         
     return    
@@ -406,21 +412,14 @@ def resume_istep():
 def sCommand( inList, scommand ) :
     
     i   =   int(scommand)
-    j   =   0
-    
-    # sanity check
-    if ( inList[i][0] == None ) :
-        print "IStep %d.0 does not exist."%( i )
-        return
         
     #   execute all the substeps in the IStep
-    for substep in inList[i] :
+    for j in range( 0, len(inList[i]) ) :
         ## print   "-----------------" 
-        ##print "run IStep %d %s  ..."%(i, substep)
+        ## print "$$$$ run IStep %d %d  ..."%(i, j)
         ##print   "-----------------" 
         if ( inList[i][j] != None ) :
             runIStep( i, j, inList )
-        j = j+1
     return    
     
     
@@ -558,9 +557,11 @@ def istepHB( symsFile, str_arg1 ):
                print( "Invalid substep %s"%(ss_list[1] ) )
                return
  
+        ## @todo - this does not work correctly across istep boundaries
         for x in range( istepM, istepN+1 ) :
                 for y in range( substepM, substepN+1 ) :
-                    runIStep( x, y, inList )
+                    if ( inList[x][y] != None ) :
+                        runIStep( x, y, inList )
     return  
 
 

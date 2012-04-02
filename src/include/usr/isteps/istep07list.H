@@ -1,7 +1,7 @@
 //  IBM_PROLOG_BEGIN_TAG
 //  This is an automatically generated prolog.
 //
-//  $Source: src/include/usr/isteps/istep12list.H $
+//  $Source: src/include/usr/isteps/istep07list.H $
 //
 //  IBM CONFIDENTIAL
 //
@@ -21,26 +21,26 @@
 //
 //  IBM_PROLOG_END
 
-#ifndef __ISTEPS_ISTEP12LIST_H
-#define __ISTEPS_ISTEP12LIST_H
+#ifndef __ISTEPS_ISTEP07LIST_H
+#define __ISTEPS_ISTEP07LIST_H
 
 /**
- * @file    istep12list.H
+ * @file    istep07list.H
  *
- *  IStep 12    Step 12 MC Init
- *  IPL FLow Doc        v0.99 (02/10/12)
+ *  IStep 07    Start Clocks On Nest Chiplets
+ *  IPL FLow Doc        v1.01 (03/26/12)
  *
- *  12.1	  host_collect_dimm_spd
- *  	: Collect Master dimm SPD
- *  12.2	  mss_volt
- *  	: Calc dimm voltage
- *  12.3	  mss_freq
- *  	: Calc dimm frequency
- *  12.4	  mss_eff_config
- *  	: Determine effective config
+ *    07.1    proc_a_x_pci_dmi_pll_setup
+ *          : Setup PLL for A, X, PCIe, DMI
+ *    07.2    proc_startclock_chiplets
+ *          : Start clocks on A, X, PCIe chiplets
+ *    07.3    proc_chiplet_scominit
+ *          : Apply scom inits to chiplets
+ *    07.4    proc_scomoverride_chiplets
+ *          : Apply sequenced scom inits
  *
  *  *****************************************************************
- *  THIS FILE WAS GENERATED ON 2012-03-01:1032
+ *  THIS FILE WAS GENERATED ON 2012-04-11:1605
  *  *****************************************************************
  *
  *  Please see the note in initsvcstructs.H for description of
@@ -52,13 +52,14 @@
 #include    <initservice/initsvcreasoncodes.H>
 
 //  include prototypes file
-#include    "../../../usr/hwpf/hwp/mc_init/mc_init.H"
+#include    "../../../usr/hwpf/hwp/start_clocks_on_nest_chiplets/start_clocks_on_nest_chiplets.H"
 
 namespace   INITSERVICE
 {
+    const   TaskInfo    g_istep07[]  =   {
 
-const   TaskInfo    g_istep12[]  =   {
         {
+
                 "",         // dummy, index 0
                 NULL,
                 {
@@ -68,45 +69,52 @@ const   TaskInfo    g_istep12[]  =   {
         },
 
         {
-                ISTEPNAME(12,01,"host_collect_dimm_spd"),
-                MC_INIT::call_host_collect_dimm_spd,
+                ISTEPNAME(07,01,"proc_a_x_pci_dmi_pll_setup"),
+                START_CLOCKS_ON_NEST_CHIPLETS::call_proc_a_x_pci_dmi_pll_setup,
                 {
                         START_FN,
                         EXT_IMAGE,
                 }
         },
+
+
         {
-                ISTEPNAME(12,02,"mss_volt"),
-                MC_INIT::call_mss_volt,
+                ISTEPNAME(07,02,"proc_startclock_chiplets"),
+                START_CLOCKS_ON_NEST_CHIPLETS::call_proc_startclock_chiplets,
                 {
                         START_FN,
                         EXT_IMAGE,
                 }
         },
+
+
         {
-                ISTEPNAME(12,03,"mss_freq"),
-                MC_INIT::call_mss_freq,
+                ISTEPNAME(07,03,"proc_chiplet_scominit"),
+                START_CLOCKS_ON_NEST_CHIPLETS::call_proc_chiplet_scominit,
                 {
                         START_FN,
                         EXT_IMAGE,
                 }
         },
+
+
         {
-                ISTEPNAME(12,4,"mss_eff_config"),
-                MC_INIT::call_mss_eff_config,
+                ISTEPNAME(07,04,"proc_scomoverride_chiplets"),
+                START_CLOCKS_ON_NEST_CHIPLETS::call_proc_scomoverride_chiplets,
                 {
                         START_FN,
                         EXT_IMAGE,
                 }
         },
+
 
         //  END OF LIST!
 };
 
 // make a struct from the above with the number of items included
-const   ExtTaskInfo g_istep12TaskList    =   {
-        &(g_istep12[0]),
-        ( sizeof(g_istep12)/sizeof(TaskInfo) ),
+const   ExtTaskInfo g_istep07TaskList    =   {
+        &(g_istep07[0]),
+        ( sizeof(g_istep07)/sizeof(TaskInfo) ),
         NULL    //  later, depModules struct
 };
 

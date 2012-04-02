@@ -1,7 +1,7 @@
 //  IBM_PROLOG_BEGIN_TAG
 //  This is an automatically generated prolog.
 //
-//  $Source: src/include/usr/isteps/istep12list.H $
+//  $Source: src/include/usr/isteps/istep15list.H $
 //
 //  IBM CONFIDENTIAL
 //
@@ -21,26 +21,22 @@
 //
 //  IBM_PROLOG_END
 
-#ifndef __ISTEPS_ISTEP12LIST_H
-#define __ISTEPS_ISTEP12LIST_H
+#ifndef __ISTEPS_ISTEP15LIST_H
+#define __ISTEPS_ISTEP15LIST_H
 
 /**
- * @file    istep12list.H
+ * @file    istep15list.H
  *
- *  IStep 12    Step 12 MC Init
- *  IPL FLow Doc        v0.99 (02/10/12)
+ *  IStep 15    Build Winkle Images
+ *  IPL FLow Doc        v1.01 (03/26/12)
  *
- *  12.1	  host_collect_dimm_spd
- *  	: Collect Master dimm SPD
- *  12.2	  mss_volt
- *  	: Calc dimm voltage
- *  12.3	  mss_freq
- *  	: Calc dimm frequency
- *  12.4	  mss_eff_config
- *  	: Determine effective config
+ *    15.1    host_build_winkle
+ *          : Build runtime winkle images
+ *    15.2    proc_set_pore_bar
+ *          : Place winkle images in memory
  *
  *  *****************************************************************
- *  THIS FILE WAS GENERATED ON 2012-03-01:1032
+ *  THIS FILE WAS GENERATED ON 2012-04-11:1608
  *  *****************************************************************
  *
  *  Please see the note in initsvcstructs.H for description of
@@ -52,13 +48,14 @@
 #include    <initservice/initsvcreasoncodes.H>
 
 //  include prototypes file
-#include    "../../../usr/hwpf/hwp/mc_init/mc_init.H"
+#include    "../../../usr/hwpf/hwp/build_winkle_images/build_winkle_images.H"
 
 namespace   INITSERVICE
 {
+    const   TaskInfo    g_istep15[]  =   {
 
-const   TaskInfo    g_istep12[]  =   {
         {
+
                 "",         // dummy, index 0
                 NULL,
                 {
@@ -68,45 +65,32 @@ const   TaskInfo    g_istep12[]  =   {
         },
 
         {
-                ISTEPNAME(12,01,"host_collect_dimm_spd"),
-                MC_INIT::call_host_collect_dimm_spd,
+                ISTEPNAME(15,01,"host_build_winkle"),
+                BUILD_WINKLE_IMAGES::call_host_build_winkle,
                 {
                         START_FN,
                         EXT_IMAGE,
                 }
         },
+
+
         {
-                ISTEPNAME(12,02,"mss_volt"),
-                MC_INIT::call_mss_volt,
+                ISTEPNAME(15,02,"proc_set_pore_bar"),
+                BUILD_WINKLE_IMAGES::call_proc_set_pore_bar,
                 {
                         START_FN,
                         EXT_IMAGE,
                 }
         },
-        {
-                ISTEPNAME(12,03,"mss_freq"),
-                MC_INIT::call_mss_freq,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                }
-        },
-        {
-                ISTEPNAME(12,4,"mss_eff_config"),
-                MC_INIT::call_mss_eff_config,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                }
-        },
+
 
         //  END OF LIST!
 };
 
 // make a struct from the above with the number of items included
-const   ExtTaskInfo g_istep12TaskList    =   {
-        &(g_istep12[0]),
-        ( sizeof(g_istep12)/sizeof(TaskInfo) ),
+const   ExtTaskInfo g_istep15TaskList    =   {
+        &(g_istep15[0]),
+        ( sizeof(g_istep15)/sizeof(TaskInfo) ),
         NULL    //  later, depModules struct
 };
 
