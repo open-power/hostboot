@@ -59,11 +59,6 @@ mkdir -p $sb/simu/data/cec-chip/
 cp $HOSTBOOTROOT/src/build/citest/etc/patches/centaur.act $sb/simu/data/cec-chip/
 #fixme with Story 38362
 
-# added this patch until defect 825800 is integrated and included in a hostboot bbuild.
-echo "+++ Add workaround for p8 Indirect SCOM action files."
-cp --update $HOSTBOOTROOT/src/build/citest/etc/patches/p8_indScom_910431.act $sb/simu/data/cec-chip/p8_indScom_910431.act
-cp --update $HOSTBOOTROOT/src/build/citest/etc/patches/p8_indScom_910520.act $sb/simu/data/cec-chip/p8_indScom_910520.act
-
 # Leaving this here as an example for the future
 echo "+++ Update to new phyp and mambo level."
 mkdir -p $sb/simu/data

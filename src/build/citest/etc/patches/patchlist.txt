@@ -1,10 +1,3 @@
-Enable ECCB-based LPC/PNOR access (temporary)
--RTC: Story 37972 will be used to remove the patches
--CQ: No fips defect because these changes are not permanent
--Files: p8_pnor.act
--Coreq: associated changes are also in workarounds.presimsetup
-
-
 Update centaur.act for running DRAM hardware procedures
 -RTC: Story 38362 will be used to remove the patch
 -CQ: SW127616
@@ -12,8 +5,3 @@ Update centaur.act for running DRAM hardware procedures
 -Coreq: the file is copied in place by the workarounds.presimsetup
 
 
-Update the Action Files to add behavior for Indirect SCOM error bits
--RTC: task 38013  will be used to remove the patch
--CMVC:  Defect 825800 was used to check in the changes in buildIndScom.pl
--Files: p8_indScom_910431.act , p8_indScom_910520.act in the src/build/citest/etc/patches directory
--Coreq: associated changes are also in workarounds.presimsetup that need to be removed.
