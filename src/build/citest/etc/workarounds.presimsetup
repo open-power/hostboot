@@ -47,6 +47,12 @@ sed -i -e's/SETENV GFW_SIMICS_ENV_THREADS_PER_CORE.*/SETENV GFW_SIMICS_ENV_THREA
 sed -i -e's/SETENV GFW_P8_MURANO_ENABLE_P8_PROC.*/SETENV GFW_P8_MURANO_ENABLE_P8_PROC yes/' $sb/simu/configs/P8_MURANO.config
 sed -i -e's/SETENV GFW_SIMICS_ENV_THREADS_PER_CORE.*/SETENV GFW_SIMICS_ENV_THREADS_PER_CORE 8/' $sb/simu/configs/P8_MURANO.config
 
+#Remove this with Task 39902
+echo "+++ Temporarily disabling multiple Centaurs (Simics bug)."
+sed -i -e's/SETENV GFW_P8_VENICE_CENTAURS_PER_PROC.*/SETENV GFW_P8_VENICE_CENTAURS_PER_PROC 1/' $sb/simu/configs/P8_VENICE.config
+sed -i -e's/SETENV GFW_P8_MURANO_CENTAURS_PER_PROC.*/SETENV GFW_P8_MURANO_CENTAURS_PER_PROC 1/' $sb/simu/configs/P8_MURANO.config
+
+
 #Note: Leave this here as an example
 #echo "+++ Some message about why you need to do this."
 #mkdir -p $sb/simu/data
