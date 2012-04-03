@@ -50,11 +50,9 @@
 #include <targeting/common/trace.H>
 #include "unittest.H"
 
-//trace_desc_t* g_trac_targeting = NULL;
-//TRAC_INIT(&g_trac_targeting, "TARG", 4096);
-
 namespace TARGETING {
-extern void dumpAllAttributes(trace_desc_t*);
+extern void dumpAllAttributes(TARG_TD_t,uint32_t);
+extern TARG_TD_t g_trac_targeting;
 };
 
 class CommonTargetingTestSuite: public CxxTest::TestSuite
@@ -66,10 +64,10 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
      */
     void testTargetServiceClass()
     {
-        //@fixme - found a Data Storage Exception that needs to be fixed (Task 
+        //@fixme - found a Data Storage Exception that needs to be fixed (Task
         // RTC 35625)
         return;
-        
+
         TARG_TS_TRACE(ENTER_MRK "testTargetServiceClass" );
 
         using namespace TARGETING;
@@ -1352,8 +1350,8 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
         TARG_TS_TRACE(ENTER_MRK "testStringAttributes" );
 
         using namespace TARGETING;
-       
-        do { 
+
+        do {
 
         TargetService& l_targetService = targetService();
 
@@ -1390,7 +1388,7 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
         {
             TARG_TS_FAIL("ERROR: Can not read l_nullString attribute");
         }
-        
+
         // TC1.4: All bytes of the string must match the reference version
         if(memcmp(l_nullStringReference,
                   l_nullString,
@@ -1409,9 +1407,9 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
         {
             TARG_TS_FAIL("ERROR: l_nullString does not strcmp to the empty string");
             TARG_BIN("Actual (l_nullString)",
-                     l_nullString,sizeof(l_nullString));       
+                     l_nullString,sizeof(l_nullString));
         }
- 
+
         // TC2: Test string attribute with only 1 character
         // TC2.1: String storage size must match the stated size
         ATTR_TEST_MIN_STRING_type l_minStringReference = {0};
@@ -1425,7 +1423,7 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
                     ATTR_TEST_MIN_STRING_max_chars+1);
         }
 
-        // TC2.2: String size must be non-zero 
+        // TC2.2: String size must be non-zero
         if(sizeof(l_minString) == 0)
         {
             TARG_TS_FAIL("ERROR: l_minString size is zero");
@@ -1436,8 +1434,8 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
         {
             TARG_TS_FAIL("ERROR: Can not read l_minString attribute");
         }
- 
-        // TC2.4: All bytes in string must match the reference string 
+
+        // TC2.4: All bytes in string must match the reference string
         if(memcmp(l_minStringReference,
                   l_minString,
                   sizeof(l_minStringReference)))
@@ -1456,7 +1454,7 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
             TARG_TS_FAIL("ERROR l_minString does not strcmp to the reference "
                     "string");
             TARG_BIN("Actual (l_minString)",
-                     l_minString,sizeof(l_minString));           
+                     l_minString,sizeof(l_minString));
         }
 
         // TC3: Test string with maximum number of characters (including NULL)
@@ -1505,7 +1503,7 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
             TARG_TS_FAIL("ERROR: l_maxString does not strcmp to the reference "
                     "string");
             TARG_BIN("Actual (l_maxString)",
-                     l_maxString,sizeof(l_maxString));    
+                     l_maxString,sizeof(l_maxString));
         }
 
         // TC4: Test string with no supplied default value
@@ -1553,7 +1551,7 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
             TARG_TS_FAIL("ERROR: l_noDefaultString does not strcmp to the reference "
                     "string");
             TARG_BIN("Actual (l_noDefaultString)",
-                     l_noDefaultString,sizeof(l_noDefaultString));   
+                     l_noDefaultString,sizeof(l_noDefaultString));
         }
 
         // TC5: Write string and read back
@@ -1587,12 +1585,6 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
         TARG_TS_TRACE(EXIT_MRK "testStringAttributes" );
     }
 
-
-    void testDump()
-    {
-        //fixme-remove this completely when RTC:38386 is done
-        //TARGETING::dumpAllAttributes(g_trac_targeting);
-    }
 };
 
 #endif // __TARGETING_COMMON_TESTCOMMONTARGETING_H

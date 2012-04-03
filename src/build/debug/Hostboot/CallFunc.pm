@@ -1,3 +1,25 @@
+#  IBM_PROLOG_BEGIN_TAG
+#  This is an automatically generated prolog.
+#
+#  $Source: src/build/debug/Hostboot/CallFunc.pm $
+#
+#  IBM CONFIDENTIAL
+#
+#  COPYRIGHT International Business Machines Corp. 2011 - 2012
+#
+#  p1
+#
+#  Object Code Only (OCO) source materials
+#  Licensed Internal Code Source Materials
+#  IBM HostBoot Licensed Internal Code
+#
+#  The source code for this program is not published or other-
+#  wise divested of its trade secrets, irrespective of what has
+#  been deposited with the U.S. Copyright Office.
+#
+#  Origin: 30
+#
+#  IBM_PROLOG_END
 use strict;
 
 package Hostboot::CallFunc;
@@ -66,12 +88,36 @@ sub main
         $force = 1;
     }
 
+    my $error = execFunc( $function, $debug, $force, @parms );
+    if( $error )
+    {
+       return;
+    }
+}
+
+sub execFunc
+{
+    my $function = shift;
+    my $debug = shift;
+    my $force = shift;
+    my $parms_arg = shift;
+    my @parms = @{$parms_arg};
+
+    if( $debug )
+    {
+        ::userDisplay("function = $function.\n");
+        my $tmparg;
+        foreach $tmparg (@parms)
+        {
+            ::userDisplay("arg = $tmparg.\n");
+        }
+    }
 
     # Ensure environment is in the proper state for running instructions.
     if (!::readyForInstructions())
     {
         ::userDisplay "Cannot execute while unable to run instructions.\n";
-        return;
+        return 1;
     }
 
     # Find symbol's TOC address.
@@ -87,7 +133,7 @@ sub main
     if ((not defined $toc) || (not defined $address))
     {
         ::userDisplay "Cannot find symbol to execute $function.\n";
-        return;
+        return 1;
     }
 
     # Verify kernel isn't busy with an outstanding request.
@@ -95,7 +141,7 @@ sub main
         (0 == $force))
     {
         ::userDisplay "Another command is still pending.\n";
-        return;
+        return 1;
     }
 
     # Write entry point (function TOC) and parameters into debug structure.
@@ -136,9 +182,9 @@ sub main
     if (0 == ::read8($address + CALLFUNC_DEBUG_COMPLETE_OFFSET))
     {
         ::userDisplay "Command failed to complete.\n";
-        return;
+        return 1;
     }
-
+    
     # Display return value.
     ::userDisplay ::read64($address + CALLFUNC_DEBUG_RETVAL_OFFSET)."\n";
 }

@@ -110,9 +110,9 @@ my $xml = new XML::Simple (KeyAttr=>[]);
 # Until full machine parseable workbook parsing splits out all the input files,
 # use the intermediate representation containing the full host boot model.
 # Aborts application if file name not found.
-my $attributes = $xml->XMLin($cfgHbXmlFile, 
+my $attributes = $xml->XMLin($cfgHbXmlFile,
     forcearray => ['enumerationType','attribute','hwpfToHbAttrMap']);
-my $fapiAttributes = $xml->XMLin($cfgFapiAttributesXmlFile, 
+my $fapiAttributes = $xml->XMLin($cfgFapiAttributesXmlFile,
     forcearray => ['attribute']);
 
 # Perform some sanity validation of the model (so we don't have to later)
@@ -331,7 +331,7 @@ sub validateTargetTypesExtension {
     my %elements = ( );
     $elements{"id"}          = { required => 1, isscalar => 1};
     $elements{"attribute"}   = { required => 1, isscalar => 1};
-   
+
     foreach my $targetTypeExtension (@{$attributes->{targetTypeExtension}})
     {
         validateSubElements("targetTypeExtension",1,
@@ -1353,9 +1353,9 @@ VERBATIM
 ######
 #Create a .C file to dump all possible attributes
 #####
-sub writeDumpFile { 
+sub writeDumpFile {
     my($attributes,$outFile) = @_;
-    
+
     #First setup the includes and function definition
     print $outFile "#include <targeting/common/targetservice.H>\n";
     print $outFile "#include <targeting/common/trace.H>\n";
@@ -1363,10 +1363,11 @@ sub writeDumpFile {
     print $outFile "\n";
     print $outFile "namespace TARGETING\n";
     print $outFile "{\n";
-    print $outFile "    void dumpAllAttributes( TARG_TD_t i_trac )\n";
+    print $outFile "    void dumpAllAttributes( TARG_TD_t i_trac, uint32_t i_huid )\n";
     print $outFile "    {\n";
     print $outFile "        using namespace TARGETING;\n";
     print $outFile "\n";
+    print $outFile "        bool foundit = false;\n";
     print $outFile "        TargetService& l_targetService = targetService();\n";
     print $outFile "\n";
     print $outFile "        // Loop through every Target\n";
@@ -1375,13 +1376,29 @@ sub writeDumpFile {
     print $outFile "             ++l_targ )\n";
     print $outFile "        {\n";
 
+    # add a HUID check first so we can act on a single target
+    print $outFile "            { //HUID Check\n";
+    print $outFile "                AttributeTraits<ATTR_HUID>::Type huid;\n";
+    print $outFile "                if( (*l_targ)->tryGetAttr<ATTR_HUID>(huid) ) {\n";
+    print $outFile "                    if( (i_huid != huid) && (i_huid != 0) )\n";
+    print $outFile "                    {\n";
+    print $outFile "                        //skip this target\n";
+    print $outFile "                        continue;\n";
+    print $outFile "                    }\n";
+    print $outFile "                    else\n";
+    print $outFile "                    {\n";
+    print $outFile "                        foundit = true;\n";
+    print $outFile "                    }\n";
+    print $outFile "                }\n";
+    print $outFile "            }\n";
+
     # add the physical path first so we know where we are
     print $outFile "            { //Physical Path\n";
     print $outFile "                AttributeTraits<ATTR_PHYS_PATH>::Type tmp;\n";
     print $outFile "                if( (*l_targ)->tryGetAttr<ATTR_PHYS_PATH>(tmp) ) {\n";
     print $outFile "                    char* tmpstring = tmp.toString();\n";
     print $outFile "                    TRACFCOMP( i_trac, \"DUMP: --ATTR_PHYS_PATH=%s--\", tmpstring );\n";
-    print $outFile "                    free(tmpstring);\n"; 
+    print $outFile "                    free(tmpstring);\n";
     print $outFile "                }\n";
     print $outFile "            }\n";
 
@@ -1451,7 +1468,7 @@ sub writeDumpFile {
 	    print $outFile "                if( (*l_targ)->tryGetAttr<ATTR_",$attribute->{id},">(tmp) ) {\n";
 	    print $outFile "                    char* tmpstring = tmp.toString();\n";
 	    print $outFile "                    TRACFCOMP( i_trac, \"DUMP: ",$attribute->{id},"=%s\", tmpstring );\n";
-	    print $outFile "                    free(tmpstring);\n"; 
+	    print $outFile "                    free(tmpstring);\n";
 	    print $outFile "                }\n";
 	    print $outFile "            }\n";
 	}
@@ -1481,7 +1498,21 @@ sub writeDumpFile {
     }
 
     print $outFile "        }\n";
+    print $outFile "\n";
+    print $outFile "        if( !foundit )\n";
+    print $outFile "        {\n";
+    print $outFile "            TRACFCOMP( i_trac, \"DUMP: No Target found matching HUID=%.8X\", i_huid );\n";
+    print $outFile "        }\n";
     print $outFile "    }\n";
+    print $outFile "\n";
+
+    # add another prototype that is easier to call from debug framework
+    print $outFile "    void dumpAllAttributes2( trace_desc_t** i_trac, uint32_t i_huid )\n";
+    print $outFile "    {\n";
+    print $outFile "        dumpAllAttributes( *i_trac, i_huid );\n";
+    print $outFile "    }\n";
+    print $outFile "\n";
+
     print $outFile "}\n";
     print $outFile "\n";
 }
@@ -1588,9 +1619,9 @@ sub enumSpace {
     # 4-byte enums instead of optimized enums.  Note there are a few
     # enumerations (primarily in PNOR header, etc.) that do not change size.
     # That is intentional in order to make this the single point of control over
-    # binary compatibility.  Note that both FSP and Hostboot should always have 
+    # binary compatibility.  Note that both FSP and Hostboot should always have
     # this policy in sync.  Also note that when Hostboot and FSP use optimized
-    # enums, they must also be compiled with -fshort-enums 
+    # enums, they must also be compiled with -fshort-enums
     # $space = 4;
 
     return $space;
@@ -2404,14 +2435,14 @@ sub packAttribute {
                         }
                         # else use the last value
 
-                        packSingleSimpleTypeAttribute(\$binaryData, 
+                        packSingleSimpleTypeAttribute(\$binaryData,
                             \$attributes, \$attribute, $typeName, $val);
                     }
                 }
                 else
                 {
                     # Not an array attribute
-                    packSingleSimpleTypeAttribute(\$binaryData, 
+                    packSingleSimpleTypeAttribute(\$binaryData,
                         \$attributes, \$attribute,$typeName, $value);
                 }
 
