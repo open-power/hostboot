@@ -31,6 +31,7 @@
 // Includes
 // ----------------------------------------------
 #include <string.h>
+#include <endian.h>
 #include <trace/interface.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
@@ -95,16 +96,6 @@ bool compareKeywords ( const mvpdKeywordInfo e1,
  */
 bool compareRecords ( const mvpdRecordInfo e1,
                       const mvpdRecordInfo e2 );
-
-/**
- * @brief Swap the 16 bit size read from MVPD since it is stored in the
- *      MVPD byte swapped.
- *
- * @param[in] i_size - The size value to be byte swapped.
- *
- * @return uint16_t - The byte swapped value.
- */
-uint16_t swapByteSize ( uint16_t i_size );
 
 /**
  * @brief This function compares sizes to be sure buffers are large enough
@@ -478,7 +469,7 @@ errlHndl_t mvpdFindRecordOffset ( const char * i_record,
     }
 
     // Return the offset found, after byte swapping it.
-    o_offset = swapByteSize( offset );
+    o_offset = le16toh( offset );
 
     TRACSSCOMP( g_trac_mvpd,
                 EXIT_MRK"mvpdFindRecordOffset()" );
@@ -526,7 +517,7 @@ errlHndl_t mvpdRetrieveKeyword ( const char * i_keywordName,
         }
 
         // Byte Swap
-        recordSize = swapByteSize( recordSize );
+        recordSize = le16toh( recordSize );
 
         // Skip 3 bytes - RT
         // Read 4 bytes ( Record name ) - compare with expected
@@ -624,7 +615,7 @@ errlHndl_t mvpdRetrieveKeyword ( const char * i_keywordName,
             if( isPoundKwd )
             {
                 // Swap it since 2 byte sizes are byte swapped.
-                keywordSize = swapByteSize( keywordSize );
+                keywordSize = le16toh( keywordSize );
             }
             else
             {
@@ -923,18 +914,5 @@ bool compareKeywords ( const mvpdKeywordInfo e1,
         return false;
 }
 
-
-// ------------------------------------------------------------------
-// swapByteSize
-// ------------------------------------------------------------------
-uint16_t swapByteSize ( uint16_t i_size )
-{
-    uint16_t swappedSize = i_size & 0x00FF;
-    uint16_t tmp = i_size & 0xFF00;
-    tmp = tmp >> 8;
-    swappedSize = swappedSize << 8;
-    swappedSize = swappedSize | tmp;
-    return swappedSize;
-}
 
 } // end namespace MVPD
