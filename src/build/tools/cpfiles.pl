@@ -79,14 +79,14 @@ my %files = ("src/build/tools/hb-parsedump.pl" => "rsv",
              "img/hbicore_test.bin" => "rsv",
              "img/hbicore.list" => "rsv",
              "img/hbicore_test.list" => "rsv",
-             "img/hbicore_extended.bin" => "rsv",
-             "img/hbicore_test_extended.bin" => "rsv",
              "img/hbicore.bin.modinfo" => "rsv",
              "img/hbicore_test.bin.modinfo" => "rsv",
-             "img/pnor.toc" => "rsv",
-             "img/simics_VENICE_targeting.bin" => "rs",
-             "img/simics_MURANO_targeting.bin" => "rs",
-             "img/vbu_targeting.bin" => "rv",
+             "img/simics_MURANO.pnor" => "rs",
+             "img/simics_MURANO_test.pnor" => "rs",
+             "img/simics_VENICE.pnor" => "rs",
+             "img/simics_VENICE_test.pnor" => "rs",
+             "img/vbu.pnor" => "rv",
+             "img/vbu_test.pnor" => "rv",
              "img/isteplist.csv" => "rsv",
              "src/usr/hwpf/hwp/fapiTestHwp.C" => "r",
              "src/include/usr/hwpf/hwp/fapiTestHwp.H" => "r",
@@ -257,7 +257,8 @@ while ( my ($key, $value) = each(%files) )
 
     #Is file in img dir?
     if (($suffix eq ".bin") ||
-	($suffix eq ".toc"))
+	($suffix eq ".toc") ||
+	($suffix eq ".pnor"))
     {
         $copyDir = $imgDir;
     }
@@ -288,7 +289,8 @@ while ( my ($key, $value) = each(%files) )
 
     #Copy .bin to the img dir
     if (($suffix eq ".bin") ||
-	($suffix eq ".toc"))
+	($suffix eq ".toc") ||
+	($suffix eq ".pnor"))
     {
         $copyDir = $imgDir;
     }
@@ -306,12 +308,22 @@ while ( my ($key, $value) = each(%files) )
             $command = sprintf("cp %s %s %s", $recursive,
                                               $key, $copyDir."/hbicore".$suffix);
         }
-        elsif ($filename eq "hbicore_test_extended")
+        elsif ($filename eq "simics_MURANO_test")
         {
             $command = sprintf("cp %s %s %s", $recursive,
-                                              $key, $copyDir."/hbicore_extended".$suffix);
+                                              $key, $copyDir."/simics_MURANO".$suffix);
         }
-        elsif ($filename ne "hbicore" and $filename ne "hbicore_extended")
+        elsif ($filename eq "simics_VENICE_test")
+        {
+            $command = sprintf("cp %s %s %s", $recursive,
+                                              $key, $copyDir."/simics_VENICE".$suffix);
+        }
+        elsif ($filename eq "vbu_test")
+        {
+            $command = sprintf("cp %s %s %s", $recursive,
+                                              $key, $copyDir."/vbu".$suffix);
+        }
+        elsif ($filename ne "hbicore" and $filename ne "simics_MURANO" and $filename ne "simics_VENICE" and $filename ne "vbu")
         {
             $command = sprintf("cp %s %s %s", $recursive,
                                               $key, $copyDir);
@@ -337,9 +349,9 @@ while ( my ($key, $value) = each(%files) )
 
 if ("s" eq $env) #simics
 {
-    # create a sym-link to the appropriate targeting binary
-    print "Linking in simics_".$machine.".targeting.bin\n";
-    $command = sprintf("ln -sf %s/simics_%s_targeting.bin %s/targeting.bin", $imgDir, $machine, $imgDir );
+    # create a sym-link to the appropriate pnor binary
+    print "Linking in simics_".$machine.".pnor\n";
+    $command = sprintf("ln -sf %s/simics_%s.pnor %s/simics.pnor", $imgDir, $machine, $imgDir );
     print "$command\n";
     `$command`;
     if( $? != 0 )
@@ -347,6 +359,7 @@ if ("s" eq $env) #simics
         print "ERROR : exiting\n";
         exit(-1);
     }
+
 }
 else #release or vpo
 {

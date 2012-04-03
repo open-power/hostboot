@@ -92,4 +92,9 @@ hbicore_test_DATA_MODULES = ${hbicore_DATA_MODULES} testdata
 
 dslid_LIDNUMBER = 80f001fe
 
+IMAGE_EXTRA_TARGETS = buildpnor
+
 include ${ROOTPATH}/config.mk
+
+buildpnor: ${IMAGES}
+	cd build/buildpnor/ && make buildpnor

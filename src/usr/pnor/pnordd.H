@@ -216,7 +216,7 @@ class PnorDD
 
         LPC_STAT_REG_ERROR_MASK = 0xFC0000000007F700, /**< Error Bits */
 
-        PNORSIZE = 3 * MEGABYTE, //@fixme - read from TOC instead
+        PNORSIZE = 4 * MEGABYTE, //@fixme - read from TOC instead
         ERASESIZE_BYTES = 4 * KILOBYTE, /**< Minimum Erase Block (bytes) */
         ERASESIZE_WORD32 = ERASESIZE_BYTES/(sizeof(uint32_t)), /**< Erase Block (32-bit words) */
 

@@ -987,9 +987,9 @@ errlHndl_t PnorDD::eraseFlash(uint32_t i_address)
  This code is used in the MODEL_MEMCPY and MODEL_LPC_MEM modes
 */
 
-#define FAKE_PNOR_START 5*MEGABYTE
+#define FAKE_PNOR_START 4*MEGABYTE
 #define FAKE_PNOR_END 8*MEGABYTE
-#define FAKE_PNOR_SIZE 3*MEGABYTE
+#define FAKE_PNOR_SIZE 4*MEGABYTE
 void write_fake_pnor( uint64_t i_pnorAddr, void* i_buffer, size_t i_size )
 {
     //create a pointer to the offset start.

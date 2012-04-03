@@ -102,7 +102,8 @@ class PnorRP
         uint64_t offset;  /**< Offset to region from zero (relative to chip) */
         uint64_t size;  /**< Size of region in bytes (with or without ECC?) */
         uint64_t size_act;  /**< Actual size of content in bytes */
-        char fuse_tbd[96];  /**< Remainder is TBD depending on FUSE requirements */
+        uint64_t misc;  /**< Miscellaneious Info */
+        char fuse_tbd[89];  /**< Free Space */
         //@todo - need a chip select here I think?
     } PACKED;
 

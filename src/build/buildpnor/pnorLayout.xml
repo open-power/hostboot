@@ -1,0 +1,66 @@
+<!--  IBM_PROLOG_BEGIN_TAG
+     This is an automatically generated prolog.
+   
+     $Source: src/build/buildpnor/pnorLayout.xml $
+   
+     IBM CONFIDENTIAL
+   
+     COPYRIGHT International Business Machines Corp. 2012
+   
+     p1
+   
+     Object Code Only (OCO) source materials
+     Licensed Internal Code Source Materials
+     IBM HostBoot Licensed Internal Code
+   
+     The source code for this program is not published or other-
+     wise divested of its trade secrets, irrespective of what has
+     been deposited with the U.S. Copyright Office.
+   
+     Origin: 30
+   
+     IBM_PROLOG_END -->
+<pnor>
+    <section>
+	<description>Table of Contents (2K)</description>
+        <eyeCatch>TOC</eyeCatch>
+        <physicalOffset>0</physicalOffset>
+        <physicalRegionSize>0x1000</physicalRegionSize>
+        <ecc>no</ecc>
+        <source>Generate</source>
+    </section>
+    <section>
+	<description>Hostboot Extended image (2MB)</description>
+        <eyeCatch>HBI</eyeCatch>
+        <physicalOffset>0x1000</physicalOffset>
+        <physicalRegionSize>0x200000</physicalRegionSize>
+        <ecc>no</ecc>
+        <source>File</source>
+    </section>
+    <section>
+	<description>Attribute Data (512K)</description>
+        <eyeCatch>HBD</eyeCatch>
+        <physicalOffset>0x201000</physicalOffset>
+        <physicalRegionSize>0x80000</physicalRegionSize>
+        <ecc>no</ecc>
+        <source>File</source>
+    </section>
+    <section>
+	<description>Module VPD</description>
+        <eyeCatch>MVPD</eyeCatch>
+        <physicalOffset>0x281000</physicalOffset>
+        <physicalRegionSize>0x80000</physicalRegionSize>
+	<actualRegionSize>0x80000</actualRegionSize>
+        <ecc>no</ecc>
+        <source>Blank</source>
+    </section>
+    <section>
+	<description>DIMM JEDEC</description>
+        <eyeCatch>DJVPD</eyeCatch>
+        <physicalOffset>0x301000</physicalOffset>
+        <physicalRegionSize>0x40000</physicalRegionSize>
+	<actualRegionSize>0x40000</actualRegionSize>
+        <ecc>no</ecc>
+        <source>Blank</source>
+    </section>
+</pnor>

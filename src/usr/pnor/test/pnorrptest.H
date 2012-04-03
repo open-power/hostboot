@@ -62,19 +62,21 @@ class PnorRpTest : public CxxTest::TestSuite
             uint64_t vaddr;
         };
         const ExpVals_t exp_data[] = {
-            /* TOC */ { 0x690, 0x80000000 },
-            /* GLOBAL_DATA */ { PAGESIZE, 0x80100690 },
-            /* SBE_IPL */ { 0, 0 },
-            /* HB_BASE_CODE */ { 0, 0 },
-            /* HB_DATA */ { 512*KILOBYTE, 0x80101690 },
-            /* HB_ERRLOGS */ { 0, 0 },
-            /* HB_EXT_CODE */ { 1024*KILOBYTE, 0x80000690 },
-            /* HB_RUNTIME */ { 0, 0 },
-            /* PAYLOAD */ { 0, 0 },
-            /* PFW_LITE_CODE */ { 0, 0 },
-            /* OCC_CODE */ { 0, 0 },
-            /* KVM_PART_INFO */ { 0, 0 },
-            /* CODE_UPDATE */ { 0, 0 },
+            /* TOC */ { 0x1000, 0x80000000 },
+            /* HB_EXT_CODE */ { 0x200000, 0x80001000 },
+            /* HB_DATA */ { 0x80000, 0x80201000 },
+            /* DIMM_JEDEC_VPD */ { 0x40000, 0x80301000 },
+            /* MODULE_VPD */ { 0x80000, 0x80281000 },
+            /* GLOBAL_DATA  { 0, 0 },*/
+            /* SBE_IPL  { 0, 0 },*/
+            /* HB_ERRLOGS  { 0, 0 },*/
+            /* HB_BASE_CODE  { 0, 0 },*/
+            /* HB_RUNTIME  { 0, 0 },*/
+            /* PAYLOAD  { 0, 0 },*/
+            /* PFW_LITE_CODE  { 0, 0 },*/
+            /* OCC_CODE  { 0, 0 },*/
+            /* KVM_PART_INFO  { 0, 0 },*/
+            /* CODE_UPDATE  { 0, 0 },*/
         };
 
         for( PNOR::SectionId id = PNOR::FIRST_SECTION;

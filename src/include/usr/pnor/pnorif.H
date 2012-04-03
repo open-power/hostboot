@@ -36,22 +36,22 @@ namespace PNOR
 enum SectionId
 {
     TOC,            /**< Table of Contents */
-    GLOBAL_DATA,    /**< Global Data */
-    SBE_IPL,        /**< Self-Boot Engine IPL image */
-    HB_BASE_CODE,   /**< Hostboot Base Image */
-    HB_DATA,        /**< Hostboot Data */
-    HB_ERRLOGS,     /**< Hostboot Error log Repository */
     HB_EXT_CODE,    /**< Hostboot Extended Image */
-    HB_RUNTIME,     /**< Hostboot Runtime Image */
-    PAYLOAD,        /**< HAL/OPAL */
-    PFW_LITE_CODE,  /**< PFW-lite */
-    OCC_CODE,       /**< OCC Code Image */
-    KVM_PART_INFO,  /**< KVM Partition Information */
-    CODE_UPDATE,    /**< Code Update Overhead */
+    HB_DATA,        /**< Hostboot Data */
+    DIMM_JEDEC_VPD, /**< DIMM JEDEC VPD */
+    MODULE_VPD,     /**< Module VPD */
     NUM_SECTIONS,   /**< Number of defined sections */
 
+    //Not currently used
+//    GLOBAL_DATA,    /**< Global Data */
+//    SBE_IPL,        /**< Self-Boot Engine IPL image */
+//    HB_BASE_CODE,   /**< Hostboot Base Image */
+//    PAYLOAD,        /**< HAL/OPAL */
+//    HB_RUNTIME,     /**< Hostboot Runtime Image */
+//    HB_ERRLOGS,     /**< Hostboot Error log Repository */
+
     FIRST_SECTION = TOC,  /**< First section (for looping) */
-    LAST_SECTION = CODE_UPDATE,  /**< Last section (for looping) */
+    LAST_SECTION = MODULE_VPD,  /**< Last section (for looping) */
     INVALID_SECTION = NUM_SECTIONS,  /**< Used for error cases, initialization */
 };
 

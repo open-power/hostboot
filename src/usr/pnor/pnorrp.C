@@ -48,19 +48,20 @@ TRAC_INIT(&g_trac_pnor, "PNOR", 4096); //4K
  */
 const char* cv_EYECATCHER[] = {  //@todo - convert there to uint64_t
     "TOC",    /**< PNOR::TOC           : Table of Contents */
-    "GLOBAL", /**< PNOR::GLOBAL_DATA   : Global Data */
-    "SBE",    /**< PNOR::SBE_IPL       : Self-Boot Enginer IPL image */
-    "HBB",    /**< PNOR::HB_BASE_CODE  : Hostboot Base Image */
-    "HBD",    /**< PNOR::HB_DATA       : Hostboot Data */
-    "XXX",    /**< PNOR::HB_ERRLOGS    : Hostboot Error log Repository */
     "HBI",    /**< PNOR::HB_EXT_CODE   : Hostboot Extended Image */
-    "HBR",    /**< PNOR::HB_RUNTIME    : Hostboot Runtime Image */
-    "OPAL",   /**< PNOR::PAYLOAD       : HAL/OPAL */
-    "PFWL",   /**< PNOR::PFW_LITE_CODE : PFW-lite */
-    "OCC",    /**< PNOR::OCC_CODE      : OCC Code Image */
-    "PART",   /**< PNOR::KVM_PART_INFO : KVM Partition Information */
-    "XXX",    /**< PNOR::CODE_UPDATE   : Code Update Overhead */
-    "XXX",    /**< NUM_SECTIONS       : Used as invalid entry */
+    "HBD",    /**< PNOR::HB_DATA       : Hostboot Data */
+    "DJVPD",  /**< PNOR::DIMM_JEDEC_VPD: Dimm JEDEC VPD */ 
+    "MVPD",   /**< PNOR::MODULE_VPD    : Module VPD */ 
+
+    //Not currently used
+//    "GLOBAL", /**< PNOR::GLOBAL_DATA   : Global Data */
+//    "SBE",    /**< PNOR::SBE_IPL       : Self-Boot Enginer IPL image */
+//    "HBB",    /**< PNOR::HB_BASE_CODE  : Hostboot Base Image */
+//    "XXX",    /**< PNOR::HB_ERRLOGS    : Hostboot Error log Repository */
+//    "HBR",    /**< PNOR::HB_RUNTIME    : Hostboot Runtime Image */
+//    "PART",   /**< PNOR::KVM_PART_INFO : KVM Partition Information */
+//    "XXX",    /**< PNOR::CODE_UPDATE   : Code Update Overhead */
+//    "XXX",    /**< NUM_SECTIONS       : Used as invalid entry */
 };
 
 
@@ -344,30 +345,35 @@ errlHndl_t PnorRP::readTOC()
     // TOC starts at offset zero
 
     // put some random sizes in here
-    iv_TOC[PNOR::SIDE_A][PNOR::TOC].size = 8 + 8 + PNOR::NUM_SECTIONS*sizeof(TOCEntry_t);
-    iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].size = 1024*KILOBYTE; //1MB
-    iv_TOC[PNOR::SIDE_A][PNOR::GLOBAL_DATA].size = PAGESIZE; //4K
-    iv_TOC[PNOR::SIDE_A][PNOR::HB_DATA].size = 512*KILOBYTE; //512K
+    //sizes and offsets taken from pnorLayout.xml
+    iv_TOC[PNOR::SIDE_A][PNOR::TOC].size = 0x1000;
+    iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].size = 0x200000; //1MB
+    iv_TOC[PNOR::SIDE_A][PNOR::HB_DATA].size = 0x80000; //512K
+    iv_TOC[PNOR::SIDE_A][PNOR::MODULE_VPD].size = 0x80000; //512K
+    iv_TOC[PNOR::SIDE_A][PNOR::DIMM_JEDEC_VPD].size = 0x40000; //256K
 
-    // fake PNOR will look like this:  TOC::HB_EXT_CODE:GLOBAL_DATA:HB_DATA
+    // fake PNOR will look like this:  TOC::HB_EXT_CODE:HB_DATA:MODULE_VPD:DIMM_JEDEC_VPD
     // virtual addresses
     iv_TOC[PNOR::SIDE_A][PNOR::TOC].virtAddr = BASE_VADDR + 0;
-    iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].virtAddr = iv_TOC[PNOR::SIDE_A][PNOR::TOC].virtAddr + iv_TOC[PNOR::SIDE_A][PNOR::TOC].size;
-    iv_TOC[PNOR::SIDE_A][PNOR::GLOBAL_DATA].virtAddr = iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].virtAddr + iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].size;
-    iv_TOC[PNOR::SIDE_A][PNOR::HB_DATA].virtAddr = iv_TOC[PNOR::SIDE_A][PNOR::GLOBAL_DATA].virtAddr + iv_TOC[PNOR::SIDE_A][PNOR::GLOBAL_DATA].size;
-    // flash
+    iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].virtAddr = BASE_VADDR + 0x1000;
+    iv_TOC[PNOR::SIDE_A][PNOR::HB_DATA].virtAddr = BASE_VADDR + 0x201000;
+    iv_TOC[PNOR::SIDE_A][PNOR::MODULE_VPD].virtAddr = BASE_VADDR + 0x281000;
+    iv_TOC[PNOR::SIDE_A][PNOR::DIMM_JEDEC_VPD].virtAddr = BASE_VADDR + 0x301000;
+    // flash 
     iv_TOC[PNOR::SIDE_A][PNOR::TOC].flashAddr = 0;
-    iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].flashAddr = iv_TOC[PNOR::SIDE_A][PNOR::TOC].flashAddr + iv_TOC[PNOR::SIDE_A][PNOR::TOC].size;
-    iv_TOC[PNOR::SIDE_A][PNOR::GLOBAL_DATA].flashAddr = iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].flashAddr + iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].size;
-    iv_TOC[PNOR::SIDE_A][PNOR::HB_DATA].flashAddr = iv_TOC[PNOR::SIDE_A][PNOR::GLOBAL_DATA].flashAddr + iv_TOC[PNOR::SIDE_A][PNOR::GLOBAL_DATA].size;
+    iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].flashAddr = 0x1000;
+    iv_TOC[PNOR::SIDE_A][PNOR::HB_DATA].flashAddr = 0x201000;
+    iv_TOC[PNOR::SIDE_A][PNOR::MODULE_VPD].flashAddr = 0x281000;
+    iv_TOC[PNOR::SIDE_A][PNOR::DIMM_JEDEC_VPD].flashAddr = 0x301000;
 
     //@todo - end fake data
 
     //keep these traces here until PNOR is rock-solid
     TRACFCOMP(g_trac_pnor, "TOC:    size=0x%.8X  flash=0x%.8X  virt=0x%.16X", iv_TOC[PNOR::SIDE_A][PNOR::TOC].size, iv_TOC[PNOR::SIDE_A][PNOR::TOC].flashAddr, iv_TOC[PNOR::SIDE_A][PNOR::TOC].virtAddr );
     TRACFCOMP(g_trac_pnor, "EXT:    size=0x%.8X  flash=0x%.8X  virt=0x%.16X", iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].size, iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].flashAddr, iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].virtAddr );
-    TRACFCOMP(g_trac_pnor, "GLOBAL: size=0x%.8X  flash=0x%.8X  virt=0x%.16X", iv_TOC[PNOR::SIDE_A][PNOR::GLOBAL_DATA].size, iv_TOC[PNOR::SIDE_A][PNOR::GLOBAL_DATA].flashAddr, iv_TOC[PNOR::SIDE_A][PNOR::GLOBAL_DATA].virtAddr );
     TRACFCOMP(g_trac_pnor, "DATA:   size=0x%.8X  flash=0x%.8X  virt=0x%.16X", iv_TOC[PNOR::SIDE_A][PNOR::HB_DATA].size, iv_TOC[PNOR::SIDE_A][PNOR::HB_DATA].flashAddr, iv_TOC[PNOR::SIDE_A][PNOR::HB_DATA].virtAddr );
+    TRACFCOMP(g_trac_pnor, "MVPD: size=0x%.8X  flash=0x%.8X  virt=0x%.16X", iv_TOC[PNOR::SIDE_A][PNOR::MODULE_VPD].size, iv_TOC[PNOR::SIDE_A][PNOR::MODULE_VPD].flashAddr, iv_TOC[PNOR::SIDE_A][PNOR::MODULE_VPD].virtAddr );
+    TRACFCOMP(g_trac_pnor, "DJVPD: size=0x%.8X  flash=0x%.8X  virt=0x%.16X", iv_TOC[PNOR::SIDE_A][PNOR::DIMM_JEDEC_VPD].size, iv_TOC[PNOR::SIDE_A][PNOR::DIMM_JEDEC_VPD].flashAddr, iv_TOC[PNOR::SIDE_A][PNOR::DIMM_JEDEC_VPD].virtAddr );
 
     //@todo - load flash layout (how many chips)
     //@todo - read TOC on each chip/bank/whatever

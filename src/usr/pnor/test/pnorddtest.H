@@ -40,7 +40,7 @@
 #include <list>
 #include <targeting/util.H>
 
-#define BASE_SCRATCH_SPACE (2*1024*1024+1024*512)  //2.5MB offset in fake PNOR
+#define BASE_SCRATCH_SPACE (3*1024*1024+1024*512)  //3.5MB offset in fake PNOR
 
 extern trace_desc_t* g_trac_pnor;
 
@@ -58,7 +58,7 @@ class PnorDdTest : public CxxTest::TestSuite
     /**
      * @brief PNOR DD readWriteTest
      *        Write some data to PNOR and read it back again
-     *        Using fakePNOR scratch space (2.5 - 3 MB)
+     *        Using fakePNOR scratch space (3.5 - 4 MB)
      */
     void test_readwrite(void)
     {

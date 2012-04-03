@@ -333,7 +333,7 @@ ${IMGDIR}/hbotStringFile : ${IMAGES}
 
 code_pass: ${OBJECTS} ${SUBDIRS} ${LIBRARIES} ${EXTRA_LIDS_} ${EXTRA_PARTS}
 ifdef IMAGES
-	${MAKE} ${IMAGES} ${IMAGE_EXTRAS}
+	${MAKE} ${IMAGES} ${IMAGE_EXTRAS} ${IMAGE_EXTRA_TARGETS}
 endif
 
 gen_pass:

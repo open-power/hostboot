@@ -33,9 +33,6 @@
 run-python-file simics-debug-framework.py
 run-python-file hb-simdebug.py
 
-#Load extended image and pnor.toc into phys_mem
-#This will be merged into once the proper tools are written.
-phys_mem.load-file ../img/hbicore_extended.bin 0x500690
-phys_mem.load-file ../img/pnor.toc 0x500000
-phys_mem.load-file ../img/targeting.bin 0x601690
+#Load PNOR image into phys_mem
+phys_mem.load-file ../img/simics.pnor 0x400000
 
