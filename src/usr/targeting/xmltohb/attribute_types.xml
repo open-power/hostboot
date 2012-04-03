@@ -3238,6 +3238,25 @@
     </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+    <id>HUID</id>
+    <description>
+        Hardware Unit ID
+        SSSSNNNNTTTTTTTTiiiiiiiiiiiiiiii
+        S=System
+        N=Node Number
+        T=Target Type (matches TYPE attribute)
+        i=Instance/Sequence number of target, relative to node
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+        <default>0xFFFFFFFF</default>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+
 <!-- Begin attributes (4) to test string support -->
 
 <attribute>

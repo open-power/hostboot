@@ -252,6 +252,7 @@ for my $i ( 0 .. $#Targets )
 }
 
 # Finally, generate the xml file.
+print "<!-- Source path = $mrwdir -->\n";
 
 print "<attributes>\n";
 
@@ -483,6 +484,7 @@ sub generate_system_node
 <targetInstance>
     <id>sys${sys}node${node}</id>
     <type>enc-node-power8</type>
+    <attribute><id>HUID</id><default>0x00020000</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-$sys/node-$node</default>
@@ -497,12 +499,14 @@ sub generate_system_node
 
 sub generate_master_proc
 {
+    my $uidstr = sprintf("0x%02X07%04X",${node},${Mproc}+${node}*8);
     print "
 <!-- " . SYSTEM . " n${node}p${Mproc} processor chip -->
 
 <targetInstance>
     <id>sys${sys}node${node}proc${Mproc}</id>
     <type>chip-processor-murano</type>
+    <attribute><id>HUID</id><default>${uidstr}</default></attribute>
     <attribute><id>POSITION</id><default>${Mproc}</default></attribute>
     <attribute><id>SCOM_SWITCHES</id>
         <default>
@@ -542,12 +546,14 @@ sub generate_master_proc
 sub generate_slave_proc
 {
     my ($proc, $fsi) = @_;
+    my $uidstr = sprintf("0x%02X07%04X",${node},$proc+${node}*8);
     print "
 <!-- " . SYSTEM . " n${node}p$proc processor chip -->
 
 <targetInstance>
     <id>sys${sys}node${node}proc$proc</id>
     <type>chip-processor-murano</type>
+    <attribute><id>HUID</id><default>${uidstr}</default></attribute>
     <attribute><id>POSITION</id><default>$proc</default></attribute>
     <attribute><id>SCOM_SWITCHES</id>
         <default>
@@ -608,11 +614,13 @@ sub generate_slave_proc
 sub generate_ex
 {
     my ($proc, $ex) = @_;
+    my $uidstr = sprintf("0x%02X0A%04X",${node},$ex+$proc*16+${node}*8*16);
     print "
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}ex$ex</id>
     <type>unit-ex-murano</type>
-        <attribute>
+    <attribute><id>HUID</id><default>${uidstr}</default></attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-$sys/node-$node/proc-$proc/ex-$ex</default>
     </attribute>
@@ -631,11 +639,13 @@ sub generate_ex
 sub generate_ex_core
 {
     my ($proc, $ex) = @_;
+    my $uidstr = sprintf("0x%02X0B%04X",${node},$ex+$proc*16+${node}*8*16);
     print "
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}ex${ex}core0</id>
     <type>unit-core-murano</type>
-        <attribute>
+    <attribute><id>HUID</id><default>${uidstr}</default></attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-$sys/node-$node/proc-$proc/ex-$ex/core-0</default>
     </attribute>
@@ -654,11 +664,13 @@ sub generate_ex_core
 sub generate_mcs
 {
     my ($proc, $mcs) = @_;
+    my $uidstr = sprintf("0x%02X0F%04X",${node},$mcs+$proc*8+${node}*8*8);
     print "
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}mcs$mcs</id>
     <type>unit-mcs-murano</type>
-        <attribute>
+    <attribute><id>HUID</id><default>${uidstr}</default></attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-$sys/node-$node/proc-$proc/mcs-$mcs</default>
     </attribute>
@@ -677,12 +689,14 @@ sub generate_mcs
 sub generate_pervasive_bus
 {
     my $proc = shift;
+    my $uidstr = sprintf("0x%02X13%04X",${node},$proc+${node}*8);
     print "
 <!-- " . SYSTEM . " n${node}p$proc pervasive unit -->
 
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}pervasive0</id>
     <type>unit-pervasive-murano</type>
+    <attribute><id>HUID</id><default>${uidstr}</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-$sys/node-$node/proc-$proc/pervasive-0</default>
@@ -698,12 +712,14 @@ sub generate_pervasive_bus
 sub generate_powerbus
 {
     my $proc = shift;
+    my $uidstr = sprintf("0x%02X14%04X",${node},$proc+${node}*8);
     print "
 <!-- " . SYSTEM . " n${node}p$proc powerbus unit -->
 
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}powerbus0</id>
     <type>unit-powerbus-murano</type>
+    <attribute><id>HUID</id><default>${uidstr}</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-$sys/node-$node/proc-$proc/powerbus-0</default>
@@ -730,10 +746,12 @@ sub generate_pcies
 sub generate_a_pcie
 {
     my ($proc, $phb) = @_;
+    my $uidstr = sprintf("0x%02X17%04X",${node},$phb+$proc*3+${node}*8*3);
     print "
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}pci${phb}</id>
     <type>unit-pci-murano</type>
+    <attribute><id>HUID</id><default>${uidstr}</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-$sys/node-$node/proc-$proc/pci-$phb</default>
@@ -757,13 +775,19 @@ sub generate_ax_buses
     my $proc_name = "n${node}p${proc}";
     print "\n<!-- " . SYSTEM . " $proc_name ${type}BUS units -->\n";
     my $maxbus = ($type eq "A") ? 2 : 3;
+    my $typenum = ($type eq "A") ? 0x16 : 0x15;
     $type = lc( $type );
     for my $i ( 0 .. $maxbus )
     {
+	my $uidstr = sprintf( "0x%02X%02X%04X",
+			     ${node},
+			       $typenum,
+			       $i+$proc*($maxbus+1)+${node}*8*($maxbus+1));
         print "
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}${type}bus$i</id>
     <type>unit-${type}bus-murano</type>
+    <attribute><id>HUID</id><default>${uidstr}</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-$sys/node-$node/proc-$proc/${type}bus-$i</default>
@@ -788,12 +812,15 @@ sub generate_centaur
     $proc =~ s/.*:p(.*):.*/$1/g;
     $mcs =~ s/.*:.*:mcs(.*)/$1/g;
 
+    my $uidstr = sprintf("0x%02X06%04X",${node},$mcs+$proc*8+${node}*8*8);
+
     print "
 <!-- " . SYSTEM . " Centaur n${node}p${ctaur} : start -->
 
 <targetInstance>
     <id>sys${sys}node${node}membuf${ctaur}</id>
     <type>chip-membuf-centaur</type>
+    <attribute><id>HUID</id><default>${uidstr}</default></attribute>
     <attribute><id>POSITION</id><default>$ctaur</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -828,12 +855,14 @@ sub generate_centaur
 </targetInstance>
 ";
 
+    $uidstr = sprintf("0x%02X10%04X",${node},$mcs+$proc*8+${node}*8*8);
     print "
 <!-- " . SYSTEM . " Centaur MBS affiliated with membuf$ctaur -->
 
 <targetInstance>
     <id>sys${sys}node${node}membuf${ctaur}mbs0</id>
     <type>unit-mbs-centaur</type>
+    <attribute><id>HUID</id><default>${uidstr}</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-$sys/node-$node/membuf-$ctaur/mbs-0</default>
@@ -859,10 +888,13 @@ sub generate_mba
                      " Centaur MBAs affiliated with membuf$ctaur -->\n";
     }
 
+    my $uidstr = sprintf("0x%02X11%04X",${node},$mba+$mcs*2+$proc*8*2+${node}*8*8*2);
+
     print "
 <targetInstance>
     <id>sys${sys}node${node}membuf${ctaur}mbs0mba$mba</id>
     <type>unit-mba-centaur</type>
+    <attribute><id>HUID</id><default>${uidstr}</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-$sys/node-$node/membuf-$ctaur/mbs-0/mba-$mba</default>
@@ -894,11 +926,13 @@ sub generate_dimm
     #$x = sprintf ("%d", $x);
     #$y = sprintf ("%d", $y);
     #$z = sprintf ("%d", $z);
+    my $uidstr = sprintf("0x%02X03%04X",${node},$dimm+${node}*512);
 
     print "
 <targetInstance>
     <id>sys${sys}node${node}dimm$dimm</id>
     <type>lcard-dimm-cdimm</type>
+    <attribute><id>HUID</id><default>${uidstr}</default></attribute>
     <attribute>
         <id>POSITION</id>
         <default>$dimm</default>
