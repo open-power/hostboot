@@ -87,4 +87,17 @@
     <valueType>uint8</valueType>
     <platInit/>
   </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_CHIP_HAS_SBE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP,TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>
+        If true, the chip has an SBE and the associated registers
+        Provided by the Machine Readable Workbook.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>false = 0, true = 1</enum>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
 </attributes>

@@ -3091,6 +3091,22 @@
 </attribute>
 
 <attribute>
+    <id>CHIP_HAS_SBE</id>
+    <description>
+        Chip attribute.
+        If true, the chip has an SBE and the associated registers.
+        Provided by the Machine Readable Workbook.
+    </description>
+    <simpleType><uint8_t></uint8_t></simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_CHIP_HAS_SBE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
     <id>FREQ_PROC_REFCLOCK</id>
     <description>
         System attribute.

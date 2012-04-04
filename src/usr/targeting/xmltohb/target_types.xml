@@ -170,6 +170,11 @@
     </attribute>
     <attribute><id>FABRIC_NODE_ID</id></attribute>
     <attribute><id>FABRIC_CHIP_ID</id></attribute>
+    <attribute>
+        <!-- Processor chips have an SBE -->
+        <id>CHIP_HAS_SBE</id>
+        <default>1</default>
+    </attribute>
     <!-- TODO. MVPD_FREQ_CORE_NOMINAL to be deleted when MVPD available -->
     <attribute><id>MVPD_FREQ_CORE_NOMINAL</id></attribute>
 </targetType>
@@ -844,7 +849,11 @@
         <id>FSI_GP_REG_SCOM_ACCESS</id> 
         <default>0</default>
     </attribute>
-
+    <attribute>
+        <!-- Centaur memory buffer chips do not have an SBE -->
+        <id>CHIP_HAS_SBE</id>
+        <default>0</default>
+    </attribute>
 </targetType>
 
 <!-- Centaur MBS -->
