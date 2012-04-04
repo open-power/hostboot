@@ -340,7 +340,6 @@ namespace Util
                     }
                     else
                     {
-                        reinterpret_cast<_Node*>(n)->data_T().second = x.second;
                         return make_pair(iterator(_TreeItr(&iv_tree, n)),
                                                   true);
                     }

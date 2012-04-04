@@ -85,6 +85,12 @@ class STLTest : public CxxTest::TestSuite
             mymap[v5] = v5;
             mymap[v3] = v3;
 
+            if (v5.value() != mymap[v5].value())   // map::operator[] value
+            {
+                TS_FAIL("map::operator[] returned wrong value %d",
+                        mymap[v5].value());
+            }
+
             // test map::insert(v), map::insert(h,v), lower_bound()
             mymap.insert(std::map<V,V>::value_type(v2,v2));  //map::insert(v);
 
