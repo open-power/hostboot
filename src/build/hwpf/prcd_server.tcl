@@ -66,7 +66,7 @@ proc AquireData { sock } {
     global driver
 
     if { [eof $sock] || [catch {gets $sock line}] } {
-        puts "Client closed unexpectedly"
+        puts "ERROR: Client closed unexpectedly"
         puts $log "$sock: Client closed unexpectedly"
         CloseOut $sock
     } else {
@@ -96,19 +96,16 @@ proc AquireData { sock } {
             puts $log "$sock: $sbname($sock)"
 
             # Make sure sandbox dir exists
-            if {[file exists $sb_dir]} {
-                file mkdir "$sb_dir/$sbname($sock)"
-
+            if {[catch {file mkdir "$sb_dir/$sbname($sock)"} res ] } {
+                puts $sock "ERROR: Could not extract code\n"
+                puts $log "$sock: Could not extract code\n)"
+                CloseOut $sock
+            } else {
                 set git_sh($sock) [open "|bash" r+]
                 fconfigure $git_sh($sock) -buffering none
                 fileevent $git_sh($sock) readable [list IfResult $git_sh($sock) $sock $sbname($sock)]
 
                 ExtractSandbox $sock $git_sh($sock)
-
-            } else {
-                puts $sock "Could not extract code\n"
-                puts $log "$sock: Could not extract code\n)"
-                CloseOut $sock
             }
         } elseif {[regexp {:HWP_FILE +(.+) +(.+)} $line a b c] } {
 
@@ -119,7 +116,7 @@ proc AquireData { sock } {
             flush $log
 
             if { ![info exists sbname($sock)] } {
-                puts $sock "No sandbox found"
+                puts $sock "ERROR: No sandbox found"
                 puts $log "$sock: No sandbox found"
                 CloseOut $sock
                 return
@@ -146,13 +143,13 @@ proc AquireData { sock } {
             # error if filen is not just 1 file
             set filesfound [regexp -all {[^\t]+} $filen ]
             if { $filesfound == 0 } {
-                puts $sock "error: Invalid Input File - $b - file not found in sandbox"
+                puts $sock "ERROR: Invalid Input File - $b - file not found in sandbox"
                 puts $log "$sock: Invalid Input File - $b - file not found in sandbox"
                 CloseOut $sock
                 return
             }
             if { $filesfound > 1 } {
-                puts $sock "error: Invalid Input File - $b - filename NOT unique in sandbox"
+                puts $sock "ERROR: Invalid Input File - $b - filename NOT unique in sandbox"
                 puts $log "$sock: Invalid Input File - $b - filename NOT unique in sandbox"
                 CloseOut $sock
                 return
@@ -160,7 +157,7 @@ proc AquireData { sock } {
 
             # Open with create/overwrite option
             if {[catch {set hwpfile($sock) [open "$filen" w+] } res ] } {
-                puts $sock "Server can't open $filen"
+                puts $sock "ERROR: Server can't open $filen"
                 puts $log "$sock: Server can't open $filen"
                 CloseOut $sock
             } else {
@@ -192,7 +189,7 @@ proc AquireData { sock } {
             flush $log
 
             if { ![info exists sbname($sock)] } {
-                puts $sock "No sandbox found"
+                puts $sock "ERROR: No sandbox found"
                 puts $log "$sock: No sandbox found"
                 CloseOut $sock
                 return
@@ -211,7 +208,7 @@ proc AquireData { sock } {
             #puts $log "$sock: writing filen: \"$filen\""; flush $log
             # Open with create/overwrite option
             if {[catch {set hwpfile($sock) [open "$filen" w+] } res ] } {
-                puts $sock "Server can't open $filen"
+                puts $sock "ERROR: Server can't open $filen"
                 puts $log "$sock: Server can't open $filen"
                 CloseOut $sock
             } else {
@@ -591,7 +588,7 @@ proc SendObjFiles { sock obj_dir } {
     # Send the image files
     if {[catch {set hbi_files [glob -dir $obj_dir simics*.bin vbu*bin hbicore*.bin *.syms hbotStringFile]} res]} {
         puts $sock "ERROR: Needed image files not found in $obj_dir"
-        puts $log "$sock: ERROR: Needed image files not found in $obj_dir"
+        puts $log "$sock: Needed image files not found in $obj_dir"
     } else {
         SendFiles $sock $hbi_files
     }

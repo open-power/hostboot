@@ -505,6 +505,9 @@ if {[llength $cmds] > 0 } {
                     fcopy $sockid $fp -size $c
                     close $fp
                     fconfigure $sockid -translation auto
+                } elseif {[regexp {.*ERROR:.*} $line ->] } {
+                    puts stderr "Error in server script - $line"
+                    set error 1
                 } elseif {[regexp {.*error:.*} $line ->] } {
                     puts stderr "Error in compile - $line"
                     set error 1
