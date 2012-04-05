@@ -28,6 +28,7 @@ import cli
 import binascii
 import datetime
 import commands     ## getoutput, getstatusoutput
+import random
 
 #------------------------------------------------------------------------------
 # Function to dump L3
@@ -85,8 +86,10 @@ def findAddr( symsFile, symName ):
 
 def hb_istep_usage():
     print   "hb-istep usage:"
-    print   "   istepmode   -   enable IStep Mode.  Must be executed before simics run command"
-    print   "   normalmode  -   disable IStep Mode. "
+    ##print   "   istepmode   -   enable IStep Mode and the SPless user console."
+    ##print   "   normalmode     -   enable IStep Mode and the FSP interface. "
+    print   "   splessmode  -   enable IStep Mode and the SPless user console."
+    print   "   fspmode     -   enable IStep Mode and the FSP interface. "
     print   "   list        -   list all named isteps"
     print   "   sN          -   execute IStep N"
     print   "   sN..M       -   execute IStep N through M"
@@ -97,11 +100,13 @@ def hb_istep_usage():
     
 ## declare GLOBAL g_SeqNum var, & a routine to manipulate it.  
 ##  TODO:  make this into a class, etc. to do it The Python Way.   
-g_SeqNum  = 0    
+##g_SeqNum  = 0
+g_SeqNum    =   random.randint(0, 63)  
+print   "g_SeqNum   =   %d"%(g_SeqNum)  
 def bump_g_SeqNum() :
     global  g_SeqNum
     g_SeqNum    = ( (g_SeqNum +1) & 0x3f) 
-    return  None
+    return  g_SeqNum
 
 ##  clock a certain amount of CPU cycles so the IStep will run (this will be 
 ##  different for each simulation environment) and then return.
@@ -186,17 +191,23 @@ def getSyncStatus( ) :
     while True :
     
         ##  advance HostBoot code by a certain # of cycles, then check the 
-        ##  sequence number to see if it has changed.  rinse and repeat.
+        ##  running bit and sequence number to see if they have changed.  
+        ##  IstepDisp will set running bit ASAP and then turn it off when
+        ##  the command is complete. 
         runClocks()
         
         ##  print a dot (with no carriage return) so that the user knows that
         ##  it's still doing something    
-        print "." ,
+        # print "." ,
 
         result = getStatus()
-        seqnum  = ( ( result & 0x3f00000000000000 ) >> 56 )
-        if ( seqnum == g_SeqNum ) :
-            print                   # print a final carriage return
+        
+        runningbit  =   ( ( result & 0x8000000000000000 ) >> 63 )
+        seqnum      =   ( ( result & 0x3f00000000000000 ) >> 56 )
+        
+        if (     ( runningbit == 0 )
+             and ( seqnum == g_SeqNum )  ) :
+            # print                   # print a final carriage return
             return result
         
         if ( count <= 0 ):
@@ -205,7 +216,7 @@ def getSyncStatus( ) :
             return -1
         count -= 1    
         
-##  write to scratch reg 3 to set istep or normal mode, check return status        
+##  write to istepmode reg  to set istep or fsp mode, check return status        
 def setMode( cmd ) :
     global  g_IStep_DEBUG
     global  g_SPLess_IStepMode_Reg
@@ -213,25 +224,24 @@ def setMode( cmd ) :
     ##IStepModeStr    = "cpu0_0_0_3->scratch=0x4057b007_4057b007"
     ##NormalModeStr   = "cpu0_0_0_3->scratch=0x700b7504_700b7504"
     
-    IStepModeStr    = "phys_mem.write 0x%8.8x 0x4057b007_4057b007 8"%(g_SPLess_IStepMode_Reg)
-    NormalModeStr   = "phys_mem.write 0x%8.8x 0x700b7504_700b7504 8"%(g_SPLess_IStepMode_Reg)    
+    SPlessModeStr    = "phys_mem.write 0x%8.8x 0x4057b007_4057b007 8"%(g_SPLess_IStepMode_Reg)
+    FSPModeStr       = "phys_mem.write 0x%8.8x 0x700b7504_700b7504 8"%(g_SPLess_IStepMode_Reg)    
     
     ##  @todo   revisit
     count   =   1000
     
-    if ( cmd == "istep" ) :
-        (result, out)  =   quiet_run_command( IStepModeStr )
-        # print   IStepModeStr
-        # print "set istepmode returned 0x%x"%(result) + " : " + out 
+    if ( cmd == "spless" ) :
+        (result, out)  =   quiet_run_command( SPlessModeStr )
         expected    =   1    
-    elif   ( cmd == "normal" ) :
-        (result, out)  =   quiet_run_command( NormalModeStr )
-        # print "set normalmode returned 0x%x"%(result) + " : " + out 
-        expected    =   0
+    elif   ( cmd == "fsp" ) :
+        (result, out)  =   quiet_run_command( FSPModeStr )
+        expected    =   1
     else :     
         print "invalid setMode command: %s"%(cmd) 
         return  None
- 
+        
+    print "setMode: %s :"%( cmd )
+    
     ##  Loop, advancing clock, and wait for readybit
     while True :
         runClocks()
@@ -285,6 +295,7 @@ def print_istep_list( inList ):
             
 
 def runIStep( istep, substep, inList ):
+    global  g_SeqNum
     
     bump_g_SeqNum()
     
@@ -319,10 +330,10 @@ def runIStep( istep, substep, inList ):
             if ( taskStatus == 11 ) :
                 print "At breakpoint 0x%x"%( istepStatus )
             else :
-                print "Istep %d.%d FAILED to launch, task status is %d"%( taskStatus )
+                print "Istep %d.%d FAILED to launch, task status is %d"%( stsIStep, stsSubstep, taskStatus )
         else:            
             print "Istep %d.%d returned Status: 0x%x"%( stsIStep, stsSubstep, istepStatus ) 
-        print   "-----------------------------------------------------------------"
+        print   "-------------------------------------------------------------- %d"%(g_SeqNum)
         
     return    
    
@@ -429,8 +440,8 @@ def find_in_inList( inList, substepname) :
 ##  ---------------------------------------------------------------------------
 ##  possible commands:
 ##      list
-##      istepmode
-##      normalmode
+##      splessmode
+##      fspmode
 ##      sN
 ##      sN..M
 ##      <substepname1>..<substepname2>
@@ -460,6 +471,7 @@ def istepHB( symsFile, str_arg1 ):
              
     ## start with empty inList.  Put some dummy isteps in istep4 for debug.        
     n   =   25                                      ## size of inlist array
+
     inList  =   [[None]*n for x in xrange(n)]       ## init to nothing
 
     ## bump seqnum
@@ -472,27 +484,31 @@ def istepHB( symsFile, str_arg1 ):
         g_IStep_DEBUG   =   1
         return
     
-    if ( str_arg1 == "istepmode"  ):    ## set IStep Mode in SCOM reg
+    if ( str_arg1 == "istepmode"  ):    
         # print   "Set Istep Mode"
-        setMode( "istep" )
+        print   "istepmode no longer used - use splessmode, or fspmode"
         return
         
-    if ( str_arg1 == "normalmode"  ):    ## set Normal Mode in SCOM reg
-        # print   "Set Normal Mode"
-        setMode( "normal" )
+    if ( str_arg1 == "splessmode"  ):    
+        # print   "Start Istep on SPless console"
+        setMode( "spless" )
         return
         
+    if ( str_arg1 == "fspmode"  ):    
+        # print   "Start Istep on FSP "
+        setMode( "fsp" )
+        return        
         
     ## get readybit to see if we are running in IStep Mode.
     StatusReg  =   getStatus()
     readybit    =   ( ( StatusReg & 0x4000000000000000 ) >> 62 )     
     if ( not readybit ):
         print   "ERROR:  HostBoot Status reg is 0x%16.16x"%( StatusReg )
-        print   "   Ready bit is not on, did you remember to run hb-istep istepmode ??"
+        print   "   Ready bit is not on, did you remember to run hb-istep spless ??"
         print   " "
         hb_istep_usage()
         return None
-       
+        
     if ( str_arg1 == "resume" ):    ## resume from break point
         resume_istep()
         return None
@@ -504,6 +520,7 @@ def istepHB( symsFile, str_arg1 ):
     if ( str_arg1 == "list"  ):         ## dump command list
         print_istep_list( inList )          
         return         
+        
        
     ## check to see if we have an 's' command (string starts with 's' and a number)    
     if ( re.match("^s+[0-9].*", str_arg1 ) ):

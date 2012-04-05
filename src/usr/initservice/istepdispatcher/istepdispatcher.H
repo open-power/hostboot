@@ -43,6 +43,10 @@
 #include    <stdint.h>
 #include    <util/singleton.H>
 
+#include    <sys/msg.h>
+#include    <mbox/mboxif.H>             // mailbox Q
+#include    <mbox/mbox_queues.H>        // HB_ISTEP_MSGQ
+
 #include    <errl/errlentry.H>
 #include    <initservice/taskargs.H>
 #include    <initservice/initsvcreasoncodes.H>
@@ -52,19 +56,32 @@
 
 #include    "splesscommon.H"
 
+#include    "istep_mbox_msgs.H"
+
 
 namespace   INITSERVICE
 {
-
-// using namespace SPLESS;
 
 /******************************************************************************/
 // Globals/Constants
 /******************************************************************************/
 
+
 /******************************************************************************/
 // Typedef/Enumerations
 /******************************************************************************/
+
+/**
+ * @brief   detached task (daemon) to handle communication from
+ *          VPO / Simics user console.
+ *
+ * param[in,out]    -   pointer to any args
+ *
+ * @return  nothing
+ *
+ */
+void spTask( void    *io_pArgs );
+
 
 /******************************************************************************/
 //  Class IStepDispatcher
@@ -100,13 +117,21 @@ public:
 
 
     /**
-     * @brief Handle an istep break point
+     * @brief Handle an istep break point to FSP
+     * @param[in] i_info, @TODO - location/info
+     *
+     * @note blocks until an outside istep cmd to resume is received.
+     */
+    void handleBreakPoint( uint32_t info);
+
+    /**
+     * @brief Handle an istep break point from SPless
      * @param[in] i_info, @TODO - location/info
      * @pre iv_sts contains current istep status + seqnum or
      *      0 if not in step mode
      * @note blocks until an outside istep cmd to resume is recieved.
      */
-    void handleBreakPoint( uint32_t info);
+    void handleSPlessBreakPoint( uint32_t info);
 
 protected:
 
@@ -128,7 +153,6 @@ private:
      */
     IStepDispatcher(const IStepDispatcher& i_right);
     IStepDispatcher& operator=(const IStepDispatcher& i_right);
-
 
     /**
      * @brief   getIStepMode - return value of IStep Mode
@@ -152,32 +176,8 @@ private:
      *
      */
     const TaskInfo *findTaskInfo(
-                                    const uint16_t i_IStep,
-                                    const uint16_t i_SubStep ) const;
-
-    /**
-     * @brief   Command 0: Run the requested IStep/SubStep
-     *
-     * param[in]    i_rcmd  -   ref to a filled in SPLessCmd struct
-     * @post       iv_sts   set to current istep status
-     *
-     * @return  none
-     */
-    void    processSingleIStepCmd( SPLESS::SPLessCmd &i_rcmd);
-
-
-     /**
-      * @brief  singleStepISteps
-      *
-      * Stop and wait for SP to send the next IStep to run.  Run that, then
-      * wait for the next one.
-      * @param[in,out]  -   ref to an errlHndl_t that can be passed back to
-      *                     ExtInitSvc .
-      *
-      * @return none
-      */
-     void   singleStepISteps( errlHndl_t    &io_rtaskRetErrl ) ;
-
+                                    const uint32_t i_IStep,
+                                    const uint32_t i_SubStep ) const;
 
      /**
       * @brief  runAllISteps
@@ -191,7 +191,20 @@ private:
       *
       * @return none
       */
-     void   runAllISteps( errlHndl_t    &io_rtaskRetErrl )  const;
+     void   runAllISteps( errlHndl_t    &io_rtaskRetErrl ) ;
+
+
+     /**
+      * @brief  singleStepISteps
+      *
+      * Go into a polling loop, waiting for Istep commands from
+      * the FSP or SPTask.
+      *
+      * @param[in,out]  -   ref to an errlHndl_t that can be passed back to
+      *                     ExtInitSvc .
+      * @return none
+      */
+     void   singleStepISteps( errlHndl_t    &io_rtaskRetErrl ) ;
 
 
     /**
@@ -222,11 +235,31 @@ private:
                             TaskInfo        &io_nextIStep  ) const;
 
 
+     /**
+      * @brief   Command 0: Run the requested IStep/SubStep
+      *
+      * param[in]   i_IStep     -   IStep number
+      * param[in]   i_Substep   -   Substep number
+      * param[out]  o_rSts      -   lookup status - returns Invalid if the
+      *                             IStep, Substep doesn't exist
+      *
+      * @post       iv_sts   set to current istep status
+      *
+      * @return  errlHndl_t
+      */
+     errlHndl_t  processSingleIStepCmd(
+                                 const  uint32_t    i_IStep,
+                                 const  uint32_t    i_Substep,
+                                 uint32_t           &o_rSts  );
+
+
+
     //  -----   internal vars   -----------------------------
 
     mutex_t             iv_poll_mutex;  //!< protect who's polling istep cmds
     SPLESS::SPLessSts   iv_sts;         //!< Current status of istep mode
-
+    msg_q_t             iv_msgQ;        //!< Message Q to FSP & SPTask.
+    msg_t               *iv_pMsg;       //!< ptr to msg from FSP or user console
 };  //  class IStepDispatcher
 
 

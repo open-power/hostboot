@@ -41,14 +41,19 @@
 #include    <stdio.h>
 #include    <string.h>
 
-//  undefine this before checking in....
+//  $$$$$$$ undefine this before checking in....
 // #define SPLESS_DEBUG    1
 
 #ifdef  SPLESS_DEBUG
-    #include    <kernel/console.H>                 // printk DEBUG
+    #include    <kernel/console.H>          // printk DEBUG
 #endif
 
 #include    <sys/mmio.h>                    //  mmio_scratch_read()
+
+#include    <targeting/attributes.H>        //  ISTEP_MODE attribute
+#include    <targeting/entitypath.H>
+#include    <targeting/target.H>
+#include    <targeting/targetservice.H>
 
 
 // external reference
@@ -76,8 +81,9 @@ namespace   SPLESS
  *          we must have a way to turn the attribute both ON and OFF - we
  *          cannot depend on the FSP to do it since we may not have a FSP.
  */
-const   uint64_t    ISTEP_MODE_ON_SIGNATURE     =   0x4057b0074057b007;
-const   uint64_t    ISTEP_MODE_OFF_SIGNATURE    =   0x700b7504700b7504;
+const   uint64_t    ISTEP_MODE_SPLESS_SIGNATURE     =   0x4057b0074057b007;
+const   uint64_t    ISTEP_MODE_FSP_SIGNATURE        =   0x700b7504700b7504;
+const   uint64_t    RUN_ALL_MODE_SIGNATURE          =   0xBADC0FFEE0DDF00D;
 
 /**
  * @enum
@@ -99,6 +105,9 @@ enum    {
     SPLESS_AT_BREAK_POINT           =   11,     // at breakpoint
     SPLESS_NOT_AT_BREAK_POINT       =   12,     // resume command w/o breakpoint
     SPLESS_SHUTTING_DOWN            =   13,     // shutdown command issued
+    SPLESS_SENDRCV_FAILED           =   14,     // could not send cmd to IstepDisp
+    SPLESS_TASKRC_INVALID_RECV_TYPE =   15,     // received wrong message type
+    SPLESS_TRACE_BUFFERS_CLEARED    =   16,     // trace buffers cleared
 };
 
 /**
@@ -150,6 +159,25 @@ const   uint64_t    SPLESS_SINGLE_STEP_STS_MASK     =   0x00000000ffffffff;
  *  @return nothing
  *
  */
+inline  bool    SPLessAttached( )
+{
+    bool    l_rc  =   false;
+
+    // check for IStep Mode signature(s)
+    if (    g_SPLess_IStepMode_Reg == ISTEP_MODE_SPLESS_SIGNATURE )
+    {
+        l_rc    =   true;
+    }
+
+    return l_rc;
+}
+
+/**
+ * @brief   init ISTEP_MODE attribute
+ *
+ *  @return nothing
+ *
+ */
 inline  void initIStepMode( )
 {
     using namespace TARGETING;
@@ -179,7 +207,9 @@ inline  void initIStepMode( )
                 l_readData );
 
         // check for IStep Mode signature(s)
-        if ( l_readData == ISTEP_MODE_ON_SIGNATURE )
+        if (    ( l_readData == ISTEP_MODE_SPLESS_SIGNATURE )
+             || ( l_readData == ISTEP_MODE_FSP_SIGNATURE )
+           )
         {
             l_pTopLevel->setAttr<ATTR_ISTEP_MODE> (true );
 
@@ -188,9 +218,8 @@ inline  void initIStepMode( )
         }
         else
         {
-            //  make sure it's set to one or the other after istepdispatcher starts.
-            //  This makes it easier for hb-istep to find HostBoot's state.
-            l_readData = ISTEP_MODE_OFF_SIGNATURE;
+            //  If not either of the above, set to run-all
+            l_readData = RUN_ALL_MODE_SIGNATURE;
             // $$ save mmio_scratch_write( MMIO_SCRATCH_IPLSTEP_CONFIG, l_readData );
             l_pTopLevel->setAttr<ATTR_ISTEP_MODE> ( false );
 
@@ -238,44 +267,13 @@ union   SPLessCmd
     struct
     {
         CommandHdr      hdr;
-        uint16_t        reserved1;
+        uint8_t         istep;
+        uint8_t         substep;
         uint32_t        reserved2;
     }   __attribute__((packed));
 
     //  init struct to 0
     SPLessCmd() : val64(0) {};
-} ;
-
-
-/**
- * @union   SPLessSingleIStepCmd
- *
- * Implement Command 0x00,  run Istep/Substep
- *
- * Send IStep and SubStep number(s) to run.
- *
- */
-union   SPLessSingleIStepCmd
-{
-    uint64_t    val64;
-    struct
-    {
-        CommandHdr      hdr;
-        uint8_t         istep;
-        uint8_t         substep;
-        uint32_t        reserved;
-    }   __attribute__((packed));
-
-    SPLessSingleIStepCmd() : val64(0)  {};
-
-
-    SPLessSingleIStepCmd( const SPLessCmd &i_cmd )
-    :   val64(i_cmd.val64)  { };
-
-private:
-    // disable assignment constructor
-    SPLessSingleIStepCmd& operator=(const SPLessSingleIStepCmd& i_right);
-
 } ;
 
 
@@ -354,7 +352,6 @@ struct  StatusHdr
 
 }   __attribute__((packed));
 
-union SPLessSingleIStepSts;
 
 /**
  * @union   SPLessSts
@@ -366,45 +363,14 @@ union   SPLessSts  {
     uint64_t    val64;
     struct      {
         StatusHdr       hdr;
-        uint16_t        reserved1;
-        uint32_t        reserved2;
-    }   __attribute__((packed));
-
-    //  init struct to 0
-    SPLessSts()    : val64(0)  {};
-    SPLessSts & operator=(const SPLessSingleIStepSts & i_right);
-}   ;
-
-
-/**
- * @union   SPLessSts0x00
- *
- *  Return  Status from IStep/Substep
- *
- */
-union   SPLessSingleIStepSts  {
-    uint64_t    val64;
-    struct      {
-        StatusHdr       hdr;
         uint8_t         istep;
         uint8_t         substep;
         uint32_t        istepStatus;
     }   __attribute__((packed));
 
-    SPLessSingleIStepSts() :   val64(0)    {};
-    SPLessSingleIStepSts(const SPLessSts & i_sts ) :   val64(i_sts.val64) {};
-    SPLessSingleIStepSts & operator=(const SPLessSts & i_right)
-    {
-        this->val64 = i_right.val64;
-        return *this;
-    }
+    //  init struct to 0
+    SPLessSts()    : val64(0)  {};
 }   ;
-
-SPLessSts & SPLessSts::operator=(const SPLessSingleIStepSts & i_right)
-{
-    this->val64 = i_right.val64;
-    return *this;
-}
 
 
 /**

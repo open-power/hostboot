@@ -345,6 +345,7 @@ my $templateCFileSubStep =
 void    call_\@substepname( void *io_pArgs )
 {
     fapi::ReturnCode    l_fapirc;
+    errlHndl_t  l_errl  =   NULL;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, \"call_\@substepname entry\" );
         
@@ -395,7 +396,7 @@ void    call_\@substepname( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, \"call_\@substepname exit\" );
 
-    task_end2( NULL );
+    task_end2( reinterpret_cast<void*>( l_errl ) );
 }
 ";
 #####   end templateCFileSubStep    ################################# 
