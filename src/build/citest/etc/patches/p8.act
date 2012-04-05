@@ -1,0 +1,9 @@
+
+CAUSE_EFFECT {
+  # copy chip ID
+  LABEL=[DEVICE_ID_REG] # EH.TPCHIP.PIB.PCBMS.DEVICE_ID_REG
+  WATCH_READ=[REG(0x000F000F)] # if someone read this
+  # No cause since we always want this behavior
+  EFFECT: TARGET=[REG(0x000F000F)] OP=[EQUALTO,BUF] DATA=[LOGIC(0xFF000009)] # copy over
+}
+

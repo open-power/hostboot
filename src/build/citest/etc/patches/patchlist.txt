@@ -1,0 +1,5 @@
+Add chipid and startclocks_chiplets action
+-RTC: task 40101 will be used to remove the patch
+-CMVC: Defect 831420 was used to check the changes into fips810
+-Files: p8.act , centaur.act
+-Coreq: associated changes in workarounds.presimsetup need to be removed.

@@ -142,7 +142,7 @@ errlHndl_t discoverTargets()
     {
         if (pSys == NULL)
         {
-            // shouldn't happen, but if it does, then we're done - nothing present.
+            // shouldn't happen; if it does, then we're done - nothing present.
             HWAS_ERR("pSys NULL - nothing present");
             break; // break out of the do/while so that we can return
         }

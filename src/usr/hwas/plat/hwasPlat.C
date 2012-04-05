@@ -65,12 +65,8 @@ errlHndl_t platReadIDEC(const TargetHandleList &i_targets)
     {
         TargetHandle_t pTarget = *pTarget_it;
 
-        if (pTarget == pMasterProc)
+        if (pTarget->getAttr<ATTR_CLASS>() == CLASS_CHIP)
         {
-            // we have to handle this special and first. issue is that we can't
-            //  do a deviceRead of an FSI address on 'ourselves'. so, if the
-            //  target is the master proccessor, which is where we are running,
-            //  then we need to do the deviceRead of the SCOM address.
             uint64_t id_ec;
             size_t op_size = sizeof(id_ec);
             errl = DeviceFW::deviceRead(pTarget, &id_ec,
@@ -90,41 +86,6 @@ errlHndl_t platReadIDEC(const TargetHandleList &i_targets)
                                ((id_ec & 0x00000F0000000000ull) >> 32) |
                                ((id_ec & 0x000F000000000000ull) >> 44) |
                                ((id_ec & 0x0000F00000000000ull) >> 44));
-                pTarget->setAttr<ATTR_CHIP_ID>(id);
-                HWAS_DBG( "pTarget %x (%p) id %x ec %x",
-                    target_to_uint64(pTarget), pTarget, id, ec);
-            }
-            else
-            {   // errl was set - this is an error condition.
-                HWAS_ERR( "pTarget %x (%p) %x/%x - failed ID/EC read",
-                    target_to_uint64(pTarget), pTarget,
-                    pTarget->getAttr<ATTR_CLASS>(),
-                    pTarget->getAttr<ATTR_TYPE>());
-
-                // break out so that we can return an error
-                break;
-            }
-        } else if (pTarget->getAttr<ATTR_CLASS>() == CLASS_CHIP)
-        { // CLASS_CHIP only
-            uint32_t id_ec;
-            size_t op_size = sizeof(id_ec);
-            errl = DeviceFW::deviceRead(pTarget, &id_ec,
-                        op_size, DEVICE_FSI_ADDRESS(0x1028));
-
-            if (errl == NULL)
-            {   // no error, so we got a valid ID/EC value back
-                // EC - nibbles 0,2
-                //                        01234567
-                uint8_t ec = (((id_ec & 0xF0000000) >> 24) |
-                              ((id_ec & 0x00F00000) >> 20));
-                pTarget->setAttr<ATTR_EC>(ec);
-
-                // ID - nibbles 1,5,3,4
-                //                         01234567
-                uint32_t id = (((id_ec & 0x0F000000) >> 12) |
-                               ((id_ec & 0x00000F00) >> 0)  |
-                               ((id_ec & 0x000F0000) >> 12) |
-                               ((id_ec & 0x0000F000) >> 12));
                 pTarget->setAttr<ATTR_CHIP_ID>(id);
                 HWAS_DBG( "pTarget %x (%p) id %x ec %x",
                     target_to_uint64(pTarget), pTarget, id, ec);

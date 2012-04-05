@@ -27,6 +27,12 @@
 ##    to setup the sandbox
 ##
 
+# remove this with task 40101
+echo "+++ Copy new centaur.act and p8.act for Chip ID/EC."
+mkdir -p $sb/simu/data/cec-chip/
+cat $BACKING_BUILD/src/simu/data/cec-chip/centaur.act $HOSTBOOTROOT/src/build/citest/etc/patches/centaur.act > $sb/simu/data/cec-chip/centaur.act
+cat $BACKING_BUILD/src/simu/data/cec-chip/p8.act      $HOSTBOOTROOT/src/build/citest/etc/patches/p8.act      > $sb/simu/data/cec-chip/p8.act
+
 echo "+++ Copy desired VENICE config file to sandbox and modify L3 to 8MB."
 mkdir -p $sb/simu/configs
 cp --update $BACKING_BUILD/src/simu/configs/P8_VENICE.config $sb/simu/configs
