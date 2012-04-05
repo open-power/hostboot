@@ -60,13 +60,14 @@ class PnorRpTest : public CxxTest::TestSuite
         struct ExpVals_t {
             uint64_t size;
             uint64_t vaddr;
+            PNOR::SideSelect side;
         };
         const ExpVals_t exp_data[] = {
-            /* TOC */ { 0x1000, 0x80000000 },
-            /* HB_EXT_CODE */ { 0x200000, 0x80001000 },
-            /* HB_DATA */ { 0x80000, 0x80201000 },
-            /* DIMM_JEDEC_VPD */ { 0x40000, 0x80301000 },
-            /* MODULE_VPD */ { 0x80000, 0x80281000 },
+            /* TOC */ { 0x1000, 0x80000000, PNOR::SIDE_A },
+            /* HB_EXT_CODE */ { 0x200000, 0x80001000, PNOR::SIDE_A },
+            /* HB_DATA */ { 0x80000, 0x80201000, PNOR::SIDE_A },
+            /* DIMM_JEDEC_VPD */ { 0x40000, 0x84301000, PNOR::SIDELESS },
+            /* MODULE_VPD */ { 0x80000, 0x84281000, PNOR::SIDELESS },
             /* GLOBAL_DATA  { 0, 0 },*/
             /* SBE_IPL  { 0, 0 },*/
             /* HB_ERRLOGS  { 0, 0 },*/
@@ -84,7 +85,7 @@ class PnorRpTest : public CxxTest::TestSuite
              id = (PNOR::SectionId) (id + 1) )
         {
             total++;
-            errhdl = PNOR::getSectionInfo( id, PNOR::SIDE_A, info );
+            errhdl = PNOR::getSectionInfo( id, exp_data[id].side, info );
             if( errhdl )
             {
                 if( exp_data[id].size != 0 )

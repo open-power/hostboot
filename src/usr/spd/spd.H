@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/spd/spd.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/spd/spd.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #ifndef __SPD_H
 #define __SPD_H
 
@@ -34,6 +35,7 @@
 // Includes
 // ----------------------------------------------
 #include <errl/errlentry.H>
+#include <spd/spdif.H>
 
 namespace SPD
 {
@@ -45,6 +47,9 @@ enum
 {
     MEM_TYPE_ADDR = 0x2,        // DIMM Basic Memory Type address
     MEM_TYPE_ADDR_SZ = 0x1,     // DIMM Basic Memory Type address size
+
+    DIMM_SPD_SECTION_SIZE = 0x200,  // Size each DIMM SPD section
+    DIMM_SPD_MAX_SECTIONS = 512,    // Maximum number of sections
 
     // Basic Memory Type Enumerations
     SPD_DDR3 = 0xB,
@@ -316,6 +321,41 @@ errlHndl_t checkModSpecificKeyword ( KeywordData i_kwdData,
                                      uint64_t i_memType,
                                      TARGETING::Target * i_target );
 
+/**
+ * @brief This function will query the PNOR RP to get the offset of the
+ *      section requested.  It will then set global variables to save this
+ *      value away for later use.  This function only needs to be called once.
+ *
+ * @param[in] i_pnorInfo - Structure of common PNOR information needed to
+ *      query for the sections address.
+ *
+ * @param[in/out] io_cachedAddr - This parameter is a gloval variable in the
+ *      calling code.  It is the address that is obtained from the PNOR
+ *      RP.
+ *
+ * @param[in] i_mutex - The Mutex from the calling code.  It is locked when
+ *      the globals are modified.
+ *
+ * @return errlHndl_t - NULL if successful, otherwise a pointer to the
+ *      Error log.
+*/
+errlHndl_t getPnorAddr ( pnorInformation & i_pnorInfo,
+                         uint64_t &io_cachedAddr,
+                         mutex_t * i_mutex );
+
+/**
+ * @brief This function is used to query the attribute code to get the VPD
+ *      Location value for the target provided.
+ *
+ * @param[out] o_vpdLocation - The value of the VPD Location attribute.
+ *
+ * @param[in] i_target - The target to query.
+ *
+ * @return errlHndl_t - NULL if successful, otherwise a pointer to the
+ *      Error log.
+ */
+errlHndl_t getVpdLocation ( int64_t & o_vpdLocation,
+                            TARGETING::Target * i_target );
 
 }; // end SPD namespace
 

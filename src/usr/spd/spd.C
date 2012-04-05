@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/spd/spd.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/spd/spd.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 /**
  * @file spd.C
  *
@@ -36,6 +37,7 @@
 #include <targeting/common/targetservice.H>
 #include <devicefw/driverif.H>
 #include <vfs/vfs.H>
+#include <pnor/pnorif.H>
 #include <spd/spdreasoncodes.H>
 #include <spd/spdenums.H>
 #include <algorithm>
@@ -46,7 +48,15 @@
 // Globals
 // ----------------------------------------------
 bool g_loadModule = true;
+
+// This mutex is used to lock for writing/updating the global variables.
 mutex_t g_spdMutex = MUTEX_INITIALIZER;
+
+uint64_t g_spdPnorAddr = 0x0;
+
+// By setting to false, allows debug at a later time by allowing to
+// substitute a binary file (dimmspd.dat) into PNOR.
+const bool g_readPNOR = true;
 
 // ----------------------------------------------
 // Trace definitions
@@ -228,7 +238,7 @@ errlHndl_t spdWriteKeywordValue ( uint64_t i_keyword,
 
     do
     {
-        // TODO - This will be implemented with story 4659
+        // TODO - This will be implemented with story 39177
         TRACFCOMP( g_trac_spd,
                    ERR_MRK"SPD writes are not supported yet!" );
 
@@ -271,24 +281,37 @@ errlHndl_t spdFetchData ( uint64_t i_byteAddr,
 
     do
     {
-        // ---------------------------------------------------------------
-        // TODO - For now, we will use a generic name of dimmspd.dat, and
-        // access the file via vfs for all SPD content for ALL DIMMs.
-        //
-        // Unfortunately Fsp will not be able to write into our file
-        // space in PNOR because the files/names will need to be signed.
-        // This means that eventually there will be block of data in PNOR
-        // where each DIMMs, and potential DIMM, information will be at
-        // a given offset.
-        // ---------------------------------------------------------------
-
-        err = spdReadBinaryFile( i_byteAddr,
-                                 i_numBytes,
-                                 o_data );
-
-        if( err )
+        if( g_readPNOR )
         {
-            break;
+            // Setup info needed to read from PNOR
+            pnorInformation info;
+            info.sectionSize = DIMM_SPD_SECTION_SIZE;
+            info.maxSections = DIMM_SPD_MAX_SECTIONS;
+            info.pnorSection = PNOR::DIMM_JEDEC_VPD;
+            info.pnorSide = PNOR::SIDELESS;
+            err = readPNOR( i_byteAddr,
+                            i_numBytes,
+                            o_data,
+                            i_target,
+                            info,
+                            g_spdPnorAddr,
+                            &g_spdMutex );
+
+            if( err )
+            {
+                break;
+            }
+        }
+        else
+        {
+            err = spdReadBinaryFile( i_byteAddr,
+                                     i_numBytes,
+                                     o_data );
+
+            if( err )
+            {
+                break;
+            }
         }
     } while( 0 );
 
@@ -660,8 +683,8 @@ errlHndl_t spdCheckSize ( size_t i_bufferSz,
     if( i_bufferSz < i_expBufferSz )
     {
         TRACFCOMP( g_trac_spd,
-                   ERR_MRK"Buffer Size (%d) for keyword (0x%04x) wasn't greater than "
-                   "or equal to expected size (%d)",
+                   ERR_MRK"Buffer Size (%d) for keyword (0x%04x) wasn't greater "
+                   "than or equal to expected size (%d)",
                    i_bufferSz, i_keyword, i_expBufferSz );
 
         /*@
@@ -679,7 +702,8 @@ errlHndl_t spdCheckSize ( size_t i_bufferSz,
                                        SPD_CHECK_SIZE,
                                        SPD_INSUFFICIENT_BUFFER_SIZE,
                                        i_keyword,
-                                       TWO_UINT32_TO_UINT64( i_bufferSz, i_expBufferSz ) );
+                                       TWO_UINT32_TO_UINT64( i_bufferSz,
+                                                             i_expBufferSz ) );
     }
 
     return err;
@@ -790,6 +814,174 @@ errlHndl_t spdReadBinaryFile ( uint64_t i_byteAddr,
 
     TRACSSCOMP( g_trac_spd,
                 EXIT_MRK"spdReadBinaryFile()" );
+
+    return err;
+}
+
+
+// ------------------------------------------------------------------
+// readPNOR
+// ------------------------------------------------------------------
+errlHndl_t readPNOR ( uint64_t i_byteAddr,
+                      size_t i_numBytes,
+                      void * o_data,
+                      TARGETING::Target * i_target,
+                      pnorInformation & i_pnorInfo,
+                      uint64_t &io_cachedAddr,
+                      mutex_t * i_mutex )
+{
+    errlHndl_t err = NULL;
+    int64_t vpdLocation = 0;
+    uint64_t addr = 0x0;
+    const char * readAddr = NULL;
+
+    TRACSSCOMP( g_trac_spd,
+                ENTER_MRK"readPNOR()" );
+
+    do
+    {
+        // Check if we have the PNOR addr cached.
+        if( 0x0 == io_cachedAddr )
+        {
+            err = getPnorAddr( i_pnorInfo,
+                               io_cachedAddr,
+                               i_mutex );
+
+            if( err )
+            {
+                break;
+            }
+        }
+        addr = io_cachedAddr;
+
+        // Find vpd location of the target
+        err = getVpdLocation( vpdLocation,
+                              i_target );
+
+        if( err )
+        {
+            break;
+        }
+
+        // Offset cached address by vpd location multiplier
+        addr += (vpdLocation * i_pnorInfo.sectionSize);
+
+        // Now offset into that chunk of data by i_byteAddr
+        addr += i_byteAddr;
+
+        TRACUCOMP( g_trac_spd,
+                   INFO_MRK"Address to read: 0x%08x",
+                   addr );
+
+        // Pull the data
+        readAddr = reinterpret_cast<const char*>( addr );
+        memcpy( o_data,
+                readAddr,
+                i_numBytes );
+    } while( 0 );
+
+    TRACSSCOMP( g_trac_spd,
+                EXIT_MRK"readPNOR()" );
+
+    return err;
+}
+
+
+// ------------------------------------------------------------------
+// getPnorAddr
+// ------------------------------------------------------------------
+errlHndl_t getPnorAddr ( pnorInformation & i_pnorInfo,
+                         uint64_t &io_cachedAddr,
+                         mutex_t * i_mutex )
+{
+    errlHndl_t err = NULL;
+    PNOR::SectionInfo_t info;
+
+    TRACSSCOMP( g_trac_spd,
+                ENTER_MRK"getPnorAddr()" );
+
+    do
+    {
+        // Get SPD PNOR section info from PNOR RP
+        err = PNOR::getSectionInfo( i_pnorInfo.pnorSection,
+                                    i_pnorInfo.pnorSide,
+                                    info );
+
+        if( err )
+        {
+            break;
+        }
+
+        // Check the Size
+        uint32_t expectedSize = i_pnorInfo.sectionSize * i_pnorInfo.maxSections;
+        if( expectedSize != info.size )
+        {
+            TRACFCOMP( g_trac_spd,
+                       ERR_MRK"PNOR section actual size (0x%08x) is not "
+                       "equal to expected size (0x%08x)!",
+                       info.size,
+                       expectedSize );
+
+            /*@
+             * @errortype
+             * @reasoncode       SPD_SIZE_MISMATCH
+             * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid         SPD_GET_PNOR_ADDR
+             * @userdata1[0:31]  PNOR RP provided size
+             * @userdata1[32:63] Expected Size
+             * @userdata2[0:31]  PNOR Section enum
+             * @userdata2[32:63] PNOR Side enum
+             * @devdesc
+             */
+            err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                           SPD_GET_PNOR_ADDR,
+                                           SPD_SIZE_MISMATCH,
+                                           TWO_UINT32_TO_UINT64( info.size,
+                                                                 expectedSize ),
+                                           TWO_UINT32_TO_UINT64( i_pnorInfo.pnorSection,
+                                                                 i_pnorInfo.pnorSide) );
+            break;
+        }
+
+        // Set the globals appropriately
+        mutex_lock( i_mutex );
+        io_cachedAddr = info.vaddr;
+        mutex_unlock( i_mutex );
+    } while( 0 );
+
+    TRACSSCOMP( g_trac_spd,
+                EXIT_MRK"getPnorAddr() - addr: 0x%08x",
+                io_cachedAddr );
+
+    return err;
+}
+
+
+// ------------------------------------------------------------------
+// getVpdLocation
+// ------------------------------------------------------------------
+errlHndl_t getVpdLocation ( int64_t & o_vpdLocation,
+                            TARGETING::Target * i_target )
+{
+    errlHndl_t err = NULL;
+
+    TRACSSCOMP( g_trac_spd,
+                ENTER_MRK"getVpdLocation()" );
+
+    // TODO - Story 39133 is complete.  And thus we should be able to use the
+    // VPD_REC_NUM attribute.  But Simics is still in the process of changing
+    // their plugging order.  Thus, there are most likely tweaks that still
+    // need to be done to the VPD preload script, as well as the system
+    // attribute xml files.  Once Simics is done, then we can step back and
+    // see exactly what part(s) need to be modified to accomodate.
+//    o_vpdLocation = i_target->getAttr<TARGETING::ATTR_VPD_REC_NUM>();
+    o_vpdLocation = 0;
+    TRACFCOMP( g_trac_spd,
+               INFO_MRK"Using VPD location: %d",
+               o_vpdLocation );
+
+    TRACSSCOMP( g_trac_spd,
+                EXIT_MRK"getVpdLocation()" );
 
     return err;
 }

@@ -51,6 +51,8 @@ enum
     RECORD_TOC_UNUSED       = 2,
     RT_SKIP_BYTES           = 3,
 
+    MVPD_SECTION_SIZE       = 0x10000,
+    MVPD_MAX_SECTIONS       = 8,
 };
 
 /**

@@ -39,6 +39,7 @@
 #include <targeting/common/targetservice.H>
 #include <devicefw/driverif.H>
 #include <vfs/vfs.H>
+#include <spd/spdif.H>
 #include <mvpd/mvpdreasoncodes.H>
 #include <mvpd/mvpdenums.H>
 
@@ -49,6 +50,12 @@
 // ----------------------------------------------
 bool g_loadModule = true;
 mutex_t g_mvpdMutex = MUTEX_INITIALIZER;
+
+uint64_t g_mvpdPnorAddr = 0x0;
+
+// By setting to false, allows debug at a later time by allowing to
+// substitute a binary file (procmvpd.dat) into PNOR.
+const bool g_readPNOR = true;
 
 // ----------------------------------------------
 // Trace definitions
@@ -222,6 +229,7 @@ errlHndl_t mvpdWrite ( DeviceFW::OperationType i_opType,
 
     do
     {
+        // TODO - This will be implemented with story 39177
         TRACFCOMP( g_trac_mvpd,
                    ERR_MRK"MVPD Writes are not supported yet!" );
 
@@ -727,20 +735,39 @@ errlHndl_t mvpdFetchData ( uint64_t i_byteAddr,
 
     do
     {
-        // --------------------------------------------------------------------
-        // TODO - For now this code will call to read a specific binary file
-        // for every request.  Eventually that will be replaced with a function
-        // that will read from the actual PNOR section that contains MVPD for
-        // each of the processors in the system.
-        // This will be done with Story 35835.
-        // --------------------------------------------------------------------
-        err = mvpdReadBinaryFile( i_byteAddr,
-                                  i_numBytes,
-                                  o_data );
-
-        if( err )
+        if( g_readPNOR )
         {
-            break;
+            // Call a function in the SPD code which does an identical thing,
+            // but with different address offsets.  Saves us having to
+            // duplicate the code between the 2 modules.
+            SPD::pnorInformation info;
+            info.sectionSize = MVPD_SECTION_SIZE;
+            info.maxSections = MVPD_MAX_SECTIONS;
+            info.pnorSection = PNOR::MODULE_VPD;
+            info.pnorSide = PNOR::SIDELESS;
+            err = SPD::readPNOR( i_byteAddr,
+                                 i_numBytes,
+                                 o_data,
+                                 i_target,
+                                 info,
+                                 g_mvpdPnorAddr,
+                                 &g_mvpdMutex );
+
+            if( err )
+            {
+                break;
+            }
+        }
+        else
+        {
+            err = mvpdReadBinaryFile( i_byteAddr,
+                                      i_numBytes,
+                                      o_data );
+
+            if( err )
+            {
+                break;
+            }
         }
     } while( 0 );
 

@@ -54,6 +54,7 @@ enum spdModuleId
     SPD_SPECIAL_CASES                   = 0x06,
     SPD_PRESENCE_DETECT                 = 0x07,
     SPD_CHECK_MODULE_SPECIFIC_KEYWORD   = 0x08,
+    SPD_GET_PNOR_ADDR                   = 0x09,
 };
 
 /**
@@ -78,6 +79,7 @@ enum spdReasonCode
     SPD_MOD_SPECIFIC_MISMATCH_CMM       = SPD_COMP_ID | 0x0b,
     SPD_MOD_SPECIFIC_MISMATCH_LRMM      = SPD_COMP_ID | 0x0c,
     SPD_MOD_SPECIFIC_UNSUPPORTED        = SPD_COMP_ID | 0x0d,
+    SPD_SIZE_MISMATCH                   = SPD_COMP_ID | 0x0e,
 };
 
 };  // end SPD
