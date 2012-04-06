@@ -43,8 +43,6 @@ namespace HWAS
 
 using   namespace   TARGETING;
 
-uint64_t target_to_uint64(const Target* i_target);
-
 //******************************************************************************
 // platReadIDEC function
 //******************************************************************************
@@ -52,12 +50,7 @@ errlHndl_t platReadIDEC(const TargetHandleList &i_targets)
 {
     errlHndl_t errl = NULL;
 
-    // we have to handle the master processor chip special, so figure
-    //  out what it is first
-    Target* pMasterProc = NULL;
-    targetService().masterProcChipTargetHandle(pMasterProc);
-
-    // we got a list of targets - read the ID/EC for eacn
+    // we got a list of targets - read the ID/EC for each
     //  and update the appropriate ATTR_ fields.
     for (TargetHandleList::const_iterator pTarget_it = i_targets.begin();
             pTarget_it != i_targets.end();
@@ -65,48 +58,38 @@ errlHndl_t platReadIDEC(const TargetHandleList &i_targets)
     {
         TargetHandle_t pTarget = *pTarget_it;
 
-        if (pTarget->getAttr<ATTR_CLASS>() == CLASS_CHIP)
-        {
-            uint64_t id_ec;
-            size_t op_size = sizeof(id_ec);
-            errl = DeviceFW::deviceRead(pTarget, &id_ec,
-                       op_size, DEVICE_SCOM_ADDRESS(0x000F000Full));
+        uint64_t id_ec;
+        size_t op_size = sizeof(id_ec);
+        errl = DeviceFW::deviceRead(pTarget, &id_ec,
+                   op_size, DEVICE_SCOM_ADDRESS(0x000F000Full));
 
-            if (errl == NULL)
-            {   // no error, so we got a valid ID/EC value back
-                // EC - nibbles 0,2
-                //                        01234567
-                uint8_t ec = (((id_ec & 0xF000000000000000ull) >> 56) |
-                              ((id_ec & 0x00F0000000000000ull) >> 52));
-                pTarget->setAttr<ATTR_EC>(ec);
+        if (errl == NULL)
+        {   // no error, so we got a valid ID/EC value back
+            // EC - nibbles 0,2
+            //                        01234567
+            uint8_t ec = (((id_ec & 0xF000000000000000ull) >> 56) |
+                          ((id_ec & 0x00F0000000000000ull) >> 52));
+            pTarget->setAttr<ATTR_EC>(ec);
 
-                // ID - nibbles 1,5,3,4
-                //                         01234567
-                uint32_t id = (((id_ec & 0x0F00000000000000ull) >> 44) |
-                               ((id_ec & 0x00000F0000000000ull) >> 32) |
-                               ((id_ec & 0x000F000000000000ull) >> 44) |
-                               ((id_ec & 0x0000F00000000000ull) >> 44));
-                pTarget->setAttr<ATTR_CHIP_ID>(id);
-                HWAS_DBG( "pTarget %x (%p) id %x ec %x",
-                    target_to_uint64(pTarget), pTarget, id, ec);
-            }
-            else
-            {   // errl was set - this is an error condition.
-                HWAS_ERR( "pTarget %x (%p) %x/%x - failed ID/EC read",
-                    target_to_uint64(pTarget), pTarget,
-                    pTarget->getAttr<ATTR_CLASS>(),
-                    pTarget->getAttr<ATTR_TYPE>());
-
-                // break out so that we can return an error
-                break;
-            }
+            // ID - nibbles 1,5,3,4
+            //                         01234567
+            uint32_t id = (((id_ec & 0x0F00000000000000ull) >> 44) |
+                           ((id_ec & 0x00000F0000000000ull) >> 32) |
+                           ((id_ec & 0x000F000000000000ull) >> 44) |
+                           ((id_ec & 0x0000F00000000000ull) >> 44));
+            pTarget->setAttr<ATTR_CHIP_ID>(id);
+            HWAS_DBG( "pTarget %x (%p) id %x ec %x",
+                pTarget->getAttr<ATTR_HUID>(), pTarget, id, ec);
         }
         else
-        {   // skipping - no ID/EC on this target
-            HWAS_DBG( "pTarget %x (%p) %x/%x - skipping",
-                target_to_uint64(pTarget), pTarget,
+        {   // errl was set - this is an error condition.
+            HWAS_ERR( "pTarget %x (%p) %x/%x - failed ID/EC read",
+                pTarget->getAttr<ATTR_HUID>(), pTarget,
                 pTarget->getAttr<ATTR_CLASS>(),
                 pTarget->getAttr<ATTR_TYPE>());
+
+            // break out so that we can return an error
+            break;
         }
     } // for pTarget_it
 
@@ -138,8 +121,8 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
         {   // no error, so we got a valid present value back
             if (present == true)
             {
-                HWAS_DBG( "io_targets %x (%p) %x/%x - detected present",
-                    target_to_uint64(pTarget), pTarget,
+                HWAS_DBG( "pTarget %x (%p) %x/%x - detected present",
+                    pTarget->getAttr<ATTR_HUID>(), pTarget,
                     pTarget->getAttr<ATTR_CLASS>(),
                     pTarget->getAttr<ATTR_TYPE>());
 
@@ -148,19 +131,19 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
             }
             else
             {   // chip no present -- remove from list
-                HWAS_DBG( "io_targets %x (%p) %x/%x - no presence",
-                    target_to_uint64(pTarget), pTarget,
+                HWAS_DBG( "pTarget %x (%p) %x/%x - no presence",
+                    pTarget->getAttr<ATTR_HUID>(), pTarget,
                     pTarget->getAttr<ATTR_CLASS>(),
                     pTarget->getAttr<ATTR_TYPE>());
 
-               // erase this target, and 'increment' to next
-               pTarget_it = io_targets.erase(pTarget_it);
+                // erase this target, and 'increment' to next
+                pTarget_it = io_targets.erase(pTarget_it);
             }
         }
         else
         {   // errl was set - this is an error condition.
-            HWAS_ERR( "io_targets %x (%p) %x/%x - failed presence detect",
-                target_to_uint64(pTarget), pTarget,
+            HWAS_ERR( "pTarget %x (%p) %x/%x - failed presence detect",
+                pTarget->getAttr<ATTR_HUID>(), pTarget,
                 pTarget->getAttr<ATTR_CLASS>(),
                 pTarget->getAttr<ATTR_TYPE>());
 

@@ -50,53 +50,6 @@ namespace   HWAS
 using   namespace   TARGETING;
 
 
-//@todo - This should come from the target/attribute code somewhere
-uint64_t target_to_uint64(const Target* i_target)
-{
-    uint64_t id = 0;
-    if (i_target == NULL)
-    {
-        id = 0x0;
-    }
-    else if (i_target == MASTER_PROCESSOR_CHIP_TARGET_SENTINEL)
-    {
-        id = 0xFFFFFFFFFFFFFFFF;
-    }
-    else
-    {
-        // physical path, 3 nibbles per type/instance pair
-        //   TIITIITII... etc.
-        EntityPath epath;
-        i_target->tryGetAttr<ATTR_PHYS_PATH>(epath);
-        for (uint32_t x = 0; x < epath.size(); x++)
-        {
-            id = id << 12;
-            id |= (uint64_t)((epath[x].type << 8) & 0xF00);
-            id |= (uint64_t)(epath[x].instance & 0x0FF);
-        }
-    }
-    return id;
-}
-
-
-/**
- * @brief       simple helper function to get and set hwas to clear state
- *
- * @param[in]   i_target    pointer to target that we're looking at
- *
- * @return      none
- */
-void clearHwasState(Target * i_target)
-{
-    HwasState hwasState             = i_target->getAttr<ATTR_HWAS_STATE>();
-    hwasState.poweredOn             = false;
-    hwasState.present               = false;
-    hwasState.functional            = false;
-    hwasState.changedSinceLastIPL   = false;
-    hwasState.gardLevel             = 0;
-    i_target->setAttr<ATTR_HWAS_STATE>(hwasState);
-}
-
 /**
  * @brief       simple helper fn to get and set hwas state to poweredOn,
  *                  present, functional
@@ -115,6 +68,7 @@ void enableHwasState(Target *i_target)
     i_target->setAttr<ATTR_HWAS_STATE>( hwasState );
 }
 
+
 errlHndl_t discoverTargets()
 {
     HWAS_DBG("discoverTargets entry");
@@ -125,32 +79,34 @@ errlHndl_t discoverTargets()
             target != targetService().end();
             ++target)
     {
-        clearHwasState(*target);
+        HwasState hwasState             = target->getAttr<ATTR_HWAS_STATE>();
+        hwasState.poweredOn             = false;
+        hwasState.present               = false;
+        hwasState.functional            = false;
+        hwasState.changedSinceLastIPL   = false;
+        hwasState.gardLevel             = 0;
+        target->setAttr<ATTR_HWAS_STATE>(hwasState);
     }
 
-    // ASSUMPTIONS: Physical hierarchy is:
-    // CLASS_SYS (exactly 1)
-    //  \->children: CLASS_ENC
-    //     \->children: CLASS_* where ALL require hardware query
-    //        \->children: CLASS_* where NONE require hardware query
-
-    // find CLASS_SYS (the top level target)
-    Target* pSys;
-    targetService().getTopLevelTarget(pSys);
+    // ASSUMPTIONS:
+    // CLASS_SYS (exactly 1) - mark as present
+    // CLASS_ENC (>=1) - mark as present
+    // TYPE_PROC TYPE_MEMBUF TYPE_DIMM (ALL require hardware query)
+    //                                  - call platPresenceDetect
+    //  \->children: CLASS_* (NONE require hardware query) - mark as present
 
     do
     {
-        if (pSys == NULL)
-        {
-            // shouldn't happen; if it does, then we're done - nothing present.
-            HWAS_ERR("pSys NULL - nothing present");
-            break; // break out of the do/while so that we can return
-        }
+        // find CLASS_SYS (the top level target)
+        Target* pSys;
+        targetService().getTopLevelTarget(pSys);
+
+        assert(pSys, "HWAS discoverTargets: no CLASS_SYS TopLevelTarget found");
 
         // mark this as present
         enableHwasState(pSys);
         HWAS_DBG("pSys   %x (%p) %x/%x - marked present",
-            target_to_uint64(pSys), pSys,
+            pSys->getAttr<ATTR_HUID>(), pSys,
             pSys->getAttr<ATTR_CLASS>(), pSys->getAttr<ATTR_TYPE>());
 
         // find CLASS_ENC
@@ -168,69 +124,89 @@ errlHndl_t discoverTargets()
             // mark it as present
             enableHwasState(pEnc);
             HWAS_DBG("pEnc   %x (%p) %x/%x - marked present",
-                target_to_uint64(pEnc), pEnc,
+                pEnc->getAttr<ATTR_HUID>(), pEnc,
                 pEnc->getAttr<ATTR_CLASS>(), pEnc->getAttr<ATTR_TYPE>());
-
-            // now find the physical children
-            TargetHandleList pChildList;
-            targetService().getAssociated(pChildList, pEnc,
-                TargetService::CHILD, TargetService::IMMEDIATE);
-
-            // pass this list of children to the hwas common api
-            // pChildList will be modified to only have present targets
-            HWAS_DBG("pChildList size before %d", pChildList.size());
-            errl = platPresenceDetect(pChildList);
-            HWAS_DBG("pChildList size after %d", pChildList.size());
-
-            if (errl != NULL)
-            {
-                break; // get out of the pEnc loop
-            }
-
-            // read Chip ID/EC data from these physical chips, since they
-            //  are present
-            errl = platReadIDEC(pChildList);
-
-            if (errl != NULL)
-            {
-                break; // get out of the pEnc loop
-            }
-
-            // no errors - keep going
-
-            // at this point, pChildList only has present targets
-            // for each, mark them and their descendants as present
-            for (TargetHandleList::iterator pChild_it = pChildList.begin();
-                    pChild_it != pChildList.end();
-                    pChild_it++)
-            {
-                TargetHandle_t pChild = *pChild_it;
-
-                // set HWAS state to show it's present
-                enableHwasState(pChild);
-                HWAS_DBG("pChild %x (%p) %x/%x - detected present",
-                    target_to_uint64(pChild), pChild,
-                    pChild->getAttr<ATTR_CLASS>(),
-                    pChild->getAttr<ATTR_TYPE>());
-
-                // now need to mark all of this target's
-                //  physical descendants as present
-                TargetHandleList pDescList;
-                targetService().getAssociated( pDescList, pChild,
-                    TargetService::CHILD, TargetService::ALL);
-                for (TargetHandleList::iterator pDesc_it = pDescList.begin();
-                        pDesc_it != pDescList.end();
-                        pDesc_it++)
-                {
-                    TargetHandle_t pDesc = *pDesc_it;
-                    enableHwasState(pDesc);
-                    HWAS_DBG("pDsnds %x (%p) %x/%x - marked present",
-                        target_to_uint64(pDesc), pDesc,
-                        pDesc->getAttr<ATTR_CLASS>(),
-                        pDesc->getAttr<ATTR_TYPE>());
-                }
-            } // for pChild_it
         } // for pEnc_it
+
+        // find TYPE_PROC, TYPE_MEMBUF and TYPE_DIMM
+        PredicateCTM predProc(CLASS_CHIP, TYPE_PROC);
+        PredicateCTM predMembuf(CLASS_CHIP, TYPE_MEMBUF);
+        PredicateCTM predDimm(CLASS_LOGICAL_CARD, TYPE_DIMM);
+        PredicatePostfixExpr checkExpr;
+        checkExpr.push(&predProc).push(&predMembuf).Or().push(&predDimm).Or();
+
+        TargetHandleList pCheckPres;
+        targetService().getAssociated( pCheckPres, pSys,
+            TargetService::CHILD, TargetService::ALL, &checkExpr );
+
+        // pass this list to the hwas platform-specific api where
+        // pCheckPres will be modified to only have present targets
+        HWAS_DBG("pCheckPres size: %d", pCheckPres.size());
+        errl = platPresenceDetect(pCheckPres);
+        HWAS_DBG("pCheckPres size: %d", pCheckPres.size());
+
+        if (errl != NULL)
+        {
+            break; // break out of the do/while so that we can return
+        }
+
+        // no errors - keep going
+        // for each, mark them and their descendants as present
+        for (TargetHandleList::iterator pTarget_it = pCheckPres.begin();
+                pTarget_it != pCheckPres.end();
+            ) // increment will be done in the loop below
+        {
+            TargetHandle_t pTarget = *pTarget_it;
+
+            // set HWAS state to show it's present
+            enableHwasState(pTarget);
+            HWAS_DBG("pTarget %x (%p) %x/%x - detected present",
+                pTarget->getAttr<ATTR_HUID>(), pTarget,
+                pTarget->getAttr<ATTR_CLASS>(),
+                pTarget->getAttr<ATTR_TYPE>());
+
+            // now need to mark all of this target's
+            //  physical descendants as present
+            TargetHandleList pDescList;
+            targetService().getAssociated( pDescList, pTarget,
+                TargetService::CHILD, TargetService::ALL);
+            for (TargetHandleList::iterator pDesc_it = pDescList.begin();
+                    pDesc_it != pDescList.end();
+                    pDesc_it++)
+            {
+                TargetHandle_t pDesc = *pDesc_it;
+                enableHwasState(pDesc);
+                HWAS_DBG("pDesc %x (%p) %x/%x - marked present",
+                    pDesc->getAttr<ATTR_HUID>(), pDesc,
+                    pDesc->getAttr<ATTR_CLASS>(),
+                    pDesc->getAttr<ATTR_TYPE>());
+            }
+
+            // if we're not a CHIP, remove us from the list, so that
+            //  when we do the Chip ID/EC call after the loop, we have
+            //  a list that is CHIPs only
+            if (pTarget->getAttr<ATTR_CLASS>() != CLASS_CHIP)
+            {
+                // erase this target, and 'increment' to next
+                pTarget_it = pCheckPres.erase(pTarget_it);
+            }
+            else
+            {
+                // advance to next entry in the list
+                pTarget_it++;
+            }
+        } // for pTarget_it
+
+        // at this point, pCheckPres only has present CLASS_CHIP targets
+        // read Chip ID/EC data from these physical chips
+        HWAS_DBG("pCheckPres size: %d", pCheckPres.size());
+        errl = platReadIDEC(pCheckPres);
+
+        if (errl != NULL)
+        {
+            break; // break out of the do/while so that we can return
+        }
+
     } while (0);
 
     if (errl != NULL)
