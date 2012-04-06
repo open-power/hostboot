@@ -85,6 +85,8 @@ my %files = ("src/build/tools/hb-parsedump.pl" => "rsv",
              "img/simics_MURANO_test.pnor" => "rs",
              "img/simics_VENICE.pnor" => "rs",
              "img/simics_VENICE_test.pnor" => "rs",
+             "img/TULETA.pnor" => "r",
+             "img/TULETA_test.pnor" => "r",
              "img/vbu.pnor" => "rv",
              "img/vbu_test.pnor" => "rv",
              "img/isteplist.csv" => "rsv",
@@ -92,7 +94,7 @@ my %files = ("src/build/tools/hb-parsedump.pl" => "rsv",
              "src/include/usr/hwpf/hwp/fapiTestHwp.H" => "r",
              "src/usr/hwpf/hwp/initfiles/sample.initfile" => "r",
              );
-             
+
 #Directories in base git repository
 my @gitRepoDirs = ("img",
                     "obj",
@@ -174,7 +176,7 @@ if ($inDir ne "")
     $imgDir = $inDir;
     print "input dir = $inDir\n";
 
-    
+
     #If at src dir in sandbox
     if (basename($inDir) eq "src")
     {
@@ -268,7 +270,7 @@ while ( my ($key, $value) = each(%files) )
     }
 
     #Delete the old file first (handles copying over symlinks)
-    $command = sprintf("rm -f %s %s/%s%s", $recursive, 
+    $command = sprintf("rm -f %s %s/%s%s", $recursive,
                                            $copyDir, $filename, $suffix);
     print "$command\n";
     die if (system("$command") != 0);

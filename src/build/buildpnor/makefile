@@ -24,7 +24,7 @@
 #Also builds images which contain the test code.
 ROOTPATH = ../../..
 
-PNOR_TARGETS = simics_MURANO simics_VENICE vbu
+PNOR_TARGETS = simics_MURANO simics_VENICE vbu TULETA
 
 define PNOR_template
 $${IMGDIR}/$(1).pnor: $${IMGDIR}/hbicore_extended.bin $${IMGDIR}/$(1)_targeting.bin
