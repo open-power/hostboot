@@ -58,8 +58,10 @@ namespace   INITSERVICE
  */
 const   TaskInfo    g_istep06[]  =   {
 
+        // @ todo   isteps are numbered wrong to match up with hb-istep -
+        //          need to add stubs for the other substeps
         {
-                ISTEPNAME(6,3,"host_init_fsi"),         // substep name
+                ISTEPNAME(06,00,"host_init_fsi"),         // substep name
                 HWAS::host_init_fsi,                    // pointer to fn
                 {
                         START_FN,                       // task type
@@ -67,7 +69,7 @@ const   TaskInfo    g_istep06[]  =   {
                 }
         },
         {
-                ISTEPNAME(6,5,"host_discover_targets"), // substep name
+                ISTEPNAME(06,01,"host_discover_targets"), // substep name
                 HWAS::host_discover_targets,            // pointer to fn
                 {
                         START_FN,                       // task type
@@ -75,7 +77,7 @@ const   TaskInfo    g_istep06[]  =   {
                 }
         },
         {
-                ISTEPNAME(6, 6, "host_gard"),           // substep name
+                ISTEPNAME(06,02, "host_gard"),           // substep name
                 HWAS::host_gard,                        // pointer to fn
                 {
                         START_FN,                       // task type

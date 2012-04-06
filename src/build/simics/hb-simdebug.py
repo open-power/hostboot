@@ -461,12 +461,7 @@ def istepHB( symsFile, str_arg1 ):
     ## start with empty inList.  Put some dummy isteps in istep4 for debug.        
     n   =   25                                      ## size of inlist array
     inList  =   [[None]*n for x in xrange(n)]       ## init to nothing
-    inList[4][0] =   "i1"
-    inList[4][1] =   "i2"
-    inList[4][2] =   "i3"
-    inList[4][3] =   "i4"
-   
-      
+
     ## bump seqnum
     bump_g_SeqNum() 
 
