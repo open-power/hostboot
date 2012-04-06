@@ -180,7 +180,7 @@ Trace::Trace()
     // fsp-trace convention expects a 2 in the first byte of tracBINARY
     for (size_t i = 0; i < 2; i++)
     {
-        g_tracBinaryInfo[i].pBuffer = 
+        g_tracBinaryInfo[i].pBuffer =
                                  static_cast<char*>(malloc(TRAC_BINARY_SIZE));
         g_tracBinaryInfo[i].pBuffer[0]     = 2;
         g_tracBinaryInfo[i].cbUsed         = 1;
@@ -341,14 +341,14 @@ void Trace::initValuesBuffer( trace_desc_t *o_buf,
 }
 
 /******************************************************************************/
-// ManageContTraceBuffers 
+// ManageContTraceBuffers
 // This function manages the usage of the two ping-pong buffers for handling
 // the continuous trace support.
 /******************************************************************************/
 void Trace::ManageContTraceBuffers(uint64_t i_cbRequired)
 {
     uint8_t l_AltBuf = (iv_CurBuf + 1) % 2;
-    
+
     // Reset TriggerActive if the buffer has been offloaded by VPO
     // script when running under VBU Awan environment
     for (size_t i = 0; (!(g_cont_trace_trigger_info.disable)) && (i < 2); i++)
@@ -377,7 +377,7 @@ void Trace::ManageContTraceBuffers(uint64_t i_cbRequired)
             // Turn on the current buffer's trigger
             g_cont_trace_trigger_info.triggers[iv_CurBuf].trig |=
                                                            TRIGGER_ACTIVE_BIT;
-            // If the alternate buffer's trigger is active and 
+            // If the alternate buffer's trigger is active and
             // the buffer will now be reused, so reset the trigger
             if (g_cont_trace_trigger_info.triggers[l_AltBuf].trig &
                                                            TRIGGER_ACTIVE_BIT)
@@ -462,7 +462,8 @@ void Trace::_trace_adal_write_all(trace_desc_t *io_td,
     // Sum the sizes of the items in i_args in order to know how big to
     // allocate the entry.
 
-    for (size_t i = 0; i <= strlen(_fmt); i++)
+    const size_t fmt_len = strlen(_fmt);
+    for (size_t i = 0; i <= fmt_len; i++)
     {
         if ('%' == _fmt[i])
         {
@@ -691,7 +692,7 @@ void Trace::_trace_adal_write_all(trace_desc_t *io_td,
             // adjust for next time
             g_tracBinaryInfo[iv_CurBuf].cbUsed += l_cbRequired;
 
-            // maintain the buffer's actually used bytes for VPO script 
+            // maintain the buffer's actually used bytes for VPO script
             if ((!g_cont_trace_trigger_info.disable))
             {
                 g_cont_trace_trigger_info.triggers[iv_CurBuf].len =
@@ -845,7 +846,7 @@ void Trace::_trace_adal_write_bin(trace_desc_t *io_td,const trace_hash_val i_has
             // adjust for next time
             g_tracBinaryInfo[iv_CurBuf].cbUsed += l_cbRequired;
 
-            // maintain the buffer's actually used bytes for VPO script 
+            // maintain the buffer's actually used bytes for VPO script
             if ((!g_cont_trace_trigger_info.disable))
             {
                 g_cont_trace_trigger_info.triggers[iv_CurBuf].len =

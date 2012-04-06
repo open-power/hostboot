@@ -83,7 +83,7 @@ PageManager::PageManager() : iv_pagesAvail(0), iv_pagesTotal(0)
     while (cache_line != end_cache_line)
     {
         dcbz(cache_line);
-        cache_line++;
+        cache_line += getCacheLineWords();
     }
 
     // Allocate pages to buckets.
@@ -206,7 +206,7 @@ void PageManager::_coalesce( void )
         while(NULL != (p = pq.remove()))
         {
             // p needs to be the even buddy to prevent merging of wrong block.
-            // To determine this, get the index of the block as if the whole 
+            // To determine this, get the index of the block as if the whole
             // page memory space were blocks of this size.
             uint64_t p_idx = (reinterpret_cast<uint64_t>(p) - firstPageAddr())/
                              ((1 << bucket)*PAGESIZE);
@@ -220,7 +220,7 @@ void PageManager::_coalesce( void )
                 // match.  The address of p also can't be greater than what's
                 // in pq or something is really messed up, therefore if
                 // pq.remove_if() returns something then it's a match.
-                page_t * p_seek = (page_t*)((uint64_t)p + 
+                page_t * p_seek = (page_t*)((uint64_t)p +
                                             (1 << bucket)*PAGESIZE);
                 page_t * p_next = pq.remove_if(p_seek);
                 if(p_next == p_seek)

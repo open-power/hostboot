@@ -31,7 +31,7 @@ void Barrier::wait()
     {
         size_t l_event = iv_event;
         iv_spinlock.unlock();
-        while(iv_event == l_event);
+        while(iv_event == l_event) { setThreadPriorityLow(); }
     }
     else
     {
@@ -39,4 +39,5 @@ void Barrier::wait()
         ++iv_event;
         iv_spinlock.unlock();
     }
+    setThreadPriorityHigh();
 }

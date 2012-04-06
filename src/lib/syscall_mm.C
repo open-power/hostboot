@@ -55,21 +55,20 @@ void mm_icache_invalidate(void * i_addr, size_t i_cpu_word_count)
     uint64_t addr = (uint64_t)i_addr  & ~0x7ull;
     uint64_t * dest = (uint64_t*)addr;
 
-    for(size_t i = 0; i < i_cpu_word_count; ++i)
+    for(size_t i = 0; i < i_cpu_word_count; i += getCacheLineWords())
     {
         dcbst(dest);
-        ++dest;
+        dest += getCacheLineWords();
     }
 
     lwsync();
 
-    dest = (uint64_t*)addr;
-    for(size_t i = 0; i < i_cpu_word_count; ++i)
-    {
-        icbi(dest);
-        ++dest;
-    }
-
+    // According to core design team we only need to do a single icbi,
+    // since the i-cache is kept coherent with the d-cache.  The single
+    // icbi invalidates the "scoreboard" in the core which, in combination
+    // with the isync, causes the core to go back out to l2-cache for any
+    // instructions past this.
+    icbi(reinterpret_cast<void*>(addr));
     isync();
 }
 
