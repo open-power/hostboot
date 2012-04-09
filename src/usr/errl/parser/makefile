@@ -49,9 +49,9 @@ CFLAGS:=-g -O0   -I $(ROOTPATH)/src/include/usr -I ${GENDIR}
 
 all: gen_pass code_pass
 
-gen_pass:  mkdirs  ${SRCPARSE_HEADER_TARGET}  ${GENDIR}/comps.C
+gen_pass:  mkdirs  ${GENDIR}/comps.C
 
-code_pass: ${IMGDIR}/errlparser
+code_pass: ${SRCPARSE_HEADER_TARGET} ${IMGDIR}/errlparser
 
 # errlparserbase and errlusrparser are plugins stuff, not errlparser. 
 # OBJFILES = ${OBJDIR}/errlparserbase.o	${OBJDIR}/errlusrparser.o
@@ -63,7 +63,7 @@ mkdirs:
 	mkdir -p ${GENDIR}
 
 # Parse for error log tags in the Hostboot code, and generate hostBootSrcParse.H
-${SRCPARSE_HEADER_TARGET} :
+${SRCPARSE_HEADER_TARGET} ::
 	./scanforsrcs.pl -b ${ROOTPATH} -o ${GENDIR}
 
 ${GENDIR}/comps.C: ${ROOTPATH}/src/include/usr/hbotcompid.H
@@ -72,7 +72,7 @@ ${GENDIR}/comps.C: ${ROOTPATH}/src/include/usr/hbotcompid.H
 	sed 's/const compId_t \([A-Z0-9]*\)_COMP_ID[ =\t]*\(0[xX][0-9a-fA-F]*\).*/{ "\1", \2 },/' \
 	> $@
 
-${OBJDIR}/errlparser.o: errlparser.C ${ROOTPATH}/src/include/usr/errl/hberrltypes.H ${GENDIR}/comps.C 
+${OBJDIR}/errlparser.o: errlparser.C ${ROOTPATH}/src/include/usr/errl/hberrltypes.H ${GENDIR}/comps.C ${SRCPARSE_HEADER_TARGET}
 	$(CC) -c  $(CFLAGS)  -o $@  $<
 
 

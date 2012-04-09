@@ -238,10 +238,16 @@ $fh = openHeaderFile();
 # Start writing the main header file that will be included by errlparser.C
 startMainHeaderFile( $fh );
 
+my $found_dup = 0;
+
 # Write each case statement for printing
 foreach my $key (sort(keys(%Comps)))
 {
     writePrintStatement( $fh, $key, \@{$Comps{$key}} );
+}
+if($found_dup > 0)
+{
+    die( "ERROR! Duplicate hash found!\n" );
 }
 
 # Finish writing the header
@@ -672,19 +678,20 @@ sub writePrintStatement
         debugMsg( "Reason Code: $reasonCode" );
 
         # If we've got a duplicate Module Id/Reason code go, on to the
-        # next one.  We can't have duplicates, and its been asked that
-        # we don't have compile errors because of it.
+        # next one.  We can't have duplicates, so if we do we set found_dup
+        # so that we can die after this loop
         if( "$modId.$reasonCode" eq $caseHash{ $compName } )
         {
             debugMsg( "Hash exists, skip subsequent." );
 
-            # Print a warning message
+            # Print a error message
             print "\n#################################################################\n";
-            print "  WARNING - Duplicate hash found for:\n";
+            print "  ERROR - Duplicate hash found for:\n";
             print "      component     $compName\n";
             print "      module id     $modId\n";
             print "      reason code   $reasonCode\n";
             print "#################################################################\n";
+            $found_dup = 1;
             next;
         }
         else
