@@ -1,0 +1,32 @@
+# IBM_PROLOG_BEGIN_TAG 
+# This is an automatically generated prolog. 
+#  
+# fips810 src/simu/data/cec-chip/p8murano.ali 1.1 
+#  
+# IBM CONFIDENTIAL 
+#  
+# OBJECT CODE ONLY SOURCE MATERIALS 
+#  
+# COPYRIGHT International Business Machines Corp. 2005,2012 
+# All Rights Reserved 
+#  
+# The source code for this program is not published or otherwise 
+# divested of its trade secrets, irrespective of what has been 
+# deposited with the U.S. Copyright Office. 
+#  
+# IBM_PROLOG_END_TAG 
+#  Flag  PTR/DCR#  Userid    Date      Description
+#  ----  --------  --------  --------  -----------
+#  ch99  SW115693  ched      12/22/11  Created from Venice
+#        SW134334  vanlee    04/09/12  startclocks and chipID actions
+
+# P8 Murano aliases
+
+membuf:n0:p0 |  myproc=proc:n0:p0
+membuf:n0:p1 |  myproc=proc:n0:p0
+membuf:n0:p2 |  myproc=proc:n0:p0
+membuf:n0:p3 |  myproc=proc:n0:p0
+
+proc:n0:p0 | mycentaur4=membuf:n0:p0 mycentaur5=membuf:n0:p1 mycentaur6=membuf:n0:p2 mycentaur7=membuf:n0:p3
+
+END
