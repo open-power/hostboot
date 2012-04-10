@@ -769,6 +769,24 @@
 </attribute>
 
 <attribute>
+    <id>EXECUTION_PLATFORM</id>
+    <description>
+        Which execution platform the HW Procedure is running on
+        Some HWPs (e.g. special wakeup) use different registers for different
+          platforms to avoid arbitration problems when multiple platforms do
+          the same thing concurrently
+        HOST = 0x01, FSP = 0x02, OCC = 0x03
+    </description>
+    <simpleType><uint8_t></uint8_t></simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EXECUTION_PLATFORM</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
     <id>IS_SIMULATION</id>
     <description>env: 1 = Awan/HWSimulator. 0 = Simics/RealHW.</description>
     <simpleType>

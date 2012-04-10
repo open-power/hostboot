@@ -32,6 +32,10 @@
     <id>sys0</id>
     <type>sys-sys-power8</type>
     <attribute>
+        <id>EXECUTION_PLATFORM</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0</default>
     </attribute>

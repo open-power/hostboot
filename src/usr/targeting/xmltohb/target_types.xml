@@ -53,6 +53,7 @@
     <attribute><id>TYPE</id><default>SYS</default></attribute>
     <attribute><id>MODEL</id><default>POWER8</default></attribute>  
     <attribute><id>HUID</id><default>0x00010000</default></attribute>
+    <attribute><id>EXECUTION_PLATFORM</id></attribute>
     <attribute><id>SCRATCH_UINT8_1</id></attribute>
     <attribute><id>SCRATCH_UINT8_2</id></attribute>
     <attribute><id>SCRATCH_UINT32_1</id></attribute>
