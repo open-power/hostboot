@@ -77,6 +77,12 @@ void task_end() NO_RETURN;
  */
 void task_end2(void* retval) NO_RETURN;
 
+/** @define task_crash
+ *  @brief End the calling task as if it crashed.
+ *
+ */
+#define task_crash() ((*(char*)NULL) = 'F')
+
 /** @fn task_gettid
  *  @brief Get task ID of calling task.
  *

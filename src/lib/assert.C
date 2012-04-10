@@ -38,9 +38,9 @@ extern "C" void __assert(AssertBehavior i_assertb, int i_line)
     switch (i_assertb)
     {
         case ASSERT_TRACE_DONE: // Custom trace was provided.
-            task_end();
+            task_crash();
             break;
-        
+
         case ASSERT_TRACE_NOTDONE: // Do a normal trace.
             if (NULL != TRACE::traceCallback)
             {
@@ -51,23 +51,23 @@ extern "C" void __assert(AssertBehavior i_assertb, int i_line)
                 printk("Assertion failed @%p on line %d.\n",
                        linkRegister(), i_line);
             }
-            task_end();
+            task_crash();
             break;
 
         case ASSERT_CRITICAL:  // Critical task, trace not available.
-            printk("Assertion failed @%p on line %d.\n", 
+            printk("Assertion failed @%p on line %d.\n",
                    linkRegister(), i_line);
-            task_end();
+            task_crash();
             break;
-        
+
         case ASSERT_KERNEL:  // Kernel assert called.
-            printk("Assertion failed @%p on line %d.\n", 
+            printk("Assertion failed @%p on line %d.\n",
                    linkRegister(), i_line);
             break;
     }
 
     // Loop forever if we make it here.  Should only happen in kernel code.
-    while (true) 
+    while (true)
     {
         setThreadPriorityLow();
     }
