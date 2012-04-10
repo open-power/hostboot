@@ -41,13 +41,12 @@ namespace TARGETING
  */
 bool is_vpo( void )
 {
-    TARGETING::EntityPath syspath(TARGETING::EntityPath::PATH_PHYSICAL);
-    syspath.addLast(TARGETING::TYPE_SYS,0);
-    TARGETING::Target* sys = TARGETING::targetService().toTarget(syspath);
+    Target * sys = NULL;
+    targetService().getTopLevelTarget( sys );
     uint8_t vpo_mode = 0;
     if( unlikely( //compiler hint to optimize the false path
         sys
-        && sys->tryGetAttr<TARGETING::ATTR_IS_SIMULATION>(vpo_mode)
+        && sys->tryGetAttr<ATTR_IS_SIMULATION>(vpo_mode)
         && (vpo_mode == 1)
         ) )
     {
@@ -56,7 +55,26 @@ bool is_vpo( void )
     return false;
 };
 
-
+/**
+ * @brief Safely fetch the HUID of a Target
+ */
+uint32_t get_huid( const Target* i_target )
+{
+    uint32_t huid = 0;
+    if( i_target == NULL )
+    {
+        huid = 0x0;
+    }
+    else if( i_target == MASTER_PROCESSOR_CHIP_TARGET_SENTINEL )
+    {
+        huid = 0xFFFFFFFF;
+    }
+    else
+    {
+        i_target->tryGetAttr<ATTR_HUID>(huid);
+    }
+    return huid;
 }
 
 
+}

@@ -472,6 +472,14 @@ sub generate_sys
         <id>FREQ_CORE_FLOOR</id>
         <default>2500</default>
     </attribute>
+    <attribute>
+        <id>SP_FUNCTIONS</id>
+        <default>
+            <field><id>fsiSlaveInit</id><value>1</value></field>
+            <field><id>mailboxEnabled</id><value>1</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 ";
 }

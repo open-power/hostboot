@@ -3274,6 +3274,46 @@
     <readable/>
 </attribute>
 
+<attribute>
+    <id>SP_FUNCTIONS</id>
+    <description>
+      Attribute which describes what the SP is or is not doing in this system
+    </description>
+    <complexType>
+        <description>Structure which defines a system's SP functions.  
+         Applicable for System target only.  Structure is read-only.
+        </description>
+        <field>
+            <name>fsiSlaveInit</name>
+            <description>
+             0b0: SP does not initialize FSI slave logic, Hostboot must; 
+             0b1: SP does initialize FSI slave logic so Hostboot should not
+            </description>
+            <type>uint8_t</type>
+            <bits>1</bits>
+            <default>1</default> 
+        </field>
+        <field>
+            <name>mailboxEnabled</name>
+            <description>
+             0b0: There is no SP mailbox support;
+             0b1: There is SP mailbox support
+            </description>
+            <type>uint8_t</type>
+            <bits>1</bits>
+            <default>0</default>
+        </field>
+        <field>
+            <name>reserved</name>
+            <description>Reserved for future use</description>
+            <type>uint8_t</type>
+            <bits>6</bits>
+            <default>0</default>
+        </field>        
+    </complexType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
 
 <!-- Begin attributes (4) to test string support -->
 

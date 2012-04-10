@@ -97,6 +97,7 @@
     <attribute><id>FREQ_PB</id></attribute>
     <attribute><id>FREQ_A</id></attribute>
     <attribute><id>FREQ_X</id></attribute>
+    <attribute><id>SP_FUNCTIONS</id></attribute>
 </targetType>
 
 <targetType>

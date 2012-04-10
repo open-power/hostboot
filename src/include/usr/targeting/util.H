@@ -29,6 +29,7 @@
 
 namespace TARGETING
 {
+class Target;
 
 /**
  * @brief Checks to see if we are running in a hardware simulation
@@ -38,6 +39,12 @@ namespace TARGETING
  */
 bool is_vpo( void );
 
+/**
+ * @brief  Safely fetch the HUID of a Target
+ * @param[in]   Pointer to a Target
+ * @return  HUID of Target, Zero if NULL, 0xFFFFFFFF if Sentinel
+ */
+uint32_t get_huid( const Target* i_target );
 
 }
 

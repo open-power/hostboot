@@ -56,34 +56,6 @@ TRAC_INIT(&g_trac_fsir, "FSIR", 4096); //4K
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
 #define TRACUCOMP(args...)  
 
-//@todo - This should come from the target/attribute code somewhere
-uint64_t target_to_uint64(const TARGETING::Target* i_target)
-{
-    uint64_t id = 0;
-    if( i_target == NULL )
-    {
-        id = 0x0;
-    }
-    else if( i_target == TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL )
-    {
-        id = 0xFFFFFFFFFFFFFFFF;
-    }
-    else
-    {
-        // physical path, 3 nibbles per type/instance pair
-        //   TIITIITII... etc.
-        TARGETING::EntityPath epath;
-        i_target->tryGetAttr<TARGETING::ATTR_PHYS_PATH>(epath);
-        for( uint32_t x = 0; x < epath.size(); x++ )
-        {
-            id = id << 12;
-            id |= (uint64_t)((epath[x].type << 8) & 0xF00);
-            id |= (uint64_t)(epath[x].instance & 0x0FF);
-        }
-    }
-    return id;
-}
-
 
 namespace FSI
 {
@@ -116,7 +88,7 @@ errlHndl_t ddOp(DeviceFW::OperationType i_opType,
 {
     errlHndl_t l_err = NULL;
     uint64_t i_addr = va_arg(i_args,uint64_t);
-    TRACUCOMP( g_trac_fsi, "FSI::ddOp> i_addr=%llX, target=%llX", i_addr, target_to_uint64(i_target) );
+    TRACUCOMP( g_trac_fsi, "FSI::ddOp> i_addr=%llX, target=%.8X", i_addr, TARGETING::get_huid(i_target) );
 
     do{
         if( io_buflen != sizeof(uint32_t) )
@@ -331,28 +303,31 @@ errlHndl_t FsiDD::read(const TARGETING::Target* i_target,
                        uint64_t i_address,
                        uint32_t* o_buffer)
 {
-    TRACDCOMP(g_trac_fsi, "FsiDD::read(i_target=%llX,i_address=0x%llX)> ", target_to_uint64(i_target), i_address);
+    TRACDCOMP(g_trac_fsi, "FsiDD::read(i_target=%.8X,i_address=0x%llX)> ", TARGETING::get_huid(i_target), i_address);
     errlHndl_t l_err = NULL;
 
     do {
         // verify slave is present before doing anything
         if( !isSlavePresent(i_target) && (i_target != iv_master) )
         {
-            TRACFCOMP( g_trac_fsi, "FsiDD::read> Requested target was never detected during FSI Init : i_target=%llX, i_address=%.llX", target_to_uint64(i_target), i_address  );
+            TRACFCOMP( g_trac_fsi, "FsiDD::read> Requested target was never detected during FSI Init : i_target=%.8X, i_address=%.llX", TARGETING::get_huid(i_target), i_address  );
 
             /*@
              * @errortype
              * @moduleid     FSI::MOD_FSIDD_READ
              * @reasoncode   FSI::RC_TARGET_NEVER_DETECTED
-             * @userdata1    Relative Absolute FSI Address
-             * @userdata2    Target ID String...
+             * @userdata1    Relative FSI Address
+             * @userdata2[0:31]   HUID of FSI Target
+             * @userdata2[32:63]  HUID of FSI Master
              * @devdesc      FsiDD::read> Target was never detected during FSI Init
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                             FSI::MOD_FSIDD_READ,
                                             FSI::RC_TARGET_NEVER_DETECTED,
                                             i_address,
-                                            target_to_uint64(i_target));
+                                            TWO_UINT32_TO_UINT64(
+                                               TARGETING::get_huid(i_target),
+                                               TARGETING::get_huid(iv_master)));
             l_err->collectTrace("FSI",1024);
             break;
         }
@@ -383,28 +358,31 @@ errlHndl_t FsiDD::write(const TARGETING::Target* i_target,
                         uint64_t i_address,
                         uint32_t* o_buffer)
 {
-    TRACDCOMP(g_trac_fsi, "FsiDD::write(i_target=%llX,i_address=0x%llX)> ", target_to_uint64(i_target), i_address);
+    TRACDCOMP(g_trac_fsi, "FsiDD::write(i_target=%.8X,i_address=0x%llX)> ", TARGETING::get_huid(i_target), i_address);
     errlHndl_t l_err = NULL;
 
     do {
         // verify slave is present before doing anything
         if( !isSlavePresent(i_target) && (i_target != iv_master) )
         {
-            TRACFCOMP( g_trac_fsi, "FsiDD::write> Requested target was never detected during FSI Init : i_target=%llX, i_address=%.llX", target_to_uint64(i_target), i_address  );
+            TRACFCOMP( g_trac_fsi, "FsiDD::write> Requested target was never detected during FSI Init : i_target=%.8X, i_address=%.llX", TARGETING::get_huid(i_target), i_address  );
 
             /*@
              * @errortype
              * @moduleid     FSI::MOD_FSIDD_WRITE
              * @reasoncode   FSI::RC_TARGET_NEVER_DETECTED
-             * @userdata1    Relative Absolute FSI Address
-             * @userdata2    Target ID String...
+             * @userdata1    Relative FSI Address
+             * @userdata2[0:31]   HUID of FSI Target
+             * @userdata2[32:63]  HUID of FSI Master
              * @devdesc      FsiDD::read> Target was never detected during FSI Init
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                             FSI::MOD_FSIDD_WRITE,
                                             FSI::RC_TARGET_NEVER_DETECTED,
                                             i_address,
-                                            target_to_uint64(i_target));
+                                            TWO_UINT32_TO_UINT64(
+                                              TARGETING::get_huid(i_target),
+                                              TARGETING::get_huid(iv_master)));
             l_err->collectTrace("FSI",1024);
             break;
         }
@@ -736,7 +714,7 @@ errlHndl_t FsiDD::read(const FsiAddrInfo_t& i_addrInfo,
                           DEVICE_XSCOM_ADDRESS(opbaddr) );
         if( l_err )
         {
-            TRACFCOMP(g_trac_fsi, "FsiDD::read> Error from device %11X : RC=%X", target_to_uint64(i_addrInfo.opbTarg), l_err->reasonCode() );
+            TRACFCOMP(g_trac_fsi, "FsiDD::read> Error from device %.8X : RC=%X", TARGETING::get_huid(i_addrInfo.opbTarg), l_err->reasonCode() );
             break;
         }
 
@@ -811,7 +789,7 @@ errlHndl_t FsiDD::write(const FsiAddrInfo_t& i_addrInfo,
                           DEVICE_XSCOM_ADDRESS(opbaddr) );
         if( l_err )
         {
-            TRACFCOMP(g_trac_fsi, "FsiDD::write> Error from device %11X : RC=%X", target_to_uint64(i_addrInfo.opbTarg), l_err->reasonCode() );
+            TRACFCOMP(g_trac_fsi, "FsiDD::write> Error from device %.8X : RC=%X", TARGETING::get_huid(i_addrInfo.opbTarg), l_err->reasonCode() );
             break;
         }
 
@@ -1071,7 +1049,7 @@ errlHndl_t FsiDD::genFullFsiAddr(FsiAddrInfo_t& io_addrInfo)
     //pull the FSI info out for this target
     FsiChipInfo_t fsi_info = getFsiInfo( io_addrInfo.fsiTarg );
 
-    TRACUCOMP( g_trac_fsi, "target=%llX : Link Id=%.8X", target_to_uint64(io_addrInfo.fsiTarg), fsi_info.linkid.id );
+    TRACUCOMP( g_trac_fsi, "target=%.8X : Link Id=%.8X", TARGETING::get_huid(io_addrInfo.fsiTarg), fsi_info.linkid.id );
 
     //FSI master is the master proc, find the port
     if( fsi_info.master == iv_master )
@@ -1082,7 +1060,7 @@ errlHndl_t FsiDD::genFullFsiAddr(FsiAddrInfo_t& io_addrInfo)
     //verify this target has a valid FSI master
     else if( TARGETING::FSI_MASTER_TYPE_CMFSI != fsi_info.type )
     {        
-        TRACFCOMP( g_trac_fsi, "target=%llX : Master Type is not supported = %d", target_to_uint64(io_addrInfo.fsiTarg), fsi_info.type );
+        TRACFCOMP( g_trac_fsi, "target=%.8X : Master Type is not supported = %d", TARGETING::get_huid(io_addrInfo.fsiTarg), fsi_info.type );
         /*@ 
          * @errortype
          * @moduleid     FSI::MOD_FSIDD_GENFULLFSIADDR
@@ -1095,10 +1073,10 @@ errlHndl_t FsiDD::genFullFsiAddr(FsiAddrInfo_t& io_addrInfo)
          * @devdesc      FsiDD::genFullFsiAddr> Master Type is not supported
          */
         l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                        FSI::MOD_FSIDD_GENFULLFSIADDR,
-                                        FSI::RC_FSI_NOT_SUPPORTED,
-                                        target_to_uint64(io_addrInfo.fsiTarg),
-                                        fsi_info.linkid.id );
+                                     FSI::MOD_FSIDD_GENFULLFSIADDR,
+                                     FSI::RC_FSI_NOT_SUPPORTED,
+                                     TARGETING::get_huid(io_addrInfo.fsiTarg),
+                                     fsi_info.linkid.id );
         l_err->collectTrace("FSI",1024);
         return l_err;
     }
@@ -1114,12 +1092,13 @@ errlHndl_t FsiDD::genFullFsiAddr(FsiAddrInfo_t& io_addrInfo)
         //check for invalid topology
         if( mfsi_info.master != iv_master )
         {
-            TRACFCOMP( g_trac_fsi, "target=%llX : master=%llX : master's master=%llX : Cannot chain 2 masters", target_to_uint64(io_addrInfo.fsiTarg), target_to_uint64(fsi_info.master), target_to_uint64(mfsi_info.master), fsi_info.type );
+            TRACFCOMP( g_trac_fsi, "target=%.8X : master=%.8X : master's master=%.8X : Cannot chain 2 masters", TARGETING::get_huid(io_addrInfo.fsiTarg), TARGETING::get_huid(fsi_info.master), TARGETING::get_huid(mfsi_info.master), fsi_info.type );
             /*@ 
              * @errortype
              * @moduleid     FSI::MOD_FSIDD_GENFULLFSIADDR
              * @reasoncode   FSI::RC_INVALID_FSI_PATH_1
-             * @userdata1    Target of FSI Operation
+             * @userdata1[0:31]   Target of FSI Operation
+             * @userdata1[32:63]  Target's FSI Master Chip
              * @userdata2[0:7]    Physical Node of FSI Master processor  [target's master]
              * @userdata2[8:15]   Physical Position of FSI Master processor  [target's master]
              * @userdata2[16:23]  FSI Master type (0=MFSI,1=CMFSI,2=NO_MASTER)  [target's master]
@@ -1130,25 +1109,29 @@ errlHndl_t FsiDD::genFullFsiAddr(FsiAddrInfo_t& io_addrInfo)
              * @userdata2[56:63]  Slave link/port number  [master's master]
              * @devdesc      FsiDD::genFullFsiAddr> Cannot chain 2 masters
              */
-            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                            FSI::MOD_FSIDD_GENFULLFSIADDR,
-                                            FSI::RC_INVALID_FSI_PATH_1,
-                                            target_to_uint64(io_addrInfo.fsiTarg),
-                                            TWO_UINT32_TO_UINT64(
-                                                      fsi_info.linkid.id,
-                                                      mfsi_info.linkid.id) );
+            l_err = new ERRORLOG::ErrlEntry(
+                              ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                              FSI::MOD_FSIDD_GENFULLFSIADDR,
+                              FSI::RC_INVALID_FSI_PATH_1,
+                              TWO_UINT32_TO_UINT64(
+                                  TARGETING::get_huid(io_addrInfo.fsiTarg),
+                                  TARGETING::get_huid(fsi_info.master)),
+                              TWO_UINT32_TO_UINT64(
+                                  fsi_info.linkid.id,
+                                  mfsi_info.linkid.id) );
             l_err->collectTrace("FSI",1024);
             return l_err;
         }
         else if( TARGETING::FSI_MASTER_TYPE_MFSI != mfsi_info.type )
         {
-            TRACFCOMP( g_trac_fsi, "target=%llX : master=%llX, type=%d, port=%d", target_to_uint64(io_addrInfo.fsiTarg), target_to_uint64(fsi_info.master), fsi_info.type, fsi_info.port );
-            TRACFCOMP( g_trac_fsi, "Master: target=%llX : master=%llX, type=%d, port=%d", target_to_uint64(fsi_info.master), target_to_uint64(mfsi_info.master), mfsi_info.type, mfsi_info.port );
+            TRACFCOMP( g_trac_fsi, "target=%.8X : master=%.8X, type=%d, port=%d", TARGETING::get_huid(io_addrInfo.fsiTarg), TARGETING::get_huid(fsi_info.master), fsi_info.type, fsi_info.port );
+            TRACFCOMP( g_trac_fsi, "Master: target=%.8X : master=%.8X, type=%d, port=%d", TARGETING::get_huid(fsi_info.master), TARGETING::get_huid(mfsi_info.master), mfsi_info.type, mfsi_info.port );
             /*@ 
              * @errortype
              * @moduleid     FSI::MOD_FSIDD_GENFULLFSIADDR
              * @reasoncode   FSI::RC_INVALID_FSI_PATH_2
-             * @userdata1    Target of FSI Operation
+             * @userdata1[0:31]   Target of FSI Operation
+             * @userdata1[32:63]  Target's FSI Master Chip
              * @userdata2[0:7]    Physical Node of FSI Master processor  [target's master]
              * @userdata2[8:15]   Physical Position of FSI Master processor  [target's master]
              * @userdata2[16:23]  FSI Master type (0=MFSI,1=CMFSI,2=NO_MASTER)  [target's master]
@@ -1159,13 +1142,16 @@ errlHndl_t FsiDD::genFullFsiAddr(FsiAddrInfo_t& io_addrInfo)
              * @userdata2[56:63]  Slave link/port number  [master's master]
              * @devdesc      FsiDD::genFullFsiAddr> Invalid master type for the target's master
              */
-            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                            FSI::MOD_FSIDD_GENFULLFSIADDR,
-                                            FSI::RC_INVALID_FSI_PATH_2,
-                                            target_to_uint64(io_addrInfo.fsiTarg),
-                                            TWO_UINT32_TO_UINT64(
-                                                      fsi_info.linkid.id,
-                                                      mfsi_info.linkid.id) );
+            l_err = new ERRORLOG::ErrlEntry(
+                              ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                              FSI::MOD_FSIDD_GENFULLFSIADDR,
+                              FSI::RC_INVALID_FSI_PATH_2,
+                              TWO_UINT32_TO_UINT64(
+                                  TARGETING::get_huid(io_addrInfo.fsiTarg),
+                                  TARGETING::get_huid(fsi_info.master)),
+                              TWO_UINT32_TO_UINT64(
+                                  fsi_info.linkid.id,
+                                  mfsi_info.linkid.id) );
             l_err->collectTrace("FSI",1024);
             return l_err;
         }
@@ -1250,12 +1236,16 @@ errlHndl_t FsiDD::initPort(FsiChipInfo_t i_fsiInfo,
         }
         TRACFCOMP( g_trac_fsi, "FsiDD::initPort> Slave %.8X is present", i_fsiInfo.linkid.id );
 
-        // Do not initialize slave in VBU because they are already done
-        // before we run
-        //@todo - switch to SP-Capabilities Attribute (See Issue 35817)
-        if( TARGETING::is_vpo() )
+        // Do not initialize slaves because they are already done
+        //  before we run
+        TARGETING::Target * sys = NULL;
+        TARGETING::targetService().getTopLevelTarget( sys );
+        TARGETING::SpFunctions spfuncs;
+        if( sys
+            && sys->tryGetAttr<TARGETING::ATTR_SP_FUNCTIONS>(spfuncs)
+            && spfuncs.fsiSlaveInit )
         {
-            TRACFCOMP( g_trac_fsi, "FsiDD::initPort> Skipping Init for VPO" );
+            TRACFCOMP( g_trac_fsi, "FsiDD::initPort> Skipping Slave Init" );
             o_enabled = true;
             break;
         }
@@ -1363,7 +1353,7 @@ errlHndl_t FsiDD::initMasterControl(const TARGETING::Target* i_master,
                                     TARGETING::FSI_MASTER_TYPE i_type)
 {
     errlHndl_t l_err = NULL;
-    TRACFCOMP( g_trac_fsi, ENTER_MRK"FsiDD::initMasterControl> Initializing Master %llX:%d", target_to_uint64(i_master), i_type );
+    TRACFCOMP( g_trac_fsi, ENTER_MRK"FsiDD::initMasterControl> Initializing Master %.8X:%d", TARGETING::get_huid(i_master), i_type );
 
     do {
         uint32_t databuf = 0;
@@ -1415,7 +1405,7 @@ errlHndl_t FsiDD::initMasterControl(const TARGETING::Target* i_master,
         // Only looking at the top bits
         uint64_t slave_index = getSlaveEnableIndex(i_master,i_type);
         iv_slaves[slave_index] = (uint8_t)(databuf >> (32-MAX_SLAVE_PORTS));
-        TRACFCOMP( g_trac_fsi, "FsiDD::initMasterControl> %llX:%d : Slave Detect = %.8X", target_to_uint64(i_master), i_type, databuf );
+        TRACFCOMP( g_trac_fsi, "FsiDD::initMasterControl> %.8X:%d : Slave Detect = %.8X", TARGETING::get_huid(i_master), i_type, databuf );
 
         //Clear FSI Slave Interrupt on ports 0-7
         databuf = 0x00000000;
@@ -1445,7 +1435,7 @@ errlHndl_t FsiDD::initMasterControl(const TARGETING::Target* i_master,
 
     if( l_err )
     {
-        TRACFCOMP( g_trac_fsi, "FsiDD::initMasterControl> Error during initialization of Target %llX : RC=%llX", target_to_uint64(iv_master), l_err->reasonCode() );
+        TRACFCOMP( g_trac_fsi, "FsiDD::initMasterControl> Error during initialization of Target %.8X : RC=%llX", TARGETING::get_huid(iv_master), l_err->reasonCode() );
         uint64_t slave_index = getSlaveEnableIndex(i_master,i_type);
         iv_slaves[slave_index] = 0;
     }
@@ -1599,7 +1589,7 @@ FsiDD::FsiChipInfo_t FsiDD::getFsiInfo( const TARGETING::Target* i_target )
         }
     }
 
-    TRACUCOMP( g_trac_fsi, "getFsiInfo> i_target=%llX : master=%llX, type=%X", target_to_uint64(i_target), target_to_uint64(info.master), info.type );
+    TRACUCOMP( g_trac_fsi, "getFsiInfo> i_target=%.8X : master=%.8X, type=%X", TARGETING::get_huid(i_target), TARGETING::get_huid(info.master), info.type );
     TRACUCOMP( g_trac_fsi, "getFsiInfo> port=%X, cascade=%X, flags=%X, linkid=%.8X", info.port, info.cascade, info.flags, info.port );
     return info;
 }
