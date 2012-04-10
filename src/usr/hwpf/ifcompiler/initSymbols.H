@@ -236,8 +236,8 @@ namespace init
         private: //data
 
             //   map | symbol name | (cini_id, usage flags) |
-            typedef pair<uint32_t,uint32_t> MAP_DATA;
-            typedef map<string,MAP_DATA > SYMBOL_MAP;
+            typedef pair<uint32_t,uint32_t> MAP_DATA; //cini_id & corresponding rpn_id/NOT_USED
+            typedef map<string,MAP_DATA > SYMBOL_MAP; //attr name & corresponding cini_id, rpn_id/NOT_USED pair
             typedef map<string,uint32_t> SPY_MAP;
             typedef map<string,uint32_t> SYMBOL_ATTR_TYPE;
             typedef map<string,uint64_t> SYMBOL_ATTR_ENUM;
@@ -245,8 +245,8 @@ namespace init
             typedef pair<Rpn,uint32_t> DEF_DATA;
             typedef map<string,DEF_DATA> DEF_MAP;
 
-            typedef pair<string,uint32_t>  RPN_DATA;
-            typedef map<uint32_t,RPN_DATA> RPN_MAP;
+            typedef pair<string,uint32_t>  RPN_DATA;  //attribute name & corresponding cini_id
+            typedef map<uint32_t,RPN_DATA> RPN_MAP;   //attr name & corresponding attr name, cini_id pair
 
             typedef vector<RPN_DATA> VAR_SYMBOL_USED;
             typedef vector<uint32_t>  SYMBOL_USED;

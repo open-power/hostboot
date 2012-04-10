@@ -45,6 +45,7 @@
 #                  camvanng  10/20/11  Fix bug
 #                  mjjones   12/16/11  Improved usage statement
 #                  mjjones   02/10/12  Allow err file with one element
+#                  mjjones   03/22/12  Generate hash values for enums
 #
 # End Change Log ******************************************************
 
@@ -53,6 +54,13 @@
 # fapiParseErrorInfo.pl <output dir> <filename1> <filename2> ...
 
 use strict;
+
+#------------------------------------------------------------------------------
+# Set PREFERRED_PARSER to XML::Parser. Otherwise it uses XML::SAX which contains
+# bugs that result in XML parse errors that can be fixed by adjusting white-
+# space (i.e. parse errors that do not make sense).
+#------------------------------------------------------------------------------
+$XML::Simple::PREFERRED_PARSER = 'XML::Parser';
 
 #------------------------------------------------------------------------------
 # Subroutine that checks if an entry exists in an array. If it doesn't exist
@@ -104,6 +112,7 @@ if ($numArgs < 2)
 #------------------------------------------------------------------------------
 # Specify perl modules to use
 #------------------------------------------------------------------------------
+use Digest::MD5 qw(md5_hex);
 use XML::Simple;
 my $xml = new XML::Simple (KeyAttr=>[]);
 
@@ -137,7 +146,6 @@ print RCFILE " * \@brief Enumeration of HWP return codes\n";
 print RCFILE " *\/\n";
 print RCFILE "enum HwpReturnCode\n";
 print RCFILE "{\n";
-print RCFILE "    RC_SUCCESS = 0,\n";
 
 #------------------------------------------------------------------------------
 # Print start of file information to fapiHwpErrorInfo.H
@@ -163,11 +171,11 @@ my $gard = 'gard';
 #------------------------------------------------------------------------------
 # For each XML file
 #------------------------------------------------------------------------------
-my $errId = 1;
 foreach my $argnum (1 .. $#ARGV)
 {
     my $infile = $ARGV[$argnum];
     my $count = 0;
+    my %enumHash;
 
     #--------------------------------------------------------------------------
     # Read XML file. The ForceArray option ensures that there is an array of
@@ -200,10 +208,28 @@ foreach my $argnum (1 .. $#ARGV)
         }
 
         #----------------------------------------------------------------------
-        # Print the return code to fapiHwpReturnCodes.H
+        # Print the return code enum to fapiHwpReturnCodes.H
+        # The enumerator value for each error is a hash value generated from 
+        # the errpr name, this ties a specific enumerator value to a specific
+        # error name. This is done for Cronus so that if a HWP is not
+        # recompiled against a new eCMD/Cronus version where the errors have
+        # changed then there will not be a mismatch in enumerator values.
+        # This is a 24bit hash value because FAPI has a requirement that the
+        # top byte of the 32 bit error value be zero to store flags indicating
+        # the creator of the error
         #----------------------------------------------------------------------
-        print RCFILE "    $err->{rc} = $errId,\n";
-        $errId++;
+        my $attrHash128Bit = md5_hex($err->{rc});
+        my $attrHash24Bit = substr($attrHash128Bit, 0, 6);
+        print RCFILE "    $err->{rc} = 0x$attrHash24Bit,\n";
+
+        if (exists($enumHash{$attrHash24Bit}))
+        {
+            # Two different errors generate the same hash-value!
+            print ("fapiParseAttributeInfo.pl ERROR. Duplicate error rc hash value\n");
+            exit(1);
+        }
+
+        $enumHash{$attrHash24Bit} = 1;
 
         #----------------------------------------------------------------------
         # Print the CALL_FUNC_TO_ANALYZE_ERROR macro to fapiHwpErrorInfo.H

@@ -52,6 +52,7 @@
 #                  mjjones   12/16/11  Generate fapiAttributePlatCheck.H
 #                                      Generate fapiAttributesSupported.html
 #                  mjjones   02/08/12  Handle attribute files with 1 entry
+#                  mjjones   03/22/12  Generate hash values for enums
 #
 # End Change Log ******************************************************
 
@@ -75,11 +76,19 @@ if ($numArgs < 2)
 #------------------------------------------------------------------------------
 # Specify perl modules to use
 #------------------------------------------------------------------------------
+use Digest::MD5 qw(md5_hex);
 use XML::Simple;
 my $xml = new XML::Simple (KeyAttr=>[]);
 
 # Uncomment to enable debug output
 #use Data::Dumper;
+
+#------------------------------------------------------------------------------
+# Set PREFERRED_PARSER to XML::Parser. Otherwise it uses XML::SAX which contains
+# bugs that result in XML parse errors that can be fixed by adjusting white-
+# space (i.e. parse errors that do not make sense).
+#------------------------------------------------------------------------------
+$XML::Simple::PREFERRED_PARSER = 'XML::Parser';
 
 #------------------------------------------------------------------------------
 # Open output files for writing
@@ -146,6 +155,7 @@ my $attribute = 'attribute';
 foreach my $argnum (1 .. $#ARGV)
 {
     my $infile = $ARGV[$argnum];
+    my %enumHash;
 
     # read XML file. The ForceArray option ensures that there is an array of
     # attributes even if there is only one attribute in the file
@@ -160,7 +170,15 @@ foreach my $argnum (1 .. $#ARGV)
     foreach my $attr (@{$attributes->{attribute}})
     {
         #----------------------------------------------------------------------
-        # Print the AttributeId to fapiAttributeIds.H
+        # Print the AttributeId enum to fapiAttributeIds.H
+        # The enumerator value for each attribute is a hash value generated
+        # from the attribute name, this ties a specific enumerator value to a
+        # specific attribute name. This is done for Cronus so that if a HWP is
+        # not recompiled against a new eCMD/Cronus version where the attributes
+        # have changed then there will not be a mismatch in enumerator values.
+        # This is a 28bit hash value because the Initfile compiler has a
+        # requirement that the top nibble of the 32 bit attribute ID be zero to
+        # store flags
         #----------------------------------------------------------------------
         if (! exists $attr->{id})
         {
@@ -168,7 +186,19 @@ foreach my $argnum (1 .. $#ARGV)
             exit(1);
         }
 
-        print AIFILE "    $attr->{id},\n";
+        # Calculate a 28 bit hash value.
+        my $attrHash128Bit = md5_hex($attr->{id});
+        my $attrHash28Bit = substr($attrHash128Bit, 0, 7);
+        print AIFILE "    $attr->{id} = 0x$attrHash28Bit,\n";
+
+        if (exists($enumHash{$attrHash28Bit}))
+        {
+            # Two different attributes generate the same hash-value!
+            print ("fapiParseAttributeInfo.pl ERROR. Duplicate attr id hash value\n");
+            exit(1);
+        }
+
+        $enumHash{$attrHash28Bit} = 1;
     };
 }
 
@@ -198,8 +228,6 @@ foreach my $argnum (1 .. $#ARGV)
     #--------------------------------------------------------------------------
     # For each Attribute
     #--------------------------------------------------------------------------
-    my $attCount = 0;
-
     foreach my $attr (@{$attributes->{attribute}})
     {
         #----------------------------------------------------------------------
@@ -270,18 +298,6 @@ foreach my $argnum (1 .. $#ARGV)
             print ("fapiParseAttributeInfo.pl ERROR. valueType not recognized: ");
             print $attr->{valueType}, "\n";
             exit(1);
-        }
-
-        #----------------------------------------------------------------------
-        # Print if the platform initializes the value to fapiAttributeIds.H
-        #----------------------------------------------------------------------
-        if (exists $attr->{platInit})
-        {
-            print AIFILE "#define $attr->{id}_PLATINIT true\n"
-        }
-        else
-        {
-            print AIFILE "#define $attr->{id}_PLATINIT false\n"
         }
 
         #----------------------------------------------------------------------
