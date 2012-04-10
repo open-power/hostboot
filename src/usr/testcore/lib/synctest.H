@@ -92,16 +92,19 @@ class SyncTest: public CxxTest::TestSuite
 
             barrier_init(&barrier,4);
 
-            TASK_INFO t1(this,1);
-            TASK_INFO t2(this,2);
-            TASK_INFO t3(this,3); 
+            TASK_INFO t1 = { this, 1, 0};
+            TASK_INFO t2 = { this, 2, 0};
+            TASK_INFO t3 = { this, 3, 0};
 
-            task_create(watch_counter, &t1);
-            task_create(increment, &t2);
-            task_create(increment, &t3);
+            t1.tid = task_create(watch_counter, &t1);
+            t2.tid = task_create(increment, &t2);
+            t3.tid = task_create(increment, &t3);
 
             barrier_wait(&barrier);
             TS_TRACE("Conditional Variable test final count = %ld",counter);
+            task_wait_tid(t1.tid, NULL, NULL);
+            task_wait_tid(t2.tid, NULL, NULL);
+            task_wait_tid(t3.tid, NULL, NULL);
             barrier_destroy(&barrier);
             sync_cond_destroy(&cond_var);
             mutex_destroy(&mutex);
@@ -117,18 +120,22 @@ class SyncTest: public CxxTest::TestSuite
 
             barrier_init(&barrier,5);
 
-            TASK_INFO t1(this,4);
-            TASK_INFO t2(this,5);
-            TASK_INFO t3(this,6); 
-            TASK_INFO t4(this,7);
+            TASK_INFO t1 = { this, 4, 0};
+            TASK_INFO t2 = { this, 5, 0};
+            TASK_INFO t3 = { this, 6, 0};
+            TASK_INFO t4 = { this, 7, 0};
 
-            task_create(watch_counter, &t1);
-            task_create(watch_counter, &t2);
-            task_create(increment1, &t3);
-            task_create(increment1, &t4);
+            t1.tid = task_create(watch_counter, &t1);
+            t2.tid = task_create(watch_counter, &t2);
+            t3.tid = task_create(increment1, &t3);
+            t4.tid = task_create(increment1, &t4);
 
             barrier_wait(&barrier);
             TS_TRACE("Conditional Variable test final count = %ld",counter);
+            task_wait_tid(t1.tid, NULL, NULL);
+            task_wait_tid(t2.tid, NULL, NULL);
+            task_wait_tid(t3.tid, NULL, NULL);
+            task_wait_tid(t4.tid, NULL, NULL);
             barrier_destroy(&barrier);
             sync_cond_destroy(&cond_var);
             mutex_destroy(&mutex);
@@ -137,17 +144,17 @@ class SyncTest: public CxxTest::TestSuite
 
 
 
-            
+
 
     private:
 
-        enum 
-        { 
+        enum
+        {
             TO_COUNT = 10,
             COUNT_SIGNAL = 13
         };
 
-        typedef std::pair<SyncTest*, size_t> TASK_INFO;
+        struct TASK_INFO { SyncTest* testobj; size_t id;  tid_t tid; };
 
         mutex_t mutex;
         barrier_t barrier;
@@ -201,17 +208,17 @@ class SyncTest: public CxxTest::TestSuite
         static void watch_counter(void * i_p)
         {
             TASK_INFO * info = (TASK_INFO *) i_p;
-            SyncTest * my = info->first;
-            TS_TRACE("CONDVAR task %ld. Start watching counter",info->second);
+            SyncTest * my = info->testobj;
+            TS_TRACE("CONDVAR task %ld. Start watching counter",info->id);
             mutex_lock(&(my->mutex));
             while(my->counter < COUNT_SIGNAL)
             {
                 sync_cond_wait(&(my->cond_var),&(my->mutex));
                 TS_TRACE("CONDVAR task %ld. Condition signal received",
-                         info->second);
+                         info->id);
                 my->counter += 100;
                 TS_TRACE("CONDVAR task %ld. Counter = %ld",
-                         info->second,my->counter);
+                         info->id,my->counter);
             }
             mutex_unlock(&(my->mutex));
             barrier_wait(&(my->barrier));
@@ -221,8 +228,8 @@ class SyncTest: public CxxTest::TestSuite
         static void increment(void * i_p)
         {
             TASK_INFO * info = (TASK_INFO *) i_p;
-            SyncTest * my = info->first;
-            TS_TRACE("CONDVAR task %ld. start Increment counter",info->second);
+            SyncTest * my = info->testobj;
+            TS_TRACE("CONDVAR task %ld. start Increment counter",info->id);
             for(size_t i = 0; i < TO_COUNT; ++i)
             {
                 mutex_lock(&(my->mutex));
@@ -232,10 +239,10 @@ class SyncTest: public CxxTest::TestSuite
                 {
                     sync_cond_signal(&(my->cond_var));
                     TS_TRACE("CONDVAR task %ld. INCR counter = %ld Threshold"
-                             " reached",info->second,my->counter);
+                             " reached",info->id,my->counter);
                 }
                 TS_TRACE("CONDVAR task %ld INCR counter = %ld Unlocking mutex",
-                         info->second, my->counter);
+                         info->id, my->counter);
                 mutex_unlock(&(my->mutex));
                 nanosleep(0,TEN_CTX_SWITCHES_NS);
             }
@@ -245,8 +252,8 @@ class SyncTest: public CxxTest::TestSuite
         static void increment1(void * i_p)
         {
             TASK_INFO * info = (TASK_INFO *) i_p;
-            SyncTest * my = info->first;
-            TS_TRACE("CONDVAR task %ld. start Increment counter",info->second);
+            SyncTest * my = info->testobj;
+            TS_TRACE("CONDVAR task %ld. start Increment counter",info->id);
             for(size_t i = 0; i < TO_COUNT; ++i)
             {
                 mutex_lock(&(my->mutex));
@@ -256,10 +263,10 @@ class SyncTest: public CxxTest::TestSuite
                 {
                     sync_cond_broadcast(&(my->cond_var));
                     TS_TRACE("CONDVAR task %ld. INCR counter = %ld Threshold"
-                             " reached",info->second,my->counter);
+                             " reached",info->id,my->counter);
                 }
                 TS_TRACE("CONDVAR task %ld INCR counter = %ld Unlocking mutex",
-                         info->second, my->counter);
+                         info->id, my->counter);
                 mutex_unlock(&(my->mutex));
                 nanosleep(0,TEN_CTX_SWITCHES_NS);
             }
