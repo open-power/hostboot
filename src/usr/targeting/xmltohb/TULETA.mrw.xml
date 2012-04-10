@@ -121,6 +121,7 @@
         <id>FABRIC_CHIP_ID</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
 </targetInstance>
 
 <!-- TULETA n0p0 EX units -->
@@ -694,6 +695,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>1</default></attribute>
 </targetInstance>
 
 <!-- TULETA n0p1 EX units -->
@@ -1267,6 +1269,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>2</default></attribute>
 </targetInstance>
 
 <!-- TULETA n0p2 EX units -->
@@ -1840,6 +1843,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>3</default></attribute>
 </targetInstance>
 
 <!-- TULETA n0p3 EX units -->
@@ -3902,6 +3906,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -3928,6 +3933,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>1</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -3954,6 +3960,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>2</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -3980,6 +3987,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>3</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -4006,6 +4014,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>4</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -4032,6 +4041,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>5</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -4058,6 +4068,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>6</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -4084,6 +4095,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>7</default></attribute>
 </targetInstance>
 
 <!-- C-DIMM n0:p6 -->
@@ -4112,6 +4124,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>8</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -4138,6 +4151,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>9</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -4164,6 +4178,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>10</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -4190,6 +4205,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>11</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -4216,6 +4232,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>12</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -4242,6 +4259,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>13</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -4268,6 +4286,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>14</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -4294,6 +4313,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>15</default></attribute>
 </targetInstance>
 
 <!-- C-DIMM n0:p5 -->
@@ -4322,6 +4342,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>16</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -4348,6 +4369,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>17</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -4374,6 +4396,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>18</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -4400,6 +4423,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>19</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -4426,6 +4450,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>20</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -4452,6 +4477,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>21</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -4478,6 +4504,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>22</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -4504,6 +4531,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>23</default></attribute>
 </targetInstance>
 
 <!-- C-DIMM n0:p4 -->
@@ -4532,6 +4560,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>24</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -4558,6 +4587,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>25</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -4584,6 +4614,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>26</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -4610,6 +4641,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>27</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -4636,6 +4668,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>28</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -4662,6 +4695,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>29</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -4688,6 +4722,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>30</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -4714,6 +4749,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>31</default></attribute>
 </targetInstance>
 
 <!-- C-DIMM n0:p12 -->
@@ -4742,6 +4778,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>32</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -4768,6 +4805,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>33</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -4794,6 +4832,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>34</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -4820,6 +4859,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>35</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -4846,6 +4886,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>36</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -4872,6 +4913,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>37</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -4898,6 +4940,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>38</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -4924,6 +4967,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>39</default></attribute>
 </targetInstance>
 
 <!-- C-DIMM n0:p13 -->
@@ -4952,6 +4996,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>40</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -4978,6 +5023,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>41</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -5004,6 +5050,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>42</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -5030,6 +5077,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>43</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -5056,6 +5104,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>44</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -5082,6 +5131,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>45</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -5108,6 +5158,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>46</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -5134,6 +5185,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>47</default></attribute>
 </targetInstance>
 
 <!-- C-DIMM n0:p14 -->
@@ -5162,6 +5214,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>48</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -5188,6 +5241,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>49</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -5214,6 +5268,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>50</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -5240,6 +5295,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>51</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -5266,6 +5322,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>52</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -5292,6 +5349,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>53</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -5318,6 +5376,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>54</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -5344,6 +5403,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>55</default></attribute>
 </targetInstance>
 
 <!-- C-DIMM n0:p15 -->
@@ -5372,6 +5432,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>56</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -5398,6 +5459,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>57</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -5424,6 +5486,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>58</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -5450,6 +5513,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>59</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -5476,6 +5540,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>60</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -5502,6 +5567,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>61</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -5528,6 +5594,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>62</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -5554,6 +5621,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>63</default></attribute>
 </targetInstance>
 
 <!-- C-DIMM n0:p23 -->
@@ -5582,6 +5650,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>64</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -5608,6 +5677,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>65</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -5634,6 +5704,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>66</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -5660,6 +5731,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>67</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -5686,6 +5758,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>68</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -5712,6 +5785,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>69</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -5738,6 +5812,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>70</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -5764,6 +5839,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>71</default></attribute>
 </targetInstance>
 
 <!-- C-DIMM n0:p22 -->
@@ -5792,6 +5868,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>72</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -5818,6 +5895,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>73</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -5844,6 +5922,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>74</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -5870,6 +5949,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>75</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -5896,6 +5976,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>76</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -5922,6 +6003,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>77</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -5948,6 +6030,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>78</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -5974,6 +6057,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>79</default></attribute>
 </targetInstance>
 
 <!-- C-DIMM n0:p21 -->
@@ -6002,6 +6086,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>80</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -6028,6 +6113,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>81</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -6054,6 +6140,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>82</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -6080,6 +6167,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>83</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -6106,6 +6194,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>84</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -6132,6 +6221,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>85</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -6158,6 +6248,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>86</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -6184,6 +6275,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>87</default></attribute>
 </targetInstance>
 
 <!-- C-DIMM n0:p20 -->
@@ -6212,6 +6304,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>88</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -6238,6 +6331,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>89</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -6264,6 +6358,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>90</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -6290,6 +6385,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>91</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -6316,6 +6412,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>92</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -6342,6 +6439,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>93</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -6368,6 +6466,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>94</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -6394,6 +6493,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>95</default></attribute>
 </targetInstance>
 
 <!-- C-DIMM n0:p28 -->
@@ -6422,6 +6522,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>96</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -6448,6 +6549,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>97</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -6474,6 +6576,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>98</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -6500,6 +6603,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>99</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -6526,6 +6630,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>100</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -6552,6 +6657,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>101</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -6578,6 +6684,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>102</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -6604,6 +6711,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>103</default></attribute>
 </targetInstance>
 
 <!-- C-DIMM n0:p29 -->
@@ -6632,6 +6740,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>104</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -6658,6 +6767,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>105</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -6684,6 +6794,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>106</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -6710,6 +6821,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>107</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -6736,6 +6848,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>108</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -6762,6 +6875,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>109</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -6788,6 +6902,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>110</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -6814,6 +6929,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>111</default></attribute>
 </targetInstance>
 
 <!-- C-DIMM n0:p30 -->
@@ -6842,6 +6958,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>112</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -6868,6 +6985,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>113</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -6894,6 +7012,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>114</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -6920,6 +7039,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>115</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -6946,6 +7066,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>116</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -6972,6 +7093,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>117</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -6998,6 +7120,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>118</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -7024,6 +7147,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>119</default></attribute>
 </targetInstance>
 
 <!-- C-DIMM n0:p31 -->
@@ -7052,6 +7176,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>120</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -7078,6 +7203,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>121</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -7104,6 +7230,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>122</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -7130,6 +7257,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>123</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -7156,6 +7284,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>124</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -7182,6 +7311,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>125</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -7208,6 +7338,7 @@
         <id>MBA_DIMM</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>126</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -7234,6 +7365,7 @@
         <id>MBA_DIMM</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>127</default></attribute>
 </targetInstance>
 
 </attributes>

@@ -3334,4 +3334,16 @@
 
 <!-- End attributes (4) to test string support -->
 
+<attribute>
+    <id>VPD_REC_NUM</id>
+    <description>Record offset for this target's VPD</description>
+    <simpleType>
+        <uint16_t>
+            <default>0xFFFF</default> 
+        </uint16_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
 </attributes>

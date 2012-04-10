@@ -180,6 +180,7 @@
     </attribute>
     <!-- TODO. MVPD_FREQ_CORE_NOMINAL to be deleted when MVPD available -->
     <attribute><id>MVPD_FREQ_CORE_NOMINAL</id></attribute>
+    <attribute><id>VPD_REC_NUM</id></attribute>
 </targetType>
 
 <targetType>
@@ -952,6 +953,8 @@
 
     <!-- Defaulting this info to the one Simics Dummy device that we have -->
     <attribute><id>EEPROM_ADDR_INFO0</id></attribute>
+
+    <attribute><id>VPD_REC_NUM</id></attribute>
 </targetType>
 
 <targetType>

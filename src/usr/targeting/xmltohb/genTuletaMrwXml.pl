@@ -539,6 +539,7 @@ sub generate_master_proc
         <id>FABRIC_CHIP_ID</id>
         <default>$Mproc</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>$Mproc</default></attribute>
 </targetInstance>
 ";
 }
@@ -607,6 +608,7 @@ sub generate_slave_proc
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>$proc</default></attribute>
 </targetInstance>
 ";
 }
@@ -953,6 +955,7 @@ sub generate_dimm
         <id>MBA_DIMM</id>
         <default>$z</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>$dimm</default></attribute>
 </targetInstance>
 ";
 }
