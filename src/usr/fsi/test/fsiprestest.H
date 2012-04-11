@@ -37,7 +37,6 @@ using namespace TARGETING;
 using namespace DeviceFW;
 
 extern trace_desc_t* g_trac_fsi;
-uint64_t target_to_uint64(const TARGETING::Target* i_target);
 
 
 class FSIPresTest : public CxxTest::TestSuite
@@ -70,7 +69,7 @@ class FSIPresTest : public CxxTest::TestSuite
             while(target)
             {
                 TS_TRACE("FSI-PRES: Testing target %x",
-                         target_to_uint64(*target)); 
+                          TARGETING::get_huid(*target)); 
 
                 // Read presence detect.
                 errlHndl_t l_errl = NULL;
@@ -83,10 +82,10 @@ class FSIPresTest : public CxxTest::TestSuite
                 if (l_errl)
                 {
                     TS_FAIL("FSI-PRES: Cannot perform presence detect. %x",
-                            target_to_uint64(*target));
+                             TARGETING::get_huid(*target));
                     TRACFCOMP(g_trac_fsi,
                               "Failed presence detect. %x",
-                              target_to_uint64(*target));
+                               TARGETING::get_huid(*target));
                 }
                 else if ((*target == l_masterChip) && (!present))
                 {
@@ -114,11 +113,11 @@ class FSIPresTest : public CxxTest::TestSuite
                     {
                         TS_FAIL("FSI-PRES: "
                                 "Error performing read to present device. %x",
-                                target_to_uint64(*target));
+                                 TARGETING::get_huid(*target));
                         TRACFCOMP(g_trac_fsi,
                                   "FSI-PRES: FSI-read failed with %d on %x",
                                   l_errl->reasonCode(),
-                                  target_to_uint64(*target));
+                                  TARGETING::get_huid(*target));
                         // commit this log for debug
                         l_errl->collectTrace("UNIT_TEST",512);
                         errlCommit(l_errl,FSI_COMP_ID);                        
@@ -127,15 +126,15 @@ class FSIPresTest : public CxxTest::TestSuite
                     {
                         TS_FAIL("FSI-PRES: No error performing "
                                 "read to non-present device. %x",
-                                target_to_uint64(*target));
+                                 TARGETING::get_huid(*target));
                         TRACFCOMP(g_trac_fsi,
                                   "FSI-PRES: FSI-read did not fail. %x",
-                                  target_to_uint64(*target));
+                                   TARGETING::get_huid(*target));
                     }
                     else
                     {
                         TS_TRACE("FSI-PRES: Read chip-id %x on %x",
-                                 fsi_data, target_to_uint64(*target));
+                                 fsi_data, TARGETING::get_huid(*target));
                     }
 
                     // Delete any logs that got produced

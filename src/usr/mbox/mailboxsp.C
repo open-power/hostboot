@@ -95,7 +95,7 @@ errlHndl_t MailboxSp::_init()
 
     if(!err)
     {
-        err = MboxDD::init(iv_trgt);
+        err = mboxInit(iv_trgt);
 
         task_create(MailboxSp::msg_handler, NULL);
     }
@@ -160,26 +160,26 @@ void MailboxSp::msgHandler()
 
                         TRACDCOMP(g_trac_mbox,"MBOXSP status=%lx",mbox_status);
 
-                        if(mbox_status & MboxDD::MBOX_HW_ACK)
+                        if(mbox_status & MBOX_HW_ACK)
                         {
                             // send next message if there is one.
                             iv_rts = true;
                             send_msg();
                         }
 
-                        if(mbox_status & MboxDD::MBOX_DATA_PENDING)
+                        if(mbox_status & MBOX_DATA_PENDING)
                         {
                             recv_msg(mbox_msg);
                         }
 
                         // Look for error status from MB hardware
-                        if(mbox_status & MboxDD::MBOX_DOORBELL_ERROR)
+                        if(mbox_status & MBOX_DOORBELL_ERROR)
                         {
                             TRACFCOMP(g_trac_mbox,
                                       ERR_MRK"MBOX status 0x%lx",
                                       mbox_status);
 
-                            if(mbox_status & MboxDD::MBOX_DATA_WRITE_ERR)
+                            if(mbox_status & MBOX_DATA_WRITE_ERR)
                             {
                                 // Write attempted before ACK - HB code error
                                 /*@ errorlog tag
@@ -205,7 +205,7 @@ void MailboxSp::msgHandler()
                                 // will assert later below
                             }
 
-                            else if(mbox_status & MboxDD::MBOX_PARITY_ERR)
+                            else if(mbox_status & MBOX_PARITY_ERR)
                             {
                                 // Hardware detected parity error
                                 // - TODO How does BB handle this error ???
@@ -213,8 +213,8 @@ void MailboxSp::msgHandler()
 
                                 /*@ errorlog tag
                                  * @errortype       ERRL_SEV_INFORMATIONAL
-                                 * @moduleid        MOD_MBOXSRV_HNDLR
-                                 * @reasoncode      RC_PARITY_ERR
+                                 * @moduleid        MBOX::MOD_MBOXSRV_HNDLR
+                                 * @reasoncode      MBOX::RC_PARITY_ERR
                                  * @userdata1       Status from MB device driver
                                  * @defdesc         Mailbox Hardware detected
                                  *                  parity error.
@@ -232,15 +232,15 @@ void MailboxSp::msgHandler()
                                 errlCommit(err,HBMBOX_COMP_ID);
                                 // err = NULL
                             }
-                            else if(mbox_status & MboxDD::MBOX_ILLEGAL_OP)
+                            else if(mbox_status & MBOX_ILLEGAL_OP)
                             {
                                 // Code problem could be FSP or HB 
                                 // - log error and continue.
 
                                 /*@ errorlog tag
                                  * @errortype       ERRL_SEV_INFORMATIONAL
-                                 * @moduleid        MOD_MBOXSRV_HNDLR
-                                 * @reasoncode      RC_ILLEGAL_OP
+                                 * @moduleid        MBOX::MOD_MBOXSRV_HNDLR
+                                 * @reasoncode      MBOX::RC_ILLEGAL_OP
                                  * @userdata1       Status from MB device driver
                                  * @defdesc         Retry failed. Bad status
                                  *                  indicated in PIB status reg.
@@ -259,7 +259,7 @@ void MailboxSp::msgHandler()
                                 // err = NULL
                             }
 
-                            //else if(mbox_status & MboxDD::MBOX_DATA_READ_ERR)
+                            //else if(mbox_status & MBOX_DATA_READ_ERR)
                             //{
                             //    // Read when no message available 
                             //    - Just ignore this one per Dean.
@@ -352,8 +352,8 @@ void MailboxSp::msgHandler()
 
                 /*@ errorlog tag
                  * @errortype       ERRL_SEV_INFORMATIONAL
-                 * @moduleid        MOD_MBOXSRV_HNDLR
-                 * @reasoncode      RC_INVALID_MBOX_MSG_TYPE
+                 * @moduleid        MBOX::MOD_MBOXSRV_HNDLR
+                 * @reasoncode      MBOX::RC_INVALID_MBOX_MSG_TYPE
                  * @userdata1       Message type
                  * @defdesc         Invalid message type sent to mailbox msgQ
                  */
@@ -584,8 +584,8 @@ void MailboxSp::recv_msg(mbox_msg_t & i_mbox_msg)
                 {
                     /*@ errorlog tag
                      * @errortype       ERRL_SEV_CRITICAL_SYS_TERM
-                     * @moduleid        MOD_MBOXSRV_RCV
-                     * @reasoncode      RC_INVALID_QUEUE
+                     * @moduleid        MBOX::MOD_MBOXSRV_RCV
+                     * @reasoncode      MBOX::RC_INVALID_QUEUE
                      * @userdata1       rc from msg_send()
                      * @userdata2       msg queue id
                      * @defdesc         Ivalid msg or msg queue
@@ -632,8 +632,8 @@ void MailboxSp::recv_msg(mbox_msg_t & i_mbox_msg)
 
                 /*@ errorlog tag
                  * @errortype       ERRL_SEV_INFORMATIONAL
-                 * @moduleid        MOD_MBOXSRV_RCV
-                 * @reasoncode      RC_INVALID_MESSAGE_TYPE
+                 * @moduleid        MBOX::MOD_MBOXSRV_RCV
+                 * @reasoncode      MBOX::RC_INVALID_MESSAGE_TYPE
                  * @userdata1       msg queue
                  * @userdata2       msg type
                  * @defdesc         Message from FSP. Message type is not
@@ -678,8 +678,8 @@ void MailboxSp::recv_msg(mbox_msg_t & i_mbox_msg)
 
             /*@ errorlog tag
              * @errortype       ERRL_SEV_CRITICAL_SYS_TERM
-             * @moduleid        MOD_MBOXSRV_RCV
-             * @reasoncode      RC_UNREGISTERED_MSG_QUEUE
+             * @moduleid        MBOX::MOD_MBOXSRV_RCV
+             * @reasoncode      MBOX::RC_UNREGISTERED_MSG_QUEUE
              * @userdata1       msg queueid
              * @defdesc         msg queue type is not registered with the
              *                  mailbox. Message dropped.
@@ -742,8 +742,8 @@ errlHndl_t MailboxSp::send(queue_id_t i_q_id, msg_t * io_msg)
     {
         /*@ errorlog tag
          * @errortype       ERRL_SEV_CRITICAL_SYS_TERM
-         * @moduleid        MOD_MBOXSRV_SEND
-         * @reasoncode      RC_INVALID_QUEUE
+         * @moduleid        MBOX::MOD_MBOXSRV_SEND
+         * @reasoncode      MBOX::RC_INVALID_QUEUE
          * @userdata1       returncode from msg_sendrecv()
          *
          * @defdesc         Invalid message or message queue

@@ -302,7 +302,7 @@ class MboxDDTest : public CxxTest::TestSuite
 
         TRACFCOMP(g_trac_mbox, "MboxDDTest::testWRPoll> Waiting for FSP to send # tests...");
         /* Wait for FSP to ack message before starting the test*/
-        while ((o_status & MboxDD::MBOX_DATA_PENDING) !=  MboxDD::MBOX_DATA_PENDING)
+        while ((o_status & MBOX_DATA_PENDING) !=  MBOX_DATA_PENDING)
             {
             read_size = CTL_SIZE * sizeof(uint32_t);
             l_err = readMessage(my_target, read_mboxMsg, read_size, o_status);
@@ -349,7 +349,7 @@ class MboxDDTest : public CxxTest::TestSuite
                 }
 
             /*If we have a message for us, process it*/
-            if(o_status & MboxDD::MBOX_DATA_PENDING)
+            if(o_status & MBOX_DATA_PENDING)
                 {
                 if(!read_size)
                     {
@@ -384,7 +384,7 @@ class MboxDDTest : public CxxTest::TestSuite
 
 
             /*see if we can send a message to the FSP*/
-            if ((o_status & MboxDD::MBOX_HW_ACK) && (num_msg_send || reply_num))
+            if ((o_status & MBOX_HW_ACK) && (num_msg_send || reply_num))
                 {
                 TRACFCOMP(g_trac_mbox, "MboxDDTest::testWRPoll> Send msg -- reply_num[%d] send_num[%d]",
                           reply_num, num_msg_send);
@@ -478,10 +478,10 @@ class MboxDDTest : public CxxTest::TestSuite
             }
 
         TRACFCOMP(g_trac_mbox, "MboxDDTest::testWRInt> Enable interrupts on MBOX");
-        l_err = MboxDD::init(my_target);
+        l_err = mboxInit(my_target);
         if(l_err)
             {
-            TS_FAIL("Errl from MboxDD::init()");
+            TS_FAIL("Errl from MboxInit()");
             delete l_err;
             l_err = NULL;
             }
@@ -501,7 +501,7 @@ class MboxDDTest : public CxxTest::TestSuite
         /*Ack the IRQ*/
         msg_respond(msgQ,msg);
 
-        if ((o_status & MboxDD::MBOX_DATA_PENDING) != MboxDD::MBOX_DATA_PENDING
+        if ((o_status & MBOX_DATA_PENDING) != MBOX_DATA_PENDING
             || !read_size)
             {
             TS_FAIL("First message Unable to read FSP control response\n");
@@ -550,7 +550,7 @@ class MboxDDTest : public CxxTest::TestSuite
             msg_respond(msgQ,msg);
 
             /*If we have a message for us, process it*/
-            if(o_status & MboxDD::MBOX_DATA_PENDING)
+            if(o_status & MBOX_DATA_PENDING)
                 {
                 if(!read_size)
                     {
@@ -585,7 +585,7 @@ class MboxDDTest : public CxxTest::TestSuite
 
 
             /*see if we can send a message to the FSP*/
-            if ((o_status & MboxDD::MBOX_HW_ACK) && (num_msg_send || reply_num))
+            if ((o_status & MBOX_HW_ACK) && (num_msg_send || reply_num))
                 {
                 TRACFCOMP(g_trac_mbox, "MboxDDTest::testWRInt> Send msg -- reply_num[%d] send_num[%d]",
                           reply_num, num_msg_send);
