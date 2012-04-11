@@ -33,10 +33,19 @@
 #include <devicefw/userif.H>
 #include <mbox/mbox_reasoncodes.H>
 
+#define HBMBOX_TRACE_NAME HBMBOX_COMP_NAME
+
 using namespace MBOX;
 
 // Defined in mboxdd.C
 extern trace_desc_t * g_trac_mbox;
+extern trace_desc_t * g_trac_mboxmsg;
+
+const char HBMBOXMSG_TRACE_NAME[] = "MBOXMSG";
+trace_desc_t* g_trac_mboxmsg = NULL; // g_trac_mbox;
+TRAC_INIT(&g_trac_mboxmsg, HBMBOXMSG_TRACE_NAME, 2048);
+
+
 
 /**
  * setup _start and handle barrier
@@ -139,121 +148,128 @@ void MailboxSp::msgHandler()
                                                mbox_msg_size,
                                                DEVICE_MBOX_ADDRESS(&mbox_status)
                                               );
-
-                    TRACDCOMP(g_trac_mbox,"MBOXSP status=%lx",mbox_status);
-
-                    if(!err && (mbox_status & MboxDD::MBOX_DOORBELL_ERROR))
-                    {
-                        TRACFCOMP(g_trac_mbox,
-                                  ERR_MRK"MBOX status 0x%lx",
-                                  mbox_status);
-
-                        if(mbox_status & MboxDD::MBOX_DATA_WRITE_ERR)
-                        {
-                            // Write attempted before ACK - HB code error
-                            /*@ errorlog tag
-                             * @errortype       ERRL_SEV_CRITICAL_SYS_TERM
-                             * @moduleid        MOD_MBOXSRV_HNDLR
-                             * @reasoncode      RC_DATA_WRITE_ERR
-                             * @userdata1       Status from MB device driver
-                             * @defdesc         Mailbox Data Write attempted
-                             *                  before ACK.
-                             *
-                             */
-                            err = new ERRORLOG::ErrlEntry
-                                (
-                                 ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
-                                 MBOX::MOD_MBOXSRV_HNDLR,
-                                 MBOX::RC_DATA_WRITE_ERR,  //  reason Code
-                                 mbox_status,              //  Status from DD
-                                 0
-                                );
-
-                            err->collectTrace(HBMBOX_COMP_NAME);
-                        }
-
-                        else if(mbox_status & MboxDD::MBOX_PARITY_ERR)
-                        {
-                            // Hardware detected parity error - TODO How does BB handle this error ???
-                            // Log it and continue
-
-                            /*@ errorlog tag
-                             * @errortype       ERRL_SEV_INFORMATIONAL
-                             * @moduleid        MOD_MBOXSRV_HNDLR
-                             * @reasoncode      RC_PARITY_ERR
-                             * @userdata1       Status from MB device driver
-                             * @defdesc         Mailbox Hardware detected
-                             *                  parity error.
-                             */
-                            err = new ERRORLOG::ErrlEntry
-                                (
-                                 ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                 MBOX::MOD_MBOXSRV_HNDLR,
-                                 MBOX::RC_PARITY_ERR,    //  reason Code
-                                 mbox_status,            //  Status from DD
-                                 0
-                                );
-
-                            errlCommit(err,HBMBOX_COMP_ID);
-                            err = NULL;
-                        }
-                        else if(mbox_status & MboxDD::MBOX_ILLEGAL_OP)
-                        {
-                            // Code problem could be FSP or HB - log error and continue.
-
-                            /*@ errorlog tag
-                             * @errortype       ERRL_SEV_INFORMATIONAL
-                             * @moduleid        MOD_MBOXSRV_HNDLR
-                             * @reasoncode      RC_ILLEGAL_OP
-                             * @userdata1       Status from MB device driver
-                             * @defdesc         Retry failed. Bad status
-                             *                  indicated in PIB status reg.
-                             *
-                             */
-                            err = new ERRORLOG::ErrlEntry
-                                (
-                                 ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                 MBOX::MOD_MBOXSRV_HNDLR,
-                                 MBOX::RC_ILLEGAL_OP,    //  reason Code
-                                 mbox_status,            //  Status from DD
-                                 0
-                                );
-                            errlCommit(err,HBMBOX_COMP_ID);
-                            err = NULL;
-                        }
-
-                        //else if(mbox_status & MboxDD::MBOX_DATA_READ_ERR)
-                        //{
-                        //    // Read when no message available - Just ignore this one!
-                        //}
-
-
-                        // The code has the ability to retry sending a message, but currently
-                        // there is no error state that requires it.
-                    }
-
-
-                    if(!err && (mbox_status & MboxDD::MBOX_HW_ACK))
-                    {
-                         // send next message if there is one.
-                        iv_rts = true;
-                        send_msg();
-                    }
-
-                    if(!err && (mbox_status & MboxDD::MBOX_DATA_PENDING))
-                    {
-                        err = recv_msg(mbox_msg);
-                    }
-
-
                     if(err)
                     {
-                        // Probably dead in the water here.
-                        // TODO Mask off MB interrupts??
-                        // No where to send the error so submit it.
-                        // need to still respond to INTR handler.
-                        errlCommit(err,HBMBOX_COMP_ID);
-                        err = NULL;
+                        err->collectTrace(HBMBOX_TRACE_NAME);
+                        err->collectTrace(HBMBOXMSG_TRACE_NAME);
+                        // still need to repond to interrupt handler
+                        // will cause assert() below.
+                    }
+                    else
+                    {
+
+                        TRACDCOMP(g_trac_mbox,"MBOXSP status=%lx",mbox_status);
+
+                        if(mbox_status & MboxDD::MBOX_HW_ACK)
+                        {
+                            // send next message if there is one.
+                            iv_rts = true;
+                            send_msg();
+                        }
+
+                        if(mbox_status & MboxDD::MBOX_DATA_PENDING)
+                        {
+                            recv_msg(mbox_msg);
+                        }
+
+                        // Look for error status from MB hardware
+                        if(mbox_status & MboxDD::MBOX_DOORBELL_ERROR)
+                        {
+                            TRACFCOMP(g_trac_mbox,
+                                      ERR_MRK"MBOX status 0x%lx",
+                                      mbox_status);
+
+                            if(mbox_status & MboxDD::MBOX_DATA_WRITE_ERR)
+                            {
+                                // Write attempted before ACK - HB code error
+                                /*@ errorlog tag
+                                 * @errortype       ERRL_SEV_CRITICAL_SYS_TERM
+                                 * @moduleid        MOD_MBOXSRV_HNDLR
+                                 * @reasoncode      RC_DATA_WRITE_ERR
+                                 * @userdata1       Status from MB device driver
+                                 * @defdesc         Mailbox Data Write attempted
+                                 *                  before ACK.
+                                 *
+                                 */
+                                err = new ERRORLOG::ErrlEntry
+                                    (
+                                     ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
+                                     MBOX::MOD_MBOXSRV_HNDLR,
+                                     MBOX::RC_DATA_WRITE_ERR,  //  reason Code
+                                     mbox_status,              //  Status from DD
+                                     0
+                                    );
+
+                                err->collectTrace(HBMBOX_TRACE_NAME);
+                                err->collectTrace(HBMBOXMSG_TRACE_NAME);
+                                // will assert later below
+                            }
+
+                            else if(mbox_status & MboxDD::MBOX_PARITY_ERR)
+                            {
+                                // Hardware detected parity error
+                                // - TODO How does BB handle this error ???
+                                // Log it and continue
+
+                                /*@ errorlog tag
+                                 * @errortype       ERRL_SEV_INFORMATIONAL
+                                 * @moduleid        MOD_MBOXSRV_HNDLR
+                                 * @reasoncode      RC_PARITY_ERR
+                                 * @userdata1       Status from MB device driver
+                                 * @defdesc         Mailbox Hardware detected
+                                 *                  parity error.
+                                 */
+                                err = new ERRORLOG::ErrlEntry
+                                    (
+                                     ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                     MBOX::MOD_MBOXSRV_HNDLR,
+                                     MBOX::RC_PARITY_ERR,    //  reason Code
+                                     mbox_status,            //  Status from DD
+                                     0
+                                    );
+
+                                err->collectTrace(HBMBOX_TRACE_NAME);
+                                errlCommit(err,HBMBOX_COMP_ID);
+                                // err = NULL
+                            }
+                            else if(mbox_status & MboxDD::MBOX_ILLEGAL_OP)
+                            {
+                                // Code problem could be FSP or HB 
+                                // - log error and continue.
+
+                                /*@ errorlog tag
+                                 * @errortype       ERRL_SEV_INFORMATIONAL
+                                 * @moduleid        MOD_MBOXSRV_HNDLR
+                                 * @reasoncode      RC_ILLEGAL_OP
+                                 * @userdata1       Status from MB device driver
+                                 * @defdesc         Retry failed. Bad status
+                                 *                  indicated in PIB status reg.
+                                 *
+                                 */
+                                err = new ERRORLOG::ErrlEntry
+                                    (
+                                     ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                     MBOX::MOD_MBOXSRV_HNDLR,
+                                     MBOX::RC_ILLEGAL_OP,    //  reason Code
+                                     mbox_status,            //  Status from DD
+                                     0
+                                    );
+                                err->collectTrace(HBMBOX_TRACE_NAME);
+                                errlCommit(err,HBMBOX_COMP_ID);
+                                // err = NULL
+                            }
+
+                            //else if(mbox_status & MboxDD::MBOX_DATA_READ_ERR)
+                            //{
+                            //    // Read when no message available 
+                            //    - Just ignore this one per Dean.
+                            //}
+
+
+                            // The code has the ability to retry sending a
+                            // message, but currently there is no error state
+                            // that requires it.
+                        }
                     }
 
 
@@ -261,6 +277,16 @@ void MailboxSp::msgHandler()
                     msg->data[0] = 0;
                     msg->data[1] = 0;
                     msg_respond(iv_msgQ,msg);
+
+                    // err will be set if scom failed in mbox DD
+                    // or MBOX_DATA_WRITE_ERR  - serious - assert
+                    if(err)
+                    {
+                        // TODO Mask off MB interrupts??
+                        errlCommit(err,HBMBOX_COMP_ID);
+
+                        assert(0);
+                    }
                 }
 
                 break;
@@ -422,18 +448,7 @@ void MailboxSp::send_msg(mbox_msg_t * i_msg)
     size_t mbox_msg_len = sizeof(mbox_msg_t);
     iv_rts = false;
 
-    // TODO make these part of a "fast" trace (Story 39989)
-    TRACFCOMP(g_trac_mbox,
-              "MBOXSP SEND MSG HEAD: msg_id:0x%x msg_queue_id:0x%x",
-              iv_msg_to_send.msg_id,
-              iv_msg_to_send.msg_queue_id);
-
-    TRACFCOMP(g_trac_mbox,
-              "MBOXSP SEND MSG: 0x%08x 0x%016lx 0x%016lx %p",
-              iv_msg_to_send.msg_payload.type,
-              iv_msg_to_send.msg_payload.data[0],
-              iv_msg_to_send.msg_payload.data[1],
-              iv_msg_to_send.msg_payload.extra_data);
+    trace_msg("SEND",iv_msg_to_send);
 
     err = DeviceFW::deviceWrite(iv_trgt,
                                 &iv_msg_to_send,
@@ -477,7 +492,7 @@ void MailboxSp::send_msg(mbox_msg_t * i_msg)
 }
 
 
-errlHndl_t MailboxSp::recv_msg(mbox_msg_t & i_mbox_msg)
+void MailboxSp::recv_msg(mbox_msg_t & i_mbox_msg)
 {
     errlHndl_t err = NULL;
     int rc = 0;
@@ -488,23 +503,11 @@ errlHndl_t MailboxSp::recv_msg(mbox_msg_t & i_mbox_msg)
     // iv_dma_pend = false;
     // call send_msg to send next message if available and rts
     //
-    // TODO - check for secure vs unsecure message types!
 
     msg_t * msg = msg_allocate();
     *msg = i_mbox_msg.msg_payload;  // copy
 
-    // TODO make these part of a "fast" trace  (Story 39989)
-    TRACFCOMP(g_trac_mbox,
-              "MBOXSP MSG HEAD: msg_id:0x%x msg_queue_id:0x%x",
-              i_mbox_msg.msg_id,
-              i_mbox_msg.msg_queue_id);
-
-    TRACFCOMP(g_trac_mbox,
-              "MBOXSP RECV MSG: 0x%08x 0x%016lx 0x%016lx %p",
-              msg->type,
-              msg->data[0],
-              msg->data[1],
-              msg->extra_data);
+    trace_msg("RECV",i_mbox_msg);
 
     // Handle moving data from DMA buffer
     if(msg->extra_data != NULL)
@@ -542,6 +545,7 @@ errlHndl_t MailboxSp::recv_msg(mbox_msg_t & i_mbox_msg)
     }
     else
     {
+        // New incomming message
         msg_q_t msgq = NULL;
 
         registry_t::iterator r = iv_registry.find
@@ -551,23 +555,104 @@ errlHndl_t MailboxSp::recv_msg(mbox_msg_t & i_mbox_msg)
         {
             msgq = r->second;
 
-
-            if(msg_is_async(msg))
+            // Check that the type is within range
+            // TODO also check if in secure mode msg->type > LAST_SECURE_MSG 
+            if(msg->type < MSG_FIRST_SYS_TYPE) // &&
+                // (!is_secure() || (is_secure() && msg->type > LAST_SECURE_MSG))
             {
-                // send msg to queue
-                rc = msg_send(msgq,msg);
+                if(msg_is_async(msg))
+                {
+                    // send msg to queue
+                    rc = msg_send(msgq,msg);
+                }
+                else //sync message from FSP
+                {
+                    // Need to save queue_id and msg_id and msg ptr
+                    // for reponse
+                    msg_respond_t * response = new msg_respond_t(msg);
+                    response->msg_id = i_mbox_msg.msg_id;
+                    response->msg_queue_id = i_mbox_msg.msg_queue_id;
+
+                    iv_respondq.insert(response);
+
+                    rc = msg_sendrecv_noblk(msgq,msg,iv_msgQ);
+                }
+
+                // Since we've filtered out illegal types this can only mean
+                // msgq or msg has a bad memory reference - code problem
+                if(rc)
+                {
+                    /*@ errorlog tag
+                     * @errortype       ERRL_SEV_CRITICAL_SYS_TERM
+                     * @moduleid        MOD_MBOXSRV_RCV
+                     * @reasoncode      RC_INVALID_QUEUE
+                     * @userdata1       rc from msg_send()
+                     * @userdata2       msg queue id
+                     * @defdesc         Ivalid msg or msg queue
+                     *
+                     */
+                    err = new ERRORLOG::ErrlEntry
+                        (
+                         ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
+                         MBOX::MOD_MBOXSRV_RCV,
+                         MBOX::RC_INVALID_QUEUE,    //  reason Code
+                         rc,                        // rc from msg_send
+                         i_mbox_msg.msg_queue_id
+                        );
+
+                    err->collectTrace(HBMBOXMSG_TRACE_NAME);
+                    errlCommit(err,HBMBOX_COMP_ID);
+
+                    free(msg->extra_data);
+                    msg_free(msg);
+
+                    assert(0);
+
+                }
             }
-            else //sync message from FSP
+            else // Bad type range
             {
-                // Need to save queue_id and msg_id and msg ptr
-                // for reponse
-                msg_respond_t * response = new msg_respond_t(msg);
-                response->msg_id = i_mbox_msg.msg_id;
-                response->msg_queue_id = i_mbox_msg.msg_queue_id;
+                //  Send a message to the FSP
+                mbox_msg_t mbox_msg;
+                mbox_msg.msg_queue_id = FSP_MAILBOX_MSGQ;
+                mbox_msg.msg_payload.type = MSG_INVALID_MSG_TYPE;
+                mbox_msg.msg_payload.data[0] = msg->type;
+                mbox_msg.msg_payload.data[1] = i_mbox_msg.msg_queue_id;
+                mbox_msg.msg_payload.extra_data = NULL;
+                mbox_msg.msg_payload.__reserved__async = 1;
 
-                iv_respondq.insert(response);
 
-                rc = msg_sendrecv_noblk(msgq,msg,iv_msgQ);
+                send_msg(&mbox_msg);
+
+                TRACFCOMP(g_trac_mbox,
+                          ERR_MRK
+                          "MailboxSp::recv_msg-Message type 0x%x range error."
+                          " Message dropped.",
+                          msg->type);
+
+                /*@ errorlog tag
+                 * @errortype       ERRL_SEV_INFORMATIONAL
+                 * @moduleid        MOD_MBOXSRV_RCV
+                 * @reasoncode      RC_INVALID_MESSAGE_TYPE
+                 * @userdata1       msg queue
+                 * @userdata2       msg type
+                 * @defdesc         Message from FSP. Message type is not
+                 *                  within a valid range. Message dropped.
+                 */
+                err = new ERRORLOG::ErrlEntry
+                    (
+                     ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                     MBOX::MOD_MBOXSRV_RCV,
+                     MBOX::RC_INVALID_MESSAGE_TYPE  ,    //  reason Code
+                     i_mbox_msg.msg_queue_id,            // rc from msg_send
+                     0
+                    );
+
+                err->collectTrace(HBMBOXMSG_TRACE_NAME);
+                errlCommit(err,HBMBOX_COMP_ID);
+
+                free(msg->extra_data);
+                msg_free(msg);
             }
         }
         else  // unregistered msg_queue_id
@@ -579,57 +664,45 @@ errlHndl_t MailboxSp::recv_msg(mbox_msg_t & i_mbox_msg)
                       "Unregistered msg queue id 0x%x",
                       i_mbox_msg.msg_queue_id);
 
-            // TODO send a response back to the FSP
-            //   msgqueue_id = 0x80000001
-            //   msg type = 0x40000001
+            //  Send a message to the FSP
+            mbox_msg_t mbox_msg;
+            mbox_msg.msg_queue_id = FSP_MAILBOX_MSGQ;
+            mbox_msg.msg_payload.type = MSG_INVALID_MSG_QUEUE_ID;
+            mbox_msg.msg_payload.data[0] = i_mbox_msg.msg_queue_id;
+            mbox_msg.msg_payload.extra_data = NULL;
+            mbox_msg.msg_payload.__reserved__async = 1;
 
-            // TODO add an error log with a user data section containing the
-            // dropped message, including it's extra_data section
-            // Do this after the fake fsp mbserver is no longer being used.
-            // (Story 39989)
+
+            send_msg(&mbox_msg);
+
+
             /*@ errorlog tag
              * @errortype       ERRL_SEV_CRITICAL_SYS_TERM
              * @moduleid        MOD_MBOXSRV_RCV
              * @reasoncode      RC_UNREGISTERED_MSG_QUEUE
              * @userdata1       msg queueid
              * @defdesc         msg queue type is not registered with the
-             *                  mailbox
+             *                  mailbox. Message dropped.
              *
              */
-            //err = new ERRORLOG::ErrlEntry
-            //    (
-            //     ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
-            //     MBOX::MOD_MBOXSRV_RCV,
-            //     MBOX::RC_UNREGISTERED_MSG_QUEUE,    //  reason Code
-            //     i_mbox_msg.msg_queue_id,            // rc from msg_send
-            //     0
-            //    );
-           free(msg->extra_data);
-           msg_free(msg);
+            err = new ERRORLOG::ErrlEntry
+                (
+                 ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
+                 MBOX::MOD_MBOXSRV_RCV,
+                 MBOX::RC_UNREGISTERED_MSG_QUEUE,    //  reason Code
+                 i_mbox_msg.msg_queue_id,            // rc from msg_send
+                 0
+                );
+
+            // This trace will have the message content.
+            err->collectTrace(HBMBOXMSG_TRACE_NAME);
+
+            errlCommit(err,HBMBOX_COMP_ID);
+
+            free(msg->extra_data);
+            msg_free(msg);
        }
     }
-
-    if(rc)
-    {
-        /*@ errorlog tag
-         * @errortype       ERRL_SEV_CRITICAL_SYS_TERM
-         * @moduleid        MOD_MBOXSRV_RCV
-         * @reasoncode      RC_INVALID_QUEUE
-         * @userdata1       rc from msg_send()
-         * @defdesc         Ivalid msg or msg queue
-         *
-         */
-        err = new ERRORLOG::ErrlEntry
-            (
-             ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
-             MBOX::MOD_MBOXSRV_RCV,
-             MBOX::RC_INVALID_QUEUE,    //  reason Code
-             rc,                        // rc from msg_send
-             0
-            );
-    }
-
-    return err;
 }
 
 /**
@@ -685,7 +758,8 @@ errlHndl_t MailboxSp::send(queue_id_t i_q_id, msg_t * io_msg)
              i_q_id                                  //  msg queue id
             );
 
-        // TODO add user section to error log containing io_msg (Story 39989)
+        // This Trace has the msg
+        err->collectTrace(HBMBOXMSG_TRACE_NAME);
     }
 
     return err;
@@ -746,6 +820,24 @@ msg_q_t MailboxSp::msgq_unregister(queue_id_t i_queue_id)
                   i_queue_id);
     }
     return msgQ;
+}
+
+void MailboxSp::trace_msg(const char * i_text,
+                          const mbox_msg_t & i_mbox_msg) const
+{
+    TRACFCOMP(g_trac_mboxmsg,
+              "MBOXSP %s MSG HEAD: msg_id:0x%x msg_queue_id:0x%x",
+              i_text,
+              i_mbox_msg.msg_id,
+              i_mbox_msg.msg_queue_id);
+
+    TRACFCOMP(g_trac_mboxmsg,
+              "MBOXSP %s MSG: 0x%08x 0x%016lx 0x%016lx %p",
+              i_text,
+              i_mbox_msg.msg_payload.type,
+              i_mbox_msg.msg_payload.data[0],
+              i_mbox_msg.msg_payload.data[1],
+              i_mbox_msg.msg_payload.extra_data);
 }
 
 // ----------------------------------------------------------------------------

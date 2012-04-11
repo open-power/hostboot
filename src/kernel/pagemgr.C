@@ -111,7 +111,7 @@ void* PageManager::_allocatePage(size_t n)
 
     int retries = 0;
     page_t* page = (page_t*)NULL;
-    while ((page == NULL) && (retries < 3))
+    while ((page == NULL) && (retries < 6))
     {
 	page = pop_bucket(which_bucket);
 	retries++;
@@ -121,7 +121,8 @@ void* PageManager::_allocatePage(size_t n)
     {
 	// TODO: Add abort instead.
         task_t* t = TaskManager::getCurrentTask();
-	printk("Insufficient memory for alloc of size %zd on tid=%d!\n", n, t->tid);
+	printk("Insufficient memory for alloc of size %zd page on tid=%d!\n", n, t->tid);
+        printk("Pages available=%ld\n",iv_pagesAvail);
 	while(1);
     }
 

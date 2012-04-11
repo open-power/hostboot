@@ -82,7 +82,9 @@ namespace MBOX
      */
     enum msg_type_t
     {
-        MSG_REQUEST_DMA_BUFFERS = FIRST_UNSECURE_MSG,
+        MSG_INVALID_MSG_QUEUE_ID = FIRST_UNSECURE_MSG + 1,
+        MSG_INVALID_MSG_TYPE,
+        MSG_REQUEST_DMA_BUFFERS,
     };
 
 

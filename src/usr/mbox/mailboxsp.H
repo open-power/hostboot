@@ -81,9 +81,6 @@ namespace MBOX
              */
             static errlHndl_t send(queue_id_t i_q_id, msg_t * io_msg);
 
-
-
-
         protected:
 
             /**
@@ -151,9 +148,10 @@ namespace MBOX
             /**
              * Handle a mailbox message received from the device driver
              * @param[in] i_mbox_msg, the mailbox message
-             * @return errlHndl_t on error
+             * @return nothing
+             * @NOTE will commit an error log on errors.
              */
-            errlHndl_t recv_msg(mbox_msg_t & i_mbox_msg);
+            void recv_msg(mbox_msg_t & i_mbox_msg);
 
             /**
              * Register a message queue to receive mailbox messages
@@ -172,6 +170,13 @@ namespace MBOX
              */
             msg_q_t msgq_unregister(queue_id_t i_queue_id);
 
+            /**
+             * Trace the message to the "fast" trace buffer
+             * @param[in] i_text, a Description
+             * @param[in] i_mbox_msg, the message to trace
+             */
+            void trace_msg(const char * i_text,
+                           const mbox_msg_t & i_mbox_msg) const;
 
             enum
             {
