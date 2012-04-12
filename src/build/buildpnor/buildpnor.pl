@@ -214,13 +214,13 @@ sub loadPnorLayout
 
         # trace(4, "$this_func: physicalOffset=$physicalOffset, physicalRegionSize=$physicalRegionSize");
 
-        %{$i_pnorLayoutRef}->{$physicalOffset}{description}=$description;
-        %{$i_pnorLayoutRef}->{$physicalOffset}{eyeCatch}=$eyeCatch;
-        %{$i_pnorLayoutRef}->{$physicalOffset}{physicalOffset}=$physicalOffset;
-        %{$i_pnorLayoutRef}->{$physicalOffset}{physicalRegionSize}=$physicalRegionSize;
-        %{$i_pnorLayoutRef}->{$physicalOffset}{actualRegionSize}=$actualRegionSize;
-        %{$i_pnorLayoutRef}->{$physicalOffset}{ecc}=$ecc;
-        %{$i_pnorLayoutRef}->{$physicalOffset}{source}=$source;
+        $$i_pnorLayoutRef{$physicalOffset}{description} = $description;
+        $$i_pnorLayoutRef{$physicalOffset}{eyeCatch} = $eyeCatch;
+        $$i_pnorLayoutRef{$physicalOffset}{physicalOffset} = $physicalOffset;
+        $$i_pnorLayoutRef{$physicalOffset}{physicalRegionSize} = $physicalRegionSize;
+        $$i_pnorLayoutRef{$physicalOffset}{actualRegionSize} = $actualRegionSize;
+        $$i_pnorLayoutRef{$physicalOffset}{ecc} = $ecc;
+        $$i_pnorLayoutRef{$physicalOffset}{source} = $source;
 
     }
 
@@ -254,16 +254,16 @@ sub genToc
     {
         #trace(1, Dumper(%{$i_pnorLayoutRef}->{$key}));
         # print eyecatcher
-        if(exists(%{$i_pnorLayoutRef}->{$key}{eyeCatch}))
+        if(exists($$i_pnorLayoutRef{$key}{eyeCatch}))
         {
             my $char;
-            my @charArray = unpack("C*", %{$i_pnorLayoutRef}->{$key}{eyeCatch});
+            my @charArray = unpack("C*", $$i_pnorLayoutRef{$key}{eyeCatch});
             foreach $char (@charArray)
             {
                 print $FILEHANDLE pack('C', $char);
             }
             #pad out to get 8 bytes
-            my $zeroPad = 8-length(%{$i_pnorLayoutRef}->{$key}{eyeCatch});
+            my $zeroPad = 8-length($$i_pnorLayoutRef{$key}{eyeCatch});
             insertPadBytes($FILEHANDLE, $zeroPad);
         }
         else
@@ -272,9 +272,9 @@ sub genToc
         }
 
         #print physical offset
-        if(exists(%{$i_pnorLayoutRef}->{$key}{physicalOffset}))
+        if(exists($$i_pnorLayoutRef{$key}{physicalOffset}))
         {
-            my $val = %{$i_pnorLayoutRef}->{$key}{physicalOffset};
+            my $val = $$i_pnorLayoutRef{$key}{physicalOffset};
             #pad first 32 bits
 	    print $FILEHANDLE pack('N', 0);
             #verify number consumes less than 32 bits
@@ -293,9 +293,9 @@ sub genToc
         }
 
         #print physical size
-        if(exists(%{$i_pnorLayoutRef}->{$key}{physicalRegionSize}))
+        if(exists($$i_pnorLayoutRef{$key}{physicalRegionSize}))
         {
-            my $val = %{$i_pnorLayoutRef}->{$key}{physicalRegionSize};
+            my $val = $$i_pnorLayoutRef{$key}{physicalRegionSize};
             #pad first 32 bits
 	    print $FILEHANDLE pack('N', 0);
             #verify number consumes less than 32 bits
@@ -314,9 +314,9 @@ sub genToc
         }
 
         #print actual size
-        if(exists(%{$i_pnorLayoutRef}->{$key}{actualRegionSize}))
+        if(exists($$i_pnorLayoutRef{$key}{actualRegionSize}))
         {
-            my $val = %{$i_pnorLayoutRef}->{$key}{actualRegionSize};
+            my $val = $$i_pnorLayoutRef{$key}{actualRegionSize};
             #pad first 32 bits
             print $FILEHANDLE pack('N', 0);
             #verify number consumes less than 32 bits
@@ -357,7 +357,7 @@ sub fillTocActSize
     my $recordCount = scalar keys %{$i_pnorLayoutRef};
     my $size = ($recordCount*$tocRecordSize);
 
-    if(%{$i_pnorLayoutRef}->{0}{ecc} =~ "yes")
+    if($$i_pnorLayoutRef{0}{ecc} =~ "yes")
     {
         $size=$size*(9/8);
     }
@@ -365,7 +365,7 @@ sub fillTocActSize
     trace(2, "$this_func: PNOR TOC Size=$size");
 
     #Assume TOC is always at address zero for now since it's currently true by design
-    %{$i_pnorLayoutRef}->{0}{actualRegionSize}=$size;
+    $$i_pnorLayoutRef{0}{actualRegionSize}=$size;
 
 
     return $rc;
