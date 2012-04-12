@@ -192,10 +192,11 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
                 if ((*((uint64_t *)io_buffer) & SCOM_IND_COMPLETE_MASK)
                     == SCOM_IND_COMPLETE_MASK)
                 {
-                    // check for bits 37-39 to be 011
+                    // check for bits 33-35 to be 0
                     //   indicating the read is valid
                     if ((*((uint64_t *)io_buffer) & SCOM_IND_ERROR_MASK)
-                        == SCOM_IND_READ_SUCCESS_MASK)
+                        == 0)
+
                     {
                         // Clear out the other bits in the io_buffer
                         // register to only return the read data to caller
@@ -319,10 +320,11 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
                 if ((temp_io_buffer & SCOM_IND_COMPLETE_MASK)
                     == SCOM_IND_COMPLETE_MASK)
                 {
-                    // The write is valid when bits 37-39 are 010..
+                    // The write is valid when bits 33-35 are 0..
                     //      if not on return error
                     if ((temp_io_buffer & SCOM_IND_ERROR_MASK)
-                        != SCOM_IND_WRITE_SUCCESS_MASK)
+                        != 0)
+
                     {
                         // bits did not get turned on.. set error to true.
                         l_indScomError = true;

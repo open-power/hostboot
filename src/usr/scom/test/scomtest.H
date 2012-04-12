@@ -356,7 +356,7 @@ public:
 
       // Setup some targets to use
       enum {
-          myPROC9,
+          myPROC0,
           NUM_TARGETS
       };
       TARGETING::Target* scom_targets[NUM_TARGETS];
@@ -370,9 +370,9 @@ public:
       TARGETING::EntityPath epath(TARGETING::EntityPath::PATH_PHYSICAL);
       epath.addLast(TARGETING::TYPE_SYS,0);
       epath.addLast(TARGETING::TYPE_NODE,0);
-      epath.addLast(TARGETING::TYPE_PROC,9);
+      epath.addLast(TARGETING::TYPE_PROC,0);
 
-      scom_targets[myPROC9] = TARGETING::targetService().toTarget(epath);
+      scom_targets[myPROC0] = TARGETING::targetService().toTarget(epath);
 
       for( uint64_t x = 0; x < NUM_TARGETS; x++ )
       {
@@ -401,8 +401,8 @@ public:
           uint64_t addr;
           uint64_t data;
       } test_data[] = {
-          { scom_targets[myPROC9], 0x80040C0102011A3F ,0x1234432112344321},
-          { scom_targets[myPROC9], 0x800C140002011E3F, 0x123443211234ABAB},
+          { scom_targets[myPROC0], 0x8000F06002011A3F ,0x1234432112344321},
+          { scom_targets[myPROC0], 0x8000086002011E3F, 0x123443211234ABAB},
       };
       const uint64_t NUM_ADDRS = sizeof(test_data)/sizeof(test_data[0]);
 

@@ -33,17 +33,13 @@ namespace SCOM
 {
     enum ScomErrorMask
     {
+        // checkf for complete bit .. bit 32
         SCOM_IND_COMPLETE_MASK = 0x0000000080000000,
-            // this mask if for bit 37-39 for a read/write
-        SCOM_IND_ERROR_MASK =  0x000000007000000,
+        //check for bits 33-35  
+        SCOM_IND_ERROR_MASK =    0x0000000070000000
     };
 
 
-    enum ScomValidMask
-    {
-        SCOM_IND_WRITE_SUCCESS_MASK =  0x000000002000000,
-        SCOM_IND_READ_SUCCESS_MASK = 0x000000003000000,
-    };
 
 /**
  * @brief Performs a SCom operation
