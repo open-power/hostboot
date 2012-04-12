@@ -36,7 +36,7 @@
  *          : Place winkle images in memory
  *
  *  *****************************************************************
- *  THIS FILE WAS GENERATED ON 2012-04-11:1608
+ *  THIS FILE WAS GENERATED ON 2012-04-12:1228
  *  *****************************************************************
  *
  *  Please see the note in initsvcstructs.H for description of

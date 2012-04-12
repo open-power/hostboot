@@ -19,7 +19,7 @@
 #
 #  Origin: 30
 #
-#  IBM_PROLOG_END
+#  IBM_PROLOG_END_TAG
 ROOTPATH = ../../..
 MODULE = mvpd
 
@@ -27,6 +27,6 @@ OBJS = mvpd.o
 
 SUBDIRS = test.d
 
-BINARY_FILES = $(IMGDIR)/procmvpd.dat:3f53917bea971716dd1005dcc889ff02e69b4a59
+BINARY_FILES = $(IMGDIR)/procmvpd.dat:e23067dae839f5b434ec12b5c86d2ae4fbb51259
 
 include ${ROOTPATH}/config.mk

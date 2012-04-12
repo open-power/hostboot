@@ -34,7 +34,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
 ## pointer to common HWP files
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/include
 
-##  NOTE: add the base istep dir here. 
+##  NOTE: add the base istep dir here.
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images
 
 ##  Include sub dirs
@@ -46,11 +46,12 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images
 ##  NOTE: add new object files when you add a new HWP
 OBJS =  build_winkle_images.o
 
-        
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 ##  EXAMPLE:
 #   VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/<HWP_dir>
 
+##  Point to the PORE image in PNOR
+BINARY_FILES = $(IMGDIR)/procpore.dat:1f6e49c91e2a2b0df5fad6c215c8f09d9f19fce6
 
 include ${ROOTPATH}/config.mk
 

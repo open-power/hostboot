@@ -40,7 +40,8 @@
 #include <list>
 #include <targeting/common/attributes.H>
 
-#define BASE_SCRATCH_SPACE (3*1024*1024+1024*512)  //3.5MB offset in fake PNOR
+//$$ #define BASE_SCRATCH_SPACE (3*1024*1024+1024*512)  //3.5MB offset in fake PNOR
+#define BASE_SCRATCH_SPACE (3*1024*1024)  //3.0MB offset in fake PNOR
 
 extern trace_desc_t* g_trac_pnor;
 
@@ -64,7 +65,7 @@ class PnorDdTest : public CxxTest::TestSuite
     {
         TARGETING::Target* l_testTarget =
           TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
-        size_t l_size = sizeof(uint64_t); 
+        size_t l_size = sizeof(uint64_t);
         errlHndl_t l_err = NULL;
         uint64_t fails = 0;
         uint64_t total = 0;
@@ -90,7 +91,7 @@ class PnorDdTest : public CxxTest::TestSuite
             total++;
             if(l_size != sizeof(uint64_t))
             {
-                TS_FAIL("PnorDdTest::test_readwrite: PNORDD write 1: Write length not expected value. Addr: 0x%llx, Exp: %d, Act: %d", l_address, 
+                TS_FAIL("PnorDdTest::test_readwrite: PNORDD write 1: Write length not expected value. Addr: 0x%llx, Exp: %d, Act: %d", l_address,
                         sizeof(uint64_t), l_size);
                 fails++;
             }
@@ -113,7 +114,7 @@ class PnorDdTest : public CxxTest::TestSuite
             total++;
             if(l_size != sizeof(uint64_t))
             {
-                TS_FAIL("PnorDdTest::test_readwrite: PNORDD write 2: Write length not expected value. Addr: 0x%llx, Exp: %d, Act: %d", l_address, 
+                TS_FAIL("PnorDdTest::test_readwrite: PNORDD write 2: Write length not expected value. Addr: 0x%llx, Exp: %d, Act: %d", l_address,
                         sizeof(uint64_t), l_size);
                 fails++;
             }
@@ -143,7 +144,7 @@ class PnorDdTest : public CxxTest::TestSuite
             total++;
             if(l_size != sizeof(uint64_t))
             {
-                TS_FAIL("PnorDdTest::test_readwrite: PNORDD read 1: Read length not expected value. Addr: 0x%llx, Exp: %d, Act: %d", l_address, 
+                TS_FAIL("PnorDdTest::test_readwrite: PNORDD read 1: Read length not expected value. Addr: 0x%llx, Exp: %d, Act: %d", l_address,
                         sizeof(uint64_t), l_size);
                 fails++;
             }
@@ -172,7 +173,7 @@ class PnorDdTest : public CxxTest::TestSuite
             total++;
             if(l_size != sizeof(uint64_t))
             {
-                TS_FAIL("PnorDdTest::test_readwrite: PNORDD read 2: Read length not expected value. Addr: 0x%llx, Exp: %d, Act: %d", l_address, 
+                TS_FAIL("PnorDdTest::test_readwrite: PNORDD read 2: Read length not expected value. Addr: 0x%llx, Exp: %d, Act: %d", l_address,
                         sizeof(uint64_t), l_size);
                 fails++;
             }
@@ -191,7 +192,7 @@ class PnorDdTest : public CxxTest::TestSuite
     {
         TARGETING::Target* l_testTarget =
           TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
-        size_t l_size = sizeof(uint64_t); 
+        size_t l_size = sizeof(uint64_t);
         errlHndl_t l_err = NULL;
         uint64_t fails = 0;
         uint64_t total = 0;
@@ -318,7 +319,7 @@ class PnorDdTest : public CxxTest::TestSuite
     {
         TARGETING::Target* l_testTarget =
           TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
-        size_t l_size = sizeof(uint64_t); 
+        size_t l_size = sizeof(uint64_t);
         errlHndl_t l_err = NULL;
         uint64_t fails = 0;
         uint64_t total = 0;
@@ -326,7 +327,7 @@ class PnorDdTest : public CxxTest::TestSuite
         do{
             TS_TRACE("PnorDdTest::test_crossblock: starting");
 
-            // Find the nearest erase-block (4K) boundary 
+            // Find the nearest erase-block (4K) boundary
             uint64_t l_boundary = (BASE_SCRATCH_SPACE+4096)
                                    - (BASE_SCRATCH_SPACE%4096);
             uint64_t l_address = 0;
@@ -381,7 +382,7 @@ class PnorDdTest : public CxxTest::TestSuite
     void test_readwrite_modes(void)
     {
         PnorDD* pnordd = NULL;
-        size_t l_size = sizeof(uint64_t); 
+        size_t l_size = sizeof(uint64_t);
         errlHndl_t l_err = NULL;
         uint64_t fails = 0;
         uint64_t total = 0;
@@ -533,7 +534,7 @@ class PnorDdTest : public CxxTest::TestSuite
     void test_smartwrite_modes(void)
     {
         PnorDD* pnordd = NULL;
-        size_t l_size = sizeof(uint64_t); 
+        size_t l_size = sizeof(uint64_t);
         errlHndl_t l_err = NULL;
         uint64_t fails = 0;
         uint64_t total = 0;
@@ -680,7 +681,7 @@ class PnorDdTest : public CxxTest::TestSuite
     void test_crossblock_modes(void)
     {
         PnorDD* pnordd = NULL;
-        size_t l_size = sizeof(uint64_t); 
+        size_t l_size = sizeof(uint64_t);
         errlHndl_t l_err = NULL;
         uint64_t fails = 0;
         uint64_t total = 0;
@@ -709,7 +710,7 @@ class PnorDdTest : public CxxTest::TestSuite
                 }
                 pnordd = new PnorDD(*m);
 
-                // Find the nearest erase-block (4K) boundary 
+                // Find the nearest erase-block (4K) boundary
                 uint64_t l_boundary = (BASE_SCRATCH_SPACE+4096)
                   - (BASE_SCRATCH_SPACE%4096);
                 uint64_t l_address = 0;
@@ -769,7 +770,7 @@ Leaving it commented out because the test-case will not dynamically find the ext
     {
 
       TARGETING::Target* l_testTarget = MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
-      size_t l_size = sizeof(uint64_t); 
+      size_t l_size = sizeof(uint64_t);
       errlHndl_t l_err = NULL;
 
       do{

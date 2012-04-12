@@ -147,7 +147,8 @@
 #
 #
 #   Make up a new directory  src/usr/hwpf/hwp/<@istepname>/<@substepname>
-#   Copy code for new HWP to src/usr/hwpf/hwp/<@istepname>/<@substepname>. using git.
+#   Copy code for new HWP to src/usr/hwpf/hwp/<@istepname>/<@substepname>,
+#   using git:
 #   - Go to the Gerrit page where the HWP is, and select the line to generate
 #       a patch
 #   - run this line and pipe it to a file.
@@ -161,7 +162,7 @@
 #       git apply --directory=src/usr/hwpf/hwp/mc_init/mss_eff_config   mss_eff_config.patch
 #
 #   Add makefile support for the new HWP:
-#   -   src/usr/hwpf/makefile       ( add to HWP_ERROR_XML_FILES )
+#   -   src/usr/hwpf/makefile       ( add any xml files to HWP_ERROR_XML_FILES )
 #   - Scan src/usr/hwpf/hwp/@substepname/makefile for the line:
 #       ##  NOTE: add a new EXTRAINCDIR when you add a new HWP
 #   - Add new line just after it:

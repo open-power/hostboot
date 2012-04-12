@@ -80,7 +80,8 @@ hbicore_EXTENDED_MODULES = ${EXTENDED_MODULES}
 # The sbe_pnor.bin is manually built from CVS SBE procedure files in CVS then copy
 # into HostBoot for now.  HostBoot build team will have a process of building sbe_pnor
 # image later.
-hbicore_DATA_MODULES =  sample.if dimmspd.dat sbe_pnor.bin procmvpd.dat
+hbicore_DATA_MODULES =  sample.if dimmspd.dat sbe_pnor.bin procmvpd.dat \
+                        procpore.dat
 
 hbicore_LIDNUMBER = 80f00100
 
