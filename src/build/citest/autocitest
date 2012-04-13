@@ -326,10 +326,10 @@ loopcount=0
 while [ $(($modsstarted)) -lt 1 -o $(($modsstarted)) -ne $(($modscompleted)) ]; do
     sleep 5
     ((loopcount++))     # increment loopcount
+        autosim $NOWIN --simcmd   "phys_mem.read 0x$mods_completed_addr 0x08"     1> $SBXHOME/modscompleted.log  2> /dev/null
+    modscompleted=`cat $SBXHOME/modscompleted.log | xargs echo -n`
     autosim $NOWIN --simcmd   "phys_mem.read 0x$mods_started_addr 0x08"     1> $SBXHOME/modsstarted.log  2> /dev/null
     modsstarted=`cat $SBXHOME/modsstarted.log | xargs echo -n`
-    autosim $NOWIN --simcmd   "phys_mem.read 0x$mods_completed_addr 0x08"     1> $SBXHOME/modscompleted.log  2> /dev/null
-    modscompleted=`cat $SBXHOME/modscompleted.log | xargs echo -n`
 
     echo "ModulesStarted:ModulesCompleted  => $modsstarted:$modscompleted"
     
