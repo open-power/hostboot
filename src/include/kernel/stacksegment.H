@@ -85,7 +85,7 @@ class StackSegment : public Segment
          *
          * Calls block chain to deal with page fault.
          */
-        bool handlePageFault(task_t* i_task, uint64_t i_addr);
+        bool handlePageFault(task_t* i_task, uint64_t i_addr, bool i_store);
 
         /**
          * @brief Locate the physical address of the given virtual address

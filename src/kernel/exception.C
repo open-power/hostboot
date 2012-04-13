@@ -58,8 +58,10 @@ void kernel_execute_prog_ex()
     }
 }
 
-const uint64_t EXCEPTION_DSISR_MASK	= 0x0000000040000000;
+const uint64_t EXCEPTION_DSISR_MASK	= 0x0000000048000000;
 const uint64_t EXCEPTION_DSISR_PTEMISS  = 0x0000000040000000;
+const uint64_t EXCEPTION_DSISR_PERMERR  = 0x0000000008000000;
+const uint64_t EXCEPTION_DSISR_STORE    = 0x0000000002000000;
 
 extern "C"
 void kernel_execute_data_storage()
@@ -71,8 +73,21 @@ void kernel_execute_data_storage()
     switch(exception)
     {
 	case EXCEPTION_DSISR_PTEMISS:
-	    handled = VmmManager::pteMiss(t, getDAR());
+        {
+            uint64_t is_store = getDSISR() & EXCEPTION_DSISR_STORE;
+            handled = VmmManager::pteMiss(t, getDAR(), 0 != is_store);
+            break;
+        }
+
+        case EXCEPTION_DSISR_PERMERR:
+        {
+            uint64_t is_store = getDSISR() & EXCEPTION_DSISR_STORE;
+            if (is_store)
+            {
+	        handled = VmmManager::pteMiss(t, getDAR(), true);
+            }
 	    break;
+        }
     }
     if (!handled)
     {
@@ -103,7 +118,7 @@ void kernel_execute_inst_storage()
     switch (exception)
     {
         case EXCEPTION_SRR1_INSTR_PTEMISS:
-            handled = VmmManager::pteMiss(t, getSRR0());
+            handled = VmmManager::pteMiss(t, getSRR0(), false);
             break;
     }
     if (!handled)

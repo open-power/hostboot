@@ -30,10 +30,11 @@
 #include <kernel/segment.H>
 #include <kernel/devicesegment.H>
 
-bool SegmentManager::handlePageFault(task_t* i_task, uint64_t i_addr)
+bool SegmentManager::handlePageFault(task_t* i_task, uint64_t i_addr,
+                                     bool i_store)
 {
     return Singleton<SegmentManager>::instance().
-                _handlePageFault(i_task, i_addr);
+                _handlePageFault(i_task, i_addr, i_store);
 }
 
 void SegmentManager::addSegment(Segment* i_segment, size_t i_segId)
@@ -72,14 +73,15 @@ int SegmentManager::devUnmap(void* ea)
     return Singleton<SegmentManager>::instance()._devUnmap(ea);
 }
 
-bool SegmentManager::_handlePageFault(task_t* i_task, uint64_t i_addr)
+bool SegmentManager::_handlePageFault(task_t* i_task, uint64_t i_addr,
+                                      bool i_store)
 {
     size_t segId = getSegmentIdFromAddress(i_addr);
 
     // Call contained segment object to handle page fault.
     if ((segId < MAX_SEGMENTS) && (NULL != iv_segments[segId]))
     {
-        return iv_segments[segId]->handlePageFault(i_task, i_addr);
+        return iv_segments[segId]->handlePageFault(i_task, i_addr, i_store);
     }
 
     return false;

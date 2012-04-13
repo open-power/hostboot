@@ -66,9 +66,9 @@ void VmmManager::init_slb()
     v.initSDR1(); /*no effect*/ // BEAM Fix.
 }
 
-bool VmmManager::pteMiss(task_t* t, uint64_t effAddr)
+bool VmmManager::pteMiss(task_t* t, uint64_t effAddr, bool store)
 {
-    return Singleton<VmmManager>::instance()._pteMiss(t, effAddr);
+    return Singleton<VmmManager>::instance()._pteMiss(t, effAddr, store);
 }
 
 uint64_t VmmManager::findPhysicalAddress(uint64_t i_vaddr)
@@ -112,11 +112,11 @@ void VmmManager::initSDR1()
     asm volatile("mtsdr1 %0" :: "r"(sdr1) : "memory");
 }
 
-bool VmmManager::_pteMiss(task_t* t, uint64_t effAddr)
+bool VmmManager::_pteMiss(task_t* t, uint64_t effAddr, bool store)
 {
     lock.lock();
 
-    bool rc = SegmentManager::handlePageFault(t, effAddr);
+    bool rc = SegmentManager::handlePageFault(t, effAddr, store);
 
     lock.unlock();
 

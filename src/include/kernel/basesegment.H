@@ -64,7 +64,8 @@ class BaseSegment : public Segment
          *
          * Calls block chain to deal with page fault.
          */
-        virtual bool handlePageFault(task_t* i_task, uint64_t i_addr);
+        virtual bool handlePageFault(task_t* i_task, uint64_t i_addr,
+                                     bool i_store);
 
         /**
          * @brief Implementation of the pure-virtual function from Segment.
@@ -108,8 +109,8 @@ class BaseSegment : public Segment
 
         /**
          * @brief Sets the page permissions for a given virtual address and size.
-         * @param i_va[in] - virtual address of the page(s) to set permissions  
-         * @param i_size[in] - range of memory that needs permissions updated... 
+         * @param i_va[in] - virtual address of the page(s) to set permissions
+         * @param i_size[in] - range of memory that needs permissions updated...
          *           if i_size equals 0 then we only need to update an
          *           individual page.
          * @param i_access_type[in] - type of permission to set
@@ -148,7 +149,7 @@ class BaseSegment : public Segment
         /**
          * @brief Sets the page permissions for a given virtual address and size.
          * @param i_va[in] - virtual address of the page(s) to set permissions
-         * @param i_size[in] - range of memory that needs permissions updated... 
+         * @param i_size[in] - range of memory that needs permissions updated...
          *          if i_size equals 0 then we only need to update an individual
          *          page.
          * @param i_access_type[in] - type of permission to set

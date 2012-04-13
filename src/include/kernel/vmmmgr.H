@@ -77,13 +77,14 @@ class VmmManager
          *
          * @param[in] t - Task causing the page fault.
          * @param[in] effAddr - Effective address accessed to cause fault.
+         * @param[in] store - The PTE miss was due to a store.
          *
          * @return true - PTE miss was successfully handled.
          *
          * If the PTE miss is not successfully handled, the exception
          * handler should collect debug information and kill the task.
          */
-        static bool pteMiss(task_t* t, uint64_t effAddr);
+        static bool pteMiss(task_t* t, uint64_t effAddr, bool store);
 
         /**
          * @brief Map a device into the device segment
@@ -177,7 +178,7 @@ class VmmManager
         void initPTEs();
         void initSDR1();
 
-        bool _pteMiss(task_t*, uint64_t);
+        bool _pteMiss(task_t*, uint64_t, bool);
 
         /** See findPhysicalAddress */
         uint64_t _findPhysicalAddress(uint64_t i_vaddr);

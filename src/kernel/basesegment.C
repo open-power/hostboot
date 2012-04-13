@@ -89,10 +89,10 @@ void BaseSegment::_init()
     }
 }
 
-bool BaseSegment::handlePageFault(task_t* i_task, uint64_t i_addr)
+bool BaseSegment::handlePageFault(task_t* i_task, uint64_t i_addr, bool i_store)
 {
     // Tail recursion to block chain.
-    return iv_block->handlePageFault(i_task, i_addr);
+    return iv_block->handlePageFault(i_task, i_addr, i_store);
 }
 
 /**

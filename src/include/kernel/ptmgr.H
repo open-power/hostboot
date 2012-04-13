@@ -59,12 +59,12 @@ class PageTableManager
     {
         PT_SIZE = (1 << 18), /**< Size of Page Table in bytes */
         PTE_SIZE = /**< Size of 1 Page Table Entry in bytes */
-            2*sizeof(uint64_t), 
+            2*sizeof(uint64_t),
         PTEG_SIZE = 8, /**< Number of PTEs in a single PTE Group */
         PTEG_COUNT =  /**< Number of PTEGs in the Page Table */
             (PT_SIZE / PTE_SIZE) / PTEG_SIZE,
         INVALID_PN = /**< Error value for a Page Number return */
-            0xFFFFFFFFFFFFFFFF, 
+            0xFFFFFFFFFFFFFFFF,
     };
 
     /**
@@ -72,7 +72,7 @@ class PageTableManager
      */
     struct UsageStats_t {
 	union {
-	    struct { 
+	    struct {
 		uint64_t C:1;    /**< Page has been modified  */
 		uint64_t R:1;    /**< Page has been referenced  */
 		uint64_t LRU:2;  /**< Current value of LRU  */
@@ -299,6 +299,11 @@ class PageTableManager
     /**
      * @brief  Write a PTE to memory and update caches appropriately
      *
+     * @note This function should only be used to change a PTE from valid to
+     *       invalid or from invalid to valid, unless modifying the permissions
+     *       on an existing PTE (without changing addresses).  Use in two
+     *       stages otherwise.
+     *
      * @param[in] i_pte  Local pointer to PTE data
      * @param[in] i_dest  Real Address inside page table to write i_pte data into
      * @param[in] i_valid  true=set Valid bit, false=clear Valid bit
@@ -371,11 +376,21 @@ class PageTableManager
     uint64_t getStatus( PageTableEntry* i_pte );
 
     /**
-     * @brief Update the LRU statistics for other PTEs in the same PTEG as the target
+     * @brief Update the LRU statistics for other PTEs in the same PTEG as the
+     *        target
      *
-     * @param[in] i_newPTE  Real address of PTE that is being added to the Page Table
+     * @param[in] i_newPTE  Real address of PTE that is being added to the
+     *                      Page Table
      */
-    void updateLRU( const PageTableEntry* i_newPTE );
+    void updateLRUGroup( const PageTableEntry* i_newPTE );
+
+    /**
+     * @brief Update the LRU statistics for a specific PTE.
+     *
+     * @param[in] i_newPTE  Real address of PTE to update.
+     */
+    void updateLRUEntry( PageTableEntry* i_newPTE );
+
 
     /**
      * @brief Invalidate TLB for a PTE
@@ -449,7 +464,7 @@ class PageTableManager
      *
      * @param[out] o_pte  PTE to modify
      */
-    static void setupDefaultPTE( PageTableEntry* o_pte );
+    static void setupDefaultPTE( PageTableEntry* o_pte ) ALWAYS_INLINE;
 
     /**
      * @brief  Push C/R/LRU bits to the VMM

@@ -56,12 +56,13 @@ class DeviceSegment : public Segment
 
         /**
          * @brief Handle a page fault for a device address access
-         * @param i_task[in] - Task pointer to the task requiring the page
-         * @param i_addr[in] - 64-bit address needed to be paged
+         * @param[in] i_task - Task pointer to the task requiring the page
+         * @param[in] i_addr - 64-bit address needed to be paged
+         * @param[in] i_store - Fault was due to a store.
          * @return bool - true: Page added to page table
          *               false: Not a valid address to be paged
          */
-        bool handlePageFault(task_t* i_task, uint64_t i_addr);
+        bool handlePageFault(task_t* i_task, uint64_t i_addr, bool i_store);
 
 
         /**

@@ -61,7 +61,8 @@ StackSegment::~StackSegment()
     } while (l_node != NULL);   /*using deallocated*/ // BEAM invalid error.
 }
 
-bool StackSegment::handlePageFault(task_t* i_task, uint64_t i_addr)
+bool StackSegment::handlePageFault(task_t* i_task, uint64_t i_addr,
+                                   bool i_store)
 {
     uint64_t l_addr_8mb = i_addr & ~((8*MEGABYTE) - 1);
 
@@ -69,7 +70,7 @@ bool StackSegment::handlePageFault(task_t* i_task, uint64_t i_addr)
 
     return (NULL == l_node ?
                 false :
-                l_node->block->handlePageFault(i_task, i_addr));
+                l_node->block->handlePageFault(i_task, i_addr, i_store));
 }
 
 uint64_t StackSegment::findPhysicalAddress(uint64_t i_vaddr) const

@@ -78,13 +78,15 @@ ShadowPTE* Block::getPTE(uint64_t i_addr) const
     return &iv_ptes[(i_addr - iv_baseAddr) / PAGESIZE];
 };
 
-bool Block::handlePageFault(task_t* i_task, uint64_t i_addr)
+
+bool Block::handlePageFault(task_t* i_task, uint64_t i_addr, bool i_store)
 {
     // Check containment, call down chain if address isn't in this block.
     if (!isContained(i_addr))
     {
         return (iv_nextBlock ?
-                    iv_nextBlock->handlePageFault(i_task, i_addr) : false);
+                    iv_nextBlock->handlePageFault(i_task, i_addr, i_store) :
+                    false);
     }
 
     // Calculate page aligned virtual address.
@@ -101,6 +103,19 @@ bool Block::handlePageFault(task_t* i_task, uint64_t i_addr)
       return false;
     }
 
+    // Mark the page as dirty if this is a store to it.
+    if (i_store)
+    {
+        if (pte->isWritable())
+        {
+            pte->setDirty(true);
+        }
+        else // Store to non-writable page!  This is a permission fault, so
+             // return unhandled.
+        {
+            return false;
+        }
+    }
 
     if (!pte->isPresent())
     {
@@ -152,7 +167,7 @@ bool Block::handlePageFault(task_t* i_task, uint64_t i_addr)
             l_addr_palign,
             pte->getPage(),
             (pte->isExecutable() ? EXECUTABLE :
-                (pte->isWritable() ? WRITABLE :
+                ((pte->isWritable() && pte->isDirty()) ? WRITABLE :
                                      READ_ONLY)));
 
     return true;
@@ -217,8 +232,9 @@ void Block::attachSPTE(void *i_vaddr)
     PageTableManager::addEntry((l_vaddr / PAGESIZE) * PAGESIZE,
                                 l_pte->getPage(),
                                 (l_pte->isExecutable() ? EXECUTABLE :
-                                 (l_pte->isWritable() ? WRITABLE :
-                                  READ_ONLY)));
+                                 ((l_pte->isWritable() && l_pte->isDirty()) ?
+                                    WRITABLE :
+                                    READ_ONLY)));
 
     // update permission for the page that corresponds to the physical page
     // addr now that we have handled the page fault.
@@ -257,9 +273,6 @@ uint64_t Block::findPhysicalAddress(uint64_t i_vaddr) const
 
 void Block::releaseAllPages()
 {
-    // Release all pages from page table.
-    PageTableManager::delRangeVA(iv_baseAddr, iv_baseAddr + iv_size);
-
     // Free all pages back to page manager.
     for(uint64_t page = iv_baseAddr;
         page < (iv_baseAddr + iv_size);
@@ -268,6 +281,7 @@ void Block::releaseAllPages()
         ShadowPTE* pte = getPTE(page);
         if (pte->isPresent())
         {
+            PageTableManager::delEntry(page);
             uint64_t addr = pte->getPageAddr();
             if (0 != addr)
             {
@@ -307,12 +321,6 @@ void Block::updateRefCount( uint64_t i_vaddr,
     else
     {
         spte->incLRU();
-    }
-
-    // track the changed/dirty bit
-    if (i_stats.C)
-    {
-        spte->setDirty( i_stats.C );
     }
 }
 

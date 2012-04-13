@@ -53,6 +53,7 @@ class Segment
          *
          * @param[in] i_task - Task causing the page fault.
          * @param[in] i_addr - Effective address accessed to cause fault.
+         * @param[in] i_store - The fault was due to a store.
          *
          * @return true - Page fault was successfully handled.
          *
@@ -60,7 +61,8 @@ class Segment
          * that the VMM will perform appropriate action, such as killing the
          * task.
          */
-        virtual bool handlePageFault(task_t* i_task, uint64_t i_addr) = 0;
+        virtual bool handlePageFault(task_t* i_task, uint64_t i_addr,
+                                     bool i_store) = 0;
 
         /**
          * @brief Get the base address of this segment.

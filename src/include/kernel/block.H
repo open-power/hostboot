@@ -104,6 +104,7 @@ class Block
          *
          * @param[in] i_task - Task causing the page fault.
          * @param[in] i_addr - Effective address accessed to cause fault.
+         * @param[in] i_store - The fault was due to a store.
          *
          * @return true - Page fault was successfully handled.
          *
@@ -114,14 +115,14 @@ class Block
          * If the address is not within this block, the block will attempt to
          * make calls down the block-chain if it exists.
          */
-        bool handlePageFault(task_t* i_task, uint64_t i_addr);
+        bool handlePageFault(task_t* i_task, uint64_t i_addr, bool i_store);
 
         /**
          * @brief Locate the physical address of the given virtual address
          *
          * @param[in] i_vaddr virtual address
          *
-         * @return the physical address bound to the virtual address, 
+         * @return the physical address bound to the virtual address,
          *         -EFAULT if not found @see errno.h
          */
         uint64_t findPhysicalAddress(uint64_t i_vaddr) const;
@@ -202,7 +203,7 @@ class Block
          *          and a size of memory needing updated permissions
          * @param i_va[in] - virtual address of the beginning of the
          *           pages that need updating.
-         * @param i_size[in] - range of memory that needs updating 
+         * @param i_size[in] - range of memory that needs updating
          *          if i_size equals 0 then we only need to update an
          *          individual page.
          * @param i_access_type[in] - type of permission to set using

@@ -49,7 +49,8 @@ void DeviceSegment::init(size_t segId)
  * @return bool - TRUE: Page added to page table
  *               FALSE: Not a valid address to be paged
  */
-bool DeviceSegment::handlePageFault(task_t* i_task, uint64_t i_addr)
+bool DeviceSegment::handlePageFault(task_t* i_task, uint64_t i_addr,
+                                    bool i_store)
 {
     //Verify input address falls within this segment's address range
     if (i_addr < this->getBaseAddress() ||

@@ -84,6 +84,7 @@ class SegmentManager
          *
          * @param[in] i_task - Task causing the page fault.
          * @param[in] i_addr - Effective address accessed to cause fault.
+         * @param[in] i_store - The page fault was due to a store.
          *
          * @return true - Page fault was successfully handled.
          *
@@ -91,7 +92,8 @@ class SegmentManager
          * that the VMM will perform appropriate action, such as killing the
          * task.
          */
-        static bool handlePageFault(task_t* i_task, uint64_t i_addr);
+        static bool handlePageFault(task_t* i_task, uint64_t i_addr,
+                                    bool i_store);
 
         /**
          * @brief Adds a segment to the container.
@@ -150,7 +152,7 @@ class SegmentManager
 
     private:
         /** See handlePageFault. */
-        bool _handlePageFault(task_t* i_task, uint64_t i_addr);
+        bool _handlePageFault(task_t* i_task, uint64_t i_addr, bool i_store);
         /** See addSegment. */
         void _addSegment(Segment* i_segment, size_t i_segId);
         /** See getSegment. */

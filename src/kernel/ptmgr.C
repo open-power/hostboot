@@ -38,62 +38,78 @@
 
 /**
  * @brief Extract a set of bits and right-justify the result
- * @param i_var64[in]  64-bit word to extract data from
- * @param i_startbit[in]  Bit to start extraction from
- * @param i_lastbit[in]  Bit to stop extraction on, inclusive
+ * @param[in] i_var64  64-bit word to extract data from
+ * @param[in] i_startbit  Bit to start extraction from
+ * @param[in] i_lastbit  Bit to stop extraction on, inclusive
  * @return uint64_t  Right-justified data
  */
-ALWAYS_INLINE uint64_t EXTRACT_RJ( uint64_t i_var64,
-                                   uint64_t i_startbit,
-                                   uint64_t i_lastbit )
+ALWAYS_INLINE static
+uint64_t EXTRACT_RJ( uint64_t i_var64,
+                     uint64_t i_startbit,
+                     uint64_t i_lastbit )
 {
-    uint64_t mask = ((0xFFFFFFFFFFFFFFFF >> i_startbit) & (0xFFFFFFFFFFFFFFFF << (63 - i_lastbit)));
+    uint64_t mask = ((0xFFFFFFFFFFFFFFFF >> i_startbit) &
+                     (0xFFFFFFFFFFFFFFFF << (63 - i_lastbit)));
     uint64_t result = (i_var64 & mask) >> (63 - i_lastbit);
     return result;
 }
 
 /**
  * @brief Extract a set of bits and left-justify the result
- * @param i_var64[in]  64-bit word to extract data from
- * @param i_startbit[in]  Bit to start extraction from
- * @param i_lastbit[in]  Bit to stop extraction on, inclusive
+ * @param[in] i_var64  64-bit word to extract data from
+ * @param[in] i_startbit  Bit to start extraction from
+ * @param[in] i_lastbit  Bit to stop extraction on, inclusive
  * @return uint64_t  Left-justified data
  */
-ALWAYS_INLINE uint64_t EXTRACT_LJ( uint64_t var64,
-                                   uint64_t i_startbit,
-                                   uint64_t i_lastbit )
+/*
+ALWAYS_INLINE static
+uint64_t EXTRACT_LJ( uint64_t var64,
+                     uint64_t i_startbit,
+                     uint64_t i_lastbit )
 {
-    uint64_t mask = ((0xFFFFFFFFFFFFFFFF >> i_startbit) & (0xFFFFFFFFFFFFFFFF << (63 - i_lastbit)));
+    uint64_t mask = ((0xFFFFFFFFFFFFFFFF >> i_startbit) &
+                     (0xFFFFFFFFFFFFFFFF << (63 - i_lastbit)));
     uint64_t result = (var64 & mask) << i_startbit;
     return result;
 }
+*/
 
 /**
- * @brief Extract a set of bits from the last word of data and right-justify the result
+ * @brief Extract a set of bits from the last word of data and right-justify
+ *        the result
  *
  *  Example:  Extract bits 25:54 from a 79 bit buffer :
  *    bb = EXTRACT_RJ_LEN(aa,79,25,54)
  *
- * @param i_lastword[in]  Right-most 64-bit word of larger data buffer, data[len-64:len]
- * @param i_bitlen[in]  Total number of bits in original buffer
- * @param i_startbit[in]  Bit to start extraction from, relative to original bit length
- * @param i_lastbit[in]  Bit to stop extraction on, inclusive, relative to original bit length
+ * @param[in] i_lastword  Right-most 64-bit word of larger data buffer,
+ *                        data[len-64:len]
+ * @param[in] i_bitlen    Total number of bits in original buffer
+ * @param[in] i_startbit  Bit to start extraction from, relative to original
+ *                        bit length
+ * @param[in] i_lastbit   Bit to stop extraction on, inclusive, relative to
+ *                        original bit length
  * @return uint64_t  Left-justified data
  */
-ALWAYS_INLINE uint64_t EXTRACT_RJ_LEN( uint64_t i_lastword,
-                                       uint64_t i_bitlen,
-                                       uint64_t i_startbit,
-                                       uint64_t i_lastbit )
+ALWAYS_INLINE static
+uint64_t EXTRACT_RJ_LEN( uint64_t i_lastword,
+                         uint64_t i_bitlen,
+                         uint64_t i_startbit,
+                         uint64_t i_lastbit )
 {
-    Dprintk( "i_lastword=%.16lX, i_bitlen=%ld, i_startbit=%ld, i_lastbit=%ld\n", i_lastword, i_bitlen, i_startbit, i_lastbit );
+    Dprintk( "i_lastword=%.16lX, i_bitlen=%ld, i_startbit=%ld, i_lastbit=%ld\n",
+             i_lastword, i_bitlen, i_startbit, i_lastbit );
     if( (i_lastbit - i_startbit) > 64 )
     {
-        Eprintk("error %d : i_lastword=%.16lX, i_bitlen=%ld, i_startbit=%ld, i_lastbit=%ld\n", __LINE__, i_lastword, i_bitlen, i_startbit, i_lastbit);
+        Eprintk("error %d : i_lastword=%.16lX, i_bitlen=%ld, i_startbit=%ld,"
+                " i_lastbit=%ld\n", __LINE__,
+                i_lastword, i_bitlen, i_startbit, i_lastbit);
         kassert(false);
     }
     else if( i_lastbit >= i_bitlen  )
     {
-        Eprintk("error %d : i_lastword=%.16lX, i_bitlen=%ld, i_startbit=%ld, i_lastbit=%ld\n", __LINE__, i_lastword, i_bitlen, i_startbit, i_lastbit);
+        Eprintk("error %d : i_lastword=%.16lX, i_bitlen=%ld, i_startbit=%ld,"
+                " i_lastbit=%ld\n", __LINE__,
+                i_lastword, i_bitlen, i_startbit, i_lastbit);
         kassert(false);
     }
     else if( i_bitlen <= 64 )
@@ -129,32 +145,46 @@ ALWAYS_INLINE uint64_t EXTRACT_RJ_LEN( uint64_t i_lastword,
 }
 
 /**
- * @brief Extract a set of bits from the last word of data and left-justify the result
+ * @brief Extract a set of bits from the last word of data and left-justify
+ *        the result
  *
- * @param i_lastword[in]  Right-most 64-bit word of larger data buffer, data[len-64:len]
- * @param i_bitlen[in]  Total number of bits in original buffer
- * @param i_startbit[in]  Bit to start extraction from, relative to original bit length
- * @param i_lastbit[in]  Bit to stop extraction on, inclusive, relative to original bit length
+ * @param[in] i_lastword  Right-most 64-bit word of larger data buffer,
+ *                        data[len-64:len]
+ * @param[in] i_bitlen    Total number of bits in original buffer
+ * @param[in] i_startbit  Bit to start extraction from, relative to original
+ *                        bit length
+ * @param[in] i_lastbit   Bit to stop extraction on, inclusive, relative to
+ *                        original bit length
  * @return uint64_t  Left-justified data
  */
-ALWAYS_INLINE uint64_t EXTRACT_LJ_LEN( uint64_t i_lastword, uint64_t i_bitlen, uint64_t i_startbit, uint64_t i_lastbit )
+/*
+ALWAYS_INLINE static
+uint64_t EXTRACT_LJ_LEN( uint64_t i_lastword,
+                         uint64_t i_bitlen,
+                         uint64_t i_startbit,
+                         uint64_t i_lastbit )
 {
     uint64_t diff = i_bitlen - 64;
     i_lastword = i_lastword >> diff;
     if( i_lastbit < 64 ) {
         i_lastbit = i_lastbit - diff;
     } else {
-        Eprintk("error %d : i_lastword=%lX, i_bitlen=%ld, i_startbit=%ld, i_lastbit=%ld\n", __LINE__, i_lastword, i_bitlen, i_startbit, i_lastbit);
+        Eprintk("error %d : i_lastword=%lX, i_bitlen=%ld, i_startbit=%ld,"
+                " i_lastbit=%ld\n", __LINE__,
+                i_lastword, i_bitlen, i_startbit, i_lastbit);
         kassert(false);
     }
     if( i_startbit < 64 ) {
         i_startbit = i_startbit - diff;
     } else {
-        Eprintk("error %d : i_lastword=%lX, i_bitlen=%ld, i_startbit=%ld, i_lastbit=%ld\n", __LINE__, i_lastword, i_bitlen, i_startbit, i_lastbit);
+        Eprintk("error %d : i_lastword=%lX, i_bitlen=%ld, i_startbit=%ld,"
+                " i_lastbit=%ld\n", __LINE__,
+                i_lastword, i_bitlen, i_startbit, i_lastbit);
         kassert(false);
     }
     return EXTRACT_LJ( i_lastword, i_startbit, i_lastbit );
 }
+*/
 
 /********************
  Public Methods
@@ -228,7 +258,9 @@ void PageTableManager::printPTE( const char* i_label,
                                  uint64_t i_pteAddr,
                                  bool i_verbose )
 {
+#ifdef HOSTBOOT_DEBUG
     Singleton<PageTableManager>::instance().printPTE( i_label, (PageTableEntry*)i_pteAddr, i_verbose );
+#endif
 }
 
 /**
@@ -238,8 +270,10 @@ void PageTableManager::printPTE( const char* i_label,
 void PageTableManager::printPTE( uint64_t i_va,
                                  bool i_verbose )
 {
+#ifdef HOSTBOOT_DEBUG
     PageTableEntry* pte = Singleton<PageTableManager>::instance().findPTE(i_va);
     Singleton<PageTableManager>::instance().printPTE( NULL, pte, i_verbose );
+#endif
 }
 
 /**
@@ -248,7 +282,9 @@ void PageTableManager::printPTE( uint64_t i_va,
  */
 void PageTableManager::printPT( void )
 {
+#ifdef HOSTBOOT_DEBUG
     Singleton<PageTableManager>::instance()._printPT();
+#endif
 }
 
 void PageTableManager::flush( void )
@@ -273,7 +309,8 @@ PageTableManager::PageTableManager( bool i_userSpace )
     }
     else
     {
-        printkd( "Page Table is at 0x%.16lX : 0x%.16lX\n", getAddress(), getAddress() + getSize() );
+        printkd( "Page Table is at 0x%.16lX : 0x%.16lX\n",
+                 getAddress(), getAddress() + getSize() );
     }
 
     //initialize the table to be invalid
@@ -310,7 +347,8 @@ void PageTableManager::_addEntry( uint64_t i_vAddr,
                                   uint64_t i_page,
                                   uint64_t i_accessType )
 {
-    Tprintk( ">> PageTableManager::_addEntry( i_vAddr=0x%.16lX, i_page=%ld, i_accessType=%d )\n", i_vAddr, i_page, i_accessType );
+    Tprintk( ">> PageTableManager::_addEntry( i_vAddr=0x%.16lX, i_page=%ld,"
+             " i_accessType=%d )\n", i_vAddr, i_page, i_accessType );
 
     //Note: no need to lock here because that is handled by higher function
 
@@ -340,7 +378,6 @@ void PageTableManager::_addEntry( uint64_t i_vAddr,
 
         // since the entry isn't in the table right now we should
         //  start fresh with the usage bits
-        pte_data.C = 0b0;    //Clear Changed bit
         pte_data.R = 0b0;    //Clear Referenced bit
         pte_data.LRU = 0b00; //Clear LRU bits
     }
@@ -350,16 +387,25 @@ void PageTableManager::_addEntry( uint64_t i_vAddr,
         {
             if( i_page != pte_slot->PN )
             {
-                Eprintk( "**ERROR** PageTableManager::_addEntry> Duplicate PTE with different page number\n" );
+                Eprintk( "**ERROR** PageTableManager::_addEntry>"
+                         " Duplicate PTE with different page number\n" );
                 kassert(false);
             }
+        }
+        else
+        {
+            // We reused a PTE previously used, but it wasn't marked valid
+            // so clear the R/LRU bits to reset it to a clean state.
+            pte_data.R = 0b0;    //Clear Referenced bit
+            pte_data.LRU = 0b00; //Clear LRU bits
         }
     }
 
     // we can't handle any other cases...
     if( pte_slot == NULL )
     {
-        Eprintk( "**ERROR** PageTableManager::_addEntry> Nowhere to put the new PTE\n" );
+        Eprintk( "**ERROR** PageTableManager::_addEntry>"
+                 " Nowhere to put the new PTE\n" );
         kassert(false);
     }
 
@@ -399,18 +445,21 @@ void PageTableManager::_delEntry( uint64_t i_vAddr )
  */
 void PageTableManager::delEntry( PageTableEntry* i_pte )
 {
-    // clear the entry from the table
-    writePTE( i_pte, i_pte, false );
+    if (i_pte->V)
+    {
+        // clear the entry from the table
+        writePTE( i_pte, i_pte, false );
 
-    // need to notify VMM when we remove a PTE
-    pushUsageStats( i_pte );
+        // need to notify VMM when we remove a PTE
+        pushUsageStats( i_pte );
+    }
 }
 
 /**
  * @brief Remove a range of entries from the hardware page table
  */
 void PageTableManager::_delRangeVA( uint64_t i_vAddrStart,
-                                  uint64_t i_vAddrFinish )
+                                    uint64_t i_vAddrFinish )
 {
     // Note : this could potentially be very slow for large ranges
 
@@ -482,7 +531,7 @@ uint64_t PageTableManager::getStatus( PageTableEntry* i_pte )
       case SegmentManager::CI_ACCESS:
 	status |= PTE_CACHE_INHIBITED;
 	break;
-  
+
       case READ_ONLY:
 	status |= PTE_READ;
 	break;
@@ -492,7 +541,7 @@ uint64_t PageTableManager::getStatus( PageTableEntry* i_pte )
 	status |= PTE_READ;
         break;
 
-      case  EXECUTABLE: 
+      case  EXECUTABLE:
 	status |= PTE_EXECUTE;
 	status |= PTE_READ;
         break;
@@ -501,9 +550,6 @@ uint64_t PageTableManager::getStatus( PageTableEntry* i_pte )
 	break;
     }
 
-    if( i_pte->C == 1 ) {
-        status |= PTE_MODIFIED;
-    }
     if( i_pte->R == 1 ) {
         status |= PTE_ACCESSED;
     }
@@ -563,7 +609,8 @@ uint64_t PageTableManager::computeHash( uint64_t i_vAddr )
 }
 
 /**
- * @brief  Find the 60-bit real address of the PTEG that matches the given virtual address
+ * @brief  Find the 60-bit real address of the PTEG that matches the given
+ *         virtual address
  */
 uint64_t PageTableManager::findPTEG( uint64_t i_vAddr )
 {
@@ -576,7 +623,8 @@ uint64_t PageTableManager::findPTEG( uint64_t i_vAddr )
     // use the hash as the index into the array of PTEGs
     uint64_t pteg_addr = getAddress() + hash * PTEG_SIZE_BYTES;
 
-    Dprintk( "PageTableManager::findPTEG(i_vAddr=0x%.16lX) = 0x%.16lX\n", i_vAddr, pteg_addr );
+    Dprintk( "PageTableManager::findPTEG(i_vAddr=0x%.16lX) = 0x%.16lX\n",
+             i_vAddr, pteg_addr );
     return pteg_addr;
 }
 
@@ -601,9 +649,12 @@ PageTableManager::PageTableEntry* PageTableManager::findPTE( uint64_t i_vAddr )
  * @brief  Find the real address of the PTE that matches the given address
  */
 PageTableManager::PageTableEntry* PageTableManager::findPTE( uint64_t i_vAddr,
-                                                             uint64_t i_ptegAddr )
+                                                             uint64_t i_ptegAddr
+                                                           )
 {
-    Tprintk( "PageTableManager::findPTE(i_vAddr=0x%.16lX,i_ptegAddr=0x%.16lX)>>\n", i_vAddr, i_ptegAddr );
+    Tprintk( "PageTableManager::findPTE(i_vAddr=0x%.16lX"
+             ",i_ptegAddr=0x%.16lX)>>\n",
+             i_vAddr, i_ptegAddr );
 
     PageTableEntry* pte_found = NULL;
 
@@ -625,7 +676,8 @@ PageTableManager::PageTableEntry* PageTableManager::findPTE( uint64_t i_vAddr,
         pte_cur++;
     }
 
-    Dprintk( "<<PageTableManager::findPTE() = %.16lX>>\n", (uint64_t)pte_found );
+    Dprintk( "<<PageTableManager::findPTE() = %.16lX>>\n",
+             (uint64_t)pte_found );
     return pte_found;
 }
 
@@ -645,44 +697,49 @@ void PageTableManager::writePTE( PageTableEntry* i_pte,
             // this should never happen because we should always go
             //   through the delEntry() path instead
             printPTE( "Stealing", i_dest );  /*no effect*/ // BEAM Fix.
-            Eprintk( "**ERROR** PageTableManager::writePTE> Trying to steal a PTE\n" );
+            Eprintk( "**ERROR** PageTableManager::writePTE>"
+                     " Trying to steal a PTE\n" );
             kassert(false);
         }
     }
 
-    if(ivTABLE)
+    if(unlikely(ivTABLE != NULL))
     {
-        Dprintk( ">> PageTableManager::writePTE( i_dest=%p, i_valid=%d )  **FAKE**\n", i_dest, i_valid );
+        Dprintk( ">> PageTableManager::writePTE( i_dest=%p, i_valid=%d )"
+                 "  **FAKE**\n",
+                 i_dest, i_valid );
         memcpy( (void*) i_dest, (void*) i_pte, sizeof(PageTableEntry) );
         if( i_valid ) {
             i_dest->V = 1;
             //printPTE( "Writing", i_dest );
         } else {
             i_dest->V = 0;
-            //printk( ">> PageTableManager::writePTE( i_dest=%p, i_valid=%d )  **FAKE**\n", i_dest, i_valid );
+            //printk( ">> PageTableManager::writePTE( i_dest=%p, i_valid=%d )"
+            //        "  **FAKE**\n",
+            //        i_dest, i_valid );
             //printPTE( "Removing", i_dest );
         }
     }
     else
     {
-        Dprintk( ">> PageTableManager::writePTE( i_dest=0x%.lX, i_valid=%d )\n", i_dest, i_valid );
+        Dprintk( ">> PageTableManager::writePTE( i_dest=0x%.lX, i_valid=%d )\n",
+                 i_dest, i_valid );
 
-        //if( i_valid ) {
-            //printPTE( "Writing", i_dest );
-        //} else {
-            //printPTE( "Removing", i_dest );
-        //}
+        // If we are invalidating or modifying permissions, need to invalidate
+        // the PTE.
+        if ((!i_valid) || (i_dest->V == 1) )
+        {
+            i_dest->V = 0; /* (other fields don't matter) */
 
-        i_dest->V = 0; /* (other fields don't matter) */
+            /* order update before tlbie and before next Page Table search */
+            asm volatile("ptesync" ::: "memory");
 
-        /* order update before tlbie and before next Page Table search */
-        asm volatile("ptesync" ::: "memory");
+            // tlbie, eieio, tlbsync, ptesync
+            invalidateTLB(i_dest);
+        }
 
-        // tlbie, eieio, tlbsync, ptesync
-        invalidateTLB(i_dest);
-
-        // if we're removing an entry we can ignore the other fields
-        if( i_valid )
+        // Requested to mark page valid?
+        if (i_valid)
         {
             //PTE:ARPN,LP,AC,R,C,WIMG,N,PP set to new values
             i_dest->dword1 = i_pte->dword1;
@@ -701,7 +758,10 @@ void PageTableManager::writePTE( PageTableEntry* i_pte,
     }
 
     // update the other entries' LRU statistics
-    updateLRU( i_dest );
+    if (i_valid)
+    {
+        updateLRUGroup( i_dest );
+    }
 
     Dprintk( "<< PageTableManager::writePTE()\n" );
 }
@@ -714,6 +774,7 @@ void PageTableManager::printPTE( const char* i_label,
                                  const PageTableEntry* i_pte,
                                  bool i_verbose )
 {
+#ifdef HOSTBOOT_DEBUG
     if( i_pte == NULL )
     {
         if( i_label ) { printkd( "%s :: ", i_label ); }
@@ -743,7 +804,7 @@ void PageTableManager::printPTE( const char* i_label,
     {
         printkd( "[%4ld:%4ld]> @%p : %.16lX %.16lX : VA=%16lX, PN=%ld\n", pte_num/PTEG_SIZE, pte_num%PTEG_SIZE, i_pte, i_pte->dword0, i_pte->dword1, getVirtAddrFromPTE(i_pte), i_pte->PN );
     }
-
+#endif
 }
 
 
@@ -752,6 +813,7 @@ void PageTableManager::printPTE( const char* i_label,
  */
 void PageTableManager::_printPT( void )
 {
+#ifdef HOSTBOOT_DEBUG
     printkd( "- -Page Table --\n" );
     uint64_t pt_addr = getAddress();
     PageTableEntry* pte = (PageTableEntry*) pt_addr;
@@ -769,6 +831,7 @@ void PageTableManager::_printPT( void )
     }
 
     printkd( "-- End Page Table --\n" );
+#endif
 }
 
 /**
@@ -776,7 +839,7 @@ void PageTableManager::_printPT( void )
  */
 uint64_t PageTableManager::getAddress( void )
 {
-    if(ivTABLE) {
+    if(unlikely(ivTABLE != NULL)) {
         return (uint64_t)ivTABLE;
     } else {
         return VmmManager::HTABORG;
@@ -861,10 +924,10 @@ uint64_t PageTableManager::getAccessType( const PageTableEntry* i_pte )
     else if (i_pte->WIMG == 0b0010)
       {
 	if (i_pte->pp1_2 == 0b00)
-	{ 
+	{
 	  return NO_ACCESS;
 	}
-	// If read and no execute 
+	// If read and no execute
 	else if ((i_pte->pp1_2 == 0b01) && (i_pte->N == 0b1))
 	{
 	  return READ_ONLY;
@@ -874,35 +937,41 @@ uint64_t PageTableManager::getAccessType( const PageTableEntry* i_pte )
 	{
 	  return WRITABLE;
 	}
-	// if readably and executable.. 
+	// if readably and executable..
 	else if  ((i_pte->pp1_2 == 0b01) && (i_pte->N == 0b0))
 	{
-	  return EXECUTABLE;         
+	  return EXECUTABLE;
 	}
       }
   }
-  Eprintk( "I don't recognize this PTE : WIMG=%ld, pp1_2=%ld\n", i_pte->WIMG, i_pte->pp1_2 );
+  Eprintk( "I don't recognize this PTE : WIMG=%ld, pp1_2=%ld\n",
+           i_pte->WIMG, i_pte->pp1_2 );
   printPTE( "getAccessType", i_pte);
   kassert(false);
   return NO_ACCESS;
-    
+
 }
 /**
  * @brief  Fill in default values for the PTE
  */
+ALWAYS_INLINE
 void PageTableManager::setupDefaultPTE( PageTableEntry* o_pte )
 {
     o_pte->B = 0b01;   //Segment Size  (01=1TB)
     o_pte->L = 0b0;    //Virtual page size  (1=>4KB)
     o_pte->H = 0b0;    //Hash function identifier  (0=primary hash)
+    o_pte->C = 0b1;    // Mark change bit so HW doesn't have to; we don't use
+                       // the change bits anyhow.
 }
 
 /**
  * @brief  Find the real address of a PTE that that is empty or invalid
  */
-PageTableManager::PageTableEntry* PageTableManager::findEmptyPTE( uint64_t i_ptegAddr )
+PageTableManager::PageTableEntry*
+    PageTableManager::findEmptyPTE( uint64_t i_ptegAddr )
 {
-    Tprintk( "PageTableManager::findEmptyPTE(i_ptegAddr=0x%.16lX)>>\n", i_ptegAddr );
+    Tprintk( "PageTableManager::findEmptyPTE(i_ptegAddr=0x%.16lX)>>\n",
+              i_ptegAddr );
 
     PageTableEntry* pte_slot = NULL;
     PageTableEntry* pte_cur = (PageTableEntry*)i_ptegAddr;
@@ -930,7 +999,8 @@ PageTableManager::PageTableEntry* PageTableManager::findEmptyPTE( uint64_t i_pte
  * @brief  Find the real address of a PTE that can be invalidated
  *   and replaced
  */
-PageTableManager::PageTableEntry* PageTableManager::findOldPTE( uint64_t i_ptegAddr )
+PageTableManager::PageTableEntry*
+    PageTableManager::findOldPTE( uint64_t i_ptegAddr )
 {
     // Order of preference for PTE slots to steal:
     // 1) PTE with highest use count (LRU==SW[2:3])
@@ -952,15 +1022,16 @@ PageTableManager::PageTableEntry* PageTableManager::findOldPTE( uint64_t i_ptegA
 }
 
 /**
- * @brief Update the LRU statistics for other PTEs in the same PTEG as the target
+ * @brief Update the LRU statistics for other PTEs in the same PTEG as
+ *        the target
  */
-void PageTableManager::updateLRU( const PageTableEntry* i_newPTE )
+void PageTableManager::updateLRUGroup( const PageTableEntry* i_newPTE )
 {
-    Tprintk( ">> PageTableManager::updateLRU( i_newPTE=%p )\n", i_newPTE );
+    Tprintk( ">> PageTableManager::updateLRUGroup( i_newPTE=%p )\n", i_newPTE );
 
-    // find the beginning of the PTEG
-    uint64_t pteg_addr = (((uint64_t)i_newPTE) - getAddress()) / PTEG_SIZE_BYTES;
-    pteg_addr = pteg_addr*PTEG_SIZE_BYTES + getAddress();
+    // find the beginning of the PTEG, by rounding down by PTEG_SIZE_BYTES.
+    uint64_t pteg_addr = (((uint64_t)i_newPTE) / PTEG_SIZE_BYTES) *
+                         PTEG_SIZE_BYTES;
 
     // loop through all 8 PTEs in the PTEG
     PageTableEntry* pte_cur = (PageTableEntry*)pteg_addr;
@@ -969,53 +1040,51 @@ void PageTableManager::updateLRU( const PageTableEntry* i_newPTE )
         // skip the entry we just added
         if( pte_cur != i_newPTE )
         {
-            PageTableEntry new_pte = *pte_cur;
-            PageTableEntry old_pte = *pte_cur;
-
-            // use this funny loop to avoid races where another thread
-            //  is causing the C bit to be updated at the same time
-            do {
-                new_pte = *pte_cur;
-                old_pte = *pte_cur;
-
-		// if the entry is valid and has been used since last update
-		//   then reset the LRU to 0 and clear the R bit
-                if( (new_pte.V == 1) && (new_pte.R == 1) )
-                {
-                    new_pte.LRU = 0;
-                    new_pte.R = 0;
-		    new_pte.R2 = 1; // remember that the R bit was set
-                }
-                else
-                {
-		    // page hasn't been used, increment the LRU
-                    if( new_pte.LRU < 0b11 )
-                    {
-                        new_pte.LRU++;
-                    }
-                }
-
-
-                // if the value currently in the table (pte_cur) is still
-                //  equal to the value we saved off earlier (old_pte) then
-                //  we will write our new data (new_pte) into the table
-                // else we will try again
-            } while( !__sync_bool_compare_and_swap( &(pte_cur->dword1),
-                                                    old_pte.dword1,
-                                                    new_pte.dword1 ) );
-
-            // LRU and R2 are on dword0
-            pte_cur->dword0 = new_pte.dword0;
-
-            // tlbie, eieio, tlbsync, ptesync
-            invalidateTLB(pte_cur);
+            updateLRUEntry(pte_cur);
         }
 
         pte_cur++;
     }
 
-    Tprintk( "<< PageTableManager::updateLRU(\n" );
+    Tprintk( "<< PageTableManager::updateLRUGroup(\n" );
 }
+
+/**
+ * @brief Update the LRU statistics for a specific PTE.
+ */
+void PageTableManager::updateLRUEntry( PageTableEntry* i_PTE )
+{
+    Tprintk( ">> PageTableManager::updateLRUEntry( i_PTE=%p )\n", i_PTE);
+
+    PageTableEntry pte = *i_PTE;
+
+    // Check if referenced.
+    if ((pte.V == 1) && (pte.R == 1))
+    {
+        // Save software bit updates for later.
+        pte.LRU = 0;
+        pte.R2 = 1;
+
+        // Update R bit in PTE.
+        //     See Resetting the Reference Bit in ISA.
+        i_PTE->R = 0;  // should only be updating 1 byte.
+        invalidateTLB(i_PTE);
+    }
+    else if (pte.LRU < 0b11)
+    {
+        pte.LRU++;
+    }
+
+    // Update the sofware bits of the PTE.
+    //     The ISA suggests we need to do a ldarx/stdcx combination
+    //     here, but this isn't required because we have a spinlock
+    //     around the page table as a whole.  No other thread will
+    //     be even reading this word here.
+    i_PTE->dword0 = pte.dword0;
+
+    Tprintk( "<< PageTableManager::updateLRUEntry(\n" );
+}
+
 
 /**
  * @brief Invalidate TLB for a PTE
@@ -1024,7 +1093,7 @@ void PageTableManager::invalidateTLB( PageTableEntry* i_pte )
 {
     Tprintk( ">> PageTableManager::invalidateTLB( i_pte=%p )\n", i_pte );
 
-    if( ivTABLE == NULL )
+    if( likely(ivTABLE == NULL) )
     {
         // TLBIE's AVA is 14:65 of the original VA (!= pte->AVA)
         uint64_t tlbie_ava = EXTRACT_RJ_LEN(
@@ -1099,51 +1168,37 @@ uint64_t PageTableManager::getVirtAddrFromPTE( const PageTableEntry* i_pte )
 void PageTableManager::pushUsageStats( PageTableEntry* i_pte )
 {
     // skip this in unit-test mode because addresses aren't really backed
-    if( ivTABLE )
+    if( unlikely(ivTABLE != NULL) )
     {
         return;
     }
 
     UsageStats_t stats;
 
-    PageTableEntry new_pte = *i_pte;
-    PageTableEntry old_pte = *i_pte;
+    // Read LRU.
+    stats.LRU = i_pte->LRU;
 
-    // use this funny loop to avoid races where another thread
-    //  is causing the C bit to be updated at the same time
-    do {
-        new_pte = *i_pte;
-        old_pte = *i_pte;
+    // Update R-bit.
+    //    See Resetting the Reference Bit in ISA.
+    if (i_pte->R)
+    {
+        stats.R = 1;
+        i_pte->R = 0;
+        invalidateTLB(i_pte);
+    }
 
-        // always update the R,R2,C bits, even for invalid entries
-        //  it is up to the caller to be sensible about when this
-        //  function is called
+    // Update R2-bit (saved reference from updateLRUEntry).
+    if (i_pte->R2)
+    {
+        stats.R = 1;
 
-        // read and clear the referenced bit
-        stats.R = new_pte.R || new_pte.R2;
-        new_pte.R = 0;
-        new_pte.R2 = 0; //R2 is on dword0
-
-        // read and clear the changed bit
-        stats.C = new_pte.C;
-        new_pte.C = 0;
-
-        // just read the LRU and send it up
-        stats.LRU = new_pte.LRU;
-
-        // if the value currently in the table (i_pte) is still
-        //  equal to the value we saved off earlier (old_pte) then
-        //  we will write our new data (new_pte) into the table
-        // else we will try again
-    } while( !__sync_bool_compare_and_swap( &(i_pte->dword1),
-                                            old_pte.dword1,
-                                            new_pte.dword1 ) );
-
-    // R2 is on dword0
-    i_pte->dword0 = new_pte.dword0;
-
-    // tlbie, eieio, tlbsync, ptesync
-    invalidateTLB(i_pte);
+        // Update R2 (software field) bit in PTE.
+        //     The ISA suggests we need to do a ldarx/stdcx combination
+        //     here, but this isn't required because we have a spinlock
+        //     around the page table as a whole.  No other thread will
+        //     be even reading this word here.
+        i_pte->R2 = 0;
+    }
 
     // now we need to send what we learned to the rest of the VMM
     uint64_t va = getVirtAddrFromPTE(i_pte);
@@ -1152,7 +1207,7 @@ void PageTableManager::pushUsageStats( PageTableEntry* i_pte )
 
 void PageTableManager::_flush( void )
 {
-    if( ivTABLE )
+    if( unlikely(ivTABLE != NULL) )
     {
         return;
     }
@@ -1161,8 +1216,10 @@ void PageTableManager::_flush( void )
     uint64_t num_ptes = getSize() / sizeof(PageTableEntry);
     for (uint64_t i = 0; i < num_ptes; ++i)
     {
-        updateLRU( pte );
-        pushUsageStats ( pte );
+        if (pte->V)
+        {
+            pushUsageStats ( pte );
+        }
         ++pte;
     }
 }
