@@ -77,3 +77,18 @@ void* realloc(void* p, size_t s)
     return HeapManager::realloc(p,s);
 }    
 
+void* calloc(size_t num, size_t size)
+{
+    // Allocate a block of memory for an array of 'num' elements, each of them
+    // 'size' bytes long and initialize to zero
+    size_t total_size = num * size;
+    void* mem = NULL;
+
+    if (total_size)
+    {
+        mem = malloc(total_size);
+        memset(mem, 0, total_size);
+    }
+
+    return mem;
+}
