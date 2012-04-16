@@ -97,8 +97,8 @@ proc AquireData { sock } {
 
             # Make sure sandbox dir exists
             if {[catch {file mkdir "$sb_dir/$sbname($sock)"} res ] } {
-                puts $sock "ERROR: Could not extract code\n"
-                puts $log "$sock: Could not extract code\n)"
+                puts $sock "ERROR: sandbox mkdir failed\n"
+                puts $log "$sock: sandbox mkdir failed\n)"
                 CloseOut $sock
             } else {
                 set git_sh($sock) [open "|bash" r+]
@@ -438,7 +438,7 @@ proc SendSandbox { sock git_sh} {
     if { [string compare $sandbox($sbname($sock)) "crashed"] == 0 } {
             if { [catch {close $git_sh} res]} {
                 puts $sock "Fail: $res\n"
-            puts $log "$sock: Fail: $res\n"
+                puts $log "$sock: Fail: $res\n"
             }
         set sandbox($sbname($sock)) idle
     } else {
@@ -516,7 +516,7 @@ proc SendSandboxNew { sock git_sh} {
 # client.  Note: Everything from stderr gets returned
 ##################################################################
 
-set explist [list  {ERROR:.*} {^IfScrub..E>.*} {^Parse Error.*} ]
+set explist [list  {^make.*Error.*} {ERROR:.*} {error:.*} {^IfScrub..E>.*} {^Parse Error.*} {^Error.*} ]
 
 ##################################################################
 ## This event catches the output of the sandbox when the pipe become readable
@@ -533,8 +533,8 @@ proc IfResult { git_sh sock sbname_sock } {
         puts $log "$sock: compile unexpectedly terminated. sandbox $sbname_sock"
 
         if { [catch {close $git_sh} res] } {
-            puts $sock "Error is $res\n"
-            puts $log "$sock: Error is $res\n"
+            puts $sock "error is $res\n"
+            puts $log "$sock: error is $res\n"
         }
         set sandbox($sbname_sock) "idle"
     } else {
@@ -551,9 +551,11 @@ proc IfResult { git_sh sock sbname_sock } {
                 set rlines [split $res "\n"]
                 foreach rline $rlines {
                     # weed out the errors from mk
-                    if {[regexp {.*error.*} $rline ->] } {
-                        puts $sock "$rline - ERROR"
-                        puts $log "$sock: $rline"
+                    foreach exp $explist {
+                        if {[regexp $exp $rline a] } {
+                            puts $sock "error: $rline"
+                            puts $log "$sock: error: $rline"
+                        }
                     }
                 }
             }
@@ -566,8 +568,8 @@ proc IfResult { git_sh sock sbname_sock } {
         } else {
             foreach exp $explist {
                if {[regexp $exp $line a]} {
-                   puts $sock $line
-                   puts $log "$sock: $line"
+                   puts $sock "error: $line"
+                   puts $log "$sock: error: $line"
                }
             }
         }
@@ -586,7 +588,7 @@ proc SendObjFiles { sock obj_dir } {
     set hbi_files {}
 
     # Send the image files
-    if {[catch {set hbi_files [glob -dir $obj_dir simics*.bin vbu*bin hbicore*.bin *.syms hbotStringFile]} res]} {
+    if {[catch {set hbi_files [glob -dir $obj_dir hbi*syms hbi*bin hbi*list hbi*modinfo *pnor *dat hbotStringFile errlparser isteplist.csv]} res]} {
         puts $sock "ERROR: Needed image files not found in $obj_dir"
         puts $log "$sock: Needed image files not found in $obj_dir"
     } else {

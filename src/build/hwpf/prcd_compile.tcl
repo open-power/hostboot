@@ -287,7 +287,7 @@ foreach arg $argv {
                 -n    { set newfiles 1 }
                 -*h* { puts {prcd_compile.tcl [--help] [-d <drivername>] [-o <ouput dir> ] [-n] <filename> }
                        puts {}
-                       puts {Note this tool only supports *.{c,C,h,H,initfile,xml} files in the following directory trees: }
+                       puts {Note this tool only supports *.{c,C,h,H,initfile,xml} files in the following hostboot directory trees: }
                        puts {    src/usr/hwpf/hwp }
                        puts {    src/include/usr/hwpf/hwp }
                        puts {}
@@ -298,7 +298,7 @@ foreach arg $argv {
                        puts {> prcd_compile.tcl -d b0218a_2012_Sprint9 -o ./output/ proc_cen_framelock.C }
                        puts {> prcd_compile.tcl -d b0218a_2012_Sprint9 -o output dmi_training/proc_cen_framelock/proc_cen_framelock.H }
                        puts {}
-                       puts {Without the -n parameter, the file are assumed to be existing files in the hostboot sandbox.}
+                       puts {Without the -n parameter, the file MUST be existing files in the hostboot sandbox.}
                        puts {If they are not found in the sandbox, an error will be returned.}
                        puts {}
                        puts {On success, files from the img/ directory (*.bin *.syms and hbotStringFile) }
