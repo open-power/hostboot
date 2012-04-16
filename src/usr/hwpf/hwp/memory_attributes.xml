@@ -60,27 +60,6 @@ firmware notes: none</description>
     <array> 2 2</array>
 </attribute>
 
-<!-- TODO Hostboot note:
-          The plan for this attribute has changed, it is now an SPD attribute in
-          the dimm_spd_attributes.xml file. The HW team will eventually remove
-          it from this file
-<attribute>
-    <id>ATTR_MSS_BAD_BIT_MASK</id>
-    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
-    <description>Structure that records which bits have errors.  It is restored from VPD information.  It can be altered by mss_draminit_training, mss_draminit_training_adv, mss_memorydiags.  Platforms must initialize this from previous values.  Platforms, when seeing a write, will write the value back to the VPD or other structures.
-creator: firmware loads last values
-consumer: mss_dram_init_training/memory diags
-firmware notes: does platform init and actions on writes </description>
-    <valueType>uint8</valueType>
-    <platInit/>
-    <platActionWrite/>
-    <writeable/>
-    <odmVisable/>
-    <array> 2 2 8 10</array>
-    <persistRuntime/>
-</attribute>
--->
-
 <attribute>
     <id>ATTR_EFF_DIMM_RANKS_CONFIGED</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -121,7 +100,7 @@ creator: mss_eff_cnfg
 consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
-    <enum>CDIMM = 0, RDIMM = 1, UDIMM = 2, LRDIMM = 3,</enum>
+    <enum>CDIMM = 0, RDIMM = 1, UDIMM = 2, LRDIMM = 3</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -136,7 +115,7 @@ creator: mss_eff_cnfg
 consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
-    <enum>X4 = 0, X8 = 1, X16 = 2, X32 = 3, </enum>
+    <enum>X4 = 0, X8 = 1, X16 = 2, X32 = 3</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -150,7 +129,7 @@ creator: mss_eff_cnfg
 consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
-    <enum>EMPTY = 0, DDR3 = 1, DDR4 = 2,</enum>
+    <enum>EMPTY = 0, DDR3 = 1, DDR4 = 2</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -164,7 +143,7 @@ creator: mss_eff_cnfg_rank_group
 consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
-    <enum>INVALID = 255,</enum>
+    <enum>INVALID = 255</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -179,7 +158,7 @@ creator: mss_eff_cnfg_rank_group
 consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
-    <enum>INVALID = 255,</enum>
+    <enum>INVALID = 255</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -194,7 +173,7 @@ creator: mss_eff_cnfg_rank_group
 consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
-    <enum>INVALID = 255,</enum>
+    <enum>INVALID = 255</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -209,7 +188,7 @@ creator: mss_eff_cnfg_rank_group
 consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
-    <enum>INVALID = 255,</enum>
+    <enum>INVALID = 255</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -224,7 +203,7 @@ creator: mss_eff_cnfg_rank_group
 consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
-    <enum>INVALID = 255,</enum>
+    <enum>INVALID = 255</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -239,7 +218,7 @@ creator: mss_eff_cnfg_rank_group
 consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
-    <enum>INVALID = 255,</enum>
+    <enum>INVALID = 255</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -254,7 +233,7 @@ creator: mss_eff_cnfg_rank_group
 consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
-    <enum>INVALID = 255,</enum>
+    <enum>INVALID = 255</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -269,7 +248,7 @@ creator: mss_eff_cnfg_rank_group
 consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
-    <enum>INVALID = 255,</enum>
+    <enum>INVALID = 255</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -284,7 +263,7 @@ creator: mss_eff_cnfg_rank_group
 consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
-    <enum>INVALID = 255,</enum>
+    <enum>INVALID = 255</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -299,7 +278,7 @@ creator: mss_eff_cnfg_rank_group
 consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
-    <enum>INVALID = 255,</enum>
+    <enum>INVALID = 255</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -314,7 +293,7 @@ creator: mss_eff_cnfg_rank_group
 consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
-    <enum>INVALID = 255,</enum>
+    <enum>INVALID = 255</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -329,7 +308,7 @@ creator: mss_eff_cnfg_rank_group
 consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
-    <enum>INVALID = 255,</enum>
+    <enum>INVALID = 255</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -344,7 +323,7 @@ creator: mss_eff_cnfg_rank_group
 consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
-    <enum>INVALID = 255,</enum>
+    <enum>INVALID = 255</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -359,7 +338,7 @@ creator: mss_eff_cnfg_rank_group
 consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
-    <enum>INVALID = 255,</enum>
+    <enum>INVALID = 255</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -374,7 +353,7 @@ creator: mss_eff_cnfg_rank_group
 consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
-    <enum>INVALID = 255,</enum>
+    <enum>INVALID = 255</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -389,7 +368,7 @@ creator: mss_eff_cnfg_rank_group
 consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
-    <enum>INVALID = 255,</enum>
+    <enum>INVALID = 255</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -432,7 +411,7 @@ creator: mss_eff_cnfg_termination
 consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
-    <enum>OHM34 = 34, OHM40 = 40,</enum>
+    <enum>OHM34 = 34, OHM40 = 40</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -447,7 +426,7 @@ creator: mss_eff_cnfg_termination
 consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
-    <enum>DISABLE = 0, OHM20 = 20, OHM30 = 30, OHM34 = 34, OHM40 = 40, OHM48 = 48, OHM60 = 60, OHM80 = 80, OHM120 = 120, OHM240 = 240,</enum>
+    <enum>DISABLE = 0, OHM20 = 20, OHM30 = 30, OHM34 = 34, OHM40 = 40, OHM48 = 48, OHM60 = 60, OHM80 = 80, OHM120 = 120, OHM240 = 240</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -462,7 +441,7 @@ creator: mss_eff_cnfg_termination
 consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
-    <enum>DISABLE = 0, OHM60 = 60, OHM120 = 120,</enum>
+    <enum>DISABLE = 0, OHM60 = 60, OHM120 = 120</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -491,7 +470,7 @@ creator: mss_eff_cnfg_termination
 consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
-    <enum>OHM24 = 24, OHM30 = 30, OHM34 = 34, OHM40 = 40,</enum>
+    <enum>OHM24 = 24, OHM30 = 30, OHM34 = 34, OHM40 = 40</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -505,7 +484,7 @@ creator: mss_eff_cnfg_termination
 consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
-    <enum>OHM15 = 15, OHM20 = 20, OHM30 = 30, OHM40 = 40,</enum>
+    <enum>OHM15 = 15, OHM20 = 20, OHM30 = 30, OHM40 = 40</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -519,7 +498,7 @@ creator: mss_eff_cnfg_termination
 consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
-    <enum>OHM15 = 15, OHM20 = 20, OHM30 = 30, OHM40 = 40,</enum>
+    <enum>OHM15 = 15, OHM20 = 20, OHM30 = 30, OHM40 = 40</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -533,7 +512,7 @@ creator: mss_eff_cnfg_termination
 consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
-    <enum>OHM15 = 15, OHM20 = 20, OHM30 = 30, OHM40 = 40, OHM48 = 48, OHM60 = 60, OHM120 = 120,</enum>
+    <enum>OHM15 = 15, OHM20 = 20, OHM30 = 30, OHM40 = 40, OHM48 = 48, OHM60 = 60, OHM120 = 120</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -705,7 +684,7 @@ firmware notes: none</description>
 creator: mss_eff_cnfg_timing
 consumer: various
 firmware notes: none</description>
-    <valueType>uint8</valueType>
+    <valueType>uint32</valueType>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -758,7 +737,7 @@ creator: mss_eff_cnfg
 consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
-    <enum>BL8 = 0, OTF = 1, BC4 = 2,</enum>
+    <enum>BL8 = 0, OTF = 1, BC4 = 2</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -785,7 +764,7 @@ creator: mss_eff_cnfg_timing
 consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
-    <enum>DISABLE = 0, CL_MINUS_1 = 1, CL_MUNUS_2 = 2,</enum>
+    <enum>DISABLE = 0, CL_MINUS_1 = 1, CL_MINUS_2 = 2</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -812,7 +791,7 @@ creator: mss_eff_cnfg
 consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
-    <enum>SEQUENTIAL = 0, INTERLEAVE = 1,</enum>
+    <enum>SEQUENTIAL = 0, INTERLEAVE = 1</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -826,7 +805,7 @@ creator: mss_eff_cnfg
 consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
-    <enum>NORMAL= 0, TEST = 1,</enum>
+    <enum>NORMAL= 0, TEST = 1</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -840,7 +819,7 @@ creator: mss_eff_cnfg
 consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
-    <enum>NO = 0, YES = 1,</enum>
+    <enum>NO = 0, YES = 1</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -867,7 +846,7 @@ creator: mss_eff_cnfg
 consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
-    <enum>SLOWEXIT = 0, FASTEXIT = 1,</enum>
+    <enum>SLOWEXIT = 0, FASTEXIT = 1</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -881,7 +860,7 @@ creator: mss_eff_cnfg
 consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
-    <enum>ENABLE = 0, DISABLE = 1,</enum>
+    <enum>ENABLE = 0, DISABLE = 1</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -895,7 +874,7 @@ creator: mss_eff_cnfg
 consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
-    <enum>DISABLE = 0, ENABLE = 1,</enum>
+    <enum>DISABLE = 0, ENABLE = 1</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -909,7 +888,7 @@ creator: mss_eff_cnfg
 consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
-    <enum>DISABLE = 0, ENABLE = 1,</enum>
+    <enum>DISABLE = 0, ENABLE = 1</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -923,7 +902,7 @@ creator: mss_eff_cnfg
 consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
-    <enum>ENABLE = 0, DISABLE = 1,</enum>
+    <enum>ENABLE = 0, DISABLE = 1</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -937,7 +916,7 @@ creator: mss_eff_cnfg
 consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
-    <enum>FULL = 0, FIRST_HALF = 1, FIRST_QUARTER = 2, FIRST_EIGHTH = 3, LAST_THREE_FOURTH = 4, LAST_HALF = 5, LAST_QUARTER = 6, LAST_EIGHTH = 7,</enum>
+    <enum>FULL = 0, FIRST_HALF = 1, FIRST_QUARTER = 2, FIRST_EIGHTH = 3, LAST_THREE_FOURTH = 4, LAST_HALF = 5, LAST_QUARTER = 6, LAST_EIGHTH = 7</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -951,7 +930,7 @@ creator: mss_eff_cnfg
 consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
-    <enum>SRT = 0, ASR = 1,</enum>
+    <enum>SRT = 0, ASR = 1</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -965,7 +944,7 @@ creator: mss_eff_cnfg
 consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
-    <enum>NORMAL = 0, EXTEND = 1,</enum>
+    <enum>NORMAL = 0, EXTEND = 1</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -992,7 +971,7 @@ creator: mss_eff_cnfg
 consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
-    <enum>DISABLE = 0, ENABLE = 1,</enum>
+    <enum>DISABLE = 0, ENABLE = 1</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -1017,7 +996,7 @@ firmware notes: none</description>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
     <description>Specifies the schmoo mode to use during draminit_train_adv.</description>
     <valueType>uint8</valueType>
-    <enum>FAST = 0, ONE_SLOW = 1, QUARTER_SLOW = 2, HALF_SLOW = 3, FULL_SLOW = 4, ONE_CHAR = 5, QUARTER_CHAR = 6, HALF_CHAR = 7, FULL_CHAR = 8,</enum>
+    <enum>FAST = 0, ONE_SLOW = 1, QUARTER_SLOW = 2, HALF_SLOW = 3, FULL_SLOW = 4, ONE_CHAR = 5, QUARTER_CHAR = 6, HALF_CHAR = 7, FULL_CHAR = 8</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -1048,7 +1027,7 @@ firmware notes: none</description>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
     <description>Specifies the memcal interval in clocks.</description>
     <valueType>uint32</valueType>
-    <enum>DISABLE = 0,</enum>
+    <enum>DISABLE = 0</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -1059,7 +1038,7 @@ firmware notes: none</description>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
     <description>Specifies the zqcal interval in clocks.</description>
     <valueType>uint32</valueType>
-    <enum>DISABLE = 0,</enum>
+    <enum>DISABLE = 0</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -1382,6 +1361,23 @@ Hash modes values are 0,1 and 2. Used in the intifile </description>
     <description>Which MBA we are working on, either 0 for MBA01 and 1 for MBA23</description>
     <valueType>uint8</valueType>
     <platInit/>
+    <odmVisable/>
+</attribute>
+-->
+
+<!-- TODO Hostboot note:
+          This attribute is associated with an MBS target. This is not a valid
+          target and needs to be changed
+
+<attribute>
+    <id>ATTR_MSS_LAB_OVERRIDE_FOR_MEM_PLL</id>
+    <targetType>TARGET_TYPE_MBS_CHIPLET</targetType>
+    <description>Tell the cen_mem_pll_setup procedure to override the default Centaur MEM PLL settings with user-specified scan chain data.
+creator: lab user
+consumer: cen_mem_pll_setup
+firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <writeable/>
     <odmVisable/>
 </attribute>
 -->

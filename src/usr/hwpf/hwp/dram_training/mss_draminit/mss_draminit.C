@@ -644,7 +644,7 @@ ReturnCode mss_mrs_load(
     {
         dram_al = 0x80;
     }
-    else if (dram_al == ENUM_ATTR_EFF_DRAM_AL_CL_MUNUS_2)
+    else if (dram_al == ENUM_ATTR_EFF_DRAM_AL_CL_MINUS_2)
     {
         dram_al = 0x40;
     }

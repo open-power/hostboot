@@ -43,6 +43,8 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.15   | jdsloat  |16-APR-12| TRFC fixed to insert the right aligned 8 bits
+//  1.15   | jdsloat  |12-Mar-12| Attribute upgrade for cronusflex 12.4 ... trfc to uint32
 //  1.14   | jdsloat  |07-Mar-12| Fixed iml_complete to match target
 //  1.13   | jdsloat  |07-Mar-12| Changed to target centaur with getChildchip, fixed buffer insert
 //  1.12   | jdsloat  |20-Feb-12| Built control_bit_ecc and power_management, added ccs_mode_reset
@@ -252,11 +254,13 @@ ReturnCode mss_start_refresh (Target& i_mbatarget, Target& i_centarget)
         rc_num = rc_num | mba01_ref0q_data_buffer_64.insert(refresh_interval, 50,10);
         rc_num = rc_num | mba01_ref0q_data_buffer_64.insert(refresh_interval_reset,19,10);
         //tRFC
-        uint8_t trfc = 0;
+        uint32_t trfc;
         rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_TRFC, &i_mbatarget, trfc);
         if(rc) return rc;
 
-        rc_num = rc_num | mba01_ref0q_data_buffer_64.insert(trfc, 30, 8);
+	FAPI_INF("TRFC: 0x%08X ", trfc);
+
+        rc_num = rc_num | mba01_ref0q_data_buffer_64.insert(trfc, 30, 8, 24);
         rc_num = rc_num | mba01_ref0q_data_buffer_64.insert((uint8_t) 0, 38, 2);
 
         //Enable Refresh

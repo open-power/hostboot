@@ -37,7 +37,7 @@
 //------------------------------------------------------------------------------
 // Version:|           Author:         |   Date:   | Comment:
 //---------|---------------------------|-----------|----------------------------
-//   X.X   | mss_eff_config_sim_gen.pl |29-Feb-2012| Machine generated code.
+//   X.X   | mss_eff_config_sim_gen.pl |07-Mar-2012| Machine generated code.
 
 
 //----------------------------------------------------------------------
@@ -179,7 +179,7 @@ fapi::ReturnCode mss_eff_config_sim(const fapi::Target i_target_mba) {
       rc = FAPI_ATTR_SET(ATTR_EFF_DRAM_TRC, &i_target_mba, my_attr_eff_dram_trc); if(rc) return rc;
       uint8_t my_attr_eff_dram_trcd = 0xB;
       rc = FAPI_ATTR_SET(ATTR_EFF_DRAM_TRCD, &i_target_mba, my_attr_eff_dram_trcd); if(rc) return rc;
-      uint8_t my_attr_eff_dram_trfc = 0x80;
+      uint32_t my_attr_eff_dram_trfc = 0x000000D0;
       rc = FAPI_ATTR_SET(ATTR_EFF_DRAM_TRFC, &i_target_mba, my_attr_eff_dram_trfc); if(rc) return rc;
       uint32_t my_attr_eff_dram_trfi = 0x00000C30;
       rc = FAPI_ATTR_SET(ATTR_EFF_DRAM_TRFI, &i_target_mba, my_attr_eff_dram_trfi); if(rc) return rc;

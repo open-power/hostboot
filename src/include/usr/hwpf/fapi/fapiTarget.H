@@ -220,7 +220,12 @@ public:
      */
     const char * toEcmdString() const;
 
-private:
+// TODO
+// When eCMD releases the version of this file that has toString as private then
+// all users will be forced to switch to use the improved toEcmdString. Right
+// now, there is a new HWP that uses toString, therefore temporarily move
+// toString back to public. 
+//private:
 
     /**
      * @brief Convert a target to an ecmd-format target string
@@ -236,6 +241,8 @@ private:
      *                           null terminated ECMD string.
      */
     void toString(char (&o_ecmdString)[MAX_ECMD_STRING_LEN]) const;
+
+private:
 
     /**
      * @brief Compare the handle
