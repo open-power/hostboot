@@ -71,7 +71,7 @@ void enableHwasState(Target *i_target)
 
 errlHndl_t discoverTargets()
 {
-    HWAS_DBG("discoverTargets entry");
+    HWAS_INF("discoverTargets entry");
     errlHndl_t errl = NULL;
 
     //  loop through all the targets and set HWAS_STATE to a known default
@@ -211,7 +211,11 @@ errlHndl_t discoverTargets()
 
     if (errl != NULL)
     {
-        HWAS_ERR("returning errl %p", errl);
+        HWAS_ERR("discoverTargets returning errl %p", errl);
+    }
+    else
+    {
+        HWAS_INF("discoverTargets exit with no error");
     }
     return errl;
 } // discoverTargets

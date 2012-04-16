@@ -43,6 +43,10 @@ extern trace_desc_t *g_trac_imp_hwas; // important - slow
 #define HWAS_DBG(_fmt_, _args_...) \
     TRACDCOMP(g_trac_dbg_hwas, TRACE_FILENAME _fmt_, ##_args_)
 
+// Information traces (go into slow trace buffer that should not wrap often)
+#define HWAS_INF(_fmt_, _args_...) \
+    TRACFCOMP(g_trac_imp_hwas, TRACE_FILENAME _fmt_, ##_args_)
+
 // Error traces (go into slow trace buffer that should not wrap often)
 #define HWAS_ERR(_fmt_, _args_...) \
     TRACFCOMP(g_trac_imp_hwas, TRACE_FILENAME _fmt_, ##_args_)
