@@ -25,6 +25,7 @@
 //                 andrewg  05/24/11 Port over for VPL/PgP
 //                 andrewg  09/19/11 Updates based on review
 //                 mjjones  11/17/11 Output attribute listing
+//                 camvanng 04/12/12 Ability to specify search paths for include files
 // End Change Log *********************************************************************************
 
 /**
@@ -48,6 +49,7 @@ extern FILE * yyin;
 extern int yyparse();
 void yyerror(const char * s);
 extern init::ScomList * yyscomlist;
+extern vector<string> yyincludepath;
 
 namespace init
 {

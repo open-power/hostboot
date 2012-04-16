@@ -19,11 +19,18 @@ SyntaxVersion = 1
 #-- -----------------------------------------------------------------------------
 #--
 #-- Includes
-#-- Note:  Must include the path to the .define file.
+#-- Note:
+#   Must specify the path to the .define file here; i.e. 
+#      "include ./hwp/initfiles/sample.define"
+#   Or specify the directories to search for the include file (-I <path to search>)
+#   in priority order at the initCompiler command line; i.e.
+#      "initCompiler -init ./sample.initfile -outdir . -attr ./fapiAttributeIds.H \
+#      -I hwp/initfiles -I hwp"
+#       
 #-- -----------------------------------------------------------------------------
 #--******************************************************************************
 #-- -----------------------------------------------------------------------------
-include ./hwp/initfiles/sample.define
+include sample.define
 
 #-- -----------------------------------------------------------------------------
 #--******************************************************************************
@@ -116,8 +123,8 @@ scom 0x0000000013013283              {
     bits ,                    scom_data        ;
     0:11 ,                    0b001111001001   ;
     12   ,                    0b1              ;
-    13   ,                    0b1              ;
-    14:59, 0b0000001100000110010000000000010000010010000000 ;
+    13   ,                    0x1              ;
+    14:59,                    0x00c190010480   ;
 }
 
 #--******************************************************************************

@@ -51,6 +51,7 @@ HWP_ATTR_XML_FILES = hwp/memory_attributes.xml \
 # Initfiles
 #------------------------------------------------------------------------------
 HWP_INITFILES = hwp/initfiles/sample.initfile
+HWP_IF_DEFINE_DIR = hwp/initfiles
 
 #------------------------------------------------------------------------------
 # Generated files
@@ -166,7 +167,8 @@ $(call GENTARGET, ${FAPI_ATTR_ID_TARGET} ${FAPI_ATTR_PLAT_CHECK_TARGET} \
 #------------------------------------------------------------------------------
 $(call GENTARGET, ${HWP_IF_ALL_TARGETS}) : \
         ${GENDIR}/${IF_CMP_COMPILER_TARGET} ${HWP_INITFILES} ${GENDIR}/${FAPI_ATTR_ID_TARGET}
-	$< -init ${HWP_INITFILES} -outdir $(dir $@) -attr ${GENDIR}/${FAPI_ATTR_ID_TARGET}
+	$< -init ${HWP_INITFILES} -outdir $(dir $@) -attr ${GENDIR}/${FAPI_ATTR_ID_TARGET} \
+    -I ${HWP_IF_DEFINE_DIR}
 
 ${EXTRA_PARTS}: ${IMGDIR}/% : ${GENDIR}/%
 	cp -f $^ $@

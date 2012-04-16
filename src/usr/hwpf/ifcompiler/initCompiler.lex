@@ -30,6 +30,8 @@
 //                camvanng 02/07/12   Ability to #include common scom initfile defines
 //                camvanng 02/14/12   Support binary and hex scom addresses
 //                                    Support for array at beginning of scom address
+//                camvanng 04/12/12   Right justify SCOM data
+//                                    Ability to specify search paths for include files
 // End Change Log *********************************************************************************/
 /**
  * @file initCompiler.lex
@@ -71,6 +73,7 @@ bool g_equation = false;   // equation inside scomv col
 std::string g_scomname;     // dg02
 
 extern int yyline;
+extern std::vector<std::string> yyincludepath;
 
 #define MAX_INCLUDE_DEPTH 10
 YY_BUFFER_STATE include_stack[MAX_INCLUDE_DEPTH];
@@ -133,6 +136,7 @@ MULTI_DIGIT [0-9]+
                         else
                         {
                             yy_delete_buffer(YY_CURRENT_BUFFER);
+                            fclose(yyin);
                             yy_switch_to_buffer(include_stack[include_stack_num]);
                         }
                     }
@@ -168,7 +172,13 @@ include                 { BEGIN(incl); }
                                 YY_CURRENT_BUFFER;
 
                             /* Switch input buffer */
-                            yyin = fopen( yytext, "r" );
+                            std::string filename = yytext;
+                            yyin = fopen( filename.c_str(), "r" );
+                            for (size_t i = 0; (i < yyincludepath.size()) && (NULL == yyin); i++)
+                            {
+                                filename = yyincludepath.at(i) + "/" + yytext;
+                                yyin = fopen( filename.c_str(), "r" );
+                            }
                             if (NULL == yyin)
                             {
                                 oss.str("");
@@ -176,6 +186,7 @@ include                 { BEGIN(incl); }
                                 lex_err(oss.str().c_str());
                                 exit(1);
                             }
+                            printf("Include file %s\n", filename.c_str());
                             yy_switch_to_buffer(yy_create_buffer(yyin, YY_BUF_SIZE));
 
                             BEGIN(INITIAL);
@@ -375,11 +386,11 @@ void lex_err(const char *s )
     std::cerr << "\nERROR: " << s << " -line " << yyline << std::endl;
 }
 
-// Convert left justified bitstring to 64 bit integer
+// Convert left justified bitstring to right-justified 64 bit integer
 uint64_t bits2int( const char * bitString)
 {
     uint32_t idx = 0;
-    uint64_t mask = 0x8000000000000000ull;
+    uint64_t mask = 0x0000000000000001ull;
     uint64_t val = 0;
     do
     {
@@ -393,6 +404,7 @@ uint64_t bits2int( const char * bitString)
 
       while( bitString[idx] != 0 )
       {
+          val <<= 1;
           char c = bitString[idx];
           if( c == '1') val |= mask;
           else if(c != '0')
@@ -401,7 +413,6 @@ uint64_t bits2int( const char * bitString)
               break;
           }
           ++idx;
-          mask >>= 1;
       }
       if(idx > 66) //dg01a  64bits + "0B" prefix
           lex_err("Bit string greater than 64 bits!");
@@ -410,7 +421,7 @@ uint64_t bits2int( const char * bitString)
     return val;   
 }
 
-// Convert left justified hex string to 64 bit integer
+// Convert left justified hex string to 64 right-justified bit integer
 uint64_t hexs2int(const char * hexString, int32_t size)
 {
     uint64_t val = 0;
@@ -420,7 +431,7 @@ uint64_t hexs2int(const char * hexString, int32_t size)
         lex_err("HEX literal greater than 64 bits");
         size = 18;
     }
-    s.append(18-size,'0');  // 0x + 16 digits
+    s.insert(2, 18-size,'0');  // 0x + 16 digits
     val = strtoull(s.c_str(),NULL,16);
     return val;
 }

@@ -43,6 +43,7 @@
  *                          camvanng    01/20/2012  Support for using a range
  *                                                  indexes for array attributes
  *                          mjjones     02/21/2012  Use new Target toEcmdString
+ *                          camvanng    04/12/2012  Right justify SCOM data
  */
 
 #include <fapiHwpExecInitFile.H>
@@ -1411,18 +1412,8 @@ fapi::ReturnCode writeScom(const ifData_t & i_ifData, const uint32_t i_scomNum,
             uint16_t l_offset = i_ifData.scoms[i_scomNum].offset;
             uint16_t l_len = i_ifData.scoms[i_scomNum].len;
 
-            if ((l_id & IF_TYPE_MASK) == IF_ATTR_TYPE) //It's an attribute
-            {
-                //Attribute data of different sizes is returned from getAttr
-                //as a 64bit right-justified number.
-                //Shift data to the right offset
-                l_data <<= (64 - (l_offset + l_len));
-            }
-            else // It's a numerical literal
-            {
-                //Shift data to the right offset
-                l_data >>= l_offset;
-            }
+            //Shift data to the right offset; data is right aligned
+            l_data <<= (64 - (l_offset + l_len));
 
             //Create mask
             uint64_t l_mask = 0;

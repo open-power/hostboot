@@ -22,6 +22,7 @@
 //                 andrewg  05/24/11 Port over for VPL/PgP
 //                 andrewg  09/19/11 Updates based on review
 //                 mjjones  11/17/11 Output attribute listing
+//                 camvanng 04/12/12 Ability to specify search paths for include files
 // End Change Log *********************************************************************************
 
 /**
@@ -50,6 +51,7 @@ using namespace std;
 
 int yyline = 1;
 init::ScomList * yyscomlist = NULL;
+vector<string> yyincludepath;  //path to search for include files
 
 ostringstream init::dbg;
 ostringstream init::erros;
@@ -204,6 +206,7 @@ Parser::Parser(int narg, char ** argv)
         else if (arg.compare(0,2,"-o") == 0)      iv_outfile = argv[++i];              //dg003a
         else if (arg.compare(0,3,"-if") == 0)     iv_source_path = argv[++i];
         else if (arg.compare(0,3,"-ec") == 0)     iv_ec = strtoul(argv[++i],NULL,16);  //dg002a
+        else if (arg.compare(0,2, "-I") == 0) yyincludepath.push_back(argv[++i]);
         else if (arg.compare(0,9,"--compare") == 0)
         {
             compare.first = argv[++i];
@@ -253,6 +256,16 @@ Parser::Parser(int narg, char ** argv)
     stats << "* attr: " << attr_listing_fn() << endl;
     stats << "* binary:  " << binseq_fn() << endl;
 
+    if (yyincludepath.size())
+    {
+        stats << "* search paths for include files:" << endl;
+        for (size_t i = 0; i < yyincludepath.size(); i++)
+        {
+            stats << "*   " << yyincludepath.at(i) << endl;
+        }
+        stats << "*" << endl;
+    }
+            
     iv_scomlist = new ScomList(iv_source_path, header_files, stats, iv_ec);   //dg002c
     if(compare.second.size())
     {
