@@ -40,6 +40,19 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
+    <id>ATTR_NAME</id>
+    <targetType>TARGET_TYPE_PROC_CHIP,TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>Product name of a chip target</description>
+    <valueType>uint8</valueType>
+    <enum>NONE = 0, VENICE = 1, MURANO = 2, CENTAUR = 3</enum>
+    <platInit/>
+    <persistRuntime/>
+    <!-- To make HWPs data driven, this is a privileged attribute that cannot
+         be accessed by normal HWPs. -->
+    <privileged/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
     <id>ATTR_EC</id>
     <targetType>TARGET_TYPE_PROC_CHIP,TARGET_TYPE_MEMBUF_CHIP</targetType>
     <description>
@@ -49,6 +62,9 @@
     <valueType>uint8</valueType>
     <platInit/>
     <persistRuntime/>
+    <!-- To make HWPs data driven, this is a privileged attribute that cannot
+         be accessed by normal HWPs. -->
+    <privileged/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>

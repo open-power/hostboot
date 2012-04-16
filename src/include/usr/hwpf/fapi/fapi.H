@@ -35,6 +35,7 @@
  *                          mjjones     08/08/2011  Updated Executor include
  *                          mjjones     09/23/2011  Added fapiHwpErrorInfo.H
  *                          mjjones     11/10/2011  Use ecmdDataBufferBase
+ *                          mjjones     04/16/2012  Added fapiChipEcFeature.H
  */
 
 #ifndef FAPI_H_
@@ -48,6 +49,7 @@
 #include <fapiPlatTrace.H>
 #include <fapiHwpExecutor.H>
 #include <fapiAttributeService.H>
+#include <fapiChipEcFeature.H>
 #include <fapiHwpReturnCodes.H> // Generated file
 #include <fapiHwpErrorInfo.H>   // Generated file
 #include <fapiAttributeIds.H>   // Generated file

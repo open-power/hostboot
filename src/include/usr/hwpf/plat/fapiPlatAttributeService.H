@@ -63,65 +63,41 @@ namespace fapi
     
 namespace platAttrSvc
 {
-    /**
-     *  @brief Returns the system target
-     *
-     *  @par Detailed Description:
-     *      Returns the system target.  If the target service has not been
-     *      initialized -or- there is any failure to acquire it, the function
-     *      will assert
-     *
-     *  @return Target handle to the system target
-     *
-     *  @retval !NULL An actual target handle
-     *  @retval NULL Not possible
-     */ 
-    TARGETING::Target* getSystemTarget();
 
-    /** 
-     *  @brief Returns a fapiReturn code containing information on an attribute
-     *      access error
-     *
-     *  @param[in] i_targAttrId Platform attribute ID
-     *  @param[in] i_fapiAttrId FAPI attribute ID which maps to the platform
-     *      attribute ID
-     *  @param[in] i_pFapiTarget Pointer to the FAPI target holding the
-     *      requested attribute
-     *
-     *  @return fapiReturn code containing a platform generated error log
-     *
-     *  @retval FAPI_RC_PLAT_ERR_SEE_DATA (return code value) which informs
-     *      caller there is a host boot error log attached
-     */
-    fapi::ReturnCode createAttrAccessError(
-        const TARGETING::ATTRIBUTE_ID i_targAttrId,
-        const fapi::AttributeId       i_fapiAttrId,
-        const fapi::Target*           i_pFapiTarget);
+/**
+ *  @brief Returns the system target
+ *
+ *  @par Detailed Description:
+ *      Returns the system target.  If the target service has not been
+ *      initialized -or- there is any failure to acquire it, the function
+ *      will assert
+ *
+ *  @return Target handle to the system target
+ *
+ *  @retval !NULL An actual target handle
+ *  @retval NULL Not possible
+ */ 
+TARGETING::Target* getSystemTarget();
 
-    /**
-     *  @brief Macro which directly maps a FAPI request to get a platform
-     *      attribute to the equivalent host boot request 
-     */
-    #define FAPI_PLAT_ATTR_SVC_GETMACRO_DIRECT(ID, PTARGET, VAL) \
-        ( ((PTARGET > 0) ? \
-            static_cast<TARGETING::Target*>( \
-                static_cast<const fapi::Target*>(PTARGET)->get()) \
-        : fapi::platAttrSvc::getSystemTarget())->tryGetAttr< \
-            FAPI_PLAT_ATTR_SVC_MACRO_DIRECT_FAPI_##ID>(VAL)) \
-                ? fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::createAttrAccessError( \
-                    FAPI_PLAT_ATTR_SVC_MACRO_DIRECT_FAPI_##ID,fapi::ID,PTARGET)
-    /**
-     *  @brief Macro which directly maps a FAPI request to set a platform
-     *      attribute to the equivalent host boot request 
-     */
-    #define FAPI_PLAT_ATTR_SVC_SETMACRO_DIRECT(ID, PTARGET, VAL) \
-        ( ((PTARGET > 0) ? \
-            static_cast<TARGETING::Target*>( \
-                static_cast<const fapi::Target*>(PTARGET)->get()) \
-        : fapi::platAttrSvc::getSystemTarget())->trySetAttr< \
-             FAPI_PLAT_ATTR_SVC_MACRO_DIRECT_FAPI_##ID>(VAL)) \
-                ? fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::createAttrAccessError( \
-                    FAPI_PLAT_ATTR_SVC_MACRO_DIRECT_FAPI_##ID,fapi::ID,PTARGET)
+/** 
+ *  @brief Returns a fapiReturn code containing information on an attribute
+ *      access error
+ *
+ *  @param[in] i_targAttrId Platform attribute ID
+ *  @param[in] i_fapiAttrId FAPI attribute ID which maps to the platform
+ *      attribute ID
+ *  @param[in] i_pFapiTarget Pointer to the FAPI target holding the
+ *      requested attribute
+ *
+ *  @return fapiReturn code containing a platform generated error log
+ *
+ *  @retval FAPI_RC_PLAT_ERR_SEE_DATA (return code value) which informs
+ *      caller there is a host boot error log attached
+ */
+fapi::ReturnCode createAttrAccessError(
+    const TARGETING::ATTRIBUTE_ID i_targAttrId,
+    const fapi::AttributeId       i_fapiAttrId,
+    const fapi::Target*           i_pFapiTarget);
 
 /**
  * @brief This function is called by the FAPI_ATTR_GET macro when accessing
@@ -186,9 +162,45 @@ fapi::ReturnCode fapiPlatGetMirrorBaseAddr(const fapi::Target * i_pMcsTarget,
 fapi::ReturnCode fapiPlatGetDqMapping(const fapi::Target * i_pDimmTarget,
                                       uint8_t (&o_data)[DIMM_DQ_NUM_DQS]);
 
+/**
+ * @brief This function is called by the FAPI_ATTR_GET macro when getting
+ * ATTR_NAME. It should not be called directly
+ *
+ * @param[in]  i_pTarget Target pointer
+ * @param[out] o_name    Output Name (from enum ATTR_NAME_Enum)
+ * @return ReturnCode.   Zero on success, else platform specified error
+ */
+fapi::ReturnCode fapiPlatGetTargetName(const fapi::Target * i_pTarget,
+                                       uint8_t & o_name);
+
 }
 
 }
+
+/**
+ *  @brief Macro which directly maps a FAPI request to get a platform
+ *      attribute to the equivalent host boot request
+ */
+#define FAPI_PLAT_ATTR_SVC_GETMACRO_DIRECT(ID, PTARGET, VAL) \
+    ( ((PTARGET > 0) ? \
+        static_cast<TARGETING::Target*>( \
+            static_cast<const fapi::Target*>(PTARGET)->get()) \
+    : fapi::platAttrSvc::getSystemTarget())->tryGetAttr< \
+        FAPI_PLAT_ATTR_SVC_MACRO_DIRECT_FAPI_##ID>(VAL)) \
+            ? fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::createAttrAccessError( \
+                FAPI_PLAT_ATTR_SVC_MACRO_DIRECT_FAPI_##ID,fapi::ID,PTARGET)
+/**
+ *  @brief Macro which directly maps a FAPI request to set a platform
+ *      attribute to the equivalent host boot request
+ */
+#define FAPI_PLAT_ATTR_SVC_SETMACRO_DIRECT(ID, PTARGET, VAL) \
+    ( ((PTARGET > 0) ? \
+        static_cast<TARGETING::Target*>( \
+            static_cast<const fapi::Target*>(PTARGET)->get()) \
+    : fapi::platAttrSvc::getSystemTarget())->trySetAttr< \
+         FAPI_PLAT_ATTR_SVC_MACRO_DIRECT_FAPI_##ID>(VAL)) \
+            ? fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::createAttrAccessError( \
+                FAPI_PLAT_ATTR_SVC_MACRO_DIRECT_FAPI_##ID,fapi::ID,PTARGET)
 
 //------------------------------------------------------------------------------
 // MACROs to route each ATTR_SPD access to the Hostboot SPD function
@@ -300,5 +312,11 @@ fapi::ReturnCode fapiPlatGetDqMapping(const fapi::Target * i_pDimmTarget,
 //------------------------------------------------------------------------------
 #define ATTR_CEN_DQ_TO_DIMM_CONN_DQ_GETMACRO(ID, PTARGET, VAL) \
     fapi::platAttrSvc::fapiPlatGetDqMapping(PTARGET, VAL)
+
+//------------------------------------------------------------------------------
+// MACRO to route ATTR_NAME access to the correct Hostboot function
+//------------------------------------------------------------------------------
+#define ATTR_NAME_GETMACRO(ID, PTARGET, VAL) \
+    fapi::platAttrSvc::fapiPlatGetTargetName(PTARGET, VAL)
 
 #endif // FAPIPLATATTRIBUTESERVICE_H_

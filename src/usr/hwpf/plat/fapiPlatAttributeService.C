@@ -295,14 +295,14 @@ fapi::ReturnCode fapiPlatBaseAddrCheckMcsGetChip(
         /*@
          *  @errortype
          *  @moduleid   MOD_ATTR_BASE_ADDR_GET
-         *  @reasoncode RC_ATTR_BASE_BAD_PARAM
+         *  @reasoncode RC_ATTR_BAD_TARGET_PARAM
          *  @devdesc    Failed to get MCS base address attribute due to
          *              bad target parameter.
          */
         errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
             ERRORLOG::ERRL_SEV_INFORMATIONAL,
             fapi::MOD_ATTR_BASE_ADDR_GET,
-            fapi::RC_ATTR_BASE_BAD_PARAM);
+            fapi::RC_ATTR_BAD_TARGET_PARAM);
         l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
     }
 
@@ -450,14 +450,86 @@ fapi::ReturnCode fapiPlatGetDqMapping(const fapi::Target * i_pDimmTarget,
         /*@
          *  @errortype
          *  @moduleid   MOD_ATTR_DQ_MAP_GET
-         *  @reasoncode RC_ATTR_BASE_BAD_PARAM
+         *  @reasoncode RC_ATTR_BAD_TARGET_PARAM
          *  @devdesc    Failed to get DIMM DQ mapping attribute due to
          *              bad target parameter.
          */
         errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
             ERRORLOG::ERRL_SEV_INFORMATIONAL,
             fapi::MOD_ATTR_DQ_MAP_GET,
-            fapi::RC_ATTR_BASE_BAD_PARAM);
+            fapi::RC_ATTR_BAD_TARGET_PARAM);
+        l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
+    }
+
+    return l_rc;
+}
+
+//******************************************************************************
+// fapiPlatGetTargetName function
+//******************************************************************************
+fapi::ReturnCode fapiPlatGetTargetName(const fapi::Target * i_pTarget,
+                                       uint8_t & o_name)
+{
+    fapi::ReturnCode l_rc;
+    o_name = ENUM_ATTR_NAME_NONE;
+    bool l_error = false;
+
+    // Check that the FAPI Target pointer is not NULL
+    if (i_pTarget == NULL)
+    {
+        FAPI_ERR("fapiPlatGetTargetName. NULL FAPI Target passed");
+        l_error = true;
+    }
+    else
+    {
+        // Extract the MCS Hostboot Target pointer
+        TARGETING::Target * l_pHbTarget = reinterpret_cast<TARGETING::Target*>(
+            i_pTarget->get());
+
+        // Check that the MCS Hostboot Target pointer is not NULL
+        if (l_pHbTarget == NULL)
+        {
+            FAPI_ERR("fapiPlatGetTargetName. NULL HB Target passed");
+            l_error = true;
+        }
+        else
+        {
+            TARGETING::MODEL l_model = l_pHbTarget->
+                getAttr<TARGETING::ATTR_MODEL>();
+
+            if (l_model == TARGETING::MODEL_VENICE)
+            {
+                o_name = ENUM_ATTR_NAME_VENICE;
+            }
+            else if (l_model == TARGETING::MODEL_MURANO)
+            {
+                o_name = ENUM_ATTR_NAME_MURANO;
+            }
+            else if (l_model == TARGETING::MODEL_CENTAUR)
+            {
+                o_name = ENUM_ATTR_NAME_CENTAUR;
+            }
+            else
+            {
+                FAPI_ERR("fapiPlatGetTargetName. Unknown name 0x%x", l_model);
+                l_error = true;
+            }
+        }
+    }
+
+    if (l_error)
+    {
+        /*@
+         *  @errortype
+         *  @moduleid   MOD_ATTR_GET_TARGET_NAME
+         *  @reasoncode RC_ATTR_BAD_TARGET_PARAM
+         *  @devdesc    Failed to get the Target name due to bad target
+         *              parameter.
+         */
+        errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
+            ERRORLOG::ERRL_SEV_INFORMATIONAL,
+            fapi::MOD_ATTR_GET_TARGET_NAME,
+            fapi::RC_ATTR_BAD_TARGET_PARAM);
         l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
     }
 

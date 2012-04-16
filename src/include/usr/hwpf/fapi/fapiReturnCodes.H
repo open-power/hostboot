@@ -39,6 +39,7 @@
  *                          mjjones     10/28/2011  Trim FAPI/PLAT errors
  *                          mjjones     11/10/2011  Use ecmdDataBufferBase
  *                          mjjones     01/13/2012  Name enumeration
+ *                          mjjones     04/16/2012  Add FAPI_RC_INVALID_CHIP_EC_FEATURE_GET
  */
 
 #ifndef FAPIRETURNCODES_H_
@@ -66,7 +67,8 @@ enum ReturnCodes
     FAPI_RC_ECMD_MASK = ECMD_ERR_ECMD, // ECMD generated error (0x01000000)
 
     // FAPI generated return codes
-    FAPI_RC_INVALID_ATTR_GET = FAPI_RC_FAPI_MASK | 0x01,
+    FAPI_RC_INVALID_ATTR_GET            = FAPI_RC_FAPI_MASK | 0x01,
+    FAPI_RC_INVALID_CHIP_EC_FEATURE_GET = FAPI_RC_FAPI_MASK | 0x02,
 
     // PLAT generated return codes
     FAPI_RC_PLAT_ERR_SEE_DATA = FAPI_RC_PLAT_MASK | 0x01,

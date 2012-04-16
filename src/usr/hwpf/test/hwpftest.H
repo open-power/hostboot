@@ -401,7 +401,7 @@ public:
             // Test ATTR_EC attribute access through FAPI
             uint8_t l_EC_R = 0xFF;
 
-            l_rc = FAPI_ATTR_GET(ATTR_EC, &l_fapiTarget, l_EC_R);
+            l_rc = FAPI_ATTR_GET_PRIVILEGED(ATTR_EC, &l_fapiTarget, l_EC_R);
             if (l_rc != fapi::FAPI_RC_SUCCESS)
             {
                 TS_FAIL("testHwpf5: ATTR_EC. Error from GET");
@@ -730,6 +730,47 @@ public:
             TS_TRACE("testHwpf9: No MBAs found, skipping test");
         }
     }
+
+    /**
+     * @brief Access the test Chip EC Feature attributes
+     */
+    void testHwpf10()
+    {
+        fapi::ReturnCode l_rc;
+        uint8_t l_chipHasFeature = 0xff;
+
+        // Get the master processor chip
+        TARGETING::Target* l_pTarget = NULL;
+        TARGETING::targetService().masterProcChipTargetHandle(l_pTarget);
+
+        // Create a FAPI Target
+        fapi::Target l_fapiTarget(TARGET_TYPE_PROC_CHIP,
+                                  reinterpret_cast<void *> (l_pTarget));
+
+        l_rc = FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_TEST1, &l_fapiTarget,
+                             l_chipHasFeature);
+        if (l_rc)
+        {
+            TS_FAIL("testHwpf10: ATTR_CHIP_EC_FEATURE_TEST1 get failed.");
+        }
+        else
+        {
+            FAPI_INF("testHwpf10: ATTR_CHIP_EC_FEATURE_TEST1: %d", l_chipHasFeature);
+
+            l_chipHasFeature = 0xff;
+            l_rc = FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_TEST2, &l_fapiTarget,
+                             l_chipHasFeature);
+            if (l_rc)
+            {
+                TS_FAIL("testHwpf10: ATTR_CHIP_EC_FEATURE_TEST2 get failed.");
+            }
+            else
+            {
+                FAPI_INF("testHwpf10: ATTR_CHIP_EC_FEATURE_TEST2: %d", l_chipHasFeature);
+            }
+        }
+    }
+
 };
 
 #endif

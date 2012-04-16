@@ -47,7 +47,7 @@ namespace fapi
         MOD_ATTR_BASE_ADDR_GET                     = 0x08,
         MOD_ATTR_DQ_MAP_GET                        = 0x09,
         MOD_GET_CFAM_CHIP_TARGET                   = 0x0A,
-
+        MOD_ATTR_GET_TARGET_NAME                   = 0x0B,
     };
 
     /**
@@ -68,7 +68,7 @@ namespace fapi
         RC_FAILED_TO_ACCESS_ATTRIBUTE = HWPF_COMP_ID | 0x13,
         RC_ECMD_OPERATION_FAILURE     = HWPF_COMP_ID | 0x14,
         RC_CFAM_ACCESS_ON_PROC_ERR    = HWPF_COMP_ID | 0x15,
-        RC_ATTR_BASE_BAD_PARAM        = HWPF_COMP_ID | 0x16,
+        RC_ATTR_BAD_TARGET_PARAM      = HWPF_COMP_ID | 0x16,
         RC_INVALID_NUM_PARENT_CHIP    = HWPF_COMP_ID | 0x17,
     };
 
