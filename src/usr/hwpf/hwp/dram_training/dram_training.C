@@ -52,9 +52,11 @@
 #include    <fapi.H>
 #include    <fapiPlatHwpInvoker.H>
 
+// Run on all Centaurs/MBAs, but needs to keep this one handy in case we
+// want to limit them in VPO
 const uint8_t UNLIMITED_RUN = 0xFF;
-const uint8_t VPO_NUM_OF_MBAS_TO_RUN = 1;
-const uint8_t VPO_NUM_OF_MEMBUF_TO_RUN = 1;
+const uint8_t VPO_NUM_OF_MBAS_TO_RUN = UNLIMITED_RUN;
+const uint8_t VPO_NUM_OF_MEMBUF_TO_RUN = UNLIMITED_RUN;
 
 //  --  prototype   includes    --
 //  Add any customized routines that you don't want overwritten into
@@ -87,9 +89,7 @@ using   namespace   fapi;
 //
 void    call_host_disable_vddr( void *io_pArgs )
 {
-    //  @todo   remove when join() merged
-
-    fapi::ReturnCode    l_fapirc;
+    errlHndl_t l_err = NULL;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_disable_vddr entry" );
 
@@ -132,7 +132,7 @@ void    call_host_disable_vddr( void *io_pArgs )
          * @todo fapi error - just print out for now...
          */
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR %d:  host_disable_vddr HWP(? ? ?) ",
+                "ERROR 0x%.8X:  host_disable_vddr HWP(? ? ?) ",
                 static_cast<uint32_t>(l_fapirc) );
     }
     // @@@@@    END CUSTOM BLOCK:   @@@@@
@@ -140,7 +140,7 @@ void    call_host_disable_vddr( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_disable_vddr exit" );
 
-    task_end2( NULL );
+    task_end2( l_err );
 }
 
 
@@ -150,9 +150,7 @@ void    call_host_disable_vddr( void *io_pArgs )
 //
 void    call_mc_pll_setup( void *io_pArgs )
 {
-    //  @todo   remove when join() merged
-
-    fapi::ReturnCode    l_fapirc;
+    errlHndl_t l_err = NULL;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mc_pll_setup entry" );
 
@@ -195,7 +193,7 @@ void    call_mc_pll_setup( void *io_pArgs )
          * @todo fapi error - just print out for now...
          */
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR %d:  mc_pll_setup HWP(? ? ?) ",
+                "ERROR 0x%.8X:  mc_pll_setup HWP(? ? ?) ",
                 static_cast<uint32_t>(l_fapirc) );
     }
     // @@@@@    END CUSTOM BLOCK:   @@@@@
@@ -203,7 +201,7 @@ void    call_mc_pll_setup( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mc_pll_setup exit" );
 
-    task_end2( NULL );
+    task_end2( l_err );
 }
 
 
@@ -213,9 +211,7 @@ void    call_mc_pll_setup( void *io_pArgs )
 //
 void    call_mba_startclocks( void *io_pArgs )
 {
-    //  @todo   remove when join() merged
-
-    fapi::ReturnCode    l_fapirc;
+    errlHndl_t l_err = NULL;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mba_startclocks entry" );
 
@@ -258,7 +254,7 @@ void    call_mba_startclocks( void *io_pArgs )
          * @todo fapi error - just print out for now...
          */
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR %d:  mba_startclocks HWP(? ? ?) ",
+                "ERROR 0x%.8X:  mba_startclocks HWP(? ? ?) ",
                 static_cast<uint32_t>(l_fapirc) );
     }
     // @@@@@    END CUSTOM BLOCK:   @@@@@
@@ -266,7 +262,7 @@ void    call_mba_startclocks( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mba_startclocks exit" );
 
-    task_end2( NULL );
+    task_end2( l_err );
 }
 
 
@@ -276,9 +272,7 @@ void    call_mba_startclocks( void *io_pArgs )
 //
 void    call_host_enable_vddr( void *io_pArgs )
 {
-    //  @todo   remove when join() merged
-
-    fapi::ReturnCode    l_fapirc;
+    errlHndl_t l_err = NULL;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_enable_vddr entry" );
 
@@ -321,7 +315,7 @@ void    call_host_enable_vddr( void *io_pArgs )
          * @todo fapi error - just print out for now...
          */
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR %d:  host_enable_vddr HWP(? ? ?) ",
+                "ERROR 0x%.8X:  host_enable_vddr HWP(? ? ?) ",
                 static_cast<uint32_t>(l_fapirc) );
     }
     // @@@@@    END CUSTOM BLOCK:   @@@@@
@@ -329,7 +323,7 @@ void    call_host_enable_vddr( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_enable_vddr exit" );
 
-    task_end2( NULL );
+    task_end2( l_err );
 }
 
 
@@ -339,9 +333,7 @@ void    call_host_enable_vddr( void *io_pArgs )
 //
 void    call_mss_initf( void *io_pArgs )
 {
-    //  @todo   remove when join() merged
-
-    fapi::ReturnCode    l_fapirc;
+    errlHndl_t l_err = NULL;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_initf entry" );
 
@@ -384,7 +376,7 @@ void    call_mss_initf( void *io_pArgs )
          * @todo fapi error - just print out for now...
          */
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR %d:  mss_initf HWP(? ? ?) ",
+                "ERROR 0x%.8X:  mss_initf HWP(? ? ?) ",
                 static_cast<uint32_t>(l_fapirc) );
     }
     // @@@@@    END CUSTOM BLOCK:   @@@@@
@@ -392,7 +384,7 @@ void    call_mss_initf( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_initf exit" );
 
-    task_end2( NULL );
+    task_end2( l_err );
 }
 
 //
@@ -401,8 +393,6 @@ void    call_mss_initf( void *io_pArgs )
 void  call_mss_ddr_phy_reset( void *io_pArgs )
 {
     errlHndl_t l_err = NULL;
-    fapi::ReturnCode    l_fapirc;
-
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_ddr_phy_reset entry" );
 
@@ -452,20 +442,20 @@ void  call_mss_ddr_phy_reset( void *io_pArgs )
 
         if (l_err)
         {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "ERROR : mss_ddr_phy_reset HWP returns error");
-            errlCommit(l_err, HWPF_COMP_ID);
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "ERROR 0x%.8X: mss_ddr_phy_reset HWP returns error",
+                    l_err->reasonCode());
+            break; // break out of mba loop
         }
         else
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "SUCCESS :  call_mss_ddr_phy_reset HWP( )" );
         }
-    }
+    } // end l_mbaNum loop
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_ddr_phy_reset exit" );
 
-    task_end2( NULL );
+    task_end2( l_err );
 }
-
 
 
 //
@@ -474,7 +464,6 @@ void  call_mss_ddr_phy_reset( void *io_pArgs )
 void    call_mss_draminit( void *io_pArgs )
 {
     errlHndl_t l_err = NULL;
-    fapi::ReturnCode    l_fapirc;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_draminit entry" );
 
@@ -524,8 +513,9 @@ void    call_mss_draminit( void *io_pArgs )
 
         if (l_err)
         {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "ERROR : mss_draminit HWP returns error");
-            errlCommit(l_err, HWPF_COMP_ID);
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "ERROR 0x%.8X : mss_draminit HWP returns error",
+                    l_err->reasonCode());
+            break; // Break out of mba loop
         }
         else
         {
@@ -536,7 +526,7 @@ void    call_mss_draminit( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_draminit exit" );
 
-    task_end2( NULL );
+    task_end2( l_err );
 }
 
 //
@@ -544,9 +534,7 @@ void    call_mss_draminit( void *io_pArgs )
 //
 void    call_mss_restore_dram_repair( void *io_pArgs )
 {
-    //  @todo   remove when join() merged
-
-    fapi::ReturnCode    l_fapirc;
+    errlHndl_t l_err = NULL;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_restore_dram_repair entry" );
 
@@ -589,7 +577,7 @@ void    call_mss_restore_dram_repair( void *io_pArgs )
          * @todo fapi error - just print out for now...
          */
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR %d:  mss_restore_dram_repair HWP(? ? ?) ",
+                "ERROR 0x%.8X:  mss_restore_dram_repair HWP(? ? ?) ",
                 static_cast<uint32_t>(l_fapirc) );
     }
     // @@@@@    END CUSTOM BLOCK:   @@@@@
@@ -597,7 +585,7 @@ void    call_mss_restore_dram_repair( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_restore_dram_repair exit" );
 
-    task_end2( NULL );
+    task_end2( l_err );
 }
 
 
@@ -608,7 +596,6 @@ void    call_mss_restore_dram_repair( void *io_pArgs )
 void    call_mss_draminit_training( void *io_pArgs )
 {
     errlHndl_t l_err = NULL;
-    fapi::ReturnCode    l_fapirc;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_draminit_training entry" );
 
@@ -659,8 +646,9 @@ void    call_mss_draminit_training( void *io_pArgs )
 
         if (l_err)
         {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "ERROR : mss_draminit_training HWP returns error");
-            errlCommit(l_err, HWPF_COMP_ID);
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "ERROR 0x%.8X : mss_draminit_training HWP returns error",
+                    l_err->reasonCode());
+            break; // break out of mba loop
         }
         else
         {
@@ -671,7 +659,7 @@ void    call_mss_draminit_training( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_draminit_training exit" );
 
-    task_end2( NULL );
+    task_end2( l_err );
 }
 
 //
@@ -679,9 +667,7 @@ void    call_mss_draminit_training( void *io_pArgs )
 //
 void    call_mss_draminit_trainadv( void *io_pArgs )
 {
-    //  @todo   remove when join() merged
-
-    fapi::ReturnCode    l_fapirc;
+    errlHndl_t l_err = NULL;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_draminit_trainadv entry" );
 
@@ -724,7 +710,7 @@ void    call_mss_draminit_trainadv( void *io_pArgs )
          * @todo fapi error - just print out for now...
          */
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR %d:  mss_draminit_trainadv HWP(? ? ?) ",
+                "ERROR 0x%.8X:  mss_draminit_trainadv HWP(? ? ?) ",
                 static_cast<uint32_t>(l_fapirc) );
     }
     // @@@@@    END CUSTOM BLOCK:   @@@@@
@@ -732,7 +718,7 @@ void    call_mss_draminit_trainadv( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_draminit_trainadv exit" );
 
-    task_end2( NULL );
+    task_end2( l_err );
 }
 
 //
@@ -741,7 +727,6 @@ void    call_mss_draminit_trainadv( void *io_pArgs )
 void    call_mss_draminit_mc( void *io_pArgs )
 {
     errlHndl_t l_err = NULL;
-    fapi::ReturnCode    l_fapirc;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_draminit_mc entry" );
 
@@ -791,19 +776,20 @@ void    call_mss_draminit_mc( void *io_pArgs )
 
         if (l_err)
         {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "ERROR : mss_draminit_mc HWP returns error");
-            errlCommit(l_err, HWPF_COMP_ID);
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "ERROR 0x%.8X : mss_draminit_mc HWP returns error",
+                    l_err->reasonCode());
+            break; // break out of memBuf loop
         }
         else
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "SUCCESS :  mss_draminit_mc HWP( )" );
         }
 
-    }
+    } // End memBuf loop
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_draminit_mc exit" );
 
-    task_end2( NULL );
+    task_end2( l_err );
 }
 
 

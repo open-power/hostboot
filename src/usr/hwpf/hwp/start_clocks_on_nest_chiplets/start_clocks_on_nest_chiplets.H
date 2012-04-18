@@ -33,7 +33,7 @@
  *  tasks by the @ref IStepDispatcher.
  *
  *  *****************************************************************
- *  THIS FILE WAS GENERATED ON 2012-04-11:1605
+ *  THIS FILE WAS GENERATED ON 2012-04-03:1952
  *  *****************************************************************
  *
  */
@@ -69,7 +69,7 @@
  *          @target_sched   serial
  *  @}
  *
- */
+ */ 
 
 /******************************************************************************/
 // Includes
@@ -87,7 +87,7 @@ namespace   START_CLOCKS_ON_NEST_CHIPLETS
  *  07.1 : : Setup PLL for A, X, PCIe, DMI
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
- *
+ *                    
  *  return  none
  *
  */
@@ -101,7 +101,7 @@ void    call_proc_a_x_pci_dmi_pll_setup( void    *io_pArgs );
  *  07.2 : : Start clocks on A, X, PCIe chiplets
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
- *
+ *                    
  *  return  none
  *
  */
@@ -115,7 +115,7 @@ void    call_proc_startclock_chiplets( void    *io_pArgs );
  *  07.3 : : Apply scom inits to chiplets
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
- *
+ *                    
  *  return  none
  *
  */
@@ -129,7 +129,7 @@ void    call_proc_chiplet_scominit( void    *io_pArgs );
  *  07.4 : : Apply sequenced scom inits
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
- *
+ *                    
  *  return  none
  *
  */

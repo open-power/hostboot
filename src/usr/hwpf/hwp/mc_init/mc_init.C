@@ -78,9 +78,7 @@ using   namespace   fapi;
 //
 void    call_host_collect_dimm_spd( void *io_pArgs )
 {
-    //  @todo   remove when join() merged
-
-    fapi::ReturnCode    l_fapirc;
+    errlHndl_t l_err = NULL;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_collect_dimm_spd entry" );
 
@@ -122,7 +120,7 @@ void    call_host_collect_dimm_spd( void *io_pArgs )
          * @todo fapi error - just print out for now...
          */
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR %d:  host_collect_dimm_spd HWP(? ? ?) ",
+                "ERROR 0x%.8X:  host_collect_dimm_spd HWP(? ? ?) ",
                 static_cast<uint32_t>(l_fapirc) );
     }
     // @@@@@    END CUSTOM BLOCK:   @@@@@
@@ -130,7 +128,7 @@ void    call_host_collect_dimm_spd( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_collect_dimm_spd exit" );
 
-    task_end2( NULL );
+    task_end2( l_err );
 }
 
 
@@ -140,9 +138,7 @@ void    call_host_collect_dimm_spd( void *io_pArgs )
 //
 void    call_mss_volt( void *io_pArgs )
 {
-    //  @todo   remove when join() merged
-
-    fapi::ReturnCode    l_fapirc;
+    errlHndl_t l_err = NULL;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_volt entry" );
 
@@ -189,27 +185,23 @@ void    call_mss_volt( void *io_pArgs )
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
             "=====  mss_volt HWP( vector )" );
     //  call the HWP with each target   ( if parallel, spin off a task )
-    l_fapirc  =   mss_volt( l_membufFapiTargets );
+    FAPI_INVOKE_HWP(l_err, mss_volt, l_membufFapiTargets);
 
     //  process return code.
-    if ( l_fapirc== fapi::FAPI_RC_SUCCESS )
+    if ( l_err )
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "ERROR 0x%.8X:  mss_volt HWP( ) ", l_err->reasonCode());
+    }
+    else
     {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                 "SUCCESS :  mss_volt HWP( )" );
     }
-    else
-    {
-        /**
-         * @todo fapi error - just print out for now...
-         */
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR %d:  mss_volt HWP( ) ",
-                static_cast<uint32_t>(l_fapirc) );
-    }
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_volt exit" );
 
-    task_end2( NULL );
+    task_end2( l_err );
 }
 
 //
@@ -217,9 +209,7 @@ void    call_mss_volt( void *io_pArgs )
 //
 void    call_mss_freq( void *io_pArgs )
 {
-    //  @todo   remove when join() merged
-
-    fapi::ReturnCode    l_fapirc;
+    errlHndl_t l_err = NULL;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_freq entry" );
 
@@ -261,41 +251,35 @@ void    call_mss_freq( void *io_pArgs )
                 reinterpret_cast<void *>
         (const_cast<TARGETING::Target*>(l_membuf_target)) );
 
-        l_fapirc  =   mss_freq( l_fapi_membuf_target );
+        FAPI_INVOKE_HWP(l_err, mss_freq, l_fapi_membuf_target);
 
         //  process return code.
-        if ( l_fapirc== fapi::FAPI_RC_SUCCESS )
+        if ( l_err )
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "SUCCESS :  mss_freq HWP( %d )", l_memBufNum );
-        }
+                     "ERROR 0x%.8X:  mss_freq HWP( %d ) ",
+                     l_err->reasonCode(),
+                     l_memBufNum );
+            break; // break out memBuf loop
+         }
         else
         {
-            /**
-             * @todo fapi error - just print out for now...
-             */
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "ERROR %d:  mss_freq HWP( %d ) ",
-                    static_cast<uint32_t>(l_fapirc),
-                    l_memBufNum );
+                     "SUCCESS :  mss_freq HWP( %d )", l_memBufNum );
         }
-    }
+    } // End memBuf loop
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_freq exit" );
 
     task_end2( NULL );
 }
 
-
-
 //
 //  Wrapper function to call 12.4 : mss_eff_config
 //
 void    call_mss_eff_config( void *io_pArgs )
 {
-    //  @todo   remove when join() merged
-
-    fapi::ReturnCode    l_fapirc;
+    errlHndl_t l_err = NULL;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_eff_config entry" );
 
@@ -339,24 +323,21 @@ void    call_mss_eff_config( void *io_pArgs )
         (const_cast<TARGETING::Target*>(l_mba_target)) );
 
         //  call the HWP with each fapi::Target
-        l_fapirc  =   mss_eff_config_sim( l_fapi_mba_target );
+        FAPI_INVOKE_HWP(l_err, mss_eff_config_sim, l_fapi_mba_target);
 
         //  process return code.
-        if ( l_fapirc== fapi::FAPI_RC_SUCCESS )
+        if ( l_err )
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "SUCCESS :  mss_eff_config HWP( mba %d )",
-                    l_mbaNum );
+                    "ERROR 0x%.8X:  mss_eff_config HWP( mba %d ) ",
+                    l_err->reasonCode(), l_mbaNum );
+            break; // break out mba loop
         }
         else
         {
-            /**
-             * @todo fapi error - just print out for now...
-             */
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "ERROR %d:  mss_eff_config HWP( mba %d ) ",
-                    static_cast<uint32_t>(l_fapirc),
-                    l_mbaNum );
+                     "SUCCESS :  mss_eff_config HWP( mba %d )",
+                     l_mbaNum );
         }
     }   // endfor
 

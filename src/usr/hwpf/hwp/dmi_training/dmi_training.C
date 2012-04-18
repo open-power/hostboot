@@ -71,13 +71,13 @@ using   namespace   fapi;
 //
 void    call_dmi_scominit( void *io_pArgs )
 {
-
+    errlHndl_t l_err = NULL;
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_scominit entry" );
 
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "dmi_scominit exit" );
 
-    task_end2( NULL );
+    task_end2( l_err );
 }
 
 
@@ -86,13 +86,13 @@ void    call_dmi_scominit( void *io_pArgs )
 //
 void    call_dmi_erepair( void *io_pArgs )
 {
-
+    errlHndl_t l_err = NULL;
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_erepair entry" );
 
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "dmi_erepair exit" );
 
-    task_end2( NULL );
+    task_end2( l_err );
 }
 
 //
@@ -100,13 +100,14 @@ void    call_dmi_erepair( void *io_pArgs )
 //
 void    call_dmi_io_dccal( void *io_pArgs )
 {
+    errlHndl_t l_err = NULL;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_io_dccal entry" );
 
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "dmi_io_dccal exit" );
 
-    task_end2( NULL );
+    task_end2( l_err );
 }
 
 
@@ -115,7 +116,7 @@ void    call_dmi_io_dccal( void *io_pArgs )
 //
 void    call_dmi_io_run_training( void *io_pArgs )
 {
-    fapi::ReturnCode    l_fapirc;
+    errlHndl_t l_err = NULL;
     TARGETING::TargetService&   l_targetService = targetService();
     uint8_t                     l_cpuNum        =   0;
 
@@ -215,17 +216,24 @@ void    call_dmi_io_run_training( void *io_pArgs )
                 l_path  =   l_mem_target->getAttr<ATTR_PHYS_PATH>();
                 l_path.dump();
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "===== " );
-
-                l_fapirc  =   io_run_training(
-                        l_fapi_master_target,
+                FAPI_INVOKE_HWP(l_err, io_run_training, l_fapi_master_target,
                         l_CustomParms[l_mcsNum].master_interface,
                         l_CustomParms[l_mcsNum].master_group,
                         l_fapi_slave_target,
                         l_CustomParms[l_mcsNum].slave_interface,
                         l_CustomParms[l_mcsNum].slave_group    );
 
-                //  process return code.
-                if ( l_fapirc == fapi::FAPI_RC_SUCCESS )
+                if (l_err)
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                            "ERROR 0x%.8X :  io_run_training HWP( cpu 0x%x, mcs 0x%x, mem 0x%x ) ",
+                            l_err->reasonCode(),
+                            l_cpuNum,
+                            l_mcsNum,
+                            l_memNum );
+                    break; // Break out mem target loop
+                }
+                else
                 {
                     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                             "SUCCESS :  io_run_training HWP( cpu 0x%x, mcs 0x%x, mem 0x%x ) ",
@@ -233,28 +241,27 @@ void    call_dmi_io_run_training( void *io_pArgs )
                             l_mcsNum,
                             l_memNum );
                 }
-                else
-                {
-                    /**
-                     * @todo fapi error - just print out for now...
-                     */
-                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                            "ERROR %d :  io_run_training HWP( cpu 0x%x, mcs 0x%x, mem 0x%x ) ",
-                            static_cast<uint32_t>(l_fapirc),
-                            l_cpuNum,
-                            l_mcsNum,
-                            l_memNum );
-                }
+
             }  //end for l_mem_target
 
+            if (l_err)
+            {
+                break; // Break out l_mcs_target
+            }
+
         }   // end for l_mcs_target
+
+        if (l_err)
+        {
+            break; // Break out l_cpu_target
+        }
 
     }   // end for l_cpu_target
 
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_io_run_training exit" );
 
-    task_end2( NULL );
+    task_end2( l_err );
 }
 
 
@@ -263,13 +270,13 @@ void    call_dmi_io_run_training( void *io_pArgs )
 //
 void    call_host_startPRD_dmi( void *io_pArgs )
 {
-
+    errlHndl_t l_err = NULL;
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_startPRD_dmi entry" );
 
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_startPRD_dmi exit" );
 
-    task_end2( NULL );
+    task_end2( l_err );
 }
 
 
@@ -279,13 +286,14 @@ void    call_host_startPRD_dmi( void *io_pArgs )
 void    call_host_attnlisten_cen( void *io_pArgs )
 {
 
+    errlHndl_t l_err = NULL;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_attnlisten_cen entry" );
 
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "<host_attnlisten_cen exit" );
 
-    task_end2( NULL );
+    task_end2( l_err );
 }
 
 //
@@ -293,8 +301,7 @@ void    call_host_attnlisten_cen( void *io_pArgs )
 //
 void    call_proc_cen_framelock( void *io_pArgs )
 {
-
-    errlHndl_t                  l_errl          =   NULL;
+    errlHndl_t l_err = NULL;
     proc_cen_framelock_args     l_args;
 
     //  Use PredicateIsFunctional to filter only functional chips
@@ -302,83 +309,92 @@ void    call_proc_cen_framelock( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_cen_framework entry" );
 
-        //  get the mcs chiplets associated with this cpu
-        TARGETING::PredicateCTM l_mcsChipFilter(CLASS_UNIT, TYPE_MCS);
-        TARGETING::PredicatePostfixExpr l_functionalAndMcsChipFilter;
-        l_functionalAndMcsChipFilter.push(&l_mcsChipFilter).push(&l_isFunctional).And();
+    //  get the mcs chiplets associated with this cpu
+    TARGETING::PredicateCTM l_mcsChipFilter(CLASS_UNIT, TYPE_MCS);
+    TARGETING::PredicatePostfixExpr l_functionalAndMcsChipFilter;
+    l_functionalAndMcsChipFilter.push(&l_mcsChipFilter).push(&l_isFunctional).And();
 
-        TARGETING::TargetRangeFilter    l_mcsFilter(
+    TARGETING::TargetRangeFilter    l_mcsFilter(
             TARGETING::targetService().begin(),
             TARGETING::targetService().end(),
             &l_functionalAndMcsChipFilter );
 
-        for (      ;  l_mcsFilter ; ++l_mcsFilter  )
+    for (      ;  l_mcsFilter ; ++l_mcsFilter  )
+    {
+        //  make a local copy of the MCS target
+        const TARGETING::Target*  l_mcs_target = *l_mcsFilter ;
+
+        //  find all the Centaurs that are associated with this MCS
+        TARGETING::PredicateCTM l_membufChipFilter(CLASS_CHIP, TYPE_MEMBUF);
+        TARGETING::PredicatePostfixExpr l_functionalAndMembufChipFilter;
+         l_functionalAndMembufChipFilter.push(&l_membufChipFilter).push(&l_isFunctional).And();
+        TARGETING::TargetHandleList l_memTargetList;
+        TARGETING::targetService().getAssociated(l_memTargetList,
+                                       l_mcs_target,
+                                       TARGETING::TargetService::CHILD_BY_AFFINITY,
+                                       TARGETING::TargetService::ALL,
+                                       &l_functionalAndMembufChipFilter);
+
+        for ( uint8_t k=0, l_memNum=0; k < l_memTargetList.size(); k++, l_memNum++ )
         {
-            //  make a local copy of the MCS target
-            const TARGETING::Target*  l_mcs_target = *l_mcsFilter ;
+            //  make a local copy of the MEMBUF target
+            const TARGETING::Target*  l_mem_target = l_memTargetList[k];
 
-            //  find all the Centaurs that are associated with this MCS
-            TARGETING::PredicateCTM l_membufChipFilter(CLASS_CHIP, TYPE_MEMBUF);
-            TARGETING::PredicatePostfixExpr l_functionalAndMembufChipFilter;
-            l_functionalAndMembufChipFilter.push(&l_membufChipFilter).push(&l_isFunctional).And();
-            TARGETING::TargetHandleList l_memTargetList;
-            TARGETING::targetService().getAssociated(l_memTargetList,
-                                          l_mcs_target,
-                                          TARGETING::TargetService::CHILD_BY_AFFINITY,
-                                          TARGETING::TargetService::ALL,
-                                          &l_functionalAndMembufChipFilter);
+            // fill out the args struct.
+            l_args.in_error_state       =   false;
+            l_args.channel_init_timeout =   CHANNEL_INIT_TIMEOUT_NO_TIMEOUT;
+            l_args.frtl_auto_not_manual =   true;
+            l_args.frtl_manual_pu       =   0;
+            l_args.frtl_manual_mem      =   0;
 
-            for ( uint8_t k=0, l_memNum=0; k < l_memTargetList.size(); k++, l_memNum++ )
+            fapi::Target l_fapiMcsTarget(
+                    TARGET_TYPE_MCS_CHIPLET,
+                    reinterpret_cast<void *>
+                      ( const_cast<TARGETING::Target*>(l_mcs_target) )
+                        );
+            fapi::Target l_fapiMemTarget(
+                    TARGET_TYPE_MEMBUF_CHIP,
+                    reinterpret_cast<void *>
+                        (const_cast<TARGETING::Target*>(l_mem_target))
+                    );
+
+            EntityPath l_path;
+            l_path  =   l_mcs_target->getAttr<ATTR_PHYS_PATH>();
+            l_path.dump();
+            l_path  =   l_mem_target->getAttr<ATTR_PHYS_PATH>();
+            l_path.dump();
+
+            FAPI_INVOKE_HWP( l_err,
+                             proc_cen_framelock,
+                             l_fapiMcsTarget,
+                             l_fapiMemTarget,
+                             l_args  );
+            if ( l_err )
             {
-                //  make a local copy of the MEMBUF target
-                const TARGETING::Target*  l_mem_target = l_memTargetList[k];
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                 "ERROR 0x%.8X : proc_cen_framelock HWP( mem %d )",
+                l_err->reasonCode(), l_memNum );
+                break; // break out of mem num loop
+            }
+            else
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                        "SUCCESS :  proc_cen_framelock HWP( mem %d ) ",
+                        l_memNum );
+            }
 
-                // fill out the args struct.
-                l_args.in_error_state       =   false;
-                l_args.channel_init_timeout =   CHANNEL_INIT_TIMEOUT_NO_TIMEOUT;
-                l_args.frtl_auto_not_manual =   true;
-                l_args.frtl_manual_pu       =   0;
-                l_args.frtl_manual_mem      =   0;
+        }   // end mem
 
-                fapi::Target l_fapiMcsTarget(
-                        TARGET_TYPE_MCS_CHIPLET,
-                        reinterpret_cast<void *>
-                            ( const_cast<TARGETING::Target*>(l_mcs_target) )
-                        );
-                fapi::Target l_fapiMemTarget(
-                        TARGET_TYPE_MEMBUF_CHIP,
-                        reinterpret_cast<void *>
-                            (const_cast<TARGETING::Target*>(l_mem_target))
-                        );
+        if (l_err)
+        {
+            break; // break out of mcs loop
+        }
 
-                EntityPath l_path;
-                l_path  =   l_mcs_target->getAttr<ATTR_PHYS_PATH>();
-                l_path.dump();
-                l_path  =   l_mem_target->getAttr<ATTR_PHYS_PATH>();
-                l_path.dump();
-
-                FAPI_INVOKE_HWP( l_errl,
-                                 proc_cen_framelock,
-                                 l_fapiMcsTarget,
-                                 l_fapiMemTarget,
-                                 l_args  );
-                if ( l_errl )
-                {
-                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                              "ERROR : proc_cen_framelock" );
-                    errlCommit( l_errl, HWPF_COMP_ID );
-                }
-                else
-                {
-                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                               "SUCCESS : proc_cen_framelock " );
-                }
-            }   // end mem
-        }   // end mcs
+    }   // end mcs
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_cen_framework exit" );
 
-    task_end2( NULL );
+    task_end2( l_err );
 }
 
 
@@ -387,14 +403,14 @@ void    call_proc_cen_framelock( void *io_pArgs )
 //
 void    call_cen_set_inband_addr( void *io_pArgs )
 {
-
+    errlHndl_t l_err = NULL;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_set_inband_addr entry" );
 
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "cen_set_inband_addr exit" );
 
-    task_end2( NULL );
+    task_end2( l_err );
 }
 
 

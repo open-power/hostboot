@@ -36,6 +36,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/include
 
 ##  NOTE: add the base istep dir here. 
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/start_clocks_on_nest_chiplets
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/start_clocks_on_nest_chiplets/proc_start_clocks_chiplets
 
 ##  Include sub dirs
 ##  NOTE: add a new EXTRAINCDIR when you add a new HWP
@@ -44,13 +45,13 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/start_clocks_on_nest_chiplets
 
 
 ##  NOTE: add new object files when you add a new HWP
-OBJS =  start_clocks_on_nest_chiplets.o
-
+OBJS =  start_clocks_on_nest_chiplets.o \
+		proc_start_clocks_chiplets.o
         
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 ##  EXAMPLE:
 #   VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/start_clocks_on_nest_chiplets/<HWP_dir>
-
+VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/start_clocks_on_nest_chiplets/proc_start_clocks_chiplets
 
 include ${ROOTPATH}/config.mk
 

@@ -1,0 +1,39 @@
+<!--  IBM_PROLOG_BEGIN_TAG
+     This is an automatically generated prolog.
+   
+     $Source: src/usr/hwpf/hwp/start_clocks_on_nest_chiplets/proc_start_clocks_chiplets_errors.xml $
+   
+     IBM CONFIDENTIAL
+   
+     COPYRIGHT International Business Machines Corp. 2012
+   
+     p1
+   
+     Object Code Only (OCO) source materials
+     Licensed Internal Code Source Materials
+     IBM HostBoot Licensed Internal Code
+   
+     The source code for this program is not published or other-
+     wise divested of its trade secrets, irrespective of what has
+     been deposited with the U.S. Copyright Office.
+   
+     Origin: 30
+   
+     IBM_PROLOG_END -->
+<!-- Error definitions for proc_start_clocks_chiplets procedure -->
+<hwpErrors>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_START_CLOCKS_CHIPLETS_CLK_STATUS_ERR</rc>
+    <description>Unexpected clock status register returned after clock start operation.</description>
+    <ffdc>STATUS_REG</ffdc>
+    <ffdc>CHIPLET_BASE_SCOM_ADDR</ffdc>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_START_CLOCKS_CHIPLETS_FIR_ERR</rc>
+    <description>Unexpected chiplet FIR bit set after clock start operation.</description>
+    <ffdc>FIR_REG</ffdc>
+    <ffdc>CHIPLET_BASE_SCOM_ADDR</ffdc>
+  </hwpError>
+</hwpErrors>

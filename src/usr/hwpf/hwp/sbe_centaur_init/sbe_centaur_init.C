@@ -46,6 +46,7 @@
 #include <fapiPoreVeArg.H>
 #include <fapiTarget.H>
 #include <fapi.H>
+#include <fapiPlatHwpInvoker.H>
 #include <vfs/vfs.H>
 #include <list>
 #include "sbe_centaur_init.H"
@@ -77,8 +78,6 @@ using   namespace   fapi;
 void    call_cen_sbe_tp_chiplet_init1( void *io_pArgs )
 {
 
-    fapi::ReturnCode    l_fapirc;
-    fapi::ReturnCode    l_fapirc2;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_tp_chiplet_init1 entry" );
 
@@ -111,9 +110,8 @@ void    call_cen_sbe_tp_chiplet_init1( void *io_pArgs )
         l_errl = VFS::module_load("sbe_pnor.bin");
         if (l_errl)
         {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_tp_chiplet_init1 - VFS::module_load(sbe_pnor.bin) returns error");
-            //@todo - Commit error and generate error FapiReturn code here
-            delete l_errl;
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "ERROR 0x%.8X call_cen_sbe_tp_chiplet_init1 - VFS::module_load(sbe_pnor.bin) returns error",
+                    l_errl->reasonCode());
             break;
         }
         else
@@ -123,9 +121,8 @@ void    call_cen_sbe_tp_chiplet_init1( void *io_pArgs )
              l_errl = VFS::module_address("sbe_pnor.bin", l_sbePnorAddr, l_sbePnorSize);
              if(l_errl)
              {
-                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_tp_chiplet_init1 - VFS::module_address(sbe_pnor.bin) return error");
-                 //@todo- Commit error and generate error FapiReturn code
-                 delete l_errl;
+                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "ERROR 0x%.8X call_cen_sbe_tp_chiplet_init1 - VFS::module_address(sbe_pnor.bin) return error",
+                         l_errl->reasonCode());
                  break;
              }
              else
@@ -202,18 +199,15 @@ void    call_cen_sbe_tp_chiplet_init1( void *io_pArgs )
             //Also, the image used for Centaur is only a temporary image provided by Todd to try out.
             if ( !TARGETING::is_vpo() )
             {
-                //@todo - Do not run poreve with temp image for now
-                l_fapirc = fapiPoreVe(l_fapiTarget, myArgs);
+                // Can't run now because the HALT returned will cause a failure in simics
+                //FAPI_INVOKE_HWP(l_errl, fapiPoreVe, l_fapiTarget, myArgs);
             }
 
-            if (l_fapirc != fapi::FAPI_RC_SUCCESS)
+            if (l_errl )
             {
-               uint32_t val = l_fapirc;
-               TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_tp_chiplet_init1 - Error returned from VSBE engine on this Centaur, l_rc 0x%llX",
-                       val);
-               //@todo - We want to commit the error here and should probably trigger a can continue loop (per Dean).
-               // For now, just move onto the next Centaur
-               continue;
+               TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "ERROR 0x%.8X call_cen_sbe_tp_chiplet_init1 - Error returned from VSBE engine on this Centaur, l_rc 0x%llX",
+                       l_errl->reasonCode());
+               break; // break out of memBuf loop
             }
             else
             {
@@ -241,44 +235,48 @@ void    call_cen_sbe_tp_chiplet_init1( void *io_pArgs )
             l_stateArg = NULL;
         }
 
+        if (l_errl)
+        {
+            break; // break out of do-while loop
+        }
+
 
     } while(0);
 
     // Unload sbe_pnor
     if (l_unloadSbePnorImg == true)
     {
-        l_fapirc2 = fapiUnloadInitFile("sbe_pnor.bin",
-                                       l_sbePnorAddr,
-                                       l_sbePnorSize);
-        if (l_fapirc2 != fapi::FAPI_RC_SUCCESS)
+        errlHndl_t  l_tempErrl = NULL;
+        FAPI_INVOKE_HWP(l_tempErrl, fapiUnloadInitFile, "sbe_pnor.bin",
+                                    l_sbePnorAddr,
+                                    l_sbePnorSize);
+        if (l_tempErrl)
         {
-             FAPI_ERR("call_cen_sbe_tp_chiplet_init1 - Error unloading sbe_pnor.bin");
-             if (l_fapirc == fapi::FAPI_RC_SUCCESS)
+             FAPI_ERR("ERROR 0x%.8X call_cen_sbe_tp_chiplet_init1 - Error unloading sbe_pnor.bin",
+                     l_tempErrl->reasonCode());
+             if (l_errl == NULL)
              {
-                 l_fapirc = l_fapirc2;
+                 l_errl = l_tempErrl;
              }
         }
     }
 
     //  process return code.
-    if ( l_fapirc == fapi::FAPI_RC_SUCCESS )
+    if ( l_errl )
+    {
+         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                 "ERROR 0x%.8X:  cen_sbe_tp_chiplet_init1 HWP(?,?,? ) ",
+                 l_errl->reasonCode());
+    }
+    else
     {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                 "SUCCESS :  cen_sbe_tp_chiplet_init1 HWP(? ? ? )" );
     }
-    else
-    {
-        /**
-         * @todo fapi error - just print out for now...
-         */
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR %d:  cen_sbe_tp_chiplet_init1 HWP(?,?,? ) ",
-                static_cast<uint32_t>(l_fapirc) );
-    }
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "cen_sbe_tp_chiplet_init1 exit" );
 
-    task_end2( NULL );
+    task_end2( l_errl );
 }
 
 
@@ -287,9 +285,7 @@ void    call_cen_sbe_tp_chiplet_init1( void *io_pArgs )
 //
 void    call_cen_sbe_npll_initf( void *io_pArgs )
 {
-
-    fapi::ReturnCode    l_fapirc;
-
+    errlHndl_t  l_errl = NULL;
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
                "call_cen_sbe_pll_initf entry"  );
 
@@ -304,26 +300,10 @@ void    call_cen_sbe_npll_initf( void *io_pArgs )
     l_fapirc  =   cen_sbe_pll_initf( ? , ?, ? );
 #endif
 
-    //  process return code.
-    if ( l_fapirc== fapi::FAPI_RC_SUCCESS )
-    {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "SUCCESS :  cen_sbe_pll_initf HWP(? ? ? )" );
-    }
-    else
-    {
-        /**
-         * @todo fapi error - just print out for now...
-         */
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR %d:  cen_sbe_pll_initf HWP(? ? ?) ",
-                static_cast<uint32_t>(l_fapirc) );
-    }
-
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
                 "call_cen_sbe_pll_initf exit" );
 
-    task_end2( NULL );
+    task_end2( l_errl );
 }
 
 
@@ -332,8 +312,7 @@ void    call_cen_sbe_npll_initf( void *io_pArgs )
 //
 void    call_cen_sbe_tp_chiplet_init2( void *io_pArgs )
 {
-
-    fapi::ReturnCode    l_fapirc;
+    errlHndl_t  l_errl = NULL;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
     "call_cen_sbe_tp_chiplet_init2" );
@@ -348,26 +327,10 @@ void    call_cen_sbe_tp_chiplet_init2( void *io_pArgs )
     l_fapirc  =   cen_sbe_tp_chiplet_init2( ? , ?, ? );
 #endif
 
-    //  process return code.
-    if ( l_fapirc== fapi::FAPI_RC_SUCCESS )
-    {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "SUCCESS :  cen_sbe_tp_chiplet_init2 HWP(? ? ? )" );
-    }
-    else
-    {
-        /**
-         * @todo fapi error - just print out for now...
-         */
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR %d:  cen_sbe_tp_chiplet_init2 HWP(? ? ?) ",
-                static_cast<uint32_t>(l_fapirc) );
-    }
-
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
                "call_cen_sbe_tp_chiplet_init2" );
 
-    task_end2( NULL );
+    task_end2( l_errl );
 }
 
 
@@ -377,7 +340,7 @@ void    call_cen_sbe_tp_chiplet_init2( void *io_pArgs )
 void    call_cen_sbe_tp_arrayinit( void *io_pArgs )
 {
 
-    fapi::ReturnCode    l_fapirc;
+    errlHndl_t  l_errl = NULL;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
                 "call_cen_sbe_tp_arrayinit entry" );
@@ -392,26 +355,10 @@ void    call_cen_sbe_tp_arrayinit( void *io_pArgs )
     l_fapirc  =   cen_sbe_tp_arrayinit( ? , ?, ? );
 #endif
 
-    //  process return code.
-    if ( l_fapirc== fapi::FAPI_RC_SUCCESS )
-    {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "SUCCESS :  cen_sbe_tp_arrayinit HWP(? ? ? )" );
-    }
-    else
-    {
-        /**
-         * @todo fapi error - just print out for now...
-         */
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR %d:  cen_sbe_tp_arrayinit HWP(? ? ?) ",
-                static_cast<uint32_t>(l_fapirc) );
-    }
-
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
                 "call_cen_sbe_tp_arrayinit exit" );
 
-    task_end2( NULL );
+    task_end2( l_errl );
 }
 
 
@@ -422,7 +369,7 @@ void    call_cen_sbe_tp_arrayinit( void *io_pArgs )
 void    call_cen_sbe_tp_chiplet_init3( void *io_pArgs )
 {
 
-    fapi::ReturnCode    l_fapirc;
+    errlHndl_t  l_errl = NULL;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
                 "call_cen_sbe_tp_chiplet_init3 entry" );
@@ -437,26 +384,11 @@ void    call_cen_sbe_tp_chiplet_init3( void *io_pArgs )
     l_fapirc  =   cen_sbe_tp_chiplet_init3( ? , ?, ? );
 #endif
 
-    //  process return code.
-    if ( l_fapirc== fapi::FAPI_RC_SUCCESS )
-    {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "SUCCESS :  cen_sbe_tp_chiplet_init3 HWP(? ? ? )" );
-    }
-    else
-    {
-        /**
-         * @todo fapi error - just print out for now...
-         */
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR %d:  cen_sbe_tp_chiplet_init3 HWP(? ? ?) ",
-                static_cast<uint32_t>(l_fapirc) );
-    }
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
                 "call_cen_sbe_tp_chiplet_init3 exit" );
 
-    task_end2( NULL );
+    task_end2( l_errl );
 }
 
 
@@ -466,7 +398,7 @@ void    call_cen_sbe_tp_chiplet_init3( void *io_pArgs )
 void    call_cen_sbe_chiplet_init( void *io_pArgs )
 {
 
-    fapi::ReturnCode    l_fapirc;
+    errlHndl_t  l_errl = NULL;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
                     "call_cen_sbe_chiplet_init entry" );
@@ -481,26 +413,11 @@ void    call_cen_sbe_chiplet_init( void *io_pArgs )
     l_fapirc  =   cen_sbe_chiplet_init( ? , ?, ? );
 #endif
 
-    //  process return code.
-    if ( l_fapirc== fapi::FAPI_RC_SUCCESS )
-    {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "SUCCESS :  cen_sbe_chiplet_init HWP(? ? ? )" );
-    }
-    else
-    {
-        /**
-         * @todo fapi error - just print out for now...
-         */
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR %d:  cen_sbe_chiplet_init HWP(? ? ?) ",
-                static_cast<uint32_t>(l_fapirc) );
-    }
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
                 "call_cen_sbe_chiplet_init exit" );
 
-    task_end2( NULL );
+    task_end2( l_errl );
 }
 
 
@@ -510,7 +427,7 @@ void    call_cen_sbe_chiplet_init( void *io_pArgs )
 void    call_cen_sbe_arrayinit( void *io_pArgs )
 {
 
-    fapi::ReturnCode    l_fapirc;
+    errlHndl_t  l_errl = NULL;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
                     "call_cen_sbe_arrayinit entry" );
@@ -525,26 +442,10 @@ void    call_cen_sbe_arrayinit( void *io_pArgs )
     l_fapirc  =   cen_sbe_arrayinit( ? , ?, ? );
 #endif
 
-    //  process return code.
-    if ( l_fapirc== fapi::FAPI_RC_SUCCESS )
-    {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "SUCCESS :  cen_sbe_arrayinit HWP(? ? ? )" );
-    }
-    else
-    {
-        /**
-         * @todo fapi error - just print out for now...
-         */
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR %d:  cen_sbe_arrayinit HWP(? ? ?) ",
-                static_cast<uint32_t>(l_fapirc) );
-    }
-
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
                 "call_cen_sbe_arrayinit exit" );
 
-    task_end2( NULL );
+    task_end2( l_errl );
 }
 
 //
@@ -553,7 +454,7 @@ void    call_cen_sbe_arrayinit( void *io_pArgs )
 void    call_cen_sbe_dts_init( void *io_pArgs )
 {
 
-    fapi::ReturnCode    l_fapirc;
+    errlHndl_t  l_errl = NULL;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
                 "call_cen_sbe_dts_init entry" );
@@ -568,26 +469,11 @@ void    call_cen_sbe_dts_init( void *io_pArgs )
     l_fapirc  =   cen_sbe_dts_init( ? , ?, ? );
 #endif
 
-    //  process return code.
-    if ( l_fapirc== fapi::FAPI_RC_SUCCESS )
-    {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "SUCCESS :  cen_sbe_dts_init HWP(? ? ? )" );
-    }
-    else
-    {
-        /**
-         * @todo fapi error - just print out for now...
-         */
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR %d:  cen_sbe_dts_init HWP(? ? ?) ",
-                static_cast<uint32_t>(l_fapirc) );
-    }
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
                     "call_cen_sbe_dts_init exit" );
 
-    task_end2( NULL );
+    task_end2( l_errl );
 }
 
 
@@ -597,7 +483,7 @@ void    call_cen_sbe_dts_init( void *io_pArgs )
 void    call_cen_sbe_initf( void *io_pArgs )
 {
 
-    fapi::ReturnCode    l_fapirc;
+    errlHndl_t  l_errl = NULL;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
                     "call_cen_sbe_initf entry" );
@@ -612,26 +498,11 @@ void    call_cen_sbe_initf( void *io_pArgs )
     l_fapirc  =   cen_sbe_initf( ? , ?, ? );
 #endif
 
-    //  process return code.
-    if ( l_fapirc== fapi::FAPI_RC_SUCCESS )
-    {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "SUCCESS :  cen_sbe_initf HWP(? ? ? )" );
-    }
-    else
-    {
-        /**
-         * @todo fapi error - just print out for now...
-         */
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR %d:  cen_sbe_initf HWP(? ? ?) ",
-                static_cast<uint32_t>(l_fapirc) );
-    }
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
                 "call_cen_sbe_initf exit" );
 
-    task_end2( NULL );
+    task_end2( l_errl );
 }
 
 
@@ -641,7 +512,7 @@ void    call_cen_sbe_initf( void *io_pArgs )
 void    call_cen_sbe_do_manual_inits( void *io_pArgs )
 {
 
-    fapi::ReturnCode    l_fapirc;
+    errlHndl_t  l_errl = NULL;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
                 "call_cen_sbe_do_manual_inits entry" );
@@ -656,26 +527,11 @@ void    call_cen_sbe_do_manual_inits( void *io_pArgs )
     l_fapirc  =   cen_sbe_do_manual_inits( ? , ?, ? );
 #endif
 
-    //  process return code.
-    if ( l_fapirc== fapi::FAPI_RC_SUCCESS )
-    {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "SUCCESS :  cen_sbe_do_manual_inits HWP(? ? ? )" );
-    }
-    else
-    {
-        /**
-         * @todo fapi error - just print out for now...
-         */
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR %d:  cen_sbe_do_manual_inits HWP(? ? ?) ",
-                static_cast<uint32_t>(l_fapirc) );
-    }
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
                 "call_cen_sbe_do_manual_inits exit" );
 
-    task_end2( NULL );
+    task_end2( l_errl );
 }
 
 
@@ -685,7 +541,7 @@ void    call_cen_sbe_do_manual_inits( void *io_pArgs )
 void    call_cen_sbe_nest_startclocks( void *io_pArgs )
 {
 
-    fapi::ReturnCode    l_fapirc;
+    errlHndl_t  l_errl = NULL;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
                 "call_cen_sbe_startclocks entry" );
@@ -700,26 +556,10 @@ void    call_cen_sbe_nest_startclocks( void *io_pArgs )
     l_fapirc  =   cen_sbe_startclocks( ? , ?, ? );
 #endif
 
-    //  process return code.
-    if ( l_fapirc== fapi::FAPI_RC_SUCCESS )
-    {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "SUCCESS :  cen_sbe_startclocks HWP(? ? ? )" );
-    }
-    else
-    {
-        /**
-         * @todo fapi error - just print out for now...
-         */
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR %d:  cen_sbe_startclocks HWP(? ? ?) ",
-                static_cast<uint32_t>(l_fapirc) );
-    }
-
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
                 "call_cen_sbe_startclocks exit" );
 
-    task_end2( NULL );
+    task_end2( l_errl );
 }
 
 
@@ -729,7 +569,7 @@ void    call_cen_sbe_nest_startclocks( void *io_pArgs )
 void    call_cen_sbe_scominits( void *io_pArgs )
 {
 
-    fapi::ReturnCode    l_fapirc;
+    errlHndl_t  l_errl = NULL;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
                 "call_cen_sbe_scominits entry" );
@@ -744,26 +584,10 @@ void    call_cen_sbe_scominits( void *io_pArgs )
     l_fapirc  =   cen_sbe_scominits( ? , ?, ? );
 #endif
 
-    //  process return code.
-    if ( l_fapirc== fapi::FAPI_RC_SUCCESS )
-    {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "SUCCESS :  cen_sbe_scominits HWP(? ? ? )" );
-    }
-    else
-    {
-        /**
-         * @todo fapi error - just print out for now...
-         */
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR %d:  cen_sbe_scominits HWP(? ? ?) ",
-                static_cast<uint32_t>(l_fapirc) );
-    }
-
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,                            
                "call_cen_sbe_scominits exit"  );
 
-    task_end2( NULL );
+    task_end2( l_errl );
 }
 
 };   // end namespace

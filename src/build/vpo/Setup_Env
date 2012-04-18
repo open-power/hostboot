@@ -3,7 +3,10 @@
 # Setup intialization source script for HostBoot Sprint Release VPO/VBU model testing with cronus tools
 #
 #
-# Version 1.0   Copy from Jim's on 03/21/2012, tested on VBU & VPO
+# Version 1.0  Copy from   Jim's on 03/21/2012, tested on VBU & VPO
+# Version 1.1  04-16-2012  Update to run with sprint 11 image
+#                          Sync with Jim's version.
+#                
 #
 ################################################################################
 
@@ -15,11 +18,18 @@ export JD=$JP/auto/dev
 export JT=$JP/auto/tmp
 export JS=$JP/HBI/scripts
 
+# Process arguments so they can be passed down to automated tools
+. $JR/autotest.args
+
+# Pick up any user specified command, otherwise default to no test
+export AUTOVBU_USER_CMD="`echo \"$my_arg_list\" | sed -n -e 's/[ ]*-- / -|- /' -e 's/.* -|- //p'`"
+test "$AUTOVBU_USER_CMD" = "" && AUTOVBU_USER_CMD=NO_TEST
+
 # Local values used in this script
 
 AUTOVBU_HBRELEASE_BASEDIR=/gsa/ausgsa/projects/h/hostboot/release
-AUTOVBU_HBTOOLS_BASEDIR=$JP/HBI/hbtools
-AUTOVBU_HBVBUTOOLS_BASEDIR=$JP/HBI/vbutools
+AUTOVBU_HBTOOLS_BASEDIR=/afs/apd.pok.ibm.com/u/thi/hbtools
+AUTOVBU_HBVBUTOOLS_BASEDIR=/gsa/ausgsa/projects/h/hostboot/vbutools
 	
 # Remove any previous test definitions for HostBoot values - force everything to default if not set
 # by Setup_MyEnv function or user specifed argument(s)
@@ -38,16 +48,17 @@ Setup_MyEnv() {
 	
 	# Default Sprint release
 
-	sprint=Sprint10
+	sprint=hb0406a_1214.810
 	
 	# Initialize HostBoot environment/cronus/tools - note new naming convention
 	
-	export AUTOVBU_CRONUS_SIM=rel.20120312
-	export HB_TOOLS=$AUTOVBU_HBTOOLS_BASEDIR/rel.20120320
+	export AUTOVBU_CRONUS_SIM=rel.20120409
+	export GLOBAL_DEBUG=8.VW.Vc.dG.F3.0I.E8.V
+	export HB_TOOLS=$AUTOVBU_HBTOOLS_BASEDIR/rel.04162012
 
 	# Select default model -- choose either VBU or VPO versions
 
-	export VPO_MODEL=m_1_c; unset VBU_MODEL; VBUVPO=VPO
+	export VPO_MODEL=m_2_a; unset VBU_MODEL; VBUVPO=VPO
 	#export VBU_MODEL=p1_e8056_c1000_cen1_cen054_unopt_2_gfw; unset VPO_MODEL; VBUVPO=VBU
 	#export VBU_MODEL=p1_e8062_wafer_nomem_c1000_opt_4; unset VPO_MODEL; VBUVPO=VBU
 	#export VBU_MODEL=p1_e8062_c1000_cen1_cen061_unopt_1; unset VPO_MODEL; VBUVPO=VBU
@@ -66,7 +77,6 @@ Setup_MyEnv() {
 	
 	# Values used internally by automated tools
 
-	export AUTOVBU_USER_CMD=NO_TEST
 	export AUTOVPO_ROOTDIR=/afs/apd/func/awanng/vpo/vpo1/mur
 
 	test "$MY_BSO_ID" = "" && echo "Warning: Set MY_BSO_ID to IBM intranet ID if BSO firewall required"
@@ -88,8 +98,6 @@ Setup_MyArgs() {
 	# Set argument defaults
 
 	get_awan=
-	eval_list=
-	set_usercmd=
 	load_hb_img=
 	
 	# Argument parse loop
@@ -157,25 +165,15 @@ Setup_MyArgs() {
 			--)
 				;;
 			*=*)
-				eval_list="$eval_list; export $1"
+				# Add 'export' to each variable specified so it gets passed to test specific functions
+				eval "export `echo \"$1\" | sed -e \"s/=/='/\" -e \"s/$/'/\"`"
 				;;
 			*)
-				test "$set_usercmd" = "" && AUTOVBU_USER_CMD="$*" && set_usercmd=yes
 				;;
 		esac
+                 
 		shift
 	done
-	
-	# Any additional arguments are assumed to be for a user specified test script
-	
-	test "$1" = "--" && shift
-	test "$*" != "" && AUTOVBU_USER_CMD="$*"
-
-	# Now process any command line environmental settings
-
-	test "$eval_list" != "" && eval "$eval_list"
-
-	unset eval_list set_usercmd
 }
 
 # Dynamically set/reset values based upon current model
@@ -232,7 +230,7 @@ Setup_MyDynamic() {
 			;;
 		*)
 			export AUTOVBU_ECMD_VER=${AUTOVBU_ECMD_VER-p8s1}
-			export AWAN_SCRIPT=${AWAN_SCRIPT-run_script_star8b_p8s1}
+			export AWAN_SCRIPT=${AWAN_SCRIPT-run_script_star8b}
 			export AWAN_CONFIG=${AWAN_CONFIG-star8b}
 			;;
 	esac
@@ -281,6 +279,11 @@ Setup_MyAWAN() {
 	MY_AWAN_KEEP=/afs/apd.pok.ibm.com/u/${MY_AFS_USER-$USER}/awan/awan.KEEP-$VBU_MODEL$VPO_MODEL-${MY_AWAN_DIR-${MY_AFS_USER-$USER}}-$DISPLAY
 		
 	if [ "$get_awan" = "YES" ]; then
+		# Add environmental definitions for automated test
+		eval export P8_${VBUVPO}DD1_${VPO_MODEL}${VBU_MODEL}_AWAN_SCRIPT="$AWAN_SCRIPT"
+		eval export P8_${VBUVPO}DD1_${VPO_MODEL}${VBU_MODEL}_AUTOVBU_ECMD_VER="$AUTOVBU_ECMD_VER"
+		eval export P8_${VBUVPO}DD1_${VPO_MODEL}${VBU_MODEL}_AUTOVBU_CRONUS_SIM="$AUTOVBU_CRONUS_SIM"
+		#export -p | egrep "P8_${VBUVPO}DD1_.*AWAN_SCRIPT"; echo
 		(
 		# Check to see if we must lower BSO firewall
 	
@@ -311,17 +314,19 @@ Setup_MyAWAN() {
 		fi
 
 		# Request AWAN and wait for it to initialize
-		
+
+		echo
+		echo "AUTOVBU_USER_CMD=$AUTOVBU_USER_CMD"
 		echo
 		echo "Requesting an AWAN:"
 		echo
-		eval export P8_${VBUVPO}DD1_${VPO_MODEL}${VBU_MODEL}_AWAN_SCRIPT="$AWAN_SCRIPT"
-		#export -p | egrep "P8_${VBUVPO}DD1_.*AWAN_SCRIPT"; echo
 		vbuvpo=`echo $VBUVPO | tr '[A-Z]' '[a-z]'`
-		echo "$JR/auto${vbuvpo}test $my_bso_cmd --silent --keep_awan SIMDISP_RELEASE=$SIMDISP_RELEASE -- : $VBU_MODEL$VPO_MODEL:$AWAN_CONFIG:HBI=\\\$AUTOVBU_USER_CMD"
+		echo "$JR/auto${vbuvpo}test $my_bso_cmd --silent --keep_awan SIMDISP_RELEASE=$SIMDISP_RELEASE AUTOVBU_ECMD_VER=$AUTOVBU_ECMD_VER AUTOVBU_CRONUS_SIM=$AUTOVBU_CRONUS_SIM \\"
+		echo "			-- : $VBU_MODEL$VPO_MODEL:$AWAN_CONFIG:HBI=\\\$AUTOVBU_USER_CMD"
 		echo
 	
-		$JR/auto${vbuvpo}test $my_bso_cmd --silent --keep_awan SIMDISP_RELEASE=$SIMDISP_RELEASE -- : $VBU_MODEL$VPO_MODEL:$AWAN_CONFIG:HBI=\$AUTOVBU_USER_CMD
+		$JR/auto${vbuvpo}test $my_bso_cmd --silent --keep_awan SIMDISP_RELEASE=$SIMDISP_RELEASE AUTOVBU_ECMD_VER=$AUTOVBU_ECMD_VER AUTOVBU_CRONUS_SIM=$AUTOVBU_CRONUS_SIM \
+					-- : $VBU_MODEL$VPO_MODEL:$AWAN_CONFIG:HBI=\$AUTOVBU_USER_CMD
 		) || return 1
 	fi
 }
@@ -361,13 +366,12 @@ Setup_MyTarget() {
 	
 	if [ -f "$CRONUS_HOME/cnfgs/${my_target}_cnfg" ]; then
 		# Update target cronus config file
-		ed $CRONUS_HOME/cnfgs/${my_target}_cnfg <<__EOF__ >/dev/null 2>&1
-g/^HW_PROCEDURE_PATH/s,.*,HW_PROCEDURE_PATH = $HB_VBUTOOLS,
-w
-q
-__EOF__
-		egrep "^HW_PROCEDURE_PATH" $CRONUS_HOME/cnfgs/${my_target}_cnfg
-	
+
+		setconfig HW_PROCEDURE_PATH $HB_VBUTOOLS  -quiet
+		getconfig HW_PROCEDURE_PATH -quiet
+
+		setconfig GLOBAL_DEBUG $GLOBAL_DEBUG -quiet
+		getconfig GLOBAL_DEBUG -quiet
 	else
 		echo
 		echo "*** WARNING: AWAN target config file was not found"
@@ -439,7 +443,8 @@ Setup_MyEnv || return 1
 
 # Now process any argument overrides
 
-Setup_MyArgs $* || return 1
+eval Setup_MyArgs  "`echo \"$my_arg_list\"`" || return 1
+
 
 # Perform dynamic adjustments based upon current settings
 

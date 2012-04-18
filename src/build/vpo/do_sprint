@@ -28,9 +28,12 @@
 #
 
 #
-# Version 1.0   Copy from Jim's on 03/21/2012, tested on VBU & VPO
+# Version 1.0   03-21-2012   Copy from Jim's on 03/21/2012, tested on VBU & VPO
+# Version 1.1   04-16-2012   - Update to run with new Sprint 11 image.  Load only these files on L3:
+#                                 hbicore.bin (or hbicore_test.bin if running test image) at address 0
+#                                 vbu.pnor at address 0x400000
+#                            - Sync with Jim's do_sprint'change
 #
-
 
 PGM=`basename $0`
 
@@ -41,46 +44,47 @@ source $CTEPATH/tools/ecmd/rel/bin/ecmdaliases.ksh
 source $PGM_DIR/autofsp.aliases
 source $PGM_DIR/autovbu.aliases
 
-# Scan argument(s)
+# Process arguments
+source $PGM_DIR/autotest.args
 
-set +x
-
-use_test=
-test_arg=
-
-while [ $# -gt 0 ]
-do
-	case "$1"
-	in
-	-use_dump_l3| \
-	-use_printk|-use_hb_trace|-use_hb_printk| \
-	-run_hb_istep|-chkpt_after_istep| \
-	-stop_after_hbiload|-start_after_hbiload|-start_after_hbitest|-chkpt_after_loops| \
-	-dump_after_hbitest| \
-	-chkpt_after_ipl|-chkpt_after_hbiload|-chkpt_after_hbitest|-chkpt_after_exception)
-		eval "`echo $1|sed -e 's/-//'`=-$1"
+SCAN_ARGS() {
+	use_test=
+	test_arg=
+	
+	while [ $# -gt 0 ]
+	do
+		case "$1"
+		in
+		-use_dump_l3| \
+		-use_printk|-use_hb_trace|-use_hb_printk| \
+		-run_hb_istep|-chkpt_after_istep| \
+		-stop_after_hbiload|-start_after_hbiload|-start_after_hbitest|-chkpt_after_loops| \
+		-dump_after_hbitest| \
+		-chkpt_after_ipl|-chkpt_after_hbiload|-chkpt_after_hbitest|-chkpt_after_exception)
+			eval "`echo $1|sed -e 's/-//'`=-$1"
+				shift
+				;;
+		--use_dump_l3| \
+		--use_printk|--use_hb_trace|--use_hb_printk| \
+		--run_hb_istep|--chkpt_after_istep| \
+		--stop_after_hbiload|--start_after_hbiload|--start_after_hbitest|--chkpt_after_loops| \
+		--dump_after_hbitest| \
+		--chkpt_after_ipl|--chkpt_after_hbiload|--chkpt_after_hbitest|--chkpt_after_exception)
+			eval "`echo $1|sed -e 's/--//'`=$1"
+				shift
+				;;
+		-test|--test)
+			use_test="_test"
+			test_arg="--test"
 			shift
 			;;
-	--use_dump_l3| \
-	--use_printk|--use_hb_trace|--use_hb_printk| \
-	--run_hb_istep|--chkpt_after_istep| \
-	--stop_after_hbiload|--start_after_hbiload|--start_after_hbitest|--chkpt_after_loops| \
-	--dump_after_hbitest| \
-	--chkpt_after_ipl|--chkpt_after_hbiload|--chkpt_after_hbitest|--chkpt_after_exception)
-		eval "`echo $1|sed -e 's/--//'`=$1"
+		*=*)
+			# Add 'export' to each variable specified so it gets passed to test specific functions
+			eval "export `echo \"$1\" | sed -e \"s/=/='/\" -e \"s/$/'/\"`"
 			shift
 			;;
-	-test|--test)
-		use_test="_test"
-		test_arg="--test"
-		shift
-		;;
-	*=*)	# export var=value settings
-		eval "export $1"
-		shift
-		;;
-	*)
-		cat <<__EOF__
+		*)
+	cat <<__EOF__
 USAGE:	$PGM [flags] [env settings]
 
 Where [flags] can be:
@@ -115,6 +119,9 @@ __EOF__
 		;;
 	esac
 done
+}
+
+eval SCAN_ARGS "`echo \"$my_arg_list\"`" || exit 1
 
 # Sanity check our environment
 
@@ -201,12 +208,7 @@ fi
 
 if [ "$start_after_hbiload" != "--start_after_hbiload" -a "$start_after_hbitest" != "--start_after_hbitest" ]; then
 	/afs/awd/projects/eclipz/lab/p8/gsiexe/p8_load_l3 -f ${HB_IMG}/hbicore${use_test}.bin -b ${CORE--c3} || exit 1
-	/afs/awd/projects/eclipz/lab/p8/gsiexe/p8_load_l3 -f ${HB_IMG}/vbu_targeting.bin \
-				-o $vbu_targeting_addr -b ${CORE--c3} || exit 1
-	/afs/awd/projects/eclipz/lab/p8/gsiexe/p8_load_l3 -f ${HB_IMG}/hbicore${use_test}_extended.bin \
-				-o 0x500690 -b ${CORE--c3} || exit 1
-	/afs/awd/projects/eclipz/lab/p8/gsiexe/p8_load_l3 -f ${HB_IMG}/pnor.toc \
-				-o 0x500000 -b ${CORE--c3} || exit 1
+	/afs/awd/projects/eclipz/lab/p8/gsiexe/p8_load_l3 -f ${HB_IMG}/vbu${use_test}.pnor -o 0x400000 -b ${CORE--c3} || exit 1
 fi
 
 
