@@ -34,11 +34,9 @@
 #include <fapiPlatHwpInvoker.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
-#include <targeting/targetservice.H>
+#include <targeting/common/commontargeting.H>
 #include <fapiHwpExecInitFile.H>
 #include <spd/spdenums.H>
-#include <targeting/predicates/predicatectm.H>
-#include <targeting/iterators/rangefilter.H>
 
 using namespace fapi;
 using namespace TARGETING;

@@ -33,7 +33,7 @@
 //******************************************************************************
 
 #include <hwpf/fapi/fapiTarget.H>
-#include <targeting/targetservice.H>
+#include <targeting/common/targetservice.H>
 #include <errl/errlentry.H>
 #include <hwpf/plat/fapiPlatAttributeService.H>
 #include <hwpf/plat/fapiPlatReasonCodes.H>

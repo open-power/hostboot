@@ -57,7 +57,11 @@
 /** Attribute Resource Provider */
 // Note: Not simplified to make it easier to extract with the PNOR targeting
 // image generator script
-#define VMM_VADDR_ATTR_RP  (3ul * 1024ul * 1024ul * 1024ul)
+// WARNING: 4 GB range deliberately chosen so that 64-bit Hostboot pointers
+// are similar to 32 bit FSP pointers, except that the upper 32 bits are
+// set to 0x00000001.  This allows both FSP and Hostboot to opearate on the same
+// targeting image
+#define VMM_VADDR_ATTR_RP  (4ul * 1024ul * 1024ul * 1024ul)
 
 /** Virtual memory block priorities */
 enum BlockPriority

@@ -46,8 +46,7 @@
 
 #include <stdint.h>
 #include <fapiAttributeIds.H>
-#include <targeting/target.H>
-#include <targeting/attributes.H>
+#include <targeting/common/attributes.H>
 #include <attributeenums.H>
 #include <fapiplatattrmacros.H>
 #include <hwpf/fapi/fapiReturnCode.H>

@@ -37,7 +37,7 @@
 #include <prdf_types.h>
 #endif
 
-#include <target.H>
+#include <targeting/common/target.H>
 
 /*--------------------------------------------------------------------*/
 /*  User Types                                                        */

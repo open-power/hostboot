@@ -21,7 +21,7 @@
 //
 //  IBM_PROLOG_END
 #include <sys/time.h>
-#include <targeting/util.H>
+#include <targeting/common/util.H>
 #include <vector>
 #include "mdiamonitor.H"
 #include "mdiasm.H"

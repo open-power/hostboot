@@ -35,7 +35,7 @@
 #include <errl/hberrltypes.H>
 #include <limits.h>
 #include <mbox/mboxif.H>
-#include <targeting/util.H>
+#include <targeting/common/util.H>
 
 extern trace_desc_t* g_trac_mbox;
 

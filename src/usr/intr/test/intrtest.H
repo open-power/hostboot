@@ -28,8 +28,8 @@
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <kernel/console.H>
-#include <targeting/targetservice.H>
-#include <targeting/util.H>
+#include <targeting/common/targetservice.H>
+#include <targeting/common/attributes.H>
 #include <sys/time.h>
 #include <sys/mmio.h>
 

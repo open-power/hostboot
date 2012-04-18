@@ -32,8 +32,8 @@
 #include <fapiSystemConfig.H>
 #include <fapiPlatReasonCodes.H>
 #include <errl/errlentry.H>
-#include <targeting/targetservice.H>
-#include <targeting/predicates/predicatectm.H>
+#include <targeting/common/targetservice.H>
+#include <targeting/common/predicates/predicates.H>
 
 extern "C"
 {

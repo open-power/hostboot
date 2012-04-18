@@ -38,7 +38,7 @@
 
 #include <fapiTarget.H>
 #include <fapiPlatTrace.H>
-#include <targeting/target.H>
+#include <targeting/common/attributes.H>
 #include <string.h>
 
 namespace fapi

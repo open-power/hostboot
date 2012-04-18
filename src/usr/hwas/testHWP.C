@@ -54,10 +54,9 @@
 
 #include <fapiTarget.H>
 #include <fapiPlatHwpInvoker.H>
-#include <targeting/targetservice.H>
+#include <targeting/common/targetservice.H>
 
 using namespace fapi;
-using namespace TARGETING;
 
 /******************************************************************************/
 // Globals/Constants

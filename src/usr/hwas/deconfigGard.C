@@ -27,7 +27,7 @@
  */
 
 #include <string.h>
-#include <targeting/targetservice.H>
+#include <targeting/common/targetservice.H>
 #include <errl/errlmanager.H>
 #include <errl/errludtarget.H>
 #include <hwas/deconfigGard.H>

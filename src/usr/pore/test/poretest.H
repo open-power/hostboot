@@ -31,20 +31,15 @@
 
 #include <list>
 #include <cxxtest/TestSuite.H>
-#include <targeting/targetservice.H>
+#include <targeting/common/commontargeting.H>
 #include <fapiPoreVeArg.H>
 #include <fapiTarget.H>
 #include <fapi.H>
 #include <vfs/vfs.H>
-#include <targeting/predicates/predicatectm.H>
-#include <targeting/iterators/rangefilter.H>
-#include <targeting/predicates/predicatepostfixexpr.H>
-#include <targeting/predicates/predicateisfunctional.H>
 
 //@todo - These two include files are to workaround
 //1. Avoid running test case in VBU
 //2. To call isSlavePresent(). Need to be removed when PD works.
-#include <targeting/util.H>
 #include <fsi/fsiif.H>
 
 #define CENTAUR_SBE_PNOR_MRR    0       // Memory Relocation Register for Centaur

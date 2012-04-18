@@ -24,7 +24,7 @@
 #define __MDIA_MDIA_H
 
 #include <errl/errlentry.H>
-#include <targeting/target.H>
+#include <targeting/common/target.H>
 
 /**
  * @file mdia.H

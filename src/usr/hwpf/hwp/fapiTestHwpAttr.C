@@ -45,9 +45,7 @@
  */
 
 #include <fapiTestHwpAttr.H>
-#include <targeting/targetservice.H>
-#include <targeting/predicates/predicatectm.H>
-#include <targeting/iterators/rangefilter.H>
+#include <targeting/common/commontargeting.H>
 
 extern "C"
 {

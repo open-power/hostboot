@@ -36,10 +36,7 @@
 #include    <stdint.h>
 #include    <assert.h>
 
-#include    <targeting/targetservice.H>
-#include    <targeting/iterators/rangefilter.H>
-#include    <targeting/predicates/predicates.H>
-#include    <targeting/util.H>
+#include    <targeting/common/commontargeting.H>
 
 #include    <hwas/hwas.H>
 #include    <hwas/hwasCommon.H>

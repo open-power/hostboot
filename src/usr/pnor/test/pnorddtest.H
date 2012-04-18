@@ -38,7 +38,7 @@
 #include <sys/time.h>
 #include "../pnordd.H"
 #include <list>
-#include <targeting/util.H>
+#include <targeting/common/attributes.H>
 
 #define BASE_SCRATCH_SPACE (3*1024*1024+1024*512)  //3.5MB offset in fake PNOR
 

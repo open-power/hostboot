@@ -26,7 +26,7 @@
 #include <sys/msg.h>
 #include <trace/interface.H>
 #include <errl/errlmanager.H>
-#include <targeting/targetservice.H>
+#include <targeting/common/targetservice.H>
 #include <devicefw/userif.H>
 #include <limits.h>
 #include <string.h>

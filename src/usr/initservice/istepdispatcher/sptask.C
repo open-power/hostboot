@@ -51,7 +51,7 @@
 #include    <initservice/initsvcudistep.H>  //  InitSvcUserDetailsIstep
 #include    <initservice/taskargs.H>        // TASK_ENTRY_MACRO
 
-#include    <targeting/util.H>              //
+#include    <targeting/common/util.H>       //
 
 #include    "istepdispatcher.H"
 #include    "splesscommon.H"

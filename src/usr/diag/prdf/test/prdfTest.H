@@ -43,9 +43,9 @@ class prdfTest: public CxxTest::TestSuite
 
     void testTrace(void)
     {
-        TS_TRACE(ENTER_MRK "testTrace()");
+        TS_TRACE(ENTER_MRK __FUNCTION__);
 
-        PRDF_ENTER( "testTrace()" );
+        PRDF_ENTER( "%s", __FUNCTION__  );
 
         const char * l_testStr = "running testTrace";
         uint64_t l_testHex = 0xDEADBEEF;
@@ -58,21 +58,21 @@ class prdfTest: public CxxTest::TestSuite
 
         PRDF_ERR( "testTrace() Please ignore this error trace 0x%08X", l_testHex );
 
+        PRDF_EXIT( "%s", __FUNCTION__ );
+
         PRDF_DENTER( "testTrace()" );
 
         PRDF_DINF( "testTrace() running testTrace" );
 
         PRDF_DEXIT( "testTrace()" );
 
-        PRDF_EXIT( "testTrace()" );
-
-        TS_TRACE(EXIT_MRK "testTrace()");
+        TS_TRACE(EXIT_MRK __FUNCTION__);
     }
 
     void testPrdInitialize(void)
     {
         using namespace PRDF;
-        TS_TRACE(ENTER_MRK "testPrdInitialize()");
+        TS_TRACE(ENTER_MRK __FUNCTION__);
         PRDF_ENTER( "testPrdInitialize()" );
 
         errlHndl_t l_pErr = NULL;
@@ -91,13 +91,13 @@ class prdfTest: public CxxTest::TestSuite
         }
 
         PRDF_EXIT( "testPrdInitialize()" );
-        TS_TRACE(EXIT_MRK "testPrdInitialize()");
+        TS_TRACE(EXIT_MRK __FUNCTION__);
     }
 
     void testPrdMain(void)
     {
         using namespace PRDF;
-        TS_TRACE(ENTER_MRK "testPrdMain()");
+        TS_TRACE(ENTER_MRK __FUNCTION__);
         PRDF_ENTER( "testPrdMain()" );
 
         errlHndl_t l_pErr = NULL;
@@ -116,19 +116,19 @@ class prdfTest: public CxxTest::TestSuite
         }
 
         PRDF_EXIT( "testPrdMain()" );
-        TS_TRACE(EXIT_MRK "testPrdMain()");
+        TS_TRACE(EXIT_MRK __FUNCTION__);
     }
 
     void testPrdIplCleanup(void)
     {
         using namespace PRDF;
-        TS_TRACE(ENTER_MRK "testPrdIplCleanup()");
+        TS_TRACE(ENTER_MRK __FUNCTION__);
         PRDF_ENTER( "testPrdIplCleanup()" );
 
         PrdIplCleanup();
 
         PRDF_EXIT( "testPrdIplCleanup()" );
-        TS_TRACE(EXIT_MRK "testPrdIplCleanup()");
+        TS_TRACE(EXIT_MRK __FUNCTION__);
     }
 
 };

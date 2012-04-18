@@ -32,7 +32,7 @@
 #include <prdf_proto.H>
 #include <iipglobl.h>
 #include <iipconst.h>
-#include <targetservice.H>
+#include <targeting/common/targetservice.H>
 
 #undef iipMain_C
 

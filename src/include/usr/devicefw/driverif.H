@@ -33,7 +33,7 @@
 #include <devicefw/userif.H>
 #include <stdarg.h>
 #include <builtins.h>
-#include <targeting/targetservice.H>
+#include <targeting/common/targetservice.H>
 
 namespace DeviceFW
 {

@@ -38,7 +38,7 @@
 
 #include <stdint.h>
 #include <errl/errlentry.H>
-#include <targeting/target.H>
+#include <targeting/common/target.H>
 
 namespace PRDF
 {

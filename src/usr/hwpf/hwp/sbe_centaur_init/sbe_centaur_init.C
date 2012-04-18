@@ -41,13 +41,8 @@
 #include    <initservice/taskargs.H>
 #include    <errl/errlentry.H>
 #include    <initservice/isteps_trace.H>
-#include    <targeting/targetservice.H>
-#include    <targeting/iterators/rangefilter.H>
-#include    <targeting/predicates/predicatectm.H>
-#include    <targeting/predicates/predicatepostfixexpr.H>
-#include    <targeting/predicates/predicateisfunctional.H>
+#include    <targeting/common/commontargeting.H>
 #include    <fapi.H>
-#include <targeting/target.H>
 #include <fapiPoreVeArg.H>
 #include <fapiTarget.H>
 #include <fapi.H>
@@ -55,10 +50,9 @@
 #include <list>
 #include "sbe_centaur_init.H"
 
-//@todo - These two include files are to workaround
-//1. Avoid running test case in VBU
-//2. To call isSlavePresent(). Need to be removed when PD works.
-#include <targeting/util.H>
+//@todo - The following workarounds need to be readdressed
+//1. Avoid running test case in VBU below
+//2. To call isSlavePresent(). Need to remove following header when PD works.
 #include <fsi/fsiif.H>
 
 // Extern function declaration

@@ -36,7 +36,7 @@
 #include <devicefw/driverif.H>
 #include <trace/interface.H>
 #include <errl/errlentry.H>
-#include <targeting/targetservice.H>
+#include <targeting/common/targetservice.H>
 #include <errl/errlmanager.H>
 #include "pnordd.H"
 #include <pnor/pnorif.H>

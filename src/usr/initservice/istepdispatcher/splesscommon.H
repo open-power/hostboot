@@ -50,10 +50,8 @@
 
 #include    <sys/mmio.h>                    //  mmio_scratch_read()
 
-#include    <targeting/attributes.H>        //  ISTEP_MODE attribute
-#include    <targeting/entitypath.H>
-#include    <targeting/target.H>
-#include    <targeting/targetservice.H>
+#include    <targeting/common/attributes.H>        //  ISTEP_MODE attribute
+#include    <targeting/common/targetservice.H>
 
 
 // external reference

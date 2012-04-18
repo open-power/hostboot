@@ -29,9 +29,10 @@
  */
 
 #include <mdia/mdia.H>
-#include <targeting/target.H>
+#include <targeting/common/attributes.H>
 #include <vector>
 #include <map>
+
 /**
  * @brief forwards
  */

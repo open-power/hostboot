@@ -35,8 +35,8 @@
 #include <errl/errlentry.H>
 #include <devicefw/driverif.H>
 #include <i2c/i2creasoncodes.H>
-#include <targeting/predicates/predicatectm.H>
-#include <targeting/util.H>
+#include <targeting/common/predicates/predicates.H>
+#include <targeting/common/attributes.H>
 
 extern trace_desc_t* g_trac_i2c;
 

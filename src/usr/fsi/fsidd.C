@@ -35,14 +35,12 @@
 #include <devicefw/driverif.H>
 #include <trace/interface.H>
 #include <errl/errlentry.H>
-#include <targeting/targetservice.H>
 #include <errl/errlmanager.H>
 #include <initservice/taskargs.H> 
-#include <targeting/predicates/predicatectm.H>
 #include <sys/time.h>
 #include <string.h>
 #include <algorithm>
-#include <targeting/util.H>
+#include <targeting/common/commontargeting.H>
 
 // FSI : General driver traces
 trace_desc_t* g_trac_fsi = NULL;

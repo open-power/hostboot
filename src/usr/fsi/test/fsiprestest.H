@@ -30,12 +30,8 @@
 
 #include <trace/interface.H>
 #include <cxxtest/TestSuite.H>
-#include <targeting/targetservice.H>
 #include <devicefw/userif.H>
-#include <targeting/predicates/predicatectm.H>
-#include <targeting/predicates/predicatepostfixexpr.H>
-#include <targeting/iterators/rangefilter.H>
-#include <targeting/util.H>
+#include <targeting/common/commontargeting.H>
 
 using namespace TARGETING;
 using namespace DeviceFW;

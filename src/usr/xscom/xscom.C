@@ -38,7 +38,7 @@
 #include <trace/interface.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
-#include <targeting/targetservice.H>
+#include <targeting/common/targetservice.H>
 #include <xscom/xscomreasoncodes.H>
 #include "xscom.H"
 #include <assert.h>

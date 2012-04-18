@@ -35,9 +35,9 @@
 #include <sys/misc.h>
 #include <kernel/console.H>
 #include <sys/task.h>
-#include <targeting/targetservice.H>
+#include <targeting/common/targetservice.H>
 #include <vmmconst.h>
-#include <targeting/util.H>
+#include <targeting/common/attributes.H>
 
 using namespace INTR;
 

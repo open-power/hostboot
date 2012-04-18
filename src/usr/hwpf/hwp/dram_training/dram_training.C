@@ -45,20 +45,13 @@
 #include    <initservice/isteps_trace.H>
 
 //  targeting support
-#include    <targeting/attributes.H>
-#include    <targeting/entitypath.H>
-#include    <targeting/target.H>
-#include    <targeting/targetservice.H>
-#include    <targeting/iterators/rangefilter.H>
-#include    <targeting/predicates/predicatectm.H>
-#include    <targeting/predicates/predicatepostfixexpr.H>
-#include    <targeting/predicates/predicateisfunctional.H>
+#include <targeting/common/commontargeting.H>
+#include <targeting/common/util.H>
 
 //  fapi support
 #include    <fapi.H>
 #include    <fapiPlatHwpInvoker.H>
 
-#include <targeting/util.H>
 const uint8_t UNLIMITED_RUN = 0xFF;
 const uint8_t VPO_NUM_OF_MBAS_TO_RUN = 1;
 const uint8_t VPO_NUM_OF_MEMBUF_TO_RUN = 1;

@@ -26,7 +26,8 @@
  *  @brief Implementation of ErrlUserDetailsTarget
  */
 #include <errl/errludtarget.H>
-#include <targeting/targetservice.H>
+#include <targeting/common/target.H>
+#include <targeting/common/targetservice.H>
 
 namespace ERRORLOG
 {

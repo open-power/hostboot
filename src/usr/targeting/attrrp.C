@@ -20,6 +20,16 @@
 //  Origin: 30
 //
 //  IBM_PROLOG_END
+
+/**
+ *  @file targeting/attrrp.C
+ *
+ *  @brief Attribute resource provider implementation which establishes and
+ *      initializes virtual memory ranges for attributes as needed, and works
+ *      with other resource providers (such as the PNOR resource provider) to
+ *      retrieve attribute data which it connot directly provide.
+ */
+
 #include <util/singleton.H>
 #include <pnortargeting.H>
 #include <pnor/pnorif.H>
@@ -28,10 +38,10 @@
 #include <string.h>
 #include <algorithm>
 #include <vmmconst.h>
-
-#include <targeting/targreasoncodes.H>
-#include "attrrp.H"
-#include "trace.H"
+#include <targeting/adapters/assertadapter.H>
+#include <targeting/common/targreasoncodes.H>
+#include <targeting/attrrp.H>
+#include <targeting/common/trace.H>
 #include <initservice/initserviceif.H>
 
 using namespace INITSERVICE;
@@ -44,27 +54,35 @@ namespace TARGETING
      */
     struct AttrRP_Section
     {
-            /** Section type. */
-        SECTION_TYPE    type;
-            /** Desired address in Attribute virtual address space. */
-        uint64_t        vmmAddress;
-            /** Location in PNOR virtual address space. */
-        uint64_t        pnorAddress;
-            /** Section size. */
-        uint64_t        size;
+        // Section type
+        SECTION_TYPE type;
+
+        // Desired address in Attribute virtual address space
+        uint64_t     vmmAddress;
+
+        // Location in PNOR virtual address space
+        uint64_t     pnorAddress;
+
+        // Section size
+        uint64_t     size;
     };
 
-    void AttrRP::init( errlHndl_t   &io_taskRetErrl )
+    void AttrRP::init(errlHndl_t &io_taskRetErrl)
     {
         // Call startup on singleton instance.
-        Singleton<AttrRP>::instance().startup( io_taskRetErrl );
+        Singleton<AttrRP>::instance().startup(io_taskRetErrl);
     }
 
-    void AttrRP::startMsgServiceTask(void* i_instance)
+    void* AttrRP::getBaseAddress()
+    {
+        return reinterpret_cast<void*>(VMM_VADDR_ATTR_RP);
+    }
+
+    void AttrRP::startMsgServiceTask(void* i_pInstance)
     {
         // Call msgServiceTask loop on instance.
-        assert(i_instance);
-        static_cast<AttrRP*>(i_instance)->msgServiceTask();
+        TARG_ASSERT(i_pInstance);
+        static_cast<AttrRP*>(i_pInstance)->msgServiceTask();
     }
 
     AttrRP::~AttrRP()
@@ -75,10 +93,10 @@ namespace TARGETING
         }
         msg_q_destroy(iv_msgQ);
 
-        assert(false);
+        TARG_ASSERT(false);
     }
 
-    void AttrRP::startup( errlHndl_t    &io_taskRetErrl )
+    void AttrRP::startup(errlHndl_t& io_taskRetErrl)
     {
         errlHndl_t l_errl = NULL;
 
@@ -86,11 +104,17 @@ namespace TARGETING
         {
             // Parse PNOR headers.
             l_errl = this->parseAttrSectHeader();
-            if (l_errl) break;
+            if (l_errl) 
+            {
+                break;
+            }
 
             // Create corresponding VMM blocks for each section.
             l_errl = this->createVmmSections();
-            if (l_errl) break;
+            if (l_errl)
+            {
+                break;
+            }
 
             // Spawn daemon thread.
             task_create(&AttrRP::startMsgServiceTask, this);
@@ -104,7 +128,7 @@ namespace TARGETING
         }
 
         //  return any errlogs to _start()
-        io_taskRetErrl  =   l_errl;
+        io_taskRetErrl = l_errl;
     }
 
     void AttrRP::msgServiceTask() const
@@ -314,8 +338,14 @@ namespace TARGETING
             for (size_t i = 0; i < iv_sectionCount; i++, l_section++)
             {
                 iv_sections[i].type = l_section->sectionType;
+
+                // Conversion cast for templated abstract pointer object only 
+                // works when casting to pointer of the templated type.  Since
+                // cache is of a different type, we first cast to extract the
+                // real pointer, then recast it into the cache
                 iv_sections[i].vmmAddress =
-                        reinterpret_cast<uint64_t>(l_header->vmmBaseAddress) +
+                        reinterpret_cast<uint64_t>(
+                            TARG_TO_PLAT_PTR(l_header->vmmBaseAddress)) +
                         l_header->vmmSectionOffset*i;
                 iv_sections[i].pnorAddress = l_pnorSectionInfo.vaddr +
                                              l_section->sectionOffset;

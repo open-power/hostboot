@@ -21,54 +21,60 @@
 #
 #  IBM_PROLOG_END
 
+################################################################################
+#
+#  @file targeting/xmltohb/makefile
+#
+#  @brief Makefile for building Hostboot's xmltohb dir 
+#
+################################################################################
+
 ROOTPATH = ../../../..
 
-XMLTOHB_HEADER_TARGETS =    \
-    attributeenums.H        \
-    attributestrings.H      \
-    attributetraits.H       \
-    attributestructs.H      \
-    pnortargeting.H         \
-    fapiplatattrmacros.H
+# Point to the common targeting makefile for xmltohb
+COMMON_XMLTOHB_DIR = xmltohb
+COMMON_TARGETING_PATH_PREFIX = ../common
+COMMON_TARGETING_REL_PATH = \
+    ${COMMON_TARGETING_PATH_PREFIX}/${COMMON_XMLTOHB_DIR}
+COMMON_TARGETING_MAKEFILE = \
+    ${COMMON_TARGETING_REL_PATH}/common.mk
 
-XMLTOHB_SOURCE_TARGETS =    \
-    attributedump.C         \
-    attributestrings.C  
+# Include the common targeting makefile for xmltohb verbatim
+include ${COMMON_TARGETING_MAKEFILE}
 
-XMLTOHB_SYSTEM_BINARIES = \
-   vbu_targeting.bin \
-   simics_VENICE_targeting.bin \
-   simics_MURANO_targeting.bin \
-   TULETA_targeting.bin
+XMLTOHB_SYSTEM_BINARIES += TULETA_targeting.bin
 
-XMLTOHB_TARGETS = \
-    ${XMLTOHB_HEADER_TARGETS} \
-    ${XMLTOHB_SOURCE_TARGETS} 
+VPATH = ${COMMON_TARGETING_REL_PATH}   
 
-XMLTOHB_GENERIC_SOURCES = attribute_types.xml target_types.xml
+FAPI_ATTR_SOURCE_DIR = ${ROOTPATH}/src/usr/hwpf/hwp
 
 XMLTOHB_FAPIATTR_SOURCES = \
-    ${ROOTPATH}/src/usr/hwpf/hwp/memory_attributes.xml \
-    ${ROOTPATH}/src/usr/hwpf/hwp/L2_L3_attributes.xml \
-    ${ROOTPATH}/src/usr/hwpf/hwp/scratch_attributes.xml \
-    ${ROOTPATH}/src/usr/hwpf/hwp/system_attributes.xml \
-    ${ROOTPATH}/src/usr/hwpf/hwp/chip_attributes.xml \
-    ${ROOTPATH}/src/usr/hwpf/hwp/dimm_spd_attributes.xml \
-    ${ROOTPATH}/src/usr/hwpf/hwp/dimm_attributes.xml \
-    ${ROOTPATH}/src/usr/hwpf/hwp/unit_attributes.xml \
-    ${ROOTPATH}/src/usr/hwpf/hwp/freq_attributes.xml \
-    ${ROOTPATH}/src/usr/hwpf/hwp/proc_mvpd_attributes.xml
+    ${addprefix ${FAPI_ATTR_SOURCE_DIR}/, ${FAPI_ATTR_SOURCES}}
 
 VMM_CONSTS_FILE = \
     ${ROOTPATH}/src/include/usr/vmmconst.h
 
-GENFILES = ${XMLTOHB_TARGETS} 
+GENFILES = ${XMLTOHB_TARGETS}
 
+#debug :
+#	@echo COMMON_TARGETING_PATH_PREFIX = ${COMMON_TARGETING_PATH_PREFIX}
+#	@echo COMMON_TARGETING_REL_PATH = ${COMMON_TARGETING_REL_PATH}
+#	@echo COMMON_TARGETING_MAKEFILE = ${COMMON_TARGETING_MAKEFILE}
+#	@echo XMLTOHB_HEADER_TARGETS = ${XMLTOHB_HEADER_TARGETS}
+#	@echo XMLTOHB_SOURCE_TARGETS = ${XMLTOHB_SOURCE_TARGETS}
+#	@echo XMLTOHB_SYSTEM_BINARIES = ${XMLTOHB_SYSTEM_BINARIES}
+#	@echo XMLTOHB_TARGETS = ${XMLTOHB_TARGETS}
+#	@echo XMLTOHB_GENERIC_SOURCES = ${XMLTOHB_GENERIC_SOURCES}
+#	@echo FAPI_ATTR_SOURCES = ${FAPI_ATTR_SOURCES}
+#	@echo FAPI_ATTR_SOURCE_DIR = ${FAPI_ATTR_SOURCE_DIR}
+#	@echo XMLTOHB_FAPIATTR_SOURCES = ${XMLTOHB_FAPIATTR_SOURCES}
+#	@echo VPATH = ${VPATH}
+    
 EXTRA_PARTS = $(addprefix $(IMGDIR)/, $(XMLTOHB_SYSTEM_BINARIES))
 
 EXTRA_CLEAN = $(addprefix $(GENDIR)/, ${XMLTOHB_SYSTEM_BINARIES}) \
-	      $(addprefix $(GENDIR)/, ${XMLTOHB_SYSTEM_BINARIES:.bin=.xml}) \
-              ${GENDIR}/generic.xml ${GENDIR}/fapiattrs.xml
+          $(addprefix $(GENDIR)/, ${XMLTOHB_SYSTEM_BINARIES:.bin=.xml}) \
+              ${GENDIR}/${XMLTOHB_GENERIC_XML} ${GENDIR}/${XMLTOHB_FAPI_XML}
 
 include ${ROOTPATH}/config.mk
 
@@ -79,31 +85,35 @@ ${EXTRA_PARTS}: ${IMGDIR}/% : ${GENDIR}/%
 	cp -f $^ $@
 
 # generic XML is created from the generic sources only
-${GENDIR}/generic.xml: ${XMLTOHB_GENERIC_SOURCES}
-	./mergexml.sh $^ > $@
+${GENDIR}/${XMLTOHB_GENERIC_XML}: \
+        ${XMLTOHB_MERGE_SCRIPT} ${XMLTOHB_GENERIC_SOURCES}
+	$< $^ > $@
 
 # merge all FAPI attribute files into one
-${GENDIR}/fapiattrs.xml: ${XMLTOHB_FAPIATTR_SOURCES}
-	./mergexml.sh $^ > $@
+${GENDIR}/${XMLTOHB_FAPI_XML}: ${XMLTOHB_MERGE_SCRIPT} \
+        ${XMLTOHB_FAPIATTR_SOURCES}
+	$< $^ > $@
 
 # create the header files, only needs generic xml
 $(call GENTARGET,$(XMLTOHB_TARGETS)) : \
-		xmltohb.pl ${GENDIR}/generic.xml ${GENDIR}/fapiattrs.xml
-	./$< $(addprefix --hb-xml-file=,${GENDIR}/generic.xml) \
-	     $(addprefix --fapi-attributes-xml-file=,${GENDIR}/fapiattrs.xml) \
-	     --src-output-dir=$(dir $@) --img-output-dir=none \
-	     --img-output-file=none
+    ${XMLTOHB_COMPILER_SCRIPT} ${GENDIR}/${XMLTOHB_GENERIC_XML} \
+        ${GENDIR}/${XMLTOHB_FAPI_XML}
+	$< $(addprefix --hb-xml-file=,${GENDIR}/${XMLTOHB_GENERIC_XML}) \
+       $(addprefix --fapi-attributes-xml-file=,${GENDIR}/${XMLTOHB_FAPI_XML}) \
+         --src-output-dir=$(dir $@) --img-output-dir=none \
+         --img-output-file=none
 
 # system-specific XML needs the generic plus the xxx.system.xml file + the
 # MRW file
 ${GENDIR}/%.hb.xml: %.system.xml ${XMLTOHB_GENERIC_SOURCES} %.mrw.xml
-	./mergexml.sh $^ > $@
+	${COMMON_TARGETING_REL_PATH}/${XMLTOHB_MERGE_SCRIPT} $^ > $@
 
 # create the binary files
-${GENDIR}/%_targeting.bin: xmltohb.pl ${GENDIR}/%.hb.xml ${GENDIR}/fapiattrs.xml ${VMM_CONSTS_FILE}
-	./$< $(addprefix --hb-xml-file=,${GENDIR}/$*.hb.xml) \
-	     $(addprefix --fapi-attributes-xml-file=,${GENDIR}/fapiattrs.xml) \
-	     --src-output-dir=none --img-output-dir=$(dir $@) \
-	     --img-output-file=$(notdir $@) \
+${GENDIR}/%_targeting.bin: ${XMLTOHB_COMPILER_SCRIPT} ${GENDIR}/%.hb.xml \
+        ${GENDIR}/${XMLTOHB_FAPI_XML} ${VMM_CONSTS_FILE}
+	$< $(addprefix --hb-xml-file=,${GENDIR}/$*.hb.xml) \
+        $(addprefix --fapi-attributes-xml-file=,${GENDIR}/${XMLTOHB_FAPI_XML}) \
+         --src-output-dir=none --img-output-dir=$(dir $@) \
+         --img-output-file=$(notdir $@) \
          --vmm-consts-file=$(VMM_CONSTS_FILE)
 

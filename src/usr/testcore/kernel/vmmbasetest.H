@@ -33,7 +33,7 @@
 #include <arch/ppc.H>
 #include <sys/mm.h>
 #include <usr/vmmconst.h>
-#include <targeting/util.H>
+#include <targeting/common/util.H>
 
 class VmmBaseTest : public CxxTest::TestSuite
 {

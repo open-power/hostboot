@@ -35,9 +35,7 @@
 #include <errl/errlentry.H>
 #include <devicefw/driverif.H>
 #include <i2c/eepromddreasoncodes.H>
-#include <targeting/predicates/predicatectm.H>
-#include <targeting/predicates/predicatepostfixexpr.H>
-#include <targeting/util.H>
+#include <targeting/common/commontargeting.H>
 #include "i2ctest.H"
 
 extern trace_desc_t* g_trac_eeprom;

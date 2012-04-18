@@ -21,7 +21,7 @@
 //
 //  IBM_PROLOG_END
 #include <devicefw/driverif.H>
-#include <targeting/targetservice.H>
+#include <targeting/common/attributes.H>
 #include <fsi/fsi_reasoncodes.H>
 #include "fsidd.H"
 

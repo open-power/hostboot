@@ -36,7 +36,7 @@
 #include <trace/interface.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
-#include <targeting/targetservice.H>
+#include <targeting/common/targetservice.H>
 #include <devicefw/driverif.H>
 #include <i2c/i2creasoncodes.H>
 

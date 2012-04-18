@@ -35,8 +35,7 @@
 #include <sys/sync.h>
 #include <util/singleton.H>
 #include <errl/errlentry.H>
-#include <targeting/target.H>
-#include <targeting/entitypath.H>
+#include <targeting/common/attributes.H>
 
 namespace HWAS
 {

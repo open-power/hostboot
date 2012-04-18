@@ -33,7 +33,7 @@
 
 #include <stdint.h>
 #include <errl/errlentry.H>
-#include <targeting/targetservice.H>
+#include <targeting/common/targetservice.H>
 
 namespace DeviceFW
 {

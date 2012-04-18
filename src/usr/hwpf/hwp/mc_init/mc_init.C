@@ -45,12 +45,7 @@
 #include    <initservice/isteps_trace.H>
 
 //  targeting support
-#include    <targeting/attributes.H>
-#include    <targeting/entitypath.H>
-#include    <targeting/target.H>
-#include    <targeting/targetservice.H>
-#include    <targeting/iterators/rangefilter.H>
-#include    <targeting/predicates/predicates.H>
+#include    <targeting/common/commontargeting.H>
 
 //  fapi support
 #include    <fapi.H>

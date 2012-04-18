@@ -33,8 +33,8 @@
 // 'system' headers
 #include <stdint.h>
 #include <errl/errlentry.H>
-#include <targeting/target.H>
-#include <targeting/targetservice.H>
+#include <targeting/common/target.H>
+#include <targeting/common/targetservice.H>
 
 // platform specific headers
 

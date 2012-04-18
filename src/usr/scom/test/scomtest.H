@@ -34,7 +34,7 @@
 #include <errl/errlentry.H>
 #include <devicefw/userif.H>
 #include <fsi/fsiif.H>
-#include <targeting/util.H>
+#include <targeting/common/util.H>
 
 
 extern trace_desc_t* g_trac_scom;

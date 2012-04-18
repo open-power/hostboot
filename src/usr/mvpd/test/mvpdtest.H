@@ -34,7 +34,7 @@
 #include <errl/errlmanager.H>
 #include <errl/errlentry.H>
 #include <devicefw/driverif.H>
-#include <targeting/predicates/predicatectm.H>
+#include <targeting/common/predicates/predicatectm.H>
 
 #include <mvpd/mvpdenums.H>
 #include <mvpd/mvpdreasoncodes.H>

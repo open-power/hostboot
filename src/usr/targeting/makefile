@@ -20,36 +20,48 @@
 #  Origin: 30
 #
 #  IBM_PROLOG_END
+
+################################################################################
+#
+#  @file src/usr/targeting/makefile
+#
+#  @brief Makefile for building Hostboot's targeting implementation 
+#
+################################################################################
+
 ROOTPATH = ../../..
 MODULE = targeting
 
-VPATH =         \
-    predicates: \
-    iterators:  
+COMMON_TARGETING_REL_PATH = common
+COMMON_TARGETING_MAKEFILE = ${COMMON_TARGETING_REL_PATH}/common.mk
 
-PREDICATES_OBJS =           \
-    predicatebase.o         \
-    predicatepostfixexpr.o  \
-    predicatectm.o 			\
-    predicateisfunctional.o      
-    
-ITERATORS_OBJS =        \
-    targetiterator.o    \
-    rangefilter.o
+include ${COMMON_TARGETING_MAKEFILE}
 
-TARGET_OBJS =       \
-    target.o        \
-    targetservice.o \
-    entitypath.o
+VPATH = \
+    adapters \
+    ${COMMON_TARGETING_REL_PATH} \
+    ${addprefix ${COMMON_TARGETING_REL_PATH}/, ${COMMON_TARGETING_SUBDIRS}}  
 
 ATTR_RP_OBJS = \
     attrrp.o
 
-OTHER_OBJS = \
-     util.o
+ENTRY_POINT_OBJS =       \
+    targetservicestart.o
 
-OBJS = ${TARGET_OBJS} ${PREDICATES_OBJS} ${ITERATORS_OBJS} ${ATTR_RP_OBJS} ${OTHER_OBJS}
-OBJS += attributestrings.o attributedump.o
+DEBUG_OBJS =           \
+    attributestrings.o \
+    attributedump.o
+
+HOSTBOOT_SPECIFIC_OBJS = ${ENTRY_POINT_OBJS} ${ATTR_RP_OBJS} ${DEBUG_OBJS}
+    
+#debug :
+#	@echo COMMON_TARGETING_REL_PATH = ${COMMON_TARGETING_REL_PATH}
+#	@echo COMMON_TARGETING_MAKEFILE = ${COMMON_TARGETING_MAKEFILE}
+#	@echo COMMON_TARGETING_SUBDIRS = ${COMMON_TARGETING_SUBDIRS}
+#	@echo VPATH = ${VPATH}
+#	@echo COMMON_TARGETING_OBJS = ${COMMON_TARGETING_OBJS}
+    
+OBJS = ${COMMON_TARGETING_OBJS} ${HOSTBOOT_SPECIFIC_OBJS}
 
 SUBDIRS = test.d xmltohb.d
 

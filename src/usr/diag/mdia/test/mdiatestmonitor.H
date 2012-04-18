@@ -27,7 +27,7 @@
 #include <sys/task.h>
 #include <sys/time.h>
 #include <stdint.h>
-#include <targeting/util.H>
+#include <targeting/common/util.H>
 #include "../mdiafwd.H"
 #include "../mdiamonitor.H"
 #include "../mdiasm.H"

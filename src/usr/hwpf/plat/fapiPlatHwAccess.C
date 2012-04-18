@@ -53,12 +53,11 @@
 #include <fapiPlatTrace.H>
 #include <fapiPlatHwAccess.H>
 #include <errl/errlentry.H>
-#include <targeting/targetservice.H>
 #include <devicefw/userif.H>
 #include <ecmdDataBufferBase.H>
 #include <fapiPlatReasonCodes.H>
-#include <targeting/predicates/predicatectm.H>
-#include <targeting/targetservice.H>
+#include <targeting/common/predicates/predicates.H>
+#include <targeting/common/targetservice.H>
 
 extern "C"
 {

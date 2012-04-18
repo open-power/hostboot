@@ -58,10 +58,8 @@
 #include    <initservice/taskargs.H>        // TASK_ENTRY_MACRO
 
 
-#include    <targeting/attributes.H>        //  ISTEP_MODE attribute
-#include    <targeting/entitypath.H>
-#include    <targeting/target.H>
-#include    <targeting/targetservice.H>
+#include    <targeting/common/attributes.H> //  ISTEP_MODE attribute
+#include    <targeting/common/targetservice.H>
 
 #include    <mbox/mbox_queues.H>            // HB_ISTEP_MSGQ
 #include    <mbox/mboxif.H>                 // register mailbox
@@ -71,7 +69,7 @@
 #include    "splesscommon.H"
 
 #include    <isteps/istepmasterlist.H>
-#include    <targeting/util.H>
+#include    <targeting/common/attributes.H>
 
 //  -----   namespace   ISTEPS_TRACE    ---------------------------------------
 namespace ISTEPS_TRACE

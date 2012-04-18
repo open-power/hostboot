@@ -30,7 +30,7 @@
 
 #include <builtins.h>
 #include <cxxtest/TestSuite.H>
-#include <targeting/target.H>
+#include <targeting/common/attributes.H>
 #include "../mdiaworkitem.H"
 #include "../mdiasm.H"
 

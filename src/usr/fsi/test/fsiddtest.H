@@ -37,7 +37,7 @@
 #include <fsi/fsiif.H>
 #include <fsi/fsi_reasoncodes.H>
 #include <sys/time.h>
-#include <targeting/util.H>
+#include <targeting/common/attributes.H>
 
 extern trace_desc_t* g_trac_fsi;
 

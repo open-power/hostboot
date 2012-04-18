@@ -20,22 +20,64 @@
 #  Origin: 30
 #
 #  IBM_PROLOG_END
+
+################################################################################
+#
+#  @file src/usr/targeting/test/makefile
+#
+#  @brief Makefile for building Hostboot's targeting test dir 
+#
+################################################################################
+
 ROOTPATH = ../../../..
 
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/plat
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
+# Determine relative paths to common targeting makefile
 
-# Allow testcase to access component trace macros
-EXTRAINCDIR += ../
+COMMON_TARGETING_REL_PATH = ../common
+COMMON_MAKEFILE = ${COMMON_TARGETING_REL_PATH}/test/common.mk
+
+# Suck in the common targeting makefile, verbatim
+
+include ${COMMON_MAKEFILE}
+
+# Defines from the common makefile included above:
+# - COMMON_TESTCASES (name of common testcase .H's)
+# - HWPF_INC_DIRS    (subdirs of HWPF to look for includes)
+
+# Point "make" to find sources and includes in the common and platform
+# specific trees
+
+VPATH += ${COMMON_TARGETING_REL_PATH}/test
+
+HWPF_REL_PATH = ${ROOTPATH}/src/include/usr/hwpf
+
+EXTRAINCDIR +=                                       \
+    $(addprefix ${HWPF_REL_PATH}/, ${HWPF_INC_DIRS}) \
+    ${ROOTPATH}/src/include/usr/ecmddatabuffer       \
+    ../
+
+# Generate the test suite     
 
 MODULE = testtargeting
-TESTS = *.H
 
-OBJS = attributestrings.o 
+COMMON_TESTCASE_REL_PATHS = \
+    $(addprefix ${COMMON_TARGETING_REL_PATH}/test/,${COMMON_TESTCASES})
+
+TESTS = testtargeting.H ${COMMON_TESTCASE_REL_PATHS}
+
+OBJS = attributestrings.o
+
+#debug :
+#	@echo EXTRAINCDIR = ${EXTRAINCDIR}
+#	@echo COMMON_TARGETING_REL_PATH = ${COMMON_TARGETING_REL_PATH}
+#	@echo COMMON_MAKEFILE = ${COMMON_MAKEFILE}
+#	@echo VPATH = ${VPATH}
+#	@echo INCLUDES = ${INCLUDES}
+#	@echo COMMON_TESTCASE_REL_PATHS = ${COMMON_TESTCASE_REL_PATHS}
+#	@echo COMMON_TESTCASES = ${COMMON_TESTCASES}
+#	@echo HWPF_INC_DIRS = ${HWPF_INC_DIRS} 
+#	@echo TESTS = ${TESTS} 
 
 include ${ROOTPATH}/config.mk
 
 vpath %.C ${GENDIR}
-
