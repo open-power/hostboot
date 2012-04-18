@@ -156,6 +156,7 @@
                 .set HSPRG1,305
                 .set HDSISR,306
                 .set HDEC,310
+                .set HRMOR,313
                 .set HSRR0,314
                 .set HSRR1,315
                 .set HMER,336

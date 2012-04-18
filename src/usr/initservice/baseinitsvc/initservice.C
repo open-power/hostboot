@@ -610,7 +610,9 @@ void InitService::registerBlock(void* i_vaddr, uint64_t i_size,
     }
 }
 
-void InitService::doShutdown(uint64_t i_status)
+void InitService::doShutdown(uint64_t i_status,
+                             uint64_t i_payload_base,
+                             uint64_t i_payload_entry)
 {
     int l_rc = 0;
     errlHndl_t l_err = NULL;
@@ -643,7 +645,7 @@ void InitService::doShutdown(uint64_t i_status)
         }
         l_rb_iter++;
     }
-    shutdown(i_status);
+    shutdown(i_status, i_payload_base, i_payload_entry);
 }
 
 } // namespace

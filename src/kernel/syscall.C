@@ -604,6 +604,8 @@ namespace Systemcalls
     void Shutdown(task_t * t)
     {
         uint64_t status = static_cast<uint64_t>(TASK_GETARG0(t));
+        KernelMisc::g_payload_base = static_cast<uint64_t>(TASK_GETARG1(t));
+        KernelMisc::g_payload_entry = static_cast<uint64_t>(TASK_GETARG2(t));
         CpuManager::requestShutdown(status);
         TASK_SETRTN(t, 0);
     }

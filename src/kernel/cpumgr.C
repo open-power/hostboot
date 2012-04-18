@@ -107,8 +107,9 @@ void CpuManager::init_slave_smp(cpu_t* cpu)
 
 void CpuManager::requestShutdown(uint64_t i_status)
 {
-    cv_shutdown_requested = true;
     cv_shutdown_status = i_status;
+    __sync_synchronize();
+    cv_shutdown_requested = true;
 }
 
 void CpuManager::startCPU(ssize_t i)

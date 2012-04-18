@@ -35,5 +35,10 @@ namespace KernelMisc
      *  @brief Sequence kernel to shutdown and switch to payload.
      */
     void shutdown();
+
+    /** @brief Base address (target HRMOR) of the payload. */
+    extern uint64_t g_payload_base;
+    /** @brief Address from base of payload entry-point. */
+    extern uint64_t g_payload_entry;
 };
 #endif

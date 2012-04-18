@@ -24,9 +24,17 @@
 #include <kernel/cpumgr.H>
 #include <kernel/cpuid.H>
 #include <kernel/console.H>
+#include <kernel/barrier.H>
+
+extern "C" void kernel_shutdown(size_t, uint64_t, uint64_t) NO_RETURN;
+
 
 namespace KernelMisc
 {
+
+    uint64_t g_payload_base = 0;
+    uint64_t g_payload_entry = 0;
+
     void shutdown()
     {
         // Update scratch SPR for shutdown status.
@@ -65,9 +73,37 @@ namespace KernelMisc
         // for exactly how this is handled.
         MAGIC_INSTRUCTION(MAGIC_SHUTDOWN);
 
-        while(1)
+        // Check for a valid payload address.
+        if ((0 == g_payload_base) && (0 == g_payload_entry))
         {
-            doze();
+            // We really don't know what we're suppose to do now, so just
+            // sleep all the processors.
+
+            if (c->master)
+            {
+                printk("No payload... doze'ing all threads.\n");
+            }
+
+            while(1)
+            {
+                doze();
+            }
+        }
+        else
+        {
+            static Barrier* l_barrier = new Barrier(CpuManager::getCpuCount());
+
+            if (c->master)
+            {
+                printk("Preparing to enter payload...%lx:%lx\n",
+                       g_payload_base, g_payload_entry);
+            }
+
+            l_barrier->wait();
+
+            kernel_shutdown(CpuManager::getCpuCount(),
+                            g_payload_base,
+                            g_payload_entry);
         }
     }
 };

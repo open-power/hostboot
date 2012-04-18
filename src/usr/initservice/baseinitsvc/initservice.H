@@ -177,10 +177,16 @@ public:
      * @brief Perform necessary steps, such as FLUSHing, to registered blocks.
      *
      * @param[in] i_status - Shutdown status to be passed along on shutdown
+     * @param[in] i_payload_base - The base address (target HRMOR) of the
+     *                             payload.
+     * @param[in] i_payload_entry - The offset from base address of the
+     *                              payload entry-point.
      *
      * @return Nothing
      */
-    void doShutdown(uint64_t i_status);
+    void doShutdown(uint64_t i_status,
+                    uint64_t i_payload_base = 0,
+                    uint64_t i_payload_entry = 0);
 
 
 protected:

@@ -49,9 +49,14 @@ extern "C"
 #ifdef __HIDDEN_SYSCALL_SHUTDOWN
 /** @fn shutdown()
  *  @brief Shutdown all CPUs (hardware threads)
- *  @param[in] i_status The status code to post
+ *  @param[in] i_status         The status code to post
+ *  @param[in] i_payload_base   The base address (target HRMOR) of the payload.
+ *  @param[in] i_payload_entry  The offset from base address of the payload
+ *                              entry-point.
  */
-extern "C" void shutdown(uint64_t i_status);
+extern "C" void shutdown(uint64_t i_status,
+                         uint64_t i_payload_base,
+                         uint64_t i_payload_entry);
 #endif
 
 /** @enum ProcessorCoreType

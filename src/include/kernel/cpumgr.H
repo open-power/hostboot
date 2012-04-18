@@ -81,6 +81,11 @@ class CpuManager
          */
         static void activateCPU(cpu_t * i_cpu);
 
+        /** @fn getCpuCount
+         * Return the number of active CPUs.
+         */
+        static size_t getCpuCount() { return cv_cpuCount; }
+
 
     protected:
         CpuManager();
