@@ -54,6 +54,7 @@ namespace   INITSERVICE
  *  6.  host_gard : Do Gard
  *  7.  host_cancontinue_clear : Clear deconfigured states
  *  8.  proc_check_slave_sbe_seeprom_complete : Check Slave SBE Complete
+ *  9.  proc_xmit_sbe : vSBE Init of Slave Chips
  *
  */
 const   TaskInfo    g_istep06[]  =   {
@@ -91,10 +92,10 @@ const   TaskInfo    g_istep06[]  =   {
                 }
         },
         {
-                ISTEPNAME(06,04,"set_ipl_parms"),
-                NULL,
+                ISTEPNAME(06,04,"host_set_ipl_parms"),
+                HWAS::host_set_ipl_parms,
                 {
-                        NONE,
+                        START_FN,
                         EXT_IMAGE,
                 }
         },
@@ -116,17 +117,25 @@ const   TaskInfo    g_istep06[]  =   {
         },
         {
                 ISTEPNAME(06,07,"host_cancontinue_clear"),
-                NULL,
+                HWAS::host_cancontinue_clear,
                 {
-                        NONE,
+                        START_FN,
                         EXT_IMAGE,
                 }
         },
         {
                 ISTEPNAME(06,08,"proc_check_slave_sbe_seeprom_complete"),
-                NULL,
+                HWAS::proc_check_slave_sbe_seeprom_complete,
                 {
-                        NONE,
+                        START_FN,
+                        EXT_IMAGE,
+                }
+        },
+        {
+                ISTEPNAME(06,09,"proc_xmit_sbe"),
+                HWAS::proc_xmit_sbe,
+                {
+                        START_FN,
                         EXT_IMAGE,
                 }
         },

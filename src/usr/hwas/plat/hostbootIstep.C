@@ -51,6 +51,18 @@ void host_init_fsi( void *io_pArgs )
 }
 
 //******************************************************************************
+// host_set_ipl_parms function
+//******************************************************************************
+void host_set_ipl_parms( void *io_pArgs )
+{
+    errlHndl_t errl = NULL;
+
+    // stub -- nothing here currently
+
+    task_end2(errl);
+}
+
+//******************************************************************************
 // host_discover_targets function
 //******************************************************************************
 void host_discover_targets( void *io_pArgs )
@@ -60,13 +72,48 @@ void host_discover_targets( void *io_pArgs )
     task_end2(errl);
 }
 
-
 //******************************************************************************
 // host_gard function
 //******************************************************************************
 void host_gard( void *io_pArgs )
 {
     errlHndl_t errl = collectGard();
+
+    task_end2(errl);
+}
+
+//******************************************************************************
+// host_cancontinue_clear function
+//******************************************************************************
+void host_cancontinue_clear( void *io_pArgs )
+{
+    errlHndl_t errl = NULL;
+
+    // stub -- nothing here currently
+
+    task_end2(errl);
+}
+
+//******************************************************************************
+// proc_check_slave_sbe_seeprom_complete function
+//******************************************************************************
+void proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
+{
+    errlHndl_t errl = NULL;
+
+    // stub -- nothing here currently
+
+    task_end2(errl);
+}
+
+//******************************************************************************
+// proc_xmit_sbe function
+//******************************************************************************
+void proc_xmit_sbe( void *io_pArgs )
+{
+    errlHndl_t errl = NULL;
+
+    // stub -- nothing here currently
 
     task_end2(errl);
 }
