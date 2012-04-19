@@ -680,7 +680,7 @@ sub writePrintStatement
         # If we've got a duplicate Module Id/Reason code go, on to the
         # next one.  We can't have duplicates, so if we do we set found_dup
         # so that we can die after this loop
-        if( "$modId.$reasonCode" eq $caseHash{ $compName } )
+        if( exists $caseHash{ $modId.$reasonCode } )
         {
             debugMsg( "Hash exists, skip subsequent." );
 
@@ -696,7 +696,7 @@ sub writePrintStatement
         }
         else
         {
-            $caseHash{ $compName } = "$modId.$reasonCode";
+            $caseHash{ $modId.$reasonCode } = 1;
         }
 
 
