@@ -37,8 +37,8 @@
 
 
 #include <stdint.h>
-#include <errlentry.H>
-#include <target.H>
+#include <errl/errlentry.H>
+#include <targeting/target.H>
 
 namespace PRDF
 {
@@ -144,7 +144,7 @@ enum prd_return_code_t
 
 /**
  * @brief Initialize PRD system model and data
- * @return - Error log if error occurs
+ * @return Error log if error occurs
  */
 extern errlHndl_t PrdInitialize();
 
@@ -152,7 +152,7 @@ extern errlHndl_t PrdInitialize();
  * @brief analyze attention errors
  * @param[in] i_attnType - global attention type
  * @param[in] i_attnList - list of chips at attention
- * @return - Error log if error occurs
+ * @return Error log if error occurs
  *
  * @note If the i_attnType is CHECK_STOP than an error log is returned
  * containing the analysis; otherwise, for other attention types, PRD
@@ -163,7 +163,7 @@ extern errlHndl_t PrdMain(ATTENTION_VALUE_TYPE i_attnType, const AttnList & i_at
 /**
  *  @brief initiate memory background scrubbing
  *  @param[in] i_pTarget - Target handle of System or Node
- *  @return - Error log if error occurs
+ *  @return Error log if error occurs
  */
 extern errlHndl_t PrdStartScrub(const TARGETING::TargetHandle_t i_pTarget);
 
@@ -187,7 +187,7 @@ extern void PrdIplCleanup();
 
 /**
  *  @brief handle service data collector sync over
- *  @return - Error log if error occurs
+ *  @return Error log if error occurs
  */
 extern errlHndl_t prdfFailoverComplete(void);
 

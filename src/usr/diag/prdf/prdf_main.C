@@ -88,7 +88,7 @@ errlHndl_t PrdMain(ATTENTION_VALUE_TYPE i_attentionType, const AttnList & i_attn
         EntityPath l_path = l_target->getAttr<ATTR_PHYS_PATH>();
         l_path.dump(); //this will binary trace the entity path
 
-        PRDF_INF( "PrdMain() attnType: %X, target: %X (%p) %X/%X", i_attnList[i].attnType, l_target->getAttr<ATTR_HUID>(), l_target, l_target->getAttr<ATTR_CLASS>(), l_target->getAttr<ATTR_TYPE>());
+        PRDF_INF( "PrdMain() attnType: %X, HUID: %X", i_attnList[i].attnType, l_target->getAttr<ATTR_HUID>());
 
     }
 
