@@ -34,8 +34,8 @@ class CpuManager
         enum
         {
             MAXCPUS = KERNEL_MAX_SUPPORTED_CPUS,
-            CPU_PERIODIC_CHECK_MEMORY = 64,
-            CPU_PERIODIC_FLUSH_PAGETABLE = 512, //TODO 1024 not currently hit
+            CPU_PERIODIC_CHECK_MEMORY = 32,
+            CPU_PERIODIC_FLUSH_PAGETABLE = 256, 
             CPU_PERIODIC_DEFRAG = 949,  // TODO Any bigger not currently hit
         };
 
