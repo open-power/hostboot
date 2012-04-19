@@ -368,18 +368,18 @@ errlHndl_t InitService::executeFn(
             /*@     errorlog tag
              *  @errortype      ERRL_SEV_CRITICAL_SYS_TERM
              *  @moduleid       BASE_INITSVC_MOD_ID
-             *  @reasoncode     WAIT_TASK_FAILED
+             *  @reasoncode     WAIT_FN_FAILED
              *  @userdata1      task id or task return code
              *  @userdata2      returned status from task
              *
-             *  @devdesc        Initialization Service launched a task and the task returned an error.
+             *  @devdesc        Initialization Service launched a function and the task returned an error.
              *
              *
              */
             l_errl = new ERRORLOG::ErrlEntry(
                                     ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
                                     INITSERVICE::BASE_INITSVC_MOD_ID,
-                                    INITSERVICE::WAIT_TASK_FAILED,
+                                    INITSERVICE::WAIT_FN_FAILED,
                                     l_tidretrc,
                                     l_childsts );
 

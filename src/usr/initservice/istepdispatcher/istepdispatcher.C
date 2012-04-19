@@ -314,18 +314,19 @@ void    IStepDispatcher::singleStepISteps( errlHndl_t   &io_rtaskRetErrl )
 
             /*@     errorlog tag
              *  @errortype      ERRL_SEV_INFORMATIONAL
-             *  @moduleid       BASE_INITSVC_MOD_ID
+             *  @moduleid       ISTEP_INITSVC_MOD_ID
              *  @reasoncode     ISTEP_SINGLESTEP_ASYNC_RCVD
              *  @userdata1      type of packet
              *  @userdata2      first data word
              *
-             *  @devdesc        IStepDisp was expecting a synchronous message
-             *                  and received an asynchonous message.
+             *  @devdesc        IStepDisp singleStepISteps was expecting a
+             *                  synchronous message and received an asynchonous
+             *                  message.
              *
              */
             errlHndl_t  l_errlAsync = new ERRORLOG::ErrlEntry(
                                             ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                            INITSERVICE::BASE_INITSVC_MOD_ID,
+                                            INITSERVICE::ISTEP_INITSVC_MOD_ID,
                                             INITSERVICE::ISTEP_SINGLESTEP_ASYNC_RCVD,
                                             iv_pMsg->type,
                                             iv_pMsg->data[0] );
@@ -431,7 +432,7 @@ void    IStepDispatcher::singleStepISteps( errlHndl_t   &io_rtaskRetErrl )
 
             /*@     errorlog tag
              *  @errortype      ERRL_SEV_INFORMATIONAL
-             *  @moduleid       BASE_INITSVC_MOD_ID
+             *  @moduleid       ISTEP_INITSVC_MOD_ID
              *  @reasoncode     ISTEP_SINGLESTEP_SHUTDOWN
              *  @userdata1      0
              *  @userdata2      0
@@ -441,7 +442,7 @@ void    IStepDispatcher::singleStepISteps( errlHndl_t   &io_rtaskRetErrl )
              */
             l_errl = new ERRORLOG::ErrlEntry(
                     ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                    INITSERVICE::BASE_INITSVC_MOD_ID,
+                    INITSERVICE::ISTEP_INITSVC_MOD_ID,
                     INITSERVICE::ISTEP_SINGLESTEP_SHUTDOWN,
                     0,
                     0 );
@@ -737,19 +738,20 @@ void IStepDispatcher::handleSPlessBreakPoint( uint32_t i_info )
 
             /*@     errorlog tag
              *  @errortype      ERRL_SEV_INFORMATIONAL
-             *  @moduleid       BASE_INITSVC_MOD_ID
-             *  @reasoncode     ISTEP_SINGLESTEP_ASYNC_RCVD
+             *  @moduleid       ISTEP_INITSVC_MOD_ID
+             *  @reasoncode     ISTEP_BKPOINT_ASYNC_RCVD
              *  @userdata1      type of packet
              *  @userdata2      first data word
              *
-             *  @devdesc        IStepDisp was expecting a synchronous message
-             *                  and received an asynchonous message.
+             *  @devdesc        IStepDisp handleSPlessBreakPoint was expecting a
+             *                  synchronous message and received an asynchonous
+             *                  message.
              *
              */
             errlHndl_t  l_errlAsync = new ERRORLOG::ErrlEntry(
                                     ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                    INITSERVICE::BASE_INITSVC_MOD_ID,
-                                    INITSERVICE::ISTEP_SINGLESTEP_ASYNC_RCVD,
+                                    INITSERVICE::ISTEP_INITSVC_MOD_ID,
+                                    INITSERVICE::ISTEP_BKPOINT_ASYNC_RCVD,
                                     iv_pMsg->type,
                                     iv_pMsg->data[0] );
 
