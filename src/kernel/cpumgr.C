@@ -212,12 +212,14 @@ void CpuManager::executePeriodics(cpu_t * i_cpu)
         {
             // set up barrier based on # cpus cv_barrier;
             // TODO whatif other cpus become active?
-            isync();
-            cv_barrier.init(cv_cpuCount);
+            isync(); // Ensure all instructions complete before this point, so
+                     // we don't get a stale shutdown_requested.
             if(!cv_shutdown_requested)
             {
+                cv_barrier.init(cv_cpuCount);
+                lwsync();  // Ensure barrier init is globally visible before
+                           // setting defrag = true.
                 cv_defrag = true;
-                lwsync();
             }
         }
     }
