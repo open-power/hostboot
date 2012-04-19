@@ -132,6 +132,12 @@ my  $g_SeqNum   =   int(rand(64));
 my  $pgmDir  =   `dirname $0`;
 chomp( $pgmDir );
 
+my $hbToolsDir = $ENV{'HB_TOOLS'};
+if ( ! defined( $hbToolsDir) || ( $hbToolsDir eq "" ) )
+{
+    $hbToolsDir = $pgmDir;         ##  Set to tool directory
+}     
+
 my $hbDir = $ENV{'HB_IMGDIR'};
 if ( ! defined( $hbDir) || ( $hbDir eq "" ) )
 {
@@ -487,6 +493,8 @@ sub getSyncStatus( )
         ##  sequence number to see if it has changed.  rinse and repeat.
         ##  Note:  RunClocks will start instructions 
         VBU_Cacheline::RunClocks();
+        system ("$hbToolsDir/hb-ContTrace --mute > /dev/null");
+        system ("cat hb-ContTrace.output >> tracMERG");
 
         ##  Stop instructions, flush L2
         VBU_Cacheline::P8_Ins_Stop();
@@ -742,6 +750,8 @@ sub setMode( $ )
         ##  advance HostBoot code by a certain # of cycles, then check the 
         ##  sequence number to see if it has changed.  rinse and repeat.
         VBU_Cacheline::RunClocks();
+        system ("$hbToolsDir/hb-ContTrace --mute > /dev/null");
+        system ("cat hb-ContTrace.output >> tracMERG");
 
         ##  Stop instructions, flush L2
          VBU_Cacheline::P8_Ins_Stop();

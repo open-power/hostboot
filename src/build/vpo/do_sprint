@@ -176,6 +176,7 @@ sim_clocks=${AUTOVBU_SIMCLOCKS-2000000}
 loopstart=${AUTOVBU_START-0}
 loopmax=`expr $loopstart '+' ${AUTOVBU_LOOPS-2000}`
 lines=${AUTOVBU_PRINTK_LINES-50}
+sample=${AUTOVBU_PRINTK_SAMPLE-30}
 
 # If we requested checkpoints after loops or isteps, force a checkpoint after the hbitest as well
 test "$chkpt_after_loops" = "--chkpt_after_loops" && chkpt_after_hbitest="--chkpt_after_hbitest"
@@ -397,6 +398,7 @@ if [ "$start_after_hbitest" != "--start_after_hbitest" ]; then
 	
 	
 		echo >$printk_tmp1
+		cat /dev/null >printk_out
 	
 		if [ $loopcnt -ne 0 -a -d $AUTOVBU_TEST_DIR/trace_after_loop${loopcnt} ]; then
 			echo
@@ -420,12 +422,16 @@ if [ "$start_after_hbitest" != "--start_after_hbitest" ]; then
 		echo "       export AUTOCHKPT_VERSION=$AUTOCHKPT_VERSION"
 		echo
 	
+                $HB_TOOLS/hb-ContTrace --enable-cont-trace=1 --mute > /dev/null
+
 		while [ ! -f "$testloop_stop" -a $loopcnt -lt $loopmax ]; do
 			loopcnt=`expr $loopcnt + 1`
 	
 			simclock $sim_clocks  -quiet || exit 1
 			cur_cia=`GET_CIA`
 			echo "$loopcnt:	$cur_cia"
+                        $HB_TOOLS/hb-ContTrace --mute > /dev/null
+                        cat hb-ContTrace.output >> tracMERG
 			if [ "$use_hb_trace" = "--use_hb_trace" ]; then
 				p8_ins_stop
 				$HB_TOOLS/hb-trace $test_arg --out $printk_tmp3 2>&1 | egrep -v "^FAPI DBG>:|^FAPI IMP>:|Using deprecated ReturnCode function to assign integer" >$printk_tmp2
@@ -436,13 +442,19 @@ if [ "$start_after_hbitest" != "--start_after_hbitest" ]; then
 			elif [ "$use_dump_l3" = "--use_dump_l3" ]; then
 				DUMP_L3_PRINTK ${addr} ${lines} >$printk_tmp2
 			else
-				p8_ins_stop
-				$HB_TOOLS/hb-printk $test_arg --out $printk_tmp3 2>&1 | egrep -v "^FAPI DBG>:|^FAPI IMP>:|Using deprecated ReturnCode function to assign integer" >$printk_tmp2
-				p8_ins_start
+                           if [ `expr $loopcnt % $sample` -eq 0 ];
+                           then
+                               $HB_TOOLS/hb-printk --mute > /dev/null
+                               diff hb-Printk.output printk_out | sed -e 's/< //g' -e '1d'
+                               mv hb-Printk.output printk_out
+                           fi
+                        fi
+                        if [ -f $printk_tmp2 ];
+                        then
+                                echo >>$printk_tmp2
+                                diff -a $printk_tmp1 $printk_tmp2 | egrep -a "^> " | sed -e 's/[Ee][Rr][Rr][Oo][Rr]/ERR*R/g' -e 's/FAIL/F*IL/g'
+                                mv $printk_tmp2 $printk_tmp1
 			fi
-			echo >>$printk_tmp2
-			diff -a $printk_tmp1 $printk_tmp2 | egrep -a "^> " | sed -e 's/[Ee][Rr][Rr][Oo][Rr]/ERR*R/g' -e 's/FAIL/F*IL/g'
-			mv $printk_tmp2 $printk_tmp1
 	
 			grep 'HypeEmu: Illegal instruction' $printk_tmp1 >/dev/null
 			if [ $? -eq 0 ]; then
@@ -491,6 +503,10 @@ if [ "$start_after_hbitest" != "--start_after_hbitest" ]; then
 				simecho "Renew Tokens: `date`" -quiet
 			fi
 		done
+                $HB_TOOLS/hb-ContTrace --mute > /dev/null
+                cat hb-ContTrace.output >> tracMERG
+                $HB_TOOLS/hb-ContTrace --mute --last > /dev/null
+                cat hb-ContTrace.output >> tracMERG
 		date
 		rm -f $printk_tmp2 $printk_tmp1
 	

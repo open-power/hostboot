@@ -39,6 +39,7 @@
 #include <util/singleton.H>
 #include <sys/sync.h>
 #include <stdarg.h>
+#include <list>
 
 
 /******************************************************************************/
@@ -131,6 +132,9 @@ namespace TRACE
 class Trace;
 typedef Singleton<Trace> theTrace;
 
+// Forward declaration.
+class TraceDaemon;
+
 /**
  *  @brief  Trace Singleton Class
  *
@@ -149,12 +153,12 @@ public:
     static Trace& getTheInstance();
 
     /**
-     *  @brief  Initialize a trace buffer. 
+     *  @brief  Initialize a trace buffer.
      *
      *  Size is capped at 2KB. You can request larger, but
-     *  the code in src/usr/trace/trace.C imposes 
+     *  the code in src/usr/trace/trace.C imposes
      *  a maximum size of 2KB. Sizes smaller than 2KB
-     *  will save space.  
+     *  will save space.
      *
      *  @param [out] o_td Trace descriptor to initialize
      *  @param [in] i_comp Component name for trace buffer
@@ -219,23 +223,23 @@ public:
      *  first query the size of the buffer by calling with the desired
      *  buffer name and with o_data null and i_bufferSize
      *  zero. The value returned will be the full buffer size.  Caller
-     *  allocates the buffer and calls again. 
-     *  
+     *  allocates the buffer and calls again.
+     *
      *  The buffer provided can be less than the full size of the desired
      *  buffer. In that case, this function will copy as many of the most
-     *  recent traces into the output buffer as will fit. The buffer must 
-     *  be big enough to hold a trace buffer header (40 bytes). 
+     *  recent traces into the output buffer as will fit. The buffer must
+     *  be big enough to hold a trace buffer header (40 bytes).
      *
-     *  i_bufferSize may be larger that the desired trace buffer. 
+     *  i_bufferSize may be larger that the desired trace buffer.
      *
-     *  @param [in]  i_pName      name of trace buffer 
+     *  @param [in]  i_pName      name of trace buffer
      *  @param [out] o_data       pointer to output buffer
      *  @param [in]  i_bufferSize size of output buffer in bytes
      *
      *  @return Count of bytes copied, or if given null parameters,
      *  the size of the buffer. Returns zero for error, perhaps the
      *  component name/trace buffer name is not found, or perhaps
-     *  the size of the provided buffer is unreasonable.  
+     *  the size of the provided buffer is unreasonable.
      */
     uint64_t getBuffer( const char * i_pName,
                         void *       o_data,
@@ -244,7 +248,7 @@ public:
 
 #if !defined(__HIDDEN_TRACEIF_CLEARBUFFER)
 private:
-#endif    
+#endif
 
 
 
@@ -390,7 +394,7 @@ private:
 
     /**
      *  @brief  This function manages the usage of the two ping-pong buffers
-     *          for handling the continuous trace support under VPO/VBU. 
+     *          for handling the continuous trace support under VPO/VBU.
      *
      *  @param [in] i_cbRequired number of bytes needed for the trace entry
      *              to be added to the active continuous trace buffer
@@ -403,10 +407,16 @@ private:
     mutex_t iv_trac_mutex;
 
     // Controls writing to tracBinary
-    bool iv_ContinuousTrace; 
+    bool iv_ContinuousTrace;
 
     // VPO/VBU continuous trace active buffer index
     uint8_t iv_CurBuf;
+
+    // sequence number
+    uint32_t iv_seqNum;
+
+    // Trace Daemon for messages.
+    TraceDaemon* iv_daemon;
 };
 
 } // namespace TRACE

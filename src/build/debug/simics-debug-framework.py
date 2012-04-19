@@ -342,6 +342,8 @@ def magic_instruction_callback(user_arg, cpu, arg):
         SIM_break_simulation( "Simulation stopped. (hap 7007)"  )
 
     if arg == 7055:   # MAGIC_CONTINUOUS_TRACE 
+        # Set execution environment flag to 0
+        writeLongLong(contTraceTrigInfo+32,0)
         # Continuous trace.
         # Residing at tracBinaryInfoAddr is the pointer to the tracBinary buffer
         pTracBinaryBuffer = readLongLong(tracBinaryInfoAddr)
@@ -377,6 +379,13 @@ for line in open('hbicore.syms'):
     if "g_tracBinaryInfo" in line:
         words=line.split(",")
         tracBinaryInfoAddr=int(words[1],16)
+        break
+# Find the address of the g_cont_trace_trigger_info and save it in
+# contTraceTrigInfo
+for line in open('hbicore.syms'):
+    if "g_cont_trace_trigger_info" in line:
+        words=line.split(",")
+        contTraceTrigInfo=int(words[1],16)
         break
 
 # Continuous trace: Clear these files.
