@@ -32,6 +32,8 @@
 //                                    Support for array at beginning of scom address
 //                camvanng 04/12/12   Right justify SCOM data
 //                                    Ability to specify search paths for include files
+//                camvanng 04/16/12   Support defines for SCOM address
+//                                    Support defines for bits, scom_data and attribute columns
 // End Change Log *********************************************************************************/
 /**
  * @file initCompiler.lex
@@ -54,6 +56,8 @@ uint64_t hexs2int(const char * hexString, int32_t size);
 void pushBackScomBody();
 void push_col(const char *s);
 void lex_err(const char *s );
+void add_define(const char *s);
+void pushBackDefine(const char *s);
 
 std::ostringstream oss;
 std::ostringstream t_oss;
@@ -71,6 +75,9 @@ uint32_t g_scomtype = 0;
 uint32_t g_paren_level = 0;
 bool g_equation = false;   // equation inside scomv col
 std::string g_scomname;     // dg02
+std::string g_scomdef_name;
+std::map<std::string,std::string> g_defines; //container for all the defines
+    //i.e. define def_A = (attrA > 1) => key = "DEF_A", value = "(attr_A > 1)"
 
 extern int yyline;
 extern std::vector<std::string> yyincludepath;
@@ -120,6 +127,8 @@ MULTI_DIGIT [0-9]+
 %x      attribute
 %x      array
 %x      incl
+%x      scomdef
+%x      scomdef_value
 
 
 %%
@@ -131,6 +140,7 @@ MULTI_DIGIT [0-9]+
 <<EOF>>		        {
                         if (--include_stack_num < 0)
                         {
+                            g_defines.clear();
                             return 0;
                         }
                         else
@@ -192,8 +202,21 @@ include                 { BEGIN(incl); }
                             BEGIN(INITIAL);
                         }
 
-define                  { return INIT_DEFINE;}
+                         /* Adding the ability to use defines for SCOM address and the different
+                          * columns (bits, scom_data and attribute columns).
+                          * Since the SCOM address and the different columns all have different
+                          * parsing rules, it is complicated to handle this in both the scanner and parser.
+                          * The simplest thing to do is to keep track of all the defines in the scanner
+                          * then push the specific define value back into the input stream for scanning
+                          * when it is used.
+                          */
 
+define                       { BEGIN(scomdef); }
+
+<scomdef>{ID}                { g_scomdef_name = yytext; }
+<scomdef>[ \t\r]*=[ \t\r]*   { BEGIN(scomdef_value); }
+<scomdef_value>[^;\n#\{\}]+  { add_define(yytext); }
+<scomdef_value>;             { g_scomdef_name = ""; BEGIN(INITIAL); }
 
 scom              { BEGIN(scomop); oss.str("");  return INIT_SCOM; }
 
@@ -278,6 +301,10 @@ scom              { BEGIN(scomop); oss.str("");  return INIT_SCOM; }
                     /*printf("lex: bin string %s\n", yytext);*/
                 }
 
+<scomop_hex_array,scomop_bin_array>{ID}\.\.{ID} { pushBackDefine(yytext); }
+<scomop_hex,scomop_hex_suffix,scomop_bin,scomop_bin_suffix>\.{ID} { pushBackDefine(yytext + 1); unput('.'); }
+<scomop,scomop_hex_array,scomop_hex_suffix,scomop_bin_array,scomop_bin_suffix>{ID}  { pushBackDefine(yytext); }
+
 <scomop>[:;\[]    { BEGIN(INITIAL); g_coltype = 0; return yytext[0]; }
 <scomop>{NEWLINE} { BEGIN(INITIAL); ++yyline; }
 
@@ -286,6 +313,7 @@ scom              { BEGIN(scomop); oss.str("");  return INIT_SCOM; }
                                  BEGIN(scomcolname);
                                  return yytext[0];
                              }
+
 
 
 
@@ -337,12 +365,20 @@ END_INITFILE            return INIT_ENDINITFILE;
 
 <*>SYS\.                yymore();
 
-<*>ENUM_{ID}            { 
+                        /* All attribute enums start with "ENUM_ATTR_" */
+<*>ENUM_ATTR_{ID}       {
                             yylval.str_ptr = new std::string(yytext); return ATTRIBUTE_ENUM;
                         } 
 
-<*>{ID}                 { 
+                        /* All attributes start with "ATTR_"; then there's "any". */
+<*>ATTR_{ID}|"any"      {
                             yylval.str_ptr = new std::string(yytext); return INIT_ID; 
+                        }
+
+                        /* Anything else is a define.
+                         * Removing any requirements that defines has to start with "def_" or "DEF_" */
+<*>{ID}                 {   // push back the define value for scanning
+                            pushBackDefine(yytext);
                         } 
 
 <*>{DIGIT}+             {
@@ -486,4 +522,82 @@ void push_col(const char * s)
         //std::cout << "Pushing ," << token.str() << std::endl;
         o << ',' << token.str();
     }
+}
+
+
+/// Save the define
+void add_define(const char * s)
+{
+    if (g_defines.end() != g_defines.find(g_scomdef_name))
+    {
+        oss.str("");
+        oss << g_scomdef_name << " already defined";
+        lex_err(oss.str().c_str());
+        exit(1);
+    }
+
+    std::string str(s);
+    g_defines[g_scomdef_name] =  str;
+    //std::cout << "g_defines[" << g_scomdef_name << "] = " << g_defines[g_scomdef_name] << std::endl;
+}
+
+// Push the define(s) back into the input stream for scanning
+void pushBackDefine(const char *s)
+{
+    std::string key(s); //set key to input string
+    std::string key2;
+    std::string value;
+
+    //std::cout << "lex: pushBackDefine input string: " << s << " key: " << key << std::endl;
+
+    //Is this a range?
+    size_t pos = key.find("..");
+    if (pos != std::string::npos)
+    {
+        key2 = key.substr(pos+2); //2nd key in the range
+        key = key.substr(0,pos);  //Reset 1st key in the range
+    }
+
+    //Exit if cannot find 1st key
+    if (g_defines.end() == g_defines.find(key))
+    {
+        oss.str("");
+        oss << "lex: Cannot find define " << key;
+        lex_err(oss.str().c_str());
+        exit(1);
+    }
+
+    // Set value string
+    value = g_defines[key];
+    if (key2.size())
+    {
+        //Exit if cannot find 2nd key
+        if (g_defines.end() == g_defines.find(key2))
+        {
+            oss.str("");
+            oss << "lex: Cannot find define " << key;
+            lex_err(oss.str().c_str());
+            exit(1);
+        }
+
+        //Get rid of spaces & append key2 value
+        size_t pos = value.find(' ');
+        if (pos != std::string::npos)
+        {
+            value = value.substr(0,pos);
+        }
+        value += ".." + g_defines[key2];
+    }
+
+    //std::cout << "lex: pushBackDefine: " << value << std::endl;
+
+    //Push back the value into the input stream
+    for(std::string::reverse_iterator r = value.rbegin();
+        r != value.rend();
+        ++r)
+    {
+        //std::cout << *r;
+        unput(*r);
+    }
+    //std::cout << std::endl;
 }

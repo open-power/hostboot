@@ -211,3 +211,14 @@ scom 0x0000000013013289              {
 #  scom_data                 ;
 #  0x0000000000000194    ;
 #}
+
+#--******************************************************************************
+#-- SCOM with defines for Scom address and each supported column.
+#-- Note: This SCOM is inluded here as an example of the supported syntax.
+#-- Uncomment only for debugging code.
+#--******************************************************************************
+#scom addr.rx_mode_reg(rx0,rx1)(lane0, lane2..lane3).addr2(xbus0,xbus3)addr3 {
+#  bits     , scom_data,              SYS.ATTR_SCRATCH_UINT32_1, expr;
+#  rx_field1, rx_field1_enum_value1,  any,                       def_equal_test;
+#  rx_field1, rx_field1_enum_value2,  attr_value1,               def_not_equal_test;
+#}

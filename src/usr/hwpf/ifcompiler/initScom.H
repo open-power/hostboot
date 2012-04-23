@@ -30,6 +30,9 @@
 //                 camvanng 12/15/11 Support for multiple duplicate addresses setting different bits
 //                 camvanng 01/20/12 Support for using a range of indexes for array attributes
 //                 camvanng 02/14/12 Support binary and hex scom addresses
+//                 camvanng 04/16/12 Support defines for SCOM address
+//                                   Support defines for bits, scom_data and attribute columns
+//                                   Delete obsolete code for defines support 
 // End Change Log *********************************************************************************
 
 /**
@@ -294,9 +297,6 @@ namespace init
             void set_cvs_versions(const string * s) { iv_cvs_versions = *s; }
             void set_syntax_version(uint32_t v);
             size_t get_syntax_version() { return iv_syntax_version; }
-            void clear_defines() { iv_symbols->clear_defines(); }
-            void add_define(const string * name, const Rpn * rpn)
-                    { iv_symbols->add_define(name,rpn); }
 
             Symbols * get_symbols() { return iv_symbols; }
 

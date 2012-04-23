@@ -25,6 +25,9 @@
 //                 camvanng 11/17/11 Support for system & target attributes
 //                 camvanng 01/07/12 Support for writing an attribute to a SCOM register
 //                 camvanng 04/10/12 Support fixed attribute enum value
+//                 camvanng 04/16/12 Support defines for SCOM address
+//                                   Support defines for bits, scom_data and attribute columns
+//                                   Delete obsolete code for defines support
 // End Change Log *********************************************************************************
 
 /**
@@ -269,56 +272,11 @@ uint32_t Symbols::get_attr_type(const uint32_t i_rpn_id)
 
 // ------------------------------------------------------------------------------------------------
 
-void Symbols::add_define(const string * name, const Rpn * rpn)
-{
-    string s(*name);
-    translate_spyname(s);
-    iv_defines[s] = DEF_DATA(*rpn,NOT_USED);
-}
-
-// -------------------------------------------------------------------------------------------------
-
-Rpn Symbols::get_define_rpn(uint32_t rpn_id)
-{
-    Rpn r(this);
-    for(DEF_MAP::iterator i = iv_defines.begin(); i != iv_defines.end(); ++i)
-    {
-        if(i->second.second == rpn_id)
-        {
-            r = i->second.first;
-            break;
-        }
-    }
-    return r;
-}
-
-// ------------------------------------------------------------------------------------------------
-
 uint32_t Symbols::use_symbol(string & i_symbol)
 {
     uint32_t rpn_id = Rpn::SYMBOL | NOT_FOUND;
     if(i_symbol == "ANY") rpn_id = INIT_ANY_LIT | Rpn::SYMBOL;
     else if(i_symbol == "EXPR") rpn_id = INIT_EXPR_VAR | Rpn::SYMBOL;
-    else if(i_symbol.compare(0,3,"DEF") == 0)
-    {
-        DEF_MAP::iterator i = iv_defines.find(i_symbol);
-        if(i != iv_defines.end())
-        {
-            if(i->second.second == NOT_USED)
-            {
-                rpn_id = Rpn::DEFINE | iv_rpn_id++;
-                i->second.second = rpn_id;
-            }
-            else
-            {
-                rpn_id = i->second.second;
-            }
-        }
-        else
-        {
-            rpn_id = add_undefined(i_symbol);
-        }
-    }
     else
     {
         SYMBOL_MAP::iterator i = iv_symbols.find(i_symbol);
@@ -1016,7 +974,6 @@ uint32_t Symbols::get_rpn_id(uint32_t bin_tag)
     uint32_t rpn_id = NOT_FOUND;
     uint32_t type = bin_tag & IF_TYPE_MASK;
     uint32_t offset = bin_tag & ~IF_TYPE_MASK;
-    //uint32_t cini_id = 0;
     switch(type)
     {
         case IF_ATTR_TYPE:  {

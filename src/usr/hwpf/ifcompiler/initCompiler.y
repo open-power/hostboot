@@ -28,6 +28,9 @@
 //                 camvanng 01/20/12  Support for using a range indexes for array attributes
 //                 camvanng 02/14/12  Support binary and hex scom addresses
 //                                    Support for array at beginning of scom address
+//                 camvanng 04/16/12  Support defines for SCOM address
+//                                    Support defines for bits, scom_data and attribute columns
+//                                    Delete obsolete code for defines support
 // End Change Log *********************************************************************************
 /**
  * @file initCompiler.y
@@ -95,7 +98,6 @@ int scom;
 %token INIT_BITS
 %token INIT_EXPR
 %token INIT_TARG
-%token INIT_DEFINE
 %token INIT_EQ
 %token INIT_NE
 %token INIT_LE
@@ -143,8 +145,8 @@ input:
 line:   scom
         | cvs_versions
         | syntax_version
-        | define 
-        | INIT_ENDINITFILE   { yyscomlist->clear_defines(); }
+        | define
+        | INIT_ENDINITFILE   {}
 ;
 
 
@@ -279,15 +281,6 @@ num_list:       INIT_INTEGER { $$ = new init::Rpn($1,yyscomlist->get_symbols());
                 | ATTRIBUTE_ENUM { $$ = new init::Rpn((yyscomlist->get_symbols())->get_attr_enum_val(*($1)),yyscomlist->get_symbols()); }
 ;
 
-
-define: INIT_DEFINE INIT_ID '=' expr  ';'
-            {
-                init::dbg << $2 << ':' << endl << $4->listing("Length of rpn for Define");
-                yyscomlist->add_define($2,$4);
-                delete $2;
-            }
-;
-
  /* expr should return an RPN string of some kind */
 expr:   INIT_INTEGER                    { $$= new init::Rpn($1,yyscomlist->get_symbols()); }
         | INIT_ID                       { $$= new init::Rpn(*($1),yyscomlist->get_symbols()); delete $1; }
@@ -327,4 +320,6 @@ void yyerror(const char * s)
     init::erros << "'  yylval = " << hex << "0x" <<  setw(8) << yylval.integer << endl;
     init::erros << "ERROR: " << s << endl;
     init::erros << setfill('-') << setw(80) << '-' << endl << endl;
+
+    cout << init::erros.str() << endl;
 }

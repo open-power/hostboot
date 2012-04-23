@@ -166,7 +166,7 @@ $(call GENTARGET, ${FAPI_ATTR_ID_TARGET} ${FAPI_ATTR_PLAT_CHECK_TARGET} \
 # The binary, list and attr files generated from Initfiles
 #------------------------------------------------------------------------------
 $(call GENTARGET, ${HWP_IF_ALL_TARGETS}) : \
-        ${GENDIR}/${IF_CMP_COMPILER_TARGET} ${HWP_INITFILES} ${GENDIR}/${FAPI_ATTR_ID_TARGET}
+        ${GENDIR}/${IF_CMP_COMPILER_TARGET} ${HWP_INITFILES} ${GENDIR}/${FAPI_ATTR_ID_TARGET} ${HWP_IF_DEFINE_DIR}
 	$< -init ${HWP_INITFILES} -outdir $(dir $@) -attr ${GENDIR}/${FAPI_ATTR_ID_TARGET} \
     -I ${HWP_IF_DEFINE_DIR}
 

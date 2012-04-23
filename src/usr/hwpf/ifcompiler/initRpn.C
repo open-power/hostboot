@@ -25,6 +25,9 @@
 //                 andrewg  11/09/11 Multi-dimensional array and move to common fapi include
 //                 camvanng 01/06/12 Support for writing an attribute to a SCOM register
 //                 camvanng 01/20/12 Support for using a range of indexes for array attributes
+//                 camvanng 04/16/12 Support defines for SCOM address
+//                                   Support defines for bits, scom_data and attribute columns
+//                                   Delete obsolete code for defines support
 // End Change Log *********************************************************************************
 
 /**
@@ -125,13 +128,6 @@ bool Rpn::operator==(const Rpn & r)
                 }
                 switch (t1)
                 {
-                    case DEFINE:
-                        {
-                            Rpn r1 = iv_symbols->get_define_rpn(*c1);
-                            Rpn r2 = r.iv_symbols->get_define_rpn(*c2);
-                            if (r1 != r2) result = false;
-                        }
-                        break;
                     case SYMBOL:
                         {
                             string s1 = iv_symbols->find_name(*c1);
@@ -190,15 +186,7 @@ void Rpn::push_id(std::string & i_id, TYPE i_type)
 
     rpn_id = iv_symbols->use_symbol(s);
 
-    if (rpn_id & DEFINE)
-    {
-        Rpn r = iv_symbols->get_define_rpn(rpn_id);
-        append(r);
-    }
-    else
-    {
-        iv_rpnstack.push_back(rpn_id);
-    }
+    iv_rpnstack.push_back(rpn_id);
 }
 
 //-------------------------------------------------------------------------------------------------

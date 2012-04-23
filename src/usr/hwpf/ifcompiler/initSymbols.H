@@ -26,6 +26,9 @@
 //                 mjjones  11/17/11 Output attribute listing
 //                 camvanng 11/17/11 Support for system & target attributes
 //                 camvanng 01/07/12 Support for writing an attribute to a SCOM register
+//                 camvanng 04/16/12 Support defines for SCOM address
+//                                   Support defines for bits, scom_data and attribute columns
+//                                   Delete obsolete code for defines support
 // End Change Log *********************************************************************************
 
 /**
@@ -175,10 +178,6 @@ namespace init
              */
             uint32_t get_spy_id(const string & spyname);
 
-            void add_define(const string * name, const Rpn * rpn);
-            Rpn get_define_rpn(uint32_t rpn_id);
-            void clear_defines() { iv_defines.clear(); }
-
 
             string listing();              ///< listing of used vars & lits
             string attr_listing();         ///< listing of used HWPF attributes
@@ -242,9 +241,6 @@ namespace init
             typedef map<string,uint32_t> SYMBOL_ATTR_TYPE;
             typedef map<string,uint64_t> SYMBOL_ATTR_ENUM;
 
-            typedef pair<Rpn,uint32_t> DEF_DATA;
-            typedef map<string,DEF_DATA> DEF_MAP;
-
             typedef pair<string,uint32_t>  RPN_DATA;  //attribute name & corresponding cini_id
             typedef map<uint32_t,RPN_DATA> RPN_MAP;   //attr name & corresponding attr name, cini_id pair
 
@@ -266,8 +262,6 @@ namespace init
 
             SPY_MAP iv_spymap;          ///< Spies & arrays & enum spies
             SPY_MAP iv_enums;           ///< Spy enums
-
-            DEF_MAP iv_defines;         ///< defines
 
             uint32_t iv_used_var_count;
             uint32_t iv_used_lit_count;
