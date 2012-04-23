@@ -114,15 +114,6 @@ class FsiDDTest : public CxxTest::TestSuite
      */
     void test_readWrite(void)
     {
-        //@todo - Issue 35803 
-        //@VBU workaround - Disable test case
-        //Temporarily disable this test case in VBU because of
-        //an MFSI/CFSI XSCOM hardware bug.
-        if( TARGETING::is_vpo() )
-        {
-            return;
-        }
-
         TRACFCOMP( g_trac_fsi, "FsiDDTest::test_readWrite> Start" );
         uint64_t fails = 0;
         uint64_t total = 0;
@@ -221,8 +212,7 @@ class FsiDDTest : public CxxTest::TestSuite
             { PROC2, 0x001028, 0x120EA049, false, false }, //CHIPID from FSI2PIB off MFSI-2
 
             //** Slave Regs
-            { CENTAUR0, 0x000000, 0xC0010E9C, false, false }, //Config Table entry for slave0 off cMFSI-0
-            //@fixme - should be 0xC0010E95 but Simics is wrong
+            { CENTAUR0, 0x000000, 0xC0010E95, false, false }, //Config Table entry for slave0 off cMFSI-0
             { CENTAUR0, 0x001028, 0x160E9049, false, false }, //CHIPID from FSI2PIB off cMFSI-0
             { CENTAUR0, 0x000C08, 0x12344321, true, false }, //FEL from SHIFT off cMFSI-0
 
@@ -400,17 +390,6 @@ class FsiDDTest : public CxxTest::TestSuite
      */
     void test_badTargets(void)
     {
-
-        //@todo - Issue 35803 
-        //@VBU workaround - Disable test case
-        //Temporarily disable this test case in VBU because of
-        //an MFSI/CFSI XSCOM hardware bug.
-        if( TARGETING::is_vpo() )
-        {
-            return;
-        }
-
-
         TRACFCOMP( g_trac_fsi, "FsiDDTest::test_badTargets> Start" );
         uint64_t fails = 0;
         uint64_t total = 0;

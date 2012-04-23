@@ -27,51 +27,21 @@
 ##    to setup the sandbox
 ##
 
-echo "+++ Copy desired VENICE config file to sandbox and modify L3 to 8MB."
-mkdir -p $sb/simu/configs
-cp --update $BACKING_BUILD/src/simu/configs/P8_VENICE.config $sb/simu/configs
-sed -i -e's/SETENV GFW_P8_VENICE_L3_MB_SIZE.*/SETENV GFW_P8_VENICE_L3_MB_SIZE 8/' $sb/simu/configs/P8_VENICE.config
-# Backing build already contains 910431.  Leave this workaround here for future scomdef files
-#sed -i -e's/SETENV GFW_P8_VENICE_MODEL_EC.*/SETENV GFW_P8_VENICE_MODEL_EC 910431/' $sb/simu/configs/P8_VENICE.config
-
-echo "+++ Copy desired MURANO config file to sandbox and modify L3 to 8MB."
-mkdir -p $sb/simu/configs
-cp --update $BACKING_BUILD/src/simu/configs/P8_MURANO.config $sb/simu/configs
-sed -i -e's/SETENV GFW_P8_MURANO_L3_MB_SIZE.*/SETENV GFW_P8_MURANO_L3_MB_SIZE 8/' $sb/simu/configs/P8_MURANO.config
-# Backing build already contains 910431.  Leave this workaround here for future scomdef files
-#sed -i -e's/SETENV GFW_P8_MURANO_MODEL_EC.*/SETENV GFW_P8_MURANO_MODEL_EC 910431/' $sb/simu/configs/P8_MURANO.config
-
-echo "+++ Enable P8 Mambo and 8-threads."
-sed -i -e's/SETENV GFW_P8_VENICE_ENABLE_P8_PROC.*/SETENV GFW_P8_VENICE_ENABLE_P8_PROC yes/' $sb/simu/configs/P8_VENICE.config
+echo "+++ Enable 8-threads."
 sed -i -e's/SETENV GFW_SIMICS_ENV_THREADS_PER_CORE.*/SETENV GFW_SIMICS_ENV_THREADS_PER_CORE 8/' $sb/simu/configs/P8_VENICE.config
-sed -i -e's/SETENV GFW_P8_MURANO_ENABLE_P8_PROC.*/SETENV GFW_P8_MURANO_ENABLE_P8_PROC yes/' $sb/simu/configs/P8_MURANO.config
 sed -i -e's/SETENV GFW_SIMICS_ENV_THREADS_PER_CORE.*/SETENV GFW_SIMICS_ENV_THREADS_PER_CORE 8/' $sb/simu/configs/P8_MURANO.config
 
-#Remove this with Task 39902
-echo "+++ Temporarily disabling multiple Centaurs (Simics bug)."
-sed -i -e's/SETENV GFW_P8_VENICE_CENTAURS_PER_PROC.*/SETENV GFW_P8_VENICE_CENTAURS_PER_PROC 1/' $sb/simu/configs/P8_VENICE.config
-sed -i -e's/SETENV GFW_P8_MURANO_CENTAURS_PER_PROC.*/SETENV GFW_P8_MURANO_CENTAURS_PER_PROC 1/' $sb/simu/configs/P8_MURANO.config
+#Remove with RTC:40975
+echo "+++ Update to new phyp level for XSCOM fixes."
+mkdir -p $sb/simu/data
+cp --update $BACKING_BUILD/src/simu/data/simicsInfo $sb/simu/data/simicsInfo
+sed -i -e's/^WSALIAS DEFAULT PHYPLEVEL.*/WSALIAS DEFAULT PHYPLEVEL env\/phypb\/simics-4.2.0\/simics-4.2.85\/ph120424b700.42/' $sb/simu/data/simicsInfo
 
-#Remove this with Task 40101
-echo "+++ Copy new centaur.act, p8.act, and p8murano.ali"
-mkdir -p $sb/simu/data/cec-chip/
-cp $HOSTBOOTROOT/src/build/citest/etc/patches/centaur.act $sb/simu/data/cec-chip/centaur.act
-cp $HOSTBOOTROOT/src/build/citest/etc/patches/p8.act $sb/simu/data/cec-chip/p8.act
-cp $HOSTBOOTROOT/src/build/citest/etc/patches/p8murano.ali $sb/simu/data/cec-chip/p8murano.ali
 
-#Note: Leave this here as an example
+#### Examples ####
 #echo "+++ Some message about why you need to do this."
 #mkdir -p $sb/simu/data
 #egrep -v "WSALIAS HOSTBOOT_LEVEL FIPSLEVEL|WSALIAS HOSTBOOT_LEVEL SIMICSLEVEL" $BACKING_BUILD/src/simu/data/simicsInfo > $sb/simu/data/simicsInfo
 #echo "WSALIAS HOSTBOOT_LEVEL FIPSLEVEL env/gfwb/simics-4.2.0/simics-4.2.83/fips/fld36/fi120201a700.42" >> $sb/simu/data/simicsInfo
 #echo "WSALIAS HOSTBOOT_LEVEL SIMICSLEVEL env/vtechb/simics-4.2.0/simics-4.2.83/bin" >> $sb/simu/data/simicsInfo
 
-# Leaving this here as an example for the future
-echo "+++ Update to new phyp and mambo level."
-mkdir -p $sb/simu/data
-cp --update $BACKING_BUILD/src/simu/data/simicsInfo $sb/simu/data/simicsInfo
-#sed -i -e's/^WSALIAS HOSTBOOT_LEVEL MAMBOLEVEL.*/WSALIAS HOSTBOOT_LEVEL MAMBOLEVEL env\/mamboa\/2011_11_10__4.2/' $sb/simu/data/simicsInfo
-# RTC task 39991 - update bbuild and remove this when it gets into a build
-sed -i -e's/^WSALIAS DEFAULT FIPSLEVEL.*/WSALIAS DEFAULT FIPSLEVEL env\/gfwb\/simics-4.2.0\/simics-4.2.85\/fips\/fld36\/fi120327b700.42/' $sb/simu/data/simicsInfo
-sed -i -e's/^WSALIAS DEFAULT PHYPLEVEL.*/WSALIAS DEFAULT PHYPLEVEL env\/phypa\/simics-4.2.0\/simics-4.2.85\/ph120319a700.42/' $sb/simu/data/simicsInfo
-sed -i -e's/^WSALIAS DEFAULT PHYP_PATCH_LEVEL.*/WSALIAS DEFAULT PHYP_PATCH_LEVEL env\/phypa\/simics-4.2.0\/simics-4.2.85\/patches\/ph120319a700.42/' $sb/simu/data/simicsInfo 

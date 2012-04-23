@@ -179,6 +179,133 @@ public:
         }
         return;
     }
+
+
+    /**
+     * @brief XSCOM test #2
+     *        Write value and read back to verify
+     */
+    void testXscom2(void)
+    {
+
+        TARGETING::TargetService& l_targetService = TARGETING::targetService();
+        TARGETING::Target* l_testTarget = NULL;
+        l_targetService.masterProcChipTargetHandle( l_testTarget );
+        assert(l_testTarget != NULL);
+
+        size_t l_size = sizeof(uint64_t);
+
+        uint64_t l_readData = 0;
+        uint64_t l_writeData[g_xscomAddrTableSz];
+        uint64_t l_savedData[g_xscomAddrTableSz];
+
+        // Loop thru table to do initial write
+        errlHndl_t l_err = NULL;
+        for( uint32_t l_num=0; l_num < g_xscomAddrTableSz; l_num++)
+        {
+            testXscomAddrData l_testEntry = g_xscomAddrTable[l_num];
+
+            // Perform XSComOM read
+            l_err = deviceRead(l_testTarget,
+                               &l_readData,
+                               l_size,
+                               DEVICE_SCOM_ADDRESS(l_testEntry.addr));
+            if (l_err)
+            {
+                TS_FAIL("testXscom2: XSCom read: deviceRead() fails! Error committed.");
+                break;
+            }
+            else
+            {
+                TS_TRACE("testXscom2: XSCom read, Address 0x%.8X, Data %llx",
+                         l_testEntry.addr,
+                         (long long unsigned)l_readData);
+            }
+
+            // Perform an XSCom write
+            l_savedData[l_num] = l_readData;
+            l_writeData[l_num] = (l_readData | l_testEntry.data);
+            l_err = deviceWrite(l_testTarget,
+                                &l_writeData[l_num],
+                                l_size,
+                                DeviceFW::SCOM,
+                                l_testEntry.addr);
+
+            if (l_err)
+            {
+                TS_FAIL("testXscom2: XSCom write: deviceWrite() fails!");
+                break;
+            }
+            else
+            {
+                TS_TRACE("testXscom2: XSCom write, Address 0x%.8X, Data %llx",
+                         l_testEntry.addr,
+                         (long long unsigned)l_writeData);
+            }
+        }
+
+        // Loop through table to do the read and verify
+        for( uint32_t l_num=0; l_num < g_xscomAddrTableSz; l_num++)
+        {
+            testXscomAddrData l_testEntry = g_xscomAddrTable[l_num];
+
+            // Read back
+            l_readData = 0;
+            l_err = deviceRead(l_testTarget,
+                               &l_readData,
+                               l_size,
+                               DEVICE_SCOM_ADDRESS(l_testEntry.addr));
+            if (l_err)
+            {
+                TS_FAIL("testXscom2: XSCom read back: deviceRead() fails!");
+                break;
+            }
+
+            if( l_readData != l_writeData[l_num] )
+            {
+                TS_FAIL("testXscom2: XSCom read back doesn't match write!");
+                /*@
+                 * @errortype
+                 * @moduleid     XSCOM_TEST_XSCOM2
+                 * @reasoncode   XSCOM_DATA_UNMATCHED
+                 * @userdata1    Write value
+                 * @userdata2    Read back value
+                 * @devdesc      Read back value doesn't match write
+                 */
+                l_err = new ERRORLOG::ErrlEntry(
+                                                ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                                XSCOM::XSCOM_TEST_XSCOM1,
+                                                XSCOM::XSCOM_DATA_UNMATCHED,
+                                                l_writeData[l_num],
+                                                l_readData);
+                break;
+            }
+
+            // Write back original value
+            l_err = deviceWrite(l_testTarget,
+                                &l_savedData[l_num],
+                                l_size,
+                                DeviceFW::SCOM,
+                                l_testEntry.addr);
+
+            if (l_err)
+            {
+                TS_FAIL("testXscom2: XSCom write back original fails!");
+                break;
+            }
+        }
+
+        if (l_err)
+        {
+            TS_FAIL("testXscom2 failed!  Error committed.");
+            errlCommit(l_err,XSCOM_COMP_ID);
+        }
+        else
+        {
+            TS_TRACE("testXscom2 runs successfully!");
+        }
+        return;
+    }
 };
 
 #endif

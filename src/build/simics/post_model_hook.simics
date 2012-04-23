@@ -46,3 +46,7 @@ venice_cec_chip_cmp0.psi_hb->psihb_xivr_fsi=0x0140000000     #02010917
 venice_cec_chip_cmp0.psi_hb->psihb_irsn=0x00030000FFFF0000   #0201091b
 p8Proc0.proc_fsi2host_mbox->responder_enable=1
 
+#@fixme - Remove with RTC:41070
+#Get the OCC scoms to work correctly
+p8Proc0.occ_scom_bridge->occ_pib=p8Proc0.OccComplexSlot.OccSimpleSlot.pcb_space
+p8Proc0.OccComplexSlot.OccSimpleSlot.ocb->trusted_boot=FALSE

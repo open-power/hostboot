@@ -33,6 +33,7 @@ namespace XSCOM
         XSCOM_SANITY_CHECK          = 0x01,
         XSCOM_TEST_XSCOM1           = 0x02,
         XSCOM_GET_TARGET_VIRT_ADDR  = 0x03,
+        XSCOM_TEST_XSCOM2           = 0x04,
     };
 
     enum xscomReasonCode

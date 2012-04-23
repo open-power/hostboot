@@ -27,7 +27,7 @@
 ##    to setup the sandbox
 ##
 
-echo "+++ FIXME Temporarily copying cec-chip.so to eliminate verbose errors"
-rm  $sb/../simics/amd64-linux/lib/cec-chip.so
-cp /afs/rch/usr8/dsanner/public/quiet.cecchip/cec-chip.so $sb/../simics/amd64-linux/lib/
-
+echo "+++ Point Simics to our base image +++"
+#ln -sf $sb/../img/hbicore.bin $sb/../simics/hostboot.bin
+mkdir -p $sb/../images/ppc/lab/flash/
+ln -sf $sb/../img/hbicore.bin $sb/../images/ppc/lab/flash/hostboot.bin

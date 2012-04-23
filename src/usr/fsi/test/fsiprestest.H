@@ -53,15 +53,6 @@ class FSIPresTest : public CxxTest::TestSuite
          */
         void testPresence()
         {
-            //@todo - Issue 35803 
-            //@VBU workaround - Disable test case
-            //Temporarily disable this test case in VBU because of
-            //an MFSI/CFSI XSCOM hardware bug.
-            if( TARGETING::is_vpo() )
-            {
-               return;
-            }
-
             Target* l_masterChip = NULL;
             targetService().masterProcChipTargetHandle(l_masterChip);
 
