@@ -31,6 +31,7 @@
 #include <kernel/taskmgr.H>
 #include <kernel/cpu.H>
 #include <kernel/scheduler.H>
+#include <arch/ppc.H>
 
 const char* INTR_MSGQ = "/msg/interrupt";
 
@@ -76,9 +77,12 @@ void InterruptMsgHdlr::handleInterrupt()
     // the message.
     task_t* t = TaskManager::getCurrentTask();
 
-    // TODO will this always be processor 0 core 0 thread 0?
-    // Need a way to pass this addr down from user code?
-    uint64_t xirrAddress = (static_cast<uint64_t>(ICPBAR_VAL) << 20) + 4;
+    uint64_t pir = getPIR();
+
+    uint64_t xirrAddress = (static_cast<uint64_t>(ICPBAR_VAL) << 20);
+
+    xirrAddress += mmio_offset(pir); // Add offset for this cpu
+    xirrAddress += XIRR_ADDR_OFFSET; // Add offset for XIRR register
 
     // Ignore HRMOR setting
     xirrAddress |= 0x8000000000000000ul;
@@ -100,7 +104,7 @@ void InterruptMsgHdlr::handleInterrupt()
     {
         cv_instance->sendMessage(MSG_INTR_EXTERN,
                                  (void *)xirr,
-                                 NULL,
+                                 (void *)pir,
                                  NULL);
     }
 
@@ -109,6 +113,8 @@ void InterruptMsgHdlr::handleInterrupt()
     // leave the interrupt presenter locked.
     // Does the code that sets up the IP registers need to check to see if
     // there is an interrupt sitting there and send an EOI?
+    // Story 41868 -  Mask off all interrupts very early - might
+    // resolve this TODO.
 
     // Return the task to the scheduler queue if we did a context-switch.
     if (TaskManager::getCurrentTask() != t)
@@ -118,6 +124,7 @@ void InterruptMsgHdlr::handleInterrupt()
 }
 
 
+// TODO where does this get called from? (story 39878)
 void InterruptMsgHdlr::addCpuCore(uint64_t i_pir)
 {
     // Save the current task in case we context-switch away when sending

@@ -42,7 +42,10 @@ phys-mem.load-file ./sysspd.dat 0x701000
 
 #Setup the mailbox 
 venice_cec_chip_cmp0.psi_hb->psihb_psihbcr=0x5f00000000000000
+# for mbox on core 0 use:
 venice_cec_chip_cmp0.psi_hb->psihb_xivr_fsi=0x0140000000     #02010917
+# for mbox on core 1 use:
+#venice_cec_chip_cmp0.psi_hb->psihb_xivr_fsi=0x0000200140000000
 venice_cec_chip_cmp0.psi_hb->psihb_irsn=0x00030000FFFF0000   #0201091b
 p8Proc0.proc_fsi2host_mbox->responder_enable=1
 

@@ -32,6 +32,9 @@
 #include <targeting/common/attributes.H>
 #include <sys/time.h>
 #include <sys/mmio.h>
+#include <sys/task.h>
+#include <sys/misc.h>
+#include <kernel/intmsghandler.H>
 
 extern trace_desc_t * g_trac_intr;
 
@@ -44,73 +47,41 @@ class IntrTest: public CxxTest::TestSuite
          */
         void test_verifyState( void )
         {
-            // TODO Temporaritly DISABLE in VBU until P8 support is verfied
-            if( TARGETING::is_vpo() )
+
+            uint32_t * addr = reinterpret_cast<uint32_t *>(iv_masterAddr);
+
+            if(*addr != 0xFF000000) // XIRR ro reg
             {
-                return;
+                TS_FAIL
+                    ("INTR:Master cpu not initialized-XIRR @ %p = 0x%08x",
+                     addr,*addr);
             }
 
-            //// Add support for second chip (dummy)
-            ////uint32_t fake_pir = 0x00000001 << 5;  // P7
-            //uint32_t fake_pir = 0x00000001 << 7;  // P8
-            //msg_q_t intr_msgQ = msg_q_resolve(INTR_MSGQ);
-            //msg_t * msg = msg_allocate();
-            //msg->type = INTR::MSG_INTR_ADD_CPU_USR;
-            //msg->data[0] = fake_pir;
+            size_t threads = cpu_thread_count();
 
-            //msg_sendrecv(intr_msgQ, msg);
-            //msg_free(msg);
-
-            // all the simics registers
-            for(uint64_t chip = 0; chip < 1; ++chip)
+            for(size_t thread = 0; thread < threads; ++thread)
             {
-                // simics P8 appears to support 8 threads on 1 core.
-                // simics P7 appears to support 4 threads on 2 cores.
-                // for P7, pretending to have 8 threads works because the
-                // bit fields for cores and threads are contiguous so we can
-                // let the thread count overflow into the core field. so this
-                // works for p7 as well.
-                for(uint64_t thread = 0; thread < 8; ++thread)
+                addr = reinterpret_cast<uint32_t *>
+                    (iv_masterAddr + (thread << 12) + 16); // LINK A reg
+
+                uint32_t linkVal = iv_masterPIR | 0x40000000;
+
+                if((*addr != linkVal) ||
+                   (*(addr+1) != linkVal) ||
+                   (*(addr+2) != (linkVal | 0x80000000)))
                 {
-                    uint64_t offset = (chip << 20) | (thread << 12);
-
-                    uint32_t * addr =
-                        reinterpret_cast<uint32_t *>(iv_baseAddr + offset);
-
-                    if(offset == 0) // Master cpu
-                    {
-                        if(*addr != 0xFF000000)
-                        {
-                            TS_FAIL
-                                ("INTR:Master cpu not initialized-XIRR@%p=0x%08x",
-                                 addr,*addr);
-                        }
-                    }
-
-                    // TODO remove restriction when/if simics supports
-                    // more than 2 chips and 4 threads each
-                    if (chip < 2 && thread < 4)
-                    {
-                        if(offset != 0 && *addr != 0)
-                        {
-                            TS_FAIL("INTR:Chip %ld Thread %ld bad XIRR@%p=0x%08x",
-                                    chip,thread,addr,*addr);
-                        }
-
-
-
-                        if(*(addr+4) != 0x40000000 ||
-                           *(addr+5) != 0x40000000 ||
-                           *(addr+6) != 0xC0000000)
-                        {
-                            TS_FAIL("INTR:Chip %ld Thread %ld bad LINKS"
-                                    " 0x%08x 0x%08x 0x%08x",
-                                    chip,thread,
-                                    *(addr+4),*(addr+5),*(addr+6));
-                        }
-                    }
+                    TS_FAIL("INTR:Bad LINKS on chipid 0x%08x "
+                            "Links: 0x%08x 0x%08x 0x%08x",
+                            ((uint32_t)iv_masterPIR + thread),
+                            *addr,
+                            *(addr + 1),
+                            *(addr + 2)
+                            );
                 }
+                
             }
+
+            // Potentially could check all link registers on other chips
         }
 
         /**
@@ -118,13 +89,8 @@ class IntrTest: public CxxTest::TestSuite
          */
         void test_enableDisable( void )
         {
-            // TODO Temporaritly DISABLE in VBU until P8 support is confirmed
-            if( TARGETING::is_vpo() )
-            {
-                return;
-            }
 
-            uint32_t * addr = reinterpret_cast<uint32_t *>(iv_baseAddr);
+            uint32_t * addr = reinterpret_cast<uint32_t *>(iv_masterAddr);
 
             errlHndl_t err = INTR::disableExternalInterrupts();
 
@@ -162,7 +128,8 @@ class IntrTest: public CxxTest::TestSuite
          */
         void test_intr( void )
         {
-            // TODO Temporaritly DISABLE in VBU until P8 support is confirmed
+
+            // DISABLE in VBU 
             if( TARGETING::is_vpo() )
             {
                 return;
@@ -182,7 +149,7 @@ class IntrTest: public CxxTest::TestSuite
 
             // Force an interrupt by writing to the MFFR on master
             volatile uint8_t * mfrr = 
-                reinterpret_cast<uint8_t *>(iv_baseAddr+12);
+                reinterpret_cast<uint8_t *>(iv_masterAddr+12);
             *(mfrr) = 0x55;
             *(mfrr) = 0xff;
 
@@ -206,12 +173,28 @@ class IntrTest: public CxxTest::TestSuite
         }
 
 
-      IntrTest() : CxxTest::TestSuite()
-      {
-          iv_baseAddr = reinterpret_cast<uint64_t>
-            (mmio_dev_map(reinterpret_cast<void*>(cv_realAddr),THIRTYTWO_MB));
-          TRACDCOMP(g_trac_intr,"IntrTest()> iv_baseAddr=0x%.X",iv_baseAddr);
-      };
+        IntrTest() : CxxTest::TestSuite()
+        {
+            iv_baseAddr = reinterpret_cast<uint64_t>
+                (mmio_dev_map(reinterpret_cast<void*>(cv_realAddr),THIRTYTWO_MB));
+
+            TRACDCOMP(g_trac_intr,"IntrTest()> iv_baseAddr=0x%.X",iv_baseAddr);
+
+            task_affinity_pin();                // pin this task to current cpu
+            task_affinity_migrate_to_master();  // Move  to the master cpu
+
+            // Get the master cpu id, thread 0
+            iv_masterPIR = task_getcpuid();
+
+            TRACDCOMP(g_trac_intr,"IntrTest()> iv_masterPIR=0x%.X",iv_masterPIR);
+
+            iv_masterPIR &= 0xFFFFFFF8;
+
+            task_affinity_unpin();              // unpin this task
+
+            iv_masterAddr = InterruptMsgHdlr::mmio_offset(iv_masterPIR) + iv_baseAddr;
+
+        };
 
 
       ~IntrTest()
@@ -222,6 +205,8 @@ class IntrTest: public CxxTest::TestSuite
     private:
 
       uint64_t iv_baseAddr;
+      uint64_t iv_masterAddr;
+      cpuid_t  iv_masterPIR;
       static const uint64_t cv_realAddr;
 };
 

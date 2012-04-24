@@ -38,11 +38,14 @@
 #include <targeting/common/targetservice.H>
 #include <vmmconst.h>
 #include <targeting/common/attributes.H>
+#include <devicefw/userif.H>
+
+#define INTR_TRACE_NAME INTR_COMP_NAME
 
 using namespace INTR;
 
 trace_desc_t * g_trac_intr = NULL;
-TRAC_INIT(&g_trac_intr, INTR_COMP_NAME, 2 * 1024);
+TRAC_INIT(&g_trac_intr, INTR_TRACE_NAME, 2 * 1024);
 
 
 /**
@@ -84,67 +87,30 @@ errlHndl_t IntrRp::_init()
 {
     errlHndl_t err = NULL;
 
-    // TODO Temporaritly DISABLE in VBU until P8 support is confirmed
-    if( TARGETING::is_vpo() )
-    {
-        iv_isVBU = true;
-    }
-
     // get the PIR
     // Which ever cpu core this is running on is the MASTER cpu
     // Make master thread 0
     uint32_t cpuid = task_getcpuid();
     iv_masterCpu = cpuid;
     // If P7 or P7+ core -- need to tweak fields in PIR
-    if(cpu_core_type() < CORE_POWER8_MURANO)
+    if(cpu_core_type() == CORE_POWER7 ||
+       cpu_core_type() == CORE_POWER7_PLUS)
     {
         iv_masterCpu = P7PIR_t(cpuid);
     }
     iv_masterCpu.threadId = 0;
 
-    TRACFCOMP(g_trac_intr,"node[%d], chip[%d], core[%d], thread[%d]",
+    TRACFCOMP(g_trac_intr,"Master cpu node[%d], chip[%d], core[%d], thread[%d]",
               iv_masterCpu.nodeId, iv_masterCpu.chipId, iv_masterCpu.coreId,
               iv_masterCpu.threadId);
 
+    // The base realAddr is the base address for the whole system.
+    // Therefore the realAddr must be based on the processor
+    // that would have the lowest BAR value in the system,
+    // whether it exists or not. In this case n0p0
 
-    uint64_t realAddr = 0;
-
-    // TODO Does the BAR scom reg need to be read here or set here??
-    //      Who sets the BAR?
-    //uint64_t size = sizeof(realAddr);
-    //TARGETING::TargetService& targetService = TARGETING::targetService();
-    //TARGETING::Target* procTarget = NULL;
-    //targetService.masterProcChipTargetHandle( procTarget );
-    //
-    // TODO What if this does not jive with with the PIR?
-
-    // TODO Does this need to be read here?
-    //err = deviceRead(procTarget,
-    //                 &realAddr,
-    //                 size,
-    //                 DEVICE_SCOM_ADDRESS(ICPBAR_SCOM_ADDR));
-    //if(err) return err;
-
-    if(realAddr == 0)
-    {
-        realAddr = (static_cast<uint64_t>(ICPBAR_VAL)) << 34;
-    }
-
-    // TODO Does this need to be set here?
-    // err = deviceWrite(procTarget,
-    //                   &realAddr,
-    //                   size,
-    //                   DEVICE_SCOM_ADDRESS(ICPBAR_SCOM_ADDR));
-
-    realAddr &= 0xFFFFFFFC00000000ul;   //[0:29] is ICP_BAR
-    realAddr >>= 14;                    //[14:43] is BAR field in real address
-
-
-    // The realAddr is the base address for the whole system.
-    // Therefore the realAddr must be based on the processor with
-    // lowest BAR value in the system. (usually n0p0)
-    // TODO Adjust the realAddr if the BAR came from a processor other
-    // than cpuid 0
+    // [14:43] is BAR field in address to shift by (34 - 14)
+    uint64_t realAddr = (static_cast<uint64_t>(ICPBAR_VAL)) << 20;
 
     TRACFCOMP(g_trac_intr,"INTR: realAddr = %lx",realAddr);
 
@@ -154,7 +120,17 @@ errlHndl_t IntrRp::_init()
 
     TRACFCOMP(g_trac_intr,"INTR: vAddr = %lx",iv_baseAddr);
 
-    err = checkAddress(iv_baseAddr);
+    // Set the BAR scom reg
+    TARGETING::Target* procTarget = NULL;
+    TARGETING::targetService().masterProcChipTargetHandle( procTarget );
+
+    err = setBAR(procTarget,iv_masterCpu);
+
+    if(!err)
+    {
+        err = checkAddress(iv_baseAddr);
+    }
+
     if(!err)
     {
 
@@ -188,9 +164,6 @@ errlHndl_t IntrRp::enableInterrupts()
 {
     errlHndl_t err = NULL;
 
-    // TODO Temporarily DISABLE in VBU until P8 support is confirmed
-    if(iv_isVBU) return err;
-
     // Enable the interrupt on master processor core, thread 0
     uint64_t baseAddr = iv_baseAddr + cpuOffsetAddr(iv_masterCpu);
 
@@ -209,9 +182,6 @@ errlHndl_t IntrRp::disableInterrupts()
     errlHndl_t err = NULL;
 
     // Disable the interrupt on master processor core, thread 0
-    // TODO Temporarily DISABLE in VBU until P8 support is confirmed
-    if(iv_isVBU) return err;
-
     uint64_t baseAddr = iv_baseAddr + cpuOffsetAddr(iv_masterCpu);
 
     err = checkAddress(baseAddr);
@@ -245,16 +215,20 @@ void IntrRp::msgHandler()
                 {
                     ext_intr_t type = NO_INTERRUPT;
 
-                    // type = XISR = XIRR[8:31]
-                    // priority = XIRR[0:7]
-                    uint32_t * xirrAddress =
-                        reinterpret_cast<uint32_t *>(iv_baseAddr+ XIRR_OFFSET+
-                                                  cpuOffsetAddr(iv_masterCpu));
-
                     // xirr was read by interrupt message handler.
                     // Passed in as data[0]
                     uint32_t xirr = static_cast<uint32_t>(msg->data[0]);
-                    type = static_cast<ext_intr_t>(xirr & 0x00FFFFFF);
+                    PIR_t pir = static_cast<PIR_t>(msg->data[1]);
+
+                    // data[1] has the PIR
+                    uint32_t * xirrAddress =
+                        reinterpret_cast<uint32_t*>(iv_baseAddr + XIRR_OFFSET +
+                                                    cpuOffsetAddr(pir));
+
+                    // type = XISR = XIRR[8:31]
+                    // priority = XIRR[0:7]
+                    // Use the XISR as the type (for now)
+                    type = static_cast<ext_intr_t>(xirr & XISR_MASK);
 
                     TRACDCOMP(g_trac_intr,"External Interrupt recieved, Type=%x",type);
 
@@ -354,8 +328,9 @@ void IntrRp::msgHandler()
                 {
                     PIR_t pir = msg->data[0];
                     // If P7 or P7+ core -- need to tweak fields in PIR
-                    if(cpu_core_type() < CORE_POWER8_MURANO)
-                    {
+                    if(cpu_core_type() == CORE_POWER7 ||
+                       cpu_core_type() == CORE_POWER7_PLUS)
+                     {
                         pir = P7PIR_t(msg->data[0]);
                     }
 
@@ -363,6 +338,7 @@ void IntrRp::msgHandler()
                               "core[%d], thread[%d]",
                               pir.nodeId, pir.chipId, pir.coreId,
                               pir.threadId);
+
 
                     size_t threads = cpu_thread_count();
 
@@ -377,12 +353,69 @@ void IntrRp::msgHandler()
                 }
                 break;
 
+            case MSG_INTR_REMOVE_CPU:
+                {
+                    PIR_t pir = msg->data[0];
+                    if(cpu_core_type() == CORE_POWER7 ||
+                       cpu_core_type() == CORE_POWER7_PLUS)
+                    {
+                        pir = P7PIR_t(msg->data[0]);
+                    }
+
+                    TRACFCOMP(g_trac_intr,"Remove CPU node[%d], chip[%d],"
+                              "core[%d], thread[%d]",
+                              pir.nodeId, pir.chipId, pir.coreId,
+                              pir.threadId);
+
+                    size_t threads = cpu_thread_count();
+
+                    for(size_t thread = 0; thread < threads; ++thread)
+                    {
+                        pir.threadId = thread;
+                        deconfigureInterruptPresenter(pir);
+                    }
+
+                    msg->data[1] = 0;
+                    msg_respond(iv_msgQ, msg);
+                }
+                break;
+
             default:
                 msg->data[1] = -EINVAL;
                 msg_respond(iv_msgQ, msg);
         }
     }
 }
+
+
+
+errlHndl_t IntrRp::setBAR(TARGETING::Target * i_target,
+                          const PIR_t i_pir)
+{
+    errlHndl_t err = NULL;
+
+    uint64_t barValue = static_cast<uint64_t>(ICPBAR_VAL) + 
+            (8 * i_pir.nodeId) + i_pir.chipId;
+    barValue <<= 34;
+
+    TRACFCOMP(g_trac_intr,"INTR: Target %p. ICPBAR value: 0x%016lx",
+              i_target,barValue);
+
+    uint64_t size = sizeof(barValue);
+
+    err = deviceWrite(i_target,
+                      &barValue,
+                      size,
+                      DEVICE_SCOM_ADDRESS(ICPBAR_SCOM_ADDR));
+
+    if(err)
+    {
+        TRACFCOMP(g_trac_intr,ERR_MRK"Unable to set IPCBAR");
+    }
+
+    return err;
+}
+
 
 
 errlHndl_t IntrRp::registerInterrupt(msg_q_t i_msgQ, ext_intr_t i_type)
@@ -424,9 +457,6 @@ errlHndl_t IntrRp::registerInterrupt(msg_q_t i_msgQ, ext_intr_t i_type)
 
 void IntrRp::initInterruptPresenter(const PIR_t i_pir) const
 {
-    // TODO Temporaritly DISABLE in VBU until P8 support is confirmed
-    if(iv_isVBU) return;
-
     uint64_t baseAddr = iv_baseAddr + cpuOffsetAddr(i_pir);
     uint8_t * cppr =
         reinterpret_cast<uint8_t*>(baseAddr + CPPR_OFFSET);
@@ -469,6 +499,44 @@ void IntrRp::initInterruptPresenter(const PIR_t i_pir) const
 }
 
 
+
+void IntrRp::deconfigureInterruptPresenter(const PIR_t i_pir) const
+{
+    uint64_t baseAddr = iv_baseAddr + cpuOffsetAddr(i_pir);
+    uint8_t * cppr =
+        reinterpret_cast<uint8_t*>(baseAddr + CPPR_OFFSET);
+    uint32_t * plinkReg =
+        reinterpret_cast<uint32_t *>(baseAddr + LINKA_OFFSET);
+
+    // non- side effect xirr register
+    uint32_t * xirrAddr = 
+        reinterpret_cast<uint32_t *>(baseAddr) + XIRR_RO_OFFSET;
+
+    uint32_t xirr = *xirrAddr & 0x00FFFFFF;
+
+    TRACDCOMP(g_trac_intr,"PIR 0x%x offset: 0x%lx",
+              i_pir.word,
+              cpuOffsetAddr(i_pir));
+
+    // Not sure if this will ever happen, but squawk alittle if it does
+    if(xirr)
+    {
+        TRACFCOMP(g_trac_intr,
+                  ERR_MRK
+                  "Pending interrupt found on shutdown. CpuId:0x%x XIRR:0x%x",
+                  i_pir.word,
+                  xirr);
+    }
+
+    *cppr = 0;          // Set priority to most favored (off)
+
+    *plinkReg = 0;      // Reset link registers - clear all forwarding
+    *(plinkReg + 1) = 0;
+    *(plinkReg + 2) = 0;
+}
+
+
+
 errlHndl_t IntrRp::checkAddress(uint64_t i_addr)
 {
     errlHndl_t err = NULL;
@@ -498,6 +566,12 @@ errlHndl_t IntrRp::checkAddress(uint64_t i_addr)
     return err;
 }
 
+// TODO rtc story 39878
+errlHndl_t IntrRp::shutDown()
+{
+    errlHndl_t err = NULL;
+    return err;
+}
 
 // Register a message queue with a particular intr type
 errlHndl_t INTR::registerMsgQ(msg_q_t i_msgQ, ext_intr_t i_type)

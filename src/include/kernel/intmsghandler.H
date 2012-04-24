@@ -27,6 +27,7 @@
 #include <kernel/types.h>
 #include <kernel/msghandler.H>
 #include <kernel/msg.H>
+#include <builtins.h>
 
 /**
  * @class InterruptMsgHdlr
@@ -40,6 +41,31 @@
 class InterruptMsgHdlr : public MessageHandler
 {
     public:
+
+        /**
+         * Field values for P8
+         * @note This is used to calculate the mmio address offset
+         * from the PIR for the interrupt presenter memory mapped registers.
+         * The masks isolate the node,chip,core, and thread id fields in the
+         * PIR.  The LSL values tell how far left a PIR field needs to be
+         * shifted to create a proper mmio offset address.
+         *
+         */
+        enum
+        {
+            P8_PIR_THREADID_MSK = 0x00000007,
+            P8_PIR_COREID_MSK   = 0x00000078,
+            P8_PIR_CHIPID_MSK   = 0x00000380,
+            P8_PIR_NODEID_MSK   = 0x00001C00,
+
+            // Logical Shift Left fields for mmio Base address from PIR.
+            // (IP addr bit pos - PIR bit pos)
+            P8_IP_THREADID_LSL = (12-0),
+            P8_IP_COREID_LSL   = (15-3),    
+            P8_IP_CHIPID_LSL   = (20-7),
+            P8_IP_NODEID_LSL   = (23-10),
+            XIRR_ADDR_OFFSET   = 4,
+        };
 
         // Notes:
         //   All external interrupts are routed to one cpu core
@@ -71,6 +97,26 @@ class InterruptMsgHdlr : public MessageHandler
                                             task_t* i_task,int i_rc);
 
 
+        ALWAYS_INLINE
+        static uint64_t mmio_offset(uint64_t i_pir)
+        {
+            uint64_t offset = 0;
+
+            // The node and chip id fields are adjacent in both the PIR and
+            // the mmio offset - so they can be done in one shift operation
+            offset  |= 
+                (i_pir & (P8_PIR_NODEID_MSK | P8_PIR_CHIPID_MSK))
+                << P8_IP_CHIPID_LSL;
+
+            // The core and thread id field are adjacent in both the PIR and
+            // the mmio offset, so they can be done in one shift operation.
+            offset  |=
+                (i_pir & (P8_PIR_COREID_MSK | P8_PIR_THREADID_MSK))
+                << P8_IP_THREADID_LSL;
+
+            return offset;
+        }
+            
         /**
          * Create the InterruptMsgHdlr to handle external interrupts
          * @param[in] i_msgQ The message queue

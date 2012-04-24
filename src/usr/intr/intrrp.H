@@ -34,6 +34,11 @@
 
 struct msg_t;
 
+namespace TARGETING
+{
+    class Target;
+};
+
 namespace INTR
 {
     class IntrRp
@@ -46,6 +51,13 @@ namespace INTR
              */
             static void init( errlHndl_t &io_rtaskRetErrl );
 
+            /**
+             * This function is registered with init for shutdown
+             * processing of the interrupt presenter.
+             * TODO Story 39878
+             */
+            static errlHndl_t shutDown();
+
         protected:
 
             /**
@@ -54,8 +66,7 @@ namespace INTR
             IntrRp() :
                 iv_msgQ(NULL),
                 iv_baseAddr(0),
-                iv_masterCpu(0),
-                iv_isVBU(false)   {}
+                iv_masterCpu(0) {}
 
             /**
              * Destructor
@@ -71,11 +82,13 @@ namespace INTR
 
             enum
             {
+                XIRR_RO_OFFSET = 0,             //!< offset to XIRR (poll)
                 CPPR_OFFSET = 4,                //!< offset to CPPR (1 byte)
                 XIRR_OFFSET = 4,                //!< offset to XIRR (4 bytes)
                 LINKA_OFFSET = 16,              //!< offset to LINKA register
                 LINKB_OFFSET = 20,              //!< offset to LINKB register
                 LINKC_OFFSET = 24,              //!< offset to LINKC register
+                XISR_MASK    = 0x00FFFFFF,      //!< XISR MASK in XIRR register
             };
 
             // If the interrupt can't be handled by the current chip there are
@@ -184,7 +197,6 @@ namespace INTR
             Registry_t  iv_registry;    //!< registered interrupt type
             uint64_t    iv_baseAddr;    //!< Base address of hw INTR regs
             PIR_t       iv_masterCpu;   //!< Master cpu PIR
-            bool        iv_isVBU;       //!< TODO Don't run on VBU for now
 
 
         private:        //functions
@@ -220,13 +232,29 @@ namespace INTR
             void initInterruptPresenter(const PIR_t i_pir) const;
 
             /**
+             * Deconfigure the interrupt presenter registers
+             * @param[in] i_pir, the PIR value for the presenter
+             */
+            void deconfigureInterruptPresenter(const PIR_t i_pir) const;
+
+            /**
+             * Set the IPCBAR scom register
+             * @param[in] i_target, the Target.
+             * @param[in] i_pir, The pir for this processor
+             */
+            errlHndl_t setBAR(TARGETING::Target * i_target,
+                              const PIR_t i_pir);
+
+            /**
              * Calculate the adress offset for the given cpu
              * @param[in] i_pir PIR value for the presenter
              * @return the offset
              */
-            ALWAYS_INLINE
+                ALWAYS_INLINE
                 uint64_t cpuOffsetAddr(const PIR_t i_pir) const
                 {
+                    // TODO when P7 support is removed then change this 
+                    // to use InterruptMsgHdlr::mmio_offset()
                     uint64_t offset = (i_pir.nodeId  * 8) + i_pir.chipId;
                     offset <<= 20;
                     switch (cpu_core_type())
