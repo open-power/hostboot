@@ -1836,8 +1836,11 @@ sub enforceString {
 ################################################################################
 # Get hash ref to supported simple types and their properties
 ################################################################################
+my $g_simpleTypeProperties_cache = 0;
 
 sub simpleTypeProperties {
+
+    return $g_simpleTypeProperties_cache if ($g_simpleTypeProperties_cache);
 
     my %typesHoH = ();
 
@@ -1855,7 +1858,9 @@ sub simpleTypeProperties {
     $typesHoH{"enumeration"} = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 0, typeName => "XMLTOHB_USE_PARENT_ATTR_ID" , bytes => 0, bits => 0 , default => \&defaultEnum  , alignment => 1, specialPolicies =>\&null,           packfmt => "packEnumeration"};
     $typesHoH{"hbmutex"}     = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 0, typeName => "mutex_t*"                   , bytes => 8, bits => 64, default => \&defaultZero  , alignment => 8, specialPolicies =>\&enforceHbMutex, packfmt =>\&packQuad};
 
-    return \%typesHoH;
+    $g_simpleTypeProperties_cache = \%typesHoH;
+
+    return $g_simpleTypeProperties_cache;
 }
 
 ################################################################################
@@ -1982,8 +1987,7 @@ sub maxEnumValue {
     my $candidateMax = 0;
     foreach my $enumerator (@{$enumeration->{enumerator}})
     {
-        my $candidateMax = unhexify(enumNameToValue(
-                                        $enumeration,$enumerator->{name}));
+        my $candidateMax = enumNameToValue($enumeration,$enumerator->{name});
         if($candidateMax > $max)
         {
             $max = $candidateMax;
@@ -2037,26 +2041,39 @@ sub enumNameToValue {
     my $found = 0;
     my $enumeratorValue;
 
-    foreach my $enumerator (@{$enumeration->{enumerator}})
+    if (defined $enumeration->{__optimized})
     {
-         my $currentEnumeratorValue;
-         if(exists $enumerator->{value} )
-         {
-             $nextEnumeratorValue = unhexify($enumerator->{value}) + 1;
-             $currentEnumeratorValue = unhexify($enumerator->{value});
-         }
-         else
-         {
-             $currentEnumeratorValue = $nextEnumeratorValue;
-             $nextEnumeratorValue += 1;
-         }
+        if (defined $enumeration->{__optimized}->{$enumeratorName})
+        {
+            $found = 1;
+            $enumeratorValue = $enumeration->{__optimized}->{$enumeratorName};
+        }
+    }
+    else
+    {
+        foreach my $enumerator (@{$enumeration->{enumerator}})
+        {
+            my $currentEnumeratorValue;
+            if(exists $enumerator->{value} )
+            {
+                $currentEnumeratorValue = unhexify($enumerator->{value});
+                $nextEnumeratorValue = $currentEnumeratorValue + 1;
+            }
+            else
+            {
+                $currentEnumeratorValue = $nextEnumeratorValue;
+                $nextEnumeratorValue += 1;
+            }
 
-         if($enumerator->{name} eq $enumeratorName)
-         {
-             $found = 1;
-             $enumeratorValue = $currentEnumeratorValue;
-             last;
-         }
+            $enumeration->{__optimized}->{$enumerator->{name}}
+                = $currentEnumeratorValue;
+
+            if($enumerator->{name} eq $enumeratorName)
+            {
+                $found = 1;
+                $enumeratorValue = $currentEnumeratorValue;
+            }
+        }
     }
 
     if(!$found)
@@ -2605,12 +2622,11 @@ sub writeTargetingImage {
     # for code update.  At minimum, ensure that we always process at this level
     # in the given order
     my @targetsAoH = ();
-    my $numTargets = 0;
     foreach my $targetInstance (@{$attributes->{targetInstance}})
     {
         push(@targetsAoH, $targetInstance);
-        $numTargets++;
     }
+    my $numTargets = @targetsAoH;
 
     my $numAttributes = 0;
     foreach my $targetInstance (@targetsAoH)
@@ -2704,128 +2720,128 @@ sub writeTargetingImage {
             }
         }
 
+        my %attributeDefCache =
+            map { $_->{id} => $_} @{$attributes->{attribute}};
+
         for my $attributeId (sort(keys %attrhash))
         {
-            foreach my $attributeDef (@{$attributes->{attribute}})
+            my $attributeDef = $attributeDefCache{$attributeId};
+            if (not defined $attributeDef)
             {
-                my $section;
-                if( $attributeDef->{id} eq $attributeId )
-                {
-                    if(    exists $attributeDef->{writeable}
-                        && $attributeDef->{persistency} eq "non-volatile" )
-                    {
-                        $section = "pnor-rw";
-                    }
-                    elsif ( !exists $attributeDef->{writeable}
-                        &&  $attributeDef->{persistency} eq "non-volatile")
-                    {
-                        $section = "pnor-ro";
-                    }
-                    elsif ($attributeDef->{persistency} eq "volatile" )
-                    {
-                        $section = "heap-pnor-initialized";
-                    }
-                    elsif($attributeDef->{persistency} eq "volatile-zeroed")
-                    {
-                        $section = "heap-zero-initialized";
-                    }
-                    else
-                    {
-                        fatal("Persistency not supported.");
-                    }
-
-                    if($section eq "pnor-ro")
-                    {
-                        my ($rodata,$alignment) = packAttribute($attributes,
-                            $attributeDef,
-                            $attrhash{$attributeId}->{default});
-
-                        # Align the data as necessary
-                        my $pads = ($alignment - ($offset % $alignment))
-                            % $alignment;
-                        $roAttrBinData .= pack ("@".$pads);
-                        $offset += $pads;
-
-                        $attributePointerBinData .= packQuad(
-                            $offset + $pnorRoBaseAddress);
-
-                        $offset += (length $rodata);
-
-                        $roAttrBinData .= $rodata;
-                    }
-                    elsif($section eq "pnor-rw")
-                    {
-                        my ($rwdata,$alignment) = packAttribute($attributes,
-                            $attributeDef,
-                            $attrhash{$attributeId}->{default});
-
-                        #print "Wrote to pnor-rw value ",$attributeDef->{id}, ",
-                        #", $attrhash{$attributeId}->{default}," \n";
-
-                        # Align the data as necessary
-                        my $pads = ($alignment - ($rwOffset % $alignment))
-                            % $alignment;
-                        $rwAttrBinData .= pack ("@".$pads);
-                        $rwOffset += $pads;
-
-                        $attributePointerBinData .= packQuad(
-                            $rwOffset + $pnorRwBaseAddress);
-
-                        $rwOffset += (length $rwdata);
-
-                        $rwAttrBinData .= $rwdata;
-
-                    }
-                    elsif($section eq "heap-zero-initialized")
-                    {
-                        my ($heapZeroInitData,$alignment) = packAttribute(
-                            $attributes,
-                            $attributeDef,$attrhash{$attributeId}->{default});
-
-                        # Align the data as necessary
-                        my $pads = ($alignment - ($heapZeroInitOffset
-                            % $alignment)) % $alignment;
-                        $heapZeroInitBinData .= pack ("@".$pads);
-                        $heapZeroInitOffset += $pads;
-
-                        $attributePointerBinData .= packQuad(
-                            $heapZeroInitOffset + $heapZeroInitBaseAddr);
-
-                        $heapZeroInitOffset += (length $heapZeroInitData);
-
-                        $heapZeroInitBinData .= $heapZeroInitData;
-
-                    }
-                    elsif($section eq "heap-pnor-initialized")
-                    {
-                        my ($heapPnorInitData,$alignment) = packAttribute(
-                            $attributes,
-                            $attributeDef,$attrhash{$attributeId}->{default});
-
-                        # Align the data as necessary
-                        my $pads = ($alignment - ($heapPnorInitOffset
-                            % $alignment)) % $alignment;
-                        $heapPnorInitBinData .= pack ("@".$pads);
-                        $heapPnorInitOffset += $pads;
-
-                        $attributePointerBinData .= packQuad(
-                            $heapPnorInitOffset + $heapPnorInitBaseAddr);
-
-                        $heapPnorInitOffset += (length $heapPnorInitData);
-
-                        $heapPnorInitBinData .= $heapPnorInitData;
-                    }
-                    else
-                    {
-                        fatal("Could not find a suitable section.");
-                    }
-
-                    $attributesWritten++;
-
-                    last;
-                }
+                fatal("Attribute $attributeId is not found.");
             }
 
+            my $section;
+            if( exists $attributeDef->{writeable}
+                    && $attributeDef->{persistency} eq "non-volatile" )
+            {
+                $section = "pnor-rw";
+            }
+            elsif ( !exists $attributeDef->{writeable}
+                    && $attributeDef->{persistency} eq "non-volatile")
+            {
+                $section = "pnor-ro";
+            }
+            elsif ($attributeDef->{persistency} eq "volatile" )
+            {
+                $section = "heap-pnor-initialized";
+            }
+            elsif($attributeDef->{persistency} eq "volatile-zeroed")
+            {
+                $section = "heap-zero-initialized";
+            }
+            else
+            {
+                fatal("Persistency not supported.");
+            }
+
+            if($section eq "pnor-ro")
+            {
+                my ($rodata,$alignment) = packAttribute($attributes,
+                        $attributeDef,
+                        $attrhash{$attributeId}->{default});
+
+                # Align the data as necessary
+                my $pads = ($alignment - ($offset % $alignment))
+                    % $alignment;
+                $roAttrBinData .= pack ("@".$pads);
+                $offset += $pads;
+
+                $attributePointerBinData .= packQuad(
+                        $offset + $pnorRoBaseAddress);
+
+                $offset += (length $rodata);
+
+                $roAttrBinData .= $rodata;
+            }
+            elsif($section eq "pnor-rw")
+            {
+                my ($rwdata,$alignment) = packAttribute($attributes,
+                        $attributeDef,
+                        $attrhash{$attributeId}->{default});
+
+                #print "Wrote to pnor-rw value ",$attributeDef->{id}, ",
+                #", $attrhash{$attributeId}->{default}," \n";
+
+                # Align the data as necessary
+                my $pads = ($alignment - ($rwOffset % $alignment))
+                    % $alignment;
+                $rwAttrBinData .= pack ("@".$pads);
+                $rwOffset += $pads;
+
+                $attributePointerBinData .= packQuad(
+                        $rwOffset + $pnorRwBaseAddress);
+
+                $rwOffset += (length $rwdata);
+
+                $rwAttrBinData .= $rwdata;
+
+            }
+            elsif($section eq "heap-zero-initialized")
+            {
+                my ($heapZeroInitData,$alignment) = packAttribute(
+                        $attributes,
+                        $attributeDef,$attrhash{$attributeId}->{default});
+
+                # Align the data as necessary
+                my $pads = ($alignment - ($heapZeroInitOffset
+                            % $alignment)) % $alignment;
+                $heapZeroInitBinData .= pack ("@".$pads);
+                $heapZeroInitOffset += $pads;
+
+                $attributePointerBinData .= packQuad(
+                        $heapZeroInitOffset + $heapZeroInitBaseAddr);
+
+                $heapZeroInitOffset += (length $heapZeroInitData);
+
+                $heapZeroInitBinData .= $heapZeroInitData;
+
+            }
+            elsif($section eq "heap-pnor-initialized")
+            {
+                my ($heapPnorInitData,$alignment) = packAttribute(
+                        $attributes,
+                        $attributeDef,$attrhash{$attributeId}->{default});
+
+                # Align the data as necessary
+                my $pads = ($alignment - ($heapPnorInitOffset
+                            % $alignment)) % $alignment;
+                $heapPnorInitBinData .= pack ("@".$pads);
+                $heapPnorInitOffset += $pads;
+
+                $attributePointerBinData .= packQuad(
+                        $heapPnorInitOffset + $heapPnorInitBaseAddr);
+
+                $heapPnorInitOffset += (length $heapPnorInitData);
+
+                $heapPnorInitBinData .= $heapPnorInitData;
+            }
+            else
+            {
+                fatal("Could not find a suitable section.");
+            }
+
+            $attributesWritten++;
 
         } # End attribute loop
 
