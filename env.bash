@@ -5,7 +5,7 @@
 #
 #  IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2010 - 2011
+#  COPYRIGHT International Business Machines Corp. 2010-2012
 #
 #  p1
 #
@@ -19,7 +19,9 @@
 #
 #  Origin: 30
 #
-#  IBM_PROLOG_END
+#  IBM_PROLOG_END_TAG
+ROOTDIR=.
+
 export MCP_PATH=/opt/mcp/shared/powerhal
 
 if [ -e /esw/fakeroot/ ]; then
@@ -33,6 +35,7 @@ export PATH=${PATH}:`pwd`/src/build/trace
 export PATH=${PATH}:`pwd`/src/build/tools
 
 export HOSTBOOTROOT=`pwd`
+TOOLSDIR=$HOSTBOOTROOT/src/build/tools
 
 if [ -e ./customrc ]; then
     source ./customrc
@@ -45,3 +48,8 @@ if [ -n "${SANDBOXROOT}" ]; then
 fi
 
 export DEFAULT_MACHINE=MURANO
+
+##  run setupgithooks.pl
+if [ -e $TOOLSDIR/setupgithooks.sh ]; then
+    $TOOLSDIR/setupgithooks.sh
+fi
