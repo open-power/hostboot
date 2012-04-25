@@ -27,6 +27,12 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.28   | bellows  | 4/11/12 | fixed missing fapi:: for targets and return codes
+//  1.27   | bellows  | 4/11/12 | Workaround for fixing up phy config reset (HW199042)
+//  1.26   | jdsloat  | 3/20/12 | MRS bank fixe to remove reverse in ccs_inst_arry0
+//  1.25   | jdsloat  | 3/09/12 | RCD address fix.  Cleaned up the RCD section.
+//  1.24   | jdsloat  | 3/08/12 | Added CDIMM to RCD Check, MRS cycles through only configured ranks
+//  1.23   | jdsloat  | 3/05/12 | Fixed dram_al enum typo
 //  1.22   | jdsloat  | 2/27/12 | Fixed hostboot parenthesis error
 //  1.21   | jdsloat  | 2/27/12 | Cycle through Ports local of MRS/RCD, CL shift fix, Initialization of address/CS, neg end bit bug fix
 //  1.20   | jdsloat  | 2/23/12 | Fixed CL typo in MRS load
@@ -71,7 +77,6 @@
 //----------------------------------------------------------------------
 //  Constants
 //----------------------------------------------------------------------
-const uint8_t MAX_NUM_RANKS = 4;
 const uint8_t MAX_NUM_DIMMS = 2;
 const uint8_t MAX_NUM_PORTS = 2; 
 const uint8_t MRS0_BA = 0;
@@ -82,6 +87,231 @@ const uint16_t GP4_REG_0x1013 = 0x1013;
 
 
 extern "C" {
+
+// WORKAROUND START
+// THIS NEEDS TO BE REMOVED = WORKAROUNDS FOR HARDWARE RESET PROBLEM
+  fapi::ReturnCode mss_putscom(fapi::Target target,uint64_t scom_address_64, uint64_t data_64) {
+    // Target is centaur.mba
+    // This procedure does a putscom to an address with constant data
+    ecmdDataBufferBase data_buffer_64(64);
+    data_buffer_64.flushTo0();
+    uint32_t rc_ecmd=0;
+    fapi::ReturnCode rc;
+
+    rc_ecmd=data_buffer_64.setDoubleWord(0,data_64);
+    if(rc_ecmd)
+    {
+      rc=rc_ecmd;
+      FAPI_ERR("ecmddatabuffer operation failed");
+
+    }
+    rc=fapiPutScom(target,scom_address_64,data_buffer_64);
+    if(!rc.ok()){
+      FAPI_ERR("putscom error occurred");
+      return(rc);
+    } 
+    return rc;
+  }
+
+  fapi::ReturnCode mss_workaround_phy_reset(fapi::Target target) {
+    // Target is centaur.mba
+    // This procedure does the series of putscoms to fix HW199042 where the phy resets the state of the config
+    // This only supports one config and only the known bad registers and allows calibration to pass
+    fapi::ReturnCode rc;
+    uint8_t core;
+
+    rc=mss_putscom( target, 0x8000C0160301143FULL,    0x000000000000BF28ULL  ); if(rc) return(rc);
+    rc=mss_putscom( target, 0x800000370301143FULL,    0x0000000000001000ULL  ); if(rc) return(rc);
+    rc=mss_putscom( target, 0x800000370301143FULL,    0x0000000000001000ULL  ); if(rc) return(rc);
+    rc=mss_putscom( target, 0x800004370301143FULL,    0x0000000000001000ULL  ); if(rc) return(rc);
+    rc=mss_putscom( target, 0x800004370301143FULL,    0x0000000000001000ULL  ); if(rc) return(rc);
+    rc=mss_putscom( target, 0x800008370301143FULL,    0x0000000000001000ULL  ); if(rc) return(rc);
+    rc=mss_putscom( target, 0x800008370301143FULL,    0x0000000000001000ULL  ); if(rc) return(rc);
+    rc=mss_putscom( target, 0x80000C370301143FULL,    0x0000000000001000ULL  ); if(rc) return(rc);
+    rc=mss_putscom( target, 0x80000C370301143FULL,    0x0000000000001000ULL  ); if(rc) return(rc);
+    rc=mss_putscom( target, 0x800010370301143FULL,    0x0000000000001000ULL  ); if(rc) return(rc);
+    rc=mss_putscom( target, 0x800010370301143FULL,    0x0000000000001000ULL  ); if(rc) return(rc);
+    rc=mss_putscom( target, 0x800100370301143FULL,    0x0000000000001000ULL  ); if(rc) return(rc);
+    rc=mss_putscom( target, 0x800100370301143FULL,    0x0000000000001000ULL  ); if(rc) return(rc);
+    rc=mss_putscom( target, 0x800104370301143FULL,    0x0000000000001000ULL  ); if(rc) return(rc);
+    rc=mss_putscom( target, 0x800104370301143FULL,    0x0000000000001000ULL  ); if(rc) return(rc);
+    rc=mss_putscom( target, 0x800108370301143FULL,    0x0000000000001000ULL  ); if(rc) return(rc);
+    rc=mss_putscom( target, 0x800108370301143FULL,    0x0000000000001000ULL  ); if(rc) return(rc);
+    rc=mss_putscom( target, 0x80010C370301143FULL,    0x0000000000001000ULL  ); if(rc) return(rc);
+    rc=mss_putscom( target, 0x80010C370301143FULL,    0x0000000000001000ULL  ); if(rc) return(rc);
+    rc=mss_putscom( target, 0x800110370301143FULL,    0x0000000000001000ULL  ); if(rc) return(rc);
+    rc=mss_putscom( target, 0x800110370301143FULL,    0x0000000000001000ULL  ); if(rc) return(rc);
+
+    rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &target, core);
+    if(rc) return rc;
+
+    if(core == 0) {
+      rc=mss_putscom( target, 0x800000040301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800000050301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800001040301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800001050301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800002040301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800002050301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800003040301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800003050301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800004040301143FULL, 0x0000000000000C00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800004050301143FULL, 0x0000000000000C00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800005040301143FULL, 0x0000000000000C00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800005050301143FULL, 0x0000000000000C00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800006040301143FULL, 0x0000000000000C00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800006050301143FULL, 0x0000000000000C00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800007040301143FULL, 0x0000000000000C00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800007050301143FULL, 0x0000000000000C00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800008040301143FULL, 0x0000000000000CC0ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800008050301143FULL, 0x0000000000000CC0ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800009040301143FULL, 0x0000000000000CC0ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800009050301143FULL, 0x0000000000000CC0ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x80000A040301143FULL, 0x0000000000000CC0ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x80000A050301143FULL, 0x0000000000000CC0ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x80000B040301143FULL, 0x0000000000000CC0ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x80000B050301143FULL, 0x0000000000000CC0ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x80000C040301143FULL, 0x0000000000000CC0ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x80000C050301143FULL, 0x0000000000000CC0ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x80000D040301143FULL, 0x0000000000000CC0ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x80000D050301143FULL, 0x0000000000000CC0ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x80000E040301143FULL, 0x0000000000000CC0ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x80000E050301143FULL, 0x0000000000000CC0ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x80000F040301143FULL, 0x0000000000000CC0ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x80000F050301143FULL, 0x0000000000000CC0ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800010040301143FULL, 0x0000000000000F00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800010050301143FULL, 0x0000000000000F00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800011040301143FULL, 0x0000000000000F00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800011050301143FULL, 0x0000000000000F00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800012040301143FULL, 0x0000000000000F00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800012050301143FULL, 0x0000000000000F00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800013040301143FULL, 0x0000000000000F00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800013050301143FULL, 0x0000000000000F00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800100040301143FULL, 0x0000000000000F00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800100050301143FULL, 0x0000000000000F00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800101040301143FULL, 0x0000000000000F00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800101050301143FULL, 0x0000000000000F00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800102040301143FULL, 0x0000000000000F00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800102050301143FULL, 0x0000000000000F00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800103040301143FULL, 0x0000000000000F00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800103050301143FULL, 0x0000000000000F00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800104040301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800104050301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800105040301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800105050301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800106040301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800106050301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800107040301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800107050301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800108040301143FULL, 0x0000000000000C00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800108050301143FULL, 0x0000000000000C00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800109040301143FULL, 0x0000000000000C00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800109050301143FULL, 0x0000000000000C00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x80010A040301143FULL, 0x0000000000000C00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x80010A050301143FULL, 0x0000000000000C00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x80010B040301143FULL, 0x0000000000000C00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x80010B050301143FULL, 0x0000000000000C00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x80010C040301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x80010C050301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x80010D040301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x80010D050301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x80010E040301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x80010E050301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x80010F040301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x80010F050301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800110040301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800110050301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800111040301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800111050301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800112040301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800112050301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800113040301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800113050301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+    } 
+    else { 
+      rc=mss_putscom( target, 0x800000040301143FULL, 0x0000000000000F00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800000050301143FULL, 0x0000000000000F00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800001040301143FULL, 0x0000000000000F00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800001050301143FULL, 0x0000000000000F00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800002040301143FULL, 0x0000000000000F00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800002050301143FULL, 0x0000000000000F00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800003040301143FULL, 0x0000000000000F00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800003050301143FULL, 0x0000000000000F00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800004040301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800004050301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800005040301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800005050301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800006040301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800006050301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800007040301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800007050301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800008040301143FULL, 0x0000000000000CC0ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800008050301143FULL, 0x0000000000000CC0ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800009040301143FULL, 0x0000000000000CC0ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800009050301143FULL, 0x0000000000000CC0ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x80000A040301143FULL, 0x0000000000000CC0ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x80000A050301143FULL, 0x0000000000000CC0ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x80000B040301143FULL, 0x0000000000000CC0ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x80000B050301143FULL, 0x0000000000000CC0ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x80000C040301143FULL, 0x000000000000C0C0ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x80000C050301143FULL, 0x000000000000C0C0ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x80000D040301143FULL, 0x000000000000C0C0ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x80000D050301143FULL, 0x000000000000C0C0ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x80000E040301143FULL, 0x000000000000C0C0ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x80000E050301143FULL, 0x000000000000C0C0ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x80000F040301143FULL, 0x000000000000C0C0ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x80000F050301143FULL, 0x000000000000C0C0ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800010040301143FULL, 0x0000000000000C00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800010050301143FULL, 0x0000000000000C00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800011040301143FULL, 0x0000000000000C00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800011050301143FULL, 0x0000000000000C00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800012040301143FULL, 0x0000000000000C00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800012050301143FULL, 0x0000000000000C00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800013040301143FULL, 0x0000000000000C00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800013050301143FULL, 0x0000000000000C00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800100040301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800100050301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800101040301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800101050301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800102040301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800102050301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800103040301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800103050301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800104040301143FULL, 0x000000000000C000ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800104050301143FULL, 0x000000000000C000ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800105040301143FULL, 0x000000000000C000ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800105050301143FULL, 0x000000000000C000ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800106040301143FULL, 0x000000000000C000ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800106050301143FULL, 0x000000000000C000ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800107040301143FULL, 0x000000000000C000ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800107050301143FULL, 0x000000000000C000ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800108040301143FULL, 0x0000000000000F00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800108050301143FULL, 0x0000000000000F00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800109040301143FULL, 0x0000000000000F00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800109050301143FULL, 0x0000000000000F00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x80010A040301143FULL, 0x0000000000000F00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x80010A050301143FULL, 0x0000000000000F00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x80010B040301143FULL, 0x0000000000000F00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x80010B050301143FULL, 0x0000000000000F00ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x80010C040301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x80010C050301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x80010D040301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x80010D050301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x80010E040301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x80010E050301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x80010F040301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x80010F050301143FULL, 0x000000000000C300ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800110040301143FULL, 0x0000000000000CC0ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800110050301143FULL, 0x0000000000000CC0ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800111040301143FULL, 0x0000000000000CC0ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800111050301143FULL, 0x0000000000000CC0ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800112040301143FULL, 0x0000000000000CC0ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800112050301143FULL, 0x0000000000000CC0ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800113040301143FULL, 0x0000000000000CC0ULL   ); if(rc) return(rc);
+      rc=mss_putscom( target, 0x800113050301143FULL, 0x0000000000000CC0ULL   ); if(rc) return(rc);
+    }
+    return rc;
+  }
+// WORKAROUND END: END OF REMOVAL
 
 using namespace fapi;
 
@@ -95,6 +325,9 @@ ReturnCode mss_draminit(Target& i_target)
 {
     // Target is centaur.mba
     //
+  FAPI_INF("WARNING: Calling workaround_phy_reset");
+  mss_workaround_phy_reset(i_target);
+  FAPI_INF("WARNING: Done workaround_phy_reset");
 
     ReturnCode rc;
     uint32_t port_number;
@@ -135,7 +368,7 @@ ReturnCode mss_draminit(Target& i_target)
         // Ports 0-1
         for ( port_number = 0; port_number < MAX_NUM_PORTS; port_number++)
         {
-            if (!(dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_UDIMM))
+            if (!((dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_UDIMM)||(dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_CDIMM)))
             {
                 // Step three: Load RCD Control Words
                 rc = mss_rcd_load(i_target, port_number, ccs_inst_cnt);
@@ -296,8 +529,8 @@ ReturnCode mss_rcd_load(
     uint32_t dimm_number;
     uint32_t rcd_number;
 
-    ecmdDataBufferBase rcd_cntl_wrd(4);
-    ecmdDataBufferBase rcd_cntl_wrd_tmp(64);
+    ecmdDataBufferBase rcd_cntl_wrd_4(8);
+    ecmdDataBufferBase rcd_cntl_wrd_64(64);
     uint16_t num_ranks;
 
     ecmdDataBufferBase address_16(16);
@@ -375,7 +608,7 @@ ReturnCode mss_rcd_load(
         else
         {
             FAPI_INF( "RCD SETTINGS FOR PORT%d DIMM%d ", i_port_number, dimm_number);
-	    FAPI_INF( "RCD Control Word: 0x%016X", rcd_array[i_port_number][dimm_number]);
+	    FAPI_INF( "RCD Control Word: 0x%016llX", rcd_array[i_port_number][dimm_number]);
 
             if (rc_num)
             {
@@ -403,25 +636,26 @@ ReturnCode mss_rcd_load(
                 rc_num = rc_num | csn_8.clearBit(3+4*dimm_number);
             }
 
-            ecmdDataBufferBase rcd_number_tmp(32);
-
             // Propogate through the 16, 4-bit control words
             for ( rcd_number = 0; rcd_number<= 15; rcd_number++)
             {
+		rc_num = rc_num | bank_3.clearBit(0, 3);
                 rc_num = rc_num | address_16.clearBit(0, 16);
-                rc_num = rc_num | rcd_cntl_wrd_tmp.setDoubleWord(0, rcd_array[i_port_number][dimm_number]);  
-                rc_num = rc_num | rcd_cntl_wrd_tmp.extract(rcd_cntl_wrd, 4*rcd_number, 4);
-                rc_num = rc_num | rcd_number_tmp.setWord( 0 , rcd_number);
 
-                //control word code bits A0, A1, A2, BA2
-                rc_num = rc_num | address_16.insert(rcd_number_tmp, 13, 1, 29);
-                rc_num = rc_num | address_16.insert(rcd_number_tmp, 14, 1, 30);
-                rc_num = rc_num | address_16.insert(rcd_number_tmp, 15, 1, 31);
-                rc_num = rc_num | bank_3.insert(rcd_number_tmp, 2, 1, 28);
+                rc_num = rc_num | rcd_cntl_wrd_64.setDoubleWord(0, rcd_array[i_port_number][dimm_number]);
+                rc_num = rc_num | rcd_cntl_wrd_64.extract(rcd_cntl_wrd_4, 4*rcd_number, 4);
 
-                //control word values A3, A4, BA0, BA1
-                rc_num = rc_num | address_16.insert(rcd_cntl_wrd, 3, 2, 0);
-                rc_num = rc_num | bank_3.insert(rcd_cntl_wrd, 0, 2, 2);
+                //control word number code bits A0, A1, A2, BA2
+                rc_num = rc_num | address_16.insert(rcd_number, 2, 1, 29);
+                rc_num = rc_num | address_16.insert(rcd_number, 1, 1, 30);
+                rc_num = rc_num | address_16.insert(rcd_number, 0, 1, 31);
+                rc_num = rc_num | bank_3.insert(rcd_number, 2, 1, 28);
+
+                //control word values RCD0 = A3, RCD1 = A4, RCD2 = BA0, RCD3 = BA1
+                rc_num = rc_num | address_16.insert(rcd_cntl_wrd_4, 3, 1, 0);
+                rc_num = rc_num | address_16.insert(rcd_cntl_wrd_4, 4, 1, 1);
+                rc_num = rc_num | bank_3.insert(rcd_cntl_wrd_4, 0, 1, 2);
+                rc_num = rc_num | bank_3.insert(rcd_cntl_wrd_4, 1, 1, 3);
 
                 // Send out to the CCS array 
                 rc_num = rc_num | num_idles_16.insertFromRight((uint32_t) 12, 0, 16);
@@ -807,7 +1041,7 @@ ReturnCode mss_mrs_load(
         else
         {
             // Rank 0-3
-            for ( rank_number = 0; rank_number < MAX_NUM_RANKS; rank_number++)
+            for ( rank_number = 0; rank_number < num_ranks; rank_number++)
             {
                     FAPI_INF( "MRS SETTINGS FOR PORT%d DIMM%d RANK%d", i_port_number, dimm_number, rank_number);
 
@@ -930,22 +1164,30 @@ ReturnCode mss_mrs_load(
                         if (mrs_number == 0)
                         {
                             rc_num = rc_num | address_16.insert(mrs2, 0, 16, 0);
-                            rc_num = rc_num | bank_3.insertFromRight((uint8_t) MRS2_BA, 0, 3);
+			    rc_num = rc_num | bank_3.insert((uint8_t) MRS2_BA, 0, 1, 7);
+                            rc_num = rc_num | bank_3.insert((uint8_t) MRS2_BA, 1, 1, 6);
+                            rc_num = rc_num | bank_3.insert((uint8_t) MRS2_BA, 2, 1, 5);
                         }
                         else if ( mrs_number == 1)
                         {
                             rc_num = rc_num | address_16.insert(mrs3, 0, 16, 0);
-                            rc_num = rc_num | bank_3.insertFromRight((uint8_t) MRS3_BA, 0, 3);
+			    rc_num = rc_num | bank_3.insert((uint8_t) MRS3_BA, 0, 1, 7);
+                            rc_num = rc_num | bank_3.insert((uint8_t) MRS3_BA, 1, 1, 6);
+                            rc_num = rc_num | bank_3.insert((uint8_t) MRS3_BA, 2, 1, 5);
                         }
                         else if ( mrs_number == 2)
                         {
                             rc_num = rc_num | address_16.insert(mrs1, 0, 16, 0);
-                            rc_num = rc_num | bank_3.insertFromRight((uint8_t) MRS1_BA, 0, 3);
+			    rc_num = rc_num | bank_3.insert((uint8_t) MRS1_BA, 0, 1, 7);
+                            rc_num = rc_num | bank_3.insert((uint8_t) MRS1_BA, 1, 1, 6);
+                            rc_num = rc_num | bank_3.insert((uint8_t) MRS1_BA, 2, 1, 5);
                         }
                         else if ( mrs_number == 3)
                         {
                             rc_num = rc_num | address_16.insert(mrs0, 0, 16, 0);
-                            rc_num = rc_num | bank_3.insertFromRight((uint8_t) MRS0_BA, 0, 3);
+			    rc_num = rc_num | bank_3.insert((uint8_t) MRS0_BA, 0, 1, 7);
+                            rc_num = rc_num | bank_3.insert((uint8_t) MRS0_BA, 1, 1, 6);
+                            rc_num = rc_num | bank_3.insert((uint8_t) MRS0_BA, 2, 1, 5);
                         }
                 
                         if (rc_num)
