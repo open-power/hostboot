@@ -1,7 +1,7 @@
 <!--  IBM_PROLOG_BEGIN_TAG
      This is an automatically generated prolog.
    
-     $Source: src/usr/HWPs/dmi_training/proc_cen_framelock_errors.xml $
+     $Source: src/usr/hwpf/hwp/dmi_training/proc_cen_framelock/proc_cen_framelock_errors.xml $
    
      IBM CONFIDENTIAL
    
@@ -27,12 +27,6 @@
     <rc>RC_PROC_CEN_FRAMELOCK_INVALID_ARGS</rc>
     <description>Invalid or out-of-range argument value(s) presented to proc_cen_framelock HWP.</description>
     <ffdc>ARGS</ffdc>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PROC_CEN_FRAMELOCK_INTERNAL_ERR</rc>
-    <description>Unexpected internal program logic error.</description>
-    <ffdc>ERR_DATA</ffdc>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>

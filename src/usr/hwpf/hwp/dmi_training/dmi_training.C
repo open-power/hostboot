@@ -294,55 +294,35 @@ void    call_host_attnlisten_cen( void *io_pArgs )
 void    call_proc_cen_framelock( void *io_pArgs )
 {
 
-    fapi::ReturnCode            l_fapirc;
+    errlHndl_t                  l_errl          =   NULL;
     proc_cen_framelock_args     l_args;
-    TARGETING::TargetService&   l_targetService = targetService();
-    uint8_t                     l_cpuNum        =   0;
 
     //  Use PredicateIsFunctional to filter only functional chips
     TARGETING::PredicateIsFunctional    l_isFunctional;
 
-
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_cen_framework entry" );
-
-    TARGETING::PredicateCTM         l_procChipFilter( CLASS_CHIP, TYPE_PROC );
-    TARGETING::PredicatePostfixExpr l_functionalAndProcChipFilter;
-    l_functionalAndProcChipFilter.push(&l_procChipFilter).push(&l_isFunctional).And();
-    TARGETING::TargetRangeFilter    l_cpuFilter(
-            l_targetService.begin(),
-            l_targetService.end(),
-            &l_functionalAndProcChipFilter );
-
-    for ( l_cpuNum=0;   l_cpuFilter;    ++l_cpuFilter, l_cpuNum++ )
-    {
-        //  make a local copy of the CPU target
-        const TARGETING::Target*  l_cpu_target = *l_cpuFilter;
 
         //  get the mcs chiplets associated with this cpu
         TARGETING::PredicateCTM l_mcsChipFilter(CLASS_UNIT, TYPE_MCS);
         TARGETING::PredicatePostfixExpr l_functionalAndMcsChipFilter;
         l_functionalAndMcsChipFilter.push(&l_mcsChipFilter).push(&l_isFunctional).And();
-        TARGETING::TargetHandleList l_mcsTargetList;
-        l_targetService.getAssociated(
-                                    l_mcsTargetList,
-                                    l_cpu_target,
-                                    TARGETING::TargetService::CHILD,
-                                    TARGETING::TargetService::IMMEDIATE,
-                                    &l_functionalAndMcsChipFilter );
 
-        for ( uint8_t j=0; j < l_mcsTargetList.size(); j++ )
+        TARGETING::TargetRangeFilter    l_mcsFilter(
+            TARGETING::targetService().begin(),
+            TARGETING::targetService().end(),
+            &l_functionalAndMcsChipFilter );
+
+        for (      ;  l_mcsFilter ; ++l_mcsFilter  )
         {
             //  make a local copy of the MCS target
-            const TARGETING::Target*  l_mcs_target = l_mcsTargetList[j];
-
-            uint8_t l_mcsNum    =   l_mcs_target->getAttr<ATTR_CHIP_UNIT>();
+            const TARGETING::Target*  l_mcs_target = *l_mcsFilter ;
 
             //  find all the Centaurs that are associated with this MCS
             TARGETING::PredicateCTM l_membufChipFilter(CLASS_CHIP, TYPE_MEMBUF);
             TARGETING::PredicatePostfixExpr l_functionalAndMembufChipFilter;
             l_functionalAndMembufChipFilter.push(&l_membufChipFilter).push(&l_isFunctional).And();
             TARGETING::TargetHandleList l_memTargetList;
-            l_targetService.getAssociated(l_memTargetList,
+            TARGETING::targetService().getAssociated(l_memTargetList,
                                           l_mcs_target,
                                           TARGETING::TargetService::CHILD_BY_AFFINITY,
                                           TARGETING::TargetService::ALL,
@@ -353,21 +333,17 @@ void    call_proc_cen_framelock( void *io_pArgs )
                 //  make a local copy of the MEMBUF target
                 const TARGETING::Target*  l_mem_target = l_memTargetList[k];
 
-
                 // fill out the args struct.
-                 l_args.mcs_pu               =   l_mcsNum;
-                 l_args.in_error_state       =   false;
-                 l_args.channel_init_timeout =   CHANNEL_INIT_TIMEOUT_NO_TIMEOUT;
-                 l_args.frtl_auto_not_manual =   true;
-                 l_args.frtl_manual_pu       =   0;
-                 l_args.frtl_manual_mem      =   0;
+                l_args.in_error_state       =   false;
+                l_args.channel_init_timeout =   CHANNEL_INIT_TIMEOUT_NO_TIMEOUT;
+                l_args.frtl_auto_not_manual =   true;
+                l_args.frtl_manual_pu       =   0;
+                l_args.frtl_manual_mem      =   0;
 
-                // Create compatable FAPI Targets from the vanilla targets,
-                //  and invoke the HWP.
-                fapi::Target l_fapiCpuTarget(
-                        TARGET_TYPE_PROC_CHIP,
+                fapi::Target l_fapiMcsTarget(
+                        TARGET_TYPE_MCS_CHIPLET,
                         reinterpret_cast<void *>
-                            ( const_cast<TARGETING::Target*>(l_cpu_target) )
+                            ( const_cast<TARGETING::Target*>(l_mcs_target) )
                         );
                 fapi::Target l_fapiMemTarget(
                         TARGET_TYPE_MEMBUF_CHIP,
@@ -375,49 +351,30 @@ void    call_proc_cen_framelock( void *io_pArgs )
                             (const_cast<TARGETING::Target*>(l_mem_target))
                         );
 
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                        "===== Call proc_cen_framelock HWP( cpu 0x%x, mcs 0x%x, mem 0x%x ) : ",
-                        l_cpuNum,
-                        l_mcsNum,
-                        l_memNum );
                 EntityPath l_path;
-                l_path = l_cpu_target->getAttr<ATTR_PHYS_PATH>();
-                l_path.dump();
                 l_path  =   l_mcs_target->getAttr<ATTR_PHYS_PATH>();
                 l_path.dump();
                 l_path  =   l_mem_target->getAttr<ATTR_PHYS_PATH>();
                 l_path.dump();
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "===== " );
 
-                // finally!
-                l_fapirc =  proc_cen_framelock(
-                                    l_fapiCpuTarget,
-                                    l_fapiMemTarget,
-                                    l_args );
-
-                if ( l_fapirc == fapi::FAPI_RC_SUCCESS )
+                FAPI_INVOKE_HWP( l_errl,
+                                 proc_cen_framelock,
+                                 l_fapiMcsTarget,
+                                 l_fapiMemTarget,
+                                 l_args  );
+                if ( l_errl )
                 {
-                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                            "SUCCESS :  proc_cen_framelock HWP( cpu 0x%x, mcs 0x%x, mem 0x%x ) ",
-                            l_cpuNum,
-                            l_mcsNum,
-                            l_memNum );
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                              "ERROR : proc_cen_framelock" );
+                    errlCommit( l_errl, HWPF_COMP_ID );
                 }
                 else
                 {
-                    /**
-                     * @todo fapi error - just print out for now...
-                     */
                     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "ERROR %d : proc_cen_framelock HWP( cpu 0x%x, mcs 0x%x, mem 0x%x )",
-                    static_cast<uint32_t>(l_fapirc),
-                    l_cpuNum,
-                    l_mcsNum,
-                    l_memNum );
+                               "SUCCESS : proc_cen_framelock " );
                 }
             }   // end mem
         }   // end mcs
-    }   //  end cpu
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_cen_framework exit" );
 
