@@ -248,10 +248,23 @@ class MVPDTest: public CxxTest::TestSuite
                 {
                     TRACFCOMP( g_trac_mvpd,
                                "testMvpdRead() - No Proc Targets found!" );
+
+                    continue;  // add continue because have no proc targets
                 }
 
                 // Use the first Proc in the list
                 theTarget = procList[0];
+
+                // check to see if the target is functional
+                if
+                    (!theTarget->getAttr<TARGETING::ATTR_HWAS_STATE>().functional)
+                {
+
+                    TRACFCOMP( g_trac_mvpd,
+                               "testMvpdRead() - Proc Target [0] non functional!" );
+
+                    continue;  // add continue because target is non functional
+                } 
 
                 uint8_t * theData = NULL;
                 size_t theSize = 0;
@@ -342,10 +355,24 @@ class MVPDTest: public CxxTest::TestSuite
                 {
                     TRACFCOMP( g_trac_mvpd,
                                "testMvpdWrite() - No Proc Targets found!" );
+
+                    continue; // no proc targets.
                 }
 
                 // Use the first Proc in the list
                 theTarget = procList[0];
+
+                // check to see if the target is functional
+                if
+                    (!theTarget->getAttr<TARGETING::ATTR_HWAS_STATE>().functional)
+                {
+
+                    TRACFCOMP( g_trac_mvpd,
+                               "testMvpdRead() - Proc Target [0] non functional!" );
+
+                    continue;  // add continue because target is non functional
+                } 
+
                 uint8_t * theData = NULL;
                 size_t theSize = 0;
 
@@ -402,10 +429,24 @@ class MVPDTest: public CxxTest::TestSuite
                     TRACFCOMP( g_trac_mvpd,
                                "testMvpdInvalidRecord() - No Proc Targets "
                                "found!" );
+
+                    continue;
                 }
 
                 // Use the first Proc in the list
                 theTarget = procList[0];
+
+                // check to see if the target is functional
+                if
+                    (!theTarget->getAttr<TARGETING::ATTR_HWAS_STATE>().functional)
+                {
+
+                    TRACFCOMP( g_trac_mvpd,
+                               "testMvpdRead() - Proc Target [0] non functional!" );
+
+                    continue;  // add continue because target is non functional
+                } 
+
                 uint8_t * theData = NULL;
                 size_t theSize = 0;
 
@@ -461,11 +502,26 @@ class MVPDTest: public CxxTest::TestSuite
                     ( NULL == procList[0] ) )
                 {
                     TRACFCOMP( g_trac_mvpd,
+
                                "testMvpdMissingRecord() - No Proc Targets found!" );
+
+                     continue;
                 }
 
                 // Use the first Proc in the list
                 theTarget = procList[0];
+
+                // check to see if the target is functional
+                if
+                    (!theTarget->getAttr<TARGETING::ATTR_HWAS_STATE>().functional)
+                {
+
+                    TRACFCOMP( g_trac_mvpd,
+                               "testMvpdRead() - Proc Target [0] non functional!" );
+
+                    continue;  // add continue because target is non functional
+                } 
+
                 uint8_t * theData = NULL;
                 size_t theSize = 0;
 
@@ -518,11 +574,26 @@ class MVPDTest: public CxxTest::TestSuite
                     ( NULL == procList[0] ) )
                 {
                     TRACFCOMP( g_trac_mvpd,
+
                                "testMvpdMissingKeyword() - No Proc Targets found!" );
+
+                    continue;
                 }
 
                 // Use the first Proc in the list
                 theTarget = procList[0];
+
+                // check to see if the target is functional
+                if
+                    (!theTarget->getAttr<TARGETING::ATTR_HWAS_STATE>().functional)
+                {
+
+                    TRACFCOMP( g_trac_mvpd,
+                               "testMvpdRead() - Proc Target [0] non functional!" );
+
+                    continue;  // add continue because target is non functional
+                } 
+
                 uint8_t * theData = NULL;
                 size_t theSize = 0;
 
@@ -577,11 +648,26 @@ class MVPDTest: public CxxTest::TestSuite
                     ( NULL == procList[0] ) )
                 {
                     TRACFCOMP( g_trac_mvpd,
+
                                "testMvpdInvalidKeyword() - No Proc Targets found!" );
+
+                    continue;
                 }
 
                 // Use the first Proc in the list
                 theTarget = procList[0];
+
+                // check to see if the target is functional
+                if
+                    (!theTarget->getAttr<TARGETING::ATTR_HWAS_STATE>().functional)
+                {
+
+                    TRACFCOMP( g_trac_mvpd,
+                               "testMvpdRead() - Proc Target [0] non functional!" );
+
+                    continue;  // add continue because target is non functional
+                } 
+
                 uint8_t * theData = NULL;
                 size_t theSize = 0;
 
@@ -639,10 +725,24 @@ class MVPDTest: public CxxTest::TestSuite
                     TRACFCOMP( g_trac_mvpd,
                                "testMvpdInvalidBufferSize() - No Proc Targets "
                                "found!" );
+
+                     continue;
                 }
 
                 // Use the first Proc in the list
                 theTarget = procList[0];
+
+                // check to see if the target is functional
+                if
+                    (!theTarget->getAttr<TARGETING::ATTR_HWAS_STATE>().functional)
+                {
+
+                    TRACFCOMP( g_trac_mvpd,
+                               "testMvpdRead() - Proc Target [0] non functional!" );
+
+                    continue;  // add continue because target is non functional
+                } 
+
                 uint8_t * theData = NULL;
                 size_t theSize = 0;
 

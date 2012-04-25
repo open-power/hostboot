@@ -101,9 +101,9 @@ public:
               TRACDCOMP( g_trac_scom, "ScomTest::test_FSISCOMreadWrite_proc> useFsiScom set to zero on target %d", x );
               scom_targets[x] = NULL; //remove from our list
           }
-          else if( !FSI::isSlavePresent(scom_targets[x]) )
+          else if (scom_targets[x]->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true) 
           {
-              TRACDCOMP( g_trac_scom, "ScomTest::test_FSISCOMreadWrite_proc> Target %d is not present", x );
+              TRACDCOMP( g_trac_scom, "ScomTest::test_FSISCOMreadWrite_proc> Target %d is not functional", x );
               scom_targets[x] = NULL; //remove from our list
           }
       }
@@ -243,9 +243,9 @@ public:
               TRACDCOMP( g_trac_scom, "ScomTest::test_FSISCOMreadWrite_centaur> useFsiScom set to zero on target %d", x );
               scom_targets[x] = NULL; //remove from our list
           }
-          else if( !FSI::isSlavePresent(scom_targets[x]) )
+          else if (scom_targets[x]->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true) 
           {
-              TRACDCOMP( g_trac_scom, "ScomTest::test_FSISCOMreadWrite_centaur> Target %d is not present", x );
+              TRACDCOMP( g_trac_scom, "ScomTest::test_FSISCOMreadWrite_centaur> Target %d is not functional", x );
               scom_targets[x] = NULL; //remove from our list
           }
       }
@@ -389,6 +389,12 @@ public:
               TRACDCOMP(g_trac_scom, "INDIRECT SCOM>> SKIPPING ");
               scom_targets[x] = NULL; //remove from our list
 	  }
+          else if (scom_targets[x]->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true) 
+          {
+              TRACDCOMP( g_trac_scom, "ScomTest::test_FSISCOMreadWrite_centaur> Target %d is not functional", x );
+              scom_targets[x] = NULL; //remove from our list
+          }
+
 
       }
 
@@ -570,6 +576,13 @@ public:
 	  {
               continue;
           }
+          // check to see if the target is functional.. if not.. skip this target
+          else if (test_data[x].target->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true) 
+          {
+              TRACDCOMP( g_trac_scom, "ScomTest::test_translate_scom_EX> Target %d is not functional", x );
+              continue;
+          }
+
 
           op_size = sizeof(uint64_t);
 
@@ -748,6 +761,12 @@ public:
           //only run if the target exists
           if(test_data[x].target == NULL)
 	  {
+              continue;
+          }
+          // check to see if the target is functional.. if not.. skip this target
+          else if (test_data[x].target->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true) 
+          {
+              TRACDCOMP( g_trac_scom, "ScomTest::test_translate_scom_MCS> Target %d is not functional", x );
               continue;
           }
 
@@ -929,6 +948,13 @@ public:
               continue;
           }
 
+          // check to see if the target is functional.. if not.. skip this target
+          else if (test_data[x].target->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true) 
+          {
+              TRACDCOMP( g_trac_scom, "ScomTest::test_translate_scom_MCS_DMI> Target %d is not functional", x );
+              continue;
+          }
+
           op_size = sizeof(uint64_t);
 
           total++;
@@ -1093,6 +1119,13 @@ public:
               continue;
           }
 
+          // check to see if the target is functional.. if not.. skip this target
+          else if (test_data[x].target->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true) 
+          {
+              TRACDCOMP( g_trac_scom, "ScomTest::test_translate_scom_MBA_MBS> Target %d is not functional", x );
+              continue;
+          }
+
           op_size = sizeof(uint64_t);
 
           total++;
@@ -1105,7 +1138,7 @@ public:
             // checking the read of NUM_ADDRs - 1 because the last entry written above failed as expected.
             if ((x == NUM_ADDRS-1) || (x==NUM_ADDRS-2))
             {
-                TRACDCOMP( g_trac_scom, "ScomTest::test_translate MCS.. Expected Errorlog Returned> x = %d", x );
+                TRACDCOMP( g_trac_scom, "ScomTest::test_translate MBA_MBS.. Expected Errorlog Returned> x = %d", x );
             }
             else
 	    {
@@ -1271,6 +1304,13 @@ public:
           //only run if the target exists
           if(test_data[x].target == NULL)
 	  {
+              continue;
+          }
+
+          // check to see if the target is functional.. if not.. skip this target
+          else if (test_data[x].target->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true) 
+          {
+              TRACDCOMP( g_trac_scom, "ScomTest::test_translate_scom_ABUS> Target %d is not functional", x );
               continue;
           }
 
@@ -1451,6 +1491,12 @@ public:
           //only run if the target exists
           if(test_data[x].target == NULL)
 	  {
+              continue;
+          }
+         // check to see if the target is functional.. if not.. skip this target
+          else if (test_data[x].target->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true) 
+          {
+              TRACDCOMP( g_trac_scom, "ScomTest::test_translate_scom_XBUS> Target %d is not functional", x );
               continue;
           }
 

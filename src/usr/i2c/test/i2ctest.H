@@ -219,6 +219,22 @@ class I2CTest: public CxxTest::TestSuite
                     // Check to see if I2C function is there
                     if( !isI2CAvailable( theTarget ) )
                     {
+                        TRACFCOMP( g_trac_i2c,
+                               "testI2ReadWrite Operation - no i2c function" );
+
+
+                        continue;
+                    }
+
+                    // check to see if the target is functional before we
+                    // continue..
+                    if
+                        (!theTarget->getAttr<TARGETING::ATTR_HWAS_STATE>().functional)
+                    {
+
+                        TRACFCOMP( g_trac_i2c,
+                               "testI2ReadWrite Operation - target not functional" );
+
                         continue;
                     }
 
@@ -332,6 +348,22 @@ class I2CTest: public CxxTest::TestSuite
                 // Check to see if I2C function is there
                 if( !isI2CAvailable( testTarget ) )
                 {
+                    TRACFCOMP( g_trac_i2c,
+                               "testI2CInvalid Operation - no i2c function" );
+
+
+                    continue;
+                }
+
+                // check to see if the target is functional before we
+                // continue..
+                if
+                    (!testTarget->getAttr<TARGETING::ATTR_HWAS_STATE>().functional)
+                {
+                    TRACFCOMP( g_trac_i2c,
+                               "testI2CInvalide Operation - not functional" );
+
+
                     continue;
                 }
 

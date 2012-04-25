@@ -230,27 +230,32 @@ class FsiDDTest : public CxxTest::TestSuite
         uint64_t patterns_to_run = 0;
         for( uint64_t x = 0; x < NUM_ADDRS; x++ )
         {
+          
             // direct writes to slave regs
             if( test_data[x].fsitarget == PROC0 )
             {
                 if( ((0xFF0000 & test_data[x].addr) == 0x080000)
-                    && FSI::isSlavePresent(fsi_targets[PROCWRAP]) )
+                    && (fsi_targets[PROCWRAP] != NULL)
+                    && (fsi_targets[PROCWRAP]->getAttr<TARGETING::ATTR_HWAS_STATE>().functional))
                 {
                     test_data[x].present = true;
                 }
                 else if( ((0xFF0000 & test_data[x].addr) == 0x040000)
-                         && FSI::isSlavePresent(fsi_targets[CENTAUR0]) )
+                         && (fsi_targets[CENTAUR0] != NULL)
+                         && (fsi_targets[CENTAUR0]->getAttr<TARGETING::ATTR_HWAS_STATE>().functional))
                 {
                     test_data[x].present = true;
                 }
                 else if( ((0xFF0000 & test_data[x].addr) == 0x100000)
-                         && FSI::isSlavePresent(fsi_targets[PROC2]) )
+                         && (fsi_targets[PROC2] != NULL)
+                         && (fsi_targets[PROC2]->getAttr<TARGETING::ATTR_HWAS_STATE>().functional))
                 {
                     test_data[x].present = true;
                 }
             }
             // otherwise only talk to chips that we see
-            else if( FSI::isSlavePresent(fsi_targets[test_data[x].fsitarget]) )
+            else if (( fsi_targets[test_data[x].fsitarget] != NULL)   &&
+                     (fsi_targets[test_data[x].fsitarget]->getAttr<TARGETING::ATTR_HWAS_STATE>().functional))
             {
                 test_data[x].present = true;
             }

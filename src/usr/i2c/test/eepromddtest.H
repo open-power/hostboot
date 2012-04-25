@@ -133,8 +133,9 @@ class EEPROMTest: public CxxTest::TestSuite
 
                 for( uint32_t j = 0; j < fullList.size(); j++ )
                 {
-                    // Skip this target if EEPROM isn't available.
-                    if( !isI2CAvailable( fullList[j] ) )
+                    // Skip this target if EEPROM isn't available. or if non functional
+                    if( !isI2CAvailable( fullList[j] ) ||
+                        !fullList[j]->getAttr<TARGETING::ATTR_HWAS_STATE>().functional)
                     {
                         continue;
                     }
@@ -215,8 +216,10 @@ class EEPROMTest: public CxxTest::TestSuite
                 tS.masterProcChipTargetHandle( testTarget );
                 assert(testTarget != NULL);
 
-                // Skip this target if EEPROM isn't available.
-                if( !isI2CAvailable( testTarget ) )
+                // Skip this target if EEPROM isn't available or target is non
+                // functional
+                if( !isI2CAvailable( testTarget )  ||
+                    !testTarget->getAttr<TARGETING::ATTR_HWAS_STATE>().functional)
                 {
                     continue;
                 }
@@ -267,8 +270,10 @@ class EEPROMTest: public CxxTest::TestSuite
                 tS.masterProcChipTargetHandle( testTarget );
                 assert(testTarget != NULL);
 
-                // Skip this target if EEPROM isn't available.
-                if( !isI2CAvailable( testTarget ) )
+                // Skip this target if EEPROM isn't available. or target is non
+                // functional
+                if( !isI2CAvailable( testTarget )  ||
+                    !testTarget->getAttr<TARGETING::ATTR_HWAS_STATE>().functional)
                 {
                     continue;
                 }
