@@ -148,7 +148,7 @@ void Target::_getAttrPtr(
 
             // Only translate addresses on platforms where addresses are 4 bytes
             // wide (FSP).  The compiler should perform dead code elimination of
-            // this path on platforms with 8 byte wide addresses (Hostboot), 
+            // this path on platforms with 8 byte wide addresses (Hostboot),
             // since the "if" check can be statically computed at compile time.
             if(TARG_ADDR_TRANSLATION_REQUIRED)
             {
@@ -177,12 +177,12 @@ mutex_t* Target::_getHbMutexAttr(
     void* l_pAttr = NULL;
     (void)_getAttrPtr(i_attribute,l_pAttr);
 
-    //@TODO Remove assert once release has stablized 
+    //@TODO Remove assert once release has stablized
     TARG_ASSERT(l_pAttr,"TARGETING::Target::_getHbMutexAttr<%d>: _getAttrPtr "
            "returned NULL",i_attribute);
 
     return static_cast<mutex_t*>(l_pAttr);
-    
+
     #undef TARG_FN
 }
 
@@ -195,12 +195,12 @@ bool Target::_tryGetHbMutexAttr(
           mutex_t*&    o_pMutex) const
 {
     #define TARG_FN "_tryGetHbMutexAttr()"
-  
+
     void* l_pAttr = NULL;
     (void)_getAttrPtr(i_attribute,l_pAttr);
     o_pMutex = static_cast<mutex_t*>(l_pAttr);
     return (l_pAttr != NULL);
-    
+
     #undef TARG_FN
 }
 
@@ -222,51 +222,69 @@ Target::Target()
 // Target::targetFFDC()
 //******************************************************************************
 
-char * Target::targetFFDC( uint32_t & o_size ) const
+uint8_t * Target::targetFFDC( uint32_t & o_size ) const
 {
     #define TARG_FN "targetFFDC(...)"
 
-    char l_buff[128];
-    char *l_pFFDC = NULL;
-    char *l_ptr   = NULL;
-    void *l_ptr1  = NULL;
-    uint32_t l_len;
+    AttributeTraits<ATTR_HUID>::Type  attrHuid  = getAttr<ATTR_HUID>();
+    AttributeTraits<ATTR_CLASS>::Type attrClass = getAttr<ATTR_CLASS>();
+    AttributeTraits<ATTR_TYPE>::Type  attrType  = getAttr<ATTR_TYPE>();
+    AttributeTraits<ATTR_MODEL>::Type attrModel = getAttr<ATTR_MODEL>();
+    uint32_t headerSize = sizeof(uint8_t) + sizeof(attrHuid) + 
+                            sizeof(attrClass) + sizeof(attrType) + 
+                            sizeof(attrModel);
 
-    o_size = sprintf( l_buff, "Class = 0x%X, Type = 0x%X, Model = 0x%X",
-                       getAttr<ATTR_CLASS>(),
-                       getAttr<ATTR_TYPE>(),
-                       getAttr<ATTR_MODEL>() );
-
-    l_pFFDC = static_cast<char*>( malloc( ++o_size ) );
-    memcpy( l_pFFDC, l_buff, o_size );
-
-    l_ptr = getAttr<ATTR_PHYS_PATH>().toString();
-    if (l_ptr)
-    {
-         l_len = strlen( l_ptr ) + 1;
-         l_ptr1 = realloc( l_pFFDC, o_size + l_len );
-         l_pFFDC = static_cast<char*>( l_ptr1 );
-         memcpy( l_pFFDC + o_size, l_ptr, l_len );
-         o_size += l_len;
-         free( l_ptr );
+    uint8_t pathPhysSize = 0;
+    AttributeTraits<ATTR_PHYS_PATH>::Type pathPhys;
+    if( tryGetAttr<ATTR_PHYS_PATH>(pathPhys) ) {
+        // entityPath is PATH_TYPE:4, NumberOfElements:4, [Element, Instance#]
+        pathPhysSize = sizeof(uint8_t) + (sizeof(pathPhys[0]) * pathPhys.size());
     }
 
-    EntityPath l_entityPath;
-    if( tryGetAttr<ATTR_AFFINITY_PATH>(l_entityPath) )
-    {
-        l_ptr = l_entityPath.toString();
-        if (l_ptr)
-        {
-            l_len = strlen( l_ptr ) + 1;
-            l_ptr1 = realloc( l_pFFDC, o_size + l_len );
-            l_pFFDC = static_cast<char*>( l_ptr1 );
-            memcpy( l_pFFDC + o_size, l_ptr, l_len );
-            o_size += l_len;
-            free( l_ptr );
-        }
+    uint8_t pathAffSize = 0;
+    AttributeTraits<ATTR_AFFINITY_PATH>::Type pathAff;
+    if( tryGetAttr<ATTR_AFFINITY_PATH>(pathAff) ) {
+        // entityPath is PATH_TYPE:4, NumberOfElements:4, [Element, Instance#]
+        pathAffSize = sizeof(uint8_t) + (sizeof(pathAff[0]) * pathAff.size());
     }
 
-    return l_pFFDC;
+    uint8_t *pFFDC;
+    pFFDC = static_cast<uint8_t*>( malloc(headerSize + 
+                                            pathPhysSize + pathAffSize));
+
+    // we'll send down a '0' then HUID CLASS TYPE and MODEL
+    uint32_t bSize = 0; // size of data in the buffer
+    *pFFDC = 0;
+    bSize++;
+    memcpy(pFFDC + bSize, &attrHuid, sizeof(attrHuid) );
+    bSize += sizeof(attrHuid);
+    memcpy(pFFDC + bSize, &attrClass, sizeof(attrClass) );
+    bSize += sizeof(attrClass);
+    memcpy(pFFDC + bSize, &attrType, sizeof(attrType) );
+    bSize += sizeof(attrType);
+    memcpy(pFFDC + bSize, &attrModel, sizeof(attrModel) );
+    bSize += sizeof(attrModel);
+
+    if( pathPhysSize > 0)
+    {
+        uint8_t attrEnum = ATTR_PHYS_PATH;
+        memcpy(pFFDC + bSize, &attrEnum, sizeof(attrEnum));
+        bSize += sizeof(attrEnum);
+        memcpy(pFFDC + bSize, &pathPhys, pathPhysSize);
+        bSize += pathPhysSize;
+    }
+
+    if( pathAffSize > 0)
+    {
+        uint8_t attrEnum = ATTR_AFFINITY_PATH;
+        memcpy(pFFDC + bSize, &attrEnum, sizeof(attrEnum));
+        bSize += sizeof(attrEnum);
+        memcpy(pFFDC + bSize, &pathAff, pathAffSize);
+        bSize += pathAffSize;
+    }
+
+    o_size = bSize;
+    return pFFDC;
 
     #undef TARG_FN
 }

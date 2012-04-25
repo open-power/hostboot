@@ -77,7 +77,7 @@ ErrlUD::ErrlUD(
 
 ErrlUD::~ErrlUD()
 {
-    if( iv_pData ) free( iv_pData );
+    free( iv_pData );
 }
 
 
@@ -90,31 +90,20 @@ ErrlUD::~ErrlUD()
 
 uint64_t ErrlUD::addData(const void *i_data, const uint64_t i_size)
 {
-    uint64_t l_rc = 0;
-
     // Expected new size of user data.
     uint64_t l_newsize = iv_Size + i_size;
 
     // Resize memory block
     iv_pData = static_cast<uint8_t*>(realloc(iv_pData, l_newsize));
 
-    // Make sure reallocate call succeeds
-    if (iv_pData != NULL)
-    {
-        // Copy new data to new area, past existing data (if any)
-        memcpy( iv_pData + iv_Size, i_data, i_size );
+    // Copy new data to new area, past existing data (if any)
+    memcpy( iv_pData + iv_Size, i_data, i_size );
 
-        // Save new size of the user-provided data. This will also
-        // be what this method returns.
-        iv_Size = l_newsize;
-        l_rc = iv_Size;
-    }
-    else
-    {
-        TRACFCOMP( g_trac_errl,
-                   "ErrlUD::addData() - Reallocate memory failed!");
-    }
-    return l_rc;
+    // Save new size of the user-provided data. This will also
+    // be what this method returns.
+    iv_Size = l_newsize;
+
+    return iv_Size;
 }
 
 

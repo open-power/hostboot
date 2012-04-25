@@ -28,6 +28,7 @@
 #include <errl/errludtarget.H>
 #include <targeting/common/target.H>
 #include <targeting/common/targetservice.H>
+#include <targeting/common/trace.H>
 
 namespace ERRORLOG
 {
@@ -35,44 +36,33 @@ namespace ERRORLOG
 //------------------------------------------------------------------------------
 ErrlUserDetailsTarget::ErrlUserDetailsTarget(
     const TARGETING::Target * i_pTarget)
-: iv_pTarget(i_pTarget)
 {
+    // Set up ErrlUserDetails instance variables
+    iv_CompId = HBERRL_COMP_ID;
+    iv_Version = 1;
+    iv_SubSection = HBERRL_UDT_TARGET;
 
+    if (i_pTarget == TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL)
+    {
+        uint8_t *pBuffer = reinterpret_cast<uint8_t *>(
+                                reallocUsrBuf(sizeof(uint8_t)));
+        // copy 0x1 to indicate MASTER
+        *pBuffer = 1;
+    }
+    else
+    {
+        uint32_t bufSize = 0;
+        uint8_t *pTargetString = i_pTarget->targetFFDC(bufSize);
+        uint8_t *pBuffer = reinterpret_cast<uint8_t *>(reallocUsrBuf(bufSize));
+        memcpy(pBuffer, pTargetString, bufSize);
+        free (pTargetString);
+    }
 }
 
 //------------------------------------------------------------------------------
 ErrlUserDetailsTarget::~ErrlUserDetailsTarget()
 {
 
-}
-
-//------------------------------------------------------------------------------
-void ErrlUserDetailsTarget::addToLog(errlHndl_t i_errl)
-{
-    if (i_errl != NULL)
-    {
-        if (iv_pTarget == TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL)
-        {
-            const char *l_bufPtr = "MASTER_PROCESSOR_CHIP_TARGET_SENTINEL";
-            i_errl->addFFDC(HBERRL_COMP_ID,
-                            l_bufPtr, strlen(l_bufPtr)+1,
-                            1, HBERRL_UDT_TARGET);
-        }
-        else
-        {
-            uint32_t l_bufSize = 0;
-            char * l_bufPtr = NULL;
-
-            l_bufPtr = iv_pTarget->targetFFDC( l_bufSize );
-            if (l_bufPtr)
-            {
-                i_errl->addFFDC(HBERRL_COMP_ID,
-                                l_bufPtr, l_bufSize,
-                                1, HBERRL_UDT_TARGET);
-                free (l_bufPtr);
-            }
-        }
-    }
 }
 
 }

@@ -50,6 +50,7 @@ enum errlUserDataType_t
     HBERRL_UDT_STRING           = 1,
     HBERRL_UDT_TARGET           = 2,
     HBERRL_UDT_BACKTRACE        = 3,
+    HBERRL_UDT_ATTRIBUTE        = 4,
 };
 
 

@@ -249,7 +249,7 @@ class Target
          *
          *  @post caller must call free() to release the buffer
          */
-        char * targetFFDC( uint32_t & o_size ) const;
+        uint8_t * targetFFDC( uint32_t & o_size ) const;
 
     private: // Private helper interfaces
 
