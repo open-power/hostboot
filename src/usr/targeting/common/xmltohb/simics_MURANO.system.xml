@@ -4007,7 +4007,7 @@
 
 <targetInstance>
     <id>sys0node0dimm32</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x00030020</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -4030,7 +4030,7 @@
 
 <targetInstance>
     <id>sys0node0dimm33</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x00030021</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -4053,7 +4053,7 @@
 
 <targetInstance>
     <id>sys0node0dimm34</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x00030022</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -4076,7 +4076,7 @@
 
 <targetInstance>
     <id>sys0node0dimm35</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x00030023</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -4099,7 +4099,7 @@
 
 <targetInstance>
     <id>sys0node0dimm36</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x00030024</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -4122,7 +4122,7 @@
 
 <targetInstance>
     <id>sys0node0dimm37</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x00030025</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -4145,7 +4145,7 @@
 
 <targetInstance>
     <id>sys0node0dimm38</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x00030026</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -4168,7 +4168,7 @@
 
 <targetInstance>
     <id>sys0node0dimm39</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x00030027</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -4191,7 +4191,7 @@
 
 <targetInstance>
     <id>sys0node0dimm40</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x00030028</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -4214,7 +4214,7 @@
 
 <targetInstance>
     <id>sys0node0dimm41</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x00030029</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -4237,7 +4237,7 @@
 
 <targetInstance>
     <id>sys0node0dimm42</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x0003002A</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -4260,7 +4260,7 @@
 
 <targetInstance>
     <id>sys0node0dimm43</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x0003002B</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -4283,7 +4283,7 @@
 
 <targetInstance>
     <id>sys0node0dimm44</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x0003002C</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -4306,7 +4306,7 @@
 
 <targetInstance>
     <id>sys0node0dimm45</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x0003002D</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -4329,7 +4329,7 @@
 
 <targetInstance>
     <id>sys0node0dimm46</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x0003002E</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -4352,7 +4352,7 @@
 
 <targetInstance>
     <id>sys0node0dimm47</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x0003002F</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -4375,7 +4375,7 @@
 
 <targetInstance>
     <id>sys0node0dimm48</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x00030030</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -4398,7 +4398,7 @@
 
 <targetInstance>
     <id>sys0node0dimm49</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x00030031</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -4421,7 +4421,7 @@
 
 <targetInstance>
     <id>sys0node0dimm50</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x00030032</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -4444,7 +4444,7 @@
 
 <targetInstance>
     <id>sys0node0dimm51</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x00030033</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -4467,7 +4467,7 @@
 
 <targetInstance>
     <id>sys0node0dimm52</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x00030034</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -4490,7 +4490,7 @@
 
 <targetInstance>
     <id>sys0node0dimm53</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x00030035</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -4513,7 +4513,7 @@
 
 <targetInstance>
     <id>sys0node0dimm54</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x00030036</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -4536,7 +4536,7 @@
 
 <targetInstance>
     <id>sys0node0dimm55</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x00030037</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -4559,7 +4559,7 @@
 
 <targetInstance>
     <id>sys0node0dimm56</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x00030038</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -4582,7 +4582,7 @@
 
 <targetInstance>
     <id>sys0node0dimm57</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x00030039</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -4605,7 +4605,7 @@
 
 <targetInstance>
     <id>sys0node0dimm58</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x0003003A</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -4628,7 +4628,7 @@
 
 <targetInstance>
     <id>sys0node0dimm59</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x0003003B</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -4651,7 +4651,7 @@
 
 <targetInstance>
     <id>sys0node0dimm60</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x0003003C</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -4674,7 +4674,7 @@
 
 <targetInstance>
     <id>sys0node0dimm61</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x0003003D</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -4697,7 +4697,7 @@
 
 <targetInstance>
     <id>sys0node0dimm62</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x0003003E</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -4720,7 +4720,7 @@
 
 <targetInstance>
     <id>sys0node0dimm63</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x0003003F</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -4743,7 +4743,7 @@
 
 <targetInstance>
     <id>sys0node0dimm96</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x00030060</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -4766,7 +4766,7 @@
 
 <targetInstance>
     <id>sys0node0dimm97</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x00030061</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -4789,7 +4789,7 @@
 
 <targetInstance>
     <id>sys0node0dimm98</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x00030062</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -4812,7 +4812,7 @@
 
 <targetInstance>
     <id>sys0node0dimm99</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x00030063</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -4835,7 +4835,7 @@
 
 <targetInstance>
     <id>sys0node0dimm100</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x00030064</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -4858,7 +4858,7 @@
 
 <targetInstance>
     <id>sys0node0dimm101</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x00030065</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -4881,7 +4881,7 @@
 
 <targetInstance>
     <id>sys0node0dimm102</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x00030066</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -4904,7 +4904,7 @@
 
 <targetInstance>
     <id>sys0node0dimm103</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x00030067</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -4927,7 +4927,7 @@
 
 <targetInstance>
     <id>sys0node0dimm104</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x00030068</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -4950,7 +4950,7 @@
 
 <targetInstance>
     <id>sys0node0dimm105</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x00030069</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -4973,7 +4973,7 @@
 
 <targetInstance>
     <id>sys0node0dimm106</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x0003006A</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -4996,7 +4996,7 @@
 
 <targetInstance>
     <id>sys0node0dimm107</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x0003006B</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -5019,7 +5019,7 @@
 
 <targetInstance>
     <id>sys0node0dimm108</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x0003006C</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -5042,7 +5042,7 @@
 
 <targetInstance>
     <id>sys0node0dimm109</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x0003006D</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -5065,7 +5065,7 @@
 
 <targetInstance>
     <id>sys0node0dimm110</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x0003006E</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -5088,7 +5088,7 @@
 
 <targetInstance>
     <id>sys0node0dimm111</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x0003006F</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -5111,7 +5111,7 @@
 
 <targetInstance>
     <id>sys0node0dimm112</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x00030070</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -5134,7 +5134,7 @@
 
 <targetInstance>
     <id>sys0node0dimm113</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x00030071</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -5157,7 +5157,7 @@
 
 <targetInstance>
     <id>sys0node0dimm114</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x00030072</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -5180,7 +5180,7 @@
 
 <targetInstance>
     <id>sys0node0dimm115</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x00030073</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -5203,7 +5203,7 @@
 
 <targetInstance>
     <id>sys0node0dimm116</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x00030074</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -5226,7 +5226,7 @@
 
 <targetInstance>
     <id>sys0node0dimm117</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x00030075</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -5249,7 +5249,7 @@
 
 <targetInstance>
     <id>sys0node0dimm118</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x00030076</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -5272,7 +5272,7 @@
 
 <targetInstance>
     <id>sys0node0dimm119</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x00030077</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -5295,7 +5295,7 @@
 
 <targetInstance>
     <id>sys0node0dimm120</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x00030078</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -5318,7 +5318,7 @@
 
 <targetInstance>
     <id>sys0node0dimm121</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x00030079</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -5341,7 +5341,7 @@
 
 <targetInstance>
     <id>sys0node0dimm122</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x0003007A</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -5364,7 +5364,7 @@
 
 <targetInstance>
     <id>sys0node0dimm123</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x0003007B</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -5387,7 +5387,7 @@
 
 <targetInstance>
     <id>sys0node0dimm124</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x0003007C</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -5410,7 +5410,7 @@
 
 <targetInstance>
     <id>sys0node0dimm125</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x0003007D</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -5433,7 +5433,7 @@
 
 <targetInstance>
     <id>sys0node0dimm126</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x0003007E</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -5456,7 +5456,7 @@
 
 <targetInstance>
     <id>sys0node0dimm127</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x0003007F</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -5479,7 +5479,7 @@
 
 <targetInstance>
     <id>sys0node0dimm160</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300A0</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -5502,7 +5502,7 @@
 
 <targetInstance>
     <id>sys0node0dimm161</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300A1</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -5525,7 +5525,7 @@
 
 <targetInstance>
     <id>sys0node0dimm162</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300A2</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -5548,7 +5548,7 @@
 
 <targetInstance>
     <id>sys0node0dimm163</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300A3</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -5571,7 +5571,7 @@
 
 <targetInstance>
     <id>sys0node0dimm164</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300A4</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -5594,7 +5594,7 @@
 
 <targetInstance>
     <id>sys0node0dimm165</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300A5</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -5617,7 +5617,7 @@
 
 <targetInstance>
     <id>sys0node0dimm166</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300A6</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -5640,7 +5640,7 @@
 
 <targetInstance>
     <id>sys0node0dimm167</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300A7</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -5663,7 +5663,7 @@
 
 <targetInstance>
     <id>sys0node0dimm168</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300A8</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -5686,7 +5686,7 @@
 
 <targetInstance>
     <id>sys0node0dimm169</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300A9</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -5709,7 +5709,7 @@
 
 <targetInstance>
     <id>sys0node0dimm170</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300AA</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -5732,7 +5732,7 @@
 
 <targetInstance>
     <id>sys0node0dimm171</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300AB</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -5755,7 +5755,7 @@
 
 <targetInstance>
     <id>sys0node0dimm172</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300AC</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -5778,7 +5778,7 @@
 
 <targetInstance>
     <id>sys0node0dimm173</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300AD</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -5801,7 +5801,7 @@
 
 <targetInstance>
     <id>sys0node0dimm174</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300AE</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -5824,7 +5824,7 @@
 
 <targetInstance>
     <id>sys0node0dimm175</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300AF</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -5847,7 +5847,7 @@
 
 <targetInstance>
     <id>sys0node0dimm176</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300B0</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -5870,7 +5870,7 @@
 
 <targetInstance>
     <id>sys0node0dimm177</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300B1</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -5893,7 +5893,7 @@
 
 <targetInstance>
     <id>sys0node0dimm178</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300B2</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -5916,7 +5916,7 @@
 
 <targetInstance>
     <id>sys0node0dimm179</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300B3</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -5939,7 +5939,7 @@
 
 <targetInstance>
     <id>sys0node0dimm180</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300B4</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -5962,7 +5962,7 @@
 
 <targetInstance>
     <id>sys0node0dimm181</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300B5</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -5985,7 +5985,7 @@
 
 <targetInstance>
     <id>sys0node0dimm182</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300B6</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -6008,7 +6008,7 @@
 
 <targetInstance>
     <id>sys0node0dimm183</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300B7</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -6031,7 +6031,7 @@
 
 <targetInstance>
     <id>sys0node0dimm184</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300B8</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -6054,7 +6054,7 @@
 
 <targetInstance>
     <id>sys0node0dimm185</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300B9</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -6077,7 +6077,7 @@
 
 <targetInstance>
     <id>sys0node0dimm186</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300BA</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -6100,7 +6100,7 @@
 
 <targetInstance>
     <id>sys0node0dimm187</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300BB</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -6123,7 +6123,7 @@
 
 <targetInstance>
     <id>sys0node0dimm188</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300BC</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -6146,7 +6146,7 @@
 
 <targetInstance>
     <id>sys0node0dimm189</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300BD</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -6169,7 +6169,7 @@
 
 <targetInstance>
     <id>sys0node0dimm190</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300BE</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -6192,7 +6192,7 @@
 
 <targetInstance>
     <id>sys0node0dimm191</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300BF</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -6215,7 +6215,7 @@
 
 <targetInstance>
     <id>sys0node0dimm224</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300E0</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -6238,7 +6238,7 @@
 
 <targetInstance>
     <id>sys0node0dimm225</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300E1</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -6261,7 +6261,7 @@
 
 <targetInstance>
     <id>sys0node0dimm226</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300E2</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -6284,7 +6284,7 @@
 
 <targetInstance>
     <id>sys0node0dimm227</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300E3</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -6307,7 +6307,7 @@
 
 <targetInstance>
     <id>sys0node0dimm228</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300E4</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -6330,7 +6330,7 @@
 
 <targetInstance>
     <id>sys0node0dimm229</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300E5</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -6353,7 +6353,7 @@
 
 <targetInstance>
     <id>sys0node0dimm230</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300E6</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -6376,7 +6376,7 @@
 
 <targetInstance>
     <id>sys0node0dimm231</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300E7</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -6399,7 +6399,7 @@
 
 <targetInstance>
     <id>sys0node0dimm232</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300E8</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -6422,7 +6422,7 @@
 
 <targetInstance>
     <id>sys0node0dimm233</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300E9</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -6445,7 +6445,7 @@
 
 <targetInstance>
     <id>sys0node0dimm234</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300EA</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -6468,7 +6468,7 @@
 
 <targetInstance>
     <id>sys0node0dimm235</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300EB</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -6491,7 +6491,7 @@
 
 <targetInstance>
     <id>sys0node0dimm236</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300EC</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -6514,7 +6514,7 @@
 
 <targetInstance>
     <id>sys0node0dimm237</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300ED</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -6537,7 +6537,7 @@
 
 <targetInstance>
     <id>sys0node0dimm238</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300EE</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -6560,7 +6560,7 @@
 
 <targetInstance>
     <id>sys0node0dimm239</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300EF</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -6583,7 +6583,7 @@
 
 <targetInstance>
     <id>sys0node0dimm240</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300F0</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -6606,7 +6606,7 @@
 
 <targetInstance>
     <id>sys0node0dimm241</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300F1</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -6629,7 +6629,7 @@
 
 <targetInstance>
     <id>sys0node0dimm242</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300F2</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -6652,7 +6652,7 @@
 
 <targetInstance>
     <id>sys0node0dimm243</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300F3</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -6675,7 +6675,7 @@
 
 <targetInstance>
     <id>sys0node0dimm244</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300F4</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -6698,7 +6698,7 @@
 
 <targetInstance>
     <id>sys0node0dimm245</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300F5</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -6721,7 +6721,7 @@
 
 <targetInstance>
     <id>sys0node0dimm246</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300F6</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -6744,7 +6744,7 @@
 
 <targetInstance>
     <id>sys0node0dimm247</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300F7</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -6767,7 +6767,7 @@
 
 <targetInstance>
     <id>sys0node0dimm248</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300F8</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -6790,7 +6790,7 @@
 
 <targetInstance>
     <id>sys0node0dimm249</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300F9</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -6813,7 +6813,7 @@
 
 <targetInstance>
     <id>sys0node0dimm250</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300FA</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -6836,7 +6836,7 @@
 
 <targetInstance>
     <id>sys0node0dimm251</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300FB</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -6859,7 +6859,7 @@
 
 <targetInstance>
     <id>sys0node0dimm252</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300FC</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -6882,7 +6882,7 @@
 
 <targetInstance>
     <id>sys0node0dimm253</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300FD</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -6905,7 +6905,7 @@
 
 <targetInstance>
     <id>sys0node0dimm254</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300FE</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -6928,7 +6928,7 @@
 
 <targetInstance>
     <id>sys0node0dimm255</id>
-    <type>lcard-dimm-jedec</type>
+    <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>0x000300FF</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>

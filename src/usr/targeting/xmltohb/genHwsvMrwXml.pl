@@ -1084,6 +1084,28 @@ sub generate_dimm
     #$z = sprintf ("%d", $z);
     my $uidstr = sprintf("0x%02X03%04X",${node},$dimm+${node}*512);
 
+    # Calculate the VPD Record number value
+    my $vpdRec = 0;
+
+    # Set offsets based on mba, mem_port, and dimm values
+    if( 1 == $x )
+    {
+        $vpdRec = $vpdRec + 4;
+    }
+    if( 1 == $y )
+    {
+        $vpdRec = $vpdRec + 2;
+    }
+    if( 1 == $z )
+    {
+        $vpdRec = $vpdRec + 1;
+    }
+
+    # Adjust offset based on MCS value
+    $vpdRec = ($mcs * 8) + $vpdRec;
+    # Adjust offset basedon processor value
+    $vpdRec = ($proc * 64) + $vpdRec;
+
     print "
 <targetInstance>
     <id>sys${sys}node${node}dimm$dimm</id>
@@ -1109,7 +1131,7 @@ sub generate_dimm
         <id>MBA_DIMM</id>
         <default>$z</default>
     </attribute>
-    <attribute><id>VPD_REC_NUM</id><default>$dimm</default></attribute>
+    <attribute><id>VPD_REC_NUM</id><default>$vpdRec</default></attribute>
 </targetInstance>
 ";
 }

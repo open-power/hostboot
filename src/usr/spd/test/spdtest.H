@@ -36,6 +36,7 @@
 #include <errl/errlentry.H>
 #include <devicefw/driverif.H>
 #include <targeting/common/predicates/predicates.H>
+#include <targeting/common/utilFilter.H>
 
 #include <spd/spdreasoncodes.H>
 #include <spd/spdenums.H>
@@ -49,20 +50,9 @@ using namespace SPD;
 
 void getDIMMTargets ( TargetHandleList & o_dimmList )
 {
-    // Get top level system target
-    TARGETING::TargetService& tS = TARGETING::targetService();
-    TARGETING::Target * sysTarget = NULL;
-    tS.getTopLevelTarget( sysTarget );
-    assert( sysTarget != NULL );
-
-    // Get a DIMM Target
-    TARGETING::PredicateCTM predDimm( TARGETING::CLASS_LOGICAL_CARD,
-                                      TARGETING::TYPE_DIMM );
-    tS.getAssociated( o_dimmList,
-                      sysTarget,
-                      TARGETING::TargetService::CHILD,
-                      TARGETING::TargetService::ALL,
-                      &predDimm );
+    // Get Dimm list.
+    getAllLogicalCards( o_dimmList,
+                        TARGETING::TYPE_DIMM );
     TRACDCOMP( g_trac_spd,
                "getDIMMTargets() - found %d DIMMs",
                o_dimmList.size() );

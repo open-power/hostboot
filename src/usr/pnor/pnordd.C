@@ -104,7 +104,7 @@ errlHndl_t ddRead(DeviceFW::OperationType i_opType,
         {
             break;
         }
- 
+
     }while(0);
 
     return l_err;
@@ -155,7 +155,7 @@ errlHndl_t ddWrite(DeviceFW::OperationType i_opType,
         {
             break;
         }
- 
+
     }while(0);
 
     return l_err;
@@ -169,7 +169,7 @@ void testRealPnor(void *io_pArgs)
 {
     //        TARGETING::Target* l_testTarget =
     //          TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
-    size_t l_size = sizeof(uint64_t); 
+    size_t l_size = sizeof(uint64_t);
     errlHndl_t l_err = NULL;
     uint64_t fails = 0;
     uint64_t total = 0;
@@ -269,7 +269,7 @@ errlHndl_t PnorDD::readFlash(void* o_buffer,
     do{
         //mask off chip select for now, will probably break up fake PNOR into
         //multiple fake chips eventually
-        uint64_t l_address = i_address & 0x00000000FFFFFFFF;    
+        uint64_t l_address = i_address & 0x00000000FFFFFFFF;
 
         l_err = verifyFlashAddressRange(l_address, io_buflen);
         if(l_err)
@@ -307,7 +307,7 @@ errlHndl_t PnorDD::writeFlash(void* i_buffer,
     //TRACDCOMP(g_trac_pnor, "PnorDD::writeFlash(i_address=0x%llx)> ", i_address);
     errlHndl_t l_err = NULL;
 
-    do{        
+    do{
         TRACDCOMP(g_trac_pnor,"PNOR write %.8X", i_address);
 
         //mask off chip select for now, will probably break up fake PNOR into
@@ -507,7 +507,7 @@ void PnorDD::sfcInit( )
                                     SFC_REG_CONF4,
                                     sm_erase_op);
                 if(l_err) { break; }
-                
+
 
                 l_err = writeRegSfc(SFC_CMD_SPACE,
                                     SFC_REG_CONF5,
@@ -522,7 +522,7 @@ void PnorDD::sfcInit( )
                 }
 
                 if(l_err) { break; }
-    
+
 
             }
             else
@@ -534,7 +534,7 @@ void PnorDD::sfcInit( )
                  * @reasoncode   PNOR::RC_UNSUPORTED_HARDWARE
                  * @userdata1    NOR Flash Chip ID
                  * @userdata2    <not used>
-                 * @devdesc      PnorDD::sfcInit> 
+                 * @devdesc      PnorDD::sfcInit>
                  */
                 l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                                 PNOR::MOD_PNORDD_SFCINIT,
@@ -614,7 +614,7 @@ errlHndl_t PnorDD::writeRegSfc(SfcRange i_range,
     }
 
     TRACDCOMP( g_trac_pnor, "PnorDD::writeRegSfc> lpc_addr=0x%.8x, i_data=0x%.8x",
-               lpc_addr, i_data ); 
+               lpc_addr, i_data );
     l_err = writeLPC(lpc_addr, i_data);
 
     return l_err;
@@ -639,7 +639,7 @@ errlHndl_t PnorDD::readRegSfc(SfcRange i_range,
 
     l_err = readLPC(lpc_addr, o_data);
     TRACDCOMP( g_trac_pnor, "PnorDD::readRegSfc> lpc_addr=0x%.8x, o_data=0x%.8x",
-               lpc_addr, o_data ); 
+               lpc_addr, o_data );
 
     return l_err;
 }
@@ -764,7 +764,7 @@ errlHndl_t PnorDD::loadSfcBuf(uint32_t i_addr,
 {
     errlHndl_t l_err = NULL;
     TRACDCOMP( g_trac_pnor, "PnorDD::loadSfcBuf> i_addr=0x%.8x, i_size=0x%.8x",
-               i_addr, i_size ); 
+               i_addr, i_size );
 
     do {
         //Write flash address to ADR reg
@@ -773,7 +773,7 @@ errlHndl_t PnorDD::loadSfcBuf(uint32_t i_addr,
                             i_addr);
         if(l_err) { break; }
 
-        //Issue ReadRaw command with size to read 
+        //Issue ReadRaw command with size to read
         SfcCmdReg_t sfc_cmd;
         sfc_cmd.opcode = SFC_OP_READRAW;
         sfc_cmd.length = i_size;
@@ -810,7 +810,7 @@ errlHndl_t PnorDD::flushSfcBuf(uint32_t i_addr,
                             i_addr);
         if(l_err) { break; }
 
-        //Issue WriteRaw command + size to write 
+        //Issue WriteRaw command + size to write
         SfcCmdReg_t sfc_cmd;
         sfc_cmd.opcode = SFC_OP_WRITERAW;
         sfc_cmd.length = i_size;
@@ -840,7 +840,7 @@ errlHndl_t PnorDD::bufferedSfcRead(uint32_t i_addr,
 {
     errlHndl_t l_err = NULL;
     TRACDCOMP( g_trac_pnor, "PnorDD::bufferedSfcRead> i_addr=0x%.8x, i_size=0x%.8x",
-               i_addr, i_size ); 
+               i_addr, i_size );
 
     do{
 
@@ -1005,7 +1005,7 @@ errlHndl_t PnorDD::readLPC(uint32_t i_addr,
 
     do {
 
-        //@todo (RTC:36950) - add non-master support  
+        //@todo (RTC:36950) - add non-master support
         TARGETING::Target* scom_target =
           TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
 
@@ -1094,19 +1094,19 @@ errlHndl_t PnorDD::writeLPC(uint32_t i_addr,
                             uint32_t i_data)
 {
     errlHndl_t l_err = NULL;
-   
+
     TRACDCOMP(g_trac_pnor, "writeLPC> %.8X = %.8X", i_addr, i_data );
 
     do {
 
-        //@todo (RTC:36950) - add non-master support  
+        //@todo (RTC:36950) - add non-master support
         TARGETING::Target* scom_target =
           TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
 
         // always read/write 64 bits to SCOM
         size_t scom_size = sizeof(uint64_t);
 
-        // write data register 
+        // write data register
         TRACDCOMP(g_trac_pnor, "writeLPC> Write ECCB data register");
 
         uint64_t eccb_data = static_cast<uint64_t>(i_data);
@@ -1119,10 +1119,10 @@ errlHndl_t PnorDD::writeLPC(uint32_t i_addr,
         if( l_err ) { break; }
 
         // write command register with LPC address to write
-        TRACDCOMP(g_trac_pnor, "writeLPC> Write ECCB command register, cmd=0x%.16x", eccb_cmd.data64 );
         ControlReg_t eccb_cmd;
         eccb_cmd.read_op = 0;
         eccb_cmd.address = i_addr;
+        TRACDCOMP(g_trac_pnor, "writeLPC> Write ECCB command register, cmd=0x%.16x", eccb_cmd.data64 );
         l_err = deviceOp( DeviceFW::WRITE,
                           scom_target,
                           &(eccb_cmd.data64),
@@ -1206,7 +1206,7 @@ errlHndl_t PnorDD::compareAndWriteBlock(uint32_t i_blockStart,
     TRACDCOMP(g_trac_pnor,">>compareAndWriteBlock(0x%.8X,0x%.8X,0x%.8X)", i_blockStart, i_writeStart, i_bytesToWrite);
     errlHndl_t l_err = NULL;
     uint8_t* read_data = NULL;
-    
+
     do {
 
         // remember any data we read so we don't have to reread it later
@@ -1218,7 +1218,7 @@ errlHndl_t PnorDD::compareAndWriteBlock(uint32_t i_blockStart,
 
         //STEP 1: Read data in PNOR for compares (only read section we want to write)
         //read_start needs to be uint32* for bitwise word compares later
-        uint32_t* read_start = (uint32_t*)(read_data + i_writeStart-i_blockStart); 
+        uint32_t* read_start = (uint32_t*)(read_data + i_writeStart-i_blockStart);
         l_err =  bufferedSfcRead(i_writeStart,
                                  i_bytesToWrite,
                                  (void*) read_start);
@@ -1238,7 +1238,7 @@ errlHndl_t PnorDD::compareAndWriteBlock(uint32_t i_blockStart,
                 //Can only write zeros to NOR, see if any bits changed from 0->1
                 if( (~(read_start[cword])) & (i_dataWord[cword]) )
                 {
-                    need_erase = true;                   
+                    need_erase = true;
 
                     // skip comparing the rest of the block,
                     //   just start writing it

@@ -968,15 +968,8 @@ errlHndl_t getVpdLocation ( int64_t & o_vpdLocation,
     TRACSSCOMP( g_trac_spd,
                 ENTER_MRK"getVpdLocation()" );
 
-    // TODO - Story 39133 is complete.  And thus we should be able to use the
-    // VPD_REC_NUM attribute.  But Simics is still in the process of changing
-    // their plugging order.  Thus, there are most likely tweaks that still
-    // need to be done to the VPD preload script, as well as the system
-    // attribute xml files.  Once Simics is done, then we can step back and
-    // see exactly what part(s) need to be modified to accomodate.
-//    o_vpdLocation = i_target->getAttr<TARGETING::ATTR_VPD_REC_NUM>();
-    o_vpdLocation = 0;
-    TRACFCOMP( g_trac_spd,
+    o_vpdLocation = i_target->getAttr<TARGETING::ATTR_VPD_REC_NUM>();
+    TRACUCOMP( g_trac_spd,
                INFO_MRK"Using VPD location: %d",
                o_vpdLocation );
 

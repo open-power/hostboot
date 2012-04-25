@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/hwpf/test/hwpftest.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/hwpf/test/hwpftest.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #ifndef __HWPFTEST_H
 #define __HWPFTEST_H
 
@@ -35,6 +36,7 @@
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <targeting/common/commontargeting.H>
+#include <targeting/common/utilFilter.H>
 #include <fapiHwpExecInitFile.H>
 #include <spd/spdenums.H>
 
@@ -524,7 +526,7 @@ public:
 
             //Call Hwp to execute the initfile
             FAPI_EXEC_HWP(l_rc, fapiHwpExecInitFile, l_target, "sample.if");
-            
+
             if (l_rc != fapi::FAPI_RC_SUCCESS)
             {
                 TS_FAIL("testHwpf5: Error from fapiHwpExecInitFile");
@@ -720,28 +722,11 @@ public:
 
         do
         {
-            // Get top level system target
-            TARGETING::TargetService& tS = TARGETING::targetService();
-            TARGETING::Target * sysTarget = NULL;
-            tS.getTopLevelTarget( sysTarget );
-
-            if (sysTarget == NULL)
-            {
-                FAPI_ERR("testHwpf8: Can't obtain system target");
-                break;
-            }
-
             // Get a DIMM Target
-            TARGETING::PredicateCTM predDimm( TARGETING::CLASS_LOGICAL_CARD,
-                                              TARGETING::TYPE_DIMM );
             TargetHandleList dimmList;
+            getAllLogicalCards( dimmList,
+                                TARGETING::TYPE_DIMM );
 
-            tS.getAssociated( dimmList,
-                              sysTarget,
-                              TARGETING::TargetService::CHILD,
-                              TARGETING::TargetService::ALL,
-                              &predDimm );
- 
             if (dimmList.size())
             {
                 fapi::Target l_dTarget(TARGET_TYPE_DIMM,
@@ -773,34 +758,54 @@ public:
     {
         errlHndl_t l_err = NULL;
 
-        // Look for MBA chiplets
-        TARGETING::PredicateCTM l_mbaFilter(CLASS_UNIT, TYPE_MBA);
+        // Look for functional DIMMs
+        TARGETING::PredicateIsFunctional l_functional;
+        TARGETING::PredicateCTM l_dimmFilter(CLASS_LOGICAL_CARD, TYPE_DIMM);
+        TARGETING::PredicatePostfixExpr l_functionalDimms;
+        l_functionalDimms.push(&l_dimmFilter).push(&l_functional).And();
+
         TARGETING::TargetRangeFilter l_filter(
             TARGETING::targetService().begin(),
             TARGETING::targetService().end(),
-            &l_mbaFilter);
+            &l_functionalDimms);
 
-        // Invoke the HWP on the first one
+        // Look for the first functional DIMM
         if (l_filter)
         {
-            fapi::Target l_fapiTarget(TARGET_TYPE_MBA_CHIPLET,
-                static_cast<void *> (*l_filter));
+            // Get the associated MBA
+            TARGETING::PredicateCTM l_mbaFilter(CLASS_UNIT, TYPE_MBA);
+            TARGETING::TargetHandleList l_MBAs;
 
-            FAPI_INVOKE_HWP(l_err, fapiTestHwpDq, l_fapiTarget);
+            TARGETING::targetService().getAssociated(l_MBAs, (*l_filter),
+                TARGETING::TargetService::PARENT_BY_AFFINITY,
+                TARGETING::TargetService::ALL,
+                &l_mbaFilter);
 
-            if (l_err)
+            if (l_MBAs.size() == 1)
             {
-                TS_FAIL("testHwpf9: fapiTestHwpDq failed. Error logged");
-                errlCommit(l_err, HWPF_COMP_ID);
+                fapi::Target l_fapiTarget(TARGET_TYPE_MBA_CHIPLET,
+                    static_cast<void *>(l_MBAs[0]));
+
+                FAPI_INVOKE_HWP(l_err, fapiTestHwpDq, l_fapiTarget);
+
+                if (l_err)
+                {
+                    TS_FAIL("testHwpf9: fapiTestHwpDq failed. Error logged");
+                    errlCommit(l_err, HWPF_COMP_ID);
+                }
+                else
+                {
+                    TS_TRACE("testHwpf9: Unit Test passed");
+                }
             }
             else
             {
-                TS_TRACE("testHwpf9: Unit Test passed");
+                TS_FAIL("testHwpf9: Parent MBA not found");
             }
         }
         else
         {
-            TS_TRACE("testHwpf9: No MBAs found, skipping test");
+            TS_TRACE("testHwpf9: No functional DIMMs found, skipping test");
         }
     }
 

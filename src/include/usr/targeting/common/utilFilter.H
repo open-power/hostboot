@@ -47,7 +47,7 @@ namespace TARGETING
  * @parm[in]  i_type, the type of the chip targets to be obtained
  * @parm[in]  i_functional, set to true to return only functional targets
  *
- * @return N/A 
+ * @return N/A
  */
 void getAllChips(TARGETING::TargetHandleList & o_vector,
                       TYPE i_type, bool i_functional = true );
@@ -60,7 +60,7 @@ void getAllChips(TARGETING::TargetHandleList & o_vector,
  * @parm[in]  i_type, the type of the chiplet targets to be obtained
  * @parm[in]  i_functional, set to true to return only functional targets
  *
- * @return N/A 
+ * @return N/A
  */
 void getAllChiplets(TARGETING::TargetHandleList & o_vector,
                       TYPE i_type, bool i_functional = true );
@@ -74,7 +74,7 @@ void getAllChiplets(TARGETING::TargetHandleList & o_vector,
  * @parm[in]  i_type, the type of the chiplet targets to be obtained
  * @parm[in]  i_functional, set to true to return only functional targets
  *
- * @return N/A 
+ * @return N/A
  */
 void getChildChiplets(TARGETING::TargetHandleList & o_vector,
                const Target * i_chip, TYPE i_type, bool i_functional = true );
@@ -88,7 +88,7 @@ void getChildChiplets(TARGETING::TargetHandleList & o_vector,
  * @parm[in]  i_type, the type of the chip target to be obtained
  * @parm[in]  i_functional, set to true to return only functional targets
  *
- * @return N/A 
+ * @return N/A
  */
 void getAffinityChips( TARGETING::TargetHandleList& o_vector,
            const Target * i_chiplet, TYPE i_type, bool i_functional = true );
@@ -101,6 +101,35 @@ void getAffinityChips( TARGETING::TargetHandleList& o_vector,
  * @return Parent chip target pointer or NULL if error
  */
 const Target * getParentChip( const Target * i_pChiplet );
+
+
+/**
+ * @brief Return a list of all cards in a system
+ *
+ * @param[out] o_vector - Vector of the matching targets.
+ * @param[in] i_cardType - The Targeting type.
+ * @param[in] i_function - Return only Functional cards, default = true
+ *
+ * @return NONE
+ */
+void getAllCards( TARGETING::TargetHandleList & o_vector,
+                  TYPE i_cardType,
+                  bool i_functional = true );
+
+
+/**
+ * @brief Return a list of all cards in a system
+ *
+ * @param[out] o_vector - Vector of the matching targets.
+ * @param[in] i_cardType - The Targeting type.
+ * @param[in] i_function - Return only Functional cards, default = true
+ *
+ * @return NONE
+ */
+
+void getAllLogicalCards( TARGETING::TargetHandleList & o_vector,
+                         TYPE i_cardType,
+                         bool i_functional = true );
 
 }
 

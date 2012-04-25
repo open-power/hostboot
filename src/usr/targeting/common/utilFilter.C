@@ -49,7 +49,7 @@ namespace TARGETING
  * @parm[in]  i_type, the type of the targets to be obtained
  * @parm[in]  i_functional, set to true to return only functional targets
  *
- * @return N/A 
+ * @return N/A
  */
 void _getAllChipsOrChiplets( TARGETING::TargetHandleList & o_vector,
                      CLASS i_class, TYPE  i_type, bool i_functional = true )
@@ -83,6 +83,28 @@ void getAllChips( TARGETING::TargetHandleList & o_vector,
                   TYPE i_chipType, bool i_functional = true )
 {
     _getAllChipsOrChiplets(o_vector, CLASS_CHIP, i_chipType, i_functional);
+}
+
+
+void getAllLogicalCards( TARGETING::TargetHandleList & o_vector,
+                         TYPE i_cardType,
+                         bool i_functional = true )
+{
+    _getAllChipsOrChiplets( o_vector,
+                            CLASS_LOGICAL_CARD,
+                            i_cardType,
+                            i_functional );
+}
+
+
+void getAllCards( TARGETING::TargetHandleList & o_vector,
+                  TYPE i_cardType,
+                  bool i_functional = true )
+{
+    _getAllChipsOrChiplets( o_vector,
+                            CLASS_CARD,
+                            i_cardType,
+                            i_functional );
 }
 
 

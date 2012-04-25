@@ -31,7 +31,7 @@ toolLoc = os.environ.get("HB_TOOLPATH");
 thisSys = os.environ.get("HB_MACHINE").upper();
 numProcs = os.environ.get( "GFW_P8_%s_NUM_PROCS" % thisSys );
 numCentaurPerProc = os.environ.get( "GFW_P8_%s_CENTAURS_PER_PROC" % thisSys );
-cmd = toolLoc + "/hb-pnor-mvpd-preload.pl --numProcs " + numProcs + " --numCentPerProc " + numCentaurPerProc + " --dataPath " + toolLoc
+cmd = toolLoc + "/hb-pnor-mvpd-preload.pl --numProcs " + numProcs + " --numCentPerProc " + numCentaurPerProc + " --machine " + thisSys + " --dataPath " + toolLoc
 print "Generate PNOR VPD for " + numProcs + " processor(s), and " + numCentaurPerProc + " Centaur(s) per Processor.";
 args = shlex.split( cmd );
 subprocess.call( args );

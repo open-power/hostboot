@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/hwpf/hwp/fapiTestHwpDq.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/hwpf/hwp/fapiTestHwpDq.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 /**
  *  @file fapiTestHwpDq.C
  *
@@ -31,6 +32,7 @@
  * Flag     Defect/Feature  User        Date        Description
  * ------   --------------  ----------  ----------- ----------------------------
  *                          mjjones     02/21/2012  Created
+ *                          mjjones     06/14/2012  Test functional DIMM
  */
 
 #include <fapiTestHwpDq.H>
@@ -62,8 +64,44 @@ fapi::ReturnCode fapiTestHwpDq(const fapi::Target & i_mba)
         FAPI_INF("fapiTestHwpDq: Got expected error from dimmGetBadDqBitmap");
         l_rc = fapi::FAPI_RC_SUCCESS;
 
-        // Get the bad DQ Bitmap for port1, dimm0, rank3
-        l_rc = dimmGetBadDqBitmap(i_mba, 1, 0, 3, l_dqBitmap);
+        // Get associated functional DIMMs
+        std::vector<fapi::Target> l_dimms;
+        l_rc = fapiGetAssociatedDimms(i_mba, l_dimms);
+
+        if (l_rc)
+        {
+            FAPI_ERR("fapiTestHwpDq: Error from fapiGetAssociatedDimms");
+            break;
+        }
+
+        if (l_dimms.size() == 0)
+        {
+            FAPI_ERR("fapiTestHwpDq: Did not find any functional DIMMs, skipping");
+            break;
+        }
+
+        // Get the first DIMM's port and dimm number
+        uint8_t l_port = 0;
+        uint8_t l_dimm = 0;
+
+        l_rc = FAPI_ATTR_GET(ATTR_MBA_PORT, &(l_dimms[0]), l_port);
+
+        if (l_rc)
+        {
+            FAPI_ERR("fapiTestHwpDq: Error getting ATTR_MBA_PORT");
+            break;
+        }
+
+        l_rc = FAPI_ATTR_GET(ATTR_MBA_DIMM, &(l_dimms[0]), l_dimm);
+
+        if (l_rc)
+        {
+            FAPI_ERR("fapiTestHwpDq: Error getting ATTR_MBA_DIMM");
+            break;
+        }
+
+        // Get the bad DQ Bitmap for the DIMM, rank 3
+        l_rc = dimmGetBadDqBitmap(i_mba, l_port, l_dimm, 3, l_dqBitmap);
 
         if (l_rc)
         {
