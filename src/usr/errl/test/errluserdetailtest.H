@@ -48,15 +48,15 @@ using   namespace   ERRORLOG;
 class UtilErrlUsrDataTest: public CxxTest::TestSuite
 {
 public:
-    
+
     // Note that errlUserDetailsTarget is tested in the targeting unit test
-    
+
     /**
      * @test testString - Capture a String in an error log
      */
     void testString(void)
     {
-        errlHndl_t l_errl = NULL;
+        errlHndl_t errl = NULL;
 
         TS_TRACE( "testString errorlog user detail data");
         /*@
@@ -68,7 +68,7 @@ public:
         * @userdata2 Test data 2
         * @devdesc  User Details unit test - create string user detail data
         */
-        l_errl = new ErrlEntry(
+        errl = new ErrlEntry(
                 ERRL_SEV_INFORMATIONAL,
                 HBERRL_USERDATA_TEST_MOD_ID,
                 HBERRL_TEST_STRING_UD,
@@ -77,10 +77,16 @@ public:
 
         // Create a test string and add it to the error log as user detail data
         const char * l_pString = "This is a test string";
-        ErrlUserDetailsString(l_pString).addToLog(l_errl);
+        ErrlUserDetailsString(l_pString).addToLog(errl);
+
+        // create more and make sure that they get merged into 1 sub-section
+        ErrlUserDetailsString("String test - string 2").addToLog(errl);
+
+        ErrlUserDetailsString stringUD("String test - string 3");
+        stringUD.addToLog(errl);
 
         // commit the errorlog
-        errlCommit(l_errl, CXXTEST_COMP_ID);
+        errlCommit(errl, CXXTEST_COMP_ID);
     }
 
     /**
@@ -88,9 +94,9 @@ public:
      */
     void testAttribute(void)
     {
-        errlHndl_t l_err = NULL;
+        errlHndl_t errl = NULL;
 
-        TS_TRACE( "testAttribute errorlog user detail data");
+        TS_TRACE( "testAttribute errorlog user detail data and merge");
         /*@
         * @errortype
         * @severity ERRORLOG_SEV_INFORMATIONAL
@@ -100,7 +106,7 @@ public:
         * @userdata2 Test data 2
         * @devdesc  User Details unit test - create string user detail data
         */
-        l_err = new ErrlEntry(
+        errl = new ErrlEntry(
                 ERRL_SEV_INFORMATIONAL,
                 HBERRL_USERDATA_TEST_MOD_ID,
                 HBERRL_TEST_ATTRIBUTE_UD,
@@ -130,48 +136,101 @@ public:
         const Target* c_target;
         c_target = *pProc;
         TS_TRACE( "testAttribute pProc %p", c_target);
-        ErrlUserDetailsString("Attribute test").addToLog(l_err);
-        ErrlUserDetailsTarget(c_target).addToLog(l_err);
-        ErrlUserDetailsBackTrace().addToLog(l_err);
-        ErrlUserDetailsAttribute(c_target,ATTR_CLASS).addToLog(l_err);
-        ErrlUserDetailsAttribute(c_target,ATTR_TYPE).addToLog(l_err);
-        ErrlUserDetailsAttribute(c_target,ATTR_MODEL).addToLog(l_err);
-        ErrlUserDetailsAttribute(c_target,ATTR_PHYS_PATH).addToLog(l_err);
-        ErrlUserDetailsAttribute(c_target,ATTR_SCRATCH_UINT8_1).addToLog(l_err);
-        ErrlUserDetailsAttribute(c_target,ATTR_HUID).addToLog(l_err);
-        ErrlUserDetailsAttribute(c_target,ATTR_DUMMY_WO).addToLog(l_err);
-        ErrlUserDetailsAttribute(c_target).addToLog(l_err);
+        ErrlUserDetailsTarget(c_target).addToLog(errl);
+        ErrlUserDetailsTarget(
+            TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL).addToLog(errl);
+
+        // all attributes
+        ErrlUserDetailsAttribute(c_target).addToLog(errl);
+
+        // HUID repeated for each addToLog()
+        ErrlUserDetailsAttribute(c_target,ATTR_EC).addToLog(errl);
+        ErrlUserDetailsAttribute(c_target,ATTR_CHIP_ID).addToLog(errl);
+
+        // 1 HUID only
+        ErrlUserDetailsAttribute(c_target,ATTR_HUID).addToLog(errl);
+
+        // HUID only - not there
+        ErrlUserDetailsAttribute(c_target,ATTR_SCRATCH_UINT8_1).addToLog(errl);
+
+        // HUID only - write only
+        ErrlUserDetailsAttribute(c_target,ATTR_DUMMY_WO).addToLog(errl);
+
+        // HUID only - read only
+        ErrlUserDetailsAttribute(c_target,ATTR_CLASS).addToLog(errl);
+
+        //
+        // one HUID then each attribute
+        ErrlUserDetailsAttribute pProcEUDA(c_target,ATTR_CHIP_ID);
+        pProcEUDA.addData(ATTR_EC);
+        pProcEUDA.addData(ATTR_CHIP_ID);
+
+        // skipped - not there
+        pProcEUDA.addData(ATTR_SCRATCH_UINT8_1);
+
+        // skipped - write only
+        pProcEUDA.addData(ATTR_DUMMY_WO);
+
+        // skipped - read only
+        pProcEUDA.addData(ATTR_CLASS);
+
+        // done - write it out
+        pProcEUDA.addToLog(errl);
 
         c_target = *pMembuf;
         TS_TRACE( "testAttribute pMembuf %p", c_target);
-        ErrlUserDetailsString("Attribute test").addToLog(l_err);
-        ErrlUserDetailsTarget(c_target).addToLog(l_err);
-        ErrlUserDetailsBackTrace().addToLog(l_err);
-        ErrlUserDetailsAttribute(c_target,ATTR_CLASS).addToLog(l_err);
-        ErrlUserDetailsAttribute(c_target,ATTR_TYPE).addToLog(l_err);
-        ErrlUserDetailsAttribute(c_target,ATTR_MODEL).addToLog(l_err);
-        ErrlUserDetailsAttribute(c_target,ATTR_PHYS_PATH).addToLog(l_err);
-        ErrlUserDetailsAttribute(c_target,ATTR_SCRATCH_UINT8_1).addToLog(l_err);
-        ErrlUserDetailsAttribute(c_target,ATTR_HUID).addToLog(l_err);
-        ErrlUserDetailsAttribute(c_target,ATTR_DUMMY_WO).addToLog(l_err);
-        ErrlUserDetailsAttribute(c_target).addToLog(l_err);
+        ErrlUserDetailsTarget(c_target).addToLog(errl);
+
+        // all attributes
+        ErrlUserDetailsAttribute(c_target).addToLog(errl);
+
+        // one HUID then each attribute
+        ErrlUserDetailsAttribute pMembufEUDA(c_target,ATTR_CHIP_ID);
+        pMembufEUDA.addData(ATTR_EC);
+        pMembufEUDA.addData(ATTR_CHIP_ID);
+        pMembufEUDA.addData(ATTR_MSS_VOLT);
+        pMembufEUDA.addData(ATTR_MSS_FREQ);
+
+        // skipped - not there
+        pMembufEUDA.addData(ATTR_SCRATCH_UINT8_1);
+
+        // skipped - write only
+        pMembufEUDA.addData(ATTR_DUMMY_WO);
+
+        // skipped - read only
+        pMembufEUDA.addData(ATTR_CLASS);
+
+        // done - write it out
+        pMembufEUDA.addToLog(errl);
 
         c_target = *pDimm;
         TS_TRACE( "testAttribute pDimm %p", c_target);
-        ErrlUserDetailsString("Attribute test").addToLog(l_err);
-        ErrlUserDetailsTarget(c_target).addToLog(l_err);
-        ErrlUserDetailsBackTrace().addToLog(l_err);
-        ErrlUserDetailsAttribute(c_target,ATTR_CLASS).addToLog(l_err);
-        ErrlUserDetailsAttribute(c_target,ATTR_TYPE).addToLog(l_err);
-        ErrlUserDetailsAttribute(c_target,ATTR_MODEL).addToLog(l_err);
-        ErrlUserDetailsAttribute(c_target,ATTR_PHYS_PATH).addToLog(l_err);
-        ErrlUserDetailsAttribute(c_target,ATTR_SCRATCH_UINT8_1).addToLog(l_err);
-        ErrlUserDetailsAttribute(c_target,ATTR_HUID).addToLog(l_err);
-        ErrlUserDetailsAttribute(c_target,ATTR_DUMMY_WO).addToLog(l_err);
-        ErrlUserDetailsAttribute(c_target).addToLog(l_err);
+        ErrlUserDetailsTarget(c_target).addToLog(errl);
 
-#if 0
-        // extended test 
+        // all attributes
+        ErrlUserDetailsAttribute(c_target).addToLog(errl);
+
+        // one HUID then each attribute
+        ErrlUserDetailsAttribute pDimmEUDA(c_target,ATTR_CHIP_ID);
+        pDimmEUDA.addData(ATTR_EC);
+        pDimmEUDA.addData(ATTR_CHIP_ID);
+        pDimmEUDA.addData(ATTR_MSS_VOLT);
+        pDimmEUDA.addData(ATTR_MSS_FREQ);
+
+        // skipped - not there
+        pDimmEUDA.addData(ATTR_SCRATCH_UINT8_1);
+
+        // skipped - write only
+        pDimmEUDA.addData(ATTR_DUMMY_WO);
+
+        // skipped - read only
+        pDimmEUDA.addData(ATTR_CLASS);
+
+        // done - write it out
+        pDimmEUDA.addToLog(errl);
+
+#if 1
+        // extended test
         uint32_t i = 0;
         for (TargetIterator target = targetService().begin();
             (i < 10) && (target != targetService().end());
@@ -179,13 +238,13 @@ public:
         {
             TS_TRACE( "testAttribute %p", *target);
             const Target* c_target = *target;
-            ErrlUserDetailsTarget(c_target).addToLog(l_err);
-            ErrlUserDetailsAttribute(c_target).addToLog(l_err);
+            ErrlUserDetailsTarget(c_target).addToLog(errl);
+            ErrlUserDetailsAttribute(c_target).addToLog(errl);
         }
 #endif
 
         // commit the errorlog
-        errlCommit(l_err, CXXTEST_COMP_ID);
+        errlCommit(errl, CXXTEST_COMP_ID);
         TS_TRACE( "testAttribute done");
     }
 

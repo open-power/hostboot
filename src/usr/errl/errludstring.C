@@ -42,6 +42,9 @@ ErrlUserDetailsString::ErrlUserDetailsString(const char * i_pString)
     iv_CompId = HBERRL_COMP_ID;
     iv_Version = 1;
     iv_SubSection = HBERRL_UDT_STRING;
+
+    // override the default of false.
+    iv_merge = true;
 }
 
 //------------------------------------------------------------------------------

@@ -295,6 +295,10 @@ public:
      *                               which classifies the data.  This in
      *                               conjunction with the version can be used
      *                               to decode the data.
+     * @param[in]   i_merge          A boolean value (defaults to false if
+     *                               parameter is not specified) to indicate
+     *                               whether this buffer is merged with the
+     *                               previous section iff it matches.
      *
      * @return Pointer to FFDC section if successfully added.
      *         NULL if fails
@@ -303,7 +307,8 @@ public:
                      const void * i_dataPtr,
                      const uint32_t i_ffdcLen,
                      const uint8_t i_ffdcVer,
-                     const uint8_t i_ffdcSubSect);
+                     const uint8_t i_ffdcSubSect,
+                     bool i_merge = false);
 
     /**
      * @brief Append more data to an FFDC section.

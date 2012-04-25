@@ -40,6 +40,7 @@ ErrlUserDetails::ErrlUserDetails()
 : iv_CompId(HBERRL_COMP_ID),
   iv_Version(0),
   iv_SubSection(0),
+  iv_merge(false),
   iv_pBuffer(NULL),
   iv_BufLen(0)
 {
@@ -62,8 +63,9 @@ void ErrlUserDetails::addToLog(errlHndl_t i_errl)
 {
     if((i_errl) && (iv_BufLen))
     {
-        i_errl->addFFDC(iv_CompId, iv_pBuffer, iv_BufLen, iv_Version,
-                        iv_SubSection );
+        i_errl->addFFDC(iv_CompId, iv_pBuffer, iv_BufLen, 
+                iv_Version, iv_SubSection,
+                iv_merge );
     }
 }
 

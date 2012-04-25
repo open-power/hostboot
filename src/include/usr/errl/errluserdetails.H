@@ -115,6 +115,11 @@ protected:
      */
     errlsubsec_t iv_SubSection;
 
+    /**
+     *  Protected Data: true/false merge like buffers
+     */
+    bool      iv_merge;
+
 private:
 
     // Disabled

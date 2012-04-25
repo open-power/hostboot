@@ -60,6 +60,7 @@ class ErrlSctnHdr
     friend class ErrlUH;
     friend class ErrlUD;
     friend class ErrlSrc;
+    friend class ErrlEntry;
 
 
 

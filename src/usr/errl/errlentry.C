@@ -86,35 +86,58 @@ ErrlUD * ErrlEntry::addFFDC(const compId_t i_compId,
              const void * i_dataPtr,
              const uint32_t i_ffdcLen,
              const uint8_t i_ffdcVer,
-             const uint8_t i_ffdcSubSect)
+             const uint8_t i_ffdcSubSect,
+             bool i_merge)
 {
     ErrlUD * l_ffdcSection = NULL;
 
-    if ( (i_dataPtr == NULL) || (i_ffdcLen == 0) )
+    if ( (i_dataPtr != NULL) && (i_ffdcLen != 0) )
     {
-        TRACFCOMP( g_trac_errl,
-        ERR_MRK"ErrlEntry::addFFDC(): Invalid FFDC data pointer or size, no add");
+        TRACDCOMP( g_trac_errl, INFO_MRK"addFFDC(): %x %d %d - %s merge",
+                      i_compId, i_ffdcVer,
+                      i_ffdcSubSect, i_merge == true ? "DO" : "NO" );
+
+        // if we're to try to merge, AND there's at least 1 section
+        if ((i_merge) && (iv_SectionVector.size() > 0))
+        {   // look at the last one to see if it's a match or not.
+            // this is done to preserve the order of the errlog - we
+            // only merge like sections if they are being put in at the
+            // 'same time'.
+            ErrlUD *pErrlUD = iv_SectionVector.back();
+
+            if ((i_compId       == pErrlUD->iv_header.iv_compId) &&
+                (i_ffdcVer      == pErrlUD->iv_header.iv_ver) &&
+                (i_ffdcSubSect  == pErrlUD->iv_header.iv_sst))
+            {
+                TRACDCOMP( g_trac_errl, INFO_MRK"appending to matched %p",
+                            pErrlUD);
+                appendToFFDC(pErrlUD, i_dataPtr, i_ffdcLen);
+                l_ffdcSection = pErrlUD;
+            }
+        } // i_merge && >0 section
+
+        // i_merge == false, or it was true but we didn't find a match
+        if (l_ffdcSection == NULL)
+        {
+            // Create a user-defined section.
+            l_ffdcSection = new ErrlUD(  i_dataPtr,
+                                         i_ffdcLen,
+                                         i_compId,
+                                         i_ffdcVer,
+                                         i_ffdcSubSect );
+
+            // Add to the vector of sections for this error log.
+            iv_SectionVector.push_back( l_ffdcSection );
+        }
     }
     else
     {
-        // Create a user-defined section.
-        l_ffdcSection = new ErrlUD(  i_dataPtr,
-                                     i_ffdcLen,
-                                     i_compId,
-                                     i_ffdcVer,
-                                     i_ffdcSubSect );
-
-        // Add to the vector of sections for this error log.
-        iv_SectionVector.push_back( l_ffdcSection );
+        TRACFCOMP( g_trac_errl,
+        ERR_MRK"addFFDC(): Invalid FFDC data pointer or size, no add");
     }
 
     return l_ffdcSection;
 }
-
-
-
-
-
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -123,6 +146,8 @@ void ErrlEntry::appendToFFDC(ErrlUD * i_pErrlUD,
                   const uint32_t i_dataLen)
 {
     uint64_t l_rc;
+    TRACDCOMP( g_trac_errl, ENTER_MRK"appendToFFDC(%p, %p, %d)",
+                i_pErrlUD, i_dataPtr, i_dataLen);
 
     l_rc = i_pErrlUD->addData( i_dataPtr, i_dataLen );
     if( 0 == l_rc )

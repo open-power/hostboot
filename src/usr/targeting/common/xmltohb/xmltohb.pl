@@ -1442,7 +1442,7 @@ sub writeAttrErrlCFile {
     print $outFile "namespace ERRORLOG\n";
     print $outFile "{\n";
     print $outFile "using namespace TARGETING;\n";
-    print $outFile "extern TARG_TD_t g_trac_errl; \n";
+    print $outFile "extern TARG_TD_t g_trac_errl;\n";
 
     # loop through every attribute to create the local dump function
     foreach my $attribute (@{$attributes->{attribute}})
@@ -1518,7 +1518,7 @@ sub writeAttrErrlCFile {
             print $outFile "    uint32_t retSize = 0;\n";
             print $outFile "    AttributeTraits<ATTR_",$attribute->{id},">::Type tmp;\n";
             print $outFile "    if( i_pTarget->tryGetAttr<ATTR_",$attribute->{id},">(tmp) ) {\n";
-            print $outFile "        // data is PATH_TYPE, Number of elements, [ Element, Instance# ] \n";
+            print $outFile "        // data is PATH_TYPE, Number of elements, [ Element, Instance# ]\n";
             print $outFile "        EntityPath::PATH_TYPE lPtype = tmp.type();\n";
             print $outFile "        memcpy(i_buffer + retSize,&lPtype,sizeof(lPtype));\n";
             print $outFile "        retSize += sizeof(lPtype);\n";
@@ -1559,16 +1559,11 @@ sub writeAttrErrlCFile {
         }
     }
 
-    # build function that takes prints 1 attribute
+    # build function that takes adds 1 attribute to the output
     print $outFile "\n";
-    print $outFile "ErrlUserDetailsAttribute::ErrlUserDetailsAttribute(\n";
-    print $outFile "    const Target * i_pTarget, uint8_t i_attr)\n";
+    print $outFile "void ErrlUserDetailsAttribute::addData(\n";
+    print $outFile "    uint8_t i_attr)\n";
     print $outFile "{\n";
-    print $outFile "    // Set up ErrlUserDetails instance variables\n";
-    print $outFile "    iv_CompId = HBERRL_COMP_ID;\n";
-    print $outFile "    iv_Version = 1;\n";
-    print $outFile "    iv_SubSection = HBERRL_UDT_ATTRIBUTE;\n";
-    print $outFile "\n";
     print $outFile "    char tmpBuffer[128];\n";
     print $outFile "    uint32_t attrSize = 0;\n";
     print $outFile "\n";
@@ -1586,68 +1581,73 @@ sub writeAttrErrlCFile {
             next;
         }
         print $outFile "        case (ATTR_",$attribute->{id},"): {\n";
-        print $outFile "            attrSize = dump_ATTR_",$attribute->{id},"(i_pTarget,tmpBuffer); break;\n";
+        print $outFile "            attrSize = dump_ATTR_",$attribute->{id},"(iv_pTarget,tmpBuffer); break;\n";
         print $outFile "        }\n";
     }
 
     print $outFile "        default: { //Shouldn't be anything here!!\n";
-    print $outFile "            TRACDCOMP( g_trac_errl, \"ErrlUserDetailsAttribute: UNKNOWN i_attr %x - dumping HUID\", i_attr);\n";
-    print $outFile "            attrSize = dump_ATTR_HUID(i_pTarget,tmpBuffer); break;\n";
+    print $outFile "            TRACDCOMP( g_trac_errl, \"ErrlUserDetailsAttribute: UNKNOWN i_attr %x\", i_attr);\n";
     print $outFile "            break;\n";
     print $outFile "        }\n";
     print $outFile "    } //switch\n";
     print $outFile "\n";
     print $outFile "    // if we generated one, copy the string into the buffer\n";
-    print $outFile "    if (attrSize) {\n";
-    print $outFile "        // first, write out the HUID if we didn't already\n";
-    print $outFile "        if (i_attr != ATTR_HUID) {\n";
-    print $outFile "            char huidBuffer[128];\n";
-    print $outFile "            uint32_t huidSize = dump_ATTR_HUID(i_pTarget,huidBuffer);\n";
-    print $outFile "            // resize buffer\n";
-    print $outFile "            uint8_t * pBuf;\n";
-    print $outFile "            pBuf = reinterpret_cast<uint8_t *>(reallocUsrBuf(huidSize + attrSize + 2));\n";
-    print $outFile "            *pBuf = ATTR_HUID; // first dump the attr enum\n";
-    print $outFile "            pBuf++;\n";
-    print $outFile "            memcpy(pBuf, huidBuffer, huidSize); // copy huid into iv_pBuffer\n";
-    print $outFile "            pBuf += huidSize;\n";
-    print $outFile "            memcpy(pBuf, &i_attr, 1); // first dump the attr enum\n";
-    print $outFile "            pBuf++;\n";
-    print $outFile "            memcpy(pBuf, tmpBuffer, attrSize); // copy tmpBuffer into iv_pBuffer\n";
-    print $outFile "            //pBuf += attrSize;\n";
-    print $outFile "        } else { // it IS HUID - just dump it\n";
-    print $outFile "            // resize buffer\n";
-    print $outFile "            uint8_t * pBuf;\n";
-    print $outFile "            pBuf = reinterpret_cast<uint8_t *>(reallocUsrBuf(attrSize + 1));\n";
-    print $outFile "            *pBuf = i_attr; // first dump the attr enum\n";
-    print $outFile "            pBuf++;\n";
-    print $outFile "            memcpy(pBuf, tmpBuffer, attrSize); // copy tmpBuffer into iv_pBuffer\n";
-    print $outFile "            //pBuf += attrSize;\n";
-    print $outFile "        }\n";
+    print $outFile "    if (attrSize) { // we have something to output\n";
+    print $outFile "        // resize buffer and copy string into it\n";
+    print $outFile "        uint8_t * pBuf;\n";
+    print $outFile "        pBuf = reinterpret_cast<uint8_t *>(reallocUsrBuf(iv_dataSize + attrSize + 1));\n";
+    print $outFile "        *(pBuf + iv_dataSize) = i_attr; // first dump the attr enum\n";
+    print $outFile "        iv_dataSize++;\n";
+    print $outFile "        memcpy(pBuf + iv_dataSize, tmpBuffer, attrSize); // copy into iv_pBuffer\n";
+    print $outFile "        iv_dataSize += attrSize;\n";
     print $outFile "    }\n";
     print $outFile "}\n";
-
-    # build function that takes prints all attributes
     print $outFile "\n";
+
+    # build constructor that dumps 1 attribute
+    print $outFile "\n";
+    print $outFile "//------------------------------------------------------------------------------\n";
     print $outFile "ErrlUserDetailsAttribute::ErrlUserDetailsAttribute(\n";
-    print $outFile "    const Target * i_pTarget)\n";
+    print $outFile "    const Target * i_pTarget, uint8_t i_attr)\n";
+    print $outFile "    : iv_pTarget(i_pTarget), iv_dataSize(0)\n";
     print $outFile "{\n";
     print $outFile "    // Set up ErrlUserDetails instance variables\n";
     print $outFile "    iv_CompId = HBERRL_COMP_ID;\n";
     print $outFile "    iv_Version = 1;\n";
     print $outFile "    iv_SubSection = HBERRL_UDT_ATTRIBUTE;\n";
+    print $outFile "    iv_merge = true;\n";
     print $outFile "\n";
-    print $outFile "    char tmpBuffer[128];\n";
-    print $outFile "    uint8_t * pBuf;\n";
-    print $outFile "    uint32_t attrSize = 0, bufSize = 0;\n";
+    print $outFile "    // first, write out the HUID\n";
+    print $outFile "    addData(ATTR_HUID);\n";
+    print $outFile "    if (i_attr != ATTR_HUID) {\n";
+    print $outFile "        addData(i_attr);\n";
+    print $outFile "    }\n";
+    print $outFile "}\n";
     print $outFile "\n";
+
+    # build constructor that dumps all attributes
+    print $outFile "//------------------------------------------------------------------------------\n";
+    print $outFile "ErrlUserDetailsAttribute::ErrlUserDetailsAttribute(\n";
+    print $outFile "    const Target * i_pTarget)\n";
+    print $outFile "    : iv_pTarget(i_pTarget), iv_dataSize(0)\n";
+    print $outFile "{\n";
+    print $outFile "    // Set up ErrlUserDetails instance variables\n";
+    print $outFile "    iv_CompId = HBERRL_COMP_ID;\n";
+    print $outFile "    iv_Version = 1;\n";
+    print $outFile "    iv_SubSection = HBERRL_UDT_ATTRIBUTE;\n";
+    print $outFile "    // override the default of false\n";
+    print $outFile "    iv_merge = true;\n";
+    print $outFile "\n";
+    print $outFile "    dumpAll();\n";
+    print $outFile "}\n";
+    print $outFile "\n";
+
+    # build internal function that dumps all attributes
+    print $outFile "//------------------------------------------------------------------------------\n";
+    print $outFile "void ErrlUserDetailsAttribute::dumpAll()\n";
+    print $outFile "{\n";
     print $outFile "    // write out the HUID first and always\n";
-    print $outFile "    attrSize = dump_ATTR_HUID(i_pTarget,tmpBuffer);\n";
-    print $outFile "    pBuf = reinterpret_cast<uint8_t *>(reallocUsrBuf(bufSize + attrSize + 1)); \n";
-    print $outFile "    *pBuf = ATTR_HUID; // first dump the attr enum\n";
-    print $outFile "    bufSize++;\n";
-    print $outFile "    memcpy(pBuf + bufSize, tmpBuffer, attrSize); // copy into iv_pBuffer \n";
-    print $outFile "    bufSize += attrSize; \n";
-    print $outFile "\n";
+    print $outFile "    addData(ATTR_HUID);\n";
 
     # loop through every attribute to make the swith/case
     foreach my $attribute (@{$attributes->{attribute}})
@@ -1663,21 +1663,12 @@ sub writeAttrErrlCFile {
           ) {
             next;
         }
-        print $outFile "    attrSize = dump_ATTR_",$attribute->{id},"(i_pTarget,tmpBuffer);\n";
-        print $outFile "    if (attrSize) { // we have something to output\n";
-        print $outFile "        // resize buffer and copy string into it\n";
-        print $outFile "        pBuf = reinterpret_cast<uint8_t *>(reallocUsrBuf(bufSize + attrSize + 1));\n";
-        print $outFile "        *(pBuf + bufSize) = ATTR_",$attribute->{id},"; // first dump the attr enum\n";
-        print $outFile "        bufSize++;\n";
-        print $outFile "        memcpy(pBuf + bufSize, tmpBuffer, attrSize); // copy into iv_pBuffer\n";
-        print $outFile "        bufSize += attrSize;\n";
-        print $outFile "    }\n";
-        print $outFile "\n";
+        print $outFile "    addData(ATTR_",$attribute->{id},");\n";
     }
-
     print $outFile "}\n";
 
     print $outFile "\n";
+
     print $outFile "//------------------------------------------------------------------------------\n";
     print $outFile "ErrlUserDetailsAttribute::~ErrlUserDetailsAttribute()\n";
     print $outFile "{ }\n";
@@ -1701,7 +1692,7 @@ sub writeAttrErrlHFile {
     print $outFile "#ifndef PARSER\n";
     print $outFile "\n";
     print $outFile "namespace TARGETING // Forward reference\n";
-    print $outFile "{ class Target; } \n";
+    print $outFile "{ class Target; }\n";
     print $outFile "\n";
     print $outFile "namespace ERRORLOG\n";
     print $outFile "{\n";
@@ -1709,21 +1700,24 @@ sub writeAttrErrlHFile {
     print $outFile "public:\n";
     print $outFile "\n";
     print $outFile "    ErrlUserDetailsAttribute(const TARGETING::Target * i_pTarget, uint8_t i_attr);\n";
-    print $outFile "\n";
     print $outFile "    ErrlUserDetailsAttribute(const TARGETING::Target * i_pTarget);\n";
-    print $outFile "\n";
+    print $outFile "    void addData(uint8_t i_attr);\n";
     print $outFile "    virtual ~ErrlUserDetailsAttribute();\n";
     print $outFile "\n";
     print $outFile "private:\n";
     print $outFile "\n";
-    print $outFile     "// Disabled\n";
+    print $outFile "    // Disabled\n";
     print $outFile "    ErrlUserDetailsAttribute(const ErrlUserDetailsAttribute &);\n";
     print $outFile "    ErrlUserDetailsAttribute & operator=(const ErrlUserDetailsAttribute &);\n";
+    print $outFile "\n";
+    print $outFile "    // internal function\n";
+    print $outFile "    void dumpAll();\n";
+    print $outFile "\n";
+    print $outFile "    const TARGETING::Target * iv_pTarget;\n";
+    print $outFile "    uint32_t iv_dataSize;\n";
     print $outFile "};\n";
     print $outFile "}\n";
     print $outFile "#else // if PARSER defined\n";
-    print $outFile "\n";
-    print $outFile "#include <string.h>\n";
     print $outFile "\n";
     print $outFile "namespace ERRORLOG\n";
     print $outFile "{\n";
@@ -1740,13 +1734,13 @@ sub writeAttrErrlHFile {
     print $outFile " *  \@param  i_pBuffer Pointer to buffer containing detail data\n";
     print $outFile " *  \@param  i_buflen  Length of the buffer\n";
     print $outFile " */\n";
-    print $outFile "  virtual void parse(errlver_t i_version, \n";
+    print $outFile "  virtual void parse(errlver_t i_version,\n";
     print $outFile "                        ErrlUsrParser & i_parser,\n";
     print $outFile "                        void * i_pBuffer,\n";
     print $outFile "                        const uint32_t i_buflen) const\n";
     print $outFile "  {\n";
     print $outFile "    const char *pLabel;\n";
-    print $outFile "    uint8_t *l_ptr = static_cast<char *>(i_pBuffer);\n";
+    print $outFile "    uint8_t *l_ptr = static_cast<uint8_t *>(i_pBuffer);\n";
     print $outFile "    uint32_t i = 0;\n";
     print $outFile "    std::vector<char> l_traceEntry(128);\n";
     print $outFile "\n";

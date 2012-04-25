@@ -118,12 +118,13 @@ public:
         uint32_t i = 0;
 
         // errlog data
-        uint8_t *l_ptr = static_cast<char *>(i_pBuffer);
+        uint8_t *l_ptr = static_cast<uint8_t *>(i_pBuffer);
+
+        // TODO: needs to be updated to handle merged records
 
         if (*l_ptr == 1) // special - master
         { 
-          //const char *pTargetString = "MASTER_PROCESSOR_CHIP_TARGET_SENTINEL";
-          i_parser.PrintString(NULL, "MASTER_PROCESSOR_CHIP_TARGET_SENTINEL");
+            i_parser.PrintString(NULL, "MASTER_PROCESSOR_CHIP_TARGET_SENTINEL");
         }
         else
         {
@@ -212,7 +213,6 @@ public:
 
             for (; i < i_buflen; )
             {
-          
                 if ((*l_ptr == 0x15) || // ATTR_PHYS_PATH
                     (*l_ptr == 0x16))   // ATTR_AFFINITY_PATH
                 {
@@ -237,8 +237,8 @@ public:
                     const uint8_t pathSize = (pathTypeLength & 0x0F);
                     uint8_t *lElementInstance = ((uint8_t *)l_ptr);
                     l_ptr += pathSize * sizeof(uint8_t);
-                    for (uint32_t i=0;i<pathSize;i += 2) {
-                        switch (lElementInstance[i]) {
+                    for (uint32_t j=0;j<pathSize;j += 2) {
+                        switch (lElementInstance[j]) {
                             case 0x01: pathString = "/Sys"; break;
                             case 0x02: pathString = "/Node"; break;
                             case 0x03: pathString = "/DIMM"; break;
@@ -273,7 +273,7 @@ public:
                             default: pathString = "/Unknown"; break;
                         } // switch
                         // copy next part in, overwritting previous terminator
-                        dataSize += sprintf(outString + dataSize, "%s%d",pathString,lElementInstance[i+1]);
+                        dataSize += sprintf(outString + dataSize, "%s%d",pathString,lElementInstance[j+1]);
                     } // for
                     if (*l_ptr == 0x15) // ATTR_PHYS_PATH
                     {
@@ -283,7 +283,7 @@ public:
                     {
                       i_parser.PrintString("ATTR_AFFINITY_PATH", outString);
                     }
-                  }
+                }
             } // for
         }
     } // parse()

@@ -69,6 +69,7 @@ private:
 
 #else // (if PARSER defined)
 
+#include <string.h>
 /**
  * @class ErrlUserDetailsString
  *
@@ -100,7 +101,13 @@ public:
                        void * i_pBuffer,
                        const uint32_t i_buflen) const
     {
-        i_parser.PrintString("String data", static_cast<char *>(i_pBuffer));
+        char *outputString= static_cast<char *>(i_pBuffer);
+        for (uint32_t i = 0; i < i_buflen; )
+        {
+            i_parser.PrintString("String data", outputString);
+            i += strlen(outputString) + 1;
+            outputString += strlen(outputString) + 1;
+        }
     }
 
 private:

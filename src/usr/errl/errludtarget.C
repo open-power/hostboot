@@ -42,6 +42,13 @@ ErrlUserDetailsTarget::ErrlUserDetailsTarget(
     iv_Version = 1;
     iv_SubSection = HBERRL_UDT_TARGET;
 
+    // override the default of false.
+    //iv_merge = true;
+    // TODO until the errlparser tool is fixed and the errludtarget parse()
+    // function can be fully tested and debugged, we'll leave this as false
+    // so that the records are NOT merged to make it less confusing.
+    iv_merge = false;
+
     if (i_pTarget == TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL)
     {
         uint8_t *pBuffer = reinterpret_cast<uint8_t *>(
