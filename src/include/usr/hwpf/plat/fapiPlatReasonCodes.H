@@ -48,6 +48,7 @@ namespace fapi
         MOD_ATTR_DQ_MAP_GET                        = 0x09,
         MOD_GET_CFAM_CHIP_TARGET                   = 0x0A,
         MOD_ATTR_GET_TARGET_NAME                   = 0x0B,
+        MOD_FAPI_GET_ASSOCIATE_DIMMS               = 0x0C,
     };
 
     /**
@@ -70,6 +71,7 @@ namespace fapi
         RC_CFAM_ACCESS_ON_PROC_ERR    = HWPF_COMP_ID | 0x15,
         RC_ATTR_BAD_TARGET_PARAM      = HWPF_COMP_ID | 0x16,
         RC_INVALID_NUM_PARENT_CHIP    = HWPF_COMP_ID | 0x17,
+        RC_EMBEDDED_NULL_TARGET_PTR   = HWPF_COMP_ID | 0x18,
     };
 
     /**

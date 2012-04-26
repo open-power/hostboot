@@ -41,15 +41,18 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/edi_ei_initialization
 ##  NOTE: add a new EXTRAINCDIR when you add a new HWP
 ##  EXAMPLE:
 ##  EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/edi_ei_initialization/<HWP_dir>
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/edi_ei_initialization/proc_fab_iovalid
 
 
 ##  NOTE: add new object files when you add a new HWP
-OBJS =  edi_ei_initialization.o
+OBJS =  edi_ei_initialization.o \
+        proc_fab_iovalid.o proc_fab_smp.o
 
         
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 ##  EXAMPLE:
 #   VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/edi_ei_initialization/<HWP_dir>
+VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/edi_ei_initialization/proc_fab_iovalid
 
 
 include ${ROOTPATH}/config.mk

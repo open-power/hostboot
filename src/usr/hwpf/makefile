@@ -35,7 +35,8 @@ HWP_ERROR_XML_FILES = hwp/fapiHwpErrorInfo.xml   \
     hwp/dmi_training/dmi_io_run_training/io_run_training_errors.xml \
     hwp/dimm_errors.xml	\
     hwp/dram_training/memory_errors.xml \
-    hwp/start_clocks_on_nest_chiplets/proc_start_clocks_chiplets/proc_start_clocks_chiplets_errors.xml
+    hwp/start_clocks_on_nest_chiplets/proc_start_clocks_chiplets/proc_start_clocks_chiplets_errors.xml \
+    hwp/edi_ei_initialization/proc_fab_iovalid/proc_fab_smp_errors.xml
 
 HWP_ATTR_XML_FILES = hwp/memory_attributes.xml \
                      hwp/L2_L3_attributes.xml \

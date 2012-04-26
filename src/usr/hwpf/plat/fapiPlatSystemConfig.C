@@ -33,7 +33,7 @@
 #include <fapiPlatReasonCodes.H>
 #include <errl/errlentry.H>
 #include <targeting/common/targetservice.H>
-#include <targeting/common/predicates/predicates.H>
+#include <targeting/common/predicates/predicatectm.H>
 
 extern "C"
 {
@@ -127,11 +127,34 @@ fapi::ReturnCode fapiGetChildChiplets(
         }
     }
 
-    if (!l_rc)
+    do
     {
+        if (l_rc)
+        {
+            break;
+        }
+
         // Extract the HostBoot Target pointer for the input chip
         TARGETING::Target * l_pChip =
             reinterpret_cast<TARGETING::Target*>(i_chip.get());
+
+        if (l_pChip == NULL)
+        {
+            /*@
+             * @errortype
+             * @moduleid     MOD_FAPI_GET_CHILD_CHIPLETS
+             * @reasoncode   RC_EMBEDDED_NULL_TARGET_PTR
+             * @devdesc      fapi target has embedded null target pointer
+             */
+            errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                fapi::MOD_FAPI_GET_CHILD_CHIPLETS,
+                fapi::RC_EMBEDDED_NULL_TARGET_PTR);
+
+            // Attach the error log to the fapi::ReturnCode
+            l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
+            break;
+        }
 
         // Create a vector of TARGETING::Target pointers
         TARGETING::TargetHandleList l_chipletList;
@@ -149,7 +172,7 @@ fapi::ReturnCode fapiGetChildChiplets(
                                    reinterpret_cast<void *>(l_chipletList[i]));
             o_chiplets.push_back(l_chiplet);
         }
-    }
+    } while(0);
 
     FAPI_INF(EXIT_MRK "fapiGetChildChiplets. %d results", o_chiplets.size());
     return l_rc;
@@ -181,11 +204,30 @@ fapi::ReturnCode fapiGetAssociatedDimms(
     // Create a vector of TARGETING::Target pointers
     TARGETING::TargetHandleList l_dimmList;
 
-    // Get associated dimms
-    TARGETING::targetService().
+    if (l_pTarget == NULL)
+    {
+        /*@
+         * @errortype
+         * @moduleid     MOD_FAPI_GET_ASSOCIATE_DIMMS
+         * @reasoncode   RC_EMBEDDED_NULL_TARGET_PTR
+         * @devdesc      fapi target has embedded null target pointer
+         */
+        errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                fapi::MOD_FAPI_GET_ASSOCIATE_DIMMS,
+                fapi::RC_EMBEDDED_NULL_TARGET_PTR);
+
+        // Attach the error log to the fapi::ReturnCode
+        l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
+    }
+    else
+    {
+        // Get associated dimms
+        TARGETING::targetService().
         getAssociated(l_dimmList, l_pTarget,
                       TARGETING::TargetService::CHILD_BY_AFFINITY,
                       TARGETING::TargetService::ALL, &l_predicate);
+    }
 
     // Return fapi::Targets to the caller
     for (uint32_t i = 0; i < l_dimmList.size(); i++)
@@ -232,14 +274,39 @@ fapi::ReturnCode fapiGetParentChip(
         // Attach the error log to the fapi::ReturnCode
         l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
     }
-    else
+
+    do
     {
+
+        if (l_rc)
+        {
+            break;
+        }
+
         // Create a Class/Type/Model predicate to look for chips
         TARGETING::PredicateCTM l_predicate(TARGETING::CLASS_CHIP);
 
         // Extract the HostBoot Target pointer for the input chiplet
         TARGETING::Target * l_pChiplet =
             reinterpret_cast<TARGETING::Target*>(i_chiplet.get());
+
+        if (l_pChiplet == NULL)
+        {
+            /*@
+             * @errortype
+             * @moduleid     MOD_FAPI_GET_PARENT_CHIP
+             * @reasoncode   RC_EMBEDDED_NULL_TARGET_PTR
+             * @devdesc      fapi target has embedded null target pointer
+             */
+            errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                fapi::MOD_FAPI_GET_PARENT_CHIP,
+                fapi::RC_EMBEDDED_NULL_TARGET_PTR);
+
+            // Attach the error log to the fapi::ReturnCode
+            l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
+            break;
+        }
 
         // Create a vector of TARGETING::Target pointers
         TARGETING::TargetHandleList l_chipList;
@@ -288,7 +355,7 @@ fapi::ReturnCode fapiGetParentChip(
             // Set the output chip (platform specific) handle
             o_chip.set(reinterpret_cast<void *>(l_chipList[0]));
         }
-    }
+    } while(0);
 
     FAPI_INF(EXIT_MRK "fapiGetParentChip");
     return l_rc;
