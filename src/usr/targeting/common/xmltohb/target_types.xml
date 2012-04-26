@@ -505,6 +505,7 @@
         <default>ABUS</default>
     </attribute>
     <attribute><id>CHIP_UNIT</id></attribute>
+    <attribute><id>PEER_TARGET</id></attribute>
 </targetType>
 
 <targetType>
@@ -542,6 +543,7 @@
         <default>XBUS</default>
     </attribute>
     <attribute><id>CHIP_UNIT</id></attribute>
+    <attribute><id>PEER_TARGET</id></attribute>
 </targetType>
 
 <targetType>

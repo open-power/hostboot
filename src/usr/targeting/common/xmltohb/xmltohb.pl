@@ -114,12 +114,15 @@ my $attributes = $xml->XMLin($cfgHbXmlFile,
     forcearray => ['enumerationType','attribute','hwpfToHbAttrMap']);
 my $fapiAttributes = $xml->XMLin($cfgFapiAttributesXmlFile,
     forcearray => ['attribute']);
+# save attributes defined as Target_t type
+my %Target_t = ();
 
 # Perform some sanity validation of the model (so we don't have to later)
 validateAttributes($attributes);
 validateTargetInstances($attributes);
 validateTargetTypes($attributes);
 validateTargetTypesExtension($attributes);
+handleTgtPtrAttributes(\$attributes, \%Target_t);
 
 # Open the output files and write them
 if( !($cfgSrcOutputDir =~ "none") )
@@ -199,12 +202,14 @@ if( !($cfgSrcOutputDir =~ "none") )
 
 if( !($cfgImgOutputDir =~ "none") )
 {
+    my $Data = generateTargetingImage($cfgVmmConstsFile,$attributes,\%Target_t);
+
     open(PNOR_TARGETING_FILE,">$cfgImgOutputDir".$cfgImgOutputFile)
       or fatal ("Targeting image file: \"$cfgImgOutputDir"
         . "$cfgImgOutputFile\" could not be opened.");
-    my $pnorFile = *PNOR_TARGETING_FILE;
-    writeTargetingImage($pnorFile,$cfgVmmConstsFile,$attributes);
-    close $pnorFile;
+    binmode(PNOR_TARGETING_FILE);
+    print PNOR_TARGETING_FILE "$Data";
+    close(PNOR_TARGETING_FILE);
 }
 
 exit(0);
@@ -275,6 +280,7 @@ sub validateSubElements {
         }
     }
 }
+
 
 ################################################################################
 # Validates attribute element for correctness
@@ -373,6 +379,62 @@ sub validateTargetInstances{
     foreach my $targetInstance (@{$attributes->{targetInstance}})
     {
         validateSubElements("targetInstance",1,$targetInstance,\%elements);
+    }
+}
+
+################################################################################
+# Convert PHYS_PATH into index for Target_t attribute's value
+################################################################################
+
+sub handleTgtPtrAttributes{
+    my($attributes, $Target_t) = @_;
+
+    my $aId = 0;
+    ${$Target_t}{'NULL'} = $aId;
+    foreach my $attribute (@{${$attributes}->{attribute}})
+    {
+        $aId++;
+        if(exists $attribute->{simpleType} &&
+           exists $attribute->{simpleType}->{'Target_t'})
+        {
+            ${$Target_t}{"$attribute->{id}"} = $aId;
+        }
+    }
+
+    my %TargetList = ();
+    my $index = 1;
+    # Mapping instance's PHYS_PATH to index (1-base)
+    foreach my $targetInstance (@{${$attributes}->{targetInstance}})
+    {
+        foreach my $attr (@{$targetInstance->{attribute}})
+        {
+            if ($attr->{id} eq "PHYS_PATH")
+            {
+                $TargetList{$attr->{default}} = $index++;
+                last;
+            }
+        }
+    }
+    # replace Target_t attribute's value with instance's index
+    foreach my $targetInstance (@{${$attributes}->{targetInstance}})
+    {
+        foreach my $attr (@{$targetInstance->{attribute}})
+        {
+            # An instance has a Target_t attribute
+            if(exists ${$Target_t}{$attr->{id}})
+            {
+                if (exists $TargetList{$attr->{default}})
+                {
+                    $attr->{default} = $TargetList{$attr->{default}};
+                }
+                else
+                {
+                    fatal("$attr->{id} attribute has an unknown value "
+                          . "$attr->{default}\n"
+                          . "It must be NULL or a valid PHYS_PATH\n");
+                }
+            }
+        }
     }
 }
 
@@ -1857,6 +1919,7 @@ sub simpleTypeProperties {
     $typesHoH{"uint64_t"}    = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "uint64_t"                   , bytes => 8, bits => 64, default => \&defaultZero  , alignment => 1, specialPolicies =>\&null,           packfmt =>\&packQuad};
     $typesHoH{"enumeration"} = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 0, typeName => "XMLTOHB_USE_PARENT_ATTR_ID" , bytes => 0, bits => 0 , default => \&defaultEnum  , alignment => 1, specialPolicies =>\&null,           packfmt => "packEnumeration"};
     $typesHoH{"hbmutex"}     = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 0, typeName => "mutex_t*"                   , bytes => 8, bits => 64, default => \&defaultZero  , alignment => 8, specialPolicies =>\&enforceHbMutex, packfmt =>\&packQuad};
+    $typesHoH{"Target_t"}    = { supportsArray => 0, canBeHex => 1, complexTypeSupport => 0, typeName => "TARGETING::Target*"         , bytes => 8, bits => 64, default => \&defaultZero  , alignment => 8, specialPolicies =>\&null,           packfmt =>\&packQuad};
 
     $g_simpleTypeProperties_cache = \%typesHoH;
 
@@ -2544,8 +2607,8 @@ sub getPnorBaseAddress {
 # Write the PNOR targeting image
 ################################################################################
 
-sub writeTargetingImage {
-    my($outFile, $vmmConstsFile, $attributes) = @_;
+sub generateTargetingImage {
+    my($vmmConstsFile, $attributes, $Target_t) = @_;
 
     # 128 MB virtual memory offset between sections
     #@TODO Need the final value after full host boot support is implemented.
@@ -2645,10 +2708,10 @@ sub writeTargetingImage {
     # Don't increment the offset; already accounted for
     $numTargetsPointer = $pnorRoBaseAddress + $offset;
     $numTargetsPointerBinData = packQuad($numTargetsPointer);
-
     my $numTargetsBinData = pack("N",$numTargets);
     $offset += (length $numTargetsBinData);
 
+    my $firstTgtPtr = $pnorRoBaseAddress + $offset;
     my $roAttrBinData;
     my $heapZeroInitOffset = 0;
     my $heapZeroInitBinData;
@@ -2666,11 +2729,11 @@ sub writeTargetingImage {
     {
         my $data;
 
-        # print "TargetInstance: $targetInstance->{id}\n";
-        # print "    Attributes:  ",
-        # $attributeListTypeHoH{$targetInstance->{type}}{elements}, "\n" ;
-        # print "        offset:  ",
-        # $attributeListTypeHoH{$targetInstance->{type}}{offset}, "\n" ;
+         # print "TargetInstance: $targetInstance->{id}\n";
+         # print "    Attributes:  ",
+         # $attributeListTypeHoH{$targetInstance->{type}}{elements}, "\n" ;
+         # print "        offset:  ",
+         # $attributeListTypeHoH{$targetInstance->{type}}{offset}, "\n" ;
 
         # Create target record
         $data .= pack('N',
@@ -2757,6 +2820,14 @@ sub writeTargetingImage {
 
             if($section eq "pnor-ro")
             {
+                if ((exists ${$Target_t}{$attributeId}) &&
+                    ($attrhash{$attributeId}->{default} != 0))
+                {
+                    my $index = $attrhash{$attributeId}->{default} - 1;
+                    $index *= 20; # length(N + quad + quad)
+                    $attrhash{$attributeId}->{default} = $index + $firstTgtPtr;
+                }
+
                 my ($rodata,$alignment) = packAttribute($attributes,
                         $attributeDef,
                         $attrhash{$attributeId}->{default});
@@ -2912,29 +2983,33 @@ sub writeTargetingImage {
         fatal("Header data of length " . (length $headerBinData) . " is larger "
             . "than allocated amount of $headerSize.");
     }
-    print $outFile $headerBinData;
+
+    my $outFile;
+    $outFile .= $headerBinData;
     my $padSize = sizeBlockAligned((length $headerBinData),$headerSize,1)
         - (length $headerBinData);
-    print $outFile pack ("@".$padSize);
+    $outFile .= pack ("@".$padSize);
 
     # Remaining data belongs to targeting
-    print $outFile $numTargetsPointerBinData;
-    print $outFile $attributeListBinData;
-    print $outFile $attributePointerBinData;
-    print $outFile $numTargetsBinData;
-    print $outFile $targetsBinData;
-    print $outFile $roAttrBinData;
-    print $outFile pack ("@".($sectionHoH{pnorRo}{size} - $offset));
+    $outFile .= $numTargetsPointerBinData;
+    $outFile .= $attributeListBinData;
+    $outFile .= $attributePointerBinData;
+    $outFile .= $numTargetsBinData;
+    $outFile .= $targetsBinData;
+    $outFile .= $roAttrBinData;
+    $outFile .= pack ("@".($sectionHoH{pnorRo}{size} - $offset));
 
     # Serialize PNOR RW section to multiple of 4k page size (pad if necessary)
-    print $outFile $rwAttrBinData;
-    print $outFile pack("@".($sectionHoH{pnorRw}{size} - $rwOffset));
+    $outFile .= $rwAttrBinData;
+    $outFile .= pack("@".($sectionHoH{pnorRw}{size} - $rwOffset));
 
     # Serialize PNOR initiated heap section to multiple of 4k page size (pad if
     # necessary)
-    print $outFile $heapPnorInitBinData;
-    print $outFile pack("@".($sectionHoH{heapPnorInit}{size}
+    $outFile .= $heapPnorInitBinData;
+    $outFile .= pack("@".($sectionHoH{heapPnorInit}{size}
         - $heapPnorInitOffset));
+
+    return $outFile;
 }
 
 __END__

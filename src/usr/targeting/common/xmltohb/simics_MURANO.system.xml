@@ -606,6 +606,10 @@
         <id>CHIP_UNIT</id>
         <default>1</default>
     </attribute>  
+    <attribute>
+        <id>PEER_TARGET</id>
+        <default>physical:sys-0/node-0/proc-2/abus-1</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -623,6 +627,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>2</default>
+    </attribute>
+    <attribute>
+        <id>PEER_TARGET</id>
+        <default>physical:sys-0/node-0/proc-2/abus-2</default>
     </attribute>
 </targetInstance>
 
@@ -644,6 +652,10 @@
         <id>CHIP_UNIT</id>
         <default>0</default>
     </attribute>  
+    <attribute>
+        <id>PEER_TARGET</id>
+        <default>physical:sys-0/node-0/proc-1/xbus-0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -1182,6 +1194,10 @@
         <id>CHIP_UNIT</id>
         <default>1</default>
     </attribute>
+    <attribute>
+        <id>PEER_TARGET</id>
+        <default>physical:sys-0/node-0/proc-3/abus-1</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -1199,6 +1215,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>2</default>
+    </attribute>
+    <attribute>
+        <id>PEER_TARGET</id>
+        <default>physical:sys-0/node-0/proc-3/abus-2</default>
     </attribute>
 </targetInstance>
 
@@ -1219,6 +1239,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PEER_TARGET</id>
+        <default>physical:sys-0/node-0/proc-0/xbus-0</default>
     </attribute>
 </targetInstance>
 
@@ -1759,6 +1783,10 @@
         <id>CHIP_UNIT</id>
         <default>1</default>
     </attribute>
+    <attribute>
+        <id>PEER_TARGET</id>
+        <default>physical:sys-0/node-0/proc-0/abus-1</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -1776,6 +1804,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>2</default>
+    </attribute>
+    <attribute>
+        <id>PEER_TARGET</id>
+        <default>physical:sys-0/node-0/proc-0/abus-2</default>
     </attribute>
 </targetInstance>
 
@@ -1796,6 +1828,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PEER_TARGET</id>
+        <default>physical:sys-0/node-0/proc-3/xbus-0</default>
     </attribute>
 </targetInstance>
 
@@ -2335,6 +2371,10 @@
         <id>CHIP_UNIT</id>
         <default>1</default>
     </attribute>
+    <attribute>
+        <id>PEER_TARGET</id>
+        <default>physical:sys-0/node-0/proc-1/abus-1</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -2352,6 +2392,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>2</default>
+    </attribute>
+    <attribute>
+        <id>PEER_TARGET</id>
+        <default>physical:sys-0/node-0/proc-1/abus-2</default>
     </attribute>
 </targetInstance>
 
@@ -2372,6 +2416,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PEER_TARGET</id>
+        <default>physical:sys-0/node-0/proc-2/xbus-0</default>
     </attribute>
 </targetInstance>
 

@@ -3403,4 +3403,22 @@
     <readable/>
 </attribute>
 
+<attribute>
+    <id>PEER_TARGET</id>
+    <description>Peer target's address of a A/X-bus connection.
+                 NULL means address 0 for no peer target. If a
+                 target instance overrides the default with the
+                 peer target's PHYS_PATH. The target compiler will
+                 convert the valid PHYS_PATH string into the runtime
+                 virtual address of the peer target instance.
+    </description>
+    <simpleType>
+        <Target_t>
+            <default>NULL</default>
+        </Target_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
 </attributes>
