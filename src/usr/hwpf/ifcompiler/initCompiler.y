@@ -145,7 +145,6 @@ input:
 line:   scom
         | cvs_versions
         | syntax_version
-        | define
         | INIT_ENDINITFILE   {}
 ;
 
