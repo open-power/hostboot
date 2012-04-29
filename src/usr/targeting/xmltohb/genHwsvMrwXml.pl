@@ -2,7 +2,7 @@
 #  IBM_PROLOG_BEGIN_TAG
 #  This is an automatically generated prolog.
 #
-#  $Source: src/usr/targeting/xmltohb/genTuletaMrwXml.pl $
+#  $Source: src/usr/targeting/xmltohb/genHwsvMrwXml.pl $
 #
 #  IBM CONFIDENTIAL
 #
@@ -21,15 +21,18 @@
 #  Origin: 30
 #
 #  IBM_PROLOG_END
-
-#
 # Author:   Van Lee    vanlee@us.ibm.com
 #
 # Usage:
 #
-#    genTuletaMrwXml.pl --mrwdir=pathname [--outfile=XmlFilename]
+# genHwsvMrwXml.pl --system=systemname --mrwdir=pathname
+#                  [--build=hb] [--outfile=XmlFilename]
+#        --system=systemname
+#              Specify which system MRW XML to be generated
 #        --mrwdir=pathname
 #              Specify the complete dir pathname of the MRW.
+#        --build=hb
+#              Specify HostBoot build (hb)
 #        --outfile=XmlFilename
 #              Specify the filename for the output XML. If omitted, the output
 #              is written to STDOUT which can be saved by redirection.
@@ -40,17 +43,20 @@
 #   extract the needed information for generating the final xml file.
 #
 
-use constant SYSTEM => "TULETA";
 use strict;
 use XML::Simple;
 use Data::Dumper;
 
 my $mrwdir = "";
+my $sysname = "";
 my $usage = 0;
 my $outFile = "";
+my $build = "fsp";
 use Getopt::Long;
 GetOptions( "mrwdir:s"  => \$mrwdir,
+            "system:s"  => \$sysname,
             "outfile:s" => \$outFile,
+            "build:s"   => \$build,
             "help"      => \$usage, );
 
 if ($usage || ($mrwdir eq ""))
@@ -66,36 +72,63 @@ if ($outFile ne "")
     select OUTFILE;
 }
 
-open (FH, "<$mrwdir/" . lc(SYSTEM) . "-system-policy.xml") ||
-    die "ERROR: unable to open $mrwdir/" . lc(SYSTEM) . "-system-policy.xml\n";
+my $SYSNAME = uc($sysname);
+
+open (FH, "<$mrwdir/${sysname}-power-busses.xml") ||
+    die "ERROR: unable to open $mrwdir/${sysname}-power-busses.xml\n";
 close (FH);
 
-my $policy = XMLin("$mrwdir/" . lc(SYSTEM) . "-system-policy.xml");
+my $powerbus = XMLin("$mrwdir/${sysname}-power-busses.xml");
 
-open (FH, "<$mrwdir/" . lc(SYSTEM) . "-targets.xml") ||
-    die "ERROR: unable to open $mrwdir/" . lc(SYSTEM) . "-targets.xml\n";
+my @pbus;
+foreach my $i (@{$powerbus->{'power-bus'}}) 
+{
+    my $endp1 = $i->{'description'};
+    my $endp2 = $endp1;
+    $endp1 =~ s/^(.*) to.*/$1/;
+    $endp2 =~ s/.* to (.*)\s*$/$1/;
+    push @pbus, [ lc($endp1), lc($endp2) ];
+    push @pbus, [ lc($endp2), lc($endp1) ];
+}
+
+open (FH, "<$mrwdir/${sysname}-cec-chips.xml") ||
+    die "ERROR: unable to open $mrwdir/${sysname}-cec-chips.xml\n";
 close (FH);
 
-my $eTargets = XMLin("$mrwdir/" . lc(SYSTEM) . "-targets.xml");
+my $devpath = XMLin("$mrwdir/${sysname}-cec-chips.xml",
+                        KeyAttr=>'instance-path');
+
+open (FH, "<$mrwdir/${sysname}-system-policy.xml") ||
+    die "ERROR: unable to open $mrwdir/${sysname}-system-policy.xml\n";
+close (FH);
+
+my $policy = XMLin("$mrwdir/${sysname}-system-policy.xml");
+
+open (FH, "<$mrwdir/${sysname}-targets.xml") ||
+    die "ERROR: unable to open $mrwdir/${sysname}-targets.xml\n";
+close (FH);
+
+my $eTargets = XMLin("$mrwdir/${sysname}-targets.xml");
  
 # Capture all targets into the @Targets array
 use constant NAME_FIELD => 0;
 use constant NODE_FIELD => 1;
 use constant POS_FIELD  => 2;
 use constant UNIT_FIELD => 3;
-use constant LOC_FIELD  => 4;
+use constant PATH_FIELD => 4;
+use constant LOC_FIELD  => 5;
 my @Targets;
 foreach my $i (@{$eTargets->{target}}) 
 {
     push @Targets, [ $i->{'ecmd-common-name'}, $i->{node}, $i->{position},
-                     $i->{'chip-unit'}, $i->{location} ];
+                     $i->{'chip-unit'}, $i->{'instance-path'}, $i->{location} ];
 }
 
-open (FH, "<$mrwdir/" . lc(SYSTEM) . "-fsi-busses.xml") ||
-    die "ERROR: unable to open $mrwdir/" . lc(SYSTEM) . "-fsi-busses.xml\n";
+open (FH, "<$mrwdir/${sysname}-fsi-busses.xml") ||
+    die "ERROR: unable to open $mrwdir/${sysname}-fsi-busses.xml\n";
 close (FH);
 
-my $fsiBus = XMLin("$mrwdir/" . lc(SYSTEM) . "-fsi-busses.xml");
+my $fsiBus = XMLin("$mrwdir/${sysname}-fsi-busses.xml");
 
 # Capture all FSI connections into the @Fsis array
 use constant FSI_TYPE_FIELD   => 0;
@@ -108,11 +141,11 @@ foreach my $i (@{$fsiBus->{'fsi-bus'}})
         "n$i->{slave}->{target}->{node}:p$i->{slave}->{target}->{position}" ];
 }
 
-open (FH, "<$mrwdir/" . lc(SYSTEM) . "-memory-busses.xml") ||
-    die "ERROR: unable to open $mrwdir/" . lc(SYSTEM) . "-memory-busses.xml\n";
+open (FH, "<$mrwdir/${sysname}-memory-busses.xml") ||
+    die "ERROR: unable to open $mrwdir/${sysname}-memory-busses.xml\n";
 close (FH);
 
-my $memBus = XMLin("$mrwdir/" . lc(SYSTEM) . "-memory-busses.xml");
+my $memBus = XMLin("$mrwdir/${sysname}-memory-busses.xml");
 
 # Capture all memory buses info into the @Membuses array
 use constant MCS_TARGET_FIELD     => 0;
@@ -272,9 +305,10 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
     if ($STargets[$i][NAME_FIELD] eq "pu")
     {
         my $proc = $STargets[$i][POS_FIELD];
+        my $ipath = $STargets[$i][PATH_FIELD];
         if ($proc eq $Mproc)
         {
-            generate_master_proc($Mproc);
+            generate_master_proc($proc, $ipath);
         }
         else
         {
@@ -284,10 +318,10 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
                 if ($Fsis[$j][FSI_TARGET_FIELD] eq "n${node}:p$proc")
                 {
                     $fsi = $Fsis[$j][FSI_LINK_FIELD];
-                    $j = $#Fsis;
+                    last;
                 }
             }
-            generate_slave_proc($proc, $fsi);
+            generate_slave_proc($proc, $fsi, $ipath);
         }
     }
     elsif ($STargets[$i][NAME_FIELD] eq "ex")
@@ -298,7 +332,7 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
         {
             if ($ex_count == 0)
             {
-                print "\n<!-- " . SYSTEM .  " n${node}p$proc EX units -->\n";
+                print "\n<!-- $SYSNAME n${node}p$proc EX units -->\n";
             }
             generate_ex($proc, $ex);
             $ex_count++;
@@ -313,7 +347,7 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
         {
             if ($ex_count == 0)
             {
-                print "\n<!-- " . SYSTEM .  " n${node}p$proc core units -->\n";
+                print "\n<!-- $SYSNAME n${node}p$proc core units -->\n";
             }
             generate_ex_core($proc,$ex);
             $ex_count++;
@@ -330,7 +364,7 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
         my $mcs = $STargets[$i][UNIT_FIELD];
         if ($mcs_count == 0)
         {
-            print "\n<!-- " . SYSTEM .  " n${node}p$proc MCS units -->\n";
+            print "\n<!-- $SYSNAME n${node}p$proc MCS units -->\n";
         }
         generate_mcs($proc,$mcs);
         $mcs_count++;
@@ -357,6 +391,7 @@ for my $i ( 0 .. $#STargets )
     if ($STargets[$i][NAME_FIELD] eq "memb")
     {
         $memb = $STargets[$i][POS_FIELD];
+        my $ipath = $STargets[$i][PATH_FIELD];
         my $centaur = "n${node}:p${memb}";
         my $found = 0;
         my $cfsi;
@@ -369,13 +404,14 @@ for my $i ( 0 .. $#STargets )
                 $membMcs = $Membuses[$j][MCS_TARGET_FIELD];
                 $cfsi = $Membuses[$j][CFSI_LINK_FIELD];
                 $found = 1;
+                last;
             }
         }
         if ($found == 0)
         {
             die "ERROR. Can't locate Centaur from memory bus table\n";
         }
-        generate_centaur( $memb, $membMcs, $cfsi );
+        generate_centaur( $memb, $membMcs, $cfsi, $ipath );
     }
     elsif ($STargets[$i][NAME_FIELD] eq "mba")
     {
@@ -383,14 +419,14 @@ for my $i ( 0 .. $#STargets )
         generate_mba( $memb, $membMcs, $mba );
         if ($mba == 1)
         {
-            print "\n<!-- " . SYSTEM .  " Centaur n${node}p${memb} : end -->\n"
+            print "\n<!-- $SYSNAME Centaur n${node}p${memb} : end -->\n"
         }
     }
 }
 
 # Fifth, generate DIMM targets
 
-print "\n<!-- " . SYSTEM . " Centaur DIMMs -->\n";
+print "\n<!-- $SYSNAME Centaur DIMMs -->\n";
 
 for my $i ( 0 .. $#SMembuses )
 {
@@ -417,7 +453,7 @@ for my $i ( 0 .. $#SMembuses )
     }
 }
 
-print "\n</attributes>";
+print "\n</attributes>\n";
 
 # All done!
 #close ($outFH);
@@ -431,7 +467,7 @@ sub generate_sys
     my $mem_refclk = $policy->{'required-policy-settings'}->{'memory-refclock-frequency'}->{content};
 
     print "
-<!-- " . SYSTEM . " System -->
+<!-- $SYSNAME System -->
 
 <targetInstance>
     <id>sys$sys</id>
@@ -487,7 +523,7 @@ sub generate_sys
 sub generate_system_node
 {
     print "
-<!-- " . SYSTEM . " System node $node -->
+<!-- $SYSNAME System node $node -->
 
 <targetInstance>
     <id>sys${sys}node${node}</id>
@@ -507,15 +543,27 @@ sub generate_system_node
 
 sub generate_master_proc
 {
-    my $uidstr = sprintf("0x%02X07%04X",${node},${Mproc}+${node}*8);
+    my ($proc, $ipath) = @_;
+    my $scompath = $devpath->{chip}->{$ipath}->{'scom-path'};
+    my $scanpath = $devpath->{chip}->{$ipath}->{'scan-path'};
+    my $scomsize = length($scompath) + 1;
+    my $scansize = length($scanpath) + 1;
+    my $mboxpath = "";
+    my $mboxsize = 0;
+    if (exists $devpath->{chip}->{$ipath}->{'mailbox-path'})
+    {
+        $mboxpath = $devpath->{chip}->{$ipath}->{'mailbox-path'};
+        $mboxsize = length($mboxpath) + 1;
+    }
+    my $uidstr = sprintf("0x%02X07%04X",${node},${proc}+${node}*8);
     print "
-<!-- " . SYSTEM . " n${node}p${Mproc} processor chip -->
+<!-- $SYSNAME n${node}p${proc} processor chip -->
 
 <targetInstance>
-    <id>sys${sys}node${node}proc${Mproc}</id>
+    <id>sys${sys}node${node}proc${proc}</id>
     <type>chip-processor-murano</type>
     <attribute><id>HUID</id><default>${uidstr}</default></attribute>
-    <attribute><id>POSITION</id><default>${Mproc}</default></attribute>
+    <attribute><id>POSITION</id><default>${proc}</default></attribute>
     <attribute><id>SCOM_SWITCHES</id>
         <default>
             <field><id>useFsiScom</id><value>0</value></field>
@@ -528,16 +576,16 @@ sub generate_master_proc
         <id>XSCOM_CHIP_INFO</id>
         <default>
             <field><id>nodeId</id><value>$node</value></field>
-            <field><id>chipId</id><value>$Mproc</value></field>
+            <field><id>chipId</id><value>$proc</value></field>
         </default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-$sys/node-$node/proc-$Mproc</default>
+        <default>physical:sys-$sys/node-$node/proc-$proc</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-$sys/node-$node/proc-$Mproc</default>
+        <default>affinity:sys-$sys/node-$node/proc-$proc</default>
     </attribute>
     <attribute>
         <id>FABRIC_NODE_ID</id>
@@ -545,19 +593,54 @@ sub generate_master_proc
     </attribute>
     <attribute>
         <id>FABRIC_CHIP_ID</id>
-        <default>$Mproc</default>
+        <default>$proc</default>
     </attribute>
-    <attribute><id>VPD_REC_NUM</id><default>$Mproc</default></attribute>
-</targetInstance>
-";
+    <attribute><id>VPD_REC_NUM</id><default>$proc</default></attribute>";
+
+    if ($build eq "fsp")
+    {
+        print "
+    <attribute>
+        <id>FSP_SCOM_DEVICE_PATH</id>
+        <default>$scompath</default>
+        <sizeInclNull>$scomsize</sizeInclNull>
+    </attribute>
+    <attribute>
+        <id>FSP_SCAN_DEVICE_PATH</id>
+        <default>$scanpath</default>
+        <sizeInclNull>$scansize</sizeInclNull>
+    </attribute>";
+    }
+
+    if (($mboxsize != 0) && ($build eq "fsp"))
+    {
+        print "
+    <attribute>
+        <id>FSP_MBOX_DEVICE_PATH</id>
+        <default>$mboxpath</default>
+        <sizeInclNull>$mboxsize</sizeInclNull>
+    </attribute>";
+    }
+    print "\n</targetInstance>\n";
 }
 
 sub generate_slave_proc
 {
-    my ($proc, $fsi) = @_;
+    my ($proc, $fsi, $ipath) = @_;
     my $uidstr = sprintf("0x%02X07%04X",${node},$proc+${node}*8);
+    my $scompath = $devpath->{chip}->{$ipath}->{'scom-path'};
+    my $scanpath = $devpath->{chip}->{$ipath}->{'scan-path'};
+    my $scomsize = length($scompath) + 1;
+    my $scansize = length($scanpath) + 1;
+    my $mboxpath = "";
+    my $mboxsize = 0;
+    if (exists $devpath->{chip}->{$ipath}->{'mailbox-path'})
+    {
+        $mboxpath = $devpath->{chip}->{$ipath}->{'mailbox-path'};
+        $mboxsize = length($mboxpath) + 1;
+    }
     print "
-<!-- " . SYSTEM . " n${node}p$proc processor chip -->
+<!-- $SYSNAME n${node}p$proc processor chip -->
 
 <targetInstance>
     <id>sys${sys}node${node}proc$proc</id>
@@ -616,9 +699,33 @@ sub generate_slave_proc
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
-    <attribute><id>VPD_REC_NUM</id><default>$proc</default></attribute>
-</targetInstance>
-";
+    <attribute><id>VPD_REC_NUM</id><default>$proc</default></attribute>";
+
+    if ($build eq "fsp")
+    {
+        print "
+    <attribute>
+        <id>FSP_SCOM_DEVICE_PATH</id>
+        <default>$scompath</default>
+        <sizeInclNull>$scomsize</sizeInclNull>
+    </attribute>
+    <attribute>
+        <id>FSP_SCAN_DEVICE_PATH</id>
+        <default>$scanpath</default>
+        <sizeInclNull>$scansize</sizeInclNull>
+    </attribute>";
+    }
+
+    if (($mboxsize != 0) && ($build eq "fsp"))
+    {
+        print "
+    <attribute>
+        <id>FSP_MBOX_DEVICE_PATH</id>
+        <default>$mboxpath</default>
+        <sizeInclNull>$mboxsize</sizeInclNull>
+    </attribute>";
+    }
+    print "\n</targetInstance>\n";
 }
 
 sub generate_ex
@@ -701,7 +808,7 @@ sub generate_pervasive_bus
     my $proc = shift;
     my $uidstr = sprintf("0x%02X13%04X",${node},$proc+${node}*8);
     print "
-<!-- " . SYSTEM . " n${node}p$proc pervasive unit -->
+<!-- $SYSNAME n${node}p$proc pervasive unit -->
 
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}pervasive0</id>
@@ -724,7 +831,7 @@ sub generate_powerbus
     my $proc = shift;
     my $uidstr = sprintf("0x%02X14%04X",${node},$proc+${node}*8);
     print "
-<!-- " . SYSTEM . " n${node}p$proc powerbus unit -->
+<!-- $SYSNAME n${node}p$proc powerbus unit -->
 
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}powerbus0</id>
@@ -746,7 +853,7 @@ sub generate_pcies
 {
     my $proc = shift;
     my $proc_name = "n${node}:p${proc}";
-    print "\n<!-- " . SYSTEM . " n${node}p${proc} PCI units -->\n";
+    print "\n<!-- $SYSNAME n${node}p${proc} PCI units -->\n";
     for my $i ( 0 .. 2 )
     {
         generate_a_pcie( $proc, $i );
@@ -783,7 +890,7 @@ sub generate_ax_buses
     my ($proc, $type) = @_;
 
     my $proc_name = "n${node}p${proc}";
-    print "\n<!-- " . SYSTEM . " $proc_name ${type}BUS units -->\n";
+    print "\n<!-- $SYSNAME $proc_name ${type}BUS units -->\n";
     my $maxbus = ($type eq "A") ? 2 : 3;
     my $typenum = ($type eq "A") ? 0x16 : 0x15;
     $type = lc( $type );
@@ -793,6 +900,21 @@ sub generate_ax_buses
 			     ${node},
 			       $typenum,
 			       $i+$proc*($maxbus+1)+${node}*8*($maxbus+1));
+        my $peer = 0;
+        my $p_proc = 0;
+        my $p_port = 0;
+        foreach my $j ( @pbus )
+        {
+            if ($j->[0] eq "n${node}:p${proc}:${type}${i}")
+            {
+                #$peer = 1;
+                $p_proc = $j->[1];
+                $p_port = $p_proc;
+                $p_proc =~ s/^.*:p(.*):.*$/$1/;
+                $p_port =~ s/.*:p.*:.(.*)$/$1/;
+                last;
+            }
+        }
         print "
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}${type}bus$i</id>
@@ -809,15 +931,26 @@ sub generate_ax_buses
     <attribute>
         <id>CHIP_UNIT</id>
         <default>$i</default>
-    </attribute>
-</targetInstance>
-";
+    </attribute>";
+        if ($peer)
+        {
+            print "
+    <attribute>
+        <id>PEER_TARGET<id>
+        <default>affinity:sys-$sys/node-$node/proc-$p_proc/${type}bus-$p_port</default>
+    </attribute>";
+        }
+        print "\n</targetInstance>\n";
     }
 }
 
 sub generate_centaur
 {
-    my ($ctaur, $mcs, $cfsi) = @_;
+    my ($ctaur, $mcs, $cfsi, $ipath) = @_;
+    my $scompath = $devpath->{chip}->{$ipath}->{'scom-path'};
+    my $scanpath = $devpath->{chip}->{$ipath}->{'scan-path'};
+    my $scomsize = length($scompath) + 1;
+    my $scansize = length($scanpath) + 1;
     my $proc = $mcs;
     $proc =~ s/.*:p(.*):.*/$1/g;
     $mcs =~ s/.*:.*:mcs(.*)/$1/g;
@@ -825,7 +958,7 @@ sub generate_centaur
     my $uidstr = sprintf("0x%02X06%04X",${node},$mcs+$proc*8+${node}*8*8);
 
     print "
-<!-- " . SYSTEM . " Centaur n${node}p${ctaur} : start -->
+<!-- $SYSNAME Centaur n${node}p${ctaur} : start -->
 
 <targetInstance>
     <id>sys${sys}node${node}membuf${ctaur}</id>
@@ -861,13 +994,27 @@ sub generate_centaur
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
+    </attribute>";
+
+    if ($build eq "fsp")
+    {
+        print "
+    <attribute>
+        <id>FSP_SCOM_DEVICE_PATH</id>
+        <default>$scompath</default>
+        <sizeInclNull>$scomsize</sizeInclNull>
     </attribute>
-</targetInstance>
-";
+    <attribute>
+        <id>FSP_SCAN_DEVICE_PATH</id>
+        <default>$scanpath</default>
+        <sizeInclNull>$scansize</sizeInclNull>
+    </attribute>";
+    }
+    print "\n</targetInstance>\n";
 
     $uidstr = sprintf("0x%02X10%04X",${node},$mcs+$proc*8+${node}*8*8);
     print "
-<!-- " . SYSTEM . " Centaur MBS affiliated with membuf$ctaur -->
+<!-- $SYSNAME Centaur MBS affiliated with membuf$ctaur -->
 
 <targetInstance>
     <id>sys${sys}node${node}membuf${ctaur}mbs0</id>
@@ -894,8 +1041,7 @@ sub generate_mba
 
     if ($mba == 0)
     {
-        print "\n<!-- " . SYSTEM .
-                     " Centaur MBAs affiliated with membuf$ctaur -->\n";
+        print "\n<!-- $SYSNAME Centaur MBAs affiliated with membuf$ctaur -->\n";
     }
 
     my $uidstr = sprintf("0x%02X11%04X",${node},$mba+$mcs*2+$proc*8*2+${node}*8*8*2);
@@ -976,9 +1122,14 @@ sub display_help
 Usage:
 
     $scriptname --help
-    $scriptname --mrwdir=pathname [--outfile=XmlFilename]
+    $scriptname --system=sysname --mrwdir=pathname
+                     [--build=hb] [--outfile=XmlFilename]
+        --system=systemname
+              Specify which system MRW XML to be generated
         --mrwdir=pathname
               Specify the complete dir pathname of the MRW.
+        --build=hb
+              Specify HostBoot build (hb)
         --outfile=XmlFilename
               Specify the filename for the output XML. If omitted, the output
               is written to STDOUT which can be saved by redirection.

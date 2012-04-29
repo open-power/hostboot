@@ -1,30 +1,30 @@
 <!--  IBM_PROLOG_BEGIN_TAG
      This is an automatically generated prolog.
-   
+
      $Source: src/usr/targeting/xmltohb/attribute_types.xml $
-   
+
      IBM CONFIDENTIAL
-   
+
      COPYRIGHT International Business Machines Corp. 2011
-   
+
      p1
-   
+
      Object Code Only (OCO) source materials
      Licensed Internal Code Source Materials
      IBM HostBoot Licensed Internal Code
-   
+
      The source code for this program is not published or other-
      wise divested of its trade secrets, irrespective of what has
      been deposited with the U.S. Copyright Office.
-   
+
      Origin: 30
-   
+
      IBM_PROLOG_END -->
 
 <attributes>
 
 <!-- =====================================================================
-     HOST BOOT ATTRIBUTE TYPES 
+     HOST BOOT ATTRIBUTE TYPES
      Contains the definition of all hostboot attributes
      ================================================================= -->
 
@@ -50,23 +50,23 @@
     <enumerator>
         <name>UNIT</name>
         <value>4</value>
-    </enumerator>            
+    </enumerator>
     <enumerator>
         <name>DEV</name>
         <value>5</value>
-    </enumerator>             
+    </enumerator>
     <enumerator>
         <name>SYS</name>
         <value>6</value>
-    </enumerator> 
+    </enumerator>
     <enumerator>
         <name>LOGICAL_CARD</name>
         <value>7</value>
-    </enumerator>            
+    </enumerator>
     <enumerator>
         <name>MAX</name>
         <value>8</value>
-    </enumerator>        
+    </enumerator>
     <default>NA</default>
 </enumerationType>
 
@@ -198,7 +198,7 @@
     <enumerator>
         <name>POWER8</name>
         <value>112</value>
-    </enumerator>            
+    </enumerator>
     <default>NA</default>
 </enumerationType>
 
@@ -288,14 +288,14 @@
     <persistency>non-volatile</persistency>
     <readable/>
     <hasStringConversion/>
-</attribute>    
+</attribute>
 
 <attribute>
     <id>SCRATCH_UINT8_1</id>
     <description>Scratch attribute that can be used for dev/test</description>
     <simpleType>
         <uint8_t>
-            <default>0</default> 
+            <default>0</default>
         </uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -588,18 +588,18 @@
     <id>PRIMARY_CAPABILITIES</id>
     <description>Attribute which describes capabilities of a target</description>
     <complexType>
-        <description>Structure which defines a target's primary capabilities.  
-        A target can only support at most FSI SCOM and one of the other two SCOM 
+        <description>Structure which defines a target's primary capabilities.
+        A target can only support at most FSI SCOM and one of the other two SCOM
         types.  Applicable for all targets.  Structure is read-only.
         </description>
         <field>
             <name>supportsFsiScom</name>
-            <description>0b0: Target does not support FSI SCOM; 
+            <description>0b0: Target does not support FSI SCOM;
             0b1: Target supports FSI SCOM
             </description>
             <type>uint8_t</type>
             <bits>1</bits>
-            <default>0</default> 
+            <default>0</default>
         </field>
         <field>
             <name>supportsXscom</name>
@@ -622,7 +622,7 @@
             <type>uint8_t</type>
             <bits>5</bits>
             <default>0</default>
-        </field>        
+        </field>
         </complexType>
     <persistency>non-volatile</persistency>
     <readable/>
@@ -632,13 +632,13 @@
     <id>SCOM_SWITCHES</id>
     <description>Attribute storing information about which SCOM path to use</description>
     <complexType>
-        <description>Structure which defines which SCOM to use at a point in 
-        time.  Only applicable if target supports one or more SCOM types.  Only 
-        one bit (of the first three) can ever be set at any one time.  
+        <description>Structure which defines which SCOM to use at a point in
+        time.  Only applicable if target supports one or more SCOM types.  Only
+        one bit (of the first three) can ever be set at any one time.
         </description>
         <field>
             <name>useFsiScom</name>
-            <description>0b0: Do not use FSI SCOM at this time.  0b1: Use FSI 
+            <description>0b0: Do not use FSI SCOM at this time.  0b1: Use FSI
             SCOM at this time</description>
             <type>uint8_t</type>
             <bits>1</bits>
@@ -646,7 +646,7 @@
         </field>
         <field>
             <name>useXscom</name>
-            <description>0b0: Do not use XSCOM at this time.  0b1: Use XSCOM at 
+            <description>0b0: Do not use XSCOM at this time.  0b1: Use XSCOM at
             this time</description>
             <type>uint8_t</type>
             <bits>1</bits>
@@ -654,7 +654,7 @@
         </field>
         <field>
             <name>useInbandScom</name>
-            <description>0b0: Do not use inband SCOM at this time.  0b1: Use 
+            <description>0b0: Do not use inband SCOM at this time.  0b1: Use
             inband SCOM at this time</description>
             <type>uint8_t</type>
             <bits>1</bits>
@@ -688,8 +688,8 @@
     <id>XSCOM_CHIP_INFO</id>
     <description>Attribute which describes XSCOM chip info</description>
     <complexType>
-        <description>Structure which defines chip info necessary for XSCOM.  
-        Only applicable for chip targets which support XSCOM.  Structure is 
+        <description>Structure which defines chip info necessary for XSCOM.
+        Only applicable for chip targets which support XSCOM.  Structure is
         read-only</description>
         <field>
             <name>nodeId</name>
@@ -829,8 +829,8 @@
 
 <attribute>
     <id>HWAS_STATE</id>
-    <description>HardWare Availability Service State Attribute.  
-        Keeps track of Target values poweredOn, present, functional, 
+    <description>HardWare Availability Service State Attribute.
+        Keeps track of Target values poweredOn, present, functional,
         changedSinceLastIPL, and gardLevel</description>
     <complexType>
         <description>struct - so far contains 4 booleans and a 4-bit GARD level
@@ -845,7 +845,7 @@
         </field>
         <field>
             <name>present</name>
-            <description>Target is present in the system.  
+            <description>Target is present in the system.
                 comes up as Not PRESENT.    </description>
             <type>uint8_t</type>
             <bits>1</bits>
@@ -861,21 +861,21 @@
         </field>
         <field>
             <name>changedSinceLastIPL</name>
-            <description>Target has changed since last IPL.  
+            <description>Target has changed since last IPL.
                 comes up as FALSE.    </description>
             <type>uint8_t</type>
             <bits>1</bits>
             <default>0</default>
-        </field>        
+        </field>
         <field>
             <name>gardLevel</name>
-            <description>GARD Level.  This is a 4-bit value.   
+            <description>GARD Level.  This is a 4-bit value.
                 comes up as 0  </description>
             <type>uint8_t</type>
             <bits>4</bits>
             <default>0</default>
         </field>
-    </complexType>    
+    </complexType>
     <persistency>volatile</persistency>
     <readable/>
     <writeable/>
@@ -891,61 +891,61 @@
             <name>fsiPath</name>
             <description>Entity path for testing purposes</description>
             <type>EntityPath</type>
-            <default>physical:sys-0</default> 
+            <default>physical:sys-0</default>
         </field>
         <field>
             <name>className</name>
             <description>Class for testing purposes</description>
             <type>CLASS</type>
-            <default>CHIP</default> 
+            <default>CHIP</default>
         </field>
         <field>
             <name>uint8</name>
             <description>Test uint8</description>
             <type>uint8_t</type>
-            <default>0xAB</default> 
+            <default>0xAB</default>
         </field>
         <field>
             <name>uint16</name>
             <description>Test uint16</description>
             <type>uint16_t</type>
-            <default>0xABCD</default> 
+            <default>0xABCD</default>
         </field>
         <field>
             <name>uint32</name>
             <description>Test uint32</description>
             <type>uint32_t</type>
-            <default>0xABCDEF01</default> 
+            <default>0xABCDEF01</default>
         </field>
         <field>
             <name>uint64</name>
             <description>Test uint64</description>
             <type>uint64_t</type>
-            <default>0xABCDEF0123456789</default> 
+            <default>0xABCDEF0123456789</default>
         </field>
         <field>
             <name>int8</name>
             <description>Test int8</description>
             <type>int8_t</type>
-            <default>-124</default> 
+            <default>-124</default>
         </field>
         <field>
             <name>int16</name>
             <description>Test int16</description>
             <type>int16_t</type>
-            <default>-32764</default> 
+            <default>-32764</default>
         </field>
         <field>
             <name>int32</name>
             <description>Test int32</description>
             <type>int32_t</type>
-            <default>-2147483644</default> 
+            <default>-2147483644</default>
         </field>
         <field>
             <name>int64</name>
             <description>Test int64</description>
             <type>int64_t</type>
-            <default>-9223372036854775804</default> 
+            <default>-9223372036854775804</default>
         </field>
         </complexType>
     <persistency>non-volatile</persistency>
@@ -976,7 +976,7 @@
     <readable/>
     <writeable/>
 </attribute>
-    
+
 <attribute>
     <id>ISTEP_MODE</id>
     <description>If True, puts HostBoot into SPLess SingleStep mode.</description>
@@ -1604,7 +1604,7 @@
     <simpleType>
         <uint8_t>
             <default>0</default>
-        </uint8_t> 
+        </uint8_t>
         <array>2,2,4</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -1622,10 +1622,10 @@
     <simpleType>
         <uint32_t>
             <default>0</default>
-        </uint32_t> 
+        </uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
-    <readable/> 
+    <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_EFF_DRAM_WR_VREF</id>
@@ -1640,9 +1640,9 @@
         <uint8_t>
             <default>0</default>
         </uint8_t>
-    </simpleType> 
+    </simpleType>
     <persistency>volatile-zeroed</persistency>
-    <readable/> 
+    <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_EFF_CEN_DRV_IMP_DQ_DQS</id>
@@ -1659,7 +1659,7 @@
         </uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
-    <readable/> 
+    <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_EFF_CEN_DRV_IMP_CMD</id>
@@ -1676,7 +1676,7 @@
         </uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
-    <readable/> 
+    <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_EFF_CEN_DRV_IMP_CNTL</id>
@@ -1693,7 +1693,7 @@
         </uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
-    <readable/> 
+    <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_EFF_CEN_RCV_IMP_DQ_DQS</id>
@@ -1710,7 +1710,7 @@
         </uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
-    <readable/> 
+    <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_EFF_CEN_SLEW_RATE_DQ_DQS</id>
@@ -1727,7 +1727,7 @@
         </uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
-    <readable/> 
+    <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_EFF_CEN_SLEW_RATE_CMD</id>
@@ -1744,7 +1744,7 @@
         </uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
-    <readable/> 
+    <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_EFF_CEN_SLEW_RATE_CNTL</id>
@@ -1761,7 +1761,7 @@
         </uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
-    <readable/> 
+    <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_EFF_CEN_RD_VREF</id>
@@ -1796,7 +1796,7 @@
         </uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
-    <readable/> 
+    <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_EFF_DRAM_DENSITY</id>
@@ -1813,7 +1813,7 @@
         </uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
-    <readable/> 
+    <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_EFF_DRAM_TRCD</id>
@@ -1830,7 +1830,7 @@
         </uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
-    <readable/> 
+    <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_EFF_DRAM_TRRD</id>
@@ -1847,7 +1847,7 @@
         </uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
-    <readable/> 
+    <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_EFF_DRAM_TRP</id>
@@ -1864,7 +1864,7 @@
         </uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
-    <readable/> 
+    <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_EFF_DRAM_TRAS</id>
@@ -1881,7 +1881,7 @@
         </uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
-    <readable/> 
+    <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_EFF_DRAM_TRC</id>
@@ -1915,7 +1915,7 @@
         </uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
-    <readable/> 
+    <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_EFF_DRAM_TRFC</id>
@@ -1932,7 +1932,7 @@
         </uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
-    <readable/> 
+    <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_EFF_DRAM_TWTR</id>
@@ -1949,7 +1949,7 @@
         </uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
-    <readable/> 
+    <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_EFF_DRAM_TRTP</id>
@@ -1966,7 +1966,7 @@
         </uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
-    <readable/> 
+    <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_EFF_DRAM_TFAW</id>
@@ -1977,13 +1977,13 @@
 <attribute>
     <id>EFF_DRAM_BL</id>
     <description>DRAM Burst Length. Initialized and used by HWPs.</description>
-    <simpleType> 
+    <simpleType>
         <uint8_t>
             <default>0</default>
         </uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
-    <readable/> 
+    <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_EFF_DRAM_BL</id>
@@ -2000,7 +2000,7 @@
         </uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
-    <readable/> 
+    <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_EFF_DRAM_CL</id>
@@ -2011,13 +2011,13 @@
 <attribute>
     <id>EFF_DRAM_AL</id>
     <description>DRAM Additive Latency. Initialized and used by HWPs.</description>
-    <simpleType> 
+    <simpleType>
         <uint8_t>
             <default>0</default>
         </uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
-    <readable/> 
+    <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_EFF_DRAM_AL</id>
@@ -2028,13 +2028,13 @@
 <attribute>
     <id>EFF_DRAM_CWL</id>
     <description>DRAM CAS Write Latency. Initialized and used by HWPs.</description>
-    <simpleType> 
+    <simpleType>
         <uint8_t>
             <default>0</default>
         </uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
-    <readable/> 
+    <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_EFF_DRAM_CWL</id>
@@ -2045,13 +2045,13 @@
 <attribute>
     <id>EFF_DRAM_RBT</id>
     <description>DRAM Read Burst Type. Initialized and used by HWPs.</description>
-    <simpleType>  
+    <simpleType>
         <uint8_t>
             <default>0</default>
         </uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
-    <readable/> 
+    <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_EFF_DRAM_RBT</id>
@@ -2062,13 +2062,13 @@
 <attribute>
     <id>EFF_DRAM_TM</id>
     <description>DRAM Test Mode. Initialized and used by HWPs.</description>
-    <simpleType>  
+    <simpleType>
         <uint8_t>
             <default>0</default>
         </uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
-    <readable/> 
+    <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_EFF_DRAM_TM</id>
@@ -2079,13 +2079,13 @@
 <attribute>
     <id>EFF_DRAM_DLL_RESET</id>
     <description>DRAM DLL Reset. Initialized and used by HWPs.</description>
-    <simpleType>  
+    <simpleType>
         <uint8_t>
             <default>0</default>
         </uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
-    <readable/> 
+    <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_EFF_DRAM_DLL_RESET</id>
@@ -2096,7 +2096,7 @@
 <attribute>
     <id>EFF_DRAM_WR</id>
     <description>DRAM Write Recovery. Initialized and used by HWPs.</description>
-    <simpleType>  
+    <simpleType>
         <uint8_t>
             <default>0</default>
         </uint8_t>
@@ -2113,7 +2113,7 @@
 <attribute>
     <id>EFF_DRAM_DLL_PPD</id>
     <description>DRAM DLL Precharge PD. Initialized and used by HWPs.</description>
-    <simpleType>  
+    <simpleType>
         <uint8_t>
             <default>0</default>
         </uint8_t>
@@ -2130,7 +2130,7 @@
 <attribute>
     <id>EFF_DRAM_DLL_ENABLE</id>
     <description>DRAM DLL Enable. Initialized and used by HWPs.</description>
-    <simpleType>  
+    <simpleType>
         <uint8_t>
             <default>0</default>
         </uint8_t>
@@ -2147,7 +2147,7 @@
 <attribute>
     <id>EFF_DRAM_TDQS</id>
     <description>DRAM TDQS. Initialized and used by HWPs.</description>
-    <simpleType>  
+    <simpleType>
         <uint8_t>
             <default>0</default>
         </uint8_t>
@@ -2164,7 +2164,7 @@
 <attribute>
     <id>EFF_DRAM_WR_LVL_ENABLE</id>
     <description>DRAM Write Level Enable. Initialized and used by HWPs.</description>
-    <simpleType>    
+    <simpleType>
         <uint8_t>
             <default>0</default>
         </uint8_t>
@@ -2181,7 +2181,7 @@
 <attribute>
     <id>EFF_DRAM_OUTPUT_BUFFER</id>
     <description>DRAM output buffer. Initialized and used by HWPs.</description>
-    <simpleType>    
+    <simpleType>
         <uint8_t>
             <default>0</default>
         </uint8_t>
@@ -2198,7 +2198,7 @@
 <attribute>
     <id>EFF_DRAM_PASR</id>
     <description>DRAM Partial Array Self-Refresh. Initialized and used by HWPs.</description>
-    <simpleType>     
+    <simpleType>
         <uint8_t>
             <default>0</default>
         </uint8_t>
@@ -2215,7 +2215,7 @@
 <attribute>
     <id>EFF_DRAM_ASR</id>
     <description>DRAM Auto Self-Refresh. Initialized and used by HWPs.</description>
-    <simpleType>     
+    <simpleType>
         <uint8_t>
             <default>0</default>
         </uint8_t>
@@ -2232,7 +2232,7 @@
 <attribute>
     <id>EFF_DRAM_SRT</id>
     <description>DRAM Self-Refresh Temperature Range. Initialized and used by HWPs.</description>
-    <simpleType>     
+    <simpleType>
         <uint8_t>
             <default>0</default>
         </uint8_t>
@@ -2249,7 +2249,7 @@
 <attribute>
     <id>EFF_MPR_LOC</id>
     <description>Multi Purpose Register Location. Initialized and used by HWPs.</description>
-    <simpleType>     
+    <simpleType>
         <uint8_t>
             <default>0</default>
         </uint8_t>
@@ -2266,7 +2266,7 @@
 <attribute>
     <id>EFF_MPR_MODE</id>
     <description>Multi Purpose Register Mode. Initialized and used by HWPs.</description>
-    <simpleType>     
+    <simpleType>
         <uint8_t>
             <default>0</default>
         </uint8_t>
@@ -2283,7 +2283,7 @@
 <attribute>
     <id>EFF_DIMM_RCD_CNTL_WORD_0_15</id>
     <description>DIMM RCD Control Word. Initialized and used by HWPs.</description>
-    <simpleType>     
+    <simpleType>
         <uint64_t>
             <default>0</default>
         </uint64_t>
@@ -2386,7 +2386,7 @@
 <attribute>
     <id>MSS_THROTTLE_NUMERATOR</id>
     <description>DIMM throttle numerator. Initialized and used by HWPs.</description>
-    <simpleType>     
+    <simpleType>
         <uint32_t>
             <default>0</default>
         </uint32_t>
@@ -2404,7 +2404,7 @@
 <attribute>
     <id>MSS_THROTTLE_DENOMINATOR</id>
     <description>DIMM throttle denominator. Initialized and used by HWPs.</description>
-    <simpleType>     
+    <simpleType>
         <uint32_t>
             <default>0</default>
         </uint32_t>
@@ -2422,7 +2422,7 @@
 <attribute>
     <id>MSS_THROTTLE_CHANNEL_NUMERATOR</id>
     <description>Channel throttle numerator. Initialized and used by HWPs.</description>
-    <simpleType>     
+    <simpleType>
         <uint32_t>
             <default>0</default>
         </uint32_t>
@@ -2440,7 +2440,7 @@
 <attribute>
     <id>MSS_THROTTLE_CHANNEL_DENOMINATOR</id>
     <description>Channel throttle denominator. Initialized and used by HWPs.</description>
-    <simpleType>     
+    <simpleType>
         <uint32_t>
             <default>0</default>
         </uint32_t>
@@ -2458,7 +2458,7 @@
 <attribute>
     <id>MSS_WATT_TARGET</id>
     <description>Channel total memory watts. Initialized and used by HWPs.</description>
-    <simpleType>     
+    <simpleType>
         <uint32_t>
             <default>0</default>
         </uint32_t>
@@ -2907,7 +2907,7 @@
         <id>ATTR_CHIP_UNIT_POS</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
-</attribute>    
+</attribute>
 
 <attribute>
     <id>POSITION</id>
@@ -3000,7 +3000,6 @@
     <simpleType>
         <enumeration>
             <id>PROC_EPS_TABLE_TYPE</id>
-            <default>EPS_TYPE_LE</default>
         </enumeration>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -3037,7 +3036,6 @@
     <simpleType>
         <enumeration>
             <id>PROC_FABRIC_PUMP_MODE</id>
-            <default>MODE1</default>
         </enumeration>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -3072,7 +3070,6 @@
     <simpleType>
         <enumeration>
             <id>PROC_X_BUS_WIDTH</id>
-            <default>W8BYTE</default>
         </enumeration>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -3215,7 +3212,7 @@
         System attribute.
         The frequency of a processor's PB chiplet in MHz.
         This is the same for all PB chiplets in the system.
-        The corresponding HWPF attribute: 
+        The corresponding HWPF attribute:
         - Is set by a HWP that runs after SBE HWPs setup the PB PLL. It
           reads ATTR_FREQ_PROC_REFCLOCK and the PB PLL settings.
     </description>
@@ -3310,18 +3307,18 @@
       Attribute which describes what the SP is or is not doing in this system
     </description>
     <complexType>
-        <description>Structure which defines a system's SP functions.  
+        <description>Structure which defines a system's SP functions.
          Applicable for System target only.  Structure is read-only.
         </description>
         <field>
             <name>fsiSlaveInit</name>
             <description>
-             0b0: SP does not initialize FSI slave logic, Hostboot must; 
+             0b0: SP does not initialize FSI slave logic, Hostboot must;
              0b1: SP does initialize FSI slave logic so Hostboot should not
             </description>
             <type>uint8_t</type>
             <bits>1</bits>
-            <default>1</default> 
+            <default>1</default>
         </field>
         <field>
             <name>mailboxEnabled</name>
@@ -3339,8 +3336,8 @@
             <type>uint8_t</type>
             <bits>6</bits>
             <default>0</default>
-        </field>        
-    </complexType>
+        </field>
+        </complexType>
     <persistency>non-volatile</persistency>
     <readable/>
 </attribute>
