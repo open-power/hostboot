@@ -479,11 +479,37 @@ sub create_release_notes
     open RELNOTE, "> ".git_root()."/releaseNotes.html";
     print RELNOTE "<html>\n";
     print RELNOTE "    <head><title>Release notes for $level</title></head>\n";
+    print RELNOTE <<STYLESHEET;
+    <style type="text/css">
+        table.release {
+            border-width: 1px;
+            border-spacing: 2px;
+            border-style: outset;
+            border-color: gray;
+            border-collapse: separate;
+            background-color: white;
+        }
+        table.release th {
+            border-width: 1px;
+            padding: 1px;
+            border-style: inset;
+            border-color: gray;
+            background-color: white;
+        }
+        table.release td {
+            border-width: 1px;
+            padding: 1px;
+            border-style: inset;
+            border-color: gray;
+            background-color: white;
+        }
+    </style>
+STYLESHEET
     print RELNOTE "    <body>\n";
 
     print RELNOTE "<h1>Level: $level</h1>\n";
     print RELNOTE "<h2>Included commits:</h2>\n";
-    print RELNOTE "<table>\n";
+    print RELNOTE "<table class='release'>\n";
     print RELNOTE "    <tr>\n";
     print RELNOTE "        <th>RTC Number</th>\n";
     print RELNOTE "        <th>Subject</th>\n";
@@ -500,7 +526,7 @@ sub create_release_notes
         if ($rtc ne "")
         {
             $rtc_hyper = rtc_hyperlink($rtc);
-            $rtc_hyper = "<a href='$rtc_hyper'>$rtc</a>";
+            $rtc_hyper = "<a href='$rtc_hyper' target='_blank'>$rtc</a>";
         }
 
         print RELNOTE "    <tr>\n";
@@ -1116,7 +1142,7 @@ sub config_get_level
 sub config_print_levels
 {
     my $levels = config_list_levels();
-    foreach my $level (keys %$levels)
+    foreach my $level (sort keys %$levels)
     {
         print $level."\n";
     }
