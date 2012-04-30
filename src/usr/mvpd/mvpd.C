@@ -741,8 +741,8 @@ errlHndl_t mvpdFetchData ( uint64_t i_byteAddr,
             // but with different address offsets.  Saves us having to
             // duplicate the code between the 2 modules.
             SPD::pnorInformation info;
-            info.sectionSize = MVPD_SECTION_SIZE;
-            info.maxSections = MVPD_MAX_SECTIONS;
+            info.segmentSize = MVPD_SECTION_SIZE;
+            info.maxSegments = MVPD_MAX_SECTIONS;
             info.pnorSection = PNOR::MODULE_VPD;
             info.pnorSide = PNOR::SIDELESS;
             err = SPD::readPNOR( i_byteAddr,

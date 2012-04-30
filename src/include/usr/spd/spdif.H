@@ -43,8 +43,8 @@ namespace SPD
  */
 struct pnorInformation
 {
-    uint64_t sectionSize;
-    uint64_t maxSections;
+    uint64_t segmentSize;
+    uint64_t maxSegments;
     PNOR::SectionId pnorSection;
     PNOR::SideSelect pnorSide;
 };

@@ -117,10 +117,10 @@ errlHndl_t dimmPresenceDetect( DeviceFW::OperationType i_opType,
         // Read Byte 2 (BASIC_MEMORY_TYPE) for the target passed in.
         uint16_t data = 0x0;
         size_t dataSz = sizeof(data);
-        err = spdGetKeywordValue( BASIC_MEMORY_TYPE,
-                                  &data,
-                                  dataSz,
-                                  i_target );
+        err = deviceRead( i_target,
+                          &data,
+                          dataSz,
+                          DEVICE_SPD_ADDRESS( SPD::BASIC_MEMORY_TYPE ) );
 
         if( err )
         {

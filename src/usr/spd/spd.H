@@ -84,15 +84,14 @@ struct KeywordData
     uint8_t bitMask;    // Bit mask
     uint8_t shift;      // Used for fields < 1 byte to right justify all values.
     bool isSpecialCase; // Whether or not this entry is a special case.
+    bool writable;      // Whether this keyword can be written to.
     modSpecTypes_t modSpec; // Module Specific type keyword is valid for.
 };
 
 
 /**
-*
-* @brief Perform an SPD operation.  It follows a pre-defined
-*       prototype function in order to be registered with the device
-*       driver framework.
+ * @brief This function is used to read SPD keywords from collected
+ *      SPD data for the given target
 *
 * @param[in] i_opType - Operation Type - See DeviceFW::OperationType in
 *       driververif.H
@@ -100,11 +99,10 @@ struct KeywordData
 * @param[in] i_target - DIMM Target device
 *
 * @param [in/out] io_buffer - Pointer to the data that was read from
-*       the target device.  It will also be used to contain data to
-*       be written to the device.
+*       the target device.
 *
-* @param [in/out] io_buflen - Length of the buffer to be read or written
-*       to/from the target.  This value should indicate the size of the
+* @param [in/out] io_buflen - Length of the buffer to be read
+*       from the target.  This value should indicate the size of the
 *       io_buffer parameter that has been allocated.  Being returned it will
 *       indicate the number of valid bytes in the buffer being returned.
 *
@@ -113,60 +111,48 @@ struct KeywordData
 *
 * @param [in] i_args - This is an argument list for the device driver
 *       framework.
-*
-* @return errlHndl_t - NULL if successful, otherwise a pointer to the
-*       error log.
-*
-*/
-errlHndl_t spdAccess ( DeviceFW::OperationType i_opType,
-                       TARGETING::Target * i_target,
-                       void * io_buffer,
-                       size_t & io_buflen,
-                       int64_t i_accessType,
-                       va_list i_args );
-
-/**
- * @brief This function is used to read SPD keywords from collected
- *      SPD data for the given target
- *
- * @param[in] i_keyword - The SPD keyword to access.
- *
- * @param[in/out] io_buffer - The buffer that will contain the data
- *      read from the SPD data.
- *
- * @param[in/out] io_buflen - The requested number of bytes to read.
- *      The actual number of bytes read will be returned.
- *
- * @param[in] i_target - The target DIMM to access the data for.
  *
  * @return errlHndl_t - NULL if successful, otherwise a pointer to the
  *      error log.
  */
-errlHndl_t spdGetKeywordValue ( uint64_t i_keyword,
+errlHndl_t spdGetKeywordValue ( DeviceFW::OperationType i_opType,
+                                TARGETING::Target * i_target,
                                 void * io_buffer,
                                 size_t & io_buflen,
-                                TARGETING::Target * i_target );
+                                int64_t i_accessType,
+                                va_list i_args );
 
 /**
  * @brief This function is used to write SPD keyword values.
- *
- * @param[in] i_keyword - The SPD keyword to access.
- *
- * @param[in/out] io_buffer - The buffer that will contain the data
- *      read from the SPD data.
- *
- * @param[in/out] io_buflen - The requested number of bytes to read.
- *      The actual number of bytes read will be returned.
- *
- * @param[in] i_target - The target DIMM to access the data for.
+*
+* @param[in] i_opType - Operation Type - See DeviceFW::OperationType in
+*       driververif.H
+*
+* @param[in] i_target - DIMM Target device
+*
+* @param [in/out] io_buffer - Pointer to the data that will contain data
+*       to be written to the device.
+*
+* @param [in/out] io_buflen - Length of the buffer to be written
+*       to the target.  This value should indicate the size of the
+*       io_buffer parameter that has been allocated.  Being returned it will
+*       indicate the number of valid bytes written to the target.
+*
+* @param [in] i_accessType - Access Type - See DeviceFW::AccessType in
+*       usrif.H
+*
+* @param [in] i_args - This is an argument list for the device driver
+*       framework.
  *
  * @return errlHndl_t - NULL if successful, otherwise a pointer to the
  *      error log.
  */
-errlHndl_t spdWriteKeywordValue ( uint64_t i_keyword,
+errlHndl_t spdWriteKeywordValue ( DeviceFW::OperationType i_opType,
+                                  TARGETING::Target * i_target,
                                   void * io_buffer,
                                   size_t & io_buflen,
-                                  TARGETING::Target * i_target );
+                                  int64_t i_accessType,
+                                  va_list i_args );
 
 /**
  * @param This function is a wrapper for reading the correct keyword.
@@ -188,6 +174,28 @@ errlHndl_t spdFetchData ( uint64_t i_byteAddr,
                           size_t i_numBytes,
                           void * o_data,
                           TARGETING::Target * i_target );
+
+/**
+ * @brief This function is a wrapper for writing the correct keyword.
+ *      It will route the write to whatever function has the latest
+ *      supported access code.
+ *
+ * @param[in] i_offset - The offset into the JEDEC SPD layout.
+ *
+ * @param[in] i_numbytes - Number of bytes to read.
+ *
+ * @param[in] i_data - The data buffer that will return the data read.
+ *
+ * @param[in] i_target - The target DIMM to access.
+ *
+ * @return errlHndl_t - NULL if successful, otherwise a pointer to the
+ *      error log.
+ */
+errlHndl_t spdWriteData ( uint64_t i_offset,
+                          size_t i_numBytes,
+                          void * i_data,
+                          TARGETING::Target * i_target );
+
 
 /**
  * @param This function will read the SPD keyword from the appropriate
@@ -213,6 +221,33 @@ errlHndl_t spdGetValue ( uint64_t i_keyword,
                          size_t & io_buflen,
                          TARGETING::Target * i_target,
                          uint64_t i_DDRRev );
+
+
+/**
+ * @brief This function will write the SPD keyword from the appropriate
+ *      table.
+ *
+ * @param[in] i_keyword - The SPD keyword to access.
+ *
+ * @param[in/out] io_buffer - The buffer that will contain the data
+ *      written from the SPD data.
+ *
+ * @param[in/out] io_buflen - The requested number of bytes to write.
+ *      The actual number of bytes written will be returned.
+ *
+ * @param[in] i_target - The target DIMM to access the data for.
+ *
+ * @param[in] i_DDRRev - The DIMM DDR Revision.
+ *
+ * @return errlHndl_t - NULL if successful, otherwise a pointer to the
+ *      error log.
+ */
+errlHndl_t spdWriteValue ( uint64_t i_keyword,
+                           void * io_buffer,
+                           size_t & io_buflen,
+                           TARGETING::Target * i_target,
+                           uint64_t i_DDRRev );
+
 
 /**
  * @param This function handles the special case keywords where
@@ -356,6 +391,86 @@ errlHndl_t getPnorAddr ( pnorInformation & i_pnorInfo,
  */
 errlHndl_t getVpdLocation ( int64_t & o_vpdLocation,
                             TARGETING::Target * i_target );
+
+
+/**
+ * @brief This function will read the PNOR at the correct offset and number of
+ *      bytes for the keyword requested.
+ *
+ * @param[in] i_byteAddr - The offset to access in the PNOR.
+ *
+ * @param[in] i_numBytes - Number of bytes to read.
+ *
+ * @param[out] o_data - The data buffer that the read data will be placed
+ *      into.
+ *
+ * @param[in] i_target - The chip target to access the data for.
+ *
+ * @param[in] i_pnorInfo - Information about the PNOR section and side that we
+ *      need to know to make the request.
+ *
+ * @param[in/out] io_cachedAddr - The address offset to the data chunk in
+ *      PNOR.
+ *
+ * @param[in] i_mutex - The mutex to lock/unlock while setting io_isAddrCached
+ *      and io_cachedAddr.  It is assumed that those parameters are global
+ *      variables in the code where they reside.
+ *
+ * @return errlHndl_t - NULL if successful, otherwise a pointer to the error
+ *      log.
+ */
+errlHndl_t readPNOR ( uint64_t i_byteAddr,
+                      size_t i_numBytes,
+                      void * o_data,
+                      TARGETING::Target * i_target,
+                      pnorInformation & i_pnorInfo,
+                      uint64_t &io_cachedAddr,
+                      mutex_t i_mutex );
+
+/**
+ * @brief This function will write the PNOR at the correct offset and number
+ *      of bytes for the keyword requested.
+ *
+ * @param[in] i_byteAddr - The offset to access in the PNOR.
+ *
+ * @param[in] i_numBytes - The number of bytes to write.
+ *
+ * @param[in] i_data - The data buffer of the data to be written.
+ *
+ * @param[in] i_target - The chip target to access the data for.
+ *
+ * @param[in] i_pnorInfo - Information about the PNOR section and side that we
+ *      need to know to make the request.
+ *
+ * @param[in/out] io_cachedAddr - The address offset to the data chunk in
+ *      PNOR.
+ *
+ * @param[in] i_mutex - The mutex to lock/unlock while setting io_isAddrCached
+ *      and io_cachedAddr.  It is assumed that those parameters are global
+ *      variables in the code where they reside.
+ *
+ * @return errlHndl_t - NULL if successful, otherwise a pointer to the error
+ *      log.
+ */
+errlHndl_t writePNOR ( uint64_t i_byteAddr,
+                       size_t i_numBytes,
+                       void * i_data,
+                       TARGETING::Target * i_target,
+                       pnorInformation & i_pnorInfo,
+                       uint64_t &io_cachedAddr,
+                       mutex_t * i_mutex );
+
+/**
+ * @brief This function handles sending the mailbox message to the Fsp to
+ *      notify of updates to the data.
+ *
+ * TODO with Story 41365
+ * @param NONE, yet.
+ *
+ * @return errlHndl_t - NULL if successful, otherwise a pointer to the error
+ *      log.
+ */
+errlHndl_t spdSendMboxWriteMsg ( void );
 
 }; // end SPD namespace
 
