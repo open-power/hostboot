@@ -59,16 +59,16 @@ namespace HWAS
 errlHndl_t platPresenceDetect(TARGETING::TargetHandleList &io_targets);
 
 /**
- * @brief platform specific code to determine the ID/EC of the targets
- *  in the input list. The platform specific code is responsible for setting
- *  the ATTR_EC and ATTR_CHIP_ID in each target.
+ * @brief platform specific code to determine the ID/EC of the input
+ *  target. The platform specific code is responsible for setting the
+ *  ATTR_EC and ATTR_CHIP_ID in each target.
  *
- * @param[in]  i_targets    TargetHandleList of targets to check for chip ID/EC
+ * @param[in]  i_target    target to check for chip ID/EC
  *
  * @return errlHndl_t       valid errlHndl_t handle if there was an error
  *                          NULL if no errors;
  */
-errlHndl_t platReadIDEC(const TARGETING::TargetHandleList &i_targets);
+errlHndl_t platReadIDEC(const TARGETING::TargetHandle_t &i_target);
 
 } // namespace HWAS
 
