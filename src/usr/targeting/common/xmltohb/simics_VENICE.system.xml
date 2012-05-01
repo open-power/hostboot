@@ -36,6 +36,11 @@
        * each Centaur membuf chip has 2 MBA chiplets
         * each MBA chiplet has 2 ports
          * each MBA port connects to 2 dimms
+
+     Note that the logical memory connections are very wacky in their
+      relationship to the FSI ports:
+        cMFSI Port 0-7 = Logical MCS Port 4,5,6,7,0,1,2,3
+
      ================================================================= -->
 
 <!-- System -->
@@ -3599,7 +3604,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>4</default>
+        <default>7</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -4467,7 +4472,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>5</default>
+        <default>6</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -7040,7 +7045,7 @@
         <default>affinity:sys-0/node-0/proc-0/mcs-0/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc0:cMFSI-0 -->
+    <!-- FSI is connected via proc0:cMFSI-4 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-0</default>
@@ -7051,7 +7056,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>0</default>
+        <default>4</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -7147,7 +7152,7 @@
         <default>affinity:sys-0/node-0/proc-0/mcs-1/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc0:cMFSI-1 -->
+    <!-- FSI is connected via proc0:cMFSI-5 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-0</default>
@@ -7158,7 +7163,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>1</default>
+        <default>5</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -7236,7 +7241,7 @@
         <default>affinity:sys-0/node-0/proc-0/mcs-2/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc0:cMFSI-2 -->
+    <!-- FSI is connected via proc0:cMFSI-6 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-0</default>
@@ -7247,7 +7252,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>2</default>
+        <default>6</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -7325,7 +7330,7 @@
         <default>affinity:sys-0/node-0/proc-0/mcs-3/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc0:cMFSI-3 -->
+    <!-- FSI is connected via proc0:cMFSI-7 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-0</default>
@@ -7336,7 +7341,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>3</default>
+        <default>7</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -7414,7 +7419,7 @@
         <default>affinity:sys-0/node-0/proc-0/mcs-4/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc0:cMFSI-4 -->
+    <!-- FSI is connected via proc0:cMFSI-0 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-0</default>
@@ -7425,7 +7430,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>4</default>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -7503,7 +7508,7 @@
         <default>affinity:sys-0/node-0/proc-0/mcs-5/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc0:cMFSI-5 -->
+    <!-- FSI is connected via proc0:cMFSI-1 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-0</default>
@@ -7514,7 +7519,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>5</default>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -7592,7 +7597,7 @@
         <default>affinity:sys-0/node-0/proc-0/mcs-6/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc0:cMFSI-6 -->
+    <!-- FSI is connected via proc0:cMFSI-2 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-0</default>
@@ -7603,7 +7608,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>6</default>
+        <default>2</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -7681,7 +7686,7 @@
         <default>affinity:sys-0/node-0/proc-0/mcs-7/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc0:cMFSI-7 -->
+    <!-- FSI is connected via proc0:cMFSI-3 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-0</default>
@@ -7692,7 +7697,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>7</default>
+        <default>3</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -7770,7 +7775,7 @@
         <default>affinity:sys-0/node-0/proc-1/mcs-0/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc1:cMFSI-0 -->
+    <!-- FSI is connected via proc1:cMFSI-4 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-1</default>
@@ -7781,7 +7786,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>0</default>
+        <default>4</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -7859,7 +7864,7 @@
         <default>affinity:sys-0/node-0/proc-1/mcs-1/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc1:cMFSI-1 -->
+    <!-- FSI is connected via proc1:cMFSI-5 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-1</default>
@@ -7870,7 +7875,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>1</default>
+        <default>5</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -7948,7 +7953,7 @@
         <default>affinity:sys-0/node-0/proc-1/mcs-2/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc1:cMFSI-2 -->
+    <!-- FSI is connected via proc1:cMFSI-6 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-1</default>
@@ -7959,7 +7964,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>2</default>
+        <default>6</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -8037,7 +8042,7 @@
         <default>affinity:sys-0/node-0/proc-1/mcs-3/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc1:cMFSI-3 -->
+    <!-- FSI is connected via proc1:cMFSI-7 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-1</default>
@@ -8048,7 +8053,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>3</default>
+        <default>7</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -8126,7 +8131,7 @@
         <default>affinity:sys-0/node-0/proc-1/mcs-4/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc1:cMFSI-4 -->
+    <!-- FSI is connected via proc1:cMFSI-0 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-1</default>
@@ -8137,7 +8142,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>4</default>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -8215,7 +8220,7 @@
         <default>affinity:sys-0/node-0/proc-1/mcs-5/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc1:cMFSI-5 -->
+    <!-- FSI is connected via proc1:cMFSI-1 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-1</default>
@@ -8226,7 +8231,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>5</default>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -8304,7 +8309,7 @@
         <default>affinity:sys-0/node-0/proc-1/mcs-6/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc1:cMFSI-6 -->
+    <!-- FSI is connected via proc1:cMFSI-2 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-1</default>
@@ -8315,7 +8320,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>6</default>
+        <default>2</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -8393,7 +8398,7 @@
         <default>affinity:sys-0/node-0/proc-1/mcs-7/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc1:cMFSI-7 -->
+    <!-- FSI is connected via proc1:cMFSI-3 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-1</default>
@@ -8404,7 +8409,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>7</default>
+        <default>3</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -8482,7 +8487,7 @@
         <default>affinity:sys-0/node-0/proc-2/mcs-0/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc2:cMFSI-0 -->
+    <!-- FSI is connected via proc2:cMFSI-4 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-2</default>
@@ -8493,7 +8498,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>0</default>
+        <default>4</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -8571,7 +8576,7 @@
         <default>affinity:sys-0/node-0/proc-2/mcs-1/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc2:cMFSI-1 -->
+    <!-- FSI is connected via proc2:cMFSI-5 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-2</default>
@@ -8582,7 +8587,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>1</default>
+        <default>5</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -8660,7 +8665,7 @@
         <default>affinity:sys-0/node-0/proc-2/mcs-2/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc2:cMFSI-2 -->
+    <!-- FSI is connected via proc2:cMFSI-6 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-2</default>
@@ -8671,7 +8676,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>2</default>
+        <default>6</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -8749,7 +8754,7 @@
         <default>affinity:sys-0/node-0/proc-2/mcs-3/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc2:cMFSI-3 -->
+    <!-- FSI is connected via proc2:cMFSI-7 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-2</default>
@@ -8760,7 +8765,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>3</default>
+        <default>7</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -8838,7 +8843,7 @@
         <default>affinity:sys-0/node-0/proc-2/mcs-4/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc2:cMFSI-4 -->
+    <!-- FSI is connected via proc2:cMFSI-0 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-2</default>
@@ -8849,7 +8854,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>4</default>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -8927,7 +8932,7 @@
         <default>affinity:sys-0/node-0/proc-2/mcs-5/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc2:cMFSI-5 -->
+    <!-- FSI is connected via proc2:cMFSI-1 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-2</default>
@@ -8938,7 +8943,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>5</default>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -9016,7 +9021,7 @@
         <default>affinity:sys-0/node-0/proc-2/mcs-6/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc2:cMFSI-6 -->
+    <!-- FSI is connected via proc2:cMFSI-2 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-2</default>
@@ -9027,7 +9032,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>6</default>
+        <default>2</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -9105,7 +9110,7 @@
         <default>affinity:sys-0/node-0/proc-2/mcs-7/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc2:cMFSI-7 -->
+    <!-- FSI is connected via proc2:cMFSI-3 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-2</default>
@@ -9116,7 +9121,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>7</default>
+        <default>3</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -9194,7 +9199,7 @@
         <default>affinity:sys-0/node-0/proc-3/mcs-0/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc3:cMFSI-0 -->
+    <!-- FSI is connected via proc3:cMFSI-4 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-3</default>
@@ -9205,7 +9210,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>0</default>
+        <default>4</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -9283,7 +9288,7 @@
         <default>affinity:sys-0/node-0/proc-3/mcs-1/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc3:cMFSI-1 -->
+    <!-- FSI is connected via proc3:cMFSI-5 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-3</default>
@@ -9294,7 +9299,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>1</default>
+        <default>5</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -9372,7 +9377,7 @@
         <default>affinity:sys-0/node-0/proc-3/mcs-2/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc3:cMFSI-2 -->
+    <!-- FSI is connected via proc3:cMFSI-6 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-3</default>
@@ -9383,7 +9388,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>2</default>
+        <default>6</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -9461,7 +9466,7 @@
         <default>affinity:sys-0/node-0/proc-3/mcs-3/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc3:cMFSI-3 -->
+    <!-- FSI is connected via proc3:cMFSI-7 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-3</default>
@@ -9472,7 +9477,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>3</default>
+        <default>7</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -9550,7 +9555,7 @@
         <default>affinity:sys-0/node-0/proc-3/mcs-4/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc3:cMFSI-4 -->
+    <!-- FSI is connected via proc3:cMFSI-0 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-3</default>
@@ -9561,7 +9566,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>4</default>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -9639,7 +9644,7 @@
         <default>affinity:sys-0/node-0/proc-3/mcs-5/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc3:cMFSI-5 -->
+    <!-- FSI is connected via proc3:cMFSI-1 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-3</default>
@@ -9650,7 +9655,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>5</default>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -9728,7 +9733,7 @@
         <default>affinity:sys-0/node-0/proc-3/mcs-6/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc3:cMFSI-6 -->
+    <!-- FSI is connected via proc3:cMFSI-2 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-3</default>
@@ -9739,7 +9744,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>6</default>
+        <default>2</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -9817,7 +9822,7 @@
         <default>affinity:sys-0/node-0/proc-3/mcs-7/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc3:cMFSI-7 -->
+    <!-- FSI is connected via proc3:cMFSI-3 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-3</default>
@@ -9828,7 +9833,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>7</default>
+        <default>3</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -9906,7 +9911,7 @@
         <default>affinity:sys-0/node-0/proc-4/mcs-0/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc4:cMFSI-0 -->
+    <!-- FSI is connected via proc4:cMFSI-4 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-4</default>
@@ -9917,7 +9922,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>0</default>
+        <default>4</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -9995,7 +10000,7 @@
         <default>affinity:sys-0/node-0/proc-4/mcs-1/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc4:cMFSI-1 -->
+    <!-- FSI is connected via proc4:cMFSI-5 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-4</default>
@@ -10006,7 +10011,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>1</default>
+        <default>5</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -10084,7 +10089,7 @@
         <default>affinity:sys-0/node-0/proc-4/mcs-2/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc4:cMFSI-2 -->
+    <!-- FSI is connected via proc4:cMFSI-6 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-4</default>
@@ -10095,7 +10100,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>2</default>
+        <default>6</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -10173,7 +10178,7 @@
         <default>affinity:sys-0/node-0/proc-4/mcs-3/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc4:cMFSI-3 -->
+    <!-- FSI is connected via proc4:cMFSI-7 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-4</default>
@@ -10184,7 +10189,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>3</default>
+        <default>7</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -10262,7 +10267,7 @@
         <default>affinity:sys-0/node-0/proc-4/mcs-4/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc4:cMFSI-4 -->
+    <!-- FSI is connected via proc4:cMFSI-0 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-4</default>
@@ -10273,7 +10278,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>4</default>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -10351,7 +10356,7 @@
         <default>affinity:sys-0/node-0/proc-4/mcs-5/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc4:cMFSI-5 -->
+    <!-- FSI is connected via proc4:cMFSI-1 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-4</default>
@@ -10362,7 +10367,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>5</default>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -10440,7 +10445,7 @@
         <default>affinity:sys-0/node-0/proc-4/mcs-6/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc4:cMFSI-6 -->
+    <!-- FSI is connected via proc4:cMFSI-2 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-4</default>
@@ -10451,7 +10456,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>6</default>
+        <default>2</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -10529,7 +10534,7 @@
         <default>affinity:sys-0/node-0/proc-4/mcs-7/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc4:cMFSI-7 -->
+    <!-- FSI is connected via proc4:cMFSI-3 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-4</default>
@@ -10540,7 +10545,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>7</default>
+        <default>3</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -10618,7 +10623,7 @@
         <default>affinity:sys-0/node-0/proc-5/mcs-0/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc5:cMFSI-0 -->
+    <!-- FSI is connected via proc5:cMFSI-4 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-5</default>
@@ -10629,7 +10634,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>0</default>
+        <default>4</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -10707,7 +10712,7 @@
         <default>affinity:sys-0/node-0/proc-5/mcs-1/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc5:cMFSI-1 -->
+    <!-- FSI is connected via proc5:cMFSI-5 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-5</default>
@@ -10718,7 +10723,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>1</default>
+        <default>5</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -10796,7 +10801,7 @@
         <default>affinity:sys-0/node-0/proc-5/mcs-2/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc5:cMFSI-2 -->
+    <!-- FSI is connected via proc5:cMFSI-6 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-5</default>
@@ -10807,7 +10812,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>2</default>
+        <default>6</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -10885,7 +10890,7 @@
         <default>affinity:sys-0/node-0/proc-5/mcs-3/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc5:cMFSI-3 -->
+    <!-- FSI is connected via proc5:cMFSI-7 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-5</default>
@@ -10896,7 +10901,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>3</default>
+        <default>7</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -10974,7 +10979,7 @@
         <default>affinity:sys-0/node-0/proc-5/mcs-4/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc5:cMFSI-4 -->
+    <!-- FSI is connected via proc5:cMFSI-0 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-5</default>
@@ -10985,7 +10990,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>4</default>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -11063,7 +11068,7 @@
         <default>affinity:sys-0/node-0/proc-5/mcs-5/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc5:cMFSI-5 -->
+    <!-- FSI is connected via proc5:cMFSI-1 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-5</default>
@@ -11074,7 +11079,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>5</default>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -11152,7 +11157,7 @@
         <default>affinity:sys-0/node-0/proc-5/mcs-6/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc5:cMFSI-6 -->
+    <!-- FSI is connected via proc5:cMFSI-2 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-5</default>
@@ -11163,7 +11168,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>6</default>
+        <default>2</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -11241,7 +11246,7 @@
         <default>affinity:sys-0/node-0/proc-5/mcs-7/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc5:cMFSI-7 -->
+    <!-- FSI is connected via proc5:cMFSI-3 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-5</default>
@@ -11252,7 +11257,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>7</default>
+        <default>3</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -11330,7 +11335,7 @@
         <default>affinity:sys-0/node-0/proc-6/mcs-0/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc6:cMFSI-0 -->
+    <!-- FSI is connected via proc6:cMFSI-4 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-6</default>
@@ -11341,7 +11346,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>0</default>
+        <default>4</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -11419,7 +11424,7 @@
         <default>affinity:sys-0/node-0/proc-6/mcs-1/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc6:cMFSI-1 -->
+    <!-- FSI is connected via proc6:cMFSI-5 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-6</default>
@@ -11430,7 +11435,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>1</default>
+        <default>5</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -11508,7 +11513,7 @@
         <default>affinity:sys-0/node-0/proc-6/mcs-2/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc6:cMFSI-2 -->
+    <!-- FSI is connected via proc6:cMFSI-6 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-6</default>
@@ -11519,7 +11524,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>2</default>
+        <default>6</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -11597,7 +11602,7 @@
         <default>affinity:sys-0/node-0/proc-6/mcs-3/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc6:cMFSI-3 -->
+    <!-- FSI is connected via proc6:cMFSI-7 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-6</default>
@@ -11608,7 +11613,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>3</default>
+        <default>7</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -11686,7 +11691,7 @@
         <default>affinity:sys-0/node-0/proc-6/mcs-4/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc6:cMFSI-4 -->
+    <!-- FSI is connected via proc6:cMFSI-0 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-6</default>
@@ -11697,7 +11702,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>4</default>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -11775,7 +11780,7 @@
         <default>affinity:sys-0/node-0/proc-6/mcs-5/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc6:cMFSI-5 -->
+    <!-- FSI is connected via proc6:cMFSI-1 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-6</default>
@@ -11786,7 +11791,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>5</default>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -11864,7 +11869,7 @@
         <default>affinity:sys-0/node-0/proc-6/mcs-6/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc6:cMFSI-6 -->
+    <!-- FSI is connected via proc6:cMFSI-2 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-6</default>
@@ -11875,7 +11880,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>6</default>
+        <default>2</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -11953,7 +11958,7 @@
         <default>affinity:sys-0/node-0/proc-6/mcs-7/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc6:cMFSI-7 -->
+    <!-- FSI is connected via proc6:cMFSI-3 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-6</default>
@@ -11964,7 +11969,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>7</default>
+        <default>3</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -12042,7 +12047,7 @@
         <default>affinity:sys-0/node-0/proc-7/mcs-0/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc7:cMFSI-0 -->
+    <!-- FSI is connected via proc7:cMFSI-4 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-7</default>
@@ -12053,7 +12058,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>0</default>
+        <default>4</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -12131,7 +12136,7 @@
         <default>affinity:sys-0/node-0/proc-7/mcs-1/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc7:cMFSI-1 -->
+    <!-- FSI is connected via proc7:cMFSI-5 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-7</default>
@@ -12142,7 +12147,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>1</default>
+        <default>5</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -12220,7 +12225,7 @@
         <default>affinity:sys-0/node-0/proc-7/mcs-2/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc7:cMFSI-2 -->
+    <!-- FSI is connected via proc7:cMFSI-6 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-7</default>
@@ -12231,7 +12236,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>2</default>
+        <default>6</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -12309,7 +12314,7 @@
         <default>affinity:sys-0/node-0/proc-7/mcs-3/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc7:cMFSI-3 -->
+    <!-- FSI is connected via proc7:cMFSI-7 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-7</default>
@@ -12320,7 +12325,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>3</default>
+        <default>7</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -12398,7 +12403,7 @@
         <default>affinity:sys-0/node-0/proc-7/mcs-4/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc7:cMFSI-4 -->
+    <!-- FSI is connected via proc7:cMFSI-0 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-7</default>
@@ -12409,7 +12414,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>4</default>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -12487,7 +12492,7 @@
         <default>affinity:sys-0/node-0/proc-7/mcs-5/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc7:cMFSI-5 -->
+    <!-- FSI is connected via proc7:cMFSI-1 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-7</default>
@@ -12498,7 +12503,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>5</default>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -12576,7 +12581,7 @@
         <default>affinity:sys-0/node-0/proc-7/mcs-6/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc7:cMFSI-6 -->
+    <!-- FSI is connected via proc7:cMFSI-2 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-7</default>
@@ -12587,7 +12592,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>6</default>
+        <default>2</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -12665,7 +12670,7 @@
         <default>affinity:sys-0/node-0/proc-7/mcs-7/membuf-0</default>
     </attribute>
 
-    <!-- FSI is connected via proc7:cMFSI-7 -->
+    <!-- FSI is connected via proc7:cMFSI-3 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-7</default>
@@ -12676,7 +12681,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>7</default>
+        <default>3</default>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>
@@ -12736,14 +12741,11 @@
 
 <!-- Centaur n0p63 : end -->
 
-<!-- Remove this until Simics model works again : 
-     @fixme with Task 39187
-
-Target used for FSI wrap-back testing
+<!-- Target used for FSI wrap-back testing -->
 <targetInstance>
     <id>sys0node0proc0wrap</id>
     <type>chip-processor-venice</type>
-    <attribute><id>HUID</id><default>0x00070000</default></attribute>
+    <attribute><id>HUID</id><default>0x00070099</default></attribute>
     <attribute><id>SCOM_SWITCHES</id>
         <default>
             <field><id>useFsiScom</id><value>1</value></field>
@@ -12761,7 +12763,7 @@ Target used for FSI wrap-back testing
         <default>affinity:sys-0/node-0/proc-9</default>
     </attribute>
 
-    FSI is connected via wrapback to itself over MFSI-0
+    <!--  FSI is connected via wrapback to itself over MFSI-0 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-0</default>
@@ -12785,7 +12787,6 @@ Target used for FSI wrap-back testing
     <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
 </targetInstance>
 
--->
 
 
 <!-- DIMMS

@@ -27,28 +27,6 @@
 ##    to setup the sandbox
 ##
 
-echo "+++ Copy centaur.act"
-mkdir -p $sb/simu/data/cec-chip
-cp $HOSTBOOTROOT/src/build/citest/etc/patches/centaur.act $sb/simu/data/cec-chip/centaur.act
-
-echo "+++ Copy desired config file to sandbox and modify Model EC."
-mkdir -p $sb/simu/configs
-cp --update $BACKING_BUILD/src/simu/configs/P8_MURANO.config $sb/simu/configs
-cp --update $BACKING_BUILD/src/simu/configs/P8_VENICE.config $sb/simu/configs
-sed -i -e's/SETENV GFW_P8_MURANO_PROC_MODEL_EC.*/SETENV GFW_P8_MURANO_PROC_MODEL_EC 910623/' $sb/simu/configs/P8_MURANO.config
-sed -i -e's/SETENV GFW_P8_MURANO_CENTAUR_MODEL_EC.*/SETENV GFW_P8_MURANO_CENTAUR_MODEL_EC 910610/' $sb/simu/configs/P8_MURANO.config
-sed -i -e's/SETENV GFW_P8_VENICE_PROC_MODEL_EC.*/SETENV GFW_P8_VENICE_PROC_MODEL_EC 910623/' $sb/simu/configs/P8_VENICE.config
-
-echo "+++ Enable 8-threads."
-sed -i -e's/SETENV GFW_SIMICS_ENV_THREADS_PER_CORE.*/SETENV GFW_SIMICS_ENV_THREADS_PER_CORE 8/' $sb/simu/configs/P8_VENICE.config
-sed -i -e's/SETENV GFW_SIMICS_ENV_THREADS_PER_CORE.*/SETENV GFW_SIMICS_ENV_THREADS_PER_CORE 8/' $sb/simu/configs/P8_MURANO.config
-
-#Remove with RTC:40975
-echo "+++ Update to new phyp level for XSCOM fixes."
-mkdir -p $sb/simu/data
-cp --update $BACKING_BUILD/src/simu/data/simicsInfo $sb/simu/data/simicsInfo
-sed -i -e's/^WSALIAS DEFAULT PHYPLEVEL.*/WSALIAS DEFAULT PHYPLEVEL env\/phypb\/simics-4.2.0\/simics-4.2.85\/ph120424b700.42/' $sb/simu/data/simicsInfo
-
 
 #### Examples ####
 #echo "+++ Some message about why you need to do this."

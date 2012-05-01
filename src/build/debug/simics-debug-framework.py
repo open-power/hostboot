@@ -399,7 +399,7 @@ def magic_instruction_callback(user_arg, cpu, arg):
             # fsp-trace style.
             writeLongLong(tracBinaryInfoAddr+8,1)
         # Save the tracBinary buffer to a file named tracBINARY in current dir
-        saveCommand = "memory_image_ln0.save tracBINARY 0x%x %d"%(pTracBinaryBuffer,cbUsed)
+        saveCommand = "p8Proc0.l3_cache_image.save tracBINARY 0x%x %d"%(pTracBinaryBuffer,cbUsed)
         SIM_run_alone(run_command, saveCommand )
         # Run fsp-trace on tracBINARY file (implied), append output to tracMERG
         os.system( "fsp-trace ./ -s hbotStringFile >>tracMERG  2>/dev/null" )

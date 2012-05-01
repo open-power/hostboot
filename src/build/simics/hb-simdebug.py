@@ -44,7 +44,7 @@ def dumpL3():
     #print t
 
     #dump L3 to hbdump.<timestamp>
-    string = "memory_image_ln0.save hbdump.%s 0 0x%x"%(t, L3_SIZE)
+    string = "p8Proc0.l3_cache_image.save hbdump.%s 0 0x%x"%(t, L3_SIZE)
     #print string
     result = run_command(string)
     #print result

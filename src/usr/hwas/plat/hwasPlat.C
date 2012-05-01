@@ -108,7 +108,7 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
 
         if (errl != NULL)
         {   // errl was set - this is an error condition.
-            HWAS_ERR( "pTarget %x (%p) - failed presence detect",
+            HWAS_ERR( "pTarget %.8X (%p) - failed presence detect",
                 pTarget->getAttr<ATTR_HUID>(), pTarget);
 
             // commit the error but keep going
@@ -116,7 +116,7 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
             // errl is now NULL
 
             // chip not present -- remove from list
-            HWAS_DBG( "pTarget %x (%p) - no presence",
+            HWAS_DBG( "pTarget %.8X (%p) - no presence",
                     pTarget->getAttr<ATTR_HUID>(), pTarget);
 
             // erase this target, and 'increment' to next
@@ -128,15 +128,15 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
 
         if (present == true)
         {
-            HWAS_DBG( "pTarget %x (%p) - detected present",
-                pTarget->getAttr<ATTR_HUID>(), pTarget);
+            HWAS_DBG( "pTarget %.8X (%p) - detected present",
+                pTarget->getAttr<ATTR_HUID>(), pTarget); 
 
             // advance to next entry in the list
             pTarget_it++;
         }
         else
         {   // chip not present -- remove from list
-            HWAS_DBG( "pTarget %x (%p) - no presence",
+            HWAS_DBG( "pTarget %.8X (%p) - no presence",
                 pTarget->getAttr<ATTR_HUID>(), pTarget);
 
             // erase this target, and 'increment' to next

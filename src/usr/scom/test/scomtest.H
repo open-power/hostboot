@@ -203,7 +203,15 @@ public:
       // Setup some targets to use
       enum {
           CENTAUR0, //local
+          CENTAUR1, //local
+          CENTAUR2, //local
+          CENTAUR3, //local
+          CENTAUR4, //local
+          CENTAUR5, //local
+          CENTAUR6, //local
+          CENTAUR7, //local
           CENTAUR8, //remote (off PROC1)
+          CENTAUR9, //remote (off PROC1)
           NUM_TARGETS
       };
       TARGETING::Target* scom_targets[NUM_TARGETS];
@@ -223,6 +231,31 @@ public:
       epath.removeLast();
       epath.addLast(TARGETING::TYPE_MEMBUF,8);
       scom_targets[CENTAUR8] = TARGETING::targetService().toTarget(epath);
+
+      epath.removeLast();
+      epath.addLast(TARGETING::TYPE_MEMBUF,1);
+      scom_targets[CENTAUR1] = TARGETING::targetService().toTarget(epath);
+      epath.removeLast();
+      epath.addLast(TARGETING::TYPE_MEMBUF,2);
+      scom_targets[CENTAUR2] = TARGETING::targetService().toTarget(epath);
+      epath.removeLast();
+      epath.addLast(TARGETING::TYPE_MEMBUF,3);
+      scom_targets[CENTAUR3] = TARGETING::targetService().toTarget(epath);
+      epath.removeLast();
+      epath.addLast(TARGETING::TYPE_MEMBUF,4);
+      scom_targets[CENTAUR4] = TARGETING::targetService().toTarget(epath);
+      epath.removeLast();
+      epath.addLast(TARGETING::TYPE_MEMBUF,5);
+      scom_targets[CENTAUR5] = TARGETING::targetService().toTarget(epath);
+      epath.removeLast();
+      epath.addLast(TARGETING::TYPE_MEMBUF,6);
+      scom_targets[CENTAUR6] = TARGETING::targetService().toTarget(epath);
+      epath.removeLast();
+      epath.addLast(TARGETING::TYPE_MEMBUF,7);
+      scom_targets[CENTAUR7] = TARGETING::targetService().toTarget(epath);
+      epath.removeLast();
+      epath.addLast(TARGETING::TYPE_MEMBUF,9);
+      scom_targets[CENTAUR9] = TARGETING::targetService().toTarget(epath);
 
       for( uint64_t x = 0; x < NUM_TARGETS; x++ )
       {
@@ -261,6 +294,17 @@ public:
           { scom_targets[CENTAUR0], 0x02011403 , 0x1234567800000000 },
           { scom_targets[CENTAUR0], 0x02011672 , 0x1122334455667788 },
           { scom_targets[CENTAUR8], 0x02011672 , 0x9E9E9E9E9E9E9E9E },
+
+          { scom_targets[CENTAUR0], 0x02011404 , 0x00000000f0f0f0f0 },
+          { scom_targets[CENTAUR1], 0x02011404 , 0x1111111100000000 },
+          { scom_targets[CENTAUR2], 0x02011404 , 0x2222222200000000 },
+          { scom_targets[CENTAUR3], 0x02011404 , 0x3333333300000000 },
+          { scom_targets[CENTAUR4], 0x02011404 , 0x4444444400000000 },
+          { scom_targets[CENTAUR5], 0x02011404 , 0x5555555500000000 },
+          { scom_targets[CENTAUR6], 0x02011404 , 0x6666666600000000 },
+          { scom_targets[CENTAUR7], 0x02011404 , 0x7777777700000000 },
+          { scom_targets[CENTAUR8], 0x02011404 , 0x8888888800000000 },
+          { scom_targets[CENTAUR9], 0x02011404 , 0x9999999900000000 },
       };
       const uint64_t NUM_ADDRS = sizeof(test_data)/sizeof(test_data[0]);
 
@@ -1165,6 +1209,12 @@ public:
           {
               continue;
           }
+          // check to see if the target is functional.. if not.. skip this target
+          else if (test_data[x].target->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true) 
+          {
+              TRACDCOMP( g_trac_scom, "ScomTest::test_translate_scom_MBA_MBS> Target %d is not functional", x );
+              continue;
+          }
 
           op_size = sizeof(uint64_t);
 
@@ -1352,6 +1402,12 @@ public:
           {
               continue;
           }
+          // check to see if the target is functional.. if not.. skip this target
+          else if (test_data[x].target->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true) 
+          {
+              TRACDCOMP( g_trac_scom, "ScomTest::test_translate_scom_ABUS> Target %d is not functional", x );
+              continue;
+          }
 
           op_size = sizeof(uint64_t);
 
@@ -1493,7 +1549,7 @@ public:
 	  {
               continue;
           }
-         // check to see if the target is functional.. if not.. skip this target
+          // check to see if the target is functional.. if not.. skip this target
           else if (test_data[x].target->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true) 
           {
               TRACDCOMP( g_trac_scom, "ScomTest::test_translate_scom_XBUS> Target %d is not functional", x );
@@ -1538,6 +1594,12 @@ public:
           {
               continue;
           }
+          // check to see if the target is functional.. if not.. skip this target
+          else if (test_data[x].target->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true) 
+          {
+              TRACDCOMP( g_trac_scom, "ScomTest::test_translate_scom_XBUS> Target %d is not functional", x );
+              continue;
+          }
 
           op_size = sizeof(uint64_t);
 
@@ -1571,9 +1633,6 @@ public:
 
   //@todo - write error path testcase for FSI scom using bad address
 
-
-
-  //@todo - address translation
 
 };
 
