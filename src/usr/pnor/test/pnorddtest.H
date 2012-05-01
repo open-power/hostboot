@@ -393,10 +393,6 @@ class PnorDdTest : public CxxTest::TestSuite
             std::list<PnorDD::PnorMode_t> supported_modes;
             supported_modes.push_back(PnorDD::MODEL_MEMCPY);
             supported_modes.push_back(PnorDD::MODEL_LPC_MEM);
-            if( !TARGETING::is_vpo() )
-            {
-                supported_modes.push_back(PnorDD::MODEL_FLAT_ECCB);
-            }
 
             uint64_t scratch_space = BASE_SCRATCH_SPACE;
 
@@ -549,10 +545,6 @@ class PnorDdTest : public CxxTest::TestSuite
             std::list<PnorDD::PnorMode_t> supported_modes;
             supported_modes.push_back(PnorDD::MODEL_MEMCPY);
             supported_modes.push_back(PnorDD::MODEL_LPC_MEM);
-            if( !TARGETING::is_vpo() )
-            {
-                supported_modes.push_back(PnorDD::MODEL_FLAT_ECCB);
-            }
 
             uint64_t scratch_space = BASE_SCRATCH_SPACE;
 
@@ -700,10 +692,6 @@ class PnorDdTest : public CxxTest::TestSuite
             std::list<PnorDD::PnorMode_t> supported_modes;
             supported_modes.push_back(PnorDD::MODEL_MEMCPY);
             supported_modes.push_back(PnorDD::MODEL_LPC_MEM);
-            if( !TARGETING::is_vpo() )
-            {
-                supported_modes.push_back(PnorDD::MODEL_FLAT_ECCB);
-            }
 
             uint64_t scratch_space = BASE_SCRATCH_SPACE;
 
