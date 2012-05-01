@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG 
 # This is an automatically generated prolog. 
 #  
-# fips810 src/simu/data/cec-chip/centaur.act 1.3 
+# fips810 src/simu/data/cec-chip/centaur.act 1.4 
 #  
 # IBM CONFIDENTIAL 
 #  
@@ -24,6 +24,7 @@
 #  jr01  swxxxxxx  jrost     09/29/11  File creation from supernova 
 #        SW127616  vanlee    03/20/12  Actions for draminit HWPs
 #        SW134334  vanlee    04/09/12  startclocks and chipID actions
+#        SW139623  vanlee    05/04/12  centaur startclocks actions
 #********************************************************************
 #  
 
@@ -90,3 +91,11 @@ CAUSE_EFFECT {
   # No cause since we always want this behavior
   EFFECT: TARGET=[REG(0x000F000F)] OP=[EQUALTO,BUF] DATA=[LOGIC(0xFF000009)] # copy over
 }
+
+CAUSE_EFFECT {
+  LABEL=[START_CLOCKS]
+  WATCH=[REG(0x03030006)]  # CC_REGION_REG
+  CAUSE: TARGET=[REG(0x03030006)] OP=[EQUALTO,BUF] DATA=[LITERAL(64,4FE00600,00000000)]
+  EFFECT: TARGET=[REG(0x03030008)] OP=[EQUALTO,BUF] DATA=[LITERAL(64,0000001F FFFFFFFF)]
+}
+

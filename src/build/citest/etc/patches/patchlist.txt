@@ -1,5 +1,12 @@
-Add chipid and startclocks_chiplets action
--RTC: task 40101 will be used to remove the patch
--CMVC: Defect 831420 was used to check the changes into fips810
--Files: p8.act , centaur.act, p8murano.ali
+Need to pick up latest model EC for p8 and centaur
+-RTC: task 41342 will be used to remove the patch
+-CMVC: Defect 834168 for checking in the changes into fips810
+-Files: P8_MURANO.config
+-Coreq: associated changes in workarounds.presimsetup need to be removed.
+
+Centaur action for cen_mem_startclocks HWP
+-RTC: task 41342 will be used to remove the patch
+-CQ: SW139623
+-CMVC: Defect 834703 for checking in the changes into fips810
+-Files: centaur.act
 -Coreq: associated changes in workarounds.presimsetup need to be removed.
