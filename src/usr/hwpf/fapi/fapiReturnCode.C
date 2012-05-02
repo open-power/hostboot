@@ -43,6 +43,7 @@
  *                          mjjones     02/22/2012  Allow user to add Target FFDC
  *                          mjjones     03/16/2012  Add type to FFDC data
  *                          mjjones     03/16/2012  Allow different PLAT errors
+ *                          mjjones     05/02/2012  Only trace setEcmdError on err
  */
 
 #include <fapiReturnCode.H>
@@ -168,7 +169,13 @@ void ReturnCode::setFapiError(const ReturnCodes i_rcValue)
 //******************************************************************************
 void ReturnCode::setEcmdError(const uint32_t i_rcValue)
 {
-    FAPI_ERR("setEcmdError: Creating ECMD error 0x%x", i_rcValue);
+    // Some HWPs perform an ecmdDataBaseBufferBase operation, then call this
+    // function then check if the ReturnCode indicates an error. Therefore only
+    // trace an error if there actually is an error
+    if (i_rcValue != 0)
+    {
+        FAPI_ERR("setEcmdError: Creating ECMD error 0x%x", i_rcValue);
+    }
     iv_rcValue = i_rcValue;
 
     // Forget about any associated data (this is a new error)
