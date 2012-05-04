@@ -380,6 +380,17 @@ errlHndl_t spdGetValue ( uint64_t i_keyword,
             break;
         }
 
+        // Check if this is a module specific keyword and check that the
+        // correct values are in place to actually request it
+        err = checkModSpecificKeyword( (*entry),
+                                       i_DDRRev,
+                                       i_target );
+
+        if( err )
+        {
+            break;
+        }
+
         if( entry->isSpecialCase )
         {
             // Handle special cases where data isn't sequential
@@ -463,163 +474,17 @@ errlHndl_t spdSpecialCases ( KeywordData i_kwdData,
         {
             switch( i_kwdData.keyword )
             {
+                // ==================================================
+                // 2 byte - LSB then MSB
                 case CAS_LATENCIES_SUPPORTED:
-                    // Length 2 bytes
-                    // Byte 0x0e [7:0]
-                    // Byte 0x0f [6:0] - MSB
-
-                    // Check Size of buffer
-                    err = spdCheckSize( io_buflen,
-                                        2,
-                                        i_kwdData.keyword );
-
-                    if( err ) break;
-
-                    // Get MSB
-                    err = spdFetchData( i_kwdData.offset,
-                                        1, /* Read 1 byte at a time */
-                                        &tmpBuffer[0],
-                                        i_target );
-
-                    if( err ) break;
-
-                    // Mask and shift if needed
-                    if( i_kwdData.useBitMask )
-                    {
-                        tmpBuffer[0] = tmpBuffer[0] & i_kwdData.bitMask;
-                        tmpBuffer[0] = tmpBuffer[0] >> i_kwdData.shift;
-                    }
-
-                    // Get LSB
-                    err = spdFetchData( 0x0e,
-                                        1, /* Read 1 byte at a time */
-                                        &tmpBuffer[1],
-                                        i_target );
-
-                    if( err ) break;
-
-                    // Set number of bytes read
-                    io_buflen = 2;
-                    break;
-
-                case TRC_MIN:
-                    // Length 2 bytes
-                    // Byte 0x15 [7:4] - MSB
-                    // Byte 0x17 [7:0]
-
-                    // Check Size of buffer
-                    err = spdCheckSize( io_buflen,
-                                        2,
-                                        i_kwdData.keyword );
-
-                    if( err ) break;
-
-                    // Get MSB
-                    err = spdFetchData( i_kwdData.offset,
-                                        1, /* Read 1 byte at a time */
-                                        &tmpBuffer[0],
-                                        i_target );
-
-                    if( err ) break;
-
-                    // Mask and shift if needed
-                    if( i_kwdData.useBitMask )
-                    {
-                        tmpBuffer[0] = tmpBuffer[0] & i_kwdData.bitMask;
-                        tmpBuffer[0] = tmpBuffer[0] >> i_kwdData.shift;
-                    }
-
-                    // Get LSB
-                    err = spdFetchData( 0x17,
-                                        1, /* Read 1 byte at a time */
-                                        &tmpBuffer[1],
-                                        i_target );
-
-                    if( err ) break;
-
-                    // Set number of bytes read
-                    io_buflen = 2;
-                    break;
-
-                case TRAS_MIN:
-                    // Length 2 bytes
-                    // Byte 0x15 [3:0] - MSB
-                    // Byte 0x16 [7:0]
-
-                    // Check size of buffer
-                    err = spdCheckSize( io_buflen,
-                                        2,
-                                        i_kwdData.keyword );
-
-                    if( err ) break;
-
-                    // Get MSB
-                    err = spdFetchData( i_kwdData.offset,
-                                        1, /* Read 1 byte at a time */
-                                        &tmpBuffer[0],
-                                        i_target );
-
-                    if( err ) break;
-
-                    // Mask and shift if needed
-                    if( i_kwdData.useBitMask )
-                    {
-                        tmpBuffer[0] = tmpBuffer[0] & i_kwdData.bitMask;
-                        tmpBuffer[0] = tmpBuffer[0] >> i_kwdData.shift;
-                    }
-
-                    // Get LSB
-                    err = spdFetchData( 0x16,
-                                        1, /* Read 1 byte at a time */
-                                        &tmpBuffer[1],
-                                        i_target );
-
-                    if( err ) break;
-
-                    // Set number of bytes read
-                    io_buflen = 2;
-                    break;
-
                 case TRFC_MIN:
-                    // Length 2 bytes
-                    // Byte 0x18 [7:0]
-                    // Byte 0x19 [7:0] - MSB
-
-                    // Check size of buffer
+                case MODULE_MANUFACTURER_ID:
+                case DRAM_MANUFACTURER_ID:
+                case RMM_MFR_ID_CODE:
+                case LRMM_MFR_ID_CODE:
+                    // Check Size of buffer
                     err = spdCheckSize( io_buflen,
-                                        2,
-                                        i_kwdData.keyword );
-
-                    if( err ) break;
-
-                    // Get MSB
-                    err = spdFetchData( i_kwdData.offset,
-                                        1, /* Read 1 byte at a time */
-                                        &tmpBuffer[0],
-                                        i_target );
-
-                    if( err ) break;
-
-                    // Get LSB
-                    err = spdFetchData( 0x18,
-                                        1, /* Read 1 byte at a time */
-                                        &tmpBuffer[1],
-                                        i_target );
-
-                    if( err ) break;
-
-                    // Set number of bytes read
-                    io_buflen = 2;
-                    break;
-
-                case TFAW_MIN:
-                    // Length 2 bytes
-                    // Byte 0x1c [3:0] - MSB
-                    // byte 0x1d [7:0]
-
-                    // Check size of buffer
-                    err = spdCheckSize( io_buflen,
-                                        2,
+                                        i_kwdData.length,
                                         i_kwdData.keyword );
 
                     if( err ) break;
@@ -640,7 +505,7 @@ errlHndl_t spdSpecialCases ( KeywordData i_kwdData,
                     }
 
                     // Get LSB
-                    err = spdFetchData( 0x1d,
+                    err = spdFetchData( (i_kwdData.offset - 1),
                                         1, /* Read 1 byte at a time */
                                         &tmpBuffer[1],
                                         i_target );
@@ -648,17 +513,15 @@ errlHndl_t spdSpecialCases ( KeywordData i_kwdData,
                     if( err ) break;
 
                     // Set number of bytes read
-                    io_buflen = 2;
+                    io_buflen = i_kwdData.length;
                     break;
 
-                case MODULE_MANUFACTURER_ID:
-                    // Length 2 bytes
-                    // Byte 0x75 [7:0]
-                    // Byte 0x76 [7:0] - MSB
-
-                    // Check size of buffer
+                // ==================================================
+                // 2 byte - MSB then LSB is 2 less than MSB
+                case TRC_MIN:
+                    // Check Size of buffer
                     err = spdCheckSize( io_buflen,
-                                        2,
+                                        i_kwdData.length,
                                         i_kwdData.keyword );
 
                     if( err ) break;
@@ -671,8 +534,15 @@ errlHndl_t spdSpecialCases ( KeywordData i_kwdData,
 
                     if( err ) break;
 
+                    // Mask and shift if needed
+                    if( i_kwdData.useBitMask )
+                    {
+                        tmpBuffer[0] = tmpBuffer[0] & i_kwdData.bitMask;
+                        tmpBuffer[0] = tmpBuffer[0] >> i_kwdData.shift;
+                    }
+
                     // Get LSB
-                    err = spdFetchData( 0x75,
+                    err = spdFetchData( (i_kwdData.offset - 2),
                                         1, /* Read 1 byte at a time */
                                         &tmpBuffer[1],
                                         i_target );
@@ -680,31 +550,37 @@ errlHndl_t spdSpecialCases ( KeywordData i_kwdData,
                     if( err ) break;
 
                     // Set number of bytes read
-                    io_buflen = 2;
+                    io_buflen = i_kwdData.length;
                     break;
 
-                case DRAM_MANUFACTURER_ID:
-                    // Length 2 bytes
-                    // Byte 0x94 [7:0]
-                    // Byte 0x95 [7:0] - MSB
-
+                // ==================================================
+                // 2 byte - MSB then LSB
+                case TRAS_MIN:
+                case TFAW_MIN:
                     // Check size of buffer
                     err = spdCheckSize( io_buflen,
-                                        2,
+                                        i_kwdData.length,
                                         i_kwdData.keyword );
 
                     if( err ) break;
 
                     // Get MSB
                     err = spdFetchData( i_kwdData.offset,
-                                        1, /*Read 1 byte at a time */
+                                        1, /* Read 1 byte at a time */
                                         &tmpBuffer[0],
                                         i_target );
 
                     if( err ) break;
 
+                    // Mask and shift if needed
+                    if( i_kwdData.useBitMask )
+                    {
+                        tmpBuffer[0] = tmpBuffer[0] & i_kwdData.bitMask;
+                        tmpBuffer[0] = tmpBuffer[0] >> i_kwdData.shift;
+                    }
+
                     // Get LSB
-                    err = spdFetchData( 0x94,
+                    err = spdFetchData( (i_kwdData.offset + 1),
                                         1, /* Read 1 byte at a time */
                                         &tmpBuffer[1],
                                         i_target );
@@ -712,9 +588,10 @@ errlHndl_t spdSpecialCases ( KeywordData i_kwdData,
                     if( err ) break;
 
                     // Set number of bytes read
-                    io_buflen = 2;
+                    io_buflen = i_kwdData.length;
                     break;
 
+                // ==================================================
                 default:
                     TRACFCOMP( g_trac_spd,
                                ERR_MRK"Unknown keyword (0x%04x) for DDR3 special cases!",
@@ -938,6 +815,212 @@ bool compareEntries ( const KeywordData e1,
     {
         return false;
     }
+}
+
+
+// ------------------------------------------------------------------
+// checkModSpecificKeyword
+// ------------------------------------------------------------------
+errlHndl_t checkModSpecificKeyword ( KeywordData i_kwdData,
+                                     uint64_t i_memType,
+                                     TARGETING::Target * i_target )
+{
+    errlHndl_t err = NULL;
+
+    TRACSSCOMP( g_trac_spd,
+                ENTER_MRK"checkModSpecificKeyword()" );
+
+    do
+    {
+        // If not a Module Specific keyword, skip this logic
+        if( NA == i_kwdData.modSpec )
+        {
+            break;
+        }
+
+        // To check the module specific flags, also need the Module Type value
+        // from byte 3.
+        uint8_t modType = 0x0;
+        err = spdFetchData( MEM_TYPE_ADDR,
+                            MEM_TYPE_ADDR_SZ,
+                            &modType,
+                            i_target );
+
+        if( err )
+        {
+            break;
+        }
+
+        // Check Unbuffered Memory Module (UMM)
+        if( (SPD_DDR3 == i_memType) &&
+            ( (0x2 == modType) ||
+              (0x3 == modType) ||
+              (0x4 == modType) ||
+              (0x6 == modType) ||
+              (0x8 == modType) ||
+              (0xc == modType) ||
+              (0xd == modType) ) )
+        {
+            if( 0 == (i_kwdData.modSpec & UMM) )
+            {
+                TRACFCOMP( g_trac_spd,
+                           ERR_MRK"Keyword (0x%04x) is not valid with UMM modules!",
+                           i_kwdData.keyword );
+
+                /*@
+                 * @errortype
+                 * @reasoncode       SPD_MOD_SPECIFIC_MISMATCH_UMM
+                 * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid         SPD_CHECK_MODULE_SPECIFIC_KEYWORD
+                 * @userdata1[0:31]  Module Type (byte 3[3:0])
+                 * @userdata1[32:63] Memory Type (byte 2)
+                 * @userdata2[0:31]  SPD Keyword
+                 * @userdata2[32:63] Module Specific flag
+                 * @devdesc          Keyword requested was not UMM Module specific.
+                 */
+                err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                               SPD_CHECK_MODULE_SPECIFIC_KEYWORD,
+                                               SPD_MOD_SPECIFIC_MISMATCH_UMM,
+                                               TWO_UINT32_TO_UINT64( modType, i_memType ),
+                                               TWO_UINT32_TO_UINT64( i_kwdData.keyword,
+                                                                     i_kwdData.modSpec ) );
+
+                break;
+            }
+        }
+        // Check Registered Memory Module (RMM)
+        else if( (SPD_DDR3 == i_memType) &&
+                 ( (0x1 == modType) ||
+                   (0x5 == modType) ||
+                   (0x9 == modType) ) )
+        {
+            if( 0 == (i_kwdData.modSpec & RMM) )
+            {
+                TRACFCOMP( g_trac_spd,
+                           ERR_MRK"Keyword (0x%04x) is not valid with RMM modules!",
+                           i_kwdData.keyword );
+
+                /*@
+                 * @errortype
+                 * @reasoncode       SPD_MOD_SPECIFIC_MISMATCH_RMM
+                 * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid         SPD_CHECK_MODULE_SPECIFIC_KEYWORD
+                 * @userdata1[0:31]  Module Type (byte 3[3:0])
+                 * @userdata1[32:63] Memory Type (byte 2)
+                 * @userdata2[0:31]  SPD Keyword
+                 * @userdata2[32:63] Module Specific flag
+                 * @devdesc          Keyword requested was not RMM Module specific.
+                 */
+                err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                               SPD_CHECK_MODULE_SPECIFIC_KEYWORD,
+                                               SPD_MOD_SPECIFIC_MISMATCH_RMM,
+                                               TWO_UINT32_TO_UINT64( modType, i_memType ),
+                                               TWO_UINT32_TO_UINT64( i_kwdData.keyword,
+                                                                     i_kwdData.modSpec ) );
+
+                break;
+            }
+        }
+        // Check Clocked Memory Module (CMM)
+        else if( (SPD_DDR3 == i_memType) &&
+                 ( (0x7 == modType) ||
+                   (0xa == modType) ) )
+        {
+            if( 0 == (i_kwdData.modSpec & CMM) )
+            {
+                TRACFCOMP( g_trac_spd,
+                           ERR_MRK"Keyword (0x%04x) is not valid with CMM modules!",
+                           i_kwdData.keyword );
+
+                /*@
+                 * @errortype
+                 * @reasoncode       SPD_MOD_SPECIFIC_MISMATCH_CMM
+                 * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid         SPD_CHECK_MODULE_SPECIFIC_KEYWORD
+                 * @userdata1[0:31]  Module Type (byte 3[3:0])
+                 * @userdata1[32:63] Memory Type (byte 2)
+                 * @userdata2[0:31]  SPD Keyword
+                 * @userdata2[32:63] Module Specific flag
+                 * @devdesc          Keyword requested was not CMM Module specific.
+                 */
+                err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                               SPD_CHECK_MODULE_SPECIFIC_KEYWORD,
+                                               SPD_MOD_SPECIFIC_MISMATCH_CMM,
+                                               TWO_UINT32_TO_UINT64( modType, i_memType ),
+                                               TWO_UINT32_TO_UINT64( i_kwdData.keyword,
+                                                                     i_kwdData.modSpec ) );
+
+                break;
+            }
+        }
+        // Check Load Reduction Memory Module (LRMM)
+        else if( (SPD_DDR3 == i_memType) &&
+                 ( (0xb == modType) ) )
+        {
+            if( 0 == (i_kwdData.modSpec & LRMM) )
+            {
+                TRACFCOMP( g_trac_spd,
+                           ERR_MRK"Keyword (0x%04x) is not valid with LRMM modules!",
+                           i_kwdData.keyword );
+
+                /*@
+                 * @errortype
+                 * @reasoncode       SPD_MOD_SPECIFIC_MISMATCH_LRMM
+                 * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid         SPD_CHECK_MODULE_SPECIFIC_KEYWORD
+                 * @userdata1[0:31]  Module Type (byte 3[3:0])
+                 * @userdata1[32:63] Memory Type (byte 2)
+                 * @userdata2[0:31]  SPD Keyword
+                 * @userdata2[32:63] Module Specific flag
+                 * @devdesc          Keyword requested was not LRMM Module specific.
+                 */
+                err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                               SPD_CHECK_MODULE_SPECIFIC_KEYWORD,
+                                               SPD_MOD_SPECIFIC_MISMATCH_LRMM,
+                                               TWO_UINT32_TO_UINT64( modType, i_memType ),
+                                               TWO_UINT32_TO_UINT64( i_kwdData.keyword,
+                                                                     i_kwdData.modSpec ) );
+
+                break;
+            }
+        }
+        else
+        {
+            TRACFCOMP( g_trac_spd,
+                       ERR_MRK"Module specific keyword could not be matched with an "
+                       "appropriate scenario!" );
+            TRACFCOMP( g_trac_spd,
+                       ERR_MRK"  Mem Type: 0x%04x, Mod Type: 0x%04x, Keyword: 0x%04x",
+                       i_memType,
+                       modType,
+                       i_kwdData.keyword );
+
+            /*@
+             * @errortype
+             * @reasoncode       SPD_MOD_SPECIFIC_UNSUPPORTED
+             * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid         SPD_CHECK_MODULE_SPECIFIC_KEYWORD
+             * @userdata1[0:31]  Module Type (byte 3[3:0])
+             * @userdata1[32:63] Memory Type (byte 2)
+             * @userdata2[0:31]  SPD Keyword
+             * @userdata2[32:63] Module Specific flag
+             * @devdesc          Unsupported Module Specific setup.
+             */
+            err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                           SPD_CHECK_MODULE_SPECIFIC_KEYWORD,
+                                           SPD_MOD_SPECIFIC_UNSUPPORTED,
+                                           TWO_UINT32_TO_UINT64( modType, i_memType ),
+                                           TWO_UINT32_TO_UINT64( i_kwdData.keyword,
+                                                                 i_kwdData.modSpec ) );
+
+            break;
+        }
+    } while( 0 );
+
+    TRACSSCOMP( g_trac_spd,
+                EXIT_MRK"checkModSpecificKeyword()" );
+
+    return err;
 }
 
 

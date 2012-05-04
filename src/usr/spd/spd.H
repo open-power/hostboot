@@ -52,6 +52,20 @@ enum
 };
 
 /**
+ * @brief Enumerations for Module Specfic Keywords
+ */
+typedef enum
+{
+    NA      = 0x00,
+    UMM     = 0x01,
+    RMM     = 0x02,
+    CMM     = 0x04,
+    LRMM    = 0x08,
+    ALL     = 0xFFFF,
+} modSpecTypes_t;
+
+
+/**
 * @brief Structure to define the lookup table for SPD keywords
 *       for DIMMs.
 */
@@ -65,6 +79,7 @@ struct KeywordData
     uint8_t bitMask;    // Bit mask
     uint8_t shift;      // Used for fields < 1 byte to right justify all values.
     bool isSpecialCase; // Whether or not this entry is a special case.
+    modSpecTypes_t modSpec; // Module Specific type keyword is valid for.
 };
 
 
@@ -282,6 +297,25 @@ errlHndl_t dimmPresenceDetect( DeviceFW::OperationType i_opType,
                                size_t & io_buflen,
                                int64_t i_accessType,
                                va_list i_args );
+
+/**
+ * @brief This function is used to check the parameters in the SPD data that
+ *      indicate which module specific keywords are valid, and then check that
+ *      against the data in the table flags.
+ *
+ * @param[in] i_kwdData - The table entry for the keyword being requested.
+ *
+ * @param[in] i_memType - The DDRx revision value from Byte 2 of the SPD data.
+ *
+ * @param[in] i_target - The chip target.
+ *
+ * @return errlHndl_t - NULL if successful, otherwise a pointer to the error
+ *      log.
+ */
+errlHndl_t checkModSpecificKeyword ( KeywordData i_kwdData,
+                                     uint64_t i_memType,
+                                     TARGETING::Target * i_target );
+
 
 }; // end SPD namespace
 

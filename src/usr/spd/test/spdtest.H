@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/spd/test/spdtest.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/spd/test/spdtest.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #ifndef __SPDTEST_H
 #define __SPDTEST_H
 
@@ -121,11 +122,11 @@ class SPDTest: public CxxTest::TestSuite
                     TS_FAIL( "testSpdRead- Failure reading Basic memory type!" );
                     errlCommit( err,
                                 SPD_COMP_ID );
-                    continue;
+                    break;;
                 }
 
-                for( uint64_t keyword = SPD::SPD_FIRST_KEYWORD;
-                     keyword < SPD::SPD_LAST_KEYWORD; keyword++ )
+                for( uint64_t keyword = SPD::SPD_FIRST_NORM_KEYWORD;
+                     keyword < SPD::SPD_LAST_NORM_KEYWORD; keyword++ )
                 {
                     cmds++;
                     if( NULL != theData )
@@ -183,10 +184,10 @@ class SPDTest: public CxxTest::TestSuite
                         continue;
                     }
 
-                    // Read was successful, print out first 2 bytes of data read
+                    // Read was successful, print out first byte of data read
                     TRACFCOMP( g_trac_spd,
-                               "testSpdRead - kwd: 0x%04x, val: %02x%02x, size: %d",
-                               keyword, theData[0], theData[1], theSize );
+                               "testSpdRead - kwd: 0x%04x, val: %02x, size: %d",
+                               keyword, theData[0], theSize );
 
                     if( NULL != theData )
                     {
@@ -243,14 +244,14 @@ class SPDTest: public CxxTest::TestSuite
                 err = deviceWrite( theTarget,
                                    theData,
                                    theSize,
-                                   DEVICE_SPD_ADDRESS( SPD_FIRST_KEYWORD ) );
+                                   DEVICE_SPD_ADDRESS( SPD_FIRST_NORM_KEYWORD ) );
 
                 if( NULL == err )
                 {
                     // No error returned, failure
                     fails++;
                     TS_FAIL( "testSpdWrite - No error returned from deviceWrite()" );
-                    continue;
+                    break;
                 }
                 else
                 {
@@ -301,13 +302,13 @@ class SPDTest: public CxxTest::TestSuite
                 err = deviceRead( theTarget,
                                   theData,
                                   theSize,
-                                  DEVICE_SPD_ADDRESS( SPD::SPD_LAST_KEYWORD ) );
+                                  DEVICE_SPD_ADDRESS( SPD::INVALID_SPD_KEYWORD ) );
 
                 if( NULL == err )
                 {
                     fails++;
                     TS_FAIL( "testSpdInvalidKeyword - No error returned!" );
-                    continue;
+                    break;
                 }
                 else
                 {
@@ -358,13 +359,13 @@ class SPDTest: public CxxTest::TestSuite
                 err = deviceRead( theTarget,
                                   theData,
                                   theSize,
-                                  DEVICE_SPD_ADDRESS( SPD::SPD_FIRST_KEYWORD ) );
+                                  DEVICE_SPD_ADDRESS( SPD::SPD_FIRST_NORM_KEYWORD ) );
 
                 if( NULL == err )
                 {
                     fails++;
                     TS_FAIL( "testSpdInvalidSize - No error for invalid size!" );
-                    continue;
+                    break;
                 }
                 else
                 {
@@ -375,6 +376,177 @@ class SPDTest: public CxxTest::TestSuite
 
             TRACFCOMP( g_trac_spd,
                        "testSpdInvalidSize - %d/%d fails",
+                       fails, cmds );
+        }
+
+
+        /**
+         * @brief This test will test reading the Module specific keywords.
+         */
+        void testspdDDR3ModSpecKwds( void )
+        {
+            errlHndl_t err = NULL;
+            uint64_t cmds = 0x0;
+            uint64_t fails = 0x0;
+            uint8_t memType = 0x0;
+            uint8_t modType = 0x0;
+
+            TRACFCOMP( g_trac_spd,
+                       ENTER_MRK"testspdDDR3ModSpecKwds()" );
+
+            do
+            {
+                TARGETING::Target * theTarget = NULL;
+
+                // Get DIMM Targets
+                TargetHandleList dimmList;
+                getDIMMTargets( dimmList );
+
+                if( ( 0 == dimmList.size() ) ||
+                    ( NULL == dimmList[0] ) )
+                {
+                    TRACFCOMP( g_trac_spd,
+                               "testspdDDR3ModSpecKwds - No DIMMs found!" );
+                    break;
+                }
+
+                // Operate on first DIMM.
+                theTarget = dimmList[0];
+                uint8_t * theData = NULL;
+                size_t theSize = 0;
+                uint32_t entry = 0x0;
+
+                // Get the DDR revision
+                size_t tmpSize = 0x1;
+                err = deviceRead( theTarget,
+                                  &memType,
+                                  tmpSize,
+                                  DEVICE_SPD_ADDRESS( SPD::BASIC_MEMORY_TYPE ) );
+
+                if( err )
+                {
+                    fails++;
+                    TS_FAIL( "testspdDDR3ModSpecKwds- Failure reading Basic "
+                             "memory type!" );
+                    errlCommit( err,
+                                SPD_COMP_ID );
+                    break;
+                }
+
+                // Get the Module Type
+                err = deviceRead( theTarget,
+                                  &modType,
+                                  tmpSize,
+                                  DEVICE_SPD_ADDRESS( SPD::MODULE_TYPE ) );
+
+                if( err )
+                {
+                    fails++;
+                    TS_FAIL( "testspdDDR3ModSpecKwds - Failure reading Module "
+                             "type" );
+                    errlCommit( err,
+                                SPD_COMP_ID );
+                    break;
+                }
+
+                // The real Keyword read testing
+                for( uint64_t keyword = SPD::SPD_FIRST_MOD_SPEC;
+                     keyword < SPD::SPD_LAST_MOD_SPEC; keyword++ )
+                {
+                    cmds++;
+                    if( NULL != theData )
+                    {
+                        free( theData );
+                        theData = NULL;
+                    }
+
+                    // Get the required size of the buffer
+                    theSize = 0;
+                    KeywordData kwdData;
+                    if( SPD_DDR3 == memType )
+                    {
+                        for( entry = 0;
+                             entry < (sizeof(ddr3Data)/sizeof(ddr3Data[0]));
+                             entry++ )
+                        {
+                            if( keyword == ddr3Data[entry].keyword )
+                            {
+                                kwdData = ddr3Data[entry];
+                                theSize = ddr3Data[entry].length;
+                                break;
+                            }
+                        }
+
+                        // Check type of module.
+                        TRACFCOMP( g_trac_spd,
+                                   INFO_MRK"SPD Error traces will follow!!!  "
+                                   "Not all module specific keywords will be "
+                                   "valid for all types of modules.  IGNORE!!" );
+                        err = checkModSpecificKeyword( kwdData,
+                                                       memType,
+                                                       theTarget );
+
+                        if( err )
+                        {
+                            // This keyword isn't supported with this module
+                            // type
+                            cmds--;
+                            delete err;
+                            err = NULL;
+                            continue;
+                        }
+                    }
+                    else
+                    {
+                        // Nothing else supported yet!
+                        // Not really a fail, just not supported
+                        cmds--;
+                        continue;
+                    }
+
+                    if( 0x0 == theSize )
+                    {
+                        fails++;
+                        TS_FAIL( "testspdDDR3ModSpecKwds - Keyword (0x%04x) "
+                                 "size = 0x0",
+                                 entry );
+                        continue;
+                    }
+
+                    // Allocate the buffer
+                    theData = static_cast<uint8_t*>(malloc( theSize ));
+                    err = deviceRead( theTarget,
+                                      theData,
+                                      theSize,
+                                      DEVICE_SPD_ADDRESS( keyword ) );
+
+                    if( err )
+                    {
+                        fails++;
+                        TS_FAIL( "testspdDDR3ModSpecKwds - Failure on keywor"
+                                 "d: %04x",
+                                 keyword );
+                        errlCommit( err,
+                                    SPD_COMP_ID );
+                        continue;
+                    }
+
+                    // Read was successful, print out first 2 bytes of data read
+                    TRACFCOMP( g_trac_spd,
+                               "testspdDDR3ModSpecKwds - kwd: 0x%04x, val: "
+                               "%02x, size: %d",
+                               keyword, theData[0], theSize );
+
+                    if( NULL != theData )
+                    {
+                        free( theData );
+                        theData = NULL;
+                    }
+                }
+            } while( 0 );
+
+            TRACFCOMP( g_trac_spd,
+                       "testspdDDR3ModSpecKwds - %d/%d fails",
                        fails, cmds );
         }
 

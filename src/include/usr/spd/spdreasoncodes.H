@@ -53,6 +53,7 @@ enum spdModuleId
     SPD_WRITE_KEYWORD_VALUE             = 0x05,
     SPD_SPECIAL_CASES                   = 0x06,
     SPD_PRESENCE_DETECT                 = 0x07,
+    SPD_CHECK_MODULE_SPECIFIC_KEYWORD   = 0x08,
 };
 
 /**
@@ -72,6 +73,11 @@ enum spdReasonCode
     SPD_INSUFFICIENT_FILE_SIZE          = SPD_COMP_ID | 0x06,
     SPD_NOT_SUPPORTED                   = SPD_COMP_ID | 0x07,
     SPD_KEYWORD_NOT_FOUND               = SPD_COMP_ID | 0x08,
+    SPD_MOD_SPECIFIC_MISMATCH_UMM       = SPD_COMP_ID | 0x09,
+    SPD_MOD_SPECIFIC_MISMATCH_RMM       = SPD_COMP_ID | 0x0a,
+    SPD_MOD_SPECIFIC_MISMATCH_CMM       = SPD_COMP_ID | 0x0b,
+    SPD_MOD_SPECIFIC_MISMATCH_LRMM      = SPD_COMP_ID | 0x0c,
+    SPD_MOD_SPECIFIC_UNSUPPORTED        = SPD_COMP_ID | 0x0d,
 };
 
 };  // end SPD
