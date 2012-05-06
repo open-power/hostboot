@@ -68,7 +68,7 @@ const uint8_t VPO_NUM_OF_MEMBUF_TO_RUN = UNLIMITED_RUN;
 //  Un-comment these files as they become available:
 // #include    "host_disable_vddr/host_disable_vddr.H"
 // #include    "mc_pll_setup/mc_pll_setup.H"
-// #include    "mba_startclocks/mba_startclocks.H"
+#include    "mem_startclocks/cen_mem_startclocks.H"
 // #include    "host_enable_vddr/host_enable_vddr.H"
 // #include    "mss_initf/mss_initf.H"
 #include    "mss_ddr_phy_reset/mss_ddr_phy_reset.H"
@@ -207,60 +207,66 @@ void    call_mc_pll_setup( void *io_pArgs )
 
 
 //
-//  Wrapper function to call 13.3 : mba_startclocks
+//  Wrapper function to call 13.3 : mem_startclocks
 //
-void    call_mba_startclocks( void *io_pArgs )
+void    call_mem_startclocks( void *io_pArgs )
 {
     errlHndl_t l_err = NULL;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mba_startclocks entry" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mem_startclocks entry" );
 
-#if 0
-    // @@@@@    CUSTOM BLOCK:   @@@@@
-    //  figure out what targets we need
-    //  customize any other inputs
-    //  set up loops to go through all targets (if parallel, spin off a task)
+    // Get all Centaur targets
+    //  Use PredicateIsFunctional to filter only functional chips
+    TARGETING::PredicateIsFunctional l_isFunctional;
+    //  find all the Centaurs in the system
+    TARGETING::PredicateCTM l_ctaurFilter(CLASS_CHIP, TYPE_MEMBUF);
+    // declare a postfix expression widget
+    TARGETING::PredicatePostfixExpr l_functionalAndCtaurFilter;
+    //  is-a-membuf-chip  is-functional   AND
+    l_functionalAndCtaurFilter.push(&l_ctaurFilter).push(&l_isFunctional).And();
+    // loop through all the targets, applying the filter,  and put the results
+    // in l_pMemBufs
+    TARGETING::TargetRangeFilter    l_pMemBufs(
+            TARGETING::targetService().begin(),
+            TARGETING::targetService().end(),
+            &l_functionalAndCtaurFilter );
 
-    //  print call to hwp and dump physical path of the target(s)
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "=====  mba_startclocks HWP(? ? ? )",
-                    ?
-                    ?
-                    ? );
-    //  dump physical path to targets
-    EntityPath l_path;
-    l_path  =   l_@targetN_target->getAttr<ATTR_PHYS_PATH>();
-    l_path.dump();
-    TRACFCOMP( g_trac_mc_init, "===== " );
-
-    // cast OUR type of target to a FAPI type of target.
-    const fapi::Target l_fapi_@targetN_target(
-                    TARGET_TYPE_MEMBUF_CHIP,
-                    reinterpret_cast<void *>
-                        (const_cast<TARGETING::Target*>(l_@targetN_target)) );
-
-    //  call the HWP with each fapi::Target
-    l_fapirc  =   mba_startclocks( ? , ?, ? );
-
-    //  process return code.
-    if ( l_fapirc== fapi::FAPI_RC_SUCCESS )
+    for ( ; l_pMemBufs ;  ++l_pMemBufs )
     {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "SUCCESS :  mba_startclocks HWP(? ? ? )" );
-    }
-    else
-    {
-        /**
-         * @todo fapi error - just print out for now...
-         */
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR 0x%.8X:  mba_startclocks HWP(? ? ?) ",
-                static_cast<uint32_t>(l_fapirc) );
-    }
-    // @@@@@    END CUSTOM BLOCK:   @@@@@
-#endif
+        //  make a local copy of the target for ease of use
+        const TARGETING::Target*  l_pCentaur = *l_pMemBufs;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mba_startclocks exit" );
+        // Dump current run on target
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "Running cen_mem_startclocks HWP on..." );
+        EntityPath l_path;
+        l_path  =   l_pCentaur->getAttr<ATTR_PHYS_PATH>();
+        l_path.dump();
+
+        // Cast to a FAPI type of target.
+        const fapi::Target l_fapi_centaur(
+                TARGET_TYPE_MEMBUF_CHIP,
+                reinterpret_cast<void *>
+                (const_cast<TARGETING::Target*>(l_pCentaur)) );
+
+        //  call the HWP with each fapi::Target
+        FAPI_INVOKE_HWP(l_err, cen_mem_startclocks, l_fapi_centaur);
+
+        if (l_err)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "ERROR 0x%.8X: cen_mem_startclocks HWP returns error",
+                      l_err->reasonCode());
+            break;
+        }
+        else
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "SUCCESS :  cen_mem_startclocks HWP( )" );
+        }
+    }
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mem_startclocks exit" );
 
     task_end2( l_err );
 }

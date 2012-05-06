@@ -58,7 +58,7 @@
  *  @}
  *  @{
  *      @substepnum     3
- *      @substepname    mba_startclocks
+ *      @substepname    mem_startclocks
  *      @substepdesc    : Start clocks on MBAs
  *      @target_sched   serial
  *  @}
@@ -150,7 +150,7 @@ void    call_mc_pll_setup( void * io_pArgs );
 
 
 /**
- *  @brief   mba_startclocks
+ *  @brief   mem_startclocks
  *
  *  13.3 : : Start clocks on MBAs
  *
@@ -159,7 +159,7 @@ void    call_mc_pll_setup( void * io_pArgs );
  *  return  none
  *
  */
-void    call_mba_startclocks( void * io_pArgs );
+void    call_mem_startclocks( void * io_pArgs );
 
 
 

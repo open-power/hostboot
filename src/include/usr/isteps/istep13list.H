@@ -34,7 +34,7 @@
  *  	: Disable VDDR on CanContinue loops
  *  13.2	  mc_pll_setup
  *  	: Setup PLL for MBAs
- *  13.3	  mba_startclocks
+ *  13.3	  mem_startclocks
  *  	: Start clocks on MBAs
  *  13.4	  host_enable_vddr
  *  	: Enable the VDDR3 Voltage Rail
@@ -98,8 +98,8 @@ const   TaskInfo    g_istep13[]  =   {
                 }
         },
         {
-                ISTEPNAME(13,03,"mba_startclocks"),
-                DRAM_TRAINING::call_mba_startclocks,
+                ISTEPNAME(13,03,"mem_startclocks"),
+                DRAM_TRAINING::call_mem_startclocks,
                 {
                         START_FN,
                         EXT_IMAGE,
