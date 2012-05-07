@@ -42,6 +42,10 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.26   | divyakum | 3/22/12 | Fixed warnings from mss_execute_zq_cal function
+//  1.26   | divyakum | 3/22/12 | Fixed mss_execute_zq_cal function variable name mismatch
+//  1.25   | divyakum | 3/21/12 | Added mss_execute_zq_cal function
+//  1.24   | jdsloat  | 3/20/12 | ccs_inst_arry0 bank fields reverse function removed
 //  1.23   | jdsloat  | 3/05/12 | ccs_inst_arry0 address fields reversed - needed to delete commented code out
 //  1.22   | jdsloat  | 2/17/12 | ccs_inst_arry0 address fields reversed
 //  1.21   | jdsloat  | 2/17/12 | FAPI ERRORs uncommented
@@ -79,6 +83,7 @@
 
 #include <fapi.H>
 #include <mss_funcs.H>
+#include <cen_scom_addresses.H>
 using namespace fapi;
 
 ReturnCode mss_ccs_set_end_bit(
@@ -162,7 +167,6 @@ ReturnCode mss_ccs_inst_arry_0(
     }
 
     //Placing bits into the data buffer
-    i_bank.reverse();
     rc_num = rc_num | data_buffer.insert( i_address, 0, 16, 0);
     rc_num = rc_num | data_buffer.insert( i_bank, 17, 3, 0);
     rc_num = rc_num | data_buffer.insert( i_activate, 20, 1, 0);
@@ -517,3 +521,109 @@ ReturnCode mss_rcd_parity_check(
 
     return rc;
 }
+
+//ZQ Cal
+ReturnCode mss_execute_zq_cal(
+            Target& i_target,
+            uint8_t i_port
+            )
+{
+    //Enums and Constants
+    enum size
+    {
+       MAX_NUM_DIMM = 2,
+    };
+
+    uint32_t NUM_POLL = 100;
+
+    uint32_t instruction_number = 0;
+    ReturnCode rc;
+    uint32_t rc_num = 0;
+
+    ecmdDataBufferBase address_buffer_16(16);
+    rc_num = rc_num | address_buffer_16.setHalfWord(0, 0x0020); //Set A10 bit for ZQCal Long
+    ecmdDataBufferBase bank_buffer_8(8);
+    rc_num = rc_num | bank_buffer_8.flushTo0();
+    ecmdDataBufferBase activate_buffer_1(1);
+    rc_num = rc_num | activate_buffer_1.flushTo0();
+    ecmdDataBufferBase rasn_buffer_1(1);
+    rc_num = rc_num | rasn_buffer_1.flushTo1(); //For ZQCal rasn = 1; casn = 1; wen = 0;
+    ecmdDataBufferBase casn_buffer_1(1);
+    rc_num = rc_num | casn_buffer_1.flushTo1();
+    ecmdDataBufferBase wen_buffer_1(1);
+    rc_num = rc_num | wen_buffer_1.flushTo0();
+    ecmdDataBufferBase cke_buffer_8(8);
+    rc_num = rc_num | cke_buffer_8.flushTo1();
+    ecmdDataBufferBase csn_buffer_8(8);
+    ecmdDataBufferBase odt_buffer_8(8);
+    rc_num = rc_num | odt_buffer_8.flushTo0();
+    ecmdDataBufferBase test_buffer_4(4);
+    rc_num = rc_num | test_buffer_4.flushTo0(); // 01XX:External ZQ calibration
+    rc_num = rc_num | test_buffer_4.setBit(1);
+    ecmdDataBufferBase num_idles_buffer_16(16);
+    rc_num = rc_num | num_idles_buffer_16.setHalfWord(0, 0x0400); //1024 for ZQCal
+    ecmdDataBufferBase num_repeat_buffer_16(16);
+    rc_num = rc_num | num_repeat_buffer_16.flushTo0();
+    ecmdDataBufferBase data_buffer_20(20);
+    rc_num = rc_num | data_buffer_20.flushTo0();
+    ecmdDataBufferBase read_compare_buffer_1(1);
+    rc_num = rc_num | read_compare_buffer_1.flushTo0();
+    ecmdDataBufferBase rank_cal_buffer_3(3);
+    rc_num = rc_num | rank_cal_buffer_3.flushTo0();
+    ecmdDataBufferBase ddr_cal_enable_buffer_1(1);
+    rc_num = rc_num | ddr_cal_enable_buffer_1.flushTo0();
+    ecmdDataBufferBase ccs_end_buffer_1(1);
+    rc_num = rc_num | ccs_end_buffer_1.flushTo1();
+
+    ecmdDataBufferBase stop_on_err_buffer_1(1);
+    rc_num = rc_num | stop_on_err_buffer_1.flushTo0();
+    ecmdDataBufferBase resetn_buffer_1(1);
+    rc_num = rc_num | resetn_buffer_1.setBit(0);
+    ecmdDataBufferBase data_buffer_64(64);
+    rc_num = rc_num | data_buffer_64.flushTo0();
+
+    uint8_t current_rank = 0;
+    uint8_t start_rank = 0;
+    uint8_t num_ranks_array[2][2]; //num_ranks_array[port][dimm]
+
+    rc = FAPI_ATTR_GET(ATTR_EFF_NUM_RANKS_PER_DIMM, &i_target, num_ranks_array);
+    if(rc) return rc;
+
+    //Set up CCS Mode Reg for ZQ cal long and Init cal
+    rc = fapiGetScom(i_target, MEM_MBA01_CCS_MODEQ_0x030106A7, data_buffer_64);
+    rc_num = rc_num | data_buffer_64.insert(stop_on_err_buffer_1, 0, 1, 0);
+    rc_num = rc_num | data_buffer_64.insert(resetn_buffer_1, 24, 1, 0);
+    if(rc_num)
+    {
+        rc.setEcmdError(rc_num);
+        return rc;
+    }
+    rc = fapiPutScom(i_target, MEM_MBA01_CCS_MODEQ_0x030106A7, data_buffer_64);
+    if(rc) return rc;
+
+    for(uint8_t dimm = 0; dimm < MAX_NUM_DIMM; dimm++)
+    {
+        start_rank=(4 * dimm);
+        for(current_rank = start_rank; current_rank < start_rank + num_ranks_array[i_port][dimm]; current_rank++) {
+            FAPI_INF( "+++++++++++++++ Sending zqcal to port: %d rank: %d +++++++++++++++", i_port, current_rank);
+            rc_num = rc_num | csn_buffer_8.flushTo1();
+            rc_num = rc_num | csn_buffer_8.clearBit(current_rank);
+            if(rc_num)
+            {
+                rc.setEcmdError(rc_num);
+                return rc;
+            }
+
+            //Issue execute.
+            FAPI_INF( "+++++++++++++++ Execute CCS array on port: %d +++++++++++++++", i_port);
+            rc = mss_ccs_inst_arry_0(i_target, instruction_number, address_buffer_16, bank_buffer_8, activate_buffer_1, rasn_buffer_1, casn_buffer_1, wen_buffer_1, cke_buffer_8, csn_buffer_8, odt_buffer_8, test_buffer_4, i_port);
+            if(rc) return rc; //Error handling for mss_ccs_inst built into mss_funcs
+            rc = mss_ccs_inst_arry_1(i_target, instruction_number, num_idles_buffer_16, num_repeat_buffer_16, data_buffer_20, read_compare_buffer_1, rank_cal_buffer_3, ddr_cal_enable_buffer_1, ccs_end_buffer_1);
+            if(rc) return rc; //Error handling for mss_ccs_inst built into mss_funcs
+            rc = mss_execute_ccs_inst_array(i_target, NUM_POLL, 60);
+            if(rc) return rc; //Error handling for mss_ccs_inst built into mss_funcs
+        }
+    }
+return rc;
+}
+

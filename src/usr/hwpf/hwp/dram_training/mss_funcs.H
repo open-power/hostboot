@@ -42,6 +42,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.11   | 3/21/12  | divyakum| Added mss_execute_zq_cal function 
 //  1.10   | 2/14/12  | jdsloat | Comment section filled in, elimated unnecessary constant, added enums
 //  1.9    | 2/08/12  | jdsloat | Target to Target&
 //  1.8    | 2/02/12  | jdsloat | Added fapi:: to arguments in function prototypes
@@ -199,6 +200,15 @@ fapi::ReturnCode mss_rcd_parity_check(fapi::Target& i_target,
 //-----------------------------------------
 uint32_t mss_reverse_32bits( uint32_t i_x);
 uint8_t mss_reverse_8bits(uint8_t i_number);
+
+
+//-----------------------------------------
+// mss_execute_zq_cal
+// execute init ZQ Cal on given target and port
+// Target = centaur.mba
+//-----------------------------------------
+fapi::ReturnCode mss_execute_zq_cal(fapi::Target& i_target, 
+                                    uint8_t i_port);
 
 #endif /* _MSS_FUNCS_H */
 
