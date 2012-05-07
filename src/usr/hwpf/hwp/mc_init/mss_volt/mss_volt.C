@@ -46,8 +46,8 @@
 //  1.1    | jsabrow  | 12/13/11 | This version compiles. Attributes dont work yet.
 //  1.3    | bellows  | 12/21/11 | fapiGetAssociatedDimms funciton does not work, added quick exit
 //  1.4    | jsabrow  | 02/13/12 | Updates for code review
-
-//  ???    | mww    | remove internal target vector
+//  1.5    | jsabrow  | 03/26/12 | Updates for code review
+//  1.5    | jdsloat  | 04/26/12 | fixed 1.5V issue
 
 // This procedure takes a vector of Centaurs behind a voltage domain,
 // reads in supported DIMM voltages from SPD and determines optimal
@@ -61,93 +61,99 @@
 #include <fapi.H>
 #include <mss_volt.H>
 
-fapi::ReturnCode mss_volt(std::vector<fapi::Target> & l_targets_memb)
+fapi::ReturnCode mss_volt(std::vector<fapi::Target> & i_targets_memb)
 {
 
   fapi::ReturnCode l_rc;
-  // $$ std::vector<fapi::Target> l_targets_memb;
-  std::vector<fapi::Target> l_mbaChiplets;
-  std::vector<fapi::Target> l_dimm_targets;
   uint8_t l_spd_dramtype=0;
   uint8_t l_spd_volts=0;
-  uint8_t l_spd_volts_all_dimms=0x07;  //start assuming all voltages supported
+  uint8_t l_spd_volts_all_dimms=0x06;  //start assuming all voltages supported
   uint8_t l_dram_ddr3_found_flag=0;
   uint8_t l_dram_ddr4_found_flag=0;
 
   uint32_t l_selected_dram_voltage=0;  //this gets written into all centaurs when done.
 
   // Iterate through the list of centaurs
-  for (uint32_t i=0; i < l_targets_memb.size(); i++)
+  for (uint32_t i=0; i < i_targets_memb.size(); i++)
     {
+      std::vector<fapi::Target> l_mbaChiplets;
       // Get associated MBA's on this centaur
-      l_rc=fapiGetChildChiplets(l_targets_memb[i], fapi::TARGET_TYPE_MBA_CHIPLET, l_mbaChiplets);
+      l_rc=fapiGetChildChiplets(i_targets_memb[i], fapi::TARGET_TYPE_MBA_CHIPLET, l_mbaChiplets);
+      if (l_rc) return l_rc;
       // Loop through the 2 MBA's
       for (uint32_t j=0; j < l_mbaChiplets.size(); j++)
 	{
+      std::vector<fapi::Target> l_dimm_targets;
 	  // Get a vector of DIMM targets
 	  l_rc = fapiGetAssociatedDimms(l_mbaChiplets[j], l_dimm_targets);
+	  if (l_rc) return l_rc;
 	  for (uint32_t k=0; k < l_dimm_targets.size(); k++)
 	    {
-
 	      l_rc = FAPI_ATTR_GET(ATTR_SPD_DRAM_DEVICE_TYPE, &l_dimm_targets[k], l_spd_dramtype);
-	      // TODO: need to verify l_rc is 'good'
-	      // can I do: 	  if (l_rc) { FAPI_ERR("..."); break; }
+	      if (l_rc) return l_rc;
 	      l_rc = FAPI_ATTR_GET(ATTR_SPD_MODULE_NOMINAL_VOLTAGE, &l_dimm_targets[k], l_spd_volts);
-	      // TODO: need to verify l_rc is 'good'
-	      // spd_volts:  bit0=1.5V bit1=1.35V bit2=1.25V, assume a 1.20V in future.
+	      if (l_rc) return l_rc;
+
+	      // spd_volts:  bit0= NOT 1.5V bit1=1.35V bit2=1.25V, assume a 1.20V in future for DDR4
 	      // check for supported voltage/dram type combo  DDR3=12, DDR4=13
-	      if (l_spd_dramtype == 0x0b)
+	      if (l_spd_dramtype == fapi::ENUM_ATTR_SPD_DRAM_DEVICE_TYPE_DDR3)
 		{
 		  l_dram_ddr3_found_flag=1;
 		}
-	      else if (l_spd_dramtype == 0x0c)
+	      else if (l_spd_dramtype == fapi::ENUM_ATTR_SPD_DRAM_DEVICE_TYPE_DDR4)
 		{
 		  l_dram_ddr4_found_flag=1;
 		}
-	      else
+	      else 
 		{
-		  //FAPI_ERR("Dimm not DDR3 or DDR4");
+		  uint8_t &DEVICE_TYPE = l_spd_dramtype;
+		  FAPI_ERR("Unknown DRAM Device Type 0x%x", l_spd_dramtype);
+		  FAPI_SET_HWP_ERROR(l_rc, RC_MSS_VOLT_UNRECOGNIZED_DRAM_DEVICE_TYPE);
+		  return l_rc;
 		}
-
-	      //AND of voltages support by all dimms in this domain (bit 0 is negative logic)
-	      l_spd_volts = l_spd_volts ^ 0x01;
+	      //AND dimm voltage capabilities together to find aggregate voltage support on all dimms
 	      l_spd_volts_all_dimms = l_spd_volts_all_dimms & l_spd_volts;
-
 	    }
 	}
-    }
+    }      
 
   // now we figure out if we have a supported ddr type and voltage
+  // note: only support DDR3=1.35V and DDR4=1.2xV
+
+  FAPI_INF( "dram type, ddr3 enum, ddr4 enum: 0x%02X 0x%02X 0x%02X", l_spd_dramtype, fapi::ENUM_ATTR_SPD_DRAM_DEVICE_TYPE_DDR3, fapi::ENUM_ATTR_SPD_DRAM_DEVICE_TYPE_DDR4);
+
   if (l_dram_ddr3_found_flag && l_dram_ddr4_found_flag)
     {
-      //FAPI_ERR("DDR3 and DDR4 mixing not allowed");
+      FAPI_ERR("mss_volt: DDR3 and DDR4 mixing not allowed");
+      FAPI_SET_HWP_ERROR(l_rc, RC_MSS_VOLT_DDR_TYPE_MIXING_UNSUPPORTED);
+      return l_rc;
     }
-
-
-  if (l_dram_ddr3_found_flag && (l_spd_volts_all_dimms & 0x01) == 0x01)
+  if (l_dram_ddr3_found_flag && ((l_spd_volts_all_dimms & fapi::ENUM_ATTR_SPD_MODULE_NOMINAL_VOLTAGE_OP1_35) == fapi::ENUM_ATTR_SPD_MODULE_NOMINAL_VOLTAGE_OP1_35))
     {
       l_selected_dram_voltage=1350;
     }
-  else if (l_dram_ddr4_found_flag && (l_spd_volts_all_dimms & 0x02) == 0x02)
+  else if (l_dram_ddr4_found_flag && ((l_spd_volts_all_dimms & fapi::ENUM_ATTR_SPD_MODULE_NOMINAL_VOLTAGE_OP1_2X) == fapi::ENUM_ATTR_SPD_MODULE_NOMINAL_VOLTAGE_OP1_2X))
     {
       l_selected_dram_voltage=1200;
     }
+  else if ((l_spd_volts_all_dimms & fapi::ENUM_ATTR_SPD_MODULE_NOMINAL_VOLTAGE_NOTOP1_5) != fapi::ENUM_ATTR_SPD_MODULE_NOMINAL_VOLTAGE_NOTOP1_5)
+    {
+      l_selected_dram_voltage=1500;
+    }
   else
     {
-      //FAPI_ERR("Dimms do not all support 1.35 or 1.2x");
+      FAPI_ERR("One or more DIMMs do not support required voltage for DIMM type");
+      FAPI_SET_HWP_ERROR(l_rc, RC_MSS_VOLT_DDR_TYPE_REQUIRED_VOLTAGE);
+      return l_rc;
     }
 
   // Iterate through the list of centaurs again, to update ATTR
-  for (uint32_t i=0; i < l_targets_memb.size(); i++)
+  for (uint32_t i=0; i < i_targets_memb.size(); i++)
     {
-      l_rc = FAPI_ATTR_SET(ATTR_MSS_VOLT, &l_targets_memb[i], l_selected_dram_voltage);
-      if (l_rc)
-	{
-	  //FAPI_ERR("Dimms do not all support 1.35 or 1.2x");
-	  break;
-	}
+      l_rc = FAPI_ATTR_SET(ATTR_MSS_VOLT, &i_targets_memb[i], l_selected_dram_voltage);
+      FAPI_INF( "mss_volt calculation complete.  MSS_VOLT: %d", l_selected_dram_voltage);
+      if (l_rc) return l_rc;
     }
-
   return l_rc;
 }
 

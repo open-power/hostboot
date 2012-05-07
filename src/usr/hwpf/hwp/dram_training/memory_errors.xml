@@ -1,7 +1,7 @@
 <!--  IBM_PROLOG_BEGIN_TAG
      This is an automatically generated prolog.
    
-     $Source: src/usr/hwpf/hwp/dram_training/mss_draminit_mc/memory_errors.xml $
+     $Source: src/usr/hwpf/hwp/dram_training/memory_errors.xml $
    
      IBM CONFIDENTIAL
    
@@ -81,6 +81,217 @@
   <hwpError>
     <rc>RC_MSS_UNEXPECTED_NEST_CLK_STATUS</rc>
     <description>A read of the nest clock status register returned an unexpected value.    </description>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INIT1_OPCG_DONE_ERROR</rc>
+    <description>Timed out waiting for OPCG done bit(15).    </description>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INIT1_FSISTATUS_FAIL</rc>
+    <description>Failed VDD status check on FSI2PIB Status Reg bit(16).    </description>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_PLL_LOCK_TIMEOUT</rc>
+    <description>Timed out waiting for PLL locks in FSI2PIB Status Reg bits(24,25).     </description>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_THOLD_ERROR</rc>
+    <description>THOLDS after Clock Start cmd do NOT match to the expected value.    </description>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_CCREG_MISMATCH</rc>
+    <description>Clock Control Register does not match the expected value.    </description>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_ARRAY_REPAIR_BUSY</rc>
+    <description>Array repair loader is busy now. 0x00050003 bit(0)=1     </description>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_ARRAY_REPAIR_NOT_DONE</rc>
+    <description>Array repair loader did NOT report repair done.     </description>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_ECC_TRAP_ERROR</rc>
+    <description>ECC trap register reported error. 0x00050004 bit(0-7) != 0x00    </description>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_DP18_0_PLL_FAILED_TO_LOCK</rc>
+    <description>DP18  0x0C000 PLL failed to lock!  See lock status register at address: 0x8000C0000301143F    </description>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_DP18_1_PLL_FAILED_TO_LOCK</rc>
+    <description>DP18  0x1C000 PLL failed to lock!  See lock status register at address: 0x8001C0000301143F    </description>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_AD32S_0_PLL_FAILED_TO_LOCK</rc>
+    <description>AD32S 0x0C001 PLL failed to lock!  See lock status register at address: 0x8000C0010301143F    </description>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_AD32S_1_PLL_FAILED_TO_LOCK</rc>
+    <description>AD32S 0x1C001 PLL failed to lock!  See lock status register at address: 0x8001C0010301143F    </description>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_GENERAL_PUTSCOM_ERROR</rc>
+    <description>PutScom failed!   See previous error message for details.    </description>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_GENERAL_GETSCOM_ERROR</rc>
+    <description>GetScom failed!   See previous error message for details.    </description>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_UNEXPECTED_CLOCK_STATUS</rc>
+    <description>Unexpected clock status!  See previous error message for details.    </description>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_UNEXPECTED_FIR_STATUS</rc>
+    <description>Unexpected FIR status!  See previous error message for details.    </description>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INIT_CAL_FAILED</rc>
+    <description>Inital Calibration failed.  Check init cal error register at address: 0x8001C0180301143F     </description>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_VOLT_UNRECOGNIZED_DRAM_DEVICE_TYPE</rc>
+    <description>Unsupported DIMM type found.  All dimms must be DDR3 or DDR4    </description>
+    <ffdc>DEVICE_TYPE</ffdc>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_VOLT_DDR_TYPE_MIXING_UNSUPPORTED</rc>
+    <description>Mixing of DDR3 and DDR4 not supported.    </description>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_VOLT_DDR_TYPE_REQUIRED_VOLTAGE</rc>
+    <description>One or more DIMMs do not support required voltage for DDR type.    </description>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_GENERAL_SIMSTKFAC_ERROR</rc>
+    <description>simSTKFAC failed!   See previous error message for details    </description>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_GET_FAPI_ATTRIBUTE_ERROR</rc>
+    <description>Failed to get FAPI attribute!   See previous error message for details.    </description>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_GET_SIM_HIERARCHY_ERROR</rc>
+    <description>Failed to get simulation hierarchy from eCmd target.    </description>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_UNSUPPORTED_FREQ_CALCULATED</rc>
+    <description>The frequency calculated with spd data is not supported by the jedec standards.    </description>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_MAINT_START_NOT_RESET</rc>
+    <description>MCMCCQ[0]: maint_cmd_start not reset by hw.    </description>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_MAINT_STOP_NOT_RESET</rc>
+    <description>MCMCCQ[1]: maint_cmd_stop not reset by hw.    </description>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_MAINT_CMD_IN_PROGRESS</rc>
+    <description>MBMSRQ[0]: Can't start new cmd if previous cmd still in progress.    </description>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_MAINT_NO_MEM_CNFG</rc>
+    <description>MBAXCRn[0:3] = 0, meaning no memory configured behind this MBA.    </description>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_MAINT_CCS_MUX_NOT_MAINLINE</rc>
+    <description>CCS_MODEQ[29] = 1, meaning mux set for CCS instead of mainline.    </description>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_MAINT_ECC_DISABLED</rc>
+    <description>MBSECC[0] non zero, meaning ECC check/correct disabled.    </description>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_MAINT_INVALID_CMD</rc>
+    <description>MBAFIRQ[0], invalid_maint_cmd.    </description>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_MAINT_INVALID_ADDR</rc>
+    <description>MBAFIRQ[1], cmd started with invalid_maint_address.    </description>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_MAINT_CMD_TIMEOUT</rc>
+    <description>Maint cmd timeout.    </description>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_MAINT_INVALID_DRAM_SIZE_WIDTH</rc>
+    <description>Invalid dramSize or dramWidth in MBAXCRn.    </description>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_MAINT_INVALID_DIMM_CNFG</rc>
+    <description>MBAXCRn configured with invalid combination of configType, configSubType, slotConfig.    </description>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_MAINT_NO_X4_SYMBOL</rc>
+    <description>Symbol mark not allowed in x4 mode.    </description>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_MAINT_INVALID_MARKSTORE</rc>
+    <description>Invalid galois field in markstore.    </description>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_MAINT_INVALID_SYMBOL_INDEX</rc>
+    <description>Symbol index out of range.    </description>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_MAINT_INVALID_CHIP_INDEX</rc>
+    <description>Not first symbol index of a chip.    </description>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_MAINT_MARKSTORE_WRITE_BLOCKED</rc>
+    <description>Markstore write may have been blocked due to MPE FIR set.    </description>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_MAINT_INVALID_SYMBOL_TO_STEER</rc>
+    <description>Trying to steer invalid symbol.    </description>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_MAINT_NO_X8_ECC_SPARE</rc>
+    <description>Invalid to use ECC spare in x8 mode.    </description>
   </hwpError>
 
 </hwpErrors>
