@@ -37,6 +37,7 @@
 #include <util/impl/splaytree.H>
 #include <utility>
 #include <util/traits/remove_const.H>
+#include <algorithm>
 
 #ifndef __UTIL_SPLAYTREE_NS
 #define __UTIL_SPLAYTREE_NS ::Util::__Util_SplayTree_Impl
