@@ -1,26 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/initservice/istepdispatcher/sptask.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
-
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/initservice/istepdispatcher/sptask.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 /**
  *  @file sptask.C
  *
@@ -254,8 +254,12 @@ void    userConsoleComm( void *  io_msgQ )
             }
 
             // clear command reg, including go bit (i.e. set to false)
-            l_cmd.val64 =   0;
-            writeCmd( l_cmd );
+            //  2012-04-27 hb-istep will clear the command reg after it sees
+            //      the running bit turn on.
+            //      Please save the following in case we have to turn this
+            //      back on.
+            // $$ l_cmd.val64 =   0;
+            // $$ writeCmd( l_cmd );
         }   //  endif   gobit
 
 
@@ -283,9 +287,6 @@ void    userConsoleComm( void *  io_msgQ )
         }
     }   //  endwhile
 
-    //  free the message struct
-    msg_free( l_pMsg  );
-
     //  @note
     //  Fell out of loop, clear sts reg and turn off readybit
     //  disable the ready bit so the user knows.
@@ -296,6 +297,9 @@ void    userConsoleComm( void *  io_msgQ )
 
     TRACFCOMP( g_trac_initsvc,
             "userConsoleComm exit" );
+
+    //  free the message struct
+    msg_free( l_pMsg  );
 
     // return to main to end task
 }

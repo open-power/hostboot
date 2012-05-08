@@ -5,7 +5,7 @@
 #
 #  IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2011
+#  COPYRIGHT International Business Machines Corp. 2011 - 2012
 #
 #  p1
 #
@@ -19,13 +19,12 @@
 #
 #  Origin: 30
 #
-#  IBM_PROLOG_END
-
+#  IBM_PROLOG_END_TAG
 ROOTPATH = ../../../..
 MODULE = istepdisp
 
-OBJS =  istepdispatcher.o initsvcudistep.o	\
-        sptask.o
+OBJS =  istepdispatcher.o initsvcudistep.o      \
+        sptask.o splesscommon.o
 
 ## SUBDIRS = test.d
 

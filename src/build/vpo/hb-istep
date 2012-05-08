@@ -6,7 +6,7 @@
 #
 #  IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2011
+#  COPYRIGHT International Business Machines Corp. 2011 - 2012
 #
 #  p1
 #
@@ -20,25 +20,22 @@
 #
 #  Origin: 30
 #
-#  IBM_PROLOG_END
+#  IBM_PROLOG_END_TAG
 #
-# Purpose:  This perl script works in concert with do_p8vbu_script_hbi_* to 
+# Purpose:  This perl script works in concert with do_sprint to
 #           implement isteps on AWAN.
 #
 # Description:
-#           The do.. script will run first to set up the AWAN environment, 
-#           then call hb_istep  twice:
-#           1) hb_istep --istepmode
-#               called after loading but before starting HostBoot
-#               this will check to see if the user has set istep mode, if so
-#               it will write the Istep_mode signature to L3 memory to put 
-#               HostBoot mode into single-step mode.
-#           2) hb_istep --command
-#               Periodically call RunClocks() to step through HostBoot.
-#               Checks for status from previous Isteps, and reports status.
-#            
-# Comments:
-#               
+#	The do_sprint script will run first to set up the AWAN environment,
+#	Then call hb_istep twice:
+#	1) hb_istep [--]istepmode
+#	    called after loading but before starting HostBoot
+#	    this will check to see if the user has set istep mode, if so
+#	    it will write the Istep_mode signature to L3 memory to put
+#       HostBoot mode into single-step mode (spless or FSP).
+#	2) hb_istep [--]command
+#	    Periodically call RunClocks() to step through HostBoot.
+#	    Checks for status from previous Isteps, and reports status.
 #
 # Author: Mark Wenning
 #
@@ -54,7 +51,7 @@ use File::Basename;
 use lib dirname (__FILE__);
 
 ## 64-bit input
-##  argh, not compatable with GetOpt!! use bigint;
+use bigint;
 no  warnings    'portable';
 
 #   read/write cachelines to L3
@@ -71,7 +68,9 @@ sub find_in_inlist;
 sub parse_command;
 sub setMode;
 sub resume_istep;
-sub getShutDownStatus;
+sub isShutDown;
+sub getSymbol;
+sub dumpEnvVar;
 
 #------------------------------------------------------------------------------
 #   Constants
@@ -80,12 +79,14 @@ my  $CORE       =   "-c3";
 
 
 ##  @todo   extract these from splesscommon.H
-use constant    ISTEP_MODE_ON_SIGNATURE     =>  "4057b0074057b007";
-use constant    ISTEP_MODE_OFF_SIGNATURE    =>  "700b7504700b7504";
+use constant    SPLESS_MODE_SIGNATURE     =>  "0x4057b0074057b007";
+use constant    FSP_MODE_SIGNATURE        =>  "0x700b7504700b7504";
+use constant    RUN_ALL_MODE_SIGNATURE    =>  "0xBADC0FFEE0DDF00D";
 
 use constant    SPLESS_SINGLE_ISTEP_CMD     =>  0x00;
 use constant    SPLESS_RESUME_ISTEP_CMD     =>  0x01;
 use constant    SPLESS_CLEAR_TRACE_CMD      =>  0x02;
+use constant    SPLESS_SHUTDOWN_CMD         =>  0x03;
 
 use constant    MAX_ISTEPS                  =>  25;
 use constant    MAX_SUBSTEPS                =>  25;
@@ -95,143 +96,227 @@ use constant    MAX_SUBSTEPS                =>  25;
 # Globals
 #------------------------------------------------------------------------------
 my  $opt_debug          =   0;
+my  $opt_help           =   0;
 my  $opt_istepmode      =   0;
-my  $opt_normalmode     =   0;
+my  $opt_splessmode     =   0;
+my  $opt_fspmode        =   0;
 my  $opt_command        =   "";
 my  $opt_list           =   0;
-my  $opt_help           =   0;
 my  $opt_resume         =   0;          ## resume istep from break point
-my  $opt_clear_trace    =   0;          ##  submit command 01    
-my  $opt_cmdfile        =   0;          ## batchmode, later   
-my  $opt_setup          =   "";         ##  run Jim's script to start up the model         
+my  $opt_clear_trace    =   0;          ##  submit command 02
+my  $opt_cmdfile        =   0;          ## batchmode, later
+my  $opt_setup          =   "";         ##  run Jim's script to start up the model
 
+
+##  initialize inList to "undefined"
 my  @inList;
 $inList[MAX_ISTEPS][MAX_SUBSTEPS]   =   ();
-##  initialize inList to "undefined"
 for( my $i = 0; $i <    MAX_ISTEPS; $i++)
 {
     for(my $j = 0; $j < MAX_SUBSTEPS; $j++)
     {
         undef( $inList[$i][$j] );
     }
-}    
+}
 
 ##  initialize the sequence number - 6 bit field, { 0 - 63 }
-my  $g_SeqNum   =   int(rand(64)); 
+my  $g_SeqNum   =   int(rand(64));
 
 
 #==============================================================================
 # MAIN
 #==============================================================================
-##  get any environment variables
 
-## Assume that all the tools, files, etc are in the same directory that 
+## Assume that all the tools, files, etc are in the same directory that
 ##  we are in.
 
-
+##  --------------------------------------------------------------------------
+##  get any environment variables
+##  --------------------------------------------------------------------------
 my  $pgmDir  =   `dirname $0`;
 chomp( $pgmDir );
 
 my $hbToolsDir = $ENV{'HB_TOOLS'};
 if ( ! defined( $hbToolsDir) || ( $hbToolsDir eq "" ) )
 {
-    $hbToolsDir = $pgmDir;         ##  Set to tool directory
-}     
+    $hbToolsDir = $pgmDir; ## Set to tool directory
+}
 
 my $hbDir = $ENV{'HB_IMGDIR'};
 if ( ! defined( $hbDir) || ( $hbDir eq "" ) )
 {
     $hbDir = $pgmDir;               ##  Set to tool directory
-}     
+}
 
 my $vbuToolsDir = $ENV{'HB_VBUTOOLS'};
 if (defined ($vbuToolsDir))
 {
     unless ($vbuToolsDir ne "")
     {
-        $vbuToolsDir = "/gsa/ausgsa/projects/h/hostboot/vbutools/dev";
+        $vbuToolsDir = "/gsa/ausgsa/projects/h/hostboot/vbutools/latest";
     }
 }
 
+my  $hbCount =   $ENV{'HB_COUNT'};
+if ( !defined( $hbCount ) || ( $hbCount eq "" ) )
+{
+    ##  set default
+    $hbCount    =   0xffffffff;     ##  effectively infinite ...
+}
 
 my $CSVfile     =   "$hbDir/isteplist.csv";
 my $hbSymsFile  =   "$hbDir/hbicore.syms";                #Use hbicore.syms
-    
-## print   $#ARGV;       
+if ( ! -e "$hbSymsFile" )  { die "Can't find symbols file $hbSymsFile\n";   }
+if ( ! -e "$CSVfile" )  { die "Can't find isteplist file $hbSymsFile\n";   }
+
+
+print   STDOUT  "Welcome to hb-istep 3.0 .  \n";
+
+
+## exit if no args
 if ( $#ARGV < 0 )
 {
     printUsage();
     exit    0 ;
-}   
+}
+
+
 #------------------------------------------------------------------------------
 # Parse optional input arguments
 #------------------------------------------------------------------------------
-GetOptions( "help|?"        =>  \$opt_help,
-            "istepmode"     =>  \$opt_istepmode,
-            "normalmode"    =>  \$opt_normalmode,
-            "list"          =>  \$opt_list,
-            "command=s"     =>  \$opt_command,
-            "resume"        =>  \$opt_resume,
-            "clear-trace"   =>  \$opt_clear_trace, 
-            "cmdfile"       =>  \$opt_cmdfile,           
-            "setup=s"       =>  \$opt_setup,
-
-            "debug"         =>  \$opt_debug,
-          );  
-          
-          
-          
-##----------------------------------------------------------------------------- 
-##  check for access to the files we need.
-##-----------------------------------------------------------------------------
-if ( ! -e "$hbSymsFile" )  { die "Can't find symbols file $hbSymsFile\n";   }
-if ( ! -e "$CSVfile" )  { die "Can't find isteplist file $hbSymsFile\n";   }   
-
+##  GetOptions( "help|?"        =>  \$opt_help,
+##              "istepmode"     =>  \$opt_istepmode,
+##              "normalmode"    =>  \$opt_normalmode,
+##              "list"          =>  \$opt_list,
+##              "command=s"     =>  \$opt_command,
+##              "resume"        =>  \$opt_resume,
+##              "clear-trace"   =>  \$opt_clear_trace,
+##              "cmdfile"       =>  \$opt_cmdfile,
+##              "setup=s"       =>  \$opt_setup,
 ##
-##  find the istep mode, command, and status registers in the syms file
-##
-my $istepmodereg = `grep "SPLESS::g_SPLess_IStepMode_Reg" $hbSymsFile | awk -F"," '{print \$2}'`;
-chomp   $istepmodereg;
+##              "debug"         =>  \$opt_debug,
+##            );
 
-my  $commandreg = `grep "SPLESS::g_SPLess_Command_Reg" $hbSymsFile | awk -F"," '{print \$2}'`;
-chomp   $commandreg;
-
-my $statusreg = `grep "SPLESS::g_SPLess_Status_Reg" $hbSymsFile | awk -F"," '{print \$2}'` ;
-chomp   $statusreg;
-
-my $shutdownflag = `grep "CpuManager::cv_shutdown_requested" $hbSymsFile | awk -F"," '{print \$2}'` ;
-chomp   $shutdownflag;
-
-my $shutdownsts = `grep "CpuManager::cv_shutdown_status" $hbSymsFile | awk -F"," '{print \$2}'` ;
-chomp   $shutdownsts;
-
-
-##-----------------------------------------------------------------------------
+##--------------------------------------------------------------------------
 ##  Start processing options
-##-----------------------------------------------------------------------------          
+##  process the "flag" standard options, then use a loop to go through
+##  the rest
+##--------------------------------------------------------------------------
+##  Get all the command line options in an array
+my  @Options        =   @ARGV;
+
+if  ( !(@Options) )
+{
+    printUsage();
+    exit;
+}
+
+##
+##  find all the standard options, set their flag, and remove them from
+##  the options list.
+##  vpo and simics used to use different command-line styles,
+##  simics wanted you to say "hb-istep debug s4", and
+##  vpo wanted you to say "hb-istep --debug --command s4" .
+##  With this change, vpo should accept both styles.
+##
+for ( my $i=0; $i <= $#Options; $i++ )
+{
+    $_  =   $Options[$i];
+
+    if ( m/\-{0,2}help/  )
+    {
+        $opt_help       =   1;
+        $Options[$i]    =   "";
+    }
+    if ( m/\-{0,2}debug/ )
+    {
+        $opt_debug      =   1;
+        $Options[$i]    =   "";
+    }
+    if ( m/\-{0,2}list/ )
+    {
+        $opt_list       =   1;
+        $Options[$i]    =   "";
+    }
+    if ( m/\-{0,2}istepmode/ )
+    {
+        $opt_istepmode  =   1;
+        $Options[$i]    =   "";
+    }
+    if ( m/\-{0,2}splessmode/ )
+    {
+        $opt_splessmode  =   1;
+        $Options[$i]    =   "";
+    }
+    if ( m/\-{0,2}fspmode/ )
+    {
+        $opt_fspmode  =   1;
+        $Options[$i]    =   "";
+    }
+    if ( m/\-{0,2}command/ )
+    {
+        ## does nothing except eat the "[--]command" option
+        $opt_command    =   1;
+        $Options[$i]    =   "";
+    }
+    if ( m/\-{0,2}resume/ )
+    {
+        $opt_resume     =   1;
+        $Options[$i]    =   "";
+    }
+    if  ( m/\-{0,2}clear-trace/ )
+    {
+        $opt_clear_trace    =   1;
+        $Options[$i]    =   "";
+    }
+
+}   ##  endfor
+
+##  if there's anything left after this, assume it is a command
+my  $command  = join( "", @Options );
+
+chomp $command;
+
+
+##  ---------------------------------------------------------------------------
+##  Fetch the symbols we need from syms file
+##  ---------------------------------------------------------------------------
+
+my  $IstepModeReg   =   getSymbol(  "SPLESS::g_SPLess_IStepMode_Reg" );
+my  $CommandReg     =   getSymbol(  "SPLESS::g_SPLess_Command_Reg" );
+my  $StatusReg      =   getSymbol(  "SPLESS::g_SPLess_Status_Reg" );
+
+my  $ShutDownFlag   =   getSymbol(  "CpuManager::cv_shutdown_requested" );
+my  $ShutDownSts    =   getSymbol(  "CpuManager::cv_shutdown_status" );
+
 if  ( $opt_debug )
 {
     print   STDERR  "\n-----    DEBUG:  ----------------------------------- \n";
     print   STDERR  "help               =   $opt_help\n";
-    print   STDERR  "istepmode          =   $opt_istepmode\n";
-    print   STDERR  "normalmode         =   $opt_normalmode\n"; 
-    print   STDERR  "list               =   $opt_list\n";   
-    print   STDERR  "command            =   $opt_command\n";
-    print   STDERR  "cmdfile            =   $opt_cmdfile\n";
-    print   STDERR  "setup              =   $opt_setup\n";
-    print   STDERR  "clear-trace        =   $opt_clear_trace\n";
     print   STDERR  "debug              =   $opt_debug\n";
-    
+    print   STDERR  "list               =   $opt_list\n";
+    print   STDERR  "istepmode          =   $opt_istepmode\n";
+    print   STDERR  "splessmode         =   $opt_splessmode\n";
+    print   STDERR  "fspmode            =   $opt_fspmode\n";
+
+    print   STDERR  "resume             =   $opt_resume\n";
+    print   STDERR  "clear-trace        =   $opt_clear_trace\n";
+    print   STDERR  "command flag       =   $opt_command\n";
+    print   STDERR  "command            =   \"$command\"\n";
+
     print   STDERR  "pgmDir             =   $pgmDir\n";
-    print   STDERR  "hbDir              =   $hbDir\n"; 
-    print   STDERR  "hbSymsFile         =   $hbSymsFile\n";   
-    print   STDERR  "istepmodereg       =   $istepmodereg\n";
-    print   STDERR  "commandreg         =   $commandreg\n";
-    print   STDERR  "statusreg          =   $statusreg\n";
-    print   STDERR  "shutdownflag reg   =   $shutdownflag\n";
-    print   STDERR  "shutdownsts  reg   =   $shutdownsts\n";
-    
-    VBU_Cacheline::SetFlags( 1, 0 ); 
+    print   STDERR  "hbDir              =   $hbDir\n";
+    print   STDERR  "hbCount            =   $hbCount\n";
+
+    print   STDERR  "hbSymsFile         =   $hbSymsFile   \n" ;
+    print   STDERR  "IstepModeReg       =   $IstepModeReg \n" ;
+    print   STDERR  "CommandReg         =   $CommandReg   \n" ;
+    print   STDERR  "StatusReg          =   $StatusReg    \n" ;
+    print   STDERR  "ShutDownFlag       =   $ShutDownFlag \n" ;
+    print   STDERR  "ShutDownSts        =   $ShutDownSts  \n" ;
+
+    ## turn on the debug flag in VBU_Cacheline.pm
+    VBU_Cacheline::SetFlags( 1, 0 );
 }
 
 if  ( $opt_help )
@@ -240,13 +325,10 @@ if  ( $opt_help )
     exit;
 }
 
-##
-##  run the main loop.  Yes, I did this on purpose.  
-##  Idea is (later) to pass this an array / hash of options and use 
-##  GetOptionsFromArray() to parse them.
-##  That way I can either pass it @ARGV or an array processed from the cmdfile 
-##
-main();         
+##  ---------------------------------------------------------------------------
+##  run the main loop.
+##  ---------------------------------------------------------------------------
+main();
 
 
 
@@ -258,7 +340,7 @@ sub main()
     print   STDOUT  "\n";
 
     ##  fetch the ISTEP csv list
-    get_istep_list();       
+    get_istep_list();
 
     if ( $opt_list )
     {
@@ -266,8 +348,21 @@ sub main()
         exit;
     }
 
+    if ( $opt_istepmode )
+    {
+        print   STDOUT "istepmode no longer used - use splessmode, or fspmode\n";
+        exit;
+    }
 
-    ## VPO cannot be running when we start.
+    ##
+    ##  Before we start, we must make sure the system is stopped and memory
+    ##  is flushed so that we can read the state.  This includes:
+    ##      - make sure that HostBoot has not already started and run to
+    ##      completion (shutdown status )
+    ##      - read/write memory location to set single-step mode (SPLESS or
+    ##      FSP)
+    ##      - etc??
+    ##
     my  $qstr   =   VBU_Cacheline::P8_Ins_Query();
     if ( $qstr  ne "STOPPED" )
     {
@@ -275,13 +370,59 @@ sub main()
         VBU_Cacheline::P8_Ins_Stop();
         VBU_Cacheline::P8_Flush_L2();
     }
-    
-    ( my $flag, my $sts ) = getShutDownStatus();
-    if ( $flag )
+
+    if ( isShutDown() )
     {
-        print   STDOUT  "Sorry, HostBoot has already shut down with status $sts, cannot run isteps.\n";
+        print   STDOUT  "HostBoot has shut down.\n";
         exit;
     }
+
+
+    if (    ( $opt_splessmode ==  1   )
+         || ( $opt_fspmode == 1 )
+       )
+    {
+        my $result = VBU_Cacheline::CLread( sprintf( "%x", $IstepModeReg ) );
+
+        if ( $opt_debug )
+        {
+            printf STDERR "=== Entry:   IStep Mode Reg = 0x%x\n", $result;
+        }
+
+        if  ( $result =~ /^.*RUN_ALL_MODE_SIGNATURE/ )
+        {
+            print STDOUT "HostBoot has already started in automatic mode.  Please restart and then try again.\n";
+            exit;
+        }
+    }
+
+
+    ##
+    ##  process --Istep Mode command
+    ##
+    if ( $opt_splessmode ==  1   )
+    {
+        print STDOUT  "ENable splessmode\n";
+        setMode( "spless" );
+        exit;
+    }
+
+    if  ( $opt_fspmode ==  1 )
+    {
+        print STDOUT  "ENable fspmode\n";
+        print STDOUT  "WARNING:  fspmode is not currently supported on VPO\n";
+        setMode( "fsp" );
+        exit;
+    }
+
+    if ( $opt_clear_trace )
+    {
+        print   STDOUT  "Clear Trace Buffers\n";
+        clear_trace();
+        exit;
+    }
+
+
 
     ##
     ## Process resume
@@ -293,45 +434,19 @@ sub main()
     }
 
     ##
-    ##  process --Istep Mode command
-    ##      IStepModeStr    = "cpu0_0_0_3->scratch=0x4057b007_4057b007"
-    ##      NormalModeStr   = "cpu0_0_0_3->scratch=0x700b7504_700b7504"
-    ##
-    if ( $opt_istepmode ==  1   )
-    {
-        my $result = VBU_Cacheline::CLread( $istepmodereg );
-        if ( $opt_debug )   { print STDERR __LINE__, "-- Entry:   IStep Mode Reg = $result";  }
-        if  ( $result =~ /^.*ISTEP_MODE_OFF_SIGNATURE/ )
-        {
-            print STDOUT "Sorry, HostBoot has already started in automatic mode.  Please restart and then try again.\n";
-            exit;
-        }     
-
-        print STDOUT  "ENable istepmode\n";
-        setMode( "istep" );
-    }
-
-    if  ( $opt_normalmode ==  1 )
-    {
-        print STDOUT  "DISable istepmode\n";
-        setMode( "normal" );
-    }
-
-    if ( $opt_clear_trace )
-    {
-        print   STDOUT  "Clear Trace Buffers\n";
-        clear_trace();
-    }
-
-    ##
     ##  Process other commands
     ##
-    if ( $opt_command ne "" )
+    if ( $command ne "" )
     {
-        if ( $opt_debug ) {   print   STDERR  "== __LINE__ process command \"$opt_command\" \n"; }
-        parse_command( $opt_command ); 
+        if ( $opt_debug )
+        {
+            print   STDERR  "=== process istep command: \"$opt_command\" \n";
+        }
+
+        parse_command( $command );
+        exit;
     }
-        
+
 }   ##  end main
 
 
@@ -341,20 +456,19 @@ sub main()
 sub printUsage()
 {
     print STDOUT "\nUsage: hb-istep   [--help]\n";
-    print STDOUT "    [--istepmode]             (enable istep mode)\n" ;
-    print STDOUT "    [--normalmode]            (disable istep mode)\n" ;
+    print STDOUT "    [--splessmode]            (enable spless mode)\n" ;
+    print STDOUT "    [--fspmode]               (enable fsp mode)\n" ;
     print STDOUT "    [--command sN]            (run istep N)\n" ;
     print STDOUT "    [--command sN..M]         (run isteps N through M)\n" ;
     print STDOUT "    [--command <foo>]         (run named istep \"foo\")\n" ;
     print STDOUT "    [--command <foo>..<bar>]  (run named isteps \"foo\" through \"bar\")\n" ;
     print STDOUT "    [--resume]                (resume an istep that is at a break point)\n" ;
+    print STDOUT "    [--clear-trace]             (clear trace buffers before starting)\n";
+
     print STDOUT "\n" ;
-    print STDOUT "  [--clear-trace]             (clear trace buffers before starting)\n";    
-##    print STDOUT "  [--cmdfile]                 (get commands from a batchfile)\n";
-##    print STDOUT "  [--setup]                   (bring up AWAN and wait for further commands)\n";
-##    print STDOUT "\n" ;
 
 }
+
 
 ##
 ##  Increment the sequence number, rolling over at 64
@@ -362,12 +476,42 @@ sub printUsage()
 sub bumpSeqNum()
 {
 
-    $g_SeqNum++;            
-    
+    $g_SeqNum++;
+
     $g_SeqNum   %=  64;
-    
+
     return  $g_SeqNum;
 }
+
+sub dumpEnvVar( $ )
+{
+    my  $envvar =   shift;
+
+    if ( defined( $ENV{$envvar} )  )
+    {
+        ## $$::userDisplay "$envvar =   $ENV{$envvar}\n";
+        print   STDOUT  "$envvar =   $ENV{$envvar}\n";
+    }
+}
+
+##
+##  Get symbol address from hbotSymsFile
+##
+sub getSymbol( $ )
+{
+    my  $symbol     =   shift;
+    my  $hexstr     =   "";
+    my  $symAddr    =   0;
+
+    $hexstr =   `grep "$symbol" $hbSymsFile | awk -F"," '{print \$2}'`;
+    chomp   $hexstr;
+
+    ## print   STDERR  __LINE__, ": $hexstr\n";
+    $symAddr    =   hex "0x$hexstr";
+
+    return  $symAddr;
+}
+
 
 ##
 ##  read in file with csv istep list and store in inList
@@ -375,25 +519,27 @@ sub bumpSeqNum()
 sub get_istep_list()
 {
     my $istep, my $substep, my $name ;
-   
+
     open( FH, "< $CSVfile") or die "can't open $CSVfile : $!";
 
     while( <FH> )
     {
         chomp;
 
-        ( $istep, $substep, $name) =   split( ",", $_ ); 
+        ( $istep, $substep, $name) =   split( ",", $_ );
         chomp $name;
+
         ## print STDERR    "$_, $istep, $substep, $name\n" ;
-         
+
         if ( defined($name) && ( $name ne "" ) )
         {
             $inList[$istep][$substep]    =   $name;
-        } 
-    }         
-    
-    close( FH );     
+        }
+    }
+
+    close( FH );
 }
+
 
 ##
 ##  print the istep list to the screen.
@@ -402,140 +548,270 @@ sub print_istep_list( )
 {
     my  $hdrflag    =   1;
 
-    ##  print   STDOUT  "IStep\tSubStep\tName\n";
-    print   STDOUT  " IStep Name\n";    
+    print   STDOUT  " IStep Name\n";
     print   STDOUT  "---------------------------------------------------\n";
-    
+
     for(my $i = 0; $i < MAX_ISTEPS; $i++)
     {
         for(my $j = 0; $j < MAX_SUBSTEPS; $j++)
         {
 
             ## print "==$i.$j $inList[$i][$j] \n";
+
             if ( defined( $inList[$i][$j] ) )
             {
-                if ( $hdrflag )  
-                { 
-                    printf  STDOUT  " -- IStep $i --  \n"; 
+                if ( $hdrflag )
+                {
+                    printf  STDOUT  " -- IStep $i --  \n";
                     $hdrflag = 0;
                 }
-                ## printf  STDOUT  "%d\t%d\t%s\n", $i, $j, $inList[$i][$j] ; 
-                printf  STDOUT  " %s\n", $inList[$i][$j] ; 
-            }  
+
+                printf  STDOUT  " %s\n", $inList[$i][$j] ;
+            }
         }   ## end for $j
+
         $hdrflag=1;
-    }   ##  end for $i     
+    }   ##  end for $i
 }
 
 
 ##
-##  
+##  Find istep name in inList array.
 ##
-sub find_in_inList( $ ) 
+##  @param[in]  -   name
+##
+##  @return     -   istep #, substep #, found flag = true for success
+##                                      fount flag = false for not found
+##
+sub find_in_inList( $ )
 {
     my  ( $substepname )    =   @_;
-    
+
     for(my $i = 0; $i < MAX_ISTEPS; $i++)
     {
         for(my $j = 0; $j < MAX_SUBSTEPS; $j++)
         {
             ## if ( defined($inList[$i][$j]) ) {   print ".$inList[$i][$j]?$substepname. \n";   }
-            
+
             if ( defined($inList[$i][$j]) && ($inList[$i][$j] eq $substepname ) )
             {
                 ## print "== $i $j $inList[$i][$j] \n";
                 return  ($i, $j, 1 );
-            }  
+            }
         }
-    }     
-
-    return ( MAX_ISTEPS, MAX_SUBSTEPS, 0 )  
-} 
-
-##
-##  Check if HostBoot has already run and shutdown.  
-sub getShutDownStatus()
-{
-
-    my $flag    =   VBU_Cacheline::CLread( $shutdownflag );
-    my $status  =   VBU_Cacheline::CLread( $shutdownsts );
-    
-    if ( $opt_debug )   
-    {   
-        print   STDERR "Shutdown Flag   =   $flag\n";
-        print   STDERR "Shutdown Status =   $status\n";       
     }
 
-    return ( $flag, $status );
+    return ( MAX_ISTEPS, MAX_SUBSTEPS, 0 )
 }
 
+
 ##
-##  keep trying to get status until seqnum syncs up 
+##  Read memory locations to check if HostBoot has already run and shutdown.
+##  return nonzero if it has, 0 otherwise
+##
+sub isShutDown()
+{
+    ## check to make sure that system is stopped and flushed.
+    my  $qstr   =   VBU_Cacheline::P8_Ins_Query();
+    if ( $qstr  ne "STOPPED" )
+    {
+        ##  Stop instructions, flush L2
+         VBU_Cacheline::P8_Ins_Stop();
+         VBU_Cacheline::P8_Flush_L2();
+    }
+
+    my $flag    =   VBU_Cacheline::CLread( sprintf( "%x", $ShutDownFlag ) );
+    my $status  =   VBU_Cacheline::CLread( sprintf( "%x", $ShutDownSts ) );
+
+    if ( $opt_debug )
+    {
+        print   STDERR "Shutdown Flag   =   $flag\n";
+        print   STDERR "Shutdown Status =   $status\n";
+    }
+
+    if ( $flag )
+    {
+        print   STDOUT  "HostBoot has shut down with status $status.\n";
+        return 1;
+    }
+
+    return 0;
+}
+
+
+##
+##  run clocks using calls to VBU_Cacheline
+##
+##  This will also start instructions if necessary
+##
+sub runClocks()
+{
+
+    VBU_Cacheline::RunClocks();
+}
+
+
+##
+##  send command using the command register
+##
+##  NOTES:  PUTFAC does not work correctly.   STKFAC will latch the value
+##          in the register forever, i.e. HostBoot cannot change it.  This
+##          is OK from our viewpoint since HostBoot does not need to modify
+##          the command reg.
+##
+sub sendCommand( $ )
+{
+    my ( $data )    =   @_;
+    my  $cmd        =   "";
+
+    ##$$ VBU_Cacheline::CLwrite( $commandreg, $cmd );
+
+    ## Use STKFAC here to clear the command reg- GMB2EC is mailbox scratchpad 3.
+    $cmd    =   "simSTKFAC " .
+                    "B0.C0.S0.P0.E8.TPC.FSI.FSI_MAILBOX.FSXCOMP." .
+                    "FSXLOG.LBUS_MAILBOX.Q_GMB2EC.NLC.L2 0 32 -quiet ";
+
+    if ( $opt_debug )   {   print STDERR __LINE__,  "-- run $cmd ...\n";    }
+    ( system( $cmd ) == 0 )
+        or die "$cmd failed, $? : $! \n";
+
+
+    ## bump the clock a few so that the clear takes effect
+    ## vbu_cacheline does not take # of cycles, so just run a raw command
+    ## here.
+    $cmd    =   "simclock  10 -quiet";
+
+    if ( $opt_debug )   {   print STDERR __LINE__,  "-- run $cmd ...\n";    }
+    ( system( $cmd ) == 0 )
+        or die "$cmd failed, $? : $! \n";
+
+
+    ##  $data comes in as a 64-bit reg, we are only allowed 32 bits with
+    ##      mailbox scoms, so we shift 32 bits here.
+    ##      The lower 32 bits of the command reg are not used anyway.
+    my $cmd32   =   ( ( $data & 0xffffffff00000000 ) >> 32 );
+    my $hexstr  =   sprintf( "0x%x", $cmd32 );
+
+    ## Use STKFAC here - GMB2EC is mailbox scratchpad 3.
+    $cmd    =   "simSTKFAC " .
+                    "B0.C0.S0.P0.E8.TPC.FSI.FSI_MAILBOX.FSXCOMP." .
+                    "FSXLOG.LBUS_MAILBOX.Q_GMB2EC.NLC.L2 $hexstr 32 -quiet";
+
+    if ( $opt_debug )   {   print STDERR __LINE__,  "-- run $cmd ...\n";    }
+    ( system( $cmd ) == 0 )
+        or die "$cmd failed, $? : $! \n";
+}
+
+
+##
+##  get status using the status register.
+##
+sub getStatus()
+{
+    my  $result     =   0;
+    my  $resultHi   =   0;
+    my  $resultLo   =   0;
+    my  $cmd        =   "";
+    my  $hexresult  =   0;
+
+    ## $$ mem $$ $result = VBU_Cacheline::CLread( $statusreg );
+
+    ##  Use GetFac here for Hi status - GMB2E8 is mailbox scratchpad 2
+    $cmd    =   "simGETFAC B0.C0.S0.P0.E8.TPC.FSI.FSI_MAILBOX.FSXCOMP." .
+                "FSXLOG.LBUS_MAILBOX.Q_GMB2E8.NLC.L2 32";
+
+    if ( $opt_debug )   {   print STDERR __LINE__,  "-- run $cmd ...\n";   }
+    $resultHi = `$cmd` ;
+    ## print STDERR __LINE__,  "=== raw resultHi=$resultHi ...\n";
+    $resultHi =~ s/.*\n0xr(.*)\n.*/$1/g;
+    $resultHi =~ s/\n//g;
+
+    ##  Use GetFac here  for Lo status - GMB2E4 is mailbox scratchpad 1
+    $cmd    =   "simGETFAC B0.C0.S0.P0.E8.TPC.FSI.FSI_MAILBOX.FSXCOMP." .
+                "FSXLOG.LBUS_MAILBOX.Q_GMB2E4.NLC.L2 32";
+
+    if ( $opt_debug )   {   print STDERR __LINE__,  "-- run $cmd ...\n";   }
+    $resultLo = `$cmd` ;
+    ## print STDERR __LINE__,  "=== raw resultLo=$resultLo ...\n";
+    $resultLo =~ s/.*\n0xr(.*)\n.*/$1/g;
+    $resultLo =~ s/\n//g;
+
+    $result = sprintf( "0x%8.8x%8.8x", (hex "0x$resultHi"), (hex "0x$resultLo") );
+
+    $hexresult = hex $result;
+
+    if ( $opt_debug )   {   printf STDERR "=== result=0x%lx ...\n", $hexresult; }
+
+    return $hexresult;
+}
+
+
+##
+##  keep trying to get status until seqnum syncs up
 ##
 sub getSyncStatus( )
 {
     # set # of retries
     ## @todo revisit
-    my  $count  =   1000;
-    my  $result =   0; 
-    my  $seqnum =   0;  
+    my  $count  =   $hbCount;
+    my  $result =   0;
+    my  $seqnum =   0;
     my  $running =  0;
-    
+
     ##  get response.  sendCmd() should have bumped g_SeqNum, so we will sit
     ##  here for a reasonable amount of time waiting for the correct sequence
-    ##  number to come back.  
+    ##  number to come back.
     while(1)
     {
 
-
-    
-        ##  advance HostBoot code by a certain # of cycles, then check the 
+        ##  advance HostBoot code by a certain # of cycles, then check the
         ##  sequence number to see if it has changed.  rinse and repeat.
-        ##  Note:  RunClocks will start instructions 
-        VBU_Cacheline::RunClocks();
-        system ("$hbToolsDir/hb-ContTrace --mute > /dev/null");
+        ##  Note:  RunClocks will also start instructions
+
+        ## $$VBU_Cacheline::RunClocks();
+        runClocks();
+
+        ##  activate continuous trace
+        system ("$hbToolsDir/hb-ContTrace --mute > /dev/null" );
         system ("cat hb-ContTrace.output >> tracMERG");
 
-        ##  Stop instructions, flush L2
-        VBU_Cacheline::P8_Ins_Stop();
-        VBU_Cacheline::P8_Flush_L2();
+        ## $$ for old memory-based regs, stop instructions, flush L2
+        ## $$ VBU_Cacheline::P8_Ins_Stop();
+        ## $$ VBU_Cacheline::P8_Flush_L2();
+        ## $$ VBU_Cacheline::CLread( $statusreg );
 
-        
-        ##  dump printk similar to the Jim McGuire's script
-        ##  NOPE, CRASHES AWAN dumpPrintk();
-
-        ## check for system crash
-        my ( $flag, $status )  =   getShutDownStatus();
-        if ( $flag )
-        {
-            print   STDOUT  "HostBoot has shut down with status $status";
-            return -1;
-        }
-
-        $result      = VBU_Cacheline::CLread( $statusreg );
+        ##  Fetch status reg(s)
+        $result      =  getStatus( );
 
         $seqnum      =   ( ( $result & 0x3f00000000000000 ) >> 56 );
         $running     =   ( ( $result & 0x8000000000000000 ) >> 63 );
+
+        ## @todo great place to add some debug, check running bit BEFORE
+        ##  starting the clock (should be off), then run 100-200 clocks till
+        ##  the bit turns on.  If it doesn't go on, command was never received.
+        ##  Then come here to wait for it to go back off again.
         ## if (    ( $running == 0 )
         ##     && ( $seqnum == $g_SeqNum )
         if  ( $seqnum == $g_SeqNum )
         {
             return $result;
         }
-        
-        if ($opt_debug)   
-            {   printf  STDERR __LINE__,  "===== getSyncStatus:  count=%d, result=0x%lx\n", $count, $result  } 
-        
+
+        if ($opt_debug)
+        {
+            printf  STDERR "=== getSyncStatus:  count=%d, result=0x%lx\n", $count, $result  ;
+        }
+
         if ( $count <= 0 )
         {
             print STDOUT    "TIMEOUT waiting for seqnum=$g_SeqNum\n";
             return -1;
         }
-        
+
         $count--;
-    }   ##  endwhile    
-          
-} 
+    }   ##  endwhile
+
+}
 
 ##
 ##  Run an istep
@@ -546,20 +822,23 @@ sub runIStep( $$ )
     my  $byte0, my $command;
     my  $cmd;
     my  $result;
-    
-    
+
+
     ##  bump the seqnum
     bumpSeqNum();
-    
+
     printf   STDOUT  "run  %d.%d %s:\n", $istep, $substep, $inList[$istep][$substep];
-    
+
     $byte0   =   0x80 + $g_SeqNum;      ## gobit + seqnum
     $command =   SPLESS_SINGLE_ISTEP_CMD;
+
     $cmd = sprintf( "0x%2.2x%2.2x%2.2x%2.2x00000000", $byte0, $command, $istep, $substep );
-    VBU_Cacheline::CLwrite( $commandreg, $cmd );
-    
+    ## $$VBU_Cacheline::CLwrite( $commandreg, $cmd );
+
+    sendCommand( $cmd );
+
     $result  =   getSyncStatus();
-    
+
     ## if result is -1 we have a timeout
     if ( $result == -1 )
     {
@@ -573,7 +852,7 @@ sub runIStep( $$ )
         my $istepStatus =   ( ( $result & 0x00000000ffffffff )  );
 
         print   STDOUT "-----------------------------------------------------------------\n";
-        ## printf STDOUT "Istep %d.%d Status: 0x%x\n", $stsIStep, $stsSubstep, $istepStatus ; 
+        ## printf STDOUT "Istep %d.%d Status: 0x%x\n", $stsIStep, $stsSubstep, $istepStatus ;
         if ( $taskStatus != 0 )
         {
             if ( $taskStatus == 11 )
@@ -582,50 +861,50 @@ sub runIStep( $$ )
             }
             else
             {
-                printf STDOUT "Istep %d.%d FAILED to launch, task status is %d\n",
-                       $stsIStep, $stsSubstep, $taskStatus ;
+                printf STDOUT "Istep %d.%d %s FAILED to launch, task status is %d\n",
+                       $stsIStep, $stsSubstep,
+                       $inList[$istep][$substep],
+                       $taskStatus ;
             }
         }
         else
-        {            
-            printf STDOUT "Istep %d.%d returned Status: 0x%x", $stsIStep, $stsSubstep, $istepStatus ;
+        {
+            printf STDOUT "Istep %d.%d %s returned Status: 0x%x\n",
+                          $stsIStep, $stsSubstep,
+                          $inList[$istep][$substep],
+                          $istepStatus ;
             if ( $istepStatus == 0xa )
             {
-                printf STDOUT   ": not implemented yet.\n";
-            }
-            else
-            {
-                printf STDOUT   "\n";
+                printf STDOUT   ":     not implemented yet.\n";
             }
         }
-           
+
         print STDOUT "-------------------------------------------------------------- $g_SeqNum\n";
-    }     
-}   
-    
-##    
+    }
+}
+
+##
 ##  run command = "sN"
-##    
+##
 sub sCommand( $ )
 {
     my  ( $scommand )   =   @_;
-    
+
     my  $i   =   $scommand;
     my  $j   =   0;
-    
+
     #   execute all the substeps in the IStep
-    for( $j=0; $j<$#inList; $j++ )
+    for( $j=0; $j<MAX_SUBSTEPS; $j++ )
     {
-        ## print   "-----------------" 
         ##print STDOUT  "run IStep %d %s  ...\n", $i, $inList[$i][$j] );
-        ##print   "-----------------" 
+
         if ( defined( $inList[$i][$j] ) )
         {
             runIStep( $i, $j );
         }
     }
 }
-     
+
 ##
 ##  parse --command [command] option and execute it.
 ##
@@ -636,40 +915,40 @@ sub parse_command( $ )
     my  $istepM, my $substepM, my $foundit, my $istepN, my $substepN;
     my  $M, my $N, my $scommand;
     my  @ss_list;
-    
-    ## check to see if we have an 's' command (string starts with 's' and a number) 
-    chomp( $command);   
+
+    ## check to see if we have an 's' command (string starts with 's' and a number)
+    chomp( $command);
     if ( $command =~ m/^s+[0-9].*/ )
     {
         ## run "s" command
-        if ($opt_debug) {   print STDERR __LINE__, "===== s command : ", $command, ":\n";   } 
+        if ($opt_debug) {   print STDERR __LINE__, "=== s command : ", $command, ":\n";   }
         substr( $command, 0, 1, "" );
- 
+
         if ( isdigit( $command ) )
         {
             # command = "sN"
-            if ($opt_debug) {   print STDERR __LINE__, "===== single IStep: ", $command, "\n";  }
-            sCommand( $command ); 
+            if ($opt_debug) {   print STDERR __LINE__, "=== single IStep: ", $command, "\n";  }
+            sCommand( $command );
         }
         else
         {
             #   list of substeps = "sM..N"
             ( $M, $N )  =   split( /\.\./, $command );
-            
-            if ($opt_debug) {   print STDERR "===== multiple ISteps: ", $M, "-", $N, "\n";    } 
+
+            if ($opt_debug) {   print STDERR "=== multiple ISteps: ", $M, "-", $N, "\n";    }
             for ( my $x=$M; $x<$N+1; $x++ )
             {
                 sCommand( $x );
-            }          
-        }                   
+            }
+        }
     }
     else
-    {  
+    {
         ## <substep name>, or <substep name>..<substep name>
-        @ss_list    =   split( /\.\./, $command );        
-        
-        if ($opt_debug) {   print STDERR __LINE__, "===== named commands : ", @ss_list, "\n";    } 
-            
+        @ss_list    =   split( /\.\./, $command );
+
+        if ($opt_debug) {   print STDERR __LINE__, "=== named commands : ", @ss_list, "\n";    }
+
         ( $istepM, $substepM, $foundit) = find_in_inList( $ss_list[0] );
         $istepN      =   $istepM;
         $substepN    =   $substepM;
@@ -678,10 +957,10 @@ sub parse_command( $ )
             print STDOUT "Invalid substep ", $ss_list[0], "\n" ;
             return -1;
         }
-        
-            
+
+
         if ( $#ss_list > 0 )
-        {    
+        {
             ( $istepN, $substepN, $foundit) = find_in_inList( $ss_list[1] );
             if ( ! $foundit )
             {
@@ -689,7 +968,7 @@ sub parse_command( $ )
                 return -1;
             }
         }
-        
+
         ## print "got it, running isteps:\n";
         for( my $x=$istepM; $x<$istepN+1; $x++ )
         {
@@ -702,55 +981,74 @@ sub parse_command( $ )
                 }
             }
         }
-        
-    }   
+
+    }
 }
 
 ##
-##  write to scratch reg 3 to set istep or normal mode, check return status 
-##       
+##  write IStepModeReg in memory to set istep or fsp mode, check return status
+##  This does not write to a scom reg, I don't have one to write to.
+##
 sub setMode( $ )
 {
     my  ( $cmd )    =   @_;
-    
-    my  $count      =   1000;
+
+    my  $count      =   $hbCount;
     my  $expected   =   0;
     my  $readybit   =   0;
     my  $result     =   0;
-   
+    my  $hexstr     =   sprintf( "%x",$IstepModeReg );
 
-    if ( $cmd eq "istep" )
+
+    ## check to make sure that system is stopped and flushed.
+    my  $qstr   =   VBU_Cacheline::P8_Ins_Query();
+    if ( $qstr  ne "STOPPED" )
     {
-        VBU_Cacheline::CLwrite( $istepmodereg, "0x4057b0074057b007" );
-        $expected    =   1;    
+        ##  Stop instructions, flush L2
+         VBU_Cacheline::P8_Ins_Stop();
+         VBU_Cacheline::P8_Flush_L2();
     }
-    elsif   ( $cmd eq "normal" )
+
+    if ( $cmd eq "spless" )
     {
-        VBU_Cacheline::CLwrite( $istepmodereg, "0x700b7504700b7504" );
-        $expected    =   0;
+        ## $$ VBU_Cacheline::CLwrite( $IstepModeReg, "0x4057b0074057b007" );
+
+        VBU_Cacheline::CLwrite( $hexstr, SPLESS_MODE_SIGNATURE );
+        $expected    =   1;
+    }
+    elsif   ( $cmd eq "fsp" )
+    {
+        ##$$VBU_Cacheline::CLwrite( $IstepModeReg, "0x700b7504700b7504" );
+
+        VBU_Cacheline::CLwrite( $hexstr,  FSP_MODE_SIGNATURE );
+        $expected    =   1;
     }
     else
-    {      
+    {
         print "invalid setMode command: %s\n", $cmd ;
         return  -1;
-    }        
-    
-    if ( $opt_debug )   
-    {
-        ##  readback and display 
-        $result = VBU_Cacheline::CLread( $istepmodereg );
-        printf STDERR __LINE__,   "=====  istepmodereg readback:  0x%lx\n", $result ;
     }
- 
+
+    if ( $opt_debug )
+    {
+        ##  readback and display
+        ##$result = VBU_Cacheline::CLread( $IstepModeReg );
+        $result = VBU_Cacheline::CLread( $hexstr );
+        printf STDERR "===  istepmodereg readback:  0x%lx\n", $result ;
+    }
+
 
     ##  Loop, advancing clock, and wait for readybit
     ##  @todo   revisit
     while(1)
     {
-        ##  advance HostBoot code by a certain # of cycles, then check the 
+        ##  advance HostBoot code by a certain # of cycles, then check the
         ##  sequence number to see if it has changed.  rinse and repeat.
-        VBU_Cacheline::RunClocks();
-        system ("$hbToolsDir/hb-ContTrace --mute > /dev/null");
+        ## $$VBU_Cacheline::RunClocks();
+        runClocks( );
+
+        ##  activate continuous trace
+        system ("$hbToolsDir/hb-ContTrace --mute > /dev/null" );
         system ("cat hb-ContTrace.output >> tracMERG");
 
         ##  Stop instructions, flush L2
@@ -758,36 +1056,38 @@ sub setMode( $ )
          VBU_Cacheline::P8_Flush_L2();
 
 
-
         ## check for system crash
-        my ( $flag, $status )  =   getShutDownStatus();
-        if ( $flag )
+        if ( isShutDown( ) )
         {
-            print   STDOUT  "HostBoot has shut down with status $status";
+            print   STDOUT  "HostBoot has shut down.";
             return -1;
         }
-        
-        $result = VBU_Cacheline::CLread( $statusreg );
-        
+
+        ## $$$result = VBU_Cacheline::CLread( $statusreg );
+        $result =   getStatus( );
+
         $readybit    =   ( ( $result & 0x4000000000000000 ) >> 62 );
-        
-        if ($opt_debug)   
-            { printf  STDERR __LINE__,  "===== setMode:  count=%d, result=0x%lx, readybit=0x%x\n", $count, $result, $readybit  } 
+
+        if ($opt_debug)
+        {
+            printf  STDERR "=== setMode:  count=%d, result=0x%lx, readybit=0x%x\n",
+                           $count, $result, $readybit ;
+        }
 
         if ( $readybit == $expected )
         {
             print STDOUT "Set $cmd Mode success.\n" ;
             return 0;
         }
-            
+
         if ( $count <= 0 )
         {
             print STDOUT "TIMEOUT waiting for readybit, status=0x%x\n", $result ;
             return -1;
         }
-           
+
         $count--;
-    } 
+    }
 }
 
 
@@ -800,12 +1100,13 @@ sub resume_istep()
 
     bumpSeqNum();       ## bump
 
-    printf STDOUT "resume from breakpoint\n";
+    print STDOUT "resume from breakpoint\n";
 
     $byte0 = 0x80 + $g_SeqNum;      ## gobit + seqnum
     $command = SPLESS_RESUME_ISTEP_CMD;
     $cmd = sprintf( "0x%2.2x%2.2x000000000000", $byte0, $command );
-    VBU_Cacheline::CLwrite( $commandreg, $cmd );
+    ## $$ VBU_Cacheline::CLwrite( $commandreg, $cmd );
+    sendCommand( $cmd );
 
     ## dgxx
     while(1)
@@ -858,7 +1159,7 @@ sub resume_istep()
                     $stsIStep, $stsSubstep, $istepStatus ;
                 last;
             }
-                        
+
             ## continue to wait for istep to complete
         }
 
@@ -872,18 +1173,20 @@ sub clear_trace( )
     my  $byte0, my $command;
     my  $cmd;
     my  $result;
-    
-    
+
+
     ##  bump the seqnum
     bumpSeqNum();
-    
+
     $byte0   =   0x80 + $g_SeqNum;      ## gobit + seqnum
     $command =   SPLESS_CLEAR_TRACE_CMD;
     $cmd = sprintf( "0x%2.2x%2.2x%2.2x%2.2x00000000", $byte0, $command, 0, 0 );
-    VBU_Cacheline::CLwrite( $commandreg, $cmd );
-    
+
+    ## $$ VBU_Cacheline::CLwrite( $commandreg, $cmd );
+    sendCommand( $cmd );
+
     $result  =   getSyncStatus();
-    
+
     ## if result is -1 we have a timeout
     if ( $result == -1 )
     {
@@ -894,9 +1197,9 @@ sub clear_trace( )
         print STDOUT "---------------------------------------------------------------\n";
         print STDOUT "Trace Buffers Cleared.\n"  ;
     }
-    
+
     print STDOUT "---------------------------------------------------------------\n";
-}   
+}
 
 
 

@@ -20,7 +20,7 @@
 #
 #  Origin: 30
 #
-#  IBM_PROLOG_END
+#  IBM_PROLOG_END_TAG
 #
 # Name:     src/build/vpo/VBU_Cacheline.pm
 #
@@ -105,19 +105,19 @@ my  $FLUSHCMD   =   "$vbuToolsDir/proc_l2_flush_wrap.x86 $CORE -quiet";
 my  $FLUSHQUERY =   "$vbuToolsDir/p8_check_l3";
 my  $RUNCLKSCMD =   "simclock";
 
-##  @todo $$$$$
+##  @todo
 ##  NOTE:   need to be able to specify thread (-t ) and core (-c ), they
 ##  should not be hardwired
-##my  $QUERYCMD   =   "$vbuToolsDir/proc_thread_control.x86 -query  $CORE -t0";
-##my  $STOPCMD    =   "$vbuToolsDir/proc_thread_control.x86 -stop   $CORE -tall";
-##my  $STARTCMD   =   "$vbuToolsDir/proc_thread_control.x86 -start  $CORE -tall";
+## my  $QUERYCMD   =   "$vbuToolsDir/proc_thread_control.x86 -query  $CORE -t0";
+## my  $STOPCMD    =   "$vbuToolsDir/proc_thread_control.x86 -stop   $CORE -tall";
+## my  $STARTCMD   =   "$vbuToolsDir/proc_thread_control.x86 -start  $CORE -tall";
+my  $RESETCMD   =   "$vbuToolsDir/proc_thread_control.x86 -sreset_auto $CORE";
 
 ##  Jim McGuire's older versions.
 my  $QUERYCMD   =   "/gsa/pokgsa/home/m/c/mcguirej/public/auto/rel/P8bin/p8_ins_query";
 my  $STOPCMD    =   "/gsa/pokgsa/home/m/c/mcguirej/public/auto/rel/P8bin/p8_ins_stop";
 my  $STARTCMD   =   "/gsa/pokgsa/home/m/c/mcguirej/public/auto/rel/P8bin/p8_ins_start";
 
-my  $RESETCMD   =   "$vbuToolsDir/proc_thread_control.x86 -sreset_auto $CORE";
 
 ##
 #==============================================================================
