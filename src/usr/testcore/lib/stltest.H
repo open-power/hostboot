@@ -211,6 +211,18 @@ class STLTest : public CxxTest::TestSuite
                 TS_FAIL("std::map fail Erase by iterator size test.");
             }
 
+            // Test erase of root node.  (find will splay to top).
+            mymap5.erase(mymap5.find(v6));
+            if (mymap5.end() != mymap5.find(v6))
+            {
+                TS_FAIL("std::map fail Erase by iterator to root test.");
+            }
+            if (mymap.size() != (mymap5.size() + 2))
+            {
+                TS_FAIL("std::map fail Erase by iterator to root size test.");
+            }
+
+
         }
 
 

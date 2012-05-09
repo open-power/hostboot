@@ -150,6 +150,11 @@ namespace Util
                 {
                     y->parent->child[direction(y->parent, n)] = y;
                 }
+                else
+                {
+                    // Removing root, so update header.
+                    header.parent = y;
+                }
 
                 y->child[LEFT] = n->child[LEFT];
                 if (y->child[LEFT])
