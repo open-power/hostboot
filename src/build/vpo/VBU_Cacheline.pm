@@ -76,9 +76,7 @@ my  $curDir      =   getcwd();
 my  $CLfile     =   "$curDir/istepmodereg.dma";
 my  $CORE       =   "-c3";
 
-## my  $SIM_CLOCKS =   "4000000";
-## my  $SIM_CLOCKS =   "2000000";
-my  $SIM_CLOCKS =   "3000000";
+my  $SIM_CLOCKS =   "5000000";
 
 #############################################
 ##  Internal Globals
@@ -105,19 +103,23 @@ my  $FLUSHCMD   =   "$vbuToolsDir/proc_l2_flush_wrap.x86 $CORE -quiet";
 my  $FLUSHQUERY =   "$vbuToolsDir/p8_check_l3";
 my  $RUNCLKSCMD =   "simclock";
 
-##  @todo
-##  NOTE:   need to be able to specify thread (-t ) and core (-c ), they
-##  should not be hardwired
-## my  $QUERYCMD   =   "$vbuToolsDir/proc_thread_control.x86 -query  $CORE -t0";
-## my  $STOPCMD    =   "$vbuToolsDir/proc_thread_control.x86 -stop   $CORE -tall";
-## my  $STARTCMD   =   "$vbuToolsDir/proc_thread_control.x86 -start  $CORE -tall";
-my  $RESETCMD   =   "$vbuToolsDir/proc_thread_control.x86 -sreset_auto $CORE";
-
-##  Jim McGuire's older versions.
-my  $QUERYCMD   =   "/gsa/pokgsa/home/m/c/mcguirej/public/auto/rel/P8bin/p8_ins_query";
-my  $STOPCMD    =   "/gsa/pokgsa/home/m/c/mcguirej/public/auto/rel/P8bin/p8_ins_stop";
-my  $STARTCMD   =   "/gsa/pokgsa/home/m/c/mcguirej/public/auto/rel/P8bin/p8_ins_start";
-
+# Start/Stop/Query tool commands
+# Note:
+# -----
+#    Query command output strings:
+#       Single thread (-t0,1,..)   "Running" or "Quiesced"
+#       All threads   (-tall)      A formatted table
+# 
+# TODO:
+# Needs to resolve the error when using "start -tall".  After running a while,
+# start -tall may lock up with this error:
+#   "proc_thread_control: Thread Start failed: RAS Status Run bit is not on"
+# Temporary workaround is using only one thread as shown below.
+# Lance Karm is still investigating.
+my  $QUERYCMD   =   "$vbuToolsDir/proc_thread_control_wrap.x86 -query  $CORE -t0";
+my  $STARTCMD   =   "$vbuToolsDir/proc_thread_control_wrap.x86 -start  $CORE -t0";
+my  $STOPCMD    =   "$vbuToolsDir/proc_thread_control_wrap.x86 -stop   $CORE -t0";
+my  $RESETCMD   =   "$vbuToolsDir/proc_thread_control_wrap.x86 -sreset $CORE";
 
 ##
 #==============================================================================
@@ -256,24 +258,16 @@ sub P8_Ins_Start()
 {
     my  $cmd    =   "$STARTCMD";
 
-    if ( P8_Ins_Query() eq "STOPPED" )
-    {
-        if ( !$CLdebug )
-        {   $cmd    .=  " -quiet";  }
-        else
-        {   print STDERR __LINE__,  "--   run $cmd ...\n";   }
-
-        ( system( $cmd ) == 0 )
-            or die "$cmd failed $? : $! \n";
-
-
-        ##  reset the flushFlag, need to flush again before a read.
-        $L2_Flushed   =   0;
-    }
+    if ( !$CLdebug )
+    {   $cmd    .=  " -quiet";  }
     else
-    {
-        if ($CLdebug)   { print STDERR __LINE__,    "--   P8_Ins_Start: already RUNNING\n";  }
-    }
+    {   print STDERR __LINE__,  "--   run $cmd ...\n";   }
+
+    ( system( $cmd ) == 0 )
+        or die "$cmd failed $? : $! \n";
+
+    ##  reset the flushFlag, need to flush again before a read.
+    $L2_Flushed   =   0;
 
 }
 
@@ -367,13 +361,6 @@ sub RunClocks()
     my  $cmd    =   0;
 
     if ( $CLdebug ) {   printf STDERR __LINE__, "-- RunClocks()\n"; }
-
-    ##  Check, and start instructions if necessary
-    if  ( P8_Ins_Query( ) ne "RUNNING" )
-    {
-
-        P8_Ins_Start();
-    }
 
     $cmd    =   "$RUNCLKSCMD $SIM_CLOCKS   -quiet";
     if ( $CLdebug )   {   print STDERR __LINE__,  "-- run $cmd ...\n";   }

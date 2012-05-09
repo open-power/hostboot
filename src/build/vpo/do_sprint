@@ -26,14 +26,30 @@
 #
 # NOTE: Execution environment must be intialized prior using source Setup_Env script
 #
+#
 
+##################################################################################
 #
 # Version 1.0   03-21-2012   Copy from Jim's on 03/21/2012, tested on VBU & VPO
-# Version 1.1   04-16-2012   - Update to run with new Sprint 11 image.  Load only these files on L3:
-#                                 hbicore.bin (or hbicore_test.bin if running test image) at address 0
-#                                 vbu.pnor at address 0x400000
+#
+# Version 1.1   04-16-2012   - Update to run with new Sprint 11 image.  Load only
+#                              these files on L3:
+#                                hbicore.bin (or hbicore_test.bin if running
+#                                test image) at address 0
+#                                vbu.pnor at address 0x400000
 #                            - Sync with Jim's do_sprint'change
 #
+# Version 1.2   05-09-2012   VPO tool changes:
+#                            - Use p8_load_l3 and p8_dump_l3 at specified
+#                              directory by Joe McGill
+#                              Default vbutool dir now is for Murano
+#                              "prev" vbutool dir is for Venice (only temporarily,
+#                              will be removed)
+#                            - Use proc_thread_control instead of
+#                              p8_ins_query/stop/start
+#                            - Use env variable $HB_VBUTOOLS for VBU tools
+#
+##################################################################################
 
 PGM=`basename $0`
 
@@ -140,6 +156,10 @@ if [ "$HB_IMGDIR" = "" -o ! -d "$HB_IMGDIR" ]; then
 	echo "ERROR: Missing/Invalid definition for HB_IMGDIR"
 fi
 
+if [ "$HB_VBUTOOLS" = "" -o ! -d "$HB_VBUTOOLS" ]; then
+	echo "ERROR: Missing/Invalid definition for HB_VBUTOOLS"
+fi
+
 if [ "$HB_TOOLS" = "" -o ! -d "$HB_TOOLS" ]; then
 	echo "ERROR: Missing/invalid definition for HB_TOOLS"
 	exit 1
@@ -176,7 +196,6 @@ sim_clocks=${AUTOVBU_SIMCLOCKS-2000000}
 loopstart=${AUTOVBU_START-0}
 loopmax=`expr $loopstart '+' ${AUTOVBU_LOOPS-2000}`
 lines=${AUTOVBU_PRINTK_LINES-50}
-sample=${AUTOVBU_PRINTK_SAMPLE-30}
 
 # If we requested checkpoints after loops or isteps, force a checkpoint after the hbitest as well
 test "$chkpt_after_loops" = "--chkpt_after_loops" && chkpt_after_hbitest="--chkpt_after_hbitest"
@@ -208,8 +227,8 @@ if [ "$start_after_hbiload" != "--start_after_hbiload" -a "$start_after_hbitest"
 fi
 
 if [ "$start_after_hbiload" != "--start_after_hbiload" -a "$start_after_hbitest" != "--start_after_hbitest" ]; then
-	/afs/awd/projects/eclipz/lab/p8/gsiexe/p8_load_l3 -f ${HB_IMG}/hbicore${use_test}.bin -b ${CORE--c3} || exit 1
-	/afs/awd/projects/eclipz/lab/p8/gsiexe/p8_load_l3 -f ${HB_IMG}/vbu${use_test}.pnor -o 0x400000 -b ${CORE--c3} || exit 1
+	$HB_VBUTOOLS/p8_load_l3 -l ${DEFAULT_LEVEL-rel} -f ${HB_IMG}/hbicore${use_test}.bin -b ${CORE--c3} || exit 1
+	$HB_VBUTOOLS/p8_load_l3 -l ${DEFAULT_LEVEL-rel} -f ${HB_IMG}/vbu${use_test}.pnor -o 0x400000 -b ${CORE--c3} || exit 1
 fi
 
 
@@ -222,7 +241,7 @@ if [ "$start_after_hbiload" != "--start_after_hbiload" -a "$start_after_hbitest"
 	simclock 1 -quiet
 
 	# Start instructions
-	p8_ins_reset || exit 1
+        $HB_VBUTOOLS/proc_thread_control_wrap.x86 -sreset ${CORE--c3} -quiet
 
 	# Make a checkpoint now if requested
 	test "$chkpt_after_hbiload" = "--chkpt_after_hbiload" && simcheckpoint chkpt_after_hbiload-$AUTOCHKPT_VERSION
@@ -349,19 +368,20 @@ if [ "$start_after_hbitest" != "--start_after_hbitest" ]; then
 			fi
 
 			if [ "$use_hb_trace" = "--use_hb_trace" ]; then
-				p8_ins_stop
+                                   $HB_VBUTOOLS/proc_thread_control_wrap.x86 -stop ${CORE--c3} -t0 -quiet
 				$HB_TOOLS/hb-trace $test_arg --out $printk_tmp3 2>&1 | egrep -v "^FAPI DBG>:|^FAPI IMP>:|Using deprecated ReturnCode function to assign integer" >$printk_tmp2
 				test -f $printk_tmp3/hb-Trace.output && cp $printk_tmp3/hb-Trace.output $printk_tmp3/tmp.hb-Trace.output-$istep
-				p8_ins_start
+                                   $HB_VBUTOOLS/proc_thread_control_wrap.x86 -start ${CORE--c3} -t0 -quiet
 			elif [ "$use_printk" = "--use_printk" ]; then
 				DUMP_PRINTK ${addr} ${lines} >$printk_tmp2
 			elif [ "$use_dump_l3" = "--use_dump_l3" ]; then
 				DUMP_L3_PRINTK ${addr} ${lines} >$printk_tmp2
 			else
-				p8_ins_stop
+                                   $HB_VBUTOOLS/proc_thread_control_wrap.x86 -stop ${CORE--c3} -t0 -quiet
 				$HB_TOOLS/hb-printk $test_arg --out $printk_tmp3 2>&1 | egrep -v "^FAPI DBG>:|^FAPI IMP>:|Using deprecated ReturnCode function to assign integer" >$printk_tmp2
-				p8_ins_start
+                                   $HB_VBUTOOLS/proc_thread_control_wrap.x86 -start ${CORE--c3} -t0 -quiet
 			fi
+
 			echo >>$printk_tmp2
 			diff -a $printk_tmp1 $printk_tmp2 | egrep -a "^> " | sed -e 's/[Ee][Rr][Rr][Oo][Rr]/ERR*R/g' -e 's/FAIL/F*IL/g'
 			mv $printk_tmp2 $printk_tmp1
@@ -430,31 +450,31 @@ if [ "$start_after_hbitest" != "--start_after_hbitest" ]; then
 			simclock $sim_clocks  -quiet || exit 1
 			cur_cia=`GET_CIA`
 			echo "$loopcnt:	$cur_cia"
-                        $HB_TOOLS/hb-ContTrace --mute > /dev/null
-                        cat hb-ContTrace.output >> tracMERG
+
+                          $HB_TOOLS/hb-ContTrace --mute > /dev/null
+                          cat hb-ContTrace.output >> tracMERG
+
 			if [ "$use_hb_trace" = "--use_hb_trace" ]; then
-				p8_ins_stop
+                                   $HB_VBUTOOLS/proc_thread_control_wrap.x86 -stop ${CORE--c3} -t0 -quiet
 				$HB_TOOLS/hb-trace $test_arg --out $printk_tmp3 2>&1 | egrep -v "^FAPI DBG>:|^FAPI IMP>:|Using deprecated ReturnCode function to assign integer" >$printk_tmp2
 				test -f $printk_tmp3/hb-Trace.output && cp $printk_tmp3/hb-Trace.output $printk_tmp3/tmp.hb-Trace.output-$loopcnt
-				p8_ins_start
+                                   #$HB_VBUTOOLS/proc_thread_control_wrap.x86 -start ${CORE--c3} -t0 -quiet
 			elif [ "$use_printk" = "--use_printk" ]; then
 				DUMP_PRINTK ${addr} ${lines} >$printk_tmp2
 			elif [ "$use_dump_l3" = "--use_dump_l3" ]; then
 				DUMP_L3_PRINTK ${addr} ${lines} >$printk_tmp2
 			else
-                           if [ `expr $loopcnt % $sample` -eq 0 ];
-                           then
-                               $HB_TOOLS/hb-printk --mute > /dev/null
-                               diff hb-Printk.output printk_out | sed -e 's/< //g' -e '1d'
-                               mv hb-Printk.output printk_out
-                           fi
-                        fi
-                        if [ -f $printk_tmp2 ];
-                        then
-                                echo >>$printk_tmp2
-                                diff -a $printk_tmp1 $printk_tmp2 | egrep -a "^> " | sed -e 's/[Ee][Rr][Rr][Oo][Rr]/ERR*R/g' -e 's/FAIL/F*IL/g'
-                                mv $printk_tmp2 $printk_tmp1
+                               $HB_VBUTOOLS/proc_thread_control_wrap.x86 -stop ${CORE--c3} -t0 -quiet
+                               $HB_TOOLS/hb-printk $test_arg --out $printk_tmp3 2>&1 | egrep -v "^FAPI DBG>:|^FAPI IMP>:|Using deprecated ReturnCode function to assign integer" >$printk_tmp2
+                               #$HB_VBUTOOLS/proc_thread_control_wrap.x86 -start ${CORE--c3} -t0 -quiet
 			fi
+    
+                          # Start instruction, conttrace may have stop instructions
+                          $HB_VBUTOOLS/proc_thread_control_wrap.x86 -start ${CORE--c3} -t0 -quiet
+                          
+                          echo >>$printk_tmp2
+                          diff -a $printk_tmp1 $printk_tmp2 | egrep -a "^> " | sed -e 's/[Ee][Rr][Rr][Oo][Rr]/ERR*R/g' -e 's/FAIL/F*IL/g'
+                          mv $printk_tmp2 $printk_tmp1
 	
 			grep 'HypeEmu: Illegal instruction' $printk_tmp1 >/dev/null
 			if [ $? -eq 0 ]; then
@@ -504,10 +524,15 @@ if [ "$start_after_hbitest" != "--start_after_hbitest" ]; then
 			fi
 		done
                 $HB_TOOLS/hb-ContTrace --mute > /dev/null
+                
                 cat hb-ContTrace.output >> tracMERG
                 $HB_TOOLS/hb-ContTrace --mute --last > /dev/null
                 cat hb-ContTrace.output >> tracMERG
-		date
+	
+                # Start instruction, conttrace may have stop instructions
+                $HB_VBUTOOLS/proc_thread_control_wrap.x86 -start ${CORE--c3} -t0 -quiet
+        
+        	date
 		rm -f $printk_tmp2 $printk_tmp1
 	
 	
@@ -562,9 +587,9 @@ if [ "$trace_after_loops" != "" ]; then
 		fi
 		echo "Loading: chkpt_after_loop${loopcnt}-$AUTOCHKPT_VERSION"
 		siminit chkpt_after_loop${loopcnt}-$AUTOCHKPT_VERSION || exit 1
-		p8_ins_stop
+                 $HB_VBUTOOLS/proc_thread_control_wrap.x86 -stop ${CORE--c3} -t0 -quiet
 		$HB_TOOLS/hb-trace $test_arg --out $AUTOVBU_TEST_DIR/trace_after_loop${loopcnt} >/dev/null 2>&1
-		p8_ins_start
+                 $HB_VBUTOOLS/proc_thread_control_wrap.x86 -start ${CORE--c3} -t0 -quiet
 	done
 	cat `ls -1rt $AUTOVBU_TEST_DIR/trace_after_loop*/hb-Trace.output` | sort | uniq -c | 
 		sed -e 's/[Ee][Rr][Rr][Oo][Rr]/ERR*R/g' -e 's/FAIL/F*IL/g' > $AUTOVBU_TEST_DIR/trace_after_loop-hb-Trace.output
@@ -580,9 +605,9 @@ if [ -d "$AUTOVBU_TEST_DIR/trace_after_hbitest" -a ! -f $AUTOVBU_TEST_DIR/trace_
 	chmod a+rx $AUTOVBU_TEST_DIR/trace_after_hbitest >/dev/null 2>&1
 	echo "Loading: chkpt_after_hbitest-$AUTOCHKPT_VERSION"
 	siminit chkpt_after_hbitest-$AUTOCHKPT_VERSION || exit 1
-	p8_ins_stop
+	$HB_VBUTOOLS/proc_thread_control_wrap.x86 -stop ${CORE--c3} -t0 -quiet
 	$HB_TOOLS/hb-trace $test_arg --out $AUTOVBU_TEST_DIR/trace_after_hbitest >/dev/null 2>&1
-	p8_ins_start
+	$HB_VBUTOOLS/proc_thread_control_wrap.x86 -start ${CORE--c3} -t0 -quiet
 	echo
 	echo "Trace file: $AUTOVBU_TEST_DIR/trace_after_hbitest/hb-Trace.output"
 	echo
@@ -616,9 +641,9 @@ if [ "$trace_after_istep" != "" ]; then
 		fi
 		echo "Loading: chkpt_after_istep_${istep}-$AUTOCHKPT_VERSION"
 		siminit chkpt_after_istep_${istep}-$AUTOCHKPT_VERSION || exit 1
-		p8_ins_stop
+		$HB_VBUTOOLS/proc_thread_control_wrap.x86 -stop ${CORE--c3} -t0 -quiet
 		$HB_TOOLS/hb-trace $test_arg --out $AUTOVBU_TEST_DIR/trace_after_istep_${istep} >/dev/null 2>&1
-		p8_ins_start
+		$HB_VBUTOOLS/proc_thread_control_wrap.x86 -start ${CORE--c3} -t0 -quiet
 	done
 	cat `ls -1rt $AUTOVBU_TEST_DIR/trace_after_istep*/hb-Trace.output` | sort | uniq -c |
 		sed -e 's/[Ee][Rr][Rr][Oo][Rr]/ERR*R/g' -e 's/FAIL/F*IL/g' > $AUTOVBU_TEST_DIR/trace_after_istep-hb-Trace.output

@@ -27,8 +27,16 @@
 # relevant data such as the code version, kernel printk buffer & component traces.
 #
 # Author: CamVan Nguyen
-# Last Updated: 07/19/2011
+
+##################################################################################
 #
+# Version 1.1   05-09-2012   Start version history
+#                            - Use HB_VBUTOOLS env if set
+#                            - Use proc_thread_control_wrap in place of
+#                              p8_ins_stop/start/query
+#
+#
+##################################################################################
 
 #------------------------------------------------------------------------------
 # Specify perl modules to use
@@ -92,6 +100,16 @@ my @ecmdOpt;                      #Array of ecmd options
 my $core = "3";                   #Default is core 3
 my @threadState = ();             #Array to store the thread states
 my $vbuToolDir = "/gsa/ausgsa/projects/h/hostboot/vbutools/latest";
+
+# Use HB_VBUTOOLS if it's set; otherwise, try to use the latest tool directory
+my $vbuToolDir = $ENV{'HB_VBUTOOLS'};
+if (defined ($vbuToolDir))
+{
+    unless ($vbuToolDir ne "")
+    {
+        $vbuToolDir = "/gsa/ausgsa/projects/h/hostboot/vbutools/latest";
+    }
+}
 
 my $hbDir = $ENV{'HB_IMGDIR'};
 if (defined ($hbDir))
@@ -587,7 +605,7 @@ sub stopInstructions
     my $thread = shift;
 
     #Stopping all threads
-    my $command = "$vbuToolDir/proc_thread_control.x86";
+    my $command = "$vbuToolDir/proc_thread_control_wrap.x86";
     $command .= " @ecmdOpt -stop -t$thread -quiet";
     die "ERROR: cannot stop instructions" if (system("$command") != 0);
 }
@@ -600,7 +618,7 @@ sub startInstructions
     my $thread = shift;
 
     #Starting all threads
-    my $command = "$vbuToolDir/proc_thread_control.x86";
+    my $command = "$vbuToolDir/proc_thread_control_wrap.x86";
     $command .= " @ecmdOpt -start -t$thread -quiet";
     die "ERROR: cannot start instructions" if (system("$command") != 0);
 }
@@ -614,7 +632,7 @@ sub queryThreadState
     my $thread = shift;
     #print "thread $thread\n";
 
-    my $command = "$vbuToolDir/proc_thread_control.x86 @ecmdOpt -query -t$thread";
+    my $command = "$vbuToolDir/proc_thread_control_wrap.x86 @ecmdOpt -query -t$thread";
     my $result = `$command`;
     #print "result:\n $result";
     if ($result =~ m/Quiesced/)

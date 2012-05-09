@@ -40,6 +40,15 @@
 # Author: Mark Wenning
 #
 
+##################################################################################
+#
+#
+# Version 1.1   05-09-2012   Start version history
+#                            VPO performance improvement changes
+#
+#
+##################################################################################
+
 #------------------------------------------------------------------------------
 # Specify perl modules to use
 #------------------------------------------------------------------------------
@@ -71,6 +80,7 @@ sub resume_istep;
 sub isShutDown;
 sub getSymbol;
 sub dumpEnvVar;
+sub isTraceFull;
 
 #------------------------------------------------------------------------------
 #   Constants
@@ -354,22 +364,9 @@ sub main()
         exit;
     }
 
-    ##
-    ##  Before we start, we must make sure the system is stopped and memory
-    ##  is flushed so that we can read the state.  This includes:
-    ##      - make sure that HostBoot has not already started and run to
-    ##      completion (shutdown status )
-    ##      - read/write memory location to set single-step mode (SPLESS or
-    ##      FSP)
-    ##      - etc??
-    ##
-    my  $qstr   =   VBU_Cacheline::P8_Ins_Query();
-    if ( $qstr  ne "STOPPED" )
-    {
-        print STDOUT "Setting P8 Instructions to STOPPED.\n";
-        VBU_Cacheline::P8_Ins_Stop();
-        VBU_Cacheline::P8_Flush_L2();
-    }
+    ## Stop instruction to read L3
+    VBU_Cacheline::P8_Ins_Stop();
+    VBU_Cacheline::P8_Flush_L2();
 
     if ( isShutDown() )
     {
@@ -422,8 +419,6 @@ sub main()
         exit;
     }
 
-
-
     ##
     ## Process resume
     ##
@@ -463,8 +458,7 @@ sub printUsage()
     print STDOUT "    [--command <foo>]         (run named istep \"foo\")\n" ;
     print STDOUT "    [--command <foo>..<bar>]  (run named isteps \"foo\" through \"bar\")\n" ;
     print STDOUT "    [--resume]                (resume an istep that is at a break point)\n" ;
-    print STDOUT "    [--clear-trace]             (clear trace buffers before starting)\n";
-
+    print STDOUT "    [--clear-trace]           (clear trace buffers before starting)\n";
     print STDOUT "\n" ;
 
 }
@@ -611,14 +605,9 @@ sub find_in_inList( $ )
 ##
 sub isShutDown()
 {
-    ## check to make sure that system is stopped and flushed.
-    my  $qstr   =   VBU_Cacheline::P8_Ins_Query();
-    if ( $qstr  ne "STOPPED" )
-    {
-        ##  Stop instructions, flush L2
-         VBU_Cacheline::P8_Ins_Stop();
-         VBU_Cacheline::P8_Flush_L2();
-    }
+    ## Make sure system is stopped and flushed.
+    VBU_Cacheline::P8_Ins_Stop();
+    VBU_Cacheline::P8_Flush_L2();
 
     my $flag    =   VBU_Cacheline::CLread( sprintf( "%x", $ShutDownFlag ) );
     my $status  =   VBU_Cacheline::CLread( sprintf( "%x", $ShutDownSts ) );
@@ -758,27 +747,38 @@ sub getSyncStatus( )
     my  $seqnum =   0;
     my  $running =  0;
 
+    # Start instructions before going into loop
+    VBU_Cacheline::P8_Ins_Start();
+
     ##  get response.  sendCmd() should have bumped g_SeqNum, so we will sit
     ##  here for a reasonable amount of time waiting for the correct sequence
     ##  number to come back.
     while(1)
     {
-
         ##  advance HostBoot code by a certain # of cycles, then check the
         ##  sequence number to see if it has changed.  rinse and repeat.
-        ##  Note:  RunClocks will also start instructions
 
-        ## $$VBU_Cacheline::RunClocks();
+        # Progress bar
+        print   STDOUT  ".";
+        
+        # Feed simclocks
         runClocks();
 
-        ##  activate continuous trace
-        system ("$hbToolsDir/hb-ContTrace --mute > /dev/null" );
-        system ("cat hb-ContTrace.output >> tracMERG");
-
-        ## $$ for old memory-based regs, stop instructions, flush L2
-        ## $$ VBU_Cacheline::P8_Ins_Stop();
-        ## $$ VBU_Cacheline::P8_Flush_L2();
-        ## $$ VBU_Cacheline::CLread( $statusreg );
+        # Check if trace buffer is full, if it is, call ContTrace to
+        # dump traces out from L3
+        # Note: This is called here in order to avoid repeated
+        #       system calls of ContTrace in every loop, when the
+        #       trace buffer is not yet full.
+        if ( isTraceFull() )
+        {
+           # Print Trace Full message just for reference when running.
+           print   STDOUT  "T/F";
+           system ("$hbToolsDir/hb-ContTrace --no-save-states --mute > /dev/null" );
+           system ("cat hb-ContTrace.output >> tracMERG");
+           
+           # Need to start instructions after trace has been dumped out.
+           VBU_Cacheline::P8_Ins_Start();
+        }
 
         ##  Fetch status reg(s)
         $result      =  getStatus( );
@@ -794,6 +794,8 @@ sub getSyncStatus( )
         ##     && ( $seqnum == $g_SeqNum )
         if  ( $seqnum == $g_SeqNum )
         {
+            # Done progress bar
+            print   STDOUT  "\n";
             return $result;
         }
 
@@ -804,6 +806,8 @@ sub getSyncStatus( )
 
         if ( $count <= 0 )
         {
+            # Done progress bar
+            print   STDOUT  "\n";
             print STDOUT    "TIMEOUT waiting for seqnum=$g_SeqNum\n";
             return -1;
         }
@@ -879,7 +883,7 @@ sub runIStep( $$ )
             }
         }
 
-        print STDOUT "-------------------------------------------------------------- $g_SeqNum\n";
+        print STDOUT "------------------------------------------------------- SeqNum: $g_SeqNum\n";
     }
 }
 
@@ -1000,26 +1004,17 @@ sub setMode( $ )
     my  $hexstr     =   sprintf( "%x",$IstepModeReg );
 
 
-    ## check to make sure that system is stopped and flushed.
-    my  $qstr   =   VBU_Cacheline::P8_Ins_Query();
-    if ( $qstr  ne "STOPPED" )
-    {
-        ##  Stop instructions, flush L2
-         VBU_Cacheline::P8_Ins_Stop();
-         VBU_Cacheline::P8_Flush_L2();
-    }
+    ## Stop and flush
+    VBU_Cacheline::P8_Ins_Stop();
+    VBU_Cacheline::P8_Flush_L2();
 
     if ( $cmd eq "spless" )
     {
-        ## $$ VBU_Cacheline::CLwrite( $IstepModeReg, "0x4057b0074057b007" );
-
         VBU_Cacheline::CLwrite( $hexstr, SPLESS_MODE_SIGNATURE );
         $expected    =   1;
     }
     elsif   ( $cmd eq "fsp" )
     {
-        ##$$VBU_Cacheline::CLwrite( $IstepModeReg, "0x700b7504700b7504" );
-
         VBU_Cacheline::CLwrite( $hexstr,  FSP_MODE_SIGNATURE );
         $expected    =   1;
     }
@@ -1032,7 +1027,6 @@ sub setMode( $ )
     if ( $opt_debug )
     {
         ##  readback and display
-        ##$result = VBU_Cacheline::CLread( $IstepModeReg );
         $result = VBU_Cacheline::CLread( $hexstr );
         printf STDERR "===  istepmodereg readback:  0x%lx\n", $result ;
     }
@@ -1042,30 +1036,44 @@ sub setMode( $ )
     ##  @todo   revisit
     while(1)
     {
+        # Progress bar
+        print   STDOUT  ".";
+
+        # Check if trace buffer is full, if it is, call ContTrace to
+        # dump traces out from L3
+        # Note: This is called here in order to avoid repeated
+        #       system calls of ContTrace in every loop, when the
+        #       trace buffer is not yet full.
+        if ( isTraceFull() )
+        {
+           # Print Trace Full message just for reference when running.
+           print   STDOUT  "T/F";
+           system ("$hbToolsDir/hb-ContTrace --no-save-states --mute > /dev/null" );
+           system ("cat hb-ContTrace.output >> tracMERG");
+        }
+
+        # Because setMode read data from L3 instead of SCOM,
+        # Start instruction needs to be done every loop
+        VBU_Cacheline::P8_Ins_Start();
+
         ##  advance HostBoot code by a certain # of cycles, then check the
         ##  sequence number to see if it has changed.  rinse and repeat.
-        ## $$VBU_Cacheline::RunClocks();
         runClocks( );
 
-        ##  activate continuous trace
-        system ("$hbToolsDir/hb-ContTrace --mute > /dev/null" );
-        system ("cat hb-ContTrace.output >> tracMERG");
-
         ##  Stop instructions, flush L2
-         VBU_Cacheline::P8_Ins_Stop();
-         VBU_Cacheline::P8_Flush_L2();
-
+        VBU_Cacheline::P8_Ins_Stop();
+        VBU_Cacheline::P8_Flush_L2();
 
         ## check for system crash
         if ( isShutDown( ) )
         {
+            # Stop progress bar
+            print   STDOUT  "\n";
             print   STDOUT  "HostBoot has shut down.";
             return -1;
         }
 
-        ## $$$result = VBU_Cacheline::CLread( $statusreg );
         $result =   getStatus( );
-
         $readybit    =   ( ( $result & 0x4000000000000000 ) >> 62 );
 
         if ($opt_debug)
@@ -1076,6 +1084,8 @@ sub setMode( $ )
 
         if ( $readybit == $expected )
         {
+            # Stop progress bar
+            print   STDOUT  "\n";
             print STDOUT "Set $cmd Mode success.\n" ;
             return 0;
         }
@@ -1201,6 +1211,27 @@ sub clear_trace( )
     print STDOUT "---------------------------------------------------------------\n";
 }
 
+##
+##  Read the scratch register to see if trace full condition is notified.
+##  The purpose of this routine is to avoid making system calls to
+##  ContTrace, which introduces overheads to VPO performance.
+##
+sub isTraceFull()
+{
+    my $traceIsFull = 1;
+    my $trigger = "simGETFAC B0.C0.S0.P0.E8.TPC.FSI.FSI_MAILBOX.FSXCOMP." .
+                  "FSXLOG.LBUS_MAILBOX.Q_GMB2E0.NLC.L2 32";
+    $trigger = `$trigger`;
+    $trigger =~ s/.*\n0xr(.*)\n.*/$1/g;
+    $trigger =~ s/\n//g;
+
+    if ($trigger !~ /[1-9a-fA-F]+/)
+    {
+       $traceIsFull = 0;
+    }
+
+    return $traceIsFull;
+}
 
 
 __END__

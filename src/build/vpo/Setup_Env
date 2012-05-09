@@ -1,11 +1,16 @@
 ################################################################################
 #
-# Setup intialization source script for HostBoot Sprint Release VPO/VBU model testing with cronus tools
+# Setup intialization source script for HostBoot Sprint Release VPO/VBU model
+# testing with cronus tools
 #
 #
 # Version 1.0  Copy from   Jim's on 03/21/2012, tested on VBU & VPO
 # Version 1.1  04-16-2012  Update to run with sprint 11 image
 #                          Sync with Jim's version.
+# Version 1.2  05-09-2012  Pick-up Jim's latest changes as of 05-09-2012
+#                          Update default Cronus version to newer level
+#                          Update default HB_TOOLS level
+#                          Increase simclock cycles to 5000000 per loop
 #                
 #
 ################################################################################
@@ -48,13 +53,13 @@ Setup_MyEnv() {
 	
 	# Default Sprint release
 
-	sprint=hb0406a_1214.810
+	sprint=hb0419a_1216.810
 	
 	# Initialize HostBoot environment/cronus/tools - note new naming convention
 	
-	export AUTOVBU_CRONUS_SIM=rel.20120409
+	export AUTOVBU_CRONUS_SIM=rel.20120507
 	export GLOBAL_DEBUG=8.VW.Vc.dG.F3.0I.E8.V
-	export HB_TOOLS=$AUTOVBU_HBTOOLS_BASEDIR/rel.04162012
+	export HB_TOOLS=$AUTOVBU_HBTOOLS_BASEDIR/rel.20120509
 
 	# Select default model -- choose either VBU or VPO versions
 
@@ -70,7 +75,7 @@ Setup_MyEnv() {
 	# Default sprint test case settings
 	
 	export AUTOVBU_CORE=-c3
-	export AUTOVBU_SIMCLOCKS=2000000
+	export AUTOVBU_SIMCLOCKS=5000000
 	export AUTOVBU_INITIAL_CHKPT=after_8megzero
 	export AUTOVBU_LOOPS=1200
 	export AUTOVBU_PRINTK_LINES=50
@@ -218,15 +223,41 @@ Setup_MyDynamic() {
 	# Set other defaults based upon MODEL
 	case "$VPO_MODEL$VBU_MODEL"
 	in
-		p1_e8062_wafer_nomem_c1000_opt_4)
+		p1_e8062_wafer_nomem_c1000_opt_4|m_2_e)
 			export AUTOVBU_ECMD_VER=${AUTOVBU_ECMD_VER-p8s1}
 			export AWAN_SCRIPT=${AWAN_SCRIPT-run_script_star4b}
 			export AWAN_CONFIG=${AWAN_CONFIG-star4b}
+			export DEFAULT_LEVEL=prev
 			;;
-		m_1_c|m_2_a|m_2_e|p1_e8056_c1000_cen1_cen054_unopt_2_gfw|p1_e8062_c1000_cen1_cen061_unopt_1)
+		m_1_c|p1_e8056_c1000_cen1_cen054_unopt_2_gfw)
 			export AUTOVBU_ECMD_VER=${AUTOVBU_ECMD_VER-cronusflex}
 			export AWAN_SCRIPT=${AWAN_SCRIPT-run_script_star8b_flex}
 			export AWAN_CONFIG=${AWAN_CONFIG-star8b}
+			export DEFAULT_LEVEL=prev
+			;;
+		m_2_a|p1_e8062_c1000_cen1_cen061_unopt_1)
+			export AUTOVBU_ECMD_VER=${AUTOVBU_ECMD_VER-cronusflex}
+			export AWAN_SCRIPT=${AWAN_SCRIPT- run_script_star8b_flex}
+			export AWAN_CONFIG=${AWAN_CONFIG-star8b}
+			export DEFAULT_LEVEL=prev
+			;;
+		p1_e8056*|p1_e8059*|p1_e8062*)
+			export AUTOVBU_ECMD_VER=${AUTOVBU_ECMD_VER-p8s1}
+			export AWAN_SCRIPT=${AWAN_SCRIPT-run_script_star8b}
+			export AWAN_CONFIG=${AWAN_CONFIG-star8b}
+			export DEFAULT_LEVEL=prev
+			;;
+		s1_e8024_wafer_nomem_dc_opt_6)
+			export AUTOVBU_ECMD_VER=${AUTOVBU_ECMD_VER-p8s1}
+			export AWAN_SCRIPT=${AWAN_SCRIPT-run_script_star8b}
+			export AWAN_CONFIG=${AWAN_CONFIG-star8b}
+			unset DEFAULT_LEVEL
+			;;
+		s1_e8024_wafer_nomem*)
+			export AUTOVBU_ECMD_VER=${AUTOVBU_ECMD_VER-p8s1}
+			export AWAN_SCRIPT=${AWAN_SCRIPT-run_script_star4b}
+			export AWAN_CONFIG=${AWAN_CONFIG-star4b}
+			unset DEFAULT_LEVEL
 			;;
 		*)
 			export AUTOVBU_ECMD_VER=${AUTOVBU_ECMD_VER-p8s1}
@@ -244,12 +275,12 @@ Setup_MyDynamic() {
 	fi
 
 	# Adjust PATH -- we want our tools at the beginning of the path, release tools at the end
-
 	echo $PATH | grep "$HB_RELDIR" >/dev/null 2>&1
 	if [ $? -ne 0 ]; then
 		PATH=$PATH:$HB_RELDIR
 	fi
 
+	# Needed for hb-dump/hb-Trace/etc... to find fsp-trace
 	echo $PATH | grep "$HB_TOOLS" >/dev/null 2>&1
 	if [ $? -ne 0 ]; then
 		PATH=$HB_TOOLS:$PATH
@@ -397,14 +428,8 @@ Setup_MyHBImage() {
 
 		set -x
 		siminit ${AUTOVBU_INITIAL_CHKPT-after_8megzero} -quiet || return 1
-
-		/afs/awd/projects/eclipz/lab/p8/gsiexe/p8_load_l3 -f ${HB_IMGDIR}/hbicore${use_test}.bin -b ${AUTOVBU_CORE--c3} || return 1
-		/afs/awd/projects/eclipz/lab/p8/gsiexe/p8_load_l3 -f ${HB_IMGDIR}/vbu_targeting.bin \
-			-o $vbu_targeting_addr -b ${AUTOVBU_CORE--c3} || return 1
-		/afs/awd/projects/eclipz/lab/p8/gsiexe/p8_load_l3 -f ${HB_IMGDIR}/hbicore${use_test}_extended.bin \
-			-o 0x500690 -b ${AUTOVBU_CORE--c3} || return 1
-		/afs/awd/projects/eclipz/lab/p8/gsiexe/p8_load_l3 -f ${HB_IMGDIR}/pnor.toc \
-			-o 0x500000 -b ${AUTOVBU_CORE--c3} || return 1
+		$HB_VBUTOOLS/p8_load_l3 -l ${DEFAULT_LEVEL-rel} -f ${HB_IMGDIR}/hbicore${use_test}.bin -b ${AUTOVBU_CORE--c3} || return 1
+		$HB_VBUTOOLS/p8_load_l3 -l ${DEFAULT_LEVEL-rel} -f ${HB_IMGDIR}/vbu${use_test}.pnor -o 0x400000 -b ${AUTOVBU_CORE--c3} || return 1
 		set +x
 	fi
 

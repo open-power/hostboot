@@ -55,7 +55,8 @@ my %optionInfo = (
                             "directory instead of using this option."],
     "--out-path=<path>" => ["The path to the directory where the output will be saved."],
     "--debug" => ["Enable debug tracing."],
-    "--mute" => ["Shut up the 'Data saved ...' message"],
+    "--mute" => ["Don't output the 'Data saved ...' message"],
+    "--no-save-states" => ["Don't save thread states..."],
     "-k#" => ["The cage to act on."],
     "-n#" => ["The node to act on."],
     "-s#" => ["The slot to act on."],
@@ -78,11 +79,21 @@ my $cfgMan = 0;
 my $toolHelp = 0;
 my $debug = 0;
 my $mute = 0;
+my $nosavestates = 0;
 my @ecmdOpt = ("-c3");
 my @threadState = ();
 my $l2Flushed = 0;
 my $fh;
-my $vbuToolDir = "/gsa/ausgsa/projects/h/hostboot/vbutools/latest";
+
+# Use HB_VBUTOOLS env if specified
+my $vbuToolDir = $ENV{'HB_VBUTOOLS'};
+if (defined ($vbuToolDir))
+{
+    unless ($vbuToolDir ne "")
+    {
+        $vbuToolDir = "/gsa/ausgsa/projects/h/hostboot/vbutools/latest";
+    }
+}
 
 my $imgPath = "";
 my $hbDir = $ENV{'HB_IMGDIR'};
@@ -105,6 +116,7 @@ if ($self)
                "out-path:s" => \$outPath,
                "debug" => \$debug,
                "mute" => \$mute,
+               "no-save-states" => \$nosavestates,
                "help" => \$cfgHelp,
                "toolhelp" => \$toolHelp,
                "man" => \$cfgMan,
@@ -113,6 +125,7 @@ if ($self)
                "s=i" => \&processEcmdOpts,
                "p=i" => \&processEcmdOpts,
                "c=i" => \&processEcmdOpts) || pod2usage(-verbose => 0);
+               
     pod2usage(-verbose => 1) if ($cfgHelp && $self);
     pod2usage(-verbose => 2) if ($cfgMan && $self);
     pod2usage(-verbose => 0) if (($tool eq "") && $self);
@@ -132,6 +145,7 @@ else
                "out-path:s" => \$outPath,
                "debug" => \$debug,
                "mute" => \$mute,
+               "no-save-states" => \$nosavestates,
                "help" => \$cfgHelp,
                "man" => \$cfgMan,
                "k=i" => \&processEcmdOpts,
@@ -173,14 +187,20 @@ if ($debug)
 }
 
 # Save original thread states
-saveThreadStates();
+if (!$nosavestates)
+{
+   saveThreadStates();
+}
 
 # Parse tool options and call module.
 parseToolOpts($toolOptions);
 callToolModule($tool);
 
 # Restore thread states
-restoreThreadStates();
+if (!$nosavestates)
+{
+   restoreThreadStates();
+}        
 
 if (!$mute)
 {
@@ -380,7 +400,7 @@ sub stopInstructions
     my $thread = shift;
 
     #Stopping all threads
-    my $command = "$vbuToolDir/proc_thread_control.x86 @ecmdOpt -stop -t$thread $flag";
+    my $command = "$vbuToolDir/proc_thread_control_wrap.x86 @ecmdOpt -stop -t$thread $flag";
 
     if ($debug)
     {
@@ -396,7 +416,7 @@ sub startInstructions
     my $thread = shift;
 
     #Starting all threads
-    my $command = "$vbuToolDir/proc_thread_control.x86 @ecmdOpt -start -t$thread $flag";
+    my $command = "$vbuToolDir/proc_thread_control_wrap.x86 @ecmdOpt -start -t$thread $flag";
 
     if ($debug)
     {
@@ -428,7 +448,7 @@ sub queryThreadState
 {
     my $thread = shift;
 
-    my $command = "$vbuToolDir/proc_thread_control.x86 @ecmdOpt -query -t$thread";
+    my $command = "$vbuToolDir/proc_thread_control_wrap.x86 @ecmdOpt -query -t$thread";
     my $result = `$command`;
 
     if ($debug)
