@@ -25,7 +25,7 @@ MODULE = errl
 
 OBJS = errlentry.o errlmanager.o errlsctn.o errlsctnhdr.o errlprvt.o errluh.o \
        errlud.o errlsrc.o errluserdetails.o backtrace.o errludtarget.o \
-       errludstring.o errludbacktrace.o errludattribute.o
+       errludstring.o errludbacktrace.o errludattribute.o errludlogregister.o
 
 SUBDIRS = test.d  parser.d
 

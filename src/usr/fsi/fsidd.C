@@ -90,7 +90,7 @@ errlHndl_t ddOp(DeviceFW::OperationType i_opType,
     TRACUCOMP( g_trac_fsi, "FSI::ddOp> i_addr=%llX, target=%.8X", i_addr, TARGETING::get_huid(i_target) );
 
     do{
-        if( io_buflen != sizeof(uint32_t) )
+        if (unlikely(io_buflen < sizeof(uint32_t)))
         {
             TRACFCOMP( g_trac_fsi, ERR_MRK "FSI::ddOp> Invalid data length : io_buflen=%d", io_buflen );
             /*@

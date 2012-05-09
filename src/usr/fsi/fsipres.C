@@ -58,7 +58,7 @@ errlHndl_t presenceDetect(DeviceFW::OperationType i_opType,
                           int64_t i_accessType,
                           va_list i_args)
 {
-    if (io_buflen != sizeof(bool))
+    if (unlikely(io_buflen < sizeof(bool)))
     {
         TRACFCOMP(g_trac_fsi,
                   ERR_MRK "FSI::presenceDetect> Invalid data length: %d",

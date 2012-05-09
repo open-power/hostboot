@@ -1,0 +1,382 @@
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/errl/errludlogregister.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
+/**
+ *  @file errludlogregister.C
+ *
+ *  @brief Implementation of ErrlUserDetailsLogRegister
+ */
+#include <errl/errludlogregister.H>
+
+#include <targeting/common/targetservice.H>
+#include <targeting/common/util.H>
+#include <targeting/common/trace.H>
+
+#include <devicefw/driverif.H>
+
+namespace ERRORLOG
+{
+
+using namespace TARGETING;
+
+extern TARG_TD_t g_trac_errl;
+
+// internal function:
+void ErrlUserDetailsLogRegister::setStateLogHUID()
+{
+    // Set up ErrlUserDetails instance variables
+    iv_CompId = HBERRL_COMP_ID;
+    iv_Version = 1;
+    iv_SubSection = HBERRL_UDT_LOGREGISTER;
+
+    // override the default of false.
+    iv_merge = true;
+
+    // write the HUID of the target into the error log buffer
+    uint32_t attrHuid = get_huid(iv_pTarget);
+    char *pBuf;
+    pBuf = reinterpret_cast<char *>(reallocUsrBuf(sizeof(attrHuid)));
+    memcpy(pBuf, &attrHuid, sizeof(attrHuid));
+    iv_dataSize += sizeof(attrHuid);
+
+} // setStateLogHUID
+
+// internal function:
+void ErrlUserDetailsLogRegister::writeRegisterData(
+    void *i_dataBuf, size_t i_dataSize,
+    int32_t i_numAddressArgs,
+    uint8_t i_accessType, va_list i_args)
+{
+
+    uint64_t regParam[i_numAddressArgs];
+    for (int32_t i = 0;i < i_numAddressArgs;i++)
+    {
+        regParam[i] = va_arg(i_args, uint64_t);
+    } // for
+
+    // write the data into the buffer; format is:
+    // i_accessType, regParam[i], uint8_t(i_dataSize), i_dataBuf
+    uint32_t newSize = sizeof(i_accessType) +
+                        sizeof(regParam) +
+                        sizeof(uint8_t) +
+                        i_dataSize;
+
+    uint8_t *pBuf;
+    pBuf = reinterpret_cast<uint8_t *>(reallocUsrBuf(iv_dataSize + newSize));
+    memcpy(pBuf + iv_dataSize, &i_accessType, sizeof(i_accessType) );
+    iv_dataSize += sizeof(i_accessType);
+    for (int32_t i = 0;i < i_numAddressArgs;i++)
+    {
+        memcpy(pBuf + iv_dataSize, &regParam[i], sizeof(regParam[i]) );
+        iv_dataSize += sizeof(regParam[i]);
+    } // for
+    uint8_t regSize = (uint8_t)i_dataSize;
+    memcpy(pBuf + iv_dataSize, &regSize, sizeof(regSize) );
+    iv_dataSize += sizeof(regSize);
+    if (i_dataSize > 0)
+    {
+        memcpy(pBuf + iv_dataSize, i_dataBuf, i_dataSize);
+        iv_dataSize += i_dataSize;
+    }
+} // writeRegisterData
+
+// internal function:
+void ErrlUserDetailsLogRegister::readRegister(
+    uint8_t i_accessType, va_list i_args)
+{
+    // we allow 0 in case there is some future type that has no parameter.
+    //  (DeviceFW::PRESENT is an example, but we chose not to log that type)
+    int32_t numAddressArgs = -1;
+
+    // do we do the deviceOpValist or not, and how many 
+    //  parameters are there to be logged
+    switch (i_accessType)
+    {
+        // one parameter
+        case DeviceFW::SCOM:        // userif.H
+        case DeviceFW::FSI:         // userif.H
+        case DeviceFW::SPD:         // userif.H
+        case DeviceFW::XSCOM:       // driverif.H
+        case DeviceFW::FSISCOM:     // driverif.H
+        {
+            numAddressArgs = 1;
+            break;
+        }
+        // two parameters
+        case DeviceFW::MVPD:        // userif.H
+        case DeviceFW::EEPROM:      // driverif.H
+        {
+            numAddressArgs = 2;
+            break;
+        }
+        // three parameters
+        case DeviceFW::I2C:         // driverif.H
+        {
+            numAddressArgs = 3;
+            break;
+        }
+        // not logged!
+        case DeviceFW::PRESENT:     // userif.H
+        case DeviceFW::PNOR:        // userif.H
+        case DeviceFW::MAILBOX:     // userif.H
+        default:
+        {   // no action - not logged
+            TRACFCOMP(g_trac_errl, "LogRegister: AccessType %x not logged",
+                i_accessType);
+            break;
+        } // default
+    } // switch i_accessType
+
+    if (numAddressArgs != -1)
+    {
+        // place for register data to go, and (max) size we expect.
+        uint64_t reg_data = 0;
+        size_t reg_size = sizeof(reg_data);
+
+        TRACDCOMP(g_trac_errl, "LogRegister: deviceOpValist()");
+        errlHndl_t errl;
+        errl = DeviceFW::deviceOpValist(DeviceFW::READ, iv_pTarget,
+                    &reg_data, reg_size,
+                    (DeviceFW::AccessType) i_accessType, i_args);
+
+        if (unlikely(errl != NULL))
+        {   // error!
+            TRACFCOMP(g_trac_errl, "LogRegister: deviceOpValist type %d"
+                        " threw errl! deleting errl.",
+                        i_accessType);
+            delete errl; // eat the error - just delete it
+
+            reg_size = 0; // in case deviceOpValist didn't reset
+        }
+
+        // internal worker function to put reg data into the log
+        writeRegisterData(&reg_data, reg_size, numAddressArgs,
+                i_accessType, i_args);
+        TRACDCOMP(g_trac_errl, "LogRegister: iv_dataSize %d", iv_dataSize);
+    }
+} // readRegister
+
+// internal function:
+void ErrlUserDetailsLogRegister::copyRegisterData(
+    void *i_dataBuf, size_t i_dataSize,
+    uint8_t i_accessType, va_list i_args)
+{
+    // we allow 0 in case there is some future type that has no parameter.
+    //  (DeviceFW::PRESENT is an example, but we chose not to log that type)
+    int32_t numAddressArgs = -1;
+
+    // do we do the deviceOpValist or not, and how many 
+    //  parameters are there to be logged
+    switch (i_accessType)
+    {
+        // one parameter
+        case DeviceFW::SCOM:        // userif.H
+        case DeviceFW::FSI:         // userif.H
+        case DeviceFW::SPD:         // userif.H
+        case DeviceFW::XSCOM:       // driverif.H
+        case DeviceFW::FSISCOM:     // driverif.H
+        {
+            numAddressArgs = 1;
+            break;
+        }
+        // two parameters
+        case DeviceFW::MVPD:        // userif.H
+        case DeviceFW::EEPROM:      // driverif.H
+        {
+            numAddressArgs = 2;
+            break;
+        }
+        // three parameters
+        case DeviceFW::I2C:         // driverif.H
+        {
+            numAddressArgs = 3;
+            break;
+        }
+        // not logged!
+        case DeviceFW::PRESENT:     // userif.H
+        case DeviceFW::PNOR:        // userif.H
+        case DeviceFW::MAILBOX:     // userif.H
+        default:
+        {   // no action - not logged
+            TRACFCOMP(g_trac_errl, "LogRegister: AccessType %x not logged",
+                i_accessType);
+            break;
+        } // default
+    } // switch i_accessType
+
+    if (numAddressArgs != -1)
+    {
+        // internal worker function to put reg data into the log
+        writeRegisterData(i_dataBuf, i_dataSize, numAddressArgs,
+                i_accessType, i_args);
+        TRACDCOMP(g_trac_errl, "LogRegister: iv_dataSize %d", iv_dataSize);
+    }
+} // copyRegisterData
+
+//------------------------------------------------------------------------------
+/*
+ * The public addData() function are templates allowing i_accesstype to change:
+ *  either the DeviceFW::AccessType values in devicefw/userif.H
+ *  OR the DeviceFW::AccessType_DriverOnly values in devicefw/driverif.H
+ *  We don't want to include driverif.H in the errludlogregister.H file, so
+ *  we do the template.
+ *
+ *  We don't want/need to include a different separate addData() for each of
+ *  those instances tho, so we create one __addData() function, and then use
+ *  this alias to have both public template functions point to this function.
+ *
+ *  This function will call the readRegister() function to log and do the read.
+ */
+template <>
+void ErrlUserDetailsLogRegister::addData<>(
+    DeviceFW::AccessType i_accessType, ...)
+__attribute__((alias("_ZN8ERRORLOG26ErrlUserDetailsLogRegister9__addDataEhz")));
+template <>
+void ErrlUserDetailsLogRegister::addData<>(
+    DeviceFW::AccessType_DriverOnly i_accessType, ...)
+__attribute__((alias("_ZN8ERRORLOG26ErrlUserDetailsLogRegister9__addDataEhz")));
+
+void ErrlUserDetailsLogRegister::__addData(
+    uint8_t i_accessType, ...)
+{
+    TRACDCOMP(g_trac_errl, "LogRegister::addData: type %x",
+        i_accessType);
+
+    // get the data - do the read
+    va_list args;
+    va_start(args, i_accessType);
+    readRegister(i_accessType, args);
+    va_end(args);
+
+} // __addData
+
+/*
+ * Same as above with regards to templates and alias.
+ *
+ * This function will just store the passed-in data, unless it's NULL.
+ */
+template <>
+void ErrlUserDetailsLogRegister::addDataBuffer<>(
+    void *i_dataBuf, size_t i_dataSize,
+    DeviceFW::AccessType i_accessType, ...)
+__attribute__((alias("_ZN8ERRORLOG26ErrlUserDetailsLogRegister15__addDataBufferEPvmhz")));
+template <>
+void ErrlUserDetailsLogRegister::addDataBuffer<>(
+    void *i_dataBuf, size_t i_dataSize,
+    DeviceFW::AccessType_DriverOnly i_accessType, ...)
+__attribute__((alias("_ZN8ERRORLOG26ErrlUserDetailsLogRegister15__addDataBufferEPvmhz")));
+
+void ErrlUserDetailsLogRegister::__addDataBuffer(
+    void *i_dataBuf, size_t i_dataSize,
+    uint8_t i_accessType, ...)
+{
+    TRACDCOMP(g_trac_errl, "LogRegister::addDataBuffer: type %x from %p size %d",
+        i_accessType, i_dataBuf, i_dataSize);
+
+    // if there's data, just copy it thru.
+    if (i_dataBuf != NULL)
+    {
+        // get the data - do the copy
+        va_list args;
+        va_start(args, i_accessType);
+        copyRegisterData(i_dataBuf, i_dataSize, i_accessType, args);
+        va_end(args);
+    }
+    else
+    {   // user didn't give us any data -
+        // get the data ourselves - do the read
+        va_list args;
+        va_start(args, i_accessType);
+        readRegister(i_accessType, args);
+        va_end(args);
+    }
+} // __addDataBuffer
+
+
+//------------------------------------------------------------------------------
+ErrlUserDetailsLogRegister::ErrlUserDetailsLogRegister(
+    TARGETING::Target * i_pTarget)
+    : iv_pTarget(i_pTarget), iv_dataSize(0)
+{
+    TRACDCOMP(g_trac_errl, "LogRegister: target %p",
+        i_pTarget);
+
+    setStateLogHUID();
+
+    // done - user will have to do addData() or addDataBuffer() calls.
+} // ctor with target only
+
+//------------------------------------------------------------------------------
+ErrlUserDetailsLogRegister::ErrlUserDetailsLogRegister(
+    TARGETING::Target * i_pTarget,
+    DeviceFW::AccessType i_accessType, ...)
+    : iv_pTarget(i_pTarget), iv_dataSize(0)
+{
+    TRACDCOMP(g_trac_errl, "LogRegister: target %p type %x",
+        i_pTarget, i_accessType);
+
+    setStateLogHUID();
+
+    // get the data - do the read
+    va_list args;
+    va_start(args, i_accessType);
+    readRegister(i_accessType, args);
+    va_end(args);
+
+} // ctor with target and register type/address
+
+//------------------------------------------------------------------------------
+ErrlUserDetailsLogRegister::ErrlUserDetailsLogRegister(
+    TARGETING::Target * i_pTarget,
+    void *i_dataBuf,
+    size_t i_dataSize,
+    DeviceFW::AccessType i_accessType, ...)
+    : iv_pTarget(i_pTarget), iv_dataSize(0)
+{
+    TRACDCOMP(g_trac_errl, "LogRegister: target %p type %x dataBuf %p size %d",
+        i_pTarget, i_accessType,
+        i_dataBuf, i_dataSize
+        );
+
+    setStateLogHUID();
+
+    // if there's data, just copy it thru.
+    if (i_dataBuf != NULL)
+    {
+        // get the data - do the copy
+        va_list args;
+        va_start(args, i_accessType);
+        copyRegisterData(i_dataBuf, i_dataSize, i_accessType, args);
+        va_end(args);
+    }
+    else
+    {   // user didn't give us any data -
+        // get the data ourselves - do the read
+        va_list args;
+        va_start(args, i_accessType);
+        readRegister(i_accessType, args);
+        va_end(args);
+    }
+} // ctor with target, register type/address and already-read data
+
+}

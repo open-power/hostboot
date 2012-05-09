@@ -34,6 +34,7 @@
 #include <errl/errludtarget.H>
 #include <errl/errludbacktrace.H>
 #include <errludattribute.H>
+#include <errl/errludlogregister.H>
 #include <errl/errludparserfactory.H>
 
 namespace ERRORLOG
@@ -58,6 +59,7 @@ public:
         registerParser<ErrlUserDetailsParserTarget>(HBERRL_UDT_TARGET);
         registerParser<ErrlUserDetailsParserBackTrace>(HBERRL_UDT_BACKTRACE);
         registerParser<ErrlUserDetailsParserAttribute>(HBERRL_UDT_ATTRIBUTE);
+        registerParser<ErrlUserDetailsParserLogRegister>(HBERRL_UDT_LOGREGISTER);
     }
 
 private:

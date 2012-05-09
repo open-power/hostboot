@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/include/usr/devicefw/driverif.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/include/usr/devicefw/driverif.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 /** @file driverif.H
  *  @brief Provides the device driver interfaces for performing device access
  *         and enabling routing registration.
@@ -233,6 +234,31 @@ namespace DeviceFW
                                        // the explicit template specializations.
     }
 
+    /**
+     *  @brief Perform a device operation by routing through the framework and
+     *         calling the appropriate registered operation.
+     *
+     *  @param[in] i_opType - Operation request (READ vs WRITE).
+     *  @param[in] i_target - Target to perform operation on.
+     *  @param[in,out] io_buffer - Data buffer for operation.
+     *  @param[in,out] io_buflen - Length of buffer / result size.
+     *  @param[in] i_accessType - Type of hardware access method to perform.
+     *  @param[in] i_args - va_list of parameters for device operation.
+     *
+     *  This function has similar behavior as the user-visible deviceRead and
+     *  deviceWrite functions and is meant as a method for device drivers to
+     *  perform accesses which may be only visible to internal drivers.
+     */
+    template <typename AccType>
+    errlHndl_t deviceOpValist(OperationType i_opType,
+                        TARGETING::Target* i_target,
+                        void* io_buffer, size_t& io_buflen,
+                        AccType i_accessType, va_list i_args)
+    {
+        return InvalidParameterType(); // Cause a compile fail if not one of
+                                       // the explicit template specializations.
+    }
+
     // --- Below are template specializations to aid in type-safety. ---
 
     // deviceRegisterRoute:
@@ -296,6 +322,21 @@ namespace DeviceFW
                           void* io_buffer, size_t& io_buflen,
                           AccessType_DriverOnly i_accessType, ...);
 
+    // deviceOpValist:
+    //          OpType - OperationType only.
+    //          TargType - TargetType only.
+    //          AccType - AccessType, AccessType_DriverOnly (no WILDCARD).
+    //          args - va_list of parameters
+    template <>
+    errlHndl_t deviceOpValist<>(OperationType i_opType,
+                          TARGETING::Target* i_target,
+                          void* io_buffer, size_t& io_buflen,
+                          AccessType i_accessType, va_list i_args);
+    template <>
+    errlHndl_t deviceOpValist<>(OperationType i_opType,
+                          TARGETING::Target* i_target,
+                          void* io_buffer, size_t& io_buflen,
+                          AccessType_DriverOnly i_accessType, va_list i_args);
 };
 
 #endif
