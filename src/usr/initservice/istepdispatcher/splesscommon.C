@@ -259,14 +259,9 @@ void    writeSts(  SPLessSts   &io_rsts )
                                                        g_SPLess_pMasterProcChip );
     }
 
-    // $$ save - mem g_SPLess_Status_Reg =   io_rsts.val64;
-    // $$ save mmio_scratch_write( MMIO_SCRATCH_IPLSTEP_STATUS, io_rsts.val64 );
     size_t  op_size =   sizeof( uint64_t );
-    DeviceFW::deviceWrite(
-              g_SPLess_pMasterProcChip,
-              &(io_rsts.val64),
-              op_size,
-              DEVICE_SCOM_ADDRESS( MBOX_SCRATCH_REG2 )  );
+
+    //  Write Status reg first
     // status reg lo is GMB2E4 - mailbox scratchpad 1  { regs 0 -3 }
     uint64_t    swap    =
         ((static_cast<uint64_t>(io_rsts.lo32) << 32 ) & 0xffffffff00000000) ;
@@ -275,6 +270,14 @@ void    writeSts(  SPLessSts   &io_rsts )
               &(swap),
               op_size,
               DEVICE_SCOM_ADDRESS( MBOX_SCRATCH_REG1 )  );
+
+    // $$ save - mem g_SPLess_Status_Reg =   io_rsts.val64;
+    // $$ save mmio_scratch_write( MMIO_SCRATCH_IPLSTEP_STATUS, io_rsts.val64 );
+    DeviceFW::deviceWrite(
+              g_SPLess_pMasterProcChip,
+              &(io_rsts.val64),
+              op_size,
+              DEVICE_SCOM_ADDRESS( MBOX_SCRATCH_REG2 )  );
 
 #ifdef  SPLESS_DEBUG
     printk( "writeSts hi 0x%x\n", io_rsts.hi32 );

@@ -20,7 +20,7 @@
 #
 #  Origin: 30
 #
-#  IBM_PROLOG_END
+#  IBM_PROLOG_END_TAG
 # @file vpo-debug-framework.pl
 # @brief Implementation of the common debug framework for running in vpo.
 #
@@ -69,6 +69,7 @@ my %optionInfo = (
 #--------------------------------------------------------------------------------
 my $name = "vpo-debug-framework.pl";
 my $self = ($0 =~ m/$name/);   #flag showing whether script invoked using a different name; i.e symlink
+my $callmodule = $0;
 my $tool = "";
 my $testImage = 0;
 my $outPath = "";
@@ -96,6 +97,7 @@ if (defined ($vbuToolDir))
 }
 
 my $imgPath = "";
+
 my $hbDir = $ENV{'HB_IMGDIR'};
 if (defined ($hbDir))
 {
@@ -104,6 +106,16 @@ if (defined ($hbDir))
         $imgPath = "$hbDir/";
     }
 }
+
+## we need hbToolsDir   for checkContTrace()    (vpo only)
+my  $pgmDir  =   `dirname $0`;
+chomp( $pgmDir );
+my $hbToolsDir = $ENV{'HB_TOOLS'};
+if ( ! defined( $hbToolsDir) || ( $hbToolsDir eq "" ) )
+{
+    $hbToolsDir = $pgmDir;         ##  Set to tool directory
+}
+
 
 Getopt::Long::Configure ("bundling");
 
@@ -125,7 +137,7 @@ if ($self)
                "s=i" => \&processEcmdOpts,
                "p=i" => \&processEcmdOpts,
                "c=i" => \&processEcmdOpts) || pod2usage(-verbose => 0);
-               
+
     pod2usage(-verbose => 1) if ($cfgHelp && $self);
     pod2usage(-verbose => 2) if ($cfgMan && $self);
     pod2usage(-verbose => 0) if (($tool eq "") && $self);
@@ -200,7 +212,7 @@ callToolModule($tool);
 if (!$nosavestates)
 {
    restoreThreadStates();
-}        
+}
 
 if (!$mute)
 {
@@ -270,7 +282,9 @@ sub flushL2
     if (0 == $l2Flushed)
     {
         #stop instructions
-        stopInstructions("all");
+        ## @todo problems with the model, just use thread 0 for now
+        ## $$ stopInstructions("all");
+        stopInstructions("0");
 
         my $command = "$vbuToolDir/proc_l2_flush_wrap.x86 @ecmdOpt $flag";
         die "ERROR: cannot flush L2" if (system("$command") != 0);
@@ -404,7 +418,7 @@ sub stopInstructions
 
     if ($debug)
     {
-        print "$command\n";
+        print "--- stopInstructions: run $command\n";
     }
 
     die "ERROR: cannot stop instructions" if (system("$command") != 0);
@@ -420,7 +434,7 @@ sub startInstructions
 
     if ($debug)
     {
-        print "$command\n";
+        print "--- startInstructions: run $command\n";
     }
 
     if (system("$command") != 0)
@@ -432,7 +446,7 @@ sub startInstructions
         else
         {
             if ($debug)
-            { 
+            {
                 print "Cannot start instructions since Hostboot has shutdown";
             }
         }
@@ -449,6 +463,11 @@ sub queryThreadState
     my $thread = shift;
 
     my $command = "$vbuToolDir/proc_thread_control_wrap.x86 @ecmdOpt -query -t$thread";
+    if ($debug)
+    {
+        print   STDERR  "--- queryThreadState:  run $command\n";
+    }
+
     my $result = `$command`;
 
     if ($debug)
@@ -539,12 +558,26 @@ sub executeInstrCycles
     }
 
     #start instructions
-    startInstructions("all");
+    ##  @todo   problems with the model - use just thread 0 for now
+    ## $$ startInstructions("all");
+    startInstructions("0");
 
     # run clock cycles
     my $cycles = shift;
-    $cycles = $cycles * 100;   #increase cycles since VBU takes longer
+
+    ## for Istep.pm, the number of cycles should be approximately
+    ##  the same between vpo and simics.
+    ##  callFunc needs a multiplier of 100.
+    ##  Add tweaks for any other module here.
+    if ( !($callmodule =~ m/Istep/) )
+    {
+        $cycles = $cycles * 100;   #increase cycles since VBU takes longer
+    }
     my $command = "simclock $cycles $flag";
+    if ($debug)
+    {
+        print   "--- executeInstrCycles:  run $command\n";
+    }
     my $noshow = shift;
     if (!$noshow)
     {
@@ -696,6 +729,162 @@ sub displayToolModuleHelp
         }
     }
 }
+
+
+# @sub  getEnv
+#
+# Return the environment that we are running in, simics or vpo
+#
+sub getEnv
+{
+
+    return  "vpo";
+}
+
+#  @sub translateAddr
+#
+#   @param[in]  -   64-bit scom address
+#
+#   @return     =   GET/STK FAC string to apply to VPO
+sub translateAddr
+{
+    my  $addr       =   shift;
+
+    my  $vpoaddr      =   "";
+
+    if ( $addr == 0x00050038 )
+    {
+        ## 50038 is mbox scratch 0 xscom addr
+        $vpoaddr    =   "GMB2E0";
+    }
+    elsif ( $addr == 0x00050039 )
+    {
+        ## 50039 is mbox scratch 1 xscom addr
+        $vpoaddr    =   "GMB2E4";
+    }
+    elsif ( $addr == 0x0005003a )
+    {
+        ## 5003a is mbox scratch 2 xscom addr
+        $vpoaddr    =   "GMB2E8";
+    }
+    elsif ( $addr == 0x0005003b )
+    {
+        ## 5003b is mbox scratch 3 xscom addr
+        $vpoaddr    =   "GMB2EC";
+    }
+    else
+    {
+        die "invalid mailbox reg:  $addr\n";
+    }
+
+    return  $vpoaddr;
+}
+
+
+# @sub readScom
+# @brief Read a scom address in VPO
+#   Scom size is always 64-bit
+#
+# @param[in]    scom address to read
+# @param[in]    data size IN BYTES - currently ignored, assumed to be 8
+#
+# @return   hex string containing data read
+#
+# @todo:  handle littleendian
+#
+sub readScom
+{
+    my $addr = shift;
+    my $size = shift;
+
+    my  $vpoaddr    =   ::translateAddr( $addr );
+
+    my  $cmd    =   "simGETFAC " .
+                    "B0.C0.S0.P0.E8.TPC.FSI.FSI_MAILBOX.FSXCOMP." .
+                    "FSXLOG.LBUS_MAILBOX.Q_$vpoaddr.NLC.L2  32";
+
+    my $result = `$cmd`;
+
+    if ( $? )   {   die "$cmd failed with $? : $!";     }
+
+    $result =~ s/.*\n0xr(.*)\n.*/$1/g;
+    $result =~ s/\n//g;
+
+    ## debug
+    ## ::userDisplay  "--- readScom: ",
+    ##     (sprintf("0x%x-->%s, 0x%x : %s", $addr,$vpoaddr,$size,$result)), "\n";
+
+    ##  comes in as a 32-bit #, need to shift 32 to match simics
+    return ( "0x" . $result . "00000000" );
+}
+
+# @sub writeScom
+# @brief Write a scom address in VPO.
+#
+# @param[in] - scom address
+# @param[in] - data size IN BYTES - ignored, assumed to be 8
+# @param[in] - binary data value.  Scom value is aways assumed to be 64bits
+#
+# @return none
+#
+# @todo:  handle littleendian
+#
+sub writeScom
+{
+    my $addr = shift;
+    my $size = shift;
+    my $value = shift;
+
+    my $cmd =   "";
+
+    my  $vpoaddr    =   ::translateAddr( $addr );
+
+    ## vpo takes a 32 bit value in the lower 32 bits
+    my  $value32    =   ( ( $value >> 32 ) & 0x00000000ffffffff );
+    my  $valuestr   =   sprintf( "0x%x", $value32 );
+
+    ## debug
+    ## ::userDisplay  "--- writeScom: ",
+    ##     (sprintf("0x%x-->%s, 0x%x, %s",$addr,$vpoaddr,$size,$valuestr)), "\n";
+
+    ##  now go ahead and write the real value
+    $cmd    =   "simSTKFAC " .
+                 "B0.C0.S0.P0.E8.TPC.FSI.FSI_MAILBOX.FSXCOMP." .
+                 "FSXLOG.LBUS_MAILBOX.Q_$vpoaddr.NLC.L2 $valuestr 32 -quiet";
+
+    ( system( $cmd ) == 0 )
+        or die "$cmd failed, $? : $! \n";
+
+    return;
+}
+
+##
+##  Special case:  only used in VPO
+##  Check the continuous trace Scom reg to see if we need to dump
+##  trace.
+##  This has to be executed as an external procedure so that it goes to the
+##  proper output file.
+##
+sub checkContTrace()
+{
+    my  $SCRATCH_MBOX0  =   0x00050038;
+    my  $contTrace      =   "";
+
+    $contTrace  =   ::readScom( $SCRATCH_MBOX0, 8 );
+    if ( ( hex $contTrace ) != 0  )
+    {
+        ##  activate continuous trace
+        system ("$hbToolsDir/hb-ContTrace --mute > /dev/null" );
+        system ("cat hb-ContTrace.output >> tracMERG");
+
+        ## ContTrace might leave instructions stopped, turn them
+        ##  back on here to make sure.
+        ##  @todo problems with the model, use just thread 0 for now
+        ::startInstructions("0");
+    }
+
+}
+
 
 __END__
 

@@ -245,6 +245,11 @@ void    userConsoleComm( void *  io_msgQ )
             l_sts.substep           =   l_cmd.substep;
             //  status should be set now, write to Status Reg.
 
+            // write the intermediate value back to the console.
+            TRACDCOMP( g_trac_initsvc,
+                    "userConsoleComm Write status 0x%x.%x",
+                    static_cast<uint32_t>( l_sts.val64 >> 32 ),
+                    static_cast<uint32_t>( l_sts.val64 & 0x0ffffffff ) );
             writeSts( l_sts );
 
             //  if shutdown issued, end this task
@@ -258,8 +263,12 @@ void    userConsoleComm( void *  io_msgQ )
             //      the running bit turn on.
             //      Please save the following in case we have to turn this
             //      back on.
-            // $$ l_cmd.val64 =   0;
-            // $$ writeCmd( l_cmd );
+
+            // write the intermediate value back to the console.
+            TRACDCOMP( g_trac_initsvc,
+                    "userConsoleComm Clear Command reg" );
+            l_cmd.val64 =   0;
+            writeCmd( l_cmd );
         }   //  endif   gobit
 
 

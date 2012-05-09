@@ -6,7 +6,7 @@
 #
 #  IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2011
+#  COPYRIGHT International Business Machines Corp. 2011 - 2012
 #
 #  p1
 #
@@ -20,8 +20,7 @@
 #
 #  Origin: 30
 #
-#  IBM_PROLOG_END
-
+#  IBM_PROLOG_END_TAG
 # _DebugFramework.pm
 #
 # This module is a set of utility functions for the debug framework, which
@@ -49,7 +48,8 @@ our @EXPORT = ( 'callToolModule', 'callToolModuleHelp', 'callToolModuleHelpInfo'
                 'findModuleByAddress', 'listModules',
                 'littleendian',
                 'read64', 'read32', 'read16', 'read8', 'readStr',
-                'write64', 'write32', 'write16', 'write8'
+                'write64', 'write32', 'write16', 'write8',
+                'getIstepList'
               );
 
 our ($parsedSymbolFile, %symbolAddress, %symbolTOC,
@@ -584,6 +584,30 @@ sub write8
     $value = pack("C", $value);
 
     my $result = ::writeData($addr, 1, $value);
+}
+
+# @sub  getIstepList
+#
+#   get an array of all the supported istep names from the
+#   "isteplist.csv" file
+#
+#   @return   array of lines in the file
+#
+sub getIstepList
+{
+    my $isteplistFile = ::getImgPath();
+
+    $isteplistFile = $isteplistFile . "isteplist.csv";
+
+    open(FILE, "< $isteplistFile")
+        or die "Cannot open isteplist file $isteplistFile";
+
+    my  @isteplist  =   <FILE>;
+
+    close   FILE    or die "cannot close isteplist file";
+
+
+    return  @isteplist;
 }
 
 __END__

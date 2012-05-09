@@ -1,26 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/initservice/istepdispatcher/istepdispatcher.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
-
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/initservice/istepdispatcher/istepdispatcher.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2011 - 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 /**
  *  @file istepdispatcher.C
  *
@@ -134,6 +134,8 @@ void IStepDispatcher::init( errlHndl_t  &io_rtaskRetErrl )
             tid_t   l_spTaskTid   = task_create( spTask, iv_msgQ );
             //  should never happen...
             assert( l_spTaskTid > 0 );
+
+            //  sptask will turn on the ready bit when it is up.
 
             // IStep single-step
             singleStepISteps( io_rtaskRetErrl );
@@ -276,7 +278,6 @@ void    IStepDispatcher::runAllISteps( errlHndl_t   &io_rtaskRetErrl )
 
 void    IStepDispatcher::singleStepISteps( errlHndl_t   &io_rtaskRetErrl )
 {
-    SPLESS::SPLessSts   l_StsReg;
     uint32_t    l_Type      =   0;
     uint32_t    l_IStep     =   0;
     uint32_t    l_Substep   =   0;
@@ -284,10 +285,6 @@ void    IStepDispatcher::singleStepISteps( errlHndl_t   &io_rtaskRetErrl )
     uint32_t    l_RetSts    =   0;
     errlHndl_t  l_errl      =   NULL;
     uint32_t    l_PLID      =   0;
-
-    //  tell VPO and Simics that we're ready
-    l_StsReg.hdr.readybit   =   1;
-    SPLESS::writeSts( l_StsReg );
 
     mutex_lock(&iv_poll_mutex);  // make sure this is only poller
 
@@ -788,7 +785,7 @@ void IStepDispatcher::handleSPlessBreakPoint( uint32_t i_info )
                         static_cast<uint32_t>( iv_pMsg->data[0] >> 32 ),
                         static_cast<uint32_t>( iv_pMsg->data[0] & 0xffffffff ) );
 
-                //  reply back to SPLEss
+                //  reply back FSP/console
                 msg_respond( iv_msgQ, iv_pMsg );
             }   // end else
         }   // end while

@@ -6,7 +6,7 @@
 #
 #  IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2011
+#  COPYRIGHT International Business Machines Corp. 2011 - 2012
 #
 #  p1
 #
@@ -20,8 +20,7 @@
 #
 #  Origin: 30
 #
-#  IBM_PROLOG_END
-
+#  IBM_PROLOG_END_TAG
 # @file simics-debug-framework.pl
 # @brief Implementation of the common debug framework for running in simics.
 #
@@ -154,6 +153,131 @@ sub getImgPath
 sub getIsTest
 {
     return 0;
+}
+
+
+# @sub  getEnv
+#
+# Return the environment that we are running in, simics or vpo
+#
+sub getEnv
+{
+    return  "simics";
+}
+
+#
+#  @sub translateAddr
+#   Do scom -> "phys_mem.read" address translation here.
+#   The xscom address looks like this:
+#    // Layout of XSCOM address parts
+#    union
+#    {
+#        uint64_t mMmioAddress;          // mMmio address
+#        struct
+#        {
+#            uint64_t mReserved1:18;     // Not currently used (0:17)
+#            uint64_t mBaseAddress:5;    // Base address (18:22)
+#            uint64_t mNodeId:3;         // Node where target resides (23:25)
+#            uint64_t mChipId:3;         // Targeted chip ID (26:28)
+#            uint64_t mSComAddrHi:27;    // PCB Address High (29:55)
+#            uint64_t mCacheLine:1;      // Cached line (56)
+#            uint64_t mSComAddrLo:4;     // PCB Address low (57:60)
+#            uint64_t mAlign:3;          // Align (61:63)
+#        } mAddressParts;
+#
+#   @param[in]  -   64-bit scom address
+#
+#   @return     =   address to send to python to do mm.read
+#
+#   @note: "host_xscom_device_mm.read/write " doesn't seem to work with this
+#           translated address, use "phys_mem.read/write "  (in python) instead.
+#
+sub translateAddr
+{
+    my  $addr   =   shift;
+    my  $simicsaddr =   0;
+
+    my  $mSComAddrHi    =   ( $addr >> 4 );
+    my  $mSComAddrLo    =   ( $addr & 0x000000000000000f ) ;
+
+    $simicsaddr =   (    0x0000300000000000                         ## Base addr
+                      | (($mSComAddrHi & 0x0000000007ffffff) << 8 ) ## 27 bits, shift 8
+                      | (($mSComAddrLo & 0x000000000000000f) << 3 ) ## 4 bits, shift 3
+                    );
+
+    return $simicsaddr;
+}
+
+
+# @sub readScom
+# @brief Send a 'read-scom' type message to Python.
+#
+# @param[in]    scom address to read
+# @param[in]    data size IN BYTES
+#
+# @return   hex string containing data read
+#
+# @todo:  handle littleendian
+#
+sub readScom
+{
+    my $addr = shift;
+    my $size = shift;
+
+    my $simicsaddr  =   translateAddr( $addr);
+
+    ## debug
+    ## ::userDisplay  "--- readScom: ", (sprintf("0x%x-->0x%x, 0x%x",$addr,$simicsaddr,$size)), "\n";
+
+    sendIPCMsg("read-scom", "$simicsaddr,$size");
+
+    my ($type, $data) = recvIPCMsg();
+
+    return $data;
+}
+
+# @sub writeScom
+# @brief Send a 'write-scom' type message to Python.
+#
+# @param[in] - xscom address
+# @param[in] - data size    IN BYTES
+# @param[in] - binary data value.  Scom value is aways assumed to be 64bits
+#
+# @return none
+#
+# @todo:  handle littleendian
+#
+sub writeScom
+{
+    my $addr = shift;
+    my $size = shift;
+    my $value = shift;
+
+    my $simicsaddr  =   translateAddr( $addr);
+
+    ## debug
+    ## ::userDisplay  "--- writeScom: ", (sprintf("0x%x-->0x%x, 0x%x, 0x%x",$addr,$simicsaddr,$size,$value)), "\n";
+
+    my  $ipctype    =   "write-scom";
+    my  $ipcdata    =   "$simicsaddr,$size,$value";
+
+
+    sendIPCMsg( $ipctype, $ipcdata );
+
+    ## $$ debug
+    ## $$my $debugstr    =   "[ \"$ipctype\", \"".unpack("H*",$ipcdata)."\" ]\n";
+    ## $$::userDisplay   "--- $debugstr\n";
+
+    return;
+}
+
+
+##
+##  Dummy module to match continuous trace call in VPO
+##
+sub checkContTrace()
+{
+
 }
 
 

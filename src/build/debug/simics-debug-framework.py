@@ -6,7 +6,7 @@
 #
 #  IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2011
+#  COPYRIGHT International Business Machines Corp. 2011 - 2012
 #
 #  p1
 #
@@ -20,8 +20,7 @@
 #
 #  Origin: 30
 #
-#  IBM_PROLOG_END
-
+#  IBM_PROLOG_END_TAG
 # @file simics-debug-framework.py
 # @brief Simics/Python implementation of the common debug framework.
 #
@@ -72,9 +71,12 @@ class DebugFrameworkIPCMessage:
     def loads(self,string):
         pattern = re.compile("\[ \"([^\"]+)\", \"([0-9a-f]*)\" ]")
         match = pattern.search(string)
-
-        self.msgtype = match.group(1)
-        self.msg = match.group(2).decode("hex")
+        if  match is None:
+            print   "error: empty message >%s< received from perl"%(string)
+            print   "       Check for print's in your perl script!!!"
+        else:
+            self.msgtype = match.group(1)
+            self.msg = match.group(2).decode("hex")
 
 # @class DebugFrameworkProcess
 # @brief Provides a wrapper to the 'subprocess' interface and IPC bridge.
@@ -188,6 +190,36 @@ class DebugFrameworkProcess:
     def get_img_path(self,data):
         self.sendMsg("data-response", self.imgPath)
 
+    # Read data from xscom address.
+    #    This message has data of the format "0dADDRESS,0dSIZE".
+    def read_xscom(self,data):
+        pattern = re.compile("([0-9]+),([0-9]+)")
+        match = pattern.search(data)
+
+        addr = int(match.group(1))
+        size = int(match.group(2))
+
+        ##  read the register using xscom reg addresses
+        runStr  =   "phys_mem.read 0x%x  0x%x"%(addr, size)
+        ( result, out )  =   quiet_run_command( runStr, output_modes.regular )
+        ## DEBUG print ">> %s: "%(runStr) + "0x%16.16x"%(result) + " : " + out
+        self.sendMsg("data-response", "%16.16x"%(result) )
+
+
+    # Write data to xscom address..
+    #    This message has data of the format "0dADDR,0dSIZE,hDATA".
+    def write_xscom(self,data):
+        pattern = re.compile("([0-9]+),([0-9]+),([0-9]+)")
+        match = pattern.search(data)
+
+        addr = int(match.group(1))
+        size = int(match.group(2))
+        data = int(match.group(3) )
+
+        runStr  =   "phys_mem.write 0x%x 0x%x 0x%x"%(addr, data, size)
+        ( result, out )  =   quiet_run_command( runStr, output_modes.regular )
+        ## DEBUG print ">> %s : "%(runStr) + " 0x%16.16x"%(result) + " : " + out
+
 # @fn run_hb_debug_framework
 # @brief Wrapper function to execute a tool module.
 #
@@ -213,6 +245,8 @@ def run_hb_debug_framework(tool = "Printk", toolOpts = "",
             "get-tool" :            DebugFrameworkProcess.get_tool,
             "get-tool-options" :    DebugFrameworkProcess.get_tool_options,
             "get-img-path" :        DebugFrameworkProcess.get_img_path,
+            "write-scom" :          DebugFrameworkProcess.write_xscom,
+            "read-scom" :           DebugFrameworkProcess.read_xscom,
             "exit" :                DebugFrameworkProcess.endProcess,
         }
         operations[msg[0]](fp,msg[1])
@@ -266,9 +300,9 @@ def register_hb_debug_framework_tools():
 
 
 # Return a number/address built from the input list elements. Each element
-# in the input is a string representation of a byte-sized hex number, for 
+# in the input is a string representation of a byte-sized hex number, for
 # example '0x2b' or '0x0' or '0xa'.  This does no endian conversion, thus
-# the input needs to be big endian.  The length of the input list can be 
+# the input needs to be big endian.  The length of the input list can be
 # any size, usually 2, 4, or 8.
 def hexDumpToNumber(hexlist):
     strNumber=""
@@ -284,7 +318,7 @@ def hexDumpToNumber(hexlist):
 
 # Read simics memory and return a list of strings such as ['0x0','0x2b','0x8']
 # representing the data read from simics. The list returned may be handed
-# to hexDumpToNumber() to turn the list into a number. 
+# to hexDumpToNumber() to turn the list into a number.
 def dumpSimicsMemory(address,bytecount):
     hexlist = map(hex,conf.phys_mem.memory[[address,address+bytecount-1]])
     return hexlist
@@ -325,7 +359,7 @@ def writeLongLong(address,n):
     writeSimicsMemory(address,intToList(n,8))
 
 
-# MAGIC_INSTRUCTION hap handler 
+# MAGIC_INSTRUCTION hap handler
 # arg contains the integer parameter n passed to MAGIC_INSTRUCTION(n)
 # See src/include/arch/ppc.H for the definitions of the magic args.
 # Hostboot magic args should range 7000..7999.
@@ -333,15 +367,15 @@ def magic_instruction_callback(user_arg, cpu, arg):
     if arg == 7006:   # MAGIC_SHUTDOWN
         # KernelMisc::shutdown()
         print "KernelMisc::shutdown() called."
-        # Could break/stop/pause the simics run, but presently 
+        # Could break/stop/pause the simics run, but presently
         # shutdown() is called four times. --Monte Jan 2012
         # SIM_break_simulation( "Shutdown. Simulation stopped." )
 
     if arg == 7007:   # MAGIC_BREAK
-        # Stop the simulation, much like a hard-coded breakpoint 
+        # Stop the simulation, much like a hard-coded breakpoint
         SIM_break_simulation( "Simulation stopped. (hap 7007)"  )
 
-    if arg == 7055:   # MAGIC_CONTINUOUS_TRACE 
+    if arg == 7055:   # MAGIC_CONTINUOUS_TRACE
         # Set execution environment flag to 0
         writeLongLong(contTraceTrigInfo+32,0)
         # Continuous trace.
@@ -370,10 +404,10 @@ def magic_instruction_callback(user_arg, cpu, arg):
         # Run fsp-trace on tracBINARY file (implied), append output to tracMERG
         os.system( "fsp-trace ./ -s hbotStringFile >>tracMERG  2>/dev/null" )
 
-# Continuous trace:  Open the symbols and find the address for 
+# Continuous trace:  Open the symbols and find the address for
 # "g_tracBinaryInfo"  Convert to a number and save in tracBinaryInfoAddr
 # The layout of g_tracBinaryInfo is a 64-bit pointer to the mixed buffer
-# followed by a 64-bit count of bytes used in the buffer.  See 
+# followed by a 64-bit count of bytes used in the buffer.  See
 # src/usr/trace/trace.C and mixed_trace_info_t.
 for line in open('hbicore.syms'):
     if "g_tracBinaryInfo" in line:
