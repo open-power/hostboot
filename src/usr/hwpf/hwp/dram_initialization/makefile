@@ -19,8 +19,7 @@
 #
 #  Origin: 30
 #
-#  IBM_PROLOG_END
-
+#  IBM_PROLOG_END_TAG
 ROOTPATH = ../../../../..
 
 MODULE = dram_initialization
@@ -34,22 +33,25 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
 ## pointer to common HWP files
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/include
 
-##  NOTE: add the base istep dir here. 
+##  NOTE: add the base istep dir here.
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dram_initialization
 
 ##  Include sub dirs
 ##  NOTE: add a new EXTRAINCDIR when you add a new HWP
 ##  EXAMPLE:
 ##  EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dram_initialization/<HWP_dir>
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dram_initialization/proc_exit_cache_contained
 
 
 ##  NOTE: add new object files when you add a new HWP
-OBJS =  dram_initialization.o
+OBJS =  dram_initialization.o \
+        proc_exit_cache_contained.o
 
-        
+
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 ##  EXAMPLE:
 #   VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/dram_initialization/<HWP_dir>
+VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/dram_initialization/proc_exit_cache_contained
 
 
 include ${ROOTPATH}/config.mk

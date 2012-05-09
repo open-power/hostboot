@@ -20,8 +20,7 @@
 #
 #  Origin: 30
 #
-#  IBM_PROLOG_END
-
+#  IBM_PROLOG_END_TAG
 #
 # Author:   Mark Wenning    wenning@us.ibm.com
 #
@@ -386,13 +385,14 @@ void    call_\@substepname( void    *io_pArgs )
     if ( l_errl )
     {
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  \"ERROR : ..........\" );
+                  \"ERROR : \@substepname, errorlog PLID=0x%x\",
+                  lerrl->plid()  );
         errlCommit( l_errl, HWPF_COMP_ID );
     }
     else
     {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   \"SUCCESS : ..........\" );
+                   \"SUCCESS : \@substepname \" );
     }
     // \@\@\@\@\@    END CUSTOM BLOCK:   \@\@\@\@\@
 #endif
