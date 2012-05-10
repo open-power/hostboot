@@ -27,6 +27,7 @@
 #include <diag/mdia/mdiamevent.H>
 #include "mdiamonitor.H"
 #include "mdiasm.H"
+#include "mdiatrace.H"
 
 using namespace TARGETING;
 
@@ -71,45 +72,6 @@ void CommandMonitor::removeMonitor(uint64_t i_monitor)
     iv_monitors.erase(i_monitor);
 
     mutex_unlock(&iv_mutex);
-}
-
-tid_t CommandMonitor::getTID()
-{
-    tid_t tid = 0;
-
-    mutex_lock(&iv_mutex);
-
-    tid = iv_tid;
-
-    mutex_unlock(&iv_mutex);
-
-    return tid;
-}
-
-bool CommandMonitor::isShutdown()
-{
-    bool shutdown = false;
-
-    mutex_lock(&iv_mutex);
-
-    shutdown = iv_shutdown;
-
-    mutex_unlock(&iv_mutex);
-
-    return shutdown;
-}
-
-uint64_t CommandMonitor::getMonitorID()
-{
-    uint64_t monitor = 0;
-
-    mutex_lock(&iv_mutex);
-
-    monitor = iv_nextMonitor;
-
-    mutex_unlock(&iv_mutex);
-
-    return monitor;
 }
 
 uint64_t CommandMonitor::getMonitorMapTimeoutEntry(uint64_t i_monitor)
@@ -173,7 +135,7 @@ void CommandMonitor::threadMain(StateMachine & i_sm)
             // scan the monitor map and if any
             // timed out, inform the state machine
 
-            iterator it = iv_monitors.begin();
+            monitorMapIterator it = iv_monitors.begin();
 
             while(it != iv_monitors.end())
             {
@@ -192,7 +154,6 @@ void CommandMonitor::threadMain(StateMachine & i_sm)
                     iv_monitors.erase(it++);
                 }
             }
-
 #ifdef MDIA_DO_POLLING
             swap(pollingList, iv_pollingList);
 #endif
@@ -224,7 +185,10 @@ void CommandMonitor::threadMain(StateMachine & i_sm)
         // istep finished...shutdown
 
         if(shutdown)
+        {
+            MDIA_FAST("cm: CommandMonitor will be shutdown");
             break;
+        }
     }
 }
 
@@ -239,6 +203,8 @@ struct ThreadArgs
 
 void CommandMonitor::start(StateMachine & i_sm)
 {
+    MDIA_FAST("cm: Start the CommandMonitor");
+
     using namespace CommandMonitorImpl;
 
     // start the monitor thread

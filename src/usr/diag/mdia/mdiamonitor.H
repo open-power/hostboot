@@ -162,7 +162,7 @@ class CommandMonitor
          * @brief aliases. Map containing monitorID key and timeout entries.
          */
         typedef std::map<uint64_t, uint64_t> MonitorMap;
-        typedef MonitorMap::iterator iterator;
+        typedef MonitorMap::iterator monitorMapIterator;
 
         /**
          * @brief maint command monitors

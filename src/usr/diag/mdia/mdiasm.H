@@ -49,7 +49,8 @@ class StateMachine
          *
          * @param[in] i_monitorIDs Vector of monitorIDs
          */
-        virtual void processCommandTimeout(std::vector<uint64_t> i_monitorIDs) {}
+        virtual void processCommandTimeout(
+                        const std::vector<uint64_t> & i_monitorIDs) {}
 
         /**
          * @brief run the state machine to completion
