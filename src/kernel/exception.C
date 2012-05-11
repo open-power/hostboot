@@ -101,7 +101,8 @@ extern "C"
 void kernel_execute_data_segment()
 {
     task_t* t = TaskManager::getCurrentTask();
-    printk("Data Segment exception, killing task %d\n", t->tid);
+    printk("Data Segment exception on %d: %lx @ %p\n",
+           t->tid, getDAR(), t->context.nip);
     TaskManager::endTask(t, NULL, TASK_STATUS_CRASHED);
 }
 
@@ -133,7 +134,7 @@ extern "C"
 void kernel_execute_inst_segment()
 {
     task_t* t = TaskManager::getCurrentTask();
-    printk("Inst Segment exception, killing task %d\n", t->tid);
+    printk("Inst Segment exception on %d: %p\n", t->tid, t->context.nip);
     TaskManager::endTask(t, NULL, TASK_STATUS_CRASHED);
 }
 

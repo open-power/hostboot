@@ -13,6 +13,5 @@ hbotStringFile
 *.toc
 errlparser
 *.csv
-dimmspd.dat
 *.pnor
-procmvpd.dat
+*.dat
