@@ -49,6 +49,15 @@ uint64_t TimeManager::convertSecToTicks(uint64_t i_sec, uint64_t i_nsec)
     return result;
 }
 
+void TimeManager::convertTicksToSec(uint64_t i_ticks,
+                                    uint64_t& o_sec, uint64_t& o_nsec)
+{
+    o_sec = i_ticks / iv_timebaseFreq;
+
+    o_nsec = (i_ticks - (o_sec * iv_timebaseFreq)) * 1000;
+    o_nsec /= (iv_timebaseFreq / 1000000);
+}
+
 void TimeManager::delayTask(task_t* t, uint64_t i_sec, uint64_t i_nsec)
 {
     Singleton<TimeManager>::instance()._delayTask(t,i_sec,i_nsec);

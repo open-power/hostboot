@@ -32,36 +32,72 @@
 
 class Scheduler;
 
+/** Struct to hold sleeping tasks in a pqueue */
 struct _TimeManager_Delay_t
 {
     _TimeManager_Delay_t * next;
-    _TimeManager_Delay_t * prev;    
+    _TimeManager_Delay_t * prev;
     uint64_t key;
     task_t* task;
 };
 
+/** @class TimeManager
+ *  @brief Keeps track of sleeping of tasks and conversions between TB and time.
+ */
 class TimeManager
 {
     public:
 	enum
 	    {
+                /** Number of time-slices to allow per second.
+                 *
+                 *  Context length becomes (1/TIMESLICE_PER_SECOND) sec.
+                 */
 		TIMESLICE_PER_SEC = 1000,
 	    };
 
+            /** Initialize the time subsystem. */
 	static void init();
+            /** Return the number of ticks per time-slice. */
 	static uint64_t getTimeSliceCount()
 	    {
 		return iv_timebaseFreq / TIMESLICE_PER_SEC;
 	    };
 
+            /** Returns the value of the processor timebase register. */
 	static uint64_t getCurrentTimeBase()
 	    {
 		return getTB();
 	    };
 
+        /** Converts seconds/nsecs to timebase ticks.
+         *
+         *  Typically this is used for calculating the number of ticks in an
+         *  interval.
+         *
+         *  @param[in] i_sec - Number of seconds.
+         *  @param[in] i_nsec - Number of nsecs.
+         *
+         *  @return Number of timebase ticks.
+         */
 	static uint64_t convertSecToTicks(uint64_t i_sec, uint64_t i_nsec);
+        /** Converts timebase ticks to seconds/nsecs.
+         *
+         *  @param[in] i_ticks - Number of ticks.
+         *  @param[out] o_sec - Number of seconds.
+         *  @param[out] o_nsec - Number of nsecs.
+         */
+        static void convertTicksToSec(uint64_t i_ticks,
+                                      uint64_t& o_sec, uint64_t& o_nsec);
 
+        /** Delay (sleep) a task for a length of time.
+         *
+         *  @param[in] t - Task to delay.
+         *  @param[in] i_sec - Seconds.
+         *  @param[in] i_nsec - Nsecs.
+         */
 	static void delayTask(task_t* t, uint64_t i_sec, uint64_t i_nsec);
+        /** Checks the sleep queue to determine if any tasks should be woken. */
 	static void checkReleaseTasks(Scheduler* s);
 
     protected:
@@ -72,9 +108,10 @@ class TimeManager
 	void _init();
 	void _delayTask(task_t* t, uint64_t i_sec, uint64_t i_nsec);
 	void _checkReleaseTasks(Scheduler* s);
-	    
+
 	Util::Locked::PQueue<_TimeManager_Delay_t, uint64_t>
 			iv_taskList[KERNEL_MAX_SUPPORTED_CPUS];
+        /** Frequency of the timebase register in Hz. (ticks per second) */
 	static uint64_t iv_timebaseFreq;
 };
 
