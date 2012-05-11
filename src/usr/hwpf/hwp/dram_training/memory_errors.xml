@@ -294,4 +294,19 @@
     <description>Invalid to use ECC spare in x8 mode.    </description>
   </hwpError>
 
+  <hwpError>
+    <rc>RC_MSS_UNSUPPORTED_SPD_DATA</rc>
+    <description>Invalid SPD data returned.    </description>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_NO_COMMON_SUPPORTED_CL</rc>
+    <description>Current Configuration has no common supported CL Values.    </description>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_EXCEED_TAA_MAX_NO_CL</rc>
+    <description> Exceeded TAA MAX with Lowest frequency.  No compatable CL.    </description>
+  </hwpError>
+
 </hwpErrors>

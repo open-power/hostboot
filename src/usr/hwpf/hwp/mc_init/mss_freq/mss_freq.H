@@ -42,13 +42,14 @@
 //---------|----------|---------_|-----------------------------------------------
 //  1.0    | jsabrow  | 11/30/11 | initial drop
 //  1.2    | jsabrow  | 02/14/12 | Updates for initial code review
+//  1.3    | jdsloat  | 04/26/12 | Code review updates
 
 #ifndef MSS_FREQHWPB_H_
 #define MSS_FREQHWPB_H_
 
 #include <fapi.H>
 
-typedef fapi::ReturnCode (*mss_freq_FP_t)(fapi::Target &);
+typedef fapi::ReturnCode (*mss_freq_FP_t)(const fapi::Target &);
 
 extern "C"
 {
@@ -56,12 +57,12 @@ extern "C"
 /**
  * @brief mss_freq procedure. Determines operating frequency for dimms behind a centaur
  *
- * @param[in]  fapi::Target &l_targets  reference to one centaur
+ * @param[in]  fapi::Target &l_targets  target type = centaur
  *
  * @return ReturnCode
  */
 
-  fapi::ReturnCode mss_freq(fapi::Target & i_target);
+  fapi::ReturnCode mss_freq(const fapi::Target & i_target);
 
 } // extern "C"
 
