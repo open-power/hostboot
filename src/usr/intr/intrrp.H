@@ -51,13 +51,6 @@ namespace INTR
              */
             static void init( errlHndl_t &io_rtaskRetErrl );
 
-            /**
-             * This function is registered with init for shutdown
-             * processing of the interrupt presenter.
-             * TODO Story 39878
-             */
-            static errlHndl_t shutDown();
-
         protected:
 
             /**

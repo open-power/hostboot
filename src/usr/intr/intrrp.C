@@ -29,6 +29,7 @@
 #include <trace/interface.H>
 #include <errno.h>
 #include <initservice/taskargs.H>
+#include <initservice/initserviceif.H>
 #include <util/singleton.H>
 #include <intr/intr_reasoncodes.H>
 #include <sys/mmio.h>
@@ -155,6 +156,11 @@ errlHndl_t IntrRp::_init()
         msg_q_register(iv_msgQ, INTR_MSGQ);
 
         task_create(IntrRp::msg_handler, NULL);
+
+        // Register event to be called on shutdown
+        INITSERVICE::registerShutdownEvent(iv_msgQ,
+                                           MSG_INTR_SHUTDOWN,
+                                           INITSERVICE::LOWEST_PRIORITY);
     }
 
     return err;
@@ -380,6 +386,14 @@ void IntrRp::msgHandler()
                 }
                 break;
 
+            case MSG_INTR_SHUTDOWN:
+                {
+                    TRACFCOMP(g_trac_intr,"Shutdown event received");
+                    // TODO rtc story 39878 for content
+                    msg_respond(iv_msgQ, msg);
+                }
+                break;
+
             default:
                 msg->data[1] = -EINVAL;
                 msg_respond(iv_msgQ, msg);
@@ -563,13 +577,6 @@ errlHndl_t IntrRp::checkAddress(uint64_t i_addr)
             );
     }
 
-    return err;
-}
-
-// TODO rtc story 39878
-errlHndl_t IntrRp::shutDown()
-{
-    errlHndl_t err = NULL;
     return err;
 }
 

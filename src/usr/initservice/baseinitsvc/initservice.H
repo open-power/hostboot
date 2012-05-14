@@ -40,6 +40,7 @@
 #include <stdint.h>
 #include <util/singleton.H>
 #include <sys/vfs.h>            // VFS_MODULE_NAME_MAX
+#include <sys/msg.h>
 
 #include <trace/interface.H>
 #include <errl/errlentry.H>     //  errlHndl_t
@@ -47,6 +48,7 @@
 #include <initservice/initsvcreasoncodes.H>
 #include <initservice/initsvcstructs.H>
 #include <vmmconst.h>
+#include <initservice/initserviceif.H>
 
 namespace   INITSERVICE
 {
@@ -174,7 +176,31 @@ public:
     void registerBlock(void* i_vaddr, uint64_t i_size, BlockPriority i_priority);
 
     /**
-     * @brief Perform necessary steps, such as FLUSHing, to registered blocks.
+     * @brief Register a service to be notified during shutdown
+     *
+     * @param[in] i_msgQ, A message queue to send a message to on shutdown
+     * @param[in] i_msgType, The message type to send.
+     * @param[in] i_priority, @See src/include/usr/initservice/initserviceif.H
+     *
+     * @return true  - i_msgQ registered
+     *         false - i_msgQ already registered.- not registered again.
+     */
+    bool registerShutdownEvent(msg_q_t i_msgQ,
+                               uint32_t i_msgType,
+                               EventPriority_t i_priority);
+
+    /**
+     * @brief Un register a service for a Shutdown event
+     * 
+     * @param[in] i_msgQ, The message queue to be removed.
+     *
+     * @return true  - i_msgQ was removed from the event notification list. |
+     *         false - i_msgQ was not registered in the event notification list.
+     */
+    bool unregisterShutdownEvent(msg_q_t i_msgQ);
+
+    /**
+     * @brief Perform necessary shut down steps.
      *
      * @param[in] i_status - Shutdown status to be passed along on shutdown
      * @param[in] i_payload_base - The base address (target HRMOR) of the
@@ -183,6 +209,8 @@ public:
      *                              payload entry-point.
      *
      * @return Nothing
+     * @note This calls registered services to notify them of shutdown and it
+     * flushes the virtual memory.
      */
     void doShutdown(uint64_t i_status,
                     uint64_t i_payload_base = 0,
@@ -245,6 +273,26 @@ private:
 
     //Store a list of registered blocks
     std::vector<regBlock_t*> iv_regBlock;
+
+    struct regMsgQ_t
+    {
+        msg_q_t msgQ;
+        uint32_t msgType;
+        uint32_t msgPriority;
+
+        /**
+         * @brief Constructor
+         */
+        regMsgQ_t(msg_q_t i_msgQ,
+                  uint32_t i_msgType,
+                  EventPriority_t i_priority) :
+            msgQ(i_msgQ), msgType(i_msgType), msgPriority((uint32_t)i_priority) {}
+    };
+
+    typedef std::vector<regMsgQ_t> EventRegistry_t;
+
+    // List of Services to notify on shutdown
+    EventRegistry_t iv_regMsgQ;
 
 };  //  class InitService
 

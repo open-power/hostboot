@@ -24,9 +24,20 @@
 #define __INITSERVICE_INITSERVICEIF_H
 
 #include <vmmconst.h>
+#include <sys/msg.h>
 
 namespace INITSERVICE
 {
+
+    /**
+     * Priority scheme, if needed
+     */
+    enum EventPriority_t
+    {
+        LOWEST_PRIORITY = 0,    //!<< Notifiy last, LIFO order
+        NO_PRIORITY = 16,       //!<< No dependency / dont' care, LIFO order
+        HIGHEST_PRIORITY = 127, //!<< Nofity first, LIFO order
+    };
 
 /**
  * @brief Register a block/range of vitual memory to be handled during a
@@ -39,6 +50,29 @@ namespace INITSERVICE
  * @return Nothing
  */
 void registerBlock(void* i_vaddr, uint64_t i_size, BlockPriority i_priority);
+
+/**
+ * @brief Register a service to be notified during shutdown
+ *
+ * @param[in] i_msgQ, A message queue to send a message to on shutdown
+ * @param[in] i_msgType, The message type to send.
+ * @param[in] i_priority, See EventPriority
+ * @return true - i_msgQ registered
+ *         false - i_msgQ already registered. Not registered again.
+ */
+bool registerShutdownEvent(msg_q_t i_msgQ,
+                           uint32_t i_msgType,
+                           EventPriority_t i_priority = NO_PRIORITY);
+
+/**
+ * @brief Un register a service for a Shutdown event
+ * 
+ * @param[in] i_msgQ, The message queue to be removed.
+ *
+ * @return true  - i_msgQ was removed from the event notification list. |
+ *         false - i_msgQ was not registered in the event notification list.
+ */
+bool unregisterShutdownEvent(msg_q_t i_msgQ);
 
 }
 

@@ -616,6 +616,23 @@ void InitService::doShutdown(uint64_t i_status,
 {
     int l_rc = 0;
     errlHndl_t l_err = NULL;
+
+    // Call registered services and notify of shutdown
+    msg_t * l_msg = msg_allocate();
+    l_msg->data[0] = i_status;
+    l_msg->data[1] = 0;
+    l_msg->extra_data = 0;
+
+    for(EventRegistry_t::iterator i = iv_regMsgQ.begin();
+        i != iv_regMsgQ.end();
+        ++i)
+    {
+        l_msg->type = i->msgType;
+        msg_sendrecv(i->msgQ,l_msg);
+    }
+
+     msg_free(l_msg);
+
     std::vector<regBlock_t*>::iterator l_rb_iter = iv_regBlock.begin();
     //FLUSH each registered block in order
     while (l_rb_iter!=iv_regBlock.end())
@@ -646,6 +663,73 @@ void InitService::doShutdown(uint64_t i_status,
         l_rb_iter++;
     }
     shutdown(i_status, i_payload_base, i_payload_entry);
+}
+
+bool InitService::registerShutdownEvent(msg_q_t i_msgQ,
+                                        uint32_t i_msgType,
+                                        EventPriority_t i_priority)
+{
+    bool result = true;
+    EventRegistry_t::iterator in_pos = iv_regMsgQ.end();
+
+    for(EventRegistry_t::iterator r = iv_regMsgQ.begin();
+        r != iv_regMsgQ.end();
+        ++r)
+    {
+        if(r->msgQ == i_msgQ)
+        {
+            result = false;
+            break;
+        }
+
+        if(r->msgPriority <= (uint32_t)i_priority)
+        {
+            in_pos = r;
+        }
+    }
+
+    if(result)
+    {
+        in_pos = iv_regMsgQ.insert(in_pos,
+                                   regMsgQ_t(i_msgQ, i_msgType, i_priority));
+    }
+
+    return result;
+}
+
+bool InitService::unregisterShutdownEvent(msg_q_t i_msgQ)
+{
+    bool result = false;
+    for(EventRegistry_t::iterator r = iv_regMsgQ.begin();
+        r != iv_regMsgQ.end();
+        ++r)
+    {
+        if(r->msgQ == i_msgQ)
+        {
+            result = true;
+            iv_regMsgQ.erase(r);
+            break;
+        }
+    }
+    return result;
+}
+
+/**
+ * @see src/include/usr/initservice/initservicif.H
+ */
+bool registerShutdownEvent(msg_q_t i_msgQ,
+                           uint32_t i_msgType,
+                           EventPriority_t i_priority)
+{
+    return
+    Singleton<InitService>::instance().registerShutdownEvent(i_msgQ,
+                                                             i_msgType,
+                                                             i_priority);
+}
+
+bool unregisterShutdownEvent(msg_q_t i_msgQ)
+{
+    return Singleton<InitService>::instance().unregisterShutdownEvent(i_msgQ);
 }
 
 } // namespace

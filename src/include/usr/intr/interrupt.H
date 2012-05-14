@@ -52,6 +52,7 @@ namespace INTR
         MSG_INTR_UNREGISTER_MSGQ,  //!< Un register a msgQ
         MSG_INTR_ENABLE,           //!< Enable external Interrupts
         MSG_INTR_DISABLE,          //!< Disable external interrupts
+        MSG_INTR_SHUTDOWN,         //!< Call to shutdown interrupt presenter
     };
 
 
