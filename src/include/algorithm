@@ -24,6 +24,7 @@
 #define ALGORITHM
 
 #include <iterator>
+#include <util/impl/qsort.H>
 
 #ifdef __cplusplus
 namespace std
@@ -173,7 +174,35 @@ namespace std
             if ((*first) == value)
                 return first;
 
-            first++;
+            ++first;
+        }
+
+        return last;
+    }
+
+    /**
+     * Find the location of an element within a range.
+     * @param[in] first InputIterator to the first position in the range.
+     * @param[in] last  InputIterator to the last position in the range.
+     * @param[in] pred  Predicate used to compare equality.
+     *
+     * Returns the first iterator i in the range [first,last) such that
+     *     pred(*i) is true or else last if no element is found.
+     *
+     * @return An iterator in the range [first,last].  last implies that no
+     *         matching element was found.
+     */
+    template <typename InputIterator, typename Predicate>
+    inline InputIterator
+    find_if(InputIterator first, InputIterator last,
+            Predicate pred)
+    {
+        while(first != last)
+        {
+            if (pred(*first))
+                return first;
+
+            ++first;
         }
 
         return last;
@@ -203,7 +232,7 @@ namespace std
             {
                 e = first;
             }
-            first++;
+            ++first;
         }
         return e;
     }
@@ -234,10 +263,71 @@ namespace std
             {
                 e = first;
             }
-            first++;
+            ++first;
         }
         return e;
     }
+
+    /**
+     * Find the maximum element within a range.
+     * @param[in] first - FwdIterator to the first position in the range.
+     * @param[in] last - FwdIterator to the last position in the range.
+     *
+     * Returns the first element (i) such that (*i) < (*j) is false for all
+     * other iterators.
+     *
+     * The iterator last is returned only when the range contains no elements.
+     *
+     * @return An iterator in [first, last) containing the minimum element.
+     *
+     */
+    template <typename FwdIterator>
+    inline FwdIterator max_element(FwdIterator first, FwdIterator last)
+    {
+        if (first == last) return last;
+        FwdIterator e = first++;
+        while(first != last)
+        {
+            if ((*e) < (*first)) 
+            {
+                e = first;
+            }
+            ++first;
+        }
+        return e;
+    }
+
+    /**
+     * Find the maximum element within a range.
+     * @param[in] first - FwdIterator to the first position in the range.
+     * @param[in] last - FwdIterator to the last position in the range.
+     * @param[in] comp - BinaryPredicate used to perform comparison.
+     *
+     * Returns the first element (i) such that comp(*i,*j) is false for all
+     * other iterators.
+     *
+     * The iterator last is returned only when the range contains no elements.
+     *
+     * @return An iterator in [first, last) containing the minimum element.
+     *
+     */
+    template <typename FwdIterator, typename BinaryPredicate>
+    inline FwdIterator max_element(FwdIterator first, FwdIterator last, 
+                                   BinaryPredicate comp)
+    {
+        if (first == last) return last;
+        FwdIterator e = first++;
+        while(first != last)
+        {
+            if (comp((*e),(*first)))
+            {
+                e = first;
+            }
+            ++first;
+        }
+        return e;
+    }
+
 
     /**
      * Find the element value in an ordered range [first, last].  Specifically,
@@ -322,6 +412,275 @@ namespace std
 
         return first;
     }
+
+    /**
+     * Apply a functor to each element in a range.
+     *
+     * Applies functor 'f' to each element in [first, last).
+     *
+     * @param[in] first - The beginning of the range.
+     * @param[in] last - The end of the range.
+     * @param[in] f - The functor.
+     *
+     * @return The functor after being having been applied.
+     */
+    template <typename InputIterator, typename UnaryFunction>
+    UnaryFunction for_each(InputIterator first, InputIterator last,
+                           UnaryFunction f)
+    {
+        while(first != last)
+        {
+            f(*first);
+            ++first;
+        }
+        return f;
+    }
+
+    /**
+     * Remove a value from a range.
+     *
+     * Removes all instances matching 'value' in the range [first, last)
+     * and returns an iterator to the end of the new range [first, new_last)
+     * where nothing in the new range has 'value'.
+     *
+     * Remove does not decrease the size of the container.
+     *
+     * @param[in] first - The beginning of the range.
+     * @param[in] last - The end of the range.
+     * @param[in] value - The value to remove.
+     *
+     * @return An iterator 'new_last' from [first, new_last).
+     */
+    template <typename ForwardIterator, typename T>
+    ForwardIterator remove(ForwardIterator first, ForwardIterator last,
+                           const T& value)
+    {
+        // Find first match.
+        first = find(first, last, value);
+
+        if (first == last) // No match found, return un-changed 'last'.
+        {
+            return last;
+        }
+
+        // Match was found.  'new_last' is now the first removed element.
+        ForwardIterator new_last = first;
+        ++first;
+
+        // Iterate through all the others.
+        while(first != last)
+        {
+            // If 'first' is a desired value, we need to copy it and move
+            // 'new_last'.
+            if (!(*first == value))
+            {
+                *new_last = *first;
+                ++new_last;
+            }
+
+            ++first;
+        }
+
+        return new_last;
+
+    }
+
+    /**
+     * Remove a value from a range using a predicate.
+     *
+     * Removes all instances pred(*i) is true in the range [first, last)
+     * and returns an iterator to the end of the new range [first, new_last)
+     * where nothing in the new range has pred(*i) true.
+     *
+     * Remove does not decrease the size of the container.
+     *
+     * @param[in] first - The beginning of the range.
+     * @param[in] last - The end of the range.
+     * @param[in] pred - The predicate to use for comparison.
+     *
+     * @return An iterator 'new_last' from [first, new_last).
+     */
+    template <typename ForwardIterator, typename Predicate>
+    ForwardIterator remove_if(ForwardIterator first, ForwardIterator last,
+                              Predicate pred)
+    {
+        // Find first match.
+        first = find_if(first, last, pred);
+
+        if (first == last) // No match found, return un-changed 'last'.
+        {
+            return last;
+        }
+
+        // Match was found.  'new_last' is now the first removed element.
+        ForwardIterator new_last = first;
+        ++first;
+
+        // Iterate through all the others.
+        while(first != last)
+        {
+            // If 'first' is a desired value, we need to copy it and move
+            // 'new_last'.
+            if (!(pred(*first)))
+            {
+                *new_last = *first;
+                ++new_last;
+            }
+
+            ++first;
+        }
+
+        return new_last;
+
+    }
+
+    /**
+     * Removes consecutive duplicate entries from a range.
+     *
+     * Removes all instances where (*i == *(i-1)) in the range [first, last)
+     * and returns an iterator to the end of the new range [first, new_last)
+     * where nothing in the new range is a consecutive duplicate.
+     *
+     * Unique does not decrease the size of the container.
+     *
+     * @param[in] first - The beginning of the range.
+     * @param[in] last - The end of the range.
+     *
+     * @return An iterator 'new_last' from [first, new_last).
+     *
+     */
+    template <typename ForwardIterator>
+    ForwardIterator unique(ForwardIterator first, ForwardIterator last)
+    {
+        // Trivial case of 0 items, return.
+        if (first == last) return last;
+
+        // The algorithm keeps 3 iterators 'prev', 'first', and 'last'.  The
+        // 'prev' iterator is always the last instance to be kept.  'last' is
+        // the end of the original range.  'first' is kept to be the item
+        // being compared.
+
+        // Point 'prev' at the first element of the range since first item is 
+        // a keeper.
+        ForwardIterator prev = first;
+        ++first;
+
+        while (first != last)
+        {
+            // If the two items are not the same, we found a new item to keep.
+            if (!(*prev == *first))
+            {
+                // Increment the "keep slot".
+                ++prev;
+
+                // If the "keep slot" is not the element being compared, we
+                // need to move the new item down to that keep slot.
+                if (prev != first)
+                {
+                    *prev = *first;
+                }
+            }
+
+            // Advance to the next element.
+            ++first;
+        }
+
+        // 'prev' points to the last item to be kept.  Increment it to make 
+        // it point to the one past.
+        ++prev;
+        return prev;
+    }
+
+    /**
+     * Removes consecutive duplicate entries from a range by predicate.
+     *
+     * Removes all instances where pred(*i,*(i-1)) is true in the
+     * range [first, last) and returns an iterator to the end of the new 
+     * range [first, new_last) where nothing in the new range is a 
+     * consecutive duplicate.
+     *
+     * Unique does not decrease the size of the container.
+     *
+     * @param[in] first - The beginning of the range.
+     * @param[in] last - The end of the range.
+     * @param[in] pred - The predicate.
+     *
+     * @return An iterator 'new_last' from [first, new_last).
+     *
+     */
+    template <typename ForwardIterator, typename BinaryPredicate>
+    ForwardIterator unique(ForwardIterator first, ForwardIterator last,
+                           BinaryPredicate pred)
+    {
+        // Trivial case of 0 items, return.
+        if (first == last) return last;
+
+        // The algorithm keeps 3 iterators 'prev', 'first', and 'last'.  The
+        // 'prev' iterator is always the last instance to be kept.  'last' is
+        // the end of the original range.  'first' is kept to be the item
+        // being compared.
+
+        // Point 'prev' at the first element of the range since first item is 
+        // a keeper.
+        ForwardIterator prev = first;
+        ++first;
+
+        while (first != last)
+        {
+            // If the two items are not the same, we found a new item to keep.
+            if (!(pred(*prev,*first)))
+            {
+                // Increment the "keep slot".
+                ++prev;
+
+                // If the "keep slot" is not the element being compared, we
+                // need to move the new item down to that keep slot.
+                if (prev != first)
+                {
+                    *prev = *first;
+                }
+            }
+
+            // Advance to the next element.
+            ++first;
+        }
+
+        // 'prev' points to the last item to be kept.  Increment it to make 
+        // it point to the one past.
+        ++prev;
+        return prev;
+    }
+
+    /** Sort a range.
+     *
+     *  Sorts all the elements in [first, last) using such that *i < *(i+1)
+     *  for all items in the range.
+     *
+     *  @param[in] first - The beginning of the range.
+     *  @param[in] last - The end of the range.
+     */
+    template <typename RandomAccessIterator>
+    void sort(RandomAccessIterator first, RandomAccessIterator last)
+    {
+        Util::__Util_QSort_Impl::sort(first, last);
+    }
+
+    /** Sort a range using a predicate
+     *
+     *  Sorts all the elements in [first, last) using such that 
+     *  pred(*i, *(i+1)) is true for all items in the range.
+     *
+     *  @param[in] first - The beginning of the range.
+     *  @param[in] last - The end of the range.
+     *  @param[in] pred - The predicate to use for comparison.
+     */
+    template <typename RandomAccessIterator, typename StrictWeakOrdering>
+    void sort(RandomAccessIterator first, RandomAccessIterator last,
+              StrictWeakOrdering pred)
+    {
+        Util::__Util_QSort_Impl::sort(first, last, pred);
+    }
+
 
 };
 #endif

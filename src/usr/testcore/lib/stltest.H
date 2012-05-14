@@ -29,6 +29,7 @@
 #include <map>
 #include <algorithm>
 #include <iterator>
+#include <functional>
 
 class STLTest : public CxxTest::TestSuite
 {
@@ -349,5 +350,128 @@ class STLTest : public CxxTest::TestSuite
                 TS_FAIL("Vector erase to end not at end()");
             }
         }
+
+        template<typename T> struct ForEachFunctor
+            : public std::unary_function<const T&, void>
+        {
+            ForEachFunctor() : count(0) {};
+
+            void operator()(const T&) { ++count; };
+
+            size_t count;
+        };
+
+        void testForEach()
+        {
+            std::vector<int> v;
+            const size_t COUNT = 10;
+            for (size_t i = 0; i < COUNT; i++)
+            {
+                v.push_back(i);
+            }
+            ForEachFunctor<int> f;
+            f = std::for_each(v.begin(), v.end(), f);
+
+            if (f.count != COUNT)
+            {
+                TS_FAIL("Functor called incorrect number of times.");
+            }
+        }
+
+        template<typename T> struct RemoveFunctor
+            : public std::unary_function<const T&, bool>
+        {
+            bool operator()(const T& i) { return (i == 3) || (i == 7); }
+        };
+
+        void testRemove()
+        {
+            std::vector<int> v;
+            const size_t COUNT = 10;
+            for (size_t i = 0; i < COUNT; i++)
+            {
+                v.push_back(i);
+            }
+
+            if (std::distance(v.begin(), v.end()) != (ssize_t) COUNT)
+            {
+                TS_FAIL("Incorrect number of elements in the vector.");
+            }
+
+            std::vector<int>::iterator new_last =
+                    std::remove(v.begin(), v.end(), 4);
+
+            if (std::distance(v.begin(), new_last) != (COUNT - 1))
+            {
+                TS_FAIL("Remove did not move 1 element.");
+            }
+
+            new_last =
+                std::remove_if(v.begin(), new_last, RemoveFunctor<int>());
+
+            if (std::distance(v.begin(), new_last) != (COUNT - 3))
+            {
+                TS_FAIL("Remove_if did not move 2 element.");
+            }
+        }
+
+        void testUnique()
+        {
+            std::vector<int> v;
+            const size_t COUNT = 10;
+            for (size_t i = 0; i < COUNT; i++)
+            {
+                v.push_back(i);
+            }
+
+            std::vector<int>::iterator new_last =
+                std::unique(v.begin(), v.end());
+
+            if (new_last != v.end())
+            {
+                TS_FAIL("Unique removed elements.");
+            }
+
+            v.clear();
+            v.push_back(1);
+            v.push_back(2);
+            v.push_back(2); // Remove item 1
+            v.push_back(3);
+            v.push_back(4);
+            v.push_back(4); // Remove item 2
+            v.push_back(4); // Remove item 3
+            v.push_back(5);
+                // Total of 8 items.
+
+            new_last = std::unique(v.begin(), v.end());
+
+            if (std::distance(v.begin(), new_last) != 5)
+            {
+                TS_FAIL("Incorrect number of items removed by unique.");
+            }
+        }
+
+        void testSort()
+        {
+            std::vector<int> v;
+            v.push_back(1);
+            v.push_back(4);
+            v.push_back(2);
+            v.push_back(8);
+            v.push_back(5);
+            v.push_back(7);
+            std::sort(v.begin(), v.end());
+
+            for(size_t i = 0; i < (v.size()-1); i++)
+            {
+                if (v[i] >= v[i+1])
+                {
+                    TS_FAIL("Element %d is in incorrect position. %d:%d",
+                            i, v[i], v[i+1]);
+                }
+            }
+
+        }
+
 };
 #endif

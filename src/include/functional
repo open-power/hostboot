@@ -73,6 +73,210 @@ namespace std
             { return x > y; }
     };
 
+// --------------- mem_fun templates --------------- //
+
+    template<typename Result, typename X>
+        struct mem_fun_t : public unary_function<X*, Result>
+    {
+        explicit mem_fun_t(Result (X::*f)()) : func(f) {}
+        Result operator()(X* x) const { return (x->*func)(); }
+
+        private:
+            Result (X::*func)();
+    };
+
+    template<typename Result, typename X>
+        struct const_mem_fun_t : public unary_function<X*, Result>
+    {
+        explicit const_mem_fun_t(Result (X::*f)() const) : func(f) {}
+        Result operator()(const X* x) const { return (x->*func)(); }
+
+        private:
+            Result (X::*func)() const;
+    };
+        
+    template<typename Result, typename X>
+    mem_fun_t<Result, X> mem_fun(Result (X::*f)())
+    {
+        return mem_fun_t<Result, X>(f);
+    }
+
+    template<typename Result, typename X>
+    const_mem_fun_t<Result, X> mem_fun(Result (X::*f)() const)
+    {
+        return const_mem_fun_t<Result, X>(f);
+    }
+
+// --------------- mem_fun1 templates --------------- //
+
+    template<typename Result, typename X, typename Arg>
+        struct mem_fun1_t : public binary_function<X*, Arg, Result>
+    {
+        explicit mem_fun1_t(Result (X::*f)(Arg)) : func(f) {}
+        Result operator()(X* x, Arg a) const { return (x->*func)(a); }
+
+        private:
+            Result (X::*func)(Arg);
+    };
+
+    template<typename Result, typename X, typename Arg>
+        struct const_mem_fun1_t : public binary_function<X*, Arg, Result>
+    {
+        explicit const_mem_fun1_t(Result (X::*f)(Arg) const) : func(f) {}
+        Result operator()(const X* x, Arg a) const { return (x->*func)(a); }
+
+        private:
+            Result (X::*func)(Arg) const;
+    };
+
+    template<typename Result, typename X, typename Arg>
+    mem_fun1_t<Result, X, Arg> mem_fun(Result (X::*f)(Arg))
+    {
+        return mem_fun1_t<Result, X, Arg>(f);
+    }
+
+    template<typename Result, typename X, typename Arg>
+    const_mem_fun1_t<Result, X, Arg> mem_fun(Result (X::*f)(Arg) const)
+    {
+        return const_mem_fun1_t<Result, X, Arg>(f);
+    }
+
+// --------------- mem_fun_ref templates --------------- //
+
+    template<typename Result, typename X>
+        struct mem_fun_ref_t : public unary_function<X, Result>
+    {
+        explicit mem_fun_ref_t(Result (X::*f)()) : func(f) {}
+        Result operator()(X& x) const { return (x.*func)(); }
+
+        private:
+            Result (X::*func)();
+    };
+
+    template<typename Result, typename X>
+        struct const_mem_fun_ref_t : public unary_function<X, Result>
+    {
+        explicit const_mem_fun_ref_t(Result (X::*f)() const) : func(f) {}
+        Result operator()(const X& x) const { return (x.*func)(); }
+
+        private:
+            Result (X::*func)() const;
+    };
+        
+    template<typename Result, typename X>
+    mem_fun_ref_t<Result, X> mem_fun_ref(Result (X::*f)())
+    {
+        return mem_fun_ref_t<Result, X>(f);
+    }
+
+    template<typename Result, typename X>
+    const_mem_fun_ref_t<Result, X> mem_fun_ref(Result (X::*f)() const)
+    {
+        return const_mem_fun_ref_t<Result, X>(f);
+    }
+
+// --------------- mem_fun1_ref templates --------------- //
+
+    template<typename Result, typename X, typename Arg>
+        struct mem_fun1_ref_t : public binary_function<X, Arg, Result>
+    {
+        explicit mem_fun1_ref_t(Result (X::*f)(Arg)) : func(f) {}
+        Result operator()(X& x, Arg a) const { return (x.*func)(a); }
+
+        private:
+            Result (X::*func)(Arg);
+    };
+
+    template<typename Result, typename X, typename Arg>
+        struct const_mem_fun1_ref_t : public binary_function<X, Arg, Result>
+    {
+        explicit const_mem_fun1_ref_t(Result (X::*f)(Arg) const) : func(f) {}
+        Result operator()(const X& x, Arg a) const { return (x.*func)(a); }
+
+        private:
+            Result (X::*func)(Arg) const;
+    };
+
+    template<typename Result, typename X, typename Arg>
+    mem_fun1_ref_t<Result, X, Arg> mem_fun_ref(Result (X::*f)(Arg))
+    {
+        return mem_fun1_ref_t<Result, X, Arg>(f);
+    }
+
+    template<typename Result, typename X, typename Arg>
+    const_mem_fun1_ref_t<Result, X, Arg> mem_fun_ref(Result (X::*f)(Arg) const)
+    {
+        return const_mem_fun1_ref_t<Result, X, Arg>(f);
+    }
+
+// --------------- bind1st templates --------------- //
+
+    template<typename AdaptableBinaryFunction>
+    struct binder1st : 
+        public unary_function<
+                    typename AdaptableBinaryFunction::second_argument_type, 
+                    typename AdaptableBinaryFunction::result_type
+               >
+    {
+        binder1st(const AdaptableBinaryFunction& F,
+                  typename AdaptableBinaryFunction::first_argument_type c) :
+            func(F), arg(c) {}
+
+        typename AdaptableBinaryFunction::result_type 
+            operator()(const typename 
+                       AdaptableBinaryFunction::second_argument_type& x) const
+        { 
+            return func(arg, x);
+        }
+
+        private:
+            AdaptableBinaryFunction func;
+            typename AdaptableBinaryFunction::first_argument_type arg;
+    };
+
+    template<typename AdaptableBinaryFunction, typename T>
+    binder1st<AdaptableBinaryFunction>
+        bind1st(const AdaptableBinaryFunction& F,
+                const T& c)
+    {
+        return binder1st<AdaptableBinaryFunction>(F, 
+                    typename AdaptableBinaryFunction::first_argument_type(c));
+    };
+
+// --------------- bind2nd templates --------------- //
+
+    template<typename AdaptableBinaryFunction>
+    struct binder2nd : 
+        public unary_function<
+                    typename AdaptableBinaryFunction::first_argument_type, 
+                    typename AdaptableBinaryFunction::result_type
+               >
+    {
+        binder2nd(const AdaptableBinaryFunction& F,
+                  typename AdaptableBinaryFunction::second_argument_type c) :
+            func(F), arg(c) {}
+
+        typename AdaptableBinaryFunction::result_type 
+            operator()(const typename 
+                       AdaptableBinaryFunction::first_argument_type& x) const
+        { 
+            return func(x, arg);
+        }
+
+        private:
+            AdaptableBinaryFunction func;
+            typename AdaptableBinaryFunction::second_argument_type arg;
+    };
+
+    template<typename AdaptableBinaryFunction, typename T>
+    binder2nd<AdaptableBinaryFunction>
+        bind2nd(const AdaptableBinaryFunction& F,
+                const T& c)
+    {
+        return binder2nd<AdaptableBinaryFunction>(F, 
+                    typename AdaptableBinaryFunction::second_argument_type(c));
+    };
+
 
 };
 #endif
