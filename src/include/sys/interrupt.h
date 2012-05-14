@@ -31,7 +31,7 @@ extern const char* INTR_MSGQ;
  */
 enum
 {
-    ICPBAR_SCOM_ADDR = 0x020109c9,      //!< for P8, P7 = 0x02011C09
+    ICPBAR_SCOM_ADDR = 0x020109ca,      //!< for P8, P7 = 0x02011C09
     // This BAR value agrees with simics (for now)
     ICPBAR_VAL = 0x03FBFF90,            //!< ICPBAR value bits[0:29]>>34
 };
