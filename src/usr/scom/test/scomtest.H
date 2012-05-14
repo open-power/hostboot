@@ -928,11 +928,11 @@ public:
           uint64_t addr;
           uint64_t data;
       } test_data[] = {
-          { scom_targets[myMCS1], 0x800EAC0002011A3F ,0x1111111122222222},
-          { scom_targets[myMCS4], 0x800EAC0002011A3F, 0x3333333344444444},
-          { scom_targets[myMCS2], 0x800EAC0002011A3F, 0x5555555566666666},
-          { scom_targets[myMCS7], 0x800EAC0002011A3F, 0x7777777788888888},
-	  { scom_targets[myMCS4], 0x800EAC2002011A3F, 0x0101010101010101},  // invalid address range
+          { scom_targets[myMCS1], 0x800EAC6002011A3F ,0x1111111122222222},
+          { scom_targets[myMCS4], 0x800EAC6002011A3F, 0x3333333344444444},
+          { scom_targets[myMCS2], 0x800EAC6002011A3F, 0x5555555566666666},
+          { scom_targets[myMCS7], 0x800EAC6002011A3F, 0x7777777788888888},
+	  { scom_targets[myMCS4], 0x800EAC0002011A3F, 0x0101010101010101},  // invalid address range
 	  { scom_targets[myMCS4], 0x800EAC4002011E3F, 0x2323232323232323},  // Invalid address range for target
       };
       const uint64_t NUM_ADDRS = sizeof(test_data)/sizeof(test_data[0]);

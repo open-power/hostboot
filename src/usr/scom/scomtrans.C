@@ -160,6 +160,7 @@ errlHndl_t scomTranslate(DeviceFW::OperationType i_opType,
             // Check that we are working with the correct MCS direct address range
             if ((i_addr & SCOM_TRANS_MCS_MASK) == SCOM_TRANS_MCS_BASEADDR )
             {
+
                 // Need to extract what instance of the entity we are at
                 l_instance =
                    epath.pathElementOfType(TARGETING::TYPE_MCS).instance;
@@ -207,15 +208,15 @@ errlHndl_t scomTranslate(DeviceFW::OperationType i_opType,
             // correct address range.
 
             // MCS Indirect mask = 0x80000060_FFFFFFFF
-            //   0x80000000_02011A3F      MCS      0  # DMI0 Indirect SCOM
-            //   0x80000020_02011A3F      MCS      1  # DMI1 Indirect SCOM
-            //   0x80000040_02011A3F      MCS      2  # DMI2 Indirect SCOM
-            //   0x80000060_02011A3F      MCS      3  # DMI3 Indirect SCOM
-            //   0x80000000_02011E3F      MCS      4  # DMI4 Indirect SCOM
-            //   0x80000020_02011E3F      MCS      5  # DMI5 Indirect SCOM
-            //   0x80000040_02011E3F      MCS      6  # DMI6 Indirect SCOM
-            //   0x80000060_02011E3F      MCS      7  # DMI7 Indirect SCOM
-            //  SCOM_TRANS_IND_MCS_BASEADDR =     0x8000000002011A00,
+            //   0x80000060_02011A3F      MCS      0  # DMI0 Indirect SCOM
+            //   0x80000040_02011A3F      MCS      1  # DMI1 Indirect SCOM
+            //   0x80000020_02011A3F      MCS      2  # DMI2 Indirect SCOM
+            //   0x80000000_02011A3F      MCS      3  # DMI3 Indirect SCOM
+            //   0x80000060_02011E3F      MCS      4  # DMI4 Indirect SCOM
+            //   0x80000040_02011E3F      MCS      5  # DMI5 Indirect SCOM
+            //   0x80000020_02011E3F      MCS      6  # DMI6 Indirect SCOM
+            //   0x80000000_02011E3F      MCS      7  # DMI7 Indirect SCOM
+            //  SCOM_TRANS_IND_MCS_BASEADDR =     0x8000006002011A00,
 
             // check that we are working with a MCS/DMI address range..
             // can be indirect or direct.
@@ -233,11 +234,25 @@ errlHndl_t scomTranslate(DeviceFW::OperationType i_opType,
                 if ((i_addr & SCOM_TRANS_IND_MCS_DMI_MASK) ==
                      SCOM_TRANS_IND_MCS_DMI_BASEADDR)
                 {
+                    // based on the instance, update the address
+                    // If instance 0 or 4 then no updating required.
+                    if (l_instance % 4 != 0)
+                    {
+                        // zero out the instance bits that need to change
+                        i_addr = i_addr & 0xFFFFFF9FFFFFFFFF;
 
-                 // Need to update the upper bits of the indirect scom address.
-                   uint64_t temp_instance = l_instance % 4;
-                   temp_instance = temp_instance << 37;
-                   i_addr = i_addr | temp_instance;
+                        // instance 1 or 5  - update instance in the addr
+                        if (l_instance % 4 == 1)
+                        {
+                            i_addr |= 0x4000000000;
+                        }
+                        // instance 2 or 6
+                        else if (l_instance % 4 == 2)
+                        {
+                            i_addr |= 0x2000000000;
+                        }
+                        // instance 3 or 7 is 0 so no bits to turn on.
+                    }
                 }
 
                 // Need to update the address whether we are indirect or not
@@ -249,6 +264,7 @@ errlHndl_t scomTranslate(DeviceFW::OperationType i_opType,
                     // or 0x400 to change 0x2011Axx to 0x2011Exx
                     i_addr = i_addr | 0x400;
                 }
+
                 // Call to set the target to the parent target type
                 l_err = scomfindParentTarget(epath,
                                              TARGETING::TYPE_PROC,
