@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/include/usr/isteps/istep6list.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/include/usr/isteps/istep06list.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2011 - 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #ifndef __ISTEPS_ISTEP6LIST_H
 #define __ISTEPS_ISTEP6LIST_H
 
@@ -67,7 +68,7 @@ const   TaskInfo    g_istep06[]  =   {
                 }
         },
         {
-                ISTEPNAME(06,01,"host_setup"),
+                ISTEPNAME(06,01,""),        // not used.
                 NULL,
                 {
                         NONE,
@@ -75,7 +76,7 @@ const   TaskInfo    g_istep06[]  =   {
                 }
         },
         {
-                ISTEPNAME(06,02,"host_istep_enable"),
+                ISTEPNAME(06,02,""),        // not used.
                 NULL,
                 {
                         NONE,
