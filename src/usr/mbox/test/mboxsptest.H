@@ -88,7 +88,7 @@ class MboxSPTest : public CxxTest::TestSuite
 
           // Send last message
           msg_t * msg = msg_allocate();
-          msg->type = 3;        // use this to terminate while loop below
+          msg->type = 0xff;        // use this to terminate while loop below
           msg->extra_data = NULL;
           err = MBOX::send(MBOX::HB_TEST_MSGQ,msg);
           if(err)
@@ -105,7 +105,7 @@ class MboxSPTest : public CxxTest::TestSuite
           {
               msg_t* msg = msg_wait(msgQ);
 
-              if(msg->type == 3)
+              if(msg->type == 0xff)
               {
                   msg_free(msg);
                   break;

@@ -139,7 +139,7 @@ class IntrTest: public CxxTest::TestSuite
 
             // Need to register a msgq
             msg_q_t msgQ = msg_q_create();
-            err = INTR::registerMsgQ(msgQ,INTR::INTERPROC);
+            err = INTR::registerMsgQ(msgQ,0,INTR::INTERPROC);
             if(err)
             {
                 TS_FAIL("Errl from INTR::registerMsgQ()");
@@ -154,10 +154,10 @@ class IntrTest: public CxxTest::TestSuite
             *(mfrr) = 0xff;
 
             msg_t* msg = msg_wait(msgQ); // wait for interrupt msg
-            TRACFCOMP(g_trac_intr,"Interrupt handled! Type=%lx",msg->type);
-            if(msg->type != INTR::INTERPROC)
+            TRACFCOMP(g_trac_intr,"Interrupt handled! Type=%lx",msg->data[0]);
+            if(msg->data[0] != INTR::INTERPROC)
             {
-                TS_FAIL("INTR::unexpected interrupt type %lx",msg->type);
+                TS_FAIL("INTR::unexpected interrupt type %lx",msg->data[0]);
             }
             msg_respond(msgQ,msg);
 

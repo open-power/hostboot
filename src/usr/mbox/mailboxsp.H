@@ -55,11 +55,7 @@ namespace MBOX
         MSG_SEND,
         MSG_REGISTER_MSGQ,
         MSG_UNREGISTER_MSGQ,
-
-        // TODO currently this is progammed to 0x1A in simics, but could change.
-        // Fix this when intr handler is changed to return this as data[0]
-        // instead of type.
-        MSG_INTR = INTR::FSP_MAILBOX,   // Currently defined in intr/interupt.H
+        MSG_INTR,
     };
 
 
@@ -170,6 +166,12 @@ namespace MBOX
              * @return The message queue
              */
             msg_q_t msgq_unregister(queue_id_t i_queue_id);
+
+            /**
+             * Handle interrupt from Intr presenter
+             * @param[in] i_msg, The message 
+             */
+            errlHndl_t handleInterrupt();
 
             /**
              * Trace the message to the "fast" trace buffer

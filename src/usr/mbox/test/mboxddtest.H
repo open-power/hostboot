@@ -469,7 +469,7 @@ class MboxDDTest : public CxxTest::TestSuite
 
         /*Register for interrupt*/
         msg_q_t msgQ = msg_q_create();
-        l_err = INTR::registerMsgQ(msgQ,(INTR::ext_intr_t)0x1A);    //Simics is setup to send IRQ on 26
+        l_err = INTR::registerMsgQ(msgQ,0,(INTR::ext_intr_t)0x1A);    //Simics is setup to send IRQ on 26
         if(l_err)
             {
             TS_FAIL("Errl from INTR::registerMsgQ()");

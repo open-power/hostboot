@@ -93,12 +93,6 @@ errlHndl_t IntrRp::_init()
     // Make master thread 0
     uint32_t cpuid = task_getcpuid();
     iv_masterCpu = cpuid;
-    // If P7 or P7+ core -- need to tweak fields in PIR
-    if(cpu_core_type() == CORE_POWER7 ||
-       cpu_core_type() == CORE_POWER7_PLUS)
-    {
-        iv_masterCpu = P7PIR_t(cpuid);
-    }
     iv_masterCpu.threadId = 0;
 
     TRACFCOMP(g_trac_intr,"Master cpu node[%d], chip[%d], core[%d], thread[%d]",
@@ -245,16 +239,21 @@ void IntrRp::msgHandler()
                     Registry_t::iterator r = iv_registry.find(type);
                     if(r != iv_registry.end())
                     {
-                        msg_q_t msgQ = r->second;
+                        msg_q_t msgQ = r->second.msgQ;
+
                         msg_t * rmsg = msg_allocate();
-                        rmsg->type = type;
+                        rmsg->type = r->second.msgType;
+                        rmsg->data[0] = type;  // interrupt type
+                        rmsg->data[1] = 0;
+                        rmsg->extra_data = NULL;
+
                         int rc = msg_sendrecv(msgQ,rmsg);
                         if(rc)
                         {
                             TRACFCOMP(g_trac_intr,ERR_MRK
                                       "External Interrupt recieved type = %d, "
                                       "but could not send message to registered"
-                                      " handler. Ignorming it. rc = %d",
+                                      " handler. Ignoring it. rc = %d",
                                       (uint32_t) type, rc);
                         }
                         msg_free(rmsg);
@@ -278,8 +277,9 @@ void IntrRp::msgHandler()
             case MSG_INTR_REGISTER_MSGQ:
                 {
                     msg_q_t l_msgQ = reinterpret_cast<msg_q_t>(msg->data[0]);
-                    ext_intr_t l_t = static_cast<ext_intr_t>(msg->data[1]);
-                    errlHndl_t err = registerInterrupt(l_msgQ,l_t);
+                    uint64_t l_type = msg->data[1];
+                    ext_intr_t l_intr_type = static_cast<ext_intr_t>(l_type & 0xFFFF);
+                    errlHndl_t err = registerInterrupt(l_msgQ,l_type >> 32,l_intr_type);
 
                     msg->data[1] = reinterpret_cast<uint64_t>(err);
                     msg_respond(iv_msgQ,msg);
@@ -297,7 +297,7 @@ void IntrRp::msgHandler()
                     Registry_t::iterator r = iv_registry.find(type);
                     if(r != iv_registry.end())
                     {
-                        msgQ = r->second;
+                        msgQ = r->second.msgQ;
                         iv_registry.erase(r);
                     }
 
@@ -333,12 +333,8 @@ void IntrRp::msgHandler()
             case MSG_INTR_ADD_CPU:
                 {
                     PIR_t pir = msg->data[0];
-                    // If P7 or P7+ core -- need to tweak fields in PIR
-                    if(cpu_core_type() == CORE_POWER7 ||
-                       cpu_core_type() == CORE_POWER7_PLUS)
-                     {
-                        pir = P7PIR_t(msg->data[0]);
-                    }
+                    pir.threadId = 0;
+                    iv_cpuList.push_back(pir);
 
                     TRACFCOMP(g_trac_intr,"Add CPU node[%d], chip[%d],"
                               "core[%d], thread[%d]",
@@ -359,38 +355,13 @@ void IntrRp::msgHandler()
                 }
                 break;
 
-            case MSG_INTR_REMOVE_CPU:
-                {
-                    PIR_t pir = msg->data[0];
-                    if(cpu_core_type() == CORE_POWER7 ||
-                       cpu_core_type() == CORE_POWER7_PLUS)
-                    {
-                        pir = P7PIR_t(msg->data[0]);
-                    }
-
-                    TRACFCOMP(g_trac_intr,"Remove CPU node[%d], chip[%d],"
-                              "core[%d], thread[%d]",
-                              pir.nodeId, pir.chipId, pir.coreId,
-                              pir.threadId);
-
-                    size_t threads = cpu_thread_count();
-
-                    for(size_t thread = 0; thread < threads; ++thread)
-                    {
-                        pir.threadId = thread;
-                        deconfigureInterruptPresenter(pir);
-                    }
-
-                    msg->data[1] = 0;
-                    msg_respond(iv_msgQ, msg);
-                }
-                break;
-
             case MSG_INTR_SHUTDOWN:
                 {
                     TRACFCOMP(g_trac_intr,"Shutdown event received");
-                    // TODO rtc story 39878 for content
+                    shutDown();
+
                     msg_respond(iv_msgQ, msg);
+
                 }
                 break;
 
@@ -432,18 +403,21 @@ errlHndl_t IntrRp::setBAR(TARGETING::Target * i_target,
 
 
 
-errlHndl_t IntrRp::registerInterrupt(msg_q_t i_msgQ, ext_intr_t i_type)
+errlHndl_t IntrRp::registerInterrupt(msg_q_t i_msgQ,
+                                     uint32_t i_msg_type,
+                                     ext_intr_t i_intr_type)
 {
     errlHndl_t err = NULL;
 
-    Registry_t::iterator r = iv_registry.find(i_type);
+    Registry_t::iterator r = iv_registry.find(i_intr_type);
     if(r == iv_registry.end())
     {
-        iv_registry[i_type] = i_msgQ;
+        TRACDCOMP(g_trac_intr,"INTR::register %x", i_intr_type);
+        iv_registry[i_intr_type] = intr_response_t(i_msgQ,i_msg_type);
     }
     else
     {
-        if(r->second != i_msgQ)
+        if(r->second.msgQ != i_msgQ)
         {
         /*@ errorlog tag
          * @errortype       ERRL_SEV_INFORMATIONAL
@@ -460,7 +434,7 @@ errlHndl_t IntrRp::registerInterrupt(msg_q_t i_msgQ, ext_intr_t i_type)
                  ERRORLOG::ERRL_SEV_INFORMATIONAL,    // severity
                  INTR::MOD_INTRRP_REGISTERINTERRUPT,  // moduleid
                  INTR::RC_ALREADY_REGISTERED,         // reason code
-                 i_type,
+                 i_intr_type,
                  0
                 );
         }
@@ -580,8 +554,60 @@ errlHndl_t IntrRp::checkAddress(uint64_t i_addr)
     return err;
 }
 
+void IntrRp::shutDown()
+{
+    msg_t * rmsg = msg_allocate();
+
+    // Call everyone and say shutting down!
+    for(Registry_t::iterator r = iv_registry.begin();
+        r != iv_registry.end();
+        ++r)
+    {
+        msg_q_t msgQ = r->second.msgQ;
+
+        rmsg->type = r->second.msgType;
+        rmsg->data[0] = SHUT_DOWN;
+        rmsg->data[1] = 0;
+        rmsg->extra_data = NULL;
+
+        int rc = msg_sendrecv(msgQ,rmsg);
+        if(rc)
+        {
+            TRACFCOMP(g_trac_intr,ERR_MRK
+                      "Could not send message to registered handler to Shut"
+                      " down. Ignoring it.  rc = %d",
+                      rc);
+        }
+    }
+
+    msg_free(rmsg);
+
+    // Reset the hardware regiseters
+
+    iv_cpuList.push_back(iv_masterCpu);
+
+    size_t threads = cpu_thread_count();
+    for(CpuList_t::iterator pir_itr = iv_cpuList.begin();
+        pir_itr != iv_cpuList.end();
+        ++pir_itr)
+    {
+        PIR_t pir = *pir_itr;
+        for(size_t thread = 0; thread < threads; ++thread)
+        {
+            pir.threadId = thread;
+            deconfigureInterruptPresenter(pir);
+        }
+    }
+}
+
+//----------------------------------------------------------------------------
+// External interfaces
+//----------------------------------------------------------------------------
+
 // Register a message queue with a particular intr type
-errlHndl_t INTR::registerMsgQ(msg_q_t i_msgQ, ext_intr_t i_type)
+errlHndl_t INTR::registerMsgQ(msg_q_t i_msgQ,
+                              uint32_t i_msg_type,
+                              ext_intr_t i_intr_type)
 {
     errlHndl_t err = NULL;
     // Can't add while handling an interrupt, so
@@ -592,7 +618,8 @@ errlHndl_t INTR::registerMsgQ(msg_q_t i_msgQ, ext_intr_t i_type)
         msg_t * msg = msg_allocate();
         msg->type = MSG_INTR_REGISTER_MSGQ;
         msg->data[0] = reinterpret_cast<uint64_t>(i_msgQ);
-        msg->data[1] = static_cast<uint64_t>(i_type);
+        msg->data[1] = static_cast<uint64_t>(i_intr_type);
+        msg->data[1] |= static_cast<uint64_t>(i_msg_type) << 32;
 
         int rc = msg_sendrecv(intr_msgQ, msg);
         if(!rc)
@@ -626,7 +653,7 @@ errlHndl_t INTR::registerMsgQ(msg_q_t i_msgQ, ext_intr_t i_type)
              ERRORLOG::ERRL_SEV_INFORMATIONAL,    // severity
              INTR::MOD_INTR_REGISTER,             // moduleid
              INTR::RC_REGISTRY_NOT_READY,         // reason code
-             static_cast<uint64_t>(i_type),
+             static_cast<uint64_t>(i_intr_type),
              0
             );
     }

@@ -123,29 +123,6 @@ namespace INTR
             };
 
             /**
-             * cpu P7PIR register
-             * @note      P7 bits - thread 2, core 3, chip 2, node 3,
-             */
-            struct P7PIR_t
-            {
-                union
-                {
-                    uint32_t word;
-                    struct
-                    {
-                        uint32_t        reserved:22;    //!< zeros
-                        uint32_t        nodeId:3;       //!< node (8)
-                        uint32_t        chipId:2;       //!< chip pos on node (4)
-                        uint32_t        coreId:3;       //!< Core number (8)
-                        uint32_t        threadId:2;     //!< thread number (4)
-                    } PACKED;
-                };
-                P7PIR_t(uint32_t i_word) : word(i_word) {}
-            };
-
-
-
-            /**
              * cpu PIR register
              */
             struct PIR_t
@@ -170,26 +147,37 @@ namespace INTR
                     word = i_word;
                     return word;
                 }
+            };
 
-                PIR_t operator = (P7PIR_t i_p7pir)
-                {
-                    nodeId      = i_p7pir.nodeId;
-                    chipId      = i_p7pir.chipId;
-                    coreId      = i_p7pir.coreId;
-                    threadId    = i_p7pir.threadId;
+            struct intr_response_t
+            {
+                msg_q_t msgQ;
+                uint32_t msgType;
 
-                    return word;
-                }
+                /**
+                 * Default Constructor
+                 */
+                intr_response_t(): msgQ(NULL), msgType(0) {}
+
+                /**
+                 * Constructor
+                 * @param[in] i_msgQ, The message queue
+                 * @param[in] i_msgType, The message type
+                 */
+                intr_response_t(msg_q_t i_msgQ, uint32_t i_msgType) :
+                    msgQ(i_msgQ), msgType(i_msgType) {}
             };
 
 
-            typedef std::map<ext_intr_t,msg_q_t> Registry_t;
+            typedef std::map<ext_intr_t,intr_response_t> Registry_t;
+            typedef std::vector<PIR_t> CpuList_t;
 
 
             msg_q_t     iv_msgQ;        //!< Kernel Interrupt message queue
             Registry_t  iv_registry;    //!< registered interrupt type
             uint64_t    iv_baseAddr;    //!< Base address of hw INTR regs
             PIR_t       iv_masterCpu;   //!< Master cpu PIR
+            CpuList_t   iv_cpuList;     //!< Other CPU chips
 
 
         private:        //functions
@@ -204,9 +192,24 @@ namespace INTR
             /**
              * Register a message queue for an interrupt type
              * @param[in] i_msgQ The message queue
-             * @param[in] i_type the interrupt type
+             * @param[in] i_msg_type, The message type of the message to send
+             *                        to i_msgQ when an interrupt of
+             *                        i_intr_type occurrs.
+             * @param[in] i_intr_type, The interrupt type to register.
+             *
+             * @note the interrupt type is currently the XISR value in the XIRR
+             *       register and consists of the chipid, buid, and level
+             *       @see src/include/usr/intr/interrupt.H i_intr_type for
+             *       enumerations.
+             *
+             * @note when an interrupt of type i_msg_type occurrs, the
+             * interrupt presenter sends a message with type i_msg_type to
+             * i_msgQ with i_intr_type in message data word 0 and then waits
+             * for a response.
              */
-            errlHndl_t registerInterrupt(msg_q_t i_msgQ, ext_intr_t i_type);
+            errlHndl_t registerInterrupt(msg_q_t i_msgQ, 
+                                         uint32_t i_msg_type,
+                                         ext_intr_t i_intr_type);
 
             /**
              * Enable hardware to reporting external interrupts
@@ -237,6 +240,11 @@ namespace INTR
              */
             errlHndl_t setBAR(TARGETING::Target * i_target,
                               const PIR_t i_pir);
+
+            /**
+             * Shutdown procedure
+             */
+            void shutDown();
 
             /**
              * Calculate the adress offset for the given cpu

@@ -61,7 +61,6 @@ enum msg_sys_types_t
 
     MSG_INTR_EXTERN,    //!< Msg sent from kernel to user space on ext intr
     MSG_INTR_ADD_CPU,   //!< Add cpu core, data[0] = cpuid (PIR)
-    MSG_INTR_REMOVE_CPU,//!< un-configure intrp on cpu core, data[0] = cpuid
 };
 
 // System-defined root queue types
