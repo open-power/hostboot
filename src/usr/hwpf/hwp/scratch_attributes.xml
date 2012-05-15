@@ -92,7 +92,7 @@
         Can be used by HWPs for testing.
     </description>
     <valueType>uint64</valueType>
-    <enum>VAL_A = 3, VAL_B = 5, VAL_C = 0x23</enum>
+    <enum>VAL_A = 0, VAL_B = 5, VAL_C = 0xffffffffffffffff</enum>
     <writeable/>
   </attribute>
   <!-- ********************************************************************* -->
@@ -165,7 +165,7 @@
     </description>
     <valueType>uint64</valueType>
     <array> 2, 2 </array>
-    <enum>VAL_A, VAL_B, VAL_C</enum>
+    <enum>VAL_A = 0x0123456789abcdef, VAL_B = 0, VAL_C = 0xffffffffffffffff</enum>
     <writeable/>
   </attribute>
   <!-- ********************************************************************* -->

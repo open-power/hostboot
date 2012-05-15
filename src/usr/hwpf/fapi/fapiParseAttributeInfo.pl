@@ -54,6 +54,8 @@
 #                  mjjones   02/08/12  Handle attribute files with 1 entry
 #                  mjjones   03/22/12  Generate hash values for enums
 #                  mjjones   04/10/12  Process Chip EC Feature attributes
+#                  mjjones   05/15/12  Detect duplicate attr ids and append
+#                                      ULL after 64bit enumerator
 #
 # End Change Log ******************************************************
 
@@ -192,6 +194,7 @@ foreach my $argnum (1 .. $#ARGV)
 {
     my $infile = $ARGV[$argnum];
     my %enumHash;
+    my %attrIdHash;
 
     # read XML file. The ForceArray option ensures that there is an array of
     # elements even if there is only one such element in the file
@@ -222,6 +225,16 @@ foreach my $argnum (1 .. $#ARGV)
             exit(1);
         }
 
+        if (exists($attrIdHash{$attr->{id}}))
+        {
+            # Two different attributes with the same id!
+            print ("fapiParseAttributeInfo.pl ERROR. Duplicate attr id ",
+                $attr->{id}, "\n");
+            exit(1);
+        }
+
+        $attrIdHash{$attr->{id}} = 1;
+
         # Calculate a 28 bit hash value.
         my $attrHash128Bit = md5_hex($attr->{id});
         my $attrHash28Bit = substr($attrHash128Bit, 0, 7);
@@ -230,7 +243,8 @@ foreach my $argnum (1 .. $#ARGV)
         if (exists($enumHash{$attrHash28Bit}))
         {
             # Two different attributes generate the same hash-value!
-            print ("fapiParseAttributeInfo.pl ERROR. Duplicate attr id hash value\n");
+            print ("fapiParseAttributeInfo.pl ERROR. Duplicate attr id hash value for ",
+                   $attr->{id}, "\n");
             exit(1);
         }
 
@@ -371,7 +385,14 @@ foreach my $argnum (1 .. $#ARGV)
             {
                 # Remove leading spaces
                 $val =~ s/^\s+//; 
-                print AIFILE "    ENUM_$attr->{id}_${val},\n";
+                print AIFILE "    ENUM_$attr->{id}_${val}";
+
+                if ($attr->{valueType} eq 'uint64')
+                {
+                    print AIFILE "ULL";
+                }
+
+                print AIFILE ",\n";
             }
 
             print AIFILE "};\n";

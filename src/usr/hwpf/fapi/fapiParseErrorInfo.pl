@@ -46,6 +46,7 @@
 #                  mjjones   12/16/11  Improved usage statement
 #                  mjjones   02/10/12  Allow err file with one element
 #                  mjjones   03/22/12  Generate hash values for enums
+#                  mjjones   05/15/12  Detect duplicate error rcs
 #
 # End Change Log ******************************************************
 
@@ -176,6 +177,7 @@ foreach my $argnum (1 .. $#ARGV)
     my $infile = $ARGV[$argnum];
     my $count = 0;
     my %enumHash;
+    my %errorRcHash;
 
     #--------------------------------------------------------------------------
     # Read XML file. The ForceArray option ensures that there is an array of
@@ -200,6 +202,16 @@ foreach my $argnum (1 .. $#ARGV)
             print ("fapiParseErrorInfo.pl ERROR. rc missing\n");
             exit(1);
         }
+
+        if (exists($errorRcHash{$err->{rc}}))
+        {
+            # Two different errors with the same rc!
+            print ("fapiParseErrorInfo.pl ERROR. Duplicate error rc ",
+                $err->{rc}, "\n");
+            exit(1);
+        }
+
+        $errorRcHash{$err->{rc}} = 1;
 
         if (! exists $err->{description})
         {
