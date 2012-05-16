@@ -153,20 +153,6 @@
 <!-- Venice n0p0 EX units -->
 
 <targetInstance>
-    <id>sys0node0proc0ex0</id>
-    <type>unit-ex-venice</type>
-    <attribute><id>HUID</id><default>0x000A0000</default></attribute>
-        <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/ex-0</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/ex-0</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
     <id>sys0node0proc0ex1</id>
     <type>unit-ex-venice</type>
     <attribute><id>HUID</id><default>0x000A0001</default></attribute>
@@ -177,6 +163,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/ex-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -192,6 +182,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/ex-2</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>2</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -205,6 +199,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/ex-3</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>3</default>
     </attribute>
 </targetInstance>
 
@@ -220,6 +218,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/ex-4</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>4</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -234,23 +236,139 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/ex-5</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>5</default>
+    </attribute>
 </targetInstance>
 
-<!-- Venice n0p0 core units -->
-
 <targetInstance>
-    <id>sys0node0proc0ex0core0</id>
-    <type>unit-core-venice</type>
-    <attribute><id>HUID</id><default>0x000B0000</default></attribute>
-    <attribute>
+    <id>sys0node0proc0ex6</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A0006</default></attribute>
+        <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/ex-0/core-0</default>
+        <default>physical:sys-0/node-0/proc-0/ex-6</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/ex-0/core-0</default>
+        <default>affinity:sys-0/node-0/proc-0/ex-6</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>6</default>
     </attribute>
 </targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0ex9</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A0009</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/ex-9</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/ex-9</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>9</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0ex10</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A000A</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/ex-10</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/ex-10</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>10</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0ex11</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A000B</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/ex-11</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/ex-11</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>11</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0ex12</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A000C</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/ex-12</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/ex-12</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>12</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0ex13</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A000D</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/ex-13</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/ex-13</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>13</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0ex14</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A000E</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/ex-14</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/ex-14</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>14</default>
+    </attribute>
+</targetInstance>
+
+<!-- Venice n0p0 core units -->
 
 <targetInstance>
     <id>sys0node0proc0ex1core0</id>
@@ -263,6 +381,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/ex-1/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -278,6 +400,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/ex-2/core-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>2</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -291,6 +417,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/ex-3/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>3</default>
     </attribute>
 </targetInstance>
 
@@ -306,6 +436,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/ex-4/core-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>4</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -319,6 +453,136 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/ex-5/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>5</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0ex6core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B0006</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/ex-6/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/ex-6/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>6</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0ex9core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B0009</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/ex-9/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/ex-9/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>9</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0ex10core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B000A</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/ex-10/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/ex-10/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>10</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0ex11core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B000B</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/ex-11/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/ex-11/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>11</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0ex12core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B000C</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/ex-12/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/ex-12/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>12</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0ex13core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B000D</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/ex-13/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/ex-13/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>13</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0ex14core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B000E</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/ex-14/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/ex-14/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>14</default>
     </attribute>
 </targetInstance>
 
@@ -757,20 +1021,6 @@
 <!-- Venice n0p1 EX units -->
 
 <targetInstance>
-    <id>sys0node0proc1ex0</id>
-    <type>unit-ex-venice</type>
-    <attribute><id>HUID</id><default>0x000A0010</default></attribute>
-        <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-1/ex-0</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/ex-0</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
     <id>sys0node0proc1ex1</id>
     <type>unit-ex-venice</type>
     <attribute><id>HUID</id><default>0x000A0011</default></attribute>
@@ -781,6 +1031,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-1/ex-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -796,6 +1050,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-1/ex-2</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>2</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -809,6 +1067,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-1/ex-3</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>3</default>
     </attribute>
 </targetInstance>
 
@@ -824,6 +1086,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-1/ex-4</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>4</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -838,23 +1104,139 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-1/ex-5</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>5</default>
+    </attribute>
 </targetInstance>
 
-<!-- Venice n0p1 core units -->
-
 <targetInstance>
-    <id>sys0node0proc1ex0core0</id>
-    <type>unit-core-venice</type>
-    <attribute><id>HUID</id><default>0x000B0010</default></attribute>
-    <attribute>
+    <id>sys0node0proc1ex6</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A0016</default></attribute>
+        <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-1/ex-0/core-0</default>
+        <default>physical:sys-0/node-0/proc-1/ex-6</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/ex-0/core-0</default>
+        <default>affinity:sys-0/node-0/proc-1/ex-6</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>6</default>
     </attribute>
 </targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc1ex9</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A0019</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/ex-9</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/ex-9</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>9</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc1ex10</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A001A</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/ex-10</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/ex-10</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>10</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc1ex11</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A001B</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/ex-11</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/ex-11</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>11</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc1ex12</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A001C</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/ex-12</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/ex-12</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>12</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc1ex13</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A001D</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/ex-13</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/ex-13</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>13</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc1ex14</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A001E</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/ex-14</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/ex-14</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>14</default>
+    </attribute>
+</targetInstance>
+
+<!-- Venice n0p1 core units -->
 
 <targetInstance>
     <id>sys0node0proc1ex1core0</id>
@@ -867,6 +1249,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-1/ex-1/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -882,6 +1268,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-1/ex-2/core-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>2</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -895,6 +1285,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-1/ex-3/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>3</default>
     </attribute>
 </targetInstance>
 
@@ -910,6 +1304,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-1/ex-4/core-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>4</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -923,6 +1321,136 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-1/ex-5/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>5</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc1ex6core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B0016</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/ex-6/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/ex-6/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>6</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc1ex9core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B0019</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/ex-9/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/ex-9/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>9</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc1ex10core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B001A</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/ex-10/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/ex-10/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>10</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc1ex11core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B001B</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/ex-11/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/ex-11/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>11</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc1ex12core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B001C</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/ex-12/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/ex-12/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>12</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc1ex13core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B001D</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/ex-13/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/ex-13/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>13</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc1ex14core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B001E</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/ex-14/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/ex-14/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>14</default>
     </attribute>
 </targetInstance>
 
@@ -1361,20 +1889,6 @@
 <!-- Venice n0p2 EX units -->
 
 <targetInstance>
-    <id>sys0node0proc2ex0</id>
-    <type>unit-ex-venice</type>
-    <attribute><id>HUID</id><default>0x000A0020</default></attribute>
-        <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-2/ex-0</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/ex-0</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
     <id>sys0node0proc2ex1</id>
     <type>unit-ex-venice</type>
     <attribute><id>HUID</id><default>0x000A0021</default></attribute>
@@ -1385,6 +1899,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-2/ex-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -1400,6 +1918,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-2/ex-2</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>2</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -1413,6 +1935,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-2/ex-3</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>3</default>
     </attribute>
 </targetInstance>
 
@@ -1428,6 +1954,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-2/ex-4</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>4</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -1442,23 +1972,139 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-2/ex-5</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>5</default>
+    </attribute>
 </targetInstance>
 
-<!-- Venice n0p2 core units -->
-
 <targetInstance>
-    <id>sys0node0proc2ex0core0</id>
-    <type>unit-core-venice</type>
-    <attribute><id>HUID</id><default>0x000B0020</default></attribute>
-    <attribute>
+    <id>sys0node0proc2ex6</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A0026</default></attribute>
+        <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-2/ex-0/core-0</default>
+        <default>physical:sys-0/node-0/proc-2/ex-6</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/ex-0/core-0</default>
+        <default>affinity:sys-0/node-0/proc-2/ex-6</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>6</default>
     </attribute>
 </targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc2ex9</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A0029</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-2/ex-9</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-2/ex-9</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>9</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc2ex10</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A002A</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-2/ex-10</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-2/ex-10</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>10</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc2ex11</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A002B</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-2/ex-11</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-2/ex-11</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>11</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc2ex12</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A002C</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-2/ex-12</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-2/ex-12</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>12</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc2ex13</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A002D</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-2/ex-13</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-2/ex-13</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>13</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc2ex14</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A002E</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-2/ex-14</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-2/ex-14</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>14</default>
+    </attribute>
+</targetInstance>
+
+<!-- Venice n0p2 core units -->
 
 <targetInstance>
     <id>sys0node0proc2ex1core0</id>
@@ -1471,6 +2117,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-2/ex-1/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -1486,6 +2136,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-2/ex-2/core-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>2</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -1499,6 +2153,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-2/ex-3/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>3</default>
     </attribute>
 </targetInstance>
 
@@ -1514,6 +2172,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-2/ex-4/core-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>4</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -1527,6 +2189,136 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-2/ex-5/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>5</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc2ex6core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B0026</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-2/ex-6/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-2/ex-6/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>6</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc2ex9core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B0029</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-2/ex-9/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-2/ex-9/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>9</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc2ex10core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B002A</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-2/ex-10/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-2/ex-10/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>10</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc2ex11core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B002B</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-2/ex-11/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-2/ex-11/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>11</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc2ex12core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B002C</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-2/ex-12/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-2/ex-12/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>12</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc2ex13core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B002D</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-2/ex-13/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-2/ex-13/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>13</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc2ex14core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B002E</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-2/ex-14/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-2/ex-14/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>14</default>
     </attribute>
 </targetInstance>
 
@@ -1965,20 +2757,6 @@
 <!-- Venice n0p3 EX units -->
 
 <targetInstance>
-    <id>sys0node0proc3ex0</id>
-    <type>unit-ex-venice</type>
-    <attribute><id>HUID</id><default>0x000A0030</default></attribute>
-        <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-3/ex-0</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/ex-0</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
     <id>sys0node0proc3ex1</id>
     <type>unit-ex-venice</type>
     <attribute><id>HUID</id><default>0x000A0031</default></attribute>
@@ -1989,6 +2767,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-3/ex-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -2004,6 +2786,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-3/ex-2</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>2</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -2017,6 +2803,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-3/ex-3</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>3</default>
     </attribute>
 </targetInstance>
 
@@ -2032,6 +2822,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-3/ex-4</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>4</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -2046,23 +2840,139 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-3/ex-5</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>5</default>
+    </attribute>
 </targetInstance>
 
-<!-- Venice n0p3 core units -->
-
 <targetInstance>
-    <id>sys0node0proc3ex0core0</id>
-    <type>unit-core-venice</type>
-    <attribute><id>HUID</id><default>0x000B0030</default></attribute>
-    <attribute>
+    <id>sys0node0proc3ex6</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A0036</default></attribute>
+        <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-3/ex-0/core-0</default>
+        <default>physical:sys-0/node-0/proc-3/ex-6</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/ex-0/core-0</default>
+        <default>affinity:sys-0/node-0/proc-3/ex-6</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>6</default>
     </attribute>
 </targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc3ex9</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A0039</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-3/ex-9</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-3/ex-9</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>9</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc3ex10</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A003A</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-3/ex-10</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-3/ex-10</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>10</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc3ex11</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A003B</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-3/ex-11</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-3/ex-11</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>11</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc3ex12</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A003C</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-3/ex-12</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-3/ex-12</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>12</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc3ex13</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A003D</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-3/ex-13</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-3/ex-13</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>13</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc3ex14</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A003E</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-3/ex-14</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-3/ex-14</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>14</default>
+    </attribute>
+</targetInstance>
+
+<!-- Venice n0p3 core units -->
 
 <targetInstance>
     <id>sys0node0proc3ex1core0</id>
@@ -2075,6 +2985,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-3/ex-1/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -2090,6 +3004,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-3/ex-2/core-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>2</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -2103,6 +3021,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-3/ex-3/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>3</default>
     </attribute>
 </targetInstance>
 
@@ -2118,6 +3040,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-3/ex-4/core-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>4</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -2131,6 +3057,136 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-3/ex-5/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>5</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc3ex6core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B0036</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-3/ex-6/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-3/ex-6/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>6</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc3ex9core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B0039</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-3/ex-9/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-3/ex-9/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>9</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc3ex10core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B003A</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-3/ex-10/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-3/ex-10/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>10</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc3ex11core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B003B</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-3/ex-11/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-3/ex-11/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>11</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc3ex12core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B003C</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-3/ex-12/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-3/ex-12/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>12</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc3ex13core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B003D</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-3/ex-13/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-3/ex-13/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>13</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc3ex14core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B003E</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-3/ex-14/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-3/ex-14/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>14</default>
     </attribute>
 </targetInstance>
 
@@ -2567,20 +3623,6 @@
 <!-- Venice n0p4 EX units -->
 
 <targetInstance>
-    <id>sys0node0proc4ex0</id>
-    <type>unit-ex-venice</type>
-    <attribute><id>HUID</id><default>0x000A0040</default></attribute>
-        <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-4/ex-0</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/ex-0</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
     <id>sys0node0proc4ex1</id>
     <type>unit-ex-venice</type>
     <attribute><id>HUID</id><default>0x000A0041</default></attribute>
@@ -2591,6 +3633,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-4/ex-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -2606,6 +3652,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-4/ex-2</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>2</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -2619,6 +3669,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-4/ex-3</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>3</default>
     </attribute>
 </targetInstance>
 
@@ -2634,6 +3688,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-4/ex-4</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>4</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -2648,23 +3706,139 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-4/ex-5</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>5</default>
+    </attribute>
 </targetInstance>
 
-<!-- Venice n0p4 core units -->
-
 <targetInstance>
-    <id>sys0node0proc4ex0core0</id>
-    <type>unit-core-venice</type>
-    <attribute><id>HUID</id><default>0x000B0040</default></attribute>
-    <attribute>
+    <id>sys0node0proc4ex6</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A0046</default></attribute>
+        <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-4/ex-0/core-0</default>
+        <default>physical:sys-0/node-0/proc-4/ex-6</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/ex-0/core-0</default>
+        <default>affinity:sys-0/node-0/proc-4/ex-6</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>6</default>
     </attribute>
 </targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc4ex9</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A0049</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-4/ex-9</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-4/ex-9</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>9</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc4ex10</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A004A</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-4/ex-10</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-4/ex-10</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>10</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc4ex11</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A004B</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-4/ex-11</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-4/ex-11</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>11</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc4ex12</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A004C</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-4/ex-12</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-4/ex-12</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>12</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc4ex13</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A004D</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-4/ex-13</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-4/ex-13</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>13</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc4ex14</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A004E</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-4/ex-14</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-4/ex-14</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>14</default>
+    </attribute>
+</targetInstance>
+
+<!-- Venice n0p4 core units -->
 
 <targetInstance>
     <id>sys0node0proc4ex1core0</id>
@@ -2677,6 +3851,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-4/ex-1/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -2692,6 +3870,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-4/ex-2/core-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>2</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -2705,6 +3887,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-4/ex-3/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>3</default>
     </attribute>
 </targetInstance>
 
@@ -2720,6 +3906,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-4/ex-4/core-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>4</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -2733,6 +3923,136 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-4/ex-5/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>5</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc4ex6core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B0046</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-4/ex-6/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-4/ex-6/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>6</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc4ex9core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B0049</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-4/ex-9/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-4/ex-9/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>9</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc4ex10core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B004A</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-4/ex-10/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-4/ex-10/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>10</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc4ex11core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B004B</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-4/ex-11/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-4/ex-11/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>11</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc4ex12core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B004C</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-4/ex-12/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-4/ex-12/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>12</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc4ex13core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B004D</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-4/ex-13/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-4/ex-13/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>13</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc4ex14core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B004E</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-4/ex-14/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-4/ex-14/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>14</default>
     </attribute>
 </targetInstance>
 
@@ -3171,20 +4491,6 @@
 <!-- Venice n0p5 EX units -->
 
 <targetInstance>
-    <id>sys0node0proc5ex0</id>
-    <type>unit-ex-venice</type>
-    <attribute><id>HUID</id><default>0x000A0050</default></attribute>
-        <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-5/ex-0</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/ex-0</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
     <id>sys0node0proc5ex1</id>
     <type>unit-ex-venice</type>
     <attribute><id>HUID</id><default>0x000A0051</default></attribute>
@@ -3195,6 +4501,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-5/ex-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -3210,6 +4520,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-5/ex-2</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>2</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -3223,6 +4537,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-5/ex-3</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>3</default>
     </attribute>
 </targetInstance>
 
@@ -3238,6 +4556,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-5/ex-4</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>4</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -3252,23 +4574,139 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-5/ex-5</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>5</default>
+    </attribute>
 </targetInstance>
 
-<!-- Venice n0p5 core units -->
-
 <targetInstance>
-    <id>sys0node0proc5ex0core0</id>
-    <type>unit-core-venice</type>
-    <attribute><id>HUID</id><default>0x000B0050</default></attribute>
-    <attribute>
+    <id>sys0node0proc5ex6</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A0056</default></attribute>
+        <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-5/ex-0/core-0</default>
+        <default>physical:sys-0/node-0/proc-5/ex-6</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/ex-0/core-0</default>
+        <default>affinity:sys-0/node-0/proc-5/ex-6</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>6</default>
     </attribute>
 </targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc5ex9</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A0059</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-5/ex-9</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-5/ex-9</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>9</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc5ex10</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A005A</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-5/ex-10</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-5/ex-10</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>10</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc5ex11</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A005B</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-5/ex-11</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-5/ex-11</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>11</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc5ex12</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A005C</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-5/ex-12</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-5/ex-12</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>12</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc5ex13</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A005D</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-5/ex-13</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-5/ex-13</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>13</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc5ex14</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A005E</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-5/ex-14</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-5/ex-14</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>14</default>
+    </attribute>
+</targetInstance>
+
+<!-- Venice n0p5 core units -->
 
 <targetInstance>
     <id>sys0node0proc5ex1core0</id>
@@ -3281,6 +4719,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-5/ex-1/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -3296,6 +4738,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-5/ex-2/core-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>2</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -3309,6 +4755,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-5/ex-3/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>3</default>
     </attribute>
 </targetInstance>
 
@@ -3324,6 +4774,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-5/ex-4/core-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>4</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -3337,6 +4791,136 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-5/ex-5/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>5</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc5ex6core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B0056</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-5/ex-6/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-5/ex-6/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>6</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc5ex9core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B0059</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-5/ex-9/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-5/ex-9/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>9</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc5ex10core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B005A</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-5/ex-10/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-5/ex-10/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>10</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc5ex11core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B005B</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-5/ex-11/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-5/ex-11/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>11</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc5ex12core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B005C</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-5/ex-12/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-5/ex-12/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>12</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc5ex13core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B005D</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-5/ex-13/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-5/ex-13/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>13</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc5ex14core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B005E</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-5/ex-14/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-5/ex-14/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>14</default>
     </attribute>
 </targetInstance>
 
@@ -3773,20 +5357,6 @@
 <!-- Venice n0p6 EX units -->
 
 <targetInstance>
-    <id>sys0node0proc6ex0</id>
-    <type>unit-ex-venice</type>
-    <attribute><id>HUID</id><default>0x000A0060</default></attribute>
-        <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-6/ex-0</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/ex-0</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
     <id>sys0node0proc6ex1</id>
     <type>unit-ex-venice</type>
     <attribute><id>HUID</id><default>0x000A0061</default></attribute>
@@ -3797,6 +5367,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-6/ex-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -3812,6 +5386,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-6/ex-2</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>2</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -3825,6 +5403,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-6/ex-3</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>3</default>
     </attribute>
 </targetInstance>
 
@@ -3840,6 +5422,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-6/ex-4</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>4</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -3854,23 +5440,139 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-6/ex-5</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>5</default>
+    </attribute>
 </targetInstance>
 
-<!-- Venice n0p6 core units -->
-
 <targetInstance>
-    <id>sys0node0proc6ex0core0</id>
-    <type>unit-core-venice</type>
-    <attribute><id>HUID</id><default>0x000B0060</default></attribute>
-    <attribute>
+    <id>sys0node0proc6ex6</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A0066</default></attribute>
+        <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-6/ex-0/core-0</default>
+        <default>physical:sys-0/node-0/proc-6/ex-6</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/ex-0/core-0</default>
+        <default>affinity:sys-0/node-0/proc-6/ex-6</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>6</default>
     </attribute>
 </targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc6ex9</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A0069</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-6/ex-9</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-6/ex-9</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>9</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc6ex10</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A006A</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-6/ex-10</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-6/ex-10</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>10</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc6ex11</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A006B</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-6/ex-11</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-6/ex-11</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>11</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc6ex12</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A006C</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-6/ex-12</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-6/ex-12</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>12</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc6ex13</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A006D</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-6/ex-13</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-6/ex-13</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>13</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc6ex14</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A006E</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-6/ex-14</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-6/ex-14</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>14</default>
+    </attribute>
+</targetInstance>
+
+<!-- Venice n0p6 core units -->
 
 <targetInstance>
     <id>sys0node0proc6ex1core0</id>
@@ -3883,6 +5585,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-6/ex-1/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -3898,6 +5604,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-6/ex-2/core-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>2</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -3911,6 +5621,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-6/ex-3/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>3</default>
     </attribute>
 </targetInstance>
 
@@ -3926,6 +5640,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-6/ex-4/core-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>4</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -3939,6 +5657,136 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-6/ex-5/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>5</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc6ex6core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B0066</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-6/ex-6/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-6/ex-6/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>6</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc6ex9core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B0069</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-6/ex-9/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-6/ex-9/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>9</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc6ex10core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B006A</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-6/ex-10/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-6/ex-10/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>10</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc6ex11core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B006B</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-6/ex-11/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-6/ex-11/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>11</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc6ex12core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B006C</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-6/ex-12/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-6/ex-12/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>12</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc6ex13core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B006D</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-6/ex-13/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-6/ex-13/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>13</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc6ex14core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B006E</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-6/ex-14/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-6/ex-14/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>14</default>
     </attribute>
 </targetInstance>
 
@@ -4376,20 +6224,6 @@
 <!-- Venice n0p7 EX units -->
 
 <targetInstance>
-    <id>sys0node0proc7ex0</id>
-    <type>unit-ex-venice</type>
-    <attribute><id>HUID</id><default>0x000A0070</default></attribute>
-        <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-7/ex-0</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/ex-0</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
     <id>sys0node0proc7ex1</id>
     <type>unit-ex-venice</type>
     <attribute><id>HUID</id><default>0x000A0071</default></attribute>
@@ -4400,6 +6234,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-7/ex-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -4415,6 +6253,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-7/ex-2</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>2</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -4428,6 +6270,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-7/ex-3</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>3</default>
     </attribute>
 </targetInstance>
 
@@ -4443,6 +6289,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-7/ex-4</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>4</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -4457,23 +6307,139 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-7/ex-5</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>5</default>
+    </attribute>
 </targetInstance>
 
-<!-- Venice n0p7 core units -->
-
 <targetInstance>
-    <id>sys0node0proc7ex0core0</id>
-    <type>unit-core-venice</type>
-    <attribute><id>HUID</id><default>0x000B0070</default></attribute>
-    <attribute>
+    <id>sys0node0proc7ex6</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A0076</default></attribute>
+        <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-7/ex-0/core-0</default>
+        <default>physical:sys-0/node-0/proc-7/ex-6</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/ex-0/core-0</default>
+        <default>affinity:sys-0/node-0/proc-7/ex-6</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>6</default>
     </attribute>
 </targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc7ex9</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A0079</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-7/ex-9</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-7/ex-9</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>9</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc7ex10</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A007A</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-7/ex-10</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-7/ex-10</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>10</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc7ex11</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A007B</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-7/ex-11</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-7/ex-11</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>11</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc7ex12</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A007C</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-7/ex-12</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-7/ex-12</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>12</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc7ex13</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A007D</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-7/ex-13</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-7/ex-13</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>13</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc7ex14</id>
+    <type>unit-ex-venice</type>
+    <attribute><id>HUID</id><default>0x000A007E</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-7/ex-14</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-7/ex-14</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>14</default>
+    </attribute>
+</targetInstance>
+
+<!-- Venice n0p7 core units -->
 
 <targetInstance>
     <id>sys0node0proc7ex1core0</id>
@@ -4486,6 +6452,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-7/ex-1/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -4501,6 +6471,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-7/ex-2/core-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>2</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -4514,6 +6488,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-7/ex-3/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>3</default>
     </attribute>
 </targetInstance>
 
@@ -4529,6 +6507,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-7/ex-4/core-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>4</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -4542,6 +6524,136 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-7/ex-5/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>5</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc7ex6core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B0076</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-7/ex-6/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-7/ex-6/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>6</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc7ex9core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B0079</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-7/ex-9/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-7/ex-9/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>9</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc7ex10core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B007A</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-7/ex-10/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-7/ex-10/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>10</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc7ex11core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B007B</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-7/ex-11/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-7/ex-11/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>11</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc7ex12core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B007C</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-7/ex-12/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-7/ex-12/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>12</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc7ex13core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B007D</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-7/ex-13/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-7/ex-13/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>13</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc7ex14core0</id>
+    <type>unit-core-venice</type>
+    <attribute><id>HUID</id><default>0x000B007E</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-7/ex-14/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-7/ex-14/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>14</default>
     </attribute>
 </targetInstance>
 
