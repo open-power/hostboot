@@ -41,6 +41,7 @@
 #include <vmmconst.h>
 #include <targeting/common/attributes.H>
 #include <devicefw/userif.H>
+#include <sys/time.h>
 
 #define INTR_TRACE_NAME INTR_COMP_NAME
 
@@ -217,14 +218,14 @@ void IntrRp::msgHandler()
                     ext_intr_t type = NO_INTERRUPT;
 
                     // xirr was read by interrupt message handler.
-                    // Passed in as data[0]
-                    uint32_t xirr = static_cast<uint32_t>(msg->data[0]);
-                    PIR_t pir = static_cast<PIR_t>(msg->data[1]);
+                    // Passed in as data[1]
+                    uint32_t xirr = static_cast<uint32_t>(msg->data[1]);
+                    // data[0] has the PIR
+                    PIR_t pir = static_cast<PIR_t>(msg->data[0]);
 
-                    // data[1] has the PIR
+                    uint64_t baseAddr = iv_baseAddr + cpuOffsetAddr(pir);
                     uint32_t * xirrAddress =
-                        reinterpret_cast<uint32_t*>(iv_baseAddr + XIRR_OFFSET +
-                                                    cpuOffsetAddr(pir));
+                        reinterpret_cast<uint32_t*>(baseAddr + XIRR_OFFSET);
 
                     // type = XISR = XIRR[8:31]
                     // priority = XIRR[0:7]
@@ -259,6 +260,15 @@ void IntrRp::msgHandler()
                         }
                         msg_free(rmsg);
                     }
+                    else if (type == INTERPROC)
+                    {
+                        // Ignore "spurious" IPIs (handled below).
+
+                        // Note that we could get an INTERPROC interrupt
+                        // and handle it through the above registration list
+                        // as well.  This is to catch the case where no one
+                        // has registered for an IPI.
+                    }
                     else  // no queue registered for this interrupt type
                     {
                         // Throw it away for now.
@@ -267,6 +277,45 @@ void IntrRp::msgHandler()
                                   "nothing registered to handle it. "
                                   "Ignoreing it.",
                                   (uint32_t)type);
+                    }
+
+                    // Handle IPIs special since they're used for waking up
+                    // cores and have special clearing requirements.
+                    if (type == INTERPROC)
+                    {
+                        // Clear IPI request.
+                        volatile uint8_t * mfrr =
+                            reinterpret_cast<uint8_t*>(baseAddr + MFRR_OFFSET);
+                        (*mfrr) = 0xff;
+                        eieio();  // Force mfrr clear before xirr EIO.
+
+                        // Deal with pending IPIs.
+                        PIR_t core_pir = pir; core_pir.threadId = 0;
+                        if (iv_ipisPending.count(core_pir))
+                        {
+                            TRACFCOMP(g_trac_intr,INFO_MRK
+                                      "IPI wakeup received for %d", pir.word);
+
+                            IPI_Info_t& ipiInfo = iv_ipisPending[core_pir];
+
+                            ipiInfo.first &= ~(1 << pir.threadId);
+
+                            if (0 == ipiInfo.first)
+                            {
+                                msg_t* ipiMsg = ipiInfo.second;
+                                iv_ipisPending.erase(core_pir);
+
+                                ipiMsg->data[1] = 0;
+                                msg_respond(iv_msgQ, ipiMsg);
+                            }
+                            else
+                            {
+                                TRACDCOMP(g_trac_intr,INFO_MRK
+                                          "IPI still pending for %x",
+                                          ipiInfo.first);
+                            }
+
+                        }
                     }
 
                     // Writing the XIRR with the same value read earlier
@@ -330,10 +379,9 @@ void IntrRp::msgHandler()
 
             //  Called when a new cpu becomes active other than the master
             //  Expect a call for each new core
-            case MSG_INTR_ADD_CPU_USR:
             case MSG_INTR_ADD_CPU:
                 {
-                    PIR_t pir = msg->data[0];
+                    PIR_t pir = msg->data[1];
                     pir.threadId = 0;
                     iv_cpuList.push_back(pir);
 
@@ -342,17 +390,15 @@ void IntrRp::msgHandler()
                               pir.nodeId, pir.chipId, pir.coreId,
                               pir.threadId);
 
-
                     size_t threads = cpu_thread_count();
+                    iv_ipisPending[pir] = IPI_Info_t((1 << threads)-1, msg);
 
                     for(size_t thread = 0; thread < threads; ++thread)
                     {
                         pir.threadId = thread;
                         initInterruptPresenter(pir);
+                        sendIPI(pir);
                     }
-
-                    msg->data[1] = 0;
-                    msg_respond(iv_msgQ, msg);
                 }
                 break;
 
@@ -383,7 +429,7 @@ errlHndl_t IntrRp::setBAR(TARGETING::Target * i_target,
     uint64_t barValue = static_cast<uint64_t>(ICPBAR_VAL) +
             (8 * i_pir.nodeId) + i_pir.chipId;
     barValue <<= 34;
-    barValue |= 1ULL << (63 - ICPBAR_EN);  
+    barValue |= 1ULL << (63 - ICPBAR_EN);
 
     TRACFCOMP(g_trac_intr,"INTR: Target %p. ICPBAR value: 0x%016lx",
               i_target,barValue);
@@ -458,11 +504,13 @@ void IntrRp::initInterruptPresenter(const PIR_t i_pir) const
               cpuOffsetAddr(i_pir));
     if(i_pir.word == iv_masterCpu.word)
     {
-        *cppr = 0xff;
+        *cppr = 0xff;      // Allow all interrupts on master.
     }
     else
     {
-        *cppr = 0;      // no interrupts allowed except on master
+        *cppr = 0x01;      // Allow only priority 0 interrupts on non-masters.
+                           // We use priority 0 to deliver IPIs for waking up
+                           // a core.
     }
 
     // Links are intended to be set up in rings.  If an interrupt ends up
@@ -525,6 +573,17 @@ void IntrRp::deconfigureInterruptPresenter(const PIR_t i_pir) const
     *(plinkReg + 2) = 0;
 }
 
+
+void IntrRp::sendIPI(const PIR_t i_pir) const
+{
+    uint64_t baseAddr = iv_baseAddr + cpuOffsetAddr(i_pir);
+    volatile uint8_t * mfrr =
+        reinterpret_cast<uint8_t*>(baseAddr + MFRR_OFFSET);
+
+    eieio(); sync();
+    MAGIC_INSTRUCTION(MAGIC_SIMICS_CORESTATESAVE);
+    (*mfrr) = 0x00;
+}
 
 
 errlHndl_t IntrRp::checkAddress(uint64_t i_addr)

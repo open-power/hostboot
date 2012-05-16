@@ -75,6 +75,9 @@ struct cpu_t
      */
     void* scheduler_extra;
 
+    /** Location for task delay-list, managed by TimeManager. */
+    void* delay_list;
+
     /** Pointer to the idle task for this CPU */
     task_t* idle_task;
 

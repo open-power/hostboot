@@ -92,10 +92,25 @@ ProcessorCoreType cpu_core_type();
 uint8_t cpu_dd_level();
 
 /** @fn cpu_thread_count()
- *  @breif Get the number of threads per cpu for this proctype
+ *  @brief Get the number of threads per cpu for this proctype
  *  @return # of threads per cpu
  */
 size_t cpu_thread_count();
+
+/** @fn cpu_start_core
+ *  @brief Have the kernel start a new core.
+ *
+ *  @param[in] pir - PIR value of the first thread on the core.
+ *
+ *  @note The kernel will start all threads on the requested core even
+ *        though the callee only requests with a single PIR value.
+ *
+ *  @return 0 or -(errno) on failure.
+ *
+ *  @retval -ENXIO - The core ID was outside of the range the kernel is
+ *                   prepared to support.
+ */
+int cpu_start_core(uint64_t pir);
 
 #ifdef __cplusplus
 }

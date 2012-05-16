@@ -324,6 +324,12 @@ inline void MAGIC_INSTRUCTION(int _n)
 
 enum
 {
+    MAGIC_SIMICS_CORESTATESAVE = 10, // Indicate to the PHYP model of simics
+                                     // that we are preparing to wake up a core
+                                     // or thread.  This allows them to save
+                                     // some state from the core doing the
+                                     // wakeup to apply into the woken one.
+
     MAGIC_SHUTDOWN            =  7006, // KernelMisc::shutdown() called.
     MAGIC_BREAK               =  7007, // hard-code a breakpoint
     MAGIC_CONTINUOUS_TRACE    =  7055, // extract mixed trace buffer

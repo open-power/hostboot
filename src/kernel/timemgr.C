@@ -24,6 +24,7 @@
 #include <kernel/scheduler.H>
 #include <util/singleton.H>
 #include <kernel/task.H>
+#include <kernel/cpumgr.H>
 
 uint64_t TimeManager::iv_timebaseFreq = 0xFFFFFFFF;
 
@@ -35,6 +36,16 @@ void TimeManager::init()
 void TimeManager::_init()
 {
     iv_timebaseFreq = 512000000ULL;
+}
+
+void TimeManager::init_cpu(cpu_t* cpu)
+{
+    Singleton<TimeManager>::instance()._init_cpu(cpu);
+}
+
+void TimeManager::_init_cpu(cpu_t* cpu)
+{
+    cpu->delay_list = new delaylist_t;
 }
 
 uint64_t TimeManager::convertSecToTicks(uint64_t i_sec, uint64_t i_nsec)
@@ -68,13 +79,13 @@ void TimeManager::_delayTask(task_t* t, uint64_t i_sec, uint64_t i_nsec)
     _TimeManager_Delay_t* node = new _TimeManager_Delay_t();
 
     node->key = this->getCurrentTimeBase() +
-		this->convertSecToTicks(i_sec, i_nsec);
+                this->convertSecToTicks(i_sec, i_nsec);
     node->task = t;
 
     t->state = TASK_STATE_BLOCK_SLEEP;
     t->state_info = (void*)node->key;
 
-    iv_taskList[getPIR()].insert(node);
+    _get_delaylist()->insert(node);
 }
 
 void TimeManager::checkReleaseTasks(Scheduler* s)
@@ -87,9 +98,14 @@ void TimeManager::_checkReleaseTasks(Scheduler* s)
     uint64_t l_currentTime = getCurrentTimeBase();
     _TimeManager_Delay_t* node = NULL;
 
-    while(NULL != (node = iv_taskList[getPIR()].remove_if(l_currentTime)))
+    while(NULL != (node = _get_delaylist()->remove_if(l_currentTime)))
     {
-	s->addTask(node->task);
-	delete node;
+        s->addTask(node->task);
+        delete node;
     }
+}
+
+inline TimeManager::delaylist_t* TimeManager::_get_delaylist()
+{
+    return static_cast<delaylist_t*>(CpuManager::getCurrentCPU()->delay_list);
 }

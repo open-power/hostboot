@@ -531,7 +531,7 @@ namespace Util
                  * This is a fairly straight-forward cast since no address
                  * translation is necessary.
                  */
-                const void** makeSplayTreeValue(const value_type& x)
+                const void** makeSplayTreeValue(const value_type& x) const
                 {
                     return reinterpret_cast<const void**>(
                                 const_cast<value_type*>(&x));

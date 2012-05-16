@@ -99,8 +99,8 @@ void InterruptMsgHdlr::handleInterrupt()
     if(cv_instance)
     {
         cv_instance->sendMessage(MSG_INTR_EXTERN,
-                                 (void *)xirr,
                                  (void *)pir,
+                                 (void *)xirr,
                                  NULL);
     }
 
@@ -114,13 +114,18 @@ void InterruptMsgHdlr::handleInterrupt()
 
 }
 
-
-// TODO where does this get called from? (story 39878)
 void InterruptMsgHdlr::addCpuCore(uint64_t i_pir)
 {
+    task_t* t = TaskManager::getCurrentTask();
+
     if(cv_instance)
     {
-        cv_instance->sendMessage(MSG_INTR_ADD_CPU,(void *)i_pir,NULL,NULL);
+        // To avoid conflict with interrupts on thread i_pir, change the key
+        // for the message to be an invalid PIR.
+        uint64_t pir_key = i_pir | 0x8000000000000000ul;
+
+        cv_instance->sendMessage(MSG_INTR_ADD_CPU,
+                                 (void*)pir_key,(void *)i_pir,t);
     }
 }
 

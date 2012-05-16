@@ -70,3 +70,9 @@ size_t cpu_thread_count()
     return threads;
 }
 
+int cpu_start_core(uint64_t pir)
+{
+    return reinterpret_cast<int64_t>(
+        _syscall1(MISC_CPUSTARTCORE, reinterpret_cast<void*>(pir)));
+}
+

@@ -32,7 +32,7 @@
 #endif
 
 // make TODO VFS_MODULE_MAX equal to the actual number of modules in the base image (+ 2?)
-#define VFS_MODULE_MAX 64
+#define VFS_MODULE_MAX 16
 // Extended use 4 4k pages
 //  Extended Module Virtual address at 1GB
 #define VFS_EXTENDED_MODULE_VADDR (1 * 1024 * 1024 * 1024)
@@ -51,7 +51,7 @@
 #define VFS_MODULE_DEFINE_START(f) \
     extern "C" void VFS_SYMBOL_START(void* args) \
     { \
-	f(args); \
+        f(args); \
     }
 
 #ifdef __cplusplus

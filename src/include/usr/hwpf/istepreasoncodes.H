@@ -50,6 +50,7 @@ enum istepModuleId
     ISTEP_STARTPAYLOAD_EXECUTE_UNIT_TESTS               = 0x01,
     ISTEP_START_PAYLOAD_CALL_SHUTDOWN                   = 0x02,
     ISTEP_START_PAYLOAD_NOTIFY_FSP                      = 0x03,
+    ISTEP_ACTIVATE_SLAVE_CORES                          = 0x04,
 };
 
 /**
@@ -64,6 +65,7 @@ enum istepReasonCode
     ISTEP_CXXTEST_FAILED_TEST                   = ISTEP_COMP_ID | 0x01,
     ISTEP_TARGET_NULL                           = ISTEP_COMP_ID | 0x02,
     ISTEP_MBOX_MSG_NULL                         = ISTEP_COMP_ID | 0x03,
+    ISTEP_BAD_RC                                = ISTEP_COMP_ID | 0x04,
 };
 
 };  // end ISTEP

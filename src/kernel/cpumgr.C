@@ -36,8 +36,10 @@
 #include <kernel/cpuid.H>
 #include <kernel/ptmgr.H>
 #include <kernel/heapmgr.H>
+#include <kernel/intmsghandler.H>
+#include <errno.h>
 
-cpu_t* CpuManager::cv_cpus[CpuManager::MAXCPUS] = { NULL };
+cpu_t** CpuManager::cv_cpus = NULL;
 bool CpuManager::cv_shutdown_requested = false;
 uint64_t CpuManager::cv_shutdown_status = 0;
 Barrier CpuManager::cv_barrier;
@@ -49,14 +51,9 @@ InteractiveDebug CpuManager::cv_interactive_debug;
 CpuManager::CpuManager()
 {
     for (int i = 0; i < MAXCPUS; i++)
-	cv_cpus[i] = NULL;
+        cv_cpus[i] = NULL;
 
     memset(&cv_interactive_debug, '\0', sizeof(cv_interactive_debug));
-}
-
-cpu_t* CpuManager::getCurrentCPU()
-{
-    return cv_cpus[getPIR()];
 }
 
 cpu_t* CpuManager::getMasterCPU()
@@ -77,27 +74,13 @@ void CpuManager::init()
     // enter the kernel, so we skip initializing all the other CPUs for now.
 
     // Determine number of threads on this core.
-    size_t threads = -1;
-    switch (CpuID::getCpuType())
-    {
-        case CORE_POWER7:
-        case CORE_POWER7_PLUS:
-            threads = 4;
-            break;
+    size_t threads = getThreadCount();
 
-        case CORE_POWER8_VENICE:
-        case CORE_POWER8_MURANO:
-            threads = 8;
-            break;
-
-        case CORE_UNKNOWN:
-        default:
-            kassert(false);
-            break;
-    }
+    // Set up CPU structure.
+    cv_cpus = new cpu_t*[MAXCPUS];
 
     // Create CPU objects starting at the thread-0 for this core.
-    size_t baseCpu = getPIR() & ~(threads-1);
+    size_t baseCpu = getCpuId() & ~(threads-1);
     for (size_t i = 0; i < threads; i++)
         Singleton<CpuManager>::instance().startCPU(i + baseCpu);
 }
@@ -119,22 +102,22 @@ void CpuManager::startCPU(ssize_t i)
     bool currentCPU = false;
     if (i < 0)
     {
-	i = getCpuId();
-	currentCPU = true;
+        i = getCpuId();
+        currentCPU = true;
     }
     else if (getCpuId() == (uint64_t)i)
     {
-	currentCPU = true;
+        currentCPU = true;
     }
 
     // Initialize CPU structure.
     if (NULL == cv_cpus[i])
     {
-	printk("Starting CPU %ld...", i);
-	cpu_t* cpu = cv_cpus[i] = new cpu_t;
+        printk("Starting CPU %ld...", i);
+        cpu_t* cpu = cv_cpus[i] = new cpu_t;
 
-	// Initialize CPU.
-	cpu->cpu = i;
+        // Initialize CPU.
+        cpu->cpu = i;
         if (currentCPU)
         {
             cpu->master = true;
@@ -143,18 +126,21 @@ void CpuManager::startCPU(ssize_t i)
         {
             cpu->master = false;
         }
-	cpu->scheduler = &Singleton<Scheduler>::instance();
+        cpu->scheduler = &Singleton<Scheduler>::instance();
         cpu->scheduler_extra = NULL;
-	cpu->kernel_stack =
-	    (void*) (((uint64_t)PageManager::allocatePage(4)) + 16320);
+        cpu->kernel_stack =
+            (void*) (((uint64_t)PageManager::allocatePage(4)) + 16320);
         cpu->xscom_mutex = (mutex_t)MUTEX_INITIALIZER;
 
-	// Create idle task.
-	cpu->idle_task = TaskManager::createIdleTask();
-	cpu->idle_task->cpu = cpu;
+        // Create idle task.
+        cpu->idle_task = TaskManager::createIdleTask();
+        cpu->idle_task->cpu = cpu;
         cpu->periodic_count = 0;
 
-	printk("done\n");
+        // Call TimeManager setup for a CPU.
+        TimeManager::init_cpu(cpu);
+
+        printk("done\n");
     }
 
     if (currentCPU)
@@ -176,7 +162,7 @@ void CpuManager::startSlaveCPU(cpu_t* cpu)
 void CpuManager::activateCPU(cpu_t * i_cpu)
 {
     i_cpu->active = true;
-    __sync_fetch_and_add(&cv_cpuCount, 1);
+    __sync_add_and_fetch(&cv_cpuCount, 1);
     lwsync();
 }
 
@@ -245,6 +231,49 @@ void CpuManager::executePeriodics(cpu_t * i_cpu)
 
         cv_barrier.wait();
     }
+}
+
+int CpuManager::startCore(uint64_t pir)
+{
+    size_t threads = getThreadCount();
+    pir = pir & ~(threads-1);
+
+
+    if (pir >= MAXCPUS) { return -ENXIO; }
+
+    for(size_t i = 0; i < threads; i++)
+    {
+        Singleton<CpuManager>::instance().startCPU(pir + i);
+    }
+    __sync_synchronize();
+
+    InterruptMsgHdlr::addCpuCore(pir);
+
+    return 0;
+};
+
+size_t CpuManager::getThreadCount()
+{
+    size_t threads = 0;
+    switch (CpuID::getCpuType())
+    {
+        case CORE_POWER7:
+        case CORE_POWER7_PLUS:
+            threads = 4;
+            break;
+
+        case CORE_POWER8_VENICE:
+        case CORE_POWER8_MURANO:
+            threads = 8;
+            break;
+
+        case CORE_UNKNOWN:
+        default:
+            kassert(false);
+            break;
+    }
+
+    return threads;
 }
 
 void CpuManager::forceMemoryPeriodic()

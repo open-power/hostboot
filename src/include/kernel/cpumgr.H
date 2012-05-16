@@ -36,7 +36,7 @@ class CpuManager
         {
             MAXCPUS = KERNEL_MAX_SUPPORTED_CPUS,
             CPU_PERIODIC_CHECK_MEMORY = 128,    // Is this even needed anymore?
-            CPU_PERIODIC_FLUSH_PAGETABLE = 256, 
+            CPU_PERIODIC_FLUSH_PAGETABLE = 256,
             CPU_PERIODIC_DEFRAG = 949,  // TODO Any bigger not currently hit
         };
 
@@ -44,7 +44,7 @@ class CpuManager
          *  Returns a pointer to the current CPU structure by using the
          *  task structure in SPRG3.
          */
-        static cpu_t* getCurrentCPU();
+        static cpu_t* getCurrentCPU() { return cv_cpus[getPIR()]; }
         static cpu_t* getCpu(size_t i) { return cv_cpus[i]; }
 
         /** @brief Return pointer to master CPU object.
@@ -87,6 +87,13 @@ class CpuManager
          */
         static size_t getCpuCount() { return cv_cpuCount; }
 
+        /** @fn startCore
+         *  Create structures to support a core activating and start the core.
+         *
+         *  @param[in] pir - PIR value of first thread in core.
+         */
+        static int startCore(uint64_t pir);
+
 
         /** @fn forceMemoryPeriodic()
          * Force the memory free / coalesce operations to be performed on the
@@ -105,8 +112,10 @@ class CpuManager
         void startCPU(ssize_t i = -1);
         void startSlaveCPU(cpu_t*);
 
+        static size_t getThreadCount();
+
     private:
-        static cpu_t* cv_cpus[MAXCPUS]; // Need to be able to access this
+        static cpu_t** cv_cpus; // Need to be able to access this
                                         // from start.S to get initial stacks
                                         // of secondary cpus / threads.
 

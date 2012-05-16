@@ -151,7 +151,6 @@ class IntrTest: public CxxTest::TestSuite
             volatile uint8_t * mfrr =
                 reinterpret_cast<uint8_t *>(iv_masterAddr+12);
             *(mfrr) = 0x55;
-            *(mfrr) = 0xff;
 
             msg_t* msg = msg_wait(msgQ); // wait for interrupt msg
             TRACFCOMP(g_trac_intr,"Interrupt handled! Type=%lx",msg->data[0]);

@@ -272,6 +272,7 @@ _other_thread_spinlock_complete:
     mfspr r1, PIR
     lis r2, _ZN10CpuManager7cv_cpusE@h
     ori r2, r2, _ZN10CpuManager7cv_cpusE@l
+    ld r2, 0(r2)                ;// Dereference cv_cpus to get array.
     muli r3, r1, 8
     add r2, r3, r2
     ld r3, 0(r2)		;// Load CPU object.

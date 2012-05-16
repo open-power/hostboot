@@ -85,6 +85,7 @@ namespace INTR
                 XIRR_RO_OFFSET = 0,             //!< offset to XIRR (poll)
                 CPPR_OFFSET = 4,                //!< offset to CPPR (1 byte)
                 XIRR_OFFSET = 4,                //!< offset to XIRR (4 bytes)
+                MFRR_OFFSET = 12,               //!< offset to MFRR (12 bytes)
                 LINKA_OFFSET = 16,              //!< offset to LINKA register
                 LINKB_OFFSET = 20,              //!< offset to LINKB register
                 LINKC_OFFSET = 24,              //!< offset to LINKC register
@@ -149,10 +150,15 @@ namespace INTR
                 };
                 PIR_t(uint32_t i_word) : word(i_word) {}
 
-                PIR_t operator = (uint32_t i_word)
+                PIR_t operator= (uint32_t i_word)
                 {
                     word = i_word;
                     return word;
+                }
+
+                bool operator< (const PIR_t& r) const
+                {
+                    return word < r.word;
                 }
             };
 
@@ -173,6 +179,7 @@ namespace INTR
                  */
                 intr_response_t(msg_q_t i_msgQ, uint32_t i_msgType) :
                     msgQ(i_msgQ), msgType(i_msgType) {}
+
             };
 
 
@@ -185,6 +192,10 @@ namespace INTR
             uint64_t    iv_baseAddr;    //!< Base address of hw INTR regs
             PIR_t       iv_masterCpu;   //!< Master cpu PIR
             CpuList_t   iv_cpuList;     //!< Other CPU chips
+
+            typedef std::pair<uint8_t, msg_t*> IPI_Info_t;
+            typedef std::map<PIR_t, IPI_Info_t> IPI_Pending_t;
+            IPI_Pending_t iv_ipisPending;  //!< Pending IPIs.
 
 
         private:        //functions
@@ -214,7 +225,7 @@ namespace INTR
              * i_msgQ with i_intr_type in message data word 0 and then waits
              * for a response.
              */
-            errlHndl_t registerInterrupt(msg_q_t i_msgQ, 
+            errlHndl_t registerInterrupt(msg_q_t i_msgQ,
                                          uint32_t i_msg_type,
                                          ext_intr_t i_intr_type);
 
@@ -241,6 +252,12 @@ namespace INTR
             void deconfigureInterruptPresenter(const PIR_t i_pir) const;
 
             /**
+             * Issue IPI to a thread.
+             * @param[in] i_pir - The PIR value of the core to send IPI to.
+             */
+            void sendIPI(const PIR_t i_pir) const;
+
+            /**
              * Set the IPCBAR scom register
              * @param[in] i_target, the Target.
              * @param[in] i_pir, The pir for this processor
@@ -261,7 +278,7 @@ namespace INTR
                 ALWAYS_INLINE
                 uint64_t cpuOffsetAddr(const PIR_t i_pir) const
                 {
-                    // TODO when P7 support is removed then change this 
+                    // TODO when P7 support is removed then change this
                     // to use InterruptMsgHdlr::mmio_offset()
                     uint64_t offset = (i_pir.nodeId  * 8) + i_pir.chipId;
                     offset <<= 20;

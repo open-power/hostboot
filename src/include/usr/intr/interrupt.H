@@ -60,11 +60,10 @@ namespace INTR
      */
     enum msg_intr_types_t
     {
-        MSG_INTR_ADD_CPU_USR = 1,  //!< Add cpu core, data[0] = cpuid (PIR)
-        MSG_INTR_REGISTER_MSGQ,    //!< Register a msgQ
-        MSG_INTR_UNREGISTER_MSGQ,  //!< Un register a msgQ
-        MSG_INTR_ENABLE,           //!< Enable external Interrupts
-        MSG_INTR_DISABLE,          //!< Disable external interrupts
+        MSG_INTR_REGISTER_MSGQ = 1, //!< Register a msgQ
+        MSG_INTR_UNREGISTER_MSGQ,   //!< Un register a msgQ
+        MSG_INTR_ENABLE,            //!< Enable external Interrupts
+        MSG_INTR_DISABLE,           //!< Disable external interrupts
         MSG_INTR_SHUTDOWN,         //!< Call to shutdown interrupt presenter
     };
 

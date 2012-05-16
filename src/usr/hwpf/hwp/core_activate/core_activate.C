@@ -47,12 +47,16 @@
 
 //  targeting support
 #include    <targeting/common/commontargeting.H>
+#include    <targeting/common/utilFilter.H>
 
 //  fapi support
 #include    <fapi.H>
 #include    <fapiPlatHwpInvoker.H>
+#include    <hwpf/istepreasoncodes.H>
 
 #include    "core_activate.H"
+#include    <sys/task.h>
+#include    <sys/misc.h>
 
 //  Uncomment these files as they become available:
 // #include    "host_activate_master/host_activate_master.H"
@@ -64,7 +68,7 @@ namespace   CORE_ACTIVATE
 
 using   namespace   TARGETING;
 using   namespace   fapi;
-
+using   namespace   ISTEP;
 
 
 //
@@ -131,38 +135,71 @@ void    call_host_activate_slave_cores( void    *io_pArgs )
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_activate_slave_cores entry" );
 
-#if 0
     // @@@@@    CUSTOM BLOCK:   @@@@@
-    //  figure out what targets we need
-    //  customize any other inputs
-    //  set up loops to go through all targets (if parallel, spin off a task)
+#if 0 // @TODO: Enable when FSP supports attr sync and core state in HDAT
+      // Story 41245
 
-    //  dump physical path to targets
-    EntityPath l_path;
-    l_path  =   l_@targetN_target->getAttr<ATTR_PHYS_PATH>();
-    l_path.dump();
+    uint64_t l_masterCoreID = task_getcpuid() & ~7;
 
-    // cast OUR type of target to a FAPI type of target.
-    const fapi::Target l_fapi_@targetN_target(
-                    TARGET_TYPE_MEMBUF_CHIP,
-                    reinterpret_cast<void *>
-                        (const_cast<TARGETING::Target*>(l_@targetN_target)) );
+    TargetHandleList l_cores;
+    getAllChiplets(l_cores, TYPE_CORE);
 
-    //  call the HWP with each fapi::Target
-    FAPI_INVOKE_HWP( l_errl, host_activate_slave_cores, _args_...);
-    if ( l_errl )
+    for(TargetHandleList::const_iterator l_core = l_cores.begin();
+        l_core != l_cores.end();
+        ++l_core)
     {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "ERROR : .........." );
-        errlCommit( l_errl, HWPF_COMP_ID );
+        ConstTargetHandle_t l_processor = getParentChip(*l_core);
+
+        CHIP_UNIT_ATTR l_coreId =
+                (*l_core)->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+        FABRIC_NODE_ID_ATTR l_logicalNodeId =
+                l_processor->getAttr<TARGETING::ATTR_FABRIC_NODE_ID>();
+        FABRIC_CHIP_ID_ATTR l_chipId =
+                l_processor->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
+
+        uint64_t pir = l_coreId << 3;
+        pir |= l_chipId << 7;
+        pir |= l_logicalNodeId << 10;
+
+        if (pir != l_masterCoreID)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "call_host_activate_slave_cores: Waking %x", pir);
+
+            int rc = cpu_start_core(pir);
+
+            // We purposefully only create one error log here.  The only
+            // failure from the kernel is a bad PIR, which means we have
+            // a pervasive attribute problem of some sort.  Just log the
+            // first failing PIR.
+            if ((0 != rc) && (NULL == l_errl))
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "call_host_activate_slave_cores: Error from kernel"
+                           " %d on core %x",
+                           rc, pir);
+                /*@
+                 * @errortype
+                 * @reasoncode  ISTEP_BAD_RC
+                 * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid    ISTEP_ACTIVATE_SLAVE_CORES
+                 * @userdata1   PIR of failing core.
+                 * @userdata2   rc of cpu_start_core().
+                 *
+                 * @devdesc Kernel returned error when trying to activate core.
+                 */
+                l_errl =
+                    new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                            ISTEP_ACTIVATE_SLAVE_CORES,
+                                            ISTEP_BAD_RC,
+                                            pir,
+                                            rc );
+            }
+        }
     }
-    else
-    {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "SUCCESS : .........." );
-    }
-    // @@@@@    END CUSTOM BLOCK:   @@@@@
+
 #endif
+    // @@@@@    END CUSTOM BLOCK:   @@@@@
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_activate_slave_cores exit" );

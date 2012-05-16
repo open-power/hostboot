@@ -96,6 +96,7 @@ namespace Systemcalls
     void Shutdown(task_t *t);
     void CpuCoreType(task_t *t);
     void CpuDDLevel(task_t *t);
+    void CpuStartCore(task_t *t);
     void MmAllocBlock(task_t *t);
     void MmRemovePages(task_t *t);
     void MmSetPermission(task_t *t);
@@ -129,6 +130,7 @@ namespace Systemcalls
         &Shutdown,    // MISC_SHUTDOWN
         &CpuCoreType, // MISC_CPUCORETYPE
         &CpuDDLevel,  // MISC_CPUDDLEVEL
+        &CpuStartCore, // MISC_CPUSTARTCORE
 
         &MmAllocBlock, // MM_ALLOC_BLOCK
         &MmRemovePages, // MM_REMOVE_PAGES
@@ -630,6 +632,13 @@ namespace Systemcalls
     {
         TASK_SETRTN(t, CpuID::getCpuDD());
     }
+
+    /** Prep core for activation. */
+    void CpuStartCore(task_t *t)
+    {
+        TASK_SETRTN(t,
+            CpuManager::startCore(static_cast<uint64_t>(TASK_GETARG0(t))));
+    };
 
     /**
      * Allocate a block of virtual memory within the base segment

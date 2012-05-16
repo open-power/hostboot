@@ -42,6 +42,13 @@ void MessageHandler::sendMessage(msg_sys_types_t i_type, void* i_key,
     mhp->key = i_key;
     mhp->task = i_task;
 
+    // Update block status for task.
+    if (NULL != i_task)
+    {
+        i_task->state = TASK_STATE_BLOCK_USRSPACE;
+        i_task->state_info = i_key;
+    }
+
     // Send userspace message if one hasn't been sent for this key.
     if (!iv_pending.find(i_key))
     {
@@ -76,10 +83,6 @@ void MessageHandler::sendMessage(msg_sys_types_t i_type, void* i_key,
     // Defer task while waiting for message response.
     if (NULL != i_task)
     {
-        // Set block status.
-        i_task->state = TASK_STATE_BLOCK_USRSPACE;
-        i_task->state_info = i_key;
-
         if (i_task == TaskManager::getCurrentTask())
         {
             // Switch to ready waiter, or pick a new task off the scheduler.

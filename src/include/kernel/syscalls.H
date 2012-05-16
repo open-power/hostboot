@@ -88,6 +88,8 @@ namespace Systemcalls
         MISC_CPUCORETYPE,
             /** cpu_dd_level() */
         MISC_CPUDDLEVEL,
+            /** cpu_start_core() */
+        MISC_CPUSTARTCORE,
 
             /** mm_alloc_block() */
         MM_ALLOC_BLOCK,

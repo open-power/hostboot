@@ -192,8 +192,10 @@ Examples: \n
 #------------------------------------------------
 #------------------------------------------------
 def hb_singlethread():
-    run_command("foreach $cpu in (system_cmp0.get-processor-list) {$cpu.disable}")
-    run_command("cpu0_0_0_0.enable");
+    run_command("foreach $cpu in (system_cmp0.get-processor-list) " +
+                "{ pdisable $cpu}");
+    run_command("penable cpu0_0_05_0");
+    run_command("pselect cpu0_0_05_0");
     return
 
 new_command("hb-singlethread",
@@ -201,4 +203,4 @@ new_command("hb-singlethread",
     [],
     alias = "hb-st",
     type = ["hostboot-commands"],
-    short = "Disable all threads except cpu0_0_0_0.")
+    short = "Disable all threads except cpu0_0_05_0.")
