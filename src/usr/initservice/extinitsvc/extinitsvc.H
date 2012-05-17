@@ -91,6 +91,17 @@ public:
     void    init( errlHndl_t  &io_rtaskRetErrl );
 
 
+    /**
+     * @brief This function will execute the Cxx Unit tests for Hostboot.  It is
+     *      to be done here, instead of in Initservice, because when this istep
+     *      completes the Payload will be started.
+     *
+     * @return errlHndl_t - NULL if successfule, otherwise a pointer to the error
+     *      log.
+     */
+    errlHndl_t executeUnitTests ( void );
+
+
 protected:
     /**
      * @brief Constructor for the InitService object.

@@ -226,6 +226,14 @@ const compId_t UTIL_COMP_ID = 0x1600;
 const char UTIL_COMP_NAME[] = "util";
 //@}
 
+/** @name ISTEP
+ *  Istep component
+ */
+//@{
+const compId_t ISTEP_COMP_ID = 0x1700;
+const char ISTEP_COMP_NAME[] = "istep";
+//@}
+
 /** @name RESERVED
  *  Reserved component ID. x3100 is the component ID
  *  of FipS ERRL component. Due to our use of

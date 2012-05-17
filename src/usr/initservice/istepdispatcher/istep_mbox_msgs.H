@@ -37,6 +37,18 @@ namespace   INITSERVICE
 
 enum
 {
+    // TODO - I'm not changing this file, but I would really like to put the
+    // SYNC_POINT_REACHED message here.  Since its related to Isteps and
+    // syncing Hostboot and Fsp.  But to do that, this needs to be in the
+    // src/include/usr side of things.
+    //
+    // Plus, I think its weird that this file uses definitions from
+    // splesscommon.H.  It should be the other way around.  Define them here
+    // and use them from splesscommon.  Issue 42491 has been opened to
+    // discuss this further.
+    //
+    // I am going to define my own message in the code that I'm writing until
+    // we get something figured out.
     SINGLE_STEP_TYPE        =   MBOX::FIRST_SECURE_MSG |
                                     SPLESS::SPLESS_SINGLE_ISTEP_CMD,
     CLEAR_TRACE_TYPE        =   MBOX::FIRST_SECURE_MSG |

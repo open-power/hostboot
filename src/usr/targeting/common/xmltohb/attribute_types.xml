@@ -3431,4 +3431,31 @@
     <readable/>
 </attribute>
 
+<attribute>
+    <id>PAYLOAD_BASE</id>
+    <description>Base address (target HRMOR) of the payload.  Value is in MB.</description>
+    <simpleType>
+        <uint64_t>
+            <default>256</default>
+        </uint64_t>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>PAYLOAD_ENTRY</id>
+    <description>The offset from base address of the payload entry-point.
+        Current default is 0x180</description>
+    <simpleType>
+        <uint64_t>
+            <default>0x180</default>
+        </uint64_t>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
 </attributes>

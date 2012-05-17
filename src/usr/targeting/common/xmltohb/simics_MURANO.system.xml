@@ -91,6 +91,16 @@
             <field><id>reserved</id><value>0</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>PAYLOAD_BASE</id>
+        <!-- Value of 0x0 for standalone systems, no payload to start -->
+        <default>0x0</default>
+    </attribute>
+    <attribute>
+        <id>PAYLOAD_ENTRY</id>
+        <!-- Value of 0x0 for standalone systems, no payload to start -->
+        <default>0x0</default>
+    </attribute>
 </targetInstance>
 
 <!-- System node 0 -->

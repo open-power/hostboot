@@ -1,26 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/initservice/istepdispatcher/istepdispatcher.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
-
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/initservice/istepdispatcher/istepdispatcher.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #ifndef __ISTEPDISPATCHER_ISTEPDISPATCHER_H
 #define __ISTEPDISPATCHER_ISTEPDISPATCHER_H
 /**
@@ -132,6 +132,27 @@ public:
      * @note blocks until an outside istep cmd to resume is recieved.
      */
     void handleSPlessBreakPoint( uint32_t info);
+
+    /**
+     * @brief This function returns the MBOX Message Queue used by the istep
+     *      dispatcher.
+     *
+     * @param[out] o_msgQ - The message queue.
+     *
+     * @return NONE.
+     */
+    void getIstepMsgQ ( msg_q_t & o_msgQ );
+
+    /**
+     * @brief This function returns the current MBOX Message used by the istep
+     *      dispatcher.
+     *
+     * @param[out] o_msg - The message.
+     *
+     * @return NONE.
+     */
+    void getIstepMsg ( msg_t * o_msg );
+
 
 protected:
 
@@ -251,7 +272,6 @@ private:
                                  const  uint32_t    i_IStep,
                                  const  uint32_t    i_Substep,
                                  uint32_t           &o_rSts  );
-
 
 
     //  -----   internal vars   -----------------------------

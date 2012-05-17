@@ -610,6 +610,15 @@ void InitService::registerBlock(void* i_vaddr, uint64_t i_size,
     }
 }
 
+void doShutdown ( uint64_t i_status,
+                  uint64_t i_payload_base,
+                  uint64_t i_payload_entry )
+{
+    Singleton<InitService>::instance().doShutdown( i_status,
+                                                   i_payload_base,
+                                                   i_payload_entry );
+}
+
 void InitService::doShutdown(uint64_t i_status,
                              uint64_t i_payload_base,
                              uint64_t i_payload_entry)

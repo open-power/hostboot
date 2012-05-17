@@ -212,9 +212,9 @@ public:
      * @note This calls registered services to notify them of shutdown and it
      * flushes the virtual memory.
      */
-    void doShutdown(uint64_t i_status,
-                    uint64_t i_payload_base = 0,
-                    uint64_t i_payload_entry = 0);
+    void doShutdown ( uint64_t i_status,
+                      uint64_t i_payload_base = 0,
+                      uint64_t i_payload_entry = 0 );
 
 
 protected:

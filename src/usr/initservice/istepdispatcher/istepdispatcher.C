@@ -5,7 +5,7 @@
  *
  *  IBM CONFIDENTIAL
  *
- *  COPYRIGHT International Business Machines Corp. 2011 - 2012
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
  *
  *  p1
  *
@@ -804,6 +804,25 @@ void iStepBreakPoint(uint32_t i_info)
     {
         IStepDispatcher::getTheInstance().handleBreakPoint( i_info );
     }
+}
+
+
+void getIstepMsgQ ( msg_q_t & o_msgQ )
+{
+    Singleton<IStepDispatcher>::instance().getIstepMsgQ( o_msgQ );
+}
+void IStepDispatcher::getIstepMsgQ ( msg_q_t & o_msgQ )
+{
+    o_msgQ = iv_msgQ;
+}
+
+void getIstepMsg ( msg_t * o_msg )
+{
+    Singleton<IStepDispatcher>::instance().getIstepMsg( o_msg );
+}
+void IStepDispatcher::getIstepMsg ( msg_t * o_msg )
+{
+    o_msg = iv_pMsg;
 }
 
 

@@ -133,102 +133,6 @@ void ExtInitSvc::init( errlHndl_t   &io_rtaskRetErrl )
         task_end2( l_errl );
     }
 
-    TRACFCOMP( g_trac_initsvc,
-            "ExtInitSvc finished OK.");
-
-
-    //  =====================================================================
-    //  -----   Unit Tests  -------------------------------------------------
-    //  =====================================================================
-    /**
-     *  @note run all of the unit tests after we finish the rest
-     *      There are 2 images generated in the build:
-     *      hbicore.bin         (HostBoot shippable image)
-     *      hbicore_test.bin    (runs all unit tests)
-     *      Only hbicore_test.bin has the libcxxtest.so module, so that's
-     *      how we test whether to run this.
-     */
-
-    // If the test task does not exist then don't run it.
-    if ( VFS::module_exists( cxxTestTask.taskname ) )
-    {
-        printk( "CxxTest entry.\n" );
-
-        //  Pass it a set of args so we can wait on the barrier
-        errlHndl_t          l_cxxerrl       =   NULL;
-        const TaskInfo      *l_pcxxtask     =   &cxxTestTask;
-
-        TRACDCOMP( g_trac_initsvc,
-                "Run CxxTest Unit Tests: %s",
-                l_pcxxtask->taskname );
-
-        l_cxxerrl = InitService::getTheInstance().startTask(    l_pcxxtask,
-                                                                NULL );
-        // process any errorlogs from cxxtestexec (not sure there are any...)
-        if ( l_cxxerrl )
-        {
-#if 0
-            //  @todo   detach this task and just do task_end()
-            //          First commit the errorlog...
-            TRACFCOMP( g_trac_initsvc,
-                    "Committing errorlog %p from cxxtask",
-                    l_cxxerrl );
-            errlCommit( l_cxxerrl, INITSVC_COMP_ID );
-
-            //  Tell the kernel to shut down.  This will not actually
-            //  happen until the last thread has ended.
-            InitService::getTheInstance().doShutdown( SHUTDOWN_STATUS_UT_FAILED);
-
-            //  end the task.
-            end_task();
-#endif
-
-             //  end the task and pass the errorlog to initservice to be committed.
-             //  initservice should do the shutdown.
-            TRACFCOMP( g_trac_initsvc,
-                    "CxxTest: ERROR: return to initsvc with errlog %p",
-                    l_cxxerrl );
-
-            task_end2( l_cxxerrl );
-        }   // endif l_cxxerrl
-
-
-        //  make up and post an errorlog if any tests failed.
-        if ( CxxTest::g_FailedTests )
-        {
-            // some unit tests failed, post an errorlog
-            /*@     errorlog tag
-             *  @errortype      ERRL_SEV_CRITICAL_SYS_TERM
-             *  @moduleid       CXXTEST_MOD_ID
-             *  @reasoncode     CXXTEST_FAILED_TEST
-             *  @userdata1      number of failed tests
-             *  @userdata2      0
-             *
-             *  @devdesc        One or more CxxTest Unit Tests failed.
-             *
-             */
-            l_cxxerrl = new ERRORLOG::ErrlEntry(
-                                    ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
-                                    INITSERVICE::CXXTEST_MOD_ID,
-                                    INITSERVICE::CXXTEST_FAILED_TEST,
-                                    CxxTest::g_FailedTests,
-                                    0 );
-            TRACFCOMP( g_trac_initsvc,
-                      "CxxTest ERROR:  %d failed tests, build errlog %p.",
-                      CxxTest::g_FailedTests,
-                      l_cxxerrl );
-
-              //  end the task and pass the errorlog to initservice to be committed.
-              //  initservice should do the shutdown.
-             TRACFCOMP( g_trac_initsvc, "CxxTest: return to initsvc with errlog" );
-
-             task_end2( l_cxxerrl );
-        }   // endif g_FailedTest
-
-        printk( "CxxTest exit.\n" );
-
-    }   // endif cxxtest module exists.
-
     //  finish things up, return to initservice with goodness.
     TRACFCOMP( g_trac_initsvc,
             "ExtInitSvc finished OK, return to initsvc with NULL.");
@@ -252,5 +156,110 @@ ExtInitSvc::ExtInitSvc()
 ExtInitSvc::~ExtInitSvc()
 { }
 
+
+//
+// Execute CXX Unit Tests
+// NOTE: This should be done right before doShutDown is called.
+//
+errlHndl_t executeUnitTests ( void )
+{
+    return Singleton<ExtInitSvc>::instance().executeUnitTests();
+}
+
+errlHndl_t ExtInitSvc::executeUnitTests ( void )
+{
+    errlHndl_t err = NULL;
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               ENTER_MRK"executeUnitTests()" );
+
+    do
+    {
+        //  ---------------------------------------------------------------------
+        //  -----   Unit Tests  -------------------------------------------------
+        //  ---------------------------------------------------------------------
+        /**
+         *  @note run all of the unit tests after we finish the rest
+         *      There are 2 images generated in the build:
+         *      hbicore.bin         (HostBoot shippable image)
+         *      hbicore_test.bin    (runs all unit tests)
+         *      Only hbicore_test.bin has the libcxxtest.so module, so that's
+         *      how we test whether to run this.
+         */
+        // If the test task does not exist then don't run it.
+        if ( VFS::module_exists( cxxTestTask.taskname ) )
+        {
+            printk( "CxxTest entry.\n" );
+
+            //  Pass it a set of args so we can wait on the barrier
+            errlHndl_t l_cxxerrl = NULL;
+            const INITSERVICE::TaskInfo *l_pcxxtask = &cxxTestTask;
+
+            TRACFCOMP( g_trac_initsvc,
+                       "Run CxxTest Unit Tests: %s",
+                       l_pcxxtask->taskname );
+
+            INITSERVICE::InitService &is
+                = INITSERVICE::InitService::getTheInstance();
+            l_cxxerrl = is.startTask( l_pcxxtask,
+                                      NULL );
+
+            // process any errorlogs from cxxtestexec (not sure there are any...)
+            if ( l_cxxerrl )
+            {
+                //  end the task and pass the errorlog to initservice to be
+                //  committed.  initservice should do the shutdown.
+                TRACFCOMP( g_trac_initsvc,
+                           "CxxTest: ERROR: return to host_start_payload istep "
+                           "with errlog %p",
+                           l_cxxerrl );
+
+                err = l_cxxerrl;
+                break;
+            }   // endif l_cxxerrl
+
+
+            //  make up and post an errorlog if any tests failed.
+            if ( CxxTest::g_FailedTests )
+            {
+                // some unit tests failed, post an errorlog
+                /*@     errorlog tag
+                 *  @errortype      ERRL_SEV_CRITICAL_SYS_TERM
+                 *  @moduleid       CXXTEST_MOD_ID
+                 *  @reasoncode     CXXTEST_FAILED_TEST
+                 *  @userdata1      number of failed tests
+                 *  @userdata2      <UNUSED>
+                 *  @devdesc        One or more CxxTest Unit Tests failed.
+                 */
+                l_cxxerrl = new ERRORLOG::ErrlEntry(
+                                        ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
+                                        INITSERVICE::CXXTEST_MOD_ID,
+                                        INITSERVICE::CXXTEST_FAILED_TEST,
+                                        CxxTest::g_FailedTests,
+                                        0 );
+
+                TRACFCOMP( g_trac_initsvc,
+                           "CxxTest ERROR:  %d failed tests, build errlog %p.",
+                           CxxTest::g_FailedTests,
+                           l_cxxerrl );
+
+                //  end the task and pass the errorlog to initservice to be
+                //  committed.  initservice should do the shutdown.
+                TRACFCOMP( g_trac_initsvc,
+                           "CxxTest: return to host_start_payload with errlog!" );
+
+                err = l_cxxerrl;
+                break;
+            }   // endif g_FailedTest
+
+            printk( "CxxTest exit.\n" );
+        }   // endif cxxtest module exists.
+    } while( 0 );
+
+    TRACDCOMP( g_trac_initsvc,
+               EXIT_MRK"executeUnitTests()" );
+
+    return err;
+}
 
 }   // namespace

@@ -68,13 +68,28 @@ bool registerShutdownEvent(msg_q_t i_msgQ,
 
 /**
  * @brief Un register a service for a Shutdown event
- * 
+ *
  * @param[in] i_msgQ, The message queue to be removed.
  *
  * @return true  - i_msgQ was removed from the event notification list. |
  *         false - i_msgQ was not registered in the event notification list.
  */
 bool unregisterShutdownEvent(msg_q_t i_msgQ);
+
+/**
+ * @brief Perform necessary steps, such as FLUSHing, to registered blocks.
+ *
+ * @param[in] i_status - Shutdown status to be passed along on shutdown
+ * @param[in] i_payload_base - The base address (target HRMOR) of the
+ *                             payload.
+ * @param[in] i_payload_entry - The offset from base address of the
+ *                              payload entry-point.
+ *
+ * @return Nothing
+ */
+void doShutdown ( uint64_t i_status,
+                  uint64_t i_payload_base = 0,
+                  uint64_t i_payload_entry = 0 );
 
 }
 

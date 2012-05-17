@@ -84,6 +84,14 @@
             <field><id>reserved</id><value>0</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>PAYLOAD_BASE</id>
+        <default>0x0</default>
+    </attribute>
+    <attribute>
+        <id>PAYLOAD_ENTRY</id>
+        <default>0x0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>

@@ -1,38 +1,39 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/include/usr/mbox/mbox_queues.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/include/usr/mbox/mbox_queues.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #ifndef __MBOX_QUEUES_H
 #define __MBOX_QUEUES_H
 
 /**
  * @file mbox_queues.H
- * @brief Mailbox queue identifiers. This file is shared between 
+ * @brief Mailbox queue identifiers. This file is shared between
  *        Hostboot and FSP.
  */
 
 namespace MBOX
 {
     /**
-     * message queue IDs 
+     * message queue IDs
      * FSP msg_queue range      0x80000000 - 0xFFFFFFFF
      * Hostboot msg_queue range 0x00000001 - 0x7FFFFFFF
      */
@@ -51,6 +52,7 @@ namespace MBOX
         FSP_PROGRESS_CODES_MSGQ,
         FSP_TRACE_MSGQ,
         FSP_ERRL_MSGQ,
+        IPL_SERVICE_QUEUE       = 0x80000008,   // Defined by Fsp team
         // Add FSP services here:
         FSP_ECHO_MSGQ = 0xFFFFFFFF,     // Fake FSP for test
     };

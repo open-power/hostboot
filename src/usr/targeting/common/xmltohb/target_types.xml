@@ -98,6 +98,8 @@
     <attribute><id>FREQ_A</id></attribute>
     <attribute><id>FREQ_X</id></attribute>
     <attribute><id>SP_FUNCTIONS</id></attribute>
+    <attribute><id>PAYLOAD_BASE</id></attribute>
+    <attribute><id>PAYLOAD_ENTRY</id></attribute>
 </targetType>
 
 <targetType>
