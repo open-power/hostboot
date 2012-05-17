@@ -232,6 +232,13 @@ const char UTIL_COMP_NAME[] = "util";
 //@{
 const compId_t ISTEP_COMP_ID = 0x1700;
 const char ISTEP_COMP_NAME[] = "istep";
+
+/** @name HBATTN
+ *  HBATTN attention service component
+ */
+//@{
+const compId_t HBATTN_COMP_ID = 0x1800;
+const char HBATTN_COMP_NAME[] = "attn";
 //@}
 
 /** @name RESERVED

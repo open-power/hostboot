@@ -42,6 +42,7 @@
 import os
 import subprocess
 import re
+import random
 
 # @class DebugFrameworkIPCMessage
 # @brief Wrapper class for constructing a properly formed IPC message for the
@@ -377,6 +378,9 @@ def writeLongLong(address,n):
 # See src/include/arch/ppc.H for the definitions of the magic args.
 # Hostboot magic args should range 7000..7999.
 def magic_instruction_callback(user_arg, cpu, arg):
+    if arg == 7008:
+        cpu.r3 = random.randint(1, 0xffffffffffffffffL)
+
     if arg == 7006:   # MAGIC_SHUTDOWN
         # KernelMisc::shutdown()
         print "KernelMisc::shutdown() called."

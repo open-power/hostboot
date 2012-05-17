@@ -60,7 +60,8 @@ EXTENDED_MODULES = targeting ecmddatabuffer fapi hwp plat	\
                    activate_powerbus build_winkle_images \
                    core_activate dram_initialization edi_ei_initialization \
                    establish_system_smp load_payload \
-                   nest_chiplets start_payload thread_activate slave_sbe
+                   nest_chiplets start_payload thread_activate slave_sbe \
+                   attn
 
 DIRECT_BOOT_MODULES = example
 RUNTIME_MODULES =
@@ -69,7 +70,7 @@ TESTCASE_MODULES = cxxtest testerrl testdevicefw testsyslib \
                    testscom testxscom testtargeting testinitservice testkernel \
                    testhwpf testecmddatabuffer initsvctesttask testcxxtest \
                    testpnor testi2c testfsi testvfs testhwas testintr testspd \
-                   testpore testutil testmbox testmdia testmvpd testprdf
+                   testpore testutil testmbox testmdia testmvpd testprdf testattn
 
 RELOCATABLE_IMAGE_LDFLAGS = -pie --export-dynamic
 

@@ -291,6 +291,19 @@ const TaskInfo g_exttaskinfolist[]   =   {
             }
         },
 
+        /**
+         * @brief ATTN code library
+         */
+        {
+            "libattn.so" ,                        // taskname
+            NULL,                                 // no pointer to fn
+            {
+               INIT_TASK,                         // task type
+               EXT_IMAGE,                         // Extended Module
+            }
+        },
+
+
 // end TODO.
 
         //  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

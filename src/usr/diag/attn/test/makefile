@@ -1,7 +1,7 @@
 #  IBM_PROLOG_BEGIN_TAG
 #  This is an automatically generated prolog.
 #
-#  $Source: src/usr/diag/makefile $
+#  $Source: src/usr/diag/attn/test/makefile $
 #
 #  IBM CONFIDENTIAL
 #
@@ -20,8 +20,14 @@
 #  Origin: 30
 #
 #  IBM_PROLOG_END
-ROOTPATH = ../../..
+ROOTPATH = ../../../../..
 
-SUBDIRS = mdia.d prdf.d attn.d
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/diag
+
+OBJS = attnfakesys.o attntest.o attnrand.o
+
+MODULE = testattn
+
+TESTS = *.H
 
 include ${ROOTPATH}/config.mk

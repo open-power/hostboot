@@ -326,7 +326,8 @@ enum
 {
     MAGIC_SHUTDOWN            =  7006, // KernelMisc::shutdown() called.
     MAGIC_BREAK               =  7007, // hard-code a breakpoint
-    MAGIC_CONTINUOUS_TRACE    =  7055  // extract mixed trace buffer
+    MAGIC_CONTINUOUS_TRACE    =  7055, // extract mixed trace buffer
+    MAGIC_RANDOM              =  7008, // generate random number
 };
 
 
