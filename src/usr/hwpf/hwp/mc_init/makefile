@@ -44,7 +44,10 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/mc_init/mss_freq
 OBJS =  mc_init.o			\
         mss_volt.o 			\
         mss_freq.o 			\
-        mss_eff_config_sim.o
+        mss_eff_config.o                \
+        mss_eff_config_thermal.o        \
+        mss_eff_config_termination.o    \
+        mss_eff_config_rank_group.o
 	
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 ##@ VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/???

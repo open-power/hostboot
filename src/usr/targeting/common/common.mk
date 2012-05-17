@@ -48,7 +48,7 @@ TARGET_OBJS =       \
     entitypath.o
 
 OTHER_OBJS = \
-     util.o
+     util.o utilFilter.o
      
 # Common     
 COMMON_TARGETING_OBJS = \

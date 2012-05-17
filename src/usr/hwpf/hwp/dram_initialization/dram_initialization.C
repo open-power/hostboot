@@ -46,6 +46,7 @@
 
 //  targeting support
 #include    <targeting/common/commontargeting.H>
+#include    <targeting/common/utilFilter.H>
 
 //  fapi support
 #include    <fapi.H>
@@ -195,27 +196,8 @@ void    call_mss_memdiag( void    *io_pArgs )
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_mss_memdiag entry" );
 
-    PredicateIsFunctional l_isFunctional;
-
-    // To filter MBAs
-    PredicateCTM l_mbaFilter(CLASS_UNIT, TYPE_MBA);
-
-    // Filter functional MBAs
-    PredicatePostfixExpr l_functionalAndMbaFilter;
-    l_functionalAndMbaFilter.push(&l_mbaFilter).push(&l_isFunctional).And();
-
-    TargetRangeFilter    l_pMbas(
-        targetService().begin(),
-        targetService().end(),
-        &l_functionalAndMbaFilter );
-
     TargetHandleList l_mbaList;
-
-    // populate MBA TargetHandlelist
-    for(;l_pMbas;++l_pMbas)
-    {
-        l_mbaList.push_back(*l_pMbas);
-    }
+    getAllChiplets(l_mbaList, TYPE_MBA);
 
     errlHndl_t l_err = runStep(l_mbaList);
     if(NULL != l_err)

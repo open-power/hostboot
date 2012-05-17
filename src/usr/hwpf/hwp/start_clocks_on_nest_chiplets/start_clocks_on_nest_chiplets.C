@@ -46,6 +46,7 @@
 
 //  targeting support
 #include    <targeting/common/commontargeting.H>
+#include    <targeting/common/utilFilter.H>
 
 //  fapi support
 #include    <fapi.H>
@@ -144,23 +145,14 @@ void    call_proc_startclock_chiplets( void    *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_startclock_chiplets entry" );
         
-    TARGETING::TargetService&   l_targetService = targetService();
     uint8_t l_cpuNum = 0;
 
-    //  Use PredicateIsFunctional to filter only functional chips
-    TARGETING::PredicateIsFunctional             l_isFunctional;
-    //  filter for functional Proc Chips
-    TARGETING::PredicateCTM         l_procChipFilter( CLASS_CHIP, TYPE_PROC );
-    TARGETING::PredicatePostfixExpr l_functionalAndProcChipFilter;
-    l_functionalAndProcChipFilter.push(&l_procChipFilter).push(&l_isFunctional).And();
-    TARGETING::TargetRangeFilter    l_cpuFilter(
-            l_targetService.begin(),
-            l_targetService.end(),
-            &l_functionalAndProcChipFilter );
+    TARGETING::TargetHandleList l_cpuTargetList;
+    getAllChips(l_cpuTargetList, TYPE_PROC);
 
-    for ( l_cpuNum=0;   l_cpuFilter;    ++l_cpuFilter, l_cpuNum++ )
+    for ( l_cpuNum=0; l_cpuNum < l_cpuTargetList.size(); l_cpuNum++ )
     {
-        const TARGETING::Target*  l_cpu_target = *l_cpuFilter;
+        const TARGETING::Target*  l_cpu_target = l_cpuTargetList[l_cpuNum];
         const fapi::Target l_fapi_proc_target(
                 TARGET_TYPE_PROC_CHIP,
                 reinterpret_cast<void *>

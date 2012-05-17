@@ -46,6 +46,7 @@
 
 //  targeting support
 #include    <targeting/common/commontargeting.H>
+#include    <targeting/common/utilFilter.H>
 
 //  fapi support
 #include    <fapi.H>
@@ -347,28 +348,17 @@ void    call_proc_fab_iovalid( void    *io_pArgs )
                "call_proc_fab_iovalid entry" );
 
     // Get all chip/chiplet targets
-    //  Use PredicateIsFunctional to filter only functional chips/chiplets
-    TARGETING::PredicateIsFunctional l_isFunctional;
-    //  filter for functional Chips/Chiplets
-    TARGETING::PredicateCTM l_Filter(CLASS_CHIP, TYPE_PROC);
-    // declare a postfix expression widget
-    TARGETING::PredicatePostfixExpr l_goodFilter;
-    //  is-a--chip  is-functional   AND
-    l_goodFilter.push(&l_Filter).push(&l_isFunctional).And();
-    // apply the filter through all targets.
-    TARGETING::TargetRangeFilter l_Procs(
-            TARGETING::targetService().begin(),
-            TARGETING::targetService().end(),
-            &l_goodFilter );
+    TARGETING::TargetHandleList l_cpuTargetList;
+    getAllChips(l_cpuTargetList, TYPE_PROC);
 
     std::vector<proc_fab_smp_proc_chip *> l_smp;
 
-    for ( ; l_Procs; ++l_Procs )
+    for ( size_t i = 0; i < l_cpuTargetList.size(); i++ )
     {
         proc_fab_smp_proc_chip *l_proc = new proc_fab_smp_proc_chip();
         l_smp.push_back( l_proc );
 
-        const TARGETING::Target * l_pTarget = *l_Procs;
+        const TARGETING::Target * l_pTarget = l_cpuTargetList[i];
         fapi::Target l_fapiproc_target( TARGET_TYPE_PROC_CHIP,
                        reinterpret_cast<void *>
                        (const_cast<TARGETING::Target*>(l_pTarget)) );

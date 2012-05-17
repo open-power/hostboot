@@ -47,6 +47,7 @@
 //  targeting support
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/util.H>
+#include <targeting/common/utilFilter.H>
 
 //  fapi support
 #include    <fapi.H>
@@ -216,25 +217,13 @@ void    call_mem_startclocks( void *io_pArgs )
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mem_startclocks entry" );
 
     // Get all Centaur targets
-    //  Use PredicateIsFunctional to filter only functional chips
-    TARGETING::PredicateIsFunctional l_isFunctional;
-    //  find all the Centaurs in the system
-    TARGETING::PredicateCTM l_ctaurFilter(CLASS_CHIP, TYPE_MEMBUF);
-    // declare a postfix expression widget
-    TARGETING::PredicatePostfixExpr l_functionalAndCtaurFilter;
-    //  is-a-membuf-chip  is-functional   AND
-    l_functionalAndCtaurFilter.push(&l_ctaurFilter).push(&l_isFunctional).And();
-    // loop through all the targets, applying the filter,  and put the results
-    // in l_pMemBufs
-    TARGETING::TargetRangeFilter    l_pMemBufs(
-            TARGETING::targetService().begin(),
-            TARGETING::targetService().end(),
-            &l_functionalAndCtaurFilter );
+    TARGETING::TargetHandleList l_membufTargetList;
+    getAllChips(l_membufTargetList, TYPE_MEMBUF);
 
-    for ( ; l_pMemBufs ;  ++l_pMemBufs )
+    for ( size_t i = 0; i < l_membufTargetList.size(); i++ )
     {
         //  make a local copy of the target for ease of use
-        const TARGETING::Target*  l_pCentaur = *l_pMemBufs;
+        const TARGETING::Target*  l_pCentaur = l_membufTargetList[i];
 
         // Dump current run on target
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -403,19 +392,8 @@ void  call_mss_ddr_phy_reset( void *io_pArgs )
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_ddr_phy_reset entry" );
 
     // Get all MBA targets
-    //  Use PredicateIsFunctional to filter only functional chips
-    TARGETING::PredicateIsFunctional    l_isFunctional;
-    //  find all the MBA's in the system
-    TARGETING::PredicateCTM             l_mbaFilter(CLASS_UNIT, TYPE_MBA);
-    // declare a postfix expression widget
-    TARGETING::PredicatePostfixExpr l_functionalAndMbaFilter;
-    //  is-a-membuf-chip  is-functional   AND
-    l_functionalAndMbaFilter.push(&l_mbaFilter).push(&l_isFunctional).And();
-    // loop through all the targets, applying the filter,  and put the results in l_pMemBufs
-    TARGETING::TargetRangeFilter    l_pMbas(
-            TARGETING::targetService().begin(),
-            TARGETING::targetService().end(),
-            &l_functionalAndMbaFilter );
+    TARGETING::TargetHandleList l_mbaTargetList;
+    getAllChiplets(l_mbaTargetList, TYPE_MBA);
 
     // Limit the number of MBAs to run in VPO environment to save time.
     uint8_t l_mbaLimit = UNLIMITED_RUN;
@@ -425,11 +403,11 @@ void  call_mss_ddr_phy_reset( void *io_pArgs )
     }
 
     for (   uint8_t l_mbaNum=0 ;
-            (l_mbaNum < l_mbaLimit) && l_pMbas ;
-            l_mbaNum++, ++l_pMbas    )
+            (l_mbaNum < l_mbaLimit) && (l_mbaNum < l_mbaTargetList.size()) ;
+            l_mbaNum++   )
     {
         //  make a local copy of the target for ease of use
-        const TARGETING::Target*  l_mba_target = *l_pMbas;
+        const TARGETING::Target*  l_mba_target = l_mbaTargetList[l_mbaNum];
 
         // Dump current run on target
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "Running call_mss_ddr_phy_reset HWP on..." );
@@ -474,19 +452,8 @@ void    call_mss_draminit( void *io_pArgs )
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_draminit entry" );
 
     // Get all MBA targets
-    //  Use PredicateIsFunctional to filter only functional chips
-    TARGETING::PredicateIsFunctional    l_isFunctional;
-    //  find all the MBA's in the system
-    TARGETING::PredicateCTM             l_mbaFilter(CLASS_UNIT, TYPE_MBA);
-    // declare a postfix expression widget
-    TARGETING::PredicatePostfixExpr l_functionalAndMbaFilter;
-    //  is-a-membuf-chip  is-functional   AND
-    l_functionalAndMbaFilter.push(&l_mbaFilter).push(&l_isFunctional).And();
-    // loop through all the targets, applying the filter,  and put the results in l_pMemBufs
-    TARGETING::TargetRangeFilter    l_pMbas(
-            TARGETING::targetService().begin(),
-            TARGETING::targetService().end(),
-            &l_functionalAndMbaFilter );
+    TARGETING::TargetHandleList l_mbaTargetList;
+    getAllChiplets(l_mbaTargetList, TYPE_MBA);
 
     // Limit the number of MBAs to run in VPO environment to save time.
     uint8_t l_mbaLimit = UNLIMITED_RUN;
@@ -496,11 +463,11 @@ void    call_mss_draminit( void *io_pArgs )
     }
 
     for (   uint8_t l_mbaNum=0 ;
-            (l_mbaNum < l_mbaLimit) && l_pMbas ;
-            l_mbaNum++, ++l_pMbas    )
+            (l_mbaNum < l_mbaLimit) && (l_mbaNum < l_mbaTargetList.size());
+            l_mbaNum++   )
     {
         // Make a local copy of the target for ease of use
-        const TARGETING::Target*  l_mba_target = *l_pMbas;
+        const TARGETING::Target*  l_mba_target = l_mbaTargetList[l_mbaNum];
 
         // Dump current run on target
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "Running mss_draminit HWP on...");
@@ -606,19 +573,8 @@ void    call_mss_draminit_training( void *io_pArgs )
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_draminit_training entry" );
 
     // Get all MBA targets
-    //  Use PredicateIsFunctional to filter only functional chips
-    TARGETING::PredicateIsFunctional    l_isFunctional;
-    //  find all the MBA's in the system
-    TARGETING::PredicateCTM             l_mbaFilter(CLASS_UNIT, TYPE_MBA);
-    // declare a postfix expression widget
-    TARGETING::PredicatePostfixExpr l_functionalAndMbaFilter;
-    //  is-a-membuf-chip  is-functional   AND
-    l_functionalAndMbaFilter.push(&l_mbaFilter).push(&l_isFunctional).And();
-    // loop through all the targets, applying the filter,  and put the results in l_pMemBufs
-    TARGETING::TargetRangeFilter    l_pMbas(
-            TARGETING::targetService().begin(),
-            TARGETING::targetService().end(),
-            &l_functionalAndMbaFilter );
+    TARGETING::TargetHandleList l_mbaTargetList;
+    getAllChiplets(l_mbaTargetList, TYPE_MBA);
 
     // Limit the number of MBAs to run in VPO environment to save time.
     uint8_t l_mbaLimit = UNLIMITED_RUN;
@@ -628,11 +584,11 @@ void    call_mss_draminit_training( void *io_pArgs )
     }
 
     for (   uint8_t l_mbaNum=0 ;
-            (l_mbaNum < l_mbaLimit) && l_pMbas ;
-            l_mbaNum++, ++l_pMbas    )
+            (l_mbaNum < l_mbaLimit) && (l_mbaNum < l_mbaTargetList.size());
+            l_mbaNum++    )
     {
         //  make a local copy of the target for ease of use
-        const TARGETING::Target*  l_mba_target = *l_pMbas;
+        const TARGETING::Target*  l_mba_target = l_mbaTargetList[l_mbaNum];
 
         // Dump current run on target
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "Running mss_draminit_training HWP on..." );
@@ -737,19 +693,8 @@ void    call_mss_draminit_mc( void *io_pArgs )
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_draminit_mc entry" );
 
     // Get all centaur targets
-    //  Use PredicateIsFunctional to filter only functional chips
-    TARGETING::PredicateIsFunctional             l_isFunctional;
-    //  filter for functional Centaur Chips
-    TARGETING::PredicateCTM l_membufChipFilter(CLASS_CHIP, TYPE_MEMBUF);
-    // declare a postfix expression widget
-    TARGETING::PredicatePostfixExpr l_functionalAndMembufChipFilter;
-    //  is-a-membuf-chip  is-functional   AND
-    l_functionalAndMembufChipFilter.push(&l_membufChipFilter).push(&l_isFunctional).And();
-    // loop through all the targets, applying the filter,  and put the results in l_pMemBufs
-    TARGETING::TargetRangeFilter    l_pMemBufs(
-            TARGETING::targetService().begin(),
-            TARGETING::targetService().end(),
-            &l_functionalAndMembufChipFilter );
+    TARGETING::TargetHandleList l_mBufTargetList;
+    getAllChips(l_mBufTargetList, TYPE_MEMBUF);
 
     // Limit the number of MBAs to run in VPO environment to save time.
     uint8_t l_memBufLimit = UNLIMITED_RUN;
@@ -758,12 +703,12 @@ void    call_mss_draminit_mc( void *io_pArgs )
         l_memBufLimit = VPO_NUM_OF_MEMBUF_TO_RUN ;
     }
 
-    for (uint8_t l_memBufNum=0 ;
-            (l_memBufNum < l_memBufLimit) && l_pMemBufs ;
-            l_memBufNum++, ++l_pMemBufs)
+    for (uint8_t l_mBufNum=0 ;
+        (l_mBufNum < l_memBufLimit) && (l_mBufNum < l_mBufTargetList.size());
+         l_mBufNum++)
     {
 
-        const TARGETING::Target*  l_membuf_target = *l_pMemBufs;
+        const TARGETING::Target* l_membuf_target = l_mBufTargetList[l_mBufNum];
 
         // Dump current run on target
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "Running mss_draminit_mc HWP on..." );

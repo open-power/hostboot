@@ -45,6 +45,7 @@
 
 //  targeting support
 #include    <targeting/common/commontargeting.H>
+#include    <targeting/common/utilFilter.H>
 
 //  fapi support
 #include    <fapi.H>
@@ -158,7 +159,6 @@ errlHndl_t  loadPoreImage( TARGETING::Target    *i_CpuTarget,
 void    call_host_build_winkle( void    *io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
-    TARGETING::TargetService&   l_targetService = targetService();
     uint8_t                     l_cpuNum        =   0;
 
     const char                  *l_pPoreImage   =   NULL;
@@ -176,24 +176,14 @@ void    call_host_build_winkle( void    *io_pArgs )
     //  customize any other inputs
     //  set up loops to go through all targets (if parallel, spin off a task)
 
-    //  Use PredicateIsFunctional to filter only functional chips
-    TARGETING::PredicateIsFunctional    l_isFunctional;
 
-    TARGETING::PredicateCTM         l_procChipFilter( CLASS_CHIP, TYPE_PROC );
-    TARGETING::PredicatePostfixExpr l_functionalAndProcChipFilter;
-    l_functionalAndProcChipFilter
-    .push(&l_procChipFilter)
-    .push(&l_isFunctional)
-    .And();
-    TARGETING::TargetRangeFilter    l_cpuFilter(
-                                               l_targetService.begin(),
-                                               l_targetService.end(),
-                                               &l_functionalAndProcChipFilter );
+    TARGETING::TargetHandleList l_cpuTargetList;
+    getAllChips(l_cpuTargetList, TYPE_PROC);
 
-    for ( l_cpuNum=0;   l_cpuFilter;    ++l_cpuFilter, l_cpuNum++ )
+    for ( l_cpuNum=0; l_cpuNum < l_cpuTargetList.size(); l_cpuNum++ )
     {
         //  make a local copy of the CPU target
-        TARGETING::Target*  l_cpu_target = *l_cpuFilter;
+        TARGETING::Target*  l_cpu_target = l_cpuTargetList[l_cpuNum];
 
         TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "Run cpuNum 0x%x",

@@ -49,6 +49,7 @@
 
 //  targeting support.
 #include    <targeting/common/commontargeting.H>
+#include    <targeting/common/utilFilter.H>
 
 //  fapi support
 #include    <fapi.H>
@@ -117,59 +118,34 @@ void    call_dmi_io_dccal( void *io_pArgs )
 void    call_dmi_io_run_training( void *io_pArgs )
 {
     errlHndl_t l_err = NULL;
-    TARGETING::TargetService&   l_targetService = targetService();
-    uint8_t                     l_cpuNum        =   0;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "dmi_io_run_training entry" );
 
-    //  Use PredicateIsFunctional to filter only functional chips
-    TARGETING::PredicateIsFunctional             l_isFunctional;
+    TARGETING::TargetHandleList l_cpuTargetList;
+    getAllChips(l_cpuTargetList, TYPE_PROC);
 
-    //  filter for functional Proc Chips
-    TARGETING::PredicateCTM         l_procChipFilter( CLASS_CHIP, TYPE_PROC );
-    TARGETING::PredicatePostfixExpr l_functionalAndProcChipFilter;
-    l_functionalAndProcChipFilter.push(&l_procChipFilter).push(&l_isFunctional).And();
-    TARGETING::TargetRangeFilter    l_cpuFilter(
-            l_targetService.begin(),
-            l_targetService.end(),
-            &l_functionalAndProcChipFilter );
-
-    for ( l_cpuNum=0;   l_cpuFilter;    ++l_cpuFilter, l_cpuNum++ )
+    for ( size_t i = 0; i < l_cpuTargetList.size(); i++ )
     {
         //  make a local copy of the CPU target
-        const TARGETING::Target*  l_cpu_target = *l_cpuFilter;
+        const TARGETING::Target*  l_cpu_target = l_cpuTargetList[i];
 
-        //  get the mcs chiplets associated with this cpu
-        TARGETING::PredicateCTM l_mcsChipFilter(CLASS_UNIT, TYPE_MCS);
-        TARGETING::PredicatePostfixExpr l_functionalAndMcsChipFilter;
-        l_functionalAndMcsChipFilter.push(&l_mcsChipFilter).push(&l_isFunctional).And();
+        uint8_t l_cpuNum = l_cpu_target->getAttr<ATTR_POSITION>();
+
+        // find all MCS chiplets of the proc
         TARGETING::TargetHandleList l_mcsTargetList;
-        l_targetService.getAssociated(
-                l_mcsTargetList,
-                l_cpu_target,
-                TARGETING::TargetService::CHILD,
-                TARGETING::TargetService::IMMEDIATE,
-                &l_functionalAndMcsChipFilter );
+        getChildChiplets( l_mcsTargetList, l_cpu_target, TYPE_MCS );
 
-        for ( uint8_t j=0; j < l_mcsTargetList.size(); j++ )
+        for ( size_t j = 0; j < l_mcsTargetList.size(); j++ )
         {
             //  make a local copy of the MCS target
             const TARGETING::Target*  l_mcs_target = l_mcsTargetList[j];
             uint8_t l_mcsNum    =   l_mcs_target->getAttr<ATTR_CHIP_UNIT>();
 
             //  find all the Centaurs that are associated with this MCS
-            TARGETING::PredicateCTM l_membufChipFilter(CLASS_CHIP, TYPE_MEMBUF);
-            TARGETING::PredicatePostfixExpr l_functionalAndMembufChipFilter;
-            l_functionalAndMembufChipFilter.push(&l_membufChipFilter).push(&l_isFunctional).And();
             TARGETING::TargetHandleList l_memTargetList;
-            l_targetService.getAssociated(
-                            l_memTargetList,
-                            l_mcs_target,
-                            TARGETING::TargetService::CHILD_BY_AFFINITY,
-                            TARGETING::TargetService::ALL,
-                            &l_functionalAndMembufChipFilter);
+            getAffinityChips(l_memTargetList, l_mcs_target, TYPE_MEMBUF);
 
-            for ( uint8_t k=0, l_memNum=0; k < l_memTargetList.size(); k++, l_memNum++ )
+            for ( size_t k = 0; k < l_memTargetList.size(); k++ )
             {
                 //  make a local copy of the MEMBUF target
                 const TARGETING::Target*  l_mem_target = l_memTargetList[k];
@@ -206,7 +182,7 @@ void    call_dmi_io_run_training( void *io_pArgs )
                         "===== Call dmi_io_run_training HWP( cpu 0x%x, mcs 0x%x, mem 0x%x ) : ",
                         l_cpuNum,
                         l_mcsNum,
-                        l_memNum );
+                        k );
 
                 EntityPath l_path;
                 l_path = l_cpu_target->getAttr<ATTR_PHYS_PATH>();
@@ -230,7 +206,7 @@ void    call_dmi_io_run_training( void *io_pArgs )
                             l_err->reasonCode(),
                             l_cpuNum,
                             l_mcsNum,
-                            l_memNum );
+                            k );
                     break; // Break out mem target loop
                 }
                 else
@@ -239,7 +215,7 @@ void    call_dmi_io_run_training( void *io_pArgs )
                             "SUCCESS :  io_run_training HWP( cpu 0x%x, mcs 0x%x, mem 0x%x ) ",
                             l_cpuNum,
                             l_mcsNum,
-                            l_memNum );
+                            k );
                 }
 
             }  //end for l_mem_target
@@ -304,38 +280,23 @@ void    call_proc_cen_framelock( void *io_pArgs )
     errlHndl_t l_err = NULL;
     proc_cen_framelock_args     l_args;
 
-    //  Use PredicateIsFunctional to filter only functional chips
-    TARGETING::PredicateIsFunctional    l_isFunctional;
-
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_cen_framework entry" );
 
-    //  get the mcs chiplets associated with this cpu
-    TARGETING::PredicateCTM l_mcsChipFilter(CLASS_UNIT, TYPE_MCS);
-    TARGETING::PredicatePostfixExpr l_functionalAndMcsChipFilter;
-    l_functionalAndMcsChipFilter.push(&l_mcsChipFilter).push(&l_isFunctional).And();
+    //  get the mcs chiplets
+    TARGETING::TargetHandleList l_mcsTargetList;
+    getAllChiplets(l_mcsTargetList, TYPE_MCS);
 
-    TARGETING::TargetRangeFilter    l_mcsFilter(
-            TARGETING::targetService().begin(),
-            TARGETING::targetService().end(),
-            &l_functionalAndMcsChipFilter );
-
-    for (      ;  l_mcsFilter ; ++l_mcsFilter  )
+    for ( size_t i = 0; i < l_mcsTargetList.size() ; ++i  )
     {
         //  make a local copy of the MCS target
-        const TARGETING::Target*  l_mcs_target = *l_mcsFilter ;
+        const TARGETING::Target*  l_mcs_target = l_mcsTargetList[i];
 
         //  find all the Centaurs that are associated with this MCS
-        TARGETING::PredicateCTM l_membufChipFilter(CLASS_CHIP, TYPE_MEMBUF);
-        TARGETING::PredicatePostfixExpr l_functionalAndMembufChipFilter;
-         l_functionalAndMembufChipFilter.push(&l_membufChipFilter).push(&l_isFunctional).And();
         TARGETING::TargetHandleList l_memTargetList;
-        TARGETING::targetService().getAssociated(l_memTargetList,
-                                       l_mcs_target,
-                                       TARGETING::TargetService::CHILD_BY_AFFINITY,
-                                       TARGETING::TargetService::ALL,
-                                       &l_functionalAndMembufChipFilter);
+        getAffinityChips(l_memTargetList, l_mcs_target, TYPE_MEMBUF);
 
-        for ( uint8_t k=0, l_memNum=0; k < l_memTargetList.size(); k++, l_memNum++ )
+        for ( uint8_t k = 0, l_memNum = 0; k < l_memTargetList.size();
+                                                             k++, l_memNum++ )
         {
             //  make a local copy of the MEMBUF target
             const TARGETING::Target*  l_mem_target = l_memTargetList[k];

@@ -42,6 +42,7 @@
 #include    <errl/errlentry.H>
 #include    <initservice/isteps_trace.H>
 #include    <targeting/common/commontargeting.H>
+#include    <targeting/common/utilFilter.H>
 #include    <fapi.H>
 #include <fapiPoreVeArg.H>
 #include <fapiTarget.H>
@@ -82,20 +83,8 @@ void    call_cen_sbe_tp_chiplet_init1( void *io_pArgs )
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_tp_chiplet_init1 entry" );
 
     // Get target list to pass in procedure
-
-    //  Use PredicateIsFunctional to filter only functional chips
-    TARGETING::PredicateIsFunctional             l_isFunctional;
-    //  filter for functional Centaur Chips
-    TARGETING::PredicateCTM l_membufChipFilter(CLASS_CHIP, TYPE_MEMBUF);
-    // declare a postfix expression widget
-    TARGETING::PredicatePostfixExpr l_functionalAndMembufChipFilter;
-    //  is-a-membuf-chip  is-functional   AND
-    l_functionalAndMembufChipFilter.push(&l_membufChipFilter).push(&l_isFunctional).And();
-    // loop through all the targets, applying the filter,  and put the results in l_pMemBufs
-    TARGETING::TargetRangeFilter    l_pMemBufs(
-            TARGETING::targetService().begin(),
-            TARGETING::targetService().end(),
-            &l_functionalAndMembufChipFilter );
+    TARGETING::TargetHandleList l_membufTargetList;
+    getAllChips(l_membufTargetList, TYPE_MEMBUF);
 
     bool l_unloadSbePnorImg = false;
     size_t l_sbePnorSize = 0;
@@ -165,10 +154,10 @@ void    call_cen_sbe_tp_chiplet_init1( void *io_pArgs )
                       myArgs.push_back(fapiArg);
 
         // Loop thru all Centaurs in list
-        for (    ;   l_pMemBufs;    ++l_pMemBufs  )
+        for ( size_t i = 0; i < l_membufTargetList.size(); i++ )
         {
             // Create a FAPI Target
-            const TARGETING::Target*  l_membuf_target = *l_pMemBufs;
+            const TARGETING::Target*  l_membuf_target = l_membufTargetList[i];
             const fapi::Target l_fapiTarget(
                               fapi::TARGET_TYPE_MEMBUF_CHIP,
                               reinterpret_cast<void *>
@@ -214,7 +203,7 @@ void    call_cen_sbe_tp_chiplet_init1( void *io_pArgs )
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_tp_chiplet_init1 - VSBE engine runs successfully on this Centaur");
             }
 
-        }   // end for l_pMemBufs
+        }   // end for
 
         // Freeing memory
         if (l_otherArg)

@@ -46,6 +46,7 @@
 
 //  targeting support
 #include    <targeting/common/commontargeting.H>
+#include    <targeting/common/utilFilter.H>
 
 //  fapi support
 #include    <fapi.H>
@@ -63,7 +64,7 @@
 // #include    "host_collect_dimm_spd/host_collect_dimm_spd.H"
 #include    "mss_volt/mss_volt.H"
 #include    "mss_freq/mss_freq.H"
-#include    "mss_eff_config/mss_eff_config_sim.H"
+#include    "mss_eff_config/mss_eff_config.H"
 
 namespace   MC_INIT
 {
@@ -142,29 +143,17 @@ void    call_mss_volt( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_volt entry" );
 
-    //  figure out what targets we need
-    //  Use PredicateIsFunctional to filter only functional chips
-    TARGETING::PredicateIsFunctional             l_isFunctional;
-    //  filter for functional Centaur Chips
-    TARGETING::PredicateCTM l_membufChipFilter(CLASS_CHIP, TYPE_MEMBUF);
-    // declare a postfix expression widget
-    TARGETING::PredicatePostfixExpr l_functionalAndMembufChipFilter;
-    //  is-a-membuf-chip  is-functional   AND
-    l_functionalAndMembufChipFilter.push(&l_membufChipFilter).push(&l_isFunctional).And();
-    // loop through all the targets, applying the filter,  and put the results in l_pMemBufs
-    TARGETING::TargetRangeFilter    l_pMemBufs(
-            TARGETING::targetService().begin(),
-            TARGETING::targetService().end(),
-            &l_functionalAndMembufChipFilter );
+    TARGETING::TargetHandleList l_membufTargetList;
+    getAllChips(l_membufTargetList, TYPE_MEMBUF);
 
     //  declare a vector of fapi targets to pass to mss_volt
     std::vector<fapi::Target> l_membufFapiTargets;
 
     //  fill in the vector
-    for ( uint8_t l_membufNum=0  ;   l_pMemBufs ; l_membufNum++,  ++l_pMemBufs )
+    for ( size_t i = 0; i < l_membufTargetList.size(); i++ )
     {
         //  make a local copy of the target for ease of use
-        const TARGETING::Target*  l_membuf_target = *l_pMemBufs;
+        const TARGETING::Target*  l_membuf_target = l_membufTargetList[i];
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                 "=====  add to fapi::Target vector..." );
@@ -213,33 +202,16 @@ void    call_mss_freq( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_freq entry" );
 
+    TARGETING::TargetHandleList l_membufTargetList;
+    getAllChips(l_membufTargetList, TYPE_MEMBUF);
 
-    //  figure out what targets we need
-    //  Use PredicateIsFunctional to filter only functional chips
-    TARGETING::PredicateIsFunctional             l_isFunctional;
-    //  filter for functional Centaur Chips
-    TARGETING::PredicateCTM l_membufChipFilter(CLASS_CHIP, TYPE_MEMBUF);
-    // declare a postfix expression widget
-    TARGETING::PredicatePostfixExpr l_functionalAndMembufChipFilter;
-    //  is-a-membuf-chip  is-functional   AND
-    l_functionalAndMembufChipFilter.push(&l_membufChipFilter).push(&l_isFunctional).And();
-    // loop through all the targets, applying the filter,  and put the results in l_pMemBufs
-    TARGETING::TargetRangeFilter    l_pMemBufs(
-            TARGETING::targetService().begin(),
-            TARGETING::targetService().end(),
-            &l_functionalAndMembufChipFilter );
-
-    for ( uint8_t l_memBufNum=0 ;
-            l_pMemBufs ;
-            l_memBufNum++, ++l_pMemBufs
-    )
+    for ( size_t i = 0; i < l_membufTargetList.size(); i++ )
     {
         //  make a local copy of the target for ease of use
-        const TARGETING::Target*  l_membuf_target = *l_pMemBufs;
+        const TARGETING::Target*  l_membuf_target = l_membufTargetList[i];
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "=====  mss_freq HWP( %d )",
-                l_memBufNum );
+                "=====  mss_freq HWP( %d )", i );
         EntityPath l_path;
         l_path  =   l_membuf_target->getAttr<ATTR_PHYS_PATH>();
         l_path.dump();
@@ -259,13 +231,13 @@ void    call_mss_freq( void *io_pArgs )
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                      "ERROR 0x%.8X:  mss_freq HWP( %d ) ",
                      l_err->reasonCode(),
-                     l_memBufNum );
+                     i );
             break; // break out memBuf loop
          }
         else
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                     "SUCCESS :  mss_freq HWP( %d )", l_memBufNum );
+                     "SUCCESS :  mss_freq HWP( %d )", i );
         }
     } // End memBuf loop
 
@@ -283,33 +255,17 @@ void    call_mss_eff_config( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_eff_config entry" );
 
+    TARGETING::TargetHandleList l_mbaTargetList;
+    getAllChiplets(l_mbaTargetList, TYPE_MBA);
 
-    //  Use PredicateIsFunctional to filter only functional chips
-    TARGETING::PredicateIsFunctional             l_isFunctional;
-    //  filter for functional Centaur Chips
-    TARGETING::PredicateCTM l_mbaFilter(CLASS_UNIT, TYPE_MBA);
-    // declare a postfix expression widget
-    TARGETING::PredicatePostfixExpr l_functionalAndMbaFilter;
-    //  is-a-membuf-chip  is-functional   AND
-    l_functionalAndMbaFilter.push(&l_mbaFilter).push(&l_isFunctional).And();
-    // loop through all the targets, applying the filter,  and put the results in l_pMemBufs
-    TARGETING::TargetRangeFilter    l_pMbas(
-            TARGETING::targetService().begin(),
-            TARGETING::targetService().end(),
-            &l_functionalAndMbaFilter );
-
-    for ( uint8_t l_mbaNum=0 ;
-            l_pMbas ;
-            l_mbaNum++, ++l_pMbas
-    )
+    for ( size_t i = 0; i < l_mbaTargetList.size(); i++ )
     {
         //  make a local copy of the target for ease of use
-        const TARGETING::Target*  l_mba_target = *l_pMbas;
+        const TARGETING::Target*  l_mba_target = l_mbaTargetList[i];
 
         //  print call to hwp and dump physical path of the target(s)
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "=====  mss_eff_config HWP( mba %d )",
-                l_mbaNum );
+                "=====  mss_eff_config HWP( mba %d )", i );
         //  dump physical path to targets
         EntityPath l_path;
         l_path  =   l_mba_target->getAttr<ATTR_PHYS_PATH>();
@@ -323,21 +279,20 @@ void    call_mss_eff_config( void *io_pArgs )
         (const_cast<TARGETING::Target*>(l_mba_target)) );
 
         //  call the HWP with each fapi::Target
-        FAPI_INVOKE_HWP(l_err, mss_eff_config_sim, l_fapi_mba_target);
+        FAPI_INVOKE_HWP(l_err, mss_eff_config, l_fapi_mba_target);
 
         //  process return code.
         if ( l_err )
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                     "ERROR 0x%.8X:  mss_eff_config HWP( mba %d ) ",
-                    l_err->reasonCode(), l_mbaNum );
+                    l_err->reasonCode(), i );
             break; // break out mba loop
         }
         else
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                     "SUCCESS :  mss_eff_config HWP( mba %d )",
-                     l_mbaNum );
+                     "SUCCESS :  mss_eff_config HWP( mba %d )", i );
         }
     }   // endfor
 
