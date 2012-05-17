@@ -56,6 +56,7 @@ namespace MBOX
         MSG_REGISTER_MSGQ,
         MSG_UNREGISTER_MSGQ,
         MSG_INTR,
+        MSG_MBOX_SHUTDOWN,
     };
 
 
@@ -193,6 +194,31 @@ namespace MBOX
              */
             void handle_hbmbox_resp(mbox_msg_t & i_mbox_msg);
 
+            /**
+             * Handle a new message from HB to FSP
+             * @param[in] i_msg, The carrier message
+             */
+            void handleNewMessage(msg_t* i_msg);
+
+            /**
+             * Handle shutdown
+             */
+            void handleShutdown();
+
+            /**
+             * Query Quiesced
+             * @returns [true|false]
+             */
+            ALWAYS_INLINE
+            bool quiesced()
+            {
+                return (iv_rts &&
+                        !iv_dma_pend &&
+                        iv_sendq.empty() &&
+                        iv_respondq.empty());
+            }
+
+
             enum
             {
                 MAX_RETRY_COUNT = 3,
@@ -232,11 +258,12 @@ namespace MBOX
             mbox_msg_t  iv_msg_to_send; //!< message being sent
             respond_q_t iv_respondq;    //!< msg respond pending list
             registry_t  iv_registry;    //!< Registered queue
-
             DmaBuffer   iv_dmaBuffer;   //!< DMA buffer manager
             TARGETING::Target * iv_trgt;//!< mailbox device driver target
+            msg_t *     iv_shutdown_msg;//!< Message to shutdown mbox
             bool        iv_rts;         //!< ready to send flag
             bool        iv_dma_pend;    //!< Request pending for more DMA buffers
+            bool        iv_disabled;    //!< Mailboxsp is shut off
     };
 };
 

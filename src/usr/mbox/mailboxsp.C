@@ -29,6 +29,7 @@
 #include "mboxdd.H"
 #include <sys/task.h>
 #include <initservice/taskargs.H>
+#include <initservice/initserviceif.H>
 #include <sys/vfs.h>
 #include <devicefw/userif.H>
 #include <mbox/mbox_reasoncodes.H>
@@ -60,8 +61,10 @@ MailboxSp::MailboxSp()
         iv_respondq(),
         iv_dmaBuffer(),
         iv_trgt(NULL),
+        iv_shutdown_msg(NULL),
         iv_rts(true),
-        iv_dma_pend(false)
+        iv_dma_pend(false),
+        iv_disabled(true)
 {
     // mailbox target
     TARGETING::targetService().masterProcChipTargetHandle(iv_trgt);
@@ -88,18 +91,49 @@ errlHndl_t MailboxSp::_init()
 {
     errlHndl_t err = NULL;
     size_t rc = 0;
+
     iv_msgQ = msg_q_create();
     rc = msg_q_register(iv_msgQ, VFS_ROOT_MSG_MBOX);
 
+    if(rc)   // could not register msgQ with kernel
+    {
+        TRACFCOMP(g_trac_mbox,ERR_MRK "MailboxSP::_init() Could not register"
+                  "message qeueue with kernel");
+
+        /*@ errorlog tag
+         * @errortype       ERRL_SEV_CRITICAL_SYS_TERM
+         * @moduleid        MBOX::MOD_MBOXSRV_INIT
+         * @reasoncode      MBOX::RC_KERNEL_REG_FAILED
+         * @userdata1       rc from msq_q_register
+         * @defdesc         Could not register mailbox message queue
+         */
+        err = new ERRORLOG::ErrlEntry
+            (
+             ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
+             MBOX::MOD_MBOXSRV_INIT,
+             MBOX::RC_KERNEL_REG_FAILED,    //  reason Code
+             rc,                        // rc from msg_send
+             0
+            );
+
+        return err;
+    }
+
+    // Initialize the mailbox hardware
+    err = mboxInit(iv_trgt);
+    if (err)
+    {
+        return err;
+    }
+
     // Register to get interrupts for mailbox
     err = INTR::registerMsgQ(iv_msgQ, MSG_INTR, INTR::FSP_MAILBOX);
-
-    if(!err)
+    if(err)
     {
-        err = mboxInit(iv_trgt);
-
-        task_create(MailboxSp::msg_handler, NULL);
+        return err;
     }
+
+    task_create(MailboxSp::msg_handler, NULL);
 
     // Send message to FSP on base DMA buffer zone
     msg_t * msg = msg_allocate();
@@ -108,6 +142,14 @@ errlHndl_t MailboxSp::_init()
     msg->data[1] = reinterpret_cast<uint64_t>(iv_dmaBuffer.getDmaBufferHead());
     msg->extra_data = NULL;
     MBOX::send(FSP_MAILBOX_MSGQ,msg);
+
+    iv_disabled = false;
+
+    // Register for shutdown
+    INITSERVICE::registerShutdownEvent(iv_msgQ,
+                                       MSG_MBOX_SHUTDOWN,
+                                       INITSERVICE::MBOX_PRIORITY);
+    
 
     return err;
 }
@@ -147,16 +189,7 @@ void MailboxSp::msgHandler()
             // Interrupt from the mailbox hardware
             case MSG_INTR:
                 {
-                    if(msg->data[0] != INTR::SHUT_DOWN)
-                    {
-                        err = handleInterrupt();
-                    }
-                    else
-                    {
-                        // Shutdown the mailbox
-                        TRACFCOMP(g_trac_mbox,"MBOXSP Shutdown event received");
-                        // TODO in story 41136
-                    }
+                    err = handleInterrupt();
 
                     // Respond to the interrupt handler regardless of err
                     msg->data[0] = 0;
@@ -172,42 +205,18 @@ void MailboxSp::msgHandler()
 
                         assert(0);
                     }
+
+                    if(iv_shutdown_msg && quiesced())
+                    {
+                        handleShutdown();
+                    }
                 }
 
                 break;
 
 
             case MSG_SEND:
-                {
-                    // Build mailbox message
-                    mbox_msg_t mbox_msg;
-                    mbox_msg.msg_queue_id = static_cast<uint32_t>(msg->data[0]);
-                    msg_t * payload = reinterpret_cast<msg_t*>(msg->extra_data);
-                    mbox_msg.msg_payload = *payload;  //copy in payload
-
-                    if(msg_is_async(msg))
-                    {
-                        msg_free(payload);
-                        msg_free(msg);
-                    }
-                    else  //synchronous
-                    {
-                        msg->data[1] = 0;  // used later for return value
-
-                        // need to watch for a response
-                        response = new msg_respond_t(msg);
-
-                        // Convert a 64 bit pointer to a 32 bit unsigned int.
-                        mbox_msg.msg_id =
-                            static_cast<uint32_t>
-                            (reinterpret_cast<uint64_t>(response->key));
-
-                        iv_respondq.insert(response);
-                    }
-
-                    send_msg(&mbox_msg);
-
-                }
+                handleNewMessage(msg);
                 break;
 
             case MSG_REGISTER_MSGQ:
@@ -227,6 +236,21 @@ void MailboxSp::msgHandler()
                     msg_q_t msgQ = msgq_unregister(queue_id);
                     msg->data[1] = reinterpret_cast<uint64_t>(msgQ);
                     msg_respond(iv_msgQ,msg);
+                }
+                break;
+
+            case MSG_MBOX_SHUTDOWN:
+                {
+                    TRACFCOMP(g_trac_mbox,"MBOXSP Shutdown event received");
+
+                    iv_shutdown_msg = msg;      // Respond to this when done
+                    iv_disabled = true;         // stop incomming new messages
+
+                    if(quiesced())
+                    {
+                        handleShutdown();       // done - shutdown now.
+                    }
+                    // else wait for things to quiesce
                 }
                 break;
 
@@ -263,6 +287,73 @@ void MailboxSp::msgHandler()
 }
 
 
+void MailboxSp::handleNewMessage(msg_t * i_msg)
+{
+    // Build mailbox message
+    mbox_msg_t mbox_msg;
+    mbox_msg.msg_queue_id = static_cast<uint32_t>(i_msg->data[0]);
+    msg_t * payload = reinterpret_cast<msg_t*>(i_msg->extra_data);
+    mbox_msg.msg_payload = *payload;  //copy in payload
+
+    if(msg_is_async(i_msg))
+    {
+        msg_free(payload);
+        msg_free(i_msg);
+    }
+
+    if(iv_disabled)
+    {
+        TRACFCOMP(g_trac_mbox,WARN_MRK
+                  "MSGSEND - mailboxsp is disabled. Message dropped!"
+                  " msgQ=0x%x type=0x%x",
+                  mbox_msg.msg_queue_id,
+                  mbox_msg.msg_payload.type);
+
+        if(!msg_is_async(i_msg)) // synchronous
+        {
+            /*@ errorlog tag
+             * @errortype       ERRL_SEV_INFORMATIONAL
+             * @moduleid        MOD_MBOXSRV_SENDMSG
+             * @reasoncode      RC_MAILBOX_DISABLED
+             * @userdata1       queue_id
+             * @userdata2       message type
+             * @defdesc         Mailbox is disabled, message dropped.
+             */
+            errlHndl_t err = new ERRORLOG::ErrlEntry
+                (
+                 ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                 MBOX::MOD_MBOXSRV_SENDMSG,
+                 MBOX::RC_MAILBOX_DISABLED,        //  reason Code
+                 i_msg->data[0],                   // queue id 
+                 payload->type                     // message type
+                );
+
+            i_msg->data[1] = reinterpret_cast<uint64_t>(err);
+
+            msg_respond(iv_msgQ,i_msg);
+        }
+    }
+    else
+    {
+
+        if(!msg_is_async(i_msg))  //synchronous
+        {
+            i_msg->data[1] = 0;  // used later for return value
+
+            // need to watch for a response
+            msg_respond_t * response = new msg_respond_t(i_msg);
+
+            // Convert a 64 bit pointer to a 32 bit unsigned int.
+            mbox_msg.msg_id =
+                static_cast<uint32_t>
+                (reinterpret_cast<uint64_t>(response->key));
+
+            iv_respondq.insert(response);
+        }
+
+        send_msg(&mbox_msg);
+    }
+}
 
 // Note: When called due to an ACK or retry, iv_rts should be true.
 void MailboxSp::send_msg(mbox_msg_t * i_msg)
@@ -1047,6 +1138,25 @@ errlHndl_t MailboxSp::handleInterrupt()
     }
 
     return err;
+}
+
+
+void MailboxSp::handleShutdown()
+{
+    // Shutdown the hardware
+    errlHndl_t err = mboxddShutDown(iv_trgt);
+
+    if(err)  // SCOM failed.
+    {
+        // If this failed, the whole system is probably buggered up.
+        errlCommit(err,HBMBOX_COMP_ID);
+        assert(0);
+    }
+
+    INTR::unRegisterMsgQ(INTR::FSP_MAILBOX);
+
+    msg_respond(iv_msgQ,iv_shutdown_msg);
+    TRACFCOMP(g_trac_mbox,INFO_MRK"Mailbox is shutdown");
 }
 
 

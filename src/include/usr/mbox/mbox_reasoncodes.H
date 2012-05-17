@@ -38,6 +38,7 @@ namespace MBOX
         MOD_MBOXREGISTER        = 0x06, // MailboxSp::msgq_register
         MOD_MBOXSRV_FSP_MSG     = 0x07, // MailboxSp::handle_hbmbox_msg
         MOD_MBOXSRV_SENDMSG     = 0x08, // MailboxSp::send_msg
+        MOD_MBOXSRV_INIT        = 0x09, // MailboxSp::_init
     };
 
     enum MBOXReasonCode
@@ -56,6 +57,8 @@ namespace MBOX
         RC_INVALID_MBOX_MSG_TYPE     = HBMBOX_COMP_ID | 0x0C,
         RC_MBOX_SERVICE_NOT_READY    = HBMBOX_COMP_ID | 0x0D,
         RC_INVALID_DMA_LENGTH        = HBMBOX_COMP_ID | 0x0E,
+        RC_KERNEL_REG_FAILED         = HBMBOX_COMP_ID | 0x0F,
+        RC_MAILBOX_DISABLED          = HBMBOX_COMP_ID | 0x10,
     };
 };
 

@@ -35,6 +35,8 @@ namespace INITSERVICE
     enum EventPriority_t
     {
         LOWEST_PRIORITY = 0,    //!<< Notifiy last, LIFO order
+        INTR_PRIORITY   = LOWEST_PRIORITY, //!<< Shutdown INTR
+        MBOX_PRIORITY   = 1,    //!<< Shutdown MBOX
         NO_PRIORITY = 16,       //!<< No dependency / dont' care, LIFO order
         HIGHEST_PRIORITY = 127, //!<< Nofity first, LIFO order
     };

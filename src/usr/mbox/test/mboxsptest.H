@@ -50,7 +50,9 @@ class MboxSPTest : public CxxTest::TestSuite
        */
       void testSendAsync(void)
       {
-          // TODO Temporaritly DISABLE in VBU until INTR BAR is set
+          //  This testcase only works if there is no FSP.
+          //  Must be disabled for vpo and
+          //  TODO disble if there is an FSP.
           if( TARGETING::is_vpo() )
           {
               return;
@@ -145,7 +147,9 @@ class MboxSPTest : public CxxTest::TestSuite
        */
       void testSendSync(void)
       {
-          // TODO Temporaritly DISABLE in VBU until INTR BAR is set
+          //  This testcase only works if there is no FSP.
+          //  Must be disabled for vpo and
+          //  TODO disble if there is an FSP.
           if( TARGETING::is_vpo() )
           {
               return;

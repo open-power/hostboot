@@ -154,7 +154,7 @@ errlHndl_t IntrRp::_init()
         // Register event to be called on shutdown
         INITSERVICE::registerShutdownEvent(iv_msgQ,
                                            MSG_INTR_SHUTDOWN,
-                                           INITSERVICE::LOWEST_PRIORITY);
+                                           INITSERVICE::INTR_PRIORITY);
     }
 
     return err;
@@ -288,8 +288,8 @@ void IntrRp::msgHandler()
 
             case MSG_INTR_UNREGISTER_MSGQ:
                 {
-                    TRACDCOMP(g_trac_intr,
-                              "UNREG: msg type = 0x%lx",
+                    TRACFCOMP(g_trac_intr,
+                              "INTR remove registration of interrupt type = 0x%lx",
                               msg->data[0]);
 
                     msg_q_t msgQ = NULL;
@@ -412,7 +412,7 @@ errlHndl_t IntrRp::registerInterrupt(msg_q_t i_msgQ,
     Registry_t::iterator r = iv_registry.find(i_intr_type);
     if(r == iv_registry.end())
     {
-        TRACDCOMP(g_trac_intr,"INTR::register %x", i_intr_type);
+        TRACFCOMP(g_trac_intr,"INTR::register intr type 0x%x", i_intr_type);
         iv_registry[i_intr_type] = intr_response_t(i_msgQ,i_msg_type);
     }
     else
@@ -598,6 +598,7 @@ void IntrRp::shutDown()
             deconfigureInterruptPresenter(pir);
         }
     }
+    TRACFCOMP(g_trac_intr,INFO_MRK,"INTR is shutdown");
 }
 
 //----------------------------------------------------------------------------

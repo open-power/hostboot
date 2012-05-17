@@ -54,7 +54,27 @@ namespace MBOX
         MBOX_PARITY_ERR      = 0x01000000, /* LBUS RAM Parity Error Detected */
     };
 
+    /**
+     * @brief Initialize device driver hardware
+     * 
+     * @param[in] i_target, Chip target of the MBOX operation
+     * @return errlHndl_t If scom error | NULL (success)
+     */
      errlHndl_t mboxInit(TARGETING::Target* i_target);
+
+     /**
+      * @brief Disable the reporting of interrupts
+      * @param[in] i_target, Chip target of the MBOX operations
+      */
+     errlHndl_t mboxddMaskInterrupts(TARGETING::Target * i_target);
+
+     /**
+      * @brief Shutdown device driver
+      *
+      * @param[in] i_target, Chip target of the MBOX operation
+      * @return errlHndl_t if scom error | NULL (success)
+      */
+     errlHndl_t mboxddShutDown(TARGETING::Target* i_target);
 
     /**
      * @brief Performs a mailbox read operation

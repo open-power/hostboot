@@ -513,6 +513,7 @@ errlHndl_t mboxWrite(TARGETING::Target* i_target,void* i_buffer,
     return l_err;
 }
 
+
 /**
  * @brief Reads the mailbox PIB error status register
  */
@@ -601,5 +602,70 @@ errlHndl_t mboxInit(TARGETING::Target* i_target)
 
 }
 
+
+errlHndl_t mboxddMaskInterrupts(TARGETING::Target * i_target)
+{
+    errlHndl_t err = NULL;
+
+    // Mask off all interrupts
+    // Reset intr enable bits by setting the bits in MBOX_DB_INT_MASK_PIB_RC
+    uint64_t scom_data = (static_cast<uint64_t>(MBOX_DOORBELL_ERROR) |
+                          static_cast<uint64_t>(MBOX_HW_ACK) |
+                          static_cast<uint64_t>(MBOX_DATA_PENDING)) << 32;
+
+    size_t scom_len = sizeof(uint64_t);
+
+    err = deviceOp(DeviceFW::WRITE,
+                   i_target,
+                   reinterpret_cast<void*>(&scom_data),
+                   scom_len,
+                   DEVICE_XSCOM_ADDRESS(MBOX_DB_INT_MASK_PIB_RC));
+
+    return err;
+}
+
+
+errlHndl_t mboxddShutDown(TARGETING::Target* i_target)
+{
+    size_t scom_len = sizeof(uint64_t);
+    uint64_t scom_data = 0;
+
+    errlHndl_t err = mboxddMaskInterrupts(i_target);
+
+    if(!err)
+    {
+        // Clear the status reg
+        //Turn off Permission to Send
+        //Turn off everything possible
+        err = deviceOp(DeviceFW::WRITE,
+                       i_target,
+                       reinterpret_cast<void*>(&scom_data),
+                       scom_len,
+                       DEVICE_XSCOM_ADDRESS(MBOX_DB_STAT_CNTRL_1));
+    }
+
+    // Clear any pending stuff
+    if(!err)
+    {
+        err = deviceOp(DeviceFW::READ,
+                       i_target,
+                       reinterpret_cast<void*>(&scom_data),
+                       scom_len,
+                       DEVICE_XSCOM_ADDRESS(MBOX_DB_INT_REG_PIB));
+    }
+
+    if(!err)
+    {
+        err = deviceOp(DeviceFW::WRITE,
+                       i_target,
+                       reinterpret_cast<void*>(&scom_data),
+                       scom_len,
+                       DEVICE_XSCOM_ADDRESS(MBOX_DB_INT_REG_PIB));
+    }
+
+    // TODO Others?
+
+    return err;
+}
 
 }; //end MBOX namespace
