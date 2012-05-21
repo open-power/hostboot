@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/HWPs/dmi_training/dmi_io_run_training/edi_regs.h $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/hwpf/hwp/bus_training/edi_regs.h $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 //----------------------------------------------------- 
 //      ____  ____     _   ______  ______ 
 //     / __ \/ __ \   / | / / __ \/_  __/ 
@@ -41,7 +42,7 @@
 //----------------------------------------------------- 
 // Constant file for edi_reg_attribute.txt_fixed
 // File generated at 16:23 on 8/31/2011 using system_pervasive/common/tools/CreateConstantsH.pl
-// $Id: edi_regs.h,v 1.5 2012/01/20 12:32:47 varkeykv Exp $
+// $Id: edi_regs.h,v 1.7 2012/05/17 08:32:23 varkeykv Exp $
 // $URL: $
 //
 // *!**************************************************************************
@@ -250,12 +251,181 @@ typedef enum {
 	rx_dfe_timers_pp,
 	rx_reset_cfg_pp,
 	rx_fir_msg_pb,
+	ei4_tx_mode_pl,
+	ei4_tx_cntl_stat_pl,
+	ei4_tx_spare_mode_pl,
+	ei4_tx_bist_stat_pl,
+	ei4_tx_prbs_mode_pl,
+	ei4_tx_data_cntl_gcrmsg_pl,
+	ei4_tx_sync_pattern_gcrmsg_pl,
+	ei4_tx_fir_pl,
+	ei4_tx_fir_mask_pl,
+	ei4_tx_fir_error_inject_pl,
+	ei4_tx_mode_fast_pl,
+	ei4_tx_clk_mode_pg,
+	ei4_tx_spare_mode_pg,
+	ei4_tx_cntl_stat_pg,
+	ei4_tx_mode_pg,
+	ei4_tx_bus_repair_pg,
+	ei4_tx_grp_repair_vec_0_15_pg,
+	ei4_tx_grp_repair_vec_16_31_pg,
+	ei4_tx_reset_act_pg,
+	ei4_tx_bist_stat_pg,
+	ei4_tx_fir_pg,
+	ei4_tx_fir_mask_pg,
+	ei4_tx_fir_error_inject_pg,
+	ei4_tx_id1_pg,
+	ei4_tx_id2_pg,
+	ei4_tx_id3_pg,
+	ei4_tx_minikerf_pg,
+	ei4_tx_clk_cntl_gcrmsg_pg,
+	ei4_tx_bad_lane_enc_gcrmsg_pg,
+	ei4_tx_sls_lane_enc_gcrmsg_pg,
+	ei4_tx_pc_ffe_pg,
+	ei4_tx_misc_analog_pg,
+	ei4_tx_lane_disabled_vec_0_15_pg,
+	ei4_tx_lane_disabled_vec_16_31_pg,
+	ei4_tx_sls_lane_mux_gcrmsg_pg,
+	ei4_tx_dyn_rpr_pg,
+	ei4_tx_slv_mv_sls_ln_req_gcrmsg_pg,
+	ei4_tx_wiretest_pp,
+	ei4_tx_mode_pp,
+	ei4_tx_sls_gcrmsg_pp,
+	ei4_tx_ber_cntl_a_pp,
+	ei4_tx_ber_cntl_b_pp,
+	ei4_tx_bist_cntl_pp,
+	ei4_tx_ber_cntl_sls_pp,
+	ei4_tx_cntl_pp,
+	ei4_tx_reset_cfg_pp,
+	ei4_rx_mode_pl,
+	ei4_rx_cntl_pl,
+	ei4_rx_spare_mode_pl,
+	ei4_rx_prot_edge_status_pl,
+	ei4_rx_bist_stat_pl,
+	ei4_rx_eyeopt_mode_pl,
+	ei4_rx_eyeopt_stat_pl,
+	ei4_rx_offset_even_pl,
+	ei4_rx_offset_odd_pl,
+	ei4_rx_amp_val_pl,
+	ei4_rx_prot_status_pl,
+	ei4_rx_prot_mode_pl,
+	ei4_rx_prot_cntl_pl,
+	ei4_rx_fifo_stat_pl,
+	ei4_rx_prbs_mode_pl,
+	ei4_rx_vref_pl,
+	ei4_rx_stat_pl,
+	ei4_rx_deskew_stat_pl,
+	ei4_rx_fir_pl,
+	ei4_rx_fir_mask_pl,
+	ei4_rx_fir_error_inject_pl,
+	ei4_rx_sls_pl,
+	ei4_rx_wt_status_pl,
+	ei4_rx_fifo_cntl_pl,
+	ei4_rx_ber_status_pl,
+	ei4_rx_ber_timer_0_15_pl,
+	ei4_rx_ber_timer_16_31_pl,
+	ei4_rx_ber_timer_32_39_pl,
+	ei4_rx_servo_cntl_pl,
+	ei4_rx_fifo_diag_0_15_pl,
+	ei4_rx_fifo_diag_16_31_pl,
+	ei4_rx_fifo_diag_32_47_pl,
+	ei4_rx_eye_width_status_pl,
+	ei4_rx_eye_width_cntl_pl,
+	ei4_rx_clk_mode_pg,
+	ei4_rx_spare_mode_pg,
+	ei4_rx_mode_pg,
+	ei4_rx_bus_repair_pg,
+	ei4_rx_grp_repair_vec_0_15_pg,
+	ei4_rx_grp_repair_vec_16_31_pg,
+	ei4_rx_recal_mode_pg,
+	ei4_rx_reset_act_pg,
+	ei4_rx_id1_pg,
+	ei4_rx_id2_pg,
+	ei4_rx_id3_pg,
+	ei4_rx_minikerf_pg,
+	ei4_rx_bist_cntl_pg,
+	ei4_rx_sls_mode_pg,
+	ei4_rx_training_start_pg,
+	ei4_rx_training_status_pg,
+	ei4_rx_recal_status_pg,
+	ei4_rx_timeout_sel_pg,
+	ei4_rx_fifo_mode_pg,
+	ei4_rx_state_debug_pg,
+	ei4_rx_state_val_pg,
+	ei4_rx_sls_status_pg,
+	ei4_rx_prot_mode_pg,
+	ei4_rx_fir1_pg,
+	ei4_rx_fir2_pg,
+	ei4_rx_fir1_mask_pg,
+	ei4_rx_fir2_mask_pg,
+	ei4_rx_fir1_error_inject_pg,
+	ei4_rx_fir2_error_inject_pg,
+	ei4_rx_fir_training_pg,
+	ei4_rx_fir_training_mask_pg,
+	ei4_rx_timeout_sel1_pg,
+	ei4_rx_lane_bad_vec_0_15_pg,
+	ei4_rx_lane_bad_vec_16_31_pg,
+	ei4_rx_lane_disabled_vec_0_15_pg,
+	ei4_rx_lane_disabled_vec_16_31_pg,
+	ei4_rx_lane_swapped_vec_0_15_pg,
+	ei4_rx_lane_swapped_vec_16_31_pg,
+	ei4_rx_init_state_pg,
+	ei4_rx_wiretest_state_pg,
+	ei4_rx_wiretest_laneinfo_pg,
+	ei4_rx_wiretest_gcrmsgs_pg,
+	ei4_rx_deskew_gcrmsgs_pg,
+	ei4_rx_deskew_state_pg,
+	ei4_rx_deskew_mode_pg,
+	ei4_rx_deskew_status_pg,
+	ei4_rx_bad_lane_enc_gcrmsg_pg,
+	ei4_rx_static_repair_state_pg,
+	ei4_rx_ei4_tx_bus_info_pg,
+	ei4_rx_sls_lane_enc_gcrmsg_pg,
+	ei4_rx_fence_pg,
+	ei4_rx_term_pg,
+	ei4_rx_timeout_sel2_pg,
+	ei4_rx_dyn_rpr_pg,
+	ei4_rx_dyn_rpr_gcrmsg_pg,
+	ei4_rx_dyn_rpr_err_tallying_pg,
+	ei4_rx_eo_final_l2u_gcrmsgs_pg,
+	ei4_rx_gcr_msg_debug_dest_ids_pg,
+	ei4_rx_gcr_msg_debug_src_ids_pg,
+	ei4_rx_gcr_msg_debug_dest_addr_pg,
+	ei4_rx_gcr_msg_debug_write_data_pg,
+	ei4_rx_wt_clk_status_pg,
+	ei4_rx_wiretest_pll_cntl_pg,
+	ei4_rx_eo_step_cntl_pg,
+	ei4_rx_eo_step_stat_pg,
+	ei4_rx_eo_step_fail_pg,
+	ei4_rx_amp_val_pg,
+	ei4_rx_sls_rcvy_pg,
+	ei4_rx_sls_rcvy_gcrmsg_pg,
+	ei4_rx_ei4_tx_lane_info_gcrmsg_pg,
+	ei4_rx_err_tallying_gcrmsg_pg,
+	ei4_rx_trace_pg,
+	ei4_rx_wiretest_pp,
+	ei4_rx_mode_pp,
+	ei4_rx_cntl_pp,
+	ei4_rx_ei4_cal_cntl_pp,
+	ei4_rx_ei4_cal_inc_a_d_pp,
+	ei4_rx_ei4_cal_inc_e_h_pp,
+	ei4_rx_ei4_cal_dec_a_d_pp,
+	ei4_rx_ei4_cal_dec_e_h_pp,
+	ei4_rx_ber_cntl_pp,
+	ei4_rx_ber_mode_pp,
+	ei4_rx_servo_to1_pp,
+	ei4_rx_servo_to2_pp,
+	ei4_rx_reset_cfg_pp,
+	ei4_rx_fir_msg_pb,
 NUM_REGS
 } GCR_sub_registers;
 
-// ext_addr is 9 bits
-const uint32_t  GCR_sub_reg_ext_addr[] = { 0x080, 0x081, 0x082, 0x085, 0x086, 0x087, 0x088, 0x08A, 0x08B, 0x08C, 0x08D, 0x180, 0x181, 0x182, 0x183, 0x184, 0x185, 0x186, 0x188, 0x189, 0x18A, 0x18B, 0x18C, 0x192, 0x193, 0x194, 0x195, 0x198, 0x199, 0x19A, 0x19B, 0x19C, 0x19D, 0x19F, 0x1A3, 0x1A4, 0x1A5, 0x1A6, 0x1A7, 0x1D0, 0x1D1, 0x1D2, 0x1D3, 0x1D4, 0x1D5, 0x1D6, 0x1D7, 0x1D8, 0x1D9, 0x1E0, 0x1E1, 0x1E2, 0x1E3, 0x1E4, 0x1E5, 0x000, 0x001, 0x002, 0x003, 0x005, 0x006, 0x007, 0x008, 0x009, 0x00A, 0x00B, 0x00C, 0x00D, 0x00E, 0x00F, 0x010, 0x011, 0x012, 0x013, 0x014, 0x016, 0x018, 0x019, 0x01A, 0x01B, 0x01C, 0x01D, 0x01E, 0x01F, 0x020, 0x021, 0x022, 0x023, 0x024, 0x025, 0x026, 0x027, 0x028, 0x029, 0x02A, 0x100, 0x101, 0x103, 0x104, 0x105, 0x106, 0x107, 0x109, 0x10A, 0x10B, 0x10C, 0x10D, 0x10E, 0x10F, 0x110, 0x111, 0x112, 0x113, 0x114, 0x115, 0x116, 0x117, 0x11A, 0x11B, 0x11C, 0x11D, 0x11E, 0x11F, 0x120, 0x121, 0x122, 0x123, 0x124, 0x125, 0x126, 0x127, 0x128, 0x129, 0x12A, 0x12B, 0x12C, 0x12D, 0x12E, 0x12F, 0x130, 0x131, 0x132, 0x133, 0x134, 0x135, 0x137, 0x138, 0x139, 0x13A, 0x13B, 0x13C, 0x13D, 0x13E, 0x13F, 0x140, 0x141, 0x142, 0x143, 0x144, 0x145, 0x146, 0x147, 0x148, 0x149, 0x14A, 0x14B, 0x14C, 0x14D, 0x14E, 0x14F, 0x150, 0x151, 0x152, 0x153, 0x154, 0x155, 0x160, 0x161, 0x162, 0x168, 0x169, 0x16A, 0x16B, 0x16C, 0x16D, 0x16E, 0x16F, 0x1FE, 0x108 };
 
+// merged ei4 and edi ext addresses
+const uint32_t  GCR_sub_reg_ext_addr[] =     { 0x080, 0x081, 0x082, 0x085, 0x086, 0x087, 0x088, 0x08A, 0x08B, 0x08C, 0x08D, 0x180, 0x181, 0x182, 0x183, 0x184, 0x185, 0x186, 0x188, 0x189, 0x18A, 0x18B, 0x18C, 0x192, 0x193, 0x194, 0x195, 0x198, 0x199, 0x19A, 0x19B, 0x19C, 0x19D, 0x19F, 0x1A3, 0x1A4, 0x1A5, 0x1A6, 0x1A7, 0x1D0, 0x1D1, 0x1D2, 0x1D3, 0x1D4, 0x1D5, 0x1D6, 0x1D7, 0x1D8, 0x1D9, 0x1E0, 0x1E1, 0x1E2, 0x1E3, 0x1E4, 0x1E5, 0x000, 0x001, 0x002, 0x003, 0x005, 0x006, 0x007, 0x008, 0x009, 0x00A, 0x00B, 0x00C, 0x00D, 0x00E, 0x00F, 0x010, 0x011, 0x012, 0x013, 0x014, 0x016, 0x018, 0x019, 0x01A, 0x01B, 0x01C, 0x01D, 0x01E, 0x01F, 0x020, 0x021, 0x022, 0x023, 0x024, 0x025, 0x026, 0x027, 0x028, 0x029, 0x02A, 0x100, 0x101, 0x103, 0x104, 0x105, 0x106, 0x107, 0x109, 0x10A, 0x10B, 0x10C, 0x10D, 0x10E, 0x10F, 0x110, 0x111, 0x112, 0x113, 0x114, 0x115, 0x116, 0x117, 0x11A, 0x11B, 0x11C, 0x11D, 0x11E, 0x11F, 0x120, 0x121, 0x122, 0x123, 0x124, 0x125, 0x126, 0x127, 0x128, 0x129, 0x12A, 0x12B, 0x12C, 0x12D, 0x12E, 0x12F, 0x130, 0x131, 0x132, 0x133, 0x134, 0x135, 0x137, 0x138, 0x139, 0x13A, 0x13B, 0x13C, 0x13D, 0x13E, 0x13F, 0x140, 0x141, 0x142, 0x143, 0x144, 0x145, 0x146, 0x147, 0x148, 0x149, 0x14A, 0x14B, 0x14C, 0x14D, 0x14E, 0x14F, 0x150, 0x151, 0x152, 0x153, 0x154, 0x155, 0x160, 0x161, 0x162, 0x168, 0x169, 0x16A, 0x16B, 0x16C, 0x16D, 0x16E, 0x16F, 0x1FE, 0x108 ,
+0x080, 0x081, 0x082, 0x085, 0x086, 0x087, 0x088, 0x08A, 0x08B, 0x08C, 0x08D, 0x180, 0x181, 0x182, 0x183, 0x184, 0x185, 0x186, 0x188, 0x189, 0x18A, 0x18B, 0x18C, 0x192, 0x193, 0x194, 0x195, 0x198, 0x19D, 0x19F, 0x1A1, 0x1A2, 0x1A3, 0x1A4, 0x1A5, 0x1A6, 0x1A7, 0x1D0, 0x1D1, 0x1D2, 0x1D3, 0x1D4, 0x1D6, 0x1D7, 0x1D8, 0x1D9, 0x000, 0x001, 0x002, 0x003, 0x005, 0x006, 0x007, 0x008, 0x009, 0x00A, 0x00C, 0x00D, 0x00E, 0x00F, 0x016, 0x017, 0x018, 0x019, 0x01A, 0x01B, 0x01C, 0x01D, 0x01E, 0x01F, 0x020, 0x021, 0x022, 0x023, 0x024, 0x025, 0x026, 0x027, 0x028, 0x029, 0x100, 0x101, 0x103, 0x104, 0x105, 0x106, 0x107, 0x109, 0x10A, 0x10B, 0x10C, 0x10D, 0x10E, 0x10F, 0x110, 0x111, 0x112, 0x113, 0x114, 0x115, 0x116, 0x117, 0x118, 0x11A, 0x11B, 0x11C, 0x11D, 0x11E, 0x11F, 0x120, 0x121, 0x122, 0x123, 0x124, 0x125, 0x126, 0x127, 0x128, 0x129, 0x12A, 0x12B, 0x12C, 0x12D, 0x12E, 0x12F, 0x130, 0x131, 0x132, 0x133, 0x134, 0x135, 0x136, 0x137, 0x139, 0x13A, 0x13B, 0x13C, 0x13D, 0x13E, 0x13F, 0x140, 0x142, 0x146, 0x147, 0x148, 0x149, 0x14E, 0x151, 0x152, 0x153, 0x154, 0x155, 0x160, 0x161, 0x162, 0x163, 0x164, 0x165, 0x166, 0x167, 0x16A, 0x16B, 0x16C, 0x16D, 0x108 };
+
+//merged ei4 and edi 
 const char* const GCR_sub_reg_names[] = {
 	"TX Lane Mode Reg",
 	"TX Cntl and Status Reg",
@@ -445,7 +615,177 @@ const char* const GCR_sub_reg_names[] = {
 	"RX Servo Timeout Select Regs 3",
 	"RX DFE Configuration Register",
 	"RX DFE timers Configuration Register",
+	"RX Configurable Reset Control Register (CRCR)",
+	
+	"TX Lane Mode Reg",
+	"TX Cntl and Status Reg",
+	"TX Per-Lane Spare Mode Reg",
+	"TX BIST Status Reg",
+	"TX Per-Lane PRBS Mode Reg",
+	"TX Data Control Reg",
+	"TX Sync Pattern Control Reg",
+	"TX Per-Lane FIR Error Source-Isolation Reg",
+	"TX Per-Lane FIR Error Mask Reg",
+	"TX Per-Lane FIR Error Injection Reg",
+	"TX Per-Lane Fast-Clocked Mode Reg",
+	"TX Per-Group Clk Mode Reg",
+	"TX Per-Group Spare Mode Reg",
+	"TX Cntl and Status Reg",
+	"TX Mode Reg",
+	"TX Bus Repair Reg",
+	"TX Clkgrp Repair Lanes 0-15 Reg",
+	"TX Clkgrp Repair Lanes 16-31 Reg",
+	"TX Reset Control Action Register (RCAR)",
+	"TX BIST CLK Status Reg",
+	"TX Per-Group FIR Error Source-Isolation Reg",
+	"TX Per-Group FIR Error Source-Isolation Reg",
+	"TX Per-Group FIR Error Injection Reg",
+	"TX Clock Group Identification 1 Reg",
+	"TX Clock Group Identification 2 Reg",
+	"TX Clock Group Identification 3 Reg",
+	"TX Minikerf Cntl Reg",
+	"TX Clock Control Reg",
+	"TX Bad Lanes Encoded",
+	"TX SLS Lane Encoded",
+	"TX Precomp and Impedance Reg",
+	"TX Misc Analog Reg",
+	"TX Lane Disable(d) 0 to 15 Reg",
+	"TX Lane Disable(d) 16 to 31 Reg",
+	"TX SLS Lane TX Mux Setting",
+	"TX Dynamic Repair & Recalibration Status",
+	"TX Dynamic Repair & Recalibration Messages",
+	"TX Wiretest Per-Group & Pack Shadow Reg",
+	"TX Mode Per-Pack Shadow Reg",
+	"TX SLS Command",
+	"TX Bit Error Injection Control A Shadow Reg",
+	"TX Bit Error Injection Control B Shadow Reg",
+	"TX BIST Cntl Reg",
+	"TX Bit Error Injection Control SLS Shadow Reg",
+	"TX Cntl Per-Pack Reg",
+	"TX Configurable Reset Control Register (CRCR)",
+	"RX Lane Mode Reg",
+	"RX Cntl and Status Reg",
+	"RX Per-lane Spare Mode Reg",
+	"RX Phase Rotator Edge Status Reg",
+	"RX BIST Status Reg",
+	"RX Eye Optimization Mode Reg",
+	"RX Eye Optimization Status Reg",
+	"RX Even Sample Latch Offset Cntl Reg",
+	"RX Odd Sample Latch Offset Cntl Reg",
+	"RX Preamp value Reg",
+	"RX Phase Rotator Status Reg",
+	"RX Phase Rotator Mode Reg",
+	"RX Phase Rotator Control Reg",
+	"RX FIFO Status Reg",
+	"RX Per-Lane PRBS Mode Reg",
+	"RX Voltage Reference Reg",
+	"RX Per-Lane Deskew Status Reg",
+	"RX FIFO deskew status/error register",
+	"RX Per-Lane FIR Error Source-Isolation Reg",
+	"RX Per-Lane FIR Error Source-Isolation Mask Reg",
+	"RX Per-Lane FIR Error Injection Reg",
+	"RX SLS Settings Register",
+	"RX Wiretest Status register  ",
+	"RX FIFO control Reg",
+	"RX BER Status Reg",
+	"RX BER Current Timer Value Reg - Bits 0 to 15",
+	"RX BER Current Timer Value Reg - Bits 16 to 31",
+	"RX BER Current Timer Value Reg - Bits 32 to 39",
+	"RX Servo Operation command and control",
+	"RX FIFO output 0 to 15 for diag",
+	"RX FIFO output 16 to 31 for diag",
+	"RX FIFO output 32 to 47 for diag",
+	"RX Current and historic minimum eye width",
+	"RX historic minimum eye width reset control",
+	"RX Per-Group Clk Mode Reg",
+	"RX Per-Group Spare Mode Reg",
+	"RX Mode Reg",
+	"RX Bus Repair Reg",
+	"RX Clkgrp Repair Lanes 0-15 Reg",
+	"RX Clkgrp Repair Lanes 16-31 Reg",
+	"RX Bus Repair Reg",
+	"RX Reset Control Action Register (RCAR)",
+	"RX Clock Group Identification 1 Reg",
+	"RX Clock Group Identification 2 Reg",
+	"RX Clock Group Identification 3 Reg",
+	"RX Minikerf Cntl Reg",
+	"RX BIST Cntl Reg",
+	"RX Spare Lane Signaling Mode Reg",
+	"RX Training State Start Reg",
+	"RX Training State Status Reg",
+	"RX Recal Status Reg",
+	"RX Timeout Select Reg",
+	"RX FIFO Mode Reg",
+	"RX State Machine Debug Cntl/Status Reg",
+	"RX State Machine Debug Value Reg",
+	"RX Spare Lane Signalling Status Reg",
+	"RX Phase Rotator/Detector Mode Reg",
+	"RX Per-Group FIR Error Source-Isolation Reg",
+	"RX Per-Group FIR Error Source-Isolation Reg",
+	"RX Per-Group FIR Error Source-Isolation Mask Reg",
+	"RX Per-Group FIR Error Source-Isolation Mask Reg",
+	"RX Per-Group FIR Error Injection Reg",
+	"RX Per-Group FIR Error Injection Reg",
+	"RX Per-Group Training FIR Error Reg",
+	"RX Per-Group Training FIR Error Mask Reg",
+	"RX Timeout Select Reg 1",
+	"RX Bad Lanes 0 to 15 Reg",
+	"RX Bad Lanes 16 to 31 Reg",
+	"RX Lane Disable(d) 0 to 15 Reg",
+	"RX Lane Disable(d) 16_31 Reg",
+	"RX P & N Lanes Swapped 0 to 15 Reg",
+	"RX P & N Lanes Swapped 16 to 31 Reg",
+	"RX Init Machine Status",
+	"RX Wiretest State Machine Reg",
+	"RX Wiretest Lane Info Reg",
+	"RX Wiretest GCR Message Reg",
+	"RX Deskew GCR Message Reg",
+	"RX Deskew State Machine Status Reg",
+	"RX Deskew State Machine Control Reg",
+	"RX Deskew State Machine Status Values",
+	"RX Bad Lanes Encoded",
+	"RX Static Repair State Machine Reg",
+	"TX Bus info for RX Ctl Macs",
+	"RX SLS Lane Encoded",
+	"RX Per Group Fence",
+	"RX Termination Reg",
+	"RX Timeout Select Reg 2",
+	"RX Dynamic Repair & Recalibration Status",
+	"CRC/ECC Dynamic Repair GCR Message Reg",
+	"CRC/ECC Dynamic Repair Error Frequency Settings",
+	"RX Final Load to Unload GCR Messages",
+	"RX SW Initiated GCR Message Destination IDs",
+	"RX SW Initiated GCR Message Source IDs",
+	"RX SW Initiated GCR Message Destination Addr",
+	"RX SW Initiated GCR Message Write Data",
+	"RX Clock Wiretest Status",
+	"RX Cleanup PLL Enable ",
+	"RX Eye optimization step control",
+	"RX Eye optimization step status",
+	"RX Eye optimization step fail flags",
+	"RX Eye optimization Amp  working registers",
+	"RX SLS Handshake Recovery Register",
+	"RX SLS Handshake Recovery GCR Messages",
+	"RX: TX Lane Info",
+	"CRC/ECC Syndrome Tallying GCR Message Reg",
+	"RX Trace Mode Reg",
+	"RX Wiretest Per-Pack Shadow Reg",
+	"RX Mode Per-Pack Shadow Reg",
+	"RX Cntl Per-Pack Shadow Reg",
+	"RX Cal Cntl Per-Pack Shadow Reg",
+	"RX Cal Accum inc value Reg",
+	"RX Cal Accum inc value Reg",
+	"RX Cal Accum dec value Reg",
+	"RX Cal Accum dec value Reg",
+	"RX BER Control Reg",
+	"RX BER Mode Reg",
+	"RX Servo Timeout Select Regs 1",
+	"RX Servo Timeout Select Regs 2",
 	"RX Configurable Reset Control Register (CRCR)"
+};
+
+const char* const ei4_GCR_sub_reg_names[] = {
+	
 };
 
 
@@ -1317,6 +1657,7 @@ const char* const GCR_sub_reg_names[] = {
 #define     rx_start_bist_helper_3                            0x0600     //Starts BIST helper state machine.   (bist
 #define     rx_start_bist_helper_clear                        0xF9FF     // Clear mask
 
+
 // rx_training_status_pg Register field name                            data value   Description
 #define     rx_wiretest_done                                  0x8000     //When this bit is read as a 1, the wiretest training state has completed. Check the corresponding rx_ts_*_failed register field for the pass/fail status of this training state.
 #define     rx_wiretest_done_clear                            0x7FFF     // Clear mask
@@ -1340,6 +1681,8 @@ const char* const GCR_sub_reg_names[] = {
 #define     rx_repair_failed_clear                            0xFFEF     // Clear mask
 #define     rx_func_mode_failed                               0x0008     //When this bit is read as a 1, the transition to functional data training state encountered and error.
 #define     rx_func_mode_failed_clear                         0xFFF7     // Clear mask
+
+
 
 // rx_recal_status_pg Register field name                               data value   Description
 #define     rx_recal_status                                   0x0000     //\bRX Recalibration Status\b
@@ -2296,6 +2639,1535 @@ const char* const GCR_sub_reg_names[] = {
 
 // rx_reset_cfg_pp Register field name                                  data value   Description
 #define     rx_reset_cfg_hld_clear                            0x0000     // Clear mask
+
+// tx_mode_pl Register field name                                       data value   Description
+#define     ei4_tx_lane_pdwn                                      0x8000     //Used to drive inhibit (tristate) and fully power down a lane. Note that this control routes through the boundary scan logic, which has dominance.  Also note that per-group registers ei4_tx_lane_disabled_vec_0_15 and ei4_tx_lane_disabled_vec_16_31 are used to logically disable a lane with respect to the training, recalibration, and repair machines. 
+#define     ei4_tx_lane_pdwn_clear                                0x7FFF     // Clear mask
+#define     ei4_tx_lane_invert                                    0x4000     //Used to invert the polarity of a lane.
+#define     ei4_tx_lane_invert_clear                              0xBFFF     // Clear mask
+#define     ei4_tx_lane_quiesce_quiesce_to_0                      0x1000     //Used to force the output of a lane to a particular value.  Quiesce Lane to a Static 0 value
+#define     ei4_tx_lane_quiesce_quiesce_to_1                      0x2000     //Used to force the output of a lane to a particular value.  Quiesce Lane to a Static 1 value
+#define     ei4_tx_lane_quiesce_quiesce_to_z                      0x3000     //Used to force the output of a lane to a particular value.  Tri-State Lane Output
+#define     ei4_tx_lane_quiesce_clear                             0xCFFF     // Clear mask
+#define     ei4_tx_lane_scramble_disable                          0x0200     //Used to disable the TX scrambler on a specific lane or all lanes by using a per-lane/per-group global write.
+#define     ei4_tx_lane_scramble_disable_clear                    0xFDFF     // Clear mask
+#define     ei4_tx_lane_error_inject_mode_single_err_inj          0x0001     //Used to set the error injection rate to a particular value.  Single Error Injection
+#define     ei4_tx_lane_error_inject_mode_0                       0x0002     //Used to set the error injection rate to a particular value.  TBD
+#define     ei4_tx_lane_error_inject_mode_1                       0x0003     //Used to set the error injection rate to a particular value.  TBD
+#define     ei4_tx_lane_error_inject_mode_2                       0x0010     //Used to set the error injection rate to a particular value.  TBD 
+#define     ei4_tx_lane_error_inject_mode_3                       0x0011     //Used to set the error injection rate to a particular value.  TBD
+#define     ei4_tx_lane_error_inject_mode_4                       0x0012     //Used to set the error injection rate to a particular value.  TBD
+#define     ei4_tx_lane_error_inject_mode_5                       0x0013     //Used to set the error injection rate to a particular value.  TBD
+#define     ei4_tx_lane_error_inject_mode_6                       0x0020     //Used to set the error injection rate to a particular value.  TBD 
+#define     ei4_tx_lane_error_inject_mode_7                       0x0021     //Used to set the error injection rate to a particular value.  TBD
+#define     ei4_tx_lane_error_inject_mode_8                       0x0022     //Used to set the error injection rate to a particular value.  TBD
+#define     ei4_tx_lane_error_inject_mode_9                       0x0023     //Used to set the error injection rate to a particular value.  TBD
+#define     ei4_tx_lane_error_inject_mode_10                      0x0030     //Used to set the error injection rate to a particular value.  TBD 
+#define     ei4_tx_lane_error_inject_mode_11                      0x0031     //Used to set the error injection rate to a particular value.  TBD
+#define     ei4_tx_lane_error_inject_mode_12                      0x0032     //Used to set the error injection rate to a particular value.  TBD
+#define     ei4_tx_lane_error_inject_mode_13                      0x0033     //Used to set the error injection rate to a particular value.  TBD
+#define     ei4_tx_lane_error_inject_mode_clear                   0xF300     // Clear mask
+
+// ei4_tx_cntl_stat_pl Register field name                                  data value   Description
+#define     ei4_tx_fifo_err                                       0x8000     //Indicates an error condition in the TX FIFO.
+#define     ei4_tx_fifo_err_clear                                 0x7FFF     // Clear mask
+
+// ei4_tx_spare_mode_pl Register field name                                 data value   Description
+#define     ei4_tx_pl_spare_mode_0                                0x8000     //Per-lane spare mode latch
+#define     ei4_tx_pl_spare_mode_0_clear                          0x7FFF     // Clear mask
+#define     ei4_tx_pl_spare_mode_1                                0x4000     //Per-lane spare mode latch
+#define     ei4_tx_pl_spare_mode_1_clear                          0xBFFF     // Clear mask
+#define     ei4_tx_pl_spare_mode_2                                0x2000     //Per-lane spare mode latch
+#define     ei4_tx_pl_spare_mode_2_clear                          0xDFFF     // Clear mask
+#define     ei4_tx_pl_spare_mode_3                                0x1000     //Per-lane spare mode latch
+#define     ei4_tx_pl_spare_mode_3_clear                          0xEFFF     // Clear mask
+#define     ei4_tx_pl_spare_mode_4                                0x0800     //Per-lane spare mode latch
+#define     ei4_tx_pl_spare_mode_4_clear                          0xF7FF     // Clear mask
+#define     ei4_tx_pl_spare_mode_5                                0x0400     //Per-lane spare mode latch
+#define     ei4_tx_pl_spare_mode_5_clear                          0xFBFF     // Clear mask
+#define     ei4_tx_pl_spare_mode_6                                0x0200     //Per-lane spare mode latch
+#define     ei4_tx_pl_spare_mode_6_clear                          0xFDFF     // Clear mask
+#define     ei4_tx_pl_spare_mode_7                                0x0100     //Per-lane spare mode latch
+#define     ei4_tx_pl_spare_mode_7_clear                          0xFEFF     // Clear mask
+
+// ei4_tx_bist_stat_pl Register field name                                  data value   Description
+#define     ei4_tx_lane_bist_err                                  0x8000     //Indicates a TXBIST error occurred.
+#define     ei4_tx_lane_bist_err_clear                            0x7FFF     // Clear mask
+#define     ei4_tx_lane_bist_done                                 0x4000     //Indicates TXBIST has completed. 
+#define     ei4_tx_lane_bist_done_clear                           0xBFFF     // Clear mask
+
+// ei4_tx_prbs_mode_pl Register field name                                  data value   Description
+#define     ei4_tx_prbs_tap_id_pattern_b                          0x2000     //TX Per-Lane PRBS Tap Selector  PRBS tap point B
+#define     ei4_tx_prbs_tap_id_pattern_c                          0x4000     //TX Per-Lane PRBS Tap Selector  PRBS tap point C
+#define     ei4_tx_prbs_tap_id_pattern_d                          0x6000     //TX Per-Lane PRBS Tap Selector  PRBS tap point D
+#define     ei4_tx_prbs_tap_id_pattern_e                          0x8000     //TX Per-Lane PRBS Tap Selector  PRBS tap point E
+#define     ei4_tx_prbs_tap_id_pattern_F                          0xA000     //TX Per-Lane PRBS Tap Selector  PRBS tap point F
+#define     ei4_tx_prbs_tap_id_pattern_g                          0xC000     //TX Per-Lane PRBS Tap Selector  PRBS tap point G
+#define     ei4_tx_prbs_tap_id_pattern_h                          0xE000     //TX Per-Lane PRBS Tap Selector  PRBS tap point H
+#define     ei4_tx_prbs_tap_id_clear                              0x1FFF     // Clear mask
+
+// ei4_tx_data_cntl_gcrmsg_pl Register field name                           data value   Description
+#define     ei4_tx_drv_data_pattern_gcrmsg_drv_wt                 0x1000     //GCR Message: TX Per Data Lane Drive Patterns  Drive Wiretest Pattern
+#define     ei4_tx_drv_data_pattern_gcrmsg_drv_1s                 0x2000     //GCR Message: TX Per Data Lane Drive Patterns  Drive All 1s Pattern
+#define     ei4_tx_drv_data_pattern_gcrmsg_drv_simple_A           0x3000     //GCR Message: TX Per Data Lane Drive Patterns  Drive Simple Pattern A
+#define     ei4_tx_drv_data_pattern_gcrmsg_drv_simple_B           0x4000     //GCR Message: TX Per Data Lane Drive Patterns  Drive Simple Pattern B
+#define     ei4_tx_drv_data_pattern_gcrmsg_drv_full_prbs23        0x5000     //GCR Message: TX Per Data Lane Drive Patterns  PRBS-23 Full Speed Scramble Pattern A thru H
+#define     ei4_tx_drv_data_pattern_gcrmsg_drv_red_prbs23         0x6000     //GCR Message: TX Per Data Lane Drive Patterns  PRBS-23 Reduced Density Scramble Pattern A thru H
+#define     ei4_tx_drv_data_pattern_gcrmsg_drv_9th_prbs23         0x7000     //GCR Message: TX Per Data Lane Drive Patterns  PRBS-23 9th pattern
+#define     ei4_tx_drv_data_pattern_gcrmsg_drv_ei3_iap            0x8000     //GCR Message: TX Per Data Lane Drive Patterns  EI-3 Busy IAP Pattern (EI4 only
+#define     ei4_tx_drv_data_pattern_gcrmsg_drv_ei3_prbs12         0x9000     //GCR Message: TX Per Data Lane Drive Patterns  Drive EI-3 PRBS-12 Shifted RDT Pattern (EI4 only
+#define     ei4_tx_drv_data_pattern_gcrmsg_unused_A               0xA000     //GCR Message: TX Per Data Lane Drive Patterns  Unused
+#define     ei4_tx_drv_data_pattern_gcrmsg_unused_B               0xB000     //GCR Message: TX Per Data Lane Drive Patterns  Unused
+#define     ei4_tx_drv_data_pattern_gcrmsg_unused_C               0xC000     //GCR Message: TX Per Data Lane Drive Patterns  Unused
+#define     ei4_tx_drv_data_pattern_gcrmsg_unused_D               0xD000     //GCR Message: TX Per Data Lane Drive Patterns  Unused
+#define     ei4_tx_drv_data_pattern_gcrmsg_unused_E               0xE000     //GCR Message: TX Per Data Lane Drive Patterns  Unused
+#define     ei4_tx_drv_data_pattern_gcrmsg_unused_F               0xF000     //GCR Message: TX Per Data Lane Drive Patterns  Unused
+#define     ei4_tx_drv_data_pattern_gcrmsg_clear                  0x0FFF     // Clear mask
+#define     ei4_tx_drv_func_data_gcrmsg                           0x0800     //GCR Message: Functional Data
+#define     ei4_tx_drv_func_data_gcrmsg_clear                     0xF7FF     // Clear mask
+#define     ei4_tx_sls_lane_sel_gcrmsg                            0x0400     //GCR Message: SLS Commands & Recalibration
+#define     ei4_tx_sls_lane_sel_gcrmsg_clear                      0xFBFF     // Clear mask
+
+// ei4_tx_sync_pattern_gcrmsg_pl Register field name                        data value   Description
+#define     ei4_tx_sync_pattern_gcrmsg_pl_spare                   0x8000     //REMOVE ME ONCE CREATEREGS WO/RO ADDRESS DECLARATION BUG IS FIXED
+#define     ei4_tx_sync_pattern_gcrmsg_pl_spare_clear             0x7FFF     // Clear mask
+#define     ei4_tx_drv_sync_patt_gcrmsg                           0x4000     //Sync Pattern
+#define     ei4_tx_drv_sync_patt_gcrmsg_clear                     0xBFFF     // Clear mask
+
+// ei4_tx_fir_pl Register field name                                        data value   Description
+#define     ei4_tx_pl_fir_errs                                    0x8000     //A 1 in this field indicates that a register or state machine parity error has occurred in per-lane logic.
+#define     ei4_tx_pl_fir_errs_clear                              0x7FFF     // Clear mask
+
+// ei4_tx_fir_mask_pl Register field name                                   data value   Description
+#define     ei4_tx_pl_fir_errs_mask                               0x8000     //FIR mask for all per-lane register or per-lane state machine parity errors.
+#define     ei4_tx_pl_fir_errs_mask_clear                         0x7FFF     // Clear mask
+
+// ei4_tx_fir_error_inject_pl Register field name                           data value   Description
+#define     ei4_tx_pl_fir_err_inj                                 0x8000     //TX Per-Lane Parity Error Injection
+#define     ei4_tx_pl_fir_err_inj_clear                           0x7FFF     // Clear mask
+
+// ei4_tx_mode_fast_pl Register field name                                  data value   Description
+#define     ei4_tx_err_inject_lane0                               0x8000     //One Hot - Software Only controled register to inject a error for one pulse on a specified lane.(default)  Inject error on lane 0.
+#define     ei4_tx_err_inject_lane1                               0x4000     //One Hot - Software Only controled register to inject a error for one pulse on a specified lane.(default)  Inject error on lane 1.
+#define     ei4_tx_err_inject_lane2                               0x2000     //One Hot - Software Only controled register to inject a error for one pulse on a specified lane.(default)  inject error on lane 2.
+#define     ei4_tx_err_inject_lane3                               0x1000     //One Hot - Software Only controled register to inject a error for one pulse on a specified lane.(default)  Inject error on lane 3.
+#define     ei4_tx_err_inject_clear                               0x0FFF     // Clear mask
+#define     ei4_tx_err_inj_A_enable                               0x0800     //Control to enable the random bit error injection A.(default)
+#define     ei4_tx_err_inj_A_enable_clear                         0xF7FF     // Clear mask
+#define     ei4_tx_err_inj_B_enable                               0x0400     //Control to enable the random bit error injection B.(default)
+#define     ei4_tx_err_inj_B_enable_clear                         0xFBFF     // Clear mask
+
+// ei4_tx_clk_mode_pg Register field name                                   data value   Description
+#define     ei4_tx_clk_pdwn                                       0x8000     //Used to disable the TX clock and put it into a low power state.
+#define     ei4_tx_clk_pdwn_clear                                 0x7FFF     // Clear mask
+#define     ei4_tx_clk_invert                                     0x4000     //Used to invert the polarity of the clock.
+#define     ei4_tx_clk_invert_clear                               0xBFFF     // Clear mask
+#define     ei4_tx_clk_quiesce_p_quiesce_to_0                     0x1000     //Used to force the output of the positive differential leg of the clock lane to a particular value.  Note that the 0 and 1 settings for EDI are for lab characterization only, and the circuits are not deemed to have the proper drive strength in those modes to meet production level quality.  Quiesce Clock Lane to a Static 0 value
+#define     ei4_tx_clk_quiesce_p_quiesce_to_1                     0x2000     //Used to force the output of the positive differential leg of the clock lane to a particular value.  Note that the 0 and 1 settings for EDI are for lab characterization only, and the circuits are not deemed to have the proper drive strength in those modes to meet production level quality.  Quiesce Clock Lane to a Static 1 value
+#define     ei4_tx_clk_quiesce_p_quiesce_to_z                     0x3000     //Used to force the output of the positive differential leg of the clock lane to a particular value.  Note that the 0 and 1 settings for EDI are for lab characterization only, and the circuits are not deemed to have the proper drive strength in those modes to meet production level quality.  Tri-State Clock Lane Output
+#define     ei4_tx_clk_quiesce_p_clear                            0xCFFF     // Clear mask
+#define     ei4_tx_clk_quiesce_n_quiesce_to_0                     0x0400     //Used to force the output of the negative differential leg of the clock lane to a particular value.  Note that the 0 and 1 settings for EDI are for lab characterization only, and the circuits are not deemed to have the proper drive strength in those modes to meet production level quality.  Quiesce Clock Lane to a Static 0 value
+#define     ei4_tx_clk_quiesce_n_quiesce_to_1                     0x0800     //Used to force the output of the negative differential leg of the clock lane to a particular value.  Note that the 0 and 1 settings for EDI are for lab characterization only, and the circuits are not deemed to have the proper drive strength in those modes to meet production level quality.  Quiesce Clock Lane to a Static 1 value
+#define     ei4_tx_clk_quiesce_n_quiesce_to_z                     0x0C00     //Used to force the output of the negative differential leg of the clock lane to a particular value.  Note that the 0 and 1 settings for EDI are for lab characterization only, and the circuits are not deemed to have the proper drive strength in those modes to meet production level quality.  Tri-State Clock Lane Output
+#define     ei4_tx_clk_quiesce_n_clear                            0xF3FF     // Clear mask
+
+// ei4_tx_spare_mode_pg Register field name                                 data value   Description
+#define     ei4_tx_pg_spare_mode_0                                0x8000     //Per-group spare mode latch
+#define     ei4_tx_pg_spare_mode_0_clear                          0x7FFF     // Clear mask
+#define     ei4_tx_pg_spare_mode_1                                0x4000     //Per-group spare mode latch
+#define     ei4_tx_pg_spare_mode_1_clear                          0xBFFF     // Clear mask
+#define     ei4_tx_pg_spare_mode_2                                0x2000     //Per-group spare mode latch
+#define     ei4_tx_pg_spare_mode_2_clear                          0xDFFF     // Clear mask
+#define     ei4_tx_pg_spare_mode_3                                0x1000     //Per-group spare mode latch
+#define     ei4_tx_pg_spare_mode_3_clear                          0xEFFF     // Clear mask
+#define     ei4_tx_pg_spare_mode_4                                0x0800     //Per-group spare mode latch
+#define     ei4_tx_pg_spare_mode_4_clear                          0xF7FF     // Clear mask
+#define     ei4_tx_pg_spare_mode_5                                0x0400     //Per-group spare mode latch
+#define     ei4_tx_pg_spare_mode_5_clear                          0xFBFF     // Clear mask
+#define     ei4_tx_pg_spare_mode_6                                0x0200     //Per-group spare mode latch
+#define     ei4_tx_pg_spare_mode_6_clear                          0xFDFF     // Clear mask
+#define     ei4_tx_pg_spare_mode_7                                0x0100     //Per-group spare mode latch
+#define     ei4_tx_pg_spare_mode_7_clear                          0xFEFF     // Clear mask
+
+// ei4_tx_cntl_stat_pg Register field name                                  data value   Description
+#define     ei4_tx_cntl_stat_pg_spare                             0x8000     //REMOVE ME ONCE CREATEREGS WO/RO ADDRESS DECLARATION BUG IS FIXED
+#define     ei4_tx_cntl_stat_pg_spare_clear                       0x7FFF     // Clear mask
+#define     ei4_tx_fifo_init                                      0x4000     //Used to initialize the TX FIFO and put it into a known reset state. This will cause the load to unload delay of the FIFO to be set to the value in the ei4_tx_FIFO_L2U_DLY field of the ei4_tx_FIFO_Mode register.
+#define     ei4_tx_fifo_init_clear                                0xBFFF     // Clear mask
+
+// ei4_tx_mode_pg Register field name                                       data value   Description
+#define     ei4_tx_max_bad_lanes                                  0x0000     //Static Repair, Dynamic Repair & Recal max number of bad lanes per TX bus
+#define     ei4_tx_max_bad_lanes_clear                            0x07FF     // Clear mask
+#define     ei4_tx_msbswap                                        0x0400     //Used to enable end-for-end or msb swap of TX lanes.  For example, lanes 0 and N-1 swap, lanes 1 and N-2 swap, etc. 
+#define     ei4_tx_msbswap_clear                                  0xFBFF     // Clear mask
+
+// ei4_tx_bus_repair_pg Register field name                                 data value   Description
+#define     ei4_tx_bus_repair_count                               0x0000     //This field is used to TBD.
+#define     ei4_tx_bus_repair_count_clear                         0x3FFF     // Clear mask
+#define     ei4_tx_bus_repair_pos_0                               0x0000     //This field is used to TBD.
+#define     ei4_tx_bus_repair_pos_0_clear                         0xC07F     // Clear mask
+#define     ei4_tx_bus_repair_pos_1                               0x0000     //This field is used to TBD.
+#define     ei4_tx_bus_repair_pos_1_clear                         0x3F80     // Clear mask
+
+// ei4_tx_grp_repair_vec_0_15_pg Register field name                        data value   Description
+#define     ei4_tx_grp_repair_vec_0_15                            0x0000     //This field is used to TBD.
+#define     ei4_tx_grp_repair_vec_0_15_clear                      0x0000     // Clear mask
+
+// ei4_tx_grp_repair_vec_16_31_pg Register field name                       data value   Description
+#define     ei4_tx_grp_repair_vec_16_31                           0x0000     //This field is used to TBD.
+#define     ei4_tx_grp_repair_vec_16_31_clear                     0x0000     // Clear mask
+
+// ei4_tx_reset_act_pg Register field name                                  data value   Description
+#define     ei4_tx_reset_cfg_ena                                  0x8000     //Enable Configurable Group Reset
+#define     ei4_tx_reset_cfg_ena_clear                            0x7FFF     // Clear mask
+#define     ei4_tx_clr_par_errs                                   0x0002     //Clear All TX Parity Error Latches
+#define     ei4_tx_clr_par_errs_clear                             0xFFFD     // Clear mask
+#define     ei4_tx_fir_reset                                      0x0001     //FIR Reset
+#define     ei4_tx_fir_reset_clear                                0xFFFE     // Clear mask
+
+// ei4_tx_bist_stat_pg Register field name                                  data value   Description
+#define     ei4_tx_clk_bist_err                                   0x8000     //Indicates a TXBIST error occurred.
+#define     ei4_tx_clk_bist_err_clear                             0x7FFF     // Clear mask
+#define     ei4_tx_clk_bist_done                                  0x4000     //Indicates TXBIST has completed. 
+#define     ei4_tx_clk_bist_done_clear                            0xBFFF     // Clear mask
+
+// ei4_tx_fir_pg Register field name                                        data value   Description
+#define     ei4_tx_pg_fir_errs_clear                              0x00FF     // Clear mask
+#define     ei4_tx_pl_fir_err                                     0x0001     //Summary bit indicating a TX per-lane register or state machine parity error has occurred in one or more lanes. The ei4_tx_fir_pl register from each lane should be read to isolate to a particular piece of logic. There is no mechanism to determine which lane had the fault without reading FIR status from each lane.
+#define     ei4_tx_pl_fir_err_clear                               0xFFFE     // Clear mask
+
+// ei4_tx_fir_mask_pg Register field name                                   data value   Description
+#define     ei4_tx_pg_fir_errs_mask_clear                         0x00FF     // Clear mask
+#define     ei4_tx_pl_fir_err_mask                                0x0001     //FIR mask for the summary bit that indicates a per-lane TX register or state machine parity error has occurred. This mask bit is used to block ALL per-lane TX parity errors from causing a FIR error.\pmt
+#define     ei4_tx_pl_fir_err_mask_clear                          0xFFFE     // Clear mask
+
+// ei4_tx_fir_error_inject_pg Register field name                           data value   Description
+#define     ei4_tx_pg_fir_err_inj_inj_par_err                     0x1000     //TX Per-Group Parity Error Injection  Causes a parity flip in the specific parity checker.
+#define     ei4_tx_pg_fir_err_inj_clear                           0x00FF     // Clear mask
+
+// ei4_tx_id1_pg Register field name                                        data value   Description
+#define     ei4_tx_bus_id                                         0x0000     //This field is used to programmably set the bus number that a clkgrp belongs to.
+#define     ei4_tx_bus_id_clear                                   0x03FF     // Clear mask
+#define     ei4_tx_group_id                                       0x0000     //This field is used to programmably set the clock group number within a bus.
+#define     ei4_tx_group_id_clear                                 0xFE07     // Clear mask
+
+// ei4_tx_id2_pg Register field name                                        data value   Description
+#define     ei4_tx_last_group_id                                  0x0000     //This field is used to programmably set the last clock group number within a bus.
+#define     ei4_tx_last_group_id_clear                            0x03FF     // Clear mask
+
+// ei4_tx_id3_pg Register field name                                        data value   Description
+#define     ei4_tx_start_lane_id                                  0x0000     //This field is used to programmably set the first lane position in the group but relative to the bus.
+#define     ei4_tx_start_lane_id_clear                            0x80FF     // Clear mask
+#define     ei4_tx_end_lane_id                                    0x0000     //This field is used to programmably set the last lane position in the group but relative to the bus.
+#define     ei4_tx_end_lane_id_clear                              0x7F80     // Clear mask
+
+// ei4_tx_minikerf_pg Register field name                                   data value   Description
+#define     ei4_tx_minikerf                                       0x0000     //Used to configure the TX Minikerf for analog characterization.
+#define     ei4_tx_minikerf_clear                                 0x0000     // Clear mask
+
+// ei4_tx_clk_cntl_gcrmsg_pg Register field name                            data value   Description
+#define     ei4_tx_drv_clk_pattern_gcrmsg_drv_wt                  0x4000     //TX Clock Drive Patterns  Drive Wiretest Pattern
+#define     ei4_tx_drv_clk_pattern_gcrmsg_drv_c4                  0x8000     //TX Clock Drive Patterns  Drive Clock Pattern
+#define     ei4_tx_drv_clk_pattern_gcrmsg_unused                  0xC000     //TX Clock Drive Patterns  Unused
+#define     ei4_tx_drv_clk_pattern_gcrmsg_clear                   0x3FFF     // Clear mask
+
+// ei4_tx_bad_lane_enc_gcrmsg_pg Register field name                        data value   Description
+#define     ei4_tx_bad_lane1_gcrmsg                               0x0000     //GCR Message: Encoded bad lane one in relation to the entire TX bus
+#define     ei4_tx_bad_lane1_gcrmsg_clear                         0x01FF     // Clear mask
+#define     ei4_tx_bad_lane2_gcrmsg                               0x0000     //GCR Message: Encoded bad lane two in relation to the entire TX bus
+#define     ei4_tx_bad_lane2_gcrmsg_clear                         0xFE03     // Clear mask
+#define     ei4_tx_bad_lane_code_gcrmsg_bad_ln1_val               0x0001     //GCR Message: TX Bad Lane Code  Bad Lane 1 Valid
+#define     ei4_tx_bad_lane_code_gcrmsg_bad_lns12_val             0x0002     //GCR Message: TX Bad Lane Code  Bad Lanes 1 and 2 Valid
+#define     ei4_tx_bad_lane_code_gcrmsg_3plus_bad_lns             0x0003     //GCR Message: TX Bad Lane Code  3+ bad lanes
+#define     ei4_tx_bad_lane_code_gcrmsg_clear                     0xFFF0     // Clear mask
+
+// ei4_tx_sls_lane_enc_gcrmsg_pg Register field name                        data value   Description
+#define     ei4_tx_sls_lane_gcrmsg                                0x0000     //GCR Message: Encoded SLS lane in relation to the entire TX bus
+#define     ei4_tx_sls_lane_gcrmsg_clear                          0x01FF     // Clear mask
+#define     ei4_tx_sls_lane_val_gcrmsg                            0x0100     //GCR Message: TX SLS Lane Valid
+#define     ei4_tx_sls_lane_val_gcrmsg_clear                      0xFEFF     // Clear mask
+
+// ei4_tx_pc_ffe_pg Register field name                                     data value   Description
+#define     ei4_tx_pc_test_mode                                   0x8000     //Driver Segment Test mode
+#define     ei4_tx_pc_test_mode_clear                             0x7FFF     // Clear mask
+#define     ei4_tx_main_slice_en_enc                              0x0000     //240ohm main slice enable (binary code - 0000 is zero slices and 0110 is maximum slices)
+#define     ei4_tx_main_slice_en_enc_clear                        0xF0FF     // Clear mask
+#define     ei4_tx_pc_slice_en_enc                                0x0000     //240ohm precompensation slice enable (binary code - 0000 is zero slices and 1110 is maximum slices)
+#define     ei4_tx_pc_slice_en_enc_clear                          0x0FF0     // Clear mask
+
+// ei4_tx_misc_analog_pg Register field name                                data value   Description
+#define     ei4_tx_slewctl                                        0x0000     //TBD
+#define     ei4_tx_slewctl_clear                                  0x0FFF     // Clear mask
+#define     ei4_tx_pvtnl_enc                                      0x0000     //TBD
+#define     ei4_tx_pvtnl_enc_clear                                0xFF0F     // Clear mask
+#define     ei4_tx_pvtpl_enc                                      0x0000     //TBD
+#define     ei4_tx_pvtpl_enc_clear                                0xF0F0     // Clear mask
+
+// ei4_tx_lane_disabled_vec_0_15_pg Register field name                     data value   Description
+#define     ei4_tx_lane_disabled_vec_0_15                         0x0000     //Lanes disabled by HW (status) or method to force lane to be disabled (save power) from software (control).
+#define     ei4_tx_lane_disabled_vec_0_15_clear                   0x0000     // Clear mask
+
+// ei4_tx_lane_disabled_vec_16_31_pg Register field name                    data value   Description
+#define     ei4_tx_lane_disabled_vec_16_31                        0x0000     //Lanes disabled by HW (status) or method to force lane to be disabled (save power) from software (control).
+#define     ei4_tx_lane_disabled_vec_16_31_clear                  0x0000     // Clear mask
+
+// ei4_tx_sls_lane_mux_gcrmsg_pg Register field name                        data value   Description
+#define     ei4_tx_sls_lane_shdw_gcrmsg                           0x8000     //GCR Message: SLS lane shadowing or unshadowing functional data (used to set up TX mux controls)
+#define     ei4_tx_sls_lane_shdw_gcrmsg_clear                     0x7FFF     // Clear mask
+
+// ei4_tx_dyn_rpr_pg Register field name                                    data value   Description
+#define     ei4_tx_sls_hndshk_state_clear                         0x07FF     // Clear mask
+
+// ei4_tx_slv_mv_sls_ln_req_gcrmsg_pg Register field name                   data value   Description
+#define     ei4_tx_slv_mv_sls_shdw_req_gcrmsg                     0x8000     //GCR Message: Request to TX Slave to Move SLS Lane
+#define     ei4_tx_slv_mv_sls_shdw_req_gcrmsg_clear               0x7FFF     // Clear mask
+#define     ei4_tx_slv_mv_sls_shdw_rpr_req_gcrmsg                 0x4000     //GCR Message: Request to TX Slave to Move SLS Lane & Set Bad Lane Register
+#define     ei4_tx_slv_mv_sls_shdw_rpr_req_gcrmsg_clear           0xBFFF     // Clear mask
+#define     ei4_tx_slv_mv_sls_unshdw_req_gcrmsg                   0x2000     //GCR Message: Request to TX Slave to Move SLS Lane
+#define     ei4_tx_slv_mv_sls_unshdw_req_gcrmsg_clear             0xDFFF     // Clear mask
+#define     ei4_tx_slv_mv_sls_unshdw_rpr_req_gcrmsg               0x1000     //GCR Message: Request to TX Slave to Move SLS Lane & Set Bad Lane Register
+#define     ei4_tx_slv_mv_sls_unshdw_rpr_req_gcrmsg_clear         0xEFFF     // Clear mask
+#define     ei4_tx_bus_width                                      0x0000     //TX Bus Width
+#define     ei4_tx_bus_width_clear                                0xF01F     // Clear mask
+#define     ei4_tx_slv_mv_sls_rpr_req_gcrmsg                      0x0010     //GCR Message: Request to TX Slave to Move SLS Lane & Set Bad Lane Register
+#define     ei4_tx_slv_mv_sls_rpr_req_gcrmsg_clear                0xFFEF     // Clear mask
+
+// ei4_tx_wiretest_pp Register field name                                   data value   Description
+#define     ei4_tx_wt_pattern_length_256                          0x4000     //TX Wiretest Pattern Length  256
+#define     ei4_tx_wt_pattern_length_512                          0x8000     //TX Wiretest Pattern Length  512
+#define     ei4_tx_wt_pattern_length_1024                         0xC000     //TX Wiretest Pattern Length  1024
+#define     ei4_tx_wt_pattern_length_clear                        0x3FFF     // Clear mask
+
+// ei4_tx_mode_pp Register field name                                       data value   Description
+#define     ei4_tx_reduced_scramble_mode_full_1                   0x4000     //Enables/Disables and sets reduced density of scramble pattern.   Full density 
+#define     ei4_tx_reduced_scramble_mode_div2                     0x8000     //Enables/Disables and sets reduced density of scramble pattern.   Enable Div2 Reduced Density 
+#define     ei4_tx_reduced_scramble_mode_div4                     0xC000     //Enables/Disables and sets reduced density of scramble pattern.   Enable Div4 Reduced Density.
+#define     ei4_tx_reduced_scramble_mode_clear                    0x3FFF     // Clear mask
+#define     ei4_tx_ei3_mode                                       0x0001     //EI3 mode - See also ei4_rx_ei3_mode 
+#define     ei4_tx_ei3_mode_clear                                 0xFFFE     // Clear mask
+
+// ei4_tx_sls_gcrmsg_pp Register field name                                 data value   Description
+#define     ei4_tx_snd_sls_cmd_gcrmsg                             0x8000     //GCR Message: Send SLS Command or Recalibration Data
+#define     ei4_tx_snd_sls_cmd_gcrmsg_clear                       0x7FFF     // Clear mask
+#define     ei4_tx_dyn_recal_tsr_ignore_gcrmsg                    0x4000     //GCR Message: Send Dynamic Recal SLS Commands all the time (not just during the Status Reporting interval)
+#define     ei4_tx_dyn_recal_tsr_ignore_gcrmsg_clear              0xBFFF     // Clear mask
+#define     ei4_tx_sls_cmd_gcrmsg                                 0x0000     //GCR Message: TX SLS Command
+#define     ei4_tx_sls_cmd_gcrmsg_clear                           0xC0FF     // Clear mask
+
+// ei4_tx_ber_cntl_a_pp Register field name                                 data value   Description
+#define     ei4_tx_err_inj_a_rand_beat_dis                        0x8000     //Used to disable randomization of error inject on different beats of data.
+#define     ei4_tx_err_inj_a_rand_beat_dis_clear                  0x7FFF     // Clear mask
+#define     ei4_tx_err_inj_a_fine_sel_0_15                        0x1000     //Acts as an adder to the error rate and so does not have any over all effect on the average of the bit error rate.  Range of 0-15
+#define     ei4_tx_err_inj_a_fine_sel_0_7                         0x2000     //Acts as an adder to the error rate and so does not have any over all effect on the average of the bit error rate.  Range of 0-7
+#define     ei4_tx_err_inj_a_fine_sel_0_3                         0x3000     //Acts as an adder to the error rate and so does not have any over all effect on the average of the bit error rate.  Range of 0-3
+#define     ei4_tx_err_inj_a_fine_sel_0_1                         0x4000     //Acts as an adder to the error rate and so does not have any over all effect on the average of the bit error rate.  Range of 0-1
+#define     ei4_tx_err_inj_a_fine_sel_fixed1                      0x5000     //Acts as an adder to the error rate and so does not have any over all effect on the average of the bit error rate.  Fixed 1
+#define     ei4_tx_err_inj_a_fine_sel_fixed3                      0x6000     //Acts as an adder to the error rate and so does not have any over all effect on the average of the bit error rate.  Fixed 3
+#define     ei4_tx_err_inj_a_fine_sel_fixed7                      0x7000     //Acts as an adder to the error rate and so does not have any over all effect on the average of the bit error rate.  Fixed 7.
+#define     ei4_tx_err_inj_a_fine_sel_clear                       0x8FFF     // Clear mask
+#define     ei4_tx_err_inj_a_coarse_sel_8_23                      0x0100     //Multipler for the error rate, narrows or widens the range of the variance in the bit error rate.  Range of 8-32, mean of 16
+#define     ei4_tx_err_inj_a_coarse_sel_12_19                     0x0200     //Multipler for the error rate, narrows or widens the range of the variance in the bit error rate.  Range of 12-19, mean of 16
+#define     ei4_tx_err_inj_a_coarse_sel_14_17                     0x0300     //Multipler for the error rate, narrows or widens the range of the variance in the bit error rate.  Range of 14-17, mean of 16
+#define     ei4_tx_err_inj_a_coarse_sel_min                       0x0400     //Multipler for the error rate, narrows or widens the range of the variance in the bit error rate.  Min range of 15-16, mean of 16
+#define     ei4_tx_err_inj_a_coarse_sel_fixed16                   0x0500     //Multipler for the error rate, narrows or widens the range of the variance in the bit error rate.  Fixed 16
+#define     ei4_tx_err_inj_a_coarse_sel_fixed24                   0x0600     //Multipler for the error rate, narrows or widens the range of the variance in the bit error rate.  Fixed 24
+#define     ei4_tx_err_inj_a_coarse_sel_fixed20                   0x0700     //Multipler for the error rate, narrows or widens the range of the variance in the bit error rate.  Fixed 20.
+#define     ei4_tx_err_inj_a_coarse_sel_clear                     0xF8FF     // Clear mask
+#define     ei4_tx_err_inj_a_ber_sel                              0x0000     //Used to set the random bit error injection rate to a particular value. See workbook for details.
+#define     ei4_tx_err_inj_a_ber_sel_clear                        0x3FC0     // Clear mask
+
+// ei4_tx_ber_cntl_b_pp Register field name                                 data value   Description
+#define     ei4_tx_err_inj_b_rand_beat_dis                        0x8000     //Used to disable randomization of error inject on different beats of data.(default)
+#define     ei4_tx_err_inj_b_rand_beat_dis_clear                  0x7FFF     // Clear mask
+#define     ei4_tx_err_inj_b_fine_sel_0_15                        0x1000     //Acts as an adder to the error rate and so does not have any over all effect on the average of the bit error rate.  Range of 0-15
+#define     ei4_tx_err_inj_b_fine_sel_0_7                         0x2000     //Acts as an adder to the error rate and so does not have any over all effect on the average of the bit error rate.  Range of 0-7
+#define     ei4_tx_err_inj_b_fine_sel_0_3                         0x3000     //Acts as an adder to the error rate and so does not have any over all effect on the average of the bit error rate.  Range of 0-3
+#define     ei4_tx_err_inj_b_fine_sel_0_1                         0x4000     //Acts as an adder to the error rate and so does not have any over all effect on the average of the bit error rate.  Range of 0-1
+#define     ei4_tx_err_inj_b_fine_sel_fixed1                      0x5000     //Acts as an adder to the error rate and so does not have any over all effect on the average of the bit error rate.  Fixed 1
+#define     ei4_tx_err_inj_b_fine_sel_fixed3                      0x6000     //Acts as an adder to the error rate and so does not have any over all effect on the average of the bit error rate.  Fixed 3
+#define     ei4_tx_err_inj_b_fine_sel_fixed7                      0x7000     //Acts as an adder to the error rate and so does not have any over all effect on the average of the bit error rate.  Fixed 7.
+#define     ei4_tx_err_inj_b_fine_sel_clear                       0x8FFF     // Clear mask
+#define     ei4_tx_err_inj_b_coarse_sel_8_23                      0x0100     //Multipler for the error rate, narrows or widens the range of the variance in the bit error rate.  Range of 8-32, mean of 16
+#define     ei4_tx_err_inj_b_coarse_sel_12_19                     0x0200     //Multipler for the error rate, narrows or widens the range of the variance in the bit error rate.  Range of 12-19, mean of 16
+#define     ei4_tx_err_inj_b_coarse_sel_14_17                     0x0300     //Multipler for the error rate, narrows or widens the range of the variance in the bit error rate.  Range of 14-17, mean of 16
+#define     ei4_tx_err_inj_b_coarse_sel_min                       0x0400     //Multipler for the error rate, narrows or widens the range of the variance in the bit error rate.  Min range of 15-16, mean of 16
+#define     ei4_tx_err_inj_b_coarse_sel_fixed16                   0x0500     //Multipler for the error rate, narrows or widens the range of the variance in the bit error rate.  Fixed 16
+#define     ei4_tx_err_inj_b_coarse_sel_fixed24                   0x0600     //Multipler for the error rate, narrows or widens the range of the variance in the bit error rate.  Fixed 24
+#define     ei4_tx_err_inj_b_coarse_sel_fixed20                   0x0700     //Multipler for the error rate, narrows or widens the range of the variance in the bit error rate.  Fixed 20.
+#define     ei4_tx_err_inj_b_coarse_sel_clear                     0xF8FF     // Clear mask
+#define     ei4_tx_err_inj_b_ber_sel                              0x0000     //Used to set the random bit error injection rate to a particular value. See workbook for details.
+#define     ei4_tx_err_inj_b_ber_sel_clear                        0x3FC0     // Clear mask
+
+// ei4_tx_bist_cntl_pp Register field name                                  data value   Description
+#define     ei4_tx_bist_en                                        0x8000     //TBD
+#define     ei4_tx_bist_en_clear                                  0x7FFF     // Clear mask
+#define     ei4_tx_bist_clr                                       0x4000     //TBD
+#define     ei4_tx_bist_clr_clear                                 0xBFFF     // Clear mask
+#define     ei4_tx_bist_prbs7_en                                  0x2000     //TBD
+#define     ei4_tx_bist_prbs7_en_clear                            0xDFFF     // Clear mask
+
+// ei4_tx_ber_cntl_sls_pp Register field name                               data value   Description
+#define     ei4_tx_err_inj_sls_mode                               0x8000     //Used to set the random bit error injection during SLS. See workbook for details.
+#define     ei4_tx_err_inj_sls_mode_clear                         0x7FFF     // Clear mask
+#define     ei4_tx_err_inj_sls_all_cmd                            0x4000     //Used to qualify the SLS mode error injection, to inject on all command values. See workbook for details.
+#define     ei4_tx_err_inj_sls_all_cmd_clear                      0xBFFF     // Clear mask
+#define     ei4_tx_err_inj_sls_cmd                                0x0000     //Used to qualify the SLS mode error injection, to only inject on this set command value. See workbook for details.
+#define     ei4_tx_err_inj_sls_cmd_clear                          0xFFC0     // Clear mask
+
+// ei4_tx_cntl_pp Register field name                                       data value   Description
+#define     ei4_tx_enable_reduced_scramble                        0x8000     //Enables reduced density of scramble pattern. 
+#define     ei4_tx_enable_reduced_scramble_clear                  0x7FFF     // Clear mask
+
+// ei4_tx_reset_cfg_pp Register field name                                  data value   Description
+#define     ei4_tx_reset_cfg_hld_clear                            0x0000     // Clear mask
+
+// ei4_rx_mode_pl Register field name                                       data value   Description
+#define     ei4_rx_lane_pdwn                                      0x8000     //Used to receive inhibit and fully power down a lane. Note that this control routes through the boundary scan logic, which has dominance.  Also note that per-group registers ei4_rx_lane_disabled_vec_0_15 and ei4_rx_lane_disabled_vec_16_31 are used to logically disable a lane with respect to the training, recalibration, and repair machines. 
+#define     ei4_rx_lane_pdwn_clear                                0x7FFF     // Clear mask
+#define     ei4_rx_lane_scramble_disable                          0x0200     //Used to disable the RX descrambler on a specific lane or all lanes by using a per-lane/per-group global write.
+#define     ei4_rx_lane_scramble_disable_clear                    0xFDFF     // Clear mask
+
+// ei4_rx_cntl_pl Register field name                                       data value   Description
+#define     ei4_rx_block_lock_lane                                0x8000     //Enables rotation and checking for block lock. 
+#define     ei4_rx_block_lock_lane_clear                          0x7FFF     // Clear mask
+#define     ei4_rx_check_skew_lane                                0x4000     //Per-Lane Initialization controls  checks skew requst
+#define     ei4_rx_check_skew_lane_clear                          0xBFFF     // Clear mask
+#define     ei4_rx_cntl_pl_tbd                                    0x0000     //TBD
+#define     ei4_rx_cntl_pl_tbd_clear                              0xC07F     // Clear mask
+
+// ei4_rx_spare_mode_pl Register field name                                 data value   Description
+#define     ei4_rx_pl_spare_mode_0                                0x8000     //Per-lane spare mode latch
+#define     ei4_rx_pl_spare_mode_0_clear                          0x7FFF     // Clear mask
+#define     ei4_rx_pl_spare_mode_1                                0x4000     //Per-lane spare mode latch
+#define     ei4_rx_pl_spare_mode_1_clear                          0xBFFF     // Clear mask
+#define     ei4_rx_pl_spare_mode_2                                0x2000     //Per-lane spare mode latch
+#define     ei4_rx_pl_spare_mode_2_clear                          0xDFFF     // Clear mask
+#define     ei4_rx_pl_spare_mode_3                                0x1000     //Per-lane spare mode latch
+#define     ei4_rx_pl_spare_mode_3_clear                          0xEFFF     // Clear mask
+#define     ei4_rx_pl_spare_mode_4                                0x0800     //Per-lane spare mode latch
+#define     ei4_rx_pl_spare_mode_4_clear                          0xF7FF     // Clear mask
+#define     ei4_rx_pl_spare_mode_5                                0x0400     //Per-lane spare mode latch
+#define     ei4_rx_pl_spare_mode_5_clear                          0xFBFF     // Clear mask
+#define     ei4_rx_pl_spare_mode_6                                0x0200     //Per-lane spare mode latch
+#define     ei4_rx_pl_spare_mode_6_clear                          0xFDFF     // Clear mask
+#define     ei4_rx_pl_spare_mode_7                                0x0100     //Per-lane spare mode latch
+#define     ei4_rx_pl_spare_mode_7_clear                          0xFEFF     // Clear mask
+
+// ei4_rx_prot_edge_status_pl Register field name                           data value   Description
+#define     ei4_rx_phaserot_left_edge                             0x0000     //RX Phase Rotator left edge.
+#define     ei4_rx_phaserot_left_edge_clear                       0x80FF     // Clear mask
+
+// ei4_rx_bist_stat_pl Register field name                                  data value   Description
+#define     ei4_rx_bist_err                                       0x8000     //Indicates a RXBIST error occurred.
+#define     ei4_rx_bist_err_clear                                 0x7FFF     // Clear mask
+#define     ei4_rx_bist_done                                      0x4000     //Indicates a RXBIST has completed. 
+#define     ei4_rx_bist_done_clear                                0xBFFF     // Clear mask
+
+// ei4_rx_eyeopt_mode_pl Register field name                                data value   Description
+#define     ei4_rx_ddc_disable                                    0x8000     //When set to a 1 this causes the phase detector to stop running which results in the phase rotator value to stop updating. This mode is used for diagnostics and characterization.
+#define     ei4_rx_ddc_disable_clear                              0x7FFF     // Clear mask
+
+// ei4_rx_eyeopt_stat_pl Register field name                                data value   Description
+#define     ei4_rx_eyeopt_stat_tbd                                0x8000     //Eye optimization status. TBD
+#define     ei4_rx_eyeopt_stat_tbd_clear                          0x7FFF     // Clear mask
+
+// ei4_rx_offset_even_pl Register field name                                data value   Description
+#define     ei4_rx_offset_even_samp1                              0x0000     //This is the vertical offset of the even sampling latch.
+#define     ei4_rx_offset_even_samp1_clear                        0xC0FF     // Clear mask
+#define     ei4_rx_offset_even_samp0                              0x0000     //This is the vertical offset of the even sampling latch.
+#define     ei4_rx_offset_even_samp0_clear                        0x3FC0     // Clear mask
+
+// ei4_rx_offset_odd_pl Register field name                                 data value   Description
+#define     ei4_rx_offset_odd_samp1                               0x0000     //This is the vertical offset of the odd sampling latch.
+#define     ei4_rx_offset_odd_samp1_clear                         0x00FF     // Clear mask
+#define     ei4_rx_offset_odd_samp0                               0x0000     //This is the vertical offset of the odd sampling latch.
+#define     ei4_rx_offset_odd_samp0_clear                         0x3FC0     // Clear mask
+
+// ei4_rx_amp_val_pl Register field name                                    data value   Description
+#define     ei4_rx_amp_peak                                       0x0000     //This is the vertical offset of the pre-amp.
+#define     ei4_rx_amp_peak_clear                                 0x0FFF     // Clear mask
+
+// ei4_rx_prot_status_pl Register field name                                data value   Description
+#define     ei4_rx_phaserot_val                                   0x0000     //RX Phase Rotator current value.
+#define     ei4_rx_phaserot_val_clear                             0x80FF     // Clear mask
+
+// ei4_rx_prot_mode_pl Register field name                                  data value   Description
+#define     ei4_rx_phaserot_offset                                0x0000     //RX Phase Rotator fixed offset from learned value.
+#define     ei4_rx_phaserot_offset_clear                          0x80FF     // Clear mask
+
+// ei4_rx_prot_cntl_pl Register field name                                  data value   Description
+#define     ei4_rx_prot_cntl_pl_dummy                             0x8000     //Per-Lane phase rotator control r/w register to make tools happy
+#define     ei4_rx_prot_cntl_pl_dummy_clear                       0x7FFF     // Clear mask
+#define     ei4_rx_ext_sr                                         0x0800     //RX Manual Phase Rotator Shift Right Pulse
+#define     ei4_rx_ext_sr_clear                                   0xF7FF     // Clear mask
+#define     ei4_rx_ext_sl                                         0x0400     //RX Manual Phase Rotator Shift Left Pulse
+#define     ei4_rx_ext_sl_clear                                   0xFBFF     // Clear mask
+
+// ei4_rx_fifo_stat_pl Register field name                                  data value   Description
+#define     ei4_rx_fifo_l2u_dly                                   0x0000     //RX FIFO load-to-unload delay, initailed during FIFO init and modified thereafter by the deskew machine.  For setting X, the latency is 4*X to 4*X+4 UI.  Default is 16-20 UI.
+#define     ei4_rx_fifo_l2u_dly_clear                             0x0FFF     // Clear mask
+#define     ei4_rx_fifo_init                                      0x0800     //Initializes the fifo unload counter with the load counter and initializes the fifo load to unload delay
+#define     ei4_rx_fifo_init_clear                                0xF7FF     // Clear mask
+
+// ei4_rx_prbs_mode_pl Register field name                                  data value   Description
+#define     ei4_rx_prbs_tap_id_pattern_b                          0x2000     //Per-Lane PRBS Tap Selector  PRBS tap point B
+#define     ei4_rx_prbs_tap_id_pattern_c                          0x4000     //Per-Lane PRBS Tap Selector  PRBS tap point C
+#define     ei4_rx_prbs_tap_id_pattern_d                          0x6000     //Per-Lane PRBS Tap Selector  PRBS tap point D
+#define     ei4_rx_prbs_tap_id_pattern_e                          0x8000     //Per-Lane PRBS Tap Selector  PRBS tap point E
+#define     ei4_rx_prbs_tap_id_pattern_F                          0xA000     //Per-Lane PRBS Tap Selector  PRBS tap point F
+#define     ei4_rx_prbs_tap_id_pattern_g                          0xC000     //Per-Lane PRBS Tap Selector  PRBS tap point G
+#define     ei4_rx_prbs_tap_id_pattern_h                          0xE000     //Per-Lane PRBS Tap Selector  PRBS tap point H
+#define     ei4_rx_prbs_tap_id_clear                              0x1FFF     // Clear mask
+
+// ei4_rx_vref_pl Register field name                                       data value   Description
+#define     ei4_rx_vref                                           0x0000     //This is the voltage reference setting of the pre-amp.
+#define     ei4_rx_vref_clear                                     0x00FF     // Clear mask
+
+// ei4_rx_stat_pl Register field name                                       data value   Description
+#define     ei4_rx_some_block_locked                              0x8000     //Per-Lane Block Lock Indicator
+#define     ei4_rx_some_block_locked_clear                        0x7FFF     // Clear mask
+#define     ei4_rx_all_block_locked_b                             0x4000     //Per-Lane Block Lock Indicator
+#define     ei4_rx_all_block_locked_b_clear                       0xBFFF     // Clear mask
+#define     ei4_rx_some_skew_valid                                0x2000     //Per-Lane Deskew Pattern B Detect Indicator
+#define     ei4_rx_some_skew_valid_clear                          0xDFFF     // Clear mask
+#define     ei4_rx_all_skew_valid_b                               0x1000     //Per-Lane Deskew Pattern B Detect Indicato (Active Low)r
+#define     ei4_rx_all_skew_valid_b_clear                         0xEFFF     // Clear mask
+#define     ei4_rx_some_prbs_synced                               0x0800     //Per-Lane PRBS Synchronization Indicator
+#define     ei4_rx_some_prbs_synced_clear                         0xF7FF     // Clear mask
+#define     ei4_rx_prbs_synced_b                                  0x0400     //Per-Lane PRBS Synchronization Indicator (Active Low)
+#define     ei4_rx_prbs_synced_b_clear                            0xFBFF     // Clear mask
+#define     ei4_rx_skew_value                                     0x0000     //Per-Lane PRBS Synchronization Count
+#define     ei4_rx_skew_value_clear                               0xFC0F     // Clear mask
+
+// ei4_rx_deskew_stat_pl Register field name                                data value   Description
+#define     ei4_rx_bad_block_lock                                 0x8000     //Deskew Step block lock not established--lane marked bad
+#define     ei4_rx_bad_block_lock_clear                           0x7FFF     // Clear mask
+#define     ei4_rx_bad_skew                                       0x4000     //Deskew Step skew value not detected--lane marked bad
+#define     ei4_rx_bad_skew_clear                                 0xBFFF     // Clear mask
+#define     ei4_rx_bad_deskew                                     0x2000     //Deskew Step deskew value
+#define     ei4_rx_bad_deskew_clear                               0xDFFF     // Clear mask
+
+// ei4_rx_fir_pl Register field name                                        data value   Description
+#define     ei4_rx_pl_fir_errs                                    0x8000     //A Per-Lane Register or State Machine Parity Error has occurred.
+#define     ei4_rx_pl_fir_errs_clear                              0x7FFF     // Clear mask
+
+// ei4_rx_fir_mask_pl Register field name                                   data value   Description
+#define     ei4_rx_pl_fir_errs_mask                               0x8000     //A 1 in this field indicates that a register or state machine parity error has occurred in per-group logic.
+#define     ei4_rx_pl_fir_errs_mask_clear                         0x7FFF     // Clear mask
+
+// ei4_rx_fir_error_inject_pl Register field name                           data value   Description
+#define     ei4_rx_pl_fir_err_inj                                 0x8000     //RX Per-Lane Parity Error Injection
+#define     ei4_rx_pl_fir_err_inj_clear                           0x7FFF     // Clear mask
+
+// ei4_rx_sls_pl Register field name                                        data value   Description
+#define     ei4_rx_sls_lane_sel                                   0x8000     //Selects which lane to receive SLS Commands and Recalibration Data on
+#define     ei4_rx_sls_lane_sel_clear                             0x7FFF     // Clear mask
+#define     ei4_rx_9th_pattern_en                                 0x4000     //Sets RX Descrabmler to use 9th Scramble Pattern
+#define     ei4_rx_9th_pattern_en_clear                           0xBFFF     // Clear mask
+
+// ei4_rx_wt_status_pl Register field name                                  data value   Description
+#define     ei4_rx_wt_lane_disabled                               0x8000     //Per-Lane Wiretest lane disabled status
+#define     ei4_rx_wt_lane_disabled_clear                         0x7FFF     // Clear mask
+#define     ei4_rx_wt_lane_inverted                               0x4000     //Per-Lane Wiretest lane inverted/swapped status
+#define     ei4_rx_wt_lane_inverted_clear                         0xBFFF     // Clear mask
+#define     ei4_rx_wt_lane_bad_code_n_stuck_1                     0x0800     //Per-Lane Wiretest Lane Bad code  N-leg stuck at 1.
+#define     ei4_rx_wt_lane_bad_code_n_stuck_0                     0x1000     //Per-Lane Wiretest Lane Bad code  N-leg stuck at 0.
+#define     ei4_rx_wt_lane_bad_code_p_stuck_1                     0x1800     //Per-Lane Wiretest Lane Bad code  P-leg stuck at 1.
+#define     ei4_rx_wt_lane_bad_code_p_stuck_0                     0x2000     //Per-Lane Wiretest Lane Bad code  P-leg stuck at 0.
+#define     ei4_rx_wt_lane_bad_code_n_or_p_floating               0x2800     //Per-Lane Wiretest Lane Bad code  N- or P- leg floating-swapping undetermined.
+#define     ei4_rx_wt_lane_bad_code_p_or_n_floating               0x3000     //Per-Lane Wiretest Lane Bad code  P or N leg floating--swapping undetermined.
+#define     ei4_rx_wt_lane_bad_code_unknown                       0x3800     //Per-Lane Wiretest Lane Bad code  Unknown failure.
+#define     ei4_rx_wt_lane_bad_code_clear                         0xC7FF     // Clear mask
+
+// ei4_rx_fifo_cntl_pl Register field name                                  data value   Description
+#define     ei4_rx_fifo_inc_l2u_dly                               0x8000     //Increment existing FIFO load-to-unload delay register.
+#define     ei4_rx_fifo_inc_l2u_dly_clear                         0x7FFF     // Clear mask
+#define     ei4_rx_fifo_dec_l2u_dly                               0x4000     //Decrement existing FIFO load-to-unload delay register.
+#define     ei4_rx_fifo_dec_l2u_dly_clear                         0xBFFF     // Clear mask
+#define     ei4_rx_clr_skew_valid                                 0x2000     //Clear skew valid registers                            
+#define     ei4_rx_clr_skew_valid_clear                           0xDFFF     // Clear mask
+#define     ei4_rx_fifo_cntl_spare                                0x1000     //Spare to make cr happy.
+#define     ei4_rx_fifo_cntl_spare_clear                          0xEFFF     // Clear mask
+
+// ei4_rx_ber_status_pl Register field name                                 data value   Description
+#define     ei4_rx_ber_count                                      0x0000     //Per-Lane (PL) Diagnostic Bit Error Rate (BER) error counter. Increments when in diagnostic BER mode AND the output of the descrambler is non-zero. This counter counts errors on every UI so it is a true BER counter.
+#define     ei4_rx_ber_count_clear                                0x80FF     // Clear mask
+#define     ei4_rx_ber_count_saturated                            0x0080     //PL Diag BER Error Counter saturation indicator. When '1' indicates that the error counter has saturated to the selected max value. A global per-lane read of this field will indicate if any lane error counters in the group are saturated.
+#define     ei4_rx_ber_count_saturated_clear                      0xFF7F     // Clear mask
+#define     ei4_rx_ber_count_frozen_by_lane                       0x0040     //PL Diag BER Error Counter and or PP Timer has been frozen by another lane's error counter being saturated.
+#define     ei4_rx_ber_count_frozen_by_lane_clear                 0xFFBF     // Clear mask
+#define     ei4_rx_ber_count_frozen_by_timer                      0x0020     //PL Diag BER Error Counter has been frozen by a diag BER timer becoming saturated.
+#define     ei4_rx_ber_count_frozen_by_timer_clear                0xFFDF     // Clear mask
+#define     ei4_rx_ber_timer_saturated                            0x0010     //PL Diag BER Timer saturation indicator. When '1' indicates that the pack BER timer has saturated to the max value. A global per-lane read of this field will indicate if any timer in the group has saturated.
+#define     ei4_rx_ber_timer_saturated_clear                      0xFFEF     // Clear mask
+
+// ei4_rx_ber_timer_0_15_pl Register field name                             data value   Description
+#define     ei4_rx_ber_timer_value_0_15                           0x0000     //PL Diag BER Timer value for this lane, bits 0-15. All lanes in a pack share a timer and will have the same timer value. The value can either be read on one lane in a pack to save data collection time or all lanes can be read.
+#define     ei4_rx_ber_timer_value_0_15_clear                     0x0000     // Clear mask
+
+// ei4_rx_ber_timer_16_31_pl Register field name                            data value   Description
+#define     ei4_rx_ber_timer_value_16_31                          0x0000     //PL Diag BER Timer value, bits 16-31.
+#define     ei4_rx_ber_timer_value_16_31_clear                    0x0000     // Clear mask
+
+// ei4_rx_ber_timer_32_39_pl Register field name                            data value   Description
+#define     ei4_rx_ber_timer_value_32_39                          0x0000     //PL Diag BER Timer value, bits 32-39.
+#define     ei4_rx_ber_timer_value_32_39_clear                    0x00FF     // Clear mask
+
+// ei4_rx_servo_cntl_pl Register field name                                 data value   Description
+#define     ei4_rx_servo_op_done                                  0x8000     //Servo Op completed
+#define     ei4_rx_servo_op_done_clear                            0x7FFF     // Clear mask
+#define     ei4_rx_servo_op_all_done_b                            0x4000     //All Servo Op (asserted low for global dot-Or reading)
+#define     ei4_rx_servo_op_all_done_b_clear                      0xBFFF     // Clear mask
+#define     ei4_rx_servo_op                                       0x0000     //Servo Operation code
+#define     ei4_rx_servo_op_clear                                 0xC1FF     // Clear mask
+
+// ei4_rx_fifo_diag_0_15_pl Register field name                             data value   Description
+#define     ei4_rx_fifo_out_0_15                                  0x0000     //Diag Capture: fifo entries 0 to 15
+#define     ei4_rx_fifo_out_0_15_clear                            0x0000     // Clear mask
+
+// ei4_rx_fifo_diag_16_31_pl Register field name                            data value   Description
+#define     ei4_rx_fifo_out_16_31                                 0x0000     //Diag Capture: fifo entries 16 to 31
+#define     ei4_rx_fifo_out_16_31_clear                           0x0000     // Clear mask
+
+// ei4_rx_fifo_diag_32_47_pl Register field name                            data value   Description
+#define     ei4_rx_fifo_out_32_47                                 0x0000     //Diag Capture: fifo entries 32 to 47
+#define     ei4_rx_fifo_out_32_47_clear                           0x0000     // Clear mask
+
+// ei4_rx_eye_width_status_pl Register field name                           data value   Description
+#define     ei4_rx_eye_width                                      0x0000     //RX Current Eye Width (in PR steps).
+#define     ei4_rx_eye_width_clear                                0x00FF     // Clear mask
+#define     ei4_rx_hist_min_eye_width_valid                       0x0080     //RX Historic Eye Minimum is valid for this lane.
+#define     ei4_rx_hist_min_eye_width_valid_clear                 0xFF7F     // Clear mask
+#define     ei4_rx_hist_min_eye_width                             0x0000     //RX Historic Eye Minimum--per-pack register valid for this lane if ei4_rx_hist_eye_min_valid is asserted for this lane.
+#define     ei4_rx_hist_min_eye_width_clear                       0xDFC0     // Clear mask
+
+// ei4_rx_eye_width_cntl_pl Register field name                             data value   Description
+#define     ei4_rx_reset_hist_eye_width_min                       0x8000     //RX Historic Eye Minimum Reset--reset historic min to maximum value and clears valid bits.
+#define     ei4_rx_reset_hist_eye_width_min_clear                 0x7FFF     // Clear mask
+#define     ei4_rx_eye_width_cntl_pl_spare                        0x4000     //RX Eye width control spare
+#define     ei4_rx_eye_width_cntl_pl_spare_clear                  0xBFFF     // Clear mask
+
+// ei4_rx_clk_mode_pg Register field name                                   data value   Description
+#define     ei4_rx_clk_pdwn                                       0x8000     //Used to disable the rx clock and put it into a low power state.
+#define     ei4_rx_clk_pdwn_clear                                 0x7FFF     // Clear mask
+#define     ei4_rx_clk_invert                                     0x4000     //Used to invert the polarity of the clock.
+#define     ei4_rx_clk_invert_clear                               0xBFFF     // Clear mask
+
+// ei4_rx_spare_mode_pg Register field name                                 data value   Description
+#define     ei4_rx_pg_spare_mode_0                                0x8000     //Per-group spare mode latch
+#define     ei4_rx_pg_spare_mode_0_clear                          0x7FFF     // Clear mask
+#define     ei4_rx_pg_spare_mode_1                                0x4000     //Per-group spare mode latch
+#define     ei4_rx_pg_spare_mode_1_clear                          0xBFFF     // Clear mask
+#define     ei4_rx_pg_spare_mode_2                                0x2000     //Per-group spare mode latch
+#define     ei4_rx_pg_spare_mode_2_clear                          0xDFFF     // Clear mask
+#define     ei4_rx_pg_spare_mode_3                                0x1000     //Per-group spare mode latch
+#define     ei4_rx_pg_spare_mode_3_clear                          0xEFFF     // Clear mask
+#define     ei4_rx_pg_spare_mode_4                                0x0800     //Per-group spare mode latch
+#define     ei4_rx_pg_spare_mode_4_clear                          0xF7FF     // Clear mask
+#define     ei4_rx_pg_spare_mode_5                                0x0400     //Per-group spare mode latch
+#define     ei4_rx_pg_spare_mode_5_clear                          0xFBFF     // Clear mask
+#define     ei4_rx_pg_spare_mode_6                                0x0200     //Per-group spare mode latch
+#define     ei4_rx_pg_spare_mode_6_clear                          0xFDFF     // Clear mask
+#define     ei4_rx_pg_spare_mode_7                                0x0100     //Per-group spare mode latch
+#define     ei4_rx_pg_spare_mode_7_clear                          0xFEFF     // Clear mask
+
+// ei4_rx_mode_pg Register field name                                       data value   Description
+#define     ei4_rx_master_mode                                    0x8000     //Master Mode
+#define     ei4_rx_master_mode_clear                              0x7FFF     // Clear mask
+#define     ei4_rx_disable_fence_reset                            0x4000     //Set to disable clearing of the RX and TX fence controls at the end of training. 
+#define     ei4_rx_disable_fence_reset_clear                      0xBFFF     // Clear mask
+
+// ei4_rx_bus_repair_pg Register field name                                 data value   Description
+#define     ei4_rx_bus_repair_count                               0x0000     //TBD
+#define     ei4_rx_bus_repair_count_clear                         0x3FFF     // Clear mask
+#define     ei4_rx_bus_repair_pos_0                               0x0000     //TBD
+#define     ei4_rx_bus_repair_pos_0_clear                         0xC07F     // Clear mask
+#define     ei4_rx_bus_repair_pos_1                               0x0000     //TBD
+#define     ei4_rx_bus_repair_pos_1_clear                         0x3F80     // Clear mask
+
+// ei4_rx_grp_repair_vec_0_15_pg Register field name                        data value   Description
+#define     ei4_rx_grp_repair_vec_0_15                            0x0000     //TBD
+#define     ei4_rx_grp_repair_vec_0_15_clear                      0x0000     // Clear mask
+
+// ei4_rx_grp_repair_vec_16_31_pg Register field name                       data value   Description
+#define     ei4_rx_grp_repair_vec_16_31                           0x0000     //TBD
+#define     ei4_rx_grp_repair_vec_16_31_clear                     0x0000     // Clear mask
+
+// ei4_rx_recal_mode_pg Register field name                                 data value   Description
+#define     ei4_rx_recal_disable                                  0x8000     //TBD
+#define     ei4_rx_recal_disable_clear                            0x7FFF     // Clear mask
+
+// ei4_rx_reset_act_pg Register field name                                  data value   Description
+#define     ei4_rx_reset_cfg_ena                                  0x8000     //Enable Configurable Group Reset
+#define     ei4_rx_reset_cfg_ena_clear                            0x7FFF     // Clear mask
+#define     ei4_rx_clr_par_errs                                   0x0002     //Clear All RX Parity Error Latches
+#define     ei4_rx_clr_par_errs_clear                             0xFFFD     // Clear mask
+#define     ei4_rx_fir_reset                                      0x0001     //FIR Reset
+#define     ei4_rx_fir_reset_clear                                0xFFFE     // Clear mask
+
+// ei4_rx_id1_pg Register field name                                        data value   Description
+#define     ei4_rx_bus_id                                         0x0000     //This field is used to programmably set the bus number that a clkgrp belongs to.
+#define     ei4_rx_bus_id_clear                                   0x03FF     // Clear mask
+#define     ei4_rx_group_id                                       0x0000     //This field is used to programmably set the clock group number within a bus.
+#define     ei4_rx_group_id_clear                                 0xFE07     // Clear mask
+
+// ei4_rx_id2_pg Register field name                                        data value   Description
+#define     ei4_rx_last_group_id                                  0x0000     //This field is used to programmably set the last clock group number within a bus.
+#define     ei4_rx_last_group_id_clear                            0x03FF     // Clear mask
+
+// ei4_rx_id3_pg Register field name                                        data value   Description
+#define     ei4_rx_start_lane_id                                  0x0000     //This field is used to programmably set the first lane position in the group but relative to the bus.
+#define     ei4_rx_start_lane_id_clear                            0x80FF     // Clear mask
+#define     ei4_rx_end_lane_id                                    0x0000     //This field is used to programmably set the last lane position in the group but relative to the bus.
+#define     ei4_rx_end_lane_id_clear                              0x7F80     // Clear mask
+
+// ei4_rx_minikerf_pg Register field name                                   data value   Description
+#define     ei4_rx_minikerf                                       0x0000     //Used to configure the rx Minikerf for analog characterization.
+#define     ei4_rx_minikerf_clear                                 0x0000     // Clear mask
+
+// ei4_rx_bist_cntl_pg Register field name                                  data value   Description
+#define     ei4_rx_bist_en                                        0x8000     //TBD
+#define     ei4_rx_bist_en_clear                                  0x7FFF     // Clear mask
+#define     ei4_rx_bist_jitter_pulse_ctl                          0x0000     //TBD
+#define     ei4_rx_bist_jitter_pulse_ctl_clear                    0x9FFF     // Clear mask
+#define     ei4_rx_bist_min_eye_width                             0x0000     //TBD
+#define     ei4_rx_bist_min_eye_width_clear                       0xE03F     // Clear mask
+
+// ei4_rx_sls_mode_pg Register field name                                   data value   Description
+#define     ei4_rx_sls_disable                                    0x8000     //Disables receiving & decoding of SLS commands
+#define     ei4_rx_sls_disable_clear                              0x7FFF     // Clear mask
+#define     ei4_tx_sls_disable                                    0x4000     //Disables the sending of SLS commands
+#define     ei4_tx_sls_disable_clear                              0xBFFF     // Clear mask
+#define     ei4_rx_sls_cntr_tap_pts_tap2                          0x1000     //How Long the SLS RX Command Needs to be Stable for.  EDI - 32 c8 clks; EI4 - 64 c4 clks
+#define     ei4_rx_sls_cntr_tap_pts_tap3                          0x2000     //How Long the SLS RX Command Needs to be Stable for.  EDI - 64 c8 clks; EI4 - 128 c4 clks
+#define     ei4_rx_sls_cntr_tap_pts_tap4                          0x3000     //How Long the SLS RX Command Needs to be Stable for.  EDI - 128 c8 clks; EI4 - 256 c4 clks
+#define     ei4_rx_sls_cntr_tap_pts_clear                         0xCFFF     // Clear mask
+#define     ei4_rx_nonsls_cntr_tap_pts_tap2                       0x0400     //How Long a Non-SLS RX Command Needs to be Stable for (to know we have switched from an SLS command to data).  EDI - 64 c8 clks; EI4 - 128 c4 clks
+#define     ei4_rx_nonsls_cntr_tap_pts_tap3                       0x0800     //How Long a Non-SLS RX Command Needs to be Stable for (to know we have switched from an SLS command to data).  EDI - 128 c8 clks; EI4 - 256 c4 clks
+#define     ei4_rx_nonsls_cntr_tap_pts_tap4                       0x0C00     //How Long a Non-SLS RX Command Needs to be Stable for (to know we have switched from an SLS command to data).  EDI - 256 c8 clks; EI4 - 512 c4 clks
+#define     ei4_rx_nonsls_cntr_tap_pts_clear                      0xF3FF     // Clear mask
+#define     ei4_rx_sls_err_chk_run                                0x0200     //Run SLS error check counter
+#define     ei4_rx_sls_err_chk_run_clear                          0xFDFF     // Clear mask
+
+// ei4_rx_training_start_pg Register field name                             data value   Description
+#define     ei4_rx_start_wiretest                                 0x8000     //When this register is written to a 1 the training state machine will run the wiretest portion of the training states.
+#define     ei4_rx_start_wiretest_clear                           0x7FFF     // Clear mask
+#define     ei4_rx_start_deskew                                   0x4000     //When this register is written to a 1 the training state machine will run the deskew portion of the training states.
+#define     ei4_rx_start_deskew_clear                             0xBFFF     // Clear mask
+#define     ei4_rx_start_eye_opt                                  0x2000     //When this register is written to a 1 the training state machine will run the data eye optimization portion of the training states.
+#define     ei4_rx_start_eye_opt_clear                            0xDFFF     // Clear mask
+#define     ei4_rx_start_repair                                   0x1000     //When this register is written to a 1 the training state machine will run the static lane repair portion of the training states.
+#define     ei4_rx_start_repair_clear                             0xEFFF     // Clear mask
+#define     ei4_rx_start_func_mode                                0x0800     //When this register is written to a 1 the training state machine will run the transition to functional data portion of the training states.
+#define     ei4_rx_start_func_mode_clear                          0xF7FF     // Clear mask
+#define     ei4_rx_start_bist_helper_1                            0x0200     //Starts BIST helper state machine.   (wtbyp
+#define     ei4_rx_start_bist_helper_2                            0x0400     //Starts BIST helper state machine.   (ocal
+#define     ei4_rx_start_bist_helper_3                            0x0600     //Starts BIST helper state machine.   (bist
+#define     ei4_rx_start_bist_helper_clear                        0xF9FF     // Clear mask
+
+// ei4_rx_training_status_pg Register field name                            data value   Description
+#define     ei4_rx_wiretest_done                                  0x8000     //When this bit is read as a 1, the wiretest training state has completed. Check the corresponding ei4_rx_ts_*_failed register field for the pass/fail status of this training state.
+#define     ei4_rx_wiretest_done_clear                            0x7FFF     // Clear mask
+#define     ei4_rx_deskew_done                                    0x4000     //When this bit is read as a 1, the deskew training state has completed. Check the corresponding ei4_rx_ts_*_failed register field for the pass/fail status of this training state.
+#define     ei4_rx_deskew_done_clear                              0xBFFF     // Clear mask
+#define     ei4_rx_eye_opt_done                                   0x2000     //When this bit is read as a 1, the eye optimization training state has completed. Check the corresponding ei4_rx_ts_*_failed register field for the pass/fail status of this training state.
+#define     ei4_rx_eye_opt_done_clear                             0xDFFF     // Clear mask
+#define     ei4_rx_repair_done                                    0x1000     //When this bit is read as a 1, the static lane repair training state has completed. Check the corresponding ei4_rx_ts_*_failed register field for the pass/fail status of this training state.
+#define     ei4_rx_repair_done_clear                              0xEFFF     // Clear mask
+#define     ei4_rx_func_mode_done                                 0x0800     //When this bit is read as a 1, the transition to functional data training state has completed. Check the corresponding ei4_rx_ts_*_failed register field for the pass/fail status of this training state.
+#define     ei4_rx_func_mode_done_clear                           0xF7FF     // Clear mask
+#define     ei4_rx_bist_helper_done                               0x0400     //When this bit is read as a 1, the BIST helper state machine has completed.
+#define     ei4_rx_bist_helper_done_clear                         0xFBFF     // Clear mask
+#define     ei4_rx_wiretest_failed                                0x0080     //When this bit is read as a 1, the wiretest training state encountered an error.
+#define     ei4_rx_wiretest_failed_clear                          0xFF7F     // Clear mask
+#define     ei4_rx_deskew_failed                                  0x0040     //When this bit is read as a 1, the deskew training state encountered an error.
+#define     ei4_rx_deskew_failed_clear                            0xFFBF     // Clear mask
+#define     ei4_rx_eye_opt_failed                                 0x0020     //When this bit is read as a 1, the eye optimization training state encountered an error.
+#define     ei4_rx_eye_opt_failed_clear                           0xFFDF     // Clear mask
+#define     ei4_rx_repair_failed                                  0x0010     //When this bit is read as a 1, the static lane repair training state encountered an error.
+#define     ei4_rx_repair_failed_clear                            0xFFEF     // Clear mask
+#define     ei4_rx_func_mode_failed                               0x0008     //When this bit is read as a 1, the transition to functional data training state encountered and error.
+#define     ei4_rx_func_mode_failed_clear                         0xFFF7     // Clear mask
+
+// ei4_rx_recal_status_pg Register field name                               data value   Description
+#define     ei4_rx_recal_status                                   0x0000     //\bRX Recalibration Status\b
+#define     ei4_rx_recal_status_clear                             0x0000     // Clear mask
+
+// ei4_rx_timeout_sel_pg Register field name                                data value   Description
+#define     ei4_rx_sls_timeout_sel_tap1                           0x2000     //Selects Spare Lane Signalling Timeout value (how long to wait for a SLS handshake command)  64k UI 
+#define     ei4_rx_sls_timeout_sel_tap2                           0x4000     //Selects Spare Lane Signalling Timeout value (how long to wait for a SLS handshake command)  128k UI 
+#define     ei4_rx_sls_timeout_sel_tap3                           0x6000     //Selects Spare Lane Signalling Timeout value (how long to wait for a SLS handshake command)  256k UI 
+#define     ei4_rx_sls_timeout_sel_tap4                           0x8000     //Selects Spare Lane Signalling Timeout value (how long to wait for a SLS handshake command)  512k UI 
+#define     ei4_rx_sls_timeout_sel_tap5                           0xA000     //Selects Spare Lane Signalling Timeout value (how long to wait for a SLS handshake command)  1024k UI 
+#define     ei4_rx_sls_timeout_sel_tap6                           0xC000     //Selects Spare Lane Signalling Timeout value (how long to wait for a SLS handshake command)  32768k UI 
+#define     ei4_rx_sls_timeout_sel_tap7                           0xE000     //Selects Spare Lane Signalling Timeout value (how long to wait for a SLS handshake command)  infinite
+#define     ei4_rx_sls_timeout_sel_clear                          0x1FFF     // Clear mask
+#define     ei4_rx_ds_bl_timeout_sel_tap1                         0x0400     //Selects Deskew Block Lock Timeout value.   128k UI or 13.6us 
+#define     ei4_rx_ds_bl_timeout_sel_tap2                         0x0800     //Selects Deskew Block Lock Timeout value.   256k UI or 27.3us 
+#define     ei4_rx_ds_bl_timeout_sel_tap3                         0x0C00     //Selects Deskew Block Lock Timeout value.   1M UI or 109.2us 
+#define     ei4_rx_ds_bl_timeout_sel_tap4                         0x1000     //Selects Deskew Block Lock Timeout value.   2M UI or 218.5us 
+#define     ei4_rx_ds_bl_timeout_sel_tap5                         0x1400     //Selects Deskew Block Lock Timeout value.   4M UI or 436.9us 
+#define     ei4_rx_ds_bl_timeout_sel_tap6                         0x1800     //Selects Deskew Block Lock Timeout value.   8M UI or 873.8us 
+#define     ei4_rx_ds_bl_timeout_sel_tap7                         0x1C00     //Selects Deskew Block Lock Timeout value.   infinite
+#define     ei4_rx_ds_bl_timeout_sel_clear                        0xE3FF     // Clear mask
+#define     ei4_rx_cl_timeout_sel_tap1                            0x0080     //Selects Clock Lock Timeout value.   128k UI or 13.6us 
+#define     ei4_rx_cl_timeout_sel_tap2                            0x0100     //Selects Clock Lock Timeout value.   256k UI or 27.3us 
+#define     ei4_rx_cl_timeout_sel_tap3                            0x0180     //Selects Clock Lock Timeout value.   1M UI or 109.2us 
+#define     ei4_rx_cl_timeout_sel_tap4                            0x0200     //Selects Clock Lock Timeout value.   2M UI or 218.5us 
+#define     ei4_rx_cl_timeout_sel_tap5                            0x0280     //Selects Clock Lock Timeout value.   4M UI or 436.9us 
+#define     ei4_rx_cl_timeout_sel_tap6                            0x0300     //Selects Clock Lock Timeout value.   8M UI or 873.8us 
+#define     ei4_rx_cl_timeout_sel_tap7                            0x0380     //Selects Clock Lock Timeout value.   infinite
+#define     ei4_rx_cl_timeout_sel_clear                           0xFC7F     // Clear mask
+#define     ei4_rx_wt_timeout_sel_tap1                            0x0010     //Selects Wiretest Timeout value.   128k UI or 13.6us 
+#define     ei4_rx_wt_timeout_sel_tap2                            0x0020     //Selects Wiretest Timeout value.   256k UI or 27.3us 
+#define     ei4_rx_wt_timeout_sel_tap3                            0x0030     //Selects Wiretest Timeout value.   1M UI or 109.2us 
+#define     ei4_rx_wt_timeout_sel_tap4                            0x0040     //Selects Wiretest Timeout value.   2M UI or 218.5us 
+#define     ei4_rx_wt_timeout_sel_tap5                            0x0050     //Selects Wiretest Timeout value.   4M UI or 436.9us 
+#define     ei4_rx_wt_timeout_sel_tap6                            0x0060     //Selects Wiretest Timeout value.   8M UI or 873.8us 
+#define     ei4_rx_wt_timeout_sel_tap7                            0x0070     //Selects Wiretest Timeout value.   infinite
+#define     ei4_rx_wt_timeout_sel_clear                           0xC78F     // Clear mask
+#define     ei4_rx_ds_timeout_sel_tap1                            0x0002     //Selects Deskew  Timeout value.   128k UI or 13.6us 
+#define     ei4_rx_ds_timeout_sel_tap2                            0x0004     //Selects Deskew  Timeout value.   256k UI or 27.3us 
+#define     ei4_rx_ds_timeout_sel_tap3                            0x0006     //Selects Deskew  Timeout value.   1M UI or 109.2us 
+#define     ei4_rx_ds_timeout_sel_tap4                            0x0008     //Selects Deskew  Timeout value.   2M UI or 218.5us 
+#define     ei4_rx_ds_timeout_sel_tap5                            0x000A     //Selects Deskew  Timeout value.   4M UI or 436.9us 
+#define     ei4_rx_ds_timeout_sel_tap6                            0x000C     //Selects Deskew  Timeout value.   8M UI or 873.8us 
+#define     ei4_rx_ds_timeout_sel_tap7                            0x000E     //Selects Deskew  Timeout value.   infinite
+#define     ei4_rx_ds_timeout_sel_clear                           0xFF11     // Clear mask
+
+// ei4_rx_fifo_mode_pg Register field name                                  data value   Description
+#define     ei4_rx_fifo_initial_l2u_dly                           0x0000     //RX FIFO Initial Load to Unload Delay. For setting X, the latency is 4*X to 4*X+4 UI.  Default is 16-20 UI.
+#define     ei4_rx_fifo_initial_l2u_dly_clear                     0x0FFF     // Clear mask
+#define     ei4_rx_fifo_final_l2u_dly                             0x0000     //RX FIFO Final Load to Unload Delay. For setting X, the latency is 4*X to 4*X+4 UI.  Default is 8-12 UI.
+#define     ei4_rx_fifo_final_l2u_dly_clear                       0xF0FF     // Clear mask
+#define     ei4_rx_fifo_max_deskew                                0x0000     //RX FIFO Max Deskew Control Value. TBD
+#define     ei4_rx_fifo_max_deskew_clear                          0xFF0F     // Clear mask
+#define     ei4_rx_fifo_final_l2u_min_err_thresh_tap1             0x0004     //RX FIFO error threshold used to qualify the minimum load to unload delay as bad, which is used as the point of reference for adjusting to the final load to unload delay. Note that the errors are accumulated across the entire clock group for a length of time selected by ei4_rx_eo_final_l2u_timeout_sel.   16 errors 
+#define     ei4_rx_fifo_final_l2u_min_err_thresh_tap2             0x0008     //RX FIFO error threshold used to qualify the minimum load to unload delay as bad, which is used as the point of reference for adjusting to the final load to unload delay. Note that the errors are accumulated across the entire clock group for a length of time selected by ei4_rx_eo_final_l2u_timeout_sel.   128 errors 
+#define     ei4_rx_fifo_final_l2u_min_err_thresh_tap3             0x000C     //RX FIFO error threshold used to qualify the minimum load to unload delay as bad, which is used as the point of reference for adjusting to the final load to unload delay. Note that the errors are accumulated across the entire clock group for a length of time selected by ei4_rx_eo_final_l2u_timeout_sel.   255 errors
+#define     ei4_rx_fifo_final_l2u_min_err_thresh_clear            0xFF33     // Clear mask
+
+// ei4_rx_state_debug_pg Register field name                                data value   Description
+#define     ei4_rx_start_at_state_en                              0x8000     //Enable Statemachine to Start
+#define     ei4_rx_start_at_state_en_clear                        0x7FFF     // Clear mask
+#define     ei4_rx_stop_at_state_en                               0x4000     //Enable Statemachine to Stop
+#define     ei4_rx_stop_at_state_en_clear                         0xBFFF     // Clear mask
+#define     ei4_rx_state_stopped                                  0x2000     //Statemachine Has Stopped at ei4_rx_STOP_STATE
+#define     ei4_rx_state_stopped_clear                            0xDFFF     // Clear mask
+#define     ei4_rx_cur_state                                      0x0000     //Current Value of Statemachine Vector
+#define     ei4_rx_cur_state_clear                                0xE01F     // Clear mask
+
+// ei4_rx_state_val_pg Register field name                                  data value   Description
+#define     ei4_rx_start_state                                    0x0000     //Start Value for Statemachine
+#define     ei4_rx_start_state_clear                              0x00FF     // Clear mask
+#define     ei4_rx_stop_state                                     0x0000     //Stop Value for Statemachine
+#define     ei4_rx_stop_state_clear                               0xFF00     // Clear mask
+
+// ei4_rx_sls_status_pg Register field name                                 data value   Description
+#define     ei4_rx_sls_cmd_val                                    0x8000     //Current SLS Command Valid
+#define     ei4_rx_sls_cmd_val_clear                              0x7FFF     // Clear mask
+#define     ei4_rx_sls_cmd_encode_shadow_request                  0x0100     //Current SLS Command  Driven by the RX side to request shadowing of its receive lane from lane n-1 to lane n
+#define     ei4_rx_sls_cmd_encode_shadow_done                     0x0200     //Current SLS Command  Driven by the RX side to signal now receiving lane n-1s data on lane n
+#define     ei4_rx_sls_cmd_encode_shadow_repair_request           0x0300     //Current SLS Command  Driven by the RX side to request shadowing and repair of its receive lane from lane n-1 to n.
+#define     ei4_rx_sls_cmd_encode_shadow_repair_done              0x0400     //Current SLS Command  Driven by the RX side to signal lane n-1 is repaired.
+#define     ei4_rx_sls_cmd_encode_unshadow_request                0x0500     //Current SLS Command  Driven by the RX side to request shadowing of receive lane from lane n+1 to lane n.
+#define     ei4_rx_sls_cmd_encode_unshadow_done                   0x0600     //Current SLS Command  Driven by the RX side to signal now receiving lane n+1 data on lane n
+#define     ei4_rx_sls_cmd_encode_unshadow_repair_request         0x0700     //Current SLS Command  Driven by the RX side to request unshadowing and repair of its receive lane from lane n+1 to lane n.
+#define     ei4_rx_sls_cmd_encode_unshadow_repair_done            0x0800     //Current SLS Command  Driven by the RX side to signal lane n+1 is repaired.
+#define     ei4_rx_sls_cmd_encode_sls_exception                   0x0900     //Current SLS Command  Driven by the RX side to indicate to the other side of the bus its RX SLS lane is broken.
+#define     ei4_rx_sls_cmd_encode_init_done                       0x0A00     //Current SLS Command  Driven to signal the CTLE/DFE/offset (re-
+#define     ei4_rx_sls_cmd_encode_recal_request                   0x0B00     //Current SLS Command  Driven on recalibration lane x to request a recalibration of its receive recalibration lane y.
+#define     ei4_rx_sls_cmd_encode_recal_running                   0x0C00     //Current SLS Command  Driven during the status reporting interval of recalibration to indicate recalibration has not completed
+#define     ei4_rx_sls_cmd_encode_recal_done                      0x0D00     //Current SLS Command  Driven to indicate its recalibration is complete.
+#define     ei4_rx_sls_cmd_encode_recal_failed                    0x0E00     //Current SLS Command  Driven to indicate recalibration has failed on its receive recalibration lane
+#define     ei4_rx_sls_cmd_encode_recal_abort                     0x0F00     //Current SLS Command  Abort recalibration.
+#define     ei4_rx_sls_cmd_encode_reserved2                       0x1000     //Current SLS Command  Reserved.010001
+#define     ei4_rx_sls_cmd_encode_reserved4                       0x1200     //Current SLS Command  Reserved.
+#define     ei4_rx_sls_cmd_encode_reserved5                       0x1300     //Current SLS Command  Reserved.
+#define     ei4_rx_sls_cmd_encode_reserved6                       0x1400     //Current SLS Command  Reserved.
+#define     ei4_rx_sls_cmd_encode_reserved7                       0x1500     //Current SLS Command  Reserved.
+#define     ei4_rx_sls_cmd_encode_reserved8                       0x1600     //Current SLS Command  Reserved.
+#define     ei4_rx_sls_cmd_encode_reserved9                       0x1700     //Current SLS Command  Reserved.
+#define     ei4_rx_sls_cmd_encode_reserved10                      0x1800     //Current SLS Command  Reserved.
+#define     ei4_rx_sls_cmd_encode_init_ack_done                   0x1900     //Current SLS Command  Driven in response to an init_done (not currently used
+#define     ei4_rx_sls_cmd_encode_reserved11                      0x1A00     //Current SLS Command  Reserved.
+#define     ei4_rx_sls_cmd_encode_recal_ack                       0x1B00     //Current SLS Command  Driven on recalibration lane y in response to a recal_request on its receive recalibration lane x
+#define     ei4_rx_sls_cmd_encode_reserved12                      0x1C00     //Current SLS Command  Reserved.
+#define     ei4_rx_sls_cmd_encode_reserved13                      0x1D00     //Current SLS Command  Reserved.
+#define     ei4_rx_sls_cmd_encode_reserved14                      0x1E00     //Current SLS Command  Reserved.
+#define     ei4_rx_sls_cmd_encode_recal_abort_ack                 0x1F00     //Current SLS Command  Abort recalibration acknowledge.
+#define     ei4_rx_sls_cmd_encode_clear                           0xC0FF     // Clear mask
+#define     ei4_rx_sls_err_chk_cnt                                0x0000     //Error count result for SLS error checking mode
+#define     ei4_rx_sls_err_chk_cnt_clear                          0xFF00     // Clear mask
+
+// ei4_rx_prot_mode_pg Register field name                                  data value   Description
+#define     ei4_rx_reverse_shift                                  0x8000     //RX Phase Rotator Direction
+#define     ei4_rx_reverse_shift_clear                            0x7FFF     // Clear mask
+
+// ei4_rx_fir1_pg Register field name                                       data value   Description
+#define     ei4_rx_pg_fir1_errs_clear                             0x0003     // Clear mask
+#define     ei4_rx_pl_fir_err                                     0x0001     //Summary bit indicating an RX per-lane register or state machine parity error has occurred in one or more lanes. The ei4_rx_fir_pl register from each lane should be read to isolate to a particular piece of logic. There is no mechanism to determine which lane had the fault without reading FIR status from each lane.
+#define     ei4_rx_pl_fir_err_clear                               0xFFFE     // Clear mask
+
+// ei4_rx_fir2_pg Register field name                                       data value   Description
+#define     ei4_rx_pg_fir2_errs_clear                             0x1FFF     // Clear mask
+
+// ei4_rx_fir1_mask_pg Register field name                                  data value   Description
+#define     ei4_rx_pg_fir1_errs_mask_clear                        0x0003     // Clear mask
+#define     ei4_rx_pg_chan_fail_mask                              0x0002     //FIR mask for generation of channel fail error when Max Spares Exceeded is active. Default is disabled with a value of 1.
+#define     ei4_rx_pg_chan_fail_mask_clear                        0xFFFD     // Clear mask
+#define     ei4_rx_pl_fir_err_mask                                0x0001     //FIR mask for the summary bit that indicates an RX register or state machine parity error has occurred. This mask bit is used to block ALL per-lane parity errors from causing a FIR error.
+#define     ei4_rx_pl_fir_err_mask_clear                          0xFFFE     // Clear mask
+
+// ei4_rx_fir2_mask_pg Register field name                                  data value   Description
+#define     ei4_rx_pg_fir2_errs_mask_clear                        0x1FFF     // Clear mask
+
+// ei4_rx_fir1_error_inject_pg Register field name                          data value   Description
+#define     ei4_rx_pg_fir1_err_inj_inj_par_err                    0x4000     //RX Per-Group Parity Error Injection  Causes a parity flip in the specific parity checker.
+#define     ei4_rx_pg_fir1_err_inj_clear                          0x0003     // Clear mask
+
+// ei4_rx_fir2_error_inject_pg Register field name                          data value   Description
+#define     ei4_rx_pg_fir2_err_inj_inj_par_err                    0x2000     //RX Per-Group Parity Error Injection  Causes a parity flip in the specific parity checker.
+#define     ei4_rx_pg_fir2_err_inj_clear                          0x1FFF     // Clear mask
+
+// ei4_rx_fir_training_pg Register field name                               data value   Description
+#define     ei4_rx_pg_fir_training_error                          0x8000     //A Training Error has occurred. The Training Error FFDC registers should be read to help isolate to a particular piece of logic.
+#define     ei4_rx_pg_fir_training_error_clear                    0x7FFF     // Clear mask
+#define     ei4_rx_pg_fir_static_spare_deployed                   0x4000     //A spare lane has been deployed during training to heal a lane that was detected as bad. The ei4_rx_bad_lane_enc_gcrmsg_pg register can be read to isolate which lane(s) were healed
+#define     ei4_rx_pg_fir_static_spare_deployed_clear             0xBFFF     // Clear mask
+#define     ei4_rx_pg_fir_static_max_spares_exceeded              0x2000     //A lane has been detected as bad during training but there are no spare lanes to heal it. THIS IS A CATASTROPHIC FAILURE FOR THE BUS.
+#define     ei4_rx_pg_fir_static_max_spares_exceeded_clear        0xDFFF     // Clear mask
+#define     ei4_rx_pg_fir_dynamic_spare_deployed                  0x1000     //A spare lane has been deployed by ECC/CRC logic to heal a lane that was detected as bad. The ei4_rx_bad_lane_enc_gcrmsg_pg register can be read to isolate which lane(s) were healed.
+#define     ei4_rx_pg_fir_dynamic_spare_deployed_clear            0xEFFF     // Clear mask
+#define     ei4_rx_pg_fir_dynamic_max_spares_exceeded             0x0800     //A lane has been detected as bad by ECC/CRC logic but there are no spare lanes to heal it. THIS IS A CATASTROPHIC FAILURE FOR THE BUS.
+#define     ei4_rx_pg_fir_dynamic_max_spares_exceeded_clear       0xF7FF     // Clear mask
+#define     ei4_rx_pg_fir_recal_error                             0x0400     //A Recalibration Error has occurred. The Recal Error FFDC registers should be read to help isolate to a particular piece of logic.
+#define     ei4_rx_pg_fir_recal_error_clear                       0xFBFF     // Clear mask
+#define     ei4_rx_pg_fir_recal_spare_deployed                    0x0200     //A spare lane has been deployed during Recal to heal a lane that was detected as bad. The ei4_rx_bad_lane_enc_gcrmsg_pg register can be read to isolate which lane(s) were healed.
+#define     ei4_rx_pg_fir_recal_spare_deployed_clear              0xFDFF     // Clear mask
+#define     ei4_rx_pg_fir_recal_max_spares_exceeded               0x0100     //A lane has been detected as bad during Recal but there are no spare lanes to heal it. THIS IS A CATASTROPHIC FAILURE FOR THE BUS.
+#define     ei4_rx_pg_fir_recal_max_spares_exceeded_clear         0xFEFF     // Clear mask
+
+// ei4_rx_fir_training_mask_pg Register field name                          data value   Description
+#define     ei4_rx_pg_fir_training_error_mask                     0x8000     //FIR mask for ei4_rx_pg_fir_training_error.
+#define     ei4_rx_pg_fir_training_error_mask_clear               0x7FFF     // Clear mask
+#define     ei4_rx_pg_fir_static_spare_deployed_mask              0x4000     //FIR mask for ei4_rx_pg_fir_static_spare_deployed.
+#define     ei4_rx_pg_fir_static_spare_deployed_mask_clear        0xBFFF     // Clear mask
+#define     ei4_rx_pg_fir_static_max_spares_exceeded_mask         0x2000     //FIR mask for ei4_rx_pg_fir_static_max_spares_exceeded
+#define     ei4_rx_pg_fir_static_max_spares_exceeded_mask_clear   0xDFFF     // Clear mask
+#define     ei4_rx_pg_fir_dynamic_spare_deployed_mask             0x1000     //FIR mask for ei4_rx_pg_fir_dynamic_spare_deployed.
+#define     ei4_rx_pg_fir_dynamic_spare_deployed_mask_clear       0xEFFF     // Clear mask
+#define     ei4_rx_pg_fir_dynamic_max_spares_exceeded_mask        0x0800     //FIR mask for ei4_rx_pg_fir_dynamic_max_spares_exceeded.
+#define     ei4_rx_pg_fir_dynamic_max_spares_exceeded_mask_clear  0xF7FF     // Clear mask
+#define     ei4_rx_pg_fir_recal_error_mask                        0x0400     //FIR mask for ei4_rx_pg_fir_recal_error.
+#define     ei4_rx_pg_fir_recal_error_mask_clear                  0xFBFF     // Clear mask
+#define     ei4_rx_pg_fir_recal_spare_deployed_mask               0x0200     //FIR mask for ei4_rx_pg_fir_recal_spare_deployed.
+#define     ei4_rx_pg_fir_recal_spare_deployed_mask_clear         0xFDFF     // Clear mask
+#define     ei4_rx_pg_fir_recal_max_spares_exceeded_mask          0x0100     //FIR mask for ei4_rx_pg_fir_recal_max_spares_exceeded.
+#define     ei4_rx_pg_fir_recal_max_spares_exceeded_mask_clear    0xFEFF     // Clear mask
+
+// ei4_rx_timeout_sel1_pg Register field name                               data value   Description
+#define     ei4_rx_eo_offset_timeout_sel_tap1                     0x2000     //Selects Latch offset timeout.   128k UI or 13.6us 
+#define     ei4_rx_eo_offset_timeout_sel_tap2                     0x4000     //Selects Latch offset timeout.   256k UI or 27.3us 
+#define     ei4_rx_eo_offset_timeout_sel_tap3                     0x6000     //Selects Latch offset timeout.   1M UI or 109.2us 
+#define     ei4_rx_eo_offset_timeout_sel_tap4                     0x8000     //Selects Latch offset timeout.   2M UI or 218.5us 
+#define     ei4_rx_eo_offset_timeout_sel_tap5                     0xA000     //Selects Latch offset timeout.   4M UI or 436.9us 
+#define     ei4_rx_eo_offset_timeout_sel_tap6                     0xC000     //Selects Latch offset timeout.   8M UI or 873.8us 
+#define     ei4_rx_eo_offset_timeout_sel_tap7                     0xE000     //Selects Latch offset timeout.   infinite
+#define     ei4_rx_eo_offset_timeout_sel_clear                    0x1FFF     // Clear mask
+#define     ei4_rx_eo_vref_timeout_sel_tap1                       0x0400     //Selects  Vref adjust watchdog timeout (EI-4 ONLY).   128k UI or 13.6us 
+#define     ei4_rx_eo_vref_timeout_sel_tap2                       0x0800     //Selects  Vref adjust watchdog timeout (EI-4 ONLY).   256k UI or 27.3us 
+#define     ei4_rx_eo_vref_timeout_sel_tap3                       0x0C00     //Selects  Vref adjust watchdog timeout (EI-4 ONLY).   1M UI or 109.2us 
+#define     ei4_rx_eo_vref_timeout_sel_tap4                       0x1000     //Selects  Vref adjust watchdog timeout (EI-4 ONLY).   2M UI or 218.5us 
+#define     ei4_rx_eo_vref_timeout_sel_tap5                       0x1400     //Selects  Vref adjust watchdog timeout (EI-4 ONLY).   4M UI or 436.9us 
+#define     ei4_rx_eo_vref_timeout_sel_tap6                       0x1800     //Selects  Vref adjust watchdog timeout (EI-4 ONLY).   8M UI or 873.8us 
+#define     ei4_rx_eo_vref_timeout_sel_tap7                       0x1C00     //Selects  Vref adjust watchdog timeout (EI-4 ONLY).   infinite
+#define     ei4_rx_eo_vref_timeout_sel_clear                      0xE3FF     // Clear mask
+#define     ei4_rx_eo_ctle_timeout_sel_tap1                       0x0080     //Selects  CTLE ajdust watchdog timeout.   128k UI or 13.6us 
+#define     ei4_rx_eo_ctle_timeout_sel_tap2                       0x0100     //Selects  CTLE ajdust watchdog timeout.   256k UI or 27.3us 
+#define     ei4_rx_eo_ctle_timeout_sel_tap3                       0x0180     //Selects  CTLE ajdust watchdog timeout.   1M UI or 109.2us 
+#define     ei4_rx_eo_ctle_timeout_sel_tap4                       0x0200     //Selects  CTLE ajdust watchdog timeout.   2M UI or 218.5us 
+#define     ei4_rx_eo_ctle_timeout_sel_tap5                       0x0280     //Selects  CTLE ajdust watchdog timeout.   4M UI or 436.9us 
+#define     ei4_rx_eo_ctle_timeout_sel_tap6                       0x0300     //Selects  CTLE ajdust watchdog timeout.   8M UI or 873.8us 
+#define     ei4_rx_eo_ctle_timeout_sel_tap7                       0x0380     //Selects  CTLE ajdust watchdog timeout.   infinite
+#define     ei4_rx_eo_ctle_timeout_sel_clear                      0xFC7F     // Clear mask
+#define     ei4_rx_eo_et_timeout_sel_tap1                         0x0002     //Selects  Measure eye watchdog timeout (EI-4 ONLY).   128k UI or 13.6us 
+#define     ei4_rx_eo_et_timeout_sel_tap2                         0x0004     //Selects  Measure eye watchdog timeout (EI-4 ONLY).   256k UI or 27.3us 
+#define     ei4_rx_eo_et_timeout_sel_tap3                         0x0006     //Selects  Measure eye watchdog timeout (EI-4 ONLY).   1M UI or 109.2us 
+#define     ei4_rx_eo_et_timeout_sel_tap4                         0x0008     //Selects  Measure eye watchdog timeout (EI-4 ONLY).   2M UI or 218.5us 
+#define     ei4_rx_eo_et_timeout_sel_tap5                         0x000A     //Selects  Measure eye watchdog timeout (EI-4 ONLY).   4M UI or 436.9us 
+#define     ei4_rx_eo_et_timeout_sel_tap6                         0x000C     //Selects  Measure eye watchdog timeout (EI-4 ONLY).   8M UI or 873.8us 
+#define     ei4_rx_eo_et_timeout_sel_tap7                         0x000E     //Selects  Measure eye watchdog timeout (EI-4 ONLY).   infinite
+#define     ei4_rx_eo_et_timeout_sel_clear                        0xFF11     // Clear mask
+#define     ei4_rx_eo_final_l2u_timeout_sel                       0x0001     //Selects Final Load to Unload Delay qualification time per step. 
+#define     ei4_rx_eo_final_l2u_timeout_sel_clear                 0xFFFE     // Clear mask
+
+// ei4_rx_lane_bad_vec_0_15_pg Register field name                          data value   Description
+#define     ei4_rx_lane_bad_vec_0_15                              0x0000     //Lanes found bad by HW (status) or method to force lane bad from software (control).
+#define     ei4_rx_lane_bad_vec_0_15_clear                        0x0000     // Clear mask
+
+// ei4_rx_lane_bad_vec_16_31_pg Register field name                         data value   Description
+#define     ei4_rx_lane_bad_vec_16_31                             0x0000     //Lanes found bad by HW (status) or method to force lane bad from software (control).
+#define     ei4_rx_lane_bad_vec_16_31_clear                       0x0000     // Clear mask
+
+// ei4_rx_lane_disabled_vec_0_15_pg Register field name                     data value   Description
+#define     ei4_rx_lane_disabled_vec_0_15                         0x0000     //Lanes disabled by HW (status) or method to force lane to be disabled (save power) from software (control).
+#define     ei4_rx_lane_disabled_vec_0_15_clear                   0x0000     // Clear mask
+
+// ei4_rx_lane_disabled_vec_16_31_pg Register field name                    data value   Description
+#define     ei4_rx_lane_disabled_vec_16_31                        0x0000     //Lanes disabled by HW (status) or method to force lane to be disabled (save power) from software (control).
+#define     ei4_rx_lane_disabled_vec_16_31_clear                  0x0000     // Clear mask
+
+// ei4_rx_lane_swapped_vec_0_15_pg Register field name                      data value   Description
+#define     ei4_rx_lane_swapped_vec_0_15                          0x0000     //Wiretest found that the P & N wire legs have been swapped on the lane indicated. Has the effect of basically inverting the signal.  Note that this status is invalid if the lane is marked bad.
+#define     ei4_rx_lane_swapped_vec_0_15_clear                    0x0000     // Clear mask
+
+// ei4_rx_lane_swapped_vec_16_31_pg Register field name                     data value   Description
+#define     ei4_rx_lane_swapped_vec_16_31                         0x0000     //Wiretest found that the P & N wire legs have been swapped on the lane indicated. Has the effect of basically inverting the signal.  Note that this status is invalid if the lane is marked bad.
+#define     ei4_rx_lane_swapped_vec_16_31_clear                   0x0000     // Clear mask
+
+// ei4_rx_init_state_pg Register field name                                 data value   Description
+#define     ei4_rx_main_init_state_1                              0x1000     //Main Initialization State Machine(RJR):  Wiretest Running
+#define     ei4_rx_main_init_state_2                              0x2000     //Main Initialization State Machine(RJR):  Deskew Running
+#define     ei4_rx_main_init_state_3                              0x3000     //Main Initialization State Machine(RJR):  Eye Optimization Running
+#define     ei4_rx_main_init_state_4                              0x4000     //Main Initialization State Machine(RJR):  Repair Running
+#define     ei4_rx_main_init_state_5                              0x5000     //Main Initialization State Machine(RJR):  Go Functional Running
+#define     ei4_rx_main_init_state_6                              0x9000     //Main Initialization State Machine(RJR):  Wiretest Failed
+#define     ei4_rx_main_init_state_7                              0x5000     //Main Initialization State Machine(RJR):  Deskew Failed
+#define     ei4_rx_main_init_state_8                              0xB000     //Main Initialization State Machine(RJR):  Eye Optimization Failed
+#define     ei4_rx_main_init_state_9                              0xC000     //Main Initialization State Machine(RJR):  Repair Failed
+#define     ei4_rx_main_init_state_10                             0xD000     //Main Initialization State Machine(RJR):  Go Functional Failed
+#define     ei4_rx_main_init_state_clear                          0x0FFF     // Clear mask
+
+// ei4_rx_wiretest_state_pg Register field name                             data value   Description
+#define     ei4_rx_wtm_state_clear                                0x07FF     // Clear mask
+#define     ei4_rx_wtr_state_clear                                0xF87F     // Clear mask
+#define     ei4_rx_wtl_state_clear                                0x0FE0     // Clear mask
+
+// ei4_rx_wiretest_laneinfo_pg Register field name                          data value   Description
+#define     ei4_rx_wtr_cur_lane                                   0x0000     //Wiretest Current Lane Under Test(RJR)
+#define     ei4_rx_wtr_cur_lane_clear                             0x07FF     // Clear mask
+#define     ei4_rx_wtr_max_bad_lanes_clear                        0xF83F     // Clear mask
+#define     ei4_rx_wtr_bad_lane_count                             0x0000     //Wiretest Current Number Of Bad Lanes in This Clk Group(RJR)
+#define     ei4_rx_wtr_bad_lane_count_clear                       0x07E0     // Clear mask
+
+// ei4_rx_wiretest_gcrmsgs_pg Register field name                           data value   Description
+#define     ei4_rx_wt_prev_done_gcrmsg                            0x8000     //GCR Message: Previous Clk Group Has Completed Wiretest
+#define     ei4_rx_wt_prev_done_gcrmsg_clear                      0x7FFF     // Clear mask
+#define     ei4_rx_wt_all_done_gcrmsg                             0x4000     //GCR Message: All Clk Groups Have Completed Wiretest
+#define     ei4_rx_wt_all_done_gcrmsg_clear                       0xBFFF     // Clear mask
+
+// ei4_rx_deskew_gcrmsgs_pg Register field name                             data value   Description
+#define     ei4_rx_deskew_seq_gcrmsg_dsalldeskewed                0x2000     //GCR Message: RX Deskew Sequencer GCR messages  Indicate all groups deskewed.
+#define     ei4_rx_deskew_seq_gcrmsg_dsprevdone                   0x4000     //GCR Message: RX Deskew Sequencer GCR messages  Indicate prior group completed deskew.
+#define     ei4_rx_deskew_seq_gcrmsg_dsalldone                    0x6000     //GCR Message: RX Deskew Sequencer GCR messages  Indicate all groups completed deskew.
+#define     ei4_rx_deskew_seq_gcrmsg_dsprevskew                   0x8000     //GCR Message: RX Deskew Sequencer GCR messages  Transmit skew values from prior group.
+#define     ei4_rx_deskew_seq_gcrmsg_dsmaxskew                    0xA000     //GCR Message: RX Deskew Sequencer GCR messages  Transmit max skew values to all groups.
+#define     ei4_rx_deskew_seq_gcrmsg_unused                       0xC000     //GCR Message: RX Deskew Sequencer GCR messages  Unused.
+#define     ei4_rx_deskew_seq_gcrmsg_dsnomsg                      0xE000     //GCR Message: RX Deskew Sequencer GCR messages  No message.
+#define     ei4_rx_deskew_seq_gcrmsg_clear                        0x1FFF     // Clear mask
+#define     ei4_rx_deskew_skmin_gcrmsg                            0x0000     //GCR Message: Min Skew Value for deskew sequence.
+#define     ei4_rx_deskew_skmin_gcrmsg_clear                      0xF03F     // Clear mask
+#define     ei4_rx_deskew_skmax_gcrmsg                            0x0000     //GCR Message: Max Skew Value for deskew sequence.
+#define     ei4_rx_deskew_skmax_gcrmsg_clear                      0x0FC0     // Clear mask
+
+// ei4_rx_deskew_state_pg Register field name                               data value   Description
+#define     ei4_rx_dsm_state_clear                                0x00FF     // Clear mask
+#define     ei4_rx_rxdsm_state_clear                              0x7F80     // Clear mask
+
+// ei4_rx_deskew_mode_pg Register field name                                data value   Description
+#define     ei4_rx_deskew_max_limit                               0x0000     //Maximum Deskewable Skew Fail Threshold
+#define     ei4_rx_deskew_max_limit_clear                         0x03FF     // Clear mask
+
+// ei4_rx_deskew_status_pg Register field name                              data value   Description
+#define     ei4_rx_deskew_minskew_grp                             0x0000     //Deskew Per-Group Raw Skew Min
+#define     ei4_rx_deskew_minskew_grp_clear                       0x03FF     // Clear mask
+#define     ei4_rx_deskew_maxskew_grp                             0x0000     //Deskew Per-Group Raw Skew Max
+#define     ei4_rx_deskew_maxskew_grp_clear                       0xFC0F     // Clear mask
+
+// ei4_rx_bad_lane_enc_gcrmsg_pg Register field name                        data value   Description
+#define     ei4_rx_bad_lane1_gcrmsg                               0x0000     //GCR Message: Encoded bad lane one in relation to the entire RX bus
+#define     ei4_rx_bad_lane1_gcrmsg_clear                         0x01FF     // Clear mask
+#define     ei4_rx_bad_lane2_gcrmsg                               0x0000     //GCR Message: Encoded bad lane two in relation to the entire RX bus
+#define     ei4_rx_bad_lane2_gcrmsg_clear                         0xFE03     // Clear mask
+#define     ei4_rx_bad_lane_code_gcrmsg_bad_ln1_val               0x0001     //GCR Message: RX Bad Lane Code  Bad Lane 1 Valid
+#define     ei4_rx_bad_lane_code_gcrmsg_bad_lns12_val             0x0002     //GCR Message: RX Bad Lane Code  Bad Lanes 1 and 2 Valid
+#define     ei4_rx_bad_lane_code_gcrmsg_3plus_bad_lns             0x0003     //GCR Message: RX Bad Lane Code  3+ bad lanes
+#define     ei4_rx_bad_lane_code_gcrmsg_clear                     0xFFF0     // Clear mask
+
+// ei4_rx_static_repair_state_pg Register field name                        data value   Description
+#define     ei4_rx_rpr_state_clear                                0x03FF     // Clear mask
+
+// ei4_rx_ei4_tx_bus_info_pg Register field name                                data value   Description
+#define     ei4_rx_ei4_tx_bus_width                                   0x0000     //TX Bus Width
+#define     ei4_rx_ei4_tx_bus_width_clear                             0x01FF     // Clear mask
+#define     ei4_rx_ei4_rx_bus_width                                   0x0000     //RX Bus Width
+#define     ei4_rx_ei4_rx_bus_width_clear                             0xFE03     // Clear mask
+
+// ei4_rx_sls_lane_enc_gcrmsg_pg Register field name                        data value   Description
+#define     ei4_rx_sls_lane_gcrmsg                                0x0000     //GCR Message: Encoded SLS lane in relation to the entire RX bus
+#define     ei4_rx_sls_lane_gcrmsg_clear                          0x01FF     // Clear mask
+#define     ei4_rx_sls_lane_val_gcrmsg                            0x0100     //GCR Message: RX SLS Lane Valid
+#define     ei4_rx_sls_lane_val_gcrmsg_clear                      0xFEFF     // Clear mask
+
+// ei4_rx_fence_pg Register field name                                      data value   Description
+#define     ei4_rx_fence                                          0x8000     //RX fence bit
+#define     ei4_rx_fence_clear                                    0x7FFF     // Clear mask
+
+// ei4_rx_term_pg Register field name                                       data value   Description
+#define     ei4_rx_term_p_mode_enc                                0x0000     //Slice enable for 240ohm pfet for termination mode (binary code - 0000 is zero slices and 1000 is maximum slices)
+#define     ei4_rx_term_p_mode_enc_clear                          0xF0FF     // Clear mask
+#define     ei4_rx_term_test_mode                                 0x0080     //Termination Segment Test mode
+#define     ei4_rx_term_test_mode_clear                           0xFF7F     // Clear mask
+
+// ei4_rx_timeout_sel2_pg Register field name                               data value   Description
+#define     ei4_rx_func_mode_timeout_sel_tap1                     0x2000     //Selects Functional Mode wait timeout. Note that his should be longer than ei4_rx_sls_timeout_sel.   128k UI or 13.7us 
+#define     ei4_rx_func_mode_timeout_sel_tap2                     0x4000     //Selects Functional Mode wait timeout. Note that his should be longer than ei4_rx_sls_timeout_sel.   256k UI or 27.3us 
+#define     ei4_rx_func_mode_timeout_sel_tap3                     0x6000     //Selects Functional Mode wait timeout. Note that his should be longer than ei4_rx_sls_timeout_sel.   512k UI or 54.6us 
+#define     ei4_rx_func_mode_timeout_sel_tap4                     0x8000     //Selects Functional Mode wait timeout. Note that his should be longer than ei4_rx_sls_timeout_sel.   1M UI or 109.2us 
+#define     ei4_rx_func_mode_timeout_sel_tap5                     0xA000     //Selects Functional Mode wait timeout. Note that his should be longer than ei4_rx_sls_timeout_sel.   2M UI or 218.5us 
+#define     ei4_rx_func_mode_timeout_sel_tap6                     0xC000     //Selects Functional Mode wait timeout. Note that his should be longer than ei4_rx_sls_timeout_sel.   64M UI or 7ms
+#define     ei4_rx_func_mode_timeout_sel_tap7                     0xE000     //Selects Functional Mode wait timeout. Note that his should be longer than ei4_rx_sls_timeout_sel.   infinite
+#define     ei4_rx_func_mode_timeout_sel_clear                    0x1FFF     // Clear mask
+
+// ei4_rx_dyn_rpr_pg Register field name                                    data value   Description
+#define     ei4_rx_dyn_rpr_state_clear                            0xC0FF     // Clear mask
+#define     ei4_rx_sls_hndshk_state_clear                         0xFF00     // Clear mask
+
+// ei4_rx_dyn_rpr_gcrmsg_pg Register field name                             data value   Description
+#define     ei4_rx_dyn_rpr_req_gcrmsg                             0x8000     //GCR Message: CRC/ECC Tallying logic has a Dynamic Repair Request
+#define     ei4_rx_dyn_rpr_req_gcrmsg_clear                       0x7FFF     // Clear mask
+#define     ei4_rx_dyn_rpr_lane2rpr_gcrmsg                        0x0000     //GCR Message: CRC/ECC Tallying logic bad lane to repair
+#define     ei4_rx_dyn_rpr_lane2rpr_gcrmsg_clear                  0x80FF     // Clear mask
+#define     ei4_rx_dyn_rpr_ip_gcrmsg                              0x0080     //GCR Message: CRC/ECC Bad Lane Repair In Progress
+#define     ei4_rx_dyn_rpr_ip_gcrmsg_clear                        0xFF7F     // Clear mask
+#define     ei4_rx_dyn_rpr_complete_gcrmsg                        0x0040     //GCR Message: CRC/ECC Bad Lane Repaired
+#define     ei4_rx_dyn_rpr_complete_gcrmsg_clear                  0xFFBF     // Clear mask
+
+// ei4_rx_dyn_rpr_err_tallying_pg Register field name                       data value   Description
+#define     ei4_rx_dyn_rpr_bad_lane_max                           0x0000     //CRC/ECC Dynamic Repair: Max number of times a lane can be found bad before repaired
+#define     ei4_rx_dyn_rpr_bad_lane_max_clear                     0x07FF     // Clear mask
+#define     ei4_rx_dyn_rpr_err_cntr_duration_tap1                 0x0100     //CRC/ECC Dynamic Repair: Duration the error counter can run before being cleared (determines the allowed error frequency)  106.6ns
+#define     ei4_rx_dyn_rpr_err_cntr_duration_tap2                 0x0200     //CRC/ECC Dynamic Repair: Duration the error counter can run before being cleared (determines the allowed error frequency)  1.7uS
+#define     ei4_rx_dyn_rpr_err_cntr_duration_tap3                 0x0300     //CRC/ECC Dynamic Repair: Duration the error counter can run before being cleared (determines the allowed error frequency)  27.3uS
+#define     ei4_rx_dyn_rpr_err_cntr_duration_tap4                 0x0400     //CRC/ECC Dynamic Repair: Duration the error counter can run before being cleared (determines the allowed error frequency)  436.7uS
+#define     ei4_rx_dyn_rpr_err_cntr_duration_tap5                 0x0500     //CRC/ECC Dynamic Repair: Duration the error counter can run before being cleared (determines the allowed error frequency)  7.0mS
+#define     ei4_rx_dyn_rpr_err_cntr_duration_tap6                 0x0600     //CRC/ECC Dynamic Repair: Duration the error counter can run before being cleared (determines the allowed error frequency)  111.8mS
+#define     ei4_rx_dyn_rpr_err_cntr_duration_tap7                 0x0700     //CRC/ECC Dynamic Repair: Duration the error counter can run before being cleared (determines the allowed error frequency)  1.8S
+#define     ei4_rx_dyn_rpr_err_cntr_duration_clear                0xF8FF     // Clear mask
+#define     ei4_rx_dyn_rpr_clr_err_cntr                           0x0080     //CRC/ECC Dynamic Repair: Firmware-based clear of error counter register
+#define     ei4_rx_dyn_rpr_clr_err_cntr_clear                     0xFF7F     // Clear mask
+
+// ei4_rx_eo_final_l2u_gcrmsgs_pg Register field name                       data value   Description
+#define     ei4_rx_eo_final_l2u_dly_seq_gcrmsg_fl2uallchg         0x4000     //GCR Message: RX Final Load to Unload Delay GCR messages  Indicate all groups have calculated max load to unload change.
+#define     ei4_rx_eo_final_l2u_dly_seq_gcrmsg_unused             0x8000     //GCR Message: RX Final Load to Unload Delay GCR messages  Unused.
+#define     ei4_rx_eo_final_l2u_dly_seq_gcrmsg_fl2unomsg          0xC000     //GCR Message: RX Final Load to Unload Delay GCR messages  No message.
+#define     ei4_rx_eo_final_l2u_dly_seq_gcrmsg_clear              0x3FFF     // Clear mask
+#define     ei4_rx_eo_final_l2u_dly_maxchg_gcrmsg                 0x0000     //GCR Message: Max change in miniumum load to unload delay.
+#define     ei4_rx_eo_final_l2u_dly_maxchg_gcrmsg_clear           0xC0FF     // Clear mask
+#define     ei4_rx_eo_final_l2u_dly_chg                           0x0000     //GCR Message: Local change in miniumum load to unload delay.
+#define     ei4_rx_eo_final_l2u_dly_chg_clear                     0x3FC0     // Clear mask
+
+// ei4_rx_gcr_msg_debug_dest_ids_pg Register field name                     data value   Description
+#define     ei4_rx_gcr_msg_debug_dest_bus_id_clear                0x03FF     // Clear mask
+#define     ei4_rx_gcr_msg_debug_dest_group_id_clear              0xFC0F     // Clear mask
+
+// ei4_rx_gcr_msg_debug_src_ids_pg Register field name                      data value   Description
+#define     ei4_rx_gcr_msg_debug_src_bus_id_clear                 0x03FF     // Clear mask
+#define     ei4_rx_gcr_msg_debug_src_group_id_clear               0xFC0F     // Clear mask
+
+// ei4_rx_gcr_msg_debug_dest_addr_pg Register field name                    data value   Description
+#define     ei4_rx_gcr_msg_debug_dest_addr_clear                  0x007F     // Clear mask
+#define     ei4_rx_gcr_msg_debug_send_msg                         0x0001     //GCR Messaging Debug: Send GCR Message on rising edge of this bit.
+#define     ei4_rx_gcr_msg_debug_send_msg_clear                   0xFFFE     // Clear mask
+
+// ei4_rx_gcr_msg_debug_write_data_pg Register field name                   data value   Description
+#define     ei4_rx_gcr_msg_debug_write_data_clear                 0x0000     // Clear mask
+
+// ei4_rx_wt_clk_status_pg Register field name                              data value   Description
+#define     ei4_rx_wt_clk_lane_inverted                           0x4000     //Clock Wiretest lane inverted/swapped status 
+#define     ei4_rx_wt_clk_lane_inverted_clear                     0xBFFF     // Clear mask
+#define     ei4_rx_wt_clk_lane_bad_code_n_stuck_1                 0x0800     //Clock Wiretest Lane Bad code  N leg stuck at 1 
+#define     ei4_rx_wt_clk_lane_bad_code_n_stuck_0                 0x1000     //Clock Wiretest Lane Bad code  N leg stuck at 0 
+#define     ei4_rx_wt_clk_lane_bad_code_p_stuck_1                 0x1800     //Clock Wiretest Lane Bad code  P leg stuck at 1 
+#define     ei4_rx_wt_clk_lane_bad_code_p_stuck_0                 0x2000     //Clock Wiretest Lane Bad code  P leg stuck at 0 
+#define     ei4_rx_wt_clk_lane_bad_code_n_or_p_floating           0x2800     //Clock Wiretest Lane Bad code  N  or P leg floating or swapping undetermined 
+#define     ei4_rx_wt_clk_lane_bad_code_NOT_USED_110              0x3000     //Clock Wiretest Lane Bad code Unused.
+#define     ei4_rx_wt_clk_lane_bad_code_NOT_USED_111              0x3800     //Clock Wiretest Lane Bad code Unused.
+#define     ei4_rx_wt_clk_lane_bad_code_clear                     0xC7FF     // Clear mask
+
+// ei4_rx_wiretest_pll_cntl_pg Register field name                          data value   Description
+#define     ei4_rx_wt_cu_pll_pgood                                0x8000     //RX cleanup PLL Enable
+#define     ei4_rx_wt_cu_pll_pgood_clear                          0x7FFF     // Clear mask
+#define     ei4_rx_wt_cu_pll_reset                                0x4000     //RX cleanup PLL Enable Request
+#define     ei4_rx_wt_cu_pll_reset_clear                          0xBFFF     // Clear mask
+#define     ei4_rx_wt_cu_pll_pgooddly_50ns                        0x0800     //RX cleanup PLL PGOOD Delay Selects length of reset period after ei4_rx_wt_cu_pll_reset is set.   Nominal 50ns Reset per PLL Spec 
+#define     ei4_rx_wt_cu_pll_pgooddly_100ns                       0x1000     //RX cleanup PLL PGOOD Delay Selects length of reset period after ei4_rx_wt_cu_pll_reset is set.   Double Nominal 50ns Reset per PLL Spec 
+#define     ei4_rx_wt_cu_pll_pgooddly_960ui                       0x1800     //RX cleanup PLL PGOOD Delay Selects length of reset period after ei4_rx_wt_cu_pll_reset is set.   Typical simulation delay exceeding TX PLL 40-refclk locking period 
+#define     ei4_rx_wt_cu_pll_pgooddly_unused_100                  0x2000     //RX cleanup PLL PGOOD Delay Selects length of reset period after ei4_rx_wt_cu_pll_reset is set.   Reserved 
+#define     ei4_rx_wt_cu_pll_pgooddly_unused_101                  0x2800     //RX cleanup PLL PGOOD Delay Selects length of reset period after ei4_rx_wt_cu_pll_reset is set.   Reserved 
+#define     ei4_rx_wt_cu_pll_pgooddly_MAX                         0x3000     //RX cleanup PLL PGOOD Delay Selects length of reset period after ei4_rx_wt_cu_pll_reset is set.   1024 UI  
+#define     ei4_rx_wt_cu_pll_pgooddly_disable                     0x3800     //RX cleanup PLL PGOOD Delay Selects length of reset period after ei4_rx_wt_cu_pll_reset is set.   Disable ei4_rx_wt_cu_pll_reset
+#define     ei4_rx_wt_cu_pll_pgooddly_clear                       0xC7FF     // Clear mask
+#define     ei4_rx_wt_cu_pll_lock                                 0x0400     //RX cleanup PLL Locked
+#define     ei4_rx_wt_cu_pll_lock_clear                           0xFBFF     // Clear mask
+
+// ei4_rx_eo_step_cntl_pg Register field name                               data value   Description
+#define     ei4_rx_eo_enable_latch_offset_cal                     0x8000     //RX eye optimization latch offset adjustment enable
+#define     ei4_rx_eo_enable_latch_offset_cal_clear               0x7FFF     // Clear mask
+#define     ei4_rx_eo_enable_ctle_cal                             0x4000     //RX eye optimization CTLE/Peakin enable
+#define     ei4_rx_eo_enable_ctle_cal_clear                       0xBFFF     // Clear mask
+#define     ei4_rx_eo_enable_vref_cal                             0x1000     //RX eye optimization VRef adjust enable
+#define     ei4_rx_eo_enable_vref_cal_clear                       0xEFFF     // Clear mask
+#define     ei4_rx_eo_enable_measure_eye_width                    0x0100     //RX eye optimization Eye width check enable
+#define     ei4_rx_eo_enable_measure_eye_width_clear              0xFEFF     // Clear mask
+#define     ei4_rx_eo_enable_final_l2u_adj                        0x0080     //RX eye optimization Final RX FIFO load-to-unload delay adjustment enable
+#define     ei4_rx_eo_enable_final_l2u_adj_clear                  0xFF7F     // Clear mask
+
+// ei4_rx_eo_step_stat_pg Register field name                               data value   Description
+#define     ei4_rx_eo_latch_offset_done                           0x8000     //RX eye optimization latch offset adjustment done
+#define     ei4_rx_eo_latch_offset_done_clear                     0x7FFF     // Clear mask
+#define     ei4_rx_eo_ctle_done                                   0x4000     //RX eye optimization CTLE/Peaking done
+#define     ei4_rx_eo_ctle_done_clear                             0xBFFF     // Clear mask
+#define     ei4_rx_eo_vref_done                                   0x1000     //RX eye optimization VRef adjust done
+#define     ei4_rx_eo_vref_done_clear                             0xEFFF     // Clear mask
+#define     ei4_rx_eo_measure_eye_width_done                      0x0100     //RX eye optimization Eye width check done
+#define     ei4_rx_eo_measure_eye_width_done_clear                0xFEFF     // Clear mask
+#define     ei4_rx_eo_final_l2u_adj_done                          0x0080     //RX eye optimization Final RX FIFO load-to-unload adjust done
+#define     ei4_rx_eo_final_l2u_adj_done_clear                    0xFF7F     // Clear mask
+
+// ei4_rx_eo_step_fail_pg Register field name                               data value   Description
+#define     ei4_rx_eo_latch_offset_failed                         0x8000     //RX eye optimization latch offset adjustment  failed
+#define     ei4_rx_eo_latch_offset_failed_clear                   0x7FFF     // Clear mask
+#define     ei4_rx_eo_ctle_failed                                 0x4000     //RX eye optimization CTLE/Peaking  failed
+#define     ei4_rx_eo_ctle_failed_clear                           0xBFFF     // Clear mask
+#define     ei4_rx_eo_vref_failed                                 0x1000     //RX eye optimization VRef adjust  failed
+#define     ei4_rx_eo_vref_failed_clear                           0xEFFF     // Clear mask
+#define     ei4_rx_eo_measure_eye_width_failed                    0x0100     //RX eye optimization Measure eye width filed
+#define     ei4_rx_eo_measure_eye_width_failed_clear              0xFEFF     // Clear mask
+#define     ei4_rx_eo_final_l2u_adj_failed                        0x0080     //RX eye optimization Final RX FIFO load-to-unload adjust  failed
+#define     ei4_rx_eo_final_l2u_adj_failed_clear                  0xFF7F     // Clear mask
+
+// ei4_rx_amp_val_pg Register field name                                    data value   Description
+#define     ei4_rx_amp_peak_work                                  0x0000     //Rx amp peak working register
+#define     ei4_rx_amp_peak_work_clear                            0x0FFF     // Clear mask
+
+// ei4_rx_sls_rcvy_pg Register field name                                   data value   Description
+#define     ei4_rx_sls_rcvy_state_clear                           0xE0FF     // Clear mask
+
+// ei4_rx_sls_rcvy_gcrmsg_pg Register field name                            data value   Description
+#define     ei4_rx_slv_shdw_done_fin_gcrmsg                       0x8000     //GCR Message: Slave RX SLS Lane Repaired; Need to finish slave shadow handshake starting with waiting for shdw_done
+#define     ei4_rx_slv_shdw_done_fin_gcrmsg_clear                 0x7FFF     // Clear mask
+#define     ei4_rx_slv_shdw_nop_fin_gcrmsg                        0x4000     //GCR Message: Slave RX SLS Lane Repaired; Need to finish slave shadow handshake starting with waiting for nop
+#define     ei4_rx_slv_shdw_nop_fin_gcrmsg_clear                  0xBFFF     // Clear mask
+#define     ei4_rx_slv_shdw_rpr_done_fin_gcrmsg                   0x2000     //GCR Message: Slave RX SLS Lane Repaired; Need to finish slave shadow handshake starting with waiting for shdw_rpr_done
+#define     ei4_rx_slv_shdw_rpr_done_fin_gcrmsg_clear             0xDFFF     // Clear mask
+#define     ei4_rx_slv_shdw_rpr_nop_fin_gcrmsg                    0x1000     //GCR Message: Slave RX SLS Lane Repaired; Need to finish slave shadow handshake starting with waiting for nop
+#define     ei4_rx_slv_shdw_rpr_nop_fin_gcrmsg_clear              0xEFFF     // Clear mask
+#define     ei4_rx_slv_unshdw_done_fin_gcrmsg                     0x0800     //GCR Message: Slave RX SLS Lane Repaired; Need to finish slave shadow handshake starting with waiting for unshdw_done
+#define     ei4_rx_slv_unshdw_done_fin_gcrmsg_clear               0xF7FF     // Clear mask
+#define     ei4_rx_slv_unshdw_nop_fin_gcrmsg                      0x0400     //GCR Message: Slave RX SLS Lane Repaired; Need to finish slave shadow handshake starting with waiting for nop
+#define     ei4_rx_slv_unshdw_nop_fin_gcrmsg_clear                0xFBFF     // Clear mask
+#define     ei4_rx_slv_unshdw_rpr_done_fin_gcrmsg                 0x0200     //GCR Message: Slave RX SLS Lane Repaired; Need to finish slave shadow handshake starting with waiting for unshdw_rpr_done
+#define     ei4_rx_slv_unshdw_rpr_done_fin_gcrmsg_clear           0xFDFF     // Clear mask
+#define     ei4_rx_slv_unshdw_rpr_nop_fin_gcrmsg                  0x0100     //GCR Message: Slave RX SLS Lane Repaired; Need to finish slave shadow handshake starting with waiting for nop
+#define     ei4_rx_slv_unshdw_rpr_nop_fin_gcrmsg_clear            0xFEFF     // Clear mask
+#define     ei4_rx_slv_recal_done_nop_fin_gcrmsg                  0x0080     //GCR Message: Slave Recal Done; Need to finish slave recal handshake starting with waiting for nop
+#define     ei4_rx_slv_recal_done_nop_fin_gcrmsg_clear            0xFF7F     // Clear mask
+#define     ei4_rx_slv_recal_fail_nop_fin_gcrmsg                  0x0040     //GCR Message: Slave Recal Fail; Need to finish slave recal handshake starting with waiting for nop
+#define     ei4_rx_slv_recal_fail_nop_fin_gcrmsg_clear            0xFFBF     // Clear mask
+#define     ei4_rx_sls_rcvy_ei4_rx_ip_gcrmsg                          0x0020     //GCR Message: SLS Rcvy; RX Lane Repair IP
+#define     ei4_rx_sls_rcvy_ei4_rx_ip_gcrmsg_clear                    0xFFDF     // Clear mask
+#define     ei4_rx_sls_rcvy_ei4_rx_rpred_gcrmsg                       0x0010     //GCR Message: SLS Rcvy; RX Lane Repair Done
+#define     ei4_rx_sls_rcvy_ei4_rx_rpred_gcrmsg_clear                 0xFFEF     // Clear mask
+
+// ei4_rx_ei4_tx_lane_info_gcrmsg_pg Register field name                        data value   Description
+#define     ei4_rx_ei4_tx_bad_lane_cntr_gcrmsg                        0x0000     //GCR Message: RX Side TX Bad Lane Counter
+#define     ei4_rx_ei4_tx_bad_lane_cntr_gcrmsg_clear                  0x3FFF     // Clear mask
+
+// ei4_rx_err_tallying_gcrmsg_pg Register field name                        data value   Description
+#define     ei4_rx_dis_synd_tallying_gcrmsg                       0x8000     //GCR Message: Disable Syndrome Tallying
+#define     ei4_rx_dis_synd_tallying_gcrmsg_clear                 0x7FFF     // Clear mask
+
+// ei4_rx_trace_pg Register field name                                      data value   Description
+#define     ei4_rx_trc_mode_tap1                                  0x1000     //RX Trace Mode  Dynamic Repair State Machines
+#define     ei4_rx_trc_mode_tap2                                  0x2000     //RX Trace Mode  SLS Handshake State Machines with Recovery
+#define     ei4_rx_trc_mode_tap3                                  0x3000     //RX Trace Mode  Dynamic Recal State Machines
+#define     ei4_rx_trc_mode_tap4                                  0x4000     //RX Trace Mode  Recal Handshake State Machine with Recovery
+#define     ei4_rx_trc_mode_tap5                                  0x5000     //RX Trace Mode  CRC/ECC Tallying Logic
+#define     ei4_rx_trc_mode_tap6                                  0x6000     //RX Trace Mode  RX SLS Commands
+#define     ei4_rx_trc_mode_tap7                                  0x7000     //RX Trace Mode  RX Bad Lanes
+#define     ei4_rx_trc_mode_tap8                                  0x8000     //RX Trace Mode  RX SLS Lanes
+#define     ei4_rx_trc_mode_tap9                                  0x9000     //RX Trace Mode  TBD
+#define     ei4_rx_trc_mode_tap10                                 0xA000     //RX Trace Mode  TBD
+#define     ei4_rx_trc_mode_tap11                                 0xB000     //RX Trace Mode  TBD
+#define     ei4_rx_trc_mode_tap12                                 0xC000     //RX Trace Mode  TBD
+#define     ei4_rx_trc_mode_tap13                                 0xD000     //RX Trace Mode  TBD
+#define     ei4_rx_trc_mode_tap14                                 0xE000     //RX Trace Mode  TBD
+#define     ei4_rx_trc_mode_tap15                                 0xF000     //RX Trace Mode  TBD
+#define     ei4_rx_trc_mode_clear                                 0x0FFF     // Clear mask
+#define     ei4_rx_trc_grp_clear                                  0xFC0F     // Clear mask
+
+// ei4_rx_wiretest_pp Register field name                                   data value   Description
+#define     ei4_rx_wt_pattern_length_256                          0x4000     //RX Wiretest Pattern Length  256
+#define     ei4_rx_wt_pattern_length_512                          0x8000     //RX Wiretest Pattern Length  512
+#define     ei4_rx_wt_pattern_length_1024                         0xC000     //RX Wiretest Pattern Length  1024
+#define     ei4_rx_wt_pattern_length_clear                        0x3FFF     // Clear mask
+
+// ei4_rx_mode_pp Register field name                                       data value   Description
+#define     ei4_rx_reduced_scramble_mode_disable_1                0x4000     //Sets reduced density of scramble pattern.   Disable reduced density 
+#define     ei4_rx_reduced_scramble_mode_enable_div2              0x8000     //Sets reduced density of scramble pattern.   Enable Div2 Reduced Density 
+#define     ei4_rx_reduced_scramble_mode_enable_div4              0xC000     //Sets reduced density of scramble pattern.   Enable Div4 Reduced Density
+#define     ei4_rx_reduced_scramble_mode_clear                    0x3FFF     // Clear mask
+#define     ei4_rx_act_check_timeout_sel_128ui                    0x0800     //Sets Activity check timeout value.   128 UI 
+#define     ei4_rx_act_check_timeout_sel_256ui                    0x1000     //Sets Activity check timeout value.   256 UI 
+#define     ei4_rx_act_check_timeout_sel_512ui                    0x1800     //Sets Activity check timeout value.   512 UI 
+#define     ei4_rx_act_check_timeout_sel_1024ui                   0x2000     //Sets Activity check timeout value.   1024 UI 
+#define     ei4_rx_act_check_timeout_sel_2048ui                   0x2800     //Sets Activity check timeout value.   2048 UI 
+#define     ei4_rx_act_check_timeout_sel_4096ui                   0x3000     //Sets Activity check timeout value.   4096 UI 
+#define     ei4_rx_act_check_timeout_sel_infinite                 0x3800     //Sets Activity check timeout value.   Infinite
+#define     ei4_rx_act_check_timeout_sel_clear                    0xC7FF     // Clear mask
+#define     ei4_rx_block_lock_timeout_sel_1024ui                  0x0100     //Sets block lock timeout value.   1024 UI 
+#define     ei4_rx_block_lock_timeout_sel_2048ui                  0x0200     //Sets block lock timeout value.   2048 UI 
+#define     ei4_rx_block_lock_timeout_sel_4096ui                  0x0300     //Sets block lock timeout value.   4096 UI 
+#define     ei4_rx_block_lock_timeout_sel_8192ui                  0x0400     //Sets block lock timeout value.   8192 UI 
+#define     ei4_rx_block_lock_timeout_sel_16384ui                 0x0500     //Sets block lock timeout value.   16384 UI 
+#define     ei4_rx_block_lock_timeout_sel_32768ui                 0x0600     //Sets block lock timeout value.   32768 UI 
+#define     ei4_rx_block_lock_timeout_sel_infinite                0x0700     //Sets block lock timeout value.   Infinite
+#define     ei4_rx_block_lock_timeout_sel_clear                   0xF8FF     // Clear mask
+#define     ei4_rx_bit_lock_timeout_sel_512ui                     0x0020     //Sets bit lock/edge detect timeout value.   512 UI 
+#define     ei4_rx_bit_lock_timeout_sel_1024ui                    0x0040     //Sets bit lock/edge detect timeout value.   1024 UI 
+#define     ei4_rx_bit_lock_timeout_sel_2048ui                    0x0060     //Sets bit lock/edge detect timeout value.   2048 UI 
+#define     ei4_rx_bit_lock_timeout_sel_4096ui                    0x0080     //Sets bit lock/edge detect timeout value.   4096 UI 
+#define     ei4_rx_bit_lock_timeout_sel_8192ui                    0x00A0     //Sets bit lock/edge detect timeout value.   8192 UI 
+#define     ei4_rx_bit_lock_timeout_sel_16384ui                   0x00C0     //Sets bit lock/edge detect timeout value.   16384 UI 
+#define     ei4_rx_bit_lock_timeout_sel_infinite                  0x00E0     //Sets bit lock/edge detect timeout value.   Infinite
+#define     ei4_rx_bit_lock_timeout_sel_clear                     0x1F1F     // Clear mask
+#define     ei4_rx_ei3_mode                                       0x0001     //EI3 mode - See also ei4_tx_ei3_mode 
+#define     ei4_rx_ei3_mode_clear                                 0xFFFE     // Clear mask
+
+// ei4_rx_cntl_pp Register field name                                       data value   Description
+#define     ei4_rx_prbs_check_sync                                0x4000     //Enables checking for the 12 ui scramble sync pattern. 
+#define     ei4_rx_prbs_check_sync_clear                          0xBFFF     // Clear mask
+#define     ei4_rx_enable_reduced_scramble                        0x2000     //Enables reduced density of scramble pattern. 
+#define     ei4_rx_enable_reduced_scramble_clear                  0xDFFF     // Clear mask
+#define     ei4_rx_prbs_inc                                       0x1000     //Shift the PRBS pattern forward in time by one extra local cycle (4ui for EDI, 2ui for EI4).
+#define     ei4_rx_prbs_inc_clear                                 0xEFFF     // Clear mask
+#define     ei4_rx_prbs_dec                                       0x0800     //Shift the PRBS pattern back in time by holding it one local cycle (4ui for EDI, 2ui for EI4).
+#define     ei4_rx_prbs_dec_clear                                 0xF7FF     // Clear mask
+
+// ei4_rx_ei4_cal_cntl_pp Register field name                               data value   Description
+#define     ei4_rx_ddc_use_cyc_block_lock                         0x8000     //0 - use phase rot, 1 - use cycle sim block lock
+#define     ei4_rx_ddc_use_cyc_block_lock_clear                   0x7FFF     // Clear mask
+
+// ei4_rx_ei4_cal_inc_a_d_pp Register field name                            data value   Description
+#define     ei4_rx_cal_inc_val_A                                  0x0000     //RX Servo Accum Inc Value A
+#define     ei4_rx_cal_inc_val_A_clear                            0x0FFF     // Clear mask
+#define     ei4_rx_cal_inc_val_B                                  0x0000     //RX Servo Accum Inc Value B
+#define     ei4_rx_cal_inc_val_B_clear                            0xF0FF     // Clear mask
+#define     ei4_rx_cal_inc_val_C                                  0x0000     //RX Servo Accum Inc Value C
+#define     ei4_rx_cal_inc_val_C_clear                            0xFF0F     // Clear mask
+#define     ei4_rx_cal_inc_val_D                                  0x0000     //RX Servo Accum Inc Value D
+#define     ei4_rx_cal_inc_val_D_clear                            0xF0F0     // Clear mask
+
+// ei4_rx_ei4_cal_inc_e_h_pp Register field name                            data value   Description
+#define     ei4_rx_cal_inc_val_E                                  0x0000     //RX Servo Accum Inc Value E
+#define     ei4_rx_cal_inc_val_E_clear                            0x0FFF     // Clear mask
+#define     ei4_rx_cal_inc_val_F                                  0x0000     //RX Servo Accum Inc Value F
+#define     ei4_rx_cal_inc_val_F_clear                            0xF0FF     // Clear mask
+#define     ei4_rx_cal_inc_val_G                                  0x0000     //RX Servo Accum Inc Value G
+#define     ei4_rx_cal_inc_val_G_clear                            0xFF0F     // Clear mask
+#define     ei4_rx_cal_inc_val_H                                  0x0000     //RX Servo Accum Inc Value H
+#define     ei4_rx_cal_inc_val_H_clear                            0xF0F0     // Clear mask
+
+// ei4_rx_ei4_cal_dec_a_d_pp Register field name                            data value   Description
+#define     ei4_rx_cal_dec_val_A                                  0x0000     //RX Servo Accum Dec Value A
+#define     ei4_rx_cal_dec_val_A_clear                            0x0FFF     // Clear mask
+#define     ei4_rx_cal_dec_val_B                                  0x0000     //RX Servo Accum Dec Value B
+#define     ei4_rx_cal_dec_val_B_clear                            0xF0FF     // Clear mask
+#define     ei4_rx_cal_dec_val_C                                  0x0000     //RX Servo Accum Dec Value C
+#define     ei4_rx_cal_dec_val_C_clear                            0xFF0F     // Clear mask
+#define     ei4_rx_cal_dec_val_D                                  0x0000     //RX Servo Accum Dec Value D
+#define     ei4_rx_cal_dec_val_D_clear                            0xF0F0     // Clear mask
+
+// ei4_rx_ei4_cal_dec_e_h_pp Register field name                            data value   Description
+#define     ei4_rx_cal_dec_val_E                                  0x0000     //RX Servo Accum Dec Value E
+#define     ei4_rx_cal_dec_val_E_clear                            0x0FFF     // Clear mask
+#define     ei4_rx_cal_dec_val_F                                  0x0000     //RX Servo Accum Dec Value F
+#define     ei4_rx_cal_dec_val_F_clear                            0xF0FF     // Clear mask
+#define     ei4_rx_cal_dec_val_G                                  0x0000     //RX Servo Accum Dec Value G
+#define     ei4_rx_cal_dec_val_G_clear                            0xFF0F     // Clear mask
+#define     ei4_rx_cal_dec_val_H                                  0x0000     //RX Servo Accum Dec Value H
+#define     ei4_rx_cal_dec_val_H_clear                            0xF0F0     // Clear mask
+
+// ei4_rx_ber_cntl_pp Register field name                                   data value   Description
+#define     ei4_rx_ber_en                                         0x8000     //Per-Pack (PP) Diagnostic Bit Error Rate (BER) error checking enable control. When 1 enables error checking. When 0 the error checking is disabled. This control enables the BER timer as well as enables the error checker and BER counters. The assumption is that the driver(s) are currently driving PRBS23 and the link has been trained before enabling BER checking.
+#define     ei4_rx_ber_en_clear                                   0x7FFF     // Clear mask
+#define     ei4_rx_ber_count_clr                                  0x4000     //PP Diag BER error counter clear pulse. When written to a 1 the per-lane error counters are cleared to all zeroes. Writing both this bit and the timer clear bit to a 1 will clear both and allow a new set of measurements to be run.
+#define     ei4_rx_ber_count_clr_clear                            0xBFFF     // Clear mask
+#define     ei4_rx_ber_timer_clr                                  0x2000     //PP Diag BER timer clear pulse. When written to a 1 the per-pack timers are cleared to all zeroes. Writing both this bit and the error counter clear bit to a 1 will clear both and allow a new set of measurements to be run.
+#define     ei4_rx_ber_timer_clr_clear                            0xDFFF     // Clear mask
+
+// ei4_rx_ber_mode_pp Register field name                                   data value   Description
+#define     ei4_rx_ber_timer_freeze_en                            0x8000     //Per-Pack (PP) Diagnostic Bit Error Rate (BER) Timer freeze enable. When set to a 1 the per-pack timer is frozen when any lane error count saturates in that pack.
+#define     ei4_rx_ber_timer_freeze_en_clear                      0x7FFF     // Clear mask
+#define     ei4_rx_ber_count_freeze_en                            0x4000     //PP Diag BER Lane Error Counter freeze enable. When set to a 1 the per-lane error counters are frozen when the timer saturates in that pack.
+#define     ei4_rx_ber_count_freeze_en_clear                      0xBFFF     // Clear mask
+#define     ei4_rx_ber_count_sel_2                                0x0400     //PP Diag BER Lane Error Counter saturation select. Selects the number of errors that will saturate the counter and cause a freeze event.   2
+#define     ei4_rx_ber_count_sel_4                                0x0800     //PP Diag BER Lane Error Counter saturation select. Selects the number of errors that will saturate the counter and cause a freeze event.   4
+#define     ei4_rx_ber_count_sel_8                                0x0C00     //PP Diag BER Lane Error Counter saturation select. Selects the number of errors that will saturate the counter and cause a freeze event.   8
+#define     ei4_rx_ber_count_sel_16                               0x1000     //PP Diag BER Lane Error Counter saturation select. Selects the number of errors that will saturate the counter and cause a freeze event.   16
+#define     ei4_rx_ber_count_sel_32                               0x1400     //PP Diag BER Lane Error Counter saturation select. Selects the number of errors that will saturate the counter and cause a freeze event.   32
+#define     ei4_rx_ber_count_sel_64                               0x1800     //PP Diag BER Lane Error Counter saturation select. Selects the number of errors that will saturate the counter and cause a freeze event.   64
+#define     ei4_rx_ber_count_sel_128                              0x1C00     //PP Diag BER Lane Error Counter saturation select. Selects the number of errors that will saturate the counter and cause a freeze event.   128
+#define     ei4_rx_ber_count_sel_clear                            0xE3FF     // Clear mask
+#define     ei4_rx_ber_timer_sel_2tothe36th                       0x0080     //PP Diag BER Timer saturation select. Selects the timer value that will saturate the timer and cause a freeze event.   2^36
+#define     ei4_rx_ber_timer_sel_2tothe32nd                       0x0100     //PP Diag BER Timer saturation select. Selects the timer value that will saturate the timer and cause a freeze event.   2^32
+#define     ei4_rx_ber_timer_sel_2tothe28th                       0x0180     //PP Diag BER Timer saturation select. Selects the timer value that will saturate the timer and cause a freeze event.   2^28
+#define     ei4_rx_ber_timer_sel_2tothe24th                       0x0200     //PP Diag BER Timer saturation select. Selects the timer value that will saturate the timer and cause a freeze event.   2^24
+#define     ei4_rx_ber_timer_sel_2tothe20th                       0x0280     //PP Diag BER Timer saturation select. Selects the timer value that will saturate the timer and cause a freeze event.   2^20
+#define     ei4_rx_ber_timer_sel_2tothe16th                       0x0300     //PP Diag BER Timer saturation select. Selects the timer value that will saturate the timer and cause a freeze event.   2^16
+#define     ei4_rx_ber_timer_sel_2tothe12th                       0x0380     //PP Diag BER Timer saturation select. Selects the timer value that will saturate the timer and cause a freeze event.   2^12
+#define     ei4_rx_ber_timer_sel_clear                            0xFC7F     // Clear mask
+#define     ei4_rx_ber_clr_count_on_read_en                       0x0040     //PP Diag BER Lane Error Counter clear on read. When set to a 1 this enables the clearing of a lanes error counter when it is read.
+#define     ei4_rx_ber_clr_count_on_read_en_clear                 0xFFBF     // Clear mask
+#define     ei4_rx_ber_clr_timer_on_read_en                       0x0020     //PP Diag BER Timer clear on read. When set to a 1 this enables the clearing of a lanes per-pack timer when it is read from any lane in the pack.
+#define     ei4_rx_ber_clr_timer_on_read_en_clear                 0xFFDF     // Clear mask
+
+// ei4_rx_servo_to1_pp Register field name                                  data value   Description
+#define     ei4_rx_servo_timeout_sel_A_512ui                      0x1000     //RX servo operation timeout A.  512 UI 
+#define     ei4_rx_servo_timeout_sel_A_1Kui                       0x2000     //RX servo operation timeout A.  1K UI 
+#define     ei4_rx_servo_timeout_sel_A_2Kui                       0x3000     //RX servo operation timeout A.  2K UI 
+#define     ei4_rx_servo_timeout_sel_A_4Kui                       0x4000     //RX servo operation timeout A.  4096 UI 
+#define     ei4_rx_servo_timeout_sel_A_8Kui                       0x5000     //RX servo operation timeout A.  8K UI 
+#define     ei4_rx_servo_timeout_sel_A_16Kui                      0x6000     //RX servo operation timeout A.  16K UI 
+#define     ei4_rx_servo_timeout_sel_A_32Kui                      0x7000     //RX servo operation timeout A.  32K UI 
+#define     ei4_rx_servo_timeout_sel_A_64Kui                      0x8000     //RX servo operation timeout A.  64K UI 
+#define     ei4_rx_servo_timeout_sel_A_128Kui                     0x9000     //RX servo operation timeout A.  128K UI 
+#define     ei4_rx_servo_timeout_sel_A_256Kui                     0xA000     //RX servo operation timeout A.  256K UI 
+#define     ei4_rx_servo_timeout_sel_A_512Kui                     0xB000     //RX servo operation timeout A.  512K UI 
+#define     ei4_rx_servo_timeout_sel_A_1Mui                       0xC000     //RX servo operation timeout A.  1M UI 
+#define     ei4_rx_servo_timeout_sel_A_2Mui                       0xD000     //RX servo operation timeout A.  2M UI 
+#define     ei4_rx_servo_timeout_sel_A_4Mui                       0xE000     //RX servo operation timeout A.  4M UI
+#define     ei4_rx_servo_timeout_sel_A_Infinite                   0xF000     //RX servo operation timeout A.  Infinite
+#define     ei4_rx_servo_timeout_sel_A_clear                      0x0FFF     // Clear mask
+#define     ei4_rx_servo_timeout_sel_B_512ui                      0x0100     //RX servo operation timeout B.  512 UI 
+#define     ei4_rx_servo_timeout_sel_B_1Kui                       0x0200     //RX servo operation timeout B.  1K UI 
+#define     ei4_rx_servo_timeout_sel_B_2Kui                       0x0300     //RX servo operation timeout B.  2K UI 
+#define     ei4_rx_servo_timeout_sel_B_4Kui                       0x0400     //RX servo operation timeout B.  4096 UI 
+#define     ei4_rx_servo_timeout_sel_B_8Kui                       0x0500     //RX servo operation timeout B.  8K UI 
+#define     ei4_rx_servo_timeout_sel_B_16Kui                      0x0600     //RX servo operation timeout B.  16K UI 
+#define     ei4_rx_servo_timeout_sel_B_32Kui                      0x0700     //RX servo operation timeout B.  32K UI 
+#define     ei4_rx_servo_timeout_sel_B_64Kui                      0x0800     //RX servo operation timeout B.  64K UI 
+#define     ei4_rx_servo_timeout_sel_B_128Kui                     0x0900     //RX servo operation timeout B.  128K UI 
+#define     ei4_rx_servo_timeout_sel_B_256Kui                     0x0A00     //RX servo operation timeout B.  256K UI 
+#define     ei4_rx_servo_timeout_sel_B_512Kui                     0x0B00     //RX servo operation timeout B.  512K UI 
+#define     ei4_rx_servo_timeout_sel_B_1Mui                       0x0C00     //RX servo operation timeout B.  1M UI 
+#define     ei4_rx_servo_timeout_sel_B_2Mui                       0x0D00     //RX servo operation timeout B.  2M UI 
+#define     ei4_rx_servo_timeout_sel_B_4Mui                       0x0E00     //RX servo operation timeout B.  4M UI
+#define     ei4_rx_servo_timeout_sel_B_Infinite                   0x0F00     //RX servo operation timeout B.  Infinite
+#define     ei4_rx_servo_timeout_sel_B_clear                      0xF0FF     // Clear mask
+#define     ei4_rx_servo_timeout_sel_C_512ui                      0x0010     //RX servo operation timeout C.  512 UI 
+#define     ei4_rx_servo_timeout_sel_C_1Kui                       0x0020     //RX servo operation timeout C.  1K UI 
+#define     ei4_rx_servo_timeout_sel_C_2Kui                       0x0030     //RX servo operation timeout C.  2K UI 
+#define     ei4_rx_servo_timeout_sel_C_4Kui                       0x0040     //RX servo operation timeout C.  4096 UI 
+#define     ei4_rx_servo_timeout_sel_C_8Kui                       0x0050     //RX servo operation timeout C.  8K UI 
+#define     ei4_rx_servo_timeout_sel_C_16Kui                      0x0060     //RX servo operation timeout C.  16K UI 
+#define     ei4_rx_servo_timeout_sel_C_32Kui                      0x0070     //RX servo operation timeout C.  32K UI 
+#define     ei4_rx_servo_timeout_sel_C_64Kui                      0x0080     //RX servo operation timeout C.  64K UI 
+#define     ei4_rx_servo_timeout_sel_C_128Kui                     0x0090     //RX servo operation timeout C.  128K UI 
+#define     ei4_rx_servo_timeout_sel_C_256Kui                     0x00A0     //RX servo operation timeout C.  256K UI 
+#define     ei4_rx_servo_timeout_sel_C_512Kui                     0x00B0     //RX servo operation timeout C.  512K UI 
+#define     ei4_rx_servo_timeout_sel_C_1Mui                       0x00C0     //RX servo operation timeout C.  1M UI 
+#define     ei4_rx_servo_timeout_sel_C_2Mui                       0x00D0     //RX servo operation timeout C.  2M UI 
+#define     ei4_rx_servo_timeout_sel_C_4Mui                       0x00E0     //RX servo operation timeout C.  4M UI
+#define     ei4_rx_servo_timeout_sel_C_Infinite                   0x00F0     //RX servo operation timeout C.  Infinite
+#define     ei4_rx_servo_timeout_sel_C_clear                      0x0F0F     // Clear mask
+#define     ei4_rx_servo_timeout_sel_D_512ui                      0x0001     //RX servo operation timeout D.  512 UI 
+#define     ei4_rx_servo_timeout_sel_D_1Kui                       0x0002     //RX servo operation timeout D.  1K UI 
+#define     ei4_rx_servo_timeout_sel_D_2Kui                       0x0003     //RX servo operation timeout D.  2K UI 
+#define     ei4_rx_servo_timeout_sel_D_4Kui                       0x0004     //RX servo operation timeout D.  4096 UI 
+#define     ei4_rx_servo_timeout_sel_D_8Kui                       0x0005     //RX servo operation timeout D.  8K UI 
+#define     ei4_rx_servo_timeout_sel_D_16Kui                      0x0006     //RX servo operation timeout D.  16K UI 
+#define     ei4_rx_servo_timeout_sel_D_32Kui                      0x0007     //RX servo operation timeout D.  32K UI 
+#define     ei4_rx_servo_timeout_sel_D_64Kui                      0x0008     //RX servo operation timeout D.  64K UI 
+#define     ei4_rx_servo_timeout_sel_D_128Kui                     0x0009     //RX servo operation timeout D.  128K UI 
+#define     ei4_rx_servo_timeout_sel_D_256Kui                     0x000A     //RX servo operation timeout D.  256K UI 
+#define     ei4_rx_servo_timeout_sel_D_512Kui                     0x000B     //RX servo operation timeout D.  512K UI 
+#define     ei4_rx_servo_timeout_sel_D_1Mui                       0x000C     //RX servo operation timeout D.  1M UI 
+#define     ei4_rx_servo_timeout_sel_D_2Mui                       0x000D     //RX servo operation timeout D.  2M UI 
+#define     ei4_rx_servo_timeout_sel_D_4Mui                       0x000E     //RX servo operation timeout D.  4M UI
+#define     ei4_rx_servo_timeout_sel_D_Infinite                   0x000F     //RX servo operation timeout D.  Infinite
+#define     ei4_rx_servo_timeout_sel_D_clear                      0xFF00     // Clear mask
+
+// ei4_rx_servo_to2_pp Register field name                                  data value   Description
+#define     ei4_rx_servo_timeout_sel_E_512ui                      0x1000     //RX servo operation timeout E.  512 UI 
+#define     ei4_rx_servo_timeout_sel_E_1Kui                       0x2000     //RX servo operation timeout E.  1K UI 
+#define     ei4_rx_servo_timeout_sel_E_2Kui                       0x3000     //RX servo operation timeout E.  2K UI 
+#define     ei4_rx_servo_timeout_sel_E_4Kui                       0x4000     //RX servo operation timeout E.  4096 UI 
+#define     ei4_rx_servo_timeout_sel_E_8Kui                       0x5000     //RX servo operation timeout E.  8K UI 
+#define     ei4_rx_servo_timeout_sel_E_16Kui                      0x6000     //RX servo operation timeout E.  16K UI 
+#define     ei4_rx_servo_timeout_sel_E_32Kui                      0x7000     //RX servo operation timeout E.  32K UI 
+#define     ei4_rx_servo_timeout_sel_E_64Kui                      0x8000     //RX servo operation timeout E.  64K UI 
+#define     ei4_rx_servo_timeout_sel_E_128Kui                     0x9000     //RX servo operation timeout E.  128K UI 
+#define     ei4_rx_servo_timeout_sel_E_256Kui                     0xA000     //RX servo operation timeout E.  256K UI 
+#define     ei4_rx_servo_timeout_sel_E_512Kui                     0xB000     //RX servo operation timeout E.  512K UI 
+#define     ei4_rx_servo_timeout_sel_E_1Mui                       0xC000     //RX servo operation timeout E.  1M UI 
+#define     ei4_rx_servo_timeout_sel_E_2Mui                       0xD000     //RX servo operation timeout E.  2M UI 
+#define     ei4_rx_servo_timeout_sel_E_4Mui                       0xE000     //RX servo operation timeout E.  4M UI
+#define     ei4_rx_servo_timeout_sel_E_Infinite                   0xF000     //RX servo operation timeout E.  Infinite
+#define     ei4_rx_servo_timeout_sel_E_clear                      0x0FFF     // Clear mask
+#define     ei4_rx_servo_timeout_sel_F_512ui                      0x0100     //RX servo operation timeout F.  512 UI 
+#define     ei4_rx_servo_timeout_sel_F_1Kui                       0x0200     //RX servo operation timeout F.  1K UI 
+#define     ei4_rx_servo_timeout_sel_F_2Kui                       0x0300     //RX servo operation timeout F.  2K UI 
+#define     ei4_rx_servo_timeout_sel_F_4Kui                       0x0400     //RX servo operation timeout F.  4096 UI 
+#define     ei4_rx_servo_timeout_sel_F_8Kui                       0x0500     //RX servo operation timeout F.  8K UI 
+#define     ei4_rx_servo_timeout_sel_F_16Kui                      0x0600     //RX servo operation timeout F.  16K UI 
+#define     ei4_rx_servo_timeout_sel_F_32Kui                      0x0700     //RX servo operation timeout F.  32K UI 
+#define     ei4_rx_servo_timeout_sel_F_64Kui                      0x0800     //RX servo operation timeout F.  64K UI 
+#define     ei4_rx_servo_timeout_sel_F_128Kui                     0x0900     //RX servo operation timeout F.  128K UI 
+#define     ei4_rx_servo_timeout_sel_F_256Kui                     0x0A00     //RX servo operation timeout F.  256K UI 
+#define     ei4_rx_servo_timeout_sel_F_512Kui                     0x0B00     //RX servo operation timeout F.  512K UI 
+#define     ei4_rx_servo_timeout_sel_F_1Mui                       0x0C00     //RX servo operation timeout F.  1M UI 
+#define     ei4_rx_servo_timeout_sel_F_2Mui                       0x0D00     //RX servo operation timeout F.  2M UI 
+#define     ei4_rx_servo_timeout_sel_F_4Mui                       0x0E00     //RX servo operation timeout F.  4M UI
+#define     ei4_rx_servo_timeout_sel_F_Infinite                   0x0F00     //RX servo operation timeout F.  Infinite
+#define     ei4_rx_servo_timeout_sel_F_clear                      0xF0FF     // Clear mask
+#define     ei4_rx_servo_timeout_sel_G_512ui                      0x0010     //RX servo operation timeout G.  512 UI 
+#define     ei4_rx_servo_timeout_sel_G_1Kui                       0x0020     //RX servo operation timeout G.  1K UI 
+#define     ei4_rx_servo_timeout_sel_G_2Kui                       0x0030     //RX servo operation timeout G.  2K UI 
+#define     ei4_rx_servo_timeout_sel_G_4Kui                       0x0040     //RX servo operation timeout G.  4096 UI 
+#define     ei4_rx_servo_timeout_sel_G_8Kui                       0x0050     //RX servo operation timeout G.  8K UI 
+#define     ei4_rx_servo_timeout_sel_G_16Kui                      0x0060     //RX servo operation timeout G.  16K UI 
+#define     ei4_rx_servo_timeout_sel_G_32Kui                      0x0070     //RX servo operation timeout G.  32K UI 
+#define     ei4_rx_servo_timeout_sel_G_64Kui                      0x0080     //RX servo operation timeout G.  64K UI 
+#define     ei4_rx_servo_timeout_sel_G_128Kui                     0x0090     //RX servo operation timeout G.  128K UI 
+#define     ei4_rx_servo_timeout_sel_G_256Kui                     0x00A0     //RX servo operation timeout G.  256K UI 
+#define     ei4_rx_servo_timeout_sel_G_512Kui                     0x00B0     //RX servo operation timeout G.  512K UI 
+#define     ei4_rx_servo_timeout_sel_G_1Mui                       0x00C0     //RX servo operation timeout G.  1M UI 
+#define     ei4_rx_servo_timeout_sel_G_2Mui                       0x00D0     //RX servo operation timeout G.  2M UI 
+#define     ei4_rx_servo_timeout_sel_G_4Mui                       0x00E0     //RX servo operation timeout G.  4M UI
+#define     ei4_rx_servo_timeout_sel_G_Infinite                   0x00F0     //RX servo operation timeout G.  Infinite
+#define     ei4_rx_servo_timeout_sel_G_clear                      0x0F0F     // Clear mask
+#define     ei4_rx_servo_timeout_sel_H_512ui                      0x0001     //RX servo operation timeout H.  512 UI 
+#define     ei4_rx_servo_timeout_sel_H_1Kui                       0x0002     //RX servo operation timeout H.  1K UI 
+#define     ei4_rx_servo_timeout_sel_H_2Kui                       0x0003     //RX servo operation timeout H.  2K UI 
+#define     ei4_rx_servo_timeout_sel_H_4Kui                       0x0004     //RX servo operation timeout H.  4096 UI 
+#define     ei4_rx_servo_timeout_sel_H_8Kui                       0x0005     //RX servo operation timeout H.  8K UI 
+#define     ei4_rx_servo_timeout_sel_H_16Kui                      0x0006     //RX servo operation timeout H.  16K UI 
+#define     ei4_rx_servo_timeout_sel_H_32Kui                      0x0007     //RX servo operation timeout H.  32K UI 
+#define     ei4_rx_servo_timeout_sel_H_64Kui                      0x0008     //RX servo operation timeout H.  64K UI 
+#define     ei4_rx_servo_timeout_sel_H_128Kui                     0x0009     //RX servo operation timeout H.  128K UI 
+#define     ei4_rx_servo_timeout_sel_H_256Kui                     0x000A     //RX servo operation timeout H.  256K UI 
+#define     ei4_rx_servo_timeout_sel_H_512Kui                     0x000B     //RX servo operation timeout H.  512K UI 
+#define     ei4_rx_servo_timeout_sel_H_1Mui                       0x000C     //RX servo operation timeout H.  1M UI 
+#define     ei4_rx_servo_timeout_sel_H_2Mui                       0x000D     //RX servo operation timeout H.  2M UI 
+#define     ei4_rx_servo_timeout_sel_H_4Mui                       0x000E     //RX servo operation timeout H.  4M UI
+#define     ei4_rx_servo_timeout_sel_H_Infinite                   0x000F     //RX servo operation timeout H.  Infinite
+#define     ei4_rx_servo_timeout_sel_H_clear                      0xFF00     // Clear mask
+
+// ei4_rx_reset_cfg_pp Register field name                                  data value   Description
+#define     ei4_rx_reset_cfg_hld_clear                            0x0000     // Clear mask
 
 
 #endif

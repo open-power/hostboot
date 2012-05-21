@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/hwpf/hwp/edi_ei_initialization/edi_ei_initialization.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/hwpf/hwp/edi_ei_initialization/edi_ei_initialization.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 
 /**
  *  @file edi_ei_initialization.C
@@ -37,6 +38,8 @@
 // Includes
 /******************************************************************************/
 #include    <stdint.h>
+#include    <map>
+#include    <hwpf/plat/fapiPlatReasonCodes.H>
 
 #include    <trace/interface.H>
 #include    <initservice/taskargs.H>
@@ -47,17 +50,19 @@
 //  targeting support
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
+#include    <targeting/common/trace.H>
 
 //  fapi support
 #include    <fapi.H>
 #include    <fapiPlatHwpInvoker.H>
 
 #include    "edi_ei_initialization.H"
+#include    "pbusLinkSvc.H"
 
 //  Uncomment these files as they become available:
 // #include    "fabric_erepair/fabric_erepair.H"
 // #include    "fabric_io_dccal/fabric_io_dccal.H"
-// #include    "fabric_io_run_training/fabric_io_run_training.H"
+#include    "fabric_io_run_training/fabric_io_run_training.H"
 // #include    "host_startPRD_pbus/host_startPRD_pbus.H"
 // #include    "host_attnlisten_proc/host_attnlisten_proc.H"
 #include    "proc_fab_iovalid/proc_fab_iovalid.H"
@@ -65,9 +70,9 @@
 namespace   EDI_EI_INITIALIZATION
 {
 
+
 using   namespace   TARGETING;
 using   namespace   fapi;
-
 
 
 //
@@ -184,43 +189,49 @@ void    call_fabric_io_run_training( void    *io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
                "call_fabric_io_run_training entry" );
 
-#if 0
-    // @@@@@    CUSTOM BLOCK:   @@@@@
-    //  figure out what targets we need
-    //  customize any other inputs
-    //  set up loops to go through all targets (if parallel, spin off a task)
+    TargetPairs_t l_PbusConnections;
+    TargetPairs_t::iterator l_itr;
+    const uint32_t MaxBusSet = 2;
+    TYPE busSet[MaxBusSet] = { TYPE_ABUS, TYPE_XBUS };
 
-    //  dump physical path to targets
-    EntityPath l_path;
-    l_path  =   l_@targetN_target->getAttr<ATTR_PHYS_PATH>();
-    l_path.dump();
-
-    // cast OUR type of target to a FAPI type of target.
-    const fapi::Target l_fapi_@targetN_target(
-                    TARGET_TYPE_MEMBUF_CHIP,
-                    reinterpret_cast<void *>
-                        (const_cast<TARGETING::Target*>(l_@targetN_target)) );
-
-    //  call the HWP with each fapi::Target
-    FAPI_INVOKE_HWP( l_errl, fabric_io_run_training, _args_...);
-    if ( l_errl )
+    for (uint32_t i = 0; (!l_errl) && (i < MaxBusSet); i++)
     {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, 
-                  "ERROR : .........." );
-        errlCommit( l_errl, HWPF_COMP_ID );
-    }
-    else
-    {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
-                   "SUCCESS : .........." );
-    }
-    // @@@@@    END CUSTOM BLOCK:   @@@@@
-#endif
+        l_errl = PbusLinkSvc::getTheInstance().getPbusConnections(
+                                            l_PbusConnections, busSet[i] );
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+        for (l_itr = l_PbusConnections.begin();
+             (!l_errl) && (l_itr != l_PbusConnections.end()); ++l_itr)
+        {
+            const fapi::Target l_fapi_endp1_target(
+                   (i ? TARGET_TYPE_XBUS_ENDPOINT : TARGET_TYPE_ABUS_ENDPOINT),
+                   reinterpret_cast<void *>
+                   (const_cast<TARGETING::Target*>(l_itr->first)));
+            const fapi::Target l_fapi_endp2_target(
+                   (i ? TARGET_TYPE_XBUS_ENDPOINT : TARGET_TYPE_ABUS_ENDPOINT),
+                   reinterpret_cast<void *>
+                   (const_cast<TARGETING::Target*>(l_itr->second)));
+
+            EntityPath l_path;
+            l_path  =   l_itr->first->getAttr<ATTR_PHYS_PATH>();
+            l_path.dump();
+            l_path  =   l_itr->second->getAttr<ATTR_PHYS_PATH>();
+            l_path.dump();
+
+            //  call the HWP with each bus connection
+            FAPI_INVOKE_HWP( l_errl, fabric_io_run_training,
+                             l_fapi_endp1_target, l_fapi_endp2_target );
+
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+                       "%s : %cbus connection io_run_training",
+                       (l_errl ? "ERROR" : "SUCCESS"),
+                       (i ? 'X' : 'A') );
+        }
+    }
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
                "call_fabric_io_run_training exit" );
 
     // end task, returning any errorlogs to IStepDisp 
@@ -351,9 +362,19 @@ void    call_proc_fab_iovalid( void    *io_pArgs )
     TARGETING::TargetHandleList l_cpuTargetList;
     getAllChips(l_cpuTargetList, TYPE_PROC);
 
+    TargetPairs_t l_abusConnections;
+    TargetPairs_t l_xbusConnections;
+    l_errl = PbusLinkSvc::getTheInstance().getPbusConnections(
+                                 l_abusConnections, TYPE_ABUS, false );
+    if (!l_errl)
+    {
+        l_errl = PbusLinkSvc::getTheInstance().getPbusConnections(
+                                 l_xbusConnections, TYPE_XBUS, false );
+    }
+
     std::vector<proc_fab_smp_proc_chip *> l_smp;
 
-    for ( size_t i = 0; i < l_cpuTargetList.size(); i++ )
+    for ( size_t i = 0; (!l_errl) && (i < l_cpuTargetList.size()); i++ )
     {
         proc_fab_smp_proc_chip *l_proc = new proc_fab_smp_proc_chip();
         l_smp.push_back( l_proc );
@@ -365,114 +386,69 @@ void    call_proc_fab_iovalid( void    *io_pArgs )
 
         l_proc->this_chip = l_fapiproc_target;
 
-        std::vector<fapi::Target> l_abuses;
-        l_rc = fapiGetChildChiplets( l_fapiproc_target,
-                       fapi::TARGET_TYPE_ABUS_ENDPOINT, l_abuses);
-        if (l_rc)
-        {
-            break;
-        }
+        TARGETING::TargetHandleList l_abuses;
+        getChildChiplets( l_abuses, l_pTarget, TYPE_ABUS );
 
-        std::vector<fapi::Target>::iterator l_abus;
-        for (l_abus = l_abuses.begin(); l_abus != l_abuses.end(); ++l_abus)
+        for (size_t j = 0; j < l_abuses.size(); j++)
         {
-            fapi::Target & l_fapiTgt = *l_abus;
-            TARGETING::Target * l_target = NULL;
-            l_target = reinterpret_cast<TARGETING::Target*>(l_fapiTgt.get());
+            TARGETING::Target * l_target = l_abuses[j];
             uint8_t l_srcID = l_target->getAttr<ATTR_CHIP_UNIT>();
-            TARGETING::Target *l_dstTgt = l_target->getAttr<ATTR_PEER_TARGET>();
-            if (l_dstTgt)
+            TargetPairs_t::iterator l_itr = l_abusConnections.find(l_target);
+            if ( l_itr == l_abusConnections.end() )
             {
-                fapi::Target l_fapiAbus( TARGET_TYPE_ABUS_ENDPOINT,
-                                reinterpret_cast<void *>
-                                (const_cast<TARGETING::Target*>(l_dstTgt)) );
-                fapi::Target l_parent;
-                l_rc = fapiGetParentChip( l_fapiAbus, l_parent );
-                if (l_rc)
-                {
-                    break;
-                }
-                proc_fab_smp_a_bus *l_Abus = new proc_fab_smp_a_bus();
-                l_proc->a_busses.push_back(l_Abus);
-                l_Abus->src_chip_bus_id =
+                continue;
+            }
+            const TARGETING::Target * l_parent = getParentChip(l_itr->second);
+            proc_fab_smp_a_bus *l_Abus = new proc_fab_smp_a_bus();
+            l_proc->a_busses.push_back(l_Abus);
+            l_Abus->src_chip_bus_id =
                                  static_cast<proc_fab_smp_a_bus_id>(l_srcID);
-                l_Abus->dest_chip = new fapi::Target(l_parent);
-                uint8_t l_destID = l_dstTgt->getAttr<ATTR_CHIP_UNIT>();
-                l_Abus->dest_chip_bus_id =
+            l_Abus->dest_chip = new fapi::Target(TARGET_TYPE_ABUS_ENDPOINT,
+                       reinterpret_cast<void *>
+                       (const_cast<TARGETING::Target*>(l_parent)) );
+            uint8_t l_destID = l_itr->second->getAttr<ATTR_CHIP_UNIT>();
+            l_Abus->dest_chip_bus_id =
                                   static_cast<proc_fab_smp_a_bus_id>(l_destID);
-            }
         }
 
-        if (l_rc)
-        {
-            break;
-        }
+        TARGETING::TargetHandleList l_xbuses;
+        getChildChiplets( l_xbuses, l_pTarget, TYPE_XBUS );
 
-        std::vector<fapi::Target> l_xbuses;
-        l_rc = fapiGetChildChiplets( l_fapiproc_target,
-                       fapi::TARGET_TYPE_XBUS_ENDPOINT, l_xbuses);
-
-        if (l_rc)
+        for (size_t j = 0; j < l_xbuses.size(); j++)
         {
-            break;
-        }
-
-        std::vector<fapi::Target>::iterator l_xbus;
-        for (l_xbus = l_xbuses.begin(); l_xbus != l_xbuses.end(); ++l_xbus)
-        {
-            fapi::Target & l_fapiTgt = *l_xbus;
-            TARGETING::Target * l_target = NULL;
-            l_target = reinterpret_cast<TARGETING::Target*>(l_fapiTgt.get());
+            TARGETING::Target * l_target = l_xbuses[j];
             uint8_t l_srcID = l_target->getAttr<ATTR_CHIP_UNIT>();
-            TARGETING::Target *l_dstTgt = l_target->getAttr<ATTR_PEER_TARGET>();
-            if (l_dstTgt)
+            TargetPairs_t::iterator l_itr = l_xbusConnections.find(l_target);
+            if ( l_itr == l_xbusConnections.end() )
             {
-                fapi::Target l_fapiXbus( TARGET_TYPE_XBUS_ENDPOINT,
-                                reinterpret_cast<void *>
-                                (const_cast<TARGETING::Target*>(l_dstTgt)) );
-                fapi::Target l_parent;
-                l_rc = fapiGetParentChip( l_fapiXbus, l_parent );
-                if (l_rc)
-                {
-                    break;
-                }
-                proc_fab_smp_x_bus *l_Xbus = new proc_fab_smp_x_bus();
-                l_proc->x_busses.push_back(l_Xbus);
-                l_Xbus->src_chip_bus_id =
-                                 static_cast<proc_fab_smp_x_bus_id>(l_srcID);
-                l_Xbus->dest_chip = new fapi::Target(l_parent);
-                uint8_t l_destID = l_dstTgt->getAttr<ATTR_CHIP_UNIT>();
-                l_Xbus->dest_chip_bus_id =
-                                  static_cast<proc_fab_smp_x_bus_id>(l_destID);
+                continue;
             }
-        }
-
-        if (l_rc)
-        {
-            break;
+            const TARGETING::Target * l_parent = getParentChip(l_itr->second);
+            proc_fab_smp_x_bus *l_Xbus = new proc_fab_smp_x_bus();
+            l_proc->x_busses.push_back(l_Xbus);
+            l_Xbus->src_chip_bus_id =
+                                 static_cast<proc_fab_smp_x_bus_id>(l_srcID);
+            l_Xbus->dest_chip = new fapi::Target(TARGET_TYPE_XBUS_ENDPOINT,
+                       reinterpret_cast<void *>
+                       (const_cast<TARGETING::Target*>(l_parent)) );
+            uint8_t l_destID = l_itr->second->getAttr<ATTR_CHIP_UNIT>();
+            l_Xbus->dest_chip_bus_id =
+                                  static_cast<proc_fab_smp_x_bus_id>(l_destID);
         }
     }
 
-    if (l_rc.ok())
+    if (l_errl)
     {
-        FAPI_INVOKE_HWP( l_errl, proc_fab_iovalid, l_smp, true, true, true );
-
-        if ( l_errl )
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, 
-                      "ERROR : proc_fab_iovalid HWP fails");
-        }
-        else
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, 
-                      "SUCCESS : proc_fab_iovalid HWP passes");
-        }
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "ERROR : call_proc_fab_iovalid encountered an error");
     }
     else
     {
-        l_errl = fapi::fapiRcToErrl(l_rc);
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
-                   "ERROR : call_proc_fab_iovalid encountered an error");
+        FAPI_INVOKE_HWP( l_errl, proc_fab_iovalid, l_smp, true, true, true );
+
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, 
+                  "%s : proc_fab_iovalid HWP.",
+                  (l_errl ? "ERROR" : "SUCCESS"));
     }
 
     std::vector<proc_fab_smp_proc_chip *>::iterator l_itr;

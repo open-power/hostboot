@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/HWPs/dmi_training/dmi_io_run_training/io_funcs.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/hwpf/hwp/bus_training/io_funcs.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -48,7 +49,7 @@
 #define IO_funcs
 #include <fapi.H>
 #include "gcr_funcs.H"
-#include "edi_regs.h"
+//#include "ei4_regs.h"
 
 using namespace fapi;
 
@@ -116,35 +117,33 @@ public:
     //  Training Functions
     // Run Wirtest,Deskew,Repair and Functional mode on selected target(endpoint) pair
     ReturnCode  run_training(const Target& master_target,  io_interface_t
-                             master_interface,uint32_t master_group,
-                             const Target&  slave_target,  io_interface_t
-                             slave_interface,uint32_t slave_group);
+                             master_interface,uint32_t master_group,const Target&  slave_target,
+			     io_interface_t slave_interface,uint32_t slave_group);
     // Runs the selected training function(s)
     ReturnCode  run_training_functions(const Target&  target,
-                                       io_interface_t interface,
-                                       uint32_t current_group);
+                                       io_interface_t interface,uint32_t current_group);
    // Checks the status of the training selected function(s)
     ReturnCode  training_function_status(const Target& master_target,
-                                         io_interface_t master_interface,
-                                         uint32_t master_group,
+                                         io_interface_t master_interface,uint32_t master_group,
                                          const Target& slave_target,
-                                         io_interface_t slave_interface,
-                                         uint32_t slave_group  );
+                                         io_interface_t slave_interface,uint32_t slave_group
+                                          );
 
     // First Fail Data Capture Routines
     // Wire Test First Fail Data Capture
     ReturnCode dump_ffdc_wiretest(const Target&  master_chip_target,
                                   io_interface_t  master_chip_interface ,
-                                  uint32_t master_group,
+				  uint32_t master_group,
                                   const Target& slave_chip_target ,
                                   io_interface_t slave_chip_interface,
-                                  uint32_t slave_group);
+				  uint32_t slave_group
+                                  );
 
     // Utility functions
     // Determines if target chip is a Master (reads rx_master_mode bit)
-    ReturnCode isChipMaster(const Target& target, io_interface_t interface,
-                            bool& master_chip_found,
-                            uint32_t current_group );
+    ReturnCode isChipMaster(const Target& target, io_interface_t interface,uint32_t current_group,
+                            bool& master_chip_found
+                            );
 };
 
 

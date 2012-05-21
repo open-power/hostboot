@@ -1,7 +1,7 @@
 #   IBM_PROLOG_BEGIN_TAG
 #  This is an automatically generated prolog.
 #
-#  $Source: src/usr/hwpf/hwp/dmi_training/makefile $
+#  $Source: src/usr/hwpf/hwp/bus_training/makefile $
 #
 #  IBM CONFIDENTIAL
 #
@@ -23,7 +23,7 @@
 
 ROOTPATH = ../../../../..
 
-MODULE = dmi_training
+MODULE = bus_training
 
 ##      support for Targeting and fapi
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
@@ -33,20 +33,10 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
 
 ## pointer to common HWP files
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/include
-EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/bus_training
 
-##  Include sub dirs
-##  NOTE: add a new EXTRAINCDIR when you add a new HWP
-EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dmi_training/proc_cen_framelock
-EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dmi_training/dmi_io_run_training
-
-OBJS =  dmi_training.o  \
-        proc_cen_framelock.o    \
-        dmi_io_run_training.o
+OBJS =  gcr_funcs.o io_funcs.o io_run_training.o
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
-VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/dmi_training/proc_cen_framelock
-VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/dmi_training/dmi_io_run_training
 ## vpath   %.C proc_cen_framelock:io_run_training
 ## vpath   %.H proc_cen_framelock:io_run_training
 

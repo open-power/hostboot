@@ -1,7 +1,7 @@
 <!--  IBM_PROLOG_BEGIN_TAG
      This is an automatically generated prolog.
    
-     $Source: src/usr/hwpf/hwp/io_run_training_errors.xml $
+     $Source: src/usr/hwpf/hwp/bus_training/io_run_training_errors.xml $
    
      IBM CONFIDENTIAL
    
@@ -19,7 +19,7 @@
    
      Origin: 30
    
-     IBM_PROLOG_END -->
+     IBM_PROLOG_END_TAG -->
 <!-- Error definitions for io_run_training procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->
@@ -94,5 +94,9 @@
     <ffdc>READ_BUF</ffdc>
     <ffdc>WRITE_BUF</ffdc>
   </hwpError>
-
+   <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>IO_RUN_TRAINING_INVALID_INVOCATION_RC</rc>
+    <description>io run training invoked with wrong pair of targets</description>
+  </hwpError>
 </hwpErrors>

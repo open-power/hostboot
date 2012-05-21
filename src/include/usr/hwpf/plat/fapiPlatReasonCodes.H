@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/include/usr/hwpf/plat/fapiPlatReasonCodes.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/include/usr/hwpf/plat/fapiPlatReasonCodes.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #ifndef FAPIPLATREASONCODES_H_
 #define FAPIPLATREASONCODES_H_
 
@@ -49,6 +50,7 @@ namespace fapi
         MOD_GET_CFAM_CHIP_TARGET                   = 0x0A,
         MOD_ATTR_GET_TARGET_NAME                   = 0x0B,
         MOD_FAPI_GET_ASSOCIATE_DIMMS               = 0x0C,
+        MOD_EDI_EI_IO_RUN_TRAINING                 = 0x0D,
     };
 
     /**
@@ -72,6 +74,9 @@ namespace fapi
         RC_ATTR_BAD_TARGET_PARAM      = HWPF_COMP_ID | 0x16,
         RC_INVALID_NUM_PARENT_CHIP    = HWPF_COMP_ID | 0x17,
         RC_EMBEDDED_NULL_TARGET_PTR   = HWPF_COMP_ID | 0x18,
+        RC_MIXED_PBUS_CONNECTION      = HWPF_COMP_ID | 0x19,
+        RC_SAME_CHIP_PBUS_CONNECTION  = HWPF_COMP_ID | 0x1A,
+        RC_CONFLICT_PBUS_CONNECTION   = HWPF_COMP_ID | 0x1B,
     };
 
     /**

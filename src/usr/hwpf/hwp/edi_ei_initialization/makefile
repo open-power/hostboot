@@ -1,4 +1,4 @@
-#  IBM_PROLOG_BEGIN_TAG
+#   IBM_PROLOG_BEGIN_TAG
 #  This is an automatically generated prolog.
 #
 #  $Source: src/usr/hwpf/hwp/edi_ei_initialization/makefile $
@@ -19,7 +19,7 @@
 #
 #  Origin: 30
 #
-#  IBM_PROLOG_END
+#  IBM_PROLOG_END_TAG
 
 ROOTPATH = ../../../../..
 
@@ -33,6 +33,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
 
 ## pointer to common HWP files
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/include
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/bus_training
 
 ##  NOTE: add the base istep dir here. 
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/edi_ei_initialization
@@ -42,17 +43,19 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/edi_ei_initialization
 ##  EXAMPLE:
 ##  EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/edi_ei_initialization/<HWP_dir>
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/edi_ei_initialization/proc_fab_iovalid
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/edi_ei_initialization/fabric_io_run_training
 
 
 ##  NOTE: add new object files when you add a new HWP
-OBJS =  edi_ei_initialization.o \
-        proc_fab_iovalid.o proc_fab_smp.o
+OBJS =  edi_ei_initialization.o pbusLinkSvc.o \
+        proc_fab_iovalid.o proc_fab_smp.o fabric_io_run_training.o
 
         
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 ##  EXAMPLE:
 #   VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/edi_ei_initialization/<HWP_dir>
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/edi_ei_initialization/proc_fab_iovalid
+VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/edi_ei_initialization/fabric_io_run_training
 
 
 include ${ROOTPATH}/config.mk

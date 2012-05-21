@@ -93,6 +93,15 @@ void getChildChiplets(TARGETING::TargetHandleList & o_vector,
 void getAffinityChips( TARGETING::TargetHandleList& o_vector,
            const Target * i_chiplet, TYPE i_type, bool i_functional = true );
 
+/**
+ * @brief return the parent chip target of the specified input chiplet
+ *
+ * @parm[in]  i_pChiplet, chiplet target for retrieving the parent chip target
+ *
+ * @return Parent chip target pointer or NULL if error
+ */
+const Target * getParentChip( const Target * i_pChiplet );
+
 }
 
 #endif // __TARGETING_COMMON_UTIL_H

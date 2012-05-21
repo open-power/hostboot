@@ -1,11 +1,11 @@
-#  IBM_PROLOG_BEGIN_TAG
+#   IBM_PROLOG_BEGIN_TAG
 #  This is an automatically generated prolog.
 #
 #  $Source: src/makefile $
 #
 #  IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2010 - 2011
+#  COPYRIGHT International Business Machines Corp. 2010-2012
 #
 #  p1
 #
@@ -19,7 +19,7 @@
 #
 #  Origin: 30
 #
-#  IBM_PROLOG_END
+#  IBM_PROLOG_END_TAG
 
 ROOTPATH = ..
 
@@ -56,7 +56,7 @@ EXTENDED_MODULES = targeting ecmddatabuffer fapi hwp plat	\
                    extinitsvc istepdisp hwas fsi fsiscom i2c intr \
 		           spd dmi_training fapiporeve poreve util	\
 		           sbe_centaur_init mc_init dram_training \
-                   mdia mbox mvpd prdf \
+                   mdia mbox mvpd prdf bus_training \
                    activate_powerbus build_winkle_images \
                    core_activate dram_initialization edi_ei_initialization \
                    establish_system_smp load_payload \

@@ -26,6 +26,7 @@
 //******************************************************************************
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/entitypath.H>
+#include <targeting/common/trace.H>
 #include <attributeenums.H>
 #include <targeting/common/iterators/rangefilter.H>
 #include <targeting/common/predicates/predicateisfunctional.H>
@@ -124,6 +125,7 @@ void getChildChiplets( TARGETING::TargetHandleList& o_vector,
 
 }
 
+
 void getAffinityChips( TARGETING::TargetHandleList& o_vector,
                  const Target * i_chiplet, TYPE i_type, bool i_functional )
 {
@@ -154,6 +156,35 @@ void getAffinityChips( TARGETING::TargetHandleList& o_vector,
                 &l_chipFilter );
     }
 
+}
+
+
+const Target * getParentChip( const Target * i_pChiplet )
+{
+
+    const Target * l_pChip = NULL;
+
+    // Create a Class/Type/Model predicate to look for chips
+    TARGETING::PredicateCTM l_predicate(TARGETING::CLASS_CHIP);
+
+    // Create a vector of TARGETING::Target pointers
+    TARGETING::TargetHandleList l_chipList;
+
+    // Get parent
+    TARGETING::targetService().getAssociated(l_chipList, i_pChiplet,
+                          TARGETING::TargetService::PARENT,
+                          TARGETING::TargetService::ALL, &l_predicate);
+
+    if (l_chipList.size() == 1)
+    {
+        l_pChip = l_chipList[0];
+    }
+    else
+    {
+        TARG_ERR("Number of Parent chip is not 1, but %d",l_chipList.size());
+    }
+
+    return l_pChip;
 }
 
 };

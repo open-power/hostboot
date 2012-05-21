@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/HWPs/dmi_training/dmi_training.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/hwpf/hwp/dmi_training/dmi_training.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 
 /**
  *  @file dmi_training.C
@@ -58,7 +59,7 @@
 //  --  prototype   includes    --
 #include    "dmi_training.H"
 #include    "proc_cen_framelock.H"
-#include    "io_run_training.H"
+#include    "dmi_io_run_training.H"
 
 namespace   DMI_TRAINING
 {
@@ -151,26 +152,11 @@ void    call_dmi_io_run_training( void *io_pArgs )
                 const TARGETING::Target*  l_mem_target = l_memTargetList[k];
 
                 //  struct containing custom parameters that is fed to HWP
-                struct DmiIORunTrainingParms    {
-                    io_interface_t master_interface;
-                    uint32_t master_group;
-                    io_interface_t slave_interface;
-                    uint32_t slave_group;
-                }   l_CustomParms[] =
-                {       { /*MCS0*/ CP_IOMC0_P0, 3, CEN_DMI, 0 },
-                        { /*MCS1*/ CP_IOMC0_P1, 2, CEN_DMI, 0 },
-                        { /*MCS2*/ CP_IOMC0_P2, 1, CEN_DMI, 0 },
-                        { /*MCS3*/ CP_IOMC0_P3, 0, CEN_DMI, 0 },
-                        { /*MCS4*/ CP_IOMC1_P0, 3, CEN_DMI, 0 },
-                        { /*MCS5*/ CP_IOMC1_P1, 2, CEN_DMI, 0 },
-                        { /*MCS6*/ CP_IOMC1_P2, 1, CEN_DMI, 0 },
-                        { /*MCS7*/ CP_IOMC1_P3, 0, CEN_DMI, 0 },
-                };
                 //  call the HWP with each target   ( if parallel, spin off a task )
                 const fapi::Target l_fapi_master_target(
-                        TARGET_TYPE_PROC_CHIP,
+                        TARGET_TYPE_MCS_CHIPLET,
                         reinterpret_cast<void *>
-                ( const_cast<TARGETING::Target*>(l_cpu_target) )
+                ( const_cast<TARGETING::Target*>(l_mcs_target) )
                 );
                 const fapi::Target l_fapi_slave_target(
                         TARGET_TYPE_MEMBUF_CHIP,
@@ -192,17 +178,14 @@ void    call_dmi_io_run_training( void *io_pArgs )
                 l_path  =   l_mem_target->getAttr<ATTR_PHYS_PATH>();
                 l_path.dump();
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "===== " );
-                FAPI_INVOKE_HWP(l_err, io_run_training, l_fapi_master_target,
-                        l_CustomParms[l_mcsNum].master_interface,
-                        l_CustomParms[l_mcsNum].master_group,
-                        l_fapi_slave_target,
-                        l_CustomParms[l_mcsNum].slave_interface,
-                        l_CustomParms[l_mcsNum].slave_group    );
+                FAPI_INVOKE_HWP(l_err, dmi_io_run_training,
+                                l_fapi_master_target, l_fapi_slave_target);
 
                 if (l_err)
                 {
                     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                            "ERROR 0x%.8X :  io_run_training HWP( cpu 0x%x, mcs 0x%x, mem 0x%x ) ",
+                            "ERROR 0x%.8X :  dmi_io_run_training HWP"
+                            "( cpu 0x%x, mcs 0x%x, mem 0x%x ) ",
                             l_err->reasonCode(),
                             l_cpuNum,
                             l_mcsNum,
@@ -212,7 +195,8 @@ void    call_dmi_io_run_training( void *io_pArgs )
                 else
                 {
                     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                            "SUCCESS :  io_run_training HWP( cpu 0x%x, mcs 0x%x, mem 0x%x ) ",
+                            "SUCCESS :  dmi_io_run_training HWP"
+                            "( cpu 0x%x, mcs 0x%x, mem 0x%x ) ",
                             l_cpuNum,
                             l_mcsNum,
                             k );
