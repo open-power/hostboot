@@ -56,6 +56,9 @@
 #                  mjjones   04/10/12  Process Chip EC Feature attributes
 #                  mjjones   05/15/12  Detect duplicate attr ids and append
 #                                      ULL after 64bit enumerator
+#                  mjjones   05/21/12  Detect duplicate ids/hashes across files
+#                  mjjones   05/21/12  Ignore newlines and whitespace when
+#                                      parsing enumerations
 #
 # End Change Log ******************************************************
 
@@ -187,14 +190,15 @@ print ASFILE "<h4>HWPF Attributes supported by this build.</h4>\n";
 print ASFILE "<table border=\"4\">\n";
 print ASFILE "<tr><th>Attribute ID</th><th>Attribute Description</th></tr>";
 
+my %enumHash;
+my %attrIdHash;
+
 #------------------------------------------------------------------------------
 # For each XML file
 #------------------------------------------------------------------------------
 foreach my $argnum (1 .. $#ARGV)
 {
     my $infile = $ARGV[$argnum];
-    my %enumHash;
-    my %attrIdHash;
 
     # read XML file. The ForceArray option ensures that there is an array of
     # elements even if there is only one such element in the file
@@ -383,8 +387,10 @@ foreach my $argnum (1 .. $#ARGV)
 
             foreach my $val (@vals)
             {
-                # Remove leading spaces
-                $val =~ s/^\s+//; 
+                # Remove newlines and leading/trailing whitespace
+                $val =~ s/\n//;
+                $val =~ s/^\s+//;
+                $val =~ s/\s+$//;
                 print AIFILE "    ENUM_$attr->{id}_${val}";
 
                 if ($attr->{valueType} eq 'uint64')

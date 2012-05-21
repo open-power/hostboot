@@ -47,6 +47,7 @@
 #                  mjjones   02/10/12  Allow err file with one element
 #                  mjjones   03/22/12  Generate hash values for enums
 #                  mjjones   05/15/12  Detect duplicate error rcs
+#                  mjjones   05/21/12  Detect duplicate ids/hashes across files
 #
 # End Change Log ******************************************************
 
@@ -169,6 +170,9 @@ my $callout = 'callout';
 my $deconfigure = 'deconfigure';
 my $gard = 'gard';
 
+my %enumHash;
+my %errorRcHash;
+
 #------------------------------------------------------------------------------
 # For each XML file
 #------------------------------------------------------------------------------
@@ -176,8 +180,6 @@ foreach my $argnum (1 .. $#ARGV)
 {
     my $infile = $ARGV[$argnum];
     my $count = 0;
-    my %enumHash;
-    my %errorRcHash;
 
     #--------------------------------------------------------------------------
     # Read XML file. The ForceArray option ensures that there is an array of
