@@ -115,13 +115,6 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
             errlCommit(errl, HWAS_COMP_ID);
             // errl is now NULL
 
-            // chip not present -- remove from list
-            HWAS_DBG( "pTarget %.8X (%p) - no presence",
-                    pTarget->getAttr<ATTR_HUID>(), pTarget);
-
-            // erase this target, and 'increment' to next
-            pTarget_it = io_targets.erase(pTarget_it);
-
             // target is not present - fall thru
             present = false;
         }
@@ -129,7 +122,7 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
         if (present == true)
         {
             HWAS_DBG( "pTarget %.8X (%p) - detected present",
-                pTarget->getAttr<ATTR_HUID>(), pTarget); 
+                pTarget->getAttr<ATTR_HUID>(), pTarget);
 
             // advance to next entry in the list
             pTarget_it++;
