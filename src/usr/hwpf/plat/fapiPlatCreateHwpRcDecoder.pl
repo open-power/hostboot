@@ -46,6 +46,7 @@ if ($numArgs < 2)
 #------------------------------------------------------------------------------
 # Specify perl modules to use
 #------------------------------------------------------------------------------
+use Digest::MD5 qw(md5_hex);
 use XML::Simple;
 my $xml = new XML::Simple (KeyAttr=>[]);
 
@@ -78,7 +79,6 @@ print TGFILE "    {\n";
 #------------------------------------------------------------------------------
 # For each XML file
 #------------------------------------------------------------------------------
-my $errId = 1;
 foreach my $argnum (1 .. $#ARGV)
 {
     #--------------------------------------------------------------------------
@@ -122,11 +122,16 @@ foreach my $argnum (1 .. $#ARGV)
 
         #----------------------------------------------------------------------
         # Print the RC decode
+        # Note that this uses the same code to calculate the attribute
+        # enumerator as fapiParseErrorInfo.pl. This code must be kept in sync
+        # with fapiParseErrorInfo.pl.
         #----------------------------------------------------------------------
-        print TGFILE "    case $errId:\n";
+        my $attrHash128Bit = md5_hex($err->{rc});
+        my $attrHash24Bit = substr($attrHash128Bit, 0, 6);
+
+        print TGFILE "    case 0x$attrHash24Bit:\n";
         print TGFILE "        return \"$desc\";\n";
         print TGFILE "        break;\n";
-        $errId++;
     }
 }
 
