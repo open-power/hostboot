@@ -32,6 +32,7 @@
 //                 camvanng 02/14/12 Support binary and hex scom addresses
 //                                   Support for array at beginning of scom address
 //                                   Fix bug in string size when converting decimal to hex string
+//                 camvanng 05/07/12 Support for associated target attributes
 // End Change Log *********************************************************************************
 
 /**
@@ -53,6 +54,7 @@
 
 extern void yyerror(const char * s);
 extern init::ScomList * yyscomlist;  // only use this during parsing
+std::map<string,string> yytarget; //generic target name & corresponding real name
 
 namespace init {
 extern ostringstream dbg;  // debug output
@@ -114,9 +116,7 @@ Scom::Scom(BINSEQ::const_iterator & bli, Symbols * i_symbols):
         // Read col heads
         for(size_t i = 0; i < numcols; ++i)
         {
-            uint32_t var_tag = Rpn::extract16(bli);
-            Rpn col_name_rpn(iv_symbols);
-            col_name_rpn.append(iv_symbols->get_rpn_id(var_tag));
+            Rpn col_name_rpn(bli,iv_symbols);
             iv_col_vars.push_back(col_name_rpn);
             iv_cols_rpn.push_back(iv_row_rpn);  // copy in blank row RPNs for this column
         }
@@ -203,12 +203,19 @@ void Scom::add_col(const string & i_colname)
     Rpn col_rpn(s,iv_symbols); // = iv_symbols->use_symbol(s);
 
     // add check - Can't add any more cols after EXPR column dg001a
-    if(iv_col_vars.size() && s != "EXPR")
+    if(iv_col_vars.size())
     {
         Rpn exp_rpn("EXPR",iv_symbols);
         if(exp_rpn == iv_col_vars.back()) // expr col already added - can't add any more cols
         {
-            yyerror("EXPR must be the last column");
+            if (s == "EXPR")
+            {
+                yyerror("Multiple EXPR columns specified.");
+            }
+            else
+            {
+                yyerror("EXPR must be the last column");
+            }
         }
     }
 
@@ -1214,6 +1221,18 @@ void ScomList::listing(BINSEQ & bin_seq,ostream & olist)
             << "Length of Sub Version Section\n\n";
         for(uint16_t i = 0; i < len; ++i) olist << (char)(*bli++);
         olist << endl;
+    }
+
+    if (yytarget.size())
+    {
+        olist << "------------------- TARGET MAPPING ------------------------\n\n"
+              << endl;
+        std::map<string,string>::iterator i;
+        for (i = yytarget.begin(); i != yytarget.end(); i++)
+        {
+            olist << i->first << setfill(' ') << setw(30 - i->first.length())
+                  << " = " << i->second << endl;
+        }
     }
 
     olist << iv_symbols->listing() << endl;

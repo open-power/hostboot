@@ -34,6 +34,8 @@
 //                                    Ability to specify search paths for include files
 //                camvanng 04/16/12   Support defines for SCOM address
 //                                    Support defines for bits, scom_data and attribute columns
+//                camvanng 05/07/12   Support for associated target attributes
+//                                    Save and restore line numbers for each include file
 // End Change Log *********************************************************************************/
 /**
  * @file initCompiler.lex
@@ -79,11 +81,16 @@ std::string g_scomdef_name;
 std::map<std::string,std::string> g_defines; //container for all the defines
     //i.e. define def_A = (attrA > 1) => key = "DEF_A", value = "(attr_A > 1)"
 
+std::string g_target;  //storage for current target
+
 extern int yyline;
 extern std::vector<std::string> yyincludepath;
+extern std::map<std::string,std::string> yytarget; //container for all defined targets
+    //i.e. define MBA0 = TGT1 => key = "TGT1", value = "MBA0"
 
 #define MAX_INCLUDE_DEPTH 10
 YY_BUFFER_STATE include_stack[MAX_INCLUDE_DEPTH];
+int yyline_stack[MAX_INCLUDE_DEPTH];
 int include_stack_num = 0;
 
 %}
@@ -148,6 +155,7 @@ MULTI_DIGIT [0-9]+
                             yy_delete_buffer(YY_CURRENT_BUFFER);
                             fclose(yyin);
                             yy_switch_to_buffer(include_stack[include_stack_num]);
+                            yyline = yyline_stack[include_stack_num];
                         }
                     }
 
@@ -177,6 +185,10 @@ include                 { BEGIN(incl); }
                                 exit( 1 );
                             }
 
+                            /* Save current line number */
+                            yyline_stack[include_stack_num] =
+                                yyline;
+
                             /* Save current input buffer */
                             include_stack[include_stack_num++] =
                                 YY_CURRENT_BUFFER;
@@ -197,6 +209,7 @@ include                 { BEGIN(incl); }
                                 exit(1);
                             }
                             printf("Include file %s\n", filename.c_str());
+                            yyline = 1;  //set line number for new buffer
                             yy_switch_to_buffer(yy_create_buffer(yyin, YY_BUF_SIZE));
 
                             BEGIN(INITIAL);
@@ -363,7 +376,19 @@ scom_data               { g_coltype = INIT_SCOMD; return INIT_SCOMD;}
                             
 END_INITFILE            return INIT_ENDINITFILE;
 
-<*>SYS\.                yymore();
+<*>SYS\.                yymore(); //System attribute
+
+<*>TGT{MULTI_DIGIT}\.   {
+                            if (g_target.length())
+                            {
+                                std::string tgt(yytext);
+                                tgt = tgt.substr(0, tgt.length() -1);
+                                yytarget[tgt] = g_target;
+                                g_target.clear();
+                            }
+
+                            yymore(); //Associated target attribute
+                        }
 
                         /* All attribute enums start with "ENUM_ATTR_" */
 <*>ENUM_ATTR_{ID}       {
@@ -377,6 +402,14 @@ END_INITFILE            return INIT_ENDINITFILE;
 
                         /* Anything else is a define.
                          * Removing any requirements that defines has to start with "def_" or "DEF_" */
+<*>{ID}\.               {   // push back the define value for scanning
+                            g_target = yytext;
+                            g_target = g_target.substr(0, g_target.length() - 1);
+                            //printf("%s\n", g_target.c_str());
+                            unput('.');
+                            pushBackDefine(g_target.c_str());
+                        }
+
 <*>{ID}                 {   // push back the define value for scanning
                             pushBackDefine(yytext);
                         } 

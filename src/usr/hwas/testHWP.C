@@ -55,6 +55,7 @@
 #include <fapiTarget.H>
 #include <fapiPlatHwpInvoker.H>
 #include <targeting/common/targetservice.H>
+#include <vector>
 
 using namespace fapi;
 
@@ -69,16 +70,70 @@ namespace HWAS
 void    testHWP( void * io_pArgs )
 {
     errlHndl_t l_err = NULL;
+    std::vector<fapi::Target> l_target;
 
     // Get the master processor chip
     TARGETING::Target* l_pTarget = NULL;
     TARGETING::targetService().masterProcChipTargetHandle(l_pTarget);
 
-    // Create a FAPI Target and invoke the hwpInitialTest HWP
+    // Create the FAPI Targets and invoke the hwpInitialTest HWP
     fapi::Target l_fapiTarget(TARGET_TYPE_PROC_CHIP,
                               reinterpret_cast<void *> (l_pTarget));
 
-    FAPI_INVOKE_HWP(l_err, hwpInitialTest, l_fapiTarget);
+    l_target.push_back(l_fapiTarget);
+
+    // Get the target for the MBA chiplets of the first MEMBUF chip
+    TARGETING::PredicateCTM l_membufChip(TARGETING::CLASS_CHIP,
+                                         TARGETING::TYPE_MEMBUF);
+
+    TARGETING::TargetRangeFilter l_filter(
+        TARGETING::targetService().begin(),
+        TARGETING::targetService().end(),
+        &l_membufChip);
+
+    PredicateCTM l_mba(CLASS_UNIT,TYPE_MBA);
+
+    // Just look at the first MEMBUF chip
+    if (l_filter)
+    {
+        TargetHandleList l_list;
+        (void) targetService().getAssociated(
+            l_list,
+            *l_filter,
+            TARGETING::TargetService::CHILD,
+            TARGETING::TargetService::ALL,
+            &l_mba);
+
+        if (2 == l_list.size())
+        {
+            for (size_t i = 0; i < l_list.size(); i++)
+            {
+                //Set the associated targets
+                fapi::Target l_fapiTargetAssoc(fapi::TARGET_TYPE_MBA_CHIPLET,
+                    reinterpret_cast<void *>(l_list.at(i)));
+                l_target.push_back(l_fapiTargetAssoc);
+            }
+
+            FAPI_INVOKE_HWP(l_err, hwpInitialTest, l_target);
+        }
+        else
+        {
+            HWAS_ERR("testHWP: Incorrect # of MBAs found: %u",
+                l_list.size());
+
+            size_t l_ffdc = l_list.size();
+            size_t & FFDC_IF_TEST_NUM_MBAS_FOUND = l_ffdc;
+            FAPI_SET_HWP_ERROR(l_rc,
+                RC_HWP_EXEC_INITFILE_TEST_INCORRECT_NUM_MBAS_FOUND);
+            l_err = fapiRcToErrl(l_rc);
+        }
+    }
+    else
+    {
+        HWAS_ERR("testHWP: No MEMBUFs found");
+        FAPI_SET_HWP_ERROR(l_rc, RC_HWP_EXEC_INITFILE_TEST_NO_MEMBUF_FOUND);
+        l_err = fapiRcToErrl(l_rc);
+    }
 
     if (l_err)
     {

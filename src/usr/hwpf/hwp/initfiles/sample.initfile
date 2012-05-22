@@ -45,6 +45,24 @@ include sample.define
 define def_equal_test     =  (SYS.ATTR_SCRATCH_UINT32_1 == SYS.ATTR_SCRATCH_UINT32_2);
 define def_not_equal_test =  (SYS.ATTR_SCRATCH_UINT64_1 != SYS.ATTR_SCRATCH_UINT64_2);
 
+#-- -----------------------------------------------------------------------------
+#--******************************************************************************
+#-- -----------------------------------------------------------------------------
+#--
+#-- Defines for associated targets
+#-- User can either use the generic target name TGTn within the initfile or
+#-- define a more informative name to use here.
+#-- By default attributes without the associated target name prefix or the "SYS."
+#-- prefix is the primary target's attribute.  The targets must be passed to
+#-- fapiHwpExecInitFile() as a std::vector<fapi::Target> with the elements in the
+#-- same order as defined in the initfile; i.e. the primary target is the first
+#-- element followed by TGT1, 2, 3...
+#--
+#-- -----------------------------------------------------------------------------
+#--******************************************************************************
+define MBA0 = TGT1;
+define MBA1 = TGT2;
+
 
 #--******************************************************************************
 #-- Basic SCOM
@@ -164,7 +182,7 @@ scom 0x0000000013013285              {
 
 scom 0x0000000013013286              {
   scom_data,            SYS.ATTR_SCRATCH_UINT32_1,  SYS.ATTR_SCRATCH_UINT32_2        ;
-  0x0000000000000192,   1,                      ENUM_ATTR_SCRATCH_UINT64_ARRAY_2_VAL_B       ;
+  0x0000000000000192,   3,                      ENUM_ATTR_SCRATCH_UINT64_ARRAY_2_VAL_B       ;
 }
 
 #--******************************************************************************
@@ -179,17 +197,19 @@ scom 0x0000000013013287              {
 #-- SCOM with 'ec' & expr column - Use scratch for now since all attributes work
 #--******************************************************************************
 scom 0x0000000013013288              {
-  scom_data,            SYS.ATTR_SCRATCH_UINT32_1        expr;
+  scom_data,            SYS.ATTR_SCRATCH_UINT32_1,   expr;
   0x0000000000000192,   3,                           SYS.ATTR_SCRATCH_UINT8_ARRAY_2[1][2][3] == 0x00000000000000BE;
 }
 
 #--******************************************************************************
-#-- Complex SCOM with Bit Support, logical operators and 'ec' column
+#-- Complex SCOM with Bit Support, associated attributes and logical operators
 #--******************************************************************************
 scom 0x0000000013013289              {
-  bits ,                    scom_data        SYS.ATTR_SCRATCH_UINT32_1        expr;
-  23   ,                    0b1,             any,                         SYS.ATTR_SCRATCH_UINT8_ARRAY_1[2] == SYS.ATTR_SCRATCH_UINT8_1;
-  23   ,                    0b0,             1,                           any;
+  bits,  scom_data,               MBA1.ATTR_CHIP_UNIT_POS, expr;
+  23,    0b0,                     1,                       MBA0.ATTR_CHIP_UNIT_POS == 1;
+  23,    MBA1.ATTR_CHIP_UNIT_POS, 1,                       MBA0.ATTR_CHIP_UNIT_POS == 0;
+  24:25, 0b10,                    0,                       any;
+  24:25, 0b01,                    1,                       SYS.ATTR_SCRATCH_UINT8_ARRAY_1[2] == SYS.ATTR_SCRATCH_UINT8_1;
 }
 
 #--******************************************************************************

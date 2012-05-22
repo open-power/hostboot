@@ -33,6 +33,8 @@
  *                          andrewg     11/09/2011  Created.
  *                          camvanng    11/16/2011  Support for system & target
  *                                                  attributes
+ *                          camvanng    05/07/2012  Support for associated
+ *                                                  target attributes
  *
  */
 
@@ -73,16 +75,15 @@ enum IfRpnOp
  */
 enum IfTypeMask
 {
-    IF_ATTR_TYPE       = 0x8000,
-    IF_NUM_TYPE        = 0xC000,
-    IF_TYPE_MASK       = 0xC000,
+    IF_NUM_TYPE            = 0x4000,
+    IF_ATTR_TYPE           = 0x8000,
+    IF_SYS_ATTR_TYPE       = 0xA000,
+    IF_ASSOC_TGT_ATTR_TYPE = 0xC000,
+    IF_TYPE_MASK           = 0xE000,
 };
 
-// System or Target attribute
-const uint16_t IF_SYS_ATTR_MASK = 0x2000;
-
-// Attribute Id mask
-const uint16_t IF_ATTR_ID_MASK = 0x1FFF;
+// Id mask
+const uint16_t IF_ID_MASK = static_cast<uint16_t>(~IF_TYPE_MASK);
 
 // Only support up to 4 dimensions for an array
 const uint8_t MAX_ATTRIBUTE_ARRAY_DIMENSION = 4;

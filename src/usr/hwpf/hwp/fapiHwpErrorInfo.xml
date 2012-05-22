@@ -92,18 +92,42 @@
     <!-- Collect local FFDC FFDC_IF_ATTR_ID_OUT_OF_RANGE -->
     <ffdc>FFDC_IF_ATTR_ID_OUT_OF_RANGE</ffdc>
   </hwpError>
+  <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_INITFILE_LIT_ID_OUT_OF_RANGE</rc>
     <description>InitFile's literal id is out of range </description>
     <!-- Collect local FFDC FFDC_IF_LIT_ID_OUT_OF_RANGE -->
     <ffdc>FFDC_IF_LIT_ID_OUT_OF_RANGE</ffdc>
   </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_INITFILE_TGT_NUM_OUT_OF_RANGE</rc>
+    <description>InitFile's target number is out of range </description>
+    <!-- Collect local FFDC -->
+    <ffdc>FFDC_IF_TGT_NUM</ffdc>
+    <ffdc>FFDC_IF_NUM_TGTS_PASSED_IN</ffdc>
+  </hwpError>
+  <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_HWP_EXEC_INITFILE_TEST_FAILED</rc>
     <description>HWP Exec InitFile test case failed </description>
   </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_HWP_EXEC_INITFILE_TEST_INCORRECT_NUM_MBAS_FOUND</rc>
+    <description>HWP Exec InitFile test incorrect number of MBA chiplets found</description>
+    <!-- Collect local FFDC -->
+        <ffdc>FFDC_IF_TEST_NUM_MBAS_FOUND</ffdc>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_HWP_EXEC_INITFILE_TEST_NO_MEMBUF_FOUND</rc>
+    <description>HWP Exec Initfile test no MEMBUF chips found</description>
+  </hwpError>
+  <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_HWP_ATTR_UNIT_TEST_FAIL</rc>
     <description>HWP Attribute Unit Test failed</description>
   </hwpError>
+  <!-- *********************************************************************** -->
 </hwpErrors>

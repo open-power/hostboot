@@ -28,6 +28,7 @@
 //                 camvanng 04/16/12 Support defines for SCOM address
 //                                   Support defines for bits, scom_data and attribute columns
 //                                   Delete obsolete code for defines support
+//                 camvanng 05/07/12 Support for associated target attributes
 // End Change Log *********************************************************************************
 
 /**
@@ -42,6 +43,7 @@
 #include <iomanip>
 #include <iostream>
 #include <stdexcept>
+#include <cstring>
 #include <fapiHwpInitFileInclude.H>  // Requires file from hwpf
 
 extern void yyerror(const char * s);
@@ -187,6 +189,27 @@ void Rpn::push_id(std::string & i_id, TYPE i_type)
     rpn_id = iv_symbols->use_symbol(s);
 
     iv_rpnstack.push_back(rpn_id);
+
+    //If this is an associated target's attribute,
+    //Add the target number as a numerical literal
+    size_t pos = s.find(ASSOC_TGT_ATTR);
+    if (pos != string::npos)
+    {
+        size_t len = ASSOC_TGT_ATTR.length();
+        pos = s.find('.');
+        if ((pos != string::npos) && (pos > len))
+        {
+            uint32_t targetNum = strtoul(s.substr(len, pos-len).c_str(), NULL, 0);
+            //printf("Rpn::push_id: Target# %u\n", targetNum);
+            push_int(targetNum);
+        }
+        else
+        {
+            std::ostringstream oss;
+            oss << "Invalid associated target attribute " << i_id.c_str();
+            yyerror(oss.str().c_str());
+        }
+    }
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -591,8 +614,17 @@ void Rpn::bin_read(BINSEQ::const_iterator & bli, Symbols * symbols)
             iv_rpnstack.push_back(l_rpn_id);
            
             //Check for attribute of array type
-            if ((v & IF_TYPE_MASK) == IF_ATTR_TYPE)
+            if (v & IF_ATTR_TYPE)
             {
+                //Check for associated target attribute
+                if ((v & IF_TYPE_MASK) == IF_ASSOC_TGT_ATTR_TYPE)
+                {
+                    v = *bli++;
+                    v = (v << 8) + (*bli++);
+                    iv_rpnstack.push_back(iv_symbols->get_rpn_id(v));
+                    //printf("Rpn::bin_read: Assoc target attribute id 0x%x\n", v);
+                }
+
                 //Get the attribute dimension & shift it to the LS nibble
                 uint32_t l_type = iv_symbols->get_attr_type(l_rpn_id);
                 uint8_t l_attrDimension = (static_cast<uint8_t>(l_type) & ATTR_DIMENSION_MASK) >> 4;
@@ -720,9 +752,8 @@ std::string  Rpn::listing(const char * i_desc, const std::string & spyname, bool
             if(i_final)
             {
                 uint32_t val = iv_symbols->get_tag(*i);
-                uint32_t type = val & IF_TYPE_MASK;
 
-                if (type == IF_ATTR_TYPE)
+                if (val & IF_ATTR_TYPE)
                 {
                     rpn_byte_size += 2;
                     oss << "0x" << std::setw(4) << val << "\t\t" << "PUSH " << name << std::endl;
@@ -747,7 +778,8 @@ std::string  Rpn::listing(const char * i_desc, const std::string & spyname, bool
         }
     }
 
-    if((iv_rpnstack.size() == 1) && (iv_rpnstack.front() & SYMBOL)) // skip size and desc
+    //Skip size and desc for empty desc string and SYMBOL literal
+    if(i_desc && (0 == strlen(i_desc)) && (iv_rpnstack.front() & SYMBOL))
     {
         odesc << oss.str();
     }

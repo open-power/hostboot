@@ -42,6 +42,8 @@
  *                                                  fapiHwpExecInitFile() 
  *                          mjjones     01/13/2012  Use new ReturnCode interfaces
  *                          mjjones     02/21/2012  Use new Target toEcmdString
+ *                          camvanng    05/07/2012  Suppport for associated
+ *                                                  target attributes
  */
 
 #include <fapiTestHwp.H>
@@ -51,19 +53,18 @@ extern "C"
 {
 
 //******************************************************************************
-// Forward Declaration
-//******************************************************************************
-fapi::ReturnCode testExecInitFile(const fapi::Target & i_chip);
-
-//******************************************************************************
 // hwpInitialTest function - Override with whatever you want here
 //******************************************************************************
-fapi::ReturnCode hwpInitialTest(const fapi::Target & i_chip)
+fapi::ReturnCode hwpInitialTest(const std::vector<fapi::Target> & i_target)
 {
     FAPI_INF("Performing HWP: hwpInitialTest");
 
-    // Print the ecmd string of the chip
-    FAPI_INF("hwpInitialTest: Chip: %s", i_chip.toEcmdString());
+    // Print the ecmd string of the target(s)
+    for (size_t i = 0; i < i_target.size(); i++)
+    {
+        FAPI_INF("hwpInitialTest: target[%u]: %s", i, i_target.at(i).toEcmdString());
+    }
+
     fapi::ReturnCode l_rc;
     uint32_t l_ecmdRc = ECMD_DBUF_SUCCESS;
 
@@ -77,7 +78,7 @@ fapi::ReturnCode hwpInitialTest(const fapi::Target & i_chip)
         // --------------------------------------------------------
         // 1. fapiGetScom test
         // --------------------------------------------------------
-        l_rc = fapiGetScom(i_chip, l_addr, l_ScomData);
+        l_rc = fapiGetScom(i_target.front(), l_addr, l_ScomData);
         if (l_rc != fapi::FAPI_RC_SUCCESS)
         {
             FAPI_ERR("hwpInitialTest: Error from fapiGetScom");
@@ -103,7 +104,7 @@ fapi::ReturnCode hwpInitialTest(const fapi::Target & i_chip)
             break;
         }
 
-        l_rc = fapiPutScom(i_chip, l_addr, l_ScomData);
+        l_rc = fapiPutScom(i_target.front(), l_addr, l_ScomData);
         if (l_rc != fapi::FAPI_RC_SUCCESS)
         {
             FAPI_ERR("hwpInitialTest: Error from fapiPutScom");
@@ -131,7 +132,7 @@ fapi::ReturnCode hwpInitialTest(const fapi::Target & i_chip)
         }
 
 
-        l_rc = fapiPutScomUnderMask(i_chip, l_addr, l_ScomData, l_maskData);
+        l_rc = fapiPutScomUnderMask(i_target.front(), l_addr, l_ScomData, l_maskData);
         if (l_rc != fapi::FAPI_RC_SUCCESS)
         {
             FAPI_ERR("hwpInitialTest: Error from fapiPutScomUnderMask");
@@ -154,7 +155,7 @@ fapi::ReturnCode hwpInitialTest(const fapi::Target & i_chip)
             break;
         }
 
-        l_rc = fapiPutScom(i_chip, l_addr, l_ScomData);
+        l_rc = fapiPutScom(i_target.front(), l_addr, l_ScomData);
         if (l_rc != fapi::FAPI_RC_SUCCESS)
         {
             FAPI_ERR("hwpInitialTest: Error from fapiPutScom");
@@ -174,7 +175,7 @@ fapi::ReturnCode hwpInitialTest(const fapi::Target & i_chip)
 // These functions, therefore, can only be called on the Centaur, which is not available
 // at this time.
 // When Centaur is supported:
-//  - Don't use i_chip (a processor) as a target. Set the target as one of the Centaurs.
+//  - Don't use i_target.front() (a processor) as a target. Set the target as one of the Centaurs.
 //  - Enable this block of code and test the cfam access functions on the Centaur.
 
         // --------------------------------------------------------
@@ -183,7 +184,7 @@ fapi::ReturnCode hwpInitialTest(const fapi::Target & i_chip)
         ecmdDataBufferBase l_cfamData(32); // 32-bit cfam data holder
         uint32_t l_originalCfamData = 0;
         const uint32_t l_cfamAddr = 0x100A; // ChipID register
-        l_rc = fapiGetCfamRegister(i_chip, l_cfamAddr, l_cfamData);
+        l_rc = fapiGetCfamRegister(i_target.front(), l_cfamAddr, l_cfamData);
         if (l_rc != fapi::FAPI_RC_SUCCESS)
         {
             FAPI_ERR("hwpInitialTest: Error from fapiGetCfamRegister");
@@ -209,7 +210,7 @@ fapi::ReturnCode hwpInitialTest(const fapi::Target & i_chip)
         }
 
 
-        l_rc = fapiPutCfamRegister(i_chip, l_cfamAddr, l_cfamData);
+        l_rc = fapiPutCfamRegister(i_target.front(), l_cfamAddr, l_cfamData);
         if (l_rc != fapi::FAPI_RC_SUCCESS)
         {
             FAPI_ERR("hwpInitialTest: Error from fapiPutCfamRegister");
@@ -233,7 +234,7 @@ fapi::ReturnCode hwpInitialTest(const fapi::Target & i_chip)
             break;
         }
 
-        l_rc = fapiModifyCfamRegister(i_chip, l_cfamAddr,
+        l_rc = fapiModifyCfamRegister(i_target.front(), l_cfamAddr,
                 l_cfamData, fapi::CHIP_OP_MODIFY_MODE_AND);
         if (l_rc != fapi::FAPI_RC_SUCCESS)
         {
@@ -257,7 +258,7 @@ fapi::ReturnCode hwpInitialTest(const fapi::Target & i_chip)
             break;
         }
 
-        l_rc = fapiPutCfamRegister(i_chip, l_cfamAddr, l_cfamData);
+        l_rc = fapiPutCfamRegister(i_target.front(), l_cfamAddr, l_cfamData);
         if (l_rc != fapi::FAPI_RC_SUCCESS)
         {
             FAPI_ERR("hwpInitialTest: Error from fapiPutCfamRegister to restore");
@@ -276,7 +277,7 @@ fapi::ReturnCode hwpInitialTest(const fapi::Target & i_chip)
         // --------------------------------------------------------
 
         //Call Hwp to execute the sample initfile
-        FAPI_EXEC_HWP(l_rc, fapiHwpExecInitFile, i_chip, "sample.if");
+        FAPI_EXEC_HWP(l_rc, fapiHwpExecInitFile, i_target, "sample.if");
         if (l_rc != fapi::FAPI_RC_SUCCESS)
         {
             FAPI_ERR("hwpInitialTest: Error from fapiHwpExecInitFile");

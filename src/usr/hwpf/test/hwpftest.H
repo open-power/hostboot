@@ -306,10 +306,11 @@ public:
                                     (0x8000000000000000 >> 0x10) |
                                     (0x8000000000000000 >> 0x13) |
                                     (0x0306400412000000 >> 0x15) },
-            {0x0000000013013286, 0, 0},
+            {0x0000000013013286, 0, 0x0000000000000192},
             {0x0000000013013287, 0, 0x0000000000000182},
             {0x0000000013013288, 0, 0x0000000000000192},
-            {0x0000000013013289, 0, 0x8000000000000000 >> 0x17}
+            {0x0000000013013289, 0, (0x8000000000000000 >> 0x17) |
+                                    (0x4000000000000000 >> 0x18)}
         };
 
         fapi::ReturnCode l_rc = fapi::FAPI_RC_SUCCESS;
@@ -340,11 +341,27 @@ public:
                 break;
             }
 
+            l_uint32 = 0;
+            l_rc = FAPI_ATTR_SET(ATTR_SCRATCH_UINT32_2, NULL, l_uint32);
+            if (l_rc != fapi::FAPI_RC_SUCCESS)
+            {
+                TS_FAIL("testHwpf5: ATTR_SCRATCH_UINT32_2. Error from SET");
+                break;
+            }
+
             uint64_t l_uint64 = 2;
             l_rc = FAPI_ATTR_SET(ATTR_SCRATCH_UINT64_1, NULL, l_uint64);
             if (l_rc != fapi::FAPI_RC_SUCCESS)
             {
                 TS_FAIL("testHwpf5: ATTR_SCRATCH_UINT64_1. Error from SET");
+                break;
+            }
+
+            l_uint64 = 0;
+            l_rc = FAPI_ATTR_SET(ATTR_SCRATCH_UINT64_2, NULL, l_uint64);
+            if (l_rc != fapi::FAPI_RC_SUCCESS)
+            {
+                TS_FAIL("testHwpf5: ATTR_SCRATCH_UINT64_2. Error from SET");
                 break;
             }
 
@@ -391,12 +408,68 @@ public:
                 //printk("ATTR_IS_SIMULATION = %d\n", l_flag);
             }
 
-            // Get the master processor chip
+            //Set the targets
+
+            std::vector<fapi::Target> l_target;
+
+            // Get the master processor chip & set it as the main target for Scom ops
             TARGETING::Target* l_pTarget = NULL;
             TARGETING::targetService().masterProcChipTargetHandle(l_pTarget);
 
             fapi::Target l_fapiTarget(TARGET_TYPE_PROC_CHIP,
                                       reinterpret_cast<void *> (l_pTarget));
+            l_target.push_back(l_fapiTarget);
+
+            // Get the target for the MBA chiplets of the first MEMBUF chip
+            TARGETING::PredicateCTM l_membufChip(TARGETING::CLASS_CHIP,
+                                                 TARGETING::TYPE_MEMBUF);
+
+            TARGETING::TargetRangeFilter l_filter(
+                TARGETING::targetService().begin(),
+                TARGETING::targetService().end(),
+                &l_membufChip);
+
+            PredicateCTM l_mba(CLASS_UNIT,TYPE_MBA);
+
+            // Just look at the first MEMBUF chip
+            if (l_filter)
+            {
+                TargetHandleList l_list;
+                (void) targetService().getAssociated(
+                    l_list,
+                    *l_filter,
+                    TARGETING::TargetService::CHILD,
+                    TARGETING::TargetService::ALL,
+                    &l_mba);
+
+                if (2 == l_list.size())
+                {
+                    for (size_t i = 0; i < l_list.size(); i++)
+                    {
+                        //Set the associated targets
+                        fapi::Target l_fapiTargetAssoc(fapi::TARGET_TYPE_MBA_CHIPLET,
+                            reinterpret_cast<void *>(l_list.at(i)));
+                        l_target.push_back(l_fapiTargetAssoc);
+                    }
+                }
+                else
+                {
+                    TS_FAIL("testHwpf5: Incorrect # of MBAs found: %u",
+                        l_list.size());
+
+                    size_t l_ffdc = l_list.size();
+                    size_t & FFDC_IF_TEST_NUM_MBAS_FOUND = l_ffdc;
+                    FAPI_SET_HWP_ERROR(l_rc,
+                        RC_HWP_EXEC_INITFILE_TEST_INCORRECT_NUM_MBAS_FOUND);
+                    break;
+                }
+            }
+            else
+            {
+                TS_FAIL("testHwpf5: No MEMBUFs found");
+                FAPI_SET_HWP_ERROR(l_rc, RC_HWP_EXEC_INITFILE_TEST_NO_MEMBUF_FOUND);
+                break;
+            }
 
             // Test ATTR_EC attribute access through FAPI
             uint8_t l_EC_R = 0xFF;
@@ -450,7 +523,7 @@ public:
             }
 
             //Call Hwp to execute the initfile
-            FAPI_EXEC_HWP(l_rc, fapiHwpExecInitFile, l_fapiTarget, "sample.if");
+            FAPI_EXEC_HWP(l_rc, fapiHwpExecInitFile, l_target, "sample.if");
             
             if (l_rc != fapi::FAPI_RC_SUCCESS)
             {

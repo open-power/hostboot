@@ -29,6 +29,7 @@
 //                 camvanng 04/16/12 Support defines for SCOM address
 //                                   Support defines for bits, scom_data and attribute columns
 //                                   Delete obsolete code for defines support
+//                 camvanng 05/07/12 Support for associated target attributes
 // End Change Log *********************************************************************************
 
 /**
@@ -56,6 +57,7 @@ using namespace std;
 namespace init
 {
     typedef set<string> FILELIST;
+    const string ASSOC_TGT_ATTR = "TGT";
 
     class Symbols
     {
@@ -98,11 +100,12 @@ namespace init
              * @param rpn_id
              * @pre  all the symbols have been marked used (no new symbols)
              * @post tag table built if not already built.
-             * @note  tag bits 0bttxxxxxx xxxxxxxx
-             *               tt == 0b01 ->  enumerated literal
-             *               tt == 0b10 ->  Variable name
-             *               tt == 0b11 ->  Numeric constant
-             *               xxxxxx xxxxxxxx assigned tag offset
+             * @note  tag bits 0btttxxxxx xxxxxxxx
+             *               ttt == 0b010 ->  Numeric constant
+             *               ttt == 0b100 ->  Target attribute
+             *               ttt == 0b101 ->  System attribute
+             *               ttt == 0b110 ->  Associated target attribute
+             *               xxxxx xxxxxxxx assigned tag offset
              */
             uint16_t get_tag(uint32_t i_rpn_id);
 
@@ -238,21 +241,21 @@ namespace init
             typedef pair<uint32_t,uint32_t> MAP_DATA; //cini_id & corresponding rpn_id/NOT_USED
             typedef map<string,MAP_DATA > SYMBOL_MAP; //attr name & corresponding cini_id, rpn_id/NOT_USED pair
             typedef map<string,uint32_t> SPY_MAP;
-            typedef map<string,uint32_t> SYMBOL_ATTR_TYPE;
-            typedef map<string,uint64_t> SYMBOL_ATTR_ENUM;
+            typedef map<string,uint32_t> SYMBOL_ATTR_TYPE; //attr name & corresponding type
+            typedef map<string,uint64_t> SYMBOL_ATTR_ENUM; //enum name & corresponding value
 
             typedef pair<string,uint32_t>  RPN_DATA;  //attribute name & corresponding cini_id
-            typedef map<uint32_t,RPN_DATA> RPN_MAP;   //attr name & corresponding attr name, cini_id pair
+            typedef map<uint32_t,RPN_DATA> RPN_MAP;   //rpn_id & corresponding attr name, cini_id pair
 
             typedef vector<RPN_DATA> VAR_SYMBOL_USED;
             typedef vector<uint32_t>  SYMBOL_USED;
 
-            typedef pair<uint64_t,uint32_t> LIT_DATA;
-            typedef vector<LIT_DATA> LIT_LIST;
+            typedef pair<uint64_t,uint32_t> LIT_DATA; //numeric literal & corresponding size
+            typedef vector<LIT_DATA> LIT_LIST; ///< List of numeric literals and their size
 
             SYMBOL_MAP  iv_symbols;     ///< From ciniIfSymbols.H all vars and enumerated lits
-            SYMBOL_ATTR_TYPE iv_attr_type;
-            SYMBOL_ATTR_ENUM iv_attr_enum;
+            SYMBOL_ATTR_TYPE iv_attr_type; ///< List of attributes and their type
+            SYMBOL_ATTR_ENUM iv_attr_enum; ///< List of attribute enums and their value
             SYMBOL_MAP  iv_not_found;   ///< List of symbols not found
             RPN_MAP     iv_rpn_map;     ///< Map rpn_id to symbol name/cini_id of used Symbols
             VAR_SYMBOL_USED iv_used_var; ///< List of used attributes and their ids ordered by name

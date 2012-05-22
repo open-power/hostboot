@@ -49,6 +49,8 @@
  *                                                  PutScomUnderMask ops to same
  *                                                  Scom register
  *                                                  Turn off most debug traces
+ *                          camvanng    05/07/2012  Support for associated target
+ *                                                  attributes
  */
 
 #include <fapiHwpExecInitFile.H>
@@ -149,15 +151,16 @@ typedef struct scomData
     uint16_t   numCols;
     uint16_t   numRows;
     uint16_t * dataId;  //attribute or numeric literal
+    uint16_t * dataTgtId; //target number of the dataId
     bool       hasExpr;
-    char *     colId;   //expr or an attribute
+    char *     colId;   //an attribute plus it's target#
     char **    rowData;
 }scomData_t;
 
 //Init File Data
 typedef struct ifData
 {
-    const fapi::Target *     pTarget;
+    const std::vector<fapi::Target> * pTarget;
     uint16_t                 numAttrs;
     uint16_t                 numLits;
     uint32_t                 numScoms;
@@ -196,6 +199,7 @@ void  unloadAttrSymbolTable(ifData_t & io_ifData);
 fapi::ReturnCode getAttr(const ifData_t & i_ifData,
                          const uint16_t i_id,
                          uint64_t & o_val,
+                         const uint32_t i_targetNum,
                          const uint16_t i_arrayIndex[MAX_ATTRIBUTE_ARRAY_DIMENSION]);
 
 void loadLitSymbolTable(ifInfo_t & io_ifInfo,
@@ -237,13 +241,14 @@ uint64_t rpnBinaryOp(IfRpnOp i_op, uint64_t i_val1, uint64_t i_val2,
                      uint32_t i_any);
 
 fapi::ReturnCode rpnDoPush(ifData_t & io_ifData, const uint16_t i_id,
-                           uint32_t & io_any, const uint16_t i_arrayIndex[MAX_ATTRIBUTE_ARRAY_DIMENSION]);
+                           uint32_t & io_any, const uint32_t i_targetNum,
+                           const uint16_t i_arrayIndex[MAX_ATTRIBUTE_ARRAY_DIMENSION]);
 
 fapi::ReturnCode rpnDoOp(rpnStack_t * io_rpnStack, IfRpnOp i_op,
                          uint32_t i_any);
 
 fapi::ReturnCode evalRpn(ifData_t & i_ifData, char * i_expr, uint32_t i_len,
-                         bool i_hasExpr = false);
+                         bool i_isColExpr = false, bool i_hasExpr = false);
 
 //******************************************************************************
 // fapiHwpExecInitFile function
@@ -253,18 +258,22 @@ fapi::ReturnCode evalRpn(ifData_t & i_ifData, char * i_expr, uint32_t i_len,
  *
  * This HWP can be called to execute a binary initfile.
  *
- * @param[in] i_Target  Reference to fapi::Target
+ * @param[in] i_target  Reference to std::vector<fapi::Target>
  * @param[in] i_file    The binary if filename: <initfile>.if
  *
  * @return ReturnCode. Zero on success.
  */
-fapi::ReturnCode fapiHwpExecInitFile(const fapi::Target & i_Target,
+fapi::ReturnCode fapiHwpExecInitFile(const std::vector<fapi::Target> & i_target,
                                      const char * i_file)
 {
     FAPI_INF(">> fapiHwpExecInitFile: Performing HWP for %s", i_file);
 
-    // Print the ecmd string of the chip
-    FAPI_INF("fapiHwpExecInitFile: Target: %s", i_Target.toEcmdString());
+    // Print the ecmd string of the targets
+    FAPI_INF("fapiHwpExecInitFile: SCOM target: %s", i_target.front().toEcmdString());
+    for (size_t i = 1; i < i_target.size(); i++)
+    {
+        FAPI_INF("fapiHwpExecInitFile: Associated target: %s", i_target.at(i).toEcmdString());
+    }
 
     fapi::ReturnCode l_rc = fapi::FAPI_RC_SUCCESS;
     fapi::ReturnCode l_tmpRc = fapi::FAPI_RC_SUCCESS;
@@ -272,7 +281,7 @@ fapi::ReturnCode fapiHwpExecInitFile(const fapi::Target & i_Target,
     const char * l_ifAddr = NULL;
 
     // Load the binary initfile
-    l_rc = fapiLoadInitFile(i_Target, i_file, l_ifAddr, l_ifSize);
+    l_rc = fapiLoadInitFile(i_target.front(), i_file, l_ifAddr, l_ifSize);
 
     if (l_rc.ok())
     {
@@ -364,7 +373,7 @@ fapi::ReturnCode fapiHwpExecInitFile(const fapi::Target & i_Target,
             //--------------------------------
             // Execute SCOMs
             //--------------------------------
-            l_ifData.pTarget = &i_Target;
+            l_ifData.pTarget = &i_target;
 
             l_rc = executeScoms(l_ifData);
 
@@ -578,52 +587,83 @@ void unloadAttrSymbolTable(ifData_t & io_ifData)
 fapi::ReturnCode getAttr(const ifData_t & i_ifData,
                          const uint16_t i_id,
                          uint64_t & o_val,
+                         const uint32_t i_targetNum,
                          const uint16_t i_arrayIndex[MAX_ATTRIBUTE_ARRAY_DIMENSION])
 {
-    IF_DBG(">> fapiHwpExecInitFile: getAttr: id 0x%x",
-             i_id);
+    IF_DBG(">> fapiHwpExecInitFile: getAttr: id 0x%x target# %u",
+             i_id, i_targetNum);
 
     fapi::ReturnCode l_rc = fapi::FAPI_RC_SUCCESS;
 
-    //Mask out the type & system bits and zero-base
-    uint16_t l_id = (i_id & IF_ATTR_ID_MASK) - 1;
-    IF_DBG("fapiHwpExecInitFile: getAttr: id 0x%x", l_id);
+    do {
 
-    if (l_id < i_ifData.numAttrs)
-    {
-        const fapi::Target * l_pTarget = i_ifData.pTarget;
+        //Mask out the type bits and zero-base
+        uint16_t l_id = (i_id & IF_ID_MASK) - 1;
+        IF_DBG("fapiHwpExecInitFile: getAttr: id 0x%x", l_id);
 
-        if (i_id & IF_SYS_ATTR_MASK)
+        if (l_id < i_ifData.numAttrs)
         {
-            l_pTarget = NULL;
-        }
+            const fapi::Target * l_pTarget = &(i_ifData.pTarget->front());
 
-        fapi::AttributeId l_attrId =
-            static_cast<fapi::AttributeId>(i_ifData.attrs[l_id].attrId);
-        IF_DBG("fapiHwpExecInitFile: getAttr: attrId 0x%x", l_attrId);
+            if ((i_id & IF_TYPE_MASK) == IF_SYS_ATTR_TYPE)
+            {
+                l_pTarget = NULL;
+            }
+            else if ((i_id & IF_TYPE_MASK) == IF_ASSOC_TGT_ATTR_TYPE)
+            {
+                if (0 == i_targetNum)
+                {
+                    //Expect nonzero targetNum
+                    fapiAssert(false);
+                }
+                else if (i_ifData.pTarget->size() <= i_targetNum)
+                {
+                    FAPI_ERR("fapiHwpExecInitFile: getAttr: target# %u is greater "
+                             "then number of targets %u passed in", i_targetNum,
+                             i_ifData.pTarget->size());
 
-        l_rc = fapi::fapiGetInitFileAttr(l_attrId, l_pTarget, o_val,
-                                         i_arrayIndex[0], i_arrayIndex[1],
-                                         i_arrayIndex[2], i_arrayIndex[3]);
+                    const uint32_t & FFDC_IF_TGT_NUM = i_targetNum;
+                    size_t l_ffdc = i_ifData.pTarget->size();
+                    size_t & FFDC_IF_NUM_TGTS_PASSED_IN = l_ffdc;
+                    FAPI_SET_HWP_ERROR(l_rc, RC_INITFILE_TGT_NUM_OUT_OF_RANGE);
+                    break;
+                }
 
-        if (l_rc)
-        {
-            FAPI_ERR("fapiHwpExecInitFile: getAttr: GetInitFileAttr failed rc 0x%x",
-                     static_cast<uint32_t>(l_rc));
+                l_pTarget = &(i_ifData.pTarget->at(i_targetNum));
+            }
+
+            if (l_pTarget)
+            {
+                IF_DBG("fapiHwpExecInitFile: target: %s", l_pTarget->toEcmdString());
+            }
+
+            fapi::AttributeId l_attrId =
+                static_cast<fapi::AttributeId>(i_ifData.attrs[l_id].attrId);
+            IF_DBG("fapiHwpExecInitFile: getAttr: attrId 0x%x", l_attrId);
+
+            l_rc = fapi::fapiGetInitFileAttr(l_attrId, l_pTarget, o_val,
+                                             i_arrayIndex[0], i_arrayIndex[1],
+                                             i_arrayIndex[2], i_arrayIndex[3]);
+
+            if (l_rc)
+            {
+                FAPI_ERR("fapiHwpExecInitFile: getAttr: GetInitFileAttr failed rc 0x%x",
+                         static_cast<uint32_t>(l_rc));
+                break;
+            }
+            
+            IF_DBG("fapiHwpExecInitFile: getAttr: val 0x%.16llx", o_val);
         }
         else
         {
-            IF_DBG("fapiHwpExecInitFile: getAttr: val 0x%.16llx", o_val);
+            FAPI_ERR("fapiHwpExecInitFile: getAttr: id out of range");
+
+            const uint16_t & FFDC_IF_ATTR_ID_OUT_OF_RANGE = i_id; // GENERIC IDENTIFIER
+            FAPI_SET_HWP_ERROR(l_rc, RC_INITFILE_ATTR_ID_OUT_OF_RANGE);
+            break;
         }
     }
-    else
-    {
-        FAPI_ERR("fapiHwpExecInitFile: getAttr: id out of range");
-
-        uint32_t l_ffdc = i_id;
-        uint32_t & FFDC_IF_ATTR_ID_OUT_OF_RANGE = l_ffdc; // GENERIC IDENTIFIER
-        FAPI_SET_HWP_ERROR(l_rc, RC_INITFILE_ATTR_ID_OUT_OF_RANGE);
-    }
+    while (0);
 
     IF_DBG("<< fapiHwpExecInitFile: getAttr");
     return l_rc;
@@ -747,7 +787,7 @@ fapi::ReturnCode getLit(const ifData_t & i_ifData,
     fapi::ReturnCode l_rc = fapi::FAPI_RC_SUCCESS;
 
     //Mask out the type bits and zero-base
-    uint16_t l_id = (i_id & (~IF_TYPE_MASK)) - 1;
+    uint16_t l_id = (i_id & IF_ID_MASK) - 1;
 
     if (l_id < i_ifData.numLits)
     {
@@ -758,8 +798,7 @@ fapi::ReturnCode getLit(const ifData_t & i_ifData,
     {
         FAPI_ERR("fapiHwpExecInitFile: getLit: id out of range");
 
-        uint32_t l_ffdc = i_id;
-        uint32_t & FFDC_IF_LIT_ID_OUT_OF_RANGE = l_ffdc; // GENERIC IDENTIFIER
+        const uint16_t & FFDC_IF_LIT_ID_OUT_OF_RANGE = i_id; // GENERIC IDENTIFIER
         FAPI_SET_HWP_ERROR(l_rc, RC_INITFILE_LIT_ID_OUT_OF_RANGE);
     }
 
@@ -862,6 +901,11 @@ void loadScomSection(ifInfo_t & io_ifInfo,
             memset(l_scoms[i].dataId, 0,
                 l_scoms[i].numRows * sizeof(uint16_t*));
 
+            //Allocate memory to hold the data's target id
+            l_scoms[i].dataTgtId =
+                reinterpret_cast<uint16_t*>(malloc(l_scoms[i].numRows * sizeof(uint16_t*)));
+            memset(l_scoms[i].dataTgtId, 0, l_scoms[i].numRows * sizeof(uint16_t*));
+
             //Read the data ids
             for (uint16_t j = 0; j < l_scoms[i].numRows; j++)
             {
@@ -871,11 +915,22 @@ void loadScomSection(ifInfo_t & io_ifInfo,
                 IF_DBG("loadScomSection: scom[%u]: dataId[%u] 0x%02x",
                          i, j, l_scoms[i].dataId[j]);
 
-                //Check for attribute of array type
-                if ((l_scoms[i].dataId[j] & IF_TYPE_MASK) == IF_ATTR_TYPE)
+                //Is this an attribute
+                if (l_scoms[i].dataId[j] & IF_ATTR_TYPE)
                 {
-                    //Mask out the type & system bits and zero-based
-                    uint16_t l_id = (l_scoms[i].dataId[j] & IF_ATTR_ID_MASK) - 1;
+                    //Is this an associated target attribute
+                    if ((l_scoms[i].dataId[j] & IF_TYPE_MASK) == IF_ASSOC_TGT_ATTR_TYPE)
+                    {
+                        //Read the target number
+                        ifRead(io_ifInfo, &l_scoms[i].dataTgtId[j],
+                               sizeof(l_scoms[i].dataTgtId[j]));
+                        IF_DBG("loadScomSection: dataTgtId[%u] 0x%02x",
+                               j, l_scoms[i].dataTgtId[j]);
+                    }
+
+                    //Check for attribute of array type
+                    //Mask out the type bits and zero-based
+                    uint16_t l_id = (l_scoms[i].dataId[j] & IF_ID_MASK) - 1;
                     if (l_id < io_ifData.numAttrs)
                     {
                         // Get the attribute dimension & shift it to the LS nibble
@@ -915,11 +970,11 @@ void loadScomSection(ifInfo_t & io_ifInfo,
             //-----------------------------------
             if (0 < l_scoms[i].numCols)
             {
-                //Allocate memory to hold the column data
+                //Allocate memory to hold the column data plus it's target id
                 l_scoms[i].colId =
-                    reinterpret_cast<char *>(malloc(l_scoms[i].numCols * sizeof(uint16_t)));
+                    reinterpret_cast<char *>(malloc(l_scoms[i].numCols * 2 * sizeof(uint16_t)));
                 memset(l_scoms[i].colId, 0,
-                    l_scoms[i].numCols * sizeof(uint16_t));
+                    l_scoms[i].numCols * 2 * sizeof(uint16_t));
 
                 //Read Column Id
                 uint16_t l_colId = 0;
@@ -933,6 +988,18 @@ void loadScomSection(ifInfo_t & io_ifInfo,
 
                     IF_DBG("loadScomSection: scom[%u]: colId[%u] "
                              "0x%02x", i, j, l_colId);
+
+                    //Is this an associated target attribute
+                    if ((l_colId & IF_TYPE_MASK) == IF_ASSOC_TGT_ATTR_TYPE)
+                    {
+                        uint16_t l_colTgtId = 0;
+                        //Read the target Id
+                        //Don't swap the bytes - it is parsed by bytes later in code.
+                        ifRead(io_ifInfo, l_pCol, sizeof(uint16_t), false);
+                        l_colTgtId = (*l_pCol << 8) | (*(l_pCol+1));
+                        IF_DBG("loadScomSection: colTgtId[%u] 0x%02x", j, l_colTgtId);
+                    }
+                    l_pCol += 2; //advance past the target Id
                 }
 
                 //Is the last column an EXPR column
@@ -1071,6 +1138,9 @@ void unloadScomSection(ifData_t & io_ifData)
         free(io_ifData.scoms[i].dataId);
         io_ifData.scoms[i].dataId = NULL;
 
+        free(io_ifData.scoms[i].dataTgtId);
+        io_ifData.scoms[i].dataTgtId = NULL;
+
         free(io_ifData.scoms[i].colId);
         io_ifData.scoms[i].colId = NULL;
 
@@ -1155,8 +1225,8 @@ fapi::ReturnCode executeScoms(ifData_t & i_ifData)
             //Evaluate the simple columns (not the 'expr' column)
             for (uint16_t col= 0; col < l_numSimpleCols; col++)
             {
-                //This will always be a push
-                l_rc = evalRpn(i_ifData, l_colExpr, 2);
+                //Evaluate the col id & target number
+                l_rc = evalRpn(i_ifData, l_colExpr, 4, true);
 
                 if (l_rc)
                 {
@@ -1164,15 +1234,24 @@ fapi::ReturnCode executeScoms(ifData_t & i_ifData)
                     break;
                 }
 
-                l_colExpr++; //advance past calculation
+                l_colExpr += 4; //advance past calculation
 
                 //This might be several pushes or just a push and an operator,
                 //so loop to read in the pushes
                 //An OP marks the end of a simple column RPN
                 while (static_cast<uint32_t>(*l_rowExpr) & PUSH_MASK)
                 {
-                    // PUSH  (SYMBOL)  always 2 bytes
-                    l_rc = evalRpn(i_ifData, l_rowExpr, 2);
+                    uint32_t l_byteCount = 2;
+                    if((static_cast<uint16_t>(*l_rowExpr << 8) & IF_TYPE_MASK)
+                       == IF_ASSOC_TGT_ATTR_TYPE)
+                    {
+                        //Read the target# also
+                        l_byteCount += 2;
+                    }
+
+                    // PUSH  (SYMBOL)
+                    l_rc = evalRpn(i_ifData, l_rowExpr, l_byteCount);
+                    l_rowExpr += l_byteCount; //advance past the calculation
 
                     if (l_rc)
                     {
@@ -1180,8 +1259,6 @@ fapi::ReturnCode executeScoms(ifData_t & i_ifData)
                                  " on scom 0x%X", i_ifData.scoms[i].addrId);
                         break;
                     }
-
-                    l_rowExpr += 2; //advance past the calculation
                 }
 
                 if (l_rc)
@@ -1247,7 +1324,7 @@ fapi::ReturnCode executeScoms(ifData_t & i_ifData)
                 l_rowExpr++;
                 //l_len--; //remove the length value from the length left
 
-                l_rc = evalRpn(i_ifData, l_rowExpr, l_len, true);
+                l_rc = evalRpn(i_ifData, l_rowExpr, l_len, false, true);
 
                 if (l_rc)
                 {
@@ -1303,7 +1380,7 @@ fapi::ReturnCode executeScoms(ifData_t & i_ifData)
             //If the scom data for this row is an attribute of array type,
             //then save it's array indexes
             uint16_t l_dataId = i_ifData.scoms[i].dataId[l_row];
-            if ((l_dataId & IF_TYPE_MASK) == IF_ATTR_TYPE) //It's an attribute
+            if (l_dataId & IF_ATTR_TYPE) //It's an attribute
             {
                 uint8_t l_attrDimension = getAttrArrayDimension(i_ifData, l_dataId);
                 if (l_attrDimension)
@@ -1314,7 +1391,7 @@ fapi::ReturnCode executeScoms(ifData_t & i_ifData)
                     #ifdef HWPEXECINITFILE_DEBUG2
                     IF_DBG("fapiHwpExecInitFile: executeScoms: scom data array"
                              " indexes are");
-                    for (uint8_t j = 0; j < l_attrDimension;  j++) 
+                    for (uint8_t j = 0; j < l_attrDimension;  j++)
                     {
                         IF_DBG(" [%u]", l_scom.dataArrayIdx[j]);
                     }
@@ -1375,8 +1452,8 @@ fapi::ReturnCode executeScoms(ifData_t & i_ifData)
         }
     } // end looping for all scoms
 
-    // Clear the scom list; the only time the scom list should not be empty
-    // is we have pending scoms to write but we broke out of the above for
+    // Clear the scom list; the only time the scom list is not empty
+    // is if we have pending scoms to write but we broke out of the above for
     // loop early due to an error (l_rc != 0).
     if (l_scomList.size())
     {
@@ -1407,7 +1484,7 @@ fapi::ReturnCode writeScom(const ifData_t & i_ifData,
     fapi::ReturnCode l_rc = fapi::FAPI_RC_SUCCESS;
     uint32_t l_ecmdRc = ECMD_DBUF_SUCCESS;
 
-    const fapi::Target l_target = *(i_ifData.pTarget);
+    const fapi::Target l_target = i_ifData.pTarget->front();
 
     uint64_t l_data = 0; // aggregate scom data to write
     uint64_t l_mask = 0; // aggregate mask for PutScomUnderMask op
@@ -1445,10 +1522,22 @@ fapi::ReturnCode writeScom(const ifData_t & i_ifData,
             uint16_t l_row = i_scomList.at(l_entry).row;
             uint16_t l_dataId = i_ifData.scoms[l_scomNum].dataId[l_row];
 
-            if ((l_dataId & IF_TYPE_MASK) == IF_ATTR_TYPE) //It's an attribute
+            if (l_dataId & IF_ATTR_TYPE) //It's an attribute
             {
+                // Get the target number
+                uint64_t l_dataTgtNum = 0;
+                uint16_t l_dataTgtId = i_ifData.scoms[l_scomNum].dataTgtId[l_row];
+                if (l_dataTgtId)
+                {
+                    l_rc = getLit(i_ifData, l_dataTgtId, l_dataTgtNum);
+                    if (l_rc)
+                    {
+                        break;
+                    }
+                }
+
                 l_rc = getAttr(i_ifData, l_dataId, l_tmpData,
-                               i_scomList.at(l_entry).dataArrayIdx);
+                               l_dataTgtNum, i_scomList.at(l_entry).dataArrayIdx);
             }
             else // It's a numeric literal
             {
@@ -1601,10 +1690,10 @@ void deleteDataArrayIdx(const ifData_t & i_ifData,
 {
     //Get the scom data
     uint16_t l_id = i_ifData.scoms[i_scomNum].dataId[i_row];
-    if ((l_id & IF_TYPE_MASK) == IF_ATTR_TYPE) //It's an attribute
+    if (l_id & IF_ATTR_TYPE) //It's an attribute
     {
-        //Mask out the type & system bits and zero-based
-        uint16_t l_tmpId = (l_id & IF_ATTR_ID_MASK) - 1;
+        //Mask out the type bits and zero-based
+        uint16_t l_tmpId = (l_id & IF_ID_MASK) - 1;
         if (l_tmpId < i_ifData.numAttrs)
         {
             // Get the attribute dimension & shift it to the LS nibble
@@ -1644,8 +1733,8 @@ uint8_t getAttrArrayDimension(const ifData_t & i_ifData, uint16_t i_id)
 {
     uint8_t l_attrDimension = 0;
 
-    //Mask out the type & system bits and zero-based
-    uint16_t l_id = (i_id & IF_ATTR_ID_MASK) - 1;
+    //Mask out the type bits and zero-based
+    uint16_t l_id = (i_id & IF_ID_MASK) - 1;
     if (l_id < i_ifData.numAttrs)
     {
         // Get the attribute dimension & shift it to the LS nibble
@@ -1930,7 +2019,8 @@ uint64_t rpnBinaryOp(IfRpnOp i_op, uint64_t i_val1, uint64_t i_val2,
  * @return fapi::ReturnCode    Zero on success
  */
 fapi::ReturnCode rpnDoPush(ifData_t & io_ifData, const uint16_t i_id,
-                           uint32_t & io_any, const uint16_t i_arrayIndex[MAX_ATTRIBUTE_ARRAY_DIMENSION])
+                           uint32_t & io_any, const uint32_t i_targetNum,
+                           const uint16_t i_arrayIndex[MAX_ATTRIBUTE_ARRAY_DIMENSION])
 {
     IF_DBG(">> fapiHwpExecInitFile: rpnDoPush: id 0x%X", i_id);
 
@@ -1940,16 +2030,16 @@ fapi::ReturnCode rpnDoPush(ifData_t & io_ifData, const uint16_t i_id,
     do
     {
 
-        if ((i_id & IF_TYPE_MASK) == IF_ATTR_TYPE) //It's an attribute
+        if (i_id & IF_ATTR_TYPE) //It's an attribute
         {
-            l_rc = getAttr(io_ifData, i_id, l_val, i_arrayIndex);
+            l_rc = getAttr(io_ifData, i_id, l_val, i_targetNum, i_arrayIndex);
             if (l_rc)
             {
               break;
             }
 
             IF_DBG("fapiHwpExecInitFile: rpnDoPush: getAttr: id = 0x%X, "
-                     "value = 0x%llX", i_id, l_val);
+                   "target# = %u, value = 0x%llX", i_id, i_targetNum, l_val);
 
             rpnPush(io_ifData.rpnStack, l_val);
         }
@@ -2099,13 +2189,14 @@ fapi::ReturnCode rpnDoOp(rpnStack_t * io_rpnStack, IfRpnOp i_op, uint32_t i_any)
  * @return fapi::ReturnCode   Zero on success
  */
 fapi::ReturnCode evalRpn(ifData_t & io_ifData, char *i_expr,
-                         uint32_t i_len, const bool i_hasExpr)
+                         uint32_t i_len, const bool i_isColExpr, const bool i_hasExpr)
 {
     IF_DBG(">> fapiHwpExecInitFile: evalRpn");
 
     fapi::ReturnCode l_rc;
     IfRpnOp l_op;
     uint16_t l_id;
+    uint64_t l_targetNum = 0;
     uint32_t l_any = IF_NOT_ANY;
 
     IF_DBG("fapiHwpExecInitFile: evalRpn: len %u", i_len);
@@ -2133,8 +2224,29 @@ fapi::ReturnCode evalRpn(ifData_t & io_ifData, char *i_expr,
             //Check for attribute of array type
             uint16_t l_arrayIndexs[MAX_ATTRIBUTE_ARRAY_DIMENSION] = {0};
 
-            if ((l_id & IF_TYPE_MASK) == IF_ATTR_TYPE)
+            if (l_id & IF_ATTR_TYPE)
             {
+                // If it's a column Id or an associated target attribute
+                if (i_isColExpr ||
+                    (l_id & IF_TYPE_MASK) == IF_ASSOC_TGT_ATTR_TYPE)
+                {
+                    // Read the target# id
+                    uint16_t l_targetId = *i_expr++ << 8;
+                    l_targetId = *i_expr++;
+                    IF_DBG("target Id 0x%x", l_targetId);
+
+                    if (l_targetId)
+                    {
+                        // Retrieve the actual value for the target number (using it's id)
+                        l_rc = getLit(io_ifData,l_targetId,l_targetNum);
+                        if (l_rc)
+                        {
+                            break;
+                        }
+                    }
+                    i_len -= 2;
+                }
+
                 // Get the attribute dimension
                 uint8_t l_attrDimension = getAttrArrayDimension(io_ifData, l_id);
 
@@ -2165,7 +2277,7 @@ fapi::ReturnCode evalRpn(ifData_t & io_ifData, char *i_expr,
                 break;
             }
 
-            l_rc = rpnDoPush(io_ifData, l_id, l_any, l_arrayIndexs);
+            l_rc = rpnDoPush(io_ifData, l_id, l_any, l_targetNum, l_arrayIndexs);
         }
         else
         {

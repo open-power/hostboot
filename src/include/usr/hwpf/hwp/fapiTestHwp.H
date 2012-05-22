@@ -34,14 +34,17 @@
  *                          mjjones     06/28/2011  Updated comment
  *                          mjjones     08/11/2011  Removed Clock HWP
  *                          mjjones     10/17/2011  Added func pointer
+ *                          camvanng    05/07/2012  Support for associated
+ *                                                  attributes
  */
 
 #ifndef FAPITESTHW_H_
 #define FAPITESTHW_H_
 
 #include <fapi.H>
+#include <vector>
 
-typedef fapi::ReturnCode (*hwpInitialTest_FP_t)(const fapi::Target &);
+typedef fapi::ReturnCode (*hwpInitialTest_FP_t)(const std::vector<fapi::Target> &);
 
 extern "C"
 {
@@ -49,11 +52,11 @@ extern "C"
 /**
  * @brief A simple HWP. Can easily be modified by HW dev team for test
  *
- * @param[in] i_chip Reference to target chip
+ * @param[in] i_target Reference to std::vector of targets
  *
  * @return ReturnCode
  */
-fapi::ReturnCode hwpInitialTest(const fapi::Target & i_chip);
+fapi::ReturnCode hwpInitialTest(const std::vector<fapi::Target> & i_target);
 
 }
 

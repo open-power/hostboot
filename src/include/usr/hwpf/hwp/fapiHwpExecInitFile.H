@@ -33,6 +33,7 @@
  *                          camvanng    09/29/2011  Created.
  *                          andrewg     11/16/2011  Refactor includes with initfile compiler
  *                          camvanng    11/16/2011  Define function pointer to HWP
+ *                          camvanng    05/07/2012  Support for associated target attributes
  *
  */
 
@@ -49,17 +50,17 @@ extern "C"
 
 //Provided for platforms that need to cast a generic function pointer into a
 //function pointer of the correct type to call the HWP.
-typedef fapi::ReturnCode (*fapiHwpExecInitFile_FP_t)(const fapi::Target & i_Target,
+typedef fapi::ReturnCode (*fapiHwpExecInitFile_FP_t)(const std::vector<fapi::Target> & i_target,
                                                      const char * i_file);
 /**
 * @brief HWP to execute an initfile.
 *
-* @param[in] i_chip Reference to target chip
+* @param[in] i_target Reference to std::vector of targets
 * @param[in] i_file filename of binary initfile 
 *
 * @return ReturnCode
 */
-fapi::ReturnCode fapiHwpExecInitFile(const fapi::Target & i_Target,
+fapi::ReturnCode fapiHwpExecInitFile(const std::vector<fapi::Target> & i_target,
                                      const char * i_file);
 
 } // extern "C"

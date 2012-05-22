@@ -28,6 +28,7 @@
 //                 camvanng 04/16/12 Support defines for SCOM address
 //                                   Support defines for bits, scom_data and attribute columns
 //                                   Delete obsolete code for defines support
+//                 camvanng 05/07/12 Support for associated target attributes
 // End Change Log *********************************************************************************
 
 /**
@@ -109,7 +110,6 @@ Symbols::Symbols(FILELIST & i_filenames)
 
                         // Store the value
                         iv_symbols[attr] = MAP_DATA(attrId,NOT_USED);
-                        iv_symbols[SYS_ATTR + attr] = MAP_DATA(attrId,NOT_USED);
 
                         getline(infs,fileline);
                     }
@@ -219,7 +219,6 @@ Symbols::Symbols(FILELIST & i_filenames)
                  }
 
                  iv_attr_type[attribute_name] = get_attr_type(type,array);
-                 iv_attr_type[SYS_ATTR + attribute_name] = iv_attr_type[attribute_name];
                  //printf("Attribute %s Type  with array dimension %u for %s is %u\n",attribute_name.c_str(),array,
                  //       type.c_str(),get_attr_type(type,array));
             }
@@ -275,6 +274,8 @@ uint32_t Symbols::get_attr_type(const uint32_t i_rpn_id)
 uint32_t Symbols::use_symbol(string & i_symbol)
 {
     uint32_t rpn_id = Rpn::SYMBOL | NOT_FOUND;
+    string l_symbol = i_symbol;
+
     if(i_symbol == "ANY") rpn_id = INIT_ANY_LIT | Rpn::SYMBOL;
     else if(i_symbol == "EXPR") rpn_id = INIT_EXPR_VAR | Rpn::SYMBOL;
     else
@@ -300,7 +301,39 @@ uint32_t Symbols::use_symbol(string & i_symbol)
         }
         else 
         {
-            rpn_id = add_undefined(i_symbol);
+            //Strip off any prefix (i.e. "SYS." or "TGT<#>.")
+            size_t pos = i_symbol.find('.');
+            if(pos != string::npos)
+            {
+                //Find the attribute without the prefix.
+                //If found, then add this system or assoc target attribute
+                //to our containers.
+                l_symbol = i_symbol.substr(pos+1);
+                SYMBOL_MAP::iterator i = iv_symbols.find(l_symbol);
+                if(i != iv_symbols.end())
+                {
+                    //Add the new attribute
+
+                    rpn_id = Rpn::SYMBOL | iv_rpn_id++;
+                    uint32_t attrId = iv_symbols[l_symbol].first;
+
+                    iv_rpn_map[rpn_id] = RPN_DATA(i_symbol,attrId);
+                    iv_symbols[i_symbol] = MAP_DATA(attrId, rpn_id);
+                    iv_attr_type[i_symbol] = iv_attr_type[l_symbol];
+
+                    ++iv_used_var_count;
+
+                    //printf ("Symbols::use_symbol: Just added %s symbol, rpn_id:0x%8X\n",i_symbol.c_str(),rpn_id);
+                }
+                else
+                {
+                    rpn_id = add_undefined(i_symbol);
+                }
+            }
+            else
+            {
+                rpn_id = add_undefined(i_symbol);
+            }
         }
     }
 
@@ -339,8 +372,8 @@ uint16_t Symbols::get_tag(uint32_t i_rpn_id)
         iv_used_var.reserve(iv_used_var_count); // makes if faster
         iv_used_lit.reserve(iv_used_lit_count);
 
-        //To differentiate between system and target attributes which have the same attribute id,
-        //save the attribute name also.
+        //To differentiate between system, target, and associated target attributes
+        //which have the same attribute id, save the attribute name also.
         iv_used_var.push_back(RPN_DATA("EXPR",SYM_EXPR));                    // EXPR var always first
         iv_used_lit.push_back(iv_rpn_map[Rpn::SYMBOL|INIT_ANY_LIT].second);  // ANY lit always first
 
@@ -394,14 +427,20 @@ uint16_t Symbols::get_tag(uint32_t i_rpn_id)
         {
             if (name == (*i).first)
             {
-                tag = (uint16_t) (offset | IF_ATTR_TYPE);
-
-                if (name.compare(0, 4, SYS_ATTR) == 0)
+                if (name.compare(0, ASSOC_TGT_ATTR.length(), ASSOC_TGT_ATTR) == 0)
                 {
-                    tag |= IF_SYS_ATTR_MASK;
-                    //printf ("get tag: %s tag 0x%x\n", name.c_str(), tag);
+                    tag = (uint16_t) (offset | IF_ASSOC_TGT_ATTR_TYPE);
+                }
+                else if (name.compare(0, SYS_ATTR.length(), SYS_ATTR) == 0)
+                {
+                    tag = (uint16_t) (offset | IF_SYS_ATTR_TYPE);
+                }
+                else
+                {
+                    tag = (uint16_t) (offset | IF_ATTR_TYPE);
                 }
 
+                //printf ("get tag: %s tag 0x%x\n", name.c_str(), tag);
                 break;
             }
         }
@@ -722,14 +761,21 @@ string Symbols::listing()
     for(VAR_SYMBOL_USED::iterator i = iv_used_var.begin() + 1; i != iv_used_var.end(); ++i)
     {
         ++count;
-        uint32_t id = count | IF_ATTR_TYPE;
+        uint32_t id = count;
 
         string name = (*i).first;
         uint32_t attrId = (*i).second;
-        if(name.compare(0, 4, SYS_ATTR) == 0)
+        if(name.compare(0, ASSOC_TGT_ATTR.length(), ASSOC_TGT_ATTR) == 0)
         {
-            id |= IF_SYS_ATTR_MASK;
-            attrId = iv_symbols[name.substr(4)].first;
+            id |= IF_ASSOC_TGT_ATTR_TYPE;
+        }
+        else if(name.compare(0, SYS_ATTR.length(), SYS_ATTR) == 0)
+        {
+            id |= IF_SYS_ATTR_TYPE;
+        }
+        else
+        {
+            id |= IF_ATTR_TYPE;
         }
 
         oss << "Type:" << setw(2) << iv_attr_type[name] << " Value:0x" << setw(8) << attrId << '\t' << "ID 0X" << setw(4) << id
@@ -737,8 +783,6 @@ string Symbols::listing()
 
         //printf("ATTRIBUTE: %s  Value:0x%02X\n",name,iv_attr_type[name]);
     }
-
-    count = 0;
 
     oss << "\n--------------- Literal Symbol Table -----------------\n\n";
 
@@ -772,9 +816,12 @@ string Symbols::attr_listing()
     for(VAR_SYMBOL_USED::iterator i = iv_used_var.begin() + 1; i != iv_used_var.end(); ++i)
     {
         string name = (*i).first;
-        if (name.compare(0, 4, SYS_ATTR) == 0)
+
+        //Strip off any prefix (i.e. "SYS." or "TGT<#>.")
+        size_t pos = name.find('.');
+        if(pos != string::npos)
         {
-            name = name.substr(4);
+            name = name.substr(pos+1);
         }
 
         oss << name << endl;
@@ -871,12 +918,14 @@ uint32_t Symbols::restore_var_bseq(BINSEQ::const_iterator & bli)
         string name = find_text(attrId);
         string used_var_name = iv_used_var.at(i+1).first;
 
-        // Account for system attributes
+        // Account for system & associated target attributes
         if (name != used_var_name)
         {
-            if (name == used_var_name.substr(4))
+            size_t pos = used_var_name.find(name);
+            if(pos != string::npos)
             {
                 attrId = iv_symbols[used_var_name].first;
+
             }
             else
             {
@@ -976,8 +1025,10 @@ uint32_t Symbols::get_rpn_id(uint32_t bin_tag)
     uint32_t offset = bin_tag & ~IF_TYPE_MASK;
     switch(type)
     {
-        case IF_ATTR_TYPE:  {
-                            offset &= ~IF_SYS_ATTR_MASK;
+        case IF_ATTR_TYPE:
+        case IF_SYS_ATTR_TYPE:
+        case IF_ASSOC_TGT_ATTR_TYPE:
+                        {
                             string name = iv_used_var[offset].first;
                             rpn_id = use_symbol(name);
                         }
