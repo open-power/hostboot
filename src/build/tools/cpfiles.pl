@@ -44,6 +44,7 @@ use warnings;
 use Cwd;
 use File::Basename;
 use File::Spec;
+use File::Path;
 
 #------------------------------------------------------------------------------
 # Forward Declaration
@@ -185,13 +186,12 @@ if ($inDir ne "")
     if (basename($inDir) eq "src")
     {
         #Check if img dir exists else will copy .bin files to simics dir
-        $imgDir = File::Spec->catdir($inDir, "../img");
+        $imgDir = File::Spec->catdir($inDir, "../images/ppc/lab/flash");
         $simicsDir = File::Spec->catdir($inDir, "../simics");
-        unless (-d ($inDir."/../img"))
+        unless (-d ($imgDir))
         {
-            $imgDir = $simicsDir;
-            print "No img directory found in sandbox.  Copying .bin files";
-            print " to simics directory\n";
+            print "Creating path to image/ppc/lab/flash directory in sandbox.\n";
+            mkpath($imgDir);
         }
     }
 }
@@ -206,7 +206,7 @@ elsif (defined ($sandbox))
 
     #Check if simics and img dirs exist, else exit
     $simicsDir = File::Spec->catdir($sandbox, "simics");
-    $imgDir = File::Spec->catdir($sandbox, "img");
+    $imgDir = File::Spec->catdir($sandbox, "images/ppc/lab/flash");
     print "simics dir = $simicsDir\n   img dir = $imgDir\n";
 
     unless ((-d $simicsDir) && (-d $imgDir))
@@ -355,7 +355,29 @@ while ( my ($key, $value) = each(%files) )
 
 if ("s" eq $env) #simics
 {
-    # create a sym-link to the appropriate pnor binary
+    # create a sim-link from hostboot name for PNOR to name simics uses.
+    print "Linking in simics_".$machine.".pnor to name used by simics\n";
+    $command = sprintf("ln -sf %s/simics_%s.pnor %s/%s.pnor", $imgDir, $machine, $imgDir, lc($machine) );
+    print "$command\n";
+    `$command`;
+    if( $? != 0 )
+    {
+        print "ERROR : exiting\n";
+        exit(-1);
+    }
+
+    # create a sym-link to hostboot.bin for simics
+    print "Linking hbicore.bin to hostboot.bin\n";
+    $command = sprintf("ln -sf %s/hbicore.bin %s/hostboot.bin", $imgDir, $imgDir );
+    print "$command\n";
+    `$command`;
+    if( $? != 0 )
+    {
+        print "ERROR : exiting\n";
+        exit(-1);
+    }
+
+    # create a sym-link to the appropriate pnor binary for simics post script loading PNOR to fake pnor
     print "Linking in simics_".$machine.".pnor\n";
     $command = sprintf("ln -sf %s/simics_%s.pnor %s/simics.pnor", $imgDir, $machine, $imgDir );
     print "$command\n";

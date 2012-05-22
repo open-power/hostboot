@@ -309,7 +309,7 @@ hb_simsetup()
     execute_in_sandbox "export BACKING_BUILD=\$bb && ./workarounds.postsimsetup"  "ppc"
     rm ${SANDBOXBASE}/src/workarounds.postsimsetup
 
-    mkdir ${SANDBOXBASE}/img
+    mkdir -p ${SANDBOXBASE}/images/ppc/lab/flash
 
     # Put a starter copy of errl to simics directory; refresh w/ "hb errlparser"
     cd ${SANDBOXBASE}/simics

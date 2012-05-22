@@ -26,14 +26,6 @@
 ## Workarounds that are run after start_simics is executed for the first time
 ##    to setup the sandbox
 ##
-
-#####
-echo "+++ Point Simics to our base image +++"
-#ln -sf $sb/../img/hbicore.bin $sb/../simics/hostboot.bin
-mkdir -p $sb/../images/ppc/lab/flash/
-ln -sf $sb/../img/hbicore.bin $sb/../images/ppc/lab/flash/hostboot.bin
-#####
-
 #####
 #@fixme - Fix with RTC:41342
 echo "+++ Copy centaur.act"

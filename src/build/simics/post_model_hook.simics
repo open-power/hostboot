@@ -36,7 +36,7 @@ run-python-file simics-debug-framework.py
 run-python-file hb-simdebug.py
 
 #Load PNOR image into phys_mem
-phys_mem.load-file ../img/simics.pnor 0x400000
+phys_mem.load-file ../images/ppc/lab/flash/simics.pnor 0x400000
 phys-mem.load-file ./sysmvpd.dat 0x681000
 phys-mem.load-file ./sysspd.dat 0x701000
 
