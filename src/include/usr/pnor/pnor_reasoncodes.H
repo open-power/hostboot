@@ -42,14 +42,15 @@ namespace PNOR
         MOD_PNORDD_VERIFYADDRESSRANGE   = 0x11, /**< pnordd.C : PnorDD::verifyAddressRange */
         MOD_PNORDD_READFLASH            = 0x12, /**< pnordd.C : PnorDD::readFlash */
         MOD_PNORDD_WRITEFLASH           = 0x13, /**< pnordd.C : PnorDD::writeFlash */
-        MOD_PNORDD_READREGLPC           = 0x14, /**< pnordd.C : PnorDD::readRegLPC */
-        MOD_PNORDD_WRITEREGLPC          = 0x15, /**< pnordd.C : PnorDD::writeRegLPC */
+        MOD_PNORDD_POLLSFCOPCOMPLETE    = 0x14, /**< pnordd.C : PnorDD::pollSfcOpComplete */
+        MOD_PNORDD_SFCINIT              = 0x15, /**< pnordd.C : PnorDD::sfcInit */
         MOD_PNORDD_READREGSPI           = 0x16, /**< pnordd.C : PnorDD::readRegSPI */
         MOD_PNORDD_WRITEREGSPI          = 0x17, /**< pnordd.C : PnorDD::writeRegSPI */
         MOD_PNORDD_READLPC              = 0x18, /**< pnordd.C : PnorDD::readLPC */
         MOD_PNORDD_WRITELPC             = 0x19, /**< pnordd.C : PnorDD::writeLPC */
         MOD_PNORDD_ERASEFLASH           = 0x1A, /**< pnordd.C : PnorDD::eraseFlash */
         MOD_PNORDD_COMPAREANDWRITEBLOCK = 0x1B, /**< pnordd.C : PnorDD::compareAndWriteBlock */
+
     };
 
     enum PNORReasonCode
@@ -62,7 +63,8 @@ namespace PNOR
         RC_INVALID_ASYNC_MESSAGE     = PNOR_COMP_ID | 0x06,
         RC_UNSUPPORTED_OPERATION     = PNOR_COMP_ID | 0x07,
         RC_LPC_ERROR                 = PNOR_COMP_ID | 0x08,
-        RC_BAD_STARTUP_RC            = PNOR_COMP_ID | 0x09
+        RC_BAD_STARTUP_RC            = PNOR_COMP_ID | 0x09,
+        RC_UNSUPORTED_HARDWARE       = PNOR_COMP_ID | 0x0A,
     };
 };
 

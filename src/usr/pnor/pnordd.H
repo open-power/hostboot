@@ -38,6 +38,13 @@ class PnorDD
 
   public:
     /**
+     * @brief Initializer called by PnorRP::init() to init the SFC
+     *
+     * @return void
+     */
+    void sfcInit( );
+
+    /**
      * @brief Performs a PNOR Read Operation
      *
      * @parm o_buffer  Buffer to read data into
@@ -65,14 +72,12 @@ class PnorDD
                           size_t& io_buflen,
                           uint64_t i_address);
 
-
-  protected:
     enum PnorMode_t {
-        MODEL_UNKNOWN, //Invalid
-        MODEL_MEMCPY, //No LPC logic, just do memcpy into cache area
-        MODEL_LPC_MEM, //Break into 32-bit LPC ops but use memcpy into cache area
-        MODEL_FLAT_ECCB, //Use ECCB scoms to drive LPC, flat memory map behind ECCB, no SPI
-        MODEL_REAL, //Code for real hardware or complete sim model
+        MODEL_UNKNOWN,   /**< Invalid */
+        MODEL_MEMCPY,    /**< No LPC logic, just do memcpy into cache area */
+        MODEL_LPC_MEM,   /**< Break into 32-bit LPC ops but use memcpy into cache area */
+        MODEL_REAL_CMD,  /**< Code for real hardware or complete sim model using Commands based reads */
+        MODEL_REAL_MMIO, /**< Code for real hardware or complete sim model using MMIO reads-Not currently implemented */
     };
 
     /**
@@ -85,6 +90,9 @@ class PnorDD
      * @brief Destructor
      */
     ~PnorDD();
+
+  protected: 
+
 
     /**
      * @brief Verify flash request is in appropriate address range
@@ -109,84 +117,232 @@ class PnorDD
     };
     
     /**
-     * @brief Read a LPC Host Controller Register
+     * @brief SPI Config Info
+     *    OP Codes and other MISC info for configuring SFC
+     */
+    enum SpiConfigInfo {
+        SPI_GET_CHIPID_OP   = 0x9F, /**< Default Op code for getting NOR ChipID */
+
+        SPI_SIM_SM_ERASE_OP = 0x00000020, /**< Simics Op Code for Small Erase */
+        SPI_SIM_SM_ERASE_SZ = 0x1000, /**< Simics Small Erase Size */
+    };
+
+    /**
+     * @brief Supported NOR Chip IDs
      *
-     * @parm i_addr  Register address, relative to the
-     *           LPC Host Controller Register Space
+     */
+    enum NorChipIDs
+    {
+        SIMICS_NOR_ID     = 0x20ba2000,  /**< CHIP ID returned by Simics NOR chip */
+    };
+
+
+    enum SfcRange {
+        SFC_CMD_SPACE,    /**< Indicate accessing command reg */
+        SFC_CMDBUF_SPACE, /**< Indicate accessing command buffer space */
+    };
+
+    /**
+     * @brief SFC Registers
+     *    These are offsets within the SFC Register Space
+     */
+    enum SfcRegAddr {
+        SFC_REG_CONF    = 0x10, /**< CONF: Direct Access Configuration */
+        SFC_REG_STATUS  = 0x0C, /**< STATUS : Status Reg */
+        SFC_REG_CMD     = 0x40, /**< CMD : Command */
+        SFC_REG_ADR     = 0x44, /**< ADR : Address */
+        SFC_REG_ERASMS  = 0x48, /**< ERASMS : Small Erase Block Size */
+        SFC_REG_ERASLGS = 0x4C, /**< ERALGS : Large Erase Block Size */
+        SFC_REG_CONF4   = 0x54, /**< CONF4  : SPI Op Code for Small Erase */
+        SFC_REG_CONF5   = 0x58, /**< CONF5  : Small Erase Size config reg */
+        SFC_REG_ADRCBF  = 0x80, /**< ADRCBF : First Intf NOR Addr Offset */
+        SFC_REG_ADRCMF  = 0x84, /**< ADRCMF : First Intf NOR Allocation */
+        SFC_REG_ADRCBS  = 0x88, /**< ADRCBS : Second Intf NOR Addr Offset */
+        SFC_REG_ADRCMS  = 0x8C, /**< ADRCMS : Second Intf NOR Allocation */
+        SFC_REG_OADRNB  = 0x90, /**< OADRNB : Direct Access OBP Window Base Address */
+        SFC_REG_OADRNS  = 0x94, /**< OADRNS : DIrect Access OPB Window Size */
+
+
+    };
+
+    /**
+     * @brief SFC Op Codes
+     *    OP Codes for the SFC Command Register
+     */
+    enum SfcOpCodes {
+        SFC_OP_READRAW    = 0x03, /**< Read Raw */
+        SFC_OP_WRITERAW   = 0x02, /**< Write Raw */
+        SFC_OP_ERASM      = 0x32, /**< Erase Small */
+        SFC_OP_ERALG      = 0x34, /**< Erase Large */
+        SFC_OP_ENWRITPROT = 0x53, /**< Enable WRite Protect */
+        SFC_OP_CHIPID     = 0x1F, /**< Get Chip ID */
+        SFC_OP_STATUS     = 0x05, /**< Get Status */
+        SFC_OP_TURNOFF    = 0x5E, /**< Turn Off */
+        SFC_OP_TURNON     = 0x50, /**< Turn On */
+        SFC_OP_ABORT      = 0x6F, /**< Super-Abort */
+        SFC_OP_START4BA   = 0x37, /**< Start 4BA */
+        SFC_OP_END4BA     = 0x69, /**< End 4BA */
+    };
+
+
+    enum {
+        SFC_CMDBUF_SIZE = 256,   /**< SFC Command buffer is 0x100/256 bytes/0x40 words */
+
+        SFC_POLL_TIME_NS = 400000, /**< todo: Find out Max time to wait */
+        SFC_POLL_INCR_NS = 10,     /**< minimum increment during poll */
+
+    };
+
+    /**
+     * @brief  SFC Command Register Layout
+     */
+    union SfcCmdReg_t
+    {
+        uint32_t data32;
+        struct
+        {
+            uint32_t reserved    : 16; /**< 0:15 = Reserved  */
+            uint32_t opcode      : 7;  /**< 16:22 = OpCode */
+            uint32_t length      : 9;  /**< 22:31 = Num bytes for ReadRaw/WriteRaw */
+        };
+        SfcCmdReg_t() : data32(0) {};
+    };
+
+    /**
+     * @brief  SFC Status Register Layout
+     */
+    union SfcStatReg_t
+    {
+        uint32_t data32;
+        struct
+        {
+            uint32_t unused    : 30; /**< 0:29 = Not Currently Used  */
+            uint32_t timeout   : 1;  /**< 30   = Timeout */
+            uint32_t done      : 1;  /**< 31   = Done */
+        };
+        SfcStatReg_t() : data32(0) {};
+    };
+
+
+    /**
+     * @brief Write a SFC Register
+     *
+     * @parm i_range  SFC Address Range
+     * @parm i_addr   SFC Register to write
+     * @parm i_data   Data to write
+     *
+     * @return Error from operation
+     */
+    errlHndl_t writeRegSfc(SfcRange i_range,
+                           uint32_t i_addr,
+                           uint32_t i_data);
+
+    /**
+     * @brief Read a SFC Register
+     *
+     * @parm i_range  SFC Address Range
+     * @parm i_addr   SFC Register to read
+     * @parm o_data   Data to write
+     *
+     * @return Error from operation
+     */
+    errlHndl_t readRegSfc(SfcRange i_range,
+                          uint32_t i_addr,
+                          uint32_t& o_data);
+
+    /**
+     * @brief Poll for SFC Op Complete
+     *
+     * @parm i_pollTime  Amount of time to Poll, default SFC_POLL_TIME_NS
+     *
+     * @return Error from operation
+     */
+    errlHndl_t pollSfcOpComplete(uint64_t i_pollTime = SFC_POLL_TIME_NS);
+
+
+    /**
+     * @brief Read the NOR FLash ChipID
+     *
+     * @parm o_chipId  NOR Flash ChipID
+     * @parm i_spiOpcode   SPI OpCode to use to get Chip ID
+     *
+     * @return Error from operation
+     */
+    errlHndl_t getNORChipId(uint32_t& o_chipId,
+                            uint32_t i_spiOpcode = SPI_GET_CHIPID_OP);
+
+    /**
+     * @brief Load SFC command buffer with data from PNOR
+     *
+     * @parm i_addr  PNOR flash Address to read
+     * @parm i_size  Number of bytes to read.to command buffer
+     *
+     * @return Error from operation
+     */
+    errlHndl_t loadSfcBuf(uint32_t i_addr,
+                          size_t i_size);
+
+    /**
+     * @brief Flush SFC command buffer contents to PNOR Flash
+     *
+     * @parm i_addr  PNOR flash Address to write
+     * @parm i_size  Number of bytes to write.to command buffer
+     *
+     * @return Error from operation
+     */
+    errlHndl_t flushSfcBuf(uint32_t i_addr,
+                           size_t i_size);
+
+    /**
+     * @brief Read data in SFC Command buffer and put into buffer
+     *
+     * @parm i_size  Amount of data in Cmd Buffer to read, in bytes.
      * @parm o_data  Buffer to read data into
      *
      * @return Error from operation
      */
-    errlHndl_t readRegLPC(LpcRegAddr i_addr,
-                          uint32_t& o_data);
+    errlHndl_t readSfcBuffer(size_t i_size,
+                             void* o_data);
 
     /**
-     * @brief Write a LPC Host Controller Register
+     * @brief Write data to SFC Command buffer
      *
-     * @parm i_addr  Register address, relative to the
-     *           LPC Host Controller Register Space
-     * @parm o_data  Data to write
+     * @parm i_size  Amount of data in Cmd Buffer to write, in bytes.
+     * @parm o_data  Buffer to read data from
      *
      * @return Error from operation
      */
-    errlHndl_t writeRegLPC(LpcRegAddr i_addr,
-                           uint32_t i_data);
+    errlHndl_t writeSfcBuffer(size_t i_size,
+                              void* i_data);
+
 
     /**
-     * @brief SPI Registers
-     *    These are offsets within the SPI Register Space
-     */
-    enum SpiRegAddr {
-        SPI_REG_CMD     = 0x40, /**< CMD : Command */
-        SPI_REG_ADR     = 0x44, /**< ADR : Address */
-        SPI_REG_ERASMS  = 0x48, /**< ERASMS : Small Erase Block Size */
-        SPI_REG_ERASLGS = 0x4C, /**< ERALGS : Large Erase Block Size */
-        SPI_REG_ADRCBF  = 0x80, /**< ADRCBF : First Intf NOR Addr Offset */
-        SPI_REG_ADRCMF  = 0x84, /**< ADRCMF : First Intf NOR Allocation */
-        SPI_REG_ADRCBS  = 0x88, /**< ADRCBS : Second Intf NOR Addr Offset */
-        SPI_REG_ADRCMS  = 0x8C, /**< ADRCMS : Second Intf NOR Allocation */
-    };
-
-    /**
-     * @brief SPI Op Codes
-     *    OP Codes for the SPI Command Register
-     */
-    enum SpiOpCodes {
-        SPI_OP_READRAW    = 0x03, /**< Read Raw */
-        SPI_OP_WRITERAW   = 0x02, /**< Write Raw */
-        SPI_OP_ERASM      = 0x32, /**< Erase Small */
-        SPI_OP_ERALG      = 0x34, /**< Erase Large */
-        SPI_OP_ENWRITPROT = 0x53, /**< Enable WRite Protect */
-        SPI_OP_CHIPID     = 0x1F, /**< Get Chip ID */
-        SPI_OP_STATUS     = 0x05, /**< Get Status */
-        SPI_OP_TURNOFF    = 0x5E, /**< Turn Off */
-        SPI_OP_TURNON     = 0x50, /**< Turn On */
-        SPI_OP_ABORT      = 0x6F, /**< Super-Abort */
-        SPI_OP_START4BA   = 0x37, /**< Start 4BA */
-        SPI_OP_END4BA     = 0x69, /**< End 4BA */
-    };
-
-    /**
-     * @brief Read a SPI Register
+     * @brief Perform command based read of PNOR, maximizing use of
+     *        SFC Command buffer..
      *
-     * @parm i_addr  Register address, relative to the SPI engine
+     * @parm i_addr  PNOR flash Address to read
+     * @parm i_size  Amount of data to read, in bytes.
      * @parm o_data  Buffer to read data into
      *
      * @return Error from operation
      */
-    errlHndl_t readRegSPI(SpiRegAddr i_addr,
-                          uint32_t& o_data);
+    errlHndl_t bufferedSfcRead(uint32_t i_addr,
+                               size_t i_size,
+                               void* o_data);
 
     /**
-     * @brief Write a SPI Register
+     * @brief Perform command based write of PNOR, maximizing use of
+     *        SFC Command buffer..
      *
-     * @parm i_addr  Register address, relative to the SPI engine
-     * @parm o_data  Data to write
+     * @parm i_addr  PNOR flash Address to write
+     * @parm i_size  Amount of data to write, in bytes.
+     * @parm i_data  Buffer containing data to write
      *
      * @return Error from operation
      */
-    errlHndl_t writeRegSPI(SpiRegAddr i_addr,
-                           uint32_t i_data);
+    errlHndl_t bufferedSfcWrite(uint32_t i_addr,
+                                size_t i_size,
+                                void* i_data);
 
 
     /**
@@ -200,15 +356,13 @@ class PnorDD
         LPCHC_REG_SPACE = 0xC0012000, /**< LPC Host Ctlr Register Space */
 
         LPC_DIRECT_READ_OFFSET = 0xFC000000,
-        LPC_SPI_REG_OFFSET = 0xF0000C00,
+        LPC_SFC_CMDREG_OFFSET = 0xF0000C00,  /** LPC Offest to SFC Command Registers */
+        LPC_SFC_CMDBUF_OFFSET = 0xF0000D00,  /** LPC Offest to SFC Command Buffer space */
         LPC_TOP_OF_FLASH_OFFSET = 0xFFFFFFFF,
 
         ECCB_CTL_REG  = 0x000B0020, /**< ECCB Control Reg (FW) */
         ECCB_STAT_REG = 0x000B0022, /**< ECCB Status Reg (FW) */
         ECCB_DATA_REG = 0x000B0023, /**< ECCB Data Reg (FW) */
-        //ECCB_CTL_REG  = 0x00090020, /**< ECCB Control Reg (FW) */
-        //ECCB_STAT_REG = 0x00090022, /**< ECCB Status Reg (FW) */
-        //ECCB_DATA_REG = 0x00090023, /**< ECCB Data Reg (FW) */
 
         // Default Values to set for all operations
         // 1101.0100.0000.000x.0000.0001.0000.0000.<address>
@@ -217,9 +371,7 @@ class PnorDD
         LPC_STAT_REG_ERROR_MASK = 0xFC0000000007F700, /**< Error Bits */
 
         PNORSIZE = 4 * MEGABYTE, //@fixme - read from TOC instead
-        ERASESIZE_BYTES = 4 * KILOBYTE, /**< Minimum Erase Block (bytes) */
-        ERASESIZE_WORD32 = ERASESIZE_BYTES/(sizeof(uint32_t)), /**< Erase Block (32-bit words) */
-
+        ERASESIZE_BYTES_DEFAULT = 4 * KILOBYTE, /**< Minimum Erase Block (bytes) */
         ECCB_POLL_TIME_NS = 400000, /**< max time from Manfred Walz is 400ms */
         ECCB_POLL_INCR_NS = 10, /**< minimum increment during poll */
     };
@@ -260,15 +412,17 @@ class PnorDD
      * @brief Compare the existing data in 1 erase block of the flash with
      *   the incoming data and write or erase as needed
      *
-     * @parm i_targetAddr  Starting flash address to write
-     * @parm i_wordsToWrite  Number of 32-bit words to write
+     * @parm i_blockStart  Start of Erase Block we're writing to
+     * @parm i_writeStart  Starting address where we want to write data.
+     * @parm i_bytesToWrite  Number of 32-bit words to write
      * @parm i_data  Buffer of data to write
      *
      * @return Error from operation
      */
-    errlHndl_t compareAndWriteBlock(uint32_t i_targetAddr,
-                                    uint32_t i_wordsToWrite,
-                                    uint32_t* i_data);
+    errlHndl_t compareAndWriteBlock(uint32_t i_blockStart,
+                                    uint32_t i_writeStart,
+                                    size_t i_bytesToWrite,
+                                    void* i_data);
 
     /**
      * @brief Determine the nearest flash address aligned to an erase block
@@ -279,7 +433,7 @@ class PnorDD
      */
     uint32_t findEraseBlock(uint32_t i_address)
     {
-        return (i_address - i_address%ERASESIZE_BYTES);
+        return (i_address - i_address%iv_erasesize_bytes);
     };
 
     /**
@@ -299,7 +453,7 @@ class PnorDD
         while( findEraseBlock(addr) < (i_address+i_byteSize) )
         {
             blocks++;
-            addr += ERASESIZE_BYTES;
+            addr += iv_erasesize_bytes;
         }
         return blocks;
     };
@@ -349,15 +503,17 @@ class PnorDD
   private: // Variables
     /**
      * @brief Mutex to prevent concurrent PNOR accesses
+     *     This needs to be static so we can mutex across multiple instances of PnorDD
      */
-    mutex_t iv_mutex;
+    static mutex_t cv_mutex;
 
+    //TODO: Make this dynamically sized.
     /**
      * @brief Track PNOR erases for wear monitoring
      *    (making this static so tools can find it easier)
      *    track writes by page (=erase block)
      */
-    uint8_t iv_erases[PNORSIZE/ERASESIZE_BYTES];
+    uint8_t* iv_erases;
 
     /** 
      * @brief Determine how much of the PNOR logic to use,
@@ -365,6 +521,25 @@ class PnorDD
      *   in the current VPO and Simics models
      */
     PnorMode_t iv_mode;
+
+    /**
+     * @brief describes the erase block size, set based on NOR chip type
+     *
+     */
+    uint32_t iv_erasesize_bytes;
+
+    /**
+     * @brief CHIP ID or the NOR chip attached to SFC.
+     *
+     */
+    static uint32_t cv_nor_chipid;
+
+    /**
+     * @brief indicates if SFC initialization has been performed.
+     *
+     */
+    static bool cv_sfcInitDone;
+
 
     // Needed for testcases
     friend class PnorDdTest;
