@@ -23,7 +23,7 @@
 ROOTPATH = ../../..
 MODULE = util
 
-OBJS = threadpool.o
+OBJS = threadpool.o utilbase.o utilstream.o utilmem.o utilfile.o
 
 SUBDIRS = test.d
 

@@ -218,6 +218,14 @@ const compId_t HBTRACE_COMP_ID = 0x1500;
 const char HBTRACE_COMP_NAME[] = "trace";
 //@}
 
+/** @name UTIL
+ *  Util component
+ */
+//@{
+const compId_t UTIL_COMP_ID = 0x1600;
+const char UTIL_COMP_NAME[] = "util";
+//@}
+
 /** @name RESERVED
  *  Reserved component ID. x3100 is the component ID
  *  of FipS ERRL component. Due to our use of
