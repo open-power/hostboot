@@ -272,27 +272,10 @@ bool isSlavePresent( const TARGETING::Target* i_target )
 }; //end FSI namespace
 
 
-/**
- * @brief   set up _start() task entry procedure for FSI daemon
- */
-TASK_ENTRY_MACRO( FsiDD::init );
-
 
 /********************
  Public Methods
  ********************/
-
-/**
- * STATIC
- * @brief Static Initializer
- */
-void FsiDD::init( void* i_taskArgs )
-{
-    TRACFCOMP(g_trac_fsi, "FsiDD::init> " );
-    // nothing to do here...
-}
-
-
 
 
 /**

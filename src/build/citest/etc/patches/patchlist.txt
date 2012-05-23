@@ -1,0 +1,14 @@
+# Example Format
+Brief description of the problem or reason for patch
+-RTC: Task/Story used to remove this patch	
+-CMVC: Defect/Req for checking the changes into fips810		
+-Files: list of files		
+-Coreq: list of associated changes, e.g. workarounds.presimsetup
+
+
+New actions for instruction state processing
+-RTC: Task 43959 will remove the patches
+-CMVC: D841334 is integrating the changes
+-Files: p8_inst.act
+-Coreq: there are related changes in workarounds.postsimsetup
+

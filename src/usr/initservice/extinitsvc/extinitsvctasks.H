@@ -107,12 +107,12 @@ const TaskInfo g_exttaskinfolist[]   =   {
          * @brief   FSI SCOM Device Driver
          */
         {
-                "libfsiscom.so" ,                           // taskname
-                NULL,                                       // no pointer to fn
-                {
-                        INIT_TASK,                          // task type
-                        EXT_IMAGE,                          // Extended Module
-                }
+            "libfsiscom.so" ,                           // taskname
+            NULL,                                       // no pointer to fn
+            {
+                INIT_TASK,                          // task type
+                EXT_IMAGE,                          // Extended Module
+            }
         },
 
         /**
@@ -216,6 +216,18 @@ const TaskInfo g_exttaskinfolist[]   =   {
                         INIT_TASK,                          // task type
                         EXT_IMAGE,                          // Extended Module
                 }
+        },
+
+        /**
+         * @brief   Start slave threads
+         */
+        {
+            "libthread_activate.so" ,               // taskname
+            NULL,                                   // no pointer to fn
+            {
+                START_TASK,                         // task type
+                EXT_IMAGE,                          // Extended Module
+            }
         },
 
 // TODO: Should these be automatically loaded / unloaded by istepdispatcher?

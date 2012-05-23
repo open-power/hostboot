@@ -1,0 +1,32 @@
+
+
+##### from src/build/etc/patches/p8_master.por.patch
+
+ACTIONS=p8_inst.act
+
+#dc01
+########################## Logical Instruction State ###################
+REGSPACE THREADSTATE CHIPLET ex
+  ### Current State ###
+  # 0: thread is in POR state
+  # 1: thread is quiesced
+  # 2: thread is running
+  # 3: thread is in maint mode
+  # 4: thread is active (not in SLEEP or NAP or POR)
+  # 5: thread is in NAP state
+  # 6: thread is in SLEEP state
+  # 7: thread is in WINKLE state
+
+  # One register per thread
+  0x0, 32
+  0x1, 32
+  0x2, 32
+  0x3, 32
+  0x4, 32
+  0x5, 32
+  0x6, 32
+  0x7, 32
+
+END
+
+##### end patch

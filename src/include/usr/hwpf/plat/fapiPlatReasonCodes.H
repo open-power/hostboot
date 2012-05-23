@@ -51,6 +51,7 @@ namespace fapi
         MOD_ATTR_GET_TARGET_NAME                   = 0x0B,
         MOD_FAPI_GET_ASSOCIATE_DIMMS               = 0x0C,
         MOD_EDI_EI_IO_RUN_TRAINING                 = 0x0D,
+        MOD_THREAD_ACTIVATE                        = 0x0E, //@fixme RTC:42816
     };
 
     /**
@@ -77,6 +78,9 @@ namespace fapi
         RC_MIXED_PBUS_CONNECTION      = HWPF_COMP_ID | 0x19,
         RC_SAME_CHIP_PBUS_CONNECTION  = HWPF_COMP_ID | 0x1A,
         RC_CONFLICT_PBUS_CONNECTION   = HWPF_COMP_ID | 0x1B,
+        RC_NO_MASTER_CORE_TARGET      = HWPF_COMP_ID | 0x1C, 
+        RC_THREAD_IN_WRONG_STATE      = HWPF_COMP_ID | 0x1D, //@fixme RTC:42816
+        RC_THREAD_DID_NOT_START       = HWPF_COMP_ID | 0x1E, //@fixme RTC:42816
     };
 
     /**
