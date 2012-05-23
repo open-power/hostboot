@@ -259,6 +259,8 @@ namespace MBOX
             respond_q_t iv_respondq;    //!< msg respond pending list
             registry_t  iv_registry;    //!< Registered queue
             DmaBuffer   iv_dmaBuffer;   //!< DMA buffer manager
+            send_q_t    iv_pendingq;    //!< Pending for queue registration
+
             TARGETING::Target * iv_trgt;//!< mailbox device driver target
             msg_t *     iv_shutdown_msg;//!< Message to shutdown mbox
             bool        iv_rts;         //!< ready to send flag

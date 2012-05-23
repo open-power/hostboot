@@ -545,6 +545,8 @@ void MailboxSp::recv_msg(mbox_msg_t & i_mbox_msg)
     *msg = i_mbox_msg.msg_payload;  // copy
 
     // Handle moving data from DMA buffer
+    // TODO for pending messages the extra_data is not a DMA address
+    //      so change this to check for valid DMA address instead of NULL.
     if(msg->extra_data != NULL)
     {
         uint64_t msg_sz = msg->data[1];
@@ -698,53 +700,21 @@ void MailboxSp::recv_msg(mbox_msg_t & i_mbox_msg)
         //  For NOW, ignore FSP mailbox stuff bounced back by the echo server
         else if(i_mbox_msg.msg_queue_id != FSP_MAILBOX_MSGQ)
         {
+            // Queue message to wait until queue is registered.
+            // TODO - on shutdown, report if iv_pending is not empty.
+
+            // copy in non-dma instance of payload msg
+            i_mbox_msg.msg_payload = *msg;
+
+            iv_pendingq.push_back(i_mbox_msg);
 
             TRACFCOMP(g_trac_mbox,
-                      ERR_MRK
-                      "MailboxSp::recv_msg - Message dropped. "
-                      "Unregistered msg queue id 0x%x",
+                      INFO_MRK
+                      "MailboxSp::recv_msg. Unregistered msg queue id 0x%x"
+                      " message queued.",
                       i_mbox_msg.msg_queue_id);
 
-            //  Send a message to the FSP
-            mbox_msg_t mbox_msg;
-            mbox_msg.msg_queue_id = FSP_MAILBOX_MSGQ;
-            mbox_msg.msg_payload.type = MSG_INVALID_MSG_QUEUE_ID;
-            mbox_msg.msg_payload.data[0] = i_mbox_msg.msg_queue_id;
-            mbox_msg.msg_payload.extra_data = NULL;
-            mbox_msg.msg_payload.__reserved__async = 0; // async
 
-
-            // prevent infinite loop with echo mb server
-            if(i_mbox_msg.msg_queue_id != FSP_MAILBOX_MSGQ)
-            {
-                send_msg(&mbox_msg);
-            }
-
-
-            /*@ errorlog tag
-             * @errortype       ERRL_SEV_CRITICAL_SYS_TERM
-             * @moduleid        MBOX::MOD_MBOXSRV_RCV
-             * @reasoncode      MBOX::RC_UNREGISTERED_MSG_QUEUE
-             * @userdata1       msg queueid
-             * @defdesc         msg queue type is not registered with the
-             *                  mailbox. Message dropped.
-             *
-             */
-            err = new ERRORLOG::ErrlEntry
-                (
-                 ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
-                 MBOX::MOD_MBOXSRV_RCV,
-                 MBOX::RC_UNREGISTERED_MSG_QUEUE,    //  reason Code
-                 i_mbox_msg.msg_queue_id,            // rc from msg_send
-                 0
-                );
-
-            // This trace will have the message content.
-            err->collectTrace(HBMBOXMSG_TRACE_NAME);
-
-            errlCommit(err,HBMBOX_COMP_ID);
-
-            free(msg->extra_data);
             msg_free(msg);
         }
         else // This is a bounce-back msg from the echo server - Ignore
@@ -921,6 +891,24 @@ errlHndl_t MailboxSp::msgq_register(queue_id_t i_queue_id, msg_q_t i_msgQ)
 
         TRACFCOMP(g_trac_mbox,INFO_MRK"MailboxSp::msgq_register queue id 0x%x",
                   i_queue_id);
+
+        // Look for pending messages and send them
+        // remove_if and remove_copy_if not available
+        size_t size = iv_pendingq.size();
+        while(size--)
+        {
+            send_q_t::iterator mbox_msg = iv_pendingq.begin();
+            if(i_queue_id == mbox_msg->msg_queue_id)
+            {
+                recv_msg(*mbox_msg);
+            }
+            else
+            {
+                iv_pendingq.push_back(*mbox_msg);
+            }
+
+            iv_pendingq.pop_front();
+        }
     }
     else
     {

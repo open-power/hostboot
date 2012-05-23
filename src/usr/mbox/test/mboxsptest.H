@@ -36,6 +36,7 @@
 #include <limits.h>
 #include <mbox/mboxif.H>
 #include <targeting/common/util.H>
+#include <sys/time.h>
 
 extern trace_desc_t* g_trac_mbox;
 
@@ -57,17 +58,12 @@ class MboxSPTest : public CxxTest::TestSuite
           {
               return;
           }
+
+          errlHndl_t err = NULL;
           // requires proper simics model
           // msg will get echoed which looks like a new msg from FSP
           // Register a message queue to receive it.
           msg_q_t msgQ = msg_q_create();
-          errlHndl_t err = MBOX::msgq_register(MBOX::HB_TEST_MSGQ,msgQ);
-
-          if(err)
-          {
-              TS_FAIL("MBOX: Could not register message queue");
-              errlCommit(err,HBMBOX_COMP_ID);
-          }
 
           // Send some messages - DMA size will force a request
           // to be sent to FSP for more buffers.
@@ -87,6 +83,18 @@ class MboxSPTest : public CxxTest::TestSuite
                   errlCommit(err,HBMBOX_COMP_ID);
               }
           }
+
+          nanosleep(0,1000000);
+
+          // late registration to test ability to queue message until
+          // a queue is ready
+          err = MBOX::msgq_register(MBOX::HB_TEST_MSGQ,msgQ);
+          if(err)
+          {
+              TS_FAIL("MBOX: Could not register message queue");
+              errlCommit(err,HBMBOX_COMP_ID);
+          }
+
 
           // Send last message
           msg_t * msg = msg_allocate();
