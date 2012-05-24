@@ -1,0 +1,63 @@
+<!--  IBM_PROLOG_BEGIN_TAG
+     This is an automatically generated prolog.
+
+     $Source: src/usr/hwpf/hwp/mvpd_pdr_errors.xml $
+
+     IBM CONFIDENTIAL
+
+     COPYRIGHT International Business Machines Corp. 2012
+
+     p1
+
+     Object Code Only (OCO) source materials
+     Licensed Internal Code Source Materials
+     IBM HostBoot Licensed Internal Code
+
+     The source code for this program is not published or other-
+     wise divested of its trade secrets, irrespective of what has
+     been deposited with the U.S. Copyright Office.
+
+     Origin: 30
+
+     IBM_PROLOG_END_TAG -->
+
+<hwpErrors>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_REPAIR_RING_INVALID_RINGBUF_PTR</rc>
+    <description>
+        Invalid input parameter:  pointer to ringbuffer was NULL
+    </description>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_REPAIR_RING_ALLOC_FAIL</rc>
+    <description>
+        Failed to allocate buffer space for repair ring data
+    </description>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_REPAIR_RING_INVALID_MAGIC</rc>
+    <description>
+        Failed to allocate buffer space for repair ring data
+    </description>
+    <ffdc>MAGIC</ffdc>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_REPAIR_RING_INVALID_SIZE</rc>
+    <description>
+        Invalid input parameter:  size of buffer was not big enough to copy repair ring data
+    </description>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_REPAIR_RING_NOT_FOUND</rc>
+    <description>
+        The repair ring specified was not found.
+    </description>
+    <ffdc>RING_MODIFIER</ffdc>
+  </hwpError>
+  <!-- *********************************************************************** -->
+</hwpErrors>

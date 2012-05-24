@@ -1,4 +1,4 @@
-#  IBM_PROLOG_BEGIN_TAG
+#   IBM_PROLOG_BEGIN_TAG
 #  This is an automatically generated prolog.
 #
 #  $Source: src/usr/hwpf/hwp/makefile $
@@ -37,7 +37,8 @@ OBJS = fapiTestHwp.o \
        fapiTestHwpDq.o \
        fapiHwpExecInitFile.o \
        dimmBadDqBitmapFuncs.o \
-       dimmBadDqBitmapAccessHwp.o
+       dimmBadDqBitmapAccessHwp.o \
+       RepairRingFunc.o
 
 SUBDIRS	=	dmi_training.d  sbe_centaur_init.d mc_init.d \
             dram_training.d activate_powerbus.d build_winkle_images.d \

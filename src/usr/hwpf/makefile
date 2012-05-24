@@ -37,8 +37,8 @@ HWP_ERROR_XML_FILES = hwp/fapiHwpErrorInfo.xml   \
     hwp/dram_training/memory_errors.xml \
     hwp/start_clocks_on_nest_chiplets/proc_start_clocks_chiplets/proc_start_clocks_chiplets_errors.xml \
     hwp/edi_ei_initialization/proc_fab_iovalid/proc_fab_smp_errors.xml  \
-    hwp/build_winkle_images/proc_slw_build/proc_slw_build_errors.xml
-
+    hwp/build_winkle_images/proc_slw_build/proc_slw_build_errors.xml    \
+    hwp/mvpd_errors.xml
 
 HWP_ATTR_XML_FILES = hwp/memory_attributes.xml \
                      hwp/L2_L3_attributes.xml \
