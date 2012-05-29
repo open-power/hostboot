@@ -1,4 +1,4 @@
-#  IBM_PROLOG_BEGIN_TAG
+#   IBM_PROLOG_BEGIN_TAG
 #  This is an automatically generated prolog.
 #
 #  $Source: src/usr/hwpf/hwp/build_winkle_images/makefile $
@@ -19,8 +19,7 @@
 #
 #  Origin: 30
 #
-#  IBM_PROLOG_END
-
+#  IBM_PROLOG_END_TAG
 ROOTPATH = ../../../../..
 
 MODULE = build_winkle_images
@@ -41,14 +40,24 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images
 ##  NOTE: add a new EXTRAINCDIR when you add a new HWP
 ##  EXAMPLE:
 ##  EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/<HWP_dir>
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/proc_slw_build
+
+CUSTOMFLAGS+= -D __FAPI
 
 
 ##  NOTE: add new object files when you add a new HWP
-OBJS =  build_winkle_images.o
+OBJS =  build_winkle_images.o   \
+        p8_image_help.o         \
+        p8_pore_static_data.o   \
+        p8_scan_compression.o   \
+        pore_inline_assembler.o \
+        proc_slw_build.o        \
+        sbe_xip_image.o
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 ##  EXAMPLE:
 #   VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/<HWP_dir>
+VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/proc_slw_build
 
 ##  Point to the PORE image in PNOR
 BINARY_FILES = $(IMGDIR)/procpore.dat:1f6e49c91e2a2b0df5fad6c215c8f09d9f19fce6

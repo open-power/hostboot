@@ -58,7 +58,7 @@
 #include    "build_winkle_images.H"
 
 //  Uncomment these files as they become available:
-// #include    "host_build_winkle/host_build_winkle.H"
+#include    "proc_slw_build/proc_slw_build.H"
 // #include    "proc_set_pore_bar/proc_set_pore_bar.H"
 
 namespace   BUILD_WINKLE_IMAGES
@@ -77,7 +77,7 @@ using   namespace   DeviceFW;
  *
  */
 void    * const g_pOutputPoreImg
-                    =   reinterpret_cast<void * const >(OUTPUT_PORE_IMAGE);
+                    =   reinterpret_cast<void * const >(OUTPUT_PORE_IMG_ADDR);
 
 /**
  *  @brief Load PORE image and return a pointer to it, or NULL
@@ -164,7 +164,7 @@ void    call_host_build_winkle( void    *io_pArgs )
     const char                  *l_pPoreImage   =   NULL;
     size_t                      l_poreSize      =   0;
     void                        *l_pImageOut    =   NULL;
-    uint32_t                    l_sizeImageOut  =   0;
+    uint32_t                    l_sizeImageOut  =   MAX_OUTPUT_PORE_IMG_SIZE;
 
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -213,23 +213,22 @@ void    call_host_build_winkle( void    *io_pArgs )
                             (const_cast<TARGETING::Target*>(l_cpu_target)) );
 
         //
-        //  stub - get address of output buffer for PORE image
+        //  stub - get address of output buffer for PORE image for this CPU,
+        //          and load it there
         //
-        l_pImageOut =   g_pOutputPoreImg;
+        l_pImageOut     =   g_pOutputPoreImg;
+        l_sizeImageOut  =   MAX_OUTPUT_PORE_IMG_SIZE;
 
-#if 0
-        // $$$$$ comment out for now    $$$$$
+
         //  call the HWP with each fapi::Target
         FAPI_INVOKE_HWP( l_errl,
                          proc_slw_build,
                          l_fapi_cpu_target,
-                         reinterpret_cast<const void*>(poreImage),
-                         reinterpret_cast<uint32_t>(poreSize),
+                         reinterpret_cast<const void*>(l_pPoreImage),
+                         static_cast<uint32_t>(l_poreSize),
                          l_pImageOut,
                          &l_sizeImageOut
                        );
-#endif
-
         if ( l_errl )
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,

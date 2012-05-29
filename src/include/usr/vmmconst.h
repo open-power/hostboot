@@ -5,7 +5,7 @@
  *
  *  IBM CONFIDENTIAL
  *
- *  COPYRIGHT International Business Machines Corp. 2011 - 2012
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
  *
  *  p1
  *
@@ -83,7 +83,9 @@ enum BlockPriority
 #define SLBE_b 12
 
 /** Hardwired pointer to output PORE image, temporary location */
-#define OUTPUT_PORE_IMAGE   0x780000
+/** MAX image size is 512 K */
+#define OUTPUT_PORE_IMG_ADDR        0x780000
+#define MAX_OUTPUT_PORE_IMG_SIZE    512*1024
 
 
 /**
