@@ -119,8 +119,9 @@ void* PageManager::_allocatePage(size_t n)
 
     if (NULL == page)
     {
-	// TODO: Add abort instead.
-        task_t* t = TaskManager::getCurrentTask();
+	// TODO: Add abort instead?
+        register task_t* t;
+        asm volatile("mr %0, 13" : "=r"(t));
 	printk("Insufficient memory for alloc of size %zd page on tid=%d!\n", n, t->tid);
         printk("Pages available=%ld\n",iv_pagesAvail);
 	while(1);
