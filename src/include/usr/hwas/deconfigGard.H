@@ -35,6 +35,7 @@
 #include <sys/sync.h>
 #include <util/singleton.H>
 #include <errl/errlentry.H>
+#include <hwas/common/hwasCommon.H>
 #include <targeting/common/attributes.H>
 
 namespace HWAS

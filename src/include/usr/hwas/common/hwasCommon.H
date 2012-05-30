@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/include/usr/hwas/hwasCommon.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/include/usr/hwas/common/hwasCommon.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 /**
  *  @file hwasCommon.H
  *
@@ -32,7 +33,6 @@
 
 // 'system' headers
 #include <stdint.h>
-#include <errl/errlentry.H>
 #include <targeting/common/target.H>
 #include <targeting/common/targetservice.H>
 
@@ -41,7 +41,11 @@
 // following file needs to do
 //  #define HWAS_DBG(_fmt_, _args_...)
 //  #define HWAS_ERR(_fmt_, _args_...)
-#include <hwasPlatTrace.H>
+#include <hwas/hwasPlatTrace.H>
+
+// following file needs to do
+//  #define HWAS_ASSERT(_expr_...)
+#include <hwas/hwasPlatAssert.H>
 
 namespace HWAS
 {

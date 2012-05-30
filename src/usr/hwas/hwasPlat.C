@@ -1,44 +1,38 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/hwas/plat/hwasPlat.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/hwas/hwasPlat.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 /**
  *  @file hwasPlat.C
  *
  *  @brief Platform specifics
  */
 
-#include <hwas/hwas.H>
-#include <hwas/hwasCommon.H>
-#include <hwas/hwasError.H>
+#include <hwas/common/hwas.H>
+#include <hwas/common/hwasCommon.H>
+#include <hwas/common/hwasError.H>
 
 #include <devicefw/driverif.H>
 #include <initservice/taskargs.H>
-
-// trace setup; used by HWAS_DBG and HWAS_ERR macros
-trace_desc_t *g_trac_dbg_hwas   = NULL; // debug - fast
-trace_desc_t *g_trac_imp_hwas   = NULL; // important - slow
-
-TRAC_INIT(&g_trac_dbg_hwas, "HWAS",     2048 );
-TRAC_INIT(&g_trac_imp_hwas, "HWAS_I",   2048 );
 
 namespace HWAS
 {
@@ -73,12 +67,12 @@ errlHndl_t platReadIDEC(const TargetHandle_t &i_target)
                        ((id_ec & 0x000F000000000000ull) >> 44) |
                        ((id_ec & 0x0000F00000000000ull) >> 44));
         i_target->setAttr<ATTR_CHIP_ID>(id);
-        HWAS_DBG( "i_target %x (%p) - id %x ec %x",
+        HWAS_DBG( "i_target %.8X (%p) - id %x ec %x",
             i_target->getAttr<ATTR_HUID>(), i_target, id, ec);
     }
     else
     {   // errl was set - this is an error condition.
-        HWAS_ERR( "i_target %x (%p) - failed ID/EC read",
+        HWAS_ERR( "i_target %.8X (%p) - failed ID/EC read",
             i_target->getAttr<ATTR_HUID>(), i_target);
     }
 
@@ -106,7 +100,7 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
         errl = deviceRead(pTarget, &present, presentSize,
                                 DEVICE_PRESENT_ADDRESS());
 
-        if (errl != NULL)
+        if (unlikely(errl != NULL))
         {   // errl was set - this is an error condition.
             HWAS_ERR( "pTarget %.8X (%p) - failed presence detect",
                 pTarget->getAttr<ATTR_HUID>(), pTarget);

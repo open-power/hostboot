@@ -159,7 +159,11 @@ fsp.tar_CONTENTS = \
     $(addsuffix :targeting/,\
 	$(call ROOTPATH_WILDCARD_RECURSIVE,src/usr/targeting/common))\
     $(addsuffix :targeting/,\
-	$(call ROOTPATH_WILDCARD_RECURSIVE,src/include/usr/targeting/common))
+	$(call ROOTPATH_WILDCARD_RECURSIVE,src/include/usr/targeting/common)) \
+    $(addsuffix :hwas/,\
+	$(call ROOTPATH_WILDCARD_RECURSIVE,src/usr/hwas/common))\
+    $(addsuffix :hwas/,\
+	$(call ROOTPATH_WILDCARD_RECURSIVE,src/include/usr/hwas/common))
 
 #
 # Portions of the FSP sandbox which must be rebuilt based on file changes.

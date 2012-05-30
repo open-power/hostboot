@@ -31,11 +31,10 @@
 #include <errl/errlmanager.H>
 #include <errl/errludtarget.H>
 #include <hwas/deconfigGard.H>
-#include <hwas/hwas_reasoncodes.H>
+#include <hwas/common/hwas_reasoncodes.H>
 #include <pnor/pnorif.H>
 
 // Trace definition
-trace_desc_t* g_trac_deconf = NULL;
 #define __COMP_TD__ g_trac_deconf
 
 // TODO The DeconfigGard code needs to trace a target. The current recommended
@@ -54,6 +53,7 @@ trace_desc_t* g_trac_deconf = NULL;
 
 namespace HWAS
 {
+HWAS_TD_t g_trac_deconf = NULL;
 
 errlHndl_t collectGard()
 {

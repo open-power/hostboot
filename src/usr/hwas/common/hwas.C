@@ -1,26 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/hwas/hwas.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
-
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/hwas/common/hwas.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 /**
  *  @file hwas.C
  *
@@ -34,20 +34,25 @@
 // Includes
 /******************************************************************************/
 #include <stdint.h>
-#include <assert.h>
 
-#include <initservice/taskargs.H>
 #include <targeting/common/commontargeting.H>
 
-#include <hwas/hwas.H>
-#include <hwas/hwasCommon.H>
-#include <hwas/hwasError.H>
+#include <hwas/common/hwas.H>
+#include <hwas/common/hwasCommon.H>
+#include <hwas/common/hwasError.H>
 
 namespace HWAS
 {
 
 using namespace TARGETING;
+using namespace HWAS::COMMON;
 
+// trace setup; used by HWAS_DBG and HWAS_ERR macros
+HWAS_TD_t g_trac_dbg_hwas   = NULL; // debug - fast
+HWAS_TD_t g_trac_imp_hwas   = NULL; // important - slow
+
+TRAC_INIT(&g_trac_dbg_hwas, "HWAS",     1024 );
+TRAC_INIT(&g_trac_imp_hwas, "HWAS_I",   1024 );
 
 /**
  * @brief       simple helper fn to get and set hwas state to poweredOn,
@@ -100,11 +105,11 @@ errlHndl_t discoverTargets()
         Target* pSys;
         targetService().getTopLevelTarget(pSys);
 
-        assert(pSys, "HWAS discoverTargets: no CLASS_SYS TopLevelTarget found");
+        HWAS_ASSERT(pSys, "HWAS discoverTargets: no CLASS_SYS TopLevelTarget found");
 
         // mark this as present
         enableHwasState(pSys, true);
-        HWAS_DBG("pSys %x (%p) - marked present",
+        HWAS_DBG("pSys %.8X (%p) - marked present",
             pSys->getAttr<ATTR_HUID>(), pSys);
 
         // find CLASS_ENC
@@ -121,7 +126,7 @@ errlHndl_t discoverTargets()
 
             // mark it as present
             enableHwasState(pEnc, true);
-            HWAS_DBG("pEnc %x (%p) - marked present",
+            HWAS_DBG("pEnc %.8X (%p) - marked present",
                 pEnc->getAttr<ATTR_HUID>(), pEnc);
         } // for pEnc_it
 
@@ -177,7 +182,7 @@ errlHndl_t discoverTargets()
                 // errl is now NULL
             }
 
-            HWAS_DBG("pTarget %x (%p) - detected present %s functional",
+            HWAS_DBG("pTarget %.8X (%p) - detected present %s functional",
                 pTarget->getAttr<ATTR_HUID>(), pTarget,
                 isFunctional ? "and" : "NOT");
 
@@ -195,7 +200,7 @@ errlHndl_t discoverTargets()
             {
                 TargetHandle_t pDesc = *pDesc_it;
                 enableHwasState(pDesc, isFunctional);
-                HWAS_DBG("pDesc %x (%p) - marked present %s functional",
+                HWAS_DBG("pDesc %.8X (%p) - marked present %s functional",
                     pDesc->getAttr<ATTR_HUID>(), pDesc,
                     isFunctional ? "and" : "NOT");
             }
@@ -203,13 +208,13 @@ errlHndl_t discoverTargets()
 
     } while (0);
 
-    if (errl != NULL)
+    if (errl == NULL)
     {
-        HWAS_ERR("discoverTargets returning errl %p", errl);
+        HWAS_INF("discoverTargets exit with no error");
     }
     else
     {
-        HWAS_INF("discoverTargets exit with no error");
+        HWAS_ERR("discoverTargets returning errl %p", errl);
     }
     return errl;
 } // discoverTargets

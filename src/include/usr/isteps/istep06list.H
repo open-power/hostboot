@@ -5,7 +5,7 @@
  *
  *  IBM CONFIDENTIAL
  *
- *  COPYRIGHT International Business Machines Corp. 2011 - 2012
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
  *
  *  p1
  *
@@ -37,8 +37,8 @@
 #include    <initservice/initsvcstructs.H>
 #include    <initservice/initsvcreasoncodes.H>
 
-#include    <hwas/hwas.H>
-#include    <hwas/plat/hostbootIstep.H>
+#include    <hwas/common/hwas.H>
+#include    <hwas/hostbootIstep.H>
 
 
 namespace   INITSERVICE

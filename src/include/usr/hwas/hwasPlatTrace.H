@@ -1,27 +1,28 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/include/usr/hwas/plat/hwasPlatTrace.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/include/usr/hwas/hwasPlatTrace.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 /**
- *  @file hwasPlatTrace.H
+ *  @file hwas/hwasPlatTrace.H
  *
  *  @brief Defines platform interfaces and whatnot needed for trace in the
  *         HWAS common and platform specific functions
@@ -36,8 +37,12 @@
 //******************************************************************************
 // Trace descriptors that are defined in a C file
 //******************************************************************************
-extern trace_desc_t *g_trac_dbg_hwas; // debug - fast
-extern trace_desc_t *g_trac_imp_hwas; // important - slow
+namespace HWAS
+{
+    typedef trace_desc_t* HWAS_TD_t;
+    extern HWAS_TD_t g_trac_dbg_hwas; // debug - fast
+    extern HWAS_TD_t g_trac_imp_hwas; // important - slow
+}
 
 // Debug traces (go into fast trace buffer that can wrap often)
 #define HWAS_DBG(_fmt_, _args_...) \

@@ -62,10 +62,10 @@ using namespace fapi;
 /******************************************************************************/
 // Globals/Constants
 /******************************************************************************/
-extern trace_desc_t *g_trac_imp_hwas;
-
 namespace HWAS
 {
+
+extern HWAS_TD_t g_trac_imp_hwas;
 
 void    testHWP( void * io_pArgs )
 {

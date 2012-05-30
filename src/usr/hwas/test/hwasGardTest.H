@@ -38,7 +38,7 @@
 #include <errl/errlmanager.H>
 #include <targeting/common/targetservice.H>
 #include <hwas/deconfigGard.H>
-#include <hwas/hwas_reasoncodes.H>
+#include <hwas/common/hwas_reasoncodes.H>
 
 class HwasGardTest: public CxxTest::TestSuite
 {

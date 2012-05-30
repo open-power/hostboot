@@ -39,7 +39,7 @@
 // Includes
 /******************************************************************************/
 #include <stdint.h>
-#include <errl/errlentry.H>
+#include <hwas/common/hwasError.H>
 
 namespace HWAS
 {

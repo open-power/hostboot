@@ -32,7 +32,7 @@
 
 .if(${CONTEXT:R} == "ppc")
 
-EXPINC_SUBDIRS   += targeting
+EXPINC_SUBDIRS   += targeting hwas
 OBJECTS_SUBDIRS  += 
 EXPLIB_SUBDIRS   += 
 EXPSHLIB_SUBDIRS += targeting
