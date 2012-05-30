@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/mvpd/mvpd.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/mvpd/mvpd.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #ifndef __MVPD_H
 #define __MVPD_H
 
@@ -184,13 +185,15 @@ const mvpdKeywordInfo mvpdKeywords[] =
  * @param[in] i_target - Processor Target device
  *
  * @param [in/out] io_buffer - Pointer to the data that was read from
- *       the target device.  It will also be used to contain data to
- *       be written to the device.
+ *       the target device.  This parameter, when set to NULL, will return the
+ *       keyword size value in io_buflen.
  *
  * @param [in/out] io_buflen - Length of the buffer to be read or written
  *       to/from the target.  This value should indicate the size of the
  *       io_buffer parameter that has been allocated.  Being returned it will
  *       indicate the number of valid bytes in the buffer being returned.
+ *       This parameter will contain the size of a keyword when the io_buffer
+ *       parameter is passed in NULL.
  *
  * @param [in] i_accessType - Access Type - See DeviceFW::AccessType in
  *       usrif.H

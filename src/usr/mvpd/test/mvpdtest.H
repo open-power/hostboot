@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/mvpd/test/mvpdtest.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/mvpd/test/mvpdtest.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #ifndef __MVPDTEST_H
 #define __MVPDTEST_H
 
@@ -53,11 +54,6 @@ struct mvpdTestData
 {
     mvpdRecord record;
     mvpdKeyword keyword;
-
-    // NOTE: current sizes will be based off of dummy data that we have
-    // now plus approximately 10% as a buffer for future growth.  These
-    // may need to be tweaked later.
-    size_t size;
 };
 
 /**
@@ -67,129 +63,129 @@ struct mvpdTestData
  */
 mvpdTestData mvpdData[] =
 {
-    { CRP0, VD,     0x04 },
-    { CRP0, ED,     0x23 },
-    { CRP0, TE,     0x13 },
-    { CRP0, DD,     0x07 },
-    { CRP0, pdP,    0x150 },
-    { CRP0, ST,     0x05 },
+    { CRP0, VD },
+    { CRP0, ED },
+    { CRP0, TE },
+    { CRP0, DD },
+    { CRP0, pdP },
+    { CRP0, ST },
 //    { CRP0, DN,     0x03 }, // TODO - This doesn't match documentation,
 //                                      pulling out for now
-    { CP00, VD,     0x04 },
-    { CP00, PG,     0x44 },
-    { CP00, PK,     0x45 },
-    { CP00, pdR,    0x5f90 },
-    { CP00, pdV,    0x130 },
-    { CP00, pdH,    0x190 },
-    { CP00, pdP,    0x1c0 },
-    { CP00, SB,     0x15 },
-    { LRP0, VD,     0x04 },
-    { LRP0, pdV,    0x150 },
-    { LRP0, pdP,    0x380 },
-    { LRP0, pdM,    0x220},
-    { LRP1, VD,     0x04 },
-    { LRP1, pdV,    0x150 },
-    { LRP1, pdP,    0x380 },
-    { LRP1, pdM,    0x220},
-    { LRP2, VD,     0x04 },
-    { LRP2, pdV,    0x150 },
-    { LRP2, pdP,    0x380 },
-    { LRP2, pdM,    0x220},
-    { LRP3, VD,     0x04 },
-    { LRP3, pdV,    0x150 },
-    { LRP3, pdP,    0x380 },
-    { LRP3, pdM,    0x220},
-    { LRP4, VD,     0x04 },
-    { LRP4, pdV,    0x150 },
-    { LRP4, pdP,    0x380 },
-    { LRP4, pdM,    0x220},
-    { LRP5, VD,     0x04 },
-    { LRP5, pdV,    0x150 },
-    { LRP5, pdP,    0x380 },
-    { LRP5, pdM,    0x220},
-    { LRP6, VD,     0x04 },
-    { LRP6, pdV,    0x150 },
-    { LRP6, pdP,    0x380 },
-    { LRP6, pdM,    0x220},
-    { LRP7, VD,     0x04 },
-    { LRP7, pdV,    0x150 },
-    { LRP7, pdP,    0x380 },
-    { LRP7, pdM,    0x220},
-    { LRP8, VD,     0x04 },
-    { LRP8, pdV,    0x150 },
-    { LRP8, pdP,    0x380 },
-    { LRP8, pdM,    0x220},
-    { LRP9, VD,     0x04 },
-    { LRP9, pdV,    0x150 },
-    { LRP9, pdP,    0x380 },
-    { LRP9, pdM,    0x220},
-    { LRPA, VD,     0x04 },
-    { LRPA, pdV,    0x150 },
-    { LRPA, pdP,    0x380 },
-    { LRPA, pdM,    0x220},
-    { LRPB, VD,     0x04 },
-    { LRPB, pdV,    0x150 },
-    { LRPB, pdP,    0x380 },
-    { LRPB, pdM,    0x220},
-    { LWP0, VD,     0x04 },
-    { LWP0, pd2,    0x60 },
-    { LWP0, pd3,    0x60 },
-    { LWP0, IN,     0x19 },
-    { LWP1, VD,     0x04 },
-    { LWP1, pd2,    0x60 },
-    { LWP1, pd3,    0x60 },
-    { LWP1, IN,     0x19 },
-    { LWP2, VD,     0x04 },
-    { LWP2, pd2,    0x60 },
-    { LWP2, pd3,    0x60 },
-    { LWP2, IN,     0x19 },
-    { LWP3, VD,     0x04 },
-    { LWP3, pd2,    0x60 },
-    { LWP3, pd3,    0x60 },
-    { LWP3, IN,     0x19 },
-    { LWP4, VD,     0x04 },
-    { LWP4, pd2,    0x60 },
-    { LWP4, pd3,    0x60 },
-    { LWP4, IN,     0x19 },
-    { LWP5, VD,     0x04 },
-    { LWP5, pd2,    0x60 },
-    { LWP5, pd3,    0x60 },
-    { LWP5, IN,     0x19 },
-    { LWP6, VD,     0x04 },
-    { LWP6, pd2,    0x60 },
-    { LWP6, pd3,    0x60 },
-    { LWP6, IN,     0x19 },
-    { LWP7, VD,     0x04 },
-    { LWP7, pd2,    0x60 },
-    { LWP7, pd3,    0x60 },
-    { LWP7, IN,     0x19 },
-    { LWP8, VD,     0x04 },
-    { LWP8, pd2,    0x60 },
-    { LWP8, pd3,    0x60 },
-    { LWP8, IN,     0x19 },
-    { LWP9, VD,     0x04 },
-    { LWP9, pd2,    0x60 },
-    { LWP9, pd3,    0x60 },
-    { LWP9, IN,     0x19 },
-    { LWPA, VD,     0x04 },
-    { LWPA, pd2,    0x60 },
-    { LWPA, pd3,    0x60 },
-    { LWPA, IN,     0x19 },
-    { LWPB, VD,     0x04 },
-    { LWPB, pd2,    0x60 },
-    { LWPB, pd3,    0x60 },
-    { LWPB, IN,     0x19 },
-    { VINI, DR,     0x12 },
-    { VINI, VZ,     0x04 },
-    { VINI, CC,     0x06 },
-    { VINI, CE,     0x03 },
-    { VINI, FN,     0x09 },
-    { VINI, PN,     0x09 },
-    { VINI, SN,     0x0f },
-    { VINI, PR,     0x0a },
-    { VINI, HE,     0x06 },
-    { VINI, CT,     0x06 },
-    { VINI, HW,     0x04 },
+    { CP00, VD },
+    { CP00, PG },
+    { CP00, PK },
+    { CP00, pdR },
+    { CP00, pdV },
+    { CP00, pdH },
+    { CP00, pdP },
+    { CP00, SB },
+    { LRP0, VD },
+    { LRP0, pdV },
+    { LRP0, pdP },
+    { LRP0, pdM },
+    { LRP1, VD },
+    { LRP1, pdV },
+    { LRP1, pdP },
+    { LRP1, pdM },
+    { LRP2, VD },
+    { LRP2, pdV },
+    { LRP2, pdP },
+    { LRP2, pdM },
+    { LRP3, VD },
+    { LRP3, pdV },
+    { LRP3, pdP },
+    { LRP3, pdM },
+    { LRP4, VD },
+    { LRP4, pdV },
+    { LRP4, pdP },
+    { LRP4, pdM },
+    { LRP5, VD },
+    { LRP5, pdV },
+    { LRP5, pdP },
+    { LRP5, pdM },
+    { LRP6, VD },
+    { LRP6, pdV },
+    { LRP6, pdP },
+    { LRP6, pdM },
+    { LRP7, VD },
+    { LRP7, pdV },
+    { LRP7, pdP },
+    { LRP7, pdM },
+    { LRP8, VD },
+    { LRP8, pdV },
+    { LRP8, pdP },
+    { LRP8, pdM },
+    { LRP9, VD },
+    { LRP9, pdV },
+    { LRP9, pdP },
+    { LRP9, pdM },
+    { LRPA, VD },
+    { LRPA, pdV },
+    { LRPA, pdP },
+    { LRPA, pdM },
+    { LRPB, VD },
+    { LRPB, pdV },
+    { LRPB, pdP },
+    { LRPB, pdM },
+    { LWP0, VD },
+    { LWP0, pd2 },
+    { LWP0, pd3 },
+    { LWP0, IN },
+    { LWP1, VD },
+    { LWP1, pd2 },
+    { LWP1, pd3 },
+    { LWP1, IN },
+    { LWP2, VD },
+    { LWP2, pd2 },
+    { LWP2, pd3 },
+    { LWP2, IN },
+    { LWP3, VD },
+    { LWP3, pd2 },
+    { LWP3, pd3 },
+    { LWP3, IN },
+    { LWP4, VD },
+    { LWP4, pd2 },
+    { LWP4, pd3 },
+    { LWP4, IN },
+    { LWP5, VD },
+    { LWP5, pd2 },
+    { LWP5, pd3 },
+    { LWP5, IN },
+    { LWP6, VD },
+    { LWP6, pd2 },
+    { LWP6, pd3 },
+    { LWP6, IN },
+    { LWP7, VD },
+    { LWP7, pd2 },
+    { LWP7, pd3 },
+    { LWP7, IN },
+    { LWP8, VD },
+    { LWP8, pd2 },
+    { LWP8, pd3 },
+    { LWP8, IN },
+    { LWP9, VD },
+    { LWP9, pd2 },
+    { LWP9, pd3 },
+    { LWP9, IN },
+    { LWPA, VD },
+    { LWPA, pd2 },
+    { LWPA, pd3 },
+    { LWPA, IN },
+    { LWPB, VD },
+    { LWPB, pd2 },
+    { LWPB, pd3 },
+    { LWPB, IN },
+    { VINI, DR },
+    { VINI, VZ },
+    { VINI, CC },
+    { VINI, CE },
+    { VINI, FN },
+    { VINI, PN },
+    { VINI, SN },
+    { VINI, PR },
+    { VINI, HE },
+    { VINI, CT },
+    { VINI, HW },
     // TODO - Add VWML when available.
 };
 
@@ -264,20 +260,39 @@ class MVPDTest: public CxxTest::TestSuite
                                "testMvpdRead() - Proc Target [0] non functional!" );
 
                     continue;  // add continue because target is non functional
-                } 
+                }
 
                 uint8_t * theData = NULL;
                 size_t theSize = 0;
                 const uint32_t numCmds = sizeof(mvpdData)/sizeof(mvpdData[0]);
                 for( uint32_t curCmd = 0; curCmd < numCmds; curCmd++ )
                 {
-                    theSize = mvpdData[curCmd].size;
-                    theData = static_cast<uint8_t*>(malloc( theSize ));
-
-                    // Read record/keyword pair
                     cmds++;
                     theRecord = (uint64_t)mvpdData[curCmd].record;
                     theKeyword = (uint64_t)mvpdData[curCmd].keyword;
+                    err = deviceRead( theTarget,
+                                      NULL,
+                                      theSize,
+                                      DEVICE_MVPD_ADDRESS( theRecord,
+                                                           theKeyword ) );
+
+                    if( err )
+                    {
+                        fails++;
+                        TRACFCOMP( g_trac_mvpd,
+                                   ERR_MRK"testMvpdRead() - failure reading "
+                                   "keyword size!!  rec: 0x%04x, kwd: 0x%04x",
+                                   theRecord,
+                                   theKeyword );
+                        TS_FAIL( "testMvpdRead() - Failure reading keyword size!" );
+                        errlCommit( err,
+                                    MVPD_COMP_ID );
+                        continue;
+                    }
+
+                    theData = static_cast<uint8_t*>(malloc( theSize ));
+
+                    // Read record/keyword pair
                     err = deviceRead( theTarget,
                                       theData,
                                       theSize,
@@ -291,8 +306,8 @@ class MVPDTest: public CxxTest::TestSuite
                                    ERR_MRK"testMvpdRead() - Failure on Record: "
                                    "0x%04x, keyword: 0x%04x, of size: 0x%04x "
                                    "- test %d",
-                                   mvpdData[curCmd].record,
-                                   mvpdData[curCmd].keyword,
+                                   theRecord,
+                                   theKeyword,
                                    theSize, curCmd );
                         TS_FAIL( "testMvpdRead() - Failure during MVPD read!" );
                         errlCommit( err,
@@ -368,13 +383,13 @@ class MVPDTest: public CxxTest::TestSuite
                 {
 
                     TRACFCOMP( g_trac_mvpd,
-                               "testMvpdRead() - Proc Target [0] non functional!" );
+                               "testMvpdWrite() - Proc Target [0] non functional!" );
 
                     continue;  // add continue because target is non functional
-                } 
+                }
 
-                uint8_t * theData = NULL;
-                size_t theSize = 0;
+                size_t theSize = 1;
+                uint8_t * theData = new uint8_t[theSize];
 
                 cmds++;
                 err = deviceWrite( theTarget,
@@ -393,6 +408,12 @@ class MVPDTest: public CxxTest::TestSuite
                 {
                     delete err;
                     err = NULL;
+                }
+
+                if( NULL != theData )
+                {
+                    delete theData;
+                    theData = NULL;
                 }
             } while( 0 );
 
@@ -442,13 +463,14 @@ class MVPDTest: public CxxTest::TestSuite
                 {
 
                     TRACFCOMP( g_trac_mvpd,
-                               "testMvpdRead() - Proc Target [0] non functional!" );
+                               "testMvpdInvalidRecord() - Proc Target [0] non "
+                               "functional!" );
 
                     continue;  // add continue because target is non functional
-                } 
+                }
 
-                uint8_t * theData = NULL;
-                size_t theSize = 0;
+                size_t theSize = 1;
+                uint8_t * theData = new uint8_t[theSize];
 
                 cmds++;
                 err = deviceRead( theTarget,
@@ -469,6 +491,12 @@ class MVPDTest: public CxxTest::TestSuite
                 {
                     delete err;
                     err = NULL;
+                }
+
+                if( NULL != theData )
+                {
+                    delete theData;
+                    theData = NULL;
                 }
             } while( 0 );
 
@@ -517,13 +545,14 @@ class MVPDTest: public CxxTest::TestSuite
                 {
 
                     TRACFCOMP( g_trac_mvpd,
-                               "testMvpdRead() - Proc Target [0] non functional!" );
+                               "testMvpdMissingRecord() - Proc Target [0] "
+                               "non functional!" );
 
                     continue;  // add continue because target is non functional
-                } 
+                }
 
-                uint8_t * theData = NULL;
-                size_t theSize = 0;
+                size_t theSize = 1;
+                uint8_t * theData = new uint8_t[theSize];
 
                 cmds++;
                 err = deviceRead( theTarget,
@@ -541,6 +570,12 @@ class MVPDTest: public CxxTest::TestSuite
                 {
                     delete err;
                     err = NULL;
+                }
+
+                if( NULL != theData )
+                {
+                    delete theData;
+                    theData = NULL;
                 }
             } while( 0 );
 
@@ -589,13 +624,14 @@ class MVPDTest: public CxxTest::TestSuite
                 {
 
                     TRACFCOMP( g_trac_mvpd,
-                               "testMvpdRead() - Proc Target [0] non functional!" );
+                               "testMvpdMissingKeyword() - Proc Target [0] "
+                               "non functional!" );
 
                     continue;  // add continue because target is non functional
-                } 
+                }
 
-                uint8_t * theData = NULL;
-                size_t theSize = 0;
+                size_t theSize = 1;
+                uint8_t * theData = new uint8_t[theSize];
 
                 cmds++;
                 err = deviceRead( theTarget,
@@ -614,6 +650,12 @@ class MVPDTest: public CxxTest::TestSuite
                 {
                     delete err;
                     err = NULL;
+                }
+
+                if( NULL != theData )
+                {
+                    delete theData;
+                    theData = NULL;
                 }
             } while( 0 );
 
@@ -663,13 +705,14 @@ class MVPDTest: public CxxTest::TestSuite
                 {
 
                     TRACFCOMP( g_trac_mvpd,
-                               "testMvpdRead() - Proc Target [0] non functional!" );
+                               "testMvpdInvalidKeyword() - Proc Target [0] "
+                               "non functional!" );
 
                     continue;  // add continue because target is non functional
-                } 
+                }
 
-                uint8_t * theData = NULL;
-                size_t theSize = 0;
+                size_t theSize = 1;
+                uint8_t * theData = new uint8_t[theSize];
 
                 cmds++;
                 err = deviceRead( theTarget,
@@ -690,6 +733,12 @@ class MVPDTest: public CxxTest::TestSuite
                 {
                     delete err;
                     err = NULL;
+                }
+
+                if( NULL != theData )
+                {
+                    delete theData;
+                    theData = NULL;
                 }
             } while( 0 );
 
@@ -738,12 +787,13 @@ class MVPDTest: public CxxTest::TestSuite
                 {
 
                     TRACFCOMP( g_trac_mvpd,
-                               "testMvpdRead() - Proc Target [0] non functional!" );
+                               "testMvpdInvalidBufferSize() - Proc Target [0] "
+                               "non functional!" );
 
                     continue;  // add continue because target is non functional
-                } 
+                }
 
-                uint8_t * theData = NULL;
+                uint8_t * theData = new uint8_t[1];
                 size_t theSize = 0;
 
                 cmds++;
@@ -763,6 +813,12 @@ class MVPDTest: public CxxTest::TestSuite
                 {
                     delete err;
                     err = NULL;
+                }
+
+                if( NULL != theData )
+                {
+                    delete theData;
+                    theData = NULL;
                 }
             } while( 0 );
 

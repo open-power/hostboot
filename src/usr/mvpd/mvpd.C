@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/mvpd/mvpd.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/mvpd/mvpd.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 /**
  * @file mvpd.C
  *
@@ -121,7 +122,7 @@ DEVICE_REGISTER_ROUTE( DeviceFW::READ,
 DEVICE_REGISTER_ROUTE( DeviceFW::WRITE,
                        DeviceFW::MVPD,
                        TARGETING::TYPE_PROC,
-                       mvpdRead );
+                       mvpdWrite );
 
 
 // ------------------------------------------------------------------
@@ -380,7 +381,6 @@ errlHndl_t mvpdFindRecordOffset ( const char * i_record,
 {
     errlHndl_t err = NULL;
     uint64_t tmpOffset = 0x0;
-//    uint8_t * record = NULL;
     char record[RECORD_BYTE_SIZE] = { '\0' };
     uint16_t offset = 0x0;
     bool matchFound = false;
@@ -493,8 +493,6 @@ errlHndl_t mvpdRetrieveKeyword ( const char * i_keywordName,
     uint16_t offset = i_offset;
     uint16_t recordSize = 0x0;
     uint16_t keywordSize = 0x0;
-//    uint8_t * record = NULL;
-//    uint8_t * keyword = NULL;
     char record[RECORD_BYTE_SIZE] = { '\0' };
     char keyword[KEYWORD_BYTE_SIZE] = { '\0' };
     bool matchFound = false;
@@ -630,6 +628,14 @@ errlHndl_t mvpdRetrieveKeyword ( const char * i_keywordName,
             if( !(memcmp( keyword, i_keywordName, KEYWORD_BYTE_SIZE ) ) )
             {
                 matchFound = true;
+
+                // If the buffer is NULL, return the keyword size in io_buflen
+                if( NULL == io_buffer )
+                {
+                    io_buflen = keywordSize;
+                    break;
+                }
+
                 // check size of usr buffer with io_buflen
                 err = checkBufferSize( io_buflen,
                                        (size_t)keywordSize );
@@ -661,7 +667,8 @@ errlHndl_t mvpdRetrieveKeyword ( const char * i_keywordName,
             }
         }
 
-        if( err )
+        if( err ||
+            matchFound )
         {
             break;
         }
