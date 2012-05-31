@@ -124,7 +124,7 @@ SBXHOME=$WORKSPACE_DIR
 
 ##  autosim, mksb, workon, etc should look in $SANDBOXRC for the location of the sandbox.
 ##  this is more effective than using -rc option (autosim has no option for this anyway)
-SANDBOXRC="$SBXHOME/my.sandboxrc"
+SANDBOXRC="$SBXHOME/hbsandboxrc"
 
 
 if [ "$DRIVER" = "" ] ; then
@@ -150,7 +150,7 @@ HBICORE_TEST_SYMS="${HBICORE_TEST%%.*}.syms"
 
 HBICORE_TEST_EXTENDED="${HBICORE_TEST%%.*}_extended.bin"
 
-CPFILES="${SBXHOME}/src/build/tools/cpfiles.pl"
+CPFILES="${SBXHOME}/src/build/tools/hbDistribute"
 
 
 ## let's get set up
@@ -192,6 +192,9 @@ fi
 ##  set $SANDBOXRC to the local one, this should cause this to make and run 
 ##  in a new sandbox at the base workspace dir.
 export SANDBOXRC
+export SANDBOXROOT=$SBXHOME
+export SANDBOXNAME=$TEST_SANDBOX
+export SANDBOXBASE=$SANDBOXROOT/$SANDBOXNAME
 
 if [ ! -d "$SBXHOME/$TEST_SANDBOX" ] ; then
         echo "run mksb to create the sandbox "
@@ -258,7 +261,7 @@ waitkb
 
 echo "Copy .syms, bin, hbotStringfile, etc to base sandbox dir."
 echo "$sb"
-$CPFILES $sb --test
+$CPFILES --test
 if [ $? -ne 0 ] ; then
     echo "ERROR: $CPFILES failed: $?"
     exit 1

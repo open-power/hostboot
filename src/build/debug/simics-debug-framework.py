@@ -89,15 +89,19 @@ class DebugFrameworkProcess:
     tool = "";                  # string - tool module name.
     toolOptions = "";           # string - tool options
     outputToString = None;      # mode - String output instead of STDOUT.
-    imgPath = "./";             # Image dir path override.
+    imgPath = None;             # Image dir path override.
     result = "";                # Result string for Usage-mode.
     outputFile = None;          # Output file for results in addition to STDOUT
 
     def __init__(self, tool = "Printk", toolOptions = "",
                        outputToString = None, usage = None,
-                       imgPath = "./",outputFile = None):
+                       imgPath = None,
+                       outputFile = None):
+        # Assign instance 'imgPath' variable.
+        self.imgPath = imgPath if imgPath else (os.environ['HB_TOOLPATH']+"/");
+
         # Determine sub-process arguments.
-        process_args = ["./simics-debug-framework.pl"];
+        process_args = [self.imgPath+"simics-debug-framework.pl"];
         if (usage): # Pass --usage if Usage mode selected.
             process_args = process_args + [ "--usage" ];
             outputToString = True;
@@ -109,7 +113,6 @@ class DebugFrameworkProcess:
         self.tool = tool;
         self.toolOptions = toolOptions;
         self.outputToString = outputToString;
-        self.imgPath = imgPath;
         self.outputFile = open(outputFile, 'w') if outputFile else None;
 
     # Read a message from the process pipe.
@@ -229,7 +232,7 @@ class DebugFrameworkProcess:
 # @param imgPath - Image path override.
 def run_hb_debug_framework(tool = "Printk", toolOpts = "",
                            outputToString = None, usage = None,
-                           imgPath = "./", outputFile = None):
+                           imgPath = None, outputFile = None):
     # Create debug sub-process.
     fp = DebugFrameworkProcess(tool,toolOpts,outputToString,
                                usage,imgPath,outputFile)
@@ -262,7 +265,7 @@ def run_hb_debug_framework(tool = "Printk", toolOpts = "",
 # @brief Create a simics command wrapper for each debug tool module.
 def register_hb_debug_framework_tools():
     # Find all modules from within Hostboot subdirectory.
-    files = os.listdir("./Hostboot")
+    files = os.listdir(os.environ['HB_TOOLPATH']+"/Hostboot")
 
     # Filter out any prefixed with '_' (utility module) or a '.' (hidden file).
     pattern = re.compile("[^\._]");
@@ -402,21 +405,22 @@ def magic_instruction_callback(user_arg, cpu, arg):
         saveCommand = "(system_cmp0.phys_mem)->map[0][1]->image.save tracBINARY 0x%x %d"%(pTracBinaryBuffer,cbUsed)
         SIM_run_alone(run_command, saveCommand )
         # Run fsp-trace on tracBINARY file (implied), append output to tracMERG
-        os.system( "fsp-trace ./ -s hbotStringFile >>tracMERG  2>/dev/null" )
+        os.system( "fsp-trace ./ -s "+os.environ['HB_TOOLPATH']+
+                   "/hbotStringFile >>tracMERG  2>/dev/null" )
 
 # Continuous trace:  Open the symbols and find the address for
 # "g_tracBinaryInfo"  Convert to a number and save in tracBinaryInfoAddr
 # The layout of g_tracBinaryInfo is a 64-bit pointer to the mixed buffer
 # followed by a 64-bit count of bytes used in the buffer.  See
 # src/usr/trace/trace.C and mixed_trace_info_t.
-for line in open('hbicore.syms'):
+for line in open(os.environ['HB_TOOLPATH']+'/hbicore.syms'):
     if "g_tracBinaryInfo" in line:
         words=line.split(",")
         tracBinaryInfoAddr=int(words[1],16)
         break
 # Find the address of the g_cont_trace_trigger_info and save it in
 # contTraceTrigInfo
-for line in open('hbicore.syms'):
+for line in open(os.environ['HB_TOOLPATH']+'/hbicore.syms'):
     if "g_cont_trace_trigger_info" in line:
         words=line.split(",")
         contTraceTrigInfo=int(words[1],16)

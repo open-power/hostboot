@@ -6,7 +6,7 @@
 #
 #  IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2011 - 2012
+#  COPYRIGHT International Business Machines Corp. 2011-2012
 #
 #  p1
 #
@@ -85,7 +85,13 @@ sub callToolModule
     my $tool = shift;
     my $package = "Hostboot::$tool";
 
-    eval("use lib '.'; use $package; return 1;") or
+    my $tool_loc = ".";
+    if (exists &::getToolOverride)
+    {
+        $tool_loc = ::getToolOverride();
+    }
+
+    eval("use lib '$tool_loc'; use $package; return 1;") or
             die "Couldn't load tool \"$tool\":\n\t$@";
     eval("$package->main(\\%toolOpts);");
     die $@ if $@;
@@ -146,7 +152,13 @@ sub callToolModuleHelpInfo
     my $tool = shift;
     my $package = "Hostboot::$tool";
 
-    eval("use lib '.'; use $package; return 1;") or
+    my $tool_loc = ".";
+    if (exists &::getToolOverride)
+    {
+        $tool_loc = ::getToolOverride();
+    }
+
+    eval("use lib '$tool_loc'; use $package; return 1;") or
             die "Couldn't load tool \"$tool\":\n\t$@";
     my %info = eval("$package->helpInfo(\\%toolOpts);");
     die $@ if $@;

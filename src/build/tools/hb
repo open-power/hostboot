@@ -6,7 +6,7 @@
 #
 #  IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2011
+#  COPYRIGHT International Business Machines Corp. 2011-2012
 #
 #  p1
 #
@@ -20,8 +20,7 @@
 #
 #  Origin: 30
 #
-#  IBM_PROLOG_END
-
+#  IBM_PROLOG_END_TAG
 execute_in_sandbox()
 {
     [ -z "${SANDBOXBASE}" ] && echo "Missing SANDBOXBASE." && exit -1
@@ -264,8 +263,7 @@ hb_prime()
             echo "Sandbox does not exist.  Create with 'hb simsetup."
             exit -1
         fi
-        needs_machine_variable
-        cpfiles.pl $*
+        hbDistribute $*
     else
         echo "SANDBOXBASE not set."
         exit -1
@@ -308,8 +306,6 @@ hb_simsetup()
     cp ${HOSTBOOTROOT}/src/build/citest/etc/workarounds.postsimsetup ${SANDBOXBASE}/src
     execute_in_sandbox "export BACKING_BUILD=\$bb && ./workarounds.postsimsetup"  "ppc"
     rm ${SANDBOXBASE}/src/workarounds.postsimsetup
-
-    mkdir -p ${SANDBOXBASE}/images/ppc/lab/flash
 
     # Put a starter copy of errl to simics directory; refresh w/ "hb errlparser"
     cd ${SANDBOXBASE}/simics

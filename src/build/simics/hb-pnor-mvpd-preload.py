@@ -19,8 +19,7 @@
 #
 #  Origin: 30
 #
-#  IBM_PROLOG_END
-
+#  IBM_PROLOG_END_TAG
 import os,sys
 import subprocess
 import shlex
@@ -28,10 +27,11 @@ import shlex
 #------------------------------------------------------------------------------
 # Call a perl script to build up the VPD data for PNOR.
 #------------------------------------------------------------------------------
-thisSys = os.environ.get( "MACHINE" );
+toolLoc = os.environ.get("HB_TOOLPATH");
+thisSys = os.environ.get("HB_MACHINE").upper();
 numProcs = os.environ.get( "GFW_P8_%s_NUM_PROCS" % thisSys );
 numCentaurPerProc = os.environ.get( "GFW_P8_%s_CENTAURS_PER_PROC" % thisSys );
-cmd = "./hb-pnor-mvpd-preload.pl --numProcs " + numProcs + " --numCentPerProc " + numCentaurPerProc
+cmd = toolLoc + "/hb-pnor-mvpd-preload.pl --numProcs " + numProcs + " --numCentPerProc " + numCentaurPerProc + " --dataPath " + toolLoc
 print "Generate PNOR VPD for " + numProcs + " processor(s), and " + numCentaurPerProc + " Centaur(s) per Processor.";
 args = shlex.split( cmd );
 subprocess.call( args );

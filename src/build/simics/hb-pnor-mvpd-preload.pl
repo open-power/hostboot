@@ -20,8 +20,7 @@
 #
 #  Origin: 30
 #
-#  IBM_PROLOG_END
-
+#  IBM_PROLOG_END_TAG
 use strict;
 use File::Temp qw/ tempfile tempdir /;
 
@@ -30,6 +29,7 @@ my $DEBUG = 0;
 my $numProcs;
 my $numCentPerProc;
 my $dataPath = ".";
+my $outputPath = ".";
 
 # Create temp file for MVPD
 my $emptyMVPDfh;
@@ -68,6 +68,11 @@ while( $ARGV = shift )
     {
         $dataPath = shift;
     }
+    elsif( $ARGV =~ m/--outputPath/ ||
+           $ARGV =~ m/-op/ )
+    {
+        $outputPath = shift;
+    }
     else
     {
         usage();
@@ -99,6 +104,7 @@ sub usage
     print "  -np    --numProcs        Number of Processors in the drawer.\n";
     print "  -ncpp  --numCentPerProc  Number of Centaurs per Processor.\n";
     print "  -dp    --dataPath        Path to where VPD data files are located.\n";
+    print "  -op    --outputPath      Path where VPD files should end up.\n";
     print "                              Default: ./\n";
     print "  -h  --help               Help/Usage.\n";
     print "\n\n";
@@ -137,14 +143,14 @@ sub createMVPDData
     my $cmd;
     my $result;
     my $sourceFile;
-    my $sysMVPDFile = "$dataPath/$sysMVPD";
+    my $sysMVPDFile = "$outputPath/$sysMVPD";
 
     if( -e $sysMVPDFile )
     {
         # Cleanup any existing files
         system( "rm -rf $sysMVPDFile" );
     }
-    
+
     # Create empty processor MVPD chunk.
     $cmd = "echo \"00FFFF: 00\" \| xxd -r \> $emptyMVPD";
     system( $cmd ) == 0 or die "Creating $emptyMVPD failed!";
@@ -187,7 +193,7 @@ sub createSPDData
     my $cmd;
     my $result;
     my $sourceFile;
-    my $sysSPDFile = "$dataPath/$sysSPD";
+    my $sysSPDFile = "$outputPath/$sysSPD";
 
     if( -e $sysSPDFile )
     {

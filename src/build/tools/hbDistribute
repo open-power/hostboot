@@ -1,0 +1,115 @@
+#!/bin/bash
+#  IBM_PROLOG_BEGIN_TAG
+#  This is an automatically generated prolog.
+#
+#  $Source: src/build/tools/hbDistribute $
+#
+#  IBM CONFIDENTIAL
+#
+#  COPYRIGHT International Business Machines Corp. 2012
+#
+#  p1
+#
+#  Object Code Only (OCO) source materials
+#  Licensed Internal Code Source Materials
+#  IBM HostBoot Licensed Internal Code
+#
+#  The source code for this program is not published or other-
+#  wise divested of its trade secrets, irrespective of what has
+#  been deposited with the U.S. Copyright Office.
+#
+#  Origin: 30
+#
+#  IBM_PROLOG_END_TAG
+TARGET_DIR="invalid directory"
+TARGET="fsp_TARGET"
+TEST_TEST=0
+
+print_usage()
+{
+    echo "Usage: $0 [--help] | "
+    echo "          [<path>] [--test] [--release | --vpo | --simics | --fsp]"
+    echo
+    echo "    This script will deliver the defined content for a distribition"
+    echo "    target.  Typically this is used to populate an ODE sandbox with"
+    echo "    images and debug tools or for the generation of a build release"
+    echo "    directory."
+    echo
+    echo "    Target content is defined in src/build/mkrules/dist_targets.mk"
+    echo
+    echo "  Options:"
+    echo "    --help: Prints usage information"
+    echo
+    echo "    --test: Includes test images and content instead of non-test."
+    echo 
+    echo "    --release: Create a full release distribution (all targets)."
+    echo "    --vpo: Generate just 'vpo' content."
+    echo "    --simics/--fsp: *default* Generate just 'fsp' content"
+}
+
+# Parse arguments
+for ARG in $*
+do
+    case $ARG in
+        "--help")
+            print_usage
+            exit
+        ;;
+
+        "--test")
+            TARGET_TEST=1
+        ;;
+
+        "--vpo")
+            TARGET="vpo_TARGET"
+        ;;
+
+        "--simics" | "--fsp")
+            TARGET="fsp_TARGET"
+        ;;
+
+        "--release")
+            TARGET="ALL"
+        ;;
+
+        "--debug")
+            DEBUG="-d"
+        ;;
+
+        --*)
+            echo "ERROR: Unknown option: $ARG"
+            exit
+        ;;
+
+        *)
+            TARGET_DIR=$ARG
+        ;;
+
+    esac
+done
+
+# Verify target directory or default to sandbox.
+if [ "${TARGET_DIR}" == "invalid directory" ]; then
+    if [ -z "${SANDBOXROOT}" -o -z "${SANDBOXNAME}" ]; then
+        echo "ERROR: No path specified and \$SANDBOXBASE undefined."
+        print_usage
+        exit
+    else
+        TARGET_DIR=${SANDBOXROOT}/${SANDBOXNAME}/src/hbfw
+    fi
+fi
+
+# Find root of repository.
+REPO_ROOT=`git rev-parse --show-toplevel`
+if [ -z $REPO_ROOT ]; then
+    echo "ERROR: Not in a git repo."
+    exit
+fi
+
+# Execute makefile for distribution.
+mkdir -p $TARGET_DIR
+export TARGET_TEST
+export TARGET_DIR
+cd $REPO_ROOT/src/build/mkrules
+make -rR ${DEBUG:=} -f dist_targets.mk $TARGET
+

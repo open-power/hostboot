@@ -6,7 +6,7 @@
 #
 #  IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2011 - 2012
+#  COPYRIGHT International Business Machines Corp. 2011-2012
 #
 #  p1
 #
@@ -31,6 +31,7 @@
 # side.
 
 use strict;
+use lib $ENV{HB_TOOLPATH};
 use Hostboot::_DebugFramework;
 
 $| = 1; # Disable buffering on STDIN/STDOUT.
@@ -149,6 +150,12 @@ sub getImgPath
     return $imgPath;
 }
 
+# Tool location override.
+sub getToolOverride
+{
+    return $ENV{'HB_TOOLPATH'}
+}
+
 # Simics always uses the non-test named files.
 sub getIsTest
 {
@@ -200,7 +207,7 @@ sub translateAddr
     my  $mSComAddrHi    =   ( $addr >> 4 );
     my  $mSComAddrLo    =   ( $addr & 0x000000000000000f ) ;
 
-    $simicsaddr =   (    0x0000300000000000                         ## Base addr
+    $simicsaddr =   (    0x0003FC0000000000                         ## Base addr
                       | (($mSComAddrHi & 0x0000000007ffffff) << 8 ) ## 27 bits, shift 8
                       | (($mSComAddrLo & 0x000000000000000f) << 3 ) ## 4 bits, shift 3
                     );
@@ -285,6 +292,11 @@ sub checkContTrace()
 sendIPCMsg("get-tool","");
 my ($unused, $tool) = recvIPCMsg();
 
+# Get image path.
+sendIPCMsg("get-img-path");
+($unused, $imgPath) = recvIPCMsg();
+$imgPath = determineImagePath($imgPath);
+
 # If we were called with --usage, send tool help instead of executing.
 if ((-1 != $#ARGV) && ("--usage" eq $ARGV[0]))
 {
@@ -292,14 +304,9 @@ if ((-1 != $#ARGV) && ("--usage" eq $ARGV[0]))
     exit;
 }
 
-# Get tool options, image path.
+# Get tool options.
 sendIPCMsg("get-tool-options","");
 my ($unused, $toolOpts) = recvIPCMsg();
-sendIPCMsg("get-img-path");
-($unused, $imgPath) = recvIPCMsg();
-
-# Update image path, parse options.
-$imgPath = determineImagePath();
 parseToolOpts($toolOpts);
 
 # Execute module.
