@@ -1,26 +1,27 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/hwpf/hwp/edi_ei_initialization/proc_fab_iovalid/proc_fab_iovalid.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
-// $Id: proc_fab_iovalid.H,v 1.6 2012/04/16 19:44:57 jmcgill Exp $
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/hwpf/hwp/edi_ei_initialization/proc_fab_iovalid/proc_fab_iovalid.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
+// $Id: proc_fab_iovalid.H,v 1.7 2012/05/18 18:03:09 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_fab_iovalid.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -35,11 +36,11 @@
 // *!
 // *! ADDITIONAL COMMENTS:
 // *!
-// *! Manage fabric SMP (X/A) link iovalid controls, which control the
+// *! Manage fabric X/A link iovalid controls, which control the
 // *! logical link layer fabric traffic.
 // *!
 // *! The iovalid controls are intended to be raised in the IPL flow
-// *! after the underlying physical (EI) layer is running, to start the
+// *! after the underlying physical link layer is running, to start the
 // *! flow of fabric frames.
 // *!
 // *! The iovalid controls are intended to be lowered prior to stopping
@@ -56,18 +57,34 @@
 //------------------------------------------------------------------------------
 
 #include <fapi.H>
-#include "proc_fab_smp.H"
 #include "p8_scom_addresses.H"
+
 
 //------------------------------------------------------------------------------
 // Structure definitions
 //------------------------------------------------------------------------------
 
+// HWP argument structure defining properties of this chip
+struct proc_fab_iovalid_proc_chip
+{
+    // target for this chip
+    fapi::Target this_chip;
+
+    // X busses to operate on
+    bool x0;
+    bool x1;
+    bool x2;
+    bool x3;
+
+    // A busses to operate on
+    bool a0;
+    bool a1;
+    bool a2;
+};
+
 // function pointer typedef definition for HWP call support
 typedef fapi::ReturnCode
-(*proc_fab_iovalid_FP_t)(std::vector<proc_fab_smp_proc_chip *>&,
-                         bool,
-                         bool,
+(*proc_fab_iovalid_FP_t)(std::vector<proc_fab_iovalid_proc_chip>&,
                          bool);
 
 //------------------------------------------------------------------------------
@@ -92,31 +109,21 @@ extern "C"
 // Function prototypes
 //------------------------------------------------------------------------------
 
+//------------------------------------------------------------------------------
 // function: FAPI proc_fab_iovalid HWP entry point
-//           operates on chips passed in i_smp argument to perform
-//           desired iovalid manipulation (set or clear) on X/A busses
-// parameters: i_smp           => vector of pointers to proc_fab_smp_chip
-//                                structures which defines scope of SMP fabric
-//                                & bus connectivity
-//             i_manage_x      => operate on X link iovalids?
-//             i_manage_x      => operate on A link iovalids?
+//           operates on chips passed in i_proc_chips argument to perform
+//           desired iovalid manipulation (set or clear) on specified X/A busses
+// parameters: i_proc_chips    => vector of proc_fab_iovalid_proc_chip
+//                                structures which defines busses to
+//                                act on
 //             i_set_not_clear => define target iovalid operation (true=set,
 //                                false=clear)
 // returns: FAPI_RC_SUCCESS if all specified operations complete successfully,
-//          RC_PROC_FAB_SMP_INVALID_PROC_FAB_SMP_PROC_CHIP_ARG
-//              if invalid/NULL proc_fab_smp_proc_chip argument is passed
-//              in HWP argument vector
-//          RC_PROC_FAB_SMP_INVALID_PROC_FAB_SMP_A_BUS_ARG
-//              if invalid/NULL proc_fab_smp_a_bus argument is passed
-//              in HWP argument vector
-//          RC_PROC_FAB_SMP_INVALID_PROC_FAB_SMP_X_BUS_ARG
-//              if invalid/NULL proc_fab_smp_x_bus argument is passed
-//              in HWP argument vector
-//          else FAPI getscom/putscom return code for failing operation
-fapi::ReturnCode proc_fab_iovalid(std::vector<proc_fab_smp_proc_chip *>& i_smp,
-                                  bool i_manage_x,
-                                  bool i_manage_a,
-                                  bool i_set_not_clear);
+//          else return code for failing operation
+//------------------------------------------------------------------------------
+fapi::ReturnCode proc_fab_iovalid(
+    std::vector<proc_fab_iovalid_proc_chip>& i_proc_chips,
+    bool i_set_not_clear);
 
 } // extern "C"
 

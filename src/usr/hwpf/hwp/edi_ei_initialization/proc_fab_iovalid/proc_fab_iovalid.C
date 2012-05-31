@@ -1,26 +1,27 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/hwpf/hwp/edi_ei_initialization/proc_fab_iovalid/proc_fab_iovalid.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
-// $Id: proc_fab_iovalid.C,v 1.6 2012/04/16 19:44:55 jmcgill Exp $
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/hwpf/hwp/edi_ei_initialization/proc_fab_iovalid/proc_fab_iovalid.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
+// $Id: proc_fab_iovalid.C,v 1.7 2012/05/18 18:03:06 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_fab_iovalid.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -121,15 +122,15 @@ fapi::ReturnCode proc_fab_iovalid_write_gp0_mask(
 
 //------------------------------------------------------------------------------
 // function: utility subroutine to set/clear X bus iovalid bits on one chip
-// parameters: i_smp_proc_chip => pointer to structure providing:
-//                                  o target for this chip
-//                                  o vector of structs representing X bus
-//                                    connections (empty if no connection)
-//             i_set_not_clear => define desired operation (true=set, false=clear)
+// parameters: i_proc_chip     => structure providing:
+//                                o target for this chip
+//                                o X busses to act on
+//             i_set_not_clear => define desired operation (true=set,
+//                                false=clear)
 // returns: FAPI_RC_SUCCESS if operation was successful, else error
 //------------------------------------------------------------------------------
 fapi::ReturnCode proc_fab_iovalid_manage_x_links(
-    proc_fab_smp_proc_chip* i_smp_proc_chip,
+    proc_fab_iovalid_proc_chip& i_proc_chip,
     bool i_set_not_clear)
 {
     // data buffer to hold iovalid bit mask
@@ -142,53 +143,57 @@ fapi::ReturnCode proc_fab_iovalid_manage_x_links(
     // mark function entry
     FAPI_DBG("proc_fab_iovalid_manage_x_links: Start");
 
-    // set mask bit for each link
-    std::vector<proc_fab_smp_x_bus*>::iterator i;
-    for (i = i_smp_proc_chip->x_busses.begin();
-         i != i_smp_proc_chip->x_busses.end();
-         i++)
+    do
     {
-        proc_fab_smp_x_bus_id src_chip_bus_id = (*i)->src_chip_bus_id;
-        FAPI_DBG("proc_fab_iovalid_manage_x_links: Adding link X%d to active link mask",
-                 (*i)->src_chip_bus_id);
-        if (src_chip_bus_id == FBC_BUS_X0)
+        // set mask bit for each link to act on
+        if (i_proc_chip.x0 ||
+            i_proc_chip.x1 ||
+            i_proc_chip.x2 ||
+            i_proc_chip.x3)
         {
-            rc_ecmd |= active_link_mask.setBit(X_GP0_X0_IOVALID_BIT);
-        }
-        else if (src_chip_bus_id == FBC_BUS_X1)
-        {
-            rc_ecmd |= active_link_mask.setBit(X_GP0_X1_IOVALID_BIT);
-        }
-        else if (src_chip_bus_id == FBC_BUS_X2)
-        {
-            rc_ecmd |= active_link_mask.setBit(X_GP0_X2_IOVALID_BIT);
-        }
-        else
-        {
-            rc_ecmd |= active_link_mask.setBit(X_GP0_X3_IOVALID_BIT);
-        }
+            if (i_proc_chip.x0)
+            {
+                FAPI_DBG("proc_fab_iovalid_manage_x_links: Adding link X0 to active link mask");
+                rc_ecmd |= active_link_mask.setBit(X_GP0_X0_IOVALID_BIT);
+            }
+            if (i_proc_chip.x1)
+            {
+                FAPI_DBG("proc_fab_iovalid_manage_x_links: Adding link X1 to active link mask");
+                rc_ecmd |= active_link_mask.setBit(X_GP0_X1_IOVALID_BIT);
+            }
+            if (i_proc_chip.x2)
+            {
+                FAPI_DBG("proc_fab_iovalid_manage_x_links: Adding link X2 to active link mask");
+                rc_ecmd |= active_link_mask.setBit(X_GP0_X2_IOVALID_BIT);
+            }
+            if (i_proc_chip.x3)
+            {
+                FAPI_DBG("proc_fab_iovalid_manage_x_links: Adding link X3 to active link mask");
+                rc_ecmd |= active_link_mask.setBit(X_GP0_X3_IOVALID_BIT);
+            }
 
-        // check aggregate return code from buffer manipulation operations
-        rc.setEcmdError(rc_ecmd);
-        if (!rc.ok())
-        {
-            FAPI_ERR("proc_fab_iovalid_manage_x_links: Error 0x%x setting up active link mask data buffer",
-                     rc_ecmd);
-            break;
-        }
+            // check aggregate return code from buffer manipulation operations
+            rc.setEcmdError(rc_ecmd);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_fab_iovalid_manage_x_links: Error 0x%x setting up active link mask data buffer",
+                         rc_ecmd);
+                break;
+            }
 
-        // write appropriate GP0 mask register to perform desired operation
-        rc = proc_fab_iovalid_write_gp0_mask(i_smp_proc_chip->this_chip,
-                                             active_link_mask,
-                                             i_set_not_clear,
-                                             X_GP0_AND_0x04000004,
-                                             X_GP0_OR_0x04000005);
-        if (!rc.ok())
-        {
-            FAPI_ERR("proc_fab_iovalid_manage_x_links: Error from proc_fab_iovalid_write_gp0_mask");
-            break;
+            // write appropriate GP0 mask register to perform desired operation
+            rc = proc_fab_iovalid_write_gp0_mask(i_proc_chip.this_chip,
+                                                 active_link_mask,
+                                                 i_set_not_clear,
+                                                 X_GP0_AND_0x04000004,
+                                                 X_GP0_OR_0x04000005);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_fab_iovalid_manage_x_links: Error from proc_fab_iovalid_write_gp0_mask");
+                break;
+            }
         }
-    }
+    } while(0);
 
     // mark function exit
     FAPI_DBG("proc_fab_iovalid_manage_x_links: End");
@@ -198,15 +203,15 @@ fapi::ReturnCode proc_fab_iovalid_manage_x_links(
 
 //------------------------------------------------------------------------------
 // function: utility subroutine to set/clear A bus iovalid bits on one chip
-// parameters: i_smp_proc_chip => pointer to structure providing:
-//                                  o target for this chip
-//                                  o vector of structs representing A bus
-//                                    connections (empty if no connection)
-//             i_set_not_clear => define desired operation (true=set, false=clear)
+// parameters: i_proc_chip     => structure providing:
+//                                o target for this chip
+//                                o A busses to act on
+//             i_set_not_clear => define desired operation (true=set,
+//                                false=clear)
 // returns: FAPI_RC_SUCCESS if operation was successful, else error
 //------------------------------------------------------------------------------
 fapi::ReturnCode proc_fab_iovalid_manage_a_links(
-    proc_fab_smp_proc_chip* i_smp_proc_chip,
+    proc_fab_iovalid_proc_chip& i_proc_chip,
     bool i_set_not_clear)
 {
     // data buffer to hold iovalid bit mask
@@ -219,49 +224,51 @@ fapi::ReturnCode proc_fab_iovalid_manage_a_links(
     // mark function entry
     FAPI_DBG("proc_fab_iovalid_manage_a_links: Start");
 
-    // set mask bit for each link
-    std::vector<proc_fab_smp_a_bus*>::iterator i;
-    for (i = i_smp_proc_chip->a_busses.begin();
-         i != i_smp_proc_chip->a_busses.end();
-         i++)
+    do
     {
-        proc_fab_smp_a_bus_id src_chip_bus_id = (*i)->src_chip_bus_id;
-        FAPI_DBG("proc_fab_iovalid_manage_a_links: Adding link A%d to active link mask",
-                 (*i)->src_chip_bus_id);
-        if (src_chip_bus_id == FBC_BUS_A0)
+        // set mask bit for each link to act on
+        if (i_proc_chip.a0 ||
+            i_proc_chip.a1 ||
+            i_proc_chip.a2)
         {
-            rc_ecmd |= active_link_mask.setBit(A_GP0_A0_IOVALID_BIT);
-        }
-        else if (src_chip_bus_id == FBC_BUS_A1)
-        {
-            rc_ecmd |= active_link_mask.setBit(A_GP0_A1_IOVALID_BIT);
-        }
-        else
-        {
-            rc_ecmd |= active_link_mask.setBit(A_GP0_A2_IOVALID_BIT);
-        }
+            if (i_proc_chip.a0)
+            {
+                FAPI_DBG("proc_fab_iovalid_manage_a_links: Adding link A0 to active link mask");
+                rc_ecmd |= active_link_mask.setBit(A_GP0_A0_IOVALID_BIT);
+            }
+            if (i_proc_chip.a1)
+            {
+                FAPI_DBG("proc_fab_iovalid_manage_a_links: Adding link A1 to active link mask");
+                rc_ecmd |= active_link_mask.setBit(A_GP0_A1_IOVALID_BIT);
+            }
+            if (i_proc_chip.a2)
+            {
+                FAPI_DBG("proc_fab_iovalid_manage_a_links: Adding link A2 to active link mask");
+                rc_ecmd |= active_link_mask.setBit(A_GP0_A2_IOVALID_BIT);
+            }
 
-        // check aggregate return code from buffer manipulation operations
-        rc.setEcmdError(rc_ecmd);
-        if (!rc.ok())
-        {
-            FAPI_ERR("proc_fab_iovalid_manage_a_links: Error 0x%x setting up active link mask data buffer",
-                     rc_ecmd);
-            break;
-        }
+            // check aggregate return code from buffer manipulation operations
+            rc.setEcmdError(rc_ecmd);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_fab_iovalid_manage_a_links: Error 0x%x setting up active link mask data buffer",
+                         rc_ecmd);
+                break;
+            }
 
-        // write appropriate GP0 mask register to perform desired operation
-        rc = proc_fab_iovalid_write_gp0_mask(i_smp_proc_chip->this_chip,
-                                             active_link_mask,
-                                             i_set_not_clear,
-                                             A_GP0_AND_0x08000004,
-                                             A_GP0_OR_0x08000005);
-        if (!rc.ok())
-        {
-            FAPI_ERR("proc_fab_iovalid_manage_a_links: Error from proc_fab_iovalid_write_gp0_mask");
-            break;
+            // write appropriate GP0 mask register to perform desired operation
+            rc = proc_fab_iovalid_write_gp0_mask(i_proc_chip.this_chip,
+                                                 active_link_mask,
+                                                 i_set_not_clear,
+                                                 A_GP0_AND_0x08000004,
+                                                 A_GP0_OR_0x08000005);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_fab_iovalid_manage_a_links: Error from proc_fab_iovalid_write_gp0_mask");
+                break;
+            }
         }
-    }
+    } while(0);
 
     // mark function exit
     FAPI_DBG("proc_fab_iovalid_manage_a_links: End");
@@ -272,54 +279,37 @@ fapi::ReturnCode proc_fab_iovalid_manage_a_links(
 //------------------------------------------------------------------------------
 // HWP entry point
 //------------------------------------------------------------------------------
-fapi::ReturnCode proc_fab_iovalid(std::vector<proc_fab_smp_proc_chip *>& i_smp,
-                                  bool i_manage_x,
-                                  bool i_manage_a,
-                                  bool i_set_not_clear)
+fapi::ReturnCode proc_fab_iovalid(
+    std::vector<proc_fab_iovalid_proc_chip>& i_proc_chips,
+    bool i_set_not_clear)
 {
     // return code
     fapi::ReturnCode rc;
+    // iterator for HWP input vector
+    std::vector<proc_fab_iovalid_proc_chip>::iterator iter;
 
     // mark HWP entry
     FAPI_IMP("proc_fab_iovalid: Entering ...");
 
     do
     {
-        // make pass through entire SMP, validate inputs
-        rc = proc_fab_smp_validate_smp(i_smp);
-        if (rc)
+        // loop over all chips in input vector
+        for (iter = i_proc_chips.begin();
+             iter != i_proc_chips.end();
+             iter++)
         {
-            FAPI_ERR("proc_fab_iovalid: Error from proc_fab_smp_validate_smp");
-            break;
-        }
-
-        // loop over all chips composing SMP
-        for (std::vector<proc_fab_smp_proc_chip *>::iterator i = i_smp.begin();
-             i != i_smp.end();
-             i++)
-        {
-            // operate on X links?
-            if (i_manage_x)
+            rc = proc_fab_iovalid_manage_x_links(*iter, i_set_not_clear);
+            if (!rc.ok())
             {
-                rc = proc_fab_iovalid_manage_x_links(*i,
-                                                     i_set_not_clear);
-                if (!rc.ok())
-                {
-                    FAPI_ERR("proc_fab_iovalid: Error from proc_fab_iovalid_manage_x_links");
-                    break;
-                }
+                FAPI_ERR("proc_fab_iovalid: Error from proc_fab_iovalid_manage_x_links");
+                break;
             }
 
-            // operate on A links?
-            if (i_manage_a)
+            rc = proc_fab_iovalid_manage_a_links(*iter, i_set_not_clear);
+            if (!rc.ok())
             {
-                rc = proc_fab_iovalid_manage_a_links(*i,
-                                                     i_set_not_clear);
-                if (!rc.ok())
-                {
-                    FAPI_ERR("proc_fab_iovalid: Error from proc_fab_iovalid_manage_a_links");
-                    break;
-                }
+                FAPI_ERR("proc_fab_iovalid: Error from proc_fab_iovalid_manage_a_links");
+                break;
             }
         }
     } while(0);
