@@ -5,7 +5,7 @@
 #
 #  IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2011 - 2012
+#  COPYRIGHT International Business Machines Corp. 2011-2012
 #
 #  p1
 #
@@ -44,7 +44,7 @@ def dumpL3():
     #print t
 
     #dump L3 to hbdump.<timestamp>
-    string = "p8Proc0.l3_cache_image.save hbdump.%s 0 0x%x"%(t, L3_SIZE)
+    string = "(system_cmp0.phys_mem)->map[0][1]->image.save hbdump.%s 0 0x%x"%(t, L3_SIZE)
     #print string
     result = run_command(string)
     #print result

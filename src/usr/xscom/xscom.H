@@ -39,7 +39,7 @@
  *  @brief  The (fixed) base address value for master proc
  */
 //@todo - Verify this value for HW
-#define MASTER_PROC_XSCOM_BASE_ADDR     0x300000000000
+#define MASTER_PROC_XSCOM_BASE_ADDR     0x0003FC0000000000
 
 /**
  *  @brief  Type definition for XSCom address and Chip ID

@@ -66,6 +66,7 @@
 //remove these once memory setup workaround is removed
 #include <devicefw/driverif.H>
 #include <spd/spdenums.H>
+#include <sys/time.h>
 
 namespace   DRAM_INITIALIZATION
 {
@@ -352,7 +353,7 @@ void    call_proc_setup_bars( void    *io_pArgs )
     //  loop through all processor targets
     //     1) loop on associated MCSs
     //          a) Get associated logical dimms, sum total size of memory
-    //          b) Write memory base addr/size out to MCFGP 0x02011800 
+    //          b) Write memory base addr/size out to MCFGP 0x02011800
 
     //Don't do this in VPO -- shouldn't be run anyway, but return as a precaution
     if( TARGETING::is_vpo() )
@@ -510,6 +511,9 @@ void    call_proc_setup_bars( void    *io_pArgs )
     //Now need to scom the L3 bar on my EX to trigger Simics cache contained exit
     if(!l_errl)
     {
+        // TODO: Remove workaround with RTC: 42922.
+        nanosleep(1,0); // workaround Simics race condition.
+
         TARGETING::Target* procTarget = NULL;
         TARGETING::targetService().masterProcChipTargetHandle( procTarget );
 
@@ -521,6 +525,7 @@ void    call_proc_setup_bars( void    *io_pArgs )
 
         uint64_t scom_data = 0x0; //data doesn't matter, just the write
         size_t size = sizeof(scom_data);
+
         l_errl = deviceWrite( procTarget,
                               &scom_data,
                               size,

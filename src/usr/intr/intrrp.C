@@ -66,11 +66,11 @@ void IntrRp::init( errlHndl_t   &io_errlHndl_t )
 }
 
 
-//  ICPBAR = INTP.ICP_BAR[0:25] in P7 = 0x3FBFF90 + (8*node) + procPos
+//  ICPBAR = INTP.ICP_BAR[0:25] in P8 = 0x3FFFF800 + (8*node) + procPos
 //  P7 Scom address 0x02011C09 P8 = 0x020109c9
 //  BaseAddress P7:
 //  BA[18:43] = ICPBAR  (P8 says [14:43] (30 bits))
-//  BA[47:49] = COREid (0-7) 
+//  BA[47:49] = COREid (0-7)
 //  BA[50:51] = cpu thread (0-3)
 //
 //  BaseAddress P8:
@@ -408,7 +408,7 @@ errlHndl_t IntrRp::setBAR(TARGETING::Target * i_target,
 {
     errlHndl_t err = NULL;
 
-    uint64_t barValue = static_cast<uint64_t>(ICPBAR_VAL) + 
+    uint64_t barValue = static_cast<uint64_t>(ICPBAR_VAL) +
             (8 * i_pir.nodeId) + i_pir.chipId;
     barValue <<= 34;
 
@@ -523,7 +523,7 @@ void IntrRp::deconfigureInterruptPresenter(const PIR_t i_pir) const
         reinterpret_cast<uint32_t *>(baseAddr + LINKA_OFFSET);
 
     // non- side effect xirr register
-    uint32_t * xirrAddr = 
+    uint32_t * xirrAddr =
         reinterpret_cast<uint32_t *>(baseAddr) + XIRR_RO_OFFSET;
 
     uint32_t xirr = *xirrAddr & 0x00FFFFFF;

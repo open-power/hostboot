@@ -28,6 +28,12 @@
 ##
 
 
+echo "+++ Updates for memory map."
+mkdir -p $sb/simu/data
+egrep -v "WSALIAS DEFAULT FIPSLEVEL|WSALIAS DEFAULT PHYPLEVEL" $BACKING_BUILD/src/simu/data/simicsInfo > $sb/simu/data/simicsInfo
+echo "WSALIAS DEFAULT FIPSLEVEL env/gfwd/simics-4.2.0/simics-4.2.85/fips/fld36/fi120530c700.42" >> $sb/simu/data/simicsInfo
+echo "WSALIAS DEFAULT PHYPLEVEL env/phypb/simics-4.2.0/simics-4.2.85/ph120531a700.42" >> $sb/simu/data/simicsInfo
+
 #### Examples ####
 #echo "+++ Some message about why you need to do this."
 #mkdir -p $sb/simu/data

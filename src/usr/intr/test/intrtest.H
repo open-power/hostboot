@@ -78,7 +78,7 @@ class IntrTest: public CxxTest::TestSuite
                             *(addr + 2)
                             );
                 }
-                
+
             }
 
             // Potentially could check all link registers on other chips
@@ -129,7 +129,7 @@ class IntrTest: public CxxTest::TestSuite
         void test_intr( void )
         {
 
-            // DISABLE in VBU 
+            // DISABLE in VBU
             if( TARGETING::is_vpo() )
             {
                 return;
@@ -148,7 +148,7 @@ class IntrTest: public CxxTest::TestSuite
             }
 
             // Force an interrupt by writing to the MFFR on master
-            volatile uint8_t * mfrr = 
+            volatile uint8_t * mfrr =
                 reinterpret_cast<uint8_t *>(iv_masterAddr+12);
             *(mfrr) = 0x55;
             *(mfrr) = 0xff;
@@ -211,7 +211,7 @@ class IntrTest: public CxxTest::TestSuite
 };
 
 //note: this must be changed if the BAR changes
-const uint64_t IntrTest::cv_realAddr = 0x3fbff9000000ul;
+const uint64_t IntrTest::cv_realAddr = 0x3ffff80000000ul;
 
 
 

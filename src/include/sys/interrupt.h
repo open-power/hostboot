@@ -33,7 +33,7 @@ enum
 {
     ICPBAR_SCOM_ADDR = 0x020109ca,      //!< for P8, P7 = 0x02011C09
     // This BAR value agrees with simics (for now)
-    ICPBAR_VAL = 0x03FBFF90,            //!< ICPBAR value bits[0:29]>>34
+    ICPBAR_VAL = 0x3FFFF800,            //!< ICPBAR value bits[0:29]>>34
 };
 
 #endif
