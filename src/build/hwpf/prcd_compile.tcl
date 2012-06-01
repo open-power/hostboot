@@ -474,9 +474,18 @@ if {[llength $cmds] > 0 } {
     # to the server, waiting for a :DONE between each one.
     ##########################################################
     if {$result == ""} {   
-        puts "Connected to $server - Starting Compile"
+        puts "Connected to $server - Starting"
         foreach cmd $cmds {
             if {[info exists verbose]}  {puts "Send to hw procedure compiler:  $cmd"}
+            # display some messages so that the user doesn't get concerned..
+            if {[string first ":DRIVER" $cmd ] != -1} {
+                puts "Sending command: start extract"
+            } elseif {[string first ":HWP_COMPILE" $cmd ] != -1} {
+                puts "Sending command: start build"
+            } elseif {[string first ":HWP_RETRIEVE" $cmd ] != -1} {
+                puts "Sending command: start retrieve"
+            }
+
             if {[string compare $cmd {quit}] == 0 } {
                 puts $sockid {quit}
                 break

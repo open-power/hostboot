@@ -254,10 +254,14 @@ proc AquireData { sock } {
             flush $sock
             flush $log
         } elseif {[string compare $line ":HWP_RETRIEVE"] == 0} {
-            SendObjFiles $sock "$sb_dir/$sbname($sock)/img"
-            puts $sock ":DONE"
-            puts $log "$sock: DONE"
-            flush $sock
+            if { [catch {SendObjFiles $sock "$sb_dir/$sbname($sock)/img"} res]} {
+                puts $log "$sock: ERROR: SendObjFiles interrupted: $res\n"
+                flush $log
+            } else {
+                puts $sock ":DONE"
+                puts $log "$sock: DONE"
+                flush $sock
+            }
         } elseif {[string compare $line ":HWP_DONE"] == 0} {
             puts $sock ":DONE"
             puts $log "$sock: DONE"
@@ -276,9 +280,14 @@ proc AquireData { sock } {
                 puts $sock "Unknown command: $line"
                 puts $log "$sock: Unknown command: $line"
             }
-            puts $sock ":DONE"
-            puts $log "$sock: DONE"
-            flush $sock
+            if { [catch {puts $sock ":DONE"} res]} {
+                puts $log "$sock: ERROR: puts failed: $res\n"
+                flush $log
+            } else {
+                puts $log "$sock: DONE"
+                flush $log
+                flush $sock
+            }
         }
     }
 }
