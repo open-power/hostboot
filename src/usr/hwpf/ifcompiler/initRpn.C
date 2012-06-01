@@ -1,17 +1,26 @@
-// IBM_PROLOG_BEGIN_TAG
-// This is an automatically generated prolog.
-//
-// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/ifcompiler/initRpn.C,v $
-//
-// IBM CONFIDENTIAL
-//
-// COPYRIGHT International Business Machines Corp. 2010,2010
-//
-//UNDEFINED
-//
-// Origin: UNDEFINED
-//
-// IBM_PROLOG_END_TAG
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/hwpf/ifcompiler/initRpn.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2010-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 // Change Log *************************************************************************************
 //
 //  Flag   Reason  Userid   Date     Description
@@ -29,6 +38,8 @@
 //                                   Support defines for bits, scom_data and attribute columns
 //                                   Delete obsolete code for defines support
 //                 camvanng 05/07/12 Support for associated target attributes
+//                 camvanng 05/22/12 Ability to do simple operations on attributes
+//                                   in the scom_data column
 // End Change Log *********************************************************************************
 
 /**
@@ -577,39 +588,31 @@ Rpn * Rpn::merge(Rpn * i_rpn)
 
 //-------------------------------------------------------------------------------------------------
 // See header file for contract
-void Rpn::bin_read(BINSEQ::const_iterator & bli, Symbols * symbols)
+void Rpn::bin_read(BINSEQ::const_iterator & bli, uint8_t i_size, Symbols * symbols)
 {
-
-    uint32_t size = 2;  // Size is always 2 for symbols
 
     if(symbols) iv_symbols = symbols;
     iv_rpnstack.clear();
     iv_array_idx_range.clear();
 
-    while(size)
+    while(i_size)
     {
         uint32_t v = *bli++;
+        --i_size;
         if(v < LAST_OP) // operator
         {
             if(v == LIST)
             {
-                --size;
+                --i_size;
                 v |= (*bli++) << 8;
             }
            iv_rpnstack.push_back(v | OPERATION);
-           --size;
         }
         else    // tag
         {
             v = (v << 8) + (*bli++);
-             --size;
-            if(size == 0)
-            {
-                std::ostringstream errss;
-                errss << "Rpn::bin_read Invalid RPN binary sequence\n";
-                throw std::invalid_argument(errss.str());
-            }
-            --size;
+            --i_size;
+
             uint32_t l_rpn_id = iv_symbols->get_rpn_id(v);
             iv_rpnstack.push_back(l_rpn_id);
            
@@ -621,6 +624,7 @@ void Rpn::bin_read(BINSEQ::const_iterator & bli, Symbols * symbols)
                 {
                     v = *bli++;
                     v = (v << 8) + (*bli++);
+                    i_size -= 2;
                     iv_rpnstack.push_back(iv_symbols->get_rpn_id(v));
                     //printf("Rpn::bin_read: Assoc target attribute id 0x%x\n", v);
                 }
@@ -633,6 +637,7 @@ void Rpn::bin_read(BINSEQ::const_iterator & bli, Symbols * symbols)
                     v = *bli++;
                     v = (v << 8) + (*bli++);
                     iv_rpnstack.push_back(iv_symbols->get_rpn_id(v));
+                    i_size -= 2;
                 }
             }
         }
@@ -663,6 +668,49 @@ BINSEQ::const_iterator Rpn::bin_read_one_op(BINSEQ::const_iterator & bli, Symbol
         iv_rpnstack.push_back(iv_symbols->get_rpn_id(v));
     }
     return bli;
+}
+
+//-------------------------------------------------------------------------------------------------
+void Rpn::bin_read_one_id(BINSEQ::const_iterator & io_bli, Symbols * i_symbols)
+{
+    if(i_symbols) iv_symbols = i_symbols;
+
+    uint32_t v = *io_bli++;
+    if(v < LAST_OP) // operator
+    {
+        std::ostringstream errss;
+        errss << "Rpn::bin_read_one_id: This is an op\n";
+        throw std::invalid_argument(errss.str());
+    }
+
+    // not op - always two bytes
+    v = (v << 8) + (*io_bli++);
+
+    uint32_t l_rpn_id = iv_symbols->get_rpn_id(v);
+    iv_rpnstack.push_back(l_rpn_id);
+
+    //Check for attribute of array type
+    if (v & IF_ATTR_TYPE)
+    {
+        //Check for associated target attribute
+        if ((v & IF_TYPE_MASK) == IF_ASSOC_TGT_ATTR_TYPE)
+        {
+            v = *io_bli++;
+            v = (v << 8) + (*io_bli++);
+            iv_rpnstack.push_back(iv_symbols->get_rpn_id(v));
+            //printf("Rpn::bin_read_one_id: Assoc target attribute id 0x%x\n", v);
+        }
+
+        //Get the attribute dimension & shift it to the LS nibble
+        uint32_t l_type = iv_symbols->get_attr_type(l_rpn_id);
+        uint8_t l_attrDimension = (static_cast<uint8_t>(l_type) & ATTR_DIMENSION_MASK) >> 4;
+        for(uint8_t i=0; i < l_attrDimension; i++)
+        {
+            v = *io_bli++;
+            v = (v << 8) + (*io_bli++);
+            iv_rpnstack.push_back(iv_symbols->get_rpn_id(v));
+        }
+    }
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -742,7 +790,7 @@ std::string  Rpn::listing(const char * i_desc, const std::string & spyname, bool
             else
             {
                 rpn_byte_size += size;
-                oss << "0x" << std::setw(size * 2) << data << '\t' << "Numerica Literal" << std::endl;
+                oss << "0x" << std::setw(size * 2) << data << '\t' << "Numerical Literal" << std::endl;
             }
         }
         else if((*i) & SYMBOL)

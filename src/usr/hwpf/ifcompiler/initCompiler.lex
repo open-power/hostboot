@@ -1,20 +1,26 @@
-/* IBM_PROLOG_BEGIN_TAG                                                   */
-/* This is an automatically generated prolog.                             */
-/*                                                                        */
-/* fips740 src/engd/initfiles/ifcompiler/initCompiler.lex 1.2             */
-/*                                                                        */
-/* IBM CONFIDENTIAL                                                       */
-/*                                                                        */
-/* OBJECT CODE ONLY SOURCE MATERIALS                                      */
-/*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010                   */
-/* All Rights Reserved                                                    */
-/*                                                                        */
-/* The source code for this program is not published or otherwise         */
-/* divested of its trade secrets, irrespective of what has been           */
-/* deposited with the U.S. Copyright Office.                              */
-/*                                                                        */
-/* IBM_PROLOG_END_TAG                                                     */
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/hwpf/ifcompiler/initCompiler.lex $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2010-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 /* Change Log *************************************************************************************
 //                                                                      
 //  Flag Track    Userid   Date       Description                
@@ -36,6 +42,7 @@
 //                                    Support defines for bits, scom_data and attribute columns
 //                camvanng 05/07/12   Support for associated target attributes
 //                                    Save and restore line numbers for each include file
+//                camvanng 05/22/12   Fix "OP" definition
 // End Change Log *********************************************************************************/
 /**
  * @file initCompiler.lex
@@ -105,7 +112,7 @@ ID2     [A-Za-z][A-Za-z0-9_]*(\[[0-9]+(..[0-9]+)?(,[0-9]+(..[0-9]+)?)*\]){0,4}
 ID3      [0-9]+[A-Za-z_]+[0-9]*
 DIGIT    [0-9]
 COMMENT  #.*\n
-OP      "="|"+"|"-"|"|"|"<"|">"|"*"|"/"|"%"
+OP      "="|"+"|"-"|"!"|"<"|">"|"*"|"/"|"%"
 FLOAT   [0-9]+"."[0-9]*
 BINARY  0[bB][0-1]+
 SINGLE_BIN [0-1]

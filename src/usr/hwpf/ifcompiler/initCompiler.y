@@ -1,20 +1,26 @@
-/* IBM_PROLOG_BEGIN_TAG                                                   */
-/* This is an automatically generated prolog.                             */
-/*                                                                        */
-/* fips730 src/engd/initfiles/ifcompiler/initCompiler.y 1.1               */
-/*                                                                        */
-/* IBM CONFIDENTIAL                                                       */
-/*                                                                        */
-/* OBJECT CODE ONLY SOURCE MATERIALS                                      */
-/*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010                   */
-/* All Rights Reserved                                                    */
-/*                                                                        */
-/* The source code for this program is not published or otherwise         */
-/* divested of its trade secrets, irrespective of what has been           */
-/* deposited with the U.S. Copyright Office.                              */
-/*                                                                        */
-/* IBM_PROLOG_END_TAG                                                     */
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/hwpf/ifcompiler/initCompiler.y $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2010-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 // Change Log *************************************************************************************
 //                                                                      
 //  Flag Track    Userid   Date       Description                
@@ -31,6 +37,8 @@
 //                 camvanng 04/16/12  Support defines for SCOM address
 //                                    Support defines for bits, scom_data and attribute columns
 //                                    Delete obsolete code for defines support
+//                 camvanng 05/22/12  Ability to do simple operations on attributes
+//                                    in the scom_data column
 // End Change Log *********************************************************************************
 /**
  * @file initCompiler.y
@@ -111,7 +119,7 @@ int scom;
     /* non-terminal tokens and the union data-type associated with them */
 
 %type <str_ptr> bitsrows
-%type <rpn_ptr> expr id_col num_list
+%type <rpn_ptr> expr id_col num_list scomdexpr
 
 
 
@@ -230,19 +238,29 @@ scombodyline:   INIT_SCOMD  ',' scomdrows  {}
 ;
 
 
-scomdrows:      expr  {
-                          /*printf("scomdrows - RPN Address:0x%X\n",$1);*/
+scomdrows:      scomdexpr  {
+                          /* printf("\n\nscomdrows - RPN Address:0x%X\n\n\n",$1); */
                           init::dbg << $1->listing("Length scom RPN");
                           current_scom->add_scom_rpn($1);
                        }
-                | scomdrows ',' expr {  init::dbg << $3->listing("Length scom RPN"); current_scom->add_scom_rpn($3); }
+                | scomdrows ',' scomdexpr {  init::dbg << $3->listing("Length scom RPN"); current_scom->add_scom_rpn($3); }
 ;
     
-
-/*
-scomdrows:      id_col { printf("scomdrows\n"); }
+scomdexpr:   INIT_INTEGER               { $$= new init::Rpn($1,yyscomlist->get_symbols());}
+        | INIT_ID                       { $$= new init::Rpn(*($1),yyscomlist->get_symbols()); delete $1;}
+        | ATTRIBUTE_ENUM                { $$= new init::Rpn((yyscomlist->get_symbols())->get_attr_enum_val(*($1)),yyscomlist->get_symbols()); delete $1; }
+        | INIT_INT64                    { $$=new init::Rpn($1,yyscomlist->get_symbols()); }
+        | scomdexpr ATTRIBUTE_INDEX     { $1->push_array_index(*($2)); delete $2; }
+        | scomdexpr INIT_SHIFT_RIGHT scomdexpr  { $$ = $1->push_merge($3,SHIFTRIGHT); }
+        | scomdexpr INIT_SHIFT_LEFT scomdexpr   { $$ = $1->push_merge($3,SHIFTLEFT); }
+        | scomdexpr '+' scomdexpr               { $$ = $1->push_merge($3,PLUS); }
+        | scomdexpr '-' scomdexpr               { $$ = $1->push_merge($3,MINUS); }
+        | scomdexpr '*' scomdexpr               { $$ = $1->push_merge($3,MULT); }
+        | scomdexpr '/' scomdexpr               { $$ = $1->push_merge($3,DIVIDE); }
+        | scomdexpr '%' scomdexpr               { $$ = $1->push_merge($3,MOD); }
+        | '!' scomdexpr                         { $$ = $2->push_op(NOT); }
+        | '(' scomdexpr ')'             { $$ = $2; }
 ;
-*/
 
 bitsrows:       bitrange {}
                 | bitsrows ',' bitrange {}

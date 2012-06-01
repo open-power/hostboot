@@ -1,17 +1,26 @@
-// IBM_PROLOG_BEGIN_TAG
-// This is an automatically generated prolog.
-//
-// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/ifcompiler/initRpn.H,v $
-//
-// IBM CONFIDENTIAL
-//
-// COPYRIGHT International Business Machines Corp. 2010,2010
-//
-//UNDEFINED 
-//
-// Origin: UNDEFINED
-//
-// IBM_PROLOG_END_TAG
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/hwpf/ifcompiler/initRpn.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2010-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #if !defined(INITRPN_H)
 #define INITRPN_H
 
@@ -27,6 +36,8 @@
 //                 camvanng 11/08/11 Added support for attribute enums
 //                 andrewg  11/09/11 Multi-dimensional array and move to common fapi include
 //                 camvanng 01/20/12 Support for using a range of indexes for array attributes
+//                 camvanng 05/22/12 Ability to do simple operations on attributes
+//                                   in the scom_data column
 // End Change Log *********************************************************************************
 
 /**
@@ -191,13 +202,15 @@ namespace init
 
         /**
          * Read binary sequence to recreate this Rpn sequence
-         * @param bineary sequence interator
+         * @param binary sequence interator
+         * @param number of bytes to read
          * @param symbol table to use
-         * @pre first byte in binary sequence is the size of the rpn sequence in bytes
-         * @post if symbols != NULL then iv_rpnstack is replaced
-         * @post iv_symbols is replace with symbols
+         * @post this rpn sequence is appended
+         * @post if symbols != NULL then iv_symbols is replaced with symbols
          */
-        void bin_read(BINSEQ::const_iterator & bli, Symbols * symbols = NULL); // read binary sequence to recreate RPN
+        void bin_read(BINSEQ::const_iterator & bli,
+                      uint8_t i_size = 2,
+                      Symbols * symbols = NULL); // read binary sequence to recreate RPN
 
         /**
          * Copy one rpn operation from bli and add to this Rpn sequence
@@ -211,6 +224,17 @@ namespace init
          * @note The input sequence should NOT have a size byte on the front
          */
         BINSEQ::const_iterator bin_read_one_op(BINSEQ::const_iterator & bli, Symbols * symbols = NULL); // read one rpn operation from bli to create Rpn
+
+        /**
+         * Copy one numeric literal or attribute from io_bli and add to this Rpn sequence
+         * @param[in,out] io_bli  iterator of a binary rpn sequence
+         * @param[in] i_symbols table to use.
+         * @pre io_bli points to a valid rpn sequence
+         * @post this Rpn sequence is appended
+         * @post Internal symbol table ptr is replaced with given symbol table ptr if not NULL
+         * @post iterator of binary sequence is one past the last byte used.
+         */
+        void bin_read_one_id(BINSEQ::const_iterator & io_bli, Symbols * i_symbols = NULL);
 
         //dg002a
         /**

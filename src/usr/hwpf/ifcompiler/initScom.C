@@ -1,18 +1,26 @@
-// IBM_PROLOG_BEGIN_TAG
-// This is an automatically generated prolog.
-//
-// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/ifcompiler/initScom.C,v $
-//
-// IBM CONFIDENTIAL
-//
-// COPYRIGHT International Business Machines Corp. 2010,2010
-//
-//UNDEFINED
-//
-// Origin: UNDEFINED
-//
-// IBM_PROLOG_END_TAG
-
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/hwpf/ifcompiler/initScom.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2010-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 // Change Log *************************************************************************************
 //
 //  Flag  Track    Userid   Date     Description
@@ -33,6 +41,8 @@
 //                                   Support for array at beginning of scom address
 //                                   Fix bug in string size when converting decimal to hex string
 //                 camvanng 05/07/12 Support for associated target attributes
+//                 camvanng 05/22/12 Ability to do simple operations on attributes
+//                                   in the scom_data column
 // End Change Log *********************************************************************************
 
 /**
@@ -105,7 +115,11 @@ Scom::Scom(BINSEQ::const_iterator & bli, Symbols * i_symbols):
 
     for(size_t i = 0; i < numrows; ++i)
     {
-        Rpn rpn(bli,iv_symbols);
+        uint8_t length = *bli++; // first byte is length of rpn sequence
+        //printf("Creating scom data rpn, length %u\n", length);
+
+        Rpn rpn(iv_symbols);       // blank RPNs
+        rpn.bin_read(bli, length); // read rpn sequence
         iv_scom_rpn.push_back(rpn);
     }
 
@@ -116,7 +130,8 @@ Scom::Scom(BINSEQ::const_iterator & bli, Symbols * i_symbols):
         // Read col heads
         for(size_t i = 0; i < numcols; ++i)
         {
-            Rpn col_name_rpn(bli,iv_symbols);
+            Rpn col_name_rpn(iv_symbols);       // blank RPNs
+            col_name_rpn.bin_read_one_id(bli);
             iv_col_vars.push_back(col_name_rpn);
             iv_cols_rpn.push_back(iv_row_rpn);  // copy in blank row RPNs for this column
         }
@@ -581,7 +596,7 @@ void Scom::bin_list_one(BINSEQ & blist,uint64_t i_addr, uint32_t i_addr_num, RAN
         {
             if ((*r) == range)
             {
-                i->bin_str(blist,numaddrs,i_addr_num,false);
+                i->bin_str(blist,numaddrs,i_addr_num,true); //Add length to blist
             }
         }
     }
@@ -589,7 +604,7 @@ void Scom::bin_list_one(BINSEQ & blist,uint64_t i_addr, uint32_t i_addr_num, RAN
     {
         for(RPN_LIST::iterator i = iv_scom_rpn.begin(); i != iv_scom_rpn.end(); ++i)
         {
-            i->bin_str(blist,numaddrs,i_addr_num,false);
+            i->bin_str(blist,numaddrs,i_addr_num,true); //Add length to blist
         }
     }
 
