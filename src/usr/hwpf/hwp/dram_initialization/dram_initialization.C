@@ -42,6 +42,7 @@
 #include    <initservice/taskargs.H>
 #include    <errl/errlentry.H>
 #include    <diag/mdia/mdia.H>
+#include    <diag/attn/attn.H>
 #include    <initservice/isteps_trace.H>
 
 //  targeting support
@@ -178,11 +179,31 @@ void    call_mss_memdiag( void    *io_pArgs )
     TargetHandleList l_mbaList;
     getAllChiplets(l_mbaList, TYPE_MBA);
 
-    errlHndl_t l_err = runStep(l_mbaList);
-    if(NULL != l_err)
-    {
-        TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "MDIA subStep failed");
-    }
+    do {
+
+        l_errl = ATTN::startService();
+
+        if(l_errl)
+        {
+            break;
+        }
+
+        l_errl = runStep(l_mbaList);
+        if(NULL != l_errl)
+        {
+            TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "MDIA subStep failed");
+            break;
+        }
+
+        l_errl = ATTN::stopService();
+
+        if(l_errl)
+        {
+            break;
+        }
+
+
+    } while (0);
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_mss_memdiag exit" );
