@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/include/kernel/cpumgr.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2010 - 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/include/kernel/cpumgr.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2010-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #ifndef __KERNEL_CPUMGR_H
 #define __KERNEL_CPUMGR_H
 
@@ -34,8 +35,8 @@ class CpuManager
         enum
         {
             MAXCPUS = KERNEL_MAX_SUPPORTED_CPUS,
-            CPU_PERIODIC_CHECK_MEMORY = 16,
-            CPU_PERIODIC_FLUSH_PAGETABLE = 256, 
+            CPU_PERIODIC_CHECK_MEMORY = 8,
+            CPU_PERIODIC_FLUSH_PAGETABLE = 128, 
             CPU_PERIODIC_DEFRAG = 949,  // TODO Any bigger not currently hit
         };
 

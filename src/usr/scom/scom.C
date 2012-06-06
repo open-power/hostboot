@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/scom/scom.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/scom/scom.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 /**
  *  @file scom.C
  *
@@ -227,7 +228,7 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
                     // got an indirect read error
                     // the data buffer is in tempIoData
                     TRACFCOMP(g_trac_scom,
-                              "INDIRECT SCOM READ= ERROR valid bits are not on..  scomreg=0x%X",
+                              "INDIRECT SCOM READ= ERROR valid bits are not on..  scomreg=0x%.16X",
                               *((uint64_t *)io_buffer));
 
                     /*@
@@ -254,7 +255,7 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
                 {
                     // got an indirect read timeout
                     TRACFCOMP(g_trac_scom,
-                              "INDIRECT SCOM READ=indirect read timout ..  scomreg=0x%X",
+                              "INDIRECT SCOM READ=indirect read timout ..  scomreg=0x%.16X",
                               *((uint64_t *)io_buffer));
 
 
@@ -346,7 +347,7 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
                 if (l_indScomError == true)
                 {
                     // got an indirect write error
-                    TRACFCOMP(g_trac_scom, "INDIRECT SCOM WRITE= ERROR valid bits are not on..  scomreg=0x%X", temp_io_buffer);
+                    TRACFCOMP(g_trac_scom, "INDIRECT SCOM WRITE= ERROR valid bits are not on..  scomreg=0x%.16X", temp_io_buffer);
 
                     /*@
                      * @errortype
@@ -372,7 +373,7 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
                 {
                     // got an indirect write timeout
                     TRACFCOMP(g_trac_scom,
-                              "INDIRECT SCOM READ=indirect write timout ..  scomreg=0x%X",
+                              "INDIRECT SCOM WRITE=indirect write timeout ..  scomreg=0x%.16X",
                               temp_io_buffer);
 
 

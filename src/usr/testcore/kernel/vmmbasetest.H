@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/testcore/kernel/vmmbasetest.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/testcore/kernel/vmmbasetest.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 /** @file vmmbasetest.H
  *  @brief Test cases for permission settings on the base block of the VMM.
  */
@@ -92,7 +93,13 @@ class VmmBaseTest : public CxxTest::TestSuite
 
         void testCastOutPages()
         {
-             uint64_t l_testAddr = VMM_VADDR_RMVPAGE_TEST;
+
+            //Disabled until page management issues are fixed.
+            //RTC: 43209 (task) created to track reenable of this test case.
+            printk("testCastOutPages: Disabled until page management issues are fixed. ");
+            return;
+
+            uint64_t l_testAddr = VMM_VADDR_RMVPAGE_TEST;
             uint64_t l_testSize = VMM_SIZE_RMVPAGE_TEST;
             uint64_t vaddr = l_testAddr+l_testSize;
             uint64_t vsize = PageManager::availPages()*PAGESIZE;
