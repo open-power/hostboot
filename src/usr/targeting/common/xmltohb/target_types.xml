@@ -1,11 +1,11 @@
 <!--  IBM_PROLOG_BEGIN_TAG
      This is an automatically generated prolog.
    
-     $Source: src/usr/targeting/xmltohb/target_types.xml $
+     $Source: src/usr/targeting/common/xmltohb/target_types.xml $
    
      IBM CONFIDENTIAL
    
-     COPYRIGHT International Business Machines Corp. 2011
+     COPYRIGHT International Business Machines Corp. 2011-2012
    
      p1
    
@@ -19,7 +19,7 @@
    
      Origin: 30
    
-     IBM_PROLOG_END -->
+     IBM_PROLOG_END_TAG -->
 
 <attributes>
 

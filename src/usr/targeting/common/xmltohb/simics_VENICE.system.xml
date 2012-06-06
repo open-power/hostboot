@@ -1,25 +1,25 @@
 <!--  IBM_PROLOG_BEGIN_TAG
      This is an automatically generated prolog.
-
-     $Source: src/usr/targeting/xmltohb/simics_VENICE.system.xml $
-
+   
+     $Source: src/usr/targeting/common/xmltohb/simics_VENICE.system.xml $
+   
      IBM CONFIDENTIAL
-
-     COPYRIGHT International Business Machines Corp. 2011
-
+   
+     COPYRIGHT International Business Machines Corp. 2011-2012
+   
      p1
-
+   
      Object Code Only (OCO) source materials
      Licensed Internal Code Source Materials
      IBM HostBoot Licensed Internal Code
-
+   
      The source code for this program is not published or other-
      wise divested of its trade secrets, irrespective of what has
      been deposited with the U.S. Copyright Office.
-
+   
      Origin: 30
-
-     IBM_PROLOG_END -->
+   
+     IBM_PROLOG_END_TAG -->
 <attributes>
 
 <!-- =====================================================================
@@ -251,7 +251,7 @@
     <id>sys0node0proc0ex6</id>
     <type>unit-ex-venice</type>
     <attribute><id>HUID</id><default>0x000A0006</default></attribute>
-        <attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/ex-6</default>
     </attribute>
@@ -7116,6 +7116,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-0/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -7129,6 +7133,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-0/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -7205,6 +7213,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-1/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -7218,6 +7230,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-1/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -7294,6 +7310,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-2/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -7307,6 +7327,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-2/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -7383,6 +7407,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-3/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -7396,6 +7424,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-3/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -7472,6 +7504,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-4/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -7485,6 +7521,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-4/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -7561,6 +7601,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-5/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -7574,6 +7618,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-5/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -7650,6 +7698,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-6/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -7663,6 +7715,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-6/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -7739,6 +7795,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-7/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -7752,6 +7812,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-7/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -7828,6 +7892,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-1/mcs-0/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -7841,6 +7909,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-1/mcs-0/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -7917,6 +7989,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-1/mcs-1/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -7930,6 +8006,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-1/mcs-1/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -8006,6 +8086,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-1/mcs-2/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -8019,6 +8103,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-1/mcs-2/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -8095,6 +8183,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-1/mcs-3/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -8108,6 +8200,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-1/mcs-3/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -8184,6 +8280,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-1/mcs-4/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -8197,6 +8297,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-1/mcs-4/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -8273,6 +8377,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-1/mcs-5/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -8286,6 +8394,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-1/mcs-5/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -8362,6 +8474,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-1/mcs-6/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -8375,6 +8491,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-1/mcs-6/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -8451,6 +8571,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-1/mcs-7/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -8464,6 +8588,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-1/mcs-7/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -8540,6 +8668,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-2/mcs-0/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -8553,6 +8685,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-2/mcs-0/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -8629,6 +8765,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-2/mcs-1/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -8642,6 +8782,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-2/mcs-1/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -8718,6 +8862,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-2/mcs-2/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -8731,6 +8879,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-2/mcs-2/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -8807,6 +8959,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-2/mcs-3/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -8820,6 +8976,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-2/mcs-3/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -8896,6 +9056,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-2/mcs-4/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -8909,6 +9073,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-2/mcs-4/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -8985,6 +9153,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-2/mcs-5/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -8998,6 +9170,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-2/mcs-5/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -9074,6 +9250,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-2/mcs-6/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -9087,6 +9267,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-2/mcs-6/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -9163,6 +9347,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-2/mcs-7/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -9176,6 +9364,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-2/mcs-7/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -9252,6 +9444,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-3/mcs-0/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -9265,6 +9461,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-3/mcs-0/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -9341,6 +9541,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-3/mcs-1/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -9354,6 +9558,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-3/mcs-1/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -9430,6 +9638,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-3/mcs-2/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -9443,6 +9655,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-3/mcs-2/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -9519,6 +9735,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-3/mcs-3/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -9532,6 +9752,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-3/mcs-3/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -9608,6 +9832,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-3/mcs-4/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -9621,6 +9849,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-3/mcs-4/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -9697,6 +9929,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-3/mcs-5/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -9710,6 +9946,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-3/mcs-5/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -9786,6 +10026,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-3/mcs-6/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -9799,6 +10043,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-3/mcs-6/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -9875,6 +10123,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-3/mcs-7/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -9888,6 +10140,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-3/mcs-7/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -9964,6 +10220,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-4/mcs-0/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -9977,6 +10237,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-4/mcs-0/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -10053,6 +10317,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-4/mcs-1/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -10066,6 +10334,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-4/mcs-1/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -10142,6 +10414,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-4/mcs-2/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -10155,6 +10431,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-4/mcs-2/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -10231,6 +10511,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-4/mcs-3/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -10244,6 +10528,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-4/mcs-3/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -10320,6 +10608,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-4/mcs-4/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -10333,6 +10625,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-4/mcs-4/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -10409,6 +10705,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-4/mcs-5/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -10422,6 +10722,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-4/mcs-5/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -10498,6 +10802,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-4/mcs-6/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -10511,6 +10819,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-4/mcs-6/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -10587,6 +10899,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-4/mcs-7/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -10600,6 +10916,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-4/mcs-7/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -10676,6 +10996,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-5/mcs-0/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -10689,6 +11013,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-5/mcs-0/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -10765,6 +11093,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-5/mcs-1/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -10778,6 +11110,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-5/mcs-1/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -10854,6 +11190,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-5/mcs-2/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -10867,6 +11207,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-5/mcs-2/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -10943,6 +11287,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-5/mcs-3/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -10956,6 +11304,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-5/mcs-3/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -11032,6 +11384,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-5/mcs-4/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -11045,6 +11401,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-5/mcs-4/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -11121,6 +11481,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-5/mcs-5/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -11134,6 +11498,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-5/mcs-5/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -11210,6 +11578,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-5/mcs-6/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -11223,6 +11595,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-5/mcs-6/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -11299,6 +11675,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-5/mcs-7/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -11312,6 +11692,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-5/mcs-7/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -11388,6 +11772,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-6/mcs-0/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -11401,6 +11789,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-6/mcs-0/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -11477,6 +11869,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-6/mcs-1/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -11490,6 +11886,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-6/mcs-1/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -11566,6 +11966,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-6/mcs-2/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -11579,6 +11983,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-6/mcs-2/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -11655,6 +12063,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-6/mcs-3/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -11668,6 +12080,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-6/mcs-3/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -11744,6 +12160,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-6/mcs-4/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -11757,6 +12177,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-6/mcs-4/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -11833,6 +12257,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-6/mcs-5/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -11846,6 +12274,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-6/mcs-5/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -11922,6 +12354,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-6/mcs-6/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -11935,6 +12371,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-6/mcs-6/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -12011,6 +12451,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-6/mcs-7/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -12024,6 +12468,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-6/mcs-7/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -12100,6 +12548,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-7/mcs-0/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -12113,6 +12565,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-7/mcs-0/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -12189,6 +12645,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-7/mcs-1/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -12202,6 +12662,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-7/mcs-1/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -12278,6 +12742,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-7/mcs-2/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -12291,6 +12759,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-7/mcs-2/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -12367,6 +12839,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-7/mcs-3/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -12380,6 +12856,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-7/mcs-3/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -12456,6 +12936,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-7/mcs-4/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -12469,6 +12953,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-7/mcs-4/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -12545,6 +13033,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-7/mcs-5/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -12558,6 +13050,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-7/mcs-5/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -12634,6 +13130,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-7/mcs-6/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -12647,6 +13147,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-7/mcs-6/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -12723,6 +13227,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-7/mcs-7/membuf-0/mbs-0/mba-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -12736,6 +13244,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-7/mcs-7/membuf-0/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
