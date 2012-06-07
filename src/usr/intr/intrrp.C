@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/intr/intrrp.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/intr/intrrp.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 /**
  * @file intrrp.C
  * @brief Interrupt Resource Provider
@@ -230,7 +231,7 @@ void IntrRp::msgHandler()
                     // Use the XISR as the type (for now)
                     type = static_cast<ext_intr_t>(xirr & XISR_MASK);
 
-                    TRACDCOMP(g_trac_intr,"External Interrupt recieved, Type=%x",type);
+                    TRACFCOMP(g_trac_intr,"External Interrupt recieved, Type=%x",type);
 
                     // Acknowlege msg
                     msg->data[1] = 0;
@@ -382,6 +383,7 @@ errlHndl_t IntrRp::setBAR(TARGETING::Target * i_target,
     uint64_t barValue = static_cast<uint64_t>(ICPBAR_VAL) +
             (8 * i_pir.nodeId) + i_pir.chipId;
     barValue <<= 34;
+    barValue |= 1ULL << (63 - ICPBAR_EN);  
 
     TRACFCOMP(g_trac_intr,"INTR: Target %p. ICPBAR value: 0x%016lx",
               i_target,barValue);
@@ -772,5 +774,10 @@ errlHndl_t INTR::disableExternalInterrupts()
             );
     }
     return err;
+}
+
+uint32_t INTR::intrDestCpuId(uint32_t i_xisr)
+{
+    return Singleton<IntrRp>::instance().intrDestCpuId(i_xisr);
 }
 

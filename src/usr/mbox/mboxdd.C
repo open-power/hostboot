@@ -28,6 +28,7 @@
 #include <trace/interface.H>
 #include <errl/errlentry.H>
 #include <targeting/common/targetservice.H>
+#include <intr/interrupt.H>
 
 
 trace_desc_t* g_trac_mbox = NULL;
@@ -596,21 +597,62 @@ errlHndl_t mboxGetErrStat(TARGETING::Target* i_target,uint64_t &o_status)
 errlHndl_t mboxInit(TARGETING::Target* i_target)
 {
     errlHndl_t err = NULL;
+    size_t scom_len = sizeof(uint64_t);
+
+    // Setup PHBISR
+    // EN.TPC.PSIHB.PSIHB_INTERRUPT2_REG set to 0x0000A00140000000
+    // EN.TPC.PSIHB.PSIHB_ISRN_REG set to 0x00030003FFFF0000
+    PSIHB_ISRN_REG_t reg;
+
+    reg.irsn = IRSN_INIT;
+    reg.die  = ENABLE;
+    reg.uie  = ENABLE;
+    reg.mask = IRSN_MASK; // 6 left bits are hardcoded in hardware to '1'
+
+    TRACFCOMP(g_trac_mbox,"PSIHB_ISRN_REG: 0x%016lx",reg.d64);
+
+    err = deviceOp(DeviceFW::WRITE,
+                   i_target,
+                   reinterpret_cast<void*>(&reg),
+                   scom_len,
+                   DEVICE_XSCOM_ADDRESS(PSIHB_ISRN_REG));
+
+    if(!err)
+    {
+        PSIHB_INTERRUPT2_REG_t reg;
+
+        // Whichever cpu core inits the mboxdd should be the desired cpu
+        reg.pir      = INTR::intrDestCpuId(IRSN_INIT | IRSN_SOURCE);
+        reg.priority = 2;       // could be 1 - 0xfe, 0xff means off
+
+        // The source gets OR'd with the irsn to form the interrupt presenter
+        // type (XISR) (e.g. 0x1A)
+        reg.source   = IRSN_SOURCE;
+
+        TRACFCOMP(g_trac_mbox,"PSIHB_INTERRUPT2_REG: 0x%016lx",reg.d64);
+
+        err = deviceOp(DeviceFW::WRITE,
+                       i_target,
+                       reinterpret_cast<void*>(&reg),
+                       scom_len,
+                       DEVICE_XSCOM_ADDRESS(PSIHB_INTERRUPT2_REG));
+    }
+
     // Setup mailbox intr mask reg
     // Set bits 2,1,0
     // assume we always use mailbox 1
-    uint64_t scom_data = (static_cast<uint64_t>(MBOX_DOORBELL_ERROR) |
-                          static_cast<uint64_t>(MBOX_HW_ACK) |
-                          static_cast<uint64_t>(MBOX_DATA_PENDING)) << 32;
+    if(!err)
+    {
+        uint64_t scom_data = (static_cast<uint64_t>(MBOX_DOORBELL_ERROR) |
+                              static_cast<uint64_t>(MBOX_HW_ACK) |
+                              static_cast<uint64_t>(MBOX_DATA_PENDING)) << 32;
 
-    size_t scom_len = sizeof(uint64_t);
-
-     
-    err = deviceOp(DeviceFW::WRITE,
-                   i_target,
-                   reinterpret_cast<void*>(&scom_data),
-                   scom_len,
-                   DEVICE_XSCOM_ADDRESS(MBOX_DB_INT_MASK_PIB_RS));
+        err = deviceOp(DeviceFW::WRITE,
+                       i_target,
+                       reinterpret_cast<void*>(&scom_data),
+                       scom_len,
+                       DEVICE_XSCOM_ADDRESS(MBOX_DB_INT_MASK_PIB_RS));
+    }
 
     return err;
 
@@ -677,7 +719,7 @@ errlHndl_t mboxddShutDown(TARGETING::Target* i_target)
                        DEVICE_XSCOM_ADDRESS(MBOX_DB_INT_REG_PIB));
     }
 
-    // TODO Others?
+    // Others?
 
     return err;
 }

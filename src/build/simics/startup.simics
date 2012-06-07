@@ -22,11 +22,10 @@ try {
 
 
 
-
 ########################### WORKAROUNDS ####################################
 # Setup the mailbox.
 # for mbox on core 0 use:
 # proc_venicechip_cmp0.psi_hb->psihb_xivr_fsi=0x0140000000     #02010917
 # for mbox on core 5 use:
-proc_venicechip_cmp0.psi_hb->psihb_xivr_fsi=0x0000A00140000000   #02010917
-proc_venicechip_cmp0.psi_hb->psihb_irsn=0x00030003FFFF0000 #0201091b
+#proc_venicechip_cmp0.psi_hb->psihb_xivr_fsi=0x0000A00140000000   #02010917
+#proc_venicechip_cmp0.psi_hb->psihb_irsn=0x00030003FFFF0000 #0201091b

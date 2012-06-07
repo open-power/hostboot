@@ -170,6 +170,66 @@ namespace MBOX
         MBOX_DATA_LBUS_SLAVE_B =0x000000FF,  // Data Count LBUS Slave B
     };                                                    // Doorbell 1
 
+    // PHBISR - PSI Host Bridget Interrupt Service Registers
+    enum EN_TCP_PSIHB
+    {
+        DISABLE                 = 0,
+        ENABLE                  = 1,
+        IRSN_SOURCE             = 2,    //!<< IRSN_SOURCE gets OR'd with
+        IRSN_INIT               = 0x18, //!<< IRSN_INIT to form XISR(0x1A)
+        IRSN_MASK               = 0x7FFF8,
+        PSIHB_INTERRUPT2_REG    = 0x02010917,
+        PSIHB_ISRN_REG          = 0x0201091b,
+    };
+
+    struct PSIHB_INTERRUPT2_REG_t
+    {
+        union
+        {
+            uint64_t    d64;
+
+            struct
+            {
+                uint64_t  res1:8;       //!< zeros
+                uint64_t  pir:14;       //!< Interrupt destination (server)
+                uint64_t  linkptr:2;    //!< Which link reg in intr presenter
+                uint64_t  priority:8;   //!< INTR priority level
+                uint64_t  source:3;     //!< Source number (Default b010)
+                uint64_t  res2:4;       //!< zeros
+                uint64_t  intr_pend:25; //!< Interrupt is pending
+            } PACKED;
+        };
+
+        /**
+         * Default contructor
+         */
+        PSIHB_INTERRUPT2_REG_t() : d64(0) {}
+    };
+
+    struct PSIHB_ISRN_REG_t
+    {
+        union
+        {
+            uint64_t    d64;
+
+            struct
+            {
+                uint64_t irsn:19;       //!< IRSN compare reg
+                uint64_t res1:10;       //!< zeros
+                uint64_t reset:1;       //!< ICS Reset
+                uint64_t die:1;         //!< Downstream Interrupt Enable
+                uint64_t uie:1;         //!< Upstream Interrupt Enable
+                uint64_t mask:19;       //!< IRSN Compare Mask
+                uint64_t res2:13;       //!< zeros
+            } PACKED;
+        };
+
+        /**
+         * Default Contructor
+         */
+        PSIHB_ISRN_REG_t() : d64(0) {}
+    };
+
 
 }; // namespace MBOX
 
