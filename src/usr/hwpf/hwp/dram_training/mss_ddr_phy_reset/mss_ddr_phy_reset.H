@@ -1,26 +1,27 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/hwpf/hwp/dram_training/mss_ddr_phy_reset/mss_ddr_phy_reset.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
-// $Id: mss_ddr_phy_reset.H,v 1.1 2011/11/19 19:19:34 mfred Exp $
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/hwpf/hwp/dram_training/mss_ddr_phy_reset/mss_ddr_phy_reset.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
+// $Id: mss_ddr_phy_reset.H,v 1.2 2012/03/21 18:12:28 mfred Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_ddr_phy_reset.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -49,18 +50,22 @@
 
 #include <fapi.H>
 
+typedef fapi::ReturnCode (*mss_ddr_phy_reset_FP_t)(const fapi::Target& i_target);
+
 extern "C"
 {
+    // Target is centaur.mba
 
 /**
- * @brief ddr_phy_reset procedure.
+ * @brief mss_ddr_phy_reset procedure.  The purpose of this procedure is to do a soft reset of the DDR PHY logic and cause the DDR PLLs to lock.
  *
- * @param[in]  i_target  Reference to target
+ * @param[in]  i_target  Reference to centaur.mba target
  *
  * @return ReturnCode
  */
 
-fapi::ReturnCode mss_ddr_phy_reset(const fapi::Target target);
+    fapi::ReturnCode mss_ddr_phy_reset(const fapi::Target& i_target);
+    // Target is centaur.mba
 
 } // extern "C"
 
