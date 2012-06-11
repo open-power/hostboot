@@ -38,6 +38,7 @@
 //                 camvanng 01/20/12 Support for using a range of indexes for array attributes
 //                 camvanng 05/22/12 Ability to do simple operations on attributes
 //                                   in the scom_data column
+//        SW146714 camvanng 06/08/12 Use two bytes to store row rpn sequence byte count
 // End Change Log *********************************************************************************
 
 /**
@@ -193,12 +194,14 @@ namespace init
          * @param i_num_addrs number of Scom addresses for this Scom
          * @param i_addr_num the nth addr with the range of Scom addresses
          * @param i_prepend_count Flag to indicate prepend rpn count to binary string
+         * @param i_one_byte_count Flag to indicate whether to use 1 byte to store
+         * the byte count (default is to use 2 bytes) when i_prepend_count == true
          * @PRE should never be called until all symbols in the initfile have been
          * "looked up" or the binary tags for Symbols and Numbers may not be accurate
          * @return void
          */
         void bin_str(BINSEQ & blist, uint32_t i_num_addrs, uint32_t i_addr_num,
-                     bool i_prepend_count = false);
+                     bool i_prepend_count = false, bool i_one_byte_count = false);
 
         /**
          * Read binary sequence to recreate this Rpn sequence
@@ -209,7 +212,7 @@ namespace init
          * @post if symbols != NULL then iv_symbols is replaced with symbols
          */
         void bin_read(BINSEQ::const_iterator & bli,
-                      uint8_t i_size = 2,
+                      uint16_t i_size = 2,
                       Symbols * symbols = NULL); // read binary sequence to recreate RPN
 
         /**

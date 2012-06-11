@@ -40,6 +40,7 @@
 //                 camvanng 05/07/12 Support for associated target attributes
 //                 camvanng 05/22/12 Ability to do simple operations on attributes
 //                                   in the scom_data column
+//        SW146714 camvanng 06/08/12 Use two bytes to store row rpn sequence byte count
 // End Change Log *********************************************************************************
 
 /**
@@ -588,7 +589,7 @@ Rpn * Rpn::merge(Rpn * i_rpn)
 
 //-------------------------------------------------------------------------------------------------
 // See header file for contract
-void Rpn::bin_read(BINSEQ::const_iterator & bli, uint8_t i_size, Symbols * symbols)
+void Rpn::bin_read(BINSEQ::const_iterator & bli, uint16_t i_size, Symbols * symbols)
 {
 
     if(symbols) iv_symbols = symbols;
@@ -847,7 +848,8 @@ std::string  Rpn::listing(const char * i_desc, const std::string & spyname, bool
 //-------------------------------------------------------------------------------------------------
 
 // binary version to write to file
-void Rpn::bin_str(BINSEQ & o_blist, uint32_t i_num_addrs, uint32_t i_addr_num, bool i_prepend_count)
+void Rpn::bin_str(BINSEQ & o_blist, uint32_t i_num_addrs, uint32_t i_addr_num,
+                  bool i_prepend_count, bool i_one_byte_count)
 {
     BINSEQ blist;
     uint32_t count = 0;
@@ -939,9 +941,35 @@ void Rpn::bin_str(BINSEQ & o_blist, uint32_t i_num_addrs, uint32_t i_addr_num, b
         }
     }
 
+    //std::cout << "Rpn::bit_str(): iv_rpnstack size: " << iv_rpnstack.size() << std::endl;
+    //std::cout << " Rpn::bit_str(): rpn byte count: " << count << std::endl;
     if (i_prepend_count)
     {
-        o_blist.push_back((uint8_t) count);
+        if (true == i_one_byte_count)
+        {
+            //Expect count <= 255
+            if (0xFF < count)
+            {
+                std::ostringstream errss;
+                errss << "Rpn::bin_str: count " << count << " > 0xFF\n";
+                throw std::invalid_argument(errss.str());
+            }
+
+            o_blist.push_back((uint8_t) count);
+        }
+        else
+        {
+            //Expect count <= 65535 
+            if (0xFFFF < count)
+            {
+                std::ostringstream errss;
+                errss << "Rpn::bin_str: count " << count << " > 0xFFFF\n";
+                throw std::invalid_argument(errss.str());
+            }
+
+            o_blist.push_back((uint8_t)(count >> 8));
+            o_blist.push_back((uint8_t) count);
+        }
     }
 
     o_blist.insert(o_blist.end(), blist.begin(), blist.end());

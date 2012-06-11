@@ -55,6 +55,8 @@
  *                          camvanng    05/22/2012  Ability to do simple operations
  *                                                  on attributes in the scom
  *                                                  data column
+ *          SW146714        camvanng    06/08/2012  Use two bytes to store row
+ *                                                  rpn sequence byte count
  */
 
 #include <fapiHwpExecInitFile.H>
@@ -994,7 +996,7 @@ void loadScomSection(ifInfo_t & io_ifInfo,
                 }
 
                 //Read the row data for each row
-                l_rowSize = 0;
+                uint16_t l_rowSize = 0;
                 l_rowPtr = NULL;
                 uint32_t c;
 
@@ -1011,10 +1013,10 @@ void loadScomSection(ifInfo_t & io_ifInfo,
                         fapiAssert(false);
                     }
 
-                    //If have expr column, need another byte to store its length
+                    //If have expr column, need another two bytes to store its length
                     if (l_scoms[i].hasExpr)
                     {
-                        l_rowSize++;
+                        l_rowSize += 2;
                     }
 
                     //Allocate the space
@@ -1056,11 +1058,12 @@ void loadScomSection(ifInfo_t & io_ifInfo,
                     //if present
                     if (l_scoms[i].hasExpr)
                     {
-                        l_rowSize--;
-                        *l_rowPtr = l_rowSize; //Save the length of the expr
+                        //Save the length of the expr
+                        l_rowSize -= 2;
+                        *l_rowPtr++ = (uint8_t)(l_rowSize >> 8);
+                        *l_rowPtr++ = (uint8_t)l_rowSize;
                         IF_DBG("loadScomSection: scom[%u]: rowData[%u] "
-                                 "expr len 0x%02x", i, j, *l_rowPtr);
-                        l_rowPtr++;
+                                 "expr len 0x%02x%02x", i, j, *(l_rowPtr-2), *(l_rowPtr-1));
 
                         //Read in the rest of the expression, which goes to the
                         //end of the row
@@ -1140,7 +1143,7 @@ fapi::ReturnCode executeScoms(ifData_t & i_ifData)
 
     fapi::ReturnCode l_rc;
     uint16_t l_numSimpleCols = 0;
-    uint8_t l_len = 0;
+    uint16_t l_len = 0;
     char * l_rowExpr = NULL;
     char * l_colExpr = NULL;
     uint16_t l_row;
@@ -1284,7 +1287,8 @@ fapi::ReturnCode executeScoms(ifData_t & i_ifData)
 
                 l_len = *((uint8_t*)l_rowExpr);
                 l_rowExpr++;
-                //l_len--; //remove the length value from the length left
+                l_len = (l_len << 8) + *((uint8_t*)l_rowExpr);
+                l_rowExpr++;
 
                 l_rc = evalRpn(i_ifData, l_rowExpr, l_len, false, true);
 

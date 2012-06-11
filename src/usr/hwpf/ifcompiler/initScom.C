@@ -43,6 +43,8 @@
 //                 camvanng 05/07/12 Support for associated target attributes
 //                 camvanng 05/22/12 Ability to do simple operations on attributes
 //                                   in the scom_data column
+//        SW146714 camvanng 06/08/12 Use two bytes to store row rpn sequence byte count
+//                                   Handle case where after row_optimize(), there's no Scom to write
 // End Change Log *********************************************************************************
 
 /**
@@ -140,9 +142,12 @@ Scom::Scom(BINSEQ::const_iterator & bli, Symbols * i_symbols):
         {
             COL_LIST::iterator cli = iv_cols_rpn.begin();       // *cli is list of row rpns for col
             RPN_LIST::iterator rpi = (*cli).begin() + row_n;    // *rpi is current row rpn for first col
-            BINSEQ::const_iterator bli_end = bli + (*bli);      // end of rpn in bin seq
-            ++bli; ++bli_end;                                   // adjust for first byte being len
+
             // The next len bytes belong to this row
+            uint16_t rpn_byte_count = (*bli++ << 8) + (*bli++); // length of rpn sequece
+            //printf("Create scom from binseq: rpn byte count: %u\n", rpn_byte_count);
+            BINSEQ::const_iterator bli_end = bli + rpn_byte_count; // end of rpn in bin seq
+            
             // Simple cols are divided by OPs
             // LIST op has two additional bytes (len,op)
             while(bli < bli_end)
@@ -271,7 +276,7 @@ void Scom::add_row_rpn(Rpn * i_rpn)
 void Scom::add_bit_range(uint32_t start, uint32_t end)
 {
     // make sure they are added in order
-    dbg << "Add bit range " << start << " to " << end;
+    dbg << "Add bit range " << start << " to " << end << endl;
     iv_range_list.push_back(RANGE(start,end));
 }
 
@@ -470,34 +475,40 @@ uint32_t Scom::bin_listing(BINSEQ & blist)
 
     row_optimize();   // delete any rows that are unconditionally false. + merge rows
 
-    ranges.insert(iv_range_list.begin(),iv_range_list.end());
+    //printf("bin_listing:  iv_scom_rpn size = %u\n", iv_scom_rpn.size());
 
-    SCOM_ADDR::iterator i = iv_scom_addr.begin();
-
-    for(; i != iv_scom_addr.end(); ++i, ++addr_num)
+    //Skip this scom if after row_optimize, there's no scom data to write
+    if (iv_scom_rpn.size())
     {
-        //printf("scom address:%s\n",(*i).c_str());
-        if(ranges.size())
+        ranges.insert(iv_range_list.begin(),iv_range_list.end());
+
+        SCOM_ADDR::iterator i = iv_scom_addr.begin();
+
+        for(; i != iv_scom_addr.end(); ++i, ++addr_num)
         {
-            for(set<RANGE>::iterator r = ranges.begin(); r != ranges.end(); ++r)
+            //printf("scom address:%s\n",(*i).c_str());
+            if(ranges.size())
+            {
+                for(set<RANGE>::iterator r = ranges.begin(); r != ranges.end(); ++r)
+                {
+                    ++scom_count;
+                    //bin_list_one(blist,*i,*r);
+                    // The following sequence will optimize the bytecode for this spy
+                    //   - Compile the spy into bytecode for a range of bits
+                    //   - Recreate the spy from the bytecode
+                    //   - Compile the recreated spy back into bytecode.
+                    BINSEQ temp;
+                    bin_list_one(temp,strtoull((*i).c_str(),NULL,16), addr_num, *r);
+                    BINSEQ::const_iterator bi = temp.begin();
+                    Scom s(bi,iv_symbols);
+                    s.bin_list_one(blist,strtoull((*i).c_str(),NULL,16), addr_num, RANGE(1,0));
+                }
+            }
+            else
             {
                 ++scom_count;
-                //bin_list_one(blist,*i,*r);
-                // The following sequence will optimize the bytecode for this spy
-                //   - Compile the spy into bytecode for a range of bits
-                //   - Recreate the spy from the bytecode
-                //   - Compile the recreated spy back into bytecode.
-                BINSEQ temp;
-                bin_list_one(temp,strtoull((*i).c_str(),NULL,16), addr_num, *r);
-                BINSEQ::const_iterator bi = temp.begin();
-                Scom s(bi,iv_symbols);
-                s.bin_list_one(blist,strtoull((*i).c_str(),NULL,16), addr_num, RANGE(1,0));
+                bin_list_one(blist,strtoull((*i).c_str(),NULL,16), addr_num, RANGE(1,0));
             }
-        }
-        else
-        {
-            ++scom_count;
-            bin_list_one(blist,strtoull((*i).c_str(),NULL,16), addr_num, RANGE(1,0));
         }
     }
 
@@ -596,7 +607,7 @@ void Scom::bin_list_one(BINSEQ & blist,uint64_t i_addr, uint32_t i_addr_num, RAN
         {
             if ((*r) == range)
             {
-                i->bin_str(blist,numaddrs,i_addr_num,true); //Add length to blist
+                i->bin_str(blist,numaddrs,i_addr_num,true,true); //Add length to blist
             }
         }
     }
@@ -604,7 +615,7 @@ void Scom::bin_list_one(BINSEQ & blist,uint64_t i_addr, uint32_t i_addr_num, RAN
     {
         for(RPN_LIST::iterator i = iv_scom_rpn.begin(); i != iv_scom_rpn.end(); ++i)
         {
-            i->bin_str(blist,numaddrs,i_addr_num,true); //Add length to blist
+            i->bin_str(blist,numaddrs,i_addr_num,true,true); //Add length to blist
         }
     }
 
@@ -664,14 +675,27 @@ void Scom::row_optimize()  //dg003a
         if(remove_me)
         {
             iv_scom_rpn.erase(iv_scom_rpn.begin() + row);   //remove spyv
-            //Need to remove rpn row segment from each iv_cols_rpn rpn list
-            for(COL_LIST::iterator i = iv_cols_rpn.begin(); i != iv_cols_rpn.end(); ++i)
+            if (0 == iv_scom_rpn.size())
             {
-                i->erase(i->begin() + row);
+                iv_col_vars.clear();
+                iv_cols_rpn.clear();
+                if(iv_range_list.size())
+                {
+                    iv_range_list.clear();
+                }
             }
-            if(iv_range_list.size()) iv_range_list.erase(iv_range_list.begin() + row);
+            else
+            {
+                //Need to remove rpn row segment from each iv_cols_rpn rpn list
+                for(COL_LIST::iterator i = iv_cols_rpn.begin(); i != iv_cols_rpn.end(); ++i)
+                {
+                    i->erase(i->begin() + row);
+                }
+                if(iv_range_list.size()) iv_range_list.erase(iv_range_list.begin() + row);
+            }
 
-            //dbg << "ROW is unconditionally false. Removing row " << row+1 << " from " << get_key_name() << endl;
+            dbg << "initScom: row_optimize: ROW is unconditionally false. Removing row " << row+1 << endl;
+            dbg << "initScom: row_optimize: iv_scom_rpn size " << iv_scom_rpn.size() << endl;
         }
     } while (row);
 
@@ -1119,7 +1143,7 @@ void ScomList::compile(BINSEQ & bin_seq)
     Rpn::set32(bin_seq,offset);           // Offset to Literal Symbol Table
     offset += blist_i.size();             // offset += lit table byte size
 
-    if(count_s)
+    //if(count_s)   //Need to write this either way
     {
         Rpn::set32(bin_seq,offset);             // SCOM Section offset
         Rpn::set32(bin_seq,count_s);            // Number of SCOM's
@@ -1137,8 +1161,8 @@ void ScomList::compile(BINSEQ & bin_seq)
     if(count_s)
     {
         bin_seq.insert(bin_seq.end(), blist_s.begin(), blist_s.end());  // add SCOM section
-        stats << '*' << setw(20) << "S scoms:" << setw(6) << count_s << endl;
     }
+    stats << '*' << setw(20) << "S scoms:" << setw(6) << count_s << endl;
     dbg << "======================== End compile ============================" << endl;
 }
 
@@ -1251,99 +1275,103 @@ void ScomList::listing(BINSEQ & bin_seq,ostream & olist)
     }
 
     olist << iv_symbols->listing() << endl;
-    olist << "------------------- SCOM TABLES ------------------------\n\n"
-          << endl;
 
-    bli = b;   // restore
-
-    olist << "------------ Scoms -----------\n\n";
-
-    b = bin_seq.begin() + offset;
-    if(!(b < bin_seq.end()))
+    if (count)
     {
-        throw overflow_error("ERROR: ScomList::listing - iterator overflowed sequence");
-    }
+        olist << "------------------- SCOM TABLES ------------------------\n\n"
+              << endl;
 
-    SCOM_LIST l_scom_list;
-    SCOM_LIST::const_iterator i;
-    pair<SCOM_LIST::const_iterator, SCOM_LIST::const_iterator> ret;
-    while (count --)
-    {
-        Scom * s = new Scom(b,iv_symbols);
-        olist << s->listing() << endl;
+        bli = b;   // restore
 
-        uint64_t l_addr = s->get_address_hex();
-        //cout << "ScomList::listing: iv_scom_address_hex 0x" << hex << l_addr << endl;
+        olist << "------------ Scoms -----------\n\n";
 
-        //Check for duplicate scom statements
-        bool l_dup_scoms = false;
-        ret = l_scom_list.equal_range(l_addr);
-        if (ret.first != ret.second)
+        b = bin_seq.begin() + offset;
+        if(!(b < bin_seq.end()))
         {
-            //cout << "ScomList::listing: Duplicate scom addresses found" << endl;
+            throw overflow_error("ERROR: ScomList::listing - iterator overflowed sequence");
+        }
 
-            uint32_t l_length = s->get_scom_length();
+        SCOM_LIST l_scom_list;
+        SCOM_LIST::const_iterator i;
+        pair<SCOM_LIST::const_iterator, SCOM_LIST::const_iterator> ret;
+        while (count --)
+        {
+            Scom * s = new Scom(b,iv_symbols);
+            olist << s->listing() << endl;
 
-            //If writing all bits
-            if (l_length == 0)
+            uint64_t l_addr = s->get_address_hex();
+            //cout << "ScomList::listing: iv_scom_address_hex 0x" << hex << l_addr << endl;
+
+            //Check for duplicate scom statements
+            bool l_dup_scoms = false;
+            ret = l_scom_list.equal_range(l_addr);
+            if (ret.first != ret.second)
             {
-                l_dup_scoms = true;
-            }
-            else
-            {
-                uint32_t l_start = s->get_scom_offset();    //start bit
-                uint32_t l_end = l_start + l_length - 1;    //end bit
-                //cout << "ScomList::listing: offset " << dec << l_start
-                //     << " end " << l_end << " length " << l_length << endl;
+                //cout << "ScomList::listing: Duplicate scom addresses found" << endl;
 
-                //loop through all the matches and check for duplicate bits
-                for (i = ret.first; i != ret.second; ++i)
+                uint32_t l_length = s->get_scom_length();
+
+                //If writing all bits
+                if (l_length == 0)
                 {
-                    uint32_t l_length2 = i->second->get_scom_length();
+                    l_dup_scoms = true;
+                }
+                else
+                {
+                    uint32_t l_start = s->get_scom_offset();    //start bit
+                    uint32_t l_end = l_start + l_length - 1;    //end bit
+                    //cout << "ScomList::listing: offset " << dec << l_start
+                    //     << " end " << l_end << " length " << l_length << endl;
 
-                    //If writing all bits
-                    if (l_length2 == 0)
+                    //loop through all the matches and check for duplicate bits
+                    for (i = ret.first; i != ret.second; ++i)
                     {
-                        l_dup_scoms = true;
-                        break;
-                    }
+                        uint32_t l_length2 = i->second->get_scom_length();
 
-                    uint32_t l_start2 = i->second->get_scom_offset(); //start bit
-                    uint32_t l_end2 = l_start2 + l_length2 - 1;       //end bit
-                    //cout << "ScomList::listing: offset2 " << l_start2
-                    //     << " end2 " << l_end2 << " length2 " << l_length2 << endl;
+                        //If writing all bits
+                        if (l_length2 == 0)
+                        {
+                            l_dup_scoms = true;
+                            break;
+                        }
 
-                    // check for duplicate bits
-                    if ((l_start <= l_end2) && (l_start2 <= l_end))
-                    {
-                        // ranges overlap
-                        l_dup_scoms = true;
-                        break;
+                        uint32_t l_start2 = i->second->get_scom_offset(); //start bit
+                        uint32_t l_end2 = l_start2 + l_length2 - 1;       //end bit
+                        //cout << "ScomList::listing: offset2 " << l_start2
+                        //     << " end2 " << l_end2 << " length2 " << l_length2 << endl;
+
+                        // check for duplicate bits
+                        if ((l_start <= l_end2) && (l_start2 <= l_end))
+                        {
+                            // ranges overlap
+                            l_dup_scoms = true;
+                            break;
+                        }
                     }
                 }
             }
+
+            if (false == l_dup_scoms)
+            {
+                l_scom_list.insert(pair<uint64_t,Scom *>(l_addr, s));
+                //cout << "ScomList::listing: l_scom_list size " << l_scom_list.size() << endl;
+            }
+            else
+            {
+                ostringstream oss;
+                oss << "ScomList::listing: Duplicate scom statements found: "
+                       "Address 0x" << hex << l_addr << endl;
+                throw invalid_argument(oss.str());
+            }
         }
 
-        if (false == l_dup_scoms)
+        //Free memory
+        for (i = l_scom_list.begin(); i != l_scom_list.end(); ++i)
         {
-            l_scom_list.insert(pair<uint64_t,Scom *>(l_addr, s));
-            //cout << "ScomList::listing: l_scom_list size " << l_scom_list.size() << endl;
+            delete i->second;
         }
-        else
-        {
-            ostringstream oss;
-            oss << "ScomList::listing: Duplicate scom statements found: "
-                   "Address 0x" << hex << l_addr << endl;
-            throw invalid_argument(oss.str());
-        }
+        l_scom_list.clear();
     }
-
-    //Free memory
-    for (i = l_scom_list.begin(); i != l_scom_list.end(); ++i)
-    {
-        delete i->second;
-    }
-    l_scom_list.clear();
 
     dbg << "======================= End Listing ========================" << endl;
 }
