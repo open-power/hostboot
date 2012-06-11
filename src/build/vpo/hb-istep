@@ -180,7 +180,7 @@ if ( ! -e "$hbSymsFile" )  { die "Can't find symbols file $hbSymsFile\n";   }
 if ( ! -e "$CSVfile" )  { die "Can't find isteplist file $hbSymsFile\n";   }
 
 
-print   STDOUT  "Welcome to hb-istep 3.0 .  \n";
+print   STDOUT  "Welcome to hb-istep 3.02 .\n";
 
 
 ## exit if no args
@@ -233,48 +233,48 @@ for ( my $i=0; $i <= $#Options; $i++ )
 {
     $_  =   $Options[$i];
 
-    if ( m/\-{0,2}help/  )
+    if ( m/^\-{0,2}help$/  )
     {
         $opt_help       =   1;
         $Options[$i]    =   "";
     }
-    if ( m/\-{0,2}debug/ )
+    if ( m/^\-{0,2}debug$/ )
     {
         $opt_debug      =   1;
         $Options[$i]    =   "";
     }
-    if ( m/\-{0,2}list/ )
+    if ( m/^\-{0,2}list$/ )
     {
         $opt_list       =   1;
         $Options[$i]    =   "";
     }
-    if ( m/\-{0,2}istepmode/ )
+    if ( m/^\-{0,2}istepmode$/ )
     {
         $opt_istepmode  =   1;
         $Options[$i]    =   "";
     }
-    if ( m/\-{0,2}splessmode/ )
+    if ( m/^\-{0,2}splessmode$/ )
     {
         $opt_splessmode  =   1;
         $Options[$i]    =   "";
     }
-    if ( m/\-{0,2}fspmode/ )
+    if ( m/^\-{0,2}fspmode$/ )
     {
         $opt_fspmode  =   1;
         $Options[$i]    =   "";
     }
-    if ( m/\-{0,2}command/ )
+    if ( m/^\-{0,2}command$/ )
     {
         ## does nothing except eat the "[--]command" option
         $opt_command    =   1;
         $Options[$i]    =   "";
     }
-    if ( m/\-{0,2}resume/ )
+    if ( m/^\-{0,2}resume$/ )
     {
         $opt_resume     =   1;
         $Options[$i]    =   "";
     }
-    if  ( m/\-{0,2}clear-trace/ )
+    if  ( m/^\-{0,2}clear-trace$/ )
     {
         $opt_clear_trace    =   1;
         $Options[$i]    =   "";
@@ -728,7 +728,7 @@ sub getSyncStatus( )
 
         # Progress bar
         print   STDOUT  ".";
-        
+
         # Feed simclocks
         runClocks();
 
@@ -743,7 +743,7 @@ sub getSyncStatus( )
            print   STDOUT  "T/F";
            system ("$hbToolsDir/hb-ContTrace --no-save-states --mute > /dev/null" );
            system ("cat hb-ContTrace.output >> tracMERG");
-           
+
            # Need to start instructions after trace has been dumped out.
            VBU_Cacheline::P8_Ins_Start();
         }

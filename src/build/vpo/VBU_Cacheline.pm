@@ -109,7 +109,7 @@ my  $RUNCLKSCMD =   "simclock";
 #    Query command output strings:
 #       Single thread (-t0,1,..)   "Running" or "Quiesced"
 #       All threads   (-tall)      A formatted table
-# 
+#
 # TODO:
 # Needs to resolve the error when using "start -tall".  After running a while,
 # start -tall may lock up with this error:
@@ -117,7 +117,7 @@ my  $RUNCLKSCMD =   "simclock";
 # Temporary workaround is using only one thread as shown below.
 # Lance Karm is still investigating.
 my  $QUERYCMD   =   "$vbuToolsDir/proc_thread_control_wrap.x86 -query  $CORE -t0 -quiet";
-my  $STARTCMD   =   "$vbuToolsDir/proc_thread_control_wrap.x86 -start  $CORE -t0 -quiet";
+my  $STARTCMD   =   "$vbuToolsDir/proc_thread_control_wrap.x86 -start  $CORE -t0 -quiet -warncheck";
 my  $STOPCMD    =   "$vbuToolsDir/proc_thread_control_wrap.x86 -stop   $CORE -t0 -quiet";
 my  $RESETCMD   =   "$vbuToolsDir/proc_thread_control_wrap.x86 -sreset $CORE -quiet";
 
@@ -253,7 +253,7 @@ sub P8_Ins_Query()
 
 
 ##
-##  Stop the simulation.  Necessary to read and write L3 .
+##  Start the simulation.
 ##
 sub P8_Ins_Start()
 {

@@ -157,6 +157,9 @@ void    userConsoleComm( void *  io_msgQ )
     l_sts.hdr.readybit  =   true;
     writeSts( l_sts );
 
+    TRACFCOMP( g_trac_initsvc,
+            "userConsoleComm : readybit set." );
+
     //  set Current to our message on entry
     l_pCurrentMsg   =   l_pMsg;
     //

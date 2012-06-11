@@ -431,8 +431,9 @@ sub startInstructions
 {
     my $thread = shift;
 
+    ##
     #Starting all threads
-    my $command = "$vbuToolDir/proc_thread_control_wrap.x86 @ecmdOpt -start -t$thread $flag";
+    my $command = "$vbuToolDir/proc_thread_control_wrap.x86 @ecmdOpt -start -t$thread -warncheck $flag ";
 
     if ($debug)
     {

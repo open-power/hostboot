@@ -86,6 +86,9 @@ use constant    MBOX_SCRATCH1               =>  0x00050039;
 use constant    MBOX_SCRATCH2               =>  0x0005003a;
 use constant    MBOX_SCRATCH3               =>  0x0005003b;
 
+##  extra parm for ::executeInstrCycles
+use constant    NOSHOW                      =>  1;
+
 #------------------------------------------------------------------------------
 # Globals
 #------------------------------------------------------------------------------
@@ -150,29 +153,9 @@ sub main
         ::userDisplay "args: $k => $v\n";
     }
 
-    ::userDisplay   "Welcome to hb-Istep 3.3 .\n";
-    ::userDisplay   "Note that in simics, multiple options must be in quotes\n\n";
-
-    ##  initialize the inList to undefined.
-    $inList[MAX_ISTEPS][MAX_SUBSTEPS]   =   ();
-    for( my $i = 0; $i <    MAX_ISTEPS; $i++)
-    {
-        for(my $j = 0; $j < MAX_SUBSTEPS; $j++)
-        {
-            undef( $inList[$i][$j] );
-        }
-    }
-
-##  fetch all the symbols we need.
-    $IstepModeReg   =   getSymbol(  "SPLESS::g_SPLess_IStepMode_Reg" );
-    $ShutDownFlag   =   getSymbol(  "CpuManager::cv_shutdown_requested" );
-    $ShutDownSts    =   getSymbol(  "CpuManager::cv_shutdown_status" );
-
-##  @todo   deprecated, fetch anyway for now
-    $CommandReg     =   getSymbol(  "SPLESS::g_SPLess_Command_Reg" );
-    $StatusReg      =   getSymbol(  "SPLESS::g_SPLess_Status_Reg" );
-
-
+    ::userDisplay   "Welcome to hb-Istep 3.31 .\n";
+    ::userDisplay   "Note that in simics, multiple options must be in quotes,";
+    ::userDisplay   "separated by spaces\n\n";
     ##  fetch the istep list
     get_istep_list();
 
@@ -189,6 +172,7 @@ sub main
     ##--------------------------------------------------------------------------
         ##  Get all the command line options in an array
     my  @options    =   ( keys %$args );
+    ## ::userDisplay   join( ' ', @options );
 
     if  ( !(@options) )
     {
@@ -196,60 +180,65 @@ sub main
         exit;
     }
 
+    ##
     ##  find all the standard options, set their flag, and remove them from
     ##  the options list.
-    ##  vpo and simics have used difference command-line styles, simics
-    ##  wanted you to say "hb-istep debug s4", and vpo wanted you to say
-    ##  "hb-istep --debug --command s4" .  This should accept both styles.
+    ##  vpo and simics use different command-line styles:
+    ##  simics wants you to say " hb-istep "debug s4" ",
+    ##  (note that multiple options must be in quotes, separated by spaces)
+    ##  and vpo wants you to say "hb-istep --debug --command s4" .
+    ##  This should accept both styles.
     ##
     for ( my $i=0; $i <= $#options; $i++ )
     {
         $_  =   $options[$i];
 
-        if ( m/\-{0,2}debug/ )
+        ## ::userDisplay ".$_.";
+
+        if ( m/^\-{0,2}debug$/ )
         {
             $opt_debug      =   1;
             $options[$i]    =   "";
         }
-        if ( m/\-{0,2}list/ )
+        if ( m/^\-{0,2}list$/ )
         {
             $opt_list       =   1;
             $options[$i]    =   "";
         }
-        if ( m/\-{0,2}istepmode/ )
+        if ( m/^\-{0,2}istepmode$/ )
         {
             $opt_istepmode  =   1;
             $options[$i]    =   "";
         }
-        if ( m/\-{0,2}splessmode/ )
+        if ( m/^\-{0,2}splessmode$/ )
         {
             $opt_splessmode  =   1;
             $options[$i]    =   "";
         }
-        if ( m/\-{0,2}fspmode/ )
+        if ( m/^\-{0,2}fspmode$/ )
         {
             $opt_fspmode  =   1;
             $options[$i]    =   "";
         }
-        if ( m/\-{0,2}command/ )
+        if ( m/^\-{0,2}command$/ )
         {
             ## doesn't do much, just eats the option
             $opt_command    =   1;
             $options[$i]    =   "";
         }
-        if ( m/\-{0,2}resume/ )
+        if ( m/^\-{0,2}resume$/ )
         {
             $opt_resume     =   1;
             $options[$i]    =   "";
         }
-        if  ( m/\-{0,2}clear-trace/ )
+        if  ( m/^\-{0,2}clear-trace$/ )
         {
             $opt_clear_trace    =   1;
             $options[$i]    =   "";
         }
     }   ##  endfor
 
-    ##  if there's anything left after this, assume it is a command
+    ##  if there's anything left after this, assume it is a single command
     $command  = join( "", @options );
     chomp $command;
 
@@ -307,6 +296,7 @@ sub main
     {
         ::userDisplay   "ENable splessmode\n";
         setMode( "spless" );
+        ::userDisplay   "Done.\n";
         exit;
     }
 
@@ -314,6 +304,7 @@ sub main
     {
         ::userDisplay   "ENable fspmode\n";
         setMode( "fsp" );
+        ::userDisplay   "Done.\n";
         exit;
     }
 
@@ -625,7 +616,7 @@ sub sendCommand( $ )
     if ( $opt_debug )
     {
         ## sanity check
-        ::executeInstrCycles( 10);
+        ::executeInstrCycles( 10, NOSHOW );
         my $readback    =   ::readScom( MBOX_SCRATCH3, 8 );
         ::userDisplay   "=== sendCommand readback: $readback\n";
     }
@@ -688,7 +679,7 @@ sub getSyncStatus( )
 
         ##  advance HostBoot code by a certain # of cycles, then check the
         ##  sequence number to see if it has changed.  rinse and repeat.
-        ::executeInstrCycles( $hbDefaultCycles );
+        ::executeInstrCycles( $hbDefaultCycles, NOSHOW );
 
 
         ##  check to see if we need to dump trace - no-op in simics
@@ -921,13 +912,17 @@ sub setMode( $ )
     $count  =   $hbCount ;
     while(1)
     {
+
+        if ( $opt_debug )   {   ::userDisplay   "=== executeInstrCycles( $hbDefaultCycles )\n"; }
         ##  advance HostBoot code by a certain # of cycles, then check the
         ##  sequence number to see if it has changed.  rinse and repeat.
-        ::executeInstrCycles( $hbDefaultCycles );
+        ::executeInstrCycles( $hbDefaultCycles, NOSHOW );
 
+        if ( $opt_debug )   {   ::userDisplay   "=== checkContTrace\n";   }
         ## check to see if it's time to dump trace - no-op in simics
         ::checkContTrace();
 
+        if ( $opt_debug )   {   ::userDisplay   "=== isShutDown\n";       }
         ## check for system crash
         if ( isShutDown( ) )
         {
@@ -935,6 +930,7 @@ sub setMode( $ )
             return -1;
         }
 
+        if ( $opt_debug )   {   ::userDisplay   "=== isReadyBitOn\n";     }
         if ( isReadyBitOn() )
         {
             return  0;
@@ -947,6 +943,8 @@ sub setMode( $ )
         }
 
         $count--;
+
+        if ( $opt_debug )   {   ::userDisplay   "=== count = $count\n";     }
     }
 }
 
