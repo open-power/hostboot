@@ -6,7 +6,7 @@
 #
 #  IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2011 - 2012
+#  COPYRIGHT International Business Machines Corp. 2011-2012
 #
 #  p1
 #

@@ -20,8 +20,7 @@
 #
 #  Origin: 30
 #
-#  IBM_PROLOG_END
-
+#  IBM_PROLOG_END_TAG
 # Common Sprint Release test case execution
 #
 # NOTE: Execution environment must be intialized prior using source Setup_Env script
