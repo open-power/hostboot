@@ -19,7 +19,7 @@
    
      Origin: 30
    
-     IBM_PROLOG_END -->
+     IBM_PROLOG_END_TAG -->
 <hwpErrors>
 <!-- *********************************************************************** -->
 
@@ -307,6 +307,11 @@
   <hwpError>
     <rc>RC_MSS_EXCEED_TAA_MAX_NO_CL</rc>
     <description> Exceeded TAA MAX with Lowest frequency.  No compatable CL.    </description>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_MODULE_TYPE_MIX</rc>
+    <description> Differing DIMM types in the same configuration.   </description>
   </hwpError>
 
 </hwpErrors>

@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/hwpf/hwp/mc_init/mss_freq/mss_freq.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/hwpf/hwp/mc_init/mss_freq/mss_freq.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 /* File mss_volt.C created by JEFF SABROWSKI on Fri 21 Oct 2011. */
 
 //------------------------------------------------------------------------------
@@ -53,6 +54,8 @@
 //  1.12   | jdsloat  | 05/08/12 | Fixed per Firmware request, fixed CL attribute set, fixed MTB usage.
 //  1.13   | jdsloat  | 05/09/12 | Fixed per Firmware request
 //  1.14   | jdsloat  | 05/10/12 | Fixed per Firmware Request, RC checks, 0 checks
+//  1.15   | jdsloat  | 06/04/12 | Added a Configuration check
+//  1.16   | jdsloat  | 06/08/12 | Updates per Firware request
 //
 // This procedure takes CENTAUR as argument.  for each DIMM (under each MBA)
 // DIMM SPD attributes are read to determine optimal DRAM frequency
@@ -65,10 +68,26 @@
 #include <fapi.H>
 #include <mss_freq.H>
 
+//----------------------------------------------------------------------
+// ENUMs   
+//----------------------------------------------------------------------
+enum {
+   MSS_FREQ_EMPTY = 0,
+   MSS_FREQ_SINGLE_DROP = 1,
+   MSS_FREQ_DUAL_DROP = 2,
+   MSS_FREQ_VALID = 255,
+};
+
+
 using namespace fapi;
 
 fapi::ReturnCode mss_freq(const fapi::Target &i_target_memb)
 {
+
+     // Define attribute array size
+    const uint8_t PORT_SIZE = 2;
+    const uint8_t DIMM_SIZE = 2;
+
   fapi::ReturnCode l_rc;
   std::vector<fapi::Target> l_mbaChiplets;
   std::vector<fapi::Target> l_dimm_targets;
@@ -87,6 +106,14 @@ fapi::ReturnCode mss_freq(const fapi::Target &i_target_memb)
   uint32_t l_spd_cas_lat_supported_all = 0xFFFFFFFF;
   uint8_t l_cas_latency = 0;
   uint32_t l_cl_mult_tck = 0;
+  uint8_t cur_mba_port = 0;
+  uint8_t cur_mba_dimm = 0;
+  uint8_t cur_dimm_spd_valid_u8array[PORT_SIZE][DIMM_SIZE] = {{0}};
+  uint8_t plug_config = 0;
+  uint8_t module_type = 0;
+  uint8_t module_type_all = 0;
+  uint8_t num_ranks = 0;
+  uint8_t num_ranks_total = 0;
 
   // Get associated MBA's on this centaur                                                                                      
   l_rc=fapiGetChildChiplets(i_target_memb, fapi::TARGET_TYPE_MBA_CHIPLET, l_mbaChiplets);
@@ -142,6 +169,33 @@ fapi::ReturnCode mss_freq(const fapi::Target &i_target_memb)
 	      break;
 	    }
 
+	  l_rc = FAPI_ATTR_GET(ATTR_MBA_PORT,  &l_dimm_targets[j], cur_mba_port); if(l_rc) return l_rc;
+	  if (l_rc)
+	    {
+	      FAPI_ERR("Unable to read the Port Info in order to determine configuration.");
+	      break;
+	    }
+	  l_rc = FAPI_ATTR_GET(ATTR_MBA_DIMM,  &l_dimm_targets[j], cur_mba_dimm); if(l_rc) return l_rc;
+	  if (l_rc)
+	    {
+	      FAPI_ERR("Unable to read the DIMM Info in order to determine configuration.");
+	      break;
+	    }
+	  l_rc = FAPI_ATTR_GET(ATTR_SPD_MODULE_TYPE,  &l_dimm_targets[j], module_type); if(l_rc) return l_rc;
+	  if (l_rc)
+	  {
+	      FAPI_ERR("Unable to read the SPD module type.");
+	      break;
+	  }
+	  l_rc = FAPI_ATTR_GET(ATTR_SPD_NUM_RANKS,  &l_dimm_targets[j], num_ranks); if(l_rc) return l_rc;
+	  if (l_rc)
+	  {
+	      FAPI_ERR("Unable to read the SPD number of ranks");
+	      break;
+	  }
+
+	  cur_dimm_spd_valid_u8array[cur_mba_port][cur_mba_dimm] = MSS_FREQ_VALID;
+
 	  if ((l_spd_min_tck_MTB == 0)||(l_spd_mtb_dividend == 0)||(l_spd_mtb_divisor == 0)||(l_spd_min_taa_MTB == 0))
 	  {
 	      //Invalid due to the fact that JEDEC dictates that these should be non-zero.
@@ -180,6 +234,16 @@ fapi::ReturnCode mss_freq(const fapi::Target &i_target_memb)
 	    }
 
 	  l_spd_cas_lat_supported_all = l_spd_cas_lat_supported_all & l_spd_cas_lat_supported;
+	  num_ranks_total = num_ranks_total + num_ranks;
+	  if (module_type_all == 0)
+	  {
+	      module_type_all = module_type;
+	  }
+	  else if (module_type_all != module_type)
+	  {
+	      FAPI_ERR("Mixing of DIMM Module Types (%d, %d)", module_type_all, module_type);
+	      FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MODULE_TYPE_MIX);
+	  }
 
       }
       if (l_rc)
@@ -187,6 +251,54 @@ fapi::ReturnCode mss_freq(const fapi::Target &i_target_memb)
 	  break;
       }
   }
+
+  //Determining the cnfg for imposing any cnfg speed limitations
+  if ((cur_dimm_spd_valid_u8array[0][0] == MSS_FREQ_VALID) && (cur_dimm_spd_valid_u8array[0][1] == MSS_FREQ_VALID))
+  {
+      plug_config = MSS_FREQ_DUAL_DROP;
+  }
+  else if ((cur_dimm_spd_valid_u8array[0][0] == MSS_FREQ_VALID) && (cur_dimm_spd_valid_u8array[0][1] == MSS_FREQ_EMPTY))
+  {
+      plug_config = MSS_FREQ_SINGLE_DROP;
+  }
+  else
+  {
+      plug_config = MSS_FREQ_EMPTY;
+  }
+
+  // Impose configuration limitations
+  // Single Drop RDIMMs Cnfgs cannot run faster than 1333 unless it only has 1 rank
+  if ((module_type_all == ENUM_ATTR_SPD_MODULE_TYPE_RDIMM)&&(plug_config == MSS_FREQ_SINGLE_DROP)&&(num_ranks_total > 1)&&(l_dimm_freq_min > 1333))
+  {
+      l_dimm_freq_min = 1333;
+      l_spd_min_tck_max = 1500;
+  }
+  // Double Drop RDIMMs Cnfgs cannot run faster than 1333 with 4 ranks total
+  else if ((module_type_all == ENUM_ATTR_SPD_MODULE_TYPE_RDIMM)&&(plug_config == MSS_FREQ_DUAL_DROP)&&(num_ranks_total == 4)&&(l_dimm_freq_min > 1333))
+  {
+      l_dimm_freq_min = 1333;
+      l_spd_min_tck_max = 1500;
+  }
+  // Double Drop RDIMMs Cnfgs cannot run faster than 1066 with 8 ranks total
+  else if ((module_type_all == ENUM_ATTR_SPD_MODULE_TYPE_RDIMM)&&(plug_config == MSS_FREQ_DUAL_DROP)&&(num_ranks_total == 8)&&(l_dimm_freq_min > 1066))
+  {
+      l_dimm_freq_min = 1066;
+      l_spd_min_tck_max = 1875;
+  }
+  // Single Drop LRDIMMs Cnfgs cannot run faster than 1333 with greater than 2 ranks
+  else if ((module_type_all == ENUM_ATTR_SPD_MODULE_TYPE_LRDIMM)&&(plug_config == MSS_FREQ_SINGLE_DROP)&&(num_ranks_total > 2)&&(l_dimm_freq_min > 1333))
+  {
+      l_dimm_freq_min = 1333;
+      l_spd_min_tck_max = 1500;
+  }
+  // Dual Drop LRDIMMs Cnfgs cannot run faster than 1333
+  else if ((module_type_all == ENUM_ATTR_SPD_MODULE_TYPE_LRDIMM)&&(plug_config == MSS_FREQ_DUAL_DROP)&&(l_dimm_freq_min > 1333))
+  {
+      l_dimm_freq_min = 1333;
+      l_spd_min_tck_max = 1500;
+  }
+
+  FAPI_INF( "PLUG CONFIG: %d Type O' Dimm: 0x%02X Num Ranks: %d",  plug_config, module_type, num_ranks);
 
   if ((l_spd_cas_lat_supported_all == 0) && (!l_rc))
   {
@@ -256,8 +368,6 @@ fapi::ReturnCode mss_freq(const fapi::Target &i_target_memb)
 	  }
       }
   }
-
-  FAPI_INF( "Calculated Frequency: %d ",  l_dimm_freq_min);
 
   //bucketize dimm freq.
   if (!l_rc) 
