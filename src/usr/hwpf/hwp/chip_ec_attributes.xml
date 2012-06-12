@@ -19,7 +19,7 @@
    
      Origin: 30
    
-     IBM_PROLOG_END -->
+     IBM_PROLOG_END_TAG -->
 <!--
     XML file specifying HWPF attributes.
     These are example Chip EC Feature attributes that specify chip features
@@ -40,14 +40,14 @@
       <chip>
         <name>ENUM_ATTR_NAME_CENTAUR</name>
         <ec>
-          <value>10</value>
+          <value>0x10</value>
           <test>EQUAL</test>
         </ec>
       </chip>
       <chip>
         <name>ENUM_ATTR_NAME_VENICE</name>
         <ec>
-          <value>30</value>
+          <value>0x30</value>
           <test>GREATER_THAN</test>
         </ec>
       </chip>
@@ -65,7 +65,7 @@
       <chip>
         <name>ENUM_ATTR_NAME_MURANO</name>
         <ec>
-          <value>20</value>
+          <value>0x20</value>
           <test>LESS_THAN</test>
         </ec>
       </chip>
