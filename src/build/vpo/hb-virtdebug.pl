@@ -34,6 +34,7 @@
 #                            - Use proc_thread_control_wrap in place of
 #                              p8_ins_stop/start/query
 #
+# Version 1.2   06-11-2012   Change "-c3" to "-cft" (first avail core)
 #
 ##################################################################################
 
@@ -96,9 +97,8 @@ my @comp;                         #Array of component trace buffers to dump
 my @symsLines;                    #Array to store the .syms file data
 my $outDir = getcwd();            #Default = current working directory
 my @ecmdOpt;                      #Array of ecmd options
-my $core = "3";                   #Default is core 3
+my $core = "ft";                  #Default is first core ("ft")
 my @threadState = ();             #Array to store the thread states
-my $vbuToolDir = "/gsa/ausgsa/projects/h/hostboot/vbutools/latest";
 
 # Use HB_VBUTOOLS if it's set; otherwise, try to use the latest tool directory
 my $vbuToolDir = $ENV{'HB_VBUTOOLS'};
@@ -824,6 +824,6 @@ sub printUsage()
     print ("  -n#               Specify which node to act on (default = 0)\n");
     print ("  -s#               Specify which slot to act on (default = 0)\n");
     print ("  -p#               Specify which chip position to act on (default = 0)\n");
-    print ("  -c#               Specify which core/chipUnit to act on (default = 3)\n");
+    print ("  -c#               Specify which core/chipUnit to act on (default = ft)\n");
 }
 

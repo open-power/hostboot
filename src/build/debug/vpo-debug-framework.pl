@@ -29,6 +29,7 @@ use strict;
 use warnings;
 
 use POSIX;
+use Cwd;
 use Getopt::Long;
 use Pod::Usage;
 use File::Temp ('tempfile');
@@ -81,12 +82,13 @@ my $toolHelp = 0;
 my $debug = 0;
 my $mute = 0;
 my $nosavestates = 0;
-my @ecmdOpt = ("-c3");
+my @ecmdOpt = ("-cft");
 my @threadState = ();
 my $l2Flushed = 0;
 my $fh;
 
 # Use HB_VBUTOOLS env if specified
+my $outDir = getcwd();
 my $vbuToolDir = $ENV{'HB_VBUTOOLS'};
 if (defined ($vbuToolDir))
 {
@@ -321,7 +323,7 @@ sub readData
     }
 
     #Read the cache lines from L3 and save to temp file
-    my (undef, $fname) = tempfile("tmpXXXXX");
+    my (undef, $fname) = tempfile("tmpXXXXX", DIR => "$outDir");
     my $command = sprintf ("$vbuToolDir/p8_dump_l3 %x $numCacheLines -f $fname -b @ecmdOpt",
                             $addr);
 
@@ -369,7 +371,7 @@ sub writeData
     }
 
     #read the cachelines from L3 & save to temp file
-    my ($fh, $fname) = tempfile("tmpXXXXX");
+    my ($fh, $fname) = tempfile("tmpXXXXX", DIR => "$outDir");
     binmode $fh;
     print $fh (readData($base, $numCacheLines * CACHELINESIZE));
     if ($debug)
@@ -396,7 +398,7 @@ sub writeData
 
     if ($debug)
     {
-        ($fh, $fname) = tempfile("tmpXXXXX");
+        ($fh, $fname) = tempfile("tmpXXXXX", DIR => "$outDir");
         binmode $fh;
         print $fh (readData($base, $numCacheLines * CACHELINESIZE));
         print "data written\n";

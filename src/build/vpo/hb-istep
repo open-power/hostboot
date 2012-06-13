@@ -45,7 +45,7 @@
 #
 # Version 1.1   05-09-2012   Start version history
 #                            VPO performance improvement changes
-#
+# Version 1.2   06-11-2012   Change "-c3" to "-cft" (first avail core)
 #
 ##################################################################################
 
@@ -85,7 +85,7 @@ sub isTraceFull;
 #------------------------------------------------------------------------------
 #   Constants
 #------------------------------------------------------------------------------
-my  $CORE       =   "-c3";
+my  $CORE       =   "-cft";
 
 
 ##  @todo   extract these from splesscommon.H

@@ -74,7 +74,7 @@ sub SetFlags;
 ############################################
 my  $curDir      =   getcwd();
 my  $CLfile     =   "$curDir/istepmodereg.dma";
-my  $CORE       =   "-c3";
+my  $CORE       =   "-cft";
 
 my  $SIM_CLOCKS =   "5000000";
 
@@ -116,10 +116,10 @@ my  $RUNCLKSCMD =   "simclock";
 #   "proc_thread_control: Thread Start failed: RAS Status Run bit is not on"
 # Temporary workaround is using only one thread as shown below.
 # Lance Karm is still investigating.
-my  $QUERYCMD   =   "$vbuToolsDir/proc_thread_control_wrap.x86 -query  $CORE -t0";
-my  $STARTCMD   =   "$vbuToolsDir/proc_thread_control_wrap.x86 -start  $CORE -t0";
-my  $STOPCMD    =   "$vbuToolsDir/proc_thread_control_wrap.x86 -stop   $CORE -t0";
-my  $RESETCMD   =   "$vbuToolsDir/proc_thread_control_wrap.x86 -sreset $CORE";
+my  $QUERYCMD   =   "$vbuToolsDir/proc_thread_control_wrap.x86 -query  $CORE -t0 -quiet";
+my  $STARTCMD   =   "$vbuToolsDir/proc_thread_control_wrap.x86 -start  $CORE -t0 -quiet";
+my  $STOPCMD    =   "$vbuToolsDir/proc_thread_control_wrap.x86 -stop   $CORE -t0 -quiet";
+my  $RESETCMD   =   "$vbuToolsDir/proc_thread_control_wrap.x86 -sreset $CORE -quiet";
 
 ##
 #==============================================================================
@@ -246,6 +246,7 @@ sub P8_Ins_Query()
     }
     else
     {
+        chomp( $retstr );
         die "invalid string \"$retstr\" from P8_Ins_Query\n";
     }
 }

@@ -11,7 +11,11 @@
 #                          Update default Cronus version to newer level
 #                          Update default HB_TOOLS level
 #                          Increase simclock cycles to 5000000 per loop
-#                
+#
+# Version 1.3   06-11-2012 Change "-c3" to "-cft" (first avail core)
+#                          Update to Cronus rel.20120611, HBTOOLS rel.20120611
+#                          Build hb0606a_1219.810
+#                          Add m_3_a Murano model
 #
 ################################################################################
 
@@ -53,17 +57,16 @@ Setup_MyEnv() {
 	
 	# Default Sprint release
 
-	sprint=hb0419a_1216.810
+	sprint=hb0606a_1219.810
 	
 	# Initialize HostBoot environment/cronus/tools - note new naming convention
 	
-	export AUTOVBU_CRONUS_SIM=rel.20120507
+	export AUTOVBU_CRONUS_SIM=rel.20120611
 	export GLOBAL_DEBUG=8.VW.Vc.dG.F3.0I.E8.V
-	export HB_TOOLS=$AUTOVBU_HBTOOLS_BASEDIR/rel.20120509
+	export HB_TOOLS=$AUTOVBU_HBTOOLS_BASEDIR/rel.20120611
 
 	# Select default model -- choose either VBU or VPO versions
-
-	export VPO_MODEL=m_2_a; unset VBU_MODEL; VBUVPO=VPO
+	export VPO_MODEL=m_3_a; unset VBU_MODEL; VBUVPO=VPO
 	#export VBU_MODEL=p1_e8056_c1000_cen1_cen054_unopt_2_gfw; unset VPO_MODEL; VBUVPO=VBU
 	#export VBU_MODEL=p1_e8062_wafer_nomem_c1000_opt_4; unset VPO_MODEL; VBUVPO=VBU
 	#export VBU_MODEL=p1_e8062_c1000_cen1_cen061_unopt_1; unset VPO_MODEL; VBUVPO=VBU
@@ -74,9 +77,9 @@ Setup_MyEnv() {
 	
 	# Default sprint test case settings
 	
-	export AUTOVBU_CORE=-c3
+	export AUTOVBU_CORE=-cft
 	export AUTOVBU_SIMCLOCKS=5000000
-	export AUTOVBU_INITIAL_CHKPT=after_8megzero
+	export AUTOVBU_INITIAL_CHKPT=after_8megzero_newxscom
 	export AUTOVBU_LOOPS=1200
 	export AUTOVBU_PRINTK_LINES=50
 	
@@ -112,6 +115,7 @@ Setup_MyArgs() {
 		in
 			-h|-help|--help)
 				echo "Usage: source Setup_Env	[-get_awan|--get_awan] \\"
+				echo "		[<-awan|--awan> <star4b|star8b|star16b>] \\"
 				echo "		[<-time|--time> <awan time>] \\"
 				echo "		[<-model|--model> <model>] \\"
 				echo "		[<-release|--release> <Sprint Release>] \\"
@@ -123,6 +127,14 @@ Setup_MyArgs() {
 				;;
 			-get_awan|--get_awan)
 				get_awan=YES
+				;;
+			-awan|--awan)
+				if [ $# -lt 2 ]; then
+					echo "Missing/invalid AWAN configuation"
+					return 1
+				fi
+				export AWAN_CONFIG=$2
+				shift 1
 				;;
 			-load_hb_img|--load_hb_img)
 				load_hb_img=YES
@@ -223,6 +235,11 @@ Setup_MyDynamic() {
 	# Set other defaults based upon MODEL
 	case "$VPO_MODEL$VBU_MODEL"
 	in
+                 s1_e8024_wafer_nomem_dc_opt_6|s1_e8026_c0400_cen1_cen069_unopt_1|m_3_a)
+                          export AUTOVBU_ECMD_VER=${AUTOVBU_ECMD_VER-p8s1}
+                          export AWAN_CONFIG=${AWAN_CONFIG-star8b}
+                          unset DEFAULT_LEVEL
+                          ;;
 		p1_e8062_wafer_nomem_c1000_opt_4|m_2_e)
 			export AUTOVBU_ECMD_VER=${AUTOVBU_ECMD_VER-p8s1}
 			export AWAN_SCRIPT=${AWAN_SCRIPT-run_script_star4b}
@@ -266,11 +283,17 @@ Setup_MyDynamic() {
 			;;
 	esac
 
+	if [ "$AUTOVBU_ECMD_VER" = "cronusflex" ]; then
+		export AWAN_SCRIPT=${AWAN_SCRIPT-run_script_${AWAN_CONFIG}_flex}
+	else
+		export AWAN_SCRIPT=${AWAN_SCRIPT-run_script_${AWAN_CONFIG}}
+	fi
+
 	# Try to dynamically set istep list if user did not supply a value
 
-	if [ "$AUTOVBU_ISTEP_LIST" = "" -f $HB_IMGDIR/isteplist.csv ]; then
-		export AUTOVBU_ISTEP_LIST=`cut -d',' -f3 <$HB_IMGDIR/isteplist.csv | tr '\n' ' '`
-	elif [ "$AUTOVBU_ISTEP_LIST" = "" -f $HB_TOOLS/isteplist.csv ]; then
+	if [ "$AUTOVBU_ISTEP_LIST" = "" -a -f $HB_IMGDIR/isteplist.csv ]; then
+		export AUTOVBU_ISTEP_LIST=`sort -s -t ',' -k 1,1n -k2,2n  $HB_IMGDIR/isteplist.csv | cut -d',' -f3 | tr '\n' ' '`
+	elif [ "$AUTOVBU_ISTEP_LIST" = "" -a -f $HB_TOOLS/isteplist.csv ]; then
 		export AUTOVBU_ISTEP_LIST=`cut -d',' -f3 <$HB_TOOLS/isteplist.csv | tr '\n' ' '`
 	fi
 
@@ -310,6 +333,7 @@ Setup_MyAWAN() {
 	MY_AWAN_KEEP=/afs/apd.pok.ibm.com/u/${MY_AFS_USER-$USER}/awan/awan.KEEP-$VBU_MODEL$VPO_MODEL-${MY_AWAN_DIR-${MY_AFS_USER-$USER}}-$DISPLAY
 		
 	if [ "$get_awan" = "YES" ]; then
+		unset ECMD_TARGET
 		# Add environmental definitions for automated test
 		eval export P8_${VBUVPO}DD1_${VPO_MODEL}${VBU_MODEL}_AWAN_SCRIPT="$AWAN_SCRIPT"
 		eval export P8_${VBUVPO}DD1_${VPO_MODEL}${VBU_MODEL}_AUTOVBU_ECMD_VER="$AUTOVBU_ECMD_VER"
@@ -368,7 +392,7 @@ Setup_MyTarget() {
 
 	# Check for AWAN using automated tools
 
-	if [ -f "$MY_AWAN_INIT" -o -f "$MY_AWAN_HAVE" ]; then
+	if [ -f "$MY_AWAN_HAVE" ]; then
 		if [ ! -f "$MY_AWAN_TARGET" ]; then
 			# Pause a while for target to initialize
 			for i in 0 1 2 3 4 5
@@ -406,8 +430,18 @@ Setup_MyTarget() {
 	else
 		echo
 		echo "*** WARNING: AWAN target config file was not found"
-		echo "User must manually set cronus target and update config file"
+		c=`dirname $CRONUS_HOME`
+		if [ "$AUTOVBU_ECMD_VER" != "cronusflex" -a -f $c/cronusflex/cnfgs/${my_target}_cnfg ]; then
+			echo "ERROR: AWAN is running cronusflex instead of $AUTOVBU_ECMD_VER"
+		elif [ "$AUTOVBU_ECMD_VER" != "p8s1" -a -f $c/p8s1/cnfgs/${my_target}_cnfg ]; then
+			echo "ERROR: AWAN is running cronus p8s1 instead of $AUTOVBU_ECMD_VER"
+		else
+			echo "User must manually set cronus target and update config file"
+		fi
+		return 1
 	fi
+
+	return 0
 }
 
 # Load HostBoot image if requested
@@ -418,18 +452,12 @@ Setup_MyHBImage() {
 
 	if [ "$load_hb_img" = "YES" ]; then
 
-		#  Allow HB_RELDIR setting to adjust load addresses as needed
-
-		vbu_targeting_addr=0x601690
-		echo "$HB_RELDIR" | grep -s "Sprint8" >/dev/null 2>&1
-		test $? -eq 0 && vbu_targeting_addr=0x5B0690
-
 		# Load initial checkpoint first
 
 		set -x
 		siminit ${AUTOVBU_INITIAL_CHKPT-after_8megzero} -quiet || return 1
-		$HB_VBUTOOLS/p8_load_l3 -l ${DEFAULT_LEVEL-rel} -f ${HB_IMGDIR}/hbicore${use_test}.bin -b ${AUTOVBU_CORE--c3} || return 1
-		$HB_VBUTOOLS/p8_load_l3 -l ${DEFAULT_LEVEL-rel} -f ${HB_IMGDIR}/vbu${use_test}.pnor -o 0x400000 -b ${AUTOVBU_CORE--c3} || return 1
+		$HB_VBUTOOLS/p8_load_l3 -l ${DEFAULT_LEVEL-rel} -f ${HB_IMGDIR}/hbicore${use_test}.bin -b ${AUTOVBU_CORE--cft} || return 1
+		$HB_VBUTOOLS/p8_load_l3 -l ${DEFAULT_LEVEL-rel} -f ${HB_IMGDIR}/vbu${use_test}.pnor -o 0x400000 -b ${AUTOVBU_CORE--cft} || return 1
 		set +x
 	fi
 
@@ -438,7 +466,7 @@ Setup_MyHBImage() {
 # Define a shell function to clean up and release the AWAN
 
 AWAN_EXIT() {
-	rm -f "$MY_AWAN_KEEP" "$MY_AWAN_HAVE"
+	rm -f "$MY_AWAN_KEEP"
 	my_target=`target query 2>/dev/null | sed -n -e '/Current target/s/.*is "\(.*\)"/\1/p'`
 	if [ "$my_target" != "" -a -f "$CRONUS_HOME/cnfgs/${my_target}_cnfg" ]; then
 		simexit -quiet
