@@ -816,11 +816,11 @@ void IStepDispatcher::getIstepMsgQ ( msg_q_t & o_msgQ )
     o_msgQ = iv_msgQ;
 }
 
-void getIstepMsg ( msg_t * o_msg )
+void getIstepMsg ( msg_t* & o_msg )
 {
     Singleton<IStepDispatcher>::instance().getIstepMsg( o_msg );
 }
-void IStepDispatcher::getIstepMsg ( msg_t * o_msg )
+void IStepDispatcher::getIstepMsg ( msg_t* & o_msg )
 {
     o_msg = iv_pMsg;
 }

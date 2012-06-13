@@ -47,7 +47,7 @@ void getIstepMsgQ ( msg_q_t & o_msgQ );
  *
  * @return NONE.
  */
-void getIstepMsg ( msg_t * o_msg );
+void getIstepMsg ( msg_t* & o_msg );
 
 }
 

@@ -151,7 +151,7 @@ public:
      *
      * @return NONE.
      */
-    void getIstepMsg ( msg_t * o_msg );
+    void getIstepMsg ( msg_t* & o_msg );
 
 
 protected:
