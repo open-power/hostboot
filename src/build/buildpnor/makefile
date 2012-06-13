@@ -1,4 +1,4 @@
-#  IBM_PROLOG_BEGIN_TAG
+#   IBM_PROLOG_BEGIN_TAG
 #  This is an automatically generated prolog.
 #
 #  $Source: src/build/buildpnor/makefile $
@@ -19,10 +19,17 @@
 #
 #  Origin: 30
 #
-#  IBM_PROLOG_END
+#  IBM_PROLOG_END_TAG
 #Build PNOR Images for each platform.
 #Also builds images which contain the test code.
 ROOTPATH = ../../..
+
+# Default target to 'buildpnor'.  This way you can type make
+# in this directory without a target and it will build the
+# pnor images.  In the standard case, this makefile is called
+# from somewhere else with the buildpnor target as well.
+.DEFAULT_GOAL := buildpnor
+
 
 PNOR_TARGETS = simics_MURANO simics_VENICE vbu TULETA
 
@@ -31,7 +38,7 @@ $${IMGDIR}/$(1).pnor: $${IMGDIR}/hbicore_extended.bin $${IMGDIR}/$(1)_targeting.
 	./buildpnor.pl --pnorLayout ./pnorLayout.xml \
 	    --genToc \
 	    --pnorOutBin $${IMGDIR}/$(1).pnor \
-	    --binFile_TOC $${IMGDIR}/$(1)_pnor.toc \
+	    --binFile_part $${IMGDIR}/$(1)_pnor.toc \
 	    --binFile_HBI $${IMGDIR}/hbicore_extended.bin \
 	    --binFile_HBD $${IMGDIR}/$(1)_targeting.bin
 endef
@@ -40,7 +47,7 @@ $${IMGDIR}/$(1)_test.pnor: $${IMGDIR}/hbicore_extended.bin $${IMGDIR}/$(1)_targe
 	./buildpnor.pl --pnorLayout ./pnorLayout.xml \
 	    --genToc \
 	    --pnorOutBin $${IMGDIR}/$(1)_test.pnor \
-	    --binFile_TOC $${IMGDIR}/$(1)_pnor.toc \
+	    --binFile_part $${IMGDIR}/$(1)_pnor.toc \
 	    --binFile_HBI $${IMGDIR}/hbicore_test_extended.bin \
 	    --binFile_HBD $${IMGDIR}/$(1)_targeting.bin
 endef

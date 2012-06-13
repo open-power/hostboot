@@ -20,8 +20,7 @@
 #
 #  Origin: 30
 #
-#  IBM_PROLOG_END
-
+#  IBM_PROLOG_END_TAG
 #Builds a PNOR image based on pnorLayout XML file.
 #See usage function at bottom of file for details on how to use this script
 
@@ -54,9 +53,9 @@ my %binFiles;
 
 my $pnorLayoutFile;
 my $pnorBinName = "";
-my $tocVersion = 0x12345;
+my $tocVersion = 0x1;
 my $genTocFlag = 0;
-
+my $g_TOCEyeCatch = "part";
 
 if ($#ARGV < 0) {
     usage();
@@ -103,6 +102,7 @@ for (my $i=0; $i < $#ARGV + 1; $i++)
 my $rc = loadPnorLayout($pnorLayoutFile, \%pnorLayout);
 if($rc != 0)
 {
+    trace(0, "Error detected from call to loadPnorLayout().  Exiting");
     exit 1;
 }
 
@@ -113,6 +113,7 @@ if($rc != 0)
 my $rc = verifyFilesExist($genTocFlag, \%pnorLayout, \%binFiles);
 if($rc != 0)
 {
+    trace(0, "Error detected from call to verifyFilesExist().  Exiting");
     exit 1;
 }
 
@@ -120,6 +121,7 @@ if($rc != 0)
 $rc = robustifyImgs(\%pnorLayout, \%binFiles);
 if($rc != 0)
 {
+    trace(0, "Error detected from call to robustifyImgs().  Exiting");
     exit 1;
 }
 
@@ -127,6 +129,7 @@ if($rc != 0)
 $rc = collectActSizes(\%pnorLayout, \%binFiles);
 if($rc != 0)
 {
+    trace(0, "Error detected from call to collectActSizes().  Exiting");
     exit 1;
 }
 
@@ -136,14 +139,16 @@ if ($genTocFlag != 0)
     $rc = fillTocActSize($tocVersion, \%pnorLayout);
     if($rc != 0)
     {
+        trace(0, "Error detected from call to fillTocActSize().  Exiting");
         exit 1;
     }
 
-    if(exists($binFiles{TOC}))
+    if(exists($binFiles{$g_TOCEyeCatch}))
     {
-        $rc = genToc($tocVersion, $binFiles{TOC}, \%pnorLayout);
+        $rc = genToc($tocVersion, $binFiles{$g_TOCEyeCatch}, \%pnorLayout);
         if($rc != 0)
         {
+            trace(0, "Error detected from call to genToc().  Exiting");
             exit 1;
         }
     }
@@ -158,12 +163,14 @@ if ($genTocFlag != 0)
 $rc = checkSpaceConstraints(\%pnorLayout, \%binFiles);
 if($rc != 0)
 {
+    trace(0, "Error detected from call to checkSpaceConstraints().  Exiting");
     exit 1;
 }
 
 $rc = assemblePnorImage($pnorBinName, \%pnorLayout, \%binFiles);
 if($rc != 0)
 {
+    trace(0, "Error detected from call to assemblePnorImage().  Exiting");
     exit 1;
 }
 
@@ -188,6 +195,23 @@ sub loadPnorLayout
     my $xml = $xs->XMLin($i_pnorFile);
 
     #trace(1, "pnorLayoutXML \n ".Dumper($xml));
+
+    #Save the meatadata - imageSize, blockSize, etc.
+    foreach my $metadataEl (@{$xml->{metadata}})
+    {
+        my $imageSize = $metadataEl->{imageSize}[0];
+        my $blockSize = $metadataEl->{blockSize}[0];
+        my $partTableSize = $metadataEl->{partTableSize}[0];
+
+        trace(3, "$this_func: metadata: imageSize = $imageSize, blockSize=$blockSize, partTableSize=$partTableSize");
+
+        $imageSize = getNumber($imageSize);
+        $blockSize = getNumber($blockSize);
+
+        $$i_pnorLayoutRef{metadata}{imageSize} = $imageSize;
+        $$i_pnorLayoutRef{metadata}{blockSize} = $blockSize;
+        $$i_pnorLayoutRef{metadata}{partTableSize} = $partTableSize;
+    }
 
     #Iterate over the <section> elements.
     foreach my $sectionEl (@{$xml->{section}})
@@ -214,13 +238,13 @@ sub loadPnorLayout
 
         # trace(4, "$this_func: physicalOffset=$physicalOffset, physicalRegionSize=$physicalRegionSize");
 
-        $$i_pnorLayoutRef{$physicalOffset}{description} = $description;
-        $$i_pnorLayoutRef{$physicalOffset}{eyeCatch} = $eyeCatch;
-        $$i_pnorLayoutRef{$physicalOffset}{physicalOffset} = $physicalOffset;
-        $$i_pnorLayoutRef{$physicalOffset}{physicalRegionSize} = $physicalRegionSize;
-        $$i_pnorLayoutRef{$physicalOffset}{actualRegionSize} = $actualRegionSize;
-        $$i_pnorLayoutRef{$physicalOffset}{ecc} = $ecc;
-        $$i_pnorLayoutRef{$physicalOffset}{source} = $source;
+        $$i_pnorLayoutRef{sections}{$physicalOffset}{description} = $description;
+        $$i_pnorLayoutRef{sections}{$physicalOffset}{eyeCatch} = $eyeCatch;
+        $$i_pnorLayoutRef{sections}{$physicalOffset}{physicalOffset} = $physicalOffset;
+        $$i_pnorLayoutRef{sections}{$physicalOffset}{physicalRegionSize} = $physicalRegionSize;
+        $$i_pnorLayoutRef{sections}{$physicalOffset}{actualRegionSize} = $actualRegionSize;
+        $$i_pnorLayoutRef{sections}{$physicalOffset}{ecc} = $ecc;
+        $$i_pnorLayoutRef{sections}{$physicalOffset}{source} = $source;
 
     }
 
@@ -232,55 +256,110 @@ sub loadPnorLayout
 ################################################################################
 sub genToc
 {
+
     my ($i_tocVersion, $i_tocBinName, $i_pnorLayoutRef) = @_;
     my $this_func = (caller(0))[3];
     my $key;
+    my $partIdCount = 1;
     my $FILEHANDLE;
     trace(4, "$this_func: >>Enter");
 
     #open output file
     open( $FILEHANDLE, ">:raw", $i_tocBinName) or die "Can't open $i_tocBinName file for writing";
 
-    #Write version to toc Binary
-    print $FILEHANDLE pack('N', 0);
+    #Insert FFS Header data
+    #HEADER WORD 1: Magic Number - "PART" in ASCII
+    my @charArray = split //, 'PART';  
+    my $curChar;                      
+    foreach $curChar (@charArray)
+    {
+        print $FILEHANDLE pack('C', ord($curChar));
+    }
+
+    #HEADER WORD 2: FFS version to Binary
     print $FILEHANDLE pack('N', $i_tocVersion);
 
-    #key is the physical offset of section.  Need to sort the keys
-    #so we put things in the correct order in toc.
-    #This is important so pnorrp can easily find the length of the TOC section.
-    #Generally speaking, this loop is populating the TOC with records based on the
-    #section data specified in the XML + actual sizes of the input binary files.
-    for $key ( sort {$a<=> $b} keys %{$i_pnorLayoutRef})
+    #HEADER WORD 3: Size of Partition table in blocks - 4 bytes of space
+    if(exists($$i_pnorLayoutRef{metadata}{partTableSize}))
     {
-        #trace(1, Dumper(%{$i_pnorLayoutRef}->{$key}));
-        # print eyecatcher
-        if(exists($$i_pnorLayoutRef{$key}{eyeCatch}))
+        my $val = $$i_pnorLayoutRef{metadata}{partTableSize};
+        #verify number consumes less than 32 bits
+        if($val > 0xFFFFFFFF)
+        {
+            trace(0, "$this_func: value=".$val.".  This is greater than 32 bits in hex and not currently supported!. \n Aborting program");
+            exit 1;
+        }
+        print $FILEHANDLE pack('N', $val);
+    }
+    else
+    {
+        insertPadBytes($FILEHANDLE, 4);
+    }
+
+    #HEADER WORD 4: Size of Partition entry in bytes
+    print $FILEHANDLE pack('N', getFFSEntrySize($i_tocVersion, $i_pnorLayoutRef));
+
+    #HEADER WORD 5: Number of Partition Entries
+    my %sectionHash = %{$$i_pnorLayoutRef{sections}};
+
+    my $partitionCount = scalar keys %sectionHash;
+    print $FILEHANDLE pack('N', $partitionCount);
+
+    #HEADER WORD 6: block size
+    my $blockSize = $$i_pnorLayoutRef{metadata}{blockSize};
+    print $FILEHANDLE pack('N', $blockSize);
+
+    #HEADER WORD 7: block count (size of flash in blocks)
+    my $imageSize = $$i_pnorLayoutRef{metadata}{imageSize};
+    my $blockCount = $imageSize/$blockSize;
+    if ($blockCount != int($blockCount))
+    {
+        trace(0, "$this_func: Image size ($imageSize) is not an even multiple of erase blocks ($blockSize).  This is not supported.  Aborting!");
+        exit 1;
+    }
+    print $FILEHANDLE pack('N', $blockCount);
+
+    #HEADER WORD 8-11: Reserved
+    #insert 16 pad bytes for 4 reserved words
+    insertPadBytes($FILEHANDLE, 16);
+
+    #HEADER WORD 12: checksum
+    #insert 4 pad bytes for now.
+    insertPadBytes($FILEHANDLE, 4);
+
+    #key into hash data is the physical offset of section.  Need to sort the keys
+    #so we put things in the correct order in toc.
+    #Generally speaking, this loop is populating the FFS Header with records based on the
+    #section data specified in the XML + actual sizes of the input binary files.
+    for $key ( sort {$a<=> $b} keys %sectionHash)
+    {
+
+        # FFS Entry Word 1-4: eyecatcher
+        if(exists($sectionHash{$key}{eyeCatch}))
         {
             my $char;
-            my @charArray = unpack("C*", $$i_pnorLayoutRef{$key}{eyeCatch});
+            my @charArray = unpack("C*", $sectionHash{$key}{eyeCatch});
             foreach $char (@charArray)
             {
                 print $FILEHANDLE pack('C', $char);
             }
-            #pad out to get 8 bytes
-            my $zeroPad = 8-length($$i_pnorLayoutRef{$key}{eyeCatch});
+            #pad out to get 16 bytes
+            my $zeroPad = 16-length($sectionHash{$key}{eyeCatch});
             insertPadBytes($FILEHANDLE, $zeroPad);
         }
         else
         {
-            insertPadBytes($FILEHANDLE, 8);
+            insertPadBytes($FILEHANDLE, 16);
         }
 
-        #print physical offset
-        if(exists($$i_pnorLayoutRef{$key}{physicalOffset}))
+        #FFS Entry Word 5: base/physical offset in blocks
+        if(exists($sectionHash{$key}{physicalOffset}))
         {
-            my $val = $$i_pnorLayoutRef{$key}{physicalOffset};
-            #pad first 32 bits
-	    print $FILEHANDLE pack('N', 0);
-            #verify number consumes less than 32 bits
-            if($val > 0xFFFFFFFF)
+            my $val = $sectionHash{$key}{physicalOffset};
+            $val = $val/$blockSize;
+            if ($val != int($val))
             {
-                trace(0, "value=".$val.".  This is greater than 32 bits in hex and not currently supported!. \n Aborting program");
+                trace(0, "$this_func: Partition offset ($val) is does not fall on an erase block ($blockSize) boundary.  This is not supported.  Aborting!");
                 exit 1;
             }
 
@@ -289,19 +368,17 @@ sub genToc
         }
         else
         {
-            insertPadBytes($FILEHANDLE, 8);
+            insertPadBytes($FILEHANDLE, 4);
         }
 
-        #print physical size
-        if(exists($$i_pnorLayoutRef{$key}{physicalRegionSize}))
+        #FFS Entry Word 6: physical size in blocks
+        if(exists($sectionHash{$key}{physicalRegionSize}))
         {
-            my $val = $$i_pnorLayoutRef{$key}{physicalRegionSize};
-            #pad first 32 bits
-	    print $FILEHANDLE pack('N', 0);
-            #verify number consumes less than 32 bits
-            if($val > 0xFFFFFFFF)
+            my $val = $sectionHash{$key}{physicalRegionSize};
+            $val = $val/$blockSize;
+            if($val != int($val))
             {
-                trace(0, "value=".$val.".  This is greater than 32 bits in hex and not currently supported!. \n Aborting program");
+                trace(0, "$this_func: Partition size ($val) is not an even multiple of erase blocks ($blockSize).  This is not supported.  Aborting!");
                 exit 1;
             }
 
@@ -310,15 +387,36 @@ sub genToc
         }
         else
         {
-            insertPadBytes($FILEHANDLE, 8);
+            insertPadBytes($FILEHANDLE, 4);
         }
 
-        #print actual size
-        if(exists($$i_pnorLayoutRef{$key}{actualRegionSize}))
+        #FFS Entry Word 7: PID (Parent ID) - always 0xFFFFFFFF for hostboot.
+        print $FILEHANDLE pack('N', 0xFFFFFFFF);
+
+        #FFS Entry Word 8: ID (Partition ID) - Incremented number for each partition.
+        print $FILEHANDLE pack('N', $partIdCount++);
+
+        #FFS Entry Word 9: type - usually 1, except TOC is 3
+        if( $sectionHash{$key}{eyeCatch} =~ $g_TOCEyeCatch )
         {
-            my $val = $$i_pnorLayoutRef{$key}{actualRegionSize};
-            #pad first 32 bits
-            print $FILEHANDLE pack('N', 0);
+            print $FILEHANDLE pack('N', 3);
+        }
+        else
+        {
+            print $FILEHANDLE pack('N', 1);
+        }
+
+        #FFS Entry Word 10: flags - always zero
+        insertPadBytes($FILEHANDLE, 4);
+
+        #FFS Entry Word 11-15: 5 Reserved words
+        insertPadBytes($FILEHANDLE, 20);
+
+        #FFS Entry Words 16-31: 16 User Words
+        #FFS User Word 1 - Actual size actual size
+        if(exists($sectionHash{$key}{actualRegionSize}))
+        {
+            my $val = $sectionHash{$key}{actualRegionSize};
             #verify number consumes less than 32 bits
             if($val > 0xFFFFFFFF)
             {
@@ -330,14 +428,21 @@ sub genToc
         }
         else
         {
-            insertPadBytes($FILEHANDLE, 8);
+            insertPadBytes($FILEHANDLE, 4);
         }
-
-        #pad Miscellaneous information (8 bytes)
+    
+        #FFS User Word 2-3: Miscellaneous information.  Not currently implemented
         insertPadBytes($FILEHANDLE, 8);
 
-        #Pad Free space in TOC entry
-        insertPadBytes($FILEHANDLE, 88);
+
+        #FFS User Word 4-16: Free space User Data
+        insertPadBytes($FILEHANDLE, 52);
+
+
+        #FFS Entry Word 31: Checksum - not currently implemented
+        insertPadBytes($FILEHANDLE, 4);
+        
+
     }
     return 0;
 }
@@ -352,20 +457,28 @@ sub fillTocActSize
     my($i_tocVersion, $i_pnorLayoutRef) = @_;
     my $this_func = (caller(0))[3];
     my $rc = 0;
-    my $tocRecordSize = 128;
+    my $ffsHeaderSize = 9*4;
+    my $ffsEntrySize = getFFSEntrySize($i_tocVersion, $i_pnorLayoutRef);
 
-    my $recordCount = scalar keys %{$i_pnorLayoutRef};
-    my $size = ($recordCount*$tocRecordSize);
+    my %sectionHash = %{$$i_pnorLayoutRef{sections}};
+    my $recordCount = scalar keys %sectionHash;
+    my $size = ($recordCount*$ffsEntrySize)+$ffsHeaderSize;
 
-    if($$i_pnorLayoutRef{0}{ecc} =~ "yes")
+    my $tocLayoutKey = findLayoutKeyByEyeCatch($g_TOCEyeCatch, \%$i_pnorLayoutRef);
+    if( $tocLayoutKey == -1)
+    {
+        trace(0, "$this_func: Unable to find EyeCatcher=$g_TOCEyeCatch in PNOR layout for TOC entry. ");
+        $rc = 1;
+        last;
+    }
+
+    if($$i_pnorLayoutRef{sections}{$tocLayoutKey}{ecc} =~ "yes")
     {
         $size=$size*(9/8);
     }
     
-    trace(2, "$this_func: PNOR TOC Size=$size");
-
-    #Assume TOC is always at address zero for now since it's currently true by design
-    $$i_pnorLayoutRef{0}{actualRegionSize}=$size;
+    trace(2, "$this_func: PNOR FFS contains $recordCount records, total Size=$size");
+    $$i_pnorLayoutRef{sections}{$tocLayoutKey}{actualRegionSize}=$size;
 
 
     return $rc;
@@ -376,7 +489,7 @@ sub fillTocActSize
 ################################################################################
 sub robustifyImgs
 {
-    my ($i_pnorLayout, $i_binFiles) = @_;
+    my ($i_pnorLayoutRef, $i_binFiles) = @_;
     my $this_func = (caller(0))[3];
 
     #@TODO: ECC Correction
@@ -390,7 +503,7 @@ sub robustifyImgs
 ################################################################################
 sub collectActSizes
 {
-    my ($i_pnorLayout, $i_binFiles) = @_;
+    my ($i_pnorLayoutRef, $i_binFiles) = @_;
     my $this_func = (caller(0))[3];
     my $key;
     my $rc = 0;
@@ -398,18 +511,18 @@ sub collectActSizes
     for $key ( keys %{$i_binFiles})
     {
         my $filesize = -s $$i_binFiles{$key};
-        trace(10, "$this_func: $$i_binFiles{$key} size = $filesize");
 
-        my $layoutKey = findLayoutKeyByEyeCatch($key, \%$i_pnorLayout);
+        my $layoutKey = findLayoutKeyByEyeCatch($key, \%$i_pnorLayoutRef);
         if( $layoutKey == -1)
         {
+            trace(0, "$this_func: entry not found in PNOR layout for file $$i_binFiles{$key}, under eyecatcher $key");
             $rc = 1;
             last;
         }
 
-        $$i_pnorLayout{$layoutKey}{actualRegionSize} = $filesize;
+        $$i_pnorLayoutRef{sections}{$layoutKey}{actualRegionSize} = $filesize;
 
-       trace(2, "$this_func: $$i_binFiles{$key} size = $$i_pnorLayout{$layoutKey}{actualRegionSize}");
+        trace(2, "$this_func: $$i_binFiles{$key} size = $$i_pnorLayoutRef{sections}{$layoutKey}{actualRegionSize}");
 
     }
 
@@ -422,17 +535,17 @@ sub collectActSizes
 sub findLayoutKeyByEyeCatch
 {
     my $layoutKey = -1;
-    my($eyeCatch, $i_pnorLayout) = @_;
+    my($eyeCatch, $i_pnorLayoutRef) = @_;
     my $key;
 
-    for $key (keys  %{$i_pnorLayout})
+    my %sectionHash = %{$$i_pnorLayoutRef{sections}};
+    for $key ( keys %sectionHash)
     {
-        if($$i_pnorLayout{$key}{eyeCatch} =~ $eyeCatch)
+        if($sectionHash{$key}{eyeCatch} =~ $eyeCatch)
         {
             $layoutKey = $key;
             last;
         }
-
     }
     
     return $layoutKey;
@@ -444,16 +557,15 @@ sub findLayoutKeyByEyeCatch
 ################################################################################
 sub verifyFilesExist
 {
-    my ($i_genToc, $i_pnorLayout, $i_binFiles) = @_;
+    my ($i_genToc, $i_pnorLayoutRef, $i_binFiles) = @_;
     my $this_func = (caller(0))[3];
     my $key;
     my $rc = 0;
 
     for $key ( keys %$i_binFiles)
     {
-
         #Don't check if toc file exists if we're going to generate it
-        if(($key =~ "TOC") && ($i_genToc != 0))
+        if(($key =~ $g_TOCEyeCatch) && ($i_genToc != 0))
         {
             next;
         }
@@ -462,6 +574,7 @@ sub verifyFilesExist
             my $inputFile = $$i_binFiles{$key};
             trace(0, "Specified input file ($inputFile) for key ($key) does not exist.  Aborting!");
             $rc = 1;
+            last;
         }
         else
         {
@@ -469,18 +582,25 @@ sub verifyFilesExist
         }
     }
 
-    #Verify there is an input file for each section of PNOR
-    for $key ( keys %$i_pnorLayout)
+    if($rc != 0)
     {
-        my $eyeCatch = $$i_pnorLayout{$key}{eyeCatch};
+        return $rc;
+    }
+
+    my %sectionHash = %{$$i_pnorLayoutRef{sections}};
+
+    #Verify there is an input file for each section of PNOR
+    for $key ( keys %sectionHash)
+    {
+        my $eyeCatch = $sectionHash{$key}{eyeCatch};
 
         #Don't check if toc file exists if we're going to generate it
-        if(($eyeCatch =~ "TOC") && ($i_genToc != 0))
+        if(($eyeCatch =~ $g_TOCEyeCatch) && ($i_genToc != 0))
         {
             next;
         }
         #Ignore sections that are marked as blank
-        elsif($$i_pnorLayout{$key}{source} =~ "Blank")
+        elsif($sectionHash{$key}{source} =~ "Blank")
         {
             next;
         }
@@ -490,10 +610,11 @@ sub verifyFilesExist
             my $inputFile = $$i_binFiles{$eyeCatch};
             trace(0, "Input file not provided for PNOR section with eyeCatcher=$eyeCatch.  Aborting!");
             $rc = 1;
+            last;
         }
         else
         {
-            trace(10, "$this_func: $$i_binFiles{$key} exists");
+            trace(10, "$this_func: Input file ($$i_binFiles{$eyeCatch}) provided for section $eyeCatch");
         }
     }
 
@@ -505,17 +626,18 @@ sub verifyFilesExist
 ################################################################################
 sub checkSpaceConstraints
 {
-    my ($i_pnorLayout, $i_binFiles) = @_;
+    my ($i_pnorLayoutRef, $i_binFiles) = @_;
     my $rc = 0;
     my $this_func = (caller(0))[3];
     my $key;
 
+    my %sectionHash = %{$$i_pnorLayoutRef{sections}};
     #Verify there is an input file for each section of PNOR
-    for $key ( keys %$i_pnorLayout)
+    for $key ( keys %sectionHash)
     {
-        my $eyeCatch = $$i_pnorLayout{$key}{eyeCatch};
-        my $physicalRegionSize = $$i_pnorLayout{$key}{physicalRegionSize};
-        my $actualRegionSize = $$i_pnorLayout{$key}{actualRegionSize};
+        my $eyeCatch = $sectionHash{$key}{eyeCatch};
+        my $physicalRegionSize = $sectionHash{$key}{physicalRegionSize};
+        my $actualRegionSize = $sectionHash{$key}{actualRegionSize};
 
         if($actualRegionSize > $physicalRegionSize)
         {
@@ -525,7 +647,6 @@ sub checkSpaceConstraints
 
     }
 
-
     return $rc;
 }
 
@@ -534,21 +655,23 @@ sub checkSpaceConstraints
 ################################################################################
 sub assemblePnorImage
 {
-    my ($i_pnorBinName, $i_pnorLayout, $i_binFiles) = @_;
+    my ($i_pnorBinName, $i_pnorLayoutRef, $i_binFiles) = @_;
     my $this_func = (caller(0))[3];
     my $rc = 0;
     my $key;
 
     #key is the physical offset into the file, however don't need to sort
     #as long as I tell dd not to truncate the file.
-    for $key ( keys %{$i_pnorLayout})
+    my %sectionHash = %{$$i_pnorLayoutRef{sections}};
+    for $key ( keys %sectionHash)
     {
-        my $eyeCatch = $$i_pnorLayout{$key}{eyeCatch};
-        my $physicalOffset = $$i_pnorLayout{$key}{physicalOffset};
+        trace(3, "$this_func: key=$key");
+        my $eyeCatch = $sectionHash{$key}{eyeCatch};
+        my $physicalOffset = $sectionHash{$key}{physicalOffset};
         my $if = $$i_binFiles{$eyeCatch};
 
         #Ignore sections that are marked as blank
-        if($$i_pnorLayout{$key}{source} =~ "Blank")
+        if($sectionHash{$key}{source} =~ "Blank")
         {
             next;
         }
@@ -590,7 +713,27 @@ sub saveInputFile
     #no return code expected
 }
     
+#################################################
+# getFFSEntrySize: Returns number of bytes in an ffs_entry based on specified version
+#################################################
+sub getFFSEntrySize
+{
+    my($i_tocVersion, $i_pnorLayoutRef) = @_;
+    my $this_func = (caller(0))[3];
+    my $ffsEntrySize = 0;
 
+    if($i_tocVersion == 0x1)
+    {
+        #16 char name + 12 fixed words + 16 user data words
+        $ffsEntrySize = 16+(12*4)+(16*4); 
+    }
+    else
+    {
+        trace(0, "$this_func:  Layout Version Unsupported!  i_tocVersion=$i_tocVersion");
+        exit 1;
+    }
+    return $ffsEntrySize;
+}
 
 #################################################
 # Insert specifed number of pad bytes into file
