@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/pore/test/poretest.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/pore/test/poretest.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #ifndef __PORETEST_H
 #define __PORETEST_H
 
@@ -69,20 +70,20 @@ public:
         do
         {
             // Loading sbe_pnor img
-            l_errl = VFS::module_load("sbe_pnor.bin");
+            l_errl = VFS::module_load("centaur.sbe_pnor.bin");
             if (l_errl)
             {
-                TS_FAIL("testPore1: Error loading sbe_pnor.bin!");
+                TS_FAIL("testPore1: Error loading centaur.sbe_pnor.bin!");
                 break;
             }
             else
             {
                 // Set flag to unload
                 l_unloadSbePnorImg = true;
-                l_errl = VFS::module_address("sbe_pnor.bin", l_sbePnorAddr, l_sbePnorSize);
+                l_errl = VFS::module_address("centaur.sbe_pnor.bin", l_sbePnorAddr, l_sbePnorSize);
                 if(l_errl)
                 {
-                    TS_FAIL("testPore1: Error getting load address of sbe_pnor.bin!");
+                    TS_FAIL("testPore1: Error getting load address of centaur.sbe_pnor.bin!");
                     break;
                 }
                 else
@@ -90,7 +91,7 @@ public:
                     char l_header[10];
                     memcpy (l_header, l_sbePnorAddr, 9);
                     l_header[9] = '\0';
-                    FAPI_INF("testPore1:Loading sbe_pnor.bin, Addr 0x%llX, Size %d, Header %s",
+                    FAPI_INF("testPore1:Loading centaur.sbe_pnor.bin, Addr 0x%llX, Size %d, Header %s",
                               l_sbePnorAddr, l_sbePnorSize, l_header);
                 }
             }
@@ -224,11 +225,11 @@ public:
         // Unload sbe_pnor
         if (l_unloadSbePnorImg == true)
         {
-            l_rc2 = fapiUnloadInitFile("sbe_pnor.bin", l_sbePnorAddr,
+            l_rc2 = fapiUnloadInitFile("centaur.sbe_pnor.bin", l_sbePnorAddr,
                                        l_sbePnorSize);
             if (l_rc2 != fapi::FAPI_RC_SUCCESS)
             {
-                 FAPI_ERR("testPore1: Error unloading sbe_pnor.bin");
+                 FAPI_ERR("testPore1: Error unloading centaur.sbe_pnor.bin");
                  if (l_rc == fapi::FAPI_RC_SUCCESS)
                  {
                      l_rc = l_rc2;

@@ -1,26 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/hwpf/hwp/sbe_centaur_init/sbe_centaur_init.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
-
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/hwpf/hwp/sbe_centaur_init/sbe_centaur_init.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 /**
  *  @file sbe_centaur_init.C
  *
@@ -37,13 +37,13 @@
 /******************************************************************************/
 #include    <stdint.h>
 
-#include    <trace/interface.H>
-#include    <initservice/taskargs.H>
-#include    <errl/errlentry.H>
-#include    <initservice/isteps_trace.H>
-#include    <targeting/common/commontargeting.H>
-#include    <targeting/common/utilFilter.H>
-#include    <fapi.H>
+#include <trace/interface.H>
+#include <initservice/taskargs.H>
+#include <errl/errlentry.H>
+#include <initservice/isteps_trace.H>
+#include <targeting/common/commontargeting.H>
+#include <targeting/common/utilFilter.H>
+#include <fapi.H>
 #include <fapiPoreVeArg.H>
 #include <fapiTarget.H>
 #include <fapi.H>
@@ -53,8 +53,7 @@
 #include "sbe_centaur_init.H"
 
 //@todo - The following workarounds need to be readdressed
-//1. Avoid running test case in VBU below
-//2. To call isSlavePresent(). Need to remove following header when PD works.
+//1. To call isSlavePresent(). Need to remove following header when PD works.
 #include <fsi/fsiif.H>
 
 // Extern function declaration
@@ -96,10 +95,10 @@ void    call_cen_sbe_tp_chiplet_init1( void *io_pArgs )
         // ----------------------- Setup sbe_pnor stuff --------------------
 
         // Loading sbe_pnor img
-        l_errl = VFS::module_load("sbe_pnor.bin");
+        l_errl = VFS::module_load("centaur.sbe_pnor.bin");
         if (l_errl)
         {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "ERROR 0x%.8X call_cen_sbe_tp_chiplet_init1 - VFS::module_load(sbe_pnor.bin) returns error",
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "ERROR 0x%.8X call_cen_sbe_tp_chiplet_init1 - VFS::module_load(centaur.sbe_pnor.bin) returns error",
                     l_errl->reasonCode());
             break;
         }
@@ -107,10 +106,10 @@ void    call_cen_sbe_tp_chiplet_init1( void *io_pArgs )
         {
              // Set flag to unload
              l_unloadSbePnorImg = true;
-             l_errl = VFS::module_address("sbe_pnor.bin", l_sbePnorAddr, l_sbePnorSize);
+             l_errl = VFS::module_address("centaur.sbe_pnor.bin", l_sbePnorAddr, l_sbePnorSize);
              if(l_errl)
              {
-                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "ERROR 0x%.8X call_cen_sbe_tp_chiplet_init1 - VFS::module_address(sbe_pnor.bin) return error",
+                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "ERROR 0x%.8X call_cen_sbe_tp_chiplet_init1 - VFS::module_address(centaur.sbe_pnor.bin) return error",
                          l_errl->reasonCode());
                  break;
              }
@@ -119,7 +118,7 @@ void    call_cen_sbe_tp_chiplet_init1( void *io_pArgs )
                  char l_header[10];
                  memcpy (l_header, l_sbePnorAddr, 9);
                  l_header[9] = '\0';
-                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_tp_chiplet_init1 -Loading sbe_pnor.bin, Addr 0x%llX, Size %d, Header %s",
+                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_tp_chiplet_init1 -Loading centaur.sbe_pnor.bin, Addr 0x%llX, Size %d, Header %s",
                            l_sbePnorAddr, l_sbePnorSize, l_header);
              }
         }
@@ -182,14 +181,13 @@ void    call_cen_sbe_tp_chiplet_init1( void *io_pArgs )
             // Run the engine
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_tp_chiplet_init1 - Start VSBE engine...");
 
-            //@todo
-            //@VBU workaround - Do not run in VPO since it takes too long
-            //Temporarily disable this test case in VBU because it takes too long to run.
-            //Also, the image used for Centaur is only a temporary image provided by Todd to try out.
-            if ( !TARGETING::is_vpo() )
+
+            //@TODO:
+            //Simics workaround - Do not run in Simics since action file is not updated
+            //Leave it to Van Lee to update action file and enable Simics run
+            if ( TARGETING::is_vpo() )
             {
-                // Can't run now because the HALT returned will cause a failure in simics
-                //FAPI_INVOKE_HWP(l_errl, fapiPoreVe, l_fapiTarget, myArgs);
+                FAPI_INVOKE_HWP(l_errl, fapiPoreVe, l_fapiTarget, myArgs);
             }
 
             if (l_errl )
@@ -236,12 +234,12 @@ void    call_cen_sbe_tp_chiplet_init1( void *io_pArgs )
     if (l_unloadSbePnorImg == true)
     {
         errlHndl_t  l_tempErrl = NULL;
-        FAPI_INVOKE_HWP(l_tempErrl, fapiUnloadInitFile, "sbe_pnor.bin",
+        FAPI_INVOKE_HWP(l_tempErrl, fapiUnloadInitFile, "centaur.sbe_pnor.bin",
                                     l_sbePnorAddr,
                                     l_sbePnorSize);
         if (l_tempErrl)
         {
-             FAPI_ERR("ERROR 0x%.8X call_cen_sbe_tp_chiplet_init1 - Error unloading sbe_pnor.bin",
+             FAPI_ERR("ERROR 0x%.8X call_cen_sbe_tp_chiplet_init1 - Error unloading centaur.sbe_pnor.bin",
                      l_tempErrl->reasonCode());
              if (l_errl == NULL)
              {

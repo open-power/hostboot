@@ -1,11 +1,11 @@
-#  IBM_PROLOG_BEGIN_TAG
+#   IBM_PROLOG_BEGIN_TAG
 #  This is an automatically generated prolog.
 #
-#  $Source: src/usr/xscom/makefile $
+#  $Source: src/usr/pore/makefile $
 #
 #  IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2011
+#  COPYRIGHT International Business Machines Corp. 2011-2012
 #
 #  p1
 #
@@ -19,11 +19,11 @@
 #
 #  Origin: 30
 #
-#  IBM_PROLOG_END
+#  IBM_PROLOG_END_TAG
 ROOTPATH = ../../..
 
 SUBDIRS = fapiporeve.d poreve.d test.d
 
-BINARY_FILES = $(IMGDIR)/sbe_pnor.bin:8f6722020041c1b724f0238a34c1c445a2aa7cce
+BINARY_FILES = $(IMGDIR)/centaur.sbe_pnor.bin:facd29e899693053b3934798976b2a263a94f229
 
 include ${ROOTPATH}/config.mk
