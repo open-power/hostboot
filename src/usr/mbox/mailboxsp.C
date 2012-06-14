@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/mailbox/mailboxsp.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/mbox/mailboxsp.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 /**
  * @file mailboxsp.C
  * @brief mailbox service provider definition
@@ -33,6 +34,7 @@
 #include <sys/vfs.h>
 #include <devicefw/userif.H>
 #include <mbox/mbox_reasoncodes.H>
+#include <mbox/mboxUdParser.H>
 
 #define HBMBOX_TRACE_NAME HBMBOX_COMP_NAME
 
@@ -200,10 +202,10 @@ void MailboxSp::msgHandler()
                     // or MBOX_DATA_WRITE_ERR  - serious - assert
                     if(err)
                     {
-                        // TODO  story 37990
                         errlCommit(err,HBMBOX_COMP_ID);
 
-                        assert(0);
+                        TRACFCOMP(g_trac_mbox, ERR_MRK"MBOXSP HALTED on critical error!");
+                        crit_assert(0);
                     }
 
                     if(iv_shutdown_msg && quiesced())
@@ -246,6 +248,7 @@ void MailboxSp::msgHandler()
                     iv_shutdown_msg = msg;      // Respond to this when done
                     iv_disabled = true;         // stop incomming new messages
 
+                    handleUnclaimed();
                     if(quiesced())
                     {
                         handleShutdown();       // done - shutdown now.
@@ -545,9 +548,7 @@ void MailboxSp::recv_msg(mbox_msg_t & i_mbox_msg)
     *msg = i_mbox_msg.msg_payload;  // copy
 
     // Handle moving data from DMA buffer
-    // TODO for pending messages the extra_data is not a DMA address
-    //      so change this to check for valid DMA address instead of NULL.
-    if(msg->extra_data != NULL)
+    if(iv_dmaBuffer.isDmaAddress(msg->extra_data))
     {
         uint64_t msg_sz = msg->data[1];
         void * buf = malloc(msg_sz);
@@ -641,13 +642,23 @@ void MailboxSp::recv_msg(mbox_msg_t & i_mbox_msg)
                          i_mbox_msg.msg_queue_id
                         );
 
+                    UserDetailsMboxMsg 
+                        ffdc(reinterpret_cast<uint64_t*>(&i_mbox_msg),
+                             sizeof(mbox_msg_t),
+                             reinterpret_cast<uint64_t*>(msg->extra_data),
+                             msg->data[1]);
+
+                    ffdc.addToLog(err);
+
                     err->collectTrace(HBMBOXMSG_TRACE_NAME);
                     errlCommit(err,HBMBOX_COMP_ID);
 
                     free(msg->extra_data);
                     msg_free(msg);
 
-                    assert(0);
+                    TRACFCOMP(g_trac_mbox,
+                              ERR_MRK"MBOXSP HALTED on critical error!");
+                    crit_assert(0);
 
                 }
             }
@@ -657,8 +668,15 @@ void MailboxSp::recv_msg(mbox_msg_t & i_mbox_msg)
                 mbox_msg_t mbox_msg;
                 mbox_msg.msg_queue_id = FSP_MAILBOX_MSGQ;
                 mbox_msg.msg_payload.type = MSG_INVALID_MSG_TYPE;
-                mbox_msg.msg_payload.data[0] = msg->type;
-                mbox_msg.msg_payload.data[1] = i_mbox_msg.msg_queue_id;
+                mbox_msg.msg_id = i_mbox_msg.msg_id;
+
+                // msg_id and msg_queue_id
+                mbox_msg.msg_payload.data[0] = 
+                    *(reinterpret_cast<uint64_t*>(&i_mbox_msg));
+                // type & flags
+                mbox_msg.msg_payload.data[1] = 
+                    *(reinterpret_cast<uint64_t*>(msg));
+
                 mbox_msg.msg_payload.extra_data = NULL;
                 mbox_msg.msg_payload.__reserved__async = 0; // async
 
@@ -686,8 +704,16 @@ void MailboxSp::recv_msg(mbox_msg_t & i_mbox_msg)
                      MBOX::MOD_MBOXSRV_RCV,
                      MBOX::RC_INVALID_MESSAGE_TYPE  ,    //  reason Code
                      i_mbox_msg.msg_queue_id,            // rc from msg_send
-                     i_mbox_msg.msg_payload.type
+                     msg->type
                     );
+
+                UserDetailsMboxMsg 
+                    ffdc(reinterpret_cast<uint64_t*>(&i_mbox_msg),
+                         sizeof(mbox_msg_t),
+                         reinterpret_cast<uint64_t*>(msg->extra_data),
+                         msg->data[1]);
+
+                ffdc.addToLog(err);
 
                 err->collectTrace(HBMBOXMSG_TRACE_NAME);
                 errlCommit(err,HBMBOX_COMP_ID);
@@ -701,8 +727,6 @@ void MailboxSp::recv_msg(mbox_msg_t & i_mbox_msg)
         else if(i_mbox_msg.msg_queue_id != FSP_MAILBOX_MSGQ)
         {
             // Queue message to wait until queue is registered.
-            // TODO - on shutdown, report if iv_pending is not empty.
-
             // copy in non-dma instance of payload msg
             i_mbox_msg.msg_payload = *msg;
 
@@ -727,58 +751,118 @@ void MailboxSp::recv_msg(mbox_msg_t & i_mbox_msg)
 
 void MailboxSp::handle_hbmbox_msg(mbox_msg_t & i_mbox_msg)
 {
-    if(i_mbox_msg.msg_payload.type == MSG_REQUEST_DMA_BUFFERS)
+    msg_t * msg = &(i_mbox_msg.msg_payload);
+
+    if(msg->type == MSG_REQUEST_DMA_BUFFERS)
     {
         // DMA req. will be resolved by send_msg
         send_msg(&i_mbox_msg);   // response message
     }
-    else if(i_mbox_msg.msg_payload.type == MSG_INVALID_MSG_QUEUE_ID)
+    else if(msg->type == MSG_INVALID_MSG_QUEUE_ID ||
+            msg->type == MSG_INVALID_MSG_TYPE)
     {
+        mbox_msg_t * bad_mbox_msg = 
+            reinterpret_cast<mbox_msg_t*>(&(msg->data[0]));
+        msg_t * bad_msg = &(bad_mbox_msg->msg_payload);
+
+        TRACFCOMP(g_trac_mbox, ERR_MRK"Invalid message was sent to FSP. Queue" 
+                  " id: 0x%08x Type: %08x",
+                  bad_mbox_msg->msg_queue_id,
+                  bad_msg->type);
+
         /*@ errorlog tag
          * @errortype       ERRL_SEV_INFORMATIONAL
          * @moduleid        MOD_MBOXSRV_FSP_MSG
          * @reasoncode      RC_INVALID_QUEUE
          * @userdata1       msg queue
-         * @defdesc         Message from FSP. A message queue sent to FSP
-         *                  was not within a valid range
+         * @userdata2       msg type
+         * @defdesc         Message from FSP. An invalid message queue ID
+         *                  or mesage type was sent to the FSP.
          */
         errlHndl_t err = new ERRORLOG::ErrlEntry
             (
              ERRORLOG::ERRL_SEV_INFORMATIONAL,
              MBOX::MOD_MBOXSRV_FSP_MSG,
              MBOX::RC_INVALID_QUEUE,
-             i_mbox_msg.msg_payload.data[0],
-             0
+             bad_mbox_msg->msg_queue_id,
+             bad_msg->type
             );
+
+        UserDetailsMboxMsg 
+            ffdc(reinterpret_cast<uint64_t*>(&i_mbox_msg),
+                 sizeof(mbox_msg_t),
+                 reinterpret_cast<uint64_t*>(msg->extra_data),
+                 msg->data[1]);
+
+        ffdc.addToLog(err);
 
         err->collectTrace(HBMBOXMSG_TRACE_NAME);
 
-        errlCommit(err,HBMBOX_COMP_ID);
+        // If the msg was sync then we need to respond to the
+        // orignal sender and clean up the respondq
+        if(!msg_is_async(bad_msg)) 
+        {
+            msg_t * key = reinterpret_cast<msg_t*>(bad_mbox_msg->msg_id);
+            msg_respond_t * response = iv_respondq.find(key);
+            if(response)
+            {
+                iv_respondq.erase(response); // unlink from the list
+
+                //response->key->extra_data points to the original msg
+                // Send back the error log
+                response->key->data[1] = reinterpret_cast<uint64_t>(err);
+                err = NULL;
+                msg_respond(iv_msgQ,response->key);
+
+                delete response;
+            }
+            else // nothing to respond to - just log the error
+            {
+                errlCommit(err,HBMBOX_COMP_ID);
+            }
+        }
+        else // async - nothing to respond to -just log the error
+        {
+            errlCommit(err,HBMBOX_COMP_ID);
+        }
     }
-    else
+    else // unknown/un-architected message from fsp MBOX
     {
+        TRACFCOMP(g_trac_mbox,
+                  ERR_MRK
+                  "Unknown message of type 0x%x received from FSP.",
+                  msg->type);
+
         /*@ errorlog tag
          * @errortype       ERRL_SEV_INFORMATIONAL
-         * @moduleid        MOD_MBOXSRV_FSP_MSG
-         * @reasoncode      RC_INVALID_MBOX_MSG_TYPE
+         * @moduleid        MBOX::MOD_MBOXSRV_FSP_MSG
+         * @reasoncode      MBOX::RC_INVALID_MESSAGE_TYPE
          * @userdata1       msg type
          * @userdata2       msg queue id
-         * @defdesc         Message from FSP. A message type sent to FSP
-         *                  was not within a valid range
+         * @defdesc         Message from FSP to HB MBOX of an unknown type
          */
         errlHndl_t err = new ERRORLOG::ErrlEntry
             (
              ERRORLOG::ERRL_SEV_INFORMATIONAL,
              MBOX::MOD_MBOXSRV_FSP_MSG,
-             MBOX::RC_INVALID_MBOX_MSG_TYPE,
-             i_mbox_msg.msg_payload.data[0],
-             i_mbox_msg.msg_payload.data[1]
+             MBOX::RC_INVALID_MESSAGE_TYPE,
+             msg->type,
+             i_mbox_msg.msg_queue_id
             );
+
+        UserDetailsMboxMsg 
+            ffdc(reinterpret_cast<uint64_t*>(&i_mbox_msg),
+                 sizeof(mbox_msg_t),
+                 reinterpret_cast<uint64_t*>(msg->extra_data),
+                 msg->data[1]);
+
+        ffdc.addToLog(err);
 
         err->collectTrace(HBMBOXMSG_TRACE_NAME);
 
         errlCommit(err,HBMBOX_COMP_ID);
     }
+
 }
 
 
@@ -834,46 +918,70 @@ errlHndl_t MailboxSp::send(queue_id_t i_q_id, msg_t * io_msg)
     msg->data[0] = static_cast<uint64_t>(i_q_id);
     msg->extra_data = reinterpret_cast<void*>(io_msg); // Payload message
 
-    if(msg_is_async(io_msg))
+    if(mboxQ != NULL)
     {
-        rc = msg_send(mboxQ, msg);
+        if(msg_is_async(io_msg))
+        {
+            rc = msg_send(mboxQ, msg);
+        }
+        else
+        {
+            rc = msg_sendrecv(mboxQ, msg);
+
+            if(0 == rc)
+            {
+                err = reinterpret_cast<errlHndl_t>(msg->data[1]);
+            }
+
+            msg_free(msg);
+
+            // io_msg now contains response message
+        }
+
+        if(rc != 0)
+        {
+            /*@ errorlog tag
+             * @errortype       ERRL_SEV_CRITICAL_SYS_TERM
+             * @moduleid        MBOX::MOD_MBOXSRV_SEND
+             * @reasoncode      MBOX::RC_INVALID_QUEUE
+             * @userdata1       returncode from msg_sendrecv()
+             *
+             * @defdesc         Invalid message or message queue
+             *
+             */
+            err = new ERRORLOG::ErrlEntry
+                (
+                 ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,   //  severity
+                 MBOX::MOD_MBOXSRV_SEND,                 //  moduleid
+                 MBOX::RC_INVALID_QUEUE,                 //  reason Code
+                 rc,                                     //  msg_sendrecv errno
+                 i_q_id                                  //  msg queue id
+                );
+
+            // This Trace has the msg
+            err->collectTrace(HBMBOXMSG_TRACE_NAME);
+        }
     }
     else
     {
-        rc = msg_sendrecv(mboxQ, msg);
-
-        if(0 == rc)
-        {
-            err = reinterpret_cast<errlHndl_t>(msg->data[1]);
-        }
-
-        msg_free(msg);
-
-        // io_msg now contains response message
-    }
-
-    if(rc != 0)
-    {
         /*@ errorlog tag
-         * @errortype       ERRL_SEV_CRITICAL_SYS_TERM
+         * @errortype       ERRL_SEV_INFORMATIONAL
          * @moduleid        MBOX::MOD_MBOXSRV_SEND
-         * @reasoncode      MBOX::RC_INVALID_QUEUE
-         * @userdata1       returncode from msg_sendrecv()
+         * @reasoncode      MBOX::RC_MBOX_SERVICE_NOT_READY
+         * @userdata1       The destination message queue id
          *
-         * @defdesc         Invalid message or message queue
+         * @defdesc         Host boot mailbox service is not available
+         *                  at this time.
          *
          */
         err = new ERRORLOG::ErrlEntry
             (
-             ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,   //  severity
+             ERRORLOG::ERRL_SEV_INFORMATIONAL,       //  severity
              MBOX::MOD_MBOXSRV_SEND,                 //  moduleid
-             MBOX::RC_INVALID_QUEUE,                 //  reason Code
-             rc,                                     //  msg_sendrecv errno
-             i_q_id                                  //  msg queue id
+             MBOX::RC_MBOX_SERVICE_NOT_READY,        //  reason Code
+             i_q_id,                                 //  queue id
+             0                                       //  
             );
-
-        // This Trace has the msg
-        err->collectTrace(HBMBOXMSG_TRACE_NAME);
     }
 
     return err;
@@ -990,12 +1098,10 @@ errlHndl_t MailboxSp::handleInterrupt()
     {
         err->collectTrace(HBMBOX_TRACE_NAME);
         err->collectTrace(HBMBOXMSG_TRACE_NAME);
-
-        // return err
     }
     else
     {
-        TRACDCOMP(g_trac_mbox,"MBOXSP status=%lx",mbox_status);
+        TRACDCOMP(g_trac_mbox,"MBOXSP: status=%lx",mbox_status);
 
         if(mbox_status & MBOX_HW_ACK)
         {
@@ -1029,7 +1135,7 @@ errlHndl_t MailboxSp::handleInterrupt()
         if(mbox_status & MBOX_DOORBELL_ERROR)
         {
             TRACFCOMP(g_trac_mbox,
-                      ERR_MRK"MBOX status 0x%lx",
+                      ERR_MRK"MBOX Hardware reported errors detected status 0x%lx",
                       mbox_status);
 
             if(mbox_status & MBOX_DATA_WRITE_ERR)
@@ -1061,7 +1167,6 @@ errlHndl_t MailboxSp::handleInterrupt()
             else if(mbox_status & MBOX_PARITY_ERR)
             {
                 // Hardware detected parity error
-                // - TODO How does BB handle this error ???
                 // Log it and continue
 
                 /*@ errorlog tag
@@ -1083,7 +1188,6 @@ errlHndl_t MailboxSp::handleInterrupt()
 
                 err->collectTrace(HBMBOX_TRACE_NAME);
                 errlCommit(err,HBMBOX_COMP_ID);
-                // err = NULL don't return err.
             }
             else if(mbox_status & MBOX_ILLEGAL_OP)
             {
@@ -1109,7 +1213,6 @@ errlHndl_t MailboxSp::handleInterrupt()
                     );
                 err->collectTrace(HBMBOX_TRACE_NAME);
                 errlCommit(err,HBMBOX_COMP_ID);
-                // err = NULL Don't return err
             }
 
             //else if(mbox_status & MBOX_DATA_READ_ERR)
@@ -1129,19 +1232,85 @@ errlHndl_t MailboxSp::handleInterrupt()
 }
 
 
+// Handle unclaimed messages in iv_pendingq
+void MailboxSp::handleUnclaimed()
+{
+    for(send_q_t::iterator mbox_msg = iv_pendingq.begin();
+        mbox_msg != iv_pendingq.end();
+        ++mbox_msg)
+    {
+        mbox_msg_t r_mbox_msg;
+        r_mbox_msg.msg_queue_id = FSP_MAILBOX_MSGQ;
+        r_mbox_msg.msg_payload.type = MSG_INVALID_MSG_QUEUE_ID;
+        r_mbox_msg.msg_id = mbox_msg->msg_id;
+
+        mbox_msg_t * msg = &(*mbox_msg);
+        // msg_id and msg_queue_id
+        r_mbox_msg.msg_payload.data[0] = 
+            *(reinterpret_cast<uint64_t*>(msg));
+        // type & flags
+        r_mbox_msg.msg_payload.data[1] = 
+            *(reinterpret_cast<uint64_t*>(&(msg->msg_payload)));
+
+        r_mbox_msg.msg_payload.extra_data = NULL;
+        r_mbox_msg.msg_payload.__reserved__async = 0; // async
+
+        send_msg(&r_mbox_msg);
+
+        TRACFCOMP(g_trac_mbox,
+                  ERR_MRK
+                  "MailboxSp::handleUnclaimed> Message never claimed. "
+                  "Queueid 0x%08x",
+                  mbox_msg->msg_queue_id);
+
+        /*@ errorlog tag
+         * @errortype       ERRL_SEV_INFORMATIONAL
+         * @moduleid        MBOX::MOD_MBOXSRC_UNCLAIMED
+         * @reasoncode      MBOX::RC_INVALID_QUEUE
+         * @userdata1       msg queue
+         * @userdata2       msg type
+         * @defdesc         Message from FSP. Message not claimed
+         *                  by any Hostboot service.
+         */
+        errlHndl_t err = new ERRORLOG::ErrlEntry
+            (
+             ERRORLOG::ERRL_SEV_INFORMATIONAL,
+             MBOX::MOD_MBOXSRC_UNCLAIMED,
+             MBOX::RC_INVALID_QUEUE,            //  reason Code
+             mbox_msg->msg_queue_id,            //  message queue id
+             mbox_msg->msg_payload.type         //  message type
+            );
+
+        UserDetailsMboxMsg 
+            ffdc(reinterpret_cast<uint64_t*>(msg),
+                 sizeof(mbox_msg_t),
+                 reinterpret_cast<uint64_t*>(msg->msg_payload.extra_data),
+                 msg->msg_payload.data[1]);
+
+        ffdc.addToLog(err);
+
+        errlCommit(err,HBMBOX_COMP_ID);
+    }
+    iv_pendingq.clear();
+}
+
+
 void MailboxSp::handleShutdown()
 {
     // Shutdown the hardware
     errlHndl_t err = mboxddShutDown(iv_trgt);
 
+    INTR::unRegisterMsgQ(INTR::FSP_MAILBOX);
+
     if(err)  // SCOM failed.
     {
         // If this failed, the whole system is probably buggered up.
-        errlCommit(err,HBMBOX_COMP_ID);
-        assert(0);
-    }
 
-    INTR::unRegisterMsgQ(INTR::FSP_MAILBOX);
+        errlCommit(err,HBMBOX_COMP_ID);
+
+        TRACFCOMP(g_trac_mbox, ERR_MRK"MBOXSP HALTED on critical error!");
+        crit_assert(0);
+    }
 
     msg_respond(iv_msgQ,iv_shutdown_msg);
     TRACFCOMP(g_trac_mbox,INFO_MRK"Mailbox is shutdown");

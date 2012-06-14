@@ -48,7 +48,7 @@ namespace MBOX
 
         // FSP mailboxes
         FSP_FIRST_MSGQ          = 0x80000000,
-        FSP_MAILBOX_MSGQ        = FSP_FIRST_MSGQ,
+        FSP_MAILBOX_MSGQ,
         FSP_PROGRESS_CODES_MSGQ,
         FSP_TRACE_MSGQ,
         FSP_ERRL_MSGQ,

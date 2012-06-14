@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/include/sys/vfs.h $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2010 - 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/include/sys/vfs.h $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2010-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #ifndef __SYS_VFS_H
 #define __SYS_VFS_H
 
@@ -67,6 +68,7 @@ extern const char* VFS_ROOT_MSG_VFS;
 enum VfsMessages
 {
     VFS_MSG_REGISTER_MSGQ, //!< Message to VFS_ROOT to register a message queue
+    VFS_MSG_REMOVE_MSGQ,   //!< Message to VFS_ROOT to remove a message queue
     VFS_MSG_RESOLVE_MSGQ,  //!< Message to VFS_ROOT to find a message queue
     VFS_MSG_EXEC,          //!< Message to VFS_ROOT execute a module
     VFS_MSG_LOAD,          //!< Message to vfsrp to load a module

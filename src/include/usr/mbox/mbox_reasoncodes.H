@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/include/usr/mbox/mbox_reasoncodes.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/include/usr/mbox/mbox_reasoncodes.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #ifndef __MBOX_REASONCODES_H
 #define __MBOX_REASONCODES_H
 
@@ -39,6 +40,7 @@ namespace MBOX
         MOD_MBOXSRV_FSP_MSG     = 0x07, // MailboxSp::handle_hbmbox_msg
         MOD_MBOXSRV_SENDMSG     = 0x08, // MailboxSp::send_msg
         MOD_MBOXSRV_INIT        = 0x09, // MailboxSp::_init
+        MOD_MBOXSRC_UNCLAIMED   = 0x0A, // MailboxSp::handleUnclaimed
     };
 
     enum MBOXReasonCode
@@ -60,6 +62,15 @@ namespace MBOX
         RC_KERNEL_REG_FAILED         = HBMBOX_COMP_ID | 0x0F,
         RC_MAILBOX_DISABLED          = HBMBOX_COMP_ID | 0x10,
     };
-};
 
+
+    /**
+     * Defins for MBOX error og user detail data sections
+     */
+    enum mboxUserDetailDataSubsection
+    {
+        MBOX_UDT_MBOXMSG_DATA = 1,
+    };
+
+};
 #endif

@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/mbox/mboxdd.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/mbox/mboxdd.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #include "mboxdd.H"
 #include <mbox/mboxif.H>
 #include <mbox/mbox_reasoncodes.H>
@@ -36,6 +37,9 @@ TRAC_INIT(&g_trac_mbox, "MBOX", 4096); //4K
 namespace MBOX
 {
 
+#if defined(__DESTRUCTIVE_MBOX_TEST__)
+    bool g_forceError = false;
+#endif
 /**
  * @brief Performs an MBOX Read Operation
  * This function performs a MBOX Read operation. It follows a pre-defined
@@ -181,6 +185,15 @@ errlHndl_t mboxRead(TARGETING::Target* i_target,void *o_buffer,
                 break;
             }
         }
+
+#if defined(__DESTRUCTIVE_MBOX_TEST__)
+        if(g_forceError)
+        {
+            TRACFCOMP(g_trac_mbox,"MBOXDD> forcing error!");
+            g_forceError = false;
+            l_stat |= MBOX_DOORBELL_ERROR | MBOX_DATA_WRITE_ERR;
+        }
+#endif
 
         // No errors so read the doorbell status and control 1a register
         l_err = deviceOp(DeviceFW::READ,i_target,
@@ -575,6 +588,7 @@ errlHndl_t mboxGetErrStat(TARGETING::Target* i_target,uint64_t &o_status)
 
     } while(0);
 
+
     return l_err;
 }
 
@@ -668,4 +682,11 @@ errlHndl_t mboxddShutDown(TARGETING::Target* i_target)
     return err;
 }
 
+#if defined(__DESTRUCTIVE_MBOX_TEST__)
+void forceErrorOnNextOperation()
+{
+    TRACFCOMP(g_trac_mbox,"ForceErrorOnNextOperatiron: g_forceError true");
+    g_forceError = true;
+}
+#endif
 }; //end MBOX namespace

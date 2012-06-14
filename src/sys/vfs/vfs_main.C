@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/sys/vfs/vfs_main.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2010 - 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/sys/vfs/vfs_main.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2010-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #include <string.h>
 #include <errno.h>
 
@@ -76,46 +77,66 @@ void vfs_main(void* i_barrier)
 
     while(1)
     {
-	msg_t* msg = msg_wait(vfsMsgQ);
+        msg_t* msg = msg_wait(vfsMsgQ);
 
-	switch(msg->type)
-	{
-	    case VFS_MSG_REGISTER_MSGQ:
-		{
-		    VfsEntry* e = new VfsEntry();
-		    strcpy(e->key.key, (char*) msg->extra_data);
-		    e->msg_q = (msg_q_t) msg->data[0];
-		    vfsContents.insert(e);
+        switch(msg->type)
+        {
+            case VFS_MSG_REGISTER_MSGQ:
+                {
+                    VfsEntry* e = new VfsEntry();
+                    strcpy(e->key.key, (char*) msg->extra_data);
+                    e->msg_q = (msg_q_t) msg->data[0];
+                    vfsContents.insert(e);
 
-		    printkd("VFS: Registering %p as %s\n",
-			    e->msg_q, e->key.key);
-		    msg_respond(vfsMsgQ, msg);
-		}
-		break;
+                    printkd("VFS: Registering %p as %s\n",
+                            e->msg_q, e->key.key);
+                    msg_respond(vfsMsgQ, msg);
+                }
+                break;
 
-	    case VFS_MSG_RESOLVE_MSGQ:
-		{
-		    VfsEntry::key_type k;
-		    strcpy(k.key, (char*) msg->extra_data);
-		    VfsEntry* e = vfsContents.find(k);
-		    if (NULL == e)
-			msg->data[0] = (uint64_t) NULL;
-		    else
-			msg->data[0] = (uint64_t) e->msg_q;
-		    msg_respond(vfsMsgQ, msg);
-		}
-		break;
+            case VFS_MSG_REMOVE_MSGQ:
+                {
+                    VfsEntry::key_type k;
+                    strcpy(k.key, (char*) msg->extra_data);
+                    VfsEntry* e = vfsContents.find(k);
+                    if(NULL != e)
+                    {
+                        msg->data[0] = 0; //(uint64_t) e->msg_q;
+                        printkd("VFS: Removing msg queue %s\n",e->key.key);
+                        vfsContents.erase(e);
+                        delete e;
+                    }
+                    else
+                    {
+                        msg->data[0] = (uint64_t) (-ENXIO);
+                    }
+                    msg_respond(vfsMsgQ, msg);
+                }
+                break;
 
-	    case VFS_MSG_EXEC:
-		{
-		    printkd("VFS: Got exec request of %s\n",
-		            (const char*)msg->data[0]);
+            case VFS_MSG_RESOLVE_MSGQ:
+                {
+                    VfsEntry::key_type k;
+                    strcpy(k.key, (char*) msg->extra_data);
+                    VfsEntry* e = vfsContents.find(k);
+                    if (NULL == e)
+                        msg->data[0] = (uint64_t) NULL;
+                    else
+                        msg->data[0] = (uint64_t) e->msg_q;
+                    msg_respond(vfsMsgQ, msg);
+                }
+                break;
 
-		    VfsSystemModule* module =
+            case VFS_MSG_EXEC:
+                {
+                    printkd("VFS: Got exec request of %s\n",
+                            (const char*)msg->data[0]);
+
+                    VfsSystemModule* module =
                         vfs_find_module(VFS_MODULES,
                                         (const char *) msg->data[0]);
 
-		    void* fnptr = vfs_start_entrypoint(module);
+                    void* fnptr = vfs_start_entrypoint(module);
 
                     // child == -ENOENT means module not found in base image
                     // so send a message to VFS_MSG queue to look in the
@@ -146,13 +167,13 @@ void vfs_main(void* i_barrier)
                         msg->data[0] = (uint64_t) fnptr;
                         msg_respond(vfsMsgQ, msg);
                     }
-		}
-		break;
+                }
+                break;
 
-	    default:
-		msg_free(msg);
-		break;
-	}
+            default:
+                msg_free(msg);
+                break;
+        }
     }   // end while(1)
 }
 
