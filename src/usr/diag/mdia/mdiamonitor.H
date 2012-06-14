@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/diag/mdia/mdiamonitor.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/diag/mdia/mdiamonitor.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #ifndef __MSS_MEMDIAG_MDIAMONITOR_H
 #define __MSS_MEMDIAG_MDIAMONITOR_H
 
@@ -91,7 +92,30 @@ class CommandMonitor
         /**
          * @brief dtor
          */
-        ~CommandMonitor();
+        virtual ~CommandMonitor();
+
+    protected:
+
+        /**
+         * @brief serialization mutex
+         */
+        mutex_t iv_mutex;
+
+        /**
+         * @brief shutdown request indicator
+         */
+        bool iv_shutdown;
+
+        /**
+         * @brief aliases. Map containing monitorID key and timeout entries.
+         */
+        typedef std::map<uint64_t, uint64_t> MonitorMap;
+        typedef MonitorMap::iterator monitorMapIterator;
+
+        /**
+         * @brief maint command monitors
+         */
+        MonitorMap iv_monitors;
 
     private:
 
@@ -105,29 +129,7 @@ class CommandMonitor
          *
          * @param[in] i_sm state machine provided for callback
          */
-        void threadMain(StateMachine & i_sm);
-
-        /**
-         * @brief Get the thread id
-         *
-         * @retval ThreadID of CommandMonitor
-         */
-        tid_t getTID();
-
-        /**
-         * @brief Is the CommandMonitor shut down
-         *
-         * @retval true if shutdown
-         *         false if not shutdown
-         */
-        bool isShutdown();
-
-        /**
-         * @brief Get the monitor id counter
-         *
-         * @retval Monitor ID counter
-         */
-        uint64_t getMonitorID();
+        virtual void threadMain(StateMachine & i_sm);
 
         /**
          * @brief Get MonitorMap Timeout entry
@@ -139,35 +141,14 @@ class CommandMonitor
         uint64_t getMonitorMapTimeoutEntry(uint64_t i_monitor);
 
         /**
-         * @brief serialization mutex
-         */
-        mutex_t iv_mutex;
-
-        /**
          * @brief thread number
          */
         tid_t iv_tid;
 
         /**
-         * @brief shutdown request indicator
-         */
-        bool iv_shutdown;
-
-        /**
          * @brief monitor ID counter
          */
         uint64_t iv_nextMonitor;
-
-        /**
-         * @brief aliases. Map containing monitorID key and timeout entries.
-         */
-        typedef std::map<uint64_t, uint64_t> MonitorMap;
-        typedef MonitorMap::iterator monitorMapIterator;
-
-        /**
-         * @brief maint command monitors
-         */
-        MonitorMap iv_monitors;
 
         /**
          * @brief list of targets to do polling

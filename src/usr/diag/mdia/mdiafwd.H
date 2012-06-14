@@ -129,6 +129,11 @@ typedef std::map<TARGETING::TargetHandle_t, WorkFlow> WorkFlowAssocMap;
 typedef WorkFlowAssocMap::const_iterator WorkFlowAssoc;
 
 /**
+* @brief MonitorIDs container of monitorIDs unique to a target
+*/
+typedef std::vector<uint64_t> MonitorIDs;
+
+/**
  * @brief getMbaDiagnosticMode get the mode (scrub, init, one, four, nine)
  *
  * @param[in] i_globals policy flags needed to determine the mode

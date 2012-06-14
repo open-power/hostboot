@@ -24,7 +24,7 @@ ROOTPATH = ../../../../..
 
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/diag
 
-OBJS = mdiafakesm.o
+OBJS = mdiafakesm.o mdiafakecm.o
 
 MODULE = testmdia
 

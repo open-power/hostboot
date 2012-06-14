@@ -57,7 +57,7 @@ class StateMachine
          * @param[in] i_monitorIDs Vector of monitorIDs
          */
         virtual void processCommandTimeout(
-                        const std::vector<uint64_t> & i_monitorIDs) {}
+                        const MonitorIDs & i_monitorIDs);
 
         /**
          * @brief run the state machine to completion
@@ -94,13 +94,26 @@ class StateMachine
          */
         virtual ~StateMachine();
 
+    protected:
+
+        /**
+         * @brief serialization mutex
+         */
+        mutex_t iv_mutex;
+
+        /**
+         * @brief command monitor
+         */
+        CommandMonitor * iv_monitor;
+
     private:
 
         /**
          * @brief aliases
          */
         typedef std::vector<WorkFlowProperties *> WorkFlowPropertiesList;
-        typedef std::vector<WorkFlowProperties *>::iterator WorkFlowPropertiesIterator;
+        typedef std::vector<WorkFlowProperties *>::iterator
+                WorkFlowPropertiesIterator;
 
         /**
          * @brief setup load the workflow properties for the provided
@@ -165,7 +178,7 @@ class StateMachine
          *
          * @param[in] i_wfp the target for which a command should be issued
          */
-        errlHndl_t doMaintCommand(WorkFlowProperties & i_wfp);
+        virtual errlHndl_t doMaintCommand(WorkFlowProperties & i_wfp);
 
         /**
          * @brief executeWorkItem work item entry point for
@@ -200,16 +213,6 @@ class StateMachine
          * @brief thread pool
          */
         Util::ThreadPool<WorkItem> * iv_tp;
-
-        /**
-         * @brief command monitor
-         */
-        CommandMonitor * iv_monitor;
-
-        /**
-         * @brief serialization mutex
-         */
-        mutex_t iv_mutex;
 
         /**
          * @brief completion condition

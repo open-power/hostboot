@@ -33,6 +33,11 @@
 #include "../mdiasm.H"
 #include "../mdiasmimpl.H"
 #include <diag/mdia/mdiamevent.H>
+#include "../mdiatrace.H"
+#include "../mdiamonitor.H"
+#include "../mdiafwd.H"
+#include <sys/time.h>
+#include "mdiafakesm.H"
 
 using namespace MDIA;
 using namespace TARGETING;
@@ -684,6 +689,117 @@ class MdiaSmTest : public CxxTest::TestSuite
             } while(0);
 
             TS_TRACE(EXIT_MRK "testSmRunning");
+        }
+
+        void testSmProcessCommandTimeout(void)
+        {
+            using namespace MDIA;
+            using namespace TARGETING;
+
+            TS_TRACE(ENTER_MRK "testSmProcessCommandTimeout");
+
+            FakeStateMachine2 stateMac;
+            WorkFlowAssocMap wkFlEntries;
+
+            TargetHandleList targets;
+            getTargets(3, targets);
+
+            wkFlEntries[targets[0]].push_back(START_SCRUB);
+            wkFlEntries[targets[1]].push_back(START_SCRUB);
+            wkFlEntries[targets[2]].push_back(START_SCRUB);
+            stateMac.setup(wkFlEntries);
+
+            uint64_t indexWkPr = stateMac.iv_workFlowProperties.size();
+            while(indexWkPr-- != 0)
+            {
+                stateMac.doMaintCommand(
+                *stateMac.iv_workFlowProperties[indexWkPr]);
+            }
+
+            static const uint64_t wakeupIntervalNanoSecs = 100000000;
+            nanosleep(0, TARGETING::is_vpo()
+                    ? TEN_CTX_SWITCHES_NS
+                    : wakeupIntervalNanoSecs);
+
+            // All targets' maint cmd should time out
+            while(++indexWkPr < stateMac.iv_workFlowProperties.size())
+            {
+                if((*stateMac.iv_workFlowProperties[indexWkPr]).status
+                    != COMMAND_TIMED_OUT)
+                {
+                    TS_FAIL("StateMachine:processCommandTimeout(1)."
+                            "Unexpected status");
+                }
+            }
+
+            stateMac.shutdown();
+            TS_TRACE(EXIT_MRK "testSmProcessCommandTimeout");
+
+        }
+
+        void testSmProcessCommandTimeoutSubset(void)
+        {
+            using namespace MDIA;
+            using namespace TARGETING;
+
+            TS_TRACE(ENTER_MRK "testSmProcessCommandTimeoutSubset");
+
+            FakeStateMachine2 stateMac;
+            WorkFlowAssocMap wkFlEntries;
+
+            TargetHandleList targets;
+            getTargets(3, targets);
+
+            wkFlEntries[targets[0]].push_back(START_SCRUB);
+            wkFlEntries[targets[1]].push_back(START_SCRUB);
+            wkFlEntries[targets[2]].push_back(START_SCRUB);
+            stateMac.setup(wkFlEntries);
+
+            uint64_t indexWkPr = stateMac.iv_workFlowProperties.size();
+            while(indexWkPr-- != 0)
+            {
+                stateMac.doMaintCommand(
+                *stateMac.iv_workFlowProperties[indexWkPr]);
+            }
+
+            // Send a 'COMMAND_COMPLETE' event for one of the targets
+            MaintCommandEvent event;
+            event.type = COMMAND_COMPLETE;
+            event.target = targets[0];
+            stateMac.processMaintCommandEvent(event);
+
+            static const uint64_t wakeupIntervalNanoSecs = 100000000;
+            nanosleep(0, TARGETING::is_vpo()
+                    ? TEN_CTX_SWITCHES_NS
+                    : wakeupIntervalNanoSecs);
+
+            indexWkPr = stateMac.iv_workFlowProperties.size();
+            indexWkPr--;
+
+            // One of the targets should not have timedout.
+            if((*stateMac.iv_workFlowProperties[indexWkPr]).status
+                == COMMAND_TIMED_OUT)
+            {
+                TS_FAIL("StateMachine:processCommandTimeout(2)."
+                        "Unexpected status");
+            }
+            else
+            {
+                //Rest of the targets should have timedout
+                while(indexWkPr-- != 0)
+                {
+                    if((*stateMac.iv_workFlowProperties[indexWkPr]).status
+                        != COMMAND_TIMED_OUT)
+                    {
+                        TS_FAIL("StateMachine:processCommandTimeout(3)."
+                                "Unexpected status");
+                    }
+                }
+            }
+
+            stateMac.shutdown();
+            TS_TRACE(EXIT_MRK "testSmProcessCommandTimeoutSubset");
+
         }
 };
 #endif

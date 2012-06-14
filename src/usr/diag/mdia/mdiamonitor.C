@@ -110,7 +110,7 @@ void CommandMonitor::threadMain(StateMachine & i_sm)
     }
 
     bool shutdown = false;
-    std::vector<uint64_t> monitorsTimedout;
+    MonitorIDs monitorsTimedout;
 
     while(true)
     {
@@ -266,8 +266,8 @@ void CommandMonitor::staticMain(void * i_args)
 }
 
 CommandMonitor::CommandMonitor() :
-    iv_tid(0),
     iv_shutdown(false),
+    iv_tid(0),
     iv_nextMonitor(0)
 {
     mutex_init(&iv_mutex);

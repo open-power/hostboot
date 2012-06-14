@@ -54,6 +54,38 @@ void StateMachine::running(bool & o_running)
     mutex_unlock(&iv_mutex);
 }
 
+void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
+{
+    MDIA_FAST("sm: processCommandTimeout");
+    WorkFlowProperties *wkflprop = NULL;
+
+    mutex_lock(&iv_mutex);
+
+    for(MonitorIDs::const_iterator monitorIt = i_monitorIDs.begin();
+        monitorIt != i_monitorIDs.end();
+        ++monitorIt)
+    {
+        for(WorkFlowPropertiesIterator wit = iv_workFlowProperties.begin();
+            wit != iv_workFlowProperties.end();
+            ++wit)
+        {
+            if((*wit)->timer == *monitorIt)
+            {
+                (*wit)->status = COMMAND_TIMED_OUT;
+                wkflprop = *wit;
+                break;
+            }
+        }
+    }
+
+    //Satisfies last/one target remaining to run maint cmds.
+    //If no match found, implies SM has already processed event(s).
+    if(wkflprop)
+        scheduleWorkItem(*wkflprop);
+
+    mutex_unlock(&iv_mutex);
+}
+
 errlHndl_t StateMachine::run(const WorkFlowAssocMap & i_list)
 {
     // load the workflow properties
@@ -72,9 +104,7 @@ errlHndl_t StateMachine::run(const WorkFlowAssocMap & i_list)
 
     mutex_lock(&iv_mutex);
 
-    WorkFlowPropertiesIterator wit;
-
-    for(wit = iv_workFlowProperties.begin();
+    for(WorkFlowPropertiesIterator wit = iv_workFlowProperties.begin();
         wit != iv_workFlowProperties.end();
         ++wit)
     {
@@ -98,10 +128,9 @@ void StateMachine::setup(const WorkFlowAssocMap & i_list)
 
     mutex_lock(&iv_mutex);
 
-    WorkFlowAssoc it;
     WorkFlowProperties * p = 0;
 
-    for(it = i_list.begin(); it != i_list.end(); ++it)
+    for(WorkFlowAssoc it = i_list.begin(); it != i_list.end(); ++it)
     {
         // for each target / workFlow assoc,
         // initialize the workFlow progress indicator
@@ -161,9 +190,9 @@ void StateMachine::start()
 
     // schedule the first work items for all target / workFlow associations
 
-    WorkFlowPropertiesIterator wit = iv_workFlowProperties.begin();
-
-    for(; wit != iv_workFlowProperties.end(); ++wit)
+    for(WorkFlowPropertiesIterator wit = iv_workFlowProperties.begin();
+        wit != iv_workFlowProperties.end();
+        ++wit)
     {
         scheduleWorkItem(**wit);
     }
@@ -334,7 +363,7 @@ bool StateMachine::executeWorkItem(WorkFlowProperties * i_wfp)
 
 errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
 {
-    errlHndl_t err = 0;
+    errlHndl_t err = NULL;
 
     mutex_lock(&iv_mutex);
 
@@ -556,9 +585,9 @@ bool StateMachine::allWorkFlowsComplete()
 
     bool allWorkFlowsComplete = true;
 
-    WorkFlowPropertiesIterator wit = iv_workFlowProperties.begin();
-
-    for(; wit != iv_workFlowProperties.end(); ++wit)
+    for(WorkFlowPropertiesIterator wit = iv_workFlowProperties.begin();
+        wit != iv_workFlowProperties.end();
+        ++wit)
     {
         if((*wit)->status == IN_PROGRESS)
         {
@@ -574,9 +603,9 @@ void StateMachine::reset()
 {
     mutex_lock(&iv_mutex);
 
-    WorkFlowPropertiesIterator wit = iv_workFlowProperties.begin();
-
-    for(; wit != iv_workFlowProperties.end(); ++wit)
+    for(WorkFlowPropertiesIterator wit = iv_workFlowProperties.begin();
+        wit != iv_workFlowProperties.end();
+        ++wit)
     {
         if((**wit).log)
         {
@@ -628,7 +657,7 @@ StateMachine::~StateMachine()
     mutex_destroy(&iv_mutex);
 }
 
-StateMachine::StateMachine() : iv_done(true), iv_tp(0), iv_monitor(0)
+StateMachine::StateMachine() : iv_monitor(0), iv_done(true), iv_tp(0)
 {
     mutex_init(&iv_mutex);
     sync_cond_init(&iv_cond);
