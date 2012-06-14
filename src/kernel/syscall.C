@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/kernel/syscall.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2010 - 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/kernel/syscall.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2010-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #include <assert.h>
 #include <errno.h>
 #include <kernel/cpu.H>
@@ -48,7 +49,8 @@ void kernel_execute_decrementer()
     cpu_t* c = CpuManager::getCurrentCPU();
     Scheduler* s = c->scheduler;
     TimeManager::checkReleaseTasks(s);
-    s->returnRunnable();
+
+    task_t* current_task = TaskManager::getCurrentTask();
 
     CpuManager::executePeriodics(c);//TODO is there still a potential deadlock?
 
@@ -63,8 +65,12 @@ void kernel_execute_decrementer()
 #endif
         KernelMisc::shutdown();
     }
-    CpuManager::executePeriodics(c);
-    s->setNextRunnable();
+
+    if (current_task == TaskManager::getCurrentTask())
+    {
+        s->returnRunnable();
+        s->setNextRunnable();
+    }
 }
 
 namespace Systemcalls

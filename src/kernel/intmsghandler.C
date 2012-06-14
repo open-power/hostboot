@@ -1,26 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/kernel/intmsghandler.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
-
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/kernel/intmsghandler.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #include <kernel/intmsghandler.H>
 #include <sys/msg.h>
 #include <util/singleton.H>
@@ -73,10 +73,6 @@ void InterruptMsgHdlr::create(MessageQueue * i_msgQ)
 
 void InterruptMsgHdlr::handleInterrupt()
 {
-    // Save the current task in case we context-switch away when sending
-    // the message.
-    task_t* t = TaskManager::getCurrentTask();
-
     uint64_t pir = getPIR();
 
     uint64_t xirrAddress = (static_cast<uint64_t>(ICPBAR_VAL) << 20);
@@ -116,30 +112,15 @@ void InterruptMsgHdlr::handleInterrupt()
     // Story 41868 -  Mask off all interrupts very early - might
     // resolve this TODO.
 
-    // Return the task to the scheduler queue if we did a context-switch.
-    if (TaskManager::getCurrentTask() != t)
-    {
-        t->cpu->scheduler->addTask(t);
-    }
 }
 
 
 // TODO where does this get called from? (story 39878)
 void InterruptMsgHdlr::addCpuCore(uint64_t i_pir)
 {
-    // Save the current task in case we context-switch away when sending
-    // the message.
-    task_t* t = TaskManager::getCurrentTask();
-
     if(cv_instance)
     {
         cv_instance->sendMessage(MSG_INTR_ADD_CPU,(void *)i_pir,NULL,NULL);
-    }
-
-    // Return the task to the scheduler queue if we did a context-switch.
-    if (TaskManager::getCurrentTask() != t)
-    {
-        t->cpu->scheduler->addTask(t);
     }
 }
 

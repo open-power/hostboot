@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/kernel/msghandler.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/kernel/msghandler.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #include <assert.h>
 #include <errno.h>
 #include <util/locked/queue.H>
@@ -33,6 +34,9 @@
 void MessageHandler::sendMessage(msg_sys_types_t i_type, void* i_key,
                                  void* i_data, task_t* i_task)
 {
+    // Task to switch to due to waiter being ready to handle message.
+    task_t* ready_task = NULL;
+
     // Save pending info for when we get the response.
     MessageHandler_Pending* mhp = new MessageHandler_Pending;
     mhp->key = i_key;
@@ -64,21 +68,41 @@ void MessageHandler::sendMessage(msg_sys_types_t i_type, void* i_key,
         {
             TASK_SETRTN(waiter, (uint64_t) m);
             iv_msgq->responses.insert(mp);
-            waiter->cpu = i_task->cpu;
-            TaskManager::setCurrentTask(waiter);
+            ready_task = waiter;
         }
         iv_msgq->lock.unlock();
     }
 
     // Defer task while waiting for message response.
-    if ((NULL != i_task) && (TaskManager::getCurrentTask() == i_task))
+    if (NULL != i_task)
     {
         // Set block status.
         i_task->state = TASK_STATE_BLOCK_USRSPACE;
         i_task->state_info = i_key;
 
-        // Select next task off scheduler.
-        i_task->cpu->scheduler->setNextRunnable();
+        if (i_task == TaskManager::getCurrentTask())
+        {
+            // Switch to ready waiter, or pick a new task off the scheduler.
+            if (ready_task)
+            {
+                TaskManager::setCurrentTask(ready_task);
+                ready_task = NULL;
+            }
+            else
+            {
+                // Select next task off scheduler.
+                i_task->cpu->scheduler->setNextRunnable();
+            }
+        }
+    }
+
+    // Switch to ready waiter.
+    if (NULL != ready_task)
+    {
+        task_t* current = TaskManager::getCurrentTask();
+        current->cpu->scheduler->addTask(current);
+        TaskManager::setCurrentTask(ready_task);
+        ready_task = NULL;
     }
 
     // Insert pending info into our queue until response is recv'd.
