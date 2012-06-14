@@ -395,17 +395,7 @@ class PnorDdTest : public CxxTest::TestSuite
             supported_modes.push_back(PnorDD::MODEL_MEMCPY);
             supported_modes.push_back(PnorDD::MODEL_LPC_MEM);
 
-            //Hack to check if this is a VENICE config since Real PNOR doesn't work in simics right now.
-            //TODO: Remove this hack when simics is fixed. (RTC: 42625)
-
-            TARGETING::EntityPath epath(TARGETING::EntityPath::PATH_PHYSICAL);
-            epath.addLast(TARGETING::TYPE_SYS,0);
-            epath.addLast(TARGETING::TYPE_NODE,0);
-            epath.addLast(TARGETING::TYPE_PROC,9);
-            TARGETING::Target* veniceProc = TARGETING::targetService().toTarget(epath);
-
-            if((!TARGETING::is_vpo()) &&
-               (veniceProc == NULL))
+            if(!TARGETING::is_vpo())
             {
                 TRACFCOMP(g_trac_pnor, "PnorDdTest::test_readwrite_modes> Adding REAL_CMD mode");
                 supported_modes.push_back(PnorDD::MODEL_REAL_CMD);
@@ -563,17 +553,7 @@ class PnorDdTest : public CxxTest::TestSuite
             supported_modes.push_back(PnorDD::MODEL_MEMCPY);
             supported_modes.push_back(PnorDD::MODEL_LPC_MEM);
 
-            //Hack to check if this is a VENICE config since Real PNOR doesn't work in simics right now.
-            //TODO: Remove this hack when simics is fixed. (RTC: 42625)
-
-            TARGETING::EntityPath epath(TARGETING::EntityPath::PATH_PHYSICAL);
-            epath.addLast(TARGETING::TYPE_SYS,0);
-            epath.addLast(TARGETING::TYPE_NODE,0);
-            epath.addLast(TARGETING::TYPE_PROC,9);
-            TARGETING::Target* veniceProc = TARGETING::targetService().toTarget(epath);
-
-            if((!TARGETING::is_vpo()) &&
-               (veniceProc == NULL))
+            if(!TARGETING::is_vpo())
             {
                 TRACFCOMP(g_trac_pnor, "PnorDdTest::test_smartwrite_modes> Adding REAL_CMD mode");
                 supported_modes.push_back(PnorDD::MODEL_REAL_CMD);
@@ -725,17 +705,8 @@ class PnorDdTest : public CxxTest::TestSuite
             std::list<PnorDD::PnorMode_t> supported_modes;
             supported_modes.push_back(PnorDD::MODEL_MEMCPY);
             supported_modes.push_back(PnorDD::MODEL_LPC_MEM);
-            //Hack to check if this is a VENICE config since Real PNOR doesn't work in simics right now.
-            //TODO: Remove this hack when simics is fixed. (RTC: 42625)
 
-            TARGETING::EntityPath epath(TARGETING::EntityPath::PATH_PHYSICAL);
-            epath.addLast(TARGETING::TYPE_SYS,0);
-            epath.addLast(TARGETING::TYPE_NODE,0);
-            epath.addLast(TARGETING::TYPE_PROC,9);
-            TARGETING::Target* veniceProc = TARGETING::targetService().toTarget(epath);
-
-            if((!TARGETING::is_vpo()) &&
-               (veniceProc == NULL))
+            if(!TARGETING::is_vpo())
             {
                 TRACFCOMP(g_trac_pnor, "PnorDdTest::test_crossblock_modes> Adding REAL_CMD mode");
                 supported_modes.push_back(PnorDD::MODEL_REAL_CMD);
