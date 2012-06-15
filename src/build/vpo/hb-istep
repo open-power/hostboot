@@ -643,10 +643,6 @@ sub runClocks()
 ##
 ##  send command using the command register
 ##
-##  NOTES:  PUTFAC does not work correctly.   STKFAC will latch the value
-##          in the register forever, i.e. HostBoot cannot change it.  This
-##          is OK from our viewpoint since HostBoot does not need to modify
-##          the command reg.
 ##
 sub sendCommand( $ )
 {
@@ -655,42 +651,14 @@ sub sendCommand( $ )
 
     ##$$ VBU_Cacheline::CLwrite( $commandreg, $cmd );
 
-    ## Use STKFAC here to clear the command reg- GMB2EC is mailbox scratchpad 3.
-    $cmd    =   "simSTKFAC " .
-                    "B0.C0.S0.P0.E8.TPC.FSI.FSI_MAILBOX.FSXCOMP." .
-                    "FSXLOG.LBUS_MAILBOX.Q_GMB2EC.NLC.L2 0 32 -quiet ";
-
-    if ( $opt_debug )   {   print STDERR __LINE__,  "-- run $cmd ...\n";    }
-    ( system( $cmd ) == 0 )
-        or die "$cmd failed, $? : $! \n";
-
-
-    ## bump the clock a few so that the clear takes effect
-    ## vbu_cacheline does not take # of cycles, so just run a raw command
-    ## here.
-    $cmd    =   "simclock  10 -quiet";
-
-    if ( $opt_debug )   {   print STDERR __LINE__,  "-- run $cmd ...\n";    }
-    ( system( $cmd ) == 0 )
-        or die "$cmd failed, $? : $! \n";
-
-
-    ##  $data comes in as a 64-bit reg, we are only allowed 32 bits with
-    ##      mailbox scoms, so we shift 32 bits here.
-    ##      The lower 32 bits of the command reg are not used anyway.
-    my $cmd32   =   ( ( $data & 0xffffffff00000000 ) >> 32 );
-    my $hexstr  =   sprintf( "0x%x", $cmd32 );
-
-    ## Use STKFAC here - GMB2EC is mailbox scratchpad 3.
-    $cmd    =   "simSTKFAC " .
-                    "B0.C0.S0.P0.E8.TPC.FSI.FSI_MAILBOX.FSXCOMP." .
-                    "FSXLOG.LBUS_MAILBOX.Q_GMB2EC.NLC.L2 $hexstr 32 -quiet";
+    ## Use Putscom to avoid hostboot race condition
+    $data  =~ s/0x//;
+    $cmd = "putscom pu 05003b -p0 -quiet" . $data;
 
     if ( $opt_debug )   {   print STDERR __LINE__,  "-- run $cmd ...\n";    }
     ( system( $cmd ) == 0 )
         or die "$cmd failed, $? : $! \n";
 }
-
 
 ##
 ##  get status using the status register.

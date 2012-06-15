@@ -949,7 +949,8 @@ errlHndl_t FsiDD::pollForComplete(const FsiAddrInfo_t& i_addrInfo,
                 break;
             }
 
-            nanosleep( 0, 10000 ); //sleep for 10,000 ns
+            //TODO tmp remove for VPO, need better polling strategy -- RTC43738
+            //nanosleep( 0, 10,000 ); //sleep for 10,000 ns
             elapsed_time_ns += 10000;
         } while( elapsed_time_ns <= MAX_OPB_TIMEOUT_NS ); // hardware has 1ms limit
         if( l_err ) { break; }

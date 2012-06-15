@@ -288,7 +288,8 @@ void    userConsoleComm( void *  io_msgQ )
         if( TARGETING::is_vpo() )
         {
             // VBU delay per Patrick
-            nanosleep(0,TEN_CTX_SWITCHES_NS);
+            //TODO tmp remove for VPO, need better polling strategy -- RTC43738
+            task_yield();
         }
         else
         {

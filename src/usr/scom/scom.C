@@ -214,7 +214,8 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
                     break;
                 }
 
-                nanosleep( 0, 10000 ); //sleep for 10,000 ns
+                //TODO tmp remove for VPO, need better polling strategy -- RTC43738
+                //nanosleep( 0, 10000 ); //sleep for 10,000 ns
                 elapsed_indScom_time_ns += 10000;
 
             }while ( elapsed_indScom_time_ns <= MAX_INDSCOM_TIMEOUT_NS);
@@ -336,7 +337,8 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
 
                 }
 
-                nanosleep( 0, 10000 ); //sleep for 10,000 ns
+                //TODO tmp remove for VPO, need better polling strategy -- RTC43738
+                //nanosleep( 0, 10000 ); //sleep for 10,000 ns
                 elapsed_indScom_time_ns += 10000;
 
             }while ( elapsed_indScom_time_ns <= MAX_INDSCOM_TIMEOUT_NS);

@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/pnor/pnordd.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/pnor/pnordd.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 /**
  *  @file pnordd.C
  *
@@ -673,7 +674,8 @@ errlHndl_t PnorDD::pollSfcOpComplete(uint64_t i_pollTime)
             // want to start out incrementing by small numbers then get bigger
             //  to avoid a really tight loop in an error case so we'll increase
             //  the wait each time through
-            nanosleep( 0, SFC_POLL_INCR_NS*(++loop) );
+            //TODO tmp remove for VPO, need better polling strategy -- RTC43738
+            //nanosleep( 0, SFC_POLL_INCR_NS*(++loop) );
             poll_time += SFC_POLL_INCR_NS*loop;
         }
         if( l_err ) { break; }
@@ -1042,7 +1044,8 @@ errlHndl_t PnorDD::readLPC(uint32_t i_addr,
             // want to start out incrementing by small numbers then get bigger
             //  to avoid a really tight loop in an error case so we'll increase
             //  the wait each time through
-            nanosleep( 0, ECCB_POLL_INCR_NS*(++loop) );
+            //TODO tmp remove for VPO, need better polling strategy -- RTC43738
+            //nanosleep( 0, ECCB_POLL_INCR_NS*(++loop) );
             poll_time += ECCB_POLL_INCR_NS*loop;
         }
         if( l_err ) { break; }
@@ -1151,7 +1154,8 @@ errlHndl_t PnorDD::writeLPC(uint32_t i_addr,
             // want to start out incrementing by small numbers then get bigger
             //  to avoid a really tight loop in an error case so we'll increase
             //  the wait each time through
-            nanosleep( 0, ECCB_POLL_INCR_NS*(++loop) );
+            //TODO tmp remove for VPO, need better polling strategy -- RTC43738
+            //nanosleep( 0, ECCB_POLL_INCR_NS*(++loop) );
             poll_time += ECCB_POLL_INCR_NS*loop;
         }
         if( l_err ) { break; }
