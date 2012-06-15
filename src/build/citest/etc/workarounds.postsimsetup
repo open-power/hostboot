@@ -2,11 +2,11 @@
 #  IBM_PROLOG_BEGIN_TAG
 #  This is an automatically generated prolog.
 #
-#  $Source: src/build/citest/etc/workarounds.postsim $
+#  $Source: src/build/citest/etc/workarounds.postsimsetup $
 #
 #  IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2011
+#  COPYRIGHT International Business Machines Corp. 2011-2012
 #
 #  p1
 #
@@ -20,36 +20,9 @@
 #
 #  Origin: 30
 #
-#  IBM_PROLOG_END
-
+#  IBM_PROLOG_END_TAG
 ##
 ## Workarounds that are run after start_simics is executed for the first time
 ##    to setup the sandbox
 ##
-#####
-#@fixme - Fix with RTC:41342
-echo "+++ Copy centaur.act"
-mkdir -p $sb/simu/data/cec-chip
-cp $HOSTBOOTROOT/src/build/citest/etc/patches/centaur.act $sb/simu/data/cec-chip/centaur.act
-#####
 
-#####
-#@fixme - Fix with RTC:41342
-echo "+++ Update Model EC."
-mkdir -p $sb/simu/configs/
-
-cp --update $bb/src/simu/configs/P8_MURANO.config $sb/simu/configs/P8_MURANO.config
-sed -i -e's/SETENV GFW_P8_MURANO_PROC_MODEL_EC.*/SETENV GFW_P8_MURANO_PROC_MODEL_EC 910623/' $sb/simu/configs/P8_MURANO.config
-sed -i -e's/SETENV GFW_P8_MURANO_CENTAUR_MODEL_EC.*/SETENV GFW_P8_MURANO_CENTAUR_MODEL_EC 910610/' $sb/simu/configs/P8_MURANO.config
-
-cp --update $bb/src/simu/configs/P8_VENICE.config $sb/simu/configs/P8_VENICE.config
-sed -i -e's/SETENV GFW_P8_VENICE_PROC_MODEL_EC.*/SETENV GFW_P8_VENICE_PROC_MODEL_EC 910623/' $sb/simu/configs/P8_VENICE.config
-#####
-
-#####
-#@fixme - Fix with RTC:41205
-echo "+++ Fix centaur aliases in p8.act (SW141619) +++"
-mkdir -p $sb/simu/data/cec-chip/
-cp --update $bb/src/simu/data/cec-chip/p8.act $sb/simu/data/cec-chip/
-sed -i -e's/mycentaur/mymcPort/' $sb/simu/data/cec-chip/p8.act
-#####

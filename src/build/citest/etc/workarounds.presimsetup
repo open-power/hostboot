@@ -2,11 +2,11 @@
 #  IBM_PROLOG_BEGIN_TAG
 #  This is an automatically generated prolog.
 #
-#  $Source: src/build/citest/etc/workarounds.presim $
+#  $Source: src/build/citest/etc/workarounds.presimsetup $
 #
 #  IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2011
+#  COPYRIGHT International Business Machines Corp. 2011-2012
 #
 #  p1
 #
@@ -20,19 +20,12 @@
 #
 #  Origin: 30
 #
-#  IBM_PROLOG_END
-
+#  IBM_PROLOG_END_TAG
 ##
 ## Workarounds that are run before start_simics is executed for the first time
 ##    to setup the sandbox
 ##
 
-
-echo "+++ Updates for memory map."
-mkdir -p $sb/simu/data
-egrep -v "WSALIAS DEFAULT FIPSLEVEL|WSALIAS DEFAULT PHYPLEVEL" $BACKING_BUILD/src/simu/data/simicsInfo > $sb/simu/data/simicsInfo
-echo "WSALIAS DEFAULT FIPSLEVEL env/gfwd/simics-4.2.0/simics-4.2.85/fips/fld36/fi120530c700.42" >> $sb/simu/data/simicsInfo
-echo "WSALIAS DEFAULT PHYPLEVEL env/phypb/simics-4.2.0/simics-4.2.85/ph120531a700.42" >> $sb/simu/data/simicsInfo
 
 #### Examples ####
 #echo "+++ Some message about why you need to do this."
