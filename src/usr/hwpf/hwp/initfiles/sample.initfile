@@ -184,7 +184,7 @@ scom 0x0000000013013285              {
 
 scom 0x0000000013013286              {
   scom_data,            SYS.ATTR_SCRATCH_UINT32_1,  SYS.ATTR_SCRATCH_UINT32_2        ;
-  0x0000000000000192,   3,                      ENUM_ATTR_SCRATCH_UINT64_ARRAY_2_VAL_B       ;
+  0x0000000000000192,   != 0,                       >= ENUM_ATTR_SCRATCH_UINT64_ARRAY_2_VAL_B       ;
 }
 
 #--******************************************************************************

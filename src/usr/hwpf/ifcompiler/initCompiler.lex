@@ -43,6 +43,7 @@
 //                camvanng 05/07/12   Support for associated target attributes
 //                                    Save and restore line numbers for each include file
 //                camvanng 05/22/12   Fix "OP" definition
+//                camvanng 06/11/12   Fix shift/reduce warnings from yacc
 // End Change Log *********************************************************************************/
 /**
  * @file initCompiler.lex
@@ -185,7 +186,7 @@ Versions                BEGIN(fnames);
 include                 { BEGIN(incl); }
 <incl>[ \t]*            /* Eat up whitespace */
 <incl>[^ \t\n]+         {   /* Got the include file name */
-                            /*printf("include file %s\n", yytext);*/
+                            /*printf("lex: include file %s\n", yytext);*/
                             if ( include_stack_num >= MAX_INCLUDE_DEPTH )
                             {
                                 lex_err("Includes nested too deeply");
@@ -277,7 +278,7 @@ scom              { BEGIN(scomop); oss.str("");  return INIT_SCOM; }
                     return INIT_SCOM_SUFFIX; 
                 }
 
-<scomop_hex,scomop_hex_suffix>\.0[bB] { BEGIN(scomop_bin); }
+<scomop_hex,scomop_hex_suffix>\.0[bB] { BEGIN(scomop_bin); return yytext[0]; }
 
 <scomop_bin>{SINGLE_BIN}+ {
                     /*printf("lex: bin string %s\n", yytext);*/
@@ -314,7 +315,7 @@ scom              { BEGIN(scomop); oss.str("");  return INIT_SCOM; }
 
 <scomop_bin,scomop_bin_suffix>\.(0[xX])? {
                     /*printf("lex: bin string %s\n", yytext);*/
-                    BEGIN(scomop_hex);
+                    BEGIN(scomop_hex); return yytext[0];
                 }
 
 <scomop_bin,scomop_bin_suffix>\.0[bB] {
@@ -412,7 +413,7 @@ END_INITFILE            return INIT_ENDINITFILE;
 <*>{ID}\.               {   // push back the define value for scanning
                             g_target = yytext;
                             g_target = g_target.substr(0, g_target.length() - 1);
-                            //printf("%s\n", g_target.c_str());
+                            //printf("lex: %s\n", g_target.c_str());
                             unput('.');
                             pushBackDefine(g_target.c_str());
                         }
@@ -459,7 +460,7 @@ int yywrap() { return 1; }
 
 void lex_err(const char *s )
 {
-    std::cerr << "\nERROR: " << s << " -line " << yyline << std::endl;
+    std::cerr << "\nERROR: lex: " << s << " -line " << yyline << std::endl;
 }
 
 // Convert left justified bitstring to right-justified 64 bit integer
@@ -576,7 +577,16 @@ void add_define(const char * s)
         exit(1);
     }
 
+    //remove trailing white spaces
     std::string str(s);
+    std::string whitespaces(" \t\r");
+    size_t pos;
+    pos=str.find_last_not_of(whitespaces);
+    if (pos != std::string::npos)
+    {
+        str.erase(pos+1);
+    }
+
     g_defines[g_scomdef_name] =  str;
     //std::cout << "g_defines[" << g_scomdef_name << "] = " << g_defines[g_scomdef_name] << std::endl;
 }
@@ -602,7 +612,7 @@ void pushBackDefine(const char *s)
     if (g_defines.end() == g_defines.find(key))
     {
         oss.str("");
-        oss << "lex: Cannot find define " << key;
+        oss << "Cannot find define " << key;
         lex_err(oss.str().c_str());
         exit(1);
     }
@@ -615,7 +625,7 @@ void pushBackDefine(const char *s)
         if (g_defines.end() == g_defines.find(key2))
         {
             oss.str("");
-            oss << "lex: Cannot find define " << key;
+            oss << "Cannot find define " << key;
             lex_err(oss.str().c_str());
             exit(1);
         }

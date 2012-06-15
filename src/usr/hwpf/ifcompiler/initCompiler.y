@@ -39,6 +39,8 @@
 //                                    Delete obsolete code for defines support
 //                 camvanng 05/22/12  Ability to do simple operations on attributes
 //                                    in the scom_data column
+//                 camvanng 06/11/12  Ability to do logical operations with attribute columns
+//                                    Fix shift/reduce warnings from yacc
 // End Change Log *********************************************************************************
 /**
  * @file initCompiler.y
@@ -119,7 +121,7 @@ int scom;
     /* non-terminal tokens and the union data-type associated with them */
 
 %type <str_ptr> bitsrows
-%type <rpn_ptr> expr id_col num_list scomdexpr
+%type <rpn_ptr> expr id_colexpr id_col num_list scomdexpr
 
 
 
@@ -182,18 +184,21 @@ scomaddr:
       scomaddr_hex { /*printf("Found a hex scom address\n");*/ }
       | scomaddr_bin { /*printf("Found a binary scom address\n");*/
                        current_scom->append_scom_address_bin(); }
-      | scomaddr scomaddr_hex { /*printf("Found a hex scom address 2\n");*/ }
-      | scomaddr scomaddr_bin { /*printf("Append binary scom address 2\n");*/
+      | scomaddr '.' scomaddr_hex { /*printf("Found a hex scom address 2\n");*/ }
+      | scomaddr '.' scomaddr_bin { /*printf("Append binary scom address 2\n");*/
                                 current_scom->append_scom_address_bin(); }
 ;
 
 
 
-scomaddr_hex: 
-                | INIT_SCOM_ADDR { /*printf("Found an INIT_SCOM_ADDR %s\n", (*($1)).c_str());*/
-                                   current_scom->set_scom_address(*($1)); delete $1; }
+scomaddr_hex:  INIT_SCOM_ADDR { /*printf("Found an INIT_SCOM_ADDR %s\n", (*($1)).c_str());*/
+                                current_scom->set_scom_address(*($1)); delete $1; }
                 | scom_list { current_scom->copy_dup_scom_address(); }
                 | INIT_SCOM_SUFFIX { current_scom->set_scom_suffix(*($1)); delete $1; }
+                | scomaddr_hex scom_list { /*printf("Found a scom_list 2\n");*/
+                                           current_scom->copy_dup_scom_address(); }
+                | scomaddr_hex INIT_SCOM_SUFFIX { /*printf("Found a scom suffix %s\n", (*($2)).c_str());*/
+                                                  current_scom->set_scom_suffix(*($2)); delete $2;}
 ;
 
 
@@ -276,20 +281,26 @@ exprrows:       expr { init::dbg << $1->listing(NULL); current_scom->add_row_rpn
                         { init::dbg << $3->listing(NULL); current_scom->add_row_rpn($3); }
 ;
 
-idrows:         id_col  { init::dbg << $1->listing(NULL); current_scom->add_row_rpn($1); }
-                | idrows ',' id_col { init::dbg << $3->listing(NULL); current_scom->add_row_rpn($3); }
+idrows:         id_colexpr  { init::dbg << $1->listing(NULL); current_scom->add_row_rpn($1); }
+                | idrows ',' id_colexpr { init::dbg << $3->listing(NULL); current_scom->add_row_rpn($3); }
 ;
-
 
         // TODO num_list could be VARs,LITs, or even ranges eg {1,2..5,7}
 
-id_col:         INIT_ID { $$ = new init::Rpn(*($1),yyscomlist->get_symbols()); $$->push_op(EQ); delete $1; }  
-                | INIT_INTEGER { $$ = new init::Rpn($1,yyscomlist->get_symbols()); $$->push_op(EQ); }
-                | '{' num_list '}' { $$ = $2; $2->push_op(LIST); $2->push_op(EQ); }
-                | ATTRIBUTE_ENUM { $$ = new init::Rpn((yyscomlist->get_symbols())->get_attr_enum_val(*($1)),yyscomlist->get_symbols()); $$->push_op(EQ); delete $1; }  
+id_colexpr: id_col { $1->push_op(EQ); }
+            | INIT_EQ id_col { $$ = $2; $2->push_op(EQ); }
+            | INIT_NE id_col { $$ = $2; $2->push_op(NE); }
+            | INIT_LE id_col { $$ = $2; $2->push_op(LE); }
+            | INIT_GE id_col { $$ = $2; $2->push_op(GE); }
+            | '<' id_col     { $$ = $2; $2->push_op(LT); }
+            | '>' id_col     { $$ = $2; $2->push_op(GT); }
 ;
 
-
+id_col:         INIT_ID { $$ = new init::Rpn(*($1),yyscomlist->get_symbols()); delete $1; }  
+                | INIT_INTEGER { $$ = new init::Rpn($1,yyscomlist->get_symbols()); }
+                | '{' num_list '}' { $$ = $2; $2->push_op(LIST); }
+                | ATTRIBUTE_ENUM { $$ = new init::Rpn((yyscomlist->get_symbols())->get_attr_enum_val(*($1)),yyscomlist->get_symbols()); delete $1; }  
+;
 
 num_list:       INIT_INTEGER { $$ = new init::Rpn($1,yyscomlist->get_symbols()); }
                 | INIT_ID    { $$ = new init::Rpn(*($1),yyscomlist->get_symbols()); }
