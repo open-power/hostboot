@@ -41,3 +41,9 @@ cat $HOSTBOOTROOT/src/build/citest/etc/patches/p8_master.por.patch >> $sb/simu/d
 
 cp $HOSTBOOTROOT/src/build/citest/etc/patches/p8_inst.act $sb/simu/data/cec-chip/
 ###
+
+
+### Fixes for MCS BAR enable bits.
+cp --update $bb/src/simu/data/cec-chip/p8.act $sb/simu/data/cec-chip/
+patch $sb/simu/data/cec-chip/p8.act $HOSTBOOTROOT/src/build/citest/etc/patches/p8.act.diff
+###

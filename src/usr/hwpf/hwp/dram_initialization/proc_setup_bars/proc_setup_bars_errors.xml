@@ -1,0 +1,146 @@
+<!--  IBM_PROLOG_BEGIN_TAG
+     This is an automatically generated prolog.
+   
+     $Source: src/usr/hwpf/hwp/dram_initialization/proc_setup_bars/proc_setup_bars_errors.xml $
+   
+     IBM CONFIDENTIAL
+   
+     COPYRIGHT International Business Machines Corp. 2012
+   
+     p1
+   
+     Object Code Only (OCO) source materials
+     Licensed Internal Code Source Materials
+     IBM HostBoot Licensed Internal Code
+   
+     The source code for this program is not published or other-
+     wise divested of its trade secrets, irrespective of what has
+     been deposited with the U.S. Copyright Office.
+   
+     Origin: 30
+   
+     IBM_PROLOG_END_TAG -->
+<!-- Error definitions for proc_setup_bars -->
+<hwpErrors>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_SETUP_BARS_NON_MIRRORED_RANGE_ATTR_ERR</rc>
+    <description>Invalid definition for non-mirrored address range (from platform attributes).</description>
+    <ffdc>BASE_ADDR</ffdc>
+    <ffdc>SIZE</ffdc>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_SETUP_BARS_NON_MIRRORED_RANGE_OVERLAP_ATTR_ERR</rc>
+    <description>Invalid definition for non-mirrored address ranges (from platform attributes), two or more ranges on this chip overlap.</description>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_SETUP_BARS_NON_MIRRORED_RANGE_ERR</rc>
+    <description>Invalid definition for non-mirrored address range.</description>
+    <ffdc>BASE_ADDR</ffdc>
+    <ffdc>SIZE</ffdc>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_SETUP_BARS_MIRRORED_RANGE_ATTR_ERR</rc>
+    <description>Invalid definition for mirrored address range (from platform attributes).</description>
+    <ffdc>BASE_ADDR</ffdc>
+    <ffdc>SIZE</ffdc>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_SETUP_BARS_MIRRORED_RANGE_OVERLAP_ATTR_ERR</rc>
+    <description>Invalid definition for mirrored address ranges (from platform attributes), two or more ranges on this chip overlap.</description>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_SETUP_BARS_MIRRORED_RANGE_ERR</rc>
+    <description>Invalid definition for mirrored address range.</description>
+    <ffdc>BASE_ADDR</ffdc>
+    <ffdc>SIZE</ffdc>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_SETUP_BARS_FOREIGN_NEAR_RANGE_ATTR_ERR</rc>
+    <description>Invalid definition for foreign near address range (from platform attributes).</description>
+    <ffdc>BASE_ADDR</ffdc>
+    <ffdc>SIZE</ffdc>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_SETUP_BARS_FOREIGN_FAR_RANGE_ATTR_ERR</rc>
+    <description>Invalid definition for foreign far address range (from platform attributes).</description>
+    <ffdc>BASE_ADDR</ffdc>
+    <ffdc>SIZE</ffdc>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_SETUP_BARS_PSI_BAR_ATTR_ERR</rc>
+    <description>Invalid definition for PSI Bridge BAR address range (from platform attributes).</description>
+    <ffdc>BASE_ADDR</ffdc>
+    <ffdc>SIZE</ffdc>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_SETUP_BARS_FSP_BAR_ATTR_ERR</rc>
+    <description>Invalid definition for FSP BAR address range (from platform attributes).</description>
+    <ffdc>BASE_ADDR</ffdc>
+    <ffdc>SIZE</ffdc>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_SETUP_BARS_FSP_MMIO_MASK_ATTR_ERR</rc>
+    <description>Invalid definition for FSP MMIO Mask address range (from platform attributes).</description>
+    <ffdc>SIZE</ffdc>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_SETUP_BARS_INTP_BAR_ATTR_ERR</rc>
+    <description>Invalid definition for INTP BAR address range (from platform attributes).</description>
+    <ffdc>BASE_ADDR</ffdc>
+    <ffdc>SIZE</ffdc>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_SETUP_BARS_NX_MMIO_BAR_ATTR_ERR</rc>
+    <description>Invalid definition for NX MMIO BAR address range (from platform attributes).</description>
+    <ffdc>BASE_ADDR</ffdc>
+    <ffdc>SIZE</ffdc>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_SETUP_BARS_PCIE_BAR_ATTR_ERR</rc>
+    <description>Invalid definition for PCIe BAR address range (from platform attributes).</description>
+    <ffdc>UNIT</ffdc>
+    <ffdc>RANGE</ffdc>
+    <ffdc>BASE_ADDR</ffdc>
+    <ffdc>SIZE</ffdc>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_SETUP_BARS_NODE_ADD_INTERNAL_ERR</rc>
+    <description>Internal Error.  Error encountered adding node to SMP structure.</description>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_SETUP_BARS_NODE_FIND_INTERNAL_ERR</rc>
+    <description>Internal Error.  Error encountered attempting to find node in SMP structure.</description>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_SETUP_BARS_DUPLICATE_FABRIC_ID_ERR</rc>
+    <description>Multiple chips found with identifcal fabric node/chip ID attribute values.</description>
+    <ffdc>NODE_ID</ffdc>
+    <ffdc>CHIP_ID</ffdc>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_SETUP_BARS_NODE_NON_MIRRORED_RANGE_OVERLAP_ERR</rc>
+    <description>Existing node non-mirrored range overlaps chip non-mirrored range.</description>
+    <ffdc>NODE_BASE_ADDR</ffdc>
+    <ffdc>NODE_SIZE</ffdc>
+    <ffdc>CHIP_BASE_ADDR</ffdc>
+    <ffdc>CHIP_SIZE</ffdc>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_SETUP_BARS_NODE_MIRRORED_RANGE_OVERLAP_ERR</rc>
+    <description>Existing node mirrored range overlaps chip mirrored range.</description>
+    <ffdc>NODE_BASE_ADDR</ffdc>
+    <ffdc>NODE_SIZE</ffdc>
+    <ffdc>CHIP_BASE_ADDR</ffdc>
+    <ffdc>CHIP_SIZE</ffdc>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_SETUP_BARS_INVALID_BAR_REG_DEF</rc>
+    <description>Internal error. Invalid proc_setup_bars_bar_reg_def structure content.</description>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_SETUP_BARS_SIZE_XLATE_ERR</rc>
+    <description>Internal error. Unsupported size translation for proc_setup_bars_bar_reg_def structure.</description>
+    <ffdc>SIZE</ffdc>
+  </hwpError>
+</hwpErrors>

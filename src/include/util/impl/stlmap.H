@@ -334,16 +334,9 @@ namespace Util
                 {
                     _Tree::node* n = NULL;
 
-                    if (iv_tree.insert_by_value(makeSplayTreeValue(x), n))
-                    {
-                        return make_pair(iterator(_TreeItr(&iv_tree, n)),
-                                         false);
-                    }
-                    else
-                    {
-                        return make_pair(iterator(_TreeItr(&iv_tree, n)),
-                                                  true);
-                    }
+                    bool rc = iv_tree.insert_by_value(makeSplayTreeValue(x), n);
+
+                    return make_pair(iterator(_TreeItr(&iv_tree, n)), rc);
 
                 }
 

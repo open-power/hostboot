@@ -42,12 +42,16 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dram_initialization
 ##  EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dram_initialization/<HWP_dir>
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dram_initialization/proc_exit_cache_contained
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dram_initialization/mss_extent_setup
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dram_initialization/proc_setup_bars
 
 
 ##  NOTE: add new object files when you add a new HWP
 OBJS =  dram_initialization.o \
         proc_exit_cache_contained.o \
-        mss_extent_setup.o
+        mss_extent_setup.o \
+        mss_setup_bars.o   \
+        proc_fab_smp.o  \
+        proc_setup_bars.o   \
 
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
@@ -55,6 +59,7 @@ OBJS =  dram_initialization.o \
 #   VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/dram_initialization/<HWP_dir>
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/dram_initialization/proc_exit_cache_contained
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/dram_initialization/mss_extent_setup
+VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/dram_initialization/proc_setup_bars
 
 
 include ${ROOTPATH}/config.mk

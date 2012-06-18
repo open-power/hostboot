@@ -46,6 +46,7 @@
 
 //  targeting support
 #include    <targeting/common/commontargeting.H>
+#include    <targeting/common/util.H>
 #include    <targeting/common/utilFilter.H>
 
 //  fapi support
@@ -60,7 +61,8 @@
 // #include    "mss_memdiag/mss_memdiag.H"
 // #include    "mss_scrub/mss_scrub.H"
 // #include    "mss_thermal_init/mss_thermal_init.H"
-// #include    "proc_setup_bars/proc_setup_bars.H"
+#include    "proc_setup_bars/mss_setup_bars.H"
+#include    "proc_setup_bars/proc_setup_bars.H"
 // #include    "proc_pbus_epsilon/proc_pbus_epsilon.H"
 #include    "proc_exit_cache_contained/proc_exit_cache_contained.H"
 
@@ -136,24 +138,24 @@ void    call_mss_extent_setup( void    *io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
             "call_mss_extent_setup entry" );
 
-    //  call the HWP 
+    //  call the HWP
     FAPI_INVOKE_HWP( l_errl, mss_extent_setup );
 
     if ( l_errl )
     {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, 
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                 "ERROR : failed executing mss_extent_setup returning error" );
     }
     else
     {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                 "SUCCESS : mss_extent_setup completed ok" );
     }
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
             "call_mss_extent_setup exit" );
 
     // end task, returning any errorlogs to IStepDisp
@@ -305,229 +307,172 @@ void    call_proc_setup_bars( void    *io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
 
+
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_setup_bars entry" );
 
-    // @@@@@    TEMPORARY SIMICS HACK for PHYP 6/1 milestone @@@@@
-    //  loop through all processor targets
-    //     1) loop on associated MCSs
-    //          a) Get associated logical dimms, sum total size of memory
-    //          b) Write memory base addr/size out to MCFGP 0x02011800
 
-    //Don't do this in VPO -- shouldn't be run anyway, but return as a precaution
-    if( TARGETING::is_vpo() )
+    // @@@@@    CUSTOM BLOCK:   @@@@@
+    // Get all Centaur targets
+    TARGETING::TargetHandleList l_cpuTargetList;
+    getAllChips(l_cpuTargetList, TYPE_PROC );
+
+
+    //  -----------------------------------------------------------------------
+    //  run mss_setup_bars on all CPUs.
+    //  -----------------------------------------------------------------------
+    for ( size_t i = 0; i < l_cpuTargetList.size(); i++ )
     {
-        task_end2( l_errl );
-    }
+        //  make a local copy of the target for ease of use
+        const TARGETING::Target*  l_pCpuTarget = l_cpuTargetList[i];
 
-    // Get all functional processor targets
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "!!!!!!!!!WORKAROUND  Memory BAR setup!!!!!!!!!!!" );
-    TARGETING::PredicateIsFunctional l_isFunctional;            //functional filter
-    TARGETING::PredicateCTM l_Filter(CLASS_CHIP, TYPE_PROC);    //Proc chip filter
-    TARGETING::PredicatePostfixExpr l_goodFilter;
-    l_goodFilter.push(&l_Filter).push(&l_isFunctional).And();
-    TARGETING::TargetRangeFilter l_Procs(
-            TARGETING::targetService().begin(),
-            TARGETING::targetService().end(),
-            &l_goodFilter );
+        TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "mss_setup_bars: proc %d", i );
+        //  dump physical path to targets
+        EntityPath l_path;
+        l_path  =   l_pCpuTarget->getAttr<ATTR_PHYS_PATH>();
+        l_path.dump();
 
-    // Create a Class/Type/Model predicate to look for units
-    TARGETING::PredicateCTM l_mcsPred(CLASS_UNIT, TYPE_MCS);
-    TARGETING::PredicatePostfixExpr l_mcsFilter;
-    l_mcsFilter.push(&l_mcsPred).push(&l_isFunctional).And();
+        // cast OUR type of target to a FAPI type of target.
+        const fapi::Target l_fapi_pCpuTarget(
+                                            TARGET_TYPE_PROC_CHIP,
+                                            reinterpret_cast<void *>
+                                            (const_cast<TARGETING::Target*>
+                                             (l_pCpuTarget)) );
 
-    // Create a Class/Type/Model predicate to look for dimm cards
-    TARGETING::PredicateCTM l_dimmPred(CLASS_LOGICAL_CARD,TYPE_DIMM);
-    TARGETING::PredicatePostfixExpr l_dimmFilter;
-    l_dimmFilter.push(&l_dimmPred).push(&l_isFunctional).And();
+        //  call the HWP with each fapi::Target
+        FAPI_INVOKE_HWP( l_errl,
+                         mss_setup_bars,
+                         l_fapi_pCpuTarget );
 
-    // Create a vector of TARGETING::Target pointers
-    TARGETING::TargetHandleList l_dimmList;
-    TARGETING::TargetHandleList l_mcsList;
-    uint64_t base_addr = 0x0;
-
-
-    for ( ; l_Procs && !l_errl; ++l_Procs )
-    {
-        const TARGETING::Target * l_pTarget = *l_Procs;
-        l_mcsList.clear();
-
-        //Get MCS sub units for this proc
-        TARGETING::targetService().getAssociated(l_mcsList, l_pTarget,
-                                                 TARGETING::TargetService::CHILD,
-                                                 TARGETING::TargetService::ALL,
-                                                 &l_mcsFilter);
-
-        for (uint32_t i = 0; (i < l_mcsList.size()) && !l_errl; i++)
+        if ( l_errl )
         {
-            uint32_t mem_size = 0;
-            l_dimmList.clear();
-
-            //Get Dimms for this MCS
-            TARGETING::targetService().getAssociated(l_dimmList, l_mcsList[i],
-                            TARGETING::TargetService::CHILD_BY_AFFINITY,
-                            TARGETING::TargetService::ALL, &l_dimmFilter);
-
-            //Tally up the total dimm size
-            for(uint32_t j=0; (j < l_dimmList.size()) && !l_errl; j++)
-            {
-
-                uint8_t dimm_den;
-                size_t l_size = 0x1;
-                l_errl = deviceRead(l_dimmList[j], &dimm_den, l_size,
-                                   DEVICE_SPD_ADDRESS(SPD::DENSITY));
-                if (l_errl)
-                {
-                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                               "WORKAROUND: Memory BAR error getting dimm density");
-
-                    break;
-                }
-
-                /*
-                 Bit [3, 2, 1, 0] :
-                 0000 = 256 Mb
-                 0001 = 512 Mb
-                 0010 = 1 Gb
-                 0011 = 2 Gb
-                 0100 = 4 Gb
-                 0101 = 8 Gb
-                 0110 = 16 Gb*/
-                mem_size += (1<<dimm_den); //(smallest size is 256MB)
-
-            }
-
-            if(l_errl)
-            {
-                break;
-            }
-
-            /*check to see if total centaur siz is less than 4GB multiple
-             Note that mem_size is in 256MB chunks
-                   0x0000 0001 -- 256MB
-                   0x0000 0010 -- 512MB
-                   0x0000 0100 --   1GB
-                   0x0000 1000 --   2GB
-                   0x0001 0000 --   4GB
-             This is a workaround HACK -- so just emit a warning
-             */
-            if(mem_size & 0xF)
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "WARNING -- CEC memory size less than 4GB on MCS[%08X]\n",
-                           TARGETING::get_huid(l_mcsList[i]));
-                mem_size = 0x10;
-            }
-            uint64_t grp_size = (mem_size >>4)-1;
-
-            /*build up MCFGP contents
-             0          -- enable               0b1
-             1:3        -- MCS/group            0x0
-             4:8        -- group id             0x0
-             9:10       -- HW settings          0b11
-             11:23      -- Group size
-                              4 GB b0000000000000
-                              8 GB b0000000000001
-                             16 GB b0000000000011
-                             32 GB b0000000000111
-                             64 GB b0000000001111
-                            128 GB b0000000011111
-                            256 GB b0000000111111
-                            512 GB b0000001111111
-                              1 TB b0000011111111
-                              2 TB b0000111111111
-                              4 TB b0001111111111
-                              8 TB b0011111111111
-             24:25      -- HW settings          0b11
-             26:43      -- Base address of group (addr 14:31)
-             44:63      -- Reserved             0x00000
-             */
-            uint64_t scom_data = 0x806000C000000000 |
-              (grp_size << 40) | (base_addr << 20);
-            size_t size = sizeof(scom_data);
-
-            TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "CEC memory base_addr[%lx], grp_size[%lx], scom[%lx]\n",
-                       base_addr, grp_size, scom_data);
-
-            l_errl = deviceWrite( l_mcsList[i],
-                               &scom_data,
-                               size,
-                               DEVICE_SCOM_ADDRESS(0x02011800) );
-            if(l_errl)
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "Failed to write MCS MCFGP scoms addr\n");
-            }
-
-            base_addr += (mem_size >>4);
-
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "ERROR : mss_setup_bars" );
+            // break and return with error
+            break;
         }
-    }
-
-
-    //Now need to scom the L3 bar on my EX to trigger Simics cache contained exit
-    if(!l_errl)
-    {
-        // TODO: Remove workaround with RTC: 42922.
-        nanosleep(1,0); // workaround Simics race condition.
-
-        TARGETING::Target* procTarget = NULL;
-        TARGETING::targetService().masterProcChipTargetHandle( procTarget );
-
-        //Base scom address is 0x1001080b, need to place core id from cpuid
-        //EX chiplet is bits 4:7 of scom addr, EX unit in cpuid is bits 25:28
-        uint32_t scom_addr = 0x1001080b | (((task_getcpuid()) & 0x78) << 21);
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "EX L3 BAR1 addr [%08x]\n", scom_addr);
-
-        uint64_t scom_data = 0x0; //data doesn't matter, just the write
-        size_t size = sizeof(scom_data);
-
-        l_errl = deviceWrite( procTarget,
-                              &scom_data,
-                              size,
-                              DEVICE_SCOM_ADDRESS(scom_addr) );
-        if(l_errl)
+        else
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "Failed to write EX %08x addr\n", scom_addr);
+                       "SUCCESS : mss_setup-bars" );
         }
-    }
+    }   // endfor
 
-#if 0
-    // @@@@@    CUSTOM BLOCK:   @@@@@
-    //  figure out what targets we need
-    //  customize any other inputs
-    //  set up loops to go through all targets (if parallel, spin off a task)
 
-    //  dump physical path to targets
-    EntityPath l_path;
-    l_path  =   l_@targetN_target->getAttr<ATTR_PHYS_PATH>();
-    l_path.dump();
 
-    // cast OUR type of target to a FAPI type of target.
-    const fapi::Target l_fapi_@targetN_target(
-                    TARGET_TYPE_MEMBUF_CHIP,
-                    reinterpret_cast<void *>
-                        (const_cast<TARGETING::Target*>(l_@targetN_target)) );
-
-    //  call the HWP with each fapi::Target
-    FAPI_INVOKE_HWP( l_errl, proc_setup_bars, _args_...);
-    if ( l_errl )
+    //  ----------------------------------------------------------------------
+    // @@@@@    TEMPORARY SIMICS HACK for PHYP 6/1 milestone @@@@@
+    //  ----------------------------------------------------------------------
+    if ( !TARGETING::is_vpo() )
     {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "ERROR : .........." );
-        errlCommit( l_errl, HWPF_COMP_ID );
+        //Now need to scom the L3 bar on my EX to trigger Simics cache contained exit
+        if (!l_errl)
+        {
+            // TODO: Remove workaround with RTC: 42922.
+            nanosleep(1,0); // workaround Simics race condition.
+
+            TARGETING::Target* procTarget = NULL;
+            TARGETING::targetService().masterProcChipTargetHandle( procTarget );
+
+            //Base scom address is 0x1001080b, need to place core id from cpuid
+            //EX chiplet is bits 4:7 of scom addr, EX unit in cpuid is bits 25:28
+            uint32_t scom_addr = 0x1001080b | (((task_getcpuid()) & 0x78) << 21);
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "EX L3 BAR1 addr [%08x]", scom_addr);
+
+            uint64_t scom_data = 0x0; //data doesn't matter, just the write
+            size_t size = sizeof(scom_data);
+
+            l_errl = deviceWrite( procTarget,
+                                  &scom_data,
+                                  size,
+                                  DEVICE_SCOM_ADDRESS(scom_addr) );
+            if (l_errl)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "Failed to write EX %08x addr\n", scom_addr);
+            }
+        }
+        // @@@@@    end TEMPORARY SIMICS HACK for PHYP 6/1 milestone @@@@@
     }
-    else
+
+// $$ #if 0
+    //  $$$$$   @todo issue 44948
+    // proc_setup_bars crashes simics, remove check when we get it working
+    if ( !TARGETING::is_vpo() )
     {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "SUCCESS : .........." );
+                   "proc_setup_bars is disabled in simics, see issue 44948" );
+        task_end2(l_errl);
     }
+    //  $$$$$   @todo issue 44948
+// $$ #endif
+
+
+    if ( ! l_errl )
+    {
+        //  -----------------------------------------------------------------------
+        //  run proc_setup_bars on all CPUs
+        //  -----------------------------------------------------------------------
+        std::vector<proc_setup_bars_proc_chip> l_proc_chips;
+
+        for ( size_t i = 0; i < l_cpuTargetList.size(); i++ )
+        {
+            //  make a local copy of the target for ease of use
+            const TARGETING::Target*  l_pCpuTarget = l_cpuTargetList[i];
+
+            TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "proc_setup_bars: proc %d", i );
+            //  dump physical path to targets
+            EntityPath l_path;
+            l_path  =   l_pCpuTarget->getAttr<ATTR_PHYS_PATH>();
+            l_path.dump();
+
+            // cast OUR type of target to a FAPI type of target.
+            const fapi::Target l_fapi_pCpuTarget(
+                                                TARGET_TYPE_MEMBUF_CHIP,
+                                                reinterpret_cast<void *>
+                                                (const_cast<TARGETING::Target*>
+                                                 (l_pCpuTarget)) );
+            //  @todo Create dummy aX targets
+            const fapi::Target  l_a0_chip;
+            const fapi::Target  l_a1_chip;
+            const fapi::Target  l_a2_chip;
+
+
+            proc_setup_bars_proc_chip l_proc_chip ;
+            l_proc_chip.this_chip  =   l_fapi_pCpuTarget;
+            l_proc_chip.a0_chip    =    l_a0_chip;
+            l_proc_chip.a1_chip    =    l_a1_chip;
+            l_proc_chip.a2_chip    =    l_a2_chip;
+            l_proc_chip.process_f0 =    true;
+            l_proc_chip.process_f1 =    true;
+
+            l_proc_chips.push_back( l_proc_chip );
+
+            //  call the HWP with each fapi::Target
+            FAPI_INVOKE_HWP( l_errl,
+                             proc_setup_bars,
+                             l_proc_chips,
+                             true );
+
+            if ( l_errl )
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "ERROR : proc_setup_bars" );
+                //  break out with error
+                break;
+            }
+            else
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "SUCCESS : proc_setup-bars" );
+            }
+        }   // endfor
+    }   // end if !l_errl
+
     // @@@@@    END CUSTOM BLOCK:   @@@@@
-#endif
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_setup_bars exit" );

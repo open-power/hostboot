@@ -54,6 +54,28 @@ namespace fapi
         MOD_THREAD_ACTIVATE                        = 0x0E, //@fixme RTC:42816
         MOD_ATTR_GET_FUNCTIONAL                    = 0x0F,
         MOD_ATTR_GET_HB_TARGET                     = 0x10,
+        MOD_ATTR_PROC_MEMBASE_GET                  = 0x11,
+        MOD_ATTR_PROC_MIRRORBASE_GET               = 0x12,
+        MOD_ATTR_PROC_FOREIGN_NEAR_BASE_GET        = 0x13,
+        MOD_ATTR_PROC_FOREIGN_NEAR_SIZE_GET        = 0x14,
+        MOD_ATTR_PROC_FOREIGN_FAR_BASE_GET         = 0x15,
+        MOD_ATTR_PROC_FOREIGN_FAR_SIZE_GET         = 0x16,
+        MOD_ATTR_PROC_HA_BASE_GET                  = 0x17,
+        MOD_ATTR_PROC_HA_SIZE_GET                  = 0x18,
+        MOD_ATTR_PROC_PSI_BRIDGE_BAR_ENABLE_GET    = 0x19,
+        MOD_ATTR_PROC_PSI_BRIDGE_BAR_BASE_ADDR_GET = 0x1A,
+        MOD_ATTR_PROC_FSP_BAR_ENABLE_GET           = 0x1B,
+        MOD_ATTR_PROC_FSP_BAR_BASE_ADDR_GET        = 0x1C,
+        MOD_ATTR_PROC_FSP_BAR_SIZE_GET             = 0x1D,
+        MOD_ATTR_PROC_FSP_MMIO_MASK_SIZE_GET       = 0x1E,
+        MOD_ATTR_PROC_INTP_BAR_ENABLE_GET          = 0x1F,
+        MOD_ATTR_PROC_INTP_BAR_BASE_ADDR_GET       = 0x20,
+        MOD_ATTR_PROC_NX_MMIO_BAR_ENABLE_GET       = 0x21,
+        MOD_ATTR_PROC_NX_MMIO_BAR_BASE_ADDR_GET    = 0x22,
+        MOD_ATTR_PROC_NX_MMIO_BAR_SIZE_GET         = 0x23,
+        MOD_ATTR_PROC_PCIE_BAR_ENABLE_GET          = 0x24,
+        MOD_ATTR_PROC_PCIE_BAR_BASE_ADDR_GET       = 0x25,
+        MOD_ATTR_PROC_PCIE_BAR_SIZE_GET            = 0x26,
     };
 
     /**
@@ -80,12 +102,13 @@ namespace fapi
         RC_MIXED_PBUS_CONNECTION      = HWPF_COMP_ID | 0x19,
         RC_SAME_CHIP_PBUS_CONNECTION  = HWPF_COMP_ID | 0x1A,
         RC_CONFLICT_PBUS_CONNECTION   = HWPF_COMP_ID | 0x1B,
-        RC_NO_MASTER_CORE_TARGET      = HWPF_COMP_ID | 0x1C, 
+        RC_NO_MASTER_CORE_TARGET      = HWPF_COMP_ID | 0x1C,
         RC_THREAD_IN_WRONG_STATE      = HWPF_COMP_ID | 0x1D, //@fixme RTC:42816
         RC_THREAD_DID_NOT_START       = HWPF_COMP_ID | 0x1E, //@fixme RTC:42816
         RC_NULL_FAPI_TARGET           = HWPF_COMP_ID | 0x1F,
         RC_UNEXPECTED_TARGET_TYPE     = HWPF_COMP_ID | 0x20,
         RC_ATTR_UNKNOWN_TARGET_NAME   = HWPF_COMP_ID | 0x21,
+        RC_ATTR_UNSUPPORTED_PROC_NUM  = HWPF_COMP_ID | 0x22,
     };
 
     /**

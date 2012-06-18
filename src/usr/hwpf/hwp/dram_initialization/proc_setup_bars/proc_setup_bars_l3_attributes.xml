@@ -1,0 +1,71 @@
+<!--  IBM_PROLOG_BEGIN_TAG
+     This is an automatically generated prolog.
+   
+     $Source: src/usr/hwpf/hwp/dram_initialization/proc_setup_bars/proc_setup_bars_l3_attributes.xml $
+   
+     IBM CONFIDENTIAL
+   
+     COPYRIGHT International Business Machines Corp. 2012
+   
+     p1
+   
+     Object Code Only (OCO) source materials
+     Licensed Internal Code Source Materials
+     IBM HostBoot Licensed Internal Code
+   
+     The source code for this program is not published or other-
+     wise divested of its trade secrets, irrespective of what has
+     been deposited with the U.S. Copyright Office.
+   
+     Origin: 30
+   
+     IBM_PROLOG_END_TAG -->
+<!-- proc_setup_bars_l3_attributes.xml -->
+<attributes>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_L3_BAR1_REG</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>L3 BAR1 register value
+      creator: proc_setup_bars
+      consumer: winkle image setup procedures
+      notes:
+        64-bit register value
+        SCOM address: 0x1001080B
+    </description>
+    <valueType>uint64</valueType>
+    <writeable/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_L3_BAR2_REG</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>L3 BAR2 register value
+      creator: proc_setup_bars
+      consumer: winkle image setup procedures
+      notes:
+        64-bit register value
+        SCOM address: 0x10010813
+    </description>
+    <valueType>uint64</valueType>
+    <writeable/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_L3_BAR_GROUP_MASK_REG</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>L3 BAR Group Mask register value
+      creator: proc_setup_bars
+      consumer: winkle image setup procedures
+      notes:
+        64-bit register value
+        SCOM address: 0x10010816
+    </description>
+    <valueType>uint64</valueType>
+    <writeable/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+</attributes>

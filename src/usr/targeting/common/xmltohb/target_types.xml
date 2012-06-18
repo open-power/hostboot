@@ -1,30 +1,30 @@
 <!--  IBM_PROLOG_BEGIN_TAG
      This is an automatically generated prolog.
-   
+
      $Source: src/usr/targeting/common/xmltohb/target_types.xml $
-   
+
      IBM CONFIDENTIAL
-   
+
      COPYRIGHT International Business Machines Corp. 2011-2012
-   
+
      p1
-   
+
      Object Code Only (OCO) source materials
      Licensed Internal Code Source Materials
      IBM HostBoot Licensed Internal Code
-   
+
      The source code for this program is not published or other-
      wise divested of its trade secrets, irrespective of what has
      been deposited with the U.S. Copyright Office.
-   
+
      Origin: 30
-   
+
      IBM_PROLOG_END_TAG -->
 
 <attributes>
 
 <!-- =====================================================================
-     HOST BOOT TARGETS 
+     HOST BOOT TARGETS
      Contains the definition of the different types of targets
      ================================================================= -->
 
@@ -51,7 +51,7 @@
     <parent>base</parent>
     <attribute><id>CLASS</id><default>SYS</default></attribute>
     <attribute><id>TYPE</id><default>SYS</default></attribute>
-    <attribute><id>MODEL</id><default>POWER8</default></attribute>  
+    <attribute><id>MODEL</id><default>POWER8</default></attribute>
     <attribute><id>HUID</id><default>0x00010000</default></attribute>
     <attribute><id>EXECUTION_PLATFORM</id></attribute>
     <attribute><id>SCRATCH_UINT8_1</id></attribute>
@@ -190,6 +190,21 @@
     <!-- TODO. MVPD_FREQ_CORE_NOMINAL to be deleted when MVPD available -->
     <attribute><id>MVPD_FREQ_CORE_NOMINAL</id></attribute>
     <attribute><id>VPD_REC_NUM</id></attribute>
+    <!-- New attributes for mss/proc_setup_bars -->
+    <!--    proc_setup_bars_memory_attributes.xml   -->
+    <attribute><id>MSS_MEM_MC_IN_GROUP</id></attribute>
+    <attribute><id>ATTR_PROC_MEM_BASES</id></attribute>
+    <attribute><id>ATTR_PROC_MEM_SIZES</id></attribute>
+    <attribute><id>ATTR_PROC_MIRROR_BASES</id></attribute>
+    <attribute><id>ATTR_PROC_MIRROR_SIZES</id></attribute>
+    <!--    proc_setup_bars_l3_attributes.xml   -->
+    <attribute><id>ATTR_PROC_L3_BAR1_REG</id></attribute>
+    <attribute><id>ATTR_PROC_L3_BAR2_REG</id></attribute>
+    <attribute><id>ATTR_PROC_L3_BAR_GROUP_MASK_REG</id></attribute>
+     <!--   proc_fab_smp_fabric_attributes.xml  -->
+     <attribute><id>ATTR_FREQ_CORE</id></attribute>
+     <attribute><id>ATTR_PROC_PCIE_NOT_F_LINK</id></attribute>
+
 </targetType>
 
 <targetType>
@@ -319,7 +334,7 @@
     <attribute>
         <id>MODEL</id>
         <default>SALERNO</default>
-    </attribute>    
+    </attribute>
 </targetType>
 
 <targetType>
@@ -328,7 +343,7 @@
     <attribute>
         <id>MODEL</id>
         <default>VENICE</default>
-    </attribute>    
+    </attribute>
 </targetType>
 
 <targetType>
@@ -337,7 +352,7 @@
     <attribute>
         <id>MODEL</id>
         <default>MURANO</default>
-    </attribute>    
+    </attribute>
 </targetType>
 
 
@@ -356,7 +371,7 @@
     <attribute>
         <id>MODEL</id>
         <default>SALERNO</default>
-    </attribute>    
+    </attribute>
 </targetType>
 
 <targetType>
@@ -365,7 +380,7 @@
     <attribute>
         <id>MODEL</id>
         <default>VENICE</default>
-    </attribute>    
+    </attribute>
 </targetType>
 
 <targetType>
@@ -374,7 +389,7 @@
     <attribute>
         <id>MODEL</id>
         <default>MURANO</default>
-    </attribute>    
+    </attribute>
 </targetType>
 
 
@@ -393,7 +408,7 @@
     <attribute>
         <id>MODEL</id>
         <default>SALERNO</default>
-    </attribute>    
+    </attribute>
 </targetType>
 
 <targetType>
@@ -402,7 +417,7 @@
     <attribute>
         <id>MODEL</id>
         <default>VENICE</default>
-    </attribute>    
+    </attribute>
 </targetType>
 
 <targetType>
@@ -411,7 +426,7 @@
     <attribute>
         <id>MODEL</id>
         <default>MURANO</default>
-    </attribute>    
+    </attribute>
 </targetType>
 
 
@@ -430,7 +445,7 @@
     <attribute>
         <id>MODEL</id>
         <default>SALERNO</default>
-    </attribute>    
+    </attribute>
 </targetType>
 
 <targetType>
@@ -439,7 +454,7 @@
     <attribute>
         <id>MODEL</id>
         <default>VENICE</default>
-    </attribute>    
+    </attribute>
 </targetType>
 
 <targetType>
@@ -448,7 +463,7 @@
     <attribute>
         <id>MODEL</id>
         <default>MURANO</default>
-    </attribute>    
+    </attribute>
 </targetType>
 
 
@@ -467,7 +482,7 @@
     <attribute>
         <id>MODEL</id>
         <default>SALERNO</default>
-    </attribute>    
+    </attribute>
 </targetType>
 
 <targetType>
@@ -476,7 +491,7 @@
     <attribute>
         <id>MODEL</id>
         <default>VENICE</default>
-    </attribute>    
+    </attribute>
 </targetType>
 
 <targetType>
@@ -485,7 +500,7 @@
     <attribute>
         <id>MODEL</id>
         <default>MURANO</default>
-    </attribute>    
+    </attribute>
 </targetType>
 
 
@@ -503,7 +518,7 @@
     <attribute>
         <id>MODEL</id>
         <default>POWER8</default>
-    </attribute>    
+    </attribute>
 </targetType>
 
 <targetType>
@@ -523,7 +538,7 @@
     <attribute>
         <id>MODEL</id>
         <default>SALERNO</default>
-    </attribute>  
+    </attribute>
 </targetType>
 
 <targetType>
@@ -561,7 +576,7 @@
     <attribute>
         <id>MODEL</id>
         <default>SALERNO</default>
-    </attribute>  
+    </attribute>
 </targetType>
 
 <targetType>
@@ -710,7 +725,7 @@
 </targetType>
 
 <targetType>
-    <id>unit-mcs-power8</id> 
+    <id>unit-mcs-power8</id>
     <parent>unit</parent>
     <attribute>
         <id>TYPE</id>
@@ -721,29 +736,29 @@
 </targetType>
 
 <targetType>
-    <id>unit-mcs-venice</id> 
+    <id>unit-mcs-venice</id>
     <parent>unit-mcs-power8</parent>
     <attribute>
         <id>MODEL</id>
-        <default>VENICE</default> 
+        <default>VENICE</default>
     </attribute>
 </targetType>
 
 <targetType>
-    <id>unit-mcs-salerno</id> 
+    <id>unit-mcs-salerno</id>
     <parent>unit-mcs-power8</parent>
     <attribute>
         <id>MODEL</id>
-        <default>SALERNO</default> 
+        <default>SALERNO</default>
     </attribute>
 </targetType>
 
 <targetType>
-    <id>unit-mcs-murano</id> 
+    <id>unit-mcs-murano</id>
     <parent>unit-mcs-power8</parent>
     <attribute>
         <id>MODEL</id>
-        <default>MURANO</default> 
+        <default>MURANO</default>
     </attribute>
 </targetType>
 
@@ -755,7 +770,7 @@
     <attribute>
         <id>MODEL</id>
         <default>VENICE</default>
-    </attribute>  
+    </attribute>
 </targetType>
 
 <targetType>
@@ -764,7 +779,7 @@
     <attribute>
         <id>MODEL</id>
         <default>SALERNO</default>
-    </attribute>  
+    </attribute>
 </targetType>
 
 <targetType>
@@ -773,7 +788,7 @@
     <attribute>
         <id>MODEL</id>
         <default>MURANO</default>
-    </attribute>  
+    </attribute>
 </targetType>
 
 <targetType>
@@ -804,31 +819,31 @@
 </targetType>
 
 <targetType>
-    <id>unit-memport-salerno</id> 
+    <id>unit-memport-salerno</id>
     <parent>unit-memport-power8</parent>
     <attribute>
         <id>MODEL</id>
-        <default>SALERNO</default> 
-    </attribute>    
-</targetType>    
+        <default>SALERNO</default>
+    </attribute>
+</targetType>
 
 <targetType>
-    <id>unit-memport-venice</id> 
+    <id>unit-memport-venice</id>
     <parent>unit-memport-power8</parent>
     <attribute>
         <id>MODEL</id>
-        <default>VENICE</default> 
-    </attribute>    
-</targetType>   
+        <default>VENICE</default>
+    </attribute>
+</targetType>
 
 <targetType>
-    <id>unit-memport-murano</id> 
+    <id>unit-memport-murano</id>
     <parent>unit-memport-venice</parent>
     <attribute>
         <id>MODEL</id>
-        <default>MURANO</default> 
-    </attribute>    
-</targetType>   
+        <default>MURANO</default>
+    </attribute>
+</targetType>
 
 <!-- Memory Buffer Target Types -->
 
@@ -878,7 +893,7 @@
     </attribute>
     <attribute>
         <!-- Centaur memory buffer chips do not have SCOM accessible FSI GP regs -->
-        <id>FSI_GP_REG_SCOM_ACCESS</id> 
+        <id>FSI_GP_REG_SCOM_ACCESS</id>
         <default>0</default>
     </attribute>
     <attribute>
@@ -925,13 +940,13 @@
     <attribute>
         <id>MODEL</id>
         <default>CENTAUR</default>
-    </attribute>  
+    </attribute>
 </targetType>
 
 <!-- Centaur memory port -->
 
 <targetType>
-    <id>unit-memport-centaur</id> 
+    <id>unit-memport-centaur</id>
     <parent>unit-memport-power8</parent>
     <attribute>
         <id>PRIMARY_CAPABILITIES</id>
@@ -944,9 +959,9 @@
     </attribute>
     <attribute>
         <id>MODEL</id>
-        <default>CENTAUR</default> 
-    </attribute>    
-</targetType>   
+        <default>CENTAUR</default>
+    </attribute>
+</targetType>
 
 <!--Dummy card to use as a DIMM for initial I2C/EEPROM testing -->
 <targetType>

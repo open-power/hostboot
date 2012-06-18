@@ -1,0 +1,224 @@
+<!--  IBM_PROLOG_BEGIN_TAG
+     This is an automatically generated prolog.
+
+     $Source: src/usr/hwpf/hwp/dram_initialization/proc_setup_bars/proc_setup_bars_memory_attributes.xml $
+
+     IBM CONFIDENTIAL
+
+     COPYRIGHT International Business Machines Corp. 2012
+
+     p1
+
+     Object Code Only (OCO) source materials
+     Licensed Internal Code Source Materials
+     IBM HostBoot Licensed Internal Code
+
+     The source code for this program is not published or other-
+     wise divested of its trade secrets, irrespective of what has
+     been deposited with the U.S. Copyright Office.
+
+     Origin: 30
+
+     IBM_PROLOG_END_TAG -->
+<!-- proc_setup_bars_memory_attributes.xml -->
+<attributes>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_MEM_BASE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Base address for non-mirrored memory regions
+      creator: platform (proc_config_base_addr)
+      consumer: mss_setup_bars
+      firmware notes:
+        64-bit RA
+    </description>
+    <valueType>uint64</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_MEM_BASES</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Non-mirrored memory base addresses
+      creator: mss_setup_bars
+      consumer: proc_setup_bars, platform
+      firmware notes:
+        64-bit RA
+        eight independent non-mirrored segments are supported
+        (max number based on Venice design)
+    </description>
+    <valueType>uint64</valueType>
+    <array>8</array>
+    <writeable/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_MEM_SIZES</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Size of non-mirrored memory regions
+      creator: mss_setup_bars
+      consumer: proc_setup_bars, platform
+      firmware notes:
+        for given index value, address space assumed to be contiguous
+        from ATTR_PROC_MEM_BASES value at matching index
+        eight independent non-mirrored segments are supported
+        (max number based on Venice design)
+    </description>
+    <valueType>uint64</valueType>
+    <array>8</array>
+    <writeable/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_MIRROR_BASE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Base address for mirrored memory regions
+      creator: platform (proc_config_base_addr)
+      consumer: mss_setup_bars
+      firmware notes:
+        64-bit RA
+    </description>
+    <valueType>uint64</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_MIRROR_BASES</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Mirrored memory base addresses
+      creator: mss_setup_bars
+      consumer: proc_setup_bars, platform
+      firmware notes:
+        64-bit RA
+        four independent mirrored segments are supported
+        (max number based on Venice design)
+    </description>
+    <valueType>uint64</valueType>
+    <array>4</array>
+    <writeable/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_MIRROR_SIZES</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Size of mirrored memory region
+      creator: mss_setup_bars
+      consumer: proc_setup_bars, platform
+      firmware notes:
+        for given index value, address space assumed to be contiguous
+        from ATTR_PROC_MIRROR_BASES value at matching index
+        four independent mirrored segments are supported
+        (max number based on Venice design)
+    </description>
+    <valueType>uint64</valueType>
+    <array>4</array>
+    <writeable/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_FOREIGN_NEAR_BASE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Foreign (near) address region base address
+      creator: platform
+      consumer: proc_setup_bars
+      firmware notes:
+        64-bit RA
+        two independent regions are supported
+        (one per foreign link)
+    </description>
+    <valueType>uint64</valueType>
+    <array>2</array>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_FOREIGN_NEAR_SIZE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Size of foreign (near) region
+      creator: platform
+      consumer: proc_setup_bars
+      firmware notes:
+        address space assumed to be contiguous from associated
+        ATTR_PROC_FOREIGN_NEAR_BASE for given index value
+        two independent regions are supported
+        (one per foreign link)
+    </description>
+    <valueType>uint64</valueType>
+    <array>2</array>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_FOREIGN_FAR_BASE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Foreign (far) address region base address
+      creator: platform
+      consumer: proc_setup_bars
+      firmware notes:
+        64-bit RA
+        two independent regions are supported
+        (one per foreign link)
+    </description>
+    <valueType>uint64</valueType>
+    <array>2</array>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_FOREIGN_FAR_SIZE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Size of foreign (far) region
+      creator: platform
+      consumer: proc_setup_bars
+      firmware notes:
+        address space assumed to be contiguous from associated
+        ATTR_PROC_FOREIGN_FAR_BASE for given index value
+        two independent regions are supported
+        (one per foreign link)
+    </description>
+    <valueType>uint64</valueType>
+    <array>2</array>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_HA_BASE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>HA logging base address
+      firmware notes:
+        64-bit RA
+        eight independent segments are supported
+        (max number based on Venice design)
+    </description>
+    <valueType>uint64</valueType>
+    <array>8</array>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_HA_SIZE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Size of HA memory region
+      firmware notes:
+        address space assumed to be contiguous from associated
+        ATTR_PROC_HA_BASE for given index value
+        eight independent segments are supported
+        (max number based on Venice design)
+    </description>
+    <valueType>uint64</valueType>
+    <array>8</array>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+</attributes>

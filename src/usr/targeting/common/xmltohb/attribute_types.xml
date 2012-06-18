@@ -1,24 +1,24 @@
 <!--  IBM_PROLOG_BEGIN_TAG
      This is an automatically generated prolog.
-   
+
      $Source: src/usr/targeting/common/xmltohb/attribute_types.xml $
-   
+
      IBM CONFIDENTIAL
-   
+
      COPYRIGHT International Business Machines Corp. 2011-2012
-   
+
      p1
-   
+
      Object Code Only (OCO) source materials
      Licensed Internal Code Source Materials
      IBM HostBoot Licensed Internal Code
-   
+
      The source code for this program is not published or other-
      wise divested of its trade secrets, irrespective of what has
      been deposited with the U.S. Copyright Office.
-   
+
      Origin: 30
-   
+
      IBM_PROLOG_END_TAG -->
 
 <attributes>
@@ -3373,7 +3373,7 @@
     <description>Record offset for this target's VPD</description>
     <simpleType>
         <uint16_t>
-            <default>0xFFFF</default> 
+            <default>0xFFFF</default>
         </uint16_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -3798,5 +3798,218 @@
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
+
+<!--    TARGETING attributes to support mss_setup_bars and proc_setup_bars  -->
+
+<attribute>
+  <id>ATTR_PROC_MEM_BASES</id>
+  <description>
+    read/write HWP attribute mapped to TARGETING
+    Non-mirrored memory base addresses
+    creator: mss_setup_bars
+    consumer: proc_setup_bars, platform
+    firmware notes:
+        64-bit RA
+        eight independent non-mirrored segments are supported
+        (max number based on Venice design)
+  </description>
+  <simpleType>
+      <uint64_t></uint64_t>
+      <array>8</array>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <writeable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_MEM_BASES</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>ATTR_PROC_MEM_SIZES</id>
+  <description>
+    read/write HWP attribute mapped to TARGETING
+    Size of non-mirrored memory regions
+    creator: mss_setup_bars
+    consumer: proc_setup_bars, platform
+    firmware notes:
+        for given index value, address space assumed to be contiguous
+        from ATTR_PROC_MEM_BASES value at matching index
+        eight independent non-mirrored segments are supported
+        (max number based on Venice design)
+  </description>
+  <simpleType>
+      <uint64_t></uint64_t>
+      <array>8</array>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <writeable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_MEM_SIZES</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>ATTR_PROC_MIRROR_BASES</id>
+  <description>Mirrored memory base addresses
+    creator: mss_setup_bars
+    consumer: proc_setup_bars, platform
+    firmware notes:
+      64-bit RA
+      four independent mirrored segments are supported
+      (max number based on Venice design)
+  </description>
+  <simpleType>
+      <uint64_t></uint64_t>
+      <array>4</array>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <writeable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_MIRROR_BASES</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+
+</attribute>
+
+<attribute>
+  <id>ATTR_PROC_MIRROR_SIZES</id>
+  <description>Size of mirrored memory region
+    creator: mss_setup_bars
+    consumer: proc_setup_bars, platform
+    firmware notes:
+      for given index value, address space assumed to be contiguous
+      from ATTR_PROC_MIRROR_BASES value at matching index
+      four independent mirrored segments are supported
+      (max number based on Venice design)
+  </description>
+  <simpleType>
+      <uint64_t></uint64_t>
+      <array>4</array>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <writeable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_MIRROR_SIZES</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>ATTR_PROC_L3_BAR1_REG</id>
+  <description>
+    read/write HWP attribute mapped to TARGETING
+    L3 BAR1 register value
+    creator: proc_setup_bars
+    consumer: winkle image setup procedures
+    notes:
+          64-bit register value
+          SCOM address: 0x1001080B
+  </description>
+  <simpleType>
+      <uint64_t></uint64_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <writeable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_L3_BAR1_REG</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>ATTR_PROC_L3_BAR2_REG</id>
+  <description>
+    read/write HWP attribute mapped to TARGETING
+    L3 BAR2 register value
+    creator: proc_setup_bars
+    consumer: winkle image setup procedures
+    notes:
+      64-bit register value
+      SCOM address: 0x10010813
+  </description>
+  <simpleType>
+      <uint64_t></uint64_t>
+   </simpleType>
+   <persistency>volatile-zeroed</persistency>
+   <readable/>
+   <writeable/>
+   <hwpfToHbAttrMap>
+      <id>ATTR_PROC_L3_BAR2_REG</id>
+      <macro>DIRECT</macro>
+   </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>ATTR_PROC_L3_BAR_GROUP_MASK_REG</id>
+  <description>
+    read/write HWP attribute mapped to TARGETING
+    L3 BAR Group Mask register value
+    creator: proc_setup_bars
+    consumer: winkle image setup procedures
+    notes:
+      64-bit register value
+      SCOM address: 0x10010816
+  </description>
+  <simpleType>
+      <uint64_t></uint64_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <writeable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_PROC_L3_BAR_GROUP_MASK_REG</id>
+     <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+
+<attribute>
+  <id>ATTR_FREQ_CORE</id>
+  <description>
+    firmware notes:
+      Nominal processor's core DPLL frequency (MHz).
+      Default value provided by Machine Readable Workbook.
+      This attribute is the current value.
+      @note this should be initialized by istep 7.1 proc_a_x_pci_dmi_pll_setup
+  </description>
+  <simpleType>
+  <uint32_t></uint32_t>
+  </simpleType>
+<persistency>volatile-zeroed</persistency>
+  <readable/>
+  <writeable/>
+<hwpfToHbAttrMap>
+  <id>ATTR_FREQ_CORE</id>
+   <macro>DIRECT</macro>
+</hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>ATTR_PROC_PCIE_NOT_F_LINK</id>
+  <description>
+    firmware notes:
+      Set IPL time mux/switch between PCIE PHB/F link function
+      (one per foreign link)
+  </description>
+  <simpleType>
+  <uint8_t>
+    <default>0,0</default>
+  </uint8_t>
+  <array>2</array>
+  </simpleType>
+<persistency>volatile</persistency>
+  <readable/>
+<hwpfToHbAttrMap>
+  <id>ATTR_PROC_PCIE_NOT_F_LINK</id>
+   <macro>DIRECT</macro>
+</hwpfToHbAttrMap>
+ </attribute>
 
 </attributes>

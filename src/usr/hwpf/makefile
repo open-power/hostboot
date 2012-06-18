@@ -39,8 +39,13 @@ HWP_ERROR_XML_FILES = hwp/fapiHwpErrorInfo.xml   \
     hwp/edi_ei_initialization/proc_fab_iovalid/proc_fab_smp_errors.xml  \
     hwp/build_winkle_images/proc_slw_build/proc_slw_build_errors.xml    \
     hwp/mvpd_errors.xml \
-    ../pore/fapiporeve/fapiPoreVe_errors.xml
+    ../pore/fapiporeve/fapiPoreVe_errors.xml \
+    hwp/dram_initialization/proc_setup_bars/proc_setup_bars_errors.xml  \
+    hwp/dram_initialization/proc_setup_bars/proc_fab_smp_errors.xml
 
+
+
+## these get generated into obj/genfiles/AttributeIds.H
 HWP_ATTR_XML_FILES = hwp/memory_attributes.xml \
                      hwp/L2_L3_attributes.xml \
                      hwp/scratch_attributes.xml \
@@ -53,7 +58,11 @@ HWP_ATTR_XML_FILES = hwp/memory_attributes.xml \
                      hwp/proc_mvpd_attributes.xml \
                      hwp/ei_bus_attributes.xml \
                      hwp/chip_ec_attributes.xml \
-                     hwp/common_attributes.xml
+                     hwp/common_attributes.xml \
+                     hwp/dram_initialization/proc_setup_bars/proc_setup_bars_memory_attributes.xml \
+                     hwp/dram_initialization/proc_setup_bars/proc_setup_bars_l3_attributes.xml \
+                     hwp/dram_initialization/proc_setup_bars/proc_setup_bars_mmio_attributes.xml \
+                     hwp/dram_initialization/proc_setup_bars/proc_fab_smp_fabric_attributes.xml
 
 #------------------------------------------------------------------------------
 # Initfiles

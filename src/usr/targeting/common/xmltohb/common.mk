@@ -24,8 +24,8 @@
 #
 #  @file targeting/common/xmltohb/common.mk
 #
-#  @brief Common attribute compiler makefile to be included in 
-#      targeting/xmltohb/makefile 
+#  @brief Common attribute compiler makefile to be included in
+#      targeting/xmltohb/makefile
 #
 ################################################################################
 
@@ -39,16 +39,16 @@ XMLTOHB_HEADER_TARGETS = \
 
 XMLTOHB_SOURCE_TARGETS = \
     attributestrings.C   \
-    attributedump.C     
+    attributedump.C
 
 XMLTOHB_SYSTEM_BINARIES =       \
    vbu_targeting.bin            \
    simics_VENICE_targeting.bin  \
-   simics_MURANO_targeting.bin  
+   simics_MURANO_targeting.bin
 
 XMLTOHB_TARGETS =             \
     ${XMLTOHB_HEADER_TARGETS} \
-    ${XMLTOHB_SOURCE_TARGETS} 
+    ${XMLTOHB_SOURCE_TARGETS}
 
 XMLTOHB_GENERIC_SOURCES = \
     attribute_types.xml   \
@@ -65,12 +65,17 @@ FAPI_ATTR_SOURCES =          \
     unit_attributes.xml      \
     freq_attributes.xml      \
     proc_mvpd_attributes.xml \
-    ei_bus_attributes.xml
-    
+    ei_bus_attributes.xml    \
+    dram_initialization/proc_setup_bars/proc_setup_bars_memory_attributes.xml \
+    dram_initialization/proc_setup_bars/proc_setup_bars_l3_attributes.xml \
+    dram_initialization/proc_setup_bars/proc_setup_bars_mmio_attributes.xml \
+    dram_initialization/proc_setup_bars/proc_fab_smp_fabric_attributes.xml
+
+
 XMLTOHB_GENERIC_XML     = generic.xml
 XMLTOHB_FAPI_XML        = fapiattrs.xml
 XMLTOHB_MERGE_SCRIPT    = mergexml.sh
 XMLTOHB_COMPILER_SCRIPT = xmltohb.pl
-VMM_CONSTS_FILE         = vmmconst.h   
+VMM_CONSTS_FILE         = vmmconst.h
 
-GENERATED_CODE = ${XMLTOHB_TARGETS} 
+GENERATED_CODE = ${XMLTOHB_TARGETS}
