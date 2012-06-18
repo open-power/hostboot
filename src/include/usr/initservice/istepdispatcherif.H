@@ -24,30 +24,55 @@
 #ifndef __INITSERVICE_ISTEPDISPATCHERIF_H
 #define __INITSERVICE_ISTEPDISPATCHERIF_H
 
-#include    <sys/msg.h>
-
 namespace INITSERVICE
 {
 
-/**
-* @brief This function returns the MBOX Message Queue used by the istep
-*      dispatcher.
-*
-* @param[out] o_msgQ - The message queue.
-*
-* @return NONE.
-*/
-void getIstepMsgQ ( msg_q_t & o_msgQ );
 
 /**
- * @brief This function returns the current MBOX Message used by the istep
- *      dispatcher.
- *
- * @param[out] o_msg - The message.
+ * @brief This function will hold off callers until a sync point message is
+ *      recieved from an outside source.
  *
  * @return NONE.
  */
-void getIstepMsg ( msg_t* & o_msg );
+void waitForSyncPoint ( void );
+
+
+/**
+ * @brief This function is to be used by external code to initiate a sync
+ *      point reached message to be sent to the Fsp.
+ *
+ * @return errlHndl_t - NULL if successful, otherwise a pointer to the error
+ *      log.
+ */
+errlHndl_t sendSyncPoint ( void );
+
+
+/**
+ * @brief This function is to be used by external code to initiate a Istep
+ *      complete message to be sent to the Fsp.
+ *
+ *      NOTE: This function should ONLY be called by the start_payload istep.
+ *      Any other use is unsupported and could cause unknown side effects.
+ *
+ * @return errlHndl_t - NULL if successful, otherwise a pointer to the error
+ *      log.
+ */
+errlHndl_t sendIstepCompleteMsg ( void );
+
+
+/**
+ * @brief This function is to be used to query the current Istep/Substep
+ *      values.  This will indicate the currently running Istep/Substep.
+ *
+ * @param[out] o_iStep - The current Istep value.
+ *
+ * @param[out] o_subStep - The current SubStep value.
+ *
+ * @return NONE.
+ */
+void getIstepInfo ( uint8_t & o_iStep,
+                    uint8_t & o_subStep );
+
 
 }
 

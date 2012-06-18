@@ -119,6 +119,14 @@ void initIStepMode( )
         // $$ save l_readData  =   mmio_scratch_read( MMIO_SCRATCH_IPLSTEP_CONFIG );
         l_readData  =   g_SPLess_IStepMode_Reg;
 
+        // Get the Thread 5 scratch reg
+        uint64_t t5ScratchVal = mmio_scratch_read( MMIO_SCRATCH_ISTEP_MODE );
+        TRACFCOMP( INITSERVICE::g_trac_initsvc,
+                   INFO_MRK"Thread 5 scratch reg val: 0x%08x",
+                   t5ScratchVal );
+        // Only need 1 bit.
+        t5ScratchVal = t5ScratchVal & 0x1;
+
 #ifdef  SPLESS_DEBUG
         printk( "IStepMode Reg  = 0x%p, 0x%lx\n",   &g_SPLess_IStepMode_Reg, l_readData );
         printk( "Status Reg     = 0x%p\n",          &g_SPLess_Status_Reg );
@@ -130,8 +138,8 @@ void initIStepMode( )
 
         // check for IStep Mode signature(s)
         if (    ( l_readData == ISTEP_MODE_SPLESS_SIGNATURE )
-             || ( l_readData == ISTEP_MODE_FSP_SIGNATURE )
-           )
+             || ( l_readData == ISTEP_MODE_FSP_SIGNATURE ) ||
+             ( 0x1 == t5ScratchVal ) )
         {
             l_pTopLevel->setAttr<ATTR_ISTEP_MODE> (true );
 

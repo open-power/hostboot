@@ -5,7 +5,7 @@
  *
  *  IBM CONFIDENTIAL
  *
- *  COPYRIGHT International Business Machines Corp. 2011 - 2012
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
  *
  *  p1
  *
@@ -100,11 +100,11 @@ enum    {
  * @note    SPLess commands, and masks for the status.
  *
  */
-const   uint8_t     SPLESS_SINGLE_ISTEP_CMD         =   0x00;
-const   uint8_t     SPLESS_RESUME_ISTEP_CMD         =   0x01;
-const   uint8_t     SPLESS_CLEAR_TRACE_CMD          =   0x02;
-const   uint8_t     SPLESS_SHUTDOWN_CMD             =   0x03;
-const   uint64_t    SPLESS_SINGLE_STEP_STS_MASK     =   0x00000000ffffffff;
+//const   uint8_t     SPLESS_SINGLE_ISTEP_CMD         =   0x00;
+//const   uint8_t     SPLESS_RESUME_ISTEP_CMD         =   0x01;
+//const   uint8_t     SPLESS_CLEAR_TRACE_CMD          =   0x02;
+//const   uint8_t     SPLESS_SHUTDOWN_CMD             =   0x03;
+//const   uint64_t    SPLESS_SINGLE_STEP_STS_MASK     =   0x00000000ffffffff;
 
 /**
  * @brief   init ISTEP_MODE attribute

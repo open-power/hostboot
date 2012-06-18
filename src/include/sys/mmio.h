@@ -88,7 +88,7 @@ enum MMIO_Scratch_Register
         /** Thread1 Scratch Register - PNOR mode control*/
     MMIO_SCRATCH_PNOR_MODE = 0x8,
         /** Thread2 Scratch Register - Unused */
-    MMIO_SCRATCH_RSVD_T2 = 0x10,
+    MMIO_SCRATCH_ISTEP_MODE = 0x10,
         /** Thread3 Scratch Register - Unused */
     MMIO_SCRATCH_RSVD_T3 = 0x18,
         /** Thread4 Scratch Register - Unused */

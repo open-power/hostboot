@@ -79,46 +79,6 @@ const   uint64_t    SINGLESTEP_PAUSE_S     =   0;
 const   uint64_t    SINGLESTEP_PAUSE_NS    =   10000000;
 
 /**
- * @brief Translate beween commands on SPless user console and FSP commands
- *
- * @param[in]   -   command from SPLess user console
- *
- * @return  FSP command
- *
- */
-uint32_t    SPLessToFSP( const uint8_t i_cmd )
-{
-    uint32_t    l_FSPCmd    =   0;
-
-    switch( i_cmd )
-    {
-
-    case    SPLESS_SINGLE_ISTEP_CMD:
-        l_FSPCmd    =   SINGLE_STEP_TYPE;
-        break;
-    case    SPLESS_RESUME_ISTEP_CMD:
-        l_FSPCmd    =   BREAKPOINT_TYPE;
-        break;
-    case    SPLESS_CLEAR_TRACE_CMD:
-        l_FSPCmd    =   CLEAR_TRACE_TYPE;
-        break;
-    case    SPLESS_SHUTDOWN_CMD:
-        l_FSPCmd    =   SHUTDOWN_TYPE;
-        break;
-    default:
-        TRACFCOMP( g_trac_initsvc,
-                "spTask ERROR:  unknown cmd %d",
-                i_cmd  );
-        // should never happen...
-        assert( 0 );
-    }
-
-    return  l_FSPCmd;
-}
-
-
-
-/**
  * @brief  userConsoleComm
  *
  * Communicate with User Console on VPO or Simics.
@@ -198,10 +158,10 @@ void    userConsoleComm( void *  io_msgQ )
             writeSts( l_sts );
 
             // pass the command on to IstepDisp, block until reply
-            l_pCurrentMsg->type        =  SPLessToFSP( l_cmd.hdr.cmdnum );
-            l_pCurrentMsg->data[0]     =
-                    ( static_cast<uint64_t>( l_cmd.istep ) << 32 ) |
-                    static_cast<uint64_t>( l_cmd.substep )  ;
+            l_pCurrentMsg->type = 0x0;
+            l_pCurrentMsg->data[0] =
+                ( ( static_cast<uint64_t>(l_cmd.istep & 0xFF) << 32) |
+                  ( static_cast<uint64_t>(l_cmd.substep & 0xFF ) ) );
             l_pCurrentMsg->data[1]     =   0;
             l_pCurrentMsg->extra_data  =   NULL;
 
@@ -233,7 +193,7 @@ void    userConsoleComm( void *  io_msgQ )
                         static_cast<uint32_t>( l_pCurrentMsg->data[0] >> 32 ),
                         static_cast<uint32_t>( l_pCurrentMsg->data[0] & 0x0ffffffff ) );
 
-            if ( l_pCurrentMsg->type   == BREAKPOINT_TYPE )
+            if ( l_pCurrentMsg->type   == BREAKPOINT )
             {
                 l_sts.hdr.status    =   SPLESS_AT_BREAK_POINT;
             }
@@ -258,6 +218,9 @@ void    userConsoleComm( void *  io_msgQ )
             //  if shutdown issued, end this task
             if ( l_cmd.hdr.cmdnum   ==  SPLESS_SHUTDOWN_CMD )
             {
+                TRACFCOMP( g_trac_initsvc,
+                           "sptask: shutdown received" );
+
                 l_quitflag    =   true;
             }
 
@@ -274,9 +237,11 @@ void    userConsoleComm( void *  io_msgQ )
             writeCmd( l_cmd );
         }   //  endif   gobit
 
-
         if  ( l_quitflag  ==  true )
         {
+            TRACFCOMP( g_trac_initsvc,
+                       "sptask: got quitflag" );
+
             //  shutdown command issued, break out of loop
             break;
         }
@@ -299,6 +264,9 @@ void    userConsoleComm( void *  io_msgQ )
             nanosleep( SINGLESTEP_PAUSE_S, SINGLESTEP_PAUSE_NS );
         }
     }   //  endwhile
+
+    TRACFCOMP( g_trac_initsvc,
+               "sptask: Uh-oh, we just exited...  what went wrong?" );
 
     //  @note
     //  Fell out of loop, clear sts reg and turn off readybit

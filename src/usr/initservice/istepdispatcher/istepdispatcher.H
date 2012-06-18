@@ -42,22 +42,15 @@
 /******************************************************************************/
 #include    <stdint.h>
 #include    <util/singleton.H>
-
 #include    <sys/msg.h>
-#include    <mbox/mboxif.H>             // mailbox Q
-#include    <mbox/mbox_queues.H>        // HB_ISTEP_MSGQ
-
+#include    <sys/sync.h>
 #include    <errl/errlentry.H>
 #include    <initservice/taskargs.H>
 #include    <initservice/initsvcreasoncodes.H>
 #include    <initservice/initsvcstructs.H>
-
 #include    "../baseinitsvc/initservice.H"
-
 #include    "splesscommon.H"
-
 #include    "istep_mbox_msgs.H"
-
 
 namespace   INITSERVICE
 {
@@ -78,9 +71,18 @@ namespace   INITSERVICE
  * param[in,out]    -   pointer to any args
  *
  * @return  nothing
- *
  */
-void spTask( void    *io_pArgs );
+void spTask ( void *io_pArgs );
+
+/**
+ * @brief enums for whether the messages IStepdispatcher sends are synchronus
+ *      or asynchronous.
+ */
+enum IStepSync_t
+{
+    ISTEP_SYNC,
+    ISTEP_ASYNC,
+};
 
 
 /******************************************************************************/
@@ -105,53 +107,71 @@ public:
      */
     static IStepDispatcher& getTheInstance();
 
-
     /**
-     *  @brief  Provide an entry function into the class, called from _start()
+     * @brief This function is what is called to startup the main istep
+     *      dispatcher thread.
      *
-     *  @param[in]  io_rtaskRetErrl  -   ref to errlHndl_t passed back to _start().
-     *
-     *  @return nothing
-     */
-    void            init( errlHndl_t    &io_rtaskRetErrl );
-
-
-    /**
-     * @brief Handle an istep break point to FSP
-     * @param[in] i_info, @TODO - location/info
-     *
-     * @note blocks until an outside istep cmd to resume is received.
-     */
-    void handleBreakPoint( uint32_t info);
-
-    /**
-     * @brief Handle an istep break point from SPless
-     * @param[in] i_info, @TODO - location/info
-     * @pre iv_sts contains current istep status + seqnum or
-     *      0 if not in step mode
-     * @note blocks until an outside istep cmd to resume is recieved.
-     */
-    void handleSPlessBreakPoint( uint32_t info);
-
-    /**
-     * @brief This function returns the MBOX Message Queue used by the istep
-     *      dispatcher.
-     *
-     * @param[out] o_msgQ - The message queue.
+     * @param[in/out] io_rtaskRetErrl - Errorlog pointer to be returned for
+     *      any errors that might have been encountered.
      *
      * @return NONE.
      */
-    void getIstepMsgQ ( msg_q_t & o_msgQ );
+    void init ( errlHndl_t &io_rtaskRetErrl );
 
     /**
-     * @brief This function returns the current MBOX Message used by the istep
-     *      dispatcher.
+     * @brief This function is used to send a sync point message from Hostboot
+     *      to the Fsp.
      *
-     * @param[out] o_msg - The message.
+     * @return errlHndl_t - NULL if successful, otherwise a pointer to the
+     *      error log.
+     */
+    errlHndl_t sendSyncPoint ( void );
+
+    /**
+     * @brief This function is used for calling code to be held off waiting
+     *      for a syncpoint message from an external source.  Anyone calling
+     *      this will be blocked on this call until ANY sync point message is
+     *      received.  Once received, each caller in succession will be
+     *      released.
      *
      * @return NONE.
      */
-    void getIstepMsg ( msg_t* & o_msg );
+    void waitForSyncPoint ( void );
+
+    /**
+     * @brief This function when called will send a Istep complete mailbox
+     *      message to the Fsp to indicate that the current Istep is complete.
+     *
+     * @return errlHndl_t - NULL if successful, otherwise a pointer to the
+     *      error log.
+     */
+    errlHndl_t sendIstepCompleteMsg ( void );
+
+    /**
+     * @brief This function will handle all breakpoint requests from the
+     *      running istep code.  The running istep code would be initiated via
+     *      the istep dispatcher worker thread.  Thus, holding off the worker
+     *      thread.
+     *
+     * @param[in] i_info - TODO - this needs to be decided yet.  But it seems
+     *      at least preliminarily that this will contain a unique breakpoint
+     *      numbering value.
+     *
+     * @return NONE.
+     */
+    void handleBreakpoint ( uint32_t i_info );
+
+    /**
+     * @brief This function will return the current istep and substep.
+     *
+     * @param[out] o_iStep - The current Istep value.
+     *
+     * @param[out] o_subStep - The current SubStep value.
+     *
+     * @return NONE.
+     */
+    void getIstepInfo ( uint8_t & o_iStep,
+                        uint8_t & o_subStep );
 
 
 protected:
@@ -182,104 +202,93 @@ private:
      *  @retval false if IStep Mode is "OFF"
      *          true if IStep Mode is "ON"
      */
-    bool getIStepMode( )    const;
-
-
-    /**
-     * @brief   Find a TaskInfo struct in the global istep list(s),
-     *          addressed by { IStep, SubStep }
-     *
-     * @param[in]       i_IStep         -   IStepNumber
-     * @param[in]       i_SubStep       -   SubStepNumber
-     *
-     * @return  pointer to a TaskInfo struct
-     * @retval  pointer to a TaskInfo struct, or NULL
-     *
-     */
-    const TaskInfo *findTaskInfo(
-                                    const uint32_t i_IStep,
-                                    const uint32_t i_SubStep ) const;
-
-     /**
-      * @brief  runAllISteps
-      *
-      * Run all available ISteps sequentially.
-      * If an IStep gets an error, report it and stop.
-      * Otherwise, return.
-      *
-      * @param[in,out]  -   ref to an errlHndl_t that can be passed back to
-      *                     ExtInitSvc .
-      *
-      * @return none
-      */
-     void   runAllISteps( errlHndl_t    &io_rtaskRetErrl ) ;
-
-
-     /**
-      * @brief  singleStepISteps
-      *
-      * Go into a polling loop, waiting for Istep commands from
-      * the FSP or SPTask.
-      *
-      * @param[in,out]  -   ref to an errlHndl_t that can be passed back to
-      *                     ExtInitSvc .
-      * @return none
-      */
-     void   singleStepISteps( errlHndl_t    &io_rtaskRetErrl ) ;
-
+    bool getIStepMode( ) const;
 
     /**
-     * @brief   getCanContinueProcedure
-     *  If an IStep fails, this routine will fetch the recovery procedure
-     *  This is only used in "normal" mode, it will not be used when IStep Mode
-     *  is ON (i.e. it will not be used when single-stepping).
+     * @brief This function will start at istep 0, substep 0, and cycle
+     *      through all possible isteps, returning when complete, or an error
+     *      is hit.
      *
-     *  @param[in]      i_failingIStep  -   ref to IStepInfo struct for failing
-     *                                      Istep
-     *  @param[in]      i_failingError  -   ref to errorlog for the failure
-     *  @param[in,out]  io_nextIStep    -   ref to TaskInfo struct for next
-     *                                      IStep to run.  struct will be filled
-     *                                      out with info on the next IStep to
-     *                                      run.
-     *
-     *  @return     bool
-     *  @retval     false if there is no Can-Continue procedure,
-     *                  true otherwise
-     *
-     *  @todo   2011-08-22 currently the defs for this procedure are pretty
-     *          vague - requirements for Can-Continue behaviour have not been
-     *          defined yet.
+     * @return errlHndl_t - NULL if successful, otherwise a pointer to an
+     *      error log.
      */
-    bool getCanContinueProcedure(
-                            const TaskInfo  &i_failingIStep,
-                            errlHndl_t      &i_failingError,
-                            TaskInfo        &io_nextIStep  ) const;
+    errlHndl_t executeAllISteps ( void );
 
+    /**
+     * @brief This function is the main handler loop for the Istep Dispatcher.
+     *      it receives all messages from outside sources and initiates the
+     *      proper action and response (if required).
+     *
+     * @return errlHndl_t - NULL if successful, otherwise a pointer to an
+     *      error log.
+     */
+    errlHndl_t msgHndlr ( void );
 
-     /**
-      * @brief   Command 0: Run the requested IStep/SubStep
-      *
-      * param[in]   i_IStep     -   IStep number
-      * param[in]   i_Substep   -   Substep number
-      * param[out]  o_rSts      -   lookup status - returns Invalid if the
-      *                             IStep, Substep doesn't exist
-      *
-      * @post       iv_sts   set to current istep status
-      *
-      * @return  errlHndl_t
-      */
-     errlHndl_t  processSingleIStepCmd(
-                                 const  uint32_t    i_IStep,
-                                 const  uint32_t    i_Substep,
-                                 uint32_t           &o_rSts  );
+    /**
+     * @brief This function is used to send mailbox messages to the Fsp.
+     *
+     * @param[in] i_sendSync - The sync type of message to send.  Whether
+     *      synchronous or asynchronous.
+     *
+     * @param[in] i_msg - The message to send to the Fsp.
+     *
+     * @return errlHndl_t - NULL if successful, otherwise a pointer to an
+     *      error log.
+     */
+    errlHndl_t sendMboxMsg ( IStepSync_t i_sendSync,
+                             msg_t * i_msg );
+
+    /**
+     * @brief This function is used for all of the Syncpoint message handling.
+     *
+     * @return NONE.
+     */
+    void handleSyncPointReachedMsg ( void );
+
+    /**
+     * @brief This function is used to handle the message from the worker
+     *      thread requesting more work.
+     *
+     * @return NONE.
+     */
+    void handleMoreWorkNeededMsg ( void );
+
+    /**
+     * @brief This function is used to handle the single Istep requests from
+     *      outside sources.
+     *
+     * @return NONE.
+     */
+    void handleIStepRequestMsg ( void );
+
+    /**
+     * @brief This function is used to set the current Istep and Substep
+     *      values for what is currently running.
+     *
+     * @return NONE.
+     */
+    void setIstepInfo ( uint16_t i_type );
+
+    /**
+     * @brief This function will return whether or not we are SPless
+     *
+     * @return bool - whether we are SPLESS.
+     */
+    bool spLess ( void );
 
 
     //  -----   internal vars   -----------------------------
 
-    mutex_t             iv_poll_mutex;  //!< protect who's polling istep cmds
-    SPLESS::SPLessSts   iv_sts;         //!< Current status of istep mode
-    msg_q_t             iv_msgQ;        //!< Message Q to FSP & SPTask.
-    msg_t               *iv_pMsg;       //!< ptr to msg from FSP or user console
+    mutex_t iv_bkPtMutex;
+    mutex_t iv_syncMutex;
+    mutex_t iv_stepMutex;
+    sync_cond_t iv_syncHit;
+    uint8_t iv_curIStep;
+    uint8_t iv_curSubStep;
+    bool iv_sync;
+    msg_q_t iv_msgQ;
+    msg_t* iv_workerMsg;    // More work Needed Msg from Worker
+    msg_t* iv_Msg;          // All other Msgs that need to be saved
 };  //  class IStepDispatcher
 
 

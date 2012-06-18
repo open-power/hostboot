@@ -129,6 +129,7 @@ if ( !defined( $hbCount ) || ( $hbCount eq "" ) )
     $hbCount    =   0xffffffff;     ##  effectively infinite ...
 }
 
+## init global variables
 my  $IstepModeReg   =   "";
 my  $ShutDownFlag   =   "";
 my  $ShutDownSts    =   "";
@@ -156,6 +157,28 @@ sub main
     ::userDisplay   "Welcome to hb-Istep 3.31 .\n";
     ::userDisplay   "Note that in simics, multiple options must be in quotes,";
     ::userDisplay   "separated by spaces\n\n";
+    
+    ##  initialize inList to "undefined"
+    $inList[MAX_ISTEPS][MAX_SUBSTEPS]   =   ();
+    for( my $i = 0; $i <    MAX_ISTEPS; $i++)
+    {
+        for(my $j = 0; $j < MAX_SUBSTEPS; $j++)
+       {
+            undef( $inList[$i][$j] );
+        }
+    }    
+    
+    ##  ---------------------------------------------------------------------------
+    ##  Fetch the symbols we need from syms file
+    ##  ---------------------------------------------------------------------------
+
+    $IstepModeReg   =   getSymbol(  "SPLESS::g_SPLess_IStepMode_Reg" );
+    $CommandReg     =   getSymbol(  "SPLESS::g_SPLess_Command_Reg" );
+    $StatusReg      =   getSymbol(  "SPLESS::g_SPLess_Status_Reg" );
+
+    $ShutDownFlag   =   getSymbol(  "CpuManager::cv_shutdown_requested" );
+    $ShutDownSts    =   getSymbol(  "CpuManager::cv_shutdown_status" );
+
     ##  fetch the istep list
     get_istep_list();
 

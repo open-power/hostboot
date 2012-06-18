@@ -5,7 +5,7 @@
  *
  *  IBM CONFIDENTIAL
  *
- *  COPYRIGHT International Business Machines Corp. 2011 - 2012
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
  *
  *  p1
  *
@@ -62,13 +62,17 @@ enum    InitServiceReasonCode
     FORCE_FAIL                  =   INITSVC_COMP_ID | 0x05,
     CXXTEST_FAILED_TEST         =   INITSVC_COMP_ID | 0x06,
     SHUTDOWN_FLUSH_FAILED       =   INITSVC_COMP_ID | 0x07,
-
     WAIT_TASK_FAILED            =   INITSVC_COMP_ID | 0x08,
     WAIT_FN_FAILED              =   INITSVC_COMP_ID | 0x09,
     INITSVC_LOAD_MODULE_FAILED  =   INITSVC_COMP_ID | 0x0a,
-    ISTEP_SINGLESTEP_SHUTDOWN   =   INITSVC_COMP_ID | 0x0b,
+    ISTEP_SHUTDOWN              =   INITSVC_COMP_ID | 0x0b,
     ISTEP_SINGLESTEP_ASYNC_RCVD =   INITSVC_COMP_ID | 0x0c,
     ISTEP_BKPOINT_ASYNC_RCVD    =   INITSVC_COMP_ID | 0x0d,
+    ISTEP_WAITFORSYNC_BAD_MSG   =   INITSVC_COMP_ID | 0x0e,
+    ISTEP_MULTIPLE_ISTEP_REQ    =   INITSVC_COMP_ID | 0x0f,
+    ISTEP_FAILED                =   INITSVC_COMP_ID | 0x10,
+    LAST_ISTEP_FAILED           =   INITSVC_COMP_ID | 0x11,
+    NO_MSG_PRESENT              =   INITSVC_COMP_ID | 0x12,
 
 };
 

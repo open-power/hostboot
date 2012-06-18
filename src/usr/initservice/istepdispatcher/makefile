@@ -1,11 +1,11 @@
-#  IBM_PROLOG_BEGIN_TAG
+#   IBM_PROLOG_BEGIN_TAG
 #  This is an automatically generated prolog.
 #
 #  $Source: src/usr/initservice/istepdispatcher/makefile $
 #
 #  IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2011 - 2012
+#  COPYRIGHT International Business Machines Corp. 2011-2012
 #
 #  p1
 #
@@ -24,7 +24,7 @@ ROOTPATH = ../../../..
 MODULE = istepdisp
 
 OBJS =  istepdispatcher.o initsvcudistep.o      \
-        sptask.o splesscommon.o
+        sptask.o splesscommon.o istepWorker.o
 
 ## SUBDIRS = test.d
 

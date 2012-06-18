@@ -108,6 +108,9 @@ void    call_host_start_payload( void    *io_pArgs )
 
     do
     {
+        // Need to wait here until Fsp tells us go
+        INITSERVICE::waitForSyncPoint();
+
         // Host Start Payload procedure, per documentation from Patrick.
         //  - Verify target image
         //      - TODO - Done via call to Secure Boot ROM.
@@ -257,68 +260,18 @@ errlHndl_t notifyFsp ( bool i_istepModeFlag,
 
     do
     {
-        // Get the Istep msgQ
-        msg_q_t msgQ;
-        INITSERVICE::getIstepMsgQ( msgQ );
-
-        // Get the Istep Msg to respond to.
-        msg_t * myMsg = NULL;
-        INITSERVICE::getIstepMsg( myMsg );
-
-        if( NULL == myMsg )
-        {
-            if( i_istepModeFlag )
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           ERR_MRK"Istep message was NULL in Istep Mode!" );
-
-                /*@
-                 * @errortype
-                 * @reasoncode       ISTEP_MBOX_MSG_NULL
-                 * @severity         ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM
-                 * @moduleid         ISTEP_START_PAYLOAD_NOTIFY_FSP
-                 * @userdata1        <UNUSED>
-                 * @userdata2        <UNUSED>
-                 * @devdesc          Istep Mailbox Message returned was NULL!
-                 */
-                err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
-                                               ISTEP_START_PAYLOAD_NOTIFY_FSP,
-                                               ISTEP_MBOX_MSG_NULL,
-                                               0x0,
-                                               0x0 );
-
-                break;
-            }
-            else
-            {
-                myMsg = msg_allocate();
-            }
-        }
-
-        // TODO - All of the following mailbox interactions really should be
-        // done within the Istep Dispatcher.  But, it needs to be reorganized
-        // to do that.  Issue 42491 should be used for this discussion and
-        // when it is determined what needs to be reorganized, this should be
-        // addressed.
-        myMsg->data[1] = 0x0;
-        myMsg->extra_data = NULL;
         if( i_istepModeFlag )
         {
             // Istep Mode send istep complete
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                        INFO_MRK"Isteps enabled, send istep complete msg" );
 
-            // TODO - I cannot use this unless I completely mess around the
-            // headers for the istepdispatcher.  I have Issue 42491 open now
-            // to discuss doing that.  For now, I'm hard coding the msg type
-            // to be equivalent to this value
-//            myMsg->type = INITSERVICE::SINGLE_STEP_TYPE;
-            myMsg->type = MBOX::FIRST_SECURE_MSG | 0x00;
-            myMsg->data[0] = 0x0;   // Fsp expects 0x0 (SUCCESS) in istep mode
+            err = INITSERVICE::sendIstepCompleteMsg();
 
-            // Respond to the Msg
-            msg_respond( msgQ,
-                         myMsg );
+            if( err )
+            {
+                break;
+            }
         }
         else
         {
@@ -326,28 +279,13 @@ errlHndl_t notifyFsp ( bool i_istepModeFlag,
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                        INFO_MRK"Isteps disabled, send SYNC_POINT_REACHED msg" );
 
-            // TODO - This really needs to be in istep_mbox_msgs.H, but that
-            // isn't in a place that I can use it right now, and it can't be
-            // moved because its using Enums from a header (splesscommon.H)
-            // that shouldn't be moved.
-            // I've opened Issue 42491 to discuss changes.
-            const uint64_t SYNC_POINT_REACHED = MBOX::FIRST_UNSECURE_MSG | 0x10;
-            myMsg->type = SYNC_POINT_REACHED;
+            err = INITSERVICE::sendSyncPoint();
 
-            // Hardcode steps in data[0] until issue 42491 is resolved.
-            // Step 21, substep 1
-            myMsg->data[0] = ((((uint64_t)21) << 32) | 1 );
-
-            // Send the async msg.
-            MBOX::send( MBOX::IPL_SERVICE_QUEUE,
-                        myMsg );
+            if( err )
+            {
+                break;
+            }
         }
-
-        TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   INFO_MRK"Sent MBOX Msg (0x%08x), msg: 0x%016llx.%016llx",
-                   myMsg->type,
-                   myMsg->data[0],
-                   myMsg->data[1] );
     } while( 0 );
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,

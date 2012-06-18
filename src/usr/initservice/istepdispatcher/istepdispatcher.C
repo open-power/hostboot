@@ -38,25 +38,17 @@
 #include    <stdio.h>
 #include    <string.h>
 
-
 #include    <kernel/console.H>              // printk status
-//  turn on clearAllBuffers()
-#define     __HIDDEN_TRACEIF_CLEARBUFFER
 
-#include    <vfs/vfs.H>                     //  load_module
 #include    <sys/task.h>                    //  tid_t, task_create, etc
-#include    <sys/time.h>                    //  nanosleep
-#include    <sys/misc.h>                    //  shutdown
-
-#include    <trace/interface.H>             //  trace support
 
 #include    <errl/errlentry.H>              //  errlHndl_t
+
 #include    <devicefw/userif.H>             //  targeting
 
 #include    <initservice/isteps_trace.H>    //  ISTEPS_TRACE buffer
 #include    <initservice/initsvcudistep.H>  //  InitSvcUserDetailsIstep
-#include    <initservice/taskargs.H>        // TASK_ENTRY_MACRO
-
+#include    <initservice/taskargs.H>        //  TASK_ENTRY_MACRO
 
 #include    <targeting/common/attributes.H> //  ISTEP_MODE attribute
 #include    <targeting/common/targetservice.H>
@@ -64,12 +56,12 @@
 #include    <mbox/mbox_queues.H>            // HB_ISTEP_MSGQ
 #include    <mbox/mboxif.H>                 // register mailbox
 
+#include    <isteps/istepmasterlist.H>
+
 #include    "istepdispatcher.H"
+#include    "istepWorker.H"
 
 #include    "splesscommon.H"
-
-#include    <isteps/istepmasterlist.H>
-#include    <targeting/common/attributes.H>
 
 //  -----   namespace   ISTEPS_TRACE    ---------------------------------------
 namespace ISTEPS_TRACE
@@ -94,752 +86,782 @@ using   namespace   SPLESS;             // SingleStepMode
 /******************************************************************************/
 extern trace_desc_t *g_trac_initsvc;
 
+const MBOX::queue_id_t HWSVRQ = MBOX::IPL_SERVICE_QUEUE;
+
 /**
  * _start() task entry procedure using the macro in taskargs.H
  */
 TASK_ENTRY_MACRO( IStepDispatcher::getTheInstance().init );
 
-
-
-
-void IStepDispatcher::init( errlHndl_t  &io_rtaskRetErrl )
+// ----------------------------------------------------------------------------
+// IstepDispatcher()
+// ----------------------------------------------------------------------------
+IStepDispatcher::IStepDispatcher ()
+    : iv_workerMsg( NULL )
 {
-    errlHndl_t  l_errl  =   NULL;
+    SPLESS::initIStepMode();
+    mutex_init( &iv_bkPtMutex );
+    mutex_init( &iv_syncMutex );
+    mutex_init( &iv_stepMutex );
+    sync_cond_init( &iv_syncHit );
 
-    // initialize (and declare) ISTEPS_TRACE here, the rest of the isteps will use it.
+    iv_curIStep = 0x0;
+    iv_curSubStep = 0x0;
+    iv_sync = false;
+
+    // init mailbox / message Q.
+    iv_msgQ = msg_q_create();
+}
+
+
+// ----------------------------------------------------------------------------
+// ~IstepDispatcher()
+// ----------------------------------------------------------------------------
+IStepDispatcher::~IStepDispatcher ()
+{
+}
+
+
+// ----------------------------------------------------------------------------
+// IstepDispatcher::getTheInstance()
+// ----------------------------------------------------------------------------
+IStepDispatcher& IStepDispatcher::getTheInstance ()
+{
+    return Singleton<IStepDispatcher>::instance();
+}
+
+
+// ----------------------------------------------------------------------------
+// IStepDispatcher::init()
+// ----------------------------------------------------------------------------
+void IStepDispatcher::init ( errlHndl_t &io_rtaskRetErrl )
+{
+    errlHndl_t err = NULL;
+
+    // initialize (and declare) ISTEPS_TRACE here, the rest of the isteps will
+    // use it.
     ISTEPS_TRACE::g_trac_isteps_trace = NULL;
-
-    printk( "IstepDispatcher entry.\n" );
-
-    TRACFCOMP( g_trac_initsvc,
-            "IStep Dispatcher entry." );
-
     TRAC_INIT(&ISTEPS_TRACE::g_trac_isteps_trace, "ISTEPS_TRACE", 2048 );
 
+    printk( "IstepDispatcher entry.\n" );
+    TRACFCOMP( g_trac_initsvc,
+               "IStep Dispatcher entry." );
 
-    if ( getIStepMode() == true )
+    do
     {
-        printk( "IStep single-step\n" );
-        TRACFCOMP( g_trac_initsvc,
-                   "IStep single-step" );
+        if( !(SPLESS::SPLessAttached()) )
+        {
+            //  register message Q with FSP Mailbox - only if Fsp attached.
+            err = MBOX::msgq_register( MBOX::HB_ISTEP_MSGQ,
+                                       iv_msgQ );
 
-        if  ( SPLESS::SPLessAttached( ) )
+            if( err )
+            {
+                break;
+            }
+        }
+
+        // Spawn off the Worker thread
+        tid_t l_workerTid = task_create( startIStepWorkerThread,
+                                         iv_msgQ );
+        assert( l_workerTid > 0 );
+
+        // Check for SPLess operation
+        if( SPLESS::SPLessAttached() )
         {
             // SPless user console is attached,
             //  launch SPTask.
-
             TRACFCOMP( g_trac_initsvc,
-                    "IStep single-step enable (SPLESS)" );
+                       "IStep single-step enable (SPLESS)" );
 
-            tid_t   l_spTaskTid   = task_create( spTask, iv_msgQ );
-            //  should never happen...
+            tid_t l_spTaskTid = task_create( spTask,
+                                             iv_msgQ );
             assert( l_spTaskTid > 0 );
+        }
 
-            //  sptask will turn on the ready bit when it is up.
+        if( err )
+        {
+            TRACFCOMP( g_trac_initsvc,
+                       "ERROR:  Failed to register mailbox, terminating" );
 
-            // IStep single-step
-            singleStepISteps( io_rtaskRetErrl );
+            break;
+        }
+
+        if( getIStepMode() )
+        {
+            printk( "IStep single-step\n" );
+            TRACFCOMP( g_trac_initsvc,
+                       "IStep single-step" );
+
+            err = msgHndlr();
+            if( err )
+            {
+                break;
+            }
+        }
+        else
+        {
+            printk( "IStep run-all\n" );
+            TRACFCOMP( g_trac_initsvc,
+                       "IStep run all" );
+
+            // Execute all Isteps sequentially in 'normal' mode
+            err = executeAllISteps();
+            if( err )
+            {
+                break;
+            }
+        }
+    } while( 0 );
+
+    TRACFCOMP( g_trac_initsvc,
+               "IStepDispatcher finished.");
+    printk( "IStepDispatcher exit.\n" );
+    task_end2( err );
+}
+
+
+// ----------------------------------------------------------------------------
+// IStepDispatcher::executeAllISteps()
+// ----------------------------------------------------------------------------
+errlHndl_t IStepDispatcher::executeAllISteps ( void )
+{
+    errlHndl_t err = NULL;
+    msg_t * theMsg = NULL;
+
+    TRACFCOMP( g_trac_initsvc,
+               ENTER_MRK"IStepDispatcher::executeAllISteps()" );
+
+    do
+    {
+        // Sequentially loop through all isteps, executing each by replying to
+        // work needed msg from worker thread.
+        uint32_t prevIstep = 0;
+        uint32_t prevSubStep = 0;
+        for( size_t istep = 0;
+             istep < MaxISteps;
+             istep++ )
+        {
+            // Run until num items +1, to be sure we know the last step
+            // finished
+            for( size_t substep = 0;
+                 substep < (g_isteps[istep].numitems + 1);
+                 substep++ )
+            {
+                // Before we can do anything, we need to be sure the worker thread is
+                // ready to start
+                theMsg = msg_wait( iv_msgQ );
+
+                // check for sync msgs
+                if( theMsg->type == SYNC_POINT_REACHED )
+                {
+                    TRACFCOMP( g_trac_initsvc,
+                               INFO_MRK"Got sync msg (0x%08x)",
+                               theMsg->type );
+                    handleSyncPointReachedMsg();
+
+                    // We didn't really do anything for this substep
+                    substep--;
+                    continue;
+                }
+
+                // If we just got the msg that the last step finished, break
+                // out
+                if( substep == (g_isteps[istep].numitems + 1) )
+                {
+                    TRACFCOMP( g_trac_initsvc,
+                               INFO_MRK"Last Step, exit" );
+                    break;
+                }
+
+                // Look for an errlog in extra_data
+                if( NULL != theMsg->extra_data )
+                {
+                    TRACFCOMP( g_trac_initsvc,
+                               ERR_MRK"Error returned from istep(%d), substep(%d)",
+                               prevIstep, prevSubStep );
+
+                    err = ((errlHndl_t)theMsg->extra_data);
+
+                    break;
+                }
+
+                TRACFCOMP( g_trac_initsvc,
+                           INFO_MRK"executeAllSteps(0x%08x), istep: %d, substep: %d",
+                           theMsg->type, istep, substep );
+
+                // Set the Istep info
+                prevIstep = istep;
+                prevSubStep = substep;
+                uint16_t istepInfo = ((istep << 8 ) | substep);
+                setIstepInfo( istepInfo );
+
+                // Put the step/substep into data[0] for the worker thread
+                theMsg->data[0] = istepInfo;
+                msg_respond( iv_msgQ,
+                             theMsg );
+
+                theMsg = NULL;
+            }
+
+            if( err )
+            {
+                break;
+            }
+        }
+
+        if( err )
+        {
+            break;
+        }
+    } while ( 0 );
+
+    TRACFCOMP( g_trac_initsvc,
+               EXIT_MRK"IStepDispatcher::executeAllISteps()" );
+
+    return err;
+}
+
+
+// ----------------------------------------------------------------------------
+// IStepDispatcher::msgHndlr()
+// ----------------------------------------------------------------------------
+errlHndl_t IStepDispatcher::msgHndlr ( void )
+{
+    errlHndl_t err = NULL;
+    msg_t * theMsg = NULL;
+
+    // TODO - Issue 45012
+    // There is enough common code between this path and executeAllISteps()
+    // that the issue above will be used to combine the 2 paths into one
+    // commone code path.
+
+    TRACFCOMP( g_trac_initsvc,
+               ENTER_MRK"IStepDispatcher::msgHndlr()" );
+
+    // We will stay in this loop unless there is a failure or other reason to
+    // exit out and terminate.  This loop is the main handler for the Istep
+    // Dispatcher.  It receives all messages from the Fsp, Child worker
+    // thread, and the SPLess task.
+    while( 1 )
+    {
+        theMsg = msg_wait( iv_msgQ );
+        TRACDCOMP( g_trac_initsvc,
+                   INFO_MRK"Got Msg - Type: 0x%08x",
+                   theMsg->type );
+
+        switch( theMsg->type )
+        {
+            case SYNC_POINT_REACHED:
+                // Sync point reached from Fsp
+                iv_Msg = theMsg;
+                handleSyncPointReachedMsg();
+                break;
+
+            case MORE_WORK_NEEDED:
+                // Worker thread is ready for more work.
+                iv_workerMsg = theMsg;
+                handleMoreWorkNeededMsg();
+                break;
+
+            case SHUTDOWN_SPLESS:
+                // Creat errorlog to return as part of the shutdown.
+                /*@
+                 * @errortype
+                 * @reasoncode       INITSERVICE::ISTEP_SHUTDOWN
+                 * @severity         ERRORLOG::ERRL_SEV_INFORMATIONAL
+                 * @moduleid         INITSERVICE::ISTEP_INITSVC_MOD_ID
+                 * @userdata1        <UNUSED>
+                 * @userdata2        <UNUSED>
+                 * @devdesc          Istep initiated Shutdown.
+                 */
+                err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                               INITSERVICE::ISTEP_INITSVC_MOD_ID,
+                                               INITSERVICE::ISTEP_SHUTDOWN,
+                                               0, 0 );
+
+                break;
+
+            default:
+                // Default Message
+                // This SHOULD be a message from the Fsp with the Step/substep
+                // to be executed.
+                // Gotta check to make sure Fsp hadn't sent us a 2nd Istep
+                // request for some reason, if so, its an error.
+                if( iv_Msg )
+                {
+                    TRACFCOMP( g_trac_initsvc,
+                               ERR_MRK"ERROR: IStep Dispatcher already has another "
+                               "Istep request for step: 0x%02x, substep: 0x%02x",
+                               ((iv_Msg->type & 0xFF00) >> 8),
+                               (iv_Msg->type & 0xFF) );
+
+                    /*@
+                     * @errortype
+                     * @reasoncode       ISTEP_MULTIPLE_ISTEP_REQ
+                     * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                     * @moduleid         ISTEP_INITSVC_MOD_ID
+                     * @userdata1        Current Istep
+                     * @userdata2        Current SubStep
+                     * @devdesc          A Second Istep request has been made
+                     *                   and we are still working on a
+                     *                   previous Istep.
+                     */
+                    err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                                   ISTEP_INITSVC_MOD_ID,
+                                                   ISTEP_MULTIPLE_ISTEP_REQ,
+                                                   ((iv_Msg->type & 0xFF00) >> 8),
+                                                   (iv_Msg->type & 0xFF) );
+
+                    break;
+                }
+
+                iv_Msg = theMsg;
+                handleIStepRequestMsg();
+                break;
+        };
+
+        if( err )
+        {
+            // Breaking here will be a BAD thing...  It means that we are
+            // exiting not just Istep Dispatcher, but all of Hostboot.  There
+            // are 2 cases where we would exit here:
+            //      1. Shutdown requested via istep (SPLESS)
+            //      2. Error during an Istep.
+            errlCommit( err,
+                        INITSVC_COMP_ID );
+        }
+    }
+
+    TRACFCOMP( g_trac_initsvc,
+               EXIT_MRK"IStepDispatcher::msgHndlr()" );
+
+    return err;
+}
+
+
+// ----------------------------------------------------------------------------
+// waitForSyncPoint()
+// IStepDispatcher::waitForSyncPoint()
+// ----------------------------------------------------------------------------
+void waitForSyncPoint ( void )
+{
+    TRACDCOMP( g_trac_initsvc,
+               ENTER_MRK"waitForSyncPoint()" );
+
+    IStepDispatcher::getTheInstance().waitForSyncPoint();
+
+    TRACDCOMP( g_trac_initsvc,
+               EXIT_MRK"waitForSyncPoint()" );
+}
+
+void IStepDispatcher::waitForSyncPoint ( void )
+{
+    TRACDCOMP( g_trac_initsvc,
+               ENTER_MRK"IStepDispatcher::waitForSyncPoint()" );
+
+    if( getIStepMode() ||
+        spLess() )
+    {
+        TRACFCOMP( g_trac_initsvc,
+                   INFO_MRK"Istep mode or SPless, no wait for sync point allowed" );
+        return;
+    }
+
+    // Lock here to hold off all additional callers
+    TRACFCOMP( g_trac_initsvc,
+               INFO_MRK"Wait for sync point" );
+    mutex_lock( &iv_syncMutex );
+    while( !iv_sync )
+    {
+        sync_cond_wait( &iv_syncHit,
+                        &iv_syncMutex );
+    }
+    iv_sync = false;
+    mutex_unlock( &iv_syncMutex );
+    TRACDCOMP( g_trac_initsvc,
+               INFO_MRK"Sync point hit." );
+
+    TRACDCOMP( g_trac_initsvc,
+               EXIT_MRK"IStepDispatcher::waitForSyncPoint()" );
+}
+
+// ----------------------------------------------------------------------------
+// sendSyncPoint()
+// IStepDispatcher::sendSyncPoint()
+// ----------------------------------------------------------------------------
+errlHndl_t sendSyncPoint ( void )
+{
+    TRACFCOMP( g_trac_initsvc,
+               ENTER_MRK"sendSyncPoint()" );
+
+    return IStepDispatcher::getTheInstance().sendSyncPoint();
+}
+
+errlHndl_t IStepDispatcher::sendSyncPoint ( void )
+{
+    errlHndl_t err = NULL;
+
+    TRACDCOMP( g_trac_initsvc,
+               ENTER_MRK"IStepDispatcher::sendSyncPoint()" );
+
+    if( getIStepMode() )
+    {
+        TRACFCOMP( g_trac_initsvc,
+                   INFO_MRK"Istep mode, no sending sync point allowed" );
+        return err;
+    }
+
+    msg_t * myMsg = msg_allocate();
+    myMsg->type = SYNC_POINT_REACHED;
+    uint64_t tmpVal = iv_curIStep;
+    tmpVal = tmpVal << 32;
+    tmpVal |= iv_curSubStep;
+    myMsg->data[0] = tmpVal;
+    myMsg->data[1] = 0x0;
+    myMsg->extra_data = NULL;
+    err = sendMboxMsg( ISTEP_ASYNC,
+                       myMsg );
+
+    TRACDCOMP( g_trac_initsvc,
+               EXIT_MRK"IStepDispatcher::sendSyncPoint()" );
+
+    return err;
+}
+
+// ----------------------------------------------------------------------------
+// sendIstepCompleteMsg()
+// IStepDispatcher::sendIstepCompleteMsg()
+// ----------------------------------------------------------------------------
+errlHndl_t sendIstepCompleteMsg ( void )
+{
+    TRACFCOMP( g_trac_initsvc,
+               ENTER_MRK"sendIstepCompleteMsg()" );
+
+    return IStepDispatcher::getTheInstance().sendIstepCompleteMsg();
+}
+
+errlHndl_t IStepDispatcher::sendIstepCompleteMsg ( void )
+{
+    errlHndl_t err = NULL;
+
+    TRACDCOMP( g_trac_initsvc,
+               ENTER_MRK"IStepDispatcher::sendIstepCompleteMsg()" );
+
+    do
+    {
+        // We just need to respond back to the outstanding iv_Msg we should
+        // already have
+        if( iv_Msg )
+        {
+            iv_Msg->data[0] = 0x0;
+            msg_respond( iv_msgQ,
+                         iv_Msg );
+            iv_Msg = NULL;
         }
         else
         {
             TRACFCOMP( g_trac_initsvc,
-                    "IStep single-step enable (FSP)" );
+                       ERR_MRK"Request to send Istep complete, but no outstanding "
+                       "message from Fsp found!!" );
 
-            //  register message Q with FSP Mailbox
-            l_errl  =   MBOX::msgq_register(
-                                    MBOX::HB_ISTEP_MSGQ,
-                                    iv_msgQ ) ;
-            if ( l_errl )
-            {
-                TRACFCOMP( g_trac_initsvc,
-                        "ERROR:  Failed to register mailbox, terminating" );
-                // fall through and report errorlog
-                io_rtaskRetErrl  =   l_errl;
-            }
-            else
-            {
-                // IStep single-step
-                singleStepISteps( io_rtaskRetErrl );
-            }
+            /*@
+             * @errortype
+             * @reasoncode       NO_MSG_PRESENT
+             * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid         ISTEP_INITSVC_MOD_ID
+             * @userdata1        Current Istep
+             * @userdata2        Current SubStep
+             * @devdesc          Request to send Istep Complete msg to Fsp, but no
+             *                   outstanding message from Fsp found.
+             */
+            err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                           ISTEP_INITSVC_MOD_ID,
+                                           NO_MSG_PRESENT,
+                                           iv_curIStep,
+                                           iv_curSubStep );
+
+            break;
+        }
+
+    } while( 0 );
+
+    TRACDCOMP( g_trac_initsvc,
+               EXIT_MRK"IStepDispatcher::sendIstepCompleteMsg()" );
+
+    return err;
+}
+
+// ----------------------------------------------------------------------------
+// IStepDispatcher::sendMboxMsg()
+// ----------------------------------------------------------------------------
+errlHndl_t IStepDispatcher::sendMboxMsg ( IStepSync_t i_sendSync,
+                                          msg_t * i_msg )
+{
+    errlHndl_t err = NULL;
+
+    TRACDCOMP( g_trac_initsvc,
+               ENTER_MRK"IStepDispatcher::sendMboxMsg()" );
+
+    do
+    {
+        if( ISTEP_SYNC == i_sendSync )
+        {
+            err = MBOX::sendrecv( HWSVRQ,
+                                  i_msg );
+        }
+        else if( ISTEP_ASYNC == i_sendSync )
+        {
+            err = MBOX::send( HWSVRQ,
+                              i_msg );
+        }
+        else
+        {
+            // should never get here, but if we do, just return back...
+            // Nothing to send.
+        }
+
+        if( err )
+        {
+            break;
+        }
+    } while( 0 );
+
+    TRACDCOMP( g_trac_initsvc,
+               EXIT_MRK"IStepDispatcher::sendMboxMsg()" );
+
+    return err;
+}
+
+
+// ----------------------------------------------------------------------------
+// IStepDispatcher::getIstepInfo()
+// ----------------------------------------------------------------------------
+void IStepDispatcher::getIstepInfo ( uint8_t & o_iStep,
+                                     uint8_t & o_subStep )
+{
+    mutex_lock( &iv_stepMutex );
+    o_iStep = iv_curIStep;
+    o_subStep = iv_curSubStep;
+    mutex_unlock( &iv_stepMutex );
+}
+
+
+// ----------------------------------------------------------------------------
+// IStepDispatcher::setIstepInfo()
+// ----------------------------------------------------------------------------
+void IStepDispatcher::setIstepInfo ( uint16_t i_type )
+{
+    mutex_lock( &iv_stepMutex );
+    iv_curIStep = ((i_type & 0xFF00) >> 8);
+    iv_curSubStep = (i_type & 0xFF);
+    mutex_unlock( &iv_stepMutex );
+}
+
+
+// ----------------------------------------------------------------------------
+// IStepDispatcher::handleSyncPointReachedMsg()
+// ----------------------------------------------------------------------------
+void IStepDispatcher::handleSyncPointReachedMsg ( void )
+{
+    TRACDCOMP( g_trac_initsvc,
+               ENTER_MRK"IStepDispatcher::handleSyncPointReachedMsg()" );
+
+    do
+    {
+        // Indicate we hit a sync point, and get anyone waiting moving.
+        mutex_lock( &iv_syncMutex );
+        iv_sync = true;
+        sync_cond_signal( &iv_syncHit );
+        mutex_unlock( &iv_syncMutex );
+    } while( 0 );
+
+    TRACDCOMP( g_trac_initsvc,
+               EXIT_MRK"IStepDispatcher::handleSyncPointReachedMsg()" );
+}
+
+
+// ----------------------------------------------------------------------------
+// IStepDispatcher::handleMoreWorkNeededMsg()
+// ----------------------------------------------------------------------------
+void IStepDispatcher::handleMoreWorkNeededMsg ( void )
+{
+    TRACDCOMP( g_trac_initsvc,
+               ENTER_MRK"IStepDispatcher::handleMoreWorkNeededMsg()" );
+
+    // Clear out current Istep/substep values.  Since worker thread told us
+    // its done, nothing is running right now.
+    iv_curIStep = 0x0;
+    iv_curSubStep = 0x0;
+
+    // Only something to do if we've gotten a request from Fsp or SPLESS
+    if( iv_Msg )
+    {
+        // Send response back to caller?
+        if( !msg_is_async( iv_Msg ) )
+        {
+            // TODO - Is data[0] status??  Not in HwSvr Doc.
+            iv_Msg->data[0] = 0x0;
+            // Send a possible errlog back to Fsp.
+            iv_Msg->extra_data = iv_workerMsg->extra_data;
+            msg_respond( iv_msgQ,
+                         iv_Msg );
+            iv_Msg = NULL;
         }
     }
     else
     {
-        printk( "IStep run-all\n" );
-
-        TRACFCOMP( g_trac_initsvc,
-                   "IStep run all" );
-
-        //  Run all the ISteps sequentially
-        runAllISteps( io_rtaskRetErrl );
-    }   // endelse
-
-
-    TRACFCOMP( g_trac_initsvc,
-               "IStepDispatcher finished.");
-
-    printk( "IStepDispatcher exit.\n" );
-
-    task_end2( io_rtaskRetErrl );
-}
-
-void    IStepDispatcher::runAllISteps( errlHndl_t   &io_rtaskRetErrl )
-{
-    errlHndl_t          l_errl          =   NULL;
-    uint32_t            l_IStep         =   0;
-    uint32_t            l_SubStep       =   0;
-    const TaskInfo      *l_pistep       =   NULL;
-    uint64_t            l_progresscode  =   0;
-
-
-    for (   l_IStep=0;
-            l_IStep<INITSERVICE::MaxISteps;
-            l_IStep++ )
-    {
-        TRACDCOMP( g_trac_initsvc,
-                        "runAllISteps: IStep %d: %d entries",
-                        l_IStep,
-                        g_isteps[l_IStep].numitems );
-
-        for (   l_SubStep=0;
-                l_SubStep < g_isteps[l_IStep].numitems;
-                l_SubStep++)
-        {
-            /**
-             *  @todo refactor - replace the following block with
-             *      processSingleIStepCmd()
-             */
-
-            l_pistep    =   findTaskInfo(
-                                    l_IStep,
-                                    l_SubStep );
-            if ( l_pistep == NULL )
-            {
-                // continue to end of list
-                continue;
-            }
-
-            //  @todo   placeholder until progress codes are defined and
-            //          progress code driver is implemented.
-            l_progresscode  =  0;
-            InitService::getTheInstance().setProgressCode( l_progresscode );
-
-            //  print out what we are running
-            TRACFCOMP( g_trac_initsvc,
-                    "IStepDisp: Run IStep %d.%d %s",
-                    l_IStep,
-                    l_SubStep,
-                    l_pistep->taskname );
-
-            l_errl = InitService::getTheInstance().executeFn(
-                                                        l_pistep,
-                                                        NULL );
-
-            // check for errors
-            if ( l_errl )
-            {
-                TRACFCOMP( g_trac_initsvc,
-                        "IStepDisp: istep %s returned errlog=%p",
-                        l_pistep->taskname,
-                        l_errl  );
-                // if we have an errorlog, break out of the inner loop
-                // and handle it.
-                break;
-            }
-        }   // endfor l_SubStep
-
-        if ( l_errl )
-        {
-            // something left an error log in the inner loop, breakout
-            break;
-        }
-    }   // endfor l_IStep
-
-
-    /**
-     * @todo detect Can-Continue condition here and reset/rerun ISteps.
-     *      For now this is pushed to a later sprint.
-     */
-
-    //
-    if  ( l_errl )
-    {
-        TRACFCOMP( g_trac_initsvc,
-            "IStepDisp ERROR:  errorlog %p",
-            l_errl );
-
-        // return to _start() with the errorlog set, parent should do shutdown
-        io_rtaskRetErrl =   l_errl;
+        // We should never be here... Worker message should only be doing
+        // something if it got a request from outside.
     }
 
-    //  return to init with io_rtaskRetErrl set
+    TRACDCOMP( g_trac_initsvc,
+               EXIT_MRK"IStepDispatcher::handleMoreWorkNeededMsg()" );
 }
 
 
-void    IStepDispatcher::singleStepISteps( errlHndl_t   &io_rtaskRetErrl )
+// ----------------------------------------------------------------------------
+// iStepBreakPoint()
+// ----------------------------------------------------------------------------
+void iStepBreakPoint ( uint32_t i_info )
 {
-    uint32_t    l_Type      =   0;
-    uint32_t    l_IStep     =   0;
-    uint32_t    l_Substep   =   0;
-    bool        l_quitflag  =   false;
-    uint32_t    l_RetSts    =   0;
-    errlHndl_t  l_errl      =   NULL;
-    uint32_t    l_PLID      =   0;
-
-    mutex_lock(&iv_poll_mutex);  // make sure this is only poller
-
-    while ( 1 )
-    {
-        TRACDCOMP( g_trac_initsvc,
-                "IStepDisp wait for message." );
-
-        //  wait for message from FSP or Dispatcher
-        iv_pMsg  =   msg_wait( iv_msgQ );
-
-        //  unblocked
-        if ( msg_is_async( iv_pMsg ) )
-        {
-            //  should not receive async messages here, drop it, post errorlog
-            //  and go back to waiting.
-            TRACFCOMP( g_trac_initsvc,
-                    "singleStepISteps: ERROR async msg type 0x%x, msg 0x%x.%x",
-                    iv_pMsg->type,
-                    static_cast<uint32_t>( iv_pMsg->data[0] >> 32 ),
-                    static_cast<uint32_t>( iv_pMsg->data[0] & 0xffffffff ) );
-
-            /*@     errorlog tag
-             *  @errortype      ERRL_SEV_INFORMATIONAL
-             *  @moduleid       ISTEP_INITSVC_MOD_ID
-             *  @reasoncode     ISTEP_SINGLESTEP_ASYNC_RCVD
-             *  @userdata1      type of packet
-             *  @userdata2      first data word
-             *
-             *  @devdesc        IStepDisp singleStepISteps was expecting a
-             *                  synchronous message and received an asynchonous
-             *                  message.
-             *
-             */
-            errlHndl_t  l_errlAsync = new ERRORLOG::ErrlEntry(
-                                            ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                            INITSERVICE::ISTEP_INITSVC_MOD_ID,
-                                            INITSERVICE::ISTEP_SINGLESTEP_ASYNC_RCVD,
-                                            iv_pMsg->type,
-                                            iv_pMsg->data[0] );
-
-            errlCommit( l_errlAsync, INITSVC_COMP_ID );
-
-            msg_free(iv_pMsg);
-            iv_pMsg =    NULL;
-
-            continue;
-        }
-
-
-        l_Type    = iv_pMsg->type;
-        l_IStep   = static_cast<uint32_t>( iv_pMsg->data[0] >>32 ) ;
-        l_Substep = static_cast<uint32_t>( iv_pMsg->data[0] & 0x0FFFFFFFF );
-
-        TRACDCOMP( g_trac_initsvc,
-                "IStepDisp recv msg type 0x%x, 0x%x.%x",
-                l_Type,
-                l_IStep,
-                l_Substep  );
-
-        //  Clear Status and PLID fields for response msg
-        l_RetSts    =   0;
-        l_PLID      =   0;
-
-        switch( l_Type )
-        {
-            case SINGLE_STEP_TYPE:
-                mutex_unlock(&iv_poll_mutex);
-                // command 0:  run istep/substep
-                TRACDCOMP( g_trac_initsvc,
-                        "Run istep %d.%d ",
-                        l_IStep,
-                        l_Substep );
-                l_errl  =   processSingleIStepCmd( l_IStep, l_Substep, l_RetSts );
-                mutex_lock(&iv_poll_mutex);
-                break;
-
-            case BREAKPOINT_TYPE: // not at break point here
-                TRACDCOMP( g_trac_initsvc,
-                        "Not at break point."  );
-                l_RetSts    =   SPLESS_NOT_AT_BREAK_POINT;
-                break;
-
-            case CLEAR_TRACE_TYPE:
-                TRAC_CLEAR_BUFFERS();
-                TRACFCOMP( g_trac_initsvc,
-                        "Cleared all trace buffers." );
-                l_RetSts    =   SPLESS_TRACE_BUFFERS_CLEARED;
-                break;
-
-            case SHUTDOWN_TYPE:
-                TRACFCOMP( g_trac_initsvc,
-                        "Shutting down HostBoot. "  );
-                l_RetSts    =   SPLESS_SHUTTING_DOWN;
-                l_quitflag            =   true;
-                break;
-
-            default:
-                TRACFCOMP( g_trac_initsvc,
-                        "ERROR: invalid command 0x%x ",
-                        l_Type );
-                l_RetSts    =   SPLESS_INVALID_COMMAND;
-                break;
-        }   // end switch
-
-        if ( l_errl )
-        {
-            //  tell the user console that the IStep returned an errorlog
-            l_RetSts    =   SPLESS_TASKRC_RETURNED_ERRLOG;
-            //  get the platform log identifier (PLID) to send to FSP
-            l_PLID      =   l_errl->plid();
-
-            // go ahead and commit the child errorlog
-            errlCommit( l_errl, INITSVC_COMP_ID );
-        }
-
-        iv_pMsg->type    =   l_Type;
-        // Return l_RetSts as hi word of data[0]
-        // Return l_PLID as lo word of data[0]
-        iv_pMsg->data[0]    =
-                ( static_cast<uint64_t>( l_RetSts ) << 32 ) |
-                  static_cast<uint64_t>( l_PLID )  ;
-
-        iv_pMsg->data[1]    =   0;
-        iv_pMsg->extra_data =   NULL;
-
-        TRACDCOMP( g_trac_initsvc,
-                "IStepDisp send msg type 0x%x, 0x%x.%x",
-                iv_pMsg->type,
-                static_cast<uint32_t>( iv_pMsg->data[0] >> 32),
-                static_cast<uint32_t>( iv_pMsg->data[0] & 0xFFFFFFFF ));
-
-        //  send status back
-        msg_respond( iv_msgQ, iv_pMsg );
-
-
-        if  ( l_quitflag  ==  true )
-        {
-            //  shutdown command issued, break out of loop
-
-            /*@     errorlog tag
-             *  @errortype      ERRL_SEV_INFORMATIONAL
-             *  @moduleid       ISTEP_INITSVC_MOD_ID
-             *  @reasoncode     ISTEP_SINGLESTEP_SHUTDOWN
-             *  @userdata1      0
-             *  @userdata2      0
-             *
-             *  @devdesc        hb-istep terminated
-             *
-             */
-            l_errl = new ERRORLOG::ErrlEntry(
-                    ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                    INITSERVICE::ISTEP_INITSVC_MOD_ID,
-                    INITSERVICE::ISTEP_SINGLESTEP_SHUTDOWN,
-                    0,
-                    0 );
-            break;
-        }
-
-    }   // end  while
-
-    // fell out of loop, return with rtaskRetErrl set
-    mutex_unlock(&iv_poll_mutex);
-    io_rtaskRetErrl =   l_errl;
+    TRACFCOMP( g_trac_initsvc,
+               ENTER_MRK"handleBreakpointMsg()" );
+    IStepDispatcher::getTheInstance().handleBreakpoint( i_info );
 }
 
 
-errlHndl_t  IStepDispatcher::processSingleIStepCmd(
-                                    const   uint32_t    i_IStep,
-                                    const   uint32_t    i_Substep,
-                                    uint32_t            &o_rSts )
+// ----------------------------------------------------------------------------
+// IStepDispatcher::handleBreakpoint()
+// ----------------------------------------------------------------------------
+void IStepDispatcher::handleBreakpoint ( uint32_t i_info )
 {
-    errlHndl_t              l_errl          =   NULL;
-    const TaskInfo          *l_pistep       =   NULL;
+    // Throttle the breakpoints by locking here.
+    mutex_lock( &iv_bkPtMutex );
+    errlHndl_t err = NULL;
+    TRACDCOMP( g_trac_initsvc,
+               ENTER_MRK"IStepDispatcher::handleBreakpointMsg()" );
 
-    o_rSts    =   0;
+    // Send Breakpoint msg to Fsp.
+    msg_t * myMsg = msg_allocate();
+    myMsg->type = BREAKPOINT;
+    uint64_t tmpVal = 0x0;
+    tmpVal = tmpVal & i_info;
+    myMsg->data[0] = (tmpVal << 32); // TODO - Is this really a Fsp requirement?
+    myMsg->data[1] = 0x0;
+    myMsg->extra_data = NULL;
 
-    //  look up istep+substep
-    l_pistep  =   IStepDispatcher::getTheInstance().findTaskInfo(
-                                                            i_IStep,
-                                                            i_Substep );
-    do
+    if( !(SPLESS::SPLessAttached()) )
     {
-        if ( l_pistep == NULL )
+        // FSP Attached
+        // Wait for Fsp to respond.
+        err = sendMboxMsg( ISTEP_SYNC,
+                           myMsg );
+        // TODO - Do we care what they sent back?  Not sure... HwSvr
+        // has no documentation on this...
+        if( err )
         {
-            // invalid istep, return error
-            TRACDCOMP( g_trac_initsvc,
-                    "processSingleIStepCmd: Invalid IStep %d.%d\n",
-                    i_IStep,
-                    i_Substep  );
-
-            o_rSts  =   SPLESS_INVALID_COMMAND;
-            break;
+            errlCommit( err,
+                        INITSVC_COMP_ID );
         }
+    }
+    else
+    {
+        // SPLESS
+        msg_respond( iv_msgQ,
+                     myMsg );
 
-        /**
-         * @todo   placeholder - set progress code before starting
-         * This will not be finalized until the progress code driver
-         * is designed and implemented.
-         */
-        uint64_t l_progresscode  =  0;
-        InitService::getTheInstance().setProgressCode( l_progresscode );
+        // Now wait for spless code to respond that we're done with the
+        // breakpoint
+        msg_t * rspMsg;
+        rspMsg = msg_wait( iv_msgQ );
+    }
 
+    msg_free( myMsg );
+
+    TRACDCOMP( g_trac_initsvc,
+               EXIT_MRK"IStepDispatcher::handleBreakpointMsg()" );
+    mutex_unlock( &iv_bkPtMutex );
+}
+
+
+// ----------------------------------------------------------------------------
+// IStepDispatcher::handleIStepRequestMsg()
+// ----------------------------------------------------------------------------
+void IStepDispatcher::handleIStepRequestMsg ( void )
+{
+    TRACDCOMP( g_trac_initsvc,
+               ENTER_MRK"IStepDispatcher::handleIStepRequestMsg()" );
+
+    // Only something to do, if the worker thread is ready for work
+    if( iv_workerMsg )
+    {
+        // Set new istep/substep info
+        uint16_t stepInfo = ((iv_Msg->data[0] & 0x000000FF00000000) >> 24);
+        stepInfo = (stepInfo | (iv_Msg->data[0] & 0xFF) );
+        setIstepInfo( stepInfo );
 
         TRACFCOMP( g_trac_initsvc,
-                "processSingleIStepCmd: Run IStep=%d.%d %s",
-                i_IStep,
-                i_Substep,
-                l_pistep->taskname );
+                   INFO_MRK"Istep req: 0x%04x",
+                   stepInfo );
 
-        //  launch the istep
-        l_errl = InitService::getTheInstance().executeFn(
-                l_pistep,
-                NULL );
+        // Set step/substep in data[0];
+        iv_workerMsg->data[0] = stepInfo;
+        msg_respond( iv_msgQ,
+                     iv_workerMsg );
 
-        if ( l_errl )
-        {
-            //  @todo    post informational errl here?
+        iv_workerMsg = NULL;
+    }
 
-            break;
-        }
-
-    } while(0);
-
-
-    return  l_errl;
+    TRACDCOMP( g_trac_initsvc,
+               EXIT_MRK"IStepDispatcher::handleIStepRequestMsg()" );
 }
 
 
-const TaskInfo *IStepDispatcher::findTaskInfo(
-                                const uint32_t i_IStep,
-                                const uint32_t i_SubStep ) const
-{
-    //  default return is NULL
-    const TaskInfo      *l_pistep       =   NULL;
-    /**
-     * @todo
-     *  everything calling this should feed into the "real" istep/substep
-     *  numbers ( starting at 1 ) - this routine should translate to index into
-     *  the isteplists ( starting at 0 )
-     *
-     *      int32_t     l_istepIndex    =   i_IStep-1;
-     *      int32_t     l_substepIndex  =   i_SubStep-1;
-     *
-     *      assert( l_istepIndex >= 0 );
-     *      assert( l_substepIndex >= 0 );
-     */
-
-    //  apply filters
-    do
-    {
-        //  Sanity check / dummy IStep
-        if ( g_isteps[i_IStep].pti == NULL)
-        {
-            TRACDCOMP( g_trac_initsvc,
-                       "g_isteps[%d].pti == NULL (substep=%d)",
-                       i_IStep,
-                       i_SubStep );
-            break;
-        }
-
-        // check input range - IStep
-        if  (   i_IStep >= INITSERVICE::MaxISteps   )
-        {
-            TRACDCOMP( g_trac_initsvc,
-                       "IStep %d out of range. (substep=%d) ",
-                       i_IStep,
-                       i_SubStep );
-            break;      // break out with l_pistep set to NULL
-        }
-
-        //  check input range - ISubStep
-        if  (   i_SubStep >= g_isteps[i_IStep].numitems )
-        {
-            TRACDCOMP( g_trac_initsvc,
-                       "IStep %d Substep %d out of range.",
-                       i_IStep,
-                       i_SubStep );
-            break;      // break out with l_pistep set to NULL
-        }
-
-        //   check for end of list.
-        if ( g_isteps[i_IStep].pti[i_SubStep].taskflags.task_type
-                == END_TASK_LIST )
-        {
-            TRACDCOMP( g_trac_initsvc,
-                       "IStep %d SubStep %d task_type==END_TASK_LIST.",
-                       i_IStep,
-                       i_SubStep );
-            break;
-        }
-
-        //  check to see if the pointer to the function is NULL.
-        //  This is possible if some of the substeps aren't working yet
-        //  and are just placeholders.
-        if  (  g_isteps[i_IStep].pti[i_SubStep].taskfn == NULL )
-        {
-            TRACDCOMP( g_trac_initsvc,
-                    "IStep %d SubStep %d fn ptr is NULL.",
-                    i_IStep,
-                    i_SubStep );
-            break;
-        }
-
-
-        //  we're good, set the istep & return it to caller
-        l_pistep        =   &( g_isteps[i_IStep].pti[i_SubStep] );
-
-    }   while ( 0 );
-
-    return  l_pistep;
-}
-
-
-bool IStepDispatcher::getIStepMode( )   const
+// ----------------------------------------------------------------------------
+// IStepDispatcher::getIStepMode()
+// ----------------------------------------------------------------------------
+bool IStepDispatcher::getIStepMode( ) const
 {
     using namespace TARGETING;
-    Target* l_pTopLevel     =   NULL;
-    bool    l_istepmodeflag =   false;
+    Target* l_pTopLevel = NULL;
+    bool l_istepmodeflag = false;
     TargetService& l_targetService = targetService();
 
-    (void) l_targetService.getTopLevelTarget(l_pTopLevel);
-    if (l_pTopLevel == NULL)
+    (void)l_targetService.getTopLevelTarget( l_pTopLevel );
+    if( l_pTopLevel == NULL )
     {
-        TRACFCOMP( g_trac_initsvc, "Top level handle was NULL" );
-        l_istepmodeflag =   false;
+        TRACFCOMP( g_trac_initsvc,
+                   "Top level handle was NULL" );
+        l_istepmodeflag = false;
     }
     else
     {
         l_istepmodeflag = l_pTopLevel->getAttr<ATTR_ISTEP_MODE> ();
-        // printk( "IStep Mode flag = 0x%x\n", l_istepmodeflag );
     }
 
     return  l_istepmodeflag;
 }
 
 
-bool IStepDispatcher::getCanContinueProcedure(  const  TaskInfo &i_failingIStep,
-                                                errlHndl_t      &i_failingError,
-                                                TaskInfo        &io_nextIstep
-                                                ) const
+// ----------------------------------------------------------------------------
+// IStepDispatcher::spLess()
+// ----------------------------------------------------------------------------
+bool IStepDispatcher::spLess ( void )
 {
-
-    return  false;
-}
-
-
-IStepDispatcher& IStepDispatcher::getTheInstance()
-{
-    return Singleton<IStepDispatcher>::instance();
-}
-
-
-void IStepDispatcher::handleBreakPoint( uint32_t i_info )
-{
-    msg_t       *l_pBpMsg   =   msg_allocate();
-    errlHndl_t  l_errl      =   NULL;
-
-    // need to be the only poller
-    mutex_lock(&iv_poll_mutex);
-
-
-    l_pBpMsg->type       =    BREAKPOINT_TYPE;
-    l_pBpMsg->data[0]    =
-            ( static_cast<uint64_t>( i_info ) << 32 ) |
-            static_cast<uint64_t>( 0 )  ;
-    l_pBpMsg->data[1]    =   0;
-    l_pBpMsg->extra_data =   NULL;
-
-    // send new message to FSP
-    TRACDCOMP( g_trac_initsvc,
-            "handleBreakPoint: FSP: send sts type 0x%x, msg 0x%x.%x",
-            l_pBpMsg->type,
-            static_cast<uint32_t>( l_pBpMsg->data[0] >> 32 ),
-            static_cast<uint32_t>( l_pBpMsg->data[0] & 0xffffffff ) );
-
-    // send status to FSP
-    l_errl  =   MBOX::sendrecv( MBOX::HB_ISTEP_MSGQ, l_pBpMsg );
-    if ( l_errl )
+    bool spless = true;
+    TARGETING::Target * sys = NULL;
+    TARGETING::targetService().getTopLevelTarget( sys );
+    TARGETING::SpFunctions spfuncs;
+    if( sys &&
+        sys->tryGetAttr<TARGETING::ATTR_SP_FUNCTIONS>(spfuncs) &&
+        spfuncs.mailboxEnabled )
     {
-        TRACFCOMP( g_trac_initsvc,
-                "handleBreakPoint: ERROR on MBOX sendrecv" );
-        errlCommit( l_errl, INITSVC_COMP_ID );
-
-        //  If sendrecv fails for some reason, error will be logged and
-        //  breakpoint will resume anyway.
+        spless = false;
     }
 
-    // unblocked
-
-    TRACDCOMP( g_trac_initsvc,
-            "handleBreakPoint exit: receive msg type 0x%x, msg 0x%x.%x",
-            l_pBpMsg->type,
-            static_cast<uint32_t>( l_pBpMsg->data[0] >> 32 ),
-            static_cast<uint32_t>( l_pBpMsg->data[0] & 0xffffffff ) );
-
-    msg_free( l_pBpMsg  );
-    mutex_unlock(&iv_poll_mutex);
+    return spless;
 }
-
-
-void IStepDispatcher::handleSPlessBreakPoint( uint32_t i_info )
-{
-
-    TRACDCOMP( g_trac_initsvc,
-            "handleBreakPoint: hijacking message Q" );
-
-    // need to be the only poller
-    mutex_lock(&iv_poll_mutex);
-
-
-    iv_pMsg->type       =    BREAKPOINT_TYPE;
-    iv_pMsg->data[0]    =
-            ( static_cast<uint64_t>( i_info ) << 32 ) |
-            static_cast<uint64_t>( 0 )  ;
-    iv_pMsg->data[1]    =   0;
-    iv_pMsg->extra_data =   NULL;
-
-    TRACDCOMP( g_trac_initsvc,
-            "handleBreakPoint: send sts msg type 0x%x, msg 0x%x.%x",
-            iv_pMsg->type,
-            static_cast<uint32_t>( iv_pMsg->data[0] >> 32 ),
-            static_cast<uint32_t>( iv_pMsg->data[0] & 0xffffffff ) );
-
-    //  respond to SPtask
-    msg_respond( iv_msgQ, iv_pMsg );
-
-    // Poll for cmd to resume
-    while( 1 )
-    {
-
-        //  wait for message from SPtask
-        iv_pMsg  =   msg_wait( iv_msgQ );
-
-        //  unblocked
-
-        if ( msg_is_async( iv_pMsg ) )
-        {
-            //  should not receive async messages here, drop it, post errorlog
-            //  and go back to waiting.
-            TRACFCOMP( g_trac_initsvc,
-                    "handleBreakPoint: ERROR async msg type 0x%x, msg 0x%x.%x",
-                    iv_pMsg->type,
-                    static_cast<uint32_t>( iv_pMsg->data[0] >> 32 ),
-                    static_cast<uint32_t>( iv_pMsg->data[0] & 0xffffffff ) );
-
-            /*@     errorlog tag
-             *  @errortype      ERRL_SEV_INFORMATIONAL
-             *  @moduleid       ISTEP_INITSVC_MOD_ID
-             *  @reasoncode     ISTEP_BKPOINT_ASYNC_RCVD
-             *  @userdata1      type of packet
-             *  @userdata2      first data word
-             *
-             *  @devdesc        IStepDisp handleSPlessBreakPoint was expecting a
-             *                  synchronous message and received an asynchonous
-             *                  message.
-             *
-             */
-            errlHndl_t  l_errlAsync = new ERRORLOG::ErrlEntry(
-                                    ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                    INITSERVICE::ISTEP_INITSVC_MOD_ID,
-                                    INITSERVICE::ISTEP_BKPOINT_ASYNC_RCVD,
-                                    iv_pMsg->type,
-                                    iv_pMsg->data[0] );
-
-            errlCommit( l_errlAsync, INITSVC_COMP_ID );
-
-            msg_free( iv_pMsg );
-            iv_pMsg =    NULL;
-            continue;
-        }
-
-        TRACDCOMP( g_trac_initsvc,
-                "handleBreakPoint: receive msg type 0x%x, msg 0x%x.%x",
-                iv_pMsg->type,
-                static_cast<uint32_t>( iv_pMsg->data[0] >> 32 ),
-                static_cast<uint32_t>( iv_pMsg->data[0] & 0xffffffff ) );
-
-            // only expect this command
-            if ( iv_pMsg->type  ==  BREAKPOINT_TYPE )
-            {
-                // correct response, return to istep
-                break;
-            }
-            else
-            {
-                // all other commands are not valid here, return the same status
-                iv_pMsg->type       =   BREAKPOINT_TYPE;
-                iv_pMsg->data[0]    =
-                        ( static_cast<uint64_t>( i_info ) << 32 ) |
-                        static_cast<uint64_t>( 0 )  ;
-                iv_pMsg->data[1]    =   0;
-                iv_pMsg->extra_data =   NULL;
-
-                TRACDCOMP( g_trac_initsvc,
-                        "handleBreakPoint: send sts msg type 0x%x, msg 0x%x.%x",
-                        iv_pMsg->type,
-                        static_cast<uint32_t>( iv_pMsg->data[0] >> 32 ),
-                        static_cast<uint32_t>( iv_pMsg->data[0] & 0xffffffff ) );
-
-                //  reply back FSP/console
-                msg_respond( iv_msgQ, iv_pMsg );
-            }   // end else
-        }   // end while
-
-    mutex_unlock(&iv_poll_mutex);
-}
-
-// route to SPless or FSP depending on what's attached
-void iStepBreakPoint(uint32_t i_info)
-{
-    if ( SPLESS::SPLessAttached() )
-    {
-        IStepDispatcher::getTheInstance().handleSPlessBreakPoint( i_info );
-    }
-    else
-    {
-        IStepDispatcher::getTheInstance().handleBreakPoint( i_info );
-    }
-}
-
-
-void getIstepMsgQ ( msg_q_t & o_msgQ )
-{
-    Singleton<IStepDispatcher>::instance().getIstepMsgQ( o_msgQ );
-}
-void IStepDispatcher::getIstepMsgQ ( msg_q_t & o_msgQ )
-{
-    o_msgQ = iv_msgQ;
-}
-
-void getIstepMsg ( msg_t* & o_msg )
-{
-    Singleton<IStepDispatcher>::instance().getIstepMsg( o_msg );
-}
-void IStepDispatcher::getIstepMsg ( msg_t* & o_msg )
-{
-    o_msg = iv_pMsg;
-}
-
-
-IStepDispatcher::IStepDispatcher()
-: iv_sts()
-{
-    SPLESS::initIStepMode();
-    mutex_init(&iv_poll_mutex);
-
-    // init mailbox / message Q.
-    iv_msgQ             =   msg_q_create();
-
-}
-
-
-IStepDispatcher::~IStepDispatcher()
-{ }
 
 
 } // namespace
