@@ -378,6 +378,8 @@ def magic_instruction_callback(user_arg, cpu, arg):
     if arg == 7006:   # MAGIC_SHUTDOWN
         # KernelMisc::shutdown()
         print "KernelMisc::shutdown() called."
+        os.system( "fsp-trace ./ -s "+os.environ['HB_TOOLPATH']+
+                   "/hbotStringFile >>tracMERG  2>/dev/null" )
         # Could break/stop/pause the simics run, but presently
         # shutdown() is called four times. --Monte Jan 2012
         # SIM_break_simulation( "Shutdown. Simulation stopped." )
@@ -394,8 +396,7 @@ def magic_instruction_callback(user_arg, cpu, arg):
         pTracBinaryBuffer = readLongLong(tracBinaryInfoAddr)
         # Read the count of bytes used in the tracBinary buffer
         cbUsed = readLongLong(tracBinaryInfoAddr+8)
-        triggerActive = readLong(tracBinaryInfoAddr+16)
-        if triggerActive == 0 and cbUsed == 1:
+        if cbUsed == 1:
             pTracBinaryBuffer = readLongLong(tracBinaryInfoAddr+24)
             cbUsed = readLongLong(tracBinaryInfoAddr+32)
             writeLong(tracBinaryInfoAddr+40,0)
