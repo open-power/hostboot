@@ -44,6 +44,7 @@
 //                                    Save and restore line numbers for each include file
 //                camvanng 05/22/12   Fix "OP" definition
 //                camvanng 06/11/12   Fix shift/reduce warnings from yacc
+//                camvanng 06/15/12   Ability to do bitwise OR and AND operations
 // End Change Log *********************************************************************************/
 /**
  * @file initCompiler.lex
@@ -113,7 +114,7 @@ ID2     [A-Za-z][A-Za-z0-9_]*(\[[0-9]+(..[0-9]+)?(,[0-9]+(..[0-9]+)?)*\]){0,4}
 ID3      [0-9]+[A-Za-z_]+[0-9]*
 DIGIT    [0-9]
 COMMENT  #.*\n
-OP      "="|"+"|"-"|"!"|"<"|">"|"*"|"/"|"%"
+OP      "="|"+"|"-"|"!"|"<"|">"|"*"|"/"|"%"|"&"|"|"
 FLOAT   [0-9]+"."[0-9]*
 BINARY  0[bB][0-1]+
 SINGLE_BIN [0-1]

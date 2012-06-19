@@ -41,6 +41,7 @@
 //                 camvanng 05/22/12 Ability to do simple operations on attributes
 //                                   in the scom_data column
 //        SW146714 camvanng 06/08/12 Use two bytes to store row rpn sequence byte count
+//                 camvanng 06/15/12 Ability to do bitwise OR and AND operations
 // End Change Log *********************************************************************************
 
 /**
@@ -84,6 +85,8 @@ const char * OP_TXT[] =
     "SHIFTRIGHT",
     "FALSE",             //dg003a
     "TRUE",              //dg003a
+    "BITWISEAND",
+    "BITWISEOR",
 };
 
 std::string Rpn::cv_empty_str;

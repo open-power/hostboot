@@ -41,6 +41,7 @@
 //                                    in the scom_data column
 //                 camvanng 06/11/12  Ability to do logical operations with attribute columns
 //                                    Fix shift/reduce warnings from yacc
+//                 camvanng 06/15/12  Ability to do bitwise OR and AND operations
 // End Change Log *********************************************************************************
 /**
  * @file initCompiler.y
@@ -263,6 +264,8 @@ scomdexpr:   INIT_INTEGER               { $$= new init::Rpn($1,yyscomlist->get_s
         | scomdexpr '*' scomdexpr               { $$ = $1->push_merge($3,MULT); }
         | scomdexpr '/' scomdexpr               { $$ = $1->push_merge($3,DIVIDE); }
         | scomdexpr '%' scomdexpr               { $$ = $1->push_merge($3,MOD); }
+        | scomdexpr '&' scomdexpr               { $$ = $1->push_merge($3,BITWISEAND); }
+        | scomdexpr '|' scomdexpr               { $$ = $1->push_merge($3,BITWISEOR); }
         | '!' scomdexpr                         { $$ = $2->push_op(NOT); }
         | '(' scomdexpr ')'             { $$ = $2; }
 ;
@@ -330,6 +333,8 @@ expr:   INIT_INTEGER                    { $$= new init::Rpn($1,yyscomlist->get_s
         | expr '*' expr                 { $$ = $1->push_merge($3,MULT); }
         | expr '/' expr                 { $$ = $1->push_merge($3,DIVIDE); }
         | expr '%' expr                 { $$ = $1->push_merge($3,MOD); }
+        | expr '&' expr                 { $$ = $1->push_merge($3,BITWISEAND); }
+        | expr '|' expr                 { $$ = $1->push_merge($3,BITWISEOR); }
         | '!' expr                      { $$ = $2->push_op(NOT); }
         | '(' expr ')'                  { $$ = $2; }
 ;

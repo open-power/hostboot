@@ -131,9 +131,9 @@ scom 0x000000000006800c              {
 
 scom 0x000000000006800c              {
     bits , scom_data                                                                  , expr       ;
-    24:31, (MBA1.ATTR_CHIP_UNIT_POS + SYS.ATTR_SCRATCH_UINT8_ARRAY_2[1][2][3])        , SYS.ATTR_SCRATCH_UINT8_1 != 1;
-    24:31, (MBA1.ATTR_CHIP_UNIT_POS + SYS.ATTR_SCRATCH_UINT8_ARRAY_2[1][2][3] + 1) / 2, !(SYS.ATTR_SCRATCH_UINT8_1 == 3);
-    32:63, (SYS.ATTR_SCRATCH_UINT32_1 * 20) << 8                                      , SYS.ATTR_SCRATCH_UINT32_1 == 3;
+    24:31, (MBA1.ATTR_CHIP_UNIT_POS + SYS.ATTR_SCRATCH_UINT8_ARRAY_2[1][2][3])          , (SYS.ATTR_SCRATCH_UINT8_1 | 0b00000001) != 1;
+    24:31, ((MBA1.ATTR_CHIP_UNIT_POS | SYS.ATTR_SCRATCH_UINT8_ARRAY_2[1][2][3]) + 1) / 2, !(SYS.ATTR_SCRATCH_UINT8_1 == 3);
+    32:63, (((SYS.ATTR_SCRATCH_UINT32_1 * 20) & 0x000000F0)) << 8                       , (SYS.ATTR_SCRATCH_UINT32_1 & 0x0000FFFF) == 3;
 }
 
 #--******************************************************************************

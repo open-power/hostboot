@@ -57,6 +57,7 @@
  *                                                  data column
  *          SW146714        camvanng    06/08/2012  Use two bytes to store row
  *                                                  rpn sequence byte count
+ *                          camvanng    06/15/2012  Ability to do bitwise OR and AND operations
  */
 
 #include <fapiHwpExecInitFile.H>
@@ -1831,6 +1832,14 @@ uint64_t rpnBinaryOp(IfRpnOp i_op, uint64_t i_val1, uint64_t i_val2,
                 result = i_val1 >> i_val2;
                 break;
 
+            case (BITWISEAND):
+                result = i_val1 & i_val2;
+                break;
+
+            case (BITWISEOR):
+                result = i_val1 | i_val2;
+                break;
+
             default:
               FAPI_ERR("fapiHwpExecInitFile: rpnBinaryOp, invalid operator %d",
                        i_op);
@@ -1964,6 +1973,8 @@ fapi::ReturnCode rpnDoOp(rpnStack_t * io_rpnStack, IfRpnOp i_op, uint32_t i_any)
         case (MOD):
         case (SHIFTLEFT):
         case (SHIFTRIGHT):
+        case (BITWISEAND):
+        case (BITWISEOR):
 
             //pop the first value
             val2 = rpnPop(io_rpnStack);
