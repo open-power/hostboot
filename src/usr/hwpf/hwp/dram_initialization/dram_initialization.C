@@ -56,7 +56,7 @@
 
 //  Uncomment these files as they become available:
 // #include    "host_startPRD_dram/host_startPRD_dram.H"
-// #include    "mss_extent_setup/mss_extent_setup.H"
+#include    "mss_extent_setup/mss_extent_setup.H"
 // #include    "mss_memdiag/mss_memdiag.H"
 // #include    "mss_scrub/mss_scrub.H"
 // #include    "mss_thermal_init/mss_thermal_init.H"
@@ -128,8 +128,6 @@ void    call_host_startPRD_dram( void    *io_pArgs )
     task_end2( l_errl );
 }
 
-
-
 //
 //  Wrapper function to call 14.2 :
 //      mss_extent_setup
@@ -138,50 +136,29 @@ void    call_mss_extent_setup( void    *io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_mss_extent_setup entry" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+            "call_mss_extent_setup entry" );
 
-#if 0
-    // @@@@@    CUSTOM BLOCK:   @@@@@
-    //  figure out what targets we need
-    //  customize any other inputs
-    //  set up loops to go through all targets (if parallel, spin off a task)
+    //  call the HWP 
+    FAPI_INVOKE_HWP( l_errl, mss_extent_setup );
 
-    //  dump physical path to targets
-    EntityPath l_path;
-    l_path  =   l_@targetN_target->getAttr<ATTR_PHYS_PATH>();
-    l_path.dump();
-
-    // cast OUR type of target to a FAPI type of target.
-    const fapi::Target l_fapi_@targetN_target(
-                    TARGET_TYPE_MEMBUF_CHIP,
-                    reinterpret_cast<void *>
-                        (const_cast<TARGETING::Target*>(l_@targetN_target)) );
-
-    //  call the HWP with each fapi::Target
-    FAPI_INVOKE_HWP( l_errl, mss_extent_setup, _args_...);
     if ( l_errl )
     {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "ERROR : .........." );
-        errlCommit( l_errl, HWPF_COMP_ID );
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, 
+                "ERROR : failed executing mss_extent_setup returning error" );
     }
     else
     {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "SUCCESS : .........." );
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+                "SUCCESS : mss_extent_setup completed ok" );
     }
-    // @@@@@    END CUSTOM BLOCK:   @@@@@
-#endif
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_mss_extent_setup exit" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+            "call_mss_extent_setup exit" );
 
     // end task, returning any errorlogs to IStepDisp
     task_end2( l_errl );
 }
-
-
 
 //
 //  Wrapper function to call 14.3 :
