@@ -2,11 +2,11 @@
 #  IBM_PROLOG_BEGIN_TAG
 #  This is an automatically generated prolog.
 #
-#  $Source: src/build/vpo/hb-istep $
+#  $Source: src/build/debug/Hostboot/Istep.pm $
 #
 #  IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2011 - 2012
+#  COPYRIGHT International Business Machines Corp. 2011-2012
 #
 #  p1
 #
@@ -102,17 +102,7 @@ my  $opt_istepmode      =   0;
 
 my  $command            =   "";
 
-
-##  initialize inList to "undefined"
 my  @inList;
-$inList[MAX_ISTEPS][MAX_SUBSTEPS]   =   ();
-for( my $i = 0; $i <    MAX_ISTEPS; $i++)
-{
-    for(my $j = 0; $j < MAX_SUBSTEPS; $j++)
-    {
-        undef( $inList[$i][$j] );
-    }
-}
 
 ##  initialize the sequence number - 6 bit field, { 0 - 63 }
 my  $g_SeqNum   =   int(rand(64));
@@ -127,7 +117,6 @@ my  $THREAD         =   "0";
 ##  @todo   make this an enviroment var?
 ##  NOTE:  this is the # cycles used for simics, it is multiplied by 100
 ##  in vpo-debug-framework.pl
-## my  $hbDefaultCycles    =   50000;
 my  $hbDefaultCycles    =   5000000;
 
 my  $hbCount =   $ENV{'HB_COUNT'};
@@ -137,15 +126,12 @@ if ( !defined( $hbCount ) || ( $hbCount eq "" ) )
     $hbCount    =   0xffffffff;     ##  effectively infinite ...
 }
 
+my  $IstepModeReg   =   "";
+my  $ShutDownFlag   =   "";
+my  $ShutDownSts    =   "";
 
-##  fetch all the symbols we need.
-my  $IstepModeReg   =   getSymbol(  "SPLESS::g_SPLess_IStepMode_Reg" );
-my  $ShutDownFlag   =   getSymbol(  "CpuManager::cv_shutdown_requested" );
-my  $ShutDownSts    =   getSymbol(  "CpuManager::cv_shutdown_status" );
-
-##  @todo   deprecated, fetch anyway for now
-my  $CommandReg     =   getSymbol(  "SPLESS::g_SPLess_Command_Reg" );
-my  $StatusReg      =   getSymbol(  "SPLESS::g_SPLess_Status_Reg" );
+my  $CommandReg     =   "";
+my  $StatusReg      =   "";
 
 
 ########################################################################
@@ -166,6 +152,27 @@ sub main
 
     ::userDisplay   "Welcome to hb-Istep 3.3 .\n";
     ::userDisplay   "Note that in simics, multiple options must be in quotes\n\n";
+
+    ##  initialize the inList to undefined.
+    $inList[MAX_ISTEPS][MAX_SUBSTEPS]   =   ();
+    for( my $i = 0; $i <    MAX_ISTEPS; $i++)
+    {
+        for(my $j = 0; $j < MAX_SUBSTEPS; $j++)
+        {
+            undef( $inList[$i][$j] );
+        }
+    }
+
+##  fetch all the symbols we need.
+    $IstepModeReg   =   getSymbol(  "SPLESS::g_SPLess_IStepMode_Reg" );
+    $ShutDownFlag   =   getSymbol(  "CpuManager::cv_shutdown_requested" );
+    $ShutDownSts    =   getSymbol(  "CpuManager::cv_shutdown_status" );
+
+##  @todo   deprecated, fetch anyway for now
+    $CommandReg     =   getSymbol(  "SPLESS::g_SPLess_Command_Reg" );
+    $StatusReg      =   getSymbol(  "SPLESS::g_SPLess_Status_Reg" );
+
+
     ##  fetch the istep list
     get_istep_list();
 
@@ -441,26 +448,41 @@ sub get_istep_list()
 sub print_istep_list( )
 {
     my  $hdrflag    =   1;
+    my  $col        =   0;
 
-    ::userDisplay   " IStep Name\n";
-    ::userDisplay   "---------------------------------------------------\n";
+    ## ::userDisplay   " IStep Name\n";
+    ##::userDisplay   "---------------------------------------------------\n";
 
-    for(my $i = 4; $i < MAX_ISTEPS; $i++)
+    for( my $i = 4; $i < MAX_ISTEPS; $i++)
     {
-        for(my $j = 0; $j < MAX_SUBSTEPS; $j++)
+        for( my $j = 0; $j < MAX_SUBSTEPS; $j++)
         {
             ## print all substeps
             if ( defined( $inList[$i][$j] ) )
             {
                 if ( $hdrflag )
                 {
-                    ::userDisplay   " -- IStep $i --  \n";
+                    ::userDisplay   " ----- IStep $i -----  \n";
                     $hdrflag = 0;
                 }
-                ::userDisplay   " $inList[$i][$j]\n" ;
+                ## will truncate after 40 chars, hopefully this will not be an issue
+                my $ss  =   sprintf( "%-40s", $inList[$i][$j] );
+                ::userDisplay   "$ss" ;
+                $col ++ ;
+                if ( $col > 1 )
+                {
+                    ::userDisplay   "\n";
+                    $col = 0;
+
+                }
             }
         }   ## end for $j
 
+        if ( $col > 0 )
+        {
+            ::userDisplay "\n";
+            $col = 0;
+        }
         $hdrflag=1;
     }   ##  end for $i
 }
@@ -1012,6 +1034,11 @@ sub clear_trace( )
     }
 }
 
+  # A Perl module must end with a true value or else it is considered not to
+  # have loaded.  By convention this value is usually 1 though it can be
+  # any true value.  A module can end with false to indicate failure but
+  # this is rarely used and it would instead die() (exit with an error).
+  1;
 
 __END__
 

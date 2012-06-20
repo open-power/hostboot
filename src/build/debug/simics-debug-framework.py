@@ -175,8 +175,14 @@ class DebugFrameworkProcess:
 
         cycles = int(match.group(1))
 
+        ## @todo mww SIM_continue is busted, try this...
         if (not SIM_simics_is_running()):
-            SIM_continue(cycles)
+            ## SIM_continue(cycles)
+            syscmd   =   "run-cycles %d"%(cycles)
+            ## print ">> %s"%(syscmd)
+            ( rc, out )  =   quiet_run_command( syscmd, output_modes.regular )
+            if ( rc ):
+                print "simics ERROR running %s: %d "%( syscmd, rc )
 
     def ready_for_instr(self,data):
         self.sendMsg("data-response", "0" if SIM_simics_is_running() else "1")
@@ -222,6 +228,8 @@ class DebugFrameworkProcess:
         runStr  =   "phys_mem.write 0x%x 0x%x 0x%x"%(addr, data, size)
         ( result, out )  =   quiet_run_command( runStr, output_modes.regular )
         ## DEBUG print ">> %s : "%(runStr) + " 0x%16.16x"%(result) + " : " + out
+        if ( result ):
+            print "simics ERROR running %s: %d "%( syscmd, result )
 
 # @fn run_hb_debug_framework
 # @brief Wrapper function to execute a tool module.
