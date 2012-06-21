@@ -35,6 +35,7 @@
 #include <devicefw/userif.H>
 #include <mbox/mbox_reasoncodes.H>
 #include <mbox/mboxUdParser.H>
+#include <targeting/common/commontargeting.H>
 
 #define HBMBOX_TRACE_NAME HBMBOX_COMP_NAME
 
@@ -121,37 +122,57 @@ errlHndl_t MailboxSp::_init()
         return err;
     }
 
-    // Initialize the mailbox hardware
-    err = mboxInit(iv_trgt);
-    if (err)
+    bool spless = true;
+
+    TARGETING::Target * sys = NULL;
+    TARGETING::targetService().getTopLevelTarget( sys );
+    TARGETING::SpFunctions spfuncs;
+    if( sys &&
+        sys->tryGetAttr<TARGETING::ATTR_SP_FUNCTIONS>(spfuncs) &&
+        spfuncs.mailboxEnabled)
     {
-        return err;
+        spless = false;
     }
 
-    // Register to get interrupts for mailbox
-    err = INTR::registerMsgQ(iv_msgQ, MSG_INTR, INTR::FSP_MAILBOX);
-    if(err)
+    if(!spless)
     {
-        return err;
+        // Initialize the mailbox hardware
+        err = mboxInit(iv_trgt);
+        if (err)
+        {
+            return err;
+        }
+
+        // Register to get interrupts for mailbox
+        err = INTR::registerMsgQ(iv_msgQ, MSG_INTR, INTR::FSP_MAILBOX);
+        if(err)
+        {
+            return err;
+        }
     }
 
     task_create(MailboxSp::msg_handler, NULL);
 
-    // Send message to FSP on base DMA buffer zone
-    msg_t * msg = msg_allocate();
-    msg->type = MSG_INITIAL_DMA;
-    msg->data[0] = 0;
-    msg->data[1] = reinterpret_cast<uint64_t>(iv_dmaBuffer.getDmaBufferHead());
-    msg->extra_data = NULL;
-    MBOX::send(FSP_MAILBOX_MSGQ,msg);
 
-    iv_disabled = false;
+    if(!spless)
+    {
+        // Send message to FSP on base DMA buffer zone
+        msg_t * msg = msg_allocate();
+        msg->type = MSG_INITIAL_DMA;
+        msg->data[0] = 0;
+        msg->data[1] = reinterpret_cast<uint64_t>(iv_dmaBuffer.getDmaBufferHead());
+        msg->extra_data = NULL;
+        MBOX::send(FSP_MAILBOX_MSGQ,msg);
 
-    // Register for shutdown
-    INITSERVICE::registerShutdownEvent(iv_msgQ,
-                                       MSG_MBOX_SHUTDOWN,
-                                       INITSERVICE::MBOX_PRIORITY);
-    
+        // Register for shutdown
+        INITSERVICE::registerShutdownEvent(iv_msgQ,
+                                           MSG_MBOX_SHUTDOWN,
+                                           INITSERVICE::MBOX_PRIORITY);
+
+        iv_disabled = false;
+    }
+    // else leave iv_disabled as true;
+
 
     return err;
 }
@@ -257,7 +278,7 @@ void MailboxSp::msgHandler()
                 }
                 break;
 
-            default: //Huh? Ignore it.
+            default:
 
                 TRACFCOMP(g_trac_mbox, ERR_MRK "MailboxSp::msgHandler() "
                           "invalid message received 0x%08x",msg->type);
@@ -598,7 +619,6 @@ void MailboxSp::recv_msg(mbox_msg_t & i_mbox_msg)
             msgq = r->second;
 
             // Check that the type is within range
-            // TODO also check if in secure mode msg->type > LAST_SECURE_MSG 
             if(msg->type < MSG_FIRST_SYS_TYPE) // &&
                 // (!is_secure() || (is_secure() && msg->type > LAST_SECURE_MSG))
             {

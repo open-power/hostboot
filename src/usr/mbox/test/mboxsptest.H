@@ -47,6 +47,22 @@ class MboxSPTest : public CxxTest::TestSuite
 {
   public:
 
+      bool mboxEnabled()
+      {
+          bool enabled = false;
+
+          TARGETING::Target * sys = NULL;
+          TARGETING::targetService().getTopLevelTarget( sys );
+          TARGETING::SpFunctions spfuncs;
+          if( sys &&
+              sys->tryGetAttr<TARGETING::ATTR_SP_FUNCTIONS>(spfuncs) &&
+              spfuncs.mailboxEnabled)
+          {
+              enabled = true;
+          }
+          return enabled;
+      }
+
       /**
        * @brief MBOX - Send asynchronous message
        */
@@ -87,67 +103,71 @@ class MboxSPTest : public CxxTest::TestSuite
 
           nanosleep(0,1000000);
 
-          // late registration to test ability to queue message until
-          // a queue is ready
-          err = MBOX::msgq_register(MBOX::HB_TEST_MSGQ,msgQ);
-          if(err)
+
+          if(mboxEnabled())
           {
-              TS_FAIL("MBOX: Could not register message queue");
-              errlCommit(err,HBMBOX_COMP_ID);
-          }
-
-
-          // Send last message
-          msg_t * msg = msg_allocate();
-          msg->type = 0xff;        // use this to terminate while loop below
-          msg->extra_data = NULL;
-          err = MBOX::send(MBOX::HB_TEST_MSGQ,msg);
-          if(err)
-          {
-              TS_FAIL("MBOX::send returned an error log");
-              errlCommit(err,HBMBOX_COMP_ID);
-          }
-
-          // now get the messages - they will look like async messages
-          // from FSP, even though they are just the echo of the
-          // async messages that hostboot just sent above.
-          size_t msg_idx = 0;
-          while(1)
-          {
-              msg_t* msg = msg_wait(msgQ);
-
-              if(msg->type == 0xff)
+              // late registration to test ability to queue message until
+              // a queue is ready
+              err = MBOX::msgq_register(MBOX::HB_TEST_MSGQ,msgQ);
+              if(err)
               {
+                  TS_FAIL("MBOX: Could not register message queue");
+                  errlCommit(err,HBMBOX_COMP_ID);
+              }
+
+
+              // Send last message
+              msg_t * msg = msg_allocate();
+              msg->type = 0xff;        // use this to terminate while loop below
+              msg->extra_data = NULL;
+              err = MBOX::send(MBOX::HB_TEST_MSGQ,msg);
+              if(err)
+              {
+                  TS_FAIL("MBOX::send returned an error log");
+                  errlCommit(err,HBMBOX_COMP_ID);
+              }
+
+              // now get the messages - they will look like async messages
+              // from FSP, even though they are just the echo of the
+              // async messages that hostboot just sent above.
+              size_t msg_idx = 0;
+              while(1)
+              {
+                  msg_t* msg = msg_wait(msgQ);
+
+                  if(msg->type == 0xff)
+                  {
+                      msg_free(msg);
+                      break;
+                  }
+
+                  ++msg_idx;
+
+                  if(msg->type != 1 || 
+                     msg->data[0] != msg_idx || 
+                     msg->data[1] != 33 * 1024)
+                  {
+                      TS_FAIL("MBOXTEST: Unexpected message from FSP");
+
+                      TRACFCOMP(g_trac_mbox,
+                                "MBOXTEST MSG from FSP: %d %lx %lx %p",
+                                msg->type,
+                                msg->data[0],
+                                msg->data[1],
+                                msg->extra_data);
+                  }
+                  if(msg->extra_data)
+                  {
+                      TRACFCOMP(g_trac_mbox,"MBOXTEST Extra data: %s",
+                                static_cast<char *>(msg->extra_data));
+                      ::free(msg->extra_data);
+                  }
+
                   msg_free(msg);
-                  break;
               }
 
-              ++msg_idx;
-
-              if(msg->type != 1 || 
-                 msg->data[0] != msg_idx || 
-                 msg->data[1] != 33 * 1024)
-              {
-                  TS_FAIL("MBOXTEST: Unexpected message from FSP");
-
-                  TRACFCOMP(g_trac_mbox,
-                            "MBOXTEST MSG from FSP: %d %lx %lx %p",
-                            msg->type,
-                            msg->data[0],
-                            msg->data[1],
-                            msg->extra_data);
-              }
-              if(msg->extra_data)
-              {
-                  TRACFCOMP(g_trac_mbox,"MBOXTEST Extra data: %s",
-                            static_cast<char *>(msg->extra_data));
-                  ::free(msg->extra_data);
-              }
-
-              msg_free(msg);
-          }
-
-          msgQ = MBOX::msgq_unregister(MBOX::HB_TEST_MSGQ);
+              msgQ = MBOX::msgq_unregister(MBOX::HB_TEST_MSGQ);
+          } // end if mboxEnabled
           msg_q_destroy(msgQ);
       }
 
@@ -159,7 +179,7 @@ class MboxSPTest : public CxxTest::TestSuite
           //  This testcase only works if there is no FSP.
           //  Must be disabled for vpo and
           //  TODO disble if there is an FSP.
-          if( TARGETING::is_vpo() )
+          if( TARGETING::is_vpo())
           {
               return;
           }
@@ -175,8 +195,18 @@ class MboxSPTest : public CxxTest::TestSuite
 
           if(err)
           {
-              TS_FAIL("MBOX::sendrecv returned an error log %p",err);
-              errlCommit(err,HBMBOX_COMP_ID);
+              if(mboxEnabled())
+              {
+                  TS_FAIL("MBOX::sendrecv returned an error log %p",err);
+                  errlCommit(err,HBMBOX_COMP_ID);
+              }
+          }
+          else
+          {
+              if(!mboxEnabled())
+              {
+                  TS_FAIL("MBOX::sendrecv expected an error log when mbox is disabled");
+              }
           }
 
           // TODO eventually the return data will be inverted or modified in
@@ -236,9 +266,9 @@ class MboxSPTest : public CxxTest::TestSuite
           }
       }
 
-#if defined(__DESTRUCTIVE_MBOX_TEST__)
-      void DISABLEtestHardwareError(void)
+      void testHardwareError(void)
       {
+#if defined(__DESTRUCTIVE_MBOX_TEST__)
           msg_t * msg = msg_allocate();
           msg->type = 0x8000ffff;
           msg->extra_data = NULL;
@@ -278,8 +308,8 @@ class MboxSPTest : public CxxTest::TestSuite
           }
 
           msg_free(msg);
-      }
 #endif
+      }
 };
 
 #endif
