@@ -736,7 +736,7 @@ errlHndl_t spdSpecialCases ( KeywordData i_kwdData,
                     break;
 
                 // ==================================================
-                // 2 byte - MSB then LSB is 2 less than MSB
+                // 2 byte - MSB with mask then LSB is 2 more than MSB
                 case TRC_MIN:
                     // Check Size of buffer
                     err = spdCheckSize( io_buflen,
@@ -761,7 +761,7 @@ errlHndl_t spdSpecialCases ( KeywordData i_kwdData,
                     }
 
                     // Get LSB
-                    err = spdFetchData( (i_kwdData.offset - 2),
+                    err = spdFetchData( (i_kwdData.offset + 2),
                                         1, /* Read 1 byte at a time */
                                         &tmpBuffer[1],
                                         i_target );
@@ -1314,11 +1314,44 @@ errlHndl_t checkModSpecificKeyword ( KeywordData i_kwdData,
             break;
         }
 
-        // To check the module specific flags, also need the Module Type value
-        // from byte 3.
+        KeywordData * modTypeEntry = NULL;
+        err = getKeywordEntry( MODULE_TYPE,
+                               i_memType,
+                               modTypeEntry );
+
+        if( err )
+        {
+            break;
+        }
+
+        if( NULL == modTypeEntry )
+        {
+            TRACFCOMP( g_trac_spd,
+                       ERR_MRK"Keyword Entry pointer is NULL!" );
+
+            /*@
+             * @errortype
+             * @reasoncode       SPD_NULL_ENTRY
+             * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid         SPD_CHECK_MODULE_SPECIFIC_KEYWORD
+             * @userdata1        i_memType
+             * @userdata2        <UNUSED>
+             * @devdesc          Entry to get Module type is NULL
+             */
+            err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                           SPD_CHECK_MODULE_SPECIFIC_KEYWORD,
+                                           SPD_NULL_ENTRY,
+                                           i_memType,
+                                           0x0 );
+
+            break;
+        }
+
+        // To check the module specific flags, also need the Module Type
+        // value.
         uint8_t modType = 0x0;
-        err = spdFetchData( MEM_TYPE_ADDR,
-                            MEM_TYPE_ADDR_SZ,
+        err = spdFetchData( modTypeEntry->offset,
+                            modTypeEntry->length,
                             &modType,
                             i_target );
 

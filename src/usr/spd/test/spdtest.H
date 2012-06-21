@@ -647,7 +647,7 @@ class SPDTest: public CxxTest::TestSuite
                     if( err )
                     {
                         fails++;
-                        TS_FAIL( "testspdDDR3ModSpecKwds - Failure on keywor"
+                        TS_FAIL( "testspdDDR3ModSpecKwds - Failure on keyword"
                                  "d: %04x",
                                  keyword );
                         errlCommit( err,
