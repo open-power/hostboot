@@ -67,6 +67,7 @@ my $cfgImgOutputFile = "./targeting.bin";
 my $cfgHelp = 0;
 my $cfgMan = 0;
 my $cfgVerbose = 0;
+my $cfgShortEnums = 1;
 
 GetOptions("hb-xml-file:s" => \$cfgHbXmlFile,
            "src-output-dir:s" =>  \$cfgSrcOutputDir,
@@ -74,6 +75,7 @@ GetOptions("hb-xml-file:s" => \$cfgHbXmlFile,
            "fapi-attributes-xml-file:s" => \$cfgFapiAttributesXmlFile,
            "img-output-file:s" =>  \$cfgImgOutputFile,
            "vmm-consts-file:s" =>  \$cfgVmmConstsFile,
+           "short-enums!" =>  \$cfgShortEnums,
            "help" => \$cfgHelp,
            "man" => \$cfgMan,
            "verbose" => \$cfgVerbose ) || pod2usage(-verbose => 0);
@@ -99,6 +101,7 @@ if($cfgVerbose)
     print STDOUT "Source output dir = $cfgSrcOutputDir\n";
     print STDOUT "Image output dir = $cfgImgOutputDir\n";
     print STDOUT "VMM constants file = $cfgVmmConstsFile\n";
+    print STDOUT "Short enums = $cfgShortEnums\n";
 }
 
 ################################################################################
@@ -2221,16 +2224,17 @@ sub enumSpace {
         # Enum needs at least one byte
         $maxEnumVal++;
     }
-    my $space = ceil(log($maxEnumVal+1) / (8 * log(2)));
 
-    # NOTE: enable the code below to force the code generator to generated
-    # 4-byte enums instead of optimized enums.  Note there are a few
+    # NOTE: Pass --noshort-enums command line option to force the code generator
+    # to generate 4-byte enums instead of optimized enums.  Note there are a few
     # enumerations (primarily in PNOR header, etc.) that do not change size.
     # That is intentional in order to make this the single point of control over
     # binary compatibility.  Note that both FSP and Hostboot should always have
     # this policy in sync.  Also note that when Hostboot and FSP use optimized
-    # enums, they must also be compiled with -fshort-enums
-    # $space = 4;
+    # enums, they must also be compiled with -fshort-enums compile option
+
+    my $space = ($cfgShortEnums == 1) ? 
+        ceil(log($maxEnumVal+1) / (8 * log(2))) : 4;
 
     return $space;
 }
@@ -3610,6 +3614,20 @@ Sets the file to receive the PNOR targeting image output (default
 Indicates the file containing the base virtual address of the attributes
 (default is src/include/usr/vmmconst.h).  Only used when generating the PNOR
 targeting image
+
+=item B<--short-enums>
+
+Writes optimially sized enumerations to binary image (default). Any code which 
+uses the binary image or enumerations from generated header files must also
+be compiled with short enumeration support.  This saves at minimum 0 and at most
+3 bytes for each enumeration value.
+
+=item B<--noshort-enums>
+
+Writes maximum sized enumerations to binary image (default). Any code which 
+uses the binary image or enumerations from generated header files must not
+be compiled with short enumeration support.  Every enumeration will consume 4
+bytes by default
 
 =item B<--verbose>
 
