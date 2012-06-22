@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/diag/mdia/mdiasm.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/diag/mdia/mdiasm.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 /**
  * @file mdiasm.C
  * @brief mdia state machine implementation
@@ -30,13 +31,16 @@
 #include "mdiatrace.H"
 #include "mdiaworkitem.H"
 #include "mdiamonitor.H"
+#include <dram_initialization/mss_memdiag/mss_maint_cmds.H>
 #include <errl/errlmanager.H>
 #include <stdio.h>
-#include <diag/mdia/mdiamevent.H>
+#include <mdia/mdiamevent.H>
 #include <hbotcompid.H>
+#include <fapi.H>
 
 using namespace TARGETING;
 using namespace std;
+using namespace fapi;
 
 namespace MDIA
 {
@@ -202,8 +206,8 @@ bool StateMachine::scheduleWorkItem(WorkFlowProperties & i_wfp)
         // TODO - multiply by memory size
         uint64_t priority = getRemainingWorkItems(i_wfp);
 
-        if(!iv_tp) {
-
+        if(!iv_tp)
+        {
             MDIA_FAST("Starting threadPool...");
             iv_tp = new Util::ThreadPool<WorkItem>;
             iv_tp->start();
@@ -321,6 +325,8 @@ bool StateMachine::executeWorkItem(WorkFlowProperties * i_wfp)
 
 errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
 {
+    errlHndl_t err = 0;
+
     mutex_lock(&iv_mutex);
 
     // starting a maint cmd ...  register a timeout monitor
@@ -335,10 +341,12 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
     WorkFlowPhase workItem = *i_wfp.workItem;
     bool restart = i_wfp.restartCommand;
 
+    TargetHandle_t targetMba = getTarget(i_wfp);
+
     mutex_unlock(&iv_mutex);
 
-    switch (workItem) {
-
+    switch (workItem)
+    {
         case START_PATTERN_0:
         case START_PATTERN_1:
         case START_PATTERN_2:
@@ -349,20 +357,77 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
         case START_PATTERN_7:
         case START_PATTERN_8:
         case START_SCRUB:
-
+        {
             mutex_lock(&iv_mutex);
 
-            if(restart) {
+            // Get the fapi target from the TargetHandle required for HWP
+            ReturnCode fapirc;
+            fapi::Target fapiMba(TARGET_TYPE_MBA_CHIPLET, targetMba);
 
+            if(restart)
+            {
                 MDIA_FAST("sm: issuing increment address on: %p",
-                            getTarget(i_wfp));
-                // TODO...restart the command (increment address)
+                            targetMba);
+                // TODO...RTC 46418
+                // restart the command (increment address)
             }
-            else {
-
+            else
+            {
                 MDIA_FAST("sm: issuing maint command on: %p",
-                            getTarget(i_wfp));
-                // TODO...start a command
+                            targetMba);
+
+                do
+                {
+                    //TODO...RTC 46187
+                    //add method to set patternIndex based on workItem
+                    ecmdDataBufferBase startAddr(64);
+                    ecmdDataBufferBase endAddr(64);
+
+                    // Get the address range for maint cmd
+                    fapirc = mss_get_address_range( fapiMba,
+                                                    MSS_ALL_RANKS,
+                                                    startAddr,
+                                                    endAddr);
+                    if(!fapirc.ok())
+                    {
+                        MDIA_FAST("sm: get_address_range failed");
+                        break;
+                    }
+
+                    const mss_MaintCmd::StopCondition stopCondition =
+                        static_cast<mss_MaintCmd::StopCondition>
+                        (mss_MaintCmd::STOP_ON_END_ADDRESS |
+                         mss_MaintCmd::ENABLE_CMD_COMPLETE_ATTENTION);
+
+                    // Create the maintenance command
+                    mss_SuperFastInit sfinit( fapiMba,
+                                              startAddr,
+                                              endAddr,
+                                              mss_MaintCmd::PATTERN_0,
+                                              stopCondition,
+                                              false);
+
+                    //Setup the maint cmd and execute it
+                    fapirc = sfinit.setupAndExecuteCmd();
+
+                    if(!fapirc.ok())
+                    {
+                        MDIA_FAST("sm: setupAndExecuteCmd failed");
+                        break;
+                    }
+
+                }while(0);
+
+                if(!fapirc.ok())
+                {
+                    MDIA_FAST("sm: Running Maint Cmd failed");
+
+                    //TODO...RTC 46419
+                    //obtain errorlog from fapirc
+
+                    // Unregister the maint cmd monitor
+                    getMonitor().removeMonitor(i_wfp.timer);
+                }
             }
 
 #ifdef MDIA_DO_POLLING
@@ -374,12 +439,12 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
             mutex_unlock(&iv_mutex);
 
             break;
-
+        }
         default:
             break;
     }
 
-    return 0;
+    return err;
 }
 
 CommandMonitor & StateMachine::getMonitor()
@@ -427,8 +492,8 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
 
     MDIA_FAST("sm: processing event for: %p", getTarget(wfp));
 
-    switch(i_event.type) {
-
+    switch(i_event.type)
+    {
         case COMMAND_COMPLETE:
 
             // command stopped or complete at end of last rank

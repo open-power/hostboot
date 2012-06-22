@@ -1,4 +1,4 @@
-#  IBM_PROLOG_BEGIN_TAG
+#   IBM_PROLOG_BEGIN_TAG
 #  This is an automatically generated prolog.
 #
 #  $Source: src/usr/diag/mdia/makefile $
@@ -19,10 +19,21 @@
 #
 #  Origin: 30
 #
-#  IBM_PROLOG_END
+#  IBM_PROLOG_END_TAG
 ROOTPATH = ../../../..
 
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/diag
+##########################################################
+# Following are needed to include hwpf/hwp/fapi.H
+##########################################################
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/plat
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
+##########################################################
+# Following is needed to include mss_maint_cmds.H
+##########################################################
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp
 
 MODULE = mdia
 
