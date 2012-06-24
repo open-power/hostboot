@@ -50,6 +50,7 @@ HWP_ATTR_XML_FILES = hwp/memory_attributes.xml \
                      hwp/unit_attributes.xml \
                      hwp/freq_attributes.xml \
                      hwp/proc_mvpd_attributes.xml \
+                     hwp/ei_bus_attributes.xml \
                      hwp/chip_ec_attributes.xml
 
 #------------------------------------------------------------------------------

@@ -100,6 +100,12 @@
     <attribute><id>SP_FUNCTIONS</id></attribute>
     <attribute><id>PAYLOAD_BASE</id></attribute>
     <attribute><id>PAYLOAD_ENTRY</id></attribute>
+    <attribute><id>MSS_MCA_HASH_MODE</id></attribute>
+    <attribute><id>MSS_MBA_ADDR_INTERLEAVE_BIT</id></attribute>
+    <attribute><id>MSS_MBA_CACHELINE_INTERLEAVE_MODE</id></attribute>
+    <attribute><id>MSS_CACHE_ENABLE</id></attribute>
+    <attribute><id>MSS_PREFETCH_ENABLE</id></attribute>
+    <attribute><id>MSS_CLEANER_ENABLE</id></attribute>
 </targetType>
 
 <targetType>
@@ -209,6 +215,7 @@
     <attribute>
         <id>XSCOM_VIRTUAL_ADDR</id>
     </attribute>
+    <attribute><id>MSS_MEM_MC_IN_GROUP</id></attribute>
 </targetType>
 
 <targetType>
@@ -691,6 +698,18 @@
     <attribute><id>MSS_DIMM_MAXPOWER</id></attribute>
     <attribute><id>MSS_CHANNEL_MAXPOWER</id></attribute>
     <attribute><id>MSS_MEMSIZE_MBA</id></attribute>
+    <attribute><id>EFF_DRAM_BANKS</id></attribute>
+    <attribute><id>EFF_DRAM_ROWS</id></attribute>
+    <attribute><id>EFF_DRAM_COLS</id></attribute>
+    <attribute><id>EFF_DIMM_RCD_IBT</id></attribute>
+    <attribute><id>EFF_DIMM_RCD_MIRROR_MODE</id></attribute>
+    <attribute><id>EFF_IBM_TYPE</id></attribute>
+    <attribute><id>EFF_NUM_DROPS_PER_PORT</id></attribute>
+    <attribute><id>EFF_STACK_TYPE</id></attribute>
+    <attribute><id>EFF_NUM_MASTER_RANKS_PER_DIMM</id></attribute>
+    <attribute><id>EFF_NUM_PACKAGES_PER_RANK</id></attribute>
+    <attribute><id>EFF_NUM_DIES_PER_PACKAGE</id></attribute>
+    <attribute><id>MSS_SPARE_BYTE</id></attribute>
 </targetType>
 
 <targetType>
@@ -700,7 +719,8 @@
         <id>TYPE</id>
         <default>MCS</default>
     </attribute>
-    <attribute><id>MSS_MEMSIZE</id></attribute>
+    <attribute><id>EI_BUS_RX_MSB_LSB_SWAP</id></attribute>
+    <attribute><id>EI_BUS_TX_MSB_LSB_SWAP</id></attribute>
 </targetType>
 
 <targetType>
@@ -850,6 +870,9 @@
     <attribute><id>EEPROM_ADDR_INFO1</id></attribute>
     <attribute><id>MSS_VOLT</id></attribute>
     <attribute><id>MSS_FREQ</id></attribute>
+    <attribute><id>MSS_LAB_OVERRIDE_FOR_MEM_PLL</id></attribute>
+    <attribute><id>EI_BUS_RX_MSB_LSB_SWAP</id></attribute>
+    <attribute><id>EI_BUS_TX_MSB_LSB_SWAP</id></attribute>
     <attribute>
         <id>FSI_SCOM_MUTEX</id>
     </attribute>

@@ -1,11 +1,11 @@
-#  IBM_PROLOG_BEGIN_TAG
+#   IBM_PROLOG_BEGIN_TAG
 #  This is an automatically generated prolog.
 #
-#  $Source: src/usr/targeting/makefile $
+#  $Source: src/usr/targeting/common/xmltohb/common.mk $
 #
 #  IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2011
+#  COPYRIGHT International Business Machines Corp. 2011-2012
 #
 #  p1
 #
@@ -19,8 +19,7 @@
 #
 #  Origin: 30
 #
-#  IBM_PROLOG_END
-
+#  IBM_PROLOG_END_TAG
 ################################################################################
 #
 #  @file targeting/common/xmltohb/common.mk
@@ -65,7 +64,8 @@ FAPI_ATTR_SOURCES =          \
     dimm_attributes.xml      \
     unit_attributes.xml      \
     freq_attributes.xml      \
-    proc_mvpd_attributes.xml
+    proc_mvpd_attributes.xml \
+    ei_bus_attributes.xml
     
 XMLTOHB_GENERIC_XML     = generic.xml
 XMLTOHB_FAPI_XML        = fapiattrs.xml

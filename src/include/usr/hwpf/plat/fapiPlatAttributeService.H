@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/include/usr/hwpf/plat/fapiPlatAttributeService.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/include/usr/hwpf/plat/fapiPlatAttributeService.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 /**
  *  @file fapiPlatAttributeService.H
  *
@@ -128,28 +129,6 @@ fapi::ReturnCode fapiPlatSetSpdAttr(const fapi::Target * i_target,
                                     const uint16_t i_keyword,
                                     void * i_data,
                                     size_t i_len );
-
-/**
- * @brief This function is called by the FAPI_ATTR_GET macro when getting
- * ATTR_MSS_MEMORY_BASE. It should not be called directly
- *
- * @param[in]  i_pMcsTarget MCS target pointer
- * @param[out] o_addr       Address of MCS BAR register
- * @return ReturnCode.  Zero on success, else platform specified error
- */
-fapi::ReturnCode fapiPlatGetMemoryBaseAddr(const fapi::Target * i_pMcsTarget,
-                                           uint64_t & o_addr);
-
-/**
- * @brief This function is called by the FAPI_ATTR_GET macro when getting
- * ATTR_MSS_MIRROR_BASE. It should not be called directly
- *
- * @param[in]  i_pMcsTarget MCS target pointer 
- * @param[out] o_addr       Address of MCS BAR register
- * @return ReturnCode.  Zero on success, else platform specified error
- */
-fapi::ReturnCode fapiPlatGetMirrorBaseAddr(const fapi::Target * i_pMcsTarget,
-                                           uint64_t & o_addr);
 
 /**
  * @brief This function is called by the FAPI_ATTR_GET macro when getting

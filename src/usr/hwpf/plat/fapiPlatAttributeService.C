@@ -1,26 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/hwpf/plat/fapiPlatAttributeService.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
-
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/hwpf/plat/fapiPlatAttributeService.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 /**
  *  @file fapiPlatAttributeService.C
  *
@@ -220,165 +220,6 @@ fapi::ReturnCode fapiPlatSetSpdAttr(const fapi::Target * i_target,
     }
 
     FAPI_DBG(EXIT_MRK "fapiPlatSetSpdAttr");
-    return l_rc;
-}
-
-//******************************************************************************
-// fapiPlatBaseAddrCheckMcsGetTargets
-//
-// Local function used by fapiPlatGetMemoryBaseAddr / fapiPlatGetMirrorBaseAddr
-// to check that the input component is an MCS chiplet and that the parent chip
-// Hostboot target can be found
-//******************************************************************************
-fapi::ReturnCode fapiPlatBaseAddrCheckMcsGetChip(
-    const fapi::Target* i_pMcsTarget,
-    TARGETING::Target* & o_pMcsTarget,
-    TARGETING::Target* & o_pChipTarget)
-{
-    fapi::ReturnCode l_rc;
-    bool l_error = false;
-
-    // Check that the FAPI Target pointer is not NULL
-    if (i_pMcsTarget == NULL)
-    {
-        FAPI_ERR("fapiPlatBaseAddrCheckMcsGetChip. NULL FAPI Target passed");
-        l_error = true;
-    }
-    else
-    {
-        // Extract the MCS Hostboot Target pointer
-        o_pMcsTarget =
-            reinterpret_cast<TARGETING::Target*>(i_pMcsTarget->get());
-
-        // Check that the MCS Hostboot Target pointer is not NULL
-        if (o_pMcsTarget == NULL)
-        {
-            FAPI_ERR("fapiPlatBaseAddrCheckMcsGetChip. NULL HB Target passed");
-            l_error = true;
-        }
-        else
-        {
-            // Check that the Target is an MCS chiplet
-            if (o_pMcsTarget->getAttr<TARGETING::ATTR_TYPE>() !=
-                TARGETING::TYPE_MCS)
-            {
-                FAPI_ERR("fapiPlatBaseAddrCheckMcsGetChip. Not an MCS (0x%x)",
-                         o_pMcsTarget->getAttr<TARGETING::ATTR_TYPE>());
-                l_error = true;
-            }
-            else
-            {
-                // Get the parent chip
-                TARGETING::TargetHandleList l_parentList;
-                TARGETING::targetService().getAssociated(
-                    l_parentList,
-                    o_pMcsTarget,
-                    TARGETING::TargetService::PARENT,
-                    TARGETING::TargetService::IMMEDIATE);
-
-                if (l_parentList.size() != 1)
-                {
-                    FAPI_ERR("fapiPlatBaseAddrCheckMcsGetChip. Did not find single parent chip (%d)",
-                             l_parentList.size());
-                    l_error = true;
-                }
-                else
-                {
-                    o_pChipTarget = l_parentList[0];
-                }
-            }
-        }
-    }
-
-    if (l_error)
-    {
-        /*@
-         *  @errortype
-         *  @moduleid   MOD_ATTR_BASE_ADDR_GET
-         *  @reasoncode RC_ATTR_BAD_TARGET_PARAM
-         *  @devdesc    Failed to get MCS base address attribute due to
-         *              bad target parameter.
-         */
-        errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
-            ERRORLOG::ERRL_SEV_INFORMATIONAL,
-            fapi::MOD_ATTR_BASE_ADDR_GET,
-            fapi::RC_ATTR_BAD_TARGET_PARAM);
-        l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
-    }
-
-    return l_rc;
-}
-
-//******************************************************************************
-// fapiPlatGetMemoryBaseAddr function.
-//******************************************************************************
-fapi::ReturnCode fapiPlatGetMemoryBaseAddr(const fapi::Target * i_pMcsTarget,
-                                           uint64_t & o_addr)
-{
-    fapi::ReturnCode l_rc;
-
-    // TODO
-    // The memory base address will depend on the PHYP System Memory Map
-    // Until that is finalized, here is how it will be calculated
-    // ProcChip0:MCS0: 0TB
-    // ProcChip0:MCS1: 8TB (8TB increment for each MCS chiplet)
-    // ProcChip0:MCS7: 56TB
-    // ProcChip1:MCS0: 64Tb (64TB increment for each proc chip)
-
-    // Check params and get the Hostboot Target pointers
-    TARGETING::Target* l_pMcsTarget;
-    TARGETING::Target* l_pChipTarget;
-
-    l_rc = fapiPlatBaseAddrCheckMcsGetChip(i_pMcsTarget, l_pMcsTarget,
-                                           l_pChipTarget);
-
-    if (!l_rc)
-    {
-        uint64_t l_chipPos = l_pChipTarget->getAttr<TARGETING::ATTR_POSITION>();
-        uint64_t l_mcsPos = l_pMcsTarget->getAttr<TARGETING::ATTR_CHIP_UNIT>();
-
-        // (ChipPos * 64TB) + (McsPos * 8 TB)
-        o_addr = ((l_chipPos * 64 * 1024 * 1024 * 1024 * 1024) +
-                  (l_mcsPos * 8 * 1024 * 1024 * 1024 * 1024));
-    }
-
-    return l_rc;
-}
-
-//******************************************************************************
-// fapiPlatGetMirrorBaseAddr function.
-//******************************************************************************
-fapi::ReturnCode fapiPlatGetMirrorBaseAddr(const fapi::Target * i_pMcsTarget,
-                                           uint64_t & o_addr)
-{
-    fapi::ReturnCode l_rc;
-
-    // TODO
-    // The mirrored memory base address will depend on the PHYP System Memory Map
-    // Until that is finalized, here is how it will be calculated
-    // ProcChip0:MCS0: 512TB
-    // ProcChip0:MCS1: 516TB (4TB increment for each MCS chiplet)
-    // ProcChip0:MCS7: 540TB
-    // ProcChip1:MCS0: 544Tb (32TB increment for each proc chip)
-
-    // Check params and get the Hostboot Target pointers
-    TARGETING::Target* l_pMcsTarget;
-    TARGETING::Target* l_pChipTarget;
-
-    l_rc = fapiPlatBaseAddrCheckMcsGetChip(i_pMcsTarget, l_pMcsTarget,
-                                           l_pChipTarget);
-
-    if (!l_rc)
-    {
-        uint64_t l_chipPos = l_pChipTarget->getAttr<TARGETING::ATTR_POSITION>();
-        uint64_t l_mcsPos = l_pMcsTarget->getAttr<TARGETING::ATTR_CHIP_UNIT>();
-
-        // 512TB + (ChipPos * 32TB) + (McsPos * 4 TB)
-        o_addr = ((static_cast<uint64_t>(512) * 1024 * 1024 * 1024 * 1024) +
-                  (l_chipPos * 32 * 1024 * 1024 * 1024 * 1024) + 
-                  (l_mcsPos * 4 * 1024 * 1024 * 1024 * 1024));
-    }
-
     return l_rc;
 }
 

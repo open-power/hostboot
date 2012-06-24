@@ -1,26 +1,27 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/hwpf/hwp/mc_init/mss_eff_config/mss_eff_config.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
-// $Id: mss_eff_config.C,v 1.7 2012/05/04 19:58:50 asaetow Exp $
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/hwpf/hwp/mc_init/mss_eff_config/mss_eff_config.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
+// $Id: mss_eff_config.C,v 1.9 2012/06/07 01:16:03 asaetow Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_eff_config.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -42,7 +43,14 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
-//   1.8   |          |         |
+//   1.10  |          |         |
+//   1.9   | asaetow  |29-MAY-12| Added divide by 0 check for mss_freq. 
+//         |          |         | Added 9 new attributes from memory_attributes.xml v1.23 
+//         |          |         | Changed plug_config to my_attr_eff_num_drops_per_port.
+//         |          |         | NOTE: DO NOT pick-up without memory_attributes.xml v1.23 or newer.
+//         |          |         | NOTE: Some hard code still in place awaiting SPD attributes bytes[76:68,33,8].
+//   1.8   | asaetow  |04-MAY-12| Fixed my_attr_eff_dimm_size calcualtion and use new ATTR_EFF_DRAM_WIDTH enum from memory_attributes.xml v1.22 
+//         |          |         | NOTE: DO NOT pick-up without memory_attributes.xml v1.22 or newer.
 //   1.7   | asaetow  |04-MAY-12| Removed calc_u8_timing_in_clk(). 
 //         |          |         | Changed calc_u32_timing_in_clk() to calc_timing_in_clk() and changed params.
 //         |          |         | Removed currently unused vars.
@@ -83,8 +91,6 @@
 //----------------------------------------------------------------------
 enum {
    EMPTY = 0,
-   SINGLE_DROP = 1,
-   DUAL_DROP = 2,
    VALID = 255,
 };
 
@@ -131,7 +137,6 @@ fapi::ReturnCode mss_eff_config(const fapi::Target i_target_mba) {
    // HERE const uint8_t SPD_ATTR_SIZE_80 = 80;
 
    // Define local variables
-   uint8_t plug_config = EMPTY;
    uint8_t cur_dimm_spd_valid_u8array[PORT_SIZE][DIMM_SIZE] = {{0}};
    uint8_t cur_mba_port = 0;
    uint8_t cur_mba_dimm = 0;
@@ -161,8 +166,10 @@ fapi::ReturnCode mss_eff_config(const fapi::Target i_target_mba) {
    uint8_t my_attr_eff_dram_al = 1;
    uint8_t my_attr_eff_dram_asr = 0;
    uint8_t my_attr_eff_dram_bl = 0;
+   uint8_t my_attr_eff_dram_banks = 0;
    // See mss_freq.C
    //uint8_t my_attr_eff_dram_cl = 0;
+   uint8_t my_attr_eff_dram_cols = 0;
    uint8_t my_attr_eff_dram_cwl = 0;
    uint8_t my_attr_eff_dram_density = 0;
    uint8_t my_attr_eff_dram_dll_enable = 0;
@@ -172,6 +179,7 @@ fapi::ReturnCode mss_eff_config(const fapi::Target i_target_mba) {
    uint8_t my_attr_eff_dram_output_buffer = 0;
    uint8_t my_attr_eff_dram_pasr = 0;
    uint8_t my_attr_eff_dram_rbt = 0;
+   uint8_t my_attr_eff_dram_rows = 0;
    uint8_t my_attr_eff_dram_srt = 1;
    uint8_t my_attr_eff_dram_tdqs = 0;
    uint8_t my_attr_eff_dram_tfaw = 0;
@@ -191,13 +199,31 @@ fapi::ReturnCode mss_eff_config(const fapi::Target i_target_mba) {
    uint8_t my_attr_eff_dram_width = 0;
    uint8_t my_attr_eff_dram_wr = 0;
    uint8_t my_attr_eff_dram_wr_lvl_enable = 0;
+
+   // AST HERE: Needs SPD byte33[7,1:0], currently hard coded to TYPE_1B
+   uint8_t my_attr_eff_ibm_type[PORT_SIZE][DIMM_SIZE] = {{2,2},{2,2}};
+
    uint32_t my_attr_eff_memcal_interval = 0;
    uint8_t my_attr_eff_mpr_loc = 0x0;
    uint8_t my_attr_eff_mpr_mode = 0;
+
+   // AST HERE: Needs SPD byte33[6:4], currently hard coded to 0
+   uint8_t my_attr_eff_num_dies_per_package[PORT_SIZE][DIMM_SIZE] = {{0}};
+
+   uint8_t my_attr_eff_num_drops_per_port = 0;
+   uint8_t my_attr_eff_num_master_ranks_per_dimm[PORT_SIZE][DIMM_SIZE] = {{0}};
+   
+   // AST HERE: Needs source data, currently hard coded to 0
+   uint8_t my_attr_eff_num_packages_per_rank[PORT_SIZE][DIMM_SIZE] = {{0}};
+
    uint8_t my_attr_eff_num_ranks_per_dimm[PORT_SIZE][DIMM_SIZE] = {{0}};
    uint8_t my_attr_eff_schmoo_mode = 0;
    uint8_t my_attr_eff_schmoo_param_valid = 0x0;
    uint8_t my_attr_eff_schmoo_test_valid = 0x0;
+
+   // AST HERE: Needs SPD byte33[7,1:0], currently hard coded to 1
+   uint8_t my_attr_eff_stack_type[PORT_SIZE][DIMM_SIZE] = {{1,1},{1,1}};
+
    uint32_t my_attr_eff_zqcal_interval = 0;
 
    // Define local spd attribute variables
@@ -253,6 +279,10 @@ fapi::ReturnCode mss_eff_config(const fapi::Target i_target_mba) {
    rc = fapiGetParentChip(i_target_mba, l_target_centaur); if(rc) return rc;
    rc = FAPI_ATTR_GET(ATTR_MSS_FREQ, &l_target_centaur, mss_freq); if(rc) return rc;
    rc = FAPI_ATTR_GET(ATTR_MSS_VOLT, &l_target_centaur, mss_volt); if(rc) return rc;
+   if (mss_freq <= 0) {
+      FAPI_ERR("Invalid ATTR_MSS_FREQ = %d on %s!", mss_freq, i_target_mba.toEcmdString());
+      FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+   }
    tCK_in_ps = 2000000/mss_freq;
    FAPI_INF("mss_freq = %d, tCK_in_ps= %d on %s.", mss_freq, tCK_in_ps, l_target_centaur.toEcmdString());
    FAPI_INF("mss_volt = %d on %s.", mss_volt, l_target_centaur.toEcmdString());
@@ -325,36 +355,48 @@ fapi::ReturnCode mss_eff_config(const fapi::Target i_target_mba) {
       FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
    }
    if ((cur_dimm_spd_valid_u8array[0][0] == VALID) && (cur_dimm_spd_valid_u8array[0][1] == VALID)) {
-      plug_config = DUAL_DROP;
+      my_attr_eff_num_drops_per_port = fapi::ENUM_ATTR_EFF_NUM_DROPS_PER_PORT_DUAL;
    } else if ((cur_dimm_spd_valid_u8array[0][0] == VALID) && (cur_dimm_spd_valid_u8array[0][1] == EMPTY)) {
-      plug_config = SINGLE_DROP;
+      my_attr_eff_num_drops_per_port = fapi::ENUM_ATTR_EFF_NUM_DROPS_PER_PORT_SINGLE;
    } else {
-      plug_config = EMPTY;
+      my_attr_eff_num_drops_per_port = fapi::ENUM_ATTR_EFF_NUM_DROPS_PER_PORT_EMPTY;
    }
 
 
    // Start Identify/Verify/Assigning values to attributes
-   if (plug_config != EMPTY) {
+   if (my_attr_eff_num_drops_per_port != fapi::ENUM_ATTR_EFF_NUM_DROPS_PER_PORT_EMPTY) {
 
       // Identify/Verify DIMM compatability
-      if ((spd_dram_device_type_u8array[0][0] != spd_dram_device_type_u8array[1][0]) || ((plug_config == DUAL_DROP) && ((spd_dram_device_type_u8array[0][1] != spd_dram_device_type_u8array[1][1]) || (spd_dram_device_type_u8array[0][0] != spd_dram_device_type_u8array[0][1])))) {
+      if ((spd_dram_device_type_u8array[0][0] != spd_dram_device_type_u8array[1][0]) || ((my_attr_eff_num_drops_per_port == fapi::ENUM_ATTR_EFF_NUM_DROPS_PER_PORT_DUAL) && ((spd_dram_device_type_u8array[0][1] != spd_dram_device_type_u8array[1][1]) || (spd_dram_device_type_u8array[0][0] != spd_dram_device_type_u8array[0][1])))) {
          FAPI_ERR("Incompatable DRAM generation on %s!", i_target_mba.toEcmdString());
          FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
       }
-      if ((spd_module_type_u8array[0][0] != spd_module_type_u8array[1][0]) || ((plug_config == DUAL_DROP) && ((spd_module_type_u8array[0][1] != spd_module_type_u8array[1][1]) || (spd_module_type_u8array[0][0] != spd_module_type_u8array[0][1])))) {
+      if ((spd_module_type_u8array[0][0] != spd_module_type_u8array[1][0]) || ((my_attr_eff_num_drops_per_port == fapi::ENUM_ATTR_EFF_NUM_DROPS_PER_PORT_DUAL) && ((spd_module_type_u8array[0][1] != spd_module_type_u8array[1][1]) || (spd_module_type_u8array[0][0] != spd_module_type_u8array[0][1])))) {
          FAPI_ERR("Incompatable DIMM type on %s!", i_target_mba.toEcmdString());
          FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
       }
-      if ((spd_num_ranks_u8array[0][0] != spd_num_ranks_u8array[1][0]) || ((plug_config == DUAL_DROP) && ((spd_num_ranks_u8array[0][1] != spd_num_ranks_u8array[1][1]) || (spd_num_ranks_u8array[0][0] != spd_num_ranks_u8array[0][1])))) {
+      if ((spd_num_ranks_u8array[0][0] != spd_num_ranks_u8array[1][0]) || ((my_attr_eff_num_drops_per_port == fapi::ENUM_ATTR_EFF_NUM_DROPS_PER_PORT_DUAL) && ((spd_num_ranks_u8array[0][1] != spd_num_ranks_u8array[1][1]) || (spd_num_ranks_u8array[0][0] != spd_num_ranks_u8array[0][1])))) {
          FAPI_ERR("Incompatable DIMM ranks on %s!", i_target_mba.toEcmdString());
          FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
       }
-      if ((spd_module_memory_bus_width_u8array[0][0] != spd_module_memory_bus_width_u8array[1][0]) || ((plug_config == DUAL_DROP) && ((spd_module_memory_bus_width_u8array[0][1] != spd_module_memory_bus_width_u8array[1][1]) || (spd_module_memory_bus_width_u8array[0][0] != spd_module_memory_bus_width_u8array[0][1])))) {
+      if ((spd_sdram_banks_u8array[0][0] != spd_sdram_banks_u8array[1][0]) || ((my_attr_eff_num_drops_per_port == fapi::ENUM_ATTR_EFF_NUM_DROPS_PER_PORT_DUAL) && ((spd_sdram_banks_u8array[0][1] != spd_sdram_banks_u8array[1][1]) || (spd_sdram_banks_u8array[0][0] != spd_sdram_banks_u8array[0][1])))) {
+         FAPI_ERR("Incompatable DIMM banks on %s!", i_target_mba.toEcmdString());
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+      }
+      if ((spd_sdram_rows_u8array[0][0] != spd_sdram_rows_u8array[1][0]) || ((my_attr_eff_num_drops_per_port == fapi::ENUM_ATTR_EFF_NUM_DROPS_PER_PORT_DUAL) && ((spd_sdram_rows_u8array[0][1] != spd_sdram_rows_u8array[1][1]) || (spd_sdram_rows_u8array[0][0] != spd_sdram_rows_u8array[0][1])))) {
+         FAPI_ERR("Incompatable DIMM rows on %s!", i_target_mba.toEcmdString());
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+      }
+      if ((spd_sdram_columns_u8array[0][0] != spd_sdram_columns_u8array[1][0]) || ((my_attr_eff_num_drops_per_port == fapi::ENUM_ATTR_EFF_NUM_DROPS_PER_PORT_DUAL) && ((spd_sdram_columns_u8array[0][1] != spd_sdram_columns_u8array[1][1]) || (spd_sdram_columns_u8array[0][0] != spd_sdram_columns_u8array[0][1])))) {
+         FAPI_ERR("Incompatable DIMM cols on %s!", i_target_mba.toEcmdString());
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+      }
+      if ((spd_module_memory_bus_width_u8array[0][0] != spd_module_memory_bus_width_u8array[1][0]) || ((my_attr_eff_num_drops_per_port == fapi::ENUM_ATTR_EFF_NUM_DROPS_PER_PORT_DUAL) && ((spd_module_memory_bus_width_u8array[0][1] != spd_module_memory_bus_width_u8array[1][1]) || (spd_module_memory_bus_width_u8array[0][0] != spd_module_memory_bus_width_u8array[0][1])))) {
          FAPI_ERR("Incompatable DRAM primary bus width on %s!", i_target_mba.toEcmdString());
          FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
       }
       /* AST HERE: Needs SPD byte8[4:3]
-      if ((spd_module_memory_bus_width_extension_u8array[0][0] != spd_module_memory_bus_width_extension_u8array[1][0]) || ((plug_config == DUAL_DROP) && ((spd_module_memory_bus_width_extension_u8array[0][1] != spd_module_memory_bus_width_extension_u8array[1][1])) || ((spd_module_memory_bus_width_extension_u8array[0][0] != spd_module_memory_bus_width_extension_u8array[0][1])))) {
+      if ((spd_module_memory_bus_width_extension_u8array[0][0] != spd_module_memory_bus_width_extension_u8array[1][0]) || ((my_attr_eff_num_drops_per_port == fapi::ENUM_ATTR_EFF_NUM_DROPS_PER_PORT_DUAL) && ((spd_module_memory_bus_width_extension_u8array[0][1] != spd_module_memory_bus_width_extension_u8array[1][1])) || ((spd_module_memory_bus_width_extension_u8array[0][0] != spd_module_memory_bus_width_extension_u8array[0][1])))) {
          FAPI_ERR("Incompatable DRAM bus width extension on %s!", i_target_mba.toEcmdString());
          FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
       }
@@ -363,7 +405,7 @@ fapi::ReturnCode mss_eff_config(const fapi::Target i_target_mba) {
          FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
       }
       */
-      if ((spd_dram_width_u8array[0][0] != spd_dram_width_u8array[1][0]) || ((plug_config == DUAL_DROP) && ((spd_dram_width_u8array[0][1] != spd_dram_width_u8array[1][1]) || (spd_dram_width_u8array[0][0] != spd_dram_width_u8array[0][1])))) {
+      if ((spd_dram_width_u8array[0][0] != spd_dram_width_u8array[1][0]) || ((my_attr_eff_num_drops_per_port == fapi::ENUM_ATTR_EFF_NUM_DROPS_PER_PORT_DUAL) && ((spd_dram_width_u8array[0][1] != spd_dram_width_u8array[1][1]) || (spd_dram_width_u8array[0][0] != spd_dram_width_u8array[0][1])))) {
          FAPI_ERR("Incompatable DRAM width on %s!", i_target_mba.toEcmdString());
          FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
       }
@@ -389,6 +431,44 @@ fapi::ReturnCode mss_eff_config(const fapi::Target i_target_mba) {
          FAPI_ERR("Unknown DIMM type on %s!", i_target_mba.toEcmdString());
          FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
       }
+      if (spd_sdram_banks_u8array[0][0] == fapi::ENUM_ATTR_SPD_SDRAM_BANKS_B8) {
+         my_attr_eff_dram_banks = 8;
+      } else if (spd_sdram_banks_u8array[0][0] == fapi::ENUM_ATTR_SPD_SDRAM_BANKS_B16) {
+         my_attr_eff_dram_banks = 16;
+      } else if (spd_sdram_banks_u8array[0][0] == fapi::ENUM_ATTR_SPD_SDRAM_BANKS_B32) {
+         my_attr_eff_dram_banks = 32;
+      } else if (spd_sdram_banks_u8array[0][0] == fapi::ENUM_ATTR_SPD_SDRAM_BANKS_B64) {
+         my_attr_eff_dram_banks = 64;
+      } else {
+         FAPI_ERR("Unknown DRAM banks on %s!", i_target_mba.toEcmdString());
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+      }
+      if (spd_sdram_rows_u8array[0][0] == fapi::ENUM_ATTR_SPD_SDRAM_ROWS_R12) {
+         my_attr_eff_dram_rows = 12;
+      } else if (spd_sdram_rows_u8array[0][0] == fapi::ENUM_ATTR_SPD_SDRAM_ROWS_R13) {
+         my_attr_eff_dram_rows = 13;
+      } else if (spd_sdram_rows_u8array[0][0] == fapi::ENUM_ATTR_SPD_SDRAM_ROWS_R14) {
+         my_attr_eff_dram_rows = 14;
+      } else if (spd_sdram_rows_u8array[0][0] == fapi::ENUM_ATTR_SPD_SDRAM_ROWS_R15) {
+         my_attr_eff_dram_rows = 15;
+      } else if (spd_sdram_rows_u8array[0][0] == fapi::ENUM_ATTR_SPD_SDRAM_ROWS_R16) {
+         my_attr_eff_dram_rows = 16;
+      } else {
+         FAPI_ERR("Unknown DRAM rows on %s!", i_target_mba.toEcmdString());
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+      }
+      if (spd_sdram_columns_u8array[0][0] == fapi::ENUM_ATTR_SPD_SDRAM_COLUMNS_C9) {
+         my_attr_eff_dram_cols = 9;
+      } else if (spd_sdram_columns_u8array[0][0] == fapi::ENUM_ATTR_SPD_SDRAM_COLUMNS_C10) {
+         my_attr_eff_dram_cols = 10;
+      } else if (spd_sdram_columns_u8array[0][0] == fapi::ENUM_ATTR_SPD_SDRAM_COLUMNS_C11) {
+         my_attr_eff_dram_cols = 11;
+      } else if (spd_sdram_columns_u8array[0][0] == fapi::ENUM_ATTR_SPD_SDRAM_COLUMNS_C12) {
+         my_attr_eff_dram_cols = 12;
+      } else {
+         FAPI_ERR("Unknown DRAM cols on %s!", i_target_mba.toEcmdString());
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+      }
       if (spd_dram_width_u8array[0][0] == fapi::ENUM_ATTR_SPD_DRAM_WIDTH_W4) {
          my_attr_eff_dram_width = fapi::ENUM_ATTR_EFF_DRAM_WIDTH_X4;
       } else if (spd_dram_width_u8array[0][0] == fapi::ENUM_ATTR_SPD_DRAM_WIDTH_W8) {
@@ -409,7 +489,7 @@ fapi::ReturnCode mss_eff_config(const fapi::Target i_target_mba) {
       }
       my_attr_eff_dram_density = 16;
       for (cur_mba_port = 0; cur_mba_port < PORT_SIZE; cur_mba_port += 1) {
-         for (cur_mba_dimm = 0; cur_mba_dimm < plug_config; cur_mba_dimm += 1) {
+         for (cur_mba_dimm = 0; cur_mba_dimm < my_attr_eff_num_drops_per_port; cur_mba_dimm += 1) {
             if (spd_sdram_density_u8array[cur_mba_port][cur_mba_dimm] == fapi::ENUM_ATTR_SPD_SDRAM_DENSITY_D16GB) {
                cur_dram_density = 16;
             } else if (spd_sdram_density_u8array[cur_mba_port][cur_mba_dimm] == fapi::ENUM_ATTR_SPD_SDRAM_DENSITY_D8GB) {
@@ -519,30 +599,16 @@ fapi::ReturnCode mss_eff_config(const fapi::Target i_target_mba) {
                my_attr_eff_num_ranks_per_dimm[cur_mba_port][cur_mba_dimm] = 0;
                my_attr_eff_dimm_ranks_configed[cur_mba_port][cur_mba_dimm] = 0x00;
             }
-
-            if (my_attr_eff_num_ranks_per_dimm != 0) {
-
+            if (my_attr_eff_num_ranks_per_dimm[cur_mba_port][cur_mba_dimm] != 0) {
                // dimm_size = dram_density / 8 * primary_bus_width / dram_width * num_ranks_per_dimm
-               // AST HERE: Temp definition for my_attr_eff_dram_width, will redefine attribute XML 
-               //my_attr_eff_dimm_size[cur_mba_port][cur_mba_dimm] = (my_attr_eff_dram_density * my_attr_eff_num_ranks_per_dimm[cur_mba_port][cur_mba_dimm] * 64) / (8 * my_attr_eff_dram_width);
-               uint8_t actual_dram_width = 0;
-               if (my_attr_eff_dram_width == fapi::ENUM_ATTR_EFF_DRAM_WIDTH_X4) {
-                  actual_dram_width = 4;
-               } else if (my_attr_eff_dram_width == fapi::ENUM_ATTR_EFF_DRAM_WIDTH_X8) {
-                  actual_dram_width = 8;
-               } else if (my_attr_eff_dram_width == fapi::ENUM_ATTR_EFF_DRAM_WIDTH_X16) {
-                  actual_dram_width = 16;
-               } else if (my_attr_eff_dram_width == fapi::ENUM_ATTR_EFF_DRAM_WIDTH_X32) {
-                  actual_dram_width = 32;
-               } else {
-                  FAPI_ERR("Unknown DRAM width on %s!", i_target_mba.toEcmdString());
-                  FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
-               }
-               my_attr_eff_dimm_size[cur_mba_port][cur_mba_dimm] = (my_attr_eff_dram_density * my_attr_eff_num_ranks_per_dimm[cur_mba_port][cur_mba_dimm] * 64) / (8 * actual_dram_width);
-
+               my_attr_eff_dimm_size[cur_mba_port][cur_mba_dimm] = (my_attr_eff_dram_density * my_attr_eff_num_ranks_per_dimm[cur_mba_port][cur_mba_dimm] * 64) / (8 * my_attr_eff_dram_width);
             } else {
                my_attr_eff_dimm_size[cur_mba_port][cur_mba_dimm] = 0;
             }
+
+            // AST HERE: Needs SPD byte33[7,1:0], currently hard coded to no stacking
+            my_attr_eff_num_master_ranks_per_dimm[cur_mba_port][cur_mba_dimm] = my_attr_eff_num_ranks_per_dimm[cur_mba_port][cur_mba_dimm];
+
             // DEBUG HERE:
             //FAPI_INF("size=%d density=%d ranks=%d width=%d on %s", my_attr_eff_dimm_size[cur_mba_port][cur_mba_dimm], my_attr_eff_dram_density, my_attr_eff_num_ranks_per_dimm[cur_mba_port][cur_mba_dimm], my_attr_eff_dram_width, i_target_mba.toEcmdString());
          }
@@ -562,9 +628,11 @@ fapi::ReturnCode mss_eff_config(const fapi::Target i_target_mba) {
    rc = FAPI_ATTR_SET(ATTR_EFF_DIMM_TYPE, &i_target_mba, my_attr_eff_dimm_type); if(rc) return rc;
    rc = FAPI_ATTR_SET(ATTR_EFF_DRAM_AL, &i_target_mba, my_attr_eff_dram_al); if(rc) return rc;
    rc = FAPI_ATTR_SET(ATTR_EFF_DRAM_ASR, &i_target_mba, my_attr_eff_dram_asr); if(rc) return rc;
+   rc = FAPI_ATTR_SET(ATTR_EFF_DRAM_BANKS, &i_target_mba, my_attr_eff_dram_banks); if(rc) return rc;
    rc = FAPI_ATTR_SET(ATTR_EFF_DRAM_BL, &i_target_mba, my_attr_eff_dram_bl); if(rc) return rc;
    // See mss_freq.C
    //rc = FAPI_ATTR_SET(ATTR_EFF_DRAM_CL, &i_target_mba, my_attr_eff_dram_cl); if(rc) return rc;
+   rc = FAPI_ATTR_SET(ATTR_EFF_DRAM_COLS, &i_target_mba, my_attr_eff_dram_cols); if(rc) return rc;
    rc = FAPI_ATTR_SET(ATTR_EFF_DRAM_CWL, &i_target_mba, my_attr_eff_dram_cwl); if(rc) return rc;
    rc = FAPI_ATTR_SET(ATTR_EFF_DRAM_DENSITY, &i_target_mba, my_attr_eff_dram_density); if(rc) return rc;
    rc = FAPI_ATTR_SET(ATTR_EFF_DRAM_DLL_ENABLE, &i_target_mba, my_attr_eff_dram_dll_enable); if(rc) return rc;
@@ -574,6 +642,7 @@ fapi::ReturnCode mss_eff_config(const fapi::Target i_target_mba) {
    rc = FAPI_ATTR_SET(ATTR_EFF_DRAM_OUTPUT_BUFFER, &i_target_mba, my_attr_eff_dram_output_buffer); if(rc) return rc;
    rc = FAPI_ATTR_SET(ATTR_EFF_DRAM_PASR, &i_target_mba, my_attr_eff_dram_pasr); if(rc) return rc;
    rc = FAPI_ATTR_SET(ATTR_EFF_DRAM_RBT, &i_target_mba, my_attr_eff_dram_rbt); if(rc) return rc;
+   rc = FAPI_ATTR_SET(ATTR_EFF_DRAM_ROWS, &i_target_mba, my_attr_eff_dram_rows); if(rc) return rc;
    rc = FAPI_ATTR_SET(ATTR_EFF_DRAM_SRT, &i_target_mba, my_attr_eff_dram_srt); if(rc) return rc;
    rc = FAPI_ATTR_SET(ATTR_EFF_DRAM_TDQS, &i_target_mba, my_attr_eff_dram_tdqs); if(rc) return rc;
    rc = FAPI_ATTR_SET(ATTR_EFF_DRAM_TFAW, &i_target_mba, my_attr_eff_dram_tfaw); if(rc) return rc;
@@ -590,13 +659,19 @@ fapi::ReturnCode mss_eff_config(const fapi::Target i_target_mba) {
    rc = FAPI_ATTR_SET(ATTR_EFF_DRAM_WIDTH, &i_target_mba, my_attr_eff_dram_width); if(rc) return rc;
    rc = FAPI_ATTR_SET(ATTR_EFF_DRAM_WR, &i_target_mba, my_attr_eff_dram_wr); if(rc) return rc;
    rc = FAPI_ATTR_SET(ATTR_EFF_DRAM_WR_LVL_ENABLE, &i_target_mba, my_attr_eff_dram_wr_lvl_enable); if(rc) return rc;
+   rc = FAPI_ATTR_SET(ATTR_EFF_IBM_TYPE, &i_target_mba, my_attr_eff_ibm_type); if(rc) return rc;
    rc = FAPI_ATTR_SET(ATTR_EFF_MEMCAL_INTERVAL, &i_target_mba, my_attr_eff_memcal_interval); if(rc) return rc;
    rc = FAPI_ATTR_SET(ATTR_EFF_MPR_LOC, &i_target_mba, my_attr_eff_mpr_loc); if(rc) return rc;
    rc = FAPI_ATTR_SET(ATTR_EFF_MPR_MODE, &i_target_mba, my_attr_eff_mpr_mode); if(rc) return rc;
+   rc = FAPI_ATTR_SET(ATTR_EFF_NUM_DIES_PER_PACKAGE, &i_target_mba, my_attr_eff_num_dies_per_package); if(rc) return rc;
+   rc = FAPI_ATTR_SET(ATTR_EFF_NUM_DROPS_PER_PORT, &i_target_mba, my_attr_eff_num_drops_per_port); if(rc) return rc;
+   rc = FAPI_ATTR_SET(ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM, &i_target_mba, my_attr_eff_num_master_ranks_per_dimm); if(rc) return rc;
+   rc = FAPI_ATTR_SET(ATTR_EFF_NUM_PACKAGES_PER_RANK, &i_target_mba, my_attr_eff_num_packages_per_rank); if(rc) return rc;
    rc = FAPI_ATTR_SET(ATTR_EFF_NUM_RANKS_PER_DIMM, &i_target_mba, my_attr_eff_num_ranks_per_dimm); if(rc) return rc;
    rc = FAPI_ATTR_SET(ATTR_EFF_SCHMOO_MODE, &i_target_mba, my_attr_eff_schmoo_mode); if(rc) return rc;
    rc = FAPI_ATTR_SET(ATTR_EFF_SCHMOO_PARAM_VALID, &i_target_mba, my_attr_eff_schmoo_param_valid); if(rc) return rc;
    rc = FAPI_ATTR_SET(ATTR_EFF_SCHMOO_TEST_VALID, &i_target_mba, my_attr_eff_schmoo_test_valid); if(rc) return rc;
+   rc = FAPI_ATTR_SET(ATTR_EFF_STACK_TYPE, &i_target_mba, my_attr_eff_stack_type); if(rc) return rc;
    rc = FAPI_ATTR_SET(ATTR_EFF_ZQCAL_INTERVAL, &i_target_mba, my_attr_eff_zqcal_interval); if(rc) return rc;
 
 
