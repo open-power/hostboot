@@ -275,13 +275,6 @@ errlHndl_t PnorDD::readFlash(void* o_buffer,
         //multiple fake chips eventually
         uint64_t l_address = i_address & 0x00000000FFFFFFFF;
 
-        l_err = verifyFlashAddressRange(l_address, io_buflen);
-        if(l_err)
-        {
-            io_buflen = 0;
-            break;
-        }
-
         // skip everything in MEMCPY mode
         if( MODEL_MEMCPY == iv_mode )
         {
@@ -317,10 +310,6 @@ errlHndl_t PnorDD::writeFlash(void* i_buffer,
         //mask off chip select for now, will probably break up fake PNOR into
         //multiple fake chips eventually
         uint64_t l_address = i_address & 0x00000000FFFFFFFF;
-
-        // make sure this is a valid address
-        l_err = verifyFlashAddressRange(l_address, io_buflen);
-        if(l_err) { break; }
 
         // skip everything in MEMCPY mode
         if( MODEL_MEMCPY == iv_mode )
@@ -568,43 +557,6 @@ void PnorDD::sfcInit( )
     }
 
 
-}
-
-/**
- * @brief Verify flash request is in appropriate address range
- */
-errlHndl_t PnorDD::verifyFlashAddressRange(uint64_t i_address,
-                                           size_t& i_length)
-{
-    errlHndl_t l_err = NULL;
-
-    do{
-        //@todo - Do we really need any checking here?
-        //  if so we should be getting the size told to us by the PNOR RP
-        //   based on the TOC or global data
-
-        if((i_address+i_length) > PNORSIZE)
-        {
-            TRACFCOMP( g_trac_pnor, "PnorDD::verifyAddressRange> Invalid Address Requested : i_address=%d", i_address );
-            /*@
-             * @errortype
-             * @moduleid     PNOR::MOD_PNORDD_VERIFYADDRESSRANGE
-             * @reasoncode   PNOR::RC_INVALID_ADDRESS
-             * @userdata1    Requested Address
-             * @userdata2    Requested Length
-             * @devdesc      PnorDD::verifyAddressRange> Invalid Address requested
-             */
-            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                            PNOR::MOD_PNORDD_VERIFYADDRESSRANGE,
-                                            PNOR::RC_INVALID_ADDRESS,
-                                            TO_UINT64(i_address),
-                                            TO_UINT64(i_length));
-            break;
-        }
-
-    }while(0);
-
-    return l_err;
 }
 
 /**

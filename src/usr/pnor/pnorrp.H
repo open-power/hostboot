@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/pnor/pnorrp.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/pnor/pnorrp.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #ifndef __PNOR_PNORRP_H
 #define __PNOR_PNORRP_H
 
@@ -29,6 +30,7 @@
 #include <builtins.h>
 #include <errl/errlentry.H>
 #include <vmmconst.h>
+#include "ffs.h"   //Common header file with BuildingBlock.
 
 /**
  * PNOR Resource Provider
@@ -77,35 +79,49 @@ class PnorRP
     {
         BASE_VADDR = VMM_VADDR_PNOR_RP, /**< 2GB = 0x80000000*/
 
-        NUM_SIDES = 3,  /**< A, B, Sideless */
+        NUM_SIDES = 2,  /**< A, B */
 
         SIDE_SIZE = 32*MEGABYTE, /**< Allocate 32 MB (0x2000000) of VA per side */
 
+        NUM_VADDR_BLOCKS = NUM_SIDES+1, /**< Number of VADDR blocks. */
         SIDEA_VADDR = BASE_VADDR,  /**< Base address of Side A */
         SIDEB_VADDR = SIDEA_VADDR + SIDE_SIZE,  /**< Base address of Side B */
-        SIDELESS_VADDR = SIDEB_VADDR + SIDE_SIZE,  /**< Base address of Sideless data */
+        SIDELESS_VADDR = SIDEB_VADDR + SIDE_SIZE,  /**< Sideless data Base Addr */
 
-        TOTAL_SIZE = SIDE_SIZE*NUM_SIDES,  /**< Size of PNOR VA region */
+        TOTAL_SIZE = SIDE_SIZE*NUM_VADDR_BLOCKS,  /**< Size of PNOR VA region */
         LAST_VADDR = BASE_VADDR + TOTAL_SIZE,  /**< End of our VA range */
 
         /** Real number of bytes required to read 1 logical page */
         PAGESIZE_PLUS_ECC = PAGESIZE * (9/8),  // 8 bytes of data + 1 byte of ECC
+
+        SUPPORTED_FFS_VERSION = 0x1,  /**< Supported FFS Version */
+        FFS_TABLE_BASE_ADDR = 0x0,    /**< Currently only have FFS table */
     };
 
     /**
-     * Table of Contents entry
-     *   This matches the PNOR binary layout  @todo this will change
+     * FFS Misc information flags
      */
-    struct TOCEntry_t
+    enum
     {
-        char name[8]; /**< Null terminated ascii string */
-        uint64_t offset;  /**< Offset to region from zero (relative to chip) */
-        uint64_t size;  /**< Size of region in bytes (with or without ECC?) */
-        uint64_t size_act;  /**< Actual size of content in bytes */
-        uint64_t misc;  /**< Miscellaneious Info */
-        char fuse_tbd[89];  /**< Free Space */
-        //@todo - need a chip select here I think?
+        MISC_ECC_PROTECT   = 0x80,    /**< ECC protected */
+        MISC_SIDELESS      = 0x40,    /**< Preserved across code updates (sideless) =1 */
+        MISC_CRC_PROTECTED = 0x20,    /**< CRC protected */
+        MISC_UNUSED        = 0x1F,    /**< Unused MISC Flags */
+    };
+
+    /**
+     * FFS entry
+     *   This matches the PNOR binary layout
+     */
+    struct ffs_hb_user_t{
+        uint32_t sizeAct;      /**< Actual Size of the image */
+        uint8_t chip;          /**< Chip Select (0,1) */
+        uint8_t compressType;  /**< Compression Indication/alg (0=not compressed) */
+        uint8_t miscFlags;     /**< Misc Partition related Flags */
+        uint8_t freeMisc[5];   /**< Unused Miscellaneious Info */
+        uint32_t freeUser[13]; /**< Unused User Data */
     } PACKED;
+
 
     /**
      * Internal information to deal with the sections of PNOR
@@ -113,20 +129,22 @@ class PnorRP
     struct SectionData_t {
         PNOR::SectionId id;  /**< Identifier for this section */
         PNOR::SideSelect side;  /** Side Select */
-
         uint64_t virtAddr;  /**< Virtual address for the start of the section */
-
         uint32_t flashAddr;  /**< Address in flash */
-
         uint32_t size;  /**< Actual size of content in bytes (not including ECC) */
         uint8_t chip;  /**< Chip Select */
-        uint8_t eccProtected;  /**< Section is ECC protected */
+        uint8_t miscFlags; /**<chip select, ECC Protect, sideless flags */
     } PACKED;
 
     /**
      * Cached copy of section data
      */
     SectionData_t iv_TOC[NUM_SIDES][PNOR::NUM_SECTIONS+1];
+
+    /**
+     * Currently selected PNOR Side
+     */
+    PNOR::SideSelect iv_curSide;
 
     /**
      * Pointer to the message queue where we receive messages

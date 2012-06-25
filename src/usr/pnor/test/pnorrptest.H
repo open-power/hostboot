@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/pnor/test/pnorrptest.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/pnor/test/pnorrptest.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #ifndef __PNORRPTEST_H
 #define __PNORRPTEST_H
 
@@ -47,81 +48,51 @@ class PnorRpTest : public CxxTest::TestSuite
 
     /**
      * @brief PNOR RP test - Section Info
-     *        Look for mismatches in section information from expected
+     *        Check that the section info at least appears somewhat valid.
      */
-    void test_getSectionInfo(void)
+    void test_sectionInfo(void)
     {
-        TRACFCOMP(g_trac_pnor, "PnorRpTest::test_getSectionInfo> Start" );
+        TRACFCOMP(g_trac_pnor, "PnorRpTest::test_sectionInfo> Start" );
         uint64_t fails = 0;
         uint64_t total = 0;
         PNOR::SectionInfo_t info;
         errlHndl_t errhdl = NULL;
-
-        struct ExpVals_t {
-            uint64_t size;
-            uint64_t vaddr;
-            PNOR::SideSelect side;
-        };
-        const ExpVals_t exp_data[] = {
-            /* TOC */ { 0x1000, 0x80000000, PNOR::SIDE_A },
-            /* HB_EXT_CODE */ { 0x200000, 0x80001000, PNOR::SIDE_A },
-            /* HB_DATA */ { 0x80000, 0x80201000, PNOR::SIDE_A },
-            /* DIMM_JEDEC_VPD */ { 0x40000, 0x84301000, PNOR::SIDELESS },
-            /* MODULE_VPD */ { 0x80000, 0x84281000, PNOR::SIDELESS },
-            /* GLOBAL_DATA  { 0, 0 },*/
-            /* SBE_IPL  { 0, 0 },*/
-            /* HB_ERRLOGS  { 0, 0 },*/
-            /* HB_BASE_CODE  { 0, 0 },*/
-            /* HB_RUNTIME  { 0, 0 },*/
-            /* PAYLOAD  { 0, 0 },*/
-            /* PFW_LITE_CODE  { 0, 0 },*/
-            /* OCC_CODE  { 0, 0 },*/
-            /* KVM_PART_INFO  { 0, 0 },*/
-            /* CODE_UPDATE  { 0, 0 },*/
-        };
 
         for( PNOR::SectionId id = PNOR::FIRST_SECTION;
              id < PNOR::NUM_SECTIONS;
              id = (PNOR::SectionId) (id + 1) )
         {
             total++;
-            errhdl = PNOR::getSectionInfo( id, exp_data[id].side, info );
+            errhdl = PNOR::getSectionInfo( id, PNOR::CURRENT_SIDE, info );
             if( errhdl )
             {
-                if( exp_data[id].size != 0 )
-                {
-                    TRACFCOMP(g_trac_pnor, "PnorRpTest::test_getSectionInfo> ERROR : getSectionInfo returned error for %d : RC=%X", id, errhdl->reasonCode() );
-                    TS_FAIL( "PnorRpTest::test_getSectionInfo> ERROR : Unexpected error log" );
-                    fails++;
-                    errlCommit(errhdl,PNOR_COMP_ID);
-                }
-                else
-                {
-                    delete errhdl;
-                }
+                TRACFCOMP(g_trac_pnor, "PnorRpTest::test_sectionInfo> ERROR : getSectionInfo returned error for %d : RC=%X", id, errhdl->reasonCode() );
+                TS_FAIL( "PnorRpTest::test_getSectionInfo> ERROR : Unexpected error log" );
+                fails++;
+                errlCommit(errhdl,PNOR_COMP_ID);
             }
 
-            // Look for expected size
+            // Look for non-zero size
             total++;
-            if( info.size != exp_data[id].size )
+            if( info.size == 0 )
             {
-                TRACFCOMP(g_trac_pnor, "PnorRpTest::test_getSectionInfo> ERROR : Mismatched size for section %d : id=%d, exp=%d, actual=%d", id, info.id, exp_data[id].size, info.size );
-                TS_FAIL( "PnorRpTest::test_getSectionInfo> ERROR : Mismatched Size" );
+                TRACFCOMP(g_trac_pnor, "PnorRpTest::test_sectionInfo> ERROR : zero size for section %d : id=%d, actual=%d", id, info.id, info.size );
+                TS_FAIL( "PnorRpTest::test_getSectionInfo> ERROR : Zero Size" );
                 fails++;
             }
 
-            // Look for expected vaddr
+            // Look for vaddr in appropriate section of virtual memory
             total++;
-            if( info.vaddr != exp_data[id].vaddr )
+            if( info.vaddr < PnorRP::BASE_VADDR )
             {
-                TRACFCOMP(g_trac_pnor, "PnorRpTest::test_getSectionInfo> ERROR : Mismatched vaddr for section %d : id=%d, exp=%d, actual=%d", id, info.id, exp_data[id].vaddr, info.vaddr );
-                TS_FAIL( "PnorRpTest::test_getSectionInfo> ERROR : Mismatched vaddr" );
+                TRACFCOMP(g_trac_pnor, "PnorRpTest::test_sectionInfo> ERROR : Virtual Addr section %d Not in appropriate range: id=%d, actual=%d", id, info.id, info.vaddr );
+                TS_FAIL( "PnorRpTest::test_getSectionInfo> ERROR : Invalid vaddr" );
                 fails++;
             }
         }
 
 
-        TRACFCOMP(g_trac_pnor, "PnorRpTest::test_getSectionInfo> %d/%d fails", fails, total );
+        TRACFCOMP(g_trac_pnor, "PnorRpTest::test_sectionInfo> %d/%d fails", fails, total );
     };
 
     /**

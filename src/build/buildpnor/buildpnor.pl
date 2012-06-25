@@ -207,6 +207,7 @@ sub loadPnorLayout
 
         $imageSize = getNumber($imageSize);
         $blockSize = getNumber($blockSize);
+        $partTableSize = getNumber($partTableSize);
 
         $$i_pnorLayoutRef{metadata}{imageSize} = $imageSize;
         $$i_pnorLayoutRef{metadata}{blockSize} = $blockSize;
@@ -223,6 +224,7 @@ sub loadPnorLayout
         my $physicalRegionSize = $sectionEl->{physicalRegionSize}[0];
         my $ecc = $sectionEl->{ecc}[0];
         my $source = $sectionEl->{source}[0];
+        my $sideless = $sectionEl->{sideless}[0];
 
         my $actualRegionSize = 0;
         if(exists($sectionEl->{actualRegionSize}[0]))
@@ -245,6 +247,7 @@ sub loadPnorLayout
         $$i_pnorLayoutRef{sections}{$physicalOffset}{actualRegionSize} = $actualRegionSize;
         $$i_pnorLayoutRef{sections}{$physicalOffset}{ecc} = $ecc;
         $$i_pnorLayoutRef{sections}{$physicalOffset}{source} = $source;
+        $$i_pnorLayoutRef{sections}{$physicalOffset}{sideless} = $sideless;
 
     }
 
@@ -431,9 +434,16 @@ sub genToc
             insertPadBytes($FILEHANDLE, 4);
         }
     
-        #FFS User Word 2-3: Miscellaneous information.  Not currently implemented
-        insertPadBytes($FILEHANDLE, 8);
-
+        #FFS User Word 2-3: Miscellaneous information.
+        #User Word 2, bit 18 indicates sideless.
+        my $miscInfo = 0x00000000;
+        if($sectionHash{$key}{sideless} =~ "yes")
+        {
+            $miscInfo = $miscInfo | 0x00004000;
+        }
+        print $FILEHANDLE pack('N', $miscInfo);
+        #User Word 3 Not currently implemented.
+        insertPadBytes($FILEHANDLE, 4);
 
         #FFS User Word 4-16: Free space User Data
         insertPadBytes($FILEHANDLE, 52);

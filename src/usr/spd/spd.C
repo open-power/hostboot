@@ -323,7 +323,7 @@ errlHndl_t spdFetchData ( uint64_t i_byteAddr,
             info.segmentSize = DIMM_SPD_SECTION_SIZE;
             info.maxSegments = DIMM_SPD_MAX_SECTIONS;
             info.pnorSection = PNOR::DIMM_JEDEC_VPD;
-            info.pnorSide = PNOR::SIDELESS;
+            info.pnorSide = PNOR::CURRENT_SIDE;
             err = readPNOR( i_byteAddr,
                             i_numBytes,
                             o_data,
@@ -379,7 +379,7 @@ errlHndl_t spdWriteData ( uint64_t i_offset,
             info.segmentSize = DIMM_SPD_SECTION_SIZE;
             info.maxSegments = DIMM_SPD_MAX_SECTIONS;
             info.pnorSection = PNOR::DIMM_JEDEC_VPD;
-            info.pnorSide = PNOR::SIDELESS;
+            info.pnorSide = PNOR::CURRENT_SIDE;
             err = writePNOR( i_offset,
                              i_numBytes,
                              i_data,

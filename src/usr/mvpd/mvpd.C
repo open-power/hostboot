@@ -744,7 +744,7 @@ errlHndl_t mvpdFetchData ( uint64_t i_byteAddr,
             info.segmentSize = MVPD_SECTION_SIZE;
             info.maxSegments = MVPD_MAX_SECTIONS;
             info.pnorSection = PNOR::MODULE_VPD;
-            info.pnorSide = PNOR::SIDELESS;
+            info.pnorSide = PNOR::CURRENT_SIDE;
             err = SPD::readPNOR( i_byteAddr,
                                  i_numBytes,
                                  o_data,

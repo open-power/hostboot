@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/pnor/pnorrp.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/pnor/pnorrp.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #include "pnorrp.H"
 #include <pnor/pnor_reasoncodes.H>
 #include <initservice/taskargs.H>
@@ -47,7 +48,7 @@ TRAC_INIT(&g_trac_pnor, "PNOR", 4096); //4K
  * Eyecatcher strings for PNOR TOC entries
  */
 const char* cv_EYECATCHER[] = {  //@todo - convert there to uint64_t
-    "TOC",    /**< PNOR::TOC           : Table of Contents */
+    "part",    /**< PNOR::TOC           : Table of Contents */
     "HBI",    /**< PNOR::HB_EXT_CODE   : Hostboot Extended Image */
     "HBD",    /**< PNOR::HB_DATA       : Hostboot Data */
     "DJVPD",  /**< PNOR::DIMM_JEDEC_VPD: Dimm JEDEC VPD */
@@ -145,6 +146,10 @@ PnorRP::PnorRP()
 ,iv_startupRC(0)
 {
     TRACFCOMP(g_trac_pnor, "PnorRP::PnorRP> " );
+
+    //Default to PNOR Side A for now.
+    //TODO: Determine proper side  (RTC: 34764)
+    iv_curSide = PNOR::SIDE_A;
 
     // setup everything in a separate function
     initDaemon();
@@ -246,9 +251,15 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
     //TRACDCOMP(g_trac_pnor, "PnorRP::getSectionInfo> i_section=%d, i_side=%X", i_section, i_side );
     errlHndl_t l_errhdl = NULL;
     PNOR::SectionId id = i_section;
+    PNOR::SideSelect side = i_side;
 
     do
     {
+        if(side == PNOR::CURRENT_SIDE)
+        {
+            side = iv_curSide;
+        }
+
         // Abort this operation if we had a startup failure
         uint64_t rc = 0;
         if( didStartupFail(rc) )
@@ -274,10 +285,10 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
         }
 
         // Zero-length means the section is invalid
-        if( 0 == iv_TOC[i_side][id].size )
+        if( 0 == iv_TOC[side][id].size )
         {
-            TRACFCOMP( g_trac_pnor, "PnorRP::getSectionInfo> Invalid Section Requested : i_section=%d, i_side=%d", i_section, i_side );
-            TRACFCOMP(g_trac_pnor, "o_info={ id=%d, size=%d }", iv_TOC[i_side][i_section].id, iv_TOC[i_side][i_section].size );
+            TRACFCOMP( g_trac_pnor, "PnorRP::getSectionInfo> Invalid Section Requested : i_section=%d, side=%d", i_section, side );
+            TRACFCOMP(g_trac_pnor, "o_info={ id=%d, size=%d }", iv_TOC[side][i_section].id, iv_TOC[side][i_section].size );
             /*@
              * @errortype
              * @moduleid     PNOR::MOD_PNORRP_GETSECTIONINFO
@@ -290,7 +301,7 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
                                                PNOR::MOD_PNORRP_GETSECTIONINFO,
                                                PNOR::RC_INVALID_SECTION,
                                                TO_UINT64(i_section),
-                                               TO_UINT64(i_side));
+                                               TO_UINT64(side));
 
             // set the return section to our invalid data
             id = PNOR::INVALID_SECTION;
@@ -298,19 +309,18 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
         }
     } while(0);
 
-    TRACFCOMP( g_trac_pnor, "i_section=%d, i_side=%d : id=%d", i_section, i_side, iv_TOC[i_side][i_section].id );
+    TRACDCOMP( g_trac_pnor, "PnorRP::getSectionInfo: i_section=%d, side=%d : id=%d", i_section, side, iv_TOC[side][i_section].id );
 
     // copy my data into the external format
-    o_info.id = iv_TOC[i_side][id].id;
-    o_info.side = iv_TOC[i_side][id].side;
+    o_info.id = iv_TOC[side][id].id;
+    o_info.side = iv_TOC[side][id].side;
     o_info.name = cv_EYECATCHER[id];
-    o_info.vaddr = iv_TOC[i_side][id].virtAddr;
-    o_info.size = iv_TOC[i_side][id].size;
-    o_info.eccProtected = iv_TOC[i_side][id].eccProtected;
+    o_info.vaddr = iv_TOC[side][id].virtAddr;
+    o_info.size = iv_TOC[side][id].size;
+    o_info.eccProtected = (bool)(iv_TOC[side][id].miscFlags & MISC_ECC_PROTECT);
 
     return l_errhdl;
 }
-
 
 
 /**
@@ -320,63 +330,172 @@ errlHndl_t PnorRP::readTOC()
 {
     TRACUCOMP(g_trac_pnor, "PnorRP::readTOC>" );
     errlHndl_t l_errhdl = NULL;
+    uint8_t* tocBuffer = NULL;
+#define SIDELESS_VADDR_INDEX 2
+    uint64_t nextVAddr[] = {SIDEA_VADDR, SIDEB_VADDR, SIDELESS_VADDR};
 
-    // Zero out my table
-    for( uint64_t side = 0; side < NUM_SIDES; side++ )
-    {
-        for( PNOR::SectionId id = PNOR::FIRST_SECTION;
-             id <= PNOR::NUM_SECTIONS; //include extra entry for error paths
-             id = (PNOR::SectionId) (id + 1) )
+    do{ 
+        // Zero out my table
+        for( uint64_t side = 0; side < NUM_SIDES; side++ )
         {
-            iv_TOC[side][id].id = id;
-            iv_TOC[side][id].side = (PNOR::SideSelect)side;
-            iv_TOC[side][id].chip = 0;
-            iv_TOC[side][id].flashAddr = 0;
-            iv_TOC[side][id].virtAddr = 0;
-            iv_TOC[side][id].size = 0;
-            iv_TOC[side][id].eccProtected = 0;
+            for( PNOR::SectionId id = PNOR::FIRST_SECTION;
+                 id <= PNOR::NUM_SECTIONS; //include extra entry for error paths
+                 id = (PNOR::SectionId) (id + 1) )
+            {
+                iv_TOC[side][id].id = id;
+                iv_TOC[side][id].side = (PNOR::SideSelect)side;
+                iv_TOC[side][id].chip = 0;
+                iv_TOC[side][id].flashAddr = 0;
+                iv_TOC[side][id].virtAddr = 0;
+                iv_TOC[side][id].size = 0;
+                iv_TOC[side][id].miscFlags = 0;
+            }
         }
+
+        // Read TOC information
+        // assume 1 chip with only 1 side for now, no sideless
+        const uint32_t cur_side = PNOR::SIDE_A;
+
+        // TOC starts at offset zero
+
+        tocBuffer = new uint8_t[PAGESIZE];
+        l_errhdl = readFromDevice( FFS_TABLE_BASE_ADDR, 0, false, tocBuffer );
+        if( l_errhdl ) { break; }
+
+        ffs_hdr* l_ffs_hdr = (ffs_hdr*) tocBuffer;
+
+        //TODO: verify checksum of header  RTC: 44147
+
+        TRACFCOMP(g_trac_pnor, "PnorRp::readTOC:  FFS Block size = 0x%.8X, Partition Table Size = 0x%.8x, entry_count=%d", l_ffs_hdr->block_size, l_ffs_hdr->size, l_ffs_hdr->entry_count);
+
+        /* Checking FFS Header to make sure it looks valid */
+        //TODO: Leave FFDC Breadcrumbs before issuing critical assert in the checks below..  RTC: 44146.
+        if(l_ffs_hdr->magic != FFS_MAGIC)
+        {
+            TRACFCOMP(g_trac_pnor, "E>PnorRp::readTOC:  Invalid magic number in FFS header: 0x%.4X", l_ffs_hdr->magic);
+            crit_assert(0);
+        }
+
+        if(l_ffs_hdr->version != SUPPORTED_FFS_VERSION)
+        {
+            TRACFCOMP(g_trac_pnor, "E>PnorRp::readTOC:  Unsupported FFS Header version: 0x%.4X", l_ffs_hdr->version);
+            crit_assert(0);
+        }
+
+        if(l_ffs_hdr->entry_size != sizeof(ffs_entry))
+        {
+            TRACFCOMP(g_trac_pnor, "E>PnorRp::readTOC:  Unexpected entry_size(0x%.8x) in FFS header: 0x%.4X", l_ffs_hdr->entry_size);
+            crit_assert(0);
+        }
+
+        if(l_ffs_hdr->entries == NULL)
+        {
+            TRACFCOMP(g_trac_pnor, "E>PnorRp::readTOC:  FFS Header pointer to entries is NULL.");
+            crit_assert(0);
+        }
+
+        if(l_ffs_hdr->block_size != PAGESIZE)
+        {
+            TRACFCOMP(g_trac_pnor, "E>PnorRp::readTOC:  Unsupported Block Size(0x%.4X). PNOR Blocks must be 4k", l_ffs_hdr->block_size);
+            crit_assert(0);
+        }
+
+        if(l_ffs_hdr->block_count == 0)
+        {
+            TRACFCOMP(g_trac_pnor, "E>PnorRp::readTOC:  Unsupported BLock COunt(0x%.4X). Device cannot be zero blocks in length.", l_ffs_hdr->block_count);
+            crit_assert(0);
+        }
+
+        //Make sure all the entries fit in specified partition table size.
+        uint64_t spaceUsed = (sizeof(ffs_entry))*l_ffs_hdr->entry_count;
+        if(spaceUsed > ((l_ffs_hdr->block_size * l_ffs_hdr->size) - sizeof(ffs_hdr)))
+        {
+            TRACFCOMP(g_trac_pnor, "E>PnorRp::readTOC:  FFS Entries (0x%.16X) go past end of FFS Table.", spaceUsed);
+            crit_assert(0);
+        }
+
+        ffs_hb_user_t* ffsUserData = NULL;
+
+        //Walk through all the entries in the table and parse the data.
+        ffs_entry* cur_entry = (l_ffs_hdr->entries);
+        for(uint32_t i=0; i<l_ffs_hdr->entry_count; i++)
+        {
+            TRACUCOMP(g_trac_pnor, "PnorRp::readTOC:  Entry %d, name=%s, pointer=0x%X", i, cur_entry->name, (uint64_t)cur_entry);
+
+            //TODO: verify checksum of entry   RTC: 44147
+
+            uint32_t secId = PNOR::INVALID_SECTION;
+
+            //Figure out section enum
+            for(uint32_t eyeIndex=PNOR::TOC; eyeIndex < PNOR::NUM_SECTIONS; eyeIndex++)
+            {
+                if(strcmp(cv_EYECATCHER[eyeIndex], cur_entry->name) == 0)
+                {
+                    secId = eyeIndex;
+                    TRACUCOMP(g_trac_pnor, "PnorRp::readTOC: sectionId=%d", secId);
+                    break;
+                }
+            }
+
+            if(secId == PNOR::INVALID_SECTION)
+            {
+                TRACFCOMP(g_trac_pnor, "PnorRp::readTOC:  Unrecognized Section name(%s), skipping", cur_entry->name);
+                continue;
+            }
+
+            ffsUserData = (ffs_hb_user_t*)&cur_entry->user;
+
+            //size
+            iv_TOC[cur_side][secId].size = ((uint64_t)cur_entry->size)*PAGESIZE;
+
+
+            //virtAddr
+            //The PNOR data is broken up into 3 blocks of Virtual Addresses, A, B, and Sideless.
+            //For Sections found to be sideless, both PNOR sides will map to the same virtual address.
+            if(!(ffsUserData->miscFlags & MISC_SIDELESS))
+            {
+                iv_TOC[cur_side][secId].virtAddr = nextVAddr[cur_side];  
+                nextVAddr[cur_side] += iv_TOC[cur_side][secId].size; 
+            }
+            else
+            {
+                //TODO: Map both sides of PNOR to the same VADDR for Sideless (RTC: 34764)
+                iv_TOC[cur_side][secId].virtAddr = nextVAddr[SIDELESS_VADDR_INDEX];
+                nextVAddr[SIDELESS_VADDR_INDEX] += iv_TOC[cur_side][secId].size;
+            }
+
+            //flashAddr
+            iv_TOC[cur_side][secId].flashAddr = ((uint64_t)cur_entry->base)*PAGESIZE;
+
+            //chipSelect
+            iv_TOC[cur_side][secId].chip = ffsUserData->chip;
+
+            //mics flags
+            iv_TOC[cur_side][secId].miscFlags = ffsUserData->miscFlags;
+
+            if((iv_TOC[cur_side][secId].flashAddr + iv_TOC[cur_side][secId].size) > (l_ffs_hdr->block_count*PAGESIZE))
+            {
+                TRACFCOMP(g_trac_pnor, "E>PnorRp::readTOC:  Partition(%s) at base address (0x%.8x) extends past end of flash device", cur_entry->name, iv_TOC[cur_side][secId].flashAddr);
+                crit_assert(0);
+            }
+
+            cur_entry++;
+        }
+
+        //keep these traces here until PNOR is rock-solid
+        TRACFCOMP(g_trac_pnor, "TOC:    size=0x%.8X  flash=0x%.8X  virt=0x%.16X", iv_TOC[PNOR::SIDE_A][PNOR::TOC].size, iv_TOC[PNOR::SIDE_A][PNOR::TOC].flashAddr, iv_TOC[PNOR::SIDE_A][PNOR::TOC].virtAddr );
+        TRACFCOMP(g_trac_pnor, "EXT:    size=0x%.8X  flash=0x%.8X  virt=0x%.16X", iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].size, iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].flashAddr, iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].virtAddr );
+        TRACFCOMP(g_trac_pnor, "DATA:   size=0x%.8X  flash=0x%.8X  virt=0x%.16X", iv_TOC[PNOR::SIDE_A][PNOR::HB_DATA].size, iv_TOC[PNOR::SIDE_A][PNOR::HB_DATA].flashAddr, iv_TOC[PNOR::SIDE_A][PNOR::HB_DATA].virtAddr );
+        TRACFCOMP(g_trac_pnor, "MVPD: size=0x%.8X  flash=0x%.8X  virt=0x%.16X", iv_TOC[PNOR::SIDE_A][PNOR::MODULE_VPD].size, iv_TOC[PNOR::SIDE_A][PNOR::MODULE_VPD].flashAddr, iv_TOC[PNOR::SIDE_A][PNOR::MODULE_VPD].virtAddr );
+        TRACFCOMP(g_trac_pnor, "DJVPD: size=0x%.8X  flash=0x%.8X  virt=0x%.16X", iv_TOC[PNOR::SIDE_A][PNOR::DIMM_JEDEC_VPD].size, iv_TOC[PNOR::SIDE_A][PNOR::DIMM_JEDEC_VPD].flashAddr, iv_TOC[PNOR::SIDE_A][PNOR::DIMM_JEDEC_VPD].virtAddr );
+
+    }while(0);
+
+    if(tocBuffer != NULL)
+    {
+        TRACUCOMP(g_trac_pnor, "Deleting tocBuffer");
+        delete tocBuffer;
     }
-
-    //@todo - Add in some dummy values for now
-    //  Will update under Story 3871
-
-    // assume 1 chip with only 1 side for now, no sideless
-    // TOC starts at offset zero
-
-    // put some random sizes in here
-    //sizes and offsets taken from pnorLayout.xml
-    iv_TOC[PNOR::SIDE_A][PNOR::TOC].size = 0x1000;
-    iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].size = 0x200000; //1MB
-    iv_TOC[PNOR::SIDE_A][PNOR::HB_DATA].size = 0x80000; //512K
-    iv_TOC[PNOR::SIDELESS][PNOR::MODULE_VPD].size = 0x80000; //512K
-    iv_TOC[PNOR::SIDELESS][PNOR::DIMM_JEDEC_VPD].size = 0x40000; //256K
-
-    // fake PNOR will look like this:  TOC::HB_EXT_CODE:HB_DATA:MODULE_VPD:DIMM_JEDEC_VPD
-    // virtual addresses
-    iv_TOC[PNOR::SIDE_A][PNOR::TOC].virtAddr = BASE_VADDR + 0;
-    iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].virtAddr = BASE_VADDR + 0x1000;
-    iv_TOC[PNOR::SIDE_A][PNOR::HB_DATA].virtAddr = BASE_VADDR + 0x201000;
-    iv_TOC[PNOR::SIDELESS][PNOR::MODULE_VPD].virtAddr = SIDELESS_VADDR + 0x281000;
-    iv_TOC[PNOR::SIDELESS][PNOR::DIMM_JEDEC_VPD].virtAddr = SIDELESS_VADDR + 0x301000;
-    // flash
-    iv_TOC[PNOR::SIDE_A][PNOR::TOC].flashAddr = 0;
-    iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].flashAddr = 0x1000;
-    iv_TOC[PNOR::SIDE_A][PNOR::HB_DATA].flashAddr = 0x201000;
-    iv_TOC[PNOR::SIDELESS][PNOR::MODULE_VPD].flashAddr = 0x281000;
-    iv_TOC[PNOR::SIDELESS][PNOR::DIMM_JEDEC_VPD].flashAddr = 0x301000;
-
-    //@todo - end fake data
-
-    //keep these traces here until PNOR is rock-solid
-    TRACFCOMP(g_trac_pnor, "TOC:    size=0x%.8X  flash=0x%.8X  virt=0x%.16X", iv_TOC[PNOR::SIDE_A][PNOR::TOC].size, iv_TOC[PNOR::SIDE_A][PNOR::TOC].flashAddr, iv_TOC[PNOR::SIDE_A][PNOR::TOC].virtAddr );
-    TRACFCOMP(g_trac_pnor, "EXT:    size=0x%.8X  flash=0x%.8X  virt=0x%.16X", iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].size, iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].flashAddr, iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].virtAddr );
-    TRACFCOMP(g_trac_pnor, "DATA:   size=0x%.8X  flash=0x%.8X  virt=0x%.16X", iv_TOC[PNOR::SIDE_A][PNOR::HB_DATA].size, iv_TOC[PNOR::SIDE_A][PNOR::HB_DATA].flashAddr, iv_TOC[PNOR::SIDE_A][PNOR::HB_DATA].virtAddr );
-    TRACFCOMP(g_trac_pnor, "MVPD: size=0x%.8X  flash=0x%.8X  virt=0x%.16X", iv_TOC[PNOR::SIDELESS][PNOR::MODULE_VPD].size, iv_TOC[PNOR::SIDELESS][PNOR::MODULE_VPD].flashAddr, iv_TOC[PNOR::SIDELESS][PNOR::MODULE_VPD].virtAddr );
-    TRACFCOMP(g_trac_pnor, "DJVPD: size=0x%.8X  flash=0x%.8X  virt=0x%.16X", iv_TOC[PNOR::SIDELESS][PNOR::DIMM_JEDEC_VPD].size, iv_TOC[PNOR::SIDELESS][PNOR::DIMM_JEDEC_VPD].flashAddr, iv_TOC[PNOR::SIDELESS][PNOR::DIMM_JEDEC_VPD].virtAddr );
-
-    //@todo - load flash layout (how many chips)
-    //@todo - read TOC on each chip/bank/whatever
 
     TRACUCOMP(g_trac_pnor, "< PnorRP::readTOC" );
     return l_errhdl;
@@ -656,7 +775,7 @@ errlHndl_t PnorRP::computeDeviceAddr( void* i_vaddr,
 
     // pull out the information we need to return from our global copy
     o_chip = iv_TOC[side][id].chip;
-    o_ecc = iv_TOC[side][id].eccProtected;
+    o_ecc = (bool)(iv_TOC[side][id].miscFlags & MISC_ECC_PROTECT);
     o_offset = l_vaddr - iv_TOC[side][id].virtAddr; //offset into pnor
     o_offset += iv_TOC[side][id].flashAddr;
 
@@ -673,7 +792,7 @@ void PnorRP::applyECC( void* i_orig,
 {
     TRACFCOMP(g_trac_pnor, "> PnorRP::applyECC" );
 
-    //@todo - fill this in  (Story 3548)
+    //@todo - fill this in  (Story 34763)
     memcpy( o_ecc, i_orig, PAGESIZE );
 
     TRACFCOMP(g_trac_pnor, "< PnorRP::applyECC" );
@@ -687,7 +806,7 @@ errlHndl_t PnorRP::stripECC( void* i_orig,
 {
     TRACFCOMP(g_trac_pnor, "> PnorRP::stripECC" );
 
-    //@todo - fill this in  (Story 3548)
+    //@todo - fill this in  (Story 34763)
     memcpy( o_data, i_orig, PAGESIZE );
 
     TRACFCOMP(g_trac_pnor, "< PnorRP::stripECC" );
@@ -713,24 +832,46 @@ errlHndl_t PnorRP::computeSection( uint64_t i_vaddr,
 
     o_id = PNOR::INVALID_SECTION;
 
-    // first figure out which side it is on (slight performance boost)
-    if( (i_vaddr >= SIDEA_VADDR)
-        && (i_vaddr < (SIDEA_VADDR + SIDE_SIZE)) )
-    {
-        o_side = PNOR::SIDE_A;
-    }
-    else if( (i_vaddr >= SIDEB_VADDR)
-             && (i_vaddr < (SIDEB_VADDR + SIDE_SIZE)) )
-    {
-        o_side = PNOR::SIDE_B;
-    }
-    else if( (i_vaddr >= SIDELESS_VADDR)
-             && (i_vaddr < (SIDELESS_VADDR + SIDE_SIZE)) )
-    {
-        o_side = PNOR::SIDELESS;
-    }
-    else
-    {
+    do {
+        // first figure out which side it is on (slight performance boost)
+        if( (i_vaddr >= SIDEA_VADDR)
+            && (i_vaddr < (SIDEA_VADDR + SIDE_SIZE)) )
+        {
+            o_side = PNOR::SIDE_A;
+        }
+        else if( (i_vaddr >= SIDEB_VADDR)
+                 && (i_vaddr < (SIDEB_VADDR + SIDE_SIZE)) )
+        {
+            o_side = PNOR::SIDE_B;
+        }
+        else if( (i_vaddr >= SIDELESS_VADDR)
+                 && (i_vaddr < (SIDELESS_VADDR + SIDE_SIZE)) )
+        {
+            o_side = iv_curSide;
+        }
+        else
+        {
+            //break to send down error path
+            break;
+        }
+
+        // loop through all sections to find a matching id
+        for( PNOR::SectionId id = PNOR::FIRST_SECTION;
+             id < PNOR::NUM_SECTIONS;
+             id = (PNOR::SectionId) (id + 1) )
+        {
+            if( (i_vaddr >= iv_TOC[o_side][id].virtAddr)
+                && (i_vaddr < (iv_TOC[o_side][id].virtAddr + iv_TOC[o_side][id].size)) )
+            {
+                o_id = iv_TOC[o_side][id].id;
+                break;
+            }
+        }
+
+    }while(0);
+
+    if(o_id == PNOR::INVALID_SECTION)
+    {   
         TRACFCOMP( g_trac_pnor, "PnorRP::computeSection> Invalid virtual address : i_vaddr=%X", i_vaddr );
         /*@
          * @errortype
@@ -748,18 +889,6 @@ errlHndl_t PnorRP::computeSection( uint64_t i_vaddr,
         return errhdl;
     }
 
-    // loop through all sections to find a matching id
-    for( PNOR::SectionId id = PNOR::FIRST_SECTION;
-         id < PNOR::NUM_SECTIONS;
-         id = (PNOR::SectionId) (id + 1) )
-    {
-        if( (i_vaddr >= iv_TOC[o_side][id].virtAddr)
-            && (i_vaddr < (iv_TOC[o_side][id].virtAddr + iv_TOC[o_side][id].size)) )
-        {
-            o_id = iv_TOC[o_side][id].id;
-            break;
-        }
-    }
 
     return errhdl;
 }

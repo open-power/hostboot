@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/vfs/vfsrp.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/vfs/vfsrp.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 /**
  * @file vfsrp.C
  * @brief Virtual File system Extended image support
@@ -116,8 +117,8 @@ errlHndl_t VfsRp::_init()
     // Discover PNOR virtual address of extended image
     PNOR::SectionInfo_t l_pnor_info;
 
-    // How will SIDE eventually be determined? TODO
-    err = PNOR::getSectionInfo(PNOR::HB_EXT_CODE, PNOR::SIDE_A, l_pnor_info);
+    // Always use CURRENT_SIDE.  PNOR RP will know if that is A or B.
+    err = PNOR::getSectionInfo(PNOR::HB_EXT_CODE, PNOR::CURRENT_SIDE, l_pnor_info);
     if(!err)
     {
         iv_pnor_vaddr = l_pnor_info.vaddr;

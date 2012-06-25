@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/pnor/pnordd.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/pnor/pnordd.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #ifndef __PNOR_PNORDD_H
 #define __PNOR_PNORDD_H
 
@@ -93,17 +94,6 @@ class PnorDD
 
   protected: 
 
-
-    /**
-     * @brief Verify flash request is in appropriate address range
-     *
-     * @i_address  Flash address being operated on
-     * @i_length  Length of chunk being operated on
-     *
-     * @return Error if requested address range is invalid
-     */
-    errlHndl_t verifyFlashAddressRange(uint64_t i_address,
-                                       size_t& i_length);
 
     /**
      * @brief LPC HC Registers
@@ -370,7 +360,7 @@ class PnorDD
 
         LPC_STAT_REG_ERROR_MASK = 0xFC0000000007F700, /**< Error Bits */
 
-        PNORSIZE = 4 * MEGABYTE, //@fixme - read from TOC instead
+        PNORSIZE = 16 * MEGABYTE, //@fixme - read from TOC instead  (RTC: 42252)
         ERASESIZE_BYTES_DEFAULT = 4 * KILOBYTE, /**< Minimum Erase Block (bytes) */
         ECCB_POLL_TIME_NS = 400000, /**< max time from Manfred Walz is 400ms */
         ECCB_POLL_INCR_NS = 10, /**< minimum increment during poll */
