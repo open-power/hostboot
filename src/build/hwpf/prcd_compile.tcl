@@ -6,7 +6,7 @@
 #
 #  IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2011
+#  COPYRIGHT International Business Machines Corp. 2011-2012
 #
 #  p1
 #
@@ -20,7 +20,7 @@
 #
 #  Origin: 30
 #
-#  IBM_PROLOG_END
+#  IBM_PROLOG_END_TAG
 # The next line is executed by /bin/sh, but not tcl \
 exec tclsh "$0" "$@" 
 
@@ -285,6 +285,7 @@ foreach arg $argv {
                 -v    { set verbose 1 }
                 -o    { set state outputflag }
                 -n    { set newfiles 1 }
+                -k    { set keepsandbox 1 }
                 -*h* { puts {prcd_compile.tcl [--help] [-d <drivername>] [-o <ouput dir> ] [-n] <filename> }
                        puts {}
                        puts {Note this tool only supports *.{c,C,h,H,initfile,xml} files in the following hostboot directory trees: }
@@ -402,8 +403,12 @@ if { ![info exists output_dir] } {
 eval {exec} "mkdir -p $output_dir"
 
 lappend cmds ":INFO userid $userid version $version"
-lappend cmds ":DRIVER $driver"
 
+if {[info exists keepsandbox]}  {
+    lappend cmds ":INFO keepsandbox"
+}
+
+lappend cmds ":DRIVER $driver"
 
 if {[info exists newfiles]}  {
 

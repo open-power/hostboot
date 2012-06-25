@@ -5,7 +5,7 @@
 #
 #  IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2011
+#  COPYRIGHT International Business Machines Corp. 2011-2012
 #
 #  p1
 #
@@ -19,7 +19,7 @@
 #
 #  Origin: 30
 #
-#  IBM_PROLOG_END
+#  IBM_PROLOG_END_TAG
 # the next line restarts using tclsh\
 exec tclsh "$0" "$@"
 
@@ -64,6 +64,7 @@ proc AquireData { sock } {
     global log
     global running
     global driver
+    global keepsandbox
 
     if { [eof $sock] || [catch {gets $sock line}] } {
         puts "ERROR: Client closed unexpectedly"
@@ -136,7 +137,7 @@ proc AquireData { sock } {
             # additionally, find usually outputs the file(s) separated by a newline. if there
             #  is a filename that's not unique, we need to flag that as an erorr, so we use the
             #  -printf to force them all onto 1 line.
-            set filen [ exec find $src_path $inc_path -type f -wholename *[ string trimleft $b "./" ] -printf "%p\t" ] 
+            set filen [ exec find $src_path $inc_path -type f -wholename */[ string trimleft $b "./" ] -printf "%p\t" ] 
             # and then truncate the last \t. yeah, hackish..
             set filen [ string trimright $filen "\t" ]
             #puts $log "$sock: find found in sandbox: \"$filen\""
@@ -270,6 +271,11 @@ proc AquireData { sock } {
         } elseif {[regexp {:INFO +(.+)} $line a b] } {
             puts $sock ":DONE"
             puts $log "$sock: $b"
+            if {[regexp {keepsandbox} $b aa] } {
+                set keepsandbox 1
+            } else {
+                set keepsandbox 0
+            }
             flush $sock
             flush $log
         } else {
@@ -303,6 +309,7 @@ proc CloseOut { sock } {
     global git_sh
     global backing
     global log
+    global keepsandbox
 
     if {![eof $sock]} { flush $sock }
 
@@ -312,7 +319,10 @@ proc CloseOut { sock } {
     puts "[clock format [clock seconds]]: Close $socklist(addr,$sock)- "
     unset socklist(addr,$sock)
     if {[info exists git_sh($sock)] } {
-        # Comment out next line to avoid deleting the sandbox
+        if { $keepsandbox != 1 } {
+            # Comment out next line to avoid deleting the sandbox
+            eval {exec} "rm -rf $sb_dir/$sbname($sock)"
+        }
         eval {exec} "rm -rf $sb_dir/$sbname($sock)"
         unset git_sh($sock)
         #unset sandbox($sbname($sock))
@@ -636,6 +646,7 @@ set forever 1
 set base_dir "/tmp"
 set logfile "$base_dir/prcd_server.log"
 set log {}
+set keepsandbox 0
 
 # Where are we running?
 foreach {host site c d} [split [exec hostname] .]  break
