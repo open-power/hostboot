@@ -56,6 +56,90 @@ namespace platAttrSvc
 {
 
 //******************************************************************************
+// fapi::platAttrSvc::getHostbootTarget
+//******************************************************************************
+fapi::ReturnCode getHostbootTarget(
+    const fapi::Target* i_pFapiTarget,
+    TARGETING::Target* & o_pTarget,
+    const TARGETING::TYPE i_expectedType = TARGETING::TYPE_NA)
+{
+    fapi::ReturnCode l_rc;
+
+    // Check that the FAPI Target pointer is not NULL
+    if (i_pFapiTarget == NULL)
+    {
+        FAPI_ERR("getHostbootTarget. NULL FAPI Target passed");
+
+        /*@
+         *  @errortype
+         *  @moduleid   MOD_ATTR_GET_HB_TARGET
+         *  @reasoncode RC_NULL_FAPI_TARGET
+         *  @devdesc    NULL FAPI Target passed to attribute access macro
+         */
+        errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
+            ERRORLOG::ERRL_SEV_INFORMATIONAL,
+            fapi::MOD_ATTR_GET_HB_TARGET,
+            fapi::RC_NULL_FAPI_TARGET);
+        l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
+    }
+    else
+    {
+        // Extract the Hostboot Target pointer
+        o_pTarget = reinterpret_cast<TARGETING::Target*>(i_pFapiTarget->get());
+
+        // Check that the Hostboot Target pointer is not NULL
+        if (o_pTarget == NULL)
+        {
+            FAPI_ERR("getHostbootTarget. NULL Hostbot Target passed");
+
+            /*@
+             *  @errortype
+             *  @moduleid   MOD_ATTR_GET_HB_TARGET
+             *  @reasoncode RC_EMBEDDED_NULL_TARGET_PTR
+             *  @devdesc    NULL HOSTBOOT Target passed to attribute access macro
+             */
+            errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                fapi::MOD_ATTR_GET_HB_TARGET,
+                fapi::RC_EMBEDDED_NULL_TARGET_PTR);
+            l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
+        }
+        else
+        {
+            // Check that the Target Type is as expected
+            if (i_expectedType != TARGETING::TYPE_NA)
+            {
+                TARGETING::TYPE l_type =
+                    o_pTarget->getAttr<TARGETING::ATTR_TYPE>();
+
+                if (l_type != i_expectedType)
+                {
+                    FAPI_ERR("getHostbootTarget. Type: %d, expected %d",
+                             l_type, i_expectedType);
+
+                    /*@
+                     *  @errortype
+                     *  @moduleid   MOD_ATTR_GET_HB_TARGET
+                     *  @reasoncode RC_UNEXPECTED_TARGET_TYPE
+                     *  @userdata1  Target Type
+                     *  @userdata2  Expected Target Type
+                     *  @devdesc    Unexpected Target Type passed to attribute access macro
+                     */
+                    errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
+                        ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                        fapi::MOD_ATTR_GET_HB_TARGET,
+                        fapi::RC_UNEXPECTED_TARGET_TYPE,
+                        l_type, i_expectedType);
+                    l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
+                }
+            }
+        }
+    }
+
+    return l_rc;
+}
+
+//******************************************************************************
 // fapi::platAttrSvc::getSystemTarget
 //******************************************************************************
 
@@ -438,7 +522,120 @@ fapi::ReturnCode fapiPlatGetFunctional(const fapi::Target * i_pTarget,
     return l_rc;
 }
 
+//******************************************************************************
+// fapi::platAttrSvc::fapiPlatGetTargetPos function
+//******************************************************************************
+fapi::ReturnCode fapiPlatGetTargetPos(const fapi::Target * i_pFapiTarget,
+                                      uint32_t & o_pos)
+{
+    fapi::ReturnCode l_rc;
+    TARGETING::Target * l_pTarget = NULL;
+
+    // Get the Hostboot Target
+    l_rc = getHostbootTarget(i_pFapiTarget, l_pTarget);
+
+    if (l_rc)
+    {
+        FAPI_ERR("getTargetName: Error getting Hostboot Target");
+    }
+    else
+    {
+        uint16_t l_pos = l_pTarget->getAttr<TARGETING::ATTR_POSITION>();
+        o_pos = l_pos;
+    }
+
+    return l_rc;
+}
+
+//******************************************************************************
+// fapi::platAttrSvc::getOverrideWrap function
+//******************************************************************************
+bool getOverrideWrap(const fapi::AttributeId i_attrId,
+                     const fapi::Target * const i_pTarget,
+                     uint64_t & o_overrideVal,
+                     const uint8_t i_arrayD1,
+                     const uint8_t i_arrayD2,
+                     const uint8_t i_arrayD3,
+                     const uint8_t i_arrayD4)
+{
+    return Singleton<fapi::AttributeOverrides>::instance().getOverride(
+        i_attrId, i_pTarget, o_overrideVal, i_arrayD1, i_arrayD2, i_arrayD3,
+        i_arrayD4);
+}
+
+//******************************************************************************
+// fapi::platAttrSvc::clearNonConstOverrideWrap function
+//******************************************************************************
+void clearNonConstOverrideWrap(const fapi::AttributeId i_attrId,
+                               const fapi::Target * const i_pTarget)
+{
+    Singleton<fapi::AttributeOverrides>::instance().clearNonConstOverride(
+        i_attrId, i_pTarget);
+}
+
+//******************************************************************************
+// fapi::platAttrSvc::setOverrideWrap function
+//******************************************************************************
+void setOverrideWrap(const AttributeOverride & i_override)
+{
+    Singleton<fapi::AttributeOverrides>::instance().setOverride(i_override);
+}
+
+//******************************************************************************
+// fapi::platAttrSvc::clearOverridesWrap function
+//******************************************************************************
+void clearOverridesWrap()
+{
+    Singleton<fapi::AttributeOverrides>::instance().clearOverrides();
+}
+
+//******************************************************************************
+// fapi::platAttrSvc::overridesExistWrap function
+//******************************************************************************
+bool overridesExistWrap()
+{
+    return Singleton<fapi::AttributeOverrides>::instance().overridesExist();
+}
+
+//******************************************************************************
+// fapi::platAttrSvc::AttributeOverridesLock class
+// This is a simple container for a mutex
+//******************************************************************************
+class AttributeOverridesLock
+{
+public:
+    AttributeOverridesLock()
+    {
+        mutex_init(&iv_mutex);
+    }
+    
+    ~AttributeOverridesLock()
+    {
+        mutex_destroy(&iv_mutex);
+    }
+    mutex_t iv_mutex;
+};
 
 } // End platAttrSvc namespace
+
+//******************************************************************************
+// fapi::AttributeOverrides::platLock function
+// This is the Hostboot PLAT implementation of the FAPI function
+//******************************************************************************
+void AttributeOverrides::platLock()
+{
+    mutex_lock(&(Singleton
+        <fapi::platAttrSvc::AttributeOverridesLock>::instance().iv_mutex));
+}
+
+//******************************************************************************
+// fapi::AttributeOverrides::platUnlock function
+// This is the Hostboot PLAT implementation of the FAPI function
+//******************************************************************************
+void AttributeOverrides::platUnlock()
+{
+    mutex_unlock(&(Singleton
+        <fapi::platAttrSvc::AttributeOverridesLock>::instance().iv_mutex));
+}
 
 } // End fapi namespace

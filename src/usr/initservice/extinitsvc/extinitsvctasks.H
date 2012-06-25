@@ -213,7 +213,7 @@ const TaskInfo g_exttaskinfolist[]   =   {
                 "libplat.so" ,                              // taskname
                 NULL,                                       // no pointer to fn
                 {
-                        INIT_TASK,                          // task type
+                        START_TASK,                         // task type
                         EXT_IMAGE,                          // Extended Module
                 }
         },

@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/hwpf/hwp/fapiTestHwpAttr.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/hwpf/hwp/fapiTestHwpAttr.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 /**
  *  @file fapiTestHwpAttr.C
  *
@@ -885,7 +886,6 @@ fapi::ReturnCode hwpTestAttributes()
             FAPI_INF("hwpTestAttributes: Deleting expected error 0x%x from fapiGetInitFileAttr",
                      static_cast<uint32_t>(l_rc));
             l_rc = fapi::FAPI_RC_SUCCESS;
-            break;
         }
         else
         {
@@ -929,7 +929,264 @@ fapi::ReturnCode hwpTestAttributes()
         //l_rc = FAPI_ATTR_GET(ATTR_SCRATCH_UINT64_ARRAY_2, NULL, l_array);
         //l_rc = FAPI_ATTR_SET(ATTR_SCRATCH_UINT64_ARRAY_2, NULL, l_array);
         }
+        
+        //----------------------------------------------------------------------
+        // Test non-const Attribute Override on ATTR_SCRATCH_UINT64_1
+        //----------------------------------------------------------------------
+        {
+        if (fapi::platAttrSvc::overridesExistWrap())
+        {
+            FAPI_INF("hwpTestAttributes: OverrideUint64. Overrides exist, skipping test");
+        }
+        else
+        {
+            // Set the attribute to a known value
+            uint64_t l_val = 4;
+            l_rc = FAPI_ATTR_SET(ATTR_SCRATCH_UINT64_1, NULL, l_val);
+            
+            if (l_rc)
+            {
+                FAPI_ERR("hwpTestAttributes: OverrideUint64. Error from SET");
+                break;
+            }
+            
+            // Create an non-const override
+            fapi::AttributeOverride l_override;
+            l_override.iv_overrideVal = 9;
+            l_override.iv_attrId =
+                static_cast<uint32_t>(fapi::ATTR_SCRATCH_UINT64_1);
+            l_override.iv_targetType =
+                static_cast<uint32_t>(fapi::TARGET_TYPE_SYSTEM);
+            l_override.iv_pos = fapi::ATTR_POS_NA;
+            l_override.iv_unitPos = fapi::ATTR_UNIT_POS_NA;
+            l_override.iv_overrideType = fapi::ATTR_OVERRIDE_NON_CONST;
+            l_override.iv_arrayD1 = fapi::ATTR_ARRAYD_NA;
+            l_override.iv_arrayD2 = fapi::ATTR_ARRAYD_NA;
+            l_override.iv_arrayD3 = fapi::ATTR_ARRAYD_NA;
+            l_override.iv_arrayD4 = fapi::ATTR_ARRAYD_NA;
+            fapi::platAttrSvc::setOverrideWrap(l_override);
+            
+            // Check that the override value is returned
+            l_rc = FAPI_ATTR_GET(ATTR_SCRATCH_UINT64_1, NULL, l_val);
+            
+            if (l_rc)
+            {
+                FAPI_ERR("hwpTestAttributes: OverrideUint64. Error from GET");
+                break;
+            }
+            
+            if (l_val != 9)
+            {
+                FAPI_SET_HWP_ERROR(l_rc, RC_HWP_ATTR_UNIT_TEST_FAIL);
+                FAPI_ERR("hwpTestAttributes: OverrideUint64 GET returned %d",
+                         static_cast<uint32_t>(l_val));
+                break;
+            }
+            
+            // Set the attribute to a known value
+            l_val = 8;
+            l_rc = FAPI_ATTR_SET(ATTR_SCRATCH_UINT64_1, NULL, l_val);
+            
+            if (l_rc)
+            {
+                FAPI_ERR("hwpTestAttributes: OverrideUint64. Error from SET (2)");
+                break;
+            }
+            
+            // Check that the override was cancelled (it is a non-const override)
+            l_val = 0;
+            l_rc = FAPI_ATTR_GET(ATTR_SCRATCH_UINT64_1, NULL, l_val);
+            
+            if (l_rc)
+            {
+                FAPI_ERR("hwpTestAttributes: OverrideUint64. Error from GET (2)");
+                break;
+            }
+            
+            if (l_val != 8)
+            {
+                FAPI_SET_HWP_ERROR(l_rc, RC_HWP_ATTR_UNIT_TEST_FAIL);
+                FAPI_ERR("hwpTestAttributes: OverrideUint64 GET returned %d (2)",
+                         static_cast<uint32_t>(l_val));
+                break;
+            }
+            
+            // Clear all overrides
+            fapi::platAttrSvc::clearOverridesWrap();
+        }
+        }
 
+        //----------------------------------------------------------------------
+        // Test const Attribute Override on ATTR_SCRATCH_UINT8_1
+        //----------------------------------------------------------------------
+        {
+        if (fapi::platAttrSvc::overridesExistWrap())
+        {
+            FAPI_INF("hwpTestAttributes: OverrideUint8. Overrides exist, skipping test");
+        }
+        else
+        {
+            // Set the attribute to a known value
+            uint8_t l_val = 1;
+            l_rc = FAPI_ATTR_SET(ATTR_SCRATCH_UINT8_1, NULL, l_val);
+            
+            if (l_rc)
+            {
+                FAPI_ERR("hwpTestAttributes: OverrideUint8. Error from SET");
+                break;
+            }
+            
+            // Create a const override
+            fapi::AttributeOverride l_override;
+            l_override.iv_overrideVal = 2;
+            l_override.iv_attrId =
+                static_cast<uint32_t>(fapi::ATTR_SCRATCH_UINT8_1);
+            l_override.iv_targetType =
+                static_cast<uint32_t>(fapi::TARGET_TYPE_SYSTEM);
+            l_override.iv_pos = fapi::ATTR_POS_NA;
+            l_override.iv_unitPos = fapi::ATTR_UNIT_POS_NA;
+            l_override.iv_overrideType = fapi::ATTR_OVERRIDE_CONST;
+            l_override.iv_arrayD1 = fapi::ATTR_ARRAYD_NA;
+            l_override.iv_arrayD2 = fapi::ATTR_ARRAYD_NA;
+            l_override.iv_arrayD3 = fapi::ATTR_ARRAYD_NA;
+            l_override.iv_arrayD4 = fapi::ATTR_ARRAYD_NA;
+            fapi::platAttrSvc::setOverrideWrap(l_override);
+            
+            // Check that the override value is returned
+            l_rc = FAPI_ATTR_GET(ATTR_SCRATCH_UINT8_1, NULL, l_val);
+            
+            if (l_rc)
+            {
+                FAPI_ERR("hwpTestAttributes: OverrideUint8. Error from GET");
+                break;
+            }
+            
+            if (l_val != 2)
+            {
+                FAPI_SET_HWP_ERROR(l_rc, RC_HWP_ATTR_UNIT_TEST_FAIL);
+                FAPI_ERR("hwpTestAttributes: OverrideUint8 GET returned %d",
+                         l_val);
+                break;
+            }
+            
+            // Set the attribute to a known value
+            l_val = 3;
+            l_rc = FAPI_ATTR_SET(ATTR_SCRATCH_UINT8_1, NULL, l_val);
+            
+            if (l_rc)
+            {
+                FAPI_ERR("hwpTestAttributes: OverrideUint8. Error from SET (2)");
+                break;
+            }
+            
+            // Check that the override value is still returned
+            l_val = 0;
+            l_rc = FAPI_ATTR_GET(ATTR_SCRATCH_UINT8_1, NULL, l_val);
+            
+            if (l_rc)
+            {
+                FAPI_ERR("hwpTestAttributes: OverrideUint8. Error from GET (2)");
+                break;
+            }
+            
+            if (l_val != 2)
+            {
+                FAPI_SET_HWP_ERROR(l_rc, RC_HWP_ATTR_UNIT_TEST_FAIL);
+                FAPI_ERR("hwpTestAttributes: OverrideUint8 GET returned %d (2)",
+                         l_val);
+                break;
+            }
+            
+            // Clear all overrides
+            fapi::platAttrSvc::clearOverridesWrap();
+            
+            // Check that the real value is now returned
+            l_val = 0;
+            l_rc = FAPI_ATTR_GET(ATTR_SCRATCH_UINT8_1, NULL, l_val);
+            
+            if (l_rc)
+            {
+                FAPI_ERR("hwpTestAttributes: OverrideUint8. Error from GET (3)");
+                break;
+            }
+            
+            if (l_val != 3)
+            {
+                FAPI_SET_HWP_ERROR(l_rc, RC_HWP_ATTR_UNIT_TEST_FAIL);
+                FAPI_ERR("hwpTestAttributes: OverrideUint8 GET returned %d (3)",
+                         l_val);
+                break;
+            }
+        }
+        }
+        
+        
+        //----------------------------------------------------------------------
+        // Test non-const Attribute Override on ATTR_SCRATCH_UINT64_ARRAY_2
+        //----------------------------------------------------------------------
+        {
+        if (fapi::platAttrSvc::overridesExistWrap())
+        {
+            FAPI_INF("hwpTestAttributes: OverrideUint64array. Overrides exist, skipping test");
+        }
+        else
+        {
+            // Create a non-const override
+            fapi::AttributeOverride l_override;
+            l_override.iv_attrId =
+                static_cast<uint32_t>(fapi::ATTR_SCRATCH_UINT64_ARRAY_2);
+            l_override.iv_targetType =
+                static_cast<uint32_t>(fapi::TARGET_TYPE_SYSTEM);
+            l_override.iv_pos = fapi::ATTR_POS_NA;
+            l_override.iv_unitPos = fapi::ATTR_UNIT_POS_NA;
+            l_override.iv_overrideType = fapi::ATTR_OVERRIDE_NON_CONST;
+            l_override.iv_arrayD3 = fapi::ATTR_ARRAYD_NA;
+            l_override.iv_arrayD4 = fapi::ATTR_ARRAYD_NA;
+    
+            l_override.iv_overrideVal = 20;
+            l_override.iv_arrayD1 = 0;
+            l_override.iv_arrayD2 = 0;
+            fapi::platAttrSvc::setOverrideWrap(l_override);
+            
+            l_override.iv_overrideVal = 21;
+            l_override.iv_arrayD1 = 0;
+            l_override.iv_arrayD2 = 1;
+            fapi::platAttrSvc::setOverrideWrap(l_override);
+            
+            l_override.iv_overrideVal = 22;
+            l_override.iv_arrayD1 = 1;
+            l_override.iv_arrayD2 = 0;
+            fapi::platAttrSvc::setOverrideWrap(l_override);
+            
+            l_override.iv_overrideVal = 0xfffffffe;
+            l_override.iv_arrayD1 = 1;
+            l_override.iv_arrayD2 = 1;
+            fapi::platAttrSvc::setOverrideWrap(l_override);
+            
+            // Check that the override value is returned
+            uint64_t l_val[2][2];
+            l_rc = FAPI_ATTR_GET(ATTR_SCRATCH_UINT64_ARRAY_2, NULL, l_val);
+            
+            if (l_rc)
+            {
+                FAPI_ERR("hwpTestAttributes: OverrideUint64array. Error from GET");
+                break;
+            }
+            
+            if ((l_val[0][0] != 20) || (l_val[0][1] != 21) ||
+                (l_val[1][0] != 22) || (l_val[1][1] != 0xfffffffe))
+            {
+                FAPI_SET_HWP_ERROR(l_rc, RC_HWP_ATTR_UNIT_TEST_FAIL);
+                FAPI_ERR("hwpTestAttributes: OverrideUint64array GET returned 0x%llx:0x%llx:0x%llx:0x%llx",
+                         l_val[0][0], l_val[0][1], l_val[1][0], l_val[1][1]);
+                break;
+            }
+            
+            // Clear all overrides
+            fapi::platAttrSvc::clearOverridesWrap();
+        }
+        }
+        
     } while (0);
 
     FAPI_INF("hwpTestAttributes: End HWP");

@@ -53,6 +53,7 @@ namespace fapi
         MOD_EDI_EI_IO_RUN_TRAINING                 = 0x0D,
         MOD_THREAD_ACTIVATE                        = 0x0E, //@fixme RTC:42816
         MOD_ATTR_GET_FUNCTIONAL                    = 0x0F,
+        MOD_ATTR_GET_HB_TARGET                     = 0x10,
     };
 
     /**
@@ -82,6 +83,9 @@ namespace fapi
         RC_NO_MASTER_CORE_TARGET      = HWPF_COMP_ID | 0x1C, 
         RC_THREAD_IN_WRONG_STATE      = HWPF_COMP_ID | 0x1D, //@fixme RTC:42816
         RC_THREAD_DID_NOT_START       = HWPF_COMP_ID | 0x1E, //@fixme RTC:42816
+        RC_NULL_FAPI_TARGET           = HWPF_COMP_ID | 0x1F,
+        RC_UNEXPECTED_TARGET_TYPE     = HWPF_COMP_ID | 0x20,
+        RC_ATTR_UNKNOWN_TARGET_NAME   = HWPF_COMP_ID | 0x21,
     };
 
     /**

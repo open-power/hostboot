@@ -35,6 +35,8 @@ OBJS = fapiPlatHwAccess.o \
        fapiPlatTarget.o \
        fapiPlatUtil.o \
        fapiPlatAttributeService.o \
-       fapiMvpdAccess.o
+       fapiMvpdAccess.o \
+       fapiPlatTask.o \
+       fapiPlatAttrOverrideDirect.o
 
 include ${ROOTPATH}/config.mk

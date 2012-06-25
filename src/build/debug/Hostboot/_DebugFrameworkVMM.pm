@@ -614,14 +614,17 @@ sub getPhysicalAddr
         ::userDisplay ("  \nVirtualToPhy: ERROR.. VA Address is out of range.\n");
     }
 
-    if (($phyAddr eq Hostboot::_DebugFrameworkVMM::NotFound) ||
-        ($phyAddr eq Hostboot::_DebugFrameworkVMM::NotPresent))
+    if ($debug)
     {
-        ::userDisplay ("\n    The Physical Address = $phyAddr\n");
-    }
-    else
-    {
-        ::userDisplay (sprintf "\n   The Physical Address =  %X\n\n" , $phyAddr);
+        if (($phyAddr eq Hostboot::_DebugFrameworkVMM::NotFound) ||
+            ($phyAddr eq Hostboot::_DebugFrameworkVMM::NotPresent))
+        {
+            ::userDisplay ("\n    The Physical Address = $phyAddr\n");
+        }
+        else
+        {
+            ::userDisplay (sprintf "\n   The Physical Address =  %X\n\n" , $phyAddr);
+        }
     }
 
     return $phyAddr;

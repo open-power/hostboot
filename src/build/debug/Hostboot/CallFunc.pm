@@ -168,7 +168,7 @@ sub execFunc
     my $i = 0;
     while((0 != ::read16($address + CALLFUNC_DEBUG_READY_OFFSET)) &&
           (0 == ::read8($address + CALLFUNC_DEBUG_COMPLETE_OFFSET)) &&
-          ($i < 50))
+          ($i < 100))
     {
         ::executeInstrCycles(100000);
         $i = $i + 1;
@@ -185,8 +185,11 @@ sub execFunc
         return 1;
     }
     
-    # Display return value.
-    ::userDisplay ::read64($address + CALLFUNC_DEBUG_RETVAL_OFFSET)."\n";
+    if( $debug )
+    {
+        # Display return value.
+        ::userDisplay ::read64($address + CALLFUNC_DEBUG_RETVAL_OFFSET)."\n";
+    }
 }
 
 sub helpInfo
