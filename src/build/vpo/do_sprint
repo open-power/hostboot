@@ -241,6 +241,9 @@ if [ "$start_after_hbiload" != "--start_after_hbiload" -a "$start_after_hbitest"
 	simPUTFAC B0.C0.S0.P0.E8.${MyEX}.EC.PC.PC_NE.FIR.FIRC_SCOM.FIR_MASKQ.ESC.L2 1 1 0 55  -ib -quiet
 	simclock 1 -quiet
 
+        #Set PNOR mode to fake PNOR using Scratch 1
+        putscom pu.ex 10013284 FAC0FAC0FAC0FAC0 -p0 -call
+
 	# Start instructions
         $HB_VBUTOOLS/proc_thread_control_wrap.x86 -sreset ${CORE--cft} -quiet
 

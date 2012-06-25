@@ -59,6 +59,10 @@ extern trace_desc_t* g_trac_pnor;
 namespace PNOR
 {
 
+    enum {
+        VPO_MODE_OVERRIDE = 0xFAC0FAC0FAC0FAC0
+    };
+
 /**
  * @brief Performs an PNOR Read Operation
  * This function performs a PNOR Read operation. It follows a pre-defined
@@ -411,11 +415,18 @@ PnorDD::PnorDD( PnorMode_t i_mode )
     //In the normal case we will choose the mode for the caller
     if( MODEL_UNKNOWN == iv_mode )
     {
-        //Break into 32-bit LPC ops but use memcpy into cache area
-        iv_mode = MODEL_LPC_MEM;
-
-        //Override for VPO, use flat model for performance
-        //@fixme - how?? I can't use targetting yet to tell I'm in VPO...
+        //Use real PNOR for everything except VPO
+        uint64_t vpo_override = mmio_scratch_read(MMIO_SCRATCH_PNOR_MODE);
+        if(vpo_override == PNOR::VPO_MODE_OVERRIDE)
+        {
+            //VPO override set -- use fastest method -- memcpy
+            iv_mode = MODEL_MEMCPY;
+        }
+        else
+        {
+            //Normal mode
+            iv_mode = MODEL_REAL_CMD;
+        }
     }
 
     if( MODEL_REAL_CMD == iv_mode )

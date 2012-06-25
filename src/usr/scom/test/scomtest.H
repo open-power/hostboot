@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/scom/test/scomtest.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/scom/test/scomtest.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #ifndef __SCOMTEST_H
 #define __SCOMTEST_H
 
@@ -118,7 +119,7 @@ public:
       } test_data[] = {
           { scom_targets[PROCWRAP], 0x120F0000 ,0xFEEDB0B000001234},
           { scom_targets[PROCWRAP], 0x120F0166, 0xFEDCBA9876543210},
-          { scom_targets[PROCWRAP], 0x00040005, 0x0000000000000000},
+          { scom_targets[PROCWRAP], 0x01010803, 0x0000000000000000},
           { scom_targets[PROCWRAP], 0x02040004, 0xFFFFFFFFFFFFFFFF},
           { scom_targets[PROC1],    0x00040005, 0x1234567887654321},
           { scom_targets[PROC1],    0x02040004, 0x1122334455667788},

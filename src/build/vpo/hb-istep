@@ -653,7 +653,7 @@ sub sendCommand( $ )
 
     ## Use Putscom to avoid hostboot race condition
     $data  =~ s/0x//;
-    $cmd = "putscom pu 05003b -p0 -quiet" . $data;
+    $cmd = "putscom pu 05003b -p0 -quiet " . $data;
 
     if ( $opt_debug )   {   print STDERR __LINE__,  "-- run $cmd ...\n";    }
     ( system( $cmd ) == 0 )

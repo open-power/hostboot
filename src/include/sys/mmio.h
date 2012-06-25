@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/include/sys/mmio.h $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2010 - 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/include/sys/mmio.h $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2010-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #ifndef __SYS_MMIO_H
 #define __SYS_MMIO_H
 
@@ -84,14 +85,20 @@ enum MMIO_Scratch_Register
 {
         /** Thread0 Scratch Register - Progress Code / Status. */
     MMIO_SCRATCH_PROGRESS_CODE = 0x0,
-        /** Thread1 Scratch Register - IPL Step Command Register. */
-    MMIO_SCRATCH_IPLSTEP_COMMAND = 0x8,
-        /** Thread2 Scratch Register - IPL Step Status Register. */
-    MMIO_SCRATCH_IPLSTEP_STATUS = 0x10,
-        /** Thread3 Scratch Register - IPL Step Config Register. */
-    MMIO_SCRATCH_IPLSTEP_CONFIG = 0x18,  // TODO: This one is temporary until
-                                         // IPL by steps in configurable in
-                                         // PNOR.
+        /** Thread1 Scratch Register - PNOR mode control*/
+    MMIO_SCRATCH_PNOR_MODE = 0x8,
+        /** Thread2 Scratch Register - Unused */
+    MMIO_SCRATCH_RSVD_T2 = 0x10,
+        /** Thread3 Scratch Register - Unused */
+    MMIO_SCRATCH_RSVD_T3 = 0x18,
+        /** Thread4 Scratch Register - Unused */
+    MMIO_SCRATCH_RSVD_T4 = 0x20,
+        /** Thread5 Scratch Register - Unused */
+    MMIO_SCRATCH_RSVD_T5 = 0x28,
+        /** Thread6 Scratch Register - Unused */
+    MMIO_SCRATCH_RSVD_T6 = 0x30,
+        /** Thread7 Scratch Register - Unused */
+    MMIO_SCRATCH_RSVD_T7 = 0x38,
 };
 
 /** @fn mmio_scratch_read()
