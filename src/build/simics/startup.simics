@@ -7,24 +7,11 @@ $hb_machine = (shell "env | grep 'GFW_P8_.*_PROC_CCIN' | sed 's/GFW_P8_\\(.*\\)_
 $hb_machine = (python "\""+$hb_machine+"\".lower()")
 python "os.environ['HB_MACHINE'] = \""+$hb_machine+"\""
 
-# Load fake PNOR.
-try {
-    $hb_pnor_image_name = $hb_machine + ".pnor"
-    $hb_pnor_image = (lookup-file $hb_pnor_image_name)
-    if ($hb_pnor_image) {
-        (system_cmp0.phys_mem).load-file $hb_pnor_image 0x400000
-    } else {
-        echo "ERROR: Cannot find Hostboot PNOR image."
-    }
-} except { echo "ERROR: Failed to load fake PNOR." }
-
 # Preload VPD in PNOR
 try {
     run-python-file (lookup-file hbfw/hb-pnor-mvpd-preload.py)
     fpga0.sfc_master_mmio_image.add-partial-diff-file ./sysmvpd.dat 0x281000
     fpga0.sfc_master_mmio_image.add-partial-diff-file ./sysspd.dat 0x301000
-    #(system_cmp0.phys_mem).load-file ./sysmvpd.dat 0x681000
-    #(system_cmp0.phys_mem).load-file ./sysspd.dat 0x701000
 } except { echo "ERROR: Failed to preload VPD into PNOR." }
 
 # Load HB debug tools.
@@ -39,7 +26,7 @@ try {
 ########################### WORKAROUNDS ####################################
 # Setup the mailbox.
 # for mbox on core 0 use:
-# venice_cec_chip_cmp0.psi_hb->psihb_xivr_fsi=0x0140000000     #02010917
+# proc_venicechip_cmp0.psi_hb->psihb_xivr_fsi=0x0140000000     #02010917
 # for mbox on core 5 use:
-venice_cec_chip_cmp0.psi_hb->psihb_xivr_fsi=0x0000A00140000000   #02010917
-venice_cec_chip_cmp0.psi_hb->psihb_irsn=0x00030003FFFF0000 #0201091b
+proc_venicechip_cmp0.psi_hb->psihb_xivr_fsi=0x0000A00140000000   #02010917
+proc_venicechip_cmp0.psi_hb->psihb_irsn=0x00030003FFFF0000 #0201091b

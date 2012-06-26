@@ -329,9 +329,9 @@ loopcount=0
 while [ $(($modsstarted)) -lt 1 -o $(($modsstarted)) -ne $(($modscompleted)) ]; do
     sleep 5
     ((loopcount++))     # increment loopcount
-        autosim $NOWIN --simcmd   "phys_mem.read 0x$mods_completed_addr 0x08"     1> $SBXHOME/modscompleted.log  2> /dev/null
+        autosim $NOWIN --simcmd   "(system_cmp0.phys_mem).read 0x$mods_completed_addr 0x08"     1> $SBXHOME/modscompleted.log  2> /dev/null
     modscompleted=`cat $SBXHOME/modscompleted.log | xargs echo -n`
-    autosim $NOWIN --simcmd   "phys_mem.read 0x$mods_started_addr 0x08"     1> $SBXHOME/modsstarted.log  2> /dev/null
+    autosim $NOWIN --simcmd   "(system_cmp0.phys_mem).read 0x$mods_started_addr 0x08"     1> $SBXHOME/modsstarted.log  2> /dev/null
     modsstarted=`cat $SBXHOME/modsstarted.log | xargs echo -n`
 
     echo "ModulesStarted:ModulesCompleted  => $modsstarted:$modscompleted"
@@ -346,7 +346,7 @@ done
 
 
 echo "====> dump totaltests..."
-autosim $NOWIN --simcmd   "phys_mem.read 0x$totaltests_addr 0x08"     1> $SBXHOME/totaltests.log  2> /dev/null
+autosim $NOWIN --simcmd   "(system_cmp0.phys_mem).read 0x$totaltests_addr 0x08"     1> $SBXHOME/totaltests.log  2> /dev/null
 if [ $? -ne 0 ] ; then
         echo "ERROR: Unable to run $?"
         stopsim
@@ -357,7 +357,7 @@ totaltests=`cat $SBXHOME/totaltests.log | xargs echo -n`
 
 
 echo "====> dump failedtests..."
-autosim $NOWIN --simcmd   "phys_mem.read 0x$failedtests_addr 0x08"     1> $SBXHOME/failedtests.log  2> /dev/null
+autosim $NOWIN --simcmd   "(system_cmp0.phys_mem).read 0x$failedtests_addr 0x08"     1> $SBXHOME/failedtests.log  2> /dev/null
 if [ $? -ne 0 ] ; then
         echo "ERROR: Unable to run $?"
         stopsim
@@ -368,7 +368,7 @@ failedtests=`cat $SBXHOME/failedtests.log | xargs echo -n`
 
 
 echo "====> dump warnings..."
-autosim $NOWIN --simcmd   "phys_mem.read 0x$warnings_addr 0x08"     1> $SBXHOME/warnings.log  2> /dev/null
+autosim $NOWIN --simcmd   "(system_cmp0.phys_mem).read 0x$warnings_addr 0x08"     1> $SBXHOME/warnings.log  2> /dev/null
 if [ $? -ne 0 ] ; then
         echo "ERROR: Unable to run $?"
         stopsim
@@ -379,7 +379,7 @@ warnings=`cat $SBXHOME/warnings.log | xargs echo -n`
 
 
 echo "====> dump tracecalls..."
-autosim $NOWIN --simcmd   "phys_mem.read 0x$tracecalls_addr 0x08"     1> $SBXHOME/tracecalls.log  2> /dev/null
+autosim $NOWIN --simcmd   "(system_cmp0.phys_mem).read 0x$tracecalls_addr 0x08"     1> $SBXHOME/tracecalls.log  2> /dev/null
 if [ $? -ne 0 ] ; then
         echo "ERROR: Unable to run $?"
         stopsim

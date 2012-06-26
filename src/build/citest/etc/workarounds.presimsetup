@@ -26,6 +26,10 @@
 ##    to setup the sandbox
 ##
 
+echo "+++ Update PHYP level for new component names (CMVC 841788)"
+mkdir -p $sb/simu/data
+egrep -v "WSALIAS DEFAULT PHYPLEVEL" $BACKING_BUILD/src/simu/data/simicsInfo > $sb/simu/data/simicsInfo
+echo "WSALIAS DEFAULT PHYPLEVEL env/phypb/simics-4.2.0/simics-4.2.94/ph120625a800.42" >> $sb/simu/data/simicsInfo
 
 #### Examples ####
 #echo "+++ Some message about why you need to do this."

@@ -152,7 +152,8 @@ class DebugFrameworkProcess:
         addr = int(match.group(1))
         size = int(match.group(2))
 
-        data = "".join(map(chr, conf.phys_mem.memory[[addr , addr+size-1]]))
+        data = "".join(map(chr,
+            conf.system_cmp0.phys_mem.memory[[addr , addr+size-1]]))
         self.sendMsg("data-response", data)
 
     # Write data to memory.
@@ -165,7 +166,7 @@ class DebugFrameworkProcess:
         size = int(match.group(2))
         data = map(ord, match.group(3).decode("hex"));
 
-        conf.phys_mem.memory[[addr, addr+size-1]] = data;
+        conf.system_cmp0.phys_mem.memory[[addr, addr+size-1]] = data;
 
     # Clock forward the model.
     #    This message had data of the format "0dCYCLES".
@@ -209,7 +210,7 @@ class DebugFrameworkProcess:
         size = int(match.group(2))
 
         ##  read the register using xscom reg addresses
-        runStr  =   "phys_mem.read 0x%x  0x%x"%(addr, size)
+        runStr  =   "(system_cmp0.phys_mem).read 0x%x  0x%x"%(addr, size)
         ( result, out )  =   quiet_run_command( runStr, output_modes.regular )
         ## DEBUG print ">> %s: "%(runStr) + "0x%16.16x"%(result) + " : " + out
         self.sendMsg("data-response", "%16.16x"%(result) )
@@ -225,7 +226,7 @@ class DebugFrameworkProcess:
         size = int(match.group(2))
         data = int(match.group(3) )
 
-        runStr  =   "phys_mem.write 0x%x 0x%x 0x%x"%(addr, data, size)
+        runStr  =   "(system_cmp0.phys_mem).write 0x%x 0x%x 0x%x"%(addr, data, size)
         ( result, out )  =   quiet_run_command( runStr, output_modes.regular )
         ## DEBUG print ">> %s : "%(runStr) + " 0x%16.16x"%(result) + " : " + out
         if ( result ):
@@ -331,7 +332,8 @@ def hexDumpToNumber(hexlist):
 # representing the data read from simics. The list returned may be handed
 # to hexDumpToNumber() to turn the list into a number.
 def dumpSimicsMemory(address,bytecount):
-    hexlist = map(hex,conf.phys_mem.memory[[address,address+bytecount-1]])
+    hexlist = map(hex,
+        conf.system_cmp0.phys_mem.memory[[address,address+bytecount-1]])
     return hexlist
 
 
@@ -345,7 +347,7 @@ def readLong(address):
     return hexDumpToNumber(hexlist)
 
 def writeLong(address,datvalue):
-    conf.phys_mem.memory[[address,address+3]] = [0,0,0,datvalue]
+    conf.system_cmp0.phys_mem.memory[[address,address+3]] = [0,0,0,datvalue]
     return
 
 
@@ -354,7 +356,7 @@ def writeLong(address,datvalue):
 # data is a list of byte-sized integers.
 def writeSimicsMemory(address,data):
     size = len(data)
-    conf.phys_mem.memory[[address, address+size-1]] = data;
+    conf.system_cmp0.phys_mem.memory[[address, address+size-1]] = data;
 
 # Convert an integer to a byte list <size> bytes long.
 def intToList(n,size):
