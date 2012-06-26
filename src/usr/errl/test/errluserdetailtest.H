@@ -39,6 +39,7 @@
 #include <errl/errludbacktrace.H>
 #include <errl/errludtarget.H>
 #include <errl/errludlogregister.H>
+#include <errl/errludcallout.H>
 #include <errludattribute.H>
 #include <targeting/common/targetservice.H>
 #include <targeting/common/iterators/rangefilter.H>
@@ -445,6 +446,74 @@ public:
         errlCommit(errl, CXXTEST_COMP_ID);
         TS_TRACE( "testLogRegister errorlog user detail data - complete");
     } // testLogRegister
+
+    /**
+     * @test testCallout - Capture a callout
+     */
+    void testCallout(void)
+    {
+        errlHndl_t errl = NULL;
+
+        TS_TRACE( "testCallout errorlog user detail data");
+        /*@
+        * @errortype
+        * @severity ERRORLOG_SEV_INFORMATIONAL
+        * @moduleid HBERRL_USERDATA_TEST_MOD_ID
+        * @reasoncode HBERRL_TEST_CALLOUT_UD
+        * @userdata1 Test data 1
+        * @userdata2 Test data 2
+        * @devdesc User Details unit test - create callout user detail data
+        */
+        errl = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                HBERRL_USERDATA_TEST_MOD_ID,
+                HBERRL_TEST_CALLOUT_UD,
+                0x0001002300450067,                   //  user1
+                0x008900AB00CD00EF );                 //  user2
+
+        using namespace TARGETING;
+        ErrlUserDetailsString("Callout test").addToLog(errl);
+
+        // first test with Master
+        ErrlUserDetailsCallout(
+                    &HWAS::TARGET_IS_SENTINEL,
+                    sizeof(HWAS::TARGET_IS_SENTINEL),
+                    HWAS::SRCI_PRIORITY_LOW,
+                    HWAS::DECONFIG,
+                    HWAS::GARD_PoreError).addToLog(errl);
+
+        ErrlUserDetailsCallout(
+                    &HWAS::TARGET_IS_SENTINEL,
+                    sizeof(HWAS::TARGET_IS_SENTINEL),
+                    HWAS::SRCI_PRIORITY_MED,
+                    HWAS::DECONFIG,
+                    HWAS::GARD_NULL).addToLog(errl);
+
+        // find a proc target
+        PredicateCTM procChipFilter(CLASS_CHIP,TYPE_PROC);
+        TargetRangeFilter pProc(
+            targetService().begin(), targetService().end(),
+            &procChipFilter);
+        TARGETING::EntityPath ep;
+        ep = pProc->getAttr<TARGETING::ATTR_PHYS_PATH>();
+
+        ErrlUserDetailsCallout(
+                    &ep,
+                    sizeof(ep),
+                    HWAS::SRCI_PRIORITY_LOW,
+                    HWAS::DECONFIG,
+                    HWAS::GARD_Fatal).addToLog(errl);
+
+        ErrlUserDetailsCallout(
+                    HWAS::EPUB_PRC_MEMORY_UE,
+                    HWAS::SRCI_PRIORITY_HIGH).addToLog(errl);
+
+        // commit the errorlog
+        errlCommit(errl, CXXTEST_COMP_ID);
+        TS_TRACE( "testCallout done");
+
+    } // testCallout
+
 };
 
 #endif

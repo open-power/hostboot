@@ -796,10 +796,9 @@
     <id>HWAS_STATE</id>
     <description>HardWare Availability Service State Attribute.
         Keeps track of Target values poweredOn, present, functional,
-        changedSinceLastIPL, and gardLevel</description>
+        and changedSinceLastIPL</description>
     <complexType>
-        <description>struct - so far contains 4 booleans and a 4-bit GARD level
-            field</description>
+        <description>struct - so far contains 5 booleans</description>
         <field>
             <name>poweredOn</name>
             <description>boolean: Target is powered on, or Not.
@@ -830,14 +829,6 @@
                 comes up as FALSE.    </description>
             <type>uint8_t</type>
             <bits>1</bits>
-            <default>0</default>
-        </field>
-        <field>
-            <name>gardLevel</name>
-            <description>GARD Level.  This is a 4-bit value.
-                comes up as 0  </description>
-            <type>uint8_t</type>
-            <bits>4</bits>
             <default>0</default>
         </field>
         <field>

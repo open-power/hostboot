@@ -206,11 +206,11 @@ errlHndl_t DeconfigGard::deconfigureTarget(TARGETING::Target & i_target,
 //******************************************************************************
 errlHndl_t DeconfigGard::createGardRecord(const TARGETING::Target & i_target,
                                           const uint32_t i_errlPlid,
-                                          const GardSeverity i_severity)
+                                          const GARD_ErrorType i_errorType)
 {
     TRAC_ERR("Usr Request: Create GARD Record");
     mutex_lock(&iv_mutex);
-    errlHndl_t l_pErr = _createGardRecord(i_target, i_errlPlid, i_severity);
+    errlHndl_t l_pErr = _createGardRecord(i_target, i_errlPlid, i_errorType);
     mutex_unlock(&iv_mutex);
     return l_pErr;
 }
@@ -468,7 +468,7 @@ void DeconfigGard::_getDeconfigureRecords(
 //******************************************************************************
 errlHndl_t DeconfigGard::_createGardRecord(const TARGETING::Target & i_target,
                                            const uint32_t i_errlPlid,
-                                           const GardSeverity i_severity)
+                                           const GARD_ErrorType i_errorType)
 {
     errlHndl_t l_pErr = NULL;
 
@@ -539,7 +539,7 @@ errlHndl_t DeconfigGard::_createGardRecord(const TARGETING::Target & i_target,
                 l_pRecord->iv_targetId = l_id;
                 // TODO Setup iv_cardMruSn or iv_chipMruEcid    
                 l_pRecord->iv_errlogPlid = i_errlPlid;
-                l_pRecord->iv_severity = i_severity;
+                l_pRecord->iv_errorType = i_errorType;
                 l_pRecord->iv_padding[0] = 0;
                 l_pRecord->iv_padding[1] = 0;
                 l_pRecord->iv_padding[2] = 0;

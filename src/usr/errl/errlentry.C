@@ -37,8 +37,11 @@
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <errl/errludbacktrace.H>
+#include <errl/errludcallout.H>
 #include <trace/interface.H>
 #include <arch/ppc.H>
+#include <hwas/common/hwasCallout.H>
+#include <targeting/common/targetservice.H>
 
 namespace ERRORLOG
 {
@@ -245,13 +248,54 @@ void ErrlEntry::removeBackTrace()
     iv_pBackTrace = NULL;
 }
 
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+void ErrlEntry::addHwCallout(const TARGETING::Target *i_target,
+                        const HWAS::callOutPriority i_priority,
+                        const HWAS::DeconfigEnum i_deconfigState,
+                        const HWAS::GARD_ErrorType i_gardErrorType)
+{
+    TRACFCOMP(g_trac_errl, ENTER_MRK"addHwCallout(%p, 0x%x)",
+                i_target, i_priority);
+
+    if (i_target == TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL)
+    {
+        ErrlUserDetailsCallout(
+                &HWAS::TARGET_IS_SENTINEL, sizeof(HWAS::TARGET_IS_SENTINEL),
+                i_priority, i_deconfigState, i_gardErrorType).addToLog(this);
+    }
+    else
+    {   // we got a non MASTER_SENTINEL target, therefore the targeting
+        // module is loaded, therefore we can make this call.
+        TARGETING::EntityPath ep;
+        ep = i_target->getAttr<TARGETING::ATTR_PHYS_PATH>();
+
+        ErrlUserDetailsCallout(&ep, sizeof(ep),
+                i_priority, i_deconfigState, i_gardErrorType).addToLog(this);
+    }
+} // addHwCallout
+
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+void ErrlEntry::addProcedureCallout(const HWAS::epubProcedureID i_procedure,
+                            const HWAS::callOutPriority i_priority)
+{
+    TRACDCOMP( g_trac_errl, ENTER_MRK"addProcedureCallout(0x%x, 0x%x)",
+                i_procedure, i_priority);
+
+    ErrlUserDetailsCallout(i_procedure, i_priority).addToLog(this);
+
+} // addProcedureCallout
+
+
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 errlSeverity_t ErrlEntry::sev() const
 {
     return iv_User.iv_severity;
 }
-
 
 
 ////////////////////////////////////////////////////////////////////////////
@@ -288,7 +332,6 @@ epubSubSystem_t ErrlEntry::subSys() const
 }
 
 
-
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 void ErrlEntry::setSubSys(const epubSubSystem_t i_subSys)
@@ -296,6 +339,7 @@ void ErrlEntry::setSubSys(const epubSubSystem_t i_subSys)
     iv_User.iv_ssid = i_subSys;
     return;
 }
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // for use by ErrlManager
@@ -307,6 +351,41 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
 
     // User header contains the component ID of the committer.
     iv_User.setComponentId( i_committerComponent );
+
+    // see if HWAS has been loaded and has set the processCallout function
+    // TODO RTC 46680
+    // If the PNOR resource provider commits an error then this function will
+    // call HWAS to process the callouts/deconfigure/GARD requests in the
+    // error log, if the HWAS function is not paged into memory then VMM will
+    // attempt to page it in which will invoke the PNOR resource provider,
+    // this will deadlock if the PNOR resource provider is waiting for the
+    // error log commit to complete before processing further requests. There
+    // may be other similar deadlock scenarios involving 'base' functions
+    // logging errors. This can be solved with a separate errl-manager task
+    // that processes error logs
+    HWAS::processCalloutFn pFn;
+    pFn = ERRORLOG::theErrlManager::instance().getHwasProcessCalloutFn();
+    if (pFn != NULL)
+    {
+        // look thru the errlog for any Callout UserDetail sections
+        for(std::vector<ErrlUD*>::iterator it = iv_SectionVector.begin();
+                it != iv_SectionVector.end();
+                it++ )
+        {
+            // if this is a CALLOUT
+            if ((HBERRL_COMP_ID     == (*it)->iv_header.iv_compId) &&
+                (1                  == (*it)->iv_header.iv_ver) &&
+                (HBERRL_UDT_CALLOUT == (*it)->iv_header.iv_sst))
+            {
+                // call HWAS to have this processed
+                (*pFn)(plid(),(*it)->iv_pData, (*it)->iv_Size);
+            }
+        } // for each SectionVector
+    } // if HWAS module loaded
+    else
+    {
+        TRACFCOMP(g_trac_errl, INFO_MRK"hwas processCalloutFn not set!");
+    }
 
     // Add the captured backtrace to the error log
     if (iv_pBackTrace)
@@ -354,7 +433,7 @@ uint64_t ErrlEntry::flatten( void * o_pBuffer,  uint64_t i_bufsize )
         if ( i_bufsize < l_flatCount )
         {
             // buffer is not big enough; return zero
-            TRACFCOMP( ERRORLOG::g_trac_errl, ERR_MRK"Invalid buffer size");
+            TRACFCOMP( g_trac_errl, ERR_MRK"Invalid buffer size");
             l_flatCount = 0;
             break;
         }

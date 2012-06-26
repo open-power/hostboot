@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/include/usr/hwas/deconfigGard.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/include/usr/hwas/deconfigGard.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 /**
  *  @file deconfigGard.H
  *
@@ -70,18 +71,6 @@ class DeconfigGard
 public:
 
     /**
-     * @enum GardSeverity
-     *
-     * Defines the possible severities of a GARD Record
-     */
-    enum GardSeverity
-    {
-        GARD_SEVERITY_FATAL      = 1,
-        GARD_SEVERITY_PREDICTIVE = 2,
-        GARD_SEVERITY_MANUAL     = 3,
-    };
-
-    /**
      * @enum DeconfigCause
      *
      * Defines the possible causes for the creation of a Deconfigure Record
@@ -110,7 +99,7 @@ public:
             uint32_t iv_chipMruEcid; // TODO is there an ECID type?
         };
         uint32_t              iv_errlogPlid;
-        uint8_t               iv_severity; // Value from GardSeverity
+        uint8_t               iv_errorType; // Value from GARD_ErrorType
         uint8_t               iv_padding[3];
         uint32_t              iv_gardTime;
     };
@@ -122,7 +111,7 @@ public:
     /**
      * @struct DeconfigureRecord
      *
-     * Defines a Deconfigure Record
+     * Defines a Deconfigure Record for deferred deconfigures
      * 
      * Only one Deconfigure Record can exist for a specific Target
      */
@@ -197,13 +186,13 @@ public:
      *
      * @param[in] i_target   Reference to Target to create GARD Record for.
      * @param[in] i_errlPlid Error log PLID to store in GARD Record.
-     * @param[in] i_severity Severity of the GARD Record.
+     * @param[in] i_errorType error type of the GARD Record.
      *
      * @return errlHndl_t. Error log handle.
      */
     errlHndl_t createGardRecord(const TARGETING::Target & i_target,
                                 const uint32_t i_errlPlid,
-                                const GardSeverity i_severity);
+                                const GARD_ErrorType i_errorType);
 
     /**
      * @brief Gets the specified Deconfigure Records.
@@ -382,13 +371,13 @@ private:
      * 
      * @param[in] i_target   Reference to Target to create GARD Record for.
      * @param[in] i_errlPlid Error log PLID to store in GARD Record.
-     * @param[in] i_severity Severity of the GARD Record.
+     * @param[in] i_errorType Error Type of the GARD Record.
      *
      * @return errlHndl_t. Error log handle.
      */
     errlHndl_t _createGardRecord(const TARGETING::Target & i_target,
                                  const uint32_t i_errlPlid,
-                                 const GardSeverity i_severity);
+                                 const GARD_ErrorType i_errorType);
     
     /**
      * @brief Clears the specified GARD Records.

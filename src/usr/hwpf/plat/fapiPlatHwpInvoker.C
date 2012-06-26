@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/hwpf/plat/fapiPlatHwpInvoker.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/hwpf/plat/fapiPlatHwpInvoker.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 /**
  *  @file fapiPlatHwpInvoker.C
  *
@@ -85,6 +86,7 @@ void processEICallouts(const ErrorInfo & i_errInfo,
          l_itr != i_errInfo.iv_callouts.end(); ++l_itr)
     {
         // TODO Add callout to error log
+        // RTC 45800
         FAPI_ERR("processEICallouts: Adding target callout to errlog (TODO). Type: 0x%x. Pri: 0x%x",
                  (*l_itr)->iv_target.getType(), (*l_itr)->iv_priority);
     }
@@ -103,6 +105,7 @@ void processEIDeconfigs(const ErrorInfo & i_errInfo,
          l_itr != i_errInfo.iv_deconfigs.end(); ++l_itr)
     {
         // TODO Deconfigure target
+        // RTC 45800
         FAPI_ERR("processEIDeconfigs: Deconfiguring target (TODO). Type: 0x%x",
                  (*l_itr)->iv_target.getType());
     }
@@ -110,10 +113,10 @@ void processEIDeconfigs(const ErrorInfo & i_errInfo,
 
 
 //******************************************************************************
-// processEiGards
+// processEIGards
 // Processes any Gard requests in the ReturnCode Error Information
 //******************************************************************************
-void processEiGards(const ErrorInfo & i_errInfo,
+void processEIGards(const ErrorInfo & i_errInfo,
                        errlHndl_t io_pError)
 {
     // Iterate through gard requests, creating a GARD record for each target
@@ -121,6 +124,7 @@ void processEiGards(const ErrorInfo & i_errInfo,
          l_itr != i_errInfo.iv_gards.end(); ++l_itr)
     {
         // TODO Create GARD record for target
+        // RTC 45800
         FAPI_ERR("processEIGards: Garding target (TODO). Type: 0x%x",
                  (*l_itr)->iv_target.getType());
     }
@@ -177,7 +181,7 @@ errlHndl_t fapiRcToErrl(ReturnCode & io_rc)
                 processEIFfdcs(*l_pErrorInfo, l_pError);
                 processEICallouts(*l_pErrorInfo, l_pError);
                 processEIDeconfigs(*l_pErrorInfo, l_pError);
-                processEiGards(*l_pErrorInfo, l_pError);
+                processEIGards(*l_pErrorInfo, l_pError);
             }
             else
             {

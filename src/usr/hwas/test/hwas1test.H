@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/targeting/test/targetingtest.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/hwas/test/hwas1test.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #ifndef __TESTTARGETING_H
 #define __TESTTARGETING_H
 
@@ -80,7 +81,6 @@ public:
             l_hwasState.present               =   true;
             l_hwasState.functional            =   true;
             l_hwasState.changedSinceLastIPL   =   true;
-            l_hwasState.gardLevel             =   3;
 
             //  Now write the modified value back to Targeting.
             l_pTarget->setAttr<ATTR_HWAS_STATE>( l_hwasState );
@@ -109,13 +109,6 @@ public:
                 TS_FAIL( " changedSinceLastIPL = 0x%x, should be true",
                         l_pTarget->getAttr<ATTR_HWAS_STATE>().changedSinceLastIPL );
             }
-
-            if ( l_pTarget->getAttr<ATTR_HWAS_STATE>().gardLevel != 3 )
-            {
-                TS_FAIL( " gardLevel = 0x%x, should be 3",
-                        l_pTarget->getAttr<ATTR_HWAS_STATE>().gardLevel );
-            }
-
 
             //
             //  Now write the original value back.
@@ -149,13 +142,6 @@ public:
             {
                 TS_FAIL( " changedSinceLastIPL = 0x%x, not restored",
                         l_pTarget->getAttr<ATTR_HWAS_STATE>().changedSinceLastIPL );
-            }
-
-            if ( l_pTarget->getAttr<ATTR_HWAS_STATE>().gardLevel
-                    != l_orgHwasState.gardLevel )
-            {
-                TS_FAIL( " gardLevel = 0x%x, not restored",
-                        l_pTarget->getAttr<ATTR_HWAS_STATE>().gardLevel );
             }
         }
 

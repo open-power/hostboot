@@ -1,11 +1,11 @@
-#  IBM_PROLOG_BEGIN_TAG
+#   IBM_PROLOG_BEGIN_TAG
 #  This is an automatically generated prolog.
 #
 #  $Source: src/usr/errl/makefile $
 #
 #  IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2011
+#  COPYRIGHT International Business Machines Corp. 2011-2012
 #
 #  p1
 #
@@ -19,13 +19,14 @@
 #
 #  Origin: 30
 #
-#  IBM_PROLOG_END
+#  IBM_PROLOG_END_TAG
 ROOTPATH = ../../..
 MODULE = errl
 
 OBJS = errlentry.o errlmanager.o errlsctn.o errlsctnhdr.o errlprvt.o errluh.o \
        errlud.o errlsrc.o errluserdetails.o backtrace.o errludtarget.o \
-       errludstring.o errludbacktrace.o errludattribute.o errludlogregister.o
+       errludstring.o errludbacktrace.o errludattribute.o errludlogregister.o \
+       errludcallout.o
 
 SUBDIRS = test.d  parser.d
 

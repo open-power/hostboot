@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/include/usr/errl/errlentry.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/include/usr/errl/errlentry.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #ifndef ERRLENTRY_H
 #define ERRLENTRY_H
 /**
@@ -54,7 +55,8 @@
 #include <errl/errlsrc.H>
 #include <errl/errlud.H>
 #include <hbotcompid.H>
-
+#include <targeting/common/target.H>
+#include <hwas/common/hwasCallout.H>
 
 namespace ERRORLOG
 {
@@ -359,7 +361,68 @@ public:
      */
     void removeBackTrace();
 
+    /**
+     *  @brief Add a hardware callout
+     *
+     *  @param[in]  i_target        The hardware target
+     *  @param[in]  i_priority      Priority of the callout
+     *  @param [in] i_deconfigState Enum indicating whether the failing part
+     *               should be deconfigured.
+     *  @param [in] i_gardErrorType to indicate what type of failure occured
+     *
+     *  @return void
+     */
+    void addHwCallout(const TARGETING::Target *i_target,
+                        const HWAS::callOutPriority i_priority,
+                        const HWAS::DeconfigEnum i_deconfigState,
+                        const HWAS::GARD_ErrorType i_gardErrorType);
+
+    /**
+     *  @brief Add a procedure ( software ) callout
+     *  Adds the given service procedure to the list
+     *  of callouts for the log
+     *
+     *  @param[in]  i_procedure     Procedure identifier.
+     *  @param[in]  i_priority      Priority of the callout
+     *
+     *  @return void
+     */
+    void addProcedureCallout(const HWAS::epubProcedureID i_procedure,
+                             const HWAS::callOutPriority i_priority);
+
 private:
+
+#if 0
+    //@todo: Need to set EPUB_Sub system based on highest
+    // priority call out FRU
+
+    /**
+     *  @brief Adds a software section to the log which is
+     *         mostly used as a stack call indicator
+     *
+     *  @param[in] i_cid        Component for which the section is being logged
+     *  @param[in] i_returnCode User supplied return code.
+     *  @param[in] i_fileId     User supplied file identifier
+     *  @param[in] i_codeloc    User supplied code location ( line # )
+     *  @param[in] i_objId      User supplied object identifier
+     *
+     *  @return Token which identifies the newly added section
+     *          A negative token is considered to be invalid
+     *
+     *  @note   The section may be dropped if there is not enough
+     *          room available to contain it
+     *
+     *
+     */
+    void addSwErr(const compId_t i_cid,
+                  const uint32_t i_returnCode,
+                  const uint16_t i_fileId,
+                  const uint16_t i_codeLoc,
+                  const uint32_t i_objId = 0);
+
+#endif
+
+
     /**
      * @brief The ErrlManager will call here to ask the
      * ErrlEntry to assign the time of commit, and to assign
@@ -368,7 +431,6 @@ private:
      *
      */
     void commit( compId_t i_commiterComp );
-
 
 
     /**
@@ -401,69 +463,6 @@ private:
       */
     ErrlEntry(const ErrlEntry& i_right);
     ErrlEntry& operator=(const ErrlEntry& i_right);
-
-
-
-#if 0
-
-    //@todo - The interfaces in this block still need support in order
-    // to have code written.
-
-
-    //@todo: Need to set EPUB_Sub system based on highest
-    // priority call out FRU
-    /**
-     *  @brief Add a hardware ( FRU ) callout
-     *
-     *  @param[in]  i_resourceId    The resource identifier for the part
-     *  @param[in]  i_target        The hardware target
-     *
-     *  @return void
-     */
-    void addFruCallout(const target_t i_target,
-                       const callOutPriority_t i_priority);
-
-
-    //@todo: Need to set EPUB_Sub system based on highest
-    // priority procedure call out
-    /**
-     *  @brief Add a procedure ( software ) callout
-     *  Adds the given service procedure to the list
-     *  of callouts for the log
-     *
-     *  @param[in]  i_priority      Priority of the callout
-     *  @param[in]  i_procedure     Procedure identifier.
-     *
-     *  @return void
-     */
-    void addProcedureCallout(const epubProcedureId_t i_procedure,
-                             const callOutPriority_t i_priority);
-
-    /**
-     *  @brief Adds a software section to the log which is
-     *         mostly used as a stack call indicator
-     *
-     *  @param[in] i_cid        Component for which the section is being logged
-     *  @param[in] i_returnCode User supplied return code.
-     *  @param[in] i_fileId     User supplied file identifier
-     *  @param[in] i_codeloc    User supplied code location ( line # )
-     *  @param[in] i_objId      User supplied object identifier
-     *
-     *  @return Token which identifies the newly added section
-     *          A negative token is considered to be invalid
-     *
-     *  @note   The section may be dropped if there is not enough
-     *          room available to contain it
-     *
-     *
-     */
-    void addSwErr(const compId_t i_cid,
-                  const uint32_t i_returnCode,
-                  const uint16_t i_fileId,
-                  const uint16_t i_codeLoc,
-                  const uint32_t i_objId = 0);
-
-#endif
 
 private:
     // Data Members

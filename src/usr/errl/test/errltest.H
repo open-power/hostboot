@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/errl/test/errltest.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/errl/test/errltest.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #ifndef __ERRLTEST_H
 #define __ERRLTEST_H
 
@@ -35,6 +36,12 @@
 #include <errl/errlreasoncodes.H>
 #include <trace/trace.H>
 #include <hbotcompid.H>
+
+#include <errl/errludtarget.H>
+#include <targeting/common/target.H>
+#include <targeting/common/iterators/rangefilter.H>
+#include <targeting/common/predicates/predicates.H>
+#include <hwas/common/hwasCallout.H>
 
 
 #define TEST_SEVERITY       ERRORLOG::ERRL_SEV_INFORMATIONAL
@@ -330,6 +337,79 @@ public:
             l_err = NULL;
 
         }
+    }
+
+    /**
+     * @brief Test callouts
+     */
+    void testErrl3(void)
+    {
+        TS_TRACE( "test testErrl3");
+        do
+        {
+            // Create an error log
+            errlHndl_t errl = new ERRORLOG::ErrlEntry(
+                                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                    HBERRL_TEST_MOD_ID,
+                                    HBERRL_TEST_REASON_CODE);
+
+            // Make sure log is created
+            if (errl == NULL)
+            {
+                TS_FAIL("testErrl3: createErrlLog() returns NULL pointer!");
+                break;
+            }
+
+            // test the different callout types
+
+            // find a proc target
+            TARGETING::PredicateCTM procChipFilter(
+                    TARGETING::CLASS_CHIP, TARGETING::TYPE_PROC);
+            TARGETING::TargetRangeFilter pProc(
+                    TARGETING::targetService().begin(),
+                    TARGETING::targetService().end(),
+                    &procChipFilter);
+
+            // find a membuf target
+            TARGETING::PredicateCTM membufChipFilter(
+                    TARGETING::CLASS_CHIP,TARGETING::TYPE_MEMBUF);
+            TARGETING::TargetRangeFilter pMembuf(
+                    TARGETING::targetService().begin(),
+                    TARGETING::targetService().end(),
+                    &membufChipFilter);
+
+            TS_TRACE( "test callout pProc %p", *pProc);
+            ERRORLOG::ErrlUserDetailsTarget(*pProc).addToLog(errl);
+
+            errl->addHwCallout(*pProc,
+                    HWAS::SRCI_PRIORITY_LOW,
+                    HWAS::DECONFIG,
+                    HWAS::GARD_Fatal);
+
+            errl->addHwCallout(*pMembuf,
+                    HWAS::SRCI_PRIORITY_MED,
+                    HWAS::DECONFIG,
+                    HWAS::GARD_NULL);
+
+            errl->addHwCallout(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
+                    HWAS::SRCI_PRIORITY_LOW,
+                    HWAS::DECONFIG,
+                    HWAS::GARD_PoreError);
+
+            errl->addHwCallout(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
+                    HWAS::SRCI_PRIORITY_MED,
+                    HWAS::DECONFIG,
+                    HWAS::GARD_NULL);
+
+            errl->addProcedureCallout(
+                    HWAS::EPUB_PRC_MEMORY_UE,
+                    HWAS::SRCI_PRIORITY_HIGH);
+
+            errlCommit(errl, CXXTEST_COMP_ID);
+            TS_TRACE( "test callout done");
+
+        }
+        while(0);
     }
 };
 

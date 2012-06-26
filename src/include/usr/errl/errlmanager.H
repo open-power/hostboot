@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/include/usr/errl/errlmanager.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/include/usr/errl/errlmanager.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #ifndef ERRLMANAGER_H
 #define ERRLMANAGER_H
 /**
@@ -40,14 +41,10 @@
 #include <vector>
 #include <kernel/timemgr.H>
 #include <hbotcompid.H>
-
-
-
+#include <hwas/common/hwasCallout.H>
 
 namespace ERRORLOG
 {
-
-
 
 /**
  *  @brief  Global function to log an error
@@ -68,8 +65,6 @@ namespace ERRORLOG
  *
  *  @return None
  */
-
-// TODO Work item 4104 to make comitter comp required, no default.
 void errlCommit(errlHndl_t& io_err, compId_t i_committerComp );
 
 /*****************************************************************************/
@@ -119,6 +114,29 @@ public:
       */
      uint32_t getUniqueErrId();
 
+     /**
+      * @brief Sets the HWAS ProcessCallout function pointer
+      *
+      * This is called by HWAS to inform errlmanager that HWAS is loaded and
+      * therefore it can call HWAS to process callout information in an errlog
+      *
+      * It is a static function because a module cannot call an interface on a
+      * singleton in another module
+      */
+     static void setHwasProcessCalloutFn(HWAS::processCalloutFn i_fn);
+
+     /**
+      * @brief  Returns the HWAS ProcessCallout function pointer
+      *
+      * This is called by ErrlEntry::commit to get the HWAS ProcessCallout
+      * function pointer, this is called to process callout information in an
+      * errlog, if NULL is returned then the function cannot be called (because
+      * the HWAS module is not loaded)
+      *
+      * @return HWAS::processCalloutFn function pointer
+      */
+      HWAS::processCalloutFn getHwasProcessCalloutFn() const;
+
 protected:
     /**
      * @brief   Destructor
@@ -166,8 +184,17 @@ private:
     /**
       * @brief Serialization for error log commits.
       */
-    mutex_t    iv_mutex;
+    mutex_t iv_commitMutex;
 
+    /**
+      * @brief    Pointer to the HWAS processCallout function
+      */
+    HWAS::processCalloutFn iv_hwasProcessCalloutFn;
+
+    /**
+      * @brief Serialization for accessing iv_hwasProcessCalloutFn
+      */
+    mutable mutex_t iv_hwasMutex;
 };
 
 } // End namespace

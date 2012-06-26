@@ -88,7 +88,6 @@ errlHndl_t discoverTargets()
         hwasState.present               = false;
         hwasState.functional            = false;
         hwasState.changedSinceLastIPL   = false;
-        hwasState.gardLevel             = 0;
         target->setAttr<ATTR_HWAS_STATE>(hwasState);
     }
 
