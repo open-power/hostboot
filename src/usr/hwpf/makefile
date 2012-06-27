@@ -35,7 +35,7 @@ HWP_ERROR_XML_FILES = hwp/fapiHwpErrorInfo.xml   \
     hwp/bus_training/io_run_training_errors.xml \
     hwp/dimm_errors.xml	\
     hwp/dram_training/memory_errors.xml \
-    hwp/start_clocks_on_nest_chiplets/proc_start_clocks_chiplets/proc_start_clocks_chiplets_errors.xml \
+    hwp/nest_chiplets/proc_start_clocks_chiplets/proc_start_clocks_chiplets_errors.xml \
     hwp/edi_ei_initialization/proc_fab_iovalid/proc_fab_smp_errors.xml  \
     hwp/build_winkle_images/proc_slw_build/proc_slw_build_errors.xml    \
     hwp/mvpd_errors.xml
@@ -56,7 +56,10 @@ HWP_ATTR_XML_FILES = hwp/memory_attributes.xml \
 #------------------------------------------------------------------------------
 # Initfiles
 #------------------------------------------------------------------------------
-HWP_INITFILES = hwp/initfiles/sample.initfile
+HWP_INITFILES = hwp/initfiles/sample.initfile \
+                hwp/initfiles/cen.dmi.scom.initfile \
+                hwp/initfiles/p8.dmi.scom.initfile
+
 HWP_IF_DEFINE_DIR = hwp/initfiles
 
 #------------------------------------------------------------------------------
@@ -110,7 +113,7 @@ GENFILES = ${IF_CMP_YACC_C_TARGET} \
            ${HWP_IF_ALL_TARGETS} \
            ${FAPI_ATTR_IF_TARGET}
 
-EXTRA_PARTS = ${ROOTPATH}/img/${HWP_IF_BIN_TARGETS}
+EXTRA_PARTS = $(addprefix ${ROOTPATH}/img/,${HWP_IF_BIN_TARGETS})
 
 include ${ROOTPATH}/config.mk
 
@@ -171,10 +174,19 @@ $(call GENTARGET, ${FAPI_ATTR_ID_TARGET} ${FAPI_ATTR_PLAT_CHECK_TARGET} \
 #------------------------------------------------------------------------------
 # The binary, list and attr files generated from Initfiles
 #------------------------------------------------------------------------------
-$(call GENTARGET, ${HWP_IF_ALL_TARGETS}) : \
-        ${GENDIR}/${IF_CMP_COMPILER_TARGET} ${HWP_INITFILES} ${GENDIR}/${FAPI_ATTR_ID_TARGET} ${HWP_IF_DEFINE_DIR}
-	$< -init ${HWP_INITFILES} -outdir $(dir $@) -attr ${GENDIR}/${FAPI_ATTR_ID_TARGET} \
-    -I ${HWP_IF_DEFINE_DIR}
+define HWP_IF_RECIPE
+$${GENDIR}/$(basename $(notdir $1)).if \
+$${GENDIR}/$(basename $(notdir $1)).if.list \
+$${GENDIR}/$(basename $(notdir $1)).if.attr : \
+	$${GENDIR}/$${IF_CMP_COMPILER_TARGET} \
+	$${GENDIR}/$${FAPI_ATTR_ID_TARGET} \
+	$${HWP_IF_DEFINE_DIR} $1
+	    $$< -init $1 -outdir $$(dir $$@) \
+            -attr $${GENDIR}/$${FAPI_ATTR_ID_TARGET} \
+            -I $${HWP_IF_DEFINE_DIR}
+endef
+$(foreach initfile,${HWP_INITFILES}, \
+	$(eval $(call HWP_IF_RECIPE,$(initfile))))
 
 ${EXTRA_PARTS}: ${IMGDIR}/% : ${GENDIR}/%
 	cp -f $^ $@

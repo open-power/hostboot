@@ -1,7 +1,7 @@
 <!--  IBM_PROLOG_BEGIN_TAG
      This is an automatically generated prolog.
    
-     $Source: src/usr/hwpf/hwp/start_clocks_on_nest_chiplets/proc_start_clocks_chiplets_errors.xml $
+     $Source: src/usr/hwpf/hwp/nest_chiplets/proc_start_clocks_chiplets/proc_start_clocks_chiplets_errors.xml $
    
      IBM CONFIDENTIAL
    
@@ -19,7 +19,7 @@
    
      Origin: 30
    
-     IBM_PROLOG_END -->
+     IBM_PROLOG_END_TAG -->
 <!-- Error definitions for proc_start_clocks_chiplets procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->

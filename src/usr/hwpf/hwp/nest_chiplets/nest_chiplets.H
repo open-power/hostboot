@@ -1,33 +1,33 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/hwpf/hwp/start_clocks_on_nest_chiplets/start_clocks_on_nest_chiplets.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
-
-#ifndef  __START_CLOCKS_ON_NEST_CHIPLETS_START_CLOCKS_ON_NEST_CHIPLETS_H
-#define  __START_CLOCKS_ON_NEST_CHIPLETS_START_CLOCKS_ON_NEST_CHIPLETS_H
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/hwpf/hwp/nest_chiplets/nest_chiplets.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
+#ifndef  __NEST_CHIPLETS_NEST_CHIPLETS_H
+#define  __NEST_CHIPLETS_NEST_CHIPLETS_H
 
 /**
- *  @file start_clocks_on_nest_chiplets.H
+ *  @file nest_chiplets.H
  *
- *  Start Clocks On Nest Chiplets
+ *  Nest Chiplets
  *
  *  All of the following routines are "named isteps" - they are invoked as
  *  tasks by the @ref IStepDispatcher.
@@ -40,9 +40,9 @@
 
  /*  @tag isteplist
  *  @docversion     v1.01 (03/26/12)
- *  @istepname      start_clocks_on_nest_chiplets
+ *  @istepname      nest_chiplets
  *  @istepnum       07
- *  @istepdesc      Start Clocks On Nest Chiplets
+ *  @istepdesc      Nest Chiplets
  *
  *  @{
  *      @substepnum     1
@@ -64,6 +64,12 @@
  *  @}
  *  @{
  *      @substepnum     4
+ *      @substepname    proc_pcie_scominit
+ *      @substepdesc    : Apply scom inits to PCIe chiplets
+ *          @target_sched   serial
+ *  @}
+ *  @{
+ *      @substepnum     5
  *      @substepname    proc_scomoverride_chiplets
  *      @substepdesc    : Apply sequenced scom inits
  *          @target_sched   serial
@@ -76,7 +82,7 @@
 /******************************************************************************/
 #include    <stdint.h>
 
-namespace   START_CLOCKS_ON_NEST_CHIPLETS
+namespace   NEST_CHIPLETS
 {
 
 
@@ -124,9 +130,23 @@ void    call_proc_chiplet_scominit( void    *io_pArgs );
 
 
 /**
+ *  @brief   proc_pcie_scominit
+ *
+ *  07.4 : : Apply scom inits to PCIe chiplets
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return  none
+ *
+ */
+void    call_proc_pcie_scominit( void    *io_pArgs );
+
+
+
+/**
  *  @brief   proc_scomoverride_chiplets
  *
- *  07.4 : : Apply sequenced scom inits
+ *  07.5 : : Apply sequenced scom inits
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *                    

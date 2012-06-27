@@ -1,0 +1,480 @@
+#-- $Id: cen.dmi.scom.initfile,v 1.3 2012/06/19 23:16:29 jmcgill Exp $
+#-- CHANGE HISTORY:
+#--------------------------------------------------------------------------------
+#-- Version:|Author: | Date:  | Comment:
+#-- --------|--------|--------|--------------------------------------------------
+#--     1.3 |jmcgill |06/19/12|Update non-mirrored mode PRBS TX/RX values to make DMI.SETUP_ID = DMI_BUS, setup RX FENCE
+#--     1.2 |thomsen |06/19/12|Updated PRBS_TAP_ID's to match processor
+#--     1.1 |thomsen |06/11/12|Created initial version
+#-- --------|--------|--------|--------------------------------------------------
+#--------------------------------------------------------------------------------
+# End of revision history
+#--------------------------------------------------------------------------------
+
+#--Master list of variables that can be used in this file is at:
+#--<Attribute Definition Location>
+
+SyntaxVersion = 1
+
+#-- -----------------------------------------------------------------------------
+#--******************************************************************************
+#-- -----------------------------------------------------------------------------
+#--
+#-- Includes
+#-- Note:  Must include the path to the .define file.
+#-- -----------------------------------------------------------------------------
+#--******************************************************************************
+#-- -----------------------------------------------------------------------------
+include edi.io.define
+
+#-- -----------------------------------------------------------------------------
+#--******************************************************************************
+#-- -----------------------------------------------------------------------------
+#--
+#-- Defines
+#--
+#-- -----------------------------------------------------------------------------
+#--******************************************************************************
+#-- -----------------------------------------------------------------------------
+define def_rx_mirrored_mode     = (ATTR_EI_BUS_RX_MSB_LSB_SWAP == 1);    # Mirrored mode
+define def_rx_non_mirrored_mode = (ATTR_EI_BUS_RX_MSB_LSB_SWAP == 0);    # Non-Mirrored mode
+define def_tx_mirrored_mode     = (ATTR_EI_BUS_TX_MSB_LSB_SWAP == 1);    # Mirrored mode
+define def_tx_non_mirrored_mode = (ATTR_EI_BUS_TX_MSB_LSB_SWAP == 0);    # Non-Mirrored mode
+
+#--******************************************************************************
+#--******************************************************************************
+#-------------------------------------------------------------------------------------
+#    _____      __                 ________
+#   / ___/___  / /___  ______     /  _/ __ \
+#   \__ \/ _ \/ __/ / / / __ \    / // / / /
+#  ___/ /  __/ /_/ /_/ / /_/ /  _/ // /_/ /
+# /____/\___/\__/\__,_/ .___/  /___/_____/   banner2 -fslant
+#                    /_/
+#-------------------------------------------------------------------------------------
+#--******************************************************************************
+# SN bus -> 1 clg, ? lanes
+scom 0x800.0b(rx_id1_pg)(rx_grp0)(lane_na).0x(cn_gcr_addr){
+        bits ,           scom_data;
+        rx_bus_id ,      0b000000;
+        rx_group_id,     0b000000;
+}
+#--******************************************************************************
+scom 0x800.0b(tx_id1_pg)(tx_grp0)(lane_na).0x(cn_gcr_addr){
+        bits ,           scom_data;
+        tx_bus_id ,      0b000000;
+        tx_group_id,     0b100000; # 0x20
+}
+#--******************************************************************************
+scom 0x800.0b(rx_id2_pg)(rx_grp0)(lane_na).0x(cn_gcr_addr){
+        bits ,                scom_data;
+        rx_last_group_id ,    0b000000;
+}
+#--******************************************************************************
+scom 0x800.0b(tx_id2_pg)(tx_grp0)(lane_na).0x(cn_gcr_addr){
+        bits ,                scom_data;
+        tx_last_group_id,     0b100000;
+}
+#--******************************************************************************
+scom 0x800.0b(rx_id3_pg)(rx_grp0)(lane_na).0x(cn_gcr_addr){
+        bits ,                scom_data;
+        rx_start_lane_id ,    0b0000000;
+        rx_end_lane_id ,      0b0010000;
+}
+#--******************************************************************************
+scom 0x800.0b(tx_id3_pg)(tx_grp0)(lane_na).0x(cn_gcr_addr){
+        bits ,                scom_data;
+        tx_start_lane_id,     0b0000000;
+        tx_end_lane_id ,      0b0010111;
+}
+#--******************************************************************************
+scom 0x800.0b(rx_tx_bus_info_pg)(rx_grp0)(lane_na).0x(cn_gcr_addr){
+        bits ,                scom_data;
+        rx_tx_bus_width ,     0b0011000;
+        rx_rx_bus_width ,     0b0010001;
+}
+#******************************************
+#  .----------------.  .----------------.
+# | .--------------. || .--------------. |
+# | |  _______     | || |  ____  ____  | |
+# | | |_   __ \    | || | |_  _||_  _| | |
+# | |   | |__) |   | || |   \ \  / /   | |
+# | |   |  __ /    | || |    > `' <    | |
+# | |  _| |  \ \_  | || |  _/ /'`\ \_  | |
+# | | |____| |___| | || | |____||____| | |
+# | |              | || |              | |
+# | '--------------' || '--------------' |
+#  '----------------'  '----------------' banner2 -fblock
+#******************************************
+#-------------------------------------------------------------------------------------
+#     ______
+#    / ____/__  ____  ________
+#   / /_  / _ \/ __ \/ ___/ _ \
+#  / __/ /  __/ / / / /__/  __/
+# /_/    \___/_/ /_/\___/\___/  banner2 -fslant
+#-------------------------------------------------------------------------------------
+scom 0x800.0b(rx_fence_pg)(rx_grp0)(lane_na).0x(cn_gcr_addr){
+        bits ,         scom_data;
+        rx_fence,       0b1;
+}
+#-------------------------------------------------------------------------------------
+#     __  ___           __               __  ___          __
+#    /  |/  /___ ______/ /____  _____   /  |/  /___  ____/ /__
+#   / /|_/ / __ `/ ___/ __/ _ \/ ___/  / /|_/ / __ \/ __  / _ \
+#  / /  / / /_/ (__  ) /_/  __/ /     / /  / / /_/ / /_/ /  __/
+# /_/  /_/\__,_/____/\__/\___/_/     /_/  /_/\____/\__,_/\___/  banner2 -fslant
+#-------------------------------------------------------------------------------------
+#
+scom 0x800.0b(rx_mode_pg)(rx_grp0)(lane_na).0x(cn_gcr_addr){
+        bits ,           scom_data;
+        rx_master_mode,  0b0;       # Centaur is always a slave
+}
+
+#-------------------------------------------------------------------------------------
+#     ____  __    __
+#    / __ \/ /   / /
+#   / /_/ / /   / /
+#  / ____/ /___/ /___
+# /_/   /_____/_____/  banner2 -fslant
+#-------------------------------------------------------------------------------------
+
+scom 0x800.0b(rx_wiretest_pll_cntl_pg)(rx_grp0)(lane_na).0x(cn_gcr_addr){
+        bits,                              scom_data;
+        rx_wt_cu_pll_reset,                0b1;      # Put PLL in disabled state until Wiretest is started.
+        rx_wt_cu_pll_pgooddly,             0b001;    # 50ns delay
+}
+#-------------------------------------------------------------------------------------
+#     __                        ____  _            __    __         
+#    / /   ____ _____  ___     / __ \(_)________ _/ /_  / /__  _____
+#   / /   / __ `/ __ \/ _ \   / / / / / ___/ __ `/ __ \/ / _ \/ ___/
+#  / /___/ /_/ / / / /  __/  / /_/ / (__  ) /_/ / /_/ / /  __(__  ) 
+# /_____/\__,_/_/ /_/\___/  /_____/_/____/\__,_/_.___/_/\___/____/   banner2 -fslant 
+#-------------------------------------------------------------------------------------
+scom 0x800.0b(rx_lane_disabled_vec_0_15_pg)(rx_grp0)(lane_na).0x(cn_gcr_addr){
+        bits,                               scom_data;
+        rx_lane_disabled_vec_0_15,          0b0000000000000000;
+}
+scom 0x800.0b(tx_lane_disabled_vec_0_15_pg)(tx_grp0)(lane_na).0x(cn_gcr_addr){
+        bits,                               scom_data;
+	tx_lane_disabled_vec_0_15,          0b0000000000000000;
+}
+#--******************************************************************************
+scom 0x800.0b(rx_lane_disabled_vec_16_31_pg)(rx_grp0)(lane_na).0x(cn_gcr_addr){
+        bits,                               scom_data;
+        rx_lane_disabled_vec_16_31,         0b0111111111111111;
+}
+scom 0x800.0b(tx_lane_disabled_vec_16_31_pg)(tx_grp0)(lane_na).0x(cn_gcr_addr){
+        bits,                               scom_data;
+        tx_lane_disabled_vec_16_31,         0b0000000011111111;
+}
+#-------------------------------------------------------------------------------------
+#     __  ___              ____            __   __                         
+#    /  |/  /___ __  __   / __ )____ _____/ /  / /   ____ _____  ___  _____
+#   / /|_/ / __ `/ |/_/  / __  / __ `/ __  /  / /   / __ `/ __ \/ _ \/ ___/
+#  / /  / / /_/ />  <   / /_/ / /_/ / /_/ /  / /___/ /_/ / / / /  __(__  ) 
+# /_/  /_/\__,_/_/|_|  /_____/\__,_/\__,_/  /_____/\__,_/_/ /_/\___/____/  banner2 -fslant
+#-------------------------------------------------------------------------------------
+
+scom 0x800.0b(rx_wiretest_laneinfo_pg)(rx_grp0)(lane_na).0x(cn_gcr_addr){
+        bits,                               scom_data;
+        rx_wtr_max_bad_lanes,               0b00010;
+}
+#--******************************************************************************
+scom 0x800.0b(tx_mode_pg)(tx_grp0)(lane_na).0x(cn_gcr_addr){
+        bits,                               scom_data;
+        tx_max_bad_lanes,                   0b00010;
+}
+#-------------------------------------------------------------------------------------
+#     ____                 ____                   _         ______      ____      _            
+#    / __ \__  ______     / __ \___  ____  ____ _(_)____   /_  __/___ _/ / /_  __(_)___  ____ _
+#   / / / / / / / __ \   / /_/ / _ \/ __ \/ __ `/ / ___/    / / / __ `/ / / / / / / __ \/ __ `/
+#  / /_/ / /_/ / / / /  / _, _/  __/ /_/ / /_/ / / /       / / / /_/ / / / /_/ / / / / / /_/ / 
+# /_____/\__, /_/ /_/  /_/ |_|\___/ .___/\__,_/_/_/       /_/  \__,_/_/_/\__, /_/_/ /_/\__, /  
+#       /____/                   /_/                                    /____/        /____/   banner2 -fslant
+#-------------------------------------------------------------------------------------
+scom 0x800.0b(rx_dyn_rpr_err_tallying1_pg)(rx_grp0)(lane_na).0x(cn_gcr_addr){
+        bits,                               scom_data;
+	rx_dyn_rpr_bad_lane_max,            0b0001111;
+        rx_dyn_rpr_err_cntr1_duration,      0b0111; 
+        rx_dyn_rpr_enc_bad_data_lane_width, 0b101;
+}
+#--******************************************************************************
+scom 0x800.0b(rx_dyn_rpr_err_tallying2_pg)(rx_grp0)(lane_na).0x(cn_gcr_addr){
+        bits,                               scom_data;
+        rx_dyn_rpr_bad_bus_max,             0b0111111;
+        rx_dyn_rpr_err_cntr2_duration,      0b0111; 
+}
+#-------------------------------------------------------------------------------------
+#     ____  ____  ____ _____    ______               _____      __          __      
+#    / __ \/ __ \/ __ ) ___/   /_  __/___ _____     / ___/___  / /__  _____/ /______
+#   / /_/ / /_/ / __  \__ \     / / / __ `/ __ \    \__ \/ _ \/ / _ \/ ___/ __/ ___/
+#  / ____/ _, _/ /_/ /__/ /    / / / /_/ / /_/ /   ___/ /  __/ /  __/ /__/ /_(__  ) 
+# /_/   /_/ |_/_____/____/    /_/  \__,_/ .___/   /____/\___/_/\___/\___/\__/____/  banner2 -fslant
+#                                      /_/                                      
+#-------------------------------------------------------------------------------------
+# PER-LANE (RX)
+#-------------------------------------------------------------------------------------
+scom 0x800.0b(rx_prbs_mode_pl)(rx_grp0)(lane_0).0x(cn_gcr_addr){
+        bits,           scom_data,                       expr;
+        rx_prbs_tap_id, rx_prbs_tap_id_pattern_a,        (def_rx_mirrored_mode);     # (def_rx_mirrored_mode);
+        rx_prbs_tap_id, rx_prbs_tap_id_pattern_a,        (def_rx_non_mirrored_mode); # (def_rx_non_mirrored_mode);
+}
+scom 0x800.0b(rx_prbs_mode_pl)(rx_grp0)(lane_1).0x(cn_gcr_addr){
+        bits,           scom_data,                       expr;
+        rx_prbs_tap_id, rx_prbs_tap_id_pattern_b,        (def_rx_mirrored_mode);
+        rx_prbs_tap_id, rx_prbs_tap_id_pattern_b,        (def_rx_non_mirrored_mode);
+}
+scom 0x800.0b(rx_prbs_mode_pl)(rx_grp0)(lane_2).0x(cn_gcr_addr){
+        bits,           scom_data,                       expr;
+        rx_prbs_tap_id, rx_prbs_tap_id_pattern_c,        (def_rx_mirrored_mode);
+        rx_prbs_tap_id, rx_prbs_tap_id_pattern_c,        (def_rx_non_mirrored_mode);
+}
+scom 0x800.0b(rx_prbs_mode_pl)(rx_grp0)(lane_3).0x(cn_gcr_addr){
+        bits,           scom_data,                       expr;
+        rx_prbs_tap_id, rx_prbs_tap_id_pattern_d,        (def_rx_mirrored_mode);
+        rx_prbs_tap_id, rx_prbs_tap_id_pattern_d,        (def_rx_non_mirrored_mode);
+}
+scom 0x800.0b(rx_prbs_mode_pl)(rx_grp0)(lane_4).0x(cn_gcr_addr){
+        bits,           scom_data,                       expr;
+        rx_prbs_tap_id, rx_prbs_tap_id_pattern_e,        (def_rx_mirrored_mode);
+        rx_prbs_tap_id, rx_prbs_tap_id_pattern_e,        (def_rx_non_mirrored_mode);
+}
+scom 0x800.0b(rx_prbs_mode_pl)(rx_grp0)(lane_5).0x(cn_gcr_addr){
+        bits,           scom_data,                       expr;
+        rx_prbs_tap_id, rx_prbs_tap_id_pattern_f,        (def_rx_mirrored_mode);
+        rx_prbs_tap_id, rx_prbs_tap_id_pattern_f,        (def_rx_non_mirrored_mode);
+}
+scom 0x800.0b(rx_prbs_mode_pl)(rx_grp0)(lane_6).0x(cn_gcr_addr){
+        bits,           scom_data,                       expr;
+        rx_prbs_tap_id, rx_prbs_tap_id_pattern_g,        (def_rx_mirrored_mode);
+        rx_prbs_tap_id, rx_prbs_tap_id_pattern_g,        (def_rx_non_mirrored_mode);
+}
+scom 0x800.0b(rx_prbs_mode_pl)(rx_grp0)(lane_7).0x(cn_gcr_addr){
+        bits,           scom_data,                       expr;
+        rx_prbs_tap_id, rx_prbs_tap_id_pattern_h,        (def_rx_mirrored_mode);
+        rx_prbs_tap_id, rx_prbs_tap_id_pattern_h,        (def_rx_non_mirrored_mode);
+}
+scom 0x800.0b(rx_prbs_mode_pl)(rx_grp0)(lane_8).0x(cn_gcr_addr){
+        bits,           scom_data,                       expr;
+        rx_prbs_tap_id, rx_prbs_tap_id_pattern_a,        (def_rx_mirrored_mode);
+        rx_prbs_tap_id, rx_prbs_tap_id_pattern_a,        (def_rx_non_mirrored_mode);
+}
+scom 0x800.0b(rx_prbs_mode_pl)(rx_grp0)(lane_9).0x(cn_gcr_addr){
+        bits,           scom_data,                       expr;
+        rx_prbs_tap_id, rx_prbs_tap_id_pattern_h,        (def_rx_mirrored_mode);
+        rx_prbs_tap_id, rx_prbs_tap_id_pattern_h,        (def_rx_non_mirrored_mode);
+}
+scom 0x800.0b(rx_prbs_mode_pl)(rx_grp0)(lane_10).0x(cn_gcr_addr){
+        bits,           scom_data,                       expr;
+        rx_prbs_tap_id, rx_prbs_tap_id_pattern_g,        (def_rx_mirrored_mode);
+        rx_prbs_tap_id, rx_prbs_tap_id_pattern_g,        (def_rx_non_mirrored_mode);
+}
+scom 0x800.0b(rx_prbs_mode_pl)(rx_grp0)(lane_11).0x(cn_gcr_addr){
+        bits,           scom_data,                       expr;
+        rx_prbs_tap_id, rx_prbs_tap_id_pattern_f,        (def_rx_mirrored_mode);
+        rx_prbs_tap_id, rx_prbs_tap_id_pattern_f,        (def_rx_non_mirrored_mode);
+}
+scom 0x800.0b(rx_prbs_mode_pl)(rx_grp0)(lane_12).0x(cn_gcr_addr){
+        bits,           scom_data,                       expr;
+        rx_prbs_tap_id, rx_prbs_tap_id_pattern_e,        (def_rx_mirrored_mode);
+        rx_prbs_tap_id, rx_prbs_tap_id_pattern_e,        (def_rx_non_mirrored_mode);
+}
+scom 0x800.0b(rx_prbs_mode_pl)(rx_grp0)(lane_13).0x(cn_gcr_addr){
+        bits,           scom_data,                       expr;
+        rx_prbs_tap_id, rx_prbs_tap_id_pattern_d,        (def_rx_mirrored_mode);
+        rx_prbs_tap_id, rx_prbs_tap_id_pattern_d,        (def_rx_non_mirrored_mode);
+}
+scom 0x800.0b(rx_prbs_mode_pl)(rx_grp0)(lane_14).0x(cn_gcr_addr){
+        bits,           scom_data,                       expr;
+        rx_prbs_tap_id, rx_prbs_tap_id_pattern_c,        (def_rx_mirrored_mode);
+        rx_prbs_tap_id, rx_prbs_tap_id_pattern_c,        (def_rx_non_mirrored_mode);
+}
+scom 0x800.0b(rx_prbs_mode_pl)(rx_grp0)(lane_15).0x(cn_gcr_addr){
+        bits,           scom_data,                       expr;
+        rx_prbs_tap_id, rx_prbs_tap_id_pattern_b,        (def_rx_mirrored_mode);
+        rx_prbs_tap_id, rx_prbs_tap_id_pattern_b,        (def_rx_non_mirrored_mode);
+}
+scom 0x800.0b(rx_prbs_mode_pl)(rx_grp0)(lane_16).0x(cn_gcr_addr){
+        bits,           scom_data,                       expr;
+        rx_prbs_tap_id, rx_prbs_tap_id_pattern_a,        (def_rx_mirrored_mode);
+        rx_prbs_tap_id, rx_prbs_tap_id_pattern_a,        (def_rx_non_mirrored_mode);
+}
+#-------------------------------------------------------------------------------------
+# PER-LANE (TX)
+#-------------------------------------------------------------------------------------
+# GCR Lane = 0
+scom 0x800.0b(tx_prbs_mode_pl)(tx_grp0)(lane_0).0x(cn_gcr_addr){
+        bits,           scom_data,                       expr;
+        tx_prbs_tap_id, tx_prbs_tap_id_pattern_a,        (def_tx_mirrored_mode);
+        tx_prbs_tap_id, tx_prbs_tap_id_pattern_a,        (def_tx_non_mirrored_mode);
+}
+# GCR Lane = 1
+scom 0x800.0b(tx_prbs_mode_pl)(tx_grp0)(lane_1).0x(cn_gcr_addr){
+        bits,           scom_data,                       expr;
+        tx_prbs_tap_id, tx_prbs_tap_id_pattern_b,        (def_tx_mirrored_mode);
+        tx_prbs_tap_id, tx_prbs_tap_id_pattern_b,        (def_tx_non_mirrored_mode);
+}
+# GCR Lane = 2
+scom 0x800.0b(tx_prbs_mode_pl)(tx_grp0)(lane_2).0x(cn_gcr_addr){
+        bits,           scom_data,                       expr;
+        tx_prbs_tap_id, tx_prbs_tap_id_pattern_c,        (def_tx_mirrored_mode);
+        tx_prbs_tap_id, tx_prbs_tap_id_pattern_c,        (def_tx_non_mirrored_mode);
+}
+# GCR Lane = 4
+scom 0x800.0b(tx_prbs_mode_pl)(tx_grp0)(lane_3).0x(cn_gcr_addr){
+        bits,           scom_data,                       expr;
+        tx_prbs_tap_id, tx_prbs_tap_id_pattern_d,        (def_tx_mirrored_mode);
+        tx_prbs_tap_id, tx_prbs_tap_id_pattern_d,        (def_tx_non_mirrored_mode);
+}
+# GCR Lane = 3
+scom 0x800.0b(tx_prbs_mode_pl)(tx_grp0)(lane_4).0x(cn_gcr_addr){
+        bits,           scom_data,                       expr;
+        tx_prbs_tap_id, tx_prbs_tap_id_pattern_e,        (def_tx_mirrored_mode);
+        tx_prbs_tap_id, tx_prbs_tap_id_pattern_e,        (def_tx_non_mirrored_mode);
+}
+# GCR Lane = 5
+scom 0x800.0b(tx_prbs_mode_pl)(tx_grp0)(lane_5).0x(cn_gcr_addr){
+        bits,           scom_data,                       expr;
+        tx_prbs_tap_id, tx_prbs_tap_id_pattern_f,        (def_tx_mirrored_mode);
+        tx_prbs_tap_id, tx_prbs_tap_id_pattern_f,        (def_tx_non_mirrored_mode);
+}
+# GCR Lane = 6
+scom 0x800.0b(tx_prbs_mode_pl)(tx_grp0)(lane_6).0x(cn_gcr_addr){
+        bits,           scom_data,                       expr;
+        tx_prbs_tap_id, tx_prbs_tap_id_pattern_g,        (def_tx_mirrored_mode);
+        tx_prbs_tap_id, tx_prbs_tap_id_pattern_g,        (def_tx_non_mirrored_mode);
+}
+# GCR Lane = 7
+scom 0x800.0b(tx_prbs_mode_pl)(tx_grp0)(lane_7).0x(cn_gcr_addr){
+        bits,           scom_data,                       expr;
+        tx_prbs_tap_id, tx_prbs_tap_id_pattern_h,        (def_tx_mirrored_mode);
+        tx_prbs_tap_id, tx_prbs_tap_id_pattern_h,        (def_tx_non_mirrored_mode);
+}
+# GCR Lane = 8
+scom 0x800.0b(tx_prbs_mode_pl)(tx_grp0)(lane_8).0x(cn_gcr_addr){
+        bits,           scom_data,                       expr;
+        tx_prbs_tap_id, tx_prbs_tap_id_pattern_a,        (def_tx_mirrored_mode);
+        tx_prbs_tap_id, tx_prbs_tap_id_pattern_a,        (def_tx_non_mirrored_mode);
+}
+# GCR Lane = 9
+scom 0x800.0b(tx_prbs_mode_pl)(tx_grp0)(lane_9).0x(cn_gcr_addr){
+        bits,           scom_data,                       expr;
+        tx_prbs_tap_id, tx_prbs_tap_id_pattern_b,        (def_tx_mirrored_mode);
+        tx_prbs_tap_id, tx_prbs_tap_id_pattern_b,        (def_tx_non_mirrored_mode);
+}
+# GCR Lane = 10
+scom 0x800.0b(tx_prbs_mode_pl)(tx_grp0)(lane_10).0x(cn_gcr_addr){
+        bits,           scom_data,                       expr;
+        tx_prbs_tap_id, tx_prbs_tap_id_pattern_c,        (def_tx_mirrored_mode);
+        tx_prbs_tap_id, tx_prbs_tap_id_pattern_c,        (def_tx_non_mirrored_mode);
+}
+# GCR Lane = 11
+scom 0x800.0b(tx_prbs_mode_pl)(tx_grp0)(lane_11).0x(cn_gcr_addr){
+        bits,           scom_data,                       expr;
+        tx_prbs_tap_id, tx_prbs_tap_id_pattern_d,        (def_tx_mirrored_mode);
+        tx_prbs_tap_id, tx_prbs_tap_id_pattern_d,        (def_tx_non_mirrored_mode);
+}
+# GCR Lane = 12
+scom 0x800.0b(tx_prbs_mode_pl)(tx_grp0)(lane_12).0x(cn_gcr_addr){
+        bits,           scom_data,                       expr;
+        tx_prbs_tap_id, tx_prbs_tap_id_pattern_d,        (def_tx_mirrored_mode);
+        tx_prbs_tap_id, tx_prbs_tap_id_pattern_d,        (def_tx_non_mirrored_mode);
+}
+# GCR Lane = 13
+scom 0x800.0b(tx_prbs_mode_pl)(tx_grp0)(lane_13).0x(cn_gcr_addr){
+        bits,           scom_data,                       expr;
+        tx_prbs_tap_id, tx_prbs_tap_id_pattern_c,        (def_tx_mirrored_mode);
+        tx_prbs_tap_id, tx_prbs_tap_id_pattern_c,        (def_tx_non_mirrored_mode);
+}
+# GCR Lane = 14
+scom 0x800.0b(tx_prbs_mode_pl)(tx_grp0)(lane_14).0x(cn_gcr_addr){
+        bits,           scom_data,                       expr;
+        tx_prbs_tap_id, tx_prbs_tap_id_pattern_b,        (def_tx_mirrored_mode);
+        tx_prbs_tap_id, tx_prbs_tap_id_pattern_b,        (def_tx_non_mirrored_mode);
+}
+# GCR Lane = 15
+scom 0x800.0b(tx_prbs_mode_pl)(tx_grp0)(lane_15).0x(cn_gcr_addr){
+        bits,           scom_data,                       expr;
+        tx_prbs_tap_id, tx_prbs_tap_id_pattern_a,        (def_tx_mirrored_mode);
+        tx_prbs_tap_id, tx_prbs_tap_id_pattern_a,        (def_tx_non_mirrored_mode);
+}
+# GCR Lane = 16
+scom 0x800.0b(tx_prbs_mode_pl)(tx_grp0)(lane_16).0x(cn_gcr_addr){
+        bits,           scom_data,                       expr;
+        tx_prbs_tap_id, tx_prbs_tap_id_pattern_h,        (def_tx_mirrored_mode);
+        tx_prbs_tap_id, tx_prbs_tap_id_pattern_h,        (def_tx_non_mirrored_mode);
+}
+# GCR Lane = 17
+scom 0x800.0b(tx_prbs_mode_pl)(tx_grp0)(lane_17).0x(cn_gcr_addr){
+        bits,           scom_data,                       expr;
+        tx_prbs_tap_id, tx_prbs_tap_id_pattern_g,        (def_tx_mirrored_mode);
+        tx_prbs_tap_id, tx_prbs_tap_id_pattern_g,        (def_tx_non_mirrored_mode);
+}
+# GCR Lane = 18
+scom 0x800.0b(tx_prbs_mode_pl)(tx_grp0)(lane_18).0x(cn_gcr_addr){
+        bits,           scom_data,                       expr;
+        tx_prbs_tap_id, tx_prbs_tap_id_pattern_f,        (def_tx_mirrored_mode);
+        tx_prbs_tap_id, tx_prbs_tap_id_pattern_f,        (def_tx_non_mirrored_mode);
+}
+# GCR Lane = 19
+scom 0x800.0b(tx_prbs_mode_pl)(tx_grp0)(lane_19).0x(cn_gcr_addr){
+        bits,           scom_data,                       expr;
+        tx_prbs_tap_id, tx_prbs_tap_id_pattern_e,        (def_tx_mirrored_mode);
+        tx_prbs_tap_id, tx_prbs_tap_id_pattern_e,        (def_tx_non_mirrored_mode);
+}
+# GCR Lane = 20
+scom 0x800.0b(tx_prbs_mode_pl)(tx_grp0)(lane_20).0x(cn_gcr_addr){
+        bits,           scom_data,                       expr;
+        tx_prbs_tap_id, tx_prbs_tap_id_pattern_d,        (def_tx_mirrored_mode);
+        tx_prbs_tap_id, tx_prbs_tap_id_pattern_d,        (def_tx_non_mirrored_mode);
+}
+# GCR Lane = 21
+scom 0x800.0b(tx_prbs_mode_pl)(tx_grp0)(lane_21).0x(cn_gcr_addr){
+        bits,           scom_data,                       expr;
+        tx_prbs_tap_id, tx_prbs_tap_id_pattern_c,        (def_tx_mirrored_mode);
+        tx_prbs_tap_id, tx_prbs_tap_id_pattern_c,        (def_tx_non_mirrored_mode);
+}
+# GCR Lane = 22
+scom 0x800.0b(tx_prbs_mode_pl)(tx_grp0)(lane_22).0x(cn_gcr_addr){
+        bits,           scom_data,                       expr;
+        tx_prbs_tap_id, tx_prbs_tap_id_pattern_b,        (def_tx_mirrored_mode);
+        tx_prbs_tap_id, tx_prbs_tap_id_pattern_b,        (def_tx_non_mirrored_mode);
+}
+# GCR Lane = 23
+scom 0x800.0b(tx_prbs_mode_pl)(tx_grp0)(lane_23).0x(cn_gcr_addr){
+        bits,           scom_data,                       expr;
+        tx_prbs_tap_id, tx_prbs_tap_id_pattern_a,        (def_tx_mirrored_mode);
+        tx_prbs_tap_id, tx_prbs_tap_id_pattern_a,        (def_tx_non_mirrored_mode);
+}
+
+
+#******************************************
+#  .----------------.  .----------------.
+# | .--------------. || .--------------. |
+# | |  _________   | || |  ____  ____  | |
+# | | |  _   _  |  | || | |_  _||_  _| | |
+# | | |_/ | | \_|  | || |   \ \  / /   | |
+# | |     | |      | || |    > `' <    | |
+# | |    _| |_     | || |  _/ /'`\ \_  | |
+# | |   |_____|    | || | |____||____| | |
+# | |              | || |              | |
+# | '--------------' || '--------------' |
+#  '----------------'  '----------------'   banner2 -fblock
+#******************************************
+#-------------------------------------------------------------------------------------
+#     ____       _               __________      ____        __  __
+#    / __ \_____(_)   _____     / ____/ / /__   / __ \____ _/ /_/ /____  _________
+#   / / / / ___/ / | / / _ \   / /   / / //_/  / /_/ / __ `/ __/ __/ _ \/ ___/ __ \
+#  / /_/ / /  / /| |/ /  __/  / /___/ / ,<    / ____/ /_/ / /_/ /_/  __/ /  / / / /
+# /_____/_/  /_/ |___/\___/   \____/_/_/|_|  /_/    \__,_/\__/\__/\___/_/  /_/ /_/  banner2 -fslant
+#-------------------------------------------------------------------------------------
+scom 0x800.0b(tx_clk_cntl_gcrmsg_pg)(tx_grp0)(lane_na).0x(cn_gcr_addr){
+        bits ,                      scom_data;
+        tx_drv_clk_pattern_gcrmsg,  0b00;        # DRV_0S. Should this be in the scaninit file?
+}
+
+
+############################################################################################
+# END OF FILE
+############################################################################################
+
+

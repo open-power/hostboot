@@ -1,31 +1,31 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/hwpf/hwp/start_clocks_on_nest_chiplets/start_clocks_on_nest_chiplets.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
-   
-/**
- *  @file start_clocks_on_nest_chiplets.C                                                
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
  *
- *  Support file for IStep: start_clocks_on_nest_chiplets                                                    
- *   Start Clocks On Nest Chiplets
+ *  $Source: src/usr/hwpf/hwp/nest_chiplets/nest_chiplets.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
+/**
+ *  @file nest_chiplets.C                                                
+ *
+ *  Support file for IStep: nest_chiplets                                                    
+ *   Nest Chiplets
  *
  *  *****************************************************************
  *  THIS FILE WAS GENERATED ON 2012-04-03:1952
@@ -55,16 +55,16 @@
 //  --  prototype   includes    --
 //  Add any customized routines that you don't want overwritten into
 //      "start_clocks_on_nest_chiplets_custom.C" and include the prototypes here.
-//  #include    "start_clocks_on_nest_chiplets_custom.H"
-#include    "start_clocks_on_nest_chiplets.H"
+//  #include    "nest_chiplets_custom.H"
+#include    "nest_chiplets.H"
 #include    "proc_start_clocks_chiplets/proc_start_clocks_chiplets.H"
+#include    "proc_chiplet_scominit/proc_chiplet_scominit.H"
 
 //  Uncomment these files as they become available:
 // #include    "proc_a_x_pci_dmi_pll_setup/proc_a_x_pci_dmi_pll_setup.H"
-// #include    "proc_chiplet_scominit/proc_chiplet_scominit.H"
 // #include    "proc_scomoverride_chiplets/proc_scomoverride_chiplets.H"
 
-namespace   START_CLOCKS_ON_NEST_CHIPLETS                                              
+namespace   NEST_CHIPLETS                                              
 {
 
 using   namespace   TARGETING;
@@ -196,9 +196,98 @@ void    call_proc_startclock_chiplets( void    *io_pArgs )
 //
 void    call_proc_chiplet_scominit( void    *io_pArgs )
 {
-    errlHndl_t          l_errl      =   NULL;  
+    errlHndl_t l_errl = NULL;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_chiplet_scominit entry" );
+    uint8_t l_num = 0;
+    
+    // Get all functional MCS chiplets
+    TARGETING::TargetHandleList l_mcsTargetList;
+    getAllChiplets(l_mcsTargetList, TYPE_MCS);
+    
+    // Invoke proc_chiplet_scominit on each one
+    for (l_num = 0; l_num < l_mcsTargetList.size(); l_num++)
+    {
+        const TARGETING::Target* l_pTarget = l_mcsTargetList[l_num];
+        const fapi::Target l_fapi_target(
+            TARGET_TYPE_MCS_CHIPLET,
+            reinterpret_cast<void *>
+                (const_cast<TARGETING::Target*>(l_pTarget)));
+
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "Running proc_chiplet_scominit HWP on...");
+        EntityPath l_path;
+        l_path = l_pTarget->getAttr<ATTR_PHYS_PATH>();
+        l_path.dump();
+
+        FAPI_INVOKE_HWP(l_errl, proc_chiplet_scominit, l_fapi_target);
+        if (l_errl)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "ERROR 0x%.8X : proc_chiplet_scominit HWP returns error",
+                      l_errl->reasonCode());
+            break;
+        }
+        else
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "SUCCESS :  proc_chiplet_scominit HWP");
+        }
+    }
+    
+    if (!l_errl)
+    {
+        // Note: The HW team and Dean said that proc_chiplet_scominit involves
+        // calling an initfile on memory buffer chips. It seems a little odd for
+        // this to be done in a HWP called proc_chiplet_scominit, but this is
+        // not a mistake
+
+        // Get all functional membuf chips
+        TARGETING::TargetHandleList l_membufTargetList;
+        getAllChips(l_membufTargetList, TYPE_MEMBUF);
+    
+        // Invoke proc_chiplet_scominit on each one
+        for (l_num = 0; l_num < l_membufTargetList.size(); l_num++)
+        {
+            const TARGETING::Target* l_pTarget = l_membufTargetList[l_num];
+            const fapi::Target l_fapi_target(
+                TARGET_TYPE_MEMBUF_CHIP,
+                reinterpret_cast<void *>
+                    (const_cast<TARGETING::Target*>(l_pTarget)));
+
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "Running proc_chiplet_scominit HWP on...");
+            EntityPath l_path;
+            l_path = l_pTarget->getAttr<ATTR_PHYS_PATH>();
+            l_path.dump();
+
+            FAPI_INVOKE_HWP(l_errl, proc_chiplet_scominit, l_fapi_target);
+            if (l_errl)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "ERROR 0x%.8X : proc_chiplet_scominit HWP returns error",
+                          l_errl->reasonCode());
+                break;
+            }
+            else
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "SUCCESS :  proc_chiplet_scominit HWP");
+            }
+        }
+    }
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_chiplet_scominit exit" );
+
+    // end task, returning any errorlogs to IStepDisp 
+    task_end2( l_errl );
+}
+
+
+
+//
+//  Wrapper function to call 07.4 :
+//      proc_pcie_scominit
+//
+void    call_proc_pcie_scominit( void    *io_pArgs )
+{
+    errlHndl_t          l_errl      =   NULL;  
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_pcie_scominit entry" );
         
 #if 0
     // @@@@@    CUSTOM BLOCK:   @@@@@    
@@ -208,7 +297,7 @@ void    call_proc_chiplet_scominit( void    *io_pArgs )
     
     //  print call to hwp and dump physical path of the target(s)
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "=====  proc_chiplet_scominit HWP(? ? ? )",
+                    "=====  proc_pcie_scominit HWP(? ? ? )",
                     ?
                     ?
                     ? );
@@ -225,13 +314,13 @@ void    call_proc_chiplet_scominit( void    *io_pArgs )
                         (const_cast<TARGETING::Target*>(l_@targetN_target)) );
                     
     //  call the HWP with each fapi::Target
-    l_fapirc  =   proc_chiplet_scominit( ? , ?, ? );
+    l_fapirc  =   proc_pcie_scominit( ? , ?, ? );
 
     //  process return code.
     if ( l_fapirc== fapi::FAPI_RC_SUCCESS )
     {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "SUCCESS :  proc_chiplet_scominit HWP(? ? ? )" );
+                "SUCCESS :  proc_pcie_scominit HWP(? ? ? )" );
     }
     else
     {
@@ -239,13 +328,13 @@ void    call_proc_chiplet_scominit( void    *io_pArgs )
          * @todo fapi error - just print out for now...
          */
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR 0x%.8X:  proc_chiplet_scominit HWP(? ? ?) ",
+                "ERROR 0x%.8X:  proc_pcie_scominit HWP(? ? ?) ",
                 static_cast<uint32_t>(l_fapirc) );
     }
     // @@@@@    END CUSTOM BLOCK:   @@@@@    
 #endif
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_chiplet_scominit exit" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_pcie_scominit exit" );
 
     // end task, returning any errorlogs to IStepDisp 
     task_end2( l_errl );
@@ -254,7 +343,7 @@ void    call_proc_chiplet_scominit( void    *io_pArgs )
 
 
 //
-//  Wrapper function to call 07.4 :
+//  Wrapper function to call 07.5 :
 //      proc_scomoverride_chiplets
 //
 void    call_proc_scomoverride_chiplets( void    *io_pArgs )

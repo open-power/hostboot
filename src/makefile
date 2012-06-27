@@ -81,8 +81,8 @@ hbicore_EXTENDED_MODULES = ${EXTENDED_MODULES}
 # CVS then copy into HostBoot for now.
 # HostBoot build team will have a process of building centaur.sbe_pnor.bin
 # image later.
-hbicore_DATA_MODULES =  sample.if dimmspd.dat centaur.sbe_pnor.bin procmvpd.dat \
-                        procpore.dat
+hbicore_DATA_MODULES =  sample.if p8.dmi.scom.if cen.dmi.scom.if \
+                        dimmspd.dat centaur.sbe_pnor.bin procmvpd.dat procpore.dat 
 
 hbicore_LIDNUMBER = 80f00100
 
