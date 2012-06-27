@@ -20,7 +20,7 @@
 #
 #  Origin: 30
 #
-#  IBM_PROLOG_END
+#  IBM_PROLOG_END_TAG
 # Author:   Van Lee    vanlee@us.ibm.com
 #
 # Usage:
@@ -516,6 +516,39 @@ sub generate_sys
             <field><id>reserved</id><value>0</value></field>
         </default>
     </attribute>
+    <!-- TODO. These must be from MRW. Hardcoded for now -->
+    <attribute>
+        <id>PAYLOAD_BASE</id>
+        <default>256</default>
+    </attribute>
+    <attribute>
+        <id>PAYLOAD_ENTRY</id>
+        <default>0x180</default>
+    </attribute>
+    <attribute>
+        <id>MSS_MCA_HASH_MODE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>MSS_MBA_ADDR_INTERLEAVE_BIT</id>
+        <default>24</default>
+    </attribute> 
+    <attribute>
+        <id>MSS_MBA_CACHELINE_INTERLEAVE_MODE</id>
+        <default>1</default>
+    </attribute> 
+    <attribute>
+        <id>MSS_CACHE_ENABLE</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>MSS_PREFETCH_ENABLE</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>MSS_CLEANER_ENABLE</id>
+        <default>1</default>
+    </attribute>
 </targetInstance>
 ";
 }
@@ -799,6 +832,17 @@ sub generate_mcs
         <id>CHIP_UNIT</id>
         <default>$mcs</default>
     </attribute>
+    <!-- TODO When MRW provides the information, these two attributes
+         should be included. values of X come from MRW.
+    <attribute>
+        <id>EI_BUS_RX_MSB_LSB_SWAP</id>
+        <default>X</default>
+    </attribute>
+    <attribute>
+        <id>EI_BUS_TX_MSB_LSB_SWAP</id>
+        <default>X</default>
+    </attribute>
+    -->
 </targetInstance>
 ";
 }
@@ -973,6 +1017,17 @@ sub generate_centaur
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs/membuf-$ctaur</default>
     </attribute>
+    <!-- TODO When MRW provides the information, these two attributes
+         should be included. values of X come from MRW.
+    <attribute>
+        <id>EI_BUS_RX_MSB_LSB_SWAP</id>
+        <default>X</default>
+    </attribute>
+    <attribute>
+        <id>EI_BUS_TX_MSB_LSB_SWAP</id>
+        <default>X</default>
+    </attribute>
+    -->
 
     <!-- FSI is connected via proc$proc:cMFSI-$cfsi -->
     <attribute>
