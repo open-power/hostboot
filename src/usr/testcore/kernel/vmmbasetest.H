@@ -93,12 +93,6 @@ class VmmBaseTest : public CxxTest::TestSuite
 
         void testCastOutPages()
         {
-
-            //Disabled until page management issues are fixed.
-            //RTC: 43209 (task) created to track reenable of this test case.
-            printk("testCastOutPages: Disabled until page management issues are fixed. ");
-            return;
-
             uint64_t l_testAddr = VMM_VADDR_RMVPAGE_TEST;
             uint64_t l_testSize = VMM_SIZE_RMVPAGE_TEST;
             uint64_t vaddr = l_testAddr+l_testSize;

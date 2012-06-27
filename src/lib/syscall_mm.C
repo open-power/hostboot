@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/lib/syscall_mm.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/lib/syscall_mm.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #include <sys/syscall.h>
 #include <sys/mm.h>
 #include <arch/ppc.H>
@@ -79,4 +80,12 @@ void mm_icache_invalidate(void * i_addr, size_t i_cpu_word_count)
 int mm_set_permission(void* va, uint64_t size, uint64_t access_type)
 {
     return (int64_t)_syscall3(MM_SET_PERMISSION, va, (void*)size,  (void*)access_type);
+}
+
+/**
+ * System call to flush pages
+ */
+void mm_flush_pages(uint64_t i_sev)
+{
+    _syscall1(MM_FLUSH_PAGES, (void*)i_sev);
 }

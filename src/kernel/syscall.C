@@ -101,6 +101,7 @@ namespace Systemcalls
     void MmAllocBlock(task_t *t);
     void MmRemovePages(task_t *t);
     void MmSetPermission(task_t *t);
+    void MmFlushPages(task_t *t);
 
 
     syscall syscalls[] =
@@ -134,6 +135,7 @@ namespace Systemcalls
         &MmAllocBlock, // MM_ALLOC_BLOCK
         &MmRemovePages, // MM_REMOVE_PAGES
         &MmSetPermission, // MM_SET_PERMISSION
+        &MmFlushPages,    // MM_FLUSH_PAGES
         };
 };
 
@@ -668,5 +670,16 @@ namespace Systemcalls
         TASK_SETRTN(t, VmmManager::mmSetPermission(va,size, access_type));
     }
 
+    /**
+     * Flush and Cast out 'old' pages
+     * @param[in] t: The task used.
+     */
+    void MmFlushPages(task_t* t)
+    {
+        VmmManager::castout_t sev = (VmmManager::castout_t)TASK_GETARG0(t);
+        VmmManager::flushPageTable();
+        VmmManager::castOutPages(sev);
+        TASK_SETRTN(t,0);
+    }
 };
 
