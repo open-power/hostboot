@@ -121,7 +121,7 @@ public:
           { scom_targets[PROCWRAP], 0x120F0166, 0xFEDCBA9876543210},
           { scom_targets[PROCWRAP], 0x01010803, 0x0000000000000000},
           { scom_targets[PROCWRAP], 0x02040004, 0xFFFFFFFFFFFFFFFF},
-          { scom_targets[PROC1],    0x00040005, 0x1234567887654321},
+          { scom_targets[PROC1],    0x01010803, 0x1234567887654321},
           { scom_targets[PROC1],    0x02040004, 0x1122334455667788},
       };
       const uint64_t NUM_ADDRS = sizeof(test_data)/sizeof(test_data[0]);

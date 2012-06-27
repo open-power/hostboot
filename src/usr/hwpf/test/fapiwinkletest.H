@@ -96,6 +96,7 @@ public:
             if ( l_fapirc != fapi::FAPI_RC_SUCCESS )
             {
                 TS_FAIL( "testGetMvpdPdr:  expected FAPI_RC_SUCCESS" );
+                fapiLogError(l_fapirc);
                 return;
             }
 
@@ -106,6 +107,7 @@ public:
                 TS_FAIL( "testGetMvpdPdr: expected size = 0x%x, received 0x%x",
                          MVPD_PDR_TEST_SIZE,
                          l_pdRLen );
+                fapiLogError(l_fapirc);
                 return;
             }
 
@@ -119,6 +121,7 @@ public:
             if ( l_fapirc != fapi::FAPI_RC_SUCCESS )
             {
                 TS_FAIL( "testGetMvpdPdr:  expected FAPI_RC_SUCCESS" );
+                fapiLogError(l_fapirc);
                 return;
             }
 
@@ -225,6 +228,7 @@ public:
                 TS_FAIL( "testRepairRings: rc FAIL: 0x%x, 0x%x",
                          fapi::RC_REPAIR_RING_INVALID_RINGBUF_PTR,
                          static_cast<uint32_t>(l_fapirc) );
+                fapiLogError(l_fapirc);
                 return;
             }
             //  ----------------------------------------------------------------
@@ -247,6 +251,7 @@ public:
                 TS_FAIL( "testRepairRings:  rc FAIL: 0x%x, 0x%x",
                          fapi::RC_REPAIR_RING_NOT_FOUND,
                          static_cast<uint32_t>(l_fapirc) );
+                fapiLogError(l_fapirc);
                 return;
             }
 
@@ -271,7 +276,9 @@ public:
                 //  note:  "uint32_t" below is an _operator_ of fapi::ReturnCode
                 TS_FAIL( "testRepairRings: rc FAIL: 0x%x, 0x%x",
                          fapi::RC_REPAIR_RING_INVALID_SIZE,
-                         static_cast<uint32_t>(l_fapirc) );
+                         static_cast<uint32_t>(l_fapirc));
+
+                fapiLogError(l_fapirc);
                 return;
             }
             if ( l_ringBufsize != l_ringModifiers[i].size )
@@ -303,6 +310,7 @@ public:
                 TS_FAIL( "testRepairRings:  rc FAIL: 0x%x, 0x%x",
                          fapi::FAPI_RC_SUCCESS,
                          static_cast<uint32_t>(l_fapirc) );
+                fapiLogError(l_fapirc);
                 return;
             }
             if ( l_ringBufsize != l_ringModifiers[i].size )

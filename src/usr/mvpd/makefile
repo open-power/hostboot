@@ -27,6 +27,6 @@ OBJS = mvpd.o
 
 SUBDIRS = test.d
 
-BINARY_FILES = $(IMGDIR)/procmvpd.dat:e23067dae839f5b434ec12b5c86d2ae4fbb51259
+BINARY_FILES = $(IMGDIR)/procmvpd.dat:2bdc54f37808b225a08a3a324f01e1b0d84b2277
 
 include ${ROOTPATH}/config.mk

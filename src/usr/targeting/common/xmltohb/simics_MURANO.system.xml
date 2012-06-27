@@ -35,7 +35,6 @@
        * each Centaur membuf chip has 2 MBA chiplets
         * each MBA chiplet has 2 ports
          * each MBA port connects to 2 logical dimms 
-     * Adding dummy EX0 because that is what Simics currently gives us @fixme
      ================================================================= -->
 
 <!-- System -->

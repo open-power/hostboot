@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/include/usr/fsi/fsi_reasoncodes.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/include/usr/fsi/fsi_reasoncodes.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #ifndef __FSI_REASONCODES_H
 #define __FSI_REASONCODES_H
 
@@ -39,7 +40,8 @@ namespace FSI
         MOD_FSIDD_INITPORT            = 0x07, /**< fsidd.C : FsiDD::initPort */
         MOD_FSIDD_GENFULLFSIADDR      = 0x09, /**< fsidd.C : FsiDD::genFullFsiAddr */
 
-        MOD_FSIPRES_PRESENCEDETECT    = 0x20, /**< fsipres.C : presenceDetect */
+        MOD_FSIPRES_PROCPRESENCEDETECT  = 0x20, /**< fsipres.C : procPresenceDetect */
+        MOD_FSIPRES_MEMBPRESENCEDETECT  = 0x21, /**< fsipres.C : membPresenceDetect */
     };
 
     enum FSIReasonCode
@@ -58,6 +60,7 @@ namespace FSI
         RC_INVALID_FSI_PATH_1        = FSI_COMP_ID | 0x0C,
         RC_INVALID_FSI_PATH_2        = FSI_COMP_ID | 0x0D,
         RC_TARGET_NEVER_DETECTED     = FSI_COMP_ID | 0x0E,
+        RC_FSI_MVPD_MISMATCH         = FSI_COMP_ID | 0x0F,
     };
 };
 
