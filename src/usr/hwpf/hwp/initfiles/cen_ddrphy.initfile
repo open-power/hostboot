@@ -1,0 +1,3991 @@
+#-- $Id: cen_ddrphy.initfile,v 1.9 2012/06/28 00:48:44 mwuu Exp $
+#-- CHANGE HISTORY:
+#--------------------------------------------------------------------------------
+#-- Version:|Author: | Date:  | Comment:
+#-- --------|--------|--------|--------------------------------------------------
+#--		1.9	|mwuu	 |06/27/12|Added SYS to IS_SIMULATION attribute
+#--		1.8	|mwuu	 |06/18/12|Changed to use spares based on DIMM_TYPE, also
+#       changed FW_RD_WR field to use AL, CL instead of hardcoded value
+#--		changed RC_CONFIG3 cal_step_size to 10 from 6 for sim, and default to 0.
+#--		1.7	|mwuu	 |05/14/12|Fixed missing () in a couple of statements
+#			|		 |		  |changed is_sim in per_cal and zcal section to any
+#--		1.6	|mwuu	 |05/09/12|Added extra '()' due to compiler change
+#--     1.3 |bellows |05/03/12|Checking in working version
+#--     1.3 |bellows |04/09/12|Updates from menlo - The real VBU config supported
+#--     1.2 |bellows |04/09/12|Updates from menlo
+#--     1.1 |bellows |04/04/12|Created File In Proper Directory
+#--     0.04|bellows |04/04/12|Updates and checking for Judy
+#--     0.03|bellows |03/26/12|Updates
+#--     0.02|bellows |03/07/12|Initial drop from Menlo
+#--     0.01|andrewg |05/24/11|Created sample file
+#-- --------|--------|--------|--------------------------------------------------
+#--------------------------------------------------------------------------------
+# End of revision history
+#--------------------------------------------------------------------------------
+
+#--Master list of variables that can be used in this file is at:
+#--<Attribute Definition Location>
+
+# 5/07/12	Switched to using ENUM values for many attributes
+# 5/04/12	Temp workaround for MSS_FREQ and MSS_VOLT
+# 4/11/12	Fixed address for DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_0
+# 			started adding expressions for this register, but need bad_bit_mask
+# 			changed
+# 4/6/12	Made initfile similar to dial settings for misc registers(PLL,etc.)
+# 3/29/12	Added DPHY01_DDRPHY_DP18_READ_CLOCK_RANK_PAIR0 and
+# 			DPHY01_DDRPHY_DP18_DQSCLK_OFFSET settings for SIM.
+
+SyntaxVersion = 1
+
+# Jan 15th?		SIM uses type 1C 4Rx8/port CDIMM first config
+# Jan 31st		1B ISDIMM DDR3 4 DIMMS (1 per port)
+# Feb 15		Initfile delivered to Firmware
+# interim date	some other configs, maybe LR DIMM
+# May 15		final initfile complete all configs
+
+#-- -----------------------------------------------------------------------------
+#-- -----------------------------------------------------------------------------
+#--
+#-- Defines
+#--
+#-- -----------------------------------------------------------------------------
+#--******************************************************************************
+#-- -----------------------------------------------------------------------------
+
+#!!!MW  problem with (!def...)
+
+# defines for parent/child attributes
+define CEN = TGT1;	# parent Centaur
+
+# short test for simulation
+define def_is_sim		=	(SYS.ATTR_IS_SIMULATION == 1)	;
+
+# TSYS_WRCLK		!!NOTE: different depending on EC level
+define def_ADR32_TSYS_WRCLK	= 0x60	;
+define def_DP18_TSYS_WRCLK	= 0x60	;
+
+# for real HW uncomment,  !!FIX once ATTR_EFF_DIMM_SPARE available
+define def_has_spare	=	(ATTR_EFF_DIMM_TYPE == 0)	;	# CDIMM
+define def_no_spare		=	(ATTR_EFF_DIMM_TYPE != 0)	;	# others, ISDIMMs, LRDIMM, etc.
+#define def_no_spare	=	(SYS.ATTR_IS_SIMULATION==1);
+#define def_has_spare	=	(SYS.ATTR_IS_SIMULATION==0);
+
+# ports 0,1 must have dimms with ranks to be valid
+define def_valid_p0		=	((ATTR_EFF_NUM_RANKS_PER_DIMM[0][0] > 0) || (ATTR_EFF_NUM_RANKS_PER_DIMM[0][1] > 0))	;
+define def_valid_p1		=	((ATTR_EFF_NUM_RANKS_PER_DIMM[1][0] > 0) || (ATTR_EFF_NUM_RANKS_PER_DIMM[1][1] > 0))	;
+
+# short test for MBA01 or MBA23
+define def_is_mba01		=	(ATTR_CHIP_UNIT_POS == 0)	;	# MBA01
+define def_is_mba23		=	(ATTR_CHIP_UNIT_POS == 1)	;	# MBA01
+
+# Port 0  valid rank pair[0:3]_p0
+# PRIMARY RANK GROUP
+define def_val_prg0_p0	= (ATTR_EFF_PRIMARY_RANK_GROUP0[0] != ENUM_ATTR_EFF_PRIMARY_RANK_GROUP0_INVALID)		;	# valid rank group 0 port0
+define def_val_prg1_p0	= (ATTR_EFF_PRIMARY_RANK_GROUP1[0] != ENUM_ATTR_EFF_PRIMARY_RANK_GROUP1_INVALID)		;	# valid rank group 1 port0
+define def_val_prg2_p0	= (ATTR_EFF_PRIMARY_RANK_GROUP2[0] != ENUM_ATTR_EFF_PRIMARY_RANK_GROUP2_INVALID)		;	# valid rank group 2 port0
+define def_val_prg3_p0	= (ATTR_EFF_PRIMARY_RANK_GROUP3[0] != ENUM_ATTR_EFF_PRIMARY_RANK_GROUP3_INVALID)		;	# valid rank group 3 port0
+# SECONDARY RANK GROUP
+define def_val_srg0_p0	= (ATTR_EFF_SECONDARY_RANK_GROUP0[0] != ENUM_ATTR_EFF_SECONDARY_RANK_GROUP0_INVALID)	;	# valid rank group 0 port0
+define def_val_srg1_p0	= (ATTR_EFF_SECONDARY_RANK_GROUP1[0] != ENUM_ATTR_EFF_SECONDARY_RANK_GROUP1_INVALID)	;	# valid rank group 1 port0
+define def_val_srg2_p0	= (ATTR_EFF_SECONDARY_RANK_GROUP2[0] != ENUM_ATTR_EFF_SECONDARY_RANK_GROUP2_INVALID)	;	# valid rank group 2 port0
+define def_val_srg3_p0	= (ATTR_EFF_SECONDARY_RANK_GROUP3[0] != ENUM_ATTR_EFF_SECONDARY_RANK_GROUP3_INVALID)	;	# valid rank group 3 port0
+# TERTIARY RANK GROUP
+define def_val_trg0_p0	= (ATTR_EFF_TERTIARY_RANK_GROUP0[0] != ENUM_ATTR_EFF_TERTIARY_RANK_GROUP0_INVALID)		;	# valid rank group 0 port0
+define def_val_trg1_p0	= (ATTR_EFF_TERTIARY_RANK_GROUP1[0] != ENUM_ATTR_EFF_TERTIARY_RANK_GROUP1_INVALID)		;	# valid rank group 1 port0
+define def_val_trg2_p0	= (ATTR_EFF_TERTIARY_RANK_GROUP2[0] != ENUM_ATTR_EFF_TERTIARY_RANK_GROUP2_INVALID)		;	# valid rank group 2 port0
+define def_val_trg3_p0	= (ATTR_EFF_TERTIARY_RANK_GROUP3[0] != ENUM_ATTR_EFF_TERTIARY_RANK_GROUP3_INVALID)		;	# valid rank group 3 port0
+# QUATERNARY RANK GROUP
+define def_val_qrg0_p0	= (ATTR_EFF_QUATERNARY_RANK_GROUP0[0] != ENUM_ATTR_EFF_QUATERNARY_RANK_GROUP0_INVALID)	;	# valid rank group 0 port0
+define def_val_qrg1_p0	= (ATTR_EFF_QUATERNARY_RANK_GROUP1[0] != ENUM_ATTR_EFF_QUATERNARY_RANK_GROUP1_INVALID)	;	# valid rank group 1 port0
+define def_val_qrg2_p0	= (ATTR_EFF_QUATERNARY_RANK_GROUP2[0] != ENUM_ATTR_EFF_QUATERNARY_RANK_GROUP2_INVALID)	;	# valid rank group 2 port0
+define def_val_qrg3_p0	= (ATTR_EFF_QUATERNARY_RANK_GROUP3[0] != ENUM_ATTR_EFF_QUATERNARY_RANK_GROUP3_INVALID)	;	# valid rank group 3 port0
+#
+# Port 1  valid rank group[0:3]_p1
+# PRIMARY RANK GROUP
+define def_val_prg0_p1	= (ATTR_EFF_PRIMARY_RANK_GROUP0[1] != ENUM_ATTR_EFF_PRIMARY_RANK_GROUP0_INVALID)		;	# valid rank group 0 port0
+define def_val_prg1_p1	= (ATTR_EFF_PRIMARY_RANK_GROUP1[1] != ENUM_ATTR_EFF_PRIMARY_RANK_GROUP1_INVALID)		;	# valid rank group 1 port0
+define def_val_prg2_p1	= (ATTR_EFF_PRIMARY_RANK_GROUP2[1] != ENUM_ATTR_EFF_PRIMARY_RANK_GROUP2_INVALID)		;	# valid rank group 2 port0
+define def_val_prg3_p1	= (ATTR_EFF_PRIMARY_RANK_GROUP3[1] != ENUM_ATTR_EFF_PRIMARY_RANK_GROUP3_INVALID)		;	# valid rank group 3 port0
+# SECONDARY RANK GROUP
+define def_val_srg0_p1	= (ATTR_EFF_SECONDARY_RANK_GROUP0[1] != ENUM_ATTR_EFF_SECONDARY_RANK_GROUP0_INVALID)	;	# valid rank group 0 port0
+define def_val_srg1_p1	= (ATTR_EFF_SECONDARY_RANK_GROUP1[1] != ENUM_ATTR_EFF_SECONDARY_RANK_GROUP1_INVALID)	;	# valid rank group 1 port0
+define def_val_srg2_p1	= (ATTR_EFF_SECONDARY_RANK_GROUP2[1] != ENUM_ATTR_EFF_SECONDARY_RANK_GROUP2_INVALID)	;	# valid rank group 2 port0
+define def_val_srg3_p1	= (ATTR_EFF_SECONDARY_RANK_GROUP3[1] != ENUM_ATTR_EFF_SECONDARY_RANK_GROUP3_INVALID)	;	# valid rank group 3 port0
+# TERTIARY RANK GROUP
+define def_val_trg0_p1	= (ATTR_EFF_TERTIARY_RANK_GROUP0[1] != ENUM_ATTR_EFF_TERTIARY_RANK_GROUP0_INVALID)		;	# valid rank group 0 port0
+define def_val_trg1_p1	= (ATTR_EFF_TERTIARY_RANK_GROUP1[1] != ENUM_ATTR_EFF_TERTIARY_RANK_GROUP1_INVALID)		;	# valid rank group 1 port0
+define def_val_trg2_p1	= (ATTR_EFF_TERTIARY_RANK_GROUP2[1] != ENUM_ATTR_EFF_TERTIARY_RANK_GROUP2_INVALID)		;	# valid rank group 2 port0
+define def_val_trg3_p1	= (ATTR_EFF_TERTIARY_RANK_GROUP3[1] != ENUM_ATTR_EFF_TERTIARY_RANK_GROUP3_INVALID)		;	# valid rank group 3 port0
+# QUATERNARY RANK GROUP
+define def_val_qrg0_p1	= (ATTR_EFF_QUATERNARY_RANK_GROUP0[1] != ENUM_ATTR_EFF_QUATERNARY_RANK_GROUP0_INVALID)	;	# valid rank group 0 port0
+define def_val_qrg1_p1	= (ATTR_EFF_QUATERNARY_RANK_GROUP1[1] != ENUM_ATTR_EFF_QUATERNARY_RANK_GROUP1_INVALID)	;	# valid rank group 1 port0
+define def_val_qrg2_p1	= (ATTR_EFF_QUATERNARY_RANK_GROUP2[1] != ENUM_ATTR_EFF_QUATERNARY_RANK_GROUP2_INVALID)	;	# valid rank group 2 port0
+define def_val_qrg3_p1	= (ATTR_EFF_QUATERNARY_RANK_GROUP3[1] != ENUM_ATTR_EFF_QUATERNARY_RANK_GROUP3_INVALID)	;	# valid rank group 3 port0
+
+# bitwise | is not working
+#
+# ena_rank_pair[0:3]_p0
+#define def_val_rp0_3_p0	= def_val_rp0_p0 << 3 | def_val_rp1_p0 << 2 | def_val_rp2_p0 << 1 | def_val_rp3_p0	;
+#	60		,	def_val_rp0_p0	,	any						;	# enable rank pair 0
+#	61		,	def_val_rp1_p0	,	any						;	# enable rank pair 1
+#	62		,	def_val_rp2_p0	,	any						;	# enable rank pair 2
+#	63		,	def_val_rp3_p0	,	any						;	# enable rank pair 3
+#	60:63	,	def_val_rp0_3_p0,	any						;	# enable rank pair0:3 on port 0
+#
+# ena_rank_pair[0:3]_p1
+#define def_ena_rp0_3_p1	= def_ena_rp0_p1 << 3 | def_ena_rp1_p1 << 2 | def_ena_rp2_p1 << 1 | def_ena_rp3_p1	;
+# 	60		,	def_ena_rp0_p1	,	any						;	# enable rank pair 0
+#	61		,	def_ena_rp1_p1	,	any						;	# enable rank pair 1
+#	62		,	def_ena_rp2_p1	,	any						;	# enable rank pair 2
+#	63		,	def_ena_rp3_p1	,	any						;	# enable rank pair 3
+#	60:63	,	def_ena_rp0_3_p1,	any						;	# enable rank pair0:3 on port 1
+
+# shorter test for DRAM gen
+#define def_is_empty	=	(ATTR_EFF_DRAM_GEN == ENUM_ATTR_EFF_DRAM_GEN_EMPTY)	;	# EMPTY, no dram?
+define def_is_ddr3	=	(ATTR_EFF_DRAM_GEN == ENUM_ATTR_EFF_DRAM_GEN_DDR3)	;	# DDR3 = 1
+define def_is_ddr4	=	(ATTR_EFF_DRAM_GEN == ENUM_ATTR_EFF_DRAM_GEN_DDR4)	;	# DDR4 = 2
+define def_not_ddr4	=	(ATTR_EFF_DRAM_GEN != ENUM_ATTR_EFF_DRAM_GEN_DDR4)	;	# not DDR4, (GEN != 2)
+
+# shorter test for DIMM type
+define def_is_cdimm		=	(ATTR_EFF_DIMM_TYPE == ENUM_ATTR_EFF_DIMM_TYPE_CDIMM)	;	# CDIMM = 0
+define def_is_rdimm		=	(ATTR_EFF_DIMM_TYPE == ENUM_ATTR_EFF_DIMM_TYPE_RDIMM)	;	# RDIMM = 1
+#define def_is_udimm	=	(ATTR_EFF_DIMM_TYPE == ENUM_ATTR_EFF_DIMM_TYPE_UDIMM)	;	# UDIMM = 2
+define def_is_lrdimm	=	(ATTR_EFF_DIMM_TYPE == ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM)	;	# LRDIMM = 3
+
+# shorter test for DRAM width
+define def_is_x4	=	(ATTR_EFF_DRAM_WIDTH == ENUM_ATTR_EFF_DRAM_WIDTH_X4)	;	# X4 = 0
+define def_is_x8	=	(ATTR_EFF_DRAM_WIDTH == ENUM_ATTR_EFF_DRAM_WIDTH_X8)	;	# X8 = 1
+#define def_is_x16	=	(ATTR_EFF_DRAM_WIDTH == ENUM_ATTR_EFF_DRAM_WIDTH_X16)	;	# X16 = 2
+#define def_is_x32	=	(ATTR_EFF_DRAM_WIDTH == ENUM_ATTR_EFF_DRAM_WIDTH_X32)	;	# X32 = 3
+
+# shorter test for burst length
+define def_is_bl8		=	(ATTR_EFF_DRAM_BL == ENUM_ATTR_EFF_DRAM_BL8)	;	# burst length 8 = (0)
+#define def_is_bl_otf	=	(ATTR_EFF_DRAM_BL == ENUM_ATTR_EFF_DRAM_OTF)	;	# burst length on the fly = (1)
+#define def_is_bl4		=	(ATTR_EFF_DRAM_BL == ENUM_ATTR_EFF_DRAM_BL4)	;	# burst length 4 = (2)
+
+# shorter test for Centaur driver impedance DQ / DQS
+define def_cdi_dqs_ohm24	=	(ATTR_EFF_CEN_DRV_IMP_DQ_DQS == ENUM_ATTR_EFF_CEN_DRV_IMP_DQ_DQS_OHM24)	;	# OHM24 = 0x18 (24)
+define def_cdi_dqs_ohm30	=	(ATTR_EFF_CEN_DRV_IMP_DQ_DQS == ENUM_ATTR_EFF_CEN_DRV_IMP_DQ_DQS_OHM30)	;	# OHM30 = 0x1E (30)
+define def_cdi_dqs_ohm34	=	(ATTR_EFF_CEN_DRV_IMP_DQ_DQS == ENUM_ATTR_EFF_CEN_DRV_IMP_DQ_DQS_OHM34)	;	# OHM34 = 0x22 (34)
+define def_cdi_dqs_ohm40	=	(ATTR_EFF_CEN_DRV_IMP_DQ_DQS == ENUM_ATTR_EFF_CEN_DRV_IMP_DQ_DQS_OHM40)	;	# OHM40 = 0x28 (40)
+
+# shorter test for Centaur driver impedance command
+define def_cdi_cmd_ohm15	=	(ATTR_EFF_CEN_DRV_IMP_CMD == ENUM_ATTR_EFF_CEN_DRV_IMP_CMD_OHM15)	;	# OHM15 = 0x0F (15)
+define def_cdi_cmd_ohm20	=	(ATTR_EFF_CEN_DRV_IMP_CMD == ENUM_ATTR_EFF_CEN_DRV_IMP_CMD_OHM20)	;	# OHM20 = 0x14 (20)
+define def_cdi_cmd_ohm30	=	(ATTR_EFF_CEN_DRV_IMP_CMD == ENUM_ATTR_EFF_CEN_DRV_IMP_CMD_OHM30)	;	# OHM30 = 0x1E (30)
+define def_cdi_cmd_ohm40	=	(ATTR_EFF_CEN_DRV_IMP_CMD == ENUM_ATTR_EFF_CEN_DRV_IMP_CMD_OHM40)	;	# OHM40 = 0x28 (40)
+
+# shorter test for Centaur driver impedance control
+define def_cdi_ctl_ohm15	=	(ATTR_EFF_CEN_DRV_IMP_CNTL == ENUM_ATTR_EFF_CEN_DRV_IMP_CNTL_OHM15)	;	# OHM15 = 0x0F (15)
+define def_cdi_ctl_ohm20	=	(ATTR_EFF_CEN_DRV_IMP_CNTL == ENUM_ATTR_EFF_CEN_DRV_IMP_CNTL_OHM20)	;	# OHM20 = 0x14 (20)
+define def_cdi_ctl_ohm30	=	(ATTR_EFF_CEN_DRV_IMP_CNTL == ENUM_ATTR_EFF_CEN_DRV_IMP_CNTL_OHM30)	;	# OHM30 = 0x1E (30)
+define def_cdi_ctl_ohm40	=	(ATTR_EFF_CEN_DRV_IMP_CNTL == ENUM_ATTR_EFF_CEN_DRV_IMP_CNTL_OHM40)	;	# OHM40 = 0x28 (40)
+
+# shorter test for Centaur receiver impedance DQ / DQS
+define def_cri_dqs_ohm15	=	(ATTR_EFF_CEN_RCV_IMP_DQ_DQS == ENUM_ATTR_EFF_CEN_RCV_IMP_DQ_DQS_OHM15)		;	# OHM15  = 0x0F  (15)
+define def_cri_dqs_ohm20	=	(ATTR_EFF_CEN_RCV_IMP_DQ_DQS == ENUM_ATTR_EFF_CEN_RCV_IMP_DQ_DQS_OHM20)		;	# OHM20  = 0x14  (20)
+define def_cri_dqs_ohm30	=	(ATTR_EFF_CEN_RCV_IMP_DQ_DQS == ENUM_ATTR_EFF_CEN_RCV_IMP_DQ_DQS_OHM30)		;	# OHM30  = 0x1E  (30)
+define def_cri_dqs_ohm40	=	(ATTR_EFF_CEN_RCV_IMP_DQ_DQS == ENUM_ATTR_EFF_CEN_RCV_IMP_DQ_DQS_OHM40)		;	# OHM40  = 0x28  (40)
+define def_cri_dqs_ohm48	=	(ATTR_EFF_CEN_RCV_IMP_DQ_DQS == ENUM_ATTR_EFF_CEN_RCV_IMP_DQ_DQS_OHM48)		;	# OHM48  = 0x30  (48)
+define def_cri_dqs_ohm60	=	(ATTR_EFF_CEN_RCV_IMP_DQ_DQS == ENUM_ATTR_EFF_CEN_RCV_IMP_DQ_DQS_OHM60)		;	# OHM60  = 0x3C  (60)
+define def_cri_dqs_ohm120	=	(ATTR_EFF_CEN_RCV_IMP_DQ_DQS == ENUM_ATTR_EFF_CEN_RCV_IMP_DQ_DQS_OHM120)	;	# OHM120 = 0x78 (120)
+#ddr4?  80 160 240
+#define def_cri_dqs_ohm80	=	(ATTR_EFF_CEN_RCV_IMP_DQ_DQS == ENUM_ATTR_EFF_CEN_RCV_IMP_DQ_DQS_OHM80)		;	# OHM80  = 0x50  (80)
+#define def_cri_dqs_ohm160	=	(ATTR_EFF_CEN_RCV_IMP_DQ_DQS == ENUM_ATTR_EFF_CEN_RCV_IMP_DQ_DQS_OHM160)	;	# OHM160 = 0xA0 (160)
+#define def_cri_dqs_ohm240	=	(ATTR_EFF_CEN_RCV_IMP_DQ_DQS == ENUM_ATTR_EFF_CEN_RCV_IMP_DQ_DQS_OHM240)	;	# OHM240 = 0xF0 (240)
+
+# SIMPLIFY
+# ================================================================================
+# test if AL is disabled
+define def_AL_ena	= (ATTR_EFF_DRAM_AL != 0);		#!! need to fix if AL == 0 then formulas below have problems
+
+# for calculating FW_RD_WR delay...  NOTE: AL could be disabled(=0)
+define def_TWTR_PLUS_8	= (ATTR_EFF_DRAM_TWTR + 8)	;
+define def_TRTP_PLUS_AL	= (ATTR_EFF_DRAM_TRTP + ATTR_EFF_DRAM_CL - ATTR_EFF_DRAM_AL)	;
+
+# for ODT on/off time calculation
+# 2tCK = DDR4 feature for extended write preamble, should be defined by attribute if used.
+# tODTLON/OFF	DDR3=CWL+AL-2, DDR4=CWL+AL-3 if using 2tCK, otherwise same as DDR3 formula
+#define def_AL		= ((def_AL_ena)*(ATTR_EFF_DRAM_CL - ATTR_EFF_DRAM_AL));
+#define def_tODTL_DDR3		= (ATTR_EFF_DRAM_CWL + def_AL - 2)	;	# DDR3
+# should not try to do the defines above...
+define def_tODTL_DDR3		= (ATTR_EFF_DRAM_CWL + ATTR_EFF_DRAM_CL - ATTR_EFF_DRAM_AL - 2)	;	# DDR3
+define def_tODTL_DDR4		= (ATTR_EFF_DRAM_CWL + ATTR_EFF_DRAM_CL - ATTR_EFF_DRAM_AL - 3)	;	# DDR4 & 2tCK
+
+# def_1PR 			= 1000*1000 / (FREQ / 2)
+# def_dqs_offset 	= (10 + ((def_p2p_jitter / 2) / def_1PR) + 1)	# +1 for ceiling FN
+#define def_p2p_jitter		=	240										;	# DQS peak to peak jitter in ps
+define def_p2p_jitter		=	2600										;	# DQS peak to peak jitter in ps
+define def_dqs_offset		=	(11 + ((def_p2p_jitter * CEN.ATTR_MSS_FREQ) / 4000000))	;
+
+#---------------------------------------------------------------------------------
+
+# =====================================================================================================
+# PHY ADDRESSING
+#
+# 0x800Pyyyy03011M3F	=	base address, P=port [0:1], M=MBA {4=MBA01, 8=MBA23},
+#
+# yyyy=16 bit PHY address {	bits  0:1 = block (00=DP18, 01=ADR, 10=AD32S, 11=Control);
+# 							bits  2:5 = instance select, '1111'=broadcast;
+# 							bits  6:7 = rank pair if applicable (00,01,10,11);
+# 							bit     8 = rank pair broadcast bit
+# 							bits 9:15 = register address within block
+#
+# =====================================================================================================
+# *****************************************************************************************************
+# =====================================================================================================
+# !! following neo_databook_072911.pdf reset sequence section 3.11.2, pg 116
+# mainly done in /afs/awd/projects/eclipz/KnowledgeBase/eclipz/chips/
+# centaur/working/procedures/ipl/fapi/mss_ddr_phy_reset.C
+#
+# should be these values after running the procedure...
+# PC_CONFIG0									= 0x0000 (DDR3) or 0x1202 (DDR4)
+# ADR PLL/Vreg Config 0 					    = 0x0000
+# ADR PLL/Vreg Config 1							= 0x0040
+# DP18 PLL/Vreg Config 0					 	= 0x0000
+# DP18 PLL/Vreg Config 1 						= 0x0040
+# DPHY01.DDRPHY_ADR_SYSCLK_CNTL_PR_P0_ADR32S0 	= 0x8020
+# DPHY01.DDRPHY_DP18_SYSCLK_PR_P0_0				= 0x8020
+# DPHY01_DDRPHY_PC_IO_PVT_FET_CONTROL_P0		= 0x0010
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# DPHY01 PC IO PVT N/P FET Driver Control		!! need to set this?
+#
+# set to 0x0008, then 0x0000
+#
+#	[01:23]							[0:1]
+# DPHY01_DDRPHY_PC_IO_PVT_FET_CONTROL_P0		0x8000c0140301143f
+# PHYW.PHYX.SYNTHX.D3SIDEA.PCX.REG20_L2(0:12)
+#
+# 48:52	0	PVTP			RW	PFET Driver PVTP value to send to all output drivers when PVT_OVERRIDE is set.
+# 53:57	0	PVTN			RW	NFET Driver PVTN value to send to all output drivers when PVT_OVERRIDE is set.
+# 58	0	PVT_OVERRIDE	RW	'1'b - All drivers are updated with the PVTP and PVTN values in this register imeadiately.
+# 								'0'b - All drivers are updated with the PVTP and PVTN values from the impedance calibration state machine.
+# 59	0	ENABLE_ZCAL		RW	'1'b - Enable Impedance Controller.
+# 								'0'b - Disable Impedance Controller.
+# 60	0	RESET_ZCAL		RW	Reset Impedance Controller. The value of this field is driven to the zcntl_reset_o
+# 								output for optional connection to the reset of an Impedance Controller.
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# ---------------------------------------------------------------------------------------
+# Pervasive FIR registers
+#
+# PHY01_DDRPHY_FIR_ACTION0_REG	default=0	0x800200960301143f
+# PHY01_DDRPHY_FIR_ACTION1_REG	default=0	0x800200970301143f
+# PHY01_DDRPHY_FIR_MASK_REG		default=0	0x800200930301143f
+# PHY01_DDRPHY_FIR_REG			default=0	0x800200900301143f
+# PHY01_DDRPHY_FIR_WOF_REG		default=0	0x800200980301143f
+#
+
+# ---------------------------------------------------------------------------------------
+# PC Config0
+#
+# ddr3=0x0000, ddr4=0x1202	# !! set in ddr_phy_reset
+#
+# DPHY01.DDRPHY_PC_CONFIG0_P[0:1] from (alias spydef)
+# PHYW.PHYX.SYNTHX.D3SIDEA.PCX.REG12_L2			0x00C	0x8000c00c0301143f
+scom 0x800(0,1)C00C0301143F {	# _P[0:1]
+	bits	,	scom_data	,	expr			;
+	# Protocol, 0=DDR3, 1=DDR4, 2=RLDRAM2 CIO, 4=RLDRAM3
+	48:51	,	0b0001		,	(def_is_ddr4)	;	# ATTR_EFF_DRAM_GEN=2=DDR4
+	48:51	,	0b0000		,	(def_not_ddr4)	;	# ATTR_EFF_DRAM_GEN=1=DDR3 or 0=empty
+	52		,	0b0			,	any				;	# 1=DATA_MUX4_1MODE, 0=2:1 data mux
+	53		,	0b0			,	any				;	# Split access mode(on primary rank) enable
+	54		,	0b1			,	(def_is_ddr4)	;	# DDR4 cmd/addr signal reduction enable
+	54		,	0b0			,	(def_not_ddr4)	;	# disable for DDR3
+	55		,	0b0			,	any				;	# SysClK 2x Mem Internal CLK
+	56		,	0b0			,	any				;	# Rank Override enable
+	57:59	,	0b000		,	any				;	# Rank Override value
+	60		,	0b0			,	any				;	# low latency (ERS Mode), 1=force off, 0=auto
+#	61		,	0b0			,	any				;	# reserved
+	62		,	0b1			,	(def_is_ddr4)	;	# enable DDR4_VLEVEL_BANK_GROUP
+	62		,	0b0			,	(def_not_ddr4)	;	# disable for DDR3
+#	63		,	0b0			,	any				;	# reserved
+}
+#
+# ---------------------------------------------------------------------------------------
+# PC_CONFIG1
+#
+# DPHY01.DDRPHY_PC_CONFIG1_P0 from (alias spydef)
+scom 0x800(0,1)C00D0301143F {
+	bits	,	scom_data	,	expr								;
+# 	# WLO is normally 0 except for RDIMM (RCD) configurations in which case it's set to 1
+ 	48:51	,	0b0001		,	(def_is_rdimm)						;	# RDIMM
+ 	48:51	,	0b0000		,	any									;	# WLO=WRITE_LATENCY_OFFSET (2's complement -8 to 7)
+# 	# 9.4.12.2	RLO = READ_LATENCY_OFFSET (2's complement -8 to 7) {0=CDIMM, 1=RDIMM, 2=LRDIMM}
+ 	52:55	,	0b0000		,	(def_is_cdimm)						;	# CDIMM
+ 	52:55	,	0b0001		,	(def_is_rdimm)						;	# RDIMM
+ 	52:55	,	0b0010		,	(def_is_lrdimm)						;	# LRDIMM
+ 	56		,	0b0			,	any									;	# MEMCTL_CIC_FAST
+ 	57		,	0b0			,	any									;	# MEMCTL_CTRN_IGNORE
+ 	58		,	0b0			,	any									;	# DISABLE_MEMCTL_CAL
+# 	# 59:61 , 000=DDR3/DDR4 CDIMM, DDR3 (001=RDIMM, 011=LRDIMM), DDR4 (101=RDIMM, 111=LRDIMM)
+ 	59:61	,	0b000		,	(def_is_cdimm)						;	# CDIMM
+ 	59:61	,	0b001		,	((def_is_rdimm) && (def_is_ddr3))	;	# DDR3 RDIMM
+ 	59:61	,	0b011		,	((def_is_lrdimm) && (def_is_ddr3))	;	# DDR3 LRDIMM
+ 	59:61	,	0b101		,	((def_is_rdimm) && (def_is_ddr4))	;	# DDR4 RDIMM
+ 	59:61	,	0b111		,	((def_is_lrdimm) && (def_is_ddr4))	;	# DDR4 LRDIMM
+#	62:63	,	0b00		,	any									;	# reserved
+ }
+
+# ---------------------------------------------------------------------------------------
+# ADR PLL VREG Config0		default=0	!! register definition for TUNEF not correct for '111b'?
+#
+# 48:50 PLL_TUNE (000=66.6uA, 111=20uA),
+# 51:53	PLL_TUNECP (000=gain 1, 111=gain 8)
+# 54:59	PLL_TUNEF, RC for 2nd order filter
+# 60:61 PLL_TUNEVCO
+# 62:63 PLL_PLLXTR, extra bits for later expansion
+#
+# DPHY01_DDRPHY_ADR_PLL_VREG_CONFIG_0_P0_ADR32S0	0x030	0x800080300301143f
+# PHYW.PHYX.ADRNEST.ADR32X0.HC.ADRLOGM.CONTROL.TWRAP.P_REG_30_L2
+#scom 0x8000(80,84)300301143F {		# PHY01 Port0 ADR32S[0:1]
+scom 0x800(0,1)BC300301143F {		# PHY01 Port[0:1] broadcast ADR32S[0:1]
+	bits	,	scom_data	,	expr						;
+# 	# 0b111 000 111011 00 00	20uA, gain 1, SE(200 ohms, 24pF, 3pF), VCO=low
+ 	48:63	,	0xE3B0		,	((CEN.ATTR_MSS_FREQ/2) < 600)	;	# 300-599.9 MHz, < 1200 MT/s
+
+#	# 0b010 000 111000 00 00	40uA, gain 1, SE(200 ohms, 16pF, 2pF), VCO=low
+ 	48:63	,	0x4380		,	((CEN.ATTR_MSS_FREQ/2) < 1000)	;	# 600-999.9 MHz, 1200-2000 MT/s
+
+# 	# 0b100 011 111011 01 00	28.57uA, gain 4, SE(200 ohms, 24pF, 3pF), VCO=high
+ 	48:63	,	0x8FB4		,	((CEN.ATTR_MSS_FREQ/2) >= 1000)	;	# 1000-1066 MHz, >=2000 MT/s
+}
+
+# ---------------------------------------------------------------------------------------
+# ADR PLL VREG Config1		default=0	!! doc on section has some inconsistencies
+#
+# CEN.ATTR_MSS_VOLT			     [0:1]   [0:1]
+# DPHY01_DDRPHY_ADR_PLL_VREG_CONFIG_1_P0_ADR32S0	0x031	0x800080310301143f
+# PHYW.PHYX.ADRNEST.ADR32X0.HC.ADRLOGM.CONTROL.TWRAP.P_REG_31_L2
+#scom 0x8000(80,84)310301143f {		# PHY01 Port0 ADR32S[0:1]
+scom 0x800(0,1)BC310301143f {		# PHY01 Port[0:1] broadcast ADR32S[0:1]
+	bits	,	scom_data	,	expr												;
+	# PLL_TUNETDIV(0:2) PLLTESTOUT (000=logic 1, 001=MDIVOUT div by 64, 01x=MDIVOUT div by 1, 1xx=dsabled, logic 0)
+	48:50	,	0b100		,	any													;	# disabled
+
+	# !! PLL_TUNEMDIV(0:1) Feedback divider (00=1, 01=2, 1x=reserved), "must be set to this value"
+#	51:52	,	0b00		,	any													;	# workaround?
+	51:52	,	0b00		,	((CEN.ATTR_MSS_FREQ/2) < 800)							;	# < 1600 MT/s
+	51:52	,	0b01		,	((CEN.ATTR_MSS_FREQ/2) >= 800)							;	# >=1600 MT/s
+
+	# PLL_TUNEATST (0=HiZ, 1=CMFB internal) - HiZ, "for all frequencies 0 is required"
+	53		,	0b0			,	any													;	# HiZ
+
+	# VREG_RANGE(0:1) (00=1.50V, 01=1.35V, 11=1.20V)
+	# !! Need to change if using 1.25V since overlap occurs!
+ 	54:55	,	0b11		,	CEN.ATTR_MSS_VOLT <= 1271								;	# set to 1.2V
+ 	54:55	,	0b01		,	((CEN.ATTR_MSS_VOLT > 1271) && (CEN.ATTR_MSS_VOLT <= 1421))	;	# set to 1.35V
+ 	54:55	,	0b00		,	CEN.ATTR_MSS_VOLT > 1421								;	# set to 1.5V
+
+	# VREG_VREGSPARE, Extra pins for later expansion.	should be put to 0
+	56		,	0b0			,	any													;
+
+	# VREG_VCCTUNE(0:1) (00=850mV, 01=855mV, 10=860mV, 11=865mV)
+# !recent
+	57:58	,	0b00		,	(def_is_sim)										;	# match dials
+#	57:58	,	0b10		,	any													;	# standard operating point
+
+	# INTERP_SIG_SLEW(0:3), Interpolated Signal Slew (PRSTCH pins on ADR16)				clk freq
+#	!! Temp workaround for attribute
+ 	59:62	,	0b0000		,	any			;	# match dials
+	59:62	,	0b1001		,	(CEN.ATTR_MSS_FREQ > 2260)								;	# 2400
+	59:62	,	0b1001		,	((CEN.ATTR_MSS_FREQ > 1993) && (CEN.ATTR_MSS_FREQ <= 2260))	;	# 2133
+	59:62	,	0b0110		,	((CEN.ATTR_MSS_FREQ > 1732) && (CEN.ATTR_MSS_FREQ <= 1993))	;	# 1866
+	59:62	,	0b1010		,	((CEN.ATTR_MSS_FREQ > 1460) && (CEN.ATTR_MSS_FREQ <= 1732))	;	# 1600
+	59:62	,	0b0010		,	((CEN.ATTR_MSS_FREQ > 1200) && (CEN.ATTR_MSS_FREQ <= 1460))	;	# 1333
+	59:62	,	0b1100		,	((CEN.ATTR_MSS_FREQ > 1013) && (CEN.ATTR_MSS_FREQ <= 1200))	;	# 1066
+	59:62	,	0b0100		,	((CEN.ATTR_MSS_FREQ > 933) && (CEN.ATTR_MSS_FREQ <= 1113))	;	#  800
+	59:62	,	0b1000		,	(CEN.ATTR_MSS_FREQ <= 933)								;	#  666
+
+	# ANALOG_WRAPON, Wrap Data control to attached ADR16(s)/ADR12(s)
+	63		,	0b0			,	any													;
+}
+
+# ---------------------------------------------------------------------------------------
+# DP18 PLL Config0			default=0
+#
+# Needed?		 [0:1][0:1][0:4]
+# DPHY01_DDRPHY_DP18_PLL_CONFIG0_P0_0	0x076		0x800000760301143f
+# PHYW.PHYX.GEN_DP#0.DPX.HC.D3PHY_WRDP18WRAP.D3PHY_WRDP18CNTL_MAC.DDRPHY_DP18_PLL_CONFIG0_L2
+# scom 0x8000(00,04,08,0C,10)760301143f {	# CONFIG0_P0_[0:4]
+scom 0x800(0,1)3C760301143F {			# CONFIG0_P[0:1] broadcast [0:4]
+	bits	,	scom_data	,	expr						;
+ 	# 0b111 000 111011 00 00	20uA, gain 1, SE(200 ohms, 24pF, 3pF), VCO=low
+ 	48:63	,	0xE3B0		,	((CEN.ATTR_MSS_FREQ/2) < 600)	;	# 300-599.9 MHz, < 1200 MT/s
+
+ 	# 0b010 000 111000 00 00	40uA, gain 1, SE(200 ohms, 16pF, 2pF), VCO=low
+ 	48:63	,	0x4380		,	((CEN.ATTR_MSS_FREQ/2) < 1000)	;	# 600-999.9 MHz, 1200-2000 MT/s
+
+	# 0b100 011 111011 01 00	28.57uA, gain 4, SE(200 ohms, 24pF, 3pF), VCO=high
+ 	48:63	,	0x8FB4		,	((CEN.ATTR_MSS_FREQ/2) >= 1000)	;	# 1000-1066 MHz, >=2000 MT/s
+}
+
+# ---------------------------------------------------------------------------------------
+# DP18 PLL Config1			default=0
+#
+# DPHY01_DDRPHY_DP18_PLL_CONFIG1_P0_0	0x077		0x800000770301143f
+# PHYW.PHYX.GEN_DP#0.DPX.HC.D3PHY_WRDP18WRAP.D3PHY_WRDP18CNTL_MAC.DDRPHY_DP18_PLL_CONFIG1_L2
+# scom 0x8000(00,04,08,0C,10)770301143f {	# CONFIG1_P0_[0:4]
+scom 0x800(0,1)3C770301143F {	# CONFIG1_P[0:1] broadcast [0:4]
+	bits	,	scom_data	,	expr												;
+	# PLL_TUNETDIV(0:2) PLLTESTOUT (all freq 1xx required)
+	48:50	,	0b100		,	any													;	# disabled
+
+	# !! PLL_TUNEMDIV(0:1) Feedback divider (00=1, 01=2, 1x=reserved), "must be set to this value"
+#	51:52	,	0b00		,	any													;	# workaround?
+	51:52	,	0b00		,	((CEN.ATTR_MSS_FREQ/2) < 800)							;	# < 1600 MT/s
+	51:52	,	0b01		,	((CEN.ATTR_MSS_FREQ/2) >= 800)							;	# >=1600 MT/s
+
+	# PLL_TUNEATST (0=HiZ, 1=CMFB internal) - HiZ, "for all frequencies 0 is required"
+	53		,	0b0			,	any													;	# HiZ
+
+	# VREG_RANGE(0:1) (00=1.50V, 01=1.35V, 11=1.20V)
+	# !! Need to change if using 1.25V since overlap occurs!
+ 	54:55	,	0b11		,	CEN.ATTR_MSS_VOLT <= 1271								;	# set to 1.2V
+ 	54:55	,	0b01		,	((CEN.ATTR_MSS_VOLT > 1271) && (CEN.ATTR_MSS_VOLT <= 1421))	;	# set to 1.35V
+ 	54:55	,	0b00		,	CEN.ATTR_MSS_VOLT > 1421								;	# set to 1.5V
+
+	# CE0DLTVCCA
+	56		,	0b0			,	any													;	# must be 0
+
+	# VREG_VCCTUNE(0:1) (00=850mV, 01=855mV, 10=860mV, 11=865mV)
+#	!recent
+	57:58	,	0b00		,	(def_is_sim)										;	# match dials
+#	57:58	,	0b10		,	any													;	# standard = 860
+
+	59		,	0b0			,	any													;	# CE0DLTVCCD1, must be 0
+	60		,	0b0			,	any													;	# CE0DLTVCCD2, must be 0
+	61		,	0b0			,	any													;	# S0INSDLYTAP, must be 0
+	62		,	0b0			,	any													;	# S1INSDLYTAP, must be 0
+#	63		,	0b0			,	any													;	# Reserved
+}
+
+# freq ranges
+#	 Low   -5%	 Nom   +5%	High
+#	   0   633	 666   700	 730		# not used
+#	 731   760	 800   840	 933		# not used
+#  -------------------------------
+#	 933  1013  1066  1120	1200
+#	1201  1266  1333  1400	1460
+#	1461  1520  1600  1680	1732
+#	1733  1773  1866  1960	1993
+#	1994  2026  2133  2240	2260
+#	2261  2280  2400  2520	++++
+# freq ranges
+#	 Low   -5%	 Nom   +5%	High
+#	 933  1013  1066  1120	1199
+#	1200  1266  1333  1400	1459
+#	1460  1520  1600  1680	1731
+#	1732  1773  1866  1960	1992
+#	1993  2026  2133  2240	2259
+#	2260  2280  2400  2520	++++
+
+# ---------------------------------------------------------------------------------------
+# DQ_DQS Slew rate setting
+#
+#	 CEN.ATTR_MSS_FREQ
+#	 ATTR_EFF_CEN_SLEW_RATE_DQ_DQS	[0:15]	0=slow, 15=fast
+#
+#	[01:23]						  [0:1][0:4]
+# DPHY01_DDRPHY_DP18_IO_TX_CONFIG0_P0_0		0x075	0x800000750301143f
+# PHYW.PHYX.GEN_DP#1.DPX.HC.D3PHY_WRDP18WRAP.D3PHY_WRDP18CNTL_MAC.DDRPHY_DP18_IO_TX_CONFIG0_L2
+#scom 0x8000(00,04,08,0C,10)750301143F {	# CONFIG0_P0_[0:4]
+scom 0x800(0,1)3C750301143F {				# CONFIG0_P[0:1] broadcast [0:4]
+	bits	,	scom_data	,	expr												;
+	# INTERP_SIG_SLEW for phase rotator
+ 	48:51	,	0b1001		,	(CEN.ATTR_MSS_FREQ > 2260)								;	# 2400
+ 	48:51	,	0b1001		,	((CEN.ATTR_MSS_FREQ > 1993) && (CEN.ATTR_MSS_FREQ <= 2260))	;	# 2133
+ 	48:51	,	0b0110		,	((CEN.ATTR_MSS_FREQ > 1732) && (CEN.ATTR_MSS_FREQ <= 1993))	;	# 1866
+ 	48:51	,	0b1010		,	((CEN.ATTR_MSS_FREQ > 1460) && (CEN.ATTR_MSS_FREQ <= 1732))	;	# 1600
+ 	48:51	,	0b0010		,	((CEN.ATTR_MSS_FREQ > 1200) && (CEN.ATTR_MSS_FREQ <= 1460))	;	# 1333
+ 	48:51	,	0b1100		,	(CEN.ATTR_MSS_FREQ <= 1200)								;	# 1066
+
+	# Post Cursor, tap coefficient for FFE, 0=no equalization, will be taken out for DD1?
+	52:55	,	0b0000		,	any													;
+
+	#  choices... 0=2.83, 1=3.35, 2=4.35, 3=5.16, 4=6.16, 5=6.50 V/ns, 6..F ~180mV/step
+	56:59	,	0b0000		,	(ATTR_EFF_CEN_SLEW_RATE_DQ_DQS == 0)				;	# SLEW_CTL, slowest
+	56:59	,	0b0001		,	(ATTR_EFF_CEN_SLEW_RATE_DQ_DQS == 1)				;	# faster .
+	56:59	,	0b0010		,	(ATTR_EFF_CEN_SLEW_RATE_DQ_DQS == 2)				;	# faster ..
+	56:59	,	0b0011		,	(ATTR_EFF_CEN_SLEW_RATE_DQ_DQS == 3)				;	# faster ...
+	56:59	,	0b0100		,	(ATTR_EFF_CEN_SLEW_RATE_DQ_DQS == 4)				;	# faster ....
+	56:59	,	0b0101		,	(ATTR_EFF_CEN_SLEW_RATE_DQ_DQS == 5)				;	# faster .....
+	56:59	,	0b0110		,	(ATTR_EFF_CEN_SLEW_RATE_DQ_DQS == 6)				;	# faster ......
+	56:59	,	0b0111		,	(ATTR_EFF_CEN_SLEW_RATE_DQ_DQS == 7)				;	# faster .......
+	56:59	,	0b1000		,	(ATTR_EFF_CEN_SLEW_RATE_DQ_DQS == 8)				;	# faster ........
+	56:59	,	0b1001		,	(ATTR_EFF_CEN_SLEW_RATE_DQ_DQS == 9)				;	# faster .........
+	56:59	,	0b1010		,	(ATTR_EFF_CEN_SLEW_RATE_DQ_DQS == 10)				;	# faster ..........
+	56:59	,	0b1011		,	(ATTR_EFF_CEN_SLEW_RATE_DQ_DQS == 11)				;	# faster ...........
+	56:59	,	0b1100		,	(ATTR_EFF_CEN_SLEW_RATE_DQ_DQS == 12)				;	# faster ............
+	56:59	,	0b1101		,	(ATTR_EFF_CEN_SLEW_RATE_DQ_DQS == 13)				;	# faster .............
+	56:59	,	0b1110		,	(ATTR_EFF_CEN_SLEW_RATE_DQ_DQS == 14)				;	# faster ..............
+	56:59	,	0b1111		,	(ATTR_EFF_CEN_SLEW_RATE_DQ_DQS == 15)				;	# fastest...............
+#	60:63	,	0b0000		,	any													;	# reserved
+}
+
+# ---------------------------------------------------------------------------------------
+# Input Termination impedance		# pg 415 Cen_WB_1.13
+#
+#	 ATTR_EFF_CEN_RCV_IMP_DQ_DQS		15,20,30,40,48,60,120
+#
+#	!! settings currently for 30, 40, 60, 80, 120, 160, 240
+#	missing 15, 20, 48, added 160, 240
+#
+# 48:55 = N/P FET slices (0-7), 56:59 = N/P FET FFE slices (0-4)
+# 2 slices of 480 (FFE) = 1 slice of 240 (non-FFE)
+#
+# for DDR4 where VDDR (POD)
+# DDR4 ohms = 1 / ((1 / (total 240 slices / 240)) + (1 / (total 480 slices / 480)))
+#
+# for DDR3 VDDR/2
+# DDR3 ohms = (1 / ((1 / (total 240 slices / 240)) + (1 / (total 480 slices / 480)))) / 2
+#
+# [01:23]				 [N:P]   [0:1][0:4]
+# DPHY01_DDRPHY_DP18_IO_TX_NFET_TERM_P0_0	0x07A	0x8000007a0301143f
+# PHYW.PHYX.GEN_DP#0.DPX.HC.D3PHY_WRDP18WRAP.D3PHY_WRDP18CNTL_MAC.DDRPHY_DP18_IO_TX_NFET_TERM_L2(0:11)
+#scom 0x8000(00,04,08,0C,10)7A0301143f {	# NFET_TERM_P0_[0:4]	broadcast
+scom 0x800(0,1)3C7A0301143f {				# NFET_TERM_P[0:1]_[0:4]	broadcast
+	bits	,	scom_data	,	expr								;
+	# 						for DDR3 = 1				ohms			# ohm/slices
+	48:59	,	0xFF0	,	((def_is_ddr3) && (def_cri_dqs_ohm15))	;	# 240/8, 480/0
+	48:59	,	0x7E0	,	((def_is_ddr3) && (def_cri_dqs_ohm20))	;	# 240/6, 480/0
+	48:59	,	0x182	,	((def_is_ddr3) && (def_cri_dqs_ohm48))	;	# 240/2, 480/1
+
+	48:59	,	0x03F	,	((def_is_ddr3) && (def_cri_dqs_ohm30))	;	# 240/2, 480/4
+	48:59	,	0x01F	,	((def_is_ddr3) && (def_cri_dqs_ohm40))	;	# 240/1, 480/4
+	48:59	,	0x00F	,	((def_is_ddr3) && (def_cri_dqs_ohm60))	;	# 240/0, 480/4
+	48:59	,	0x007	,	((def_is_ddr3) && (ATTR_EFF_CEN_RCV_IMP_DQ_DQS == 80))	;	# 240/0, 480/3
+	48:59	,	0x003	,	((def_is_ddr3) && (def_cri_dqs_ohm120))	;	# 240/0, 480/2
+# Joe Iadanza's spreadsheet (from Saravana note 3/28/12 11:20A) has this...
+# 	48:59	,	0x3C0	,	((def_is_ddr3) && (def_cri_dqs_ohm30))	;	# 240/4, 480/0
+# 	48:59	,	0x186	,	((def_is_ddr3) && (def_cri_dqs_ohm40))	;	# 240/2, 480/2
+# 	48:59	,	0x180	,	((def_is_ddr3) && (def_cri_dqs_ohm60))	;	# 240/2, 480/0
+# 	48:59	,	0x102	,	((def_is_ddr3) && (ATTR_EFF_CEN_RCV_IMP_DQ_DQS == 80))	;	# 240/1, 480/1
+# 	48:59	,	0x100	,	((def_is_ddr3) && (def_cri_dqs_ohm120))	;	# 240/1, 480/0
+#
+#   !! need to find out if supporting POD Mode Termination (DDR4 only?)
+#   if no, then remove def_is_ddr3 from statements above
+#	if yes, then leave above statements and remove commented section below.
+#
+#	Note 6) For POD Mode Termination, the slice vector is only applied to the PFET portion of the Driver (High).
+#	The	NFET portion of the Driver uses vector 0,0 for high impedance
+#
+#	48:59	,	0x03F	,	((def_is_ddr4) && (def_cri_dqs_ohm60))	;	# 240/2, 480/4
+#	48:59	,	0x01F	,	((def_is_ddr4) && (ATTR_EFF_CEN_RCV_IMP_DQ_DQS == 80))	;	# 240/1, 480/4
+#	48:59	,	0x00F	,	((def_is_ddr4) && (def_cri_dqs_ohm120))	;	# 240/0, 480/4
+#	48:59	,	0x007	,	((def_is_ddr4) && (ATTR_EFF_CEN_RCV_IMP_DQ_DQS == 160))	;	# 240/0, 480/3
+#	48:59	,	0x003	,	((def_is_ddr4) && (ATTR_EFF_CEN_RCV_IMP_DQ_DQS == 240))	;	# 240/0, 480/2
+#							for DDR4 will catch DDR3 & not valid imp
+	48:59	,	0x000	,	any										;	# 240/0, 480/0
+}
+# DPHY01_DDRPHY_DP18_IO_TX_PFET_TERM_P0_0	0x07B	0x8000007B0301143f
+#scom 0x8000(00,04,08,0C,10)7B0301143f {	# PFET_TERM_P0_[0:4]
+scom 0x800(0,1)3C7B0301143f {				# PFET_TERM_P[0:1]_[0:4]	broadcast
+	bits	,	scom_data,	expr									;
+	# 						for DDR3 = 1		 		  ohms			# ohm/slices
+	48:59	,	0x03F	,	((def_is_ddr3) && (def_cri_dqs_ohm30))	;	# 240/2, 480/4
+	48:59	,	0x01F	,	((def_is_ddr3) && (def_cri_dqs_ohm40))	;	# 240/1, 480/4
+	48:59	,	0x00F	,	((def_is_ddr3) && (def_cri_dqs_ohm60))	;	# 240/0, 480/4
+	48:59	,	0x007	,	((def_is_ddr3) && (ATTR_EFF_CEN_RCV_IMP_DQ_DQS == 80))	;	# 240/0, 480/3
+	48:59	,	0x003	,	((def_is_ddr3) && (def_cri_dqs_ohm120))	;	# 240/0, 480/2
+	#						for DDR4 = 2
+	48:59	,	0x03F	,	((def_is_ddr4) && (def_cri_dqs_ohm60))	;	# 240/2, 480/4
+	48:59	,	0x01F	,	((def_is_ddr4) && (ATTR_EFF_CEN_RCV_IMP_DQ_DQS == 80))	;	# 240/1, 480/4
+#	48:59	,	0x01F	,	((def_is_ddr4) && (def_cri_dqs_ohm80))	;	# 240/1, 480/4
+	48:59	,	0x00F	,	((def_is_ddr4) && (def_cri_dqs_ohm120))	;	# 240/0, 480/4
+	48:59	,	0x007	,	((def_is_ddr4) && (ATTR_EFF_CEN_RCV_IMP_DQ_DQS == 160))	;	# 240/0, 480/3
+	48:59	,	0x003	,	((def_is_ddr4) && (ATTR_EFF_CEN_RCV_IMP_DQ_DQS == 240))	;	# 240/0, 480/2
+	48:59	,	0x000	,	any										;	# 240/0, 480/0
+# Joe Iadanza's spreadsheet (from Saravana note 3/28/12 11:20A) has this...
+# 	48:59	,	0x3C0	,	((def_is_ddr4) && (def_cri_dqs_ohm60))	;	# 240/4, 480/0
+# 	48:59	,	0x186	,	((def_is_ddr4) && (ATTR_EFF_CEN_RCV_IMP_DQ_DQS == 80))	;	# 240/2, 480/2
+# 	48:59	,	0x180	,	((def_is_ddr4) && (def_cri_dqs_ohm120))	;	# 240/2, 480/0
+# 	48:59	,	0x---	,	((def_is_ddr4) && (ATTR_EFF_CEN_RCV_IMP_DQ_DQS == 160))	;	# 240/?, 480/?
+# 	48:59	,	0x100	,	((def_is_ddr4) && (ATTR_EFF_CEN_RCV_IMP_DQ_DQS == 240))	;	# 240/1, 480/0
+# 	48:59	,	0x000	,	any										;	# 240/0, 480/0
+}
+
+# ---------------------------------------------------------------------------------------
+# Output(DQ/DQS) driver impedance settings
+#
+#  ATTR_EFF_CEN_DRV_IMP_DQ_DQS	24, 30, 34, 40
+#
+#  [01:23]				 [N:P]	[0:1][0:4]
+# DPHY01_DDRPHY_DP18_IO_TX_NFET_SLICE_P0_0	0x078	0x800000780301143f
+# PHYW.PHYX.GEN_DP#0.DPX.HC.D3PHY_WRDP18WRAP.D3PHY_WRDP18CNTL_MAC.DDRPHY_DP18_IO_TX_NFET_SLICE_L2(0:11)
+#scom 0x800(0,1)3C780301143f {	# NFET_SLICE_P[0:1]_[0:4]	broadcast
+scom 0x800(0,1)3C7(8,9)0301143F {	# [N:P]FET_SLICE_P[0:1]_[0:4]	broadcast
+	bits	,	scom_data	,	expr				;	# ohm/slices
+	48:59	,	0xFFF		,	(def_cdi_dqs_ohm24)	;	# 240/8, 480/4
+	48:59	,	0x3FF		,	(def_cdi_dqs_ohm30)	;	# 240/6, 480/4
+	48:59	,	0x1FF		,	(def_cdi_dqs_ohm34)	;	# 240/5, 480/4
+	48:59	,	0x0FF		,	(def_cdi_dqs_ohm40)	;	# 240/4, 480/4
+	48:59	,	0x000		,	any					;	# 240/0, 480/0
+}
+# DPHY01_DDRPHY_DP18_IO_TX_PFET_SLICE_P0_0	0x079	0x800000790301143f
+#scom 0x800(0,1)3C790301143f {	# PFET_SLICE_P[0:1]_[0:4]	broadcast
+#	bits	,	scom_data,	expr;
+#	48:55	,	0xFF		,	(def_cdi_dqs_ohm24)	;	# 240/8
+#	48:55	,	0x3F		,	(def_cdi_dqs_ohm30)	;	# 240/6
+#	48:55	,	0x1F		,	(def_cdi_dqs_ohm34)	;	# 240/5
+#	48:55	,	0x0F		,	(def_cdi_dqs_ohm40)	;	# 240/4
+#	48:55	,	0x00		,	any									;	# 240/0
+#	56:59	,	0x0F		,	any									;	# FFE=480/4
+#}
+
+#**********************************************************************************
+#!! DO NOT NEED to set for Centaur from Joe Iadanza.
+#
+# page 414 Centaur_WB_1.13.pdf
+#
+#!PHYW.PHYX.ADRNEST.ADR32X0.HC.ADRLOGM.CONTROL.TWRAP.REG_A_10_L2(0:15)
+#!selects which values in one of these four registers are sent to each ADR output pin.
+#!
+#! [01:23]			  [P:N]		  [0:3][0:1][0:3]
+#!DPHY01_DDRPHY_ADR_IO_NFET_SLICE_EN0_P0_ADR0	0x800040100301143f
+#!DDRPHY_ADR_IO_NFET_SLICE_EN0_P0_ADR1	0x800044100301143f
+#!DDRPHY_ADR_IO_NFET_SLICE_EN0_P0_ADR2	0x800048100301143f
+#!DDRPHY_ADR_IO_NFET_SLICE_EN0_P0_ADR3	0x80004C100301143f
+#!
+#!DPHY01_DDRPHY_ADR_IO_PFET_SLICE_EN0_P0_ADR0
+#!DDRPHY_ADR_IO_PFET_SLICE_EN0	0x014	0x800040140301143f
+#!
+#! ---------------------------------------------------------------------------------------
+#! ---  PHY01 ADR IO NFET SLICE EN[0:3] P[0:1] ADR[0:3] ---------------------------
+#! ---------------------------------------------------------------------------------------
+#!DPHY01.DDRPHY_ADR_IO_NFET_SLICE_EN0_P0_ADR0 from (alias spydef)
+#!scom 0x800(0,1)(40,44,48,4C)100301143F {
+#!scom 0x800(0,1)(40,44,48,4C)(10,11,12,13)0301143F {	# EN[0:3]_P[0:1]_ADR[0:3]
+#!scom 0x800(0,1)7C(10,11,12,13)0301143F {	# EN[0:3]_P[0:1]_ADR[0:3] via broadcast
+#!	bits	,	scom_data	;
+#!	48:63	,	0b1111111111110000		;
+#!}
+#!
+#! ---------------------------------------------------------------------------------------
+#! ---     PHY01 ADR IO PFET SLICE EN[0:3] P[0:1] ADR[0:3]    ---------------------------
+#! ---------------------------------------------------------------------------------------
+#!DPHY01.DDRPHY_ADR_IO_PFET_SLICE_EN0_P0_ADR0 from (alias spydef)
+#!scom 0x800(0,1)(40,44,48,4C)140301143F {
+#!scom 0x800(0,1)(40,44,48,4C)(14,15,16,17)0301143F {	# EN[0:3]_P[0:1]_ADR[0:3]
+#!scom 0x800(0,1)7C(14,15,16,17)0301143F {	# EN[0:3]_P[0:1]_ADR[0:3] via broadcast
+#!	bits	,	scom_data	;
+#!	48:63	,	0b1111111111110000		;
+#!}
+#**********************************************************************************
+
+# ---------------------------------------------------------------------------------------
+# Output Command / Control Impedance settings
+#
+# ADR I/O FET Slice Enable Map 0
+# Register 0(MAP0) contains lanes 0:7, Register 1(MAP1) contains lanes 8:13
+# CMD  = address lines, ba, parity, ras, cas, we, act(DDR4)
+# CNTL = cke, clk, cs, odt
+#
+#    ATTR_EFF_CEN_DRV_IMP_CMD			15,20,30,40
+#    ATTR_EFF_CEN_DRV_IMP_CNTL			15,20,30,40
+#
+# SEL#  impedance
+# 00b = 15 ohm,
+# 01b = 20 ohm,
+# 10b = 30 ohm,
+# 11b = 40 ohm
+#
+# ---------------------------------------------------------------------------------
+# -----------------  Port 0  ADR 0  -----------------------------------------------
+# ---------------------------------------------------------------------------------
+#  [01:23]                         [0:1][0:1][0:3]
+# DPHY01_DDRPHY_ADR_IO_FET_SLICE_EN_MAP0_P0_ADR0	0x020	0x800040200301143f
+# PHYW.PHYX.ADRNEST.ADR32X0.HC.ADRLOGM.CONTROL.TWRAP.REG_A_20_L2(0:15)
+scom 0x800040200301143f {
+	bits	,	scom_data	,	expr				;
+	48:49	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL0
+	48:49	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL0
+	48:49	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL0
+	48:49	,	0b11		,	any					;	# SEL0, 40 or anything
+	50:51	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL1
+	50:51	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL1
+	50:51	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL1
+	50:51	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL1
+	52:53	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL2
+	52:53	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL2
+	52:53	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL2
+	52:53	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL2
+	54:55	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL3
+	54:55	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL3
+	54:55	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL3
+	54:55	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL3
+#	48:55	,	0b00000000	,	(def_cdi_ctl_ohm15)	;	# SEL0:SEL3
+#	48:55	,	0b01010101	,	(def_cdi_ctl_ohm20)	;	# SEL0:SEL3
+#	48:55	,	0b10101010	,	(def_cdi_ctl_ohm30)	;	# SEL0:SEL3
+#	48:55	,	0b11111111	,	(def_cdi_ctl_ohm40)	;	# SEL0:SEL3
+#	48:55	,	0x00		,	(def_cdi_ctl_ohm15)	;	# SEL0:SEL3
+#	48:55	,	0x55		,	(def_cdi_ctl_ohm20)	;	# SEL0:SEL3
+#	48:55	,	0xAA		,	(def_cdi_ctl_ohm30)	;	# SEL0:SEL3
+#	48:55	,	0xFF		,	(def_cdi_ctl_ohm40)	;	# SEL0:SEL3
+	56:57	,	0b00		,	(def_cdi_cmd_ohm15)	;	# SEL4
+	56:57	,	0b01		,	(def_cdi_cmd_ohm20)	;	# SEL4
+	56:57	,	0b10		,	(def_cdi_cmd_ohm30)	;	# SEL4
+	56:57	,	0b11		,	(def_cdi_cmd_ohm40)	;	# SEL4
+	58:59	,	0b00		,	(def_cdi_cmd_ohm15)	;	# SEL5
+	58:59	,	0b01		,	(def_cdi_cmd_ohm20)	;	# SEL5
+	58:59	,	0b10		,	(def_cdi_cmd_ohm30)	;	# SEL5
+	58:59	,	0b11		,	(def_cdi_cmd_ohm40)	;	# SEL5
+	60:61	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL6
+	60:61	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL6
+	60:61	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL6
+	60:61	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL6
+	62:63	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL7
+	62:63	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL7
+	62:63	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL7
+	62:63	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL7
+#	48:63	,	0x0000		,	any									;	# SEL0-7
+}
+# ADR I/O FET Slice Enable Map 1, register 1 containing lanes 8:15
+#  [01:23]                         [0:1][0:1][0:3]
+# DPHY01_DDRPHY_ADR_IO_FET_SLICE_EN_MAP1_P0_ADR0
+scom 0x800040210301143f {
+	bits	,	scom_data	,	expr				;
+	48:49	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL8
+	48:49	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL8
+	48:49	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL8
+	48:49	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL8
+	50:51	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL9
+	50:51	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL9
+	50:51	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL9
+	50:51	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL9
+	52:53	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL10 clk
+	52:53	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL10 clk
+	52:53	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL10 clk
+	52:53	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL10 clk
+	54:55	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL11 clk
+	54:55	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL11 clk
+	54:55	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL11 clk
+	54:55	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL11 clk
+}
+# -----------------  Port 0  ADR 1  -----------------------------------------------
+# DPHY01_DDRPHY_ADR_IO_FET_SLICE_EN_MAP0_P0_ADR1
+scom 0x800044200301143f {
+	bits	,	scom_data	,	expr				;
+	48:49	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL0
+	48:49	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL0
+	48:49	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL0
+	48:49	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL0
+	50:51	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL1
+	50:51	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL1
+	50:51	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL1
+	50:51	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL1
+	52:53	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL2
+	52:53	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL2
+	52:53	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL2
+	52:53	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL2
+	54:55	,	0b00		,	(def_cdi_cmd_ohm15)	;	# SEL3
+	54:55	,	0b01		,	(def_cdi_cmd_ohm20)	;	# SEL3
+	54:55	,	0b10		,	(def_cdi_cmd_ohm30)	;	# SEL3
+	54:55	,	0b11		,	(def_cdi_cmd_ohm40)	;	# SEL3
+	56:57	,	0b00		,	(def_cdi_cmd_ohm15)	;	# SEL4
+	56:57	,	0b01		,	(def_cdi_cmd_ohm20)	;	# SEL4
+	56:57	,	0b10		,	(def_cdi_cmd_ohm30)	;	# SEL4
+	56:57	,	0b11		,	(def_cdi_cmd_ohm40)	;	# SEL4
+	58:59	,	0b00		,	(def_cdi_cmd_ohm15)	;	# SEL5
+	58:59	,	0b01		,	(def_cdi_cmd_ohm20)	;	# SEL5
+	58:59	,	0b10		,	(def_cdi_cmd_ohm30)	;	# SEL5
+	58:59	,	0b11		,	(def_cdi_cmd_ohm40)	;	# SEL5
+	60:61	,	0b00		,	(def_cdi_cmd_ohm15)	;	# SEL6
+	60:61	,	0b01		,	(def_cdi_cmd_ohm20)	;	# SEL6
+	60:61	,	0b10		,	(def_cdi_cmd_ohm30)	;	# SEL6
+	60:61	,	0b11		,	(def_cdi_cmd_ohm40)	;	# SEL6
+	62:63	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL7
+	62:63	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL7
+	62:63	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL7
+	62:63	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL7
+}
+# DPHY01_DDRPHY_ADR_IO_FET_SLICE_EN_MAP1_P0_ADR1
+scom 0x800044210301143f {
+	bits	,	scom_data	,	expr				;
+	48:49	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL8
+	48:49	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL8
+	48:49	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL8
+	48:49	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL8
+	50:51	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL9
+	50:51	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL9
+	50:51	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL9
+	50:51	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL9
+	52:53	,	0b00		,	(def_cdi_cmd_ohm15)	;	# SEL10
+	52:53	,	0b01		,	(def_cdi_cmd_ohm20)	;	# SEL10
+	52:53	,	0b10		,	(def_cdi_cmd_ohm30)	;	# SEL10
+	52:53	,	0b11		,	(def_cdi_cmd_ohm40)	;	# SEL10
+	54:55	,	0b00		,	(def_cdi_cmd_ohm15)	;	# SEL11
+	54:55	,	0b01		,	(def_cdi_cmd_ohm20)	;	# SEL11
+	54:55	,	0b10		,	(def_cdi_cmd_ohm30)	;	# SEL11
+	54:55	,	0b11		,	(def_cdi_cmd_ohm40)	;	# SEL11
+}
+# -----------------  Port 0  ADR 2  -----------------------------------------------
+# DPHY01_DDRPHY_ADR_IO_FET_SLICE_EN_MAP0_P0_ADR2
+scom 0x800048200301143f {
+	bits	,	scom_data	,	expr				;
+	48:49	,	0b00		,	(def_cdi_cmd_ohm15)	;	# SEL0
+	48:49	,	0b01		,	(def_cdi_cmd_ohm20)	;	# SEL0
+	48:49	,	0b10		,	(def_cdi_cmd_ohm30)	;	# SEL0
+	48:49	,	0b11		,	(def_cdi_cmd_ohm40)	;	# SEL0
+	50:51	,	0b00		,	(def_cdi_cmd_ohm15)	;	# SEL1
+	50:51	,	0b01		,	(def_cdi_cmd_ohm20)	;	# SEL1
+	50:51	,	0b10		,	(def_cdi_cmd_ohm30)	;	# SEL1
+	50:51	,	0b11		,	(def_cdi_cmd_ohm40)	;	# SEL1
+	52:53	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL2
+	52:53	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL2
+	52:53	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL2
+	52:53	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL2
+	54:55	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL3
+	54:55	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL3
+	54:55	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL3
+	54:55	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL3
+	56:57	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL4 clk
+	56:57	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL4 clk
+	56:57	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL4 clk
+	56:57	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL4 clk
+	58:59	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL5 clk
+	58:59	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL5 clk
+	58:59	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL5 clk
+	58:59	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL5 clk
+	60:61	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL6
+	60:61	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL6
+	60:61	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL6
+	60:61	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL6
+	62:63	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL7
+	62:63	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL7
+	62:63	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL7
+	62:63	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL7
+}
+# DPHY01_DDRPHY_ADR_IO_FET_SLICE_EN_MAP1_P0_ADR2
+scom 0x800048210301143f {
+	bits	,	scom_data	,	expr				;
+	48:49	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL8
+	48:49	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL8
+	48:49	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL8
+	48:49	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL8
+	50:51	,	0b00		,	(def_cdi_cmd_ohm15)	;	# SEL9
+	50:51	,	0b01		,	(def_cdi_cmd_ohm20)	;	# SEL9
+	50:51	,	0b10		,	(def_cdi_cmd_ohm30)	;	# SEL9
+	50:51	,	0b11		,	(def_cdi_cmd_ohm40)	;	# SEL9
+	52:53	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL10 clk
+	52:53	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL10 clk
+	52:53	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL10 clk
+	52:53	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL10 clk
+	54:55	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL11 clk
+	54:55	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL11 clk
+	54:55	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL11 clk
+	54:55	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL11 clk
+	56:57	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL12 clk
+	56:57	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL12 clk
+	56:57	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL12 clk
+	56:57	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL12 clk
+	58:59	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL13 clk
+	58:59	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL13 clk
+	58:59	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL13 clk
+	58:59	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL13 clk
+}
+# -----------------  Port 0  ADR 3  -----------------------------------------------
+# DPHY01_DDRPHY_ADR_IO_FET_SLICE_EN_MAP0_P0_ADR3
+scom 0x80004c200301143f {
+	bits	,	scom_data	,	expr				;
+	48:49	,	0b00		,	(def_cdi_cmd_ohm15)	;	# SEL0
+	48:49	,	0b01		,	(def_cdi_cmd_ohm20)	;	# SEL0
+	48:49	,	0b10		,	(def_cdi_cmd_ohm30)	;	# SEL0
+	48:49	,	0b11		,	(def_cdi_cmd_ohm40)	;	# SEL0
+	50:51	,	0b00		,	(def_cdi_cmd_ohm15)	;	# SEL1
+	50:51	,	0b01		,	(def_cdi_cmd_ohm20)	;	# SEL1
+	50:51	,	0b10		,	(def_cdi_cmd_ohm30)	;	# SEL1
+	50:51	,	0b11		,	(def_cdi_cmd_ohm40)	;	# SEL1
+	52:53	,	0b00		,	(def_cdi_cmd_ohm15)	;	# SEL2
+	52:53	,	0b01		,	(def_cdi_cmd_ohm20)	;	# SEL2
+	52:53	,	0b10		,	(def_cdi_cmd_ohm30)	;	# SEL2
+	52:53	,	0b11		,	(def_cdi_cmd_ohm40)	;	# SEL2
+	54:55	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL3
+	54:55	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL3
+	54:55	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL3
+	54:55	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL3
+	56:57	,	0b00		,	(def_cdi_cmd_ohm15)	;	# SEL4
+	56:57	,	0b01		,	(def_cdi_cmd_ohm20)	;	# SEL4
+	56:57	,	0b10		,	(def_cdi_cmd_ohm30)	;	# SEL4
+	56:57	,	0b11		,	(def_cdi_cmd_ohm40)	;	# SEL4
+	58:59	,	0b00		,	(def_cdi_cmd_ohm15)	;	# SEL5
+	58:59	,	0b01		,	(def_cdi_cmd_ohm20)	;	# SEL5
+	58:59	,	0b10		,	(def_cdi_cmd_ohm30)	;	# SEL5
+	58:59	,	0b11		,	(def_cdi_cmd_ohm40)	;	# SEL5
+	60:61	,	0b00		,	(def_cdi_cmd_ohm15)	;	# SEL6
+	60:61	,	0b01		,	(def_cdi_cmd_ohm20)	;	# SEL6
+	60:61	,	0b10		,	(def_cdi_cmd_ohm30)	;	# SEL6
+	60:61	,	0b11		,	(def_cdi_cmd_ohm40)	;	# SEL6
+	62:63	,	0b00		,	(def_cdi_cmd_ohm15)	;	# SEL7
+	62:63	,	0b01		,	(def_cdi_cmd_ohm20)	;	# SEL7
+	62:63	,	0b10		,	(def_cdi_cmd_ohm30)	;	# SEL7
+	62:63	,	0b11		,	(def_cdi_cmd_ohm40)	;	# SEL7
+}
+# DPHY01_DDRPHY_ADR_IO_FET_SLICE_EN_MAP1_P0_ADR3
+scom 0x80004c210301143f {
+	bits	,	scom_data	,	expr				;
+	48:49	,	0b00		,	(def_cdi_cmd_ohm15)	;	# SEL8
+	48:49	,	0b01		,	(def_cdi_cmd_ohm20)	;	# SEL8
+	48:49	,	0b10		,	(def_cdi_cmd_ohm30)	;	# SEL8
+	48:49	,	0b11		,	(def_cdi_cmd_ohm40)	;	# SEL8
+	50:51	,	0b00		,	(def_cdi_cmd_ohm15)	;	# SEL9
+	50:51	,	0b01		,	(def_cdi_cmd_ohm20)	;	# SEL9
+	50:51	,	0b10		,	(def_cdi_cmd_ohm30)	;	# SEL9
+	50:51	,	0b11		,	(def_cdi_cmd_ohm40)	;	# SEL9
+	52:53	,	0b00		,	(def_cdi_cmd_ohm15)	;	# SEL10
+	52:53	,	0b01		,	(def_cdi_cmd_ohm20)	;	# SEL10
+	52:53	,	0b10		,	(def_cdi_cmd_ohm30)	;	# SEL10
+	52:53	,	0b11		,	(def_cdi_cmd_ohm40)	;	# SEL10
+	54:55	,	0b00		,	(def_cdi_cmd_ohm15)	;	# SEL11
+	54:55	,	0b01		,	(def_cdi_cmd_ohm20)	;	# SEL11
+	54:55	,	0b10		,	(def_cdi_cmd_ohm30)	;	# SEL11
+	54:55	,	0b11		,	(def_cdi_cmd_ohm40)	;	# SEL11
+	56:57	,	0b00		,	(def_cdi_cmd_ohm15)	;	# SEL12
+	56:57	,	0b01		,	(def_cdi_cmd_ohm20)	;	# SEL12
+	56:57	,	0b10		,	(def_cdi_cmd_ohm30)	;	# SEL12
+	56:57	,	0b11		,	(def_cdi_cmd_ohm40)	;	# SEL12
+	58:59	,	0b00		,	(def_cdi_cmd_ohm15)	;	# SEL13
+	58:59	,	0b01		,	(def_cdi_cmd_ohm20)	;	# SEL13
+	58:59	,	0b10		,	(def_cdi_cmd_ohm30)	;	# SEL13
+	58:59	,	0b11		,	(def_cdi_cmd_ohm40)	;	# SEL13
+}
+# =================================================================================
+# -----------------  Port 1  ADR 0  -----------------------------------------------
+# =================================================================================
+# DPHY01_DDRPHY_ADR_IO_FET_SLICE_EN_MAP0_P1_ADR0
+scom 0x800140200301143f {
+	bits	,	scom_data	,	expr				;
+	48:49	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL0 clk
+	48:49	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL0 clk
+	48:49	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL0 clk
+	48:49	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL0 clk
+	50:51	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL1 clk
+	50:51	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL1 clk
+	50:51	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL1 clk
+	50:51	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL1 clk
+	52:53	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL2 clk
+	52:53	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL2 clk
+	52:53	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL2 clk
+	52:53	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL2 clk
+	54:55	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL3 clk
+	54:55	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL3 clk
+	54:55	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL3 clk
+	54:55	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL3 clk
+	56:57	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL4
+	56:57	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL4
+	56:57	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL4
+	56:57	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL4
+	58:59	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL5
+	58:59	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL5
+	58:59	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL5
+	58:59	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL5
+	60:61	,	0b00		,	(def_cdi_cmd_ohm15)	;	# SEL6
+	60:61	,	0b01		,	(def_cdi_cmd_ohm20)	;	# SEL6
+	60:61	,	0b10		,	(def_cdi_cmd_ohm30)	;	# SEL6
+	60:61	,	0b11		,	(def_cdi_cmd_ohm40)	;	# SEL6
+	62:63	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL7
+	62:63	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL7
+	62:63	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL7
+	62:63	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL7
+}
+# DPHY01_DDRPHY_ADR_IO_FET_SLICE_EN_MAP1_P1_ADR0
+scom 0x800140210301143f {
+	bits	,	scom_data	,	expr				;
+	48:49	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL8
+	48:49	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL8
+	48:49	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL8
+	48:49	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL8
+	50:51	,	0b00		,	(def_cdi_cmd_ohm15)	;	# SEL9
+	50:51	,	0b01		,	(def_cdi_cmd_ohm20)	;	# SEL9
+	50:51	,	0b10		,	(def_cdi_cmd_ohm30)	;	# SEL9
+	50:51	,	0b11		,	(def_cdi_cmd_ohm40)	;	# SEL9
+	52:53	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL10
+	52:53	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL10
+	52:53	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL10
+	52:53	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL10
+	54:55	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL11
+	54:55	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL11
+	54:55	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL11
+	54:55	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL11
+}
+# -----------------  Port 1  ADR 1  -----------------------------------------------
+# DPHY01_DDRPHY_ADR_IO_FET_SLICE_EN_MAP0_P1_ADR1
+scom 0x800144200301143f {
+	bits	,	scom_data	,	expr				;
+	48:49	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL0
+	48:49	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL0
+	48:49	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL0
+	48:49	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL0
+	50:51	,	0b00		,	(def_cdi_cmd_ohm15)	;	# SEL1
+	50:51	,	0b01		,	(def_cdi_cmd_ohm20)	;	# SEL1
+	50:51	,	0b10		,	(def_cdi_cmd_ohm30)	;	# SEL1
+	50:51	,	0b11		,	(def_cdi_cmd_ohm40)	;	# SEL1
+	52:53	,	0b00		,	(def_cdi_cmd_ohm15)	;	# SEL2
+	52:53	,	0b01		,	(def_cdi_cmd_ohm20)	;	# SEL2
+	52:53	,	0b10		,	(def_cdi_cmd_ohm30)	;	# SEL2
+	52:53	,	0b11		,	(def_cdi_cmd_ohm40)	;	# SEL2
+	54:55	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL3
+	54:55	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL3
+	54:55	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL3
+	54:55	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL3
+	56:57	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL4
+	56:57	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL4
+	56:57	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL4
+	56:57	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL4
+	58:59	,	0b00		,	(def_cdi_cmd_ohm15)	;	# SEL5
+	58:59	,	0b01		,	(def_cdi_cmd_ohm20)	;	# SEL5
+	58:59	,	0b10		,	(def_cdi_cmd_ohm30)	;	# SEL5
+	58:59	,	0b11		,	(def_cdi_cmd_ohm40)	;	# SEL5
+	60:61	,	0b00		,	(def_cdi_cmd_ohm15)	;	# SEL6
+	60:61	,	0b01		,	(def_cdi_cmd_ohm20)	;	# SEL6
+	60:61	,	0b10		,	(def_cdi_cmd_ohm30)	;	# SEL6
+	60:61	,	0b11		,	(def_cdi_cmd_ohm40)	;	# SEL6
+	62:63	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL7
+	62:63	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL7
+	62:63	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL7
+	62:63	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL7
+}
+# DPHY01_DDRPHY_ADR_IO_FET_SLICE_EN_MAP1_P1_ADR1
+scom 0x800144210301143f {
+	bits	,	scom_data	,	expr				;
+	48:49	,	0b00		,	(def_cdi_cmd_ohm15)	;	# SEL8
+	48:49	,	0b01		,	(def_cdi_cmd_ohm20)	;	# SEL8
+	48:49	,	0b10		,	(def_cdi_cmd_ohm30)	;	# SEL8
+	48:49	,	0b11		,	(def_cdi_cmd_ohm40)	;	# SEL8
+	50:51	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL9
+	50:51	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL9
+	50:51	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL9
+	50:51	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL9
+	52:53	,	0b00		,	(def_cdi_cmd_ohm15)	;	# SEL10
+	52:53	,	0b01		,	(def_cdi_cmd_ohm20)	;	# SEL10
+	52:53	,	0b10		,	(def_cdi_cmd_ohm30)	;	# SEL10
+	52:53	,	0b11		,	(def_cdi_cmd_ohm40)	;	# SEL10
+	54:55	,	0b00		,	(def_cdi_cmd_ohm15)	;	# SEL11
+	54:55	,	0b01		,	(def_cdi_cmd_ohm20)	;	# SEL11
+	54:55	,	0b10		,	(def_cdi_cmd_ohm30)	;	# SEL11
+	54:55	,	0b11		,	(def_cdi_cmd_ohm40)	;	# SEL11
+}
+# -----------------  Port 1  ADR 2  -----------------------------------------------
+# DPHY01_DDRPHY_ADR_IO_FET_SLICE_EN_MAP0_P1_ADR2
+scom 0x800148200301143f {
+	bits	,	scom_data	,	expr				;
+	48:49	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL0
+	48:49	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL0
+	48:49	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL0
+	48:49	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL0
+	50:51	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL1
+	50:51	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL1
+	50:51	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL1
+	50:51	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL1
+	52:53	,	0b00		,	(def_cdi_cmd_ohm15)	;	# SEL2
+	52:53	,	0b01		,	(def_cdi_cmd_ohm20)	;	# SEL2
+	52:53	,	0b10		,	(def_cdi_cmd_ohm30)	;	# SEL2
+	52:53	,	0b11		,	(def_cdi_cmd_ohm40)	;	# SEL2
+	54:55	,	0b00		,	(def_cdi_cmd_ohm15)	;	# SEL3
+	54:55	,	0b01		,	(def_cdi_cmd_ohm20)	;	# SEL3
+	54:55	,	0b10		,	(def_cdi_cmd_ohm30)	;	# SEL3
+	54:55	,	0b11		,	(def_cdi_cmd_ohm40)	;	# SEL3
+	56:57	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL4
+	56:57	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL4
+	56:57	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL4
+	56:57	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL4
+	58:59	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL5
+	58:59	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL5
+	58:59	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL5
+	58:59	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL5
+	60:61	,	0b00		,	(def_cdi_cmd_ohm15)	;	# SEL6
+	60:61	,	0b01		,	(def_cdi_cmd_ohm20)	;	# SEL6
+	60:61	,	0b10		,	(def_cdi_cmd_ohm30)	;	# SEL6
+	60:61	,	0b11		,	(def_cdi_cmd_ohm40)	;	# SEL6
+	62:63	,	0b00		,	(def_cdi_cmd_ohm15)	;	# SEL7
+	62:63	,	0b01		,	(def_cdi_cmd_ohm20)	;	# SEL7
+	62:63	,	0b10		,	(def_cdi_cmd_ohm30)	;	# SEL7
+	62:63	,	0b11		,	(def_cdi_cmd_ohm40)	;	# SEL7
+}
+# DPHY01_DDRPHY_ADR_IO_FET_SLICE_EN_MAP1_P1_ADR2
+scom 0x800148210301143f {
+	bits	,	scom_data	,	expr				;
+	48:49	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL8 clk
+	48:49	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL8 clk
+	48:49	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL8 clk
+	48:49	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL8 clk
+	50:51	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL9 clk
+	50:51	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL9 clk
+	50:51	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL9 clk
+	50:51	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL9 clk
+	52:53	,	0b00		,	(def_cdi_cmd_ohm15)	;	# SEL10
+	52:53	,	0b01		,	(def_cdi_cmd_ohm20)	;	# SEL10
+	52:53	,	0b10		,	(def_cdi_cmd_ohm30)	;	# SEL10
+	52:53	,	0b11		,	(def_cdi_cmd_ohm40)	;	# SEL10
+	54:55	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL11
+	54:55	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL11
+	54:55	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL11
+	54:55	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL11
+	56:57	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL12
+	56:57	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL12
+	56:57	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL12
+	56:57	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL12
+	58:59	,	0b00		,	(def_cdi_cmd_ohm15)	;	# SEL13
+	58:59	,	0b01		,	(def_cdi_cmd_ohm20)	;	# SEL13
+	58:59	,	0b10		,	(def_cdi_cmd_ohm30)	;	# SEL13
+	58:59	,	0b11		,	(def_cdi_cmd_ohm40)	;	# SEL13
+}
+# -----------------  Port 1  ADR 3  -----------------------------------------------
+# DPHY01_DDRPHY_ADR_IO_FET_SLICE_EN_MAP0_P1_ADR3
+scom 0x80014c200301143f {
+	bits	,	scom_data	,	expr				;
+	48:49	,	0b00		,	(def_cdi_cmd_ohm15)	;	# SEL0
+	48:49	,	0b01		,	(def_cdi_cmd_ohm20)	;	# SEL0
+	48:49	,	0b10		,	(def_cdi_cmd_ohm30)	;	# SEL0
+	48:49	,	0b11		,	(def_cdi_cmd_ohm40)	;	# SEL0
+	50:51	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL1
+	50:51	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL1
+	50:51	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL1
+	50:51	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL1
+	52:53	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL2 clk
+	52:53	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL2 clk
+	52:53	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL2 clk
+	52:53	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL2 clk
+	54:55	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL3 clk
+	54:55	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL3 clk
+	54:55	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL3 clk
+	54:55	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL3 clk
+	56:57	,	0b00		,	(def_cdi_cmd_ohm15)	;	# SEL4
+	56:57	,	0b01		,	(def_cdi_cmd_ohm20)	;	# SEL4
+	56:57	,	0b10		,	(def_cdi_cmd_ohm30)	;	# SEL4
+	56:57	,	0b11		,	(def_cdi_cmd_ohm40)	;	# SEL4
+	58:59	,	0b00		,	(def_cdi_cmd_ohm15)	;	# SEL5
+	58:59	,	0b01		,	(def_cdi_cmd_ohm20)	;	# SEL5
+	58:59	,	0b10		,	(def_cdi_cmd_ohm30)	;	# SEL5
+	58:59	,	0b11		,	(def_cdi_cmd_ohm40)	;	# SEL5
+	60:61	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL6
+	60:61	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL6
+	60:61	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL6
+	60:61	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL6
+	62:63	,	0b00		,	(def_cdi_ctl_ohm15)	;	# SEL7
+	62:63	,	0b01		,	(def_cdi_ctl_ohm20)	;	# SEL7
+	62:63	,	0b10		,	(def_cdi_ctl_ohm30)	;	# SEL7
+	62:63	,	0b11		,	(def_cdi_ctl_ohm40)	;	# SEL7
+}
+# DPHY01_DDRPHY_ADR_IO_FET_SLICE_EN_MAP1_P1_ADR3
+scom 0x80014c210301143f {
+	bits	,	scom_data	,	expr				;
+	48:49	,	0b00		,	(def_cdi_cmd_ohm15)	;	# SEL8
+	48:49	,	0b01		,	(def_cdi_cmd_ohm20)	;	# SEL8
+	48:49	,	0b10		,	(def_cdi_cmd_ohm30)	;	# SEL8
+	48:49	,	0b11		,	(def_cdi_cmd_ohm40)	;	# SEL8
+	50:51	,	0b00		,	(def_cdi_cmd_ohm15)	;	# SEL9
+	50:51	,	0b01		,	(def_cdi_cmd_ohm20)	;	# SEL9
+	50:51	,	0b10		,	(def_cdi_cmd_ohm30)	;	# SEL9
+	50:51	,	0b11		,	(def_cdi_cmd_ohm40)	;	# SEL9
+	52:53	,	0b00		,	(def_cdi_cmd_ohm15)	;	# SEL10
+	52:53	,	0b01		,	(def_cdi_cmd_ohm20)	;	# SEL10
+	52:53	,	0b10		,	(def_cdi_cmd_ohm30)	;	# SEL10
+	52:53	,	0b11		,	(def_cdi_cmd_ohm40)	;	# SEL10
+	54:55	,	0b00		,	(def_cdi_cmd_ohm15)	;	# SEL11
+	54:55	,	0b01		,	(def_cdi_cmd_ohm20)	;	# SEL11
+	54:55	,	0b10		,	(def_cdi_cmd_ohm30)	;	# SEL11
+	54:55	,	0b11		,	(def_cdi_cmd_ohm40)	;	# SEL11
+	56:57	,	0b00		,	(def_cdi_cmd_ohm15)	;	# SEL12
+	56:57	,	0b01		,	(def_cdi_cmd_ohm20)	;	# SEL12
+	56:57	,	0b10		,	(def_cdi_cmd_ohm30)	;	# SEL12
+	56:57	,	0b11		,	(def_cdi_cmd_ohm40)	;	# SEL12
+	58:59	,	0b00		,	(def_cdi_cmd_ohm15)	;	# SEL13
+	58:59	,	0b01		,	(def_cdi_cmd_ohm20)	;	# SEL13
+	58:59	,	0b10		,	(def_cdi_cmd_ohm30)	;	# SEL13
+	58:59	,	0b11		,	(def_cdi_cmd_ohm40)	;	# SEL13
+}
+
+#**********************************************************************************
+# ADR Slew Calibration control		default=0
+#
+# Controls the circuit that performs the ADR slew calibration.
+#
+# 	[01:23]						 [0:1]   [0:1]
+# DPHY01_DDRPHY_ADR_SLEW_CAL_CNTL_P0_ADR32S0	0x039	0x800080390301143f
+# Controls the circuit that performs the ADR slew calibration.
+#
+scom 0x800080390301143f {
+	bits	,	scom_data	;
+	48		,	0b0			;	# enable
+	49		,	0b1			;	# start
+#	50		,	0b0			;	# reserved
+	51		,	0b1			;	# override enable
+	52:55	,	0b0100		;	# override vector
+#	56:58	,	0b010		;	# reserved
+	59:63	,	0b10111		;	# slew target phase rotator offset
+}
+#
+# 	!! looks like 4,5,6V/ns for 1.35V and 4,5V/ns at 1.2V, need to add this to the
+# 	ddr_reset_phy procedure.  Waiting on details from analog PHY team for settings.
+#
+#**********************************************************************************
+
+# ---------------------------------------------------------------------------------------
+# Configure slew rate mux(CTL) registers(4)
+# CTL0 = CMD, CTL1 = CNTL, CTL2 = unused, CTL3 = unused
+#
+#	 ATTR_EFF_CEN_SLEW_RATE_CMD		0=slow, 15=fast		use in CTL0
+#	 ATTR_EFF_CEN_SLEW_RATE_CNTL	0=slow, 15=fast		use in CTL1
+#
+#  choices... 0=3.61, 1=4.33, 2=5.41, 3=6.69, 4=8.11, 5=8.58 V/ns
+#				 6..F is approximately 180mV/step, F=10.56 V/ns
+#
+#  [01:23]								  [0:1][0:3]
+# DPHY01_DDRPHY_ADR_IO_SLEW_CTL_VALUE_P0_ADR0	0x01A	0x8000401a0301143f
+#scom 0x8000(40,44,48,4c)1A0301143f {	# VALUE_P0_ADR[0:3]
+scom 0x800(0,1)7C1A0301143f {			# VALUE_P[0:1]_ADR[0:3] broadcast
+	bits	,	scom_data	,	expr								;
+	# SLEW_CTL0, used for command
+	48:51	,	0b0000		,	(ATTR_EFF_CEN_SLEW_RATE_CMD == 0)	;	# slow
+	48:51	,	0b0001		,	(ATTR_EFF_CEN_SLEW_RATE_CMD == 1)	;	# faster .
+	48:51	,	0b0010		,	(ATTR_EFF_CEN_SLEW_RATE_CMD == 2)	;	# faster ..
+	48:51	,	0b0011		,	(ATTR_EFF_CEN_SLEW_RATE_CMD == 3)	;	# faster ...
+	48:51	,	0b0100		,	(ATTR_EFF_CEN_SLEW_RATE_CMD == 4)	;	# faster ....
+	48:51	,	0b0101		,	(ATTR_EFF_CEN_SLEW_RATE_CMD == 5)	;	# faster .....
+	48:51	,	0b0110		,	(ATTR_EFF_CEN_SLEW_RATE_CMD == 6)	;	# faster ......
+	48:51	,	0b0111		,	(ATTR_EFF_CEN_SLEW_RATE_CMD == 7)	;	# faster .......
+	48:51	,	0b1000		,	(ATTR_EFF_CEN_SLEW_RATE_CMD == 8)	;	# faster ........
+	48:51	,	0b1001		,	(ATTR_EFF_CEN_SLEW_RATE_CMD == 9)	;	# faster .........
+	48:51	,	0b1010		,	(ATTR_EFF_CEN_SLEW_RATE_CMD == 10)	;	# faster ..........
+	48:51	,	0b1011		,	(ATTR_EFF_CEN_SLEW_RATE_CMD == 11)	;	# faster ...........
+	48:51	,	0b1100		,	(ATTR_EFF_CEN_SLEW_RATE_CMD == 12)	;	# faster ............
+	48:51	,	0b1101		,	(ATTR_EFF_CEN_SLEW_RATE_CMD == 13)	;	# faster .............
+	48:51	,	0b1110		,	(ATTR_EFF_CEN_SLEW_RATE_CMD == 14)	;	# faster ..............
+	48:51	,	0b1111		,	(ATTR_EFF_CEN_SLEW_RATE_CMD == 15)	;	# fastest...............
+	# SLEW_CTL1, used for control
+	52:55	,	0b0000		,	(ATTR_EFF_CEN_SLEW_RATE_CNTL == 0)	;	# slow
+	52:55	,	0b0001		,	(ATTR_EFF_CEN_SLEW_RATE_CNTL == 1)	;	# faster .
+	52:55	,	0b0010		,	(ATTR_EFF_CEN_SLEW_RATE_CNTL == 2)	;	# faster ..
+	52:55	,	0b0011		,	(ATTR_EFF_CEN_SLEW_RATE_CNTL == 3)	;	# faster ...
+	52:55	,	0b0100		,	(ATTR_EFF_CEN_SLEW_RATE_CNTL == 4)	;	# faster ....
+	52:55	,	0b0101		,	(ATTR_EFF_CEN_SLEW_RATE_CNTL == 5)	;	# faster .....
+	52:55	,	0b0110		,	(ATTR_EFF_CEN_SLEW_RATE_CNTL == 6)	;	# faster ......
+	52:55	,	0b0111		,	(ATTR_EFF_CEN_SLEW_RATE_CNTL == 7)	;	# faster .......
+	52:55	,	0b1000		,	(ATTR_EFF_CEN_SLEW_RATE_CNTL == 8)	;	# faster ........
+	52:55	,	0b1001		,	(ATTR_EFF_CEN_SLEW_RATE_CNTL == 9)	;	# faster .........
+	52:55	,	0b1010		,	(ATTR_EFF_CEN_SLEW_RATE_CNTL == 10)	;	# faster ..........
+	52:55	,	0b1011		,	(ATTR_EFF_CEN_SLEW_RATE_CNTL == 11)	;	# faster ...........
+	52:55	,	0b1100		,	(ATTR_EFF_CEN_SLEW_RATE_CNTL == 12)	;	# faster ............
+	52:55	,	0b1101		,	(ATTR_EFF_CEN_SLEW_RATE_CNTL == 13)	;	# faster .............
+	52:55	,	0b1110		,	(ATTR_EFF_CEN_SLEW_RATE_CNTL == 14)	;	# faster ..............
+	52:55	,	0b1111		,	(ATTR_EFF_CEN_SLEW_RATE_CNTL == 15)	;	# fastest...............
+	# SLEW_CTL2	3.61 V/ns, not used currently
+	56:59	,	0b0000		,	any									;	# slow
+	# SLEW_CTL3	3.61 V/ns, not used currently
+	60:63	,	0b0000		,	any									;	# slow
+}
+
+# ---------------------------------------------------------------------------------------
+# Set slew rate to select CMD(CTL0) or CNTL(CTL1)
+#
+# MAP0 = SLEW_CTL_SEL{0:7}	MAP1 = SLEW_CTL_SEL{8:15}
+# select between CTL0-3 slew rates in value register
+#
+#	[01:23]								  [0:1][0:1][0:3]
+# DPHY01_DDRPHY_ADR_IO_SLEW_CTL_VALUE_MAP0_P0_ADR0	0x02a	0x8000402a0301143f
+# -----------------  Port 0  ADR 0  -----------------------------------------------
+scom 0x8000402a0301143f {		# MAP0_P0_ADR0
+	bits	,	scom_data	,	expr			;
+	48:49	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL0
+	50:51	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL1
+	52:53	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL2
+	54:55	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL3
+	56:57	,	0b00		,	(def_is_mba01)	;	# CMD	# SEL4
+	58:59	,	0b00		,	(def_is_mba01)	;	# CMD	# SEL5
+	60:61	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL6
+	62:63	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL7
+	# -----------------  Port 2  ADR 0  Map 0  ------------------------------------
+	48:49	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL0
+	50:51	,	0b00		,	(def_is_mba23)	;	# CMD	# SEL1
+	52:53	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL2
+	54:55	,	0b00		,	(def_is_mba23)	;	# CMD	# SEL3
+	56:57	,	0b00		,	(def_is_mba23)	;	# CMD	# SEL4
+	58:59	,	0b00		,	(def_is_mba23)	;	# CMD	# SEL5
+	60:61	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL6 clk
+	62:63	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL7 clk
+}
+# ADR I/O FET Slice Enable Map 1
+# Register 1 containing lanes 8:15
+#  [01:23]                         [0:1][0:1][0:3]
+# DPHY01_DDRPHY_ADR_IO_SLEW_CTL_VALUE_MAP1_P0_ADR0	0x02b	0x8000402b0301143f
+scom 0x8000402b0301143f {
+	bits	,	scom_data	,	expr			;
+	48:49	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL8
+	50:51	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL9
+	52:53	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL10 clk
+	54:55	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL11 clk
+	# -----------------  Port 2  ADR 0  Map 1  ------------------------------------
+	48:49	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL8 clk
+	50:51	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL9 clk
+	52:53	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL10
+	54:55	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL11
+}
+# -----------------  Port 0  ADR 1  -----------------------------------------------
+# DPHY01_DDRPHY_ADR_IO_SLEW_CTL_VALUE_MAP0_P0_ADR1
+scom 0x8000442a0301143f {
+	bits	,	scom_data	,	expr			;
+	48:49	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL0
+	50:51	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL1
+	52:53	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL2
+	54:55	,	0b00		,	(def_is_mba01)	;	# CMD	# SEL3
+	56:57	,	0b00		,	(def_is_mba01)	;	# CMD	# SEL4
+	58:59	,	0b00		,	(def_is_mba01)	;	# CMD	# SEL5
+	60:61	,	0b00		,	(def_is_mba01)	;	# CMD	# SEL6
+	62:63	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL7
+	# -----------------  Port 2  ADR 1  Map 0  ------------------------------------
+	48:49	,	0b00		,	(def_is_mba23)	;	# CMD	# SEL0
+	50:51	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL1
+	52:53	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL2
+	54:55	,	0b00		,	(def_is_mba23)	;	# CMD	# SEL3
+	56:57	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL4
+	58:59	,	0b00		,	(def_is_mba23)	;	# CMD	# SEL5
+	60:61	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL6
+	62:63	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL7
+}
+# DPHY01_DDRPHY_ADR_IO_SLEW_CTL_VALUE_MAP1_P0_ADR1
+scom 0x8000442b0301143f {
+	bits	,	scom_data	,	expr			;
+	48:49	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL8
+	50:51	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL9
+	52:53	,	0b00		,	(def_is_mba01)	;	# CMD	# SEL10
+	54:55	,	0b00		,	(def_is_mba01)	;	# CMD	# SEL11
+	# -----------------  Port 2  ADR 1  Map 1  ------------------------------------
+	48:49	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL8
+	50:51	,	0b00		,	(def_is_mba23)	;	# CMD	# SEL9
+	52:53	,	0b00		,	(def_is_mba23)	;	# CMD	# SEL10
+	54:55	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL11
+}
+# -----------------  Port 0  ADR 2  -----------------------------------------------
+# DPHY01_DDRPHY_ADR_IO_SLEW_CTL_VALUE_MAP0_P0_ADR2
+scom 0x8000482a0301143f {
+	bits	,	scom_data	,	expr			;
+	48:49	,	0b00		,	(def_is_mba01)	;	# CMD	# SEL0
+	50:51	,	0b00		,	(def_is_mba01)	;	# CMD	# SEL1
+	52:53	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL2
+	54:55	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL3
+	56:57	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL4 clk
+	58:59	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL5 clk
+	60:61	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL6
+	62:63	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL7
+	# -----------------  Port 2  ADR 2  Map 0  ------------------------------------
+	48:49	,	0b00		,	(def_is_mba23)	;	# CMD	# SEL0
+	50:51	,	0b00		,	(def_is_mba23)	;	# CMD	# SEL1
+	52:53	,	0b00		,	(def_is_mba23)	;	# CMD	# SEL2
+	54:55	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL3
+	56:57	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL4
+	58:59	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL5
+	60:61	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL6
+	62:63	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL7
+}
+# DPHY01_DDRPHY_ADR_IO_SLEW_CTL_VALUE_MAP1_P0_ADR2
+scom 0x8000482b0301143f {
+	bits	,	scom_data	,	expr			;
+	48:49	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL8
+	50:51	,	0b00		,	(def_is_mba01)	;	# CMD	# SEL9
+	52:53	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL10 clk
+	54:55	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL11 clk
+	56:57	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL12 clk
+	58:59	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL13 clk
+	# -----------------  Port 2  ADR 2  Map 1  ------------------------------------
+	48:49	,	0b00		,	(def_is_mba23)	;	# CMD	# SEL8
+	50:51	,	0b00		,	(def_is_mba23)	;	# CMD	# SEL9
+	52:53	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL10 clk
+	54:55	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL11 clk
+	56:57	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL12
+	58:59	,	0b00		,	(def_is_mba23)	;	# CMD	# SEL13
+}
+# -----------------  Port 0  ADR 3  -----------------------------------------------
+# DPHY01_DDRPHY_ADR_IO_SLEW_CTL_VALUE_MAP0_P0_ADR3
+scom 0x80004c2a0301143f {
+	bits	,	scom_data	,	expr			;
+	48:49	,	0b00		,	(def_is_mba01)	;	# CMD	# SEL0
+	50:51	,	0b00		,	(def_is_mba01)	;	# CMD	# SEL1
+	52:53	,	0b00		,	(def_is_mba01)	;	# CMD	# SEL2
+	54:55	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL3
+	56:57	,	0b00		,	(def_is_mba01)	;	# CMD	# SEL4
+	58:59	,	0b00		,	(def_is_mba01)	;	# CMD	# SEL5
+	60:61	,	0b00		,	(def_is_mba01)	;	# CMD	# SEL6
+	62:63	,	0b00		,	(def_is_mba01)	;	# CMD	# SEL7
+	# -----------------  Port 2  ADR 3  Map 0  ------------------------------------
+	48:49	,	0b00		,	(def_is_mba23)	;	# CMD	# SEL0
+	50:51	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL1
+	52:53	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL2 clk
+	54:55	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL3 clk
+	56:57	,	0b00		,	(def_is_mba23)	;	# CMD	# SEL4
+	58:59	,	0b00		,	(def_is_mba23)	;	# CMD	# SEL5
+	60:61	,	0b00		,	(def_is_mba23)	;	# CMD	# SEL6
+	62:63	,	0b00		,	(def_is_mba23)	;	# CMD	# SEL7
+}
+# DPHY01_DDRPHY_ADR_IO_SLEW_CTL_VALUE_MAP1_P0_ADR3
+scom 0x80004c2b0301143f {
+	bits	,	scom_data	,	expr			;
+	48:49	,	0b00		,	(def_is_mba01)	;	# CMD	# SEL8
+	50:51	,	0b00		,	(def_is_mba01)	;	# CMD	# SEL9
+	52:53	,	0b00		,	(def_is_mba01)	;	# CMD	# SEL10
+	54:55	,	0b00		,	(def_is_mba01)	;	# CMD	# SEL11
+	56:57	,	0b00		,	(def_is_mba01)	;	# CMD	# SEL12
+	58:59	,	0b00		,	(def_is_mba01)	;	# CMD	# SEL13
+	# -----------------  Port 2  ADR 3  Map 1  ------------------------------------
+	48:49	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL8
+	50:51	,	0b00		,	(def_is_mba23)	;	# CMD	# SEL9
+	52:53	,	0b00		,	(def_is_mba23)	;	# CMD	# SEL10
+	54:55	,	0b00		,	(def_is_mba23)	;	# CMD	# SEL11
+	56:57	,	0b00		,	(def_is_mba23)	;	# CMD	# SEL12
+	58:59	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL13
+}
+# =================================================================================
+# -----------------  Port 1  ADR 0  -----------------------------------------------
+# =================================================================================
+# DPHY01_DDRPHY_ADR_IO_SLEW_CTL_VALUE_MAP0_P1_ADR0
+scom 0x8001402a0301143f {
+	bits	,	scom_data	,	expr			;
+	48:49	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL0 clk
+	50:51	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL1 clk
+	52:53	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL2 clk
+	54:55	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL3 clk
+	56:57	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL4
+	58:59	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL5
+	60:61	,	0b00		,	(def_is_mba01)	;	# CMD	# SEL6
+	62:63	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL7
+	# -----------------  Port 3  ADR 0  Map 0  ------------------------------------
+	48:49	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL0
+	50:51	,	0b00		,	(def_is_mba23)	;	# CMD	# SEL1
+	52:53	,	0b00		,	(def_is_mba23)	;	# CMD	# SEL2
+	54:55	,	0b00		,	(def_is_mba23)	;	# CMD	# SEL3
+	56:57	,	0b00		,	(def_is_mba23)	;	# CMD	# SEL4
+	58:59	,	0b00		,	(def_is_mba23)	;	# CMD	# SEL5
+	60:61	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL6
+	62:63	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL7
+}
+# DPHY01_DDRPHY_ADR_IO_SLEW_CTL_VALUE_MAP1_P1_ADR0
+scom 0x8001402b0301143f {
+	bits	,	scom_data	,	expr			;
+	48:49	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL8
+	50:51	,	0b00		,	(def_is_mba01)	;	# CMD	# SEL9
+	52:53	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL10
+	54:55	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL11
+	# -----------------  Port 3  ADR 0  Map 1  ------------------------------------
+	48:49	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL8
+	50:51	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL9
+	52:53	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL10 clk
+	54:55	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL11 clk
+}
+# -----------------  Port 1  ADR 1  -----------------------------------------------
+# DPHY01_DDRPHY_ADR_IO_SLEW_CTL_VALUE_MAP0_P1_ADR1
+scom 0x8001442a0301143f {
+	bits	,	scom_data	,	expr			;
+	48:49	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL0
+	50:51	,	0b00		,	(def_is_mba01)	;	# CMD	# SEL1
+	52:53	,	0b00		,	(def_is_mba01)	;	# CMD	# SEL2
+	54:55	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL3
+	56:57	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL4
+	58:59	,	0b00		,	(def_is_mba01)	;	# CMD	# SEL5
+	60:61	,	0b00		,	(def_is_mba01)	;	# CMD	# SEL6
+	62:63	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL7
+	# -----------------  Port 3  ADR 1  Map 0  ------------------------------------
+	48:49	,	0b00		,	(def_is_mba23)	;	# CMD	# SEL0
+	50:51	,	0b00		,	(def_is_mba23)	;	# CMD	# SEL1
+	52:53	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL2
+	54:55	,	0b00		,	(def_is_mba23)	;	# CMD	# SEL3
+	56:57	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL4
+	58:59	,	0b00		,	(def_is_mba23)	;	# CMD	# SEL5
+	60:61	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL6
+	62:63	,	0b00		,	(def_is_mba23)	;	# CMD	# SEL7
+}
+# DPHY01_DDRPHY_ADR_IO_SLEW_CTL_VALUE_MAP1_P1_ADR1
+scom 0x8001442b0301143f {
+	bits	,	scom_data	,	expr			;
+	48:49	,	0b00		,	(def_is_mba01)	;	# CMD	# SEL8
+	50:51	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL9
+	52:53	,	0b00		,	(def_is_mba01)	;	# CMD	# SEL10
+	54:55	,	0b00		,	(def_is_mba01)	;	# CMD	# SEL11
+	# -----------------  Port 3  ADR 1  Map 1  ------------------------------------
+	48:49	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL8
+	50:51	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL9
+	52:53	,	0b00		,	(def_is_mba23)	;	# CMD	# SEL10
+	54:55	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL11
+}
+# -----------------  Port 1  ADR 2  -----------------------------------------------
+# DPHY01_DDRPHY_ADR_IO_SLEW_CTL_VALUE_MAP0_P1_ADR2
+scom 0x8001482a0301143f {
+	bits	,	scom_data	,	expr			;
+	48:49	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL0
+	50:51	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL1
+	52:53	,	0b00		,	(def_is_mba01)	;	# CMD	# SEL2
+	54:55	,	0b00		,	(def_is_mba01)	;	# CMD	# SEL3
+	56:57	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL4
+	58:59	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL5
+	60:61	,	0b00		,	(def_is_mba01)	;	# CMD	# SEL6
+	62:63	,	0b00		,	(def_is_mba01)	;	# CMD	# SEL7
+	# -----------------  Port 3  ADR 2  Map 0  ------------------------------------
+	48:49	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL0
+	50:51	,	0b00		,	(def_is_mba23)	;	# CMD	# SEL1
+	52:53	,	0b00		,	(def_is_mba23)	;	# CMD	# SEL2
+	54:55	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL3
+	56:57	,	0b00		,	(def_is_mba23)	;	# CMD	# SEL4
+	58:59	,	0b00		,	(def_is_mba23)	;	# CMD	# SEL5
+	60:61	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL6
+	62:63	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL7
+}
+# DPHY01_DDRPHY_ADR_IO_SLEW_CTL_VALUE_MAP1_P1_ADR2
+scom 0x8001482b0301143f {
+	bits	,	scom_data	,	expr			;
+	48:49	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL8 clk
+	50:51	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL9 clk
+	52:53	,	0b00		,	(def_is_mba01)	;	# CMD	# SEL10
+	54:55	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL11
+	56:57	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL12
+	58:59	,	0b00		,	(def_is_mba01)	;	# CMD	# SEL13
+	# -----------------  Port 3  ADR 2  Map 1  ------------------------------------
+	48:49	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL8
+	50:51	,	0b00		,	(def_is_mba23)	;	# CMD	# SEL9
+	52:53	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL10 clk
+	54:55	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL11 clk
+	56:57	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL12 clk
+	58:59	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL13 clk
+}
+# -----------------  Port 1  ADR 3  -----------------------------------------------
+# DPHY01_DDRPHY_ADR_IO_SLEW_CTL_VALUE_MAP0_P1_ADR3
+scom 0x80014c2a0301143f {
+	bits	,	scom_data	,	expr			;
+	48:49	,	0b00		,	(def_is_mba01)	;	# CMD	# SEL0
+	50:51	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL1
+	52:53	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL2 clk
+	54:55	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL3 clk
+	56:57	,	0b00		,	(def_is_mba01)	;	# CMD	# SEL4
+	58:59	,	0b00		,	(def_is_mba01)	;	# CMD	# SEL5
+	60:61	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL6
+	62:63	,	0b01		,	(def_is_mba01)	;	# CNTL	# SEL7
+	# -----------------  Port 3  ADR 3  Map 0  ------------------------------------
+	48:49	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL0
+	50:51	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL1
+	52:53	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL2 clk
+	54:55	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL3 clk
+	56:57	,	0b00		,	(def_is_mba23)	;	# CMD	# SEL4
+	58:59	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL5
+	60:61	,	0b00		,	(def_is_mba23)	;	# CMD	# SEL6
+	62:63	,	0b00		,	(def_is_mba23)	;	# CMD	# SEL7
+}
+# DPHY01_DDRPHY_ADR_IO_SLEW_CTL_VALUE_MAP1_P1_ADR3
+scom 0x80014c2b0301143f {
+	bits	,	scom_data	,	expr			;
+	48:49	,	0b00		,	(def_is_mba01)	;	# CMD	# SEL8
+	50:51	,	0b00		,	(def_is_mba01)	;	# CMD	# SEL9
+	52:53	,	0b00		,	(def_is_mba01)	;	# CMD	# SEL10
+	54:55	,	0b00		,	(def_is_mba01)	;	# CMD	# SEL11
+	56:57	,	0b00		,	(def_is_mba01)	;	# CMD	# SEL12
+	58:59	,	0b00		,	(def_is_mba01)	;	# CMD	# SEL13
+	# -----------------  Port 3  ADR 3  Map 1  ------------------------------------
+	48:49	,	0b00		,	(def_is_mba23)	;	# CMD	# SEL8
+	50:51	,	0b00		,	(def_is_mba23)	;	# CMD	# SEL9
+	52:53	,	0b00		,	(def_is_mba23)	;	# CMD	# SEL10
+	54:55	,	0b00		,	(def_is_mba23)	;	# CMD	# SEL11
+	56:57	,	0b00		,	(def_is_mba23)	;	# CMD	# SEL12
+	58:59	,	0b01		,	(def_is_mba23)	;	# CNTL	# SEL13
+}
+
+# ---------------------------------------------------------------------------------------
+# ADR I/O Post Cursor Value Register	default=0		!! need to set?
+#
+# This register contains four Driver Post Cursor Slice values. The registers described in
+# Section 5.2.2.7 ADR I/O Post Cursor Value Map {0-1} on page 303 selects which one of
+# these four values are sent to each ADR output pin.
+#
+# The POST_CURSOR* control vectors select the amount of equalization enabled in the address
+# drivers. While the vectors determine whether a subset of the slices in each I/O operate
+# in either a normal data or post cursor data regime, it is the data history which determines
+# the amount of equalization provided at the driver output at any time.
+#
+# DPHY01_DDRPHY_ADR_IO_POST_CURSOR_VALUE_P0_ADR0	0x018	0x800040180301143f
+# PHYW.PHYX.ADRNEST.ADR32X0.HC.ADRLOGM.ADRLOGX.CONTROL.TWRAP.REG_A_18_L2
+#
+
+# ---------------------------------------------------------------------------------------
+# ADR I/O Post Cursor Value Map {0-1} Register		default=0		!! need to set?
+#
+# Each predefined pin pair on the ADR can be mapped to one of four Post Cursor values. These
+# registers determine which of the four Post Cursor values in the register described in
+# Section 5.2.2.6 ADR I/O Post Cursor Value on page 301 are used for the given ADR output pin.
+# Pins are defined by the mnemonic {{0-1}*8+n}, with n = 0 - 7, with register 0 containing
+# lanes 0:7 and register 1 containing lanes 8:15
+#
+# DPHY01_DDRPHY_ADR_IO_POST_CURSOR_VALUE_MAP0_P0_ADR0	0x028	0x800040280301143f
+# PHYW.PHYX.ADRNEST.ADR32X0.HC.ADRLOGM.ADRLOGX.CONTROL.TWRAP.REG_A_28_L2
+#
+
+# ---------------------------------------------------------------------------------------
+# Centaur Vref Trimmer Control & RCM	default=0		!! need to set RCM for DDR3/4
+#
+# Also sets RCM for DDR4 MPR mode setting(staggered, serial, parallel, custom) with
+# SEQ Read/Write Data register for values (seq_rd_wr_data)
+#
+#    ATTR_EFF_CEN_RD_VREF	DDR3 = [40375, 41750, 43125, .... 61000]	1.37%
+#		    				DDR4 = [60375, 61750, 63125, ... 81000]		1.38%
+#
+# Vref trim for Centaur is in approximately 1.375% increments from 0.40375 to 0.575.
+# Example: VDD = 1.5V(nom DDR3), ATTR_EFF_DRAM_WR_VREF = 500,
+# 		Vref = VDD * ATTR_EFF_DRAM_WR_VREF/1000 = 0.750 V
+#
+# Vref Trim table	bits=MCVREF[0:3]
+# ________DDR3 (POD=0)__________|___________DDR4 (POD=1)_________
+# 0xF = 0.61000	 0x0 = 0.50000	|  0xF = 0.81000  0x0 = 0.70000
+# 0xE = 0.59625  0x1 = 0.48625	|  0xE = 0.79625  0x1 = 0.68625
+# 0xD = 0.58250	 0x2 = 0.47250	|  0xD = 0.78250  0x2 = 0.67250
+# 0xC = 0.56875	 0x3 = 0.45875	|  0xC = 0.76875  0x3 = 0.65875
+# 0xB = 0.55500  0x4 = 0.44500	|  0xB = 0.75500  0x4 = 0.64500
+# 0xA = 0.54125	 0x5 = 0.43125	|  0xA = 0.74125  0x5 = 0.63125
+# 0x9 = 0.52750	 0x6 = 0.41750	|  0x9 = 0.72750  0x6 = 0.61750
+# 0x8 = 0.51375	 0x7 = 0.40375	|  0x8 = 0.71375  0x7 = 0.60375
+#
+#	[01:23]					P[0:1]_[0:4]
+# DPHY01_DDRPHY_DP18_RX_PEAK_AMP_P0_0		0x006	0x800000060301143f
+# PHYW.PHYX.GEN_DP#0.DPX.HC.HC.RDDP18WRAP.RDDP18CNTL_MAC.RCVRPEAK_L2
+#scom 0x800(0,1)(00,04,08,0C,10)060301143f {	# _P[0:1]_[0:4]
+scom 0x800(0,1)3C060301143f {	# _P[0:1]_[0:4] via broadcast
+	bits	,	scom_data	,	expr			;
+	48:50	,	0b000		,	any				;	# PEAK_AMP_CTL_SIDE0, amp ctl bits
+#	51		,	0b0			,	any				;	# reserved, 0=no peaking, [1:7]=0.3dB-0.9dB
+	52:54	,	0b000		,	any				;	# PEAK_AMP_CTL_SIDE1, amp ctl bits
+#	55		,	0b0			,	any				;	# reserved
+	# SxMCVREF_0_3, Vref trim ctl signals				  DDR3								DDR4
+	56:59	,	0xF			,	((ATTR_EFF_CEN_RD_VREF == 61000) || (ATTR_EFF_CEN_RD_VREF == 81000))	;
+	56:59	,	0xE			,	((ATTR_EFF_CEN_RD_VREF == 59625) || (ATTR_EFF_CEN_RD_VREF == 79625))	;
+	56:59	,	0xD			,	((ATTR_EFF_CEN_RD_VREF == 58250) || (ATTR_EFF_CEN_RD_VREF == 78250))	;
+	56:59	,	0xC			,	((ATTR_EFF_CEN_RD_VREF == 56875) || (ATTR_EFF_CEN_RD_VREF == 76875))	;
+	56:59	,	0xB			,	((ATTR_EFF_CEN_RD_VREF == 55500) || (ATTR_EFF_CEN_RD_VREF == 75500))	;
+	56:59	,	0xA			,	((ATTR_EFF_CEN_RD_VREF == 54125) || (ATTR_EFF_CEN_RD_VREF == 74125))	;
+	56:59	,	0x9			,	((ATTR_EFF_CEN_RD_VREF == 52750) || (ATTR_EFF_CEN_RD_VREF == 72750))	;
+	56:59	,	0x8			,	((ATTR_EFF_CEN_RD_VREF == 51375) || (ATTR_EFF_CEN_RD_VREF == 71375))	;
+	56:59	,	0x0			,	((ATTR_EFF_CEN_RD_VREF == 50000) || (ATTR_EFF_CEN_RD_VREF == 70000))	;
+	56:59	,	0x1			,	((ATTR_EFF_CEN_RD_VREF == 48625) || (ATTR_EFF_CEN_RD_VREF == 68625))	;
+	56:59	,	0x2			,	((ATTR_EFF_CEN_RD_VREF == 47250) || (ATTR_EFF_CEN_RD_VREF == 67250))	;
+	56:59	,	0x3			,	((ATTR_EFF_CEN_RD_VREF == 45875) || (ATTR_EFF_CEN_RD_VREF == 65875))	;
+	56:59	,	0x4			,	((ATTR_EFF_CEN_RD_VREF == 44500) || (ATTR_EFF_CEN_RD_VREF == 64500))	;
+	56:59	,	0x5			,	((ATTR_EFF_CEN_RD_VREF == 43125) || (ATTR_EFF_CEN_RD_VREF == 63125))	;
+	56:59	,	0x6			,	((ATTR_EFF_CEN_RD_VREF == 41750) || (ATTR_EFF_CEN_RD_VREF == 61750))	;
+	56:59	,	0x7			,	((ATTR_EFF_CEN_RD_VREF == 40375) || (ATTR_EFF_CEN_RD_VREF == 60375))	;
+	56:59	,	0x0			,	any				;
+	60		,	0b1			,	(def_is_ddr4)	;	# SxPODVREF, if DDR4, POD=0.7*VDD
+	60		,	0b0			,	any				;	# else (DDR3), POD=0.5*VDD
+	61		,	0b0			,	any				;	# 1=DISABLE_TERMINATION, for dq/dqs pins
+	# (00=MPR_PATTERN_BIT or staggered, custom [01=serial, 10=parallel, 11=custom] using SEQ rd/wr data
+	62:63	,	0b00		,	any				;	# READ_CENTERING_MODE
+}
+
+# ---------------------------------------------------------------------------------------
+# SEQ Read/Write Data {0-1} Register	default=0x5555		!! 	need to set to custom mode
+#																for DDR3
+#	!! Anuwat says for WLC pattern get from SN, doesn't look like its only for WLC
+#
+# For DDRPHY_DP18_RX_PEAK_AMP:Read_Centering_Mode
+#
+# Attributes
+# Read/Write via programming interface. Two registers. These two registers are used to
+# create eight beats of data by repeating every fourth bit of data within a beat.
+#
+# Description
+# The data in these registers are used to write the custom training pattern into a specified
+# memory location during calibration operations which use reserved memory locations in the
+# memory devices. The data in these registers is also used as comparison data during calibration
+# operations that perform a read operation from a reserved memory location which requires the
+# incoming read data to be compared. This register must be programmed to the pre-defined pattern
+# for protocols which provide a pre-defined pattern for read calibrations. For the most robust
+# centering solution, custom patterns for DQS Centering should have data transitions at all
+# beats. Each bit lane can have a different pattern, but the composite pattern should have
+# transitions at each beat.
+#
+#						    [0:1]
+# DPHY01_DDRPHY_SEQ_RD_WR_DATA0_P0		0x000-0x001		0x8000c4000301143f
+# PHYW.PHYX.SYNTHX.D3SIDEA.SEQX.U_SEQ_APB.RD_WR_DATA0_L2
+scom 0x8000c40(0,1)0301143f {
+	bits	,	scom_data	,	expr			;	#				beat 12345678
+	48:63	,	0x0000		,	(def_is_sim)	;	# to match dials
+	48:63	,	0x5555		,	any				;	# MPR_PATTERN_BIT of 0F0F0F0F pattern
+#	48:63	,	0xD896		,	any				;	# 1st half-nibble of EA0CA653 pattern
+}
+
+# DPHY01_DDRPHY_SEQ_RD_WR_DATA[0:1]_P1
+scom 0x8001c40(0,1)0301143f {
+	bits	,	scom_data	,	expr			;	#				beat 12345678
+	48:63	,	0x0000		,	(def_is_sim)	;	# to match dials
+	48:63	,	0x5555		,	any				;	# MPR_PATTERN_BIT of 0F0F0F0F pattern
+#	48:63	,	0xCD03		,	any				;	# 2st half-nibble of EA0CA653 pattern
+}
+
+# ---------------------------------------------------------------------------------------
+# DP18 Pattern Position 0 Register		default=0
+#	needed for DDR4 staggered pattern, not setting in initfile since needs to be sequenced.
+#
+# SYSTEM Dependent due to wiring on data bus.
+# Volt = planar.	all ISDIMMs (LRDIMM, UDIMM, RDIMM) should have same wiring.  Ken requirement.
+#
+# Bare minimum to support DDR4 parallel/staggered pattern on single rank or all ranks if wired
+# exactly the same per port, or if this register is written to each time a calibration of a rank
+# is performed.
+#
+# use CDIMM to identify, need short vs tall?
+#
+# Need to check with layout people(Brian Connolly[CDIMM] and Cindy Armstrong[ISDIMMs on Volt])
+# in order to confirm C4 to DQ mappings.
+#
+# No need to set POS_2 since lanes 16-23 always DQS
+# POS_0_P0_0 = DP0, lanes 0-7
+# POS_1_P0_0 = DP0, lanes 8-15
+# POS_0_P0_1 = DP1, lanes 0-7
+# POS_1_P0_1 = DP1, lanes 8-15
+# POS_0_P0_2 = DP2, lanes 0-7
+# POS_1_P0_2 = DP2, lanes 8-15
+# POS_0_P0_3 = DP3, lanes 0-7
+# POS_1_P0_3 = DP3, lanes 8-15
+# POS_0_P0_4 = DP4, lanes 0-7
+# POS_1_P0_4 = DP4, lanes 8-15
+#
+#	[01:23]					[0:2]_P[0:1]_[0:4]
+# DPHY01_DDRPHY_DP18_PATTERN_POS_0_P0_0		0x032	0x800000320301143f
+# DPHY01_DDRPHY_DP18_PATTERN_POS_1_P0_0		0x033	0x800000330301143f
+# DPHY01_DDRPHY_DP18_PATTERN_POS_2_P0_0		0x034	0x800000340301143f
+# PHYW.PHYX.GEN_DP#0.DPX.HC.HC.RDDP18WRAP.RDDP18CNTL_MAC.DQMAP0_7_L2
+#
+
+#-------------------------------------------------------------------------------
+# DDR Vref Output Driver Control register		default=0, output to DIMM
+#
+#    ATTR_EFF_DRAM_WR_VREF	DDR3 = [420, 425, 430, ... 575]
+#    Note:  NOT valid for DDR4.
+#
+# Vref driven to the DIMM(s) in 0.5% increments from 0.420 to 0.575.
+# Example: VDD=1.5V(nom DDR3), ATTR_EFF_DRAM_WR_VREF = 500,
+# 		Vref = VDD * ATTR_EFF_DRAM_WR_VREF/1000 = 0.750 V
+#
+# sign bit, VREFDQ[0:3]D
+# 01111 = 575+ 	01110 = 535		10000 = 495 	10001 = 455
+# 00111 = 570 	00110 = 530 	11000 = 490 	11001 = 450
+# 01011 = 565 	01010 = 525 	10100 = 485 	10101 = 445
+# 00011 = 560 	00010 = 520 	11100 = 480 	11101 = 440
+# 01101 = 555 	01100 = 515 	10010 = 475 	10011 = 435
+# 00101 = 550 	00100 = 510 	11010 = 470 	11011 = 430
+# 01001 = 545 	01000 = 505 	10110 = 465 	10111 = 425
+# 00001 = 540	00000 = 500*	11110 = 460		11111 = 420-
+#
+#	[01:23]						   [0:1]
+# DPHY01_DDRPHY_PC_VREF_DRV_CONTROL_P0		0x015	0x8000c0150301143f
+scom 0x8000c0150301143f {
+	bits	,	scom_data	,	expr							;
+	48		,	0b1			,	(ATTR_EFF_DRAM_WR_VREF < 500)	;	# VREFDQ0 sign bit
+	48		,	0b0			,	(ATTR_EFF_DRAM_WR_VREF >= 500)	;	# VREFDQ0 sign bit
+	# VREFDQ0D bit enables
+	49:52	,	0xF			,	((ATTR_EFF_DRAM_WR_VREF == 575) || (ATTR_EFF_DRAM_WR_VREF == 420))	;
+	49:52	,	0x7			,	((ATTR_EFF_DRAM_WR_VREF == 570) || (ATTR_EFF_DRAM_WR_VREF == 425))	;
+	49:52	,	0xB			,	((ATTR_EFF_DRAM_WR_VREF == 565) || (ATTR_EFF_DRAM_WR_VREF == 430))	;
+	49:52	,	0x3			,	((ATTR_EFF_DRAM_WR_VREF == 560) || (ATTR_EFF_DRAM_WR_VREF == 435))	;
+	49:52	,	0xD			,	((ATTR_EFF_DRAM_WR_VREF == 555) || (ATTR_EFF_DRAM_WR_VREF == 440))	;
+	49:52	,	0x5			,	((ATTR_EFF_DRAM_WR_VREF == 550) || (ATTR_EFF_DRAM_WR_VREF == 445))	;
+	49:52	,	0x9			,	((ATTR_EFF_DRAM_WR_VREF == 545) || (ATTR_EFF_DRAM_WR_VREF == 450))	;
+	49:52	,	0x1			,	((ATTR_EFF_DRAM_WR_VREF == 540) || (ATTR_EFF_DRAM_WR_VREF == 455))	;
+	49:52	,	0xE			,	((ATTR_EFF_DRAM_WR_VREF == 535) || (ATTR_EFF_DRAM_WR_VREF == 460))	;
+	49:52	,	0x6			,	((ATTR_EFF_DRAM_WR_VREF == 530) || (ATTR_EFF_DRAM_WR_VREF == 465))	;
+	49:52	,	0xA			,	((ATTR_EFF_DRAM_WR_VREF == 525) || (ATTR_EFF_DRAM_WR_VREF == 470))	;
+	49:52	,	0x2			,	((ATTR_EFF_DRAM_WR_VREF == 520) || (ATTR_EFF_DRAM_WR_VREF == 475))	;
+	49:52	,	0xC			,	((ATTR_EFF_DRAM_WR_VREF == 515) || (ATTR_EFF_DRAM_WR_VREF == 480))	;
+	49:52	,	0x4			,	((ATTR_EFF_DRAM_WR_VREF == 510) || (ATTR_EFF_DRAM_WR_VREF == 485))	;
+	49:52	,	0x8			,	((ATTR_EFF_DRAM_WR_VREF == 505) || (ATTR_EFF_DRAM_WR_VREF == 490))	;
+	49:52	,	0x0			,	((ATTR_EFF_DRAM_WR_VREF == 500) || (ATTR_EFF_DRAM_WR_VREF == 495))	;
+	49:52	,	0b0000		,	any								;	# VREFDQ0D bit enables
+	53		,	0b1			,	(ATTR_EFF_DRAM_WR_VREF < 500)	;	# VREFDQ1 sign bit
+	53		,	0b0			,	(ATTR_EFF_DRAM_WR_VREF >= 500)	;	# VREFDQ1 sign bit
+	# VREFDQ1D bit enables
+	54:57	,	0xF			,	((ATTR_EFF_DRAM_WR_VREF == 575) || (ATTR_EFF_DRAM_WR_VREF == 420))	;
+	54:57	,	0x7			,	((ATTR_EFF_DRAM_WR_VREF == 570) || (ATTR_EFF_DRAM_WR_VREF == 425))	;
+	54:57	,	0xB			,	((ATTR_EFF_DRAM_WR_VREF == 565) || (ATTR_EFF_DRAM_WR_VREF == 430))	;
+	54:57	,	0x3			,	((ATTR_EFF_DRAM_WR_VREF == 560) || (ATTR_EFF_DRAM_WR_VREF == 435))	;
+	54:57	,	0xD			,	((ATTR_EFF_DRAM_WR_VREF == 555) || (ATTR_EFF_DRAM_WR_VREF == 440))	;
+	54:57	,	0x5			,	((ATTR_EFF_DRAM_WR_VREF == 550) || (ATTR_EFF_DRAM_WR_VREF == 445))	;
+	54:57	,	0x9			,	((ATTR_EFF_DRAM_WR_VREF == 545) || (ATTR_EFF_DRAM_WR_VREF == 450))	;
+	54:57	,	0x1			,	((ATTR_EFF_DRAM_WR_VREF == 540) || (ATTR_EFF_DRAM_WR_VREF == 455))	;
+	54:57	,	0xE			,	((ATTR_EFF_DRAM_WR_VREF == 535) || (ATTR_EFF_DRAM_WR_VREF == 460))	;
+	54:57	,	0x6			,	((ATTR_EFF_DRAM_WR_VREF == 530) || (ATTR_EFF_DRAM_WR_VREF == 465))	;
+	54:57	,	0xA			,	((ATTR_EFF_DRAM_WR_VREF == 525) || (ATTR_EFF_DRAM_WR_VREF == 470))	;
+	54:57	,	0x2			,	((ATTR_EFF_DRAM_WR_VREF == 520) || (ATTR_EFF_DRAM_WR_VREF == 475))	;
+	54:57	,	0xC			,	((ATTR_EFF_DRAM_WR_VREF == 515) || (ATTR_EFF_DRAM_WR_VREF == 480))	;
+	54:57	,	0x4			,	((ATTR_EFF_DRAM_WR_VREF == 510) || (ATTR_EFF_DRAM_WR_VREF == 485))	;
+	54:57	,	0x8			,	((ATTR_EFF_DRAM_WR_VREF == 505) || (ATTR_EFF_DRAM_WR_VREF == 490))	;
+	54:57	,	0x0			,	((ATTR_EFF_DRAM_WR_VREF == 500) || (ATTR_EFF_DRAM_WR_VREF == 495))	;
+	54:57	,	0b0000		,	any								;
+#	58:63	,	0b000000	,	any								;	# reserved
+
+# sign bit, VREFDQ[0:3]D
+# 01111 = 575+ 	01110 = 535		10000 = 495 	10001 = 455
+# 00111 = 570 	00110 = 530 	11000 = 490 	11001 = 450
+# 01011 = 565 	01010 = 525 	10100 = 485 	10101 = 445
+# 00011 = 560 	00010 = 520 	11100 = 480 	11101 = 440
+# 01101 = 555 	01100 = 515 	10010 = 475 	10011 = 435
+# 00101 = 550 	00100 = 510 	11010 = 470 	11011 = 430
+# 01001 = 545 	01000 = 505 	10110 = 465 	10111 = 425
+# 00001 = 540	00000 = 500*	11110 = 460		11111 = 420-
+#
+#																	D0SIGN, D0ENA, D1SIGN, D1ENA
+# 	48:57	,	0x1EF		,	(ATTR_EFF_DRAM_WR_VREF == 575)	;	# 0b 0 1111 0 1111	,	0b01 1110 1111
+# 	48:57	,	0x0E7		,	(ATTR_EFF_DRAM_WR_VREF == 570)	;	# 0b 0 0111 0 0111	,	0b00 1110 0111
+# 	48:57	,	0x16B		,	(ATTR_EFF_DRAM_WR_VREF == 565)	;	# 0b 0 1011 0 1011	,	0b01 0110 1011
+# 	48:57	,	0x063		,	(ATTR_EFF_DRAM_WR_VREF == 560)	;	# 0b 0 0011 0 0011	,	0b00 0110 0011
+# 	48:57	,	0x1AD		,	(ATTR_EFF_DRAM_WR_VREF == 555)	;	# 0b 0 1101 0 1101	,	0b01 1010 1101
+# 	48:57	,	0x0A5		,	(ATTR_EFF_DRAM_WR_VREF == 550)	;	# 0b 0 0101 0 0101	,	0b00 1010 0101
+# 	48:57	,	0x129		,	(ATTR_EFF_DRAM_WR_VREF == 545)	;	# 0b 0 1001 0 1001	,	0b01 0010 1001
+# 	48:57	,	0x029		,	(ATTR_EFF_DRAM_WR_VREF == 540)	;	# 0b 0 0001 0 0001	,	0b00 0010 0001
+# 	48:57	,	0x1CE		,	(ATTR_EFF_DRAM_WR_VREF == 535)	;	# 0b 0 1110 0 1110	,	0b01 1100 1110
+# 	48:57	,	0x0C6		,	(ATTR_EFF_DRAM_WR_VREF == 530)	;	# 0b 0 0110 0 0110	,	0b00 1100 0110
+# 	48:57	,	0x14A		,	(ATTR_EFF_DRAM_WR_VREF == 525)	;	# 0b 0 1010 0 1010	,	0b01 0100 1010
+# 	48:57	,	0x042		,	(ATTR_EFF_DRAM_WR_VREF == 520)	;	# 0b 0 0010 0 0010	,	0b00 0100 0010
+# 	48:57	,	0x01C		,	(ATTR_EFF_DRAM_WR_VREF == 515)	;	# 0b 0 1100 0 1100	,	0b01 1000 1100
+# 	48:57	,	0x004		,	(ATTR_EFF_DRAM_WR_VREF == 510)	;	# 0b 0 0100 0 0100	,	0b00 1000 0100
+# 	48:57	,	0x108		,	(ATTR_EFF_DRAM_WR_VREF == 505)	;	# 0b 0 1000 0 1000	,	0b01 0000 1000
+# 	48:57	,	0x000		,	(ATTR_EFF_DRAM_WR_VREF == 500)	;	# 0b 0 0000 0 0000	,	0b00 0000 0000
+# 	48:57	,	0x210		,	(ATTR_EFF_DRAM_WR_VREF == 495)	;	# 0b 1 0000 1 0000	,	0b10 0001 0000
+# 	48:57	,	0x318		,	(ATTR_EFF_DRAM_WR_VREF == 490)	;	# 0b 1 1000 1 1000	,	0b11 0001 1000
+# 	48:57	,	0x294		,	(ATTR_EFF_DRAM_WR_VREF == 485)	;	# 0b 1 0100 1 0100	,	0b10 1001 0100
+# 	48:57	,	0x39C		,	(ATTR_EFF_DRAM_WR_VREF == 480)	;	# 0b 1 1100 1 1100	,	0b11 1001 1100
+# 	48:57	,	0x252		,	(ATTR_EFF_DRAM_WR_VREF == 475)	;	# 0b 1 0010 1 0010	,	0b10 0101 0010
+# 	48:57	,	0x35A		,	(ATTR_EFF_DRAM_WR_VREF == 470)	;	# 0b 1 1010 1 1010	,	0b11 0101 1010
+# 	48:57	,	0x2D6		,	(ATTR_EFF_DRAM_WR_VREF == 465)	;	# 0b 1 0110 1 0110	,	0b10 1101 0110
+# 	48:57	,	0x3DE		,	(ATTR_EFF_DRAM_WR_VREF == 460)	;	# 0b 1 1110 1 1110	,	0b11 1101 1110
+# 	48:57	,	0x231		,	(ATTR_EFF_DRAM_WR_VREF == 455)	;	# 0b 1 0001 1 0001	,	0b10 0011 0001
+# 	48:57	,	0x339		,	(ATTR_EFF_DRAM_WR_VREF == 450)	;	# 0b 1 1001 1 1001	,	0b11 0011 1001
+# 	48:57	,	0x2B5		,	(ATTR_EFF_DRAM_WR_VREF == 445)	;	# 0b 1 0101 1 0101	,	0b10 1011 0101
+# 	48:57	,	0x3BD		,	(ATTR_EFF_DRAM_WR_VREF == 440)	;	# 0b 1 1101 1 1101	,	0b11 1011 1101
+# 	48:57	,	0x273		,	(ATTR_EFF_DRAM_WR_VREF == 435)	;	# 0b 1 0011 1 0011	,	0b10 0111 0011
+# 	48:57	,	0x37B		,	(ATTR_EFF_DRAM_WR_VREF == 430)	;	# 0b 1 1011 1 1011	,	0b11 0111 1011
+# 	48:57	,	0x2F7		,	(ATTR_EFF_DRAM_WR_VREF == 425)	;	# 0b 1 0111 1 0111	,	0b10 1111 0111
+# 	48:57	,	0x3FF		,	(ATTR_EFF_DRAM_WR_VREF == 420)	;	# 0b 1 1111 1 1111	,	0b11 1111 1111
+}
+
+#-------------------------------------------------------------------------------
+# 	ODT Default Configuration Register
+#
+# Determines the ODT values sent to all ranks during MRS commands
+# basically used when ODT pins used as CID (chip ID) for TSV DIMMs...
+#
+# DDRPHY_SEQ_ODT_DEFAULT_CONFIG		SEQ 0x024	0x...
+#
+# 48:55 = ODT[0:7]
+
+#-------------------------------------------------------------------------------
+# 	ODT Read Registers		default=0
+#
+# Determines the ODT values sent to all ranks when the given rank in read
+# operation during calibration.
+# 48:55	are ODT pins 0-7 (bit0-7) during read of rank {0-3}*2
+# 56:63	are ODT pins 0-7 (bit8-15) during read of rank {0-3}*2+1
+#
+# bit#=odt#		  0..1	0..1  0..3		ODT0:1	ODT2:3	ODT4:5	ODT6:7
+# ATTR_EFF_ODT_RD[port][dimm][rank] = 	dimm0	dimm1	dimm2	unused;
+#									bits 0:1     2:3     4:5     6:7
+#
+# DPHY01_DDRPHY_SEQ_ODT_RD_CONFIG0_P0	0x00E	0x8000c40e0301143f
+# PHYW.PHYX.SYNTHX.D3SIDEA.SEQX.U_SEQ_APB.ODT_RD_CONFIG0_L2
+scom 0x8000C40E0301143F {
+#		      ODT 01234567
+	bits	,	scom_data					;	# DIMM0, Port0
+	48:55	,	ATTR_EFF_ODT_RD[0][0][0]	;	# when Read of Rank0
+	56:63	,	ATTR_EFF_ODT_RD[0][0][1]	;	# when Read of Rank1
+}
+# DPHY01_DDRPHY_SEQ_ODT_RD_CONFIG1_P0
+scom 0x8000C40F0301143F {
+	bits	,	scom_data					;	# DIMM0, Port0
+	48:55	,	ATTR_EFF_ODT_RD[0][0][2]	;	# when Read of Rank2
+	56:63	,	ATTR_EFF_ODT_RD[0][0][3]	;	# when Read of Rank3
+}
+# DPHY01_DDRPHY_SEQ_ODT_RD_CONFIG2_P0
+scom 0x8000C4100301143F {
+	bits	,	scom_data					;	# DIMM1, Port0
+	48:55	,	ATTR_EFF_ODT_RD[0][1][0]	;	# when Read of Rank4
+	56:63	,	ATTR_EFF_ODT_RD[0][1][1]	;	# when Read of Rank5
+}
+# DPHY01_DDRPHY_SEQ_ODT_RD_CONFIG3_P0
+scom 0x8000C4110301143F {
+	bits	,	scom_data					;	# DIMM1, Port0
+	48:55	,	ATTR_EFF_ODT_RD[0][1][2]	;	# when Read of Rank6
+	56:63	,	ATTR_EFF_ODT_RD[0][1][3]	;	# when Read of Rank7
+}
+# -------  Read ODT  Port 1 (DIMM2 & DIMM3)  ----------------------------------
+# DPHY01_DDRPHY_SEQ_ODT_RD_CONFIG0_P1
+scom 0x8001C40E0301143F {
+	bits	,	scom_data					;	# DIMM2, Port1
+	48:55	,	ATTR_EFF_ODT_RD[1][0][0]	;	# when Read of Rank0
+	56:63	,	ATTR_EFF_ODT_RD[1][0][1]	;	# when Read of Rank1
+}
+# DPHY01_DDRPHY_SEQ_ODT_RD_CONFIG1_P1
+scom 0x8001C40F0301143F {
+	bits	,	scom_data					;	# DIMM2, Port1
+	48:55	,	ATTR_EFF_ODT_RD[1][0][2]	;	# when Read of Rank2
+	56:63	,	ATTR_EFF_ODT_RD[1][0][3]	;	# when Read of Rank3
+}
+# DPHY01_DDRPHY_SEQ_ODT_RD_CONFIG2_P1
+scom 0x8001C4100301143F {
+	bits	,	scom_data					;	# DIMM3, Port1
+	48:55	,	ATTR_EFF_ODT_RD[1][1][0]	;	# when Read of Rank4
+	56:63	,	ATTR_EFF_ODT_RD[1][1][1]	;	# when Read of Rank5
+}
+# DPHY01_DDRPHY_SEQ_ODT_RD_CONFIG3_P1
+scom 0x8001C4110301143F {
+	bits	,	scom_data					;	# DIMM3, Port1
+	48:55	,	ATTR_EFF_ODT_RD[1][1][2]	;	# when Read of Rank6
+	56:63	,	ATTR_EFF_ODT_RD[1][1][3]	;	# when Read of Rank7
+}
+#================================================================================
+#  ODT write registers		default=0
+#
+# bit#=odt#		  0..1	0..1  0..3		ODT0:1	ODT2:3	ODT4:5	ODT6:7
+# ATTR_EFF_ODT_WR[port][dimm][rank] = 	dimm0	dimm1	dimm2	unused	;
+#
+# DPHY01_DDRPHY_SEQ_ODT_WR_CONFIG0_P0		0x000A	0x8000c40a0301143f
+# PHYW.PHYX.SYNTHX.D3SIDEA.SEQX.U_SEQ_APB.ODT_WR_CONFIG0_L2
+scom 0x8000C40A0301143F {
+	bits	,	scom_data					;	# DIMM0, Port0
+	48:55	,	ATTR_EFF_ODT_WR[0][0][0]	;	# when write of Rank0
+	56:63	,	ATTR_EFF_ODT_WR[0][0][1]	;	# when write of Rank1
+}
+# DPHY01_DDRPHY_SEQ_ODT_WR_CONFIG1_P0
+scom 0x8000C40B0301143F {
+	bits	,	scom_data					;	# DIMM0, Port0
+	48:55	,	ATTR_EFF_ODT_WR[0][0][2]	;	# when write of Rank2
+	56:63	,	ATTR_EFF_ODT_WR[0][0][3]	;	# when write of Rank3
+}
+# DPHY01_DDRPHY_SEQ_ODT_WR_CONFIG2_P0
+scom 0x8000C40C0301143F {
+	bits	,	scom_data					;	# DIMM1, Port0
+	48:55	,	ATTR_EFF_ODT_WR[0][1][0]	;	# when write of Rank4
+	56:63	,	ATTR_EFF_ODT_WR[0][1][1]	;	# when write of Rank5
+}
+# DPHY01_DDRPHY_SEQ_ODT_WR_CONFIG3_P0
+scom 0x8000C40D0301143F {
+	bits	,	scom_data					;	# DIMM1, Port0
+	48:55	,	ATTR_EFF_ODT_WR[0][1][2]	;	# when write of Rank6
+	56:63	,	ATTR_EFF_ODT_WR[0][1][3]	;	# when write of Rank7
+}
+# -------  Write ODT  Port 1 (DIMM2 & DIMM3)  ----------------------------------
+# DPHY01_DDRPHY_SEQ_ODT_WR_CONFIG0_P1
+scom 0x8001C40A0301143F {
+	bits	,	scom_data					;	# DIMM2, Port1
+	48:55	,	ATTR_EFF_ODT_WR[1][0][0]	;	# when write of Rank0
+	56:63	,	ATTR_EFF_ODT_WR[1][0][1]	;	# when write of Rank1
+}
+# DPHY01_DDRPHY_SEQ_ODT_WR_CONFIG1_P1
+scom 0x8001C40B0301143F {
+	bits	,	scom_data					;	# DIMM2, Port1
+	48:55	,	ATTR_EFF_ODT_WR[1][0][2]	;	# when write of Rank2
+	56:63	,	ATTR_EFF_ODT_WR[1][0][3]	;	# when write of Rank3
+}
+# DPHY01_DDRPHY_SEQ_ODT_WR_CONFIG2_P1
+scom 0x8001C40C0301143F {
+	bits	,	scom_data					;	# DIMM3, Port1
+	48:55	,	ATTR_EFF_ODT_WR[1][1][0]	;	# when write of Rank4
+	56:63	,	ATTR_EFF_ODT_WR[1][1][1]	;	# when write of Rank5
+}
+# DPHY01_DDRPHY_SEQ_ODT_WR_CONFIG3_P1
+scom 0x8001C40D0301143F {
+	bits	,	scom_data					;	# DIMM3, Port1
+	48:55	,	ATTR_EFF_ODT_WR[1][1][2]	;	# when write of Rank6
+	56:63	,	ATTR_EFF_ODT_WR[1][1][3]	;	# when write of Rank7
+}
+
+# ---------------------------------------------------------------------------------------
+# PC MODE registers			default=0		done in mss_draminit.C
+#
+# DPHY01_DDRPHY_PC_MR0_PRI_RP0_P0		0x01C	0x8000c01c0301143f
+# PHYW.PHYX.SYNTHX.D3SIDEA.PCX.REG28_RP0_L2
+#
+# ~~~~~~~~~~~~  Mode Register settings  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# -- MR0 --		DDRPHY_PC_MR0_PRI_RP[0:3]_P[0:1]	0x01C	0x8000c01c0301143f
+# ATTR_EFF_DRAM_DLL_PPD						# 0=slow exit, 1=fast exit
+# ATTR_EFF_DRAM_WR
+# ATTR_EFF_DRAM_DLL_RESET					# 0=no, 1=yes
+# ATTR_EFF_DRAM_TM							# 0=normal, 1= Test
+# ATTR_EFF_DRAM_CL
+# ATTR_EFF_DRAM_RBT							# 0=sequential, 1=interleave
+# ATTR_EFF_DRAM_BL							# 0=BL8, OTF=1, BC4=2
+# -- MR1 --		DDRPHY_PC_MR1_PRI_RP[0:3]_P[0:1]	0x01D	0x8000c01d0301143f
+# ATTR_EFF_DRAM_OUTPUT_BUFFER				# 0=enable, 1=disable
+# ATTR_EFF_DRAM_TDQS						# 0=disable, 1=enable
+# ATTR_EFF_DRAM_RTT_NOM	[0..1][0..1][0..3]	# 0, 20, 30, 34(DDR4), 40, 48(DDR4), 50, 80(DDR4), 120, 240(DDR4)
+# ATTR_EFF_DRAM_WR_LVL_ENABLE				# 0=disable, 1=enable
+# ATTR_EFF_DRAM_RON	[0..1][0..1]			# 34, 40(DDR3)
+# ATTR_EFF_DRAM_AL							# 0=disable, 1=CL-1, 2=CL-2
+# ATTR_EFF_DRAM_DLL_ENABLE					# 0=enable 1=disable
+# -- MR2 --		DDRPHY_PC_MR2_PRI_RP[0:3]_P[0:1]	0x01E	0x8000c01e0301143f
+# ATTR_EFF_DRAM_RTT_WR	[0..1][0..1][0..3]	# 0, 60, 120
+# ATTR_EFF_DRAM_SRT							# 0=normal, 1=extend
+# ATTR_EFF_DRAM_ASR							# 0=SRT, 1=ASR
+# ATTR_EFF_DRAM_CWL
+# ATTR_EFF_DRAM_PASR	# 0=full, 1=1st 1/2, 2=1st 1/4, 3=1st 1/8, 4=last 3/4, 5=last 1/2, 6=last 1/4, 7=last 1/8
+# -- MR3 --		DDRPHY_PC_MR3_PRI_RP[0:3]_P[0:1]	0x01F	0x8000c01f0301143f
+# ATTR_EFF_MPR_MODE							# 0=disable, 1=enable
+# ATTR_EFF_MPR_LOC
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+# ATTR_EFF_DIMM_RCD_CNTL_WORD_0_15	[0..1][0..1]	uint64
+#
+# RCD_LRDIM_CNTL_WORD0_15Q	0x000000dd
+# CWD=BA1,BA0,A4,A3	0:3=CWD0, 4:7=CWD1, 8:11=CWD2, etc.
+# last RCD or LRDIMM control word that was programmed using CCS.
+
+# ---------------------------------------------------------------------------------------
+# PC Chip select ID configuration register	default=0	!! need to set?
+#
+# This register controls the value of Chip Select (CS) signals not selected
+# by any of the PC Rank Pair registers during initial calibration.
+#
+# DPHY01_DDRPHY_PC_CSID_CFG_P0		0x033	0x8000c0330301143f
+# PHYW.PHYX.SYNTHX.D3SIDEA.PCX.REG51_L2
+
+# ---------------------------------------------------------------------------------------
+# DP18 DQSCLK offset		default=0x0200			needed for SIM
+#
+# Used to pervent switching to the live DQS too early in RLDRAM or DDR4 modes or during
+# calibration routines of all protocols.
+#
+# DQS_OFFSET = 10 + ceiling(peak_to_peak_jitter_magnitude_in_ticks / 2)
+# or more specifically:
+# DQS_OFFSET = 2 + ceiling(peak_to_peak_jitter_magnitude_in_ticks / 2) +
+# 		(peak_to_peak_periodic_drift_in_ticks/2)
+# Where peak_to_peak_jitter_magnitude_in_ticks is a whole number equal to the read clock
+# strobe (DQS) peak to peak jitter rounded up to the nearest 128th memory clock. And,
+# peak_to_peak_periodic_drift_in_ticks is the peak to peak drift of the read clock strobe
+# (DQS) rounded up to the nearest 128th memory clock.
+# The + 2 term in the equation accounts for the jitter sources within the DDR PHY.
+#
+# Setup margin time... would cause read errors if set incorrectly.
+# James Mossman for more details.
+#
+# DPHY01_DDRPHY_DP18_DQSCLK_OFFSET_P0_0		0x037	0x800000370301143f
+# PHYW.PHYX.GEN_DP#0.DPX.HC.HC.RDDP18WRAP.RDDP18CNTL_MAC.DQSOFFSET_L2(0:6)
+scom 0x800(0,1)3C370301143f {	# _P[0:1]_[0:4]
+	bits	,	scom_data		,	expr			;
+#	48		,	0b0				,	any				;	# reserved
+#	49:55	,	0b0010000		,	(def_is_sim)	;	# DQS_OFFSET
+	49:55	,	def_dqs_offset ,	any				;	# DQS_OFFSET, 7 bits
+#	56:63	,	0b0				,	any				;	# reserved
+}
+
+# ---------------------------------------------------------------------------------------
+# DP18 Write DQ offset value register	default=0		aka=windage
+#
+# Used to perform a pre-offset before write leveling starts.  Value will be used by the
+# Write centering calibration state machine.
+# NOTE:  Does NOT affect the data bit delay values if calibration is not run!
+#
+# 200 ps offset / # steps based on freq?
+#
+#	[01:23]				_RP[0:3]_P[0:1]_[0:4]
+# DPHY01_DDRPHY_DP18_DQ_WR_OFFSET_RP0_P0_0		0x07E	0x8000007e0301143f
+# PHYW.PHYX.GEN_DP#0.DPX.HC.HC.D3PHY_WRDP18WRAP.D3PHY_WRDP18CNTL_MAC.DDRPHY_DP18_DQS_WR_OFFSET_RP0_L2
+#
+#scom 0x8000007e0301143f {					# _RP0_P0_0
+#scom 0x8000(00,04,08,0C,10)7E0301143f {	# _RP0_P0_[0:4], all instances
+#scom 0x80003C7E0301143f {					# _RP0_P0_[0:4], all instances via broadcast
+#scom 0x80003(C,D,E,F)7E0301143f {			# _RP[0:3]_P0_[0:4], all instances(broadcast), all rank pairs
+#scom 0x80003CFE0301143f {					# _RP[0:3]_P0_[0:4], all instances and rank pairs via broadcast
+#
+# _RP[0:3]_P[0:1]_[0:4], all instances and rank pairs via broadcast, both ports
+# scom 0x800(0,1)3CFE0301143f {	# _RP[0:3]_P[0:1]_[0:4]
+# 	bits	,	scom_data	,	expr			;
+# 	48:51	,	0x0			,	any				;	# DQ_WR_OFFSET_N0
+# 	52:55	,	0x0			,	any				;	# DQ_WR_OFFSET_N1
+# 	56:59	,	0x0			,	any				;	# DQ_WR_OFFSET_N2
+# 	60:63	,	0x0			,	any				;	# DQ_WR_OFFSET_N3
+# }
+#
+# scom 0x80003C7E0301143f {	# _RP0_P0_[0:4], rank pair 0, all instances via broadcast
+# 	bits	,	scom_data	,	expr			;
+# 	~~~~~~~~~~~~~~~  Port 0  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 	48:51	,	0x0			,	(def_is_mba01)		;	# DQ_WR_OFFSET_N0
+# 	52:55	,	0x0			,	(def_is_mba01)		;	# DQ_WR_OFFSET_N1
+# 	56:59	,	0x0			,	(def_is_mba01)		;	# DQ_WR_OFFSET_N2
+# 	60:63	,	0x0			,	(def_is_mba01)		;	# DQ_WR_OFFSET_N3
+# 	~~~~~~~~~~~~~~~  Port 2  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 	48:51	,	0x0			,	(def_is_mba23)		;	# DQ_WR_OFFSET_N0
+# 	52:55	,	0x0			,	(def_is_mba23)		;	# DQ_WR_OFFSET_N1
+# 	56:59	,	0x0			,	(def_is_mba23)		;	# DQ_WR_OFFSET_N2
+# 	60:63	,	0x0			,	(def_is_mba23)		;	# DQ_WR_OFFSET_N3
+# }
+# scom 0x80003D7E0301143f {	# _RP1_P0_[0:4], rank pair 1, all instances via broadcast
+# 	bits	,	scom_data	,	expr			;
+# 	~~~~~~~~~~~~~~~  Port 0  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 	48:51	,	0x0			,	(def_is_mba01)		;	# DQ_WR_OFFSET_N0
+# 	52:55	,	0x0			,	(def_is_mba01)		;	# DQ_WR_OFFSET_N1
+# 	56:59	,	0x0			,	(def_is_mba01)		;	# DQ_WR_OFFSET_N2
+# 	60:63	,	0x0			,	(def_is_mba01)		;	# DQ_WR_OFFSET_N3
+# 	~~~~~~~~~~~~~~~  Port 2  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 	48:51	,	0x0			,	(def_is_mba23)		;	# DQ_WR_OFFSET_N0
+# 	52:55	,	0x0			,	(def_is_mba23)		;	# DQ_WR_OFFSET_N1
+# 	56:59	,	0x0			,	(def_is_mba23)		;	# DQ_WR_OFFSET_N2
+# 	60:63	,	0x0			,	(def_is_mba23)		;	# DQ_WR_OFFSET_N3
+# }
+# scom 0x80003E7E0301143f {	# _RP2_P0_[0:4], rank pair 2, all instances via broadcast
+# 	bits	,	scom_data	,	expr			;
+# 	~~~~~~~~~~~~~~~  Port 0  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 	48:51	,	0x0			,	(def_is_mba01)		;	# DQ_WR_OFFSET_N0
+# 	52:55	,	0x0			,	(def_is_mba01)		;	# DQ_WR_OFFSET_N1
+# 	56:59	,	0x0			,	(def_is_mba01)		;	# DQ_WR_OFFSET_N2
+# 	60:63	,	0x0			,	(def_is_mba01)		;	# DQ_WR_OFFSET_N3
+# 	~~~~~~~~~~~~~~~  Port 2  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 	48:51	,	0x0			,	(def_is_mba23)		;	# DQ_WR_OFFSET_N0
+# 	52:55	,	0x0			,	(def_is_mba23)		;	# DQ_WR_OFFSET_N1
+# 	56:59	,	0x0			,	(def_is_mba23)		;	# DQ_WR_OFFSET_N2
+# 	60:63	,	0x0			,	(def_is_mba23)		;	# DQ_WR_OFFSET_N3
+# }
+# scom 0x80003F7E0301143f {	# _RP3_P0_[0:4], rank pair 3, all instances via broadcast
+# 	bits	,	scom_data	,	expr			;
+# 	~~~~~~~~~~~~~~~  Port 0  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 	48:51	,	0x0			,	(def_is_mba01)		;	# DQ_WR_OFFSET_N0
+# 	52:55	,	0x0			,	(def_is_mba01)		;	# DQ_WR_OFFSET_N1
+# 	56:59	,	0x0			,	(def_is_mba01)		;	# DQ_WR_OFFSET_N2
+# 	60:63	,	0x0			,	(def_is_mba01)		;	# DQ_WR_OFFSET_N3
+# 	~~~~~~~~~~~~~~~  Port 2  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 	48:51	,	0x0			,	(def_is_mba23)		;	# DQ_WR_OFFSET_N0
+# 	52:55	,	0x0			,	(def_is_mba23)		;	# DQ_WR_OFFSET_N1
+# 	56:59	,	0x0			,	(def_is_mba23)		;	# DQ_WR_OFFSET_N2
+# 	60:63	,	0x0			,	(def_is_mba23)		;	# DQ_WR_OFFSET_N3
+# }
+# ===============================================================================
+# scom 0x80013C7E0301143f {	# _RP0_P1_[0:4], rank pair 0, all instances via broadcast
+# 	bits	,	scom_data	,	expr			;
+# 	~~~~~~~~~~~~~~~  Port 1  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 	48:51	,	0x0			,	(def_is_mba01)		;	# DQ_WR_OFFSET_N0
+# 	52:55	,	0x0			,	(def_is_mba01)		;	# DQ_WR_OFFSET_N1
+# 	56:59	,	0x0			,	(def_is_mba01)		;	# DQ_WR_OFFSET_N2
+# 	60:63	,	0x0			,	(def_is_mba01)		;	# DQ_WR_OFFSET_N3
+# 	~~~~~~~~~~~~~~~  Port 3  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 	48:51	,	0x0			,	(def_is_mba23)		;	# DQ_WR_OFFSET_N0
+# 	52:55	,	0x0			,	(def_is_mba23)		;	# DQ_WR_OFFSET_N1
+# 	56:59	,	0x0			,	(def_is_mba23)		;	# DQ_WR_OFFSET_N2
+# 	60:63	,	0x0			,	(def_is_mba23)		;	# DQ_WR_OFFSET_N3
+# }
+# scom 0x80013D7E0301143f {	# _RP1_P1_[0:4], rank pair 1, all instances via broadcast
+# 	bits	,	scom_data	,	expr			;
+# 	~~~~~~~~~~~~~~~  Port 1  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 	48:51	,	0x0			,	(def_is_mba01)		;	# DQ_WR_OFFSET_N0
+# 	52:55	,	0x0			,	(def_is_mba01)		;	# DQ_WR_OFFSET_N1
+# 	56:59	,	0x0			,	(def_is_mba01)		;	# DQ_WR_OFFSET_N2
+# 	60:63	,	0x0			,	(def_is_mba01)		;	# DQ_WR_OFFSET_N3
+# 	~~~~~~~~~~~~~~~  Port 3  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 	48:51	,	0x0			,	(def_is_mba23)		;	# DQ_WR_OFFSET_N0
+# 	52:55	,	0x0			,	(def_is_mba23)		;	# DQ_WR_OFFSET_N1
+# 	56:59	,	0x0			,	(def_is_mba23)		;	# DQ_WR_OFFSET_N2
+# 	60:63	,	0x0			,	(def_is_mba23)		;	# DQ_WR_OFFSET_N3
+# }
+# scom 0x80013E7E0301143f {	# _RP2_P1_[0:4], rank pair 2, all instances via broadcast
+# 	bits	,	scom_data	,	expr			;
+# 	~~~~~~~~~~~~~~~  Port 1  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 	48:51	,	0x0			,	(def_is_mba01)		;	# DQ_WR_OFFSET_N0
+# 	52:55	,	0x0			,	(def_is_mba01)		;	# DQ_WR_OFFSET_N1
+# 	56:59	,	0x0			,	(def_is_mba01)		;	# DQ_WR_OFFSET_N2
+# 	60:63	,	0x0			,	(def_is_mba01)		;	# DQ_WR_OFFSET_N3
+# 	~~~~~~~~~~~~~~~  Port 3  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 	48:51	,	0x0			,	(def_is_mba23)		;	# DQ_WR_OFFSET_N0
+# 	52:55	,	0x0			,	(def_is_mba23)		;	# DQ_WR_OFFSET_N1
+# 	56:59	,	0x0			,	(def_is_mba23)		;	# DQ_WR_OFFSET_N2
+# 	60:63	,	0x0			,	(def_is_mba23)		;	# DQ_WR_OFFSET_N3
+# }
+# scom 0x80013F7E0301143f {	# _RP3_P1_[0:4], rank pair 3, all instances via broadcast
+# 	bits	,	scom_data	,	expr			;
+# 	~~~~~~~~~~~~~~~  Port 1  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 	48:51	,	0x0			,	(def_is_mba01)		;	# DQ_WR_OFFSET_N0
+# 	52:55	,	0x0			,	(def_is_mba01)		;	# DQ_WR_OFFSET_N1
+# 	56:59	,	0x0			,	(def_is_mba01)		;	# DQ_WR_OFFSET_N2
+# 	60:63	,	0x0			,	(def_is_mba01)		;	# DQ_WR_OFFSET_N3
+# 	~~~~~~~~~~~~~~~  Port 3  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 	48:51	,	0x0			,	(def_is_mba23)		;	# DQ_WR_OFFSET_N0
+# 	52:55	,	0x0			,	(def_is_mba23)		;	# DQ_WR_OFFSET_N1
+# 	56:59	,	0x0			,	(def_is_mba23)		;	# DQ_WR_OFFSET_N2
+# 	60:63	,	0x0			,	(def_is_mba23)		;	# DQ_WR_OFFSET_N3
+# }
+
+# ---------------------------------------------------------------------------------------
+# DP18 Write Delay Value {0-23} Register	default=0x0008		!! need to set this?
+#
+# Attributes
+# Read/Write via programming interface. Write via hardware.
+# 20 registers hold the delay values for the twenty-four MEMINTDnnB pins for a given
+# rank pair. DP18 lanes 16-23 can only be used as DQS. As such, registers for lanes 17, 19,
+# 21, 23 exist, yet serve no purpose. Lane 16 register controls both DQS lanes 16 and 17, etc.
+# A 24 register set exists for each rank pair. 96 total registers.
+#
+# Description
+# This register holds the write delay values for one of the MEMINTDnnB pins for one Rank Pair
+# within the DP18. The write leveling calibration algorithms write this register. The write
+# leveling algorithm does not reset this register. The write eye centering algorithm uses this
+# register value as a starting point for the algorithm.
+#
+# DPHY01_DP18_WR_DELAY_VALUE_0_RP0_REG_P0_0		0x038-0x04F		0x800000380301143f
+# PHYW.PHYX.GEN_DP#0.DPX.HC.HC.D3PHY_WRDP18WRAP.D3PHY_WRDP18CNTL_MAC.DP18_WR_DELAY_VALUE_0_RP0_REG_L2
+#
+
+# ---------------------------------------------------------------------------------------
+# DP18 Read Delay Value {0-11} Register		default=0x4040		!! need to set this?
+#
+# Attributes
+# Read/Write via programming interface. Write via hardware. Each register holds the delay value
+# for two of the twenty-four MEMINTDnnB pins on the DP18.
+# An 8 register set exists for each rank pair: DP18 Read Delay Value {0-7}. 32 total registers.
+#
+# Description
+# This register holds the read delay values for two of the MEMINTDnnB pins for one Rank Pair
+# within the DP18. The read centering calibration algorithms writes this register. The read
+# centering algorithm does not reset this register.  The read centering algorithm uses this
+# register value as a starting point for the algorithm.
+#
+# DPHY01_DDRPHY_DP18_READ_DELAY0_RANK_PAIR0_P0_0		0x050-0x05B		0x800000500301143f
+# PHYW.PHYX.GEN_DP#0.DPX.HC.HC.RDDP18WRAP.SL#0.DL#1.RDDP18FIFO_MAC.R0RDCLKDLY_L2
+#
+
+# ---------------------------------------------------------------------------------------
+# DP18 Drift Limits Register		default=0		!! need to set this?
+#
+# Description
+# This register holds the limits for periodic drift of the data eye and the received strobe.
+#
+# DPHY01_DDRPHY_DP18_DRIFT_LIMITS_P0_0		0x00A		0x8000000a0301143f
+# PHYW.PHYX.GEN_DP#0.DPX.HC.HC.RDDP18WRAP.RDDP18CNTL_MAC.LIMITS_L2
+#
+
+# ---------------------------------------------------------------------------------------
+# DP18 DQS Gate Delay Register		default=0		!! need to set this?
+#
+# This register contains the DQS gate delay settings for each incoming read clock. One
+# register exists for each rank pair.
+#
+# From Centaur Chip Spec, section 9.4.12.3,
+# The PHY can only auto-calibrate within a 4-memory clock cycle delay window as
+# determined by the Gate Delay equation. If more than 4 cycles of delay exist on the
+# memory interface, the RLO must be increased by a sufficient amount until the resulting
+# Gate Delay falls within the 4 cycle window. Since the RLO applies to all bits on the
+# interface, it has the effect of directly adding latency to the overall data return time
+# and effectively sliding the entire calibration window in time.
+#
+# gateDelay =
+# ((staticDQSgateDelay + cmdDelayMax + dqsDelayMax - (RLO * clkPeriod)) * 0x80 / clkPeriod) >> 7
+#
+# DPHY01_DDRPHY_DP18_DQS_GATE_DELAY_RP0_P0_0		0x013	0x800000130301143f
+# PHYW.PHYX.GEN_DP#0.DPX.HC.HC.RDDP18WRAP.SL#3.RDDP18DQS_MAC.DQSLOGIC.R0DQSCDLY_L2
+#
+
+# ---------------------------------------------------------------------------------------
+# DP18 Read Diagnostic Configuration 3 Register		!! need to set this?
+#
+# !! can't find address in DB
+
+# ---------------------------------------------------------------------------------------
+# Initial calibration sequence Config0 register		default=0	sim = 0xBF2?
+#
+#  !! Needed?  Which procedure does this??
+#  !! need to check if needed to be set in the initfile or not.
+#
+# DPHY01_DDRPHY_PC_INIT_CAL_CONFIG0_P0		0x016	0x8000c0160301143f
+# PHYW.PHYX.SYNTHX.D3SIDEA.PCX.REG22_L2
+scom 0x8000C0160301143F {	# Port 0
+	bits	,	scom_data	,	expr				;
+	48		,	0b1			,	(def_is_sim)		;	# ENA_WR_LEVEL
+	49		,	0b0			,	(def_is_sim)		;	# ENA_INITIAL_PAT_WR, for custom pattern
+	50		,	0b1			,	(def_is_sim)		;	# ENA_DQS_ALIGN
+	51		,	0b1			,	(def_is_sim)		;	# ENA_RDCLK_ALIGN
+
+	52		,	0b1			,	(def_is_sim)		;	# ENA_READ_CTR
+	53		,	0b1			,	(def_is_sim)		;	# ENA_WRITE_CTR
+	54		,	0b1			,	(def_is_sim)		;	# ENA_INITIAL_COARSE_WR
+	55		,	0b1			,	(def_is_sim)		;	# ENA_COARSE_RD
+
+	56		,	0b0			,	any					;	# ENA_CUSTOM_RD
+	57		,	0b0			,	any					;	# ENA_CUSTOM_WR
+	58		,	0b1			,	(def_is_sim)		;	# ABORT_ON_CAL_ERROR
+	59		,	0b0			,	any					;	# ENA_DIGITAL_EYE
+
+	# ENA_RANK_GROUP[0:3], 4 bits
+	60		,	0b1			,	(def_val_prg0_p0)	;	# enable primary rank group 0
+	60		,	0b0			,	any					;	# disable primary rank group 0
+	61		,	0b1			,	(def_val_prg1_p0)	;	# enable primary rank group 1
+	61		,	0b0			,	any					;	# disable primary rank group 1
+	62		,	0b1			,	(def_val_prg2_p0)	;	# enable primary rank group 2
+	62		,	0b0			,	any					;	# disable primary rank group 2
+	63		,	0b1			,	(def_val_prg3_p0)	;	# enable primary rank group 3
+	63		,	0b0			,	any					;	# disable primary rank group 3
+}
+
+# DPHY01.DDRPHY_PC_INIT_CAL_CONFIG0_P1
+scom 0x8001C0160301143F {	# Port 1
+	bits	,	scom_data	,	expr				;
+	48		,	0b1			,	(def_is_sim)		;	# ENA_WR_LEVEL
+	49		,	0b0			,	(def_is_sim)		;	# ENA_INITIAL_PAT_WR, for custom pattern
+	50		,	0b1			,	(def_is_sim)		;	# ENA_DQS_ALIGN
+	51		,	0b1			,	(def_is_sim)		;	# ENA_RDCLK_ALIGN
+	52		,	0b1			,	(def_is_sim)		;	# ENA_READ_CTR
+	53		,	0b1			,	(def_is_sim)		;	# ENA_WRITE_CTR
+	54		,	0b1			,	(def_is_sim)		;	# ENA_INITIAL_COARSE_WR
+	55		,	0b1			,	(def_is_sim)		;	# ENA_COARSE_RD
+	56		,	0b0			,	any					;	# ENA_CUSTOM_RD
+	57		,	0b0			,	any					;	# ENA_CUSTOM_WR
+	58		,	0b1			,	(def_is_sim)		;	# ABORT_ON_CAL_ERROR
+	59		,	0b0			,	any					;	# ENA_DIGITAL_EYE
+	# ENA_RANK_GROUP[0:3], 4 bits
+	60		,	0b1			,	(def_val_prg0_p1)	;	# enable primary rank group 0
+	60		,	0b0			,	any					;	# disable primary rank group 0
+	61		,	0b1			,	(def_val_prg1_p1)	;	# enable primary rank group 1
+	61		,	0b0			,	any					;	# disable primary rank group 1
+	62		,	0b1			,	(def_val_prg2_p1)	;	# enable primary rank group 2
+	62		,	0b0			,	any					;	# disable primary rank group 2
+	63		,	0b1			,	(def_val_prg3_p1)	;	# enable primary rank group 3
+	63		,	0b0			,	any					;	# disable primary rank group 3
+}
+
+# ---------------------------------------------------------------------------------------
+# Initial calibration sequence Config1 register		default=0
+#
+# Controls refreshes during calibration, and regular refresh interval.
+# !! Needed? 	Does a procedure do this?
+#
+# EFF_DRAM_TRFI
+#
+# DPHY01_DDRPHY_PC_INIT_CAL_CONFIG1_P0		0x017	0x8000c0170301143f
+# PHYW.PHYX.SYNTHX.D3SIDEA.PCX.REG23_L2
+scom 0x800(0,1)C0170301143F {	# _P[0:1]
+	bits	,	scom_data		,	expr			;
+	48:51	,	0b0000			,	any				;	# REFRESH_COUNT, num of refreshes before cal
+	52:53	,	0b00			,	any				;	# REFRESH_CONTROL during initial calibration
+	54		,	0b0				,	any				;	# REFRESH_ALL_RANKS, during calibration
+#	55:56	,	0b00			,	any				;	# reserved
+	# REFRESH_INTERVAL, defaults to 6 if value < 6, value*256=num clks between refreshes
+	# ATTR_EFF_DRAM_TRFI = refresh interval in clocks
+	57:63	,	0b0000000		,	(def_is_sim)	;	# match dials
+	57:63	,	(ATTR_EFF_DRAM_TRFI >> 8)	,	any	;	# field needs refresh/256
+}
+
+# ---------------------------------------------------------------------------------------
+# Peroidic calibration configuration register	default=0
+#
+# !! Setup in mss_draminit_mc.C ??
+#
+# DPHY01_DDRPHY_PC_PER_CAL_CONFIG_P0		0x00B	0x8000c00b0301143f
+# PHYW.PHYX.SYNTHX.D3SIDEA.PCX.REG11_L2
+scom 0x8000C00B0301143F {	# Port 0
+	bits	,	scom_data	,	expr				;
+	# PER_ENA_RANK_GROUP[0:3], 4 bits
+	48		,	0b1			,	(def_val_prg0_p0)	;	# enable primary rank group 0
+	48		,	0b0			,	any					;	# disable primary rank group 0
+	49		,	0b1			,	(def_val_prg1_p0)	;	# enable primary rank group 1
+	49		,	0b0			,	any					;	# disable primary rank group 1
+	50		,	0b1			,	(def_val_prg2_p0)	;	# enable primary rank group 2
+	50		,	0b0			,	any					;	# disable primary rank group 2
+	51		,	0b1			,	(def_val_prg3_p0)	;	# enable primary rank group 3
+	51		,	0b0			,	any					;	# disable primary rank group 3
+
+	52		,	0b1			,	any					;	# PER_ENA_ZCAL
+	53		,	0b1			,	any					;	# PER_ENA_SYSCLK_ALIGN
+	54		,	0b1			,	any					;	# ENA_PER_RDCLK_ALIGN
+	55		,	0b1			,	any					;	# ENA_PER_DQS_ALIGN
+	56		,	0b1			,	any					;	# ENA_PER_READ_CTR
+	57:58	,	0b00		,	any					;	# PER_NEXT_RANK_group
+	59		,	0b1			,	any					;	# FAST_SIM_PER_CNTR
+	60		,	0b0			,	any					;	# START_INIT_CAL
+	61		,	0b0			,	any					;	# START_PER_CAL
+	62		,	0b0			,	any					;	# ABORT_ON_ERR_EN
+	63		,	0b0			,	any					;	# ZCAL_UPDATE_MODE
+}
+# DPHY01.DDRPHY_PC_PER_CAL_CONFIG_P1
+scom 0x8001C00B0301143F {	# Port 1
+	bits	,	scom_data	,	expr				;
+	# PER_ENA_RANK_GROUP[0:3], 4 bits
+	48		,	0b1			,	(def_val_prg0_p1)	;	# enable primary rank group 0
+	48		,	0b0			,	any					;	# disable primary rank group 0
+	49		,	0b1			,	(def_val_prg1_p1)	;	# enable primary rank group 1
+	49		,	0b0			,	any					;	# disable primary rank group 1
+	50		,	0b1			,	(def_val_prg2_p1)	;	# enable primary rank group 2
+	50		,	0b0			,	any					;	# disable primary rank group 2
+	51		,	0b1			,	(def_val_prg3_p1)	;	# enable primary rank group 3
+	51		,	0b0			,	any					;	# disable primary rank group 3
+
+	52		,	0b1			,	any					;	# PER_ENA_ZCAL
+	53		,	0b1			,	any					;	# PER_ENA_SYSCLK_ALIGN
+	54		,	0b1			,	any					;	# ENA_PER_RDCLK_ALIGN
+	55		,	0b1			,	any					;	# ENA_PER_DQS_ALIGN
+	56		,	0b1			,	any					;	# ENA_PER_READ_CTR
+	57:58	,	0b00		,	any					;	# PER_NEXT_RANK_PAIR
+	59		,	0b1			,	any					;	# FAST_SIM_PER_CNTR
+	60		,	0b0			,	any					;	# START_INIT_CAL
+	61		,	0b0			,	any					;	# START_PER_CAL
+	62		,	0b0			,	any					;	# ABORT_ON_ERR_EN
+	63		,	0b0			,	any					;	# ZCAL_UPDATE_MODE
+}
+
+# ---------------------------------------------------------------------------------------
+# Peroidic calibration reload value  register	default=0
+#
+# Periodic calibration request enable is also in this register.
+# The value in this register is loaded into the PC Periodic Base Counter 0(PBC0)  when it
+# rolls over.  Periodic Base Counter[1:0] together form a 32-bit timer where periodic
+# base counter 1 is the most significant 16 bits and periodic base counter 0 is the least
+# significant 16 bits.  The memcal interval is 48 bits formed by concatenating the
+# periodic calibration timer(PCT) with the periodic base counter[1:0] where the PCT is
+# the most significant 16 bits and the PBC[1:0] is the least significant 32 bits.
+#
+# Interval = { PCT, PBC1, PBC0 } =
+#    (periodic_timer_reload_value -1) * (2^16 -1) * ((periodic_reload_value0 * 2) + 1)
+#
+# Note if FAST_SIM_PER_CNTR = 1, 2^16 becomes 2^8
+#
+# DPHY01_DDRPHY_PC_RELOAD_VALUE0_P0		0x005	0x8000c0050301143f
+scom 0x800(0,1)C0050301143F {	# _P[0:1]
+	bits	,	scom_data	,	expr			;
+	48		,	0b0			,	any				;	# PERIODIC_CAL_REQ_EN
+	49:63	,	0x0001		,	any				;	# PERIODIC_RELOAD_VALUE0
+# !! problem with right alignment that needs to be 0x0002 instead of 0x0001
+#	49:63	,	0x0002		,	any				;	# PERIODIC_RELOAD_VALUE0
+}
+
+# ---------------------------------------------------------------------------------------
+# DPHY01 PC Periodic Calibration Timer Reload Value		default=0
+#
+# Loaded into PC Periodic Calibration Timer register.
+#
+# memcal interval = ATTR_EFF_MEMCAL_INTERVAL		# u32	value in clocks
+# periodic_reload_value0 = 1;
+#
+# Anuwat says should be ~114ms = 91200000 clks @ 1600MHz
+#
+# if FAST_SIM_PER_CNTR = 0,
+# memcal interval = (periodic_timer_reload_value -1) * (2^16 -1) * ((periodic_reload_value0 * 2) + 1)
+# periodic_timer_reload_value = ((ATTR_EFF_MEMCAL_INTERVAL / ((2^16 -1) * ((periodic_reload_value0 * 2) + 1))) + 1)
+# periodic_timer_reload_value = ((ATTR_EFF_MEMCAL_INTERVAL / (65535  * ((1 * 2) + 1))) + 1)
+# periodic_timer_reload_value = ((ATTR_EFF_MEMCAL_INTERVAL / (65535  * 3)) + 1)
+# periodic_timer_reload_value = ((ATTR_EFF_MEMCAL_INTERVAL / 196605) + 1)
+#
+# FAST_SIM_PER_CNTR=1, periodic_timer_reload_value = ATTR_EFF_MEMCAL_INTERVAL / 765
+#
+# DPHY01_DDRPHY_PC_CAL_TIMER_RELOAD_VALUE_P0	0x008	0x8000c0080301143f
+# PHYE.PHYX.SYNTHX.D3SIDEA.PCX.REG08_L2
+scom 0x800(0,1)c0080301143f {	# _P[0:1]
+	bits	,	scom_data								,	expr			;	# must be >= 2...
+	48:63	,	0x0000									,	(def_is_sim)	;	# match dials
+#	need to fix...
+#	48:63	,	((ATTR_EFF_MEMCAL_INTERVAL/196605)+1)	,	any				;	# FAST_SIM_PER_CNTR=0
+#	48:63	,	((ATTR_EFF_MEMCAL_INTERVAL/765)+1)		,	any				;	# FAST_SIM_PER_CNTR=1
+	48:63	,	0x01D1									,	any				;	# 464 = 114ms @ 1600MHz
+}
+
+
+# ---------------------------------------------------------------------------------------
+#  Periodic ZQcal configuration register		default=0
+#
+# DPHY01.DDRPHY_PC_PER_ZCAL_CONFIG_P0 from (alias spydef)
+# DPHY01_DDRPHY_PC_PER_ZCAL_CONFIG_P0		0x00F	0x8000c00f0301143f
+# PHYW.PHYX.SYNTHX.D3SIDEA.PCX.REG15_L2
+scom 0x8000C00F0301143F {	# Port0
+	bits	,	scom_data	,	expr										;
+	# PER_ZCAL_ENA_RANK for ranks [0:7]
+	48:51	,	0b1000		,	(ATTR_EFF_NUM_RANKS_PER_DIMM[0][0] == 1)	;	# dimm0 = 1 rank
+	48:51	,	0b1100		,	(ATTR_EFF_NUM_RANKS_PER_DIMM[0][0] == 2)	;	# dimm0 = 2 rank
+	48:51	,	0b1111		,	(ATTR_EFF_NUM_RANKS_PER_DIMM[0][0] >= 4)	;	# dimm0 >= 4 rank dimm
+	48:51	,	0b0000		,	any											;	# dimm0 = no valid ranks
+	# DIMM1
+	52:55	,	0b1000		,	(ATTR_EFF_NUM_RANKS_PER_DIMM[0][1] == 1)	;	# dimm1 = 1 rank
+	52:55	,	0b1100		,	(ATTR_EFF_NUM_RANKS_PER_DIMM[0][1] == 2)	;	# dimm1 = 2 rank
+	# dimm1 = 4 rank or dimm0 > 4 ranks
+	52:55	,	0b1111		,	((ATTR_EFF_NUM_RANKS_PER_DIMM[0][1] == 4) || (ATTR_EFF_NUM_RANKS_PER_DIMM[0][0] > 4))	;
+	52:55	,	0b0000		,	any											;	# no valid ranks
+	# PER_ZCAL_NEXT_RANK, indicates next rank to be cal'd
+	56:58	,	0b000		,	any											;
+	# START_PER_ZCAL
+	59		,	0b0			,	any											;
+}
+scom 0x8001C00F0301143F {	# Port1
+	bits	,	scom_data	,	expr										;
+	# PER_ZCAL_ENA_RANK for ranks [0:7]
+	48:51	,	0b1000		,	(ATTR_EFF_NUM_RANKS_PER_DIMM[1][0] == 1)	;	# dimm0 = 1 rank
+	48:51	,	0b1100		,	(ATTR_EFF_NUM_RANKS_PER_DIMM[1][0] == 2)	;	# dimm0 = 2 rank
+	48:51	,	0b1111		,	(ATTR_EFF_NUM_RANKS_PER_DIMM[1][0] >= 4)	;	# dimm0 >= 4 rank dimm
+	48:51	,	0b0000		,	any											;	# dimm0 = no valid ranks
+	# DIMM1
+	52:55	,	0b1000		,	(ATTR_EFF_NUM_RANKS_PER_DIMM[1][1] == 1)	;	# dimm1 = 1 rank
+	52:55	,	0b1100		,	(ATTR_EFF_NUM_RANKS_PER_DIMM[1][1] == 2)	;	# dimm1 = 2 rank
+	# dimm1 = 4 rank or dimm0 > 4 ranks
+	52:55	,	0b1111		,	((ATTR_EFF_NUM_RANKS_PER_DIMM[1][1] == 4) || (ATTR_EFF_NUM_RANKS_PER_DIMM[1][0] > 4))	;
+	52:55	,	0b0000		,	any											;	# no valid ranks
+	# PER_ZCAL_NEXT_RANK, indicates next rank to be cal'd
+	56:58	,	0b000		,	any											;
+	# START_PER_ZCAL
+	59		,	0b0			,	any											;
+}
+
+# ---------------------------------------------------------------------------------------
+# Peroidic ZQcal reload value  register	default=0
+#
+# Value from this register is loaded into the PERIODIC_ZCAL_TIMER.
+# (2^16 - 1) * ((PERIODIC_RELOAD_VALUE0 * 2) + 1) * (PERIODIC_ZCAL_TIMER_RELOAD_VALUE - 1)
+# if FAST_SIM_PER_CNTR is set, it becomes 2^8 instead of 2^16.
+#
+# Note: calibration is performed on a single rank per request.
+#
+# Anuwat says should be ~11ms = 8800000 clks @ 1600MHz
+#
+# 65535 * ((PERIODIC_RELOAD_VALUE0*2)+1) * (zcal_timer_reload_val - 1)
+# (ATTR_EFF_ZQCAL_INTERVAL/(65535*(2prv+1)))+1
+# zcq_int=88000000
+#
+# DPHY01_DDRPHY_PC_ZCAL_TIMER_RELOAD_VALUE_P0	0x00A	0x8000c0090301143f
+# PHYW.PHYX.SYNTHX.D3SIDEA.PCX.REG09_L2
+scom 0x8000c0090301143f {
+	bits	,	scom_data								,	expr					;	# must be >= 2...
+#	fix needed from Anuwat to set the attribute value...
+#	48:63	,	((ATTR_EFF_ZQCAL_INTERVAL/196605)+1)	,	(SYS.ATTR_IS_SIMULATION==0)	;	# FAST_SIM_PER_CNTR=0
+#	48:63	,	((ATTR_EFF_ZQCAL_INTERVAL/765)+1)		,	any						;	# FAST_SIM_PER_CNTR=1
+	48:63	,	0x002E									,	any						;	# 46 = 11ms @ 1600MHz
+}
+
+# ---------------------------------------------------------------------------------------
+#  DPHY01 PC Power Down 1		default=0
+#
+# !! need to set this?
+# This register provides control of the power down modes of the DDR PHY.
+#
+# DPHY01_DDRPHY_PC_POWERDOWN_1_P0	0x010	0x8000c0100301143f
+
+
+# PC Rank Group Register
+# DDRPHY_PC_RANK_GROUP		PC 0x011
+# This register provides control of the rank groups.
+# ADDR_MIRROR_RP0_PRI
+# ADDR_MIRROR_RP0_SEC
+# ADDR_MIRROR_RP1_PRI
+# ADDR_MIRROR_RP1_SEC
+# ADDR_MIRROR_RP2_PRI
+# ADDR_MIRROR_RP2_SEC
+# ADDR_MIRROR_RP3_PRI
+# ADDR_MIRROR_RP3_SEC
+# RANK_GROUPING
+# ADDR_MIRROR_A3_A4
+# ADDR_MIRROR_A5_A6
+# ADDR_MIRROR_A7_A8
+# ADDR_MIRROR_A11_A13
+# ADDR_MIRROR_BA0_BA1
+# ADDR_MIRROR_BG0_BG1
+
+# PC Rank Group Extension Register
+# DDRPHY_PC_RANK_GROUP_EXT		0x035
+# ADDR_MIRROR_RP0_TER
+# ADDR_MIRROR_RP0_QUA
+# ADDR_MIRROR_RP1_TER
+# ADDR_MIRROR_RP1_QUA
+# ADDR_MIRROR_RP2_TER
+# ADDR_MIRROR_RP2_QUA
+# ADDR_MIRROR_RP3_TER
+# ADDR_MIRROR_RP3_QUA
+
+
+# ---------------------------------------------------------------------------------------
+# Rank pair 0 configuration register	default=0
+#
+# Configures rank pairing for primary & secondary ranks [0:1].
+#
+# !! need to zero out 3 bits when invalid?  shouldn't invalid bit take care of it?
+#
+#							  reg  port
+# ATTR_EFF_PRIMARY_RANK_GROUP{0:3}[0:1]		CS, 255=invalid
+# ATTR_EFF_SECONDARY_RANK_GROUP{0:3}[0:1]	CS, 255=invalid
+#
+# DPHY01.DDRPHY_PC_RANK_PAIR0_P0 from (alias spydef)
+# DPHY01_DDRPHY_PC_RANK_PAIR0_P0		0x002	0x8000c0020301143f
+# PHYW.PHYX.SYNTHX.D3SIDEA.PCX.REG02_L2
+scom 0x8000C0020301143F {
+	bits	,	scom_data							,	expr				;
+	48:50	,	(ATTR_EFF_PRIMARY_RANK_GROUP0[0])	,	(def_val_prg0_p0)	;	# P0_RP0_PRI
+	48:50	,	0b000								,	any					;	# P0_RP0_PRI
+	51		,	0b1									,	(def_val_prg0_p0)	;	# P0_RP0_PRI_V
+	51		,	0b0									,	any					;	# P0_RP0_PRI_V invalid
+	52:54	,	(ATTR_EFF_SECONDARY_RANK_GROUP0[0])	,	(def_val_srg0_p0)	;	# P0_RP0_SEC
+	52:54	,	0b000								,	any					;	# P0_RP0_SEC invalid
+	55		,	0b1									,	(def_val_srg0_p0)	;	# P0_RP0_SEC_V
+	55		,	0b0									,	any					;	# P0_RP0_SEC_V invalid
+	56:58	,	(ATTR_EFF_PRIMARY_RANK_GROUP1[0])	,	(def_val_prg1_p0)	;	# P0_RP1_PRI
+	56:58	,	0b000								,	any					;	# P0_RP1_PRI invalid
+	59		,	0b1									,	(def_val_prg1_p0)	;	# P0_RP1_PRI_V
+	59		,	0b0									,	any					;	# P0_RP1_PRI_V invalid
+	60:62	,	(ATTR_EFF_SECONDARY_RANK_GROUP1[0])	,	(def_val_srg1_p0)	;	# P0_RP1_SEC
+	60:62	,	0b000								,	any					;	# P0_RP1_SEC invalid
+	63		,	0b1									,	(def_val_srg1_p0)	;	# P0_RP1_SEC_V
+	63		,	0b0									,	any					;	# P0_RP1_SEC_V invalid
+}
+
+# -=-=-=-=-=-=-=-  PC_RANK_PAIR0  Port 1  -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# DPHY01.DDRPHY_PC_RANK_PAIR0_P1 from (alias spydef)
+scom 0x8001C0020301143F {
+	bits	,	scom_data							,	expr				;
+	48:50	,	(ATTR_EFF_PRIMARY_RANK_GROUP0[1])	,	(def_val_prg0_p1)	;	# P1_RP0_PRI
+	48:50	,	0b000								,	any					;	# P1_RP0_PRI invalid
+	51		,	0b1									,	(def_val_prg0_p1)	;	# P1_RP0_PRI_V
+	51		,	0b0									,	any					;	# P1_RP0_PRI_V invalid
+	52:54	,	(ATTR_EFF_SECONDARY_RANK_GROUP0[1])	,	(def_val_srg0_p1)	;	# P1_RP0_SEC
+	52:54	,	0b000								,	any					;	# P1_RP0_SEC invalid
+	55		,	0b1									,	(def_val_srg0_p1)	;	# P1_RP0_SEC_V
+	55		,	0b0									,	any					;	# P1_RP0_SEC_V invalid
+#	56:59	,	((ATTR_EFF_PRIMARY_RANK_GROUP1[1]<<1) | 0x1)	,	(def_val_prg1_p1)	;	# P1_RP1_PRI = 9
+#	56:59	,	0b0000											,	any					;	# P1_RP1_PRI invalid
+ 	56:58	,	(ATTR_EFF_PRIMARY_RANK_GROUP1[1])	,	(def_val_prg1_p1)	;	# P1_RP1_PRI
+ 	56:58	,	0b000								,	any					;	# P1_RP1_PRI invalid
+ 	59		,	0b1									,	(def_val_prg1_p1)	;	# P1_RP1_PRI_V
+ 	59		,	0b0									,	any					;	# P1_RP1_PRI_V invalid
+	60:62	,	(ATTR_EFF_SECONDARY_RANK_GROUP1[1])	,	(def_val_srg1_p1)	;	# P1_RP1_SEC
+	60:62	,	0b000								,	any					;	# P1_RP1_SEC invalid
+	63		,	0b1									,	(def_val_srg1_p1)	;	# P1_RP1_SEC_V
+	63		,	0b0									,	any					;	# P1_RP1_SEC_V invalid
+}
+
+# ---------------------------------------------------------------------------------------
+# Rank pair 1 configuration register	default=0
+#
+# Configures rank pairing for primary & secondary ranks [2:3].
+#
+#							  reg  port
+# ATTR_EFF_PRIMARY_RANK_GROUP{0:3}[0:1]		CS, 255=invalid
+# ATTR_EFF_SECONDARY_RANK_GROUP{0:3}[0:1]	CS, 255=invalid
+#
+# DPHY01.DDRPHY_PC_RANK_PAIR1_P0 from (alias spydef)
+scom 0x8000C0030301143F {
+	bits	,	scom_data							,	expr				;
+	48:50	,	(ATTR_EFF_PRIMARY_RANK_GROUP2[0])	,	(def_val_prg2_p0)	;	# P0_RP2_PRI
+	48:50	,	0b000								,	any					;	# P0_RP2_PRI invalid
+	51		,	0b1									,	(def_val_prg2_p0)	;	# P0_RP2_PRI_V
+	51		,	0b0									,	any					;	# P0_RP2_PRI_V invalid
+	52:54	,	(ATTR_EFF_SECONDARY_RANK_GROUP2[0])	,	(def_val_srg2_p0)	;	# P0_RP2_SEC
+	52:54	,	0b000								,	any					;	# P0_RP2_SEC invalid
+	55		,	0b1									,	(def_val_srg2_p0)	;	# P0_RP2_SEC_V
+	55		,	0b0									,	any					;	# P0_RP2_SEC_V invalid
+	56:58	,	(ATTR_EFF_PRIMARY_RANK_GROUP3[0])	,	(def_val_prg3_p0)	;	# P0_RP3_PRI
+	56:58	,	0b000								,	any					;	# P0_RP3_PRI invalid
+	59		,	0b1									,	(def_val_prg3_p0)	;	# P0_RP3_PRI_V
+	59		,	0b0									,	any					;	# P0_RP3_PRI_V invalid
+	60:62	,	(ATTR_EFF_SECONDARY_RANK_GROUP3[0])	,	(def_val_srg3_p0)	;	# P0_RP3_SEC
+	60:62	,	0b000								,	any					;	# P0_RP3_SEC invalid
+	63		,	0b1									,	(def_val_srg3_p0)	;	# P0_RP3_SEC_V
+	63		,	0b0									,	any					;	# P0_RP3_SEC_V invalid
+}
+
+# -=-=-=-=-=-=-=-  PC_RANK_PAIR1  Port 1  -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# DPHY01.DDRPHY_PC_RANK_PAIR1_P1 from (alias spydef)
+scom 0x8001C0030301143F {
+	bits	,	scom_data							,	expr				;
+	48:50	,	(ATTR_EFF_PRIMARY_RANK_GROUP2[1])	,	(def_val_prg2_p1)	;	# P1_RP2_PRI
+	48:50	,	0b000								,	any					;	# P1_RP2_PRI invalid
+	51		,	0b1									,	(def_val_prg2_p1)	;	# P1_RP2_PRI_V
+	51		,	0b0									,	any					;	# P1_RP2_PRI_V invalid
+	52:54	,	(ATTR_EFF_SECONDARY_RANK_GROUP2[1])	,	(def_val_srg2_p1)	;	# P1_RP2_SEC
+	52:54	,	0b000								,	any					;	# P1_RP2_SEC invalid
+	55		,	0b1									,	(def_val_srg2_p1)	;	# P1_RP2_SEC_V
+	55		,	0b0									,	any					;	# P1_RP2_SEC_V invalid
+	56:58	,	(ATTR_EFF_PRIMARY_RANK_GROUP3[1])	,	(def_val_prg3_p1)	;	# P1_RP3_PRI
+	56:58	,	0b000								,	any					;	# P1_RP3_PRI invalid
+	59		,	0b1									,	(def_val_prg3_p1)	;	# P1_RP3_PRI_V
+	59		,	0b0									,	any					;	# P1_RP3_PRI_V invalid
+	60:62	,	(ATTR_EFF_SECONDARY_RANK_GROUP3[1])	,	(def_val_srg3_p1)	;	# P1_RP3_SEC
+	60:62	,	0b000								,	any					;	# P1_RP3_SEC invalid
+	63		,	0b1									,	(def_val_srg3_p1)	;	# P1_RP3_SEC_V
+	63		,	0b0									,	any					;	# P1_RP3_SEC_V invalid
+}
+
+# ---------------------------------------------------------------------------------------
+# Rank pair 2 configuration register	default=0
+#
+# Configures rank pairing for tertiary & quaternary ranks [0:1].
+#
+#							  reg  port
+# ATTR_EFF_TERTIARY_RANK_GROUP{0:3}[0:1]	CS, 255=invalid
+# ATTR_EFF_QUATERNARY_RANK_GROUP{0:3}[0:1]	CS, 255=invalid
+#
+# DPHY01_DDRPHY_PC_RANK_PAIR2_P0		0x030	0x8000c0300301143f
+# PHYW.PHYX.SYNTHX.D3SIDEA.PCX.REG48_L2
+scom 0x8000c0300301143f {
+	bits	,	scom_data							,	expr				;
+ 	48:50	,	(ATTR_EFF_TERTIARY_RANK_GROUP0[0])	,	(def_val_trg0_p0)	;	# P0_RP0_TER
+	48:50	,	0b000								,	any					;	# P0_RP0_TER invalid
+ 	51		,	0b1									,	(def_val_trg0_p0)	;	# P0_RP0_TER_V
+ 	51		,	0b0									,	any					;	# P0_RP0_TER_V invalid
+ 	52:54	,	(ATTR_EFF_QUATERNARY_RANK_GROUP0[0]),	(def_val_qrg0_p0)	;	# P0_RP0_QUA
+	52:54	,	0b000								,	any					;	# P0_RP0_SEC invalid
+ 	55		,	0b1									,	(def_val_qrg0_p0)	;	# P0_RP0_QUA_V
+ 	55		,	0b0									,	any					;	# P0_RP0_QUA_V invalid
+ 	56:58	,	(ATTR_EFF_TERTIARY_RANK_GROUP1[0])	,	(def_val_trg1_p0)	;	# P0_RP1_TER
+	56:58	,	0b000								,	any					;	# P0_RP1_TER invalid
+ 	59		,	0b1									,	(def_val_trg1_p0)	;	# P0_RP1_TER_V
+ 	59		,	0b0									,	any					;	# P0_RP1_TER_V invalid
+ 	60:62	,	(ATTR_EFF_QUATERNARY_RANK_GROUP1[0]),	(def_val_qrg1_p0)	;	# P0_RP1_QUA
+	60:62	,	0b000								,	any					;	# P0_RP1_QUA invalid
+ 	63		,	0b1									,	(def_val_qrg1_p0)	;	# P0_RP1_QUA_V
+ 	63		,	0b0									,	any					;	# P0_RP1_QUA_V invalid
+}
+#
+# -=-=-=-=-=-=-=-  PC_RANK_PAIR2  Port 1  -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# DPHY01.DDRPHY_PC_RANK_PAIR2_P1
+scom 0x8001c0300301143f {
+	bits	,	scom_data							,	expr				;
+ 	48:50	,	(ATTR_EFF_TERTIARY_RANK_GROUP0[1])	,	(def_val_trg0_p1)	;	# P1_RP0_TER
+	48:50	,	0b000								,	any					;	# P1_RP0_TER invalid
+ 	51		,	0b1									,	(def_val_trg0_p1)	;	# P1_RP0_TER_V
+ 	51		,	0b0									,	any					;	# P1_RP0_TER_V invalid
+ 	52:54	,	(ATTR_EFF_QUATERNARY_RANK_GROUP0[1]),	(def_val_qrg0_p1)	;	# P1_RP0_QUA
+	52:54	,	0b000								,	any					;	# P1_RP0_SEC invalid
+ 	55		,	0b1									,	(def_val_qrg0_p1)	;	# P1_RP0_QUA_V
+ 	55		,	0b0									,	any					;	# P1_RP0_QUA_V invalid
+ 	56:58	,	(ATTR_EFF_TERTIARY_RANK_GROUP1[1])	,	(def_val_trg1_p1)	;	# P1_RP1_TER
+	56:58	,	0b000								,	any					;	# P1_RP1_TER invalid
+ 	59		,	0b1									,	(def_val_trg1_p1)	;	# P1_RP1_TER_V
+ 	59		,	0b0									,	any					;	# P1_RP1_TER_V invalid
+ 	60:62	,	(ATTR_EFF_QUATERNARY_RANK_GROUP1[1]),	(def_val_qrg1_p1)	;	# P1_RP1_QUA
+	60:62	,	0b000								,	any					;	# P1_RP1_QUA invalid
+ 	63		,	0b1									,	(def_val_qrg1_p1)	;	# P1_RP1_QUA_V
+ 	63		,	0b0									,	any					;	# P1_RP1_QUA_V invalid
+}
+#
+# ---------------------------------------------------------------------------------------
+# Rank pair 3 configuration register	default=0
+#
+# Configures rank pairing for tertiary & quaternary ranks [2:3].
+#
+#							  reg  port
+# ATTR_EFF_TERTIARY_RANK_GROUP{0:3}[0:1]	CS, 255=invalid
+# ATTR_EFF_QUATERNARY_RANK_GROUP{0:3}[0:1]	CS, 255=invalid
+#
+# DPHY01_DDRPHY_PC_RANK_PAIR3_P0		0x031	0x8000c0310301143f
+# PHYW.PHYX.SYNTHX.D3SIDEA.PCX.REG49_L2
+scom 0x8000c0310301143f {
+	bits	,	scom_data							,	expr				;
+ 	48:50	,	(ATTR_EFF_TERTIARY_RANK_GROUP2[0])	,	(def_val_trg2_p0)	;	# P0_RP2_TER
+	48:50	,	0b000								,	any					;	# P0_RP2_TER invalid
+ 	51		,	0b1									,	(def_val_trg2_p0)	;	# P0_RP2_TER_V
+ 	51		,	0b0									,	any					;	# P0_RP2_TER_V invalid
+ 	52:54	,	(ATTR_EFF_QUATERNARY_RANK_GROUP2[0]),	(def_val_qrg2_p0)	;	# P0_RP2_QUA
+	52:54	,	0b000								,	any					;	# P0_RP0_QUA invalid
+ 	55		,	0b1									,	(def_val_qrg2_p0)	;	# P0_RP2_QUA_V
+ 	55		,	0b0									,	any					;	# P0_RP2_QUA_V invalid
+ 	56:58	,	(ATTR_EFF_TERTIARY_RANK_GROUP3[0])	,	(def_val_trg3_p0)	;	# P0_RP3_TER
+	56:58	,	0b000								,	any					;	# P0_RP3_TER invalid
+ 	59		,	0b1									,	(def_val_trg3_p0)	;	# P0_RP3_TER_V
+ 	59		,	0b0									,	any					;	# P0_RP3_TER_V invalid
+ 	60:62	,	(ATTR_EFF_QUATERNARY_RANK_GROUP3[0]),	(def_val_qrg3_p0)	;	# P0_RP3_QUA
+	60:62	,	0b000								,	any					;	# P0_RP3_QUA invalid
+ 	63		,	0b1									,	(def_val_qrg3_p0)	;	# P0_RP3_QUA_V
+ 	63		,	0b0									,	any					;	# P0_RP3_QUA_V invalid
+}
+#
+# -=-=-=-=-=-=-=-  PC_RANK_PAIR3  Port 1  -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# DPHY01.DDRPHY_PC_RANK_PAIR3_P1
+scom 0x8001c0310301143f {
+	bits	,	scom_data							,	expr				;
+ 	48:50	,	(ATTR_EFF_TERTIARY_RANK_GROUP2[1])	,	(def_val_trg2_p1)	;	# P1_RP2_TER
+	48:50	,	0b000								,	any					;	# P1_RP2_TER invalid
+ 	51		,	0b1									,	(def_val_trg2_p1)	;	# P1_RP2_TER_V
+ 	51		,	0b0									,	any					;	# P1_RP2_TER_V invalid
+ 	52:54	,	(ATTR_EFF_QUATERNARY_RANK_GROUP2[1]),	(def_val_qrg2_p1)	;	# P1_RP2_QUA
+	52:54	,	0b000								,	any					;	# P1_RP2_QUA invalid
+ 	55		,	0b1									,	(def_val_qrg2_p1)	;	# P1_RP2_QUA_V
+ 	55		,	0b0									,	any					;	# P1_RP2_QUA_V invalid
+ 	56:58	,	(ATTR_EFF_TERTIARY_RANK_GROUP3[1])	,	(def_val_trg3_p1)	;	# P1_RP3_TER
+	56:58	,	0b000								,	any					;	# P1_RP3_TER invalid
+ 	59		,	0b1									,	(def_val_trg3_p1)	;	# P1_RP3_TER_V
+ 	59		,	0b0									,	any					;	# P1_RP3_TER_V invalid
+ 	60:62	,	(ATTR_EFF_QUATERNARY_RANK_GROUP3[1]),	(def_val_qrg3_p1)	;	# P1_RP3_QUA
+	60:62	,	0b000								,	any					;	# P1_RP3_QUA invalid
+ 	63		,	0b1									,	(def_val_qrg3_p1)	;	# P1_RP3_QUA_V
+ 	63		,	0b0									,	any					;	# P1_RP3_QUA_V invalid
+}
+
+# ---------------------------------------------------------------------------------------
+# Read Control Configuration 0		default=0x0002
+#
+# DPHY01.DDRPHY_RC_CONFIG0_P0 from (alias spydef)
+# DPHY01.DDRPHY_RC_CONFIG0_P1 from (alias spydef)
+#
+# DPHY01_DDRPHY_RC_CONFIG0_P0		0x000	0x8000c8000301143f
+# PHYW.PHYX.SYNTHX.D3SIDEA.RCX.RC_CONFIG0_L2
+scom 0x800(0,1)C8000301143F {	# _P[0:1]
+	bits	,	scom_data	,	expr			;
+	# min GPO=5
+	48:51	,	0b0101		,	any				;	# GLOBAL_PHY_OFFSET (GPO), 2:1 max=11, 4:1 max=13
+	52		,	0b0			,	any				;	# ADVANCE_RD_VALID
+	53		,	0b0			,	any				;	# ERS_MODE, reserved
+	54:56	,	0b000		,	any				;	# PER_REPEAT_COUNT
+	57		,	0b0			,	any				;	# SINGLE_BIT_MPR_RP0
+	58		,	0b0			,	any				;	# SINGLE_BIT_MPR_RP1
+	59		,	0b0			,	any				;	# SINGLE_BIT_MPR_RP2
+	60		,	0b0			,	any				;	# SINGLE_BIT_MPR_RP3
+	61		,	0b0			,	any				;	# ALIGN_ON_EVEN_CYCLES
+# !! switched to '1' to match SIM
+	62		,	0b1			,	any				;	# PERFORM_RDCLK_ALIGN
+	63		,	0b0			,	any				;	# STAGGERED_PATTERN
+}
+
+# ---------------------------------------------------------------------------------------
+# Read Control Configuration 1      default=0x0000
+#
+# DPHY01.DDRPHY_RC_CONFIG1_P0 from (alias spydef)
+# DPHY01.DDRPHY_RC_CONFIG1_P1 from (alias spydef)
+#
+# DPHY01_DDRPHY_RC_CONFIG1_P0       0x001   0x8000c8010301143f
+# PHYW.PHYX.SYNTHX.D3SIDEA.RCX.ITERATION_COUNT_L2
+scom 0x800(0,1)C8010301143F {	# _P[0:1]
+	bits	,	scom_data			;
+	48:61	,	0b00000000000000	;	# OUTER_LOOP_CNT
+#	62:63	,	0b00				;	# reserved
+}
+
+# ---------------------------------------------------------------------------------------
+# Read Control Configuration 2      default=0x4008
+#
+# DPHY01.DDRPHY_RC_CONFIG2_P0 from (alias spydef)
+# DPHY01.DDRPHY_RC_CONFIG2_P1 from (alias spydef)
+#
+# DPHY01_DDRPHY_RC_CONFIG2_P0		0x002	0x8000c8020301143f
+# PHYW.PHYX.SYNTHX.D3SIDEA.RCX.RC_CONFIG2_L2
+scom 0x800(0,1)C8020301143F {	# _P[0:1]
+	bits	,	scom_data	,	expr			;
+	48:52	,	0b00000		,	(def_is_sim)	;	# CONSEQ_PASS	sim value
+	48:52	,	0b00110		,	(def_is_bl8)	;	# CONSEQ_PASS	6 min for BL8
+	48:52	,	0b01100		,	any				;	# CONSEQ_PASS	12 min for BL4, or OTF
+#	53:56	,	0b0000		,	any				;	# reserved
+	# 00 = compare beats 1:4, 01 = compare beats 3:6,	10 = compare beats 5:8, 11 = compare all 8 beats
+#	57:58	,	0b00		,	(def_is_sim)	;	# BURST_WINDOW, compare beats 1-4 (legacy, if SIM)
+	57:58	,	0b11		,	any				;	# BURST_WINDOW, compare all 8 beats (AS recommended)
+	59		,	0b0			,	any				;	# ALLOW_RD_FIFO_AUTO_RESET
+#	60:63	,	0b0000		,	any				;	# reserved
+}
+
+# ---------------------------------------------------------------------------------------
+# Read Control Configuration 3      default=0x0800
+#
+# DPHY01.DDRPHY_RC_CONFIG3_P0 from (alias spydef)
+# DPHY01.DDRPHY_RC_CONFIG3_P1 from (alias spydef)
+#
+# DPHY01_DDRPHY_RC_CONFIG3_P0		0x007	0x8000c8070301143f
+# PHYW.PHYX.SYNTHX.D3SIDEA.RCX.RC_CONFIG3_L2(0:6),PHYW.PHYX.SYNTHX.D3SIDEA.RCX.DQSDQ_ENUM_COUNT_L2
+scom 0x800(0,1)C8070301143F {	# _P[0:1]
+	bits	,	scom_data	,	expr			;
+	# FINE_CAL_STEP_SIZE (000=1/128, 001=1/64, 010=3/128, 011=1/32...)
+	48:50	,	0b000		,	any				;	# 1/128
+
+	# COARSE_CAL_STEP_SIZE same as above but 8-16 reserved, but when DIGITAL_EYE_EN=1
+	# in DFT_DIG_EYE register, 51:52 reserved, 53=DIGEYE_16_NOT_1, 54= DIGEYE_REFRESH
+	#51:54	,	0b0100		,	(def_is_sim)	;	# COARSE_CAL_STEP_SIZE = 4 = 5/128  # old 5/18
+	#51:54	,	0b1100		,	any				;	# COARSE_CAL_STEP_SIZE				# old 5/18
+	51:54	,	0b1010		,	(def_is_sim)	;	# COARSE_CAL_STEP_SIZE
+	51:54	,	0b0000		,	any				;	# COARSE_CAL_STEP_SIZE
+	55:56	,	0b00		,	any				;	# DQ_SEL_QUAD
+	57:59	,	0b000		,	any				;	# DQ_SEL_LANE
+}
+
+# ---------------------------------------------------------------------------------------
+# RC Periodic Register		default=????	!! need to set?
+#
+# !! can't find address in db.
+#
+
+# ---------------------------------------------------------------------------------------
+# SEQ Configuration 0 Register		default=0		!! need to review settings
+#
+# DPHY01.DDRPHY_SEQ_CONFIG0_P0 from (alias spydef)
+# DPHY01.DDRPHY_SEQ_CONFIG0_P1 from (alias spydef)
+#
+# DPHY01_DDRPHY_SEQ_CONFIG0_P0		CTL 0x002	0x8000c4020301143f
+# PHYW.PHYX.SYNTHX.D3SIDEA.SEQX.U_SEQ_APB.MPR_PATTERN_DATA_L2
+scom 0x800(0,1)C4020301143F {	# _P[0:1]
+	bits	,	scom_data		;
+	48		,	0b0				;	# MPR_PATTERN_BIT
+	49		,	0b0				;	# TWO_CYCLE_ADDR_EN (must be set to 0), need 1 in sim ?  2N
+	50:53	,	0b0000			;	# MR_MASK_EN (mode register[0:3] mask during calibration)
+	54		,	0b0				;	# PARITY_DLY (only for DDR4, DDR3 don't care)
+	55		,	0b0				;	# LRDIMM_CONTEXT
+#	56:63	,	0b00000000		;	# reserved
+}
+
+# ---------------------------------------------------------------------------------------
+# SEQ Reserved Address 0		default=0		!! 	need to set for DDR3 init due to custom
+# 													pattern during initialization.
+#
+# Attributes Read/Write via programming interface. Row address Lower
+#
+# Description
+# This register contains the reserved address to be used during calibration algorithms in the
+# memory devices. This address is used within all primary ranks of rank pairs. The exact mapping
+# of these register bits to physical ADR pins is protocol dependant.
+#
+# Each read/write access by the DDR PHY during calibration algorithms receives/sends eight beats
+# of data starting at the address defined by the SEQ Reserved Address registers. Since RLDRAM2 and
+# RLDRAM3 support a burst length of 4, the DDR PHY sends multiple back to back commands to receive
+# and send eight beats of data. That is, for BL = 4 the DDR PHY sends two commands back to back.
+#
+# Row/Column addressing:
+# RLDRAM2/3 Addressing with BL = 4: The first command is to address as in SEQ Reserved Address
+# Registers.  The second command is to the row and column address increments by 4.  Some calibration
+# algorithms require multiple reads with burst length 8 to be performed back to back to generate read
+# data bursts greater than 8 beats. To achieve this in RLDRAM2 and RLDRAM3 the consecutive reads must
+# be to different banks. Therefore, in RLDRAM2 and RLDRAM3 the reserved address defined in the SEQ
+# Reserved Address Registers is used in every bank.
+#
+# Bank Addressing:
+# Single read or write command: The bank address is defined by the SEQ Reserved Address Registers.
+# Series of multiple back to back read or write commands: The first read/write is to the bank address
+# defined by the SEQ Reserved Address Registers and the bank address is incremented by 1 for each
+# subsequent read or write command.
+#
+# DPHY01_DDRPHY_SEQ_RESERVED_ADDR0_P0	CTL 0x003	0x8000c4030301143f
+# DPHY01_DDRPHY_SEQ_RESERVED_ADDR1_P0	CTL 0x004	0x8000c4040301143f
+# DPHY01_DDRPHY_SEQ_RESERVED_ADDR2_P0	CTL 0x005	0x8000c4050301143f
+# DPHY01_DDRPHY_SEQ_RESERVED_ADDR3_P0	CTL 0x006	0x8000c4060301143f
+# DPHY01_DDRPHY_SEQ_RESERVED_ADDR4_P0	CTL 0x007	0x8000c4070301143f
+#
+# DPHY01_DDRPHY_SEQ_RESERVED_ADDR0_P0	CTL 0x003	0x8000c4030301143f
+# PHYW.PHYX.SYNTHX.D3SIDEA.SEQX.U_SEQ_APB.RSVD_ADDR0_L2
+
+
+# ---------------------------------------------------------------------------------------
+# SEQ Memory Timing Parameter 0		default=0x7777
+#
+# Memory Timing Parameters to be used during calibration.  Each nibble is used as
+# exponent of 2, to calculate # of clock cycles.  Ex: TMOD_CYCLES=5, 2^5 clocks
+#
+#			clk		12*clks		16*clks		15ns/clk	24*clk
+#  800 =	2.5ns	30 ns 		40 ns
+# 1066 = 	1.876ns	22.512 ns	30 ns
+# 1333 =	1.5ns	18 ns 		24 ns
+# 1460 -	1.370ns	16.439 ns	22 ns					32.88 ns*
+# 1600 =	1.25ns	15 ns		20 ns		12			30 ns*
+# 1731 =	1.155ns	13.865 ns	18.49 ns	13			27.72 ns*
+# 1866 =	1.072ns	12.862 ns	17.15 ns	14			25.73 ns*
+# 2133 =	.9376ns 11.25 ns	15 ns		16			22.50 ns*
+# 2259 =	.8853ns 10.624 ns	14.16 ns	17			21.25 ns*
+# 3200 0.625ns
+#
+# DPHY01.DDRPHY_SEQ_MEM_TIMING_PARAM0_P0 from (alias spydef)
+# 	[01:23]					   [0:2] [0:1]
+# DPHY01_DDRPHY_SEQ_MEM_TIMING_PARAM0_P0	CTL	0x012	0x8000c4120301143f
+# PHYW.PHYX.SYNTHX.D3SIDEA.SEQX.U_SEQ_APB.MEM_TIMING_PARAM0_L2
+scom 0x800(0,1)C4120301143F {	# _P[0:1]
+	bits	,	scom_data	,	expr														;
+	# TMOD_CYCLES, DDR3=max(12nCK, 15ns), DDR4=max(24nCK, 15ns)
+#	48:51	,	0x7			,	(def_is_sim)		;	# match dials
+ 	48:51	,	0x4			,	((CEN.ATTR_MSS_FREQ <= 2133) && (def_is_ddr3))					;	# DDR3 && < 2133, 2^4 = 16clks
+ 	48:51	,	0x5			,	((CEN.ATTR_MSS_FREQ > 2133) && (def_is_ddr3))					;	# DDR3 && > 2133, 2^5 = 32clks
+ 	48:51	,	0x5			,	((CEN.ATTR_MSS_FREQ < 3200) && (def_is_ddr4))					;	# DDR4 && < 3200, 2^5 = 32clks
+	# TRCD_CYCLES
+#	52:55	,	0x7			,	(def_is_sim)												;	# match dials
+	52:55	,	0x4			,	((ATTR_EFF_DRAM_TRCD > 8) && (ATTR_EFF_DRAM_TRCD <= 16))	;	# 2^4 = 16 clks
+	52:55	,	0x3			,	(ATTR_EFF_DRAM_TRCD <= 8)									;	# 2^3 = 8 clks
+	52:55	,	0x5			,	(ATTR_EFF_DRAM_TRCD > 16)									;	# 2^5 = 32 clks
+	# TRP_CYCLES
+#	56:59	,	0x7			,	(def_is_sim)												;	# match dials
+	56:59	,	0x3			,	(ATTR_EFF_DRAM_TRP < 8)										;	# 2^3 = 8 clks
+	56:59	,	0x4			,	((ATTR_EFF_DRAM_TRP > 8) && (ATTR_EFF_DRAM_TRP <= 16))		;	# 2^4 = 16 clks
+	56:59	,	0x5			,	(ATTR_EFF_DRAM_TRP > 16)									;	# 2^5 = 32 clks
+	# TRFC_CYCLES, based on Gb density (512=90ns 1Gb=110ns 2Gb=160ns 4Gb=300ns 8Gb=350ns)
+	# ATTR_EFF_DRAM_TRFC in clocks = tRFC / clock
+#	60:63	,	0x7			,	(def_is_sim)												;	# match dials
+	60:63	,	0x6			,	((ATTR_EFF_DRAM_TRFC <= 64) && (ATTR_EFF_DRAM_TRFC > 32))	;	# 2^6 = 64 clks
+	60:63	,	0x7			,	((ATTR_EFF_DRAM_TRFC <= 128) && (ATTR_EFF_DRAM_TRFC > 64))	;	# 2^7 = 128 clks
+	60:63	,	0x8			,	((ATTR_EFF_DRAM_TRFC <= 256) && (ATTR_EFF_DRAM_TRFC > 128))	;	# 2^8 = 256 clks
+	60:63	,	0x9			,	(ATTR_EFF_DRAM_TRFC > 256)									;	# 2^9 = 512 clks
+}
+
+# ---------------------------------------------------------------------------------------
+# SEQ Memory Timing Parameter 1		default=0x7777
+#
+# Memory Timing Parameters to be used during calibration.  Each nibble is used as
+# exponent of 2, to calculate # of clock cycles.  Ex: TZQCS_CYCLES=6, 2^6 clocks
+#
+# DPHY01.DDRPHY_SEQ_MEM_TIMING_PARAM1_P0 from (alias spydef)
+# 	[01:23]					   [0:2] [0:1]
+# DPHY01_DDRPHY_SEQ_MEM_TIMING_PARAM1_P0	CTL	0x013	0x8000c4130301143f
+# PHYW.PHYX.SYNTHX.D3SIDEA.SEQX.U_SEQ_APB.MEM_TIMING_PARAM1_L2
+scom 0x800(0,1)C4130301143F {	# _P[0:1]
+	bits	,	scom_data	,	expr										;
+	# TZQINIT_CYCLES max(tZQINIT,tZQOPER)	DDR3=max(512nCK, 640ns)	DDR4=1024nCK
+#	48:51	,	0x7			,	(def_is_sim)								;	# match dials
+ 	48:51	,	0x9			,	((def_is_ddr3) && (CEN.ATTR_MSS_FREQ <= 1600))	;	# DDR3 & freq <= 1600, 512 clks
+ 	48:51	,	0xA			,	((def_is_ddr4) || (CEN.ATTR_MSS_FREQ > 1600))	;	# DDR4 || freq > 1600, 1024 clks
+	# TZQCS_CYCLES		DDR3=max(64nCK, 80ns)	DDR4=128nCK
+#	52:55	,	0x7			,	(def_is_sim)								;	# match dials
+ 	52:55	,	0x6			,	((def_is_ddr3) && (CEN.ATTR_MSS_FREQ <= 1600))	;	# DDR3 & freq <= 1600, 64 clks
+ 	52:55	,	0xA			,	((def_is_ddr4) || (CEN.ATTR_MSS_FREQ > 1600))	;	# DDR4 || freq > 1600, 128 clks
+	# TWLDQSEN_CYCLES	DDR3/4=min(25nCK)*
+#	56:59	,	0x7			,	(def_is_sim)								;	# match dials
+	56:59	,	0x5			,	any											;	# 2^5 = 32 clks
+	# TWLMRD_CYCLES		DDR3/4=min(40nCK)*
+#	60:63	,	0x7			,	(def_is_sim)								;	# match dials
+	60:63	,	0x6			,	any											;	# 2^6 = 64 clks
+# *Note: max values system dependent
+}
+
+# ---------------------------------------------------------------------------------------
+# SEQ Memory Timing Parameter 2		default=0x7777
+#
+# Memory Timing Parameters to be used during calibration.  Each nibble is used as
+# exponent of 2, to calculate # of clock cycles.  Ex: TRCS_CYCLES=0, 2^0 clocks
+#
+# DPHY01.DDRPHY_SEQ_MEM_TIMING_PARAM2_P0 from (alias spydef)
+# 	[01:23]					   [0:2] [0:1]
+# DPHY01_DDRPHY_SEQ_MEM_TIMING_PARAM2_P0	CTL	0x014	0x8000c4140301143f
+# PHYW.PHYX.SYNTHX.D3SIDEA.SEQX.U_SEQ_APB.MEM_TIMING_PARAM2_L2
+# DPHY01.DDRPHY_SEQ_MEM_TIMING_PARAM2_P0 from (alias spydef)
+#
+# TODTLON_OFF_CYCLES	DDR3=CWL+AL-2	DDR4 if 2tCK, CWL+AL-3
+# define def_tODTL_DDR3_AL0	=	def_tODTL_DDR3 - ATTR_EFF_DRAM_CL	;
+# scom 0x800(0,1)C4140301143F {	# _P[0:1]
+# 	bits	,	scom_data	,	ATTR_EFF_DRAM_GEN	,	ATTR_EFF_DRAM_AL	,	expr						;
+# 	#--------------- DDR3 -------------------------------------------------------------------------
+# 	48:51	,	0x3			,	1	,	0	,	(def_tODTL_DDR3_AL0 <= 8)									;	#  8 clks
+# 	48:51	,	0x4			,	1	,	0	,	((def_tODTL_DDR3_AL0 <= 16) && (def_tODTL_DDR3_AL0 > 8))	;	# 16 clks
+# 	48:51	,	0x5			,	1	,	0	,	((def_tODTL_DDR3_AL0 <= 32) && (def_tODTL_DDR3_AL0 > 16))	;	# 32 clks
+# 	48:51	,	0x6			,	1	,	0	,	((def_tODTL_DDR3_AL0 <= 64) && (def_tODTL_DDR3_AL0 > 32))	;	# 64 clks
+#  	48:51	,	0x3			,	1	,	any	,	(def_tODTL_DDR3 <= 8)										;	#  8 clks
+#  	48:51	,	0x4			,	1	,	any	,	((def_tODTL_DDR3 <= 16) && (def_tODTL_DDR3 > 8))			;	# 16 clks
+#  	48:51	,	0x5			,	1	,	any	,	((def_tODTL_DDR3 <= 32) && (def_tODTL_DDR3 > 16))			;	# 32 clks
+#  	48:51	,	0x6			,	1	,	any	,	((def_tODTL_DDR3 <= 64) && (def_tODTL_DDR3 > 32))			;	# 64 clks
+# 	#--------------- DDR4 -------------------------------------------------------------------------
+# 	48:51	,	0x3			,	2	,	0	,	(def_tODTL_DDR4_AL0 <= 8)									;	#  8 clks
+# 	48:51	,	0x4			,	2	,	0	,	((def_tODTL_DDR4_AL0 <= 16) && (def_tODTL_DDR4_AL0 > 8))	;	# 16 clks
+# 	48:51	,	0x5			,	2	,	0	,	((def_tODTL_DDR4_AL0 <= 32) && (def_tODTL_DDR4_AL0 > 16))	;	# 32 clks
+# 	48:51	,	0x6			,	2	,	0	,	((def_tODTL_DDR4_AL0 <= 64) && (def_tODTL_DDR4_AL0 > 32))	;	# 64 clks
+#  	48:51	,	0x3			,	2	,	any	,	(def_tODTL_DDR4 <= 8)										;	#  8 clks
+#  	48:51	,	0x4			,	2	,	any	,	((def_tODTL_DDR4 <= 16) && (def_tODTL_DDR4 > 8))			;	# 16 clks
+#  	48:51	,	0x5			,	2	,	any	,	((def_tODTL_DDR4 <= 32) && (def_tODTL_DDR4 > 16))			;	# 32 clks
+#  	48:51	,	0x6			,	2	,	any	,	((def_tODTL_DDR4 <= 64) && (def_tODTL_DDR4 > 32))			;	# 64 clks
+# 	48:51	,	0x0			,	any	,	any	,	any															;	#  0 clks
+# 	# TRC_CYCLES
+# 	52:55	,	0x7			,	(def_is_sim)														;	# match dials
+# 	52:55	,	0x7			,	((ATTR_EFF_DRAM_TRC > 64) && (ATTR_EFF_DRAM_TRC <= 128))			;	# 2^7 = 128 clks
+# 	52:55	,	0x6			,	((ATTR_EFF_DRAM_TRC > 32) && (ATTR_EFF_DRAM_TRC <= 64))				;	# 2^6 = 64 clks
+# 	52:55	,	0x5			,	((ATTR_EFF_DRAM_TRC > 16) && (ATTR_EFF_DRAM_TRC <= 32))				;	# 2^5 = 32 clks
+# 	52:55	,	0x4			,	((ATTR_EFF_DRAM_TRC > 8) && (ATTR_EFF_DRAM_TRC <= 16))				;	# 2^4 = 16 clks
+# 	52:55	,	0x3			,	(ATTR_EFF_DRAM_TRC <= 8)											;	# 2^3 = 8 clks
+# 	# TMRSC_CYCLES	for RLDRAMs, set to 0 for everything else
+# 	56:59	,	0x7			,	(def_is_sim)														;	# match dials
+# 	56:59	,	0x0			,	any																	;
+# #	60:63	,	0x0			,	any																	;	# reserved
+# }
+
+scom 0x800(0,1)C4140301143F {	# _P[0:1]
+	bits	,	scom_data	,	expr																;
+	# TODTLON_OFF_CYCLES	DDR3=CWL+AL-2	DDR4 if 2tCK, CWL+AL-3
+	#--------------- DDR3 -------------------------------------------------------------------------
+	48:51	,	0x3			,	((def_is_ddr3) && (def_tODTL_DDR3 <= 8))							;	#  8 clks
+	48:51	,	0x4			,	((def_is_ddr3) && (def_tODTL_DDR3 <= 16) && (def_tODTL_DDR3 > 8))	;	# 16 clks
+	48:51	,	0x5			,	((def_is_ddr3) && (def_tODTL_DDR3 <= 32) && (def_tODTL_DDR3 > 16))	;	# 32 clks
+	48:51	,	0x6			,	((def_is_ddr3) && (def_tODTL_DDR3 <= 64) && (def_tODTL_DDR3 > 32))	;	# 64 clks
+	#--------------- DDR4 -------------------------------------------------------------------------
+	48:51	,	0x3			,	((def_is_ddr4) && (def_tODTL_DDR4 <= 8))							;	#  8 clks
+	48:51	,	0x4			,	((def_is_ddr4) && (def_tODTL_DDR4 <= 16) && (def_tODTL_DDR4 > 8))	;	# 16 clks
+	48:51	,	0x5			,	((def_is_ddr4) && (def_tODTL_DDR4 <= 32) && (def_tODTL_DDR4 > 16))	;	# 32 clks
+	48:51	,	0x6			,	((def_is_ddr4) && (def_tODTL_DDR4 <= 64) && (def_tODTL_DDR4 > 32))	;	# 64 clks
+	48:51	,	0x0			,	any																	;	#  0 clks
+	# TRC_CYCLES
+	52:55	,	0x7			,	(def_is_sim)														;	# match dials
+	52:55	,	0x7			,	((ATTR_EFF_DRAM_TRC > 64) && (ATTR_EFF_DRAM_TRC <= 128))			;	# 2^7 = 128 clks
+	52:55	,	0x6			,	((ATTR_EFF_DRAM_TRC > 32) && (ATTR_EFF_DRAM_TRC <= 64))				;	# 2^6 = 64 clks
+	52:55	,	0x5			,	((ATTR_EFF_DRAM_TRC > 16) && (ATTR_EFF_DRAM_TRC <= 32))				;	# 2^5 = 32 clks
+	52:55	,	0x4			,	((ATTR_EFF_DRAM_TRC > 8) && (ATTR_EFF_DRAM_TRC <= 16))				;	# 2^4 = 16 clks
+	52:55	,	0x3			,	(ATTR_EFF_DRAM_TRC <= 8)											;	# 2^3 = 8 clks
+	# TMRSC_CYCLES	for RLDRAMs, set to 0 for everything else
+	56:59	,	0x7			,	(def_is_sim)														;	# match dials
+	56:59	,	0x0			,	any																	;
+#	60:63	,	0x0			,	any																	;	# reserved
+}
+# ---------------------------------------------------------------------------------------
+# SEQ Low Power Termination Address		default=0xFFFF		!! need to set this?
+#
+# bit positions and mapping of the Address/BA/BG pins in DDR3/DDR4 of the low power
+# termination address{2-4}
+#
+# for DDR3:
+# A(0:9) 	= LPT_ADDR2(0:9)
+# A(11) 	= LPT_ADDR2(11)
+# A(13:15)	= LPT_ADDR2(13:15)
+# BA(0:2)	= LPT_ADDR4(0:2)
+#
+# for DDR4:
+# A(0:9) 	= LPT_ADDR2(0:9)
+# A(11) 	= LPT_ADDR2(11)
+# A(13)		= LPT_ADDR2(13)
+# A(17)		= LPT_ADDR3(1)
+# BA(0:1)	= LPT_ADDR4(0:1)
+# BG(0:1)	= LPT_ADDR4(2:3)
+#
+#DPHY01_DDRPHY_SEQ_LPT_ADDR2_P0		0x017	0x8000c4170301143f
+#scom 0x8000c4170301143f {
+#	bits	,	scom_data		;
+#	48:63	,	0xFFFF			;	# LPT_ADDR2
+#}
+
+# ---------------------------------------------------------------------------------------
+# Write control logic configuration 0	default=0
+#
+# tWLO = write leveling output delay;	freq < 1600, max=9 otherwise max=7.5 ns
+# tWLOE= write leveling output error;	max=2 ns
+#
+# DPHY01_DDRPHY_WC_CONFIG0_P0	0x000	0x8000cc000301143f
+# PHYW.PHYX.SYNTHX.D3SIDEA.WCX.DDRPHY_WC_CONFIG0_L2
+scom 0x800(0,1)CC000301143F {	# _P[0:1]
+	bits	,	scom_data	,	expr			;
+	# = 12 + max(tWLDQSEN-tMOD,tWLO+tWLOE) + (longest DQS wire delay in CKs) + (longest DQ wire delay in CKs)
+	# @ 1600, = 12 + max(13,3) + ldqs + ldq = 25 + ldqs + ldq
+	48:55	,	0x10		,	(def_is_sim)	;	# TWLO_TWLOE = 16
+	48:55	,	0x1B		,	any				;	# TWLO_TWLOE = 27
+	#48:55	,	(25+ldqs+ldq),	< 1866			;	# TWLO_TWLOE
+	56		,	0b1			,	any				;	# WL_ONE_DQS_PULSE = enable
+	57:62	,	0b000000	,	any				;	# FW_WR_RD
+	63		,	0b0			,	any				;	# CUSTOM_INIT_WRITE
+}
+# ---------------------------------------------------------------------------------------
+# Write control logic configuration 1	default=0x2350	addr=0xCC01
+#
+# DPHY01_DDRPHY_WC_CONFIG1_P0	0x001	0x8000cc010301143f
+# PHYW.PHYX.SYNTHX.D3SIDEA.WCX.DDRPHY_WC_CONFIG1_L2
+scom 0x800(0,1)CC010301143F {	# _P[0:1]
+	bits	,	scom_data	,	expr			;
+	48:51	,	0b1100		,	(def_is_sim)	;	# BIG_STEP = 12	(changed from default for SIM)
+	48:51	,	0b0010		,	any				;	# BIG_STEP = 2	(default)
+	52:54	,	0b001		,	any				;	# SMALL_STEP = 1	(!! recommend setting to 0)
+	55:60	,	0b101010	,	any				;	# WR_PRE_DLY = 42
+#	61:63	,	0b000		,	any				;	# reserved
+}
+
+# ---------------------------------------------------------------------------------------
+# Write control logic configuration 2	default=0x5440
+#
+# DPHY01.DDRPHY_WC_CONFIG2_P0 from (alias spydef)
+#
+# DPHY01_DDRPHY_WC_CONFIG2_P0	0x002	0x8000cc020301143f
+# PHYW.PHYX.SYNTHX.D3SIDEA.WCX.DDRPHY_WC_CONFIG2_L2
+scom 0x800(0,1)CC020301143F {	# _P[0:1]
+	bits	,	scom_data			,	expr			;
+	48:51	,	0x3					,	(def_is_sim)	;	# NUM_VALID_SAMPLES = 3 (changed from defaults)
+	48:51	,	0x5					,	any				;	# NUM_VALID_SAMPLES = 5 (defaults)
+
+	# FW_RD_WR = max(tWTR+8,AL+tRTP), AL=ATTR_EFF_DRAM_CL-ATTR_EFF_DRAM_AL when ATTR_EFF_DRAM_AL != 0
+	52:57	,	(def_TWTR_PLUS_8)	,	(def_TWTR_PLUS_8 >= def_TRTP_PLUS_AL)	;	# TWTR + 8 >= TRTP + AL
+	52:57	,	(def_TRTP_PLUS_AL)	,	(def_TWTR_PLUS_8 < def_TRTP_PLUS_AL)	;	# TWTR + 8 < TRTP + AL
+
+#	58:62	,	0b00000				,	any				;	# reserved
+
+	# DP18_WR_DELAY_VALUE_{0-23}_RP{0-3}_REG are reset to 0 at the start of WL cal for rank pair 0 when '1'
+	63		,	0b0					,	any				;	# EN_RESET_WR_DELAY_WL = disabled
+}
+
+# ---------------------------------------------------------------------------------------
+# Write control logic configuration 3	default=0x01F8
+#
+# DPHY01.DDRPHY_WC_CONFIG3_P0 from (alias spydef)
+#
+# DPHY01_DDRPHY_WC_CONFIG3_P0	0x005	0x8000cc050301143f
+# PHYW.PHYX.SYNTHX.D3SIDEA.WCX.DDRPHY_WC_CONFIG3_L2
+scom 0x800(0,1)CC050301143F {	# _P[0:1]
+	bits	,	scom_data	,	expr				;
+	48		,	0b1			,	(def_is_ddr4)		;	# if DDR4, drive DQ pins in DATA_BIT_ENABLE1
+	48		,	0b0			,	(def_not_ddr4)		;	# if not DDR4, set to 0
+	# MRS_CMD_DQ_ON determines the WL_per_DRAM_addr time.
+	# WL_per_DRAM_addr = 10 + MRS_CMD_DQ_ON 	in 2:1 mode
+	# WL_per_DRAM_addr = 18 + 2 * MRS_CMD_DQ_ON in 4:1 mode
+	49:54	,	0b000000	,	any					;	# MRS_CMD_DQ_ON		!!
+	55:60	,	0b000000	,	(def_is_sim)		;	# MRS_CMD_DQ_OFF	!!
+	55:60	,	0b111111	,	any					;	# MRS_CMD_DQ_OFF	!!
+#	61:63	,	0b000		,	any					;	# reserved
+}
+
+# ---------------------------------------------------------------------------------------
+# DP18 Data Bit Direction 0		defaults to 0's		!! need to set this?
+#
+# 1 indicates output only
+#
+# DPHY01_DDRPHY_DP18_DATA_BIT_DIR0_P0_0		0x002	0x800000020301143f
+# PHYW.PHYX.GEN_DP#0.DPX.HC.HC.D3PHY_WRDP18WRAP.D3PHY_WRDP18CNTL_MAC.DDRPHY_DP18_DATA_BIT_DIR0_L2
+
+# ---------------------------------------------------------------------------------------
+# DP18 Data Bit Direction 1		defaults to 0's
+#
+# '1'b indicates DP18 bit is an output and continously drives out a signal
+#
+# DPHY01.DDRPHY_DP18_DATA_BIT_DIR1_P0_0 from (alias spydef)
+# DPHY01_DDRPHY_DP18_DATA_BIT_DIR1_P0_0		0x003	0x800000030301143f
+# PHYW.PHYX.GEN_DP#0.DPX.HC.HC.D3PHY_WRDP18WRAP.D3PHY_WRDP18CNTL_MAC.DDRPHY_DP18_DATA_BIT_DIR1_L2
+#scom 0x800(0,1)(00,04,08,0C,10)030301143f {	# DIR1_P[0:1]_[0:4]
+scom 0x800(0,1)3C030301143f {	# DIR1_P[0:1]_[0:4] via broadcast
+	bits	,	scom_data	,	expr			;
+	48:55	,	0b00000000	,	any				;	# DATA_BIT_DIR_16_23
+	56		,	0b0			,	any				;	# WL_ADVANCE_DISABLE
+	57		,	0b0			,	any				;	# DISABLE_PING_PONG
+# !recent
+#	58		,	0b0			,	(def_is_sim)	;	# DELAY_PING_PONG_HALF, to match dials
+	58		,	0b1			,	any				;	# DELAY_PING_PONG_HALF, must be 1 from definition
+# !recent
+#	59		,	0b0			,	(def_is_sim)	;	# ADVANCE_PING_PONG. to match dials
+	59		,	0b1			,	any				;	# ADVANCE_PING_PONG. must be 1 from definition
+	60:63	,	0b0000		,	any				;	# ATEST_MUX_CTL[0:3]
+}
+
+# ---------------------------------------------------------------------------------------
+# DP18 Data Bit Enable 0	(defaults to 0's)	Affects ALL Ranks
+#
+# DP18 24 single ended data (tx/rx) pins enable(1)/disable(0).
+# When set to disable, it turns off the bit(lane) for ALL ranks
+#
+# Byte spares on P0_1, P1_2, P2_4, P3_1, DQ in lanes 8:15, DQS in lanes 20:23
+#
+# P0_1{56:63}, P1_2{56:63} = 0xFF if spares enabled else 0x00
+# all others (P0_0, P0_[2:4], P1_[0:1], P1_[3:4]) = 0xFFFF
+#
+# P2_4{56:63}, P3_1{56:63} = 0xFF if spares enabled else 0x00
+# all others (P2_[0:3], P3_0, P3_[2:4]) = 0xFFFF
+#
+# DPHY01_DDRPHY_DP18_DATA_BIT_ENABLE0_P0_0		0x800000000301143f
+# DPHY01_DDRPHY_DP18_DATA_BIT_ENABLE0_P0_2		0x800008000301143f
+# DPHY01_DDRPHY_DP18_DATA_BIT_ENABLE0_P0_3		0x80000C000301143f
+# DPHY01_DDRPHY_DP18_DATA_BIT_ENABLE0_P1_0		0x800100000301143f
+# DPHY01_DDRPHY_DP18_DATA_BIT_ENABLE0_P1_3		0x80010C000301143f
+# DPHY01_DDRPHY_DP18_DATA_BIT_ENABLE0_P1_4		0x800110000301143f
+#
+#   [01:23]					 [0:1]_[0:1]_[0:4]
+# DPHY01_DDRPHY_DP18_DATA_BIT_ENABLE0_P0_0		0x000	0x800000000301143f
+# DPHY01_DDRPHY_DP18_DATA_BIT_ENABLE0_P0_2				0x800008000301143f
+# DPHY01_DDRPHY_DP18_DATA_BIT_ENABLE0_P0_3				0x80000C000301143f
+# PHYW.PHYX.GEN_DP#0.DPX.HC.HC.D3PHY_WRDP18WRAP.D3PHY_WRDP18CNTL_MAC.DDRPHY_DP18_DATA_BIT_ENABLE0_L2
+# ENABLE0_(P0_0, P0_2, P0_3, P2_0, P2_2, P2_3)
+scom 0x800(000,008,00C)000301143f {
+	bits	,	scom_data	,	expr			;
+	48:63	,	0xFFFF		,	(def_valid_p0)	;	# enable DATA_BIT_ENABLE_0_15
+	48:63	,	0x0000		,	any				;
+}
+# DPHY01_DDRPHY_DP18_DATA_BIT_ENABLE0_P1_0		0x800100000301143f
+# DPHY01_DDRPHY_DP18_DATA_BIT_ENABLE0_P1_3		0x80010C000301143f
+# DPHY01_DDRPHY_DP18_DATA_BIT_ENABLE0_P1_4		0x800110000301143f
+# ENABLE0_(P1_0, P1_3, P1_4, P3_0, P3_3, P3_4)
+scom 0x800(100,10C,110)000301143f {
+	bits	,	scom_data	,	expr			;
+	48:63	,	0xFFFF		,	(def_valid_p1)	;	# enable DATA_BIT_ENABLE_0_15
+	48:63	,	0x0000		,	any				;
+}
+
+# DPHY01_DDRPHY_DP18_DATA_BIT_ENABLE0_P0_4		0x800010000301143f
+scom 0x800(010)000301143f {
+	bits	,	scom_data	,	expr												;
+	48:63	,	0xFFFF		,	((def_is_mba01) && (def_valid_p0))					;	# enable DATA_BIT_ENABLE_0_15
+# ENABLE0_(P2_4)
+	48:63	,	0xFFFF		,	((def_is_mba23) && (def_valid_p0) && (def_has_spare))	;	# enable DATA_BIT_ENABLE_0_15
+	48:63	,	0xFF00		,	((def_is_mba23) && (def_valid_p0) && (def_no_spare))	;	# enable DATA_BIT_ENABLE_0_15
+	48:63	,	0x0000		,	any													;
+}
+# DPHY01_DDRPHY_DP18_DATA_BIT_ENABLE0_P1_1		0x800104000301143f
+scom 0x800(104)000301143f {
+	bits	,	scom_data	,	expr												;
+	48:63	,	0xFFFF		,	((def_is_mba01) && (def_valid_p1))					;	# enable DATA_BIT_ENABLE_0_15
+# ENABLE0_(P3_1)
+	48:63	,	0xFFFF		,	((def_is_mba23) && (def_valid_p1) && (def_has_spare))	;	# enable DATA_BIT_ENABLE_0_15
+	48:63	,	0xFF00		,	((def_is_mba23) && (def_valid_p1) && (def_no_spare))	;	# enable DATA_BIT_ENABLE_0_15
+	48:63	,	0x0000		,	any													;
+}
+
+# DPHY01_DDRPHY_DP18_DATA_BIT_ENABLE0_P2_1		0x800004000301183f
+scom 0x800(004)000301143f {
+	bits	,	scom_data	,	expr												;
+	48:63	,	0xFFFF		,	((def_is_mba23) && (def_valid_p0))					;	# enable DATA_BIT_ENABLE_0_15
+# ENABLE0_(P0_1)
+	48:63	,	0xFFFF		,	((def_is_mba01) && (def_valid_p0) && (def_has_spare))	;	# enable DATA_BIT_ENABLE_0_15
+	48:63	,	0xFF00		,	((def_is_mba01) && (def_valid_p0) && (def_no_spare))	;	# enable DATA_BIT_ENABLE_0_15
+	48:63	,	0x0000		,	any													;
+}
+# DPHY01_DDRPHY_DP18_DATA_BIT_ENABLE0_P3_2		0x800108000301183f
+scom 0x800(108)000301143f {						# DATA_BIT_ENABLE_0_15
+	bits	,	scom_data	,	expr												;	# spare = 8_15
+	48:63	,	0xFFFF		,	((def_is_mba23) && (def_valid_p1))					;	# P3_2
+# ENABLE0_(P1_2)
+	48:63	,	0xFFFF		,	((def_is_mba01) && (def_valid_p1) && (def_has_spare))	;	# P1_2, enable spare if CDIMM
+	48:63	,	0xFF00		,	((def_is_mba01) && (def_valid_p1) && (def_no_spare))	;	# P1_2, disable spare
+}
+
+# ---------------------------------------------------------------------------------------
+# DP18 Data Bit Enable 1	(defaults to 0's)
+#
+# Centaur has mapped DP18 data bits 16:23 to be DQS, so 0's for this register is fine.
+#
+# DPHY01_DDRPHY_DP18_DATA_BIT_ENABLE1_P0_0		0x001	0x800000010301143f
+#PHYW.PHYX.GEN_DP#0.DPX.HC.HC.D3PHY_WRDP18WRAP.D3PHY_WRDP18CNTL_MAC.DDRPHY_DP18_DATA_BIT_ENABLE1_L2
+#scom 0x800(0,1)(00,04,08,0C,10)010301143f {	# ENABLE1_P[0:1]_[0:4]
+# scom 0x800(0,1)3C010301143f {	# ENABLE0_P[0:1]_[0:4] via broadcast
+# 	bits	,	scom_data		;
+# 	48:55	,	0b00000000		;	# data_bit_enable_16_23
+# 	56		,	0b0				;	# DFT_FORCE_OUTPUTS
+# 	57		,	0b0				;	# DFT_PRBS7_GEN_EN
+# 	58		,	0b0				;	# WRAPSEL
+# 	59		,	0b0				;	# HW_VALUE
+# 	60		,	0b0				;	# MRS_CMD_DATA_N0
+# 	61		,	0b0				;	# MRS_CMD_DATA_N1
+# 	62		,	0b0				;	# MRS_CMD_DATA_N2
+# 	63		,	0b0				;	# MRS_CMD_DATA_N3
+# }
+
+#---------------------------------------------------------------------------
+# DP18 Data Bit Disable 0	default=0		per Rank Group/Pair
+#
+# This register is used to disable each of the 24 pins on the DP18. During calibration
+# operations, the hardware sets the bit in this register which corresponds to a pin on the
+# DP18 which failed a calibration step. This register indicates which DQ pins on the DP18
+# failed a calibration step. This register does not indicate which calibration step failed.
+#
+# !! does the reset clear these 2 registers?  does the initfile need to set these?
+# ATTR_MSS_BAD_BIT_MASK[port][dimm][rank][byte]
+# PHY logic registers only care about bits on a rank pair/port, so dimm will not be needed.
+#
+# get rank pair via ATTR_EFF_PRIMARY_RANK_GROUP0[0],sec,ter,qua then 'or' the byte together to form
+# the value needed for register
+#
+# NOTE:  No need to disable spare dram bits since it should not be enabled.
+# port P0_1, P0_4,
+#	56:63	,	0xFF		,	((def_no_spare) && (def_is_mba01))	;	# disable spare bits
+#
+#define def_bb_p0_rp0_d = ATTR_EFF_PRIMARY_RANK_GROUP0[0] >> 2;
+#define def_bb_p0_rp0_r = ATTR_EFF_PRIMARY_RANK_GROUP0[0] & 0x03;
+#define SYS.ATTR_SCRATCH_UINT8_1 = ATTR_EFF_PRIMARY_RANK_GROUP0[0] >> 2;
+#define SYS.ATTR_SCRATCH_UINT8_2 = ATTR_EFF_PRIMARY_RANK_GROUP0[0] & 0x03;
+# define def_bb_p0_rp1_d = ATTR_EFF_PRIMARY_RANK_GROUP1[0] >> 2;
+# define def_bb_p0_rp1_r = ATTR_EFF_PRIMARY_RANK_GROUP1[0] & 0x03;
+# define def_bb_p0_rp2_d = ATTR_EFF_PRIMARY_RANK_GROUP2[0] >> 2;
+# define def_bb_p0_rp2_r = ATTR_EFF_PRIMARY_RANK_GROUP2[0] & 0x03;
+# define def_bb_p0_rp3_d = ATTR_EFF_PRIMARY_RANK_GROUP3[0] >> 2;
+# define def_bb_p0_rp3_r = ATTR_EFF_PRIMARY_RANK_GROUP3[0] & 0x03;
+#
+# DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_0		0x07C	0x8000007c0301143f
+# PHYW.PHYX.GEN_DP#0.DPX.HC.HC.D3PHY_WRDP18WRAP.D3PHY_WRDP18CNTL_MAC.DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_L2
+scom 0x8000007C0301143f {	# DATA_BIT_DISABLE0_RP0_P0_0
+	bits	,	scom_data	,	expr									;	# bits 0:15
+	48:55	,	0xFF		,	(ATTR_EFF_PRIMARY_RANK_GROUP0[0]==255)	;	# invalid rank pair0
+#	48:55	,	(ATTR_MSS_BAD_BIT_MASK[0][(ATTR_EFF_PRIMARY_RANK_GROUP0[0] >> 2)][(ATTR_EFF_PRIMARY_RANK_GROUP0[0] & 0x03)][0]	,	any	;
+#	48:55	,	(ATTR_MSS_BAD_BIT_MASK[0][def_bb_p0_rp0_d][def_bb_p0_rp0_r][0])	,	any	;	# expr for byte0
+#	48:55	,	0x55		,	(ATTR_MSS_BAD_BIT_MASK[0][SYS.ATTR_SCRATCH_UINT8_1][0][0] == 0x04)
+#	48:55	,	0x55		,	(ATTR_EFF_DIMM_SIZE[0][SYS.ATTR_SCRATCH_UINT8_1] == 0x00);
+	56:63	,	0xFF		,	(ATTR_EFF_PRIMARY_RANK_GROUP0[0]==255)	;	# invalid rank pair0
+	#56:63	,	(ATTR_MSS_BAD_BIT_MASK[0][def_bb_p0_rp0_d][def_bb_p0_rp0_r][1])	,	any	;	# expr for byte1
+}
+scom 0x8000047C0301143f {	# DATA_BIT_DISABLE0_RP0_P0_1
+	bits	,	scom_data	,	expr									;	# bits 0:15
+	48:55	,	0xFF		,	(ATTR_EFF_PRIMARY_RANK_GROUP0[0]==255)	;	# invalid rank pair0
+	56:63	,	0xFF		,	(ATTR_EFF_PRIMARY_RANK_GROUP0[0]==255)	;	# invalid rank pair0
+}
+scom 0x8000087C0301143f {	# DATA_BIT_DISABLE0_RP0_P0_2
+	bits	,	scom_data	,	expr									;	# bits 0:15
+	48:55	,	0xFF		,	(ATTR_EFF_PRIMARY_RANK_GROUP0[0]==255)	;	# invalid rank pair0
+	56:63	,	0xFF		,	(ATTR_EFF_PRIMARY_RANK_GROUP0[0]==255)	;	# invalid rank pair0
+}
+scom 0x80000C7C0301143f {	# DATA_BIT_DISABLE0_RP0_P0_3
+	bits	,	scom_data	,	expr									;	# bits 0:15
+	48:55	,	0xFF		,	(ATTR_EFF_PRIMARY_RANK_GROUP0[0]==255)	;	# invalid rank pair0
+	56:63	,	0xFF		,	(ATTR_EFF_PRIMARY_RANK_GROUP0[0]==255)	;	# invalid rank pair0
+}
+scom 0x8000107C0301143f {	# DATA_BIT_DISABLE0_RP0_P0_4
+	bits	,	scom_data	,	expr									;	# bits 0:15
+	48:55	,	0xFF		,	(ATTR_EFF_PRIMARY_RANK_GROUP0[0]==255)	;	# invalid rank pair0
+	56:63	,	0xFF		,	(ATTR_EFF_PRIMARY_RANK_GROUP0[0]==255)	;	# invalid rank pair0
+}
+
+# DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_0		0x17C	0x8000017c0301143f
+scom 0x8000017C0301143f {	# DATA_BIT_DISABLE0_RP1_P0_0
+	bits	,	scom_data	,	expr									;	# bits 0:15
+	48:55	,	0xFF		,	(ATTR_EFF_PRIMARY_RANK_GROUP1[0]==255)	;	# invalid rank pair1
+	56:63	,	0xFF		,	(ATTR_EFF_PRIMARY_RANK_GROUP1[0]==255)	;	# invalid rank pair1
+}
+scom 0x8000057C0301143f {	# DATA_BIT_DISABLE0_RP1_P0_1
+	bits	,	scom_data	,	expr									;	# bits 0:15
+	48:55	,	0xFF		,	(ATTR_EFF_PRIMARY_RANK_GROUP1[0]==255)	;	# invalid rank pair1
+	56:63	,	0xFF		,	(ATTR_EFF_PRIMARY_RANK_GROUP1[0]==255)	;	# invalid rank pair1
+}
+scom 0x8000097C0301143f {	# DATA_BIT_DISABLE0_RP1_P0_2
+	bits	,	scom_data	,	expr									;	# bits 0:15
+	48:55	,	0xFF		,	(ATTR_EFF_PRIMARY_RANK_GROUP1[0]==255)	;	# invalid rank pair1
+	56:63	,	0xFF		,	(ATTR_EFF_PRIMARY_RANK_GROUP1[0]==255)	;	# invalid rank pair1
+}
+scom 0x80000D7C0301143f {	# DATA_BIT_DISABLE0_RP1_P0_3
+	bits	,	scom_data	,	expr									;	# bits 0:15
+	48:55	,	0xFF		,	(ATTR_EFF_PRIMARY_RANK_GROUP1[0]==255)	;	# invalid rank pair1
+	56:63	,	0xFF		,	(ATTR_EFF_PRIMARY_RANK_GROUP1[0]==255)	;	# invalid rank pair1
+}
+scom 0x8000117C0301143f {	# DATA_BIT_DISABLE0_RP1_P0_4
+	bits	,	scom_data	,	expr									;	# bits 0:15
+	48:55	,	0xFF		,	(ATTR_EFF_PRIMARY_RANK_GROUP1[0]==255)	;	# invalid rank pair1
+	56:63	,	0xFF		,	(ATTR_EFF_PRIMARY_RANK_GROUP1[0]==255)	;	# invalid rank pair1
+}
+
+# DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_0		0x27C	0x8000027c0301143f
+scom 0x8000027C0301143f {	# DATA_BIT_DISABLE0_RP2_P0_0
+	bits	,	scom_data	,	expr									;	# bits 0:15
+	48:55	,	0xFF		,	(ATTR_EFF_PRIMARY_RANK_GROUP2[0]==255)	;	# invalid rank pair2
+	56:63	,	0xFF		,	(ATTR_EFF_PRIMARY_RANK_GROUP2[0]==255)	;	# invalid rank pair2
+}
+scom 0x8000067C0301143f {	# DATA_BIT_DISABLE0_RP2_P0_1
+	bits	,	scom_data	,	expr									;	# bits 0:15
+	48:55	,	0xFF		,	(ATTR_EFF_PRIMARY_RANK_GROUP2[0]==255)	;	# invalid rank pair2
+	56:63	,	0xFF		,	(ATTR_EFF_PRIMARY_RANK_GROUP2[0]==255)	;	# invalid rank pair2
+}
+scom 0x80000A7C0301143f {	# DATA_BIT_DISABLE0_RP2_P0_2
+	bits	,	scom_data	,	expr									;	# bits 0:15
+	48:55	,	0xFF		,	(ATTR_EFF_PRIMARY_RANK_GROUP2[0]==255)	;	# invalid rank pair2
+	56:63	,	0xFF		,	(ATTR_EFF_PRIMARY_RANK_GROUP2[0]==255)	;	# invalid rank pair2
+}
+scom 0x80000E7C0301143f {	# DATA_BIT_DISABLE0_RP2_P0_3
+	bits	,	scom_data	,	expr									;	# bits 0:15
+	48:55	,	0xFF		,	(ATTR_EFF_PRIMARY_RANK_GROUP2[0]==255)	;	# invalid rank pair2
+	56:63	,	0xFF		,	(ATTR_EFF_PRIMARY_RANK_GROUP2[0]==255)	;	# invalid rank pair2
+}
+scom 0x8000127C0301143f {	# DATA_BIT_DISABLE0_RP2_P0_4
+	bits	,	scom_data	,	expr									;	# bits 0:15
+	48:55	,	0xFF		,	(ATTR_EFF_PRIMARY_RANK_GROUP2[0]==255)	;	# invalid rank pair2
+	56:63	,	0xFF		,	(ATTR_EFF_PRIMARY_RANK_GROUP2[0]==255)	;	# invalid rank pair2
+}
+
+# DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_0		0x37C	0x8000037c0301143f
+scom 0x8000037C0301143f {	# DATA_BIT_DISABLE0_RP3_P0_0
+	bits	,	scom_data	,	expr									;	# bits 0:15
+	48:55	,	0xFF		,	(ATTR_EFF_PRIMARY_RANK_GROUP3[0]==255)	;	# invalid rank pair3
+	56:63	,	0xFF		,	(ATTR_EFF_PRIMARY_RANK_GROUP3[0]==255)	;	# invalid rank pair3
+}
+scom 0x8000077C0301143f {	# DATA_BIT_DISABLE0_RP3_P0_1
+	bits	,	scom_data	,	expr									;	# bits 0:15
+	48:55	,	0xFF		,	(ATTR_EFF_PRIMARY_RANK_GROUP3[0]==255)	;	# invalid rank pair3
+	56:63	,	0xFF		,	(ATTR_EFF_PRIMARY_RANK_GROUP3[0]==255)	;	# invalid rank pair3
+}
+scom 0x80000B7C0301143f {	# DATA_BIT_DISABLE0_RP3_P0_2
+	bits	,	scom_data	,	expr									;	# bits 0:15
+	48:55	,	0xFF		,	(ATTR_EFF_PRIMARY_RANK_GROUP3[0]==255)	;	# invalid rank pair3
+	56:63	,	0xFF		,	(ATTR_EFF_PRIMARY_RANK_GROUP3[0]==255)	;	# invalid rank pair3
+}
+scom 0x80000F7C0301143f {	# DATA_BIT_DISABLE0_RP3_P0_3
+	bits	,	scom_data	,	expr									;	# bits 0:15
+	48:55	,	0xFF		,	(ATTR_EFF_PRIMARY_RANK_GROUP3[0]==255)	;	# invalid rank pair3
+	56:63	,	0xFF		,	(ATTR_EFF_PRIMARY_RANK_GROUP3[0]==255)	;	# invalid rank pair3
+}
+scom 0x8000137C0301143f {	# DATA_BIT_DISABLE0_RP3_P0_4
+	bits	,	scom_data	,	expr									;	# bits 0:15
+	48:55	,	0xFF		,	(ATTR_EFF_PRIMARY_RANK_GROUP3[0]==255)	;	# invalid rank pair3
+	56:63	,	0xFF		,	(ATTR_EFF_PRIMARY_RANK_GROUP3[0]==255)	;	# invalid rank pair3
+}
+
+# Port1, MBA01 = instance 2
+#	56:63	,	0xFF		,	((def_no_spare) && (def_is_mba01))	;	# disable spare bits
+# Port1, MBA23 = instance 1
+#	56:63	,	0xFF		,	((def_no_spare) && (def_is_mba23))	;	# disable spare bits
+
+#---------------------------------------------------------------------------
+# DP18 Data Bit Disable 1	default=0
+#
+# bits 16:23, used for DQS, no need to set, legacy logic (Dave)
+#
+# DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE1_RP0_P0_0		0x07D	0x8000007d0301143f
+# PHYW.PHYX.GEN_DP#0.DPX.HC.HC.D3PHY_WRDP18WRAP.D3PHY_WRDP18CNTL_MAC.DDRPHY_DP18_DATA_BIT_DISABLE1_RP0_L2
+#scom 0x80007D000301143f {	# DATA_BIT_DISABLE1_RP0_P0_0
+#	bits	,	scom_data	,	expr		;	# bits 16:23
+#	48:55	,	0x00		,	any			;	# ATTR_MSS_BAD_BIT_MASK[2][2][8][10]
+#	56:63	,	0x00		,	any			;	# reserved
+#}
+
+#---------------------------------------------------------------------------
+#  ADR BIT ENABLE P[0:1] ADR[0:3]	default=0
+#
+# Note: refined this so that bits 12:15 not used in ADR[0:1],
+# and bits 14:15 not used in ADR[2:3].
+#
+# DPHY01_DDRPHY_ADR_BIT_ENABLE_P0_ADR0		0x000	0x800040000301143f
+# DPHY01.DDRPHY_ADR_BIT_ENABLE_P0_ADR0 from (alias spydef)
+#scom 0x800(0,1)(40,44,48,4c)000301143f {	# _P[0:1]_ADR[0:3]
+# scom 0x800(0,1)7C000301143F {	# _P[0:1]_ADR[0:3] via broadcast
+# 	bits	,	scom_data		;
+# 	48:63	,	0xFFFF			;	# enable all ADR bits
+# }
+
+# need to turn off if deconfiguring the ports, should be handled in a
+# clean up procedure
+scom 0x800(040,044,140,144)000301143F {	# _P[0:1]_ADR[0:1]
+	bits	,	scom_data		;
+	48:63	,	0xFFF0			;	# bits 12:15 not used in ADR[0:1]
+}
+scom 0x800(048,04C,148,14C)000301143F {	# _P[0:1]_ADR[2:3]
+	bits	,	scom_data		;
+	48:63	,	0xFFFC			;	# 14:15 not used in ADR[2:3]
+}
+
+#---------------------------------------------------------------------------
+#  ADR DELAYs		defaults to 0's
+#
+#  Adjustment in the ADR to center clock signals with address/cmd
+# Settings for differential clocks for all ports and ADR blocks based
+# on how Centaur maps the clocks to ADR lanes.  reference: centaur_pins_xref.xls
+#
+# ADR {0:3} = address {0x400, 0x440, 0x480, 0x4C0}
+#
+# DELAY	 Address offset		lane(ADR)
+# -----------------------------------
+#   0			4			0:1
+#   1			5			2:3
+#   2			6			4:5
+#   3			7			6:7
+#   4			8			8:9
+#   5			9			10:11
+#   6			A			12:13
+#   7			B			14:15	(not used in our design)
+#
+# dimm0 = clk[0:1], dimm1 = clk[2:3]
+# 49:55 = value0, 57:63 = value1,
+# 0x40 = 64 (for single data rate), 0x20 = 32 (for double data rate)
+#
+# -------------   Port 0   ---------------------------------------------
+#  [01:23]			[0:7] [0:1] [0:3]
+# DPHY01_DDRPHY_ADR_DELAY5_P0_ADR0		0x004	0x800040090301143f
+# PHYW.PHYX.ADRNEST.ADR32X0.HC.ADRLOGM.ADRLOGX.CONTROL.TWRAP.REG_A_09_L2
+scom 0x800040090301143F {
+	bits	,	scom_data	,	expr			;
+	48:63	,	0x4040		,	(def_is_mba01)	;	# lane 10:11, clk0_p/n
+}
+# DPHY01.DDRPHY_ADR_DELAY5_P0_ADR2 from (alias spydef)
+# DPHY23_DDRPHY_ADR_DELAY5_P0_ADR2
+scom 0x800048090301143F {
+	# -------------   Port 0 & 2   -------------------------------------
+	bits	,	scom_data	,	expr			;
+	# for port 0 & port 2, lane 10:11, Port0=clk1_n/p, Port2=clk0_n/p
+	48:63	,	0x4040		,	any				;	# for both mba01 & mba23
+	#48:63	,	0x4040		,	((def_is_mba01) || (def_is_mba23))	;
+}
+# DPHY01.DDRPHY_ADR_DELAY2_P0_ADR2 from (alias spydef)
+scom 0x800048060301143F {
+	bits	,	scom_data	,	expr			;
+	48:63	,	0x4040		,	(def_is_mba01)	;	# lane 4:5, clk2_p/n
+}
+# DPHY01.DDRPHY_ADR_DELAY6_P0_ADR2 from (alias spydef)
+scom 0x8000480A0301143F {
+	bits	,	scom_data	,	expr			;
+	48:63	,	0x4040		,	(def_is_mba01)	;	# lane 12:13, clk3_n/p
+}
+
+# -------------   Port 2   ---------------------------------------------
+# DPHY23_DDRPHY_ADR_DELAY3_P0_ADR0
+scom 0x800040070301143F {
+	bits	,	scom_data	,	expr			;
+	48:63	,	0x4040		,	(def_is_mba23)	;	# lane 6:7, clk1_p/n
+	48:63	,	0x0000		,	any				;	# mba01
+}
+#DPHY23_DDRPHY_ADR_DELAY1_P0_ADR3
+scom 0x80004C050301143F {
+	bits	,	scom_data	,	expr			;
+	48:63	,	0x4040		,	(def_is_mba23)	;	# lane 2:3, clk2_p/n
+	48:63	,	0x0000		,	any				;	# mba01
+}
+# DPHY23_DDRPHY_ADR_DELAY4_P0_ADR0
+scom 0x800040080301143F {
+	bits	,	scom_data	,	expr			;
+	48:63	,	0x4040		,	(def_is_mba23)	;	# lane 8:9, clk3_p/n
+	48:63	,	0x0000		,	any				;	# mba01
+}
+
+# -------------   Port 1   ---------------------------------------------
+# DPHY01.DDRPHY_ADR_DELAY1_P1_ADR3 from (alias spydef)
+# DPHY23_DDRPHY_ADR_DELAY1_P1_ADR3
+scom 0x80014C050301143F {
+	# -------------   Port 1 & 3   -------------------------------------
+	bits	,	scom_data	,	expr			;
+	# lane 2:3, Port1=clk0_n/p, Port3=clk0_n/p
+	48:63	,	0x4040		,	any				;	# for mba01 & mba23
+	#48:63	,	0x4040		,	((def_is_mba01) || (def_is_mba23))	;
+}
+# DPHY01.DDRPHY_ADR_DELAY4_P1_ADR2 from (alias spydef)
+scom 0x800148080301143F {
+	bits	,	scom_data	,	expr			;
+	48:63	,	0x4040		,	(def_is_mba01)	;	# lane 8:9, clk1_p/n
+}
+# DPHY01.DDRPHY_ADR_DELAY0_P1_ADR0 from (alias spydef)
+scom 0x800140040301143F {
+	bits	,	scom_data	,	expr			;
+	48:63	,	0x4040		,	(def_is_mba01)	;	# lane 0:1, clk2_n/p
+}
+# DPHY01.DDRPHY_ADR_DELAY1_P1_ADR0 from (alias spydef)
+scom 0x800140050301143F {
+	bits	,	scom_data	,	expr			;
+	48:63	,	0x4040		,	(def_is_mba01)	;	# lane 2:3, clk3_n/p
+}
+
+# -------------   Port 3   ---------------------------------------------
+# DPHY23_DDRPHY_ADR_DELAY6_P1_ADR2
+scom 0x8001480A0301143F {
+	bits	,	scom_data	,	expr			;
+	48:63	,	0x4040		,	(def_is_mba23)	;	# lane 12:13, clk1_n/p
+	48:63	,	0x0000		,	any				;	#
+}
+# DPHY23_DDRPHY_ADR_DELAY5_P1_ADR0
+scom 0x800140090301143F {
+	bits	,	scom_data	,	expr			;
+	48:63	,	0x4040		,	(def_is_mba23)	;	# lane 10:11, clk2_p/n
+	48:63	,	0x0000		,	any				;	#
+}
+# DPHY23_DDRPHY_ADR_DELAY5_P1_ADR2
+scom 0x800148090301143F {
+	bits	,	scom_data	,	expr			;
+	48:63	,	0x4040		,	(def_is_mba23)	;	# lane 10:11, clk3_n/p
+	48:63	,	0x0000		,	any				;	#
+}
+
+#================================================================================
+# ADR Differential Pair Enable
+#
+# Settings for differential clocks for all ports and ADR blocks based
+# on how Centaur maps the clocks to ADR lanes.  reference: centaur_pins_xref.xls
+#
+# bits 48:55 correspond to ADR lane pairs.  ex. bit 0 = ADR lane 0 & 1
+#
+# -------------   Port 0   ---------------------------------------------
+# DPHY01_DDRPHY_ADR_DIFFPAIR_ENABLE_P0_ADR0		0x001	0x800040010301143f
+# PHYW.PHYX.ADRNEST.ADR32X0.HC.ADRLOGM.ADRLOGX.CONTROL.TWRAP.REG_A_01_L2
+scom 0x800040010301143F {
+	bits	,	scom_data	,	expr			;
+	48:55	,	0x04		,	(def_is_mba01)	;	# lane 10:11(clk0)
+	# -------------   Port 2   -------------------------------------
+	# DPHY23_DDRPHY_ADR_DIFFPAIR_ENABLE_P0_ADR0
+	48:55	,	0x18		,	(def_is_mba23)	;	# lane 6:7(clk1), 8:9(clk3)
+}
+# DPHY01.DDRPHY_ADR_DIFFPAIR_ENABLE_P0_ADR2 from (alias spydef)
+scom 0x800048010301143F {
+	bits	,	scom_data	,	expr			;
+	48:55	,	0x26		,	(def_is_mba01)	;	# lane 4:5(clk2), 10:11(clk1), 12:13(clk3)
+	# -------------   Port 2   -------------------------------------
+	# DPHY23_DDRPHY_ADR_DIFFPAIR_ENABLE_P0_ADR2
+	48:55	,	0x04		,	(def_is_mba23)	;	# lane 10:11(clk0)
+}
+
+# -------------   Port 2   ---------------------------------------------
+# DPHY23_DDRPHY_ADR_DIFFPAIR_ENABLE_P0_ADR3
+scom 0x80004C010301143F {
+	bits	,	scom_data	,	expr			;
+	48:55	,	0x40		,	(def_is_mba23)	;	# lane 2:3(clk2)
+	48:55	,	0x00		,	any				;	# for mba01
+}
+
+# -------------   Port 1   ---------------------------------------------
+# DPHY01.DDRPHY_ADR_DIFFPAIR_ENABLE_P1_ADR0 from (alias spydef)
+scom 0x800140010301143F {
+	bits	,	scom_data	,	expr			;
+	48:55	,	0xC0		,	(def_is_mba01)	;	# lane 0:1(clk2), 2:3(clk3)
+	# -------------   Port 3   -------------------------------------
+	# DPHY23_DDRPHY_ADR_DIFFPAIR_ENABLE_P1_ADR0
+	48:55	,	0x04		,	(def_is_mba23)	;	# lane 10:11(clk2)
+}
+# DPHY01.DDRPHY_ADR_DIFFPAIR_ENABLE_P1_ADR2 from (alias spydef)
+scom 0x800148010301143F {
+	bits	,	scom_data	,	expr			;
+	48:55	,	0x08		,	(def_is_mba01)	;	# lane 8:9(clk1)
+	# -------------   Port 3   -------------------------------------
+	# DPHY23_DDRPHY_ADR_DIFFPAIR_ENABLE_P1_ADR2
+	48:55	,	0x06		,	(def_is_mba23)	;	# lane 10:11(clk3), 12:13(clk1)
+}
+# DPHY01.DDRPHY_ADR_DIFFPAIR_ENABLE_P1_ADR3 from (alias spydef)
+scom 0x80014C010301143F {
+	bits	,	scom_data	,	expr			;
+	48:55	,	0x40		,	(def_is_mba01)	;	# lane 2:3(clk0)
+	# -------------   Port 3   -------------------------------------
+	# DPHY23_DDRPHY_ADR_DIFFPAIR_ENABLE_P1_ADR3
+	48:55	,	0x40		,	(def_is_mba23)	;	# lane 2:3(clk0)
+}
+
+#	!! need updates to these clock registers from PHY / SIM team
+# set to 0x8070, reset seq sets it to 0x8024
+#---------------------------------------------------------------------------------------
+#   ADR SYSCLK settings		default=0x8074
+#
+# DPHY01.DDRPHY_ADR_SYSCLK_CNTL_PR_P0_ADR32S0 from (alias spydef)
+#
+# Controls the circuit which aligns the internal SysClk to the incoming dphy_nclk clock.
+#
+# DPHY01_DDRPHY_ADR_SYSCLK_CNTL_PR_P0_ADR32S0	0x032	0x800080320301143F
+# PHYW.PHYX.ADRNEST.ADR32X0.HC.ADRLOGM.ADRLOGX.CONTROL.TWRAP.REG_32_L2
+#scom 0x800(0,1)(80,84)320301143F {	# _P[0:1]_ADR32S[0:1]
+scom 0x800(0,1)BC320301143F {		# _P[0:1]_ADR32S[0:1] via broadcast
+	bits	,	scom_data	,	expr			;
+	48		,	0b0			,	(def_is_sim)	;	# made to match dials
+	48		,	0b1			,	any				;	# ADR32_SYSCLK_ENABLE
+
+	49:55	,	0b0000000	,	any				;	# ADR32_SYSCLK_ROT_OVERRIDE
+
+	56		,	0b1			,	(def_is_sim)	;	# made to match dials
+	56		,	0b0			,	any				;	# ADR32_SYSCLK_ROT_OVERRIDE_EN
+
+	57		,	0b0			,	(def_is_sim)	;	# made to match dials
+	57		,	0b1			,	any				;	# ADR32_SYSCLK_PHASE_ALIGN_RESET
+
+	58		,	0b0			,	(def_is_sim)	;	# made to match dials
+	58		,	0b1			,	any				;	# ADR32_SYSCLK_PHASE_CNTL_EN
+
+	59		,	0b0			,	(def_is_sim)	;	# made to match dials
+	59		,	0b1			,	any				;	# ADR32_SYSCLK_PHASE_DEFAULT_EN
+
+	60		,	0b0			,	any				;	# ADR32_SYSCLK_POS_EDGE_ALIGN
+	61		,	0b0			,	any				;	# ADR32_CONTINUOUS_UPDATE
+	62:63	,	0b00		,	any				;	# CE0DLTVCC, must be '00'b
+}
+
+# ---------------------------------------------------------------------------------------
+# DPHY01.DDRPHY_ADR_MCCLK_WRCLK_PR_STATIC_OFFSET_P0_ADR32S0 from (alias spydef)
+#
+# !!NOTE different depending on EC level
+#
+# ADR Phase Rotator Static Offset value used to determine the
+# Phase of the WrClk with respect to SysClk. Adjusts for race
+# condition between combinatorial logic for WrClk to SysClk.
+#
+# PHYW.PHYX.ADRNEST.ADR32X0.HC.ADRLOGM.ADRLOGX.CONTROL.TWRAP.REG_33_L2
+#	[01:23]										[0:1]	[0:1]
+# DPHY01_DDRPHY_ADR_MCCLK_WRCLK_PR_STATIC_OFFSET_P0_ADR32S0		0x033	0x800080330301143f
+#scom 0x800(0,1)(80,84)330301143F {	# _P[0:1]_ADR32S[0:1]
+scom 0x800(0,1)BC330301143F {		# _P[0:1]_ADR32S[0:1] via broadcast
+	bits	,	scom_data				,	expr			;	# !!NOTE different depending on EC level
+	48:55	,	def_ADR32_TSYS_WRCLK	,	any				;	# ADR32_TSYS_WRCLK	for sim set to 0x60
+#	56:63	,	0x00					,	any				;	# reserved
+}
+
+#  ---------------------------------------------------------------------------------------
+#  ---     DP18 WRCLK_PR P[0:1]_[0:4]    Phase Rotator   ---------------------------
+#  ---------------------------------------------------------------------------------------
+# DPHY01.DDRPHY_DP18_WRCLK_PR_P0_0 		default=0
+#
+# !!NOTE different depending on EC level
+#
+# DP18 Phase Rotator Static Offset value used to
+# determine the Phase of the WrClk with respect to SysClk.
+#
+#	[01:23]					[0:1]_[0:4]
+# DPHY01_DDRPHY_DP18_WRCLK_PR_P0_0		0x074	0x800000740301143f
+# PHYW.PHYX.GEN_DP#0.DPX.HC.HC.D3PHY_WRDP18WRAP.D3PHY_WRDP18CNTL_MAC.DDRPHY_DP18_WRCLK_PR_L2
+#scom 0x800(0,1)(00,04,08,0C,10)740301143F {	#_P[0:1]_[0:4]
+scom 0x800(0,1)3C740301143F {					#_P[0:1]_[0:4] via broadcast
+	bits	,	scom_data			,	expr			;	 # !!NOTE different depending on EC level
+#	48		,	0b0					,	any				;	# reserved
+#	below yields 0x3000 in register instead of 0x6000 if not right aligned.
+#	49:55	,	0b1100000			,	(def_is_sim)	;	# DP18_TSYS_WRCLK	# for sim set to 0x60
+	49:55	,	def_DP18_TSYS_WRCLK	,	any				;	# DP18_TSYS_WRCLK
+#	56:63	,	0x00				,	any				;	# reserved
+}
+
+#  ---------------------------------------------------------------------------------------
+#  ---     DP18 SYSCLK_PR P[0:1]_[0:4]   Phase Rotator   ---------------------------
+#  ---------------------------------------------------------------------------------------
+# DPHY01.DDRPHY_DP18_SYSCLK_PR_P0_0 from (alias spydef)		default=0x8070
+#
+# to Align bang-bang
+#
+# !! set to 0x8020 at the end of ddr_phy_reset procedure, should not setting in initfile?
+#
+# DPHY01 DP18 SysClk Phase Rotator Control
+# This register controls the circuit which aligns the internal
+# SysClk to the incoming dphy_nclk clock.
+#
+#	[01:23]					[0:1]_[0:4]
+# DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_0		0x007	0x0x800000070301143f
+# PHYW.PHYX.GEN_DP#0.DPX.HC.HC.D3PHY_WRDP18WRAP.D3PHY_WRDP18CNTL_MAC.DDRPHY_DP18_SYSCLK_PR_L2
+#scom 0x800(0,1)(00,04,08,0C,10)070301143F {	#_P[0:1]_[0:4]
+scom 0x800(0,1)3C070301143F {					#_P[0:1]_[0:4] via broadcast
+	bits	,	scom_data	,	expr			;
+	48		,	0b1			,	any				;	# DP18_SYSCLK_ENABLE
+	49:55	,	0b0000000	,	any				;	# DP18_SYSCLK_ROT_OVERRIDE
+
+	56		,	0b1			,	(def_is_sim)	;	# DP18_SYSCLK_ROT_OVERRIDE_EN
+	56		,	0b0			,	any				;	# DP18_SYSCLK_ROT_OVERRIDE_EN
+
+	57		,	0b0			,	(def_is_sim)	;	# DP18_SYSCLK_PHASE_ALIGN_RESET
+	57		,	0b1			,	any				;	# DP18_SYSCLK_PHASE_ALIGN_RESET
+
+	58		,	0b0			,	(def_is_sim)	;	# DP18_SYSCLK_PHASE_CNTL_EN
+	58		,	0b1			,	any				;	# DP18_SYSCLK_PHASE_CNTL_EN
+
+	59		,	0b0			,	(def_is_sim)	;	# DP18_SYSCLK_PHASE_DEFAULT_EN
+	59		,	0b1			,	any				;	# DP18_SYSCLK_PHASE_DEFAULT_EN
+
+	60		,	0b0			,	any				;	# DP18_SYSCLK_POS_EDGE_ALIGN
+	61		,	0b0			,	any				;	# DP18_CONTINUOUS_UPDATE
+#	62:63	,	0b00		,	any				;	# reserved
+}
+
+#  =======================================================================================
+#  ---  Read clock / WRCLK ENABLE Rank pair P[0:1]_[0:4]  --------------------------------
+#  =======================================================================================
+#
+# DPHY01_DDRPHY_DP18_READ_CLOCK_RANK_PAIR0_P0_0		default=0
+# DPHY01_DDRPHY_DP18_WRCLK_EN_RP0_P0_0				default=0
+#
+#  Set according to table in chapter 14.3 of the Centaur_Chip_Spec.pdf
+#  These are settings for the read and write clock enables of the rank pair for
+#  x4 & x8 DRAM devices with and without spare DRAMs.
+#
+#  For Centaur:
+#  Spares on P0_1, P1_2, P2_4, P3_1, DQS in lanes 2:3, DQ in lanes 8:15
+#
+# DP18 Read Clock Enable & Selection RP0
+#  [01:23]						PAIR[0:3]_P[0:1]_[0:4]
+# DPHY01_DDRPHY_DP18_READ_CLOCK_RANK_PAIR0_P0_0		0x004	0x800000040301143f
+# PHYW.PHYX.GEN_DP#0.DPX.HC.HC.RDDP18WRAP.RDDP18CNTL_MAC.R0RDCLKEN_L2
+# 	48:51	,	0b1100			;	# Quad[0:3]_CLK16, MEMINTD[0:15,18:23]B(n)
+# 	52:53	,	0b00			;	# Quad[0:1]_CLK18, MEMINTD[0:7,16,17]B(n)
+# 	54:55	,	0b11			;	# Quad[2:3]_CLK20, MEMINTD[8:15,22,23]B(n)
+# 	56:57	,	0b00			;	# Quad[2:3]_CLK22, MEMINTD[8:15,20,21]B(n)
+# 	58:61	,	0b0000			;	# CLK[16,18,20,22]_SINGLE_ENDED
+# 	62:63	,	0b00			;	# Reserved
+#
+# DP18 Write Clock Enable & Selection Register
+# DPHY01_DDRPHY_DP18_WRCLK_EN_RP0_P0_0				0x005	0x800000050301143f
+# PHYW.PHYX.GEN_DP#0.DPX.HC.HC.D3PHY_WRDP18WRAP.D3PHY_WRDP18CNTL_MAC.DDRPHY_DP18_WRCLK_EN_RP0_L2
+# 	same as above, except
+# 	62:63	,	0b00			;	# Quad[2:3]_CLK18
+#
+# instance _0=00, _1=04, _2=08, _3=0C, _4=10
+#   RANK_PAIR[0:3], RP[0:3] _P0_0
+# DPHY01_DDRPHY_DP18_READ_CLOCK_RANK_PAIR0_P0_0 	(4)
+# DPHY01_DRPHY_DP18_WRCLK_EN_RP0_P0_0				(5)
+scom 0x8000008(4,5)0301143F {	# _RP[0:3] via broadcast bit
+# P0_0
+	bits	,	scom_data	,	expr							;
+	48:63	,	0x8580		,	((def_is_mba01) && (def_is_x4))	;	# x4
+	48:63	,	0xC300		,	((def_is_mba01) && (def_is_x8))	;	# x8
+# P2_0
+	48:63	,	0x8640		,	((def_is_mba23) && (def_is_x4))	;	# x4
+	48:63	,	0x0F00		,	((def_is_mba23) && (def_is_x8))	;	# x8
+	48:63	,	0x0000		,	any								;
+}
+
+#   RANK_PAIR[0:3], RP[0:3] _P0_1
+# DPHY01_DDRPHY_DP18_READ_CLOCK_RANK_PAIR0_P0_1
+# DPHY01_DDRPHY_DP18_WRCLK_EN_RP0_P0_1
+scom 0x8000048(4,5)0301143F {	# _RP[0:3] via broadcast bit
+# P0_1
+	bits	,	scom_data	,	expr											;
+	48:63	,	0x8580		,	((def_is_mba01) && (def_has_spare) && (def_is_x4))	;	# x4
+	48:63	,	0x8400		,	((def_is_mba01) && (def_no_spare) && (def_is_x4))	;	# x4
+	48:63	,	0x0CC0		,	((def_is_mba01) && (def_has_spare) && (def_is_x8))	;	# x8
+	48:63	,	0x0C00		,	((def_is_mba01) && (def_no_spare) && (def_is_x8))	;	# x8
+# P2_1
+	48:63	,	0x8580		,	((def_is_mba23) && (def_is_x4))					;	# x4
+	48:63	,	0xC300		,	((def_is_mba23) && (def_is_x8))					;	# x8
+	48:63	,	0x0000		,	any												;
+}
+
+#   RANK_PAIR[0:3], RP[0:3] _P0_2
+# DPHY01_DDRPHY_DP18_READ_CLOCK_RANK_PAIR0_P0_2
+# DPHY01_DDRPHY_DP18_WRCLK_EN_RP0_P0_2
+scom 0x8000088(4,5)0301143F {	# _RP[0:3] via broadcast bit
+# P0_2
+	bits	,	scom_data	,	expr							;
+	48:63	,	0x8640		,	((def_is_mba01) && (def_is_x4))	;	# x4
+	48:63	,	0x0CC0		,	((def_is_mba01) && (def_is_x8))	;	# x8
+# P2_2
+	48:63	,	0x8640		,	((def_is_mba23) && (def_is_x4))	;	# x4
+	48:63	,	0x0CC0		,	((def_is_mba23) && (def_is_x8))	;	# x8
+	48:63	,	0x0000		,	any								;
+}
+
+#   RANK_PAIR[0:3], RP[0:3] _P0_3
+# DPHY01_DDRPHY_DP18_READ_CLOCK_RANK_PAIR0_P0_3
+# DPHY01_DDRPHY_DP18_WRCLK_EN_RP0_P0_3
+scom 0x80000C8(4,5)0301143F {	# _RP[0:3] via broadcast bit
+# P0_3
+	bits	,	scom_data	,	expr							;
+	48:63	,	0x8640		,	((def_is_mba01) && (def_is_x4))	;	# x4
+	48:63	,	0x0CC0		,	((def_is_mba01) && (def_is_x8))	;	# x8
+# P2_3
+	48:63	,	0x8640		,	((def_is_mba23) && (def_is_x4))	;	# x4
+	48:63	,	0xC0C0		,	((def_is_mba23) && (def_is_x8))	;	# x8
+	48:63	,	0x0000		,	any								;
+}
+
+#   RANK_PAIR[0:3], RP[0:3] _P0_4
+# DPHY01_DDRPHY_DP18_READ_CLOCK_RANK_PAIR0_P0_4
+# DPHY01_DDRPHY_DP18_WRCLK_EN_RP0_P0_4
+scom 0x8000108(4,5)0301143F {	# _RP[0:3] via broadcast bit
+# P0_4
+	bits	,	scom_data	,	expr											;
+	48:63	,	0x8640		,	((def_is_mba01) && (def_is_x4))					;	# x4
+	48:63	,	0x0F00		,	((def_is_mba01) && (def_is_x8))					;	# x8
+# P2_4
+	48:63	,	0x8640		,	((def_is_mba23) && (def_has_spare) && (def_is_x4))	;	# x4
+	48:63	,	0x8400		,	((def_is_mba23) && (def_no_spare) && (def_is_x4))	;	# x4
+	48:63	,	0x0F00		,	((def_is_mba23) && (def_has_spare) && (def_is_x8))	;	# x8
+	48:63	,	0x0C00		,	((def_is_mba23) && (def_no_spare) && (def_is_x8))	;	# x8
+	48:63	,	0x0000		,	any												;
+}
+
+#   RANK_PAIR[0:3], RP[0:3] _P1_0
+# DPHY01_DDRPHY_DP18_READ_CLOCK_RANK_PAIR0_P1_0
+# DPHY01_DDRPHY_DP18_WRCLK_EN_RP0_P1_0
+scom 0x8001008(4,5)0301143F {	# _RP[0:3] via broadcast bit
+# P1_0
+	bits	,	scom_data	,	expr							;
+	48:63	,	0x4A40		,	((def_is_mba01) && (def_is_x4))	;	# x4
+	48:63	,	0x0F00		,	((def_is_mba01) && (def_is_x8))	;	# x8
+# P3_0
+	48:63	,	0x8640		,	((def_is_mba23) && (def_is_x4))	;	# x4
+	48:63	,	0xC300		,	((def_is_mba23) && (def_is_x8))	;	# x8
+	48:63	,	0x0000		,	any								;
+}
+
+#   RANK_PAIR[0:3]_, P1_1
+# DPHY01_DDRPHY_DP18_READ_CLOCK_RANK_PAIR0_P1_1
+# DPHY01_DDRPHY_DP18_WRCLK_EN_RP0_P1_1
+scom 0x8001048(4,5)0301143F {	# _RP[0:3] via broadcast bit
+# P1_1
+	bits	,	scom_data	,	expr											;
+	48:63	,	0x4A40		,	((def_is_mba01) && (def_is_x4))					;	# x4
+	48:63	,	0xC300		,	((def_is_mba01) && (def_is_x8))					;	# x8
+# P3_1
+	48:63	,	0x8640		,	((def_is_mba23) && (def_has_spare) && (def_is_x4))	;	# x4
+	48:63	,	0x8400		,	((def_is_mba23) && (def_no_spare) && (def_is_x4))	;	# x4
+	48:63	,	0xC300		,	((def_is_mba23) && (def_has_spare) && (def_is_x8))	;	# x8
+	48:63	,	0xC000		,	((def_is_mba23) && (def_no_spare) && (def_is_x8))	;	# x8
+	48:63	,	0x0000		,	any												;
+}
+
+#   RANK_PAIR[0:3], RP[0:3] _P1_2
+# DPHY01_DDRPHY_DP18_READ_CLOCK_RANK_PAIR0_P1_2
+# DPHY01_DDRPHY_DP18_WRCLK_EN_RP0_P1_2
+scom 0x8001088(4,5)0301143F {	# _RP[0:3] via broadcast bit
+# P1_2
+	bits	,	scom_data	,	expr											;
+	48:63	,	0x8640		,	((def_is_mba01) && (def_has_spare) && (def_is_x4))	;	# x4
+	48:63	,	0x8400		,	((def_is_mba01) && (def_no_spare) && (def_is_x4))	;	# x4
+	48:63	,	0x0CC0		,	((def_is_mba01) && (def_has_spare) && (def_is_x8))	;	# x8
+	48:63	,	0x0C00		,	((def_is_mba01) && (def_no_spare) && (def_is_x8))	;	# x8
+# P3_2
+	48:63	,	0x8580		,	((def_is_mba23) && (def_is_x4))					;	# x4
+	48:63	,	0x0F00		,	((def_is_mba23) && (def_is_x8))					;	# x8
+	48:63	,	0x0000		,	any												;
+}
+
+#   RANK_PAIR[0:3], RP[0:3] _P1_3
+# DPHY01_DDRPHY_DP18_READ_CLOCK_RANK_PAIR0_P1_3
+# DPHY01_DDRPHY_DP18_WRCLK_EN_RP0_P1_3
+scom 0x80010C8(4,5)0301143F {	# _RP[0:3] via broadcast bit
+# P1_3
+	bits	,	scom_data	,	expr							;
+	48:63	,	0x8640		,	((def_is_mba01) && (def_is_x4))	;	# x4
+	48:63	,	0xC300		,	((def_is_mba01) && (def_is_x8))	;	# x8
+# P3_3
+	48:63	,	0x4A40		,	((def_is_mba23) && (def_is_x4))	;	# x4
+	48:63	,	0xC300		,	((def_is_mba23) && (def_is_x8))	;	# x8
+	48:63	,	0x0000		,	any								;
+}
+
+#   RANK_PAIR[0:3], RP[0:3] _P1_4
+# DPHY01_DDRPHY_DP18_READ_CLOCK_RANK_PAIR0_P1_4
+# DPHY01_DDRPHY_DP18_WRCLK_EN_RP0_P1_4
+scom 0x8001108(4,5)0301143F {	# _RP[0:3] via broadcast bit
+# P1_4
+	bits	,	scom_data	,	expr							;
+	48:63	,	0x8580		,	((def_is_mba01) && (def_is_x4))	;	# x4
+	48:63	,	0xC300		,	((def_is_mba01) && (def_is_x8))	;	# x8
+# P3_4
+	48:63	,	0x8640		,	((def_is_mba23) && (def_is_x4))	;	# x4
+	48:63	,	0x0CC0		,	((def_is_mba23) && (def_is_x8))	;	# x8
+	48:63	,	0x0000		,	any								;
+}

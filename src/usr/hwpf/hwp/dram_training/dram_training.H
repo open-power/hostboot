@@ -1,26 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/hwpf/hwp/dram_training/dram_training.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
-
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/hwpf/hwp/dram_training/dram_training.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #ifndef  __DRAM_TRAINING_DRAM_TRAINING_H
 #define  __DRAM_TRAINING_DRAM_TRAINING_H
 
@@ -70,7 +70,7 @@
  *  @}
  *  @{
  *      @substepnum     5
- *      @substepname    mss_initf
+ *      @substepname    mss_scominit
  *      @substepdesc    : Perform scom inits to MC and PHY
  *      @target_sched   serial
  *  @}
@@ -178,7 +178,7 @@ void    call_host_enable_vddr( void * io_pArgs );
 
 
 /**
- *  @brief   mss_initf
+ *  @brief   mss_scominit
  *
  *  13.5 : : Perform scom inits to MC and PHY
  *
@@ -187,7 +187,7 @@ void    call_host_enable_vddr( void * io_pArgs );
  *  return  none
  *
  */
-void    call_mss_initf( void * io_pArgs );
+void    call_mss_scominit( void * io_pArgs );
 
 
 

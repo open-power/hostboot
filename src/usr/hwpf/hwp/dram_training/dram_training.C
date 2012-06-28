@@ -1,26 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/hwpf/hwp/dram_training/dram_training.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
-
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/hwpf/hwp/dram_training/dram_training.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 /**
  *  @file dram_training.C
  *
@@ -71,7 +71,7 @@ const uint8_t VPO_NUM_OF_MEMBUF_TO_RUN = UNLIMITED_RUN;
 // #include    "mc_pll_setup/mc_pll_setup.H"
 #include    "mem_startclocks/cen_mem_startclocks.H"
 // #include    "host_enable_vddr/host_enable_vddr.H"
-// #include    "mss_initf/mss_initf.H"
+#include    "mss_scominit/mss_scominit.H"
 #include    "mss_ddr_phy_reset/mss_ddr_phy_reset.H"
 #include    "mss_draminit/mss_draminit.H"
 // #include    "mss_restore_dram_repair/mss_restore_dram_repair.H"
@@ -324,60 +324,72 @@ void    call_host_enable_vddr( void *io_pArgs )
 
 
 //
-//  Wrapper function to call 13.5 : mss_initf
+//  Wrapper function to call 13.5 : mss_scominit
 //
-void    call_mss_initf( void *io_pArgs )
+void    call_mss_scominit( void *io_pArgs )
 {
     errlHndl_t l_err = NULL;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_initf entry" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_scominit entry" );
 
-#if 0
-    // @@@@@    CUSTOM BLOCK:   @@@@@
-    //  figure out what targets we need
-    //  customize any other inputs
-    //  set up loops to go through all targets (if parallel, spin off a task)
-
-    //  print call to hwp and dump physical path of the target(s)
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "=====  mss_initf HWP(? ? ? )",
-                    ?
-                    ?
-                    ? );
-    //  dump physical path to targets
-    EntityPath l_path;
-    l_path  =   l_@targetN_target->getAttr<ATTR_PHYS_PATH>();
-    l_path.dump();
-    TRACFCOMP( g_trac_mc_init, "===== " );
-
-    // cast OUR type of target to a FAPI type of target.
-    const fapi::Target l_fapi_@targetN_target(
-                    TARGET_TYPE_MEMBUF_CHIP,
-                    reinterpret_cast<void *>
-                        (const_cast<TARGETING::Target*>(l_@targetN_target)) );
-
-    //  call the HWP with each fapi::Target
-    l_fapirc  =   mss_initf( ? , ?, ? );
-
-    //  process return code.
-    if ( l_fapirc== fapi::FAPI_RC_SUCCESS )
+    // TODO:  RTC 44947
+    // This currently fails on Simics because cen_ddrphy.initfile accesses
+    // indirect broadcast SCOM addresses.  When Simics have support for
+    // indirect broadcast SCOM addresses than this HWP can be executed.
+    // For now, just execute the HWP on VPO.
+    TARGETING::Target * l_pSysTarget = NULL;
+    TARGETING::targetService().getTopLevelTarget(l_pSysTarget);
+    uint8_t l_vpoMode = l_pSysTarget->getAttr<TARGETING::ATTR_IS_SIMULATION>();
+    if (!l_vpoMode)
     {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "SUCCESS :  mss_initf HWP(? ? ? )" );
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+            "INFO : not executing mss_scominit in Simics until it supports "
+            "indirect broadcast SCOM addresses");
     }
     else
     {
-        /**
-         * @todo fapi error - just print out for now...
-         */
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR 0x%.8X:  mss_initf HWP(? ? ?) ",
-                static_cast<uint32_t>(l_fapirc) );
-    }
-    // @@@@@    END CUSTOM BLOCK:   @@@@@
-#endif
+        // Get all Centaur targets
+        TARGETING::TargetHandleList l_membufTargetList;
+        getAllChips(l_membufTargetList, TYPE_MEMBUF);
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_initf exit" );
+        for ( size_t i = 0; i < l_membufTargetList.size(); i++ )
+        {
+            //  make a local copy of the target for ease of use
+            const TARGETING::Target*  l_pCentaur = l_membufTargetList[i];
+
+            // Dump current run on target
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "Running mss_scominit HWP on..." );
+            
+            EntityPath l_path;
+            l_path  =   l_pCentaur->getAttr<ATTR_PHYS_PATH>();
+            l_path.dump();
+
+            // Cast to a FAPI type of target.
+            const fapi::Target l_fapi_centaur(
+                    TARGET_TYPE_MEMBUF_CHIP,
+                    reinterpret_cast<void *>
+                    (const_cast<TARGETING::Target*>(l_pCentaur)) );
+
+            //  call the HWP with each fapi::Target
+            FAPI_INVOKE_HWP(l_err, mss_scominit, l_fapi_centaur);
+
+            if (l_err)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "ERROR 0x%.8X: mss_scominit HWP returns error",
+                          l_err->reasonCode());
+                break;
+            }
+            else
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "SUCCESS :  mss_scominit HWP( )" );
+            }
+        }
+    }
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_scominit exit" );
 
     task_end2( l_err );
 }

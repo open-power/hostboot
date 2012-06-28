@@ -58,7 +58,10 @@ HWP_ATTR_XML_FILES = hwp/memory_attributes.xml \
 #------------------------------------------------------------------------------
 HWP_INITFILES = hwp/initfiles/sample.initfile \
                 hwp/initfiles/cen.dmi.scom.initfile \
-                hwp/initfiles/p8.dmi.scom.initfile
+                hwp/initfiles/p8.dmi.scom.initfile \
+                hwp/initfiles/mbs_def.initfile \
+                hwp/initfiles/mba_def.initfile \
+                hwp/initfiles/cen_ddrphy.initfile
 
 HWP_IF_DEFINE_DIR = hwp/initfiles
 
