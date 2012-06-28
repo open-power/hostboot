@@ -153,13 +153,6 @@
         </default>
     </attribute>
     <attribute>
-        <id>XSCOM_CHIP_INFO</id>
-        <default>
-            <field><id>nodeId</id><value>0</value></field>
-            <field><id>chipId</id><value>0</value></field>
-        </default>
-    </attribute>
-    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0</default>
     </attribute>

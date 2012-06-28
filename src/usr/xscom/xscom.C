@@ -346,17 +346,23 @@ errlHndl_t getTargetVirtualAddress(TARGETING::Target* i_target,
 
             // Get the virtual addr value of the chip from the virtual address
             // attribute
-             o_virtAddr =  reinterpret_cast<uint64_t*>(i_target->getAttr<TARGETING::ATTR_XSCOM_VIRTUAL_ADDR>());
+            o_virtAddr =  reinterpret_cast<uint64_t*>(i_target->getAttr<TARGETING::ATTR_XSCOM_VIRTUAL_ADDR>());
 
             // If the virtual address equals NULL(default) then this is the
             // first XSCOM to this target so we need to calculate
             // the virtual address and save it in the xscom address attribute.
             if (o_virtAddr == NULL)
             {
-                // Get the target chip info
-                TARGETING::XscomChipInfo l_xscomChipInfo = {0};
-                l_xscomChipInfo =
-                        i_target->getAttr<TARGETING::ATTR_XSCOM_CHIP_INFO>();
+                uint64_t  xscomNodeId = 0;
+                uint64_t  xscomChipId = 0;
+
+                // Get the target Node Id
+                xscomNodeId =
+                  i_target->getAttr<TARGETING::ATTR_FABRIC_NODE_ID>();
+
+                // Get the target Chip Id
+                xscomChipId =
+                  i_target->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
 
                 //@todo
                 // Save the node id of the master chip in a global as well and
@@ -376,13 +382,16 @@ errlHndl_t getTargetVirtualAddress(TARGETING::Target* i_target,
 
                 // Target's XSCOM Base address
                 l_XSComBaseAddr = l_systemBaseAddr +
-                    ( ( (g_xscomMaxChipsPerNode * l_xscomChipInfo.nodeId) +
-                            l_xscomChipInfo.chipId ) * THIRTYTWO_GB);
+                    ( ( (g_xscomMaxChipsPerNode * xscomNodeId) +
+                            xscomChipId ) * THIRTYTWO_GB);
 
                 // Target's virtual address
                 o_virtAddr = static_cast<uint64_t*>
                     (mmio_dev_map(reinterpret_cast<void*>(l_XSComBaseAddr),
                       THIRTYTWO_GB));
+
+                TRACDCOMP(g_trac_xscom, "xscomPerformOp: o_Virtual Address   =  0x%llX\n",
+                 o_virtAddr);
 
                 // Implemented the virtual address attribute..
 
@@ -400,7 +409,9 @@ errlHndl_t getTargetVirtualAddress(TARGETING::Target* i_target,
                 // this case.
 
                 // Save the virtual address attribute.
+
                 i_target->setAttr<TARGETING::ATTR_XSCOM_VIRTUAL_ADDR>(reinterpret_cast<uint64_t>(o_virtAddr));
+
             }
         }
 
@@ -465,11 +476,6 @@ errlHndl_t xscomPerformOp(DeviceFW::OperationType i_opType,
         // Get the offset
         uint64_t l_offset = l_mmioAddr.offset();
 
-        TRACDCOMP(g_trac_xscom, "xscomPerformOp: OpType 0x%.16llX, Address 0x%llX, l_virtAddr+l_offset %p",
-          static_cast<uint64_t>(i_opType),
-          l_addr,
-          l_virtAddr + l_offset);
-
         // Keep MMIO access until XSCOM successfully done or error
         uint64_t l_data = 0;
         do
@@ -483,11 +489,14 @@ errlHndl_t xscomPerformOp(DeviceFW::OperationType i_opType,
 
             if (i_opType == DeviceFW::READ)
             {
+
                  l_data = *(l_virtAddr + l_offset);
+
                  memcpy(io_buffer, &l_data, sizeof(l_data));
             }
             else
             {
+
                 memcpy(&l_data, io_buffer, sizeof(l_data));
                 *(l_virtAddr + l_offset) = l_data;
             }

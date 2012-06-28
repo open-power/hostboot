@@ -1,26 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/targeting/targetservice.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
-
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/targeting/common/targetservice.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 /**
  *  @file targeting/common/targetservice.C
  *
@@ -512,13 +512,18 @@ void TargetService::dump() const
             TARG_INF("XSCOM Base Address = 0x%016llX",l_xscomBaseAddr);
         }
 
-        XscomChipInfo l_xscomChipInfo = {0};
-        if ( (*iv_targets)[i].tryGetAttr<ATTR_XSCOM_CHIP_INFO>(
-            l_xscomChipInfo) )
+        uint8_t l_Node_Id = 0;
+        if ( (*iv_targets)[i].tryGetAttr<ATTR_FABRIC_NODE_ID>(l_Node_Id))
         {
-            TARG_INF("XSCOM Node ID = 0x%X",l_xscomChipInfo.nodeId);
-            TARG_INF("XSCOM Chip ID = 0x%X",l_xscomChipInfo.chipId);
+            TARG_INF("XSCOM Node ID = 0x%X",l_Node_Id);
         }
+
+        uint8_t l_Chip_Id = 0;
+        if ( (*iv_targets)[i].tryGetAttr<ATTR_FABRIC_CHIP_ID>(l_Chip_Id))
+        {
+            TARG_INF("XSCOM Chip ID = 0x%X",l_Chip_Id);
+        }
+
     }
 
     return;

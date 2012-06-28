@@ -195,9 +195,6 @@
 <targetType>
     <id>chip-processor-power8</id>
     <parent>chip-processor</parent>
-    <attribute>
-        <id>XSCOM_CHIP_INFO</id>
-    </attribute>
     <attribute><id>DUMMY_RW</id></attribute>
     <attribute><id>DUMMY_HEAP_ZERO_DEFAULT</id></attribute>
     <attribute>

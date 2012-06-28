@@ -1,26 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/targeting/test/targetingtest.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
-
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/targeting/common/test/testcommontargeting.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #ifndef __TARGETING_COMMON_TESTCOMMONTARGETING_H
 #define __TARGETING_COMMON_TESTCOMMONTARGETING_H
 
@@ -1067,10 +1067,10 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
 
         uint64_t l_xscom =
           l_pTarget->getAttr<TARGETING::ATTR_XSCOM_BASE_ADDRESS>();
-        if(l_xscom != 0x300000000000ULL)
+        if(l_xscom != 0x0003FC0000000000)
         {
             TARG_TS_FAIL("l_xscom value is 0x%016llX, not 0x%016llX as expected in direct "
-                    "attribute access",l_xscom,0x300000000000ULL);
+                    "attribute access",l_xscom,0x0003FC00000000ULL);
         }
 
         TARG_TS_TRACE(INF_MRK "Now using FAPI get macros");

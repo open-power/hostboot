@@ -37,6 +37,8 @@
 #include <fsi/fsiif.H>
 #include <targeting/common/util.H>
 
+#include <devicefw/driverif.H>
+
 
 extern trace_desc_t* g_trac_scom;
 
@@ -1635,6 +1637,161 @@ public:
   //@todo - write error path testcase for FSI scom using bad address
 
 
+
+
+
+  /**
+   * @brief multi chip SCOM test 
+   *
+   */
+  void test_MultiChipSCOMreadWrite_proc(void)
+  {
+
+      TRACFCOMP( g_trac_scom, "ScomTest::test_MultiChipSCOMreadWrite_proc> Start" );
+
+      uint64_t fails = 0;
+      uint64_t total = 0;
+      errlHndl_t l_err = NULL;
+
+      // Setup some targets to use
+      enum {
+          PROC1,
+          NUM_TARGETS
+      };
+      TARGETING::Target* scom_targets[NUM_TARGETS];
+      for( uint64_t x = 0; x < NUM_TARGETS; x++ )
+      {
+          scom_targets[x] = NULL;
+      }
+
+      TARGETING::EntityPath epath(TARGETING::EntityPath::PATH_PHYSICAL);
+      epath.addLast(TARGETING::TYPE_SYS,0);
+      epath.addLast(TARGETING::TYPE_NODE,0);
+      epath.addLast(TARGETING::TYPE_PROC,1);
+      scom_targets[PROC1] = TARGETING::targetService().toTarget(epath);
+
+      for( uint64_t x = 0; x < NUM_TARGETS; x++ )
+      {
+          //only run if the target exists
+          if(scom_targets[x] == NULL)
+          {
+              continue;
+          }
+          else if (scom_targets[x]->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true) 
+          {
+              TRACDCOMP( g_trac_scom, "ScomTest::test_FSISCOMreadWrite_proc> Target %d is not functional", x );
+              scom_targets[x] = NULL; //remove from our list
+          }
+      }
+      // scratch data to use
+      //@fixme: Need to either fabricate some fake registers to use or save off data before modifying SCOMs to avoid
+      //   corrupting the HW.
+      struct {
+          TARGETING::Target* target;
+          uint64_t addr;
+          uint64_t data;
+      } test_data[] = {
+          { scom_targets[PROC1],    0x01010803, 0x1234567887654321},
+          { scom_targets[PROC1],    0x02040004, 0x1122334455667788},
+      };
+      const uint64_t NUM_ADDRS = sizeof(test_data)/sizeof(test_data[0]);
+
+      // allocate space for read data
+      uint64_t read_data[NUM_ADDRS];
+      size_t op_size = sizeof(uint32_t);
+
+      // write all the test registers
+      for( uint64_t x = 0; x < NUM_ADDRS; x++ )
+      {
+          //only run if the target exists
+          if(test_data[x].target == NULL)
+          {
+              continue;
+          }
+
+          op_size = sizeof(uint64_t);
+
+          total++;
+
+          l_err = deviceOp(    DeviceFW::WRITE,
+                               test_data[x].target,
+                               &(test_data[x].data),
+                               op_size,
+                               DEVICE_XSCOM_ADDRESS(test_data[x].addr) );              
+
+          if( l_err )
+          {
+              TRACFCOMP(g_trac_scom, "ScomTest::test_MultiChipScomWrite_proc> [%d] Write: Error from device : addr=0x%X, RC=%X", x,  test_data[x].addr, l_err->reasonCode() );
+              TS_FAIL( "ScomTest::test__MultiChipScomWrite_proc> ERROR : Unexpected error log from write1" );
+              fails++;
+              errlCommit(l_err,SCOM_COMP_ID);
+          }
+      }
+
+      // read all the test registers
+      for( uint64_t x = 0; x < NUM_ADDRS; x++ )
+      {
+          //only run if the target exists
+          if(test_data[x].target == NULL)
+          {
+              continue;
+          }
+
+          op_size = sizeof(uint64_t);
+
+          total++;
+
+          // read the data back using XSCOM
+          l_err = deviceOp(    DeviceFW::READ,
+                               test_data[x].target,
+                               &(read_data[x]),
+                               op_size,
+                               DEVICE_XSCOM_ADDRESS(test_data[x].addr) );
+
+          if( l_err )
+          {
+              TRACFCOMP(g_trac_scom, "ScomTest::test__MultiChipScomWrite_proc> [%d] XSCOM Read: Error from device : addr=0x%X, RC=%X", x,  test_data[x].addr, l_err->reasonCode() );
+              TS_FAIL( "ScomTest::test__MultiChipScomWrite_proc> ERROR : Unexpected error log from write1" );
+              fails++;
+              errlCommit(l_err,SCOM_COMP_ID);
+          }
+          else if(read_data[x] != test_data[x].data)
+          {
+              TRACFCOMP(g_trac_scom, "ScomTest::test__MultiChipScomWrite_proc> [%d] XSCOM Read: Data miss-match : addr=0x%X, read_data=0x%llx, write_data=0x%llx", x, test_data[x].addr, read_data[x], test_data[x].data);
+              TS_FAIL( "ScomTest::test__MultiChipScomWrite_proc> ERROR : Data miss-match between read and expected data" );
+              fails++;
+          }
+
+          // Read the data back using FSIscom to make sure the data is the same.
+          l_err = deviceOp(    DeviceFW::READ,
+                               test_data[x].target,
+                               &(read_data[x]),
+                               op_size,
+                               DEVICE_FSISCOM_ADDRESS(test_data[x].addr) );
+
+
+          if( l_err )
+          {
+              TRACFCOMP(g_trac_scom, "ScomTest::test__MultiChipScomWrite_proc> [%d] FSISCOM Read: Error from device : addr=0x%X, RC=%X", x,  test_data[x].addr, l_err->reasonCode() );
+              TS_FAIL( "ScomTest::test__MultiChipScomWrite_proc> ERROR : Unexpected error log from write1" );
+              fails++;
+              errlCommit(l_err,SCOM_COMP_ID);
+          }
+          else if(read_data[x] != test_data[x].data)
+          {
+              TRACFCOMP(g_trac_scom, "ScomTest::test__MultiChipScomWrite_proc> [%d] FSISCOM Read: Data miss-match : addr=0x%X, read_data=0x%llx, write_data=0x%llx", x, test_data[x].addr, read_data[x], test_data[x].data);
+              TS_FAIL( "ScomTest::test__MultiChipScomWrite_proc> ERROR : Data miss-match between read and expected data" );
+              fails++;
+          }
+
+      }
+
+      TRACFCOMP( g_trac_scom, "ScomTest::test__MultiChipScomWrite_proc> %d/%d fails", fails, total );
+
+  }
+
 };
+
+
 
 #endif

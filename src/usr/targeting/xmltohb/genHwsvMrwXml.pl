@@ -606,13 +606,6 @@ sub generate_master_proc
         </default>
     </attribute>
     <attribute>
-        <id>XSCOM_CHIP_INFO</id>
-        <default>
-            <field><id>nodeId</id><value>$node</value></field>
-            <field><id>chipId</id><value>$proc</value></field>
-        </default>
-    </attribute>
-    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-$sys/node-$node/proc-$proc</default>
     </attribute>
@@ -686,13 +679,6 @@ sub generate_slave_proc
             <field><id>useXscom</id><value>0</value></field>
             <field><id>useInbandScom</id><value>0</value></field>
             <field><id>reserved</id><value>0</value></field>
-        </default>
-    </attribute>
-    <attribute>
-        <id>XSCOM_CHIP_INFO</id>
-        <default>
-            <field><id>nodeId</id><value>$node</value></field>
-            <field><id>chipId</id><value>$Mproc</value></field>
         </default>
     </attribute>
     <attribute>
