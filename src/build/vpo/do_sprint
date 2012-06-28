@@ -268,18 +268,7 @@ default_istep_list="
  apply_partial_bad
  apply_gard
  testHWP
- cen_sbe_tp_chiplet_init1
- cen_sbe_tp_arrayinit
- cen_sbe_tp_chiplet_init2
- cen_sbe_tp_chiplet_init3
- cen_sbe_chiplet_init
- cen_sbe_arrayinit
- cen_sbe_pll_initf
- cen_sbe_dts_init
- cen_sbe_initf
- cen_sbe_do_manual_inits
- cen_sbe_startclocks
- cen_sbe_scominits
+ cen_sbe_centaur_init
  dmi_scominit
  dmi_erepair
  dmi_io_dccal
@@ -294,7 +283,7 @@ default_istep_list="
  mss_eff_config
  host_disable_vddr
  mc_pll_setup
- mba_startclocks
+ mem_startclocks
  host_enable_vddr
  mss_initf
  mss_ddr_phy_reset

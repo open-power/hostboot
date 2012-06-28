@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/pore/poreve/pore_model/ibuf/pore_model.c $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/pore/poreve/pore_model/ibuf/pore_model.c $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 /******************************************************************************
  *
  * Virtual PORe Engine
@@ -39,6 +40,7 @@ static int fetch(pore_model_t p);
 static int decode(pore_model_t p);
 static int execute(pore_model_t p);
 static int finishBrokenInstruction(pore_model_t p);
+static int __pore_flush_reset(pore_model_t p);
 
 #define PORE_GET_BITS(X,S,N)						\
 	((((~(0xFFFFFFFFFFFFFFFFull >> (N))) >> (S))			\
@@ -283,31 +285,49 @@ pore_control_reg_write(pore_model_t p, uint64_t val, uint64_t mask)
 static inline int
 pore_exe_trigger_reg_write(pore_model_t p, uint64_t val, uint64_t mask)
 {
-	int me = PORE_SUCCESS;
-
 	val &= PORE_EXE_TRIGGER_VALID_BITS;
 	if (p->reset.fn_reset == 1) {
-		me = PORE_ERR_IN_RESET;
+		return PORE_ERR_IN_RESET;
 
-	} else if (mask == PORE_BITS_32_63) {
-		p->exe_trigger.val = ((val		  &  mask) |
-				      (p->exe_trigger.val & ~mask));
-
-	} else if (p->control.lock_exe_trig) {
-		me = PORE_ERR_REGISTER_LOCKED;
-
-	} else {
-		p->exe_trigger.val = ((val		  &  mask) |
-				      (p->exe_trigger.val & ~mask));
-
-		// Lock the EXE_TRIGGER register, compute the
-		// new starting PC, and begin execution.
-
-		p->control.lock_exe_trig = 1;
-		p->control.start_stop = 0;
-		pore_exeVector(p, p->exe_trigger.start_vector);
 	}
-	return me;
+
+	if (p->control.lock_exe_trig &&
+	    !p->control.interrupt_sequencer_enabled) {
+		return PORE_ERR_REGISTER_LOCKED;
+	}
+
+	if (mask == PORE_BITS_32_63) {
+		p->exe_trigger.val = ((val		  &  mask) |
+				      (p->exe_trigger.val & ~mask));
+		return PORE_SUCCESS;
+	}
+
+	if (p->control.interrupt_sequencer_enabled) {
+		if (p->control.pore_interruptible == 0) {
+			/* enque request, remember desired exe_trigger_reg */
+			p->pore_interrupt_request = 1;
+			p->dbg0.interrupt_counter = 0x00;
+			p->exe_trigger.val = ((val		  &  mask) |
+					      (p->exe_trigger.val & ~mask));
+
+			return PORE_SUCCESS;
+		} else {
+			/* else do the trigger, and wipe out the request */
+			p->pore_interrupt_request = 0;
+		}
+	}
+
+	p->exe_trigger.val = ((val		  &  mask) |
+			      (p->exe_trigger.val & ~mask));
+
+	/* Lock the EXE_TRIGGER register, compute the new starting PC,
+	 * and begin execution.
+	 */
+	p->control.lock_exe_trig = 1;
+	p->control.start_stop = 0;
+	pore_exeVector(p, p->exe_trigger.start_vector);
+
+	return PORE_SUCCESS;
 }
 
 /// write method for IBUF_01 register. Upon write to the ibuf_0 part
@@ -338,6 +358,21 @@ pore_ibuf_01_reg_write(pore_model_t p, uint64_t val, uint64_t mask)
 		me = execute(p);
 		if (me != PORE_SUCCESS)
 			return me;
+
+		/* Extension for interruptible operation of SLW instance */
+		if (p->control.interrupt_sequencer_enabled &&
+		    p->pore_interrupt_request) {
+
+			if (p->control.pore_interruptible) {
+				__pore_flush_reset(p);
+				pore_exe_trigger_reg_write(p,
+							   p->exe_trigger.val,
+							   PORE_BITS_0_63);
+			} else {
+				if (p->dbg0.interrupt_counter != 0xff)
+					p->dbg0.interrupt_counter++;
+			}
+		}
 
 		/* FIXME In case of stuffing instructions I strongly
 		   assume that the PC must not be upated. */
@@ -601,7 +636,9 @@ static int __writeReg(pore_model_t p, pore_internal_reg_t reg, uint64_t val)
 		break;
 
 	case PORE_TABLE_BASE_ADDR_ENC:
-		p->table_base_addr.val = val; break;
+		p->table_base_addr.val = val;
+		break;
+
 	case PORE_EXE_TRIGGER_ENC:
 		/**
 		 * A COPY instruction to the EXE_Trigger register will
@@ -786,7 +823,7 @@ static void signalFatalError(pore_model_t p)
  *
  * Each error cause is indicated by a corresponding bit in DBG
  * Register1.  Since errors on this event are fatal for PORE, it is
- * highly recommended to configure the actions ï¿½Stop IBUF execution
+ * highly recommended to configure the actions âStop IBUF execution
  * and IBUF fatal error in the IBUF Error Mask register.  This is
  * the default setting.
  *
@@ -1414,9 +1451,9 @@ static int decode(pore_model_t p)
 		return PORE_ERR_INVALID_PARAM;
 
 	dis = &p->dis;
-	pore_inline_decode_instruction(dis, p->ibuf_01.ibuf0);
-	pore_inline_decode_imd64(dis, ((uint64_t)p->ibuf_01.ibuf1 << 32 |
-				       (uint64_t)p->ibuf_2.ibuf2));
+	vpore_inline_decode_instruction(dis, p->ibuf_01.ibuf0);
+	vpore_inline_decode_imd64(dis, ((uint64_t)p->ibuf_01.ibuf1 << 32 |
+					(uint64_t)p->ibuf_2.ibuf2));
 
 	p->opcode_len = 4;
 	if (dis->long_instruction)
@@ -1723,7 +1760,6 @@ static const uint16_t bin_2_unary[] = {
 };
 
 static int pore_scand_read(pore_model_t p, PoreAddress *addr, uint32_t *word)
-
 {
 	int rc;
 	uint64_t data;
@@ -2594,6 +2630,20 @@ int pore_step(pore_model_t p)
 		return rc;
 	}
 
+	/* Extension for interruptible operation of SLW instance */
+	if (p->control.interrupt_sequencer_enabled &&
+	    p->pore_interrupt_request) {
+
+		if (p->control.pore_interruptible) {
+			__pore_flush_reset(p);
+			pore_exe_trigger_reg_write(p, p->exe_trigger.val,
+						   PORE_BITS_0_63);
+		} else {
+			if (p->dbg0.interrupt_counter != 0xff)
+				p->dbg0.interrupt_counter++;
+		}
+	}
+
 	return rc;
 }
 
@@ -2621,10 +2671,9 @@ void pore_dump(pore_model_t p)
 		"  IBUF: %08llx %08x.%08x.%08x\n"
 		"-------------------------------------"
 		"-------------------------------------\n"
-		"  D0  : %016llx   D1 : %016llx\n"
-		"  A0  : %04x:%08x     A1 : %04x:%08x\n"
-		"  P0  : %02x	             P1 : %02x\n"
-		"  CTR : %06x\n"
+		"  D0: %016llx   D1: %016llx\n"
+		"  A0: %04x:%08x      A1: %04x:%08x\n"
+		"  P0: %02x P1: %02x          CTR: %06x\n"
 		"-------------------------------------"
 		"-------------------------------------\n",
 		__func__,
@@ -2684,6 +2733,11 @@ void pore_dump(pore_model_t p)
 		"    DATA0:        %016llx MEM_RELOC:	 %016llx\n"
 		"    I2C_E0:       %016llx I2C_E1:	 %016llx\n"
 		"    I2C_E2:       %016llx PC:		 %016llx\n"
+		"  Internal State\n"
+		"    branchTaken/broken:       %lld/%lld\n"
+		"    pore_interrupt_request:   %lld\n"
+		"    oci_fetchBufValid/Cursor: %lld/%lld\n"
+		"    oci_fetchBuf:             %016llx\n"
 		"-------------------------------------"
 		"-------------------------------------\n",
 		(long long)p->status.val,	(long long)p->control.val,
@@ -2702,59 +2756,88 @@ void pore_dump(pore_model_t p)
 		(long long)p->i2c_e_param[0].val,
 		(long long)p->i2c_e_param[1].val,
 		(long long)p->i2c_e_param[2].val,
-		(long long)p->status.pc);
+		(long long)p->status.pc,
+		(long long)p->branchTaken, (long long)p->broken,
+		(long long)p->pore_interrupt_request,
+		(long long)p->oci_fetchBufferValid,
+		(long long)p->oci_fetchBufferCursor,
+		(long long)p->oci_fetchBuffer);
 }
 
-/* Model Creation ************************************************************/
+/* Model Creation and Reset **************************************************/
 
-int pore_flush_reset(pore_model_t p)
+static int __pore_flush_reset(pore_model_t p)
 {
-	dprintf(p, "%s: %s\n", __func__, p->name);
-
+	/* --------------- always ------------------------------------------ */
+	/* STATUS */
 	p->status.val = 0;
 	p->status.cur_state = PORE_STATE_WAIT;
-
-	p->control.val = 0;
-	p->control.start_stop = 1;
-
-	p->control.lock_exe_trig = 0;
-	p->control.check_parity = 0;
-	p->control.prv_parity = 0;
-	p->control.pc_brk_pt = 0xffffffffffffull;
+	p->status.pc = 0;
 
 	p->prv_base[0].val = 0;
 	p->prv_base[1].val = 0;
 	p->oci_base[0].val = 0;
 	p->oci_base[1].val = 0;
-	p->table_base_addr.val = 0;
-	p->exe_trigger.val = 0;
+
+	/* SCR0, SRC1, IBUF01, IBUF2 */
 	p->scratch0.val = 0;
 	p->scratch1 = 0;
 	p->scratch2 = 0;
 	p->ibuf_01.val = 0;
 	p->ibuf_2.val = 0;
 
+	/* ID_FLAGS, DBG0, DBG1, PC_STACK0/1/2, DATA0 */
 	p->id_flags.val = p->id_flags.ibuf_id; /* keep ibuf_id */
 	p->dbg0.val = 0;
 	p->dbg1.val = 0;
 	p->pc_stack[0].val = 0; /* clears one bits on a write */
 	p->pc_stack[1].val = 0;
 	p->pc_stack[2].val = 0;
-
 	p->data0 = 0;
-	p->memory_reloc.val = 0;
-	p->status.pc = 0;
+
+	/* Internal model state */
 	p->err_code = 0;
 	p->branchTaken = 0;
 	p->broken = 0;
 	p->singleStep = 0;
 	p->forcedBranchMode = FORCED_BRANCH_DISALLOWED;
 	p->forcedPc = 0;
-	/* page 74: IBUF Err Mask, not altered during functional PORE reset. */
 
+	/* Externally attached busses */
 	poreb_reset(p->pib);	/* reset bus models, e.g. clear buffers */
 	poreb_reset(p->mem);
 
+	return 0;
+}
+
+int pore_flush_reset(pore_model_t p)
+{
+	dprintf(p, "%s: %s\n", __func__, p->name);
+
+	/* --------------- exclude those regs for interruptible PORE case -- */
+	/* EXE_TRIGGER */
+	p->exe_trigger.val = 0;
+
+	/* CONTROL */
+	p->control.val = 0;
+	p->control.start_stop = 1;
+	p->control.lock_exe_trig = 0;
+	p->control.check_parity = 0;
+	p->control.prv_parity = 0;
+	p->control.pc_brk_pt = 0xffffffffffffull;
+
+	/* TABLE_BASE */
+	p->table_base_addr.val = 0;
+
+	/* ERROR_MASK ... only at 1st init */
+	/* page 74: IBUF Err Mask, not altered during functional PORE reset. */
+
+	/* MEMORY_RELOC */
+	p->memory_reloc.val = 0;
+
+	/* I2C_PARAM0/1/2 ... only at 1st init */
+
+	__pore_flush_reset(p);
 	return 0;
 }
 
@@ -2769,7 +2852,6 @@ pore_model_t pore_model_create(const char *name)
 
 	p->name = name;
 	pore_flush_reset(p);
-	p->status.pc = 0;
 	p->enableHookInstruction = 0;
 	p->enableAddressHooks = 0;
 
@@ -3011,36 +3093,23 @@ pore_sbe_create(pore_bus_t pib)
 	p->id_flags.ibuf_id = PORE_IBUF_ID_SBE;
 	p->error_mask.val = 0x00BFF00000000000ull; /* FIXME spec undefined */
 
+	p->control.interrupt_sequencer_enabled = 0;
+	p->control.pore_interruptible = 0;
+
 	/* SEEPROM */
-	p->i2c_e_param[0].i2c_engine_identifier = 0xc;
-	p->i2c_e_param[0].i2c_engine_address_range = 0x2;
-	p->i2c_e_param[0].i2c_engine_port = 0x0;
-	p->i2c_e_param[0].i2c_engine_device_id = 0x0;
-
-	/* OTPROM */
-	p->i2c_e_param[1].i2c_engine_identifier = 0x1;
-	p->i2c_e_param[1].i2c_engine_address_range = 0x2;
-	p->i2c_e_param[1].i2c_engine_port = 0x0;
-	p->i2c_e_param[1].i2c_engine_device_id = 0x0;
-
-	/* PNOR */
-	p->i2c_e_param[2].i2c_engine_identifier = 0xb;
-	p->i2c_e_param[2].i2c_engine_address_range = 0x4;
-	p->i2c_e_param[2].i2c_engine_port = 0x0;
-	p->i2c_e_param[2].i2c_engine_device_id = 0x0;
+	p->i2c_e_param[0].i2c_engine_speed = 0x0f;
 
 	/* OCI/MEM Route */
 	p->oci_base[0].val = 0;
-	p->oci_base[0].oci_mem_route = 0xa; /* matches here SEEPROM */
-	p->oci_base[0].oci_base_address = 0x000000000;
-
 	p->oci_base[1].val = 0;
-	p->oci_base[1].oci_mem_route = 0x1; /* matches here OTP */
-	p->oci_base[1].oci_base_address = 0x000000000;
 
+	/* The 0x00040000 in the SBE address space translates to the
+	 * 0x00008000 (>>3) on the PIB bus.
+	 */
 	/* Table base address defines where start and exception vectors are */
 	p->table_base_addr.val = 0;
-	p->table_base_addr.table_base_address = 0x00010008 << 3; /* for SBE */
+	p->table_base_addr.memory_space = 0x00001; /* for SBE */
+	p->table_base_addr.table_base_address = 0x00040020; /* for SBE */
 
 	/* setup reference for the case it is not yet done. */
 	if (pib)
@@ -3083,6 +3152,9 @@ __slw_create(const char *name, pore_bus_t pib, pore_bus_t oci,
 	p->id_flags.ibuf_id = ibuf_id;
 	p->error_mask.val = 0x00BFF00000000000ull;
 
+	p->table_base_addr.memory_space = 0x00000; /* for SLW/GPE */
+	p->table_base_addr.table_base_address = 0x00000000; /* for SLW/GPE */
+
 	/* setup reference for the case it is not yet done. */
 	if (pib)
 		pib->pore = p;
@@ -3114,7 +3186,12 @@ __slw_create(const char *name, pore_bus_t pib, pore_bus_t oci,
 pore_model_t
 pore_slw_create(pore_bus_t pib, pore_bus_t oci)
 {
-	return __slw_create("SLW", pib, oci, PORE_IBUF_ID_SLW);
+	pore_model_t pore;
+
+	pore = __slw_create("SLW", pib, oci, PORE_IBUF_ID_SLW);
+	pore->control.interrupt_sequencer_enabled = 1;
+	pore->control.pore_interruptible = 1;
+	return pore;
 }
 
 pore_model_t

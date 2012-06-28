@@ -1,28 +1,29 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/pore/fapiporeve/fapiPoreVeArg.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/pore/fapiporeve/fapiPoreVeArg.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 // -*- mode: C++; c-file-style: "linux";  -*-
-// $Id: fapiPoreVeArg.H,v 1.11 2011/12/07 22:31:39 jeshua Exp $
-// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/fapiPoreVeArg.H,v $
+// $Id: fapiPoreVeArg.H,v 1.14 2012/04/26 21:30:49 jeshua Exp $
+// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/poreve/working/fapiporeve/fapiPoreVeArg.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -54,6 +55,7 @@ namespace vsbe
         ARG_SEEPROM,
         ARG_SRAM,
         ARG_MAINMEM,
+        ARG_PIBMEM,
     };
 
     const uint32_t BAD_ERROR_CODE = 0xDEADC0DE;
@@ -148,6 +150,15 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they are included here.
 
 $Log: fapiPoreVeArg.H,v $
+Revision 1.14  2012/04/26 21:30:49  jeshua
+file renamed from ../../../fapiporeve/working/fapiPoreVeArg.H to fapiPoreVeArg.H
+
+Revision 1.13  2012/04/26 20:54:22  jeshua
+file renamed from ../../chips/p8/working/procedures/fapiPoreVeArg.H to fapiPoreVeArg.H
+
+Revision 1.12  2012/03/01 20:11:31  jeshua
+Updated for PIBMEM support
+
 Revision 1.11  2011/12/07 22:31:39  jeshua
 Initial MRR support
 

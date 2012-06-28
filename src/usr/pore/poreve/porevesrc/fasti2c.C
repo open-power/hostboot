@@ -1,26 +1,27 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/pore/poreve/porevesrc/fasti2c.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
-// $Id: fasti2c.C,v 1.5 2012/01/10 00:27:41 bcbrock Exp $
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/pore/poreve/porevesrc/fasti2c.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
+// $Id: fasti2c.C,v 1.6 2012/05/23 19:51:39 bcbrock Exp $
 
 /// \file fasti2c.C
 /// \brief The "fast-mode" I2C controllers and I2C memory models used
@@ -43,14 +44,20 @@ using namespace vsbe;
 // I2cMemory
 ////////////////////////////////////////////////////////////////////////////
 
-I2cMemory::I2cMemory(const size_t i_addressBytes) :
-iv_addressBytes(i_addressBytes), iv_address(0)
+I2cMemory::I2cMemory()
 {
 }
 
 
 I2cMemory::~I2cMemory()
 {
+}
+
+
+void
+I2cMemory::configure(const uint8_t i_bytes)
+{
+    iv_addressBytes = i_bytes;
 }
 
 
@@ -102,11 +109,9 @@ I2cMemory::dataWrite(const size_t i_bytes, const uint64_t i_data)
 
 FastI2cController::FastI2cController() :
     iv_devices(0),
-    iv_state(IDLE), iv_fifo(0)
-
+    iv_state(IDLE)
 {
         iv_status.value = 0;
-        iv_control.value = 0;
 }
 
 
@@ -128,8 +133,8 @@ FastI2cController::~FastI2cController()
 
 ModelError
 FastI2cController::attachMemory(I2cMemory* i_memory,
-                                const unsigned i_port,
-                                const unsigned i_deviceAddress)
+                                const uint8_t i_port,
+                                const uint8_t i_deviceAddress)
 {
     ModelError me = ME_SUCCESS;
     FastI2cControlRegister control; // Used to validate i_Port and i_deviceId
@@ -137,7 +142,6 @@ FastI2cController::attachMemory(I2cMemory* i_memory,
     
     control.fields.port_number = i_port;
     control.fields.device_address = i_deviceAddress;
-    // Make sure input variables fits into control fields
     if ((control.fields.port_number != i_port) ||
         (control.fields.device_address != i_deviceAddress)) {
         BUG();
@@ -353,7 +357,7 @@ FastI2cController::operation(Transaction& io_transaction)
 
     if (me != 0) {
         iv_state = ERROR;
-        rc = 1;                 // \bug Fix this
+        FAPI_SET_HWP_ERROR(rc, RC_POREVE_FASTI2C_OPERATION_ERROR);
     }
     io_transaction.busError(me);
     return rc;
@@ -586,7 +590,7 @@ LpcController::operation(Transaction& io_transaction)
     }
     if (!handledBySuperclass) {
         if (me != 0) {
-            rc = 1;             // \bug Fix this;
+            FAPI_SET_HWP_ERROR(rc, RC_POREVE_LPC_OPERATION_ERROR);
         }
         io_transaction.busError(me);
     }

@@ -1,29 +1,30 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/pore/poreve/porevesrc/poreve.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/pore/poreve/porevesrc/poreve.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #ifndef __VSBE_POREVE_H
 #define __VSBE_POREVE_H
 
-// $Id: poreve.H,v 1.20 2012/02/27 22:50:53 jeshua Exp $
+// $Id: poreve.H,v 1.25 2012/06/18 23:38:37 bcbrock Exp $
 
 /// \file poreve.H
 /// \brief The PORE Virtual Environment
@@ -73,7 +74,9 @@
 #include "fapi.H"
 
 #include "fasti2c.H"
+#include "pibmem.H"
 #include "poremodel.H"
+#include "poreregister.H"
 #include "pore.H"
 
 #include "pib2cfam.H"
@@ -140,9 +143,9 @@ namespace vsbe {
     /// The number of PIB \e registers defined by the PIBMEM memory controller
     ///
     /// PIB memories are 8-byte \e word addressed. The maximum amount of
-    /// memory accessible through the controller is (PIBMEM_PIB_SIZE * 8)
+    /// memory accessible through the controller is (PIBMEM_PIB_REGISTERS * 8)
     /// bytes (3KB).
-    const uint64_t PIBMEM_PIB_SIZE = 0x180;
+    const uint64_t PIBMEM_PIB_REGISTERS = 0x180;
 
 
     //////////////////////////////////////////////////////////////////////
@@ -155,11 +158,12 @@ namespace vsbe {
     /// The number of registers defined by the PNOR memory controller
     const size_t PNOR_PIB_SIZE = LPCM_REGISTERS;
 
-    /// The number of bytes in a PNOR address (actually a parameter of the
-    /// memory attached to the controller)
-    const size_t PNOR_ADDRESS_BYTES = 4;
-
     /// The PNOR I2C Port Number
+    ///
+    /// When the ECCAX unit is configured for access to the LPC (PNOR)
+    /// interface, the I2C port and I2C device address are ignored by the
+    /// unit, however we go ahead and define these constants as 0 for the
+    /// benefit of our generic I2C controller model.
     const unsigned PNOR_I2C_PORT = 0;
 
     /// The PNOR I2C Device Address
@@ -175,18 +179,6 @@ namespace vsbe {
 
     /// The number of registers defined by the SEEPROM memory controller
     const uint64_t SEEPROM_PIB_SIZE = FASTI2C_REGISTERS;
-
-    /// The number of bytes in an SEEPROM address
-    const uint64_t SEEPROM_ADDRESS_BYTES = 2;
-
-    /// The SEEPROM I2C Port Number
-    const unsigned SEEPROM_I2C_PORT = 0;
-
-    /// The SEEPROM I2C Device Address
-    ///
-    /// \bug This value (0) is bogus, need the real value from the system
-    /// design. 
-    const unsigned SEEPROM_I2C_DEVICE_ADDRESS = 0;
 
 
     //////////////////////////////////////////////////////////////////////
@@ -271,15 +263,28 @@ public:
 
     ////////////////////  Simulation Interface    /////////////////////////
 
-    /// Reset the simulation to target a new slave
+    /// Reset the simulation and target a new slave
     ///
     /// \param[in] i_slaveTarget  The slave target of the new slave
     ///
-    /// The reset() method is provided to cleanly reset the simulation for
-    /// simulation with a new slave target. Once reset, the application is
-    /// responsible for setting up the register state of the Pore and invoking
-    /// the run() method to begin simulation.
-    virtual void
+    /// The reset() method is provided to cleanly reset the simulator for
+    /// simulation with a new slave target. 
+    ///
+    /// If the embedded PORE engine is PORE-SBE, then this method simulates
+    /// the auto-POR sequence for the engine, and the engine comes up with a
+    /// 'running' status at the correct auto-POR branch table address.  For
+    /// other engines the application is responsible for setting up the
+    /// register state of the Pore and invoking the run() method to begin
+    /// simulation. As a side effect, any error status is also cleared from
+    /// the HookManager.
+    ///
+    /// If the slave target is Centaur, then this method also takes the step
+    /// of initializing the I2C_E0_PARAM register to allow the Centaur "PNOR"
+    /// image to access the virtual PNOR.
+    ///
+    /// \returns The return code from the call of FAPI_ATTR_GET_PRIVILEGED()
+    /// used to determine the target type.
+    virtual fapi::ReturnCode
     reset(fapi::Target i_slaveTarget);
 
     
@@ -306,6 +311,9 @@ public:
     /// model return modeled results, and accesses of non-modeled addresses
     /// are converted into FAPI calls.
     ///
+    /// \note Use the getmemInteger() method to read from OCI/I2C memory
+    /// spaces.
+    ///
     /// \returns A return value of 0 indicates success of the method call, but
     /// does not guarantee that the PIB transaction succeeded. It will also be
     /// necessary to also observe that PIB/PCB return code \a o_rc was
@@ -330,6 +338,9 @@ public:
     /// model update modeled registers, and accesses of non-modeled addresses
     /// are converted into FAPI calls.
     ///
+    /// \note Use the putmemInteger() method to write to OCI/I2C memory
+    /// spaces.
+    ///
     /// \returns A return value of 0 indicates success of the method call, but
     /// does not guarantee that the PIB transaction succeeded. It will also be
     /// necessary to also observe that PIB/PCB return code \a o_rc was
@@ -337,6 +348,39 @@ public:
     /// modeling error.
     virtual ModelError
     putscom(const uint32_t i_address, const uint64_t i_data, int& o_rc);
+
+    
+    /// See PoreModel::getmemInteger()
+    virtual ModelError
+    getmemInteger(const PoreAddress i_address,
+                  uint64_t& o_data,
+                  const size_t i_size);
+
+
+    /// See PoreModel::putmemInteger()
+    virtual ModelError
+    putmemInteger(const PoreAddress i_address,
+                  uint64_t i_data,
+                  const size_t i_size);
+
+
+    /// Return the FAPI return code associated with constructing the PoreVe
+    /// object. 
+    ///
+    /// Any application constucting a PoreVe object must check that the object
+    /// was constructed without error by using this method.
+    virtual fapi::ReturnCode 
+    constructorRc();
+
+
+    /// Return the last FAPI return code from any PORE operations in the
+    /// virtual environment. 
+    ///
+    /// If the status returned by run() includes the bit
+    /// PORE_STATUS_MODEL_ERROR, then calling poreRc() will return the FAPI
+    /// return code associated with the error, if any.
+    virtual fapi::ReturnCode
+    poreRc();
 
 
     //////////////////// Public Implementation ////////////////////////////
@@ -399,6 +443,27 @@ protected:
     /// this data member is provided to all slaves during configuration.
     ecmdDataBufferBase iv_dataBuffer;
 
+    /// The FAPI return code associated with object construction
+    ///
+    /// Constructing a PoreVe object entails making FAPI and other API calls
+    /// that may fail, however the host boot environment does not support
+    /// exceptions, only FAPI return codes. To the extent possible, the
+    /// constructor is coded such that this member holds the first non-OK
+    /// return code encountered during construction, if any. Any application
+    /// constucting a PoreVe object must check that the object was constructed
+    /// without error by using the constructorRc() method.
+    fapi::ReturnCode iv_constructorRc;
+
+    /// The I2C setup for the PNOR controller
+    ///
+    /// When the PoreVe-SBE is being used to bring up the Centaur, this data
+    /// member holds the I2C parameters required to allow the SBE to access
+    /// the virtual PNOR containing the Centaur IPL code.  For processor IPL
+    /// the IPL code itself does all setup, but since Centaur is only brought
+    /// up virtually we elected to do this one piece of setup behind the
+    /// scenes in the reset() method.
+    pore_i2c_en_param_reg iv_pnorI2cParam;
+
 
     ///////////////////////////// Safety //////////////////////////////////
 
@@ -437,7 +502,15 @@ public:
     /// \param[in] i_masterTarget  The fapi::Target associated with the master
     /// chip in an HBI master/slave configuration.  This target is also
     /// installed into \a iv_slaveTarget by the constructor.
-    PoreVe(const PoreIbufId i_id, const fapi::Target i_masterTarget);
+    ///
+    /// \param[in] i_useSecondarySeepromConfig The model contains a single
+    /// SEEPROM memory, however the hardware always includes a primary and
+    /// secondary SEEPROM. This option to the constructor selects which
+    /// SEEPROM addressing attributes (device Id, port) to use for the SEEPROM
+    /// memory model. The default is to use the primary attributes.
+    PoreVe(const PoreIbufId i_id, 
+           const fapi::Target i_masterTarget,
+           const bool i_useSecondarySeepromConfig = false);
 
     virtual ~PoreVe();
 
@@ -470,10 +543,10 @@ public:
     /// The OTPROM memory model
     Memory iv_otpromMemory;
 
-    /// The PIBMEM controller model - No advanced functions implemented for now
-    PibMemory iv_pibmem;
+    /// The PIBMEM controller model
+    Pibmem iv_pibmem;
 
-    /// The PIPMEM memory model
+    /// The PIBMEM memory model
     Memory iv_pibmemMemory;
 
     /// The SEEPROM controller model

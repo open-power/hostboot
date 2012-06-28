@@ -1,32 +1,35 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/pore/poreve/model/poreregister.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/pore/poreve/model/poreregister.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #ifndef __VSBE_POREREGISTER_H
 #define __VSBE_POREREGISTER_H
 
-// $Id: poreregister.H,v 1.2 2011/08/03 17:59:00 bcbrock Exp $
+// $Id: poreregister.H,v 1.3 2012/06/15 12:34:39 bcbrock Exp $
 
 /// \file poreregister.H
 /// \brief The PoreRegister and PoreRegisterWritable classes
+///
+/// This header also includes selected register layout definitions
 
 #include <stdint.h>
 
@@ -271,5 +274,46 @@ private:
     PoreDataBuffer(const PoreDataBuffer& i_rhs);
     PoreDataBuffer& operator=(PoreDataBuffer& i_rhs);
 };
+
+
+/// \bug These register layouts are defined in pore_model/ibuf/pore_regs.h,
+/// however that header also includes a definition of a PoreAddress type that
+/// conflicts with the type we define in PoreAddress.H.  If the conflict can
+/// be removed from pore_regs.h then we can #include that file instead of
+/// duplicating it here.
+
+#include <endian.h>
+
+typedef union {
+        struct {
+#if (__BYTE_ORDER == __BIG_ENDIAN)
+                uint64_t i2c_engine_identifier : 4;
+                uint64_t reserved0 : 1;
+                uint64_t i2c_engine_address_range : 3;
+                uint64_t reserved1 : 3;
+                uint64_t i2c_engine_port : 5;
+                uint64_t reserved2 : 1;
+                uint64_t i2c_engine_device_id : 7;
+                uint64_t reserved3 : 2;
+                uint64_t i2c_engine_speed : 2;
+                uint64_t i2c_done_max_polls : 4; /* I2C_E0_PARAM only */
+                uint64_t reserved4 : 32;
+#else
+                uint64_t reserved4 : 32;
+                uint64_t i2c_done_max_polls : 4; /* I2C_E0_PARAM only */
+                uint64_t i2c_engine_speed : 2;
+                uint64_t reserved3 : 2;
+                uint64_t i2c_engine_device_id : 7;
+                uint64_t reserved2 : 1;
+                uint64_t i2c_engine_port : 5;
+                uint64_t reserved1 : 3;
+                uint64_t i2c_engine_address_range : 3;
+                uint64_t reserved0 : 1;
+                uint64_t i2c_engine_identifier : 4;
+#endif
+        };
+        uint64_t val;
+} pore_i2c_en_param_reg;
+
 
 #endif  // __VSBE_POREREGISTER_H

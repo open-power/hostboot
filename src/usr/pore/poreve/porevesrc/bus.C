@@ -1,26 +1,27 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/pore/poreve/porevesrc/bus.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
-// $Id: bus.C,v 1.22 2012/01/05 23:15:54 bcbrock Exp $
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/pore/poreve/porevesrc/bus.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
+// $Id: bus.C,v 1.25 2012/03/20 22:52:49 bcbrock Exp $
 
 /// \file bus.C
 /// \brief PoreVe bus and base device models
@@ -35,7 +36,7 @@ using namespace vsbe;
 
 //-----------------------------------------------------------------------------
 Bus::Bus() :
-    iv_primarySlaves(NULL),
+    iv_primarySlaves(NULL), 
     iv_secondarySlaves(NULL)
 {
 }
@@ -52,7 +53,9 @@ Bus::attachPrimarySlave(Slave* i_slave)
     if( iv_primarySlaves == 0 )
     {
         i_slave->iv_next = 0;
-    }else{
+    }
+    else
+    {
         i_slave->iv_next = iv_primarySlaves;
     }
     iv_primarySlaves = i_slave;
@@ -65,7 +68,9 @@ Bus::attachSecondarySlave(Slave* i_slave)
     if( iv_secondarySlaves == 0 )
     {
         i_slave->iv_next = 0;
-    }else{
+    }
+    else
+    {
         i_slave->iv_next = iv_secondarySlaves;
     }
     iv_secondarySlaves = i_slave;
@@ -83,46 +88,49 @@ Bus::operation(Transaction& trans)
     {
         for( slave = iv_primarySlaves; slave; slave = slave->iv_next )
         {
-            if( (trans.iv_address >= slave->iv_base) && (trans.iv_address < (slave->iv_base + slave->iv_size) ) )
+            if( (trans.iv_address >= slave->iv_base) &&
+                (trans.iv_address < (slave->iv_base + slave->iv_size) ) )
             {
-              break; // found a primary slave
+                break; // found a primary slave
             }
         }
 
         if( slave == 0 )
-        { // primary slaves did not hold the transaction address. Try using the secondary slaves.
-          for( slave = iv_secondarySlaves; slave; slave = slave->iv_next )
-          {
-              if( (trans.iv_address >= slave->iv_base) && (trans.iv_address < (slave->iv_base + slave->iv_size) ) )
-              {
-                break; // found a secondary slave
-              }
-          }
+        {   // primary slaves did not hold the transaction address.
+            // Try using the secondary slaves.
+            for( slave = iv_secondarySlaves; slave; slave = slave->iv_next )
+            {
+                if( (trans.iv_address >= slave->iv_base) &&
+                    (trans.iv_address < (slave->iv_base + slave->iv_size) ) )
+                {
+                    break; // found a secondary slave
+                }
+            }
         }
 
         break;
-
-    }while(0);
+    } while(0);
 
     do
     {
-        if( slave == 0 ) // neither primary nor secondary slaves held the address
+        if( slave == 0 ) // neither primary nor secondary slaves held the addr
         {
-          trans.busError(ME_NOT_MAPPED_ON_BUS);
-          rc= 1;
-          break;
+             trans.busError(ME_NOT_MAPPED_ON_BUS);
+             FAPI_SET_HWP_ERROR(rc, RC_POREVE_BUS_ME_NOT_MAPPED_IN_BUS);
+             break;
         }
 
-        if( (trans.iv_mode & slave->iv_permissions) == 0 ){
-          trans.busError(ME_BUS_SLAVE_PERMISSION_DENIED);
-          rc= 1;
-          break;
-          }
+        if( (trans.iv_mode & slave->iv_permissions) == 0 )
+        {
+            trans.busError(ME_BUS_SLAVE_PERMISSION_DENIED);
+            FAPI_SET_HWP_ERROR(rc, RC_POREVE_BUS_ME_NOT_MAPPED_IN_BUS);
+            break;
+        }
 
         trans.iv_offset = trans.iv_address - slave->iv_base;
         rc = slave->operation( trans );
         break;
-    }while(1);
+    } while(0);
 
     return rc;
 }
@@ -132,7 +140,6 @@ Slave::Slave()
 :iv_base(0), iv_size(0), iv_permissions(0),
 iv_next(NULL), iv_target(NULL), iv_dataBuffer(NULL)
 {
-
 }
 
 //-----------------------------------------------------------------------------
@@ -157,7 +164,7 @@ PibSlave::operation(Transaction& io_transaction)
     fapi::ReturnCode rc;
     PibTransaction* pt = (PibTransaction*)&io_transaction;
 
-    if( io_transaction.iv_mode & ACCESS_MODE_READ )
+    if( io_transaction.iv_mode & (ACCESS_MODE_READ | ACCESS_MODE_EXECUTE))
     {
         rc = getScom( io_transaction.iv_address, io_transaction.iv_data );
     }
@@ -166,33 +173,41 @@ PibSlave::operation(Transaction& io_transaction)
         rc = putScom( io_transaction.iv_address, io_transaction.iv_data );
     }
 
-    if( rc.ok() )
-    {
+    if ( rc.ok() ) {
         pt->iv_pcbReturnCode = PCB_SUCCESS;
-    }
-    else
-    {
-        if( rc & fapi_PCB_RESOURCE_BUSY ){
+    } else {
+        fapi::ReturnCode rc1;
+        if( rc == fapi_PCB_RESOURCE_BUSY ){
             pt->iv_pcbReturnCode = PCB_RESOURCE_OCCUPIED;
-        }else if( rc & fapi_PCB_OFFLINE_ERROR ){
+            rc = rc1;
+        }else if( rc == fapi_PCB_OFFLINE_ERROR ){
             pt->iv_pcbReturnCode = PCB_CHIPLET_OFFLINE;
-        }else if( rc & fapi_PCB_PARTIAL_ERROR ){
+            rc = rc1;
+        }else if( rc == fapi_PCB_PARTIAL_ERROR ){
             pt->iv_pcbReturnCode = PCB_PARTIAL_GOOD;
-        }else if( rc & fapi_PCB_ADDRESS_ERROR ){
+            rc = rc1;
+        }else if( rc == fapi_PCB_ADDRESS_ERROR ){
             pt->iv_pcbReturnCode = PCB_ADDRESS_ERROR;
-        }else if( rc & fapi_PCB_CLOCK_ERROR ){
+            rc = rc1;
+        }else if( rc == fapi_PCB_CLOCK_ERROR ){
             pt->iv_pcbReturnCode = PCB_CLOCK_ERROR;
-        }else if( rc & fapi_PCB_PARITY_ERROR ){
+            rc = rc1;
+        }else if( rc == fapi_PCB_PARITY_ERROR ){
             pt->iv_pcbReturnCode = PCB_PACKET_ERROR;
-        }else if( rc & fapi_PCB_TIMEOUT_ERROR ){
+            rc = rc1;
+        }else if( rc == fapi_PCB_TIMEOUT_ERROR ){
             pt->iv_pcbReturnCode = PCB_TIMEOUT;
+            rc = rc1;
         }else{
             pt->iv_pcbReturnCode = PCB_TIMEOUT;
-          }
-        rc = 0;
+        }
     }
 
-    io_transaction.iv_modelError = ME_SUCCESS;
+    if ( rc.ok() ) {
+        io_transaction.iv_modelError = ME_SUCCESS;
+    } else {
+        io_transaction.iv_modelError = ME_FAILURE;
+    }
     return rc;
 }
 
@@ -212,7 +227,6 @@ Slave::configure(
     iv_base        = i_base;
     iv_size        = i_size;
     iv_permissions = i_permissions;
-    iv_next        = NULL;
 }
 
 
@@ -222,8 +236,9 @@ fapi::ReturnCode
 PibSlave::getScom(const uint32_t i_offset, uint64_t& o_data)
 {
     fapi::ReturnCode rc;
-    rc = fapiGetScom( *iv_target, i_offset, *iv_dataBuffer );
-    o_data = iv_dataBuffer->getDoubleWord( 0 );
+    ecmdDataBufferBase l_dataBuffer;
+    rc = fapiGetScom( *iv_target, i_offset, l_dataBuffer );
+    o_data = l_dataBuffer.getDoubleWord( 0 );
 
     return rc;
 }
@@ -233,9 +248,10 @@ fapi::ReturnCode
 PibSlave::putScom(const uint32_t i_offset, const uint64_t i_data)
 {
     fapi::ReturnCode rc;
-    iv_dataBuffer->setDoubleWordLength( 1 );
-    iv_dataBuffer->setDoubleWord( 0, i_data );
-    rc = fapiPutScom( *iv_target, i_offset, *iv_dataBuffer );
+    ecmdDataBufferBase l_dataBuffer(64);
+
+    l_dataBuffer.setDoubleWord( 0, i_data );
+    rc = fapiPutScom( *iv_target, i_offset, l_dataBuffer );
 
     return rc;
 }
@@ -243,7 +259,7 @@ PibSlave::putScom(const uint32_t i_offset, const uint64_t i_data)
 
 //-----------------------------------------------------------------------------
 PibMemory::PibMemory() :
-iv_passThrough(false),iv_memory(NULL)
+    iv_passThrough(false), iv_memory(NULL)
 {
 }
 
@@ -276,7 +292,6 @@ PibMemory::configure(
     iv_size        = i_size;
     iv_permissions = i_permissions;
     iv_memory      = i_memory;
-    iv_next        = NULL;
 }
 
 
@@ -288,9 +303,13 @@ PibMemory::operation(Transaction& io_transaction)
     fapi::ReturnCode rc;
     ModelError       me;
 
+    FAPI_SET_HWP_ERROR(rc, RC_POREVE_PIBMEM_OPERATION_ERROR);
+
     if( io_transaction.iv_mode & ACCESS_MODE_READ )
     {
-        me = iv_memory->read( (uint32_t)(io_transaction.iv_offset * TRANSACTION_SIZE_IN_BYTES), io_transaction.iv_data, TRANSACTION_SIZE_IN_BYTES );
+        me = iv_memory->read(
+               (uint32_t)(io_transaction.iv_offset * TRANSACTION_SIZE_IN_BYTES),
+               io_transaction.iv_data, TRANSACTION_SIZE_IN_BYTES );
         if( me == ME_NOT_MAPPED_IN_MEMORY && iv_passThrough )
         {
             rc = getScom( io_transaction.iv_address, io_transaction.iv_data );
@@ -306,7 +325,9 @@ PibMemory::operation(Transaction& io_transaction)
     }
     else if( io_transaction.iv_mode & ACCESS_MODE_WRITE )
     {
-        me = iv_memory->write( (uint32_t)(io_transaction.iv_offset * TRANSACTION_SIZE_IN_BYTES), io_transaction.iv_data, TRANSACTION_SIZE_IN_BYTES );
+        me = iv_memory->write(
+               (uint32_t)(io_transaction.iv_offset * TRANSACTION_SIZE_IN_BYTES),
+               io_transaction.iv_data, TRANSACTION_SIZE_IN_BYTES );
         if( me == ME_NOT_MAPPED_IN_MEMORY && iv_passThrough )
         {
             rc = putScom( io_transaction.iv_address, io_transaction.iv_data );
@@ -322,7 +343,9 @@ PibMemory::operation(Transaction& io_transaction)
     }
     else
     {
-        me = iv_memory->fetch( (uint32_t)(io_transaction.iv_offset * TRANSACTION_SIZE_IN_BYTES), io_transaction.iv_data, TRANSACTION_SIZE_IN_BYTES );
+        me = iv_memory->fetch(
+               (uint32_t)(io_transaction.iv_offset * TRANSACTION_SIZE_IN_BYTES),
+               io_transaction.iv_data, TRANSACTION_SIZE_IN_BYTES );
         if( me == ME_NOT_MAPPED_IN_MEMORY && iv_passThrough )
         {
             rc = getScom( io_transaction.iv_address, io_transaction.iv_data );
@@ -339,13 +362,9 @@ PibMemory::operation(Transaction& io_transaction)
 
     io_transaction.busError( me );
 
-    if( me == ME_SUCCESS )
-    {
-        rc = (uint32_t)0; // if read/write or getScom/putScom succeeded then set rc = 0
-    }
-
-    // if read/write failed then rc == 1 by default
-    // if read/write returned ME_NOT_MAPPED_IN_MEMORY && pass through true then rc == value returned from putScom or getScom
+    // if read/write failed then rc == RC_PIBMEM_OPERATION_ERROR by default
+    // if read/write returned ME_NOT_MAPPED_IN_MEMORY && pass through true then
+    // rc == value returned from putScom or getScom
 
     return rc;
 }
@@ -363,6 +382,17 @@ Memory::Memory() :
 //-----------------------------------------------------------------------------
 Memory::~Memory()
 {
+    MemoryImage* m1 = iv_images;
+    while (m1)
+    {
+        MemoryImage* m2 = m1->iv_next;
+        delete m1;
+        m1 = m2;
+        if (m2 == iv_images)
+        {
+            break;
+        }
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -372,16 +402,20 @@ Memory::checkCrc()
     MemoryImage* mi = iv_images;
     bool         rc = true;
 
-    do{
-
-      if( mi->checkCrc() == false )
-      {
+    if (iv_images == 0)
+    {
         rc = false;
-        break;
-      }
-      mi = mi->iv_next;
+    }
 
-    }while( mi != iv_images );
+    while (rc == true)
+    {
+        rc = mi->checkCrc();
+        mi = mi->iv_next;
+        if (mi == iv_images)
+        {
+            break;
+        }
+    }
 
     return rc;
 }
@@ -405,67 +439,74 @@ Memory::read(
     o_data = 0; // Assure all bytes are cleared
 
     me = ME_SUCCESS;
-    do{
-			if( iv_images == 0 )
-			{
-					me = ME_NOT_MAPPED_IN_MEMORY;
-					break;
-			}
-      mi       = iv_images;
-      mi_found = 0;
-      do{
-
-        if( (i_offset >= mi->iv_base) && ((i_offset + i_size) <= (mi->iv_base + mi->iv_size) ) )
+    do
+    {
+        if( iv_images == 0 )
         {
-            mi_found= 1;
-            iv_images = mi; // have the Memory always point to the last MemoryImage that was used
-            break;          // we found a chunk of memory containing the transaction address
+            me = ME_NOT_MAPPED_IN_MEMORY;
+            break;
         }
-        mi = mi->iv_next;
+        mi       = iv_images;
+        mi_found = 0;
+        do
+        {
+            if( (i_offset >= mi->iv_base) &&
+                ((i_offset + i_size) <= (mi->iv_base + mi->iv_size) ) )
+            {
+                mi_found= 1;
+                iv_images = mi; // have the Memory always point to the last
+                                // MemoryImage that was used
+                break;          // we found a chunk of memory containing the
+                                // transaction address
+            }
+            mi = mi->iv_next;
 
-      }while( mi != iv_images );
+        } while( mi != iv_images );
 
-      if( ! mi_found )
-      { // There was no MemoryImage that contained the transaction address
-        me = ME_NOT_MAPPED_IN_MEMORY;
-        break;
-      }
+        if( ! mi_found )
+        {   // There was no MemoryImage that contained the transaction address
+            me = ME_NOT_MAPPED_IN_MEMORY;
+            break;
+        }
 
-      if( (mi->iv_permissions & ACCESS_MODE_READ ) == 0 )
-      { // The permissions over the memory block do not allow the mode being used by the transaction
-        me = ME_MEMORY_IMAGE_PERMISSION_DENIED;
-        break;
-      }
+        if( (mi->iv_permissions & ACCESS_MODE_READ ) == 0 )
+        {   // The permissions over the memory block do not allow the mode
+            // being used by the transaction
+            me = ME_MEMORY_IMAGE_PERMISSION_DENIED;
+            break;
+        }
 
-      // Init the character pointer into the eprom image we are using.
-      from_ptr = (char*)mi->iv_image + (i_offset - mi->iv_base);
+        // Init the character pointer into the eprom image we are using.
+        from_ptr = (char*)mi->iv_image + (i_offset - mi->iv_base);
 
-      // Init the character pointer into the o_data buffer.
-      // Take care of Endianess by moving to one or the other end of the buffer as appropriate.
+        // Init the character pointer into the o_data buffer.
+        // Take care of Endianess by moving to one or the other end of the
+        // buffer as appropriate.
 #ifdef _BIG_ENDIAN
         to_ptr   = (char*)&o_data + (TRANSACTION_SIZE_IN_BYTES - i_size);
 #else
         to_ptr   = ((char*)&o_data + i_size -1);
 #endif
 
-      for( cnt = 0; cnt < i_size; cnt++ )
-      {
-        *to_ptr = *from_ptr++;
+        for( cnt = 0; cnt < i_size; cnt++ )
+        {
+            *to_ptr = *from_ptr++;
 
-        // Move the to pointer either forward or backward as appropriate for Endianess
+            // Move the to pointer either forward or backward as appropriate
+            // for Endianess
 #ifdef _BIG_ENDIAN
-        to_ptr++;
+            to_ptr++;
 #else
-        to_ptr--;
+            to_ptr--;
 #endif
-      }
+        }
 
-      me = ME_SUCCESS;
-      break;
-    }while(1);
+        me = ME_SUCCESS;
+        break;
+    } while(0);
 
 #if POREVE_STATISTICS
-        iv_reads++;
+    iv_reads++;
 #endif
 
     return me;
@@ -489,67 +530,74 @@ Memory::fetch(
     o_data = 0; // Assure all bytes are cleared
 
     me = ME_SUCCESS;
-    do{
-			if( iv_images == 0 )
-			{
-					me = ME_NOT_MAPPED_IN_MEMORY;
-					break;
-			}
-      mi       = iv_images;
-      mi_found = 0;
-      do{
-
-        if( (i_offset >= mi->iv_base) && ((i_offset + i_size) <= (mi->iv_base + mi->iv_size) ) )
+    do
+    {
+        if( iv_images == 0 )
         {
-            mi_found= 1;
-            iv_images = mi; // have the Memory always point to the last MemoryImage that was used
-            break;          // we found a chunk of memory containing the transaction address
+            me = ME_NOT_MAPPED_IN_MEMORY;
+            break;
         }
-        mi = mi->iv_next;
+        mi       = iv_images;
+        mi_found = 0;
+        do
+        {
+            if( (i_offset >= mi->iv_base) &&
+                ((i_offset + i_size) <= (mi->iv_base + mi->iv_size) ) )
+            {
+                mi_found= 1;
+                iv_images = mi; // have the Memory always point to the last
+                                // MemoryImage that was used
+                break;          // we found a chunk of memory containing the
+                                // transaction address
+            }
+            mi = mi->iv_next;
 
-      }while( mi != iv_images );
+        } while( mi != iv_images );
 
-      if( ! mi_found )
-      { // There was no MemoryImage that contained the transaction address
-        me = ME_NOT_MAPPED_IN_MEMORY;
-        break;
-      }
+        if( ! mi_found )
+        {   // There was no MemoryImage that contained the transaction address
+            me = ME_NOT_MAPPED_IN_MEMORY;
+            break;
+        }
 
-      if( (mi->iv_permissions & ACCESS_MODE_EXECUTE ) == 0 )
-      { // The permissions over the memory block do not allow the mode being used by the transaction
-        me = ME_MEMORY_IMAGE_PERMISSION_DENIED;
-        break;
-      }
+        if( (mi->iv_permissions & ACCESS_MODE_EXECUTE ) == 0 )
+        {   // The permissions over the memory block do not allow the mode
+            // being used by the transaction
+            me = ME_MEMORY_IMAGE_PERMISSION_DENIED;
+            break;
+        }
 
-      // Init the character pointer into the eprom image we are using.
-      from_ptr = (char*)mi->iv_image + i_offset;
+        // Init the character pointer into the eprom image we are using.
+        from_ptr = (char*)mi->iv_image + i_offset;
 
-      // Init the character pointer into the o_data buffer.
-      // Take care of Endianess by moving to one or the other end of the buffer as appropriate.
+        // Init the character pointer into the o_data buffer.
+        // Take care of Endianess by moving to one or the other end of the
+        // buffer as appropriate.
 #ifdef _BIG_ENDIAN
         to_ptr   = (char*)&o_data + (TRANSACTION_SIZE_IN_BYTES - i_size);
 #else
         to_ptr   = ((char*)&o_data + i_size -1);
 #endif
 
-      for( cnt = 0; cnt < i_size; cnt++ )
-      {
-        *to_ptr = *from_ptr++;
+        for( cnt = 0; cnt < i_size; cnt++ )
+        {
+            *to_ptr = *from_ptr++;
 
-        // Move the to pointer either forward or backward as appropriate for Endianess
+            // Move the to pointer either forward or backward as appropriate
+            // for Endianess
 #ifdef _BIG_ENDIAN
-        to_ptr++;
+            to_ptr++;
 #else
-        to_ptr--;
+            to_ptr--;
 #endif
-      }
+        }
 
-      me = ME_SUCCESS;
-      break;
-    }while(1);
+        me = ME_SUCCESS;
+        break;
+    } while(0);
 
 #if POREVE_STATISTICS
-        iv_fetches++;
+    iv_fetches++;
 #endif
 
     return me;
@@ -562,7 +610,8 @@ ModelError
 Memory::write(
     uint32_t  i_offset, // the address in the eprom image 
     uint64_t  i_data,   // data to write into the eprom image
-    size_t    i_size    // number of bytes to write (pretty much going to be TRANSACTION_SIZE_IN_BYTES)
+    size_t    i_size    // number of bytes to write (pretty much going to be
+                        // TRANSACTION_SIZE_IN_BYTES)
     )
 {
     char*        to_ptr;
@@ -573,68 +622,75 @@ Memory::write(
     int          mi_found;
 
     me = ME_SUCCESS;
-    do{
+    do
+    {
         if( iv_images == 0 )
         {
             me = ME_NOT_MAPPED_IN_MEMORY;
             break;
         }
-      mi       = iv_images;
-      mi_found = 0;
-      do{
-
-        if( (i_offset >= mi->iv_base) && ((i_offset + i_size) <= (mi->iv_base + mi->iv_size) ) )
+	mi       = iv_images;
+	mi_found = 0;
+	do
         {
-            mi_found= 1;
-            iv_images = mi; // have the Memory always point to the last MemoryImage that was used
-            break;          // we found a chunk of memory containing the transaction address
+       	    if( (i_offset >= mi->iv_base) &&
+                ((i_offset + i_size) <= (mi->iv_base + mi->iv_size) ) )
+            {
+                mi_found= 1;
+                iv_images = mi; // have the Memory always point to the last
+                                // MemoryImage that was used
+                break;          // we found a chunk of memory containing the
+                                // transaction address
+            }
+            mi = mi->iv_next;
+
+        } while( mi != iv_images );
+
+        if( ! mi_found )
+        {   // There was no MemoryImage that contained the transaction address
+            me = ME_NOT_MAPPED_IN_MEMORY;
+            break;
         }
-        mi = mi->iv_next;
 
-      }while( mi != iv_images );
+        if( (mi->iv_permissions & ACCESS_MODE_WRITE ) == 0 )
+        {   // The permissions over the memory block do not allow the mode
+            // being used by the transaction
+            me = ME_MEMORY_IMAGE_PERMISSION_DENIED;
+            break;
+        }
 
-      if( ! mi_found )
-      { // There was no MemoryImage that contained the transaction address
-        me = ME_NOT_MAPPED_IN_MEMORY;
-        break;
-      }
+        // Init the character pointer into the eprom image we are using.
+        to_ptr = (char*)mi->iv_image + i_offset;
 
-      if( (mi->iv_permissions & ACCESS_MODE_WRITE ) == 0 )
-      { // The permissions over the memory block do not allow the mode being used by the transaction
-        me = ME_MEMORY_IMAGE_PERMISSION_DENIED;
-        break;
-      }
-
-      // Init the character pointer into the eprom image we are using.
-      to_ptr = (char*)mi->iv_image + i_offset;
-
-      // Init the character pointer into the o_data buffer.
-      // Take care of Endianess by moving to one or the other end of the buffer as appropriate.
+        // Init the character pointer into the o_data buffer.
+        // Take care of Endianess by moving to one or the other end of the
+        // buffer as appropriate.
 #ifdef _BIG_ENDIAN
         from_ptr   = (char*)&i_data + (TRANSACTION_SIZE_IN_BYTES - i_size);
 #else
         from_ptr   = ((char*)&i_data + i_size -1);
 #endif
 
-      for( cnt = 0; cnt < i_size; cnt++ )
-      {
-        *to_ptr++ = *from_ptr;
+        for( cnt = 0; cnt < i_size; cnt++ )
+        {
+            *to_ptr++ = *from_ptr;
 
-        // Move the to pointer either forward or backward as appropriate for Endianess
+            // Move the to pointer either forward or backward as appropriate
+            // for Endianess
 #ifdef _BIG_ENDIAN
-        from_ptr++;
+            from_ptr++;
 #else
-        from_ptr--;
+            from_ptr--;
 #endif
-      }
+        }
 
-      me = ME_SUCCESS;
-      break;
+        me = ME_SUCCESS;
+        break;
 
-    }while(1);
+    } while(0);
 
 #if POREVE_STATISTICS
-        iv_writes++;
+    iv_writes++;
 #endif
 
     return me;
@@ -644,8 +700,9 @@ Memory::write(
 //-----------------------------------------------------------------------------
 ModelError
 Memory::map(
-    uint32_t i_base,            // For direct memory this is the 0 based offset from the Slave iv_base
-    size_t   i_size,            // Size of this chunk of memory
+    uint32_t i_base,        // For direct memory this is the 0 based offset
+                            // from the Slave iv_base
+    size_t   i_size,        // Size of this chunk of memory
     int      i_permissions,
     void*    i_image,
     bool     i_crcEnable
@@ -653,20 +710,23 @@ Memory::map(
 {
     ModelError   me = ME_SUCCESS;
     MemoryImage* n;
-    MemoryImage* mi = new MemoryImage( i_base, i_size, i_permissions, i_image, i_crcEnable );
+    MemoryImage* mi = new MemoryImage( i_base, i_size, i_permissions,
+                                       i_image, i_crcEnable );
 
     if( iv_images == 0 )
     {
-      iv_images = mi;
-      mi->iv_next = mi;
-    }else{
-      n = iv_images->iv_next;
-      while( n->iv_next != iv_images )
-      {
-        n = n->iv_next;
-      }
-      n->iv_next = mi;
-      mi->iv_next = iv_images;
+        iv_images = mi;
+        mi->iv_next = mi;
+    }
+    else
+    {
+        n = iv_images->iv_next;
+        while( n->iv_next != iv_images )
+        {
+            n = n->iv_next;
+        }
+        n->iv_next = mi;
+        mi->iv_next = iv_images;
     }
 
     return me;
@@ -701,7 +761,6 @@ MemoryImage::MemoryImage(
     iv_image       = i_image;
     iv_crcEnable   = i_crcEnable;
     iv_originalCrc = 0;
-    iv_next = NULL;
 
     if( i_crcEnable )
     {
@@ -742,7 +801,7 @@ MemoryImage::checkCrc()
 
 //-----------------------------------------------------------------------------
 OciMemory::OciMemory() :
-iv_memory(NULL), iv_passThrough(false)
+    iv_passThrough(false)
 {
 }
 
@@ -785,12 +844,14 @@ fapi::ReturnCode
 OciMemory::operation(Transaction& io_transaction)
 {
     fapi::ReturnCode rc;
-
     ModelError       me;
+
+    FAPI_SET_HWP_ERROR(rc, RC_POREVE_BUS_OPERATION_ERROR);
 
     if( io_transaction.iv_mode & ACCESS_MODE_READ )
     {
-        me = iv_memory->read( (uint32_t)io_transaction.iv_offset, io_transaction.iv_data, TRANSACTION_SIZE_IN_BYTES );
+        me = iv_memory->read( (uint32_t)io_transaction.iv_offset,
+                            io_transaction.iv_data, TRANSACTION_SIZE_IN_BYTES );
         if( me == ME_NOT_MAPPED_IN_MEMORY && iv_passThrough )
         {
             rc = read( io_transaction.iv_address, io_transaction.iv_data );
@@ -806,7 +867,8 @@ OciMemory::operation(Transaction& io_transaction)
     }
     else
     {
-        me = iv_memory->write( (uint32_t)io_transaction.iv_offset, io_transaction.iv_data, TRANSACTION_SIZE_IN_BYTES );
+        me = iv_memory->write( (uint32_t)io_transaction.iv_offset,
+                            io_transaction.iv_data, TRANSACTION_SIZE_IN_BYTES );
         if( me == ME_NOT_MAPPED_IN_MEMORY && iv_passThrough )
         {
             rc = write( io_transaction.iv_address, io_transaction.iv_data );
@@ -823,12 +885,7 @@ OciMemory::operation(Transaction& io_transaction)
 
     io_transaction.busError( me );
 
-    if( me == ME_SUCCESS )
-    {
-      rc = (uint32_t)0;
-    }
-
-    // if read/write failed then rc == 1 by default
+    // if read/write failed then rc == RC_BUS_OPERATION_ERROR  by default
     // if read/write returned ME_NOT_MAPPED_IN_MEMORY && pass through true then
     // rc == value returned from putScom or getScom
 
@@ -875,6 +932,7 @@ fapi::ReturnCode
 OciSlave::read(const uint32_t i_address, uint64_t& o_data)
 {
     fapi::ReturnCode rc;
+    FAPI_SET_HWP_ERROR(rc, RC_POREVE_BUS_OCI_SLAVE_READ_NOT_SUPPORTED);
     return rc;
 }
 
@@ -883,6 +941,7 @@ fapi::ReturnCode
 OciSlave::write(const uint32_t i_address, const uint64_t i_data)
 {
     fapi::ReturnCode rc;
+    FAPI_SET_HWP_ERROR(rc, RC_POREVE_BUS_OCI_SLAVE_WRITE_NOT_SUPPORTED);
     return rc;
 }
 
@@ -890,8 +949,6 @@ OciSlave::write(const uint32_t i_address, const uint64_t i_data)
 fapi::ReturnCode
 OciSlaveWritable::write(const uint32_t i_address, const uint64_t i_data)
 {
-
-    // For this model, print out a message to confirm a write has been written is all it needs.
     FAPI_INF("OciSlaveWritable::write(0x%08x, 0x%016llx)",
              i_address, i_data);
     fapi::ReturnCode rc;

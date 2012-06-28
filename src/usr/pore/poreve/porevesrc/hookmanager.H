@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/pore/poreve/porevesrc/hookmanager.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/pore/poreve/porevesrc/hookmanager.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #ifndef __VSBE_HOOKMANAGER_H
 #define __VSBE_HOOKMANAGER_H
 
@@ -301,6 +302,35 @@ namespace vsbe {
 /// This class defines the comparison operator for STL containers using a
 /// PoreAddress as the key.  
 
+class
+vsbe::PoreAddressComparison {
+
+public:
+
+    PoreAddressComparison() {}
+
+    ~PoreAddressComparison() {}
+
+    /// Compare PoreAddress*
+    ///
+    /// \param[in] i_lhs Left hand side object
+    ///
+    /// \param[in] i_rhs Right hand side object
+    ///
+    /// \retval rc This is a simple lexicographic order on the segment and
+    /// offset.
+    bool operator() (PoreAddress const& i_lhs,
+                     PoreAddress const& i_rhs) const; 
+
+
+    ///////////////////////////// Safety //////////////////////////////////
+
+private:
+    // STL requires a copy operator
+    PoreAddressComparison& operator=(const PoreAddressComparison& rhs);
+};
+
+
 ////////////////////////////////////////////////////////////////////////////
 // CharPointerComparison
 ////////////////////////////////////////////////////////////////////////////
@@ -434,6 +464,8 @@ public:
                      CharPointerComparison> GlobalSymbolMap;
 
     ////////////////////////////// Creators //////////////////////////////
+
+    HookManager();
 
     virtual ~HookManager();
 
@@ -809,7 +841,6 @@ protected:
     ///////////////////////////// Safety //////////////////////////////////
 
 private:
-    HookManager();
     HookManager(const HookManager& i_rhs);
     HookManager& operator=(const HookManager& i_rhs);
 };

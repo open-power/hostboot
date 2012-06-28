@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/pore/poreve/pore_model/ibuf/pore_ibuf.h $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/pore/poreve/pore_model/ibuf/pore_ibuf.h $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #ifndef __PORE_IBUF_H__
 #define __PORE_IBUF_H__
 
@@ -130,8 +131,10 @@ struct pore_model {
 	pore_i2c_en_param_reg i2c_e_param[3];		/* 0x000000b8 *
 							 * 0x000000c0 *
 							 * 0x000000c8 */
-	uint64_t branchTaken;	/* last ins branch? pc updated?    d0 */
-	uint64_t broken;	/* in case we ran on a breakpoint  d8 */
+	uint32_t branchTaken;	/* last ins branch? pc updated?    d0 */
+	uint32_t broken;	/* in case we ran on a breakpoint     */
+	uint32_t pore_interrupt_request;		/* 0x000000d8 */
+	uint32_t reserved;
 	uint32_t oci_fetchBufferValid;			/* 0x000000e0 */
 	uint32_t oci_fetchBufferCursor;
 	uint64_t oci_fetchBuffer;			/* 0x000000e8 */

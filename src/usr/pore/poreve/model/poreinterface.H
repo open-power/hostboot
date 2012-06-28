@@ -1,29 +1,30 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/pore/poreve/model/poreinterface.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/pore/poreve/model/poreinterface.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #ifndef __VSBE_POREINTERFACE_H
 #define __VSBE_POREINTERFACE_H
 
-// $Id: poreinterface.H,v 1.10 2011/11/07 23:39:33 bcbrock Exp $
+// $Id: poreinterface.H,v 1.11 2012/06/18 13:56:57 bcbrock Exp $
 
 /// \file poreinterface.H
 /// \brief The PORE hardware interface class
@@ -177,6 +178,18 @@ public:
     /// See PoreModel::getStopCode()
     virtual int
     getStopCode();
+
+    /// See PoreModel::getmemInteger()
+    virtual ModelError
+    getmemInteger(const PoreAddress i_address,
+                  uint64_t& o_data,
+                  const size_t i_size);
+
+    /// See PoreModel::putmemInteger()
+    virtual ModelError
+    putmemInteger(const PoreAddress i_address,
+                  uint64_t i_data,
+                  const size_t i_size);
 
 
     ////////////////////  Abstract Interface  /////////////////////////

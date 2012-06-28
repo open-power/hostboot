@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/pore/poreve/porevesrc/hookmanager.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/pore/poreve/porevesrc/hookmanager.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 // $Id: hookmanager.C,v 1.12 2012/01/06 21:25:25 bcbrock Exp $
 
 /// \file hookmanager.C
@@ -41,7 +42,22 @@ using namespace vsbe;
 #endif
 
 fapi::ReturnCode vsbe::hookOk;
+
 HookManager* HookManager::s_instance = 0;
+
+
+////////////////////////////////////////////////////////////////////////////
+// PoreAddressComparison
+////////////////////////////////////////////////////////////////////////////
+
+bool
+PoreAddressComparison::operator()(PoreAddress const& i_lhs, 
+                                  PoreAddress const& i_rhs) const
+{
+    return 
+        (i_lhs.iv_memorySpace < i_rhs.iv_memorySpace) || 
+        (i_lhs.iv_offset  < i_rhs.iv_offset);
+}
 
 
 ////////////////////////////////////////////////////////////////////////////
@@ -573,3 +589,4 @@ HookInitializer::HookInitializer(HookManagerInitializer i_function)
 HookInitializer::~HookInitializer()
 {
 }
+

@@ -1,11 +1,11 @@
-#  IBM_PROLOG_BEGIN_TAG
+#   IBM_PROLOG_BEGIN_TAG
 #  This is an automatically generated prolog.
 #
-#  $Source: src/usr/pore/pore_model/makefile $
+#  $Source: src/usr/pore/poreve/makefile $
 #
 #  IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2011
+#  COPYRIGHT International Business Machines Corp. 2011-2012
 #
 #  p1
 #
@@ -19,8 +19,7 @@
 #
 #  Origin: 30
 #
-#  IBM_PROLOG_END
-
+#  IBM_PROLOG_END_TAG
 # Module poreve built from 3 different source code areas:
 #
 # model         The source code of the PoreInterface and PoreModel classes,
@@ -45,14 +44,14 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/plat
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
 EXTRAINCDIR += ${ROOTPATH}/src/usr/pore/poreve/porevesrc
 
-CUSTOMFLAGS += -D__BYTE_ORDER=1 -D__BIG_ENDIAN=1 -D__LITTLE_ENDIAN=0 -DFASTI2C_BASE_OFFSET=0 -DDEBUG_FASTI2C=1 -D_BIG_ENDIAN=1
+CUSTOMFLAGS += -DDEBUG_FASTI2C=1 -D_BIG_ENDIAN=1
 
 # Override to use C++ compiler for %.c/h files
 CC_OVERRIDE = 1
 
 OBJS = poreveutil.o
 OBJS += transaction.o poreaddress.o poremodel.o poreregister.o poreinterface.o porestate.o
-OBJS += pore_model.o pore_bus.o pore_fi2c.o pore_inline_decode.o vsbe.o
+OBJS += pore_model.o pore_bus.o pore_fi2c.o pore_inline_decode.o vsbe.o pibmem.o
 OBJS += pore.o bus.o hookmanager.o poreve.o pib2cfam.o fasti2c.o sbevital.o create.o
 HOOK_SOURCE_FILES = $(notdir $(wildcard ./hook/*sbe*.hooks.cc))
 OBJS += $(patsubst %.cc,%.o,$(HOOK_SOURCE_FILES))

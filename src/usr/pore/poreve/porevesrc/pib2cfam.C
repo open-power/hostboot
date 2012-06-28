@@ -1,27 +1,28 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/pore/poreve/porevesrc/pib2cfam.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/pore/poreve/porevesrc/pib2cfam.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 // -*- mode: C++; c-file-style: "linux";  -*-
-// $Id: pib2cfam.C,v 1.10 2012/02/27 22:52:31 jeshua Exp $
+// $Id: pib2cfam.C,v 1.11 2012/04/02 16:27:58 jeshua Exp $
 
 /// \file pib2cfam.C
 /// \brief A simple PibSlave that maps a small range of PIB addresses to CFAM
@@ -53,9 +54,7 @@ translateAddress(uint32_t address, fapi::Target* i_target)
 
     frc = FAPI_ATTR_GET( ATTR_FSI_GP_REG_SCOM_ACCESS, i_target, fsi_gpreg_scom_access );
     if(!frc.ok()) {
-        FAPI_ERR( "Unable to get ATTR_FSI_GP_REG_SCOM_ACCESS for target\n" );
-//JDS TODO - create an actual fapi error
-//      FAPI_SET_HWP_ERROR( frc, "Unable to get ATTR_FSI_GP_REG_SCOM_ACCESS for target\n" );
+        FAPI_ERR( "Unable to get ATTR_FSI_GP_REG_SCOM_ACCESS for target" );
     }
 
 
@@ -84,6 +83,8 @@ Pib2Cfam::operation(Transaction& io_transaction)
         case 0x00050014:
         case 0x00050015:
         case 0x00050016:
+        case 0x00050017:
+        case 0x00050018:
         case 0x00050019:
         case 0x0005001A:
         case 0x0005001B:
@@ -99,6 +100,7 @@ Pib2Cfam::operation(Transaction& io_transaction)
             }
             break;
         default:
+            FAPI_SET_HWP_ERROR(rc,RC_POREVE_PIB2CFAM_ME_NOT_MAPPED_IN_MEMORY);
             me = ME_NOT_MAPPED_IN_MEMORY;
         }
         break;
@@ -112,6 +114,8 @@ Pib2Cfam::operation(Transaction& io_transaction)
         case 0x00050014:
         case 0x00050015:
         case 0x00050016:
+        case 0x00050017:
+        case 0x00050018:
         case 0x0005001B:
             iv_dataBuffer->setWordLength(1);
             iv_dataBuffer->setWord(0, io_transaction.iv_data >> 32);
@@ -127,18 +131,20 @@ Pib2Cfam::operation(Transaction& io_transaction)
 
         case 0x00050019:
         case 0x0005001A:
-            rc = 1;
+            FAPI_SET_HWP_ERROR(rc,
+                            RC_POREVE_PIB2CFAM_ME_BUS_SLAVE_PERMISSION_DENIED);
             me = ME_BUS_SLAVE_PERMISSION_DENIED;
             break;
 
         default:
-            rc = 1;
+            FAPI_SET_HWP_ERROR(rc,RC_POREVE_PIB2CFAM_ME_NOT_MAPPED_IN_MEMORY);
             me = ME_NOT_MAPPED_IN_MEMORY;
         }
         break;
         
     default:
-        rc = 1;
+        FAPI_SET_HWP_ERROR(rc,
+                           RC_POREVE_PIB2CFAM_ME_BUS_SLAVE_PERMISSION_DENIED);
         me = ME_BUS_SLAVE_PERMISSION_DENIED;
         break;
     }

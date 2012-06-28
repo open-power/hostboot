@@ -1,29 +1,30 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/pore/poreve/porevesrc/fasti2c.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/pore/poreve/porevesrc/fasti2c.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #ifndef __VSBE_FASTI2C_H
 #define __VSBE_FASTI2C_H
 
-// $Id: fasti2c.H,v 1.5 2011/12/16 20:27:26 bcbrock Exp $
+// $Id: fasti2c.H,v 1.6 2012/05/23 19:51:40 bcbrock Exp $
 
 /// \file fasti2c.H
 /// \brief The "fast-mode" I2C controllers and memory models used
@@ -243,16 +244,20 @@ public:
     ////////////////////////////// Creators //////////////////////////////
 
     /// Create an I2c Memory
-    ///
-    /// \param[in] i_addressBytes The number of bytes (1-4) in a memory
-    /// address for this memory.
-    I2cMemory(const size_t i_addressBytes);
+    I2cMemory();
 
     virtual ~I2cMemory();
 
     ///////////////////////////// Accessors //////////////////////////////
 
     //////////////////////////// Manipulators ////////////////////////////
+
+    /// Configure the number of address bytes
+    ///
+    /// \param[in] i_addressBytes The number of address bytes (1-4) in a
+    /// memory address for this devie.
+    void
+    configure(const uint8_t i_addressBytes);
 
     /// Perform an I2C address write to an attached device.
     ///
@@ -297,7 +302,7 @@ public:
 protected:
 
     /// The number of address bytes (1-4)
-    const size_t iv_addressBytes;
+    uint8_t iv_addressBytes;
 
     /// The address register, auto-incremented on data reads and writes
     uint32_t iv_address;
@@ -412,8 +417,8 @@ public:
     /// ME_AMBIGUOUS_CONFIGURATION.
     ModelError
     attachMemory(I2cMemory* i_memory, 
-                 const unsigned i_port, 
-                 const unsigned i_deviceAddress);
+                 const uint8_t i_port, 
+                 const uint8_t i_deviceAddress);
 
     /// Handle a PIB transaction
     ///

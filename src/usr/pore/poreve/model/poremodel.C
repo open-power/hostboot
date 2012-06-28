@@ -1,26 +1,27 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/pore/poreve/model/poremodel.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
-// $Id: poremodel.C,v 1.19 2011/11/11 00:50:35 bcbrock Exp $
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/pore/poreve/model/poremodel.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
+// $Id: poremodel.C,v 1.22 2012/06/18 13:56:57 bcbrock Exp $
 
 /// \file poremodel.C
 /// \brief The PORE hardware engine model and interface to the virtual
@@ -37,6 +38,9 @@ using namespace vsbe;
 
 /////////////// Common Creation/Control Interface ////////////////////
 
+/// \bug The underlying PORE model does not model reset correctly.  This is
+/// fixed here.
+
 int 
 PoreModel::restart()
 {
@@ -44,6 +48,60 @@ PoreModel::restart()
     iv_modelError = ME_SUCCESS;
     iv_instructions = 0;
     iv_stopCode = 0;
+
+    // Begin bug workaround
+
+    registerWriteRaw(PORE_STATUS, 0);
+
+    if (iv_ibufId == PORE_SLW) {
+        registerWriteRaw(PORE_CONTROL,0x8005ffffffffffffull);
+    } else {
+        registerWriteRaw(PORE_CONTROL,0x8000ffffffffffffull);
+    }
+        
+    registerWriteRaw(PORE_RESET,0);
+
+    registerWriteRaw(PORE_ERROR_MASK,0x00bff00000000000ull);
+
+    registerWriteRaw(PORE_PRV_BASE_ADDR0,0);
+    registerWriteRaw(PORE_PRV_BASE_ADDR1,0);
+    registerWriteRaw(PORE_OCI_MEMORY_BASE_ADDR0,0);
+    registerWriteRaw(PORE_OCI_MEMORY_BASE_ADDR1,0);
+
+    if (iv_ibufId == PORE_SBE) {
+        registerWriteRaw(PORE_TABLE_BASE_ADDR, 0x0000000100040020ull);
+    } else {
+        registerWriteRaw(PORE_TABLE_BASE_ADDR, 0);
+    }
+        
+    registerWriteRaw(PORE_EXE_TRIGGER,0);
+    registerWriteRaw(PORE_SCRATCH0,0);
+    registerWriteRaw(PORE_SCRATCH1,0);
+    registerWriteRaw(PORE_SCRATCH2,0);
+    registerWriteRaw(PORE_IBUF_01,0);
+    registerWriteRaw(PORE_IBUF_2,0);
+    registerWriteRaw(PORE_DBG0,0);
+    registerWriteRaw(PORE_DBG1,0);
+    registerWriteRaw(PORE_PC_STACK0,0);
+    registerWriteRaw(PORE_PC_STACK1,0);
+    registerWriteRaw(PORE_PC_STACK2,0);
+
+    registerWriteRaw(PORE_ID_FLAGS, iv_ibufId);
+
+    registerWriteRaw(PORE_DATA0,0);
+    registerWriteRaw(PORE_MEM_RELOC,0);
+
+    registerWriteRaw(PORE_I2C_E0_PARAM,0x0000000f00000000ull);
+
+    registerWriteRaw(PORE_I2C_E1_PARAM,0);
+    registerWriteRaw(PORE_I2C_E2_PARAM,0);
+
+    // End bug workaround
+
+    if (iv_ibufId == PORE_SBE) {
+        registerWrite(PORE_EXE_TRIGGER,0);
+    }
+    
     return getStatus();
 }
 
@@ -111,7 +169,8 @@ PoreModel::run(const uint64_t i_instructions, uint64_t& o_ran)
             }
             o_ran++;
             iv_instructions++;
-            if (getModelError() != 0) {
+            me = getModelError();
+            if (me != 0) {
                 break;
             }
         }
@@ -345,6 +404,174 @@ int
 PoreModel::getStopCode()
 {
     return iv_stopCode;
+}
+
+
+// 'Ram' a load or store instruction without modifying the final state of the
+// PORE. 
+
+static ModelError
+_ramLoadStore(PoreModel& io_pore, 
+     uint32_t i_instruction, uint64_t i_immediate,
+     uint64_t& io_d0, uint64_t i_a0, uint8_t i_p0)
+{
+    ModelError me;
+    PoreState state;
+    uint64_t control;
+    bool stateExtracted;
+
+    do {
+
+        // Extract the state, then load up the caller's register state
+
+        stateExtracted = false;
+
+        me = io_pore.extractState(state);
+        if (me) break;
+
+        stateExtracted = true;
+
+        me = io_pore.registerWrite(PORE_SCRATCH1, io_d0);
+        if (me) break;
+        me = io_pore.registerWrite(PORE_OCI_MEMORY_BASE_ADDR0, i_a0);
+        if (me) break;
+        me = io_pore.registerWrite(PORE_PRV_BASE_ADDR0, i_p0);
+        if (me) break;
+
+
+        // Stop the engine (set control register bit 0) and ram the
+        // instruction by writing PORE_IBUF_01.  The model executes the
+        // instruction immediately w/o the necessity of run()-ing it.
+
+        me = io_pore.registerRead(PORE_CONTROL, control);
+        if (me) break;
+        me = io_pore.registerWrite(PORE_CONTROL, control | BE64_BIT(0));
+        if (me) break;
+
+        me = io_pore.registerWrite(PORE_IBUF_2, i_immediate << 32);
+        if (me) break;
+        me = io_pore.registerWrite(PORE_IBUF_01, 
+                                   (((uint64_t)i_instruction) << 32) |
+                                   i_immediate >> 32);
+        if (me) break;
+
+        
+        // Extract the return value of D0
+
+        me = io_pore.registerRead(PORE_SCRATCH1, io_d0);
+        if (me) break;
+
+    } while (0);
+
+    if (stateExtracted) {
+        me = io_pore.installState(state);
+    }
+
+    return me;
+}
+        
+
+ModelError
+PoreModel::getmemInteger(const PoreAddress& i_address, 
+                         uint64_t& o_data,
+                         const size_t i_size)
+{
+    PoreAddress address;
+    int byte;
+    ModelError me;
+
+    union {
+        uint64_t u64;
+        uint32_t u32[2];
+        uint16_t u16[4];
+        uint8_t u8[8];
+    } data;
+
+    do {
+
+        // Check the address legality and alignment vis-a-vis the size, and
+        // align the address to an 8-byte boundary.
+
+        address = i_address;
+
+        if (!(address.iv_memorySpace & 0x8000) ||
+            ((address.iv_offset & (i_size - 1)) != 0)) {
+            me = ME_INVALID_ARGUMENT;
+            break;
+        }
+
+        byte = address.iv_offset % 8;
+        address.iv_offset -= byte;
+
+        
+        // Ram "LD D0, 0, A0", then pull out the requested bytes in host
+        // format.
+
+        me = _ramLoadStore(*this, 
+                           0x64800000, 0, 
+                           data.u64, (uint64_t)address, 0);
+        if (me) break;
+
+#ifndef _BIG_ENDIAN
+        byte = 7 - byte;
+#endif
+
+        switch (i_size) {
+            
+        case 1: o_data = data.u8[byte]; break;
+        case 2: o_data = data.u16[byte / 2]; break;
+        case 4: o_data = data.u32[byte / 4]; break;
+        case 8: o_data = data.u64; break;
+        default: me = ME_INVALID_ARGUMENT;
+
+        }
+
+        if (me) break;
+
+    } while (0);
+
+    return me;
+}
+
+
+ModelError
+PoreModel::putmemInteger(const PoreAddress& i_address, 
+                         const uint64_t i_data,
+                         const size_t i_size)
+{
+    PoreAddress address;
+    int byte;
+    uint64_t d0;
+    ModelError me;
+
+    do {
+
+        // Check the address and size for legality.
+
+        address = i_address;
+
+        if ((i_size != 8) ||
+            !(address.iv_memorySpace & 0x8000) ||
+            ((address.iv_offset & (i_size - 1)) != 0)) {
+            me = ME_INVALID_ARGUMENT;
+            break;
+        }
+
+        byte = address.iv_offset % 8;
+        address.iv_offset -= byte;
+
+
+        // Ram "STD D0, 0, A0"
+
+        d0 = i_data;
+        me = _ramLoadStore(*this, 
+                           0x72800000, 0, 
+                           d0, (uint64_t)address, 0);
+        if (me) break;
+
+    } while (0);
+
+    return me;
 }
 
 

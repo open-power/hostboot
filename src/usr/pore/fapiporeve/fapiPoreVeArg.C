@@ -1,28 +1,29 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/pore/fapiporeve/fapiPoreVeArg.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/pore/fapiporeve/fapiPoreVeArg.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 // -*- mode: C++; c-file-style: "linux";  -*-
-// $Id: fapiPoreVeArg.C,v 1.16 2012/01/09 20:55:57 jeshua Exp $
-// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/fapiPoreVeArg.C,v $
+// $Id: fapiPoreVeArg.C,v 1.19 2012/04/26 21:30:40 jeshua Exp $
+// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/poreve/working/fapiporeve/fapiPoreVeArg.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -74,27 +75,28 @@ FapiPoreVeMemArg::FapiPoreVeMemArg( const FapiPoreVeArg_t   i_type,
     uint32_t rc = 0;
 
     if( iv_fd < 0 ) {
-        FAPI_ERR( "Failed to open %s file\n", iv_filename );
+        FAPI_ERR( "Failed to open %s file", iv_filename );
         rc = BAD_ERROR_CODE;
     } else {
         iv_size = lseek( iv_fd, 0, SEEK_END );
         if( iv_size == (size_t)((off_t)-1) ) {
-            FAPI_ERR( "Failed to determine the size of %s file\n", iv_filename );
+            FAPI_ERR( "Failed to determine the size of %s file", iv_filename );
         } else {
             if( (iv_type == ARG_SRAM) || (iv_type == ARG_MAINMEM) ||
-                (iv_type == ARG_PNOR) || (iv_type == ARG_SEEPROM) ) {
-                iv_data = mmap( 0, iv_size, PROT_READ | PROT_WRITE, MAP_PRIVATE, iv_fd, 0 );
+                (iv_type == ARG_PNOR) || (iv_type == ARG_SEEPROM) ||
+                (iv_type == ARG_PIBMEM) ) {
+                iv_data = mmap( 0, iv_size,
+                               PROT_READ | PROT_WRITE, MAP_PRIVATE, iv_fd, 0 );
             } else {
                 iv_data = mmap( 0, iv_size, PROT_READ, MAP_PRIVATE, iv_fd, 0 );
             }
             if( iv_data == MAP_FAILED ) {
-                FAPI_ERR( "Failed to map %s file\n", iv_filename );
+                FAPI_ERR( "Failed to map %s file", iv_filename );
                 rc = BAD_ERROR_CODE;
             }
         }
     }
     //JDS TODO - how do I make the constructor fail if mapping failed?
-
 }
 #endif
 
@@ -125,16 +127,15 @@ FapiPoreVeMemArg::~FapiPoreVeMemArg( )
             rc = BAD_ERROR_CODE;
         }
     }
-    if( iv_fd >= 0 ) {
+    if( iv_filename != NULL ) {
         int close_rc = close( iv_fd );
         if( close_rc != 0 ) {
-            FAPI_ERR( "Failed to close %s\n", iv_filename );
+            FAPI_ERR( "Failed to close %s, iv_fd=%i\n", iv_filename, iv_fd );
             rc = BAD_ERROR_CODE;
         }
     }
 #endif
     //JDS TODO - how do I make the destructor fail if unmapping failed?
-
 }
 
 #ifndef __HOSTBOOT_MODULE
@@ -203,6 +204,15 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they are included here.
 
 $Log: fapiPoreVeArg.C,v $
+Revision 1.19  2012/04/26 21:30:40  jeshua
+file renamed from ../../../fapiporeve/working/fapiPoreVeArg.C to fapiPoreVeArg.C
+
+Revision 1.18  2012/04/26 20:53:57  jeshua
+file renamed from ../../chips/p8/working/procedures/fapiPoreVeArg.C to fapiPoreVeArg.C
+
+Revision 1.17  2012/03/01 20:11:31  jeshua
+Updated for PIBMEM support
+
 Revision 1.16  2012/01/09 20:55:57  jeshua
 Don't include file-related code for hostboot
 

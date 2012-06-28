@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/pore/poreve/pore_model/ibuf/pore_regs.h $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/pore/poreve/pore_model/ibuf/pore_regs.h $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #ifndef __PORE_REGS__
 #define __PORE_REGS__
 
@@ -77,11 +78,18 @@ typedef union {
 		uint64_t prv_parity : 1;
 		uint64_t trap_enable : 1;
 		/* bits 12:15 */
-		uint64_t tbd : 4;
+		uint64_t narrow_mode_trace : 1;
+		uint64_t pore_interruptible : 1;
+		uint64_t pore_done_override : 1;
+		uint64_t interrupt_sequencer_enabled : 1;
+		/* bits 16:63 */
 		uint64_t pc_brk_pt : 48;
 #else
 		uint64_t pc_brk_pt : 48;
-		uint64_t tbd : 4;
+		uint64_t interrupt_sequencer_enabled : 1;
+		uint64_t pore_done_override : 1;
+		uint64_t pore_interruptible : 1;
+		uint64_t narrow_mode_trace : 1;
 		uint64_t trap_enable : 1;
 		uint64_t prv_parity : 1;
 		uint64_t check_parity : 1;
@@ -303,19 +311,29 @@ typedef union {
 	uint64_t val;
 } pore_ibuf_2_reg;
 
-#define PORE_DBG0_VALID_BITS 0xfffffffff0000000ull
+#define PORE_DBG0_VALID_BITS 0xffffffffffff0000ull
 
 typedef union {
 	struct {
 #if (__BYTE_ORDER == __BIG_ENDIAN)
 		uint64_t last_completed_address : 32;
-		uint64_t filler_bit : 1; /* clearOnAnyWrite */
-		uint64_t last_ret_code_prv : 3; /* clearOnAnyWrite */
-		uint64_t spare : 28; /* clearOnAnyWrite */
+		uint64_t last_acc_parity_fail_ind : 1; /* clearOnAnyWrite */
+		uint64_t last_ret_code_prv : 3;	       /* clearOnAnyWrite */
+		uint64_t i2c_bad_status_0 : 1;	       /* clearOnAnyWrite */
+		uint64_t i2c_bad_status_1 : 1;	       /* clearOnAnyWrite */
+		uint64_t i2c_bad_status_2 : 1;	       /* clearOnAnyWrite */
+		uint64_t i2c_bad_status_3 : 1;	       /* clearOnAnyWrite */
+		uint64_t interrupt_counter : 8;	       /* ROX */
+		uint64_t spare : 16;		       /* clearOnAnyWrite */
 #else
-		uint64_t spare : 28; /* clearOnAnyWrite */
-		uint64_t last_ret_code_prv : 3; /* clearOnAnyWrite */
-		uint64_t filler_bit : 1; /* clearOnAnyWrite */
+		uint64_t spare : 16;
+		uint64_t interrupt_counter : 8;	       /* ROX */
+		uint64_t i2c_bad_status_3 : 1;	       /* clearOnAnyWrite */
+		uint64_t i2c_bad_status_2 : 1;	       /* clearOnAnyWrite */
+		uint64_t i2c_bad_status_1 : 1;	       /* clearOnAnyWrite */
+		uint64_t i2c_bad_status_0 : 1;	       /* clearOnAnyWrite */
+		uint64_t last_ret_code_prv : 3;
+		uint64_t last_acc_parity_fail_ind : 1;
 		uint64_t last_completed_address : 32;
 #endif
 	};
@@ -528,8 +546,10 @@ typedef union {
 					  ((bits) & 0x3f))
 
 #ifndef FASTI2C_BASE_OFFSET
-#  define FASTI2C_BASE_OFFSET    0x00008000
+/* #  define FASTI2C_BASE_OFFSET    0x00008000 */
+#  define FASTI2C_BASE_OFFSET    0x00000000 /* new default */
 #endif
+
 #define FASTI2C_CONTROL_OFFSET   (FASTI2C_BASE_OFFSET + 0x00000000)
 #define FASTI2C_RESET_OFFSET     (FASTI2C_BASE_OFFSET + 0x00000001)
 #define FASTI2C_STATUS_OFFSET    (FASTI2C_BASE_OFFSET + 0x00000002)

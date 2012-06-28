@@ -1,26 +1,27 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/pore/poreve/porevesrc/poreve.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
-// $Id: poreve.C,v 1.16 2012/02/27 22:54:15 jeshua Exp $
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/pore/poreve/porevesrc/poreve.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
+// $Id: poreve.C,v 1.24 2012/06/18 23:38:37 bcbrock Exp $
 
 /// \file poreve.C
 /// \brief The PORE Virtual Environment
@@ -38,56 +39,85 @@ using namespace vsbe;
 PoreVeBase::PoreVeBase(const PoreIbufId i_id, 
                        const fapi::Target i_masterTarget) :
     iv_pore(i_id),
-    iv_pnorMemory(PNOR_ADDRESS_BYTES),
     iv_id(i_id),
     iv_masterTarget(i_masterTarget),
     iv_slaveTarget(i_masterTarget)
 {
     uint32_t porePibBase;
+    uint8_t pnorI2cAddressBytes;
 
-    // Configure the PORE.  Only the PIB bus is connected, the OCI bus remains
-    // unconnected (0).  The PIB self-SCOM interface configuration is a
-    // function of which PORE egine is being configured. Technically we should
-    // barf if \a i_id is not PORE_SBE or PORE_SLW, but HBI doesn't want any
-    // throw()s.
+    do {
 
-    if (i_id == PORE_SLW) {
-        porePibBase = PORE_SLW_PIB_BASE;
-    } else {
-        porePibBase = PORE_SBE_PIB_BASE;
-    }
+        if (iv_constructorRc) break;
 
-    iv_pore.configure(&iv_slaveTarget, &iv_pib, 0,
-                      &iv_dataBuffer,
-                      porePibBase, PORE_PIB_SIZE, 
-                      ACCESS_MODE_READ | ACCESS_MODE_WRITE);
+        // Configure the PORE.  Only the PIB bus is connected, the OCI bus
+        // remains unconnected (0).  The PIB self-SCOM interface configuration
+        // is a function of which PORE egine is being configured. Technically
+        // we should barf if \a i_id is not PORE_SBE or PORE_SLW, but HBI
+        // doesn't want any throw()s.
 
-    iv_pib.attachPrimarySlave(&iv_pore);
+        if (i_id == PORE_SLW) {
+            porePibBase = PORE_SLW_PIB_BASE;
+        } else {
+            porePibBase = PORE_SBE_PIB_BASE;
+        }
 
-    // Configure the PNOR controller and attach its memory
+        iv_pore.configure(&iv_slaveTarget, &iv_pib, 0,
+                          &iv_dataBuffer,
+                          porePibBase, PORE_PIB_SIZE, 
+                          ACCESS_MODE_READ | ACCESS_MODE_WRITE);
 
-    iv_pnorController.configure(&iv_masterTarget,
+        iv_pib.attachPrimarySlave(&iv_pore);
+
+        // Configure the PNOR controller and configure and attach its memory.
+        // The PNOR controller PORE I2C configuration will also be saved away
+        // for use with Centaur targets; See the documentation for
+        // iv_pnorI2cParam and the code for the reset() method.
+
+#ifdef __USE_POREVE_ATTRIBUTES__
+
+        iv_constructorRc = FAPI_ATTR_GET_(ATTR_PNOR_I2C_ADDRESS_BYTES, 
+                                          &iv_masterTarget,
+                                          pnorI2cAddressBytes);
+        if (iv_constructorRc) {
+            FAPI_ERR("Unable to get ATTR_PNOR_I2C_ADDRESS_BYTES");
+            break;
+        }
+#else
+
+        pnorI2cAddressBytes = 4;
+
+#endif
+
+        iv_pnorController.configure(&iv_masterTarget,
+                                    &iv_dataBuffer,
+                                    PNOR_PIB_BASE,
+                                    PNOR_PIB_SIZE,
+                                    ACCESS_MODE_READ | ACCESS_MODE_WRITE);
+
+        iv_pib.attachPrimarySlave(&iv_pnorController);
+
+        iv_pnorMemory.configure(pnorI2cAddressBytes);
+
+        iv_pnorController.attachMemory(&iv_pnorMemory,
+                                       PNOR_I2C_PORT,
+                                       PNOR_I2C_DEVICE_ADDRESS);
+
+        iv_pnorI2cParam.val = 0;
+        iv_pnorI2cParam.i2c_engine_identifier = (PNOR_PIB_BASE >> 16) & 0xf;
+        iv_pnorI2cParam.i2c_engine_address_range = 4;
+
+        // Configure the PIB catch-all model
+
+        iv_pibDefault.configure(&iv_slaveTarget,
                                 &iv_dataBuffer,
-                                PNOR_PIB_BASE,
-                                PNOR_PIB_SIZE,
+                                PIB_DEFAULT_PIB_BASE,
+                                PIB_DEFAULT_PIB_SIZE,
                                 ACCESS_MODE_READ | ACCESS_MODE_WRITE);
 
-    iv_pib.attachPrimarySlave(&iv_pnorController);
+        iv_pib.attachSecondarySlave(&iv_pibDefault);
 
-    iv_pnorController.attachMemory(&iv_pnorMemory,
-                                   PNOR_I2C_PORT,
-                                   PNOR_I2C_DEVICE_ADDRESS);
-
-
-    // Configure the PIB catch-all model
-
-    iv_pibDefault.configure(&iv_slaveTarget,
-                            &iv_dataBuffer,
-                            PIB_DEFAULT_PIB_BASE,
-                            PIB_DEFAULT_PIB_SIZE,
-                            ACCESS_MODE_READ | ACCESS_MODE_WRITE);
-
-    iv_pib.attachSecondarySlave(&iv_pibDefault);
+    } while (0);
 }
 
 
@@ -96,38 +126,39 @@ PoreVeBase::~PoreVeBase()
 }
 
 
-//  This is a temporary hack: Until the final specification of the reset state
-//  of the PORE-SBE engine is available, we initialize the PORE-SBE engine
-//  here.  This is simpler than trying to keep the PMX model up to date as we
-//  mess with chaging requirements, and it's also better for PMX to assume
-//  that the PORE-SBE is halted at PMX-IPL, since PMX/Simics is really a model
-//  for OCC firmware.  This initializaton of PORE-SBE is done here rather than
-//  in the PoreModel because we have the memory address assumptions here.
-//
-//  If this is a PORE-SBE, then the machine comes up running from OTPROM.
-
-/// \bug Temporary hack
-
-void
+fapi::ReturnCode
 PoreVeBase::reset(fapi::Target i_slaveTarget)
 {
+    fapi::ReturnCode rc;
+
+    HookManager::clearError();
     iv_slaveTarget = i_slaveTarget;
     iv_pore.restart();
-    HookManager::clearError();
 
-    if (iv_id == PORE_SBE) {
+    // If the slave target is Centaur, set up I2C_E0_PARAM to allow the
+    // Centaur PNOR image to execute.  This is only done for Centaur since
+    // Centaur SBE code is always run virtually.
 
-        // The PMX model comes up halted in OCI space.  We set the PC to
-        // OTPROM space and run() 0 instructions. This will clear the stop bit
-        // to start execution.
+#ifdef __USE_POREVE_ATTRIBUTES__
 
-        PoreAddress pc;
-        uint64_t ran;
+    /// \bug This does not work yet, but it doesn't hurt (much) to go ahead
+    /// and initialize the register.
 
-        pc.setFromPibAddress(OTPROM_PIB_BASE);
-        iv_pore.setPc(pc);
-        iv_pore.run(0, ran);
+    uint8_t name;
+    rc = FAPI_ATTR_GET_PRIVILEGED(ATTR_NAME, i_slaveTarget, name);
+    if (!rc) {
+        if (name == ENUM_ATTR_NAME_CENTAUR) {
+            iv_pore.registerWrite(PORE_I2C_E0_PARAM, iv_pnorI2cParam.val);
+        }
     }
+
+#else
+
+    iv_pore.registerWrite(PORE_I2C_E0_PARAM, iv_pnorI2cParam.val);
+
+#endif
+
+    return rc;
 }
 
 
@@ -170,157 +201,245 @@ PoreVeBase::putscom(const uint32_t i_address, const uint64_t i_data, int& o_rc)
 }
 
 
+ModelError
+PoreVeBase::getmemInteger(const PoreAddress i_address,
+                          uint64_t& o_data,
+                          const size_t i_size)
+{
+    return iv_pore.getmemInteger(i_address, o_data, i_size);
+}
+
+
+ModelError
+PoreVeBase::putmemInteger(const PoreAddress i_address,
+                          uint64_t i_data,
+                          const size_t i_size)
+{
+    return iv_pore.putmemInteger(i_address, i_data, i_size);
+}
+
+
+fapi::ReturnCode
+PoreVeBase::constructorRc()
+{
+    return iv_constructorRc;
+}
+
+
+fapi::ReturnCode
+PoreVeBase::poreRc()
+{
+    return iv_pore.getFapiReturnCode();
+}
+
+
 ////////////////////////////////////////////////////////////////////////////
 // PoreVe
 ////////////////////////////////////////////////////////////////////////////
 
 PoreVe::PoreVe(const PoreIbufId i_id, 
-               const fapi::Target i_masterTarget) :
+               const fapi::Target i_masterTarget,
+               const bool i_useSecondarySeepromConfig) :
     PoreVeBase(i_id, i_masterTarget),
-    iv_seepromMemory(SEEPROM_ADDRESS_BYTES)
+    iv_pibmem(PIBMEM_PIB_SIZE)
 {
     uint32_t porePibBase;
+    uint8_t seepromI2cAddressBytes;
+    uint8_t seepromI2cDeviceAddress[2];
+    uint8_t seepromI2cPort[2];
+    int seepromConfig;
 
-    // Reconfigure the Pore - this doesn't hurt anything in the previous
-    // configuration in the base class as this is a set of simple pointer and
-    // data assignments. But it's another reason to jettison the requirement
-    // for the base class.  The PORE was attached to the PIB in the base
-    // class.
+    do {
 
-    if (i_id == PORE_SLW) {
-        porePibBase = PORE_SLW_PIB_BASE;
-    } else {
-        porePibBase = PORE_SBE_PIB_BASE;
-    }
+        // Reconfigure the Pore - this doesn't hurt anything in the previous
+        // configuration in the base class as this is a set of simple pointer
+        // and data assignments. But it's another reason to jettison the
+        // requirement for the base class.  The PORE was attached to the PIB
+        // in the base class.
 
-    iv_pore.configure(&iv_slaveTarget, &iv_pib, &iv_oci,
-                      &iv_dataBuffer,
-                      porePibBase, PORE_PIB_SIZE, 
-                      ACCESS_MODE_READ | ACCESS_MODE_WRITE);
+        if (i_id == PORE_SLW) {
+            porePibBase = PORE_SLW_PIB_BASE;
+        } else {
+            porePibBase = PORE_SBE_PIB_BASE;
+        }
 
-    // Configure the OTPROM
+        iv_pore.configure(&iv_slaveTarget, &iv_pib, &iv_oci,
+                          &iv_dataBuffer,
+                          porePibBase, PORE_PIB_SIZE, 
+                          ACCESS_MODE_READ | ACCESS_MODE_WRITE);
 
-    iv_otprom.configure(&iv_slaveTarget,
-                        &iv_dataBuffer,
-                        OTPROM_PIB_BASE,
-                        OTPROM_PIB_SIZE,
-                        ACCESS_MODE_READ | ACCESS_MODE_EXECUTE,
-                        &iv_otpromMemory);
+        // Configure the OTPROM
 
-    iv_pib.attachPrimarySlave(&iv_otprom);
+        iv_otprom.configure(&iv_slaveTarget,
+                            &iv_dataBuffer,
+                            OTPROM_PIB_BASE,
+                            OTPROM_PIB_SIZE,
+                            ACCESS_MODE_READ | ACCESS_MODE_EXECUTE,
+                            &iv_otpromMemory);
 
-
-    // Configure the PIBMEM
-
-    iv_pibmem.configure(&iv_slaveTarget,
-                        &iv_dataBuffer,
-                        PIBMEM_PIB_BASE,
-                        PIBMEM_PIB_SIZE,
-                        ACCESS_MODE_READ |
-                        ACCESS_MODE_WRITE |
-                        ACCESS_MODE_EXECUTE,
-                        &iv_pibmemMemory);
-
-    iv_pib.attachPrimarySlave(&iv_pibmem);
+        iv_pib.attachPrimarySlave(&iv_otprom);
 
 
-    // Configure the SEEPROM controller
+        // Configure the PIBMEM.  Unlike the other memories that represent
+        // pre-programmed ROM memories, the PIBMEM is an uninitialized RAM, and
+        // arguably we could allocate a blank image for it here.  However for
+        // consistency (and ease of checkpointing) we require the user to
+        // explicitly provide and map a PIBMEM image, which should be of size
+        // (PIBMEM_PIB_REGISTERS * 8) bytes.
 
-    iv_seepromController.configure(&iv_slaveTarget,
-                                   &iv_dataBuffer,
-                                   SEEPROM_PIB_BASE,
-                                   SEEPROM_PIB_SIZE,
-                                   ACCESS_MODE_READ | ACCESS_MODE_WRITE);
+        iv_pibmem.configure(&iv_slaveTarget,
+                            &iv_dataBuffer,
+                            PIBMEM_PIB_BASE,
+                            PIBMEM_PIB_SIZE,
+                            ACCESS_MODE_READ |
+                            ACCESS_MODE_WRITE |
+                            ACCESS_MODE_EXECUTE,
+                            &iv_pibmemMemory);
 
-    iv_pib.attachPrimarySlave(&iv_seepromController);
+        iv_pib.attachPrimarySlave(&iv_pibmem);
 
-    iv_seepromController.attachMemory(&iv_seepromMemory,
-                                      SEEPROM_I2C_PORT,
-                                      SEEPROM_I2C_DEVICE_ADDRESS);
 
-    // Configure Mainstore
+        // Configure the SEEPROM controller and its memory
 
-    iv_main.configure(&iv_slaveTarget,
-                      &iv_dataBuffer,
-                      MAINSTORE_OCI_BASE,
-                      MAINSTORE_OCI_SIZE,
-                      ACCESS_MODE_READ | ACCESS_MODE_WRITE,
-                      &iv_mainMemory);
+        seepromConfig = (i_useSecondarySeepromConfig ? 1 : 0);
+
+#ifdef __USE_POREVE_ATTRIBUTES__
+
+        iv_constructorRc = FAPI_ATTR_GET(ATTR_SEEPROM_I2C_ADDRESS_BYTES, 
+                                         &iv_masterTarget,
+                                         seepromI2cAddressBytes);
+        if (iv_constructorRc) {
+            FAPI_ERR("Unable to get ATTR_SEEPROM_I2C_ADDRESS_BYTES");
+            break;
+        }
+
+        iv_constructorRc = FAPI_ATTR_GET(ATTR_SEEPROM_I2C_DEVICE_ADDRESS,
+                                         &iv_masterTarget,
+                                         seepromI2cDeviceAddtess);
+        if (iv_constructorRc) {
+            FAPI_ERR("Unable to get ATTR_SEEPROM_I2C_DEVICE_ADDRESS");
+            break;
+        }
+
+
+        iv_constructorRc = FAPI_ATTR_GET(ATTR_SEEPROM_I2C_PORT,
+                                         &iv_masterTarget,
+                                         seepromI2cPort);
+        if (iv_constructorRc) {
+            FAPI_ERR("Unable to get ATTR_SEEPROM_I2C_PORT");
+            break;
+        }
+
+#else
+
+        seepromI2cAddressBytes = 2; // Murano primary configuration
+        seepromI2cDeviceAddress[0] = 0x56;
+        seepromI2cPort[0] = 0;            
+
+#endif
+
+        iv_seepromController.configure(&iv_slaveTarget,
+                                       &iv_dataBuffer,
+                                       SEEPROM_PIB_BASE,
+                                       SEEPROM_PIB_SIZE,
+                                       ACCESS_MODE_READ | ACCESS_MODE_WRITE);
+
+        iv_pib.attachPrimarySlave(&iv_seepromController);
+
+        iv_seepromMemory.configure(seepromI2cAddressBytes);
+
+        // printf("ATTACHING MEMORY\n");
+
+        iv_seepromController.
+            attachMemory(&iv_seepromMemory,
+                         seepromI2cPort[seepromConfig],
+                         seepromI2cDeviceAddress[seepromConfig]);
+
+        // Configure Mainstore
+
+        iv_main.configure(&iv_slaveTarget,
+                          &iv_dataBuffer,
+                          MAINSTORE_OCI_BASE,
+                          MAINSTORE_OCI_SIZE,
+                          ACCESS_MODE_READ | ACCESS_MODE_WRITE,
+                          &iv_mainMemory);
     
-    iv_oci.attachPrimarySlave(&iv_main);
+        iv_oci.attachPrimarySlave(&iv_main);
 
 
-    // Configure SRAM
+        // Configure SRAM
 
-    iv_sram.configure(&iv_slaveTarget,
-                      &iv_dataBuffer,
-                      SRAM_OCI_BASE,
-                      SRAM_OCI_SIZE,
-                      ACCESS_MODE_READ | ACCESS_MODE_WRITE,
-                      &iv_sramMemory);
+        iv_sram.configure(&iv_slaveTarget,
+                          &iv_dataBuffer,
+                          SRAM_OCI_BASE,
+                          SRAM_OCI_SIZE,
+                          ACCESS_MODE_READ | ACCESS_MODE_WRITE,
+                          &iv_sramMemory);
 
-    iv_oci.attachPrimarySlave(&iv_sram);
+        iv_oci.attachPrimarySlave(&iv_sram);
 
 
 #ifdef PM_HACKS
-    // This device provides write-only access to a single control register in
-    // the PMC.
+        // This device provides write-only access to a single control register
+        // in the PMC.
 
-    iv_pmc.configure(&iv_slaveTarget,
-                     &iv_dataBuffer,
-                     PMC_OCI_BASE,
-                     PMC_OCI_SIZE,
-                     ACCESS_MODE_WRITE);
+        iv_pmc.configure(&iv_slaveTarget,
+                         &iv_dataBuffer,
+                         PMC_OCI_BASE,
+                         PMC_OCI_SIZE,
+                         ACCESS_MODE_WRITE);
 
-    iv_oci.attachPrimarySlave(&iv_pmc);
+        iv_oci.attachPrimarySlave(&iv_pmc);
 #endif  // PM_HACKS
 
+        // Note: Optional components are always present in the model and
+        // always configured, but may not be attached to the busses.  This
+        // simpifies certain types of testing.
 
-    // Configure the Pib2Cfam component to remap MBOX scom addresses to cfam addresses
-    uint8_t fsi_gpreg_scom_access;
-    fapi::ReturnCode frc;
+        // Configure the Pib2Cfam component to remap MBOX scom addresses to
+        // cfam addresses.
+        uint8_t fsi_gpreg_scom_access;
 
-    //JDS TODO - uncomment this when the model actually works
-//     frc = FAPI_ATTR_GET( ATTR_FSI_GP_REG_SCOM_ACCESS, &iv_slaveTarget, fsi_gpreg_scom_access );
-    fsi_gpreg_scom_access = 0;
+        iv_constructorRc = FAPI_ATTR_GET( ATTR_FSI_GP_REG_SCOM_ACCESS, 
+                                          &iv_masterTarget, 
+                                          fsi_gpreg_scom_access);
+        if (iv_constructorRc) {
+            FAPI_ERR( "Unable to get ATTR_FSI_GP_REG_SCOM_ACCESS for target\n" );
+            break;
+        }
 
-    if(!frc.ok()) {
-      FAPI_ERR( "Unable to get ATTR_FSI_GP_REG_SCOM_ACCESS for target\n" );
-      //JDS TODO - create an actual fapi error
-      //      FAPI_SET_HWP_ERROR( frc, "Unable to get ATTR_FSI_GP_REG_SCOM_ACCESS for target\n" );
-    }
-    if( !fsi_gpreg_scom_access ) {
-      iv_pib2Cfam.configure(&iv_slaveTarget,
-                            &iv_dataBuffer,
-                            PIB2CFAM_PIB_BASE,
-                            PIB2CFAM_PIB_SIZE,
-                            ACCESS_MODE_READ | ACCESS_MODE_WRITE);
+        iv_pib2Cfam.configure(&iv_slaveTarget,
+                              &iv_dataBuffer,
+                              PIB2CFAM_PIB_BASE,
+                              PIB2CFAM_PIB_SIZE,
+                              ACCESS_MODE_READ | ACCESS_MODE_WRITE);
 
-      iv_pib.attachPrimarySlave(&iv_pib2Cfam);
-    }
+        if( !fsi_gpreg_scom_access ) {
+            iv_pib.attachPrimarySlave(&iv_pib2Cfam);
+        }
 
-    // Configure the sbeVital register emulation
-    uint8_t use_hw_sbe_vital_register;
+        // Configure the sbeVital register emulation
+        uint8_t use_hw_sbe_vital_register;
 
-    // JDS TODO - this needs to be done with an attribute (ATTR_USE_HW_SBE_VITAL_REGISTER requested)
-//     frc = FAPI_ATTR_GET( ATTR_USE_HW_SBE_VITAL_REGISTER, &iv_slaveTarget, use_hw_sbe_vital_register );
-//     if(!frc.ok()) {
-//       FAPI_ERR( "Unable to get ATTR_USE_HW_SBE_VITAL_REGISTER for target\n" );
-//       //JDS TODO - create an actual fapi error
-//       //      FAPI_SET_HWP_ERROR( frc, "Unable to get ATTR_USE_HW_SBE_VITAL_REGISTER for target\n" );
-//     }
-    use_hw_sbe_vital_register = 0; //JDS TODO - TMP until the attribute is supported and the hardware allows access to the register
+        iv_constructorRc = FAPI_ATTR_GET( ATTR_CHIP_HAS_SBE,
+                                          &iv_masterTarget, 
+                                          use_hw_sbe_vital_register );
+        if (iv_constructorRc) {
+            FAPI_ERR( "Unable to get ATTR_CHIP_HAS_SBE for target\n" );
+            break;
+        }
 
-    if( !use_hw_sbe_vital_register ) {
-      iv_sbeVital.configure(&iv_slaveTarget,
-                            &iv_dataBuffer,
-                            SBEVITAL_PIB_BASE,
-                            SBEVITAL_PIB_SIZE,
-                            ACCESS_MODE_READ | ACCESS_MODE_WRITE);
+        iv_sbeVital.configure(&iv_slaveTarget,
+                              &iv_dataBuffer,
+                              SBEVITAL_PIB_BASE,
+                              SBEVITAL_PIB_SIZE,
+                              ACCESS_MODE_READ | ACCESS_MODE_WRITE);
 
-      iv_pib.attachPrimarySlave(&iv_sbeVital);
-    }
+        if( !use_hw_sbe_vital_register ) {
+            iv_pib.attachPrimarySlave(&iv_sbeVital);
+        }
 
+    } while (0);
 }
 
 

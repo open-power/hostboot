@@ -1,29 +1,30 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/pore/poreve/model/modelerror.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/pore/poreve/model/modelerror.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #ifndef __VSBE_MODELERROR_H
 #define __VSBE_MODELERROR_H
 
-// $Id: modelerror.H,v 1.9 2011/07/07 03:51:52 bcbrock Exp $
+// $Id: modelerror.H,v 1.10 2012/06/18 13:56:56 bcbrock Exp $
 
 /// \file modelerror.H
 /// \brief An enumeration of modeling errors
@@ -64,9 +65,9 @@ namespace vsbe {
         ME_PORE_MODEL_GENERIC_ERROR = 8,
         /// A transaction size error
         ME_SIZE_ERROR = 9,
-        /// An error ocurred on the registerRead() method
+        /// An error ocurred on the registerRead[Raw]() method
         ME_REGISTER_READ_ERROR = 10,
-        /// An error ocurred on the registerWrite() method
+        /// An error ocurred on the registerWrite[Raw]() method
         ME_REGISTER_WRITE_ERROR = 11,
         /// Transaction address is not in any known memory map
         ME_NOT_MAPPED_ON_BUS = 12,

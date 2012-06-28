@@ -1,29 +1,30 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/pore/poreve/model/poremodel.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/pore/poreve/model/poremodel.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #ifndef __VSBE_POREMODEL_H
 #define __VSBE_POREMODEL_H
 
-// $Id: poremodel.H,v 1.23 2011/11/11 00:55:26 bcbrock Exp $
+// $Id: poremodel.H,v 1.25 2012/06/18 13:56:57 bcbrock Exp $
 
 /// \file poremodel.H
 /// \brief The PORE hardware engine model
@@ -92,22 +93,19 @@ public:
     static PoreModel* 
     create(PoreIbufId i_id, PoreInterface *i_interface);
 
-    /// Restart the PORE engine to its scan-flush state
+    /// Restart the PORE engine in its auto-POR or scan-flush state
     ///
-    /// For PORE-SBE, the engine is reset to begin execution from the OTPROM
-    /// at the proper location, with all configuration registers (e.g., the
-    /// I2C configuration) flushed to the correct state to begin an IPL.  
-    ///
-    /// For the other engines, they are reset as documented and will not run
-    /// (correctly) until the BASE address and EXE trigger registers are
-    /// written.  As a side effect the status of the PoreModel is computed and
-    /// returned.  The PoreModel is defined to be in the restart (scan-flush)
-    /// state at the end of constructing the model.
+    /// For PORE-SBE, the engine is reset and inintialized as if the auto-POR
+    /// sequence had run.  This means that the engine will be running at the
+    /// first program vector in the OTPROM.  For the other engines, they are
+    /// reset as documented and will not run (correctly) until the BASE
+    /// address and EXE trigger registers are written.  As a side effect the
+    /// status of the PoreModel is computed and returned.  The application
+    /// should always restart() the model after construction to ensure that
+    /// the model is in the correct reset state.
     ///
     /// \retval status PORE-SBE returns 0 (running); The other engines return
     /// PORE_STATUS_HARDWARE_STOP. 
-    ///
-    /// \bug Check to make sure this is true for the SBE.
     virtual int 
     restart();
 
@@ -307,6 +305,62 @@ public:
     /// supplied with the last stop() call that caused the PORE model to stop.
     virtual int
     getStopCode();
+
+    /// Read an integer from memory as seen by the PORE engine
+    ///
+    /// \param[in] i_address The PoreAddress of the memory to read, which must
+    /// be aligned to \a i_size.
+    ///
+    /// \param[out] o_data The data at \a i_address, as a right-justified \a
+    /// i_size byte unsigned integer in host endian format
+    ///
+    /// \param[in] i_size The data size in bytes, which must be either 1, 2, 4
+    /// or 8.
+    ///
+    /// This method performs a memory read operation on the memory space as
+    /// seen by the PORE engine, interpreting the memory data as an \a i-size
+    /// byte integer. The \a i_address must specify an OCI (GPEn/SLW) or
+    /// I2C/PNOR (SBE) address (bit 0 of the address must be a 1).  In
+    /// OCI-attached engines the address will be issued on the OCI.  For SBE,
+    /// the address is issued to the addressed I2C controller (or the
+    /// psuedo-I2C controller that provides access to the PNOR).
+    ///
+    /// \note Use the getscom() method to read from PIB memory spaces.
+    ///
+    /// \returns Either 0 for success, or a ModelError return code in the
+    /// event of a failure.
+    virtual ModelError
+    getmemInteger(const PoreAddress& i_address, 
+           uint64_t& o_data,
+           const size_t i_size);
+
+    /// Write an integer to memory as seen from the PORE engine
+    ///
+    /// \param[in] i_address The PoreAddress of the memory to write, which
+    /// must be aligned to \a i_size
+    ///
+    /// \param[in] i_data The data to write to \a i_address, as a
+    /// right-justified \a i_size byte unsigned integer in host endian format
+    ///
+    /// \param[in] i_size The data size in bytes. The method currently only
+    /// supports 8-byte writes.
+    ///
+    /// This method performs a memory write operation on the memory space as
+    /// seen by the PORE engine, performing endian-conversion of \a i_data if
+    /// necessary.  The \a i_address must specify an OCI (GPEn/SLW) or
+    /// I2C/PNOR (SBE) address (bit 0 of the address must be a 1).  In
+    /// OCI-attached engines the address will be issued on the OCI.  For SBE,
+    /// the address is issued to the addressed I2C controller (or the
+    /// psuedo-I2C controller that provides access to the PNOR).
+    ///
+    /// \note Use the putscom() method to write to PIB memory spaces.
+    ///
+    /// \returns Either 0 for success, or a ModelError return code in the
+    /// event of a failure.
+    virtual ModelError
+    putmemInteger(const PoreAddress& i_address, 
+                  const uint64_t i_data,
+                  const size_t i_size);
 
 
     ///////////////////////// Abstract Interface /////////////////////////

@@ -49,37 +49,30 @@
 #include <fapi.H>
 #include <fapiPlatHwpInvoker.H>
 #include <vfs/vfs.H>
-#include <list>
 #include "sbe_centaur_init.H"
-
-//@todo - The following workarounds need to be readdressed
-//1. To call isSlavePresent(). Need to remove following header when PD works.
-#include <fsi/fsiif.H>
 
 // Extern function declaration
 extern fapi::ReturnCode fapiPoreVe(const fapi::Target i_target,
-                                   std::list<uint64_t> & io_sharedObjectArgs);
+                   std::vector<vsbe::FapiPoreVeArg *> & io_sharedObjectArgs);
 // Constants
-#define CENTAUR_SBE_PNOR_MRR    0   // Memory Relocation Register for Centaur SBE image
-
-// Name spaces
-using namespace TARGETING;
-using namespace vsbe;
+// Memory Relocation Register for Centaur SBE image
+const uint64_t CENTAUR_SBE_PNOR_MRR = 0;
 
 namespace   SBE_CENTAUR_INIT
 {
 
 using   namespace   TARGETING;
 using   namespace   fapi;
+using   namespace   vsbe;
 
 //
-//  Wrapper function to call 10.1 : cen_sbe_tp_chiplet_init1
+//  Wrapper function to call step 10 : sbe_centaur_init
 //
-void    call_cen_sbe_tp_chiplet_init1( void *io_pArgs )
+void    call_sbe_centaur_init( void *io_pArgs )
 {
 
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_tp_chiplet_init1 entry" );
+    TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+              "call_sbe_centaur_init entry");
 
     // Get target list to pass in procedure
     TARGETING::TargetHandleList l_membufTargetList;
@@ -94,23 +87,28 @@ void    call_cen_sbe_tp_chiplet_init1( void *io_pArgs )
     {
         // ----------------------- Setup sbe_pnor stuff --------------------
 
-        // Loading sbe_pnor img
+        // Loading image
         l_errl = VFS::module_load("centaur.sbe_pnor.bin");
         if (l_errl)
         {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "ERROR 0x%.8X call_cen_sbe_tp_chiplet_init1 - VFS::module_load(centaur.sbe_pnor.bin) returns error",
-                    l_errl->reasonCode());
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                 "ERROR 0x%.8X call_sbe_centaur_init - "
+                 "VFS::module_load(centaur.sbe_pnor.bin) returns error",
+                 l_errl->reasonCode());
             break;
         }
         else
         {
              // Set flag to unload
              l_unloadSbePnorImg = true;
-             l_errl = VFS::module_address("centaur.sbe_pnor.bin", l_sbePnorAddr, l_sbePnorSize);
+             l_errl = VFS::module_address("centaur.sbe_pnor.bin",
+                                          l_sbePnorAddr, l_sbePnorSize);
              if(l_errl)
              {
-                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "ERROR 0x%.8X call_cen_sbe_tp_chiplet_init1 - VFS::module_address(centaur.sbe_pnor.bin) return error",
-                         l_errl->reasonCode());
+                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "ERROR 0x%.8X call_sbe_centaur_init - "
+                      "VFS::module_address(centaur.sbe_pnor.bin) return error",
+                      l_errl->reasonCode());
                  break;
              }
              else
@@ -118,132 +116,102 @@ void    call_cen_sbe_tp_chiplet_init1( void *io_pArgs )
                  char l_header[10];
                  memcpy (l_header, l_sbePnorAddr, 9);
                  l_header[9] = '\0';
-                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_tp_chiplet_init1 -Loading centaur.sbe_pnor.bin, Addr 0x%llX, Size %d, Header %s",
-                           l_sbePnorAddr, l_sbePnorSize, l_header);
+                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "call_sbe_centaur_init - Loading "
+                      "centaur.sbe_pnor.bin, Addr 0x%llX, Size %d, Header %s",
+                      l_sbePnorAddr, l_sbePnorSize, l_header);
              }
         }
 
         // Setup args
-        std::list<uint64_t> myArgs;
+        std::vector<FapiPoreVeArg *> myArgs;
 
         // Set FapiPoreVeOtherArg: run unlimited instructions
         FapiPoreVeOtherArg *l_otherArg =
-                new FapiPoreVeOtherArg(vsbe::RUN_UNLIMITED,
-                                       vsbe::PORE_SBE);
+                new FapiPoreVeOtherArg(vsbe::RUN_UNLIMITED, vsbe::PORE_SBE);
         // Entry point
         l_otherArg->iv_entryPoint = const_cast<char*>("pnor::_sbe_pnor_start");
         l_otherArg->iv_mrr = CENTAUR_SBE_PNOR_MRR;
-        uint64_t fapiArg = reinterpret_cast<uint64_t> (l_otherArg);
-        myArgs.push_back(fapiArg);
+        myArgs.push_back(l_otherArg);
 
         // Set FapiPoreVeMemArg for pnor option, base address = 0
         uint32_t base_addr = 0;
         char* l_dataPnor = const_cast<char*>(l_sbePnorAddr);
         FapiPoreVeMemArg* l_memArg = new FapiPoreVeMemArg(ARG_PNOR,
-                            base_addr, l_sbePnorSize,
-                            static_cast<void*>(l_dataPnor));
-        fapiArg = reinterpret_cast<uint64_t> (l_memArg);
-                  myArgs.push_back(fapiArg);
+                                               base_addr, l_sbePnorSize,
+                                               static_cast<void*>(l_dataPnor));
+        myArgs.push_back(l_memArg);
 
         // Create state argument to dump out state for debugging purpose
         FapiPoreVeStateArg *l_stateArg = new FapiPoreVeStateArg(NULL);
-                      l_stateArg->iv_installState = false;
-                      l_stateArg->iv_extractState = true;
-                      fapiArg = reinterpret_cast<uint64_t> (l_stateArg);
-                      myArgs.push_back(fapiArg);
+        l_stateArg->iv_installState = false;
+        l_stateArg->iv_extractState = true;
+        myArgs.push_back(l_stateArg);
 
         // Loop thru all Centaurs in list
         for ( size_t i = 0; i < l_membufTargetList.size(); i++ )
         {
             // Create a FAPI Target
             const TARGETING::Target*  l_membuf_target = l_membufTargetList[i];
-            const fapi::Target l_fapiTarget(
-                              fapi::TARGET_TYPE_MEMBUF_CHIP,
-                              reinterpret_cast<void *>
-                              (const_cast<TARGETING::Target*>(l_membuf_target)));
+            const fapi::Target l_fapiTarget( fapi::TARGET_TYPE_MEMBUF_CHIP,
+                            reinterpret_cast<void *>
+                            (const_cast<TARGETING::Target*>(l_membuf_target)));
 
             //  Put out info on target
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                             "Running cen_sbe_tp_chiplet_init1 on Centaur entity path...");
+                    "Running call_sbe_centaur_init on Centaur entity path...");
 
             EntityPath l_path;
             l_path  =   l_membuf_target->getAttr<ATTR_PHYS_PATH>();
             l_path.dump();
 
-            //@todo - This is a temporary hack to skip if Target is not present.
-            // This should be removed when PD works.
-            if ( !FSI::isSlavePresent(l_membuf_target) )
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_tp_chiplet_init1 - Skip this Centaur because it's not present");
-                continue;
-            }
-
             // Run the engine
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_tp_chiplet_init1 - Start VSBE engine...");
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "call_sbe_centaur_init - Start VSBE engine...");
 
-
-            //@TODO:
-            //Simics workaround - Do not run in Simics since action file is not updated
-            //Leave it to Van Lee to update action file and enable Simics run
-            if ( TARGETING::is_vpo() )
-            {
-                FAPI_INVOKE_HWP(l_errl, fapiPoreVe, l_fapiTarget, myArgs);
-            }
+            FAPI_INVOKE_HWP(l_errl, fapiPoreVe, l_fapiTarget, myArgs);
 
             if (l_errl )
             {
-               TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "ERROR 0x%.8X call_cen_sbe_tp_chiplet_init1 - Error returned from VSBE engine on this Centaur, l_rc 0x%llX",
-                       l_errl->reasonCode());
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                     "ERROR 0x%.8X call_sbe_centaur_init - Error returned from"
+                     " VSBE engine on this Centaur, l_rc 0x%llX",
+                     l_errl->reasonCode());
                break; // break out of memBuf loop
             }
             else
             {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_sbe_tp_chiplet_init1 - VSBE engine runs successfully on this Centaur");
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                     "call_sbe_centaur_init - VSBE engine runs successfully "
+                     "on this Centaur");
             }
 
         }   // end for
 
         // Freeing memory
-        if (l_otherArg)
-        {
-            delete l_otherArg;
-            l_otherArg = NULL;
-        }
-
-        if (l_memArg)
-        {
-            delete l_memArg;
-            l_memArg = NULL;
-        }
-
-        if (l_stateArg)
-        {
-            delete l_stateArg;
-            l_stateArg = NULL;
-        }
-
-        if (l_errl)
-        {
-            break; // break out of do-while loop
-        }
-
+        delete l_otherArg;
+        delete l_memArg;
+        delete l_stateArg;
 
     } while(0);
 
-    // Unload sbe_pnor
+    // Unload image
     if (l_unloadSbePnorImg == true)
     {
-        errlHndl_t  l_tempErrl = NULL;
-        FAPI_INVOKE_HWP(l_tempErrl, fapiUnloadInitFile, "centaur.sbe_pnor.bin",
-                                    l_sbePnorAddr,
-                                    l_sbePnorSize);
+        errlHndl_t l_tempErrl = VFS::module_unload("centaur.sbe_pnor.bin");
+
         if (l_tempErrl)
         {
-             FAPI_ERR("ERROR 0x%.8X call_cen_sbe_tp_chiplet_init1 - Error unloading centaur.sbe_pnor.bin",
-                     l_tempErrl->reasonCode());
+             FAPI_ERR("ERROR 0x%.8X call_sbe_centaur_init - "
+                      "Error unloading centaur.sbe_pnor.bin",
+                      l_tempErrl->reasonCode());
              if (l_errl == NULL)
              {
                  l_errl = l_tempErrl;
+             }
+             else
+             {
+                 errlCommit( l_tempErrl, HWPF_COMP_ID );
              }
         }
     }
@@ -251,328 +219,18 @@ void    call_cen_sbe_tp_chiplet_init1( void *io_pArgs )
     //  process return code.
     if ( l_errl )
     {
-         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                 "ERROR 0x%.8X:  cen_sbe_tp_chiplet_init1 HWP(?,?,? ) ",
-                 l_errl->reasonCode());
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "ERROR 0x%.8X:  sbe_centaur_init HWP",
+                   l_errl->reasonCode());
     }
     else
     {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "SUCCESS :  cen_sbe_tp_chiplet_init1 HWP(? ? ? )" );
+                   "SUCCESS :  sbe_centaur_init HWP" );
     }
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "cen_sbe_tp_chiplet_init1 exit" );
-
-    task_end2( l_errl );
-}
-
-
-//
-//  Wrapper function to call 10.2 : cen_sbe_npll_initf
-//
-void    call_cen_sbe_npll_initf( void *io_pArgs )
-{
-    errlHndl_t  l_errl = NULL;
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
-               "call_cen_sbe_pll_initf entry"  );
-
-
-    //  figure out what targets we need
-    //  ADD TARGET CODE HERE
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "=====  cen_sbe_pll_initf HWP(? ? ? )" );
-
-#if 0
-    //  call the HWP with each target   ( if parallel, spin off a task )
-    l_fapirc  =   cen_sbe_pll_initf( ? , ?, ? );
-#endif
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
-                "call_cen_sbe_pll_initf exit" );
-
-    task_end2( l_errl );
-}
-
-
-//
-//  Wrapper function to call 10.3 : cen_sbe_tp_chiplet_init2
-//
-void    call_cen_sbe_tp_chiplet_init2( void *io_pArgs )
-{
-    errlHndl_t  l_errl = NULL;
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
-    "call_cen_sbe_tp_chiplet_init2" );
-
-
-    //  figure out what targets we need
-    //  ADD TARGET CODE HERE
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "=====  cen_sbe_tp_chiplet_init2 HWP(? ? ? )" );
-#if 0
-    //  call the HWP with each target   ( if parallel, spin off a task )
-    l_fapirc  =   cen_sbe_tp_chiplet_init2( ? , ?, ? );
-#endif
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
-               "call_cen_sbe_tp_chiplet_init2" );
-
-    task_end2( l_errl );
-}
-
-
-//
-//  Wrapper function to call 10.4 : cen_sbe_tp_arrayinit
-//
-void    call_cen_sbe_tp_arrayinit( void *io_pArgs )
-{
-
-    errlHndl_t  l_errl = NULL;
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
-                "call_cen_sbe_tp_arrayinit entry" );
-
-
-    //  figure out what targets we need
-    //  ADD TARGET CODE HERE
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "=====  cen_sbe_tp_arrayinit HWP(? ? ? )" );
-#if 0
-    //  call the HWP with each target   ( if parallel, spin off a task )
-    l_fapirc  =   cen_sbe_tp_arrayinit( ? , ?, ? );
-#endif
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
-                "call_cen_sbe_tp_arrayinit exit" );
-
-    task_end2( l_errl );
-}
-
-
-
-//
-//  Wrapper function to call 10.5 : cen_sbe_tp_chiplet_init3
-//
-void    call_cen_sbe_tp_chiplet_init3( void *io_pArgs )
-{
-
-    errlHndl_t  l_errl = NULL;
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
-                "call_cen_sbe_tp_chiplet_init3 entry" );
-
-
-    //  figure out what targets we need
-    //  ADD TARGET CODE HERE
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "=====  cen_sbe_tp_chiplet_init3 HWP(? ? ? )" );
-#if 0
-    //  call the HWP with each target   ( if parallel, spin off a task )
-    l_fapirc  =   cen_sbe_tp_chiplet_init3( ? , ?, ? );
-#endif
-
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
-                "call_cen_sbe_tp_chiplet_init3 exit" );
-
-    task_end2( l_errl );
-}
-
-
-//
-//  Wrapper function to call 10.6 : cen_sbe_chiplet_init
-//
-void    call_cen_sbe_chiplet_init( void *io_pArgs )
-{
-
-    errlHndl_t  l_errl = NULL;
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
-                    "call_cen_sbe_chiplet_init entry" );
-
-
-    //  figure out what targets we need
-    //  ADD TARGET CODE HERE
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "=====  cen_sbe_chiplet_init HWP(? ? ? )" );
-#if 0
-    //  call the HWP with each target   ( if parallel, spin off a task )
-    l_fapirc  =   cen_sbe_chiplet_init( ? , ?, ? );
-#endif
-
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
-                "call_cen_sbe_chiplet_init exit" );
-
-    task_end2( l_errl );
-}
-
-
-//
-//  Wrapper function to call 10.7 : cen_sbe_arrayinit
-//
-void    call_cen_sbe_arrayinit( void *io_pArgs )
-{
-
-    errlHndl_t  l_errl = NULL;
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
-                    "call_cen_sbe_arrayinit entry" );
-
-
-    //  figure out what targets we need
-    //  ADD TARGET CODE HERE
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "=====  cen_sbe_arrayinit HWP(? ? ? )" );
-#if 0
-    //  call the HWP with each target   ( if parallel, spin off a task )
-    l_fapirc  =   cen_sbe_arrayinit( ? , ?, ? );
-#endif
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
-                "call_cen_sbe_arrayinit exit" );
-
-    task_end2( l_errl );
-}
-
-//
-//  Wrapper function to call 10.8 : cen_sbe_dts_init
-//
-void    call_cen_sbe_dts_init( void *io_pArgs )
-{
-
-    errlHndl_t  l_errl = NULL;
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
-                "call_cen_sbe_dts_init entry" );
-
-
-    //  figure out what targets we need
-    //  ADD TARGET CODE HERE
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "=====  cen_sbe_dts_init HWP(? ? ? )" );
-#if 0
-    //  call the HWP with each target   ( if parallel, spin off a task )
-    l_fapirc  =   cen_sbe_dts_init( ? , ?, ? );
-#endif
-
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
-                    "call_cen_sbe_dts_init exit" );
-
-    task_end2( l_errl );
-}
-
-
-//
-//  Wrapper function to call 10.9 : cen_sbe_initf
-//
-void    call_cen_sbe_initf( void *io_pArgs )
-{
-
-    errlHndl_t  l_errl = NULL;
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
-                    "call_cen_sbe_initf entry" );
-
-
-    //  figure out what targets we need
-    //  ADD TARGET CODE HERE
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "=====  cen_sbe_initf HWP(? ? ? )" );
-#if 0
-    //  call the HWP with each target   ( if parallel, spin off a task )
-    l_fapirc  =   cen_sbe_initf( ? , ?, ? );
-#endif
-
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
-                "call_cen_sbe_initf exit" );
-
-    task_end2( l_errl );
-}
-
-
-//
-//  Wrapper function to call 10.10 : cen_sbe_do_manual_inits
-//
-void    call_cen_sbe_do_manual_inits( void *io_pArgs )
-{
-
-    errlHndl_t  l_errl = NULL;
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
-                "call_cen_sbe_do_manual_inits entry" );
-
-
-    //  figure out what targets we need
-    //  ADD TARGET CODE HERE
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "=====  cen_sbe_do_manual_inits HWP(? ? ? )" );
-#if 0
-    //  call the HWP with each target   ( if parallel, spin off a task )
-    l_fapirc  =   cen_sbe_do_manual_inits( ? , ?, ? );
-#endif
-
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
-                "call_cen_sbe_do_manual_inits exit" );
-
-    task_end2( l_errl );
-}
-
-
-//
-//  Wrapper function to call 10.11 : cen_sbe_nest_startclocks
-//
-void    call_cen_sbe_nest_startclocks( void *io_pArgs )
-{
-
-    errlHndl_t  l_errl = NULL;
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
-                "call_cen_sbe_startclocks entry" );
-
-
-    //  figure out what targets we need
-    //  ADD TARGET CODE HERE
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "=====  cen_sbe_startclocks HWP(? ? ? )" );
-#if 0
-    //  call the HWP with each target   ( if parallel, spin off a task )
-    l_fapirc  =   cen_sbe_startclocks( ? , ?, ? );
-#endif
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
-                "call_cen_sbe_startclocks exit" );
-
-    task_end2( l_errl );
-}
-
-
-//
-//  Wrapper function to call 10.12 : cen_sbe_scominits
-//
-void    call_cen_sbe_scominits( void *io_pArgs )
-{
-
-    errlHndl_t  l_errl = NULL;
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
-                "call_cen_sbe_scominits entry" );
-
-
-    //  figure out what targets we need
-    //  ADD TARGET CODE HERE
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "=====  cen_sbe_scominits HWP(? ? ? )" );
-#if 0
-    //  call the HWP with each target   ( if parallel, spin off a task )
-    l_fapirc  =   cen_sbe_scominits( ? , ?, ? );
-#endif
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,                            
-               "call_cen_sbe_scominits exit"  );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_sbe_centaur_init exit" );
 
     task_end2( l_errl );
 }
