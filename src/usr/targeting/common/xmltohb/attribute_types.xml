@@ -875,6 +875,14 @@
             <bits>4</bits>
             <default>0</default>
         </field>
+        <field>
+            <name>dumpfunctional</name>
+            <description>FSP Only, used by DUMP applet to indicate targets dump capability.
+                Comes up as  0 which indicates the target is not dump capable</description>
+            <type>uint8_t</type>
+            <bits>1</bits>
+            <default>0</default>
+        </field>
     </complexType>
     <persistency>volatile</persistency>
     <readable/>
