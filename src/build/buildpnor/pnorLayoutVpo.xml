@@ -22,12 +22,12 @@
      IBM_PROLOG_END_TAG -->
 <pnor>
     <metadata>
-        <imageSize>0x800000</imageSize>
+        <imageSize>0x400000</imageSize>
         <blockSize>0x1000</blockSize>
         <partTableSize>0x1</partTableSize>
     </metadata>
     <section>
-        <description>Table of Contents (4K)</description>
+        <description>Table of Contents (2K)</description>
         <eyeCatch>part</eyeCatch>
         <physicalOffset>0</physicalOffset>
         <physicalRegionSize>0x1000</physicalRegionSize>
@@ -36,16 +36,25 @@
         <sideless>no</sideless>
     </section>
     <section>
-        <description>Hostboot Extended image (2.5MB)</description>
+        <description>Hostboot Extended image (2MB)</description>
         <eyeCatch>HBI</eyeCatch>
         <physicalOffset>0x1000</physicalOffset>
-        <physicalRegionSize>0x280000</physicalRegionSize>
+        <physicalRegionSize>0x200000</physicalRegionSize>
         <ecc>no</ecc>
         <source>File</source>
         <sideless>no</sideless>
     </section>
     <section>
-        <description>Module VPD (512K)</description>
+        <description>Attribute Data (512K)</description>
+        <eyeCatch>HBD</eyeCatch>
+        <physicalOffset>0x201000</physicalOffset>
+        <physicalRegionSize>0x80000</physicalRegionSize>
+        <ecc>no</ecc>
+        <source>File</source>
+        <sideless>no</sideless>
+   </section>
+    <section>
+        <description>Module VPD</description>
         <eyeCatch>MVPD</eyeCatch>
         <physicalOffset>0x281000</physicalOffset>
         <physicalRegionSize>0x80000</physicalRegionSize>
@@ -55,7 +64,7 @@
         <sideless>yes</sideless>
     </section>
     <section>
-        <description>DIMM JEDEC (256K)</description>
+        <description>DIMM JEDEC</description>
         <eyeCatch>DJVPD</eyeCatch>
         <physicalOffset>0x301000</physicalOffset>
         <physicalRegionSize>0x40000</physicalRegionSize>
@@ -63,24 +72,5 @@
         <ecc>no</ecc>
         <source>Blank</source>
         <sideless>yes</sideless>
-    </section>
-    <section>
-        <description>Hostboot Data (512K)</description>
-        <eyeCatch>HBD</eyeCatch>
-        <physicalOffset>0x341000</physicalOffset>
-        <physicalRegionSize>0x80000</physicalRegionSize>
-        <ecc>no</ecc>
-        <source>File</source>
-        <sideless>no</sideless>
-   </section>
-    <section>
-        <description>Hostboot Base (512K)</description>
-        <eyeCatch>HBB</eyeCatch>
-        <physicalOffset>0x3C1000</physicalOffset>
-        <physicalRegionSize>0x80000</physicalRegionSize>
-        <actualRegionSize>0x80000</actualRegionSize>
-        <ecc>no</ecc>
-        <source>File</source>
-        <sideless>no</sideless>
     </section>
 </pnor>

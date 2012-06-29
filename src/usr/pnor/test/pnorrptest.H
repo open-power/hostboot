@@ -58,15 +58,25 @@ class PnorRpTest : public CxxTest::TestSuite
         PNOR::SectionInfo_t info;
         errlHndl_t errhdl = NULL;
 
-        for( PNOR::SectionId id = PNOR::FIRST_SECTION;
-             id < PNOR::NUM_SECTIONS;
-             id = (PNOR::SectionId) (id + 1) )
+        //Only check required sections.  Some are currently optional due to
+        //Storage limitations in VPO.
+        const PNOR::SectionId testSections[] = {
+            PNOR::TOC,            /**< Table of Contents */
+            PNOR::HB_EXT_CODE,    /**< Hostboot Extended Image */
+            PNOR::HB_DATA,        /**< Hostboot Data */
+            PNOR::DIMM_JEDEC_VPD, /**< DIMM JEDEC VPD */
+            PNOR::MODULE_VPD,     /**< Module VPD */
+        };
+        uint64_t numSections = 5;
+
+        for( uint64_t idx = 0; idx < numSections; idx++)
         {
             total++;
-            errhdl = PNOR::getSectionInfo( id, PNOR::CURRENT_SIDE, info );
+            errhdl = PNOR::getSectionInfo( testSections[idx], PNOR::CURRENT_SIDE, info );
             if( errhdl )
             {
-                TRACFCOMP(g_trac_pnor, "PnorRpTest::test_sectionInfo> ERROR : getSectionInfo returned error for %d : RC=%X", id, errhdl->reasonCode() );
+                TRACFCOMP(g_trac_pnor, "PnorRpTest::test_sectionInfo> ERROR : getSectionInfo returned error for %d : RC=%X",
+                          testSections[idx], errhdl->reasonCode() );
                 TS_FAIL( "PnorRpTest::test_getSectionInfo> ERROR : Unexpected error log" );
                 fails++;
                 errlCommit(errhdl,PNOR_COMP_ID);
@@ -76,7 +86,8 @@ class PnorRpTest : public CxxTest::TestSuite
             total++;
             if( info.size == 0 )
             {
-                TRACFCOMP(g_trac_pnor, "PnorRpTest::test_sectionInfo> ERROR : zero size for section %d : id=%d, actual=%d", id, info.id, info.size );
+                TRACFCOMP(g_trac_pnor, "PnorRpTest::test_sectionInfo> ERROR : zero size for section %d : id=%d, actual=%d",
+                          testSections[idx], info.id, info.size );
                 TS_FAIL( "PnorRpTest::test_getSectionInfo> ERROR : Zero Size" );
                 fails++;
             }
@@ -85,7 +96,8 @@ class PnorRpTest : public CxxTest::TestSuite
             total++;
             if( info.vaddr < PnorRP::BASE_VADDR )
             {
-                TRACFCOMP(g_trac_pnor, "PnorRpTest::test_sectionInfo> ERROR : Virtual Addr section %d Not in appropriate range: id=%d, actual=%d", id, info.id, info.vaddr );
+                TRACFCOMP(g_trac_pnor, "PnorRpTest::test_sectionInfo> ERROR : Virtual Addr section %d Not in appropriate range: id=%d, actual=%d",
+                          testSections[idx], info.id, info.vaddr );
                 TS_FAIL( "PnorRpTest::test_getSectionInfo> ERROR : Invalid vaddr" );
                 fails++;
             }

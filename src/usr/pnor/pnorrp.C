@@ -53,11 +53,11 @@ const char* cv_EYECATCHER[] = {  //@todo - convert there to uint64_t
     "HBD",    /**< PNOR::HB_DATA       : Hostboot Data */
     "DJVPD",  /**< PNOR::DIMM_JEDEC_VPD: Dimm JEDEC VPD */
     "MVPD",   /**< PNOR::MODULE_VPD    : Module VPD */
+    "HBB",    /**< PNOR::HB_BASE_CODE  : Hostboot Base Image */
 
     //Not currently used
 //    "GLOBAL", /**< PNOR::GLOBAL_DATA   : Global Data */
 //    "SBE",    /**< PNOR::SBE_IPL       : Self-Boot Enginer IPL image */
-//    "HBB",    /**< PNOR::HB_BASE_CODE  : Hostboot Base Image */
 //    "XXX",    /**< PNOR::HB_ERRLOGS    : Hostboot Error log Repository */
 //    "HBR",    /**< PNOR::HB_RUNTIME    : Hostboot Runtime Image */
 //    "PART",   /**< PNOR::KVM_PART_INFO : KVM Partition Information */
@@ -483,11 +483,12 @@ errlHndl_t PnorRP::readTOC()
         }
 
         //keep these traces here until PNOR is rock-solid
-        TRACFCOMP(g_trac_pnor, "TOC:    size=0x%.8X  flash=0x%.8X  virt=0x%.16X", iv_TOC[PNOR::SIDE_A][PNOR::TOC].size, iv_TOC[PNOR::SIDE_A][PNOR::TOC].flashAddr, iv_TOC[PNOR::SIDE_A][PNOR::TOC].virtAddr );
-        TRACFCOMP(g_trac_pnor, "EXT:    size=0x%.8X  flash=0x%.8X  virt=0x%.16X", iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].size, iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].flashAddr, iv_TOC[PNOR::SIDE_A][PNOR::HB_EXT_CODE].virtAddr );
-        TRACFCOMP(g_trac_pnor, "DATA:   size=0x%.8X  flash=0x%.8X  virt=0x%.16X", iv_TOC[PNOR::SIDE_A][PNOR::HB_DATA].size, iv_TOC[PNOR::SIDE_A][PNOR::HB_DATA].flashAddr, iv_TOC[PNOR::SIDE_A][PNOR::HB_DATA].virtAddr );
-        TRACFCOMP(g_trac_pnor, "MVPD: size=0x%.8X  flash=0x%.8X  virt=0x%.16X", iv_TOC[PNOR::SIDE_A][PNOR::MODULE_VPD].size, iv_TOC[PNOR::SIDE_A][PNOR::MODULE_VPD].flashAddr, iv_TOC[PNOR::SIDE_A][PNOR::MODULE_VPD].virtAddr );
-        TRACFCOMP(g_trac_pnor, "DJVPD: size=0x%.8X  flash=0x%.8X  virt=0x%.16X", iv_TOC[PNOR::SIDE_A][PNOR::DIMM_JEDEC_VPD].size, iv_TOC[PNOR::SIDE_A][PNOR::DIMM_JEDEC_VPD].flashAddr, iv_TOC[PNOR::SIDE_A][PNOR::DIMM_JEDEC_VPD].virtAddr );
+        for(PNOR::SectionId tmpId = PNOR::FIRST_SECTION;
+            tmpId < PNOR::NUM_SECTIONS;
+            tmpId = (PNOR::SectionId) (tmpId + 1) )
+        {
+            TRACFCOMP(g_trac_pnor, "%s:    size=0x%.8X  flash=0x%.8X  virt=0x%.16X", cv_EYECATCHER[tmpId], iv_TOC[PNOR::SIDE_A][tmpId].size, iv_TOC[PNOR::SIDE_A][tmpId].flashAddr, iv_TOC[PNOR::SIDE_A][tmpId].virtAddr );
+        }
 
     }while(0);
 

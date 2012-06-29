@@ -41,18 +41,18 @@ enum SectionId
     HB_DATA,        /**< Hostboot Data */
     DIMM_JEDEC_VPD, /**< DIMM JEDEC VPD */
     MODULE_VPD,     /**< Module VPD */
+    HB_BASE_CODE,   /**< Hostboot Base Image */
     NUM_SECTIONS,   /**< Number of defined sections */
 
     //Not currently used
 //    GLOBAL_DATA,    /**< Global Data */
 //    SBE_IPL,        /**< Self-Boot Engine IPL image */
-//    HB_BASE_CODE,   /**< Hostboot Base Image */
 //    PAYLOAD,        /**< HAL/OPAL */
 //    HB_RUNTIME,     /**< Hostboot Runtime Image */
 //    HB_ERRLOGS,     /**< Hostboot Error log Repository */
 
     FIRST_SECTION = TOC,  /**< First section (for looping) */
-    LAST_SECTION = MODULE_VPD,  /**< Last section (for looping) */
+    LAST_SECTION = HB_BASE_CODE,  /**< Last section (for looping) */
     INVALID_SECTION = NUM_SECTIONS,  /**< Used for error cases, initialization */
 };
 
