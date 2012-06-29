@@ -26,9 +26,3 @@
 ##    to setup the sandbox
 ##
 
-### Force LPC2SPI FPGA to be enabled - default being changed with SW147676.  Remove with RTC: 43661
-echo "+++ Update VENICE config to include LPC2SPI FPGA"
-mkdir -p $sb/simu/configs/
-cp --update $bb/src/simu/configs/P8_VENICE.config $sb/simu/configs/P8_VENICE.config
-sed -i -e's/SETENV GFW_P8_VENICE_USE_LPC2SPI_FPGA.*/SETENV GFW_P8_VENICE_USE_LPC2SPI_FPGA yes/' $sb/simu/configs/P8_VENICE.config
-
