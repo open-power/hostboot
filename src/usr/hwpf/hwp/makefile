@@ -44,7 +44,6 @@ SUBDIRS	=	dmi_training.d  sbe_centaur_init.d mc_init.d \
             dram_training.d activate_powerbus.d build_winkle_images.d \
             core_activate.d dram_initialization.d edi_ei_initialization.d \
             establish_system_smp.d load_payload.d bus_training.d \
-            nest_chiplets.d start_payload.d \
-            thread_activate.d 
+            nest_chiplets.d start_payload.d thread_activate.d  slave_sbe.d
 
 include ${ROOTPATH}/config.mk

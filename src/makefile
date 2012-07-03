@@ -60,7 +60,7 @@ EXTENDED_MODULES = targeting ecmddatabuffer fapi hwp plat	\
                    activate_powerbus build_winkle_images \
                    core_activate dram_initialization edi_ei_initialization \
                    establish_system_smp load_payload \
-                   start_clocks_on_nest_chiplets start_payload thread_activate
+                   nest_chiplets start_payload thread_activate slave_sbe
 
 DIRECT_BOOT_MODULES = example
 RUNTIME_MODULES =

@@ -1,26 +1,27 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/hwpf/hwp/dmi_training/proc_cen_framelock/proc_cen_framelock.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
-// $Id: proc_cen_framelock.C,v 1.5 2012/04/11 06:23:54 jmcgill Exp $
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/hwpf/hwp/dmi_training/proc_cen_framelock/proc_cen_framelock.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
+// $Id: proc_cen_framelock.C,v 1.6 2012/06/01 02:47:07 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_cen_framelock.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -156,11 +157,11 @@ fapi::ReturnCode proc_cen_framelock_clear_pu_mci_stat_reg(
 
     FAPI_DBG("proc_cen_framelock_clear_pu_mci_stat_reg: Start");
 
-    rc = fapiPutScom(i_pu_target, MCI_STAT_0x0201184B, zero_data);
+    rc = fapiPutScom(i_pu_target, MCS_MCISTAT_0x0201184B, zero_data);
 
     if (rc)
     {
-        FAPI_ERR("proc_cen_framelock_clear_pu_mci_stat_reg: fapiPutScom error (MCI_STAT_0x0201184B)");
+        FAPI_ERR("proc_cen_framelock_clear_pu_mci_stat_reg: fapiPutScom error (MCI_MCISTAT_0x0201184B)");
     }
 
     return rc;
@@ -182,11 +183,11 @@ fapi::ReturnCode proc_cen_framelock_get_pu_mci_stat_reg(
 
     FAPI_DBG("proc_cen_framelock_get_pu_mci_stat_reg: Start");
 
-    rc = fapiGetScom(i_pu_target, MCI_STAT_0x0201184B, o_data);
+    rc = fapiGetScom(i_pu_target, MCS_MCISTAT_0x0201184B, o_data);
 
     if (rc)
     {
-        FAPI_ERR("proc_cen_framelock_get_pu_mci_stat_reg: fapiGetScom error (MCI_STAT_0x0201184B)");
+        FAPI_ERR("proc_cen_framelock_get_pu_mci_stat_reg: fapiGetScom error (MCS_MCISTAT_0x0201184B)");
     }
     return rc;
 }
@@ -206,11 +207,11 @@ fapi::ReturnCode proc_cen_framelock_clear_pu_mci_fir_reg(
 
     FAPI_DBG("proc_cen_framelock_clear_pu_mci_fir_reg: Start");
 
-    rc = fapiPutScom(i_pu_target, MCI_FIR_0x02011840, zero_data);
+    rc = fapiPutScom(i_pu_target, MCS_MCIFIR_0x02011840, zero_data);
 
     if (rc)
     {
-        FAPI_ERR("proc_cen_framelock_clear_pu_mci_fir_reg: fapiPutScom error (MCI_FIR_0x02011840)");
+        FAPI_ERR("proc_cen_framelock_clear_pu_mci_fir_reg: fapiPutScom error (MCS_MCIFIR_0x02011840)");
     }
 
     return rc;
@@ -232,11 +233,11 @@ fapi::ReturnCode proc_cen_framelock_get_pu_mci_fir_reg(
 
     FAPI_DBG("proc_cen_framelock_get_pu_mci_fir_reg: Start");
 
-    rc = fapiGetScom(i_pu_target, MCI_FIR_0x02011840, o_data);
+    rc = fapiGetScom(i_pu_target, MCS_MCIFIR_0x02011840, o_data);
 
     if (rc)
     {
-        FAPI_ERR("proc_cen_framelock_get_pu_mci_fir_reg: fapiGetScom error (MCI_FIR_0x02011840)");
+        FAPI_ERR("proc_cen_framelock_get_pu_mci_fir_reg: fapiGetScom error (MCS_MCIFIR_0x02011840)");
     }
 
     return rc;
@@ -285,11 +286,11 @@ fapi::ReturnCode proc_cen_framelock_set_pu_mci_cfg_reg(
 
     FAPI_DBG("proc_cen_framelock_set_pu_mci_cfg_reg: Start");
 
-    rc = fapiPutScomUnderMask(i_pu_target, MCI_CFG_0x0201184A, i_data, i_mask);
+    rc = fapiPutScomUnderMask(i_pu_target, MCS_MCICFG_0x0201184A, i_data, i_mask);
 
     if (rc)
     {
-        FAPI_ERR("proc_cen_framelock_set_pu_mci_cfg_reg: fapiPutScomUnderMask error (MCI_CFG_0x0201184A)");
+        FAPI_ERR("proc_cen_framelock_set_pu_mci_cfg_reg: fapiPutScomUnderMask error (MCS_MCICFG_0x0201184A)");
     }
 
     return rc;

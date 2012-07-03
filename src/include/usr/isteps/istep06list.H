@@ -36,10 +36,9 @@
 
 #include    <initservice/initsvcstructs.H>
 #include    <initservice/initsvcreasoncodes.H>
-
 #include    <hwas/common/hwas.H>
 #include    <hwas/hostbootIstep.H>
-
+#include    "../../../usr/hwpf/hwp/slave_sbe/slave_sbe.H"
 
 namespace   INITSERVICE
 {
@@ -54,8 +53,9 @@ namespace   INITSERVICE
  *  5.  host_discover_targets : Builds targeting
  *  6.  host_gard : Do Gard
  *  7.  host_cancontinue_clear : Clear deconfigured states
- *  8.  proc_check_slave_sbe_seeprom_complete : Check Slave SBE Complete
- *  9.  proc_xmit_sbe : vSBE Init of Slave Chips
+ *  8.  proc_revert_sbe_mcs_setup : Clean up MCS extent regs
+ *  9.  proc_check_slave_sbe_seeprom_complete : Check Slave SBE Complete
+ * 10.  proc_xmit_sbe : vSBE Init of Slave Chips
  *
  */
 const   TaskInfo    g_istep06[]  =   {
@@ -125,7 +125,15 @@ const   TaskInfo    g_istep06[]  =   {
                 }
         },
         {
-                ISTEPNAME(06,08,"proc_check_slave_sbe_seeprom_complete"),
+                ISTEPNAME(06,08,"proc_revert_sbe_mcs_setup"),
+                SLAVE_SBE::call_proc_revert_sbe_mcs_setup,
+                {
+                        START_FN,
+                        EXT_IMAGE,
+                }
+        },
+        {
+                ISTEPNAME(06,09,"proc_check_slave_sbe_seeprom_complete"),
                 HWAS::proc_check_slave_sbe_seeprom_complete,
                 {
                         START_FN,
@@ -133,7 +141,7 @@ const   TaskInfo    g_istep06[]  =   {
                 }
         },
         {
-                ISTEPNAME(06,09,"proc_xmit_sbe"),
+                ISTEPNAME(06,10,"proc_xmit_sbe"),
                 HWAS::proc_xmit_sbe,
                 {
                         START_FN,

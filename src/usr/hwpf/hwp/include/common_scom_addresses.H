@@ -1,26 +1,27 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/HWPs/common_scom_addresses.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
-// $Id: common_scom_addresses.H,v 1.1 2012/01/06 22:21:10 jmcgill Exp $
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/hwpf/hwp/include/common_scom_addresses.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
+// $Id: common_scom_addresses.H,v 1.18 2012/06/25 17:52:34 bcbrock Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/common_scom_addresses.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -95,7 +96,7 @@
 //    if the multicast bit is set
 //
 
-#include "fapi_sbe_common.h"
+#include "fapi_sbe_common.H"
 
 
 /******************************************************************************/
@@ -105,6 +106,7 @@
 CONST_UINT64_T( STBY_CHIPLET_0x00000000               , ULL(0x00000000) );
 CONST_UINT64_T( TP_CHIPLET_0x01000000                 , ULL(0x01000000) );
 CONST_UINT64_T( NEST_CHIPLET_0x02000000               , ULL(0x02000000) );
+CONST_UINT64_T( XBUS_CHIPLET_0x04000000               , ULL(0x04000000) );
 
 
 /******************************************************************************/
@@ -128,10 +130,13 @@ CONST_UINT64_T( GENERIC_OPCG_CNTL0_0x00030002         , ULL(0x00030002) );
 CONST_UINT64_T( GENERIC_OPCG_CNTL1_0x00030003         , ULL(0x00030003) );
 CONST_UINT64_T( GENERIC_OPCG_CNTL2_0x00030004         , ULL(0x00030004) );
 CONST_UINT64_T( GENERIC_OPCG_CNTL3_0x00030005         , ULL(0x00030005) );
+CONST_UINT64_T( GENERIC_CLK_SYNC_CONFIG_0x00030000    , ULL(0x00030000) );
 CONST_UINT64_T( GENERIC_CLK_REGION_0x00030006         , ULL(0x00030006) );
 CONST_UINT64_T( GENERIC_CLK_SCANSEL_0x00030007        , ULL(0x00030007) );
 CONST_UINT64_T( GENERIC_CLK_STATUS_0x00030008         , ULL(0x00030008) );
 CONST_UINT64_T( GENERIC_CLK_SCANDATA0_0x00038000      , ULL(0x00038000) );
+CONST_UINT64_T( GENERIC_CLK_SCAN_UPDATEDR_0x0003A000  , ULL(0x0003A000) );
+CONST_UINT64_T( GENERIC_CLK_SCAN_CAPTUREDR_0x0003C000 , ULL(0x0003C000) );
 
 //------------------------------------------------------------------------------
 //      GENERIC FIR
@@ -195,12 +200,21 @@ CONST_UINT32_T( CFAM_FSI_GP4_0x00001013               , ULL(0x00001013) );
 CONST_UINT32_T( CFAM_FSI_GP5_0x00001014               , ULL(0x00001014) );
 CONST_UINT32_T( CFAM_FSI_GP6_0x00001015               , ULL(0x00001015) );
 CONST_UINT32_T( CFAM_FSI_GP7_0x00001016               , ULL(0x00001016) );
+CONST_UINT32_T( CFAM_FSI_GP8_0x00001017               , ULL(0x00001017) );
 CONST_UINT32_T( CFAM_FSI_GP3_MIRROR_0x0000101B        , ULL(0x0000101B) );
 
 //------------------------------------------------------------------------------
 //      OTPROM
 //------------------------------------------------------------------------------
 CONST_UINT64_T( OTPROM_0x00010000                     , ULL(0x00010000) );
+
+
+//------------------------------------------------------------------------------
+//      PIBMEM
+//------------------------------------------------------------------------------
+
+CONST_UINT64_T( PIBMEM_REPAIR_0x00088007              , ULL(0x00088007) );
+
 
 //------------------------------------------------------------------------------
 //      MFSI0
@@ -230,10 +244,19 @@ CONST_UINT64_T( MBOX_FSIGP4_0x00050013                , ULL(0x00050013) );
 CONST_UINT64_T( MBOX_FSIGP5_0x00050014                , ULL(0x00050014) );
 CONST_UINT64_T( MBOX_FSIGP6_0x00050015                , ULL(0x00050015) );
 CONST_UINT64_T( MBOX_FSIGP7_0x00050016                , ULL(0x00050016) );
+CONST_UINT64_T( MBOX_FSIGP8_0x00050017                , ULL(0x00050017) );
 CONST_UINT64_T( MBOX_OSC_S1_0x00050019                , ULL(0x00050019) );
 CONST_UINT64_T( MBOX_OSC_S2_0x0005001A                , ULL(0x0005001A) );
 CONST_UINT64_T( MBOX_GP3MIR_0x0005001B                , ULL(0x0005001B) );
 CONST_UINT64_T( MBOX_SBEVITAL_0x0005001C              , ULL(0x0005001C) );
+CONST_UINT64_T( MBOX_SCRATCH_REG0_0x00050038          , ULL(0x00050038) );
+CONST_UINT64_T( MBOX_SCRATCH_REG1_0x00050039          , ULL(0x00050039) );
+
+//------------------------------------------------------------------------------
+//      TP ADDITIONAL REGISTER
+//------------------------------------------------------------------------------
+CONST_UINT64_T( TP_PLL_LOCK_0x010F0019                 , ULL(0x010F0019) );
+
 
 //------------------------------------------------------------------------------
 //      I2C MASTER (MEMS0)
@@ -243,6 +266,8 @@ CONST_UINT64_T( I2CMS_MEMS0_RESET_0x000A0001          , ULL(0x000A0001) );
 CONST_UINT64_T( I2CMS_MEMS0_STATUS_0x000A0002         , ULL(0x000A0002) );
 CONST_UINT64_T( I2CMS_MEMS0_DATA_0x000A0003           , ULL(0x000A0003) );
 CONST_UINT64_T( I2CMS_MEMS0_COMMAND_0x000A0005        , ULL(0x000A0005) );
+CONST_UINT64_T( I2CMS_MEMS0_MODE_0x000A0006           , ULL(0x000A0006) );
+CONST_UINT64_T( I2CMS_MEMS0_STATUS_0x000A000B         , ULL(0x000A000B) );
 
 //------------------------------------------------------------------------------
 //      PCB MASTER
@@ -271,6 +296,12 @@ CONST_UINT64_T( TP_GP4_OR_0x01000007                  , ULL(0x01000007) );
 CONST_UINT64_T( TP_SCOM_0x01010000                    , ULL(0x01010000) );
 
 //------------------------------------------------------------------------------
+//      TP TRACE
+//------------------------------------------------------------------------------
+CONST_UINT64_T( TP_TRACE_DATA_HI_0x01010400           , ULL(0x01010400) );
+CONST_UINT64_T( TP_TRACE_DATA_LO_0x01010401           , ULL(0x01010401) );
+
+//------------------------------------------------------------------------------
 //      TP ITR
 //------------------------------------------------------------------------------
 CONST_UINT64_T( TP_OSC_MSK_0x0102001A                 , ULL(0x0102001A) );
@@ -283,6 +314,7 @@ CONST_UINT64_T( TP_OPCG_CNTL1_0x01030003              , ULL(0x01030003) );
 CONST_UINT64_T( TP_OPCG_CNTL2_0x01030004              , ULL(0x01030004) );
 CONST_UINT64_T( TP_OPCG_CNTL3_0x01030005              , ULL(0x01030005) );
 CONST_UINT64_T( TP_CLK_REGION_0x01030006              , ULL(0x01030006) );
+
 CONST_UINT64_T( TP_CLK_SCANSEL_0x01030007             , ULL(0x01030007) );
 CONST_UINT64_T( TP_CLK_STATUS_0x01030008              , ULL(0x01030008) );
 
@@ -325,6 +357,7 @@ CONST_UINT64_T( TP_MCGR4_0x010F0004                   , ULL(0x010F0004) );
 //------------------------------------------------------------------------------
 CONST_UINT64_T( TP_HANG_P1_0x010F0021                  , ULL(0x010F0021) );     // PRV: setup hang pulse register0
 CONST_UINT64_T( TP_HANG_P2_0x010F0022                  , ULL(0x010F0022) );     // PRV: setup hang pulse register1
+CONST_UINT64_T( TP_HANG_P6_0x010F0026                  , ULL(0x010F0026) );     // PRV: setup hang pulse register6
 CONST_UINT64_T( TP_HANG_PRE_0x010F0028                 , ULL(0x010F0028) );     // PRV: setup hang precounter (HEX:01)
 
 
@@ -403,20 +436,137 @@ CONST_UINT64_T( NEST_HANG_P4_0x020F0024               , ULL(0x020F0024) );     /
 CONST_UINT64_T( NEST_HANG_PRE_0x020F0028              , ULL(0x020F0028) );     // NEST (PB): setup hang precounter (HEX:01)
 
 
+/******************************************************************************/
+/*********  MULTICAST REGISTER DEFINITIONS FOR PERVASIVE INITs ****************/
+/******************************************************************************/
+
+CONST_UINT64_T( READ_ALL_GP0_0x43000000               , ULL(0x43000000) );       // all GP0 but not PRV
+CONST_UINT64_T( WRITE_ALL_GP0_0x6B000000              , ULL(0x6B000000) );       // all GP0 but not PRV
+CONST_UINT64_T( WRITE_ALL_GP0_AND_0x6B000004          , ULL(0x6B000004) );       // all GP0 AND but not PRV
+CONST_UINT64_T( WRITE_ALL_GP0_OR_0x6B000005           , ULL(0x6B000005) );       // all GP0 OR but not PRV
+
+CONST_UINT64_T( READ_ALL_GP1_AND_0x4B000001           , ULL(0x4B000001) );       // and all GP1 but not PRV
+
+CONST_UINT64_T( WRITE_EX_GP3_AND_0x690F0013           , ULL(0x690F0013) );       // and all EX GP3
+
+CONST_UINT64_T( WRITE_ALL_CLK_REGION_0x6B030006       , ULL(0x6B030006) );       // all GP3 but not PRV
+
+CONST_UINT64_T( READ_ALL_OPCG_CNTL0_0x43030002        , ULL(0x43030002) );       // all EX OPCG0
+CONST_UINT64_T( WRITE_ALL_OPCG_CNTL0_0x6B030002       , ULL(0x6B030002) );       // all EX OPCG0
+
+CONST_UINT64_T( READ_ALL_OPCG_CNTL2_0x43030004        , ULL(0x43030004) );       // all OPCG2 but not PRV
+CONST_UINT64_T( WRITE_ALL_OPCG_CNTL2_0x6B030004       , ULL(0x6B030004) );       // all OPCG2 but not PRV
+
+CONST_UINT64_T( READ_ALL_FUNC_GP3_0x430F0012          , ULL(0x430F0012) );       // all GP3 but not PRV
+
+CONST_UINT64_T( SLAVE_PCB_ERR_0x6B0F001F              , ULL(0x6B0F001F) );
+
+
+CONST_UINT64_T( READ_OR_ALL_FUNC_GP0_0x43000000         , ULL(0x43000000) ); // group3: all except PRV: GP0
+CONST_UINT64_T( READ_OR_ALL_FUNC_GP1_0x43000001         , ULL(0x43000001) ); // group3: all except PRV: GP1
+CONST_UINT64_T( READ_OR_ALL_FUNC_GP2_0x43000002         , ULL(0x43000002) ); // group3: all except PRV: GP2
+CONST_UINT64_T( READ_OR_ALL_FUNC_GP4_0x43000003         , ULL(0x43000003) ); // group3: all except PRV: GP4
+CONST_UINT64_T( READ_OR_ALL_FUNC_OPCG_CNTL0_0x43030002  , ULL(0x43030002) ); // group3: all except PRV: OPCG_CNTL0
+CONST_UINT64_T( READ_OR_ALL_FUNC_OPCG_CNTL1_0x43030003  , ULL(0x43030003) ); // group3: all except PRV: OPCG_CNTL1
+CONST_UINT64_T( READ_OR_ALL_FUNC_OPCG_CNTL2_0x43030004  , ULL(0x43030004) ); // group3: all except PRV: OPCG_CNTL2
+CONST_UINT64_T( READ_OR_ALL_FUNC_OPCG_CNTL3_0x43030005  , ULL(0x43030005) ); // group3: all except PRV: OPCG_CNTL3
+CONST_UINT64_T( READ_OR_ALL_FUNC_CLK_REGION_0x43030006  , ULL(0x43030006) ); // group3: all except PRV: CLK_REGION
+CONST_UINT64_T( READ_OR_ALL_FUNC_CLK_SCANSEL_0x43030007 , ULL(0x43030007) ); // group3: all except PRV: CLK_SCANSEL
+CONST_UINT64_T( READ_OR_ALL_FUNC_CLK_STATUS_0x43030008  , ULL(0x43030008) ); // group3: all except PRV: CLK_STATUS
+CONST_UINT64_T( READ_OR_ALL_FUNC_GP3_0x430F0012         , ULL(0x430F0012) ); // group3: all except PRV: GP3
+CONST_UINT64_T( READ_OR_ALL_PCB_SLAVE_ERRREG_0x430F001F , ULL(0x430F001F) ); // group3: all except PRV:
+
+CONST_UINT64_T( READ_AND_ALL_FUNC_GP0_0x4B000000         , ULL(0x4B000000) ); // group3: all except PRV: GP0
+CONST_UINT64_T( READ_AND_ALL_FUNC_GP1_0x4B000001         , ULL(0x4B000001) ); // group3: all except PRV: GP1
+CONST_UINT64_T( READ_AND_ALL_FUNC_GP2_0x4B000002         , ULL(0x4B000002) ); // group3: all except PRV: GP2
+CONST_UINT64_T( READ_AND_ALL_FUNC_GP4_0x4B000003         , ULL(0x4B000003) ); // group3: all except PRV: GP4
+CONST_UINT64_T( READ_AND_ALL_FUNC_OPCG_CNTL0_0x4B030002  , ULL(0x4B030002) ); // group3: all except PRV: OPCG_CNTL0
+CONST_UINT64_T( READ_AND_ALL_FUNC_OPCG_CNTL1_0x4B030003  , ULL(0x4B030003) ); // group3: all except PRV: OPCG_CNTL1
+CONST_UINT64_T( READ_AND_ALL_FUNC_OPCG_CNTL2_0x4B030004  , ULL(0x4B030004) ); // group3: all except PRV: OPCG_CNTL2
+CONST_UINT64_T( READ_AND_ALL_FUNC_OPCG_CNTL3_0x4B030005  , ULL(0x4B030005) ); // group3: all except PRV: OPCG_CNTL3
+CONST_UINT64_T( READ_AND_ALL_FUNC_CLK_REGION_0x4B030006  , ULL(0x4B030006) ); // group3: all except PRV: CLK_REGION
+CONST_UINT64_T( READ_AND_ALL_FUNC_CLK_SCANSEL_0x4B030007 , ULL(0x4B030007) ); // group3: all except PRV: CLK_SCANSEL
+CONST_UINT64_T( READ_AND_ALL_FUNC_CLK_STATUS_0x4B030008  , ULL(0x4B030008) ); // group3: all except PRV: CLK_STATUS
+CONST_UINT64_T( READ_AND_ALL_FUNC_GP3_0x4B0F0012         , ULL(0x4B0F0012) ); // group3: all except PRV: GP3
+CONST_UINT64_T( READ_AND_ALL_PCB_SLAVE_ERRREG_0x4B0F001F , ULL(0x4B0F001F) ); // group3: all except PRV:
+
+CONST_UINT64_T( READ_ALL_PCB_SLAVE_ATTN_INT_0x500F001A   , ULL(0x500F001A) ); // group0: all chiplets
+CONST_UINT64_T( READ_ALL_PCB_SLAVE_RECOV_INT_0x500F001B  , ULL(0x500F001B) ); // group0: all chiplets
+CONST_UINT64_T( READ_ALL_PCB_SLAVE_XSTOP_INT_0x500F001C  , ULL(0x500F001C) ); // group0: all chiplets
+
+CONST_UINT64_T( WRITE_ALL_FUNC_GP0_0x6B000000            , ULL(0x6B000000) ); // group3: all except PRV: GP0
+CONST_UINT64_T( WRITE_ALL_FUNC_GP1_0x6B000001            , ULL(0x6B000001) ); // group3: all except PRV: GP1
+CONST_UINT64_T( WRITE_ALL_FUNC_GP2_0x6B000002            , ULL(0x6B000002) ); // group3: all except PRV: GP2
+CONST_UINT64_T( WRITE_ALL_FUNC_GP4_0x6B000003            , ULL(0x6B000003) ); // group3: all except PRV: GP4
+CONST_UINT64_T( WRITE_ALL_FUNC_GP0_AND_0x6B000004        , ULL(0x6B000004) ); // group3: all except PRV: GP0 AND (for clearing bits)
+CONST_UINT64_T( WRITE_ALL_FUNC_GP0_OR_0x6B000005         , ULL(0x6B000005) ); // group3: all except PRV: GP0 OR  (for setting bits)
+CONST_UINT64_T( WRITE_ALL_FUNC_GP4_AND_0x6B000006        , ULL(0x6B000006) ); // group3: all except PRV: GP4 AND (for clearing bits)
+CONST_UINT64_T( WRITE_ALL_FUNC_GP4_OR_0x6B000007         , ULL(0x6B000007) ); // group3: all except PRV: GP4 OR  (for setting bits)
+CONST_UINT64_T( WRITE_ALL_FUNC_OPCG_CNTL0_0x6B030002     , ULL(0x6B030002) ); // group3: all except PRV: OPCG_CNTL0
+CONST_UINT64_T( WRITE_ALL_FUNC_OPCG_CNTL1_0x6B030003     , ULL(0x6B030003) ); // group3: all except PRV: OPCG_CNTL1
+CONST_UINT64_T( WRITE_ALL_FUNC_OPCG_CNTL2_0x6B030004     , ULL(0x6B030004) ); // group3: all except PRV: OPCG_CNTL2
+CONST_UINT64_T( WRITE_ALL_FUNC_OPCG_CNTL3_0x6B030005     , ULL(0x6B030005) ); // group3: all except PRV: OPCG_CNTL3
+CONST_UINT64_T( WRITE_ALL_FUNC_CLK_REGION_0x6B030006     , ULL(0x6B030006) ); // group3: all except PRV: CLK_REGION
+CONST_UINT64_T( WRITE_ALL_FUNC_CLK_SCANSEL_0x6B030007    , ULL(0x6B030007) ); // group3: all except PRV: CLK_SCANSEL
+CONST_UINT64_T( WRITE_ALL_FUNC_CLK_STATUS_0x6B030008     , ULL(0x6B030008) ); // group3: all except PRV: CLK_STATUS
+CONST_UINT64_T( WRITE_ALL_FUNC_GP3_0x6B0F0012            , ULL(0x6B0F0012) ); // group3: all except PRV: GP3
+CONST_UINT64_T( WRITE_ALL_FUNC_GP3_AND_0x6B0F0013        , ULL(0x6B0F0013) ); // group3: all except PRV: GP3 AND (for clearing bits)
+CONST_UINT64_T( WRITE_ALL_FUNC_GP3_OR_0x6B0F0014         , ULL(0x6B0F0014) ); // group3: all except PRV: GP3 OR  (for setting bits)
+CONST_UINT64_T( WRITE_ALL_PCB_SLAVE_ERRREG_0x6B0F001F    , ULL(0x6B0F001F) ); // group3: all except PRV:
+
+
 //******************************************************************************/
 //*********  ADDRESS PREFIXES FOR SUBROUTINE SCAN0_MODULE CALLS ****************/
 //******************************************************************************/
-CONST_UINT64_T( SCAN_ALLSCANEXVITAL,              ULL(0x0FF00FFE00000000) );
+
+
+CONST_UINT64_T( SCAN_ALLREGIONEXVITAL,              ULL(0x0FF00E0000000000) );
+CONST_UINT64_T( SCAN_CLK_ALL,                       ULL(0x0FF00E0000000000) );
+CONST_UINT64_T( SCAN_CLK_ALLEXDPLL,                 ULL(0x0FE00E0000000000) );
+CONST_UINT64_T( SCAN_CLK_CORE_ONLY,                 ULL(0x06000E0000000000) );
+
+
+CONST_UINT64_T( SCAN_ALLSCANEXVITAL,                ULL(0x0FF00DCE00000000) );  // Looking to be deprecated
+CONST_UINT64_T( SCAN_ALLSCANEXPRV,                  ULL(0x0FF00DCE00000000) );  // Looking to be deprecated
+CONST_UINT64_T( SCAN_ALL_BUT_GPTRTIMEREP,           ULL(0x0FF00DCE00000000) );
+CONST_UINT64_T( SCAN_ALL_BUT_VITALDPLLGPTRTIME,     ULL(0x0FE00DCE00000000) );
+CONST_UINT64_T( SCAN_GPTR_TIME_REP,                 ULL(0x0FF0023000000000) );
+CONST_UINT64_T( SCAN_TIME_REP,                      ULL(0x0CF0003000000000) );
+
+CONST_UINT64_T( SCAN_CORE_ALL,                      ULL(0x06000FFE00000000) );
+CONST_UINT64_T( SCAN_CORE_ALL_BUT_GPTRTIMEREP,      ULL(0x06000DCE00000000) );
+CONST_UINT64_T( SCAN_CORE_GPTR_TIME_REP,            ULL(0x0600023000000000) );
+CONST_UINT64_T( SCAN_CORE_TIME_REP,                 ULL(0x0600003000000000) );
+
+
+
+
+CONST_UINT8_T( SCAN_CHIPLET_TP,                     ULL(0x01) );
+CONST_UINT8_T( SCAN_CHIPLET_NEST,                   ULL(0x02) );
+CONST_UINT8_T( SCAN_CHIPLET_MEM,                    ULL(0x03) );
+CONST_UINT8_T( SCAN_CHIPLET_ALL,                    ULL(0x68) );
+CONST_UINT8_T( SCAN_CHIPLET_GROUP1,                 ULL(0x69) );
+CONST_UINT8_T( SCAN_CHIPLET_GROUP3,                 ULL(0x6B) );
+
+/*  This content is old but will let R. Koester remove it formally
+CONST_UINT64_T( SCAN_ALLREGIONEXVITAL,            ULL(0x0FF00E0000000000) );
+// next line was wrong based on a documentation error, do we need this option at all?
+// use OPTION 3 instead rkoester 05/23/12
+// CONST_UINT64_T( SCAN_ALLSCANEXVITAL,              ULL(0x0FF00FFE00000000) );
+CONST_UINT64_T( SCAN_ALLSCANEXVITAL,              ULL(0x0FF00DCE00000000) );
 CONST_UINT64_T( SCAN_ALLSCANEXPRV,                ULL(0x0FF00DCE00000000) );
-CONST_UINT64_T( SCAN_GPTR_TIME_REP,               ULL(0x0FF0023000000000) );
-CONST_UINT64_T( SCAN_TIME_REP,                    ULL(0x0CF0003000000000) );
+// next line is a suggestion from Johannes, I need to discuss this with PRV design first:
+// this would exclude a scan region for PRV, which probably does not serve chiplet init correctly
+// rkoester 05/23/12
+// CONST_UINT64_T( SCAN_ALLSCANEXPRV,             ULL(0x07F00DCE00000000) );
+*/
 
-CONST_UINT8_T( SCAN_CHIPLET_TP,                   ULL(0x01) );
-CONST_UINT8_T( SCAN_CHIPLET_NEST,                 ULL(0x02) );
-CONST_UINT8_T( SCAN_CHIPLET_MEM,                  ULL(0x03) );
-CONST_UINT8_T( SCAN_CHIPLET_ALL,                  ULL(0x69) );
-CONST_UINT8_T( SCAN_CHIPLET_GROUP3,               ULL(0x6B) );
-
+CONST_UINT8_T( READ_OR_ALL_CHIPLETS,                ULL(0x40) );   // group 0: all chiplets
+CONST_UINT8_T( READ_OR_ALL_FUNC_CHIPLETS,           ULL(0x43) );   // group 3: all functional chiplets
+// CONST_UINT8_T( READ_AND_ALL_CHIPLETS,              ULL(0x48) );   // group 0: all chiplets
+CONST_UINT8_T( READ_AND_ALL_FUNC_CHIPLETS,          ULL(0x4B) );   // group 3: all functional chiplets
+CONST_UINT8_T( WRITE_ALL_CHIPLETS,                  ULL(0x68) );   // group 0: all chiplets
+CONST_UINT8_T( WRITE_ALL_FUNC_CHIPLETS,             ULL(0x6B) );   // group 3: all functional chiplets
 
 #endif
 
@@ -427,6 +577,67 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: common_scom_addresses.H,v $
+Revision 1.18  2012/06/25 17:52:34  bcbrock
+Modified proc_sbe_decompress_scan.S: 1) Removed comments and code related to
+the "polling" protocol. 2) Added a final SCOM to always issue a "setpulse"
+after acanning.
+
+Revision 1.17  2012/06/20 14:49:29  rkoester
+add plllock register
+
+Revision 1.16  2012/06/17 20:25:57  jmcgill
+update trace SCOM addresses
+
+Revision 1.15  2012/06/14 14:21:03  koenig
+Added MBOX scratch and I2CMS status - AK
+
+Revision 1.14  2012/06/11 16:14:56  rkoester
+FSI GP8 CFAM address added
+
+Revision 1.13  2012/06/05 17:05:41  mfred
+Added constants for reading PCB interrupt regs.
+
+Revision 1.12  2012/05/31 12:15:24  stillgs
+Update constant names for (ex) scan0 routines that do real scanning
+
+Revision 1.11  2012/05/23 17:03:25  rkoester
+scan0 vectors for scan0 module modified, Option 1 wrong
+
+Revision 1.10  2012/04/27 15:08:29  koenig
+Added GENERIC_CLK_SYNC - AK
+
+Revision 1.9  2012/04/19 22:05:35  koenig
+Added AND write to EX MCGR GP3 - AK
+
+Revision 1.8  2012/04/16 23:55:34  bcbrock
+Corrected problems related to C/C++ and 32-bit/64-bit portability and Host
+Boot after initial review by FW team.
+
+o Renamed fapi_sbe_common.h to fapi_sbe_common.H
+o Renamed p8_scan_compression.[ch] to .[CH] since these are for use by C++
+  procedures only (no requirement to execute on OCC).
+o Modified sbe_xip_image.c to use the C99 standard way to print uint64_t
+  variables.
+o Added __cplusplus guards to sbe_xip_image.h
+
+Revision 1.7  2012/04/04 11:41:15  koenig
+Added TP hangcounter 6 and MBOX_FSIGP8
+
+Revision 1.6  2012/03/26 15:16:52  stillgs
+Added SCAN_CORE_ALL, SCAN_CORE_GPTR_TIME_REP, SCAN_CORE_TIME_REP constants for use by Sleep Exit
+
+Revision 1.5  2012/02/10 23:09:50  jmcgill
+add trace array addresses
+
+Revision 1.4  2012/01/30 10:07:53  gweber
+changed SCAN_CHIPLET_ALL to 0x68
+
+Revision 1.3  2012/01/27 09:36:42  koenig
+Added a region vector for scan0 module
+
+Revision 1.2  2012/01/24 21:59:39  mfred
+Moved common multicast address constants to common_scom_accresses.H
+
 Revision 1.1  2012/01/06 22:21:10  jmcgill
 initial release
 
