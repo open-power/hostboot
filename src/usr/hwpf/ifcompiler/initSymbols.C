@@ -1,17 +1,26 @@
-// IBM_PROLOG_BEGIN_TAG
-// This is an automatically generated prolog.
-//
-// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/ifcompiler/initSymbols.C,v $
-//
-// IBM CONFIDENTIAL
-//
-// COPYRIGHT International Business Machines Corp. 2010,2010
-//
-//UNDEFINED 
-//
-// Origin: UNDEFINED
-//
-// IBM_PROLOG_END_TAG
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/hwpf/ifcompiler/initSymbols.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2010-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 // Change Log *************************************************************************************
 //                                                                      
 //  Flag Track     Userid   Date     Description                
@@ -29,6 +38,8 @@
 //                                   Support defines for bits, scom_data and attribute columns
 //                                   Delete obsolete code for defines support
 //                 camvanng 05/07/12 Support for associated target attributes
+//                 camvanng 06/27/12 Improve error and debug tracing
+//                                   Add get_numeric_array_data()
 // End Change Log *********************************************************************************
 
 /**
@@ -67,7 +78,8 @@ Symbols::Symbols(FILELIST & i_filenames)
         if(!infs)
         {
             errss.str("");
-            errss << "ERROR - Could not open " << *fn;
+            errss << "ERROR! Symbols::Symbols: Could not open "
+                  << *fn << endl;
             throw invalid_argument(errss.str());
         }
         while(getline(infs,fileline))
@@ -569,6 +581,29 @@ uint64_t Symbols::get_numeric_data(uint32_t i_rpn_id, uint32_t & o_size)
         ostringstream err;
         err << hex;
         err << "ERROR! - Symbols::get_numeric_data() invalid arg rpn_id = " << i_rpn_id << endl;
+        throw invalid_argument(err.str());
+    }
+    return data;
+}
+
+// ------------------------------------------------------------------------------------------------
+
+uint64_t Symbols::get_numeric_array_data(uint32_t i_rpn_id, uint32_t & o_size)
+{
+    uint64_t data = 0;
+    o_size = 0;
+    uint32_t offset = i_rpn_id - Rpn::ARRAY_INDEX;
+    if(offset < iv_lits.size())
+    {
+        LIT_DATA d = iv_lits[offset];
+        data = d.first;
+        o_size = d.second;
+    }
+    else
+    {
+        ostringstream err;
+        err << hex;
+        err << "ERROR! - Symbols::get_numeric_array_data() invalid arg rpn_id = " << i_rpn_id << endl;
         throw invalid_argument(err.str());
     }
     return data;

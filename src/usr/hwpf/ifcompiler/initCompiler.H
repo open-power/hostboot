@@ -1,17 +1,26 @@
-// IBM_PROLOG_BEGIN_TAG
-// This is an automatically generated prolog.
-//
-// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/ifcompiler/initCompiler.H,v $
-//
-// IBM CONFIDENTIAL
-//
-// COPYRIGHT International Business Machines Corp. 2010,2010
-//
-//UNDEFINED 
-//
-// Origin: UNDEFINED
-//
-// IBM_PROLOG_END_TAG
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/hwpf/ifcompiler/initCompiler.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2010-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #if !defined(INITCOMPILER_H)
 #define INITCOMPILER_H
 
@@ -26,6 +35,7 @@
 //                 andrewg  09/19/11 Updates based on review
 //                 mjjones  11/17/11 Output attribute listing
 //                 camvanng 04/12/12 Ability to specify search paths for include files
+//                 camvanng 06/27/12 Improve error and debug tracing
 // End Change Log *********************************************************************************
 
 /**
@@ -50,6 +60,8 @@ extern int yyparse();
 void yyerror(const char * s);
 extern init::ScomList * yyscomlist;
 extern vector<string> yyincludepath;
+extern vector<string> yyfname;
+extern string dbg_fname;
 
 namespace init
 {
@@ -58,6 +70,12 @@ namespace init
     extern ostringstream dbg;    // debug (verbose) output
     extern ostringstream erros;  // error output stream
     extern ostringstream stats;  // Misc info to be displayed
+
+    /**
+     * Dump the dbg stringstream to a file
+     * @param i_fname file to dump dbg stringstream
+     */
+    void capture_dbg(string i_fname);
 
 
 
@@ -79,15 +97,16 @@ namespace init
             string source_fn()  { return iv_source_path; }
             string binseq_fn()  { return iv_outfile; }  //dg003a
             //{ string s(iv_outdir); s.append(iv_initfile); s.append(".if"); return s; } //dg003d
+
+            // File to dump dbg stringstream
+            string dbg_fn() {string fname(iv_outdir); fname += iv_initfile + ".dbg"; return fname; }
+
             uint32_t get_source_type() { return iv_type; }
 
             ostream & listing_ostream() { return iv_list_ostream; }
             ostream & attr_listing_ostream() { return iv_attr_list_ostream; }
 
-            ScomList * get_scomlist() { return iv_scomlist; }  // TODO refactor this out
             bool debug_mode() { return iv_dbg; }
-
-            void capture_dbg();  // if iv_dbg then dump the dbg stringstream to a file
 
         private:
             string iv_prog_name;

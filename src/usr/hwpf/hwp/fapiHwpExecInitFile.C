@@ -58,6 +58,7 @@
  *          SW146714        camvanng    06/08/2012  Use two bytes to store row
  *                                                  rpn sequence byte count
  *                          camvanng    06/15/2012  Ability to do bitwise OR and AND operations
+ *                          camvanng    06/27/2012  Fix bug in targetId
  */
 
 #include <fapiHwpExecInitFile.H>
@@ -74,7 +75,7 @@ extern "C"
 //#define HWPEXECINITFILE_DEBUG
 #ifdef HWPEXECINITFILE_DEBUG
 //#define HWPEXECINITFILE_DEBUG2
-#define IF_DBG(_fmt_, _args_...) FAPI_DBG(_fmt_, ##_args_)
+#define IF_DBG(_fmt_, _args_...) FAPI_INF(_fmt_, ##_args_)
 #else
 #define IF_DBG(_fmt_, _args_...)
 #endif
@@ -130,9 +131,6 @@ enum IfHeader
 
 //RPN stack
 typedef std::vector<uint64_t> rpnStack_t;
-
-//Array Index Id container for scom data of array attribute type
-typedef std::vector<uint64_t> dataArrayIdxId_t;
 
 //InitFile address, size and current offset
 typedef struct ifInfo
@@ -915,8 +913,8 @@ void loadScomSection(ifInfo_t & io_ifInfo,
                 //Read in the scom data
                 //Don't swap the bytes, scom data will parsed by byte later in code
                 ifRead(io_ifInfo, l_rowPtr, l_rowSize, false);
-                #if defined(HOSTBOOT_DEBUG) && defined(HWPEXECINITFILE_DEBUG)
-                for (k = 0; k < l_rowSize; k++)
+                #ifdef HWPEXECINITFILE_DEBUG
+                for (uint8_t k = 0; k < l_rowSize; k++)
                 {
                     IF_DBG("loadScomSection: scom[%u]: data[%u] "
                            "0x%02x", i, j, *l_rowPtr++);
@@ -1626,7 +1624,7 @@ fapi::ReturnCode getAttrArrayDimension(const ifData_t & i_ifData,
 
         IF_DBG("fapiHwpExecInitFile: getAttrArrayDimension: Attr ID:0x%.4X "
                  "has dimension %u of type 0x%.4X",
-                 i_id, l_attrDimension, i_ifData.attrs[l_id].type);
+                 i_id, o_attrDimension, i_ifData.attrs[l_id].type);
     }
     else
     {
@@ -1684,7 +1682,7 @@ uint64_t rpnPop(rpnStack_t * io_rpnStack)
  */
 void rpnDumpStack(rpnStack_t * i_rpnStack)
 {
-    #ifdef HOSTBOOT_DEBUG
+    #ifdef HWPEXECINITFILE_DEBUG2
 
     IF_DBG(">> fapiHwpExecInitFile: rpnDumpStack: stack size = %d",
              i_rpnStack->size());
@@ -2080,7 +2078,7 @@ fapi::ReturnCode evalRpn(ifData_t & io_ifData, char *i_expr,
                 {
                     // Read the target# id
                     uint16_t l_targetId = *i_expr++ << 8;
-                    l_targetId = *i_expr++;
+                    l_targetId |= *i_expr++;
                     IF_DBG("target Id 0x%x", l_targetId);
 
                     if (l_targetId)

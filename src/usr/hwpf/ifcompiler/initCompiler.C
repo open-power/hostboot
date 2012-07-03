@@ -1,17 +1,26 @@
-// IBM_PROLOG_BEGIN_TAG
-// This is an automatically generated prolog.
-//
-// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/ifcompiler/initCompiler.C,v $
-//
-// IBM CONFIDENTIAL
-//
-// COPYRIGHT International Business Machines Corp. 2010,2010
-//
-//UNDEFINED 
-//
-// Origin: UNDEFINED
-//
-// IBM_PROLOG_END_TAG
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/hwpf/ifcompiler/initCompiler.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2010-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 // Change Log *************************************************************************************
 //                                                                      
 //  Flag   Track    Userid   Date     Description                
@@ -23,6 +32,7 @@
 //                 andrewg  09/19/11 Updates based on review
 //                 mjjones  11/17/11 Output attribute listing
 //                 camvanng 04/12/12 Ability to specify search paths for include files
+//                 camvanng 06/27/12 Improve error and debug tracing
 // End Change Log *********************************************************************************
 
 /**
@@ -52,6 +62,8 @@ using namespace std;
 int yyline = 1;
 init::ScomList * yyscomlist = NULL;
 vector<string> yyincludepath;  //path to search for include files
+vector<string> yyfname;        //list of initfile/define files being parsed
+string dbg_fname;              //file to dump dbg stringstream
 
 ostringstream init::dbg;
 ostringstream init::erros;
@@ -100,9 +112,9 @@ int main(int narg, char ** argv)
             ifstream ifs(initfile.c_str(), ios_base::in | ios_base::binary);
             if(!ifs)
             {
-                string msg("Can't open ");
-                msg.append(initfile);
-                throw invalid_argument(msg);
+                std::ostringstream msg;
+                msg << "initCompiler.C: main: Could not open " << initfile << endl;
+                throw invalid_argument(msg.str());
             }
             while(1)
             {
@@ -114,7 +126,7 @@ int main(int narg, char ** argv)
 
             yyscomlist->listing(bin_seq, cout);
 
-            erros << parsed.get_scomlist()->get_symbols()->not_found_listing();
+            erros << yyscomlist->get_symbols()->not_found_listing();
 
         }
         else // normal initfile processing
@@ -127,14 +139,15 @@ int main(int narg, char ** argv)
 
             // if there are missing symbols, SpyList::listing() will add duplicates
             // So get the listing now
-            erros << parsed.get_scomlist()->get_symbols()->not_found_listing();
+            erros << yyscomlist->get_symbols()->not_found_listing();
 
             string if_fn = parsed.binseq_fn();
             ofstream ofs(if_fn.c_str(), ios_base::out | ios_base::binary);
             if(!ofs)
             {
-                erros << "ERROR - Could not open" << if_fn << endl;
-                throw invalid_argument(if_fn);
+                std::ostringstream msg;
+                msg << "initCompiler.C: main: Could not open " << if_fn << endl;
+                throw invalid_argument(msg.str());
             }
             else
             {
@@ -158,12 +171,22 @@ int main(int narg, char ** argv)
 
         }
 
-        printf("Generate Debug\n");
-        parsed.capture_dbg();
+        if (parsed.debug_mode())
+        {
+            printf("Generate Debug\n");
+            capture_dbg(dbg_fname);
+        }
         //if(parsed.debug_mode()) cout << dbg.str() << endl;
     }
     catch(exception & e)
     {
+        //Dump dbg stringstream to file
+        capture_dbg(dbg_fname);
+
+        //Dump current stats
+        stats << "*********************************************************\n";
+        cerr << stats.str() << endl;
+
         cerr << "ERROR! exception caught: " << e.what() << endl;
         rc = 2;
     }
@@ -215,7 +238,14 @@ Parser::Parser(int narg, char ** argv)
         else if (arg.compare(0,7,"--debug") == 0) iv_dbg = true;
 
     }
-    if(iv_source_path.size() == 0) iv_source_path = compare.first;
+    if(iv_source_path.size() == 0)
+    {
+        iv_source_path = compare.first;
+    }
+    else
+    {
+        yyfname.push_back(iv_source_path);
+    }
 
     if(!narg) // TEST MODE
     {
@@ -250,6 +280,8 @@ Parser::Parser(int narg, char ** argv)
 
     iv_outfile.insert(0,iv_outdir);
 
+    dbg_fname = dbg_fn();
+
     stats << "*********************************************************" << endl;
     stats << "* source:  " << iv_source_path << endl;
     stats << "* listing: " << listing_fn() << endl;
@@ -283,13 +315,17 @@ Parser::Parser(int narg, char ** argv)
     iv_list_ostream.open(listing_fn().c_str());
     if(!iv_list_ostream)
     {
-        throw invalid_argument(string("ERROR! Could not open ") + listing_fn());
+        std::ostringstream msg;
+        msg << "initCompiler.C: Parser: Could not open " << listing_fn() << endl;
+        throw invalid_argument(msg.str());
     }
 
     iv_attr_list_ostream.open(attr_listing_fn().c_str());
     if(!iv_attr_list_ostream)
     {
-        throw invalid_argument(string("ERROR! Could not open ") + attr_listing_fn());
+        std::ostringstream msg;
+        msg << "initCompiler.C: Parser: Could not open " << attr_listing_fn() << endl;
+        throw invalid_argument(msg.str());
     }
 }
 
@@ -299,23 +335,17 @@ Parser::~Parser()
     iv_attr_list_ostream.close();
 }
 
-void Parser::capture_dbg()
+void init::capture_dbg(string i_fname)
 {
-    if(iv_dbg)
+    ofstream dbgfs(i_fname.c_str());
+    if(!dbgfs)
     {
-        string fname(iv_outdir);
-        fname.append(iv_initfile);
-        fname.append(".dbg");
-        ofstream dbgfs(fname.c_str());
-        if(!dbgfs)
-        {
-            string msg("Can't open ");
-            msg.append(fname);
-            throw invalid_argument(msg);
-        }
-        dbgfs << dbg.str() << endl;
-        dbgfs.close();
+        std::ostringstream msg;
+        msg << "initCompiler.C: capture_dbg: Could not open " << i_fname << endl;
+        throw invalid_argument(msg.str());
     }
+    dbgfs << dbg.str() << endl;
+    dbgfs.close();
 }
 
 // TODO

@@ -45,6 +45,7 @@
 //                                   in the scom_data column
 //        SW146714 camvanng 06/08/12 Use two bytes to store row rpn sequence byte count
 //                                   Handle case where after row_optimize(), there's no Scom to write
+//                 camvanng 06/27/12 Improve error and debug tracing
 // End Change Log *********************************************************************************
 
 /**
@@ -110,7 +111,8 @@ Scom::Scom(BINSEQ::const_iterator & bli, Symbols * i_symbols):
         else // What's this?
         {
             ostringstream errs;
-            errs << "ERROR: Invalid scom bit length [" << iv_scom_length << "]" << endl;
+            errs << "ERROR: Scom::Scom: Invalid scom bit length ["
+                 << iv_scom_length << "]" << endl;
             throw range_error(errs.str());
         }
     }
@@ -230,11 +232,11 @@ void Scom::add_col(const string & i_colname)
         {
             if (s == "EXPR")
             {
-                yyerror("Multiple EXPR columns specified.");
+                yyerror("Scom:: add_col: Multiple EXPR columns specified.");
             }
             else
             {
-                yyerror("EXPR must be the last column");
+                yyerror("Scom:: add_col: EXPR must be the last column");
             }
         }
     }
@@ -276,7 +278,7 @@ void Scom::add_row_rpn(Rpn * i_rpn)
 void Scom::add_bit_range(uint32_t start, uint32_t end)
 {
     // make sure they are added in order
-    dbg << "Add bit range " << start << " to " << end << endl;
+    dbg << "Add bit range " << dec << start << " to " << end << endl;
     iv_range_list.push_back(RANGE(start,end));
 }
 
@@ -357,6 +359,7 @@ string Scom::list_one(RANGE range)
     oss << hex << setfill('0');
     oss << "------------";
     oss << " Scom Address: 0x" << setw(16) << iv_scom_addr_hex;
+    dbg << " Scom Address: 0x" << hex << setfill('0') << setw(16) << iv_scom_addr_hex << endl;
     if(bitlen)
     {
         oss << '~' << dec << range.first;
@@ -486,7 +489,8 @@ uint32_t Scom::bin_listing(BINSEQ & blist)
 
         for(; i != iv_scom_addr.end(); ++i, ++addr_num)
         {
-            //printf("scom address:%s\n",(*i).c_str());
+            dbg << "SCOM::bin_listing: SCOM[" << dec << scom_count << "]  Address: "
+                << hex << *i << endl;
             if(ranges.size())
             {
                 for(set<RANGE>::iterator r = ranges.begin(); r != ranges.end(); ++r)
@@ -895,7 +899,7 @@ ScomList::ScomList(const string & initfile, FILELIST & defines, ostream & stats,
         yyin = fopen(initfile.c_str(), "r");
         if(!yyin)
         {
-            string ers("ERROR: Could not open initfile: ");
+            string ers("ERROR: ScomList::ScomList: Could not open initfile: ");
             ers.append(initfile);
             throw invalid_argument(ers);
         }
@@ -1037,7 +1041,7 @@ void ScomList::clear()
 
 void ScomList::set_syntax_version(uint32_t v)
 {
-    if(v != 1 && v != 2) yyerror("Invalid Syntax Version");
+    if(v != 1 && v != 2) yyerror("ScomList:: set_syntax_version: Invalid Syntax Version");
     iv_syntax_version = v;
 }
 
@@ -1097,12 +1101,12 @@ void ScomList::compile(BINSEQ & bin_seq)
         }
         else
         {
-            throw range_error("ERROR: No CVS version(s) specified");
+            throw range_error("ERROR: ScomList::compile: No CVS version(s) specified");
         }
     }
     else // syntax version already validated to be 1 or 2 - so if we get here it was never set.
     {
-        throw range_error("ERROR: No syntax version specified!");
+        throw range_error("ERROR: ScomList::compile: No syntax version specified!");
     }
     stats << '*' << setw(20) << "Syntax Version:" << setw(6) << iv_syntax_version << endl;
 
@@ -1288,7 +1292,7 @@ void ScomList::listing(BINSEQ & bin_seq,ostream & olist)
         b = bin_seq.begin() + offset;
         if(!(b < bin_seq.end()))
         {
-            throw overflow_error("ERROR: ScomList::listing - iterator overflowed sequence");
+            throw overflow_error("ERROR: ScomList::listing: iterator overflowed sequence");
         }
 
         SCOM_LIST l_scom_list;
@@ -1458,7 +1462,7 @@ void Scom::set_scom_address(const string & i_scom_addr)
 
     if(iv_scom_addr.size())
     {
-        yyerror("SCOM Address already set!");
+        yyerror("Scom::set_scom_address: SCOM Address already set!");
     }
     else
     {
@@ -1485,7 +1489,7 @@ void Scom::dup_scom_address(const string & i_scom_addr)
         if (l_num1 >= l_num2)
         {
             std::ostringstream oss;
-            oss << "Invalid scom address range: " << i_scom_addr;
+            oss << "Scom::dup_scom_address: Invalid scom address range: " << i_scom_addr;
             yyerror(oss.str().c_str());
         }
 
@@ -1559,7 +1563,7 @@ void Scom::set_scom_suffix(const string & i_scom_addr)
     if(iv_scom_addr.size() == 0)
     {
         std::ostringstream oss;
-        oss << "No base scom address to append suffix " << i_scom_addr;
+        oss << "Scom::set_scom_suffix: No base scom address to append suffix " << i_scom_addr;
         yyerror(oss.str().c_str());
     }
     else
@@ -1583,7 +1587,7 @@ void Scom::set_scom_address_bin(const string & i_scom_addr)
 
     if(iv_scom_addr_bin.size())
     {
-        yyerror("Binary SCOM Address already set!");
+        yyerror("Scom::set_scom_address_bin: Binary SCOM Address already set!");
     }
     else
     {
@@ -1610,7 +1614,8 @@ void Scom::dup_scom_address_bin(const string & i_scom_addr)
         if (l_num1 >= l_num2)
         {
             std::ostringstream oss;
-            oss << "Invalid binary scom address range: " << i_scom_addr;
+            oss << "Scom::dup_scom_address_bin: Invalid binary scom address range: "
+                << i_scom_addr;
             yyerror(oss.str().c_str());
         }
 
@@ -1684,7 +1689,8 @@ void Scom::set_scom_suffix_bin(const string & i_scom_addr)
     if(iv_scom_addr_bin.size() == 0)
     {
         std::ostringstream oss;
-        oss << "No base binary scom address to append suffix " << i_scom_addr;
+        oss << "Scom::set_scom_suffix_bin: No base binary scom address to append suffix "
+            << i_scom_addr;
         yyerror(oss.str().c_str());
     }
     else
@@ -1707,7 +1713,8 @@ void Scom::append_scom_address_bin()
         if (0 != (iv_scom_addr_bin.at(i).size() % 4))
         {
             std::ostringstream oss;
-            oss << "Binary scom address " << iv_scom_addr_bin.at(i) << " is a partial hex!";
+            oss << "Scom::append_scom_address_bin: Binary scom address "
+                << iv_scom_addr_bin.at(i) << " is a partial hex!";
             yyerror(oss.str().c_str());
             break;
         }
@@ -1755,3 +1762,16 @@ string Scom::dec2binString(uint64_t i_num, size_t i_str_size)
     return string(l_buf + l_idx, l_buf + l_size);
 }
 
+string Scom::addr_listing()
+{
+    std::stringstream l_ss;
+    l_ss << "\t\t\tSCOM Addresses" << endl;
+    //l_ss << std::hex << std::setfill('0');
+
+    for (size_t i = 0; i < iv_scom_addr.size(); i++)
+    {
+        //l_ss << "0x" << std::setw(16) << op_id << "\t\t" << OP_TXT[op_id] << std::endl;
+        l_ss << iv_scom_addr.at(i) << endl;
+    }
+    return l_ss.str();
+}

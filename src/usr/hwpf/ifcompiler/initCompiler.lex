@@ -45,6 +45,7 @@
 //                camvanng 05/22/12   Fix "OP" definition
 //                camvanng 06/11/12   Fix shift/reduce warnings from yacc
 //                camvanng 06/15/12   Ability to do bitwise OR and AND operations
+//                camvanng 06/27/12   Improve error handling
 // End Change Log *********************************************************************************/
 /**
  * @file initCompiler.lex
@@ -85,7 +86,6 @@ uint32_t g_coltype = 0;
 uint32_t g_scomtype = 0;
 uint32_t g_paren_level = 0;
 bool g_equation = false;   // equation inside scomv col
-std::string g_scomname;     // dg02
 std::string g_scomdef_name;
 std::map<std::string,std::string> g_defines; //container for all the defines
     //i.e. define def_A = (attrA > 1) => key = "DEF_A", value = "(attr_A > 1)"
@@ -102,6 +102,8 @@ YY_BUFFER_STATE include_stack[MAX_INCLUDE_DEPTH];
 int yyline_stack[MAX_INCLUDE_DEPTH];
 int include_stack_num = 0;
 
+extern std::vector<std::string> yyfname;
+
 %}
 
 
@@ -110,7 +112,7 @@ int include_stack_num = 0;
 NEWLINE  \n
 FILENAME [A-Za-z][A-Za-z0-9_\.]*
 ID      [A-Za-z][A-Za-z0-9_]*
-ID2     [A-Za-z][A-Za-z0-9_]*(\[[0-9]+(..[0-9]+)?(,[0-9]+(..[0-9]+)?)*\]){0,4}
+ID2     [A-Za-z][A-Za-z0-9_]*(\[[0-9]+(\.\.[0-9]+)?(,[0-9]+(\.\.[0-9]+)?)*\]){0,4}
 ID3      [0-9]+[A-Za-z_]+[0-9]*
 DIGIT    [0-9]
 COMMENT  #.*\n
@@ -123,6 +125,7 @@ HEX     0[xX][A-Fa-f0-9]+
 SINGLE_HEX [A-Fa-f0-9]
 ATTRIBUTE [\[[A-Fa-f0-9]\]]
 MULTI_DIGIT [0-9]+
+MULTI_INDEX_RANGE [0-9]+(\.\.[0-9]+)?(,[0-9]+(\.\.[0-9]+)?)*
 
 %x      scomop 
 %x      scomop_hex 
@@ -165,6 +168,7 @@ MULTI_DIGIT [0-9]+
                             fclose(yyin);
                             yy_switch_to_buffer(include_stack[include_stack_num]);
                             yyline = yyline_stack[include_stack_num];
+                            yyfname.pop_back();
                         }
                     }
 
@@ -190,7 +194,8 @@ include                 { BEGIN(incl); }
                             /*printf("lex: include file %s\n", yytext);*/
                             if ( include_stack_num >= MAX_INCLUDE_DEPTH )
                             {
-                                lex_err("Includes nested too deeply");
+                                lex_err("Include nested too deeply");
+                                lex_err(yytext);
                                 exit( 1 );
                             }
 
@@ -213,12 +218,13 @@ include                 { BEGIN(incl); }
                             if (NULL == yyin)
                             {
                                 oss.str("");
-                                oss << "Cannot open file: " << yytext;
+                                oss << "Cannot open include file: " << yytext;
                                 lex_err(oss.str().c_str());
                                 exit(1);
                             }
                             printf("Include file %s\n", filename.c_str());
                             yyline = 1;  //set line number for new buffer
+                            yyfname.push_back(filename); //save file name of new file being parsed
                             yy_switch_to_buffer(yy_create_buffer(yyin, YY_BUF_SIZE));
 
                             BEGIN(INITIAL);
@@ -349,7 +355,7 @@ scom              { BEGIN(scomop); oss.str("");  return INIT_SCOM; }
 
 <scomcolname>{COMMENT}   ++yyline;
 <scomcolname>\n          ++yyline;
-<scomcolname>{ID2}        {
+<scomcolname>{ID}        {  // Only non-array attributes are supported for attribute column
                             g_colstream.push_back(new std::ostringstream());
                             *(g_colstream.back()) << yytext;
                          }
@@ -360,7 +366,14 @@ scom              { BEGIN(scomop); oss.str("");  return INIT_SCOM; }
 <scomrow>{NEWLINE}       ++yyline;
 <scomrow>([^,;\n#\{\}]+{ID2}*)+ push_col(yytext);
 <scomrow>[,]             ++g_scomcol;
-<scomrow>[;]             g_scomcol = 0;
+<scomrow>[;]             { 
+                             if ((g_scomcol + 1) < g_colstream.size())
+                             {
+                                 lex_err("# Scom columns < # of column headers");
+                                 exit(1);
+                             }
+                             g_scomcol = 0;
+                         }
 <scomrow>[\}]            {
                             pushBackScomBody();  // create new format and put it back on yyin
                             BEGIN(INITIAL);
@@ -446,14 +459,19 @@ END_INITFILE            return INIT_ENDINITFILE;
 <*>[\(]                 { ++g_paren_level; return yytext[0]; }
 <*>[\)]                 { --g_paren_level; return yytext[0]; }
 
-<*>\[({MULTI_DIGIT}[,.]*)+\]    { yylval.str_ptr = new std::string(yytext);  return ATTRIBUTE_INDEX; }
+<*>\[{MULTI_INDEX_RANGE}\]    { yylval.str_ptr = new std::string(yytext);  return ATTRIBUTE_INDEX; }
 
-<*>[\[\]\{\},:]         {g_equation = false; return yytext[0]; }
+<*>[\{\},:]             {g_equation = false; return yytext[0]; }
 
 <*>[ \t\r]+             /* Eat up whitespace */
 [\n]                    { BEGIN(INITIAL);++yyline;}
 
-<*>.                    lex_err(yytext);
+<*>.                    {
+                            oss.str("");
+                            oss << yytext << " is not valid syntax";
+                            lex_err(oss.str().c_str());
+                            exit(1);
+                        }
 
 %%
 
@@ -461,7 +479,8 @@ int yywrap() { return 1; }
 
 void lex_err(const char *s )
 {
-    std::cerr << "\nERROR: lex: " << s << " -line " << yyline << std::endl;
+    std::cerr << "\nERROR: lex: " << yyfname.back().c_str()
+              << ", line " << yyline << ": " << s << std::endl << std::endl;
 }
 
 // Convert left justified bitstring to right-justified 64 bit integer
@@ -470,32 +489,36 @@ uint64_t bits2int( const char * bitString)
     uint32_t idx = 0;
     uint64_t mask = 0x0000000000000001ull;
     uint64_t val = 0;
-    do
+
+    if( (bitString[0] != '0') ||
+        ((bitString[1] != 'b') && (bitString[1] != 'B')))
     {
-      if( (bitString[0] != '0') ||
-          ((bitString[1] != 'b') && (bitString[1] != 'B')))
-      {
-          lex_err("Invalid bit string");
-          break;
-      }
-      idx = 2;
+        lex_err("Invalid bit string");
+        lex_err(bitString);
+        exit(1);
+    }
+    idx = 2;
 
-      while( bitString[idx] != 0 )
-      {
-          val <<= 1;
-          char c = bitString[idx];
-          if( c == '1') val |= mask;
-          else if(c != '0')
-          {
-              lex_err("Invalid bit string");
-              break;
-          }
-          ++idx;
-      }
-      if(idx > 66) //dg01a  64bits + "0B" prefix
-          lex_err("Bit string greater than 64 bits!");
+    while( bitString[idx] != 0 )
+    {
+        val <<= 1;
+        char c = bitString[idx];
+        if( c == '1') val |= mask;
+        else if(c != '0')
+        {
+            lex_err("Invalid bit string");
+            lex_err(bitString);
+            exit(1);
+        }
+        ++idx;
+    }
+    if(idx > 66) //dg01a  64bits + "0B" prefix
+    {
+        lex_err("Bit string greater than 64 bits!");
+        lex_err(bitString);
+        exit(1);
+    }
 
-     } while (0);
     return val;   
 }
 
@@ -507,7 +530,8 @@ uint64_t hexs2int(const char * hexString, int32_t size)
     if(size > 18) //dg01a
     {
         lex_err("HEX literal greater than 64 bits");
-        size = 18;
+        lex_err(hexString);
+        exit(1);
     }
     s.insert(2, 18-size,'0');  // 0x + 16 digits
     val = strtoull(s.c_str(),NULL,16);
@@ -541,17 +565,11 @@ void pushBackScomBody()
 /// help collect column data
 void push_col(const char * s)
 {
-    //dg02a begin
-    while(g_scomcol >= g_colstream.size())  // more data cols than headers cols
+    if(g_scomcol >= g_colstream.size())  // more data cols than headers cols
     {
-        // This will force an error in the parser where it can stop the compile.
-        g_colstream.push_back(new std::ostringstream());
-        *(g_colstream.back()) << "MISSING_COLUMN_HEADER";
-        lex_err(g_scomname.c_str());
-        lex_err("Invalid number of scom cols");
+        lex_err("Missing column header");
+        exit(1);
     }
-    //dgxxa end
-    //dgxxd remove if(g_colstream < g_colstream.size() 
 
     std::ostringstream & o = *(g_colstream[g_scomcol]);
     std::ostringstream token;

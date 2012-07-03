@@ -42,6 +42,7 @@
 //                                   in the scom_data column
 //        SW146714 camvanng 06/08/12 Use two bytes to store row rpn sequence byte count
 //                 camvanng 06/15/12 Ability to do bitwise OR and AND operations
+//                 camvanng 06/27/12 Improve error and debug tracing
 // End Change Log *********************************************************************************
 
 /**
@@ -221,7 +222,7 @@ void Rpn::push_id(std::string & i_id, TYPE i_type)
         else
         {
             std::ostringstream oss;
-            oss << "Invalid associated target attribute " << i_id.c_str();
+            oss << "Rpn::push_id: Invalid associated target attribute " << i_id.c_str();
             yyerror(oss.str().c_str());
         }
     }
@@ -264,7 +265,8 @@ void Rpn::push_array_index(std::string &i_array_idx)
             if (l_array_val >= l_array_val2)
             {
                 std::ostringstream oss;
-                oss << "Invalid attribute array index range: " << l_idxstr.at(i);
+                oss << "Rpn::push_array_index: Invalid attribute array index range: "
+                    << l_idxstr.at(i);
                 yyerror(oss.str().c_str());
             }
 
@@ -293,9 +295,9 @@ void Rpn::push_array_index(std::string &i_array_idx)
         if (iv_array_idx_range.back() != l_num_idx)
         {
             std::ostringstream oss;
-            oss << "Array attribute has different range of index for each dimension: "
-                << i_array_idx << " iv_array_idx_range: " << iv_array_idx_range.back()
-                << " l_num_idx: " << l_num_idx;
+            oss << "Rpn::push_array_index: Array attribute has different range of index "
+                << "for each dimension: " << i_array_idx << " iv_array_idx_range: "
+                << iv_array_idx_range.back() << " l_num_idx: " << l_num_idx;
             yyerror(oss.str().c_str());
         }
     }
@@ -305,17 +307,6 @@ void Rpn::push_array_index(std::string &i_array_idx)
     }
 
     //printf("Rpn::push_array_index: %s, iv_array_idx_range.size %u\n", i_array_idx.c_str(), iv_array_idx_range.size());
-}
-
-//-------------------------------------------------------------------------------------------------
-void Rpn::push_attr_enum(std::string &i_attr_enum)
-{
-    uint64_t l_attr_enum_val = iv_symbols->get_attr_enum_val(i_attr_enum);
-
-    uint32_t rpn_id = iv_symbols->find_numeric_lit(l_attr_enum_val,8);
-    iv_rpnstack.push_back(rpn_id);
-
-    //printf("Attribute Enum name: %s  Value:%u  rpn_id:0x%8X\n",i_attr_enum.c_str(),l_attr_enum_val,rpn_id);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -683,7 +674,7 @@ void Rpn::bin_read_one_id(BINSEQ::const_iterator & io_bli, Symbols * i_symbols)
     if(v < LAST_OP) // operator
     {
         std::ostringstream errss;
-        errss << "Rpn::bin_read_one_id: This is an op\n";
+        errss << "Rpn::bin_read_one_id: This is an op 0x" << hex << v << endl;
         throw std::invalid_argument(errss.str());
     }
 
@@ -795,6 +786,23 @@ std::string  Rpn::listing(const char * i_desc, const std::string & spyname, bool
             {
                 rpn_byte_size += size;
                 oss << "0x" << std::setw(size * 2) << data << '\t' << "Numerical Literal" << std::endl;
+            }
+        }
+        else if((*i) & ARRAY_INDEX)
+        {
+            uint32_t size = 0;
+            uint64_t data = iv_symbols->get_numeric_array_data(*i,size);
+            if(i_final)
+            {
+                uint32_t tag = iv_symbols->get_numeric_array_tag(*i);
+                rpn_byte_size += 2;
+                oss << "0x" << std::setw(4) << tag << "\t\t" << "PUSH 0x"
+                    << std::setw(size*2) << data << std::endl;
+            }
+            else
+            {
+                rpn_byte_size += size;
+                oss << "0x" << std::setw(size * 2) << data << '\t' << "Numerical Literal (array index)" << std::endl;
             }
         }
         else if((*i) & SYMBOL)
@@ -924,7 +932,8 @@ void Rpn::bin_str(BINSEQ & o_blist, uint32_t i_num_addrs, uint32_t i_addr_num,
                                     if ((v & TYPE_MASK) != ARRAY_INDEX)
                                     {
                                         std::ostringstream errss;
-                                        errss << "Rpn::bin_str: Rpn is not array index " << endl;
+                                        errss << "Rpn::bin_str: Rpn 0x" << hex << v
+                                              << " is not array index " << endl;
                                         throw std::invalid_argument(errss.str());
                                     }
                                 }
@@ -939,7 +948,9 @@ void Rpn::bin_str(BINSEQ & o_blist, uint32_t i_num_addrs, uint32_t i_addr_num,
                                 break;
 
             default:
-                    std::cerr << "ERROR! Rpn::bit_str() Invalid Rpn type: " << v << std::endl;
+                    std::ostringstream errss;
+                    errss << "Rpn::bin_str: Invalid Rpn type: 0x" << hex << v << endl;
+                    throw std::invalid_argument(errss.str());
                     break;
         }
     }

@@ -42,6 +42,7 @@
 //                 camvanng 06/11/12  Ability to do logical operations with attribute columns
 //                                    Fix shift/reduce warnings from yacc
 //                 camvanng 06/15/12  Ability to do bitwise OR and AND operations
+//                 camvanng 06/27/12  Improve error and debug tracing
 // End Change Log *********************************************************************************
 /**
  * @file initCompiler.y
@@ -178,6 +179,7 @@ scom:       INIT_SCOM {current_scom = new init::Scom(yyscomlist->get_symbols(),y
                      /* printf("Found an INIT_SCOM!\n"); */
                     /* current_scom = new init::Scom(yyscomlist->get_symbols(),yyline); */
                     yyscomlist->insert(current_scom);
+                    init::dbg << current_scom->addr_listing() << std::endl;
                 }
 ;	
 
@@ -344,13 +346,17 @@ expr:   INIT_INTEGER                    { $$= new init::Rpn($1,yyscomlist->get_s
 
 void yyerror(const char * s)
 {
+    //dump dbg stringstream to file
+    init::capture_dbg(dbg_fname);
+
     init::erros << setfill('-') << setw(80) << '-' << endl;
     init::erros << setfill('0');
-    init::erros << "Parse Error line " << dec << setw(4) << yyline << ": yychar = " 
-                << dec << (uint32_t) yychar << " [0x" << hex << (uint32_t) yychar << "] '";
+    init::erros << "Parse Error: " << yyfname.back().c_str() << ", line "
+                << dec << setw(4) << yyline << ": yychar = " 
+                << dec << (uint32_t) yychar << " = 0x" << hex << (uint32_t) yychar << " = '";
     if(isprint(yychar)) init::erros << (char)yychar;
     else  init::erros << ' ';
-    init::erros << "'  yylval = " << hex << "0x" <<  setw(8) << yylval.integer << endl;
+    init::erros << "'  yylval = " << hex << "0x" <<  setw(16) << yylval.uint64 << endl;
     init::erros << "ERROR: " << s << endl;
     init::erros << setfill('-') << setw(80) << '-' << endl << endl;
 

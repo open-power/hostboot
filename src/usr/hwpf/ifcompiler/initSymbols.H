@@ -1,17 +1,26 @@
-// IBM_PROLOG_BEGIN_TAG
-// This is an automatically generated prolog.
-//
-// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/ifcompiler/initSymbols.H,v $
-//
-// IBM CONFIDENTIAL
-//
-// COPYRIGHT International Business Machines Corp. 2010,2010
-//
-//UNDEFINED 
-//
-// Origin: UNDEFINED
-//
-// IBM_PROLOG_END_TAG
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/hwpf/ifcompiler/initSymbols.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2010-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #if !defined(INITSYMBOLS_H)
 #define INITSYMBOLS_H
 
@@ -30,6 +39,7 @@
 //                                   Support defines for bits, scom_data and attribute columns
 //                                   Delete obsolete code for defines support
 //                 camvanng 05/07/12 Support for associated target attributes
+//                 camvanng 06/27/12 Add get_numeric_array_data()
 // End Change Log *********************************************************************************
 
 /**
@@ -157,6 +167,14 @@ namespace init
              * @returns uint64_t data
              */
             uint64_t get_numeric_data(uint32_t i_rpn_id, uint32_t & o_size);
+
+            /**
+             * Get the literal data value from the Rpn id returned by find_numeric_array_lit()
+             * @param uint32_t Rpn id
+             * @param uint32_t for returned byte size
+             * @returns uint64_t data
+             */
+            uint64_t get_numeric_array_data(uint32_t i_rpn_id, uint32_t & o_size);
 
             /**
              * Get the attribute enum value for the attr enum

@@ -1,17 +1,26 @@
-// IBM_PROLOG_BEGIN_TAG
-// This is an automatically generated prolog.
-//
-// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/ifcompiler/initScom.H,v $
-//
-// IBM CONFIDENTIAL
-//
-// COPYRIGHT International Business Machines Corp. 2010,2010
-//
-//UNDEFINED
-//
-// Origin: UNDEFINED
-//
-// IBM_PROLOG_END_TAG
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/hwpf/ifcompiler/initScom.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2010-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #if !defined(INITSPY_H)
 #define INITSPY_H
 
@@ -33,6 +42,7 @@
 //                 camvanng 04/16/12 Support defines for SCOM address
 //                                   Support defines for bits, scom_data and attribute columns
 //                                   Delete obsolete code for defines support 
+//                 camvanng 06/27/12 Improve error and debug tracing
 // End Change Log *********************************************************************************
 
 /**
@@ -222,6 +232,11 @@ namespace init
              * @param i_str_size   string size
              */
             string dec2binString(uint64_t i_num, size_t i_str_size);
+
+            /**
+             * @brief Return scom address strings
+             */
+            string addr_listing();
 
         private:  // functions
 

@@ -39,6 +39,7 @@
 //                 camvanng 05/22/12 Ability to do simple operations on attributes
 //                                   in the scom_data column
 //        SW146714 camvanng 06/08/12 Use two bytes to store row rpn sequence byte count
+//                 camvanng 06/27/12 Delete push_attr_enum()
 // End Change Log *********************************************************************************
 
 /**
@@ -123,15 +124,6 @@ namespace init
          * @return Void
          */
         void push_array_index(std::string &i_array_idx);
-
-        /**
-         * @brief Add an attribute enum
-         *
-         * @param[in] i_attr_enum attribute enum name
-         *
-         * @return Void
-         */
-        void push_attr_enum(std::string &i_attr_enum);
 
         Rpn * push_op(IfRpnOp op);                   //<<< Add an operation to the Rpn sequence
 
