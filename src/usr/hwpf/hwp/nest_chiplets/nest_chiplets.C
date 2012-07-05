@@ -196,87 +196,16 @@ void    call_proc_startclock_chiplets( void    *io_pArgs )
 //
 void    call_proc_chiplet_scominit( void    *io_pArgs )
 {
-    errlHndl_t l_errl = NULL;
+    errlHndl_t l_err = NULL;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_chiplet_scominit entry" );
-    uint8_t l_num = 0;
-    
-    // Get all functional MCS chiplets
-    TARGETING::TargetHandleList l_mcsTargetList;
-    getAllChiplets(l_mcsTargetList, TYPE_MCS);
-    
-    // Invoke proc_chiplet_scominit on each one
-    for (l_num = 0; l_num < l_mcsTargetList.size(); l_num++)
-    {
-        const TARGETING::Target* l_pTarget = l_mcsTargetList[l_num];
-        const fapi::Target l_fapi_target(
-            TARGET_TYPE_MCS_CHIPLET,
-            reinterpret_cast<void *>
-                (const_cast<TARGETING::Target*>(l_pTarget)));
 
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "Running proc_chiplet_scominit HWP on...");
-        EntityPath l_path;
-        l_path = l_pTarget->getAttr<ATTR_PHYS_PATH>();
-        l_path.dump();
-
-        FAPI_INVOKE_HWP(l_errl, proc_chiplet_scominit, l_fapi_target);
-        if (l_errl)
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "ERROR 0x%.8X : proc_chiplet_scominit HWP returns error",
-                      l_errl->reasonCode());
-            break;
-        }
-        else
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "SUCCESS :  proc_chiplet_scominit HWP");
-        }
-    }
-    
-    if (!l_errl)
-    {
-        // Note: The HW team and Dean said that proc_chiplet_scominit involves
-        // calling an initfile on memory buffer chips. It seems a little odd for
-        // this to be done in a HWP called proc_chiplet_scominit, but this is
-        // not a mistake
-
-        // Get all functional membuf chips
-        TARGETING::TargetHandleList l_membufTargetList;
-        getAllChips(l_membufTargetList, TYPE_MEMBUF);
-    
-        // Invoke proc_chiplet_scominit on each one
-        for (l_num = 0; l_num < l_membufTargetList.size(); l_num++)
-        {
-            const TARGETING::Target* l_pTarget = l_membufTargetList[l_num];
-            const fapi::Target l_fapi_target(
-                TARGET_TYPE_MEMBUF_CHIP,
-                reinterpret_cast<void *>
-                    (const_cast<TARGETING::Target*>(l_pTarget)));
-
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "Running proc_chiplet_scominit HWP on...");
-            EntityPath l_path;
-            l_path = l_pTarget->getAttr<ATTR_PHYS_PATH>();
-            l_path.dump();
-
-            FAPI_INVOKE_HWP(l_errl, proc_chiplet_scominit, l_fapi_target);
-            if (l_errl)
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "ERROR 0x%.8X : proc_chiplet_scominit HWP returns error",
-                          l_errl->reasonCode());
-                break;
-            }
-            else
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "SUCCESS :  proc_chiplet_scominit HWP");
-            }
-        }
-    }
+    // proc_chiplet_scominit will be called when there are initfiles to execute
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_chiplet_scominit exit" );
 
-    // end task, returning any errorlogs to IStepDisp 
-    task_end2( l_errl );
+    task_end2( l_err );
 }
-
 
 
 //

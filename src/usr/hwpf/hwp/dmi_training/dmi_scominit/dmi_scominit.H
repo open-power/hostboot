@@ -1,7 +1,7 @@
 /*  IBM_PROLOG_BEGIN_TAG
  *  This is an automatically generated prolog.
  *
- *  $Source: src/usr/hwpf/hwp/nest_chiplets/proc_chiplet_scominit/proc_chiplet_scominit.C $
+ *  $Source: src/usr/hwpf/hwp/dmi_training/dmi_scominit/dmi_scominit.H $
  *
  *  IBM CONFIDENTIAL
  *
@@ -26,13 +26,13 @@
 // *! All Rights Reserved -- Property of IBM
 // *! *** IBM Confidential ***
 //------------------------------------------------------------------------------
-// *! TITLE       : proc_chiplet_scominit.C
-// *! DESCRIPTION : Wrapper HWP that invokes the proc_chiplet_scominit initfiles
+// *! TITLE       : dmi_scominit.H
+// *! DESCRIPTION : Wrapper HWP that invokes the dmi_scominit initfiles
 // *! OWNER NAME  : Mike Jones        Email: mjjones@us.ibm.com
 // *! BACKUP NAME : Mark Bellows      Email: bellows@us.ibm.com
 // *! ADDITIONAL COMMENTS :
 //
-// The purpose of this procedure execute memory initfiles in proper sequence.
+// Header file for dmi_scominit.
 //
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
@@ -41,31 +41,41 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
-//   1.2   | mjjones  |26-JUN-12| Initial version
-//   1.3   | mjjones  |05-JUL-12| Removed DMI initfiles from here
+//   1.1   | mjjones  |05-JUL-12| Initial version
+
+
+#ifndef DMI_SCOMINIT_H_
+#define DMI_SCOMINIT_H_
 
 //----------------------------------------------------------------------
 //  My Includes
 //----------------------------------------------------------------------
-#include <proc_chiplet_scominit.H>
 
 //----------------------------------------------------------------------
 //  Includes
 //----------------------------------------------------------------------
-#include <fapiHwpExecInitFile.H>
+#include <fapi.H>
+
+typedef fapi::ReturnCode (*dmi_scominit_FP_t)(const fapi::Target & i_target);
 
 extern "C" {
 
-fapi::ReturnCode proc_chiplet_scominit(const fapi::Target & i_target)
-{
-    FAPI_INF("Performing HWP: proc_chiplet_scominit on %s",
-             i_target.toEcmdString());
-    
-    fapi::ReturnCode l_rc;
-
-    // This is a stub for now, initfiles will be invoked as and when needed
-
-	return l_rc;
-}
+/**
+ * @brief HWP that calls the dmi_scominit initfiles
+ * 
+ * Should be called with all functional MCS chiplets and all functional
+ * membuf chips.
+ * 
+ * @param[in] i_target Reference to target
+ *                     If MCS_CHIPLET, calls:
+ *                     - p8.dmi.scom.initfile
+ *                     If MEMBUF_CHIP, calls:
+ *                     - cen.dmi.scom.initfile
+ *
+ * @return ReturnCode
+ */
+fapi::ReturnCode dmi_scominit(const fapi::Target & i_target);
 
 } // extern "C"
+
+#endif // DMI_SCOMINIT_H_

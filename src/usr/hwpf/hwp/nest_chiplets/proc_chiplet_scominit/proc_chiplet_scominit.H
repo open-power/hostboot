@@ -42,6 +42,7 @@
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
 //   1.3   | mjjones  |26-JUN-12| Initial version
+//   1.4   | mjjones  |05-JUL-12| Removed DMI initfiles from here
 
 
 #ifndef PROC_CHIPLET_SCOMINIT_H_
@@ -63,14 +64,10 @@ extern "C" {
 /**
  * @brief HWP that calls the proc_chiplet_scominit initfiles
  * 
- * Should be called with all functional MCS chiplets then all functional
- * membuf chips.
+ * Should be called with all functional proc chips. It invokes initfiles
+ * on chiplets.
  * 
- * @param[in] i_target Reference to target
- *                     If MCS_CHIPLET, calls:
- *                     - p8.dmi.scom.initfile
- *                     If MEMBUF_CHIP, calls:
- *                     - cen.dmi.scom.initfile
+ * @param[in] i_target Reference to PROC_CHIP target
  *
  * @return ReturnCode
  */

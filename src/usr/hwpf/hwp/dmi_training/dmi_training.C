@@ -60,6 +60,7 @@
 #include    "dmi_training.H"
 #include    "proc_cen_framelock.H"
 #include    "dmi_io_run_training.H"
+#include    "dmi_scominit.H"
 
 namespace   DMI_TRAINING
 {
@@ -73,13 +74,80 @@ using   namespace   fapi;
 //
 void    call_dmi_scominit( void *io_pArgs )
 {
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_errl = NULL;
+
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_scominit entry" );
+    uint8_t l_num = 0;
+   
+    // Get all functional MCS chiplets
+    TARGETING::TargetHandleList l_mcsTargetList;
+    getAllChiplets(l_mcsTargetList, TYPE_MCS);
+   
+    // Invoke dmi_scominit on each one
+    for (l_num = 0; l_num < l_mcsTargetList.size(); l_num++)
+    {
+        const TARGETING::Target* l_pTarget = l_mcsTargetList[l_num];
+        const fapi::Target l_fapi_target(
+            TARGET_TYPE_MCS_CHIPLET,
+            reinterpret_cast<void *>
+                (const_cast<TARGETING::Target*>(l_pTarget)));
 
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "Running dmi_scominit HWP on...");
+        EntityPath l_path;
+        l_path = l_pTarget->getAttr<ATTR_PHYS_PATH>();
+        l_path.dump();
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "dmi_scominit exit" );
+        FAPI_INVOKE_HWP(l_errl, dmi_scominit, l_fapi_target);
+        if (l_errl)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "ERROR 0x%.8X : dmi_scominit HWP returns error",
+                      l_errl->reasonCode());
+            break;
+        }
+        else
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "SUCCESS :  dmi_scominit HWP");
+        }
+    }
 
-    task_end2( l_err );
+    if (!l_errl)
+    {
+        // Get all functional membuf chips
+        TARGETING::TargetHandleList l_membufTargetList;
+        getAllChips(l_membufTargetList, TYPE_MEMBUF);
+
+        // Invoke dmi_scominit on each one
+        for (l_num = 0; l_num < l_membufTargetList.size(); l_num++)
+        {
+            const TARGETING::Target* l_pTarget = l_membufTargetList[l_num];
+            const fapi::Target l_fapi_target(
+                TARGET_TYPE_MEMBUF_CHIP,
+                reinterpret_cast<void *>
+                    (const_cast<TARGETING::Target*>(l_pTarget)));
+
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "Running dmi_scominit HWP on...");
+            EntityPath l_path;
+            l_path = l_pTarget->getAttr<ATTR_PHYS_PATH>();
+            l_path.dump();
+
+            FAPI_INVOKE_HWP(l_errl, dmi_scominit, l_fapi_target);
+            if (l_errl)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "ERROR 0x%.8X : dmi_scominit HWP returns error",
+                          l_errl->reasonCode());
+                break;
+            }
+            else
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "SUCCESS :  dmi_scominit HWP");
+            }
+        }
+    }
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_scominit exit" );
+
+    // end task, returning any errorlogs to IStepDisp
+    task_end2( l_errl );
 }
 
 
@@ -224,40 +292,8 @@ void    call_dmi_io_run_training( void *io_pArgs )
     task_end2( l_err );
 }
 
-
 //
-//  Wrapper function to call 11.5 : host_startPRD_dmi
-//
-void    call_host_startPRD_dmi( void *io_pArgs )
-{
-    errlHndl_t l_err = NULL;
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_startPRD_dmi entry" );
-
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_startPRD_dmi exit" );
-
-    task_end2( l_err );
-}
-
-
-//
-//  Wrapper function to call 11.6 : host_attnlisten_cen
-//
-void    call_host_attnlisten_cen( void *io_pArgs )
-{
-
-    errlHndl_t l_err = NULL;
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_attnlisten_cen entry" );
-
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "<host_attnlisten_cen exit" );
-
-    task_end2( l_err );
-}
-
-//
-//  Wrapper function to call 11.7 : proc_cen_framelock
+//  Wrapper function to call 11.5 : proc_cen_framelock
 //
 void    call_proc_cen_framelock( void *io_pArgs )
 {
@@ -342,6 +378,35 @@ void    call_proc_cen_framelock( void *io_pArgs )
     task_end2( l_err );
 }
 
+//
+//  Wrapper function to call 11.6 : host_startPRD_dmi
+//
+void    call_host_startPRD_dmi( void *io_pArgs )
+{
+    errlHndl_t l_err = NULL;
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_startPRD_dmi entry" );
+
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_startPRD_dmi exit" );
+
+    task_end2( l_err );
+}
+
+//
+//  Wrapper function to call 11.7 : host_attnlisten_cen
+//
+void    call_host_attnlisten_cen( void *io_pArgs )
+{
+
+    errlHndl_t l_err = NULL;
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_attnlisten_cen entry" );
+
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "<host_attnlisten_cen exit" );
+
+    task_end2( l_err );
+}
 
 //
 //  Wrapper function to call 11.8 : cen_set_inband_addr

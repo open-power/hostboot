@@ -1,31 +1,32 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/include/usr/isteps/istep4list.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/include/usr/isteps/istep11list.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #ifndef __ISTEPS_ISTEP11LIST_H
 #define __ISTEPS_ISTEP11LIST_H
 
 /**
  * list of functions called for DMI Training - ISTEP 11 according to Dean's
- * HostBoot IPL Flow v982
+ * HostBoot IPL Flow v1.05
  *
  * 11.1. dmi_scominit
  *       :  Scom setup on centaur
@@ -35,12 +36,12 @@
  *       : Calibrate DMI interfaces
  * 11.4. dmi_io_run_training
  *       : Run training on MC buses
- * 11.5. host_startPRD_dmi
- *       : Load PRD for DMI domain
- * 11.6. host_attnlisten_cen
- *       : Start listening for attentions
- * 11.7. proc_cen_framelock
+ * 11.5. proc_cen_framelock
  *       : Initialize EDI Frame
+ * 11.6. host_startPRD_dmi
+ *       : Load PRD for DMI domain
+ * 11.7. host_attnlisten_cen
+ *       : Start listening for attentions
  * 11.8. cen_set_inband_addr
  *       : Set the Inband base addresses
  */
@@ -107,7 +108,15 @@ const   TaskInfo    g_istep11[]  =   {
                 }
         },
         {
-                ISTEPNAME(11,05,"host_startPRD_dmi"),        // substep name
+                ISTEPNAME(11,05,"proc_cen_framelock"),       // substep name
+                DMI_TRAINING::call_proc_cen_framelock,      // pointer to fn
+                {
+                        START_FN,                           // task type
+                        EXT_IMAGE,                          // Extended Module
+                }
+        },
+        {
+                ISTEPNAME(11,06,"host_startPRD_dmi"),        // substep name
                 DMI_TRAINING::call_host_startPRD_dmi,       // pointer to fn
                 {
                         START_FN,                           // task type
@@ -115,16 +124,8 @@ const   TaskInfo    g_istep11[]  =   {
                 }
         },
         {
-                ISTEPNAME(11,06,"host_attnlisten_cen"),      // substep name
+                ISTEPNAME(11,07,"host_attnlisten_cen"),      // substep name
                 DMI_TRAINING::call_host_attnlisten_cen,     // pointer to fn
-                {
-                        START_FN,                           // task type
-                        EXT_IMAGE,                          // Extended Module
-                }
-        },
-        {
-                ISTEPNAME(11,07,"proc_cen_framelock"),       // substep name
-                DMI_TRAINING::call_proc_cen_framelock,      // pointer to fn
                 {
                         START_FN,                           // task type
                         EXT_IMAGE,                          // Extended Module
