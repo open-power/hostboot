@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/xscom/xscom.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/xscom/xscom.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 /**
  *  @file xscom.C
  *
@@ -342,7 +343,7 @@ errlHndl_t getTargetVirtualAddress(TARGETING::Target* i_target,
         }
         else // This is not the master sentinel
         {
-   
+
             // Get the virtual addr value of the chip from the virtual address
             // attribute
              o_virtAddr =  reinterpret_cast<uint64_t*>(i_target->getAttr<TARGETING::ATTR_XSCOM_VIRTUAL_ADDR>());
@@ -383,9 +384,9 @@ errlHndl_t getTargetVirtualAddress(TARGETING::Target* i_target,
                     (mmio_dev_map(reinterpret_cast<void*>(l_XSComBaseAddr),
                       THIRTYTWO_GB));
 
-                // Implemented the virtual address attribute.. 
+                // Implemented the virtual address attribute..
 
-                // Leaving the comments as a discussion point... 
+                // Leaving the comments as a discussion point...
                 // Technically there is a race condition here. The mutex is
                 // a per-hardware thread mutex, not a mutex for the whole XSCOM
                 // logic. So there is possibility that this same thread is running
@@ -442,25 +443,21 @@ errlHndl_t xscomPerformOp(DeviceFW::OperationType i_opType,
         // Re-init l_retry for loop
         l_retry = false;
 
-        // Pin this thread to current CPU
-        task_affinity_pin();
-
-        // Lock other XSCom in this same thread from running
-        l_XSComMutex = mmio_xscom_mutex();
-        mutex_lock(l_XSComMutex);
-
         // Get the target chip's virtual address
         uint64_t* l_virtAddr = NULL;
         l_err = getTargetVirtualAddress(i_target, l_virtAddr);
 
         if (l_err)
         {
-            // Unlock
-            mutex_unlock(l_XSComMutex);
-            // Done, un-pin
-            task_affinity_unpin();
             break;
         }
+
+        // Pin this thread to current CPU
+        task_affinity_pin();
+
+        // Lock other XSCom in this same thread from running
+        l_XSComMutex = mmio_xscom_mutex();
+        mutex_lock(l_XSComMutex);
 
         // Build the XSCom address (relative to node 0, chip 0)
         XSComP8Address l_mmioAddr(l_addr);
