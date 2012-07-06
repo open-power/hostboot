@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/include/usr/hwpf/fapi/fapiHwAccess.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/include/usr/hwpf/fapi/fapiPlatHwAccess.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 /**
  *  @file fapiPlatHwAccess.H
  *
@@ -47,6 +48,7 @@
  * ------   --------------  ----------  ----------- ----------------------------
  *                          monte       8sep2011    new
  *                          mjjones     11/10/2011  Use ecmdDataBufferBase
+ *          836579          thi         May 22,2012 Spy/Ring supports
  */
 
 #ifndef FAPIPLATHWACCESS_H_
@@ -158,6 +160,115 @@ fapi::ReturnCode platModifyCfamRegister(const fapi::Target& i_target,
                                   const uint32_t i_address,
                                   ecmdDataBufferBase & i_data,
                                   const fapi::ChipOpModifyMode i_modifyMode);
+
+
+/**
+ * @brief Platform-level implementation called by fapiGetRing()
+ * Hardware procedures writers will not call this function.
+ * 
+ * @param[in] i_target  Target to operate on
+ * @param[in] i_address Ring address to read from
+ * @param[out] o_data   ecmdDataBufferBase object that holds data read from
+ *                      address
+ * @return ReturnCode. Zero on success, else platform specified error
+ */
+fapi::ReturnCode platGetRing(const fapi::Target& i_target,
+                             const uint32_t i_address,
+                             ecmdDataBufferBase & o_data);
+
+
+/**
+ * @brief Platform-level implementation called by fapiPutRing()
+ * Hardware procedures writers will not call this function.
+ *
+ * @param[in] i_target  Target to operate on
+ * @param[in] i_address Ring address to write to
+ * @param[in] i_data    ecmdDataBufferBase object that holds data to write into
+ *                      address
+ * @return ReturnCode. Zero on success, else platform specified error
+ */
+fapi::ReturnCode platPutRing(const fapi::Target& i_target,
+                             const uint32_t i_address,
+                             ecmdDataBufferBase & i_data);
+
+
+/**
+ * @brief Platform-level implementation called by fapiModifyRing()
+ * Hardware procedures writers will not call this function.
+ *
+ * @param[in] i_target  Target to operate on
+ * @param[in] i_address Ring address to modify
+ * @param[in] i_data    ecmdDataBufferBase object that holds data to write into
+ *                      address
+ * @return ReturnCode. Zero on success, else platform specified error
+ */
+fapi::ReturnCode platModifyRing(const fapi::Target& i_target,
+                                const uint32_t i_address,
+                                ecmdDataBufferBase & i_data,
+                                const fapi::ChipOpModifyMode i_modifyMode);
+
+// --------------------------------------------------------------------------
+// NOTE:
+// These spy access interfaces are only used in FSP.
+// HB does not allow spy access
+
+#ifndef _NO_SPY_ACCESS
+/**
+ * @brief Platform-level implementation called by fapiGetSpy()
+ * Hardware procedures writers will not call this function.
+ *
+ * @param[in] i_target              Target to read spy from
+ * @param[in] i_spyId               The spy's id
+ * @param[out] o_data               Storage for output data
+ *
+ * @return ReturnCode. Zero on success, else platform specified error
+ */
+fapi::ReturnCode platGetSpy(const fapi::Target& i_target,
+                            const uint32_t i_spyId,
+                            ecmdDataBufferBase & o_data);
+
+/**
+ * @brief Platform-level implementation called by fapiPutSpy()
+ * Hardware procedures writers will not call this function.
+ *
+ * @param[in] i_target  Target to operate on
+ * @param[in] i_spyId   The spy's id
+ * @param[in] i_data    ecmdDataBufferBase object that holds data to write into
+ *                      address
+ *
+ * @return ReturnCode. Zero on success, else platform specified error
+ */
+fapi::ReturnCode platPutSpy(const fapi::Target& i_target,
+                            const uint32_t i_spyId,
+                            ecmdDataBufferBase & i_data);
+
+/**
+ * @brief Platform-level implementation called by fapiGetSpyEnum()
+ * Hardware procedures writers will not call this function.
+ *
+ * @param[in] i_target         Target to read spy enum from
+ * @param[in] i_spyId          The spy's id
+ * @param[out] o_enumVal       Spy enum value
+ *
+ * @return ReturnCode. Zero on success, else platform specified error
+ */
+fapi::ReturnCode platGetSpyEnum(const fapi::Target& i_target,
+                                const uint32_t i_spyId,
+                                uint32_t& o_enumVal);
+
+/**
+ * @brief Platform-level implementation called by fapiPutSpyEnum()
+ * Hardware procedures writers will not call this function.
+ *
+ * @param[in] i_target             The chip or logical unit target
+ * @param[in] i_spyId              The spy's id
+ * @param[in] i_enumVal            Spy enum value to write
+ */
+fapi::ReturnCode platPutSpyEnum(const fapi::Target& i_target,
+                                const uint32_t i_spyId,
+                                const uint32_t i_enumVal);
+
+#endif
 
 } // extern "C"
 

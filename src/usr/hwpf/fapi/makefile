@@ -1,11 +1,11 @@
-#  IBM_PROLOG_BEGIN_TAG
+#   IBM_PROLOG_BEGIN_TAG
 #  This is an automatically generated prolog.
 #
 #  $Source: src/usr/hwpf/fapi/makefile $
 #
 #  IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2011
+#  COPYRIGHT International Business Machines Corp. 2011-2012
 #
 #  p1
 #
@@ -19,7 +19,7 @@
 #
 #  Origin: 30
 #
-#  IBM_PROLOG_END
+#  IBM_PROLOG_END_TAG
 ROOTPATH = ../../../..
 MODULE = fapi
 
@@ -27,6 +27,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/plat
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
+CUSTOMFLAGS += -D_NO_SPY_ACCESS=1
 
 OBJS =  fapiReturnCode.o \
         fapiReturnCodeDataRef.o \
