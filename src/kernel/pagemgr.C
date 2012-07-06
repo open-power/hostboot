@@ -29,10 +29,11 @@
 #include <util/locked/pqueue.H>
 #include <kernel/task.H>
 #include <kernel/taskmgr.H>
-#include <usr/vmmconst.h>
 #include <kernel/vmmmgr.H>
 #include <sys/task.h>
-#include <sys/mm.h>
+#include <kernel/misc.H>
+#include <sys/syscall.h>
+#include <assert.h>
 
 size_t PageManager::cv_coalesce_count = 0;
 size_t PageManager::cv_low_page_count = -1;
@@ -47,14 +48,14 @@ void PageManagerCore::addMemory( size_t i_addr, size_t i_pageCount )
     size_t page_length = BUCKETS-1;
     while(length > 0)
     {
-	while (length < (size_t)(1 << page_length))
+        while (length < (size_t)(1 << page_length))
         {
-	    page_length--;
+            page_length--;
         }
 
-	iv_heap[page_length].push(page);
-	page = (page_t*)((uint64_t)page + (1 << page_length)*PAGESIZE);
-	length -= (1 << page_length);
+        iv_heap[page_length].push(page);
+        page = (page_t*)((uint64_t)page + (1 << page_length)*PAGESIZE);
+        length -= (1 << page_length);
     }
     __sync_add_and_fetch(&iv_available, i_pageCount);
 }
@@ -63,8 +64,15 @@ void PageManagerCore::addMemory( size_t i_addr, size_t i_pageCount )
 
 PageManagerCore::page_t * PageManagerCore::allocatePage( size_t i_pageCount )
 {
-    size_t which_bucket = 0;
-    while (i_pageCount > (size_t)(1 << which_bucket)) which_bucket++;
+    size_t which_bucket = ((sizeof(size_t)*8 - 1) -
+                                __builtin_clzl(i_pageCount));
+    size_t bucket_size = ((size_t)1) << which_bucket;
+
+    if (bucket_size != i_pageCount)
+    {
+        ++which_bucket;
+        bucket_size <<= 1;
+    }
 
     page_t* page = (page_t*)NULL;
     int retries = 0;
@@ -77,7 +85,18 @@ PageManagerCore::page_t * PageManagerCore::allocatePage( size_t i_pageCount )
     // Update statistics.
     if(page)
     {
-        __sync_sub_and_fetch(&iv_available, i_pageCount);
+        __sync_sub_and_fetch(&iv_available, bucket_size);
+
+        // Buckets are 2^k in size so if i_pageCount is not 2^k we have some
+        // extra pages allocated.  ie. the non-2^k portion of i_pageCount.
+        // Return that portion by freeing.
+        if (bucket_size != i_pageCount)
+        {
+            freePage(reinterpret_cast<void*>(
+                            reinterpret_cast<uintptr_t>(page) +
+                            (i_pageCount*PAGESIZE)),
+                     bucket_size - i_pageCount);
+        }
     }
 
     return page;
@@ -89,13 +108,24 @@ void PageManagerCore::freePage( void * i_page, size_t i_pageCount )
 {
     if ((NULL == i_page) || (0 == i_pageCount)) return;
 
-    size_t which_bucket = 0;
-    while (i_pageCount > (size_t)(1 << which_bucket)) which_bucket++;
+    size_t which_bucket = ((sizeof(size_t)*8 - 1) -
+                                __builtin_clzl(i_pageCount));
+    size_t bucket_size = ((size_t)1) << which_bucket;
 
     push_bucket((page_t*)i_page, which_bucket);
 
     // Update statistics.
-    __sync_add_and_fetch(&iv_available, i_pageCount);
+    __sync_add_and_fetch(&iv_available, bucket_size);
+
+    // Buckets are 2^k in size so if i_pageCount is not 2^k we have some
+    // spare pages to free.  ie. the non-2^k portion of i_pageCount.
+    if (bucket_size != i_pageCount)
+    {
+        freePage(reinterpret_cast<void*>(
+                    reinterpret_cast<uintptr_t>(i_page) +
+                    (bucket_size*PAGESIZE)),
+                 i_pageCount - bucket_size);
+    }
 
     return;
 }
@@ -107,10 +137,34 @@ void PageManager::init()
     Singleton<PageManager>::instance();
 }
 
-void* PageManager::allocatePage(size_t n)
+void* PageManager::allocatePage(size_t n, bool userspace)
 {
-    PageManager& pmgr = Singleton<PageManager>::instance();
-    return pmgr._allocatePage(n);
+    void* page = NULL;
+
+    // In non-kernel mode, make a system-call to allocate in kernel-mode.
+    if (!KernelMisc::in_kernel_mode())
+    {
+        while (NULL == page)
+        {
+            page = _syscall1(Systemcalls::MM_ALLOC_PAGES,
+                             reinterpret_cast<void*>(n));
+
+            // Didn't successfully allocate, so yield in hopes that memory
+            // will eventually free up (ex. VMM flushes).
+            if (NULL == page)
+            {
+                task_yield();
+            }
+        }
+    }
+    else
+    {
+        // In kernel mode.  Do a normal call to the PageManager.
+        PageManager& pmgr = Singleton<PageManager>::instance();
+        page = pmgr._allocatePage(n, userspace);
+    }
+
+    return page;
 }
 
 void PageManager::freePage(void* p, size_t n)
@@ -140,8 +194,8 @@ PageManager::PageManager()
 
     // Display.
     printk("Initializing PageManager with %zd pages starting at %lx...",
-	   length,
-	   addr);
+           length,
+           addr);
 
     // Populate L3 cache lines.
     uint64_t* cache_line = reinterpret_cast<uint64_t*>(addr);
@@ -172,62 +226,27 @@ PageManager::PageManager()
     printk("done\n");
 }
 
-void* PageManager::_allocatePage(size_t n)
+void* PageManager::_allocatePage(size_t n, bool userspace)
 {
-    PageManagerCore::page_t* page = NULL;
+    PageManagerCore::page_t* page = iv_heap.allocatePage(n);
 
-    // Initiate a page cast out if low
-    if(_queryAvail() < 16 && queryKernelMode() == false)
+    // If the allocation came from kernel-space and normal allocation
+    // was unsuccessful, pull a page off the reserve heap.
+    if ((NULL == page) && (!userspace))
     {
-        // Kernel mode might have Vmm mutex lock which would cause deadlock
-        // were VmmManager functions called to flush and cast out.
-
-        // Only want one thread testing and flushing
-        if(__sync_bool_compare_and_swap(&(iv_lock),0,1))
-        {
-            if(_queryAvail() < 5)
-            {
-                mm_flush_pages(VmmManager::CRITICAL);
-            }
-            else
-            {
-                mm_flush_pages(VmmManager::NORMAL);
-            }
-            iv_lock = 0;
-        }
+        printkd("PAGEMANAGER: kernel heap used\n");
+        page = iv_heapKernel.allocatePage(n);
     }
 
-    while(page == NULL)
-    {
-        page = iv_heap.allocatePage(n);
-
-        if(NULL == page)
-        {
-            if(queryKernelMode() == true)
-            {
-                printkd("PAGEMANAGER: kernel heap used\n");
-                page = iv_heapKernel.allocatePage(n);
-                break;
-            }
-            else
-            {
-                //task yield and hope there is more memory available
-                //when execution continues
-                printkd("PAGEMANAGER: Task held off\n");
-                task_yield();
-
-                //Possible Loop forever? or is there a break condition??
-            }
-        }
-    }
-
-    if (NULL == page)
+    // If still not successful, we're out of memory.  Assert.
+    if ((NULL == page) && (!userspace))
     {
         register task_t* t;
         asm volatile("mr %0, 13" : "=r"(t));
-	printk("Insufficient memory for alloc of size %zd page on tid=%d!\n", n, t->tid);
+        printk("Insufficient memory for alloc %zd pages on tid=%d!\n",
+               n, t->tid);
         printk("Pages available=%ld\n",iv_pagesAvail);
-	while(1);
+        kassert(false);
     }
 
     // Update statistics.
@@ -257,7 +276,6 @@ void PageManager::_freePage(void* p, size_t n)
         if(page)
         {
             iv_heapKernel.addMemory(reinterpret_cast<size_t>(page), ks);
-            __sync_sub_and_fetch(&iv_pagesAvail, ks);
         }
     }
 
@@ -273,14 +291,14 @@ PageManagerCore::page_t* PageManagerCore::pop_bucket(size_t i_n)
 
     if (NULL == p)
     {
-	// Couldn't allocate from the correct size bucket, so split up an
-	// item from the next sized bucket.
-	p = pop_bucket(i_n+1);
-	if (NULL != p)
-	{
-	    push_bucket((page_t*) (((uint64_t)p) + (PAGESIZE * (1 << i_n))),
-			i_n);
-	}
+        // Couldn't allocate from the correct size bucket, so split up an
+        // item from the next sized bucket.
+        p = pop_bucket(i_n+1);
+        if (NULL != p)
+        {
+            push_bucket((page_t*) (((uint64_t)p) + (PAGESIZE * (1 << i_n))),
+                        i_n);
+        }
     }
     return p;
 }
@@ -304,9 +322,6 @@ void PageManager::_coalesce( void )
 // Coalsesce adjacent free memory blocks
 void PageManagerCore::coalesce( void )
 {
-    // TODO: Issue 44511 - Function appears to leak memory.
-    return;
-
     // Look at all the "free buckets" and find blocks to merge
     // Since this is binary, all merges will be from the same free bucket
     // Each bucket is a stack of non-allocated memory blocks of the same size
@@ -371,13 +386,3 @@ void PageManagerCore::coalesce( void )
     printkd("PAGEMGR low page count %ld\n", PageManager::cv_low_page_count);
 }
 
-bool PageManager::queryKernelMode() const
-{
-    uint64_t stack = 0;
-    asm volatile("mr %0, 1" : "=r"(stack));
-    if(stack >= VMM_VADDR_STACK_SEGMENT && stack < VMM_VADDR_DEVICE_SEGMENT_FIRST)
-    {
-        return false;
-    }
-    return true;
-}

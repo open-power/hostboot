@@ -97,8 +97,8 @@ namespace Systemcalls
            /** mm_set_permission() */
         MM_SET_PERMISSION,
 
-           /** mm_flush_pages() */
-        MM_FLUSH_PAGES,
+           /** mm_alloc_pages() */
+        MM_ALLOC_PAGES,
 
 	SYSCALL_MAX
     };

@@ -192,11 +192,11 @@ void CpuManager::executePeriodics(cpu_t * i_cpu)
         if(0 == (i_cpu->periodic_count % CPU_PERIODIC_CHECK_MEMORY))
         {
             uint64_t pcntAvail = PageManager::queryAvail();
-            if(pcntAvail < 16)
+            if(pcntAvail < PageManager::LOWMEM_NORM_LIMIT)
             {
                 VmmManager::flushPageTable();
                 ++(i_cpu->periodic_count);   // prevent another flush below
-                if(pcntAvail < 5)
+                if(pcntAvail < PageManager::LOWMEM_CRIT_LIMIT)
                 {
                     VmmManager::castOutPages(VmmManager::CRITICAL);
                 }

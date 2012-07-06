@@ -89,8 +89,6 @@ namespace Systemcalls
     void MsgSendRecv(task_t*);
     void MsgRespond(task_t*);
     void MsgWait(task_t*);
-    void MmioMap(task_t*);
-    void MmioUnmap(task_t*);
     void DevMap(task_t*);
     void DevUnmap(task_t*);
     void TimeNanosleep(task_t*);
@@ -101,7 +99,7 @@ namespace Systemcalls
     void MmAllocBlock(task_t *t);
     void MmRemovePages(task_t *t);
     void MmSetPermission(task_t *t);
-    void MmFlushPages(task_t *t);
+    void MmAllocPages(task_t *t);
 
 
     syscall syscalls[] =
@@ -135,7 +133,7 @@ namespace Systemcalls
         &MmAllocBlock, // MM_ALLOC_BLOCK
         &MmRemovePages, // MM_REMOVE_PAGES
         &MmSetPermission, // MM_SET_PERMISSION
-        &MmFlushPages,    // MM_FLUSH_PAGES
+        &MmAllocPages,    // MM_ALLOC_PAGES
         };
 };
 
@@ -165,6 +163,9 @@ namespace Systemcalls
         Scheduler* s = t->cpu->scheduler;
         s->returnRunnable();
         s->setNextRunnable();
+
+        // TODO: Issue 44523 - Temporary workaround for live-lock situation.
+        CpuManager::executePeriodics(CpuManager::getCurrentCPU());
     }
 
     void TaskStart(task_t* t)
@@ -671,15 +672,30 @@ namespace Systemcalls
     }
 
     /**
-     * Flush and Cast out 'old' pages
+     * Call PageManager to allocate a number of pages.
      * @param[in] t: The task used.
      */
-    void MmFlushPages(task_t* t)
+    void MmAllocPages(task_t* t)
     {
-        VmmManager::castout_t sev = (VmmManager::castout_t)TASK_GETARG0(t);
-        VmmManager::flushPageTable();
-        VmmManager::castOutPages(sev);
-        TASK_SETRTN(t,0);
+        // Attempt to allocate the page(s).
+        void* page = PageManager::allocatePage(TASK_GETARG0(t), true);
+        TASK_SETRTN(t, reinterpret_cast<uint64_t>(page));
+
+        // If we are low on memory, call into the VMM to free some up.
+        uint64_t pcntAvail = PageManager::queryAvail();
+        if (pcntAvail < PageManager::LOWMEM_NORM_LIMIT)
+        {
+            static uint64_t one_at_a_time = 0;
+            if (!__sync_lock_test_and_set(&one_at_a_time, 1))
+            {
+                VmmManager::flushPageTable();
+                VmmManager::castout_t sev =
+                    (pcntAvail < PageManager::LOWMEM_CRIT_LIMIT) ?
+                        VmmManager::CRITICAL : VmmManager::NORMAL;
+                VmmManager::castOutPages(sev);
+                __sync_lock_release(&one_at_a_time);
+            }
+        }
     }
 };
 

@@ -35,14 +35,21 @@
  * Segments
  */
 
+/** Stacks are all 1TB in size. */
+#define VMM_SEGMENT_SIZE (1 * TERABYTE)
+
+/** Base Segment is at 0 TB */
+#define VMM_VADDR_BASE_SEGMENT  (0 * TERABYTE)
+
 /** Stack Segment is at 1 TB */
-#define VMM_VADDR_STACK_SEGMENT  (1 * TERABYTE)
+#define VMM_VADDR_STACK_SEGMENT  (VMM_VADDR_BASE_SEGMENT + VMM_SEGMENT_SIZE)
 
 /** Device Segments are at 2 TB - 10 TB */
-#define VMM_VADDR_DEVICE_SEGMENT_FIRST  (2 * TERABYTE)
-#define VMM_VADDR_DEVICE_SEGMENT_LAST   (VMM_VADDR_DEVICE_SEGMENT_FIRST + \
-                                         (8 * TERABYTE))
+#define VMM_VADDR_DEVICE_SEGMENT_FIRST  \
+            (VMM_VADDR_STACK_SEGMENT + VMM_SEGMENT_SIZE)
 
+#define VMM_VADDR_DEVICE_SEGMENT_LAST  \
+            (VMM_VADDR_DEVICE_SEGMENT_FIRST + (8 * VMM_SEGMENT_SIZE))
 
 /**
  * Resource Providers

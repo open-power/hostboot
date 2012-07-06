@@ -97,12 +97,6 @@ int mm_remove_pages(PAGE_REMOVAL_OPS i_op, void* i_vaddr, uint64_t i_size);
  */
 int mm_set_permission(void* va, uint64_t size, uint64_t access_type);
 
-/** @fn mm_flush_pages()
- * @brief  System call to flush pages
- * @param[in] i_sev - [VmmManager::NORMAL | VmmManager::CRITIAL]
- */
-void mm_flush_pages(uint64_t i_sev);
-
 #ifdef __cplusplus
 }
 #endif

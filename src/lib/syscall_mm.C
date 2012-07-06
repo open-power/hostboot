@@ -81,11 +81,3 @@ int mm_set_permission(void* va, uint64_t size, uint64_t access_type)
 {
     return (int64_t)_syscall3(MM_SET_PERMISSION, va, (void*)size,  (void*)access_type);
 }
-
-/**
- * System call to flush pages
- */
-void mm_flush_pages(uint64_t i_sev)
-{
-    _syscall1(MM_FLUSH_PAGES, (void*)i_sev);
-}

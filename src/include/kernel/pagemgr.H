@@ -54,7 +54,7 @@ class PageManagerCore
         /**
          * Default Constructor
          */
-        PageManagerCore() 
+        PageManagerCore()
             : iv_available(0) {}
 
         /**
@@ -76,7 +76,7 @@ class PageManagerCore
          * @return a pointer to the requested allocation | NULL
          * if the request could not be satisfied.
          */
-        page_t  * allocatePage( size_t i_pageCount );
+        page_t * allocatePage( size_t i_pageCount );
 
         /**
          * Return page allocations to the page manager
@@ -136,9 +136,10 @@ class PageManager
         /**
          * Allocate pages
          * @param[in] n, Requested allocation in pages
+         * @param[in] userspace - Request to allocate came from userspace
          * @return pointer to requested memory
          */
-        static void* allocatePage(size_t n = 1);
+        static void* allocatePage(size_t n = 1, bool userspace = false);
 
         /**
          * Return pages to the pagemanager
@@ -170,6 +171,9 @@ class PageManager
         {
             MEMLEN = VmmManager::MBOX_DMA_ADDR,
             RESERVED_PAGES = 4,
+
+            LOWMEM_NORM_LIMIT = 16,
+            LOWMEM_CRIT_LIMIT = 5,
         };
 
         static size_t cv_coalesce_count;        //!< running coalesced counter
@@ -182,15 +186,9 @@ class PageManager
 
     private:
 
-        void* _allocatePage(size_t);    //!< see allocatePage()
-        void _freePage(void*, size_t);  //!< see freePage()
-        void _coalesce( void );         //!< see coalesce()
-
-        /**
-         * Query if in kernel mode
-         * @return [true | false]
-         */
-        bool queryKernelMode() const;
+        void* _allocatePage(size_t,bool);    //!< see allocatePage()
+        void _freePage(void*, size_t);       //!< see freePage()
+        void _coalesce( void );              //!< see coalesce()
 
         /** see queryAvail() */
         ALWAYS_INLINE uint64_t _queryAvail() const
