@@ -42,6 +42,15 @@ EXPSHLIB_SUBDIRS += fsp
 STANDARD_SUBDIRS += fsp
 RUNBVT_SUBDIRS   += 
 
+.elseif(${CONTEXT} == "x86.nfp")
+
+EXPINC_SUBDIRS   += nfp
+OBJECTS_SUBDIRS  += 
+EXPLIB_SUBDIRS   += nfp
+EXPSHLIB_SUBDIRS += nfp
+STANDARD_SUBDIRS += nfp
+RUNBVT_SUBDIRS   += 
+
 .endif
 
 # Directives to expand tar files and ensure expansion before
