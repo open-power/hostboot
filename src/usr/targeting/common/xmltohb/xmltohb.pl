@@ -68,6 +68,7 @@ my $cfgHelp = 0;
 my $cfgMan = 0;
 my $cfgVerbose = 0;
 my $cfgShortEnums = 1;
+my $cfgBigEndian = 1;
 
 GetOptions("hb-xml-file:s" => \$cfgHbXmlFile,
            "src-output-dir:s" =>  \$cfgSrcOutputDir,
@@ -76,6 +77,7 @@ GetOptions("hb-xml-file:s" => \$cfgHbXmlFile,
            "img-output-file:s" =>  \$cfgImgOutputFile,
            "vmm-consts-file:s" =>  \$cfgVmmConstsFile,
            "short-enums!" =>  \$cfgShortEnums,
+           "big-endian!" =>  \$cfgBigEndian,
            "help" => \$cfgHelp,
            "man" => \$cfgMan,
            "verbose" => \$cfgVerbose ) || pod2usage(-verbose => 0);
@@ -102,6 +104,7 @@ if($cfgVerbose)
     print STDOUT "Image output dir = $cfgImgOutputDir\n";
     print STDOUT "VMM constants file = $cfgVmmConstsFile\n";
     print STDOUT "Short enums = $cfgShortEnums\n";
+    print STDOUT "Big endian = $cfgBigEndian\n";
 }
 
 ################################################################################
@@ -1431,7 +1434,7 @@ VERBATIM
 ######
 #Create a .C file to put attributes into the errlog
 #####
-sub writeAttrErrlCFile { 
+sub writeAttrErrlCFile {
     my($attributes,$outFile) = @_;
 
     #First setup the includes and function definition
@@ -1474,7 +1477,7 @@ sub writeAttrErrlCFile {
             print $outFile "    return(0);\n";
             print $outFile "}\n";
         }
-        # Enums 
+        # Enums
         elsif(exists $attribute->{simpleType} && (exists $attribute->{simpleType}->{enumeration}) ) {
             print $outFile "uint32_t dump_ATTR_",$attribute->{id},"(const Target * i_pTarget, char *i_buffer)\n";
             print $outFile "{   //simpleType:enum\n";
@@ -1488,7 +1491,7 @@ sub writeAttrErrlCFile {
             print $outFile "    return(retSize);\n";
             print $outFile "}\n";
         }
-        # signed and unsigned ints 
+        # signed and unsigned ints
         elsif(exists $attribute->{simpleType} &&
               ( (exists $attribute->{simpleType}->{uint8_t}) ||
                 (exists $attribute->{simpleType}->{uint16_t}) ||
@@ -1682,7 +1685,7 @@ sub writeAttrErrlCFile {
 ######
 #Create a .H file to parse attributes out of the errlog
 #####
-sub writeAttrErrlHFile { 
+sub writeAttrErrlHFile {
     my($attributes,$outFile) = @_;
 
     #First setup the includes and function definition
@@ -1780,7 +1783,7 @@ sub writeAttrErrlHFile {
             print $outFile "              pLabel = \"ATTR_",$attribute->{id},"\";\n";
             foreach my $enumerationType (@{$attributes->{enumerationType}})
             {
-                if ($enumerationType->{id} eq $attribute->{id}) 
+                if ($enumerationType->{id} eq $attribute->{id})
                 {
                 print $outFile "              switch (*l_ptr) {\n";
                 foreach my $enumerator (@{$enumerationType->{enumerator}})
@@ -1858,7 +1861,7 @@ sub writeAttrErrlHFile {
         elsif(exists $attribute->{nativeType} && ($attribute->{nativeType}->{name} eq "EntityPath")) {
             print $outFile "              //nativeType:EntityPath\n";
             print $outFile "              pLabel = \"ATTR_",$attribute->{id},"\";\n";
-            # data is PATH_TYPE, Number of elements, [ Element, Instance# ] 
+            # data is PATH_TYPE, Number of elements, [ Element, Instance# ]
             # output is PathType:/ElementInstance/ElementInstance/ElementInstance
             print $outFile "              const char *pathString;\n";
             print $outFile "              // from targeting/common/entitypath.[CH]\n";
@@ -2172,15 +2175,80 @@ sub unhexify {
 }
 
 ################################################################################
-# Pack uint64_t into a buffer in big-endian format
+# Pack 8 byte value into a buffer using configured endianness
 ################################################################################
 
-sub packQuad{
+sub pack8byte {
     my($quad) = @_;
 
     my $value = unhexify($quad);
 
-    return pack("NN" , (($value >> 32) & 0xFFFFFFFF), ($value & 0xFFFFFFFF));
+    my $binaryData;
+    if($cfgBigEndian)
+    {
+        $binaryData = pack("NN" , (($value >> 32) & 0xFFFFFFFF),
+                                    ($value & 0xFFFFFFFF));
+    }
+    else # Little endian
+    {
+        # Invert the words, then reverse them individually
+        $binaryData = pack("VV" , ($value & 0xFFFFFFFF),
+                                     (($value >> 32) & 0xFFFFFFFF));
+    }
+
+    return $binaryData;
+}
+
+################################################################################
+# Pack 4 byte value into a buffer using configured endianness
+################################################################################
+
+sub pack4byte {
+    my($value) = @_;
+
+    my $binaryData;
+    if($cfgBigEndian)
+    {
+        $binaryData = pack("N",$value);
+    }
+    else # Little endian
+    {
+        $binaryData = pack("V",$value);
+    }
+
+    return $binaryData;
+}
+
+################################################################################
+# Pack 2 byte value into a buffer using configured endianness
+################################################################################
+
+sub pack2byte {
+    my($value) = @_;
+
+    my $binaryData;
+    if($cfgBigEndian)
+    {
+        $binaryData = pack("n",$value);
+    }
+    else # Little endian
+    {
+        $binaryData = pack("v",$value);
+    }
+
+    return $binaryData;
+}
+
+################################################################################
+# Pack 1 byte value into a buffer using configured endianness
+################################################################################
+
+sub pack1byte {
+    my($value) = @_;
+
+    my $binaryData = pack("C",$value);
+
+    return $binaryData;
 }
 
 ################################################################################
@@ -2233,7 +2301,7 @@ sub enumSpace {
     # this policy in sync.  Also note that when Hostboot and FSP use optimized
     # enums, they must also be compiled with -fshort-enums compile option
 
-    my $space = ($cfgShortEnums == 1) ? 
+    my $space = ($cfgShortEnums == 1) ?
         ceil(log($maxEnumVal+1) / (8 * log(2))) : 4;
 
     return $space;
@@ -2460,16 +2528,16 @@ sub simpleTypeProperties {
     # more readable/editable
     $typesHoH{"string"}      = { supportsArray => 0, canBeHex => 0, complexTypeSupport => 0, typeName => "char"                       , bytes => 1, bits => 8 , default => \&defaultString, alignment => 1, specialPolicies =>\&enforceString,  packfmt =>\&packString};
     $typesHoH{"int8_t"}      = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "int8_t"                     , bytes => 1, bits => 8 , default => \&defaultZero  , alignment => 1, specialPolicies =>\&null,           packfmt => "C" };
-    $typesHoH{"int16_t"}     = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "int16_t"                    , bytes => 2, bits => 16, default => \&defaultZero  , alignment => 1, specialPolicies =>\&null,           packfmt => "n" };
-    $typesHoH{"int32_t"}     = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "int32_t"                    , bytes => 4, bits => 32, default => \&defaultZero  , alignment => 1, specialPolicies =>\&null,           packfmt => "N" };
-    $typesHoH{"int64_t"}     = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "int64_t"                    , bytes => 8, bits => 64, default => \&defaultZero  , alignment => 1, specialPolicies =>\&null,           packfmt =>\&packQuad};
+    $typesHoH{"int16_t"}     = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "int16_t"                    , bytes => 2, bits => 16, default => \&defaultZero  , alignment => 1, specialPolicies =>\&null,           packfmt =>\&pack2byte};
+    $typesHoH{"int32_t"}     = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "int32_t"                    , bytes => 4, bits => 32, default => \&defaultZero  , alignment => 1, specialPolicies =>\&null,           packfmt =>\&pack4byte};
+    $typesHoH{"int64_t"}     = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "int64_t"                    , bytes => 8, bits => 64, default => \&defaultZero  , alignment => 1, specialPolicies =>\&null,           packfmt =>\&pack8byte};
     $typesHoH{"uint8_t"}     = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "uint8_t"                    , bytes => 1, bits => 8 , default => \&defaultZero  , alignment => 1, specialPolicies =>\&null,           packfmt => "C" };
-    $typesHoH{"uint16_t"}    = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "uint16_t"                   , bytes => 2, bits => 16, default => \&defaultZero  , alignment => 1, specialPolicies =>\&null,           packfmt => "n" };
-    $typesHoH{"uint32_t"}    = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "uint32_t"                   , bytes => 4, bits => 32, default => \&defaultZero  , alignment => 1, specialPolicies =>\&null,           packfmt => "N" };
-    $typesHoH{"uint64_t"}    = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "uint64_t"                   , bytes => 8, bits => 64, default => \&defaultZero  , alignment => 1, specialPolicies =>\&null,           packfmt =>\&packQuad};
+    $typesHoH{"uint16_t"}    = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "uint16_t"                   , bytes => 2, bits => 16, default => \&defaultZero  , alignment => 1, specialPolicies =>\&null,           packfmt =>\&pack2byte};
+    $typesHoH{"uint32_t"}    = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "uint32_t"                   , bytes => 4, bits => 32, default => \&defaultZero  , alignment => 1, specialPolicies =>\&null,           packfmt =>\&pack4byte};
+    $typesHoH{"uint64_t"}    = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "uint64_t"                   , bytes => 8, bits => 64, default => \&defaultZero  , alignment => 1, specialPolicies =>\&null,           packfmt =>\&pack8byte};
     $typesHoH{"enumeration"} = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 0, typeName => "XMLTOHB_USE_PARENT_ATTR_ID" , bytes => 0, bits => 0 , default => \&defaultEnum  , alignment => 1, specialPolicies =>\&null,           packfmt => "packEnumeration"};
-    $typesHoH{"hbmutex"}     = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 0, typeName => "mutex_t*"                   , bytes => 8, bits => 64, default => \&defaultZero  , alignment => 8, specialPolicies =>\&enforceHbMutex, packfmt =>\&packQuad};
-    $typesHoH{"Target_t"}    = { supportsArray => 0, canBeHex => 1, complexTypeSupport => 0, typeName => "TARGETING::Target*"         , bytes => 8, bits => 64, default => \&defaultZero  , alignment => 8, specialPolicies =>\&null,           packfmt =>\&packQuad};
+    $typesHoH{"hbmutex"}     = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 0, typeName => "mutex_t*"                   , bytes => 8, bits => 64, default => \&defaultZero  , alignment => 8, specialPolicies =>\&enforceHbMutex, packfmt =>\&pack8byte};
+    $typesHoH{"Target_t"}    = { supportsArray => 0, canBeHex => 1, complexTypeSupport => 0, typeName => "TARGETING::Target*"         , bytes => 8, bits => 64, default => \&defaultZero  , alignment => 8, specialPolicies =>\&null,           packfmt =>\&pack8byte};
 
     $g_simpleTypeProperties_cache = \%typesHoH;
 
@@ -2627,7 +2695,15 @@ sub packEnumeration {
     # Encode the value
     for (my $count=$bytes-1; $count >= 0; $count--)
     {
-        $binaryData .= pack("C", (0xFF & ($value >> (8*$count))) );
+        if($cfgBigEndian)
+        {
+            $binaryData .= pack1byte(0xFF & ($value >> (8*$count)));
+        }
+        else # Little endian
+        {
+            $binaryData .= pack1byte(
+                    0xFF & ($value >> (8*($bytes - 1 - $count))));
+        }
     }
 
     if( (length $binaryData) < 1)
@@ -2763,13 +2839,27 @@ sub accumulate {
 
     for(my $count = 0; $count < $bits; $count++)
     {
-        if( 1 & ($value >> $bits - $count - 1))
+        if($cfgBigEndian)
         {
-            $self->{_accumulator} .= "1";
+            if( 1 & ($value >> $bits - $count - 1))
+            {
+                $self->{_accumulator} .= "1";
+            }
+            else
+            {
+                $self->{_accumulator} .= "0";
+            }
         }
         else
         {
-            $self->{_accumulator} .= "0";
+            if( 1 & ($value >> $count))
+            {
+                $self->{_accumulator} .= "1";
+            }
+            else
+            {
+                $self->{_accumulator} .= "0";
+            }
         }
     }
 
@@ -2789,9 +2879,18 @@ sub releaseAndClear {
     {
         my $simpleTypeProperties = main::simpleTypeProperties();
 
-        $binaryData = pack
+        if($cfgBigEndian)
+        {
+            $binaryData = pack
             ("B$simpleTypeProperties->{$self->{_currentType}}{bits}",
                 $self->{_accumulator});
+        }
+        else # Little endian, inverse order
+        {
+            $binaryData = pack
+            ("b$simpleTypeProperties->{$self->{_currentType}}{bits}",
+                $self->{_accumulator});
+        }
 
         $self->{_accumulator} = "";
         $self->{_currentType} = "";
@@ -2941,8 +3040,16 @@ sub packEntityPath {
         fatal("Path elements cannot be greater than $maxPathElements.");
     }
 
-    $binaryData .= pack("C", (0xF0 & ($type << 4)) +
-        (0x0F & (scalar @paths)));
+    if($cfgBigEndian)
+    {
+        $binaryData .= pack1byte((0xF0 & ($type << 4)) +
+            (0x0F & (scalar @paths)));
+    }
+    else # Little endian
+    {
+        $binaryData .= pack1byte((0x0F & ($type)) +
+            (0xF0 & ((scalar @paths) << 4)));
+    }
 
     foreach my $pathElement (@paths)
     {
@@ -2957,7 +3064,8 @@ sub packEntityPath {
                 enumNameToValue(
                   getEnumerationType($attributes,
                    $attr->{simpleType}->{enumeration}->{id}),$pathType);
-                $binaryData .= pack ("CC", $pathType, $pathInstance);
+                $binaryData .= pack1byte($pathType);
+                $binaryData .= pack1byte($pathInstance);
                 last;
             }
         }
@@ -3177,7 +3285,7 @@ sub generateTargetingImage {
 
     # Reserve space for the pointer to the # of targets, update later;
     my $numTargetsPointer = 0;
-    my $numTargetsPointerBinData = packQuad($numTargetsPointer);
+    my $numTargetsPointerBinData = pack8byte($numTargetsPointer);
     $offset += (length $numTargetsPointerBinData);
 
     ############################################################################
@@ -3252,13 +3360,13 @@ sub generateTargetingImage {
     # Reserve # pointers * sizeof(pointer)
     my $startOfAttributePointers = $offset;
     # print "Total attributes = $numAttributes\n";
-    $offset += ($numAttributes * (length packQuad(0) ));
+    $offset += ($numAttributes * (length pack8byte(0) ));
 
     # Now we can determine the pointer to the number of targets
     # Don't increment the offset; already accounted for
     $numTargetsPointer = $pnorRoBaseAddress + $offset;
-    $numTargetsPointerBinData = packQuad($numTargetsPointer);
-    my $numTargetsBinData = pack("N",$numTargets);
+    $numTargetsPointerBinData = pack8byte($numTargetsPointer);
+    my $numTargetsBinData = pack4byte($numTargets);
     $offset += (length $numTargetsBinData);
 
     my $firstTgtPtr = $pnorRoBaseAddress + $offset;
@@ -3286,14 +3394,14 @@ sub generateTargetingImage {
          # $attributeListTypeHoH{$targetInstance->{type}}{offset}, "\n" ;
 
         # Create target record
-        $data .= pack('N',
+        $data .= pack4byte(
             $attributeListTypeHoH{$targetInstance->{type}}{elements});
-        $data .= packQuad(
+        $data .= pack8byte(
               $attributeListTypeHoH{$targetInstance->{type}}{offset}
             + $pnorRoBaseAddress);
-        $data .= packQuad($attrAddr);
+        $data .= pack8byte($attrAddr);
         $attrAddr += $attributeListTypeHoH{$targetInstance->{type}}{elements}
-            * (length packQuad(0));
+            * (length pack8byte(0));
 
         # Increment the offset
         $offset += (length $data);
@@ -3388,8 +3496,8 @@ sub generateTargetingImage {
                 $roAttrBinData .= pack ("@".$pads);
                 $offset += $pads;
 
-                $attributePointerBinData .= packQuad(
-                        $offset + $pnorRoBaseAddress);
+                        $attributePointerBinData .= pack8byte(
+                            $offset + $pnorRoBaseAddress);
 
                 $offset += (length $rodata);
 
@@ -3410,8 +3518,8 @@ sub generateTargetingImage {
                 $rwAttrBinData .= pack ("@".$pads);
                 $rwOffset += $pads;
 
-                $attributePointerBinData .= packQuad(
-                        $rwOffset + $pnorRwBaseAddress);
+                $attributePointerBinData .= pack8byte(
+                    $rwOffset + $pnorRwBaseAddress);
 
                 $rwOffset += (length $rwdata);
 
@@ -3430,8 +3538,8 @@ sub generateTargetingImage {
                 $heapZeroInitBinData .= pack ("@".$pads);
                 $heapZeroInitOffset += $pads;
 
-                $attributePointerBinData .= packQuad(
-                        $heapZeroInitOffset + $heapZeroInitBaseAddr);
+                $attributePointerBinData .= pack8byte(
+                    $heapZeroInitOffset + $heapZeroInitBaseAddr);
 
                 $heapZeroInitOffset += (length $heapZeroInitData);
 
@@ -3450,8 +3558,8 @@ sub generateTargetingImage {
                 $heapPnorInitBinData .= pack ("@".$pads);
                 $heapPnorInitOffset += $pads;
 
-                $attributePointerBinData .= packQuad(
-                        $heapPnorInitOffset + $heapPnorInitBaseAddr);
+                $attributePointerBinData .= pack8byte(
+                    $heapPnorInitOffset + $heapPnorInitBaseAddr);
 
                 $heapPnorInitOffset += (length $heapPnorInitData);
 
@@ -3509,20 +3617,20 @@ sub generateTargetingImage {
     my $sizeOfSection = 9;
     my $offsetToSections = 0;
 
-    $headerBinData .= pack("N",$eyeCatcher);
-    $headerBinData .= pack("N",$headerMajorMinorVersion);
-    $headerBinData .= pack("N",$headerSize);
-    $headerBinData .= pack("N",$vmmSectionOffset);
-    $headerBinData .= packQuad($pnorRoBaseAddress);
-    $headerBinData .= pack("N",$sizeOfSection);
-    $headerBinData .= pack("N",$numSections);
-    $headerBinData .= pack("N",$offsetToSections);
+    $headerBinData .= pack4byte($eyeCatcher);
+    $headerBinData .= pack4byte($headerMajorMinorVersion);
+    $headerBinData .= pack4byte($headerSize);
+    $headerBinData .= pack4byte($vmmSectionOffset);
+    $headerBinData .= pack8byte($pnorRoBaseAddress);
+    $headerBinData .= pack4byte($sizeOfSection);
+    $headerBinData .= pack4byte($numSections);
+    $headerBinData .= pack4byte($offsetToSections);
 
     foreach my $section ("pnorRo","pnorRw","heapPnorInit","heapZeroInit")
     {
-        $headerBinData .= pack("C" , $sectionHoH{$section}{type});
-        $headerBinData .= pack("N" , $sectionHoH{$section}{offset});
-        $headerBinData .= pack("N" , $sectionHoH{$section}{size});
+        $headerBinData .= pack1byte($sectionHoH{$section}{type});
+        $headerBinData .= pack4byte($sectionHoH{$section}{offset});
+        $headerBinData .= pack4byte($sectionHoH{$section}{size});
     }
 
     # Serialize PNOR RO section to multiple of 4k page size (pad if necessary)
@@ -3615,16 +3723,25 @@ Indicates the file containing the base virtual address of the attributes
 (default is src/include/usr/vmmconst.h).  Only used when generating the PNOR
 targeting image
 
+=item B<--big-endian>
+
+Writes data structures to file in big endian format (default)
+
+=item B<--nobig-endian>
+
+Writes data structures to targeting image in little endian format (override to
+default).  Supports x86 environments.
+
 =item B<--short-enums>
 
-Writes optimially sized enumerations to binary image (default). Any code which 
+Writes optimially sized enumerations to binary image (default). Any code which
 uses the binary image or enumerations from generated header files must also
 be compiled with short enumeration support.  This saves at minimum 0 and at most
 3 bytes for each enumeration value.
 
 =item B<--noshort-enums>
 
-Writes maximum sized enumerations to binary image (default). Any code which 
+Writes maximum sized enumerations to binary image (default). Any code which
 uses the binary image or enumerations from generated header files must not
 be compiled with short enumeration support.  Every enumeration will consume 4
 bytes by default
