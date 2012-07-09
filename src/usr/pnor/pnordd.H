@@ -124,12 +124,14 @@ class PnorDD
     enum NorChipIDs
     {
         SIMICS_NOR_ID     = 0x20ba2000,  /**< CHIP ID returned by Simics NOR chip */
+        VPO_NOR_ID        = 0x20201820,  /**< CHIP ID returned by VPO NOR chip */
     };
 
 
     enum SfcRange {
         SFC_CMD_SPACE,    /**< Indicate accessing command reg */
         SFC_CMDBUF_SPACE, /**< Indicate accessing command buffer space */
+        SFC_MMIO_SPACE,   /**< Indicate accessing MMIO based Direct Reads */
     };
 
     /**
@@ -348,6 +350,7 @@ class PnorDD
         LPC_DIRECT_READ_OFFSET = 0xFC000000,
         LPC_SFC_CMDREG_OFFSET = 0xF0000C00,  /** LPC Offest to SFC Command Registers */
         LPC_SFC_CMDBUF_OFFSET = 0xF0000D00,  /** LPC Offest to SFC Command Buffer space */
+        LPC_SFC_MMIO_OFFSET   = 0xF4000000,  /** LPC Offset into SFC MMIO Direct Read space */
         LPC_TOP_OF_FLASH_OFFSET = 0xFFFFFFFF,
 
         ECCB_CTL_REG  = 0x000B0020, /**< ECCB Control Reg (FW) */
@@ -511,6 +514,11 @@ class PnorDD
      *   in the current VPO and Simics models
      */
     PnorMode_t iv_mode;
+
+    /**
+     * @brief Flag to drive special behavior in VPO.
+     */
+     static uint64_t iv_vpoMode;
 
     /**
      * @brief describes the erase block size, set based on NOR chip type

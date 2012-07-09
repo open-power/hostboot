@@ -477,8 +477,9 @@ class PnorDdTest : public CxxTest::TestSuite
 
             if(!TARGETING::is_vpo())
             {
-                TRACFCOMP(g_trac_pnor, "PnorDdTest::test_readwrite_modes> Adding REAL_CMD mode");
+                TRACFCOMP(g_trac_pnor, "PnorDdTest::test_readwrite_modes> Adding REAL_CMD & MODEL_REAL_MMIO modes");
                 supported_modes.push_back(PnorDD::MODEL_REAL_CMD);
+                supported_modes.push_back(PnorDD::MODEL_REAL_MMIO);
             }
 
             uint64_t scratch_space = base_address;
@@ -644,8 +645,9 @@ class PnorDdTest : public CxxTest::TestSuite
 
             if(!TARGETING::is_vpo())
             {
-                TRACFCOMP(g_trac_pnor, "PnorDdTest::test_smartwrite_modes> Adding REAL_CMD mode");
+                TRACFCOMP(g_trac_pnor, "PnorDdTest::test_smartwrite_modes> Adding REAL_CMD & MODEL_REAL_MMIO modes");
                 supported_modes.push_back(PnorDD::MODEL_REAL_CMD);
+                supported_modes.push_back(PnorDD::MODEL_REAL_MMIO);
             }
 
             uint64_t scratch_space = base_address;
@@ -805,8 +807,9 @@ class PnorDdTest : public CxxTest::TestSuite
 
             if(!TARGETING::is_vpo())
             {
-                TRACFCOMP(g_trac_pnor, "PnorDdTest::test_crossblock_modes> Adding REAL_CMD mode");
+                TRACFCOMP(g_trac_pnor, "PnorDdTest::test_crossblock_modes> Adding REAL_CMD & MODEL_REAL_MMIO mode");
                 supported_modes.push_back(PnorDD::MODEL_REAL_CMD);
+                supported_modes.push_back(PnorDD::MODEL_REAL_MMIO);
             }
 
             uint64_t scratch_space = base_address;

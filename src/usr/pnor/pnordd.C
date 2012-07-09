@@ -60,7 +60,8 @@ namespace PNOR
 {
 
     enum {
-        VPO_MODE_OVERRIDE = 0xFAC0FAC0FAC0FAC0
+        VPO_MODE_MEMCPY = 0xFAC0FAC0FAC0FAC0,
+        VPO_MODE_MMIO   = 0xDAB0DAB0DAB0DAB0,
     };
 
 /**
@@ -165,83 +166,6 @@ errlHndl_t ddWrite(DeviceFW::OperationType i_opType,
     return l_err;
 }
 
-/**
- * @brief Used for VPO testing via istep hack.  Will be removed once VPO Bringup is done.
- *    TODO (RTC:42487: Remove this once VPO PNOR bringup is done.
- */
-void testRealPnor(void *io_pArgs)
-{
-    //        TARGETING::Target* l_testTarget =
-    //          TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
-    size_t l_size = sizeof(uint64_t);
-    errlHndl_t l_err = NULL;
-    uint64_t fails = 0;
-    uint64_t total = 0;
-
-    TRACFCOMP(g_trac_pnor, "PNOR::testRealPnor> starting" );
-
-    PnorDD* pnordd = NULL;
-    pnordd = new PnorDD(PnorDD::MODEL_REAL_CMD);
-
-
-    // Perform PnorDD read
-    const uint64_t l_address = 0x4;
-    uint64_t l_readData = 0;
-    l_size = sizeof(uint64_t);
-    l_err = pnordd->readFlash(&l_readData,
-                              l_size,
-                              l_address);
-    total++;
-    if (l_err)
-    {
-        TRACFCOMP(g_trac_pnor, "E>PnorDdTest::testRealPnor: PNORDD read 1: readFlash() failed! Error committed.");
-        errlCommit(l_err,PNOR_COMP_ID);
-        fails++;
-    }
-    total++;
-
-    TRACFCOMP(g_trac_pnor, "PNOR::testRealPnor> l_readData=0x%.16x", l_readData );
-    TRACFCOMP(g_trac_pnor, "PNOR::testRealPnor> Try writing data" );
-
-    uint64_t l_writeData = 0x12345678FEEDB0B0;
-    l_size = sizeof(uint64_t);
-    l_err = pnordd->writeFlash(&l_writeData,
-                               l_size,
-                               l_address);
-
-    total++;
-    if (l_err)
-    {
-        TRACFCOMP(g_trac_pnor, "E>PNOR::testRealPnor: PNORDD write 1: writeFlash() failed! Error committed.");
-        errlCommit(l_err,PNOR_COMP_ID);
-        fails++;
-    }
-    total++;
-
-    // Perform PnorDD read
-    l_readData = 0;
-    l_size = sizeof(uint64_t);
-    l_err = pnordd->readFlash(&l_readData,
-                              l_size,
-                              l_address);
-    total++;
-    if (l_err)
-    {
-        TRACFCOMP(g_trac_pnor, "E>PNOR::testRealPnor: PNORDD read 2: readFlash() failed! Error committed.");
-        errlCommit(l_err,PNOR_COMP_ID);
-        fails++;
-    }
-    total++;
-
-    TRACFCOMP(g_trac_pnor, "PNOR::testRealPnor>  PNORDD read 2: l_readData=0x%.16x", l_readData );
-
-    TRACFCOMP(g_trac_pnor, "PNOR::testRealPnor> %d/%d fails", fails, total );
-    if( pnordd )
-    {
-        delete pnordd;
-    }
-}
-
 // Register PNORDD access functions to DD framework
 DEVICE_REGISTER_ROUTE(DeviceFW::READ,
                       DeviceFW::PNOR,
@@ -282,7 +206,15 @@ errlHndl_t PnorDD::readFlash(void* o_buffer,
             break;
         }
 
-        //If we get here we're doing either MODEL_LPC_MEM or MODEL_REAL_CMD
+        //trace each page when running in VPO to show we're making progress.
+        //TODO: Remove after we get more PNOR runtime in VPO.  RTC: 45885
+        if(0 != iv_vpoMode) 
+        {
+            TRACFCOMP(g_trac_pnor,"PNOR read of address %.8X, size=0x%X", i_address, io_buflen);
+        }
+
+
+        //If we get here we're doing either MODEL_LPC_MEM, MODEL_REAL_CMD, or MODEL_REAL_MMIO
         mutex_lock(&cv_mutex);
         l_err = bufferedSfcRead(i_address, io_buflen, o_buffer);
         mutex_unlock(&cv_mutex);
@@ -318,7 +250,21 @@ errlHndl_t PnorDD::writeFlash(void* i_buffer,
             break;
         }
 
-        //If we get here we're doing either MODEL_LPC_MEM or MODEL_REAL_CMD
+        //If we get here we're doing either MODEL_LPC_MEM, MODEL_REAL_CMD, or MODEL_REAL_MMIO
+
+        //If we're in VPO, just do the write directly (no erases)
+        if(0 != iv_vpoMode)
+        {
+            mutex_lock(&cv_mutex);
+            //TODO: Remove trace after we get more PNOR runtime in VPO.  RTC: 45885
+            TRACFCOMP(g_trac_pnor,"PNOR write %.8X, skipping right to bufferedSfcWrite to improve performance", i_address);
+            l_err = bufferedSfcWrite(static_cast<uint32_t>(l_address),
+                                     8,
+                                     i_buffer);
+            mutex_unlock(&cv_mutex);
+            break;
+        }
+
 
         // LPC is accessed 32-bits at a time, but SFC has a 256byte buffer
         //   but we also need to be smart about handling erases.  In NOR
@@ -391,7 +337,7 @@ errlHndl_t PnorDD::writeFlash(void* i_buffer,
  Private/Protected Methods
  ********************/
 mutex_t PnorDD::cv_mutex = MUTEX_INITIALIZER;
-
+uint64_t PnorDD::iv_vpoMode = 0;
 /**
  * @brief  Constructor
  */
@@ -401,24 +347,36 @@ PnorDD::PnorDD( PnorMode_t i_mode )
     iv_erasesize_bytes = ERASESIZE_BYTES_DEFAULT;
     iv_erases = NULL;
 
+    //Use real PNOR for everything except VPO
+    if(0 == iv_vpoMode)
+    {
+        iv_vpoMode =  mmio_scratch_read(MMIO_SCRATCH_PNOR_MODE);
+    }
+
     //In the normal case we will choose the mode for the caller
     if( MODEL_UNKNOWN == iv_mode )
     {
-        //Use real PNOR for everything except VPO
-        uint64_t vpo_override = mmio_scratch_read(MMIO_SCRATCH_PNOR_MODE);
-        if(vpo_override == PNOR::VPO_MODE_OVERRIDE)
+        if(iv_vpoMode == PNOR::VPO_MODE_MEMCPY)
         {
             //VPO override set -- use fastest method -- memcpy
+            TRACFCOMP(g_trac_pnor,"PNORDD: Running in MEMCPY mode for VPO");
             iv_mode = MODEL_MEMCPY;
+        }
+        else if(iv_vpoMode == PNOR::VPO_MODE_MMIO)
+        {
+            //VPO override set -- use MMIO mode
+            TRACFCOMP(g_trac_pnor,"PNORDD: Running in VPO Mode, writes will not trigger erase attempts");
+            iv_mode = MODEL_REAL_MMIO;
         }
         else
         {
             //Normal mode
-            iv_mode = MODEL_REAL_CMD;
+            iv_mode = MODEL_REAL_MMIO;
         }
     }
 
-    if( MODEL_REAL_CMD == iv_mode )
+    if( (MODEL_REAL_CMD == iv_mode) ||
+        (MODEL_REAL_MMIO == iv_mode) )
     {
         sfcInit( );
     }
@@ -486,8 +444,6 @@ void PnorDD::sfcInit( )
                                 conf_init);
             if(l_err) { break; }
 
-            cv_sfcInitDone = true;
-
             //Determine NOR Flash type, configure SFC and PNOR DD as needed
             l_err = getNORChipId(cv_nor_chipid);
             TRACFCOMP(g_trac_pnor, "PnorDD::sfcInit: cv_nor_chipid=0x%.8x> ", cv_nor_chipid );
@@ -525,9 +481,15 @@ void PnorDD::sfcInit( )
 
 
             }
+            else if(VPO_NOR_ID == cv_nor_chipid)
+            {
+                TRACFCOMP( g_trac_pnor, "PnorDD::sfcInit> Detected VPO NOR Chip(0x%.4X).  Erase not currently supported", cv_nor_chipid );
+                //Set chip ID back to zero to avoid later chip specific logic.
+                cv_nor_chipid = 0;
+            }
             else
             {
-                TRACFCOMP( g_trac_pnor, "PnorDD::sfcInit> Unsupported NOR type detected : cv_nor_chipid=%d", cv_nor_chipid );
+                TRACFCOMP( g_trac_pnor, "PnorDD::sfcInit> Unsupported NOR type detected : cv_nor_chipid=%.4X", cv_nor_chipid );
                 /*@
                  * @errortype
                  * @moduleid     PNOR::MOD_PNORDD_SFCINIT
@@ -540,10 +502,12 @@ void PnorDD::sfcInit( )
                                                 PNOR::MOD_PNORDD_SFCINIT,
                                                 PNOR::RC_UNSUPORTED_HARDWARE,
                                                 TO_UINT64(cv_nor_chipid));
-
+                //@todo: Leave FFDC Breadcrumbs and assert on unsupported chip...  RTC: 44146.
                 //Set chip ID back to zero to avoid later chip specific logic.
                 cv_nor_chipid = 0;
             }
+
+            cv_sfcInitDone = true;
 
         }
 
@@ -572,8 +536,14 @@ errlHndl_t PnorDD::writeRegSfc(SfcRange i_range,
     if(SFC_CMD_SPACE == i_range)
     {
         lpc_addr = LPC_SFC_CMDREG_OFFSET | i_addr;
-    } else {
+    }
+    else if (SFC_CMDBUF_SPACE == i_range)
+    {
         lpc_addr = LPC_SFC_CMDBUF_OFFSET | i_addr;
+    }
+    else
+    {
+        lpc_addr = LPC_SFC_MMIO_OFFSET | i_addr;
     }
 
     TRACDCOMP( g_trac_pnor, "PnorDD::writeRegSfc> lpc_addr=0x%.8x, i_data=0x%.8x",
@@ -596,8 +566,14 @@ errlHndl_t PnorDD::readRegSfc(SfcRange i_range,
     if(SFC_CMD_SPACE == i_range)
     {
         lpc_addr = LPC_SFC_CMDREG_OFFSET | i_addr;
-    } else {
+    }
+    else if (SFC_CMDBUF_SPACE == i_range)
+    {
         lpc_addr = LPC_SFC_CMDBUF_OFFSET | i_addr;
+    }
+    else
+    {
+        lpc_addr = LPC_SFC_MMIO_OFFSET | i_addr;
     }
 
     l_err = readLPC(lpc_addr, o_data);
@@ -807,39 +783,61 @@ errlHndl_t PnorDD::bufferedSfcRead(uint32_t i_addr,
 
     do{
 
-        if( MODEL_LPC_MEM == iv_mode )
+        switch(iv_mode)
         {
-            read_fake_pnor( i_addr,
-                            o_data,
-                            i_size );
-            break;
-        }
-
-        // Note: If we got here then iv_mode is MODEL_REAL_CMD
-
-        // Command based reads are buffered 256 bytes at a time.
-        uint32_t chunk_size = 0;
-        uint64_t addr = i_addr;
-        uint64_t end_addr = i_addr + i_size;
-
-        while(addr < end_addr)
-        {
-            chunk_size = SFC_CMDBUF_SIZE;
-            if( (addr + SFC_CMDBUF_SIZE) > end_addr)
+        case MODEL_LPC_MEM:
             {
-                chunk_size = end_addr - addr;
+                read_fake_pnor( i_addr,
+                                o_data,
+                                i_size );
+                break;
             }
+        case MODEL_REAL_MMIO:
+            {
+                //Read directly from MMIO space
+                uint32_t* word_ptr = static_cast<uint32_t*>(o_data);
+                uint32_t word_size = i_size/4;
+                for( uint32_t words_read = 0;
+                     words_read < word_size;
+                     words_read ++ )
+                {
+                    l_err = readRegSfc(SFC_MMIO_SPACE,
+                                       i_addr+words_read*4, //MMIO Address offset
+                                       word_ptr[words_read]);
+                    if( l_err ) {  break; }
+                }
 
-            //Read data via SFC CMD Buffer
-            l_err = loadSfcBuf(addr, chunk_size);
-            if(l_err) { break;}
+                break;
+            }
+        default:
+            {
+                // Note: If we get here then iv_mode is MODEL_REAL_CMD
 
-            //read SFC CMD Buffer via MMIO
-            l_err = readSfcBuffer(chunk_size,
-                                  (void*)((uint64_t)o_data + (addr-i_addr)));
-            if(l_err) { break;}
+                // Command based reads are buffered 256 bytes at a time.
+                uint32_t chunk_size = 0;
+                uint64_t addr = i_addr;
+                uint64_t end_addr = i_addr + i_size;
 
-            addr += chunk_size;
+                while(addr < end_addr)
+                {
+                    chunk_size = SFC_CMDBUF_SIZE;
+                    if( (addr + SFC_CMDBUF_SIZE) > end_addr)
+                    {
+                        chunk_size = end_addr - addr;
+                    }
+
+                    //Read data via SFC CMD Buffer
+                    l_err = loadSfcBuf(addr, chunk_size);
+                    if(l_err) { break;}
+
+                    //read SFC CMD Buffer via MMIO
+                    l_err = readSfcBuffer(chunk_size,
+                                          (void*)((uint64_t)o_data + (addr-i_addr)));
+                    if(l_err) { break;}
+
+                    addr += chunk_size;
+                }
+            }
         }
     }while(0);
 
@@ -862,39 +860,44 @@ errlHndl_t PnorDD::bufferedSfcWrite(uint32_t i_addr,
     errlHndl_t l_err = NULL;
 
     do{
-        if( MODEL_LPC_MEM == iv_mode )
+        switch(iv_mode)
         {
-            write_fake_pnor( i_addr,
-                             i_data,
-                             i_size );
-            break;
-        }
-
-        // Note: If we got here then iv_mode is MODEL_REAL_CMD
-
-        // Command based reads are buffered 256 bytes at a time.
-        uint32_t chunk_size = 0;
-        uint64_t addr = i_addr;
-        uint64_t end_addr = i_addr + i_size;
-
-        while(addr < end_addr)
-        {
-            chunk_size = SFC_CMDBUF_SIZE;
-            if( (addr + SFC_CMDBUF_SIZE) > end_addr)
+        case MODEL_LPC_MEM:
             {
-                chunk_size = end_addr - addr;
+                write_fake_pnor( i_addr,
+                                 i_data,
+                                 i_size );
+                break;
             }
+        default:
+            {
+                // Note: If we got here then iv_mode is MODEL_REAL_CMD or MODEL_REAL_MMIO
 
-            //write data to SFC CMD Buffer via MMIO
-            l_err = writeSfcBuffer(chunk_size,
-                                   (void*)((uint64_t)i_data + (addr-i_addr)));
-            if(l_err) { break;}
+                // Command based reads are buffered 256 bytes at a time.
+                uint32_t chunk_size = 0;
+                uint64_t addr = i_addr;
+                uint64_t end_addr = i_addr + i_size;
 
-            //Fetch bits into SFC CMD Buffer
-            l_err = flushSfcBuf(addr, chunk_size);
-            if(l_err) { break;}
+                while(addr < end_addr)
+                {
+                    chunk_size = SFC_CMDBUF_SIZE;
+                    if( (addr + SFC_CMDBUF_SIZE) > end_addr)
+                    {
+                        chunk_size = end_addr - addr;
+                    }
 
-            addr += chunk_size;
+                    //write data to SFC CMD Buffer via MMIO
+                    l_err = writeSfcBuffer(chunk_size,
+                                           (void*)((uint64_t)i_data + (addr-i_addr)));
+                    if(l_err) { break;}
+
+                    //Fetch bits into SFC CMD Buffer
+                    l_err = flushSfcBuf(addr, chunk_size);
+                    if(l_err) { break;}
+
+                    addr += chunk_size;
+                }
+            }
         }
     }while(0);
 
@@ -1360,6 +1363,13 @@ errlHndl_t PnorDD::eraseFlash(uint32_t i_address)
         if(cv_nor_chipid != 0)
         {
             TRACDCOMP(g_trac_pnor, "PnorDD::eraseFlash> Erasing flash for cv_nor_chipid=0x%.8x, iv_mode=0x%.8x", cv_nor_chipid, iv_mode);
+
+            //Write erase address to ADR reg
+            l_err = writeRegSfc(SFC_CMD_SPACE,
+                                SFC_REG_ADR,
+                                i_address);
+
+
             //Issue Erase command
             SfcCmdReg_t sfc_cmd;
             sfc_cmd.opcode = SFC_OP_ERASM;
