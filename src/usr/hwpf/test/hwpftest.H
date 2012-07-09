@@ -483,6 +483,19 @@ public:
                 break;
             }
 
+            // Test ATTR_FUNCTIONAL attribute access through FAPI
+            uint8_t l_functional = 0xff;
+            l_rc = FAPI_ATTR_GET(ATTR_FUNCTIONAL, &l_fapiTarget, l_functional);
+            if (l_rc != fapi::FAPI_RC_SUCCESS)
+            {
+                TS_FAIL("testHwpf5: ATTR_FUNCTIONAL. Error from GET");
+                break;
+            }
+            else
+            {
+                FAPI_INF("testHwpf5: Master chip ATTR_FUNCTIONAL: %d", l_functional);
+            }
+
             //printk("EC = %d\n", l_EC_R);
 
             /*

@@ -377,6 +377,68 @@ fapi::ReturnCode fapiPlatGetTargetName(const fapi::Target * i_pTarget,
     return l_rc;
 }
 
+//******************************************************************************
+// fapiPlatGetFunctional function
+//******************************************************************************
+fapi::ReturnCode fapiPlatGetFunctional(const fapi::Target * i_pTarget,
+                                       uint8_t & o_functional)
+{
+    fapi::ReturnCode l_rc;
+    o_functional = 0;
+    bool l_error = false;
+
+    // TODO. Move the checking of the FAPI Target pointer and embedded Hostboot
+    // Target pointer to a common function. Not doing it here because there are
+    // currently other changes to this file going through review.
+
+    // Check that the FAPI Target pointer is not NULL
+    if (i_pTarget == NULL)
+    {
+        FAPI_ERR("fapiPlatGetFunctional. NULL FAPI Target passed");
+        l_error = true;
+    }
+    else
+    {
+        // Extract the MCS Hostboot Target pointer
+        TARGETING::Target * l_pHbTarget = reinterpret_cast<TARGETING::Target*>(
+            i_pTarget->get());
+
+        // Check that the MCS Hostboot Target pointer is not NULL
+        if (l_pHbTarget == NULL)
+        {
+            FAPI_ERR("fapiPlatGetFunctional. NULL HB Target passed");
+            l_error = true;
+        }
+        else
+        {
+            TARGETING::PredicateIsFunctional l_functional;
+            if (l_functional(l_pHbTarget))
+            {
+                o_functional = 1;
+            }
+        }
+    }
+
+    if (l_error)
+    {
+        /*@
+         *  @errortype
+         *  @moduleid   MOD_ATTR_GET_FUNCTIONAL
+         *  @reasoncode RC_ATTR_BAD_TARGET_PARAM
+         *  @devdesc    Failed to get the functional state due to bad target
+         *              parameter.
+         */
+        errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
+            ERRORLOG::ERRL_SEV_INFORMATIONAL,
+            fapi::MOD_ATTR_GET_FUNCTIONAL,
+            fapi::RC_ATTR_BAD_TARGET_PARAM);
+        l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
+    }
+
+    return l_rc;
+}
+
+
 } // End platAttrSvc namespace
 
 } // End fapi namespace

@@ -52,6 +52,7 @@ namespace fapi
         MOD_FAPI_GET_ASSOCIATE_DIMMS               = 0x0C,
         MOD_EDI_EI_IO_RUN_TRAINING                 = 0x0D,
         MOD_THREAD_ACTIVATE                        = 0x0E, //@fixme RTC:42816
+        MOD_ATTR_GET_FUNCTIONAL                    = 0x0F,
     };
 
     /**

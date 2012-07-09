@@ -1,0 +1,47 @@
+<!--  IBM_PROLOG_BEGIN_TAG
+     This is an automatically generated prolog.
+   
+     $Source: src/usr/hwpf/hwp/common_attributes.xml $
+   
+     IBM CONFIDENTIAL
+   
+     COPYRIGHT International Business Machines Corp. 2012
+   
+     p1
+   
+     Object Code Only (OCO) source materials
+     Licensed Internal Code Source Materials
+     IBM HostBoot Licensed Internal Code
+   
+     The source code for this program is not published or other-
+     wise divested of its trade secrets, irrespective of what has
+     been deposited with the U.S. Copyright Office.
+   
+     Origin: 30
+   
+     IBM_PROLOG_END_TAG -->
+<!--
+    XML file specifying HWPF attributes.
+    These are platInit attributes associated with multiple target types
+    Each execution platform must initialize.
+-->
+
+<attributes>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_FUNCTIONAL</id>
+    <targetType>
+        TARGET_TYPE_DIMM, TARGET_TYPE_PROC_CHIP, TARGET_TYPE_MEMBUF_CHIP,
+        TARGET_TYPE_EX_CHIPLET, TARGET_TYPE_MBA_CHIPLET,
+        TARGET_TYPE_MCS_CHIPLET, TARGET_TYPE_XBUS_ENDPOINT,
+        TARGET_TYPE_ABUS_ENDPOINT
+    </targetType>
+    <description>
+        1 if the target is functional, else 0
+        Set by the platform.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>NON_FUNCTIONAL = 0, FUNCTIONAL = 1</enum>
+    <platInit/>
+  </attribute>
+</attributes>

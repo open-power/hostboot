@@ -152,6 +152,17 @@ fapi::ReturnCode fapiPlatGetDqMapping(const fapi::Target * i_pDimmTarget,
 fapi::ReturnCode fapiPlatGetTargetName(const fapi::Target * i_pTarget,
                                        uint8_t & o_name);
 
+/**
+ * @brief This function is called by the FAPI_ATTR_GET macro when getting
+ * ATTR_FUNCTIONAL. It should not be called directly
+ *
+ * @param[in]  i_pTarget    Target pointer
+ * @param[out] o_functional 1 = functional, else 0
+ * @return ReturnCode.   Zero on success, else platform specified error
+ */
+fapi::ReturnCode fapiPlatGetFunctional(const fapi::Target * i_pTarget,
+                                       uint8_t & o_functional);
+
 }
 
 }
@@ -297,5 +308,11 @@ fapi::ReturnCode fapiPlatGetTargetName(const fapi::Target * i_pTarget,
 //------------------------------------------------------------------------------
 #define ATTR_NAME_GETMACRO(ID, PTARGET, VAL) \
     fapi::platAttrSvc::fapiPlatGetTargetName(PTARGET, VAL)
+
+//------------------------------------------------------------------------------
+// MACRO to route ATTR_FUNCTIONAL access to the correct Hostboot function
+//------------------------------------------------------------------------------
+#define ATTR_FUNCTIONAL_GETMACRO(ID, PTARGET, VAL) \
+    fapi::platAttrSvc::fapiPlatGetFunctional(PTARGET, VAL)
 
 #endif // FAPIPLATATTRIBUTESERVICE_H_
