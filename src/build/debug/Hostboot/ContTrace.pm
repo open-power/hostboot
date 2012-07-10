@@ -20,8 +20,7 @@
 #
 #  Origin: 30
 #
-#  IBM_PROLOG_END
-
+#  IBM_PROLOG_END_TAG
 use strict;
 
 package Hostboot::ContTrace;
@@ -239,6 +238,7 @@ sub main
                 ::userDisplay $line;
             }
         }
+        unlink($fname[$i]);
     }
 
     if ($dbgMsg)

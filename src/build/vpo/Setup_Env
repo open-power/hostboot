@@ -1,3 +1,27 @@
+#!/bin/sh "Use source to invoke this script"
+#  IBM_PROLOG_BEGIN_TAG
+#  This is an automatically generated prolog.
+#
+#  $Source: src/build/vpo/Setup_Env $
+#
+#  IBM CONFIDENTIAL
+#
+#  COPYRIGHT International Business Machines Corp. 2012
+#
+#  p1
+#
+#  Object Code Only (OCO) source materials
+#  Licensed Internal Code Source Materials
+#  IBM HostBoot Licensed Internal Code
+#
+#  The source code for this program is not published or other-
+#  wise divested of its trade secrets, irrespective of what has
+#  been deposited with the U.S. Copyright Office.
+#
+#  Origin: 30
+#
+#  IBM_PROLOG_END_TAG
+
 ################################################################################
 #
 # Setup intialization source script for HostBoot Sprint Release VPO/VBU model
@@ -16,6 +40,10 @@
 #                          Update to Cronus rel.20120611, HBTOOLS rel.20120611
 #                          Build hb0606a_1219.810
 #                          Add m_3_a Murano model
+#
+# Version 1.4   07-10-2012 Default HB_TOOLS to rel.20120710
+#                          Update for new m_4_a model, default to new checkpoint
+#                          Load SPD data
 #
 ################################################################################
 
@@ -60,16 +88,14 @@ Setup_MyEnv() {
 	sprint=hb0606a_1219.810
 	
 	# Initialize HostBoot environment/cronus/tools - note new naming convention
-	
-	export AUTOVBU_CRONUS_SIM=rel.20120611
+	#export AUTOVBU_CRONUS_SIM=rel.20120709
+	export AUTOVBU_CRONUS_SIM=dev
+
 	export GLOBAL_DEBUG=8.VW.Vc.dG.F3.0I.E8.V
-	export HB_TOOLS=$AUTOVBU_HBTOOLS_BASEDIR/rel.20120611
+	export HB_TOOLS=$AUTOVBU_HBTOOLS_BASEDIR/rel.20120710
 
 	# Select default model -- choose either VBU or VPO versions
-	export VPO_MODEL=m_3_a; unset VBU_MODEL; VBUVPO=VPO
-	#export VBU_MODEL=p1_e8056_c1000_cen1_cen054_unopt_2_gfw; unset VPO_MODEL; VBUVPO=VBU
-	#export VBU_MODEL=p1_e8062_wafer_nomem_c1000_opt_4; unset VPO_MODEL; VBUVPO=VBU
-	#export VBU_MODEL=p1_e8062_c1000_cen1_cen061_unopt_1; unset VPO_MODEL; VBUVPO=VBU
+	export VPO_MODEL=m_4_a; unset VBU_MODEL; VBUVPO=VPO
 	
 	# Default AWAN request time - shorter periods get AWAN faster
 
@@ -78,8 +104,8 @@ Setup_MyEnv() {
 	# Default sprint test case settings
 	
 	export AUTOVBU_CORE=-cft
-	export AUTOVBU_SIMCLOCKS=5000000
-	export AUTOVBU_INITIAL_CHKPT=after_8megzero_newxscom
+	export AUTOVBU_SIMCLOCKS=3000000
+	export AUTOVBU_INITIAL_CHKPT=zero_vpo_after_proc_sbe
 	export AUTOVBU_LOOPS=1200
 	export AUTOVBU_PRINTK_LINES=50
 	
@@ -235,52 +261,32 @@ Setup_MyDynamic() {
 	# Set other defaults based upon MODEL
 	case "$VPO_MODEL$VBU_MODEL"
 	in
-                 s1_e8024_wafer_nomem_dc_opt_6|s1_e8026_c0400_cen1_cen069_unopt_1|m_3_a)
-                          export AUTOVBU_ECMD_VER=${AUTOVBU_ECMD_VER-p8s1}
-                          export AWAN_CONFIG=${AWAN_CONFIG-star8b}
-                          unset DEFAULT_LEVEL
-                          ;;
-		p1_e8062_wafer_nomem_c1000_opt_4|m_2_e)
-			export AUTOVBU_ECMD_VER=${AUTOVBU_ECMD_VER-p8s1}
-			export AWAN_SCRIPT=${AWAN_SCRIPT-run_script_star4b}
-			export AWAN_CONFIG=${AWAN_CONFIG-star4b}
-			export DEFAULT_LEVEL=prev
-			;;
-		m_1_c|p1_e8056_c1000_cen1_cen054_unopt_2_gfw)
-			export AUTOVBU_ECMD_VER=${AUTOVBU_ECMD_VER-cronusflex}
-			export AWAN_SCRIPT=${AWAN_SCRIPT-run_script_star8b_flex}
-			export AWAN_CONFIG=${AWAN_CONFIG-star8b}
-			export DEFAULT_LEVEL=prev
-			;;
-		m_2_a|p1_e8062_c1000_cen1_cen061_unopt_1)
-			export AUTOVBU_ECMD_VER=${AUTOVBU_ECMD_VER-cronusflex}
-			export AWAN_SCRIPT=${AWAN_SCRIPT- run_script_star8b_flex}
-			export AWAN_CONFIG=${AWAN_CONFIG-star8b}
-			export DEFAULT_LEVEL=prev
-			;;
-		p1_e8056*|p1_e8059*|p1_e8062*)
-			export AUTOVBU_ECMD_VER=${AUTOVBU_ECMD_VER-p8s1}
-			export AWAN_SCRIPT=${AWAN_SCRIPT-run_script_star8b}
-			export AWAN_CONFIG=${AWAN_CONFIG-star8b}
-			export DEFAULT_LEVEL=prev
-			;;
-		s1_e8024_wafer_nomem_dc_opt_6)
-			export AUTOVBU_ECMD_VER=${AUTOVBU_ECMD_VER-p8s1}
-			export AWAN_SCRIPT=${AWAN_SCRIPT-run_script_star8b}
-			export AWAN_CONFIG=${AWAN_CONFIG-star8b}
-			unset DEFAULT_LEVEL
-			;;
-		s1_e8024_wafer_nomem*)
-			export AUTOVBU_ECMD_VER=${AUTOVBU_ECMD_VER-p8s1}
-			export AWAN_SCRIPT=${AWAN_SCRIPT-run_script_star4b}
-			export AWAN_CONFIG=${AWAN_CONFIG-star4b}
-			unset DEFAULT_LEVEL
-			;;
-		*)
-			export AUTOVBU_ECMD_VER=${AUTOVBU_ECMD_VER-p8s1}
-			export AWAN_SCRIPT=${AWAN_SCRIPT-run_script_star8b}
-			export AWAN_CONFIG=${AWAN_CONFIG-star8b}
-			;;
+        s1_e8032_c0400_cen1_cen073_unopt_2|m_3_b)
+            export AUTOVBU_ECMD_VER=${AUTOVBU_ECMD_VER-p8s1}
+            export AWAN_CONFIG=${AWAN_CONFIG-star8b}
+            unset DEFAULT_LEVEL
+            ;;
+        s1_e8032_c0400_cen1_cen077_unopt_1|m_4_a)
+            export AUTOVBU_ECMD_VER=${AUTOVBU_ECMD_VER-p8s1}
+            export AWAN_CONFIG=${AWAN_CONFIG-star8b}
+            unset DEFAULT_LEVEL
+            ;;
+        s1_e8024_wafer_nomem_dc_opt_6|s1_e8026_c0400_cen1_cen069_unopt_1|m_3_a)
+            export AUTOVBU_ECMD_VER=${AUTOVBU_ECMD_VER-p8s1}
+            export AWAN_CONFIG=${AWAN_CONFIG-star8b}
+            unset DEFAULT_LEVEL
+            ;;
+	m_2_a|p1_e8062_c1000_cen1_cen061_unopt_1)
+            export AUTOVBU_ECMD_VER=${AUTOVBU_ECMD_VER-cronusflex}
+            export AWAN_SCRIPT=${AWAN_SCRIPT- run_script_star8b_flex}
+            export AWAN_CONFIG=${AWAN_CONFIG-star8b}
+            export DEFAULT_LEVEL=prev
+            ;;
+	*)
+            export AUTOVBU_ECMD_VER=${AUTOVBU_ECMD_VER-p8s1}
+            export AWAN_SCRIPT=${AWAN_SCRIPT-run_script_star8b}
+            export AWAN_CONFIG=${AWAN_CONFIG-star8b}
+            ;;
 	esac
 
 	if [ "$AUTOVBU_ECMD_VER" = "cronusflex" ]; then
@@ -454,11 +460,13 @@ Setup_MyHBImage() {
 
 		# Load initial checkpoint first
 
-		set -x
-		siminit ${AUTOVBU_INITIAL_CHKPT-after_8megzero} -quiet || return 1
-		$HB_VBUTOOLS/p8_load_l3 -l ${DEFAULT_LEVEL-rel} -f ${HB_IMGDIR}/hbicore${use_test}.bin -b ${AUTOVBU_CORE--cft} || return 1
-		$HB_VBUTOOLS/p8_load_l3 -l ${DEFAULT_LEVEL-rel} -f ${HB_IMGDIR}/vbu${use_test}.pnor -o 0x400000 -b ${AUTOVBU_CORE--cft} || return 1
-		set +x
+        set -x
+        siminit ${AUTOVBU_INITIAL_CHKPT-zero_vpo_after_proc_sbe} -quiet || return 1
+        $HB_VBUTOOLS/p8_load_l3 -l ${DEFAULT_LEVEL-rel} -f ${HB_IMGDIR}/hbicore${use_test}.bin -b ${AUTOVBU_CORE--cft} || return 1
+        $HB_VBUTOOLS/p8_load_l3 -l ${DEFAULT_LEVEL-rel} -f ${HB_IMGDIR}/vbu${use_test}.pnor -o 0x400000 -b ${AUTOVBU_CORE--cft} || return 1
+        $HB_VBUTOOLS/p8_load_l3 -l ${DEFAULT_LEVEL-rel} -f ${HB_IMGDIR}/sysmvpd.dat -o 0x681000 -b ${CORE--cft} || exit 1
+        $HB_VBUTOOLS/p8_load_l3 -l ${DEFAULT_LEVEL-rel} -f ${HB_IMGDIR}/sysspd.dat -o 0x701000 -b ${CORE--cft} || exit 1
+        set +x
 	fi
 
 	return 0

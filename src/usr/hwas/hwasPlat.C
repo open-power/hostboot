@@ -49,8 +49,26 @@ errlHndl_t platReadIDEC(const TargetHandle_t &i_target)
     uint64_t id_ec;
     size_t op_size = sizeof(id_ec);
     errlHndl_t errl = NULL;
-    errl = DeviceFW::deviceRead(i_target, &id_ec,
-               op_size, DEVICE_SCOM_ADDRESS(0x000F000Full));
+
+    // At the time when we read IDEC, the tp chiplet of Centaur & slave
+    // processors are not yet enabled; therefore, we can not read IDEC
+    // using SCOM path.  We must use FSI path to read the IDEC values.
+    // For master proc, use scom
+    // For everything else, use FSI(0x1028)
+    TARGETING::Target* l_pMasterProcChip = NULL;
+    TARGETING::targetService(). masterProcChipTargetHandle(l_pMasterProcChip);
+
+    if (i_target == l_pMasterProcChip)
+    {
+        errl = DeviceFW::deviceRead(i_target, &id_ec,
+                                    op_size,
+                                    DEVICE_SCOM_ADDRESS(0x000F000Full));
+    }
+    else
+    {
+        errl = DeviceFW::deviceRead(i_target, &id_ec, op_size,
+                                    DEVICE_FSI_ADDRESS(0x01028));
+    }
 
     if (errl == NULL)
     {   // no error, so we got a valid ID/EC value back

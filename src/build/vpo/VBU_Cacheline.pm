@@ -76,7 +76,7 @@ my  $curDir      =   getcwd();
 my  $CLfile     =   "$curDir/istepmodereg.dma";
 my  $CORE       =   "-cft";
 
-my  $SIM_CLOCKS =   "5000000";
+my  $SIM_CLOCKS =   "3000000";
 
 #############################################
 ##  Internal Globals

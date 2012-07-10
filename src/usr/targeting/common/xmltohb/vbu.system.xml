@@ -28,6 +28,8 @@
      Contains target instance declarations for the VBU configuration
      ================================================================= -->
 
+<!-- System -->
+
 <targetInstance>
     <id>sys0</id>
     <type>sys-sys-power8</type>
@@ -84,13 +86,14 @@
             <field><id>reserved</id><value>0</value></field>
         </default>
     </attribute>
+    <!-- TODO: These PAYLOAD_BASE/PAYLOAD_ENTRY values is a specific workaround in order to allow Todd's memtester to work. Need to review for all VBU setups. -->
     <attribute>
         <id>PAYLOAD_BASE</id>
-        <default>0x0</default>
+        <default>256</default>
     </attribute>
     <attribute>
         <id>PAYLOAD_ENTRY</id>
-        <default>0x0</default>
+        <default>0x100</default>
     </attribute>
     <attribute>
         <id>MSS_MCA_HASH_MODE</id>
@@ -118,6 +121,8 @@
     </attribute>
 </targetInstance>
 
+<!-- System node 0 -->
+
 <targetInstance>
     <id>sys0node0</id>
     <type>enc-node-power8</type>
@@ -132,11 +137,11 @@
     </attribute>
 </targetInstance>
 
-<!-- Venice n0p0 processor chip -->
+<!-- Murano n0p0 processor chip -->
 
 <targetInstance>
     <id>sys0node0proc0</id>
-    <type>chip-processor-venice</type>
+    <type>chip-processor-murano</type>
     <attribute><id>HUID</id><default>0x00070000</default></attribute>
     <attribute><id>POSITION</id><default>0</default></attribute>
     <attribute><id>SCOM_SWITCHES</id>
@@ -170,69 +175,14 @@
         <id>FABRIC_CHIP_ID</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
 </targetInstance>
 
-<!-- Venice n0p0 EX units -->
-
-<targetInstance>
-    <id>sys0node0proc0ex0</id>
-    <type>unit-ex-venice</type>
-    <attribute><id>HUID</id><default>0x000A0000</default></attribute>
-        <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/ex-0</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/ex-0</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
-    <id>sys0node0proc0ex1</id>
-    <type>unit-ex-venice</type>
-    <attribute><id>HUID</id><default>0x000A0001</default></attribute>
-        <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/ex-1</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/ex-1</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
-    <id>sys0node0proc0ex2</id>
-    <type>unit-ex-venice</type>
-    <attribute><id>HUID</id><default>0x000A0002</default></attribute>
-        <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/ex-2</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/ex-2</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
-    <id>sys0node0proc0ex3</id>
-    <type>unit-ex-venice</type>
-    <attribute><id>HUID</id><default>0x000A0003</default></attribute>
-        <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/ex-3</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/ex-3</default>
-    </attribute>
-</targetInstance>
+<!-- Murano n0p0 EX units -->
 
 <targetInstance>
     <id>sys0node0proc0ex4</id>
-    <type>unit-ex-venice</type>
+    <type>unit-ex-murano</type>
     <attribute><id>HUID</id><default>0x000A0004</default></attribute>
         <attribute>
         <id>PHYS_PATH</id>
@@ -242,13 +192,17 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/ex-4</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>4</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
     <id>sys0node0proc0ex5</id>
-    <type>unit-ex-venice</type>
+    <type>unit-ex-murano</type>
     <attribute><id>HUID</id><default>0x000A0005</default></attribute>
-    <attribute>
+        <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/ex-5</default>
     </attribute>
@@ -256,65 +210,85 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/ex-5</default>
     </attribute>
-</targetInstance>
-
-<!-- Venice n0p0 core units -->
-
-<targetInstance>
-    <id>sys0node0proc0ex0core0</id>
-    <type>unit-core-venice</type>
-    <attribute><id>HUID</id><default>0x000B0000</default></attribute>
     <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/ex-0/core-0</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/ex-0/core-0</default>
+        <id>CHIP_UNIT</id>
+        <default>5</default>
     </attribute>
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0proc0ex1core0</id>
-    <type>unit-core-venice</type>
-    <attribute><id>HUID</id><default>0x000B0001</default></attribute>
-    <attribute>
+    <id>sys0node0proc0ex6</id>
+    <type>unit-ex-murano</type>
+    <attribute><id>HUID</id><default>0x000A0006</default></attribute>
+        <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/ex-1/core-0</default>
+        <default>physical:sys-0/node-0/proc-0/ex-6</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/ex-1/core-0</default>
+        <default>affinity:sys-0/node-0/proc-0/ex-6</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>6</default>
     </attribute>
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0proc0ex2core0</id>
-    <type>unit-core-venice</type>
-    <attribute><id>HUID</id><default>0x000B0002</default></attribute>
-    <attribute>
+    <id>sys0node0proc0ex12</id>
+    <type>unit-ex-murano</type>
+    <attribute><id>HUID</id><default>0x000A000C</default></attribute>
+        <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/ex-2/core-0</default>
+        <default>physical:sys-0/node-0/proc-0/ex-12</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/ex-2/core-0</default>
+        <default>affinity:sys-0/node-0/proc-0/ex-12</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>12</default>
     </attribute>
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0proc0ex3core0</id>
-    <type>unit-core-venice</type>
-    <attribute><id>HUID</id><default>0x000B0003</default></attribute>
-    <attribute>
+    <id>sys0node0proc0ex13</id>
+    <type>unit-ex-murano</type>
+    <attribute><id>HUID</id><default>0x000A000D</default></attribute>
+        <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/ex-3/core-0</default>
+        <default>physical:sys-0/node-0/proc-0/ex-13</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/ex-3/core-0</default>
+        <default>affinity:sys-0/node-0/proc-0/ex-13</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>13</default>
     </attribute>
 </targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0ex14</id>
+    <type>unit-ex-murano</type>
+    <attribute><id>HUID</id><default>0x000A000E</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/ex-14</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/ex-14</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>14</default>
+    </attribute>
+</targetInstance>
+
+<!-- Murano n0p0 core units -->
 
 <targetInstance>
     <id>sys0node0proc0ex4core0</id>
@@ -328,11 +302,15 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/ex-4/core-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>5</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
     <id>sys0node0proc0ex5core0</id>
-    <type>unit-core-venice</type>
+    <type>unit-core-murano</type>
     <attribute><id>HUID</id><default>0x000B0005</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -342,85 +320,17 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/ex-5/core-0</default>
     </attribute>
-</targetInstance>
-
-<!-- Venice n0p0 MCS units -->
-
-<targetInstance>
-    <id>sys0node0proc0mcs0</id>
-    <type>unit-mcs-venice</type>
-    <attribute><id>HUID</id><default>0x000F0000</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/mcs-0</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-0</default>
-    </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
-        <default>0</default>
+        <default>5</default>
     </attribute>
 </targetInstance>
 
-<targetInstance>
-    <id>sys0node0proc0mcs1</id>
-    <type>unit-mcs-venice</type>
-    <attribute><id>HUID</id><default>0x000F0001</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/mcs-1</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-1</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>1</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
-    <id>sys0node0proc0mcs2</id>
-    <type>unit-mcs-venice</type>
-    <attribute><id>HUID</id><default>0x000F0002</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/mcs-2</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-2</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>2</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
-    <id>sys0node0proc0mcs3</id>
-    <type>unit-mcs-venice</type>
-    <attribute><id>HUID</id><default>0x000F0003</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/mcs-3</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-3</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>3</default>
-    </attribute>
-</targetInstance>
+<!-- Murano n0p0 MCS units -->
 
 <targetInstance>
     <id>sys0node0proc0mcs4</id>
-    <type>unit-mcs-venice</type>
+    <type>unit-mcs-murano</type>
     <attribute><id>HUID</id><default>0x000F0004</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -438,7 +348,7 @@
 
 <targetInstance>
     <id>sys0node0proc0mcs5</id>
-    <type>unit-mcs-venice</type>
+    <type>unit-mcs-murano</type>
     <attribute><id>HUID</id><default>0x000F0005</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -456,7 +366,7 @@
 
 <targetInstance>
     <id>sys0node0proc0mcs6</id>
-    <type>unit-mcs-venice</type>
+    <type>unit-mcs-murano</type>
     <attribute><id>HUID</id><default>0x000F0006</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -474,7 +384,7 @@
 
 <targetInstance>
     <id>sys0node0proc0mcs7</id>
-    <type>unit-mcs-venice</type>
+    <type>unit-mcs-murano</type>
     <attribute><id>HUID</id><default>0x000F0007</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -490,11 +400,11 @@
     </attribute>
 </targetInstance>
 
-<!-- Venice n0p0 pervasive unit -->
+<!-- Murano n0p0 pervasive unit -->
 
 <targetInstance>
     <id>sys0node0proc0pervasive0</id>
-    <type>unit-pervasive-venice</type>
+    <type>unit-pervasive-murano</type>
     <attribute><id>HUID</id><default>0x00130000</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -506,11 +416,11 @@
     </attribute>
 </targetInstance>
 
-<!-- Venice n0p0 powerbus unit -->
+<!-- Murano n0p0 powerbus unit -->
 
 <targetInstance>
     <id>sys0node0proc0powerbus0</id>
-    <type>unit-powerbus-venice</type>
+    <type>unit-powerbus-murano</type>
     <attribute><id>HUID</id><default>0x00140000</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -522,11 +432,11 @@
     </attribute>
 </targetInstance>
 
-<!-- Venice n0p0 PCI units -->
+<!-- Murano n0p0 PCI units -->
 
 <targetInstance>
     <id>sys0node0proc0pci0</id>
-    <type>unit-pci-venice</type>
+    <type>unit-pci-murano</type>
     <attribute><id>HUID</id><default>0x00170000</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -536,11 +446,15 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/pci-0</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
     <id>sys0node0proc0pci1</id>
-    <type>unit-pci-venice</type>
+    <type>unit-pci-murano</type>
     <attribute><id>HUID</id><default>0x00170001</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -550,11 +464,15 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/pci-1</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
     <id>sys0node0proc0pci2</id>
-    <type>unit-pci-venice</type>
+    <type>unit-pci-murano</type>
     <attribute><id>HUID</id><default>0x00170002</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -564,14 +482,18 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/pci-2</default>
     </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>2</default>
+    </attribute>
 </targetInstance>
 
 
-<!-- Venice n0p0 ABUS units -->
+<!-- Murano n0p0 ABUS units -->
 
 <targetInstance>
     <id>sys0node0proc0abus0</id>
-    <type>unit-abus-venice</type>
+    <type>unit-abus-murano</type>
     <attribute><id>HUID</id><default>0x00160000</default></attribute>
         <attribute>
         <id>PHYS_PATH</id>
@@ -589,7 +511,7 @@
 
 <targetInstance>
     <id>sys0node0proc0abus1</id>
-    <type>unit-abus-venice</type>
+    <type>unit-abus-murano</type>
     <attribute><id>HUID</id><default>0x00160001</default></attribute>
         <attribute>
         <id>PHYS_PATH</id>
@@ -607,7 +529,7 @@
 
 <targetInstance>
     <id>sys0node0proc0abus2</id>
-    <type>unit-abus-venice</type>
+    <type>unit-abus-murano</type>
     <attribute><id>HUID</id><default>0x00160002</default></attribute>
         <attribute>
         <id>PHYS_PATH</id>
@@ -624,11 +546,11 @@
 </targetInstance>
 
 
-<!-- Venice n0p0 XBUS units -->
+<!-- Murano n0p0 XBUS units -->
 
 <targetInstance>
     <id>sys0node0proc0xbus0</id>
-    <type>unit-xbus-venice</type>
+    <type>unit-xbus-murano</type>
     <attribute><id>HUID</id><default>0x00150000</default></attribute>
         <attribute>
         <id>PHYS_PATH</id>
@@ -646,7 +568,7 @@
 
 <targetInstance>
     <id>sys0node0proc0xbus1</id>
-    <type>unit-xbus-venice</type>
+    <type>unit-xbus-murano</type>
     <attribute><id>HUID</id><default>0x00150001</default></attribute>
         <attribute>
         <id>PHYS_PATH</id>
@@ -664,7 +586,7 @@
 
 <targetInstance>
     <id>sys0node0proc0xbus2</id>
-    <type>unit-xbus-venice</type>
+    <type>unit-xbus-murano</type>
     <attribute><id>HUID</id><default>0x00150002</default></attribute>
         <attribute>
         <id>PHYS_PATH</id>
@@ -682,7 +604,7 @@
 
 <targetInstance>
     <id>sys0node0proc0xbus3</id>
-    <type>unit-xbus-venice</type>
+    <type>unit-xbus-murano</type>
     <attribute><id>HUID</id><default>0x00150003</default></attribute>
         <attribute>
         <id>PHYS_PATH</id>
@@ -699,20 +621,20 @@
 </targetInstance>
 
 
-<!-- Centaur n0p0 : start -->
+<!-- Centaur n0p4 : start -->
 
 <targetInstance>
-    <id>sys0node0membuf0</id>
+    <id>sys0node0membuf4</id>
     <type>chip-membuf-centaur</type>
-    <attribute><id>HUID</id><default>0x00060000</default></attribute>
-    <attribute><id>POSITION</id><default>0</default></attribute>
+    <attribute><id>HUID</id><default>0x00060004</default></attribute>
+    <attribute><id>POSITION</id><default>4</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/membuf-0</default>
+        <default>physical:sys-0/node-0/membuf-4</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-0/membuf-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-4/membuf-4</default>
     </attribute>
 
     <!-- FSI is connected via proc0:cMFSI-0 -->
@@ -738,70 +660,76 @@
     </attribute>
 </targetInstance>
 
-<!-- Centaur MBS affiliated with membuf0 -->
+<!-- Centaur MBS affiliated with membuf4 -->
 
 <targetInstance>
-    <id>sys0node0membuf0mbs0</id>
+    <id>sys0node0membuf4mbs0</id>
     <type>unit-mbs-centaur</type>
-    <attribute><id>HUID</id><default>0x00100000</default></attribute>
+    <attribute><id>HUID</id><default>0x00100004</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/membuf-0/mbs-0</default>
+        <default>physical:sys-0/node-0/membuf-4/mbs-0</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-0/membuf-0/mbs-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-4/membuf-4/mbs-0</default>
     </attribute>
 </targetInstance>
 
-<!-- Centaur MBAs affiliated with membuf0 -->
+<!-- Centaur MBAs affiliated with membuf4 -->
 
 <targetInstance>
-    <id>sys0node0membuf0mbs0mba0</id>
+    <id>sys0node0membuf4mbs0mba0</id>
     <type>unit-mba-centaur</type>
-    <attribute><id>HUID</id><default>0x00110000</default></attribute>
+    <attribute><id>HUID</id><default>0x00110008</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/membuf-0/mbs-0/mba-0</default>
+        <default>physical:sys-0/node-0/membuf-4/mbs-0/mba-0</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-0/membuf-0/mbs-0/mba-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-4/membuf-4/mbs-0/mba-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
     </attribute>
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0membuf0mbs0mba1</id>
+    <id>sys0node0membuf4mbs0mba1</id>
     <type>unit-mba-centaur</type>
-    <attribute><id>HUID</id><default>0x00110001</default></attribute>
+    <attribute><id>HUID</id><default>0x00110009</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/membuf-0/mbs-0/mba-1</default>
+        <default>physical:sys-0/node-0/membuf-4/mbs-0/mba-1</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-0/membuf-0/mbs-0/mba-1</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-4/membuf-4/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
-<!-- Centaur n0p0 : end -->
+<!-- Centaur n0p4 : end -->
 
-
-
-<!-- Centaur n0p1 : start -->
+<!-- Centaur n0p5 : start -->
 
 <targetInstance>
-    <id>sys0node0membuf1</id>
+    <id>sys0node0membuf5</id>
     <type>chip-membuf-centaur</type>
-    <attribute><id>HUID</id><default>0x00060001</default></attribute>
-    <attribute><id>POSITION</id><default>1</default></attribute>
+    <attribute><id>HUID</id><default>0x00060005</default></attribute>
+    <attribute><id>POSITION</id><default>5</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/membuf-1</default>
+        <default>physical:sys-0/node-0/membuf-5</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-1/membuf-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-5/membuf-5</default>
     </attribute>
 
     <!-- FSI is connected via proc0:cMFSI-1 -->
@@ -827,72 +755,80 @@
     </attribute>
 </targetInstance>
 
-<!-- Centaur MBS affiliated with membuf1 -->
+<!-- Centaur MBS affiliated with membuf5 -->
 
 <targetInstance>
-    <id>sys0node0membuf1mbs0</id>
+    <id>sys0node0membuf5mbs0</id>
     <type>unit-mbs-centaur</type>
-    <attribute><id>HUID</id><default>0x00100001</default></attribute>
+    <attribute><id>HUID</id><default>0x00100005</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/membuf-1/mbs-0</default>
+        <default>physical:sys-0/node-0/membuf-5/mbs-0</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-1/membuf-0/mbs-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-5/membuf-5/mbs-0</default>
     </attribute>
 </targetInstance>
 
-<!-- Centaur MBAs affiliated with membuf1 -->
+<!-- Centaur MBAs affiliated with membuf5 -->
 
 <targetInstance>
-    <id>sys0node0membuf1mbs0mba0</id>
+    <id>sys0node0membuf5mbs0mba0</id>
     <type>unit-mba-centaur</type>
-    <attribute><id>HUID</id><default>0x00110002</default></attribute>
+    <attribute><id>HUID</id><default>0x0011000A</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/membuf-1/mbs-0/mba-0</default>
+        <default>physical:sys-0/node-0/membuf-5/mbs-0/mba-0</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-1/membuf-0/mbs-0/mba-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-5/membuf-5/mbs-0/mba-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
     </attribute>
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0membuf1mbs0mba1</id>
+    <id>sys0node0membuf5mbs0mba1</id>
     <type>unit-mba-centaur</type>
-    <attribute><id>HUID</id><default>0x00110003</default></attribute>
+    <attribute><id>HUID</id><default>0x0011000B</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/membuf-1/mbs-0/mba-1</default>
+        <default>physical:sys-0/node-0/membuf-5/mbs-0/mba-1</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-1/membuf-0/mbs-0/mba-1</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-5/membuf-5/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
 <!-- Centaur n0p1 : end -->
 
 <!-- DIMMS
-     id/physical is sys-0/node-0/dimm-[i]
-            where i=[0-255]
+     id/physical is sys-0/node-0/dimm-[d]
+            where d=[0-512]
      affinity    is sys-0/node-0/proc-[i]/mcs-[j]/membuf-0/mbs-0/mba-[k]/mem_port-[l]/dimm-[m]
-            where i=[0] j=[0-1] k=[0-1] l=[0-1] m=[0-1]
+            where i=[0-7] j=[0-7] k=[0-1] l=[0-1] m=[0-1]
 -->
 
 <targetInstance>
-    <id>sys0node0dimm0</id>
+    <id>sys0node0dimm32</id>
     <type>lcard-dimm-jedec</type>
-    <attribute><id>HUID</id><default>0x00030000</default></attribute>
+    <attribute><id>HUID</id><default>0x00030020</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/dimm-0</default>
+        <default>physical:sys-0/node-0/dimm-32</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-0/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-4/membuf-4/mbs-0/mba-0/mem_port-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -902,19 +838,20 @@
         <id>MBA_PORT</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>32</default></attribute>
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0dimm1</id>
+    <id>sys0node0dimm33</id>
     <type>lcard-dimm-jedec</type>
-    <attribute><id>HUID</id><default>0x00030001</default></attribute>
+    <attribute><id>HUID</id><default>0x00030021</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/dimm-1</default>
+        <default>physical:sys-0/node-0/dimm-33</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-0/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-4/membuf-4/mbs-0/mba-0/mem_port-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -924,19 +861,20 @@
         <id>MBA_PORT</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>33</default></attribute>
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0dimm2</id>
+    <id>sys0node0dimm34</id>
     <type>lcard-dimm-jedec</type>
-    <attribute><id>HUID</id><default>0x00030002</default></attribute>
+    <attribute><id>HUID</id><default>0x00030022</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/dimm-2</default>
+        <default>physical:sys-0/node-0/dimm-34</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-0/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-4/membuf-4/mbs-0/mba-0/mem_port-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -946,19 +884,20 @@
         <id>MBA_PORT</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>34</default></attribute>
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0dimm3</id>
+    <id>sys0node0dimm35</id>
     <type>lcard-dimm-jedec</type>
-    <attribute><id>HUID</id><default>0x00030003</default></attribute>
+    <attribute><id>HUID</id><default>0x00030023</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/dimm-3</default>
+        <default>physical:sys-0/node-0/dimm-35</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-0/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-4/membuf-4/mbs-0/mba-0/mem_port-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -968,107 +907,20 @@
         <id>MBA_PORT</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>35</default></attribute>
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0dimm4</id>
+    <id>sys0node0dimm36</id>
     <type>lcard-dimm-jedec</type>
-    <attribute><id>HUID</id><default>0x00030004</default></attribute>
+    <attribute><id>HUID</id><default>0x00030024</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/dimm-4</default>
+        <default>physical:sys-0/node-0/dimm-36</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-0/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
-    </attribute>
-    <attribute>
-        <id>MBA_DIMM</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>MBA_PORT</id>
-        <default>0</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
-    <id>sys0node0dimm5</id>
-    <type>lcard-dimm-jedec</type>
-    <attribute><id>HUID</id><default>0x00030005</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/dimm-5</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-0/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
-    </attribute>
-    <attribute>
-        <id>MBA_DIMM</id>
-        <default>1</default>
-    </attribute>
-    <attribute>
-        <id>MBA_PORT</id>
-        <default>0</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
-    <id>sys0node0dimm6</id>
-    <type>lcard-dimm-jedec</type>
-    <attribute><id>HUID</id><default>0x00030006</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/dimm-6</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-0/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
-    </attribute>
-    <attribute>
-        <id>MBA_DIMM</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>MBA_PORT</id>
-        <default>1</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
-    <id>sys0node0dimm7</id>
-    <type>lcard-dimm-jedec</type>
-    <attribute><id>HUID</id><default>0x00030007</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/dimm-7</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-0/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
-    </attribute>
-    <attribute>
-        <id>MBA_DIMM</id>
-        <default>1</default>
-    </attribute>
-    <attribute>
-        <id>MBA_PORT</id>
-        <default>1</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
-    <id>sys0node0dimm8</id>
-    <type>lcard-dimm-jedec</type>
-    <attribute><id>HUID</id><default>0x00030008</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/dimm-8</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-1/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-4/membuf-4/mbs-0/mba-1/mem_port-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -1078,19 +930,20 @@
         <id>MBA_PORT</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>36</default></attribute>
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0dimm9</id>
+    <id>sys0node0dimm37</id>
     <type>lcard-dimm-jedec</type>
-    <attribute><id>HUID</id><default>0x00030009</default></attribute>
+    <attribute><id>HUID</id><default>0x00030025</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/dimm-9</default>
+        <default>physical:sys-0/node-0/dimm-37</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-1/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-4/membuf-4/mbs-0/mba-1/mem_port-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -1100,19 +953,20 @@
         <id>MBA_PORT</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>37</default></attribute>
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0dimm10</id>
+    <id>sys0node0dimm38</id>
     <type>lcard-dimm-jedec</type>
-    <attribute><id>HUID</id><default>0x0003000A</default></attribute>
+    <attribute><id>HUID</id><default>0x00030026</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/dimm-10</default>
+        <default>physical:sys-0/node-0/dimm-38</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-1/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-4/membuf-4/mbs-0/mba-1/mem_port-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -1122,19 +976,20 @@
         <id>MBA_PORT</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>38</default></attribute>
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0dimm11</id>
+    <id>sys0node0dimm39</id>
     <type>lcard-dimm-jedec</type>
-    <attribute><id>HUID</id><default>0x0003000B</default></attribute>
+    <attribute><id>HUID</id><default>0x00030027</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/dimm-11</default>
+        <default>physical:sys-0/node-0/dimm-39</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-1/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-4/membuf-4/mbs-0/mba-1/mem_port-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -1144,19 +999,112 @@
         <id>MBA_PORT</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>39</default></attribute>
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0dimm12</id>
+    <id>sys0node0dimm40</id>
     <type>lcard-dimm-jedec</type>
-    <attribute><id>HUID</id><default>0x0003000C</default></attribute>
+    <attribute><id>HUID</id><default>0x00030028</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/dimm-12</default>
+        <default>physical:sys-0/node-0/dimm-40</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-1/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-5/membuf-5/mbs-0/mba-0/mem_port-0/dimm-0</default>
+    </attribute>
+    <attribute>
+        <id>MBA_DIMM</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>MBA_PORT</id>
+        <default>0</default>
+    </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>40</default></attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm41</id>
+    <type>lcard-dimm-jedec</type>
+    <attribute><id>HUID</id><default>0x00030029</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-41</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-5/membuf-5/mbs-0/mba-0/mem_port-0/dimm-1</default>
+    </attribute>
+    <attribute>
+        <id>MBA_DIMM</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>MBA_PORT</id>
+        <default>0</default>
+    </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>41</default></attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm42</id>
+    <type>lcard-dimm-jedec</type>
+    <attribute><id>HUID</id><default>0x0003002A</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-42</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-5/membuf-5/mbs-0/mba-0/mem_port-1/dimm-0</default>
+    </attribute>
+    <attribute>
+        <id>MBA_DIMM</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>MBA_PORT</id>
+        <default>1</default>
+    </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>42</default></attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm43</id>
+    <type>lcard-dimm-jedec</type>
+    <attribute><id>HUID</id><default>0x0003002B</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-43</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-5/membuf-5/mbs-0/mba-0/mem_port-1/dimm-1</default>
+    </attribute>
+    <attribute>
+        <id>MBA_DIMM</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>MBA_PORT</id>
+        <default>1</default>
+    </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>43</default></attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm44</id>
+    <type>lcard-dimm-jedec</type>
+    <attribute><id>HUID</id><default>0x0003002C</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-44</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-5/membuf-5/mbs-0/mba-1/mem_port-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -1166,19 +1114,20 @@
         <id>MBA_PORT</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>44</default></attribute>
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0dimm13</id>
+    <id>sys0node0dimm45</id>
     <type>lcard-dimm-jedec</type>
-    <attribute><id>HUID</id><default>0x0003000D</default></attribute>
+    <attribute><id>HUID</id><default>0x0003002D</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/dimm-13</default>
+        <default>physical:sys-0/node-0/dimm-45</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-1/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-5/membuf-5/mbs-0/mba-1/mem_port-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -1188,19 +1137,20 @@
         <id>MBA_PORT</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>45</default></attribute>
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0dimm14</id>
+    <id>sys0node0dimm46</id>
     <type>lcard-dimm-jedec</type>
-    <attribute><id>HUID</id><default>0x0003000E</default></attribute>
+    <attribute><id>HUID</id><default>0x0003002E</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/dimm-14</default>
+        <default>physical:sys-0/node-0/dimm-46</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-1/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-5/membuf-5/mbs-0/mba-1/mem_port-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -1210,19 +1160,20 @@
         <id>MBA_PORT</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>46</default></attribute>
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0dimm15</id>
+    <id>sys0node0dimm47</id>
     <type>lcard-dimm-jedec</type>
-    <attribute><id>HUID</id><default>0x0003000F</default></attribute>
+    <attribute><id>HUID</id><default>0x0003002F</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/dimm-15</default>
+        <default>physical:sys-0/node-0/dimm-47</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-1/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-5/membuf-5/mbs-0/mba-1/mem_port-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -1232,6 +1183,7 @@
         <id>MBA_PORT</id>
         <default>1</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>47</default></attribute>
 </targetInstance>
 
 </attributes>
