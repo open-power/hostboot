@@ -42,6 +42,7 @@ enum SectionId
     DIMM_JEDEC_VPD, /**< DIMM JEDEC VPD */
     MODULE_VPD,     /**< Module VPD */
     HB_BASE_CODE,   /**< Hostboot Base Image */
+    TEST,           /**< Scratch space for PNOR test cases */ 
     NUM_SECTIONS,   /**< Number of defined sections */
 
     //Not currently used
@@ -52,7 +53,7 @@ enum SectionId
 //    HB_ERRLOGS,     /**< Hostboot Error log Repository */
 
     FIRST_SECTION = TOC,  /**< First section (for looping) */
-    LAST_SECTION = HB_BASE_CODE,  /**< Last section (for looping) */
+    LAST_SECTION = TEST,  /**< Last section (for looping) */
     INVALID_SECTION = NUM_SECTIONS,  /**< Used for error cases, initialization */
 };
 

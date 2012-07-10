@@ -275,6 +275,7 @@ class PnorRP
 
     // allow testcase to see inside
     friend class PnorRpTest;
+    friend class PnorDdTest;
 
     /**
      * @brief Static instance function for testcase only

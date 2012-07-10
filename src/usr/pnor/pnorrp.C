@@ -48,12 +48,13 @@ TRAC_INIT(&g_trac_pnor, "PNOR", 4096); //4K
  * Eyecatcher strings for PNOR TOC entries
  */
 const char* cv_EYECATCHER[] = {  //@todo - convert there to uint64_t
-    "part",    /**< PNOR::TOC           : Table of Contents */
+    "part",   /**< PNOR::TOC           : Table of Contents */
     "HBI",    /**< PNOR::HB_EXT_CODE   : Hostboot Extended Image */
     "HBD",    /**< PNOR::HB_DATA       : Hostboot Data */
     "DJVPD",  /**< PNOR::DIMM_JEDEC_VPD: Dimm JEDEC VPD */
     "MVPD",   /**< PNOR::MODULE_VPD    : Module VPD */
     "HBB",    /**< PNOR::HB_BASE_CODE  : Hostboot Base Image */
+    "TEST",   /**< PNOR::TEST          : Test space for PNOR*/
 
     //Not currently used
 //    "GLOBAL", /**< PNOR::GLOBAL_DATA   : Global Data */
@@ -338,11 +339,11 @@ errlHndl_t PnorRP::readTOC()
         // Zero out my table
         for( uint64_t side = 0; side < NUM_SIDES; side++ )
         {
-            for( PNOR::SectionId id = PNOR::FIRST_SECTION;
+            for( size_t id = PNOR::FIRST_SECTION;
                  id <= PNOR::NUM_SECTIONS; //include extra entry for error paths
-                 id = (PNOR::SectionId) (id + 1) )
+                 ++id )
             {
-                iv_TOC[side][id].id = id;
+                iv_TOC[side][id].id = (PNOR::SectionId)id;
                 iv_TOC[side][id].side = (PNOR::SideSelect)side;
                 iv_TOC[side][id].chip = 0;
                 iv_TOC[side][id].flashAddr = 0;

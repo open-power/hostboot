@@ -72,7 +72,7 @@
         <ecc>no</ecc>
         <source>File</source>
         <sideless>no</sideless>
-   </section>
+    </section>
     <section>
         <description>Hostboot Base (512K)</description>
         <eyeCatch>HBB</eyeCatch>
@@ -83,4 +83,16 @@
         <source>File</source>
         <sideless>no</sideless>
     </section>
+    <section>
+        <description>Special PNOR Test Space (32K)</description>
+        <eyeCatch>TEST</eyeCatch>
+        <physicalOffset>0x441000</physicalOffset>
+        <physicalRegionSize>0x8000</physicalRegionSize>
+        <actualRegionSize>0x8000</actualRegionSize>
+        <ecc>no</ecc>
+        <source>Blank</source>
+        <sideless>no</sideless>
+        <testonly>yes</testonly>
+    </section>
+
 </pnor>

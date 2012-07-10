@@ -34,14 +34,14 @@
 #include <errl/errlmanager.H>
 #include <errl/errlentry.H>
 #include <pnor/pnorif.H>
+#include <pnor/pnor_reasoncodes.H>
 #include <devicefw/userif.H>
 #include <kernel/console.H>
 #include <sys/time.h>
 #include "../pnordd.H"
+#include "../pnorrp.H"
 #include <list>
 #include <targeting/common/attributes.H>
-
-#define BASE_SCRATCH_SPACE (0x360000) // 3.5MB - 128K offset in fake PNOR
 
 extern trace_desc_t* g_trac_pnor;
 
@@ -55,6 +55,53 @@ extern trace_desc_t* g_trac_pnor;
 class PnorDdTest : public CxxTest::TestSuite
 {
   public:
+
+    bool getTestSection(uint64_t &o_physAddr, uint64_t &o_size)
+    {
+        errlHndl_t l_err = NULL;
+        PNOR::SectionInfo_t info;
+        uint64_t chip_select = 0xF;
+        bool needs_ecc = false;
+        bool section_found = false;
+
+        do{
+
+            // Get SPD PNOR section info from PNOR RP
+            l_err = PNOR::getSectionInfo( PNOR::TEST,
+                                          PNOR::CURRENT_SIDE,
+                                          info );
+            if(l_err)
+            {
+                if(l_err->reasonCode() == PNOR::RC_INVALID_SECTION)
+                {
+                    //This is expected in some configurations, so just delete it.
+                    delete l_err;
+                }
+                else
+                {
+                    //Any other type of error is not expected, so commit it.
+                    errlCommit(l_err,PNOR_COMP_ID);
+                }
+                break;
+            }
+
+            l_err = PnorRP::getInstance().computeDeviceAddr((void*)info.vaddr,
+                                                            o_physAddr,
+                                                            chip_select,
+                                                            needs_ecc);
+            if(l_err)
+            {
+                errlCommit(l_err,PNOR_COMP_ID);
+                break;
+            }
+
+            o_size = info.size;
+            section_found = true;
+
+        }while(0);
+
+        return section_found;
+    }
 
     /**
      * @brief PNOR DD readWriteTest
@@ -73,8 +120,17 @@ class PnorDdTest : public CxxTest::TestSuite
         do{
             TS_TRACE("PnorDdTest::test_readwrite: starting");
 
+            uint64_t base_address;
+            uint64_t sect_size;
+            if(!getTestSection(base_address, sect_size))
+            {
+                TRACFCOMP(g_trac_pnor, "PnorDdTest::test_readwrite> Skipped due to not finding test section in PNOR" );
+                break;
+            }
+
             // Perform PnorDD Write 1
-            uint64_t l_address = BASE_SCRATCH_SPACE+0x100;
+
+            uint64_t l_address = base_address+0x100;
             uint64_t l_writeData = 0x12345678FEEDB0B0;
             l_size = sizeof(uint64_t);
             l_err = deviceWrite(l_testTarget,
@@ -97,7 +153,7 @@ class PnorDdTest : public CxxTest::TestSuite
             }
 
             // Perform PnorDD Write 2
-            l_address = BASE_SCRATCH_SPACE+0x108;
+            l_address = base_address+0x108;
             l_writeData = 0xFEEDBEEF000ABCDE;
             l_size = sizeof(uint64_t);
             l_err = deviceWrite(l_testTarget,
@@ -120,7 +176,7 @@ class PnorDdTest : public CxxTest::TestSuite
             }
 
             // Perform PnorDD read 1
-            l_address = BASE_SCRATCH_SPACE+0x100;
+            l_address = base_address+0x100;
             uint64_t l_readData = 0;
             l_size = sizeof(uint64_t);
             l_err = deviceRead(l_testTarget,
@@ -150,7 +206,7 @@ class PnorDdTest : public CxxTest::TestSuite
             }
 
             // Perform PnorDD read 2
-            l_address = BASE_SCRATCH_SPACE+0x108;
+            l_address = base_address+0x108;
             l_size = sizeof(uint64_t);
             l_err = deviceRead(l_testTarget,
                                &l_readData,
@@ -201,7 +257,15 @@ class PnorDdTest : public CxxTest::TestSuite
             TS_TRACE("PnorDdTest::test_smartwrite: starting");
 
             // Perform PnorDD Write 1
-            uint64_t l_address = BASE_SCRATCH_SPACE+0x120;
+            uint64_t base_address;
+            uint64_t sect_size;
+            if(!getTestSection(base_address, sect_size))
+            {
+                TRACFCOMP(g_trac_pnor, "PnorDdTest::test_smartwrite> Skipped due to not finding test section in PNOR" );
+                break;
+            }
+
+            uint64_t l_address = base_address+0x120;
             uint64_t l_writeData = 0xAAAAAAAA55555555;
             l_size = sizeof(uint64_t);
             l_err = deviceWrite(l_testTarget,
@@ -327,9 +391,17 @@ class PnorDdTest : public CxxTest::TestSuite
         do{
             TS_TRACE("PnorDdTest::test_crossblock: starting");
 
+            uint64_t base_address;
+            uint64_t sect_size;
+            if(!getTestSection(base_address, sect_size))
+            {
+                TRACFCOMP(g_trac_pnor, "PnorDdTest::test_readwrite> Skipped due to not finding test section in PNOR" );
+                break;
+            }
+
             // Find the nearest erase-block (4K) boundary 
-            uint64_t l_boundary = (BASE_SCRATCH_SPACE+4096)
-                                   - (BASE_SCRATCH_SPACE%4096);
+            uint64_t l_boundary = (base_address+4096)
+                                   - (base_address%4096);
             uint64_t l_address = 0;
 
             // Perform PnorDD Write 1 - write through boundary
@@ -390,10 +462,18 @@ class PnorDdTest : public CxxTest::TestSuite
         do{
             TS_TRACE("PnorDdTest::test_readwrite_modes: starting");
 
+            uint64_t base_address;
+            uint64_t sect_size;
+            if(!getTestSection(base_address, sect_size))
+            {
+                TRACFCOMP(g_trac_pnor, "PnorDdTest::test_readwrite_modes> Skipped due to not finding test section in PNOR" );
+                break;
+            }
+
             // list of all modes to test
             std::list<PnorDD::PnorMode_t> supported_modes;
-            supported_modes.push_back(PnorDD::MODEL_MEMCPY);
-            supported_modes.push_back(PnorDD::MODEL_LPC_MEM);
+            //supported_modes.push_back(PnorDD::MODEL_MEMCPY);  (Enable with RTC: 44938)
+            //supported_modes.push_back(PnorDD::MODEL_LPC_MEM);  (Enable with RTC: 44938)
 
             if(!TARGETING::is_vpo())
             {
@@ -401,7 +481,7 @@ class PnorDdTest : public CxxTest::TestSuite
                 supported_modes.push_back(PnorDD::MODEL_REAL_CMD);
             }
 
-            uint64_t scratch_space = BASE_SCRATCH_SPACE;
+            uint64_t scratch_space = base_address;
 
             // loop through all of the supported modes
             for( std::list<PnorDD::PnorMode_t>::iterator m
@@ -419,6 +499,7 @@ class PnorDdTest : public CxxTest::TestSuite
 
                 // Perform PnorDD Write 1
                 uint64_t l_address = scratch_space;
+
                 uint64_t l_writeData = 0x12345678FEEDB0B0;
                 l_size = sizeof(uint64_t);
                 l_err = pnordd->writeFlash(&l_writeData,
@@ -548,10 +629,18 @@ class PnorDdTest : public CxxTest::TestSuite
         do{
             TS_TRACE("PnorDdTest::test_smartwrite_modes: starting");
 
+            uint64_t base_address;
+            uint64_t sect_size;
+            if(!getTestSection(base_address, sect_size))
+            {
+                TRACFCOMP(g_trac_pnor, "PnorDdTest::test_smartwrite_modes> Skipped due to not finding test section in PNOR" );
+                break;
+            }
+
             // list of all modes to test
             std::list<PnorDD::PnorMode_t> supported_modes;
-            supported_modes.push_back(PnorDD::MODEL_MEMCPY);
-            supported_modes.push_back(PnorDD::MODEL_LPC_MEM);
+            //supported_modes.push_back(PnorDD::MODEL_MEMCPY); (Enable with RTC: 44938)
+            //supported_modes.push_back(PnorDD::MODEL_LPC_MEM);  (Enable with RTC: 44938)
 
             if(!TARGETING::is_vpo())
             {
@@ -559,7 +648,7 @@ class PnorDdTest : public CxxTest::TestSuite
                 supported_modes.push_back(PnorDD::MODEL_REAL_CMD);
             }
 
-            uint64_t scratch_space = BASE_SCRATCH_SPACE;
+            uint64_t scratch_space = base_address;
 
             // loop through all of the supported modes
             for( std::list<PnorDD::PnorMode_t>::iterator m
@@ -701,10 +790,18 @@ class PnorDdTest : public CxxTest::TestSuite
         do{
             TS_TRACE("PnorDdTest::test_crossblock_modes: starting");
 
+            uint64_t base_address;
+            uint64_t sect_size;
+            if(!getTestSection(base_address, sect_size))
+            {
+                TRACFCOMP(g_trac_pnor, "PnorDdTest::test_crossblock_modes> Skipped due to not finding test section in PNOR" );
+                break;
+            }
+
             // list of all modes to test
             std::list<PnorDD::PnorMode_t> supported_modes;
-            supported_modes.push_back(PnorDD::MODEL_MEMCPY);
-            supported_modes.push_back(PnorDD::MODEL_LPC_MEM);
+            //supported_modes.push_back(PnorDD::MODEL_MEMCPY);  (Enable with RTC: 44938)
+            //supported_modes.push_back(PnorDD::MODEL_LPC_MEM);  (Enable with RTC: 44938)
 
             if(!TARGETING::is_vpo())
             {
@@ -712,7 +809,7 @@ class PnorDdTest : public CxxTest::TestSuite
                 supported_modes.push_back(PnorDD::MODEL_REAL_CMD);
             }
 
-            uint64_t scratch_space = BASE_SCRATCH_SPACE;
+            uint64_t scratch_space = base_address;
 
             // loop through all of the supported modes
             for( std::list<PnorDD::PnorMode_t>::iterator m
@@ -729,9 +826,18 @@ class PnorDdTest : public CxxTest::TestSuite
                 pnordd = new PnorDD(*m);
 
                 // Find the nearest erase-block (4K) boundary 
-                uint64_t l_boundary = (BASE_SCRATCH_SPACE+4096)
-                  - (BASE_SCRATCH_SPACE%4096);
+                uint64_t l_boundary = (base_address+4096)
+                  - (base_address%4096);
                 uint64_t l_address = 0;
+
+                //make sure we don't go past the end of the section
+                if(l_boundary+0x4 > base_address+sect_size)
+                {
+                    TS_FAIL("PnorDdTest::test_crossblock_modes: Test Case went beyond allocated space in test section.");
+                    TRACFCOMP(g_trac_pnor, "PnorDdTest::test_crossblock_modes: Test Case went beyond allocated space in test section.l_boundary=0x%X, base_address=0x%X, sect_size=0x%X", l_boundary, base_address, sect_size);
+                    TRACFCOMP(g_trac_pnor, "PnorDdTest::test_crossblock_modes: sect_size=0x%X", sect_size);
+                   break;
+                }
 
                 // Perform PnorDD Write 1 - write through boundary
                 l_address = l_boundary - sizeof(uint32_t);

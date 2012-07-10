@@ -34,6 +34,7 @@ ROOTPATH = ../../..
 PNOR_TARGETS = simics_MURANO simics_VENICE TULETA
 PNOR_VBU_TARGETS = vbu
 
+#Murano/Venice IPL PNOR images
 define PNOR_template
 $${IMGDIR}/$(1).pnor: $${IMGDIR}/hbicore_extended.bin $${IMGDIR}/$(1)_targeting.bin
 	./buildpnor.pl --pnorLayout ./pnorLayout.xml \
@@ -44,12 +45,14 @@ $${IMGDIR}/$(1).pnor: $${IMGDIR}/hbicore_extended.bin $${IMGDIR}/$(1)_targeting.
 	    --binFile_HBD $${IMGDIR}/$(1)_targeting.bin \
             --binFile_HBB $${IMGDIR}/hbicore.bin 
 endef
+
+#Murano/Venice Test case Pnor Image
 define PNOR_test_template
 $${IMGDIR}/$(1)_test.pnor: $${IMGDIR}/hbicore_extended.bin $${IMGDIR}/$(1)_targeting.bin
-	./buildpnor.pl --pnorLayout ./pnorLayout.xml \
+	./buildpnor.pl --pnorLayout ./pnorLayout.xml --test \
 	    --genToc \
 	    --pnorOutBin $${IMGDIR}/$(1)_test.pnor \
-	    --binFile_part $${IMGDIR}/$(1)_pnor.toc \
+	    --binFile_part $${IMGDIR}/$(1)_test_pnor.toc \
 	    --binFile_HBI $${IMGDIR}/hbicore_test_extended.bin \
 	    --binFile_HBD $${IMGDIR}/$(1)_targeting.bin \
             --binFile_HBB $${IMGDIR}/hbicore_test.bin 
@@ -66,10 +69,10 @@ $${IMGDIR}/$(1).pnor: $${IMGDIR}/hbicore_extended.bin $${IMGDIR}/$(1)_targeting.
 endef
 define PNOR_vbu_test_template
 $${IMGDIR}/$(1)_test.pnor: $${IMGDIR}/hbicore_extended.bin $${IMGDIR}/$(1)_targeting.bin
-	./buildpnor.pl --pnorLayout ./pnorLayoutVpo.xml \
+	./buildpnor.pl --pnorLayout ./pnorLayoutVpo.xml --test \
 	    --genToc \
 	    --pnorOutBin $${IMGDIR}/$(1)_test.pnor \
-	    --binFile_part $${IMGDIR}/$(1)_pnor.toc \
+	    --binFile_part $${IMGDIR}/$(1)_test_pnor.toc \
 	    --binFile_HBI $${IMGDIR}/hbicore_test_extended.bin \
 	    --binFile_HBD $${IMGDIR}/$(1)_targeting.bin
 endef
@@ -78,13 +81,14 @@ PNOR_IMAGES = $(addsuffix .pnor, $(addprefix $(IMGDIR)/, ${PNOR_TARGETS})) \
               $(addsuffix _test.pnor, $(addprefix $(IMGDIR)/, ${PNOR_TARGETS}))
 
 PNOR_VBU_IMAGES =  $(addsuffix .pnor, $(addprefix $(IMGDIR)/, ${PNOR_VBU_TARGETS})) \
-		   $(addsuffix .pnor, $(addprefix $(IMGDIR)/, ${PNOR_VBU_TARGETS})) \
+		   $(addsuffix _test.pnor, $(addprefix $(IMGDIR)/, ${PNOR_VBU_TARGETS})) \
 
 EXTRA_CLEAN = ${PNOR_IMAGES} ${PNOR_IMAGES:.pnor=_pnor.toc} ${PNOR_VBU_IMAGES} ${PNOR_VBU_IMAGES:.pnor=_pnor.toc}
 
 include ${ROOTPATH}/config.mk
 
-buildpnor: ${PNOR_IMAGES}
+.PHONY: buildpnor
+buildpnor: ${PNOR_IMAGES} ${PNOR_VBU_IMAGES}
 
 #Standard Images
 $(foreach pnor,$(PNOR_TARGETS),$(eval $(call PNOR_template,$(pnor))))

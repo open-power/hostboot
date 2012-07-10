@@ -43,7 +43,7 @@ $XML::Simple::PREFERRED_PARSER = 'XML::Parser';
 
 my $TRAC_ERR = 0;
 # 0=errors, >0 for more traces, leaving at 1 to keep key milestone traces.
-my $g_trace = 1; 
+my $g_trace = 1;
 
 my $programName = File::Basename::basename $0;
 my %tocLayout;
@@ -56,6 +56,7 @@ my $pnorBinName = "";
 my $tocVersion = 0x1;
 my $genTocFlag = 0;
 my $g_TOCEyeCatch = "part";
+my $emitTestSections = 0;
 
 if ($#ARGV < 0) {
     usage();
@@ -89,6 +90,9 @@ for (my $i=0; $i < $#ARGV + 1; $i++)
         my $argName = $ARGV[$i];
         my $argVal = $ARGV[++$i];
         saveInputFile("--binFile", $argName, $argVal, \%binFiles);
+    }
+    elsif($ARGV[$i] =~ /--test/) {
+        $emitTestSections = 1;
     }
     else {
         traceErr("Unrecognized Input: $ARGV[$i]");
@@ -188,7 +192,7 @@ sub loadPnorLayout
     {
         traceErr("$this_func: File not found: $i_pnorFile");
         return -1;
-    }    
+    }
 
     #parse the input XML file
     my $xs = new XML::Simple(keyattr=>[], forcearray => 1);
@@ -225,6 +229,11 @@ sub loadPnorLayout
         my $ecc = $sectionEl->{ecc}[0];
         my $source = $sectionEl->{source}[0];
         my $sideless = $sectionEl->{sideless}[0];
+
+        if (($emitTestSections == 0) && ($sectionEl->{testonly}[0] eq "yes"))
+        {
+            next;
+        }
 
         my $actualRegionSize = 0;
         if(exists($sectionEl->{actualRegionSize}[0]))
@@ -272,8 +281,8 @@ sub genToc
 
     #Insert FFS Header data
     #HEADER WORD 1: Magic Number - "PART" in ASCII
-    my @charArray = split //, 'PART';  
-    my $curChar;                      
+    my @charArray = split //, 'PART';
+    my $curChar;
     foreach $curChar (@charArray)
     {
         print $FILEHANDLE pack('C', ord($curChar));
@@ -433,7 +442,7 @@ sub genToc
         {
             insertPadBytes($FILEHANDLE, 4);
         }
-    
+
         #FFS User Word 2-3: Miscellaneous information.
         #User Word 2, bit 18 indicates sideless.
         my $miscInfo = 0x00000000;
@@ -451,7 +460,7 @@ sub genToc
 
         #FFS Entry Word 31: Checksum - not currently implemented
         insertPadBytes($FILEHANDLE, 4);
-        
+
 
     }
     return 0;
@@ -486,7 +495,7 @@ sub fillTocActSize
     {
         $size=$size*(9/8);
     }
-    
+
     trace(2, "$this_func: PNOR FFS contains $recordCount records, total Size=$size");
     $$i_pnorLayoutRef{sections}{$tocLayoutKey}{actualRegionSize}=$size;
 
@@ -557,7 +566,7 @@ sub findLayoutKeyByEyeCatch
             last;
         }
     }
-    
+
     return $layoutKey;
 }
 
@@ -694,8 +703,8 @@ sub assemblePnorImage
         trace(1, "$this_func: populating section $eyeCatch, filename=$if");
 #        my $ddCmd = `dd if=$if ibs=8c of=$i_pnorBinName obs=8c seek=$physicalOffset`;
         my $ddCmd = `dd if=$if ibs=1b of=$i_pnorBinName obs=1b seek=$blockSeek conv=notrunc`;
-        
-        
+
+
 
     }
 
@@ -722,7 +731,7 @@ sub saveInputFile
 
     #no return code expected
 }
-    
+
 #################################################
 # getFFSEntrySize: Returns number of bytes in an ffs_entry based on specified version
 #################################################
@@ -735,7 +744,7 @@ sub getFFSEntrySize
     if($i_tocVersion == 0x1)
     {
         #16 char name + 12 fixed words + 16 user data words
-        $ffsEntrySize = 16+(12*4)+(16*4); 
+        $ffsEntrySize = 16+(12*4)+(16*4);
     }
     else
     {
@@ -747,7 +756,7 @@ sub getFFSEntrySize
 
 #################################################
 # Insert specifed number of pad bytes into file
-#  
+#
 #################################################
 sub insertPadBytes
 {
@@ -822,7 +831,7 @@ print <<"ENDUSAGE";
     -h                  Print this help text
     --pnorlayout <file> PNOR Layout XML file
     --pnorOutBin <file> Name of output file for PNOR Binary
-    --genToc            Indicates you wish to generate a table of contents.  It will 
+    --genToc            Indicates you wish to generate a table of contents.  It will
                         write the file indicated by --binFile_TOC.
 
     --binFile_<Section> <file>  This is a special paramater.  It is used to specify
@@ -833,6 +842,7 @@ print <<"ENDUSAGE";
                                        --binFile_TOC murano.toc
                          A section declared as Blank in the XML does not need to have a
                          binFile specified
+    --test              Output test-only sections.
 
   Current Limitations:
       --TOC Records must be 4 or 8 bytes in length
