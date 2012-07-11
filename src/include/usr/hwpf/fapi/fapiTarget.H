@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/include/usr/hwpf/fapi/fapiTarget.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/include/usr/hwpf/fapi/fapiTarget.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 /**
  *  @file fapiTarget.H
  *
@@ -220,12 +221,7 @@ public:
      */
     const char * toEcmdString() const;
 
-// TODO
-// When eCMD releases the version of this file that has toString as private then
-// all users will be forced to switch to use the improved toEcmdString. Right
-// now, there is a new HWP that uses toString, therefore temporarily move
-// toString back to public. 
-//private:
+private:
 
     /**
      * @brief Convert a target to an ecmd-format target string
@@ -241,8 +237,6 @@ public:
      *                           null terminated ECMD string.
      */
     void toString(char (&o_ecmdString)[MAX_ECMD_STRING_LEN]) const;
-
-private:
 
     /**
      * @brief Compare the handle

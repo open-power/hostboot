@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/hwpf/fapi/fapiReturnCodeDataRef.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/hwpf/fapi/fapiReturnCodeDataRef.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 /**
  *  @file fapiReturnCodeDataRef.C
  *
@@ -35,7 +36,8 @@
  *                          mjjones     06/30/2011  Added #include
  *                          mjjones     07/05/2011  Removed const from data
  *                          mjjones     07/25/2011  Added support for FFDC
- *                          mjjones     09/22/2100  Added support for Error Info
+ *                          mjjones     09/22/2011  Added support for Error Info
+ *                          mjjones     07/11/2012  Removed some tracing
  */
 
 #include <string.h>
@@ -79,8 +81,6 @@ ReturnCodeDataRef::~ReturnCodeDataRef()
 //******************************************************************************
 void ReturnCodeDataRef::incRefCount()
 {
-	FAPI_DBG("ReturnCodeDataRef::incRefCount: iv_refCount = %d on entry",
-             iv_refCount);
     iv_refCount++;
 }
 
@@ -89,9 +89,6 @@ void ReturnCodeDataRef::incRefCount()
 //******************************************************************************
 bool ReturnCodeDataRef::decRefCountCheckZero()
 {
-	FAPI_DBG("ReturnCodeDataRef::decRefCountCheckZero: iv_refCount = %d on "
-             "entry", iv_refCount);
-
     if (iv_refCount == 0)
     {
         FAPI_ERR("ReturnCodeDataRef. Bug. Dec with zero refcount");

@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/hwpf/fapi/fapiTarget.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/hwpf/fapi/fapiTarget.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 /**
  *  @file fapiTarget.C
  *
@@ -36,6 +37,7 @@
  *                          mjjones     02/07/2012  Remove MBS_CHIPLET
  *                                                  Add XBUS_ENDPOINT ABUS_ENDPOINT
  *                          mjjones     02/21/2012  Add high performance toEcmdString
+ *                          mjjones     07/11/2012  Clear iv_pEcmdString on set
  */
 
 #include <fapiTarget.H>
@@ -134,6 +136,8 @@ void * Target::get() const
 void Target::set(void * i_pHandle)
 {
     iv_pHandle = i_pHandle;
+    delete [] iv_pEcmdString;
+    iv_pEcmdString = NULL;
 }
 
 //******************************************************************************

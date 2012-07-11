@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/hwpf/fapi/fapiReturnCode.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/hwpf/fapi/fapiReturnCode.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 /**
  *  @file fapiReturnCode.C
  *
@@ -44,6 +45,7 @@
  *                          mjjones     03/16/2012  Add type to FFDC data
  *                          mjjones     03/16/2012  Allow different PLAT errors
  *                          mjjones     05/02/2012  Only trace setEcmdError on err
+ *                          mjjones     07/11/2012  Remove a trace
  */
 
 #include <fapiReturnCode.H>
@@ -127,7 +129,6 @@ ReturnCode & ReturnCode::operator=(const ReturnCode & i_right)
 //******************************************************************************
 ReturnCode & ReturnCode::operator=(const uint32_t i_rcValue)
 {
-    FAPI_ERR("Using deprecated ReturnCode function to assign integer");
     iv_rcValue = i_rcValue;
 
     // Forget about any associated data
