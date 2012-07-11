@@ -97,4 +97,11 @@ sub countItemsInStack
     return 1 + countItemsInStack(::read64($stack));
 }
 
-
+sub helpInfo
+{
+    my %info = (
+        name => "PageMgr",
+        intro => ["Calculates free pages in Kernel PageManager."],
+        options => { "debug" => ["Turn on additional debug messages"], },
+    );
+}
