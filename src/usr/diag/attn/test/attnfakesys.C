@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/diag/attn/test/attnfakesys.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/diag/attn/test/attnfakesys.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 /**
  * @file attnfakesys.C
  *
@@ -38,6 +39,63 @@ using namespace TARGETING;
 
 namespace ATTN
 {
+
+errlHndl_t FakeSystem::putScom(
+        TargetHandle_t i_target,
+        uint64_t i_address,
+        uint64_t i_data)
+{
+    mutex_lock(&iv_mutex);
+
+    iv_regs[i_target][i_address] = i_data;
+
+    mutex_unlock(&iv_mutex);
+
+    return 0;
+}
+
+errlHndl_t FakeSystem::getScom(
+                TargetHandle_t i_target,
+                uint64_t i_address,
+                uint64_t & o_data)
+{
+    mutex_lock(&iv_mutex);
+
+    o_data = iv_regs[i_target][i_address];
+
+    mutex_unlock(&iv_mutex);
+
+    return 0;
+}
+
+errlHndl_t FakeSystem::modifyScom(
+                TargetHandle_t i_target,
+                uint64_t i_address,
+                uint64_t i_data,
+                uint64_t & o_data,
+                ScomOp i_op)
+{
+    mutex_lock(&iv_mutex);
+
+    o_data = iv_regs[i_target][i_address];
+
+    uint64_t data = iv_regs[i_target][i_address];
+
+    bool changed = (i_op == SCOM_OR
+            ? (data | i_data) != data
+            : (data & i_data) != data);
+
+    if(changed)
+    {
+        iv_regs[i_target][i_address] = i_op == SCOM_OR
+            ? data | i_data
+            : data & i_data;
+    }
+
+    mutex_unlock(&iv_mutex);
+
+    return 0;
+}
 
 errlHndl_t FakeSystem::mask(const PRDF::AttnData & i_data)
 {

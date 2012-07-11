@@ -34,6 +34,7 @@
 #include "../attnops.H"
 #include "../attnprd.H"
 #include "../attnresolv.H"
+#include "../attnscom.H"
 #include <map>
 
 namespace ATTN
@@ -128,9 +129,59 @@ struct Comp
 class FakeSystem :
     public AttentionOps,
     public Resolver,
-    public PrdImpl
+    public PrdImpl,
+    public ScomImpl
 {
     public:
+
+        /**
+         * @brief putScom Write a register using SCOM.
+         *
+         * @param[in] i_target Target to write register on.
+         * @param[in] i_address Register address to write to.
+         * @param[in] i_data Data to write to register.
+         *
+         * @retval[0] No errors.
+         * @retval[!0] Unexpected error occurred.
+         */
+        errlHndl_t putScom(
+                TARGETING::TargetHandle_t i_target,
+                uint64_t i_address,
+                uint64_t i_data);
+
+        /**
+         * @brief getScom Read a register using SCOM.
+         *
+         * @param[in] i_target Target to read register from.
+         * @param[in] i_address Register address to read from.
+         * @param[out] o_data Buffer to write register content to.
+         *
+         * @retval[0] No errors.
+         * @retval[!0] Unexpected error occurred.
+         */
+        errlHndl_t getScom(
+                TARGETING::TargetHandle_t i_target,
+                uint64_t i_address,
+                uint64_t & o_data);
+
+        /**
+         * @brief modifyScom RMW a register using SCOM.
+         *
+         * @param[in] i_target Target to update register on.
+         * @param[in] i_address Register address to update.
+         * @param[in] i_data Data to write to register.
+         * @param[out] o_data Data read from register.
+         * @param[in] i_op and/or behavior.
+         *
+         * @retval[0] No errors.
+         * @retval[!0] Unexpected error occurred.
+         */
+        errlHndl_t modifyScom(
+                TARGETING::TargetHandle_t i_target,
+                uint64_t i_address,
+                uint64_t i_data,
+                uint64_t & o_data,
+                ScomOp i_op);
 
         /**
          * @brief mask Mask this attention.
@@ -251,6 +302,21 @@ class FakeSystem :
          * @brief iv_map Attention <-> state association.
          */
         std::map<PRDF::AttnData, FakeSystemProperties, Comp> iv_map;
+
+        /**
+         * @brief Reg Register/address association alias.
+         */
+        typedef std::map<uint64_t, uint64_t> RegAddrDataAssoc;
+
+        /**
+         * @brief Regs Registers/target association alias.
+         */
+        typedef std::map<TARGETING::TargetHandle_t, RegAddrDataAssoc> Regs;
+
+        /**
+         * @brief iv_regs Current register content.
+         */
+        Regs iv_regs;
 
         /**
          * @brief iv_mutex iv_map protection.

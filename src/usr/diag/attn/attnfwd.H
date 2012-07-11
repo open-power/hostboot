@@ -42,6 +42,7 @@ class AttnTraceTest;
 class AttnSvcTest;
 class AttnListTest;
 class AttnOpsTest;
+class AttScomTest;
 
 namespace ATTN
 {
@@ -55,6 +56,8 @@ class ResolverWrapper;
 class Resolver;
 class TargetService;
 class TargetServiceImpl;
+class ScomWrapper;
+class ScomImpl;
 
 enum
 {
@@ -80,6 +83,76 @@ enum MessageType
      */
     SHUTDOWN,
 };
+
+/**
+ * @brief ScomOp ModifyScom operation types.
+ */
+enum ScomOp
+{
+    /**
+     * @brief SCOM_OR ModifyScom or operation.
+     */
+    SCOM_OR,
+
+    /**
+     * @brief SCOM_AND ModifyScom and operation.
+     */
+    SCOM_AND,
+};
+
+/**
+ * @brief getScom Read a register using SCOM.
+ *
+ * @param[in] i_target Target to read register from.
+ * @param[in] i_address Register address to read from.
+ * @param[in] i_data Buffer to write register content to.
+ *
+ * @retval[0] No errors.
+ * @retval[!0] Unexpected error occurred.
+ */
+errlHndl_t getScom(
+        TARGETING::TargetHandle_t i_target,
+        uint64_t i_address,
+        uint64_t & o_data);
+
+/**
+ * @brief putScom Write a register using SCOM.
+ *
+ * @param[in] i_target Target to write register on.
+ * @param[in] i_address Register address to write to.
+ * @param[in] i_data Data to write to register.
+ *
+ * @retval[0] No errors.
+ * @retval[!0] Unexpected error occurred.
+ */
+errlHndl_t putScom(
+        TARGETING::TargetHandle_t i_target,
+        uint64_t i_address,
+        uint64_t i_data);
+
+/**
+ * @brief modifyScom Read/Modify/Write a register using SCOM.
+ *
+ * @param[in] i_target Target to write register on.
+ * @param[in] i_address Register address to write to.
+ * @param[in] i_data Data to write to register.
+ * @param[in] i_op And/Or specification.
+ *
+ * @retval[0] No errors.
+ * @retval[!0] Unexpected error occurred.
+ */
+errlHndl_t modifyScom(
+        TARGETING::TargetHandle_t i_target,
+        uint64_t i_address,
+        uint64_t i_data,
+        ScomOp i_op);
+
+/**
+ * @brief getScomWrapper ScomWrapper singleton access.
+ *
+ * @return ScomWrapper Singleton instance.
+ */
+ScomWrapper & getScomWrapper();
 
 /**
  * @brief getPrdWrapper PrdWrapper singleton access.
