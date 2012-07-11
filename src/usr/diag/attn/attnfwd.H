@@ -53,6 +53,8 @@ class PrdWrapper;
 class PrdImpl;
 class ResolverWrapper;
 class Resolver;
+class TargetService;
+class TargetServiceImpl;
 
 enum
 {
@@ -92,6 +94,13 @@ PrdWrapper & getPrdWrapper();
  * @return ResolverWrapper Singleton instance.
  */
 ResolverWrapper & getResolverWrapper();
+
+/**
+ * @brief getTargetService TargetService singleton access.
+ *
+ * @return TargetService Singleton instance.
+ */
+TargetService & getTargetService();
 
 /**
  * @brief compare compare two PRDF::AttnData structures.
