@@ -1,4 +1,4 @@
-#  IBM_PROLOG_BEGIN_TAG
+#   IBM_PROLOG_BEGIN_TAG
 #  This is an automatically generated prolog.
 #
 #  $Source: src/usr/diag/attn/makefile $
@@ -19,14 +19,14 @@
 #
 #  Origin: 30
 #
-#  IBM_PROLOG_END
+#  IBM_PROLOG_END_TAG
 ROOTPATH = ../../../..
 
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/diag
 
 MODULE = attn
 
-OBJS =  attntrace.o attn.o attnsvc.o attnlist.o 
+OBJS =  attntrace.o attn.o attnsvc.o attnlist.o attnbits.o
 
 SUBDIRS = test.d
 

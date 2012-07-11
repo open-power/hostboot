@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/diag/attn/attnfwd.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/diag/attn/attnfwd.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #ifndef __ATTN_ATTNFWD_H
 #define __ATTN_ATTNFWD_H
 
@@ -35,6 +36,7 @@
 #include <targeting/common/target.H>
 #include <vector>
 #include <builtins.h>
+#include "attnbits.H"
 
 class AttnTraceTest;
 class AttnSvcTest;
@@ -51,6 +53,15 @@ class PrdWrapper;
 class PrdImpl;
 class ResolverWrapper;
 class Resolver;
+
+enum
+{
+    /**
+     * @brief HOST Represents host attentions,
+     *         distinct from the local error attentions.
+     */
+    HOST = PRDF::END_ATTENTION_TYPE,
+};
 
 /**
  * @brief MessageType Attention service message types.
@@ -97,4 +108,5 @@ ResolverWrapper & getResolverWrapper();
 int64_t compare(const PRDF::AttnData & i_l, const PRDF::AttnData & i_r);
 
 }
+
 #endif
