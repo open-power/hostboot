@@ -46,6 +46,7 @@
 //                camvanng 06/11/12   Fix shift/reduce warnings from yacc
 //                camvanng 06/15/12   Ability to do bitwise OR and AND operations
 //                camvanng 06/27/12   Improve error handling
+//                camvanng 07/12/12   Support for "ANY"
 // End Change Log *********************************************************************************/
 /**
  * @file initCompiler.lex
@@ -418,7 +419,7 @@ END_INITFILE            return INIT_ENDINITFILE;
                         } 
 
                         /* All attributes start with "ATTR_"; then there's "any". */
-<*>ATTR_{ID}|"any"      {
+<*>ATTR_{ID}|"any"|"ANY" {
                             yylval.str_ptr = new std::string(yytext); return INIT_ID; 
                         }
 
