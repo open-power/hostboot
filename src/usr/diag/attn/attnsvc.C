@@ -32,8 +32,9 @@
 #include "attnsvc.H"
 #include "attntrace.H"
 #include "attnlistutil.H"
-#include "attnresolv.H"
 #include "attnprd.H"
+#include "attnproc.H"
+#include "attnmem.H"
 
 using namespace std;
 using namespace PRDF;
@@ -115,8 +116,37 @@ errlHndl_t Service::processIntrQMsgPreAck(const msg_t & i_msg,
     do {
 
         // determine what has an attention
+        // determine what attentions are unmasked
+        // in the ipoll mask register and query the proc & mem
+        // resolvers for active attentions
 
-        err = getResolverWrapper().resolve(proc, o_attentions);
+        static ProcOps procOps;
+        static MemOps memOps;
+
+        uint64_t ipollMaskScomData = 0;
+
+        // get ipoll mask register content and decode
+        // unmasked attention types
+
+        err = getScom(proc, IPOLL::address, ipollMaskScomData);
+
+        if(err)
+        {
+            break;
+        }
+
+        // query the proc resolver for active attentions
+
+        err = procOps.resolve(proc, ipollMaskScomData, o_attentions);
+
+        if(err)
+        {
+            break;
+        }
+
+        // query the mem resolver for active attentions
+
+        err = memOps.resolve(proc, ipollMaskScomData, o_attentions);
 
         if(err)
         {
@@ -131,6 +161,8 @@ errlHndl_t Service::processIntrQMsgPreAck(const msg_t & i_msg,
         {
             break;
         }
+
+        ATTN_DBG("resolved %d", o_attentions.size());
 
     } while(0);
 

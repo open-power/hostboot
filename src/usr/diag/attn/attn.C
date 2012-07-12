@@ -28,7 +28,6 @@
  */
 
 #include "attnprd.H"
-#include "attnresolv.H"
 #include "attnops.H"
 #include "attnlist.H"
 #include "attntrace.H"
@@ -100,87 +99,6 @@ errlHndl_t PrdWrapper::callPrd(const AttentionList & i_attentions)
     ATTN_DBG("call PRD with %d using: %p", i_attentions.size(), iv_impl);
 
     return iv_impl->callPrd(i_attentions);
-}
-
-errlHndl_t Resolver::resolve(
-        TARGETING::TargetHandle_t i_proc,
-        AttentionList & o_attentions)
-{
-    // default resolver.  determine what attentions are unmasked
-    // in the ipoll mask register and query the proc & mem
-    // resolvers for active attentions
-
-    static ProcOps procOps;
-    static MemOps memOps;
-
-    errlHndl_t err = 0;
-
-    uint64_t ipollMaskScomData = 0;
-
-    do {
-
-        // get ipoll mask register content and decode
-        // unmasked attention types
-
-        err = getScom(i_proc, IPOLL::address, ipollMaskScomData);
-
-        if(err)
-        {
-            break;
-        }
-
-        // query the proc resolver for active attentions
-
-        err = procOps.resolve(i_proc, ipollMaskScomData, o_attentions);
-
-        if(err)
-        {
-            break;
-        }
-
-        // query the mem resolver for active attentions
-
-        err = memOps.resolve(i_proc, ipollMaskScomData, o_attentions);
-
-        if(err)
-        {
-            break;
-        }
-
-    } while(0);
-
-    return err;
-}
-
-ResolverWrapper & getResolverWrapper()
-{
-    // resolver wrapper singleton access
-
-    static ResolverWrapper w;
-
-    return w;
-}
-
-ResolverWrapper::ResolverWrapper()
-    : iv_impl(&Singleton<Resolver>::instance())
-{
-    // default call the real resolver
-}
-
-errlHndl_t ResolverWrapper::resolve(
-        TARGETING::TargetHandle_t i_proc,
-        AttentionList & o_attentions)
-{
-    // forward call to the installed resolver implementation
-
-    errlHndl_t err = iv_impl->resolve(i_proc, o_attentions);
-
-    if(!err)
-    {
-        ATTN_DBG("resolved %d using: %p", o_attentions.size(), iv_impl);
-    }
-
-    return err;
 }
 
 int64_t Attention::compare(const Attention & i_rhs) const

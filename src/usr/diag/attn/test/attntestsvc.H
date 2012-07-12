@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/diag/attn/test/attntestsvc.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/diag/attn/test/attntestsvc.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #ifndef __TEST_ATTNTESTSVC_H
 #define __TEST_ATTNTESTSVC_H
 
@@ -29,7 +30,6 @@
  * @brief Unit test for the attnsvc module.
  */
 
-#include "../attnfwd.H"
 #include "../attnsvc.H"
 #include "attnfakesys.H"
 #include "attntest.H"
@@ -185,14 +185,76 @@ class AttnSvcTest: public CxxTest::TestSuite
          */
         void testAttentions()
         {
+            static const uint64_t targetPoolSize = 8;
+            static const uint64_t iterations = 5;
+            static const uint64_t maxAttnsPerIteration = 5;
+
             TS_TRACE(ENTER_MRK "testAttentions");
 
             errlHndl_t err = 0;
 
-            FakeSystem hooks;
             Service svc;
 
-            hooks.install();
+            FakePresenter presenter;
+            FakeSystem system;
+
+            FakeGfir xstpGfir(CHECK_STOP),
+                     spclGfir(SPECIAL),
+                     recGfir(RECOVERABLE);
+
+            xstpGfir.install(system);
+            spclGfir.install(system);
+            recGfir.install(system);
+
+            FakeMcs rec(RECOVERABLE), xstp(CHECK_STOP), special(SPECIAL);
+            FakeGp1 gp1;
+
+            xstp.install(system);
+            special.install(system);
+            rec.install(system);
+            gp1.install(system);
+
+            FakeIpoll xstpIpoll(CHECK_STOP, presenter),
+                      spclIpoll(SPECIAL, presenter),
+                      recIpoll(RECOVERABLE, presenter),
+                      hostIpoll(HOST, presenter);
+
+            xstpIpoll.install(system);
+            spclIpoll.install(system);
+            recIpoll.install(system);
+            hostIpoll.install(system);
+
+            Validator v;
+
+            v.install(system);
+
+            system.installScomImpl();
+
+            FakeMemTargetService targetSvc(targetPoolSize);
+
+            TargetHandleList membufs, procs;
+
+            targetSvc.getAllChips(procs, TYPE_PROC);
+            targetSvc.getAllChips(membufs, TYPE_MEMBUF);
+
+            RandSource procSource(iterations,
+                    maxAttnsPerIteration,
+                    system,
+                    &procs[0],
+                    &procs[0] + procs.size());
+
+            RandSource memSource(
+                    iterations,
+                    maxAttnsPerIteration,
+                    system,
+                    &membufs[0],
+                    &membufs[0] + membufs.size());
+
+            targetSvc.installTargetService();
+
+            FakePrd prd(system);
+
+            prd.installPrd();
 
             do
             {
@@ -204,32 +266,67 @@ class AttnSvcTest: public CxxTest::TestSuite
                     break;
                 }
 
-                static const int64_t iterations = 20;
-
-                for(int64_t it = 0; it < iterations; ++it)
+                if(!presenter.start(svc.iv_intrTaskQ))
                 {
-                    int64_t count = randint(1, 10);
-
-                    TS_TRACE("raising %d attentions", count);
-
-                    hooks.raiseAttentions(svc.iv_intrTaskQ, count);
-                }
-
-                err = svc.stop();
-
-                if(err)
-                {
-                    TS_FAIL("unexpected error stopping service");
+                    TS_FAIL("unexpected error starting fake presenter");
                     break;
                 }
 
-                if(!hooks.validate())
+                if(!memSource.start())
                 {
-                    TS_FAIL("unexpected result after injecting attentions");
+                    TS_FAIL("unexpected error starting source");
+                    break;
+                }
+
+                if(!procSource.start())
+                {
+                    TS_FAIL("unexpected error starting source");
+                    break;
+                }
+
+                // wait for the testcase to finish injecting attentions
+
+                if(!memSource.wait())
+                {
+                    TS_FAIL("unexpected error waiting for source");
+                    break;
+                }
+
+                if(!procSource.wait())
+                {
+                    TS_FAIL("unexpected error waiting for source");
+                    break;
+                }
+
+                // wait for the the service to handle all the attentions
+                TS_TRACE("Waiting for attentions to be cleared.");
+
+                if(!system.wait(TEN_CTX_SWITCHES_NS * iterations * 100))
+                {
+                    TS_FAIL("Attentions still present on system.");
+
+                    system.dump();
                     break;
                 }
 
             } while(0);
+
+            err = svc.stop();
+
+            if(err)
+            {
+                TS_FAIL("unexpected error stopping service");
+                delete err;
+            }
+
+            presenter.stop();
+
+            if(!v.empty())
+            {
+                TS_FAIL("unexpected result after injecting attentions");
+
+                v.dump();
+            }
 
             TS_TRACE(EXIT_MRK "testAttentions");
         }

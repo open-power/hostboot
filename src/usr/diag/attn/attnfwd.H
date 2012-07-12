@@ -54,8 +54,6 @@ class AttentionList;
 class AttentionOps;
 class PrdWrapper;
 class PrdImpl;
-class ResolverWrapper;
-class Resolver;
 class TargetService;
 class TargetServiceImpl;
 class ScomWrapper;
@@ -162,13 +160,6 @@ ScomWrapper & getScomWrapper();
  * @return PrdWrapper Singleton instance.
  */
 PrdWrapper & getPrdWrapper();
-
-/**
- * @brief getResolverWrapper ResolverWrapper singleton access.
- *
- * @return ResolverWrapper Singleton instance.
- */
-ResolverWrapper & getResolverWrapper();
 
 /**
  * @brief getTargetService TargetService singleton access.
