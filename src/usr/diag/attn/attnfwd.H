@@ -43,6 +43,7 @@ class AttnSvcTest;
 class AttnListTest;
 class AttnOpsTest;
 class AttScomTest;
+class AttnProcTest;
 
 namespace ATTN
 {

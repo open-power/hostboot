@@ -33,6 +33,7 @@
 #include "attnlist.H"
 #include "attntrace.H"
 #include "attnsvc.H"
+#include "attnproc.H"
 
 using namespace std;
 using namespace PRDF;
@@ -108,7 +109,36 @@ errlHndl_t Resolver::resolve(
     // in the ipoll mask register and query the proc & mem
     // resolvers for active attentions
 
-    return 0;
+    static ProcOps procOps;
+
+    errlHndl_t err = 0;
+
+    uint64_t ipollMaskScomData = 0;
+
+    do {
+
+        // get ipoll mask register content and decode
+        // unmasked attention types
+
+        err = getScom(i_proc, IPOLL::address, ipollMaskScomData);
+
+        if(err)
+        {
+            break;
+        }
+
+        // query the proc resolver for active attentions
+
+        err = procOps.resolve(i_proc, ipollMaskScomData, o_attentions);
+
+        if(err)
+        {
+            break;
+        }
+
+    } while(0);
+
+    return err;
 }
 
 ResolverWrapper & getResolverWrapper()
