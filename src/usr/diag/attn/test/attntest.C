@@ -33,6 +33,7 @@
 #include "../attntrace.H"
 
 using namespace std;
+using namespace PRDF;
 
 namespace ATTN
 {
@@ -74,5 +75,26 @@ uint64_t randint(uint64_t i_min, uint64_t i_max)
     }
 
     return ((lo | hi) % (i_max +1 - i_min)) + i_min;
+}
+
+ATTENTION_VALUE_TYPE getRandomAttentionType()
+{
+    ATTENTION_VALUE_TYPE a;
+
+    switch (randint(1, 3))
+    {
+        case 1:
+            a = CHECK_STOP;
+            break;
+        case 2:
+            a = RECOVERABLE;
+            break;
+        case 3:
+        default:
+            a = SPECIAL;
+            break;
+    };
+
+    return a;
 }
 }

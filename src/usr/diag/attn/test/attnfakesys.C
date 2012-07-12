@@ -242,27 +242,6 @@ void FakeSystem::install()
     getPrdWrapper().setImpl(*this);
 }
 
-ATTENTION_VALUE_TYPE getRandomAttentionType()
-{
-    ATTENTION_VALUE_TYPE a;
-
-    switch (randint(1, 3))
-    {
-        case 1:
-            a = CHECK_STOP;
-            break;
-        case 2:
-            a = RECOVERABLE;
-            break;
-        case 3:
-        default:
-            a = SPECIAL;
-            break;
-    };
-
-    return a;
-}
-
 uint64_t FakeSystem::generateAttentions(uint64_t i_count, AttnList & io_list)
 {
     static const TargetHandle_t nullTarget = 0;

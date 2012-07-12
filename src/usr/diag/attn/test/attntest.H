@@ -73,5 +73,15 @@ template <typename T>
     {
 
     };
+
+/**
+ * @brief getRandomAttentionType
+ *
+ * Obtain a random attention type.
+ *
+ * @return The generated attention type.
+ */
+PRDF::ATTENTION_VALUE_TYPE getRandomAttentionType();
+
 }
 #endif

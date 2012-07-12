@@ -25,7 +25,7 @@ ROOTPATH = ../../../../..
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/diag
 
 OBJS = attnfakesys.o attntest.o attnrand.o attnfakepresenter.o attnfakeprd.o \
-       attnfaketarget.o
+       attnfaketarget.o attnrandsource.o
 
 MODULE = testattn
 
