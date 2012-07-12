@@ -557,7 +557,8 @@ fapi::ReturnCode platModifyCfamRegister(const fapi::Target& i_target,
 //******************************************************************************
 fapi::ReturnCode platGetRing(const fapi::Target& i_target,
                              const uint32_t i_address,
-                             ecmdDataBufferBase & o_data)
+                             ecmdDataBufferBase & o_data,
+                             const uint32_t i_ringMode)
 {
     FAPI_DBG(ENTER_MRK "platGetRing");
 
@@ -574,7 +575,8 @@ fapi::ReturnCode platGetRing(const fapi::Target& i_target,
 //******************************************************************************
 fapi::ReturnCode platPutRing(const fapi::Target& i_target,
                              const uint32_t i_address,
-                             ecmdDataBufferBase & i_data)
+                             ecmdDataBufferBase & i_data,
+                             const uint32_t i_ringMode)
 {
     FAPI_DBG(ENTER_MRK "platPutRing");
     fapi::ReturnCode l_rc;
@@ -591,7 +593,8 @@ fapi::ReturnCode platPutRing(const fapi::Target& i_target,
 fapi::ReturnCode platModifyRing(const fapi::Target& i_target,
                              const uint32_t i_address,
                              ecmdDataBufferBase & i_data,
-                             const fapi::ChipOpModifyMode i_modifyMode)
+                             const fapi::ChipOpModifyMode i_modifyMode,
+                             const uint32_t i_ringMode)
 {
     FAPI_DBG(ENTER_MRK "platModifyRing");
     fapi::ReturnCode l_rc;

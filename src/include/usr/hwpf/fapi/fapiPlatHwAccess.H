@@ -49,6 +49,7 @@
  *                          monte       8sep2011    new
  *                          mjjones     11/10/2011  Use ecmdDataBufferBase
  *          836579          thi         May 22,2012 Spy/Ring supports
+ *                          mjjones     07/12/2012  Add Pulse mode option to Ring funcs
  */
 
 #ifndef FAPIPLATHWACCESS_H_
@@ -170,11 +171,13 @@ fapi::ReturnCode platModifyCfamRegister(const fapi::Target& i_target,
  * @param[in] i_address Ring address to read from
  * @param[out] o_data   ecmdDataBufferBase object that holds data read from
  *                      address
+ * @param[in] i_ringMode Any number of mode options from fapi::RingMode ORed
  * @return ReturnCode. Zero on success, else platform specified error
  */
 fapi::ReturnCode platGetRing(const fapi::Target& i_target,
                              const uint32_t i_address,
-                             ecmdDataBufferBase & o_data);
+                             ecmdDataBufferBase & o_data,
+                             const uint32_t i_ringMode);
 
 
 /**
@@ -185,11 +188,13 @@ fapi::ReturnCode platGetRing(const fapi::Target& i_target,
  * @param[in] i_address Ring address to write to
  * @param[in] i_data    ecmdDataBufferBase object that holds data to write into
  *                      address
+ * @param[in] i_ringMode Any number of mode options from fapi::RingMode ORed
  * @return ReturnCode. Zero on success, else platform specified error
  */
 fapi::ReturnCode platPutRing(const fapi::Target& i_target,
                              const uint32_t i_address,
-                             ecmdDataBufferBase & i_data);
+                             ecmdDataBufferBase & i_data,
+                             const uint32_t i_ringMode);
 
 
 /**
@@ -200,12 +205,14 @@ fapi::ReturnCode platPutRing(const fapi::Target& i_target,
  * @param[in] i_address Ring address to modify
  * @param[in] i_data    ecmdDataBufferBase object that holds data to write into
  *                      address
+ * @param[in] i_ringMode Any number of mode options from fapi::RingMode ORed
  * @return ReturnCode. Zero on success, else platform specified error
  */
 fapi::ReturnCode platModifyRing(const fapi::Target& i_target,
                                 const uint32_t i_address,
                                 ecmdDataBufferBase & i_data,
-                                const fapi::ChipOpModifyMode i_modifyMode);
+                                const fapi::ChipOpModifyMode i_modifyMode,
+                                const uint32_t i_ringMode);
 
 // --------------------------------------------------------------------------
 // NOTE:

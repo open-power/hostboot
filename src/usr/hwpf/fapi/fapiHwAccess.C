@@ -42,6 +42,7 @@
  *                          mjjones     02/21/2012  Use high performance Target
  *                                                  toEcmdString
  *          836579          thi         May 18,2012 Spy/ring supports
+ *                          mjjones     07/12/2012  Add Pulse mode option to Ring funcs
  */
 
 #include <fapi.H>
@@ -253,13 +254,14 @@ fapi::ReturnCode fapiModifyCfamRegister(const fapi::Target& i_target,
 ////////////////////////////////////////////////////////////////////////////
 fapi::ReturnCode fapiGetRing(const fapi::Target& i_target,
                              const uint32_t i_address,
-                             ecmdDataBufferBase & o_data)
+                             ecmdDataBufferBase & o_data,
+                             const uint32_t i_ringMode)
 {
     fapi::ReturnCode l_rc;
     bool l_traceit = platIsScanTraceEnabled();
 
     // call the platform implementation
-    l_rc = platGetRing( i_target, i_address, o_data );
+    l_rc = platGetRing( i_target, i_address, o_data, i_ringMode );
 
     if (l_rc)
     {
@@ -281,13 +283,14 @@ fapi::ReturnCode fapiGetRing(const fapi::Target& i_target,
 ////////////////////////////////////////////////////////////////////////////
 fapi::ReturnCode fapiPutRing(const fapi::Target& i_target,
                              const uint32_t i_address,
-                             ecmdDataBufferBase & i_data)
+                             ecmdDataBufferBase & i_data,
+                             const uint32_t i_ringMode)
 {
     fapi::ReturnCode l_rc;
     bool l_traceit = platIsScanTraceEnabled();
 
     // call the platform implementation
-    l_rc = platPutRing( i_target, i_address, i_data );
+    l_rc = platPutRing( i_target, i_address, i_data, i_ringMode );
 
     if (l_rc)
     {
@@ -310,13 +313,14 @@ fapi::ReturnCode fapiPutRing(const fapi::Target& i_target,
 fapi::ReturnCode fapiModifyRing(const fapi::Target& i_target,
                                 const uint32_t i_address,
                                 ecmdDataBufferBase & i_data,
-                                const fapi::ChipOpModifyMode i_modifyMode)
+                                const fapi::ChipOpModifyMode i_modifyMode,
+                                const uint32_t i_ringMode)
 {
     fapi::ReturnCode l_rc;
     bool l_traceit = platIsScanTraceEnabled();
 
     // call the platform implementation
-    l_rc = platModifyRing( i_target, i_address, i_data, i_modifyMode );
+    l_rc = platModifyRing( i_target, i_address, i_data, i_modifyMode, i_ringMode );
 
     if (l_rc)
     {

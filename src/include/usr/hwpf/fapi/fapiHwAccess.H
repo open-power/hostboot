@@ -41,6 +41,7 @@
  *                          mjjones     09/14/2011  Prepended fapi to functions
  *                          mjjones     11/10/2011  Use ecmdDataBufferBase
  *          836579          thi         May 22,2012 Spy/Ring supports
+ *                          mjjones     07/12/2012  Add mode options to Ring funcs
  */
 
 #ifndef FAPIHWACCESS_H_
@@ -61,6 +62,19 @@ namespace fapi
         CHIP_OP_MODIFY_MODE_OR = 1,
         CHIP_OP_MODIFY_MODE_AND = 2,
         CHIP_OP_MODIFY_MODE_XOR = 3,
+    };
+
+    /**
+     * @brief Enumeration of Ring operation modes
+     *
+     * This is a bitmap to allow the user to specify multiple modes
+     */
+    enum RingMode
+    {
+        RING_MODE_SET_PULSE       = 0x00000001,
+        RING_MODE_NO_HEADER_CHECK = 0x00000002,
+        // FUTURE_MODE            = 0x00000004,
+        // FUTURE_MODE            = 0x00000008,
     };
 }
 
@@ -153,11 +167,13 @@ fapi::ReturnCode fapiModifyCfamRegister(const fapi::Target& i_target,
  * @param[in] i_address Ring address to read from
  * @param[out] o_data ecmdDataBufferBase object that holds data read from
  *                    address
+ * @param[in] i_ringMode Any number of mode options from fapi::RingMode ORed
  * @return ReturnCode. Zero on success, else platform specified error
  */
 fapi::ReturnCode fapiGetRing(const fapi::Target& i_target,
                              const uint32_t i_address,
-                             ecmdDataBufferBase & o_data);
+                             ecmdDataBufferBase & o_data,
+                             const uint32_t i_ringMode = 0);
 
 /**
  * @brief Writes a ring register on a target
@@ -165,11 +181,13 @@ fapi::ReturnCode fapiGetRing(const fapi::Target& i_target,
  * @param[in] i_address Ring address to write to
  * @param[in] i_data    ecmdDataBufferBase object that holds data to write into
  *                      address
+ * @param[in] i_ringMode Any number of mode options from fapi::RingMode ORed
  * @return ReturnCode. Zero on success, else platform specified error
  */
 fapi::ReturnCode fapiPutRing(const fapi::Target& i_target,
                              const uint32_t i_address,
-                             ecmdDataBufferBase & i_data);
+                             ecmdDataBufferBase & i_data,
+                             const uint32_t i_ringMode = 0);
 
 
 /**
@@ -178,12 +196,14 @@ fapi::ReturnCode fapiPutRing(const fapi::Target& i_target,
  * @param[in] i_address Ring address to modify
  * @param[in] i_data    ecmdDataBufferBase object that holds data to write into
  *                      address
+ * @param[in] i_ringMode Any number of mode options from fapi::RingMode ORed
  * @return ReturnCode. Zero on success, else platform specified error
  */
 fapi::ReturnCode fapiModifyRing(const fapi::Target& i_target,
                                 const uint32_t i_address,
                                 ecmdDataBufferBase & i_data,
-                                const fapi::ChipOpModifyMode i_modifyMode);
+                                const fapi::ChipOpModifyMode i_modifyMode,
+                                const uint32_t i_ringMode = 0);
 
 // --------------------------------------------------------------------------
 // NOTE:
