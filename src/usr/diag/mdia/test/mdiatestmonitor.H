@@ -33,83 +33,9 @@
 #include "../mdiamonitor.H"
 #include "../mdiasm.H"
 #include "../mdiatrace.H"
+#include "mdiafakesm.H"
+
 using namespace MDIA;
-
-class FakeStateMachineTest: public StateMachine
-{
-    public:
-        void processCommandTimeout(const std::vector<uint64_t> & i_monitorIDs)
-        {
-            if(true != isEqual(i_monitorIDs))
-            {
-                //TODO: This is commented out due to Issue 44509.
-                //TS_FAIL("i_monitorIDs and iv_monitors vectors are not equal");
-            }
-
-            iv_processedTimeout = true;
-        }
-
-        void addMonitor(uint64_t i_mon)
-        {
-            iv_monitors.push_back(i_mon);
-        }
-
-        void removeMonitor(const uint64_t i_position)
-        {
-            iv_monitors.erase(iv_monitors.begin() + i_position);
-        }
-
-        void clearMonitors()
-        {
-            iv_monitors.clear();
-        }
-
-        void resetTimeout()
-        {
-            iv_processedTimeout = false;
-        }
-
-        bool isTimeoutProcessed() const
-        {
-            return iv_processedTimeout;
-        }
-
-        FakeStateMachineTest() : iv_processedTimeout(false) {}
-
-        ~FakeStateMachineTest() {}
-
-    private:
-
-        bool isEqual(const std::vector<uint64_t> & i_monitorIDs) const
-        {
-            bool isEqual = true;
-            if(i_monitorIDs.size() == iv_monitors.size())
-            {
-                std::vector<uint64_t>::const_iterator mon = i_monitorIDs.begin();
-                std::vector<uint64_t>::const_iterator mon1 = iv_monitors.begin();
-                while(mon != i_monitorIDs.end())
-                {
-                    if(*mon == *mon1)
-                    {
-                        mon++;
-                        mon1++;
-                    }
-                    else
-                    {
-                        isEqual = false;
-                        break;
-                    }
-                }
-            }
-            else
-                isEqual = false;
-
-            return isEqual;
-        }
-
-        bool iv_processedTimeout;
-        std::vector<uint64_t> iv_monitors;
-};
 
 class MdiaCommandMonitorTest: public CxxTest::TestSuite
 {
@@ -124,6 +50,123 @@ class MdiaCommandMonitorTest: public CxxTest::TestSuite
             {
                 nanosleep(i_sleepSec, i_sleepNanoSec);
             }
+        }
+
+        void TimeoutAll(mutex_t *i_mutex, sync_cond_t *i_cond)
+        {
+            TS_TRACE(ENTER_MRK "TimeoutAll");
+
+            uint64_t l_mntCmdTime = 10000000;
+            FakeStateMachine1 l_sm;
+            CommandMonitor l_cm;
+
+            //Start the CM thread. Force a timeout.
+            //All monitorIDs should timeout.
+            uint64_t l_monID1 = 0, l_monID2 = 0;
+            l_cm.start(l_sm);
+            l_monID1 = l_cm.addMonitor(l_mntCmdTime);
+            l_sm.addMonitor(l_monID1);
+            l_monID2 = l_cm.addMonitor(l_mntCmdTime);
+            l_sm.addMonitor(l_monID2);
+
+            //2 monitorIDs should timeout
+            l_sm.setTotalExpectedMons(2);
+            l_sm.setSyncVars(i_mutex, i_cond);
+
+            mutex_lock(i_mutex);
+            // Wait until all monitorIDs timeout
+            while(false == l_sm.isTimeoutProcessed())
+            {
+                sync_cond_wait(i_cond, i_mutex);
+            }
+            mutex_unlock(i_mutex);
+
+            if(true != l_sm.isContentsEqual())
+            {
+                TS_FAIL("Expected monitorIDs to timeout are not equal "
+                        "to actual timedout monitorIDs");
+            }
+
+            //All maint cmds/monitorIDs have timedout
+            //Therefore all timedout iv_monitors should be erased
+            if(l_cm.iv_monitors.size() != 0)
+            {
+                TS_FAIL("Size not zero");
+            }
+
+            TS_TRACE(EXIT_MRK "TimeoutAll");
+        }
+
+        void TimeoutSubset(mutex_t *i_mutex, sync_cond_t *i_cond)
+        {
+            TS_TRACE(ENTER_MRK "TimeoutSubset");
+
+            FakeStateMachine1 l_sm;
+            CommandMonitor l_cm;
+            l_sm.setSyncVars(i_mutex, i_cond);
+            l_cm.start(l_sm);
+
+            uint64_t l_mntCmdTime = 10000000;
+
+            //Add 7 more
+            //3 of the 7 monitorIDs should timeout.
+            uint64_t l_monID1 = 0,
+                     l_monID2 = 0,
+                     l_monID3 = 0,
+                     l_monID4 = 0,
+                     l_monID5 = 0,
+                     l_monID6 = 0,
+                     l_monID7 = 0;
+            l_monID1 = l_cm.addMonitor(l_mntCmdTime);
+            l_sm.addMonitor(l_monID1);
+            l_monID2 = l_cm.addMonitor(l_mntCmdTime);
+            l_sm.addMonitor(l_monID2);
+            l_monID3 = l_cm.addMonitor(l_mntCmdTime);
+            l_sm.addMonitor(l_monID3);
+            l_monID4 = l_cm.addMonitor(l_mntCmdTime);
+            l_sm.addMonitor(l_monID4);
+            l_monID5 = l_cm.addMonitor(l_mntCmdTime);
+            l_sm.addMonitor(l_monID5);
+            l_monID6 = l_cm.addMonitor(l_mntCmdTime);
+            l_sm.addMonitor(l_monID6);
+            l_monID7 = l_cm.addMonitor(l_mntCmdTime);
+            l_sm.addMonitor(l_monID7);
+
+            //Remove 4 of the 7 monIDs
+            l_cm.removeMonitor(l_monID1);
+            l_sm.removeMonitor(0);
+            nanoSleep(0, 100);
+            l_cm.removeMonitor(l_monID4);
+            l_sm.removeMonitor(2);
+            l_cm.removeMonitor(l_monID5);
+            l_sm.removeMonitor(2);
+            l_cm.removeMonitor(l_monID6);
+            l_sm.removeMonitor(2);
+
+            //3 monitorIDs should timeout
+            l_sm.setTotalExpectedMons(3);
+
+            if(false != l_sm.isTimeoutProcessed())
+            {
+                TS_FAIL("Unexpected timeout");
+            }
+
+            //Wait till all monitorIDs have timed out
+            mutex_lock(i_mutex);
+            while(false == l_sm.isTimeoutProcessed())
+            {
+                sync_cond_wait(i_cond, i_mutex);
+            }
+            mutex_unlock(i_mutex);
+
+            if(true != l_sm.isContentsEqual())
+            {
+                TS_FAIL("Expected monitorIDs to timeout are not equal "
+                        "to actual timedout monitorIDs");
+            }
+
+            TS_TRACE(EXIT_MRK "TimeoutSubset");
+
         }
 
     public:
@@ -177,7 +220,7 @@ class MdiaCommandMonitorTest: public CxxTest::TestSuite
                 }
 
                 // Add monitor after starting the CM thread
-                FakeStateMachineTest l_sm;
+                StateMachine l_sm;
                 l_cm1.start(l_sm);
                 l_cm1.addMonitor(++l_timeout);
                 l_mon = l_cm1.addMonitor(++l_timeout);
@@ -235,73 +278,23 @@ class MdiaCommandMonitorTest: public CxxTest::TestSuite
         void testthreadMainTimeout(void)
         {
             TS_TRACE(ENTER_MRK "testthreadMainTimeout");
+            mutex_t mutex;
+            sync_cond_t cond;
+            mutex_init(&mutex);
+            sync_cond_init(&cond);
 
-            uint64_t l_mntCmdTime = 10000000;
-            FakeStateMachineTest l_sm;
-            CommandMonitor l_cm;
-
-            //Start the CM thread. Force a timeout.
-            //All monitorIDs should timeout.
-            uint64_t l_monID1, l_monID2 = 0;
-            l_cm.start(l_sm);
-            l_monID1 = l_cm.addMonitor(l_mntCmdTime);
-            l_sm.addMonitor(l_monID1);
-            l_monID2 = l_cm.addMonitor(l_mntCmdTime);
-            l_sm.addMonitor(l_monID2);
-            nanoSleep(0, 100000000);
-            if(true != l_sm.isTimeoutProcessed())
+            for(uint64_t iterations=0; iterations<20; iterations++)
             {
-                TS_FAIL("Did not timeout");
-            }
-            l_sm.clearMonitors();
-            l_sm.resetTimeout();
-
-            //All maint cmds/monitorIDs have timedout
-            //Therefore all timedout iv_monitors should be erased
-            if(l_cm.iv_monitors.size() != 0)
-            {
-                TS_FAIL("Size not zero");
+                TimeoutAll(&mutex, &cond);
             }
 
-            //Add 7 more
-            //3 of the 7 monitorIDs should timeout.
-            uint64_t l_monID3, l_monID4, l_monID5, l_monID6, l_monID7 = 0;
-            l_monID1 = l_cm.addMonitor(l_mntCmdTime);
-            l_sm.addMonitor(l_monID1);
-            l_monID2 = l_cm.addMonitor(l_mntCmdTime);
-            l_sm.addMonitor(l_monID2);
-            l_monID3 = l_cm.addMonitor(l_mntCmdTime);
-            l_sm.addMonitor(l_monID3);
-            l_monID4 = l_cm.addMonitor(l_mntCmdTime);
-            l_sm.addMonitor(l_monID4);
-            l_monID5 = l_cm.addMonitor(l_mntCmdTime);
-            l_sm.addMonitor(l_monID5);
-            l_monID6 = l_cm.addMonitor(l_mntCmdTime);
-            l_sm.addMonitor(l_monID6);
-            l_monID7 = l_cm.addMonitor(l_mntCmdTime);
-            l_sm.addMonitor(l_monID7);
-
-            //Remove 4 of the 7 monIDs
-            l_cm.removeMonitor(l_monID1);
-            l_sm.removeMonitor(0);
-            nanoSleep(0, 100);
-            l_cm.removeMonitor(l_monID4);
-            l_sm.removeMonitor(2);
-            l_cm.removeMonitor(l_monID5);
-            l_sm.removeMonitor(2);
-            l_cm.removeMonitor(l_monID6);
-            l_sm.removeMonitor(2);
-
-            if(false != l_sm.isTimeoutProcessed())
+            for(uint64_t iterations=0; iterations<20; iterations++)
             {
-                TS_FAIL("Unexpected timeout");
+                TimeoutSubset(&mutex, &cond);
             }
 
-            nanoSleep(0, 100000000);
-            if(true != l_sm.isTimeoutProcessed())
-            {
-                TS_FAIL("Did not timeout");
-            }
+            sync_cond_destroy(&cond);
+            mutex_destroy(&mutex);
 
             TS_TRACE(EXIT_MRK "testthreadMainTimeout");
         }
