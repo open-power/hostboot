@@ -10,8 +10,8 @@ python "os.environ['HB_MACHINE'] = \""+$hb_machine+"\""
 # Preload VPD in PNOR
 try {
     run-python-file (lookup-file hbfw/hb-pnor-mvpd-preload.py)
-    fpga0.sfc_master_mmio_image.add-partial-diff-file ./sysmvpd.dat 0x281000
-    fpga0.sfc_master_mmio_image.add-partial-diff-file ./sysspd.dat 0x301000
+    fpga0.sfc_master_mem.load-file ./sysmvpd.dat 0x281000
+    fpga0.sfc_master_mem.load-file ./sysspd.dat 0x301000
 } except { echo "ERROR: Failed to preload VPD into PNOR." }
 
 # Load HB debug tools.
