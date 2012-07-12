@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/kernel/timemgr.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2010 - 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/kernel/timemgr.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2010-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #include <kernel/timemgr.H>
 #include <kernel/scheduler.H>
 #include <util/singleton.H>
@@ -105,7 +106,55 @@ void TimeManager::_checkReleaseTasks(Scheduler* s)
     }
 }
 
-inline TimeManager::delaylist_t* TimeManager::_get_delaylist()
+TimeManager::delaylist_t* TimeManager::_get_delaylist()
 {
     return static_cast<delaylist_t*>(CpuManager::getCurrentCPU()->delay_list);
 }
+
+uint64_t TimeManager::getIdleTimeSliceCount()
+{
+    uint64_t sliceCount = getTimeSliceCount();
+
+    // Get a delayed task, if there is one
+    _TimeManager_Delay_t* node = _get_delaylist()->front();
+
+    if(node)
+    {
+        uint64_t currentTime = getCurrentTimeBase();
+        if(currentTime < node->key)
+        {
+            uint64_t diffTime = node->key - currentTime;
+            if(diffTime < sliceCount)
+            {
+                sliceCount = diffTime;
+            }
+        }
+        else  // ready to run now! Minimum delay
+        {
+            sliceCount = 1;
+        }
+    }
+    return sliceCount;
+}
+
+bool TimeManager::simpleDelay(uint64_t i_sec, uint64_t i_nsec)
+{
+    bool result = false;
+
+    uint64_t threshold = getTimeSliceCount()/YIELD_THRESHOLD_PER_SLICE;
+    uint64_t delay = convertSecToTicks(i_sec, i_nsec);
+
+    if(delay < threshold)
+    {
+        uint64_t expire = getCurrentTimeBase() + delay;
+        while(getCurrentTimeBase() < expire)
+        {
+            setThreadPriorityLow();
+        }
+        setThreadPriorityHigh();
+        result = true;
+    }
+
+    return result;
+}
+
