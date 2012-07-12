@@ -31,11 +31,17 @@
  */
 
 #include "../attnfwd.H"
+#include <map>
 
 namespace ATTN
 {
 
 class FakePresenter;
+struct AttnDataSwo;
+struct AttnDataEq;
+class FakeSystem;
+class FakeReg;
+class FakeSource;
 
 /**
  * @brief randint Generate random integer between bounds.
@@ -55,5 +61,17 @@ uint64_t randint(uint64_t i_min, uint64_t i_max);
  * @return uint64_t Random integer from simics host.
  */
 extern "C" uint64_t generate_random();
+
+/**
+ * @brief AttnDataMap
+ *
+ * AttnData as key map template.
+ */
+template <typename T>
+    class AttnDataMap :
+        public std::map<PRDF::AttnData, T, AttnDataSwo>
+    {
+
+    };
 }
 #endif

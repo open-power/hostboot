@@ -30,11 +30,12 @@
  * @brief HBATTN fake system class definition.
  */
 
-#include "../attnfwd.H"
 #include "../attnops.H"
 #include "../attnprd.H"
 #include "../attnresolv.H"
 #include "../attnscom.H"
+#include "attntest.H"
+#include "attncomp.H"
 #include <map>
 
 namespace ATTN
@@ -98,33 +99,10 @@ struct FakeSystemProperties
 };
 
 /**
- * @brief Comp Comparison functor for two PRDF::AttnData structs.
- */
-struct Comp
-{
-    /**
-     * @brief operator() Comparison functor for two PRDF::AttnData structs.
-     *
-     * @param[in] i_l One of two PRDF::AttnData structs to be compared.
-     * @param[in] i_r One of two PRDF::AttnData structs to be compared.
-     *
-     * @return bool Comparison result.
-     *
-     * @retval[true] i_l < i_r;
-     * @retval[false ] i_r < i_l;
-     */
-    bool operator()(const PRDF::AttnData & i_l,
-            const PRDF::AttnData & i_r) const
-    {
-        return compare(i_l,  i_r) < 0;
-    }
-};
-
-/**
  * @brief FakeSystem
  *
- * AttentionOps, Resolver and PRD implementations that simulate
- * normal system behavior.
+ * Container that presents an interface to fake hardware
+ * implementations.
  */
 class FakeSystem :
     public AttentionOps,
@@ -133,6 +111,158 @@ class FakeSystem :
     public ScomImpl
 {
     public:
+
+        /**
+         * @brief putReg
+         *
+         * Simulate register modification originating in hardware.
+         *
+         * @param[in] i_target Target to write register on.
+         * @param[in] i_address Register address to write to.
+         * @param[in] i_data Data to write to register.
+         *
+         * @retval[0] No errors.
+         * @retval[!0] Unexpected error occurred.
+         */
+        errlHndl_t putReg(
+                TARGETING::TargetHandle_t i_target,
+                uint64_t i_address,
+                uint64_t i_data);
+
+        /**
+         * @brief modifyReg
+         *
+         * Simulate register modification originating in hardware.
+         *
+         * @param[in] i_target Target to update register on.
+         * @param[in] i_address Register address to update.
+         * @param[in] i_data Data to write to register.
+         * @param[in] i_op and/or behavior.
+         *
+         * @retval[0] No errors.
+         * @retval[!0] Unexpected error occurred.
+         */
+        errlHndl_t modifyReg(
+                TARGETING::TargetHandle_t i_target,
+                uint64_t i_address,
+                uint64_t i_data,
+                ScomOp i_op);
+
+        /**
+         * @brief getReg Register read originating in hardware.
+         *
+         * @param[in] i_target Target to read register from.
+         * @param[in] i_address Register address to read from.
+         *
+         * @return Register data.
+         */
+        uint64_t getReg(
+                TARGETING::TargetHandle_t i_target,
+                uint64_t i_address);
+
+        /**
+         * @brief putAttentions
+         *
+         * Instruct the system to inject the specified attention.
+         *
+         * @param[in] i_list The attentions to inject.
+         *
+         * @retval[0] No error occurred.
+         * @retval[!0] Unexpected error occurred.
+         */
+        errlHndl_t putAttentions(
+                const PRDF::AttnList & i_list);
+
+        /**
+         * @brief clearAttention
+         *
+         * Instruct the system clear the specified attention.
+         *
+         * @param[in] i_attn The attention to clear.
+         *
+         * @retval[0] No error occurred.
+         * @retval[!0] Unexpected error occurred.
+         */
+        errlHndl_t clearAttention(
+                const PRDF::AttnData & i_attn);
+
+        /**
+         * @brief clearAllAttentions
+         *
+         * Instruct the system clear all instances of the specified attention.
+         *
+         * @param[in] i_attn The attention to clear.
+         *
+         * @retval[0] No error occurred.
+         * @retval[!0] Unexpected error occurred.
+         */
+        errlHndl_t clearAllAttentions(
+                const PRDF::AttnData & i_attn);
+
+        /**
+         * @brief count
+         *
+         * For the provided attention type, obtain the number
+         * of times it is being reported by the system.
+         *
+         * @param[in] i_attn The attention type for which the count should be
+         *                obtained.
+         */
+        uint64_t count(
+                const PRDF::AttnData & i_attn);
+
+        /**
+         * @brief wait
+         *
+         * Block the calling thread until no attentions are
+         * being reported on the system.
+         *
+         * @param[in] i_maxTimeNs Max amount of time to wait
+         *                once system has reached stable state
+         *                (number of attentions isn't changing)
+         *
+         * @retval[true] No attentions being reported.
+         * @retval[false].Attentions still being reported
+         *                  after waiting i_maxTimeNs.
+         */
+        bool wait(uint64_t i_maxTimeNs);
+
+        /**
+         * @brief wait
+         *
+         * Block the calling thread until no attentions are
+         * being reported on the system.
+         */
+        void wait();
+
+        /**
+         * @brief addReg
+         *
+         * Register a register implementaion with the system.
+         *
+         * @param[in] i_address The address for which the implementation
+         *              wishes to monitor.
+         * @param[in] i_reg The register implementation to add to the system.
+         */
+        void addReg(
+                uint64_t i_address,
+                FakeReg & i_reg);
+
+        /**
+         * @brief addSource
+         *
+         * Register an attention source implementation with the system.
+         *
+         * @param[in] i_targetType The target type for which the implementation
+         *              wishes to monitor.
+         * @param[in] i_type The attention type for which the implementation
+         *              wishes to monitor.
+         * @param[in] i_source The source to add to the system.
+         */
+        void addSource(
+                TARGETING::TYPE i_targetType,
+                PRDF::ATTENTION_VALUE_TYPE i_type,
+                FakeSource & i_source);
 
         /**
          * @brief putScom Write a register using SCOM.
@@ -277,6 +407,11 @@ class FakeSystem :
         virtual bool validate();
 
         /**
+         * @brief dump Dump active attentions to trace.
+         */
+        void dump();
+
+        /**
          * @brief ctor
          */
         FakeSystem();
@@ -301,7 +436,7 @@ class FakeSystem :
         /**
          * @brief iv_map Attention <-> state association.
          */
-        std::map<PRDF::AttnData, FakeSystemProperties, Comp> iv_map;
+        AttnDataMap<FakeSystemProperties> iv_map;
 
         /**
          * @brief Reg Register/address association alias.
@@ -319,9 +454,100 @@ class FakeSystem :
         Regs iv_regs;
 
         /**
-         * @brief iv_mutex iv_map protection.
+         * @brief makeAttnCallbacks
+         *
+         * Notify registered sources of attention state changes.
+         *
+         * @param[in] i_list List of attentions changing state.
+         * @param[in] i_set Attentions turning on / off.
+         *
+         * @retval[0] No error occurred.
+         * @retval[!0] Unexpected error occurred.
+         */
+        errlHndl_t makeAttnCallbacks(
+                const PRDF::AttnList & i_list,
+                bool i_set);
+
+        /**
+         * @brief makeRegCallbacks
+         *
+         * Notify registered registers of content changes.
+         *
+         * @param[in] i_target Target being updated.
+         * @param[in] i_address Address of register being updated.
+         * @param[in] i_new Post update register content.
+         * @param[in] i_new Pre update register content.
+         *
+         * @retval[0] No error occurred.
+         * @retval[!0] Unexpected error occurred.
+         */
+        errlHndl_t makeRegCallbacks(
+                TARGETING::TargetHandle_t i_target,
+                uint64_t i_address,
+                uint64_t i_new,
+                uint64_t i_old);
+
+        /**
+         * @brief clearAttentionUnsafe
+         *
+         * Thread unsafe wrapper for clearAttention.
+         *
+         * @param[in] i_attn The attention to clear.
+         *
+         * @retval[0] No error occurred.
+         * @retval[!0] Unexpected error occurred.
+         */
+        void clearAttentionUnsafe(
+                const PRDF::AttnData & i_attn);
+
+        /**
+         * @brief putRegUnsafe
+         *
+         * Thread unsafe wrapper for putReg.
+         *
+         * @param[in] i_target Target to write register on.
+         * @param[in] i_address Register address to write to.
+         * @param[in] i_data Data to write to register.
+         */
+        void putRegUnsafe(
+                TARGETING::TargetHandle_t i_target,
+                uint64_t i_address,
+                uint64_t i_data);
+
+        /**
+         * @brief iv_attentions Current active attentions.
+         */
+        AttnDataMap<uint64_t> iv_attentions;
+
+        /**
+         * @brief iv_regImpl registered register implementations.
+         */
+        std::vector<std::pair<uint64_t, FakeReg *> > iv_regImpl;
+
+        /**
+         * @brief Key Registered source key alias.
+         */
+        typedef std::pair<TARGETING::TYPE, PRDF::ATTENTION_VALUE_TYPE> Key;
+
+        /**
+         * @brief Entry Registered source key/value alias.
+         */
+        typedef std::pair<Key, FakeSource *> Entry;
+
+        /**
+         * @brief iv_source Registered sources.
+         */
+        std::vector<Entry> iv_sources;
+
+        /**
+         * @brief iv_mutex Shared data access serialization.
          */
         mutex_t iv_mutex;
+
+        /**
+         * @brief iv_cond Zero attentions condition.
+         */
+        sync_cond_t iv_cond;
 };
 }
 #endif
