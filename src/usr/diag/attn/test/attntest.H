@@ -82,6 +82,5 @@ template <typename T>
  * @return The generated attention type.
  */
 PRDF::ATTENTION_VALUE_TYPE getRandomAttentionType();
-
 }
 #endif

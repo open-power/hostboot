@@ -31,9 +31,11 @@
 #include <algorithm>
 #include "attntest.H"
 #include "../attntrace.H"
+#include "../attntarget.H"
 
 using namespace std;
 using namespace PRDF;
+using namespace TARGETING;
 
 namespace ATTN
 {
