@@ -44,6 +44,7 @@ class AttnListTest;
 class AttnOpsTest;
 class AttScomTest;
 class AttnProcTest;
+class AttnMemTest;
 
 namespace ATTN
 {

@@ -34,6 +34,7 @@
 #include "attntrace.H"
 #include "attnsvc.H"
 #include "attnproc.H"
+#include "attnmem.H"
 
 using namespace std;
 using namespace PRDF;
@@ -110,6 +111,7 @@ errlHndl_t Resolver::resolve(
     // resolvers for active attentions
 
     static ProcOps procOps;
+    static MemOps memOps;
 
     errlHndl_t err = 0;
 
@@ -130,6 +132,15 @@ errlHndl_t Resolver::resolve(
         // query the proc resolver for active attentions
 
         err = procOps.resolve(i_proc, ipollMaskScomData, o_attentions);
+
+        if(err)
+        {
+            break;
+        }
+
+        // query the mem resolver for active attentions
+
+        err = memOps.resolve(i_proc, ipollMaskScomData, o_attentions);
 
         if(err)
         {

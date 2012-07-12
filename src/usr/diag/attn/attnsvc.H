@@ -255,6 +255,7 @@ class Service
          */
         friend class ::AttnSvcTest;
         friend class ::AttnProcTest;
+        friend class ::AttnMemTest;
 };
 }
 #endif

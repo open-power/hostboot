@@ -27,7 +27,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/diag
 MODULE = attn
 
 OBJS =  attntrace.o attn.o attnsvc.o attnlist.o attnbits.o attntarget.o \
-        attnscom.o attnproc.o
+        attnscom.o attnproc.o attnmem.o
 
 SUBDIRS = test.d
 
