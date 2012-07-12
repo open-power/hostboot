@@ -57,6 +57,13 @@ class PrdImpl
         virtual errlHndl_t callPrd(const AttentionList & i_attentions);
 
         /**
+         * @brief installPrd
+         *
+         * Make this the active PRD implementation.
+         */
+        void installPrd();
+
+        /**
          * @brief dtor
          */
         virtual ~PrdImpl() {}

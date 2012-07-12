@@ -51,6 +51,11 @@ errlHndl_t stopService()
     return Singleton<Service>::instance().stop();
 }
 
+void PrdImpl::installPrd()
+{
+    getPrdWrapper().setImpl(*this);
+}
+
 errlHndl_t PrdImpl::callPrd(const AttentionList & i_attentions)
 {
     // forward call to the real PRD
