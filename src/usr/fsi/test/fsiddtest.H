@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/fsi/test/fsiddtest.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/fsi/test/fsiddtest.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #ifndef __FSIDDTEST_H
 #define __FSIDDTEST_H
 
@@ -176,8 +177,6 @@ class FsiDDTest : public CxxTest::TestSuite
         fsi_target = TARGETING::targetService().toTarget(epath);
         fsi_targets[CENTAUR8] = fsi_target;
 
-        
-
         // scratch data to use
         struct {
             int fsitarget;
@@ -191,25 +190,20 @@ class FsiDDTest : public CxxTest::TestSuite
             { PROC0, 0x003074, 0x91010800, false, true }, //CMFSI MVER
             { PROC0, 0x003474, 0x92010800, false, true }, //MFSI MVER
 
-            //** Slave Regs (cheating)
-            { PROC0, 0x080000, 0xC0010EA0, false, false }, //Config Table entry for slave0 off MFSI-0 
+            //** Slave Regs (via absolute address)
             { PROC0, 0x081000, 0x12345678, true, false }, //DATA_0 from FSI2PIB off MFSI-0 
             { PROC0, 0x041028, 0x160E9049, false, false }, //CHIPID from SHIFT off cMFSI-0
             { PROC0, 0x103074, 0x91010800, false, false }, //CMFSI MVER from Proc off MFSI-2
 
             //** Slave Regs
-            { PROCWRAP, 0x000000, 0xC0010EA0, false, false }, //Config Table entry for slave0 off MFSI-0 
             { PROCWRAP, 0x001000, 0x12345678, false, false }, //DATA_0 from FSI2PIB off MFSI-0 
             { PROCWRAP, 0x001004, 0xA5A5A5A5, true, false }, //DATA_1 from FSI2PIB off MFSI-0
-            { PROCWRAP, 0x001028, 0x120EA049, false, false }, //CHIPID from FSI2PIB off MFSI-0 
 
             //** Slave Regs
             { PROC1, 0x001000, 0x88776655, true, false }, //FEL from SHIFT off MFSI-1
 
             //** Slave Regs
-            { PROC2, 0x000000, 0xC0010EA0, false, false }, //Config Table entry for slave0 off MFSI-2
             { PROC2, 0x001000, 0x12345678, true, false }, //FEL from SHIFT off MFSI-2
-            { PROC2, 0x001028, 0x120EA049, false, false }, //CHIPID from FSI2PIB off MFSI-2
 
             //** Slave Regs
             { CENTAUR0, 0x000000, 0xC0010E95, false, false }, //Config Table entry for slave0 off cMFSI-0
