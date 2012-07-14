@@ -88,6 +88,13 @@ class CpuManager
         static size_t getCpuCount() { return cv_cpuCount; }
 
 
+        /** @fn forceMemoryPeriodic()
+         * Force the memory free / coalesce operations to be performed on the
+         * next "periodic" interval.
+         */
+        static void forceMemoryPeriodic();
+
+
     protected:
         CpuManager();
         ~CpuManager() {}
@@ -106,6 +113,7 @@ class CpuManager
         static Barrier cv_barrier;   //!<  barrier for cpus
         static bool cv_defrag;       //!<  mem heap defrag
         static size_t cv_cpuCount;   //!<  # of active CPUs
+        static bool cv_forcedMemPeriodic;       //!<  force free / coalesce.
 
         // If a shutdown of all CPUs is requested
         static bool cv_shutdown_requested;

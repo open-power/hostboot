@@ -99,10 +99,10 @@ enum BlockPriority
  * Test Constants
  */
 /** Base virtual address used in remove pages test */
-#define VMM_VADDR_RMVPAGE_TEST (700 * GIGABYTE);
+#define VMM_VADDR_RMVPAGE_TEST (700 * GIGABYTE)
 
 /** Block size used in remove pages test */
-#define VMM_SIZE_RMVPAGE_TEST (8 * PAGESIZE);
+#define VMM_SIZE_RMVPAGE_TEST (8 * PAGESIZE)
 
 
 #endif /* _VMMCONST_H */

@@ -677,8 +677,10 @@ namespace Systemcalls
      */
     void MmAllocPages(task_t* t)
     {
+        ssize_t pages = TASK_GETARG0(t);
+
         // Attempt to allocate the page(s).
-        void* page = PageManager::allocatePage(TASK_GETARG0(t), true);
+        void* page = PageManager::allocatePage(pages, true);
         TASK_SETRTN(t, reinterpret_cast<uint64_t>(page));
 
         // If we are low on memory, call into the VMM to free some up.
@@ -696,6 +698,11 @@ namespace Systemcalls
                 __sync_lock_release(&one_at_a_time);
             }
         }
+        else if ((page == NULL) && (pages > 1))
+        {
+            CpuManager::forceMemoryPeriodic();
+        }
+
     }
 };
 

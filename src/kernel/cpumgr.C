@@ -43,6 +43,7 @@ uint64_t CpuManager::cv_shutdown_status = 0;
 Barrier CpuManager::cv_barrier;
 bool CpuManager::cv_defrag = false;
 size_t CpuManager::cv_cpuCount = 0;
+bool CpuManager::cv_forcedMemPeriodic = false;
 InteractiveDebug CpuManager::cv_interactive_debug;
 
 CpuManager::CpuManager()
@@ -188,11 +189,16 @@ void CpuManager::executePeriodics(cpu_t * i_cpu)
             cv_interactive_debug.startDebugTask();
         }
 
+        bool forceMemoryPeriodic = __sync_fetch_and_and(&cv_forcedMemPeriodic,
+                                                        false);
+
         ++(i_cpu->periodic_count);
-        if(0 == (i_cpu->periodic_count % CPU_PERIODIC_CHECK_MEMORY))
+        if((0 == (i_cpu->periodic_count % CPU_PERIODIC_CHECK_MEMORY)) ||
+           (forceMemoryPeriodic))
         {
             uint64_t pcntAvail = PageManager::queryAvail();
-            if(pcntAvail < PageManager::LOWMEM_NORM_LIMIT)
+            if((pcntAvail < PageManager::LOWMEM_NORM_LIMIT) ||
+               (forceMemoryPeriodic))
             {
                 VmmManager::flushPageTable();
                 ++(i_cpu->periodic_count);   // prevent another flush below
@@ -210,7 +216,8 @@ void CpuManager::executePeriodics(cpu_t * i_cpu)
         {
             VmmManager::flushPageTable();
         }
-        if(0 == (i_cpu->periodic_count % CPU_PERIODIC_DEFRAG))
+        if((0 == (i_cpu->periodic_count % CPU_PERIODIC_DEFRAG)) ||
+           (forceMemoryPeriodic))
         {
             // set up barrier based on # cpus cv_barrier;
             // TODO whatif other cpus become active?
@@ -240,3 +247,7 @@ void CpuManager::executePeriodics(cpu_t * i_cpu)
     }
 }
 
+void CpuManager::forceMemoryPeriodic()
+{
+    cv_forcedMemPeriodic = true;
+}

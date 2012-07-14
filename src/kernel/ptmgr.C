@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/kernel/ptmgr.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/kernel/ptmgr.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #include <kernel/ptmgr.H>
 #include <kernel/vmmmgr.H>
 #include <util/singleton.H>
@@ -295,7 +296,8 @@ void PageTableManager::flush( void )
 /********************
  Private/Protected Methods
  ********************/
-
+#include <sys/mm.h> //@TODO: Remove with 43401
+#include <usr/vmmconst.h> //@TODO: Remove with 43401.
 /**
  * @brief  Constructor
  */
@@ -304,7 +306,16 @@ PageTableManager::PageTableManager( bool i_userSpace )
 {
     if( i_userSpace )
     {
-        ivTABLE = new char[getSize()];
+        //@TODO: Remove with 43401.
+        // Don't have enough contiguous memory to do this allocation, so
+        // allocate a VMM block instead.
+        ivTABLE = reinterpret_cast<char*>(VMM_VADDR_RMVPAGE_TEST - getSize());
+        mm_alloc_block(NULL, ivTABLE, getSize());
+        mm_set_permission(ivTABLE, getSize(), WRITABLE | ALLOCATE_FROM_ZERO);
+
+        //@TODO: Add back after 43401.
+        //ivTABLE = new char[getSize()];
+
         //printk( "** PageTableManager running in USER_SPACE : ivTABLE = %p**\n", ivTABLE );
     }
     else
@@ -335,7 +346,11 @@ void PageTableManager::invalidatePT( void )
 PageTableManager::~PageTableManager()
 {
     if( ivTABLE ) {
-        delete[] ivTABLE;
+        //@TODO: Remove after 43401.
+        mm_remove_pages(RELEASE, ivTABLE, getSize());
+
+        //@TODO: Add back after 43401.
+        //delete[] ivTABLE;
     }
 }
 
