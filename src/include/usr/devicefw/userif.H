@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/include/usr/devicefw/userif.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2011-2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/include/usr/devicefw/userif.H $                           */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /** @file userif.H
  *  @brief Provides the user application interfaces for performing device
  *         access.
@@ -50,6 +49,7 @@ namespace DeviceFW
         FSI,
         SPD,
         MVPD,
+        SCAN,
 
         LAST_ACCESS_TYPE,
     };
@@ -107,6 +107,21 @@ namespace DeviceFW
     #define DEVICE_MVPD_ADDRESS( i_record, i_keyword )\
         DeviceFW::MVPD, static_cast<uint64_t>(( i_record )),\
             static_cast<uint64_t>(( i_keyword ))
+
+    /**
+     * Construct the device addressing parameters for the SCAN device ops.
+     * @param[in] i_ring - The ring address to scan 
+     * @param[in] i_ringlen - The length of the ring to scan in bits
+     *                 NOTE: This value is the scanring length must
+     *                       match the scandef file value. 
+     * @param[in] i_flag - Specific requests on the scan such as
+     *             check the header, or set pulse option.
+     *     Flag options are located in: src/include/usr/scan/scanif.H
+     */
+    #define DEVICE_SCAN_ADDRESS( i_ring, i_ringlen, i_flag )\
+        DeviceFW::SCAN, static_cast<uint64_t>(( i_ring )),\
+            static_cast<uint64_t>(( i_ringlen )),\
+            static_cast<uint64_t>(( i_flag ))
 
     /**
      *  @brief Perform a hardware read operation.
