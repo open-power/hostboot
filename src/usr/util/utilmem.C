@@ -170,8 +170,8 @@ uint32_t UtilMem::read(
 
         /*@
          * @errortype
-         * @moduleid            UTIL::MOD_MEM_READ
-         * @reasoncode          UTIL::UTIL_ERC_BAD_PTR
+         * @moduleid            Util::UTIL_MOD_MEM_READ
+         * @reasoncode          Util::UTIL_ERC_BAD_PTR
          * @userdata1[0:31]     Task ID.
          * @userdata1[31:64]    End of File (boolean)
          * @userdata2           Address of memory buffer.
@@ -185,8 +185,8 @@ uint32_t UtilMem::read(
 
         /*@
          * @errortype
-         * @moduleid            UTIL::MOD_MEM_READ
-         * @reasoncode          UTIL::UTIL_ERC_EOF
+         * @moduleid            Util::UTIL_MOD_MEM_READ
+         * @reasoncode          Util::UTIL_ERC_EOF
          * @userdata1[0:31]     Task ID.
          * @userdata1[31:64]    End of File (boolean)
          * @userdata2           Address of memory buffer.
@@ -264,8 +264,8 @@ uint32_t UtilMem::write(
 
         /*@
          * @errortype
-         * @moduleid            UTIL::MOD_MEM_WRITE
-         * @reasoncode          UTIL::UTIL_ERC_BAD_PTR
+         * @moduleid            Util::UTIL_MOD_MEM_WRITE
+         * @reasoncode          Util::UTIL_ERC_BAD_PTR
          * @userdata1[0:31]     Task ID.
          * @userdata1[31:64]    End of File (boolean)
          * @userdata2           Address of memory buffer.
@@ -279,8 +279,8 @@ uint32_t UtilMem::write(
 
         /*@
          * @errortype
-         * @moduleid            UTIL::MOD_MEM_WRITE
-         * @reasoncode          UTIL::UTIL_ERC_EOF
+         * @moduleid            Util::UTIL_MOD_MEM_WRITE
+         * @reasoncode          Util::UTIL_ERC_EOF
          * @userdata1[0:31]     Task ID.
          * @userdata1[31:64]    End of File (boolean)
          * @userdata2           Address of memory buffer.
