@@ -38,6 +38,8 @@
 /*------------------------------------------------------------------------------*/
 
 #include "p8_delta_scan_rw.h"
+#include "p8_pore_table_gen_api.H"
+#include "common_scom_addresses.H"
 
 #ifdef __FAPI
 #include <fapi.H>
@@ -47,9 +49,9 @@ extern "C"  {
 
 // get_ring_layout_from_image()
 //
-int get_ring_layout_from_image(  const void  *i_imageIn,
+int get_ring_layout_from_image( const void  *i_imageIn,
                                 uint32_t    i_ddLevel,
-                                uint8_t      i_sysPhase,
+                                uint8_t     i_sysPhase,
                                 DeltaRingLayout  *o_rs4RingLayout,
                                 void        **nextRing)
 {
@@ -158,28 +160,31 @@ int get_ring_layout_from_image(  const void  *i_imageIn,
                                             sizeof(thisRingLayout->reserved2));
   o_rs4RingLayout->rs4Launch    = (uint32_t*)((uintptr_t)thisRingLayout + 
                                                 myRev64(thisRingLayout->entryOffset));
-  // Since RS4 launch size is only word-aligned, make sure to point to nearest [higher] double-word boundary.
-  o_rs4RingLayout->rs4Delta      = (uint32_t*)((((uintptr_t)thisRingLayout + 
+  // entryOffset, rs4Launch and ASM_RS4_LAUNCH_BUF_SIZE should already be 8-byte aligned.
+  o_rs4RingLayout->rs4Delta      = (uint32_t*)( (uintptr_t)thisRingLayout + 
                                                 myRev64(thisRingLayout->entryOffset) +
-                                                ASM_RS4_LAUNCH_BUF_SIZE-1)/8+1)*8);
+                                                ASM_RS4_LAUNCH_BUF_SIZE );
 
-  // Check that the ring layout structure in the memory is double-word aligned. This must be so because:
-  //   - The entryOffset address must be on an 8-byte boundary because the start of the .initf ELF section must
-  //     be 8-byte aligned AND because the rs4Delta member is the last member and which must itself be 8-byte aligned.
-  //   - These two things together means that both the beginning and end of the delta ring layout must be 8-byte
-  //     aligned, and thus the whole block,i.e. sizeOfThis, must be 8-byte aligned.
-  // Also check that the RS4 delta ring is double-word aligned.
-  // Also check that the RS4 launcher is word aligned.
+  // Check that the ring layout structure in the memory is 8-byte aligned. This must 
+	// be so because:
+  // - The entryOffset address must be on an 8-byte boundary because the start of the 
+	//   .rings section must be 8-byte aligned AND because the rs4Delta member is the 
+	//   last member and which must itself be 8-byte aligned.
+  // - These two things together means that both the beginning and end of the delta 
+	//   ring layout must be 8-byte aligned, and thus the whole block, i.e. sizeOfThis, 
+	//   must therefore automatically be 8-byte aligned.
+  // Also check that the RS4 delta ring is 8-byte aligned.
+  // Also check that the RS4 launcher is 8-byte aligned.
   //
   if (((uintptr_t)thisRingLayout-(uintptr_t)i_imageIn)%8 || 
       myRev32(o_rs4RingLayout->sizeOfThis)%8 || 
-      (uintptr_t)o_rs4RingLayout->rs4Launch%4 || 
-      (uintptr_t)o_rs4RingLayout->rs4Delta%8)  {
-    MY_ERR("ERROR : Ring layout is not double-word-aligned or RS4 launcher is not word aligned.");
-    MY_ERR("  thisRingLayout#8 = 0x%016llx",(uint64_t)thisRingLayout%8);
-    MY_ERR("  myRev32(o_rs4RingLayout->sizeOfThis)#8 = %i",myRev32(o_rs4RingLayout->sizeOfThis)%8);
-    MY_ERR("  o_rs4RingLayout->rs4Launch#4 = 0x%016llx",(uint64_t)o_rs4RingLayout->rs4Launch%4);
-    MY_ERR("  o_rs4RingLayout->rs4Delta#8 = 0x%016llx",(uint64_t)o_rs4RingLayout->rs4Delta%8);
+      myRev64(o_rs4RingLayout->entryOffset)%8 || 
+      ASM_RS4_LAUNCH_BUF_SIZE%8)  {
+    MY_ERR("ERROR : Ring block or layout structure is not 8-byte aligned:");
+    MY_ERR("  thisRingLayout-imageIn = %i",(uintptr_t)thisRingLayout-(uintptr_t)i_imageIn);
+    MY_ERR("  o_rs4RingLayout->sizeOfThis = %i",myRev32(o_rs4RingLayout->sizeOfThis));
+    MY_ERR("  o_rs4RingLayout->entryOffset = %i",(uint32_t)myRev64(o_rs4RingLayout->entryOffset));
+    MY_ERR("  ASM_RS4_LAUNCH_BUF_SIZE = %i",(uint32_t)ASM_RS4_LAUNCH_BUF_SIZE);
     return IMGBUILD_ERR_MISALIGNED_RING_LAYOUT;
   }
 
@@ -197,16 +202,17 @@ int get_ring_layout_from_image(  const void  *i_imageIn,
 
 // create_wiggle_flip_prg() function
 // Notes:
-// - WF procedure needs to be updated with polling protocol.
-// - WF procedure needs to reflect P0/P1 usage policy
-int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta state
+// - WF routine implements dynamic P1 multicast bit set based on P0 status.
+// - WF routine checks header word on scan complete.
+// - WF routine is 8-byte aligned.
+int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta state (in BE format)
                             uint32_t i_ringBitLen,          // length of ring
                             uint32_t i_scanSelectData,      // Scan ring modifier data
                             uint32_t i_chipletID,            // Chiplet ID
                             uint32_t **o_wfInline,       // location of the PORE instructions data stream
                             uint32_t *o_wfInlineLenInWords)   // final length of data stream
 {
-  uint32_t rc=P8_PORE_SUCCESS_RC;  //defined in p8_pore_api_const.h
+  uint32_t rc=0;  //defined in p8_pore_api_const.h
   uint32_t i=0;
   uint32_t scanSelectAddr=0;
   uint32_t scanRing_baseAddr=0;
@@ -214,16 +220,21 @@ int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta s
   uint32_t scanRingCheckWord=0;
   uint32_t count=0;
   uint32_t rotateLen=0, remainder=0, remainingBits=0;
-  uint32_t osIndex=0;
   int pgas_rc=0;
   uint64_t pore_imm64b=0;
   uint32_t maxWfInlineLenInWords = 10*MAX_RING_SIZE/32;
   PoreInlineContext ctx;
-  PoreInlineLocation src3=0, tgt3=0;
 
   *o_wfInline = (uint32_t*)malloc(maxWfInlineLenInWords);
 
-  //pore_inline_context_create(&ctx, buf, P8_PORE_BUFSIZE * 4, 0, PORE_INLINE_CHECK_PARITY);
+/* Uncomment to dump ring state
+  printf("\n");
+  for (i=0; i<i_ringBitLen/4; i++)  {
+    printf("%02x",*((uint8_t*)i_deltaRing+i));
+    if ((i+1)%32==0) printf("\n");
+  }
+*/
+
   pore_inline_context_create(&ctx, *o_wfInline, maxWfInlineLenInWords * 4, 0, 0);
   
   // Get chiplet and Ring Addr info.
@@ -238,34 +249,35 @@ int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta s
   scanRing_poreAddr=scanRing_baseAddr;          // Init scan ring rotate addr
   scanRingCheckWord=P8_SCAN_CHECK_WORD;          // Header check word for checking ring write was successful
   
-  // Program scanselq reg for scan clock control setup before ring scan
-  // --------------------------------------------------------------------------
-  
 #ifndef SLW_BUILD_WF_P0_FIX
-// The following fix is a direct copy of the setp1_mcreadand macro in ./ipl/sbe/p8_slw.H 
+  // This fix is a direct copy of the setp1_mcreadand macro in ./ipl/sbe/p8_slw.H 
   uint64_t CLEAR_MC_TYPE_MASK=0x47;
   PoreInlineLocation src1=0, src2=0, tgt1=0, tgt2=0;
-  pgas_rc = pore_MR( &ctx, D1, P0)             ||
-            pore_ANDI( &ctx, D1, D1, BIT(57))  ||
-            PORE_LOCATION( &ctx, src1)         ||
-            pore_BRANZ( &ctx, D1, src1)        ||
-            pore_MR( &ctx, P1, P0)            ||
-            PORE_LOCATION( &ctx, src2)        ||
-            pore_BRA( &ctx, tgt2)              ||
-            PORE_LOCATION( &ctx, tgt1)        ||
-            pore_MR( &ctx, D1, P0)            ||
-            pore_ANDI( &ctx, D1, D1, CLEAR_MC_TYPE_MASK)  ||
-            pore_ORI( &ctx, D1, D1, BIT(60))  ||
-            pore_MR( &ctx, P1, D1)            ||
-            PORE_LOCATION( &ctx, tgt2);
+  pgas_rc =           pore_MR( &ctx, D1, P0);
+  pgas_rc = pgas_rc + pore_ANDI( &ctx, D1, D1, BIT(57));
+  pgas_rc = pgas_rc + PORE_LOCATION( &ctx, src1);
+  pgas_rc = pgas_rc + pore_BRANZ( &ctx, D1, src1);
+  pgas_rc = pgas_rc + pore_MR( &ctx, P1, P0);
+  pgas_rc = pgas_rc + PORE_LOCATION( &ctx, src2);
+  pgas_rc = pgas_rc + pore_BRA( &ctx, tgt2);
+  pgas_rc = pgas_rc + PORE_LOCATION( &ctx, tgt1);
+  pgas_rc = pgas_rc + pore_MR( &ctx, D1, P0);
+  pgas_rc = pgas_rc + pore_ANDI( &ctx, D1, D1, CLEAR_MC_TYPE_MASK);
+  pgas_rc = pgas_rc + pore_ORI( &ctx, D1, D1, BIT(60));
+  pgas_rc = pgas_rc + pore_MR( &ctx, P1, D1);
+  pgas_rc = pgas_rc + PORE_LOCATION( &ctx, tgt2);
   if (pgas_rc>0)  {
     MY_ERR("***setp1_mcreadand rc = %d", pgas_rc);
     return pgas_rc;
   }
-  pgas_rc = pore_inline_branch_fixup( &ctx, src1, tgt1) ||
-            pore_inline_branch_fixup( &ctx, src2, tgt2);
+  pgas_rc = pore_inline_branch_fixup( &ctx, src1, tgt1);
   if (pgas_rc>0)  {
-    MY_ERR("***inline_branch_fixup rc = %d", pgas_rc);
+    MY_ERR("***inline_branch_fixup error (1) rc = %d", pgas_rc);
+    return pgas_rc;
+  }
+  pgas_rc = pore_inline_branch_fixup( &ctx, src2, tgt2);
+  if (pgas_rc>0)  {
+    MY_ERR("***inline_branch_fixup error (2) rc = %d", pgas_rc);
     return pgas_rc;
   }
 #else
@@ -277,6 +289,7 @@ int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta s
   }
 #endif
   
+  // Program scanselq reg for scan clock control setup before ring scan
   pore_imm64b = ((uint64_t)i_scanSelectData) << 32;
   pgas_rc = pore_STI(&ctx, scanSelectAddr, P0, pore_imm64b);
   if (pgas_rc>0)  {
@@ -345,7 +358,7 @@ int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta s
         MY_DBG("base addr = 0x8%x, pore addr = 0x8%x, rotatelen = %d", scanRing_baseAddr, scanRing_poreAddr, rotateLen);
 
         //SCR1RD: shift out then read
-        pgas_rc=pore_LD(&ctx, D0, scanRing_poreAddr, P0);
+        pgas_rc=pore_LD(&ctx, D0, scanRing_poreAddr, P1);
         if (pgas_rc > 0)  {
           MY_ERR("***LD D0 rc = %d", pgas_rc);
           return pgas_rc;
@@ -359,9 +372,7 @@ int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta s
       else
         scanRing_poreAddr = scanRing_baseAddr | remainingBits;
 
-      //LI : Load XORed value to Scratch 1 reg.   (same as p7+)
-      //TODO:    Check why not overwrite with init values?
-      pore_imm64b = ((uint64_t)i_deltaRing[i]) << 32;
+      pore_imm64b = ((uint64_t)myRev32(i_deltaRing[i])) << 32;
 
       pgas_rc = pore_LI(&ctx, D0, pore_imm64b );
       if (pgas_rc > 0)  {
@@ -396,7 +407,7 @@ int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta s
       // Rotate the chain and reset rotate length counter
       if (rotateLen>0xFC0)  {
         scanRing_poreAddr = scanRing_baseAddr | rotateLen;
-        pgas_rc = pore_LD(&ctx, D0, scanRing_poreAddr, P0);
+        pgas_rc = pore_LD(&ctx, D0, scanRing_poreAddr, P1);
         if (pgas_rc > 0)  {
           MY_ERR("***LD D0 rc = %d", pgas_rc);
           return pgas_rc;
@@ -418,7 +429,7 @@ int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta s
   //  shift the ring by remaining shift bit length
   if (rotateLen>0)  {
     scanRing_poreAddr=scanRing_baseAddr | rotateLen;
-    pgas_rc = pore_LD(&ctx, D0, scanRing_poreAddr, P0);
+    pgas_rc = pore_LD(&ctx, D0, scanRing_poreAddr, P1);
     if (pgas_rc > 0)  {
       MY_ERR("***LD D0 rc = %d", pgas_rc);
       return pgas_rc;
@@ -427,32 +438,123 @@ int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta s
   }
 
   // Finally, check that our header check word went through in one piece.
+  // Note, we first do the MC-READ-AND check, then the MC-READ-OR check
+#ifndef SLW_BUILD_WF_P0_FIX
   //
-  // Load the output check word...
-  pgas_rc = pore_LD(&ctx, D0, scanRing_baseAddr, P0) |
+  // ...First, do the MC-READ-AND check
+  //    (Reference: setp1_mcreadand macro in ./ipl/sbe/p8_slw.H)
+  //
+  PoreInlineLocation src3=0, src5=0, src7=0, src8=0, tgt3=0, tgt5=0, tgt7=0, tgt8=0;
+  pgas_rc =           pore_MR( &ctx, D1, P0);
+  pgas_rc = pgas_rc + pore_ANDI( &ctx, D1, D1, BIT(57));
+  pgas_rc = pgas_rc + PORE_LOCATION( &ctx, src3);
+  pgas_rc = pgas_rc + pore_BRANZ( &ctx, D1, src3);
+  pgas_rc = pgas_rc + pore_MR( &ctx, P1, P0); // If here, MC=0. Omit MC check in OR case.
+  pgas_rc = pgas_rc + PORE_LOCATION( &ctx, src7);
+  pgas_rc = pgas_rc + pore_BRA( &ctx, tgt7);
+  pgas_rc = pgas_rc + PORE_LOCATION( &ctx, tgt3);
+  pgas_rc = pgas_rc + pore_MR( &ctx, D1, P0);
+  pgas_rc = pgas_rc + pore_ANDI( &ctx, D1, D1, CLEAR_MC_TYPE_MASK);
+  pgas_rc = pgas_rc + pore_ORI( &ctx, D1, D1, BIT(60));
+  pgas_rc = pgas_rc + pore_MR( &ctx, P1, D1); 
+  if (pgas_rc>0)  { 
+    MY_ERR("***setp1_mcreadand rc = %d", pgas_rc);
+    return pgas_rc;
+  }
+  pgas_rc = pore_inline_branch_fixup( &ctx, src3, tgt3);
+  if (pgas_rc>0)  {
+    MY_ERR("***inline_branch_fixup error (3) rc = %d", pgas_rc);
+    return pgas_rc;
+  }
+  // ...Load the output check word...
+  pgas_rc =           pore_LD(&ctx, D0, scanRing_baseAddr, P1);
   // Compare against the reference header check word...
-            pore_XORI( &ctx, D0, D0, ((uint64_t)scanRingCheckWord) << 32) |
-  // For now, branch to HALT instruction if not equal, otherwise return in the following instruction...
-  // But eventually branch to firmware error_handler if not equal
-  //          pore_BRANZ(&ctx, D0, error_handler) ||
-            PORE_LOCATION( &ctx, src3)   |
-//            pore_BRANZ( &ctx, D0, ctx.lc+8) ||  // Jump two 4-byte instr (incl this one) to get to HALT.
-            pore_BRANZ( &ctx, D0, tgt3)  |  // Jump two 4-byte instr (incl this one) to get to HALT.
-            pore_RET( &ctx)             |
-            PORE_LOCATION( &ctx, tgt3)  |
-            pore_HALT( &ctx);
+  pgas_rc = pgas_rc + pore_XORI( &ctx, D0, D0, ((uint64_t)scanRingCheckWord) << 32);
+  pgas_rc = pgas_rc + PORE_LOCATION( &ctx, src5);
+  pgas_rc = pgas_rc + pore_BRAZ( &ctx, D0, tgt5);
+  pgas_rc = pgas_rc + pore_HALT( &ctx);
+  pgas_rc = pgas_rc + PORE_LOCATION( &ctx, tgt5);
+  if (pgas_rc > 0)  {
+    MY_ERR("***LD, XORI, BRANZ, RET or HALT went wrong  rc = %d", pgas_rc);
+    return pgas_rc;
+  }
+  pgas_rc = pore_inline_branch_fixup( &ctx, src5, tgt5);
+  if (pgas_rc>0)  {
+    MY_ERR("***inline_branch_fixup error (5) rc = %d", pgas_rc);
+    return pgas_rc;
+  }
+  //
+  // ...Now do the MC-READ-OR check
+  //    (Reference: setp1_mcreador macro in ./ipl/sbe/p8_slw.H)
+  //    Note. If we made is this far, we know that MC=1 already, so don't check for it.
+  //
+  pgas_rc =           pore_MR( &ctx, D1, P0);
+  pgas_rc = pgas_rc + pore_ANDI( &ctx, D1, D1, CLEAR_MC_TYPE_MASK); // This also clears bit-60.
+  pgas_rc = pgas_rc + pore_MR( &ctx, P1, D1);
+  pgas_rc = pgas_rc + PORE_LOCATION( &ctx, tgt7);
+  if (pgas_rc>0)  {
+    MY_ERR("***setp1_mcreadand rc = %d", pgas_rc);
+    return pgas_rc;
+  }
+  pgas_rc = pore_inline_branch_fixup( &ctx, src7, tgt7);
+  if (pgas_rc>0)  {
+    MY_ERR("***inline_branch_fixup error (7) rc = %d", pgas_rc);
+    return pgas_rc;
+  }
+  // ...Load the output check word...
+  pgas_rc =           pore_LD(&ctx, D0, scanRing_baseAddr, P1);
+  pgas_rc = pgas_rc + pore_XORI( &ctx, D0, D0, ((uint64_t)scanRingCheckWord) << 32);
+  pgas_rc = pgas_rc + PORE_LOCATION( &ctx, src8);
+  pgas_rc = pgas_rc + pore_BRAZ( &ctx, D0, tgt8);
+  pgas_rc = pgas_rc + pore_HALT( &ctx);
+  pgas_rc = pgas_rc + PORE_LOCATION( &ctx, tgt8);
+  pgas_rc = pgas_rc + pore_LI( &ctx, D0, 0x0);  // Do shadowing by setpulse.
+	pgas_rc = pgas_rc + pore_STD( &ctx, D0, GENERIC_CLK_SCAN_UPDATEDR_0x0003A000, P0);
+	pgas_rc = pgas_rc + pore_RET( &ctx);
+  if (pgas_rc > 0)  {
+    MY_ERR("***LD, XORI, BRANZ, RET or HALT went wrong  rc = %d", pgas_rc);
+    return pgas_rc;
+  }
+  pgas_rc = pore_inline_branch_fixup( &ctx, src8, tgt8);
+  if (pgas_rc>0)  {
+    MY_ERR("***inline_branch_fixup error (8) rc = %d", pgas_rc);
+    return pgas_rc;
+  }
+#else
+  PoreInlineLocation src3=0, tgt3=0;
+  // Load the output check word...
+  pgas_rc =           pore_LD(&ctx, D0, scanRing_baseAddr, P1);
+  // Compare against the reference header check word...
+  pgas_rc = pgas_rc + pore_XORI( &ctx, D0, D0, ((uint64_t)scanRingCheckWord) << 32);
+  pgas_rc = pgas_rc + PORE_LOCATION( &ctx, src3);
+  // For now, branch to HALT instruction if NZ, otherwise return in the following instr ..eventually branch to firmware error_handler i.e. pore_BRANZ(&ctx, D0, error_handler)
+  pgas_rc = pgas_rc + pore_BRANZ( &ctx, D0, tgt3);  //pore_BRANZ( &ctx, D0, ctx.lc+8)
+  pgas_rc = pgas_rc + pore_RET( &ctx);
+  pgas_rc = pgas_rc + PORE_LOCATION( &ctx, tgt3);
+  pgas_rc = pgas_rc + pore_HALT( &ctx);
   if (pgas_rc > 0)  {
     MY_ERR("***LD, XORI, BRANZ, RET or HALT went wrong  rc = %d", pgas_rc);
     return pgas_rc;
   }
   pgas_rc = pore_inline_branch_fixup( &ctx, src3, tgt3);
   if (pgas_rc>0)  {
-    MY_ERR("***inline_branch_fixup rc = %d", pgas_rc);
+    MY_ERR("***inline_branch_fixup error (3) rc = %d", pgas_rc);
     return pgas_rc;
   }
+#endif
 
-  osIndex = ctx.lc/4;
-  *o_wfInlineLenInWords = osIndex;
+  *o_wfInlineLenInWords = ctx.lc/4;
+
+  // 8-byte align code, just as a precaution.
+  if ((*o_wfInlineLenInWords*4)%8)  {
+    // Insert 4-byte NOP at end.
+    pgas_rc = pore_NOP( &ctx);
+    if (pgas_rc>0)  {
+      MY_ERR("***NOP went wrong rc = %d", pgas_rc);
+      return pgas_rc;
+    }
+    *o_wfInlineLenInWords = ctx.lc/4;
+  }
 
   return rc;
 }
@@ -460,51 +562,47 @@ int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta s
 
 
 // write_wiggle_flip_to_image()
-// 1 - mmap input image,
-// 2 - Compose delta binary buffer containing RS4 launcher + RS4 delta data,
-// 3 - Append delta buffer to .initf section.
-// 4 - Save new image to output image file.
-int write_wiggle_flip_to_image(  void *io_imageOut,
+int write_wiggle_flip_to_image( void *io_imageOut,
                                 uint32_t  *i_sizeImageMaxNew,
                                 DeltaRingLayout *i_ringLayout,
                                 uint32_t  *i_wfInline,
                                 uint32_t  i_wfInlineLenInWords)
 {
   uint32_t rc=0, bufLC;
+	int      deltaLC, i;
   uint32_t sizeImageIn, sizeNewDataBlock;
   uint32_t sizeImageOutThisEst=0, sizeImageOutThis=0;
-  void *initfBuffer=NULL;
+  void *ringsBuffer=NULL;
   uint32_t ringRingsOffset=0;
   uint64_t ringPoreAddress=0,backPtr=0,fwdPtr=0,fwdPtrCheck;
   
-  SBE_XIP_ERROR_STRINGS(errorStrings);
+	SBE_XIP_ERROR_STRINGS(errorStrings);
 
   MY_DBG("wfInlineLenInWords=%i", i_wfInlineLenInWords);  
   
   // Modify the input ring layout content
-  // - Remove the qualifier section: ddLevel, sysPhase, override and reserved1+2.  This means
-  //    reducing the entryOffset by the size of these qualifiers.
-  // - Adjust sizeOfThis
-  // - Use new wfInline member of ring layout struct.
-  // - Ignore the rs4Delta member
+  // - Remove the qualifier section: ddLevel, sysPhase, override and reserved1+2.  
+  //   This means reducing the entryOffset by the size of these qualifiers.
+  // - The new WF ring block and start of WF code must both be 8-byte aligned. 
+  //   - RS4 entryOffset is already 8-byte aligned.
+  //   - The WF code section, i.e. wfInlineLenInWords, is already 8-byte aligned.
   //
-  // For sizeOfThis, we must ensure 4-byte alignment WF code.  That is easy since both entryOffset
-  //  and wfInlineLenInWord are already word-aligned.
-  //
-  i_ringLayout->entryOffset  =  myRev64(  myRev64(i_ringLayout->entryOffset) -
-                                      sizeof(i_ringLayout->ddLevel) -
-                                      sizeof(i_ringLayout->sysPhase) -
-                                      sizeof(i_ringLayout->override) -
-                                      sizeof(i_ringLayout->reserved1) -
-                                      sizeof(i_ringLayout->reserved2) ); 
-  i_ringLayout->sizeOfThis   =  myRev32(  myRev64(i_ringLayout->entryOffset) + 
-                                      i_wfInlineLenInWords*4 );
+  i_ringLayout->entryOffset  =  
+    myRev64(  myByteAlign(8, myRev64(i_ringLayout->entryOffset) -
+                             sizeof(i_ringLayout->ddLevel) -
+                             sizeof(i_ringLayout->sysPhase) -
+                             sizeof(i_ringLayout->override) -
+                             sizeof(i_ringLayout->reserved1) -
+                             sizeof(i_ringLayout->reserved2) ) );
+  i_ringLayout->sizeOfThis   =  
+    myRev32( myRev64(i_ringLayout->entryOffset) + i_wfInlineLenInWords*4 );
+  
   // Not really any need for this. Just being consistent. Once we have transitioned completely to new
   //  headers, then ditch i_wfInline from parm list and assign wfInline to layout in main program. 
   i_ringLayout->wfInline    = i_wfInline;
   
-  if (((uintptr_t)i_ringLayout)%4 || myRev64(i_ringLayout->entryOffset)%4)  {
-    MY_ERR("ERROR : Ring layout is not word-aligned.");
+  if (myRev64(i_ringLayout->entryOffset)%8 || myRev32(i_ringLayout->sizeOfThis)%8)  {
+    MY_ERR("ERROR : Ring block or WF code origin not 8-byte aligned.");
     return IMGBUILD_ERR_MISALIGNED_RING_LAYOUT;
   }
       
@@ -517,63 +615,82 @@ int write_wiggle_flip_to_image(  void *io_imageOut,
   }
   sizeNewDataBlock = myRev32(i_ringLayout->sizeOfThis);
   // ...estimate max size of new image
-	sizeImageOutThisEst = sizeImageIn + sizeNewDataBlock + SBE_XIP_MAX_SECTION_ALIGNMENT; // 
+  sizeImageOutThisEst = sizeImageIn + sizeNewDataBlock + SBE_XIP_MAX_SECTION_ALIGNMENT; // 
 
   if (sizeImageOutThisEst>*i_sizeImageMaxNew)  {
     MY_ERR("ERROR : Estimated new image size (=%i) would exceed max allowed size (=%i).",
       sizeImageOutThisEst, *i_sizeImageMaxNew);
-		*i_sizeImageMaxNew = sizeImageOutThisEst;
+    *i_sizeImageMaxNew = sizeImageOutThisEst;
     return IMGBUILD_ERR_IMAGE_TOO_LARGE;
   }
   
-  MY_DBG("Input image size\t\t= %6i\n\tNew initf data block size\t= %6i\n\tOutput image size\t\t<=%6i",
+  MY_DBG("Input image size\t\t= %6i\n\tNew rings data block size\t= %6i\n\tOutput image size (max)\t\t<=%6i",
     sizeImageIn, sizeNewDataBlock, sizeImageOutThisEst);
   MY_DBG("entryOffset = %i\n\tsizeOfThis = %i\n\tMeta data size = %i",
     (uint32_t)myRev64(i_ringLayout->entryOffset), myRev32(i_ringLayout->sizeOfThis), myRev32(i_ringLayout->sizeOfMeta));
   MY_DBG("Back item ptr = 0x%016llx",myRev64(i_ringLayout->backItemPtr));
-  MY_DBG("DD level = %i\n\tSys phase = %i\n\tOverride = %i\n\tReserved1+2 = %i",
+  MY_DBG("DD level = 0x%02x\n\tSys phase = %i\n\tOverride = %i\n\tReserved1+2 = %i",
     myRev32(i_ringLayout->ddLevel), i_ringLayout->sysPhase, i_ringLayout->override, i_ringLayout->reserved1|i_ringLayout->reserved2);
 
-  // Combine rs4RingLayout members into a unified buffer (initfBuffer).
+  // Combine rs4RingLayout members into a unified buffer (ringsBuffer).
   //
-  initfBuffer = malloc((size_t)sizeNewDataBlock);
-  if (initfBuffer == NULL)  {
+  ringsBuffer = malloc((size_t)sizeNewDataBlock);
+  if (ringsBuffer == NULL)  {
     MY_ERR("ERROR : malloc() of initf buffer failed.");
     return IMGBUILD_ERR_MEMORY;
   }
-  // ... and copy the WF ring layout content into initfBuffer in BIG-ENDIAN format.
+  // ... First, copy WF ring layout header into ringsBuffer in BIG-ENDIAN format.
   bufLC = 0;
-  memcpy( (uint8_t*)initfBuffer+bufLC, &i_ringLayout->entryOffset, (uintptr_t)&i_ringLayout->metaData-(uintptr_t)&i_ringLayout->entryOffset);
-  bufLC = (uintptr_t)&i_ringLayout->metaData-(uintptr_t)&i_ringLayout->entryOffset;
-  memcpy( (uint8_t*)initfBuffer+bufLC, i_ringLayout->metaData, myRev32(i_ringLayout->sizeOfMeta));
-
-  bufLC = (uint32_t)myRev64(i_ringLayout->entryOffset); 
-  // The above forces word-alignment of bufLC as [previous] metaData member is only byte aligned.
-  memcpy( (uint8_t*)initfBuffer+bufLC, i_wfInline, i_wfInlineLenInWords*4);
+  deltaLC =  (uintptr_t)&i_ringLayout->ddLevel-(uintptr_t)&i_ringLayout->entryOffset;
+  memcpy( (uint8_t*)ringsBuffer+bufLC, &i_ringLayout->entryOffset, deltaLC);
+  // ... then meta data
+  bufLC = bufLC + deltaLC;
+  deltaLC = myRev32(i_ringLayout->sizeOfMeta);
+  memcpy( (uint8_t*)ringsBuffer+bufLC, i_ringLayout->metaData, deltaLC);
+  // ... Is this padding or WF buffer?
+  bufLC = bufLC + deltaLC;
+  deltaLC = (uint32_t)myRev64(i_ringLayout->entryOffset) - bufLC;
+  if (deltaLC<0 || deltaLC>=8)  {
+	  MY_ERR("ERROR : Ring layout mess. Check code or delta_scan(). deltaLC=%i",deltaLC);
+	  return IMGBUILD_ERR_CHECK_CODE;
+	}
+  if (deltaLC>0)  {
+    // OK, it's padding time.
+    for (i=0; i<deltaLC; i++)
+      *(uint8_t*)((uint8_t*)ringsBuffer+bufLC+i) = 0;
+  }
+  // ... now do the WF buffer
+  bufLC = bufLC + deltaLC;
+  if (bufLC!=(uint32_t)myRev64(i_ringLayout->entryOffset))  {
+    MY_ERR("ERROR : Ring layout messup. Check code or delta_scan().");
+    return IMGBUILD_ERR_CHECK_CODE;
+  }
+  deltaLC = i_wfInlineLenInWords*4;
+  memcpy( (uint8_t*)ringsBuffer+bufLC, i_wfInline, deltaLC);
   
   // Append WF ring layout to .rings section of in-memory input image.
-  //   Note! All layout members should already be 4-byte-aligned.
+  //   Note! All layout members should already be 8-byte aligned.
   //
   rc = sbe_xip_append( io_imageOut, 
                        SBE_XIP_SECTION_RINGS, 
-                       (void*)initfBuffer,
+                       (void*)ringsBuffer,
                        sizeNewDataBlock,
                        sizeImageOutThisEst,
                        &ringRingsOffset);
   MY_DBG("ringRingsOffset=0x%08x",ringRingsOffset);
   if (rc)   {
     MY_ERR("ERROR : sbe_xip_append() failed: %s", SBE_XIP_ERROR_STRING(errorStrings, rc));
-    if (initfBuffer)  free(initfBuffer);
+    if (ringsBuffer)  free(ringsBuffer);
     return IMGBUILD_ERR_XIP_MISC;
   }
   // ...get new image size, update return size, and test if successful update.
   sbe_xip_image_size( io_imageOut, &sizeImageOutThis);
   MY_DBG("Output image size (final)\t=%i",sizeImageOutThis);
-	*i_sizeImageMaxNew = sizeImageOutThis;
+  *i_sizeImageMaxNew = sizeImageOutThis;
   rc = sbe_xip_validate( io_imageOut, sizeImageOutThis);
   if (rc)   {
     MY_ERR("ERROR : sbe_xip_validate() of output image failed: %s", SBE_XIP_ERROR_STRING(errorStrings, rc));
-    if (initfBuffer)  free(initfBuffer);
+    if (ringsBuffer)  free(ringsBuffer);
     return IMGBUILD_ERR_XIP_MISC;
   }
   MY_DBG("Successful append of RS4 ring to .rings. Next, update forward ptr...");
@@ -586,7 +703,7 @@ int write_wiggle_flip_to_image(  void *io_imageOut,
   MY_DBG("fwdPtr=0x%016llx", fwdPtr);
   if (rc)   {
     MY_ERR("ERROR : sbe_xip_section2pore() failed: %s", SBE_XIP_ERROR_STRING(errorStrings, rc));
-    if (initfBuffer)  free(initfBuffer);
+    if (ringsBuffer)  free(ringsBuffer);
     return IMGBUILD_ERR_XIP_MISC;
   }
   // ...then update the forward pointer, i.e. the old "variable/ring name's" pointer.
@@ -603,7 +720,7 @@ int write_wiggle_flip_to_image(  void *io_imageOut,
                               &fwdPtrCheck);
   if (rc)  {
     MY_ERR("ERROR : sbe_xip_[write,read]_uint64() failed: %s", SBE_XIP_ERROR_STRING(errorStrings, rc));
-    if (initfBuffer)  free(initfBuffer);
+    if (ringsBuffer)  free(ringsBuffer);
     return IMGBUILD_ERR_XIP_MISC;
   }
   if (fwdPtrCheck!=ringPoreAddress || backPtr!=myRev64(i_ringLayout->backItemPtr))  {
@@ -612,7 +729,7 @@ int write_wiggle_flip_to_image(  void *io_imageOut,
     MY_ERR("fwdPtrCheck  =0x%016llx",fwdPtrCheck);
     MY_ERR("layout bckPtr=0x%016llx",myRev64(i_ringLayout->backItemPtr));
     MY_ERR("backPtr      =0x%016llx",backPtr);
-    if (initfBuffer)  free(initfBuffer);
+    if (ringsBuffer)  free(ringsBuffer);
     return IMGBUILD_ERR_FWD_BACK_PTR_MESS;
   }
   // ...test if successful update.
@@ -622,11 +739,11 @@ int write_wiggle_flip_to_image(  void *io_imageOut,
     MY_ERR("Probable cause:");
     MY_ERR("\tsbe_xip_write_uint64() updated at the wrong address (=0x%016llx)",
       myRev64(i_ringLayout->backItemPtr));
-    if (initfBuffer)  free(initfBuffer);
+    if (ringsBuffer)  free(ringsBuffer);
     return IMGBUILD_ERR_XIP_MISC;
   }
   
-  if (initfBuffer)  free(initfBuffer);
+  if (ringsBuffer)  free(ringsBuffer);
     
   return rc;
 }
@@ -657,11 +774,11 @@ int append_empty_section( void      *io_image,
   //
   sbe_xip_image_size( io_image, &sizeImageIn);
   // ...estimate max size of new image
-	sizeImageOutThisEst = sizeImageIn + i_sizeSection + SBE_XIP_MAX_SECTION_ALIGNMENT;
+  sizeImageOutThisEst = sizeImageIn + i_sizeSection + SBE_XIP_MAX_SECTION_ALIGNMENT;
   if (sizeImageOutThisEst>*i_sizeImageMaxNew)  {
     MY_ERR("ERROR : Estimated new image size (=%i) would exceed max allowed size (=%i).",
       sizeImageOutThisEst, *i_sizeImageMaxNew);
-		*i_sizeImageMaxNew = sizeImageOutThisEst;
+    *i_sizeImageMaxNew = sizeImageOutThisEst;
     return IMGBUILD_ERR_IMAGE_TOO_LARGE;
   }
   
@@ -685,7 +802,7 @@ int append_empty_section( void      *io_image,
   // ...get new image size, update return size, and test if successful update.
   sbe_xip_image_size( io_image, &sizeImageOutThis);
   MY_DBG("Output image size (final)\t=%i",sizeImageOutThis);
-	*i_sizeImageMaxNew = sizeImageOutThis;
+  *i_sizeImageMaxNew = sizeImageOutThis;
   rc = sbe_xip_validate( io_image, sizeImageOutThis);
   if (rc)   {
     MY_ERR("ERROR : xip_validate() of output image failed: %s", SBE_XIP_ERROR_STRING(errorStrings, rc));
@@ -695,6 +812,101 @@ int append_empty_section( void      *io_image,
   
   if (bufEmpty)
     free(bufEmpty);
+
+  return rc;
+}
+
+
+
+// initialize_slw_section()
+// - allocate space for Ramming and Scomming
+// - populate Scomming table with ret/nop/nop/nop (RNNN) inline asm instructions
+// - update Scomming vector
+int initialize_slw_section( void      *io_image,
+                            uint32_t  *i_sizeImageMaxNew)
+{
+  uint32_t rc=0, i_coreId=0, i_iis=0;
+  int      pgas_rc=0;
+  void     *bufRNNN=NULL;
+  PoreInlineContext ctx;
+  SbeXipSection  xipSection;
+  SbeXipItem     xipTocItem;
+  void   *hostScomTableFirst, *hostScomTableNext, *hostScomVectorFirst, *hostScomVectorNext;
+  uint64_t xipScomTableFirst;
+  
+  SBE_XIP_ERROR_STRINGS(errorStrings);
+
+  rc = 0;
+  
+  rc = append_empty_section( io_image,
+                             i_sizeImageMaxNew,
+                             SBE_XIP_SECTION_SLW,
+                             SLW_RAM_TABLE_SIZE + SLW_SCOM_TABLE_SIZE);
+  if (rc)
+    return rc;
+
+  //
+  // Ramming table:  Nothing to do.  Already 0-initialized in append_empty_section().
+  //
+
+  //
+  // Scomming table:  Fill with RNNN (16-byte) instruction sequences.
+  //
+
+  // ... allocate buffer to hold one RNNN instruction sequence.
+  bufRNNN = malloc( XIPSIZE_SCOM_ENTRY);
+
+  // ... create RNNN instruction sequence.
+  pore_inline_context_create( &ctx, bufRNNN, XIPSIZE_SCOM_ENTRY, 0, 0);
+  pgas_rc =           pore_RET( &ctx);
+  pgas_rc = pgas_rc + pore_NOP( &ctx);
+  pgas_rc = pgas_rc + pore_NOP( &ctx);
+  pgas_rc = pgas_rc + pore_NOP( &ctx);
+  if (pgas_rc>0)  {
+    MY_ERR("***_RET or _NOP generated rc = %d", pgas_rc);
+    if (bufRNNN)  free(bufRNNN);
+    return IMGBUILD_ERR_PORE_INLINE_ASM;
+  }
+  
+  // ... get host and pore location of Scom table in .slw section.
+  rc = sbe_xip_get_section( io_image, SBE_XIP_SECTION_SLW, &xipSection);
+  if (rc)   {
+    MY_ERR("ERROR : sbe_xip_get_section() failed: %s", SBE_XIP_ERROR_STRING(errorStrings, rc));
+    MY_ERR("Probable cause:");
+    MY_ERR("\tThe section (=SBE_XIP_SECTION_SLW=%i) was not found.",SBE_XIP_SECTION_SLW);
+    if (bufRNNN)  free(bufRNNN);
+    return IMGBUILD_ERR_KEYWORD_NOT_FOUND;
+  }
+  hostScomTableFirst = (void*)((uintptr_t)io_image + xipSection.iv_offset + SLW_RAM_TABLE_SIZE);
+  sbe_xip_host2pore( io_image, hostScomTableFirst, &xipScomTableFirst);
+
+//#ifdef DUMMY_DEF1  // Undo this ifdef once Scom vector name is defined in TOC.
+  // ... get location of Scom vector from TOC.
+  rc = sbe_xip_find( io_image, SLW_HOST_SCOM_VECTOR_TOC_NAME, &xipTocItem);
+  if (rc)  {
+    MY_ERR("ERROR : sbe_xip_find() failed w/rc=%i and %s", rc, SBE_XIP_ERROR_STRING(errorStrings, rc));
+    MY_ERR("Probable cause:");
+    MY_ERR("\tThe keyword (=%s) was not found.",SLW_HOST_SCOM_VECTOR_TOC_NAME);
+    if (bufRNNN)  free(bufRNNN);
+    return IMGBUILD_ERR_KEYWORD_NOT_FOUND;
+  }
+  rc = sbe_xip_pore2host( io_image, xipTocItem.iv_address, &hostScomVectorFirst);
+
+  // ... populate entire Scom table with RNNN IIS.
+  for (i_iis=0; i_iis<SLW_SCOM_TABLE_SIZE; i_iis=i_iis+XIPSIZE_SCOM_ENTRY)  {
+    hostScomTableNext = (void*)( (uintptr_t)hostScomTableFirst + i_iis);
+    memcpy( hostScomTableNext, bufRNNN, XIPSIZE_SCOM_ENTRY);
+  }
+
+  // ... update Scom vector.
+  for (i_coreId=0; i_coreId<SLW_MAX_CORES; i_coreId++)  {
+    hostScomVectorNext = (void*)( (uint64_t*)hostScomVectorFirst + i_coreId);
+    *(uint64_t*)hostScomVectorNext = myRev64( xipScomTableFirst +
+                                              SLW_SCOM_TABLE_SPACE_PER_CORE*i_coreId);
+  }
+//#endif
+
+  if (bufRNNN)  free(bufRNNN);
 
   return rc;
 }

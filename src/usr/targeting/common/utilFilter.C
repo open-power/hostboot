@@ -32,6 +32,8 @@
 #include <targeting/common/predicates/predicateisfunctional.H>
 #include <targeting/common/predicates/predicatepostfixexpr.H>
 
+#include <sys/task.h>           // task_getcpuid()
+
 
 /**
  * Miscellaneous Filter Utility Functions
@@ -209,4 +211,56 @@ const Target * getParentChip( const Target * i_pChiplet )
     return l_pChip;
 }
 
-};
+
+const TARGETING::Target *   getMasterCore( )
+{
+    uint64_t l_masterCoreID                     =   task_getcpuid() & ~7;
+    const   TARGETING::Target * l_masterCore    =   NULL;
+
+    TARGETING::Target * l_processor =   NULL;
+    (void)TARGETING::targetService().masterProcChipTargetHandle( l_processor );
+    FABRIC_NODE_ID_ATTR l_logicalNodeId =
+                l_processor->getAttr<TARGETING::ATTR_FABRIC_NODE_ID>();
+    FABRIC_CHIP_ID_ATTR l_chipId =
+                l_processor->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
+
+    TargetHandleList l_cores;
+    getChildChiplets( l_cores,
+                      l_processor,
+                      TYPE_CORE,
+                      true );
+
+    TRACDCOMP( g_trac_targeting,
+               "getMasterCore: found %d cores on master proc",
+               l_cores.size()   );
+
+    for ( uint8_t l_coreNum=0; l_coreNum < l_cores.size(); l_coreNum++ )
+    {
+        TARGETING::Target *    l_core  =   l_cores[ l_coreNum ] ;
+
+        CHIP_UNIT_ATTR l_coreId =
+                    l_core->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+
+        uint64_t pir = l_coreId << 3;
+        pir |= l_chipId << 7;
+        pir |= l_logicalNodeId << 10;
+
+        if (pir == l_masterCoreID){
+            TRACDCOMP( g_trac_targeting,
+                       "found master core: 0x%x, PIR=0x%x :",
+                       l_coreId,
+                       pir  );
+            EntityPath l_path;
+            l_path  =   l_core->getAttr<ATTR_PHYS_PATH>();
+            l_path.dump();
+
+            l_masterCore    =   l_core ;
+            break;
+        }
+
+    }   // endfor
+
+    return l_masterCore;
+}
+
+};  // end namespace

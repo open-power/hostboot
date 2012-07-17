@@ -34,6 +34,7 @@
 /******************************************************************************/
 #include    <stdint.h>
 
+#include    <sys/misc.h>                        //  cpu_thread_count()
 #include    <vfs/vfs.H>                         // PORE image
 
 #include    <trace/interface.H>
@@ -59,7 +60,7 @@
 
 //  Uncomment these files as they become available:
 #include    "proc_slw_build/proc_slw_build.H"
-// #include    "proc_set_pore_bar/proc_set_pore_bar.H"
+#include    "proc_set_pore_bar/proc_set_pore_bar.H"
 
 namespace   BUILD_WINKLE_IMAGES
 {
@@ -73,11 +74,9 @@ using   namespace   DeviceFW;
 /**
  *  @def pointer to area for output PORE image
  *  @todo - make system call to allocate 512k - 1M of space to put output
- *          image.  Currently hardwired to 0x78000
- *
+ *          image for the master chip.
+ *          Currently hardwired to 0x400000
  */
-void    * const g_pOutputPoreImg
-                    =   reinterpret_cast<void * const >(OUTPUT_PORE_IMG_ADDR);
 
 /**
  *  @brief Load PORE image and return a pointer to it, or NULL
@@ -94,9 +93,9 @@ void    * const g_pOutputPoreImg
  *          HWP's are finished.
  *
  */
-errlHndl_t  loadPoreImage( TARGETING::Target    *i_CpuTarget,
-                           const char           *& o_rporeAddr,
-                            size_t      & o_rporeSize )
+errlHndl_t  loadPoreImage( const TARGETING::Target  *i_CpuTarget,
+                           const char               *& o_rporeAddr,
+                            size_t                  & o_rporeSize )
 {
     errlHndl_t  l_errl      =   NULL;
     const char * fileName   =   "procpore.dat";
@@ -152,6 +151,144 @@ errlHndl_t  loadPoreImage( TARGETING::Target    *i_CpuTarget,
     return  l_errl;
 }
 
+
+/**
+ * @brief   apply cpu reg information to the SLW image using
+ *          p8_pore_gen_cpureg() .
+ *
+ * @param io_image      -   pointer to the SLW image
+ * @param i_sizeImage   -   size of the SLW image
+ *
+ * @return errorlog if error, NULL otherwise.
+ *
+ *  @todo   $$ pore_gen_cpu_reg not supported this sprint (???), leave main code
+ *          commented out for now.
+ *  @todo   $$ l_regname is defined as "unswizzled spr value" ????
+ */
+errlHndl_t  applyPoreGenCpuRegs(   TARGETING::Target *i_cpuTarget,
+                                   void      *io_image,
+                                   uint32_t  i_sizeImage )
+{
+    errlHndl_t  l_errl      =   NULL;
+
+    TARGETING::TargetHandleList l_coreIds;
+    getChildChiplets(   l_coreIds,
+                        i_cpuTarget,
+                        TYPE_CORE,
+                        true );
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "applyPoreGenCpuRegs: Process cores=0x%x, threads=0x%x",
+               l_coreIds.size(),
+               cpu_thread_count() );
+
+#if 1
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+           "applyPoreGenCpuRegs: DISABLED until pore_gen_cpureg integration" );
+
+    //  $$ this will be turned on when we integrate pore_gen_cpureg
+    //  $$   @todo RTC 41425
+#else
+    size_t      l_threadid  =   0;
+    size_t      l_coreid    =   0;
+    uint32_t    l_rc        =   0;
+    uint64_t    l_msrcVal   =   cpu_spr_value(CPU_SPR_MSRC) ;
+    uint64_t    l_lpcrVal   =   cpu_spr_value(CPU_SPR_LPCR) ;
+    uint64_t    l_hrmorVal  =   cpu_spr_value(CPU_SPR_HRMOR);
+    for ( l_coreid=0; l_coreid < l_coreIds.size(); l_coreid++ )
+    {
+        for ( l_threadid=0; l_threadid < cpu_thread_count(); l_threadid++ )
+        {
+
+            TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "core=0x%x,thread=0x%x: ",
+                       l_coreid,
+                       l_threadid );
+            TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "msrc=0x%x,lpcr=0x%x,hrmor=0x%x",
+                       l_msrcVal,
+                       l_lpcrVal,
+                       l_hrmorVal  );
+            do  {
+                l_rc =  p8_pore_gen_cpureg( io_image,
+                                            i_sizeImage,
+                                            l_regName,
+                                            l_msrcVal,
+                                            l_coreid,
+                                            l_threadid);
+                if ( l_rc )
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                               "p8_pore_gen_cpu_reg ERROR: MSRC: core=0x%x,thread=0x%x,l_rc=0x%x",
+                               l_coreId,
+                               l_threadId,
+                               l_rc );
+                    break;
+                }
+
+                l_rc =  p8_pore_gen_cpureg( io_image,
+                                            i_sizeImage,
+                                            l_regName,
+                                            l_lpcrVal,
+                                            l_coreid,
+                                            l_threadid);
+                if ( l_rc )
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                               "p8_pore_gen_cpu_reg ERROR: LPCR: core=0x%x,thread=0x%x,l_rc=0x%x",
+                               l_coreId,
+                               l_threadId,
+                               l_rc );
+                    break;
+                }
+
+                l_rc =  p8_pore_gen_cpureg( io_image,
+                                            i_sizeImage,
+                                            l_regName,
+                                            l_hrmorVal,
+                                            l_coreid,
+                                            l_threadid);
+                if ( l_rc ){
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                               "p8_pore_gen_cpu_reg ERROR: HRMOR: core=0x%x,thread=0x%x,l_rc=0x%x",
+                               l_coreId,
+                               l_threadId,
+                               l_rc );
+                    break;
+                }
+
+
+            } while (0);
+
+            if ( l_rc ){
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "p8_pore_gen_cpu_reg ERROR: core=0x%x, thread=0x%x, l_rc=0x%x",
+                           l_coreId,
+                           l_threadId,
+                           l_rc );
+                /*@
+                 * @errortype
+                 * @reasoncode  ISTEP_BAD_RC
+                 * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid    ISTEP_BUILD_WINKLE_IMAGES
+                 * @userdata1   return code from p8_pore_gen_cpureg
+                 *
+                 * @devdesc p8_pore_gen_cpureg returned an error when
+                 *          attempting to change a reg value in the PORE image.
+                 */
+                l_errl =
+                new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                        ISTEP_BUILD_WINKLE_IMAGES,
+                                        ISTEP_BAD_RC,
+                                        l_rc  );
+            }
+        }   // end for l_threadId
+    }   // end for l_coreId
+#endif
+
+    return  l_errl;
+}
+
 //
 //  Wrapper function to call 15.1 :
 //      host_build_winkle
@@ -159,40 +296,33 @@ errlHndl_t  loadPoreImage( TARGETING::Target    *i_CpuTarget,
 void    call_host_build_winkle( void    *io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
-    uint8_t                     l_cpuNum        =   0;
 
     const char                  *l_pPoreImage   =   NULL;
     size_t                      l_poreSize      =   0;
     void                        *l_pImageOut    =   NULL;
     uint32_t                    l_sizeImageOut  =   MAX_OUTPUT_PORE_IMG_SIZE;
 
-
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_build_winkle entry" );
 
     // @@@@@    CUSTOM BLOCK:   @@@@@
 
-    //  figure out what targets we need
-    //  customize any other inputs
-    //  set up loops to go through all targets (if parallel, spin off a task)
+    // find the master core, i.e. the one we are running on
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "Find master chip: " );
 
+    const TARGETING::Target*  l_masterCore  = getMasterCore( );
+    assert( l_masterCore != NULL );
 
-    TARGETING::TargetHandleList l_cpuTargetList;
-    getAllChips(l_cpuTargetList, TYPE_PROC);
+    TARGETING::Target* l_cpu_target = const_cast<TARGETING::Target *>
+                                            ( getParentChip( l_masterCore ) );
 
-    for ( l_cpuNum=0; l_cpuNum < l_cpuTargetList.size(); l_cpuNum++ )
-    {
-        //  make a local copy of the CPU target
-        TARGETING::Target*  l_cpu_target = l_cpuTargetList[l_cpuNum];
+    //  dump physical path to target
+    EntityPath l_path;
+    l_path  =   l_cpu_target->getAttr<ATTR_PHYS_PATH>();
+    l_path.dump();
 
-        TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "Run cpuNum 0x%x",
-                   l_cpuNum  );
-
-        //  dump physical path to target
-        EntityPath l_path;
-        l_path  =   l_cpu_target->getAttr<ATTR_PHYS_PATH>();
-        l_path.dump();
+    do {
 
         l_errl  =   loadPoreImage(  l_cpu_target,
                                     l_pPoreImage,
@@ -205,20 +335,29 @@ void    call_host_build_winkle( void    *io_pArgs )
             // drop out of loop and return errlog to fail.
             break;
         }
+        //
+        //  @todo stub - eventually this will make a system call to get storage
+        //  ( and size ) for the output buffer for PORE image for this CPU.
+        //  Save the results in attributes so that other isteps/substeps can
+        //  use it.
+        //
+        //  @NOTE NOTE NOTE
+        //  This address must be on a 1-meg boundary.
+        //
+        l_pImageOut =   reinterpret_cast<void * const >(OUTPUT_PORE_IMG_ADDR);
+        l_cpu_target->setAttr<TARGETING::ATTR_SLW_IMAGE_ADDR>
+                                                    ( OUTPUT_PORE_IMG_ADDR );
+
+        l_sizeImageOut  =   MAX_OUTPUT_PORE_IMG_SIZE;
+        l_cpu_target->setAttr<TARGETING::ATTR_SLW_IMAGE_SIZE>
+                                                ( MAX_OUTPUT_PORE_IMG_SIZE );
 
         // cast OUR type of target to a FAPI type of target.
         const fapi::Target l_fapi_cpu_target(
-                            TARGET_TYPE_PROC_CHIP,
-                            reinterpret_cast<void *>
-                            (const_cast<TARGETING::Target*>(l_cpu_target)) );
-
-        //
-        //  stub - get address of output buffer for PORE image for this CPU,
-        //          and load it there
-        //
-        l_pImageOut     =   g_pOutputPoreImg;
-        l_sizeImageOut  =   MAX_OUTPUT_PORE_IMG_SIZE;
-
+                                TARGET_TYPE_PROC_CHIP,
+                                reinterpret_cast<void *>
+                                              (const_cast<TARGETING::Target*>
+                                                            (l_cpu_target)) );
 
         //  call the HWP with each fapi::Target
         FAPI_INVOKE_HWP( l_errl,
@@ -244,7 +383,25 @@ void    call_host_build_winkle( void    *io_pArgs )
                        l_sizeImageOut );
         }
 
-    }   // endfor
+        //  set the actual size of the image now.
+        l_cpu_target->setAttr<TARGETING::ATTR_SLW_IMAGE_SIZE>
+                                                        ( l_sizeImageOut );
+
+        //  apply the cpu reg information to the image.
+        l_errl =   applyPoreGenCpuRegs( l_cpu_target,
+                                        l_pImageOut,
+                                        l_sizeImageOut );
+        if ( l_errl )
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "applyPoreGenCpuRegs ERROR : Returning errorlog, PLID=0x%x",
+                      l_errl->plid() );
+            //  drop out if we hit an error and quit.
+            break;
+        }
+
+    }   while (0);  // end do block
+
     // @@@@@    END CUSTOM BLOCK:   @@@@@
 
 
@@ -263,43 +420,96 @@ void    call_host_build_winkle( void    *io_pArgs )
 //
 void    call_proc_set_pore_bar( void    *io_pArgs )
 {
-    errlHndl_t  l_errl  =   NULL;
+    errlHndl_t  l_errl      =   NULL;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_set_pore_bar entry" );
 
-#if 0
     // @@@@@    CUSTOM BLOCK:   @@@@@
-    //  figure out what targets we need
-    //  customize any other inputs
-    //  set up loops to go through all targets (if parallel, spin off a task)
 
-    //  dump physical path to targets
+    const TARGETING::Target*  l_masterCore  = TARGETING::getMasterCore( );
+    assert( l_masterCore != NULL );
+
+    TARGETING::Target* l_cpu_target = const_cast<TARGETING::Target *>
+                                      ( getParentChip( l_masterCore ) );
+
+    //  dump physical path to target
     EntityPath l_path;
-    l_path  =   l_@targetN_target->getAttr<ATTR_PHYS_PATH>();
+    l_path  =   l_cpu_target->getAttr<ATTR_PHYS_PATH>();
     l_path.dump();
 
-    // cast OUR type of target to a FAPI type of target.
-    const fapi::Target l_fapi_@targetN_target(
-                    TARGET_TYPE_MEMBUF_CHIP,
-                    reinterpret_cast<void *>
-                        (const_cast<TARGETING::Target*>(l_@targetN_target)) );
+    do  {
 
-    //  call the HWP with each fapi::Target
-    FAPI_INVOKE_HWP( l_errl, proc_set_pore_bar, _args_...);
-    if ( l_errl )
-    {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "ERROR : .........." );
-        errlCommit( l_errl, HWPF_COMP_ID );
-    }
-    else
-    {
+        //  fetch image location and size, written by host_build_winkle above
+
+        //  Note that the "i_mem_bar" input to proc_set_pore_bar is the physical
+        //  address of the PORE image, this is the image that will get executed
+        //  at winkle.  The void * i_image parameter actually points to the same
+        //  place in HostBoot; in fsp or cronus these will be different.
+        //
+        //  @todo this may change for secure boot, need to make up an RTC
+        //      to handle this, or there may one already???
+        //
+        uint64_t l_imageAddr =
+        l_cpu_target->getAttr<TARGETING::ATTR_SLW_IMAGE_ADDR>();
+
+
+        //  $$ @todo the hardware wants a mask to cover the size of the image,
+        //  with the added proviso that the lower 5 nybbles of the mask must
+        //  always be 0.
+        //  Thus, as long as the image is under 1M, this value will be 0 .
+        //  The HWP guys will probably pull this calculation inside
+        //  proc_set_pore_bar() so that we just specify the size in bytes.
+        //  This comment will be left until we integrate the new version.
+        //  In the meantime, l_mem_mask should be set to 0 to work correctly.
+        uint64_t l_mem_mask =  0;
+
+        //  defined in proc_set_pore_bar.H
+        uint32_t        l_mem_type  =   SLW_L3 ;
+
+        // cast OUR type of target to a FAPI type of target.
+        const fapi::Target l_fapi_cpu_target(
+                                            TARGET_TYPE_PROC_CHIP,
+                                            reinterpret_cast<void *>
+                                            (const_cast<TARGETING::Target*>
+                                             (l_cpu_target)) );
+
+        //  call the HWP with each fapi::Target
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "SUCCESS : .........." );
-    }
+                   "Call proc_set_pore_bar, membar=0x%lx, size=0x%lx, mask=0x%lx, type=0x%x",
+                   l_imageAddr,
+                   (l_cpu_target->getAttr<ATTR_SLW_IMAGE_SIZE>()),
+                   l_mem_mask,
+                   l_mem_type );
+
+
+        void * const l_pImage = reinterpret_cast<void * const>(l_imageAddr);
+
+        FAPI_INVOKE_HWP( l_errl,
+                         proc_set_pore_bar,
+                         l_fapi_cpu_target,
+                         l_pImage,
+                         l_imageAddr,
+                         l_mem_mask,
+                         l_mem_type
+                       );
+
+        if ( l_errl )
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "ERROR : proc_set_pore_bar, PLID=0x%x",
+                      l_errl->plid()  );
+        }
+        else
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "SUCCESS : proc_set_pore_bar" );
+        }
+
+    }   while ( 0 ); // end do block
+
     // @@@@@    END CUSTOM BLOCK:   @@@@@
-#endif
+
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_set_pore_bar exit" );

@@ -25,32 +25,38 @@
 /* *! TITLE : proc_slw_build                                                    */
 /* *! DESCRIPTION : Extracts and decompresses delta ring states from EPROM      */
 //                  image. Utilizes the linked list approach (LLA) to extract
-//                  and position wiggle-flip programs in .rings according to
-//                  back pointer, DD level, phase and override settings.
+//                  and position wiggle-flip programs in .rings according to 
+//                  back pointer, DD level, phase and override settings. 
 /* *! OWNER NAME : Michael Olsen                  cmolsen@us.ibm.com            */
 //
 /* *! EXTENDED DESCRIPTION :                                                    */
 //
 /* *! USAGE : To build (for Hostboot) -                                         */
 //              buildfapiprcd  -r ver-12-5  -C "p8_image_help.C,p8_scan_compression.C"  -c "sbe_xip_image.c,pore_inline_assembler.c,pore_inline_disassembler.c,p8_pore_static_data.c" -e "../../xml/error_info/proc_slw_build_errors.xml"  proc_slw_build.C
-//            Parameter list -
+//            Parameter list - 
 //              See function definition below.
-//            Alternative usages -
-//              To build for scanning by EPM team:
-//                 buildfapiprcd_cmo -u "SLW_BUILD_WF_P0_FIX,SLW_BUILD_SYSPHASE_ZERO_MODE,SLW_COMMAND_LINE" -r ...
+//            Alternative usages - 
+//              To build for scanning by EPM team w/fixed P0 value, sysPhase=0,
+//                 always-return-after-wf, command-line mode:
+//                 buildfapiprcd -u "SLW_BUILD_WF_P0_FIX,SLW_BUILD_SYSPHASE_ZERO_MODE,SLW_BUILD_WF_RETURN,SLW_COMMAND_LINE" -r ...
 //
 /* *! ASSUMPTIONS :                                                             */
-//    - For proc_slw_build, sysPhase=1 is assumed during real hostboot.
+//    - For Hostboot environment:
+//      - dynamic P0/P1 calculation
+//      - sysPhase=1
+//      - check header word after WF
+//      - non-command-line mode, FAPI call
 //
 /* *! COMMENTS :                                                                */
 //    - All image content, incl .initf content and ring layout, is handled
 //      in BE format. No matter which platform.
-//    - A ring may only be requested with the sysPhase=0 or 1. Any other
+//    - A ring may only be requested with the sysPhase=0 or 1. Any other 
 //      sysPhase value, incl sysPhase=2, will cause no rings to be found.
 //
 /*------------------------------------------------------------------------------*/
 
 #include "proc_slw_build.H"
+#include "p8_delta_scan_rw.h"
 
 extern "C"  {
 
@@ -77,7 +83,7 @@ ReturnCode proc_slw_build( const fapi::Target    &i_target,
 #else
   uint8_t  sysPhase=1;
 #endif
-
+    
   uint32_t  rcLoc=0, rcSearch=0, i, countWF=0;
   uint32_t  sizeImage=0, sizeImageOutMax, sizeImageTmp, sizeImageOld;
   uint8_t *deltaRingDxed=NULL;
@@ -85,13 +91,13 @@ ReturnCode proc_slw_build( const fapi::Target    &i_target,
   DeltaRingLayout rs4RingLayout;
   void *nextRing=NULL;
 
-  uint32_t ringBitLen=0, ringByteLen=0, ringTrailBits=0;
+  uint32_t ringBitLen=0; //ringByteLen=0, ringTrailBits=0;
 
   uint32_t *wfInline=NULL;
   uint32_t wfInlineLenInWords;
 
   sizeImageOutMax = *io_sizeImageOut;
-
+  
   if (sizeImageOutMax<i_sizeImageIn)  {
     FAPI_ERR("Inp image size (from caller): %i",i_sizeImageIn);
     FAPI_ERR("Max image size (from caller): %i",*io_sizeImageOut);
@@ -100,7 +106,7 @@ ReturnCode proc_slw_build( const fapi::Target    &i_target,
 		FAPI_SET_HWP_ERROR(rc, RC_PROC_SLWB_INPUT_IMAGE_SIZE_MESS);
     return rc;
   }
-
+    
 
   // ==========================================================================
   // Check and copy image to mainstore and clean it up.
@@ -128,7 +134,7 @@ ReturnCode proc_slw_build( const fapi::Target    &i_target,
     return rc;
   }
   FAPI_DBG("Image size (in EPROM): %i",i_sizeImageIn);
-
+  
   // Second, copy input image to supplied mainstore location.
   //
   memcpy( i_imageOut, i_imageIn, i_sizeImageIn);
@@ -188,11 +194,11 @@ ReturnCode proc_slw_build( const fapi::Target    &i_target,
   // ==========================================================================
   // Get DD level from FAPI attributes.
   // ==========================================================================
-  // $$rc = FAPI_ATTR_GET(ATTR_EC, &i_target, l_uint8);
+//  rc = FAPI_ATTR_GET(ATTR_EC, &i_target, l_uint8);
   rc = FAPI_ATTR_GET_PRIVILEGED(ATTR_EC, &i_target, l_uint8);
   ddLevel = (uint32_t)l_uint8;
   if (rc)  {
-    FAPI_ERR("FAPI_ATTR_GET() failed w/rc=%i and  ddLevel=0x%02x",(uint32_t)rc,l_uint8);
+    FAPI_ERR("FAPI_ATTR_GET_PRIVILEGED() failed w/rc=%i and  ddLevel=0x%02x",(uint32_t)rc,l_uint8);
     return rc;
   }
 
@@ -202,7 +208,7 @@ ReturnCode proc_slw_build( const fapi::Target    &i_target,
   do  {
 
   FAPI_DBG("nextRing (at top)=0x%016llx",(uint64_t)nextRing);
-
+  
 
   // ==========================================================================
   // Get ring layout from image
@@ -214,8 +220,8 @@ ReturnCode proc_slw_build( const fapi::Target    &i_target,
                                       &rs4RingLayout,
                                       &nextRing);
   rcSearch = rcLoc;
-  if (rcSearch!=DSLWB_RING_SEARCH_MATCH &&
-      rcSearch!=DSLWB_RING_SEARCH_EXHAUST_MATCH &&
+  if (rcSearch!=DSLWB_RING_SEARCH_MATCH && 
+      rcSearch!=DSLWB_RING_SEARCH_EXHAUST_MATCH && 
       rcSearch!=DSLWB_RING_SEARCH_NO_MATCH)  {
     FAPI_ERR("\tERROR : Getting delta ring from image was unsuccessful (rcSearch=%i).",rcSearch);
     FAPI_ERR("\tNo wiggle-flip programs will be stored in .rings section.");
@@ -224,22 +230,20 @@ ReturnCode proc_slw_build( const fapi::Target    &i_target,
 	  FAPI_SET_HWP_ERROR(rc, RC_PROC_SLWB_RING_RETRIEVAL_ERROR);
     return rc;
   }
-  if (rcSearch==DSLWB_RING_SEARCH_MATCH ||
+  if (rcSearch==DSLWB_RING_SEARCH_MATCH || 
       rcSearch==DSLWB_RING_SEARCH_EXHAUST_MATCH)
     FAPI_DBG("\tRetrieving RS4 delta ring was successful.");
 
   // Check if we're done at this point.
-  //
+  //      
   if (rcSearch==DSLWB_RING_SEARCH_NO_MATCH)  {
     FAPI_INF("Wiggle-flip programming done.");
     FAPI_INF("Number of wf programs appended: %i", countWF);
     if (countWF==0)
       FAPI_INF("ZERO WF programs appended to .rings section.");
     sizeImageTmp = sizeImageOutMax;
-    rcLoc = append_empty_section( i_imageOut,
-                                  &sizeImageTmp,
-                                  SBE_XIP_SECTION_SLW,
-                                  SLW_SLW_SECTION_SIZE);
+    rcLoc = initialize_slw_section( i_imageOut,
+                                    &sizeImageTmp);
     if (rcLoc)  {
       if (rcLoc==IMGBUILD_ERR_IMAGE_TOO_LARGE)  {
 		    uint32_t & DATA_IMG_SIZE_OLD=sizeImageOld;
@@ -253,14 +257,14 @@ ReturnCode proc_slw_build( const fapi::Target    &i_target,
       }
 			return rc;
     }
-    FAPI_INF("SLW section allocated for Ramming table.");
+    FAPI_INF("SLW section allocated for Ramming and Scomming tables.");
     sbe_xip_image_size( i_imageOut, io_sizeImageOut);
     FAPI_INF("Final SLW image size: %i", *io_sizeImageOut);
     return FAPI_RC_SUCCESS;
   }
-
+  
   deltaRingRS4 = (CompressedScanData*)rs4RingLayout.rs4Delta;
-
+  
   FAPI_DBG("Dumping ring layout:");
   FAPI_DBG("\tentryOffset      = %i",(uint32_t)myRev64(rs4RingLayout.entryOffset));
   FAPI_DBG("\tbackItemPtr     = 0x%016llx",myRev64(rs4RingLayout.backItemPtr));
@@ -270,7 +274,7 @@ ReturnCode proc_slw_build( const fapi::Target    &i_target,
   FAPI_DBG("\tsysPhase        = %i",rs4RingLayout.sysPhase);
   FAPI_DBG("\toverride        = %i",rs4RingLayout.override);
   FAPI_DBG("\treserved1+2     = %i",rs4RingLayout.reserved1|rs4RingLayout.reserved2);
-  FAPI_DBG("\tRS4 magic #     = 0x%08x",myRev32(deltaRingRS4->iv_magic));
+  FAPI_DBG("\tRS4 magic #     = 0x%08x",myRev32(deltaRingRS4->iv_magic));    
   FAPI_DBG("\tRS4 total size  = %i",myRev32(deltaRingRS4->iv_size));
   FAPI_DBG("\tUnXed data size = %i",myRev32(deltaRingRS4->iv_length));
   FAPI_DBG("\tScan select     = 0x%08x",myRev32(deltaRingRS4->iv_scanSelect));
@@ -303,20 +307,20 @@ ReturnCode proc_slw_build( const fapi::Target    &i_target,
     return rc;
   }
   FAPI_DBG("\tDecompression successful.\n");
-
-  ringByteLen = (ringBitLen-1)/8+1;
-  ringTrailBits = ringBitLen - 8*(ringByteLen-1);
+  
+//  ringByteLen = (ringBitLen-1)/8+1;
+//  ringTrailBits = ringBitLen - 8*(ringByteLen-1);
 
 
   // ==========================================================================
   // Create Wiggle-Flip Programs
   // ==========================================================================
   FAPI_DBG("--> Creating Wiggle-Flip Program.");
-  rcLoc = create_wiggle_flip_prg( (uint32_t*)deltaRingDxed,
+  rcLoc = create_wiggle_flip_prg( (uint32_t*)deltaRingDxed, 
                                   ringBitLen,
                                   myRev32(deltaRingRS4->iv_scanSelect),
                                   (uint32_t)deltaRingRS4->iv_chipletId,
-                                  &wfInline,
+                                  &wfInline, 
                                   &wfInlineLenInWords);
   if (rcLoc)  {
     FAPI_ERR("ERROR : create_wiggle_flip_prg() failed w/rcLoc=%i",rcLoc);
@@ -327,7 +331,7 @@ ReturnCode proc_slw_build( const fapi::Target    &i_target,
     return rc;
   }
   FAPI_DBG("\tWiggle-flip programming successful.");
-
+  
 
   // ==========================================================================
   // Append Wiggle-Flip programs to .rings section.
@@ -356,7 +360,7 @@ ReturnCode proc_slw_build( const fapi::Target    &i_target,
     return rc;
   }
   FAPI_DBG("\tUpdating image w/wiggle-flip program + header was successful.");
-
+  
   // Update some variables for debugging and error reporting.
   sizeImageOld = sizeImageTmp;
   countWF++;
@@ -367,8 +371,8 @@ ReturnCode proc_slw_build( const fapi::Target    &i_target,
   // ==========================================================================
   if (deltaRingDxed)  free(deltaRingDxed);
   if (wfInline)  free(wfInline);
-
-
+  
+  
   // ==========================================================================
   // Are we done?
   // ==========================================================================
@@ -378,10 +382,8 @@ ReturnCode proc_slw_build( const fapi::Target    &i_target,
     if (countWF==0)
       FAPI_INF("ZERO WF programs appended to .rings section.");
     sizeImageTmp = sizeImageOutMax;
-    rcLoc = append_empty_section( i_imageOut,
-                                  &sizeImageTmp,
-                                  SBE_XIP_SECTION_SLW,
-                                  SLW_SLW_SECTION_SIZE);
+    rcLoc = initialize_slw_section( i_imageOut,
+                                    &sizeImageTmp);
     if (rcLoc)  {
       if (rcLoc==IMGBUILD_ERR_IMAGE_TOO_LARGE)  {
 		    uint32_t & DATA_IMG_SIZE_OLD=sizeImageOld;
@@ -395,14 +397,14 @@ ReturnCode proc_slw_build( const fapi::Target    &i_target,
       }
 			return rc;
     }
-    FAPI_INF("SLW section allocated for Ramming table.");
+    FAPI_INF("SLW section allocated for Ramming and Scomming tables.");
     sbe_xip_image_size( i_imageOut, io_sizeImageOut);
     FAPI_INF("Final SLW image size: %i", *io_sizeImageOut);
     return FAPI_RC_SUCCESS;
   }
 
   FAPI_DBG("nextRing (at bottom)=0x%016llx",(uint64_t)nextRing);
-
+    
   }   while (nextRing!=NULL);
   /***************************************************************************
    *                            SEARCH LOOP - End                              *

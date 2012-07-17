@@ -23,8 +23,6 @@
  */
 
 #include <fapi.H>
-#include "p8_delta_scan_rw.h"
-#include "p8_pore_table_gen_api.H"
 
 typedef fapi::ReturnCode (*proc_slw_build_FP_t) (	const fapi::Target&, 
 																									const void*,

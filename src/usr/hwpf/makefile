@@ -41,7 +41,9 @@ HWP_ERROR_XML_FILES = hwp/fapiHwpErrorInfo.xml   \
     hwp/mvpd_errors.xml \
     ../pore/fapiporeve/fapiPoreVe_errors.xml \
     hwp/dram_initialization/proc_setup_bars/proc_setup_bars_errors.xml  \
-    hwp/dram_initialization/proc_setup_bars/proc_fab_smp_errors.xml
+    hwp/dram_initialization/proc_setup_bars/proc_fab_smp_errors.xml     \
+    hwp/build_winkle_images/proc_set_pore_bar/proc_set_pore_bar_errors.xml  \
+    hwp/build_winkle_images/proc_pba_bar_config/proc_pba_bar_config_errors.xml
 
 
 

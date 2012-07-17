@@ -204,7 +204,9 @@
      <!--   proc_fab_smp_fabric_attributes.xml  -->
      <attribute><id>FREQ_CORE</id></attribute>
      <attribute><id>PROC_PCIE_NOT_F_LINK</id></attribute>
-
+     <!-- new attribute for isteps 15 & 16 -->
+     <attribute><id>SLW_IMAGE_ADDR</id></attribute>
+     <attribute><id>SLW_IMAGE_SIZE</id></attribute>
 </targetType>
 
 <targetType>

@@ -89,9 +89,10 @@ enum BlockPriority
 /** Page Size in bits per SLBE  */
 #define SLBE_b 12
 
-/** Hardwired pointer to output PORE image, temporary location */
+/** Hardwired pointer to output SLW image, temporary location */
+/** SLW image must be on 1M boundary */
 /** MAX image size is 512 K */
-#define OUTPUT_PORE_IMG_ADDR        0x780000
+#define OUTPUT_PORE_IMG_ADDR        0x400000
 #define MAX_OUTPUT_PORE_IMG_SIZE    512*1024
 
 

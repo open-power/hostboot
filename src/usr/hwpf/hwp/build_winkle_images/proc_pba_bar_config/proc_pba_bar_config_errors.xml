@@ -1,0 +1,56 @@
+<!--  IBM_PROLOG_BEGIN_TAG
+     This is an automatically generated prolog.
+
+     $Source: src/usr/hwpf/hwp/build_winkle_images/proc_pba_bar_config/proc_pba_bar_config_errors.xml $
+
+     IBM CONFIDENTIAL
+
+     COPYRIGHT International Business Machines Corp. 2012
+
+     p1
+
+     Object Code Only (OCO) source materials
+     Licensed Internal Code Source Materials
+     IBM HostBoot Licensed Internal Code
+
+     The source code for this program is not published or other-
+     wise divested of its trade secrets, irrespective of what has
+     been deposited with the U.S. Copyright Office.
+
+     Origin: 30
+
+     IBM_PROLOG_END_TAG -->
+<!-- Error definitions for proc_pba_bar_config procedure -->
+<hwpErrors>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_PBA_BAR_INDEX_OUT_OF_RANGE</rc>
+    <description>pba bar index out of range, allowed is 0 to 3</description>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_PBA_BAR_SCOPE_OUT_OF_RANGE</rc>
+    <description>pba bar scope  out of range, allowed is 0 to 7</description>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_PBA_ADDR_OUT_OF_RANGE</rc>
+    <description>pba bar scope  out of range, allowed is 0 to 7</description>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_PBA_BAR_MASK_OUT_OF_RANGE</rc>
+    <description>pba bar mask out of range. .</description>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_PBA_BAR_MODE_NOT_SUPPORTED</rc>
+    <description>pba bar procedure mode is not supported .</description>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_PBA_BAR_PUTSCOM_FAILED</rc>
+    <description>pba bar putscom failed .</description>
+  </hwpError>
+  <!-- *********************************************************************** -->
+</hwpErrors>

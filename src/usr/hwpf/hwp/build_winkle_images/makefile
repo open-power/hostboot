@@ -41,6 +41,9 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images
 ##  EXAMPLE:
 ##  EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/<HWP_dir>
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/proc_slw_build
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/proc_set_pore_bar
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/proc_pba_bar_config
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/pore_gen_cpureg
 
 CUSTOMFLAGS+= -D __FAPI
 
@@ -52,15 +55,20 @@ OBJS =  build_winkle_images.o   \
         p8_scan_compression.o   \
         pore_inline_assembler.o \
         proc_slw_build.o        \
-        sbe_xip_image.o
+        sbe_xip_image.o         \
+        proc_set_pore_bar.o     \
+        proc_pba_bar_config.o
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 ##  EXAMPLE:
 #   VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/<HWP_dir>
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/proc_slw_build
+VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/proc_set_pore_bar
+VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/proc_pba_bar_config
+VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/pore_gen_cpureg
 
 ##  Point to the PORE image in PNOR
-BINARY_FILES = $(IMGDIR)/procpore.dat:1f6e49c91e2a2b0df5fad6c215c8f09d9f19fce6
+BINARY_FILES = $(IMGDIR)/procpore.dat:72cc5bef88f4d55dd9bbc9ad096e7dacff7d46e4
 
 include ${ROOTPATH}/config.mk
 

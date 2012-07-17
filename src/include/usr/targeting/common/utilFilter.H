@@ -131,6 +131,14 @@ void getAllLogicalCards( TARGETING::TargetHandleList & o_vector,
                          TYPE i_cardType,
                          bool i_functional = true );
 
+
+/**
+ * @brief   find master core in system
+ *
+ *  @return master target core, NULL otherwise
+ */
+const TARGETING::Target *   getMasterCore( );
+
 }
 
 #endif // __TARGETING_COMMON_UTIL_H

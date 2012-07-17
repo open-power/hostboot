@@ -51,6 +51,8 @@ enum istepModuleId
     ISTEP_START_PAYLOAD_CALL_SHUTDOWN                   = 0x02,
     ISTEP_START_PAYLOAD_NOTIFY_FSP                      = 0x03,
     ISTEP_ACTIVATE_SLAVE_CORES                          = 0x04,
+    ISTEP_BUILD_WINKLE_IMAGES                           = 0x05,
+    ISTEP_CORE_ACTIVATE                                 = 0x06,
 };
 
 /**
@@ -66,6 +68,7 @@ enum istepReasonCode
     ISTEP_TARGET_NULL                           = ISTEP_COMP_ID | 0x02,
     ISTEP_MBOX_MSG_NULL                         = ISTEP_COMP_ID | 0x03,
     ISTEP_BAD_RC                                = ISTEP_COMP_ID | 0x04,
+    ISTEP_FAIL_MASTER_WINKLE_RC                 = ISTEP_COMP_ID | 0x05,
 };
 
 };  // end ISTEP

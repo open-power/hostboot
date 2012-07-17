@@ -21,23 +21,23 @@
  *
  *  IBM_PROLOG_END_TAG
  */
-/* $Id: p8_pore_api_const.h,v 1.1 2011/08/25 12:32:33 yjkim Exp $ */
+/* $Id: p8_pore_api_const.h,v 1.2 2012/06/11 20:55:00 cmolsen Exp $ */
 /* $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/utils/p8_pore_api_const.h,v $ */
 
 /**
   * Contains any constants uses as inputs or outputs to the p7p_pore functions
   */
 
-
+// CMO-20120601: SCOM Operators moved to p8_pore_table_gen_api.H
 /****************************/
 /*****  SCOM Operators  *****/
 /****************************/
-#define P8_PORE_SCOM_APPEND  0  /* add scom instructions to the end of the existing image */
-#define P8_PORE_SCOM_REPLACE 1  /* replace existing instructions with new data */
-#define P8_PORE_SCOM_OR      2  /* overlay scom data onto existing instruction by bitwise OR */
-#define P8_PORE_SCOM_AND     3  /* overlay scom data onto existing instruction by bitwise AND */
-#define P8_PORE_SCOM_NOOP    4  /* replace existing instructions with NOP */
-#define P8_PORE_SCOM_LAST_OP 4  /* keep track of the last op for checking correctness of op input */
+//#define P8_PORE_SCOM_APPEND  0  /* add scom instructions to the end of the existing image */
+//#define P8_PORE_SCOM_REPLACE 1  /* replace existing instructions with new data */
+//#define P8_PORE_SCOM_OR      2  /* overlay scom data onto existing instruction by bitwise OR */
+//#define P8_PORE_SCOM_AND     3  /* overlay scom data onto existing instruction by bitwise AND */
+//#define P8_PORE_SCOM_NOOP    4  /* replace existing instructions with NOP */
+//#define P8_PORE_SCOM_LAST_OP 4  /* keep track of the last op for checking correctness of op input */
 
 
 /***************************/
@@ -82,6 +82,10 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: p8_pore_api_const.h,v $
+Revision 1.2  2012/06/11 20:55:00  cmolsen
+Updated to comment out the Scom operation defines which are now defined in
+p8_pore_table_gen_api.H instead.
+
 Revision 1.1  2011/08/25 12:32:33  yjkim
 initial checkin
 

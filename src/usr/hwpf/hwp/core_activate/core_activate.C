@@ -71,56 +71,143 @@ using   namespace   fapi;
 using   namespace   ISTEP;
 
 
+
 //
 //  Wrapper function to call 16.1 :
 //      host_activate_master
 //
-void    call_host_activate_master( void    *io_pArgs )
-{
-    errlHndl_t  l_errl  =   NULL;
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_host_activate_master entry" );
-
-#if 0
-    // @@@@@    CUSTOM BLOCK:   @@@@@
-    //  figure out what targets we need
-    //  customize any other inputs
-    //  set up loops to go through all targets (if parallel, spin off a task)
-
-    //  dump physical path to targets
-    EntityPath l_path;
-    l_path  =   l_@targetN_target->getAttr<ATTR_PHYS_PATH>();
-    l_path.dump();
-
-    // cast OUR type of target to a FAPI type of target.
-    const fapi::Target l_fapi_@targetN_target(
-                    TARGET_TYPE_MEMBUF_CHIP,
-                    reinterpret_cast<void *>
-                        (const_cast<TARGETING::Target*>(l_@targetN_target)) );
-
-    //  call the HWP with each fapi::Target
-    FAPI_INVOKE_HWP( l_errl, host_activate_master, _args_...);
-    if ( l_errl )
+    void    call_host_activate_master( void    *io_pArgs )
     {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "ERROR : .........." );
-        errlCommit( l_errl, HWPF_COMP_ID );
-    }
-    else
-    {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "SUCCESS : .........." );
-    }
-    // @@@@@    END CUSTOM BLOCK:   @@@@@
+        errlHndl_t  l_errl  =   NULL;
+
+        TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "call_host_activate_master entry" );
+
+        // @@@@@    CUSTOM BLOCK:   @@@@@
+
+        do  {
+
+            // find the master core, i.e. the one we are running on
+            TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "call_host_activate_master: Find master core: " );
+
+            const TARGETING::Target*  l_masterCore  = getMasterCore( );
+            assert( l_masterCore != NULL );
+
+            TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "call_host_activate_master: Find master chip: " );
+            TARGETING::Target* l_cpu_target = const_cast<TARGETING::Target *>
+                                              ( getParentChip( l_masterCore ) );
+
+            //  dump physical path to target
+            EntityPath l_path;
+            l_path  =   l_cpu_target->getAttr<ATTR_PHYS_PATH>();
+            l_path.dump();
+
+            // cast OUR type of target to a FAPI type of target.
+            const fapi::Target l_fapi_cpu_target(
+                                                TARGET_TYPE_PROC_CHIP,
+                                                reinterpret_cast<void *>
+                                                (const_cast<TARGETING::Target*>(l_cpu_target)) );
+
+
+#if 1
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "Call proc_prep_master_winkle when integrated..." );
+#else
+            //  call the HWP with each fapi::Target
+            FAPI_INVOKE_HWP( l_errl,
+                             proc_prep_master_winkle,
+                             l_fapi_cpu_target );
 #endif
+            if ( l_errl )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "proc_prep_master_winkle ERROR : Returning errorlog, PLID=0x%x",
+                           l_errl->plid() );
+                break;
+            }
+            else
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "proc_prep_master_winkle SUCCESS"  );
+            }
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_host_activate_master exit" );
+            //  put the master into winkle.
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "call_host_activate_master: put master into winkle..." );
 
-    // end task, returning any errorlogs to IStepDisp
-    task_end2( l_errl );
-}
+            //  @todo 2012-07-30  currently this is just a stub...
+            int l_rc    =   cpu_master_winkle( );
+            if ( l_rc )
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "ERROR : failed to winkle master, rc=0x%x",
+                          l_rc  );
+                /*@
+                 * @errortype
+                 * @reasoncode  ISTEP_FAIL_MASTER_WINKLE_RC
+                 * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid    ISTEP_CORE_ACTIVATE
+                 * @userdata1   return code from cpu_master_winkle
+                 *
+                 * @devdesc p8_pore_gen_cpureg returned an error when
+                 *          attempting to change a reg value in the PORE image.
+                 */
+                l_errl =
+                new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                        ISTEP_CORE_ACTIVATE,
+                                        ISTEP_FAIL_MASTER_WINKLE_RC,
+                                        l_rc  );
+                break;
+            }
+
+
+            //  --------------------------------------------------------
+            //  $$ @todo   do something to trigger IPI at this point.
+            //  MAGIC_INSTRUCTION( ???? );
+            //  --------------------------------------------------------
+
+
+            //  --------------------------------------------------------
+            //  should return from Winkle at this point
+            //  --------------------------------------------------------
+
+
+#if 1
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "Call proc_stop_deadman_timer when integrated..." );
+#else
+            //  call the HWP with each fapi::Target
+            FAPI_INVOKE_HWP( l_errl,
+                             proc_stop_deadman_timer,
+                             l_fapi_cpu_target  );
+#endif
+            if ( l_errl )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "proc_stop_deadman_timer ERROR : Returning errorlog, PLID=0x%x",
+                           l_errl->plid() );
+                break;
+            }
+            else
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "proc_prep_master_winkle SUCCESS"  );
+            }
+
+        }   while ( 0 );
+
+        // @@@@@    END CUSTOM BLOCK:   @@@@@
+
+
+        TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "call_host_activate_master exit" );
+
+        // end task, returning any errorlogs to IStepDisp
+        task_end2( l_errl );
+
+    }
 
 
 

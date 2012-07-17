@@ -102,7 +102,7 @@
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROC_SLWB_UNKOWN_ERROR</rc>
-    <description>Unknown error, shouldn't be in this code section.</description>
+    <description>Unknown error. (Shouldn't be in this code section.)</description>
     <ffdc>RC_LOCAL</ffdc>
   </hwpError>
 </hwpErrors>

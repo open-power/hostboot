@@ -21,7 +21,7 @@
  *
  *  IBM_PROLOG_END_TAG
  */
-// $Id: sbe_xip_image.c,v 1.17 2012/05/22 22:59:05 bcbrock Exp $
+// $Id: sbe_xip_image.c,v 1.20 2012/06/21 01:41:31 bcbrock Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/sbe/sbe_xip_image.c,v $
 //-----------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -191,6 +191,27 @@ dumpSectionTable(const void* i_image)
 // Note: For maximum flexibility we provide private versions of
 // endian-conversion routines rather than counting on a system-specific header
 // to provide these. 
+
+/// Byte-reverse a 16-bit integer if on a little-endian machine
+
+static uint16_t
+revle16(const uint16_t i_x)
+{
+    uint16_t rx;
+
+#ifndef _BIG_ENDIAN
+    uint8_t *pix = (uint8_t*)(&i_x);
+    uint8_t *prx = (uint8_t*)(&rx);
+
+    prx[0] = pix[1];
+    prx[1] = pix[0];
+#else
+    rx = i_x;
+#endif
+
+    return rx;
+}
+
 
 /// Byte-reverse a 32-bit integer if on a little-endian machine
 
@@ -421,8 +442,8 @@ translateSection(SbeXipSection* o_dest, const SbeXipSection* i_src)
 {
 #ifndef _BIG_ENDIAN
 
-#if SBE_XIP_HEADER_VERSION != 7
-#error This code assumes the SBE-XIP header version 7 layout
+#if SBE_XIP_HEADER_VERSION != 8
+#error This code assumes the SBE-XIP header version 8 layout
 #endif
 
     o_dest->iv_offset = revle32(i_src->iv_offset);
@@ -446,8 +467,8 @@ translateToc(SbeXipToc* o_dest, SbeXipToc* i_src)
 {
 #ifndef _BIG_ENDIAN
 
-#if SBE_XIP_HEADER_VERSION != 7
-#error This code assumes the SBE-XIP header version 7 layout
+#if SBE_XIP_HEADER_VERSION != 8
+#error This code assumes the SBE-XIP header version 8 layout
 #endif
 
     o_dest->iv_id = revle32(i_src->iv_id);
@@ -476,6 +497,7 @@ finalSection(const void* i_image, int* o_sectionId)
     sbe_xip_translate_header(&hostHeader, (SbeXipHeader*)i_image);
 
     offset = 0;
+    *o_sectionId = 0;           /* Make GCC -O3 happy */
     for (i = 0; i < SBE_XIP_SECTIONS; i++) {
         if (hostHeader.iv_section[i].iv_offset > offset) {
             *o_sectionId = i;
@@ -835,7 +857,36 @@ validateTocEntry(void* io_image, const SbeXipItem* i_item, void* io_arg)
 }
     
 
-/// Normalize a TOC entry
+// This is the FNV-1a hash, used for hashing symbol names in the .fixed
+// section into 32-bit hashes for the mini-TOC.
+
+// According to the authors:
+
+// "FNV hash algorithms and source code have been released into the public
+// domain. The authors of the FNV algorithmm look deliberate steps to disclose
+// the algorhtm (sic) in a public forum soon after it was invented. More than
+// a year passed after this public disclosure and the authors deliberatly took
+// no steps to patent the FNV algorithm. Therefore it is safe to say that the
+// FNV authors have no patent claims on the FNV algorithm as published."
+
+#define FNV_OFFSET_BASIS 2166136261u
+#define FNV_PRIME32 16777619u
+
+uint32_t
+hash32(const char* s) 
+{
+    uint32_t hash;
+
+    hash = FNV_OFFSET_BASIS;
+    while (*s) {
+        hash ^= *s++;
+        hash *= FNV_PRIME32;
+    }
+    return hash;
+}
+
+
+// Normalize a TOC entry
 
 // Normalize the TOC entry by converting relocatable pointers into 32-bit
 // offsets from the beginning of the section containing the data. All
@@ -843,11 +894,14 @@ validateTocEntry(void* io_image, const SbeXipItem* i_item, void* io_arg)
 // in bits 16:31 of the link address of the image.
 
 static int
-normalizeToc(void* io_image, SbeXipToc *io_imageToc)
+normalizeToc(void* io_image, SbeXipToc *io_imageToc,
+             SbeXipHashedToc** io_fixedTocEntry,
+             size_t* io_fixedEntriesRemaining)
 {
     SbeXipToc hostToc;
     int idSection, dataSection;
     uint32_t idOffset, dataOffset;
+    char* hostString;
     int rc;
 
     do {
@@ -857,6 +911,9 @@ normalizeToc(void* io_image, SbeXipToc *io_imageToc)
         // the data.
 
         translateToc(&hostToc, io_imageToc);
+
+        hostString = 
+            (char*)pore2Host(io_image, fullAddress(io_image, hostToc.iv_id));
 
         rc = pore2Section(io_image,
                           fullAddress(io_image, hostToc.iv_id),
@@ -882,12 +939,63 @@ normalizeToc(void* io_image, SbeXipToc *io_imageToc)
         hostToc.iv_data = dataOffset;
         hostToc.iv_section = dataSection;
 
+        // If this TOC entry is from .fixed, create a new record in .fixed_toc
+
+        if (hostToc.iv_section == SBE_XIP_SECTION_FIXED) {
+
+            if (*io_fixedEntriesRemaining == 0) {
+                rc = TRACE_ERRORX(SBE_XIP_TOC_ERROR,
+                                  "Too many TOC entries for .fixed\n");
+                break;
+            }
+            if (hostToc.iv_data != (uint16_t)hostToc.iv_data) {
+                rc = TRACE_ERRORX(SBE_XIP_IMAGE_ERROR,
+                                  "The .fixed section is too big to index\n");
+                break;
+            }
+
+            (*io_fixedTocEntry)->iv_hash = revle32(hash32(hostString));
+            (*io_fixedTocEntry)->iv_offset = revle16(hostToc.iv_data);
+            (*io_fixedTocEntry)->iv_type = hostToc.iv_type;
+            (*io_fixedTocEntry)->iv_elements = hostToc.iv_elements;
+            
+            (*io_fixedTocEntry)++;
+            (*io_fixedEntriesRemaining)--;
+        }            
+
         // Finally update the TOC entry
 
         translateToc(io_imageToc, &hostToc);
 
     } while (0);
 
+    return rc;
+}
+
+
+// Check for hash collisions in the .fixed mini-TOC.  Note that endianness is
+// not an issue here, as we're comparing for equality.
+
+static int
+hashCollision(SbeXipHashedToc* i_fixedToc, size_t i_entries)
+{
+    int rc;
+    size_t i, j;
+
+    rc = 0;
+
+    for (i = 0; i < i_entries; i++) {
+        for (j = i + 1; j < i_entries; j++) {
+            if (i_fixedToc[i].iv_hash == i_fixedToc[j].iv_hash) {
+                rc = TRACE_ERRORX(SBE_XIP_HASH_COLLISION,
+                                  "Hash collision at index %d\n",
+                                  i);
+                break;
+            }
+        }
+        if (rc) break;
+    }
+    
     return rc;
 }
 
@@ -945,6 +1053,8 @@ decodeToc(void* i_image,
 
         o_item->iv_address = 
             linkAddress(i_image) + dataSection.iv_offset + hostToc.iv_data;
+
+        o_item->iv_partial = 0;
             
     } while (0);
     return rc;
@@ -1020,6 +1130,92 @@ padImage(void* io_image, uint32_t i_allocation,
 }
 
 
+//  Get the .fixed_toc section
+
+static int
+getFixedToc(void* io_image, 
+            SbeXipHashedToc** o_imageToc, 
+            size_t* o_entries)
+{
+    int rc;
+    SbeXipSection section;
+
+    rc = sbe_xip_get_section(io_image, SBE_XIP_SECTION_FIXED_TOC, &section);
+    if (!rc) {
+
+        *o_imageToc = 
+            (SbeXipHashedToc*)((unsigned long)io_image + section.iv_offset);  
+
+        *o_entries = section.iv_size / sizeof(SbeXipHashedToc);
+    }
+
+    return rc;
+}
+
+
+// Search for an item in the fixed TOC, and populate a partial TOC entry if
+// requested. This table is small and unsorted so a linear search is
+// adequate. The TOC structures are also small so all byte-reversal is done
+// 'by hand' rather than with a translate-type API.
+
+static int
+fixedFind(void* i_image, const char* i_id, SbeXipItem* o_item)
+{
+    int rc;
+    SbeXipHashedToc* toc;
+    size_t entries;
+    uint32_t hash;
+    SbeXipSection fixedSection;
+    uint32_t offset;
+
+    do {
+        rc = getFixedToc(i_image, &toc, &entries);
+        if (rc) break;
+
+        for (hash = revle32(hash32(i_id)); entries != 0; entries--, toc++) {
+            if (toc->iv_hash == hash) break;
+        }
+
+        if (entries == 0) {
+            rc = SBE_XIP_ITEM_NOT_FOUND;
+            break;
+        } else {
+            rc = 0;
+        }
+
+        // The caller may have requested a lookup only (o_item == 0), in which
+        // case we're done.  Otherwise we create a partial SbeXipItem and
+        // populate the non-0 fields analogously to the decodeToc()
+        // routine. The data resides in the .fixed section in this case.
+
+        if (o_item == 0) break;
+
+        o_item->iv_partial = 1;
+        o_item->iv_toc = 0;
+        o_item->iv_id = 0;
+
+        o_item->iv_type = toc->iv_type;
+        o_item->iv_elements = toc->iv_elements;
+
+        rc = sbe_xip_get_section(i_image, SBE_XIP_SECTION_FIXED, &fixedSection);
+        if (rc) break;
+
+        if (fixedSection.iv_size == 0) {
+            rc = TRACE_ERROR(SBE_XIP_DATA_NOT_PRESENT);
+            break;
+        }
+
+        offset = fixedSection.iv_offset + revle16(toc->iv_offset);
+
+        o_item->iv_imageData = (void*)((uint8_t*)i_image + offset);
+        o_item->iv_address = linkAddress(i_image) + offset;
+
+    } while (0);
+
+    return rc;
+}
+        
+
 ////////////////////////////////////////////////////////////////////////////
 // Published API
 ////////////////////////////////////////////////////////////////////////////
@@ -1051,6 +1247,14 @@ sbe_xip_validate(void* i_image, const uint32_t i_size)
                               "C/Assembler size mismatch(%d/%d) "
                               "for SbeXipToc\n",
                               sizeof(SbeXipToc), SIZE_OF_SBE_XIP_TOC);
+            break;
+        }
+
+        if (sizeof(SbeXipHashedToc) != SIZE_OF_SBE_XIP_HASHED_TOC) {
+            rc = TRACE_ERRORX(SBE_XIP_BUG,
+                              "C/Assembler size mismatch(%d/%d) "
+                              "for SbeXipHashedToc\n",
+                              sizeof(SbeXipHashedToc), SIZE_OF_SBE_XIP_HASHED_TOC);
             break;
         }
 
@@ -1160,20 +1364,41 @@ sbe_xip_normalize(void* io_image)
     int rc, i;
     SbeXipSection section;
     SbeXipToc* imageToc;
-    size_t entries;
+    SbeXipHashedToc* fixedImageToc;
+    SbeXipHashedToc* fixedTocEntry;
+    size_t tocEntries, fixedTocEntries, fixedEntriesRemaining;
        
     do {
         rc = quickCheck(io_image, 0);
         if (rc) break;
 
         if (!normalized(io_image)) {
-            rc = getToc(io_image, &imageToc, &entries, 0, 0);
+
+            rc = getToc(io_image, &imageToc, &tocEntries, 0, 0);
             if (rc) break;
-            for (; entries--; imageToc++) {
-                rc = normalizeToc(io_image, imageToc);
-                if (rc) break;
+
+            rc = getFixedToc(io_image, &fixedImageToc, &fixedTocEntries);
+            if (rc) break;
+
+            fixedTocEntry = fixedImageToc;
+            fixedEntriesRemaining = fixedTocEntries;
+
+            for (; tocEntries--; imageToc++) {
+                rc = normalizeToc(io_image, imageToc, 
+                                  &fixedTocEntry, &fixedEntriesRemaining);
+                                  
             }
             if (rc) break;
+
+            if (fixedEntriesRemaining != 0) {
+                rc = TRACE_ERRORX(SBE_XIP_TOC_ERROR,
+                                  "Not enough TOC entries for .fixed");
+                break;
+            }
+
+            rc = hashCollision(fixedImageToc, fixedTocEntries);
+            if (rc) break;
+
             ((SbeXipHeader*)io_image)->iv_normalized = 1;
         }
 
@@ -1228,6 +1453,9 @@ sbe_xip_get_section(const void* i_image,
 }
 
 
+// If the 'big' TOC is not present, search the mini-TOC that only indexes the
+// fixed section.
+
 int
 sbe_xip_find(void* i_image, 
              const char* i_id,
@@ -1236,10 +1464,19 @@ sbe_xip_find(void* i_image,
     int rc;
     SbeXipToc* toc;
     SbeXipItem item, *pitem;
+    SbeXipSection* tocSection;
 
     do {
         rc = quickCheck(i_image, 1);
         if (rc) break;
+
+        rc = getSectionPointer(i_image, SBE_XIP_SECTION_TOC, &tocSection);
+        if (rc) break;
+
+        if (tocSection->iv_size == 0) {
+            rc = fixedFind(i_image, i_id, o_item);
+            break;
+        }
 
         if (sorted(i_image)) {
             rc = binarySearch(i_image, i_id, &toc);
@@ -1920,8 +2157,8 @@ sbe_xip_translate_header(SbeXipHeader* o_dest, const SbeXipHeader* i_src)
     SbeXipSection* destSection;
     const SbeXipSection* srcSection;
 
-#if SBE_XIP_HEADER_VERSION != 7
-#error This code assumes the SBE-XIP header version 7 layout
+#if SBE_XIP_HEADER_VERSION != 8
+#error This code assumes the SBE-XIP header version 8 layout
 #endif
 
     o_dest->iv_magic = revle64(i_src->iv_magic);
