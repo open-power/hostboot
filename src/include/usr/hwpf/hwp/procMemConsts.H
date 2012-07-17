@@ -31,21 +31,8 @@
 #ifndef _HWP_PROCMEMCONSTS_H_
 #define _HWP_PROCMEMCONSTS_H_
 
-//  Service Processor PSI Space - line 85 Overall Map
-//  size is 1_MB
-const uint64_t  SP_PSI_START        =   0x0003FFFE80000000ULL ;
-const uint64_t  SP_PSI_SIZE         =   0x0000000000100000ULL ;
-
-
-//  Processor Interrupt Space - line 7 Overall Map
-//  size is 1_MB
-const uint64_t  PROC_INTP_START      =   0x0003FFFF80000000ULL;
-const uint64_t  PROC_INTP_SIZE       =   0x0000000000100000ULL;
-
-
 // Lower FSP Bar Regions - line 226 Overall Map, line 72 service processor
 //  size is 4_GB
-const uint64_t  SP_BAR_START        =   0x0003FFE000000000ULL ;
 const uint64_t  SP_BAR_SIZE         =   0x0000000100000000ULL ;
 
 //  FSP Bar Size,  line 227 Overall Map
@@ -57,13 +44,11 @@ const uint64_t  FSP_MMIO_MASK_SIZE  =   0x0000000100000000 ;
 
 //  Processor RNG Space, for NX_MMIO - line 46 Overall Map
 //  size is 4_KB
-const uint64_t  PROC_RNG_START	    =   0x0003FFFF40000000ULL;
 const uint64_t  PROC_RNG_SIZE	    =   0x0000000000001000ULL;
 
 //  PCIE Mem Address Space   -   line 236 Overall Map
 //      corresponds to the "unit number" in ATTR description
 //  size is 64_GB
-const uint64_t  PCI_MEM_START	    =   0x0003D00000000000ULL;
 const uint64_t  PCI_MEM_SIZE	    =   0x0000001000000000ULL;
 
 //  PCIE BAR size values
@@ -76,7 +61,6 @@ const uint64_t  PCIE_BAR2_SIZE      =   0x0000000000001000ULL;
 
 //  PHB Register Address Space  -   line 90 Overall Map
 //  size is 1_MB
-const uint64_t  PHB_REGS_START	    =   0x0003FFFE40000000ULL;
 const uint64_t  PHB_REGS_SIZE       =   0x0000000000100000ULL;
 
 

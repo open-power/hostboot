@@ -462,30 +462,6 @@ bool getOverrideT(const fapi::AttributeId i_attrId,
 //------------------------------------------------------------------------------
 /**
  * @brief This function is called by the FAPI_ATTR_GET macro when getting
- * ATTR_PROC_MEM_BASE .
- * It should not be called directly
- *
- *  @param[in]  i_pTarget   Target pointer
- *  @param[out] o_memBase   Base CPU address for non-mirrored memory regions
- *  @return     ReturnCode. Zero on success, else platform specified error
- */
-fapi::ReturnCode fapiPlatGetProcMemBase(
-                                    const fapi::Target * i_pTarget,
-                                    uint64_t   &o_memBase );
-/**
- * @brief This function is called by the FAPI_ATTR_GET macro when getting
- * ATTR_PROC_MIRROR_BASE .
- * It should not be called directly.
- *
- *  @param[in]  i_pTarget   Target pointer
- *  @param[out] o_mirrorMemBase     Base address for mirrored memory regions
- *  @return     ReturnCode. Zero on success, else platform specified error
- */
-fapi::ReturnCode fapiPlatGetProcMirrorBase (
-                                    const fapi::Target * i_pTarget,
-                                    uint64_t    &o_mirrorMemBase );
-/**
- * @brief This function is called by the FAPI_ATTR_GET macro when getting
  * ATTR_PROC_FOREIGN_NEAR_BASE .
  * It should not be called directly.
  *
@@ -587,18 +563,6 @@ fapi::ReturnCode fapiPlatGetProcPsiBridgeBarEnable (
                                     uint8_t     &o_psiBridgeBarEnable );
 /**
  * @brief This function is called by the FAPI_ATTR_GET macro when getting
- * ATTR_PROC_PSI_BRIDGE_BAR_BASE_ADDR
- * It should not be called directly.
- *
- *  @param[in]  i_pTarget   Target pointer
- *  @param[out] o_psiBridgeBarBase  PSI Bridge BAR base address value
- *  @return     ReturnCode. Zero on success, else platform specified error
- */
-fapi::ReturnCode fapiPlatGetProcPsiBridgeBarBaseAddr (
-                                    const fapi::Target * i_pTarget,
-                                    uint64_t    &o_psiBridgeBarBase );
-/**
- * @brief This function is called by the FAPI_ATTR_GET macro when getting
  * ATTR_PROC_FSP_BAR_ENABLE
  * It should not be called directly.
  *
@@ -609,43 +573,6 @@ fapi::ReturnCode fapiPlatGetProcPsiBridgeBarBaseAddr (
 fapi::ReturnCode fapiPlatGetProcFspBarEnable (
                                     const fapi::Target * i_pTarget,
                                     uint8_t     &o_fspBarEnable );
-/**
- * @brief This function is called by the FAPI_ATTR_GET macro when getting
- * ATTR_PROC_FSP_BAR_BASE_ADDR
- * It should not be called directly.
- *
- *  @param[in]  i_pTarget   Target pointer
- *  @param[out] o_fspBarBase    FSP BAR base address value
- *  @return     ReturnCode. Zero on success, else platform specified error
- */
-
-fapi::ReturnCode fapiPlatGetProcFspBarBaseAddr (
-                                    const fapi::Target * i_pTarget,
-                                    uint64_t    &o_fspBarBase );
-/**
- * @brief This function is called by the FAPI_ATTR_GET macro when getting
- * ATTR_PROC_FSP_BAR_SIZE
- * It should not be called directly.
- *
- *  @param[in]  i_pTarget   Target pointer
- *  @param[out] o_fspBarSize    FSP BAR size value
- *  @return     ReturnCode. Zero on success, else platform specified error
- */
-fapi::ReturnCode fapiPlatGetProcFspBarSize (
-                                    const fapi::Target * i_pTarget,
-                                    uint64_t    &o_fspBarSize );
-/**
- * @brief This function is called by the FAPI_ATTR_GET macro when getting
- * ATTR_PROC_FSP_MMIO_MASK_SIZE
- * It should not be called directly.
- *
- *  @param[in]  i_pTarget   Target pointer
- *  @param[out] o_fspMmioMaskSize   FSP MMIO mask size value
- *  @return     ReturnCode. Zero on success, else platform specified error
- */
-fapi::ReturnCode fapiPlatGetProcFspMmioMaskSize (
-                                    const fapi::Target * i_pTarget,
-                                    uint64_t    &o_fspMmioMaskSize );
 /**
  * @brief This function is called by the FAPI_ATTR_GET macro when getting
  * ATTR_PROC_INTP_BAR_ENABLE
@@ -660,18 +587,6 @@ fapi::ReturnCode fapiPlatGetProcIntpBarEnable (
                                     uint8_t    &o_intpBarEnable );
 /**
  * @brief This function is called by the FAPI_ATTR_GET macro when getting
- * ATTR_PROC_INTP_BAR_BASE_ADDR
- * It should not be called directly.
- *
- *  @param[in]  i_pTarget   Target pointer
- *  @param[out] o_intpBarBaseAddr   INTP BAR base address value
- *  @return     ReturnCode. Zero on success, else platform specified error
- */
-fapi::ReturnCode fapiPlatGetProcIntpBarBaseAddr (
-                                    const fapi::Target * i_pTarget,
-                                    uint64_t    &o_intpBarBaseAddr );
-/**
- * @brief This function is called by the FAPI_ATTR_GET macro when getting
  * ATTR_PROC_NX_MMIO_BAR_ENABLE
  * It should not be called directly.
  *
@@ -682,18 +597,6 @@ fapi::ReturnCode fapiPlatGetProcIntpBarBaseAddr (
 fapi::ReturnCode fapiPlatGetProcNxMmioBarEnable(
                                     const fapi::Target * i_pTarget,
                                     uint8_t     &o_nxMmioBarEnable );
-/**
- * @brief This function is called by the FAPI_ATTR_GET macro when getting
- * ATTR_PROC_NX_MMIO_BAR_BASE_ADDR
- * It should not be called directly.
- *
- *  @param[in]  i_pTarget   Target pointer
- *  @param[out] o_nxMmioBarBase     NX MMIO BAR base address value
- *  @return     ReturnCode. Zero on success, else platform specified error
- */
-fapi::ReturnCode fapiPlatGetProcNxMmioBarBaseAddr (
-                                    const fapi::Target * i_pTarget,
-                                    uint64_t    &o_nxMmioBarBase );
 /**
  * @brief This function is called by the FAPI_ATTR_GET macro when getting
  * ATTR_PROC_NX_MMIO_BAR_SIZE
@@ -922,10 +825,6 @@ fapi::ReturnCode fapiPlatGetProcPcieBarSize (
 //------------------------------------------------------------------------------
 // MACROS to support  proc_setup_bars_memory_attributes.xml
 //------------------------------------------------------------------------------
-#define ATTR_PROC_MEM_BASE_GETMACRO( ID, PTARGET, VAL ) \
-    fapi::platAttrSvc::fapiPlatGetProcMemBase( PTARGET, VAL )
-#define ATTR_PROC_MIRROR_BASE_GETMACRO( ID, PTARGET, VAL )  \
-    fapi::platAttrSvc::fapiPlatGetProcMirrorBase (PTARGET, VAL )
 #define ATTR_PROC_FOREIGN_NEAR_BASE_GETMACRO( ID, PTARGET, VAL )    \
     fapi::platAttrSvc::fapiPlatGetProcForeignNearBase (PTARGET, VAL )
 #define ATTR_PROC_FOREIGN_NEAR_SIZE_GETMACRO( ID, PTARGET, VAL )    \
@@ -944,24 +843,12 @@ fapi::ReturnCode fapiPlatGetProcPcieBarSize (
 //------------------------------------------------------------------------------
 #define ATTR_PROC_PSI_BRIDGE_BAR_ENABLE_GETMACRO( ID, PTARGET, VAL )    \
     fapi::platAttrSvc::fapiPlatGetProcPsiBridgeBarEnable (PTARGET, VAL )
-#define ATTR_PROC_PSI_BRIDGE_BAR_BASE_ADDR_GETMACRO( ID, PTARGET, VAL ) \
-    fapi::platAttrSvc::fapiPlatGetProcPsiBridgeBarBaseAddr (PTARGET, VAL )
 #define ATTR_PROC_FSP_BAR_ENABLE_GETMACRO( ID, PTARGET, VAL )   \
     fapi::platAttrSvc::fapiPlatGetProcFspBarEnable (PTARGET, VAL )
-#define ATTR_PROC_FSP_BAR_BASE_ADDR_GETMACRO( ID, PTARGET, VAL )    \
-    fapi::platAttrSvc::fapiPlatGetProcFspBarBaseAddr (PTARGET, VAL )
-#define ATTR_PROC_FSP_BAR_SIZE_GETMACRO( ID, PTARGET, VAL )    \
-    fapi::platAttrSvc::fapiPlatGetProcFspBarSize (PTARGET, VAL )
-#define ATTR_PROC_FSP_MMIO_MASK_SIZE_GETMACRO( ID, PTARGET, VAL )    \
-    fapi::platAttrSvc::fapiPlatGetProcFspMmioMaskSize (PTARGET, VAL )
 #define ATTR_PROC_INTP_BAR_ENABLE_GETMACRO( ID, PTARGET, VAL )  \
     fapi::platAttrSvc::fapiPlatGetProcIntpBarEnable (PTARGET, VAL )
-#define ATTR_PROC_INTP_BAR_BASE_ADDR_GETMACRO( ID, PTARGET, VAL )   \
-    fapi::platAttrSvc::fapiPlatGetProcIntpBarBaseAddr (PTARGET, VAL )
 #define ATTR_PROC_NX_MMIO_BAR_ENABLE_GETMACRO( ID, PTARGET, VAL )   \
     fapi::platAttrSvc::fapiPlatGetProcNxMmioBarEnable(PTARGET, VAL )
-#define ATTR_PROC_NX_MMIO_BAR_BASE_ADDR_GETMACRO( ID, PTARGET, VAL )    \
-    fapi::platAttrSvc::fapiPlatGetProcNxMmioBarBaseAddr (PTARGET, VAL )
 #define ATTR_PROC_NX_MMIO_BAR_SIZE_GETMACRO( ID, PTARGET, VAL )    \
     fapi::platAttrSvc::fapiPlatGetProcNxMmioBarSize (PTARGET, VAL )
 #define ATTR_PROC_PCIE_BAR_ENABLE_GETMACRO( ID, PTARGET, VAL )  \
@@ -975,14 +862,5 @@ fapi::ReturnCode fapiPlatGetProcPcieBarSize (
 //  MACROS to support proc_fab_smp_fabric_attributes.xml
 //------------------------------------------------------------------------------
 
-#if 0
-// @todo not sure if these need to be active yet.  Leave commented out
-#define ATTR_FREQ_CORE_GETMACRO( ID, PTARGET, VAL ) \
-    fapi::platAttrSvc::fapiPlatGetFreqCore (PTARGET, VAL )
-#define ATTR_FREQ_CORE_SETMACRO( ID, PTARGET, VAL ) \
-    fapi::platAttrSvc::fapiPlatSetFreqCore (PTARGET, VAL )
-#define ATTR_PROC_PCIE_NOT_F_LINK_GETMACRO( ID, PTARGET, VAL )  \
-    fapi::platAttrSvc::fapiPlatGetProcPcieNotFLink (PTARGET, VAL )
-#endif
 
 #endif // FAPIPLATATTRIBUTESERVICE_H_

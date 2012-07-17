@@ -1200,48 +1200,6 @@ fapi::ReturnCode fapiPlatGetProcPsiBridgeBarEnable (
     return  l_fapirc;
 }
 
-fapi::ReturnCode fapiPlatGetProcPsiBridgeBarBaseAddr (
-                                    const fapi::Target * i_pTarget,
-                                    uint64_t    &o_psiBridgeBarBase )
-{
-    fapi::ReturnCode l_fapirc( fapi::FAPI_RC_SUCCESS );
-    uint64_t    l_procNum       =   0;
-    uint8_t     l_isEnabled     =   PROC_BARS_DISABLE;
-
-    do  {
-        /*@
-         *  @errortype
-         *  @moduleid   MOD_ATTR_PROC_PSI_BRIDGE_BAR_BASE_ADDR_GET
-         *  @reasoncode RC_ATTR_BAD_TARGET_PARAM
-         *  @devdesc    Null FAPI Target passed to ATTR_GET
-         */
-        l_fapirc    =   barsPreCheck(
-                              i_pTarget,
-                              fapi::MOD_ATTR_PROC_PSI_BRIDGE_BAR_BASE_ADDR_GET,
-                              l_procNum,
-                              l_isEnabled );
-        if ( l_fapirc )
-        {
-            FAPI_ERR("ERROR : NULL FAPI Target");
-            break;
-        }
-
-        // The spreadsheet shows the base address ( SPPSIStart ) is
-        //  0x0003FFFE80000000.
-        //  On the Service Processor page there are 63
-        //  links, incrementing by 1 MB , i.e.
-        //  0x0003FFFE80000000 - 0x0003FFFE83F00000
-        //  For now it doesn't matter which link is assigned to which proc
-        //  @todo further work done in RTC 34095
-
-        o_psiBridgeBarBase  =   SP_PSI_START + ( l_procNum * SP_PSI_SIZE );
-
-    }   while(0);
-
-
-    return  l_fapirc;
-}
-
 fapi::ReturnCode fapiPlatGetProcFspBarEnable (
                                     const fapi::Target * i_pTarget,
                                     uint8_t     &o_fspBarEnable )
@@ -1270,109 +1228,6 @@ fapi::ReturnCode fapiPlatGetProcFspBarEnable (
         o_fspBarEnable  =   l_isEnabled;
 
     }   while(0);
-
-    return  l_fapirc;
-}
-
-fapi::ReturnCode fapiPlatGetProcFspBarBaseAddr (
-                                    const fapi::Target * i_pTarget,
-                                    uint64_t    &o_fspBarBase )
-{
-    fapi::ReturnCode l_fapirc( fapi::FAPI_RC_SUCCESS );
-    uint64_t    l_procNum       =   0;
-    uint8_t     l_isEnabled     =   PROC_BARS_DISABLE;
-
-    do  {
-        /*@
-         *  @errortype
-         *  @moduleid   MOD_ATTR_PROC_FSP_BAR_BASE_ADDR_GET
-         *  @reasoncode RC_ATTR_BAD_TARGET_PARAM
-         *  @devdesc    Null FAPI Target passed to ATTR_GET
-         */
-        l_fapirc    =   barsPreCheck( i_pTarget,
-                                      fapi::MOD_ATTR_PROC_FSP_BAR_BASE_ADDR_GET,
-                                      l_procNum,
-                                      l_isEnabled );
-        if ( l_fapirc )
-        {
-            FAPI_ERR("ERROR : NULL FAPI Target");
-            break;
-        }
-
-        //  There are 16 FSP's starting at 0x0003FFE000000000, incrementing
-        //  every 4GB.
-        //  For now, map each FSP to a different proc
-        //  @todo further work done in RTC 34095
-        o_fspBarBase    =   SP_BAR_START + ( l_procNum * SP_BAR_SIZE );
-
-    }   while(0);
-
-
-    return  l_fapirc;
-}
-
-fapi::ReturnCode fapiPlatGetProcFspBarSize (
-                                    const fapi::Target * i_pTarget,
-                                    uint64_t    &o_fspBarSize )
-{
-    fapi::ReturnCode l_fapirc( fapi::FAPI_RC_SUCCESS );
-    uint64_t    l_procNum       =   0;
-    uint8_t     l_isEnabled     =   PROC_BARS_DISABLE;
-
-    do  {
-        /*@
-         *  @errortype
-         *  @moduleid   MOD_ATTR_PROC_FSP_BAR_SIZE_GET
-         *  @reasoncode RC_ATTR_BAD_TARGET_PARAM
-         *  @devdesc    Null FAPI Target passed to ATTR_GET
-         */
-        l_fapirc    =   barsPreCheck( i_pTarget,
-                                      fapi::MOD_ATTR_PROC_FSP_BAR_SIZE_GET,
-                                      l_procNum,
-                                      l_isEnabled );
-        if ( l_fapirc )
-        {
-            FAPI_ERR("ERROR : NULL FAPI Target");
-            break;
-        }
-
-        o_fspBarSize    =   FSP_BAR_SIZE ;
-
-    }   while(0);
-
-
-    return  l_fapirc;
-}
-
-fapi::ReturnCode fapiPlatGetProcFspMmioMaskSize (
-                                    const fapi::Target * i_pTarget,
-                                    uint64_t    &o_fspMmioMaskSize )
-{
-    fapi::ReturnCode l_fapirc( fapi::FAPI_RC_SUCCESS );
-    uint64_t    l_procNum       =   0;
-    uint8_t     l_isEnabled     =   PROC_BARS_DISABLE;
-
-    do  {
-        /*@
-         *  @errortype
-         *  @moduleid   MOD_ATTR_PROC_FSP_MMIO_MASK_SIZE_GET
-         *  @reasoncode RC_ATTR_BAD_TARGET_PARAM
-         *  @devdesc    Null FAPI Target passed to ATTR_GET
-         */
-        l_fapirc    =   barsPreCheck( i_pTarget,
-                                      fapi::MOD_ATTR_PROC_FSP_MMIO_MASK_SIZE_GET,
-                                      l_procNum,
-                                      l_isEnabled );
-        if ( l_fapirc )
-        {
-            FAPI_ERR("ERROR : NULL FAPI Target");
-            break;
-        }
-
-        o_fspMmioMaskSize    =  FSP_MMIO_MASK_SIZE ;
-
-    }   while(0);
-
 
     return  l_fapirc;
 }
@@ -1409,40 +1264,6 @@ fapi::ReturnCode fapiPlatGetProcIntpBarEnable (
     return  l_fapirc;
 }
 
-fapi::ReturnCode fapiPlatGetProcIntpBarBaseAddr (
-                                    const fapi::Target * i_pTarget,
-                                    uint64_t    &o_intpBarBaseAddr )
-{
-    fapi::ReturnCode l_fapirc( fapi::FAPI_RC_SUCCESS );
-    uint64_t    l_procNum       =   0;
-    uint8_t     l_isEnabled     =   PROC_BARS_DISABLE;
-
-    do  {
-        /*@
-         *  @errortype
-         *  @moduleid   MOD_ATTR_PROC_INTP_BAR_BASE_ADDR_GET
-         *  @reasoncode RC_ATTR_BAD_TARGET_PARAM
-         *  @devdesc    Null FAPI Target passed to ATTR_GET
-         */
-        l_fapirc    =   barsPreCheck( i_pTarget,
-                                      fapi::MOD_ATTR_PROC_INTP_BAR_BASE_ADDR_GET,
-                                      l_procNum,
-                                      l_isEnabled );
-        if ( l_fapirc )
-        {
-            FAPI_ERR("ERROR : NULL FAPI Target");
-            break;
-        }
-
-        //  @todo further work done in RTC 34095
-        o_intpBarBaseAddr   =   PROC_INTP_START + (l_procNum * PROC_INTP_SIZE );
-
-
-    }   while(0);
-
-    return  l_fapirc;
-}
-
 fapi::ReturnCode fapiPlatGetProcNxMmioBarEnable(
                                     const fapi::Target * i_pTarget,
                                     uint8_t     &o_nxMmioBarEnable )
@@ -1469,38 +1290,6 @@ fapi::ReturnCode fapiPlatGetProcNxMmioBarEnable(
         }
 
         o_nxMmioBarEnable   =   l_isEnabled;
-
-    }   while(0);
-
-    return  l_fapirc;
-}
-
-fapi::ReturnCode fapiPlatGetProcNxMmioBarBaseAddr (
-                                    const fapi::Target * i_pTarget,
-                                    uint64_t    &o_nxMmioBarBase )
-{
-    fapi::ReturnCode l_fapirc( fapi::FAPI_RC_SUCCESS );
-    uint64_t    l_procNum       =   0;
-    uint8_t     l_isEnabled     =   PROC_BARS_DISABLE;
-
-    do  {
-        /*@
-         *  @errortype
-         *  @moduleid   MOD_ATTR_PROC_NX_MMIO_BAR_BASE_ADDR_GET
-         *  @reasoncode RC_ATTR_BAD_TARGET_PARAM
-         *  @devdesc    Null FAPI Target passed to ATTR_GET
-         */
-        l_fapirc    =   barsPreCheck( i_pTarget,
-                                  fapi::MOD_ATTR_PROC_NX_MMIO_BAR_BASE_ADDR_GET,
-                                  l_procNum,
-                                  l_isEnabled );
-        if ( l_fapirc )
-        {
-            FAPI_ERR("ERROR : NULL FAPI Target");
-            break;
-        }
-
-          o_nxMmioBarBase   =   PROC_RNG_START + (l_procNum * PROC_RNG_SIZE );
 
     }   while(0);
 
@@ -1611,16 +1400,24 @@ fapi::ReturnCode fapiPlatGetProcPcieBarBaseAddr (
             break;
         }
 
+        // Extract the Proc Hostboot Target pointer
+        TARGETING::Target * l_hbProc =
+          reinterpret_cast<TARGETING::Target*>(i_pTarget->get());
+
+        // Pull the data out of the Hostboot attribute
+        uint64_t l_pciMem[4];
+        l_hbProc->tryGetAttr<TARGETING::ATTR_PCI_BASE_ADDRS>(l_pciMem);
+        uint64_t l_phbRegs[4];
+        l_hbProc->tryGetAttr<TARGETING::ATTR_PHB_BASE_ADDRS>(l_phbRegs);
+
         //  BAR # 0 are the PCIE unit #'s
         //  BAR # 1 is disabled, set to 0
         //  BAR # 2 are the PHB REGS
         for ( uint8_t u=0; u < 3; u++ )
         {
-           o_pcieBarBase[u][0]  =  ( PCI_MEM_START +
-                                      (u+(l_procNum*4)) * PCI_MEM_SIZE );
-           o_pcieBarBase[u][1]  =   0;
-           o_pcieBarBase[u][2]  =   ( PHB_REGS_START +
-                                       (u+(l_procNum*4)) * PHB_REGS_SIZE );
+           o_pcieBarBase[u][0]  =  l_pciMem[u];
+           o_pcieBarBase[u][1]  =  0;
+           o_pcieBarBase[u][2]  =  l_phbRegs[u];
 
            FAPI_DBG( "fapiPlatGetProcPcieBarBaseAddr: Unit %d : %p %p %p",
                      u,

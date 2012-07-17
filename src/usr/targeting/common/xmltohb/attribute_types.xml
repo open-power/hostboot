@@ -673,19 +673,6 @@
 </attribute>
 
 <attribute>
-    <id>XSCOM_BASE_ADDRESS</id>
-    <description>System XSCOM base address</description>
-    <simpleType>
-        <uint64_t>
-            <default>0x0003FC0000000000</default>
-        </uint64_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-
-<attribute>
     <id>XSCOM_VIRTUAL_ADDR</id>
     <description>Cached Virtual Address of Xscom memory space for this Chip</description>
     <simpleType>
@@ -1126,7 +1113,7 @@
         <uint32_t>
             <default>0</default>
         </uint32_t>
-        <array>2,2</array>
+        <array>2,2</array><!-- [drop][port] -->
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -1144,7 +1131,7 @@
         <uint8_t>
             <default>0</default>
         </uint8_t>
-        <array>2,2</array>
+        <array>2,2</array><!-- [drop][port] -->
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -1162,7 +1149,7 @@
         <uint8_t>
             <default>0</default>
         </uint8_t>
-        <array>2,2</array>
+        <array>2,2</array><!-- [drop][port] -->
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -1555,7 +1542,7 @@
         <uint8_t>
             <default>0</default>
         </uint8_t>
-        <array>2,2</array>
+        <array>2,2</array><!-- [drop][port] -->
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -1762,13 +1749,32 @@
         <uint8_t>
             <default>0</default>
         </uint8_t>
-        <array>2,2</array>
+        <array>2,2</array><!-- [drop][port] -->
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_EFF_DIMM_SIZE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_SIZE_CONFIGED</id>
+    <description>Actual Configured DIMM Size. Initialized and used by HWPs.
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2,2</array><!-- [drop][port] -->
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DIMM_SIZE_CONFIGED</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -2273,7 +2279,7 @@
         <uint64_t>
             <default>0</default>
         </uint64_t>
-        <array>2,2</array>
+        <array>2,2</array><!-- [drop][port] -->
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -2376,7 +2382,7 @@
         <uint32_t>
             <default>0</default>
         </uint32_t>
-        <array>2,2</array>
+        <array>2,2</array><!-- [drop][port] -->
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -2394,7 +2400,7 @@
         <uint32_t>
             <default>0</default>
         </uint32_t>
-        <array>2,2</array>
+        <array>2,2</array><!-- [drop][port] -->
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -2466,7 +2472,7 @@
         <uint32_t>
             <default>0</default>
         </uint32_t>
-        <array>2,2</array>
+        <array>2,2</array><!-- [drop][port] -->
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -2484,7 +2490,7 @@
         <uint32_t>
             <default>0</default>
         </uint32_t>
-        <array>2,2</array>
+        <array>2,2</array><!-- [drop][port] -->
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -2502,7 +2508,7 @@
         <uint32_t>
             <default>0</default>
         </uint32_t>
-        <array>2,2</array>
+        <array>2,2</array><!-- [drop][port] -->
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -2520,7 +2526,7 @@
         <uint32_t>
             <default>0</default>
         </uint32_t>
-        <array>2,2</array>
+        <array>2,2</array><!-- [drop][port] -->
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -2574,7 +2580,7 @@
         <uint32_t>
             <default>0</default>
         </uint32_t>
-        <array>2,2</array>
+        <array>2,2</array><!-- [drop][port] -->
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -3494,7 +3500,7 @@
         <uint32_t>
             <default>0</default>
         </uint32_t>
-        <array>2,2</array>
+        <array>2,2</array><!-- [drop][port] -->
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -3512,7 +3518,7 @@
         <uint8_t>
             <default>0</default>
         </uint8_t>
-        <array>2,2</array>
+        <array>2,2</array><!-- [drop][port] -->
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -3530,7 +3536,7 @@
         <uint8_t>
             <default>0</default>
         </uint8_t>
-        <array>2,2</array>
+        <array>2,2</array><!-- [drop][port] -->
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -3565,7 +3571,7 @@
         <uint8_t>
             <default>0</default>
         </uint8_t>
-        <array>2,2</array>
+        <array>2,2</array><!-- [drop][port] -->
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -3583,7 +3589,7 @@
         <uint8_t>
             <default>0</default>
         </uint8_t>
-        <array>2,2</array>
+        <array>2,2</array><!-- [drop][port] -->
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -3601,7 +3607,7 @@
         <uint8_t>
             <default>0</default>
         </uint8_t>
-        <array>2,2</array>
+        <array>2,2</array><!-- [drop][port] -->
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -3619,7 +3625,7 @@
         <uint8_t>
             <default>0</default>
         </uint8_t>
-        <array>2,2</array>
+        <array>2,2</array><!-- [drop][port] -->
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -3826,7 +3832,7 @@
   </description>
   <simpleType>
       <uint64_t></uint64_t>
-      <array>8</array>
+      <array>8</array><!--per group-->
   </simpleType>
   <persistency>volatile-zeroed</persistency>
   <readable/>
@@ -3852,7 +3858,7 @@
   </description>
   <simpleType>
       <uint64_t></uint64_t>
-      <array>8</array>
+      <array>8</array><!--per group-->
   </simpleType>
   <persistency>volatile-zeroed</persistency>
   <readable/>
@@ -3875,7 +3881,7 @@
   </description>
   <simpleType>
       <uint64_t></uint64_t>
-      <array>4</array>
+      <array>4</array><!--per group-->
   </simpleType>
   <persistency>volatile-zeroed</persistency>
   <readable/>
@@ -3899,7 +3905,7 @@
   </description>
   <simpleType>
       <uint64_t></uint64_t>
-      <array>4</array>
+      <array>4</array><!--per group-->
   </simpleType>
   <persistency>volatile-zeroed</persistency>
   <readable/>
@@ -4049,5 +4055,301 @@
     <readable/>
     <writeable/>
 </attribute>
+
+<attribute>
+    <id>PROC_MCS_GROUPS</id>
+    <description>
+        Per MCS group number
+        Value is index for PROC_MEM_BASES and PROC_MEM_SIZES arrays
+        creator: mss_eff_grouping.C
+        consumer: HDAT        
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0,0,0,0,0,0,0,0</default>
+        </uint8_t>
+    <array>8</array><!--per MCS-->
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_MCS_GROUPS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<!-- ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== 
+     Memory Map
+     The attributes below are defined by the PHYP Memory Map
+     documentation owned by Shawn Lambeth
+
+     @todo: RTC:44128 will be used to automatically create this data
+     ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== -->
+
+<!-- ===== System Attributes ===== -->
+
+<attribute>
+    <id>XSCOM_BASE_ADDRESS</id>
+    <description>System XSCOM base address</description>
+    <simpleType>
+        <uint64_t>
+            <!-- 1020TB, 32GB per proc -->
+            <default>0x0003FC0000000000</default>
+        </uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>IBSCOM_BASE_ADDR</id>
+    <description>System Inband Scom base address</description>
+    <simpleType>
+        <uint64_t>
+            <!-- 992TB, XX per proc/centaur? (@todo RTC:34743) -->
+            <default>0x0003E00000000000</default>
+        </uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>MIRROR_BASE_ADDRESS</id>
+    <description>System Mirrorable base address</description>
+    <simpleType>
+        <uint64_t>
+            <default>0x0002000000000000</default><!-- 512 TB -->
+        </uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+
+<!-- ===== Processor Chip Attributes ===== -->
+
+<attribute>
+    <id>FSP_BASE_ADDR</id>
+    <description>Base Address of FSP IO Region</description>
+    <simpleType>
+        <uint64_t>
+            <!-- Starts at 1024TB - 128GB, 4GB per proc -->
+            <default>0x0003FFE000000000</default>
+        </uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_FSP_BAR_BASE_ADDR</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>FSP_BAR_SIZE</id>
+    <description>Size of FSP IO Region</description>
+    <simpleType>
+        <uint64_t>
+            <!-- 4GB per Proc -->
+            <default>0x0000000000100000</default>
+        </uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_FSP_BAR_SIZE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>FSP_MMIO_MASK_SIZE</id>
+    <description>MMIO Mask for FSP IO Region</description>
+    <simpleType>
+        <uint64_t>
+            <!-- @fixme : what is this value? -->
+            <default>0x0000000000000000</default>
+        </uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_FSP_MMIO_MASK_SIZE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PSI_BRIDGE_BASE_ADDR</id>
+    <description>Base Address of PSI Bridge Logic</description>
+    <simpleType>
+        <uint64_t>
+            <!-- Starts at 1024TB - 6GB, 1MB per link -->
+            <!-- 0x0003FFFE80000000 + 0x100000*procnum -->
+            <default>0xFFFFFFFFFFFFFFFF</default>
+        </uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PSI_BRIDGE_BAR_BASE_ADDR</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>INTP_BASE_ADDR</id>
+    <description>Base Address of Interrupt Presenter</description>
+    <simpleType>
+        <uint64_t>
+            <!-- Starts at 1024TB - 2GB, 1MB per proc -->
+            <!-- 0x0003FFFF80000000 + 0x100000*procnum -->
+            <default>0xFFFFFFFFFFFFFFFF</default>
+        </uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_INTP_BAR_BASE_ADDR</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PHB_BASE_ADDRS</id>
+    <description>Base Address of PHB Register Space</description>
+    <simpleType>
+        <uint64_t>
+            <!-- Starts at 1024TB - 7GB -->
+            <!-- 0x0003FFFE40000000 + 0x400000*procnum + 0x100000*phbnum -->
+            <default>
+                0xFFFFFFFFFFFFFFFF,
+                0xFFFFFFFFFFFFFFFF,
+                0xFFFFFFFFFFFFFFFF,
+                0xFFFFFFFFFFFFFFFF
+            </default>
+        </uint64_t>
+        <array>4</array><!-- per PHB -->
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>PCI_BASE_ADDRS</id>
+    <description>Base Address of PCI Memory Space</description>
+    <simpleType>
+        <uint64_t>
+            <!-- Starts at 976TB, 64GB per PHB (=256GB per proc) -->
+            <!-- 0x0003D00000000000 + 0x4000000000*procnum + 0x1000000000*phbnum -->
+            <default>
+                0x0003D00000000000,
+                0x0003FFFE40100000,
+                0x0003FFFE40200000,
+                0x0003FFFE40300000
+            </default>
+        </uint64_t>
+        <array>4</array><!-- per PHB -->
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+
+<attribute>
+    <id>MEM_BASE</id>
+    <description>Base Address for all mainstore behind this processor</description>
+    <simpleType>
+        <uint64_t>
+            <default>0xFFFFFFFFFFFFFFFF</default>
+        </uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_MEM_BASE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MIRROR_BASE</id>
+    <description>Base Address for all mirrored mainstore behind this processor</description>
+    <simpleType>
+        <uint64_t>
+            <default>0xFFFFFFFFFFFFFFFF</default>
+        </uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_MIRROR_BASE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>RNG_BASE_ADDR</id>
+    <description>Base Address of RNG IO Region</description>
+    <simpleType>
+        <uint64_t>
+            <!-- Starts at 1024TB - 3GB -->
+            <!-- 0x0003FFFF40000000 + 0x1000*procnum -->
+            <default>0xFFFFFFFFFFFFFFFF</default>
+        </uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_NX_MMIO_BAR_BASE_ADDR</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>RNG_BAR_SIZE</id>
+    <description>Size of RNG IO Region</description>
+    <simpleType>
+        <uint64_t>
+            <!-- 4 KB per processor -->
+            <default>0x000000000001000</default>
+        </uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>IMT_BASE_ADDR</id>
+    <description>Base Address of In-Memory Trace Region
+        Set by FSP-based tooling
+    </description>
+    <simpleType>
+        <uint64_t>
+            <default>0xFFFFFFFFFFFFFFFF</default>
+        </uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>IMT_BAR_SIZE</id>
+    <description>Size of IMT IO Region
+        Set by FSP-based tooling
+    </description>
+    <simpleType>
+        <uint64_t>
+            <default>0x0000000000000000</default>
+        </uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<!-- ===== ===== End Memory Map ===== ===== ===== ===== ===== ===== -->
 
 </attributes>

@@ -648,6 +648,72 @@ sub generate_master_proc
         <sizeInclNull>$mboxsize</sizeInclNull>
     </attribute>";
     }
+
+    # Data from PHYP Memory Map
+    print "    <!-- Data from PHYP Memory Map -->\n";
+
+    # Starts at 1024TB - 128GB, 4GB per proc
+    printf( "    <attribute><id>FSP_BASE_ADDR</id>\n" );
+    printf( "        <default>0x%016X</default>\n",
+	   0x0003FFE000000000 + 0x1000000000*$proc );
+    printf( "    </attribute>\n" );
+
+    # Starts at 1024TB - 6GB, 1MB per link/proc
+    printf( "    <attribute><id>PSI_BRIDGE_BASE_ADDR</id>\n" );
+    printf( "        <default>0x%016X</default>\n",
+	   0x0003FFFE80000000 + 0x100000*$proc );
+    printf( "    </attribute>\n" );
+
+    # Starts at 1024TB - 2GB, 1MB per proc
+    printf( "    <attribute><id>INTP_BASE_ADDR</id>\n" );
+    printf( "        <default>0x%016X</default>\n",
+	   0x0003FFFF80000000 + 0x100000*$proc );
+    printf( "    </attribute>\n" );
+
+    # Starts at 1024TB - 7GB, 1MB per PHB (=4MB per proc)
+    printf( "    <attribute><id>PHB_BASE_ADDRS</id>\n" );
+    printf( "        <default>\n" );
+    printf( "            0x%016X,0x%016X,\n",
+	   0x0003FFFE40000000 + 0x400000*$proc + 0x100000*0,
+	     0x0003FFFE40000000 + 0x400000*$proc + 0x100000*1 );
+    printf( "            0x%016X,0x%016X\n",
+	   0x0003FFFE40000000 + 0x400000*$proc + 0x100000*2,
+	     0x0003FFFE40000000 + 0x400000*$proc + 0x100000*3 );
+    printf( "        </default>\n" );
+    printf( "    </attribute>\n" );
+
+    # Starts at 976TB, 64GB per PHB (=256GB per proc)
+    printf( "    <attribute><id>PCI_BASE_ADDRS</id>\n" );
+    printf( "        <default>\n" );
+    printf( "            0x%016X,0x%016X,\n",
+	   0x0003D00000000000 + 0x4000000000*$proc + 0x1000000000*0,
+	     0x0003D00000000000 + 0x4000000000*$proc + 0x1000000000*1 );
+    printf( "            0x%016X,0x%016X\n",
+	   0x0003D00000000000 + 0x4000000000*$proc + 0x1000000000*2,
+	     0x0003D00000000000 + 0x4000000000*$proc + 0x1000000000*3 );
+    printf( "        </default>\n" );
+    printf( "    </attribute>\n" );
+
+    # Starts at 0, 2TB per proc
+    printf( "    <attribute><id>MEM_BASE</id>\n" );
+    printf( "        <default>0x%016X</default>\n", 0x20000000000*$proc );
+    printf( "    </attribute>\n" );
+
+    # Starts at 512TB, 2TB per proc
+    printf( "    <attribute><id>MIRROR_BASE</id>\n" );
+    printf( "        <default>0x%016X</default>\n",
+	   0x0002000000000000 + 0x20000000000*$proc );
+    printf( "    </attribute>\n" );
+
+    # Starts at 1024TB - 3GB
+    printf( "    <attribute><id>RNG_BASE_ADDR</id>\n" );
+    printf( "        <default>0x%016X</default>\n",
+	   0x0003FFFF40000000 + 0x1000*$proc );
+    printf( "    </attribute>\n" );
+
+    print "    <!-- End PHYP Memory Map -->\n";
+    # end PHYP Memory Map
+
     print "\n</targetInstance>\n";
 }
 
@@ -745,6 +811,72 @@ sub generate_slave_proc
         <sizeInclNull>$mboxsize</sizeInclNull>
     </attribute>";
     }
+
+    # Data from PHYP Memory Map
+
+    # Starts at 1024TB - 128GB, 4GB per proc
+    printf( "    <attribute><id>FSP_BASE_ADDR</id>\n" );
+    printf( "        <default>0x%016X</default>\n",
+	   0x0003FFE000000000 + 0x1000000000*$proc );
+    printf( "    </attribute>\n" );
+
+    # Starts at 1024TB - 6GB, 1MB per link/proc
+    printf( "    <attribute><id>PSI_BRIDGE_BASE_ADDR</id>\n" );
+    printf( "        <default>0x%016X</default>\n",
+	   0x0003FFFE80000000 + 0x100000*$proc );
+    printf( "    </attribute>\n" );
+
+    # Starts at 1024TB - 2GB, 1MB per proc
+    printf( "    <attribute><id>INTP_BASE_ADDR</id>\n" );
+    printf( "        <default>0x%016X</default>\n",
+	   0x0003FFFF80000000 + 0x100000*$proc );
+    printf( "    </attribute>\n" );
+
+    # Starts at 1024TB - 7GB, 1MB per PHB (=4MB per proc)
+    printf( "    <attribute>\n" );
+    printf( "    <id>PHB_BASE_ADDRS</id>\n" );
+    printf( "    <default>\n" );
+    printf( "       0x%016X,0x%016X,\n",
+	   0x0003FFFE40000000 + 0x400000*$proc + 0x100000*0,
+	     0x0003FFFE40000000 + 0x400000*$proc + 0x100000*1 );
+    printf( "       0x%016X,0x%016X\n",
+	   0x0003FFFE40000000 + 0x400000*$proc + 0x100000*2,
+	     0x0003FFFE40000000 + 0x400000*$proc + 0x100000*3 );
+    printf( "    </default>\n" );
+    printf( "    </attribute>\n" );
+
+    # Starts at 976TB, 64GB per PHB (=256GB per proc)
+    printf( "    <attribute>\n" );
+    printf( "    <id>PCI_BASE_ADDRS</id>\n" );
+    printf( "    <default>\n" );
+    printf( "       0x%016X,0x%016X,\n",
+	   0x0003D00000000000 + 0x4000000000*$proc + 0x1000000000*0,
+	     0x0003D00000000000 + 0x4000000000*$proc + 0x1000000000*1 );
+    printf( "       0x%016X,0x%016X\n",
+	   0x0003D00000000000 + 0x4000000000*$proc + 0x1000000000*2,
+	     0x0003D00000000000 + 0x4000000000*$proc + 0x1000000000*3 );
+    printf( "    </default>\n" );
+    printf( "    </attribute>\n" );
+
+    # Starts at 0, 2TB per proc
+    printf( "    <attribute><id>MEM_BASE</id>\n" );
+    printf( "        <default>0x%016X</default>\n", 0x20000000000*$proc );
+    printf( "    </attribute>\n" );
+
+    # Starts at 512TB, 2TB per proc
+    printf( "    <attribute><id>MIRROR_BASE</id>\n" );
+    printf( "        <default>0x%016X</default>\n",
+	   0x0002000000000000 + 0x20000000000*$proc );
+    printf( "    </attribute>\n" );
+
+    # Starts at 1024TB - 3GB
+    printf( "    <attribute><id>RNG_BASE_ADDR</id>\n" );
+    printf( "        <default>0x%016X</default>\n",
+	   0x0003FFFF40000000 + 0x1000*$proc );
+    printf( "    </attribute>\n" );
+
+    # end PHYP Memory Map
+
     print "\n</targetInstance>\n";
 }
 

@@ -70,6 +70,7 @@
     <attribute><id>HB_MUTEX_TEST_LOCK</id></attribute>
     <attribute><id>DUMMY_RW</id></attribute>
     <attribute><id>XSCOM_BASE_ADDRESS</id></attribute>
+    <attribute><id>IBSCOM_BASE_ADDR</id></attribute>
     <attribute><id>TEST_NULL_STRING</id></attribute>
     <attribute><id>TEST_MIN_STRING</id><default>Z</default></attribute>
     <attribute><id>TEST_MAX_STRING</id></attribute>
@@ -106,6 +107,7 @@
     <attribute><id>MSS_CACHE_ENABLE</id></attribute>
     <attribute><id>MSS_PREFETCH_ENABLE</id></attribute>
     <attribute><id>MSS_CLEANER_ENABLE</id></attribute>
+    <attribute><id>MIRROR_BASE_ADDRESS</id></attribute>
 </targetType>
 
 <targetType>
@@ -230,6 +232,22 @@
         <id>XSCOM_VIRTUAL_ADDR</id>
     </attribute>
     <attribute><id>MSS_MEM_MC_IN_GROUP</id></attribute>
+
+    <!-- From PHYP Memory Map -->
+    <attribute><id>FSP_BASE_ADDR</id></attribute>
+    <attribute><id>FSP_BAR_SIZE</id></attribute>
+    <attribute><id>FSP_MMIO_MASK_SIZE</id></attribute>
+    <attribute><id>PSI_BRIDGE_BASE_ADDR</id></attribute>
+    <attribute><id>INTP_BASE_ADDR</id></attribute>
+    <attribute><id>PHB_BASE_ADDRS</id></attribute>
+    <attribute><id>PCI_BASE_ADDRS</id></attribute>
+    <attribute><id>MEM_BASE</id></attribute>
+    <attribute><id>MIRROR_BASE</id></attribute>
+    <attribute><id>RNG_BASE_ADDR</id></attribute>
+    <attribute><id>RNG_BAR_SIZE</id></attribute>
+    <attribute><id>IMT_BASE_ADDR</id></attribute>
+    <attribute><id>IMT_BAR_SIZE</id></attribute>
+    <!-- end Memory Map -->
 </targetType>
 
 <targetType>

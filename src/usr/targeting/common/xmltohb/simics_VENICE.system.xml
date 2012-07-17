@@ -181,6 +181,36 @@
         <default>0</default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
+    <attribute><id>FSP_BASE_ADDR</id>
+        <default>0x0003FFE000000000</default>
+    </attribute>
+    <attribute><id>PSI_BRIDGE_BASE_ADDR</id>
+        <default>0x0003FFFE80000000</default>
+    </attribute>
+    <attribute><id>INTP_BASE_ADDR</id>
+        <default>0x0003FFFF80000000</default>
+    </attribute>
+    <attribute><id>PHB_BASE_ADDRS</id>
+        <default>
+            0x0003FFFE40000000,0x0003FFFE40100000,
+            0x0003FFFE40200000,0x0003FFFE40300000
+        </default>
+    </attribute>
+    <attribute><id>PCI_BASE_ADDRS</id>
+        <default>
+            0x0003D00000000000,0x0003D01000000000,
+            0x0003D02000000000,0x0003D03000000000
+        </default>
+    </attribute>
+    <attribute><id>MEM_BASE</id>
+        <default>0x0000000000000000</default>
+    </attribute>
+    <attribute><id>MIRROR_BASE</id>
+        <default>0x0002000000000000</default>
+    </attribute>
+    <attribute><id>RNG_BASE_ADDR</id>
+        <default>0x0003FFFF40000000</default>
+    </attribute>
 </targetInstance>
 
 <!-- Venice n0p0 EX units -->
@@ -1042,6 +1072,36 @@
         <default>1</default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>1</default></attribute>
+    <attribute><id>FSP_BASE_ADDR</id>
+        <default>0x0003FFF000000000</default>
+    </attribute>
+    <attribute><id>PSI_BRIDGE_BASE_ADDR</id>
+        <default>0x0003FFFE80100000</default>
+    </attribute>
+    <attribute><id>INTP_BASE_ADDR</id>
+        <default>0x0003FFFF80100000</default>
+    </attribute>
+    <attribute><id>PHB_BASE_ADDRS</id>
+        <default>
+            0x0003FFFE40400000,0x0003FFFE40500000,
+            0x0003FFFE40600000,0x0003FFFE40700000
+        </default>
+    </attribute>
+    <attribute><id>PCI_BASE_ADDRS</id>
+        <default>
+            0x0003D04000000000,0x0003D05000000000,
+            0x0003D06000000000,0x0003D07000000000
+        </default>
+    </attribute>
+    <attribute><id>MEM_BASE</id>
+        <default>0x0000020000000000</default>
+    </attribute>
+    <attribute><id>MIRROR_BASE</id>
+        <default>0x0002020000000000</default>
+    </attribute>
+    <attribute><id>RNG_BASE_ADDR</id>
+        <default>0x0003FFFF40001000</default>
+    </attribute>
 </targetInstance>
 
 <!-- Venice n0p1 EX units -->
@@ -1903,6 +1963,36 @@
         <default>2</default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>2</default></attribute>
+    <attribute><id>FSP_BASE_ADDR</id>
+        <default>0x0004000000000000</default>
+    </attribute>
+    <attribute><id>PSI_BRIDGE_BASE_ADDR</id>
+        <default>0x0003FFFE80200000</default>
+    </attribute>
+    <attribute><id>INTP_BASE_ADDR</id>
+        <default>0x0003FFFF80200000</default>
+    </attribute>
+    <attribute><id>PHB_BASE_ADDRS</id>
+        <default>
+            0x0003FFFE40800000,0x0003FFFE40900000,
+            0x0003FFFE40A00000,0x0003FFFE40B00000
+        </default>
+    </attribute>
+    <attribute><id>PCI_BASE_ADDRS</id>
+        <default>
+            0x0003D08000000000,0x0003D09000000000,
+            0x0003D0A000000000,0x0003D0B000000000
+        </default>
+    </attribute>
+    <attribute><id>MEM_BASE</id>
+        <default>0x0000040000000000</default>
+    </attribute>
+    <attribute><id>MIRROR_BASE</id>
+        <default>0x0002040000000000</default>
+    </attribute>
+    <attribute><id>RNG_BASE_ADDR</id>
+        <default>0x0003FFFF40002000</default>
+    </attribute>
 </targetInstance>
 
 <!-- Venice n0p2 EX units -->
@@ -2764,6 +2854,36 @@
         <default>3</default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>3</default></attribute>
+    <attribute><id>FSP_BASE_ADDR</id>
+        <default>0x0004001000000000</default>
+    </attribute>
+    <attribute><id>PSI_BRIDGE_BASE_ADDR</id>
+        <default>0x0003FFFE80300000</default>
+    </attribute>
+    <attribute><id>INTP_BASE_ADDR</id>
+        <default>0x0003FFFF80300000</default>
+    </attribute>
+    <attribute><id>PHB_BASE_ADDRS</id>
+        <default>
+            0x0003FFFE40C00000,0x0003FFFE40D00000,
+            0x0003FFFE40E00000,0x0003FFFE40F00000
+        </default>
+    </attribute>
+    <attribute><id>PCI_BASE_ADDRS</id>
+        <default>
+            0x0003D0C000000000,0x0003D0D000000000,
+            0x0003D0E000000000,0x0003D0F000000000
+        </default>
+    </attribute>
+    <attribute><id>MEM_BASE</id>
+        <default>0x0000060000000000</default>
+    </attribute>
+    <attribute><id>MIRROR_BASE</id>
+        <default>0x0002060000000000</default>
+    </attribute>
+    <attribute><id>RNG_BASE_ADDR</id>
+        <default>0x0003FFFF40003000</default>
+    </attribute>
 </targetInstance>
 
 <!-- Venice n0p3 EX units -->
@@ -3623,6 +3743,36 @@
         <default>4</default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>4</default></attribute>
+    <attribute><id>FSP_BASE_ADDR</id>
+        <default>0x0004002000000000</default>
+    </attribute>
+    <attribute><id>PSI_BRIDGE_BASE_ADDR</id>
+        <default>0x0003FFFE80400000</default>
+    </attribute>
+    <attribute><id>INTP_BASE_ADDR</id>
+        <default>0x0003FFFF80400000</default>
+    </attribute>
+    <attribute><id>PHB_BASE_ADDRS</id>
+        <default>
+            0x0003FFFE41000000,0x0003FFFE41100000,
+            0x0003FFFE41200000,0x0003FFFE41300000
+        </default>
+    </attribute>
+    <attribute><id>PCI_BASE_ADDRS</id>
+        <default>
+            0x0003D10000000000,0x0003D11000000000,
+            0x0003D12000000000,0x0003D13000000000
+        </default>
+    </attribute>
+    <attribute><id>MEM_BASE</id>
+        <default>0x0000080000000000</default>
+    </attribute>
+    <attribute><id>MIRROR_BASE</id>
+        <default>0x0002080000000000</default>
+    </attribute>
+    <attribute><id>RNG_BASE_ADDR</id>
+        <default>0x0003FFFF40004000</default>
+    </attribute>
 </targetInstance>
 
 <!-- Venice n0p4 EX units -->
@@ -4484,6 +4634,36 @@
         <default>5</default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>5</default></attribute>
+    <attribute><id>FSP_BASE_ADDR</id>
+        <default>0x0004003000000000</default>
+    </attribute>
+    <attribute><id>PSI_BRIDGE_BASE_ADDR</id>
+        <default>0x0003FFFE80500000</default>
+    </attribute>
+    <attribute><id>INTP_BASE_ADDR</id>
+        <default>0x0003FFFF80500000</default>
+    </attribute>
+    <attribute><id>PHB_BASE_ADDRS</id>
+        <default>
+            0x0003FFFE41400000,0x0003FFFE41500000,
+            0x0003FFFE41600000,0x0003FFFE41700000
+        </default>
+    </attribute>
+    <attribute><id>PCI_BASE_ADDRS</id>
+        <default>
+            0x0003D14000000000,0x0003D15000000000,
+            0x0003D16000000000,0x0003D17000000000
+        </default>
+    </attribute>
+    <attribute><id>MEM_BASE</id>
+        <default>0x00000A0000000000</default>
+    </attribute>
+    <attribute><id>MIRROR_BASE</id>
+        <default>0x00020A0000000000</default>
+    </attribute>
+    <attribute><id>RNG_BASE_ADDR</id>
+        <default>0x0003FFFF40005000</default>
+    </attribute>
 </targetInstance>
 
 <!-- Venice n0p5 EX units -->
@@ -5343,6 +5523,36 @@
         <default>6</default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>6</default></attribute>
+    <attribute><id>FSP_BASE_ADDR</id>
+        <default>0x0004004000000000</default>
+    </attribute>
+    <attribute><id>PSI_BRIDGE_BASE_ADDR</id>
+        <default>0x0003FFFE80600000</default>
+    </attribute>
+    <attribute><id>INTP_BASE_ADDR</id>
+        <default>0x0003FFFF80600000</default>
+    </attribute>
+    <attribute><id>PHB_BASE_ADDRS</id>
+        <default>
+            0x0003FFFE41800000,0x0003FFFE41900000,
+            0x0003FFFE41A00000,0x0003FFFE41B00000
+        </default>
+    </attribute>
+    <attribute><id>PCI_BASE_ADDRS</id>
+        <default>
+            0x0003D18000000000,0x0003D19000000000,
+            0x0003D1A000000000,0x0003D1B000000000
+        </default>
+    </attribute>
+    <attribute><id>MEM_BASE</id>
+        <default>0x00000C0000000000</default>
+    </attribute>
+    <attribute><id>MIRROR_BASE</id>
+        <default>0x00020C0000000000</default>
+    </attribute>
+    <attribute><id>RNG_BASE_ADDR</id>
+        <default>0x0003FFFF40006000</default>
+    </attribute>
 </targetInstance>
 
 <!-- Venice n0p6 EX units -->
@@ -6203,6 +6413,36 @@
         <default>7</default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>7</default></attribute>
+    <attribute><id>FSP_BASE_ADDR</id>
+        <default>0x0004005000000000</default>
+    </attribute>
+    <attribute><id>PSI_BRIDGE_BASE_ADDR</id>
+        <default>0x0003FFFE80700000</default>
+    </attribute>
+    <attribute><id>INTP_BASE_ADDR</id>
+        <default>0x0003FFFF80700000</default>
+    </attribute>
+    <attribute><id>PHB_BASE_ADDRS</id>
+        <default>
+            0x0003FFFE41C00000,0x0003FFFE41D00000,
+            0x0003FFFE41E00000,0x0003FFFE41F00000
+        </default>
+    </attribute>
+    <attribute><id>PCI_BASE_ADDRS</id>
+        <default>
+            0x0003D1C000000000,0x0003D1D000000000,
+            0x0003D1E000000000,0x0003D1F000000000
+        </default>
+    </attribute>
+    <attribute><id>MEM_BASE</id>
+        <default>0x00000E0000000000</default>
+    </attribute>
+    <attribute><id>MIRROR_BASE</id>
+        <default>0x00020E0000000000</default>
+    </attribute>
+    <attribute><id>RNG_BASE_ADDR</id>
+        <default>0x0003FFFF40007000</default>
+    </attribute>
 </targetInstance>
 
 <!-- Venice n0p7 EX units -->
@@ -13276,6 +13516,36 @@
         <default>0</default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
+    <attribute><id>FSP_BASE_ADDR</id>
+        <default>0x0003FFE000000000</default>
+    </attribute>
+    <attribute><id>PSI_BRIDGE_BASE_ADDR</id>
+        <default>0x0003FFFE80000000</default>
+    </attribute>
+    <attribute><id>INTP_BASE_ADDR</id>
+        <default>0x0003FFFF80000000</default>
+    </attribute>
+    <attribute><id>PHB_BASE_ADDRS</id>
+        <default>
+            0x0003FFFE40000000,0x0003FFFE40100000,
+            0x0003FFFE40200000,0x0003FFFE40300000
+        </default>
+    </attribute>
+    <attribute><id>PCI_BASE_ADDRS</id>
+        <default>
+            0x0003D00000000000,0x0003D01000000000,
+            0x0003D02000000000,0x0003D03000000000
+        </default>
+    </attribute>
+    <attribute><id>MEM_BASE</id>
+        <default>0x0000000000000000</default>
+    </attribute>
+    <attribute><id>MIRROR_BASE</id>
+        <default>0x0002000000000000</default>
+    </attribute>
+    <attribute><id>RNG_BASE_ADDR</id>
+        <default>0x0003FFFF40000000</default>
+    </attribute>
 </targetInstance>
 
 
