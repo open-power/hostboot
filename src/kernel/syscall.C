@@ -97,6 +97,7 @@ namespace Systemcalls
     void CpuCoreType(task_t *t);
     void CpuDDLevel(task_t *t);
     void CpuStartCore(task_t *t);
+    void CpuSprValue(task_t *t);
     void MmAllocBlock(task_t *t);
     void MmRemovePages(task_t *t);
     void MmSetPermission(task_t *t);
@@ -131,6 +132,7 @@ namespace Systemcalls
         &CpuCoreType, // MISC_CPUCORETYPE
         &CpuDDLevel,  // MISC_CPUDDLEVEL
         &CpuStartCore, // MISC_CPUSTARTCORE
+        &CpuSprValue, // MISC_CPUSPRVALUE
 
         &MmAllocBlock, // MM_ALLOC_BLOCK
         &MmRemovePages, // MM_REMOVE_PAGES
@@ -638,6 +640,31 @@ namespace Systemcalls
     {
         TASK_SETRTN(t,
             CpuManager::startCore(static_cast<uint64_t>(TASK_GETARG0(t))));
+    };
+
+    /** Read SPR values. */
+    void CpuSprValue(task_t *t)
+    {
+        uint64_t spr = TASK_GETARG0(t);
+
+        switch (spr)
+        {
+            case CPU_SPR_MSR:
+                TASK_SETRTN(t, CpuManager::WAKEUP_MSR_VALUE);
+                break;
+
+            case CPU_SPR_LPCR:
+                TASK_SETRTN(t, CpuManager::WAKEUP_LPCR_VALUE);
+                break;
+
+            case CPU_SPR_HRMOR:
+                TASK_SETRTN(t, getHRMOR());
+                break;
+
+            default:
+                TASK_SETRTN(t, -1);
+                break;
+        }
     };
 
     /**

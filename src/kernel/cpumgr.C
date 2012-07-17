@@ -161,9 +161,15 @@ void CpuManager::startSlaveCPU(cpu_t* cpu)
 
 void CpuManager::activateCPU(cpu_t * i_cpu)
 {
+    // Set active.
     i_cpu->active = true;
     __sync_add_and_fetch(&cv_cpuCount, 1);
     lwsync();
+
+    // Verify / set SPRs.
+    uint64_t msr = getMSR();
+    kassert(WAKEUP_MSR_VALUE == msr);
+    setLPCR(WAKEUP_LPCR_VALUE);
 }
 
 void CpuManager::executePeriodics(cpu_t * i_cpu)

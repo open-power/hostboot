@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/include/sys/misc.h $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/include/sys/misc.h $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #ifndef __SYS_MISC_H
 #define __SYS_MISC_H
 
@@ -39,7 +40,6 @@ enum ShutdownStatus
     SHUTDOWN_STATUS_EXTINITSVC_FAILED   = 0x01230003,
     SHUTDOWN_STATUS_INITSVC_FAILED      = 0x01230004,
 };
-
 
 #ifdef __cplusplus
 extern "C"
@@ -111,6 +111,27 @@ size_t cpu_thread_count();
  *                   prepared to support.
  */
 int cpu_start_core(uint64_t pir);
+
+/**
+ * @enum CpuSprNames
+ *
+ * Names for SPR registers for cpu_spr_value().
+ */
+enum CpuSprNames
+{
+    CPU_SPR_MSR,
+    CPU_SPR_LPCR,
+    CPU_SPR_HRMOR,
+};
+
+/** @fn cpu_spr_value
+ *  @brief Reads the kernel-desired value for an SPR.
+ *
+ *  This is used, for instance, in building a sleep-winkle image.
+ *
+ *  @return The desired value of the SPR register.
+ */
+uint64_t cpu_spr_value(CpuSprNames spr);
 
 #ifdef __cplusplus
 }

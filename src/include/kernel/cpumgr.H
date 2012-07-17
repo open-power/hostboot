@@ -101,6 +101,20 @@ class CpuManager
          */
         static void forceMemoryPeriodic();
 
+        /** Desired value for MSR after wakeup.
+         *
+         *  bit 0 - 64 bit mode.
+         *  bit 3 - Hypervisor mode.
+         */
+        static const uint64_t WAKEUP_MSR_VALUE =    0x9000000000000000;
+
+        /** Desired value for LPCR after wakeup.
+         *
+         *  bit 49 - Wake-up from external interrupt.
+         *  bit 51 - Wake-up from machine check.
+         *  bit 60, 61 - LPES(0,1) = 1 (see ISA).
+         */
+        static const uint64_t WAKEUP_LPCR_VALUE =   0x000000000000500C;
 
     protected:
         CpuManager();
@@ -131,6 +145,7 @@ class CpuManager
         static uint64_t cv_shutdown_status;
 
         static InteractiveDebug cv_interactive_debug;
+
 };
 
 #endif

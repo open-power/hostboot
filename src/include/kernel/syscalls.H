@@ -90,6 +90,8 @@ namespace Systemcalls
         MISC_CPUDDLEVEL,
             /** cpu_start_core() */
         MISC_CPUSTARTCORE,
+            /** cpu_spr_value() */
+        MISC_CPUSPRVALUE,
 
             /** mm_alloc_block() */
         MM_ALLOC_BLOCK,
