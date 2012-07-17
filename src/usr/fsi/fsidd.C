@@ -1339,6 +1339,21 @@ errlHndl_t FsiDD::initMasterControl(const TARGETING::Target* i_master,
     TRACFCOMP( g_trac_fsi, ENTER_MRK"FsiDD::initMasterControl> Initializing Master %.8X:%d", TARGETING::get_huid(i_master), i_type );
 
     do {
+        // Do not initialize slaves because they are already done
+        //  before we run
+        bool skipit = false;
+        TARGETING::Target * sys = NULL;
+        TARGETING::targetService().getTopLevelTarget( sys );
+        TARGETING::SpFunctions spfuncs;
+        if( sys
+            && sys->tryGetAttr<TARGETING::ATTR_SP_FUNCTIONS>(spfuncs)
+            && spfuncs.fsiSlaveInit )
+        {
+            TRACFCOMP( g_trac_fsi, "FsiDD::initMasterControl> Skipping Master Init" );
+            skipit = true;
+            break;
+        }
+
         uint32_t databuf = 0;
 
         //find the full offset to the master control reg
@@ -1351,34 +1366,35 @@ errlHndl_t FsiDD::initMasterControl(const TARGETING::Target* i_master,
             ctl_reg += getPortOffset(TARGETING::FSI_MASTER_TYPE_MFSI,m_info.port);
         }
 
-
-        //Clear fsi port errors and general reset on all ports
-        for( uint32_t port = 0; port < MAX_SLAVE_PORTS; ++port )
+        if( !skipit )
         {
-            // 2= General reset to all bridges
-            // 3= General reset to all port controllers
-            databuf = 0x30000000;
-            l_err = write( ctl_reg|FSI_MRESP0_0D0|port, &databuf );
+            //Clear fsi port errors and general reset on all ports
+            for( uint32_t port = 0; port < MAX_SLAVE_PORTS; ++port )
+            {
+                // 2= General reset to all bridges
+                // 3= General reset to all port controllers
+                databuf = 0x30000000;
+                l_err = write( ctl_reg|FSI_MRESP0_0D0|port, &databuf );
+                if( l_err ) { break; }
+            }
+            if( l_err ) { break; }
+
+            //Freeze FSI Port on FSI/OPB bridge error (global)
+            // 18= Freeze FSI port on FSI/OPB bridge error
+            databuf = 0x00002000;
+            l_err = write( ctl_reg|FSI_MECTRL_2E0, &databuf );
+            if( l_err ) { break; }
+
+
+            //Set MMODE reg to enable HW recovery, parity checking, setup clock ratio
+            // 1= Enable hardware error recovery
+            // 3= Enable parity checking
+            // 4:13= FSI clock ratio 0 is 1:1
+            // 14:23= FSI clock ratio 1 is 4:1
+            databuf = 0x50040400;
+            l_err = write( ctl_reg|FSI_MMODE_000, &databuf );
             if( l_err ) { break; }
         }
-        if( l_err ) { break; }
-
-
-        //Freeze FSI Port on FSI/OPB bridge error (global)
-        // 18= Freeze FSI port on FSI/OPB bridge error
-        databuf = 0x00002000;
-        l_err = write( ctl_reg|FSI_MECTRL_2E0, &databuf );
-        if( l_err ) { break; }
-
-
-        //Set MMODE reg to enable HW recovery, parity checking, setup clock ratio
-        // 1= Enable hardware error recovery
-        // 3= Enable parity checking
-        // 4:13= FSI clock ratio 0 is 1:1
-        // 14:23= FSI clock ratio 1 is 4:1
-        databuf = 0x50040400;
-        l_err = write( ctl_reg|FSI_MMODE_000, &databuf );
-        if( l_err ) { break; }
 
 
         //Determine which links are present 
@@ -1389,6 +1405,11 @@ errlHndl_t FsiDD::initMasterControl(const TARGETING::Target* i_master,
         uint64_t slave_index = getSlaveEnableIndex(i_master,i_type);
         iv_slaves[slave_index] = (uint8_t)(databuf >> (32-MAX_SLAVE_PORTS));
         TRACFCOMP( g_trac_fsi, "FsiDD::initMasterControl> %.8X:%d : Slave Detect = %.8X", TARGETING::get_huid(i_master), i_type, databuf );
+
+        if( skipit )
+        {
+            break; //all done
+        }
 
         //Clear FSI Slave Interrupt on ports 0-7
         databuf = 0x00000000;
