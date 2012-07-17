@@ -410,6 +410,17 @@ errlHndl_t FakeSystem::clearAllAttentions(
     return err;
 }
 
+uint64_t FakeSystem::count()
+{
+    mutex_lock(&iv_mutex);
+
+    uint64_t c = iv_attentions.size();
+
+    mutex_unlock(&iv_mutex);
+
+    return c;
+}
+
 uint64_t FakeSystem::count(const AttnData & i_attention)
 {
     AttnDataMap<uint64_t>::iterator it = iv_attentions.find(i_attention);

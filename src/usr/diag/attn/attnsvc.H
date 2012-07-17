@@ -74,6 +74,14 @@ class Service
         errlHndl_t start();
 
         /**
+         * @brief running Provide a service running indicator.
+         *
+         * @retval[true] Service is running.
+         * @retval[false] Service is not running.
+         */
+        bool running();
+
+        /**
          * @brief ctor
          */
         Service();

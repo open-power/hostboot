@@ -35,6 +35,8 @@
 #include "attnproc.H"
 #include "attnmem.H"
 #include <util/singleton.H>
+#include "attntarget.H"
+#include <errl/errlmanager.H>
 
 using namespace std;
 using namespace PRDF;
@@ -71,6 +73,86 @@ errlHndl_t stopService()
     return Singleton<Service>::instance().stop();
 }
 
+errlHndl_t checkForIplAttentions()
+{
+    errlHndl_t err = NULL;
+
+    assert(!Singleton<Service>::instance().running());
+
+    ProcOps & procOps = Singleton<ProcOps>::instance();
+    MemOps & memOps = Singleton<MemOps>::instance();
+
+    TargetHandleList list;
+
+    getTargetService().getAllChips(list, TYPE_PROC);
+
+    TargetHandleList::iterator tit = list.begin();
+
+    while(tit != list.end())
+    {
+        AttentionList attentions;
+
+        do {
+
+            attentions.clear();
+
+            // query the proc resolver for active attentions
+
+            err = procOps.resolve(*tit, 0, attentions);
+
+            if(err)
+            {
+                break;
+            }
+
+            // query the mem resolver for active attentions
+
+            err = memOps.resolve(*tit, 0, attentions);
+
+            if(err)
+            {
+                break;
+            }
+
+            // TODO RTC 51547
+            // historically ATTN has enumerated
+            // all chips on the entire system so that
+            // PRD can figure out who caused a system
+            // checkstop.
+
+            // since hostboot won't be handling that
+            // its faster to just enumerate attentions one
+            // chip at a time
+
+            // The intent of the RTC is to confirm this
+            // is the desired behavior
+
+            if(!attentions.empty())
+            {
+                err = getPrdWrapper().callPrd(attentions);
+            }
+
+            if(err)
+            {
+                break;
+            }
+
+        } while(!attentions.empty());
+
+        if(err || attentions.empty())
+        {
+            tit = list.erase(tit);
+        }
+
+        if(err)
+        {
+            errlCommit(err, HBATTN_COMP_ID);
+        }
+    }
+
+    return 0;
+}
+
 void PrdImpl::installPrd()
 {
     getPrdWrapper().setImpl(*this);
@@ -80,7 +162,7 @@ errlHndl_t PrdImpl::callPrd(const AttentionList & i_attentions)
 {
     // forward call to the real PRD
 
-    errlHndl_t err = 0;
+    errlHndl_t err = NULL;
 
     // convert attention list to PRD type
 

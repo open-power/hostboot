@@ -30,6 +30,7 @@
  * @brief HBATTN forward declarations.
  */
 
+#include <attn/attn.H>
 #include <intr/interrupt.H>
 #include <errl/errlentry.H>
 #include <diag/prdf/prdfMain.H>

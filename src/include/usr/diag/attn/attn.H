@@ -30,6 +30,8 @@
  * @brief HBATTN declarations.
  */
 
+#include <errl/errlentry.H>
+
 namespace ATTN
 {
 
@@ -57,5 +59,17 @@ errlHndl_t startService();
  * @retval[1] Unexpected error occurred.
  */
 errlHndl_t stopService();
+
+/**
+ * @brief checkForIplAttentions
+ *
+ * Check each proc target for any attentions
+ * and invoke PRD for analysis.  Will loop indefinitely
+ * until all chips stop reporting attentions.
+ *
+ * @retval[0] No errors.
+ * @retval[!0] Unexpected error occurred.
+ */
+errlHndl_t checkForIplAttentions();
 }
 #endif

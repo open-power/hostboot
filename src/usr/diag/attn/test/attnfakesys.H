@@ -254,6 +254,14 @@ class FakeSystem : public ScomImpl
          */
         void dump();
 
+        /*
+         * @brief count Obtain the number of attentions present
+         *          on the system.
+         *
+         * @return The number of attentions present on the system.
+         */
+        uint64_t count();
+
         /**
          * @brief ctor
          */

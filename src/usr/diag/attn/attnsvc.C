@@ -652,4 +652,17 @@ Service::~Service()
     sync_cond_destroy(&iv_cond);
     mutex_destroy(&iv_mutex);
 }
+
+bool Service::running()
+{
+    bool running;
+
+    mutex_lock(&iv_mutex);
+
+    running = 0 != iv_intrTaskQ;
+
+    mutex_unlock(&iv_mutex);
+
+    return running;
+}
 }

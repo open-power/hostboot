@@ -83,6 +83,11 @@ class RandSource
                 TARGETING::TargetHandle_t * i_rangeEnd);
 
         /**
+         * @brief run Execute the testcase.
+         */
+        void run();
+
+        /**
          * @brief dtor
          */
         ~RandSource();
@@ -95,11 +100,6 @@ class RandSource
          * @param[in] i_source The source on which to call run.
          */
         static void* main(void * i_source);
-
-        /**
-         * @brief run Execute the testcase.
-         */
-        void run();
 
         /**
          * @brief iv_mutex Shared data access serialization.
