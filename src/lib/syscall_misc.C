@@ -83,3 +83,8 @@ uint64_t cpu_spr_value(CpuSprNames spr)
         _syscall1(MISC_CPUSPRVALUE, reinterpret_cast<void*>(spr)));
 }
 
+int cpu_master_winkle()
+{
+    return 0;
+}
+

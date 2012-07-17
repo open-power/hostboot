@@ -133,6 +133,18 @@ enum CpuSprNames
  */
 uint64_t cpu_spr_value(CpuSprNames spr);
 
+/** @fn cpu_master_winkle
+ *  @brief Winkle the master core so runtime SLW image can be applied.
+ *
+ *  This requires that the master core is the only one executing instructions.
+ *  Will execute the winkle instruction on all running threads and return when
+ *  an IPI is receieved on the master thread of the core.
+ *
+ *  @retval 0 - Success
+ *  @retval -EDEADLK - Cores other than the master are already running.
+ */
+int cpu_master_winkle();
+
 #ifdef __cplusplus
 }
 #endif
