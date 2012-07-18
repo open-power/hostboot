@@ -6,7 +6,7 @@
 #
 #  IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2011
+#  COPYRIGHT International Business Machines Corp. 2011-2012
 #
 #  p1
 #
@@ -20,8 +20,7 @@
 #
 #  Origin: 30
 #
-#  IBM_PROLOG_END
-
+#  IBM_PROLOG_END_TAG
 use strict;
 
 package Hostboot::Ps;
@@ -47,7 +46,7 @@ use constant PS_TRACKER_RETVAL_OFFSET => 8 + PS_TRACKER_STATUS_OFFSET;
 use constant PS_TRACKER_WAITINFO_OFFSET => 8 + PS_TRACKER_RETVAL_OFFSET;
 use constant PS_TRACKER_ENTRYPOINT_OFFSET => 8 + PS_TRACKER_WAITINFO_OFFSET;
 
-use constant PS_TASK_STATE_OFFSET => 8*42;
+use constant PS_TASK_STATE_OFFSET => 8*43;
 use constant PS_TASK_STATEEXTRA_OFFSET => 8 + PS_TASK_STATE_OFFSET;
 
 sub main

@@ -98,6 +98,7 @@ namespace Systemcalls
     void CpuDDLevel(task_t *t);
     void CpuStartCore(task_t *t);
     void CpuSprValue(task_t *t);
+    void CpuDoze(task_t *t);
     void MmAllocBlock(task_t *t);
     void MmRemovePages(task_t *t);
     void MmSetPermission(task_t *t);
@@ -133,6 +134,7 @@ namespace Systemcalls
         &CpuDDLevel,  // MISC_CPUDDLEVEL
         &CpuStartCore, // MISC_CPUSTARTCORE
         &CpuSprValue, // MISC_CPUSPRVALUE
+        &CpuDoze, // MISC_CPUDOZE
 
         &MmAllocBlock, // MM_ALLOC_BLOCK
         &MmRemovePages, // MM_REMOVE_PAGES
@@ -664,6 +666,34 @@ namespace Systemcalls
             default:
                 TASK_SETRTN(t, -1);
                 break;
+        }
+    };
+
+    /**
+     *  Allow a task to request priviledge escalation to execute the 'doze'
+     *  instruction.
+     *
+     *  Verifies the instruction to execute is, in fact, doze and then sets
+     *  an MSR mask in the task structure to allow escalation on next
+     *  execution.
+     *
+     *  When 'doze' is executed the processor will eventually issue an
+     *  SRESET exception with flags in srr1 to indication that the
+     *  decrementer caused the wake-up.  The kernel will then need to
+     *  advance the task to the instruction after the doze and remove
+     *  priviledge escalation.
+     *
+     */
+    void CpuDoze(task_t *t)
+    {
+
+        uint32_t* instruction = static_cast<uint32_t*>(t->context.nip);
+        if (0x4c000324 == (*instruction)) // Verify 'doze' instruction,
+                                          // otherwise just return.
+        {
+            // Disable PR, IR, DR so 'doze' can be executed.
+            //     (which means to stay in HV state)
+            t->context.msr_mask = 0x4030;
         }
     };
 

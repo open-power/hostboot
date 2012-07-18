@@ -92,6 +92,8 @@ namespace Systemcalls
         MISC_CPUSTARTCORE,
             /** cpu_spr_value() */
         MISC_CPUSPRVALUE,
+            /** cpu_doze() - Hidden syscall */
+        MISC_CPUDOZE,
 
             /** mm_alloc_block() */
         MM_ALLOC_BLOCK,

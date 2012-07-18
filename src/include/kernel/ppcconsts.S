@@ -1,25 +1,25 @@
 #   IBM_PROLOG_BEGIN_TAG
 #   This is an automatically generated prolog.
-#
+# 
 #   $Source: src/include/kernel/ppcconsts.S $
-#
+# 
 #   IBM CONFIDENTIAL
-#
-#   COPYRIGHT International Business Machines Corp. 2010 - 2011
-#
+# 
+#   COPYRIGHT International Business Machines Corp. 2010-2012
+# 
 #   p1
-#
+# 
 #   Object Code Only (OCO) source materials
 #   Licensed Internal Code Source Materials
 #   IBM HostBoot Licensed Internal Code
-#
+# 
 #   The source code for this program is not published or other-
 #   wise divested of its trade secrets, irrespective of what has
 #   been deposited with the U.S. Copyright Office.
-#
+# 
 #   Origin: 30
-#
-#   IBM_PROLOG_END
+# 
+#   IBM_PROLOG_END_TAG
 #*--------------------------------------------------------------------*#
 #*  Register Constants                                                *#
 #*--------------------------------------------------------------------*#
@@ -206,8 +206,9 @@
 .set TASK_CR, TASK_LR+8
 .set TASK_CTR, TASK_CR+8
 .set TASK_XER, TASK_CTR+8
+.set TASK_MSR_MASK, TASK_XER+8
 
-.set TASK_FP_CONTEXT, TASK_XER+8
+.set TASK_FP_CONTEXT, TASK_MSR_MASK+8
 .set TASK_FPR_0, 0
 .set TASK_FPR_1, TASK_FPR_0+8
 .set TASK_FPR_2, TASK_FPR_1+8

@@ -146,11 +146,41 @@ finished_relocate:
 
 .org _start + 0x100
 intvect_system_reset:
-    b _start
+    /* TODO: Add handling for SRESET from winkle for master. */
+    ;// Need to identify reason for SRESET and then perform appropriate
+    ;// action.
+    ;// Current support:
+    ;//         - Decrementer wake-up from doze.
+    ;//         - External interrupt (also wake-up from doze).
+    ;//         - IPI wake-up from winkle of slave core.
 
-.org _start + 0x17C
-hbi_pre_phyp_breakpoint:
-    attn;   /* TODO: Add actual breakpoint attention. */
+    ;// Free up two registers temporarily.
+    mtsprg0 r1
+    mtsprg1 r2
+
+    ;// Save CR.
+    mfcr r1
+
+    ;// Find bit 42:44 of SRR1 (reason for SRESET).
+    mfsrr1 r2
+    extrdi r2, r2, 3, 42
+    ;// Check for decrementer (bits = 011).
+    cmpi cr0, r2, 0x3
+    beq+ intvect_system_reset_decrementer
+    ;// Check for external interrupt (bits = 010).
+    cmpi cr0, r2, 0x4
+    beq+ intvect_system_reset_external
+    ;// Check for HMI (bits = 101).
+    cmpi cr0, r2, 0x5
+    beq+ _start
+    ;// Check for bits 000, which is probably a Simics bug right now.
+    cmpi cr0, r2, 0x0
+    beq+ _start
+1:  ;// Unknown reason.
+    b 1b
+
+.org _start + 0x180
+intvect_inst_start:
     b _start
 
     /* TODO: Eventually we likely need specific code for machine check
@@ -436,10 +466,10 @@ kernel_dispatch_task:
 
     mfmsr r2		;// Get current MSR
     ori r2,r2, 0xC030	;// Enable MSR[EE,PR,IR,DR].
-    rldicl r2,r2,1,1	;// Clear ...
-    rotldi r2,r2,63	;// 	MSR[TA]
     rldicl r2,r2,50,1   ;// Clear ...
     rotldi r2,r2,14     ;//     MSR[FP]
+    ld r3, TASK_MSR_MASK(r1) ;// Load MSR mask.
+    xor r2, r2, r3      ;// Apply MSR mask (XOR).
     mtsrr1 r2		;// Set task MSR (SRR1)
 
     ld r2, TASK_NIP(r1)	;// Load NIP from context.
@@ -544,7 +574,44 @@ kernel_dispatch_task:
 
     b 2b
 
+    ;// @fn intvect_system_reset_decrementer
+    ;// Handle SRESET due to decrementer wake-up.
+    ;//     This is a wake-up from 'doze'.  Clear priviledge escalation and
+    ;//     perform decrementer.
+intvect_system_reset_decrementer:
+    ;// Restore CR.
+    mtcr r1
 
+    ;// Clear MSR mask, since privilaged instruction was now executed (doze).
+    mfsprg3 r1  ;// Load task structure to r1.
+    li r2, 0    ;// Zero r2.
+    std r2, TASK_MSR_MASK(r1) ;// Zero msr_mask.
+
+    ;// Advance saved NIA (past doze).
+    mfsrr0 r1
+    addi r1, r1, 4
+    mtsrr0 r1
+
+    ;// Restore save registers.
+    mfsprg0 r1
+    mfsprg1 r2
+
+    b intvect_decrementer
+
+    ;// @fn intvect_system_reset_external
+    ;// Handle SRESET due to wake-up from external interrupt.
+    ;//     This is a wake-up from 'doze', but not due to the decrementer
+    ;//     itself firing.  Therefore, leave 'doze' process state alone
+    ;//     including NIA and handle the external interrupt.
+intvect_system_reset_external:
+    ;// Restore CR.
+    mtcr r1
+
+    ;// Restore save registers.
+    mfsprg0 r1
+    mfsprg1 r2
+
+    b intvect_external
 
     ;// @fn system_call_fast_path
     ;// Handle fast path system calls.

@@ -111,10 +111,11 @@ class CpuManager
         /** Desired value for LPCR after wakeup.
          *
          *  bit 49 - Wake-up from external interrupt.
+         *  bit 50 - Wake-up from decrementer.
          *  bit 51 - Wake-up from machine check.
          *  bit 60, 61 - LPES(0,1) = 1 (see ISA).
          */
-        static const uint64_t WAKEUP_LPCR_VALUE =   0x000000000000500C;
+        static const uint64_t WAKEUP_LPCR_VALUE =   0x000000000000700C;
 
     protected:
         CpuManager();

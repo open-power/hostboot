@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/kernel/exception.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2010 - 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/kernel/exception.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2010-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #include <assert.h>
 #include <kernel/types.h>
 #include <kernel/console.H>
@@ -29,14 +30,16 @@
 #include <kernel/vmmmgr.H>
 #include <kernel/cpuid.H>
 #include <kernel/intmsghandler.H>
+#include <errno.h>
+#include <kernel/vmmmgr.H>
 
 namespace ExceptionHandles
 {
-    bool HvEmulation(task_t*);
+    bool PrivInstr(task_t*);
 }
 
 const uint64_t EXCEPTION_SRR1_MASK 	= 0x00000000783F0000;
-const uint64_t EXCEPTION_SRR1_HVEMUL	= 0x0000000000080000;
+const uint64_t EXCEPTION_SRR1_PRIVINS   = 0x0000000000040000;
 
 extern "C"
 void kernel_execute_prog_ex()
@@ -47,9 +50,9 @@ void kernel_execute_prog_ex()
     bool handled = false;
     switch(exception)
     {
-	case EXCEPTION_SRR1_HVEMUL:
-	    handled = ExceptionHandles::HvEmulation(t);
-	    break;
+        case EXCEPTION_SRR1_PRIVINS:
+            handled = ExceptionHandles::PrivInstr(t);
+            break;
     }
     if (!handled)
     {
@@ -157,22 +160,26 @@ void kernel_execute_hype_emu_assist()
 
 namespace ExceptionHandles
 {
-    bool HvEmulation(task_t* t)
+    bool PrivInstr(task_t* t)
     {
-	/*printk("NIP = %lx : Inst = %x\n",
-	       t->context.nip,
-	       (*(uint32_t*)t->context.nip));*/
+        uint64_t phys_addr = VmmManager::findPhysicalAddress(
+                reinterpret_cast<uint64_t>(t->context.nip));
 
-	uint32_t instruction = *(uint32_t*)t->context.nip;
+        if (-EFAULT != static_cast<int64_t>(phys_addr))
+        {
+            uint32_t* instruction = reinterpret_cast<uint32_t*>(phys_addr);
 
-	    // check for mfsprg3
-	if ((instruction & 0xfc1fffff) == 0x7c1342a6)
-	{
-	    t->context.gprs[(instruction & 0x03E00000) >> 21] =
-		    (uint64_t) t;
-	    t->context.nip = (void*) (((uint64_t)t->context.nip)+4);
-	    return true;
-	}
+            // Check for 'doze' and skip over.  This avoids a task-crash
+            // if for some reason we entered back into the task without
+            // priviledge raised.
+            if (*instruction == 0x4c000324)
+            {
+                printk("Error: Doze executed with lowered permissions on %d\n",
+                       t->tid);
+                t->context.nip = static_cast<void*>(instruction + 1);
+                return true;
+            }
+        }
 
 	return false;
     }
