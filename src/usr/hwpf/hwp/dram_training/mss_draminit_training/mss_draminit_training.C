@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/hwpf/hwp/dram_training/mss_draminit_training/mss_draminit_training.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/hwpf/hwp/dram_training/mss_draminit_training/mss_draminit_training.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -27,6 +28,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|------------------------------------------------
+//  1.28   | bellows  |02-May-12| cal ranks are 4 bits, this needed to be adjusted
 //  1.26   | asaetow  |12-Apr-12| Added "if(rc) return rc;" at line 180.
 //  1.25   | asaetow  |06-Apr-12| Added "if(rc) return rc;" at line 165.
 //  1.24   | asaetow  |03-Apr-12| Changed FAPI_INF to FAPI_ERR where applicable from lines 275 to 324, per Mike Jones.
@@ -146,8 +148,8 @@ ReturnCode mss_draminit_training(Target& i_target)
     rc_num = rc_num | data_buffer_20.flushTo0();
     ecmdDataBufferBase read_compare_buffer_1(1);
     rc_num = rc_num | read_compare_buffer_1.flushTo0();
-    ecmdDataBufferBase rank_cal_buffer_3(3); 
-    rc_num = rc_num | rank_cal_buffer_3.flushTo0();
+    ecmdDataBufferBase rank_cal_buffer_4(4); 
+    rc_num = rc_num | rank_cal_buffer_4.flushTo0();
     ecmdDataBufferBase ddr_cal_enable_buffer_1(1);
     ecmdDataBufferBase ccs_end_buffer_1(1);
     rc_num = rc_num | ccs_end_buffer_1.flushTo1();
@@ -160,7 +162,7 @@ ReturnCode mss_draminit_training(Target& i_target)
     ecmdDataBufferBase resetn_buffer_1(1);
     rc_num = rc_num | resetn_buffer_1.setBit(0);
     ecmdDataBufferBase cal_timeout_cnt_mult_buffer_2(2);
-    rc_num = rc_num | cal_timeout_cnt_mult_buffer_2.flushTo0();
+    rc_num = rc_num | cal_timeout_cnt_mult_buffer_2.flushTo1();
 
     ecmdDataBufferBase data_buffer_64(64);
     if(rc_num)
@@ -226,15 +228,17 @@ ReturnCode mss_draminit_training(Target& i_target)
             FAPI_INF( "+++++++++++++++ Sending init cal on rank group: %d +++++++++++++++", group);
             rc = mss_ccs_inst_arry_0(i_target, instruction_number, address_buffer_16, bank_buffer_8, activate_buffer_1, rasn_buffer_1, casn_buffer_1, wen_buffer_1, cke_buffer_8, csn_buffer_8, odt_buffer_8, test_buffer_4, 0);
             if(rc) return rc; //Error handling for mss_ccs_inst built into mss_funcs
+            FAPI_INF( "primary_ranks_array[%d][0]: %d [%d][1]: %d", group, primary_ranks_array[group][0],
+                      group, primary_ranks_array[group][1]);
             if(primary_ranks_array[group][0] == INVALID)
             {
-                rc_num = rc_num | rank_cal_buffer_3.insert(primary_ranks_array[group][1], 0, 3, 0);
+                rc_num = rc_num | rank_cal_buffer_4.insert(primary_ranks_array[group][1], 0, 4, 4); // 8 bit storage, need last 4 bits
             }
             else
             {
-                rc_num = rc_num | rank_cal_buffer_3.insert(primary_ranks_array[group][0], 0, 3, 0);
+                rc_num = rc_num | rank_cal_buffer_4.insert(primary_ranks_array[group][0], 0, 4, 4); // 8 bit storage, need last 4 bits
             }
-            rc = mss_ccs_inst_arry_1(i_target, instruction_number, num_idles_buffer_16, num_repeat_buffer_16, data_buffer_20, read_compare_buffer_1, rank_cal_buffer_3, ddr_cal_enable_buffer_1, ccs_end_buffer_1);
+            rc = mss_ccs_inst_arry_1(i_target, instruction_number, num_idles_buffer_16, num_repeat_buffer_16, data_buffer_20, read_compare_buffer_1, rank_cal_buffer_4, ddr_cal_enable_buffer_1, ccs_end_buffer_1);
             if(rc) return rc; //Error handling for mss_ccs_inst built into mss_funcs
             FAPI_INF( "+++++++++++++++ Execute CCS array +++++++++++++++");
             rc = mss_execute_ccs_inst_array( i_target, NUM_POLL, 60);
@@ -278,7 +282,7 @@ ReturnCode mss_check_cal_status(
         rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_INIT_CAL_ERROR_P1_0x8001C0180301143F, cal_error_buffer_64);
         if(rc) return rc;
     }
-    while((!cal_status_buffer_64.isBitSet(cal_status_reg_offset)) && (!cal_error_buffer_64.isBitSet(cal_error_reg_offset)) && (poll_count <= 5))
+    while((!cal_status_buffer_64.isBitSet(cal_status_reg_offset)) && (!cal_error_buffer_64.isBitSet(cal_error_reg_offset)) && (poll_count <= 20))
     {
         FAPI_INF( "+++++++++++++++ Calibration on port: %d rank group: %d in progress. Poll count: %d +++++++++++++++", i_port, i_group, poll_count);
         poll_count++;

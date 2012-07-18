@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/hwpf/hwp/mc_init/mss_volt/mss_volt.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/hwpf/hwp/mc_init/mss_volt/mss_volt.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 /* File mss_volt.C created by JEFF SABROWSKI on Fri 21 Oct 2011. */
 
 //------------------------------------------------------------------------------
@@ -47,7 +48,9 @@
 //  1.3    | bellows  | 12/21/11 | fapiGetAssociatedDimms funciton does not work, added quick exit
 //  1.4    | jsabrow  | 02/13/12 | Updates for code review
 //  1.5    | jsabrow  | 03/26/12 | Updates for code review
-//  1.5    | jdsloat  | 04/26/12 | fixed 1.5V issue
+//  1.8    | jdsloat  | 04/26/12 | fixed 1.5V issue
+//  1.9    | jdsloat  | 05/08/12 | Removed debug message
+//  1.10   | jdsloat  | 05/09/12 | Fixed typo
 
 // This procedure takes a vector of Centaurs behind a voltage domain,
 // reads in supported DIMM voltages from SPD and determines optimal
@@ -119,8 +122,6 @@ fapi::ReturnCode mss_volt(std::vector<fapi::Target> & i_targets_memb)
 
   // now we figure out if we have a supported ddr type and voltage
   // note: only support DDR3=1.35V and DDR4=1.2xV
-
-  FAPI_INF( "dram type, ddr3 enum, ddr4 enum: 0x%02X 0x%02X 0x%02X", l_spd_dramtype, fapi::ENUM_ATTR_SPD_DRAM_DEVICE_TYPE_DDR3, fapi::ENUM_ATTR_SPD_DRAM_DEVICE_TYPE_DDR4);
 
   if (l_dram_ddr3_found_flag && l_dram_ddr4_found_flag)
     {

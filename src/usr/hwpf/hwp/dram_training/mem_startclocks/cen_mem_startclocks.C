@@ -21,7 +21,7 @@
  *
  *  IBM_PROLOG_END_TAG
  */
-// $Id: cen_mem_startclocks.C,v 1.7 2012/05/31 18:29:20 mfred Exp $
+// $Id: cen_mem_startclocks.C,v 1.9 2012/06/07 13:52:27 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/cen_mem_startclocks.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -117,22 +117,14 @@ fapi::ReturnCode cen_mem_startclocks(const fapi::Target & i_target)
 
     fapi::ReturnCode rc;
     uint32_t rc_ecmd = 0;
-    ecmdDataBufferBase data;
+    ecmdDataBufferBase scom_data(64);
+    ecmdDataBufferBase cfam_data(32);
 
 
 
     FAPI_INF("********* cen_mem_startclocks start *********");
     do
     {
-        rc_ecmd |= data.setBitLength(64);
-        if (rc_ecmd)
-        {
-            FAPI_ERR("Error 0x%x setting up ecmd data buffer bit length.",  rc_ecmd);
-            rc.setEcmdError(rc_ecmd);
-            break;
-        }
-
-
         //
         // The following details are from the Common POR spreadsheet sections 20.1 and 21.1 and from the Centaur Chip Spec.
         //
@@ -142,15 +134,15 @@ fapi::ReturnCode cen_mem_startclocks(const fapi::Target & i_target)
 
         //   Write SCOM      address 0x030F0013  bit(18)=0b0    , drop fence in GP3
         FAPI_DBG("Writing GP3 AND mask to clear chiplet fence (bit 18) ...");
-        rc_ecmd |= data.flushTo1();
-        rc_ecmd |= data.clearBit(GP3_FENCE_EN_BIT);
+        rc_ecmd |= scom_data.flushTo1();
+        rc_ecmd |= scom_data.clearBit(GP3_FENCE_EN_BIT);
         if (rc_ecmd)
         {
             FAPI_ERR("Error 0x%x setting up ecmd data buffer to clear chiplet fence.",  rc_ecmd);
             rc.setEcmdError(rc_ecmd);
             break;
         }
-        rc = fapiPutScom( i_target, MEM_GP3_AND_0x030F0013, data);
+        rc = fapiPutScom( i_target, MEM_GP3_AND_0x030F0013, scom_data);
         if (rc)
         {
             FAPI_ERR("Error writing GP3 AND mask 0x030F0013 (bit 18) to clear chiplet fence.");
@@ -160,15 +152,15 @@ fapi::ReturnCode cen_mem_startclocks(const fapi::Target & i_target)
 
         //   Write SCOM      address 0x030F0014  bit(28)=0b1    , enable EDRAM, just chiplets with EDRAM logic
         FAPI_DBG("Writing GP3 OR mask to enable EDRAM (bit 28) ...");
-        rc_ecmd |= data.flushTo0();
-        rc_ecmd |= data.setBit(GP3_EDRAM_ENABLE_BIT);
+        rc_ecmd |= scom_data.flushTo0();
+        rc_ecmd |= scom_data.setBit(GP3_EDRAM_ENABLE_BIT);
         if (rc_ecmd)
         {
             FAPI_ERR("Error 0x%x setting up ecmd data buffer to enable EDRAM.",  rc_ecmd);
             rc.setEcmdError(rc_ecmd);
             break;
         }
-        rc = fapiPutScom( i_target, MEM_GP3_OR_0x030F0014, data);
+        rc = fapiPutScom( i_target, MEM_GP3_OR_0x030F0014, scom_data);
         if (rc)
         {
             FAPI_ERR("Error writing GP3 OR mask 0x030F0014 (bit 28) to enable EDRAM.");
@@ -183,17 +175,17 @@ fapi::ReturnCode cen_mem_startclocks(const fapi::Target & i_target)
         //   Write SCOM      address 0x03000004  bit(0)=0b0, bit(1)=0b0    , clear mux selects in GP0
         FAPI_DBG("Writing GP0 AND mask to drop pervasive fence (bit 63) ...");
         FAPI_DBG("Writing GP0 AND mask to clear mux selects (bits 0-1) ...");
-        rc_ecmd |= data.flushTo1();
-        rc_ecmd |= data.clearBit(GP0_ABSTCLK_MUXSEL_BIT);
-        rc_ecmd |= data.clearBit(GP0_SYNCCLK_MUXSEL_BIT);
-        rc_ecmd |= data.clearBit(GP0_PERV_FENCE_BIT);
+        rc_ecmd |= scom_data.flushTo1();
+        rc_ecmd |= scom_data.clearBit(GP0_ABSTCLK_MUXSEL_BIT);
+        rc_ecmd |= scom_data.clearBit(GP0_SYNCCLK_MUXSEL_BIT);
+        rc_ecmd |= scom_data.clearBit(GP0_PERV_FENCE_BIT);
         if (rc_ecmd)
         {
             FAPI_ERR("Error 0x%x setting up ecmd data buffer to drop pervasive fence and clear mux selects.",  rc_ecmd);
             rc.setEcmdError(rc_ecmd);
             break;
         }
-        rc = fapiPutScom( i_target, MEM_GP0_AND_0x03000004, data);
+        rc = fapiPutScom( i_target, MEM_GP0_AND_0x03000004, scom_data);
         if (rc)
         {
             FAPI_ERR("Error writing GP0 AND mask 0x03000004 (bits 0,1,63) to drop pervasive fence and clear mux selects.");
@@ -203,15 +195,15 @@ fapi::ReturnCode cen_mem_startclocks(const fapi::Target & i_target)
 
         //   Write SCOM      address 0x03000005  bit(11)=0b1        abist_mode_dc for core chiplets (core recovery)
         FAPI_DBG("Writing GP0 OR mask to set abist_mode_dc (bit 11) ...");
-        rc_ecmd |= data.flushTo0();
-        rc_ecmd |= data.setBit(GP0_ABIST_MODE_BIT);
+        rc_ecmd |= scom_data.flushTo0();
+        rc_ecmd |= scom_data.setBit(GP0_ABIST_MODE_BIT);
         if (rc_ecmd)
         {
             FAPI_ERR("Error 0x%x setting up ecmd data buffer to set abist_mode_dc.",  rc_ecmd);
             rc.setEcmdError(rc_ecmd);
             break;
         }
-        rc = fapiPutScom( i_target, MEM_GP0_OR_0x03000005, data);
+        rc = fapiPutScom( i_target, MEM_GP0_OR_0x03000005, scom_data);
         if (rc)
         {
             FAPI_ERR("Error writing GP0 OR mask 0x03000005 (bit 11) to set abist_mode_dc.");
@@ -221,14 +213,14 @@ fapi::ReturnCode cen_mem_startclocks(const fapi::Target & i_target)
 
         //   Write SCOM      address 0x03030007  0x0000000000000000     Write CC Scan Region Reg, set all bits='0' prior clk start
         FAPI_DBG("Writing CC Scan Region Register to all zeros prior to clock start ...");
-        rc_ecmd |= data.flushTo0();
+        rc_ecmd |= scom_data.flushTo0();
         if (rc_ecmd)
         {
             FAPI_ERR("Error 0x%x setting up ecmd data buffer to flush Scan Region Register.",  rc_ecmd);
             rc.setEcmdError(rc_ecmd);
             break;
         }
-        rc = fapiPutScom( i_target, MEM_CLK_SCANSEL_0x03030007, data);
+        rc = fapiPutScom( i_target, MEM_CLK_SCANSEL_0x03030007, scom_data);
         if (rc)
         {
             FAPI_ERR("Error writing CC Scan Region Register 0x03030007 to all zeros prior to clock start.");
@@ -242,14 +234,14 @@ fapi::ReturnCode cen_mem_startclocks(const fapi::Target & i_target)
 
         //   Write SCOM      address 0x03030006  data=0x4FE0 0600 0000 0000    unicast, write CC clock region reg in MEM chiplet. start clocks
         FAPI_DBG("Writing CC Clock Region Register to 0x4FE0060000000000 to start array and nsl clocks ...");
-        rc_ecmd |= data.setDoubleWord(0, CLK_REGION_REG_DATA_TO_START_NSL_ARY);
+        rc_ecmd |= scom_data.setDoubleWord(0, CLK_REGION_REG_DATA_TO_START_NSL_ARY);
         if (rc_ecmd)
         {
             FAPI_ERR("Error 0x%x setting up ecmd data buffer to start array and nsl clocks.",  rc_ecmd);
             rc.setEcmdError(rc_ecmd);
             break;
         }
-        rc = fapiPutScom( i_target, MEM_CLK_REGION_0x03030006, data);
+        rc = fapiPutScom( i_target, MEM_CLK_REGION_0x03030006, scom_data);
         if (rc)
         {
             FAPI_ERR("Error writing CC Clock Region Register 0x03030006 to 0x4FE0060000000000 to start array and nsl clocks.");
@@ -259,14 +251,14 @@ fapi::ReturnCode cen_mem_startclocks(const fapi::Target & i_target)
 
         //   Write SCOM      address 0x03030006  data=0x4FE0 0E00 0000 0000    unicast, write CC clock region reg in MEM chiplet. start clocks
         FAPI_DBG("Writing CC Clock Region Register to 0x4FE00E0000000000 to start sl clocks ...");
-        rc_ecmd |= data.setDoubleWord(0, CLK_REGION_REG_DATA_TO_START_ALL);
+        rc_ecmd |= scom_data.setDoubleWord(0, CLK_REGION_REG_DATA_TO_START_ALL);
         if (rc_ecmd)
         {
             FAPI_ERR("Error 0x%x setting up ecmd data buffer to start sl clocks.",  rc_ecmd);
             rc.setEcmdError(rc_ecmd);
             break;
         }
-        rc = fapiPutScom( i_target, MEM_CLK_REGION_0x03030006, data);
+        rc = fapiPutScom( i_target, MEM_CLK_REGION_0x03030006, scom_data);
         if (rc)
         {
             FAPI_ERR("Error writing CC Clock Region Register 0x03030006 to 0x4FE00E0000000000 to start sl clocks.");
@@ -276,15 +268,15 @@ fapi::ReturnCode cen_mem_startclocks(const fapi::Target & i_target)
 
         //   Read SCOM       address 0x03030008  expect=0x0000 001F FFFF FFFF  unicast, read clock status reg in MEM chiplet
         FAPI_DBG("Reading CC Clock Status Register to see if clocks are running ...");
-        rc = fapiGetScom( i_target, MEM_CLK_STATUS_0x03030008, data);
+        rc = fapiGetScom( i_target, MEM_CLK_STATUS_0x03030008, scom_data);
         if ( rc )
         {
             FAPI_ERR("Error reading CC Clock Status Register 0x03030008.");
             break;
         }
-        if ( data.getDoubleWord(0) != MEM_CLK_STATUS_REG_EXP_DATA )
+        if ( scom_data.getDoubleWord(0) != MEM_CLK_STATUS_REG_EXP_DATA )
         {
-            FAPI_ERR("Unexpected clock status! Clk Status Reg 0x03030008 = %16llX, but %16llX was expected.",data.getDoubleWord(0),MEM_CLK_STATUS_REG_EXP_DATA);
+            FAPI_ERR("Unexpected clock status! Clk Status Reg 0x03030008 = %16llX, but %16llX was expected.",scom_data.getDoubleWord(0),MEM_CLK_STATUS_REG_EXP_DATA);
             FAPI_SET_HWP_ERROR(rc, RC_MSS_UNEXPECTED_CLOCK_STATUS);
             break;
         }
@@ -298,20 +290,20 @@ fapi::ReturnCode cen_mem_startclocks(const fapi::Target & i_target)
 
         //   Write CFAM      address 0x13        bit(02)=0b1       Set MemReset Stability Control
         FAPI_DBG("Writing FSI GP4 register (bit2) to set MemReset Stability control ...");
-        rc = fapiGetScom( i_target, CFAM_FSI_GP4_0x00001013, data);
+        rc = fapiGetCfamRegister( i_target, CFAM_FSI_GP4_0x00001013, cfam_data);
         if (rc)
         {
             FAPI_ERR("Error reading FSI GP4 Regiter 0x00001013.");
             break;
         }
-        rc_ecmd |= data.setBit(FSI_GP4_MEMRESET_STABILITY_BIT);
+        rc_ecmd |= cfam_data.setBit(FSI_GP4_MEMRESET_STABILITY_BIT);
         if (rc_ecmd)
         {
             FAPI_ERR("Error 0x%x setting up ecmd data buffer to set MemReset Stability control.",  rc_ecmd);
             rc.setEcmdError(rc_ecmd);
             break;
         }
-        rc = fapiPutScom( i_target, CFAM_FSI_GP4_0x00001013, data);
+        rc = fapiPutCfamRegister( i_target, CFAM_FSI_GP4_0x00001013, cfam_data);
         if (rc)
         {
             FAPI_ERR("Error writing FSI GP4 0x00001013 (bit 2) to set MemReset Stability control.");
@@ -321,20 +313,20 @@ fapi::ReturnCode cen_mem_startclocks(const fapi::Target & i_target)
 
         //   Write CFAM      address 0x13        bit(04)=0b1     Release D3PHY PLL Reset Control
         FAPI_DBG("Writing FSI GP4 register (bit4) to release D3PHY PLL Reset Control ...");
-        rc = fapiGetScom( i_target, CFAM_FSI_GP4_0x00001013, data);
+        rc = fapiGetCfamRegister( i_target, CFAM_FSI_GP4_0x00001013, cfam_data);
         if (rc)
         {
             FAPI_ERR("Error reading FSI GP4 Regiter 0x00001013.");
             break;
         }
-        rc_ecmd |= data.setBit(FSI_GP4_DPHY_PLLRESET_BIT);
+        rc_ecmd |= cfam_data.setBit(FSI_GP4_DPHY_PLLRESET_BIT);
         if (rc_ecmd)
         {
             FAPI_ERR("Error 0x%x setting up ecmd data buffer to release D3PHY PLL Reset Control.",  rc_ecmd);
             rc.setEcmdError(rc_ecmd);
             break;
         }
-        rc = fapiPutScom( i_target, CFAM_FSI_GP4_0x00001013, data);
+        rc = fapiPutCfamRegister( i_target, CFAM_FSI_GP4_0x00001013, cfam_data);
         if (rc)
         {
             FAPI_ERR("Error writing FSI GP4 0x00001013 (bit 4) to release D3PHY PLL Reset Control.");
@@ -348,15 +340,15 @@ fapi::ReturnCode cen_mem_startclocks(const fapi::Target & i_target)
 
         //   Write SCOM      address 0x03000004  bit(3)=0b0    clear force_align in all Chiplets in GP0
         FAPI_DBG("Writing GP0 AND mask to clear force_align (bit 3) ...");
-        rc_ecmd |= data.flushTo1();
-        rc_ecmd |= data.clearBit(GP0_FORCE_ALIGN_BIT);
+        rc_ecmd |= scom_data.flushTo1();
+        rc_ecmd |= scom_data.clearBit(GP0_FORCE_ALIGN_BIT);
         if (rc_ecmd)
         {
             FAPI_ERR("Error 0x%x setting up ecmd data buffer to clear force_align.",  rc_ecmd);
             rc.setEcmdError(rc_ecmd);
             break;
         }
-        rc = fapiPutScom( i_target, MEM_GP0_AND_0x03000004, data);
+        rc = fapiPutScom( i_target, MEM_GP0_AND_0x03000004, scom_data);
         if (rc)
         {
             FAPI_ERR("Error writing GP0 AND mask 0x03000004 (bit 3) to clear force_align.");
@@ -366,15 +358,15 @@ fapi::ReturnCode cen_mem_startclocks(const fapi::Target & i_target)
 
         //   Write SCOM      address 0x03000004  bit(2)=0b0    clear flushmode_inhibit in Chiplet in GP0
         FAPI_DBG("Writing GP0 AND mask to clear flushmode_inhibit (bit 2) ...");
-        rc_ecmd |= data.flushTo1();
-        rc_ecmd |= data.clearBit(GP0_FLUSHMODE_INHIBIT_BIT);
+        rc_ecmd |= scom_data.flushTo1();
+        rc_ecmd |= scom_data.clearBit(GP0_FLUSHMODE_INHIBIT_BIT);
         if (rc_ecmd)
         {
             FAPI_ERR("Error 0x%x setting up ecmd data buffer to clear flushmode_inhibit.",  rc_ecmd);
             rc.setEcmdError(rc_ecmd);
             break;
         }
-        rc = fapiPutScom( i_target, MEM_GP0_AND_0x03000004, data);
+        rc = fapiPutScom( i_target, MEM_GP0_AND_0x03000004, scom_data);
         if (rc)
         {
             FAPI_ERR("Error writing GP0 AND mask 0x03000004 (bit 2) to clear flushmode_inhibit.");
@@ -401,6 +393,12 @@ fapi::ReturnCode cen_mem_startclocks(const fapi::Target & i_target)
 This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 $Log: cen_mem_startclocks.C,v $
+Revision 1.9  2012/06/07 13:52:27  jmcgill
+use independent data buffers for cfam/scom accesses
+
+Revision 1.8  2012/06/06 20:04:59  jmcgill
+change FSI GP3/GP4/status register accesses from SCOM->CFAM
+
 Revision 1.7  2012/05/31 18:29:20  mfred
 Updates for RC checking and error messages, etc.
 

@@ -43,7 +43,7 @@
 //------------------------------------------------------------------------------
 #include "gcr_funcs.H"
 using namespace fapi;
-ReturnCode  GCR_read(const Target& chip_target, io_interface_t interface, GCR_sub_registers target_io_reg, uint32_t group_address,  uint32_t lane_address, ecmdDataBufferBase &databuf_16bit)
+ReturnCode  GCR_read(const Target& chip_target, io_interface_t interface,GCR_sub_registers target_io_reg, uint32_t group_address,  uint32_t lane_address, ecmdDataBufferBase &databuf_16bit)
 {
    ReturnCode rc;
    uint32_t rc_ecmd=0;
@@ -137,8 +137,16 @@ ReturnCode  doGCRop(const Target& chip_target, io_interface_t interface, gcr_op 
     // Generate the  gcr2_register_data  putscom data
     /* gcr2        reg_addr  12        9       # gcr ring (register) address (ext_addr)                                      */
     // align the extended address to bit (12:20)
-     rc_ecmd |= getscom_data64.insert( GCR_sub_reg_ext_addr[target_io_reg], 12, 9, 23 );
+      rc_ecmd |= getscom_data64.insert( GCR_sub_reg_ext_addr[target_io_reg], 12, 9, 23 );
+       FAPI_DBG("Register Extended address = %x\n",GCR_sub_reg_ext_addr[target_io_reg]);
   
+    const char *temp;
+    temp=GCR_sub_reg_names[target_io_reg];
+    if(temp[0] == 'T' )
+    {
+      // This is a TX register/field need to set the TX bit
+       rc_ecmd |= getscom_data64.setBit( 21 ); // does not include leading TX bit now since we are using only RX
+    }
     /* gcr2        group     22        5       # does NOT include tx/rx as leading bit                                       */
     // align the group address to bit (22:26)
     rc_ecmd |= getscom_data64.insert( group_address, 22, 5, 27); // does not include leading TX bit now since we are using only RX
@@ -159,12 +167,13 @@ ReturnCode  doGCRop(const Target& chip_target, io_interface_t interface, gcr_op 
         if(!rc.ok())
         {
             FAPI_ERR("IO gcr_funcs:GETSCOM error occurred ********\n");
-            FAPI_ERR( "IO GCR FUNCS \tRead GCR %s, @ = %llX, Data = %08X%08X  Failed  group_address=%d\n",
+		             FAPI_ERR( "IO GCR FUNCS \tRead GCR %s, @ = %llX, Data = %08X%08X  Failed  group_address=%d\n",
                          GCR_sub_reg_names[target_io_reg], scom_address64, getscom_data64.getWord(0), getscom_data64.getWord(1),group_address);
+
         }
         else
         {
-          FAPI_DBG( "\tRead GCR2 %s:  GETSCOM 0x%llX %08X%08X \n",
+	    FAPI_DBG( "\tRead GCR2 %s:  GETSCOM 0x%llX %08X%08X \n",
                         GCR_sub_reg_names[target_io_reg], scom_address64, getscom_data64.getWord(0), getscom_data64.getWord(1) );
           rc_ecmd|=getscom_data64.extract( local_data16,   48, 16 ); // return data on read ops -- for 54/52 onwards
           
@@ -200,8 +209,8 @@ ReturnCode  doGCRop(const Target& chip_target, io_interface_t interface, gcr_op 
                 }
                 else
                 {
-                   FAPI_DBG( "\tWrite GCR2 %s: PUTSCOM 0x%llX  0x%08X%08X",
-                   GCR_sub_reg_names[target_io_reg], scom_address64, putscom_data64.getWord(0), putscom_data64.getWord(1) );
+		    FAPI_DBG( "\tWrite GCR2 %s: PUTSCOM 0x%llX  0x%08X%08X",
+                    GCR_sub_reg_names[target_io_reg], scom_address64, putscom_data64.getWord(0), putscom_data64.getWord(1) );
                    rc = fapiPutScom( chip_target, scom_address64, putscom_data64);
                    if(!rc.ok())
                    {
@@ -226,8 +235,8 @@ ReturnCode  doGCRop(const Target& chip_target, io_interface_t interface, gcr_op 
                            { //add skipCheck for tx_err_inj since self resetting -- djd 2/11/11
                                if ( local_data16 != databuf_16bit )
                                {
-                                   FAPI_ERR( "\t %s VALIDATE write failed: read=0x%04X  write=%04X\n",
-                                   GCR_sub_reg_names[target_io_reg], local_data16.getHalfWord(0), databuf_16bit.getHalfWord(0) );
+				        FAPI_ERR( "\t %s VALIDATE write failed: read=0x%04X  write=%04X\n",
+				   GCR_sub_reg_names[target_io_reg], local_data16.getHalfWord(0), databuf_16bit.getHalfWord(0) );
                                    ecmdDataBufferBase &READ_BUF=local_data16;
                                    ecmdDataBufferBase &WRITE_BUF=databuf_16bit;
                                    FAPI_SET_HWP_ERROR(rc, IO_GCR_WRITE_MISMATCH_RC);
@@ -240,7 +249,6 @@ ReturnCode  doGCRop(const Target& chip_target, io_interface_t interface, gcr_op 
                 }
             }
          }
-        
         }
     }
    

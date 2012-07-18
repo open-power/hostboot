@@ -44,7 +44,7 @@
 //------------------------------------------------------------------------------
 #include <fapi.H>
 #include "io_run_training.H"
-
+#include "io_funcs.H"
 
 extern "C" {
      using namespace fapi;
@@ -79,7 +79,7 @@ ReturnCode io_run_training(const Target &master_target,const Target &slave_targe
                if(!is_master){
                     //Swap master and slave targets !!
                     FAPI_DBG("X Bus ..target swap performed");
-                    for(int i=0;i<4;++i){
+                    for(int i=0;i<5;++i){
                      master_group=slave_group=i;
                        FAPI_DBG("X Bus training for group %d",i);
                      rc=init.run_training(slave_target,slave_interface,slave_group,master_target,master_interface,master_group);
@@ -90,7 +90,7 @@ ReturnCode io_run_training(const Target &master_target,const Target &slave_targe
                     }
                }
                else{
-                    for(int i=0;i<4;++i){
+                    for(int i=0;i<5;++i){
                      master_group=slave_group=i;
                      FAPI_DBG("X Bus training for group %d",i);
                      rc=init.run_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group);

@@ -62,15 +62,13 @@ extern "C" {
 using namespace fapi;
 
 
-ReturnCode mss_extent_setup()
-{
+ReturnCode mss_extent_setup(){
 
     ReturnCode rc;
-
-    if(rc)
-    {
-        FAPI_ERR("Error occured in mss_extent_setup() ");
-    }
+	    if(rc){
+		FAPI_ERR(" Calling Extent function Error ");
+		return rc;
+	    }
     return rc;
 }
 

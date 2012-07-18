@@ -21,7 +21,7 @@
  *
  *  IBM_PROLOG_END_TAG
  */
-// $Id: mss_ddr_phy_reset.C,v 1.7 2012/05/31 18:27:54 mfred Exp $
+// $Id: mss_ddr_phy_reset.C,v 1.9 2012/07/18 16:27:39 mfred Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_ddr_phy_reset.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -72,6 +72,7 @@ fapi::ReturnCode mss_ddr_phy_reset(const fapi::Target & i_target)
     uint32_t rc_ecmd = 0;
     uint32_t poll_count = 0;
     uint32_t done_polling = 0;
+    uint8_t is_simulation = 0;
     ecmdDataBufferBase i_data, j_data, k_data, l_data;
 
 
@@ -581,6 +582,205 @@ fapi::ReturnCode mss_ddr_phy_reset(const fapi::Target & i_target)
         }
 
 
+
+        // Work-around required to get alignment in simulation
+        // Read the ATTR_IS_SIMULATION attribute
+        rc = FAPI_ATTR_GET( ATTR_IS_SIMULATION, NULL, is_simulation);
+        if (rc)
+        {
+            FAPI_ERR("Failed to get attribute: ATTR_IS_SIMULATION.");
+            break;
+        }
+        if (is_simulation)
+        {
+            FAPI_DBG("Step 11.1 (SIM ONLY): Write '8000'x into the ADR SysClk Phase Rotator Control Regs and the DP18 SysClk Phase Rotator Control Regs.\n");
+            rc_ecmd |= i_data.setDoubleWord(0, 0x0000000000008000ull);
+            if (rc_ecmd)
+            {
+                FAPI_ERR("Error 0x%x setting up ecmd data buffer to write 0x8020 into the Phase Rotator registers.",  rc_ecmd);
+                rc.setEcmdError(rc_ecmd);
+                break;
+            }
+            rc = fapiPutScom( i_target, DPHY01_DDRPHY_ADR_SYSCLK_CNTL_PR_P0_ADR32S0_0x800080320301143F, i_data);
+            if (rc)
+            {
+                FAPI_ERR("Error writing DPHY01_DDRPHY_ADR_SYSCLK_CNTL_PR_P0_ADR32S0 register.");
+                break;
+            }
+            rc = fapiPutScom( i_target, DPHY01_DDRPHY_ADR_SYSCLK_CNTL_PR_P1_ADR32S0_0x800180320301143F, i_data);
+            if (rc)
+            {
+                FAPI_ERR("Error writing DPHY01_DDRPHY_ADR_SYSCLK_CNTL_PR_P1_ADR32S0 register.");
+                break;
+            }
+            rc = fapiPutScom( i_target, DPHY01_DDRPHY_ADR_SYSCLK_CNTL_PR_P0_ADR32S1_0x800084320301143F, i_data);
+            if (rc)
+            {
+                FAPI_ERR("Error writing DPHY01_DDRPHY_ADR_SYSCLK_CNTL_PR_P0_ADR32S1 register.");
+                break;
+            }
+            rc = fapiPutScom( i_target, DPHY01_DDRPHY_ADR_SYSCLK_CNTL_PR_P1_ADR32S1_0x800184320301143F, i_data);
+            if (rc)
+            {
+                FAPI_ERR("Error writing DPHY01_DDRPHY_ADR_SYSCLK_CNTL_PR_P1_ADR32S1 register.");
+                break;
+            }
+            rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_0_0x800000070301143F, i_data);
+            if (rc)
+            {
+                FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_0 register.");
+                break;
+            }
+            rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_0_0x800100070301143F, i_data);
+            if (rc)
+            {
+                FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_0 register.");
+                break;
+            }
+            rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_1_0x800004070301143F, i_data);
+            if (rc)
+            {
+                FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_1 register.");
+                break;
+            }
+            rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_1_0x800104070301143F, i_data);
+            if (rc)
+            {
+                FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_1 register.");
+                break;
+            }
+            rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_2_0x800008070301143F, i_data);
+            if (rc)
+            {
+                FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_2 register.");
+                break;
+            }
+            rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_2_0x800108070301143F, i_data);
+            if (rc)
+            {
+                FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_2 register.");
+                break;
+            }
+            rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_3_0x80000C070301143F, i_data);
+            if (rc)
+            {
+                FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_3 register.");
+                break;
+            }
+            rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_3_0x80010C070301143F, i_data);
+            if (rc)
+            {
+                FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_3 register.");
+                break;
+            }
+            rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_4_0x800010070301143F, i_data);
+            if (rc)
+            {
+                FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_4 register.");
+                break;
+            }
+            rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_4_0x800110070301143F, i_data);
+            if (rc)
+            {
+                FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_4 register.");
+                break;
+            }
+    
+    
+            FAPI_DBG("Step 11.2 (SIM ONLY): Write '8080'x into the ADR SysClk Phase Rotator Control Regs and the DP18 SysClk Phase Rotator Control Regs.\n");
+            rc_ecmd |= i_data.setDoubleWord(0, 0x0000000000008080ull);
+            if (rc_ecmd)
+            {
+                FAPI_ERR("Error 0x%x setting up ecmd data buffer to write 0x8020 into the Phase Rotator registers.",  rc_ecmd);
+                rc.setEcmdError(rc_ecmd);
+                break;
+            }
+            rc = fapiPutScom( i_target, DPHY01_DDRPHY_ADR_SYSCLK_CNTL_PR_P0_ADR32S0_0x800080320301143F, i_data);
+            if (rc)
+            {
+                FAPI_ERR("Error writing DPHY01_DDRPHY_ADR_SYSCLK_CNTL_PR_P0_ADR32S0 register.");
+                break;
+            }
+            rc = fapiPutScom( i_target, DPHY01_DDRPHY_ADR_SYSCLK_CNTL_PR_P1_ADR32S0_0x800180320301143F, i_data);
+            if (rc)
+            {
+                FAPI_ERR("Error writing DPHY01_DDRPHY_ADR_SYSCLK_CNTL_PR_P1_ADR32S0 register.");
+                break;
+            }
+            rc = fapiPutScom( i_target, DPHY01_DDRPHY_ADR_SYSCLK_CNTL_PR_P0_ADR32S1_0x800084320301143F, i_data);
+            if (rc)
+            {
+                FAPI_ERR("Error writing DPHY01_DDRPHY_ADR_SYSCLK_CNTL_PR_P0_ADR32S1 register.");
+                break;
+            }
+            rc = fapiPutScom( i_target, DPHY01_DDRPHY_ADR_SYSCLK_CNTL_PR_P1_ADR32S1_0x800184320301143F, i_data);
+            if (rc)
+            {
+                FAPI_ERR("Error writing DPHY01_DDRPHY_ADR_SYSCLK_CNTL_PR_P1_ADR32S1 register.");
+                break;
+            }
+            rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_0_0x800000070301143F, i_data);
+            if (rc)
+            {
+                FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_0 register.");
+                break;
+            }
+            rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_0_0x800100070301143F, i_data);
+            if (rc)
+            {
+                FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_0 register.");
+                break;
+            }
+            rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_1_0x800004070301143F, i_data);
+            if (rc)
+            {
+                FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_1 register.");
+                break;
+            }
+            rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_1_0x800104070301143F, i_data);
+            if (rc)
+            {
+                FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_1 register.");
+                break;
+            }
+            rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_2_0x800008070301143F, i_data);
+            if (rc)
+            {
+                FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_2 register.");
+                break;
+            }
+            rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_2_0x800108070301143F, i_data);
+            if (rc)
+            {
+                FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_2 register.");
+                break;
+            }
+            rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_3_0x80000C070301143F, i_data);
+            if (rc)
+            {
+                FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_3 register.");
+                break;
+            }
+            rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_3_0x80010C070301143F, i_data);
+            if (rc)
+            {
+                FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_3 register.");
+                break;
+            }
+            rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_4_0x800010070301143F, i_data);
+            if (rc)
+            {
+                FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_4 register.");
+                break;
+            }
+            rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_4_0x800110070301143F, i_data);
+            if (rc)
+            {
+                FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_4 register.");
+                break;
+            }
+        }
+
   
         //
         // 12.Wait at least 32 memory clock cycles.
@@ -621,7 +821,6 @@ fapi::ReturnCode mss_ddr_phy_reset(const fapi::Target & i_target)
 
 
 
-
     } while(0);
 
     FAPI_INF("********* mss_ddr_phy_reset complete *********");
@@ -640,6 +839,12 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: mss_ddr_phy_reset.C,v $
+Revision 1.9  2012/07/18 16:27:39  mfred
+Check for ATTR_IS_SIMULATION attribute instead of use compiler switch.
+
+Revision 1.8  2012/06/07 22:30:25  jmcgill
+add sim only inits for phase rotator alignment (wrapped in SIM_ONLY ifdef for now)
+
 Revision 1.7  2012/05/31 18:27:54  mfred
 Removing some config settings that are now done in config file.  See Gary Van Huben note May 3, 2012
 
