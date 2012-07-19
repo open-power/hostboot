@@ -36,23 +36,14 @@
         <sideless>no</sideless>
     </section>
     <section>
-        <description>Hostboot Extended image (2MB)</description>
+        <description>Hostboot Extended image (2.5MB)</description>
         <eyeCatch>HBI</eyeCatch>
         <physicalOffset>0x1000</physicalOffset>
-        <physicalRegionSize>0x200000</physicalRegionSize>
+        <physicalRegionSize>0x280000</physicalRegionSize>
         <ecc>no</ecc>
         <source>File</source>
         <sideless>no</sideless>
     </section>
-    <section>
-        <description>Attribute Data (512K)</description>
-        <eyeCatch>HBD</eyeCatch>
-        <physicalOffset>0x201000</physicalOffset>
-        <physicalRegionSize>0x80000</physicalRegionSize>
-        <ecc>no</ecc>
-        <source>File</source>
-        <sideless>no</sideless>
-   </section>
     <section>
         <description>Module VPD</description>
         <eyeCatch>MVPD</eyeCatch>
@@ -73,4 +64,13 @@
         <source>Blank</source>
         <sideless>yes</sideless>
     </section>
+    <section>
+        <description>Attribute Data (256K)</description>
+        <eyeCatch>HBD</eyeCatch>
+        <physicalOffset>0x341000</physicalOffset>
+        <physicalRegionSize>0x40000</physicalRegionSize>
+        <ecc>no</ecc>
+        <source>File</source>
+        <sideless>no</sideless>
+   </section>
 </pnor>
