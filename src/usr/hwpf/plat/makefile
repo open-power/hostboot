@@ -35,7 +35,7 @@ OBJS = fapiPlatHwAccess.o \
        fapiPlatTarget.o \
        fapiPlatUtil.o \
        fapiPlatAttributeService.o \
-       fapiMvpdAccess.o \
+       fapiPlatMvpdAccess.o \
        fapiPlatTask.o \
        fapiPlatAttrOverrideDirect.o
 

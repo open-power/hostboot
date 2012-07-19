@@ -50,7 +50,7 @@ class FapiWinkleTest: public CxxTest::TestSuite
 public:
 
     /**
-     * @brief   call fapiGetMvpdPdr to fetch a #R record.
+     * @brief   call fapiGetMvpdField to fetch a #R record.
      *
      */
     void    testGetMvpdPdr()
@@ -86,16 +86,18 @@ public:
                                           reinterpret_cast<void *>
                                           (const_cast<TARGETING::Target*>(l_cpu_target)) );
 
-            TS_TRACE( "call fapiGetMvpdPdr with NULL pointer" );
+            TS_TRACE( "call fapiGetMvpdField with NULL pointer" );
 
-            //  call fapiGetMvpdPdr once with a NULL pointer to get the buffer size
+            //  call fapiGetMvpdField once with a NULL pointer to get the buffer size
             //  should return no error now.
-            l_fapirc = fapiGetMvpdPdr(  l_fapi_cpu_target,
+            l_fapirc = fapiGetMvpdField(fapi::MVPD_RECORD_CP00,
+                                        fapi::MVPD_KEYWORD_PDR,
+                                        l_fapi_cpu_target,
                                         NULL,
                                         l_pdRLen );
             if ( l_fapirc != fapi::FAPI_RC_SUCCESS )
             {
-                TS_FAIL( "testGetMvpdPdr:  expected FAPI_RC_SUCCESS" );
+                TS_FAIL( "fapiGetMvpdField:  expected FAPI_RC_SUCCESS" );
                 fapiLogError(l_fapirc);
                 return;
             }
@@ -104,7 +106,7 @@ public:
             //  above.
             if ( l_pdRLen   !=  MVPD_PDR_TEST_SIZE )
             {
-                TS_FAIL( "testGetMvpdPdr: expected size = 0x%x, received 0x%x",
+                TS_FAIL( "fapiGetMvpdField: expected size = 0x%x, received 0x%x",
                          MVPD_PDR_TEST_SIZE,
                          l_pdRLen );
                 fapiLogError(l_fapirc);
@@ -114,14 +116,17 @@ public:
             //  do a malloc instead of a new just for variety
             l_pdRRecord =   reinterpret_cast<uint8_t *>(malloc(l_pdRLen) );
 
-            //  call fapiGetMvpdPdr once with a NULL pointer to get the buffer size
-            l_fapirc = fapiGetMvpdPdr(  l_fapi_cpu_target,
+            //  call fapiGetMvpdField once with a valid pointer
+            l_fapirc = fapiGetMvpdField(fapi::MVPD_RECORD_CP00,
+                                        fapi::MVPD_KEYWORD_PDR,
+                                        l_fapi_cpu_target,
                                         l_pdRRecord,
                                         l_pdRLen );
             if ( l_fapirc != fapi::FAPI_RC_SUCCESS )
             {
-                TS_FAIL( "testGetMvpdPdr:  expected FAPI_RC_SUCCESS" );
+                TS_FAIL( "fapiGetMvpdField:  expected FAPI_RC_SUCCESS" );
                 fapiLogError(l_fapirc);
+                free( l_pdRRecord );
                 return;
             }
 

@@ -21,7 +21,7 @@
  *
  *  IBM_PROLOG_END_TAG
  */
-
+// $Id: RepairRingFunc.C,v 1.1 2012/07/19 22:00:40 mjjones Exp $
 /**
  *  @file RepairRingFunc.C
  *
@@ -99,21 +99,23 @@ fapi::ReturnCode    getRepairRing(  const fapi::Target  &i_fapiTarget,
 
         FAPI_DBG( "getRepairRing: get MVPD #R buffer" );
 
-        //  call fapiGetMvpdPdr once with a NULL pointer to get the buffer size
-        //  no error should be returned.
-        l_fapirc = fapiGetMvpdPdr(  i_fapiTarget,
-                                    NULL,
-                                    l_pdRLen );
+        //  call fapiGetMvpdField once with a NULL pointer to get the buffer
+        //  size no error should be returned.
+        l_fapirc = fapiGetMvpdField(  fapi::MVPD_RECORD_CP00,
+                                      fapi::MVPD_KEYWORD_PDR,
+                                      i_fapiTarget,
+                                      NULL,
+                                      l_pdRLen );
         if ( l_fapirc )
         {
-            FAPI_ERR("getRepairRing: fapiGetMvpdPdr failed to get buffer size");
+            FAPI_ERR("getRepairRing: fapiGetMvpdField failed to get buffer size");
 
             io_rRingBufsize =   0;
             //  break out with fapirc
             break;
         }
 
-        FAPI_DBG( "getRepairRing: fapiGetMvpdPdr returned l_pdRLen=0x%x",
+        FAPI_DBG( "getRepairRing: fapiGetMvpdField returned l_pdRLen=0x%x",
                   l_pdRLen );
 
         //  allocate buffer for the record
@@ -130,12 +132,14 @@ fapi::ReturnCode    getRepairRing(  const fapi::Target  &i_fapiTarget,
         }
 
         //  load repair ring from MVPD for this target
-        l_fapirc = fapiGetMvpdPdr(  i_fapiTarget,
-                                    l_pdRRecord,
-                                    l_pdRLen );
+        l_fapirc = fapiGetMvpdField(  fapi::MVPD_RECORD_CP00,
+                                      fapi::MVPD_KEYWORD_PDR,
+                                      i_fapiTarget,
+                                      l_pdRRecord,
+                                      l_pdRLen );
         if ( l_fapirc )
         {
-            FAPI_ERR("getRepairRing: fapiGetMvpdPdr failed");
+            FAPI_ERR("getRepairRing: fapiGetMvpdField failed");
 
             io_rRingBufsize =   0;
             //  break out with fapirc

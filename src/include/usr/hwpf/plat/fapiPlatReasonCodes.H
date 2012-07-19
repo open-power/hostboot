@@ -76,6 +76,7 @@ namespace fapi
         MOD_ATTR_PROC_PCIE_BAR_ENABLE_GET          = 0x24,
         MOD_ATTR_PROC_PCIE_BAR_BASE_ADDR_GET       = 0x25,
         MOD_ATTR_PROC_PCIE_BAR_SIZE_GET            = 0x26,
+        MOD_MVPD_ACCESS                            = 0x27,
     };
 
     /**
@@ -109,6 +110,8 @@ namespace fapi
         RC_UNEXPECTED_TARGET_TYPE     = HWPF_COMP_ID | 0x20,
         RC_ATTR_UNKNOWN_TARGET_NAME   = HWPF_COMP_ID | 0x21,
         RC_ATTR_UNSUPPORTED_PROC_NUM  = HWPF_COMP_ID | 0x22,
+        RC_INVALID_RECORD             = HWPF_COMP_ID | 0x23,
+        RC_INVALID_KEYWORD            = HWPF_COMP_ID | 0x24,
     };
 
     /**
