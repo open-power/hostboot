@@ -1341,7 +1341,7 @@ errlHndl_t FsiDD::initMasterControl(const TARGETING::Target* i_master,
     do {
         // Do not initialize slaves because they are already done
         //  before we run
-        bool skipit = false;
+        bool fsp_slave_init = false;
         TARGETING::Target * sys = NULL;
         TARGETING::targetService().getTopLevelTarget( sys );
         TARGETING::SpFunctions spfuncs;
@@ -1350,8 +1350,7 @@ errlHndl_t FsiDD::initMasterControl(const TARGETING::Target* i_master,
             && spfuncs.fsiSlaveInit )
         {
             TRACFCOMP( g_trac_fsi, "FsiDD::initMasterControl> Skipping Master Init" );
-            skipit = true;
-            break;
+            fsp_slave_init = true;
         }
 
         uint32_t databuf = 0;
@@ -1366,7 +1365,7 @@ errlHndl_t FsiDD::initMasterControl(const TARGETING::Target* i_master,
             ctl_reg += getPortOffset(TARGETING::FSI_MASTER_TYPE_MFSI,m_info.port);
         }
 
-        if( !skipit )
+        if( !fsp_slave_init )
         {
             //Clear fsi port errors and general reset on all ports
             for( uint32_t port = 0; port < MAX_SLAVE_PORTS; ++port )
@@ -1401,12 +1400,23 @@ errlHndl_t FsiDD::initMasterControl(const TARGETING::Target* i_master,
         l_err = read( ctl_reg|FSI_MLEVP0_018, &databuf );
         if( l_err ) { break; }
 
+        //Read what FSP actually enabled as well if they initialized it
+        if( fsp_slave_init )
+        {
+            uint32_t databuf2 = 0;
+            l_err = read( ctl_reg|FSI_MENP0_010, &databuf2 );
+            if( l_err ) { break; }
+
+            //Only use slaves that we sense and FSP has enabled
+            databuf = databuf & databuf2;
+        }        
+
         // Only looking at the top bits
         uint64_t slave_index = getSlaveEnableIndex(i_master,i_type);
         iv_slaves[slave_index] = (uint8_t)(databuf >> (32-MAX_SLAVE_PORTS));
         TRACFCOMP( g_trac_fsi, "FsiDD::initMasterControl> %.8X:%d : Slave Detect = %.8X", TARGETING::get_huid(i_master), i_type, databuf );
 
-        if( skipit )
+        if( fsp_slave_init )
         {
             break; //all done
         }

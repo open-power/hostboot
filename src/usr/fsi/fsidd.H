@@ -379,6 +379,7 @@ class FsiDD
         FSI_MMODE_000   = 0x000,
         FSI_MDLYR_004   = 0x004,
         FSI_MCRSP0_008  = 0x008,
+        FSI_MENP0_010   = 0x010,
         FSI_MLEVP0_018  = 0x018,
         FSI_MSIEP0_030  = 0x030,
         FSI_MAEB_070    = 0x070,
