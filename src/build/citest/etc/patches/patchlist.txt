@@ -11,8 +11,3 @@ New actions for instruction state processing
 -CMVC: D841334 is integrating the changes
 -Files: p8_inst.act
 -Coreq: there are related changes in workarounds.postsimsetup
-
-Fixes for MCS BAR enable bits.
--CMVC: F843251 (next HB sprint) includes the changes.
--Files: p8.act.diff
--Coreq: workarounds.postsimsetup
