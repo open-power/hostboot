@@ -132,7 +132,6 @@ for( my $i = 0; $i <    MAX_ISTEPS; $i++)
 ##  initialize the sequence number - 6 bit field, { 0 - 63 }
 my  $g_SeqNum   =   int(rand(64));
 
-
 #==============================================================================
 # MAIN
 #==============================================================================
@@ -473,6 +472,8 @@ sub bumpSeqNum()
     $g_SeqNum++;
 
     $g_SeqNum   %=  64;
+
+    $g_SeqNum += ($g_SeqNum == 0) ? 1 : 0;
 
     return  $g_SeqNum;
 }
