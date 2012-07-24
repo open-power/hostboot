@@ -1,9 +1,12 @@
 
-#-- $Id: mba_def.initfile,v 1.7 2012/07/02 22:02:06 yctschan Exp $
+#-- $Id: mba_def.initfile,v 1.10 2012/08/01 15:08:50 mwuu Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--		1.10|menlowuu|08/01/12|add/fixed comments in refresh section, missed a line
+#--		1.9 |menlowuu|07/30/12|add/fixed comments in refresh section
+#--     1.8 |tschang |07/28/12|set refresh interval value and refresh check interval values
 #--     1.4 |tschang |06/28/12|clean up define syntax and ()'s
 #--     1.3 |tschang |05/08/12|moved refresh settings from mss_draminit_mc to this init file
 #--     1.2 |bellows |05/03/12|Updates for working version
@@ -1109,8 +1112,10 @@ scom 0x0301040A     {
 scom 0x03010432    {
     bits    ,   scom_data    , expr;
      4:7    ,   0b0111       , any; # MBAREF0Q_refresh priority threshold is 0x7 for all cfgs      30     ?
-     8:18   ,   0b00011000010, any; # MBAREF0Q_refresh intveral set to 97 decimal                  31     ?
-    19:29   ,   0b00011000010, any; # MBAREF0Q_refresh reset interval set to 95 decimal            32     ?
+# refresh interval = tREFI(7.8) / # ranks per port / DRAM clk(ns) / 0.008
+     8:18   ,   0b00010110000, any; # MBAREF0Q_refresh intveral set to 176 decimal                 31     ?		!!FIXME
+# reset check interval = tREFI(7.8) / DRAM clk(ns) / 0.008
+    19:29   ,   0b00011000010, any; # MBAREF0Q_refresh reset interval set to 194 decimal           32     ?		!!FIXME
     30:39   ,   0b0001010110 , (def_MBAREF0Q_cfg_trfc_dly86  == 1); # MBAREF0Q_cfg_trfc   33
     30:39   ,   0b0001101011 , (def_MBAREF0Q_cfg_trfc_dly107 == 1); # MBAREF0Q_cfg_trfc   33
     30:39   ,   0b0010000000 , (def_MBAREF0Q_cfg_trfc_dly128 == 1); # MBAREF0Q_cfg_trfc   33
@@ -1129,7 +1134,8 @@ scom 0x03010432    {
     30:39   ,   0b0101011110 , (def_MBAREF0Q_cfg_trfc_dly350 == 1); # MBAREF0Q_cfg_trfc   33
 #    30:39   ,   0b0001101011 , any; # MBAREF0Q_cfg_trfc set to 107 decimal
     40:49   ,   0b0000011000 , any; # MBAREF0Q_cfg_refr_tsv_stack is 24 for all cfgs               34      D
-    50:60   ,   0b00011000010, any; # MBAREF0Q_refresh check intveral set to 97 decimal            35
+# refr_check_interval=desired_tREFI_in_us/DRAM_command_clock_cycle_in_ns/.008
+    50:60   ,   0b01100001100, any; # MBAREF0Q_refresh check intveral set to 780 decimal            35
 }
 
 # MBAPC0Q    power control settings reg 1
@@ -1390,7 +1396,7 @@ scom 0x03010435    {
 
 # use prim map A for 1b, 1c
 
-# MBAREF1Q   mba01 refresh settings
+# MBAREF1Q   MBA01 Rank-to-primary-CKE mapping table
 #
 scom 0x03010433      {
     bits    ,   scom_data    , expr;
