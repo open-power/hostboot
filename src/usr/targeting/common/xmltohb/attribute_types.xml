@@ -3802,7 +3802,7 @@
 <!--    TARGETING attributes to support mss_setup_bars and proc_setup_bars  -->
 
 <attribute>
-  <id>ATTR_PROC_MEM_BASES</id>
+  <id>PROC_MEM_BASES</id>
   <description>
     read/write HWP attribute mapped to TARGETING
     Non-mirrored memory base addresses
@@ -3827,7 +3827,7 @@
 </attribute>
 
 <attribute>
-  <id>ATTR_PROC_MEM_SIZES</id>
+  <id>PROC_MEM_SIZES</id>
   <description>
     read/write HWP attribute mapped to TARGETING
     Size of non-mirrored memory regions
@@ -3853,7 +3853,7 @@
 </attribute>
 
 <attribute>
-  <id>ATTR_PROC_MIRROR_BASES</id>
+  <id>PROC_MIRROR_BASES</id>
   <description>Mirrored memory base addresses
     creator: mss_setup_bars
     consumer: proc_setup_bars, platform
@@ -3873,11 +3873,10 @@
       <id>ATTR_PROC_MIRROR_BASES</id>
       <macro>DIRECT</macro>
   </hwpfToHbAttrMap>
-
 </attribute>
 
 <attribute>
-  <id>ATTR_PROC_MIRROR_SIZES</id>
+  <id>PROC_MIRROR_SIZES</id>
   <description>Size of mirrored memory region
     creator: mss_setup_bars
     consumer: proc_setup_bars, platform
@@ -3901,7 +3900,7 @@
 </attribute>
 
 <attribute>
-  <id>ATTR_PROC_L3_BAR1_REG</id>
+  <id>PROC_L3_BAR1_REG</id>
   <description>
     read/write HWP attribute mapped to TARGETING
     L3 BAR1 register value
@@ -3924,7 +3923,7 @@
 </attribute>
 
 <attribute>
-  <id>ATTR_PROC_L3_BAR2_REG</id>
+  <id>PROC_L3_BAR2_REG</id>
   <description>
     read/write HWP attribute mapped to TARGETING
     L3 BAR2 register value
@@ -3936,18 +3935,18 @@
   </description>
   <simpleType>
       <uint64_t></uint64_t>
-   </simpleType>
-   <persistency>volatile-zeroed</persistency>
-   <readable/>
-   <writeable/>
-   <hwpfToHbAttrMap>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <writeable/>
+  <hwpfToHbAttrMap>
       <id>ATTR_PROC_L3_BAR2_REG</id>
       <macro>DIRECT</macro>
-   </hwpfToHbAttrMap>
+  </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
-  <id>ATTR_PROC_L3_BAR_GROUP_MASK_REG</id>
+  <id>PROC_L3_BAR_GROUP_MASK_REG</id>
   <description>
     read/write HWP attribute mapped to TARGETING
     L3 BAR Group Mask register value
@@ -3964,14 +3963,14 @@
   <readable/>
   <writeable/>
   <hwpfToHbAttrMap>
-    <id>ATTR_PROC_L3_BAR_GROUP_MASK_REG</id>
-     <macro>DIRECT</macro>
+      <id>ATTR_PROC_L3_BAR_GROUP_MASK_REG</id>
+      <macro>DIRECT</macro>
   </hwpfToHbAttrMap>
 </attribute>
 
 
 <attribute>
-  <id>ATTR_FREQ_CORE</id>
+  <id>FREQ_CORE</id>
   <description>
     firmware notes:
       Nominal processor's core DPLL frequency (MHz).
@@ -3980,36 +3979,36 @@
       @note this should be initialized by istep 7.1 proc_a_x_pci_dmi_pll_setup
   </description>
   <simpleType>
-  <uint32_t></uint32_t>
+      <uint32_t></uint32_t>
   </simpleType>
-<persistency>volatile-zeroed</persistency>
+  <persistency>volatile-zeroed</persistency>
   <readable/>
   <writeable/>
-<hwpfToHbAttrMap>
-  <id>ATTR_FREQ_CORE</id>
-   <macro>DIRECT</macro>
-</hwpfToHbAttrMap>
+  <hwpfToHbAttrMap>
+      <id>ATTR_FREQ_CORE</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
-  <id>ATTR_PROC_PCIE_NOT_F_LINK</id>
+  <id>PROC_PCIE_NOT_F_LINK</id>
   <description>
     firmware notes:
       Set IPL time mux/switch between PCIE PHB/F link function
       (one per foreign link)
   </description>
   <simpleType>
-  <uint8_t>
-    <default>0,0</default>
-  </uint8_t>
-  <array>2</array>
+      <uint8_t>
+          <default>0,0</default>
+      </uint8_t>
+      <array>2</array>
   </simpleType>
-<persistency>volatile</persistency>
+  <persistency>volatile</persistency>
   <readable/>
-<hwpfToHbAttrMap>
-  <id>ATTR_PROC_PCIE_NOT_F_LINK</id>
-   <macro>DIRECT</macro>
-</hwpfToHbAttrMap>
- </attribute>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_PCIE_NOT_F_LINK</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
 
 </attributes>

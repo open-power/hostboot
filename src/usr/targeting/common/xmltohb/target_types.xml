@@ -193,17 +193,17 @@
     <!-- New attributes for mss/proc_setup_bars -->
     <!--    proc_setup_bars_memory_attributes.xml   -->
     <attribute><id>MSS_MEM_MC_IN_GROUP</id></attribute>
-    <attribute><id>ATTR_PROC_MEM_BASES</id></attribute>
-    <attribute><id>ATTR_PROC_MEM_SIZES</id></attribute>
-    <attribute><id>ATTR_PROC_MIRROR_BASES</id></attribute>
-    <attribute><id>ATTR_PROC_MIRROR_SIZES</id></attribute>
+    <attribute><id>PROC_MEM_BASES</id></attribute>
+    <attribute><id>PROC_MEM_SIZES</id></attribute>
+    <attribute><id>PROC_MIRROR_BASES</id></attribute>
+    <attribute><id>PROC_MIRROR_SIZES</id></attribute>
     <!--    proc_setup_bars_l3_attributes.xml   -->
-    <attribute><id>ATTR_PROC_L3_BAR1_REG</id></attribute>
-    <attribute><id>ATTR_PROC_L3_BAR2_REG</id></attribute>
-    <attribute><id>ATTR_PROC_L3_BAR_GROUP_MASK_REG</id></attribute>
+    <attribute><id>PROC_L3_BAR1_REG</id></attribute>
+    <attribute><id>PROC_L3_BAR2_REG</id></attribute>
+    <attribute><id>PROC_L3_BAR_GROUP_MASK_REG</id></attribute>
      <!--   proc_fab_smp_fabric_attributes.xml  -->
-     <attribute><id>ATTR_FREQ_CORE</id></attribute>
-     <attribute><id>ATTR_PROC_PCIE_NOT_F_LINK</id></attribute>
+     <attribute><id>FREQ_CORE</id></attribute>
+     <attribute><id>PROC_PCIE_NOT_F_LINK</id></attribute>
 
 </targetType>
 
