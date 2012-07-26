@@ -1,26 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/trace/trace.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
-
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/trace/trace.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 /**
  *  @file trace.C
  *
@@ -141,7 +141,7 @@ struct vpo_cont_support_t
 // at compile time to 1. The VPO script set the enable variable at the
 // start to enable the continuous trace support for VPO. It then montiors the
 // trigger active bit of each buffer and take action.
-vpo_cont_support_t g_cont_trace_trigger_info = { { {0,0,0}, {0,0,0} }, 1 };
+vpo_cont_support_t g_cont_trace_trigger_info = { { {0,0,0}, {0,0,1} }, 1 };
 
 const uint64_t TRIGGER_ACTIVE_BIT = 0x8000000000000000;
 
@@ -450,6 +450,7 @@ void Trace::ManageContTraceBuffers(uint64_t i_cbRequired)
             }
 
             g_cont_trace_trigger_info.triggers[iv_CurBuf].seq = iv_seqNum++;
+            g_cont_trace_trigger_info.triggers[l_AltBuf].seq = iv_seqNum;
             // Turn on the current buffer's trigger
             g_cont_trace_trigger_info.triggers[iv_CurBuf].trig |=
                                                            TRIGGER_ACTIVE_BIT;
@@ -1475,6 +1476,24 @@ void Trace::clearAllBuffers()
     mutex_unlock(&iv_trac_mutex);
 }
 
+
+/******************************************************************************/
+// flushContBuffers()
+/******************************************************************************/
+void Trace::flushContBuffers()
+{
+    getTheInstance()._flushContBuffers();
+}
+
+/******************************************************************************/
+// _flushContBuffers()
+/******************************************************************************/
+void Trace::_flushContBuffers()
+{
+    mutex_lock(&iv_trac_mutex);
+    MAGIC_INSTRUCTION(MAGIC_CONTINUOUS_TRACE);
+    mutex_unlock(&iv_trac_mutex);
+}
 
 
 #if 0
