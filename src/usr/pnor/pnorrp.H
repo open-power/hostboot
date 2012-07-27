@@ -30,7 +30,6 @@
 #include <builtins.h>
 #include <errl/errlentry.H>
 #include <vmmconst.h>
-#include "ffs.h"   //Common header file with BuildingBlock.
 
 /**
  * PNOR Resource Provider
@@ -97,31 +96,6 @@ class PnorRP
         SUPPORTED_FFS_VERSION = 0x1,  /**< Supported FFS Version */
         FFS_TABLE_BASE_ADDR = 0x0,    /**< Currently only have FFS table */
     };
-
-    /**
-     * FFS Misc information flags
-     */
-    enum
-    {
-        MISC_ECC_PROTECT   = 0x80,    /**< ECC protected */
-        MISC_SIDELESS      = 0x40,    /**< Preserved across code updates (sideless) =1 */
-        MISC_CRC_PROTECTED = 0x20,    /**< CRC protected */
-        MISC_UNUSED        = 0x1F,    /**< Unused MISC Flags */
-    };
-
-    /**
-     * FFS entry
-     *   This matches the PNOR binary layout
-     */
-    struct ffs_hb_user_t{
-        uint32_t sizeAct;      /**< Actual Size of the image */
-        uint8_t chip;          /**< Chip Select (0,1) */
-        uint8_t compressType;  /**< Compression Indication/alg (0=not compressed) */
-        uint8_t miscFlags;     /**< Misc Partition related Flags */
-        uint8_t freeMisc[5];   /**< Unused Miscellaneious Info */
-        uint32_t freeUser[13]; /**< Unused User Data */
-    } PACKED;
-
 
     /**
      * Internal information to deal with the sections of PNOR

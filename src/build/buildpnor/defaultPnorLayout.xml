@@ -25,6 +25,7 @@
         <imageSize>0x800000</imageSize>
         <blockSize>0x1000</blockSize>
         <partTableSize>0x1</partTableSize>
+	<sideAOffset>0x0</sideAOffset>
     </metadata>
     <section>
         <description>Table of Contents (4K)</description>
@@ -32,7 +33,7 @@
         <physicalOffset>0</physicalOffset>
         <physicalRegionSize>0x1000</physicalRegionSize>
         <ecc>no</ecc>
-        <source>Generate</source>
+        <source>Blank</source>
         <sideless>no</sideless>
     </section>
     <section>

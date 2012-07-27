@@ -31,36 +31,11 @@ ROOTPATH = ../../..
 .DEFAULT_GOAL := buildpnor
 
 
-PNOR_TARGETS = simics_MURANO simics_VENICE TULETA
 PNOR_VBU_TARGETS = vbu
-
-#Murano/Venice IPL PNOR images
-define PNOR_template
-$${IMGDIR}/$(1).pnor: $${IMGDIR}/hbicore_extended.bin $${IMGDIR}/$(1)_targeting.bin
-	./buildpnor.pl --pnorLayout ./pnorLayout.xml \
-	    --genToc \
-	    --pnorOutBin $${IMGDIR}/$(1).pnor \
-	    --binFile_part $${IMGDIR}/$(1)_pnor.toc \
-	    --binFile_HBI $${IMGDIR}/hbicore_extended.bin \
-	    --binFile_HBD $${IMGDIR}/$(1)_targeting.bin \
-            --binFile_HBB $${IMGDIR}/hbicore.bin 
-endef
-
-#Murano/Venice Test case Pnor Image
-define PNOR_test_template
-$${IMGDIR}/$(1)_test.pnor: $${IMGDIR}/hbicore_extended.bin $${IMGDIR}/$(1)_targeting.bin
-	./buildpnor.pl --pnorLayout ./pnorLayout.xml --test \
-	    --genToc \
-	    --pnorOutBin $${IMGDIR}/$(1)_test.pnor \
-	    --binFile_part $${IMGDIR}/$(1)_test_pnor.toc \
-	    --binFile_HBI $${IMGDIR}/hbicore_test_extended.bin \
-	    --binFile_HBD $${IMGDIR}/$(1)_targeting.bin \
-            --binFile_HBB $${IMGDIR}/hbicore_test.bin 
-endef
 
 define PNOR_vbu_template
 $${IMGDIR}/$(1).pnor: $${IMGDIR}/hbicore_extended.bin $${IMGDIR}/$(1)_targeting.bin
-	./buildpnor.pl --pnorLayout ./pnorLayoutVpo.xml \
+	./buildpnorOld.pl --pnorLayout ./pnorLayoutVpo.xml \
 	    --genToc \
 	    --pnorOutBin $${IMGDIR}/$(1).pnor \
 	    --binFile_part $${IMGDIR}/$(1)_pnor.toc \
@@ -69,7 +44,7 @@ $${IMGDIR}/$(1).pnor: $${IMGDIR}/hbicore_extended.bin $${IMGDIR}/$(1)_targeting.
 endef
 define PNOR_vbu_test_template
 $${IMGDIR}/$(1)_test.pnor: $${IMGDIR}/hbicore_extended.bin $${IMGDIR}/$(1)_targeting.bin
-	./buildpnor.pl --pnorLayout ./pnorLayoutVpo.xml --test \
+	./buildpnorOld.pl --pnorLayout ./pnorLayoutVpo.xml --test \
 	    --genToc \
 	    --pnorOutBin $${IMGDIR}/$(1)_test.pnor \
 	    --binFile_part $${IMGDIR}/$(1)_test_pnor.toc \
@@ -88,11 +63,8 @@ EXTRA_CLEAN = ${PNOR_IMAGES} ${PNOR_IMAGES:.pnor=_pnor.toc} ${PNOR_VBU_IMAGES} $
 include ${ROOTPATH}/config.mk
 
 .PHONY: buildpnor
-buildpnor: ${PNOR_IMAGES} ${PNOR_VBU_IMAGES}
+buildpnor: ${PNOR_VBU_IMAGES}
 
-#Standard Images
-$(foreach pnor,$(PNOR_TARGETS),$(eval $(call PNOR_template,$(pnor))))
-$(foreach pnor,$(PNOR_TARGETS),$(eval $(call PNOR_test_template,$(pnor))))
 
 #VBU Specific images
 $(foreach pnor,$(PNOR_VBU_TARGETS),$(eval $(call PNOR_vbu_template,$(pnor))))

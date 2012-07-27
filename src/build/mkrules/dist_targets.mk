@@ -73,9 +73,7 @@ COPY_RENAME_FILES = \
     img/makefile:src/build/mkrules/hbfw/img/makefile:fsp \
     hbicore.bin:img/hbicore$(UNDERSCORE_TEST).bin:vpo \
     img/hostboot.bin:img/hbicore$(UNDERSCORE_TEST).bin:fsp \
-    img/murano.pnor:img/simics_MURANO$(UNDERSCORE_TEST).pnor:fsp \
-    img/venice.pnor:img/simics_VENICE$(UNDERSCORE_TEST).pnor:fsp \
-    img/tuleta.pnor:img/TULETA$(UNDERSCORE_TEST).pnor:fsp \
+    img/hostboot_extended.bin:img/hbicore$(UNDERSCORE_TEST)_extended.bin:fsp \
     vbu.pnor:img/vbu$(UNDERSCORE_TEST).pnor:vpo \
     hbicore.syms:img/hbicore$(UNDERSCORE_TEST).syms:tools,vpo \
     hbicore.list:img/hbicore$(UNDERSCORE_TEST).list:tools,vpo \
@@ -158,6 +156,11 @@ simics.tar_CONTENTS = \
 #
 fsp.tar_CONTENTS = \
     src/build/mkrules/hbfw/fsp/makefile \
+    src/build/buildpnor/buildpnor.pl \
+    src/build/buildpnor/defaultPnorLayout.xml \
+    img/simics_MURANO_targeting.bin \
+    img/simics_VENICE_targeting.bin \
+    img/TULETA_targeting.bin \
     $(addsuffix :targeting/,\
 	$(call ROOTPATH_WILDCARD_RECURSIVE,src/usr/targeting/common))\
     $(addsuffix :targeting/,\
@@ -165,7 +168,9 @@ fsp.tar_CONTENTS = \
     $(addsuffix :hwas/,\
 	$(call ROOTPATH_WILDCARD_RECURSIVE,src/usr/hwas/common))\
     $(addsuffix :hwas/,\
-	$(call ROOTPATH_WILDCARD_RECURSIVE,src/include/usr/hwas/common))
+	$(call ROOTPATH_WILDCARD_RECURSIVE,src/include/usr/hwas/common)) \
+    $(addsuffix :pnor/,\
+	$(call ROOTPATH_WILDCARD_RECURSIVE,src/usr/pnor/common))
 
 #
 # Portions of the FSP sandbox which must be rebuilt based on file changes.

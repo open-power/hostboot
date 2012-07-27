@@ -35,6 +35,8 @@
 #include <errno.h>
 #include <initservice/initserviceif.H>
 #include "pnordd.H"
+#include "ffs.h"   //Common header file with BuildingBlock.
+#include "common/ffs_hb.H" //Hostboot definition of user data in ffs_entry struct.
 
 // Trace definition
 trace_desc_t* g_trac_pnor = NULL;
@@ -318,7 +320,7 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
     o_info.name = cv_EYECATCHER[id];
     o_info.vaddr = iv_TOC[side][id].virtAddr;
     o_info.size = iv_TOC[side][id].size;
-    o_info.eccProtected = (bool)(iv_TOC[side][id].miscFlags & MISC_ECC_PROTECT);
+    o_info.eccProtected = (bool)(iv_TOC[side][id].miscFlags & FFS_MISC_ECC_PROTECT);
 
     return l_errhdl;
 }
@@ -453,7 +455,7 @@ errlHndl_t PnorRP::readTOC()
             //virtAddr
             //The PNOR data is broken up into 3 blocks of Virtual Addresses, A, B, and Sideless.
             //For Sections found to be sideless, both PNOR sides will map to the same virtual address.
-            if(!(ffsUserData->miscFlags & MISC_SIDELESS))
+            if(!(ffsUserData->miscFlags & FFS_MISC_SIDELESS))
             {
                 iv_TOC[cur_side][secId].virtAddr = nextVAddr[cur_side];  
                 nextVAddr[cur_side] += iv_TOC[cur_side][secId].size; 
@@ -777,7 +779,7 @@ errlHndl_t PnorRP::computeDeviceAddr( void* i_vaddr,
 
     // pull out the information we need to return from our global copy
     o_chip = iv_TOC[side][id].chip;
-    o_ecc = (bool)(iv_TOC[side][id].miscFlags & MISC_ECC_PROTECT);
+    o_ecc = (bool)(iv_TOC[side][id].miscFlags & FFS_MISC_ECC_PROTECT);
     o_offset = l_vaddr - iv_TOC[side][id].virtAddr; //offset into pnor
     o_offset += iv_TOC[side][id].flashAddr;
 

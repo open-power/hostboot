@@ -31,27 +31,97 @@
 
 .if($(CONTEXT:R) == "ppc")
 
-PNOR_IMAGES = tuleta.pnor murano.pnor venice.pnor
-OTHER_IMAGES = hostboot.bin
-
-ALL_IMAGES = ${PNOR_IMAGES} ${OTHER_IMAGES}
+FFSCMD = ffs
+VPATH += ../fsp
 
 DEFAULT_PATH = ${.PATH}
 SRCPATH = ${DEFAULT_PATH:M*src*}
 
-OTHERS = cp_hbfiles
+OTHERS = cp_hbfiles build_pnor_images
 
-cp_hbfiles:
-	${ALL_IMAGES:@image@cp -f ${SRCPATH:F${image}} ${image};@}
+#################################################
+# Copy Hostboot binary images to obj dir to be grabbed
+# during build flash pass and consumption by HWSV.
+# Having external users acquire from OBJ dir as there are packaging
+# changes expected in the future which will require using OBJ version.
+#################################################
+BASE_IMAGE = hostboot.bin
+BASE_IMAGES = ${BASE_IMAGE} hostboot_extended.bin
+
+cp_hbfiles: .SPECTARG 
+	${BASE_IMAGES:@image@cp -f -u ${SRCPATH:F${image}} ${image};@}
 
 clobber_cp_hbfiles:
-	rm ${ALL_IMAGES}
+	rm -f ${BASE_IMAGES}
 
+
+#################################################
+###  SAMPLE for building a PNOR image
+#################################################
+#MURANO_TARGETING = simics_MURANO_targeting.bin 
+#MURANO_LAYOUT = defaultPnorLayout.xml
+#murano.pnor: ${MURANO_TARGETING} ${MURANO_LAYOUT} hostboot_extended.bin hostboot.bin
+#	${buildpnor.pl:P} --pnorLayout ${.PATH:F${MURANO_LAYOUT}} \
+#	   --pnorOutBin ${.TARGET} \
+#	   --binFile_HBI ${.PATH:Fhostboot_extended.bin} \
+#	   --binFile_HBD ${.PATH:F${MURANO_TARGETING}} \
+#	   --binFile_HBB ${.PATH:Fhostboot.bin} \
+#	   --ffsCmd "${FFSCMD}"
+##################################################
+PNOR_BUILD_SCRIPT = ${buildpnor.pl:P}
+
+#early hostboot use of this makefile will be against FSP drivers lacking fips_pnor.mk
+#so need to use tryinclude for now.
+.tryinclude <${.PATH:Ffips_pnor.mk}>
+
+HOSTBOOT_DEFAULT_SECTIONS = HBB=hostboot.bin,HBI=hostboot_extended.bin
+
+PNOR_IMG_INFO = murano.pnor:defaultPnorLayout.xml:HBD=simics_MURANO_targeting.bin,${HOSTBOOT_DEFAULT_SECTIONS} \
+	      venice.pnor:defaultPnorLayout.xml:HBD=simics_VENICE_targeting.bin,${HOSTBOOT_DEFAULT_SECTIONS} \
+              ${FIPS_PNOR_INFO}
+
+__IMAGE_BUILD/% : .SPECTARG .PMAKE cp_hbfiles
+	@${MAKE:T:R} BUILD_SPECIFIC_IMAGE \
+	    "IMAGE_PARAMS=${.TARGET:s/__IMAGE_BUILD\///:s/:/ /g}"
+
+.ifdef IMAGE_PARAMS
+
+IMAGE_TARGET = ${IMAGE_PARAMS:xs/ .*//}
+IMAGE_LAYOUT = ${IMAGE_PARAMS:xs/[^ ]* //:xs/ .*//:p}
+IMAGE_SECTIONS = ${IMAGE_PARAMS:xs/[^ ]* //:xs/[^ ]* //:xs/ .*//}
+IMAGE_BINS = ${IMAGE_SECTIONS:s/,/ /g:xS/[^=]*=//g}
+IMAGE_BIN_OPTION = ${IMAGE_SECTIONS:s/,/ /g:S/^/--binFile_/g:s/=/ /g:p}
+
+BUILD_SPECIFIC_IMAGE: .SPECTARG ${IMAGE_TARGET}
+	#@echo TARGET ${IMAGE_TARGET}
+	#@echo LAYOUT ${IMAGE_LAYOUT}
+	#@echo BINARIES ${IMAGE_BINS}
+	#@echo BIN_OPTION ${IMAGE_BIN_OPTION}
+
+${IMAGE_TARGET}: ${IMAGE_LAYOUT} ${IMAGE_BINS} ${PNOR_BUILD_SCRIPT}
+	${PNOR_BUILD_SCRIPT} --pnorOutBin ${IMAGE_TARGET} \
+		--pnorLayout ${IMAGE_LAYOUT} \
+		${IMAGE_BIN_OPTION} --ffsCmd "${FFSCMD}"
+
+.endif
+
+build_pnor_images: .SPECTARG ${PNOR_IMG_INFO:S/^/__IMAGE_BUILD\//g}
+
+clobber_build_pnor_images:
+	${PNOR_IMG_INFO:@image@${pnorimg:!rm -f ${image:s/:/ /g:xs/ .*//};!e}@}
+
+
+#################################################
+#Special target to copy images to flash dir for simics
+#################################################
 FLASH_DEST = $(MAKETOP)$(OBJECTDIRTOP)../images/$(CONTEXT)/lab/flash
 
-update_images_for_sandbox:
+update_images_for_sandbox: build_pnor_images 
 	mkdir -p ${FLASH_DEST}
-	${ALL_IMAGES:@image@${hbimg:!cd ${FLASH_DEST}; cp -f ${.PATH:F${image}} ${image};!e}@}
+	#Copy hostboot base image to flash dir
+	${BASE_IMAGE:@image@${baseimg:!cd ${FLASH_DEST}; cp -f ${.PATH:F${image}} ${image};!e}@}
+	#Copy pnor images to flash dir
+	${PNOR_IMG_INFO:@image@${pnorimg:!cd ${FLASH_DEST}; cp -f ${.PATH:F${image:s/:/ /g:xs/ .*//}} ${image:s/:/ /g:xs/ .*//};!e}@}
 
 .endif
 
