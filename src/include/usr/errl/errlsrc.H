@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/include/usr/errl/errlsrc.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/include/usr/errl/errlsrc.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #ifndef ERRLSRC_H
 #define ERRLSRC_H
 
@@ -117,10 +118,10 @@ private:
 
 
     // Instance data
-    srcType_t       iv_srcType;     // SRC type, the ?? in SRC ??xxxxxx
+    srcType_t       iv_srcType : 8; // SRC type, the ?? in SRC ??xxxxxx
     uint8_t         iv_modId;       // module ID
     uint16_t        iv_reasonCode;  // reason code
-    epubSubSystem_t iv_ssid;        // subsystem type, the ?? in SRC xx??xxxx
+    epubSubSystem_t iv_ssid : 8 ;   // subsystem type, the ?? in SRC xx??xxxx
     uint64_t        iv_user1;       // user data 1
     uint64_t        iv_user2;       // user data 2
 

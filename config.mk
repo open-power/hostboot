@@ -1,11 +1,11 @@
-#  IBM_PROLOG_BEGIN_TAG
+#   IBM_PROLOG_BEGIN_TAG
 #  This is an automatically generated prolog.
 #
 #  $Source: config.mk $
 #
 #  IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2010 - 2011
+#  COPYRIGHT International Business Machines Corp. 2010-2012
 #
 #  p1
 #
@@ -19,8 +19,7 @@
 #
 #  Origin: 30
 #
-#  IBM_PROLOG_END
-
+#  IBM_PROLOG_END_TAG
 all:
 	${MAKE} gen_pass
 	${MAKE} code_pass
@@ -112,7 +111,7 @@ BEAMFLAGS = \
 
 COMMONFLAGS = -O3 -nostdlib ${EXTRACOMMONFLAGS}
 CFLAGS = ${COMMONFLAGS} -mcpu=power7 -nostdinc -g -mno-vsx -mno-altivec\
-	 -Wall -Werror -fshort-enums ${CUSTOMFLAGS}
+	 -Wall -Werror ${CUSTOMFLAGS} 
 ASMFLAGS = ${COMMONFLAGS} -mcpu=power7
 CXXFLAGS = ${CFLAGS} -nostdinc++ -fno-rtti -fno-exceptions -Wall
 LDFLAGS = --nostdlib --sort-common ${COMMONFLAGS}

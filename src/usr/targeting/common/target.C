@@ -1,26 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/targeting/target.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
-
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/targeting/common/target.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 /**
  *  @file targeting/common/target.C
  *
@@ -234,6 +234,8 @@ uint8_t * Target::targetFFDC( uint32_t & o_size ) const
                             sizeof(attrClass) + sizeof(attrType) + 
                             sizeof(attrModel);
 
+    uint8_t attrEnum = ATTR_NA;
+    
     uint8_t pathPhysSize = 0;
     AttributeTraits<ATTR_PHYS_PATH>::Type pathPhys;
     if( tryGetAttr<ATTR_PHYS_PATH>(pathPhys) ) {
@@ -249,8 +251,16 @@ uint8_t * Target::targetFFDC( uint32_t & o_size ) const
     }
 
     uint8_t *pFFDC;
-    pFFDC = static_cast<uint8_t*>( malloc(headerSize + 
-                                            pathPhysSize + pathAffSize));
+
+    // If there is a physical path or affinity path, the serialization code
+    // below prefixes an attribute type ahead of the actual structure, so need
+    // to compensate for the size of that attribute type, when applicable
+    pFFDC = static_cast<uint8_t*>(
+        malloc(  headerSize
+               + pathPhysSize 
+               + (pathPhysSize ? sizeof(attrEnum) : 0)
+               + pathAffSize
+               + (pathAffSize ? sizeof(attrEnum) : 0)));
 
     // we'll send down a '0' then HUID CLASS TYPE and MODEL
     uint32_t bSize = 0; // size of data in the buffer
@@ -267,7 +277,7 @@ uint8_t * Target::targetFFDC( uint32_t & o_size ) const
 
     if( pathPhysSize > 0)
     {
-        uint8_t attrEnum = ATTR_PHYS_PATH;
+        attrEnum = ATTR_PHYS_PATH;
         memcpy(pFFDC + bSize, &attrEnum, sizeof(attrEnum));
         bSize += sizeof(attrEnum);
         memcpy(pFFDC + bSize, &pathPhys, pathPhysSize);
@@ -276,7 +286,7 @@ uint8_t * Target::targetFFDC( uint32_t & o_size ) const
 
     if( pathAffSize > 0)
     {
-        uint8_t attrEnum = ATTR_AFFINITY_PATH;
+        attrEnum = ATTR_AFFINITY_PATH;
         memcpy(pFFDC + bSize, &attrEnum, sizeof(attrEnum));
         bSize += sizeof(attrEnum);
         memcpy(pFFDC + bSize, &pathAff, pathAffSize);

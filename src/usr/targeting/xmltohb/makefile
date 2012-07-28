@@ -1,11 +1,11 @@
-#  IBM_PROLOG_BEGIN_TAG
+#   IBM_PROLOG_BEGIN_TAG
 #  This is an automatically generated prolog.
 #
-#  $Source: src/usr/targeting/makefile $
+#  $Source: src/usr/targeting/xmltohb/makefile $
 #
 #  IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2011
+#  COPYRIGHT International Business Machines Corp. 2011-2012
 #
 #  p1
 #
@@ -19,8 +19,7 @@
 #
 #  Origin: 30
 #
-#  IBM_PROLOG_END
-
+#  IBM_PROLOG_END_TAG
 ################################################################################
 #
 #  @file targeting/xmltohb/makefile
@@ -115,5 +114,5 @@ ${GENDIR}/%_targeting.bin: ${XMLTOHB_COMPILER_SCRIPT} ${GENDIR}/%.hb.xml \
         $(addprefix --fapi-attributes-xml-file=,${GENDIR}/${XMLTOHB_FAPI_XML}) \
          --src-output-dir=none --img-output-dir=$(dir $@) \
          --img-output-file=$(notdir $@) \
-         --vmm-consts-file=$(VMM_CONSTS_FILE)
+         --vmm-consts-file=$(VMM_CONSTS_FILE) --noshort-enums
 
