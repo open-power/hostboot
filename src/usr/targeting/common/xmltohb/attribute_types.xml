@@ -798,6 +798,7 @@
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_IS_SIMULATION</id>
         <macro>DIRECT</macro>

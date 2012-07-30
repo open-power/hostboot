@@ -26,16 +26,16 @@
 #           implement isteps on AWAN.
 #
 # Description:
-#	The do_sprint script will run first to set up the AWAN environment,
-#	Then call hb_istep twice:
-#	1) hb_istep [--]istepmode
-#	    called after loading but before starting HostBoot
-#	    this will check to see if the user has set istep mode, if so
-#	    it will write the Istep_mode signature to L3 memory to put
+#       The do_sprint script will run first to set up the AWAN environment,
+#       Then call hb_istep twice:
+#       1) hb_istep [--]istepmode
+#           called after loading but before starting HostBoot
+#           this will check to see if the user has set istep mode, if so
+#           it will write the Istep_mode signature to L3 memory to put
 #       HostBoot mode into single-step mode (spless or FSP).
-#	2) hb_istep [--]command
-#	    Periodically call RunClocks() to step through HostBoot.
-#	    Checks for status from previous Isteps, and reports status.
+#       2) hb_istep [--]command
+#           Periodically call RunClocks() to step through HostBoot.
+#           Checks for status from previous Isteps, and reports status.
 #
 # Author: Mark Wenning
 #
@@ -77,6 +77,7 @@ sub find_in_inlist;
 sub parse_command;
 sub setMode;
 sub resume_istep;
+sub continue_istep;
 sub isShutDown;
 sub getSymbol;
 sub dumpEnvVar;
@@ -113,6 +114,7 @@ my  $opt_fspmode        =   0;
 my  $opt_command        =   "";
 my  $opt_list           =   0;
 my  $opt_resume         =   0;          ## resume istep from break point
+my  $opt_clock          =   0;          ## continue istep 
 my  $opt_clear_trace    =   0;          ##  submit command 02
 my  $opt_cmdfile        =   0;          ## batchmode, later
 my  $opt_setup          =   "";         ##  run Jim's script to start up the model
@@ -273,6 +275,11 @@ for ( my $i=0; $i <= $#Options; $i++ )
         $opt_resume     =   1;
         $Options[$i]    =   "";
     }
+    if ( m/^\-{0,2}clock$/ )
+    {
+        $opt_clock   =   1;
+        $Options[$i]    =   "";
+    }
     if  ( m/^\-{0,2}clear-trace$/ )
     {
         $opt_clear_trace    =   1;
@@ -309,6 +316,7 @@ if  ( $opt_debug )
     print   STDERR  "fspmode            =   $opt_fspmode\n";
 
     print   STDERR  "resume             =   $opt_resume\n";
+    print   STDERR  "clock              =   $opt_clock\n";
     print   STDERR  "clear-trace        =   $opt_clear_trace\n";
     print   STDERR  "command flag       =   $opt_command\n";
     print   STDERR  "command            =   \"$command\"\n";
@@ -406,7 +414,6 @@ sub main()
     if  ( $opt_fspmode ==  1 )
     {
         print STDOUT  "ENable fspmode\n";
-        print STDOUT  "WARNING:  fspmode is not currently supported on VPO\n";
         setMode( "fsp" );
         exit;
     }
@@ -417,6 +424,16 @@ sub main()
         clear_trace();
         exit;
     }
+
+    ##
+    ## Process clock
+    ##
+    if ( $opt_clock )
+    {
+        clock_istep();
+        ## exit; ??
+    }
+
 
     ##
     ## Process resume
@@ -457,6 +474,7 @@ sub printUsage()
     print STDOUT "    [--command <foo>]         (run named istep \"foo\")\n" ;
     print STDOUT "    [--command <foo>..<bar>]  (run named isteps \"foo\" through \"bar\")\n" ;
     print STDOUT "    [--resume]                (resume an istep that is at a break point)\n" ;
+    print STDOUT "    [--clock]                 (spless mode -- poll for istep, fspmode -- clock indefinately))\n" ;
     print STDOUT "    [--clear-trace]           (clear trace buffers before starting)\n";
     print STDOUT "\n" ;
 
@@ -971,6 +989,7 @@ sub setMode( $ )
     my  $readybit   =   0;
     my  $result     =   0;
     my  $hexstr     =   sprintf( "%x",$IstepModeReg );
+    my  $resultRaw   =  0;
 
 
     ## Stop and flush
@@ -1042,8 +1061,28 @@ sub setMode( $ )
             return -1;
         }
 
-        $result =   getStatus( );
-        $readybit    =   ( ( $result & 0x4000000000000000 ) >> 62 );
+        if ( $cmd eq "spless" )
+        {
+            $result =   getStatus( );
+            $readybit    =   ( ( $result & 0x4000000000000000 ) >> 62 );
+        }
+        else  # fsp mode
+        {
+            $cmd = "getscom pu 050033 -p0 -quiet";
+
+            if ( $opt_debug )   {   print STDERR __LINE__,  "-- run $cmd ...\n";    }
+            $resultRaw = `$cmd` ;
+            if ( $opt_debug )   {   printf STDERR "=== resultRaw=$resultRaw ...\n"; }
+            $resultRaw =~ s/.*0x/0x/g;
+            $resultRaw =~ s/\n//g;
+            $result = hex $resultRaw;
+
+            if ( $opt_debug )   {   printf STDERR "=== result=0x%lx ...\n", $result; }
+            if (($result & 0x0000000300000000) eq 0x0000000300000000)
+            {
+                $readybit = 1;
+            }
+        }
 
         if ($opt_debug)
         {
@@ -1146,6 +1185,64 @@ sub resume_istep()
     print STDOUT "-----------------------------------------------------------------\n";
 
 }
+
+sub clock_istep()
+{
+    my $byte0;
+    my $command;
+    my $cmd;
+    my $result;
+
+    bumpSeqNum();       ## bump
+
+    print STDOUT "Clock istep\n";
+
+    $result = getSyncStatus();
+
+    ## if result is -1 we have a timeout
+    if ( $result == -1 )
+    {
+        print   "-----------------------------------------------------------------\n";
+    }
+    else
+    {
+        my $taskStatus  =   ( ( $result & 0x00ff000000000000 ) >> 48 );
+        my $stsIStep    =   ( ( $result & 0x0000ff0000000000 ) >> 40 );
+        my $stsSubstep  =   ( ( $result & 0x000000ff00000000 ) >> 32 );
+        my $istepStatus =   ( ( $result & 0x00000000ffffffff )  );
+
+        print   STDOUT "-----------------------------------------------------------------\n";
+        ## printf STDOUT "Istep %d.%d Status: 0x%x\n", $stsIStep, $stsSubstep, $istepStatus ;
+        if ( $taskStatus != 0 )
+        {
+            if ( $taskStatus == 11 )
+            {
+                printf STDOUT "At breakpoint 0x%x\n", $istepStatus;
+            }
+            else
+            {
+                printf STDOUT "Istep %d.%d %s task status is %d\n",
+                  $stsIStep, $stsSubstep,
+                  $inList[$stsIStep][$stsSubstep],
+                  $taskStatus ;
+            }
+        }
+        else
+        {
+            printf STDOUT "Istep %d.%d %s returned Status: 0x%x\n",
+              $stsIStep, $stsSubstep,
+              $inList[$stsIStep][$stsSubstep],
+              $istepStatus ;
+            if ( $istepStatus == 0xa )
+            {
+                printf STDOUT   ":     not implemented yet.\n";
+            }
+        }
+
+        print STDOUT "------------------------------------------------------- SeqNum: $g_SeqNum\n";
+    }
+}
+
 
 sub clear_trace( )
 {
