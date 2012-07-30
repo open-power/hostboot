@@ -2996,7 +2996,7 @@ sub packComplexType {
 
         if(!$found)
         {
-            fatal("Could not find value for field.");
+            fatal("Could not find value for field $field->{name} of type $field->{type}");
         }
     }
 

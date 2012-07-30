@@ -513,6 +513,7 @@ sub generate_sys
         <default>
             <field><id>fsiSlaveInit</id><value>1</value></field>
             <field><id>mailboxEnabled</id><value>1</value></field>
+            <field><id>fsiMasterInit</id><value>1</value></field>
             <field><id>reserved</id><value>0</value></field>
         </default>
     </attribute>

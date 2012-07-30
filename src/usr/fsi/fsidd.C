@@ -1339,18 +1339,18 @@ errlHndl_t FsiDD::initMasterControl(const TARGETING::Target* i_master,
     TRACFCOMP( g_trac_fsi, ENTER_MRK"FsiDD::initMasterControl> Initializing Master %.8X:%d", TARGETING::get_huid(i_master), i_type );
 
     do {
-        // Do not initialize slaves because they are already done
-        //  before we run
-        bool fsp_slave_init = false;
+        // Do not initialize the masters because they are already 
+        //  working before we run
+        bool fsp_master_init = false;
         TARGETING::Target * sys = NULL;
         TARGETING::targetService().getTopLevelTarget( sys );
         TARGETING::SpFunctions spfuncs;
         if( sys
             && sys->tryGetAttr<TARGETING::ATTR_SP_FUNCTIONS>(spfuncs)
-            && spfuncs.fsiSlaveInit )
+            && spfuncs.fsiMasterInit )
         {
             TRACFCOMP( g_trac_fsi, "FsiDD::initMasterControl> Skipping Master Init" );
-            fsp_slave_init = true;
+            fsp_master_init = true;
         }
 
         uint32_t databuf = 0;
@@ -1365,7 +1365,7 @@ errlHndl_t FsiDD::initMasterControl(const TARGETING::Target* i_master,
             ctl_reg += getPortOffset(TARGETING::FSI_MASTER_TYPE_MFSI,m_info.port);
         }
 
-        if( !fsp_slave_init )
+        if( !fsp_master_init )
         {
             //Clear fsi port errors and general reset on all ports
             for( uint32_t port = 0; port < MAX_SLAVE_PORTS; ++port )
@@ -1401,7 +1401,7 @@ errlHndl_t FsiDD::initMasterControl(const TARGETING::Target* i_master,
         if( l_err ) { break; }
 
         //Read what FSP actually enabled as well if they initialized it
-        if( fsp_slave_init )
+        if( spfuncs.fsiSlaveInit )
         {
             uint32_t databuf2 = 0;
             l_err = read( ctl_reg|FSI_MENP0_010, &databuf2 );
@@ -1416,7 +1416,7 @@ errlHndl_t FsiDD::initMasterControl(const TARGETING::Target* i_master,
         iv_slaves[slave_index] = (uint8_t)(databuf >> (32-MAX_SLAVE_PORTS));
         TRACFCOMP( g_trac_fsi, "FsiDD::initMasterControl> %.8X:%d : Slave Detect = %.8X", TARGETING::get_huid(i_master), i_type, databuf );
 
-        if( fsp_slave_init )
+        if( fsp_master_init )
         {
             break; //all done
         }
