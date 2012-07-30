@@ -454,7 +454,7 @@ public:
           uint64_t addr;
           uint64_t data;
       } test_data[] = {
-          { scom_targets[myPROC0], 0x8000F06002011A3F ,0x1234432112344321},
+          { scom_targets[myPROC0], 0x8000F06002011E3F ,0x1234432112344321},
           { scom_targets[myPROC0], 0x8000086002011E3F, 0x123443211234ABAB},
       };
       const uint64_t NUM_ADDRS = sizeof(test_data)/sizeof(test_data[0]);
@@ -1558,6 +1558,16 @@ public:
               TRACDCOMP( g_trac_scom, "ScomTest::test_translate_scom_XBUS> Target %d is not functional", x );
               continue;
           }
+          // TODO: engd data for s1 supports XBUS1 only.
+          // For now check if murano chip and target is not XBUS1, then skip this target.
+          // Long term solution would be to change HWAS per RTC 45796.
+          else if ((scom_targets[myProc0]->getAttr<TARGETING::ATTR_MODEL>() ==
+              TARGETING::MODEL_MURANO) && (x != 1))
+          {
+              TRACDCOMP( g_trac_scom, "ScomTest::test_translate_scom_XBUS> Processor is Murano"
+                  " - skipping Target %d", x );
+              continue;
+          }
 
           op_size = sizeof(uint64_t);
 
@@ -1600,7 +1610,17 @@ public:
           // check to see if the target is functional.. if not.. skip this target
           else if (test_data[x].target->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true) 
           {
-              TRACDCOMP( g_trac_scom, "ScomTest::test_translate_scom_XBUS> Target %d is not functional", x );
+              TRACDCOMP( g_trac_scom, "ScomTest::test_TranslateScom_XBUS> Target %d is not functional", x );
+              continue;
+          }
+          // TODO: engd data for s1 supports XBUS1 only.
+          // For now check if murano chip and target is not XBUS1, then skip this target.
+          // Long term solution would be to change HWAS per RTC 45796.
+          else if ((scom_targets[myProc0]->getAttr<TARGETING::ATTR_MODEL>() ==
+              TARGETING::MODEL_MURANO) && (x != 1))
+          {
+              TRACDCOMP( g_trac_scom, "ScomTest::test_TranslateScom_XBUS> Processor is Murano"
+                  " - skipping Target %d", x );
               continue;
           }
 
