@@ -38,7 +38,7 @@ namespace ExceptionHandles
     bool PrivInstr(task_t*);
 }
 
-const uint64_t EXCEPTION_SRR1_MASK 	= 0x00000000783F0000;
+const uint64_t EXCEPTION_SRR1_MASK      = 0x00000000783F0000;
 const uint64_t EXCEPTION_SRR1_PRIVINS   = 0x0000000000040000;
 
 extern "C"
@@ -56,12 +56,12 @@ void kernel_execute_prog_ex()
     }
     if (!handled)
     {
-	printk("Program exception, killing task %d\n", t->tid);
-	TaskManager::endTask(t, NULL, TASK_STATUS_CRASHED);
+        printk("Program exception, killing task %d\n", t->tid);
+        TaskManager::endTask(t, NULL, TASK_STATUS_CRASHED);
     }
 }
 
-const uint64_t EXCEPTION_DSISR_MASK	= 0x0000000048000000;
+const uint64_t EXCEPTION_DSISR_MASK     = 0x0000000048000000;
 const uint64_t EXCEPTION_DSISR_PTEMISS  = 0x0000000040000000;
 const uint64_t EXCEPTION_DSISR_PERMERR  = 0x0000000008000000;
 const uint64_t EXCEPTION_DSISR_STORE    = 0x0000000002000000;
@@ -75,7 +75,7 @@ void kernel_execute_data_storage()
     bool handled = false;
     switch(exception)
     {
-	case EXCEPTION_DSISR_PTEMISS:
+        case EXCEPTION_DSISR_PTEMISS:
         {
             uint64_t is_store = getDSISR() & EXCEPTION_DSISR_STORE;
             handled = VmmManager::pteMiss(t, getDAR(), 0 != is_store);
@@ -87,16 +87,16 @@ void kernel_execute_data_storage()
             uint64_t is_store = getDSISR() & EXCEPTION_DSISR_STORE;
             if (is_store)
             {
-	        handled = VmmManager::pteMiss(t, getDAR(), true);
+                handled = VmmManager::pteMiss(t, getDAR(), true);
             }
-	    break;
+            break;
         }
     }
     if (!handled)
     {
-	printk("Data Storage exception on %d: %lx, %lx @ %p\n",
-	       t->tid, getDAR(), getDSISR(), t->context.nip);
-	TaskManager::endTask(t, NULL, TASK_STATUS_CRASHED);
+        printk("Data Storage exception on %d: %lx, %lx @ %p\n",
+               t->tid, getDAR(), getDSISR(), t->context.nip);
+        TaskManager::endTask(t, NULL, TASK_STATUS_CRASHED);
     }
 }
 
@@ -129,7 +129,7 @@ void kernel_execute_inst_storage()
     {
         printk("Inst Storage exception on %d: %lx, %lx\n",
                t->tid, getSRR0(), getSRR1());
-	TaskManager::endTask(t, NULL, TASK_STATUS_CRASHED);
+        TaskManager::endTask(t, NULL, TASK_STATUS_CRASHED);
     }
 }
 
@@ -169,19 +169,19 @@ namespace ExceptionHandles
         {
             uint32_t* instruction = reinterpret_cast<uint32_t*>(phys_addr);
 
-            // Check for 'doze' and skip over.  This avoids a task-crash
+            // Check for 'nap' and skip over.  This avoids a task-crash
             // if for some reason we entered back into the task without
             // priviledge raised.
-            if (*instruction == 0x4c000324)
+            if (*instruction == 0x4c000364)
             {
-                printk("Error: Doze executed with lowered permissions on %d\n",
+                printk("Error: Nap executed with lowered permissions on %d\n",
                        t->tid);
                 t->context.nip = static_cast<void*>(instruction + 1);
                 return true;
             }
         }
 
-	return false;
+        return false;
     }
 
 }

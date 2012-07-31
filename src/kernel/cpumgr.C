@@ -38,13 +38,13 @@
 #include <kernel/heapmgr.H>
 #include <kernel/intmsghandler.H>
 #include <errno.h>
+#include <kernel/deferred.H>
+#include <kernel/misc.H>
 
 cpu_t** CpuManager::cv_cpus = NULL;
 bool CpuManager::cv_shutdown_requested = false;
 uint64_t CpuManager::cv_shutdown_status = 0;
-Barrier CpuManager::cv_barrier;
-bool CpuManager::cv_defrag = false;
-size_t CpuManager::cv_cpuCount = 0;
+size_t CpuManager::cv_cpuSeq = 0;
 bool CpuManager::cv_forcedMemPeriodic = false;
 InteractiveDebug CpuManager::cv_interactive_debug;
 
@@ -95,6 +95,35 @@ void CpuManager::requestShutdown(uint64_t i_status)
     cv_shutdown_status = i_status;
     __sync_synchronize();
     cv_shutdown_requested = true;
+
+    class ExecuteShutdown : public DeferredWork
+    {
+        public:
+            void masterPreWork()
+            {
+                // The stats can be retrieved from global variables as needed.
+                // This can be uncommented for debug if desired
+                #ifdef __MEMSTATS__
+                if(c->master)
+                    HeapManager::stats();
+                #endif
+            }
+
+            void activeMainWork()
+            {
+                KernelMisc::shutdown();
+            }
+
+            void nonactiveMainWork()
+            {
+                // Something wasn't synchronized correctly if we got to here.
+                // Should not have CPUs coming online while trying to execute
+                // a shutdown.
+                kassert(false);
+            }
+    };
+
+    DeferredQueue::insert(new ExecuteShutdown());
 }
 
 void CpuManager::startCPU(ssize_t i)
@@ -163,13 +192,43 @@ void CpuManager::activateCPU(cpu_t * i_cpu)
 {
     // Set active.
     i_cpu->active = true;
-    __sync_add_and_fetch(&cv_cpuCount, 1);
-    lwsync();
+
+    // Update sequence ID.
+    do
+    {
+        uint64_t old_seq = cv_cpuSeq;
+        i_cpu->cpu_start_seqid = old_seq + 1 + (1ull << 32);
+
+        if (__sync_bool_compare_and_swap(&cv_cpuSeq, old_seq,
+                                         i_cpu->cpu_start_seqid))
+        {
+            break;
+        }
+    } while (1);
+    i_cpu->cpu_start_seqid >>= 32;
 
     // Verify / set SPRs.
     uint64_t msr = getMSR();
     kassert(WAKEUP_MSR_VALUE == msr);
     setLPCR(WAKEUP_LPCR_VALUE);
+}
+
+void CpuManager::deactivateCPU(cpu_t * i_cpu)
+{
+    // Set inactive.
+    i_cpu->active = false;
+
+    // Update sequence ID.
+    do
+    {
+        uint64_t old_seq = cv_cpuSeq;
+        uint64_t new_seq = old_seq - 1 + (1ull << 32);
+
+        if (__sync_bool_compare_and_swap(&cv_cpuSeq, old_seq, new_seq))
+        {
+            break;
+        }
+    } while(1);
 }
 
 void CpuManager::executePeriodics(cpu_t * i_cpu)
@@ -211,32 +270,22 @@ void CpuManager::executePeriodics(cpu_t * i_cpu)
         if((0 == (i_cpu->periodic_count % CPU_PERIODIC_DEFRAG)) ||
            (forceMemoryPeriodic))
         {
-            // set up barrier based on # cpus cv_barrier;
-            // TODO whatif other cpus become active?
-            isync(); // Ensure all instructions complete before this point, so
-                     // we don't get a stale shutdown_requested.
-            if(!cv_shutdown_requested)
+            class MemoryCoalesce : public DeferredWork
             {
-                cv_barrier.init(cv_cpuCount);
-                lwsync();  // Ensure barrier init is globally visible before
-                           // setting defrag = true.
-                cv_defrag = true;
-            }
+                public:
+                    void masterPreWork()
+                    {
+                        HeapManager::coalesce();
+                        PageManager::coalesce();
+                    }
+            };
+
+            DeferredQueue::insert(new MemoryCoalesce());
         }
     }
-    if(cv_defrag)
-    {
-        cv_barrier.wait();
 
-        if(i_cpu->master)
-        {
-            HeapManager::coalesce();
-            PageManager::coalesce();
-            cv_defrag = false;
-        }
+    DeferredQueue::execute();
 
-        cv_barrier.wait();
-    }
 }
 
 int CpuManager::startCore(uint64_t pir)

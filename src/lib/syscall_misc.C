@@ -25,6 +25,7 @@
 
 #include <sys/misc.h>
 #include <sys/syscall.h>
+#include <sys/task.h>
 
 using namespace Systemcalls;
 
@@ -85,6 +86,13 @@ uint64_t cpu_spr_value(CpuSprNames spr)
 
 int cpu_master_winkle()
 {
-    return 0;
+    task_affinity_pin();
+    task_affinity_migrate_to_master();
+
+    int rc = reinterpret_cast<int64_t>(_syscall0(MISC_CPUWINKLE));
+
+    task_affinity_unpin();
+
+    return rc;
 }
 

@@ -5,7 +5,7 @@
  *
  *  IBM CONFIDENTIAL
  *
- *  COPYRIGHT International Business Machines Corp. 2010 - 2011
+ *  COPYRIGHT International Business Machines Corp. 2010-2012
  *
  *  p1
  *
@@ -19,7 +19,7 @@
  *
  *  Origin: 30
  *
- *  IBM_PROLOG_END
+ *  IBM_PROLOG_END_TAG
  */
 base_load_address = 0x00000000;
 text_load_address = 0x00003000;
@@ -31,6 +31,7 @@ SECTIONS
     .text ALIGN(0x1000): {
 	*(.text.intvects)
 	. = text_load_address;
+        *(.text.kernelasm)
 	*(.text)
 	*(.text._*)
 	*(.rodata)

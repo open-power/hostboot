@@ -134,6 +134,9 @@ using   namespace   ISTEP;
                            "proc_prep_master_winkle SUCCESS"  );
             }
 
+            if (is_vpo()) // TODO: RTC 46651 - Simics doesn't support winkle.
+            {
+
             //  put the master into winkle.
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                        "call_host_activate_master: put master into winkle..." );
@@ -163,11 +166,7 @@ using   namespace   ISTEP;
                 break;
             }
 
-
-            //  --------------------------------------------------------
-            //  $$ @todo   do something to trigger IPI at this point.
-            //  MAGIC_INSTRUCTION( ???? );
-            //  --------------------------------------------------------
+            } // TODO: Remove with RTC 46651
 
 
             //  --------------------------------------------------------

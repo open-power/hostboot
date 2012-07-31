@@ -159,6 +159,16 @@ inline uint64_t getTB()
 }
 
 ALWAYS_INLINE
+inline void setTB(uint64_t _tb)
+{
+    // The bottom 24 bits of the timebase can't be written so round it up.
+    register uint64_t tb = (_tb + 0x1000000);
+    // Note that SPR 286 is intended (while getTB is 268) here.
+    // This is the mttbu40 instruction and not the mttb, which doesn't exist.
+    asm volatile("mtspr 286, %0" :: "r" (tb));
+}
+
+ALWAYS_INLINE
 inline void setDEC(uint64_t _dec)
 {
     register uint64_t dec = _dec;
@@ -277,9 +287,9 @@ inline void icbi(void* _ptr)
 }
 
 ALWAYS_INLINE
-inline void doze()
+inline void nap()
 {
-    asm volatile("doze");
+    asm volatile("nap");
 }
 
 ALWAYS_INLINE

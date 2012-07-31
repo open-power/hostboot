@@ -30,6 +30,8 @@
 
 #include <stdint.h>
 #include <usr/vmmconst.h>
+#include <kernel/deferred.H>
+#include <kernel/task.H>
 
 namespace KernelMisc
 {
@@ -59,5 +61,32 @@ namespace KernelMisc
         }
         return true;
     }
+
+    /** @class WinkleCore
+     *
+     *  @brief DeferredWork class for implementing cpu_master_winkle.
+     */
+    class WinkleCore : public ::DeferredWork
+    {
+        public:
+            /** ctor
+             *
+             *  @param i_caller - Task calling cpu_master_winkle to be
+             *                    restored after winkle is complete.
+             */
+            WinkleCore(task_t* i_caller) :
+                iv_caller(i_caller), iv_timebase(0) {};
+
+            void masterPreWork();
+            void activeMainWork();
+            void masterPostWork();
+            void nonactiveMainWork();
+
+        private:
+                /** Caller of cpu_master_winkle() */
+            task_t* iv_caller;
+                /** Current time-base value for restore after winkle. */
+            uint64_t iv_timebase;
+    };
 };
 #endif

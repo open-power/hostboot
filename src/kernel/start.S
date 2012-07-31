@@ -145,39 +145,8 @@ finished_relocate:
 	b kernel_dispatch_task; /* Return to task */
 
 .org _start + 0x100
-intvect_system_reset:
-    /* TODO: Add handling for SRESET from winkle for master. */
-    ;// Need to identify reason for SRESET and then perform appropriate
-    ;// action.
-    ;// Current support:
-    ;//         - Decrementer wake-up from doze.
-    ;//         - External interrupt (also wake-up from doze).
-    ;//         - IPI wake-up from winkle of slave core.
-
-    ;// Free up two registers temporarily.
-    mtsprg0 r1
-    mtsprg1 r2
-
-    ;// Save CR.
-    mfcr r1
-
-    ;// Find bit 42:44 of SRR1 (reason for SRESET).
-    mfsrr1 r2
-    extrdi r2, r2, 3, 42
-    ;// Check for decrementer (bits = 011).
-    cmpi cr0, r2, 0x3
-    beq+ intvect_system_reset_decrementer
-    ;// Check for external interrupt (bits = 010).
-    cmpi cr0, r2, 0x4
-    beq+ intvect_system_reset_external
-    ;// Check for HMI (bits = 101).
-    cmpi cr0, r2, 0x5
-    beq+ _start
-    ;// Check for bits 000, which is probably a Simics bug right now.
-    cmpi cr0, r2, 0x0
-    beq+ _start
-1:  ;// Unknown reason.
-    b 1b
+intvect_system_reset_stub:
+    b intvect_system_reset
 
 .org _start + 0x180
 intvect_inst_start:
@@ -272,7 +241,7 @@ softpatch_stub:
     mfsprg1 r1          ;// Restore R1 and use normal interrupt code.
 STD_INTERRUPT_NOADDR(softpatch)
 
-.section .text
+.section .text.kernelasm
 ;// _main:
 ;//	Set up stack and TOC and call kernel's main.
 _main:
@@ -302,8 +271,7 @@ _other_thread_spinlock:
 1:
     ld r3, 0(r2)
     ;// Loop until value is 1...
-    li r4, 1
-    cmp cr0, r3, r4
+    cmpi cr0, r3, 1
     beq _other_thread_spinlock_complete
     or 1,1,1 ;// Lower thread priority.
     b 1b
@@ -321,7 +289,7 @@ _other_thread_spinlock_complete:
     ld r3, 0(r2)		;// Load CPU object.
     cmpi cr0, r3, 0             ;// Check for NULL CPU object.
     beq- cr0, 1f                ;// Jump to handling if no CPU object found.
-    ld r1, 0(r3)		;// Load initial stack.
+    ld r1, CPU_KERNEL_STACK(r3)	;// Load initial stack.
 
     lis r2, smp_slave_main@h 	;// Load TOC base.
     ori r2, r2, smp_slave_main@l
@@ -329,11 +297,11 @@ _other_thread_spinlock_complete:
     bl smp_slave_main		;// Call smp_slave_main
     b _main_loop
 1:
-    ;// No CPU object available, doze this CPU.
+    ;// No CPU object available, nap this CPU.
         ;// We should only get to this point on simics.  SBE will only wake up
         ;// a single core / thread at a time and we are responsible for
         ;// further sequencing.
-    doze
+    nap
     b 1b
 
 
@@ -399,8 +367,8 @@ kernel_save_task:
     bne- cr0, 1f                ;// Jump to FP-save if != NULL.
 2:
 
-    ld r1, 0(r1)	;// Get CPU pointer
-    ld r1, 0(r1)	;// Get kernel stack pointer.
+    ld r1, TASK_CPUPTR(r1)	;// Get CPU pointer
+    ld r1, CPU_KERNEL_STACK(r1)	;// Get kernel stack pointer.
 
     mfsprg0 r0		;// Retrieve return address from SPRG0
     mtlr r0		;// Call
@@ -461,8 +429,8 @@ kernel_dispatch_task:
 .global kernel_dispatch_task
     mfsprg3 r1		;// Load task structure to r1.
 
-    ldarx r0, 0, r1	;// Clear the reservation by loading / storing
-    stdcx. r0, 0, r1	;// the CPU pointer in the task.
+    ldarx r0, TASK_CPUPTR, r1	;// Clear the reservation by loading / storing
+    stdcx. r0, TASK_CPUPTR, r1	;// the CPU pointer in the task.
 
     mfmsr r2		;// Get current MSR
     ori r2,r2, 0xC030	;// Enable MSR[EE,PR,IR,DR].
@@ -574,20 +542,88 @@ kernel_dispatch_task:
 
     b 2b
 
+intvect_system_reset:
+    ;// Need to identify reason for SRESET and then perform appropriate
+    ;// action.
+    ;// Current support:
+    ;//         - Initial sreset.
+    ;//         - Decrementer wake-up from nap.
+    ;//         - External interrupt from nap or winkle.
+    ;//         - IPI wake-up from winkle of slave core.
+
+    ;// Raise priority to high.
+    or 3,3,3
+
+    ;// Free up two registers temporarily.
+    mtsprg0 r1
+    mtsprg1 r2
+
+    ;// Check spinlock for 0, which implies we haven't started yet.
+    lis r2, kernel_other_thread_spinlock@h
+    ori r2, r2, kernel_other_thread_spinlock@l
+    ld r2, 0(r2)
+    cmpi cr0, r2, 0
+    beq- _start
+
+    ;// Get CPU object from thread ID, check for NULL which implies not
+    ;// started yet.
+    mfspr r1, PIR
+    lis r2, _ZN10CpuManager7cv_cpusE@h
+    ori r2, r2, _ZN10CpuManager7cv_cpusE@l
+    ld r2, 0(r2)                ;// Dereference cv_cpus to get array.
+    muli r1, r1, 8
+    ldx r2, r1, r2		;// Load CPU object.
+    cmpi cr0, r2, 0             ;// Check for NULL CPU object.
+    beq- _start
+
+    ;// Check for inactive CPU.
+    ld r1, CPU_STATUS(r2)
+    extrdi. r1, r1, 1, CPU_STATUS_ACTIVE
+    beq- intvect_system_reset_inactive
+
+    ;// Now we were an active processor so this must be a nap-wakeup.
+
+    ;// Find bit 42:44 of SRR1 (reason for SRESET).
+    mfsrr1 r2
+    extrdi r2, r2, 3, 42
+    ;// Check for decrementer (bits = 011).
+    cmpi cr0, r2, 0x3
+    beq+ intvect_system_reset_decrementer
+    ;// Check for external interrupt (bits = 010).
+    cmpi cr0, r2, 0x4
+    beq+ intvect_system_reset_external
+    ;// Check for HMI (bits = 101).
+    cmpi cr0, r2, 0x5
+    beq+ 1f ;// TODO: need to handle HMIs?
+1:  ;// Unknown reason.
+    b 1b
+
+    ;// @fn intvect_system_reset_inactive
+    ;// Handle SRESET on an inactive processor.
+    ;//     This is due to either instruction start or winkle-wakeup.
+intvect_system_reset_inactive:
+    ;// Check winkle state in CPU.
+    ld r1, CPU_STATUS(r2)
+    extrdi. r1, r1, 1, CPU_STATUS_WINKLED
+    beq+ _start
+
+    ;// Now we are a winkled processor that is awoken.
+    ld r1, CPU_KERNEL_STACK(r2)
+    ld r1, 0(r1)
+    mtsprg3 r1
+    b kernel_dispatch_task
+
     ;// @fn intvect_system_reset_decrementer
     ;// Handle SRESET due to decrementer wake-up.
-    ;//     This is a wake-up from 'doze'.  Clear priviledge escalation and
+    ;//     This is a wake-up from 'nap'.  Clear priviledge escalation and
     ;//     perform decrementer.
 intvect_system_reset_decrementer:
-    ;// Restore CR.
-    mtcr r1
-
-    ;// Clear MSR mask, since privilaged instruction was now executed (doze).
+    ;// Clear MSR mask, since privilaged instruction was now executed (nap).
     mfsprg3 r1  ;// Load task structure to r1.
     li r2, 0    ;// Zero r2.
     std r2, TASK_MSR_MASK(r1) ;// Zero msr_mask.
 
-    ;// Advance saved NIA (past doze).
+    ;// Advance saved NIA (past nap).
     mfsrr0 r1
     addi r1, r1, 4
     mtsrr0 r1
@@ -600,13 +636,10 @@ intvect_system_reset_decrementer:
 
     ;// @fn intvect_system_reset_external
     ;// Handle SRESET due to wake-up from external interrupt.
-    ;//     This is a wake-up from 'doze', but not due to the decrementer
-    ;//     itself firing.  Therefore, leave 'doze' process state alone
+    ;//     This is a wake-up from 'nap', but not due to the decrementer
+    ;//     itself firing.  Therefore, leave 'nap' process state alone
     ;//     including NIA and handle the external interrupt.
 intvect_system_reset_external:
-    ;// Restore CR.
-    mtcr r1
-
     ;// Restore save registers.
     mfsprg0 r1
     mfsprg1 r2
@@ -638,9 +671,9 @@ system_call_fast_path:
     bne cr0, 4f
         ;// Check for being on master processor.
     mfsprg3 r6          ;// Get task structure.
-    ld r6, 0(r6)        ;// Get CPU structure.
-    lbz r6, 12(r6)      ;// Read master boolean.
-    cmpi cr0, r6, 0x0
+    ld r6, TASK_CPUPTR(r6)        ;// Get CPU structure.
+    ld r6, CPU_STATUS(r6)       ;// Read master boolean.
+    extrdi. r6, r6, 1, CPU_STATUS_MASTER
     beq cr0, 300f       ;// Call TASK_MIGRATE_TO_MASTER if not on master.
         ;// Read scratch.
     mtspr 276, r4
@@ -665,9 +698,9 @@ system_call_fast_path:
     bne cr0, 5f
         ;// Check for master processor.
     mfsprg3 r6          ;// Get task structure.
-    ld r6, 0(r6)        ;// Get CPU structure.
-    lbz r6, 12(r6)      ;// Read master boolean.
-    cmpi cr0, r6, 0x0
+    ld r6, TASK_CPUPTR(r6)        ;// Get CPU structure.
+    ld r6, CPU_STATUS(r6)       ;// Read master boolean.
+    extrdi. r6, r6, 1, CPU_STATUS_MASTER
     beq cr0, 300b       ;// Call TASK_MIGRATE_TO_MASTER if not on master.
         ;// Write scratch.
     mtspr 276, r4
@@ -784,6 +817,34 @@ kernel_shutdown_ea0_1_mode:
     hrfid
 
 STD_INTERRUPT_NOADDR(hype_emu_assist)
+
+    ;// @fn kernel_execute_winkle
+    ;//
+    ;// Saves kernel state into a specified task structure and then executes
+    ;// the winkle instruction.
+    ;//
+    ;// @param r3 - task_t* to save kernel state into.
+    ;//
+.global kernel_execute_winkle
+kernel_execute_winkle:
+    ;// Move save area to SPRG3 for kernel_save_task.
+    mtsprg3 r3
+
+    ;// Copy LR to SRR0 (since that is where kernel_save_task gets it from).
+    mflr r3
+    mtsrr0 r3
+
+    ;// Load winkle instruction address into the "return to" address (SPRG0).
+    lis r3, 1f@h
+    ori r3, r3, 1f@l
+    mtsprg0 r3
+
+    ;// Save kernel state.
+    b kernel_save_task
+
+    ;// Execute winkle.
+1:
+    rvwinkle
 
 .section .data
     .balign 1024

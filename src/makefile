@@ -29,7 +29,8 @@ EXTRA_LIDS = dslid
 
 BASE_OBJECTS = console.o spinlock.o string.o string_ext.o stdlib.o ctype.o \
                assert.o stdio.o builtins.o vfs_init.o heapmgr.o pagemgr.o \
-               math.o barrier.o idebug.o intmsghandler.o idletask.o splaytree.o
+               math.o barrier.o idebug.o intmsghandler.o deferred.o \
+	       idletask.o splaytree.o
 
 ifdef HOSTBOOT_PROFILE
 BASE_OBJECTS += gcov.o

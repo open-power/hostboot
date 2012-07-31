@@ -27,17 +27,8 @@
 ##
 
 ### Updates to handle instruction states (Remove with RTC:43959)
-echo "+++ Update cec-chip files for instruction state processing"
+echo "+++ Update cec-chip files for master-winkle wakeup"
 mkdir -p $sb/simu/data/cec-chip/
-
-cp --update $bb/src/simu/data/cec-chip/p8.chip $sb/simu/data/cec-chip/
-cat $HOSTBOOTROOT/src/build/citest/etc/patches/p8.chip.patch >> $sb/simu/data/cec-chip/p8.chip
-grep -v DONE $sb/simu/data/cec-chip/p8.chip > $sb/simu/data/cec-chip/p8.chip.tmp
-echo "DONE" >> $sb/simu/data/cec-chip/p8.chip.tmp
-mv $sb/simu/data/cec-chip/p8.chip.tmp $sb/simu/data/cec-chip/p8.chip
-
-cp --update $bb/src/simu/data/cec-chip/p8_master.por $sb/simu/data/cec-chip/
-cat $HOSTBOOTROOT/src/build/citest/etc/patches/p8_master.por.patch >> $sb/simu/data/cec-chip/p8_master.por
 
 cp $HOSTBOOTROOT/src/build/citest/etc/patches/p8_inst.act $sb/simu/data/cec-chip/
 ###

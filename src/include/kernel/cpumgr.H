@@ -82,10 +82,39 @@ class CpuManager
          */
         static void activateCPU(cpu_t * i_cpu);
 
-        /** @fn getCpuCount
-         * Return the number of active CPUs.
+        /** @fn deactivateCPU
+         *  Deactivate a cpu to show it is not running.
+         *  @param[in] cpu_t the CPU
+         *  @post Active flag is off in cpu_t structure.
          */
-        static size_t getCpuCount() { return cv_cpuCount; }
+        static void deactivateCPU(cpu_t * i_cpu);
+
+        /** @fn getCpuCount
+         *  Return the number of active CPUs.
+         */
+        static size_t getCpuCount() { return cv_cpuSeq & 0xFFFFFFFF; }
+
+        /** @fn getCpuSeqId
+         *  Return the current CPU start sequence ID.
+         */
+        static size_t getCpuSeqId() { return cv_cpuSeq >> 32; }
+
+        /** @fn getCpuCountAndSeqId
+         *  Atomically retrieve both the current active CPU count and
+         *  sequence ID.
+         *
+         */
+        static void getCpuCountAndSeqId(uint32_t& o_count, uint32_t& o_seq)
+        {
+            uint64_t cpuSeq = cv_cpuSeq;
+            o_count = cpuSeq & 0xFFFFFFFF;
+            o_seq = cpuSeq >> 32;
+        }
+
+        /** @fn getThreadCount
+         *  Return the number of HW threads for this CPU core type.
+         */
+        static size_t getThreadCount();
 
         /** @fn startCore
          *  Create structures to support a core activating and start the core.
@@ -127,16 +156,16 @@ class CpuManager
         void startCPU(ssize_t i = -1);
         void startSlaveCPU(cpu_t*);
 
-        static size_t getThreadCount();
-
     private:
         static cpu_t** cv_cpus; // Need to be able to access this
                                         // from start.S to get initial stacks
                                         // of secondary cpus / threads.
 
-        static Barrier cv_barrier;   //!<  barrier for cpus
-        static bool cv_defrag;       //!<  mem heap defrag
-        static size_t cv_cpuCount;   //!<  # of active CPUs
+            /** Number of active CPUs.
+             *  Stored as "(seqID << 32) | cpus"
+             */
+        static uint64_t cv_cpuSeq;
+
         static bool cv_forcedMemPeriodic;       //!<  force free / coalesce.
 
         // If a shutdown of all CPUs is requested

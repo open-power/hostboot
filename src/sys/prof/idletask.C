@@ -42,11 +42,11 @@ void TaskManager::idleTaskLoop(void* unused)
 	// Lower priority (and yield simics thread).
         setThreadPriorityLow();
 
-        // Request privilege escalation for doze.
-        register uint64_t syscall = MISC_CPUDOZE;
-        asm volatile("or 3, %0, %0; sc" :: "r" (syscall) : "r3");
+        // Request privilege escalation for nap.
+        register uint64_t syscall = MISC_CPUNAP;
+        asm volatile("or 3, %0, %0; sc" :: "r" (syscall) : "r3", "cc");
 
-        // Execute doze.
-        doze();
+        // Execute nap.
+        nap();
     }
 }

@@ -52,19 +52,7 @@ void kernel_execute_decrementer()
 
     task_t* current_task = TaskManager::getCurrentTask();
 
-    CpuManager::executePeriodics(c);//TODO is there still a potential deadlock?
-
-    if (CpuManager::isShutdownRequested())
-    {
-        // The code below could cause a hang during shutdown
-        // The stats can be retrieved from global variables as needed.
-        // This can be uncommented for debug if desired
-#ifdef __MEMSTATS__
-        if(c->master)
-            HeapManager::stats();
-#endif
-        KernelMisc::shutdown();
-    }
+    CpuManager::executePeriodics(c);
 
     if (current_task == TaskManager::getCurrentTask())
     {
@@ -98,7 +86,8 @@ namespace Systemcalls
     void CpuDDLevel(task_t *t);
     void CpuStartCore(task_t *t);
     void CpuSprValue(task_t *t);
-    void CpuDoze(task_t *t);
+    void CpuNap(task_t *t);
+    void CpuWinkle(task_t *t);
     void MmAllocBlock(task_t *t);
     void MmRemovePages(task_t *t);
     void MmSetPermission(task_t *t);
@@ -134,7 +123,8 @@ namespace Systemcalls
         &CpuDDLevel,  // MISC_CPUDDLEVEL
         &CpuStartCore, // MISC_CPUSTARTCORE
         &CpuSprValue, // MISC_CPUSPRVALUE
-        &CpuDoze, // MISC_CPUDOZE
+        &CpuNap, // MISC_CPUNAP
+        &CpuWinkle,   // MISC_CPUWINKLE
 
         &MmAllocBlock, // MM_ALLOC_BLOCK
         &MmRemovePages, // MM_REMOVE_PAGES
@@ -670,32 +660,51 @@ namespace Systemcalls
     };
 
     /**
-     *  Allow a task to request priviledge escalation to execute the 'doze'
+     *  Allow a task to request priviledge escalation to execute the 'nap'
      *  instruction.
      *
-     *  Verifies the instruction to execute is, in fact, doze and then sets
+     *  Verifies the instruction to execute is, in fact, nap and then sets
      *  an MSR mask in the task structure to allow escalation on next
      *  execution.
      *
-     *  When 'doze' is executed the processor will eventually issue an
+     *  When 'nap' is executed the processor will eventually issue an
      *  SRESET exception with flags in srr1 to indication that the
      *  decrementer caused the wake-up.  The kernel will then need to
-     *  advance the task to the instruction after the doze and remove
+     *  advance the task to the instruction after the nap and remove
      *  priviledge escalation.
      *
      */
-    void CpuDoze(task_t *t)
+    void CpuNap(task_t *t)
     {
 
         uint32_t* instruction = static_cast<uint32_t*>(t->context.nip);
-        if (0x4c000324 == (*instruction)) // Verify 'doze' instruction,
+        if (0x4c000364 == (*instruction)) // Verify 'nap' instruction,
                                           // otherwise just return.
         {
-            // Disable PR, IR, DR so 'doze' can be executed.
+            // Disable PR, IR, DR so 'nap' can be executed.
             //     (which means to stay in HV state)
             t->context.msr_mask = 0x4030;
         }
     };
+
+    /** Winkle all the threads so that the runtime SLW image can be loaded. */
+    void CpuWinkle(task_t *t)
+    {
+        cpu_t* cpu = CpuManager::getCurrentCPU();
+
+        if ((CpuManager::getCpuCount() > CpuManager::getThreadCount()) ||
+            (!cpu->master))
+        {
+            TASK_SETRTN(t, -EDEADLK);
+        }
+        else
+        {
+            TASK_SETRTN(t, 0);
+            DeferredQueue::insert(new KernelMisc::WinkleCore(t));
+            TaskManager::setCurrentTask(cpu->idle_task);
+            DeferredQueue::execute();
+        }
+    }
 
     /**
      * Allocate a block of virtual memory within the base segment

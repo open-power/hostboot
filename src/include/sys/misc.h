@@ -142,6 +142,9 @@ uint64_t cpu_spr_value(CpuSprNames spr);
  *
  *  @retval 0 - Success
  *  @retval -EDEADLK - Cores other than the master are already running.
+ *
+ *  @note This function will migrate the task to the master thread and in the
+ *        process will unset any task affinity.  See task_affinity_unpin().
  */
 int cpu_master_winkle();
 

@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/include/kernel/cpu.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2010 - 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/include/kernel/cpu.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2010-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 /** @file cpu.H
  *  @brief Defines kernel information and functions about CPUs.
  *
@@ -42,7 +43,7 @@ class Scheduler;
  *  @brief Stores per-CPU kernel information.
  *
  *  @note kernel_stack and master need to be at fixed locations in this
- *        structure due to usages in start.S.
+ *        structure due to usages in start.S (see ppcconsts.S).
  *
  *  - kernel_stack is a double-word at cpu_t[0 bytes].
  *  - master is a byte at cpu_t[12 bytes].
@@ -63,8 +64,11 @@ struct cpu_t
         /** If the CPU is active */
         bool active:1;
 
+        /** If the CPU is winkled */
+        bool winkled:1;
+
         /** Ensure alignment of master attribute for asm code. */
-        uint64_t __reserved_master:30;
+        uint64_t __reserved_master:29;
     } PACKED;
 
     /** Pointer to the scheduler for this CPU (may not be unique) */
@@ -86,6 +90,9 @@ struct cpu_t
 
     /** counter for executePeriodics */
     size_t periodic_count;
+
+    /** Sequence ID of CPU initialization. */
+    uint64_t cpu_start_seqid;
 };
 
 /** @fn getCpuId
