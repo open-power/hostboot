@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/errl/errlentry.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2011-2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/errl/errlentry.C $                                    */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  *  @file errlentry.C
  *
@@ -248,7 +247,6 @@ void ErrlEntry::removeBackTrace()
     iv_pBackTrace = NULL;
 }
 
-
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 void ErrlEntry::addHwCallout(const TARGETING::Target *i_target,
@@ -288,57 +286,6 @@ void ErrlEntry::addProcedureCallout(const HWAS::epubProcedureID i_procedure,
     ErrlUserDetailsCallout(i_procedure, i_priority).addToLog(this);
 
 } // addProcedureCallout
-
-
-////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
-errlSeverity_t ErrlEntry::sev() const
-{
-    return iv_User.iv_severity;
-}
-
-
-////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
-void ErrlEntry::setSev(const errlSeverity_t i_sev)
-{
-    iv_User.iv_severity = i_sev;
-    return;
-}
-
-
-////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
-errlEventType_t ErrlEntry::eventType() const
-{
-    return iv_User.iv_etype;
-}
-
-
-
-////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
-void ErrlEntry::setEventType(const errlEventType_t i_eventType)
-{
-    iv_User.iv_etype = i_eventType;
-    return;
-}
-
-////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
-epubSubSystem_t ErrlEntry::subSys() const
-{
-    return iv_User.iv_ssid;
-}
-
-
-////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
-void ErrlEntry::setSubSys(const epubSubSystem_t i_subSys)
-{
-    iv_User.iv_ssid = i_subSys;
-    return;
-}
 
 
 ///////////////////////////////////////////////////////////////////////////////

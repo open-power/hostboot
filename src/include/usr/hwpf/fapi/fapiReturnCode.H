@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/include/usr/hwpf/fapi/fapiReturnCode.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2011-2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/include/usr/hwpf/fapi/fapiReturnCode.H $                  */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  *  @file fapiReturnCode.H
  *
@@ -43,6 +42,7 @@
  *                          mjjones     02/22/2012  Allow user to add Target FFDC
  *                          mjjones     03/16/2012  Add type to FFDC data
  *                          mjjones     03/16/2012  Allow different PLAT errors
+ *                          brianh      07/31/2012  performance/size optimizations
  *                          mjjones     08/14/2012  Created getCreateReturnCodeDataRef
  */
 
@@ -111,7 +111,7 @@ public:
     /**
      * @brief Default constructor. Sets rcValue to success
      */
-    ReturnCode();
+    ReturnCode() : iv_rcValue(FAPI_RC_SUCCESS), iv_pDataRef(NULL) { }
 
     /**
      * @brief Constructor. Sets rcValue to the specified value
@@ -165,7 +165,7 @@ public:
      *
      * @return bool. True if ok, else false
      */
-    bool ok() const;
+    bool ok() const { return (iv_rcValue == FAPI_RC_SUCCESS); }
 
     /**
      * @brief uint32_t conversion function. Returns the rcValue
@@ -175,7 +175,7 @@ public:
      *       2/ ReturnCode to ReturnCode (Both ReturnCode converted to uint32_t)
      *       This allows a user to test if a ReturnCode is bad (if (l_rc){})
      */
-    operator uint32_t() const;
+    operator uint32_t() const { return iv_rcValue; }
 
     /**
      * @brief Sets a FAPI error. Sets the rcValue to the supplied value (from

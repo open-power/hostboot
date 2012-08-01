@@ -1,26 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/targeting/entitypath.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
-
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/targeting/common/entitypath.C $                       */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  *  @file targeting/common/entitypath.C
  *
@@ -79,17 +78,6 @@ EntityPath::EntityPath()
     #define TARG_FN "EntityPath()"
 
     memset(&iv_pathElement[0], 0x00, sizeof(iv_pathElement));
-
-    #undef TARG_FN
-}
-
-//******************************************************************************
-// EntityPath::~EntityPath
-//******************************************************************************
-
-EntityPath::~EntityPath()
-{
-    #define TARG_FN "~EntityPath()"
 
     #undef TARG_FN
 }
@@ -262,19 +250,6 @@ const EntityPath::PathElement EntityPath::pathElementOfType(
 }
 
 //******************************************************************************
-// EntityPath::size
-//******************************************************************************
-
-uint32_t EntityPath::size() const
-{
-    #define TARG_FN "size()"
-
-    return iv_size;
-
-    #undef TARG_FN
-}
-
-//******************************************************************************
 // EntityPath::setType
 //******************************************************************************
 
@@ -284,19 +259,6 @@ void EntityPath::setType(
     #define TARG_FN "setType(...)"
 
     iv_type = i_pathType;
-
-    #undef TARG_FN
-}
-
-//******************************************************************************
-// EntityPath::type
-//******************************************************************************
-
-EntityPath::PATH_TYPE EntityPath::type() const
-{
-    #define TARG_FN "type()"
-
-    return iv_type;
 
     #undef TARG_FN
 }

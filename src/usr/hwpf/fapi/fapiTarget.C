@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/fapi/fapiTarget.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2011-2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/fapi/fapiTarget.C $                              */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  *  @file fapiTarget.C
  *
@@ -123,14 +122,6 @@ bool Target::operator!=(const Target & i_right) const
 }
 
 //******************************************************************************
-// Get the handle.
-//******************************************************************************
-void * Target::get() const
-{
-    return iv_pHandle;
-}
-
-//******************************************************************************
 // Set the handle.
 //******************************************************************************
 void Target::set(void * i_pHandle)
@@ -138,22 +129,6 @@ void Target::set(void * i_pHandle)
     iv_pHandle = i_pHandle;
     delete [] iv_pEcmdString;
     iv_pEcmdString = NULL;
-}
-
-//******************************************************************************
-// Get the target type
-//******************************************************************************
-TargetType Target::getType() const
-{
-    return iv_type;
-}
-
-//******************************************************************************
-// Set the target type
-//******************************************************************************
-void Target::setType(const TargetType i_type)
-{
-    iv_type = i_type;
 }
 
 //******************************************************************************

@@ -1,26 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/include/usr/targeting/entitypath.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
-
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/include/usr/targeting/common/entitypath.H $               */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef __TARGETING_COMMON_ENTITYPATH_H
 #define __TARGETING_COMMON_ENTITYPATH_H
 
@@ -137,7 +136,7 @@ class EntityPath
          *  @post Entity path destroyed and all previously owned exclusive
          *      resources freed
          */
-        ~EntityPath();
+        ~EntityPath() {}
 
         /**
          *  @brief Removes/clears the last path element from an entity path
@@ -335,7 +334,7 @@ class EntityPath
          *
          *  @return uint32_t giving the number of path elements
          */
-        uint32_t size() const;
+        uint32_t size() const { return iv_size; }
 
         /**
          *  @brief Sets the path type
@@ -364,7 +363,7 @@ class EntityPath
          *
          *  @return PATH_TYPE indicating the entity path's path type
          */
-        PATH_TYPE type() const;
+        PATH_TYPE type() const { return iv_type; }
 
         /**
          *  @brief DEBUG ONLY.  Returns the path type as a string.

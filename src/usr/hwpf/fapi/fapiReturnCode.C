@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/fapi/fapiReturnCode.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2011-2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/fapi/fapiReturnCode.C $                          */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  *  @file fapiReturnCode.C
  *
@@ -46,6 +45,7 @@
  *                          mjjones     03/16/2012  Allow different PLAT errors
  *                          mjjones     05/02/2012  Only trace setEcmdError on err
  *                          mjjones     07/11/2012  Remove a trace
+ *                          brianh      07/31/2012  performance/size optimizations
  *                          mjjones     08/14/2012  Use new ErrorInfo structure
  */
 
@@ -55,15 +55,6 @@
 
 namespace fapi
 {
-
-//******************************************************************************
-// Default Constructor
-//******************************************************************************
-ReturnCode::ReturnCode() :
-    iv_rcValue(FAPI_RC_SUCCESS), iv_pDataRef(NULL)
-{
-
-}
 
 //******************************************************************************
 // Constructor
@@ -136,22 +127,6 @@ ReturnCode & ReturnCode::operator=(const uint32_t i_rcValue)
     forgetData();
 
     return *this;
-}
-
-//******************************************************************************
-// ok function
-//******************************************************************************
-bool ReturnCode::ok() const
-{
-    return (iv_rcValue == FAPI_RC_SUCCESS);
-}
-
-//******************************************************************************
-// returnCode_t cast
-//******************************************************************************
-ReturnCode::operator uint32_t() const
-{
-    return iv_rcValue;
 }
 
 //******************************************************************************

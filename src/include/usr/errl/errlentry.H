@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/include/usr/errl/errlentry.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2011-2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/include/usr/errl/errlentry.H $                            */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef ERRLENTRY_H
 #define ERRLENTRY_H
 /**
@@ -143,7 +142,7 @@ public:
      *  @return Current Log Severity
      *
      */
-    errlSeverity_t sev() const;
+    errlSeverity_t sev() const { return iv_User.iv_severity; }
 
 
     /**
@@ -157,7 +156,10 @@ public:
      *
      *  @return     void
      */
-    void setSev(const errlSeverity_t i_sev);
+    void setSev(const errlSeverity_t i_sev)
+    {
+        iv_User.iv_severity = i_sev;
+    }
 
 
     /**
@@ -216,7 +218,7 @@ public:
      *  @return errlEventType_t
      *
      */
-    errlEventType_t eventType() const;
+    errlEventType_t eventType() const { return iv_User.iv_etype; }
 
     /**
      *  @brief Set the log's event type
@@ -226,7 +228,10 @@ public:
      *  @return void
      *
      */
-    void setEventType(const errlEventType_t i_eventType);
+    void setEventType(const errlEventType_t i_eventType)
+    {
+        iv_User.iv_etype = i_eventType;
+    }
 
     /**
      *  @brief Returns the log's sub system. See errl/errltypes.H
@@ -234,7 +239,7 @@ public:
      *  @return epubSubSystem_t
      *
      */
-    epubSubSystem_t subSys() const;
+    epubSubSystem_t subSys() const { return iv_User.iv_ssid; }
 
    /**
      *  @brief Set the log's ePub sub system type.
@@ -243,7 +248,10 @@ public:
      *
      *  @return void
      */
-    void setSubSys(const epubSubSystem_t i_subSys);
+    void setSubSys(const epubSubSystem_t i_subSys)
+    {
+        iv_User.iv_ssid = i_subSys;
+    }
 
 
     /**
