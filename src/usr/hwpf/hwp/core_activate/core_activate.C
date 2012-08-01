@@ -61,7 +61,8 @@
 #include    <sys/misc.h>
 
 //  Uncomment these files as they become available:
-// #include    "host_activate_master/host_activate_master.H"
+#include    "proc_prep_master_winkle.H"
+#include    "proc_stop_deadman_timer.H"
 // #include    "host_activate_slave_cores/host_activate_slave_cores.H"
 // #include    "host_ipl_complete/host_ipl_complete.H"
 
@@ -82,7 +83,7 @@ using   namespace   ISTEP;
     {
         errlHndl_t  l_errl  =   NULL;
 
-        TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "call_host_activate_master entry" );
 
         // @@@@@    CUSTOM BLOCK:   @@@@@
@@ -108,26 +109,24 @@ using   namespace   ISTEP;
 
             // cast OUR type of target to a FAPI type of target.
             const fapi::Target l_fapi_cpu_target(
-                                TARGET_TYPE_PROC_CHIP,
-                                reinterpret_cast<void *>
-                                (const_cast<TARGETING::Target*>(l_cpu_target))
-                               );
+                                                TARGET_TYPE_PROC_CHIP,
+                                                reinterpret_cast<void *>
+                                                (const_cast<TARGETING::Target*>
+                                                            (l_cpu_target)) );
 
-
-#if 1
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "Call proc_prep_master_winkle when integrated..." );
-#else
+                   "call_host_activate_master: call proc_prep_master_winkle." );
+
             //  call the HWP with each fapi::Target
             FAPI_INVOKE_HWP( l_errl,
                              proc_prep_master_winkle,
-                             l_fapi_cpu_target );
-#endif
+                             l_fapi_cpu_target,
+                             true  );
             if ( l_errl )
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "proc_prep_master_winkle ERROR : Returning errorlog, PLID=0x%x",
-                           l_errl->plid() );
+                "proc_prep_master_winkle ERROR : Returning errorlog, PLID=0x%x",
+                    l_errl->plid() );
                 break;
             }
             else
@@ -136,14 +135,12 @@ using   namespace   ISTEP;
                            "proc_prep_master_winkle SUCCESS"  );
             }
 
-            if (is_vpo()) // TODO: RTC 46651 - Simics doesn't support winkle.
-            {
 
             //  put the master into winkle.
+            //  Simics should work after build b0815a_1233.810 .
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                        "call_host_activate_master: put master into winkle..." );
 
-            //  @todo 2012-07-30  currently this is just a stub...
             int l_rc    =   cpu_master_winkle( );
             if ( l_rc )
             {
@@ -168,23 +165,19 @@ using   namespace   ISTEP;
                 break;
             }
 
-            } // TODO: Remove with RTC 46651
-
-
             //  --------------------------------------------------------
             //  should return from Winkle at this point
             //  --------------------------------------------------------
-
-
-#if 1
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "Call proc_stop_deadman_timer when integrated..." );
-#else
+                       "Returned from Winkle." );
+
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "Call proc_stop_deadman_timer..." );
+
             //  call the HWP with each fapi::Target
             FAPI_INVOKE_HWP( l_errl,
                              proc_stop_deadman_timer,
                              l_fapi_cpu_target  );
-#endif
             if ( l_errl )
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -203,7 +196,7 @@ using   namespace   ISTEP;
         // @@@@@    END CUSTOM BLOCK:   @@@@@
 
 
-        TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "call_host_activate_master exit" );
 
         // end task, returning any errorlogs to IStepDisp

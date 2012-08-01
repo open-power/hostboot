@@ -1,26 +1,26 @@
 #!/usr/bin/perl
-#  IBM_PROLOG_BEGIN_TAG
-#  This is an automatically generated prolog.
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
 #
-#  $Source: src/build/debug/Hostboot/Istep.pm $
+# $Source: src/build/debug/Hostboot/Istep.pm $
 #
-#  IBM CONFIDENTIAL
+# IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2011-2012
+# COPYRIGHT International Business Machines Corp. 2011,2012
 #
-#  p1
+# p1
 #
-#  Object Code Only (OCO) source materials
-#  Licensed Internal Code Source Materials
-#  IBM HostBoot Licensed Internal Code
+# Object Code Only (OCO) source materials
+# Licensed Internal Code Source Materials
+# IBM HostBoot Licensed Internal Code
 #
-#  The source code for this program is not published or other-
-#  wise divested of its trade secrets, irrespective of what has
-#  been deposited with the U.S. Copyright Office.
+# The source code for this program is not published or otherwise
+# divested of its trade secrets, irrespective of what has been
+# deposited with the U.S. Copyright Office.
 #
-#  Origin: 30
+# Origin: 30
 #
-#  IBM_PROLOG_END_TAG
+# IBM_PROLOG_END_TAG
 #
 # Purpose:  This perl script works in concert with do_sprint to
 #           implement isteps on AWAN.
@@ -152,7 +152,7 @@ sub main
         ::userDisplay "args: $k => $v\n";
     }
 
-    ::userDisplay   "Welcome to hb-Istep 3.31 .\n";
+    ::userDisplay   "Welcome to hb-Istep 3.33 .\n";
     ::userDisplay   "Note that in simics, multiple options must be in quotes,";
     ::userDisplay   "separated by spaces\n\n";
 
@@ -567,12 +567,14 @@ sub isShutDown()
     if ( $opt_debug )
     {
         ::userDisplay "=== isShutDown : Shutdown Flag   =   $flag\n";
-        ::userDisplay "=== isShutDown : Shutdown Status =   $status\n";
+        ::userDisplay "=== isShutDown : Shutdown Status = ",
+                      sprintf( "0x%x", $status), "\n";
     }
 
     if ( $flag )
     {
-        ::userDisplay "HostBoot has shut down with status $status.\n";
+        ::userDisplay "HostBoot has shut down with status ",
+                      sprintf( "0x%x", $status), ".\n";
         return 1;
     }
 
@@ -780,7 +782,7 @@ sub runIStep( $$ )
         else
         {
             ::userDisplay   "Istep $stsIStep.$stsSubstep $inList[$istep][$substep] returned Status: ",
-                            sprintf("0x%x",$istepStatus),
+                            sprintf("%d",$istepStatus),
                             "\n" ;
             if ( $istepStatus == 0xa )
             {
@@ -947,7 +949,7 @@ sub setMode( $ )
         ## check for system crash
         if ( isShutDown( ) )
         {
-            ::userDisplay  "Cannot run HostBoot\n";
+            ::userDisplay  "Cannot run HostBoot.\n";
             return -1;
         }
 

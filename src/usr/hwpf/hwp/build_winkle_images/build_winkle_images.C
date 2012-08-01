@@ -455,15 +455,9 @@ void    call_proc_set_pore_bar( void    *io_pArgs )
         l_cpu_target->getAttr<TARGETING::ATTR_SLW_IMAGE_ADDR>();
 
 
-        //  $$ @todo the hardware wants a mask to cover the size of the image,
-        //  with the added proviso that the lower 5 nybbles of the mask must
-        //  always be 0.
-        //  Thus, as long as the image is under 1M, this value will be 0 .
-        //  The HWP guys will probably pull this calculation inside
-        //  proc_set_pore_bar() so that we just specify the size in bytes.
-        //  This comment will be left until we integrate the new version.
-        //  In the meantime, l_mem_mask should be set to 0 to work correctly.
-        uint64_t l_mem_mask =  0;
+        // Size in Meg of the image, this is rounded up to the nearest power
+        //  of 2.  So far our images are less than 1 meg so this is 1
+        uint64_t l_mem_size =  1;
 
         //  defined in proc_set_pore_bar.H
         uint32_t        l_mem_type  =   SLW_L3 ;
@@ -480,7 +474,7 @@ void    call_proc_set_pore_bar( void    *io_pArgs )
                    "Call proc_set_pore_bar, membar=0x%lx, size=0x%lx, mask=0x%lx, type=0x%x",
                    l_imageAddr,
                    (l_cpu_target->getAttr<ATTR_SLW_IMAGE_SIZE>()),
-                   l_mem_mask,
+                   l_mem_size,
                    l_mem_type );
 
 
@@ -491,7 +485,7 @@ void    call_proc_set_pore_bar( void    *io_pArgs )
                          l_fapi_cpu_target,
                          l_pImage,
                          l_imageAddr,
-                         l_mem_mask,
+                         l_mem_size,
                          l_mem_type
                        );
 

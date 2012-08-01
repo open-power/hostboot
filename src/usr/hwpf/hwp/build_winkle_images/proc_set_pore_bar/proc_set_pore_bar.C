@@ -21,13 +21,13 @@
  *
  *  IBM_PROLOG_END_TAG
  */
-// $Id: proc_set_pore_bar.C,v 1.7 2012/07/25 12:26:28 stillgs Exp $
+// $Id: proc_set_pore_bar.C,v 1.8 2012/08/13 13:04:28 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_set_pore_bar.C,v $
-//------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
 // *! *** IBM Confidential ***
-//------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------
 // *! OWNER NAME: Greg Still         Email: stillgs@us.ibm.com
 // *!
 /// \file proc_set_pore_bar.C
@@ -71,18 +71,21 @@
 ///     - SLW image memory region has been allocated and XIP image loaded.
 /// \endverbatim
 ///
-//------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------
 
 
-// ----------------------------------------------------------------------
+// ------------------------------------------------------------------------------
 // Includes
-// ----------------------------------------------------------------------
+// ------------------------------------------------------------------------------
 #include <fapi.H>
 #include "p8_scom_addresses.H"
+#include "pgp_common.h"
 #include "proc_set_pore_bar.H"
 #include "proc_pm.H"
 #include "proc_pba_init.H"
 #include "proc_pba_bar_config.H"
+#include "pba_firmware_register.H"
+#include "pgp_pba.h"
 #include "sbe_xip_image.h"
 
 
@@ -90,32 +93,38 @@ extern "C" {
 
 using namespace fapi;
 
-// ----------------------------------------------------------------------
+// ------------------------------------------------------------------------------
 // Constant definitions
-// ----------------------------------------------------------------------
+// ------------------------------------------------------------------------------
 
 const uint32_t  SLW_PBA_BAR = 2;
+const uint32_t  SLW_PBA_SLAVE = 2;
 
-// ----------------------------------------------------------------------
+// ------------------------------------------------------------------------------
 // Global variables
-// ----------------------------------------------------------------------
+// ------------------------------------------------------------------------------
 
-// ----------------------------------------------------------------------
+// ------------------------------------------------------------------------------
 // Function prototypes
-// ----------------------------------------------------------------------
+// ------------------------------------------------------------------------------
 
-// ----------------------------------------------------------------------
+fapi::ReturnCode pba_slave_reset(   const fapi::Target& i_target,
+                                    uint32_t id);
+
+// ------------------------------------------------------------------------------
 // Function definitions
-// ----------------------------------------------------------------------
+// ------------------------------------------------------------------------------
 
 
 /// \param[in] i_target     Procesor Chip target
 /// \param[in] i_image      Platform memory pointer where image is
 ///                         located
 /// \param[in] i_mem_bar    Base address of the region where image is located
-/// \param[in] i_mem_mask   Mask that defines which address bits of the
-///                         BAR apply such to define the region size
-/// \param[in] i_mem_type Defines where the SLW image was loaded.  See
+/// \param[in] i_mem_size   Size (in MB) of the region where image is located
+///                         if not a power of two value, the value will be 
+///                         rounded up to the next power of 2 for setting the 
+///                         hardware mask
+/// \param[in] i_mem_type   Defines where the SLW image was loaded.  See
 ///                         proc_set_pore_bar.H enum for valid values.
 ///
 /// \retval SUCCESS
@@ -128,12 +137,12 @@ fapi::ReturnCode
 proc_set_pore_bar(      const fapi::Target& i_target,
                         void                *i_image,
                         uint64_t            i_mem_bar,
-                        uint64_t            i_mem_mask,
+                        uint64_t            i_mem_size,
                         uint32_t            i_mem_type)
 {
     fapi::ReturnCode    rc;
     uint32_t            l_ecmdRc = 0;
-    ecmdDataBufferBase  data;
+    ecmdDataBufferBase  data(64);
 
     uint64_t            image_address;
     uint64_t            image_size;
@@ -145,6 +154,8 @@ proc_set_pore_bar(      const fapi::Target& i_target,
 //    uint64_t            computed_last_image_address;
 
     uint64_t            slw_branch_table_address;
+    
+    pba_slvctln_t       ps;                         // PBA Slave
 
     // Hardcoded use of PBA BAR and Slave
     const uint32_t      pba_bar = PBA_BAR2;
@@ -395,20 +406,15 @@ proc_set_pore_bar(      const fapi::Target& i_target,
         FAPI_ERR("Put SCOM error for Memory Relocation Address");
         return rc;
     }
-    
-    
-
-
-    
-
-    FAPI_DBG("Calling pba_bar_config to BAR %x Addr: 0x%16llX  Mask: 0x%16llX",
-                    pba_bar, i_mem_bar, i_mem_mask);
+   
+    FAPI_DBG("Calling pba_bar_config to BAR %x Addr: 0x%16llX  Size: 0x%16llX",
+                    pba_bar, i_mem_bar, i_mem_size);
 
     // Set the PBA BAR for the SLW region
     FAPI_EXEC_HWP(rc, proc_pba_bar_config, i_target,
                                            pba_bar,
                                            i_mem_bar,
-                                           i_mem_mask,
+                                           i_mem_size,
                                            slw_pba_cmd_scope);
     if(rc) { return rc; }
 
@@ -423,7 +429,7 @@ proc_set_pore_bar(      const fapi::Target& i_target,
     // read_prefetch_ctl=0;        // Auto Early
     // buf_invalidate_ctl=0;       // Disabled
     // buf_alloc_w=0;              // SLW does not write.  24x7 will
-    // buf_alloc_a=0;              // SLW uses Buf A
+    // buf_alloc_a=1;              // SLW uses Buf A
     // buf_alloc_b=0;              // SLW does not use buffer B
     // buf_alloc_c=0;              // SLW does not use buffer C
     // dis_write_gather=0;         // SLW does not write.  \todo 24x7
@@ -432,6 +438,7 @@ proc_set_pore_bar(      const fapi::Target& i_target,
     // extaddr=0;                  // Bits 23:36.  NA for SLW
     //
 
+/*
     // Clear the data buffer (for cleanliness)
     l_ecmdRc |= data.flushTo0();
 
@@ -440,7 +447,39 @@ proc_set_pore_bar(      const fapi::Target& i_target,
     l_ecmdRc |= data.setBit(0);     // Enable the slave
     l_ecmdRc |= data.setBit(1);     // PORE-SLW engine - 0b100
     l_ecmdRc |= data.setBit(5,3);   // Care mask-only PORE-SLW
+    l_ecmdRc |= data.setBit(5,3);   // Allocate read buffer
+    l_ecmdRc |= data.setBit(5,3);   // Care mask-only PORE-SLW
+*/
+    
+    // Slave 2 (PORE-SLW).  This is a read/write slave. Write gathering is
+    // allowed, but with the shortest possible timeout.  The slave is set up
+    // to allow normal reads and writes at initialization.  The 24x7 code may
+    // reprogram this slave for IMA writes using special code sequences that
+    // restore normal DMA writes after each IMA sequence.
 
+    rc = pba_slave_reset(i_target, SLW_PBA_SLAVE);
+    if (rc)
+    {
+        FAPI_ERR("PBA Slave Reset failed");
+        // \todo add FFDC
+        return rc;
+    }
+
+    
+    ps.value = 0;
+    ps.fields.enable = 1;
+    ps.fields.mid_match_value = OCI_MASTER_ID_PORE_SLW;
+    ps.fields.mid_care_mask = 0x7;
+    ps.fields.read_ttype = PBA_READ_TTYPE_CL_RD_NC;
+    ps.fields.read_prefetch_ctl = PBA_READ_PREFETCH_NONE;
+    ps.fields.write_ttype = PBA_WRITE_TTYPE_DMA_PR_WR;
+    ps.fields.wr_gather_timeout = PBA_WRITE_GATHER_TIMEOUT_2_PULSES;
+    ps.fields.buf_alloc_a = 1;
+    ps.fields.buf_alloc_b = 1;
+    ps.fields.buf_alloc_c = 1;
+    ps.fields.buf_alloc_w = 1;
+    
+    l_ecmdRc |=  data.setDoubleWord(0, ps.value);
     if(l_ecmdRc)
     {
         FAPI_ERR("Error (0x%x) manipulating ecmdDataBufferBase for PBASLVCTL", l_ecmdRc);
@@ -455,6 +494,91 @@ proc_set_pore_bar(      const fapi::Target& i_target,
         FAPI_ERR("Put SCOM error for PBA Slave Control");
         return rc;
     }
+
+    return rc;
+}
+
+/// Reset a PBA slave with explicit timeout.  
+///
+/// \param id A PBA slave id in the range 0..3
+///
+/// \param timeout A value of SsxInterval type.  The special value
+/// SSX_WAIT_FOREVER indicates no timeout.
+///
+/// This form of pba_slave_reset() gives the caller control over timeouts and
+/// error handling.
+///
+/// \retval 0 Succes
+///
+/// \retval RC_PROCPM_PBA_SLVRST_TIMED_OUT The procedure timed out waiting for the PBA
+/// to reset the slave.
+
+fapi::ReturnCode
+pba_slave_reset(const fapi::Target& i_target, uint32_t id)
+{
+    
+    uint32_t            poll_count = 0;
+    pba_slvrst_t        psr;
+    fapi::ReturnCode    rc;
+    uint32_t            l_ecmdRc = 0;
+    ecmdDataBufferBase  data(64);
+
+    
+    // Tell PBA to reset the slave, then poll for completion with timeout.
+    // The PBA is always polled at least twice to guarantee that we always
+    // poll once after a timeout.
+
+    psr.value = 0;
+    psr.fields.set = PBA_SLVRST_SET(id);
+    
+    FAPI_DBG("  PBA_SLVRST%x: 0x%16llx", id, psr.value);
+    
+    l_ecmdRc |= data.setDoubleWord(0, psr.value);
+    if(l_ecmdRc)
+    {
+        FAPI_ERR("Error (0x%x) manipulating ecmdDataBufferBase for PBA_SLVRST", l_ecmdRc);
+        rc.setEcmdError(l_ecmdRc);
+        return rc;
+    }
+        
+    rc = fapiPutScom(i_target, PBA_SLVRST_0x00064001, data);
+    if (rc)
+    {
+        FAPI_ERR("Put SCOM error for PBA Slave Reset");
+        return rc;
+    }
+    
+    do 
+    {
+        rc = fapiGetScom(i_target, PBA_SLVRST_0x00064001, data);
+        if (rc)
+        {
+            FAPI_ERR("Put SCOM error for PBA Slave Reset");
+            return rc;
+        }
+
+        psr.value = data.getDoubleWord(0);
+        if(l_ecmdRc)
+        {
+            FAPI_ERR("Error (0x%x) manipulating ecmdDataBufferBase for PBA_SLVRST", l_ecmdRc);
+            rc.setEcmdError(l_ecmdRc);
+            return rc;
+        }
+        
+        
+        if (!(psr.fields.in_prog & PBA_SLVRST_IN_PROG(id))) 
+        {
+	        break;
+	    }
+        
+        poll_count++;
+	    if (poll_count == PBA_SLAVE_RESET_TIMEOUT) 
+        {
+	        FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PBA_SLVRST_TIMED_OUT);
+            break;
+	    }
+	  
+    } while (1);
 
     return rc;
 }

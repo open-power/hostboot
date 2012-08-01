@@ -21,7 +21,7 @@
  *
  *  IBM_PROLOG_END_TAG
  */
-// $Id: proc_set_pore_bar.H,v 1.3 2012/07/20 21:14:11 stillgs Exp $
+// $Id: proc_set_pore_bar.H,v 1.4 2012/08/13 13:04:30 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_set_pore_bar.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -105,8 +105,10 @@ enum PORE__BA_SLAVE {
 /// \param[in] i_image      Platform memory pointer where image is
 ///                         located
 /// \param[in] i_mem_bar    Base address of the region where image is located
-/// \param[in] i_mem_mask   Mask that defines which address bits of the
-///                         BAR apply such to define the region size
+/// \param[in] i_mem_size   Size (in MB) of the region where image is located
+///                         if not a power of two value, the value will be 
+///                         rounded up to the next power of 2 for setting the 
+///                         hardware mask
 /// \param[in] i_mem_type   Defines where the SLW image was loaded.  See
 ///                         proc_set_pore_bar.H enum for valid values.
 
@@ -114,7 +116,7 @@ fapi::ReturnCode
 proc_set_pore_bar(  const fapi::Target& i_target, 
                     void *i_image, 
                     uint64_t i_mem_bar, 
-                    uint64_t i_mem_mask, 
+                    uint64_t i_mem_size, 
                     uint32_t i_mem_type);
 
 

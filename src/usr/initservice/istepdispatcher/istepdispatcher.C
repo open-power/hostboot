@@ -5,7 +5,7 @@
  *
  *  IBM CONFIDENTIAL
  *
- *  COPYRIGHT International Business Machines Corp. 2011-2012
+ *  COPYRIGHT International Business Machines Corp. 2011,2012
  *
  *  p1
  *
@@ -346,19 +346,27 @@ errlHndl_t IStepDispatcher::msgHndlr ( void )
     while( 1 )
     {
         theMsg = msg_wait( iv_msgQ );
+
         TRACDCOMP( g_trac_initsvc,
-                   INFO_MRK"Got Msg - Type: 0x%08x",
-                   theMsg->type );
+                   "msgHndlr: rcvmsg t=0x%08x, d0=0x%016x, d1=0x%016x, x=%p",
+                   theMsg->type,
+                   theMsg->data[0],
+                   theMsg->data[1],
+                   theMsg->extra_data );
 
         switch( theMsg->type )
         {
             case SYNC_POINT_REACHED:
+                TRACDCOMP( g_trac_initsvc,
+                           "msgHndlr : SYNC_POINT_REACHED" );
                 // Sync point reached from Fsp
                 iv_Msg = theMsg;
                 handleSyncPointReachedMsg();
                 break;
 
             case MORE_WORK_NEEDED:
+                TRACDCOMP( g_trac_initsvc,
+                           "msgHndlr : MORE_WORK_NEEDED" );
                 // Worker thread is ready for more work.
                 iv_workerMsg = theMsg;
                 // The very first MORE_WORK_NEEDED message will
@@ -405,20 +413,25 @@ errlHndl_t IStepDispatcher::msgHndlr ( void )
                     break;
                 }
 
+                TRACDCOMP( g_trac_initsvc,
+                           "msgHndlr : default" );
                 iv_Msg = theMsg;
                 handleIStepRequestMsg();
                 break;
-        };
+        };  // end switch
 
         if( err )
         {
+            TRACFCOMP( g_trac_initsvc,
+                       "istepDispatcher, recieved errorlog, PLID = 0x%x",
+                       err->plid()  );
             // Breaking here will be a BAD thing...  It means that we are
             // exiting not just Istep Dispatcher, but all of Hostboot.
             // This should only happen if there is an error during an Istep.
             errlCommit( err,
                         INITSVC_COMP_ID );
         }
-    }
+    }   // end while(1)
 
     TRACFCOMP( g_trac_initsvc,
                EXIT_MRK"IStepDispatcher::msgHndlr()" );
@@ -673,6 +686,8 @@ void IStepDispatcher::handleSyncPointReachedMsg ( void )
 // ----------------------------------------------------------------------------
 void IStepDispatcher::handleMoreWorkNeededMsg ( bool i_first )
 {
+    uint32_t    l_plid  =   0;
+
     TRACDCOMP( g_trac_initsvc,
                ENTER_MRK"IStepDispatcher::handleMoreWorkNeededMsg()" );
 
@@ -691,10 +706,33 @@ void IStepDispatcher::handleMoreWorkNeededMsg ( bool i_first )
         // Send response back to caller?
         else if( !msg_is_async( iv_Msg ) )
         {
-            // TODO - Is data[0] status??  Not in HwSvr Doc.
-            iv_Msg->data[0] = 0x0;
-            // Send a possible errlog back to Fsp.
-            iv_Msg->extra_data = iv_workerMsg->extra_data;
+            //  if the istep failed, istepWorker will return the errorlog
+            //  in iv_WorkerMsg->extra_data.  Commit the error here and then
+            //  return the plid as status to the FSP/spless in iv_Msg.
+            //  Note that there are 2 messages in transit here, iv_WorkerMsg
+            //  and iv_Msg .
+            if ( iv_workerMsg->extra_data   !=  NULL )
+            {
+                errlHndl_t tmpErr = static_cast<errlHndl_t>(iv_workerMsg->extra_data);
+                l_plid              =   tmpErr->plid();
+                errlCommit( tmpErr,
+                            INITSVC_COMP_ID );
+
+                // pass the plid back to FSP/spless as status.
+            }
+            // status is returned in the high 32 bits of data[0] .
+            // I'm not sure what the lower 32 bits are.
+            iv_Msg->data[0]     =   ( static_cast<uint64_t>(l_plid) << 32 );
+            iv_Msg->data[1]     =   0x0;
+            iv_Msg->extra_data  =   NULL;
+
+
+            TRACDCOMP( g_trac_initsvc,
+            "MoreWorkNeeded: sendmsg t=0x%08x, d0=0x%016x, d1=0x%016x, x=%p",
+                       iv_Msg->type,
+                       iv_Msg->data[0],
+                       iv_Msg->data[1],
+                       iv_Msg->extra_data );
             msg_respond( iv_msgQ,
                          iv_Msg );
             iv_Msg = NULL;
@@ -787,13 +825,21 @@ void IStepDispatcher::handleIStepRequestMsg ( void )
     // Only something to do, if the worker thread is ready for work
     if( iv_workerMsg )
     {
+        //  debug
+        TRACDCOMP( g_trac_initsvc,
+        "handleIstepRequestMsg: iv_Msg: t=0x%08x, d0=0x%016x, d1=0x%016x, x=%p",
+                   iv_Msg->type,
+                   iv_Msg->data[0],
+                   iv_Msg->data[1],
+                   iv_Msg->extra_data );
+
         // Set new istep/substep info
         uint16_t stepInfo = ((iv_Msg->data[0] & 0x000000FF00000000) >> 24);
         stepInfo = (stepInfo | (iv_Msg->data[0] & 0xFF) );
         setIstepInfo( stepInfo );
 
-        TRACFCOMP( g_trac_initsvc,
-                   INFO_MRK"Istep req: 0x%04x",
+        TRACDCOMP( g_trac_initsvc,
+                   INFO_MRK"handleIstepRequestMsg: Istep req: 0x%04x",
                    stepInfo );
 
         // Set step/substep in data[0];

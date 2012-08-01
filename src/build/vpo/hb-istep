@@ -1,26 +1,26 @@
 #!/usr/bin/perl
-#  IBM_PROLOG_BEGIN_TAG
-#  This is an automatically generated prolog.
-#
-#  $Source: src/build/vpo/hb-istep $
-#
-#  IBM CONFIDENTIAL
-#
-#  COPYRIGHT International Business Machines Corp. 2011-2012
-#
-#  p1
-#
-#  Object Code Only (OCO) source materials
-#  Licensed Internal Code Source Materials
-#  IBM HostBoot Licensed Internal Code
-#
-#  The source code for this program is not published or other-
-#  wise divested of its trade secrets, irrespective of what has
-#  been deposited with the U.S. Copyright Office.
-#
-#  Origin: 30
-#
-#  IBM_PROLOG_END_TAG
+# IBM_PROLOG_BEGIN_TAG 
+# This is an automatically generated prolog. 
+#  
+# $Source: src/build/vpo/hb-istep $ 
+#  
+# IBM CONFIDENTIAL 
+#  
+# COPYRIGHT International Business Machines Corp. 2011,2012 
+#  
+# p1 
+#  
+# Object Code Only (OCO) source materials 
+# Licensed Internal Code Source Materials 
+# IBM HostBoot Licensed Internal Code 
+#  
+# The source code for this program is not published or otherwise 
+# divested of its trade secrets, irrespective of what has been 
+# deposited with the U.S. Copyright Office. 
+#  
+# Origin: 30 
+#  
+# IBM_PROLOG_END_TAG 
 #
 # Purpose:  This perl script works in concert with do_sprint to
 #           implement isteps on AWAN.
@@ -102,6 +102,9 @@ use constant    SPLESS_SHUTDOWN_CMD         =>  0x03;
 use constant    MAX_ISTEPS                  =>  25;
 use constant    MAX_SUBSTEPS                =>  25;
 
+##  shutdown exit codes
+use constant    EXIT_SHUTDOWN               =>  1;
+
 
 #------------------------------------------------------------------------------
 # Globals
@@ -114,7 +117,7 @@ my  $opt_fspmode        =   0;
 my  $opt_command        =   "";
 my  $opt_list           =   0;
 my  $opt_resume         =   0;          ## resume istep from break point
-my  $opt_clock          =   0;          ## continue istep 
+my  $opt_clock          =   0;          ## continue istep
 my  $opt_clear_trace    =   0;          ##  submit command 02
 my  $opt_cmdfile        =   0;          ## batchmode, later
 my  $opt_setup          =   "";         ##  run Jim's script to start up the model
@@ -181,7 +184,7 @@ if ( ! -e "$hbSymsFile" )  { die "Can't find symbols file $hbSymsFile\n";   }
 if ( ! -e "$CSVfile" )  { die "Can't find isteplist file $hbSymsFile\n";   }
 
 
-print   STDOUT  "Welcome to hb-istep 3.02 .\n";
+print   STDOUT  "Welcome to hb-istep 3.03 .\n";
 
 
 ## exit if no args
@@ -377,8 +380,9 @@ sub main()
 
     if ( isShutDown() )
     {
-        print   STDOUT  "HostBoot has shut down.\n";
-        exit;
+        print   STDOUT  "HostBoot has shut down." ;
+
+        exit EXIT_SHUTDOWN;
     }
 
 
@@ -634,12 +638,13 @@ sub isShutDown()
     if ( $opt_debug )
     {
         print   STDERR "Shutdown Flag   =   $flag\n";
-        print   STDERR "Shutdown Status =   $status\n";
+        print   STDERR "Shutdown Status =  ", sprintf( "0x%x", $status), "\n";
     }
 
     if ( $flag )
     {
-        print   STDOUT  "HostBoot has shut down with status $status.\n";
+        print   STDOUT  "HostBoot has shut down with status ",
+                        sprintf( "0x%x", $status), "\n";
         return 1;
     }
 
@@ -860,7 +865,7 @@ sub runIStep( $$ )
         }
         else
         {
-            printf STDOUT "Istep %d.%d %s returned Status: 0x%x\n",
+            printf STDOUT "Istep %d.%d %s returned Status: %d\n",
                           $stsIStep, $stsSubstep,
                           $inList[$istep][$substep],
                           $istepStatus ;
@@ -1100,7 +1105,7 @@ sub setMode( $ )
 
         if ( $count <= 0 )
         {
-            print STDOUT "TIMEOUT waiting for readybit, status=0x%x\n", $result ;
+            printf STDOUT "TIMEOUT waiting for readybit, status=0x%x\n", $result ;
             return -1;
         }
 

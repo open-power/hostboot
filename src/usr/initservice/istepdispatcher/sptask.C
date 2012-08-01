@@ -206,18 +206,11 @@ void    userConsoleComm( void *  io_msgQ )
             {
                 l_sts.hdr.status    =   SPLESS_AT_BREAK_POINT;
             }
+
             //  istep status is the hi word in the returned data 0
+            //  this should be either 0 or a plid from a returned errorlog
             l_sts.istepStatus   =
-                    static_cast<uint32_t>( l_pCurrentMsg->data[0] >> 32 );
-            // Data 0 is not used by HwSvr, thus incorrect status.  Need to
-            // check whether there is anything in extra_data
-            if( NULL != l_pCurrentMsg->extra_data )
-            {
-                l_sts.istepStatus = 0x1;
-                errlHndl_t tmpErr = static_cast<errlHndl_t>(l_pCurrentMsg->extra_data);
-                errlCommit( tmpErr,
-                            INITSVC_COMP_ID );
-            }
+                        static_cast<uint32_t>( l_pCurrentMsg->data[0] >> 32 );
 
             // finish filling in status
             l_sts.hdr.runningbit    =   false;

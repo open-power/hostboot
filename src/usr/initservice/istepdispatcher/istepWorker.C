@@ -84,12 +84,12 @@ void startIStepWorkerThread ( void * io_args )
 // ----------------------------------------------------------------------------
 void iStepWorkerThread ( void * i_msgQ )
 {
-    errlHndl_t err = NULL;
-    msg_q_t theQ = static_cast<msg_q_t>( i_msgQ );
-    msg_t * theMsg = NULL;
-    uint32_t istep = 0x0;
-    uint32_t substep = 0x0;
-    uint64_t progressCode = 0x0;
+    errlHndl_t err          =   NULL;
+    msg_q_t theQ            =   static_cast<msg_q_t>( i_msgQ );
+    msg_t * theMsg          =   NULL;
+    uint32_t istep          =   0x0;
+    uint32_t substep        =   0x0;
+    uint64_t progressCode   =   0x0;
     bool first = true;
 
     TRACDCOMP( g_trac_initsvc,
@@ -101,13 +101,36 @@ void iStepWorkerThread ( void * i_msgQ )
         theMsg = msg_allocate();
         theMsg->type = MORE_WORK_NEEDED;
         theMsg->data[0] = first ? 1 : 0x0;
-        theMsg->data[1] = 0x0;
+        if ( err )
+        {
+            // The size of the errorlog (data[1]) is intentionally left at 0;
+            //  the main thread will commit this errorlog.  We do not really
+            //  need to send the size of the errorlog.
+            theMsg->data[1] = 0;
+            TRACFCOMP( g_trac_initsvc,
+                       "istepWorker:  send errlog back to main, PLID = 0x%x",
+                       err->plid()  );
+        }
+
         theMsg->extra_data = err;
         err = NULL;
+        TRACDCOMP( g_trac_initsvc,
+        INFO_MRK"istepWorker: sendmsg t=0x%08x, d0=0x%016x, d1=0x%016x, x=%p",
+                   theMsg->type,
+                   theMsg->data[0],
+                   theMsg->data[1],
+                   theMsg->extra_data );
 
         // Wait here until the main thread has work for us.
         msg_sendrecv( theQ,
                       theMsg );
+
+        TRACDCOMP( g_trac_initsvc,
+        INFO_MRK"istepWorker: rcvmsg t=0x%08x, d0=0x%016x, d1=0x%016x, x=%p",
+                   theMsg->type,
+                   theMsg->data[0],
+                   theMsg->data[1],
+                   theMsg->extra_data );
 
         first = false;
 
@@ -148,9 +171,12 @@ void iStepWorkerThread ( void * i_msgQ )
                        INFO_MRK"Empty Istep, nothing to do!" );
         }
 
+        //  flush contTrace after each istep/substep  returns
+        TRACE::Trace::getTheInstance().flushContBuffers();
+
         msg_free( theMsg );
         theMsg = NULL;
-    }
+    }   // end while(1)
 
     // Something bad happened...  this thread should never exit once started
     assert( 0 );

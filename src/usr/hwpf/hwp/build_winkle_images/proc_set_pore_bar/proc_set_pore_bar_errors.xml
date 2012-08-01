@@ -37,6 +37,11 @@
     <rc>RC_PROCPM_POREBAR_PBABAR_ERROR</rc>
     <description>PBA BAR image location passed to proc_set_pore_bar</description>
   </hwpError>
+    <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_PBA_SLVRST_TIMED_OUT</rc>
+    <description>PBA Slave Reset timed out in proc_set_pore_bar</description>
+  </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROCPM_POREBAR_IMAGE_SIZE_ERROR</rc>

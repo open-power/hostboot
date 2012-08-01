@@ -24,7 +24,7 @@
 #ifndef __SBE_XIP_IMAGE_H
 #define __SBE_XIP_IMAGE_H
 
-// $Id: sbe_xip_image.h,v 1.17 2012/06/12 13:30:28 bcbrock Exp $
+// $Id: sbe_xip_image.h,v 1.18 2012/07/06 20:03:09 bcbrock Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/sbe/sbe_xip_image.h,v $
 //-----------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -134,7 +134,7 @@
 /// Maximum section alignment for SBE-XIP sections
 #define SBE_XIP_MAX_SECTION_ALIGNMENT 128
 
-/// defgroup sbe_xip_toc_types SBE-XIP Table of Contents data types
+/// \defgroup sbe_xip_toc_types SBE-XIP Table of Contents data types
 ///
 /// These are the data types stored in the \a iv_type field of the SbeXipToc
 /// objects.  These must be defined as manifest constants because they are
@@ -859,7 +859,7 @@ sbe_xip_set_element(void *i_image,
 
 /// Set string data in an SBE-XIP image
 ///
-/// \param[in] i_image A pointer to an SBE-XIP image in host memory.  The
+/// \param[in,out] io_image A pointer to an SBE-XIP image in host memory.  The
 /// image is assumed to be consistent with the information contained in the
 /// header regarding the presence of and sizes of all sections.  The image is
 /// also required to have been normalized.
@@ -941,7 +941,7 @@ sbe_xip_write_uint64(void *io_image,
 /// \retval 0 Success; All TOC entries were mapped, including the case that
 /// the .toc section is empty.
 ///
-/// \revtal non-0 May be either one of the SBE-XIP image error codes (see \ref
+/// \retval non-0 May be either one of the SBE-XIP image error codes (see \ref
 /// sbe_xip_image_errors), or a non-zero code from \a i_fn. Since the standard
 /// SBE_XIP return codes are > 0, application-defined codes should be < 0.
 int
@@ -1014,6 +1014,8 @@ sbe_xip_find(void* i_image,
 ///             const char* i_rcString,
 ///             void* io_arg)
 ///
+/// \endcode
+///
 /// \param[in,out] io_arg The private argument of \a i_fn.
 ///
 /// This API iterates over each entry of the .halt section, calling \a i_fn
@@ -1025,10 +1027,10 @@ sbe_xip_find(void* i_image,
 ///
 /// \retval 0 Success, including the case that the image has no .halt section.
 ///
-/// \revtal non-0 May be either one of the SBE-XIP image error codes (see \ref
+/// \retval non-0 May be either one of the SBE-XIP image error codes (see \ref
 /// sbe_xip_image_errors), or any non-zero code from \a i_fn.  Since the
-/// standard SBE_XIP return codes are > 0, application-defined codes should be
-/// < 0.
+/// standard SBE_XIP return codes are \> 0, application-defined codes should
+/// be \< 0.
 int
 sbe_xip_map_halt(void* io_image, 
                  int (*i_fn)(void* io_image, 
@@ -1055,19 +1057,19 @@ sbe_xip_map_halt(void* io_image,
 ///
 /// \retval 0 Success
 ///
-/// \retval SBE_XIP_ITEM_NOT_FOUND The \a i_poreAddress is not associated
+/// \revtal SBE_XIP_ITEM_NOT_FOUND The \a i_poreAddress is not associated
 /// with a halt code in .halt.
 ///
 /// \revtal Other See \ref sbe_xip_image_errors
 int
 sbe_xip_get_halt(void* io_image, 
-                 const uint64_t i_poreAdress,
+                 const uint64_t i_poreAddress,
                  const char** o_rcString);
 
 
 /// Delete a section from an SBE-XIP image in host memory
 ///
-/// \param[in,out] i_image A pointer to an SBE-XIP image in host memory.  The
+/// \param[in,out] io_image A pointer to an SBE-XIP image in host memory.  The
 /// image is assumed to be consistent with the information contained in the
 /// header regarding the presence of and sizes of all sections. The image is
 /// also required to have been normalized.
@@ -1107,10 +1109,10 @@ sbe_xip_delete_section(void* io_image, const int i_sectionId);
 /// section.  
 ///
 /// This API creates a bytewise duplicate of a non-empty section into newly
-/// malloc()-ed memory. At exit \a o_duplicate points to the duplicate, and \i
+/// malloc()-ed memory. At exit \a o_duplicate points to the duplicate, and \a
 /// o_size is set the the size of the duplicated section. The caller is
 /// responsible for free()-ing the memory when no longer required.  The
-/// pointer at \o_duplicate is set to NULL (0) and teh \a o_size is set to 0
+/// pointer at \a o_duplicate is set to NULL (0) and the \a o_size is set to 0
 /// in the event of any failure.
 ///
 /// \retval 0 Success
@@ -1120,7 +1122,7 @@ int
 sbe_xip_duplicate_section(const void* i_image, 
                           const int i_sectionId,
                           void** o_duplicate,
-                          uint32_t* size);
+                          uint32_t* o_size);
 
 
 /// Append binary data to an SBE-XIP image held in host memory
@@ -1317,7 +1319,7 @@ sbe_xip_pore2section(const void* i_image,
 int
 sbe_xip_host2pore(const void* i_image, 
                   void* i_hostAddress,
-                  uint64_t* i_poreAddress);
+                  uint64_t* o_poreAddress);
 
 
 /// \defgroup sbe_xip_image_errors Error codes from SBE-XIP image APIs

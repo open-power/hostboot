@@ -1,25 +1,25 @@
-<!--  IBM_PROLOG_BEGIN_TAG
-     This is an automatically generated prolog.
-
-     $Source: src/usr/targeting/common/xmltohb/attribute_types.xml $
-
-     IBM CONFIDENTIAL
-
-     COPYRIGHT International Business Machines Corp. 2011-2012
-
-     p1
-
-     Object Code Only (OCO) source materials
-     Licensed Internal Code Source Materials
-     IBM HostBoot Licensed Internal Code
-
-     The source code for this program is not published or other-
-     wise divested of its trade secrets, irrespective of what has
-     been deposited with the U.S. Copyright Office.
-
-     Origin: 30
-
-     IBM_PROLOG_END_TAG -->
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/targeting/common/xmltohb/attribute_types.xml $        -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2011,2012              -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
 
 <attributes>
 
@@ -4150,7 +4150,7 @@
     <simpleType>
         <uint64_t>
             <!-- 4GB per Proc -->
-            <default>0x0000000000100000</default>
+            <default>0x0000000100000000</default>
         </uint64_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -4167,7 +4167,7 @@
     <simpleType>
         <uint64_t>
             <!-- @fixme : what is this value? -->
-            <default>0x0000000000000000</default>
+            <default>0x0000000100000000</default>
         </uint64_t>
     </simpleType>
     <persistency>non-volatile</persistency>
