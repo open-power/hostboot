@@ -296,8 +296,8 @@ generate_sys();
 # Second, generate system node using the master processor's node
 generate_system_node();
 
-# Third, generate the proc, ex-chiplet, mcs-chiplet, pervasive-bus, powerbus,
-# pcie bus and A/X-bus.
+# Third, generate the proc, occ, ex-chiplet, mcs-chiplet, pervasive-bus, powerbus,
+# unit-tp (if on fsp), pcie bus and A/X-bus.
 my $ex_count = 0;
 my $mcs_count = 0;
 for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
@@ -309,6 +309,10 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
         if ($proc eq $Mproc)
         {
             generate_master_proc($proc, $ipath);
+            if ($build eq "fsp")
+            {
+                generate_occ($proc);
+            }
         }
         else
         {
@@ -322,6 +326,10 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
                 }
             }
             generate_slave_proc($proc, $fsi, $ipath);
+            if ($build eq "fsp")
+            {
+                generate_occ($proc);
+            }
         }
     }
     elsif ($STargets[$i][NAME_FIELD] eq "ex")
@@ -374,6 +382,10 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
             $mcs_count = 0;
             generate_pervasive_bus($proc);
             generate_powerbus($proc);
+            if ($build eq "fsp")
+            {
+                 generate_unit_tp($proc);
+            }
             generate_pcies($proc);
             generate_ax_buses($proc, "A");
             generate_ax_buses($proc, "X");
@@ -467,7 +479,7 @@ sub generate_sys
     my $mem_refclk = $policy->{'required-policy-settings'}->{'memory-refclock-frequency'}->{content};
 
     print "
-<!-- $SYSNAME System -->
+<!-- $SYSNAME System with new values-->
 
 <targetInstance>
     <id>sys$sys</id>
@@ -547,6 +559,7 @@ sub generate_sys
         <default>1</default>
     </attribute>
 </targetInstance>
+
 ";
 }
 
@@ -569,6 +582,44 @@ sub generate_system_node
     </attribute>
 </targetInstance>
 ";
+
+    if ($build eq "fsp")
+    {
+          print "
+<!-- APSS For system node $node -->
+
+<targetInstance>
+    <id>sys0node0apss0</id>
+    <type>apss</type>
+    <attribute><id>HUID</id><default>0x001B0000</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-$sys/node-$node/apss-$node</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-$sys/node-$node/apss-$node</default>
+    </attribute>
+</targetInstance>
+
+<!-- DPSS For system node $node -->
+
+<targetInstance>
+    <id>sys0node0dpss0</id>
+    <type>dpss</type>
+    <attribute><id>HUID</id><default>0x001A0000</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-$sys/node-$node/dpss-$node</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-$node/node-$node/dpss-$node</default>
+    </attribute>
+</targetInstance>
+
+";
+    }
 }
 
 sub generate_master_proc
@@ -632,6 +683,10 @@ sub generate_master_proc
         <id>FSP_SCAN_DEVICE_PATH</id>
         <default>$scanpath</default>
         <sizeInclNull>$scansize</sizeInclNull>
+    </attribute>
+    <attribute>
+        <id>RID</id>
+        <default>0x100$proc</default>
     </attribute>";
     }
 
@@ -711,6 +766,32 @@ sub generate_master_proc
     # end PHYP Memory Map
 
     print "\n</targetInstance>\n";
+
+}
+
+sub generate_occ
+{
+    my ($proc) = @_;
+
+    my $uidstr = sprintf("0x001C000%01X",$proc);
+
+        print "
+<!-- $SYSNAME n${node}p${proc} OCC units -->
+
+<targetInstance>
+    <id>sys${sys}node${node}proc${proc}occ$proc</id>
+    <type>occ</type>
+        <attribute><id>HUID</id><default>${uidstr}</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-$sys/node-$node/proc-$proc/occ-$proc</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-$sys/node-$node/proc-$proc/occ-$proc</default>
+    </attribute>
+</targetInstance>\n";
+
 }
 
 sub generate_slave_proc
@@ -873,7 +954,18 @@ sub generate_slave_proc
 
     # end PHYP Memory Map
 
+
+    if ($build eq "fsp")
+    {
+        print "
+    <attribute>
+        <id>RID</id>
+        <default>0x100$proc</default>
+    </attribute>";
+    }
+
     print "\n</targetInstance>\n";
+
 }
 
 sub generate_ex
@@ -1003,6 +1095,29 @@ sub generate_powerbus
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-$sys/node-$node/proc-$proc/powerbus-0</default>
+    </attribute>
+</targetInstance>
+";
+}
+
+sub generate_unit_tp
+{
+    my $proc = shift;
+    my $uidstr = sprintf("0x%02X18%04X",${node},$proc+${node}*8);
+    print "
+<!-- $SYSNAME n${node}p$proc tp unit -->
+
+<targetInstance>
+    <id>sys${sys}node${node}proc${proc}tp0</id>
+    <type>unit-tp-murano</type>
+    <attribute><id>HUID</id><default>${uidstr}</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-$sys/node-$node/proc-$proc/tp-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-$sys/node-$node/proc-$proc/tp-0</default>
     </attribute>
 </targetInstance>
 ";
@@ -1276,6 +1391,8 @@ sub generate_dimm
     # Adjust offset basedon processor value
     $vpdRec = ($proc * 64) + $vpdRec;
 
+	my $dimmNum=($dimm - ($dimm%8))/8;
+	my $dimmHex=sprintf("0xD00%01X",$dimmNum);
     print "
 <targetInstance>
     <id>sys${sys}node${node}dimm$dimm</id>
@@ -1301,9 +1418,15 @@ sub generate_dimm
         <id>MBA_DIMM</id>
         <default>$z</default>
     </attribute>
-    <attribute><id>VPD_REC_NUM</id><default>$vpdRec</default></attribute>
-</targetInstance>
-";
+    <attribute><id>VPD_REC_NUM</id><default>$vpdRec</default></attribute>";
+
+    if ($build eq "fsp")
+    {
+         print"
+    <attribute><id>RID</id><default>$dimmHex</default></attribute>";
+    }
+
+print "\n</targetInstance>\n";
 }
 
 sub display_help
