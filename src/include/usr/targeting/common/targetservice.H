@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/include/usr/targeting/common/targetservice.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2011-2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/include/usr/targeting/common/targetservice.H $            */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef __TARGETING_COMMON_TARGETSERVICE_H
 #define __TARGETING_COMMON_TARGETSERVICE_H
 
@@ -324,6 +323,8 @@ class TargetService
          *
          *  @param[out] o_masterProcChipTarget Target handle referring to the
          *      current master processor chip (the one connected to PNOR)
+         *  @param[in]  i_node Node that this master resides on (default
+         *      is 0)
          *
          *  @pre None
          *
@@ -332,7 +333,8 @@ class TargetService
          *      information is not yet initialized
          */
         void masterProcChipTargetHandle(
-            Target*& o_masterProcChipTargetHandle) const;
+            Target*& o_masterProcChipTargetHandle,
+            uint8_t i_node = 0) const;
 
         /**
          *  @brief Returns whether the specified entity path attribute exists
