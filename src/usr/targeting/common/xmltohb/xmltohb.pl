@@ -69,6 +69,7 @@ my $cfgMan = 0;
 my $cfgVerbose = 0;
 my $cfgShortEnums = 1;
 my $cfgBigEndian = 1;
+my $cfgIncludeFspAttributes = 0;
 
 GetOptions("hb-xml-file:s" => \$cfgHbXmlFile,
            "src-output-dir:s" =>  \$cfgSrcOutputDir,
@@ -78,6 +79,7 @@ GetOptions("hb-xml-file:s" => \$cfgHbXmlFile,
            "vmm-consts-file:s" =>  \$cfgVmmConstsFile,
            "short-enums!" =>  \$cfgShortEnums,
            "big-endian!" =>  \$cfgBigEndian,
+           "include-fsp-attributes!" =>  \$cfgIncludeFspAttributes,
            "help" => \$cfgHelp,
            "man" => \$cfgMan,
            "verbose" => \$cfgVerbose ) || pod2usage(-verbose => 0);
@@ -105,6 +107,7 @@ if($cfgVerbose)
     print STDOUT "VMM constants file = $cfgVmmConstsFile\n";
     print STDOUT "Short enums = $cfgShortEnums\n";
     print STDOUT "Big endian = $cfgBigEndian\n";
+    print STDOUT "include-fsp-attributes = $cfgIncludeFspAttributes\n",
 }
 
 ################################################################################
@@ -682,6 +685,10 @@ namespace TARGETING
 
         // Targeting heap section intialized to zero
         SECTION_TYPE_HEAP_ZERO_INIT = 0x03,
+
+        // FSP section
+        // TODO RTC: 35451 
+        SECTION_TYPE_FSP = 0x04,
     };
 
     struct TargetingSection
@@ -3279,6 +3286,10 @@ sub generateTargetingImage {
     my $heapPnorInitBaseAddr = $pnorRwBaseAddress    + $vmmSectionOffset;
     my $heapZeroInitBaseAddr = $heapPnorInitBaseAddr + $vmmSectionOffset;
 
+    # TODO RTC: 35451
+    # Split "fsp" into additional sections
+    my $fspBaseAddr          = $heapZeroInitBaseAddr + $vmmSectionOffset;
+
     # Reserve 256 bytes for the header, then keep track of PNOR RO offset
     my $headerSize = 256;
     my $offset = $headerSize;
@@ -3377,6 +3388,12 @@ sub generateTargetingImage {
     my $heapPnorInitBinData;
     my $rwAttrBinData;
     my $rwOffset = 0;
+
+    # TODO RTC: 35451   
+    # Split into more granular sections
+    my $fspOffset = 0;
+    my $fspBinData;
+
     my $attributePointerBinData;
     my $targetsBinData;
 
@@ -3453,7 +3470,13 @@ sub generateTargetingImage {
             }
 
             my $section;
-            if( exists $attributeDef->{writeable}
+            # TODO RTC: 35451
+            # Split "fsp" into more sections later
+            if( exists $attributeDef->{fspOnly} )
+            {
+                $section = "fsp";
+            }
+            elsif( exists $attributeDef->{writeable}
                     && $attributeDef->{persistency} eq "non-volatile" )
             {
                 $section = "pnor-rw";
@@ -3565,6 +3588,27 @@ sub generateTargetingImage {
 
                 $heapPnorInitBinData .= $heapPnorInitData;
             }
+            # TODO RTC: 35451
+            # Split FSP section into more granular sections
+            elsif($section eq "fsp")
+            {
+                my ($fspData,$alignment) = packAttribute(
+                        $attributes,
+                        $attributeDef,$attrhash{$attributeId}->{default});
+
+                # Align the data as necessary
+                my $pads = ($alignment - ($fspOffset
+                            % $alignment)) % $alignment;
+                $fspBinData .= pack ("@".$pads);
+                $fspOffset += $pads;
+
+                $attributePointerBinData .= pack8byte(
+                    $fspOffset + $fspBaseAddr);
+
+                $fspOffset += (length $fspData);
+
+                $fspBinData .= $fspData;
+            }  
             else
             {
                 fatal("Could not find a suitable section.");
@@ -3608,6 +3652,19 @@ sub generateTargetingImage {
     $sectionHoH{ heapZeroInit }{ type   } = 3;
     $sectionHoH{ heapZeroInit }{ size   } =
         sizeBlockAligned($heapZeroInitOffset,$blockSize,1);
+  
+    # TODO RTC: 35451
+    # Split "fsp" into additional sections
+    if($cfgIncludeFspAttributes)
+    {
+        # zeroInitSection occupies no space in the binary, so set the FSP
+        # section address to that of the zeroInitSection
+        $sectionHoH{ fsp }{ offset } =
+             $sectionHoH{heapZeroInit}{offset};
+        $sectionHoH{ fsp }{ type } = 4;
+        $sectionHoH{ fsp }{ size } =
+            sizeBlockAligned($fspOffset,$blockSize,1);
+    }
 
     my $numSections = keys %sectionHoH;
 
@@ -3626,7 +3683,15 @@ sub generateTargetingImage {
     $headerBinData .= pack4byte($numSections);
     $headerBinData .= pack4byte($offsetToSections);
 
-    foreach my $section ("pnorRo","pnorRw","heapPnorInit","heapZeroInit")
+    # TODO RTC: 35451
+    # Split "fsp" into additional sections
+    my @sections = ("pnorRo","pnorRw","heapPnorInit","heapZeroInit");
+    if($cfgIncludeFspAttributes)
+    {
+        push(@sections,"fsp");
+    }
+
+    foreach my $section (@sections)
     {
         $headerBinData .= pack1byte($sectionHoH{$section}{type});
         $headerBinData .= pack4byte($sectionHoH{$section}{offset});
@@ -3666,6 +3731,16 @@ sub generateTargetingImage {
     $outFile .= $heapPnorInitBinData;
     $outFile .= pack("@".($sectionHoH{heapPnorInit}{size}
         - $heapPnorInitOffset));
+
+    # TODO RTC: 35451
+    # Serialize FSP section to multiple of 4k page size (pad if
+    # necessary)
+    if($cfgIncludeFspAttributes)
+    {
+        $outFile .= $fspBinData;
+        $outFile .= pack("@".($sectionHoH{fsp}{size}
+            - $fspOffset));
+    }
 
     return $outFile;
 }
@@ -3745,6 +3820,16 @@ Writes maximum sized enumerations to binary image (default). Any code which
 uses the binary image or enumerations from generated header files must not
 be compiled with short enumeration support.  Every enumeration will consume 4
 bytes by default
+
+=item B<--include-fsp-attributes>
+
+Emits FSP specific attributes and targets into the generated binaries and
+generated code.  
+
+=item B<--noinclude-fsp-attributes>
+
+Omits FSP specific attributes and targets from the generated binaries and
+generated code.  This is the default behavior.
 
 =item B<--verbose>
 

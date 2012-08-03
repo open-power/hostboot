@@ -378,9 +378,48 @@ namespace TARGETING
             // Create VMM block for each section, assign permissions.
             for (size_t i = 0; i < iv_sectionCount; i++)
             {
-                int rc = 0;
+                uint64_t l_perm = 0;
+                switch(iv_sections[i].type)
+                {
+                    case SECTION_TYPE_PNOR_RO:
+                        l_perm = READ_ONLY;
+                        break;
 
-                rc = mm_alloc_block((iv_sections[i].type ==
+                    case SECTION_TYPE_PNOR_RW:
+                        l_perm = WRITABLE | WRITE_TRACKED;
+                        break;
+
+                    case SECTION_TYPE_HEAP_PNOR_INIT:
+                        l_perm = WRITABLE;
+                        break;
+
+                    case SECTION_TYPE_HEAP_ZERO_INIT:
+                        l_perm = WRITABLE | ALLOCATE_FROM_ZERO;
+                        break;
+
+                    default:
+                    
+                        /*@
+                         *   @errortype
+                         *   @moduleid   TARG_MOD_ATTRRP
+                         *   @reasoncode TARG_RC_UNHANDLED_ATTR_SEC_TYPE
+                         *   @userdata1  Section type
+                         *
+                         *   @devdesc    Found unhandled attribute section type
+                         */
+                    l_errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                           TARG_MOD_ATTRRP,
+                                           TARG_RC_UNHANDLED_ATTR_SEC_TYPE,
+                                           iv_sections[i].type);
+                    break;
+                }
+
+                if(l_errl)
+                {
+                    break;
+                }
+                
+                int rc = mm_alloc_block((iv_sections[i].type ==
                                         SECTION_TYPE_HEAP_ZERO_INIT ?
                                      NULL : iv_msgQ),
                                     reinterpret_cast<void*>(
@@ -407,31 +446,15 @@ namespace TARGETING
                     break;
                 }
 
-                uint64_t l_perm = 0;
-                switch(iv_sections[i].type)
+                if(iv_sections[i].type == SECTION_TYPE_PNOR_RW)
                 {
-                    case SECTION_TYPE_PNOR_RO:
-                        l_perm = READ_ONLY;
-                        break;
-
-                    case SECTION_TYPE_PNOR_RW:
-                        l_perm = WRITABLE | WRITE_TRACKED;
-                        /*
-                         * Register this memory range to be FLUSHed during
-                         * a shutdown.
-                         */
-                        INITSERVICE::registerBlock(
-                            reinterpret_cast<void*>(iv_sections[i].vmmAddress),
-                            iv_sections[i].size,ATTR_PRIORITY);
-                        break;
-
-                    case SECTION_TYPE_HEAP_PNOR_INIT:
-                        l_perm = WRITABLE;
-                        break;
-
-                    case SECTION_TYPE_HEAP_ZERO_INIT:
-                        l_perm = WRITABLE | ALLOCATE_FROM_ZERO;
-                        break;
+                    /*
+                     * Register this memory range to be FLUSHed during
+                     * a shutdown.
+                     */
+                    INITSERVICE::registerBlock(
+                        reinterpret_cast<void*>(iv_sections[i].vmmAddress),
+                        iv_sections[i].size,ATTR_PRIORITY);
                 }
 
                 rc = mm_set_permission(reinterpret_cast<void*>(
@@ -460,8 +483,12 @@ namespace TARGETING
                     break;
                 }
 
+            } // End iteration through each section 
+
+            if(l_errl)
+            {
+                break;
             }
-            if (l_errl) break; // Catch errorlog fall-outs from inside for-loop.
 
         } while (false);
 
