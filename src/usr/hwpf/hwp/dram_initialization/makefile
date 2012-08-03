@@ -43,6 +43,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dram_initialization
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dram_initialization/proc_exit_cache_contained
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dram_initialization/mss_extent_setup
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dram_initialization/proc_setup_bars
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dram_initialization/mss_memdiag
 
 
 ##  NOTE: add new object files when you add a new HWP
@@ -52,6 +53,7 @@ OBJS =  dram_initialization.o \
         mss_setup_bars.o   \
         proc_fab_smp.o  \
         proc_setup_bars.o   \
+        mss_maint_cmds.o
 
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
@@ -60,6 +62,7 @@ OBJS =  dram_initialization.o \
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/dram_initialization/proc_exit_cache_contained
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/dram_initialization/mss_extent_setup
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/dram_initialization/proc_setup_bars
+VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/dram_initialization/mss_memdiag
 
 
 include ${ROOTPATH}/config.mk
