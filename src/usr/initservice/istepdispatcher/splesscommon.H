@@ -139,7 +139,7 @@ void initIStepMode( );
 struct  CommandHdr
 {
     bool            gobit:1;
-    uint8_t         reserved0:1;
+    uint8_t         readbit:1;
     uint8_t         seqnum:6;
     uint8_t         cmdnum;
 

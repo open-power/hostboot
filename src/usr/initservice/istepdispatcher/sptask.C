@@ -133,6 +133,9 @@ void    userConsoleComm( void *  io_msgQ )
         //  process any pending commands
         if ( l_cmd.hdr.gobit )
         {
+            l_cmd.hdr.readbit = 1;
+            writeCmd( l_cmd );
+
             // get the sequence number from caller
             l_seqnum    =   l_cmd.hdr.seqnum;
 
@@ -183,6 +186,12 @@ void    userConsoleComm( void *  io_msgQ )
             //  This should unblock on any message sent on the Q,
             l_pCurrentMsg  =   msg_wait( l_RecvMsgQ );
 
+            // Clear command reg when the command is done
+            TRACDCOMP( g_trac_initsvc,
+                    "userConsoleComm Clear Command reg" );
+            l_cmd.val64 =   0;
+            writeCmd( l_cmd );
+
             // process returned status from IStepDisp
             l_sts.hdr.status    =   0;
 
@@ -230,11 +239,6 @@ void    userConsoleComm( void *  io_msgQ )
             //      Please save the following in case we have to turn this
             //      back on.
 
-            // write the intermediate value back to the console.
-            TRACDCOMP( g_trac_initsvc,
-                    "userConsoleComm Clear Command reg" );
-            l_cmd.val64 =   0;
-            writeCmd( l_cmd );
         }   //  endif   gobit
 
         if  ( l_quitflag  ==  true )
