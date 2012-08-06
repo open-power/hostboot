@@ -209,6 +209,15 @@ void    userConsoleComm( void *  io_msgQ )
             //  istep status is the hi word in the returned data 0
             l_sts.istepStatus   =
                     static_cast<uint32_t>( l_pCurrentMsg->data[0] >> 32 );
+            // Data 0 is not used by HwSvr, thus incorrect status.  Need to
+            // check whether there is anything in extra_data
+            if( NULL != l_pCurrentMsg->extra_data )
+            {
+                l_sts.istepStatus = 0x1;
+                errlHndl_t tmpErr = static_cast<errlHndl_t>(l_pCurrentMsg->extra_data);
+                errlCommit( tmpErr,
+                            INITSVC_COMP_ID );
+            }
 
             // finish filling in status
             l_sts.hdr.runningbit    =   false;
