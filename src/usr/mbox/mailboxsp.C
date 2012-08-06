@@ -1441,5 +1441,24 @@ msg_q_t MBOX::msgq_unregister(queue_id_t i_queue_id)
     return msgQ;
 }
 
+bool MBOX::mailbox_enabled()
+{
+    bool enabled = false;
+
+    TARGETING::Target * sys = NULL;
+
+    TARGETING::targetService().getTopLevelTarget( sys );
+
+    TARGETING::SpFunctions spfuncs;
+
+    if( sys &&
+        sys->tryGetAttr<TARGETING::ATTR_SP_FUNCTIONS>(spfuncs) &&
+        spfuncs.mailboxEnabled)
+    {
+        enabled = true;
+    }
+    
+    return enabled;
+}
 
 

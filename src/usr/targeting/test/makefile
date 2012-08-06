@@ -1,11 +1,11 @@
-#  IBM_PROLOG_BEGIN_TAG
+#   IBM_PROLOG_BEGIN_TAG
 #  This is an automatically generated prolog.
 #
 #  $Source: src/usr/targeting/test/makefile $
 #
 #  IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2011
+#  COPYRIGHT International Business Machines Corp. 2011-2012
 #
 #  p1
 #
@@ -19,8 +19,7 @@
 #
 #  Origin: 30
 #
-#  IBM_PROLOG_END
-
+#  IBM_PROLOG_END_TAG
 ################################################################################
 #
 #  @file src/usr/targeting/test/makefile
@@ -63,7 +62,7 @@ MODULE = testtargeting
 COMMON_TESTCASE_REL_PATHS = \
     $(addprefix ${COMMON_TARGETING_REL_PATH}/test/,${COMMON_TESTCASES})
 
-TESTS = testtargeting.H ${COMMON_TESTCASE_REL_PATHS}
+TESTS = testtargeting.H testattrsync.H ${COMMON_TESTCASE_REL_PATHS}
 
 OBJS = attributestrings.o
 

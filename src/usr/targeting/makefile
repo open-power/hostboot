@@ -42,7 +42,8 @@ VPATH = \
     ${addprefix ${COMMON_TARGETING_REL_PATH}/, ${COMMON_TARGETING_SUBDIRS}}
 
 ATTR_RP_OBJS = \
-    attrrp.o
+    attrrp.o   \
+    attrsync.o
 
 ENTRY_POINT_OBJS =       \
     targetservicestart.o

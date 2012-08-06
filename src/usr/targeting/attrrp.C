@@ -43,6 +43,7 @@
 #include <targeting/attrrp.H>
 #include <targeting/common/trace.H>
 #include <initservice/initserviceif.H>
+#include <util/align.H>
 
 using namespace INITSERVICE;
 using namespace ERRORLOG;
@@ -493,6 +494,67 @@ namespace TARGETING
         } while (false);
 
         return l_errl;
+    }
+
+    void AttrRP::writeSectionData(
+                        const std::vector<TARGETING::sectionRefData>& i_pages)
+    {
+        // $TODO RTC Story 46672
+        assert(0);
+    }
+
+    void AttrRP::readSectionData(
+                        std::vector<TARGETING::sectionRefData>& o_pages,
+                        const TARGETING::SECTION_TYPE i_sectionId)
+    {
+        sectionRefData sectionData  = {0};
+        uint16_t count              =  0;
+        uint16_t pages              =  0;
+
+        // search for the section we need
+        for (size_t i = 0; i < iv_sectionCount; i++ )
+        {
+            if ( iv_sections[i].type == i_sectionId )
+            {
+                // found it..
+                // now figure out how many pages - rounding up to the
+                // the next full page and dividing by the page size
+                pages = ALIGN_PAGE( iv_sections[i].size )/PAGESIZE;
+
+                TRACFCOMP(g_trac_targeting,
+                        "Reading Attribute Section: ID: %d, \
+                        address: 0x%lx size: 0x%lx pages: %d",
+                        iv_sections[i].type,
+                        iv_sections[i].vmmAddress,
+                        iv_sections[i].size,
+                        pages);
+
+                // populate and push the structure for each page
+                while( count != pages  )
+                {
+                    // duplicate the same section id in each structure
+                    sectionData.sectionId = i_sectionId;
+
+                    // update the current page number
+                    sectionData.pageNumber = count;
+
+                    // addjust the pointer out by page size * count each
+                    // iteration
+                    sectionData.dataPtr =
+                             reinterpret_cast<uint8_t *>
+                             (iv_sections[i].vmmAddress) + (count * PAGESIZE );
+
+                    count++;
+
+                    // pushing the actual structure to the vector
+                    o_pages.push_back( sectionData );
+
+                }
+
+                break;
+            }
+        }
+        // $TODO what if we dont find it??
     }
 
 };

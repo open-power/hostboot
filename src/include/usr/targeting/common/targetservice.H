@@ -1,26 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/include/usr/targeting/targetservice.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
-
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/include/usr/targeting/common/targetservice.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #ifndef __TARGETING_COMMON_TARGETSERVICE_H
 #define __TARGETING_COMMON_TARGETSERVICE_H
 
@@ -48,6 +48,7 @@
 #include <targeting/common/iterators/iterators.H>
 #include <targeting/common/predicates/predicates.H>
 #include <targeting/adapters/types.H>
+#include <pnortargeting.H>
 
 //******************************************************************************
 // Interface Definitions
@@ -60,6 +61,33 @@
 namespace TARGETING
 {
     class TargetService;
+
+    /**
+     *  @brief Struct specifying different parameters required for section data
+     *  update on the sectionId/NodePtr.
+     *
+     *  Given a struct with the following elements required to point to a
+     *  specific section in a given node and the dataPtr to be updated.
+     *  Size of the data is always the Page size i.e. 4K
+     *
+     *  Struct element details -
+     *  sectionId - Section Id
+     *  pageNumber - PageNumber for the section.
+     *  padBytes - PadBytes to fill in 2 extra bytes
+     *  dataPtr - Data Ptr
+     *  pNodeTarget - Node Targeting Ptr
+     *
+     */
+
+    struct sectionRefData
+    {
+        uint8_t sectionId;
+        uint8_t pageNumber;
+        uint8_t padBytes[2];
+        uint8_t* dataPtr;
+        Target* pNodeTarget;
+    };
+
 
     /**
      *  @brief Returns a reference to the targeting service singleton
@@ -385,6 +413,53 @@ class TargetService
          *  @post Output written to buffer
          */
         void dump() const;
+
+        /**
+         *  @brief Updates the targeting/attribute section data with the
+         *  specified vector parameters.
+         *
+         *  This is the top level interface, would basically call the lower
+         *  level attribute resource provider interface. The lower level
+         *  interface would fetch each vector element and update each section
+         *  with corresponding data from the offset specified. 
+         *
+         *  @param[in] i_pages, vector of sectionRefData struct
+         *
+         *  @pre N/A
+         *
+         *  @post See "return"
+         *
+         *  @return bool indicates whether the write to section data is
+         *  successful or not.
+         *
+         *  @retval true Section Data update successful
+         *  @retval false Section Data update failed.
+         */
+        bool writeSectionData(const std::vector<sectionRefData>& i_pages);
+
+        /**
+         *  @brief Fill up the vector with  the targeting/attribute section
+         *  data specified in the sectionId parameter.
+         *
+         *  This is the top level interface, would basically call the lower
+         *  level attribute resource provider interface. The lower level
+         *  interface would fetch section data as per the sectionId specified
+         *  and push to vector reference.
+         *
+         *  @param[out] o_pages, vector of sectionRefData struct
+         *  @param[in] i_sectionId, section type
+         *
+         *  @pre N/A
+         *
+         *  @post See "return"
+         *
+         *  @return void would fill up the vectore refernce with complete
+         *  section data in pages.
+         *
+         */
+
+        void readSectionData(std::vector<sectionRefData>& o_pages,
+            const SECTION_TYPE i_sectionId);
 
     private:
 

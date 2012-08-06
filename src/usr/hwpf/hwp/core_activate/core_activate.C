@@ -49,6 +49,7 @@
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
 #include    <targeting/namedtarget.H>
+#include    <targeting/attrsync.H>
 
 //  fapi support
 #include    <fapi.H>
@@ -107,9 +108,10 @@ using   namespace   ISTEP;
 
             // cast OUR type of target to a FAPI type of target.
             const fapi::Target l_fapi_cpu_target(
-                                                TARGET_TYPE_PROC_CHIP,
-                                                reinterpret_cast<void *>
-                                                (const_cast<TARGETING::Target*>(l_cpu_target)) );
+                                TARGET_TYPE_PROC_CHIP,
+                                reinterpret_cast<void *>
+                                (const_cast<TARGETING::Target*>(l_cpu_target))
+                               );
 
 
 #if 1
@@ -343,18 +345,25 @@ void    call_host_ipl_complete( void    *io_pArgs )
         // @@@@@    END CUSTOM BLOCK:   @@@@@
 #endif
 
-        // Send Sync Point to Fsp
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   INFO_MRK"Send SYNC_POINT_REACHED msg to Fsp" );
-        l_errl = INITSERVICE::sendSyncPoint();
+        // Sync attributes to Fsp
+        l_errl = syncAllAttributesToFsp();
+
         if( l_errl )
         {
             break;
         }
+
+        // Send Sync Point to Fsp
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   INFO_MRK"Send SYNC_POINT_REACHED msg to Fsp" );
+        l_errl = INITSERVICE::sendSyncPoint();
+
+
     } while( 0 );
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_host_ipl_complete exit" );
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_host_ipl_complete exit elog ptr = %p", l_errl );
+
 
     // end task, returning any errorlogs to IStepDisp
     task_end2( l_errl );

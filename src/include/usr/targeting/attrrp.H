@@ -1,26 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/targeting/attrrp.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
-
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/include/usr/targeting/attrrp.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #ifndef __TARGETING_ATTRRP_H
 #define __TARGETING_ATTRRP_H
 
@@ -38,6 +38,9 @@
 #include <initservice/taskargs.H>
 #include <sys/msg.h>
 #include <targeting/adapters/types.H>
+#include <targeting/common/targetservice.H>
+#include <targeting/attrsync.H>
+
 
 namespace TARGETING
 {
@@ -59,6 +62,15 @@ struct AttrRP_Section;
  */
 class AttrRP
 {
+    
+    // add some friends for the attribute sync features
+    friend  bool TargetService::writeSectionData( 
+                           const std::vector<sectionRefData>& i_pages );
+
+    friend  void TargetService::readSectionData( 
+                           std::vector<sectionRefData>& o_pages,
+                           const SECTION_TYPE i_sectionId);
+
     public:
 
         /**
@@ -128,6 +140,32 @@ class AttrRP
          *        Function will assert if called due to leaky behavior.
          */
         ~AttrRP();
+
+        /**
+         *  @brief Copies the section data buffer from the vector to the
+         *  appropriate section offset with respect to the node target ptr
+         *  and section id.
+         *
+         *  @param[in] i_pages, vector of sectionRefData struct
+         *
+         *  @return void
+         */
+
+        void writeSectionData(
+                const std::vector <sectionRefData>& i_pages);
+
+        /**
+         *  @brief Populates the output vector with the correct information
+         *         for the data pages specified by the selected section
+         *
+         *  @param[out] o_pages, vector of sectionRefData struct
+         *
+         *  @return void
+         */
+        void readSectionData(
+                std::vector <sectionRefData>& o_pages,
+                const SECTION_TYPE i_sectionType);
+
 
     private:
 

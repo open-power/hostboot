@@ -531,13 +531,52 @@ void TargetService::dump() const
     #undef TARG_FN
 }
 
+
+//******************************************************************************
+// TargetService::writeSectionData
+//******************************************************************************
+bool TargetService::writeSectionData(
+    const std::vector<sectionRefData>& i_pages)
+{
+    #define TARG_FN "writeSectionData(...)"
+    TARG_ENTER();
+    bool l_response = false;
+    if(i_pages.size() != 0)
+    {
+        TARG_GET_SINGLETON(TARGETING::theAttrRP).writeSectionData(i_pages);
+        l_response = true;
+    }
+    TARG_EXIT();
+
+    return l_response;
+    #undef TARG_FN
+}
+
+//******************************************************************************
+// TargetService::readSectionData
+//******************************************************************************
+void TargetService::readSectionData(
+    std::vector <sectionRefData>& o_pages,
+    const SECTION_TYPE i_sectionId)
+{
+    #define TARG_FN "readSectionData(...)"
+    TARG_ENTER();
+
+    TARG_GET_SINGLETON(TARGETING::theAttrRP).readSectionData(
+                                                     o_pages, i_sectionId);
+
+    TARG_EXIT();
+
+    #undef TARG_FN
+}
+
 //******************************************************************************
 // TargetService::_configureTargetPool
 //******************************************************************************
 
 void TargetService::_configureTargetPool()
 {
-    #define TARG_FN "_configureTargetPool(...)"
+#define TARG_FN "_configureTargetPool(...)"
 
     TARG_ENTER();
 
