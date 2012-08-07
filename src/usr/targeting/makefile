@@ -1,11 +1,11 @@
-#  IBM_PROLOG_BEGIN_TAG
+#   IBM_PROLOG_BEGIN_TAG
 #  This is an automatically generated prolog.
 #
 #  $Source: src/usr/targeting/makefile $
 #
 #  IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2011
+#  COPYRIGHT International Business Machines Corp. 2011-2012
 #
 #  p1
 #
@@ -19,13 +19,12 @@
 #
 #  Origin: 30
 #
-#  IBM_PROLOG_END
-
+#  IBM_PROLOG_END_TAG
 ################################################################################
 #
 #  @file src/usr/targeting/makefile
 #
-#  @brief Makefile for building Hostboot's targeting implementation 
+#  @brief Makefile for building Hostboot's targeting implementation
 #
 ################################################################################
 
@@ -40,7 +39,7 @@ include ${COMMON_TARGETING_MAKEFILE}
 VPATH = \
     adapters \
     ${COMMON_TARGETING_REL_PATH} \
-    ${addprefix ${COMMON_TARGETING_REL_PATH}/, ${COMMON_TARGETING_SUBDIRS}}  
+    ${addprefix ${COMMON_TARGETING_REL_PATH}/, ${COMMON_TARGETING_SUBDIRS}}
 
 ATTR_RP_OBJS = \
     attrrp.o
@@ -52,15 +51,20 @@ DEBUG_OBJS =           \
     attributestrings.o \
     attributedump.o
 
-HOSTBOOT_SPECIFIC_OBJS = ${ENTRY_POINT_OBJS} ${ATTR_RP_OBJS} ${DEBUG_OBJS}
-    
+HOSTBOOT_SPECIFIC_OBJS =    \
+    ${ENTRY_POINT_OBJS}     \
+    ${ATTR_RP_OBJS}         \
+    ${DEBUG_OBJS}           \
+    namedtarget.o
+
+
 #debug :
 #	@echo COMMON_TARGETING_REL_PATH = ${COMMON_TARGETING_REL_PATH}
 #	@echo COMMON_TARGETING_MAKEFILE = ${COMMON_TARGETING_MAKEFILE}
 #	@echo COMMON_TARGETING_SUBDIRS = ${COMMON_TARGETING_SUBDIRS}
 #	@echo VPATH = ${VPATH}
 #	@echo COMMON_TARGETING_OBJS = ${COMMON_TARGETING_OBJS}
-    
+
 OBJS = ${COMMON_TARGETING_OBJS} ${HOSTBOOT_SPECIFIC_OBJS}
 
 SUBDIRS = test.d xmltohb.d

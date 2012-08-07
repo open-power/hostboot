@@ -48,6 +48,7 @@
 //  targeting support
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
+#include    <targeting/namedtarget.H>
 
 //  fapi support
 #include    <fapi.H>
