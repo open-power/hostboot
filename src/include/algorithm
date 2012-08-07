@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/include/algorithm $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/include/algorithm $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #ifndef ALGORITHM
 #define ALGORITHM
 
@@ -122,6 +123,24 @@ namespace std
             *first = value;
             ++first;
         }
+    }
+
+    /**
+     * Fill a sequence with a generated value
+     * @param[in] first OutputIterator to the first position in the sequence.
+     * @param[in] n number of elements in the sequence
+     * @param[in] gen functor to create values used to fill the sequence.
+     */
+    template <typename OutputIterator, typename Size, typename Generator>
+    OutputIterator generate_n(OutputIterator first, Size n, Generator gen)
+    {
+        for(; n>0; --n)
+        {
+            *first = gen();
+            ++first;
+        }
+
+        return first;
     }
 
     /**
@@ -680,6 +699,58 @@ namespace std
     {
         Util::__Util_QSort_Impl::sort(first, last, pred);
     }
+
+    /** Transform one sequence into another. 
+     *
+     *  Executes an operator against all elements in [first, last) and writes
+     *  the result to another sequence.
+     *
+     *  @param first - Beginning of the input range.
+     *  @param last - Ending of the input range.
+     *  @param result - Beginning of the output range.
+     *  @param op - The transformation operator.
+     */
+    template <typename InputIterator, typename OutputIterator, 
+              typename UnaryFunction>
+    OutputIterator transform(InputIterator first, InputIterator last,
+                             OutputIterator result, UnaryFunction op)
+    {
+        while (first != last)
+        {
+            *result = op(*first);
+            ++result;
+            ++first;
+        }
+        return result;
+    }
+
+    /** Transform two sequences into another. 
+     *
+     *  Executes an operator against all elements in [first1, last1) along
+     *  with the peer from [first2, ...) and writes the result to 
+     *  another sequence.
+     *
+     *  @param first1 - Beginning of the first input range.
+     *  @param last1 - Ending of the first input range.
+     *  @param first2 - Beginning of the second input range.
+     *  @param result - Beginning of the output range.
+     *  @param op - The transformation operator.
+     */
+    template <typename InputIterator1, typename InputIterator2,
+              typename OutputIterator, typename BinaryFunction>
+    OutputIterator transform(InputIterator1 first1, InputIterator1 last1,
+                             InputIterator2 first2, OutputIterator result, 
+                             BinaryFunction op)
+    {
+        while (first1 != last1)
+        {
+            *result = op(*first1, *first2);
+            ++result;
+            ++first1; ++first2;
+        }
+        return result;
+    }
+
 
 
 };

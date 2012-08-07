@@ -1,26 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/include/iterator $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
-
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/include/iterator $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #ifndef __STL_ITERATOR
 #define __STL_ITERATOR
 
@@ -98,6 +98,85 @@ typename iterator_traits<InputIterator>::difference_type
                 InputIterator, 
                 typename iterator_traits<InputIterator>::difference_type>
         (first, last);
+}
+
+/** A OutputIterator which operates by push_back onto a container.
+ *
+ *  See public std::back_insert_iterator documentation.
+ */
+template <typename BackInsertionSequence>
+class back_insert_iterator
+{
+    public:
+            // Common iterator typedefs.
+        typedef typename BackInsertionSequence::value_type value_type;
+        typedef typename BackInsertionSequence::difference_type difference_type;
+        typedef typename BackInsertionSequence::pointer pointer;
+        typedef typename BackInsertionSequence::reference reference;
+
+            /** Default constructor from a container reference. */
+        back_insert_iterator(BackInsertionSequence& s) : sequence(s) {};
+            /** Copy constructor.  Reuses container reference. */
+        back_insert_iterator(const back_insert_iterator& i)
+            : sequence(i.sequence) {};
+
+            /** Assignment (copy) operator. */
+        back_insert_iterator& operator=(const back_insert_iterator& i)
+        {
+            sequence = i.sequence;
+            return *this;
+        }
+
+        /** Dereference operator.
+         *
+         *  This is used to make the standard pattern '*i = x' work on
+         *  an iterator.  Since we need to 'push_back' into the 
+         *  container we don't actually return anything except ourself,
+         *  which allows the operator= to be called.
+         */
+        back_insert_iterator& operator*() { return *this; }
+
+        /** Assignment operator.
+         *
+         *  This is the second part of the standard pattern '*i = x'.
+         *
+         *  Adds the value to the container by calling push_back.
+         *
+         *  @param[in] v - The value to insert to the container.
+         */
+        back_insert_iterator& operator=(const value_type& v)
+        {
+            sequence.push_back(v);
+            return *this;
+        }
+
+            /** Preincrement operator - no-op */
+        back_insert_iterator& operator++() { return *this; };
+            /** Postincrement operator - no-op */
+        back_insert_iterator& operator++(int unused) { return *this; };
+
+    private:
+            /** The container to insert into. */
+        BackInsertionSequence& sequence;
+};
+
+/** Create a back_insert_iterator from a container.
+ *
+ *  Utility function to allow back_insert_iterators to be created without
+ *  needing to specify the underlying container type.
+ *
+ *  Example:  Reverse copy elements from one vector into a new vector.
+ *      copy(v.rbegin(), v.rend(), back_inserter(v2));
+ *
+ *  @param[in] s - Sequence to create an iterator for.
+ *  
+ *  @return The back_insert_iterator.
+ */
+template <typename BackInsertionSequence>
+back_insert_iterator<BackInsertionSequence> 
+    back_inserter(BackInsertionSequence& s)
+{
+    return back_insert_iterator<BackInsertionSequence>(s);
 }
 
 }; // namespace std.
