@@ -539,10 +539,6 @@ sub generate_sys
         <default>1</default>
     </attribute> 
     <attribute>
-        <id>MSS_CACHE_ENABLE</id>
-        <default>1</default>
-    </attribute>
-    <attribute>
         <id>MSS_PREFETCH_ENABLE</id>
         <default>1</default>
     </attribute>

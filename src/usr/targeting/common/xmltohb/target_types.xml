@@ -104,7 +104,6 @@
     <attribute><id>MSS_MCA_HASH_MODE</id></attribute>
     <attribute><id>MSS_MBA_ADDR_INTERLEAVE_BIT</id></attribute>
     <attribute><id>MSS_MBA_CACHELINE_INTERLEAVE_MODE</id></attribute>
-    <attribute><id>MSS_CACHE_ENABLE</id></attribute>
     <attribute><id>MSS_PREFETCH_ENABLE</id></attribute>
     <attribute><id>MSS_CLEANER_ENABLE</id></attribute>
     <attribute><id>MIRROR_BASE_ADDRESS</id></attribute>
@@ -921,6 +920,7 @@
         <id>CHIP_HAS_SBE</id>
         <default>0</default>
     </attribute>
+    <attribute><id>MSS_CACHE_ENABLE</id></attribute>
 </targetType>
 
 <!-- Centaur MBS -->
