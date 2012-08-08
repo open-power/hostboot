@@ -21,7 +21,7 @@
  *
  *  IBM_PROLOG_END_TAG
  */
-// $Id: proc_cen_framelock.C,v 1.6 2012/06/01 02:47:07 jmcgill Exp $
+// $Id: proc_cen_framelock.C,v 1.7 2012/07/23 14:15:46 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_cen_framelock.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -40,6 +40,8 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
+#include "p8_scom_addresses.H"
+#include "cen_scom_addresses.H"
 #include "proc_cen_framelock.H"
 
 extern "C"

@@ -21,6 +21,7 @@
  *
  *  IBM_PROLOG_END_TAG
  */
+// $Id: mss_draminit.C,v 1.35 2012/07/27 16:44:38 bellows Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -28,6 +29,8 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.35   | bellows  | 7/25/12 | CQ 216395 (move force mclk low deassert to phyreset, resetn toggle)
+//  1.34   | bellows  | 7/16/12 | added in Id tag
 //  1.33   | jdsloat  | 6/26/12 | Added rtt_nom rank by rank value.
 //  1.32   | jdsloat  | 6/11/12 | Fixed Attributes: RTT_NOM, CL, DRAM_WR within the MRS load.
 //  1.31   | bellows  | 5/24/12 | Removed GP Bit 
@@ -99,7 +102,14 @@ ReturnCode mss_rcd_load( Target& i_target, uint32_t i_port_number, uint32_t& io_
 ReturnCode mss_mrs_load( Target& i_target, uint32_t i_port_number, uint32_t& io_ccs_inst_cnt);
 ReturnCode mss_assert_resetn_drive_mem_clks( Target& i_target);
 ReturnCode mss_deassert_force_mclk_low( Target& i_target);
+ReturnCode mss_assert_resetn ( Target& i_target, uint8_t value);
 
+const uint64_t  DELAY_100NS             = 100;      // general purpose 100 ns delay for HW mode   (2000 sim cycles if simclk = 20ghz)
+const uint64_t  DELAY_1US               = 1000;     // general purpose 1 usec delay for HW mode   (20000 sim cycles if simclk = 20ghz)
+const uint64_t  DELAY_100US             = 100000;   // general purpose 100 usec delay for HW mode (2000000 sim cycles if simclk = 20ghz)
+const uint64_t  DELAY_2000SIMCYCLES     = 2000;     // general purpose 2000 sim cycle delay for sim mode     (100 ns if simclk = 20Ghz)
+const uint64_t  DELAY_20000SIMCYCLES    = 20000;    // general purpose 20000 sim cycle delay for sim mode    (1 usec if simclk = 20Ghz)
+const uint64_t  DELAY_2000000SIMCYCLES  = 2000000;  // general purpose 2000000 sim cycle delay for sim mode  (100 usec if simclk = 20Ghz)
 
 ReturnCode mss_draminit(Target& i_target)
 {
@@ -125,13 +135,7 @@ ReturnCode mss_draminit(Target& i_target)
         //MASTER_ATTENTION_REG_CHECK();
 
         // Step one: Deassert Force_mclk_low signal     
-        rc = mss_deassert_force_mclk_low(i_target);
-        if(rc)
-        {
-            FAPI_ERR(" deassert_force_mclk_low Failed rc = 0x%08X (creator = %d)", uint32_t(rc), rc.getCreator());
-            return rc;
-        }
-
+      // this action needs to be done in ddr_phy_reset so that the plls can actually lock
 
         // Step two: Assert Resetn signal, Begin driving mem clks
         rc = mss_assert_resetn_drive_mem_clks(i_target);
@@ -141,6 +145,20 @@ ReturnCode mss_draminit(Target& i_target)
             return rc;
         }
 
+        rc = mss_assert_resetn(i_target, 0 ); // assert a reset
+        if(rc)
+        {
+            FAPI_ERR(" assert_resetn Failed rc = 0x%08X (creator = %d)", uint32_t(rc), rc.getCreator());
+            return rc;
+        }
+        rc = fapiDelay(DELAY_100US, DELAY_2000SIMCYCLES); // wait 2000 simcycles (in sim mode) OR 100 uS (in hw mode)
+
+        rc = mss_assert_resetn(i_target, 1 ); // de-assert a reset
+        if(rc)
+        {
+            FAPI_ERR(" assert_resetn Failed rc = 0x%08X (creator = %d)", uint32_t(rc), rc.getCreator());
+            return rc;
+        }
         // Cycle through Ports...
         // Ports 0-1
         for ( port_number = 0; port_number < MAX_NUM_PORTS; port_number++)
@@ -221,26 +239,6 @@ ReturnCode mss_draminit(Target& i_target)
 }
 
 
-
-ReturnCode mss_deassert_force_mclk_low (Target& i_target)
-{ 
-    ReturnCode rc;
-    uint32_t rc_num = 0;
-    ecmdDataBufferBase data_buffer(64);
-
-    FAPI_INF( "+++++++++++++++++++++ DEASSERTING FORCE MCLK LOW +++++++++++++++++++++");
-
-
-    rc = fapiGetScom(i_target, MEM_MBA01_CCS_MODEQ_0x030106A7, data_buffer);
-    if(rc) return rc;
-    rc_num = data_buffer.setBit(63);
-    rc.setEcmdError( rc_num);
-    if(rc) return rc;
-    rc = fapiPutScom(i_target, MEM_MBA01_CCS_MODEQ_0x030106A7, data_buffer);
-    if(rc) return rc;
-
-    return rc;
-}
 
 ReturnCode mss_assert_resetn_drive_mem_clks(
             Target& i_target
@@ -1034,6 +1032,40 @@ ReturnCode mss_mrs_load(
     }
     return rc;
 }
+
+ReturnCode mss_assert_resetn (
+            Target& i_target,
+            uint8_t value
+            )
+{    
+// value of 1 deasserts reset
+
+    ReturnCode rc;
+    ReturnCode rc_buff;
+    uint32_t rc_num = 0;
+    ecmdDataBufferBase data_buffer(64);
+
+    FAPI_INF( "+++++++++++++++++++++ ASSERTING RESETN to the value of %d +++++++++++++++++++++", value);
+
+    rc = fapiGetScom(i_target, CCS_MODEQ_AB_REG_0x030106A7, data_buffer);
+    if(rc) return rc;
+
+    //Setting up CCS mode
+    rc_num = rc_num | data_buffer.insert( value, 24, 1, 7); // use bit 7
+
+    if (rc_num)
+    {
+        FAPI_ERR( "mss_ccs_mode: Error setting up buffers");
+        rc_buff.setEcmdError(rc_num);
+        return rc_buff;
+    }
+
+    rc = fapiPutScom(i_target, CCS_MODEQ_AB_REG_0x030106A7, data_buffer);
+    if(rc) return rc;
+
+    return rc;
+}
+
 
 } //end extern C
 

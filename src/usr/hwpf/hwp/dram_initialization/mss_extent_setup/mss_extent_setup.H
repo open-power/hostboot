@@ -21,6 +21,7 @@
  *
  *  IBM_PROLOG_END_TAG
  */
+// $Id: mss_extent_setup.H,v 1.8 2012/07/17 13:22:51 bellows Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -41,6 +42,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.8    | bellows  |16-Jul-12| added in Id tag
 //  1.7    | bellows  |15-Jun-12| Updated for Firmware
 //   1.2   |          |         |
 //   1.1   | gpaulraj |11-NOV-11| First Draft.
@@ -54,6 +56,7 @@ typedef fapi::ReturnCode (*mss_extent_setup_FP_t)();
 
 extern "C"
 {
+
 /**
  * @brief extent setup  procedure -- currently an open shell until extent functions are found t obe needed 
  *

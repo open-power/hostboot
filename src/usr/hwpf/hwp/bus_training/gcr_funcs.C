@@ -68,7 +68,7 @@ ReturnCode  GCR_read(const Target& chip_target, io_interface_t interface,GCR_sub
 //------------------------------------------------------------------------------------------------------------------------------------
 // GCR SCOM WRITE  - main api for write - do not use doGCRop directly
 //------------------------------------------------------------------------------------------------------------------------------------
-ReturnCode  GCR_write(const Target& chip_target, io_interface_t interface, GCR_sub_registers target_io_reg, uint32_t group_address,  uint32_t lane_address,  ecmdDataBufferBase set_bits,  ecmdDataBufferBase clear_bits, int skipCheck)
+ReturnCode  GCR_write(const Target& chip_target, io_interface_t interface, GCR_sub_registers target_io_reg, uint32_t group_address,  uint32_t lane_address,  ecmdDataBufferBase set_bits,  ecmdDataBufferBase clear_bits, int skipCheck,int bypass_rmw)
 {
    ReturnCode rc;
    uint32_t rc_ecmd=0;
@@ -79,7 +79,7 @@ ReturnCode  GCR_write(const Target& chip_target, io_interface_t interface, GCR_s
       rc.setEcmdError(rc_ecmd);
    }
    else{
-        rc=doGCRop(chip_target, interface, gcr_op_write, target_io_reg, group_address, lane_address, set_bits, clear_bits, databuf_16bit, skipCheck);
+        rc=doGCRop(chip_target, interface, gcr_op_write, target_io_reg, group_address, lane_address, set_bits, clear_bits, databuf_16bit, skipCheck,bypass_rmw);
         if(!rc.ok())
         {
           FAPI_ERR("Unexpected error while performing GCR OP \n");
@@ -125,7 +125,7 @@ uint64_t scom_address_64bit(uint32_t gcr_addr, uint64_t gcr_data) {
 /* gcr2        readvalid 39        1       # read data valid bit                                                         */
 /*************************************************************************************************************************/
 
-ReturnCode  doGCRop(const Target& chip_target, io_interface_t interface, gcr_op read_or_write, GCR_sub_registers target_io_reg, uint32_t group_address,  uint32_t lane_address,  ecmdDataBufferBase set_bits,  ecmdDataBufferBase clear_bits, ecmdDataBufferBase &databuf_16bit, int skipCheck) {
+ReturnCode  doGCRop(const Target& chip_target, io_interface_t interface, gcr_op read_or_write, GCR_sub_registers target_io_reg, uint32_t group_address,  uint32_t lane_address,  ecmdDataBufferBase set_bits,  ecmdDataBufferBase clear_bits, ecmdDataBufferBase &databuf_16bit, int skipCheck,int bypass_rmw) {
     ReturnCode rc;
     uint32_t rc_ecmd=0;
     uint64_t  scom_address64=0;
@@ -163,7 +163,12 @@ ReturnCode  doGCRop(const Target& chip_target, io_interface_t interface, gcr_op 
     {
         FAPI_DBG("ei_reg_addr_GCR_scom[interface]=%x\n",ei_reg_addr_GCR_scom[interface]);
         scom_address64 =scom_address_64bit(ei_reg_addr_GCR_scom[interface], getscom_data64.getDoubleWord(0));
-        rc = fapiGetScom( chip_target, scom_address64, getscom_data64 );
+        if(!bypass_rmw){
+           rc = fapiGetScom( chip_target, scom_address64, getscom_data64 );
+        }
+        else{
+         getscom_data64.flushTo0();
+        }
         if(!rc.ok())
         {
             FAPI_ERR("IO gcr_funcs:GETSCOM error occurred ********\n");
@@ -219,7 +224,9 @@ ReturnCode  doGCRop(const Target& chip_target, io_interface_t interface, gcr_op 
                    else
                    {
                        // check the write
-                       rc = fapiGetScom( chip_target, scom_address64, getscom_data64 );
+                       if(!skipCheck){
+                        rc = fapiGetScom( chip_target, scom_address64, getscom_data64 );
+                       }
                        if(!rc.ok()){
                        FAPI_ERR("IO gcr_funcs: GETSCOM error occurred\n");
                        return(rc);

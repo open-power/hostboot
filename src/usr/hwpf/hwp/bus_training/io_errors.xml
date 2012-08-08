@@ -1,7 +1,7 @@
 <!--  IBM_PROLOG_BEGIN_TAG
      This is an automatically generated prolog.
    
-     $Source: src/usr/hwpf/hwp/bus_training/io_run_training_errors.xml $
+     $Source: src/usr/hwpf/hwp/bus_training/io_errors.xml $
    
      IBM CONFIDENTIAL
    
@@ -20,7 +20,7 @@
      Origin: 30
    
      IBM_PROLOG_END_TAG -->
-<!-- Error definitions for io_run_training procedure -->
+<!-- Error definitions for IO HWPS  -->
 <hwpErrors>
   <!-- *********************************************************************** -->
   <hwpError>
@@ -98,5 +98,30 @@
   <hwpError>
     <rc>IO_RUN_TRAINING_INVALID_INVOCATION_RC</rc>
     <description>io run training invoked with wrong pair of targets</description>
+  </hwpError>
+     <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>IO_DCCAL_OFFCAL_TIMEOUT_RC</rc>
+    <description>io offset cal timedout</description>
+  </hwpError>
+   <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>IO_DCCAL_OFFCAL_ERROR_RC</rc>
+    <description>io offset cal errored out</description>
+  </hwpError>
+     <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>IO_DCCAL_INVALID_INVOCATION_RC</rc>
+    <description>io dc cal invoked with wrong pair of targets</description>
+  </hwpError>
+     <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>IO_DCCAL_ZCAL_ERROR_RC</rc>
+    <description>io impedance cal errored out</description>
+  </hwpError>
+     <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>IO_DCCAL_ZCAL_TIMEOUT_RC</rc>
+    <description>io impedance cal timed out</description>
   </hwpError>
 </hwpErrors>

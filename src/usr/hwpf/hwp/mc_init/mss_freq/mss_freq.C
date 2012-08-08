@@ -21,6 +21,7 @@
  *
  *  IBM_PROLOG_END_TAG
  */
+// $Id: mss_freq.C,v 1.17 2012/07/17 13:24:13 bellows Exp $
 /* File mss_volt.C created by JEFF SABROWSKI on Fri 21 Oct 2011. */
 
 //------------------------------------------------------------------------------
@@ -56,6 +57,7 @@
 //  1.14   | jdsloat  | 05/10/12 | Fixed per Firmware Request, RC checks, 0 checks
 //  1.15   | jdsloat  | 06/04/12 | Added a Configuration check
 //  1.16   | jdsloat  | 06/08/12 | Updates per Firware request
+//  1.17   | bellows  | 07/16/12 | added in Id tag
 //
 // This procedure takes CENTAUR as argument.  for each DIMM (under each MBA)
 // DIMM SPD attributes are read to determine optimal DRAM frequency

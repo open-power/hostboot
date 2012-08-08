@@ -77,28 +77,20 @@ ReturnCode io_run_training(const Target &master_target,const Target &slave_targe
           rc=init.isChipMaster(master_target,master_interface,master_group,is_master);
           if(rc.ok()){
                if(!is_master){
-                    //Swap master and slave targets !!
-                    FAPI_DBG("X Bus ..target swap performed");
-                    for(int i=0;i<5;++i){
-                     master_group=slave_group=i;
-                       FAPI_DBG("X Bus training for group %d",i);
+                     //Swap master and slave targets !!
+                     FAPI_DBG("X Bus ..target swap performed");
                      rc=init.run_training(slave_target,slave_interface,slave_group,master_target,master_interface,master_group);
                      //If one clock group cannot be trained.. bus cannot be used..so return rc to plat
                      if(!rc.ok()){
                          return(rc);
                      }
-                    }
-               }
+			   }
                else{
-                    for(int i=0;i<5;++i){
-                     master_group=slave_group=i;
-                     FAPI_DBG("X Bus training for group %d",i);
                      rc=init.run_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group);
                      //If one clock group cannot be trained.. bus cannot be used..so return rc to plat
                      if(!rc.ok()){
                          return(rc);
                      }
-                    }
                }
           }
      }

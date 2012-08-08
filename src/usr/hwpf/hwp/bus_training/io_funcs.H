@@ -49,7 +49,6 @@
 #define IO_funcs
 #include <fapi.H>
 #include "gcr_funcs.H"
-//#include "ei4_regs.h"
 
 using namespace fapi;
 

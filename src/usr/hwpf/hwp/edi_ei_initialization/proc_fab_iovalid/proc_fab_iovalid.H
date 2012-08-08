@@ -21,7 +21,7 @@
  *
  *  IBM_PROLOG_END_TAG
  */
-// $Id: proc_fab_iovalid.H,v 1.7 2012/05/18 18:03:09 jmcgill Exp $
+// $Id: proc_fab_iovalid.H,v 1.8 2012/07/23 14:15:54 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_fab_iovalid.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -57,7 +57,6 @@
 //------------------------------------------------------------------------------
 
 #include <fapi.H>
-#include "p8_scom_addresses.H"
 
 
 //------------------------------------------------------------------------------

@@ -21,7 +21,7 @@
  *
  *  IBM_PROLOG_END_TAG
  */
-// $Id: proc_setup_bars.H,v 1.2 2012/06/12 02:44:02 jmcgill Exp $
+// $Id: proc_setup_bars.H,v 1.3 2012/07/23 17:47:41 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_setup_bars.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -211,19 +211,14 @@ struct proc_setup_bars_addr_range
     // round region size to next largest power of 2
     void round_next_power_of_2()
     {
-        uint64_t size_round;
-        // if size is zero/one, leave as is
-        if ((size != 0) && (size != 1))
-        {
-            // shift until new size is greater than or
-            // equal to existing size
-            for (size_round = 0x1ULL;
-                 size_round < size;
-                 size_round = (size_round << 1))
-            {
-            }
-            size = size_round;
-        }
+        size = size - 1;
+        size = size | (size >> 1);
+        size = size | (size >> 2);
+        size = size | (size >> 4);
+        size = size | (size >> 8);
+        size = size | (size >> 16);
+        size = size | (size >> 32);
+        size = size + 1;
     }
 
     // return ending address of range
@@ -236,10 +231,10 @@ struct proc_setup_bars_addr_range
     bool overlaps(const proc_setup_bars_addr_range& range_compare) const
     {
         // if either range is disabled, consider them non-overlapping
-        return(!(!enabled ||
-                 !range_compare.enabled ||
-                 ((end_addr() < range_compare.base_addr) ||
-                  (base_addr > range_compare.end_addr()))));
+        return(enabled &&
+               range_compare.enabled &&
+               (base_addr <= range_compare.end_addr()) &&
+               (end_addr() >= range_compare.base_addr));
     }
 
     // merge two ranges (span breadth of both ranges)

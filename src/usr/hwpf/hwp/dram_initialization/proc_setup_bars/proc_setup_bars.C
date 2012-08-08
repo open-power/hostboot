@@ -21,7 +21,7 @@
  *
  *  IBM_PROLOG_END_TAG
  */
-// $Id: proc_setup_bars.C,v 1.3 2012/06/12 02:44:04 jmcgill Exp $
+// $Id: proc_setup_bars.C,v 1.5 2012/07/23 17:47:05 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_setup_bars.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -74,6 +74,7 @@ extern "C" {
 //------------------------------------------------------------------------------
 // Function definitions
 //------------------------------------------------------------------------------
+
 
 //------------------------------------------------------------------------------
 // function: utility function to display address range/BAR information and
@@ -154,9 +155,9 @@ bool proc_setup_bars_common_do_ranges_overlap(
     // check that ranges are non-overlapping
     if (i_ranges.size() > 1)
     {
-        for (uint8_t r = 0; (r < i_ranges.size()-1) && !overlap; r++)
+        for (size_t r = 0; (r < i_ranges.size()-1) && !overlap; r++)
         {
-            for (uint8_t x = r+1; x < i_ranges.size(); x++)
+            for (size_t x = r+1; x < i_ranges.size(); x++)
             {
                 if (i_ranges[r]->overlaps(*(i_ranges[x])))
                 {

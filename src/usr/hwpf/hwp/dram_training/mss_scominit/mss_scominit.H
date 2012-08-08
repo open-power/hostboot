@@ -21,6 +21,7 @@
  *
  *  IBM_PROLOG_END_TAG
  */
+// $Id: mss_scominit.H,v 1.5 2012/07/17 13:23:28 bellows Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -41,8 +42,9 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
-//	 1.4   | menlowuu |20-JUN-12| added type to the typedef
-//	 1.3   | menlowuu |13-JUN-12| added & to reference i_target in FP_t function
+//   1.5   |bellows   |16-JUL-12| added in Id tag
+//   1.4   | menlowuu |20-JUN-12| added type to the typedef
+//   1.3   | menlowuu |13-JUN-12| added & to reference i_target in FP_t function
 //	 							  added comment expecting centaur target
 //   1.2   | menlowuu |06-JUN-12| Removed char* parameter for function
 //   0.1   | menlowuu |01-DEC-11| First Draft.

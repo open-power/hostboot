@@ -21,6 +21,7 @@
  *
  *  IBM_PROLOG_END_TAG
  */
+// $Id: mss_scominit.C,v 1.8 2012/07/17 13:24:42 bellows Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -41,7 +42,8 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
-//	 1.7   | menlowuu |14-JUN-12| Added fixes suggested by Mike,
+//   1.8   | bellows  |16-JUL-12| added in Id tag
+//   1.7   | menlowuu |14-JUN-12| Added fixes suggested by Mike,
 //	 					replace rc_num with ReturnCode, created RC for when
 //	 					MBAs != 2, and return on all errors 
 //   1.6   | menlowuu |08-JUN-12| Fixed inserting centaur vector & return code.

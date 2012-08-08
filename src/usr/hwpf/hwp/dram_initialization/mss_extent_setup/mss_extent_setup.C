@@ -21,6 +21,7 @@
  *
  *  IBM_PROLOG_END_TAG
  */
+// $Id: mss_extent_setup.C,v 1.8 2012/07/17 13:24:10 bellows Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -31,6 +32,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.8    | bellows  |16-Jul-12| added in Id tag
 //  1.7    | bellows  |15-Jun-12| Updated for Firmware
 //  1.3    | gpaulraj |11-Nov-11| modified according HWPF format
 //  1.2    | gpaulraj |02-oct-11| supported for MCS loop - SIM model. compiled in the ecmd & FAPI calls included.

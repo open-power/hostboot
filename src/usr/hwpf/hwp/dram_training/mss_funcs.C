@@ -1,25 +1,27 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/hwpf/hwp/dram_training/mss_funcs.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/hwpf/hwp/dram_training/mss_funcs.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
+// $Id: mss_funcs.C,v 1.28 2012/07/17 13:24:16 bellows Exp $
 /* File mss_funcs.C created by SLOAT JACOB D. (JAKE),2D3970 on Fri Apr 22 2011. */
 
 //------------------------------------------------------------------------------
@@ -42,7 +44,8 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
-//  1.26   | divyakum | 3/22/12 | Fixed warnings from mss_execute_zq_cal function
+//  1.28   | bellows  | 07/16/12|added in Id tag
+//  1.27   | divyakum | 3/22/12 | Fixed warnings from mss_execute_zq_cal function
 //  1.26   | divyakum | 3/22/12 | Fixed mss_execute_zq_cal function variable name mismatch
 //  1.25   | divyakum | 3/21/12 | Added mss_execute_zq_cal function
 //  1.24   | jdsloat  | 3/20/12 | ccs_inst_arry0 bank fields reverse function removed
@@ -324,7 +327,7 @@ ReturnCode mss_ccs_start_stop(
         rc_buff.setEcmdError(rc_num);
         return rc_buff;
     }
-    
+
     rc = fapiPutScom(i_target, CCS_CNTLQ_AB_REG_0x030106A5, data_buffer);
 
     return rc;

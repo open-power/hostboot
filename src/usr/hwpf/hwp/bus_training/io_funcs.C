@@ -73,11 +73,23 @@ ReturnCode  edi_training::run_training(const Target& master_target,  io_interfac
             }
             else{
                  // Get training function  status for Master Chip  (poll on the master chip's rx_wderf_done)
-                rc=training_function_status(master_target  ,  master_interface,master_group,   slave_target  ,  slave_interface,slave_group);
-                if(!rc.ok()){
-                    FAPI_ERR("io_run_training : Failed Training");
-                }
-            }
+		 if(master_interface==CP_FABRIC_X0){
+		    for (int current_group = 0 ; current_group < 4; current_group++)
+		    {
+		    rc=training_function_status(master_target  ,  master_interface,current_group,   slave_target  ,  slave_interface,current_group);
+			if(!rc.ok()){
+			    FAPI_ERR("io_run_training : Failed Training");
+			}
+		    }
+		 }
+		 else{
+		     rc=training_function_status(master_target  ,  master_interface,master_group,   slave_target  ,  slave_interface,slave_group);
+			if(!rc.ok()){
+			    FAPI_ERR("io_run_training : Failed Training");
+			}
+		    }
+		 }
+
         }
     return(rc);
 }
@@ -159,14 +171,16 @@ ReturnCode  edi_training::run_training_functions(const Target& target, io_interf
 		}
 		else
 		{
-			FAPI_DBG("io_run_training:Setting Training start bit on intereface %d group=%d\n",interface,current_group);
+
 			if(interface==CP_FABRIC_X0)
 			{
-			 rc=GCR_write(target ,  interface,  ei4_rx_training_start_pg, current_group,0,   set_bits, clear_bits);
+	      		       FAPI_DBG("io_run_training:Setting Training start bit via broadcast on interface %d group=%d\n",interface,current_group);
+   			       rc=GCR_write(target ,  interface,  ei4_rx_training_start_pg, 15,0,   set_bits, clear_bits,1,1);
 			}
 			else
 			{
-			 rc=GCR_write(target ,  interface,  rx_training_start_pg, current_group,0,   set_bits, clear_bits);
+  	           FAPI_DBG("io_run_training:Setting Training start bit on interface %d group=%d\n",interface,current_group);
+			   rc=GCR_write(target ,  interface,  rx_training_start_pg, current_group,0,   set_bits, clear_bits);
 			}
 			if (rc) {
 				 FAPI_ERR("io_run_training: Failed to write training start bits \n");
@@ -232,6 +246,7 @@ ReturnCode  edi_training::training_function_status(const Target&  master_chip_ta
                                       // Run First FAILED Data Capture for Wire Test for FAILED bus
                                        dump_ffdc_wiretest(master_chip_target, master_chip_interface , master_group, slave_chip_target ,  slave_chip_interface,slave_group);
 				       break;
+				    
                                     }
                                     else
                                     {

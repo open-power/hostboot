@@ -21,6 +21,7 @@
  *
  *  IBM_PROLOG_END_TAG
  */
+// $Id: mss_draminit_mc.C,v 1.24 2012/07/17 13:23:51 bellows Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -44,6 +45,8 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.24   | bellows  |16-JUL-12| added in Id tag
+//  1.22   | bellows  |13-JUL-12| Fixed periodic cal bit 61 being set. HW214829
 //  1.20   | jdsloat  |21-MAY-12| Typo fix, addresses moved to cen_scom_addresses.H, moved per cal settings to initfile
 //  1.19   | jdsloat  |08-MAY-12| All Refresh controls moved to initfile, changed to just enable refresh
 //  1.18   | jdsloat  |07-MAY-12| Fixed refresh interval, trfc, ref check interval bit ordering
@@ -165,14 +168,13 @@ ReturnCode mss_draminit_mc (Target& i_target)
 	}
 
         // Step Four: Setup Periodic Cals
-        FAPI_INF( "+++ Skipping Periodic Cals +++");
-        // FAPI_INF( "+++ Setting Up Periodic Cals +++");
-        // rc = mss_enable_periodic_cal(l_mbaChiplets[i]);
-        // if(rc)
-        // {
-        //    FAPI_ERR("---Error During Periodic Cal Setup and Enable rc = 0x%08X (creator = %d)---", uint32_t(rc), rc.getCreator());
-        //    return rc;
-        // }
+        FAPI_INF( "+++ Setting Up Periodic Cals +++");
+        rc = mss_enable_periodic_cal(l_mbaChiplets[i]);
+        if(rc)
+        {
+           FAPI_ERR("---Error During Periodic Cal Setup and Enable rc = 0x%08X (creator = %d)---", uint32_t(rc), rc.getCreator());
+           return rc;
+        }
 
         // Step Five: Setup Power Management
         FAPI_INF( "+++ Setting Up Power Management +++");
@@ -280,7 +282,8 @@ ReturnCode mss_enable_periodic_cal (Target& i_target)
     }
 
     //Start the periodic Cal
-     rc_num = rc_num | mba01_data_buffer_64_p1.setBit(61);
+    // do not set bit 61 - HW214829
+    // rc_num = rc_num | mba01_data_buffer_64_p1.setBit(61);
 
     //Write the mba_p01_PER_CAL_CFG_REG
     rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_PER_CAL_CONFIG_P0_0x8000C00B0301143F, mba01_data_buffer_64_p0);

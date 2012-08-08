@@ -25,7 +25,6 @@
 #define IO_RUN_TRAINING_H_
 
 #include <fapi.H>
-#include "io_funcs.H"
 
 using namespace fapi;
 

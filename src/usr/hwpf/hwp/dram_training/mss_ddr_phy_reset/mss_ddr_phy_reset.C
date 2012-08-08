@@ -21,7 +21,7 @@
  *
  *  IBM_PROLOG_END_TAG
  */
-// $Id: mss_ddr_phy_reset.C,v 1.9 2012/07/18 16:27:39 mfred Exp $
+// $Id: mss_ddr_phy_reset.C,v 1.11 2012/07/27 16:43:25 bellows Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_ddr_phy_reset.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -64,6 +64,10 @@ extern "C" {
 
 using namespace fapi;
 
+   // prototype of function called in phy reset
+ReturnCode mss_deassert_force_mclk_low (const Target& i_target); 
+
+
 fapi::ReturnCode mss_ddr_phy_reset(const fapi::Target & i_target)
 {
     // Target is centaur.mba
@@ -98,7 +102,6 @@ fapi::ReturnCode mss_ddr_phy_reset(const fapi::Target & i_target)
         //
         // Run cen_ddr_phy_reset.C prepares the DDR PLLs. These PLLs were previously configured via scan init, but have
         // been held in reset. At this point the PLL GP bit is deasserted to take the PLLs out of reset.
-        // Note - this is done in the cen_startclocks.C procedure.
         //
         // The cen_ddr_phy_reset.C now resets the DDR PHY logic. This process will NOT destroy any configuration values
         // previously loaded via the init file. The intent is for the initialized phase rotator configuration to remain valid after the
@@ -107,7 +110,18 @@ fapi::ReturnCode mss_ddr_phy_reset(const fapi::Target & i_target)
         //
         // The following steps must be performed as part of the PHY reset procedure.
   
-  
+
+         // PLL Lock cannot happen if mclk low is asserted
+        // this procedure was moved from draminit to:
+        // Deassert Force_mclk_low signal
+        // see CQ 216395
+        rc = mss_deassert_force_mclk_low(i_target);
+        if(rc)
+        {
+            FAPI_ERR(" deassert_force_mclk_low Failed rc = 0x%08X (creator = %d)", uint32_t(rc), rc.getCreator());
+            return rc;
+        }
+
   
         //
         // 1. Drive all control signals to the PHY to their inactive state, idle state, or inactive value.
@@ -827,6 +841,28 @@ fapi::ReturnCode mss_ddr_phy_reset(const fapi::Target & i_target)
     return rc;
 }
 
+// function moved from draminit because we need mclk low not asserted for pll locking
+ReturnCode mss_deassert_force_mclk_low (const Target& i_target)
+{ 
+    ReturnCode rc;
+    uint32_t rc_num = 0;
+    ecmdDataBufferBase data_buffer(64);
+
+    FAPI_INF( "+++++++++++++++++++++ DEASSERTING FORCE MCLK LOW +++++++++++++++++++++");
+
+
+    rc = fapiGetScom(i_target, MEM_MBA01_CCS_MODEQ_0x030106A7, data_buffer);
+    if(rc) return rc;
+    rc_num = data_buffer.setBit(63);
+    rc.setEcmdError( rc_num);
+    if(rc) return rc;
+    rc = fapiPutScom(i_target, MEM_MBA01_CCS_MODEQ_0x030106A7, data_buffer);
+    if(rc) return rc;
+
+    return rc;
+}
+
+
 } //end extern C
 
 
@@ -839,6 +875,12 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: mss_ddr_phy_reset.C,v $
+Revision 1.11  2012/07/27 16:43:25  bellows
+CQ216395 hardware needs force mclk low in phy reset procedure
+
+Revision 1.10  2012/07/24 17:11:02  mfred
+Removed confusing comment.
+
 Revision 1.9  2012/07/18 16:27:39  mfred
 Check for ATTR_IS_SIMULATION attribute instead of use compiler switch.
 

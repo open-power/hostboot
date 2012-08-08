@@ -122,7 +122,7 @@ ReturnCode doGCRop(const Target& chip_target, io_interface_t interface,
                    gcr_op read_or_write, GCR_sub_registers target_io_reg,
                    uint32_t group_address,  uint32_t lane_address,
                    ecmdDataBufferBase set_bits,  ecmdDataBufferBase clear_bits,
-                   ecmdDataBufferBase &databuf_16bit, int skipCheck=0);
+                   ecmdDataBufferBase &databuf_16bit, int skipCheck=0,int bypass_rmw=0);
 
 //------------------------------------------------------------------------------------------------------------------------------------
 // GCR SCOM READ  - main api for read - do not use doGCRop directly
@@ -137,7 +137,7 @@ ReturnCode  GCR_read(const Target& chip_target, io_interface_t interface,
 ReturnCode  GCR_write(const Target& chip_target, io_interface_t interface,
                       GCR_sub_registers target_io_reg, uint32_t group_address,
                       uint32_t lane_address,  ecmdDataBufferBase set_bits,
-                      ecmdDataBufferBase clear_bits, int skipCheck=0);
+                      ecmdDataBufferBase clear_bits, int skipCheck=0,int bypass_rmw=0);
 
 
 

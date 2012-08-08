@@ -21,7 +21,7 @@
  *
  *  IBM_PROLOG_END_TAG
  */
-// $Id: common_scom_addresses.H,v 1.18 2012/06/25 17:52:34 bcbrock Exp $
+// $Id: common_scom_addresses.H,v 1.22 2012/07/24 15:52:06 koenig Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/common_scom_addresses.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -448,6 +448,10 @@ CONST_UINT64_T( WRITE_ALL_GP0_OR_0x6B000005           , ULL(0x6B000005) );      
 CONST_UINT64_T( READ_ALL_GP1_AND_0x4B000001           , ULL(0x4B000001) );       // and all GP1 but not PRV
 
 CONST_UINT64_T( WRITE_EX_GP3_AND_0x690F0013           , ULL(0x690F0013) );       // and all EX GP3
+CONST_UINT64_T( WRITE_EX_GP3_OR_0x690F0014            , ULL(0x690F0014) );       // or all EX GP3
+
+
+CONST_UINT64_T( WRITE_EX_PMGP0_OR_0x690F0102          , ULL(0x690F0102) );       // or all EX PMGP0
 
 CONST_UINT64_T( WRITE_ALL_CLK_REGION_0x6B030006       , ULL(0x6B030006) );       // all GP3 but not PRV
 
@@ -523,6 +527,7 @@ CONST_UINT64_T( WRITE_ALL_PCB_SLAVE_ERRREG_0x6B0F001F    , ULL(0x6B0F001F) ); //
 CONST_UINT64_T( SCAN_ALLREGIONEXVITAL,              ULL(0x0FF00E0000000000) );
 CONST_UINT64_T( SCAN_CLK_ALL,                       ULL(0x0FF00E0000000000) );
 CONST_UINT64_T( SCAN_CLK_ALLEXDPLL,                 ULL(0x0FE00E0000000000) );
+CONST_UINT64_T( SCAN_CLK_ALL_BUT_PLL,               ULL(0x0FE00E0000000000) );
 CONST_UINT64_T( SCAN_CLK_CORE_ONLY,                 ULL(0x06000E0000000000) );
 
 
@@ -530,6 +535,7 @@ CONST_UINT64_T( SCAN_ALLSCANEXVITAL,                ULL(0x0FF00DCE00000000) );  
 CONST_UINT64_T( SCAN_ALLSCANEXPRV,                  ULL(0x0FF00DCE00000000) );  // Looking to be deprecated
 CONST_UINT64_T( SCAN_ALL_BUT_GPTRTIMEREP,           ULL(0x0FF00DCE00000000) );
 CONST_UINT64_T( SCAN_ALL_BUT_VITALDPLLGPTRTIME,     ULL(0x0FE00DCE00000000) );
+CONST_UINT64_T( SCAN_ALL_BUT_VITALPLLGPTRTIME,      ULL(0x0FE00DCE00000000) );
 CONST_UINT64_T( SCAN_GPTR_TIME_REP,                 ULL(0x0FF0023000000000) );
 CONST_UINT64_T( SCAN_TIME_REP,                      ULL(0x0CF0003000000000) );
 
@@ -538,9 +544,11 @@ CONST_UINT64_T( SCAN_CORE_ALL_BUT_GPTRTIMEREP,      ULL(0x06000DCE00000000) );
 CONST_UINT64_T( SCAN_CORE_GPTR_TIME_REP,            ULL(0x0600023000000000) );
 CONST_UINT64_T( SCAN_CORE_TIME_REP,                 ULL(0x0600003000000000) );
 
+CONST_UINT64_T( SCAN_TP_ARRAY_INIT_REGIONS,         ULL(0x09000e0000000000) );
+CONST_UINT64_T( SCAN_TP_REGIONS_EXCEPT_PIB_PCB,     ULL(0x09e00e0000000000) );
+CONST_UINT64_T( SCAN_TP_SCAN_SELECTS,               ULL(0x09e00dce00000000) );
 
-
-
+CONST_UINT8_T( SCAN_CHIPLET_STBY,                   ULL(0x00) );
 CONST_UINT8_T( SCAN_CHIPLET_TP,                     ULL(0x01) );
 CONST_UINT8_T( SCAN_CHIPLET_NEST,                   ULL(0x02) );
 CONST_UINT8_T( SCAN_CHIPLET_MEM,                    ULL(0x03) );
@@ -548,18 +556,6 @@ CONST_UINT8_T( SCAN_CHIPLET_ALL,                    ULL(0x68) );
 CONST_UINT8_T( SCAN_CHIPLET_GROUP1,                 ULL(0x69) );
 CONST_UINT8_T( SCAN_CHIPLET_GROUP3,                 ULL(0x6B) );
 
-/*  This content is old but will let R. Koester remove it formally
-CONST_UINT64_T( SCAN_ALLREGIONEXVITAL,            ULL(0x0FF00E0000000000) );
-// next line was wrong based on a documentation error, do we need this option at all?
-// use OPTION 3 instead rkoester 05/23/12
-// CONST_UINT64_T( SCAN_ALLSCANEXVITAL,              ULL(0x0FF00FFE00000000) );
-CONST_UINT64_T( SCAN_ALLSCANEXVITAL,              ULL(0x0FF00DCE00000000) );
-CONST_UINT64_T( SCAN_ALLSCANEXPRV,                ULL(0x0FF00DCE00000000) );
-// next line is a suggestion from Johannes, I need to discuss this with PRV design first:
-// this would exclude a scan region for PRV, which probably does not serve chiplet init correctly
-// rkoester 05/23/12
-// CONST_UINT64_T( SCAN_ALLSCANEXPRV,             ULL(0x07F00DCE00000000) );
-*/
 
 CONST_UINT8_T( READ_OR_ALL_CHIPLETS,                ULL(0x40) );   // group 0: all chiplets
 CONST_UINT8_T( READ_OR_ALL_FUNC_CHIPLETS,           ULL(0x43) );   // group 3: all functional chiplets
@@ -577,6 +573,18 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: common_scom_addresses.H,v $
+Revision 1.22  2012/07/24 15:52:06  koenig
+Added EX GP3 OR codepoint - AK
+
+Revision 1.21  2012/07/06 09:49:48  rkoester
+add clock region / scan region for tp_arrayinit, make this common
+
+Revision 1.20  2012/07/03 09:38:25  rkoester
+add address for Centaur Scan0
+
+Revision 1.19  2012/07/02 16:43:47  rkoester
+add vector for scan_no_pll
+
 Revision 1.18  2012/06/25 17:52:34  bcbrock
 Modified proc_sbe_decompress_scan.S: 1) Removed comments and code related to
 the "polling" protocol. 2) Added a final SCOM to always issue a "setpulse"

@@ -21,6 +21,7 @@
  *
  *  IBM_PROLOG_END_TAG
  */
+// $Id: mss_draminit_training.C,v 1.29 2012/07/17 13:23:56 bellows Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -28,6 +29,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|------------------------------------------------
+//  1.29   | bellows  |16-Jul-12| bellows | added in Id tag
 //  1.28   | bellows  |02-May-12| cal ranks are 4 bits, this needed to be adjusted
 //  1.26   | asaetow  |12-Apr-12| Added "if(rc) return rc;" at line 180.
 //  1.25   | asaetow  |06-Apr-12| Added "if(rc) return rc;" at line 165.
