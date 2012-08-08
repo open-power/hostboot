@@ -21,7 +21,7 @@
  *
  *  IBM_PROLOG_END_TAG
  */
-// $Id: proc_start_clocks_chiplets.C,v 1.3 2012/02/19 15:40:39 jmcgill Exp $
+// $Id: proc_start_clocks_chiplets.C,v 1.5 2012/08/08 12:05:11 rkoester Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_start_clocks_chiplets.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -69,17 +69,17 @@ fapi::ReturnCode proc_start_clocks_chiplet_clear_chiplet_fence(
         // form AND mask to clear chiplet fence bit
         rc_ecmd |= mask_data.flushTo1();
         rc_ecmd |= mask_data.clearBit(GP3_FENCE_EN_BIT);
-        rc = rc_ecmd;
-        if (!rc.ok())
+        if (rc_ecmd)
         {
             FAPI_ERR("proc_start_clocks_chiplet_clear_chiplet_fence: Error 0x%x setting up data buffer to clear chiplet fence",
                      rc_ecmd);
+            rc.setEcmdError(rc_ecmd);
             break;
         }
 
         // write chiplet GP3 AND mask register to clear fence bit
         rc = fapiPutScom(i_target, scom_addr, mask_data);
-        if (!rc.ok())
+        if (rc)
         {
             FAPI_ERR("proc_start_clocks_chiplet_clear_chiplet_fence: fapiPutScom error (GP3_AND_0x%08X)",
                      scom_addr);
@@ -117,17 +117,17 @@ fapi::ReturnCode proc_start_clocks_chiplet_clear_perv_fence(
         // form AND mask to clear pervasive fence bit
         rc_ecmd |= mask_data.flushTo1();
         rc_ecmd |= mask_data.clearBit(GP0_PERV_FENCE_BIT);
-        rc = rc_ecmd;
-        if (!rc.ok())
+        if (rc_ecmd)
         {
             FAPI_ERR("proc_start_clocks_chiplet_clear_perv_fence: Error 0x%x setting up data buffer to clear pervasive fence",
                      rc_ecmd);
+            rc.setEcmdError(rc_ecmd);
             break;
         }
 
         // write chiplet GP0 AND mask register to clear pervasive fence bit
         rc = fapiPutScom(i_target, scom_addr, mask_data);
-        if (!rc.ok())
+        if (rc)
         {
             FAPI_ERR("proc_start_clocks_chiplet_clear_perv_fence: fapiPutScom error (GP0_AND_0x%08X)",
                      scom_addr);
@@ -167,17 +167,17 @@ fapi::ReturnCode proc_start_clocks_chiplet_set_mux_selects(
         rc_ecmd |= mask_data.flushTo1();
         rc_ecmd |= mask_data.clearBit(GP0_ABSTCLK_MUXSEL_BIT);
         rc_ecmd |= mask_data.clearBit(GP0_SYNCCLK_MUXSEL_BIT);
-        rc = rc_ecmd;
-        if (!rc.ok())
+        if (rc_ecmd)
         {
             FAPI_ERR("proc_start_clocks_chiplet_set_mux_selects: Error 0x%x setting up data buffer to clear chiplet mux selects",
                      rc_ecmd);
+            rc.setEcmdError(rc_ecmd);
             break;
         }
 
         // write chiplet GP0 AND mask register to clear mux selects
         rc = fapiPutScom(i_target, scom_addr, mask_data);
-        if (!rc.ok())
+        if (rc)
         {
             FAPI_ERR("proc_start_clocks_chiplet_set_mux_selects: fapiPutScom error (GP0_AND_0x%08X)",
                      scom_addr);
@@ -213,7 +213,7 @@ fapi::ReturnCode proc_start_clocks_chiplet_clear_clk_scansel_reg(
     {
         // clear chiplet scan select register
         rc = fapiPutScom(i_target, scom_addr, zero_data);
-        if (!rc.ok())
+        if (rc)
         {
             FAPI_ERR("proc_start_clocks_chiplet_clear_clk_scansel_reg: fapiPutScom error (CLK_SCANSEL_0x%08X)",
                      scom_addr);
@@ -250,16 +250,16 @@ fapi::ReturnCode proc_start_clocks_chiplet_set_clk_region_reg(
     {
         // start NSL/array clocks
         rc_ecmd |= data.setDoubleWord(0, PROC_START_CLOCKS_CHIPLETS_CLK_REGION_REG_START_NSL_ARY);
-        rc = rc_ecmd;
-        if (!rc.ok())
+        if (rc_ecmd)
         {
             FAPI_ERR("proc_start_clocks_chiplet_set_clk_region_reg: Error 0x%x setting up data buffer for NSL/ARY clock start",
                      rc_ecmd);
+            rc.setEcmdError(rc_ecmd);
             break;
         }
 
         rc = fapiPutScom(i_target, scom_addr, data);
-        if (!rc.ok())
+        if (rc)
         {
             FAPI_ERR("proc_start_clocks_chiplet_set_clk_region_reg: fapiPutScom error (CLK_REGION_0x%08X)",
                      scom_addr);
@@ -268,16 +268,16 @@ fapi::ReturnCode proc_start_clocks_chiplet_set_clk_region_reg(
 
         // start all clocks
         rc_ecmd |= data.setDoubleWord(0, PROC_START_CLOCKS_CHIPLETS_CLK_REGION_REG_START_ALL);
-        rc = rc_ecmd;
-        if (!rc.ok())
+        if (rc_ecmd)
         {
             FAPI_ERR("proc_start_clocks_chiplet_set_clk_region_reg: Error 0x%x setting up data buffer for SL/NSL/ARY clock start",
                      rc_ecmd);
+            rc.setEcmdError(rc_ecmd);
             break;
         }
 
         rc = fapiPutScom(i_target, scom_addr, data);
-        if (!rc.ok())
+        if (rc)
         {
             FAPI_ERR("proc_start_clocks_chiplet_set_clk_region_reg: fapiPutScom error (CLK_REGION_0x%08X)",
                      scom_addr);
@@ -319,7 +319,7 @@ fapi::ReturnCode proc_start_clocks_chiplet_check_clk_status_reg(
     {
         // read clock status register
         rc = fapiGetScom(i_target, scom_addr, status_data);
-        if (!rc.ok())
+        if (rc)
         {
             FAPI_ERR("proc_start_clocks_chiplet_check_clk_status_reg: fapiGetScom error (CLK_STATUS_0x%08X)",
                      scom_addr);
@@ -327,6 +327,7 @@ fapi::ReturnCode proc_start_clocks_chiplet_check_clk_status_reg(
         }
 
         // check that value matches expected pattern
+        // set a unique HWP_ERROR
         if (status_data.getDoubleWord(0) != i_status_reg_exp)
         {
             FAPI_ERR("proc_start_clocks_chiplet_check_clk_status_reg: Clock status register actual value (%016llX) does not match expected value (%016llX)",
@@ -368,17 +369,17 @@ fapi::ReturnCode proc_start_clocks_chiplet_clear_force_align(
         // form AND mask to clear force align bit
         rc_ecmd |= mask_data.flushTo1();
         rc_ecmd |= mask_data.clearBit(GP0_FORCE_ALIGN_BIT);
-        rc = rc_ecmd;
-        if (!rc.ok())
+        if (rc_ecmd)
         {
             FAPI_ERR("proc_start_clocks_chiplet_clear_force_align: Error 0x%x setting up data buffer to clear force align",
                      rc_ecmd);
+            rc.setEcmdError(rc_ecmd);
             break;
         }
 
         // write chiplet GP0 AND mask register to clear force align bit
         rc = fapiPutScom(i_target, scom_addr, mask_data);
-        if (!rc.ok())
+        if (rc)
         {
             FAPI_ERR("proc_start_clocks_chiplet_clear_force_align: fapiPutScom error (GP0_AND_0x%08X)",
                      scom_addr);
@@ -416,17 +417,17 @@ fapi::ReturnCode proc_start_clocks_chiplet_clear_flushmode_inhibit(
         // form AND mask to clear force align bit
         rc_ecmd |= mask_data.flushTo1();
         rc_ecmd |= mask_data.clearBit(GP0_FLUSHMODE_INHIBIT_BIT);
-        rc = rc_ecmd;
-        if (!rc.ok())
+        if (rc_ecmd)
         {
             FAPI_ERR("proc_start_clocks_chiplet_clear_flushmode_inhibit: Error 0x%x setting up data buffer to clear flushmode inhibit",
                      rc_ecmd);
+            rc.setEcmdError(rc_ecmd);
             break;
         }
 
         // write chiplet GP0 AND mask register to clear force align bit
         rc = fapiPutScom(i_target, scom_addr, mask_data);
-        if (!rc.ok())
+        if (rc)
         {
             FAPI_ERR("proc_start_clocks_chiplet_clear_flushmode_inhibit: fapiPutScom error (GP0_AND_0x%08X)",
                      scom_addr);
@@ -465,7 +466,7 @@ fapi::ReturnCode proc_start_clocks_chiplet_check_fir(
     {
         // read chiplet FIR register
         rc = fapiGetScom(i_target, scom_addr, fir_data);
-        if (!rc.ok())
+        if (rc)
         {
             FAPI_ERR("proc_start_clocks_chiplet_check_fir: fapiGetScom error (XSTOP_0x%08X)",
                      scom_addr);
@@ -473,6 +474,7 @@ fapi::ReturnCode proc_start_clocks_chiplet_check_fir(
         }
 
         // check that value matches expected pattern
+        // set a unique HWP_ERROR
         if (fir_data.getDoubleWord(0) !=
             PROC_START_CLOCKS_CHIPLETS_CHIPLET_FIR_REG_EXP)
         {
@@ -503,7 +505,7 @@ fapi::ReturnCode proc_start_clocks_chiplet_check_fir(
 fapi::ReturnCode proc_start_clocks_generic_chiplet(
     const fapi::Target& i_target,
     const uint32_t i_chiplet_base_addr,
-	const uint64_t i_status_reg_exp)
+    const uint64_t i_status_reg_exp)
 {
     fapi::ReturnCode rc;
 
@@ -668,5 +670,6 @@ fapi::ReturnCode proc_start_clocks_chiplets(const fapi::Target& i_target,
     FAPI_IMP("proc_start_clocks_chiplets: Exiting ...");
     return rc;
 }
+
 
 } // extern "C"
