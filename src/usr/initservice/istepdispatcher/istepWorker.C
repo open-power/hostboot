@@ -90,6 +90,7 @@ void iStepWorkerThread ( void * i_msgQ )
     uint32_t istep = 0x0;
     uint32_t substep = 0x0;
     uint64_t progressCode = 0x0;
+    bool first = true;
 
     TRACDCOMP( g_trac_initsvc,
                ENTER_MRK"iStepWorkerThread()" );
@@ -99,7 +100,7 @@ void iStepWorkerThread ( void * i_msgQ )
         // Send More Work Needed msg to the main thread.
         theMsg = msg_allocate();
         theMsg->type = MORE_WORK_NEEDED;
-        theMsg->data[0] = 0x0;
+        theMsg->data[0] = first ? 1 : 0x0;
         theMsg->data[1] = 0x0;
         theMsg->extra_data = err;
         err = NULL;
@@ -107,6 +108,8 @@ void iStepWorkerThread ( void * i_msgQ )
         // Wait here until the main thread has work for us.
         msg_sendrecv( theQ,
                       theMsg );
+
+        first = false;
 
         // Got a response...  The step/substep to execute are in data[0]
         istep = ((theMsg->data[0] & 0xFF00) >> 8);

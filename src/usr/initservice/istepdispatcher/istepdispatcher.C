@@ -361,7 +361,14 @@ errlHndl_t IStepDispatcher::msgHndlr ( void )
             case MORE_WORK_NEEDED:
                 // Worker thread is ready for more work.
                 iv_workerMsg = theMsg;
-                handleMoreWorkNeededMsg();
+                // The very first MORE_WORK_NEEDED message will 
+                // have theMsg->data[0] set to 1. It is set to 0
+                // for subsequent messages. handleMoreWorkNeededMsg
+                // needs to know the very first MORE_WORK_NEEDED msg
+                // to handle the case that a msg is queued in the 
+                // mbox msg queue before this first MORE_WORK_NEEDED
+                // is received.
+                handleMoreWorkNeededMsg( (theMsg->data[0] == 1) );
                 break;
 
             case SHUTDOWN_SPLESS:
@@ -684,7 +691,7 @@ void IStepDispatcher::handleSyncPointReachedMsg ( void )
 // ----------------------------------------------------------------------------
 // IStepDispatcher::handleMoreWorkNeededMsg()
 // ----------------------------------------------------------------------------
-void IStepDispatcher::handleMoreWorkNeededMsg ( void )
+void IStepDispatcher::handleMoreWorkNeededMsg ( bool i_first )
 {
     TRACDCOMP( g_trac_initsvc,
                ENTER_MRK"IStepDispatcher::handleMoreWorkNeededMsg()" );
@@ -697,8 +704,12 @@ void IStepDispatcher::handleMoreWorkNeededMsg ( void )
     // Only something to do if we've gotten a request from Fsp or SPLESS
     if( iv_Msg )
     {
+        if (i_first)
+        {
+            handleIStepRequestMsg();
+        }
         // Send response back to caller?
-        if( !msg_is_async( iv_Msg ) )
+        else if( !msg_is_async( iv_Msg ) )
         {
             // TODO - Is data[0] status??  Not in HwSvr Doc.
             iv_Msg->data[0] = 0x0;

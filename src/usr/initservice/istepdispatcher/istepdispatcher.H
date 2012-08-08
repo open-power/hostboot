@@ -249,9 +249,11 @@ private:
      * @brief This function is used to handle the message from the worker
      *      thread requesting more work.
      *
+     * @param[in] i_first - TRUE for the very first call. FALSE afterward
+     *
      * @return NONE.
      */
-    void handleMoreWorkNeededMsg ( void );
+    void handleMoreWorkNeededMsg ( bool i_first );
 
     /**
      * @brief This function is used to handle the single Istep requests from
