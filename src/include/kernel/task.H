@@ -103,7 +103,7 @@ struct task_t
     uint64_t affinity_pinned;
 
         /** State of task */
-    task_states state;
+    task_states state:8;
         /** Extra info about the state.
          *  This is used when the task is blocked to give a pointer to the
          *  object the task is blocked on. */
