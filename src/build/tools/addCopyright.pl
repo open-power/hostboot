@@ -71,22 +71,13 @@ my $copyrightSymbol = "";
 my  $projectName            =   "HostBoot";
 
 ## note that these use single ticks so that the escape chars are NOT evaluated yet.
-my  $OLD_DELIMITER_END      =   'IBM_PROLOG_END\s+';
+my  $OLD_DELIMITER_END      =   'IBM_PROLOG_END';
 my  $DELIMITER_END          =   'IBM_PROLOG_END_TAG';
 my  $DELIMITER_BEGIN        =   'IBM_PROLOG_BEGIN_TAG';
 
-my  $DELIMITER_WARNING_TEXT =   "This is an automatically generated prolog.";
 my  $SOURCE_BEGIN_TAG       =   "\$Source:";
 my  $SOURCE_END_TAG         =   "\$";
 my  $PVALUE                 =   "p1";       ## my best guess
-my  $PVALUE_TEXT            =
-"Object Code Only (OCO) source materials
-  Licensed Internal Code Source Materials
-  IBM $projectName Licensed Internal Code
-
-  The source code for this program is not published or other-
-  wise divested of its trade secrets, irrespective of what has
-  been deposited with the U.S. Copyright Office.";
 my  $ORIGIN                 =   "30";
 
 # End Project-specific settings
@@ -121,6 +112,11 @@ my  $TempFile               =   "";
 my  @Files                  =   ();
 
 my  $rc                     =   0;
+
+# NOTE: $OLD_DELIMITER_END is a subset of $DELIMITER_END so must match 
+#       $DELIMITER_END first in order to return the entire string.
+my $g_end_del_re = "($DELIMITER_END|$OLD_DELIMITER_END)";
+my $g_prolog_re  = "($DELIMITER_BEGIN)((.|\n)+?)$g_end_del_re";
 
 #------------------------------------------------------------------------------
 #   Forward Declaration
@@ -277,7 +273,7 @@ foreach ( @Files )
         if ( $rc == RC_OLD_DELIMITER_END )
         {
             ##  special case, let it go for now
-            print STDOUT  "$_ has old prolog end \"$OLD_DELIMITER_END\", please fix\n";
+            print STDOUT  "$_ has old prolog end '$OLD_DELIMITER_END', please fix\n";
         }
         elsif ( $rc )
         {
@@ -537,51 +533,30 @@ sub extractCopyrightBlock( $ )
     my  ( $infile )    =   shift;
 
     my  $data               =   "";
-    my  $block              =   "";
-    my  $delimiter_begin    =   "";
-    my  $delimiter_end      =   "";
 
-    open( FH, "< $infile")      or die " ERROR $? : can't open $infile : $!";
-    read( FH, $data, -s FH )    or die "ERROR $? :  reading $infile: $!";
+    open( FH, "< $infile")   or die "ERROR $? : can't open $infile : $!";
+    read( FH, $data, -s FH ) or die "ERROR $? : reading $infile: $!";
     close FH;
 
     ## print   $data;
-    # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-    # Capture everything in the file that matches the regex
-    # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-    while ($data =~ /($DELIMITER_BEGIN)((.|\n)+?)($OLD_DELIMITER_END|$DELIMITER_END)/mgo )
-    {
-        ##  $1, $2, etc. are the "backreferences" of the regular expression above.
-        ##  "A pair of parenthesis around a part of a regular expression
-        ##  causes whatever was matched by that part to be remembered for
-        ##  later use."  - Programming Perl p. 31
-        $delimiter_begin    =   $1;
-        $block              =   $2;
-        ## $3 ???
-        $delimiter_end      =   $4;
-    }
+
+    # Extract the prolog into beginning delimiter, block data, and end delimiter
+    my @prolog = ( '', '', '' );
+    @prolog = ($1, $2, $4) if ( $data =~ m/$g_prolog_re/ );
 
     ##  As long as we're here extract the copyright string within the block
     ##  and save it to a global var
-    for ( split /^/, $block )
-    {
-        chomp( $_ );
-
-        if  ( m/COPYRIGHT\s+International\s+Business\s+Machines\s+Corp./i    )
-        {
-             $CopyRightString = $_;
-        }
-    }   ## endfor
+    $CopyRightString = $1 if ( $prolog[1] =~ /(^.*COPYRIGHT.*$)/im );
 
     if ( $opt_debug )
     {
-        print STDERR __LINE__, ": DELIMITER_BEGIN:  >$delimiter_begin<\n";
-        print STDERR __LINE__, ": DELIMITER_END:    >$delimiter_end<\n";
-        print STDERR __LINE__, ": Extracted Block: \n>>>>>$block<<<<<\n";
+        print STDERR __LINE__, ": DELIMITER_BEGIN: >${prolog[0]}<\n";
+        print STDERR __LINE__, ": DELIMITER_END:   >${prolog[2]}<\n";
+        print STDERR __LINE__, ": Extracted Block: \n>>>>>${prolog[1]}<<<<<\n";
         print STDERR __LINE__, ": CopyRightString: >$CopyRightString<\n";
     }
 
-    return  ( $delimiter_begin, $block, $delimiter_end );
+    return @prolog;
 }
 
 
@@ -607,7 +582,7 @@ sub checkCopyrightBlock( $$ )
         return  RC_OLD_COPYRIGHT_BLOCK;
     }
 
-    if ( $DelimiterEnd  =~ m/$OLD_DELIMITER_END/ )
+    if ( $DelimiterEnd eq $OLD_DELIMITER_END )
     {
         print   STDOUT  "WARNING:  Old Prolog Tag End\n";
         return  RC_OLD_DELIMITER_END;
@@ -678,7 +653,6 @@ sub checkCopyrightBlock( $$ )
 sub createYearString( $ )
 {
     my  ( $filename )   =   @_;
-    my  $currentyearstr =   "";
     my  $yearstr        =   "";
     my  @years          =   ();
 
@@ -686,21 +660,11 @@ sub createYearString( $ )
     ##  files that are checked in from FSP.  In this case the earliest
     ##  year will be before it was checked into git .  We have to construct
     ##  a yearstring based on the earliest year.
-    $currentyearstr =   $CopyRightString;
-    $currentyearstr =~  m/^(.*COPYRIGHT\s+International\s+Business\s+Machines\s+Corp.\s+)([0-9][0-9-, ]*)(.*)$/i;
-    if ( defined( $2 ) )
+    if ( $CopyRightString =~  m/COPYRIGHT/i )
     {
-        $yearstr    =   $2;
-        ##  get rid of whitespace
-        $yearstr =~ s/ //g;
-
-        ##  assume that yearstring looks like "2002,2010" or "2002-2010"
-        ##  otherwise it's too confusing.
-        @years = split /[-,]/, $yearstr;
+        @years = ( $CopyRightString =~ /([0-9]{4})/g );
     }
-
-    ##  Push the latest year onto the list
-    push    @years, $ReleaseYear;
+    push @years, $ReleaseYear; # Add the current year.
 
     ##
     ##  Make a call to git to find the earliest commit date of the file
@@ -731,11 +695,24 @@ sub createYearString( $ )
     ## if there is more than one index then also output the highest one.
     if ( $#outyears > 0 )
     {
-        $yearstr    .=  "-$outyears[$#outyears]";
+        # A '-' is preferred but CMVC uses ',' so using ','.
+        $yearstr    .=  ",$outyears[$#outyears]";
     }
 
 
     return  $yearstr;
+}
+
+###################################
+##  Helper function for removeCopyrightBlock()
+###################################
+sub removeProlog($$$)
+{
+    my ( $data, $begin_re, $end_re ) = @_;
+
+    $data =~ s/(\n?)(.*?$begin_re.*$g_prolog_re(.|\n)*?$end_re.*?\n)/$1/;
+
+    return $data;
 }
 
 ###################################
@@ -758,29 +735,29 @@ sub removeCopyrightBlock( $$ )
     select( OUTPUT );               ## new default filehandle for print
 
     ## preprocess to get rid of OLD_DELIMITER_END
-    $data   =~  s/$OLD_DELIMITER_END/$DELIMITER_END\n/;
+    $data   =~  s/$OLD_DELIMITER_END(\s+?)/$DELIMITER_END$1/;
 
     if  ( "C"  eq  $filetype )
     {
         ##  pre-process this for /* */ comments
-        $data   =~  s/\/\*.*($DELIMITER_BEGIN)((.|\n)+?)($DELIMITER_END).*?\*\///gs ;
+        $data = removeProlog( $data, '\/\*', '\*\/' );
 
         ## Now apply filter for // comments
-        $data   =~  s/\/\/\s+($DELIMITER_BEGIN)((.|\n)+?)($DELIMITER_END)//gs ;
+        $data = removeProlog( $data, '\/\/', '' );
     }
     elsif  ( ("RPC" eq $filetype) or
              ("LinkerScript" eq $filetype)
            )
     {
-        $data   =~  s/\/\*.*($DELIMITER_BEGIN)((.|\n)+?)($DELIMITER_END).*?\*\///gs ;
+        $data = removeProlog( $data, '\/\*', '\*\/' );
     }
     elsif ( $filetype  eq "xml" )
     {
-        $data   =~  s/<!--.*($DELIMITER_BEGIN)((.|\n)+?)($DELIMITER_END).*?-->//gs ;
+        $data = removeProlog( $data, '<!--', '-->' );
     }
     elsif  ( "Assembly" eq $filetype )
     {
-        $data   =~  s/\#\s+($DELIMITER_BEGIN)((.|\n)+?)($OLD_DELIMITER_END|$DELIMITER_END)//gs ;
+        $data = removeProlog( $data, '\#', '' );
     }
     elsif ( ("Autoconf" eq $filetype) or
             ("Automake" eq $filetype) or
@@ -793,7 +770,7 @@ sub removeCopyrightBlock( $$ )
           )
     {
         # Don't wipe the the '#!' line at the top.
-        $data   =~  s/\#\s+($DELIMITER_BEGIN)((.|\n)+?)($DELIMITER_END)//gs ;
+        $data = removeProlog( $data, '\#', '' );
     }
      else
      {
@@ -844,11 +821,11 @@ sub addEmptyCopyrightBlock( $$$ )
     select( OUTPUT );               ## new default filehandle for print
     if ("Assembly" eq $filetype)
     {
-        print OUTPUT "#  $DELIMITER_BEGIN $DELIMITER_END";
+        print OUTPUT "# $DELIMITER_BEGIN $DELIMITER_END \n";
     }
     elsif ("Makefile" eq $filetype )
     {
-        print OUTPUT "#  $DELIMITER_BEGIN $DELIMITER_END";
+        print OUTPUT "# $DELIMITER_BEGIN $DELIMITER_END \n";
     }
     elsif (("Autoconf" eq $filetype) or
            ("Automake" eq $filetype) or
@@ -869,7 +846,7 @@ sub addEmptyCopyrightBlock( $$$ )
         {
             print OUTPUT $line;
         }
-        print OUTPUT "# $DELIMITER_BEGIN $DELIMITER_END";
+        print OUTPUT "# $DELIMITER_BEGIN $DELIMITER_END \n";
         unless ($line =~ m/^#!/)
         {
             print OUTPUT $line;
@@ -877,22 +854,22 @@ sub addEmptyCopyrightBlock( $$$ )
     }
     elsif ( "C" eq $filetype )
     {
-        print OUTPUT "/* $DELIMITER_BEGIN $DELIMITER_END\n */";
+        print OUTPUT "/* $DELIMITER_BEGIN $DELIMITER_END */\n";
     }
     elsif ( ("RPC" eq $filetype) or
             ("LinkerScript" eq $filetype)
           )
     {
         # ld stubbornly refuses to use modern comment lines.
-        print OUTPUT "/* $DELIMITER_BEGIN $DELIMITER_END\n */";
+        print OUTPUT "/* $DELIMITER_BEGIN $DELIMITER_END */\n";
     }
     elsif ("MofFile" eq $filetype)
     {
-        print OUTPUT "// $DELIMITER_BEGIN $DELIMITER_END";
+        print OUTPUT "// $DELIMITER_BEGIN $DELIMITER_END \n";
     }
     elsif ("xml" eq $filetype )
     {
-        print   OUTPUT "<!-- $DELIMITER_BEGIN $DELIMITER_END -->";
+        print   OUTPUT "<!-- $DELIMITER_BEGIN $DELIMITER_END -->\n";
     }
     else
     {
@@ -901,13 +878,6 @@ sub addEmptyCopyrightBlock( $$$ )
         close( OUTPUT )     or die " $? can't close $TempFile: $!" ;
         ## leave $Tempfile around for debug
         return RC_INVALID_FILETYPE;
-    }
-
-    ##  if this is a new copyright block, we have to add a carriage return
-    ##  after $DELIMITER_END .
-    if ( $validaterc == RC_NO_COPYRIGHT_BLOCK )
-    {
-        print   OUTPUT  "\n";
     }
 
     # Copy rest of file
@@ -930,6 +900,53 @@ sub addEmptyCopyrightBlock( $$$ )
 }
 
 ############################################
+## Helper functions for fillinEmptyCopyrightBlock()
+############################################
+sub addPrologComments($$$)
+{
+    my ( $data, $begin, $end ) = @_;
+
+    my @lines = split( /\n/, $data );
+
+    $data = '';
+    for my $line ( @lines )
+    {
+        # If there is an block comment end tag, fill the end of the line with 
+        # spaces.
+        if ( '' ne $end )
+        {
+            my $max_line_len = 70;
+            my $len = length($line);
+            if ( $len < $max_line_len )
+            {
+                my $fill = ' ' x ($max_line_len - $len);
+                $line .= $fill;
+            }
+        }
+
+        if ( $line =~ m/$DELIMITER_BEGIN/ )
+        {
+            # NOTE: Prologs with inline comments will have a single trailing
+            #       space at the end of the line. This matches what is done in
+            #       CMVC.
+            $line = "$line $end\n";
+        }
+        elsif ( $line =~ m/$DELIMITER_END/ )
+        {
+            $line = "$begin $line";
+        }
+        else
+        {
+            $line = "$begin $line $end\n";
+        }
+
+        $data .= $line;
+    }
+
+    return $data;
+}
+
+############################################
 ##  fill in the empty copyright block
 ## Copyright guidelines from:
 ##   FSP ClearCase Architecture
@@ -946,23 +963,30 @@ sub fillinEmptyCopyrightBlock( $$ )
 
     my  $copyrightYear  =   createYearString( $filename );
     ##  define the final copyright block template here.
-    my $IBMCopyrightBlock =
-" $DELIMITER_BEGIN
-  $DELIMITER_WARNING_TEXT
+    my $IBMCopyrightBlock = <<EOF;
+$DELIMITER_BEGIN
+This is an automatically generated prolog.
 
-  $SOURCE_BEGIN_TAG $filename $SOURCE_END_TAG
+$SOURCE_BEGIN_TAG $filename $SOURCE_END_TAG
 
-  IBM CONFIDENTIAL
+IBM CONFIDENTIAL
 
-  COPYRIGHT International Business Machines Corp. $copyrightYear
+COPYRIGHT International Business Machines Corp. $copyrightYear
 
-  $PVALUE
+$PVALUE
 
-  $PVALUE_TEXT
+Object Code Only (OCO) source materials
+Licensed Internal Code Source Materials
+IBM $projectName Licensed Internal Code
 
-  Origin: $ORIGIN
+The source code for this program is not published or otherwise
+divested of its trade secrets, irrespective of what has been
+deposited with the U.S. Copyright Office.
 
-  $DELIMITER_END";
+Origin: $ORIGIN
+
+$DELIMITER_END
+EOF
 
     ## Modify file in place with temp file  Perl Cookbook 7.8
     my  $savedbgfile    =   "$filename.fillin";
@@ -977,12 +1001,11 @@ sub fillinEmptyCopyrightBlock( $$ )
 
     if ("Assembly" eq $filetype)
     {
-        ## assembly
-        $IBMCopyrightBlock =~ s/\n/\n# /sg;
+        $IBMCopyrightBlock = addPrologComments($IBMCopyrightBlock, '#', '');
     }
     elsif  ( "Makefile" eq $filetype )
     {
-        $IBMCopyrightBlock =~ s/\n/\n#/sg;
+        $IBMCopyrightBlock = addPrologComments($IBMCopyrightBlock, '#', '');
     }
     elsif (("Autoconf" eq $filetype) or
            ("Automake" eq $filetype) or
@@ -993,18 +1016,18 @@ sub fillinEmptyCopyrightBlock( $$ )
            ("Tcl" eq $filetype))
     {
         ##  all files with a "shebang"
-        $IBMCopyrightBlock =~ s/\n/\n#/sg;
+        $IBMCopyrightBlock = addPrologComments($IBMCopyrightBlock, '#', '');
     }
     elsif ( "C" eq $filetype )
     {
-        ##  lex files are classified as C, but do not recognise // comments
-        $IBMCopyrightBlock =~ s|\n|\n *|sg;
+        ## lex files are classified as C, but do not recognize '//' comments
+        $IBMCopyrightBlock = addPrologComments($IBMCopyrightBlock, '/*', '*/');
     }
     elsif ( ("RPC" eq $filetype) or
             ("LinkerScript" eq $filetype)
           )
     {
-        $IBMCopyrightBlock =~ s|\n|\n *|sg;
+        $IBMCopyrightBlock = addPrologComments($IBMCopyrightBlock, '/*', '*/');
     }
     elsif ("EmxFile" eq $filetype)
     {
@@ -1013,11 +1036,11 @@ sub fillinEmptyCopyrightBlock( $$ )
     }
     elsif ("MofFile" eq $filetype)
     {
-        $IBMCopyrightBlock =~ s|\n|\n//|sg;
+        $IBMCopyrightBlock = addPrologComments($IBMCopyrightBlock, '//', '');
     }
     elsif ( "xml" eq $filetype)
     {
-        $IBMCopyrightBlock =~ s|\n|\n   |sg;
+        $IBMCopyrightBlock = addPrologComments($IBMCopyrightBlock, '<!--', '-->');
     }
     else
     {
