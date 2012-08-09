@@ -486,6 +486,10 @@ sub filetype
     {
         return "xml"
     }
+    if ( $filename =~ m/\.rule$/i )
+    {
+        return "PrdRuleFile"
+    }
     if ( ( $filename =~ m/\.emx$/i )
        ||( $filename =~ m/\.odt$/i )
        ||( $filename =~ m/\.gitignore$/i )
@@ -508,7 +512,7 @@ sub filetype
         }
         $type =~ s/^\s*//;
         $type =~ s/\s*$//;
-        my %knownTypes = qw/Assembly Assembly Automake Automake Autoconf Autoconf C C CVS CVS EmxFile EmxFile LinkerScript LinkerScript Makefile Makefile MofFile MofFile Perl Perl Python Python RPC RPC Shellscript Shellscript Tcl Tcl/;
+        my %knownTypes = qw/Assembly Assembly Automake Automake Autoconf Autoconf C C CVS CVS EmxFile EmxFile LinkerScript LinkerScript Makefile Makefile MofFile MofFile Perl Perl PrdRuleFile PrdRuleFile Python Python RPC RPC Shellscript Shellscript Tcl Tcl/;
         return $type if defined($knownTypes{$type});
     }
     { # Other random files containing non-printable characters.
@@ -764,6 +768,7 @@ sub removeCopyrightBlock( $$ )
             ("CVS" eq $filetype) or
             ("Makefile" eq $filetype) or
             ("Perl" eq $filetype) or
+            ("PrdRuleFile" eq $filetype) or
             ("Python" eq $filetype) or
             ("Shellscript" eq $filetype) or
             ("Tcl" eq $filetype)
@@ -823,7 +828,8 @@ sub addEmptyCopyrightBlock( $$$ )
     {
         print OUTPUT "# $DELIMITER_BEGIN $DELIMITER_END \n";
     }
-    elsif ("Makefile" eq $filetype )
+    elsif ( ("Makefile"    eq $filetype) or
+            ("PrdRuleFile" eq $filetype) )
     {
         print OUTPUT "# $DELIMITER_BEGIN $DELIMITER_END \n";
     }
@@ -1003,7 +1009,8 @@ EOF
     {
         $IBMCopyrightBlock = addPrologComments($IBMCopyrightBlock, '#', '');
     }
-    elsif  ( "Makefile" eq $filetype )
+    elsif  ( ("Makefile"    eq $filetype) or
+             ("PrdRuleFile" eq $filetype) )
     {
         $IBMCopyrightBlock = addPrologComments($IBMCopyrightBlock, '#', '');
     }
