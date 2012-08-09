@@ -143,7 +143,8 @@ void UtilFile::Open(
         }
 
         // Create UtilMem object to overlay module location in memory.
-        iv_contents = UtilMem(const_cast<char*>(l_address), l_size);
+        iv_contents.~UtilMem();
+        new (&iv_contents) UtilMem(const_cast<char*>(l_address), l_size);
 
         iv_eof = iv_contents.eof();
         iv_lastError = iv_contents.getLastError();
