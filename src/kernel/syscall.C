@@ -681,9 +681,9 @@ namespace Systemcalls
         if (0x4c000364 == (*instruction)) // Verify 'nap' instruction,
                                           // otherwise just return.
         {
-            // Disable PR, IR, DR so 'nap' can be executed.
+            // Disable EE, PR, IR, DR so 'nap' can be executed.
             //     (which means to stay in HV state)
-            t->context.msr_mask = 0x4030;
+            t->context.msr_mask = 0xC030;
         }
     };
 
