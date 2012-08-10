@@ -50,9 +50,6 @@
 #include    <hwpf/plat/fapiPlatTrace.H>
 
 
-//@fixme - Patrick is adding this constant under 37009
-#define MAGIC_SIMICS_CORESTATESAVE  10
-
 namespace   THREAD_ACTIVATE
 {
 

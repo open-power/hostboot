@@ -161,7 +161,7 @@ namespace ExceptionHandles
 {
     bool PrivInstr(task_t* t)
     {
-        uint64_t phys_addr = VmmManager::findPhysicalAddress(
+        uint64_t phys_addr = VmmManager::findKernelAddress(
                 reinterpret_cast<uint64_t>(t->context.nip));
 
         if (-EFAULT != static_cast<int64_t>(phys_addr))

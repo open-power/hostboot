@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/testcore/kernel/ptmgrtest.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/testcore/kernel/ptmgrtest.H $                         */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef __PTMGRTEST_H
 #define __PTMGRTEST_H
 /**
@@ -154,7 +154,8 @@ class ptmgrtest : public CxxTest::TestSuite
                 TS_TRACE( "Addr=%.16lX, Status=%.16lX", TEST_DATA[x].va, status );
                 fails++;
             }
-            else if( (status & PageTableManager::PTE_VALID) && (pn == TEST_DATA[x].page) )
+            else if( (status & PageTableManager::PTE_VALID)
+                     && (pn == TEST_DATA[x].page) )
             {
                 PASS_TRACE( "ptmgrtest::test_addEntry> PASS1 : 0x%.16lX", TEST_DATA[x].va );
 
@@ -162,8 +163,8 @@ class ptmgrtest : public CxxTest::TestSuite
 		uint64_t va = ptmgr->getVirtAddrFromPTE(pte);
 		if( va != (TEST_DATA[x].va - TEST_DATA[x].va%4096) )
 		{
-		    printk( "ptmgrtest::test_addEntry> ERROR6 : VA doesn't match expected" );
-		    printk( "Exp=%.16lX, Act=%.16lX", TEST_DATA[x].va, va );
+		    TS_FAIL( "ptmgrtest::test_addEntry> ERROR6 : VA doesn't match expected" );
+		    TS_TRACE( "Exp=%.16lX, Act=%.16lX", TEST_DATA[x].va, va );
 		    fails++;
 		}
 		total++;

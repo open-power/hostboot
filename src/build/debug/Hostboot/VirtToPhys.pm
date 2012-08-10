@@ -47,7 +47,7 @@ sub main
     }
 
 
-    if (defined $args->{"showSPTE"})
+    if( (defined $args->{"SPTE"}) || (defined $args->{"spte"}) )
     {
         $displaySPTE = 1;
     }
@@ -55,20 +55,30 @@ sub main
     # Parse 'vaddr' argument.    
     if (not defined $args->{"vaddr"})
     {
-      ::userDisplay "ERROR.. Did not pass in Virtual Address.\n";
-       die;
+        ::userDisplay "ERROR.. Did not pass in Virtual Address.\n";
+        die;
     }
 
     my $vaddr = hex($args->{"vaddr"});
 
     if ($debug)
     {
-    ::userDisplay (sprintf "\n   Virtual Address = %X\n" , $vaddr);
+        ::userDisplay (sprintf "\n   Virtual Address = %X\n" , $vaddr);
     }
-  
-   $phyAddr = Hostboot::_DebugFrameworkVMM::getPhysicalAddr($vaddr, $debug, $displaySPTE); 
-   
-   return $phyAddr;
+
+    $phyAddr = Hostboot::_DebugFrameworkVMM::getPhysicalAddr($vaddr, $debug, $displaySPTE); 
+
+    if (($phyAddr eq Hostboot::_DebugFrameworkVMM::NotFound) ||
+        ($phyAddr eq Hostboot::_DebugFrameworkVMM::NotPresent))
+    {
+        ::userDisplay ("The Physical Address = $phyAddr\n");
+    }
+    else
+    {
+        ::userDisplay (sprintf "The Physical Address =  0x%X\n" , $phyAddr);
+    }
+
+    return $phyAddr;
 }
 
 
@@ -80,7 +90,7 @@ sub helpInfo
         options => {
                     "vaddr=<number>" =>  ["Virtual Address "],
                     "debug" => ["More debug output."],
-                    "displaySPTE" => ["Display the SPTE for the VA passed in"],
+                    "SPTE" => ["Display the SPTE for the VA passed in"],
                    },
 
     );

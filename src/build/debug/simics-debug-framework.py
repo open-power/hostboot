@@ -233,6 +233,13 @@ class DebugFrameworkProcess:
         if ( result ):
             print "simics ERROR running %s: %d "%( syscmd, result )
 
+    # Read HRMOR from processors.
+    #    This message has no input data
+    def get_hrmor(self,data):
+        hrmor = getHRMOR()
+        self.sendMsg("data-response", "%d"%(hrmor) )
+
+
 # @fn run_hb_debug_framework
 # @brief Wrapper function to execute a tool module.
 #
@@ -260,6 +267,7 @@ def run_hb_debug_framework(tool = "Printk", toolOpts = "",
             "get-img-path" :        DebugFrameworkProcess.get_img_path,
             "write-scom" :          DebugFrameworkProcess.write_xscom,
             "read-scom" :           DebugFrameworkProcess.read_xscom,
+            "get-hrmor" :           DebugFrameworkProcess.get_hrmor,
             "exit" :                DebugFrameworkProcess.endProcess,
         }
         operations[msg[0]](fp,msg[1])
@@ -329,10 +337,18 @@ def hexDumpToNumber(hexlist):
     return int(strNumber,16)
 
 
+# Fetch the current HRMOR value.
+def getHRMOR():
+    runStr  =  "(system_cmp0.cpu0_0_05_0).read-reg HRMOR"
+    ( result, out )  =   quiet_run_command( runStr, output_modes.regular )
+    return result
+
+
 # Read simics memory and return a list of strings such as ['0x0','0x2b','0x8']
 # representing the data read from simics. The list returned may be handed
 # to hexDumpToNumber() to turn the list into a number.
 def dumpSimicsMemory(address,bytecount):
+    address = address + getHRMOR()
     hexlist = map(hex,
         conf.system_cmp0.phys_mem.memory[[address,address+bytecount-1]])
     return hexlist
@@ -348,6 +364,7 @@ def readLong(address):
     return hexDumpToNumber(hexlist)
 
 def writeLong(address,datvalue):
+    address = address + getHRMOR()
     conf.system_cmp0.phys_mem.memory[[address,address+3]] = [0,0,0,datvalue]
     return
 
@@ -356,6 +373,7 @@ def writeLong(address,datvalue):
 # Write simics memory. address is an integer.
 # data is a list of byte-sized integers.
 def writeSimicsMemory(address,data):
+    address = address + getHRMOR()
     size = len(data)
     conf.system_cmp0.phys_mem.memory[[address, address+size-1]] = data;
 
@@ -489,6 +507,12 @@ def magic_instruction_callback(user_arg, cpu, arg):
             # the byte at offset 0 of the buffer which contains a 0x02 in
             # fsp-trace style.
             writeLongLong(tracBinaryInfoAddr+8,1)
+        # Figure out if we are running out of the cache or mainstore
+        runStr = "(system_cmp0.phys_mem)->map[0][1]"
+        ( result, out )  =   quiet_run_command( runStr, output_modes.regular )
+        # Add the HRMOR if we're running from memory
+        if 'cache' not in result:
+            pTracBinaryBuffer = pTracBinaryBuffer + getHRMOR()
         # Save the tracBinary buffer to a file named tracBINARY in current dir
         saveCommand = "(system_cmp0.phys_mem)->map[0][1]->image.save tracBINARY 0x%x %d"%(pTracBinaryBuffer,cbUsed)
         SIM_run_alone(run_command, saveCommand )

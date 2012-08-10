@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/kernel/devicesegment.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/kernel/devicesegment.C $                                  */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #include <util/singleton.H>
 #include <limits.h>
 #include <assert.h>
@@ -130,10 +130,38 @@ int DeviceSegment::devUnmap(void *ea)
     {
         //Remove all of the defined block's size (<= 32GB)
         PageTableManager::delRangePN(iv_mmioMap[idx].addr / PAGESIZE,
-                (iv_mmioMap[idx].addr + iv_mmioMap[idx].size) / PAGESIZE);
+                (iv_mmioMap[idx].addr + iv_mmioMap[idx].size) / PAGESIZE,
+                 false);
         iv_mmioMap[idx].addr = 0;
         rc = 0;
     }
 
     return rc;
 }
+
+/**
+ * Locate the physical address of the given virtual address
+ */
+uint64_t DeviceSegment::findPhysicalAddress(uint64_t i_vaddr) const
+{
+    uint64_t rc = -EFAULT;
+    uint64_t segment_ea = i_vaddr;
+    //Verify input address falls within this segment's address range
+    if (segment_ea < this->getBaseAddress() ||
+        segment_ea >= (this->getBaseAddress() + (1ull << SLBE_s)))
+    {
+        return rc;
+    }
+    segment_ea = segment_ea - this->getBaseAddress();
+    //TODO - Calculate idx by segment block size if/when new device size needed
+    size_t idx = segment_ea / ((1ull << SLBE_s) / MMIO_MAP_DEVICES);
+    if (0 != iv_mmioMap[idx].addr)
+    {
+        //memory offset within this device's window
+        uint64_t offset = segment_ea - idx*((1ull << SLBE_s) / MMIO_MAP_DEVICES);
+        return (iv_mmioMap[idx].addr + offset);
+    }
+
+    return rc;
+}
+

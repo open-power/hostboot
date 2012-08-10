@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/include/kernel/ptmgr.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/include/kernel/ptmgr.H $                                  */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef __KERNEL_PTMGR_H
 #define __KERNEL_PTMGR_H
 
@@ -121,15 +121,19 @@ class PageTableManager
      *
      * @param[in] i_pnStart  First Physical Page to remove  (page number)
      * @param[in] i_pnFinish  Last Physical Page to remove  (page number)
+     * @param[in] i_applyHRMOR  If true then the HRMOR is applied to the
+     *                          page numbers, MMIOs should set to false
      */
     static void delRangePN( uint64_t i_pnStart,
-                            uint64_t i_pnFinish );
+                            uint64_t i_pnFinish,
+                            bool i_applyHRMOR = true );
 
     /**
      * @brief Return status information about an entry in the hardware page table
      *
      * @param[in] i_vAddr  Virtual Address within the page to be queried  (full address)
-     * @param[out] o_pn  Real physical page number to map to, INVALID_PN if PTE is invalid
+     * @param[out] o_pn  Real physical page number va is mapped to,
+     *                   INVALID_PN if PTE is invalid
      *
      * @return uint64_t  ORed combination of status flags
      */

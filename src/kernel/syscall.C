@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/kernel/syscall.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2010-2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/kernel/syscall.C $                                        */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2010,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #include <assert.h>
 #include <errno.h>
 #include <kernel/cpu.H>
@@ -92,6 +91,7 @@ namespace Systemcalls
     void MmRemovePages(task_t *t);
     void MmSetPermission(task_t *t);
     void MmAllocPages(task_t *t);
+    void MmVirtToPhys(task_t *t);
 
 
     syscall syscalls[] =
@@ -130,6 +130,7 @@ namespace Systemcalls
         &MmRemovePages, // MM_REMOVE_PAGES
         &MmSetPermission, // MM_SET_PERMISSION
         &MmAllocPages,    // MM_ALLOC_PAGES
+        &MmVirtToPhys,    // MM_VIRT_TO_PHYS
         };
 };
 
@@ -207,7 +208,7 @@ namespace Systemcalls
         if (status != NULL)
         {
             uint64_t addr =
-                VmmManager::findPhysicalAddress(
+                VmmManager::findKernelAddress(
                     reinterpret_cast<uint64_t>(status));
 
             if (addr == (static_cast<uint64_t>(-EFAULT)))
@@ -222,7 +223,7 @@ namespace Systemcalls
         if (retval != NULL)
         {
             uint64_t addr =
-                VmmManager::findPhysicalAddress(
+                VmmManager::findKernelAddress(
                     reinterpret_cast<uint64_t>(retval));
 
             if (addr == (static_cast<uint64_t>(-EFAULT)))
@@ -543,7 +544,7 @@ namespace Systemcalls
         // Set RC to success initially.
         TASK_SETRTN(t,0);
 
-        futex = VmmManager::findPhysicalAddress(futex);
+        futex = VmmManager::findKernelAddress(futex);
         if(futex == (static_cast<uint64_t>(-EFAULT)))
         {
             printk("Task %d terminated. No physical address found for address 0x%p",
@@ -579,7 +580,7 @@ namespace Systemcalls
             case FUTEX_REQUEUE:
                 // Wake (val) task(s) on futex && requeue remaining tasks on futex2
 
-                futex2 = VmmManager::findPhysicalAddress(futex2);
+                futex2 = VmmManager::findKernelAddress(futex2);
                 if(futex2 == (static_cast<uint64_t>(-EFAULT)))
                 {
                     printk("Task %d terminated. No physical address found for address 0x%p",
@@ -778,6 +779,17 @@ namespace Systemcalls
             CpuManager::forceMemoryPeriodic();
         }
 
+    }
+
+     /**
+      * Return the physical address backing a virtual address
+      * @param[in] t: The task used
+      */
+    void MmVirtToPhys(task_t* t)
+    {
+        uint64_t i_vaddr = (uint64_t)TASK_GETARG0(t);
+        uint64_t phys = VmmManager::findPhysicalAddress(i_vaddr);
+        TASK_SETRTN(t, phys);
     }
 };
 

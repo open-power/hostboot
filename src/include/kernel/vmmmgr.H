@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/include/kernel/vmmmgr.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2010 - 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/include/kernel/vmmmgr.H $                                 */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2010,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef __KERNEL_VMMMGR_H
 #define __KERNEL_VMMMGR_H
 
@@ -28,6 +28,7 @@
 #include <sys/mm.h>
 #include <kernel/types.h>
 #include <kernel/spinlock.H>
+
 
 class MessageQueue;
 
@@ -43,12 +44,16 @@ class VmmManager
 
             // put the Page Table at the end of our memory space
             PTSIZE = (1 << 18),
-            HTABORG = (FULL_MEM_SIZE - PTSIZE),
+            HTABORG_OFFSET = (FULL_MEM_SIZE - PTSIZE),
 
             // Put the DMA Pages just under the Page Table
             MBOX_DMA_PAGES = 64,    // must be <= 64
             MBOX_DMA_PAGESIZE = (1 * KILOBYTE),
-            MBOX_DMA_ADDR = (HTABORG - (MBOX_DMA_PAGES * MBOX_DMA_PAGESIZE))
+            MBOX_DMA_ADDR = (HTABORG_OFFSET
+                             - (MBOX_DMA_PAGES * MBOX_DMA_PAGESIZE)),
+
+            // Tells processor to ignore HRMOR
+            FORCE_PHYS_ADDR = 0x8000000000000000,
         };
 
         enum castout_t
@@ -117,7 +122,7 @@ class VmmManager
         static int mmAllocBlock(MessageQueue* i_mq,void* i_va,uint64_t i_size);
 
         /**
-         * @brief Find the phyiscal address bound to the given address
+         * @brief Find the physical address bound to the given address
          * @param[in] i_vaddr The address
          * @return the physical address or -EFAULT @see errno.h
          */
@@ -165,6 +170,20 @@ class VmmManager
          * nearest divisible page size.
          */
         static int mmSetPermission(void* i_va,uint64_t i_size, uint64_t i_access_type);
+
+        /**
+         * @brief Retrieve the current HTABORG value
+         * @return uint64_t - value of HTABORG
+         */
+        static uint64_t HTABORG();
+
+        /**
+         * @brief Find the kernel addressable address bound to the
+         *     given virtual address
+         * @param[in] i_vaddr The address
+         * @return the kernel address or -EFAULT @see errno.h
+         */
+        static uint64_t findKernelAddress(uint64_t i_vaddr);
 
     protected:
         VmmManager();

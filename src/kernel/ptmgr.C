@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/kernel/ptmgr.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2011-2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/kernel/ptmgr.C $                                          */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #include <kernel/ptmgr.H>
 #include <kernel/vmmmgr.H>
 #include <util/singleton.H>
@@ -34,6 +33,7 @@
 #define Dprintk(args...)
 #define Tprintk(args...)
 #define Eprintk(args...) printk(args)
+
 
 // Utilities to do some bit manipulation
 
@@ -208,7 +208,15 @@ void PageTableManager::addEntry( uint64_t i_vAddr,
                                  uint64_t i_page,
                                  uint64_t i_accessType )
 {
-    return Singleton<PageTableManager>::instance()._addEntry( i_vAddr, i_page, i_accessType );
+    // adjust physical address for the HRMOR unless this is a mmio
+    if( SegmentManager::CI_ACCESS != i_accessType )
+    {
+        i_page |= (getHRMOR() / PAGESIZE);
+    }
+
+    return Singleton<PageTableManager>::instance()._addEntry( i_vAddr,
+                                                              i_page,
+                                                              i_accessType );
 }
 
 /**
@@ -235,8 +243,16 @@ void PageTableManager::delRangeVA( uint64_t i_vAddrStart,
  * @brief Remove a range of entries from the hardware page table
  */
 void PageTableManager::delRangePN( uint64_t i_pnStart,
-                                   uint64_t i_pnFinish )
+                                   uint64_t i_pnFinish,
+                                   bool i_applyHRMOR )
 {
+    // adjust physical address for the HRMOR unless this is a mmio
+    if( i_applyHRMOR )
+    {
+        i_pnStart |= (getHRMOR() / PAGESIZE);
+        i_pnFinish |= (getHRMOR() / PAGESIZE);
+    }
+    
     return Singleton<PageTableManager>::instance()._delRangePN(i_pnStart,i_pnFinish);
 }
 
@@ -857,7 +873,7 @@ uint64_t PageTableManager::getAddress( void )
     if(unlikely(ivTABLE != NULL)) {
         return (uint64_t)ivTABLE;
     } else {
-        return VmmManager::HTABORG;
+        return VmmManager::HTABORG();
     }
 }
 

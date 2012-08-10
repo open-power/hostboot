@@ -131,7 +131,7 @@ uint64_t BaseSegment::findPhysicalAddress(uint64_t i_vaddr) const
         // Anything in the physical address size is valid (and linear mapped)
         // except NULL.
         if (i_vaddr >= PAGE_SIZE)
-            return i_vaddr;
+            return (i_vaddr | getHRMOR());
         else return -EFAULT;
     }
     return (iv_block ? iv_block->findPhysicalAddress(i_vaddr) : -EFAULT);
