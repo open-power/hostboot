@@ -32,9 +32,6 @@
 #include <targeting/common/predicates/predicateisfunctional.H>
 #include <targeting/common/predicates/predicatepostfixexpr.H>
 
-#include <sys/task.h>           // task_getcpuid()
-
-
 /**
  * Miscellaneous Filter Utility Functions
  */
