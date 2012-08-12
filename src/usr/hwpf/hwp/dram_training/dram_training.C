@@ -74,7 +74,6 @@ const uint8_t VPO_NUM_OF_MEMBUF_TO_RUN = UNLIMITED_RUN;
 #include    "mss_scominit/mss_scominit.H"
 #include    "mss_ddr_phy_reset/mss_ddr_phy_reset.H"
 #include    "mss_draminit/mss_draminit.H"
-// #include    "mss_restore_dram_repair/mss_restore_dram_repair.H"
 #include    "mss_draminit_training/mss_draminit_training.H"
 // #include    "mss_draminit_trainadv/mss_draminit_trainadv.H"
 #include    "mss_draminit_mc/mss_draminit_mc.H"
@@ -514,69 +513,9 @@ void    call_mss_draminit( void *io_pArgs )
     task_end2( l_err );
 }
 
-//
-//  Wrapper function to call 13.8 : mss_restore_dram_repair
-//
-void    call_mss_restore_dram_repair( void *io_pArgs )
-{
-    errlHndl_t l_err = NULL;
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_restore_dram_repair entry" );
-
-#if 0
-    // @@@@@    CUSTOM BLOCK:   @@@@@
-    //  figure out what targets we need
-    //  customize any other inputs
-    //  set up loops to go through all targets (if parallel, spin off a task)
-
-    //  print call to hwp and dump physical path of the target(s)
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "=====  mss_restore_dram_repair HWP(? ? ? )",
-                    ?
-                    ?
-                    ? );
-    //  dump physical path to targets
-    EntityPath l_path;
-    l_path  =   l_@targetN_target->getAttr<ATTR_PHYS_PATH>();
-    l_path.dump();
-    TRACFCOMP( g_trac_mc_init, "===== " );
-
-    // cast OUR type of target to a FAPI type of target.
-    const fapi::Target l_fapi_@targetN_target(
-                    TARGET_TYPE_MEMBUF_CHIP,
-                    reinterpret_cast<void *>
-                        (const_cast<TARGETING::Target*>(l_@targetN_target)) );
-
-    //  call the HWP with each fapi::Target
-    l_fapirc  =   mss_restore_dram_repair( ? , ?, ? );
-
-    //  process return code.
-    if ( l_fapirc== fapi::FAPI_RC_SUCCESS )
-    {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "SUCCESS :  mss_restore_dram_repair HWP(? ? ? )" );
-    }
-    else
-    {
-        /**
-         * @todo fapi error - just print out for now...
-         */
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR 0x%.8X:  mss_restore_dram_repair HWP(? ? ?) ",
-                static_cast<uint32_t>(l_fapirc) );
-    }
-    // @@@@@    END CUSTOM BLOCK:   @@@@@
-#endif
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_restore_dram_repair exit" );
-
-    task_end2( l_err );
-}
-
-
 
 //
-//  Wrapper function to call 13.9 : mss_draminit_training
+//  Wrapper function to call 13.8 : mss_draminit_training
 //
 void    call_mss_draminit_training( void *io_pArgs )
 {
@@ -637,7 +576,7 @@ void    call_mss_draminit_training( void *io_pArgs )
 }
 
 //
-//  Wrapper function to call 13.10 : mss_draminit_trainadv
+//  Wrapper function to call 13.9 : mss_draminit_trainadv
 //
 void    call_mss_draminit_trainadv( void *io_pArgs )
 {
@@ -696,7 +635,7 @@ void    call_mss_draminit_trainadv( void *io_pArgs )
 }
 
 //
-//  Wrapper function to call 13.11 : mss_draminit_mc
+//  Wrapper function to call 13.10 : mss_draminit_mc
 //
 void    call_mss_draminit_mc( void *io_pArgs )
 {

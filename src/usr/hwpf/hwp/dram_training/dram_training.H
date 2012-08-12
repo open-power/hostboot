@@ -88,24 +88,18 @@
  *  @}
  *  @{
  *      @substepnum     8
- *      @substepname    mss_restore_dram_repair
- *      @substepdesc    : Restore Dram repairs
- *      @target_sched   serial
- *  @}
- *  @{
- *      @substepnum     9
  *      @substepname    mss_draminit_training
  *      @substepdesc    : Dram training
  *      @target_sched   serial
  *  @}
  *  @{
- *      @substepnum     10
+ *      @substepnum     9
  *      @substepname     mss_draminit_trainadv
  *      @substepdesc     : Advanced dram training
  *      @target_sched   serial
  *  @}
  *  @{
- *      @substepnum     11
+ *      @substepnum     10
  *      @substepname     mss_draminit_mc
  *      @substepdesc     : Hand off control to MC
  *      @target_sched   serial
@@ -218,25 +212,10 @@ void    call_mss_ddr_phy_reset( void * io_pArgs );
 void    call_mss_draminit( void * io_pArgs );
 
 
-
-/**
- *  @brief   mss_restore_dram_repair
- *
- *  13.8 : : Restore Dram repairs
- *
- *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
- *                              or NULL.
- *  return  none
- *
- */
-void    call_mss_restore_dram_repair( void * io_pArgs );
-
-
-
 /**
  *  @brief   mss_draminit_training
  *
- *  13.9 : : Dram training
+ *  13.8 : : Dram training
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
@@ -250,7 +229,7 @@ void    call_mss_draminit_training( void * io_pArgs );
 /**
  *  @brief   mss_draminit_trainadv
  *
- *  13.10 : : Advanced dram training
+ *  13.9 : : Advanced dram training
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
@@ -264,7 +243,7 @@ void    call_mss_draminit_trainadv( void * io_pArgs );
 /**
  *  @brief   mss_draminit_mc
  *
- *  13.11 : : Hand off control to MC
+ *  13.10 : : Hand off control to MC
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.

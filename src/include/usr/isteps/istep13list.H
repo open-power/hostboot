@@ -44,13 +44,11 @@
  *  	: Soft reset of DDR PHY macros
  *  13.7	  mss_draminit
  *  	: Dram initialize
- *  13.8	  mss_restore_dram_repair
- *  	: Restore Dram repairs
- *  13.9	  mss_draminit_training
+ *  13.8	  mss_draminit_training
  *  	: Dram training
- *  13.10	  mss_draminit_trainadv
+ *  13.9	  mss_draminit_trainadv
  *  	: Advanced dram training
- *  13.11	  mss_draminit_mc
+ *  13.10	  mss_draminit_mc
  *  	: Hand off control to MC
  *
  *  *****************************************************************
@@ -138,15 +136,7 @@ const   TaskInfo    g_istep13[]  =   {
                 }
         },
         {
-                ISTEPNAME(13,08,"mss_restore_dram_repair"),
-                DRAM_TRAINING::call_mss_restore_dram_repair,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                }
-        },
-        {
-                ISTEPNAME(13,09,"mss_draminit_training"),
+                ISTEPNAME(13,08,"mss_draminit_training"),
                 DRAM_TRAINING::call_mss_draminit_training,
                 {
                         START_FN,
@@ -154,7 +144,7 @@ const   TaskInfo    g_istep13[]  =   {
                 }
         },
         {
-                ISTEPNAME(13,10,"mss_draminit_trainadv"),
+                ISTEPNAME(13,09,"mss_draminit_trainadv"),
                 DRAM_TRAINING::call_mss_draminit_trainadv,
                 {
                         START_FN,
@@ -162,7 +152,7 @@ const   TaskInfo    g_istep13[]  =   {
                 }
         },
         {
-                ISTEPNAME(13,11,"mss_draminit_mc"),
+                ISTEPNAME(13,10,"mss_draminit_mc"),
                 DRAM_TRAINING::call_mss_draminit_mc,
                 {
                         START_FN,
