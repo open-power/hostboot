@@ -27,10 +27,6 @@
 # NOTE: Do NOT modify this file in CMVC directly!  It comes from the Hostboot
 #       repository and will be overwritten.
 
-STANDARD_SUBDIRS += \
-    img             \
-    simics
-
 # Process the fsp subtree
 
 .if(${CONTEXT:R} == "ppc")
@@ -39,17 +35,17 @@ EXPINC_SUBDIRS   += fsp
 OBJECTS_SUBDIRS  += 
 EXPLIB_SUBDIRS   += 
 EXPSHLIB_SUBDIRS += fsp
-STANDARD_SUBDIRS += fsp
+STANDARD_SUBDIRS += fsp img simics
 RUNBVT_SUBDIRS   += 
 
 .elseif(${CONTEXT} == "x86.nfp")
 
-EXPINC_SUBDIRS   += nfp
+EXPINC_SUBDIRS   += fsp
 OBJECTS_SUBDIRS  += 
-EXPLIB_SUBDIRS   += nfp
-EXPSHLIB_SUBDIRS += nfp
-STANDARD_SUBDIRS += nfp
-RUNBVT_SUBDIRS   += 
+EXPLIB_SUBDIRS   += fsp
+EXPSHLIB_SUBDIRS += fsp
+STANDARD_SUBDIRS += fsp
+RUNBVT_SUBDIRS   +=
 
 .endif
 

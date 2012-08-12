@@ -345,7 +345,7 @@ namespace TARGETING
                 // cache is of a different type, we first cast to extract the
                 // real pointer, then recast it into the cache
                 iv_sections[i].vmmAddress =
-                        reinterpret_cast<uint64_t>(
+                        static_cast<uint64_t>(
                             TARG_TO_PLAT_PTR(l_header->vmmBaseAddress)) +
                         l_header->vmmSectionOffset*i;
                 iv_sections[i].pnorAddress = l_pnorSectionInfo.vaddr +

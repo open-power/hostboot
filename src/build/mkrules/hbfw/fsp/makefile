@@ -39,6 +39,10 @@ EXPSHLIB_SUBDIRS += targeting
 STANDARD_SUBDIRS += targeting
 RUNBVT_SUBDIRS   += 
 
+.elseif(${CONTEXT} == "x86.nfp")
+
+.include "makefile.nfp"
+
 .endif
 
 .include <${RULES_MK}>
