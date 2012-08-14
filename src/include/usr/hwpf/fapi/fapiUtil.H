@@ -44,6 +44,7 @@
  *                          camvanng    11/15/2011  Pass target to fapiLoadInitFile
  *                                                  and doxygen changes;
  *                                                  needed by cronus
+ *                          mjjones     08/13/2012  Add fapiSpecialWakeup
  */
 
 #ifndef FAPIUTIL_H_
@@ -179,6 +180,39 @@ fapi::ReturnCode fapiUnloadInitFile(const char * i_file, const char *& io_addr,
  */
 
 void fapiBreakPoint(uint32_t i_info);
+
+/**
+ * @brief Enable/Disable special wakeup on processor chip core(s)
+ *
+ * Special Wakeup Enable must be done when a HWP is doing an operation that
+ * requires core(s) to be awake (e.g. modifying the Sleep-Winkle image). For
+ * each Special Wakeup Enable call, there must be a subsequent Special Wakeup
+ * Disable call.
+ *
+ * This does not apply to SCOM operations, platforms must handle Special Wakeup
+ * for SCOM operations internally.
+ *
+ * If Special Wakeup is enabled, a core will not go to sleep (if already
+ * sleeping, it is woken up). If Special Wakeup is disabled, if there are no
+ * other active Enables, the core is allowed to sleep.
+ *
+ * @note Implemented by platform code calling the proc_cpu_special_wakeup HWP.
+ *       This is a FAPI function because each platform may do different things
+ *         Hostboot: Does nothing (cores cannot sleep while Hostboot running)
+ *         FSP: Uses an algorithm to decide when to disable special wakeup
+ *         Cronus: Does Special Wakeup enable/disable as requested
+ *
+ * @param[in] i_target
+ *              TARGET_TYPE_PROC_CHIP: Enables/Disables Special Wakeup on all
+ *                cores (EX chiplets) of the specified chip
+ *              TARGET_TYPE_EX_CHIPLET: Enables/Disables Special Wakeup on the
+ *                specified core (EX chiplet)
+ * @param[in] i_enable. true = enable. false = disable.
+ *
+ * @return ReturnCode. Zero on success, else platform specified error.
+ */
+fapi::ReturnCode fapiSpecialWakeup(const fapi::Target & i_target,
+                                   const bool i_enable);
 
 }
 
