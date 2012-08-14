@@ -1,0 +1,162 @@
+#   IBM_PROLOG_BEGIN_TAG
+#   This is an automatically generated prolog.
+#
+#   $Source: src/kernel/shutdown.S $
+#
+#   IBM CONFIDENTIAL
+#
+#   COPYRIGHT International Business Machines Corp. 2012
+#
+#   p1
+#
+#   Object Code Only (OCO) source materials
+#   Licensed Internal Code Source Materials
+#   IBM HostBoot Licensed Internal Code
+#
+#   The source code for this program is not published or other-
+#   wise divested of its trade secrets, irrespective of what has
+#   been deposited with the U.S. Copyright Office.
+#
+#   Origin: 30
+#
+#   IBM_PROLOG_END_TAG
+.include "kernel/ppcconsts.S"
+
+#define KERNEL_BARRIER(addr, count, temp) \
+        /*     Increment thread count. */ \
+    1: \
+        ldarx temp, 0, addr; \
+        addi temp, temp, 1; \
+        stdcx. temp, 0, addr; \
+        bne- 1b; \
+        isync; \
+        /*     Wait for count to reach CPU count. */ \
+    1: \
+        or 1,1,1;    /* Drop thread priority */ \
+        ld temp, 0(addr); \
+        cmpd cr0, temp, count; \
+        bne 1b; \
+        /*     Instruction barrier to ensure exit. */ \
+        isync; \
+        or 3,3,3;    /* Increase thread priority */
+
+
+.section .text
+
+    ;// @fn kernel_shutdown
+    ;// Leave the Hostboot kernel and switch to the payload.
+    ;//
+    ;// There are four stages to switching to the payload, all of which
+    ;// must be synchronized across all of the threads.
+    ;// Steps:
+    ;//     All threads enter "EA[0]=1" mode.
+    ;//     <sync barrier 1>
+    ;//     Thread0 on each core updates HRMOR.
+    ;//     <sync barrier 2>
+    ;//     All threads execute - isync ; slbia ; isync
+    ;//     <sync barrier 3>
+    ;//     All threads except "last thread" enters payload.
+    ;//         * last thread waits for all other threads to leave.
+    ;//
+    ;// The design of the barrier stages comes from the BookIV chapter
+    ;// titled "HRMOR Update Sequence".
+    ;//
+    ;// @param[in] r3 - CPU count - Number of active CPUs.
+    ;// @param[in] r4 - Payload Base
+    ;// @param[in] r5 - Payload Entry
+    ;// @param[in] r6 - Last thread to enter payload.
+    ;//
+.global kernel_shutdown
+kernel_shutdown:
+        ;// Set R10 to 0x8000000000000000 so we can set "EA[0]=1" for addrs.
+    li r10, 1
+    rotldi r10, r10, 63
+        ;// Retrieve existing HRMOR.
+    mfspr r7, HRMOR
+        ;// Determine physical address of shutdown_barrier.
+    lis r8, kernel_shutdown_barriers@h
+    ori r8, r8, kernel_shutdown_barriers@l
+    or r8, r8, r7       ;// Apply HRMOR.
+    or r8, r8, r10      ;// Apply EA[0] = 1.
+        ;// Determine physical address of EA[0]=1 mode instruction.
+    lis r9, kernel_shutdown_ea0_1_mode@h
+    ori r9, r9, kernel_shutdown_ea0_1_mode@l
+    or r9, r9, r7       ;// Apply HRMOR.
+    or r9, r9, r10      ;// Apply EA[0] = 1.
+        ;// Jump to enter EA[0] = 1
+    mtlr r9
+    blr
+kernel_shutdown_ea0_1_mode:
+        ;// Perform barrier - 1
+    KERNEL_BARRIER(r8, r3, r11)
+    isync
+    or 3,3,3    ;// Increase thread priority
+        ;// Update HRMOR on master.
+    mfspr r10, PIR
+    andi. r10, r10, 7
+    bne+ 1f
+    mtspr HRMOR, r4
+1:
+        ;// Perform barrier - 2
+    addi r8, r8, 8
+    KERNEL_BARRIER(r8, r3, r11)
+
+        ;// Clear out SLBs, ERATs, etc.
+    isync
+    slbia
+    isync
+
+        ;// Perform barrier - 3
+    addi r8, r8, 8
+    KERNEL_BARRIER(r8, r3, r11)
+
+        ;// "Barrier" 4:
+        ;//     Increment counter as leaving, except PIR == r6 waits.
+    addi r8, r8, 8
+            ;// Check for PIR == r6.
+    mfspr r10, PIR
+    cmp cr0, r10, r6
+    beq 3f
+        ;// Increment thread count.
+1:
+    ldarx r11, 0, r8
+    addi r11, r11, 1
+    stdcx. r11, 0, r8
+    bne- 1b
+    isync
+2:
+    ;// Enter Payload.
+        ;// Set HSRR0 to entry point.
+    mtspr HSRR0, r5
+        ;// Save MSR, move to HSRR1.
+    mfmsr r10
+    mtspr HSRR1, r10
+        ;// Jump to entry point. Causes HSRR0 -> NIA, HSSR1 -> MSR.
+    hrfid
+
+        ;// PIR == r6 waits here for all others to leave.
+3:
+    subi r3, r3, 1
+1:
+    or 1,1,1
+    ld r11, 0(r8)
+    cmp cr0, r3, r11
+    bne+ 1b
+    isync
+        ;// All other threads have left, so wait a little bit...
+            ;// Set CTR to 512.
+    li r11, 512
+    mtctr r11
+            ;// Execute thread-priority-low until CTR is 0.
+1:
+    or 1,1,1
+    bdnz 1b
+    isync
+        ;// Raise thread priority and leave ourselves.
+    or 3,3,3
+    b 2b
+
+.section .data
+kernel_shutdown_barriers:
+    .space 8*4 ;//
+

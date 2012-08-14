@@ -754,67 +754,6 @@ task_end_stub:
     li r4, 0  ;// NULL -> r4 (status value)
     sc
 
-    ;// @fn kernel_shutdown
-    ;// Leave the Hostboot kernel and switch to the payload.
-    ;//
-    ;// This code must first move itself into "EA[0]=1" mode, migrate to a
-    ;// new HRMOR, and then jump to the new code.  The migration of the
-    ;// HRMOR must be synchronized, since the HRMOR is a core-shared SPR, so
-    ;// we must first ensure that all threads are in "EA[0]=1" mode.
-    ;//
-    ;// @param[in] r3 - CPU count - Number of active CPUs.
-    ;// @param[in] r4 - Payload Base
-    ;// @param[in] r5 - Payload Entry
-.global kernel_shutdown
-kernel_shutdown:
-        ;// Set R6 to 0x8000000000000000 so we can set "EA[0]=1" for addrs.
-    li r6, 1
-    rotldi r6, r6, 63
-        ;// Retrieve existing HRMOR.
-    mfspr r7, HRMOR
-        ;// Determine physical address of shutdown_barrier.
-    lis r8, kernel_shutdown_barrier@h
-    ori r8, r8, kernel_shutdown_barrier@l
-    or r8, r8, r7       ;// Apply HRMOR.
-    or r8, r8, r6       ;// Apply EA[0] = 1.
-        ;// Determine physical address of EA[0]=1 mode instruction.
-    lis r9, kernel_shutdown_ea0_1_mode@h
-    ori r9, r9, kernel_shutdown_ea0_1_mode@l
-    or r9, r9, r7       ;// Apply HRMOR.
-    or r9, r9, r6       ;// Apply EA[0] = 1.
-        ;// Jump to enter EA[0] = 1
-    mtlr r9
-    blr
-kernel_shutdown_ea0_1_mode:
-        ;// Perform barrier
-        ;//     Increment thread count.
-1:
-    ldarx r11, 0, r8
-    addi r11, r11, 1
-    stdcx. r11, 0, r8
-    bne- 1b
-    isync
-        ;//     Wait for count to reach CPU count.
-1:
-    or 1,1,1    ;// Drop thread priority
-    ld r11, 0(r8)
-    cmpd cr0, r11, r3
-    bne 1b
-        ;//     Instruction barrier to ensure exit.
-    isync
-    or 3,3,3    ;// Increase thread priority
-        ;// Update HRMOR.
-        ;// TODO: There might be more to it than just this, such as clearing
-        ;//       ERATs but this works for now in Simics.
-    mtspr HRMOR, r4
-        ;// Set HSRR0 to entry point.
-    mtspr HSRR0, r5
-        ;// Save MSR, move to HSRR1.
-    mfmsr r10
-    mtspr HSRR1, r10
-        ;// TODO: Any updates we need to do to HSRR1/MSR for payload?
-        ;// Jump to entry point. Causes HSRR0 -> NIA, HSSR1 -> MSR.
-    hrfid
 
 STD_INTERRUPT_NOADDR(hype_emu_assist)
 
@@ -853,9 +792,6 @@ kernel_stack:
 
 .global kernel_other_thread_spinlock
 kernel_other_thread_spinlock:
-    .space 8
-
-kernel_shutdown_barrier:
     .space 8
 
 .global hbi_ImageId

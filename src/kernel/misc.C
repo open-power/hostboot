@@ -29,7 +29,8 @@
 #include <kernel/scheduler.H>
 #include <assert.h>
 
-extern "C" void kernel_shutdown(size_t, uint64_t, uint64_t) NO_RETURN;
+extern "C"
+    void kernel_shutdown(size_t, uint64_t, uint64_t, uint64_t) NO_RETURN;
 
 
 namespace KernelMisc
@@ -98,6 +99,7 @@ namespace KernelMisc
         else
         {
             static Barrier* l_barrier = new Barrier(CpuManager::getCpuCount());
+            static uint64_t l_lowestPIR = 0xffffffffffffffffull;
 
             if (c->master)
             {
@@ -105,11 +107,31 @@ namespace KernelMisc
                        g_payload_base, g_payload_entry);
             }
 
+            // Need to identify the thread with the lowest PIR because it needs
+            // to be the last one to jump to PHYP.
+            uint64_t l_pir = getPIR();
+            do
+            {
+                uint64_t currentPIR = l_lowestPIR;
+                if (l_pir > currentPIR)
+                {
+                    break;
+                }
+
+                if (__sync_bool_compare_and_swap(&l_lowestPIR,
+                                                 currentPIR, l_pir))
+                {
+                    break;
+                }
+
+            } while(1);
+
             l_barrier->wait();
 
             kernel_shutdown(CpuManager::getCpuCount(),
                             g_payload_base,
-                            g_payload_entry);
+                            g_payload_entry,
+                            l_lowestPIR);
         }
     }
 
