@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/hwpf/test/fapiRcTest.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/hwpf/test/fapiRcTest.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 /**
  *  @file fapiTargetTest.C
  *
@@ -34,6 +35,7 @@
  *                          mjjones     07/26/2011  Added more tests
  *                          mjjones     09/23/2011  Updated test for ErrorInfo
  *                          mjjones     01/13/2012  Use new ReturnCode interfaces
+ *                          mjjones     08/14/2012  Use new ErrorInfo structures
  */
 
 #include <fapi.H>
@@ -662,57 +664,49 @@ uint32_t rcTest12()
             break;
         }
 
-        // Check the callout error information
-        if (l_pErrInfo->iv_callouts.size() != 1)
+        // Check the callout/deconfigure/gard error information
+        if (l_pErrInfo->iv_CDGs.size() != 1)
         {
-            FAPI_ERR("rcTest12. %d callouts", l_pErrInfo->iv_ffdcs.size());
+            FAPI_ERR("rcTest12. %d CDGs", l_pErrInfo->iv_CDGs.size());
             l_result = 5;
             break;
         }
 
-        if (l_pErrInfo->iv_callouts[0]->iv_target != l_target)
+        if (l_pErrInfo->iv_CDGs[0]->iv_target != l_target)
         {
-            FAPI_ERR("rcTest12. callout target mismatch");
+            FAPI_ERR("rcTest12. CDG target mismatch");
             l_result = 6;
             break;
         }
 
-        if (l_pErrInfo->iv_callouts[0]->iv_priority != PRI_MEDIUM)
+        if (l_pErrInfo->iv_CDGs[0]->iv_callout != true)
         {
-            FAPI_ERR("rcTest12. callout priority mismatch");
+            FAPI_ERR("rcTest12. callout not set");
             l_result = 7;
             break;
         }
 
-        // Check the deconfig error information
-        if (l_pErrInfo->iv_deconfigs.size() != 1)
+        if (l_pErrInfo->iv_CDGs[0]->iv_calloutPriority != PRI_MEDIUM)
         {
-            FAPI_ERR("rcTest12. %d deconfigs", l_pErrInfo->iv_deconfigs.size());
+            FAPI_ERR("rcTest12. callout priority mismatch");
             l_result = 8;
             break;
         }
 
-        if (l_pErrInfo->iv_deconfigs[0]->iv_target != l_target)
+        if (l_pErrInfo->iv_CDGs[0]->iv_deconfigure != true)
         {
-            FAPI_ERR("rcTest12. deconfig target mismatch");
+            FAPI_ERR("rcTest12. deconfigure not set");
             l_result = 9;
             break;
         }
 
-        // Check the GARD error information
-        if (l_pErrInfo->iv_gards.size() != 1)
+        if (l_pErrInfo->iv_CDGs[0]->iv_gard != true)
         {
-            FAPI_ERR("rcTest12. %d gards", l_pErrInfo->iv_gards.size());
+            FAPI_ERR("rcTest12. GARD not set");
             l_result = 10;
             break;
         }
 
-        if (l_pErrInfo->iv_gards[0]->iv_target != l_target)
-        {
-            FAPI_ERR("rcTest12. gard target mismatch");
-            l_result = 11;
-            break;
-        }
 
         FAPI_INF("rcTest12. Success!");
     }
@@ -767,17 +761,24 @@ uint32_t rcTest13()
             break;
         }
        
-        if (l_pErrInfo->iv_gards.size() != 1)
+        if (l_pErrInfo->iv_CDGs.size() != 1)
         {
-            FAPI_ERR("rcTest13. %d gards", l_pErrInfo->iv_gards.size());
+            FAPI_ERR("rcTest13. %d CDGs", l_pErrInfo->iv_CDGs.size());
             l_result = 3;
             break;
         }
 
-        if (l_pErrInfo->iv_gards[0]->iv_target != l_target)
+        if (l_pErrInfo->iv_CDGs[0]->iv_target != l_target)
         {
-            FAPI_ERR("rcTest13. gard target mismatch");
+            FAPI_ERR("rcTest13. CDG target mismatch");
             l_result = 4;
+            break;
+        }
+
+        if (l_pErrInfo->iv_CDGs[0]->iv_gard != true)
+        {
+            FAPI_ERR("rcTest13. GARD not set");
+            l_result = 5;
             break;
         }
 
@@ -845,17 +846,24 @@ uint32_t rcTest14()
             break;
         }
 
-        if (l_pErrInfo->iv_gards.size() != 1)
+        if (l_pErrInfo->iv_CDGs.size() != 1)
         {
-            FAPI_ERR("rcTest14. %d gards", l_pErrInfo->iv_gards.size());
+            FAPI_ERR("rcTest14. %d CDGs", l_pErrInfo->iv_CDGs.size());
             l_result = 3;
             break;
         }
 
-        if (l_pErrInfo->iv_gards[0]->iv_target != l_target)
+        if (l_pErrInfo->iv_CDGs[0]->iv_target != l_target)
         {
-            FAPI_ERR("rcTest14. gard target mismatch");
+            FAPI_ERR("rcTest14. CDG target mismatch");
             l_result = 4;
+            break;
+        }
+
+        if (l_pErrInfo->iv_CDGs[0]->iv_gard != true)
+        {
+            FAPI_ERR("rcTest14. GARD not set");
+            l_result = 5;
             break;
         }
 
@@ -951,9 +959,8 @@ uint32_t rcTest16()
          {fapi::ReturnCode::EI_TYPE_CALLOUT, 3, fapi::PRI_LOW},
          {fapi::ReturnCode::EI_TYPE_DECONF, 2},
          {fapi::ReturnCode::EI_TYPE_DECONF, 3},
-         {fapi::ReturnCode::EI_TYPE_GARD, 2},
-         {fapi::ReturnCode::EI_TYPE_GARD, 3}};
-    l_rc.addErrorInfo(l_objects, l_entries, 8);
+         {fapi::ReturnCode::EI_TYPE_GARD, 2}};
+    l_rc.addErrorInfo(l_objects, l_entries, 7);
 
     do
     {
@@ -1013,83 +1020,67 @@ uint32_t rcTest16()
             break;
         }
 
-        // Check the callout error information
-        if (l_pErrInfo->iv_callouts.size() != 2)
+        // Check the callout/deconfigure/GARD error information
+        if (l_pErrInfo->iv_CDGs.size() != 2)
         {
-            FAPI_ERR("rcTest16. %d callouts", l_pErrInfo->iv_ffdcs.size());
+            FAPI_ERR("rcTest16. %d CDGs", l_pErrInfo->iv_CDGs.size());
             l_result = 7;
             break;
         }
 
-        if (l_pErrInfo->iv_callouts[0]->iv_target != l_target)
+        if (l_pErrInfo->iv_CDGs[0]->iv_target != l_target)
         {
-            FAPI_ERR("rcTest16. callout[0] target mismatch");
+            FAPI_ERR("rcTest16. CDG[0] target mismatch");
             l_result = 8;
             break;
         }
 
-        if (l_pErrInfo->iv_callouts[0]->iv_priority != PRI_HIGH)
+        if (l_pErrInfo->iv_CDGs[0]->iv_calloutPriority != PRI_HIGH)
         {
-            FAPI_ERR("rcTest16. callout[0] priority mismatch");
+            FAPI_ERR("rcTest16. CDG[0] callout priority mismatch");
             l_result = 9;
             break;
         }
 
-        if (l_pErrInfo->iv_callouts[1]->iv_target != l_target2)
+        if (l_pErrInfo->iv_CDGs[0]->iv_deconfigure == false)
         {
-            FAPI_ERR("rcTest16. callout[1] target mismatch");
+            FAPI_ERR("rcTest16. CDG[0] deconfigure not set");
             l_result = 10;
             break;
         }
 
-        if (l_pErrInfo->iv_callouts[1]->iv_priority != PRI_LOW)
+        if (l_pErrInfo->iv_CDGs[0]->iv_gard == false)
         {
-            FAPI_ERR("rcTest16. callout[1] priority mismatch");
+            FAPI_ERR("rcTest16. CDG[0] gard not set");
             l_result = 11;
             break;
         }
 
-        // Check the deconfig error information
-        if (l_pErrInfo->iv_deconfigs.size() != 2)
+        if (l_pErrInfo->iv_CDGs[1]->iv_target != l_target2)
         {
-            FAPI_ERR("rcTest16. %d deconfigs", l_pErrInfo->iv_deconfigs.size());
+            FAPI_ERR("rcTest16. CDG[1] target mismatch");
             l_result = 12;
             break;
         }
 
-        if (l_pErrInfo->iv_deconfigs[0]->iv_target != l_target)
+        if (l_pErrInfo->iv_CDGs[1]->iv_calloutPriority != PRI_LOW)
         {
-            FAPI_ERR("rcTest16. deconfig[0] target mismatch");
+            FAPI_ERR("rcTest16. CDG[1] callout priority mismatch");
             l_result = 13;
             break;
         }
 
-        if (l_pErrInfo->iv_deconfigs[1]->iv_target != l_target2)
+        if (l_pErrInfo->iv_CDGs[1]->iv_deconfigure == false)
         {
-            FAPI_ERR("rcTest16. deconfig[1] target mismatch");
-            l_result = 13;
-            break;
-        }
-
-        // Check the GARD error information
-        if (l_pErrInfo->iv_gards.size() != 2)
-        {
-            FAPI_ERR("rcTest16. %d gards", l_pErrInfo->iv_gards.size());
+            FAPI_ERR("rcTest16. CDG[1] deconfigure not set");
             l_result = 14;
             break;
         }
 
-        if (l_pErrInfo->iv_gards[0]->iv_target != l_target)
+        if (l_pErrInfo->iv_CDGs[1]->iv_gard == true)
         {
-            FAPI_ERR("rcTest16. gard[0] target mismatch");
+            FAPI_ERR("rcTest16. CDG[1] gard set");
             l_result = 15;
-            break;
-        }
-
-        if (l_pErrInfo->iv_gards[1]->iv_target != l_target2)
-        {
-            FAPI_ERR("rcTest16. gard[1] target mismatch");
-            l_result = 16;
             break;
         }
 

@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/include/usr/hwpf/fapi/fapiReturnCode.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/include/usr/hwpf/fapi/fapiReturnCode.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 /**
  *  @file fapiReturnCode.H
  *
@@ -42,6 +43,7 @@
  *                          mjjones     02/22/2012  Allow user to add Target FFDC
  *                          mjjones     03/16/2012  Add type to FFDC data
  *                          mjjones     03/16/2012  Allow different PLAT errors
+ *                          mjjones     08/14/2012  Created getCreateReturnCodeDataRef
  */
 
 #ifndef FAPIRETURNCODE_H_
@@ -343,9 +345,12 @@ public:
 private:
 
     /**
-     * @brief If iv_pDataRef is NULL then a new ReturnCodeDataRef is created
+     * @brief Get a reference to the ReturnCodeDataRef, if it doesn't exist
+     *        then one is created and returned
+     *
+     * @return ReturnCodeDataRef &. Reference to ReturnCodeDataRef
      */
-    void ensureDataRefExists();
+    ReturnCodeDataRef & getCreateReturnCodeDataRef();
 
     /**
      * @brief Forgets about any associated data (PlatData and ErrorInfo)

@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/include/usr/hwpf/fapi/fapiErrorInfo.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/include/usr/hwpf/fapi/fapiErrorInfo.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 /**
  *  @file fapiErrorInfo.H
  *
@@ -35,6 +36,8 @@
  *                          mjjones     09/22/2011  Major updates
  *                          mjjones     03/16/2012  Add FfdcType. Remove copy
  *                                                  ctor and assignment operator
+ *                          mjjones     08/14/2012  Merge Callout/Deconfig/Gard
+ *                                                  structures into one
  */
 
 #ifndef FAPIERRORINFO_H_
@@ -124,74 +127,45 @@ private:
  */
 enum CalloutPriority
 {
-    PRI_HIGH = 1,
+    PRI_LOW = 1,
     PRI_MEDIUM = 2,
-    PRI_LOW = 3,
+    PRI_HIGH = 3,
 };
 
 /**
- * @struct ErrorInfoCallout
+ * @struct ErrorInfoCDG
  *
- * This struct contains a target to callout
+ * This struct contains a target to callout/deconfigure/GARD
  */
-struct ErrorInfoCallout
+struct ErrorInfoCDG
 {
     /**
      * @brief Constructor.
      *
-     * @param[in] i_target   Reference to the target to callout
-     * @param[in] i_priority The priority of the callout
+     * @param[in] i_target Reference to the target to callout/deconfigure/GARD
      */
-    ErrorInfoCallout(const Target & i_target,
-                     const CalloutPriority i_priority);
+    ErrorInfoCDG(const Target & i_target);
 
-    // The target to call out
+    // The target to callout/deconfigure/GARD
     Target iv_target;
 
-    // The priority of the callout
-    CalloutPriority iv_priority;
+    // Callout Information
+    bool iv_callout;
+    CalloutPriority iv_calloutPriority;
+
+    // Deconfigure Information
+    bool iv_deconfigure;
+
+    // GARD Information
+    bool iv_gard;
 };
 
-/**
- * @struct ErrorInfoDeconfig
- *
- * This struct contains a target to deconfigure
- */
-struct ErrorInfoDeconfig
-{
-    /**
-     * @brief Constructor.
-     *
-     * @param[in] i_target Reference to the target to deconfigure
-     */
-    ErrorInfoDeconfig(const Target & i_target);
-
-    // The target to deconfigure
-    Target iv_target;
-};
-
-/**
- * @struct ErrorInfoGard
- *
- * This struct contains a target to create a GARD record for
- */
-struct ErrorInfoGard
-{
-    /**
-     * @brief Constructor.
-     *
-     * @param[in] i_target Reference to the target to create a GARD record for
-     */
-    ErrorInfoGard(const Target & i_target);
-
-    // The target to create a GARD record for
-    Target iv_target;
-};
 
 /**
  * @struct ErrorInfo
  *
- * This struct defines the error information
+ * This struct defines the error information associated with a fapi::ReturnCode
+ * Users are allowed to access the data directly
  */
 struct ErrorInfo
 {
@@ -200,25 +174,25 @@ struct ErrorInfo
      */
     ~ErrorInfo();
 
+    /**
+     * @brief Get a reference to the ErrorInfoCDG structure for the specified
+     *        Target. If there is no existing structure then one is created
+     *
+     * @param[in] i_target Reference to Target to get the information for
+     *
+     * @return Reference to ErrorInfoCDG
+     */
+    ErrorInfoCDG & getCreateErrorInfoCDG(const Target & i_target);
+
     // Vector of FFDC Data
     std::vector<ErrorInfoFfdc *> iv_ffdcs;
     typedef std::vector<ErrorInfoFfdc *>::iterator ErrorInfoFfdcItr_t;
     typedef std::vector<ErrorInfoFfdc *>::const_iterator ErrorInfoFfdcCItr_t;
 
-    // Vector of targets to callout
-    std::vector<ErrorInfoCallout *> iv_callouts;
-    typedef std::vector<ErrorInfoCallout *>::iterator ErrorInfoCalloutItr_t;
-    typedef std::vector<ErrorInfoCallout *>::const_iterator ErrorInfoCalloutCItr_t;
-
-    // Vector of targets to deconfigure
-    std::vector<ErrorInfoDeconfig *> iv_deconfigs;
-    typedef std::vector<ErrorInfoDeconfig *>::iterator ErrorInfoDeconfigItr_t;
-    typedef std::vector<ErrorInfoDeconfig *>::const_iterator ErrorInfoDeconfigCItr_t;
-
-    // Vector of targets to create a GARD record for
-    std::vector<ErrorInfoGard *> iv_gards;
-    typedef std::vector<ErrorInfoGard *>::iterator ErrorInfoGardItr_t;
-    typedef std::vector<ErrorInfoGard *>::const_iterator ErrorInfoGardCItr_t;
+    // Vector of targets to callout/deconfigure/GARD
+    std::vector<ErrorInfoCDG *> iv_CDGs;
+    typedef std::vector<ErrorInfoCDG *>::iterator ErrorInfoCDGItr_t;
+    typedef std::vector<ErrorInfoCDG *>::const_iterator ErrorInfoCDGCItr_t;
 };
 
 }

@@ -74,59 +74,48 @@ void processEIFfdcs(const ErrorInfo & i_errInfo,
 }
 
 //******************************************************************************
-// processEICallouts
-// Processes any Callout requests in the ReturnCode Error Information
+// processEICDGs
+// Processes any Callout/Deconfigure/GARD  requests in the ReturnCode Error
+// Information
 //******************************************************************************
-void processEICallouts(const ErrorInfo & i_errInfo,
-                          errlHndl_t io_pError)
+void processEICDGs(const ErrorInfo & i_errInfo,
+                   errlHndl_t io_pError)
 {
-    // Iterate through the callout requestss, adding each  to the error log
-    for (ErrorInfo::ErrorInfoCalloutCItr_t l_itr =
-             i_errInfo.iv_callouts.begin();
-         l_itr != i_errInfo.iv_callouts.end(); ++l_itr)
-    {
-        // TODO Add callout to error log
-        // RTC 45800
-        FAPI_ERR("processEICallouts: Adding target callout to errlog (TODO). Type: 0x%x. Pri: 0x%x",
-                 (*l_itr)->iv_target.getType(), (*l_itr)->iv_priority);
-    }
-}
+    // TODO: RTC issue 47147
+    // Need to figure out how connections are called out. Assuming this is done
+    // by calling out Target pairs, then the HWAS::SRCI_PRIORITY will need to
+    // be a 'grouping' priority (MEDA/B/C)
 
-//******************************************************************************
-// processEIDeconfigs
-// Processes any Deconfig requests in the ReturnCode Error Information
-//******************************************************************************
-void processEIDeconfigs(const ErrorInfo & i_errInfo,
-                           errlHndl_t io_pError)
-{
-    // Iterate through the deconfigure requests, deconfiguring each target
-    for (ErrorInfo::ErrorInfoDeconfigCItr_t l_itr =
-             i_errInfo.iv_deconfigs.begin();
-         l_itr != i_errInfo.iv_deconfigs.end(); ++l_itr)
+    // Iterate through the CGD requests, adding each  to the error log
+    for (ErrorInfo::ErrorInfoCDGCItr_t l_itr = i_errInfo.iv_CDGs.begin();
+         l_itr != i_errInfo.iv_CDGs.end(); ++l_itr)
     {
-        // TODO Deconfigure target
-        // RTC 45800
-        FAPI_ERR("processEIDeconfigs: Deconfiguring target (TODO). Type: 0x%x",
-                 (*l_itr)->iv_target.getType());
-    }
-}
+        TARGETING::Target * l_pTarget =
+            reinterpret_cast<TARGETING::Target*>((*l_itr)->iv_target.get());
 
+        HWAS::callOutPriority l_priority = HWAS::SRCI_PRIORITY_HIGH;
+        if ((*l_itr)->iv_calloutPriority == fapi::PRI_MEDIUM)
+        {
+            l_priority = HWAS::SRCI_PRIORITY_MED;
+        }
+        else if ((*l_itr)->iv_calloutPriority == fapi::PRI_LOW)
+        {
+            l_priority = HWAS::SRCI_PRIORITY_LOW;
+        }
 
-//******************************************************************************
-// processEIGards
-// Processes any Gard requests in the ReturnCode Error Information
-//******************************************************************************
-void processEIGards(const ErrorInfo & i_errInfo,
-                       errlHndl_t io_pError)
-{
-    // Iterate through gard requests, creating a GARD record for each target
-    for (ErrorInfo::ErrorInfoGardCItr_t l_itr = i_errInfo.iv_gards.begin();
-         l_itr != i_errInfo.iv_gards.end(); ++l_itr)
-    {
-        // TODO Create GARD record for target
-        // RTC 45800
-        FAPI_ERR("processEIGards: Garding target (TODO). Type: 0x%x",
-                 (*l_itr)->iv_target.getType());
+        HWAS::DeconfigEnum l_deconfig = HWAS::NO_DECONFIG;
+        if ((*l_itr)->iv_deconfigure)
+        {
+            l_deconfig = HWAS::DELAYED_DECONFIG;
+        }
+
+        HWAS::GARD_ErrorType l_gard = HWAS::GARD_NULL;
+        if ((*l_itr)->iv_gard)
+        {
+            l_gard = HWAS::GARD_Unrecoverable;
+        }
+
+        io_pError->addHwCallout(l_pTarget, l_priority, l_deconfig, l_gard);
     }
 }
 
@@ -179,9 +168,7 @@ errlHndl_t fapiRcToErrl(ReturnCode & io_rc)
             {
                 // There is error information associated with the ReturnCode
                 processEIFfdcs(*l_pErrorInfo, l_pError);
-                processEICallouts(*l_pErrorInfo, l_pError);
-                processEIDeconfigs(*l_pErrorInfo, l_pError);
-                processEIGards(*l_pErrorInfo, l_pError);
+                processEICDGs(*l_pErrorInfo, l_pError);
             }
             else
             {

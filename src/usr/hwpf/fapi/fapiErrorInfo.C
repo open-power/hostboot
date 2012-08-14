@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/hwpf/fapi/fapiErrorInfo.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/hwpf/fapi/fapiErrorInfo.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 /**
  *  @file fapiErrorInfo.C
  *
@@ -35,6 +36,8 @@
  *                          mjjones     09/22/2011  Major updates
  *                          mjjones     03/16/2012  Add FfdcType. Remove copy
  *                                                  ctor and assignment operator
+ *                          mjjones     08/14/2012  Merge Callout/Deconfig/Gard
+ *                                                  structures into one
  */
 
 #include <fapiErrorInfo.H>
@@ -82,30 +85,11 @@ FfdcType ErrorInfoFfdc::getType() const
 }
 
 //******************************************************************************
-// ErrorInfoCallout Constructor
+// ErrorInfoCDG Constructor
 //******************************************************************************
-ErrorInfoCallout::ErrorInfoCallout(const Target & i_target,
-                                   const CalloutPriority i_priority)
-: iv_target(i_target),
-  iv_priority(i_priority)
-{
-
-}
-
-//******************************************************************************
-// ErrorInfoDeconfig Constructor
-//******************************************************************************
-ErrorInfoDeconfig::ErrorInfoDeconfig(const Target & i_target)
-: iv_target(i_target)
-{
-
-}
-
-//******************************************************************************
-// ErrorInfoGard Constructor
-//******************************************************************************
-ErrorInfoGard::ErrorInfoGard(const Target & i_target)
-: iv_target(i_target)
+ErrorInfoCDG::ErrorInfoCDG(const Target & i_target)
+: iv_target(i_target), iv_callout(false), iv_calloutPriority(PRI_LOW),
+  iv_deconfigure(false), iv_gard(false)
 {
 
 }
@@ -122,26 +106,38 @@ ErrorInfo::~ErrorInfo()
         (*l_itr) = NULL;
     }
 
-    for (ErrorInfo::ErrorInfoCalloutItr_t l_itr = iv_callouts.begin();
-         l_itr != iv_callouts.end(); ++l_itr)
+    for (ErrorInfo::ErrorInfoCDGItr_t l_itr = iv_CDGs.begin();
+         l_itr != iv_CDGs.end(); ++l_itr)
     {
         delete (*l_itr);
         (*l_itr) = NULL;
+    }
+}
+
+//******************************************************************************
+// ErrorInfo getCreateErrorInfoCDG
+//******************************************************************************
+ErrorInfoCDG & ErrorInfo::getCreateErrorInfoCDG(const Target & i_target)
+{
+    ErrorInfoCDG * l_pInfo = NULL;
+
+    for (ErrorInfo::ErrorInfoCDGCItr_t l_itr = iv_CDGs.begin();
+         l_itr != iv_CDGs.end(); ++l_itr)
+    {
+        if ((*l_itr)->iv_target == i_target)
+        {
+            l_pInfo = (*l_itr);
+            break;
+        }
     }
 
-    for (ErrorInfo::ErrorInfoDeconfigItr_t l_itr = iv_deconfigs.begin();
-         l_itr != iv_deconfigs.end(); ++l_itr)
+    if (l_pInfo == NULL)
     {
-        delete (*l_itr);
-        (*l_itr) = NULL;
+        l_pInfo = new ErrorInfoCDG(i_target);
+        iv_CDGs.push_back(l_pInfo);
     }
 
-    for (ErrorInfo::ErrorInfoGardItr_t l_itr = iv_gards.begin();
-         l_itr != iv_gards.end(); ++l_itr)
-    {
-        delete (*l_itr);
-        (*l_itr) = NULL;
-    }
+    return *l_pInfo;
 }
 
 }

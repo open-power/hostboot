@@ -46,6 +46,7 @@
  *                          mjjones     03/16/2012  Allow different PLAT errors
  *                          mjjones     05/02/2012  Only trace setEcmdError on err
  *                          mjjones     07/11/2012  Remove a trace
+ *                          mjjones     08/14/2012  Use new ErrorInfo structure
  */
 
 #include <fapiReturnCode.H>
@@ -197,8 +198,7 @@ void ReturnCode::setPlatError(void * i_pData,
 
     if (i_pData)
     {
-        ensureDataRefExists();
-        iv_pDataRef->setPlatData(i_pData);
+        getCreateReturnCodeDataRef().setPlatData(i_pData);
     }
 }
 
@@ -336,9 +336,9 @@ void ReturnCode::addEIFfdc(const void * i_pFfdc,
                            const FfdcType i_type)
 {
     // Create a ErrorInfoFfdc object and add it to the Error Information
-    ensureDataRefExists();
     ErrorInfoFfdc * l_pFfdc = new ErrorInfoFfdc(i_pFfdc, i_size, i_type);
-    iv_pDataRef->getCreateErrorInfo().iv_ffdcs.push_back(l_pFfdc);
+    getCreateReturnCodeDataRef().getCreateErrorInfo().
+        iv_ffdcs.push_back(l_pFfdc);
 }
 
 
@@ -377,14 +377,16 @@ ReturnCode::returnCodeCreator ReturnCode::getCreator() const
 }
 
 //******************************************************************************
-// ensureDataRefExists function
+// getCreateReturnCodeDataRef function
 //******************************************************************************
-void ReturnCode::ensureDataRefExists()
+ReturnCodeDataRef & ReturnCode::getCreateReturnCodeDataRef()
 {
-    if (!iv_pDataRef)
+    if (iv_pDataRef == NULL)
     {
         iv_pDataRef = new ReturnCodeDataRef();
     }
+
+    return *iv_pDataRef;
 }
 
 //******************************************************************************
@@ -411,10 +413,16 @@ void ReturnCode::forgetData()
 void ReturnCode::addEICallout(const Target & i_target,
                               const CalloutPriority i_priority)
 {
-    // Create a ErrorInfoCallout object and add it to the Error Information
-    ensureDataRefExists();
-    ErrorInfoCallout * l_pCallout = new ErrorInfoCallout(i_target, i_priority);
-    iv_pDataRef->getCreateErrorInfo().iv_callouts.push_back(l_pCallout);
+    // Get/Create a ErrorInfoCDG object for the target and update the callout
+    ErrorInfoCDG & l_errorInfoCdg = getCreateReturnCodeDataRef().
+        getCreateErrorInfo().getCreateErrorInfoCDG(i_target);
+    l_errorInfoCdg.iv_callout = true;
+
+    // If the same target is called out multiple times, use the highest priority
+    if (i_priority > l_errorInfoCdg.iv_calloutPriority)
+    {
+        l_errorInfoCdg.iv_calloutPriority = i_priority;
+    }
 }
 
 //******************************************************************************
@@ -422,10 +430,10 @@ void ReturnCode::addEICallout(const Target & i_target,
 //******************************************************************************
 void ReturnCode::addEIDeconfigure(const Target & i_target)
 {
-    // Create a ErrorInfoDeconfig object and add it to the Error Information
-    ensureDataRefExists();
-    ErrorInfoDeconfig * l_pDeconfig = new ErrorInfoDeconfig(i_target);
-    iv_pDataRef->getCreateErrorInfo().iv_deconfigs.push_back(l_pDeconfig);
+    // Get/Create a ErrorInfoCDG object for the target and update the deconfig
+    ErrorInfoCDG & l_errorInfoCdg = getCreateReturnCodeDataRef().
+        getCreateErrorInfo().getCreateErrorInfoCDG(i_target);
+    l_errorInfoCdg.iv_deconfigure = true;
 }
 
 //******************************************************************************
@@ -433,10 +441,10 @@ void ReturnCode::addEIDeconfigure(const Target & i_target)
 //******************************************************************************
 void ReturnCode::addEIGard(const Target & i_target)
 {
-    // Create a ErrorInfoGard object and add it to the Error Information
-    ensureDataRefExists();
-    ErrorInfoGard * l_pGard = new ErrorInfoGard(i_target);
-    iv_pDataRef->getCreateErrorInfo().iv_gards.push_back(l_pGard);
+    // Get/Create a ErrorInfoCDG object for the target and update the GARD
+    ErrorInfoCDG & l_errorInfoCdg = getCreateReturnCodeDataRef().
+        getCreateErrorInfo().getCreateErrorInfoCDG(i_target);
+    l_errorInfoCdg.iv_gard = true;
 }
 
 }
