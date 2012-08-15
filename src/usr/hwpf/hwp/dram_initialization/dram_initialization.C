@@ -64,7 +64,7 @@
 // #include    "mss_thermal_init/mss_thermal_init.H"
 #include    "proc_setup_bars/mss_setup_bars.H"
 #include    "proc_setup_bars/proc_setup_bars.H"
-// #include    "proc_pbus_epsilon/proc_pbus_epsilon.H"
+// #include    "proc_pcie_config/proc_pcie_config.H"
 #include    "proc_exit_cache_contained/proc_exit_cache_contained.H"
 
 //remove these once memory setup workaround is removed
@@ -506,14 +506,14 @@ void    call_proc_setup_bars( void    *io_pArgs )
 
 //
 //  Wrapper function to call 14.7 :
-//      proc_pbus_epsilon
+//      proc_pcie_config
 //
-void    call_proc_pbus_epsilon( void    *io_pArgs )
+void    call_proc_pcie_config( void    *io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_proc_pbus_epsilon entry" );
+               "call_proc_pcie_config entry" );
 
 #if 0
     // @@@@@    CUSTOM BLOCK:   @@@@@
@@ -533,7 +533,7 @@ void    call_proc_pbus_epsilon( void    *io_pArgs )
                         (const_cast<TARGETING::Target*>(l_@targetN_target)) );
 
     //  call the HWP with each fapi::Target
-    FAPI_INVOKE_HWP( l_errl, proc_pbus_epsilon, _args_...);
+    FAPI_INVOKE_HWP( l_errl, proc_pcie_config, _args_...);
     if ( l_errl )
     {
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
@@ -549,7 +549,7 @@ void    call_proc_pbus_epsilon( void    *io_pArgs )
 #endif
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_proc_pbus_epsilon exit" );
+               "call_proc_pcie_config exit" );
 
     // end task, returning any errorlogs to IStepDisp
     task_end2( l_errl );

@@ -158,7 +158,7 @@
 #       ## cutNpaste the patch comand from Gerrit and pipe to a file:
 #       git fetch ssh://wenning@gfw160.austin.ibm.com:29418/hwp_review_centaur refs/changes/63/663/3 && git format-patch -1 --stdout FETCH_HEAD > mss_eff_config.patch
 #       ##  then run the git command to put the code in the right directory:
-#       git apply --directory=src/usr/hwpf/hwp/mc_init/mss_eff_config   mss_eff_config.patch
+#       git apply --directory=src/usr/hwpf/hwp/mc_config/mss_eff_config   mss_eff_config.patch
 #
 #   Add makefile support for the new HWP:
 #   -   src/usr/hwpf/makefile       ( add any xml files to HWP_ERROR_XML_FILES )

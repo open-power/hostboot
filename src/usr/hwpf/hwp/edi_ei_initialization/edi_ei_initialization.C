@@ -62,7 +62,9 @@
 //  Uncomment these files as they become available:
 // #include    "fabric_erepair/fabric_erepair.H"
 // #include    "fabric_io_dccal/fabric_io_dccal.H"
+// #include    "fabric_pre_trainadv/fabric_pre_trainadv.H"
 #include    "fabric_io_run_training/fabric_io_run_training.H"
+// #include    "fabric_post_trainadv/fabric_post_trainadv.H"
 // #include    "host_startPRD_pbus/host_startPRD_pbus.H"
 // #include    "host_attnlisten_proc/host_attnlisten_proc.H"
 #include    "proc_fab_iovalid/proc_fab_iovalid.H"
@@ -83,7 +85,7 @@ void    call_fabric_erepair( void    *io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_fabric_erepair entry" );
 
 #if 0
@@ -107,22 +109,22 @@ void    call_fabric_erepair( void    *io_pArgs )
     FAPI_INVOKE_HWP( l_errl, fabric_erepair, _args_...);
     if ( l_errl )
     {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, 
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                   "ERROR : .........." );
         errlCommit( l_errl, HWPF_COMP_ID );
     }
     else
     {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "SUCCESS : .........." );
     }
     // @@@@@    END CUSTOM BLOCK:   @@@@@
 #endif
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_fabric_erepair exit" );
 
-    // end task, returning any errorlogs to IStepDisp 
+    // end task, returning any errorlogs to IStepDisp
     task_end2( l_errl );
 }
 
@@ -136,7 +138,7 @@ void    call_fabric_io_dccal( void    *io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_fabric_io_dccal entry" );
 
 #if 0
@@ -160,22 +162,22 @@ void    call_fabric_io_dccal( void    *io_pArgs )
     FAPI_INVOKE_HWP( l_errl, fabric_io_dccal, _args_...);
     if ( l_errl )
     {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, 
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                   "ERROR : .........." );
         errlCommit( l_errl, HWPF_COMP_ID );
     }
     else
     {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "SUCCESS : .........." );
     }
     // @@@@@    END CUSTOM BLOCK:   @@@@@
 #endif
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_fabric_io_dccal exit" );
 
-    // end task, returning any errorlogs to IStepDisp 
+    // end task, returning any errorlogs to IStepDisp
     task_end2( l_errl );
 }
 
@@ -183,13 +185,66 @@ void    call_fabric_io_dccal( void    *io_pArgs )
 
 //
 //  Wrapper function to call 08.3 :
+//      fabric_pre_trainadv
+//
+void    call_fabric_pre_trainadv( void    *io_pArgs )
+{
+    errlHndl_t  l_errl  =   NULL;
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_fabric_pre_trainadv entry" );
+
+#if 0
+    // @@@@@    CUSTOM BLOCK:   @@@@@
+    //  figure out what targets we need
+    //  customize any other inputs
+    //  set up loops to go through all targets (if parallel, spin off a task)
+
+    //  dump physical path to targets
+    EntityPath l_path;
+    l_path  =   l_@targetN_target->getAttr<ATTR_PHYS_PATH>();
+    l_path.dump();
+
+    // cast OUR type of target to a FAPI type of target.
+    const fapi::Target l_fapi_@targetN_target(
+                    TARGET_TYPE_MEMBUF_CHIP,
+                    reinterpret_cast<void *>
+                        (const_cast<TARGETING::Target*>(l_@targetN_target)) );
+
+    //  call the HWP with each fapi::Target
+    FAPI_INVOKE_HWP( l_errl, fabric_pre_trainadv, _args_...);
+    if ( l_errl )
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "ERROR : .........." );
+        errlCommit( l_errl, HWPF_COMP_ID );
+    }
+    else
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "SUCCESS : .........." );
+    }
+    // @@@@@    END CUSTOM BLOCK:   @@@@@
+#endif
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_fabric_pre_trainadv exit" );
+
+    // end task, returning any errorlogs to IStepDisp
+    task_end2( l_errl );
+}
+
+
+
+//
+//  Wrapper function to call 08.4 :
 //      fabric_io_run_training
 //
 void    call_fabric_io_run_training( void    *io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
 
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_fabric_io_run_training entry" );
 
     TargetPairs_t l_PbusConnections;
@@ -224,31 +279,84 @@ void    call_fabric_io_run_training( void    *io_pArgs )
             FAPI_INVOKE_HWP( l_errl, fabric_io_run_training,
                              l_fapi_endp1_target, l_fapi_endp2_target );
 
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                        "%s : %cbus connection io_run_training",
                        (l_errl ? "ERROR" : "SUCCESS"),
                        (i ? 'X' : 'A') );
         }
     }
 
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_fabric_io_run_training exit" );
 
-    // end task, returning any errorlogs to IStepDisp 
+    // end task, returning any errorlogs to IStepDisp
     task_end2( l_errl );
 }
 
 
 
 //
-//  Wrapper function to call 08.4 :
+//  Wrapper function to call 08.5 :
+//      fabric_post_trainadv
+//
+void    call_fabric_post_trainadv( void    *io_pArgs )
+{
+    errlHndl_t  l_errl  =   NULL;
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_fabric_post_trainadv entry" );
+
+#if 0
+    // @@@@@    CUSTOM BLOCK:   @@@@@
+    //  figure out what targets we need
+    //  customize any other inputs
+    //  set up loops to go through all targets (if parallel, spin off a task)
+
+    //  dump physical path to targets
+    EntityPath l_path;
+    l_path  =   l_@targetN_target->getAttr<ATTR_PHYS_PATH>();
+    l_path.dump();
+
+    // cast OUR type of target to a FAPI type of target.
+    const fapi::Target l_fapi_@targetN_target(
+                    TARGET_TYPE_MEMBUF_CHIP,
+                    reinterpret_cast<void *>
+                        (const_cast<TARGETING::Target*>(l_@targetN_target)) );
+
+    //  call the HWP with each fapi::Target
+    FAPI_INVOKE_HWP( l_errl, fabric_post_trainadv, _args_...);
+    if ( l_errl )
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "ERROR : .........." );
+        errlCommit( l_errl, HWPF_COMP_ID );
+    }
+    else
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "SUCCESS : .........." );
+    }
+    // @@@@@    END CUSTOM BLOCK:   @@@@@
+#endif
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_fabric_post_trainadv exit" );
+
+    // end task, returning any errorlogs to IStepDisp
+    task_end2( l_errl );
+}
+
+
+
+//
+//  Wrapper function to call 08.6 :
 //      host_startPRD_pbus
 //
 void    call_host_startPRD_pbus( void    *io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_startPRD_pbus entry" );
 
 #if 0
@@ -272,36 +380,36 @@ void    call_host_startPRD_pbus( void    *io_pArgs )
     FAPI_INVOKE_HWP( l_errl, host_startPRD_pbus, _args_...);
     if ( l_errl )
     {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, 
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                   "ERROR : .........." );
         errlCommit( l_errl, HWPF_COMP_ID );
     }
     else
     {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "SUCCESS : .........." );
     }
     // @@@@@    END CUSTOM BLOCK:   @@@@@
 #endif
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_startPRD_pbus exit" );
 
-    // end task, returning any errorlogs to IStepDisp 
+    // end task, returning any errorlogs to IStepDisp
     task_end2( l_errl );
 }
 
 
 
 //
-//  Wrapper function to call 08.5 :
+//  Wrapper function to call 08.7 :
 //      host_attnlisten_proc
 //
 void    call_host_attnlisten_proc( void    *io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_attnlisten_proc entry" );
 
 #if 0
@@ -325,29 +433,29 @@ void    call_host_attnlisten_proc( void    *io_pArgs )
     FAPI_INVOKE_HWP( l_errl, host_attnlisten_proc, _args_...);
     if ( l_errl )
     {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, 
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                   "ERROR : .........." );
         errlCommit( l_errl, HWPF_COMP_ID );
     }
     else
     {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "SUCCESS : .........." );
     }
     // @@@@@    END CUSTOM BLOCK:   @@@@@
 #endif
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_attnlisten_proc exit" );
 
-    // end task, returning any errorlogs to IStepDisp 
+    // end task, returning any errorlogs to IStepDisp
     task_end2( l_errl );
 }
 
 
 
 //
-//  Wrapper function to call 08.6 :
+//  Wrapper function to call 08.8 :
 //      proc_fab_iovalid
 //
 void    call_proc_fab_iovalid( void    *io_pArgs )
@@ -447,7 +555,7 @@ void    call_proc_fab_iovalid( void    *io_pArgs )
     {
         FAPI_INVOKE_HWP( l_errl, proc_fab_iovalid, l_smp, true );
 
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, 
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                   "%s : proc_fab_iovalid HWP.",
                   (l_errl ? "ERROR" : "SUCCESS"));
     }
@@ -455,7 +563,7 @@ void    call_proc_fab_iovalid( void    *io_pArgs )
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_fab_iovalid exit" );
 
-    // end task, returning any errorlogs to IStepDisp 
+    // end task, returning any errorlogs to IStepDisp
     task_end2( l_errl );
 }
 

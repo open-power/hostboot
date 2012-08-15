@@ -1,25 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/include/usr/isteps/istepmasterlist.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/include/usr/isteps/istepmasterlist.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2011-2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #ifndef __ISTEPS_ISTEPMASTERLIST_H
 #define __ISTEPS_ISTEPMASTERLIST_H
 
@@ -73,7 +74,7 @@
 // istep 17, FSP only
 #include    "istep18list.H"
 // istep 19, FSP only
-#include    "istep20list.H"
+// istep 20, FSP only
 #include    "istep21list.H"
 
 namespace   INITSERVICE
@@ -101,7 +102,7 @@ const  ExtTaskInfo  g_isteps[]    =   {
         { NULL, 0, NULL},                               //  FSP   IStep 17
         INITSERVICE::g_istep18TaskList,                 //        IStep 18
         { NULL, 0, NULL },                              //  FSP   IStep 19
-        INITSERVICE::g_istep20TaskList,                 //        IStep 20
+        { NULL, 0, NULL },                              //  FSP   IStep 20
         INITSERVICE::g_istep21TaskList                  //        IStep 21
         //
         // add further istep lists at the end.

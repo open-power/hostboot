@@ -1,7 +1,7 @@
-#  IBM_PROLOG_BEGIN_TAG
+#   IBM_PROLOG_BEGIN_TAG
 #  This is an automatically generated prolog.
 #
-#  $Source: src/usr/hwpf/hwp/mc_init/makefile $
+#  $Source: src/usr/hwpf/hwp/mc_config/makefile $
 #
 #  IBM CONFIDENTIAL
 #
@@ -19,11 +19,10 @@
 #
 #  Origin: 30
 #
-#  IBM_PROLOG_END
-
+#  IBM_PROLOG_END_TAG
 ROOTPATH = ../../../../..
 
-MODULE = mc_init
+MODULE = mc_config
 
 ##      support for Targeting and fapi
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
@@ -37,11 +36,11 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/include
 ##  Include sub dirs
 ##  NOTE: add a new EXTRAINCDIR when you add a new HWP
 ##@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/???
-EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/mc_init/mss_eff_config
-EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/mc_init/mss_volt
-EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/mc_init/mss_freq
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/mc_config/mss_eff_config
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/mc_config/mss_volt
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/mc_config/mss_freq
 
-OBJS =  mc_init.o			\
+OBJS =  mc_config.o			\
         mss_volt.o 			\
         mss_freq.o 			\
         mss_eff_config.o                \
@@ -51,9 +50,9 @@ OBJS =  mc_init.o			\
 	
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 ##@ VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/???
-VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/mc_init/mss_eff_config
-VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/mc_init/mss_volt
-VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/mc_init/mss_freq
+VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/mc_config/mss_eff_config
+VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/mc_config/mss_volt
+VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/mc_config/mss_freq
 
 
 include ${ROOTPATH}/config.mk

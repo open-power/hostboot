@@ -1,26 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/hwpf/hwp/dram_initialization/dram_initialization.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
-
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/usr/hwpf/hwp/dram_initialization/dram_initialization.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #ifndef  __DRAM_INITIALIZATION_DRAM_INITIALIZATION_H
 #define  __DRAM_INITIALIZATION_DRAM_INITIALIZATION_H
 
@@ -39,7 +39,7 @@
  */
 
  /*  @tag isteplist
- *  @docversion     v1.01 (03/26/12)
+ *  @docversion     v1.08 (08/13/12)
  *  @istepname      dram_initialization
  *  @istepnum       14
  *  @istepdesc      Dram Initialization
@@ -82,8 +82,8 @@
  *  @}
  *  @{
  *      @substepnum     7
- *      @substepname    proc_pbus_epsilon
- *      @substepdesc    : Set runtime epsilons
+ *      @substepname    proc_pcie_config
+ *      @substepdesc    : Configure the PHBs
  *          @target_sched   serial
  *  @}
  *  @{
@@ -185,16 +185,16 @@ void    call_proc_setup_bars( void    *io_pArgs );
 
 
 /**
- *  @brief   proc_pbus_epsilon
+ *  @brief   proc_pcie_config
  *
- *  14.7 : : Set runtime epsilons
+ *  14.7 : : Configure the PHBs
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
  *  return  none
  *
  */
-void    call_proc_pbus_epsilon( void    *io_pArgs );
+void    call_proc_pcie_config( void    *io_pArgs );
 
 
 

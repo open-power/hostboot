@@ -56,11 +56,11 @@ BASE_MODULES = trace errl devicefw scom xscom initservice \
 EXTENDED_MODULES = targeting ecmddatabuffer fapi hwp plat	\
                    extinitsvc istepdisp hwas fsi fsiscom i2c intr \
 		           spd dmi_training fapiporeve poreve util	\
-		           sbe_centaur_init mc_init dram_training \
+		           sbe_centaur_init mc_config dram_training \
                    mdia mbox mvpd prdf bus_training \
                    activate_powerbus build_winkle_images \
                    core_activate dram_initialization edi_ei_initialization \
-                   establish_system_smp load_payload \
+                   establish_system_smp \
                    nest_chiplets start_payload thread_activate slave_sbe \
                    attn
 

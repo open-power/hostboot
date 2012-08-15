@@ -27,8 +27,8 @@
 /**
  * @file    istep12list.H
  *
- *  IStep 12    Step 12 MC Init
- *  IPL FLow Doc        v0.99 (02/10/12)
+ *  IStep 12    Step 12 MC Config
+ *  IPL FLow Doc        v1.08 (08/13/12)
  *
  *  12.1	  host_collect_dimm_spd
  *  	: Collect Master dimm SPD
@@ -52,7 +52,7 @@
 #include    <initservice/initsvcreasoncodes.H>
 
 //  include prototypes file
-#include    "../../../usr/hwpf/hwp/mc_init/mc_init.H"
+#include    "../../../usr/hwpf/hwp/mc_config/mc_config.H"
 
 namespace   INITSERVICE
 {
@@ -69,7 +69,7 @@ const   TaskInfo    g_istep12[]  =   {
 
         {
                 ISTEPNAME(12,01,"host_collect_dimm_spd"),
-                MC_INIT::call_host_collect_dimm_spd,
+                MC_CONFIG::call_host_collect_dimm_spd,
                 {
                         START_FN,
                         EXT_IMAGE,
@@ -77,7 +77,7 @@ const   TaskInfo    g_istep12[]  =   {
         },
         {
                 ISTEPNAME(12,02,"mss_volt"),
-                MC_INIT::call_mss_volt,
+                MC_CONFIG::call_mss_volt,
                 {
                         START_FN,
                         EXT_IMAGE,
@@ -85,7 +85,7 @@ const   TaskInfo    g_istep12[]  =   {
         },
         {
                 ISTEPNAME(12,03,"mss_freq"),
-                MC_INIT::call_mss_freq,
+                MC_CONFIG::call_mss_freq,
                 {
                         START_FN,
                         EXT_IMAGE,
@@ -93,7 +93,7 @@ const   TaskInfo    g_istep12[]  =   {
         },
         {
                 ISTEPNAME(12,04,"mss_eff_config"),
-                MC_INIT::call_mss_eff_config,
+                MC_CONFIG::call_mss_eff_config,
                 {
                         START_FN,
                         EXT_IMAGE,

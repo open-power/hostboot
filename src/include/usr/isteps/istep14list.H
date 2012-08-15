@@ -1,26 +1,26 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/include/usr/isteps/istep14list.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
-
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
+ *
+ *  $Source: src/include/usr/isteps/istep14list.H $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
 #ifndef __ISTEPS_ISTEP14LIST_H
 #define __ISTEPS_ISTEP14LIST_H
 
@@ -28,7 +28,7 @@
  * @file    istep14list.H
  *
  *  IStep 14    Dram Initialization
- *  IPL FLow Doc        v1.01 (03/26/12)
+ *  IPL FLow Doc        v1.08 (08/13/12)
  *
  *    14.1    host_startPRD_dram
  *          : Load PRD for DRAM domain
@@ -42,8 +42,8 @@
  *          : Initialize the thermal sensor
  *    14.6    proc_setup_bars
  *          : Setup Memory BARs
- *    14.7    proc_pbus_epsilon
- *          : Set runtime epsilons
+ *    14.7    proc_pcie_config
+ *          : Configure the PHBs
  *    14.8    proc_exit_cache_contained
  *          : Allow execution from memory
  *
@@ -137,8 +137,8 @@ namespace   INITSERVICE
 
 
         {
-                ISTEPNAME(14,07,"proc_pbus_epsilon"),
-                DRAM_INITIALIZATION::call_proc_pbus_epsilon,
+                ISTEPNAME(14,07,"proc_pcie_config"),
+                DRAM_INITIALIZATION::call_proc_pcie_config,
                 {
                         START_FN,
                         EXT_IMAGE,

@@ -68,7 +68,7 @@ const uint8_t VPO_NUM_OF_MEMBUF_TO_RUN = UNLIMITED_RUN;
 
 //  Un-comment these files as they become available:
 // #include    "host_disable_vddr/host_disable_vddr.H"
-// #include    "mc_pll_setup/mc_pll_setup.H"
+// #include    "mem_pll_setup/mem_pll_setup.H"
 #include    "mem_startclocks/cen_mem_startclocks.H"
 // #include    "host_enable_vddr/host_enable_vddr.H"
 #include    "mss_scominit/mss_scominit.H"
@@ -146,13 +146,13 @@ void    call_host_disable_vddr( void *io_pArgs )
 
 
 //
-//  Wrapper function to call 13.2 : mc_pll_setup
+//  Wrapper function to call 13.2 : mem_pll_setup
 //
-void    call_mc_pll_setup( void *io_pArgs )
+void    call_mem_pll_setup( void *io_pArgs )
 {
     errlHndl_t l_err = NULL;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mc_pll_setup entry" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mem_pll_setup entry" );
 
 #if 0
     // @@@@@    CUSTOM BLOCK:   @@@@@
@@ -162,7 +162,7 @@ void    call_mc_pll_setup( void *io_pArgs )
 
     //  print call to hwp and dump physical path of the target(s)
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "=====  mc_pll_setup HWP(? ? ? )",
+                    "=====  mem_pll_setup HWP(? ? ? )",
                     ?
                     ?
                     ? );
@@ -179,13 +179,13 @@ void    call_mc_pll_setup( void *io_pArgs )
                         (const_cast<TARGETING::Target*>(l_@targetN_target)) );
 
     //  call the HWP with each fapi::Target
-    l_fapirc  =   mc_pll_setup( ? , ?, ? );
+    l_fapirc  =   mem_pll_setup( ? , ?, ? );
 
     //  process return code.
     if ( l_fapirc== fapi::FAPI_RC_SUCCESS )
     {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "SUCCESS :  mc_pll_setup HWP(? ? ? )" );
+                "SUCCESS :  mem_pll_setup HWP(? ? ? )" );
     }
     else
     {
@@ -193,13 +193,13 @@ void    call_mc_pll_setup( void *io_pArgs )
          * @todo fapi error - just print out for now...
          */
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR 0x%.8X:  mc_pll_setup HWP(? ? ?) ",
+                "ERROR 0x%.8X:  mem_pll_setup HWP(? ? ?) ",
                 static_cast<uint32_t>(l_fapirc) );
     }
     // @@@@@    END CUSTOM BLOCK:   @@@@@
 #endif
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mc_pll_setup exit" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mem_pll_setup exit" );
 
     task_end2( l_err );
 }

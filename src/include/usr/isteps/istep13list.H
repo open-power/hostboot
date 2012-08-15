@@ -28,28 +28,28 @@
  * @file    istep13list.H
  *
  *  IStep 13    Step 13 DRAM Training
- *  IPL FLow Doc        v0.99 (02/10/12)
+ *  IPL FLow Doc        v1.08 (08/13/12)
  *
- *  13.1	  host_disable_vddr
- *  	: Disable VDDR on CanContinue loops
- *  13.2	  mc_pll_setup
- *  	: Setup PLL for MBAs
- *  13.3	  mem_startclocks
- *  	: Start clocks on MBAs
- *  13.4	  host_enable_vddr
- *  	: Enable the VDDR3 Voltage Rail
- *  13.5	  mss_scominit
- *  	: Perform scom inits to MC and PHY
- *  13.6	  mss_ddr_phy_reset
- *  	: Soft reset of DDR PHY macros
- *  13.7	  mss_draminit
- *  	: Dram initialize
- *  13.8	  mss_draminit_training
- *  	: Dram training
- *  13.9	  mss_draminit_trainadv
- *  	: Advanced dram training
- *  13.10	  mss_draminit_mc
- *  	: Hand off control to MC
+ *  13.1      host_disable_vddr
+ *      : Disable VDDR on CanContinue loops
+ *  13.2      mem_pll_setup
+ *      : Setup PLL for MBAs
+ *  13.3      mem_startclocks
+ *      : Start clocks on MBAs
+ *  13.4      host_enable_vddr
+ *      : Enable the VDDR3 Voltage Rail
+ *  13.5      mss_scominit
+ *      : Perform scom inits to MC and PHY
+ *  13.6      mss_ddr_phy_reset
+ *      : Soft reset of DDR PHY macros
+ *  13.7      mss_draminit
+ *      : Dram initialize
+ *  13.8      mss_draminit_training
+ *      : Dram training
+ *  13.9      mss_draminit_trainadv
+ *      : Advanced dram training
+ *  13.10     mss_draminit_mc
+ *      : Hand off control to MC
  *
  *  *****************************************************************
  *  THIS FILE WAS GENERATED ON 2012-02-27:2142
@@ -88,8 +88,8 @@ const   TaskInfo    g_istep13[]  =   {
                 }
         },
         {
-                ISTEPNAME(13,02,"mc_pll_setup"),
-                DRAM_TRAINING::call_mc_pll_setup,
+                ISTEPNAME(13,02,"mem_pll_setup"),
+                DRAM_TRAINING::call_mem_pll_setup,
                 {
                         START_FN,
                         EXT_IMAGE,

@@ -39,7 +39,7 @@
  */
 
 /*  @tag isteplist
- *  @docversion     v0.99 (02/10/12)
+ *  @docversion     v1.08 (08/13/12)
  *  @istepname      dram_training
  *  @istepnum       13
  *  @istepdesc      Step 13 DRAM Training
@@ -52,7 +52,7 @@
  *  @}
  *  @{
  *      @substepnum     2
- *      @substepname    mc_pll_setup
+ *      @substepname    mem_pll_setup
  *      @substepdesc    : Setup PLL for MBAs
  *      @target_sched   serial
  *  @}
@@ -130,7 +130,7 @@ void    call_host_disable_vddr( void * io_pArgs );
 
 
 /**
- *  @brief   mc_pll_setup
+ *  @brief   mem_pll_setup
  *
  *  13.2 : : Setup PLL for MBAs
  *
@@ -139,7 +139,7 @@ void    call_host_disable_vddr( void * io_pArgs );
  *  return  none
  *
  */
-void    call_mc_pll_setup( void * io_pArgs );
+void    call_mem_pll_setup( void * io_pArgs );
 
 
 

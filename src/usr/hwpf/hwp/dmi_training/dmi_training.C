@@ -160,7 +160,7 @@ void    call_dmi_erepair( void *io_pArgs )
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_erepair entry" );
 
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "dmi_erepair exit" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_erepair exit" );
 
     task_end2( l_err );
 }
@@ -175,20 +175,36 @@ void    call_dmi_io_dccal( void *io_pArgs )
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_io_dccal entry" );
 
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "dmi_io_dccal exit" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_io_dccal exit" );
 
     task_end2( l_err );
 }
 
 
 //
-//  Wrapper function to call 11.4 : dmi_io_run_training
+//  Wrapper function to call 11.4 : dmi_pre_trainadv
+//
+void    call_dmi_pre_trainadv( void *io_pArgs )
+{
+    errlHndl_t l_err = NULL;
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_pre_trainadv entry" );
+
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_pre_trainadv exit" );
+
+    task_end2( l_err );
+}
+
+
+//
+//  Wrapper function to call 11.5 : dmi_io_run_training
 //
 void    call_dmi_io_run_training( void *io_pArgs )
 {
     errlHndl_t l_err = NULL;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "dmi_io_run_training entry" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_io_run_training entry" );
 
     TARGETING::TargetHandleList l_cpuTargetList;
     getAllChips(l_cpuTargetList, TYPE_PROC);
@@ -287,13 +303,29 @@ void    call_dmi_io_run_training( void *io_pArgs )
     }   // end for l_cpu_target
 
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_io_run_training exit" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_io_run_training exit" );
 
     task_end2( l_err );
 }
 
 //
-//  Wrapper function to call 11.5 : proc_cen_framelock
+//  Wrapper function to call 11.6 : dmi_post_trainadv
+//
+void    call_dmi_post_trainadv( void *io_pArgs )
+{
+    errlHndl_t l_err = NULL;
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_post_trainadv entry" );
+
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_post_trainadv exit" );
+
+    task_end2( l_err );
+}
+
+
+//
+//  Wrapper function to call 11.7 : proc_cen_framelock
 //
 void    call_proc_cen_framelock( void *io_pArgs )
 {
@@ -379,7 +411,7 @@ void    call_proc_cen_framelock( void *io_pArgs )
 }
 
 //
-//  Wrapper function to call 11.6 : host_startPRD_dmi
+//  Wrapper function to call 11.8 : host_startPRD_dmi
 //
 void    call_host_startPRD_dmi( void *io_pArgs )
 {
@@ -387,13 +419,13 @@ void    call_host_startPRD_dmi( void *io_pArgs )
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_startPRD_dmi entry" );
 
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_startPRD_dmi exit" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_startPRD_dmi exit" );
 
     task_end2( l_err );
 }
 
 //
-//  Wrapper function to call 11.7 : host_attnlisten_cen
+//  Wrapper function to call 11.9 : host_attnlisten_cen
 //
 void    call_host_attnlisten_cen( void *io_pArgs )
 {
@@ -403,13 +435,13 @@ void    call_host_attnlisten_cen( void *io_pArgs )
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_attnlisten_cen entry" );
 
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "<host_attnlisten_cen exit" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_attnlisten_cen exit" );
 
     task_end2( l_err );
 }
 
 //
-//  Wrapper function to call 11.8 : cen_set_inband_addr
+//  Wrapper function to call 11.10 : cen_set_inband_addr
 //
 void    call_cen_set_inband_addr( void *io_pArgs )
 {
@@ -418,7 +450,7 @@ void    call_cen_set_inband_addr( void *io_pArgs )
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_set_inband_addr entry" );
 
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "cen_set_inband_addr exit" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_set_inband_addr exit" );
 
     task_end2( l_err );
 }

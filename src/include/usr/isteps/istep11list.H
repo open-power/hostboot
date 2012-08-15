@@ -26,7 +26,7 @@
 
 /**
  * list of functions called for DMI Training - ISTEP 11 according to Dean's
- * HostBoot IPL Flow v1.05
+ * HostBoot IPL Flow v1.08
  *
  * 11.1. dmi_scominit
  *       :  Scom setup on centaur
@@ -34,15 +34,19 @@
  *          : Restore EDI Bus eRepair data
  * 11.3. dmi_io_dccal
  *       : Calibrate DMI interfaces
- * 11.4. dmi_io_run_training
+ * 11.4. dmi_pre_trainadv
+ *       : Advanced pre DMI training
+ * 11.5. dmi_io_run_training
  *       : Run training on MC buses
- * 11.5. proc_cen_framelock
+ * 11.6. dmi_post_trainadv
+ *       : Advanced post DMI training
+ * 11.7. proc_cen_framelock
  *       : Initialize EDI Frame
- * 11.6. host_startPRD_dmi
+ * 11.8. host_startPRD_dmi
  *       : Load PRD for DMI domain
- * 11.7. host_attnlisten_cen
+ * 11.9. host_attnlisten_cen
  *       : Start listening for attentions
- * 11.8. cen_set_inband_addr
+ * 11.10. cen_set_inband_addr
  *       : Set the Inband base addresses
  */
 
@@ -100,7 +104,15 @@ const   TaskInfo    g_istep11[]  =   {
                 }
         },
         {
-                ISTEPNAME(11,04,"dmi_io_run_training"),      // substep name
+                ISTEPNAME(11,04,"dmi_pre_trainadv"),        // substep name
+                DMI_TRAINING::call_dmi_pre_trainadv,        // pointer to fn
+                {
+                        START_FN,                           // task type
+                        EXT_IMAGE,                          // Extended Module
+                }
+        },
+        {
+                ISTEPNAME(11,05,"dmi_io_run_training"),      // substep name
                 DMI_TRAINING::call_dmi_io_run_training,     // pointer to fn
                 {
                         START_FN,                           // task type
@@ -108,7 +120,15 @@ const   TaskInfo    g_istep11[]  =   {
                 }
         },
         {
-                ISTEPNAME(11,05,"proc_cen_framelock"),       // substep name
+                ISTEPNAME(11,06,"dmi_post_trainadv"),       // substep name
+                DMI_TRAINING::call_dmi_post_trainadv,       // pointer to fn
+                {
+                        START_FN,                           // task type
+                        EXT_IMAGE,                          // Extended Module
+                }
+        },
+        {
+                ISTEPNAME(11,07,"proc_cen_framelock"),       // substep name
                 DMI_TRAINING::call_proc_cen_framelock,      // pointer to fn
                 {
                         START_FN,                           // task type
@@ -116,7 +136,7 @@ const   TaskInfo    g_istep11[]  =   {
                 }
         },
         {
-                ISTEPNAME(11,06,"host_startPRD_dmi"),        // substep name
+                ISTEPNAME(11,08,"host_startPRD_dmi"),        // substep name
                 DMI_TRAINING::call_host_startPRD_dmi,       // pointer to fn
                 {
                         START_FN,                           // task type
@@ -124,7 +144,7 @@ const   TaskInfo    g_istep11[]  =   {
                 }
         },
         {
-                ISTEPNAME(11,07,"host_attnlisten_cen"),      // substep name
+                ISTEPNAME(11,09,"host_attnlisten_cen"),      // substep name
                 DMI_TRAINING::call_host_attnlisten_cen,     // pointer to fn
                 {
                         START_FN,                           // task type
@@ -132,8 +152,8 @@ const   TaskInfo    g_istep11[]  =   {
                 }
         },
         {
-                ISTEPNAME(11,08,"cen_set_inband_addr"),      // substep name
-                DMI_TRAINING::call_cen_set_inband_addr,          // pointer to fn
+                ISTEPNAME(11,10,"cen_set_inband_addr"),      // substep name
+                DMI_TRAINING::call_cen_set_inband_addr,      // pointer to fn
                 {
                         START_FN,                           // task type
                         EXT_IMAGE,                          // Extended Module

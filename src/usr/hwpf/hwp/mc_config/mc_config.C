@@ -1,31 +1,31 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/hwpf/hwp/mc_init/mc_init.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
-
-/**
- *  @file mc_init.C
+/*  IBM_PROLOG_BEGIN_TAG
+ *  This is an automatically generated prolog.
  *
- *  Support file for IStep: mc_init
- *   Step 12 MC Init
+ *  $Source: src/usr/hwpf/hwp/mc_config/mc_config.C $
+ *
+ *  IBM CONFIDENTIAL
+ *
+ *  COPYRIGHT International Business Machines Corp. 2012
+ *
+ *  p1
+ *
+ *  Object Code Only (OCO) source materials
+ *  Licensed Internal Code Source Materials
+ *  IBM HostBoot Licensed Internal Code
+ *
+ *  The source code for this program is not published or other-
+ *  wise divested of its trade secrets, irrespective of what has
+ *  been deposited with the U.S. Copyright Office.
+ *
+ *  Origin: 30
+ *
+ *  IBM_PROLOG_END_TAG
+ */
+/**
+ *  @file mc_config.C
+ *
+ *  Support file for IStep: mc_config
+ *   Step 12 MC Config
  *
  *  *****************************************************************
  *  THIS FILE WAS GENERATED ON 2012-03-01:1032
@@ -55,10 +55,10 @@
 
 //  --  prototype   includes    --
 //  Add any customized routines that you don't want overwritten into
-//      "mc_init_custom.C" and include the prototypes here.
-//  #include    "mc_init_custom.H"
+//      "mc_config_custom.C" and include the prototypes here.
+//  #include    "mc_config_custom.H"
 
-#include    "mc_init.H"
+#include    "mc_config.H"
 
 //  Uncomment these files as they become available:
 // #include    "host_collect_dimm_spd/host_collect_dimm_spd.H"
@@ -66,7 +66,7 @@
 #include    "mss_freq/mss_freq.H"
 #include    "mss_eff_config/mss_eff_config.H"
 
-namespace   MC_INIT
+namespace   MC_CONFIG
 {
 
 using   namespace   TARGETING;
