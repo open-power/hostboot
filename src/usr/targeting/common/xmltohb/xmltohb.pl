@@ -2784,6 +2784,30 @@ sub enumNameToValue {
 }
 
 ################################################################################
+# Query if target instance is an FSP target
+################################################################################
+
+my %g_fspTargetTypesCache = ();
+
+sub isFspTargetInstance {
+    my($attributes,$targetInstance) = @_;
+    my $fspTargetInstance = 0;
+
+    if(%g_fspTargetTypesCache)
+    {
+        $fspTargetInstance = %g_fspTargetTypesCache->{$targetInstance->{type}};
+    }
+    else
+    {
+        %g_fspTargetTypesCache =
+            map { $_->{id} => exists $_->{fspOnly} ? 1:0 } 
+                @{$attributes->{targetType}};
+    }
+    
+    return $fspTargetInstance;
+}
+
+################################################################################
 # Object which accumulates/flushes bit field data
 ################################################################################
 
@@ -3458,6 +3482,11 @@ sub generateTargetingImage {
             }
         }
 
+        # Flag if target is FSP specific; in that case store all of its 
+        # attributes in the FSP section, regardless of whether they are 
+        # themselves FSP specific.  Only need to do this 1x per target instance
+        my $fspTarget = isFspTargetInstance($attributes,$targetInstance);
+ 
         my %attributeDefCache =
             map { $_->{id} => $_} @{$attributes->{attribute}};
 
@@ -3472,7 +3501,8 @@ sub generateTargetingImage {
             my $section;
             # TODO RTC: 35451
             # Split "fsp" into more sections later
-            if( exists $attributeDef->{fspOnly} )
+            if(   (exists $attributeDef->{fspOnly})
+               || ($fspTarget))
             {
                 $section = "fsp";
             }
