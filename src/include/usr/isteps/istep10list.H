@@ -58,7 +58,7 @@ const   TaskInfo    g_istep10[]  =   {
                 }
         },
         {
-                ISTEPNAME(10,01,"sbe_centaur_init"),
+                ISTEPNAME(10,01,"cen_sbe_tp_chiplet_init1"),
                 SBE_CENTAUR_INIT::call_sbe_centaur_init,
                 {
                         START_FN,
