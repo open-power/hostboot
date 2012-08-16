@@ -196,9 +196,7 @@ public:
    * @brief SCOM test via FSISCOM to Centaur
    *
    */
-  //Disabled due to test case fails when switching to b0810a_1233.810.  Opened issue 47059 to track re-enabling
-  //TODO: Investigate test case fails, tracked with RTC: 47059.
-  void disabled_FSISCOMreadWrite_centaur(void)
+  void test_FSISCOMreadWrite_centaur(void)
   {
       TRACFCOMP( g_trac_scom, "ScomTest::test_FSISCOMreadWrite_centaur> Start" );
       uint64_t fails = 0;
@@ -300,16 +298,16 @@ public:
           { scom_targets[CENTAUR0], 0x02011672 , 0x1122334455667788 },
           { scom_targets[CENTAUR8], 0x02011672 , 0x9E9E9E9E9E9E9E9E },
 
-          { scom_targets[CENTAUR0], 0x02011404 , 0x00000000f0f0f0f0 },
-          { scom_targets[CENTAUR1], 0x02011404 , 0x1111111100000000 },
-          { scom_targets[CENTAUR2], 0x02011404 , 0x2222222200000000 },
-          { scom_targets[CENTAUR3], 0x02011404 , 0x3333333300000000 },
-          { scom_targets[CENTAUR4], 0x02011404 , 0x4444444400000000 },
-          { scom_targets[CENTAUR5], 0x02011404 , 0x5555555500000000 },
-          { scom_targets[CENTAUR6], 0x02011404 , 0x6666666600000000 },
-          { scom_targets[CENTAUR7], 0x02011404 , 0x7777777700000000 },
-          { scom_targets[CENTAUR8], 0x02011404 , 0x8888888800000000 },
-          { scom_targets[CENTAUR9], 0x02011404 , 0x9999999900000000 },
+          { scom_targets[CENTAUR0], 0x030104E0 , 0x00000000f0f0f0f0 },
+          { scom_targets[CENTAUR1], 0x030104E1 , 0x1111111100000000 },
+          { scom_targets[CENTAUR2], 0x030104E2 , 0x2222222200000000 },
+          { scom_targets[CENTAUR3], 0x030104E3 , 0x3333333300000000 },
+          { scom_targets[CENTAUR4], 0x030104E4 , 0x4444444400000000 },
+          { scom_targets[CENTAUR5], 0x030104E5 , 0x5555555500000000 },
+          { scom_targets[CENTAUR6], 0x030104E6 , 0x6666666600000000 },
+          { scom_targets[CENTAUR7], 0x030104E7 , 0x7777777700000000 },
+          { scom_targets[CENTAUR8], 0x030104E8 , 0x8888888800000000 },
+          { scom_targets[CENTAUR9], 0x030104E9 , 0x9999999900000000 },
       };
       const uint64_t NUM_ADDRS = sizeof(test_data)/sizeof(test_data[0]);
 
