@@ -331,60 +331,43 @@ void    call_mss_scominit( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_scominit entry" );
 
-    // TODO:  RTC 44947
-    // This currently fails on Simics because cen_ddrphy.initfile accesses
-    // indirect broadcast SCOM addresses.  When Simics have support for
-    // indirect broadcast SCOM addresses than this HWP can be executed.
-    // For now, just execute the HWP on VPO.
-    TARGETING::Target * l_pSysTarget = NULL;
-    TARGETING::targetService().getTopLevelTarget(l_pSysTarget);
-    uint8_t l_vpoMode = l_pSysTarget->getAttr<TARGETING::ATTR_IS_SIMULATION>();
-    if (!l_vpoMode)
-    {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-            "INFO : not executing mss_scominit in Simics until it supports "
-            "indirect broadcast SCOM addresses");
-    }
-    else
-    {
-        // Get all Centaur targets
-        TARGETING::TargetHandleList l_membufTargetList;
-        getAllChips(l_membufTargetList, TYPE_MEMBUF);
+    // Get all Centaur targets
+    TARGETING::TargetHandleList l_membufTargetList;
+    getAllChips(l_membufTargetList, TYPE_MEMBUF);
 
-        for ( size_t i = 0; i < l_membufTargetList.size(); i++ )
+    for ( size_t i = 0; i < l_membufTargetList.size(); i++ )
+    {
+        //  make a local copy of the target for ease of use
+        const TARGETING::Target*  l_pCentaur = l_membufTargetList[i];
+
+        // Dump current run on target
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "Running mss_scominit HWP on..." );
+        
+        EntityPath l_path;
+        l_path  =   l_pCentaur->getAttr<ATTR_PHYS_PATH>();
+        l_path.dump();
+
+        // Cast to a FAPI type of target.
+        const fapi::Target l_fapi_centaur(
+                TARGET_TYPE_MEMBUF_CHIP,
+                reinterpret_cast<void *>
+                (const_cast<TARGETING::Target*>(l_pCentaur)) );
+
+        //  call the HWP with each fapi::Target
+        FAPI_INVOKE_HWP(l_err, mss_scominit, l_fapi_centaur);
+
+        if (l_err)
         {
-            //  make a local copy of the target for ease of use
-            const TARGETING::Target*  l_pCentaur = l_membufTargetList[i];
-
-            // Dump current run on target
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "ERROR 0x%.8X: mss_scominit HWP returns error",
+                      l_err->reasonCode());
+            break;
+        }
+        else
+        {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "Running mss_scominit HWP on..." );
-            
-            EntityPath l_path;
-            l_path  =   l_pCentaur->getAttr<ATTR_PHYS_PATH>();
-            l_path.dump();
-
-            // Cast to a FAPI type of target.
-            const fapi::Target l_fapi_centaur(
-                    TARGET_TYPE_MEMBUF_CHIP,
-                    reinterpret_cast<void *>
-                    (const_cast<TARGETING::Target*>(l_pCentaur)) );
-
-            //  call the HWP with each fapi::Target
-            FAPI_INVOKE_HWP(l_err, mss_scominit, l_fapi_centaur);
-
-            if (l_err)
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "ERROR 0x%.8X: mss_scominit HWP returns error",
-                          l_err->reasonCode());
-                break;
-            }
-            else
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "SUCCESS :  mss_scominit HWP( )" );
-            }
+                       "SUCCESS :  mss_scominit HWP( )" );
         }
     }
 
