@@ -166,6 +166,28 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
         {
             TARG_TS_FAIL("Expected to get the original target");
         }
+    
+        // Post init 
+        // Tested API: Target* toTarget(
+        //     const EntityPath& i_entityPath) const;
+        // Behavior: Given an arbitrary target, I should be able to take its 
+        //     affinity path and convert it to the original target 
+        PredicateCTM mbaPredicate(CLASS_UNIT,TYPE_MBA);
+        TargetRangeFilter mbaFilter(
+            targetService().begin(),
+            targetService().end(),
+            &mbaPredicate);
+        for(;mbaFilter;++mbaFilter)
+        {
+            Target* pCandidate = l_targetService.toTarget(
+                mbaFilter->getAttr<ATTR_AFFINITY_PATH>());
+            if (pCandidate != *mbaFilter)
+            {
+                TARG_TS_FAIL("Failed to convert MBA target's affinity path "
+                             "back to original target");
+            }
+            break;
+        }
 
         // Post init
         // Test: void getAssociated(

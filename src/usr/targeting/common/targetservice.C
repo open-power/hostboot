@@ -291,7 +291,22 @@ Target* TargetService::toTarget(
 
     for (uint32_t i = 0; i < iv_maxTargets; ++i)
     {
-        if (i_entityPath == (*iv_targets)[i].getAttr<ATTR_PHYS_PATH> ())
+        bool found = false;
+        switch(i_entityPath.type())
+        {
+            case EntityPath::PATH_PHYSICAL: 
+                found = (   (i_entityPath)
+                         == (*iv_targets)[i].getAttr<ATTR_PHYS_PATH>());
+                break;
+            case EntityPath::PATH_AFFINITY: 
+                found = (   (i_entityPath)
+                         == (*iv_targets)[i].getAttr<ATTR_AFFINITY_PATH>());
+                break;
+            default:
+                break;
+        }
+
+        if (found)
         {
             l_pTarget = &(*iv_targets)[i];
             break;
