@@ -62,39 +62,23 @@ void call_proc_revert_sbe_mcs_setup(void *io_pArgs)
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_revert_sbe_mcs_setup entry" );
 
-    // TODO
-    // This currently fails on Simics because this touches a Murano chip
-    // register that doesn't exist in the Venice chip. When Simcs supports
-    // a Murano chip, this HWP can be executed. For now, just execute the
-    // HWP on VPO
-    TARGETING::Target * l_pSysTarget = NULL;
-    TARGETING::targetService().getTopLevelTarget(l_pSysTarget);
-    uint8_t l_vpoMode = l_pSysTarget->getAttr<TARGETING::ATTR_IS_SIMULATION>();
-    if (!l_vpoMode)
+    TARGETING::Target* l_pProcTarget = NULL;
+    TARGETING::targetService().masterProcChipTargetHandle(l_pProcTarget);
+
+    fapi::Target l_fapiProcTarget(fapi::TARGET_TYPE_PROC_CHIP, l_pProcTarget);
+
+    // Invoke the HWP
+    FAPI_INVOKE_HWP(l_errl, proc_revert_sbe_mcs_setup, l_fapiProcTarget);
+
+    if (l_errl)
     {
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "INFO : not executing proc_revert_sbe_mcs_setup until murano chip in Simics");
+                  "ERROR : failed executing proc_revert_sbe_mcs_setup returning error");
     }
     else
     {
-        TARGETING::Target* l_pProcTarget = NULL;
-        TARGETING::targetService().masterProcChipTargetHandle(l_pProcTarget);
-
-        fapi::Target l_fapiProcTarget(fapi::TARGET_TYPE_PROC_CHIP, l_pProcTarget);
-
-        // Invoke the HWP
-        FAPI_INVOKE_HWP(l_errl, proc_revert_sbe_mcs_setup, l_fapiProcTarget);
-
-        if (l_errl)
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "ERROR : failed executing proc_revert_sbe_mcs_setup returning error");
-        }
-        else
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "SUCCESS : proc_revert_sbe_mcs_setup completed ok");
-        }
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "SUCCESS : proc_revert_sbe_mcs_setup completed ok");
     }
 
     TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
