@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/pnor/test/pnorddtest.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2011-2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/pnor/test/pnorddtest.H $                              */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef __PNORDDTEST_H
 #define __PNORDDTEST_H
 
@@ -454,26 +453,21 @@ class PnorDdTest : public CxxTest::TestSuite
     void test_readwrite_modes(void)
     {
         PnorDD* pnordd = NULL;
+        uint8_t* fake_space = NULL;
         size_t l_size = sizeof(uint64_t); 
         errlHndl_t l_err = NULL;
         uint64_t fails = 0;
         uint64_t total = 0;
+        uint64_t scratch_space = 0;
+        uint64_t sect_size = 0;
 
         do{
             TS_TRACE("PnorDdTest::test_readwrite_modes: starting");
 
-            uint64_t base_address;
-            uint64_t sect_size;
-            if(!getTestSection(base_address, sect_size))
-            {
-                TRACFCOMP(g_trac_pnor, "PnorDdTest::test_readwrite_modes> Skipped due to not finding test section in PNOR" );
-                break;
-            }
-
             // list of all modes to test
             std::list<PnorDD::PnorMode_t> supported_modes;
-            //supported_modes.push_back(PnorDD::MODEL_MEMCPY);  (Enable with RTC: 44938)
-            //supported_modes.push_back(PnorDD::MODEL_LPC_MEM);  (Enable with RTC: 44938)
+            supported_modes.push_back(PnorDD::MODEL_MEMCPY);
+            supported_modes.push_back(PnorDD::MODEL_LPC_MEM);
 
             if(!TARGETING::is_vpo())
             {
@@ -482,21 +476,49 @@ class PnorDdTest : public CxxTest::TestSuite
                 supported_modes.push_back(PnorDD::MODEL_REAL_MMIO);
             }
 
-            uint64_t scratch_space = base_address;
-
             // loop through all of the supported modes
             for( std::list<PnorDD::PnorMode_t>::iterator m
                  = supported_modes.begin();
                  m != supported_modes.end();
                  ++m )
-            {
-                scratch_space += 0x100;
-
+            { 
                 if( pnordd )
                 {
                     delete pnordd;
                 }
-                pnordd = new PnorDD(*m);
+
+                //Fake PNOR
+                if( (PnorDD::MODEL_MEMCPY == *m) ||
+                    (PnorDD::MODEL_LPC_MEM == *m) )
+                {
+                    //malloc some space to use as fake-PNOR
+                    if( fake_space )
+                    {
+                        delete fake_space;
+                    }
+                    fake_space = new uint8_t[4 * KILOBYTE];
+                    pnordd = new PnorDD(*m,
+                                        reinterpret_cast<uint64_t>(fake_space),
+                                        (4 * KILOBYTE));
+                    //Adjusting the address by an arbitrary multiplier to keep 
+                    //successive tests from always using the same memory space.
+                    scratch_space = (*m)*0x20;
+                }
+                //Real PNOR
+                else
+                {
+                    pnordd = new PnorDD(*m);
+
+                    if(!getTestSection(scratch_space, sect_size))
+                    {
+                        TRACFCOMP(g_trac_pnor,
+                                  "PnorDdTest::test_readwrite_modes> Skipped due to not finding test section in PNOR" );
+                        continue;
+                    }
+                    //Adjusting the address by an arbitrary multiplier to keep 
+                    //successive tests from always using the same memory space.
+                    scratch_space += (*m)*0x20;
+                }
 
                 // Perform PnorDD Write 1
                 uint64_t l_address = scratch_space;
@@ -613,6 +635,11 @@ class PnorDdTest : public CxxTest::TestSuite
         {
             delete pnordd;
         }
+        if( fake_space )
+        {
+            delete fake_space;
+        }
+
     }
 
     /**
@@ -622,26 +649,21 @@ class PnorDdTest : public CxxTest::TestSuite
     void test_smartwrite_modes(void)
     {
         PnorDD* pnordd = NULL;
+        uint8_t* fake_space = NULL;
         size_t l_size = sizeof(uint64_t); 
         errlHndl_t l_err = NULL;
         uint64_t fails = 0;
         uint64_t total = 0;
+        uint64_t scratch_space = 0;
+        uint64_t sect_size = 0;
 
         do{
             TS_TRACE("PnorDdTest::test_smartwrite_modes: starting");
 
-            uint64_t base_address;
-            uint64_t sect_size;
-            if(!getTestSection(base_address, sect_size))
-            {
-                TRACFCOMP(g_trac_pnor, "PnorDdTest::test_smartwrite_modes> Skipped due to not finding test section in PNOR" );
-                break;
-            }
-
             // list of all modes to test
             std::list<PnorDD::PnorMode_t> supported_modes;
-            //supported_modes.push_back(PnorDD::MODEL_MEMCPY); (Enable with RTC: 44938)
-            //supported_modes.push_back(PnorDD::MODEL_LPC_MEM);  (Enable with RTC: 44938)
+            supported_modes.push_back(PnorDD::MODEL_MEMCPY);
+            supported_modes.push_back(PnorDD::MODEL_LPC_MEM);
 
             if(!TARGETING::is_vpo())
             {
@@ -650,21 +672,51 @@ class PnorDdTest : public CxxTest::TestSuite
                 supported_modes.push_back(PnorDD::MODEL_REAL_MMIO);
             }
 
-            uint64_t scratch_space = base_address;
-
             // loop through all of the supported modes
             for( std::list<PnorDD::PnorMode_t>::iterator m
                  = supported_modes.begin();
                  m != supported_modes.end();
                  ++m )
             {
-                scratch_space += 0x100;
-
                 if( pnordd )
                 {
                     delete pnordd;
                 }
-                pnordd = new PnorDD(*m);
+
+                //Fake PNOR
+                if( (PnorDD::MODEL_MEMCPY == *m) ||
+                    (PnorDD::MODEL_LPC_MEM == *m) )
+                {
+                    //malloc some space to use as fake-PNOR
+                    if( fake_space )
+                    {
+                        delete fake_space;
+                    }
+                    fake_space = new uint8_t[4 * KILOBYTE];
+                    pnordd = new PnorDD(*m,
+                                        reinterpret_cast<uint64_t>(fake_space),
+                                        (4 * KILOBYTE));
+                    
+                    //Adjusting the address by an arbitrary multiplier to keep 
+                    //successive tests from always using the same memory space.
+                    scratch_space = (*m)*0x30;
+
+                }
+                //Real PNOR
+                else
+                {
+                    pnordd = new PnorDD(*m);
+
+                    if(!getTestSection(scratch_space, sect_size))
+                    {
+                        TRACFCOMP(g_trac_pnor,
+                                  "PnorDdTest::test_readwrite_modes> Skipped due to not finding test section in PNOR" );
+                        continue;
+                    }
+                    //Adjusting the address by an arbitrary multiplier to keep 
+                    //successive tests from always using the same memory space.
+                    scratch_space += (*m)*0x30;
+                }
 
                 // Perform PnorDD Write 1
                 uint64_t l_address = scratch_space+0x20;
@@ -773,6 +825,10 @@ class PnorDdTest : public CxxTest::TestSuite
         {
             delete pnordd;
         }
+        if( fake_space )
+        {
+            delete fake_space;
+        }
 
         TRACFCOMP(g_trac_pnor, "PnorDdTest::test_smartwrite> %d/%d fails", fails, total );
     }
@@ -784,26 +840,21 @@ class PnorDdTest : public CxxTest::TestSuite
     void test_crossblock_modes(void)
     {
         PnorDD* pnordd = NULL;
+        uint8_t* fake_space = NULL;
         size_t l_size = sizeof(uint64_t); 
         errlHndl_t l_err = NULL;
         uint64_t fails = 0;
         uint64_t total = 0;
+        uint64_t scratch_space = 0;
+        uint64_t sect_size = 0;
 
         do{
             TS_TRACE("PnorDdTest::test_crossblock_modes: starting");
 
-            uint64_t base_address;
-            uint64_t sect_size;
-            if(!getTestSection(base_address, sect_size))
-            {
-                TRACFCOMP(g_trac_pnor, "PnorDdTest::test_crossblock_modes> Skipped due to not finding test section in PNOR" );
-                break;
-            }
-
             // list of all modes to test
             std::list<PnorDD::PnorMode_t> supported_modes;
-            //supported_modes.push_back(PnorDD::MODEL_MEMCPY);  (Enable with RTC: 44938)
-            //supported_modes.push_back(PnorDD::MODEL_LPC_MEM);  (Enable with RTC: 44938)
+            supported_modes.push_back(PnorDD::MODEL_MEMCPY);
+            supported_modes.push_back(PnorDD::MODEL_LPC_MEM);
 
             if(!TARGETING::is_vpo())
             {
@@ -812,33 +863,62 @@ class PnorDdTest : public CxxTest::TestSuite
                 supported_modes.push_back(PnorDD::MODEL_REAL_MMIO);
             }
 
-            uint64_t scratch_space = base_address;
-
             // loop through all of the supported modes
             for( std::list<PnorDD::PnorMode_t>::iterator m
                  = supported_modes.begin();
                  m != supported_modes.end();
                  ++m )
             {
-                scratch_space += 4096;
-
                 if( pnordd )
                 {
                     delete pnordd;
                 }
-                pnordd = new PnorDD(*m);
+
+
+                //Fake PNOR
+                if( (PnorDD::MODEL_MEMCPY == *m) ||
+                    (PnorDD::MODEL_LPC_MEM == *m) )
+                {
+                    //malloc some space to use as fake-PNOR
+                    if( fake_space )
+                    {
+                        delete fake_space;
+                    }
+                    fake_space = new uint8_t[8 * KILOBYTE];
+                    pnordd = new PnorDD(*m,
+                                        reinterpret_cast<uint64_t>(fake_space),
+                                        (8 * KILOBYTE));
+                    scratch_space = 0;
+                    sect_size = 8 * KILOBYTE;
+                }
+                //Real PNOR
+                else
+                {
+                    pnordd = new PnorDD(*m);
+
+                    if(!getTestSection(scratch_space, sect_size))
+                    {
+                        TRACFCOMP(g_trac_pnor,
+                                  "PnorDdTest::test_readwrite_modes> Skipped due to not finding test section in PNOR" );
+                        continue;
+                    }
+                }
 
                 // Find the nearest erase-block (4K) boundary 
-                uint64_t l_boundary = (base_address+4096)
-                  - (base_address%4096);
+                uint64_t l_boundary = (scratch_space+4096)
+                  - (scratch_space%4096);
                 uint64_t l_address = 0;
 
                 //make sure we don't go past the end of the section
-                if(l_boundary+0x4 > base_address+sect_size)
+                if(l_boundary+0x4 > scratch_space+sect_size)
                 {
                     TS_FAIL("PnorDdTest::test_crossblock_modes: Test Case went beyond allocated space in test section.");
-                    TRACFCOMP(g_trac_pnor, "PnorDdTest::test_crossblock_modes: Test Case went beyond allocated space in test section.l_boundary=0x%X, base_address=0x%X, sect_size=0x%X", l_boundary, base_address, sect_size);
-                    TRACFCOMP(g_trac_pnor, "PnorDdTest::test_crossblock_modes: sect_size=0x%X", sect_size);
+                    TRACFCOMP(g_trac_pnor,
+                              "PnorDdTest::test_crossblock_modes: Test Case went beyond allocated space in test section.l_boundary=0x%X, scratch_space=0x%X, sect_size=0x%X",
+                              l_boundary, scratch_space, sect_size);
+                    TRACFCOMP(g_trac_pnor,
+                              "PnorDdTest::test_crossblock_modes: sect_size=0x%X",
+                              sect_size);
                    break;
                 }
 
@@ -883,6 +963,10 @@ class PnorDdTest : public CxxTest::TestSuite
         if( pnordd )
         {
             delete pnordd;
+        }
+        if( fake_space )
+        {
+            delete fake_space;
         }
 
         TRACFCOMP(g_trac_pnor, "PnorDdTest::test_crossblock_modes> %d/%d fails", fails, total );

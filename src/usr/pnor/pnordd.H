@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/pnor/pnordd.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2011-2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/pnor/pnordd.H $                                       */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef __PNOR_PNORDD_H
 #define __PNOR_PNORDD_H
 
@@ -84,7 +83,9 @@ class PnorDD
     /**
      * @brief Constructor
      */
-    PnorDD( PnorMode_t i_mode = MODEL_UNKNOWN );
+    PnorDD( PnorMode_t i_mode = MODEL_UNKNOWN,
+            uint64_t i_fakeStart = 0,
+            uint64_t i_fakeSize =  0);
 
 
     /**
@@ -451,6 +452,37 @@ class PnorDD
         return blocks;
     };
 
+    // These are used to cheat and use a chunk of our cache as a PNOR
+    //   iv_mode == MODEL_MEMCPY,MODEL_LPC_MEM
+    /**
+     * @brief write to fake PNOR
+     *
+     * @parm i_pnorAddr  Offset into fake PNOR
+     * @parm i_buffer  Buffer of data to write
+     * @param i_size Amount to write.
+     */
+    void write_fake_pnor( uint64_t i_pnorAddr,
+                          void* i_buffer, size_t i_size );
+
+    /**
+     * @brief Read from fake PNOR
+     *
+     * @parm i_pnorAddr  Offset into fake PNOR
+     * @parm i_buffer  Buffer to return read data
+     * @param i_size Amount to read.
+     */
+    void read_fake_pnor( uint64_t i_pnorAddr,
+                         void* o_buffer,
+                         size_t i_size );
+
+    /**
+     * @brief Erase fake PNOR
+     *
+     * @parm i_pnorAddr  Offset to start erase
+     * @param i_size Amount to erase.
+     */
+    void erase_fake_pnor( uint64_t i_pnorAddr,
+                          size_t i_size );
 
     /**
      * @brief  ECCB Control Register Layout
@@ -538,6 +570,17 @@ class PnorDD
      */
     static bool cv_sfcInitDone;
 
+    /**
+     * @brief Start of Fake PNOR address range..
+     *
+     */
+    uint64_t iv_fakeStart;
+
+    /**
+     * @brief Size of Fake PNOR address range..
+     *
+     */
+    uint64_t iv_fakeSize;
 
     // Needed for testcases
     friend class PnorDdTest;

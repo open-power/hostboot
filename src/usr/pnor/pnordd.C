@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/pnor/pnordd.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2011-2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/pnor/pnordd.C $                                       */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  *  @file pnordd.C
  *
@@ -47,11 +46,6 @@
 // Uncomment this to enable smart writing
 //#define SMART_WRITE
 
-// These are used to cheat and use a chunk of our cache as a PNOR
-//   iv_mode == MODEL_MEMCPY,MODEL_LPC_MEM
-void write_fake_pnor( uint64_t i_pnorAddr, void* i_buffer, size_t i_size );
-void read_fake_pnor( uint64_t i_pnorAddr, void* o_buffer, size_t i_size );
-void erase_fake_pnor( uint64_t i_pnorAddr, size_t i_size );
 
 extern trace_desc_t* g_trac_pnor;
 
@@ -338,10 +332,22 @@ errlHndl_t PnorDD::writeFlash(void* i_buffer,
  ********************/
 mutex_t PnorDD::cv_mutex = MUTEX_INITIALIZER;
 uint64_t PnorDD::iv_vpoMode = 0;
+
+//
+// @note    fake pnor is moved up and shrunk by 1/2 meg to make room for
+//          the SLW image, it must be at a 1 M boundary.
+//          See build_winkle_images for more info.
+//
+#define FAKE_PNOR_START 4*MEGABYTE+512*KILOBYTE
+#define FAKE_PNOR_END 8*MEGABYTE
+#define FAKE_PNOR_SIZE 3*MEGABYTE+512*KILOBYTE
+
 /**
  * @brief  Constructor
  */
-PnorDD::PnorDD( PnorMode_t i_mode )
+PnorDD::PnorDD( PnorMode_t i_mode,
+                uint64_t i_fakeStart,
+                uint64_t i_fakeSize )
 : iv_mode(i_mode)
 {
     iv_erasesize_bytes = ERASESIZE_BYTES_DEFAULT;
@@ -373,6 +379,14 @@ PnorDD::PnorDD( PnorMode_t i_mode )
             //Normal mode
             iv_mode = MODEL_REAL_MMIO;
         }
+    }
+
+    if( (MODEL_MEMCPY == iv_mode) ||
+        (MODEL_LPC_MEM == iv_mode) )
+    {
+        //Only use input fake values if they are != zero
+        iv_fakeStart = (i_fakeStart != 0) ? i_fakeStart : FAKE_PNOR_START;
+        iv_fakeSize = (i_fakeSize != 0) ? i_fakeSize : FAKE_PNOR_SIZE;
     }
 
     if( (MODEL_REAL_CMD == iv_mode) ||
@@ -1413,40 +1427,73 @@ errlHndl_t PnorDD::eraseFlash(uint32_t i_address)
 /*
  This code is used in the MODEL_MEMCPY and MODEL_LPC_MEM modes
 */
-
-//
-// @note    fake pnor is moved up and shrunk by 1/2 meg to make room for
-//          the SLW image, it must be at a 1 M boundary.
-//          See build_winkle_images for more info.
-//
-#define FAKE_PNOR_START 4*MEGABYTE+512*KILOBYTE
-#define FAKE_PNOR_END 8*MEGABYTE
-#define FAKE_PNOR_SIZE 3*MEGABYTE+512*KILOBYTE
-
-
-void write_fake_pnor( uint64_t i_pnorAddr, void* i_buffer, size_t i_size )
+/**
+ * @brief Write to fake PNOR
+ */
+void PnorDD::write_fake_pnor( uint64_t i_pnorAddr,
+                              void* i_buffer,
+                              size_t i_size )
 {
     //create a pointer to the offset start.
-    char * destPtr = (char *)(FAKE_PNOR_START+i_pnorAddr);
+    char * destPtr = (char *)(iv_fakeStart+i_pnorAddr);
 
-    //copy data from memory into the buffer.
-    memcpy(destPtr, i_buffer, i_size);
+    if( (i_pnorAddr+i_size) > iv_fakeSize )
+    {
+        TRACFCOMP(g_trac_pnor,
+                  "PnorDD write_fake_pnor> Write goes past end of fake-PNOR, skipping write. i_pnorAddr=0x%X, i_size=0x%X",
+                  i_pnorAddr, i_size );
+    }
+    else
+    {
+        //copy data from memory into the buffer.
+        memcpy(destPtr, i_buffer, i_size);
+    }
 }
-void read_fake_pnor( uint64_t i_pnorAddr, void* o_buffer, size_t i_size )
+
+/**
+ * @brief Read from fake PNOR
+ */
+void PnorDD::read_fake_pnor( uint64_t i_pnorAddr,
+                             void* o_buffer,
+                             size_t i_size )
 {
     //create a pointer to the offset start.
-    char * srcPtr = (char *)(FAKE_PNOR_START+i_pnorAddr);
+    char * srcPtr = (char *)(iv_fakeStart+i_pnorAddr);
 
-    //copy data from memory into the buffer.
-    memcpy(o_buffer, srcPtr, i_size);
+    if( (i_pnorAddr+i_size) > iv_fakeSize )
+    {
+        TRACFCOMP(g_trac_pnor,
+                  "PnorDD read_fake_pnor> Read goes past end of fake-PNOR, skipping read. i_pnorAddr=0x%X, i_size=0x%X",
+                  i_pnorAddr, i_size );
+    }
+    else
+    {
+        //copy data from memory into the buffer.
+        memcpy(o_buffer, srcPtr, i_size);
+    }
+
 }
-void erase_fake_pnor( uint64_t i_pnorAddr, size_t i_size )
+
+/**
+ * @brief Erase chunk of fake PNOR
+ */
+void PnorDD::erase_fake_pnor( uint64_t i_pnorAddr,
+                              size_t i_size )
 {
     //create a pointer to the offset start.
-    char * srcPtr = (char *)(FAKE_PNOR_START+i_pnorAddr);
+    char * srcPtr = (char *)(iv_fakeStart+i_pnorAddr);
 
-    //copy data from memory into the buffer.
-    memset( srcPtr, 0, i_size );
+    if( (i_pnorAddr+i_size) > iv_fakeSize )
+    {
+        TRACFCOMP(g_trac_pnor,
+                  "PnorDD erase_fake_pnor> Erase goes past end of fake-PNOR, skipping erase. i_pnorAddr=0x%X, i_size=0x%X",
+                  i_pnorAddr, i_size );
+    }
+    else
+    {
+        //Zero out memory
+        memset( srcPtr, 0, i_size );
+    }
 }
 
 
