@@ -111,6 +111,11 @@ errlHndl_t ProcOps::resolve(
             type != END_ATTENTION_TYPE;
             ++type)
     {
+        if(!enabled())
+        {
+            break;
+        }
+
         if(!GFIR::getCheckbits(type, ignored))
         {
             // this object doesn't support

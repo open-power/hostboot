@@ -43,6 +43,33 @@ class ProcOps : public AttentionOps
     public:
 
         /**
+         * @brief disable Clear the enablement state.
+         */
+        void disable()
+        {
+            iv_enabled = false;
+        }
+
+        /**
+         * @brief enable Set the enablement state.
+         */
+        void enable()
+        {
+            iv_enabled = true;
+        }
+
+        /**
+         * @brief enabled Obtain the enablement state.
+         *
+         * @retval[true] Enabled.
+         * @retval[true] Disabled.
+         */
+        bool enabled() const
+        {
+            return iv_enabled;
+        }
+
+        /**
          * @brief mask Mask this attention.
          *
          * @param[in] i_data The attention to mask.
@@ -93,6 +120,18 @@ class ProcOps : public AttentionOps
          * @brief dtor
          */
         ~ProcOps() {}
+
+        /**
+         * @brief ctor
+         */
+        ProcOps() : iv_enabled(true) {}
+
+    private:
+
+        /**
+         * @brief iv_enabled Enablement state.
+         */
+        bool iv_enabled;
 };
 }
 #endif

@@ -120,8 +120,8 @@ errlHndl_t Service::processIntrQMsgPreAck(const msg_t & i_msg,
         // in the ipoll mask register and query the proc & mem
         // resolvers for active attentions
 
-        static ProcOps procOps;
-        static MemOps memOps;
+        ProcOps & procOps = getProcOps();
+        MemOps & memOps = getMemOps();
 
         uint64_t ipollMaskScomData = 0;
 

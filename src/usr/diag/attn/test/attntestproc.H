@@ -399,6 +399,8 @@ class AttnProcTest: public CxxTest::TestSuite
 
             prd.installPrd();
 
+            getProcOps().enable();
+
             do
             {
                 err = svc.start();

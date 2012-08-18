@@ -34,13 +34,32 @@
 #include "attnsvc.H"
 #include "attnproc.H"
 #include "attnmem.H"
+#include <util/singleton.H>
 
 using namespace std;
 using namespace PRDF;
 using namespace TARGETING;
+using namespace Util;
 
 namespace ATTN
 {
+
+/**
+ * @brief DisableProcResolver
+ *
+ * FIXME:  Temp turn off the proc
+ *  resolver until the proc global
+ *  FIRs can be scomed in simics.
+ *  RTC: 47750
+ */
+static struct DisableProcResolver
+{
+    DisableProcResolver()
+    {
+        Singleton<ProcOps>::instance().disable();
+    }
+
+} disableProcResolver;
 
 errlHndl_t startService()
 {
@@ -99,6 +118,16 @@ errlHndl_t PrdWrapper::callPrd(const AttentionList & i_attentions)
     ATTN_DBG("call PRD with %d using: %p", i_attentions.size(), iv_impl);
 
     return iv_impl->callPrd(i_attentions);
+}
+
+ProcOps & getProcOps()
+{
+    return Singleton<ProcOps>::instance();
+}
+
+MemOps & getMemOps()
+{
+    return Singleton<MemOps>::instance();
 }
 
 int64_t Attention::compare(const Attention & i_rhs) const

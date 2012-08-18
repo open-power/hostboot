@@ -58,6 +58,8 @@ class TargetService;
 class TargetServiceImpl;
 class ScomWrapper;
 class ScomImpl;
+class ProcOps;
+class MemOps;
 
 enum
 {
@@ -167,6 +169,20 @@ PrdWrapper & getPrdWrapper();
  * @return TargetService Singleton instance.
  */
 TargetService & getTargetService();
+
+/**
+ * @brief getProcOps ProcOps singleton access.
+ *
+ * @return ProcOps Singleton instance.
+ */
+ProcOps & getProcOps();
+
+/**
+ * @brief getMemOps MemOps singleton access.
+ *
+ * @return MemOps Singleton instance.
+ */
+MemOps & getMemOps();
 
 /**
  * @brief compare compare two PRDF::AttnData structures.
