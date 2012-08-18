@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/targeting/common/test/testcommontargeting.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2011-2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/targeting/common/test/testcommontargeting.H $         */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef __TARGETING_COMMON_TESTCOMMONTARGETING_H
 #define __TARGETING_COMMON_TESTCOMMONTARGETING_H
 
@@ -539,6 +538,117 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
         TARG_TS_TRACE(EXIT_MRK "testTargetClass" );
     }
 
+    void testPredicateHwas()
+    {
+        TARG_TS_TRACE(ENTER_MRK "testPredicateHwas" );
+
+        do {
+
+        using namespace TARGETING;
+        TargetService& l_targetService = targetService();
+
+        // Get top level (system) target
+        Target* l_pTopLevel = NULL;
+        (void) l_targetService.getTopLevelTarget(l_pTopLevel);
+        if (l_pTopLevel == NULL)
+        {
+            TARG_TS_FAIL("Top level handle was NULL when initialization "
+                    "complete");
+            break;
+        }
+
+        PredicateHwas hwasPredicate;
+ 
+        ATTR_HWAS_STATE_type savedHwasState
+            = l_pTopLevel->getAttr<ATTR_HWAS_STATE>();
+
+        // Test: Given a target with any HWAS state, default HWAS predicate
+        //     should return a match
+        for(size_t i=0; i<32; ++i)
+        {
+            ATTR_HWAS_STATE_type sweepHwasState 
+                = { i&16, i&8, i&4, i&2, i&1 };
+            l_pTopLevel->setAttr<ATTR_HWAS_STATE>(sweepHwasState);
+        
+            if(!hwasPredicate(l_pTopLevel))
+            {
+                TARG_TS_FAIL("Expected default HWAS predicate to match the "
+                    "target's HWAS state, using i = %d",i);
+            }
+        }
+
+        // Test: Given a target with cleared HWAS state of functional, predicate
+        //    looking for functional should return false
+        hwasPredicate.reset().functional(true);
+        ATTR_HWAS_STATE_type nonFunctionalHwasState = {0};
+        l_pTopLevel->setAttr<ATTR_HWAS_STATE>(nonFunctionalHwasState);
+        if(hwasPredicate(l_pTopLevel))
+        {
+            TARG_TS_FAIL("Expected HWAS functional predicate not to match the "
+                "target's cleared HWAS state");
+        }
+
+        // Test: Having previously not matched a target, resetting the HWAS
+        //     predicate should match the target again
+        hwasPredicate.reset();
+        if(!hwasPredicate(l_pTopLevel))
+        {
+            TARG_TS_FAIL("Expected HWAS reset predicate to match the "
+                "target's functional HWAS state");
+        }
+
+        // Test: Given a target with HWAS state of functional, predicate
+        //    looking for functional should return true
+        hwasPredicate.reset().functional(true);
+        ATTR_HWAS_STATE_type functionalHwasState = {0};
+        functionalHwasState.functional = true;
+        l_pTopLevel->setAttr<ATTR_HWAS_STATE>(functionalHwasState);
+        if(!hwasPredicate(l_pTopLevel))
+        {
+            TARG_TS_FAIL("Expected HWAS functional predicate to match the "
+                "target's functional HWAS state");
+        }
+
+        // Test: Given a target with HWAS state of non-functional, predicate
+        //    looking for non-functional should return true
+        hwasPredicate.reset().functional(false);
+        l_pTopLevel->setAttr<ATTR_HWAS_STATE>(nonFunctionalHwasState);
+        if(!hwasPredicate(l_pTopLevel))
+        {
+            TARG_TS_FAIL("Expected HWAS non-functional predicate to match the "
+                "target's non-functional HWAS state");
+        }
+         
+        // Test: Given a predicate looking for target whose HWAS state
+        //     exactly matches all 5 configurable HWAS states, filter should
+        //     return true
+        hwasPredicate.reset().poweredOn(true).present(true).functional(false);
+        hwasPredicate.changedSinceLastIpl(true).dumpFunctional(false);
+
+        ATTR_HWAS_STATE_type allFiveHwasState = {true,true,false,true,false};
+        l_pTopLevel->setAttr<ATTR_HWAS_STATE>(allFiveHwasState);
+        if(!hwasPredicate(l_pTopLevel))
+        {
+            TARG_TS_FAIL("Expected 5 setting HWAS predicate to match the "
+                "target's similarly configured HWAS state");
+        }
+
+        // Test: Given a predicate looking for target whose HWAS state
+        //     exactly matches all 4 of 5 configurable HWAS states, filter 
+        //     should return false
+        allFiveHwasState.dumpfunctional = true;
+        l_pTopLevel->setAttr<ATTR_HWAS_STATE>(allFiveHwasState);
+        if(hwasPredicate(l_pTopLevel))
+        {
+            TARG_TS_FAIL("Expected HWAS predicate not to match the target's "
+                "4/5 matching HWAS state configuration");
+        }
+
+        } while(0);
+
+        TARG_TS_TRACE(EXIT_MRK "testPredicateHwas" );
+    }
+
     void testPredicateCtm()
     {
         TARG_TS_TRACE(ENTER_MRK "testPredicateCtm" );
@@ -632,7 +742,6 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
         l_pBase = NULL;
 
         TARG_TS_TRACE(EXIT_MRK "testPredicateCtm" );
-
     }
 
     void testPredicatePostfixExpr()
