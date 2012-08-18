@@ -29,6 +29,7 @@
 
 #include "attnfakepresenter.H"
 #include "../attntrace.H"
+#include "../attntarget.H"
 
 using namespace TARGETING;
 using namespace PRDF;
@@ -42,6 +43,7 @@ struct InterruptProperties
     MessageType type;
     void * data;
     void (*callback)(TargetHandle_t, MessageType, void *);
+    uint64_t xisr;
 };
 
 struct PresenterProperties
@@ -127,12 +129,23 @@ void FakePresenter::interrupt(
 
     if(iv_tid)
     {
+        IcpXisr xisr;
+
+        uint64_t node = 0, chip = 0;
+
+        getTargetService().getAttribute(ATTR_FABRIC_NODE_ID, i_source, node);
+        getTargetService().getAttribute(ATTR_FABRIC_CHIP_ID, i_source, chip);
+
+        xisr.node = node;
+        xisr.chip = chip;
+
         InterruptProperties * p = new InterruptProperties;
 
         p->source = i_source;
         p->type = i_type;
         p->data = i_data;
         p->callback = i_callback;
+        p->xisr = xisr.u64;
 
         msg_t * m = msg_allocate();
 
@@ -170,10 +183,10 @@ bool FakePresenter::wait(msg_q_t i_q)
                 recvMsg->data[0]);
 
         sendMsg->type = p->type;
-        sendMsg->data[0] = reinterpret_cast<uint64_t>(p->source);
+        sendMsg->data[0] = p->xisr;
 
-        ATTN_DBG("FakePresenter: raising interrupt: src: %p, type: %d",
-                p->source, p->type);
+        ATTN_DBG("FakePresenter: raising interrupt: src: %p, type: %d, xisr: 0x%07x",
+                p->source, p->type, p->xisr);
 
         msg_sendrecv(i_q, sendMsg);
 

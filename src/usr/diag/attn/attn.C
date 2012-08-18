@@ -90,7 +90,17 @@ errlHndl_t PrdImpl::callPrd(const AttentionList & i_attentions)
 
     if(!attnList.empty())
     {
-        err = PRDF::main(INVALID_ATTENTION_TYPE, attnList);
+        // AttentionLists keep themselves sorted by attention type
+        // with higher priority attentions
+        // appearing before those with lower priority, where the
+        // priority is defined by the ATTENTION_VALUE_TYPE enum.
+        //
+        // When an AttentionList is converted to an AttnList
+        // the order is preserved.  In this way, the PRD
+        // requirement that the highest priority attention
+        // appear first in the argument list is satisfied.
+
+        err = PRDF::main(attnList.front().attnType, attnList);
     }
 
     return err;

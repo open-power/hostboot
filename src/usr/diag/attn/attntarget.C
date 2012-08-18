@@ -37,6 +37,14 @@ using namespace TARGETING;
 namespace ATTN
 {
 
+void TargetServiceImpl::getAllChips(
+        TARGETING::TargetHandleList & o_list,
+        TARGETING::TYPE i_type,
+        bool i_functional)
+{
+    TARGETING::getAllChips(o_list, i_type, i_functional);
+}
+
 void TargetServiceImpl::getMcsList(
         TargetHandle_t i_proc,
         TargetHandleList & o_list)
@@ -94,28 +102,39 @@ TargetHandle_t TargetServiceImpl::getMcs(
         TargetHandle_t i_proc,
         uint64_t i_pos)
 {
+    PredicateCTM classTypeMatch(CLASS_UNIT, TYPE_MCS);
+    PredicateIsFunctional functionalMatch;
+    PredicatePostfixExpr pred;
+
     class ChipUnitMatch : public PredicateBase
     {
-        uint64_t iv_pos;
+        uint8_t iv_pos;
 
         public:
 
         bool operator()(const Target * i_target) const
         {
-            return i_target->getAttr<ATTR_CHIP_UNIT>() == iv_pos;
+            uint8_t pos;
+
+            bool match = false;
+
+            if(i_target->tryGetAttr<ATTR_CHIP_UNIT>(pos))
+            {
+                match = iv_pos == pos;
+            }
+
+            return match;
         }
 
-        explicit ChipUnitMatch(uint64_t i_pos) : iv_pos(i_pos) {}
+        explicit ChipUnitMatch(uint8_t i_pos)
+            : iv_pos(i_pos) {}
 
     } chipUnitMatch(i_pos);
 
-    PredicateCTM classTypeMatch(CLASS_UNIT, TYPE_MCS);
-    PredicateIsFunctional functionalMatch;
-
-    PredicatePostfixExpr pred;
-
-    pred.push(&chipUnitMatch).push(&classTypeMatch).And().push(
+    pred.push(&classTypeMatch).push(
             &functionalMatch).And();
+
+    pred.push(&chipUnitMatch).And();
 
     TargetHandleList list;
     TargetHandle_t mcs = NULL;
@@ -124,8 +143,8 @@ TargetHandle_t TargetServiceImpl::getMcs(
             list,
             i_proc,
             TARGETING::TargetService::CHILD_BY_AFFINITY,
-            TARGETING::TargetService::IMMEDIATE,
-            &pred);
+            TARGETING::TargetService::ALL,
+            &chipUnitMatch);
 
     if(list.size() == 1)
     {
@@ -158,9 +177,59 @@ TargetHandle_t TargetServiceImpl::getMembuf(
     return membuf;
 }
 
+bool TargetServiceImpl::getAttribute(
+        ATTRIBUTE_ID i_attribute,
+        TargetHandle_t i_target,
+        uint64_t & o_val)
+{
+    bool found = false;
+    uint8_t u8;
+
+    switch (i_attribute)
+    {
+        case ATTR_FABRIC_NODE_ID:
+
+            found = i_target->tryGetAttr<ATTR_FABRIC_NODE_ID>(u8);
+            o_val = u8;
+
+            break;
+
+        case ATTR_FABRIC_CHIP_ID:
+
+            found = i_target->tryGetAttr<ATTR_FABRIC_CHIP_ID>(u8);
+            o_val = u8;
+
+            break;
+
+        default:
+
+            break;
+    }
+
+    return found;
+}
+
 TYPE TargetServiceImpl::getType(TargetHandle_t i_target)
 {
     return i_target->getAttr<ATTR_TYPE>();
+}
+
+TargetServiceImpl::~TargetServiceImpl()
+{
+    // restore the default
+
+    getTargetService().setImpl(Singleton<TargetServiceImpl>::instance());
+
+    TargetService & wrapper = getTargetService();
+    TargetServiceImpl * defaultImpl = &Singleton<TargetServiceImpl>::instance();
+
+    if(wrapper.iv_impl == this)
+    {
+        if(this != defaultImpl)
+        {
+            wrapper.setImpl(*defaultImpl);
+        }
+    }
 }
 
 TargetService & getTargetService()

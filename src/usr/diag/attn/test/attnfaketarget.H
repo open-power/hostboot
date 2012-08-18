@@ -203,6 +203,11 @@ class FakeProcTargetService : public TargetServiceImpl
             return TARGETING::TYPE_PROC;
         }
 
+        virtual bool getAttribute(
+                TARGETING::ATTRIBUTE_ID i_attribute,
+                TARGETING::TargetHandle_t i_target,
+                uint64_t & o_val);
+
         /**
          * @brief dtor
          */

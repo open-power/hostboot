@@ -70,6 +70,19 @@ class TargetService
                 TARGETING::TargetHandle_t i_membuf);
 
         /**
+         * @brief getAllChips Get a list of chips.
+         *
+         * @param[out] o_list The populated list of chips.
+         * @param[in] i_type The type of chip for which a list
+         *              should be obtained.
+         * @param[in] i_functional functional chip filter.
+         */
+        void getAllChips(
+                TARGETING::TargetHandleList & o_list,
+                TARGETING::TYPE i_type,
+                bool i_functional = true);
+
+        /**
          * @brief getMcs Find the requested membuf chip
          *           target parent MCS unit target.
          *
@@ -137,6 +150,22 @@ class TargetService
                 TARGETING::TargetHandle_t i_target);
 
         /**
+         * @brief getAttribute Obtain the attribute for the requested target.
+         *
+         * @param[in] i_attribute The attribute to be obtained.
+         * @param[in] i_target The target for which the attribute
+         *                should be obtained.
+         * @param[out] o_val The value of the attribute.
+         *
+         * @retval[true] The attribute was found.
+         * @retval[false] The attribute was not found.
+         */
+        bool getAttribute(
+                TARGETING::ATTRIBUTE_ID i_attribute,
+                TARGETING::TargetHandle_t i_target,
+                uint64_t & o_val);
+
+        /**
          * @brief setImpl Set the active target service implementation.
          *
          * @param[in] i_impl The target service implementation to make active.
@@ -164,6 +193,11 @@ class TargetService
          * @brief assignment Disabled.
          */
         TargetService & operator=(const TargetService &);
+
+        /**
+         * @brief Give access to the default implementation.
+         */
+        friend class TargetServiceImpl;
 };
 
 /**
@@ -216,6 +250,19 @@ class TargetServiceImpl
          */
         virtual TARGETING::TargetHandle_t getMcs(
                 TARGETING::TargetHandle_t i_membuf);
+
+        /**
+         * @brief getAllChips Get a list of chips.
+         *
+         * @param[out] o_list The populated list of chips.
+         * @param[in] i_type The type of chip for which a list
+         *              should be obtained.
+         * @param[in] i_functional functional chip filter.
+         */
+        virtual void getAllChips(
+                TARGETING::TargetHandleList & o_list,
+                TARGETING::TYPE i_type,
+                bool i_functional = true);
 
         /**
          * @brief getMcs Find the MCS unit target given
@@ -271,6 +318,22 @@ class TargetServiceImpl
                 TARGETING::TargetHandle_t i_target);
 
         /**
+         * @brief getAttribute Obtain the attribute for the requested target.
+         *
+         * @param[in] i_attribute The attribute to be obtained.
+         * @param[in] i_target The target for which the attribute
+         *                should be obtained.
+         * @param[out] o_val The value of the attribute.
+         *
+         * @retval[true] The attribute was found.
+         * @retval[false] The attribute was not found.
+         */
+        virtual bool getAttribute(
+                TARGETING::ATTRIBUTE_ID i_attribute,
+                TARGETING::TargetHandle_t i_target,
+                uint64_t & o_val);
+
+        /**
          * @brief installTargetService
          *
          * Make this the active target service implementation.
@@ -280,7 +343,7 @@ class TargetServiceImpl
         /**
          * @brief dtor
          */
-        virtual ~TargetServiceImpl() {}
+        virtual ~TargetServiceImpl();
 
         /**
          * @brief ctor
@@ -314,6 +377,14 @@ inline TARGETING::TargetHandle_t TargetService::getMcs(
     return iv_impl->getMcs(i_proc, i_pos);
 }
 
+inline void TargetService::getAllChips(
+        TARGETING::TargetHandleList & o_list,
+        TARGETING::TYPE i_type,
+        bool i_functional)
+{
+    iv_impl->getAllChips(o_list, i_type, i_functional);
+}
+
 inline void TargetService::getMcsPos(
         TARGETING::TargetHandle_t i_mcs,
         uint64_t & o_pos)
@@ -331,6 +402,14 @@ inline TARGETING::TYPE TargetService::getType(
         TARGETING::TargetHandle_t i_target)
 {
     return iv_impl->getType(i_target);
+}
+
+inline bool TargetService::getAttribute(
+        TARGETING::ATTRIBUTE_ID i_attribute,
+        TARGETING::TargetHandle_t i_target,
+        uint64_t & o_val)
+{
+    return iv_impl->getAttribute(i_attribute, i_target, o_val);
 }
 
 inline void TargetService::setImpl(TargetServiceImpl & i_impl)

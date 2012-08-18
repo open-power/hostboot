@@ -141,6 +141,22 @@ void ScomImpl::installScomImpl()
     getScomWrapper().setImpl(*this);
 }
 
+ScomImpl::~ScomImpl()
+{
+    // restore the default
+
+    ScomWrapper & wrapper = getScomWrapper();
+    ScomImpl * defaultImpl = &Singleton<ScomImpl>::instance();
+
+    if(wrapper.iv_impl == this)
+    {
+        if(this != defaultImpl)
+        {
+            wrapper.setImpl(*defaultImpl);
+        }
+    }
+}
+
 errlHndl_t ScomWrapper::putScom(TargetHandle_t i_target, uint64_t i_address,
         uint64_t i_data)
 {

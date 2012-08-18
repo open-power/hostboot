@@ -39,7 +39,8 @@ namespace ATTN
 /**
  * @brief AttentionList Class definition.
  *
- * Container for Attentions.
+ * Container for Attentions.  Attentions
+ * kept sorted by attention type priority.
  */
 class AttentionList : public std::vector<Attention>
 {
@@ -63,6 +64,10 @@ class AttentionList : public std::vector<Attention>
 
         /**
          * @brief getAttnList Convert to PRDF::AttnList.
+         *
+         * Elements are placed such that attentions with
+         * higher priority appear before those with
+         * lower priority.
          *
          * @param[out] o_dest Where PRDF::AttnData elements are placed.
          */

@@ -103,7 +103,7 @@ class ScomImpl
         /**
          * @brief dtor
          */
-        virtual ~ScomImpl() {}
+        virtual ~ScomImpl();
 
         /**
          * @brief ctor
@@ -215,6 +215,11 @@ class ScomWrapper
          * @brief assignment Disabled.
          */
         ScomWrapper & operator=(const ScomWrapper &);
+
+        /**
+         * @brief Give access to the default implementation.
+         */
+        friend class ScomImpl;
 };
 }
 #endif

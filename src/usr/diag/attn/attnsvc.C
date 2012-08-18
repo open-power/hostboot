@@ -35,6 +35,7 @@
 #include "attnprd.H"
 #include "attnproc.H"
 #include "attnmem.H"
+#include "attntarget.H"
 
 using namespace std;
 using namespace PRDF;
@@ -44,13 +45,165 @@ using namespace ERRORLOG;
 namespace ATTN
 {
 
-void* Service::intrTask(void * i_svc)
+errlHndl_t Service::configureInterrupt(
+        ConfigureMode i_mode,
+        TargetHandle_t i_proc,
+        msg_q_t i_q,
+        uint64_t i_xisr,
+        uint64_t i_xivrData,
+        uint64_t i_xivrAddr)
+{
+    errlHndl_t err = NULL;
+
+    do {
+
+        if(i_mode == UP)
+        {
+            err = INTR::registerMsgQ(
+                    i_q,
+                    ATTENTION,
+                    static_cast<INTR::ext_intr_t>(i_xisr));
+        }
+        else
+        {
+            if(NULL == INTR::unRegisterMsgQ(
+                    static_cast<INTR::ext_intr_t>(i_xisr)))
+            {
+                ATTN_ERR("INTR did not find xisr: 0x%07x, tgt: %p",
+                        i_xisr, i_proc);
+            }
+        }
+
+        if(err)
+        {
+            break;
+        }
+
+
+        // TODO: validate this order of operations doesn't
+        // cause any checkstops (RTC: 52894)
+
+        err = putScom(i_proc, i_xivrAddr, i_xivrData);
+
+        if(err)
+        {
+            break;
+        }
+
+    } while(0);
+
+    return err;
+}
+
+void getMask(uint64_t i_type, void * i_data)
+{
+    uint64_t & mask = *static_cast<uint64_t *>(i_data);
+    uint64_t tmp = 0;
+
+    IPOLL::getCheckbits(i_type, tmp);
+
+    mask |= tmp;
+}
+
+errlHndl_t Service::configureInterrupts(
+        msg_q_t i_q,
+        ConfigureMode i_mode)
+{
+    uint64_t prio = i_mode == UP
+        ? LCL_ERR_PRIO
+        : LCL_ERR_PRIO_DISABLED;
+
+    errlHndl_t err = NULL;
+
+    TargetHandleList procs;
+
+    getTargetService().getAllChips(procs, TYPE_PROC);
+
+    TargetHandleList::iterator it = procs.begin();
+
+    while(it != procs.end())
+    {
+        PsiHbIrqSrcCmp psiHbIrqSrcCmpData;
+
+        psiHbIrqSrcCmpData.irsn = PSI_HB_IRSN;
+        psiHbIrqSrcCmpData.mask = PSI_HB_IRSN_MASK;
+        psiHbIrqSrcCmpData.die = PSI_HB_IC_ENABLE;
+        psiHbIrqSrcCmpData.uie = PSI_HB_IC_ENABLE;
+
+        if(i_mode == UP)
+        {
+            // setup psihb interrupts
+
+            // FIXME: This scom can go away when RTC 47105 in place.
+
+            err = putScom(
+                    *it,
+                    PSI_HB_IRQ_SRC_CMP_ADDR,
+                    psiHbIrqSrcCmpData.u64);
+        }
+
+        if(err)
+        {
+            break;
+        }
+
+        // setup local error interrupts
+
+        IcpXisr xisr;
+
+        uint64_t node = 0, chip = 0;
+
+        getTargetService().getAttribute(ATTR_FABRIC_NODE_ID, *it, node);
+        getTargetService().getAttribute(ATTR_FABRIC_CHIP_ID, *it, chip);
+
+        xisr.node = node;
+        xisr.chip = chip;
+        xisr.source = PSI_HB_IRSN | LCL_ERR_ISN;
+
+        PsiHbXivr psiHbXivrData;
+
+        psiHbXivrData.source = LCL_ERR_ISN;
+        psiHbXivrData.priority = prio;
+        psiHbXivrData.pir = INTR::intrDestCpuId(xisr.u64);
+
+        err = configureInterrupt(
+                i_mode,
+                *it,
+                i_q,
+                xisr.u64,
+                psiHbXivrData.u64,
+                LCL_ERR_XIVR_ADDR);
+
+        if(err)
+        {
+            break;
+        }
+
+        // unmask interrupts in ipoll mask
+
+        uint64_t mask = 0;
+        IPOLL::forEach(~0, &mask, &getMask);
+
+        err = modifyScom(*it, IPOLL::address, ~mask, SCOM_AND);
+
+        if(err)
+        {
+            break;
+        }
+
+        ++it;
+    }
+
+    return err;
+}
+
+void * Service::intrTask(void * i_svc)
 {
     // interrupt task loop
 
     Service & svc = *static_cast<Service *>(i_svc);
     bool shutdown = false;
-    msg_t * msg = 0;
+    msg_t * msg = NULL;
 
     while(true)
     {
@@ -108,11 +261,37 @@ errlHndl_t Service::processIntrQMsgPreAck(const msg_t & i_msg,
     // since the hw can't generate additional interrupts
     // until the msg is acknowledged
 
-    errlHndl_t err = 0;
+    errlHndl_t err = NULL;
 
-    // FIXME replace with a real msg -> target conversion
+    TargetHandle_t proc = NULL;
 
-    TargetHandle_t proc = reinterpret_cast<TargetHandle_t>(i_msg.data[0]);
+    IcpXisr xisr;
+
+    xisr.u64 = i_msg.data[0];
+
+    TargetHandleList procs;
+    getTargetService().getAllChips(procs, TYPE_PROC);
+
+    TargetHandleList::iterator it = procs.begin();
+
+    while(it != procs.end())
+    {
+        uint64_t node = 0, chip = 0;
+
+        getTargetService().getAttribute(ATTR_FABRIC_NODE_ID, *it, node);
+        getTargetService().getAttribute(ATTR_FABRIC_CHIP_ID, *it, chip);
+
+        if(node == xisr.node
+                && chip == xisr.chip)
+        {
+            proc = *it;
+            break;
+        }
+
+        ++it;
+    }
+
+    ATTN_DBG("preack: xisr: 0x%07x, tgt: %p", xisr.u64, proc);
 
     do {
 
@@ -135,6 +314,8 @@ errlHndl_t Service::processIntrQMsgPreAck(const msg_t & i_msg,
         {
             break;
         }
+
+        ATTN_DBG("resolving 0x%016x...", ipollMaskScomData);
 
         // query the proc resolver for active attentions
 
@@ -163,7 +344,7 @@ errlHndl_t Service::processIntrQMsgPreAck(const msg_t & i_msg,
             break;
         }
 
-        ATTN_DBG("resolved %d", o_attentions.size());
+        ATTN_DBG("...resolved %d", o_attentions.size());
 
     } while(0);
 
@@ -172,7 +353,7 @@ errlHndl_t Service::processIntrQMsgPreAck(const msg_t & i_msg,
 
 void Service::processIntrQMsg(msg_t & i_msg)
 {
-    errlHndl_t err = 0;
+    errlHndl_t err = NULL;
 
     AttentionList newAttentions;
 
@@ -271,7 +452,7 @@ bool Service::prdTaskWait(AttentionList & o_attentions)
 
 void Service::processAttentions(const AttentionList & i_attentions)
 {
-    errlHndl_t err = 0;
+    errlHndl_t err = NULL;
 
     err = getPrdWrapper().callPrd(i_attentions);
 
@@ -336,7 +517,12 @@ errlHndl_t Service::stop()
 
     if(intrTask)
     {
-        unRegisterMsgQ(INTR::ATTENTION);
+        errlHndl_t err = configureInterrupts(q, DOWN);
+
+        if(err)
+        {
+            errlCommit(err, HBATTN_COMP_ID);
+        }
 
         msg_t * shutdownMsg = msg_allocate();
         shutdownMsg->type = SHUTDOWN;
@@ -382,7 +568,7 @@ bool Service::startPrdTask()
 
 errlHndl_t Service::start()
 {
-    errlHndl_t err = 0;
+    errlHndl_t err = NULL;
     bool cleanStartup = false;
 
     ATTN_SLOW("starting...");
@@ -398,7 +584,7 @@ errlHndl_t Service::start()
 
             msg_q_t q = msg_q_create();
 
-            err = registerMsgQ(q, INTR::ATTENTION, INTR::ATTENTION);
+            err = configureInterrupts(q, UP);
 
             if(err)
             {
@@ -423,16 +609,24 @@ errlHndl_t Service::start()
 
     } while(0);
 
+    tid_t prd = iv_prdTask, intr = iv_intrTask;
+
     mutex_unlock(&iv_mutex);
 
     if(!cleanStartup)
     {
-        // TODO
+        errlHndl_t err2 = stop();
+
+        if(err2)
+        {
+            errlCommit(err2, HBATTN_COMP_ID);
+        }
     }
     else
     {
-        ATTN_SLOW("..startup complete");
+        ATTN_SLOW("..startup complete, intr: %d, prd: %d", intr, prd);
     }
+
     return err;
 }
 
@@ -452,7 +646,7 @@ Service::~Service()
 
     if(err)
     {
-        // TODO
+        errlCommit(err, HBATTN_COMP_ID);
     }
 
     sync_cond_destroy(&iv_cond);

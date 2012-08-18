@@ -73,6 +73,43 @@ void FakeProcTargetService::getAllChips(
     }
 }
 
+bool FakeProcTargetService::getAttribute(
+        TARGETING::ATTRIBUTE_ID i_attribute,
+        TARGETING::TargetHandle_t i_target,
+        uint64_t & o_val)
+{
+    bool found = false;
+
+    if(find(iv_procs.begin(), iv_procs.end(), i_target) != iv_procs.end())
+    {
+        found = true;
+
+        switch (i_attribute)
+        {
+            case ATTR_FABRIC_NODE_ID:
+
+                o_val = 0;
+                break;
+
+            case ATTR_FABRIC_CHIP_ID:
+
+                o_val = distance(
+                        iv_procs.begin(),
+                        find(
+                            iv_procs.begin(),
+                            iv_procs.end(),
+                            i_target));
+                break;
+
+            default:
+                found = false;
+                break;
+        }
+    }
+
+    return found;
+}
+
 void FakeMemTargetService::getAllChips(
         TargetHandleList & o_list,
         TYPE i_type,
