@@ -47,6 +47,13 @@ use strict;
 use XML::Simple;
 use Data::Dumper;
 
+################################################################################
+# Set PREFERRED_PARSER to XML::Parser. Otherwise it uses XML::SAX which contains
+# bugs that result in XML parse errors that can be fixed by adjusting white-
+# space (i.e. parse errors that do not make sense).
+################################################################################
+$XML::Simple::PREFERRED_PARSER = 'XML::Parser';
+
 my $mrwdir = "";
 my $sysname = "";
 my $usage = 0;
@@ -165,25 +172,13 @@ foreach my $i (@{$memBus->{'memory-bus'}})
          $i->{dimm}->{'instance-path'}, $i->{'fsi-link'} ];
 }
 
-# Sort physical DIMM order
-my @Memfields;
-my @SMembuses;
-for my $i ( 0 .. $#Membuses )
+# Sort the memory busses, based on their instance paths
+my @SMembuses = sort byDimmInstancePath @Membuses;
+
+# Rewrite each DIMM instance path's DIMM instance to be indexed from 0
+for my $i ( 0 .. $#SMembuses )
 {
-    for (my $j = 0; $j <= $#Membuses; $j++ )
-    {
-        my $k = $Membuses[$j][DIMM_PATH_FIELD];
-        $k =~ s/.*dimm-(.*).*$/$1/;
-        if ($k == $i)
-        {
-            for my $l ( 0 .. CFSI_LINK_FIELD )
-            {
-                $Memfields[$l] = $Membuses[$j][$l];
-            }
-            push @SMembuses, [ @Memfields ];
-            $j = $#Membuses;
-        }
-    }
+    $SMembuses[$i][DIMM_PATH_FIELD] =~ s/[0-9]*$/$i/;
 }
 
 # Find master processor's node and proc. The FSP master is always connected to
@@ -472,6 +467,35 @@ print "\n</attributes>\n";
 exit 0;
 
 ##########   Subroutines    ##############
+
+################################################################################
+# Compares two MRW DIMM instance paths based only on the DIMM instance #
+################################################################################
+
+sub byDimmInstancePath ($$) 
+{
+    # Operates on two DIMM instance paths, each in the form of:
+    #     assembly-0/shilin-0/dimm-X
+    #
+    # Assumes that "X is always a decimal number, and that every DIMM in the
+    # system has a unique value of "X", including for multi-node systems and for
+    # systems whose DIMMs are contained on different parts of the system
+    # topology
+    #
+    # Note, in the path example above, the parts leading up to the dimm-X could
+    # be arbitrarily deep and have different types/instance values
+
+    # Get just the instance path for each supplied memory bus
+    my $lhsInstance = $_[0][DIMM_PATH_FIELD];
+    my $rhsInstance = $_[1][DIMM_PATH_FIELD];
+
+    # Replace each with just its DIMM instance value (a string)
+    $lhsInstance =~ s/.*-([0-9]*)$/$1/;
+    $rhsInstance =~ s/.*-([0-9]*)$/$1/;
+
+    # Convert each DIMM instance value string to int, and return comparison
+    return int($lhsInstance) <=> int($rhsInstance);
+}
 
 sub generate_sys
 {
