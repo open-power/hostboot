@@ -258,16 +258,26 @@ hb_workon()
 
 hb_prime()
 {
-    if [ -n "${SANDBOXBASE}" ]; then
-        if [ ! -d "${SANDBOXBASE}" ]; then
-            echo "Sandbox does not exist.  Create with 'hb simsetup."
-            exit -1
-        fi
-        hbDistribute $*
-    else
-        echo "SANDBOXBASE not set."
+    [ -z "${SANDBOXBASE}" ] && echo "Missing SANDBOXBASE." && exit -1
+    [ -z "${HOSTBOOTROOT}" ] && echo "Missing HOSTBOOTROOT." && exit -1
+
+    if [ ! -d "${SANDBOXBASE}" ]; then
+        echo "Sandbox does not exist.  Create with 'hb simsetup."
         exit -1
     fi
+
+    SBDRIVER=`cat ${SANDBOXBASE}/rc_files/sb.conf | \
+              grep "backing_build" | awk '{ print $3 }'`
+    DRIVER=`cat ${HOSTBOOTROOT}/src/build/citest/etc/bbuild`
+
+    if [ ${SBDRIVER} != ${DRIVER} ]; then
+        echo "Driver mismatch between sandbox and src/build/citest/etc/bbuild."
+        echo "Sandbox at ${SBDRIVER}"
+        echo "Update sandbox with 'hb simsetup'."
+        exit -1
+    fi
+
+    hbDistribute $*
 }
 
 hb_simsetup()
