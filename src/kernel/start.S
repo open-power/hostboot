@@ -50,7 +50,7 @@
 .global _start
 _start:
     ;// Set thread priority high.
-    or 3,3,3
+    or 2,2,2
 
     ;// Clear MSR[TA] (bit 63).
     mfmsr r2
@@ -146,7 +146,7 @@ finished_relocate:
 
 #define STD_INTERRUPT_NOADDR(name) \
     intvect_##name: \
-	or 3,3,3; /* Ensure thread priority is high. */ \
+	or 2,2,2; /* Ensure thread priority is high. */ \
 	mtsprg1 r1; /* Save GPR1 */ \
 	    ;/* Retrieve processing address for interrupt. */ \
 	lis r1, intvect_##name##_finish_save@h; \
@@ -299,7 +299,7 @@ _other_thread_spinlock:
     b 1b
 ;// Now released by primary thread.
 _other_thread_spinlock_complete:
-    or 3,3,3 ;// Raise thread priority.
+    or 2,2,2 ;// Raise thread priority.
     isync
     ;// Get CPU object from thread ID.
     mfspr r1, PIR
@@ -574,7 +574,7 @@ intvect_system_reset:
     ;//         - IPI wake-up from winkle of slave core.
 
     ;// Raise priority to high.
-    or 3,3,3
+    or 2,2,2
 
     ;// Free up two registers temporarily.
     mtsprg0 r1

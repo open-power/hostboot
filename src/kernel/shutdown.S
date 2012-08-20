@@ -38,7 +38,7 @@
         bne 1b; \
         /*     Instruction barrier to ensure exit. */ \
         isync; \
-        or 3,3,3;    /* Increase thread priority */
+        or 2,2,2;    /* Increase thread priority */
 
 
 .section .text
@@ -89,8 +89,7 @@ kernel_shutdown:
 kernel_shutdown_ea0_1_mode:
         ;// Perform barrier - 1
     KERNEL_BARRIER(r8, r3, r11)
-    isync
-    or 3,3,3    ;// Increase thread priority
+
         ;// Update HRMOR on master.
     mfspr r10, PIR
     andi. r10, r10, 7
@@ -153,13 +152,12 @@ kernel_shutdown_ea0_1_mode:
     bdnz 1b
     isync
         ;// Raise thread priority and leave ourselves.
-    or 3,3,3
+    or 2,2,2
         ;// Clear "Hostboot active" scratch register.
     li r3, (0x40 + 0x38) ;// See sys/mmio.h
     mtspr SPRC, r3
     li r3, 0x0
     mtspr SPRD, r3
-
     b 2b
 
 .section .data
