@@ -1,26 +1,26 @@
 #!/usr/bin/perl
-#  IBM_PROLOG_BEGIN_TAG
-#  This is an automatically generated prolog.
-#
-#  $Source: src/usr/targeting/common/xmltohb/xmltohb.pl $
-#
-#  IBM CONFIDENTIAL
-#
-#  COPYRIGHT International Business Machines Corp. 2011-2012
-#
-#  p1
-#
-#  Object Code Only (OCO) source materials
-#  Licensed Internal Code Source Materials
-#  IBM HostBoot Licensed Internal Code
-#
-#  The source code for this program is not published or other-
-#  wise divested of its trade secrets, irrespective of what has
-#  been deposited with the U.S. Copyright Office.
-#
-#  Origin: 30
-#
-#  IBM_PROLOG_END_TAG
+# IBM_PROLOG_BEGIN_TAG 
+# This is an automatically generated prolog. 
+#  
+# $Source: src/usr/targeting/common/xmltohb/xmltohb.pl $ 
+#  
+# IBM CONFIDENTIAL 
+#  
+# COPYRIGHT International Business Machines Corp. 2011,2012 
+#  
+# p1 
+#  
+# Object Code Only (OCO) source materials 
+# Licensed Internal Code Source Materials 
+# IBM HostBoot Licensed Internal Code 
+#  
+# The source code for this program is not published or otherwise 
+# divested of its trade secrets, irrespective of what has been 
+# deposited with the U.S. Copyright Office. 
+#  
+# Origin: 30 
+#  
+# IBM_PROLOG_END_TAG 
 
 #
 # Purpose:
@@ -67,7 +67,7 @@ my $cfgImgOutputFile = "./targeting.bin";
 my $cfgHelp = 0;
 my $cfgMan = 0;
 my $cfgVerbose = 0;
-my $cfgShortEnums = 1;
+my $cfgShortEnums = 0;
 my $cfgBigEndian = 1;
 my $cfgIncludeFspAttributes = 0;
 
@@ -1575,7 +1575,7 @@ sub writeAttrErrlCFile {
     # build function that takes adds 1 attribute to the output
     print $outFile "\n";
     print $outFile "void ErrlUserDetailsAttribute::addData(\n";
-    print $outFile "    uint8_t i_attr)\n";
+    print $outFile "    uint32_t i_attr)\n";
     print $outFile "{\n";
     print $outFile "    char tmpBuffer[128];\n";
     print $outFile "    uint32_t attrSize = 0;\n";
@@ -1608,9 +1608,9 @@ sub writeAttrErrlCFile {
     print $outFile "    if (attrSize) { // we have something to output\n";
     print $outFile "        // resize buffer and copy string into it\n";
     print $outFile "        uint8_t * pBuf;\n";
-    print $outFile "        pBuf = reinterpret_cast<uint8_t *>(reallocUsrBuf(iv_dataSize + attrSize + 1));\n";
-    print $outFile "        *(pBuf + iv_dataSize) = i_attr; // first dump the attr enum\n";
-    print $outFile "        iv_dataSize++;\n";
+    print $outFile "        pBuf = reinterpret_cast<uint8_t *>(reallocUsrBuf(iv_dataSize + attrSize + sizeof(i_attr) ));\n";
+    print $outFile "        memcpy(pBuf + iv_dataSize, &i_attr, sizeof(i_attr)); // first dump the attr enum\n";
+    print $outFile "        iv_dataSize += sizeof(i_attr);\n";
     print $outFile "        memcpy(pBuf + iv_dataSize, tmpBuffer, attrSize); // copy into iv_pBuffer\n";
     print $outFile "        iv_dataSize += attrSize;\n";
     print $outFile "    }\n";
@@ -1621,7 +1621,7 @@ sub writeAttrErrlCFile {
     print $outFile "\n";
     print $outFile "//------------------------------------------------------------------------------\n";
     print $outFile "ErrlUserDetailsAttribute::ErrlUserDetailsAttribute(\n";
-    print $outFile "    const Target * i_pTarget, uint8_t i_attr)\n";
+    print $outFile "    const Target * i_pTarget, uint32_t i_attr)\n";
     print $outFile "    : iv_pTarget(i_pTarget), iv_dataSize(0)\n";
     print $outFile "{\n";
     print $outFile "    // Set up ErrlUserDetails instance variables\n";
@@ -1712,9 +1712,9 @@ sub writeAttrErrlHFile {
     print $outFile "class ErrlUserDetailsAttribute : public ErrlUserDetails {\n";
     print $outFile "public:\n";
     print $outFile "\n";
-    print $outFile "    ErrlUserDetailsAttribute(const TARGETING::Target * i_pTarget, uint8_t i_attr);\n";
+    print $outFile "    ErrlUserDetailsAttribute(const TARGETING::Target * i_pTarget, uint32_t i_attr);\n";
     print $outFile "    ErrlUserDetailsAttribute(const TARGETING::Target * i_pTarget);\n";
-    print $outFile "    void addData(uint8_t i_attr);\n";
+    print $outFile "    void addData(uint32_t i_attr);\n";
     print $outFile "    virtual ~ErrlUserDetailsAttribute();\n";
     print $outFile "\n";
     print $outFile "private:\n";
@@ -1754,27 +1754,19 @@ sub writeAttrErrlHFile {
     print $outFile "  {\n";
     print $outFile "    const char *pLabel;\n";
     print $outFile "    uint8_t *l_ptr = static_cast<uint8_t *>(i_pBuffer);\n";
-    print $outFile "    uint32_t i = 0;\n";
     print $outFile "    std::vector<char> l_traceEntry(128);\n";
     print $outFile "\n";
-    print $outFile "    for (; i < i_buflen; ) {\n";
-    print $outFile "        if (*l_ptr == 0) { // skip over NULLs\n";
-    print $outFile "            l_ptr++;\n";
-    print $outFile "            i++;\n";
-    print $outFile "            continue;\n";
-    print $outFile "        }\n";
-    print $outFile "        // first byte is the attr enum\n";
-    print $outFile "        uint8_t attrEnum = *l_ptr;\n";
+    print $outFile "        // first 4 bytes is the attr enum\n";
+    print $outFile "        uint32_t attrEnum = *(uint32_t *)l_ptr;\n";
     print $outFile "        uint32_t dataSize = 0;\n";
-    print $outFile "        l_ptr++;\n";
-    print $outFile "        i++;\n";
+    print $outFile "        l_ptr += sizeof(attrEnum);\n";
     print $outFile "\n";
     print $outFile "        switch (attrEnum) {\n";
 
     # loop through every attribute to make the swith/case
     foreach my $attribute (@{$attributes->{attribute}})
     {
-        my $attrVal = sprintf "0x%02X", $attribute->{value};
+        my $attrVal = sprintf "0x%08X", $attribute->{value};
         print $outFile "          case ",$attrVal,": {\n";
 
         # things we'll skip:
@@ -1796,9 +1788,10 @@ sub writeAttrErrlHFile {
                 foreach my $enumerator (@{$enumerationType->{enumerator}})
                 {
                     my $enumName = $attribute->{id} . "_" . $enumerator->{name};
-                    my $enumHex = sprintf "0x%02X", enumNameToValue($enumerationType,$enumerator->{name});
+                    my $enumHex = sprintf "0x%08X", enumNameToValue($enumerationType,$enumerator->{name});
                     print $outFile "                  case ",$enumHex,": {\n";
-                    print $outFile "                      dataSize = 1 + sprintf(&(l_traceEntry[0]), \"",$enumName,"\");\n";
+                    print $outFile "                      // get the length and add one for the null terminator ";
+                    print $outFile "                      dataSize = 1  + sprintf(&(l_traceEntry[0]), \"",$enumName,"\");\n";
                     print $outFile "                      break;\n";
                     print $outFile "                  }\n";
                 }
@@ -1835,7 +1828,8 @@ sub writeAttrErrlHFile {
         {
             print $outFile "              //simpleType:uint\n";
             print $outFile "              pLabel = \"ATTR_",$attribute->{id},"\";\n";
-            if (exists $attribute->{simpleType}->{uint8_t}) {
+            if (exists $attribute->{simpleType}->{uint8_t}) 
+            {
                 print $outFile "              dataSize = 1 + sprintf(&(l_traceEntry[0]), \"0x%.2X\", *((uint8_t *)l_ptr));\n";
             }
             elsif (exists $attribute->{simpleType}->{uint16_t}) {
@@ -1945,7 +1939,6 @@ sub writeAttrErrlHFile {
     print $outFile "          }\n";
     print $outFile "        } // switch\n";
     print $outFile "\n";
-    print $outFile "        i += dataSize; // increment past all of this\n";
     print $outFile "        // pointing to something - print it.\n";
     print $outFile "        if (dataSize != 0) {\n";
     print $outFile "            if (l_traceEntry.size() < dataSize + 2) {\n";
@@ -1954,8 +1947,7 @@ sub writeAttrErrlHFile {
     print $outFile "            i_parser.PrintString(pLabel, &(l_traceEntry[0]));\n";
     print $outFile "        }\n";
     print $outFile "        l_ptr += dataSize;\n";
-    print $outFile "    } // for\n";
-    print $outFile "  }\n";
+    print $outFile "    } // for\n\n";
     print $outFile "private:\n";
     print $outFile "\n";
     print $outFile "// Disabled\n";
