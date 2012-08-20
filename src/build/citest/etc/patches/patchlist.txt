@@ -5,8 +5,8 @@ Brief description of the problem or reason for patch
 -Files: list of files		
 -Coreq: list of associated changes, e.g. workarounds.presimsetup
 
-New actions for master-winkle wakeup
+New actions for real proc_thread_control
 -RTC: Task 43959 will remove the patches
--CMVC: D846452 is integrating the changes
--Files: p8_inst.act
+-CMVC: D851143 is integrating the changes
+-Files: p8_inst.act.patch
 -Coreq: there are related changes in workarounds.postsimsetup

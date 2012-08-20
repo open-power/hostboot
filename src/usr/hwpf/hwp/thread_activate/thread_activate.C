@@ -61,7 +61,7 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
 {
     errlHndl_t  l_errl  =   NULL;
 
-    TRACFCOMP( g_fapiTd, 
+    TRACFCOMP( g_fapiTd,
                "activate_threads entry" );
 
     // get the master processor target
@@ -71,7 +71,7 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
     {
         TRACFCOMP( g_fapiImpTd,
                    "Could not find master proc!!!" );
-        assert(false);        
+        assert(false);
     }
 
     // get the list of core targets for this proc chip
@@ -88,8 +88,8 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
     task_affinity_unpin();
 
     //NNNCCCPPPPTTT
-    uint64_t l_masterCoreID = (cpuid & 0x0078)>>3; 
-    uint64_t l_masterThreadID = (cpuid & 0x0007);    
+    uint64_t l_masterCoreID = (cpuid & 0x0078)>>3;
+    uint64_t l_masterThreadID = (cpuid & 0x0007);
 
     TARGETING::Target* l_masterCore = NULL;
     for( TARGETING::TargetHandleList::iterator core_it
@@ -106,7 +106,7 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
     }
     if( l_masterCore == NULL )
     {
-        TRACFCOMP( g_fapiImpTd, 
+        TRACFCOMP( g_fapiImpTd,
                    "Could not find a target for core %d",
                    l_masterCoreID );
         /*@
@@ -130,7 +130,7 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
         return;
     }
 
-    TRACFCOMP( g_fapiTd, 
+    TRACFCOMP( g_fapiTd,
                "Master CPU : c%d t%d (HUID=%.8X)",
                l_masterCoreID, l_masterThreadID, TARGETING::get_huid(l_masterCore) );
 
@@ -157,7 +157,7 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
         }
 
         // send a magic instruction for PHYP Simics to work...
-        MAGIC_INSTRUCTION(MAGIC_SIMICS_CORESTATESAVE);       
+        MAGIC_INSTRUCTION(MAGIC_SIMICS_CORESTATESAVE);
 
         //@todo - call the real proc_thread_control HWP  (RTC:42816)
 #if 0
@@ -184,7 +184,7 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
                          l_threadState ); //o_thread_state
         if ( l_errl )
         {
-            TRACFCOMP( g_fapiImpTd, 
+            TRACFCOMP( g_fapiImpTd,
                        "ERROR: 0x%.8X :  proc_thread_control HWP( cpu %d, thread %d )",
                        l_errl->reasonCode(),
                        l_masterCoreID,
@@ -195,7 +195,7 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
         }
         else
         {
-            TRACFCOMP( g_fapiTd, 
+            TRACFCOMP( g_fapiTd,
                        "SUCCESS: 0x%.8X :  proc_thread_control HWP( cpu %d, thread %d )",
                        l_errl->reasonCode(),
                        l_masterCoreID,
@@ -218,7 +218,7 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
         // Make sure the thread is in maintenance mode
         if( !(statreg & 0x0000040000000000) ) //21:PTC_RAS_STAT_MAINT
         {
-            TRACFCOMP( g_fapiImpTd, 
+            TRACFCOMP( g_fapiImpTd,
                        "ERROR: Thread c%d t%d is in the wrong state : Status=%.16X",
                        l_masterCoreID,
                        thread,
@@ -258,9 +258,9 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
                              DEVICE_SCOM_ADDRESS(rasStatAddr) );
         if( l_errl ) { break; }
 
-        if( !(statreg & 0x0000000000001000) ) //51:PTC_RAS_STAT_RUN_BIT
+        if( !(statreg & 0x0008000000000000) ) //12:PTC_RAS_STAT_INST_COMP
         {
-            TRACFCOMP( g_fapiImpTd, 
+            TRACFCOMP( g_fapiImpTd,
                        "ERROR: Thread c%d t%d did not start : Status=%.16X",
                        l_masterCoreID,
                        thread,
@@ -285,14 +285,14 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
         }
 #endif
 
-        TRACFCOMP( g_fapiTd, 
+        TRACFCOMP( g_fapiTd,
                    "SUCCESS: Thread c%d t%d started",
                    l_masterCoreID,
                    thread );
 
     }
 
-    TRACFCOMP( g_fapiTd, 
+    TRACFCOMP( g_fapiTd,
                "activate_threads exit" );
 
     io_rtaskRetErrl = l_errl;

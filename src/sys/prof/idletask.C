@@ -43,8 +43,7 @@ void TaskManager::idleTaskLoop(void* unused)
         setThreadPriorityLow();
 
         // Request privilege escalation for nap.
-        register uint64_t syscall = MISC_CPUNAP;
-        asm volatile("or 3, %0, %0; sc" :: "r" (syscall) : "r3", "cc");
+        asm volatile("li 3, %0; sc" :: "K" (MISC_CPUNAP) : "r3", "cc");
 
         // Execute nap.
         nap();

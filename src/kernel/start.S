@@ -1,48 +1,26 @@
-# IBM_PROLOG_BEGIN_TAG 
-# This is an automatically generated prolog. 
-#  
-# $Source: src/kernel/start.S $ 
-#  
-# IBM CONFIDENTIAL 
-#  
-# COPYRIGHT International Business Machines Corp. 2010,2012 
-#  
-# p1 
-#  
-# Object Code Only (OCO) source materials 
-# Licensed Internal Code Source Materials 
-# IBM HostBoot Licensed Internal Code 
-#  
-# The source code for this program is not published or otherwise 
-# divested of its trade secrets, irrespective of what has been 
-# deposited with the U.S. Copyright Office. 
-#  
-# Origin: 30 
-#  
-# IBM_PROLOG_END_TAG 
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/kernel/start.S $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2010-2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/kernel/start.S $
+#
+# IBM CONFIDENTIAL
+#
+# COPYRIGHT International Business Machines Corp. 2010,2012
+#
+# p1
+#
+# Object Code Only (OCO) source materials
+# Licensed Internal Code Source Materials
+# IBM HostBoot Licensed Internal Code
+#
+# The source code for this program is not published or otherwise
+# divested of its trade secrets, irrespective of what has been
+# deposited with the U.S. Copyright Office.
+#
+# Origin: 30
+#
+# IBM_PROLOG_END_TAG
+
 .include "kernel/ppcconsts.S"
 
 .section .text.intvects
@@ -52,10 +30,11 @@ _start:
     ;// Set thread priority high.
     or 2,2,2
 
-    ;// Clear MSR[TA] (bit 63).
+    ;// Clear MSR[TA] (bit 1) and MSR[ME] (bit 51).
     mfmsr r2
-    rldicl r2,r2,1,1
-    rotldi r2,r2,63
+    rldicl r2,r2,1,1    ;// Clear bit 1  - result [1-63,0]
+    rldicl r2,r2,50,1   ;// Clear bit 51 - result [51-63,0-50]
+    rldicl r2,r2,13,0   ;// Rotate around back to [0-63]
     ;// Set up SRR0 / SRR1 to enable new MSR.
     mtsrr1 r2
     li r2, _start_postmsr@l
@@ -646,8 +625,15 @@ intvect_system_reset_inactive:
 
     ;// @fn intvect_system_reset_decrementer
     ;// Handle SRESET due to decrementer wake-up.
-    ;//     This is a wake-up from 'nap'.  Clear priviledge escalation and
-    ;//     perform decrementer.
+    ;//     This is a wake-up from 'nap'.
+    ;//
+    ;//     When entering nap, all thread-state is lost (GPRs, etc).  In order
+    ;//     to execute nap the task had to first make a system call to raise
+    ;//     priviledge which has the side effect of saving state in the task
+    ;//     struct.  None of the state can be changed by the nap instruction
+    ;//     itself.  Therefore, we need to remove priviledge escalation,
+    ;//     increment the NIA (past the nap instruction), and execute the
+    ;//     post-task-save portion of the decrementer vector.
 intvect_system_reset_decrementer:
     ;// Clear MSR mask, since privilaged instruction was now executed (nap).
     mfsprg3 r1  ;// Load task structure to r1.
@@ -655,15 +641,16 @@ intvect_system_reset_decrementer:
     std r2, TASK_MSR_MASK(r1) ;// Zero msr_mask.
 
     ;// Advance saved NIA (past nap).
-    mfsrr0 r1
-    addi r1, r1, 4
-    mtsrr0 r1
+    ld r2, TASK_NIP(r1)
+    addi r2, r2, 4
+    std r2, TASK_NIP(r1)
 
-    ;// Restore save registers.
-    mfsprg0 r1
-    mfsprg1 r2
+    ;// Restore kernel stack.
+    ld r1, TASK_CPUPTR(r1)	;// Get CPU pointer
+    ld r1, CPU_KERNEL_STACK(r1)	;// Get kernel stack pointer.
 
-    b intvect_decrementer
+    ;// Jump to post-save portion of decrementer.
+    b intvect_decrementer_finish_save
 
     ;// @fn intvect_system_reset_external
     ;// Handle SRESET due to wake-up from external interrupt.
