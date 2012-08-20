@@ -55,18 +55,6 @@ enum
 };
 
 // ------------------------------------------------------------------
-// SPLess Msg Type Enums
-enum
-{
-    // Randomly picked 0xAA since SPLess mode looks at this to know whether it
-    // got a shutdown.  originall was 0x0, and shutdown every time.
-    // TODO - need to check if the simics script needs to know this value.
-    // Opened Issue 45042 to have this as well as hb-istep support of shutdown
-    // removed.
-    SPLESS_SHUTDOWN_CMD         = 0xAA,
-};
-
-// ------------------------------------------------------------------
 // Msgs that IstepDispatcher can accept
 enum
 {
@@ -87,13 +75,6 @@ enum
     BREAKPOINT_WORKER       = MBOX::FIRST_SECURE_MSG |
                                 ISTEP_WORKER_MSG |
                                 WORKER_BREAKPOINT,
-
-    // --------------------------------------------------------------
-    // SPLess Messages
-    // --------------------------------------------------------------
-    SHUTDOWN_SPLESS         = MBOX::FIRST_SECURE_MSG |
-                                SPLESS_MSG |
-                                SPLESS_SHUTDOWN_CMD,
 
 };
 

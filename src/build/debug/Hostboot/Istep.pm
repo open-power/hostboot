@@ -74,8 +74,6 @@ use constant    RUN_ALL_MODE_SIGNATURE    =>  0xBADC0FFEE0DDF00D;
 use constant    SPLESS_SINGLE_ISTEP_CMD     =>  0x00;
 use constant    SPLESS_RESUME_ISTEP_CMD     =>  0x01;
 use constant    SPLESS_CLEAR_TRACE_CMD      =>  0x02;
-use constant    SPLESS_SHUTDOWN_CMD         =>  0x03;
-
 
 use constant    MAX_ISTEPS                  =>  25;
 use constant    MAX_SUBSTEPS                =>  25;
@@ -157,7 +155,7 @@ sub main
     ::userDisplay   "Welcome to hb-Istep 3.31 .\n";
     ::userDisplay   "Note that in simics, multiple options must be in quotes,";
     ::userDisplay   "separated by spaces\n\n";
-    
+
     ##  initialize inList to "undefined"
     $inList[MAX_ISTEPS][MAX_SUBSTEPS]   =   ();
     for( my $i = 0; $i <    MAX_ISTEPS; $i++)
@@ -166,8 +164,8 @@ sub main
        {
             undef( $inList[$i][$j] );
         }
-    }    
-    
+    }
+
     ##  ---------------------------------------------------------------------------
     ##  Fetch the symbols we need from syms file
     ##  ---------------------------------------------------------------------------

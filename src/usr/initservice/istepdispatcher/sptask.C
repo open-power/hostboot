@@ -40,7 +40,6 @@
 
 #include    <sys/task.h>                    //  tid_t, task_create, etc
 #include    <sys/time.h>                    //  nanosleep
-#include    <sys/misc.h>                    //  shutdown
 #include    <sys/msg.h>                     //  message Q's
 #include    <mbox/mbox_queues.H>            //  MSG_HB_MSG_BASE
 
@@ -97,7 +96,6 @@ void    userConsoleComm( void *  io_msgQ )
     SPLessCmd               l_cmd;
     SPLessSts               l_sts;
     uint8_t                 l_seqnum        =   0;
-    bool                    l_quitflag      =   false;
     int                     l_sr_rc         =   0;
     msg_q_t                 l_SendMsgQ      =   static_cast<msg_q_t>( io_msgQ );
     msg_t                   *l_pMsg         =   msg_allocate();
@@ -154,7 +152,7 @@ void    userConsoleComm( void *  io_msgQ )
 
             // write the intermediate value back to the console.
             TRACDCOMP( g_trac_initsvc,
-                    "userConsoleComm Write status 0x%x.%x",
+                    "userConsoleComm Write status (running) 0x%x.%x",
                     static_cast<uint32_t>( l_sts.val64 >> 32 ),
                     static_cast<uint32_t>( l_sts.val64 & 0x0ffffffff ) );
 
@@ -169,12 +167,11 @@ void    userConsoleComm( void *  io_msgQ )
             l_pCurrentMsg->extra_data  =   NULL;
 
             TRACDCOMP( g_trac_initsvc,
-                     "userConsoleComm send %p cmd type 0x%x, 0x%x.%x",
-                     l_pCurrentMsg,
-                     l_pCurrentMsg->type,
-                     static_cast<uint32_t>( l_pCurrentMsg->data[0] >> 32 ),
-                     static_cast<uint32_t>( l_pCurrentMsg->data[0] & 0x0ffffffff ) );
-
+            "userConsoleComm: sendmsg type=0x%08x, d0=0x%16x, d1=0x%16x, x=%p",
+                       l_pCurrentMsg->type,
+                       l_pCurrentMsg->data[0],
+                       l_pCurrentMsg->data[1],
+                       l_pCurrentMsg->extra_data );
             //
             //  msg_sendrecv_noblk  effectively splits the "channel" into
             //  a send Q and a receive Q
@@ -186,21 +183,24 @@ void    userConsoleComm( void *  io_msgQ )
             //  This should unblock on any message sent on the Q,
             l_pCurrentMsg  =   msg_wait( l_RecvMsgQ );
 
+            // build status to return to console
+            l_sts.istep         =   l_cmd.istep;
+            l_sts.substep       =   l_cmd.substep;
+            l_sts.hdr.status    =   0;
+
             // Clear command reg when the command is done
             TRACDCOMP( g_trac_initsvc,
                     "userConsoleComm Clear Command reg" );
             l_cmd.val64 =   0;
             writeCmd( l_cmd );
 
-            // process returned status from IStepDisp
-            l_sts.hdr.status    =   0;
 
             TRACDCOMP( g_trac_initsvc,
-                        "spTask: %p recv msg type 0x%x, 0x%x.%x",
-                        l_pCurrentMsg,
-                        l_pCurrentMsg->type,
-                        static_cast<uint32_t>( l_pCurrentMsg->data[0] >> 32 ),
-                        static_cast<uint32_t>( l_pCurrentMsg->data[0] & 0x0ffffffff ) );
+            "userConsoleComm: rcvmsg type=0x%08x, d0=0x%16x, d1=0x%16x, x=%p",
+                       l_pCurrentMsg->type,
+                       l_pCurrentMsg->data[0],
+                       l_pCurrentMsg->data[1],
+                       l_pCurrentMsg->extra_data );
 
             if ( l_pCurrentMsg->type   == BREAKPOINT )
             {
@@ -222,25 +222,12 @@ void    userConsoleComm( void *  io_msgQ )
             // finish filling in status
             l_sts.hdr.runningbit    =   false;
             l_sts.hdr.seqnum        =   l_seqnum;
-            l_sts.istep             =   l_cmd.istep;
-            l_sts.substep           =   l_cmd.substep;
-            //  status should be set now, write to Status Reg.
 
-            // write the intermediate value back to the console.
             TRACDCOMP( g_trac_initsvc,
-                    "userConsoleComm Write status 0x%x.%x",
+                    "userConsoleComm Write (finished) status 0x%x.%x",
                     static_cast<uint32_t>( l_sts.val64 >> 32 ),
                     static_cast<uint32_t>( l_sts.val64 & 0x0ffffffff ) );
             writeSts( l_sts );
-
-            //  if shutdown issued, end this task
-            if ( l_cmd.hdr.cmdnum   ==  SPLESS_SHUTDOWN_CMD )
-            {
-                TRACFCOMP( g_trac_initsvc,
-                           "sptask: shutdown received" );
-
-                l_quitflag    =   true;
-            }
 
             // clear command reg, including go bit (i.e. set to false)
             //  2012-04-27 hb-istep will clear the command reg after it sees
@@ -249,15 +236,6 @@ void    userConsoleComm( void *  io_msgQ )
             //      back on.
 
         }   //  endif   gobit
-
-        if  ( l_quitflag  ==  true )
-        {
-            TRACFCOMP( g_trac_initsvc,
-                       "sptask: got quitflag" );
-
-            //  shutdown command issued, break out of loop
-            break;
-        }
 
         // sleep, and wait for user to give us something else to do.
         /**
@@ -314,7 +292,7 @@ void spTask( void    *io_pArgs )
     TRACFCOMP( g_trac_initsvc,
             "spTask exit." );
 
-    // shutdown requested, end the task.
+    // End the task.
     task_end();
 }
 

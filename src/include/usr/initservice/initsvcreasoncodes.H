@@ -48,7 +48,6 @@ enum    InitServiceModuleID
     EXT_INITSVC_MOD_ID                  =   0x02,
     ISTEP_INITSVC_MOD_ID                =   0x03,
     CXXTEST_MOD_ID                      =   0x04,
-    INITSVC_DO_SHUTDOWN_MOD_ID          =   0x05,
 
 };
 
@@ -65,7 +64,7 @@ enum    InitServiceReasonCode
     WAIT_TASK_FAILED            =   INITSVC_COMP_ID | 0x08,
     WAIT_FN_FAILED              =   INITSVC_COMP_ID | 0x09,
     INITSVC_LOAD_MODULE_FAILED  =   INITSVC_COMP_ID | 0x0a,
-    ISTEP_SHUTDOWN              =   INITSVC_COMP_ID | 0x0b,
+    // not used
     ISTEP_SINGLESTEP_ASYNC_RCVD =   INITSVC_COMP_ID | 0x0c,
     ISTEP_BKPOINT_ASYNC_RCVD    =   INITSVC_COMP_ID | 0x0d,
     ISTEP_WAITFORSYNC_BAD_MSG   =   INITSVC_COMP_ID | 0x0e,

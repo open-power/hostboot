@@ -361,32 +361,14 @@ errlHndl_t IStepDispatcher::msgHndlr ( void )
             case MORE_WORK_NEEDED:
                 // Worker thread is ready for more work.
                 iv_workerMsg = theMsg;
-                // The very first MORE_WORK_NEEDED message will 
+                // The very first MORE_WORK_NEEDED message will
                 // have theMsg->data[0] set to 1. It is set to 0
                 // for subsequent messages. handleMoreWorkNeededMsg
                 // needs to know the very first MORE_WORK_NEEDED msg
-                // to handle the case that a msg is queued in the 
+                // to handle the case that a msg is queued in the
                 // mbox msg queue before this first MORE_WORK_NEEDED
                 // is received.
                 handleMoreWorkNeededMsg( (theMsg->data[0] == 1) );
-                break;
-
-            case SHUTDOWN_SPLESS:
-                // Creat errorlog to return as part of the shutdown.
-                /*@
-                 * @errortype
-                 * @reasoncode       INITSERVICE::ISTEP_SHUTDOWN
-                 * @severity         ERRORLOG::ERRL_SEV_INFORMATIONAL
-                 * @moduleid         INITSERVICE::ISTEP_INITSVC_MOD_ID
-                 * @userdata1        <UNUSED>
-                 * @userdata2        <UNUSED>
-                 * @devdesc          Istep initiated Shutdown.
-                 */
-                err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                               INITSERVICE::ISTEP_INITSVC_MOD_ID,
-                                               INITSERVICE::ISTEP_SHUTDOWN,
-                                               0, 0 );
-
                 break;
 
             default:
@@ -431,10 +413,8 @@ errlHndl_t IStepDispatcher::msgHndlr ( void )
         if( err )
         {
             // Breaking here will be a BAD thing...  It means that we are
-            // exiting not just Istep Dispatcher, but all of Hostboot.  There
-            // are 2 cases where we would exit here:
-            //      1. Shutdown requested via istep (SPLESS)
-            //      2. Error during an Istep.
+            // exiting not just Istep Dispatcher, but all of Hostboot.
+            // This should only happen if there is an error during an Istep.
             errlCommit( err,
                         INITSVC_COMP_ID );
         }
