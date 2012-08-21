@@ -59,11 +59,6 @@ public:
         uint8_t             *l_pdRRecord            =   NULL;
         uint32_t            l_pdRLen                =   0;
 
-        // test value, coreesponds to procmvpd.dat:e23067dae839f5b434ec12b5c86d2ae4fbb51259
-        //  @todo change test when we get valid data in procpore.dat
-        const   uint32_t    MVPD_PDR_TEST_SIZE      =   0x5f74;
-
-
         TS_TRACE( "testGetMvpdPdr entry" );
 
         TARGETING::TargetHandleList l_cpuTargetList;
@@ -102,16 +97,8 @@ public:
                 return;
             }
 
-            //  this will change when MVPD is changed, and will need to be changed
-            //  above.
-            if ( l_pdRLen   !=  MVPD_PDR_TEST_SIZE )
-            {
-                TS_FAIL( "fapiGetMvpdField: expected size = 0x%x, received 0x%x",
-                         MVPD_PDR_TEST_SIZE,
-                         l_pdRLen );
-                fapiLogError(l_fapirc);
-                return;
-            }
+            TS_TRACE( "fapiGetMvpdField: size or #R record = 0x%x",
+                      l_pdRLen );
 
             //  do a malloc instead of a new just for variety
             l_pdRRecord =   reinterpret_cast<uint8_t *>(malloc(l_pdRLen) );
@@ -138,7 +125,6 @@ public:
         TS_TRACE( "testGetMvpdPdr exit" );
     }
 
-
     //  @note:
     //  ring modifiers are from  MVPD #R record, 2012-05-22.
     //  This will change and the unit test will need to be changed...
@@ -151,41 +137,34 @@ public:
         fapi::ReturnCode    l_fapirc        =   fapi::FAPI_RC_SUCCESS;
         uint8_t             *l_pRingBuf     =   NULL;
         uint32_t            l_ringBufsize   =   0;
-        uint32_t            l_ringModifier  =   0;
+        uint32_t            l_ringId        =   0;
+        uint32_t            l_chipletId     =   0;
         struct _testRRstr {
-            uint32_t val;
+            uint32_t ringIdval;
+            uint32_t chipletIdval;
             uint32_t size;
         }  l_ringModifiers[] = {
-            { 0x8036006, 0x20,  },
-            { 0x11033006, 0x20, },
-            { 0x12033006, 0x20, },
-            { 0x13033006, 0x20, },
-            { 0x14033006, 0x20, },
-            { 0x15033006, 0x20, },
-            { 0x18033006, 0x20, },
-            { 0x19033006, 0x20, },
-            { 0x1a033006, 0x20, },
-            { 0x1b033006, 0x20, },
-            { 0x1c033006, 0x20, },
-            { 0x1d033006, 0x20, },
-            { 0x1e033006, 0x20, },
-            { 0x11034f86, 0x20, },
-            { 0x12034f86, 0x20, },
-            { 0x13034f86, 0x20, },
-            { 0x14034f86, 0x20, },
-            { 0x15034f86, 0x20, },
-            { 0x18034f86, 0x20, },
-            { 0x19034f86, 0x20, },
-            { 0x1a034f86, 0x20, },
-            { 0x1b034f86, 0x20, },
-            { 0x1c034f86, 0x20, },
-            { 0x1d034f86, 0x20, },
-            { 0x1e034f86, 0x20, },
-            { 0x2036e06,  0x20, },
-            { 0x2031006,  0x20, },
-            { 0x9037d06,  0x20, },
-            { 0x1034806,  0x20, },
-            { 0x3034806,  0x20, },
+            { 0xe0, 0x8  , 0x20 },
+            { 0xe1, 0x11 , 0x20 },
+            { 0xe1, 0x12 , 0x20 },
+            { 0xe1, 0x13 , 0x20 },
+            { 0xe1, 0x14 , 0x20 },
+            { 0xe1, 0x15 , 0x20 },
+            { 0xe1, 0x18 , 0x20 },
+            { 0xe2, 0x11 , 0x20 },
+            { 0xe2, 0x12 , 0x20 },
+            { 0xe2, 0x13 , 0x20 },
+            { 0xe2, 0x14 , 0x20 },
+            { 0xe2, 0x15 , 0x20 },
+            { 0xe2, 0x18 , 0x20 },
+            { 0xe3, 0x2  , 0x20 },
+            { 0xe5, 0x2  , 0x20 },
+            { 0xe6, 0x2  , 0x20 },
+            { 0xe7, 0x9  , 0x20 },
+            { 0xe8, 0x1  , 0x20 },
+            { 0xe9, 0x1  , 0x20 },
+            { 0xea, 0x1  , 0x20 },
+            { 0xeb, 0x4  , 0x20 },
         };
 
         TS_TRACE( "testRepairRings entry" );
@@ -220,13 +199,15 @@ public:
             //  ----------------------------------------------------------------
             TS_TRACE( "testRepairRings: pass in NULL ptr" );
             l_ringBufsize   =   0x0;
-            l_ringModifier  =   0;
+            l_ringId        =   0;
+            l_chipletId     =   0;
             l_fapirc    =   getRepairRing(  l_fapi_cpu_target,
-                                            l_ringModifier,
+                                            l_chipletId,
+                                            l_ringId,
                                             NULL,
                                             l_ringBufsize );
-            TS_TRACE( "testRepairRings: ring modifier=0x%x: l_ringBufsize=0x%x",
-                      l_ringModifier, l_ringBufsize );
+            TS_TRACE( "testRepairRings: ringId=0x%x, chipletId=0x%x: l_ringBufsize=0x%x",
+                      l_ringId, l_chipletId, l_ringBufsize );
             if ( l_fapirc != fapi::RC_REPAIR_RING_INVALID_RINGBUF_PTR )
             {
                 //  note:  "uint32_t" below is an _operator_ of fapi::ReturnCode
@@ -240,15 +221,18 @@ public:
             //  Pass in 0 for the ring modifier, should return with "not found"
             //  error
             //  ----------------------------------------------------------------
-            TS_TRACE( "testRepairRings: pass in invalid ringModifier" );
+            TS_TRACE( "testRepairRings: pass in invalid ringId" );
             l_ringBufsize   =   0x100;
-            l_ringModifier  =   0;     // ringModifier picked at random
+            l_ringId        =   0;     // ringId
+            l_chipletId     =   0;     // chipletId
             l_fapirc    =   getRepairRing(  l_fapi_cpu_target,
-                                            l_ringModifier,
+                                            l_chipletId,
+                                            l_ringId,
                                             l_pRingBuf,
                                             l_ringBufsize );
-            TS_TRACE( "testRepairRings: ring modifier=0x%x: l_ringBufsize=0x%x",
-                      l_ringModifier,
+            TS_TRACE( "testRepairRings: ringId=0x%x, chipletId=0x%x: l_ringBufsize=0x%x",
+                      l_ringId,
+                      l_chipletId,
                       l_ringBufsize );
             if ( l_fapirc != fapi::RC_REPAIR_RING_NOT_FOUND )
             {
@@ -263,18 +247,21 @@ public:
             //  loop takes too long, test ring 5
             uint8_t i   =   5;
             //  ----------------------------------------------------------------
-            //  Pass in 0 length with a valid ringModifier, should return with
-            //  correct length and no buffer.
+            //  Pass in 0 length with a valid ringId/chipletId, should return
+            //  with correct length and no buffer.
             //  ----------------------------------------------------------------
             TS_TRACE( "testRepairRings: get size of ring %d ", i );
             l_ringBufsize   =   0x0;
-            l_ringModifier  =   l_ringModifiers[i].val;
-            l_fapirc    =   getRepairRing(  l_fapi_cpu_target,
-                                            l_ringModifier,
-                                            l_pRingBuf,
-                                            l_ringBufsize );
-            TS_TRACE( "testRepairRings: ring modifier=0x%x: l_ringBufsize=0x%x",
-                      l_ringModifier,
+            l_ringId        =   l_ringModifiers[i].ringIdval;
+            l_chipletId     =   l_ringModifiers[i].chipletIdval;
+            l_fapirc        =   getRepairRing(  l_fapi_cpu_target,
+                                                l_chipletId,
+                                                l_ringId,
+                                                l_pRingBuf,
+                                                l_ringBufsize );
+            TS_TRACE( "testRepairRings: ringId=0x%x, chipletId=0x%x: l_ringBufsize=0x%x",
+                      l_ringId,
+                      l_chipletId,
                       l_ringBufsize );
             if ( l_fapirc != fapi::RC_REPAIR_RING_INVALID_SIZE )
             {
@@ -301,13 +288,15 @@ public:
             TS_TRACE( "testRepairRings: get ring %d", i );
 
             // l_ringBufsize set from above...
-            l_ringModifier  =   l_ringModifiers[i].val;
+            l_ringId    =   l_ringModifiers[i].ringIdval;
+            l_chipletId =   l_ringModifiers[i].chipletIdval;
             l_fapirc    =   getRepairRing(  l_fapi_cpu_target,
-                                            l_ringModifier,
+                                            l_chipletId,
+                                            l_ringId,
                                             l_pRingBuf,
                                             l_ringBufsize );
-            TS_TRACE( "testRepairRings: ring modifier=0x%x: l_ringBufsize=0x%x",
-                      l_ringModifier, l_ringBufsize );
+            TS_TRACE( "testRepairRings: ringId=0x%x, chipletId=0x%x: l_ringBufsize=0x%x",
+                      l_ringId, l_chipletId, l_ringBufsize );
 
             if ( l_fapirc != fapi::FAPI_RC_SUCCESS )
             {
@@ -335,9 +324,10 @@ public:
             delete[]    l_pRingBuf;
         }
 
+
         TS_TRACE( "testRepairRings exit" );
     }
 
-};
+};  // end class FapiWinkleTest
 
 #endif

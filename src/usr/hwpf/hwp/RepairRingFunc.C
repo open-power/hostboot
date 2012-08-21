@@ -1,4 +1,4 @@
-/*  IBM_PROLOG_BEGIN_TAG
+ /*  IBM_PROLOG_BEGIN_TAG
  *  This is an automatically generated prolog.
  *
  *  $Source: src/usr/hwpf/hwp/RepairRingFunc.C $
@@ -36,40 +36,19 @@
 
 #include    <RepairRingFunc.H>
 
-//
-//  @todo :
-//      pull in CompressedScanData def from proc_slw_build HWP and then remove
-//      the definitions below
-// #include <p8_scan_compression.H>
-//
-/**
- *  @struct RS4 Compressed Scan Header
- */
-typedef struct  {
-    uint32_t    magic;          // "RSA" + version 01 signature
-    uint32_t    size;           // Total size in bytes, including the header
-    uint32_t    algorithReserved;   // "reserved to the algorithm"
-    uint32_t    length;         // len of original scan chain in BITS
-    uint32_t    scanSelect;     // hi 32 bits of the scan select reg
-    uint8_t     reserved[3];
-    uint8_t     chipletId;      // 7-bit pervasive chiplet Id + Multicast bit
-}   CompressedScanData;
-
-/**
- * @def RSA_MAGIC signature - "RSA"+0x01
- */
-const   uint32_t    RS4_MAGIC       =   0x52533401;
-
+//      pull in CompressedScanData def from proc_slw_build HWP
+#include <p8_scan_compression.H>
 
 extern "C"
 {
 using   namespace   fapi;
 
 
-fapi::ReturnCode    getRepairRing(  const fapi::Target  &i_fapiTarget,
-                                    const uint32_t      i_ringModifier,
-                                    uint8_t             *io_pRingBuf,
-                                    uint32_t            &io_rRingBufsize )
+fapi::ReturnCode getRepairRing( const fapi::Target &i_fapiTarget,
+                                const uint8_t       i_chipletId,
+                                const uint8_t       i_ringId,
+                                uint8_t             *io_pRingBuf,
+                                uint32_t            &io_rRingBufsize)
 {
     fapi::ReturnCode        l_fapirc( fapi::FAPI_RC_SUCCESS );
     uint8_t                 *l_pRing        =   NULL;
@@ -80,8 +59,9 @@ fapi::ReturnCode    getRepairRing(  const fapi::Target  &i_fapiTarget,
     bool                    l_foundflag     =   false;
 
 
-    FAPI_DBG(" getRepairRing: entry ringModifier=0x%x, size=0x%x ",
-             i_ringModifier,
+    FAPI_DBG(" getRepairRing: entry ringId=0x%x, chipletId=0x%x, size=0x%x ",
+             i_ringId,
+             i_chipletId,
              io_rRingBufsize  );
 
     do  {
@@ -167,17 +147,17 @@ fapi::ReturnCode    getRepairRing(  const fapi::Target  &i_fapiTarget,
                 reinterpret_cast<CompressedScanData *>( l_pRing+l_offset );
 
             //  dump record info for debug
-            FAPI_DBG(   "getRepairRing: %d scanSelect=0x%x, size=0x%x, chipletId=0x%x",
+            FAPI_DBG(   "getRepairRing: %d ringId=0x%x, size=0x%x, chipletId=0x%x",
                         l_offset,
-                        l_pScanData->scanSelect,
-                        l_pScanData->size,
-                        l_pScanData->chipletId  );
+                        l_pScanData->iv_ringId,
+                        l_pScanData->iv_chipletId,
+                        l_pScanData->iv_size    );
 
             //  Check magic key to make sure this is a valid record.
-            if ( l_pScanData->magic != RS4_MAGIC )
+            if ( l_pScanData->iv_magic != RS4_MAGIC )
             {
                 FAPI_ERR(   "getRepairRing: Header 0x%x at offset 0x%x, break",
-                            l_pScanData->magic,
+                            l_pScanData->iv_magic,
                             l_offset  );
 
                 //  @todo
@@ -193,31 +173,27 @@ fapi::ReturnCode    getRepairRing(  const fapi::Target  &i_fapiTarget,
                 break;
             }
 
-            //
-            //  @TODO Need to do Leon's translation here??
-            //      It's not certain that the scanSelect/ringModifier may be
-            //      passed in here; if so we will have to do some translating.
-            //      Leon Freimour has the translation algorithm.
-            //      This will have to wait until Phase II .
 
-            if ( l_pScanData->scanSelect == i_ringModifier )
+            if (    (l_pScanData->iv_ringId == i_ringId)
+                 && (l_pScanData->iv_chipletId == i_chipletId) )
             {
-                FAPI_DBG( "getRepairRing: Found it: 0x%x, 0x%x",
-                          i_ringModifier,
-                          l_pScanData->size  );
+                FAPI_DBG( "getRepairRing: Found it: 0x%x.0x%x, 0x%x",
+                          i_ringId,
+                          i_chipletId,
+                          l_pScanData->iv_size  );
 
                 l_foundflag =   true;
                 //  check if we have enough space
-                if ( io_rRingBufsize < l_pScanData->size )
+                if ( io_rRingBufsize < l_pScanData->iv_size )
                 {
                     FAPI_ERR( "getRepairRing: output buffer too small:  0x%x < 0x%x",
                               io_rRingBufsize,
-                              l_pScanData->size
+                              l_pScanData->iv_size
                               );
 
                     //  return actual size of data, so caller can re-try with
                     //  the correct value
-                    io_rRingBufsize =   l_pScanData->size;
+                    io_rRingBufsize =   l_pScanData->iv_size;
                     FAPI_SET_HWP_ERROR(l_fapirc, RC_REPAIR_RING_INVALID_SIZE );
 
                     //  break out of do block with fapi rc set
@@ -225,12 +201,13 @@ fapi::ReturnCode    getRepairRing(  const fapi::Target  &i_fapiTarget,
                 }
 
                 //  Goodness, return ring and actual size of data.
-                io_rRingBufsize =   l_pScanData->size;
+                io_rRingBufsize =   l_pScanData->iv_size;
                 //  we're good, copy data into the passed-in buffer
                 memcpy( io_pRingBuf, l_pScanData, io_rRingBufsize );
 
-                FAPI_DBG( "getRepairRing: return record: 0x%x 0x%p,  0x%x",
-                          i_ringModifier,
+                FAPI_DBG( "getRepairRing: return record: 0x%x.0x%x %p,  0x%x",
+                          i_ringId,
+                          i_chipletId,
                           l_pScanData,
                           io_rRingBufsize  );
 
@@ -239,7 +216,7 @@ fapi::ReturnCode    getRepairRing(  const fapi::Target  &i_fapiTarget,
             }
 
             // bump to next ring
-            l_offset +=  l_pScanData->size ;
+            l_offset +=  l_pScanData->iv_size ;
 
         }   // end while scan loop
 
@@ -249,7 +226,7 @@ fapi::ReturnCode    getRepairRing(  const fapi::Target  &i_fapiTarget,
         //
         if ( ! l_foundflag )
         {
-            const   uint32_t    & RING_MODIFIER =   i_ringModifier;
+            const   uint32_t    & RING_MODIFIER =   i_ringId;
             FAPI_SET_HWP_ERROR(l_fapirc, RC_REPAIR_RING_NOT_FOUND );
 
             io_rRingBufsize =   0;

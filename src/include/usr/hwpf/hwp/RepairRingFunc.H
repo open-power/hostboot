@@ -1,4 +1,4 @@
-/*  IBM_PROLOG_BEGIN_TAG
+ /*  IBM_PROLOG_BEGIN_TAG
  *  This is an automatically generated prolog.
  *
  *  $Source: src/include/usr/hwpf/hwp/RepairRingFunc.H $
@@ -43,7 +43,8 @@ extern "C"
  *          target CPU.
  *
  * @param i_fapiTarget      -   cpu target
- * @param i_ringModifier    -   ringModifier/scanSelect id for the repair ring
+ * @param i_chipletId       -   Chiplet ID
+ * @param i_ringId          -   Ring ID
  * @param io_pRingBuf       -   pointer to a buffer allocated by the caller
  * @param io_rRingBufsize   -   in:     size of ring buffer that caller has
  *                                      allocated
@@ -58,10 +59,11 @@ extern "C"
  * @return fapi::ReturnCode -   FAPI_RC_SUCCESS if success,
  *                              relevant error code for failure.
  */
-fapi::ReturnCode    getRepairRing(  const fapi::Target  &i_fapiTarget,
-                                    const uint32_t      i_ringModifier,
-                                    uint8_t             *io_pRingBuf,
-                                    uint32_t            &io_rRingBufsize );
+fapi::ReturnCode getRepairRing( const fapi::Target  &i_fapiTarget,
+                                const uint8_t       i_chipletId,
+                                const uint8_t       i_ringId,
+                                uint8_t             *io_pRingBuf,
+                                uint32_t            &io_rRingBufsize );
 
 }
 
