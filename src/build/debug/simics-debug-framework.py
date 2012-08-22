@@ -1,26 +1,26 @@
 #!/usr/bin/python
-#  IBM_PROLOG_BEGIN_TAG
-#  This is an automatically generated prolog.
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
 #
-#  $Source: src/build/debug/simics-debug-framework.py $
+# $Source: src/build/debug/simics-debug-framework.py $
 #
-#  IBM CONFIDENTIAL
+# IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2011-2012
+# COPYRIGHT International Business Machines Corp. 2011,2012
 #
-#  p1
+# p1
 #
-#  Object Code Only (OCO) source materials
-#  Licensed Internal Code Source Materials
-#  IBM HostBoot Licensed Internal Code
+# Object Code Only (OCO) source materials
+# Licensed Internal Code Source Materials
+# IBM HostBoot Licensed Internal Code
 #
-#  The source code for this program is not published or other-
-#  wise divested of its trade secrets, irrespective of what has
-#  been deposited with the U.S. Copyright Office.
+# The source code for this program is not published or otherwise
+# divested of its trade secrets, irrespective of what has been
+# deposited with the U.S. Copyright Office.
 #
-#  Origin: 30
+# Origin: 30
 #
-#  IBM_PROLOG_END_TAG
+# IBM_PROLOG_END_TAG
 # @file simics-debug-framework.py
 # @brief Simics/Python implementation of the common debug framework.
 #
@@ -368,10 +368,80 @@ def intToList(n,size):
         n = n >> 8
     return lst
 
+# Convert a byte list to an integer.
+def listToInt(l):
+    i = 0;
+    for c in l:
+        i = (i << 8) | c
+    return i
+
 # Write the 64-bit big endian n at the address given.
 def writeLongLong(address,n):
     writeSimicsMemory(address,intToList(n,8))
 
+# Recursively parse out the saved link-registers in a stack.
+#   Param - cpu - CPU object to read stack from.
+#   Param - frame - Pointer to the frame-pointer to be parsed.
+def magic_memoryleak_stackdump(cpu, frame):
+
+    if frame == 0:
+        return []
+
+    # Pointer to the next frame is at the current frame memory address.
+    next_frame = \
+        cpu.iface.processor_info.logical_to_physical(frame, 1).address
+    next_frame = listToInt( \
+        conf.system_cmp0.phys_mem.memory[[next_frame, next_frame+7]])
+
+    if next_frame == 0:
+        return []
+
+    # The LR save area is 2 words ahead of the current frame pointer.
+    lr_save = \
+        cpu.iface.processor_info.logical_to_physical(frame + 16, 1).address
+    lr_save = listToInt( \
+        conf.system_cmp0.phys_mem.memory[[lr_save, lr_save+7]])
+
+    # Recursively add LR to rest of the stack-frame.
+    return [lr_save] + magic_memoryleak_stackdump(cpu, next_frame)
+
+# Respond to the magic instruction for a memory allocation function call.
+#   Param - cpu - The CPU raising the magic instruction.
+#
+#   Registers:
+#       cpu.r3 - function called (see MemoryLeak_FunctionType).
+#       cpu.r4 - size of allocation (for malloc / realloc).
+#       cpu.r5 - pointer (result for malloc / realloc, parameter for free).
+#       cpu.r6 - pointer2 (original pointer for realloc).
+#
+def magic_memoryleak_function(cpu):
+    # Parse registers.
+    function = ["MALLOC", "REALLOC", "FREE"][cpu.r3]
+    size = cpu.r4
+    ptr = cpu.r5
+    ptr2 = cpu.r6
+
+    # Find stack frame.
+    stack_frame = \
+        cpu.iface.processor_info.logical_to_physical(cpu.r1, 1).address
+    stack_frame = listToInt( \
+        conf.system_cmp0.phys_mem.memory[[stack_frame, stack_frame+7]])
+
+    file = open("hb_memoryleak.dat", "a")
+
+    # Output parameters.
+    file.write("%s %d 0x%x 0x%x" % (function,size,ptr,ptr2))
+    # Output stack backtrace.
+    file.write(" [ %s ]\n" % str.join(" ", \
+        ("0x%x" % i for i in magic_memoryleak_stackdump(cpu, stack_frame))))
+
+    file.close()
+
+# Erase the hb_memoryleak.dat save data when starting up.
+try:
+    os.remove("hb_memoryleak.dat")
+except:
+    1
 
 # MAGIC_INSTRUCTION hap handler
 # arg contains the integer parameter n passed to MAGIC_INSTRUCTION(n)
@@ -393,6 +463,9 @@ def magic_instruction_callback(user_arg, cpu, arg):
     if arg == 7007:   # MAGIC_BREAK
         # Stop the simulation, much like a hard-coded breakpoint
         SIM_break_simulation( "Simulation stopped. (hap 7007)"  )
+
+    if arg == 7009:   # MAGIC_MEMORYLEAK_FUNCTION
+        magic_memoryleak_function(cpu)
 
     if arg == 7055:   # MAGIC_CONTINUOUS_TRACE
         # Set execution environment flag to 0
