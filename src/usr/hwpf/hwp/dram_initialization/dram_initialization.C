@@ -390,9 +390,6 @@ void    call_proc_setup_bars( void    *io_pArgs )
         //Now need to scom the L3 bar on my EX to trigger Simics cache contained exit
         if (!l_errl)
         {
-            // TODO: Remove workaround with RTC: 42922.
-            nanosleep(1,0); // workaround Simics race condition.
-
             TARGETING::Target* procTarget = NULL;
             TARGETING::targetService().masterProcChipTargetHandle( procTarget );
 
