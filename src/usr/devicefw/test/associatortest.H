@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/devicefw/test/associatortest.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/devicefw/test/associatortest.H $                      */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef __TEST_ASSOCIATORTEST_H
 #define __TEST_ASSOCIATORTEST_H
 
@@ -42,7 +42,7 @@ static int64_t g_associatorTest_accessType;
 class AssociatorTest: public CxxTest::TestSuite
 {
 public:
-    
+
     /**
      * @test Ensure AssociationContainer can be constructed.
      */
@@ -69,7 +69,7 @@ public:
 
         return NULL;
     }
-    
+
     /**
      * @test Verify simple registration.
      */
@@ -85,9 +85,9 @@ public:
                          SCOM,
                          TYPE_PROC,
                          &performOperation);
-        
-        errlHndl_t l_errl = as.performOp(READ, 
-                                         MASTER_PROCESSOR_CHIP_TARGET_SENTINEL, 
+
+        errlHndl_t l_errl = as.performOp(READ,
+                                         MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
                                          buf, bufsize,
                                          SCOM, va_list());
 
@@ -203,7 +203,7 @@ public:
                          SCOM,
                          TYPE_PROC,
                          &performOperation);
-        
+
         errlHndl_t l_errl = as.performOp(WRITE,
                                          MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
                                          buf, bufsize,
@@ -229,7 +229,7 @@ public:
             TS_FAIL("Invalid access type.");
         }
     }
-    
+
     /**
      * @test Verify registration with a target type as a WILDCARD.
      */
@@ -245,8 +245,8 @@ public:
                          SCOM,
                          WILDCARD,
                          &performOperation);
-        
-        errlHndl_t l_errl = as.performOp(READ, 
+
+        errlHndl_t l_errl = as.performOp(READ,
                                          MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
                                          buf, bufsize,
                                          SCOM, va_list());
@@ -272,7 +272,7 @@ public:
         }
     }
 
-        
+
     /**
      * @test Verify missing registration returns an error log.
      */
@@ -288,7 +288,7 @@ public:
                          SCOM,
                          WILDCARD,
                          &performOperation);
-        
+
         errlHndl_t l_errl = as.performOp(READ,
                                          MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
                                          buf, bufsize,
@@ -301,6 +301,10 @@ public:
         else if (DEVFW_RC_NO_ROUTE_FOUND != l_errl->reasonCode())
         {
             TS_FAIL("Reason code different from DEVFW_RC_NO_ROUTE_FOUND.");
+        }
+        else
+        {
+            delete l_errl;
         }
     }
 
