@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/trace/trace.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2011-2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/trace/trace.C $                                       */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  *  @file trace.C
  *
@@ -659,8 +658,12 @@ void Trace::_trace_adal_write_all(trace_desc_t *io_td,
         l_entry_size = ALIGN_4(l_entry_size);
 
         // Allocate buffer for the arguments we're tracing
-        void * l_buffer = malloc(l_data_size);
-        memset(l_buffer, 0, l_data_size);
+        void * l_buffer = NULL;
+        if (l_data_size)
+        {
+            l_buffer = malloc(l_data_size);
+            memset(l_buffer, 0, l_data_size);
+        }
         char * l_ptr = static_cast<char *> (l_buffer);
 
         // Now copy the arguments to the buffer.
@@ -731,9 +734,12 @@ void Trace::_trace_adal_write_all(trace_desc_t *io_td,
                   sizeof(l_entry));
 
         // Now write the actual data
-        writeData(io_td,
-                  l_buffer,
-                  l_data_size);
+        if (l_data_size)
+        {
+            writeData(io_td,
+                      l_buffer,
+                      l_data_size);
+        }
 
         // Now write the size at the end
         // Note that fsp-trace assumes this to be a 32 bit long word
