@@ -1,25 +1,25 @@
-#   IBM_PROLOG_BEGIN_TAG
-#  This is an automatically generated prolog.
-#
-#  $Source: src/usr/hwpf/makefile $
-#
-#  IBM CONFIDENTIAL
-#
-#  COPYRIGHT International Business Machines Corp. 2011-2012
-#
-#  p1
-#
-#  Object Code Only (OCO) source materials
-#  Licensed Internal Code Source Materials
-#  IBM HostBoot Licensed Internal Code
-#
-#  The source code for this program is not published or other-
-#  wise divested of its trade secrets, irrespective of what has
-#  been deposited with the U.S. Copyright Office.
-#
-#  Origin: 30
-#
-#  IBM_PROLOG_END_TAG
+# IBM_PROLOG_BEGIN_TAG 
+# This is an automatically generated prolog. 
+#  
+# $Source: src/usr/hwpf/makefile $ 
+#  
+# IBM CONFIDENTIAL 
+#  
+# COPYRIGHT International Business Machines Corp. 2011,2012 
+#  
+# p1 
+#  
+# Object Code Only (OCO) source materials 
+# Licensed Internal Code Source Materials 
+# IBM HostBoot Licensed Internal Code 
+#  
+# The source code for this program is not published or otherwise 
+# divested of its trade secrets, irrespective of what has been 
+# deposited with the U.S. Copyright Office. 
+#  
+# Origin: 30 
+#  
+# IBM_PROLOG_END_TAG 
 ROOTPATH = ../../..
 SUBDIRS = fapi.d hwp.d plat.d test.d
 
@@ -43,8 +43,8 @@ HWP_ERROR_XML_FILES = hwp/fapiHwpErrorInfo.xml   \
     hwp/dram_initialization/proc_setup_bars/proc_setup_bars_errors.xml  \
     hwp/dram_initialization/proc_setup_bars/proc_fab_smp_errors.xml     \
     hwp/build_winkle_images/proc_set_pore_bar/proc_set_pore_bar_errors.xml  \
-    hwp/build_winkle_images/proc_pba_bar_config/proc_pba_bar_config_errors.xml
-
+    hwp/build_winkle_images/proc_pba_bar_config/proc_pba_bar_config_errors.xml \
+    hwp/nest_chiplets/proc_a_x_pci_dmi_pll_setup_errors.xml
 
 
 ## these get generated into obj/genfiles/AttributeIds.H

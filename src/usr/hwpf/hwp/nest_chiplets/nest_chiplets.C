@@ -60,9 +60,8 @@
 #include    "proc_start_clocks_chiplets/proc_start_clocks_chiplets.H"
 #include    "proc_chiplet_scominit/proc_chiplet_scominit.H"
 #include    "proc_scomoverride_chiplets/proc_scomoverride_chiplets.H"
-
-//  Uncomment these files as they become available:
-// #include    "proc_a_x_pci_dmi_pll_setup/proc_a_x_pci_dmi_pll_setup.H"
+#include    "proc_a_x_pci_dmi_pll_setup/proc_a_x_pci_dmi_pll_setup.H"
+#include    "proc_a_x_pci_dmi_pll_setup/proc_a_x_pci_dmi_pll_initf.H"
 
 namespace   NEST_CHIPLETS                                              
 {
@@ -78,59 +77,84 @@ using   namespace   fapi;
 //
 void    call_proc_a_x_pci_dmi_pll_setup( void    *io_pArgs )
 {
-    errlHndl_t          l_errl      =   NULL;  
-
+    errlHndl_t l_err = NULL;
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_a_x_pci_dmi_pll_setup entry" );
-        
-#if 0
-    // @@@@@    CUSTOM BLOCK:   @@@@@    
-    //  figure out what targets we need
-    //  customize any other inputs
-    //  set up loops to go through all targets (if parallel, spin off a task)
-    
-    //  print call to hwp and dump physical path of the target(s)
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "=====  proc_a_x_pci_dmi_pll_setup HWP(? ? ? )",
-                    ?
-                    ?
-                    ? );
-    //  dump physical path to targets
-    EntityPath l_path;
-    l_path  =   l_@targetN_target->getAttr<ATTR_PHYS_PATH>();
-    l_path.dump();
-    TRACFCOMP( g_trac_mc_init, "===== " );   
 
-    // cast OUR type of target to a FAPI type of target.                         
-    const fapi::Target l_fapi_@targetN_target(
-                    TARGET_TYPE_MEMBUF_CHIP,
-                    reinterpret_cast<void *>
-                        (const_cast<TARGETING::Target*>(l_@targetN_target)) );
-                    
-    //  call the HWP with each fapi::Target
-    l_fapirc  =   proc_a_x_pci_dmi_pll_setup( ? , ?, ? );
-
-    //  process return code.
-    if ( l_fapirc== fapi::FAPI_RC_SUCCESS )
+    //TODO - Enable this procedure in SIMICs when RTC 46643 is done.
+    //       For now, only run this procedure in VPO.
+    if ( !(TARGETING::is_vpo()) )
     {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "SUCCESS :  proc_a_x_pci_dmi_pll_setup HWP(? ? ? )" );
+                            "WARNING: proc_a_x_pci_dmi_pll_setup HWP is disabled in SIMICS run!");
+        // end task
+        task_end2( l_err );
     }
-    else
+
+    uint8_t l_cpuNum = 0;
+    TARGETING::TargetHandleList l_cpuTargetList;
+    getAllChips(l_cpuTargetList, TYPE_PROC);
+
+    for ( l_cpuNum=0; l_cpuNum < l_cpuTargetList.size(); l_cpuNum++ )
     {
-        /**
-         * @todo fapi error - just print out for now...
-         */
+        const TARGETING::Target*  l_cpu_target = l_cpuTargetList[l_cpuNum];
+        const fapi::Target l_fapi_proc_target(
+                TARGET_TYPE_PROC_CHIP,
+                reinterpret_cast<void *>
+                ( const_cast<TARGETING::Target*>(l_cpu_target) ) );
+
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR 0x%.8X:  proc_a_x_pci_dmi_pll_setup HWP(? ? ?) ",
-                static_cast<uint32_t>(l_fapirc) );
+                    "Running proc_a_x_pci_dmi_pll_setup HWP on...");
+        EntityPath l_path;
+        l_path  =   l_cpu_target->getAttr<ATTR_PHYS_PATH>();
+        l_path.dump();
+
+        //  call proc_a_x_pci_dmi_pll_initf
+        FAPI_INVOKE_HWP(l_err, proc_a_x_pci_dmi_pll_initf,
+                        l_fapi_proc_target,
+                        true,   // xbus
+                        true,   // abus
+                        true,   // pcie
+                        true);  // dmi
+
+        if (l_err)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "ERROR 0x%.8X: proc_a_x_pci_dmi_pll_initf HWP returns error",
+                      l_err->reasonCode());
+            break;
+        }
+        else
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "SUCCESS: proc_a_x_pci_dmi_pll_initf HWP( )" );
+        }
+
+        //  call proc_a_x_pci_dmi_pll_setup
+        FAPI_INVOKE_HWP(l_err, proc_a_x_pci_dmi_pll_setup,
+                        l_fapi_proc_target,
+                        true,   // xbus
+                        true,   // abus
+                        true,   // pcie
+                        true);  // dmi
+
+        if (l_err)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "ERROR 0x%.8X: proc_a_x_pci_dmi_pll_setup HWP returns error",
+                      l_err->reasonCode());
+            break;
+        }
+        else
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "SUCCESS: proc_a_x_pci_dmi_pll_setup HWP( )" );
+        }
     }
-    // @@@@@    END CUSTOM BLOCK:   @@@@@    
-#endif
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_a_x_pci_dmi_pll_setup exit" );
 
     // end task, returning any errorlogs to IStepDisp 
-    task_end2( l_errl );
+    task_end2( l_err );
 }
 
 

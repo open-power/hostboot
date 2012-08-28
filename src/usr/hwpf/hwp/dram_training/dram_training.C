@@ -68,7 +68,8 @@ const uint8_t VPO_NUM_OF_MEMBUF_TO_RUN = UNLIMITED_RUN;
 
 //  Un-comment these files as they become available:
 // #include    "host_disable_vddr/host_disable_vddr.H"
-// #include    "mem_pll_setup/mem_pll_setup.H"
+#include    "mem_pll_setup/cen_mem_pll_initf.H"
+#include    "mem_pll_setup/cen_mem_pll_setup.H"
 #include    "mem_startclocks/cen_mem_startclocks.H"
 // #include    "host_enable_vddr/host_enable_vddr.H"
 #include    "mss_scominit/mss_scominit.H"
@@ -151,53 +152,71 @@ void    call_host_disable_vddr( void *io_pArgs )
 void    call_mem_pll_setup( void *io_pArgs )
 {
     errlHndl_t l_err = NULL;
-
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mem_pll_setup entry" );
 
-#if 0
-    // @@@@@    CUSTOM BLOCK:   @@@@@
-    //  figure out what targets we need
-    //  customize any other inputs
-    //  set up loops to go through all targets (if parallel, spin off a task)
-
-    //  print call to hwp and dump physical path of the target(s)
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "=====  mem_pll_setup HWP(? ? ? )",
-                    ?
-                    ?
-                    ? );
-    //  dump physical path to targets
-    EntityPath l_path;
-    l_path  =   l_@targetN_target->getAttr<ATTR_PHYS_PATH>();
-    l_path.dump();
-    TRACFCOMP( g_trac_mc_init, "===== " );
-
-    // cast OUR type of target to a FAPI type of target.
-    const fapi::Target l_fapi_@targetN_target(
-                    TARGET_TYPE_MEMBUF_CHIP,
-                    reinterpret_cast<void *>
-                        (const_cast<TARGETING::Target*>(l_@targetN_target)) );
-
-    //  call the HWP with each fapi::Target
-    l_fapirc  =   mem_pll_setup( ? , ?, ? );
-
-    //  process return code.
-    if ( l_fapirc== fapi::FAPI_RC_SUCCESS )
+    //TODO - Enable this procedure in SIMICs when RTC 46643 is done.
+    //       For now, only run this procedure in VPO.
+    if ( !(TARGETING::is_vpo()) )
     {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "SUCCESS :  mem_pll_setup HWP(? ? ? )" );
+                            "WARNING: mem_pll_setup HWP is disabled in SIMICS run!");
+        // end task
+        task_end2( l_err );
     }
-    else
+
+
+    // Get all Centaur targets
+    TARGETING::TargetHandleList l_membufTargetList;
+    getAllChips(l_membufTargetList, TYPE_MEMBUF);
+
+    for ( size_t i = 0; i < l_membufTargetList.size(); i++ )
     {
-        /**
-         * @todo fapi error - just print out for now...
-         */
+        const TARGETING::Target*  l_pCentaur = l_membufTargetList[i];
+        // Dump current run on target
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR 0x%.8X:  mem_pll_setup HWP(? ? ?) ",
-                static_cast<uint32_t>(l_fapirc) );
+                   "Running mem_pll_setup HWP on..." );
+        EntityPath l_path;
+        l_path  =   l_pCentaur->getAttr<ATTR_PHYS_PATH>();
+        l_path.dump();
+
+        // Cast to a FAPI type of target.
+        const fapi::Target l_fapi_centaur(
+                TARGET_TYPE_MEMBUF_CHIP,
+                reinterpret_cast<void *>
+                (const_cast<TARGETING::Target*>(l_pCentaur)) );
+
+        //  call cen_mem_pll_initf to do pll init
+        FAPI_INVOKE_HWP(l_err, cen_mem_pll_initf, l_fapi_centaur);
+
+        if (l_err)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "ERROR 0x%.8X: mem_pll_initf HWP returns error",
+                      l_err->reasonCode());
+            break;
+        }
+        else
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "SUCCESS: mem_pll_initf HWP( )" );
+        }
+
+        //  call cen_mem_pll_setup to verify lock
+        FAPI_INVOKE_HWP(l_err, cen_mem_pll_setup, l_fapi_centaur);
+
+        if (l_err)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "ERROR 0x%.8X: mem_pll_setup HWP returns error",
+                      l_err->reasonCode());
+            break;
+        }
+        else
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "SUCCESS: mem_pll_setup HWP( )" );
+        }
     }
-    // @@@@@    END CUSTOM BLOCK:   @@@@@
-#endif
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mem_pll_setup exit" );
 
