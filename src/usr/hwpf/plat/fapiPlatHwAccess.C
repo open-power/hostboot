@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/plat/fapiPlatHwAccess.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2011-2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/plat/fapiPlatHwAccess.C $                        */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 //  This is an automatically generated prolog.
 //
 //  $Source: src/usr/hwpf/plat/fapiPlatHwAccess.C $
@@ -41,7 +40,7 @@
 //
 //  Origin: 30
 //
-//  IBM_PROLOG_END
+//  IBM_PROLOG_END_TAG
 /**
  *  @file fapiPlatHwAccess.C
  *
@@ -59,9 +58,14 @@
 #include <fapiPlatReasonCodes.H>
 #include <targeting/common/predicates/predicates.H>
 #include <targeting/common/targetservice.H>
+#include <scan/scanif.H>
 
 extern "C"
 {
+
+// Function prototypes
+uint64_t platGetDDScanMode(const uint32_t i_ringMode);
+
 
 //******************************************************************************
 // platGetScom function, the platform implementation
@@ -561,10 +565,26 @@ fapi::ReturnCode platGetRing(const fapi::Target& i_target,
                              const uint32_t i_ringMode)
 {
     FAPI_DBG(ENTER_MRK "platGetRing");
-
     fapi::ReturnCode l_rc;
+    errlHndl_t l_err = NULL;
 
-    //TODO - Implement getRing when RTC 34014 is ready
+    // Extract the component pointer
+    TARGETING::Target* l_target =
+            reinterpret_cast<TARGETING::Target*>(i_target.get());
+
+    // Output buffer must be set to ring's len by user
+    uint64_t l_ringLen = o_data.getBitLength();
+    uint64_t l_flag = platGetDDScanMode(i_ringMode);
+    size_t l_size = o_data.getByteLength();
+    l_err = deviceRead(l_target,
+                 ecmdDataBufferBaseImplementationHelper::getDataPtr(&o_data),
+                 l_size,
+                 DEVICE_SCAN_ADDRESS(i_address, l_ringLen, l_flag));
+    if (l_err)
+    {
+        // Add the error log pointer as data to the ReturnCode
+        l_rc.setPlatError(reinterpret_cast<void *> (l_err));
+    }
 
     FAPI_DBG(EXIT_MRK "platGetRing");
     return l_rc;
@@ -578,10 +598,28 @@ fapi::ReturnCode platPutRing(const fapi::Target& i_target,
                              ecmdDataBufferBase & i_data,
                              const uint32_t i_ringMode)
 {
+
     FAPI_DBG(ENTER_MRK "platPutRing");
     fapi::ReturnCode l_rc;
+    errlHndl_t l_err = NULL;
 
-    //TODO - Implement getRing when RTC 34014 is ready
+    // Extract the component pointer
+    TARGETING::Target* l_target =
+            reinterpret_cast<TARGETING::Target*>(i_target.get());
+
+    // Output buffer must be set to ring's len by user
+    uint64_t l_ringLen = i_data.getBitLength();
+    uint64_t l_flag = platGetDDScanMode(i_ringMode);
+    size_t l_size = i_data.getByteLength();
+    l_err = deviceWrite(l_target,
+                 ecmdDataBufferBaseImplementationHelper::getDataPtr(&i_data),
+                 l_size,
+                 DEVICE_SCAN_ADDRESS(i_address, l_ringLen, l_flag));
+    if (l_err)
+    {
+        // Add the error log pointer as data to the ReturnCode
+        l_rc.setPlatError(reinterpret_cast<void *> (l_err));
+    }
 
     FAPI_DBG(EXIT_MRK "platPutRing");
     return l_rc;
@@ -598,11 +636,100 @@ fapi::ReturnCode platModifyRing(const fapi::Target& i_target,
 {
     FAPI_DBG(ENTER_MRK "platModifyRing");
     fapi::ReturnCode l_rc;
+    errlHndl_t l_err = NULL;
+    uint32_t l_ecmdRc = ECMD_DBUF_SUCCESS;
 
-    //TODO - Implement ModifyRing when RTC 34014 is ready
+    do
+    {
+        // Extract the component pointer
+        TARGETING::Target* l_target =
+                reinterpret_cast<TARGETING::Target*>(i_target.get());
+
+        // --------------------
+        // Read current value
+        // --------------------
+        uint64_t l_ringLen = i_data.getBitLength();
+        ecmdDataBufferBase l_modifiedRingBuffer(l_ringLen);
+        uint64_t l_flag = platGetDDScanMode(i_ringMode);
+        size_t l_size = l_modifiedRingBuffer.getByteLength();
+        l_err = deviceRead(l_target,
+                     ecmdDataBufferBaseImplementationHelper::getDataPtr(
+                                     &l_modifiedRingBuffer),
+                     l_size,
+                     DEVICE_SCAN_ADDRESS(i_address, l_ringLen, l_flag));
+        if (l_err)
+        {
+            // Add the error log pointer as data to the ReturnCode
+            l_rc.setPlatError(reinterpret_cast<void *> (l_err));
+        }
+
+        // ----------------------
+        // Applying modification
+        // ----------------------
+        if (fapi::CHIP_OP_MODIFY_MODE_OR == i_modifyMode)
+        {
+            l_ecmdRc = l_modifiedRingBuffer.setOr(i_data, 0, l_ringLen);
+        }
+        else if (fapi::CHIP_OP_MODIFY_MODE_AND == i_modifyMode)
+        {
+            l_ecmdRc = l_modifiedRingBuffer.setAnd(i_data, 0, l_ringLen);
+        }
+        else
+        {
+            l_ecmdRc = l_modifiedRingBuffer.setXor(i_data, 0, l_ringLen);
+        }
+
+        if (l_ecmdRc)
+        {
+            FAPI_ERR("platModifyRing: ecmdDataBufferBase operation returns error, ecmdRc 0x%.8X",
+                     l_ecmdRc);
+            l_rc.setEcmdError(l_ecmdRc);
+            break;
+        }
+
+        // ---------------
+        // Write back
+        // ---------------
+        l_err = deviceWrite(l_target,
+                      ecmdDataBufferBaseImplementationHelper::getDataPtr(
+                              &l_modifiedRingBuffer),
+                      l_size,
+                      DEVICE_SCAN_ADDRESS(i_address, l_ringLen, l_flag));
+        if (l_err)
+        {
+            // Add the error log pointer as data to the ReturnCode
+            l_rc.setPlatError(reinterpret_cast<void *> (l_err));
+        }
+
+    } while (0);
 
     FAPI_DBG(EXIT_MRK "platModifyRing");
     return l_rc;
 }
+
+//******************************************************************************
+// platPutRing function
+//******************************************************************************
+uint64_t platGetDDScanMode(const uint32_t i_ringMode)
+{
+    fapi::ReturnCode l_rc;
+    uint32_t l_scanMode = 0;
+
+    // Set Pulse
+    if (i_ringMode & fapi::RING_MODE_SET_PULSE)
+    {
+        l_scanMode |= SCAN::SET_PULSE;
+    }
+
+    // Header Check
+    if (i_ringMode & fapi::RING_MODE_NO_HEADER_CHECK)
+    {
+        l_scanMode |= SCAN::NO_HEADER_CHECK;
+    }
+
+    return l_scanMode;
+}
+
+
 
 } // extern "C"
