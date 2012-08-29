@@ -302,15 +302,19 @@ _other_thread_spinlock_complete:
     or 2,2,2 ;// Raise thread priority.
     isync
     ;// Get CPU object from thread ID.
-    mfspr r1, PIR
     lis r2, _ZN10CpuManager7cv_cpusE@h
     ori r2, r2, _ZN10CpuManager7cv_cpusE@l
-    ld r2, 0(r2)                ;// Dereference cv_cpus to get array.
-    muli r3, r1, 8
-    add r2, r3, r2
-    ld r3, 0(r2)		;// Load CPU object.
+    mfspr r1, PIR               ;// Extract node id.
+    extrwi r1, r1, 3, 19
+    sldi r1, r1, 3
+    ldx r2, r1, r2              ;// Dereference to get on-node CPUs array.
+    cmpi cr0, r2, 0             ;// Check for NULL node array.
+    beq- 1f
+    mfspr r1, PIR               ;// Extract on-node CPU id.
+    clrlslwi r1, r1, 22, 3
+    ldx r3, r1, r2		;// Load CPU object.
     cmpi cr0, r3, 0             ;// Check for NULL CPU object.
-    beq- cr0, 1f                ;// Jump to handling if no CPU object found.
+    beq- 1f
     ld r1, CPU_KERNEL_STACK(r3)	;// Load initial stack.
 
     lis r2, smp_slave_main@h 	;// Load TOC base.
@@ -589,11 +593,16 @@ intvect_system_reset:
 
     ;// Get CPU object from thread ID, check for NULL which implies not
     ;// started yet.
-    mfspr r1, PIR
     lis r2, _ZN10CpuManager7cv_cpusE@h
     ori r2, r2, _ZN10CpuManager7cv_cpusE@l
-    ld r2, 0(r2)                ;// Dereference cv_cpus to get array.
-    muli r1, r1, 8
+    mfspr r1, PIR               ;// Extract node id.
+    extrwi r1, r1, 3, 19
+    sldi r1, r1, 3
+    ldx r2, r1, r2              ;// Dereference to get on-node CPUs array.
+    cmpi cr0, r2, 0             ;// Check for NULL node array.
+    beq- _start
+    mfspr r1, PIR               ;// Extract on-node CPU id.
+    clrlslwi r1, r1, 22, 3
     ldx r2, r1, r2		;// Load CPU object.
     cmpi cr0, r2, 0             ;// Check for NULL CPU object.
     beq- _start

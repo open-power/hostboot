@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/kernel/cpumgr.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2010-2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/kernel/cpumgr.C $                                         */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2010,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #include <assert.h>
 #include <kernel/cpumgr.H>
 #include <kernel/task.H>
@@ -41,7 +40,7 @@
 #include <kernel/deferred.H>
 #include <kernel/misc.H>
 
-cpu_t** CpuManager::cv_cpus = NULL;
+cpu_t** CpuManager::cv_cpus[KERNEL_MAX_SUPPORTED_NODES];
 bool CpuManager::cv_shutdown_requested = false;
 uint64_t CpuManager::cv_shutdown_status = 0;
 size_t CpuManager::cv_cpuSeq = 0;
@@ -50,7 +49,7 @@ InteractiveDebug CpuManager::cv_interactive_debug;
 
 CpuManager::CpuManager()
 {
-    for (int i = 0; i < MAXCPUS; i++)
+    for (int i = 0; i < KERNEL_MAX_SUPPORTED_NODES; i++)
         cv_cpus[i] = NULL;
 
     memset(&cv_interactive_debug, '\0', sizeof(cv_interactive_debug));
@@ -58,10 +57,21 @@ CpuManager::CpuManager()
 
 cpu_t* CpuManager::getMasterCPU()
 {
-    for (int i = 0; i < MAXCPUS; i++)
-        if (cv_cpus[i] != NULL)
-            if (cv_cpus[i]->master)
-                return cv_cpus[i];
+    for (int i = 0; i < KERNEL_MAX_SUPPORTED_NODES; i++)
+    {
+        if (NULL == cv_cpus[i])
+        {
+            continue;
+        }
+
+        for (int j = 0; j < KERNEL_MAX_SUPPORTED_CPUS_PER_NODE; j++)
+        {
+            if ((cv_cpus[i][j] != NULL) && (cv_cpus[i][j]->master))
+            {
+                return cv_cpus[i][j];
+            }
+        }
+    }
     return NULL;
 }
 
@@ -77,7 +87,8 @@ void CpuManager::init()
     size_t threads = getThreadCount();
 
     // Set up CPU structure.
-    cv_cpus = new cpu_t*[MAXCPUS];
+    cv_cpus[getPIR() / KERNEL_MAX_SUPPORTED_CPUS_PER_NODE] =
+        new cpu_t*[KERNEL_MAX_SUPPORTED_CPUS_PER_NODE];
 
     // Create CPU objects starting at the thread-0 for this core.
     size_t baseCpu = getCpuId() & ~(threads-1);
@@ -139,11 +150,20 @@ void CpuManager::startCPU(ssize_t i)
         currentCPU = true;
     }
 
+    size_t nodeId = i / KERNEL_MAX_SUPPORTED_CPUS_PER_NODE;
+    size_t cpuId = i % KERNEL_MAX_SUPPORTED_CPUS_PER_NODE;
+
+    // Initialize node structure.
+    if (NULL == cv_cpus[nodeId])
+    {
+        cv_cpus[nodeId] = new cpu_t*[KERNEL_MAX_SUPPORTED_CPUS_PER_NODE];
+    }
+
     // Initialize CPU structure.
-    if (NULL == cv_cpus[i])
+    if (NULL == cv_cpus[nodeId][cpuId])
     {
         printk("Starting CPU %ld...", i);
-        cpu_t* cpu = cv_cpus[i] = new cpu_t;
+        cpu_t* cpu = cv_cpus[nodeId][cpuId] = new cpu_t;
 
         // Initialize CPU.
         cpu->cpu = i;
@@ -175,7 +195,7 @@ void CpuManager::startCPU(ssize_t i)
     if (currentCPU)
     {
         setDEC(TimeManager::getTimeSliceCount());
-        activateCPU(cv_cpus[i]);
+        activateCPU(getCpu(i));
     }
     return;
 }
@@ -293,8 +313,11 @@ int CpuManager::startCore(uint64_t pir)
     size_t threads = getThreadCount();
     pir = pir & ~(threads-1);
 
-
-    if (pir >= MAXCPUS) { return -ENXIO; }
+    if (pir >=
+        (KERNEL_MAX_SUPPORTED_NODES * KERNEL_MAX_SUPPORTED_CPUS_PER_NODE))
+    {
+        return -ENXIO;
+    }
 
     for(size_t i = 0; i < threads; i++)
     {
@@ -312,11 +335,6 @@ size_t CpuManager::getThreadCount()
     size_t threads = 0;
     switch (CpuID::getCpuType())
     {
-        case CORE_POWER7:
-        case CORE_POWER7_PLUS:
-            threads = 4;
-            break;
-
         case CORE_POWER8_VENICE:
         case CORE_POWER8_MURANO:
             threads = 8;

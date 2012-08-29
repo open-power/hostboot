@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/include/kernel/cpumgr.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2010-2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/include/kernel/cpumgr.H $                                 */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2010,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef __KERNEL_CPUMGR_H
 #define __KERNEL_CPUMGR_H
 
@@ -34,7 +33,6 @@ class CpuManager
     public:
         enum
         {
-            MAXCPUS = KERNEL_MAX_SUPPORTED_CPUS,
             CPU_PERIODIC_CHECK_MEMORY = 128,    // Is this even needed anymore?
             CPU_PERIODIC_FLUSH_PAGETABLE = 256,
             CPU_PERIODIC_DEFRAG = 949,  // TODO Any bigger not currently hit
@@ -44,8 +42,25 @@ class CpuManager
          *  Returns a pointer to the current CPU structure by using the
          *  task structure in SPRG3.
          */
-        static cpu_t* getCurrentCPU() { return cv_cpus[getPIR()]; }
-        static cpu_t* getCpu(size_t i) { return cv_cpus[i]; }
+        static cpu_t* getCurrentCPU()
+        {
+            size_t pir = getPIR();
+            return cv_cpus[pir / KERNEL_MAX_SUPPORTED_CPUS_PER_NODE]
+                          [pir % KERNEL_MAX_SUPPORTED_CPUS_PER_NODE];
+        }
+        static cpu_t* getCpu(size_t i)
+        {
+            cpu_t** c = cv_cpus[i / KERNEL_MAX_SUPPORTED_CPUS_PER_NODE];
+
+            if (NULL == c)
+            {
+                return NULL;
+            }
+            else
+            {
+                return c[i % KERNEL_MAX_SUPPORTED_CPUS_PER_NODE];
+            }
+        }
 
         /** @brief Return pointer to master CPU object.
         */
@@ -157,9 +172,20 @@ class CpuManager
         void startSlaveCPU(cpu_t*);
 
     private:
-        static cpu_t** cv_cpus; // Need to be able to access this
-                                        // from start.S to get initial stacks
-                                        // of secondary cpus / threads.
+        /** Per-CPU kernel structures.
+         *
+         *  There is one entry per hardware thread and they are stored as
+         *  a two dimensional array of (cpu_t*)s: cv_cpus[node][thread]
+         *
+         *  This needs to be a global variable rather than an instance
+         *  variable of a singleton because it is needed within the kernel
+         *  assembly code for interrupt / exception handling.  For instance,
+         *  when secondary CPUs start they need to find their own stack from
+         *  these structures.  Any changes to this structure needs to be
+         *  kept in sync with the assembly code (ex. start.S).
+         */
+        static cpu_t** cv_cpus[KERNEL_MAX_SUPPORTED_NODES];
+
 
             /** Number of active CPUs.
              *  Stored as "(seqID << 32) | cpus"

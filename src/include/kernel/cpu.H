@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/include/kernel/cpu.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2010-2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/include/kernel/cpu.H $                                    */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2010,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /** @file cpu.H
  *  @brief Defines kernel information and functions about CPUs.
  *
@@ -34,8 +33,9 @@
 #include <builtins.h>
 #include <sys/sync.h>
 
-// Thread ID support only, Power8 (8 threads).
-#define KERNEL_MAX_SUPPORTED_CPUS (8 * 16 * 8) // Sockets, cores, threads.
+// See BookIV PIR definition.
+#define KERNEL_MAX_SUPPORTED_NODES 8
+#define KERNEL_MAX_SUPPORTED_CPUS_PER_NODE (8 * 16 * 8) // Chip, core, thread.
 
 class Scheduler;
 
@@ -101,7 +101,7 @@ struct cpu_t
 ALWAYS_INLINE
 inline cpuid_t getCpuId()
 {
-    return getPIR() & (KERNEL_MAX_SUPPORTED_CPUS - 1);
+    return getPIR();
 }
 
 #endif
