@@ -70,6 +70,8 @@ my $copyrightSymbol = "";
 
 my  $projectName            =   "HostBoot";
 
+my $copyright_IBM = 'COPYRIGHT International Business Machines Corp';
+
 ## note that these use single ticks so that the escape chars are NOT evaluated yet.
 my  $OLD_DELIMITER_END      =   'IBM_PROLOG_END';
 my  $DELIMITER_END          =   'IBM_PROLOG_END_TAG';
@@ -409,6 +411,9 @@ sub filetype
     if ( ( $filename =~ m/\.[cht]$/i )
        ||( $filename =~ m/\.[cht]\+\+$/i )
        ||( $filename =~ m/\.[cht]pp$/i )
+       ||( $filename =~ m/\.inl$/ ) # inline C functions
+       ||( $filename =~ m/\.y$/ )   # yacc
+       ||( $filename =~ m/\.lex$/ ) # flex
        ||( $fileinfo =~ m/c program text/i )
        ||( $fileinfo =~ m/c\+\+ program text/i )
        )
@@ -550,7 +555,7 @@ sub extractCopyrightBlock( $ )
 
     ##  As long as we're here extract the copyright string within the block
     ##  and save it to a global var
-    $CopyRightString = $1 if ( $prolog[1] =~ /(^.*COPYRIGHT.*$)/im );
+    $CopyRightString = $1 if ( $prolog[1] =~ /(^.*$copyright_IBM.*$)/m );
 
     if ( $opt_debug )
     {
@@ -628,10 +633,10 @@ sub checkCopyrightBlock( $$ )
         }
 
         ##  check for the correct year string
-        if  ( m/COPYRIGHT International Business Machines Corp./    )
+        if  ( m/$copyright_IBM/ )
         {
-             $goodyearflag   =   grep /COPYRIGHT International Business Machines Corp. $yearstring/, $_;
-             if  ( !$goodyearflag )
+            $goodyearflag = grep /$copyright_IBM.* $yearstring/, $_;
+            if  ( !$goodyearflag )
             {
                 print   STDOUT  "WARNING: outdated copyright year: $_\n";
                 print   STDOUT  "         Expected: $yearstring\n";
@@ -664,7 +669,7 @@ sub createYearString( $ )
     ##  files that are checked in from FSP.  In this case the earliest
     ##  year will be before it was checked into git .  We have to construct
     ##  a yearstring based on the earliest year.
-    if ( $CopyRightString =~  m/COPYRIGHT/i )
+    if ( $CopyRightString =~  m/$copyright_IBM/ )
     {
         @years = ( $CopyRightString =~ /([0-9]{4})/g );
     }
@@ -919,7 +924,7 @@ sub addPrologComments($$$)
     {
         # If there is an block comment end tag, fill the end of the line with 
         # spaces.
-        if ( '' ne $end )
+        if ( $end )
         {
             my $max_line_len = 70;
             my $len = length($line);
@@ -930,12 +935,14 @@ sub addPrologComments($$$)
             }
         }
 
+        # NOTE: CMVC prologs with inline comments will have a single trailing
+        #       space at the end of the line. This is undesirable for most
+        #       hostboot developers so it will not be added.
+
         if ( $line =~ m/$DELIMITER_BEGIN/ )
         {
-            # NOTE: Prologs with inline comments will have a single trailing
-            #       space at the end of the line. This matches what is done in
-            #       CMVC.
-            $line = "$line $end\n";
+            $line = "$line $end" if ( $end );
+            $line = "$line\n";
         }
         elsif ( $line =~ m/$DELIMITER_END/ )
         {
@@ -943,7 +950,9 @@ sub addPrologComments($$$)
         }
         else
         {
-            $line = "$begin $line $end\n";
+            $line = "$begin $line";
+            $line = "$line $end" if ( $end );
+            $line = "$line\n";
         }
 
         $data .= $line;
@@ -977,7 +986,7 @@ $SOURCE_BEGIN_TAG $filename $SOURCE_END_TAG
 
 IBM CONFIDENTIAL
 
-COPYRIGHT International Business Machines Corp. $copyrightYear
+$copyright_IBM. $copyrightYear
 
 $PVALUE
 
