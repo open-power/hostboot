@@ -1,25 +1,25 @@
-#   IBM_PROLOG_BEGIN_TAG
-#   This is an automatically generated prolog.
-#
-#   $Source: src/include/kernel/ppcconsts.S $
-#
-#   IBM CONFIDENTIAL
-#
-#   COPYRIGHT International Business Machines Corp. 2010-2012
-#
-#   p1
-#
-#   Object Code Only (OCO) source materials
-#   Licensed Internal Code Source Materials
-#   IBM HostBoot Licensed Internal Code
-#
-#   The source code for this program is not published or other-
-#   wise divested of its trade secrets, irrespective of what has
-#   been deposited with the U.S. Copyright Office.
-#
-#   Origin: 30
-#
-#   IBM_PROLOG_END_TAG
+# IBM_PROLOG_BEGIN_TAG 
+# This is an automatically generated prolog. 
+#  
+# $Source: src/include/kernel/ppcconsts.S $ 
+#  
+# IBM CONFIDENTIAL 
+#  
+# COPYRIGHT International Business Machines Corp. 2010,2012 
+#  
+# p1 
+#  
+# Object Code Only (OCO) source materials 
+# Licensed Internal Code Source Materials 
+# IBM HostBoot Licensed Internal Code 
+#  
+# The source code for this program is not published or otherwise 
+# divested of its trade secrets, irrespective of what has been 
+# deposited with the U.S. Copyright Office. 
+#  
+# Origin: 30 
+#  
+# IBM_PROLOG_END_TAG 
 #*--------------------------------------------------------------------*#
 #*  Register Constants                                                *#
 #*--------------------------------------------------------------------*#
@@ -148,6 +148,8 @@
                 .set SPRG1,273
                 .set SPRG2,274
                 .set SPRG3,275
+                .set SPRC,276
+                .set SPRD,277
                 .set EAR,282
                 .set TBL,284
                 .set TBU,285

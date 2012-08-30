@@ -154,6 +154,12 @@ kernel_shutdown_ea0_1_mode:
     isync
         ;// Raise thread priority and leave ourselves.
     or 3,3,3
+        ;// Clear "Hostboot active" scratch register.
+    li r3, (0x40 + 0x38) ;// See sys/mmio.h
+    mtspr SPRC, r3
+    li r3, 0x0
+    mtspr SPRD, r3
+
     b 2b
 
 .section .data

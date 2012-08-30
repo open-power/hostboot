@@ -1,3 +1,25 @@
+# IBM_PROLOG_BEGIN_TAG 
+# This is an automatically generated prolog. 
+#  
+# $Source: src/kernel/start.S $ 
+#  
+# IBM CONFIDENTIAL 
+#  
+# COPYRIGHT International Business Machines Corp. 2010,2012 
+#  
+# p1 
+#  
+# Object Code Only (OCO) source materials 
+# Licensed Internal Code Source Materials 
+# IBM HostBoot Licensed Internal Code 
+#  
+# The source code for this program is not published or otherwise 
+# divested of its trade secrets, irrespective of what has been 
+# deposited with the U.S. Copyright Office. 
+#  
+# Origin: 30 
+#  
+# IBM_PROLOG_END_TAG 
 /*  IBM_PROLOG_BEGIN_TAG
  *  This is an automatically generated prolog.
  *
@@ -676,9 +698,9 @@ system_call_fast_path:
     extrdi. r6, r6, 1, CPU_STATUS_MASTER
     beq cr0, 300f       ;// Call TASK_MIGRATE_TO_MASTER if not on master.
         ;// Read scratch.
-    mtspr 276, r4
+    mtspr SPRC, r4
     isync
-    mfspr r3, 277
+    mfspr r3, SPRD
     b 1f                        ;// Jump to exit point.
         ;// Migrate task via TASK_MIGRATE_TO_MASTER
 300:
@@ -703,9 +725,9 @@ system_call_fast_path:
     extrdi. r6, r6, 1, CPU_STATUS_MASTER
     beq cr0, 300b       ;// Call TASK_MIGRATE_TO_MASTER if not on master.
         ;// Write scratch.
-    mtspr 276, r4
+    mtspr SPRC, r4
     isync
-    mtspr 277, r5
+    mtspr SPRD, r5
     b 1f                        ;// Jump to exit point.
         ;// Invalid system call, loop for debug.
 5:

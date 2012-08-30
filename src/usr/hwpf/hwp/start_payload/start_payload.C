@@ -46,6 +46,7 @@
 #include    <usr/cxxtest/TestSuite.H>
 #include    <hwpf/istepreasoncodes.H>
 #include    <sys/time.h>
+#include    <sys/mmio.h>
 #include    <mbox/mbox_queues.H>
 #include    <mbox/mboxif.H>
 
@@ -163,6 +164,11 @@ errlHndl_t callShutdown ( void )
 
     do
     {
+        // Set scratch register to indicate Hostboot is [still] active.
+        const char * hostboot_string = "hostboot";
+        mmio_scratch_write(MMIO_SCRATCH_HOSTBOOT_ACTIVE,
+                           *reinterpret_cast<const uint64_t*>(hostboot_string));
+
         // Get Target Service, and the system target.
         TargetService& tS = targetService();
         TARGETING::Target* sys = NULL;
