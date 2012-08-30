@@ -155,6 +155,7 @@ simics.tar_CONTENTS = \
 # Common code delivered to FSP builds.
 #
 fsp.tar_CONTENTS = \
+    obj/genfiles/hwp_id.html \
     src/build/mkrules/hbfw/fsp/makefile \
     src/build/buildpnor/buildpnor.pl \
     src/build/buildpnor/defaultPnorLayout.xml \

@@ -33,6 +33,8 @@
  * ------   --------------  ----------  ----------- ----------------------------
  *                          mjjones     02/21/2012  Created
  *                          mjjones     06/14/2012  Test functional DIMM
+ *
+ *  HWP_IGNORE_VERSION_CHECK
  */
 
 #include <fapiTestHwpDq.H>

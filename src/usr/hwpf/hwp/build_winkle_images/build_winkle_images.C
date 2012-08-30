@@ -27,6 +27,8 @@
  *  Support file for IStep: build_winkle_images
  *   Build Winkle Images
  *
+ *  HWP_IGNORE_VERSION_CHECK
+ *
  */
 
 /******************************************************************************/

@@ -28,6 +28,8 @@
  *  Support file for hardware procedure:
  *      DMI Training
  *
+ *  HWP_IGNORE_VERSION_CHECK
+ *
  */
 
 /**

@@ -26,6 +26,8 @@
  *
  *  Support file to start non-primary threads
  *
+ *  HWP_IGNORE_VERSION_CHECK
+ *
  */
 
 /******************************************************************************/

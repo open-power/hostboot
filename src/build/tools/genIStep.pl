@@ -245,6 +245,7 @@ my  $templateHFileHdr   =
  *  THIS FILE WAS GENERATED ON \@timestamp
  *  *****************************************************************
  *
+ *  HWP_IGNORE_VERSION_CHECK
  */
 
  \@tag_block
@@ -305,6 +306,8 @@ my  $templateCFileHdr   =
  *  *****************************************************************
  *  THIS FILE WAS GENERATED ON \@timestamp
  *  *****************************************************************
+ *
+ *  HWP_IGNORE_VERSION_CHECK
  *
  */
 

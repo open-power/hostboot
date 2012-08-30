@@ -1,24 +1,24 @@
-# IBM_PROLOG_BEGIN_TAG
-# This is an automatically generated prolog.
-# 
-# $Source: config.mk $
-# 
-# IBM CONFIDENTIAL
-# 
-# COPYRIGHT International Business Machines Corp. 2010,2012
-# 
-# p1
-# 
-# Object Code Only (OCO) source materials
-# Licensed Internal Code Source Materials
-# IBM HostBoot Licensed Internal Code
-# 
-# The source code for this program is not published or otherwise
-# divested of its trade secrets, irrespective of what has been
-# deposited with the U.S. Copyright Office.
-# 
-# Origin: 30
-# 
+# IBM_PROLOG_BEGIN_TAG 
+# This is an automatically generated prolog. 
+#  
+# $Source: config.mk $ 
+#  
+# IBM CONFIDENTIAL 
+#  
+# COPYRIGHT International Business Machines Corp. 2010,2012 
+#  
+# p1 
+#  
+# Object Code Only (OCO) source materials 
+# Licensed Internal Code Source Materials 
+# IBM HostBoot Licensed Internal Code 
+#  
+# The source code for this program is not published or otherwise 
+# divested of its trade secrets, irrespective of what has been 
+# deposited with the U.S. Copyright Office. 
+#  
+# Origin: 30 
+#  
 # IBM_PROLOG_END_TAG 
 all:
 	${MAKE} gen_pass
@@ -314,6 +314,9 @@ $(foreach lid,$(EXTRA_LIDS),$(eval $(call LIDHDR_template,$(lid))))
 
 ${IMGDIR}/hbotStringFile : ${IMAGES}
 	${ROOTPATH}/src/build/trace/tracehash_hb.pl -c -d ${ROOTPATH}/obj -s $@
+
+${GENDIR}/hwp_id.html : ${SUBDIRS}
+	${ROOTPATH}/src/build/tools/hwp_id.pl -i -l > $@
 
 %.d: ${OBJECTS}
 	cd ${basename $@} && ${MAKE} code_pass

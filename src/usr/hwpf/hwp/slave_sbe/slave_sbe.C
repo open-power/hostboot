@@ -26,6 +26,8 @@
  *
  *  Support file for IStep: slave_sbe
  *   Slave SBE
+ *
+ *  HWP_IGNORE_VERSION_CHECK
  */
 
 /******************************************************************************/

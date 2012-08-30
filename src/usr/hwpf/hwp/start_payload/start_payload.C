@@ -27,6 +27,8 @@
  *  Support file for IStep: start_payload
  *   Start Payload
  *
+ *  HWP_IGNORE_VERSION_CHECK
+ *
  */
 
 /******************************************************************************/

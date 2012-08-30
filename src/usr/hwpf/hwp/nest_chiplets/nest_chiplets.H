@@ -36,6 +36,8 @@
  *  THIS FILE WAS GENERATED ON 2012-04-03:1952
  *  *****************************************************************
  *
+ *  HWP_IGNORE_VERSION_CHECK
+ *
  */
 
  /*  @tag isteplist

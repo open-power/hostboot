@@ -42,6 +42,8 @@
  *                          camvanng    11/09/2011  Update attr enum test
  *                          mjjones     11/17/2011  Removed some initfile attr tests
  *                          mjjones     11/22/2011  Demonstrate use of heap based array
+ *
+ *  HWP_IGNORE_VERSION_CHECK
  */
 
 #include <fapiTestHwpAttr.H>

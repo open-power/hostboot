@@ -29,6 +29,8 @@
  *  All of the following routines are "named isteps" - they are invoked as
  *  tasks by the @ref IStepDispatcher.
  *
+ *  HWP_IGNORE_VERSION_CHECK
+ *
  */
 
 /*  @tag isteplist
