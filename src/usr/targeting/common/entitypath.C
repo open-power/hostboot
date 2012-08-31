@@ -20,6 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
 /**
  *  @file targeting/common/entitypath.C
  *
@@ -353,6 +354,10 @@ const char* EntityPath::pathElementTypeAsString(
             return "DPSS";
         case TYPE_OCC:
             return "OCC";
+        case TYPE_PSI:
+            return "PSI";
+        case TYPE_FSP:
+            return "FSP";
 //        case TYPE_FSI_LINK:
 //            return "FSI-link";
 //        case TYPE_CFAM:

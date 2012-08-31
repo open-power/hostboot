@@ -162,6 +162,12 @@
         <name>OCC</name>
     </enumerator>
     <enumerator>
+        <name>PSI</name>
+    </enumerator>
+    <enumerator>
+        <name>FSP</name>
+    </enumerator>
+    <enumerator>
         <name>LAST_IN_RANGE</name>
     </enumerator>
     <default>NA</default>
