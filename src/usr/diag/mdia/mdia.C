@@ -107,4 +107,10 @@ errlHndl_t processEvent(MaintCommandEvent & i_event)
         return err;
 }
 
+void waitingForMaintCmdEvents(bool & o_waiting)
+{
+    // TODO unstub RTC 45395
+
+    o_waiting = true;
+}
 }
