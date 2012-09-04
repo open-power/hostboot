@@ -415,19 +415,6 @@ void    call_proc_setup_bars( void    *io_pArgs )
         // @@@@@    end TEMPORARY SIMICS HACK for PHYP 6/1 milestone @@@@@
     }
 
-// $$ #if 0
-    //  $$$$$   @todo issue 44948
-    // proc_setup_bars crashes simics, remove check when we get it working
-    if ( !TARGETING::is_vpo() )
-    {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "proc_setup_bars is disabled in simics, see issue 44948" );
-        task_end2(l_errl);
-    }
-    //  $$$$$   @todo issue 44948
-// $$ #endif
-
-
     if ( ! l_errl )
     {
         //  -----------------------------------------------------------------------
