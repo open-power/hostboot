@@ -121,8 +121,12 @@ my $xml = new XML::Simple (KeyAttr=>[]);
 # Aborts application if file name not found.
 my $attributes = $xml->XMLin($cfgHbXmlFile,
     forcearray => ['enumerationType','attribute','hwpfToHbAttrMap']);
-my $fapiAttributes = $xml->XMLin($cfgFapiAttributesXmlFile,
-    forcearray => ['attribute']);
+my $fapiAttributes = {};
+if ($cfgFapiAttributesXmlFile ne "")
+{
+    $fapiAttributes = $xml->XMLin($cfgFapiAttributesXmlFile,
+        forcearray => ['attribute']);
+}
 # save attributes defined as Target_t type
 my %Target_t = ();
 
@@ -525,47 +529,9 @@ sub writeFapiPlatAttrMacrosHeaderFileContent {
             my $fapiWriteable = 0;
             my $instantiated = 0;
 
-            foreach my $fapiAttr (@{$fapiAttributes->{attribute}})
+            if ($cfgFapiAttributesXmlFile eq "")
             {
-                if(   (exists $fapiAttr->{id})
-                   && ($fapiAttr->{id} eq $hwpfToHbAttrMap->{id}) )
-                {
-                    # Check that non-platInit attributes are in the
-                    # volatile-zeroed section and have a direct mapping
-                    if (! exists $fapiAttr->{platInit})
-                    {
-                        if ($hwpfToHbAttrMap->{macro} ne "DIRECT")
-                        {
-                            fatal("FAPI non-platInit attr " .
-                                  "'$hwpfToHbAttrMap->{id}' is " .
-                                  "'$hwpfToHbAttrMap->{macro}', " .
-                                  "it must be DIRECT");
-                        }
-
-                        if ($attribute->{persistency} ne "volatile-zeroed")
-                        {
-                            fatal("FAPI non-platInit attr " .
-                                  "'$hwpfToHbAttrMap->{id}' is " .
-                                  "'$attribute->{persistency}', " .
-                                  "it must be volatile-zeroed");
-                        }
-
-                    }
-
-                    # All FAPI attributes are readable
-                    $fapiReadable = 1;
-
-                    if(exists $fapiAttr->{writeable})
-                    {
-                        $fapiWriteable = 1;
-                    }
-
-                    last;
-                }
-            }
-
-            if($fapiReadable)
-            {
+                #No FAPI attributes xml file specified
                 if(exists $attribute->{readable})
                 {
                     $macroSection .= '    #define ' .  $hwpfToHbAttrMap->{id} .
@@ -574,27 +540,93 @@ sub writeFapiPlatAttrMacrosHeaderFileContent {
                         $hwpfToHbAttrMap->{macro} . "(ID,PTARGET,VAL)\n";
                     $instantiated = 1;
                 }
-                else
-                {
-                    fatal("FAPI attribute $hwpfToHbAttrMap->{id} requires " .
-                        "platform supply readable attribute.");
-                }
-            }
 
-            if($fapiWriteable)
-            {
                 if(exists $attribute->{writeable})
                 {
+                    $macroSection .= '    #ifndef ' .  $hwpfToHbAttrMap->{id} .
+                        "_SETMACRO\n";
                     $macroSection .= '    #define ' .  $hwpfToHbAttrMap->{id} .
                         "_SETMACRO(ID,PTARGET,VAL) \\\n" .
                         "        FAPI_PLAT_ATTR_SVC_SETMACRO_" .
                         $hwpfToHbAttrMap->{macro} . "(ID,PTARGET,VAL)\n";
+                    $macroSection .= "    #endif\n";
                     $instantiated = 1;
                 }
-                else
+            }
+            else
+            {
+                #FAPI attribute xml file specified - validate against FAPI attrs
+                foreach my $fapiAttr (@{$fapiAttributes->{attribute}})
                 {
-                    fatal("FAPI attribute $hwpfToHbAttrMap->{id} requires "
-                        . "platform supply writeable attribute.");
+                    if(   (exists $fapiAttr->{id})
+                       && ($fapiAttr->{id} eq $hwpfToHbAttrMap->{id}) )
+                    {
+                        # Check that non-platInit attributes are in the
+                        # volatile-zeroed section and have a direct mapping
+                        if (! exists $fapiAttr->{platInit})
+                        {
+                            if ($hwpfToHbAttrMap->{macro} ne "DIRECT")
+                            {
+                                fatal("FAPI non-platInit attr " .
+                                      "'$hwpfToHbAttrMap->{id}' is " .
+                                      "'$hwpfToHbAttrMap->{macro}', " .
+                                      "it must be DIRECT");
+                            }
+
+                            if ($attribute->{persistency} ne "volatile-zeroed")
+                            {
+                                fatal("FAPI non-platInit attr " .
+                                      "'$hwpfToHbAttrMap->{id}' is " .
+                                      "'$attribute->{persistency}', " .
+                                      "it must be volatile-zeroed");
+                            }
+
+                        }
+
+                        # All FAPI attributes are readable
+                        $fapiReadable = 1;
+
+                        if(exists $fapiAttr->{writeable})
+                        {
+                            $fapiWriteable = 1;
+                        }
+
+                        last;
+                    }
+                }
+
+                if($fapiReadable)
+                {
+                    if(exists $attribute->{readable})
+                    {
+                        $macroSection .= '    #define ' .  $hwpfToHbAttrMap->{id} .
+                            "_GETMACRO(ID,PTARGET,VAL) \\\n" .
+                            "        FAPI_PLAT_ATTR_SVC_GETMACRO_" .
+                            $hwpfToHbAttrMap->{macro} . "(ID,PTARGET,VAL)\n";
+                        $instantiated = 1;
+                    }
+                    else
+                    {
+                        fatal("FAPI attribute $hwpfToHbAttrMap->{id} requires " .
+                            "platform supply readable attribute.");
+                    }
+                }
+
+                if($fapiWriteable)
+                {
+                    if(exists $attribute->{writeable})
+                    {
+                        $macroSection .= '    #define ' .  $hwpfToHbAttrMap->{id} .
+                            "_SETMACRO(ID,PTARGET,VAL) \\\n" .
+                            "        FAPI_PLAT_ATTR_SVC_SETMACRO_" .
+                            $hwpfToHbAttrMap->{macro} . "(ID,PTARGET,VAL)\n";
+                        $instantiated = 1;
+                    }
+                    else
+                    {
+                        fatal("FAPI attribute $hwpfToHbAttrMap->{id} requires "
+                            . "platform supply writeable attribute.");
+                    }
                 }
             }
 
