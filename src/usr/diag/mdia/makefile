@@ -41,7 +41,7 @@ OBJS =  mdiamonitor.o mdiatrace.o mdiaworkitem.o mdiamba.o mdia.o mdiasm.o
 
 SUBDIRS = test.d
 
-ifndef MDIA_NO_POLLING
+ifdef MDIA_POLLING
     CUSTOMFLAGS += -DMDIA_DO_POLLING=1
 endif
 

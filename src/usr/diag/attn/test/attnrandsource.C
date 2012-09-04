@@ -28,7 +28,8 @@
  */
 
 #include "attnrandsource.H"
-#include "attnfakesys.H"
+#include "attninject.H"
+#include "../attntrace.H"
 #include "sys/time.h"
 
 using namespace PRDF;
@@ -50,6 +51,8 @@ bool RandSource::start()
     }
 
     success = iv_tid != 0;
+
+    ATTN_DBG("RandSource started: %d", iv_tid);
 
     mutex_unlock(&iv_mutex);
 
@@ -111,20 +114,20 @@ void RandSource::run()
             l.push_back(d);
         }
 
-        iv_system->putAttentions(l);
+        iv_injectSink->putAttentions(l);
     }
 }
 
 RandSource::RandSource(
         uint64_t i_iterations,
         uint64_t i_maxAttnsPerIteration,
-        FakeSystem & i_system,
+        InjectSink & i_injectSink,
         TargetHandle_t * i_first,
         TargetHandle_t * i_last)
     : iv_tid(0),
     iv_iterations(i_iterations),
     iv_max(i_maxAttnsPerIteration),
-    iv_system(&i_system),
+    iv_injectSink(&i_injectSink),
     iv_first(i_first),
     iv_last(i_last)
 {

@@ -49,10 +49,10 @@ class FakePrd : public PrdImpl
         /**
          * @brief ctor
          *
-         * @param[in] i_system The system where attentions
+         * @param[in] i_injectSink The system where attentions
          *                     should be cleared.
          */
-        explicit FakePrd(FakeSystem & i_system);
+        explicit FakePrd(InjectSink & i_injectSink);
 
         /**
          * @brief dtor
@@ -77,10 +77,10 @@ class FakePrd : public PrdImpl
     private:
 
         /**
-         * @brief iv_system The system where attentions should
+         * @brief iv_injectSink The system where attentions should
          *                  be cleared.
          */
-        FakeSystem * iv_system;
+        InjectSink * iv_injectSink;
 };
 }
 #endif

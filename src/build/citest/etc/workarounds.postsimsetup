@@ -26,3 +26,9 @@
 ##    to setup the sandbox
 ##
 
+### Updates to handle maint command complete (Remove with RTC:59218)
+echo "+++ Update cec-chip files for Centaur maint command complete."
+mkdir -p $sb/simu/data/cec-chip/
+cp $bb/src/simu/data/cec-chip/centaur.act $sb/simu/data/cec-chip/centaur.act
+patch -p0 $sb/simu/data/cec-chip/centaur.act $HOSTBOOTROOT/src/build/citest/etc/patches/centaur.act.patch
+###

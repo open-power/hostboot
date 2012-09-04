@@ -69,7 +69,7 @@ class RandSource
          * @param[in] i_iterations The number of attentions to inject.
          * @param[in] i_maxAttnsPerIteration The upper bound on the number
          *               of attentions to inject per iteration.
-         * @param[in] i_system The fake hardware on which to inject attentions.
+         * @param[in] i_injectSink The hardware on which to inject attentions.
          * @param[in] i_first The start of the range from which to
          *                         generate attentions.
          * @param[in] i_last The end of the range from which to
@@ -78,7 +78,7 @@ class RandSource
         RandSource(
                 uint64_t i_iterations,
                 uint64_t i_maxAttnsPerIteration,
-                FakeSystem & i_system,
+                InjectSink & i_injectSink,
                 TARGETING::TargetHandle_t * i_rangeStart,
                 TARGETING::TargetHandle_t * i_rangeEnd);
 
@@ -123,9 +123,9 @@ class RandSource
         uint64_t iv_max;
 
         /**
-         * @brief iv_system The system on which attentions are injected.
+         * @brief iv_injectSink The system on which attentions are injected.
          */
-        FakeSystem * iv_system;
+        InjectSink * iv_injectSink;
 
         /**
          * @brief iv_rangeStart The start of the range from which to

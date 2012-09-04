@@ -33,6 +33,7 @@
 #include "../attnscom.H"
 #include "attntest.H"
 #include "attncomp.H"
+#include "attninject.H"
 #include <map>
 
 namespace ATTN
@@ -44,7 +45,7 @@ namespace ATTN
  * Container that presents an interface to fake hardware
  * implementations.
  */
-class FakeSystem : public ScomImpl
+class FakeSystem : public ScomImpl, public InjectSink
 {
     public:
 

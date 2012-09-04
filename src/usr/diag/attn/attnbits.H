@@ -256,6 +256,10 @@ enum
     PSI_HB_IRQ_SRC_CMP_ADDR = 0x0201091b,
     PSI_HB_IRSN             = 0x18,
     PSI_HB_IRSN_MASK        = 0x7FFF8,
+    INTR_TYPE_LCL_ERR_STATUS_REG = 0x1020000,
+    INTR_TYPE_MASK_REG      = 0x102000c,
+    INTR_TYPE_CONFIG_REG    = 0x102000f,
+    GP2_REG                 = 0x2000002,
 };
 }
 #endif

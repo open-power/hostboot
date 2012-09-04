@@ -42,6 +42,7 @@ struct AttnDataEq;
 class FakeSystem;
 class FakeReg;
 class FakeSource;
+class InjectSink;
 
 /**
  * @brief randint Generate random integer between bounds.

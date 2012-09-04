@@ -179,12 +179,73 @@ errlHndl_t Service::configureInterrupts(
             break;
         }
 
-        // unmask interrupts in ipoll mask
-
         uint64_t mask = 0;
+
+        // clear status
+
+        if(i_mode == UP)
+        {
+            err = putScom(*it, INTR_TYPE_LCL_ERR_STATUS_REG, 0);
+        }
+
+        if(err)
+        {
+            break;
+        }
+
+        // unmask lcl err intr
+
+        mask = 0x8000000000000000ull;
+
+        err = modifyScom(
+                *it,
+                INTR_TYPE_MASK_REG,
+                i_mode == UP ? ~mask : mask,
+                i_mode == UP ? SCOM_AND : SCOM_OR);
+
+        if(err)
+        {
+            break;
+        }
+
+        // set lcl err intr conf - or
+
+        if(i_mode == UP)
+        {
+            err = modifyScom(*it, INTR_TYPE_CONFIG_REG, ~mask, SCOM_AND);
+        }
+
+        if(err)
+        {
+            break;
+        }
+
+        // enable powerbus gpin
+
+        mask = 0x0018000000000000ull;
+
+        err = modifyScom(
+                *it,
+                GP2_REG,
+                i_mode == UP ? mask : ~mask,
+                i_mode == UP ? SCOM_OR : SCOM_AND);
+
+        if(err)
+        {
+            break;
+        }
+
+        // enable interrupts in ipoll mask
+
+        mask = 0;
+
         IPOLL::forEach(~0, &mask, &getMask);
 
-        err = modifyScom(*it, IPOLL::address, ~mask, SCOM_AND);
+        err = modifyScom(
+                *it,
+                IPOLL::address,
+                i_mode == UP ? ~mask : mask,
+                i_mode == UP ? SCOM_AND : SCOM_OR);
 
         if(err)
         {

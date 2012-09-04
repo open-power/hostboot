@@ -340,16 +340,16 @@ class AttnProcTest: public CxxTest::TestSuite
         }
 
         /**
-         * @brief testAttentions Unit test for the
+         * @brief testFakeAttentions Unit test for the
          *        attnproc module.
          */
-        void testAttentions()
+        void testFakeAttentions()
         {
             static const uint64_t targetPoolSize = 8;
             static const uint64_t iterations = 5;
             static const uint64_t maxAttnsPerIteration = 5;
 
-            TS_TRACE(ENTER_MRK "testAttentions");
+            TS_TRACE(ENTER_MRK "testFakeAttentions");
 
             errlHndl_t err = 0;
 
@@ -461,7 +461,7 @@ class AttnProcTest: public CxxTest::TestSuite
                 v.dump();
             }
 
-            TS_TRACE(EXIT_MRK "testAttentions");
+            TS_TRACE(EXIT_MRK "testFakeAttentions");
         }
 };
 #endif

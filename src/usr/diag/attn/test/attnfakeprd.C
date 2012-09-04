@@ -28,7 +28,7 @@
  */
 
 #include "attnfakeprd.H"
-#include "attnfakesys.H"
+#include "attninject.H"
 #include "../attnops.H"
 #include "../attnlist.H"
 #include <sys/time.h>
@@ -40,7 +40,7 @@ namespace ATTN
 
 struct Clear
 {
-    Clear(FakeSystem & i_system) : iv_system(&i_system), err(0) {}
+    Clear(InjectSink & i_injectSink) : iv_injectSink(&i_injectSink), err(0) {}
 
     void operator()(const Attention & i_attention)
     {
@@ -61,22 +61,22 @@ struct Clear
                 // to see attentions that were not cleared and call PRD
                 // again
 
-                err = iv_system->clearAllAttentions(d);
+                err = iv_injectSink->clearAllAttentions(d);
             }
         }
     }
 
-    FakeSystem * iv_system;
+    InjectSink * iv_injectSink;
     errlHndl_t err;
 };
 
 errlHndl_t FakePrd::callPrd(const AttentionList & i_attentions)
 {
-    return i_attentions.forEach(Clear(*iv_system)).err;
+    return i_attentions.forEach(Clear(*iv_injectSink)).err;
 }
 
-FakePrd::FakePrd(FakeSystem & i_system) :
-    iv_system(&i_system)
+FakePrd::FakePrd(InjectSink & i_injectSink) :
+    iv_injectSink(&i_injectSink)
 {
 
 }

@@ -28,6 +28,7 @@
  */
 
 #include "attntarget.H"
+#include "attntrace.H"
 #include "targeting/common/predicates/predicates.H"
 #include "targeting/common/utilFilter.H"
 #include <util/singleton.H>
@@ -144,7 +145,7 @@ TargetHandle_t TargetServiceImpl::getMcs(
             i_proc,
             TARGETING::TargetService::CHILD_BY_AFFINITY,
             TARGETING::TargetService::ALL,
-            &chipUnitMatch);
+            &pred);
 
     if(list.size() == 1)
     {

@@ -5,3 +5,8 @@ Brief description of the problem or reason for patch
 -Files: list of files		
 -Coreq: list of associated changes, e.g. workarounds.presimsetup
 
+New actions for Centaur maint command complete
+-RTC: Task 59218 will remove the patch
+-CMVC: D862701 is integrating the changes
+-Files: centaur.act.patch
+-Coreq: there are related changes in workarounds.postsimsetup

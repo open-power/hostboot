@@ -43,6 +43,7 @@
 #include "attnrandsource.H"
 #include "attnfaketarget.H"
 #include "attnvalidate.H"
+#include "attnmeminject.H"
 #include <cxxtest/TestSuite.H>
 #include <sys/time.h>
 
@@ -346,16 +347,16 @@ class AttnMemTest: public CxxTest::TestSuite
         }
 
         /**
-         * @brief testAttentions Unit test for the
+         * @brief testFakeAttentions Unit test for the
          *        attnmem module.
          */
-        void testAttentions()
+        void testFakeAttentions()
         {
             static const uint64_t targetPoolSize = 8;
             static const uint64_t iterations = 5;
             static const uint64_t maxAttentionsPerIteration = 5;
 
-            TS_TRACE(ENTER_MRK "testAttentions");
+            TS_TRACE(ENTER_MRK "testFakeAttentions");
 
             errlHndl_t err = 0;
 
@@ -458,6 +459,77 @@ class AttnMemTest: public CxxTest::TestSuite
                 TS_FAIL("unexpected result after injecting attentions");
 
                 v.dump();
+            }
+
+            TS_TRACE(EXIT_MRK "testFakeAttentions");
+        }
+
+        /**
+         * @brief testAttentions Unit test for the
+         *        attnmem module.
+         */
+        void testAttentions(void)
+        {
+            static const uint64_t iterations = 1;
+            static const uint64_t maxAttnsPerIteration = 1;
+
+            TS_TRACE(ENTER_MRK "testAttentions");
+
+            errlHndl_t err = 0;
+
+            Service svc;
+            MemInjectSink sink;
+
+            TargetHandleList membufs;
+
+            getTargetService().getAllChips(
+                    membufs,
+                    TYPE_MEMBUF);
+
+            RandSource source(
+                    iterations,
+                    maxAttnsPerIteration,
+                    sink,
+                    &membufs[0],
+                    &membufs[0] + membufs.size());
+
+            FakePrd prd(sink);
+
+            prd.installPrd();
+
+            do
+            {
+                err = svc.start();
+
+                if(err)
+                {
+                    TS_FAIL("unexpected error starting service");
+                    break;
+                }
+
+                if(!source.start())
+                {
+                    TS_FAIL("unexpected error starting source");
+                    break;
+                }
+
+                // wait for the testcase to finish injecting attentions
+
+                if(!source.wait())
+                {
+                    TS_FAIL("unexpected error waiting for source");
+                    break;
+                }
+
+            } while(0);
+
+            err = svc.stop();
+
+            if(err)
+            {
+                TS_FAIL("unexpected error stopping service");
+
+                delete err;
             }
 
             TS_TRACE(EXIT_MRK "testAttentions");
