@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/errl/errlmanager.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2011-2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/errl/errlmanager.C $                                  */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  *  @file errlmanager.C
  *
@@ -85,7 +84,6 @@ ErrlManager::ErrlManager()
     iv_hwasProcessCalloutFn = NULL;
 
     mutex_init(&iv_commitMutex);
-    mutex_init(&iv_hwasMutex);
 
     // Scaffolding.
     // For now, put error logs in a 64KB buffer in L3 RAM
@@ -200,20 +198,10 @@ uint32_t ErrlManager::getUniqueErrId()
 ///////////////////////////////////////////////////////////////////////////////
 void ErrlManager::setHwasProcessCalloutFn(HWAS::processCalloutFn i_fn)
 {
-    mutex_lock(&(ERRORLOG::theErrlManager::instance().iv_hwasMutex));
+    // sync to ensure that all of HWAS is fully constructed BEFORE we
+    //  write this function pointer
+    lwsync();
     ERRORLOG::theErrlManager::instance().iv_hwasProcessCalloutFn = i_fn;
-    mutex_unlock(&(ERRORLOG::theErrlManager::instance().iv_hwasMutex));
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-HWAS::processCalloutFn ErrlManager::getHwasProcessCalloutFn() const
-{
-    HWAS::processCalloutFn l_fp = NULL;
-    mutex_lock(&iv_hwasMutex);
-    l_fp = iv_hwasProcessCalloutFn;
-    mutex_unlock(&iv_hwasMutex);
-    return l_fp;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
