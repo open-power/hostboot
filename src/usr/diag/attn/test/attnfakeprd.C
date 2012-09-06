@@ -55,23 +55,13 @@ struct Clear
 
             nanosleep(0, randint(TEN_CTX_SWITCHES_NS, TEN_CTX_SWITCHES_NS * 10));
 
-            uint64_t behavior = randint(0, 2);
-
-            switch(behavior)
+            if(randint(0, 10) < 8)
             {
-                case 1:
+                // periodically do nothing to force the main service
+                // to see attentions that were not cleared and call PRD
+                // again
 
-                    // periodically do nothing to force the main service
-                    // to see attentions that were not cleared and call PRD
-                    // again
-
-                    break;
-
-                default:
-
-                    err = iv_system->clearAllAttentions(d);
-
-                    break;
+                err = iv_system->clearAllAttentions(d);
             }
         }
     }
