@@ -36,6 +36,7 @@
 #include <errl/errludbacktrace.H>
 #include <errludattribute.H>
 #include <errl/errludlogregister.H>
+#include <errl/errludcallout.H>
 #include <errl/errludparserfactory.H>
 
 namespace ERRORLOG

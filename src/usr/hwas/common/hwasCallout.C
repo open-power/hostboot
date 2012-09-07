@@ -96,13 +96,13 @@ void processCallout(const uint32_t i_errlPlid,
                 /*@
                  * @errortype
                  * @moduleid     MOD_PROCESS_CALLOUT
-                 * @reasoncode   INVALID_TARGET
+                 * @reasoncode   HWAS::RC_INVALID_TARGET
                  * @devdesc      Invalid Target encountered into processCallout
                  */
                 errl = new ERRORLOG::ErrlEntry(
                     ERRORLOG::ERRL_SEV_INFORMATIONAL,
                     MOD_PROCESS_CALLOUT,
-                    RC_INVALID_TARGET);
+                    HWAS::RC_INVALID_TARGET);
                 errlCommit(errl, HWAS_COMP_ID);
                 break;
             }
