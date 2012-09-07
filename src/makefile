@@ -58,14 +58,14 @@ EXTENDED_MODULES = targeting ecmddatabuffer fapi hwp plat	\
                    core_activate dram_initialization edi_ei_initialization \
                    establish_system_smp \
                    nest_chiplets start_payload thread_activate slave_sbe \
-                   attn
+                   attn runtime
 
 TESTCASE_MODULES = cxxtest testerrl testdevicefw testsyslib \
                    testscom testxscom testtargeting testinitservice testkernel \
                    testhwpf testecmddatabuffer initsvctesttask testcxxtest \
                    testpnor testi2c testfsi testvfs testhwas testintr testspd \
                    testpore testutil testmbox testmdia testmvpd testprdf testattn \
-                   testscan
+                   testscan testruntime
 
 RELOCATABLE_IMAGE_LDFLAGS = -pie --export-dynamic
 

@@ -62,6 +62,7 @@
 #include    <fapiPlatHwpInvoker.H>
 
 #include    "start_payload.H"
+#include    <runtime/runtime.H>
 
 //  Uncomment these files as they become available:
 // #include    "host_start_payload/host_start_payload.H"
@@ -114,6 +115,21 @@ void    call_host_start_payload( void    *io_pArgs )
         // Need to wait here until Fsp tells us go
         INITSERVICE::waitForSyncPoint();
 
+        // Need to load up the runtime module if it isn't already loaded
+        if (  !VFS::module_is_loaded( "libruntime.so" ) )
+        {
+            l_errl = VFS::module_load( "libruntime.so" );
+            if ( l_errl )
+            {
+                //  load module returned with errl set
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "Could not load runtime module" );
+
+                //  break out of do block
+                break;
+            }
+        }
+
         // Host Start Payload procedure, per documentation from Patrick.
         //  - Verify target image
         //      - TODO - Done via call to Secure Boot ROM.
@@ -121,6 +137,14 @@ void    call_host_start_payload( void    *io_pArgs )
 
         //  - Update HDAT with updated SLW images
         //      - TODO - Once we know where they go in the HDAT
+
+        //@todo : Move this to new sub-step with RTC:49501
+        // Write the HostServices attributes into mainstore
+        l_errl = RUNTIME::populate_attributes();
+        if( l_errl )
+        {
+            break;
+        }
 
         //  - Run CXX testcases
         l_errl = INITSERVICE::executeUnitTests();

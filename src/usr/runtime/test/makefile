@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG 
 # This is an automatically generated prolog. 
 #  
-# $Source: src/usr/makefile $ 
+# $Source: src/usr/runtime/test/makefile $ 
 #  
 # IBM CONFIDENTIAL 
 #  
-# COPYRIGHT International Business Machines Corp. 2010,2012 
+# COPYRIGHT International Business Machines Corp. 2012 
 #  
 # p1 
 #  
@@ -20,16 +20,17 @@
 # Origin: 30 
 #  
 # IBM_PROLOG_END_TAG 
-ROOTPATH = ../..
+ROOTPATH = ../../../..
 
-# Do not instrument the module_init.o
-HOSTBOOT_PROFILE_NO_INSTRUMENT = 1
-OBJS = module_init.o
+MODULE = testruntime
+TESTS = *.H
 
-SUBDIRS = example.d trace.d cxxtest.d testcore.d errl.d devicefw.d  \
-          scom.d xscom.d targeting.d initservice.d hwpf.d \
-          ecmddatabuffer.d pnor.d i2c.d vfs.d fsi.d hwas.d fsiscom.d \
-          intr.d spd.d pore.d util.d mbox.d diag.d mvpd.d scan.d \
-          runtime.d
+#@fixme - remove this after testing
+##      support for fapi
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/plat
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
+
 
 include ${ROOTPATH}/config.mk

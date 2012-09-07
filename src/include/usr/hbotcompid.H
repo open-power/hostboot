@@ -249,6 +249,14 @@ const compId_t SCAN_COMP_ID = 0x1900;
 const char SCAN_COMP_NAME[] = "scan";
 //@}
 
+/** @name RUNTIME
+ *  RUNTIME component
+ */
+//@{
+const compId_t RUNTIME_COMP_ID = 0x1A00;
+const char RUNTIME_COMP_NAME[] = "runtime";
+//@}
+
 /** @name RESERVED
  *  Reserved component ID. x3100 is the component ID
  *  of FipS ERRL component. Due to our use of
