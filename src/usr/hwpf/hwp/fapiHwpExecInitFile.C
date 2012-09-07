@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/hwp/fapiHwpExecInitFile.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2011-2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/hwp/fapiHwpExecInitFile.C $                      */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  *  @file fapiHwpExecInitFile.C
  *
@@ -59,6 +58,8 @@
  *                                                  rpn sequence byte count
  *                          camvanng    06/15/2012  Ability to do bitwise OR and AND operations
  *                          camvanng    06/27/2012  Fix bug in targetId
+ *                          camvanng    09/07/2012  Optimization - do PutScom vs PutScomUnderMask
+ *                                                  if the combined bit mask enables all 64 bits
  */
 
 #include <fapiHwpExecInitFile.H>
@@ -1540,7 +1541,7 @@ fapi::ReturnCode writeScom(ifData_t & i_ifData,
              break;
         }
 
-        if (l_mask)
+        if (l_mask && (l_mask != 0xFFFFFFFFFFFFFFFFull))
         {
             //Perform a PutScomUnderMask operation on the target
 
