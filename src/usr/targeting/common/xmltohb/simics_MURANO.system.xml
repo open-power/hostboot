@@ -1,25 +1,25 @@
-<!--  IBM_PROLOG_BEGIN_TAG
-     This is an automatically generated prolog.
-   
-     $Source: src/usr/targeting/common/xmltohb/simics_MURANO.system.xml $
-   
-     IBM CONFIDENTIAL
-   
-     COPYRIGHT International Business Machines Corp. 2011-2012
-   
-     p1
-   
-     Object Code Only (OCO) source materials
-     Licensed Internal Code Source Materials
-     IBM HostBoot Licensed Internal Code
-   
-     The source code for this program is not published or other-
-     wise divested of its trade secrets, irrespective of what has
-     been deposited with the U.S. Copyright Office.
-   
-     Origin: 30
-   
-     IBM_PROLOG_END_TAG -->
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/targeting/common/xmltohb/simics_MURANO.system.xml $   -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2011,2012              -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
 <attributes>
 
 <!-- =====================================================================
@@ -667,10 +667,6 @@
         <id>CHIP_UNIT</id>
         <default>0</default>
     </attribute>  
-    <attribute>
-        <id>PEER_TARGET</id>
-        <default>physical:sys-0/node-0/proc-1/xbus-0</default>
-    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -688,6 +684,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>1</default>
+    </attribute>
+    <attribute>
+        <id>PEER_TARGET</id>
+        <default>physical:sys-0/node-0/proc-1/xbus-1</default>
     </attribute>
 </targetInstance>
 
@@ -1278,10 +1278,6 @@
         <id>CHIP_UNIT</id>
         <default>0</default>
     </attribute>
-    <attribute>
-        <id>PEER_TARGET</id>
-        <default>physical:sys-0/node-0/proc-0/xbus-0</default>
-    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -1299,6 +1295,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>1</default>
+    </attribute>
+    <attribute>
+        <id>PEER_TARGET</id>
+        <default>physical:sys-0/node-0/proc-0/xbus-1</default>
     </attribute>
 </targetInstance>
 
@@ -1890,10 +1890,6 @@
         <id>CHIP_UNIT</id>
         <default>0</default>
     </attribute>
-    <attribute>
-        <id>PEER_TARGET</id>
-        <default>physical:sys-0/node-0/proc-3/xbus-0</default>
-    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -1911,6 +1907,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>1</default>
+    </attribute>
+    <attribute>
+        <id>PEER_TARGET</id>
+        <default>physical:sys-0/node-0/proc-3/xbus-1</default>
     </attribute>
 </targetInstance>
 
@@ -2501,10 +2501,6 @@
         <id>CHIP_UNIT</id>
         <default>0</default>
     </attribute>
-    <attribute>
-        <id>PEER_TARGET</id>
-        <default>physical:sys-0/node-0/proc-2/xbus-0</default>
-    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -2522,6 +2518,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>1</default>
+    </attribute>
+    <attribute>
+        <id>PEER_TARGET</id>
+        <default>physical:sys-0/node-0/proc-2/xbus-1</default>
     </attribute>
 </targetInstance>
 
