@@ -185,6 +185,22 @@ class VmmManager
          */
         static uint64_t findKernelAddress(uint64_t i_vaddr);
 
+        /**
+         * @brief Allocates a block of virtual memory that extends the VMM
+         *          space upto 32MEG of Mainstore. 
+         */
+        static int mmExtend( void);
+
+        /** @fn mm_linear_map()
+         *  @brief   Allocates a block of memory of the given size
+         *           to at a specified address (direct pa to va  mapping)
+         *  @param[in] i_paddr - physical address of the location for the block
+         *  @param[in] i_size - size of the block requested
+         *
+         *  @return int - 0 for successful add, non-zero otherwise
+         */
+         static int mmLinearMap(void *i_paddr, uint64_t i_size);
+
     protected:
         VmmManager();
         ~VmmManager() {};
@@ -223,10 +239,16 @@ class VmmManager
         int _mmRemovePages(VmmManager::PAGE_REMOVAL_OPS i_op,void* i_vaddr,
                            uint64_t i_size,task_t* i_task);
 
+        /** See mmExtend */
+        int _mmExtend( void );
+
         /** See devMap */
         void* _devMap(void* ra, uint64_t i_devDataSize);
         /** See devUnmap */
         int _devUnmap(void* ea);
+
+        /** See mmLinearMap */
+        int _mmLinearMap(void*, uint64_t);
 
     public:
         friend class Block;

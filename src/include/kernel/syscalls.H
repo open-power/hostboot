@@ -110,6 +110,12 @@ namespace Systemcalls
            /** mm_virt_to_phys() */
         MM_VIRT_TO_PHYS,
 
+            /** mm_extend() */
+        MM_EXTEND,
+
+            /** mm_linear_map() */
+        MM_LINEAR_MAP,
+
 	SYSCALL_MAX
     };
 

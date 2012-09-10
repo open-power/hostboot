@@ -96,6 +96,23 @@ int mm_remove_pages(PAGE_REMOVAL_OPS i_op, void* i_vaddr, uint64_t i_size);
  */
 int mm_set_permission(void* va, uint64_t size, uint64_t access_type);
 
+/** @fn mm_extend()
+ *  @brief System call to extend Memory to 32MEG
+ *
+ *  @return int - 0 for successful extension of memory, non-zero otherwise
+ */
+int mm_extend(void);
+
+/** @fn mm_linear_map()
+ *  @brief   Allocates a block of memory of the given size at a specified
+ *           address (direct physical to virtual mapping)
+ *  @param[in] i_paddr - physical address of the location for the block
+ *  @param[in] size - size of the block requested
+ *
+ *  @return int - 0 for successful add, non-zero otherwise
+ */
+int mm_linear_map(void *i_paddr, uint64_t i_size);
+
 #ifdef __cplusplus
 }
 #endif

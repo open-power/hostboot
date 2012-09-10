@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/include/kernel/basesegment.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/include/kernel/basesegment.H $                            */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /** @file basesegment.H
  *  @brief Defines the base segment (0TB) class.
  */
@@ -83,10 +83,17 @@ class BaseSegment : public Segment
          * @param i_va[in] - Page aligned base virtual address of the block
          *                   to be allocated
          * @param i_size[in] - Requested virtual memory size of the block
+         * @param i_mappedToPhy[in] - bool value assigned to the block to
+         *         determine if this blocked is mapped directly to a physical
+         *         address
+         *             DEFAULT - FALSE
+         * @param i_SPTEaddr[in] - address of where the SPTE should be put.
+         *              DEFAULT = NULL (no specific address)
          * @return int - 0 for successful block allocation, non-zero otherwise
          */
-        static int mmAllocBlock(MessageQueue* i_mq,void* i_va,
-                                uint64_t i_size);
+        static int mmAllocBlock(MessageQueue* i_mq,void* i_va,uint64_t i_size,
+                                  bool iv_mappedToPhy = false,
+                                  uint64_t *i_SPTEaddr = NULL );
 
         /**
          * @brief Locate the physical address of the given virtual address
@@ -119,11 +126,28 @@ class BaseSegment : public Segment
         static int mmSetPermission(void* i_va,
                                       uint64_t i_size,
                                       uint64_t i_access_type);
-         /**
-          * @breif Cast out older physical memory pages
-          * @param[in] castout Constraint
-          */
-         virtual void castOutPages(uint64_t i_type);
+        /**
+         * @brief Cast out older physical memory pages
+         * @param[in] castout Constraint
+         */
+        virtual void castOutPages(uint64_t i_type);
+
+        /**
+         * @brief Allocates a block of virtual memory that extends the VMM
+         *          space upto 32MEG of Mainstore. 
+         */
+        static int mmExtend(void);
+
+        /**
+         * @brief Allocates a block of memory of the given size to at a
+         *     specified physical address.
+         * @param i_paddr[in] - physical address of the location of the block of
+         *         memory
+         * @param i_size[in] - range of memory being created
+         * @return int - 0 for successful block allocation, non-zero otherwise
+         */
+        static int mmLinearMap(void *i_paddr, uint64_t i_size);
+
 
     private:
         /**
@@ -142,9 +166,17 @@ class BaseSegment : public Segment
          * @param i_mq[in] - Message queue to be associated with the block
          * @param i_va[in] - Base virtual address of the block to be allocated
          * @param i_size[in] - Requested virtual memory size of the block
+         * @param i_mappedToPhy[in] - bool value assigned to the block to
+         *         determine if this blocked is mapped directly to a physical
+         *         address
+         *             DEFAULT - FALSE
+         * @param i_SPTEaddr[in] - address of where the SPTE should be put.
+         *              DEFAULT = NULL (no specific address)
          * @return int - 0 for successful block allocation, non-zero otherwise
          */
-        int _mmAllocBlock(MessageQueue* i_mq,void* i_va,uint64_t i_size);
+        int _mmAllocBlock(MessageQueue* i_mq,void* i_va,uint64_t i_size,
+                            bool iv_mappedToPhy = false,
+                            uint64_t *i_SPTEaddr = NULL);
 
         /**
          * @brief Sets the page permissions for a given virtual address and size.
@@ -169,6 +201,23 @@ class BaseSegment : public Segment
          */
         int _mmRemovePages(VmmManager::PAGE_REMOVAL_OPS i_op, void* i_vaddr,
                 uint64_t i_size, task_t* i_task);
+
+        /**
+         * @brief Allocates a block of virtual memory that extends the VMM
+         *          space upto 32MEG of Mainstore. 
+         */
+         int _mmExtend(void);
+
+        /**
+         * @brief Allocates a block of memory of the given size to at a
+         *     specified physical address.
+         * @param i_paddr[in] - physical address of the location of the block of
+         *         memory
+         * @param i_size[in] - range of memory being created
+         * @return int - 0 for successful block allocation, non-zero otherwise
+         */
+         int _mmLinearMap(void* i_paddr, uint64_t i_size);
+
 
 };
 

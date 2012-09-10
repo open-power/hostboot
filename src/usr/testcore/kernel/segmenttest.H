@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/testcore/kernel/segmenttest.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2011-2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/testcore/kernel/segmenttest.H $                       */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef __SEGMENTTEST_H
 #define __SEGMENTTEST_H
 /**
@@ -110,6 +109,51 @@ class segmenttest: public CxxTest::TestSuite
                 mmio_dev_unmap(blocks.front());
                 blocks.pop_front();
             }
+        }
+
+       // Create 2 blocks at different specified address's and sizes and direct
+       // map this.
+        void testSegLinearBlock()
+        {
+            int rc = -1;
+            uint64_t phys = 0;
+            uint64_t addr = 0x8000000 - 0x5000; //128M- 16K
+            uint64_t size = 0x1000; //4K
+
+            rc = mm_linear_map(reinterpret_cast<void*>(addr),size);
+            if (rc != 0)
+            {
+                TS_FAIL("Failed to create BaseSegment block\n");
+            }
+
+            phys = mm_virt_to_phys( reinterpret_cast<void*>(addr) );
+
+            if( phys != addr )
+            {
+                TS_TRACE( "Block> virt=%lX, phys=%lX", &addr, phys );
+                TS_FAIL("Unexpected Physical Address for block.");
+            }
+
+
+            uint64_t addr2 = 0x8000000 - 0x3000; //128M- 12k
+            uint64_t size2 = 0x3000; //12K
+
+            rc = mm_linear_map(reinterpret_cast<void*>(addr2),size2);
+
+            if (rc != 0)
+            {
+                TS_FAIL("Failed to create BaseSegment block\n");
+            }
+
+            phys = mm_virt_to_phys( reinterpret_cast<void*>(addr2) );
+
+            if( phys != addr2 )
+            {
+                TS_TRACE( "Block> virt=%lX, phys=%lX", &addr2, phys );
+                TS_FAIL("Unexpected Physical Address for block.");
+                
+            }
+
         }
 
 };

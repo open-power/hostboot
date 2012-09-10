@@ -41,7 +41,6 @@ VmmManager::VmmManager() : lock()
 
 void VmmManager::init()
 {
-    printk("Starting VMM...\n");
 
     VmmManager& v = Singleton<VmmManager>::instance();
 
@@ -57,7 +56,6 @@ void VmmManager::init()
     v.initPTEs();
     v.initSDR1(); /*no effect*/ // BEAM Fix.
 
-    printk("...done.\n");
 };
 
 void VmmManager::init_slb()
@@ -209,6 +207,20 @@ void VmmManager::_flushPageTable( void )
     lock.unlock();
 }
 
+
+int VmmManager::mmExtend(void)
+{
+    return Singleton<VmmManager>::instance()._mmExtend();
+}
+
+int VmmManager::_mmExtend(void)
+{
+    lock.lock();
+    int rc = BaseSegment::mmExtend();
+    lock.unlock();
+    return rc;
+}
+
 void* VmmManager::_devMap(void* ra, uint64_t i_devDataSize)
 {
     void* ea = NULL;
@@ -246,4 +258,17 @@ uint64_t VmmManager::findKernelAddress(uint64_t i_vaddr)
         phys |= FORCE_PHYS_ADDR;
     }
     return phys;
+}
+
+int VmmManager::mmLinearMap(void *i_paddr, uint64_t i_size)
+{
+    return Singleton<VmmManager>::instance()._mmLinearMap(i_paddr, i_size);
+}
+
+int VmmManager::_mmLinearMap(void *i_paddr, uint64_t i_size)
+{
+    lock.lock();
+    int rc = BaseSegment::mmLinearMap(i_paddr, i_size);
+    lock.unlock();
+    return rc;
 }

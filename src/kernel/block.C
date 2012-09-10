@@ -39,6 +39,8 @@
 #include <kernel/basesegment.H>
 #include <arch/ppc.H>
 
+#include <new>
+
 // Track eviction requests due to aging pages
 uint32_t Block::cv_ro_evict_req = 0;
 uint32_t Block::cv_rw_evict_req = 0;
@@ -58,10 +60,21 @@ Block::~Block()
     }
 }
 
-void Block::init(MessageQueue* i_msgQ)
+void Block::init(MessageQueue* i_msgQ, uint64_t *i_spteAddr)
 {
-    // Create a shadow PTE for each page.
-    iv_ptes = new ShadowPTE[iv_size / PAGESIZE];
+
+    if (i_spteAddr == NULL)
+    {
+        // Create a shadow PTE for each page.
+        iv_ptes = new ShadowPTE[iv_size / PAGESIZE];
+    }
+    else // set the page table to reside at the address requested
+    {
+        // Doing a placement new to put the SPTE at the beginging
+        // of the block we allocated. 
+        iv_ptes = new(i_spteAddr) ShadowPTE[iv_size / PAGESIZE];
+    }
+
     if (i_msgQ != NULL)
     {
         //Create message handler to handle read operations for this block
@@ -265,7 +278,12 @@ uint64_t Block::findPhysicalAddress(uint64_t i_vaddr) const
     {
         paddr = pte->getPageAddr();
         paddr += i_vaddr % PAGESIZE;
-        paddr |= getHRMOR();
+
+        // If not a physically mapped block then add HRMOR
+        if (!iv_mappedToPhysical)
+        {
+            paddr |= getHRMOR();
+        }
     }
 
     return paddr;

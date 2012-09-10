@@ -68,11 +68,13 @@
 #include    "proc_setup_bars/proc_setup_bars.H"
 // #include    "proc_pcie_config/proc_pcie_config.H"
 #include    "proc_exit_cache_contained/proc_exit_cache_contained.H"
-
+#include    <hwpf/plat/fapiPlatReasonCodes.H>
 //remove these once memory setup workaround is removed
 #include <devicefw/driverif.H>
 #include <spd/spdenums.H>
 #include <sys/time.h>
+#include <sys/mm.h>
+
 
 namespace   DRAM_INITIALIZATION
 {
@@ -558,6 +560,7 @@ void    call_proc_exit_cache_contained( void    *io_pArgs )
     //  figure out what targets we need
     //  customize any other inputs
     //  set up loops to go through all targets (if parallel, spin off a task)
+    //  extend the memory space from 8MEG to 32Meg
 
     //  call the HWP with each fapi::Target
     FAPI_INVOKE_HWP( l_errl,
@@ -574,10 +577,38 @@ void    call_proc_exit_cache_contained( void    *io_pArgs )
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "SUCCESS : call_proc_exit_cache_contained" );
     }
-    // @@@@@    END CUSTOM BLOCK:   @@@@@
+
+
+    // Call the function to extend VMM to 32MEG
+    int rc = mm_extend();
+
+    if (rc!=0)
+    {
+        /*@
+         * @errortype
+         * @moduleid     fapi::MOD_EXIT_CACHE_CONTAINED
+         * @reasoncode   fapi::RC_MM_EXTEND_FAILED
+         *   @userdata1  rc from mm_extend
+         *   @userdata2        <UNUSED>
+         *
+         *   @devdesc  Failure extending memory to 32MEG after
+         *        exiting cache contained mode.
+         */
+        l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                         fapi::MOD_EXIT_CACHE_CONTAINED,
+                                         fapi::RC_MM_EXTEND_FAILED,
+                                         rc,
+                                         0);
+
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "ERROR : call_proc_exit_cache_contained - extendVMM, rc=0x%x",
+                  rc );
+    }
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_exit_cache_contained exit" );
+
+    // @@@@@    END CUSTOM BLOCK:   @@@@@
 
     // end task, returning any errorlogs to IStepDisp
     task_end2( l_errl );

@@ -42,6 +42,7 @@
 #include <kernel/intmsghandler.H>
 #include <sys/sync.h>
 
+
 extern "C"
 void kernel_execute_decrementer()
 {
@@ -92,6 +93,8 @@ namespace Systemcalls
     void MmSetPermission(task_t *t);
     void MmAllocPages(task_t *t);
     void MmVirtToPhys(task_t *t);
+    void MmExtend(task_t *t);
+    void MmLinearMap(task_t *t);
 
 
     syscall syscalls[] =
@@ -131,6 +134,8 @@ namespace Systemcalls
         &MmSetPermission, // MM_SET_PERMISSION
         &MmAllocPages,    // MM_ALLOC_PAGES
         &MmVirtToPhys,    // MM_VIRT_TO_PHYS
+        &MmExtend,        // MM_EXTEND
+        &MmLinearMap,     // MM_LINEAR_MAP
         };
 };
 
@@ -794,5 +799,28 @@ namespace Systemcalls
         uint64_t phys = VmmManager::findPhysicalAddress(i_vaddr);
         TASK_SETRTN(t, phys);
     }
+
+    /**
+     * Allocates a block of virtual memory that extends the VMM
+     * space upto 32MEG of Mainstore.
+     * @param[in] t: The task used to extend Memory 
+     */
+    void MmExtend(task_t* t)
+    {
+        TASK_SETRTN(t, VmmManager::mmExtend());
+    }
+
+    /**
+     * Allocates a block of memory of the given size
+     * to at a specified physical address 
+     */
+    void MmLinearMap(task_t* t)
+    {
+        void* paddr = (void *)TASK_GETARG0(t);
+        uint64_t size = (uint64_t)TASK_GETARG1(t);
+
+        TASK_SETRTN(t, VmmManager::mmLinearMap(paddr,size));
+    }
+
 };
 

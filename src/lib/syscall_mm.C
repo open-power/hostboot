@@ -25,6 +25,8 @@
 #include <arch/ppc.H>
 #include <kernel/vmmmgr.H>
 
+
+
 using namespace Systemcalls;
 
 /**
@@ -81,10 +83,28 @@ int mm_set_permission(void* va, uint64_t size, uint64_t access_type)
     return (int64_t)_syscall3(MM_SET_PERMISSION, va, (void*)size,  (void*)access_type);
 }
 
+
 /**
  * System call to return the physical address backing a virtual address
  */
 uint64_t mm_virt_to_phys( void* i_vaddr )
 {
     return (uint64_t) _syscall1(MM_VIRT_TO_PHYS,i_vaddr);
+}
+
+/**
+ * System call to extend Memory to 32Meg. 
+ */
+int mm_extend(void)
+{
+    return (int64_t)_syscall0(MM_EXTEND);
+}
+
+
+/**
+ * System call to create a block of memory at a specific physical address 
+ */
+int mm_linear_map(void *i_paddr, uint64_t i_size)
+{
+    return (int64_t)_syscall2(MM_LINEAR_MAP, i_paddr, (void*)i_size);
 }

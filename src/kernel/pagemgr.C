@@ -388,3 +388,22 @@ void PageManagerCore::coalesce( void )
     printkd("PAGEMGR low page count %ld\n", PageManager::cv_low_page_count);
 }
 
+void PageManager::addMemory(size_t i_addr, size_t i_pageCount)
+{
+    PageManager& pmgr = Singleton<PageManager>::instance();
+    return pmgr._addMemory(i_addr, i_pageCount);
+}
+
+// add memory to the heap
+void PageManager::_addMemory(size_t i_addr, size_t i_pageCount)
+{
+    iv_heap.addMemory(i_addr,i_pageCount);
+
+    // Update statistics.
+    __sync_add_and_fetch(&iv_pagesAvail, i_pageCount);
+
+    // Update statistics.
+    __sync_add_and_fetch(&iv_pagesTotal, i_pageCount);
+
+    return;
+}

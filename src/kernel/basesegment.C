@@ -30,7 +30,8 @@
 #include <kernel/block.H>
 #include <kernel/cpuid.H>
 #include <kernel/console.H>
-
+#include <kernel/pagemgr.H>
+#include <kernel/spte.H>
 
 BaseSegment::~BaseSegment()
 {
@@ -53,7 +54,7 @@ void BaseSegment::_init()
         case CORE_POWER8_MURANO:
         case CORE_POWER8_VENICE:
         default:
-            iv_physMemSize = (8*MEGABYTE);
+            iv_physMemSize = VMM_BASE_BLOCK_SIZE;
             break;
     }
     // Base block is L3 cache physical memory size
@@ -63,10 +64,10 @@ void BaseSegment::_init()
     // TODO iv_physMemSize needs to be recalculated when DIMM memory is avail.
 
     // Set default page permissions on block.
-    for (uint64_t i = 0; i < 0x800000; i += PAGESIZE)
+    for (uint64_t i = 0; i < VMM_BASE_BLOCK_SIZE; i += PAGESIZE)
     {
-            // External address filled in by linker as start of kernel's
-            // data pages.
+        // External address filled in by linker as start of kernel's
+        // data pages.
         extern void* data_load_address;
 
         // Don't map in the 0 (NULL) page.
@@ -97,15 +98,21 @@ bool BaseSegment::handlePageFault(task_t* i_task, uint64_t i_addr, bool i_store)
  * STATIC
  * Allocates a block of virtual memory of the given size
  */
-int BaseSegment::mmAllocBlock(MessageQueue* i_mq,void* i_va,uint64_t i_size)
+int BaseSegment::mmAllocBlock(MessageQueue* i_mq,void* i_va,uint64_t i_size,
+                                bool i_mappedToPhy, uint64_t *i_SPTEaddr)
 {
-    return Singleton<BaseSegment>::instance()._mmAllocBlock(i_mq,i_va,i_size);
+    return Singleton<BaseSegment>::instance()._mmAllocBlock(i_mq,i_va,i_size,
+                                                            i_mappedToPhy,
+                                                            i_SPTEaddr);
+
 }
 
 /**
  * Allocates a block of virtual memory of the given size
  */
-int BaseSegment::_mmAllocBlock(MessageQueue* i_mq,void* i_va,uint64_t i_size)
+int BaseSegment::_mmAllocBlock(MessageQueue* i_mq,void* i_va,uint64_t i_size,
+                                bool i_mappedToPhy, uint64_t *i_SPTEaddr)
+
 {
     uint64_t l_vaddr = reinterpret_cast<uint64_t>(i_va);
     uint64_t l_blockSizeTotal = 0;
@@ -118,7 +125,26 @@ int BaseSegment::_mmAllocBlock(MessageQueue* i_mq,void* i_va,uint64_t i_size)
     {
         return -EINVAL;
     }
-    Block* l_block = new Block(l_vaddr, ALIGN_PAGE(i_size), i_mq);
+
+    // Verify that the block we are adding is not already contained within
+    // another block in the base segment
+    Block* temp_block = iv_block;
+    while (temp_block != NULL)
+    {
+        // Checking to see if the l_vaddr is already contained in another
+        // block.. if so return error
+        if  (temp_block->isContained(l_vaddr))
+        {
+            printk("mmAllocBlock Address = %lx is already in a block\n",l_vaddr);
+            return -EINVAL;
+        }
+
+        temp_block = temp_block->iv_nextBlock;
+    }
+
+    Block* l_block = new Block(l_vaddr, ALIGN_PAGE(i_size), i_mq,i_mappedToPhy,
+                               i_SPTEaddr );
+
     l_block->setParent(this);
     iv_block->appendBlock(l_block);
     return 0;
@@ -190,4 +216,103 @@ int BaseSegment::_mmRemovePages(VmmManager::PAGE_REMOVAL_OPS i_op,
     return (iv_block->iv_nextBlock ?
             iv_block->iv_nextBlock->removePages(i_op,i_vaddr,i_size,i_task):
             -EINVAL);
+}
+
+
+/**
+ * STATIC
+ * Allocates a block of virtual memory to extend the VMM
+ */
+int BaseSegment::mmExtend(void)
+{
+    return Singleton<BaseSegment>::instance()._mmExtend();
+}
+
+/**
+ * Allocates a block of virtual memory of the given size
+ * to extend the VMM to 32MEG in size in mainstore
+ */
+int BaseSegment::_mmExtend(void)
+{
+    // The base address of the extended memory is 8Mg.. The first x pages is
+    // for the SPTE.. The remaining pages from 8MG + SPTE to 32MEG is added to
+    // the HEAP..
+
+    uint64_t l_vaddr = VMM_ADDR_EXTEND_BLOCK; // 8MEG
+    uint64_t l_size = VMM_EXTEND_BLOCK_SIZE;  // 32MEG - 8MB (base block)
+
+    // Call to allocate a block passing in the requested address of where the
+    // SPTEs should be created
+    int rc =  _mmAllocBlock(NULL, reinterpret_cast<void *>(l_vaddr), l_size, false,
+                            /*(uint64_t *)*/reinterpret_cast<uint64_t *>(l_vaddr));
+   
+    if (rc)
+    {
+        printk("Got an error in mmAllocBlock\n");
+        return rc;
+    }
+
+    // Set default page permissions on block.
+    for (uint64_t i = l_vaddr; i < l_vaddr + l_size; i += PAGESIZE)
+    {
+        iv_block->setPhysicalPage(i, i, WRITABLE);
+    }
+
+    // Now need to take the pages past the SPTE and add them to the heap.
+
+    //get the number of pages needed to hold the SPTE entries.
+    uint64_t spte_pages = (ALIGN_PAGE(l_size)/PAGESIZE * sizeof(ShadowPTE))/PAGESIZE;
+
+    printkd("Number of SPTE pages %ld\n", spte_pages);
+
+    // Need to setup the starting address of the memory we need to add to the
+    // heap to be the address of the block + the number of pages that are being
+    // used for the SPTE.
+
+    // Call Add Memory with the starting address , size.. it will put the pages
+    // on the heap call this with the address being the first page past the SPTE.
+    PageManager::addMemory(l_vaddr + (spte_pages*PAGESIZE),
+                           l_size/PAGESIZE - spte_pages);
+
+    // Update the physical Memory size to now be 32MEG. by adding the extended
+    // block size to the physical mem size.
+    iv_physMemSize += VMM_EXTEND_BLOCK_SIZE;
+
+    return 0;
+}
+
+/**
+ * Allocates a block of virtual memory of the given size
+ * to at a specified physical address. 
+ */
+int BaseSegment::mmLinearMap(void *i_paddr, uint64_t i_size)
+{
+    return Singleton<BaseSegment>::instance()._mmLinearMap(i_paddr, i_size);
+}
+
+/**
+ * Allocates a block of virtual memory of the given size
+ * to at a specified physical address 
+ */
+int BaseSegment::_mmLinearMap(void *i_paddr, uint64_t i_size)
+{
+
+    int rc = _mmAllocBlock(NULL, i_paddr, i_size, true);
+
+    if (rc)
+    {
+        printk("Got an error in mmAllocBlock\n");
+        return rc;
+    }
+
+    uint64_t l_addr = reinterpret_cast<uint64_t>(i_paddr);
+
+    // set the default permissions and the va-pa mapping in the SPTE
+    for (uint64_t i = l_addr; i < l_addr + i_size; i += PAGESIZE)
+    {
+        iv_block->setPhysicalPage(i, i, WRITABLE);
+    }
+
+    return 0;
+
 }

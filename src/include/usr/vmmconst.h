@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/include/usr/vmmconst.h $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2011-2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/include/usr/vmmconst.h $                                  */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef _VMMCONST_H
 #define _VMMCONST_H
 
@@ -51,6 +50,21 @@
 #define VMM_VADDR_DEVICE_SEGMENT_LAST  \
             (VMM_VADDR_DEVICE_SEGMENT_FIRST + (8 * VMM_SEGMENT_SIZE))
 
+/**
+ * Blocks
+ */
+
+/** Base Segment Base Block Base Address */
+#define VMM_ADDR_BASE_BLOCK 0
+
+/** Base Segment Base Block size */
+#define VMM_BASE_BLOCK_SIZE 8*MEGABYTE
+
+/** Base Segment Extended Memory Block Base Address */
+#define VMM_ADDR_EXTEND_BLOCK VMM_ADDR_BASE_BLOCK + VMM_BASE_BLOCK_SIZE
+
+/** Base Segment Extended Memory Block Size */
+#define VMM_EXTEND_BLOCK_SIZE (32*MEGABYTE)-VMM_BASE_BLOCK_SIZE
 /**
  * Resource Providers
  */

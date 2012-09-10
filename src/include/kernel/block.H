@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/include/kernel/block.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/include/kernel/block.H $                                  */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /** @file block.H
  *  @brief Defines the implementation for the generic VMM block class.
  */
@@ -65,15 +65,23 @@ class Block
          * @param[in] i_size - Size of the block (in bytes).
          * @param[in] i_msgQueue - Message queue passed along to the handler
          *                         Default: NULL
+         * @param[in] i_mappedToPhy - boolean value indicating whether this
+         *              block is a mapped to physical block.
+         *                         Default: false
+         * @param[in] i_spteAddr - address that the SPTE will be created  
+         *              at if a specific location is required.
+         *                         Default: NULL
          *
          * Will allocate enough shadow PTEs to track pages in the block.
          */
         Block(uint64_t i_baseAddr, uint64_t i_size,
-              MessageQueue* i_msgQueue = NULL) :
-                iv_baseAddr(i_baseAddr), iv_size(i_size),
-                iv_parent(NULL), iv_nextBlock(NULL), iv_ptes(NULL),
-                iv_readMsgHdlr(NULL), iv_writeMsgHdlr(NULL)
-            { init(i_msgQueue); };
+              MessageQueue* i_msgQueue = NULL, bool i_mappedToPhy = false,
+              uint64_t *i_spteAddr = NULL) : iv_baseAddr(i_baseAddr),
+              iv_size(i_size),iv_parent(NULL), iv_nextBlock(NULL),
+              iv_ptes(NULL), iv_readMsgHdlr(NULL),iv_writeMsgHdlr(NULL),
+              iv_mappedToPhysical(i_mappedToPhy)
+            {init(i_msgQueue, i_spteAddr);};
+ 
 
         /**
          * @brief Destructor.
@@ -298,10 +306,15 @@ class Block
 
         static uint32_t cv_ro_evict_req;   //!< memstat ro eviction requests
         static uint32_t cv_rw_evict_req;   //!< memstat rw eviction requests
+
+        bool iv_mappedToPhysical;
         /**
          * @brief Finish initialization of block.
          *
          * @param[in] i_msgQ - The message queue associated with this block
+         * @param[in] i_spteAddr - address that the SPTE will be created  
+         *              at if a specific address is required. 
+         *              Default: NULL
          *
          * Construct ShadowPTE entries.
          *
@@ -310,7 +323,7 @@ class Block
          * "not-in-charge" version of each constructor, so put as much
          * common code into an init function.
          */
-        void init(MessageQueue* i_msgQ);
+        void init(MessageQueue* i_msgQ, uint64_t *i_spteAddr);
 
         /**
          * @brief Find the Shadow PTE for a virtual address.
