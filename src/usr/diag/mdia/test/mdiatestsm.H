@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/diag/mdia/test/mdiatestsm.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/diag/mdia/test/mdiatestsm.H $                         */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012                   */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef __TEST_MDIATESTSM_H
 #define __TEST_MDIATESTSM_H
 
@@ -33,6 +33,9 @@
 #include "../mdiasm.H"
 #include "../mdiasmimpl.H"
 #include <diag/mdia/mdiamevent.H>
+
+using namespace MDIA;
+using namespace TARGETING;
 
 class MdiaSmTest : public CxxTest::TestSuite
 {
@@ -629,6 +632,58 @@ class MdiaSmTest : public CxxTest::TestSuite
             s.executeWorkItem(&wfp);
 
             TS_TRACE(EXIT_MRK "testSmDoMaintCommand");
+        }
+
+        void testSmRunning(void)
+        {
+            TS_TRACE(ENTER_MRK "testSmRunning");
+
+            StateMachine s;
+
+            bool running = false;
+
+            do {
+
+                s.running(running);
+
+                if(running)
+                {
+                    TS_FAIL("unexpected result calling running (1)");
+                    break;
+                }
+
+                WorkFlowAssocMap wkFlentries;
+
+                TargetHandleList targets;
+                getTargets(1, targets);
+
+                wkFlentries[targets[0]].push_back(START_SCRUB);
+
+                s.setup(wkFlentries);
+
+                s.running(running);
+
+                if(!running)
+                {
+                    TS_FAIL("unexpected result calling running (2)");
+                    break;
+                }
+
+                s.reset();
+
+                s.run(wkFlentries);
+
+                s.running(running);
+
+                if(running)
+                {
+                    TS_FAIL("unexpected result calling running (3)");
+                    break;
+                }
+
+            } while(0);
+
+            TS_TRACE(EXIT_MRK "testSmRunning");
         }
 };
 #endif

@@ -45,6 +45,15 @@ using namespace fapi;
 namespace MDIA
 {
 
+void StateMachine::running(bool & o_running)
+{
+    mutex_lock(&iv_mutex);
+
+    o_running = !iv_done;
+
+    mutex_unlock(&iv_mutex);
+}
+
 errlHndl_t StateMachine::run(const WorkFlowAssocMap & i_list)
 {
     // load the workflow properties

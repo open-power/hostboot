@@ -109,8 +109,6 @@ errlHndl_t processEvent(MaintCommandEvent & i_event)
 
 void waitingForMaintCmdEvents(bool & o_waiting)
 {
-    // TODO unstub RTC 45395
-
-    o_waiting = true;
+    Singleton<StateMachine>::instance().running(o_waiting);
 }
 }
