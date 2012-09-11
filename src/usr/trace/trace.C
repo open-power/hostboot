@@ -628,8 +628,6 @@ void Trace::_trace_adal_write_all(trace_desc_t *io_td,
         }
     }
 
-    va_end( i_args );
-
 
     if((num_4byte_args <= TRAC_MAX_ARGS) && (io_td != NULL))
     {
