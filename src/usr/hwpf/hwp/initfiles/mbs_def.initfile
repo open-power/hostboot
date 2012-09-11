@@ -1,8 +1,10 @@
-#-- $Id: mbs_def.initfile,v 1.17 2012/07/23 19:36:49 bellows Exp $
+#-- $Id: mbs_def.initfile,v 1.19 2012/08/21 23:01:12 mwuu Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--   1.19  |menlowuu|08/21/12| fixed 2 address typo's
+#--   1.18  |tschang |08/20/12| added mbs mcbist setup values for simple write and read test
 #--   1.17  |bellows |07/23/12| made ATTR_MSS_CACHE_ENABLE at centaur level instead of system
 #--   1.16  |yctschan|07/05/12| Removed sticks for subtype B
 #--   1.14  |yctschan|06/28/12| Cleanup define syntax and ()'s
@@ -587,6 +589,70 @@ scom 0x0201140C     {
 #    12      ,   0b0     , any;							# -MW match dials  # MBAXCR01Q_MBA23_Interleave_Mode
     12      ,   0b0     , (SYS.ATTR_MSS_MBA_CACHELINE_INTERLEAVE_MODE == 0);  # MBAXCR01Q_MBA23_Interleave_Mode
     12      ,   0b1     , (SYS.ATTR_MSS_MBA_CACHELINE_INTERLEAVE_MODE == 1);  # MBAXCR01Q_MBA23_Interleave_Mode
+}
+
+
+
+
+###########################################################################################
+# MBS MCBIST SETUP SECTION                                                                #
+###########################################################################################
+
+###################################
+# MCBIST Fixed data pattern
+###################################
+# Name = MBA01.MBA_MCBIST.SCOMFIR.MCBFD[0-7]Q_Q(0:63) (scomdef)
+# Name = MBA01.MBA_MCBIST.SCOMFIR.MCBFDQ_Q(0:63) (scomdef)
+# Name = MBA01.MBA_MCBIST.SCOMFIR.MCBFDSPQ_Q(0:63) (scomdef)
+
+scom 0x02011681     {
+    bits    ,   scom_data   , expr;
+    0:63    ,   0x1111111111111111, any;         # Fixed data burst 0
+}
+
+scom 0x02011682     {
+    bits    ,   scom_data   , expr;
+    0:63    ,   0x2222222222222222, any;         # Fixed data burst 1
+}
+
+scom 0x02011683     {
+    bits    ,   scom_data   , expr;
+    0:63    ,   0x3333333333333333, any;         # Fixed data burst 2
+}
+
+scom 0x02011684     {
+    bits    ,   scom_data   , expr;
+    0:63    ,   0x4444444444444444, any;         # Fixed data burst 3
+}
+
+scom 0x02011685     {
+    bits    ,   scom_data   , expr;
+    0:63    ,   0x5555555555555555, any;         # Fixed data burst 4
+}
+
+scom 0x02011686     {
+    bits    ,   scom_data   , expr;
+    0:63    ,   0x6666666666666666, any;         # Fixed data burst 5
+}
+
+scom 0x02011687     {
+    bits    ,   scom_data   , expr;
+    0:63    ,   0x7777777777777777, any;         # Fixed data burst 6
+}
+
+scom 0x02011688     {
+    bits    ,   scom_data   , expr;
+    0:63    ,   0x8888888888888888, any;         # Fixed data burst 7
+}
+
+scom 0x02011689     {
+    bits    ,   scom_data   , expr;
+    0:63    ,   0x9999999999999999, any;         # Fixed data burst 0-7 ECC bits
+}
+
+scom 0x0201168A     {
+    bits    ,   scom_data   , expr;
+    0:63    ,   0xAAAAAAAAAAAAAAAA, any;         # Fixed data burst 0-7 SPARE bits
 }
 
 

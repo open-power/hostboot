@@ -1,27 +1,26 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/hwp/mc_config/mss_eff_config/mss_eff_config_rank_group.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
-// $Id: mss_eff_config_rank_group.C,v 1.6 2012/04/30 15:11:46 asaetow Exp $
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/hwp/mc_config/mss_eff_config/mss_eff_config_rank_group.C $ */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012                   */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+// $Id: mss_eff_config_rank_group.C,v 1.8 2012/08/30 03:07:27 asaetow Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_eff_config_rank_group.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -47,7 +46,9 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
-//   1.7   |          |         |
+//   1.9   |          |         |
+//   1.8   | asaetow  |29-AUG-12| Fixed variable init for rank_group to INVALID for PORT1. 
+//   1.7   | asaetow  |24-AUG-12| Fixed variable init for rank_group to INVALID. 
 //   1.6   | asaetow  |30-APR-12| Fixed "fapi::" for hostboot, added "const", renamed "i_target_mba", and changed comments.
 //         |          |         | Changed message to standardized format.
 //         |          |         | Changed BACKUP to Mark Bellows.
@@ -179,13 +180,15 @@ fapi::ReturnCode mss_eff_config_rank_group(const fapi::Target i_target_mba) {
             }
             primary_rank_group0_u8array[cur_port] = 0;
             primary_rank_group1_u8array[cur_port] = 4;
+            primary_rank_group2_u8array[cur_port] = INVALID;
+            primary_rank_group3_u8array[cur_port] = INVALID;
+            secondary_rank_group0_u8array[cur_port] = INVALID;
+            secondary_rank_group1_u8array[cur_port] = INVALID;
+            secondary_rank_group2_u8array[cur_port] = INVALID;
+            secondary_rank_group3_u8array[cur_port] = INVALID;
             if (num_ranks_per_dimm_u8array[cur_port][0] == 2) {
                primary_rank_group2_u8array[cur_port] = 1;
                primary_rank_group3_u8array[cur_port] = 5;
-               secondary_rank_group0_u8array[cur_port] = INVALID;
-               secondary_rank_group1_u8array[cur_port] = INVALID;
-               secondary_rank_group2_u8array[cur_port] = INVALID;
-               secondary_rank_group3_u8array[cur_port] = INVALID;
             } else if (num_ranks_per_dimm_u8array[cur_port][0] == 4) {
                primary_rank_group2_u8array[cur_port] = 2;
                primary_rank_group3_u8array[cur_port] = 6;

@@ -1,9 +1,11 @@
 
-#-- $Id: mba_def.initfile,v 1.10 2012/08/01 15:08:50 mwuu Exp $
+#-- $Id: mba_def.initfile,v 1.11 2012/08/20 16:00:27 yctschan Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--     1.11|tschang |08/20/12|added mba mcbist setup values for simple write and read test
+#--		1.10|menlowuu|08/01/12|add/fixed comments in refresh section, missed a line
 #--		1.10|menlowuu|08/01/12|add/fixed comments in refresh section, missed a line
 #--		1.9 |menlowuu|07/30/12|add/fixed comments in refresh section
 #--     1.8 |tschang |07/28/12|set refresh interval value and refresh check interval values
@@ -1417,5 +1419,154 @@ scom 0x03010433      {
     28:31   ,   0b0001       , (def_prim_map_a == 1); # MBAREF1Q_cfg_mrnk7_prim_cke
     28:31   ,   0b0001       , (def_prim_map_c == 1); # MBAREF1Q_cfg_mrnk7_prim_cke
 }
+
+
+
+###########################################################################################
+# MBA MCBIST SETUP SECTION                                                                #
+###########################################################################################
+
+###################################
+# MCBIST Memory Register
+###################################
+# Name = MBA01.MBA_MCBIST.SCOMFIR.MCBMR0Q_Q(0:63) (scomdef)
+# Setup subtest tests
+# Setup subtest 0 is a write with fixed data
+# Setup subtest 1 is a read with fixed data
+
+scom 0x030106A8     {
+    bits    ,   scom_data   , expr;
+    0:2     ,   0b000, any;         # cfg_test00_op_type is a write
+    3       ,   0b0,   any;         # cfg_test00_compl_1st_cmd
+    4       ,   0b0,   any;         # cfg_test00_compl_2nd_cmd
+    5       ,   0b0,   any;         # cfg_test00_compl_3rd_cmd
+    6:7     ,   0b00,  any;         # cfg_test00_addr_mode
+    8:10    ,   0b000, any;         # cfg_test00_data_mode
+    11      ,   0b0  , any;         # cfg_test00_done
+    12:13   ,   0b00,  any;         # cfg_test00_data_sel
+    14:15   ,   0b00,  any;         # cfg_test00_addr_sel
+    16:18   ,   0b001, any;         # cfg_test01_op_type is a read
+    19      ,   0b0,   any;         # cfg_test01_compl_1st_cmd
+    20      ,   0b0,   any;         # cfg_test01_compl_2nd_cmd
+    21      ,   0b0,   any;         # cfg_test01_compl_3rd_cmd
+    22:23   ,   0b00,  any;         # cfg_test01_addr_mode
+    24:26   ,   0b000, any;         # cfg_test01_data_mode
+    27      ,   0b1  , any;         # cfg_test01_done is set
+    28:29   ,   0b00,  any;         # cfg_test01_data_sel
+    30:31   ,   0b00,  any;         # cfg_test01_addr_sel
+    32:34   ,   0b000, any;         # cfg_test02_op_type
+    35      ,   0b0,   any;         # cfg_test02_compl_1st_cmd
+    36      ,   0b0,   any;         # cfg_test02_compl_2nd_cmd
+    37      ,   0b0,   any;         # cfg_test02_compl_3rd_cmd
+    38:39   ,   0b00,  any;         # cfg_test02_addr_mode
+    40:42   ,   0b000, any;         # cfg_test02_data_mode
+    43      ,   0b0  , any;         # cfg_test02_done
+    44:45   ,   0b00,  any;         # cfg_test02_data_sel
+    46:47   ,   0b00,  any;         # cfg_test02_addr_sel
+    48:50   ,   0b000, any;         # cfg_test03_op_type
+    51      ,   0b0,   any;         # cfg_test03_compl_1st_cmd
+    52      ,   0b0,   any;         # cfg_test03_compl_2nd_cmd
+    53      ,   0b0,   any;         # cfg_test03_compl_3rd_cmd
+    54:55   ,   0b00,  any;         # cfg_test03_addr_mode
+    56:58   ,   0b000, any;         # cfg_test03_data_mode
+    59      ,   0b0  , any;         # cfg_test03_done
+    60:61   ,   0b00,  any;         # cfg_test03_data_sel
+    62:63   ,   0b00,  any;         # cfg_test03_addr_sel
+}
+
+###################################
+# MCBIST Fixed data pattern
+###################################
+# Name = MBA01.MBA_MCBIST.SCOMFIR.MCBFD[0-7]Q_Q(0:63) (scomdef)
+# Name = MBA01.MBA_MCBIST.SCOMFIR.MCBFDQ_Q(0:63) (scomdef)
+# Name = MBA01.MBA_MCBIST.SCOMFIR.MCBFDSPQ_Q(0:63) (scomdef)
+
+scom 0x030106BE     {
+    bits    ,   scom_data   , expr;
+    0:63    ,   0x1111111111111111, any;         # Fixed data burst 0
+}
+
+scom 0x030106BF     {
+    bits    ,   scom_data   , expr;
+    0:63    ,   0x2222222222222222, any;         # Fixed data burst 1
+}
+
+scom 0x030106C0     {
+    bits    ,   scom_data   , expr;
+    0:63    ,   0x3333333333333333, any;         # Fixed data burst 2
+}
+
+scom 0x030106C1     {
+    bits    ,   scom_data   , expr;
+    0:63    ,   0x4444444444444444, any;         # Fixed data burst 3
+}
+
+scom 0x030106C2     {
+    bits    ,   scom_data   , expr;
+    0:63    ,   0x5555555555555555, any;         # Fixed data burst 4
+}
+
+scom 0x030106C3     {
+    bits    ,   scom_data   , expr;
+    0:63    ,   0x6666666666666666, any;         # Fixed data burst 5
+}
+
+scom 0x030106C4     {
+    bits    ,   scom_data   , expr;
+    0:63    ,   0x7777777777777777, any;         # Fixed data burst 6
+}
+
+scom 0x030106C5     {
+    bits    ,   scom_data   , expr;
+    0:63    ,   0x8888888888888888, any;         # Fixed data burst 7
+}
+
+scom 0x030106C6     {
+    bits    ,   scom_data   , expr;
+    0:63    ,   0x9999999999999999, any;         # Fixed data burst 0-7 ECC bits
+}
+
+scom 0x030106C7     {
+    bits    ,   scom_data   , expr;
+    0:63    ,   0xAAAAAAAAAAAAAAAA, any;         # Fixed data burst 0-7 SPARE bits
+}
+
+
+###################################
+# MCBIST Fixed Addr A0 Start/End
+###################################
+
+# Name = MBA01.MBA_MCBIST.SCOMFIR.MCBSAARA0Q_Q (scomdef)
+# Name = MBA01.MBA_MCBIST.SCOMFIR.MCBSEARA0Q_Q (scomdef)
+# MBA_FARB1Q Slot0, Master Rank 0/2 chip select programming
+#
+
+scom 0x030106D0     {
+    bits    ,   scom_data   , expr;
+    0:35    ,   0x000000000, any;          # A0 start address
+    36:37   ,   0b00, any;                 # A0 start address
+}
+
+scom 0x030106D2     {
+    bits    ,   scom_data   , expr;
+    0:35    ,   0x000000000, any;          # A0 End address
+    36:37   ,   0b11, any;                 # A0 End address
+}
+
+###################################
+# MCBIST Addr Gen Cfg Reg
+###################################
+
+# Name = MBA01.MBA_MCBIST.SCOMFIR.MCBSAARA0Q_Q (scomdef)
+# Name = MBA01.MBA_MCBIST.SCOMFIR.MCBSEARA0Q_Q (scomdef)
+# MBA_FARB1Q Slot0, Master Rank 0/2 chip select programming
+#
+
+scom 0x030106D6     {
+    bits    ,   scom_data   , expr;
+    24:25   ,   0b10, any;                 # A0 setup only A0 address gen
+}
+
+
 
 

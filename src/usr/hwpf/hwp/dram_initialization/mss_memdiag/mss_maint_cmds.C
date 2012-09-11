@@ -1,27 +1,26 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/hwp/dram_initialization/mss_maint_cmds/mss_maint_cmds.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
-// $Id: mss_maint_cmds.C,v 1.9 2012/07/18 21:37:50 gollub Exp $
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/hwp/dram_initialization/mss_memdiag/mss_maint_cmds.C $ */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012                   */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+// $Id: mss_maint_cmds.C,v 1.11 2012/09/07 22:35:07 gollub Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -41,6 +40,14 @@
 //   1.8   | 07/16/12 | bellows | added in Id tag
 //   1.9   | 07/18/12 | gollub  | Updates from review.
 //         |          |         | Updates for timebase scrub.
+//   1.10  | 07/24/12 | gollub  | Fix UE/SUE status bit swap in MBMACA
+//         |          |         | Added stop condition enums
+//         |          |         | STOP_IMMEDIATE
+//         |          |         | ENABLE_CMD_COMPLETE_ATTENTION_ON_CLEAN_AND_ERROR
+//         |          |         | Now require cleanupCmd() for super fast read 
+//         |          |         | to disable rrq fifo mode when done.
+//   1.11  | 09/07/12 | gollub  | Updates from review.
+//         |          |         | Support for more patterns.
 
 //------------------------------------------------------------------------------
 //  Includes
@@ -88,6 +95,11 @@ const uint8_t MSS_X4_STEER_OPTIONS_PER_PORT1 =        18;
  */                                                         
 const uint8_t MSS_X4_ECC_STEER_OPTIONS =              36;        
                                                             
+/**
+ * @brief Max 8 patterns
+ */ 
+const uint8_t MSS_MAX_PATTERNS =                      8;
+
 
 namespace mss_MemConfig
 {
@@ -307,11 +319,213 @@ static const uint8_t mss_eccSpareIndex_to_symbol[MSS_X4_ECC_STEER_OPTIONS]={
     // NOTE: DRAM 0 (x4) (symbols 0,1) used for the ECC spare.
     // NOTE: Can't use ECC spare to fix bad spare DRAMs on Port0 or Port1
 
+// TODO: Update with actual patterns from Luis Lastras when they are ready
+static const uint32_t mss_maintBufferData[MSS_MAX_PATTERNS][16][2]={
+
+// PATTERN_0
+   {{0x00000000, 0x00000000},    
+    {0x00000000, 0x00000000},    
+    {0x00000000, 0x00000000},    
+    {0x00000000, 0x00000000},    
+    {0x00000000, 0x00000000},    
+    {0x00000000, 0x00000000},    
+    {0x00000000, 0x00000000},    
+    {0x00000000, 0x00000000},    
+    {0x00000000, 0x00000000},    
+    {0x00000000, 0x00000000},    
+    {0x00000000, 0x00000000},    
+    {0x00000000, 0x00000000},    
+    {0x00000000, 0x00000000},    
+    {0x00000000, 0x00000000},    
+    {0x00000000, 0x00000000},    
+    {0x00000000, 0x00000000}},   
+
+// PATTERN_1
+   {{0xffffffff, 0xffffffff},    
+    {0xffffffff, 0xffffffff},    
+    {0xffffffff, 0xffffffff},    
+    {0xffffffff, 0xffffffff},    
+    {0xffffffff, 0xffffffff},    
+    {0xffffffff, 0xffffffff},    
+    {0xffffffff, 0xffffffff},    
+    {0xffffffff, 0xffffffff},    
+    {0xffffffff, 0xffffffff},    
+    {0xffffffff, 0xffffffff},    
+    {0xffffffff, 0xffffffff},    
+    {0xffffffff, 0xffffffff},    
+    {0xffffffff, 0xffffffff},    
+    {0xffffffff, 0xffffffff},        
+    {0xffffffff, 0xffffffff},            
+    {0xffffffff, 0xffffffff}},
+
+// PATTERN_2
+   {{0xf0f0f0f0, 0xf0f0f0f0},
+    {0xf0f0f0f0, 0xf0f0f0f0},
+    {0xf0f0f0f0, 0xf0f0f0f0},
+    {0xf0f0f0f0, 0xf0f0f0f0},
+    {0xf0f0f0f0, 0xf0f0f0f0},
+    {0xf0f0f0f0, 0xf0f0f0f0},
+    {0xf0f0f0f0, 0xf0f0f0f0},
+    {0xf0f0f0f0, 0xf0f0f0f0},
+    {0xf0f0f0f0, 0xf0f0f0f0},
+    {0xf0f0f0f0, 0xf0f0f0f0},
+    {0xf0f0f0f0, 0xf0f0f0f0},
+    {0xf0f0f0f0, 0xf0f0f0f0},
+    {0xf0f0f0f0, 0xf0f0f0f0},
+    {0xf0f0f0f0, 0xf0f0f0f0},
+    {0xf0f0f0f0, 0xf0f0f0f0},
+    {0xf0f0f0f0, 0xf0f0f0f0}},   
+        
+// PATTERN_3
+   {{0x0f0f0f0f, 0x0f0f0f0f},    
+    {0x0f0f0f0f, 0x0f0f0f0f},
+    {0x0f0f0f0f, 0x0f0f0f0f},
+    {0x0f0f0f0f, 0x0f0f0f0f},
+    {0x0f0f0f0f, 0x0f0f0f0f},
+    {0x0f0f0f0f, 0x0f0f0f0f},
+    {0x0f0f0f0f, 0x0f0f0f0f},
+    {0x0f0f0f0f, 0x0f0f0f0f},
+    {0x0f0f0f0f, 0x0f0f0f0f},
+    {0x0f0f0f0f, 0x0f0f0f0f},
+    {0x0f0f0f0f, 0x0f0f0f0f},
+    {0x0f0f0f0f, 0x0f0f0f0f},
+    {0x0f0f0f0f, 0x0f0f0f0f},
+    {0x0f0f0f0f, 0x0f0f0f0f},
+    {0x0f0f0f0f, 0x0f0f0f0f},
+    {0x0f0f0f0f, 0x0f0f0f0f}},
+
+// PATTERN_4
+   {{0xaaaaaaaa, 0xaaaaaaaa},    
+    {0xaaaaaaaa, 0xaaaaaaaa},
+    {0xaaaaaaaa, 0xaaaaaaaa},
+    {0xaaaaaaaa, 0xaaaaaaaa},
+    {0xaaaaaaaa, 0xaaaaaaaa},
+    {0xaaaaaaaa, 0xaaaaaaaa},
+    {0xaaaaaaaa, 0xaaaaaaaa},
+    {0xaaaaaaaa, 0xaaaaaaaa},
+    {0xaaaaaaaa, 0xaaaaaaaa},
+    {0xaaaaaaaa, 0xaaaaaaaa},
+    {0xaaaaaaaa, 0xaaaaaaaa},
+    {0xaaaaaaaa, 0xaaaaaaaa},
+    {0xaaaaaaaa, 0xaaaaaaaa},
+    {0xaaaaaaaa, 0xaaaaaaaa},
+    {0xaaaaaaaa, 0xaaaaaaaa},
+    {0xaaaaaaaa, 0xaaaaaaaa}},
+
+// PATTERN_5
+   {{0x55555555, 0x55555555},    
+    {0x55555555, 0x55555555},
+    {0x55555555, 0x55555555},
+    {0x55555555, 0x55555555},
+    {0x55555555, 0x55555555},
+    {0x55555555, 0x55555555},
+    {0x55555555, 0x55555555},
+    {0x55555555, 0x55555555},
+    {0x55555555, 0x55555555},
+    {0x55555555, 0x55555555},
+    {0x55555555, 0x55555555},
+    {0x55555555, 0x55555555},
+    {0x55555555, 0x55555555},
+    {0x55555555, 0x55555555},
+    {0x55555555, 0x55555555},
+    {0x55555555, 0x55555555}},    
+
+// PATTERN_6
+   {{0xcccccccc, 0xcccccccc},
+    {0xcccccccc, 0xcccccccc},
+    {0xcccccccc, 0xcccccccc},
+    {0xcccccccc, 0xcccccccc},
+    {0xcccccccc, 0xcccccccc},
+    {0xcccccccc, 0xcccccccc},
+    {0xcccccccc, 0xcccccccc},
+    {0xcccccccc, 0xcccccccc},
+    {0xcccccccc, 0xcccccccc},
+    {0xcccccccc, 0xcccccccc},
+    {0xcccccccc, 0xcccccccc},
+    {0xcccccccc, 0xcccccccc},
+    {0xcccccccc, 0xcccccccc},
+    {0xcccccccc, 0xcccccccc},
+    {0xcccccccc, 0xcccccccc},
+    {0xcccccccc, 0xcccccccc}},
+
+// PATTERN_7
+   {{0x33333333, 0x33333333},
+    {0x33333333, 0x33333333},
+    {0x33333333, 0x33333333},
+    {0x33333333, 0x33333333},
+    {0x33333333, 0x33333333},
+    {0x33333333, 0x33333333},
+    {0x33333333, 0x33333333},
+    {0x33333333, 0x33333333},
+    {0x33333333, 0x33333333},
+    {0x33333333, 0x33333333},
+    {0x33333333, 0x33333333},
+    {0x33333333, 0x33333333},
+    {0x33333333, 0x33333333},
+    {0x33333333, 0x33333333},
+    {0x33333333, 0x33333333},
+    {0x33333333, 0x33333333}}};
+
+
+// TODO: Update with actual patterns from Luis Lastras when they are ready
+static const uint8_t mss_65thByte[MSS_MAX_PATTERNS][4]={
+
+// bit1=tag0_2, bit2=tag1_3, bit3=MDI
+
+// PATTERN_0
+   {0x00,   // 1st 64B of cachline: tag0=0, tag1=0, MDI=0
+    0x00,   // 1st 64B of cachline: tag2=0, tag3=0, MDI=0
+    0x00,   // 2nd 64B of cachline: tag0=0, tag1=0, MDI=0
+    0x00},  // 2nd 64B of cachline: tag2=0, tag3=0, MDI=0
+
+// PATTERN_1
+   {0x70,   // 1st 64B of cachline: tag0=1, tag1=1, MDI=1
+    0x70,   // 1st 64B of cachline: tag2=1, tag3=1, MDI=1
+    0x70,   // 2nd 64B of cachline: tag0=1, tag1=1, MDI=1
+    0x70},  // 2nd 64B of cachline: tag2=1, tag3=1, MDI=1
+
+// PATTERN_2
+   {0x70,   // 1st 64B of cachline: tag0=1, tag1=1, MDI=1
+    0x00,   // 1st 64B of cachline: tag2=0, tag3=0, MDI=0
+    0x70,   // 2nd 64B of cachline: tag0=1, tag1=1, MDI=1
+    0x00},  // 2nd 64B of cachline: tag2=0, tag3=0, MDI=0
+
+// PATTERN_3
+   {0x00,   // 1st 64B of cachline: tag0=0, tag1=0, MDI=0
+    0x70,   // 1st 64B of cachline: tag2=1, tag3=1, MDI=1
+    0x00,   // 2nd 64B of cachline: tag0=0, tag1=0, MDI=0
+    0x70},  // 2nd 64B of cachline: tag2=1, tag3=1, MDI=1
+
+// PATTERN_4
+   {0x30,   // 1st 64B of cachline: tag0=0, tag1=1, MDI=1
+    0x50,   // 1st 64B of cachline: tag2=1, tag3=0, MDI=1
+    0x20,   // 2nd 64B of cachline: tag0=0, tag1=1, MDI=0
+    0x40},  // 2nd 64B of cachline: tag2=1, tag3=0, MDI=0
+
+// PATTERN_5
+   {0x60,   // 1st 64B of cachline: tag0=1, tag1=0, MDI=0
+    0x20,   // 1st 64B of cachline: tag2=0, tag3=1, MDI=0
+    0x50,   // 2nd 64B of cachline: tag0=1, tag1=0, MDI=1
+    0x30},  // 2nd 64B of cachline: tag2=0, tag3=1, MDI=1
+
+// PATTERN_6
+   {0x70,   // 1st 64B of cachline: tag0=1, tag1=1, MDI=1
+    0x40,   // 1st 64B of cachline: tag2=1, tag3=0, MDI=0
+    0x60,   // 2nd 64B of cachline: tag0=1, tag1=1, MDI=0
+    0x50},  // 2nd 64B of cachline: tag2=1, tag3=0, MDI=1
+
+// PATTERN_7
+   {0x20,   // 1st 64B of cachline: tag0=0, tag1=1, MDI=0
+    0x70,   // 1st 64B of cachline: tag2=1, tag3=1, MDI=1
+    0x30,   // 2nd 64B of cachline: tag0=0, tag1=1, MDI=1
+    0x60}}; // 2nd 64B of cachline: tag2=1, tag3=1, MDI=0
 
 
 //------------------------------------------------------------------------------
 // Parent class
 //------------------------------------------------------------------------------
+
+
 
 //---------------------------------------------------------
 // mss_MaintCmd Constructor
@@ -319,7 +533,7 @@ static const uint8_t mss_eccSpareIndex_to_symbol[MSS_X4_ECC_STEER_OPTIONS]={
 mss_MaintCmd::mss_MaintCmd(const fapi::Target & i_target,
                            const ecmdDataBufferBase & i_startAddr,
                            const ecmdDataBufferBase & i_endAddr,
-                           StopCondition i_stopCondition,
+                           uint32_t i_stopCondition,
                            bool i_poll,
                            CmdType i_cmdType ) :
     iv_target( i_target ),
@@ -576,59 +790,65 @@ fapi::ReturnCode mss_MaintCmd::loadStopCondMask()
     l_rc = fapiGetScom(iv_target, MBA01_MBASCTLQ_0x0301060F, l_mbasctlq); 
     if(l_rc) return l_rc;
     
-    // Start by clearing all bits 0:12
+    // Start by clearing all bits 0:12 and bit 16
     l_ecmd_rc |= l_mbasctlq.clearBit(0,13);
+    l_ecmd_rc |= l_mbasctlq.clearBit(16);
 
-    // Stop location
+    // Enable stop immediate
+    if ( 0 != (iv_stopCondition & STOP_IMMEDIATE) )     
+        l_ecmd_rc |= l_mbasctlq.setBit(0);
+
     // Enable stop end of rank    
     if ( 0 != (iv_stopCondition & STOP_END_OF_RANK) ) 
-    l_ecmd_rc |= l_mbasctlq.setBit(1);
-    // Enable stop immediate
-    else l_ecmd_rc |= l_mbasctlq.setBit(0);
+        l_ecmd_rc |= l_mbasctlq.setBit(1);
     
     // Stop on hard NCE ETE
     if ( 0 != (iv_stopCondition & STOP_ON_HARD_NCE_ETE) ) 
-    l_ecmd_rc |= l_mbasctlq.setBit(2);
+        l_ecmd_rc |= l_mbasctlq.setBit(2);
 
     // Stop on intermittent NCE ETE
     if ( 0 != (iv_stopCondition & STOP_ON_INT_NCE_ETE) ) 
-    l_ecmd_rc |= l_mbasctlq.setBit(3);
+        l_ecmd_rc |= l_mbasctlq.setBit(3);
 
     // Stop on soft NCE ETE
     if ( 0 != (iv_stopCondition & STOP_ON_SOFT_NCE_ETE) ) 
-    l_ecmd_rc |= l_mbasctlq.setBit(4);
+        l_ecmd_rc |= l_mbasctlq.setBit(4);
 
     // Stop on SCE
     if ( 0 != (iv_stopCondition & STOP_ON_SCE) ) 
-    l_ecmd_rc |= l_mbasctlq.setBit(5);
+        l_ecmd_rc |= l_mbasctlq.setBit(5);
 
     // Stop on MCE
     if ( 0 != (iv_stopCondition & STOP_ON_MCE) ) 
-    l_ecmd_rc |= l_mbasctlq.setBit(6);
+        l_ecmd_rc |= l_mbasctlq.setBit(6);
 
     // Stop on retry CE ETE
     if ( 0 != (iv_stopCondition & STOP_ON_RETRY_CE) ) 
-    l_ecmd_rc |= l_mbasctlq.setBit(7);
+        l_ecmd_rc |= l_mbasctlq.setBit(7);
 
     // Stop on MPE
     if ( 0 != (iv_stopCondition & STOP_ON_MPE) ) 
-    l_ecmd_rc |= l_mbasctlq.setBit(8);    
+        l_ecmd_rc |= l_mbasctlq.setBit(8);    
 
     // Stop on UE
     if ( 0 != (iv_stopCondition & STOP_ON_UE) ) 
-    l_ecmd_rc |= l_mbasctlq.setBit(9);
+        l_ecmd_rc |= l_mbasctlq.setBit(9);
 
     // Stop on end address
     if ( 0 != (iv_stopCondition & STOP_ON_END_ADDRESS) ) 
-    l_ecmd_rc |= l_mbasctlq.setBit(10);
+        l_ecmd_rc |= l_mbasctlq.setBit(10);
 
     // Enable command complete attention
     if ( 0 != (iv_stopCondition & ENABLE_CMD_COMPLETE_ATTENTION) ) 
-    l_ecmd_rc |= l_mbasctlq.setBit(11);
+        l_ecmd_rc |= l_mbasctlq.setBit(11);
 
     // Stop on SUE
     if ( 0 != (iv_stopCondition & STOP_ON_SUE) ) 
-    l_ecmd_rc |= l_mbasctlq.setBit(12);
+        l_ecmd_rc |= l_mbasctlq.setBit(12);
+    
+    // Enable command complete attention on clean and error
+    if ( 0 != (iv_stopCondition & ENABLE_CMD_COMPLETE_ATTENTION_ON_CLEAN_AND_ERROR) ) 
+        l_ecmd_rc |= l_mbasctlq.setBit(16);
 
     if(l_ecmd_rc)
     {
@@ -655,8 +875,12 @@ fapi::ReturnCode mss_MaintCmd::startMaintCmd()
     uint32_t l_ecmd_rc = 0;                    
     ecmdDataBufferBase l_data(64);
 
-    FAPI_INF("ENTER mss_MaintCmd::startMaintCmd()");    
+    FAPI_INF("ENTER mss_MaintCmd::startMaintCmd()");
     
+    // DEBUG - should be no special attentions before we start cmd
+    l_rc = fapiGetScom(iv_target, MBA01_MBSPAQ_0x03010611, l_data); 
+    if(l_rc) return l_rc;
+        
     l_rc = fapiGetScom(iv_target, MBA01_MBMCCQ_0x0301060B, l_data); 
     if(l_rc) return l_rc;
     
@@ -752,6 +976,11 @@ fapi::ReturnCode mss_MaintCmd::pollForMaintCmdComplete()
     {
         fapiDelay(HW_MODE_DELAY, SIM_MODE_DELAY); 
                 
+        // DEBUG - want to see attention only when cmd done
+        FAPI_INF("MBSPAQ");
+        l_rc = fapiGetScom(iv_target, MBA01_MBSPAQ_0x03010611, l_data); 
+        if(l_rc) return l_rc;
+
         FAPI_INF("Read MBMACAQ just to see if it's incrementing");    
         l_rc = fapiGetScom(iv_target, MBA01_MBMACAQ_0x0301060D, l_data); 
         if(l_rc) return l_rc;
@@ -805,8 +1034,8 @@ fapi::ReturnCode mss_MaintCmd::collectFFDC()
     if (l_data.isBitSet(42)) FAPI_ERR("42:MCE");    
     if (l_data.isBitSet(43)) FAPI_ERR("43:RCE");    
     if (l_data.isBitSet(44)) FAPI_ERR("44:MPE");    
-    if (l_data.isBitSet(45)) FAPI_ERR("45:SUE");    
-    if (l_data.isBitSet(46)) FAPI_ERR("46:UE");    
+    if (l_data.isBitSet(45)) FAPI_ERR("45:UE");    
+    if (l_data.isBitSet(46)) FAPI_ERR("46:SUE");    
     
     FAPI_INF("MBMEAQ");
     l_rc = fapiGetScom(iv_target, MBA01_MBMEAQ_0x0301060E, l_data);
@@ -906,48 +1135,7 @@ fapi::ReturnCode mss_MaintCmd::loadPattern(PatternIndex i_initPattern)
     {MAINT1_MBS_MAINT_BUFF3_DATA2_0x0201173C, MAINT1_MBS_MAINT_BUFF3_DATA_ECC2_0x02011744},
     {MAINT1_MBS_MAINT_BUFF3_DATA3_0x0201173D, MAINT1_MBS_MAINT_BUFF3_DATA_ECC3_0x02011745}}};
 
-    // DEBUG    
-    /*
-    static const uint32_t maintBufferData[16][2]={
-    {0x00000000, 0x10000000},    
-    {0x00000001, 0x10000001},    
-    {0x00000002, 0x10000002},    
-    {0x00000003, 0x10000003},    
-    {0x00000004, 0x10000004},    
-    {0x00000005, 0x10000005},    
-    {0x00000006, 0x10000006},    
-    {0x00000007, 0x10000007},    
-    {0x00000008, 0x10000008},    
-    {0x00000009, 0x10000009},    
-    {0x0000000A, 0x1000000A},    
-    {0x0000000B, 0x1000000B},    
-    {0x0000000C, 0x1000000C},    
-    {0x0000000D, 0x1000000D},    
-    {0x0000000E, 0x1000000E},    
-    {0x0000000F, 0x1000000F}};    
-    */
-    
-    
-    static const uint32_t maintBufferData[16][2]={
-    {0x00000000, 0x00000000},    
-    {0x00000000, 0x00000000},    
-    {0x00000000, 0x00000000},    
-    {0x00000000, 0x00000000},    
-    {0x00000000, 0x00000000},    
-    {0x00000000, 0x00000000},    
-    {0x00000000, 0x00000000},    
-    {0x00000000, 0x00000000},    
-    {0x00000000, 0x00000000},    
-    {0x00000000, 0x00000000},    
-    {0x00000000, 0x00000000},    
-    {0x00000000, 0x00000000},    
-    {0x00000000, 0x00000000},    
-    {0x00000000, 0x00000000},    
-    {0x00000000, 0x00000000},    
-    {0x00000000, 0x00000000}};    
-    
-
-
+  
     static const uint32_t maintBuffer65thRegs[4][2]={
     {MAINT0_MBS_MAINT_BUFF_65TH_BYTE_64B_ECC0_0x0201164A,    MAINT1_MBS_MAINT_BUFF_65TH_BYTE_64B_ECC0_0x0201174A},
     {MAINT0_MBS_MAINT_BUFF_65TH_BYTE_64B_ECC1_0x0201164B,    MAINT1_MBS_MAINT_BUFF_65TH_BYTE_64B_ECC1_0x0201174B},
@@ -977,8 +1165,8 @@ fapi::ReturnCode mss_MaintCmd::loadPattern(PatternIndex i_initPattern)
     {
         // A write to MAINT_BUFFx_DATAy will not update until the corresponding 
         // MAINT_BUFFx_DATA_ECCy is written to.
-        l_ecmd_rc |= l_data.insert(maintBufferData[loop][0], 0, 32, 0);
-        l_ecmd_rc |= l_data.insert(maintBufferData[loop][1], 32, 32, 0);
+        l_ecmd_rc |= l_data.insert(mss_maintBufferData[i_initPattern][loop][0], 0, 32, 0);
+        l_ecmd_rc |= l_data.insert(mss_maintBufferData[i_initPattern][loop][1], 32, 32, 0);
         if(l_ecmd_rc)
         {
             l_rc.setEcmdError(l_ecmd_rc);
@@ -996,7 +1184,6 @@ fapi::ReturnCode mss_MaintCmd::loadPattern(PatternIndex i_initPattern)
     //----------------------------------------------------
     FAPI_INF("Load the 65th byte: 4 loops to fill in the two 65th bytes in the cacheline");
     
-    // For now, just use all 0's
     l_ecmd_rc |= l_65th.flushTo0();    
     
     // Set bit 56 so that hw will generate the fabric ECC.
@@ -1007,20 +1194,19 @@ fapi::ReturnCode mss_MaintCmd::loadPattern(PatternIndex i_initPattern)
         l_rc.setEcmdError(l_ecmd_rc);
         return l_rc;
     }                                                                              
-
         
     for(loop=0; loop<4; loop++ )
     {
-        l_rc = fapiPutScom(iv_targetCentaur, maintBuffer65thRegs[loop][iv_mbaPosition], l_65th); 
-        if(l_rc) return l_rc;   
-    }
+        l_ecmd_rc |= l_65th.insert(mss_65thByte[i_initPattern][loop], 1, 3, 1);
+        if(l_ecmd_rc)
+        {
+            l_rc.setEcmdError(l_ecmd_rc);
+            return l_rc;
+        }                                                                              
 
-    
-    if (i_initPattern == PATTERN_1)
-    {
-        FAPI_INF("loading PATTERN_1");        
-    }
-    
+        l_rc = fapiPutScom(iv_targetCentaur, maintBuffer65thRegs[loop][iv_mbaPosition], l_65th); 
+        if(l_rc) return l_rc;                   
+    }  
     
     FAPI_INF("EXIT mss_MaintCmd::loadPattern()");        
 
@@ -1178,7 +1364,7 @@ mss_SuperFastInit::mss_SuperFastInit( const fapi::Target & i_target,
                                       const ecmdDataBufferBase & i_startAddr,
                                       const ecmdDataBufferBase & i_endAddr,
                                       PatternIndex i_initPattern,
-                                      StopCondition i_stopCondition,
+                                      uint32_t i_stopCondition,
                                       bool i_poll ) :
     mss_MaintCmd( i_target,
                   i_startAddr,
@@ -1310,7 +1496,7 @@ mss_SuperFastRandomInit::mss_SuperFastRandomInit( const fapi::Target & i_target,
                                                   const ecmdDataBufferBase & i_startAddr,
                                                   const ecmdDataBufferBase & i_endAddr,
                                                   PatternIndex i_initPattern,
-                                                  StopCondition i_stopCondition,
+                                                  uint32_t i_stopCondition,
                                                   bool i_poll ) :
     mss_MaintCmd( i_target,
                   i_startAddr,
@@ -1364,7 +1550,7 @@ fapi::ReturnCode mss_SuperFastRandomInit::setupAndExecuteCmd()
 
     // Disable 8B ECC check/correct on WRD data bus: MBA_WRD_MODE(0:1) = 11
     // before a SuperFastRandomInit command is issued
-    l_rc = fapiGetScom(iv_target, MBA01_MBA_WRD_MODE_0x03010429, iv_saved_MBA_WRD_MODE);
+    l_rc = fapiGetScom(iv_target, MBA01_MBA_WRD_MODE_0x03010449, iv_saved_MBA_WRD_MODE);
     if(l_rc) return l_rc;
     
     ecmdDataBufferBase l_data(64);
@@ -1376,7 +1562,7 @@ fapi::ReturnCode mss_SuperFastRandomInit::setupAndExecuteCmd()
         l_rc.setEcmdError(l_ecmd_rc);
         return l_rc;
     }                                                                              
-    l_rc = fapiPutScom(iv_target, MBA01_MBA_WRD_MODE_0x03010429, l_data);
+    l_rc = fapiPutScom(iv_target, MBA01_MBA_WRD_MODE_0x03010449, l_data);
     if(l_rc) return l_rc;
 
     // Start the command: MBMCCQ
@@ -1435,7 +1621,7 @@ fapi::ReturnCode mss_SuperFastRandomInit::cleanupCmd()
     // Clear maintenance command complete attention, scrub stats, etc...
 
     // Restore MBA_WRD_MODE
-    l_rc = fapiPutScom(iv_target, MBA01_MBA_WRD_MODE_0x03010429, iv_saved_MBA_WRD_MODE);
+    l_rc = fapiPutScom(iv_target, MBA01_MBA_WRD_MODE_0x03010449, iv_saved_MBA_WRD_MODE);
     if(l_rc) return l_rc;
 
     FAPI_INF("EXIT mss_SuperFastRandomInit::cleanupCmd()");                    
@@ -1458,7 +1644,7 @@ const mss_MaintCmd::CmdType mss_SuperFastRead::cv_cmdType = SUPERFAST_READ;
 mss_SuperFastRead::mss_SuperFastRead( const fapi::Target & i_target,
                                       const ecmdDataBufferBase & i_startAddr,
                                       const ecmdDataBufferBase & i_endAddr,
-                                      StopCondition i_stopCondition,
+                                      uint32_t i_stopCondition,
                                       bool i_poll ) :
     mss_MaintCmd( i_target,
                   i_startAddr,
@@ -1476,7 +1662,8 @@ fapi::ReturnCode mss_SuperFastRead::setupAndExecuteCmd()
     FAPI_INF("ENTER mss_SuperFastRead::setupAndExecuteCmd()");                    
         
     fapi::ReturnCode l_rc;
-    
+    uint32_t l_ecmd_rc = 0;
+        
     // Gather data that needs to be stored. For testing purposes we will just 
     // set an abitrary number.
     //l_rc = setSavedData( 0xdeadbeef ); if(l_rc) return l_rc;
@@ -1497,6 +1684,29 @@ fapi::ReturnCode mss_SuperFastRead::setupAndExecuteCmd()
     // Load stop conditions: MBASCTLQ
     l_rc = loadStopCondMask(); if(l_rc) return l_rc;
     
+    // Need to set RRQ to fifo mode to ensure super fast read commands
+    // are done on order. Otherwise, if cmds get out of order we can't be sure
+    // the trapped address in MBMACA will be correct when we stop
+    // on error. That means we could unintentionally skip addresses if we just
+    // try to increment MBMACA and continue.
+    // NOTE: Cleanup needs to be done to restore settings done.
+    l_rc = fapiGetScom(iv_target, MBA01_MBA_RRQ0Q_0x0301040E, iv_saved_MBA_RRQ0);
+    if(l_rc) return l_rc;
+    
+    ecmdDataBufferBase l_data(64);
+    l_ecmd_rc |= l_data.insert(iv_saved_MBA_RRQ0, 0, 64, 0);
+    l_ecmd_rc |= l_data.clearBit(6,5); // Set 6:10 = 00000 (fifo mode)
+    l_ecmd_rc |= l_data.setBit(12);    // Disable MBA RRQ fastpath
+    if(l_ecmd_rc)
+    {
+        l_rc.setEcmdError(l_ecmd_rc);
+        return l_rc;
+    }                                                                              
+    l_rc = fapiPutScom(iv_target, MBA01_MBA_RRQ0Q_0x0301040E, l_data);
+    if(l_rc) return l_rc;
+
+
+
     /*
     // DEBUG. Set hard CE threshold to 1: MBSTRQ
     FAPI_INF("\nDEBUG. Set hard CE threshold to 1: MBSTRQ");
@@ -1567,6 +1777,10 @@ fapi::ReturnCode mss_SuperFastRead::cleanupCmd()
     // Restore the saved data.
     //printf( "Saved data: 0x%08x\n", getSavedData() );
 
+    // Undo rrq fifo mode
+    l_rc = fapiPutScom(iv_target, MBA01_MBA_RRQ0Q_0x0301040E, iv_saved_MBA_RRQ0);
+    if(l_rc) return l_rc;
+    
     FAPI_INF("EXIT mss_SuperFastRead::cleanupCmd()");                        
     
     return l_rc;
@@ -1625,6 +1839,9 @@ fapi::ReturnCode mss_AtomicInject::setupAndExecuteCmd()
     // Load start address: MBMACAQ
     l_rc = loadStartAddress(); if(l_rc) return l_rc;    
   
+    // Load stop conditions: MBASCTLQ
+    l_rc = loadStopCondMask(); if(l_rc) return l_rc;
+
     // Load inject type: MBECTLQ
     ecmdDataBufferBase l_injectType(64);
     l_rc = fapiGetScom(iv_target, MBA01_MBECTLQ_0x03010610, l_injectType);
@@ -1727,6 +1944,9 @@ fapi::ReturnCode mss_Display::setupAndExecuteCmd()
     
     // Load start address: MBMACAQ
     l_rc = loadStartAddress(); if(l_rc) return l_rc;    
+
+    // Load stop conditions: MBASCTLQ
+    l_rc = loadStopCondMask(); if(l_rc) return l_rc;
     
     // Start the command: MBMCCQ
     l_rc = startMaintCmd(); if(l_rc) return l_rc;
@@ -1766,6 +1986,13 @@ fapi::ReturnCode mss_Display::setupAndExecuteCmd()
       MAINT0_MBA_MAINT_BUFF3_DATA1_0x03010686,
       MAINT0_MBA_MAINT_BUFF3_DATA2_0x03010687,
       MAINT0_MBA_MAINT_BUFF3_DATA3_0x03010688};
+      
+    static const uint32_t maintBufferRead65thByteRegs[4]={
+      MAINT0_MBA_MAINT_BUFF_65TH_BYTE_64B_ECC0_0x03010695,
+      MAINT0_MBA_MAINT_BUFF_65TH_BYTE_64B_ECC1_0x03010696,
+      MAINT0_MBA_MAINT_BUFF_65TH_BYTE_64B_ECC2_0x03010697,
+      MAINT0_MBA_MAINT_BUFF_65TH_BYTE_64B_ECC3_0x03010698};
+
 
     uint32_t loop = 0;
     ecmdDataBufferBase l_data(64);
@@ -1781,14 +2008,20 @@ fapi::ReturnCode mss_Display::setupAndExecuteCmd()
         if(l_rc) return l_rc;
     }
  
+    //----------------------------------------------------
+    // Read the 65th byte: 4 loops
+    //----------------------------------------------------
+    FAPI_INF("Read the 65th byte: 4 loops");
+        
+    for(loop=0; loop<4; loop++ )
+    {
+        l_rc = fapiGetScom(iv_target, maintBufferRead65thByteRegs[loop], l_data);
+        if(l_rc) return l_rc;
+    }
+
     // Collect FFDC
     l_rc = collectFFDC(); if(l_rc) return l_rc;
     
-    // Clear MBECCFIR
-    l_data.flushTo0();         
-    l_rc = fapiPutScom(iv_targetCentaur, mss_mbeccfir[iv_mbaPosition], l_data);
-    if(l_rc) return l_rc;
-
     FAPI_INF("EXIT Display::setupAndExecuteCmd()");                                        
         
     return l_rc;
@@ -1899,7 +2132,7 @@ mss_TimeBaseScrub::mss_TimeBaseScrub( const fapi::Target & i_target,
                                       const ecmdDataBufferBase & i_startAddr,
                                       const ecmdDataBufferBase & i_endAddr,
                                       TimeBaseSpeed i_speed,             
-                                      StopCondition i_stopCondition,
+                                      uint32_t i_stopCondition,
                                       bool i_poll ) :
     mss_MaintCmd( i_target,
                   i_startAddr,
@@ -2105,8 +2338,7 @@ fapi::ReturnCode mss_get_address_range( const fapi::Target & i_target,
     {
         // Create new log. 
         FAPI_ERR("MBAXCRn[0:3] = 0, meaning no memory configured behind this MBA.");
-        // DEBUG
-        // FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_NO_MEM_CNFG);
+        FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_NO_MEM_CNFG);
         return l_rc;
     }
     
@@ -2225,18 +2457,8 @@ fapi::ReturnCode mss_get_address_range( const fapi::Target & i_target,
         {
             FAPI_INF("ATTR_IS_SIMULATION = 1, Awan/HWSimulator, so use smaller address range.");
             
-            /*
-            l_ecmd_rc |= o_endAddr.flushTo0();
-            l_ecmd_rc |= o_endAddr.setBit(36);
-            l_ecmd_rc |= o_endAddr.setBit(35);
-            l_ecmd_rc |= o_endAddr.setBit(34); // DEBUG
-            l_ecmd_rc |= o_endAddr.setBit(33); // DEBUG
-            l_ecmd_rc |= o_endAddr.setBit(32); // DEBUG
-            l_ecmd_rc |= o_endAddr.setBit(31); // DEBUG
-            l_ecmd_rc |= o_endAddr.setBit(30); // DEBUG
-            */
 
-            // DEBUG - try whole rank0, row0, all banks all cols
+            // Do only rank0, row0, all banks all cols
             l_end_rank = 0;             
             uint32_t l_row_zero = 0;
             l_ecmd_rc |= o_endAddr.flushTo0();
@@ -2284,18 +2506,29 @@ fapi::ReturnCode mss_get_address_range( const fapi::Target & i_target,
         // NOTE: If this rank is not valid, we should see MBAFIR[1]: invalid 
         // maint address, when cmd started
 
-        // DEBUG: Set start address to 8 addresses away from end of rank
-        //l_ecmd_rc |= o_startAddr.flushTo0();         
-        //l_ecmd_rc |= o_startAddr.insert( i_rank, 0, 4, 8-4 );                 
-        //l_ecmd_rc |= o_startAddr.insert( (uint32_t)l_bank, 7, 4, 32-4 );      
-        //l_ecmd_rc |= o_startAddr.insert( (uint32_t)l_row, 11, 17, 32-17 );    
-        //l_ecmd_rc |= o_startAddr.insert( (uint32_t)l_col, 28, 9, 32-9 );      
-        //l_ecmd_rc |= o_startAddr.clearBit(32);
-        //l_ecmd_rc |= o_startAddr.clearBit(33);
-        //l_ecmd_rc |= o_startAddr.clearBit(34);
-        //l_ecmd_rc |= o_startAddr.clearBit(35);
-        //l_ecmd_rc |= o_startAddr.clearBit(36);
+        
+        // DEBUG - run on last few address of the rank
+        /*
+        // Set end address to end of rank
+        l_ecmd_rc |= o_endAddr.flushTo0();
+        l_ecmd_rc |= o_endAddr.insert( i_rank, 0, 4, 8-4 );
+        l_ecmd_rc |= o_endAddr.insert( (uint32_t)l_bank, 7, 4, 32-4 );
+        l_ecmd_rc |= o_endAddr.insert( (uint32_t)l_row, 11, 17, 32-17 );
+        l_ecmd_rc |= o_endAddr.insert( (uint32_t)l_col, 28, 12, 32-12 );
 
+
+        // Set start address so we do all banks/cols in last row of the rank
+        uint32_t l_bank_zero = 0;
+        uint32_t l_col_zero = 0;        
+        l_ecmd_rc |= o_startAddr.flushTo0();         
+        l_ecmd_rc |= o_startAddr.insert( i_rank, 0, 4, 8-4 );                 
+        l_ecmd_rc |= o_startAddr.insert( (uint32_t)l_bank_zero, 7, 4, 32-4 );      
+        l_ecmd_rc |= o_startAddr.insert( (uint32_t)l_row, 11, 17, 32-17 );    
+        l_ecmd_rc |= o_startAddr.insert( (uint32_t)l_col_zero, 28, 12, 32-12 );      
+        */
+        // DEBUG - run on last few address of the rank
+
+        
         // Start address is just i_rank with row/col/bank all 0's
         l_ecmd_rc |= o_startAddr.flushTo0();
 
@@ -2316,12 +2549,6 @@ fapi::ReturnCode mss_get_address_range( const fapi::Target & i_target,
             l_ecmd_rc |= o_endAddr.insert( (uint32_t)l_row_zero, 11, 17, 32-17 );
             // COL = 28:39, note: c2, c1, c0 always 0
             l_ecmd_rc |= o_endAddr.insert( (uint32_t)l_col, 28, 12, 32-12 );
-            //l_ecmd_rc |= o_endAddr.setBit(35); // DEBUG
-            //l_ecmd_rc |= o_endAddr.setBit(34); // DEBUG
-            //l_ecmd_rc |= o_endAddr.setBit(33); // DEBUG
-            //l_ecmd_rc |= o_endAddr.setBit(32); // DEBUG
-            //l_ecmd_rc |= o_endAddr.setBit(31); // DEBUG
-            //l_ecmd_rc |= o_endAddr.setBit(30); // DEBUG
 
         }
         // Else, set end address to be last address of i_rank
@@ -2335,8 +2562,9 @@ fapi::ReturnCode mss_get_address_range( const fapi::Target & i_target,
             // ROW = 11:27            
             l_ecmd_rc |= o_endAddr.insert( (uint32_t)l_row, 11, 17, 32-17 );
             // COL = 28:36
-            l_ecmd_rc |= o_endAddr.insert( (uint32_t)l_col, 28, 9, 32-9 );
-        }           
+            l_ecmd_rc |= o_endAddr.insert( (uint32_t)l_col, 28, 12, 32-12 );
+        }
+                   
     }
     
     if(l_ecmd_rc)

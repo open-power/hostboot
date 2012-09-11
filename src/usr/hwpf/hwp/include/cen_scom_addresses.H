@@ -1,27 +1,26 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/hwp/include/cen_scom_addresses.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
-// $Id: cen_scom_addresses.H,v 1.22 2012/06/18 01:58:44 jmcgill Exp $
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/hwp/include/cen_scom_addresses.H $               */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012                   */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+// $Id: cen_scom_addresses.H,v 1.28 2012/09/10 14:34:14 jdsloat Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/cen_scom_addresses.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -46,6 +45,20 @@
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
 //         |          |         |
+//  1.28   | jdsloat  |10-Sep-12| Fixed MBA CAL Names
+//  1.27   | gollub   |07-Sep-12| Fixed address for MBA01_MBA_WRD_MODE
+//         |          |         | Added Maint Read Buffers 65th Byte
+//  1.26   | jdsloat  |06-Sep-12| Added MBA CAL Registers
+//  1.25   | gollub   |31-Aug-12| Added MBACALFIR Registers
+//         |          |         | Added MBSFIR Registers
+//         |          |         | Added MBAFIR Registers
+//         |          |         | Added MBSPA Registers
+//         |          |         | Added MBECCFIR Registers
+//         |          |         | Added SCAC Registers
+//  1.24   | jdsloat  |20-Aug-12| Added Primary Rank Pair MRS Shadow Regs
+//  1.23   | gollub   |27-Jul-12| Added MBS FIR Registers
+//         |          |         | Added DDRPHY FIR Registers
+//         |          |         | Added MBA_RRQ Register
 //  1.22   | jmcgill  |17-Jun-12| Added trace related SCOM addresses
 //  1.21   | gollub   |23-May-12| Added regs needed for mss_maint_cmds
 //  1.20   | jdsloat  |17-May-12| Added MBA/MBS level PM, REF register addresses
@@ -318,6 +331,22 @@ CONST_UINT64_T( DPHY01_DDRPHY_PC_RESETS_P0_0x8000C00E0301143F,                  
 CONST_UINT64_T( DPHY01_DDRPHY_PC_RESETS_P1_0x8001C00E0301143F,                       ULL(0x8001C00E0301143F) );
 CONST_UINT64_T( DPHY01_DDRPHY_PC_IO_PVT_FET_CONTROL_P0_0x8000C0140301143F,           ULL(0x8000C0140301143F) );
 CONST_UINT64_T( DPHY01_DDRPHY_PC_IO_PVT_FET_CONTROL_P1_0x8001C0140301143F,           ULL(0x8001C0140301143F) );
+CONST_UINT64_T( DPHY01_DDRPHY_PC_MR0_PRI_RP0_P0_0x8000C01C0301143F,                  ULL(0x8000C01C0301143F) );
+CONST_UINT64_T( DPHY01_DDRPHY_PC_MR1_PRI_RP0_P0_0x8000C01D0301143F,                  ULL(0x8000C01D0301143F) );
+CONST_UINT64_T( DPHY01_DDRPHY_PC_MR2_PRI_RP0_P0_0x8000C01E0301143F,                  ULL(0x8000C01E0301143F) );
+CONST_UINT64_T( DPHY01_DDRPHY_PC_MR3_PRI_RP0_P0_0x8000C01F0301143F,                  ULL(0x8000C01F0301143F) );
+CONST_UINT64_T( DPHY01_DDRPHY_PC_MR0_PRI_RP1_P0_0x8000C11C0301143F,                  ULL(0x8000C11C0301143F) );
+CONST_UINT64_T( DPHY01_DDRPHY_PC_MR1_PRI_RP1_P0_0x8000C11D0301143F,                  ULL(0x8000C11D0301143F) );
+CONST_UINT64_T( DPHY01_DDRPHY_PC_MR2_PRI_RP1_P0_0x8000C11E0301143F,                  ULL(0x8000C11E0301143F) );
+CONST_UINT64_T( DPHY01_DDRPHY_PC_MR3_PRI_RP1_P0_0x8000C11F0301143F,                  ULL(0x8000C11F0301143F) );
+CONST_UINT64_T( DPHY01_DDRPHY_PC_MR0_PRI_RP2_P0_0x8000C21C0301143F,                  ULL(0x8000C21C0301143F) );
+CONST_UINT64_T( DPHY01_DDRPHY_PC_MR1_PRI_RP2_P0_0x8000C21D0301143F,                  ULL(0x8000C21D0301143F) );
+CONST_UINT64_T( DPHY01_DDRPHY_PC_MR2_PRI_RP2_P0_0x8000C21E0301143F,                  ULL(0x8000C21E0301143F) );
+CONST_UINT64_T( DPHY01_DDRPHY_PC_MR3_PRI_RP2_P0_0x8000C21F0301143F,                  ULL(0x8000C21F0301143F) );
+CONST_UINT64_T( DPHY01_DDRPHY_PC_MR0_PRI_RP3_P0_0x8000C31C0301143F,                  ULL(0x8000C31C0301143F) );
+CONST_UINT64_T( DPHY01_DDRPHY_PC_MR1_PRI_RP3_P0_0x8000C31D0301143F,                  ULL(0x8000C31D0301143F) );
+CONST_UINT64_T( DPHY01_DDRPHY_PC_MR2_PRI_RP3_P0_0x8000C31E0301143F,                  ULL(0x8000C31E0301143F) );
+CONST_UINT64_T( DPHY01_DDRPHY_PC_MR3_PRI_RP3_P0_0x8000C31F0301143F,                  ULL(0x8000C31F0301143F) );
 
 //------------------------------------------------------------------------------
 //      CALIBRATION SCOM ADDRESSES (DPHY REGISTERS)
@@ -347,6 +376,11 @@ CONST_UINT64_T( DPHY01_DDRPHY_PC_PER_ZCAL_CONFIG_P1_0x8001C00F0301143F,         
 //      MBA Fault Isolation Register
 //------------------------------------------------------------------------------
 CONST_UINT64_T( MBA01_MBAFIRQ_0x03010600           , ULL(0x03010600) );
+CONST_UINT64_T( MBA01_MBAFIRMASK_0x03010603        , ULL(0x03010603) );
+CONST_UINT64_T( MBA01_MBAFIRMASK_AND_0x03010604    , ULL(0x03010604) );
+CONST_UINT64_T( MBA01_MBAFIRMASK_OR_0x03010605     , ULL(0x03010605) );
+CONST_UINT64_T( MBA01_MBAFIRACT0_0x03010606        , ULL(0x03010606) );
+CONST_UINT64_T( MBA01_MBAFIRACT1_0x03010607        , ULL(0x03010607) );
 
 //------------------------------------------------------------------------------
 //      MBA Maintenance Command Type Register
@@ -387,30 +421,42 @@ CONST_UINT64_T( MBA01_MBECTLQ_0x03010610           , ULL(0x03010610) );
 //      MBA Special Attention Register
 //------------------------------------------------------------------------------
 CONST_UINT64_T( MBA01_MBSPAQ_0x03010611           , ULL(0x03010611) );
+CONST_UINT64_T( MBA01_MBSPAMSKQ_0x03010614        , ULL(0x03010614) );
 
 //------------------------------------------------------------------------------
 //      MBA Maint Read Buffers corresponding to ports 0/1
 //------------------------------------------------------------------------------
 
+// Maint Read Buffer0
 CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF0_DATA0_0x03010655           , ULL(0x03010655) );
 CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF0_DATA1_0x03010656           , ULL(0x03010656) );
 CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF0_DATA2_0x03010657           , ULL(0x03010657) );
 CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF0_DATA3_0x03010658           , ULL(0x03010658) );
 
+// Maint Read Buffer1
 CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF1_DATA0_0x03010665           , ULL(0x03010665) );
 CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF1_DATA1_0x03010666           , ULL(0x03010666) );
 CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF1_DATA2_0x03010667           , ULL(0x03010667) );
 CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF1_DATA3_0x03010668           , ULL(0x03010668) );
 
+// Maint Read Buffer2
 CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF2_DATA0_0x03010675           , ULL(0x03010675) );
 CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF2_DATA1_0x03010676           , ULL(0x03010676) );
 CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF2_DATA2_0x03010677           , ULL(0x03010677) );
 CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF2_DATA3_0x03010678           , ULL(0x03010678) );
 
+// Maint Read Buffer3
 CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF3_DATA0_0x03010685           , ULL(0x03010685) );
 CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF3_DATA1_0x03010686           , ULL(0x03010686) );
 CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF3_DATA2_0x03010687           , ULL(0x03010687) );
 CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF3_DATA3_0x03010688           , ULL(0x03010688) );
+
+// Maint Read Buffers 65th Byte
+CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF_65TH_BYTE_64B_ECC0_0x03010695 , ULL(0x03010695) );
+CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF_65TH_BYTE_64B_ECC1_0x03010696 , ULL(0x03010696) );
+CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF_65TH_BYTE_64B_ECC2_0x03010697 , ULL(0x03010697) );
+CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF_65TH_BYTE_64B_ECC3_0x03010698 , ULL(0x03010698) );
+
 
 //------------------------------------------------------------------------------
 //      MBA Write Bit Steer Control Registers
@@ -425,14 +471,19 @@ CONST_UINT64_T( MBA01_MBABS6_0x03010446           , ULL(0x03010446) );
 CONST_UINT64_T( MBA01_MBABS7_0x03010447           , ULL(0x03010447) );
 
 //------------------------------------------------------------------------------
-//      MBA CAL FIR Register
+//      MBA CAL FIR Registers
 //------------------------------------------------------------------------------
 CONST_UINT64_T( MBA01_MBACALFIR_0x03010400           , ULL(0x03010400) );
+CONST_UINT64_T( MBA01_MBACALFIR_MASK_0x03010403      , ULL(0x03010403) );
+CONST_UINT64_T( MBA01_MBACALFIR_MASK_AND_0x03010404  , ULL(0x03010404) );
+CONST_UINT64_T( MBA01_MBACALFIR_MASK_OR_0x03010405   , ULL(0x03010405) );
+CONST_UINT64_T( MBA01_MBACALFIR_ACTION0_0x03010406   , ULL(0x03010406) );
+CONST_UINT64_T( MBA01_MBACALFIR_ACTION1_0x03010407   , ULL(0x03010407) );
 
 //------------------------------------------------------------------------------
 //      MBA WRD Mode Register
 //------------------------------------------------------------------------------
-CONST_UINT64_T( MBA01_MBA_WRD_MODE_0x03010429           , ULL(0x03010429) );
+CONST_UINT64_T( MBA01_MBA_WRD_MODE_0x03010449           , ULL(0x03010449) );
 
 
 
@@ -448,7 +499,18 @@ CONST_UINT64_T( MBAXCR23Q_0x0201140C           , ULL(0x0201140C) );
 //      MBS ECC Decoder FIR Registers
 //------------------------------------------------------------------------------
 CONST_UINT64_T( MBS_ECC0_MBECCFIR_0x02011440           , ULL(0x02011440) );
+CONST_UINT64_T( MBS_ECC0_MBECCFIR_MASK_0x02011443      , ULL(0x02011443) );
+CONST_UINT64_T( MBS_ECC0_MBECCFIR_MASK_AND_0x02011444  , ULL(0x02011444) );
+CONST_UINT64_T( MBS_ECC0_MBECCFIR_MASK_OR_0x02011445   , ULL(0x02011445) );
+CONST_UINT64_T( MBS_ECC0_MBECCFIR_ACTION0_0x02011446   , ULL(0x02011446) );
+CONST_UINT64_T( MBS_ECC0_MBECCFIR_ACTION1_0x02011447   , ULL(0x02011447) );
+
 CONST_UINT64_T( MBS_ECC1_MBECCFIR_0x02011480           , ULL(0x02011480) );
+CONST_UINT64_T( MBS_ECC1_MBECCFIR_MASK_0x02011483      , ULL(0x02011483) );
+CONST_UINT64_T( MBS_ECC1_MBECCFIR_MASK_AND_0x02011484  , ULL(0x02011484) );
+CONST_UINT64_T( MBS_ECC1_MBECCFIR_MASK_OR_0x02011485   , ULL(0x02011485) );
+CONST_UINT64_T( MBS_ECC1_MBECCFIR_ACTION0_0x02011486   , ULL(0x02011486) );
+CONST_UINT64_T( MBS_ECC1_MBECCFIR_ACTION1_0x02011487   , ULL(0x02011487) );
 
 //------------------------------------------------------------------------------
 //      MBS Memory ECC Mark Store Registers
@@ -611,9 +673,69 @@ CONST_UINT64_T( MBS_ECC1_MBSECCQ_0x0201148A           , ULL(0x0201148A) );
 //------------------------------------------------------------------------------
 //      MBS Memory Scrub/Read Error Threshold Registers
 //------------------------------------------------------------------------------
-CONST_UINT64_T( MBS01_MBSTRQ_0x02011655           , ULL(02011655) );
-CONST_UINT64_T( MBS23_MBSTRQ_0x02011755           , ULL(02011755) );
+CONST_UINT64_T( MBS01_MBSTRQ_0x02011655           , ULL(0x02011655) );
+CONST_UINT64_T( MBS23_MBSTRQ_0x02011755           , ULL(0x02011755) );
 
+//------------------------------------------------------------------------------
+//      MBS FIR Registers
+//------------------------------------------------------------------------------
+CONST_UINT64_T( MBS_FIR_REG_0x02011400              , ULL(0x02011400) );
+CONST_UINT64_T( MBS_FIR_MASK_REG_0x02011403         , ULL(0x02011403) );
+CONST_UINT64_T( MBS_FIR_MASK_REG_AND_0x02011404     , ULL(0x02011404) );
+CONST_UINT64_T( MBS_FIR_MASK_REG_OR_0x02011405      , ULL(0x02011405) );
+CONST_UINT64_T( MBS_FIR_ACTION0_REG_0x02011406      , ULL(0x02011406) );
+CONST_UINT64_T( MBS_FIR_ACTION1_REG_0x02011407      , ULL(0x02011407) );
+
+//------------------------------------------------------------------------------
+//      DDRPHY FIR Registers
+//------------------------------------------------------------------------------
+CONST_UINT64_T( PHY01_DDRPHY_FIR_REG_0x800200900301143f             , ULL(0x800200900301143f) );
+CONST_UINT64_T( PHY01_DDRPHY_FIR_MASK_REG_0x800200930301143f        , ULL(0x800200930301143f) );
+CONST_UINT64_T( PHY01_DDRPHY_FIR_MASK_REG_AND_0x800200940301143f    , ULL(0x800200940301143f) );
+CONST_UINT64_T( PHY01_DDRPHY_FIR_MASK_REG_OR_0x800200950301143f     , ULL(0x800200950301143f) );
+CONST_UINT64_T( PHY01_DDRPHY_FIR_ACTION0_REG_0x800200960301143f     , ULL(0x800200960301143f) );
+CONST_UINT64_T( PHY01_DDRPHY_FIR_ACTION1_REG_0x800200970301143f     , ULL(0x800200970301143f) );
+
+//------------------------------------------------------------------------------
+//      MBA RRQ0 Register - DDR read command parameters
+//------------------------------------------------------------------------------
+CONST_UINT64_T( MBA01_MBA_RRQ0Q_0x0301040E               , ULL(0x0301040e) );
+
+//------------------------------------------------------------------------------
+//      MBA CAL Registers - DDR CAL REGs
+//------------------------------------------------------------------------------
+CONST_UINT64_T( MBA01_MBA_CAL0Q_0x0301040F               , ULL(0x0301040F) );
+CONST_UINT64_T( MBA01_MBA_CAL1Q_0x03010410               , ULL(0x03010410) );
+CONST_UINT64_T( MBA01_MBA_CAL2Q_0x03010411               , ULL(0x03010411) );
+CONST_UINT64_T( MBA01_MBA_CAL3Q_0x03010412               , ULL(0x03010412) );
+
+
+//------------------------------------------------------------------------------
+//      MBSFIR Registers
+//------------------------------------------------------------------------------
+CONST_UINT64_T( MBS01_MBSFIRQ_0x02011600            , ULL(0x02011600) );
+CONST_UINT64_T( MBS01_MBSFIRMASK_0x02011603         , ULL(0x02011603) );
+CONST_UINT64_T( MBS01_MBSFIRMASK_AND_0x02011604     , ULL(0x02011604) );
+CONST_UINT64_T( MBS01_MBSFIRMASK_OR_0x02011605      , ULL(0x02011605) );
+CONST_UINT64_T( MBS01_MBSFIRACT0_0x02011606         , ULL(0x02011606) );
+CONST_UINT64_T( MBS01_MBSFIRACT1_0x02011607         , ULL(0x02011607) );
+
+CONST_UINT64_T( MBS23_MBSFIRQ_0x02011700            , ULL(0x02011700) );
+CONST_UINT64_T( MBS23_MBSFIRMASK_0x02011703         , ULL(0x02011703) );
+CONST_UINT64_T( MBS23_MBSFIRMASK_AND_0x02011704     , ULL(0x02011704) );
+CONST_UINT64_T( MBS23_MBSFIRMASK_OR_0x02011705      , ULL(0x02011705) );
+CONST_UINT64_T( MBS23_MBSFIRACT0_0x02011706         , ULL(0x02011706) );
+CONST_UINT64_T( MBS23_MBSFIRACT1_0x02011707         , ULL(0x02011707) );
+
+//------------------------------------------------------------------------------
+//      SCAC Registers
+//------------------------------------------------------------------------------
+CONST_UINT64_T( SCAC_LFIR_0x020115C0            , ULL(0x020115C0) );
+CONST_UINT64_T( SCAC_FIRMASK_0x020115C3         , ULL(0x020115C3) );
+CONST_UINT64_T( SCAC_FIRMASK_AND_0x020115C4     , ULL(0x020115C4) );
+CONST_UINT64_T( SCAC_FIRMASK_OR_0x020115C5      , ULL(0x020115C5) );
+CONST_UINT64_T( SCAC_FIRACTION0_0x020115C6      , ULL(0x020115C6) );
+CONST_UINT64_T( SCAC_FIRACTION1_0x020115C7      , ULL(0x020115C7) );
 
 
 /******************************************************************************/
@@ -636,6 +758,30 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: cen_scom_addresses.H,v $
+Revision 1.28  2012/09/10 14:34:14  jdsloat
+Fixed MBA CAL Names
+
+Revision 1.27  2012/09/07 21:29:39  gollub
+
+Fixed address for MBA01_MBA_WRD_MODE
+Added Maint Read Buffers 65th Byte
+
+Revision 1.26  2012/09/06 18:39:34  jdsloat
+Added MBA CAL Registers
+
+Revision 1.25  2012/09/06 13:28:25  gollub
+
+Added more FIR registers.
+
+Revision 1.24  2012/08/20 17:12:23  jdsloat
+Added Primary Rank Pair MRS Shadow Regs
+
+Revision 1.23  2012/08/17 20:15:03  gollub
+
+Added MBS FIR Registers
+Added DDRPHY FIR Registers
+Added MBA_RRQ Register
+
 Revision 1.22  2012/06/18 01:58:44  jmcgill
 added trace related SCOM addresses
 

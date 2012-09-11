@@ -1,27 +1,26 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/hwp/dram_initialization/mss_maint_cmds/mss_maint_cmds.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
-// $Id: mss_maint_cmds.H,v 1.8 2012/07/18 21:36:50 gollub Exp $
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/hwp/dram_initialization/mss_memdiag/mss_maint_cmds.H $ */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012                   */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+// $Id: mss_maint_cmds.H,v 1.10 2012/09/07 21:32:14 gollub Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -38,7 +37,13 @@
 //         | 07/13/12 | gollub  | Updates from review.
 //   1.7   | 07/16/12 | bellows | added in Id tag
 //   1.8   | 07/18/12 | gollub  | Updates for timebase scrub.
-
+//   1.9   | 08/15/12 | gollub  | Added stop condition enums
+//         |          |         | STOP_IMMEDIATE
+//         |          |         | ENABLE_CMD_COMPLETE_ATTENTION_ON_CLEAN_AND_ERROR
+//         |          |         | Added iv_saved_MBA_WRD_MODE to allow 
+//         |          |         | save/restore of setting for super fast read
+//   1.10  | 09/07/12 | gollub  | Updates from review.
+//         |          |         | Support for more patterns.
 
 
 #ifndef _MSS_MAINT_CMDS_H
@@ -108,22 +113,17 @@ class mss_MaintCmd
     /**
      * @brief Index into array containing data patterns to load into memory
      */
-    // TODO: Array doesn't exist yet. 
-    // Currently just hardcodeding one pattern: all 0's.
     enum PatternIndex
     {
-        PATTERN_0,
-        PATTERN_1,
-        PATTERN_2,
-        PATTERN_3,
-        PATTERN_4,
-        PATTERN_5,
-        PATTERN_6,
-        PATTERN_7,
-        PATTERN_8,
-        PATTERN_9,
-        PATTERN_11,
-        PATTERN_RANDOM,
+        PATTERN_0       = 0,  //0x00
+        PATTERN_1       = 1,  //0xFF
+        PATTERN_2       = 2,  //0xF0
+        PATTERN_3       = 3,  //0x0F
+        PATTERN_4       = 4,  //0xAA
+        PATTERN_5       = 5,  //0x55
+        PATTERN_6       = 6,  //0xCC
+        PATTERN_7       = 7,  //0x33
+        PATTERN_RANDOM  = 1,  // NOTE: Using PATTERN_1 as random seed
     };
 
     /**
@@ -145,41 +145,49 @@ class mss_MaintCmd
         // Turn off all stop conditions
         NO_STOP_CONDITIONS =                 0x0000,
                 
-        // Stop at end of rank if stop condition hit
-        STOP_END_OF_RANK =                   0x8000,
+        // Stop immediately if stop on error condition hit
+        STOP_IMMEDIATE =                     0x8000,
+
+        // Stop at end of rank if stop on error condition hit
+        STOP_END_OF_RANK =                   0x4000,
         
         // Stop on hard new CE error threshlold equal        
-        STOP_ON_HARD_NCE_ETE =               0x4000,        
+        STOP_ON_HARD_NCE_ETE =               0x2000,        
         
         // Stop on intermittent new CE error threshlold equal
-        STOP_ON_INT_NCE_ETE =                0x2000,        
+        STOP_ON_INT_NCE_ETE =                0x1000,        
         
         // Stop on soft new CE error threshlold equal
-        STOP_ON_SOFT_NCE_ETE =               0x1000,        
+        STOP_ON_SOFT_NCE_ETE =               0x0800,        
         
         // Stop on symbol corrected error (error on symbol already marked)
-        STOP_ON_SCE =                        0x0800,        
+        STOP_ON_SCE =                        0x0400,        
         
         // Stop on mark corrected error (error on chip already marked)
-        STOP_ON_MCE =                        0x0400,        
+        STOP_ON_MCE =                        0x0200,        
         
         // Stop on retry CE (UE that went away on retry)
-        STOP_ON_RETRY_CE =                   0x0200,        
+        STOP_ON_RETRY_CE =                   0x0100,        
         
         // Stop on mark placed error (hw placed a chip mark)
-        STOP_ON_MPE =                        0x0100,        
+        STOP_ON_MPE =                        0x0080,        
         
         // Stop on UE
-        STOP_ON_UE =                         0x0080,        
+        STOP_ON_UE =                         0x0040,        
         
         // Stop on SUE
-        STOP_ON_SUE =                        0x0040,        
+        STOP_ON_SUE =                        0x0020,        
         
         // Stop when MBMACAQ = MBMEAQ
-        STOP_ON_END_ADDRESS =                0x0020,        
+        STOP_ON_END_ADDRESS =                0x0010,        
         
         // Enable command complete attention
-        ENABLE_CMD_COMPLETE_ATTENTION =      0x0010,        
+        ENABLE_CMD_COMPLETE_ATTENTION =      0x0008,        
+        
+        // Enable command complete attention for both stop clean, and stop
+        // due to error
+        ENABLE_CMD_COMPLETE_ATTENTION_ON_CLEAN_AND_ERROR = 0x0004,        
+
     };
 
     /**
@@ -233,7 +241,7 @@ class mss_MaintCmd
     mss_MaintCmd( const fapi::Target & i_target,
                   const ecmdDataBufferBase & i_startAddr,
                   const ecmdDataBufferBase & i_endAddr,
-                  StopCondition i_stopCondition,
+                  uint32_t i_stopCondition,
                   bool i_poll,
                   CmdType i_cmdType );
 
@@ -368,7 +376,7 @@ class mss_MaintCmd
     fapi::Target iv_targetCentaur;      // Centaur associated with this MBA
     ecmdDataBufferBase iv_startAddr;    // Start address
     ecmdDataBufferBase iv_endAddr;      // End address
-    StopCondition iv_stopCondition;     // Mask of stop contitions
+    uint32_t iv_stopCondition;          // Mask of stop contitions
     bool iv_poll;                       // Set true to wait for cmd complete
     const CmdType iv_cmdType;           // Command type
     uint8_t iv_mbaPosition;             // 0 = mba01, 1 = mba23
@@ -395,7 +403,7 @@ class mss_SuperFastInit : public mss_MaintCmd
                        const ecmdDataBufferBase & i_startAddr,   // Address cmd will start at
                        const ecmdDataBufferBase & i_endAddr,     // Address cmd will stop at
                        PatternIndex i_initPattern,               // Index into table containing patterns to load into memory
-                       StopCondition i_stopCondition,            // Mask of error conditions cmd should stop on
+                       uint32_t i_stopCondition,                 // Mask of error conditions cmd should stop on
                        bool i_poll );                            // Set to true if you wait for command to complete
 
   public:
@@ -450,7 +458,7 @@ class mss_SuperFastRandomInit : public mss_MaintCmd
                              const ecmdDataBufferBase & i_startAddr,    // Address cmd will start at
                              const ecmdDataBufferBase & i_endAddr,      // Address cmd will stop at
                              PatternIndex i_initPattern,                // Index into table containing pattern to use for random seed
-                             StopCondition i_stopCondition,             // Mask of error conditions cmd should stop on
+                             uint32_t i_stopCondition,                  // Mask of error conditions cmd should stop on
                              bool i_poll );                             // Set to true if you wait for command to complete
 
   public:
@@ -506,7 +514,7 @@ class mss_SuperFastRead : public mss_MaintCmd
     mss_SuperFastRead( const fapi::Target & i_target,            // MBA target
                        const ecmdDataBufferBase & i_startAddr,   // Address cmd will start at
                        const ecmdDataBufferBase & i_endAddr,     // Address cmd will stop at
-                       StopCondition i_stopCondition,            // Mask of error conditions cmd should stop on
+                       uint32_t i_stopCondition,                 // Mask of error conditions cmd should stop on
                        bool i_poll );                            // Set to true if you wait for command to complete
 
   public:
@@ -543,6 +551,9 @@ class mss_SuperFastRead : public mss_MaintCmd
 
     // List of things to save may be cmd-specific, so keep it here for now
     uint32_t iv_savedData;
+    // Setting that had to be restored when done
+    ecmdDataBufferBase iv_saved_MBA_RRQ0; 
+    
 };
 
 
@@ -668,7 +679,7 @@ class mss_TimeBaseScrub : public mss_MaintCmd
                        const ecmdDataBufferBase & i_startAddr,  // Address cmd will start at
                        const ecmdDataBufferBase & i_endAddr,    // Address cmd will stop at
                        TimeBaseSpeed i_speed,                   // Fast as possible, or slow (all memory on the MBA in 12h)
-                       StopCondition i_stopCondition,           // Mask of error conditions cmd should stop on
+                       uint32_t i_stopCondition,                // Mask of error conditions cmd should stop on
                        bool i_poll );                           // Set to true if you wait for command to complete
 
   public:
@@ -824,6 +835,8 @@ fapi::ReturnCode mss_put_steer_mux( const fapi::Target & i_target,
                                     mss_SteerMux::muxType i_muxType,
                                     mss_SteerMux::steerType i_steerType,
                                     uint8_t i_symbol );
+
+
 
 
 #endif /* _MSS_MAINT_CMDS_H */

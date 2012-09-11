@@ -1,27 +1,26 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/hwp/mc_init/mss_eff_config/mss_eff_config.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
-// $Id: mss_eff_config.C,v 1.9 2012/06/07 01:16:03 asaetow Exp $
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/hwp/mc_config/mss_eff_config/mss_eff_config.C $  */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012                   */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+// $Id: mss_eff_config.C,v 1.10 2012/08/02 18:31:50 bellows Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_eff_config.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -43,7 +42,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
-//   1.10  |          |         |
+//   1.10  | bellows  |02-AUG-12| Added in DIMM functional vector for Daniel
 //   1.9   | asaetow  |29-MAY-12| Added divide by 0 check for mss_freq. 
 //         |          |         | Added 9 new attributes from memory_attributes.xml v1.23 
 //         |          |         | Changed plug_config to my_attr_eff_num_drops_per_port.
@@ -140,6 +139,8 @@ fapi::ReturnCode mss_eff_config(const fapi::Target i_target_mba) {
    uint8_t cur_dimm_spd_valid_u8array[PORT_SIZE][DIMM_SIZE] = {{0}};
    uint8_t cur_mba_port = 0;
    uint8_t cur_mba_dimm = 0;
+   uint8_t dimm_functional_vector = 0x00;
+   uint8_t dimm_functional=0; 
    uint8_t cur_dram_density = 0;
    uint32_t mss_freq = 0;
    uint32_t mss_volt = 0;
@@ -296,6 +297,13 @@ fapi::ReturnCode mss_eff_config(const fapi::Target i_target_mba) {
       rc = FAPI_ATTR_GET(ATTR_MBA_PORT, &l_target_dimm_array[dimm_index], cur_mba_port); if(rc) return rc;
       rc = FAPI_ATTR_GET(ATTR_MBA_DIMM, &l_target_dimm_array[dimm_index], cur_mba_dimm); if(rc) return rc;
       cur_dimm_spd_valid_u8array[cur_mba_port][cur_mba_dimm] = VALID;
+
+      rc = FAPI_ATTR_GET(ATTR_FUNCTIONAL, &l_target_dimm_array[dimm_index], dimm_functional); if(rc) return rc;
+      if(dimm_functional == fapi::ENUM_ATTR_FUNCTIONAL_FUNCTIONAL) 
+        dimm_functional=1;
+      else
+        dimm_functional=0;
+      dimm_functional_vector |=  dimm_functional << ((4*(1-cur_mba_port))+(4-cur_mba_dimm)-1);
 
       rc = FAPI_ATTR_GET(ATTR_SPD_DRAM_DEVICE_TYPE, &l_target_dimm_array[dimm_index], spd_dram_device_type_u8array[cur_mba_port][cur_mba_dimm]); if(rc) return rc;
       rc = FAPI_ATTR_GET(ATTR_SPD_MODULE_TYPE, &l_target_dimm_array[dimm_index], spd_module_type_u8array[cur_mba_port][cur_mba_dimm]); if(rc) return rc;
@@ -673,7 +681,7 @@ fapi::ReturnCode mss_eff_config(const fapi::Target i_target_mba) {
    rc = FAPI_ATTR_SET(ATTR_EFF_SCHMOO_TEST_VALID, &i_target_mba, my_attr_eff_schmoo_test_valid); if(rc) return rc;
    rc = FAPI_ATTR_SET(ATTR_EFF_STACK_TYPE, &i_target_mba, my_attr_eff_stack_type); if(rc) return rc;
    rc = FAPI_ATTR_SET(ATTR_EFF_ZQCAL_INTERVAL, &i_target_mba, my_attr_eff_zqcal_interval); if(rc) return rc;
-
+   rc = FAPI_ATTR_SET(ATTR_MSS_EFF_DIMM_FUNCTIONAL_VECTOR, &i_target_mba, dimm_functional_vector); if(rc) return rc;
 
    // Calls to sub-procedures
    rc = mss_eff_config_rank_group(i_target_mba); if(rc) return rc;

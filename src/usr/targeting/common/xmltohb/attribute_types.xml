@@ -4356,4 +4356,243 @@
 
 <!-- ===== ===== End Memory Map ===== ===== ===== ===== ===== ===== -->
 
+<attribute>
+    <id>MSS_MCS_GROUP</id>
+    <description>Data Structure from eff grouping to setup bars to help determine different groups
+   Non- Mirroring [0-7] 0 -- MCS size //1-- No of MCS/group //2-- Total group size //3 -- Base address// 4-11 - MCS ID number// 12 --Alter.Bar //13 - A.Group Size // 14 - A.Base address
+ //  Mirroring      [8-15] 0 -- MCS size //1-- No of MCS/group //2-- Total group size //3 -- Base address// 4-11 - MCS ID number// 12 --Alter.Bar //13 - A.Group Size // 14 - A.Base address
+Measured in GB</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>16,16</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_MCS_GROUP</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_MCS_GROUP_32</id>
+    <description>Data Structure from eff grouping to setup bars to help determine different groups
+   Non- Mirroring [0-7] 0 -- MCS size //1-- No of MCS/group //2-- Total group size //3 -- Base address// 4-11 - MCS ID number// 12 --Alter.Bar //13 - A.Group Size // 14 - A.Base address
+ //  Mirroring      [8-15] 0 -- MCS size //1-- No of MCS/group //2-- Total group size //3 -- Base address// 4-11 - MCS ID number// 12 --Alter.Bar //13 - A.Group Size // 14 - A.Base address
+Measured in GB</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+        <array>16,16</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_MCS_GROUP_32</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_EFF_DIMM_FUNCTIONAL_VECTOR</id>
+    <description>A bit vector (per Dean's request) specifying if a DIMM is functional.  DIMM attributes, such as SIZE, are qualified by this bit vector.  The attribute ANDed 0x80 means port 0, DIMM 0 is functional, 0x40 means port 0, DIMM 1 is functional.  0x08 means port 1, DIMM 0 is functional and 0x04 means port 1 DIMM 1 is functional.  A fully populated system would have the value of 0xCC. Used in various locations and is computed in mss_eff_cnfg. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.  Each memory channel will have a value. creator: mss_eff_cnfg consumer: various firmware notes: none
+This factors in functionality</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_EFF_DIMM_FUNCTIONAL_VECTOR</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_INTERLEAVE_ENABLE</id>
+    <description>Used in the setting of groups.  It is a bit vector.  If the value  BITWISE_AND  1 = 1 then groups of 1 are enabled with special checkerboard modes needed, if the value  BITWISE_AND  2 = 2, then groups of 2 are possible; if value  BITWISE_AND  4, the groups of 4 are possible; if value  BITWISE_AND  8, the groups of 8 are possible.  If no groups can formed according to this input, then an error will be thrown.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_INTERLEAVE_ENABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CKE_MAP</id>
+    <description>Rank to CKE map. Used in various locations and is computed in mss_eff_cnfg_cke. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.   creator: mss_eff_cnfg_cke consumer: various firmware notes: none</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2,2,4</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CKE_MAP</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_SPARE</id>
+    <description>Spare DRAM availability. Used in various locations and is computed in mss_eff_cnfg. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.   creator: mss_eff_cnfg consumer: various firmware notes: load from spd</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2,2,4</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DIMM_SPARE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_SCHMOO_WR_EYE_MIN_MARGIN</id>
+    <description>Specifies the schmoo minimum margin to use during draminit_train_adv. Used to signal possible SI issues in memory.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_SCHMOO_WR_EYE_MIN_MARGIN</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_SCHMOO_RD_EYE_MIN_MARGIN</id>
+    <description>Specifies the schmoo minimum margin to use during draminit_train_adv. Used to signal possible SI issues in memory.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_SCHMOO_RD_EYE_MIN_MARGIN</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_SCHMOO_DQS_CLK_MIN_MARGIN</id>
+    <description>Specifies the schmoo minimum margin to use during draminit_train_adv. Used to signal possible SI issues in memory.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_SCHMOO_DQS_CLK_MIN_MARGIN</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_SCHMOO_RD_GATE_MIN_MARGIN</id>
+    <description>Specifies the schmoo minimum margin to use during draminit_train_adv. Used to signal possible SI issues in memory.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_SCHMOO_RD_GATE_MIN_MARGIN</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_SCHMOO_ADDR_CMD_MIN_MARGIN</id>
+    <description>Specifies the schmoo minimum margin to use during draminit_train_adv. Used to signal possible SI issues in memory.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_SCHMOO_ADDR_CMD_MIN_MARGIN</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_CAL_STEP_ENABLE</id>
+    <description>A bit vector denoting valid cal steps to run during dram_init_train. [0] EXT_ZQCAL
+[1] WR_LEVEL
+[2] DQS_ALIGN
+[3] RDCLK_ALIGN
+[4] READ_CTR
+[5] WRITE_CTR
+[6] COARSE_WR
+[7] COARSE_RD
+bits6:7  will be consumed together to form COARSE_LVL. </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_CAL_STEP_ENABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_MEM_IPL_COMPLETE</id>
+    <description>A numerical number indicating if the memory procedures are complete.  written by mss_setup_bars when the bars are now functional in the processor.  </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_MEM_IPL_COMPLETE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
 </attributes>
