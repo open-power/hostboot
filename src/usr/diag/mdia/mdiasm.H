@@ -30,11 +30,32 @@
 
 #include <vector>
 #include <util/threadpool.H>
+#include <dram_initialization/mss_memdiag/mss_maint_cmds.H>
 #include "sys/sync.h"
 #include "mdiafwd.H"
 
 namespace MDIA
 {
+
+/**
+ * @brief work flow phases
+ */
+enum WorkFlowPhase
+{
+    START_PATTERN_0 = mss_MaintCmd::PATTERN_0,
+    START_PATTERN_1 = mss_MaintCmd::PATTERN_1,
+    START_PATTERN_2 = mss_MaintCmd::PATTERN_2,
+    START_PATTERN_3 = mss_MaintCmd::PATTERN_3,
+    START_PATTERN_4 = mss_MaintCmd::PATTERN_4,
+    START_PATTERN_5 = mss_MaintCmd::PATTERN_5,
+    START_PATTERN_6 = mss_MaintCmd::PATTERN_6,
+    START_PATTERN_7 = mss_MaintCmd::PATTERN_7,
+    START_RANDOM_PATTERN,
+    DUMMY_SYNC_PHASE,
+    DUMMY_ASYNC_PHASE,
+    RESTORE_DRAM_REPAIRS,
+    START_SCRUB,
+};
 
 /**
  * @brief memory diagnostics step state machine

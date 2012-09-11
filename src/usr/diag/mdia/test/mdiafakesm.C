@@ -160,7 +160,7 @@ errlHndl_t FakeStateMachine2::doMaintCommand(WorkFlowProperties & i_wfp)
     uint32_t timeout = 100;
     i_wfp.timer = getMonitor().addMonitor(timeout);
 
-    WorkFlowPhase workItem = *i_wfp.workItem;
+    uint64_t workItem = *i_wfp.workItem;
     bool restart = i_wfp.restartCommand;
 
     mutex_unlock(&iv_mutex);
@@ -175,7 +175,6 @@ errlHndl_t FakeStateMachine2::doMaintCommand(WorkFlowProperties & i_wfp)
         case START_PATTERN_5:
         case START_PATTERN_6:
         case START_PATTERN_7:
-        case START_PATTERN_8:
         case START_SCRUB:
 
             mutex_lock(&iv_mutex);

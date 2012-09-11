@@ -31,12 +31,12 @@
 #include "mdiatrace.H"
 #include "mdiaworkitem.H"
 #include "mdiamonitor.H"
-#include <dram_initialization/mss_memdiag/mss_maint_cmds.H>
 #include <errl/errlmanager.H>
 #include <stdio.h>
 #include <mdia/mdiamevent.H>
 #include <hbotcompid.H>
 #include <fapi.H>
+#include <fapiPlatHwpInvoker.H>
 
 using namespace TARGETING;
 using namespace std;
@@ -298,7 +298,7 @@ bool StateMachine::executeWorkItem(WorkFlowProperties * i_wfp)
 
     bool async = workItemIsAsync(*i_wfp);
 
-    WorkFlowPhase workItem = *i_wfp->workItem;
+    uint64_t workItem = *i_wfp->workItem;
 
     MDIA_FAST("sm: executing work item %d for: %p",
             workItem, getTarget(*i_wfp));
@@ -309,7 +309,6 @@ bool StateMachine::executeWorkItem(WorkFlowProperties * i_wfp)
 
     switch(workItem)
     {
-        // TODO...
         // do the appropriate thing based on the phase for this target
 
         case START_PATTERN_0:
@@ -320,7 +319,7 @@ bool StateMachine::executeWorkItem(WorkFlowProperties * i_wfp)
         case START_PATTERN_5:
         case START_PATTERN_6:
         case START_PATTERN_7:
-        case START_PATTERN_8:
+        case START_RANDOM_PATTERN:
         case START_SCRUB:
 
             err = doMaintCommand(*i_wfp);
@@ -363,124 +362,139 @@ bool StateMachine::executeWorkItem(WorkFlowProperties * i_wfp)
 
 errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
 {
+    static const uint64_t timeout = 100;
     errlHndl_t err = NULL;
+
+    uint64_t stopCondition = mss_MaintCmd::STOP_ON_END_ADDRESS
+        | mss_MaintCmd::ENABLE_CMD_COMPLETE_ATTENTION;
+
+    uint64_t workItem;
+    bool restart;
+    TargetHandle_t targetMba;
+    ecmdDataBufferBase startAddr(64), endAddr(64);
+    mss_MaintCmd * cmd = NULL;
+
+    // starting a maint cmd ...  register a timeout monitor
+    uint64_t monitorId = getMonitor().addMonitor(timeout);
 
     mutex_lock(&iv_mutex);
 
-    // starting a maint cmd ...  register a timeout monitor
+    i_wfp.timer = monitorId;
+    workItem = *i_wfp.workItem;
+    restart = i_wfp.restartCommand;
+    targetMba = getTarget(i_wfp);
 
-    // select a timeout based on the size of the address range
-    // the command is being run against
+    fapi::Target fapiMba(TARGET_TYPE_MBA_CHIPLET, targetMba);
 
-    // uint32_t timeout = i_wfp.memSize / 1024; // TODO
-    uint32_t timeout = 100;
-    i_wfp.timer = getMonitor().addMonitor(timeout);
+    do {
 
-    WorkFlowPhase workItem = *i_wfp.workItem;
-    bool restart = i_wfp.restartCommand;
+        FAPI_INVOKE_HWP(
+                err,
+                mss_get_address_range,
+                fapiMba,
+                MSS_ALL_RANKS,
+                startAddr,
+                endAddr);
 
-    TargetHandle_t targetMba = getTarget(i_wfp);
-
-    mutex_unlock(&iv_mutex);
-
-    switch (workItem)
-    {
-        case START_PATTERN_0:
-        case START_PATTERN_1:
-        case START_PATTERN_2:
-        case START_PATTERN_3:
-        case START_PATTERN_4:
-        case START_PATTERN_5:
-        case START_PATTERN_6:
-        case START_PATTERN_7:
-        case START_PATTERN_8:
-        case START_SCRUB:
+        if(err)
         {
-            mutex_lock(&iv_mutex);
-
-            // Get the fapi target from the TargetHandle required for HWP
-            ReturnCode fapirc;
-            fapi::Target fapiMba(TARGET_TYPE_MBA_CHIPLET, targetMba);
-
-            if(restart)
-            {
-                MDIA_FAST("sm: issuing increment address on: %p",
-                            targetMba);
-                // TODO...RTC 46418
-                // restart the command (increment address)
-            }
-            else
-            {
-                MDIA_FAST("sm: issuing maint command on: %p",
-                            targetMba);
-
-                do
-                {
-                    //TODO...RTC 46187
-                    //add method to set patternIndex based on workItem
-                    ecmdDataBufferBase startAddr(64);
-                    ecmdDataBufferBase endAddr(64);
-
-                    // Get the address range for maint cmd
-                    fapirc = mss_get_address_range( fapiMba,
-                                                    MSS_ALL_RANKS,
-                                                    startAddr,
-                                                    endAddr);
-                    if(!fapirc.ok())
-                    {
-                        MDIA_FAST("sm: get_address_range failed");
-                        break;
-                    }
-
-                    const mss_MaintCmd::StopCondition stopCondition =
-                        static_cast<mss_MaintCmd::StopCondition>
-                        (mss_MaintCmd::STOP_ON_END_ADDRESS |
-                         mss_MaintCmd::ENABLE_CMD_COMPLETE_ATTENTION);
-
-                    // Create the maintenance command
-                    mss_SuperFastInit sfinit( fapiMba,
-                                              startAddr,
-                                              endAddr,
-                                              mss_MaintCmd::PATTERN_0,
-                                              stopCondition,
-                                              false);
-
-                    //Setup the maint cmd and execute it
-                    fapirc = sfinit.setupAndExecuteCmd();
-
-                    if(!fapirc.ok())
-                    {
-                        MDIA_FAST("sm: setupAndExecuteCmd failed");
-                        break;
-                    }
-
-                }while(0);
-
-                if(!fapirc.ok())
-                {
-                    MDIA_FAST("sm: Running Maint Cmd failed");
-
-                    //TODO...RTC 46419
-                    //obtain errorlog from fapirc
-
-                    // Unregister the maint cmd monitor
-                    getMonitor().removeMonitor(i_wfp.timer);
-                }
-            }
-
-#ifdef MDIA_DO_POLLING
-
-            MDIA_FAST("sm: polling on: %p", getTarget(i_wfp));
-
-            getMonitor().startPolling(getTarget(i_wfp));
-#endif
-            mutex_unlock(&iv_mutex);
-
+            MDIA_FAST("sm: get_address_range failed");
             break;
         }
-        default:
+
+        if(restart)
+        {
+            cmd = new mss_IncrementAddress(fapiMba);
+
+            MDIA_FAST("sm: increment address on: %p", targetMba);
+        }
+        else
+        {
+            switch(workItem)
+            {
+                case START_RANDOM_PATTERN:
+                    cmd = new mss_SuperFastRandomInit(
+                            fapiMba,
+                            startAddr,
+                            endAddr,
+                            mss_MaintCmd::PATTERN_RANDOM,
+                            stopCondition,
+                            false);
+
+                    MDIA_FAST("sm: random init on: %p", targetMba);
+                    break;
+
+                case START_SCRUB:
+                    cmd = new mss_SuperFastRead(
+                            fapiMba,
+                            startAddr,
+                            endAddr,
+                            stopCondition,
+                            false);
+
+                    MDIA_FAST("sm: scrub on: %p", targetMba);
+                    break;
+
+                case START_PATTERN_0:
+                case START_PATTERN_1:
+                case START_PATTERN_2:
+                case START_PATTERN_3:
+                case START_PATTERN_4:
+                case START_PATTERN_5:
+                case START_PATTERN_6:
+                case START_PATTERN_7:
+
+                    cmd = new mss_SuperFastInit(
+                            fapiMba,
+                            startAddr,
+                            endAddr,
+                            static_cast<mss_MaintCmd::PatternIndex>(workItem),
+                            stopCondition,
+                            false);
+
+                    MDIA_FAST("sm: init on: %p", targetMba);
+                    break;
+
+                default:
+                    break;
+            }
+
+            if(!cmd)
+            {
+                MDIA_ERR("unrecognized maint command type %d on: %p",
+                        workItem, targetMba);
+                break;
+            }
+        }
+
+        ReturnCode fapirc = cmd->setupAndExecuteCmd();
+        err = fapiRcToErrl(fapirc);
+
+        if(err || !cmd)
+        {
+            MDIA_FAST("sm: setupAndExecuteCmd failed");
             break;
+        }
+
+    } while(0);
+
+    if(err)
+    {
+        MDIA_FAST("sm: Running Maint Cmd failed");
+
+        getMonitor().removeMonitor(monitorId);
     }
+
+#ifdef MDIA_DO_POLLING
+    else
+    {
+        MDIA_FAST("sm: polling on: %p", targetMba);
+
+        getMonitor().startPolling(targetMba);
+    }
+#endif
+
+    mutex_unlock(&iv_mutex);
 
     return err;
 }
@@ -514,9 +528,8 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
 
     if(wit == iv_workFlowProperties.end())
     {
-        // TODO ... target not found...commit a log
+        MDIA_ERR("sm: did not find target");
 
-        MDIA_FAST("sm: did not find target");
         return false;
     }
 
