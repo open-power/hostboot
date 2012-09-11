@@ -1198,7 +1198,7 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
 
         uint64_t l_xscom =
           l_pTarget->getAttr<TARGETING::ATTR_XSCOM_BASE_ADDRESS>();
-        if(l_xscom != 0x0003FC0000000000)
+        if(l_xscom != 0x0003FC0000000000ULL)
         {
             TARG_TS_FAIL("l_xscom value is 0x%016llX, not 0x%016llX as expected in direct "
                     "attribute access",l_xscom,0x0003FC00000000ULL);
