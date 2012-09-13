@@ -41,6 +41,8 @@
 #include    <devicefw/userif.H>
 #include    <sys/misc.h>
 
+#include    <proc_thread_control.H>
+
 //  targeting support
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
@@ -158,36 +160,44 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
         // send a magic instruction for PHYP Simics to work...
         MAGIC_INSTRUCTION(MAGIC_SIMICS_CORESTATESAVE);
 
-        //@todo - call the real proc_thread_control HWP  (RTC:42816)
-#if 0
         // parameters: i_target   => core target
         //             i_thread   => thread (0..7)
-        //             i_sreset   => initiate sreset thread command
-        //             i_start    => initiate start thread command
-        //             i_stop     => initiate stop thread command
-        //             i_step     => initiate step thread command
-        //             i_activate => initiate activate thread command
-        //             i_query    => query and return thread state
-        //                           return data in o_thread_state
-        //             o_thread_state   => output: thread state
-        uint8_t l_threadState = false;
+        //             i_command  =>
+        //               PTC_CMD_SRESET => initiate sreset thread command
+        //               PTC_CMD_START  => initiate start thread command
+        //               PTC_CMD_STOP   => initiate stop thread command
+        //               PTC_CMD_STEP   => initiate step thread command
+        //               PTC_CMD_QUERY  => query and return thread state
+        //                                 return data in o_ras_status
+        //             i_warncheck => convert pre/post checks errors to warnings
+        //             o_ras_status  => output: complete RAS status register
+        //             o_state       => output: thread state info
+        //                               see proc_thread_control.H
+        //                               for bit enumerations:
+        //                               THREAD_STATE_*
+        ecmdDataBufferBase l_ras_status;
+        uint64_t l_thread_state;
         FAPI_INVOKE_HWP( l_errl, proc_thread_control,
-                         l_fapiCore, //i_target
-                         thread, //i_thread
-                         true,   //i_sreset
-                         false,  //i_start
-                         false,  //i_stop
-                         false,  //i_step
-                         false,  //i_activate
-                         false,  //i_query
-                         l_threadState ); //o_thread_state
-        if ( l_errl )
+                         l_fapiCore,      //i_target
+                         thread,          //i_thread
+                         PTC_CMD_SRESET,  //i_command
+                         false,           //i_warncheck
+                         l_ras_status,    //o_ras_status
+                         l_thread_state); //o_state
+
+        if ( l_errl != NULL )
         {
             TRACFCOMP( g_fapiImpTd,
-                       "ERROR: 0x%.8X :  proc_thread_control HWP( cpu %d, thread %d )",
+                       "ERROR: 0x%.8X :  proc_thread_control HWP( cpu %d, thread %d, "
+                       "ras status 0x%.16X, thread state 0x%.16X )",
                        l_errl->reasonCode(),
                        l_masterCoreID,
-                       thread );
+                       thread,
+                       l_ras_status.getDoubleWord(0),
+                       l_thread_state );
+            l_errl->collectTrace(FAPI_TRACE_NAME,256);
+            l_errl->collectTrace(FAPI_IMP_TRACE_NAME,256);
+
             // if 1 thread fails it is unlikely that other threads will work
             //   so we'll just jump out now
             break;
@@ -195,94 +205,13 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
         else
         {
             TRACFCOMP( g_fapiTd,
-                       "SUCCESS: 0x%.8X :  proc_thread_control HWP( cpu %d, thread %d )",
-                       l_errl->reasonCode(),
-                       l_masterCoreID,
-                       thread );
-        }
-#else
-        //@todo - Temp version, just do the scoms manually (RTC:42816)
-        size_t scom_size = sizeof(uint64_t);
-        uint32_t directControlAddr = 0x10013000 + (thread << 4);
-        uint32_t rasStatAddr = 0x10013002 + (thread << 4);
-
-        // Check the initial state
-        uint64_t statreg = 0;
-        l_errl = deviceRead( l_masterCore,
-                             &statreg,
-                             scom_size,
-                             DEVICE_SCOM_ADDRESS(rasStatAddr) );
-        if( l_errl ) { break; }
-
-        // Make sure the thread is in maintenance mode
-        if( !(statreg & 0x0000040000000000) ) //21:PTC_RAS_STAT_MAINT
-        {
-            TRACFCOMP( g_fapiImpTd,
-                       "ERROR: Thread c%d t%d is in the wrong state : Status=%.16X",
+                       "SUCCESS: proc_thread_control HWP( cpu %d, thread %d, "
+                       "ras status 0x%.16X,thread state 0x%.16X )",
                        l_masterCoreID,
                        thread,
-                       statreg );
-            /*@
-             * @errortype
-             * @moduleid     fapi::MOD_THREAD_ACTIVATE
-             * @reasoncode   fapi::RC_THREAD_IN_WRONG_STATE
-             * @userdata1    Thread RAS Status Scom Addr
-             * @userdata2    Thread RAS Status Data
-             * @devdesc      activate_threads> Thread start attempted on
-             *               thread that is not in maintenance mode
-             */
-            l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                             fapi::MOD_THREAD_ACTIVATE,
-                                             fapi::RC_THREAD_IN_WRONG_STATE,
-                                             rasStatAddr,
-                                             statreg);
-            l_errl->collectTrace(FAPI_TRACE_NAME,256);
-            l_errl->collectTrace(FAPI_IMP_TRACE_NAME,256);
-            break;
-
+                       l_ras_status.getDoubleWord(0),
+                       l_thread_state );
         }
-
-        // Start the thread
-        uint64_t ctlreg = 0x0000000000000008; //60:PTC_DIR_CTL_SP_SRESET
-        l_errl = deviceWrite( l_masterCore,
-                              &ctlreg,
-                              scom_size,
-                              DEVICE_SCOM_ADDRESS(directControlAddr) );
-        if( l_errl ) { break; }
-
-        // Make sure we really started
-        l_errl = deviceRead( l_masterCore,
-                             &statreg,
-                             scom_size,
-                             DEVICE_SCOM_ADDRESS(rasStatAddr) );
-        if( l_errl ) { break; }
-
-        if( !(statreg & 0x0008000000000000) ) //12:PTC_RAS_STAT_INST_COMP
-        {
-            TRACFCOMP( g_fapiImpTd,
-                       "ERROR: Thread c%d t%d did not start : Status=%.16X",
-                       l_masterCoreID,
-                       thread,
-                       statreg );
-            /*@
-             * @errortype
-             * @moduleid     fapi::MOD_THREAD_ACTIVATE
-             * @reasoncode   fapi::RC_THREAD_DID_NOT_START
-             * @userdata1    Thread RAS Status Scom Addr
-             * @userdata2    Thread RAS Status Data
-             * @devdesc      activate_threads> Thread did not start
-             */
-            l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                             fapi::MOD_THREAD_ACTIVATE,
-                                             fapi::RC_THREAD_DID_NOT_START,
-                                             rasStatAddr,
-                                             statreg);
-            l_errl->collectTrace(FAPI_TRACE_NAME,256);
-            l_errl->collectTrace(FAPI_IMP_TRACE_NAME,256);
-            break;
-
-        }
-#endif
 
         TRACFCOMP( g_fapiTd,
                    "SUCCESS: Thread c%d t%d started",

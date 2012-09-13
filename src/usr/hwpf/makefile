@@ -47,7 +47,8 @@ HWP_ERROR_XML_FILES = hwp/fapiHwpErrorInfo.xml   \
     hwp/nest_chiplets/proc_chiplet_scominit/proc_chiplet_scominit_errors.xml \
     hwp/nest_chiplets/proc_a_x_pci_dmi_pll_setup_errors.xml \
     hwp/core_activate/proc_prep_master_winkle/proc_prep_master_winkle_errors.xml \
-    hwp/core_activate/proc_stop_deadman_timer/proc_stop_deadman_timer_errors.xml
+    hwp/core_activate/proc_stop_deadman_timer/proc_stop_deadman_timer_errors.xml \
+    hwp/thread_activate/proc_thread_control/proc_thread_control.xml
 
 
 ## these get generated into obj/genfiles/AttributeIds.H

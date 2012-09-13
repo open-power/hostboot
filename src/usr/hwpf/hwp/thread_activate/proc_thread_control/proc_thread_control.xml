@@ -1,0 +1,66 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hwpf/hwp/thread_activate/proc_thread_control/proc_thread_control.xml $ -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2012                   -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- $Id: proc_thread_control.xml,v 1.6 2012/07/25 18:29:09 karm Exp $ -->
+<!-- Error definitions for proc_thread_control procedure -->
+<hwpErrors>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_PROC_THREAD_CONTROL_INV_COMMAND</rc>
+    <description>Invalid command issued to proc_thread_control procedure</description>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_PROC_THREAD_CONTROL_SRESET_FAIL</rc>
+    <description>Sreset command failed: RAS STAT instruction completed bit was not set after sreset command.</description>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_PROC_THREAD_CONTROL_START_PRE_NOMAINT</rc>
+    <description>Start command precondition not met: RAS STAT Maintenance bit is not set.</description>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_PROC_THREAD_CONTROL_START_FAIL</rc>
+    <description>Sreset command failed: RAS STAT instruction completed bit was not set after start command.</description>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_PROC_THREAD_CONTROL_STOP_FAIL</rc>
+    <description>Stop command issued to core PC, but RAS STAT maintenance bit is not set.</description>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_PROC_THREAD_CONTROL_STEP_PRE_NOMAINT</rc>
+    <description>Step command precondition not met: RAS STAT Maintenance bit is not set.</description>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_PROC_THREAD_CONTROL_STEP_FAIL</rc>
+    <description>Step command issued to core PC, but RAS STAT run bit is still set.</description>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_PROC_THREAD_CONTROL_ACTIVATE_FAIL</rc>
+    <description>Activate command issued to core PC, but THREAD ACTIVE bit was not set.</description>
+  </hwpError>
+</hwpErrors>

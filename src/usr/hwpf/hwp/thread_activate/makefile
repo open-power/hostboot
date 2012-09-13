@@ -40,15 +40,18 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/thread_activate
 ##  NOTE: add a new EXTRAINCDIR when you add a new HWP
 ##  EXAMPLE:
 ##  EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/thread_activate/<HWP_dir>
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/thread_activate/proc_thread_control
 
 
 ##  NOTE: add new object files when you add a new HWP
-OBJS =  thread_activate.o 
+OBJS =  thread_activate.o \
+        proc_thread_control.o
 
         
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 ##  EXAMPLE:
 #   VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/thread_activate/<HWP_dir>
+VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/thread_activate/proc_thread_control
 
 
 include ${ROOTPATH}/config.mk
