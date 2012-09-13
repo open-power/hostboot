@@ -1,27 +1,26 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/hwp/include/common_scom_addresses.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
-// $Id: common_scom_addresses.H,v 1.22 2012/07/24 15:52:06 koenig Exp $
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/hwp/include/common_scom_addresses.H $            */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012                   */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+// $Id: common_scom_addresses.H,v 1.30 2012/09/13 19:55:40 mfred Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/common_scom_addresses.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -176,6 +175,11 @@ CONST_UINT64_T( GENERIC_GP3_OR_0x000F0014             , ULL(0x000F0014) );
 CONST_UINT64_T( GENERIC_PMGP0_OR_0x000F0102           , ULL(0x000F0102) );
 
 //------------------------------------------------------------------------------
+//      GENERIC PLLLOCK REG
+//------------------------------------------------------------------------------
+CONST_UINT64_T( GENERIC_PLLLOCKREG_0x000F0019         , ULL(0x000F0019) );
+
+//------------------------------------------------------------------------------
 //      GENERIC HANG PULSE CONTROL
 //------------------------------------------------------------------------------
 CONST_UINT64_T( GENERIC_HANG_P0_0x000F0020            , ULL(0x000F0020) );
@@ -202,6 +206,14 @@ CONST_UINT32_T( CFAM_FSI_GP6_0x00001015               , ULL(0x00001015) );
 CONST_UINT32_T( CFAM_FSI_GP7_0x00001016               , ULL(0x00001016) );
 CONST_UINT32_T( CFAM_FSI_GP8_0x00001017               , ULL(0x00001017) );
 CONST_UINT32_T( CFAM_FSI_GP3_MIRROR_0x0000101B        , ULL(0x0000101B) );
+
+CONST_UINT32_T( CFAM_FSI_GP3_0x00002812               , ULL(0x00002812) );
+CONST_UINT32_T( CFAM_FSI_GP4_0x00002813               , ULL(0x00002813) );
+CONST_UINT32_T( CFAM_FSI_GP5_0x00002814               , ULL(0x00002814) );
+CONST_UINT32_T( CFAM_FSI_GP6_0x00002815               , ULL(0x00002815) );
+CONST_UINT32_T( CFAM_FSI_GP7_0x00002816               , ULL(0x00002816) );
+CONST_UINT32_T( CFAM_FSI_GP8_0x00002817               , ULL(0x00002817) );
+CONST_UINT32_T( CFAM_FSI_GP3_MIRROR_0x0000281B        , ULL(0x0000281B) );
 
 //------------------------------------------------------------------------------
 //      OTPROM
@@ -251,11 +263,14 @@ CONST_UINT64_T( MBOX_GP3MIR_0x0005001B                , ULL(0x0005001B) );
 CONST_UINT64_T( MBOX_SBEVITAL_0x0005001C              , ULL(0x0005001C) );
 CONST_UINT64_T( MBOX_SCRATCH_REG0_0x00050038          , ULL(0x00050038) );
 CONST_UINT64_T( MBOX_SCRATCH_REG1_0x00050039          , ULL(0x00050039) );
+CONST_UINT64_T( MBOX_SCRATCH_REG2_0x0005003A          , ULL(0x0005003A) );
+CONST_UINT64_T( MBOX_SCRATCH_REG3_0x0005003B          , ULL(0x0005003B) );
 
 //------------------------------------------------------------------------------
 //      TP ADDITIONAL REGISTER
 //------------------------------------------------------------------------------
 CONST_UINT64_T( TP_PLL_LOCK_0x010F0019                 , ULL(0x010F0019) );
+CONST_UINT64_T( TP_CLK_ADJ_SET_0x010F0016              , ULL(0x010F0016) );
 
 
 //------------------------------------------------------------------------------
@@ -447,16 +462,10 @@ CONST_UINT64_T( WRITE_ALL_GP0_OR_0x6B000005           , ULL(0x6B000005) );      
 
 CONST_UINT64_T( READ_ALL_GP1_AND_0x4B000001           , ULL(0x4B000001) );       // and all GP1 but not PRV
 
-CONST_UINT64_T( WRITE_EX_GP3_AND_0x690F0013           , ULL(0x690F0013) );       // and all EX GP3
-CONST_UINT64_T( WRITE_EX_GP3_OR_0x690F0014            , ULL(0x690F0014) );       // or all EX GP3
-
-
-CONST_UINT64_T( WRITE_EX_PMGP0_OR_0x690F0102          , ULL(0x690F0102) );       // or all EX PMGP0
-
 CONST_UINT64_T( WRITE_ALL_CLK_REGION_0x6B030006       , ULL(0x6B030006) );       // all GP3 but not PRV
 
-CONST_UINT64_T( READ_ALL_OPCG_CNTL0_0x43030002        , ULL(0x43030002) );       // all EX OPCG0
-CONST_UINT64_T( WRITE_ALL_OPCG_CNTL0_0x6B030002       , ULL(0x6B030002) );       // all EX OPCG0
+CONST_UINT64_T( READ_ALL_OPCG_CNTL0_0x43030002        , ULL(0x43030002) );       // all OPCG0 but not PRV
+CONST_UINT64_T( WRITE_ALL_OPCG_CNTL0_0x6B030002       , ULL(0x6B030002) );       // all OPCG0 but not PRV
 
 CONST_UINT64_T( READ_ALL_OPCG_CNTL2_0x43030004        , ULL(0x43030004) );       // all OPCG2 but not PRV
 CONST_UINT64_T( WRITE_ALL_OPCG_CNTL2_0x6B030004       , ULL(0x6B030004) );       // all OPCG2 but not PRV
@@ -497,6 +506,8 @@ CONST_UINT64_T( READ_AND_ALL_PCB_SLAVE_ERRREG_0x4B0F001F , ULL(0x4B0F001F) ); //
 CONST_UINT64_T( READ_ALL_PCB_SLAVE_ATTN_INT_0x500F001A   , ULL(0x500F001A) ); // group0: all chiplets
 CONST_UINT64_T( READ_ALL_PCB_SLAVE_RECOV_INT_0x500F001B  , ULL(0x500F001B) ); // group0: all chiplets
 CONST_UINT64_T( READ_ALL_PCB_SLAVE_XSTOP_INT_0x500F001C  , ULL(0x500F001C) ); // group0: all chiplets
+
+CONST_UINT64_T( WRITE_ALL_GP0_OR_0x68000005              , ULL(0x68000005) ); // group0: all chiplets
 
 CONST_UINT64_T( WRITE_ALL_FUNC_GP0_0x6B000000            , ULL(0x6B000000) ); // group3: all except PRV: GP0
 CONST_UINT64_T( WRITE_ALL_FUNC_GP1_0x6B000001            , ULL(0x6B000001) ); // group3: all except PRV: GP1
@@ -573,6 +584,30 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: common_scom_addresses.H,v $
+Revision 1.30  2012/09/13 19:55:40  mfred
+Move group 1 multicast definitions (EX chiplet) to p8_scom_addresses.H.
+
+Revision 1.29  2012/09/13 19:42:43  mfred
+fix misleading comment.
+
+Revision 1.28  2012/09/12 17:10:18  jmcgill
+add remainder of mailbox scratch registers
+
+Revision 1.27  2012/08/17 16:46:50  mfred
+Committing common PLL lock address for EX cores.
+
+Revision 1.26  2012/08/16 13:06:19  gweber
+added remaining CFAM-addresses 28xx
+
+Revision 1.25  2012/08/11 22:20:37  jmcgill
+add multicast GP0 OR address (all chiplets)
+
+Revision 1.24  2012/08/08 13:28:18  gweber
+added CFAM-addresses 28xx
+
+Revision 1.23  2012/08/07 09:09:43  koenig
+Added TP skewadjust register - AK
+
 Revision 1.22  2012/07/24 15:52:06  koenig
 Added EX GP3 OR codepoint - AK
 

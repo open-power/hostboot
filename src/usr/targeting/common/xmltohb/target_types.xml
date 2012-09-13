@@ -608,6 +608,7 @@
     <attribute><id>EFF_NUM_DIES_PER_PACKAGE</id></attribute>
     <attribute><id>MSS_SPARE_BYTE</id></attribute>
     <attribute><id>MSS_EFF_DIMM_FUNCTIONAL_VECTOR</id></attribute>
+    <attribute><id>MSS_CAL_STEP_ENABLE</id></attribute>
 </targetType>
 
 <targetType>

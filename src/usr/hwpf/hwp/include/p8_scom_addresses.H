@@ -1,27 +1,26 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/hwp/include/p8_scom_addresses.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
-// $Id: p8_scom_addresses.H,v 1.82 2012/06/27 07:43:32 rkoester Exp $
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/hwp/include/p8_scom_addresses.H $                */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012                   */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+// $Id: p8_scom_addresses.H,v 1.105 2012/09/26 17:53:25 jklazyns Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/p8_scom_addresses.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -114,11 +113,22 @@ CONST_UINT64_T( ALL_CHIPLETS_BITX_0x50000000          , ULL(0x50000000) );
 CONST_UINT64_T( ALL_CHIPLETS_COMP_0x60000000          , ULL(0x60000000) );
 CONST_UINT64_T( ALL_CHIPLETS_WRITE_0x68000000         , ULL(0x68000000) );
 
+// Group 1 : EX chiplets
 CONST_UINT64_T( ALL_EXS_OR_0x41000000                 , ULL(0x41000000) );
 CONST_UINT64_T( ALL_EXS_AND_0x49000000                , ULL(0x49000000) );
 CONST_UINT64_T( ALL_EXS_BITX_0x51000000               , ULL(0x51000000) );
 CONST_UINT64_T( ALL_EXS_COMP_0x61000000               , ULL(0x61000000) );
 CONST_UINT64_T( ALL_EXS_WRITE_0x69000000              , ULL(0x69000000) );
+CONST_UINT64_T( WRITE_ALL_EXS_GP0_AND_0x69000004      , ULL(0x69000004) );
+CONST_UINT64_T( WRITE_ALL_EXS_GP0_OR_0x69000005       , ULL(0x69000005) );
+CONST_UINT64_T( WRITE_ALL_EXS_CLK_REGION_0x69030006   , ULL(0x69030006) );
+CONST_UINT64_T( WRITE_ALL_EXS_CLK_SCANSEL_0x69030007  , ULL(0x69030007) );
+CONST_UINT64_T( READ_OR_ALL_EXS_CLK_STATUS_0x41030008 , ULL(0x41030008) );
+CONST_UINT64_T( WRITE_ALL_EXS_GP3_AND_0x690F0013      , ULL(0x690F0013) );
+CONST_UINT64_T( WRITE_ALL_EXS_GP3_OR_0x690F0014       , ULL(0x690F0014) );
+CONST_UINT64_T( WRITE_EX_GP3_AND_0x690F0013           , ULL(0x690F0013) );       // and all EX GP3
+CONST_UINT64_T( WRITE_EX_GP3_OR_0x690F0014            , ULL(0x690F0014) );       // or all EX GP3
+CONST_UINT64_T( WRITE_EX_PMGP0_OR_0x690F0102          , ULL(0x690F0102) );       // or all EX PMGP0
 
 CONST_UINT64_T( ALL_CORES_OR_0x42000000               , ULL(0x42000000) );
 CONST_UINT64_T( ALL_CORES_AND_0x4A000000              , ULL(0x4A000000) );
@@ -132,10 +142,32 @@ CONST_UINT64_T( ALL_CORES_WRITE_0x6A000000            , ULL(0x6A000000) );
 /******************************************************************************/
 
 //------------------------------------------------------------------------------
+//      FSI MBOX (CFAM)
+//------------------------------------------------------------------------------
+CONST_UINT64_T( MBOX_SCRATCH_REG0_0x00002838          , ULL(0x00002838) );
+CONST_UINT64_T( MBOX_SCRATCH_REG1_0x00002839          , ULL(0x00002839) );
+CONST_UINT64_T( MBOX_SCRATCH_REG2_0x0000283A          , ULL(0x0000283A) );
+CONST_UINT64_T( MBOX_SCRATCH_REG3_0x0000283B          , ULL(0x0000283B) );
+
+//------------------------------------------------------------------------------
 //      OTPROM
 //------------------------------------------------------------------------------
-CONST_UINT64_T( ECID_PART_0_0x00018000                   , ULL(0x00018000) );
-CONST_UINT64_T( ECID_PART_1_0x00018001                   , ULL(0x00018001) );
+CONST_UINT64_T( SECURITY_SWITCH_0x00010005            , ULL(0x00010005) );
+CONST_UINT64_T( ECID_PART_0_0x00018000                , ULL(0x00018000) );
+CONST_UINT64_T( ECID_PART_1_0x00018001                , ULL(0x00018001) );
+
+//------------------------------------------------------------------------------
+//      Time of Day (TOD)
+//------------------------------------------------------------------------------
+CONST_UINT64_T( TOD_FSM_REG_00040024                  , ULL(0x00040024) );
+
+
+//------------------------------------------------------------------------------
+//      SBE VITAL REG
+//------------------------------------------------------------------------------
+CONST_UINT64_T( PORE_SBE_VITAL_0x0005001C             , ULL(0x0005001C) );
+
+
 
 //------------------------------------------------------------------------------
 //      PORE-GPE0
@@ -299,6 +331,15 @@ CONST_UINT64_T( OCB3_UNTRUSTED_CONTROL_0x0006A237     , ULL(0x0006A237) );
 CONST_UINT64_T( OCB3_LIN_WINDOW_CONTROL_0x0006A238    , ULL(0x0006A238) );
 CONST_UINT64_T( OCB3_LIN_WINDOW_BASE_0x0006A23C       , ULL(0x0006A23C) );
 
+CONST_UINT64_T( OCC_LFIR_0x01010800                   , ULL(0x01010800) ); 
+CONST_UINT64_T( OCC_LFIR_AND_0x01010801               , ULL(0x01010801) );
+CONST_UINT64_T( OCC_LFIR_OR_0x01010802                , ULL(0x01010802) );
+CONST_UINT64_T( OCC_LFIR_MASK_0x01010803              , ULL(0x01010803) );
+CONST_UINT64_T( OCC_LFIR_MASK_AND_0x01010804          , ULL(0x01010804) );
+CONST_UINT64_T( OCC_LFIR_MASK_OR_0x01010805           , ULL(0x01010805) );
+CONST_UINT64_T( OCC_LFIR_ACT0_0x01010806              , ULL(0x01010806) );
+CONST_UINT64_T( OCC_LFIR_ACT1_0x01010807              , ULL(0x01010807) );
+
 // sram registers
 CONST_UINT64_T( OCC_SRAM_BOOT_VEC0_0x00066004         , ULL(0x00066004) );
 CONST_UINT64_T( OCC_SRAM_BOOT_VEC1_0x00066005         , ULL(0x00066005) );
@@ -308,11 +349,17 @@ CONST_UINT64_T( OCC_SRAM_BOOT_VEC3_0x00066007         , ULL(0x00066007) );
 //------------------------------------------------------------------------------
 //      PMC
 //------------------------------------------------------------------------------
-// todo:  the full set needs to be added.  The ones below are for SLW at this time
 
 // PIB Space Addresses
 
-
+CONST_UINT64_T( PMC_MODE_REG_0x00062000               , ULL(0x00062000) );
+CONST_UINT64_T( PMC_PSTATE_MONITOR_AND_CTRL_REG_0x00062002, ULL(0x00062002)) ;
+CONST_UINT64_T( PMC_PARAMETER_REG1_0x00062006         , ULL(0x00062006)) 
+CONST_UINT64_T( PMC_STATUS_REG_0x00062009             , ULL(0x00062009)) ;
+CONST_UINT64_T( PMC_OCC_HEARTBEAT_REG_0x00062066      , ULL(0x00062066)) ;
+CONST_UINT64_T( PMC_CORE_DECONFIG_REG_0x0006200D      , ULL(0x0006200D) );
+CONST_UINT64_T( PMC_FSMSTATE_STATUS_REG_0x00062000    , ULL(0x00062020) );
+// SPIVID Controller
 CONST_UINT64_T( PMC_SPIV_CTRL_REG0A_0x00062040        , ULL(0x00062040) );
 CONST_UINT64_T( PMC_SPIV_CTRL_REG0B_0x00062041        , ULL(0x00062041) );
 CONST_UINT64_T( PMC_SPIV_CTRL_REG1_0x00062042         , ULL(0x00062042) );
@@ -321,8 +368,7 @@ CONST_UINT64_T( PMC_SPIV_CTRL_REG3_0x00062044         , ULL(0x00062044) );
 CONST_UINT64_T( PMC_SPIV_CTRL_REG4_0x00062045         , ULL(0x00062045) );
 CONST_UINT64_T( PMC_SPIV_STATUS_REG_0x00062046        , ULL(0x00062046) );
 CONST_UINT64_T( PMC_SPIV_COMMAND_REG_0x00062047       , ULL(0x00062047) );
-
-
+// OCI to SPI (O2S)
 CONST_UINT64_T( PMC_O2S_CTRL_REG0A_0x00062050         , ULL(0x00062050) );
 CONST_UINT64_T( PMC_O2S_CTRL_REG0B_0x00062051         , ULL(0x00062051) ); 		
 CONST_UINT64_T( PMC_O2S_CTRL_REG1_0x00062052          , ULL(0x00062052) ); 		
@@ -332,13 +378,17 @@ CONST_UINT64_T( PMC_O2S_STATUS_REG_0x00062056         , ULL(0x00062056) );
 CONST_UINT64_T( PMC_O2S_COMMAND_REG_0x00062057        , ULL(0x00062057) ); 		
 CONST_UINT64_T( PMC_O2S_WDATA_REG_0x00062058          , ULL(0x00062058) ); 		
 CONST_UINT64_T( PMC_O2S_RDATA_REG_0x00062059          , ULL(0x00062059) );
-
+// PORE interface
 CONST_UINT64_T( PMC_PORE_REQ_STAT_REG_0x00062090      , ULL(0x00062090) );
-CONST_UINT64_T( PMC_MODE_REG_0x00062000               , ULL(0x00062000) );
+
+// OCI Space Addresses
+
+CONST_UINT32_T( OCI_PMC_PORE_REQ_STAT_REG_0x40010480  , ULL(0x40010480) );
 
 
-
-
+//------------------------------------------------------------------------------
+//      SPIADC
+//------------------------------------------------------------------------------
 CONST_UINT64_T( SPIPSS_ADC_CTRL_REG0_0x00070000       , ULL(0x00070000) );
 CONST_UINT64_T( SPIPSS_ADC_CTRL_REG1_0x00070001       , ULL(0x00070001) );
 CONST_UINT64_T( SPIPSS_ADC_CTRL_REG2_0x00070002       , ULL(0x00070002) );
@@ -360,21 +410,10 @@ CONST_UINT64_T( SPIPSS_P2S_RDATA_REG_0x00070060       , ULL(0x00070060) );
 CONST_UINT64_T( SPIPSS_ADC_RESET_REGISTER_0x00070005  , ULL(0x00070005) );
 CONST_UINT64_T( SPIPSS_P2S_RESET_REGISTER_0x00070045  , ULL(0x00070045) );
 
-
-// OCI Space Addresses
-CONST_UINT32_T( OCI_PMC_PORE_REQ_STAT_REG_0x40010480  , ULL(0x40010480) );
-
-
-//------------------------------------------------------------------------------
-//      SPIADC
-//------------------------------------------------------------------------------
-CONST_UINT64_T( SPIADC_0x00070000                     , ULL(0x00070000) );
-
 //------------------------------------------------------------------------------
 //      PIB-ATTACHED MEMORY
 //------------------------------------------------------------------------------
 CONST_UINT64_T( PIBMEM0_0x00080000                    , ULL(0x00080000) );
-
 CONST_UINT64_T( PIBMEM_CONTROL_0x00088000             , ULL(0x00088000) );
 CONST_UINT64_T( PIBMEM_ADDRESS_0x00088001             , ULL(0x00088001) );
 CONST_UINT64_T( PIBMEM_DATA_0x00088002                , ULL(0x00088002) );
@@ -383,6 +422,12 @@ CONST_UINT64_T( PIBMEM_DATA_DEC_0x00088004            , ULL(0x00088004) );
 CONST_UINT64_T( PIBMEM_STATUS_0x00088005              , ULL(0x00088005) );
 CONST_UINT64_T( PIBMEM_RESET_0x00088006               , ULL(0x00088006) );
 CONST_UINT64_T( PIBMEM_REPAIR_LOAD_0x00088007         , ULL(0x00088007) );
+
+//------------------------------------------------------------------------------
+//      I2C MASTER (MODE)
+//------------------------------------------------------------------------------
+CONST_UINT64_T( I2CM_MODE_REGISTER_0_0x000A0006       , ULL(0x000A0006) );
+
 
 //------------------------------------------------------------------------------
 //      I2C MASTER (MEMS1)
@@ -402,6 +447,29 @@ CONST_UINT64_T( I2CMS_PCI_RESET_0x000A0041            , ULL(0x000A0041) );
 CONST_UINT64_T( I2CMS_PCI_STATUS_0x000A0042           , ULL(0x000A0042) );
 CONST_UINT64_T( I2CMS_PCI_DATA_0x000A0043             , ULL(0x000A0043) );
 CONST_UINT64_T( I2CMS_PCI_COMMAND_0x000A0045          , ULL(0x000A0045) );
+
+//------------------------------------------------------------------------------
+//      LPC
+//------------------------------------------------------------------------------
+CONST_UINT64_T( LPC_CONTROL_0x000B0000                , ULL(0x000B0000) );
+CONST_UINT64_T( LPC_RESET_0x000B0001                  , ULL(0x000B0001) );
+CONST_UINT64_T( LPC_STATUS_0x000B0002                 , ULL(0x000B0002) );
+CONST_UINT64_T( LPC_DATA_0x000B0003                   , ULL(0x000B0003) );
+CONST_UINT64_T( LPC_ECC_ADDRESS_0x000B0004            , ULL(0x000B0004) );
+CONST_UINT64_T( LPC_I2C_ADDRESS_0x000B0005            , ULL(0x000B0005) );
+CONST_UINT64_T( LPC_FW_CONTROL_0x000B0020             , ULL(0x000B0020) );
+CONST_UINT64_T( LPC_FW_RESET_0x000B0021               , ULL(0x000B0021) );
+CONST_UINT64_T( LPC_FW_STATUS_0x000B0022              , ULL(0x000B0022) );
+CONST_UINT64_T( LPC_FW_DATA_0x000B0023                , ULL(0x000B0023) );
+
+//------------------------------------------------------------------------------
+//    PORE_ECCB
+//------------------------------------------------------------------------------
+ 
+CONST_UINT64_T( PORE_ECCB_CONTROL_REGISTER_0x000C0000 , ULL(0x000C0000) );
+CONST_UINT64_T( PORE_ECCB_STATUS_REGISTER_READ_0x000C0002, ULL(0x000C0002) );
+CONST_UINT64_T( PORE_ECCB_DATA_REGISTER_0x000C0003    , ULL(0x000C0003) );
+ 
 
 //------------------------------------------------------------------------------
 //      PORE-SBE
@@ -559,24 +627,51 @@ CONST_UINT64_T( PBA_BARMSK3_0x02013F07                , ULL(0x02013F07) );
 CONST_UINT64_T( PBA_TRUSTMODE_0x02013F08              , ULL(0x02013F08) );
 
 //------------------------------------------------------------------------------
+//      PBAX
+//------------------------------------------------------------------------------
+CONST_UINT64_T( PBAXSNDTX_00064020    , ULL(0x00064020) );
+CONST_UINT64_T( PBAXCFG_00064021      , ULL(0x00064021) );
+CONST_UINT64_T( PBAXSHBR0_00064026    , ULL(0x00064026) );
+CONST_UINT64_T( PBAXSHBR1_0006402A    , ULL(0x0006402A) );
+
+//------------------------------------------------------------------------------
 //      PSI
 //------------------------------------------------------------------------------
+CONST_UINT64_T( PSI_TXCSR_0x02010800                  , ULL(0x02010800) );
+CONST_UINT64_T( PSI_RXCSR_0x02010808                  , ULL(0x02010808) );    
+CONST_UINT64_T( PSI_TXCIAR_0x02010810                 , ULL(0x02010810) );    
+CONST_UINT64_T( PSI_TXCMISC_0x02010813                , ULL(0x02010813) );    
+CONST_UINT64_T( PSI_RXCIAR_0x02010818                 , ULL(0x02010818) );    
+CONST_UINT64_T( PSI_RXCMISC_0x0201081B                , ULL(0x0201081B) );
 CONST_UINT64_T( PSI_BRIDGE_BAR_0x0201090A             , ULL(0x0201090A) );
 CONST_UINT64_T( PSI_FSP_BAR_0x0201090B                , ULL(0x0201090B) );
 CONST_UINT64_T( PSI_FSP_MMR_0x0201090C                , ULL(0x0201090C) );
 CONST_UINT64_T( PSI_BRIDGE_STATUS_CTL_0x0201090E      , ULL(0x0201090E) );
+CONST_UINT64_T( PSI_BRIDGE_STATUS_CTL_OR_0x02010912   , ULL(0x02010912) );
+
+CONST_UINT64_T( PSI_NOTRUST_BAR0_0x02013F40           , ULL(0x02013F40) );
+CONST_UINT64_T( PSI_NOTRUST_BAR1_0x02013F41           , ULL(0x02013F41) );
+CONST_UINT64_T( PSI_NOTRUST_BAR0_MASK_0x02013F42      , ULL(0x02013F42) );
+CONST_UINT64_T( PSI_NOTRUST_BAR1_MASK_0x02013F43      , ULL(0x02013F43) );
+
+
+//------------------------------------------------------------------------------
+//      HCA
+//------------------------------------------------------------------------------
+CONST_UINT64_T( HCA_MODE_0x0201094F                   , ULL(0x0201094F) );
 
 //------------------------------------------------------------------------------
 //     INTERRUPT CONTROL PRESENTER  (ICP)
 //------------------------------------------------------------------------------
 CONST_UINT64_T( ICP_BAR_0x020109CA                    , ULL(0x020109CA) );
+CONST_UINT64_T( ICP_SYNC_MODE_REG0_0x020109CB         , ULL(0x020109CB) );
 CONST_UINT64_T( ICP_INTR_INJECT_0x020109CC            , ULL(0x020109CC) );
 
 
 //------------------------------------------------------------------------------
 //      NEST PB EH
 //------------------------------------------------------------------------------
-// registers with multiple physical/shadow copies (all must be configured consistently)
+// registers with multiple physical/shadow copies
 // west
 CONST_UINT64_T( PB_MODE_WEST_0x02010C0A               , ULL(0x02010C0A) );
 CONST_UINT64_T( PB_HP_MODE_NEXT_WEST_0x02010C0B       , ULL(0x02010C0B) );
@@ -587,6 +682,7 @@ CONST_UINT64_T( PB_FLMCFG0_WEST_0x02010C12            , ULL(0x02010C12) );
 CONST_UINT64_T( PB_FLMCFG1_WEST_0x02010C13            , ULL(0x02010C13) );
 CONST_UINT64_T( PB_FRMCFG0_WEST_0x02010C14            , ULL(0x02010C14) );
 CONST_UINT64_T( PB_FRMCFG1_WEST_0x02010C15            , ULL(0x02010C15) );
+CONST_UINT64_T( PB_SCONFIG_LOAD_WEST_0x02010C16       , ULL(0x02010C16) );
 // center
 CONST_UINT64_T( PB_MODE_CENT_0x02010C4A               , ULL(0x02010C4A) );
 CONST_UINT64_T( PB_HP_MODE_NEXT_CENT_0x02010C4B       , ULL(0x02010C4B) );
@@ -597,6 +693,7 @@ CONST_UINT64_T( PB_FLMCFG0_CENT_0x02010C5E            , ULL(0x02010C5E) );
 CONST_UINT64_T( PB_FLMCFG1_CENT_0x02010C5F            , ULL(0x02010C5F) );
 CONST_UINT64_T( PB_FRMCFG0_CENT_0x02010C60            , ULL(0x02010C60) );
 CONST_UINT64_T( PB_FRMCFG1_CENT_0x02010C61            , ULL(0x02010C61) );
+CONST_UINT64_T( PB_SCONFIG_LOAD_CENT_0x02010C6D       , ULL(0x02010C6D) );
 // east
 CONST_UINT64_T( PB_MODE_EAST_0x02010C8A               , ULL(0x02010C8A) );
 CONST_UINT64_T( PB_HP_MODE_NEXT_EAST_0x02010C8B       , ULL(0x02010C8B) );
@@ -607,6 +704,7 @@ CONST_UINT64_T( PB_FLMCFG0_EAST_0x02010C92            , ULL(0x02010C92) );
 CONST_UINT64_T( PB_FLMCFG1_EAST_0x02010C93            , ULL(0x02010C93) );
 CONST_UINT64_T( PB_FRMCFG0_EAST_0x02010C94            , ULL(0x02010C94) );
 CONST_UINT64_T( PB_FRMCFG1_EAST_0x02010C95            , ULL(0x02010C95) );
+CONST_UINT64_T( PB_SCONFIG_LOAD_EAST_0x02010C96       , ULL(0x02010C96) );
 
 // registers without shadow copies
 // center
@@ -625,12 +723,12 @@ CONST_UINT64_T( PB_RGMCFG10_0x02010C5A                , ULL(0x02010C5A) );
 CONST_UINT64_T( PB_RGMCFGM00_0x02010C5B               , ULL(0x02010C5B) );
 CONST_UINT64_T( PB_RGMCFGM01_0x02010C5C               , ULL(0x02010C5C) );
 CONST_UINT64_T( PB_RGMCFGM10_0x02010C5D               , ULL(0x02010C5D) );
-CONST_UINT64_T( PB_GP_CMD_RATE_DP0_0x02010C62         , ULL(0x02010C62) );
-CONST_UINT64_T( PB_GP_CMD_RATE_DP1_0x02010C63         , ULL(0x02010C63) );
-CONST_UINT64_T( PB_RGP_CMD_RATE_DP0_0x02010C64        , ULL(0x02010C64) );
-CONST_UINT64_T( PB_RGP_CMD_RATE_DP1_0x02010C65        , ULL(0x02010C65) );
-CONST_UINT64_T( PB_SP_CMD_RATE_DP0_0x02010C66         , ULL(0x02010C66) );
-CONST_UINT64_T( PB_SP_CMD_RATE_DP1_0x02010C67         , ULL(0x02010C67) );
+CONST_UINT64_T( PB_GP_CMD_RATE_DP_LO_0x02010C62       , ULL(0x02010C62) );
+CONST_UINT64_T( PB_GP_CMD_RATE_DP_HI_0x02010C63       , ULL(0x02010C63) );
+CONST_UINT64_T( PB_RGP_CMD_RATE_DP_LO_0x02010C64      , ULL(0x02010C64) );
+CONST_UINT64_T( PB_RGP_CMD_RATE_DP_HI_0x02010C65      , ULL(0x02010C65) );
+CONST_UINT64_T( PB_SP_CMD_RATE_DP_LO_0x02010C66       , ULL(0x02010C66) );
+CONST_UINT64_T( PB_SP_CMD_RATE_DP_HI_0x02010C67       , ULL(0x02010C67) );
 CONST_UINT64_T( PB_EVENT_TRACE_0x02010C68             , ULL(0x02010C68) );
 CONST_UINT64_T( PB_EVENT_COMPA_0x02010C69             , ULL(0x02010C69) );
 CONST_UINT64_T( PB_EVENT_COMPB_0x02010C6A             , ULL(0x02010C6A) );
@@ -682,9 +780,20 @@ CONST_UINT64_T( PB_RAS_FIR_ACTION1_0x02010C73         , ULL(0x02010C73) );
 CONST_UINT64_T( PB_PLLLOCKREG_0x020F0019              , ULL(0x020F0019) );
 
 //------------------------------------------------------------------------------
+//      CAPP
+//------------------------------------------------------------------------------
+CONST_UINT64_T( CAPP_APC_MASTER_PB_CTL_0x02013018     , ULL(0x02013018) );
+CONST_UINT64_T( CAPP_CXA_SNOOP_CTL_0x0201301B         , ULL(0x0201301B) );
+
+//------------------------------------------------------------------------------
 //      MCS
 //------------------------------------------------------------------------------
 CONST_UINT64_T( MCS_MCFGP_0x02011800                  , ULL(0x02011800) );
+CONST_UINT64_T( MCS_MCFGPM_0x02011801                 , ULL(0x02011801) );
+CONST_UINT64_T( MCS_MCFGPR_0x02011802                 , ULL(0x02011802) );
+CONST_UINT64_T( MCS_MCFGPA_0x02011814                 , ULL(0x02011814) );
+CONST_UINT64_T( MCS_MCFGPMA_0x02011815                , ULL(0x02011815) );
+CONST_UINT64_T( MCS_MCEPS_0x02011816                  , ULL(0x02011816) );
 
 CONST_UINT64_T( MCS_MCIFIR_0x02011840                 , ULL(0x02011840) );
 CONST_UINT64_T( MCS_MCIFIR_AND_0x02011841             , ULL(0x02011841) );
@@ -708,6 +817,7 @@ CONST_UINT64_T( ADU_FORCE_ECC_0x02020010              , ULL(0x02020010) );
 CONST_UINT64_T( ADU_PMISC_MODE_0x0202000B             , ULL(0x0202000B) );
 CONST_UINT64_T( ADU_UNTRUSTED_BAR_0x02020015          , ULL(0x02020015) );
 CONST_UINT64_T( ADU_UNTRUSTED_BAR_MASK_0x02020016     , ULL(0x02020016) );
+CONST_UINT64_T( ADU_TBROM_BAR_0x02020017              , ULL(0x02020017) );
 
 //------------------------------------------------------------------------------
 //      PCIe
@@ -777,10 +887,12 @@ CONST_UINT64_T( NX_NEAR_BAR_F0_0x02013099             , ULL(0x02013099) );
 CONST_UINT64_T( NX_FAR_BAR_F0_0x0201309A              , ULL(0x0201309A) );
 CONST_UINT64_T( NX_NEAR_BAR_F1_0x0201309B             , ULL(0x0201309B) );
 CONST_UINT64_T( NX_FAR_BAR_F1_0x0201309C              , ULL(0x0201309C) );
+CONST_UINT64_T( NX_CQ_EPS_0x0201309D                  , ULL(0x0201309D) );
 
 //------------------------------------------------------------------------------
 //      MCD
 //------------------------------------------------------------------------------
+CONST_UINT64_T( MCD_PRE_EPS_0x0201340B                , ULL(0x0201340B) );
 CONST_UINT64_T( MCD_CN00_0x0201340C                   , ULL(0x0201340C) );
 CONST_UINT64_T( MCD_CN01_0x0201340D                   , ULL(0x0201340D) );
 CONST_UINT64_T( MCD_CN10_0x0201340E                   , ULL(0x0201340E) );
@@ -818,6 +930,18 @@ CONST_UINT64_T( X_TRACE_DATA_HI_T0_0x04010400         , ULL(0x04010400) );
 CONST_UINT64_T( X_TRACE_DATA_LO_T0_0x04010401         , ULL(0x04010401) );
 CONST_UINT64_T( X_TRACE_DATA_HI_T1_0x04010800         , ULL(0x04010800) );
 CONST_UINT64_T( X_TRACE_DATA_LO_T1_0x04010801         , ULL(0x04010801) );
+
+//------------------------------------------------------------------------------
+//      X-BUS PBEN
+//------------------------------------------------------------------------------
+CONST_UINT64_T( PB_X_MODE_0x04010C0A                  , ULL(0x04010C0A) );
+
+//------------------------------------------------------------------------------
+//      X-BUS IOPSI
+//------------------------------------------------------------------------------
+CONST_UINT64_T( X_PSI_RXCNTL_0x04012420               , ULL(0x04012420) );
+CONST_UINT64_T( X_PSI_RXSTATUS_0x04012422             , ULL(0x04012422) );
+CONST_UINT64_T( X_PSI_TXCNTL_0x04012430               , ULL(0x04012430) );
 
 //------------------------------------------------------------------------------
 //      X-BUS CLOCK CONTROL
@@ -878,11 +1002,6 @@ CONST_UINT64_T( X_PLLLOCKREG_0x040F0019               , ULL(0x040F0019) );
 //------------------------------------------------------------------------------
 CONST_UINT64_T( X_HANG_P0_XBUS_0x040F0020             , ULL(0x040F0020) );   // XBUS     : setup hang pulse register0
 CONST_UINT64_T( X_HANG_PRE_XBUS_0x040F0028            , ULL(0x040F0028) );   // XBUS     : setup hang precounter (HEX:01)
-
-//------------------------------------------------------------------------------
-//      X-BUS PBEN
-//------------------------------------------------------------------------------
-CONST_UINT64_T( X_PB_MODE_0x04010C0A                  , ULL(0x04010C0A) );
 
 
 /******************************************************************************/
@@ -976,8 +1095,9 @@ CONST_UINT64_T( A_HANG_PRE_0x080F0028                 , ULL(0x080F0028) ); // AB
 //------------------------------------------------------------------------------
 //      A-BUS PBES
 //------------------------------------------------------------------------------
-CONST_UINT64_T( A_PB_MODE_0x0801080A                  , ULL(0x0801080A) );
-
+CONST_UINT64_T( PB_A_MODE_0x0801080A                  , ULL(0x0801080A) );
+CONST_UINT64_T( PB_A_TRACE_0x08010812                 , ULL(0x08010812) );
+CONST_UINT64_T( PB_A_FMR_CFG_0x08010813               , ULL(0x08010813) );
 
 /******************************************************************************/
 /*****************************  PCIE-BUS CHIPLET  *****************************/
@@ -1007,6 +1127,12 @@ CONST_UINT64_T( PCIE_GP0_OR_0x09000005                , ULL(0x09000005) );
 CONST_UINT64_T( PCIE_SCOM_0x09010000                  , ULL(0x09010000) );
 
 //------------------------------------------------------------------------------
+//      PCIE-BUS PB
+//------------------------------------------------------------------------------
+CONST_UINT64_T( PB_F_TRACE_0x09010812                 , ULL(0x09010812) );
+CONST_UINT64_T( PB_F_FMR_CFG_0x09010813               , ULL(0x09010813) );
+
+//------------------------------------------------------------------------------
 //      PCIE-BUS TRACE
 //------------------------------------------------------------------------------
 CONST_UINT64_T( PCIE_TRACE_DATA_HI_0x09010400         , ULL(0x09010400) );
@@ -1018,6 +1144,11 @@ CONST_UINT64_T( PCIE_TRACE_DATA_LO_0x09010401         , ULL(0x09010401) );
 CONST_UINT64_T( PCIE0_ASB_BAR_0x0901200B              , ULL(0x0901200B) );
 CONST_UINT64_T( PCIE1_ASB_BAR_0x0901240B              , ULL(0x0901240B) );
 CONST_UINT64_T( PCIE2_ASB_BAR_0x0901280B              , ULL(0x0901280B) );
+
+//------------------------------------------------------------------------------
+//      PCIE-BUS PB
+//------------------------------------------------------------------------------
+CONST_UINT64_T( PB_IOF_MODE_0x09011C0A                , ULL(0x09011C0A) );
 
 //------------------------------------------------------------------------------
 //      PCIE-BUS CLOCK CONTROL
@@ -1134,6 +1265,7 @@ CONST_UINT64_T( EX_GP2_0x10000002                     , ULL(0x10000002) );
 //L3
 CONST_UINT64_T( EX_L3_MODE_REG1_0x1001080A            , ULL(0x1001080A) );
 CONST_UINT64_T( EX_L3_MODE_REG0_0x1001082B            , ULL(0x1001082B) );
+CONST_UINT64_T( EX_L3_PRD_PURGE_REG_0x1001080E        , ULL(0x1001080E) );
 //L2
 CONST_UINT64_T( EX_L2_FIR_REG_0x10012800              , ULL(0x10012800) );
 CONST_UINT64_T( EX_L2_CERRS_REG0_0x10012815           , ULL(0x10012815) );
@@ -1238,6 +1370,7 @@ CONST_UINT64_T( EX_OHA_AISS_IO_REG_0x10020014                               , UL
 //------------------------------------------------------------------------------
 //      EX CLOCK CONTROL
 //------------------------------------------------------------------------------
+CONST_UINT64_T( EX_SYNC_CONFIG_0x10030000             , ULL(0x10030000) );
 CONST_UINT64_T( EX_OPCG_CNTL0_0x10030002              , ULL(0x10030002) );
 CONST_UINT64_T( EX_OPCG_CNTL1_0x10030003              , ULL(0x10030003) );
 CONST_UINT64_T( EX_OPCG_CNTL2_0x10030004              , ULL(0x10030004) );
@@ -1249,6 +1382,15 @@ CONST_UINT64_T( EX_CLK_STATUS_0x10030008              , ULL(0x10030008) );
 //------------------------------------------------------------------------------
 //      EX FIR
 //------------------------------------------------------------------------------
+CONST_UINT64_T( EX_CORE_FIR_0x10013100                , ULL(0x10013100) );
+CONST_UINT64_T( EX_CORE_FIR_AND_0x10013101            , ULL(0x10013101) );
+CONST_UINT64_T( EX_CORE_FIR_OR_0x10013102             , ULL(0x10013102) );
+CONST_UINT64_T( EX_CORE_FIR_MASK_0x10013103           , ULL(0x10013103) );
+CONST_UINT64_T( EX_CORE_FIR_MASK_AND_0x10013104       , ULL(0x10013104) );
+CONST_UINT64_T( EX_CORE_FIR_MASK_OR_0x10013105        , ULL(0x10013105) );
+CONST_UINT64_T( EX_CORE_FIR_ACTION0_0x10013106        , ULL(0x10013106) );
+CONST_UINT64_T( EX_CORE_FIR_ACTION1_0x10013107        , ULL(0x10013107) );
+CONST_UINT64_T( EX_CORE_FIR_WOF_0x10013108            , ULL(0x10013108) );
 CONST_UINT64_T( EX_XSTOP_0x10040000                   , ULL(0x10040000) );
 CONST_UINT64_T( EX_RECOV_0x10040001                   , ULL(0x10040001) );
 CONST_UINT64_T( EX_FIR_MASK_0x10040002                , ULL(0x10040002) );
@@ -1360,6 +1502,15 @@ CONST_UINT64_T( EX15_GP3_OR_0x1F0F0014                , ULL(0x1F0F0014) );
 //      EX PCB SLAVE PM
 //------------------------------------------------------------------------------
 //Generic names (need to add in (cuTarget.chipUnitNum * 0x01000000)) when being used
+//Hang counter registers
+CONST_UINT64_T( EX_HANG_P0_0x100F0020                 , ULL(0x100F0020) );
+CONST_UINT64_T( EX_HANG_P1_0x100F0021                 , ULL(0x100F0021) );
+CONST_UINT64_T( EX_HANG_P2_0x100F0022                 , ULL(0x100F0022) );
+CONST_UINT64_T( EX_HANG_P3_0x100F0023                 , ULL(0x100F0023) );
+CONST_UINT64_T( EX_HANG_P4_0x100F0024                 , ULL(0x100F0024) );
+CONST_UINT64_T( EX_HANG_P5_0x100F0025                 , ULL(0x100F0025) );
+CONST_UINT64_T( EX_HANG_P6_0x100F0026                 , ULL(0x100F0026) );
+CONST_UINT64_T( EX_HANG_PRE_0x100F0028                , ULL(0x100F0028) );
 //PMGP0 Register
 CONST_UINT64_T( EX_PMGP0_0x100F0100                   , ULL(0x100F0100) );
 CONST_UINT64_T( EX_PMGP0_AND_0x100F0101               , ULL(0x100F0101) );
@@ -1453,6 +1604,81 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: p8_scom_addresses.H,v $
+Revision 1.105  2012/09/26 17:53:25  jklazyns
+
+Added EX_L3_PRD_PURGE_REG to support L3 purge procedure
+
+Revision 1.104  2012/09/26 15:11:07  jklazyns
+
+Added addresses for Core FIR, Mask, Action, and WOF
+
+Revision 1.103  2012/09/24 03:06:59  jmcgill
+add security switch register, PSI notrust BARs
+
+Revision 1.102  2012/09/21 10:54:18  stillgs
+Clean up old PMC entries
+
+Revision 1.101  2012/09/20 10:43:03  rmaier
+Added TOD_FSM_REG_00040024
+
+Revision 1.100  2012/09/15 21:26:14  jmcgill
+add cfam addresses for mailbox scratch registers
+
+Revision 1.99  2012/09/13 20:27:35  mfred
+Added some multicast group 1 addresses to the file.
+
+Revision 1.98  2012/09/13 19:54:41  mfred
+Move group 1 (ex chiplet) multicast group definitions to this file.
+
+Revision 1.97  2012/09/12 17:19:36  jmcgill
+add LPC SCOM registers
+
+Revision 1.96  2012/09/11 14:20:23  szhong
+added: SBE VITAL REG
+       I2C MASTER (MODE)
+       PORE_ECCB CONTROL REG
+       PORE_ECCB STATUS REG
+       PORE_ECCB DATA REG
+
+Revision 1.95  2012/09/04 15:40:09  jimyac
+added OCC LFIR registers
+
+Revision 1.94  2012/08/28 07:56:27  pchatnah
+updating
+
+Revision 1.93  2012/08/26 01:54:37  jmcgill
+add EX hang pulse register definitions
+
+Revision 1.92  2012/08/21 03:30:37  jmcgill
+add A/F link framer config registers
+
+Revision 1.91  2012/08/20 19:25:19  jmcgill
+add entry from ADU TBROM BAR
+
+Revision 1.90  2012/08/15 15:03:12  jmcgill
+add PB A/F link trace register addresses
+
+Revision 1.89  2012/08/11 22:21:04  jmcgill
+add addresses for proc_build_smp procedure
+
+Revision 1.88  2012/08/08 14:25:13  kgungl
+pbax updates
+
+Revision 1.87  2012/08/08 13:18:30  stillgs
+Added PMC monitoring registers
+
+Revision 1.86  2012/08/08 11:32:16  pchatnah
+updating register address for vsafe mode
+
+Revision 1.85  2012/08/06 18:35:34  karm
+added EX_SYNC_CONFIG
+
+Revision 1.84  2012/07/30 15:34:53  bellows
+Updates for set up bars
+
+Revision 1.83  2012/07/23 14:42:39  jmcgill
+add addresses needed proc_psi_init
+
 Revision 1.82  2012/06/27 07:43:32  rkoester
 add remaining PLLLOCK register
 
