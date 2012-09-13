@@ -177,8 +177,15 @@ void CpuManager::startCPU(ssize_t i)
         }
         cpu->scheduler = &Singleton<Scheduler>::instance();
         cpu->scheduler_extra = NULL;
-        cpu->kernel_stack =
-            (void*) (((uint64_t)PageManager::allocatePage(4)) + 16320);
+
+        const size_t kernel_page_count = 4;
+        const size_t kernel_page_offset = kernel_page_count * PAGESIZE -
+                                          8 * sizeof(uint64_t);
+        cpu->kernel_stack_bottom = PageManager::allocatePage(kernel_page_count);
+        cpu->kernel_stack = reinterpret_cast<void*>(
+            reinterpret_cast<uintptr_t>(cpu->kernel_stack_bottom) +
+            kernel_page_offset);
+
         cpu->xscom_mutex = (mutex_t)MUTEX_INITIALIZER;
 
         // Create idle task.

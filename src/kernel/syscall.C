@@ -701,7 +701,10 @@ namespace Systemcalls
         else
         {
             TASK_SETRTN(t, 0);
-            DeferredQueue::insert(new KernelMisc::WinkleCore(t));
+            KernelMisc::WinkleCore* deferred = new KernelMisc::WinkleCore(t);
+            t->state = TASK_STATE_BLOCK_USRSPACE;
+            t->state_info = deferred;
+            DeferredQueue::insert(deferred);
             TaskManager::setCurrentTask(cpu->idle_task);
             DeferredQueue::execute();
         }

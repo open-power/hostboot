@@ -618,7 +618,7 @@ intvect_system_reset_inactive:
     beq+ _start
 
     ;// Now we are a winkled processor that is awoken.
-    ld r1, CPU_KERNEL_STACK(r2)
+    ld r1, CPU_KERNEL_STACK_BOTTOM(r2)
     ld r1, 0(r1)
     mtsprg3 r1
     b kernel_dispatch_task

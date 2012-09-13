@@ -1,25 +1,25 @@
-# IBM_PROLOG_BEGIN_TAG 
-# This is an automatically generated prolog. 
-#  
-# $Source: src/include/kernel/ppcconsts.S $ 
-#  
-# IBM CONFIDENTIAL 
-#  
-# COPYRIGHT International Business Machines Corp. 2010,2012 
-#  
-# p1 
-#  
-# Object Code Only (OCO) source materials 
-# Licensed Internal Code Source Materials 
-# IBM HostBoot Licensed Internal Code 
-#  
-# The source code for this program is not published or otherwise 
-# divested of its trade secrets, irrespective of what has been 
-# deposited with the U.S. Copyright Office. 
-#  
-# Origin: 30 
-#  
-# IBM_PROLOG_END_TAG 
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/include/kernel/ppcconsts.S $
+#
+# IBM CONFIDENTIAL
+#
+# COPYRIGHT International Business Machines Corp. 2010,2012
+#
+# p1
+#
+# Object Code Only (OCO) source materials
+# Licensed Internal Code Source Materials
+# IBM HostBoot Licensed Internal Code
+#
+# The source code for this program is not published or otherwise
+# divested of its trade secrets, irrespective of what has been
+# deposited with the U.S. Copyright Office.
+#
+# Origin: 30
+#
+# IBM_PROLOG_END_TAG
 #*--------------------------------------------------------------------*#
 #*  Register Constants                                                *#
 #*--------------------------------------------------------------------*#
@@ -246,7 +246,8 @@
 .set TASK_FPSCR, TASK_FPR_31+8
 
 .set CPU_KERNEL_STACK, 0
-.set CPU_CPUID, CPU_KERNEL_STACK+8
+.set CPU_KERNEL_STACK_BOTTOM, CPU_KERNEL_STACK+8
+.set CPU_CPUID, CPU_KERNEL_STACK_BOTTOM+8
 .set CPU_STATUS, CPU_CPUID+4
 
 .set CPU_STATUS_MASTER, 0

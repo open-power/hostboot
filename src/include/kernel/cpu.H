@@ -53,6 +53,9 @@ struct cpu_t
     /** Stack to use while in kernel mode. */
     void* kernel_stack;
 
+    /** Bottom of the kernel stack. */
+    void* kernel_stack_bottom;
+
     /** ID of the CPU (PIR value) */
     cpuid_t cpu;
 
@@ -93,6 +96,7 @@ struct cpu_t
 
     /** Sequence ID of CPU initialization. */
     uint64_t cpu_start_seqid;
+
 };
 
 /** @fn getCpuId

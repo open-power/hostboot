@@ -162,7 +162,7 @@ namespace KernelMisc
         task_t* saveArea = new task_t;
         memset(saveArea, '\0', sizeof(task_t));
         saveArea->context.msr_mask = 0xC030; // EE, PR, IR, DR.
-        *(reinterpret_cast<task_t**>(cpu->kernel_stack)) = saveArea;
+        *(reinterpret_cast<task_t**>(cpu->kernel_stack_bottom)) = saveArea;
 
         // Execute winkle.
         kernel_execute_winkle(saveArea);
@@ -190,6 +190,7 @@ namespace KernelMisc
         setTB(iv_timebase);
 
         // Restore caller of cpu_master_winkle().
+        iv_caller->state = TASK_STATE_RUNNING;
         TaskManager::setCurrentTask(iv_caller);
 
     }
