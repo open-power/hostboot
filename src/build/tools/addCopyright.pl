@@ -1,27 +1,26 @@
 #!/usr/bin/perl
-#  IBM_PROLOG_BEGIN_TAG
-#  This is an automatically generated prolog.
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
 #
-#  $Source: src/build/tools/addCopyright.pl $
+# $Source: src/build/tools/addCopyright.pl $
 #
-#  IBM CONFIDENTIAL
+# IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2011-2012
+# COPYRIGHT International Business Machines Corp. 2011-2012
 #
-#  p1
+# p1
 #
-#  Object Code Only (OCO) source materials
-#  Licensed Internal Code Source Materials
-#  IBM HostBoot Licensed Internal Code
+# Object Code Only (OCO) source materials
+# Licensed Internal Code Source Materials
+# IBM HostBoot Licensed Internal Code
 #
-#  The source code for this program is not published or other-
-#  wise divested of its trade secrets, irrespective of what has
-#  been deposited with the U.S. Copyright Office.
+# The source code for this program is not published or otherwise
+# divested of its trade secrets, irrespective of what has been
+# deposited with the U.S. Copyright Office.
 #
-#  Origin: 30
+# Origin: 30
 #
-#  IBM_PROLOG_END_TAG
-
+# IBM_PROLOG_END_TAG
 
 #################################### ABOUT ####################################
 # Forked from:                                                                #
@@ -115,7 +114,7 @@ my  @Files                  =   ();
 
 my  $rc                     =   0;
 
-# NOTE: $OLD_DELIMITER_END is a subset of $DELIMITER_END so must match 
+# NOTE: $OLD_DELIMITER_END is a subset of $DELIMITER_END so must match
 #       $DELIMITER_END first in order to return the entire string.
 my $g_end_del_re = "($DELIMITER_END|$OLD_DELIMITER_END)";
 my $g_prolog_re  = "($DELIMITER_BEGIN)((.|\n)+?)$g_end_del_re";
@@ -782,12 +781,12 @@ sub removeCopyrightBlock( $$ )
         # Don't wipe the the '#!' line at the top.
         $data = removeProlog( $data, '\#', '' );
     }
-     else
-     {
-         print  STDOUT  "ERROR: Don't know how to remove old block from $filetype file.\n";
-         close  OUTPUT;
-         return RC_INVALID_FILETYPE;
-     }
+    else
+    {
+        print  STDOUT  "ERROR: Don't know how to remove old block from $filetype file.\n";
+        close  OUTPUT;
+        return RC_INVALID_FILETYPE;
+    }
 
     print   OUTPUT  $data;
 
@@ -831,12 +830,12 @@ sub addEmptyCopyrightBlock( $$$ )
     select( OUTPUT );               ## new default filehandle for print
     if ("Assembly" eq $filetype)
     {
-        print OUTPUT "# $DELIMITER_BEGIN $DELIMITER_END \n";
+        print OUTPUT "# $DELIMITER_BEGIN $DELIMITER_END\n";
     }
     elsif ( ("Makefile"    eq $filetype) or
             ("PrdRuleFile" eq $filetype) )
     {
-        print OUTPUT "# $DELIMITER_BEGIN $DELIMITER_END \n";
+        print OUTPUT "# $DELIMITER_BEGIN $DELIMITER_END\n";
     }
     elsif (("Autoconf" eq $filetype) or
            ("Automake" eq $filetype) or
@@ -857,7 +856,7 @@ sub addEmptyCopyrightBlock( $$$ )
         {
             print OUTPUT $line;
         }
-        print OUTPUT "# $DELIMITER_BEGIN $DELIMITER_END \n";
+        print OUTPUT "# $DELIMITER_BEGIN $DELIMITER_END\n";
         unless ($line =~ m/^#!/)
         {
             print OUTPUT $line;
@@ -876,7 +875,7 @@ sub addEmptyCopyrightBlock( $$$ )
     }
     elsif ("MofFile" eq $filetype)
     {
-        print OUTPUT "// $DELIMITER_BEGIN $DELIMITER_END \n";
+        print OUTPUT "// $DELIMITER_BEGIN $DELIMITER_END\n";
     }
     elsif ("xml" eq $filetype )
     {
@@ -906,7 +905,6 @@ sub addEmptyCopyrightBlock( $$$ )
     {
         ## leave the files around for debug
         unlink( $savedbgfile ) or die " $? can't delete $savedbgfile: $!";
-
     }
 }
 
@@ -922,7 +920,7 @@ sub addPrologComments($$$)
     $data = '';
     for my $line ( @lines )
     {
-        # If there is an block comment end tag, fill the end of the line with 
+        # If there is an block comment end tag, fill the end of the line with
         # spaces.
         if ( $end )
         {
@@ -950,9 +948,17 @@ sub addPrologComments($$$)
         }
         else
         {
-            $line = "$begin $line";
-            $line = "$line $end" if ( $end );
-            $line = "$line\n";
+            if ( not $end and not $line )
+            {
+                # Compensate for blank lines with no end delimeter.
+                $line = "$begin\n";
+            }
+            else
+            {
+                $line = "$begin $line";
+                $line = "$line $end" if ( $end );
+                $line = "$line\n";
+            }
         }
 
         $data .= $line;
