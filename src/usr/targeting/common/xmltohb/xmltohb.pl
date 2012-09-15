@@ -2826,6 +2826,7 @@ sub isFspTargetInstance {
         %g_fspTargetTypesCache =
             map { $_->{id} => exists $_->{fspOnly} ? 1:0 } 
                 @{$attributes->{targetType}};
+        $fspTargetInstance = %g_fspTargetTypesCache->{$targetInstance->{type}};
     }
     
     return $fspTargetInstance;
