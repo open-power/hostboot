@@ -41,12 +41,6 @@ class TimeTest : public CxxTest::TestSuite
          */
         void testClockGetTime()
         {
-            task_affinity_pin();  // TODO: Bug in PHYP start-cores code that
-                                  //       does not sync timebase register, so
-                                  //       we need to pin ourselves to a core
-                                  //       while doing timebase testing.
-                                  // RTC: 42921
-
             timespec_t first, second;
 
             if (-EINVAL != clock_gettime(CLOCK_REALTIME, &first))
@@ -71,8 +65,6 @@ class TimeTest : public CxxTest::TestSuite
             {
                 TS_FAIL("Monotonic clock is not increasing.");
             }
-
-            task_affinity_unpin(); // TODO.
         }
 };
 
