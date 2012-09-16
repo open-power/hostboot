@@ -26,9 +26,3 @@
 ##    to setup the sandbox
 ##
 
-### Updates to handle instruction states (Remove with RTC:43959)
-echo "+++ Update cec-chip files for inst-start fix."
-mkdir -p $sb/simu/data/cec-chip/
-cp $bb/src/simu/data/cec-chip/p8_inst.act $sb/simu/data/cec-chip/p8_inst.act
-patch -p0 $sb/simu/data/cec-chip/p8_inst.act $HOSTBOOTROOT/src/build/citest/etc/patches/p8_inst.act.patch
-###
