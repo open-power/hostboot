@@ -202,6 +202,13 @@ class CpuManager
 
         static InteractiveDebug cv_interactive_debug;
 
+        /** Timebase of the master the last time a CPU was started.
+         *
+         *  This is used when slave CPUs activate to determine if the
+         *  timebases need to be synchronized.
+         */
+        uint64_t iv_lastStartTimebase;
+
 };
 
 #endif

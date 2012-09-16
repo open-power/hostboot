@@ -47,7 +47,7 @@ size_t CpuManager::cv_cpuSeq = 0;
 bool CpuManager::cv_forcedMemPeriodic = false;
 InteractiveDebug CpuManager::cv_interactive_debug;
 
-CpuManager::CpuManager()
+CpuManager::CpuManager() : iv_lastStartTimebase(0)
 {
     for (int i = 0; i < KERNEL_MAX_SUPPORTED_NODES; i++)
         cv_cpus[i] = NULL;
@@ -139,6 +139,9 @@ void CpuManager::requestShutdown(uint64_t i_status)
 
 void CpuManager::startCPU(ssize_t i)
 {
+    // Save away the current timebase for TB synchronization.
+    iv_lastStartTimebase = getTB();
+
     bool currentCPU = false;
     if (i < 0)
     {
@@ -209,8 +212,39 @@ void CpuManager::startCPU(ssize_t i)
 
 void CpuManager::startSlaveCPU(cpu_t* cpu)
 {
-    setDEC(TimeManager::getTimeSliceCount());
+    // Activate CPU.
     activateCPU(cpu);
+
+    // Sync timebase with master.
+    while(getTB() < iv_lastStartTimebase)
+    {
+        class SyncTimebase : public DeferredWork
+        {
+            public:
+                void masterPreWork()
+                {
+                    iv_timebase = getTB();
+                }
+
+                void activeMainWork()
+                {
+                    if (getTB() < iv_timebase)
+                    {
+                        setTB(iv_timebase);
+                    }
+                }
+
+            private:
+                uint64_t iv_timebase;
+        };
+
+        SyncTimebase* deferred = new SyncTimebase();
+        DeferredQueue::insert(deferred);
+        DeferredQueue::execute();
+    }
+
+    // Update decrementer.
+    setDEC(TimeManager::getTimeSliceCount());
 
     return;
 }
