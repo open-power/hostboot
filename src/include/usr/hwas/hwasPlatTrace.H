@@ -48,6 +48,9 @@ namespace HWAS
 #define HWAS_DBG(_fmt_, _args_...) \
     TRACDCOMP(g_trac_dbg_hwas, TRACE_FILENAME _fmt_, ##_args_)
 
+#define HWAS_DBG_BIN(_str_, _addr_, _len_) \
+    TRACDBIN(g_trac_dbg_hwas, TRACE_FILENAME _str_, _addr_, _len_)
+
 // Information traces (go into slow trace buffer that should not wrap often)
 #define HWAS_INF(_fmt_, _args_...) \
     TRACFCOMP(g_trac_imp_hwas, TRACE_FILENAME _fmt_, ##_args_)

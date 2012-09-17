@@ -1,33 +1,32 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwas/test/hwas1test.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2011-2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwas/test/hwas1test.H $                               */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef __TESTTARGETING_H
 #define __TESTTARGETING_H
 
 /**
  *  @file testtargeting.H
  *
- *  @brief Unit tests for HWAS (ISTEP 4)
+ *  @brief Unit tests for HWAS
  */
 
 //******************************************************************************
@@ -46,7 +45,8 @@
 #include <fapiAttributeService.H>
 #include <errl/errlmanager.H>
 
-// This component
+#include <hwas/common/hwas.H>
+#include <hwas/common/hwasCommon.H>
 #include <targeting/common/commontargeting.H>
 
 class HWAS1test: public CxxTest::TestSuite
@@ -147,6 +147,108 @@ public:
 
         TS_TRACE( "testHWASReadWrite exit" );
     }
+
+    /**
+     * @brief   test platReadIDEC
+     */
+    void testHWASplatReadIDEC()
+    {
+        using namespace TARGETING;
+
+        TS_TRACE( "testHWASplatReadIDEC entry" );
+
+        // call platReadIDEC with target that doesn't have an ID/EC
+        errlHndl_t l_errl;
+
+        Target* pSys;
+        targetService().getTopLevelTarget(pSys);
+
+        l_errl = HWAS::platReadIDEC(pSys);
+
+        if (l_errl)
+        {
+            // error log is expected case, delete it
+            delete l_errl;
+        }
+        else
+        {
+            TS_FAIL("testHWASplatReadIDEC>"
+                    "No error from platReadIDEC(pSys).");
+        }
+
+        TS_TRACE( "testHWASplatReadIDEC exit" );
+    }
+
+    /**
+     * @brief   test platReadPartialGood
+     */
+    void testHWASplatReadPartialGood()
+    {
+        using namespace TARGETING;
+
+        TS_TRACE( "testHWASplatReadPartialGood entry" );
+
+        // call platReadPartialGood with target that isn't in the VPD
+        errlHndl_t l_errl;
+
+        Target* pSys;
+        targetService().getTopLevelTarget(pSys);
+        uint8_t pgData[64];
+
+        l_errl = HWAS::platReadPartialGood(pSys, pgData);
+
+        if (l_errl)
+        {
+            // error log is expected case, delete it
+            delete l_errl;
+        }
+        else
+        {
+            TS_FAIL("testHWASplatReadPartialGood>"
+                    "No error from platReadPartialGood(pSys).");
+        }
+
+        TS_TRACE( "testHWASplatReadPartialGood exit" );
+    }
+
+    /**
+     * @brief   test platPresenceDetect
+     */
+    void testHWASplatPresenceDetect()
+    {
+        using namespace TARGETING;
+        using namespace HWAS;
+
+        TS_TRACE( "testHWASplatPresenceDetect entry" );
+
+        // call platPresenceDetect with target that won't return PRESENT
+        errlHndl_t l_errl;
+
+        TargetHandleList pCheckPres;
+        Target* pSys;
+        targetService().getTopLevelTarget(pSys);
+        pCheckPres.push_back(pSys);
+
+        l_errl = HWAS::platPresenceDetect(pCheckPres);
+
+        if (l_errl)
+        {
+            TS_FAIL("testHWASplatPresenceDetect>"
+                    "Error from platPresenceDetect.");
+        }
+        else
+        {
+            // check to make sure list returned is now empty
+            if (pCheckPres.size() != 0)
+            {
+                TS_FAIL("testHWASplatPresenceDetect>"
+                        "platPresenceDetect didn't return empty list");
+            }
+        }
+
+        TS_TRACE( "testHWASplatPresenceDetect exit" );
+    }
+
 
 };
 

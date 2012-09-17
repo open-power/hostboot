@@ -58,15 +58,17 @@ TRAC_INIT(&g_trac_imp_hwas, "HWAS_I",   1024 );
  *                  present, functional
  *
  * @param[in]   i_target    pointer to target that we're looking at
+ * @param[in]   i_present   boolean indicating present or not
+ * @param[in]   i_functional boolean indicating functional or not
  *
  * @return      none
  *
  */
-void enableHwasState(Target *i_target, bool i_functional)
+void enableHwasState(Target *i_target, bool i_present, bool i_functional)
 {
     HwasState hwasState     = i_target->getAttr<ATTR_HWAS_STATE>();
     hwasState.poweredOn     = true;
-    hwasState.present       = true;
+    hwasState.present       = i_present;
     hwasState.functional    = i_functional;
     i_target->setAttr<ATTR_HWAS_STATE>( hwasState );
 }
@@ -103,12 +105,13 @@ errlHndl_t discoverTargets()
         Target* pSys;
         targetService().getTopLevelTarget(pSys);
 
-        HWAS_ASSERT(pSys, "HWAS discoverTargets: no CLASS_SYS TopLevelTarget found");
+        HWAS_ASSERT(pSys,
+                "HWAS discoverTargets: no CLASS_SYS TopLevelTarget found");
 
         // mark this as present
-        enableHwasState(pSys, true);
-        HWAS_DBG("pSys %.8X (%p) - marked present",
-            pSys->getAttr<ATTR_HUID>(), pSys);
+        enableHwasState(pSys, true, true);
+        HWAS_DBG("pSys %.8X - marked present",
+            pSys->getAttr<ATTR_HUID>());
 
         // find CLASS_ENC
         PredicateCTM predEnc(CLASS_ENC);
@@ -123,9 +126,9 @@ errlHndl_t discoverTargets()
             TargetHandle_t pEnc = *pEnc_it;
 
             // mark it as present
-            enableHwasState(pEnc, true);
-            HWAS_DBG("pEnc %.8X (%p) - marked present",
-                pEnc->getAttr<ATTR_HUID>(), pEnc);
+            enableHwasState(pEnc, true, true);
+            HWAS_DBG("pEnc %.8X - marked present",
+                pEnc->getAttr<ATTR_HUID>());
         } // for pEnc_it
 
         PredicateCTM predChip(CLASS_CHIP);
@@ -150,7 +153,9 @@ errlHndl_t discoverTargets()
 
         // no errors - keep going
         // for each, read their ID/EC level. if that works,
-        //  mark them and their descendants as present and functional
+        //  mark them and their descendants as present
+        //  read the partialGood vector to determine if any are not functional
+
         for (TargetHandleList::iterator pTarget_it = pCheckPres.begin();
                 pTarget_it != pCheckPres.end();
                 pTarget_it++
@@ -158,35 +163,90 @@ errlHndl_t discoverTargets()
         {
             TargetHandle_t pTarget = *pTarget_it;
 
-            // read Chip ID/EC data from these physical chips
+            bool chipFunctional = true;
+            bool chipPresent = true;
+            uint16_t pgData[VPD_CP00_PG_DATA_LENGTH / sizeof(uint16_t)];
+            bzero(pgData, sizeof(pgData));
             if (pTarget->getAttr<ATTR_CLASS>() == CLASS_CHIP)
             {
+                // read Chip ID/EC data from these physical chips
                 errl = platReadIDEC(pTarget);
-            }
 
-            bool isFunctional;
-            if (!errl)
-            {   // no error
-                isFunctional = true;
-            }
-            else
-            {   // read of ID/EC failed even tho we were present..
-                isFunctional = false;
+                if (errl)
+                {   // read of ID/EC failed even tho we were present..
+                    chipFunctional = false;
 
-                // commit the error but keep going
-                errlCommit(errl, HWAS_COMP_ID);
-                // errl is now NULL
-            }
+                    // commit the error but keep going
+                    errlCommit(errl, HWAS_COMP_ID);
+                    // errl is now NULL
+                }
 
-            HWAS_DBG("pTarget %.8X (%p) - detected present %s functional",
-                pTarget->getAttr<ATTR_HUID>(), pTarget,
-                isFunctional ? "and" : "NOT");
+                if (pTarget->getAttr<ATTR_TYPE>() == TYPE_PROC)
+                {
+                    // read partialGood vector from these as well.
+                    errl = platReadPartialGood(pTarget, pgData);
 
-            // set HWAS state to show it's present
-            enableHwasState(pTarget, isFunctional);
+                    if (errl)
+                    {   // read of PG failed even tho we were present..
+                        chipFunctional = false;
+
+                        // commit the error but keep going
+                        errlCommit(errl, HWAS_COMP_ID);
+                        // errl is now NULL
+                    }
+                    else
+                    // look at the 'nest' logic to override the functionality
+                    //  of this proc
+                    if (pgData[VPD_CP00_PG_PIB_INDEX] !=
+                                    VPD_CP00_PG_PIB_GOOD)
+                    {
+                        HWAS_DBG("pTarget %.8X - PIB bad. "
+                                    "pgPdata[%d]: expected 0x%04X - bad",
+                            pTarget->getAttr<ATTR_HUID>(),
+                            VPD_CP00_PG_PIB_INDEX,
+                            VPD_CP00_PG_PIB_GOOD);
+                        chipFunctional = false;
+                    }
+                    else
+                    if (pgData[VPD_CP00_PG_PERVASIVE_INDEX] !=
+                                    VPD_CP00_PG_PERVASIVE_GOOD)
+                    {
+                        HWAS_DBG("pTarget %.8X - Pervasive bad. "
+                                    "pgPdata[%d]: expected 0x%04X - bad",
+                            pTarget->getAttr<ATTR_HUID>(),
+                            VPD_CP00_PG_PERVASIVE_INDEX,
+                            VPD_CP00_PG_PERVASIVE_GOOD);
+                        chipFunctional = false;
+                    }
+                    else
+                    if (pgData[VPD_CP00_PG_POWERBUS_INDEX] !=
+                                    VPD_CP00_PG_POWERBUS_GOOD)
+                    {
+                        HWAS_DBG("pTarget %.8X - PowerBus bad. "
+                                    "pgPdata[%d]: expected 0x%04X - bad",
+                            pTarget->getAttr<ATTR_HUID>(),
+                            VPD_CP00_PG_POWERBUS_INDEX,
+                            VPD_CP00_PG_POWERBUS_GOOD);
+                        chipFunctional = false;
+                    }
+                } // TYPE_PROC
+            } // CLASS_CHIP
+
+            // TODO: Story 35077 - add PR processing. roughly:
+            //  totalcores = readPR();
+            //  for each child ex in chip c
+            //      if goodcores < totalcores
+            //          if ex->functional==true
+            //              goodcores++
+            //      else
+            //          ex->functional = false
+
+            HWAS_DBG("pTarget %.8X - detected present, %sfunctional",
+                pTarget->getAttr<ATTR_HUID>(),
+                chipFunctional ? "" : "NOT ");
 
             // now need to mark all of this target's
-            //  physical descendants as present and NOT functional
+            //  physical descendants as present and functional as appropriate
             TargetHandleList pDescList;
             targetService().getAssociated( pDescList, pTarget,
                 TargetService::CHILD, TargetService::ALL);
@@ -195,11 +255,85 @@ errlHndl_t discoverTargets()
                     pDesc_it++)
             {
                 TargetHandle_t pDesc = *pDesc_it;
-                enableHwasState(pDesc, isFunctional);
-                HWAS_DBG("pDesc %.8X (%p) - marked present %s functional",
-                    pDesc->getAttr<ATTR_HUID>(), pDesc,
-                    isFunctional ? "and" : "NOT");
+                // by default, the descendant's functionality is 'inherited'
+                bool descFunctional = chipFunctional;
+
+                if (chipFunctional)
+                {   // if the chip is functional, the look through the
+                    //  partialGood vector to see if its chiplets
+                    //  are functional
+                    if ((pDesc->getAttr<ATTR_TYPE>() == TYPE_XBUS) &&
+                        (pgData[VPD_CP00_PG_XBUS_INDEX] !=
+                            VPD_CP00_PG_XBUS_GOOD))
+                    {
+                        HWAS_DBG("pDesc %.8X - XBUS bad. "
+                                    "pgPdata[%d]: expected 0x%04X - bad",
+                            pDesc->getAttr<ATTR_HUID>(),
+                            VPD_CP00_PG_XBUS_INDEX,
+                            VPD_CP00_PG_XBUS_GOOD);
+                        descFunctional = false;
+                    }
+                    else
+                    if ((pDesc->getAttr<ATTR_TYPE>() == TYPE_ABUS) &&
+                        (pgData[VPD_CP00_PG_ABUS_INDEX] !=
+                            VPD_CP00_PG_ABUS_GOOD))
+                    {
+                        HWAS_DBG("pDesc %.8X - ABUS "
+                                    "pgPdata[%d]: expected 0x%04X - bad",
+                            pDesc->getAttr<ATTR_HUID>(),
+                            VPD_CP00_PG_ABUS_INDEX,
+                            VPD_CP00_PG_ABUS_GOOD);
+                        descFunctional = false;
+                    }
+                    else
+                    if ((pDesc->getAttr<ATTR_TYPE>() == TYPE_PCI) &&
+                        (pgData[VPD_CP00_PG_PCIE_INDEX] !=
+                            VPD_CP00_PG_PCIE_GOOD))
+                    {
+                        HWAS_DBG("pDesc %.8X - PCIe "
+                                    "pgPdata[%d]: expected 0x%04X - bad",
+                            pDesc->getAttr<ATTR_HUID>(),
+                            VPD_CP00_PG_PCIE_INDEX,
+                            VPD_CP00_PG_PCIE_GOOD);
+                        descFunctional = false;
+                    }
+                    else
+                    if ((pDesc->getAttr<ATTR_TYPE>() == TYPE_EX) ||
+                        (pDesc->getAttr<ATTR_TYPE>() == TYPE_CORE)
+                       )
+                    {
+                      ATTR_CHIP_UNIT_type indexEX =
+                                pDesc->getAttr<ATTR_CHIP_UNIT>();
+                      if (pgData[VPD_CP00_PG_EX0_INDEX + indexEX] !=
+                            VPD_CP00_PG_EX0_GOOD)
+                      {
+                        HWAS_DBG("pDesc %.8X - EX%d "
+                                    "pgPdata[%d]: expected 0x%04X - bad",
+                            pDesc->getAttr<ATTR_HUID>(), indexEX,
+                            VPD_CP00_PG_EX0_INDEX + indexEX,
+                            VPD_CP00_PG_EX0_GOOD);
+////////////////////////////////////////////////////////////////////////////////
+                        // RTC: 49991 for now, return true because the VPD in
+                        // hostboot is broken (has 0xF200 instead of 0xF300,
+                        // and has the last 6 cores in the incorrect place)
+                        descFunctional = true;
+                        //descFunctional = false;
+////////////////////////////////////////////////////////////////////////////////
+                      }
+                    }
+                } // chipFunctional
+
+                // for sub-parts, if it's not functional, it's not present.
+                enableHwasState(pDesc, descFunctional, descFunctional);
+                HWAS_DBG("pDesc %.8X - marked %spresent, %sfunctional",
+                    pDesc->getAttr<ATTR_HUID>(),
+                    descFunctional ? "" : "NOT ",
+                    descFunctional ? "" : "NOT ");
             }
+
+            // set HWAS state to show CHIP is present, functional per above
+            enableHwasState(pTarget, chipPresent, chipFunctional);
+
         } // for pTarget_it
 
     } while (0);

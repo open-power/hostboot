@@ -33,6 +33,8 @@
 
 #include <devicefw/driverif.H>
 #include <initservice/taskargs.H>
+#include <mvpd/mvpdenums.H>
+#include <stdio.h>
 
 namespace HWAS
 {
@@ -85,17 +87,81 @@ errlHndl_t platReadIDEC(const TargetHandle_t &i_target)
                        ((id_ec & 0x000F000000000000ull) >> 44) |
                        ((id_ec & 0x0000F00000000000ull) >> 44));
         i_target->setAttr<ATTR_CHIP_ID>(id);
-        HWAS_DBG( "i_target %.8X (%p) - id %x ec %x",
-            i_target->getAttr<ATTR_HUID>(), i_target, id, ec);
+        HWAS_DBG( "i_target %.8X - id %x ec %x",
+            i_target->getAttr<ATTR_HUID>(), id, ec);
     }
     else
     {   // errl was set - this is an error condition.
-        HWAS_ERR( "i_target %.8X (%p) - failed ID/EC read",
-            i_target->getAttr<ATTR_HUID>(), i_target);
+        HWAS_ERR( "i_target %.8X - failed ID/EC read",
+            i_target->getAttr<ATTR_HUID>());
     }
 
     return errl;
 } // platReadIDEC
+
+//******************************************************************************
+// platReadPartialGood function
+//******************************************************************************
+errlHndl_t platReadPartialGood(const TargetHandle_t &i_target,
+        void *o_pgData)
+{
+    errlHndl_t errl = NULL;
+    HWAS_DBG( "i_target %.8X",
+            i_target->getAttr<ATTR_HUID>());
+
+    // call deviceRead() to find the PartialGood record
+    uint8_t pgRaw[VPD_CP00_PG_HDR_LENGTH + VPD_CP00_PG_DATA_LENGTH];
+    size_t pgSize = sizeof(pgRaw);
+
+    errl = deviceRead(i_target, pgRaw, pgSize,
+            DEVICE_MVPD_ADDRESS(MVPD::CP00, MVPD::PG));
+
+    if (unlikely(errl != NULL))
+    {   // errl was set - this is an error condition.
+        HWAS_ERR( "i_target %.8X - failed partialGood read",
+            i_target->getAttr<ATTR_HUID>());
+    }
+    else
+    {
+#if 0
+// Unit test. set P8_MURANO.config to have 4 procs, and this code will
+//  alter the VPD so that some of the procs and chiplets should get marked
+//  as NOT functional.
+        {
+            // skip past the header
+            uint16_t *pgData = reinterpret_cast <uint16_t *>(&pgRaw[VPD_CP00_PG_HDR_LENGTH]);
+            if (i_target->getAttr<ATTR_HUID>() == 0x70000)
+            {   // 1st proc - let it go thru ok.
+            }
+            else
+            if (i_target->getAttr<ATTR_HUID>() == 0x70001)
+            {   // 2nd proc - mark Pervasive bad - entire chip
+                //  should be marked present and NOT functional
+                pgData[VPD_CP00_PG_PERVASIVE_INDEX] = 0;
+            }
+            else
+            if (i_target->getAttr<ATTR_HUID>() == 0x70002)
+            {   // 3rd proc - part of XBUS is bad
+                pgData[VPD_CP00_PG_XBUS_INDEX] = 0;
+            }
+            else
+            if (i_target->getAttr<ATTR_HUID>() == 0x70003)
+            {   // 4th proc -  EX13 and EX14 are bad
+                pgData[VPD_CP00_PG_EX0_INDEX+13] = 0;
+                pgData[VPD_CP00_PG_EX0_INDEX+14] = 0;
+            }
+        }
+#endif
+
+        // skip past the header
+        void *pgData = static_cast<void *>(&pgRaw[VPD_CP00_PG_HDR_LENGTH]);
+        HWAS_DBG_BIN("PG record", pgData, VPD_CP00_PG_DATA_LENGTH);
+        // copy the data back into the caller's buffer
+        memcpy(o_pgData, pgData, VPD_CP00_PG_DATA_LENGTH);
+    }
+
+    return errl;
+} // platReadPartialGood
 
 //******************************************************************************
 // platPresenceDetect function
@@ -120,8 +186,8 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
 
         if (unlikely(errl != NULL))
         {   // errl was set - this is an error condition.
-            HWAS_ERR( "pTarget %.8X (%p) - failed presence detect",
-                pTarget->getAttr<ATTR_HUID>(), pTarget);
+            HWAS_ERR( "pTarget %.8X - failed presence detect",
+                pTarget->getAttr<ATTR_HUID>());
 
             // commit the error but keep going
             errlCommit(errl, HWAS_COMP_ID);
@@ -133,16 +199,16 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
 
         if (present == true)
         {
-            HWAS_DBG( "pTarget %.8X (%p) - detected present",
-                pTarget->getAttr<ATTR_HUID>(), pTarget);
+            HWAS_DBG( "pTarget %.8X - detected present",
+                pTarget->getAttr<ATTR_HUID>());
 
             // advance to next entry in the list
             pTarget_it++;
         }
         else
         {   // chip not present -- remove from list
-            HWAS_DBG( "pTarget %.8X (%p) - no presence",
-                pTarget->getAttr<ATTR_HUID>(), pTarget);
+            HWAS_DBG( "pTarget %.8X - no presence",
+                pTarget->getAttr<ATTR_HUID>());
 
             // erase this target, and 'increment' to next
             pTarget_it = io_targets.erase(pTarget_it);
