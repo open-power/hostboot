@@ -94,6 +94,7 @@ enum istepModuleId
     ISTEP_PROC_FAB_IOVALID_EROR                         = 0x2d,
     ISTEP_LOAD_PORE_IMAGE                               = 0x2e,
     ISTEP_APPLY_PORE_GEN_CPU_REGS                       = 0x2f,
+    ISTEP_PROC_PORESLW_INIT                             = 0x30,
 };
 
 /**
@@ -126,6 +127,8 @@ enum istepReasonCode
     ISTEP_STEP_NINETEEN                         = ISTEP_COMP_ID | 0x13,
     ISTEP_LOAD_PAYLOAD_FAILED                   = ISTEP_COMP_ID | 0x14,
     ISTEP_START_PAYLOAD_FAILED                  = ISTEP_COMP_ID | 0x15,
+    ISTEP_RESET_PORE_BARS_FAILED                = ISTEP_COMP_ID | 0x16,
+    ISTEP_P8_PORESLW_INIT_FAILED                = ISTEP_COMP_ID | 0x17,
 };  // end ISTEP
 
 }

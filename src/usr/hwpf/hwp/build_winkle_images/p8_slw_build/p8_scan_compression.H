@@ -1,30 +1,29 @@
- /*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/hwp/build_winkle_images/proc_slw_build/p8_scan_compression.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/hwp/build_winkle_images/p8_slw_build/p8_scan_compression.H $ */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012                   */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef __P8_SCAN_COMPRESSION_H__
 #define __P8_SCAN_COMPRESSION_H__
 
-// $Id: p8_scan_compression.H,v 1.2 2012/08/17 16:20:15 cmolsen Exp $
+// $Id: p8_scan_compression.H,v 1.3 2012/09/20 20:25:37 bcbrock Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/utils/p8_scan_compression.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -34,7 +33,7 @@
 // *! OWNER NAME: Bishop Brock  Email: Bishop Brock; bcbrock@us.ibm.com
 // *!
 // *! General Description:
-// *!
+// *! 
 // *!     See below.
 //------------------------------------------------------------------------------
 //
@@ -43,7 +42,7 @@
 
 /// \file p8_scan_compression.H
 /// \brief Structure definitions and protoypes related to scan chain
-/// compression.
+/// compression. 
 ///
 /// This header declares and documents the entry points defined in
 /// p8_scan_compression.C.  Some constants are also required by the scan
@@ -65,7 +64,7 @@
 /// decompression algorithms.
 ///
 /// Bytes - Content
-///
+/// 
 /// 0:3 - A 32-bit "magic number" that identifies and validates the
 /// compression algorithm and algorithm version used to compress the data.
 ///
@@ -81,7 +80,7 @@
 ///
 /// 16:19 - The 32 high-order bits of the value written to the Scan Select
 /// register to set up the scan.  The Scan Select register only defines these
-/// bits.
+/// bits. 
 ///
 /// 20 - The Scan Chain Data Structure version number
 ///
@@ -189,7 +188,7 @@ compressed_scan_data_translate(CompressedScanData* o_data,
 /// a repair ring. (See p8_ring_identification.c for more info.)
 ///
 /// \param i_chipletId The 7-bit value for the iv_chipletId field of the
-/// CompressedScanData.
+/// CompressedScanData. 
 ///
 /// \param i_flushOptimization This input parameter should be set to a non-0
 /// value if it is known that this ring difference will be applied to a scan-0
@@ -201,13 +200,13 @@ compressed_scan_data_translate(CompressedScanData* o_data,
 int
 rs4_compress(CompressedScanData** o_data,
              uint32_t* o_size,
-             const uint8_t* i_string,
+             const uint8_t* i_string, 
              const uint32_t i_length,
              const uint64_t i_scanSelect,
-						 const uint8_t i_ringId,
+             const uint8_t i_ringId,
              const uint8_t i_chipletId,
              const uint8_t i_flushOptimization);
-
+             
 
 /// Decompress a scan string compressed using the RS4 compression algorithm
 ///
@@ -220,12 +219,12 @@ rs4_compress(CompressedScanData** o_data,
 /// bytes.
 ///
 /// \param i_data A pointer to the CompressedScanData header + data to be
-/// decompressed.
+/// decompressed. 
 int
 rs4_decompress(uint8_t** o_string,
                uint32_t* o_length,
                const CompressedScanData* i_data);
-
+             
 #endif  // __ASSEMBLER__
 
 

@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/hwpf/hwp/core_activate/proc_prep_master_winkle/proc_sbe_trigger_winkle.H $ */
+/* $Source: src/usr/hwpf/hwp/build_winkle_images/p8_set_pore_bar/p8_pba_bar_config.H $ */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
@@ -20,23 +20,36 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_sbe_trigger_winkle.H,v 1.6 2012/09/21 19:29:25 stillgs Exp $
-
-/// Substep numbers for the proc_sbe_trigger_winkle procedure
-
-#ifndef __PROC_SBE_TRIGGER_WINKLE_H
-#define __PROC_SBE_TRIGGER_WINKLE_H
-
-#include "fapi_sbe_common.H"
-#include "sbe_vital.H"
-
-CONST_UINT8_T(SUBSTEP_PROC_ENTRY,                   ULL(0x0));
-CONST_UINT8_T(SUBSTEP_SBE_READY,                    ULL(0x1));
-CONST_UINT8_T(SUBSTEP_DEADMAN_START,                ULL(0x2));
-CONST_UINT8_T(SUBSTEP_DEADMAN_WAITING_FOR_WINKLE,   ULL(0x3));
-CONST_UINT8_T(SUBSTEP_DEADMAN_WAITING_FOR_WAKEUP,   ULL(0x4));
-CONST_UINT8_T(SUBSTEP_DEADMAN_WAITING_FOR_HOSTBOOT, ULL(0x5));
-CONST_UINT8_T(SUBSTEP_HOSTBOOT_ALIVE_AGAIN,         ULL(0x6));
+// $Id: p8_pba_bar_config.H,v 1.1 2012/09/25 20:18:52 stillgs Exp $
+//------------------------------------------------------------------------------
+// *! (C) Copyright International Business Machines Corp. 2011
+// *! All Rights Reserved -- Property of IBM
+// *! *** IBM Confidential ***
+//------------------------------------------------------------------------------
+// *! OWNER NAME: Klaus P. Gungl         Email: kgungl@de.ibm.com
+// *!
+// *! General Description:
+// *!        
+// *! include file for p8_pba_bar_config 
+// *!
+//------------------------------------------------------------------------------
+// 
 
 
-#endif  // __PROC_SBE_TRIGGER_WINKLE_H
+// function pointer typedef definition for HWP call support
+typedef fapi::ReturnCode (*p8_pba_bar_config_FP_t) (const fapi::Target&, 
+                                                            uint32_t, 
+                                                            uint64_t, 
+                                                            uint64_t, 
+                                                            uint64_t);
+
+extern "C" 
+{				
+
+fapi::ReturnCode 
+p8_pba_bar_config   (const fapi::Target&    i_target, 
+		             uint32_t               index, 
+		             uint64_t               pba_bar_addr,
+		             uint64_t               pba_bar_size,
+		             uint64_t               pba_cmd_scope);
+}

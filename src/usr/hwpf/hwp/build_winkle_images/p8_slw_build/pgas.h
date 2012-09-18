@@ -1,32 +1,31 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/hwp/build_winkle_images/proc_slw_build/pgas.h $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/hwp/build_winkle_images/p8_slw_build/pgas.h $    */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012                   */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef __PGAS_H__
 #define __PGAS_H__
 
 #define __PGAS__
 
-// $Id: pgas.h,v 1.16 2012/05/23 19:03:40 bcbrock Exp $
+// $Id: pgas.h,v 1.17 2012/08/15 19:24:49 bcbrock Exp $
 
 // ** WARNING : This file is maintained as part of the OCC firmware.  Do **
 // ** not edit this file in the PMX area, the hardware procedure area,   **
@@ -36,7 +35,7 @@
 /// \brief Pore GAS
 ///
 /// PGAS is documented in a seperate standalone document entitled <em> PGAS :
-/// PORE GAS (GNU Assembler) User's and Reference Manual <\em>.
+/// PORE GAS (GNU Assembler) User's and Reference Manual </em>.
 ///
 /// This file defines support macros for the GNU PORE assembler, and the PORE
 /// inline assembler and disassebler which follow the PGAS assembly syntax.
@@ -696,7 +695,7 @@
 
 
 	//////////////////////////////////////////////////////////////////////
-	// TEB<eng> - Test Engine and branch if engine.
+	// TEB[N]<eng> - Test Engine and branch if [not] engine.
 	//////////////////////////////////////////////////////////////////////
 	//
 	// All but GPE0 use a 1-hot code.
@@ -723,6 +722,31 @@
 	mr	(\dest), IFR
 	andi	(\dest), (\dest), PORE_ID_SBE
 	branz	(\dest), (\target)
+	.endm	
+
+
+	.macro	tebngpe0, dest:req, target:req
+	mr	(\dest), IFR
+	andi	(\dest), (\dest), 0xf
+	branz	(\dest), (\target)
+	.endm	
+
+	.macro	tebngpe1, dest:req, target:req
+	mr	(\dest), IFR
+	andi	(\dest), (\dest), PORE_ID_GPE1
+	braz	(\dest), (\target)
+	.endm	
+
+	.macro	tebnslw, dest:req, target:req
+	mr	(\dest), IFR
+	andi	(\dest), (\dest), PORE_ID_SLW
+	braz	(\dest), (\target)
+	.endm	
+
+	.macro	tebnsbe, dest:req, target:req
+	mr	(\dest), IFR
+	andi	(\dest), (\dest), PORE_ID_SBE
+	braz	(\dest), (\target)
 	.endm	
 
 

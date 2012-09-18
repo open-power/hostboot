@@ -34,6 +34,8 @@
  *          : Build runtime winkle images
  *    15.2    proc_set_pore_bar
  *          : Tell SLW Eng where winkle image is
+ *    15.3    proc_poreslw_init
+ *          : Initialize the PORE-SLW engine
  *
  *  *****************************************************************
  *  THIS FILE WAS GENERATED ON 2012-04-12:1228
@@ -83,6 +85,14 @@ namespace   INITSERVICE
                 }
         },
 
+        {
+                ISTEPNAME(15,03,"proc_poreslw_init"),
+                BUILD_WINKLE_IMAGES::call_proc_poreslw_init,
+                {
+                        START_FN,
+                        EXT_IMAGE,
+                }
+        },
 
         //  END OF LIST!
 };

@@ -149,17 +149,19 @@ class CpuManager
          *
          *  bit 0 - 64 bit mode.
          *  bit 3 - Hypervisor mode.
+         *  bit 51 - Machine-check enable
          */
-        static const uint64_t WAKEUP_MSR_VALUE =    0x9000000000000000;
+        static const uint64_t WAKEUP_MSR_VALUE =    0x9000000000001000;
 
         /** Desired value for LPCR after wakeup.
          *
          *  bit 49 - Wake-up from external interrupt.
          *  bit 50 - Wake-up from decrementer.
          *  bit 51 - Wake-up from machine check.
-         *  bit 60, 61 - LPES(0,1) = 1 (see ISA).
+         *  bit 60 - LPES(0) = 1 (see ISA).
+         *  bit 61 - LPES(1) = 0 (P8 RFC02204 forces to 0)
          */
-        static const uint64_t WAKEUP_LPCR_VALUE =   0x000000000000700C;
+        static const uint64_t WAKEUP_LPCR_VALUE =   0x0000000000007008;
 
     protected:
         CpuManager();

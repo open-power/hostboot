@@ -37,8 +37,8 @@
 /// \verbatim
 ///
 ///     Address and size of SLW image for the target (chip) is passed based on
-///     where the caller has placed the image for this target in the platform 
-///     memory.  
+///     where the caller has placed the image for this target in the platform
+///     memory.
 ///
 ///     The Base Address (BAR) and a mask for the region in which the SLW
 ///     image is placed is passed.  This is used to establish the PBA BAR and
@@ -120,8 +120,8 @@ fapi::ReturnCode pba_slave_reset(   const fapi::Target& i_target,
 ///                         located
 /// \param[in] i_mem_bar    Base address of the region where image is located
 /// \param[in] i_mem_size   Size (in MB) of the region where image is located
-///                         if not a power of two value, the value will be 
-///                         rounded up to the next power of 2 for setting the 
+///                         if not a power of two value, the value will be
+///                         rounded up to the next power of 2 for setting the
 ///                         hardware mask
 /// \param[in] i_mem_type   Defines where the SLW image was loaded.  See
 ///                         p8_set_pore_bar.H enum for valid values.
@@ -153,7 +153,7 @@ p8_set_pore_bar(      const fapi::Target& i_target,
 //    uint64_t            computed_last_image_address;
 
     uint64_t            slw_branch_table_address;
-    
+
     pba_slvctln_t       ps;                         // PBA Slave
 
     // Hardcoded use of PBA BAR and Slave
@@ -230,8 +230,8 @@ p8_set_pore_bar(      const fapi::Target& i_target,
         return rc;
     }
     FAPI_INF("SLW PORE Table Base Address set to 0x%16llx", data.getDoubleWord(0));
-    
-    
+
+
 
     // Setup the memory relocation register
     //
@@ -315,16 +315,16 @@ p8_set_pore_bar(      const fapi::Target& i_target,
         }
 
         FAPI_DBG("SLW PORE Memory Relocation Register after MEM 0x%16llx", data.getDoubleWord(0));
-        
+
         // Check that the bar address passed is 1MB aligned (eg bits 44:63 are zero)
         //
         region_masked_address = i_mem_bar & 0x00000000000FFFFF;
-        if (region_masked_address != 0 )                        
-        {                                                                
-            FAPI_ERR("SLW BAR address is not 1MB aligned:  0x%16llx", i_mem_bar );               
-            FAPI_SET_HWP_ERROR(rc, RC_PROCPM_POREBAR_PBABAR_ERROR);  
-            return rc;                                                   
-        }                                                                
+        if (region_masked_address != 0 )
+        {
+            FAPI_ERR("SLW BAR address is not 1MB aligned:  0x%16llx", i_mem_bar );
+            FAPI_SET_HWP_ERROR(rc, RC_PROCPM_POREBAR_PBABAR_ERROR);
+            return rc;
+        }
 
 
         // The PBA Mask indicates which bits from 23:43 (1MB grandularity) are
@@ -397,7 +397,7 @@ p8_set_pore_bar(      const fapi::Target& i_target,
         FAPI_SET_HWP_ERROR(rc, RC_PROCPM_POREBAR_LOC_ERROR);
         return rc;
     }
-    
+
     FAPI_INF("SLW PORE Memory Relocation Register set to 0x%16llx", data.getDoubleWord(0));
     rc = fapiPutScom(i_target, PORE_SLW_MEMORY_RELOC_0x00068016, data);
     if (rc)
@@ -405,7 +405,7 @@ p8_set_pore_bar(      const fapi::Target& i_target,
         FAPI_ERR("Put SCOM error for Memory Relocation Address");
         return rc;
     }
-   
+
     FAPI_DBG("Calling pba_bar_config to BAR %x Addr: 0x%16llX  Size: 0x%16llX",
                     pba_bar, i_mem_bar, i_mem_size);
 
@@ -449,7 +449,7 @@ p8_set_pore_bar(      const fapi::Target& i_target,
     l_ecmdRc |= data.setBit(5,3);   // Allocate read buffer
     l_ecmdRc |= data.setBit(5,3);   // Care mask-only PORE-SLW
 */
-    
+
     // Slave 2 (PORE-SLW).  This is a read/write slave. Write gathering is
     // allowed, but with the shortest possible timeout.  The slave is set up
     // to allow normal reads and writes at initialization.  The 24x7 code may
@@ -464,7 +464,7 @@ p8_set_pore_bar(      const fapi::Target& i_target,
         return rc;
     }
 
-    
+
     ps.value = 0;
     ps.fields.enable = 1;
     ps.fields.mid_match_value = OCI_MASTER_ID_PORE_SLW;
@@ -477,7 +477,7 @@ p8_set_pore_bar(      const fapi::Target& i_target,
     ps.fields.buf_alloc_b = 1;
     ps.fields.buf_alloc_c = 1;
     ps.fields.buf_alloc_w = 1;
-    
+
     l_ecmdRc |=  data.setDoubleWord(0, ps.value);
     if(l_ecmdRc)
     {
@@ -497,7 +497,7 @@ p8_set_pore_bar(      const fapi::Target& i_target,
     return rc;
 }
 
-/// Reset a PBA slave with explicit timeout.  
+/// Reset a PBA slave with explicit timeout.
 ///
 /// \param id A PBA slave id in the range 0..3
 ///
@@ -515,23 +515,23 @@ p8_set_pore_bar(      const fapi::Target& i_target,
 fapi::ReturnCode
 pba_slave_reset(const fapi::Target& i_target, uint32_t id)
 {
-    
+
     uint32_t            poll_count = 0;
     pba_slvrst_t        psr;
     fapi::ReturnCode    rc;
     uint32_t            l_ecmdRc = 0;
     ecmdDataBufferBase  data(64);
 
-    
+
     // Tell PBA to reset the slave, then poll for completion with timeout.
     // The PBA is always polled at least twice to guarantee that we always
     // poll once after a timeout.
 
     psr.value = 0;
     psr.fields.set = PBA_SLVRST_SET(id);
-    
+
     FAPI_DBG("  PBA_SLVRST%x: 0x%16llx", id, psr.value);
-    
+
     l_ecmdRc |= data.setDoubleWord(0, psr.value);
     if(l_ecmdRc)
     {
@@ -539,15 +539,15 @@ pba_slave_reset(const fapi::Target& i_target, uint32_t id)
         rc.setEcmdError(l_ecmdRc);
         return rc;
     }
-        
+
     rc = fapiPutScom(i_target, PBA_SLVRST_0x00064001, data);
     if (rc)
     {
         FAPI_ERR("Put SCOM error for PBA Slave Reset");
         return rc;
     }
-    
-    do 
+
+    do
     {
         rc = fapiGetScom(i_target, PBA_SLVRST_0x00064001, data);
         if (rc)
@@ -563,20 +563,20 @@ pba_slave_reset(const fapi::Target& i_target, uint32_t id)
             rc.setEcmdError(l_ecmdRc);
             return rc;
         }
-        
-        
-        if (!(psr.fields.in_prog & PBA_SLVRST_IN_PROG(id))) 
+
+
+        if (!(psr.fields.in_prog & PBA_SLVRST_IN_PROG(id)))
         {
 	        break;
 	    }
-        
+
         poll_count++;
-	    if (poll_count == PBA_SLAVE_RESET_TIMEOUT) 
+	    if (poll_count == PBA_SLAVE_RESET_TIMEOUT)
         {
 	        FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PBA_SLVRST_TIMED_OUT);
             break;
 	    }
-	  
+
     } while (1);
 
     return rc;

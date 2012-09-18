@@ -1,27 +1,26 @@
- /*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/hwp/build_winkle_images/proc_slw_build/p8_scan_compression.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
-// $Id: p8_scan_compression.C,v 1.4 2012/08/17 16:19:44 cmolsen Exp $
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/hwp/build_winkle_images/p8_slw_build/p8_scan_compression.C $ */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012                   */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+// $Id: p8_scan_compression.C,v 1.5 2012/09/20 20:25:29 bcbrock Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/utils/p8_scan_compression.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -31,7 +30,7 @@
 // *! OWNER NAME: Bishop Brock  Email: Bishop Brock; bcbrock@us.ibm.com
 // *!
 // *! General Description:
-// *!
+// *! 
 // *!     See below.
 //------------------------------------------------------------------------------
 //
@@ -39,7 +38,7 @@
 // for revision history of p8_scan_compression.c.
 
 /// \file p8_scan_compression.C
-/// \brief APIs related to scan chain compression.
+/// \brief APIs related to scan chain compression. 
 ///
 /// RS4 Compression Format
 /// ======================
@@ -103,34 +102,34 @@
 ///     (R S)* (R E) T D?
 ///
 /// \code
-///
+/// 
 /// <rs4_string>        ::= <rotate> <terminate> |
 ///                         <rotate> <scan> <rs4_string>
-///
+/// 
 /// <rotate>            ::= <octal_stop> |
 ///                         <octal_go> <rotate>
-///
+/// 
 /// <octal_go>          ::= '0x0' | ... | '0x7'
-///
+/// 
 /// <octal_stop>        ::= '0x8' | ... | '0xf'
-///
+/// 
 /// <scan>              ::= <scan_count(N)> <data(N)>
-///
+/// 
 /// <scan_count(N)>     ::= * 0bnnnn, for N = 0bnnnn, N != 0 *
-///
+/// 
 /// <data(N)>           ::= * N nibbles of uncompressed data *
-///
+/// 
 /// <terminate>         ::= '0x0' <terminal_count(0)> |
 ///                         '0x0' <terminal_count(T, T > 0)> <terminal_data(T)>
-///
+/// 
 /// <terminal_count(T)> ::= * 0b00nn, for T = 0bnn *
-///
+/// 
 /// <terminal_data(1)>  ::= '0x0' | '0x8'
 ///
 /// <terminal_data(2)>  ::= '0x0' | '0x4' | '0x8' | '0xc'
 ///
 /// <terminal_data(3)>  ::= '0x0' | '0x2' | '0x4' | ... | '0xe'
-///
+/// 
 /// \endcode
 
 
@@ -198,7 +197,7 @@ revle32(const uint32_t i_x)
 #endif
     return rx;
 }
-
+        
 
 #if COMPRESSED_SCAN_DATA_VERSION != 1
 #error This code assumes CompressedScanData structure version 1 layout
@@ -236,7 +235,7 @@ get_nibble(const uint8_t* i_string, const uint32_t i_i)
     }
     return nibble;
 }
-
+        
 
 // Set a big-endian-indexed nibble in a byte string
 
@@ -257,7 +256,7 @@ set_nibble(uint8_t* io_string, const uint32_t i_i, const int i_nibble)
 
 // Encode an unsigned integer into a 4-bit octal stop code directly into a
 // nibble stream at io_string<i_i>, returning the number of nibbles in the
-// resulting code.
+// resulting code. 
 
 static int
 stop_encode(const uint32_t i_count, uint8_t* io_string, const uint32_t i_i)
@@ -317,7 +316,7 @@ stop_decode(uint32_t* o_count, const uint8_t* i_string, const uint32_t i_i)
     return digits;
 }
 
-
+      
 // RS4 compression algorithm notes:
 //
 // RS4 compression processes i_string as a string of nibbles.  Final
@@ -336,7 +335,7 @@ stop_decode(uint32_t* o_count, const uint8_t* i_string, const uint32_t i_i)
 
 static uint32_t
 _rs4_compress(CompressedScanData* o_data,
-              const uint8_t* i_string,
+              const uint8_t* i_string, 
               const uint32_t i_length)
 {
     int state;                  /* 0 : Rotate, 1 : Scan */
@@ -356,7 +355,7 @@ _rs4_compress(CompressedScanData* o_data,
     data = (uint8_t*)o_data + sizeof(CompressedScanData);
     count = 0;
     state = 0;
-
+    
     // Process the bulk of the string.  Note that state changes do not
     // increment 'i' - the nibble at i_data<i> is always scanned again.
 
@@ -411,8 +410,8 @@ _rs4_compress(CompressedScanData* o_data,
     j++;
 
     // Insert the remainder count nibble, and if non-0, the remainder data
-    // nibble.
-
+    // nibble. 
+    
     set_nibble(data, j, r);
     j++;
     if (r != 0) {
@@ -420,7 +419,7 @@ _rs4_compress(CompressedScanData* o_data,
         j++;
     }
 
-    // Return the number of nibbles in the compressed string.
+    // Return the number of nibbles in the compressed string. 
 
     return j;
 }
@@ -436,7 +435,7 @@ _rs4_compress(CompressedScanData* o_data,
 int
 rs4_compress(CompressedScanData** o_data,
              uint32_t* o_size,
-             const uint8_t* i_string,
+             const uint8_t* i_string, 
              const uint32_t i_length,
              const uint64_t i_scanSelect,
 						 const uint8_t i_ringId,
@@ -484,8 +483,8 @@ rs4_compress(CompressedScanData** o_data,
 // Returns a scan compression return code.
 
 static int
-_rs4_decompress(uint8_t* o_string,
-                const uint8_t* i_string,
+_rs4_decompress(uint8_t* o_string, 
+                const uint8_t* i_string, 
                 const uint32_t i_length)
 {
     int rc;
@@ -584,19 +583,19 @@ rs4_decompress(uint8_t** o_string,
         }
 
         *o_length = revle32(i_data->iv_length);
-        bytes = ((*o_length + 7) / 8) * 8;
+        bytes = (*o_length + 7) / 8;
         *o_string = (uint8_t*)calloc(bytes, 1);
         if (*o_string == 0) {
             rc = BUG(SCAN_COMPRESSION_NO_MEMORY);
             break;
         }
 
-        rc = _rs4_decompress(*o_string,
+        rc = _rs4_decompress(*o_string, 
                              (uint8_t*)i_data + sizeof(CompressedScanData),
                              *o_length);
     } while (0);
 
     return rc;
 }
-
-
+    
+    

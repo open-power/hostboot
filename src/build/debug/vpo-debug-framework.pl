@@ -63,6 +63,7 @@ my %optionInfo = (
     "-s#" => ["The slot to act on."],
     "-p#" => ["The chip position to act on."],
     "-c#" => ["The core/chipUnit to act on."],
+    "--realmem" =>  ["read from real memory instead of L3"],
 );
 
 #--------------------------------------------------------------------------------
@@ -86,6 +87,7 @@ my @ecmdOpt = ("-cft");
 my @threadState = ();
 my $l2Flushed = 0;
 my $fh;
+my $opt_realmem =   0;
 
 # Use HB_VBUTOOLS env if specified
 my $outDir = getcwd();
@@ -130,6 +132,7 @@ if ($self)
                "out-path:s" => \$outPath,
                "debug" => \$debug,
                "mute" => \$mute,
+               "realmem"    =>  \$opt_realmem,
                "no-save-states" => \$nosavestates,
                "help" => \$cfgHelp,
                "toolhelp" => \$toolHelp,
@@ -159,6 +162,7 @@ else
                "out-path:s" => \$outPath,
                "debug" => \$debug,
                "mute" => \$mute,
+               "realmem"    =>  \$opt_realmem,
                "no-save-states" => \$nosavestates,
                "help" => \$cfgHelp,
                "man" => \$cfgMan,
@@ -324,15 +328,34 @@ sub readData
 
     #Read the cache lines from L3 and save to temp file
     my (undef, $fname) = tempfile("tmpXXXXX", DIR => "$outDir");
-    my $command = sprintf ("$vbuToolDir/p8_dump_l3 %x $numCacheLines -f $fname -b @ecmdOpt",
-                            $addr);
+    my  $command    =   "";
+    if ( $opt_realmem )
+    {
+        ## after winkle, cache-contained is disabled, and the buffers are in
+        ## real memory at the same address.
+        ##  use --realmem to read them.
+        ##
+        ##  @todo RTC 50233 need to modify all these routines to sense
+        ##  cache-contained mode and do the switch automatically
+        $command = sprintf ("getmemdma %x %d -fb $fname -quiet",
+                               $addr,
+                               $size    );
+        ##  not using cachelines, no need to seek to offset.
+        $offset =   0;
+    }
+    else
+    {
+        $command = sprintf ("$vbuToolDir/p8_dump_l3 %x $numCacheLines -f $fname -b @ecmdOpt",
+                               $addr);
+    }
 
     if ($debug)
     {
         print "addr $addr, size $size, offset $offset\n";
         print "$command\n";
     }
-    die "ERROR: cannot read L3" if (system("$command") != 0);
+
+    die "ERROR: cannot read memory: $command " if (system("$command") != 0);
 
     #Extract just the data requested from the cache lines read
     open FILE, $fname or die "ERROR: $fname not found : $!";

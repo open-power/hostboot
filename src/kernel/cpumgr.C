@@ -270,6 +270,7 @@ void CpuManager::activateCPU(cpu_t * i_cpu)
 
     // Verify / set SPRs.
     uint64_t msr = getMSR();
+    msr |= 0x1000; // TODO: RTC: 51148 - Simics workaround for SW170137.
     kassert(WAKEUP_MSR_VALUE == msr);
     setLPCR(WAKEUP_LPCR_VALUE);
 }

@@ -30,11 +30,11 @@ _start:
     ;// Set thread priority high.
     or 2,2,2
 
-    ;// Clear MSR[TA] (bit 1) and MSR[ME] (bit 51).
+    ;// Clear MSR[TA] (bit 1) and enable MSR[ME] (bit 51).
     mfmsr r2
-    rldicl r2,r2,1,1    ;// Clear bit 1  - result [1-63,0]
-    rldicl r2,r2,50,1   ;// Clear bit 51 - result [51-63,0-50]
-    rldicl r2,r2,13,0   ;// Rotate around back to [0-63]
+    rldicl r2,r2,1,1    ;// Clear bit 1 - result [1-63,0]
+    rotrdi r2,r2,1      ;// Rotate right 1 - result [0,63]
+    ori r2,r2,4096      ;// Set bit 51
     ;// Set up SRR0 / SRR1 to enable new MSR.
     mtsrr1 r2
     li r2, _start_postmsr@l
@@ -448,7 +448,7 @@ kernel_dispatch_task:
     stdcx. r0, TASK_CPUPTR, r1	;// the CPU pointer in the task.
 
     mfmsr r2		;// Get current MSR
-    ori r2,r2, 0xC030	;// Enable MSR[EE,PR,IR,DR].
+    ori r2,r2, 0xD030	;// Enable MSR[EE,ME,PR,IR,DR].
     rldicl r2,r2,50,1   ;// Clear ...
     rotldi r2,r2,14     ;//     MSR[FP]
     ld r3, TASK_MSR_MASK(r1) ;// Load MSR mask.
@@ -628,6 +628,7 @@ intvect_system_reset_inactive:
     beq+ _start
 
     ;// Now we are a winkled processor that is awoken.
+
     ld r1, CPU_KERNEL_STACK_BOTTOM(r2)
     ld r1, 0(r1)
     mtsprg3 r1

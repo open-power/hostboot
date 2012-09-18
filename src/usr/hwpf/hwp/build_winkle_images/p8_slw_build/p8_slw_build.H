@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/hwpf/hwp/core_activate/proc_prep_master_winkle/proc_sbe_trigger_winkle.H $ */
+/* $Source: src/usr/hwpf/hwp/build_winkle_images/p8_slw_build/p8_slw_build.H $ */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
@@ -20,23 +20,31 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_sbe_trigger_winkle.H,v 1.6 2012/09/21 19:29:25 stillgs Exp $
+// $Id: p8_slw_build.H,v 1.2 2012/09/17 19:42:43 cmolsen Exp $
 
-/// Substep numbers for the proc_sbe_trigger_winkle procedure
+#include <fapi.H>
 
-#ifndef __PROC_SBE_TRIGGER_WINKLE_H
-#define __PROC_SBE_TRIGGER_WINKLE_H
+typedef fapi::ReturnCode (*p8_slw_build_FP_t) (	const fapi::Target&, 
+																								const void*,
+																								uint32_t,
+																								void*,
+																								uint32_t*);
 
-#include "fapi_sbe_common.H"
-#include "sbe_vital.H"
-
-CONST_UINT8_T(SUBSTEP_PROC_ENTRY,                   ULL(0x0));
-CONST_UINT8_T(SUBSTEP_SBE_READY,                    ULL(0x1));
-CONST_UINT8_T(SUBSTEP_DEADMAN_START,                ULL(0x2));
-CONST_UINT8_T(SUBSTEP_DEADMAN_WAITING_FOR_WINKLE,   ULL(0x3));
-CONST_UINT8_T(SUBSTEP_DEADMAN_WAITING_FOR_WAKEUP,   ULL(0x4));
-CONST_UINT8_T(SUBSTEP_DEADMAN_WAITING_FOR_HOSTBOOT, ULL(0x5));
-CONST_UINT8_T(SUBSTEP_HOSTBOOT_ALIVE_AGAIN,         ULL(0x6));
-
-
-#endif  // __PROC_SBE_TRIGGER_WINKLE_H
+extern "C"
+{
+	// Description:  FAPI HWP entry point.  p8_slw_build() constructs the 
+	//               Sleep-Winkle (SLW) image in mainstore during Hostboot
+	//               IPL.
+	// Parameters:   i_target:    Processor chip target.
+	//               *i_imageIn:  Pointer to location of input SBE-XIP image.
+	//               i_sizeImageIn: Size of input image.
+	//               *i_imageOut: Pointer to location of output SLW image in
+	//                            mainstore.
+	//               *io_sizeImageOut: On input, upper limit of size of output 
+	//                            image.  On output, final size of output image.
+	fapi::ReturnCode p8_slw_build( 	const fapi::Target &i_target,
+																	const void 	*i_imageIn,
+																	uint32_t 		i_sizeImageIn,
+																	void 				*i_imageOut,
+																	uint32_t 		*io_sizeImageOut);
+}

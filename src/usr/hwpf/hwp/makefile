@@ -30,7 +30,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/plat
 
 #   CompressedScanData struct needed for getRepairRings()
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/include
-EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/proc_slw_build
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/p8_slw_build
 
 OBJS = fapiTestHwp.o \
        fapiTestHwpError.o \

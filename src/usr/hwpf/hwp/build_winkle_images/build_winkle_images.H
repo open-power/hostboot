@@ -58,6 +58,12 @@
  *      @substepdesc    : Tell SLW Eng where winkle image is
  *          @target_sched   serial
  *  @}
+ *  @{
+ *      @substepnum     3
+ *      @substepname    proc_poreslw_init
+ *      @substepdesc    : Initialize the PORE-SLW engine
+ *          @target_sched   serial
+ *  @}
  *
  */
 
@@ -97,6 +103,19 @@ void*    call_host_build_winkle( void    *io_pArgs );
  *
  */
 void*    call_proc_set_pore_bar( void    *io_pArgs );
+
+
+/**
+ *  @brief   proc_poreslw_init
+ *
+ *  15.3 : : Initialize the PORE-SLW engine
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return  any error logs to istep
+ *
+ */
+void*    call_proc_poreslw_init( void    *io_pArgs );
 
 
 };   // end namespace

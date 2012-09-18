@@ -1,7 +1,7 @@
 <!-- IBM_PROLOG_BEGIN_TAG                                                   -->
 <!-- This is an automatically generated prolog.                             -->
 <!--                                                                        -->
-<!-- $Source: src/usr/hwpf/hwp/build_winkle_images/p8_pba_bar_config/p8_pba_bar_config_errors.xml $ -->
+<!-- $Source: src/usr/hwpf/hwp/build_winkle_images/p8_slw_build/proc_pba_bar_config_errors.xml $ -->
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
@@ -20,7 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: p8_pba_bar_config_errors.xml,v 1.1 2012/09/27 09:20:45 pchatnah Exp $ -->
+<!-- $Id: proc_pba_bar_config_errors.xml,v 1.4 2012/09/12 21:59:26 wenning Exp $ -->
 <!-- Error definitions for proc_pba_bar_config procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->

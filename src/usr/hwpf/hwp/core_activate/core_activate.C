@@ -121,6 +121,62 @@ using   namespace   ISTEP_ERROR;
                                                 (const_cast<TARGETING::Target*>
                                                             (l_cpu_target)) );
 
+#if 1
+            //  SIMICS HACK - The values written by simics are not correct -
+            //  Write them here until we can get the actions files fixed.
+            //  @todo RTC 41384
+            const  uint64_t PORE_SBE_CONTROL_0x000E0001 =   0x00000000000E0001 ;
+            const  uint64_t MBOX_SBEVITAL_0x0005001C    =   0x000000000005001C ;
+            fapi::ReturnCode    rc;
+            ecmdDataBufferBase data(64);
+            uint32_t    sbe_code    =   0;
+
+            rc = fapiGetScom(   l_fapi_cpu_target,
+                                PORE_SBE_CONTROL_0x000E0001,
+                                data );
+            if(!rc.ok()) { TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,"ERROR: reading scom" ); }
+
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "DEBUG: PORE_SBE_CONTROL_0x000E0001  =   0x%lx",
+                       data.getDoubleWord( 0 ) );
+
+            if ( !is_vpo() )
+            {
+                //  proc_prep_master_winkle expects bit 0 to be off (SBE running)
+                data.clearBit(0);
+                rc = fapiPutScom(   l_fapi_cpu_target,
+                                    PORE_SBE_CONTROL_0x000E0001,
+                                    data );
+            }
+
+            rc = fapiGetScom(   l_fapi_cpu_target,
+                                MBOX_SBEVITAL_0x0005001C,
+                                data );
+            if(!rc.ok()) { TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,"ERROR: reading scom" ); }
+
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "DEBUG: MBOX_SBEVITAL_0x0005001C =   0x%lx",
+                       data.getDoubleWord( 0 ) );
+
+
+            if ( !is_vpo() )
+            {
+                //  prop_prep_master_winkle expects the SBE to write F011 to
+                //  SBE_VITAL   before we get here.
+                sbe_code    =   0xF011;
+                data.insertFromRight( &sbe_code,
+                                      16,           // ISTEP_NUM_BIT_POSITION
+                                      16 );         // number of bits
+                rc = fapiPutScom(   l_fapi_cpu_target,
+                                    MBOX_SBEVITAL_0x0005001C,
+                                    data );
+                if(!rc.ok()) { TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,"ERROR: writing scom" ); }
+            }
+#else
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "Simics has been fixed..." );
+#endif
+
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "call_host_activate_master: call proc_prep_master_winkle." );
 
@@ -178,6 +234,39 @@ using   namespace   ISTEP_ERROR;
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                        "Returned from Winkle." );
 
+#if 1
+            //  SIMICS HACK - The values written by simics are not correct -
+            //  Write them here until we can get the actions files fixed.
+
+            rc = fapiGetScom(   l_fapi_cpu_target,
+                                MBOX_SBEVITAL_0x0005001C,
+                                data );
+            if(!rc.ok()) { TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,"ERROR: reading scom" ); }
+
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "DEBUG: MBOX_SBEVITAL_0x0005001C =   0x%lx",
+                       data.getDoubleWord( 0 ) );
+
+            if ( !is_vpo() )
+            {
+                //  prop_stop_deadman_timer expects the SBE to write F015 to
+                //  SBE_VITAL   before we get here.
+                sbe_code    =   0xF015;
+                data.insertFromRight( &sbe_code,
+                                  16,           // ISTEP_NUM_BIT_POSITION
+                                  16 );         // number of bits
+                rc = fapiPutScom(   l_fapi_cpu_target,
+                                    MBOX_SBEVITAL_0x0005001C,
+                                    data );
+                if(!rc.ok()) { TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,"ERROR: writing scom" ); }
+            }
+
+#else
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "Simics has been fixed..." );
+#endif
+
+
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                        "Call proc_stop_deadman_timer..." );
 
@@ -195,7 +284,7 @@ using   namespace   ISTEP_ERROR;
             else
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "proc_prep_master_winkle SUCCESS"  );
+                           "proc_stop_deadman_timer SUCCESS"  );
             }
 
         }   while ( 0 );

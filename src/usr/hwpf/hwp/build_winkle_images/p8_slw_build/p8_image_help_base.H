@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/hwpf/hwp/build_winkle_images/p8_pba_bar_config/p8_pba_bar_config.H $ */
+/* $Source: src/usr/hwpf/hwp/build_winkle_images/p8_slw_build/p8_image_help_base.H $ */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
@@ -20,36 +20,41 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pba_bar_config.H,v 1.1 2012/09/25 20:18:52 stillgs Exp $
+// $Id: p8_image_help_base.H,v 1.4 2012/09/01 16:49:28 cmolsen Exp $
 //------------------------------------------------------------------------------
-// *! (C) Copyright International Business Machines Corp. 2011
-// *! All Rights Reserved -- Property of IBM
-// *! *** IBM Confidential ***
+//  Title:  p8_image_help_base.H
+//  Description:  Contains the most basic structures and defines needed for 
+//                image building and interpretation.
 //------------------------------------------------------------------------------
-// *! OWNER NAME: Klaus P. Gungl         Email: kgungl@de.ibm.com
-// *!
-// *! General Description:
-// *!        
-// *! include file for p8_pba_bar_config 
-// *!
-//------------------------------------------------------------------------------
-// 
 
+#define ASM_RS4_LAUNCH_BUF_SIZE  24	// Byte size of RS4 launch buffer. 
+#define LISTING_STRING_SIZE  (2*PORE_INLINE_DISASSEMBLER_STRING_SIZE)
 
-// function pointer typedef definition for HWP call support
-typedef fapi::ReturnCode (*p8_pba_bar_config_FP_t) (const fapi::Target&, 
-                                                            uint32_t, 
-                                                            uint64_t, 
-                                                            uint64_t, 
-                                                            uint64_t);
+// Base (shared) ring layout for both RS4 and Wiggle-flip layouts.
+typedef struct {
+	uint64_t entryOffset;
+	uint64_t backItemPtr;
+	uint32_t sizeOfThis;
+	uint32_t sizeOfMeta; // Exact size of meta data. Arbitrary size. Not null terminated.
+} BaseRingLayout;
 
-extern "C" 
-{				
+// RS4 specific layout.
+typedef struct {
+  uint64_t entryOffset;
+  uint64_t backItemPtr;
+  uint32_t sizeOfThis;
+  uint32_t sizeOfMeta; // Exact size of meta data. Arbitrary size. Not null terminated.
+  uint32_t ddLevel;
+  uint8_t  sysPhase;
+  uint8_t  override;
+  uint8_t  reserved1;
+  uint8_t  reserved2;
+} Rs4RingLayout;
 
-fapi::ReturnCode 
-p8_pba_bar_config   (const fapi::Target&    i_target, 
-		             uint32_t               index, 
-		             uint64_t               pba_bar_addr,
-		             uint64_t               pba_bar_size,
-		             uint64_t               pba_cmd_scope);
-}
+// PairingInfo is used for pairing, or matching, a back pointer address of a
+// ring block with its corresponding TOC name.
+typedef struct {
+    uint64_t  address;  // 64-bit PORE address
+    char      *name;    // TOC name
+    uint8_t   override; // 0: base  1: override
+} PairingInfo;
