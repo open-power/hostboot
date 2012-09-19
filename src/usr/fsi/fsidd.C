@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/fsi/fsidd.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2011-2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/fsi/fsidd.C $                                         */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  *  @file fsidd.C
  *
@@ -1385,12 +1384,22 @@ errlHndl_t FsiDD::initMasterControl(const TARGETING::Target* i_master,
             if( l_err ) { break; }
 
 
-            //Set MMODE reg to enable HW recovery, parity checking, setup clock ratio
+            //Set MMODE reg to enable HW recovery, parity checking,
+            //  setup clock ratio
             // 1= Enable hardware error recovery
             // 3= Enable parity checking
             // 4:13= FSI clock ratio 0 is 1:1
             // 14:23= FSI clock ratio 1 is 4:1
             databuf = 0x50040400;
+            //Hardware Bug HW204566 on Murano DD1.0 requires legacy
+            //  mode to be enabled
+            if( (i_master->getAttr<TARGETING::ATTR_MODEL>()
+                                      == TARGETING::MODEL_MURANO) &&
+                (i_master->getAttr<TARGETING::ATTR_EC>() == 0x10) )
+            {
+                // 25=clock/4 mode 
+                databuf |= 0x00000040;
+            }
             l_err = write( ctl_reg|FSI_MMODE_000, &databuf );
             if( l_err ) { break; }
         }

@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/fsi/fsipres.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2011-2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/fsi/fsipres.C $                                       */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #include <devicefw/driverif.H>
 #include <targeting/common/attributes.H>
 #include <fsi/fsiif.H>
@@ -148,16 +147,6 @@ errlHndl_t procPresenceDetect(DeviceFW::OperationType i_opType,
         {
             mvpd_present = true;
         }
-    }
-
-    //@fixme-RTC:35551 : FSI presence detection is wrong in VPO
-    //   Force FSI to follow MVPD
-    if( (fsi_present != mvpd_present) && TARGETING::is_vpo() )
-    {
-        TRACFCOMP(g_trac_fsi,
-                  ERR_MRK "FSI::procPresenceDetect> Lying about FSI presence for %.8X",
-                  TARGETING::get_huid(i_target));
-        fsi_present = mvpd_present;
     }
 
     // Finally compare the 2 methods
@@ -292,16 +281,6 @@ errlHndl_t membPresenceDetect(DeviceFW::OperationType i_opType,
             errlCommit( l_errl,
                         FSI_COMP_ID );
         }
-    }
-
-    //@fixme-RTC:35551 : FSI presence detection is wrong in VPO
-    //   Force FSI to follow VPD
-    if( (fsi_present != vpd_present) && TARGETING::is_vpo() )
-    {
-        TRACFCOMP(g_trac_fsi,
-                  ERR_MRK "FSI::membPresenceDetect> Lying about FSI presence for %.8X",
-                  TARGETING::get_huid(i_target));
-        fsi_present = vpd_present;
     }
 
     // Finally compare the 2 methods
