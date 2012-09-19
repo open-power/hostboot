@@ -48,7 +48,7 @@ extern trace_desc_t* g_trac_errl;
 
 // Scaffolding
 // Store error logs in this memory buffer in L3 RAM.
-char g_ErrlStorage[ ERRL_STORAGE_SIZE ];
+char* g_ErrlStorage = new char[ ERRL_STORAGE_SIZE ];
 
 
 /**
@@ -90,23 +90,19 @@ ErrlManager::ErrlManager()
     // This buffer has a header (storage_header_t) followed by
     // storage.
     iv_pStorage = reinterpret_cast<storage_header_t*>(g_ErrlStorage);
-
-    // g_ErrlStorage is in BSS segment, therefore already zeroed.
-    // memset( iv_pStorage, 0, sizeof(storage_header_t));
+    memset( iv_pStorage, 0, sizeof(storage_header_t));
 
     // Storage size is placed here for benefit of downstream parsers.
-    iv_pStorage->cbStorage    = sizeof( g_ErrlStorage );
+    iv_pStorage->cbStorage    = ERRL_STORAGE_SIZE;
 
     // Offsets are zero-based at &g_ErrlStorage[0],
     // so the first usable offset is just past the header.
     iv_pStorage->offsetMarker = sizeof(storage_header_t);
     iv_pStorage->offsetStart  = sizeof(storage_header_t);
 
-    // g_ErrlStorage is in BSS segment, therefore already zeroed.
-    // Thus, the prime marker in storage is already zero.
-    // marker_t* l_pMarker = OFFSET2MARKER( iv_pStorage->offsetStart );
-    // l_pMarker->offsetNext = 0;
-    // l_pMarker->length     = 0;
+    marker_t* l_pMarker = OFFSET2MARKER( iv_pStorage->offsetStart );
+    l_pMarker->offsetNext = 0;
+    l_pMarker->length     = 0;
 
 }
 

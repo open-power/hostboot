@@ -1,24 +1,24 @@
-# IBM_PROLOG_BEGIN_TAG 
-# This is an automatically generated prolog. 
-#  
-# $Source: config.mk $ 
-#  
-# IBM CONFIDENTIAL 
-#  
-# COPYRIGHT International Business Machines Corp. 2010,2012 
-#  
-# p1 
-#  
-# Object Code Only (OCO) source materials 
-# Licensed Internal Code Source Materials 
-# IBM HostBoot Licensed Internal Code 
-#  
-# The source code for this program is not published or otherwise 
-# divested of its trade secrets, irrespective of what has been 
-# deposited with the U.S. Copyright Office. 
-#  
-# Origin: 30 
-#  
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+# 
+# $Source: config.mk $
+# 
+# IBM CONFIDENTIAL
+# 
+# COPYRIGHT International Business Machines Corp. 2010,2012
+# 
+# p1
+# 
+# Object Code Only (OCO) source materials
+# Licensed Internal Code Source Materials
+# IBM HostBoot Licensed Internal Code
+# 
+# The source code for this program is not published or otherwise
+# divested of its trade secrets, irrespective of what has been
+# deposited with the U.S. Copyright Office.
+# 
+# Origin: 30
+# 
 # IBM_PROLOG_END_TAG 
 all:
 	${MAKE} gen_pass
@@ -39,9 +39,11 @@ ifdef STRICT
         EXTRACOMMONFLAGS += -Weffc++
 endif
 CUSTOMFLAGS += -D__HOSTBOOT_MODULE=${MODULE}
+ifndef TESTS
 ifdef HOSTBOOT_PROFILE
 vpath %.C ${ROOTPATH}/src/sys/prof
-OBJS += gcov.o
+OBJS := gcov.o ${OBJS}
+endif
 endif
 LIBS += $(addsuffix .so, $(addprefix lib, ${MODULE}))
 MODULE_INIT = ${ROOTPATH}/obj/core/module_init.o
@@ -77,8 +79,12 @@ endif
 endif
 endif
 
+ifndef TESTS
 ifdef HOSTBOOT_PROFILE
+ifndef HOSTBOOT_PROFILE_NO_INSTRUMENT
 CUSTOMFLAGS += --coverage
+endif
+endif
 endif
 
 TRACEPP = ${ROOTPATH}/src/build/trace/tracepp
@@ -109,7 +115,12 @@ BEAMFLAGS = \
     --beam::exit0 \
     -o /dev/null
 
-COMMONFLAGS = -O3 -nostdlib ${EXTRACOMMONFLAGS}
+ifdef HOSTBOOT_PROFILE
+COMMONFLAGS = -Os 
+else
+COMMONFLAGS = -O3
+endif
+COMMONFLAGS += -nostdlib ${EXTRACOMMONFLAGS}
 CFLAGS = ${COMMONFLAGS} -mcpu=power7 -nostdinc -g -mno-vsx -mno-altivec\
 	 -Wall -Werror -mtraceback=no ${CUSTOMFLAGS}
 ASMFLAGS = ${COMMONFLAGS} -mcpu=power7

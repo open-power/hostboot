@@ -1,26 +1,26 @@
 #!/usr/bin/perl
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
-# 
+#
 # $Source: src/build/debug/simics-debug-framework.pl $
-# 
+#
 # IBM CONFIDENTIAL
-# 
+#
 # COPYRIGHT International Business Machines Corp. 2011,2012
-# 
+#
 # p1
-# 
+#
 # Object Code Only (OCO) source materials
 # Licensed Internal Code Source Materials
 # IBM HostBoot Licensed Internal Code
-# 
+#
 # The source code for this program is not published or otherwise
 # divested of its trade secrets, irrespective of what has been
 # deposited with the U.S. Copyright Office.
-# 
+#
 # Origin: 30
-# 
-# IBM_PROLOG_END_TAG 
+#
+# IBM_PROLOG_END_TAG
 # @file simics-debug-framework.pl
 # @brief Implementation of the common debug framework for running in simics.
 #
@@ -282,25 +282,100 @@ sub writeScom
     return;
 }
 
-
-##
-##  Dummy module to match continuous trace call in VPO
-##
-sub checkContTrace()
+# @sub getHRMOR
+# @brief Retrieve the HRMOR value
+#
+my $cached_HRMOR = "";
+sub getHRMOR
 {
+    if ($cached_HRMOR eq "")
+    {
+        sendIPCMsg("get-hrmor","");
+        my ($unused, $hrmor) = recvIPCMsg();
+        $cached_HRMOR = $hrmor;
+        return $hrmor;
+    }
+
+    return $cached_HRMOR;
 
 }
 
 
-##
-##  Retrieve the HRMOR value
-##
-sub getHRMOR()
+use constant PNOR_MODE_UNKNOWN => 0;
+use constant PNOR_MODE_MEMCPY => PNOR_MODE_UNKNOWN + 1;
+use constant PNOR_MODE_LPC_MEM => PNOR_MODE_MEMCPY + 1;
+use constant PNOR_MODE_REAL_CMD => PNOR_MODE_LPC_MEM + 1;
+use constant PNOR_MODE_REAL_MMIO => PNOR_MODE_REAL_CMD + 1;
+my $extImageMode = PNOR_MODE_UNKNOWN;
+my $extImageOffset = 0;
+
+use constant PNOR_DD_MODE_OFFSET => 8;
+use constant PNOR_DD_FAKESTART_OFFSET => PNOR_DD_MODE_OFFSET + 16;
+
+use constant PNOR_RP_HBEXT_SECTION => 1;
+use constant PNOR_RP_SECTIONDATA_SIZE => 3 * 8 + 2;
+use constant PNOR_RP_SECTIONDATA_FLASHADDR_OFFSET => 2 * 8;
+
+sub determineExtImageInfo
 {
-    sendIPCMsg("get-hrmor","");
-    my ($unused, $hrmor) = recvIPCMsg();
-    return $hrmor;
+    my ($pnorDDAddr, $pnorDDSize) =
+        ::findSymbolAddress("Singleton<PnorDD>::instance()::instance");
+
+    $extImageMode = read32($pnorDDAddr + PNOR_DD_MODE_OFFSET);
+    if ((PNOR_MODE_MEMCPY == $extImageMode) ||
+        (PNOR_MODE_LPC_MEM == $extImageMode))
+    {
+        $extImageOffset = read32($pnorDDAddr + PNOR_DD_FAKESTART_OFFSET);
+    }
+
+    my ($pnorRPAddr, $pnorRPSize) =
+        ::findSymbolAddress("Singleton<PnorRP>::instance()::instance");
+
+    $extImageOffset +=
+        read32($pnorRPAddr +
+               (PNOR_RP_SECTIONDATA_SIZE * PNOR_RP_HBEXT_SECTION) +
+               PNOR_RP_SECTIONDATA_FLASHADDR_OFFSET);
 }
+
+# @sub readExtImage
+#
+# Reads from the extended image file.
+#
+# @param addr - Address to read.
+# @param size - Size to read.
+sub readExtImage
+{
+    my $addr = shift;
+    my $size = shift;
+
+    if ($extImageMode == PNOR_MODE_UNKNOWN) { determineExtImageInfo(); }
+
+    if ((PNOR_MODE_MEMCPY == $extImageMode) ||
+        (PNOR_MODE_LPC_MEM == $extImageMode))
+    {
+        $addr += getHRMOR() + $extImageOffset;
+        return readData($addr, $size);
+    }
+    else
+    {
+        $addr += $extImageOffset;
+        sendIPCMsg("read-pnor", "$addr,$size");
+
+        my ($type, $data) = recvIPCMsg();
+
+        if (length($data) == $size)
+        {
+            return $data;
+        }
+    }
+    return "";
+
+}
+
+
+
+
+
 
 # Get tool name.
 sendIPCMsg("get-tool","");
@@ -325,4 +400,13 @@ parseToolOpts($toolOpts);
 
 # Execute module.
 callToolModule($tool);
+
+
+##
+##  Dummy function to match continuous trace call in VPO
+##
+sub checkContTrace
+{
+
+}
 

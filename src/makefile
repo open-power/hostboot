@@ -46,27 +46,19 @@ DIRECT_BOOT_OBJECTS = start.o kernel.o taskmgr.o cpumgr.o syscall.o \
                       blockmsghdlr.o stacksegment.o softpatch_p7.o \
 		      shutdown.o
 
-## STUB_TESTCASE_OBJECT = cxxtest_stub.o
-
-RUNTIME_OBJECTS =
-
-
 BASE_MODULES = trace errl devicefw scom xscom initservice \
-               pnor vfs scan
+               pnor vfs
 
 EXTENDED_MODULES = targeting ecmddatabuffer fapi hwp plat	\
-                   extinitsvc istepdisp hwas fsi fsiscom i2c intr \
-		           spd dmi_training fapiporeve poreve util	\
-		           sbe_centaur_init mc_config dram_training \
+                   extinitsvc istepdisp hwas fsi fsiscom i2c intr scan \
+                   spd dmi_training fapiporeve poreve util	\
+                   sbe_centaur_init mc_config dram_training \
                    mdia mbox mvpd prdf bus_training \
                    activate_powerbus build_winkle_images \
                    core_activate dram_initialization edi_ei_initialization \
                    establish_system_smp \
                    nest_chiplets start_payload thread_activate slave_sbe \
                    attn
-
-DIRECT_BOOT_MODULES = example
-RUNTIME_MODULES =
 
 TESTCASE_MODULES = cxxtest testerrl testdevicefw testsyslib \
                    testscom testxscom testtargeting testinitservice testkernel \
@@ -77,8 +69,8 @@ TESTCASE_MODULES = cxxtest testerrl testdevicefw testsyslib \
 
 RELOCATABLE_IMAGE_LDFLAGS = -pie --export-dynamic
 
-hbicore_OBJECTS = ${BASE_OBJECTS} ${DIRECT_BOOT_OBJECTS} ${STUB_TESTCASE_OBJECT}
-hbicore_MODULES = ${BASE_MODULES} ${DIRECT_BOOT_MODULES}
+hbicore_OBJECTS = ${BASE_OBJECTS} ${DIRECT_BOOT_OBJECTS}
+hbicore_MODULES = ${BASE_MODULES}
 hbicore_EXTENDED_MODULES = ${EXTENDED_MODULES}
 #@todo - Temporary workaround
 # The centaur.sbe_pnor.bin is manually built from CVS SBE procedure files in
@@ -91,15 +83,10 @@ hbicore_DATA_MODULES =  sample.if p8.dmi.scom.if cen.dmi.scom.if \
 
 hbicore_LIDNUMBER = 80f00100
 
-hbicore_test_OBJECTS = ${BASE_OBJECTS} ${DIRECT_BOOT_OBJECTS}
+hbicore_test_OBJECTS = ${hbicore_OBJECTS}
 hbicore_test_MODULES = ${hbicore_MODULES}
 hbicore_test_EXTENDED_MODULES = ${hbicore_EXTENDED_MODULES} ${TESTCASE_MODULES}
 hbicore_test_DATA_MODULES = ${hbicore_DATA_MODULES} testdata
-
-#halruntime_OBJECTS = ${BASE_OBJECTS} ${RUNTIME_OBJECTS}
-#halruntime_MODULES = ${BASE_MODULES} ${EXTENDED_MODULES} ${RUNTIME_MODULES}
-#halruntime_LDFLAGS = ${RELOCATABLE_IMAGE_LDFLAGS}
-#halruntime_LIDNUMBER = 80f00101
 
 dslid_LIDNUMBER = 80f001fe
 
@@ -108,4 +95,4 @@ IMAGE_EXTRA_TARGETS = buildpnor
 include ${ROOTPATH}/config.mk
 
 buildpnor: ${IMAGES}
-	cd build/buildpnor/ && make buildpnor
+	cd build/buildpnor/ && ${MAKE} buildpnor

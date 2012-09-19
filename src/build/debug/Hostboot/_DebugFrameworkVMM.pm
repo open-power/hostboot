@@ -1,26 +1,26 @@
 #!/usr/bin/perl
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
-# 
+#
 # $Source: src/build/debug/Hostboot/_DebugFrameworkVMM.pm $
-# 
+#
 # IBM CONFIDENTIAL
-# 
+#
 # COPYRIGHT International Business Machines Corp. 2011,2012
-# 
+#
 # p1
-# 
+#
 # Object Code Only (OCO) source materials
 # Licensed Internal Code Source Materials
 # IBM HostBoot Licensed Internal Code
-# 
+#
 # The source code for this program is not published or otherwise
 # divested of its trade secrets, irrespective of what has been
 # deposited with the U.S. Copyright Office.
-# 
+#
 # Origin: 30
-# 
-# IBM_PROLOG_END_TAG 
+#
+# IBM_PROLOG_END_TAG
 # _DebugFrameworkVMM.pm
 #
 # This module is a set of utility functions for the debug framework, which
@@ -50,7 +50,6 @@ our @EXPORT = (
                 'printStackSegment',
                 'printDeviceSegments'
               );
-
 
 use constant NotFound => 'not found';
 use constant NotPresent => 'not present';
@@ -86,9 +85,9 @@ use constant BLOCK_SPTE_OFFSET => 32;
 
 
 
-our @EXPORT_OK = ('NotFound');
-our @EXPORT_OK = ('NotPresent');
-our @EXPORT_OK = ('SEGMGR_BASE_SEGMENT_OFFSET',
+our @EXPORT_OK = ('NotFound',
+                  'NotPresent',
+                  'SEGMGR_BASE_SEGMENT_OFFSET',
                   'SEGMGR_STACK_SEGMENT_OFFSET',
                   'SEGMGR_FIRSTDEVICE_SEGMENT_OFFSET',
                   'STACKSEGMENT_BASEADDR_OFFSET',
@@ -797,7 +796,7 @@ sub getNumPresentPages
 
     while( $i<$pages)
     {
-        my $SPTE_entry = ::read32 ($SPTE_ptr + $i, 4);
+        my $SPTE_entry = ::read32 ($SPTE_ptr + (4*$i), 4);
 
         # if found present
         if ($SPTE_entry & 0x00000800)
@@ -823,7 +822,7 @@ sub getNumPresentPages
 #  their info.
 #  In addition each individual device segment could have
 #  up to 32 mmio devices populated so this routine will print
-#  out those as well. 
+#  out those as well.
 #
 # @param Ptr to the Address of the First Device segment
 #        we need to work with from the segment manager
@@ -856,7 +855,7 @@ sub printDeviceSegments
                                       DEVICESEGMENT_BASEADDR_OFFSET, 8);
 
         # If the device segment is valid, then print out its info and
-        # check for MMIO devices populated.     
+        # check for MMIO devices populated.
         if ($deviceSegmentPtr != 0)
         {
             #::userDisplay (sprintf "   segmentbaseaddr:  %X\n" , $segmentbaseaddr);
@@ -912,6 +911,6 @@ sub printDeviceSegments
 
 }
 
-
+1;
 
 __END__

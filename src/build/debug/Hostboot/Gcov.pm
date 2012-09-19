@@ -26,6 +26,8 @@ use File::Path;
 use File::Basename;
 
 package Hostboot::Gcov;
+use Hostboot::_DebugFrameworkVMM qw(NotFound NotPresent getPhysicalAddr);
+
 use Exporter;
 our @EXPORT_OK = ('main');
 
@@ -170,12 +172,16 @@ sub parseModuleGcov
 
     userDebug("\tFound info at 0x" . (sprintf "%x", $gcov_info) . "\n");
 
-    # TODO: We don't support extended image modules yet because the VMM
-    # debug tools don't exist yet.
-    if ($gcov_info > GCOV_EXTENDED_IMAGE_ADDRESS)
+    # Translate gcov_info chain to a physical address if in a module.
+    if (isVirtualAddress($gcov_info))
     {
-        ::userDisplay "\tUnable to parse extended image modules.  Skipped.\n";
-        return;
+        $gcov_info = getPhysicalAddr($gcov_info);
+
+        if (($gcov_info eq NotFound) || ($gcov_info eq NotPresent))
+        {
+            ::userDisplay "\tModule data is not present.\n";
+            return;
+        }
     }
 
     # Check that we found the gcov_info chain.
@@ -186,7 +192,7 @@ sub parseModuleGcov
     }
 
     # Parse info chain.
-    parseGcovInfo(::read64($gcov_info));
+    parseGcovInfo(read64($gcov_info));
 }
 
 sub parseGcovInfo
@@ -194,19 +200,19 @@ sub parseGcovInfo
     my $info_ptr = shift;
     return if (0 eq $info_ptr);
 
-    my $filename = ::readStr(::read64($info_ptr + GCOV_INFO_FILENAME_OFFSET));
+    my $filename = readStr(read64($info_ptr + GCOV_INFO_FILENAME_OFFSET));
     userDebug("\tFile = ".$filename."\n");
 
-    my $version = ::read32($info_ptr + GCOV_INFO_VERSION_OFFSET);
-    my $stamp = ::read32($info_ptr + GCOV_INFO_TIMESTAMP_OFFSET);
+    my $version = read32($info_ptr + GCOV_INFO_VERSION_OFFSET);
+    my $stamp = read32($info_ptr + GCOV_INFO_TIMESTAMP_OFFSET);
 
-    my $func_count = ::read32($info_ptr + GCOV_INFO_NFUNCTIONS_OFFSET);
+    my $func_count = read32($info_ptr + GCOV_INFO_NFUNCTIONS_OFFSET);
     userDebug("\tFunction Count = ".$func_count."\n");
 
-    my $funcs = ::read64($info_ptr + GCOV_INFO_FUNCTIONS_OFFSET);
+    my $funcs = read64($info_ptr + GCOV_INFO_FUNCTIONS_OFFSET);
     userDebug("\tFunc Address = ".(sprintf "%x", $funcs)."\n");
 
-    my $ctrmask = ::read32($info_ptr + GCOV_INFO_CTRMASK_OFFSET);
+    my $ctrmask = read32($info_ptr + GCOV_INFO_CTRMASK_OFFSET);
     if ($ctrmask % 2) # Check that COUNTER_ARCS is turned on.
     {
         # COUNTER_ARCS is on.  Create file, find arc-values array,
@@ -214,7 +220,7 @@ sub parseGcovInfo
 
         my $fd = createGcovFile($filename, $version, $stamp);
 
-        my $arcs_ptr = ::read64($info_ptr + GCOV_INFO_COUNTS_OFFSET +
+        my $arcs_ptr = read64($info_ptr + GCOV_INFO_COUNTS_OFFSET +
                                 GCOV_CTRINFO_VALUEPTR_OFFSET);
         parseGcovFuncs($fd, $funcs, $func_count, $ctrmask, $arcs_ptr);
 
@@ -226,7 +232,7 @@ sub parseGcovInfo
     }
 
     # Look for next .o in gcov_info chain, parse.
-    my $next = ::read64($info_ptr + GCOV_INFO_NEXT_OFFSET);
+    my $next = read64($info_ptr + GCOV_INFO_NEXT_OFFSET);
     parseGcovInfo($next);
 }
 
@@ -270,8 +276,8 @@ sub parseGcovFuncs
     for(my $function = 0; $function < $func_count; $function++)
     {
         my $func_off = ($func_ptr + $func_size * $function);
-        my $ident = ::read32($func_off + GCOV_FNINFO_IDENT_OFFSET);
-        my $chksum = ::read32($func_off + GCOV_FNINFO_CHECKSUM_OFFSET);
+        my $ident = read32($func_off + GCOV_FNINFO_IDENT_OFFSET);
+        my $chksum = read32($func_off + GCOV_FNINFO_CHECKSUM_OFFSET);
 
         userDebug("Ident = ".(sprintf "%x", $ident)."\n");
         userDebug("Chksum = ".(sprintf "%x", $chksum)."\n");
@@ -281,16 +287,21 @@ sub parseGcovFuncs
         print $fd pack('l', $ident); # Write ident.
         print $fd pack('l', $chksum); # Write checksum.
 
-        my $nctr_val = ::read32($func_off + GCOV_FNINFO_NCTRS_OFFSET);
+        my $nctr_val = read32($func_off + GCOV_FNINFO_NCTRS_OFFSET);
         userDebug("N-Counters = ".$nctr_val."\n");
 
         print $fd pack('l', GCOV_COUNTERS_TAG); # Write counter tag.
         print $fd pack('l', $nctr_val * 2); # Write counter length.
 
         # Read each counter value, output.
+        #       Read as one big block for performance reasons.
+        my $counters = readData($val_ptr + 8*($fn_offset), 8 * $nctr_val);
         for(my $v_idx = 0; $v_idx < $nctr_val; $v_idx++)
         {
-            my $val = ::read64($val_ptr + 8*($fn_offset + $v_idx));
+            my $val = substr $counters, 0, 8;
+            $counters = substr $counters, 8;
+            if (::littleendian()) { $val = reverse($val); }
+            $val = unpack("Q", $val);
             userDebug("\tValue[$v_idx] = ".$val."\n");
 
             print $fd pack('l', $val & 0xFFFFFFFF);  # Write lower word.
@@ -355,6 +366,152 @@ sub getModules
 
     return @result;
 }
+
+# Determine if an address is virtual.
+sub isVirtualAddress
+{
+    my $addr = shift;
+
+    return ($addr >= GCOV_EXTENDED_IMAGE_ADDRESS);
+}
+
+# Utility to read a block of data from eithr memory or using the extended
+# image file as a fallback if not present in memory.
+use constant PAGESIZE => 4096;
+sub readData
+{
+    my $addr = shift;
+    my $size = shift;
+
+    if (isVirtualAddress($addr))
+    {
+        my $result = "";
+
+        while($size)
+        {
+            my $amount = $size;
+
+            if ((($addr % PAGESIZE) + $size) >= PAGESIZE)
+            {
+                $amount = PAGESIZE - ($addr % PAGESIZE);
+            }
+
+            my $paddr = getPhysicalAddr($addr);
+            if ((NotFound eq $paddr) || (NotPresent eq $paddr))
+            {
+                $paddr = $addr - GCOV_EXTENDED_IMAGE_ADDRESS;
+                $result = $result.::readExtImage($paddr, $amount);
+            }
+            else
+            {
+                $result = $result.::readData($paddr, $amount);
+            }
+
+            $size = $size - $amount;
+        }
+
+        return $result;
+    }
+
+    return ::readData($addr, $size);
+}
+
+# Utility to read 64 bits from either memory or using the extended image file
+# as a fallback if not present in memory.
+sub read64
+{
+    my $addr = shift;
+    my $old_addr = $addr;
+    if (isVirtualAddress($addr))
+    {
+        $addr = getPhysicalAddr($addr);
+        if ((NotFound eq $addr) || (NotPresent eq $addr))
+        {
+            $addr = $old_addr - GCOV_EXTENDED_IMAGE_ADDRESS;
+            my $result = ::readExtImage($addr, 8);
+            if (::littleendian()) { $result = reverse($result); }
+            return unpack("Q", $result);
+        }
+    }
+
+    return ::read64($addr);
+}
+
+# Utility to read 32 bits from either memory or using the extended image file
+# as a fallback if not present in memory.
+sub read32
+{
+    my $addr = shift;
+    my $old_addr = $addr;
+    if (isVirtualAddress($addr))
+    {
+        $addr = getPhysicalAddr($addr);
+        if ((NotFound eq $addr) || (NotPresent eq $addr))
+        {
+            $addr = $old_addr - GCOV_EXTENDED_IMAGE_ADDRESS;
+            my $result = ::readExtImage($addr, 4);
+            if (::littleendian()) { $result = reverse($result); }
+            return unpack("L", $result);
+        }
+    }
+
+    return ::read32($addr);
+}
+
+# Utility to read 8 bits from either memory or using the extended image file
+# as a fallback if not present in memory.
+sub read8
+{
+    my $addr = shift;
+    my $old_addr = $addr;
+    if (isVirtualAddress($addr))
+    {
+        $addr = getPhysicalAddr($addr);
+        if ((NotFound eq $addr) || (NotPresent eq $addr))
+        {
+            $addr = $old_addr - GCOV_EXTENDED_IMAGE_ADDRESS;
+            my $result = ::readExtImage($addr, 1);
+            return unpack("C", $result);
+        }
+    }
+
+    return ::read8($addr);
+}
+
+# Utility to read a string from either memory or using the extended image file
+# as a fallback if not present in memory.
+sub readStr
+{
+    my $addr = shift;
+    my $old_addr = $addr;
+    if (isVirtualAddress($addr))
+    {
+        $addr = $addr - GCOV_EXTENDED_IMAGE_ADDRESS;
+
+        # Virtual address, so need to read 1 byte at a time from the file.
+        my $string = "";
+        my $byte = 0;
+
+        do
+        {
+            $byte = ::readExtImage($addr,1);
+            $addr = $addr + 1;
+
+            if (unpack("C",$byte) eq 0)
+            {
+                return $string;
+            }
+
+            $string = $string.$byte;
+
+        } while (1)
+    }
+    else
+    {
+        ::readStr($addr);
+    }
+}
+
 
 sub userDebug
 {

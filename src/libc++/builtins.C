@@ -1,30 +1,31 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/libc++/builtins.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2010 - 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/libc++/builtins.C $                                       */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2010,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #include <stdint.h>
 #include <stdlib.h>
 
 #include <arch/ppc.H>
 #include <util/locked/list.H>
+#include <sys/sync.h>
 
 void* operator new(size_t s)
 {
@@ -109,13 +110,13 @@ struct DtorEntry_t
     key_type    key;
     void (*dtor)(void*);
     void * arg;
-    void * dso_handle;
 
     DtorEntry_t * next;
     DtorEntry_t * prev;
 };
 
 Util::Locked::List<DtorEntry_t, DtorEntry_t::key_type> g_dtorRegistry;
+mutex_t g_dtorLock = MUTEX_INITIALIZER;
 
 
 /**
@@ -125,15 +126,17 @@ Util::Locked::List<DtorEntry_t, DtorEntry_t::key_type> g_dtorRegistry;
  */
 void call_dtors(void * i_dso_handle)
 {
+    mutex_lock(&g_dtorLock);
+
     DtorEntry_t * entry = NULL;
-    // A module is never exited by different threads so
-    // assume no locking needed here.
     while( NULL != (entry = g_dtorRegistry.find(i_dso_handle)) )
     {
         g_dtorRegistry.erase(entry);  // remove from list
         (*(entry->dtor))(entry->arg);
         delete entry;
     }
+
+    mutex_unlock(&g_dtorLock);
 }
 
 
@@ -150,7 +153,10 @@ extern "C" int __cxa_atexit(void (*i_dtor)(void*),
         entry->key = i_dso_handle;
         entry->dtor = i_dtor;
         entry->arg = i_arg;
+
+        mutex_lock(&g_dtorLock);
         g_dtorRegistry.insert(entry);
+        mutex_unlock(&g_dtorLock);
     }
     return 0;
 }

@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/include/usr/pnor/pnorif.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2011-2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/include/usr/pnor/pnorif.H $                               */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef __PNOR_PNORIF_H
 #define __PNOR_PNORIF_H
 
@@ -37,12 +36,13 @@ namespace PNOR
 enum SectionId
 {
     TOC,            /**< Table of Contents */
+            // Value of HB_EXT_CODE must be 1 for debug framework.
     HB_EXT_CODE,    /**< Hostboot Extended Image */
     HB_DATA,        /**< Hostboot Data */
     DIMM_JEDEC_VPD, /**< DIMM JEDEC VPD */
     MODULE_VPD,     /**< Module VPD */
     HB_BASE_CODE,   /**< Hostboot Base Image */
-    TEST,           /**< Scratch space for PNOR test cases */ 
+    TEST,           /**< Scratch space for PNOR test cases */
     NUM_SECTIONS,   /**< Number of defined sections */
 
     //Not currently used
@@ -70,6 +70,7 @@ enum SideSelect
 /**
  * Information about a section of PNOR
  */
+    // Size and layout of this structure must be maintained for debug framework.
 struct SectionInfo_t
 {
     SectionId id;  /**< Identifier for this section */

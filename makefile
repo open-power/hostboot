@@ -1,24 +1,24 @@
-# IBM_PROLOG_BEGIN_TAG 
-# This is an automatically generated prolog. 
-#  
-# $Source: makefile $ 
-#  
-# IBM CONFIDENTIAL 
-#  
-# COPYRIGHT International Business Machines Corp. 2010,2012 
-#  
-# p1 
-#  
-# Object Code Only (OCO) source materials 
-# Licensed Internal Code Source Materials 
-# IBM HostBoot Licensed Internal Code 
-#  
-# The source code for this program is not published or otherwise 
-# divested of its trade secrets, irrespective of what has been 
-# deposited with the U.S. Copyright Office. 
-#  
-# Origin: 30 
-#  
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+# 
+# $Source: makefile $
+# 
+# IBM CONFIDENTIAL
+# 
+# COPYRIGHT International Business Machines Corp. 2010,2012
+# 
+# p1
+# 
+# Object Code Only (OCO) source materials
+# Licensed Internal Code Source Materials
+# IBM HostBoot Licensed Internal Code
+# 
+# The source code for this program is not published or otherwise
+# divested of its trade secrets, irrespective of what has been
+# deposited with the U.S. Copyright Office.
+# 
+# Origin: 30
+# 
 # IBM_PROLOG_END_TAG 
 SUBDIRS = src.d
 ROOTPATH = .
@@ -39,5 +39,5 @@ gcov:
 	make gcov_pass
 	find obj/gcov/ -size 0c | xargs rm # Delete empty files.
 	genhtml obj/gcov/*.lcov -o obj/gcov/html
-	echo "View GCOV results with: firefox obj/gcov/html/index.html"
+	@echo "View GCOV results with: firefox obj/gcov/html/index.html"
 

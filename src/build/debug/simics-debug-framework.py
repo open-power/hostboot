@@ -169,6 +169,19 @@ class DebugFrameworkProcess:
 
         conf.system_cmp0.phys_mem.memory[[addr, addr+size-1]] = data;
 
+    # Read data from PNOR.
+    #    This message has data of the format "0dADDRESS,0dSIZE".
+    def read_pnor(self,data):
+        pattern = re.compile("([0-9]+),([0-9]+)")
+        match = pattern.search(data)
+
+        addr = int(match.group(1))
+        size = int(match.group(2))
+
+        data = "".join(map(chr,
+            conf.fpga0.sfc_master_mem.memory[[addr , addr+size-1]]))
+        self.sendMsg("data-response", data)
+
     # Clock forward the model.
     #    This message had data of the format "0dCYCLES".
     def execute_instrs(self,data):
@@ -260,6 +273,7 @@ def run_hb_debug_framework(tool = "Printk", toolOpts = "",
         operations = { "display" :  DebugFrameworkProcess.display,
             "read-data" :           DebugFrameworkProcess.read_data,
             "write-data" :          DebugFrameworkProcess.write_data,
+            "read-pnor" :           DebugFrameworkProcess.read_pnor,
             "execute-instrs" :      DebugFrameworkProcess.execute_instrs,
             "ready-for-instr" :     DebugFrameworkProcess.ready_for_instr,
             "get-tool" :            DebugFrameworkProcess.get_tool,

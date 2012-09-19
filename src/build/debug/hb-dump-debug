@@ -1,26 +1,26 @@
 #!/usr/bin/perl
-#  IBM_PROLOG_BEGIN_TAG
-#  This is an automatically generated prolog.
-#
-#  $Source: src/build/debug/hb-dump-debug $
-#
-#  IBM CONFIDENTIAL
-#
-#  COPYRIGHT International Business Machines Corp. 2011
-#
-#  p1
-#
-#  Object Code Only (OCO) source materials
-#  Licensed Internal Code Source Materials
-#  IBM HostBoot Licensed Internal Code
-#
-#  The source code for this program is not published or other-
-#  wise divested of its trade secrets, irrespective of what has
-#  been deposited with the U.S. Copyright Office.
-#
-#  Origin: 30
-#
-#  IBM_PROLOG_END
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+# 
+# $Source: src/build/debug/hb-dump-debug $
+# 
+# IBM CONFIDENTIAL
+# 
+# COPYRIGHT International Business Machines Corp. 2011,2012
+# 
+# p1
+# 
+# Object Code Only (OCO) source materials
+# Licensed Internal Code Source Materials
+# IBM HostBoot Licensed Internal Code
+# 
+# The source code for this program is not published or otherwise
+# divested of its trade secrets, irrespective of what has been
+# deposited with the U.S. Copyright Office.
+# 
+# Origin: 30
+# 
+# IBM_PROLOG_END_TAG 
 
 use strict;
 
@@ -141,7 +141,64 @@ sub getIsTest
     return $testImage;
 }
 
+# @sub getHRMOR
+#
+# Returns the HRMOR (0 for a dump file).
+#
+sub getHRMOR
+{
+    return 0;
+}
 
+# @sub readExtImage
+#
+# Reads from the extended image file.
+#
+# @param addr - Address to read.
+# @param size - Size to read.
+sub readExtImage
+{
+    my $addr = shift;
+    my $size = shift;
+
+    my $extImage = extImageFile();
+
+    seek $extImage, $addr, SEEK_SET;
+
+    my $result = "";
+    read $extImage, $result, $size;
+
+    return $result;
+}
+
+# @sub extImageFile
+#
+# Returns a file descriptor to the extended image file.
+#
+my $extImage = 0;
+sub extImageFile
+{
+    if ($extImage == 0)
+    {
+        my $path = determineImagePath(getImgPath());
+
+        if (getIsTest())
+        {
+            $path = $path . "hbicore_test_extended.bin";
+        }
+        else
+        {
+            $path = $path . "hbicore_extended.bin";
+        }
+
+        print $path."\n";
+
+        open($extImage, "< $path") or die "Cannot find extended image";
+        binmode($extImage);
+    }
+
+    return $extImage;
+}
 
 __END__
 

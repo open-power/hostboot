@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/include/util/locked/pqueue.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2010-2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/include/util/locked/pqueue.H $                            */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2010,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef __UTIL_LOCKED_PQUEUE_H
 #define __UTIL_LOCKED_PQUEUE_H
 
@@ -119,43 +118,45 @@ namespace Util
         template <typename _T, typename _K, bool locked, typename _S>
             void PQueue<_T,_K,locked,_S>::bubbleUp(_T* item)
             {
-                if (!item->next)
-                    return;
-
-                if (item->next->key <= item->key)
-                    return;
-
-                if (this->head == item)
-                    this->head = item->next;
-                if (this->tail == item->next)
-                    this->tail = item;
-
-                _T* temp = item->next;
-
-                if (temp->next)
+                while(1)
                 {
-                    temp->next->prev = item;
-                    item->next = item->next->next;
-                }
-                else
-                {
-                    item->next = NULL;
-                }
 
-                if (item->prev)
-                {
-                    item->prev->next = temp;
-                    temp->prev = item->prev;
-                }
-                else
-                {
-                    temp->prev = NULL;
-                }
+                    if (!item->next)
+                        break;
 
-                temp->next = item;
-                item->prev = temp;
+                    if (item->next->key <= item->key)
+                        break;
 
-                bubbleUp(item);
+                    if (this->head == item)
+                        this->head = item->next;
+                    if (this->tail == item->next)
+                        this->tail = item;
+
+                    _T* temp = item->next;
+
+                    if (temp->next)
+                    {
+                        temp->next->prev = item;
+                        item->next = item->next->next;
+                    }
+                    else
+                    {
+                        item->next = NULL;
+                    }
+
+                    if (item->prev)
+                    {
+                        item->prev->next = temp;
+                        temp->prev = item->prev;
+                    }
+                    else
+                    {
+                        temp->prev = NULL;
+                    }
+
+                    temp->next = item;
+                    item->prev = temp;
+                }
             }
 
 

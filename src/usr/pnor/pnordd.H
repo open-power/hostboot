@@ -48,7 +48,7 @@ class PnorDD
      * @brief Performs a PNOR Read Operation
      *
      * @parm o_buffer  Buffer to read data into
-     * @parm io_buflen  Input: Number of bytes to read, 
+     * @parm io_buflen  Input: Number of bytes to read,
      *       Output: Number of bytes actually read
      * @parm i_address  Offset into flash to read
      *
@@ -62,7 +62,7 @@ class PnorDD
      * @brief Performs a PNOR Write Operation
      *
      * @parm i_buffer  Buffer to write data from
-     * @parm io_buflen  Input: Number of bytes to write, 
+     * @parm io_buflen  Input: Number of bytes to write,
      *       Output: Number of bytes actually written
      * @parm i_address  Offset into flash to write
      *
@@ -72,6 +72,7 @@ class PnorDD
                           size_t& io_buflen,
                           uint64_t i_address);
 
+        // Enumeration values must match those in debug framework.
     enum PnorMode_t {
         MODEL_UNKNOWN,   /**< Invalid */
         MODEL_MEMCPY,    /**< No LPC logic, just do memcpy into cache area */
@@ -93,7 +94,7 @@ class PnorDD
      */
     ~PnorDD();
 
-  protected: 
+  protected:
 
 
     /**
@@ -106,7 +107,7 @@ class PnorDD
         LPC_REG_BAR2 = 0x08, /**< BAR2 : LPC Memory space */
         LPC_REG_BAR3 = 0x0C, /**< BAR3 : LPC Firmware space */
     };
-    
+
     /**
      * @brief SPI Config Info
      *    OP Codes and other MISC info for configuring SFC
@@ -437,7 +438,7 @@ class PnorDD
      * @parm i_address  Offset into flash
      * @parm i_byteSize  Number of bytes in range
      *
-     * @return Number of full or partial erase blocks 
+     * @return Number of full or partial erase blocks
      */
     uint32_t getNumAffectedBlocks(uint32_t i_address,
                                   size_t i_byteSize)
@@ -502,7 +503,7 @@ class PnorDD
             uint64_t address     : 32; /**< 32:63 = LPC Address */
         };
 
-        ControlReg_t() : data64(LPC_CTL_REG_DEFAULT) {};            
+        ControlReg_t() : data64(LPC_CTL_REG_DEFAULT) {};
     };
 
     /**
@@ -526,6 +527,10 @@ class PnorDD
     };
 
   private: // Variables
+
+    // NOTE: The layout of the variables in this class must be maintained
+    //       along with the offsets in the debug framework.
+
     /**
      * @brief Mutex to prevent concurrent PNOR accesses
      *     This needs to be static so we can mutex across multiple instances of PnorDD
@@ -540,7 +545,7 @@ class PnorDD
      */
     uint8_t* iv_erases;
 
-    /** 
+    /**
      * @brief Determine how much of the PNOR logic to use,
      *   this is required due to different model functionality
      *   in the current VPO and Simics models

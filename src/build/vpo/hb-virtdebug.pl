@@ -1,26 +1,26 @@
 #!/usr/bin/perl
-#  IBM_PROLOG_BEGIN_TAG
-#  This is an automatically generated prolog.
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
 #
-#  $Source: src/build/vpo/hb-virtdebug.pl $
+# $Source: src/build/vpo/hb-virtdebug.pl $
 #
-#  IBM CONFIDENTIAL
+# IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2011-2012
+# COPYRIGHT International Business Machines Corp. 2011,2012
 #
-#  p1
+# p1
 #
-#  Object Code Only (OCO) source materials
-#  Licensed Internal Code Source Materials
-#  IBM HostBoot Licensed Internal Code
+# Object Code Only (OCO) source materials
+# Licensed Internal Code Source Materials
+# IBM HostBoot Licensed Internal Code
 #
-#  The source code for this program is not published or other-
-#  wise divested of its trade secrets, irrespective of what has
-#  been deposited with the U.S. Copyright Office.
+# The source code for this program is not published or otherwise
+# divested of its trade secrets, irrespective of what has been
+# deposited with the U.S. Copyright Office.
 #
-#  Origin: 30
+# Origin: 30
 #
-#  IBM_PROLOG_END_TAG
+# IBM_PROLOG_END_TAG
 #
 # Purpose:  This perl script works on VBU and will dump either the entire L3 or
 # relevant data such as the code version, kernel printk buffer & component traces.
@@ -419,15 +419,15 @@ if ($dumpTrace)
                 print "$command\n";
                 die if (system("$command") != 0);
 
-                # Get the length of the buffer from the component trace header 
-                $buffer = readBinFile( "$outDir/trace.out", 
-                                       $offset+TRAC_BUFFER_SIZE_OFFSET, 
+                # Get the length of the buffer from the component trace header
+                $buffer = readBinFile( "$outDir/trace.out",
+                                       $offset+TRAC_BUFFER_SIZE_OFFSET,
                                        TRAC_BUFFER_SIZE_SIZE );
 
                 my $compBufferSize=unpack('H*',$buffer);
                 $compBufferSize = hex $compBufferSize;
 
-                # Re-read trace buffer using correct buffer size 
+                # Re-read trace buffer using correct buffer size
                 $offset = $compBufAddr % CACHE_LINE_SIZE;
                 $cacheLines = ceil( $compBufferSize / CACHE_LINE_SIZE);
                 if ($offset != 0)
@@ -494,11 +494,12 @@ if ($dumpTrace)
 
 
 #------------------------------------------------------------------------------
-# Dump the error logs 
+# Dump the error logs
 #------------------------------------------------------------------------------
 if ($dumpErrl)
 {
     #Find address and size of the g_ErrlStorage from the .syms file
+    #TODO: This is broken - Expect all this to disappear with Story 47517
     $string = 'g_ErrlStorage';
     ($addr, $size) = getAddrNSize($string, \@symsLines);
 
