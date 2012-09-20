@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/fapi/fapiHwAccess.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2011-2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/fapi/fapiHwAccess.C $                            */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  *  @file fapiHwAccess.C
  *
@@ -43,8 +42,9 @@
  *                                                  toEcmdString
  *          836579          thi         May 18,2012 Spy/ring supports
  *                          mjjones     07/12/2012  Add Pulse mode option to Ring funcs
+ *                          rjknight    09/20/2012  Update fapiGetSpy to take
+ *                                                  a string as input
  */
-
 #include <fapi.H>
 #include <fapiPlatHwAccess.H>
 
@@ -362,13 +362,13 @@ fapi::ReturnCode fapiModifyRing(const fapi::Target& i_target,
 
 // --------------------------------------------------------------------------
 // NOTE:
-// These spy access interfaces are only used in FSP.
+// These spy access interfaces are only used in FSP and cronus.
 // HB does not allow spy access
 
-#ifndef _NO_SPY_ACCESS
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
-fapi::ReturnCode fapiGetSpy(const fapi::Target& i_target,
+#ifdef FAPI_SUPPORT_SPY_AS_ENUM
+fapi::ReturnCode _fapiGetSpy(const fapi::Target& i_target,
                             const uint32_t i_spyId,
                             ecmdDataBufferBase & o_data)
 {
@@ -393,10 +393,40 @@ fapi::ReturnCode fapiGetSpy(const fapi::Target& i_target,
 
     return l_rc;
 }
+#endif
 
+#ifdef FAPI_SUPPORT_SPY_AS_STRING
+fapi::ReturnCode _fapiGetSpy(const fapi::Target& i_target,
+                            const char * i_spyId,
+                            ecmdDataBufferBase & o_data)
+{
+    fapi::ReturnCode l_rc;
+    bool l_traceit = platIsScanTraceEnabled();
+
+    // call the platform implementation
+    l_rc = platGetSpy( i_target, i_spyId, o_data );
+
+    if (l_rc)
+    {
+        FAPI_ERR("fapiGetSpy failed - Target %s, SpyId %s", i_target.toEcmdString(), i_spyId);
+    }
+
+    if( l_traceit )
+    {
+        FAPI_SCAN( "TRACE : GETSPY      : %s : %s %.16llX", 
+                   i_target.toEcmdString(),
+                   i_spyId,
+                   o_data.getDoubleWord(0));
+    }
+
+    return l_rc;
+}
+#endif
+
+#ifdef FAPI_SUPPORT_SPY_AS_ENUM
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
-fapi::ReturnCode fapiPutSpy(const fapi::Target& i_target,
+fapi::ReturnCode _fapiPutSpy(const fapi::Target& i_target,
                             const uint32_t i_spyId,
                             ecmdDataBufferBase & i_data)
 {
@@ -421,64 +451,37 @@ fapi::ReturnCode fapiPutSpy(const fapi::Target& i_target,
 
     return l_rc;
 }
-
-////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
-fapi::ReturnCode fapiGetSpyEnum(const fapi::Target& i_target,
-                                const uint32_t i_spyId,
-                                uint32_t& o_enumVal)
-{
-    fapi::ReturnCode l_rc;
-    bool l_traceit = platIsScanTraceEnabled();
-
-    // call the platform implementation
-    l_rc = platGetSpyEnum( i_target, i_spyId, o_enumVal );
-
-    if (l_rc)
-    {
-        FAPI_ERR("fapiGetSpyEnum failed - Target %s, SpyId 0x%.8X", i_target.toEcmdString(), i_spyId);
-    }
-
-    if( l_traceit )
-    {
-        FAPI_SCAN( "TRACE : GETSPYENUM  : %s : %.8X %.8X", 
-                   i_target.toEcmdString(),
-                   i_spyId,
-                   o_enumVal);
-    }
-
-    return l_rc;
-}
-
-////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
-fapi::ReturnCode fapiPutSpyEnum(const fapi::Target& i_target,
-                                const uint32_t i_spyId,
-                                const uint32_t i_enumVal)
-{
-    fapi::ReturnCode l_rc;
-    bool l_traceit = platIsScanTraceEnabled();
-
-    // call the platform implementation
-    l_rc = platPutSpyEnum( i_target, i_spyId, i_enumVal );
-
-    if (l_rc)
-    {
-        FAPI_ERR("fapiPutSpyEnum failed - Target %s, SpyId 0x%.8X, EnumVal %d",
-                 i_target.toEcmdString(), i_spyId, i_enumVal);
-    }
-
-    if( l_traceit )
-    {
-        FAPI_SCAN( "TRACE : PUTSPYENUM  : %s : %.8X %.8X",
-                   i_target.toEcmdString(),
-                   i_spyId,
-                   i_enumVal);
-    }
-
-    return l_rc;
-}
-
 #endif
+
+#ifdef FAPI_SUPPORT_SPY_AS_STRING
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+fapi::ReturnCode _fapiPutSpy(const fapi::Target& i_target,
+                            const char * const i_spyId,
+                            ecmdDataBufferBase & i_data)
+{
+    fapi::ReturnCode l_rc;
+    bool l_traceit = platIsScanTraceEnabled();
+
+    // call the platform implementation
+    l_rc = platPutSpy( i_target, i_spyId, i_data );
+
+    if (l_rc)
+    {
+        FAPI_ERR("fapiPutSpy failed - Target %s, SpyId %s.8X", i_target.toEcmdString(), i_spyId);
+    }
+
+    if( l_traceit )
+    {
+        FAPI_SCAN( "TRACE : PUTSPY      : %s : %s %.16llX",
+                   i_target.toEcmdString(),
+                   i_spyId,
+                   i_data.getDoubleWord(0));
+    }
+
+    return l_rc;
+}
+#endif
+
 
 } // extern "C"

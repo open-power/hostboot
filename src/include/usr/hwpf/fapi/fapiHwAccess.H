@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/include/usr/hwpf/fapi/fapiHwAccess.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2011-2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/include/usr/hwpf/fapi/fapiHwAccess.H $                    */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  *  @file fapiHwAccess.H
  *
@@ -42,6 +41,8 @@
  *                          mjjones     11/10/2011  Use ecmdDataBufferBase
  *          836579          thi         May 22,2012 Spy/Ring supports
  *                          mjjones     07/12/2012  Add mode options to Ring funcs
+ *                          rjknight    09/20/2012  Update fapiSpy interfaces to
+ *                                                  allow string inputs for cronus
  */
 
 #ifndef FAPIHWACCESS_H_
@@ -207,10 +208,8 @@ fapi::ReturnCode fapiModifyRing(const fapi::Target& i_target,
 
 // --------------------------------------------------------------------------
 // NOTE:
-// These spy access interfaces are only used in FSP.
+// These spy access interfaces are only used in FSP and cronus
 // HB does not allow spy access
-
-#ifndef _NO_SPY_ACCESS
 
 /**
  * @brief Reads a Spy from a target
@@ -219,12 +218,57 @@ fapi::ReturnCode fapiModifyRing(const fapi::Target& i_target,
  * @param[out] o_data               Storage for output data
  *
  * @return ReturnCode. Zero on success, else platform specified error
- 
- */
-fapi::ReturnCode fapiGetSpy(const fapi::Target& i_target,
+ *
+ * @note:  The string version is only supported for cronus.
+ *
+ *         The fapi design to support both FSP and cronus use of get and
+ *         put spy funcions is dependant on the SPY names being expanded
+ *         to resemble a valid C identifier. This design places some
+ *         restrictions on the SPY names which can be used.
+ *
+ *         1. if the spy name contains a # procedure writers should replade it
+ *         with an __P__ for example -
+ *
+ *         ABUS.RX0.RXPACKS#0.RXPACK.RD.LC.LC.ACT_DIS
+ *         becomes
+ *         ABUS.RX0.RXPACKS__P__0.RXPACK.RD.LC.LC.ACT_DIS
+ *
+ *         2. if the spy name has a number following a "." it must have an
+ *         uinderscore prepended to the number.
+ *
+ *         EH.TPCHIP.2KX100_ARY_CLK_EDGES_DLY
+ *         becomes
+ *         EH.TPCHIP._2KX100_ARY_CLK_EDGES_DLY
+ *
+ *         Example SPY name:
+ *         The hardware procedure should call the function like:
+ *
+ *          ABUS.RX0.RXPACKS#0.RXPACK.RD.LC.LC.ACT_DIS
+ *
+ *          fapi::ReturnCode rc = fapiGetSpy( targ,
+ *                  ABUS.RX0.RXPACKS__P__0.RXPACK.RD.LC.LC.ACT_DIS, data );
+ *
+ *         NOTE: the ID is not in quotes the fapi code will handle adding the
+ *         quotes for the cronus environment
+ *
+*/
+#ifdef FAPI_SUPPORT_SPY_AS_ENUM
+
+#define fapiGetSpy(TARGET, ID, DATA) _fapiGetSpy(TARGET, FAPI_SPY_NAMES::ID.value, DATA )
+fapi::ReturnCode _fapiGetSpy(const fapi::Target& i_target,
                             const uint32_t i_spyId,
                             ecmdDataBufferBase & o_data);
+#endif
 
+#ifdef FAPI_SUPPORT_SPY_AS_STRING
+
+#define fapiGetSpy(TARGET, ID, DATA) _fapiGetSpy(TARGET, #ID, DATA)
+fapi::ReturnCode _fapiGetSpy(const fapi::Target& i_target,
+                             const char * const i_spyId,
+                             ecmdDataBufferBase & o_data);
+#endif
+
+#ifdef FAPI_SUPPORT_SPY_AS_ENUM
 /**
  * @brief Writes a spy on a target
  * @param[in] i_target  Target to operate on
@@ -233,33 +277,51 @@ fapi::ReturnCode fapiGetSpy(const fapi::Target& i_target,
  *                      address
  *
  * @return ReturnCode. Zero on success, else platform specified error
- */
-fapi::ReturnCode fapiPutSpy(const fapi::Target& i_target,
+ *
+ * @note:  The string version is only supported for cronus.
+ *
+ *         The fapi design to support both FSP and cronus use of get and
+ *         put spy funcions is dependant on the SPY names being expanded
+ *         to resemble a valid C identifier. This design places some
+ *         restrictions on the SPY names which can be used.
+ *
+ *         1. if the spy name contains a # procedure writers should replade it
+ *         with an __P__ for example -
+ *
+ *         ABUS.RX0.RXPACKS#0.RXPACK.RD.LC.LC.ACT_DIS
+ *         becomes
+ *         ABUS.RX0.RXPACKS__P__0.RXPACK.RD.LC.LC.ACT_DIS
+ *
+ *         2. if the spy name has a number following a "." it must have an
+ *         uinderscore prepended to the number.
+ *
+ *         EH.TPCHIP.2KX100_ARY_CLK_EDGES_DLY
+ *         becomes
+ *         EH.TPCHIP._2KX100_ARY_CLK_EDGES_DLY
+ *
+ *         Example SPY name:
+ *         The hardware procedure should call the function like:
+ *
+ *          ABUS.RX0.RXPACKS#0.RXPACK.RD.LC.LC.ACT_DIS
+ *
+ *          fapi::ReturnCode rc = fapiPutSpy( targ,
+ *                  ABUS.RX0.RXPACKS__P__0.RXPACK.RD.LC.LC.ACT_DIS, data );
+ *
+ *         NOTE: the ID is not in quotes the fapi code will handle adding the
+ *         quotes for the cronus environment
+ *
+*/
+#define fapiPutSpy(TARGET, ID, DATA) _fapiPutSpy(TARGET, FAPI_SPY_NAMES::ID.value, DATA)
+fapi::ReturnCode _fapiPutSpy(const fapi::Target& i_target,
                             const uint32_t i_spyId,
                             ecmdDataBufferBase & i_data);
+#endif
 
-/**
- * @brief Read spy Enum data from a target
- * @param[in] i_target         Target to read spy enum from
- * @param[in] i_spyId          The spy's id
- * @param[out] o_enumVal       Spy enum value
- *
- * @return ReturnCode. Zero on success, else platform specified error
- */
-fapi::ReturnCode fapiGetSpyEnum(const fapi::Target& i_target,
-                                const uint32_t i_spyId,
-                                uint32_t& o_enumVal);
-
-/**
- * @brief Write spy enum data to a target
- * @param[in] i_target             The chip or logical unit target
- * @param[in] i_spyId              The spy's id
- * @param[in] i_enumVal            Spy enum value to write
- */
-fapi::ReturnCode fapiPutSpyEnum(const fapi::Target& i_target,
-                                const uint32_t i_spyId,
-                                const uint32_t i_enumVal);
-
+#ifdef FAPI_SUPPORT_SPY_AS_STRING
+#define fapiPutSpy(TARGET, ID, DATA) _fapiPutSpy(TARGET, #ID, DATA)
+fapi::ReturnCode _fapiPutSpy(const fapi::Target& i_target,
+                            const char* const i_spyId,
+                            ecmdDataBufferBase & i_data);
 #endif
 
 } // extern "C"

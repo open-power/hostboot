@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/include/usr/hwpf/fapi/fapiPlatHwAccess.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2011-2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/include/usr/hwpf/fapi/fapiPlatHwAccess.H $                */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  *  @file fapiPlatHwAccess.H
  *
@@ -219,7 +218,6 @@ fapi::ReturnCode platModifyRing(const fapi::Target& i_target,
 // These spy access interfaces are only used in FSP.
 // HB does not allow spy access
 
-#ifndef _NO_SPY_ACCESS
 /**
  * @brief Platform-level implementation called by fapiGetSpy()
  * Hardware procedures writers will not call this function.
@@ -230,10 +228,30 @@ fapi::ReturnCode platModifyRing(const fapi::Target& i_target,
  *
  * @return ReturnCode. Zero on success, else platform specified error
  */
+#ifdef FAPI_SUPPORT_SPY_AS_ENUM
 fapi::ReturnCode platGetSpy(const fapi::Target& i_target,
                             const uint32_t i_spyId,
                             ecmdDataBufferBase & o_data);
+#endif
 
+#ifdef FAPI_SUPPORT_SPY_AS_STRING
+/**
+ * @brief Reads a Spy from a target
+ * @param[in] i_target              Target to read spy from
+ * @param[in] i_spyId               The spy's id
+ * @param[out] o_data               Storage for output data
+ *
+ * @return ReturnCode. Zero on success, else platform specified error
+ *
+ * @note:  This is only supported in the cronus environment
+ *         it will not compile in FSP code 
+ */
+fapi::ReturnCode platGetSpy(const fapi::Target& i_target,
+                             const char * const i_spyId,
+                             ecmdDataBufferBase & o_data);
+#endif
+
+#ifdef FAPI_SUPPORT_SPY_AS_ENUM
 /**
  * @brief Platform-level implementation called by fapiPutSpy()
  * Hardware procedures writers will not call this function.
@@ -248,33 +266,12 @@ fapi::ReturnCode platGetSpy(const fapi::Target& i_target,
 fapi::ReturnCode platPutSpy(const fapi::Target& i_target,
                             const uint32_t i_spyId,
                             ecmdDataBufferBase & i_data);
+#endif
 
-/**
- * @brief Platform-level implementation called by fapiGetSpyEnum()
- * Hardware procedures writers will not call this function.
- *
- * @param[in] i_target         Target to read spy enum from
- * @param[in] i_spyId          The spy's id
- * @param[out] o_enumVal       Spy enum value
- *
- * @return ReturnCode. Zero on success, else platform specified error
- */
-fapi::ReturnCode platGetSpyEnum(const fapi::Target& i_target,
-                                const uint32_t i_spyId,
-                                uint32_t& o_enumVal);
-
-/**
- * @brief Platform-level implementation called by fapiPutSpyEnum()
- * Hardware procedures writers will not call this function.
- *
- * @param[in] i_target             The chip or logical unit target
- * @param[in] i_spyId              The spy's id
- * @param[in] i_enumVal            Spy enum value to write
- */
-fapi::ReturnCode platPutSpyEnum(const fapi::Target& i_target,
-                                const uint32_t i_spyId,
-                                const uint32_t i_enumVal);
-
+#ifdef FAPI_SUPPORT_SPY_AS_STRING
+fapi::ReturnCode platPutSpy(const fapi::Target& i_target,
+                             const char * const i_spyId,
+                             ecmdDataBufferBase & i_data);
 #endif
 
 } // extern "C"
