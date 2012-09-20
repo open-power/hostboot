@@ -56,15 +56,15 @@
     </attribute>
         <attribute>
         <id>PROC_EPS_TABLE_TYPE</id>
-        <default>EPS_TYPE_LE</default>
+        <default>2</default>
     </attribute>
     <attribute>
         <id>PROC_FABRIC_PUMP_MODE</id>
-        <default>MODE1</default>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>PROC_X_BUS_WIDTH</id>
-        <default>W8BYTE</default>
+        <default>2</default>
     </attribute>
     <attribute>
         <id>ALL_MCS_IN_INTERLEAVING_GROUP</id>

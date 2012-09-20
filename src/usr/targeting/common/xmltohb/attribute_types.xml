@@ -2969,9 +2969,7 @@
         epsilon register values.
     </description>
     <simpleType>
-        <enumeration>
-            <id>PROC_EPS_TABLE_TYPE</id>
-        </enumeration>
+        <uint8_t></uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <hasStringConversion/>
@@ -3005,9 +3003,7 @@
         Provided by the Machine Readable Workbook.
     </description>
     <simpleType>
-        <enumeration>
-            <id>PROC_FABRIC_PUMP_MODE</id>
-        </enumeration>
+        <uint8_t></uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <hasStringConversion/>
@@ -3039,9 +3035,7 @@
         Provided by the Machine Readable Workbook.
     </description>
     <simpleType>
-        <enumeration>
-            <id>PROC_X_BUS_WIDTH</id>
-        </enumeration>
+        <uint8_t></uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <hasStringConversion/>

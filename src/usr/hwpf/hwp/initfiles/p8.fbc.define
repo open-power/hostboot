@@ -1,0 +1,60 @@
+#-- $Id: p8.fbc.define,v 1.3 2012/08/21 03:33:40 jmcgill Exp $
+#-------------------------------------------------------------------------------
+#--
+#-- (C) Copyright International Business Machines Corp. 2011
+#-- All Rights Reserved -- Property of IBM
+#-- *** IBM Confidential ***
+#--
+#-- TITLE       : p8.fbc.define
+#-- DESCRIPTION : Register field/bit definitions for fabric initfile
+#--
+#-- OWNER NAME  : Joe McGill              Email: jmcgill@us.ibm.com
+#--------------------------------------------------------------------------------
+
+#-- PB Mode Register (PB_MODE / 0x02010C[048]A)
+define chip_is_system = 4;
+define avp_mode = 6;
+define sw_ab_wait = 12:15;
+define sp_hw_mark = 16:21;
+define gp_hw_mark = 22:27;
+define lcl_hw_mark = 28:33;
+define e2e_hw_mark = 34:40;
+define fp_hw_mark = 41:46;
+define switch_option_ab = 59;
+define cpu_ratio_override = 60:62;
+
+#-- PB Trace Array Select Configuration Register (PB_EVENT_TRACE / 0x02010C4F)
+define sn0_select = 0:1;
+define sn1_select = 2:3;
+define cr0_select = 4:5;
+define cr1_select = 6:7;
+define rt0_select = 8:9;
+define rt1_select = 10:12;
+define dat_select = 13:18;
+
+#-- PB Node Master Power Management Counter Register (PB_NMPM_COUNTER / 0x2010C50)
+define apm_en = 0;
+define pmucnt_en = 3;
+define pmucnt_sel = 4:5;
+
+#-- MCD Debug Configuration Register (MCD_DBG / 0x02013416)
+define mcd_debug_enable = 3;
+define mcd_debug_select = 4:7;
+
+#-- PB X Link Mode Register (PB_X_MODE / 0x04010C0A)
+define x_avp_mode = 0;
+define x_4b_mode = 1;
+
+#-- PB A Link Mode Register (PB_IOA_MODE / 0x0801080A)
+define a_avp_mode = 0;
+
+#-- PB A Link Framer Configuration Register (PB_IOA_FMR_CFG / 0x08010813)
+define a_ow_pack = 24;
+define a_ow_pack_priority = 25;
+
+#-- PB IOF Link Mode Register (PB_IOF_MODE / 0x0901080A)
+define f_avp_mode = 0;
+
+#-- PB F Link Framer Configuration Register (PB_IOF_FMR_CFG / 0x09010813)
+define f_ow_pack = 20;
+define f_ow_pack_priority = 21;

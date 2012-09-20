@@ -1,0 +1,107 @@
+#-- $Id: p8.fbc.scom.initfile,v 1.3 2012/08/21 03:33:42 jmcgill Exp $
+#-------------------------------------------------------------------------------
+#--
+#-- (C) Copyright International Business Machines Corp. 2011
+#-- All Rights Reserved -- Property of IBM
+#-- *** IBM Confidential ***
+#--
+#-- TITLE       : p8.fbc.scom.initfile
+#-- DESCRIPTION : Perform fabric configuration
+#--
+#-- OWNER NAME  : Joe McGill              Email: jmcgill@us.ibm.com
+#--
+#--------------------------------------------------------------------------------
+
+SyntaxVersion = 1
+
+#--------------------------------------------------------------------------------
+#-- Includes
+#--------------------------------------------------------------------------------
+include p8.fbc.define
+
+#--------------------------------------------------------------------------------
+#-- Defines
+#--------------------------------------------------------------------------------
+
+#define def_x_is_4b = (SYS.ATTR_PROC_X_BUS_WIDTH == ENUM_ATTR_PROC_X_BUS_WIDTH_W4BYTE);
+define def_x_is_4b = (0 == ENUM_ATTR_PROC_X_BUS_WIDTH_W4BYTE);
+
+
+#--------------------------------------------------------------------------------
+#-- SCOM initializations
+#--------------------------------------------------------------------------------
+
+#-- PB Mode Register (PB_MODE / 0x02010C[048]A)
+scom 0x02010C(0,4,8)A {
+    bits,                       scom_data;
+    chip_is_system,             0b1;                                    #-- single chip
+    avp_mode,                   0b0;                                    #-- AVP mode (TODO: link to attribute)
+    sw_ab_wait,                 0x0;                                    #-- no delay
+    sp_hw_mark,                 0x20;                                   #-- 32
+    gp_hw_mark,                 0x20;                                   #-- 32
+    lcl_hw_mark,                0x20;                                   #-- 32
+    e2e_hw_mark,                0x40;                                   #-- 64
+    fp_hw_mark,                 0x20;                                   #-- 32
+    switch_option_ab,           0b0;                                    #-- no switch CD on switch AB
+    cpu_ratio_override,         0b000;                                  #-- rcmd queue depth = 16
+}
+
+#-- PB Trace Array Select Configuration Register (PB_EVENT_TRACE / 0x02010C4F)
+scom 0x02010C4F {
+    bits,                       scom_data;
+    sn0_select,                 0b10;                                   #-- rcmd 0
+    sn1_select,                 0b10;                                   #-- rcmd 1
+    cr0_select,                 0b10;                                   #-- cresp 0 / presp 0
+    cr1_select,                 0b10;                                   #-- cresp 1 / presp 1
+    rt0_select,                 0b10;                                   #-- rtag NW
+    rt1_select,                 0b001;                                  #-- MCD
+    dat_select,                 0b000000;                               #-- none
+}
+
+#-- PB Node Master Power Management Counter Register (PB_NMPM_COUNTER / 0x2010C50)
+scom 0x02010C50 {
+    bits,                       scom_data;
+    apm_en,                     0b0;                                    #-- set shared counters to PMU mode
+    pmucnt_en,                  0b1;                                    #-- set shared counters to PMU mode
+    pmucnt_sel,                 0b11;                                   #-- PMU counter select = rcmd 0 OR rcmd 1
+}
+
+#-- MCD Debug Configuration Register (MCD_DBG / 0x02013416)
+scom 0x02013416 {
+    bits,                       scom_data;
+    mcd_debug_enable,           0b1;                                    #-- enable debug clocks
+    mcd_debug_select,           0b1000;                                 #-- default debug bus select
+}
+
+#-- PB X Link Mode Register (PB_X_MODE / 0x04010C0A)
+scom 0x04010C0A {
+    bits,                       scom_data,          expr;
+    x_avp_mode,                 0b0,                any;                #-- X AVP mode (TODO: link to attribute)
+    x_4b_mode,                  0b1,                (def_x_is_4b);      #-- X bus 4/8B switch
+}
+
+#-- PB A Link Mode Register (PB_IOA_MODE / 0x0801080A)
+scom 0x0801080A {
+    bits,                       scom_data;
+    a_avp_mode,                 0b0;                                    #-- A AVP mode (TODO: link to attribute)
+}
+
+#-- PB A Link Framer Configuration Register (PB_IOA_FMR_CFG / 0x08010813)
+scom 0x08010813 {
+    bits,                       scom_data;
+    a_ow_pack,                  0b0;                                    #-- OW pack disabled
+    a_ow_pack_priority,         0b0;                                    #-- low priority
+}
+
+#-- PB F Link Mode Register (PB_IOF_MODE / 0x0901080A)
+scom 0x0901080A {
+    bits,                       scom_data;
+    f_avp_mode,                 0b0;                                    #-- F AVP mode (TODO: link to attribute)
+}
+
+#-- PB F Link Framer Configuration Register (PB_IOF_FMR_CFG / 0x09010813)
+scom 0x09010813 {
+    bits,                       scom_data;
+    f_ow_pack,                  0b0;                                    #-- OW pack disabled
+    f_ow_pack_priority,         0b0;                                    #-- low priority
+}
