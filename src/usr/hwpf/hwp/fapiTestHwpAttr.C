@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/hwp/fapiTestHwpAttr.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2011-2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/hwp/fapiTestHwpAttr.C $                          */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  *  @file fapiTestHwpAttr.C
  *
@@ -46,7 +45,9 @@
  */
 
 #include <fapiTestHwpAttr.H>
+#include <targeting/common/target.H>
 #include <targeting/common/commontargeting.H>
+#include <targeting/common/utilFilter.H>
 
 extern "C"
 {
@@ -61,6 +62,37 @@ fapi::ReturnCode hwpTestAttributes()
 
     do
     {
+        //----------------------------------------------------------------------
+        // Test ATTR_MSS_DIMM_MFG_ID_CODE
+        //----------------------------------------------------------------------
+        {
+            uint32_t l_data;
+            TARGETING::TargetHandleList l_dimmList;
+            getAllLogicalCards( l_dimmList, TARGETING::TYPE_DIMM );
+
+            for( size_t i = 0; i < l_dimmList.size(); i++)
+            {
+                fapi::Target l_target( fapi::TARGET_TYPE_DIMM,
+                                        (void *)(l_dimmList[i]) ); 
+                l_rc = FAPI_ATTR_GET(ATTR_POS, &l_target, l_data);
+
+                if (l_rc)
+                {
+                    FAPI_ERR("hwpTestAttributes: ATTR_POS. Error from GET");
+                    break;
+                }
+                else
+                {
+                    FAPI_INF("hwpTestAttributes: ATTR_POS = %d", l_data);
+                }
+            }
+
+            if (l_rc)
+            {
+                break;
+            }
+        }
+
         //----------------------------------------------------------------------
         // Test ATTR_MSS_DIMM_MFG_ID_CODE
         //----------------------------------------------------------------------

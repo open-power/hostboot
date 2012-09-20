@@ -392,6 +392,7 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
 
 my $memb;
 my $membMcs;
+my $mba_count = 0;
 
 for my $i ( 0 .. $#STargets )
 {
@@ -422,10 +423,18 @@ for my $i ( 0 .. $#STargets )
     }
     elsif ($STargets[$i][NAME_FIELD] eq "mba")
     {
+        if ($mba_count == 0)
+        {
+            print "\n";
+            print "<!-- $SYSNAME Centaur MBAs affiliated with membuf$memb -->";
+            print "\n";
+        }
         my $mba = $STargets[$i][UNIT_FIELD];
         generate_mba( $memb, $membMcs, $mba );
-        if ($mba == 1)
+        $mba_count += 1;
+        if ($mba_count == 2)
         {
+            $mba_count = 0;
             print "\n<!-- $SYSNAME Centaur n${node}p${memb} : end -->\n"
         }
     }
@@ -725,6 +734,7 @@ sub generate_master_proc
     }
 
     # Data from PHYP Memory Map
+    print "\n";
     print "    <!-- Data from PHYP Memory Map -->\n";
 
     # Starts at 1024TB - 128GB, 4GB per proc
@@ -857,14 +867,6 @@ sub generate_slave_proc
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-$sys/node-$node/proc-$proc</default>
     </attribute>
-    <attribute>
-        <id>FABRIC_NODE_ID</id>
-        <default>$node</default>
-    </attribute>
-    <attribute>
-        <id>FABRIC_CHIP_ID</id>
-        <default>$proc</default>
-    </attribute>
     <!-- FSI is connected via proc${Mproc}:MFSI-$fsi -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
@@ -885,6 +887,14 @@ sub generate_slave_proc
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FABRIC_NODE_ID</id>
+        <default>$node</default>
+    </attribute>
+    <attribute>
+        <id>FABRIC_CHIP_ID</id>
+        <default>$proc</default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>$proc</default></attribute>";
 
@@ -916,6 +926,7 @@ sub generate_slave_proc
     # Data from PHYP Memory Map
 
     # Starts at 1024TB - 128GB, 4GB per proc
+    printf( "\n" );
     printf( "    <attribute><id>FSP_BASE_ADDR</id>\n" );
     printf( "        <default>0x%016X</default>\n",
 	   0x0003FFE000000000 + 0x1000000000*$proc );
@@ -934,29 +945,27 @@ sub generate_slave_proc
     printf( "    </attribute>\n" );
 
     # Starts at 1024TB - 7GB, 1MB per PHB (=4MB per proc)
-    printf( "    <attribute>\n" );
-    printf( "    <id>PHB_BASE_ADDRS</id>\n" );
-    printf( "    <default>\n" );
-    printf( "       0x%016X,0x%016X,\n",
+    printf( "    <attribute><id>PHB_BASE_ADDRS</id>\n" );
+    printf( "        <default>\n" );
+    printf( "            0x%016X,0x%016X,\n",
 	   0x0003FFFE40000000 + 0x400000*$proc + 0x100000*0,
 	     0x0003FFFE40000000 + 0x400000*$proc + 0x100000*1 );
-    printf( "       0x%016X,0x%016X\n",
+    printf( "            0x%016X,0x%016X\n",
 	   0x0003FFFE40000000 + 0x400000*$proc + 0x100000*2,
 	     0x0003FFFE40000000 + 0x400000*$proc + 0x100000*3 );
-    printf( "    </default>\n" );
+    printf( "        </default>\n" );
     printf( "    </attribute>\n" );
 
     # Starts at 976TB, 64GB per PHB (=256GB per proc)
-    printf( "    <attribute>\n" );
-    printf( "    <id>PCI_BASE_ADDRS</id>\n" );
-    printf( "    <default>\n" );
-    printf( "       0x%016X,0x%016X,\n",
+    printf( "    <attribute><id>PCI_BASE_ADDRS</id>\n" );
+    printf( "        <default>\n" );
+    printf( "            0x%016X,0x%016X,\n",
 	   0x0003D00000000000 + 0x4000000000*$proc + 0x1000000000*0,
 	     0x0003D00000000000 + 0x4000000000*$proc + 0x1000000000*1 );
-    printf( "       0x%016X,0x%016X\n",
+    printf( "            0x%016X,0x%016X\n",
 	   0x0003D00000000000 + 0x4000000000*$proc + 0x1000000000*2,
 	     0x0003D00000000000 + 0x4000000000*$proc + 0x1000000000*3 );
-    printf( "    </default>\n" );
+    printf( "        </default>\n" );
     printf( "    </attribute>\n" );
 
     # Starts at 0, 2TB per proc
@@ -1205,7 +1214,7 @@ sub generate_ax_buses
         {
             if ($j->[0] eq "n${node}:p${proc}:${type}${i}")
             {
-                #$peer = 1;
+                $peer = 1;
                 $p_proc = $j->[1];
                 $p_port = $p_proc;
                 $p_proc =~ s/^.*:p(.*):.*$/$1/;
@@ -1234,8 +1243,8 @@ sub generate_ax_buses
         {
             print "
     <attribute>
-        <id>PEER_TARGET<id>
-        <default>affinity:sys-$sys/node-$node/proc-$p_proc/${type}bus-$p_port</default>
+        <id>PEER_TARGET</id>
+        <default>physical:sys-$sys/node-$node/proc-$p_proc/${type}bus-$p_port</default>
     </attribute>";
         }
         print "\n</targetInstance>\n";
@@ -1348,11 +1357,6 @@ sub generate_mba
     $proc =~ s/.*:p(.*):.*/$1/g;
     $mcs =~ s/.*:.*:mcs(.*)/$1/g;
 
-    if ($mba == 0)
-    {
-        print "\n<!-- $SYSNAME Centaur MBAs affiliated with membuf$ctaur -->\n";
-    }
-
     my $uidstr = sprintf("0x%02X11%04X",${node},$mba+$mcs*2+$proc*8*2+${node}*8*8*2);
 
     print "
@@ -1410,6 +1414,8 @@ sub generate_dimm
         $vpdRec = $vpdRec + 1;
     }
 
+    my $position = ($proc * 64) + 8 * $mcs + $vpdRec;
+
     # Adjust offset based on MCS value
     $vpdRec = ($mcs * 8) + $vpdRec;
     # Adjust offset basedon processor value
@@ -1422,10 +1428,7 @@ sub generate_dimm
     <id>sys${sys}node${node}dimm$dimm</id>
     <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>${uidstr}</default></attribute>
-    <attribute>
-        <id>POSITION</id>
-        <default>$dimm</default>
-    </attribute>
+    <attribute><id>POSITION</id><default>$position</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-$sys/node-$node/dimm-$dimm</default>
@@ -1435,12 +1438,12 @@ sub generate_dimm
         <default>affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs/membuf-$pos/mbs-0/mba-$x/mem_port-$y/dimm-$z</default>
     </attribute>
     <attribute>
-        <id>MBA_PORT</id>
-        <default>$y</default>
-    </attribute>
-    <attribute>
         <id>MBA_DIMM</id>
         <default>$z</default>
+    </attribute>
+    <attribute>
+        <id>MBA_PORT</id>
+        <default>$y</default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>$vpdRec</default></attribute>";
 
