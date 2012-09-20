@@ -1,0 +1,163 @@
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+# 
+# $Source: src/usr/diag/prdf/plat/pegasus/Membuf.rule $
+# 
+# IBM CONFIDENTIAL
+# 
+# COPYRIGHT International Business Machines Corp. 2012
+# 
+# p1
+# 
+# Object Code Only (OCO) source materials
+# Licensed Internal Code Source Materials
+# IBM HostBoot Licensed Internal Code
+# 
+# The source code for this program is not published or otherwise
+# divested of its trade secrets, irrespective of what has been
+# deposited with the U.S. Copyright Office.
+# 
+# Origin: 30
+# 
+# IBM_PROLOG_END_TAG 
+
+################################################################################
+#
+# Scope:
+#   Registers and actions for the following chiplets:
+#
+# Chiplet  Register Adddresses      Description
+# =======  =======================  ============================================
+#   TP     0x01000000 - 0x01FFFFFF  TP pervasive logic
+#   NEST   0x02000000 - 0x02FFFFFF  NEST pervasive logic
+#   MEM    0x03000000 - 0x03FFFFFF  MEM pervasive logic, note that this does
+#                                   include the SCOM addresses characterized by
+#                                   the MBA target. See Mba.rule for those
+#                                   address ranges.
+#
+################################################################################
+
+chip Membuf
+{
+    name        "Centaur Chip";
+    targettype  TYPE_MEMBUF;
+    sigoff      0x8000;
+# FIXME May need to update dump type
+    dump        DUMP_CONTENT_HWSUPERNOVA;
+    scomlen     64;
+
+ #############################################################################
+ #                                                                           #
+ #  ######                                                                   #
+ #  #     #  ######   ####     ###    ####    #####  ######  #####    ####   #
+ #  #     #  #       #    #     #    #          #    #       #    #  #       #
+ #  ######   #####   #          #     ####      #    #####   #    #   ####   #
+ #  #   #    #       #  ###     #         #     #    #       #####        #  #
+ #  #    #   #       #    #     #    #    #     #    #       #   #   #    #  #
+ #  #     #  ######   ####     ###    ####      #    ######  #    #   ####   #
+ #                                                                           #
+ #############################################################################
+
+    ############################################################################
+    # Global Broadcast Registers
+    ############################################################################
+
+    register GLOBAL_CS_FIR
+    {
+        name        "Global Checkstop Attention FIR";
+        scomaddr    0x570F001C;
+        capture     group default;
+    };
+
+    register GLOBAL_RE_FIR
+    {
+        name        "Global Recoverable Attention FIR";
+        scomaddr    0x570F001B;
+        capture     group default;
+    };
+
+    register GLOBAL_SPA
+    {
+        name        "Global Special Attention FIR";
+        scomaddr    0x570F001A;
+        capture     group default;
+    };
+
+# Import all of the chiplet registers
+.include "Membuf_regs_TP.rule"
+.include "Membuf_regs_NEST.rule"
+.include "Membuf_regs_MEM.rule"
+
+};
+
+ ##############################################################################
+ #                                                                            #
+ # ####                                 #                                     #
+ # #   # #   # #    #####  ###      #  # #    ##  ##### ###  ###  #   #  ###  #
+ # #   # #   # #    #     #        #  #   #  #  #   #    #  #   # ##  # #     #
+ # ####  #   # #    ####   ###    #  ####### #      #    #  #   # # # #  ###  #
+ # #  #  #   # #    #         #  #   #     # #  #   #    #  #   # #  ##     # #
+ # #   #  ###  #### #####  ###  #    #     #  ##    #   ###  ###  #   #  ###  #
+ #                                                                            #
+ ##############################################################################
+
+################################################################################
+# Global Broadcast Registers
+################################################################################
+
+rule GlobalFir
+{
+    CHECK_STOP:  GLOBAL_CS_FIR;
+    RECOVERABLE: GLOBAL_RE_FIR;
+};
+
+group gGlobalFir attntype CHECK_STOP, RECOVERABLE filter singlebit
+{
+    /** GLOBAL_FIR[1]
+     *  Attention from TP chiplet
+     */
+    (GlobalFir, bit(1)) ? analyze(gTpChipletFir);
+
+    /** GLOBAL_FIR[2]
+     *  Attention from NEST chiplet
+     */
+    (GlobalFir, bit(2)) ? analyze(gNestChipletFir);
+
+    /** GLOBAL_FIR[3]
+     *  Attention from MEM chiplet
+     */
+    (GlobalFir, bit(3)) ? analyze(gMemChipletFir);
+};
+
+rule GlobalSpa
+{
+    SPECIAL: GLOBAL_SPA;
+};
+
+group gGlobalSpa attntype SPECIAL filter singlebit
+{
+    /** GLOBAL_SPA[3]
+     *  Attention from MEM chiplet
+     */
+    (GlobalSpa, bit(3)) ? analyze(gMemChipletSpa);
+};
+
+# Import all of the chiplet rules and actions
+.include "Membuf_acts_TP.rule"
+.include "Membuf_acts_NEST.rule"
+.include "Membuf_acts_MEM.rule"
+
+ ##############################################################################
+ #                                                                            #
+ #    #                                  ###                                  #
+ #   # #    ##  ##### ###  ###  #   #   #   # #     #    ###   ###  ###  ###  #
+ #  #   #  #  #   #    #  #   # ##  #   #     #    # #  #     #     #   #     #
+ # ####### #      #    #  #   # # # #   #     #   #####  ###   ###  ##   ###  #
+ # #     # #  #   #    #  #   # #  ##   #   # #   #   #     #     # #       # #
+ # #     #  ##    #   ###  ###  #   #    ###  ### #   #  ###   ###  ###  ###  #
+ #                                                                            #
+ ##############################################################################
+
+# Include the common action set.
+.include "CommonActions.rule"
+

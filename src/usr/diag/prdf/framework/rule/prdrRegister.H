@@ -1,0 +1,300 @@
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/diag/prdf/framework/rule/prdrRegister.H $             */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2004,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+
+#ifndef __PRDRREGISTER_H
+#define __PRDRREGISTER_H
+
+#include <stdio.h>
+#include <string.h>
+#include <algorithm>
+
+#include <string>
+#include <list>
+
+#include <stdint.h>
+
+#include <iostream>
+#include <iomanip>
+#include <netinet/in.h>
+
+// define needed to enable x86 rule parser code only
+#define __PRD_RULE_COMPILE
+#include <prdrCommon.H>
+#include <UtilHash.H>
+
+#ifdef __HOSTBOOT_MODULE
+  #include <endian.h>
+  # define htonll(x) htobe64(x)
+#else
+  #include <utilendian.H>
+#endif
+
+extern Prdr::HashCollisionMap g_regsHashCollision;
+extern bool g_hadError;
+
+struct PrdrResetOrMaskStruct
+{
+    uint8_t type;
+    uint64_t addr_r;
+    uint64_t addr_w;
+
+    void output(FILE * l_file)
+    {
+        fwrite(&type, 1, 1, l_file);
+
+        uint64_t l_tmp64;
+
+        l_tmp64 = htonll(addr_r);
+        fwrite(&l_tmp64, sizeof (l_tmp64), 1, l_file);
+
+        l_tmp64 = htonll(addr_w);
+        fwrite(&l_tmp64, sizeof (l_tmp64), 1, l_file);
+    }
+};
+
+struct PrdrCaptureReqStruct
+{
+    uint8_t type;
+    uint32_t data[2];
+    std::string str;
+
+    enum
+    {
+        PRDR_CAPTURE_GROUPID = 'G',
+        PRDR_CAPTURE_CONN    = 'C',
+        PRDR_CAPTURE_FUNC    = 'f',
+        PRDR_CAPTURE_TYPE    = 'T', // Added this for storing a register's type in the capture struct.
+    };
+
+    void output(FILE * l_file)
+    {
+        fwrite(&type, 1, 1, l_file);
+        uint32_t l_tmp32;
+
+        int loopMax = 0;
+
+        switch (type)
+        {
+            case PRDR_CAPTURE_GROUPID:
+            case PRDR_CAPTURE_TYPE:
+                loopMax = 1;
+                break;
+
+            case PRDR_CAPTURE_CONN:
+                loopMax = 2;
+                break;
+
+            case PRDR_CAPTURE_FUNC:
+                loopMax = 0;
+                break;
+        }
+
+        for (int i = 0; i < loopMax; i++)
+        {
+            l_tmp32 = htonl(data[i]);
+            fwrite(&l_tmp32, 4, 1, l_file);
+        }
+        if (type == PRDR_CAPTURE_FUNC)
+        {
+            if ('"' == (str)[0])
+                str = str.substr(1, str.size() - 2);
+            fwrite(str.c_str(), str.size() + 1, 1, l_file);
+        }
+    };
+};
+
+class PrdrRegister
+{
+  public:
+
+    std::string * cv_sname;
+    std::string * cv_name;
+
+    uint32_t cv_flags;
+
+    uint64_t cv_scomaddr;
+    uint16_t cv_scomlen;
+
+    std::string cv_name_default;
+
+    std::list<PrdrResetOrMaskStruct> cv_resets;
+    std::list<PrdrResetOrMaskStruct> cv_masks;
+
+    std::list<PrdrCaptureReqStruct> cv_captures;
+
+    PrdrRegister() :
+        cv_sname(NULL),
+        cv_name(&cv_name_default),
+        cv_flags(0),
+        cv_scomaddr(0),
+        cv_scomlen(0),
+        cv_resets(0), cv_masks(0), cv_captures(0)
+    {};
+
+    static void merge(PrdrRegister * i_l, PrdrRegister * i_r)
+    {
+        if (NULL != i_r->cv_sname)
+            i_l->cv_sname = i_r->cv_sname;
+        if (&i_r->cv_name_default != i_r->cv_name)
+            i_l->cv_name = i_r->cv_name;
+        if (0 != i_r->cv_flags)
+            i_l->cv_flags = i_r->cv_flags;
+        if (0 != i_r->cv_scomaddr)
+            i_l->cv_scomaddr = i_r->cv_scomaddr;
+        if (0 != i_r->cv_scomlen)
+            i_l->cv_scomlen = i_r->cv_scomlen;
+        if (0 != i_r->cv_resets.size())
+        {
+            std::copy( i_r->cv_resets.begin(),
+                       i_r->cv_resets.end(),
+                       std::back_inserter(i_l->cv_resets) );
+        }
+        if (0 != i_r->cv_masks.size())
+        {
+            std::copy( i_r->cv_masks.begin(),
+                       i_r->cv_masks.end(),
+                       std::back_inserter(i_l->cv_masks) );
+        }
+        if (0 != i_r->cv_captures.size())
+        {
+            std::copy( i_r->cv_captures.begin(),
+                       i_r->cv_captures.end(),
+                       std::back_inserter(i_l->cv_captures) );
+        }
+    };
+
+    void print()
+    {
+        using std::cout;
+        using std::endl;
+        cout << "Register " << *cv_sname << ":" << endl;
+        cout << "\tLong Name: " << *cv_name << endl;
+        cout << "\tScom Addr: " << cv_scomaddr << endl;
+        cout << "\tScom Len:  " << cv_scomlen << endl;
+    };
+
+    int output( FILE * l_file, uint16_t i_sigOff )
+    {
+        // Check for hash collisions
+        uint16_t hash = Util::hashString( cv_sname->c_str() ) ^ i_sigOff;
+        Prdr::HashCollisionMap::iterator i = g_regsHashCollision.find(hash);
+        if ( g_regsHashCollision.end() != i )
+        {
+            g_hadError = true; // Compile error
+
+            std::cerr << "Register hash collision '" << *cv_sname << "' "
+                      << std::hex << "[0x"
+                      << std::setfill('0') << std::setw(4)
+                      << hash << "]";
+
+            if ( 0 != cv_sname->compare(i->second) )
+            {
+                std::cerr << ": previous register was '" << i->second << "'";
+            }
+
+            std::cerr << std::endl;
+        }
+        g_regsHashCollision[hash] = (*cv_sname);
+
+        // Setup flags
+        if (0 != cv_resets.size())
+            cv_flags |= Prdr::PRDR_REGISTER_RESETS;
+        if (0 != cv_masks.size())
+            cv_flags |= Prdr::PRDR_REGISTER_MASKS;
+        if (0 != cv_captures.size())
+            cv_flags |= Prdr::PRDR_REGISTER_CAPTURE;
+
+        // output data
+        uint32_t l_temp;
+        uint16_t l_temp16;
+
+        l_temp16 = htons(Util::hashString( cv_sname->c_str() ));
+        fwrite(&l_temp16, sizeof(l_temp16), 1, l_file);
+
+        l_temp = htonl(cv_flags);
+        fwrite(&l_temp, sizeof(l_temp), 1, l_file);
+
+        uint64_t l_temp64 = htonll(cv_scomaddr);
+        fwrite(&l_temp64, sizeof(l_temp64), 1, l_file);
+
+        if (cv_flags & Prdr::PRDR_REGISTER_SCOMLEN)
+        {
+            l_temp16 = htons(cv_scomlen);
+            fwrite(&l_temp16, sizeof(l_temp16), 1, l_file);
+        }
+
+        if (cv_flags & Prdr::PRDR_REGISTER_RESETS)
+        {
+            l_temp16 = htons(cv_resets.size());
+            fwrite(&l_temp16, sizeof(l_temp16), 1, l_file);
+
+            std::for_each( cv_resets.begin(), cv_resets.end(),
+                           std::bind2nd(
+                               std::mem_fun_ref(&PrdrResetOrMaskStruct::output),
+                               l_file) );
+        }
+
+        if (cv_flags & Prdr::PRDR_REGISTER_MASKS)
+        {
+            l_temp16 = htons(cv_masks.size());
+            fwrite(&l_temp16, sizeof(l_temp16), 1, l_file);
+
+            std::for_each( cv_masks.begin(), cv_masks.end(),
+                           std::bind2nd(
+                               std::mem_fun_ref(&PrdrResetOrMaskStruct::output),
+                               l_file) );
+        }
+
+        if (cv_flags & Prdr::PRDR_REGISTER_CAPTURE)
+        {
+            l_temp16 = htons(cv_captures.size());
+            fwrite(&l_temp16, sizeof(l_temp16), 1, l_file);
+
+            std::for_each( cv_captures.begin(), cv_captures.end(),
+                           std::bind2nd(
+                                std::mem_fun_ref(&PrdrCaptureReqStruct::output),
+                                l_file) );
+        }
+
+        return 0;
+    };
+
+    void outputRegisterFile(std::ostream & o_file, uint16_t i_sigOff)
+    {
+        uint16_t hash = Util::hashString( cv_sname->c_str() ) ^ i_sigOff;
+
+        o_file << "\tPRDR_REGISTER_ID ( "
+               << std::hex
+               << "0x" << std::setfill('0') << std::setw(4)
+               << hash << ", "
+               << *cv_sname << ", " << *cv_name << ", "
+               << "0x" << std::setfill('0') << std::setw(16)
+               << cv_scomaddr << "ULL )"
+               << std::endl;
+    };
+};
+
+typedef std::list<PrdrRegister *> PrdrRegisterList;
+
+#endif
+

@@ -1,24 +1,24 @@
-# IBM_PROLOG_BEGIN_TAG 
-# This is an automatically generated prolog. 
-#  
-# $Source: src/makefile $ 
-#  
-# IBM CONFIDENTIAL 
-#  
-# COPYRIGHT International Business Machines Corp. 2010,2012 
-#  
-# p1 
-#  
-# Object Code Only (OCO) source materials 
-# Licensed Internal Code Source Materials 
-# IBM HostBoot Licensed Internal Code 
-#  
-# The source code for this program is not published or otherwise 
-# divested of its trade secrets, irrespective of what has been 
-# deposited with the U.S. Copyright Office. 
-#  
-# Origin: 30 
-#  
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+# 
+# $Source: src/makefile $
+# 
+# IBM CONFIDENTIAL
+# 
+# COPYRIGHT International Business Machines Corp. 2010,2012
+# 
+# p1
+# 
+# Object Code Only (OCO) source materials
+# Licensed Internal Code Source Materials
+# IBM HostBoot Licensed Internal Code
+# 
+# The source code for this program is not published or otherwise
+# divested of its trade secrets, irrespective of what has been
+# deposited with the U.S. Copyright Office.
+# 
+# Origin: 30
+# 
 # IBM_PROLOG_END_TAG 
 
 ROOTPATH = ..
@@ -72,6 +72,10 @@ RELOCATABLE_IMAGE_LDFLAGS = -pie --export-dynamic
 hbicore_OBJECTS = ${BASE_OBJECTS} ${DIRECT_BOOT_OBJECTS}
 hbicore_MODULES = ${BASE_MODULES}
 hbicore_EXTENDED_MODULES = ${EXTENDED_MODULES}
+
+# for PRDR_RULE_TABLE_TARGETS
+include ${ROOTPATH}/src/usr/diag/prdf/prd_ruletable.mk
+
 #@todo - Temporary workaround
 # The centaur.sbe_pnor.bin is manually built from CVS SBE procedure files in
 # CVS then copy into HostBoot for now.
@@ -79,7 +83,8 @@ hbicore_EXTENDED_MODULES = ${EXTENDED_MODULES}
 # image later.
 hbicore_DATA_MODULES =  sample.if p8.dmi.scom.if cen.dmi.scom.if \
                         p8.fbc.scom.if mbs_def.if mba_def.if cen_ddrphy.if \
-                        dimmspd.dat centaur.sbe_pnor.bin procmvpd.dat procpore.dat 
+                        dimmspd.dat centaur.sbe_pnor.bin procmvpd.dat \
+						procpore.dat ${PRDR_RULE_TABLE_TARGETS}
 
 hbicore_LIDNUMBER = 80f00100
 

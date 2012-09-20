@@ -1,0 +1,329 @@
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+# 
+# $Source: src/usr/diag/prdf/plat/pegasus/Mcs.rule $
+# 
+# IBM CONFIDENTIAL
+# 
+# COPYRIGHT International Business Machines Corp. 2012
+# 
+# p1
+# 
+# Object Code Only (OCO) source materials
+# Licensed Internal Code Source Materials
+# IBM HostBoot Licensed Internal Code
+# 
+# The source code for this program is not published or otherwise
+# divested of its trade secrets, irrespective of what has been
+# deposited with the U.S. Copyright Office.
+# 
+# Origin: 30
+# 
+# IBM_PROLOG_END_TAG 
+
+################################################################################
+#
+# Scope:
+#   Registers and actions for the following chiplets:
+#       Note that only addresses for MC0/MCS0 will be used.
+#
+# Chiplet  Register Addresses       Description
+# =======  =======================  ============================================
+#   MCS    0x02011800 - 0x0201187F  MC0/MCS0
+#   MCS    0x02011880 - 0x020118FF  MC0/MCS1
+#   MCS    0x02011900 - 0x0201197F  MC1/MCS0
+#   MCS    0x02011980 - 0x020119FF  MC1/MCS1
+#   MCS    0x02011A00 - 0x02011A3E  DMI0 - DMI3
+#   MCS    0x02011C00 - 0x02011C7F  MC2/MCS0
+#   MCS    0x02011C80 - 0x02011CFF  MC2/MCS1
+#   MCS    0x02011D00 - 0x02011D7F  MC3/MCS0
+#   MCS    0x02011D80 - 0x02011DFF  MC3/MCS1
+#   MCS    0x02011E00 - 0x02011E3E  DMI4 - DMI7
+#
+################################################################################
+
+chip Mcs
+{
+    name        "Power8 MCS Chiplet";
+    targettype  TYPE_MCS;
+    sigoff      0x8000;
+# FIXME May need to update dump type
+    dump        DUMP_CONTENT_HW;
+    scomlen     64;
+
+ #############################################################################
+ #                                                                           #
+ #  ######                                                                   #
+ #  #     #  ######   ####     ###    ####    #####  ######  #####    ####   #
+ #  #     #  #       #    #     #    #          #    #       #    #  #       #
+ #  ######   #####   #          #     ####      #    #####   #    #   ####   #
+ #  #   #    #       #  ###     #         #     #    #       #####        #  #
+ #  #    #   #       #    #     #    #    #     #    #       #   #   #    #  #
+ #  #     #  ######   ####     ###    ####      #    ######  #    #   ####   #
+ #                                                                           #
+ #############################################################################
+
+    ############################################################################
+    # PB Chiplet MCIFIR
+    ############################################################################
+
+    register MCIFIR
+    {
+        name        "MC0.MCS0.RIGHT.MCI.SCOMFIR.MCIFIRQ";
+        scomaddr    0x02011840;
+        reset       (&, 0x02011841);
+        mask        (|, 0x02011845);
+        capture     group default;
+    };
+
+    register MCIFIR_AND
+    {
+        name        "MC0.MCS0.RIGHT.MCI.SCOMFIR.MCIFIRQ AND";
+        scomaddr    0x02011841;
+        capture     group never;
+    };
+
+    register MCIFIR_MASK
+    {
+        name        "MC0.MCS0.RIGHT.MCI.SCOMFIR.MCIFIRMASK";
+        scomaddr    0x02011843;
+        capture     type secondary;
+        capture     group default;
+    };
+
+    register MCIFIR_ACT0
+    {
+        name        "MC0.MCS0.RIGHT.MCI.SCOMFIR.MCIFIRACT0";
+        scomaddr    0x02011846;
+        capture     type secondary;
+        capture     group default;
+    };
+
+    register MCIFIR_ACT1
+    {
+        name        "MC0.MCS0.RIGHT.MCI.SCOMFIR.MCIFIRACT1";
+        scomaddr    0x02011847;
+        capture     type secondary;
+        capture     group default;
+    };
+};
+
+ ##############################################################################
+ #                                                                            #
+ # ####                                 #                                     #
+ # #   # #   # #    #####  ###      #  # #    ##  ##### ###  ###  #   #  ###  #
+ # #   # #   # #    #     #        #  #   #  #  #   #    #  #   # ##  # #     #
+ # ####  #   # #    ####   ###    #  ####### #      #    #  #   # # # #  ###  #
+ # #  #  #   # #    #         #  #   #     # #  #   #    #  #   # #  ##     # #
+ # #   #  ###  #### #####  ###  #    #     #  ##    #   ###  ###  #   #  ###  #
+ #                                                                            #
+ ##############################################################################
+
+################################################################################
+# PB Chiplet MCIFIR
+################################################################################
+
+rule MciFir
+{
+    CHECK_STOP:  MCIFIR & ~MCIFIR_MASK & ~MCIFIR_ACT0 & ~MCIFIR_ACT1;
+    RECOVERABLE: MCIFIR & ~MCIFIR_MASK & ~MCIFIR_ACT0 &  MCIFIR_ACT1;
+    SPECIAL:     MCIFIR & ~MCIFIR_MASK &  MCIFIR_ACT0 & ~MCIFIR_ACT1;
+};
+
+group gMciFir attntype CHECK_STOP, RECOVERABLE, SPECIAL filter singlebit
+{
+    /** MCIFIR[0]
+     *  MCIFIRQ_REPLAY_TIMEOUT
+     */
+    (MciFir, bit(0)) ? TBDDefaultCallout;
+
+    /** MCIFIR[1]
+     *  MCIFIRQ_CHANNEL_FAIL
+     */
+    (MciFir, bit(1)) ? TBDDefaultCallout;
+
+    /** MCIFIR[2]
+     *  MCIFIRQ_CRC_ERROR
+     */
+    (MciFir, bit(2)) ? TBDDefaultCallout;
+
+    /** MCIFIR[3]
+     *  MCIFIRQ_FRAME_NOACK
+     */
+    (MciFir, bit(3)) ? TBDDefaultCallout;
+
+    /** MCIFIR[4]
+     *  MCIFIRQ_SEQID_OUT_OF_ORDER
+     */
+    (MciFir, bit(4)) ? TBDDefaultCallout;
+
+    /** MCIFIR[5]
+     *  MCIFIRQ_REPLAY_BUFFER_ECC_CE
+     */
+    (MciFir, bit(5)) ? TBDDefaultCallout;
+
+    /** MCIFIR[6]
+     *  MCIFIRQ_REPLAY_BUFFER_ECC_UE
+     */
+    (MciFir, bit(6)) ? TBDDefaultCallout;
+
+    /** MCIFIR[7]
+     *  MCIFIRQ_MCI_CHINIT_STATE_MACHINE_TIMEOUT
+     */
+    (MciFir, bit(7)) ? TBDDefaultCallout;
+
+    /** MCIFIR[8]
+     *  MCIFIRQ_MCI_INTERNAL_CONTROL_PARITY_ERROR
+     */
+    (MciFir, bit(8)) ? TBDDefaultCallout;
+
+    /** MCIFIR[9]
+     *  MCIFIRQ_MCI_DATA_FLOW_PARITY_ERROR
+     */
+    (MciFir, bit(9)) ? TBDDefaultCallout;
+
+    /** MCIFIR[10]
+     *  MCIFIRQ_CRC_PERFORMANCE_DEGRADATION
+     */
+    (MciFir, bit(10)) ? TBDDefaultCallout;
+
+    /** MCIFIR[11]
+     *  MCIFIRQ_CHANNEL_INTERLOCK_FAIL
+     */
+    (MciFir, bit(11)) ? TBDDefaultCallout;
+
+    /** MCIFIR[12]
+     *  MCIFIRQ_CENTAUR_CHECKSTOP
+     */
+    (MciFir, bit(12)) ? TBDDefaultCallout;
+
+    /** MCIFIR[13]
+     *  MCIFIRQ_CENTAUR_TRACESTOP
+     */
+    (MciFir, bit(13)) ? TBDDefaultCallout;
+
+    /** MCIFIR[14]
+     *  MCIFIRQ_FPGA_INTERRUPT
+     */
+    (MciFir, bit(14)) ? TBDDefaultCallout;
+
+    /** MCIFIR[15]
+     *  MCIFIRQ_CENTAUR_RECOVERABLE_ERROR
+     */
+    (MciFir, bit(15)) ? TBDDefaultCallout;
+
+    /** MCIFIR[16]
+     *  MCIFIRQ_CENTAUR_SPECIAL_ATTENTION
+     */
+    (MciFir, bit(16)) ? TBDDefaultCallout;
+
+    /** MCIFIR[17]
+     *  MCIFIRQ_CENTAUR_MAINTENANCE_COMPLETE
+     */
+    (MciFir, bit(17)) ? TBDDefaultCallout;
+
+    /** MCIFIR[18]
+     *  MCIFIRQ_CENTAUR_INBAND_PIB_ERROR
+     */
+    (MciFir, bit(18)) ? TBDDefaultCallout;
+
+    /** MCIFIR[24]
+     *  MCIFIRQ_MCS_RECOVERABLE_ERROR
+     */
+    (MciFir, bit(24)) ? TBDDefaultCallout;
+
+    /** MCIFIR[25]
+     *  MCIFIRQ_MCS_INTERNAL_NONRECOVERABLE_ERROR
+     */
+    (MciFir, bit(25)) ? TBDDefaultCallout;
+
+    /** MCIFIR[26]
+     *  MCIFIRQ_POWERBUS_PROTOCOL_ERROR
+     */
+    (MciFir, bit(26)) ? TBDDefaultCallout;
+
+    /** MCIFIR[27]
+     *  MCIFIRQ_MCS_COMMAND_LIST_TIMEOUT_DUE_TO_POWERBUS
+     */
+    (MciFir, bit(27)) ? TBDDefaultCallout;
+
+    /** MCIFIR[28]
+     *  MCIFIRQ_MCS_COMMAND_LIST_TIMEOUT_DUE_TO_EDI_CHANNEL
+     */
+    (MciFir, bit(28)) ? TBDDefaultCallout;
+
+    /** MCIFIR[29]
+     *  MCIFIRQ_INBAND_BAR_HIT_WITH_INCORRECT_TTYPE
+     */
+    (MciFir, bit(29)) ? TBDDefaultCallout;
+
+    /** MCIFIR[30]
+     *  MCIFIRQ_MULTIPLE_BAR_HIT
+     */
+    (MciFir, bit(30)) ? TBDDefaultCallout;
+
+    /** MCIFIR[31]
+     *  MCIFIRQ_CHANNEL_FAIL_SIGNAL_ACTIVE
+     */
+    (MciFir, bit(31)) ? TBDDefaultCallout;
+
+    /** MCIFIR[32]
+     *  MCIFIRQ_MIRROR_ACTION_OCCURRED
+     */
+    (MciFir, bit(32)) ? TBDDefaultCallout;
+
+    /** MCIFIR[33]
+     *  MCIFIRQ_NONFOREIGN_ACCESS_TO_FOREIGN_BAR
+     */
+    (MciFir, bit(33)) ? TBDDefaultCallout;
+
+    /** MCIFIR[34]
+     *  MCIFIRQ_CENTAUR_SYNC_COMMAND_DETECTED
+     */
+    (MciFir, bit(34)) ? TBDDefaultCallout;
+
+    /** MCIFIR[35]
+     *  MCIFIRQ_POWERBUS_WRITE_DATA_BUFFER_CE
+     */
+    (MciFir, bit(35)) ? TBDDefaultCallout;
+
+    /** MCIFIR[36]
+     *  MCIFIRQ_POWERBUS_WRITE_DATA_BUFFER_UE
+     */
+    (MciFir, bit(36)) ? TBDDefaultCallout;
+
+    /** MCIFIR[37]
+     *  MCIFIRQ_POWERBUS_WRITE_DATA_BUFFER_SUE
+     */
+    (MciFir, bit(37)) ? TBDDefaultCallout;
+
+    /** MCIFIR[38]
+     *  MCIFIRQ_HA_ILLEGAL_CONSUMER_ACCESS_ERROR
+     */
+    (MciFir, bit(38)) ? TBDDefaultCallout;
+
+    /** MCIFIR[48]
+     *  MCIFIRQ_INTERNAL_SCOM_ERROR
+     */
+    (MciFir, bit(48)) ? TBDDefaultCallout;
+
+    /** MCIFIR[49]
+     *  MCIFIRQ_INTERNAL_SCOM_ERROR_CLONE
+     */
+    (MciFir, bit(49)) ? TBDDefaultCallout;
+};
+
+ ##############################################################################
+ #                                                                            #
+ #    #                                  ###                                  #
+ #   # #    ##  ##### ###  ###  #   #   #   # #     #    ###   ###  ###  ###  #
+ #  #   #  #  #   #    #  #   # ##  #   #     #    # #  #     #     #   #     #
+ # ####### #      #    #  #   # # # #   #     #   #####  ###   ###  ##   ###  #
+ # #     # #  #   #    #  #   # #  ##   #   # #   #   #     #     # #       # #
+ # #     #  ##    #   ###  ###  #   #    ###  ### #   #  ###   ###  ###  ###  #
+ #                                                                            #
+ ##############################################################################
+
+# Include the common action set.
+.include "CommonActions.rule"
+

@@ -1,0 +1,1476 @@
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+# 
+# $Source: src/usr/diag/prdf/plat/pegasus/Proc_acts_PCIE.rule $
+# 
+# IBM CONFIDENTIAL
+# 
+# COPYRIGHT International Business Machines Corp. 2012
+# 
+# p1
+# 
+# Object Code Only (OCO) source materials
+# Licensed Internal Code Source Materials
+# IBM HostBoot Licensed Internal Code
+# 
+# The source code for this program is not published or otherwise
+# divested of its trade secrets, irrespective of what has been
+# deposited with the U.S. Copyright Office.
+# 
+# Origin: 30
+# 
+# IBM_PROLOG_END_TAG 
+
+################################################################################
+# PCIE Chiplet Registers
+################################################################################
+
+rule PcieChipletFir
+{
+  CHECK_STOP:
+     (PCIE_CHIPLET_CS_FIR       & `1EE0000000000000`) & ~PCIE_CHIPLET_FIR_MASK;
+  RECOVERABLE:
+    ((PCIE_CHIPLET_RE_FIR >> 2) & `1EE0000000000000`) & ~PCIE_CHIPLET_FIR_MASK;
+};
+
+group gPcieChipletFir filter singlebit
+{
+    /** PCIE_CHIPLET_FIR[3]
+     *  Attention from LFIR
+     */
+    (PcieChipletFir, bit(3)) ? analyze(gPcieLFir);
+
+    /** PCIE_CHIPLET_FIR[4|5|6]
+     *  Attention from PCICLOCKFIR (0-2)
+     */
+    (PcieChipletFir, bit(4|5|6)) ? analyze(gPciClockFir);
+
+    /** PCIE_CHIPLET_FIR[8]
+     *  Attention from PBFFIR
+     */
+    (PcieChipletFir, bit(8)) ? analyze(gPbfFir);
+
+    /** PCIE_CHIPLET_FIR[9|10]
+     *  Attention from IOPPCIFIR (0-1)
+     */
+    (PcieChipletFir, bit(9|10)) ? analyze(gIopPciFir);
+};
+
+rule PcieChipletSpa
+{
+    SPECIAL: PCIE_CHIPLET_SPA & ~PCIE_CHIPLET_SPA_MASK;
+};
+
+group gPcieChipletSpa filter singlebit
+{
+    /** PCIE_CHIPLET_SPA[0]
+     *  Attention from PBFFIR
+     */
+    (PcieChipletSpa, bit(0)) ? analyze(gPbfFir);
+};
+
+################################################################################
+# PCIE Chiplet LFIR
+################################################################################
+
+rule PcieLFir
+{
+  CHECK_STOP:  PCIE_LFIR & ~PCIE_LFIR_MASK & ~PCIE_LFIR_ACT0 & ~PCIE_LFIR_ACT1;
+  RECOVERABLE: PCIE_LFIR & ~PCIE_LFIR_MASK & ~PCIE_LFIR_ACT0 &  PCIE_LFIR_ACT1;
+};
+
+group gPcieLFir filter singlebit
+{
+    /** PCIE_LFIR[0]
+     *  CFIR internal parity error
+     */
+    (PcieLFir, bit(0)) ? TBDDefaultCallout;
+
+    /** PCIE_LFIR[1]
+     *  Local errors from GPIO (PCB error)
+     */
+    (PcieLFir, bit(1)) ? TBDDefaultCallout;
+
+    /** PCIE_LFIR[2]
+     *  Local errors from CC (PCB error)
+     */
+    (PcieLFir, bit(2)) ? TBDDefaultCallout;
+
+    /** PCIE_LFIR[3]
+     *  Local errors from CC (OPCG, parity, scan collision, ...)
+     */
+    (PcieLFir, bit(3)) ? TBDDefaultCallout;
+
+    /** PCIE_LFIR[4]
+     *  Local errors from PSC (PCB error)
+     */
+    (PcieLFir, bit(4)) ? TBDDefaultCallout;
+
+    /** PCIE_LFIR[5]
+     *  Local errors from PSC (parity error)
+     */
+    (PcieLFir, bit(5)) ? TBDDefaultCallout;
+
+    /** PCIE_LFIR[6]
+     *  Local errors from Thermal (parity error)
+     */
+    (PcieLFir, bit(6)) ? TBDDefaultCallout;
+
+    /** PCIE_LFIR[7]
+     *  Local errors from Thermal (PCB error)
+     */
+    (PcieLFir, bit(7)) ? TBDDefaultCallout;
+
+    /** PCIE_LFIR[8|9]
+     *  Local errors from Thermal (Trip error)
+     */
+    (PcieLFir, bit(8|9)) ? TBDDefaultCallout;
+
+    /** PCIE_LFIR[10|11]
+     *  Local errors from Trace Array ( error)
+     */
+    (PcieLFir, bit(10|11)) ? TBDDefaultCallout;
+};
+
+################################################################################
+# PCIE Chiplet PCICLOCKFIRs
+################################################################################
+
+# TODO - All these FIRs should have the same bit definition. Idealy, we will
+#        only want to have one copy of the bit definition. Unfortuately, the
+#        rule code parser does not have the support for something like this.
+#        Maybe we can add this as a later feature.
+
+rule PciClockFir_0
+{
+  CHECK_STOP:
+    PCICLOCKFIR_0 & ~PCICLOCKFIR_0_MASK & ~PCICLOCKFIR_0_ACT0 & ~PCICLOCKFIR_0_ACT1;
+  RECOVERABLE:
+    PCICLOCKFIR_0 & ~PCICLOCKFIR_0_MASK & ~PCICLOCKFIR_0_ACT0 &  PCICLOCKFIR_0_ACT1;
+};
+
+rule PciClockFir_1
+{
+  CHECK_STOP:
+    PCICLOCKFIR_1 & ~PCICLOCKFIR_1_MASK & ~PCICLOCKFIR_1_ACT0 & ~PCICLOCKFIR_1_ACT1;
+  RECOVERABLE:
+    PCICLOCKFIR_1 & ~PCICLOCKFIR_1_MASK & ~PCICLOCKFIR_1_ACT0 &  PCICLOCKFIR_1_ACT1;
+};
+
+rule PciClockFir_2
+{
+  CHECK_STOP:
+    PCICLOCKFIR_2 & ~PCICLOCKFIR_2_MASK & ~PCICLOCKFIR_2_ACT0 & ~PCICLOCKFIR_2_ACT1;
+  RECOVERABLE:
+    PCICLOCKFIR_2 & ~PCICLOCKFIR_2_MASK & ~PCICLOCKFIR_2_ACT0 &  PCICLOCKFIR_2_ACT1;
+};
+
+group gPciClockFir filter singlebit
+{
+    /** PCICLOCKFIR_0[0]
+     *  AIB_COMMAND_INVALID
+     */
+    (PciClockFir_0, bit(0)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[0]
+     *  AIB_COMMAND_INVALID
+     */
+    (PciClockFir_1, bit(0)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[0]
+     *  AIB_COMMAND_INVALID
+     */
+    (PciClockFir_2, bit(0)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[1]
+     *  AIB_ADDRESSING_ERROR
+     */
+    (PciClockFir_0, bit(1)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[1]
+     *  AIB_ADDRESSING_ERROR
+     */
+    (PciClockFir_1, bit(1)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[1]
+     *  AIB_ADDRESSING_ERROR
+     */
+    (PciClockFir_2, bit(1)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[2]
+     *  AIB_SIZE_ALIGNMENT_ERROR
+     */
+    (PciClockFir_0, bit(2)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[2]
+     *  AIB_SIZE_ALIGNMENT_ERROR
+     */
+    (PciClockFir_1, bit(2)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[2]
+     *  AIB_SIZE_ALIGNMENT_ERROR
+     */
+    (PciClockFir_2, bit(2)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[3]
+     *  Reserved field (Access type is Reserved00)
+     */
+    (PciClockFir_0, bit(3)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[3]
+     *  Reserved field (Access type is Reserved00)
+     */
+    (PciClockFir_1, bit(3)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[3]
+     *  Reserved field (Access type is Reserved00)
+     */
+    (PciClockFir_2, bit(3)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[4]
+     *  AIB_CMD_CTRLS_PARITY_ERROR
+     */
+    (PciClockFir_0, bit(4)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[4]
+     *  AIB_CMD_CTRLS_PARITY_ERROR
+     */
+    (PciClockFir_1, bit(4)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[4]
+     *  AIB_CMD_CTRLS_PARITY_ERROR
+     */
+    (PciClockFir_2, bit(4)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[5]
+     *  AIB_DATA_CTRLS_PARITY_ERROR
+     */
+    (PciClockFir_0, bit(5)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[5]
+     *  AIB_DATA_CTRLS_PARITY_ERROR
+     */
+    (PciClockFir_1, bit(5)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[5]
+     *  AIB_DATA_CTRLS_PARITY_ERROR
+     */
+    (PciClockFir_2, bit(5)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[6]
+     *  MMIO_BAR_DOMAIN_TABLE_ECC_CORRECTABLE_ERROR
+     */
+    (PciClockFir_0, bit(6)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[6]
+     *  MMIO_BAR_DOMAIN_TABLE_ECC_CORRECTABLE_ERROR
+     */
+    (PciClockFir_1, bit(6)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[6]
+     *  MMIO_BAR_DOMAIN_TABLE_ECC_CORRECTABLE_ERROR
+     */
+    (PciClockFir_2, bit(6)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[7]
+     *  MMIO_BAR_DOMAIN_TABLE_ECC_UNCORRECTABLE_ERROR
+     */
+    (PciClockFir_0, bit(7)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[7]
+     *  MMIO_BAR_DOMAIN_TABLE_ECC_UNCORRECTABLE_ERROR
+     */
+    (PciClockFir_1, bit(7)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[7]
+     *  MMIO_BAR_DOMAIN_TABLE_ECC_UNCORRECTABLE_ERROR
+     */
+    (PciClockFir_2, bit(7)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[8]
+     *  AIB_BUS_PARITY_ERROR
+     */
+    (PciClockFir_0, bit(8)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[8]
+     *  AIB_BUS_PARITY_ERROR
+     */
+    (PciClockFir_1, bit(8)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[8]
+     *  AIB_BUS_PARITY_ERROR
+     */
+    (PciClockFir_2, bit(8)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[9]
+     *  Reserved field (Access type is Reserved01)
+     */
+    (PciClockFir_0, bit(9)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[9]
+     *  Reserved field (Access type is Reserved01)
+     */
+    (PciClockFir_1, bit(9)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[9]
+     *  Reserved field (Access type is Reserved01)
+     */
+    (PciClockFir_2, bit(9)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[10]
+     *  AIB_DATA_CTRLS_SEQUENCE_ERROR
+     */
+    (PciClockFir_0, bit(10)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[10]
+     *  AIB_DATA_CTRLS_SEQUENCE_ERROR
+     */
+    (PciClockFir_1, bit(10)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[10]
+     *  AIB_DATA_CTRLS_SEQUENCE_ERROR
+     */
+    (PciClockFir_2, bit(10)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[11]
+     *  MMIO_CMD_DATA_PARITY_ERROR
+     */
+    (PciClockFir_0, bit(11)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[11]
+     *  MMIO_CMD_DATA_PARITY_ERROR
+     */
+    (PciClockFir_1, bit(11)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[11]
+     *  MMIO_CMD_DATA_PARITY_ERROR
+     */
+    (PciClockFir_2, bit(11)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[12]
+     *  PCI_E_CFG_IO_WRITE_CA_OR_UR_RESPONSE
+     */
+    (PciClockFir_0, bit(12)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[12]
+     *  PCI_E_CFG_IO_WRITE_CA_OR_UR_RESPONSE
+     */
+    (PciClockFir_1, bit(12)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[12]
+     *  PCI_E_CFG_IO_WRITE_CA_OR_UR_RESPONSE
+     */
+    (PciClockFir_2, bit(12)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[13]
+     *  GBIF_TIMEOUT
+     */
+    (PciClockFir_0, bit(13)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[13]
+     *  GBIF_TIMEOUT
+     */
+    (PciClockFir_1, bit(13)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[13]
+     *  GBIF_TIMEOUT
+     */
+    (PciClockFir_2, bit(13)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[14]
+     *  MMIO_PENDING_ERROR
+     */
+    (PciClockFir_0, bit(14)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[14]
+     *  MMIO_PENDING_ERROR
+     */
+    (PciClockFir_1, bit(14)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[14]
+     *  MMIO_PENDING_ERROR
+     */
+    (PciClockFir_2, bit(14)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[15]
+     *  AIB_RX_DATA_ECC_CORRECTABLE_ERROR
+     */
+    (PciClockFir_0, bit(15)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[15]
+     *  AIB_RX_DATA_ECC_CORRECTABLE_ERROR
+     */
+    (PciClockFir_1, bit(15)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[15]
+     *  AIB_RX_DATA_ECC_CORRECTABLE_ERROR
+     */
+    (PciClockFir_2, bit(15)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[16]
+     *  AIB_RX_DATA_ECC_UNCORRECTABLE_ERROR
+     */
+    (PciClockFir_0, bit(16)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[16]
+     *  AIB_RX_DATA_ECC_UNCORRECTABLE_ERROR
+     */
+    (PciClockFir_1, bit(16)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[16]
+     *  AIB_RX_DATA_ECC_UNCORRECTABLE_ERROR
+     */
+    (PciClockFir_2, bit(16)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[17]
+     *  DCT_TABLE_ERROR
+     */
+    (PciClockFir_0, bit(17)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[17]
+     *  DCT_TABLE_ERROR
+     */
+    (PciClockFir_1, bit(17)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[17]
+     *  DCT_TABLE_ERROR
+     */
+    (PciClockFir_2, bit(17)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[18]
+     *  DMA_RESPONSE_DATA_ERROR
+     */
+    (PciClockFir_0, bit(18)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[18]
+     *  DMA_RESPONSE_DATA_ERROR
+     */
+    (PciClockFir_1, bit(18)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[18]
+     *  DMA_RESPONSE_DATA_ERROR
+     */
+    (PciClockFir_2, bit(18)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[19]
+     *  DMA_RESPONSE_TIMEOUT
+     */
+    (PciClockFir_0, bit(19)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[19]
+     *  DMA_RESPONSE_TIMEOUT
+     */
+    (PciClockFir_1, bit(19)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[19]
+     *  DMA_RESPONSE_TIMEOUT
+     */
+    (PciClockFir_2, bit(19)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[20]
+     *  TCE_RD_RESPONSE_ERROR_INDICATION
+     */
+    (PciClockFir_0, bit(20)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[20]
+     *  TCE_RD_RESPONSE_ERROR_INDICATION
+     */
+    (PciClockFir_1, bit(20)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[20]
+     *  TCE_RD_RESPONSE_ERROR_INDICATION
+     */
+    (PciClockFir_2, bit(20)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[21]
+     *  CFG_RETRY_TIMEOUT_ERROR
+     */
+    (PciClockFir_0, bit(21)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[21]
+     *  CFG_RETRY_TIMEOUT_ERROR
+     */
+    (PciClockFir_1, bit(21)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[21]
+     *  CFG_RETRY_TIMEOUT_ERROR
+     */
+    (PciClockFir_2, bit(21)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[22]
+     *  CFG_ACCESS_ERROR
+     */
+    (PciClockFir_0, bit(22)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[22]
+     *  CFG_ACCESS_ERROR
+     */
+    (PciClockFir_1, bit(22)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[22]
+     *  CFG_ACCESS_ERROR
+     */
+    (PciClockFir_2, bit(22)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[24]
+     *  RGA_MACRO_INTERNAL_ERROR
+     */
+    (PciClockFir_0, bit(24)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[24]
+     *  RGA_MACRO_INTERNAL_ERROR
+     */
+    (PciClockFir_1, bit(24)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[24]
+     *  RGA_MACRO_INTERNAL_ERROR
+     */
+    (PciClockFir_2, bit(24)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[25]
+     *  PHB3_REGISTER_PARITY_ERROR_RSM_ONE_HOT_ERROR
+     */
+    (PciClockFir_0, bit(25)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[25]
+     *  PHB3_REGISTER_PARITY_ERROR_RSM_ONE_HOT_ERROR
+     */
+    (PciClockFir_1, bit(25)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[25]
+     *  PHB3_REGISTER_PARITY_ERROR_RSM_ONE_HOT_ERROR
+     */
+    (PciClockFir_2, bit(25)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[26]
+     *  PHB3_REGISTER_ACCESS_ERROR
+     */
+    (PciClockFir_0, bit(26)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[26]
+     *  PHB3_REGISTER_ACCESS_ERROR
+     */
+    (PciClockFir_1, bit(26)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[26]
+     *  PHB3_REGISTER_ACCESS_ERROR
+     */
+    (PciClockFir_2, bit(26)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[27]
+     *  PAPR_OUTBOUND_INJECTION_ERROR_TRIGGERED
+     */
+    (PciClockFir_0, bit(27)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[27]
+     *  PAPR_OUTBOUND_INJECTION_ERROR_TRIGGERED
+     */
+    (PciClockFir_1, bit(27)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[27]
+     *  PAPR_OUTBOUND_INJECTION_ERROR_TRIGGERED
+     */
+    (PciClockFir_2, bit(27)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[28]
+     *  PCI_E_CORE_FATAL_ERROR
+     */
+    (PciClockFir_0, bit(28)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[28]
+     *  PCI_E_CORE_FATAL_ERROR
+     */
+    (PciClockFir_1, bit(28)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[28]
+     *  PCI_E_CORE_FATAL_ERROR
+     */
+    (PciClockFir_2, bit(28)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[29]
+     *  PCI_E_INBOUND_TLP_ECRC_ERROR
+     */
+    (PciClockFir_0, bit(29)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[29]
+     *  PCI_E_INBOUND_TLP_ECRC_ERROR
+     */
+    (PciClockFir_1, bit(29)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[29]
+     *  PCI_E_INBOUND_TLP_ECRC_ERROR
+     */
+    (PciClockFir_2, bit(29)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[30]
+     *  PCI_E_UTL_PRIMARY_INTERRUPT
+     */
+    (PciClockFir_0, bit(30)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[30]
+     *  PCI_E_UTL_PRIMARY_INTERRUPT
+     */
+    (PciClockFir_1, bit(30)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[30]
+     *  PCI_E_UTL_PRIMARY_INTERRUPT
+     */
+    (PciClockFir_2, bit(30)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[31]
+     *  PCI_E_UTL_SECONDARY_INTERRUPT
+     */
+    (PciClockFir_0, bit(31)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[31]
+     *  PCI_E_UTL_SECONDARY_INTERRUPT
+     */
+    (PciClockFir_1, bit(31)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[31]
+     *  PCI_E_UTL_SECONDARY_INTERRUPT
+     */
+    (PciClockFir_2, bit(31)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[32]
+     *  IODA_FATAL_ERROR
+     */
+    (PciClockFir_0, bit(32)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[32]
+     *  IODA_FATAL_ERROR
+     */
+    (PciClockFir_1, bit(32)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[32]
+     *  IODA_FATAL_ERROR
+     */
+    (PciClockFir_2, bit(32)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[33]
+     *  IODA_MSI_PE_MISMATCH_ERROR
+     */
+    (PciClockFir_0, bit(33)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[33]
+     *  IODA_MSI_PE_MISMATCH_ERROR
+     */
+    (PciClockFir_1, bit(33)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[33]
+     *  IODA_MSI_PE_MISMATCH_ERROR
+     */
+    (PciClockFir_2, bit(33)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[34]
+     *  IODA_IVT_ERROR
+     */
+    (PciClockFir_0, bit(34)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[34]
+     *  IODA_IVT_ERROR
+     */
+    (PciClockFir_1, bit(34)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[34]
+     *  IODA_IVT_ERROR
+     */
+    (PciClockFir_2, bit(34)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[35]
+     *  IODA_TVT_ERROR
+     */
+    (PciClockFir_0, bit(35)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[35]
+     *  IODA_TVT_ERROR
+     */
+    (PciClockFir_1, bit(35)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[35]
+     *  IODA_TVT_ERROR
+     */
+    (PciClockFir_2, bit(35)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[36]
+     *  IODA_TVT_ADDRESS_RANGE_ERROR
+     */
+    (PciClockFir_0, bit(36)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[36]
+     *  IODA_TVT_ADDRESS_RANGE_ERROR
+     */
+    (PciClockFir_1, bit(36)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[36]
+     *  IODA_TVT_ADDRESS_RANGE_ERROR
+     */
+    (PciClockFir_2, bit(36)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[37]
+     *  IODA_PAGE_ACCESS_ERROR
+     */
+    (PciClockFir_0, bit(37)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[37]
+     *  IODA_PAGE_ACCESS_ERROR
+     */
+    (PciClockFir_1, bit(37)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[37]
+     *  IODA_PAGE_ACCESS_ERROR
+     */
+    (PciClockFir_2, bit(37)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[38]
+     *  CFG_PAPR_INJECTION_TRIGGERED
+     */
+    (PciClockFir_0, bit(38)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[38]
+     *  CFG_PAPR_INJECTION_TRIGGERED
+     */
+    (PciClockFir_1, bit(38)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[38]
+     *  CFG_PAPR_INJECTION_TRIGGERED
+     */
+    (PciClockFir_2, bit(38)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[39]
+     *  PAPR_INBOUND_INJECTION_ERROR_TRIGGERED
+     */
+    (PciClockFir_0, bit(39)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[39]
+     *  PAPR_INBOUND_INJECTION_ERROR_TRIGGERED
+     */
+    (PciClockFir_1, bit(39)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[39]
+     *  PAPR_INBOUND_INJECTION_ERROR_TRIGGERED
+     */
+    (PciClockFir_2, bit(39)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[40]
+     *  INBOUND_FATAL_ERROR
+     */
+    (PciClockFir_0, bit(40)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[40]
+     *  INBOUND_FATAL_ERROR
+     */
+    (PciClockFir_1, bit(40)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[40]
+     *  INBOUND_FATAL_ERROR
+     */
+    (PciClockFir_2, bit(40)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[41]
+     *  MSI_ADDRESS_ALIGNMENT_ERROR
+     */
+    (PciClockFir_0, bit(41)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[41]
+     *  MSI_ADDRESS_ALIGNMENT_ERROR
+     */
+    (PciClockFir_1, bit(41)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[41]
+     *  MSI_ADDRESS_ALIGNMENT_ERROR
+     */
+    (PciClockFir_2, bit(41)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[42]
+     *  INTERNAL_BAR_DISABLED_ERROR
+     */
+    (PciClockFir_0, bit(42)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[42]
+     *  INTERNAL_BAR_DISABLED_ERROR
+     */
+    (PciClockFir_1, bit(42)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[42]
+     *  INTERNAL_BAR_DISABLED_ERROR
+     */
+    (PciClockFir_2, bit(42)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[43]
+     *  GBIF_INBOUND_COMPLETION_DONE_ERROR
+     */
+    (PciClockFir_0, bit(43)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[43]
+     *  GBIF_INBOUND_COMPLETION_DONE_ERROR
+     */
+    (PciClockFir_1, bit(43)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[43]
+     *  GBIF_INBOUND_COMPLETION_DONE_ERROR
+     */
+    (PciClockFir_2, bit(43)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[44]
+     *  PCT_TIMEOUT_ERROR
+     */
+    (PciClockFir_0, bit(44)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[44]
+     *  PCT_TIMEOUT_ERROR
+     */
+    (PciClockFir_1, bit(44)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[44]
+     *  PCT_TIMEOUT_ERROR
+     */
+    (PciClockFir_2, bit(44)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[45]
+     *  TCE_REQUEST_TIMEOUT_ERROR
+     */
+    (PciClockFir_0, bit(45)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[45]
+     *  TCE_REQUEST_TIMEOUT_ERROR
+     */
+    (PciClockFir_1, bit(45)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[45]
+     *  TCE_REQUEST_TIMEOUT_ERROR
+     */
+    (PciClockFir_2, bit(45)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[47]
+     *  AIB_TX_TIMEOUT_ERROR
+     */
+    (PciClockFir_0, bit(47)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[47]
+     *  AIB_TX_TIMEOUT_ERROR
+     */
+    (PciClockFir_1, bit(47)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[47]
+     *  AIB_TX_TIMEOUT_ERROR
+     */
+    (PciClockFir_2, bit(47)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[48]
+     *  AIB_TX_TIMEOUT_ERROR
+     */
+    (PciClockFir_0, bit(48)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[48]
+     *  AIB_TX_TIMEOUT_ERROR
+     */
+    (PciClockFir_1, bit(48)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[48]
+     *  AIB_TX_TIMEOUT_ERROR
+     */
+    (PciClockFir_2, bit(48)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[49]
+     *  TCE_REQUEST_UNEXPECTED_RESPONSE_ERROR
+     */
+    (PciClockFir_0, bit(49)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[49]
+     *  TCE_REQUEST_UNEXPECTED_RESPONSE_ERROR
+     */
+    (PciClockFir_1, bit(49)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[49]
+     *  TCE_REQUEST_UNEXPECTED_RESPONSE_ERROR
+     */
+    (PciClockFir_2, bit(49)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[50]
+     *  INBOUND_ECC_CORRECTABLE_ERROR
+     */
+    (PciClockFir_0, bit(50)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[50]
+     *  INBOUND_ECC_CORRECTABLE_ERROR
+     */
+    (PciClockFir_1, bit(50)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[50]
+     *  INBOUND_ECC_CORRECTABLE_ERROR
+     */
+    (PciClockFir_2, bit(50)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[51]
+     *  INBOUND_ECC_UNCORRECTABLE_ERROR
+     */
+    (PciClockFir_0, bit(51)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[51]
+     *  INBOUND_ECC_UNCORRECTABLE_ERROR
+     */
+    (PciClockFir_1, bit(51)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[51]
+     *  INBOUND_ECC_UNCORRECTABLE_ERROR
+     */
+    (PciClockFir_2, bit(51)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[52]
+     *  DMA_WRITE_MSI_INTERRUPT_DATA_POISONED_ERROR
+     */
+    (PciClockFir_0, bit(52)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[52]
+     *  DMA_WRITE_MSI_INTERRUPT_DATA_POISONED_ERROR
+     */
+    (PciClockFir_1, bit(52)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[52]
+     *  DMA_WRITE_MSI_INTERRUPT_DATA_POISONED_ERROR
+     */
+    (PciClockFir_2, bit(52)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[55]
+     *  DL_RX_MALFORMED
+     */
+    (PciClockFir_0, bit(55)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[55]
+     *  DL_RX_MALFORMED
+     */
+    (PciClockFir_1, bit(55)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[55]
+     *  DL_RX_MALFORMED
+     */
+    (PciClockFir_2, bit(55)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[56]
+     *  REPLAY_BUFFER_ECC_CORRECTABLE_ERROR
+     */
+    (PciClockFir_0, bit(56)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[56]
+     *  REPLAY_BUFFER_ECC_CORRECTABLE_ERROR
+     */
+    (PciClockFir_1, bit(56)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[56]
+     *  REPLAY_BUFFER_ECC_CORRECTABLE_ERROR
+     */
+    (PciClockFir_2, bit(56)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[57]
+     *  REPLAY_BUFFER_ECC_UNCORRECTABLE_ERROR
+     */
+    (PciClockFir_0, bit(57)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[57]
+     *  REPLAY_BUFFER_ECC_UNCORRECTABLE_ERROR
+     */
+    (PciClockFir_1, bit(57)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[57]
+     *  REPLAY_BUFFER_ECC_UNCORRECTABLE_ERROR
+     */
+    (PciClockFir_2, bit(57)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[58]
+     *  AIB_DAT_ERR_INDICATION
+     */
+    (PciClockFir_0, bit(58)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[58]
+     *  AIB_DAT_ERR_INDICATION
+     */
+    (PciClockFir_1, bit(58)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[58]
+     *  AIB_DAT_ERR_INDICATION
+     */
+    (PciClockFir_2, bit(58)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[59]
+     *  AIB_CREDITS_ERROR
+     */
+    (PciClockFir_0, bit(59)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[59]
+     *  AIB_CREDITS_ERROR
+     */
+    (PciClockFir_1, bit(59)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[59]
+     *  AIB_CREDITS_ERROR
+     */
+    (PciClockFir_2, bit(59)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[60]
+     *  CFG_EC08_FATAL_ERROR
+     */
+    (PciClockFir_0, bit(60)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[60]
+     *  CFG_EC08_FATAL_ERROR
+     */
+    (PciClockFir_1, bit(60)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[60]
+     *  CFG_EC08_FATAL_ERROR
+     */
+    (PciClockFir_2, bit(60)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[61]
+     *  CFG_EC08_NONFATAL_ERROR
+     */
+    (PciClockFir_0, bit(61)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[61]
+     *  CFG_EC08_NONFATAL_ERROR
+     */
+    (PciClockFir_1, bit(61)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[61]
+     *  CFG_EC08_NONFATAL_ERROR
+     */
+    (PciClockFir_2, bit(61)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[62]
+     *  CFG_EC08_CORR_ERROR
+     */
+    (PciClockFir_0, bit(62)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[62]
+     *  CFG_EC08_CORR_ERROR
+     */
+    (PciClockFir_1, bit(62)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[62]
+     *  CFG_EC08_CORR_ERROR
+     */
+    (PciClockFir_2, bit(62)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_0[63]
+     *  LEM_FIR_INTERNAL_PARITY_ERROR
+     */
+    (PciClockFir_0, bit(63)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_1[63]
+     *  LEM_FIR_INTERNAL_PARITY_ERROR
+     */
+    (PciClockFir_1, bit(63)) ? TBDDefaultCallout;
+
+    /** PCICLOCKFIR_2[63]
+     *  LEM_FIR_INTERNAL_PARITY_ERROR
+     */
+    (PciClockFir_2, bit(63)) ? TBDDefaultCallout;
+};
+
+################################################################################
+# PCIE Chiplet PBFFIR
+################################################################################
+
+rule PbfFir
+{
+    CHECK_STOP:  PBFFIR & ~PBFFIR_MASK & ~PBFFIR_ACT0 & ~PBFFIR_ACT1;
+    RECOVERABLE: PBFFIR & ~PBFFIR_MASK & ~PBFFIR_ACT0 &  PBFFIR_ACT1;
+    SPECIAL:     PBFFIR & ~PBFFIR_MASK &  PBFFIR_ACT0 & ~PBFFIR_ACT1;
+};
+
+group gPbfFir filter singlebit
+{
+    /** PBFFIR[0|1|2|3]
+     *  F0_MAILBOX_WRITTEN
+     */
+    (PbfFir, bit(0|1|2|3)) ? TBDDefaultCallout;
+
+    /** PBFFIR[4]
+     *  F0_RX_DETECT
+     */
+    (PbfFir, bit(4)) ? TBDDefaultCallout;
+
+    /** PBFFIR[5]
+     *  F0_LINK_TRAINING_DONE
+     */
+    (PbfFir, bit(5)) ? TBDDefaultCallout;
+
+    /** PBFFIR[6]
+     *  F0LINK_TRAINED
+     */
+    (PbfFir, bit(6)) ? TBDDefaultCallout;
+
+    /** PBFFIR[7]
+     *  F0LINK_FIR_ERR
+     */
+    (PbfFir, bit(7)) ? TBDDefaultCallout;
+
+    /** PBFFIR[8]
+     *  F0LINK_FMR_PSR_OBS_ERR
+     */
+    (PbfFir, bit(8)) ? TBDDefaultCallout;
+
+    /** PBFFIR[9]
+     *  F0LINK_FMR_COR_ERR
+     */
+    (PbfFir, bit(9)) ? TBDDefaultCallout;
+
+    /** PBFFIR[10]
+     *  F0LINK_FMR_SUE_ERR
+     */
+    (PbfFir, bit(10)) ? TBDDefaultCallout;
+
+    /** PBFFIR[11]
+     *  F0LINK_FMR_UNC_ERR
+     */
+    (PbfFir, bit(11)) ? TBDDefaultCallout;
+
+    /** PBFFIR[12]
+     *  F0_EQ_FAILED
+     */
+    (PbfFir, bit(12)) ? TBDDefaultCallout;
+
+    /** PBFFIR[13]
+     *  F0_REPLAY_THRESHOLD
+     */
+    (PbfFir, bit(13)) ? TBDDefaultCallout;
+
+    /** PBFFIR[14]
+     *  F0_CRC_ERROR
+     */
+    (PbfFir, bit(14)) ? TBDDefaultCallout;
+
+    /** PBFFIR[15]
+     *  F0_LOST_PACKET
+     */
+    (PbfFir, bit(15)) ? TBDDefaultCallout;
+
+    /** PBFFIR[16]
+     *  F0_NAK_RECEIVED
+     */
+    (PbfFir, bit(16)) ? TBDDefaultCallout;
+
+    /** PBFFIR[17]
+     *  F0_REPLAY_TIMER_ERROR
+     */
+    (PbfFir, bit(17)) ? TBDDefaultCallout;
+
+    /** PBFFIR[18]
+     *  F0_RETRAIN_THRESHOLD
+     */
+    (PbfFir, bit(18)) ? TBDDefaultCallout;
+
+    /** PBFFIR[19]
+     *  F0_REPLAY_NUM_RETRAIN
+     */
+    (PbfFir, bit(19)) ? TBDDefaultCallout;
+
+    /** PBFFIR[20]
+     *  F0_RX_ERROR
+     */
+    (PbfFir, bit(20)) ? TBDDefaultCallout;
+
+    /** PBFFIR[21]
+     *  F0_DESKEW_ERROR
+     */
+    (PbfFir, bit(21)) ? TBDDefaultCallout;
+
+    /** PBFFIR[22]
+     *  F0_FRAMING_ERROR
+     */
+    (PbfFir, bit(22)) ? TBDDefaultCallout;
+
+    /** PBFFIR[23]
+     *  F0_OS_RECEIVED
+     */
+    (PbfFir, bit(23)) ? TBDDefaultCallout;
+
+    /** PBFFIR[24]
+     *  F0_ECC_CE_ERR
+     */
+    (PbfFir, bit(24)) ? TBDDefaultCallout;
+
+    /** PBFFIR[25]
+     *  F0_ECC_UE_ERR
+     */
+    (PbfFir, bit(25)) ? TBDDefaultCallout;
+
+    /** PBFFIR[26]
+     *  F0_RETRAIN_ERR
+     */
+    (PbfFir, bit(26)) ? TBDDefaultCallout;
+
+    /** PBFFIR[27]
+     *  F0_TRAINING_ERR
+     */
+    (PbfFir, bit(27)) ? TBDDefaultCallout;
+
+    /** PBFFIR[28]
+     *  F0_UNRECOV_ERR
+     */
+    (PbfFir, bit(28)) ? TBDDefaultCallout;
+
+    /** PBFFIR[29]
+     *  F0_INTERNAL_ERR
+     */
+    (PbfFir, bit(29)) ? TBDDefaultCallout;
+
+    /** PBFFIR[32|33|34|35]
+     *  F1_MAILBOX_WRITTEN
+     */
+    (PbfFir, bit(32|33|34|35)) ? TBDDefaultCallout;
+
+    /** PBFFIR[36]
+     *  F1_RX_DETECT
+     */
+    (PbfFir, bit(36)) ? TBDDefaultCallout;
+
+    /** PBFFIR[37]
+     *  F1_LINK_TRAINING_DONE
+     */
+    (PbfFir, bit(37)) ? TBDDefaultCallout;
+
+    /** PBFFIR[38]
+     *  F1LINK_TRAINED
+     */
+    (PbfFir, bit(38)) ? TBDDefaultCallout;
+
+    /** PBFFIR[39]
+     *  F1LINK_FIR_ERR
+     */
+    (PbfFir, bit(39)) ? TBDDefaultCallout;
+
+    /** PBFFIR[40]
+     *  F1LINK_FMR_PSR_OBS_ERR
+     */
+    (PbfFir, bit(40)) ? TBDDefaultCallout;
+
+    /** PBFFIR[41]
+     *  F1LINK_FMR_COR_ERR
+     */
+    (PbfFir, bit(41)) ? TBDDefaultCallout;
+
+    /** PBFFIR[42]
+     *  F1LINK_FMR_SUE_ERR
+     */
+    (PbfFir, bit(42)) ? TBDDefaultCallout;
+
+    /** PBFFIR[43]
+     *  F1LINK_FMR_UNC_ERR
+     */
+    (PbfFir, bit(43)) ? TBDDefaultCallout;
+
+    /** PBFFIR[44]
+     *  F1_EQ_FAILED
+     */
+    (PbfFir, bit(44)) ? TBDDefaultCallout;
+
+    /** PBFFIR[45]
+     *  F1_REPLAY_THRESHOLD
+     */
+    (PbfFir, bit(45)) ? TBDDefaultCallout;
+
+    /** PBFFIR[46]
+     *  F1_CRC_ERROR
+     */
+    (PbfFir, bit(46)) ? TBDDefaultCallout;
+
+    /** PBFFIR[47]
+     *  F1_LOST_PACKET
+     */
+    (PbfFir, bit(47)) ? TBDDefaultCallout;
+
+    /** PBFFIR[48]
+     *  F1_NAK_RECEIVED
+     */
+    (PbfFir, bit(48)) ? TBDDefaultCallout;
+
+    /** PBFFIR[49]
+     *  F1_REPLAY_TIMER_ERROR
+     */
+    (PbfFir, bit(49)) ? TBDDefaultCallout;
+
+    /** PBFFIR[50]
+     *  F1_RETRAIN_THRESHOLD
+     */
+    (PbfFir, bit(50)) ? TBDDefaultCallout;
+
+    /** PBFFIR[51]
+     *  F1_REPLAY_NUM_RETRAIN
+     */
+    (PbfFir, bit(51)) ? TBDDefaultCallout;
+
+    /** PBFFIR[52]
+     *  F1_RX_ERROR
+     */
+    (PbfFir, bit(52)) ? TBDDefaultCallout;
+
+    /** PBFFIR[53]
+     *  F1_DESKEW_ERROR
+     */
+    (PbfFir, bit(53)) ? TBDDefaultCallout;
+
+    /** PBFFIR[54]
+     *  F1_FRAMING_ERROR
+     */
+    (PbfFir, bit(54)) ? TBDDefaultCallout;
+
+    /** PBFFIR[55]
+     *  F1_OS_RECEIVED
+     */
+    (PbfFir, bit(55)) ? TBDDefaultCallout;
+
+    /** PBFFIR[56]
+     *  F1_ECC_CE_ERR
+     */
+    (PbfFir, bit(56)) ? TBDDefaultCallout;
+
+    /** PBFFIR[57]
+     *  F1_ECC_UE_ERR
+     */
+    (PbfFir, bit(57)) ? TBDDefaultCallout;
+
+    /** PBFFIR[58]
+     *  F1_RETRAIN_ERR
+     */
+    (PbfFir, bit(58)) ? TBDDefaultCallout;
+
+    /** PBFFIR[59]
+     *  F1_TRAINING_ERR
+     */
+    (PbfFir, bit(59)) ? TBDDefaultCallout;
+
+    /** PBFFIR[60]
+     *  F1_UNRECOV_ERR
+     */
+    (PbfFir, bit(60)) ? TBDDefaultCallout;
+
+    /** PBFFIR[61]
+     *  F1_INTERNAL_ERR
+     */
+    (PbfFir, bit(61)) ? TBDDefaultCallout;
+};
+
+################################################################################
+# PCIE Chiplet IOPPCIFIRs
+################################################################################
+
+# TODO - All these FIRs should have the same bit definition. Idealy, we will
+#        only want to have one copy of the bit definition. Unfortuately, the
+#        rule code parser does not have the support for something like this.
+#        Maybe we can add this as a later feature.
+
+rule IopPciFir_0
+{
+  CHECK_STOP:
+    IOPPCIFIR_0 & ~IOPPCIFIR_0_MASK & ~IOPPCIFIR_0_ACT0 & ~IOPPCIFIR_0_ACT1;
+  RECOVERABLE:
+    IOPPCIFIR_0 & ~IOPPCIFIR_0_MASK & ~IOPPCIFIR_0_ACT0 &  IOPPCIFIR_0_ACT1;
+};
+
+rule IopPciFir_1
+{
+  CHECK_STOP:
+    IOPPCIFIR_1 & ~IOPPCIFIR_1_MASK & ~IOPPCIFIR_1_ACT0 & ~IOPPCIFIR_1_ACT1;
+  RECOVERABLE:
+    IOPPCIFIR_1 & ~IOPPCIFIR_1_MASK & ~IOPPCIFIR_1_ACT0 &  IOPPCIFIR_1_ACT1;
+};
+
+group gIopPciFir filter singlebit
+{
+    /** IOPPCIFIR_0[0]
+     * FIR_STATUS_REG_G2_PLL_CCERR_STATUS
+     */
+    (IopPciFir_0, bit(0)) ? TBDDefaultCallout;
+
+    /** IOPPCIFIR_1[0]
+     * FIR_STATUS_REG_G2_PLL_CCERR_STATUS
+     */
+    (IopPciFir_1, bit(0)) ? TBDDefaultCallout;
+
+    /** IOPPCIFIR_0[1]
+     *  FIR_STATUS_REG_G3_PLL_CCERR_STATUS
+     */
+    (IopPciFir_0, bit(1)) ? TBDDefaultCallout;
+
+    /** IOPPCIFIR_1[1]
+     *  FIR_STATUS_REG_G3_PLL_CCERR_STATUS
+     */
+    (IopPciFir_1, bit(1)) ? TBDDefaultCallout;
+
+    /** IOPPCIFIR_0[2]
+     *  FIR_STATUS_REG_TX_A_ERR_STATUS
+     */
+    (IopPciFir_0, bit(2)) ? TBDDefaultCallout;
+
+    /** IOPPCIFIR_1[2]
+     *  FIR_STATUS_REG_TX_A_ERR_STATUS
+     */
+    (IopPciFir_1, bit(2)) ? TBDDefaultCallout;
+
+    /** IOPPCIFIR_0[3]
+     *  FIR_STATUS_REG_TX_B_ERR_STATUS
+     */
+    (IopPciFir_0, bit(3)) ? TBDDefaultCallout;
+
+    /** IOPPCIFIR_1[3]
+     *  FIR_STATUS_REG_TX_B_ERR_STATUS
+     */
+    (IopPciFir_1, bit(3)) ? TBDDefaultCallout;
+
+    /** IOPPCIFIR_0[4]
+     *  FIR_STATUS_REG_RX_A_ERR_STATUS
+     */
+    (IopPciFir_0, bit(4)) ? TBDDefaultCallout;
+
+    /** IOPPCIFIR_1[4]
+     *  FIR_STATUS_REG_RX_A_ERR_STATUS
+     */
+    (IopPciFir_1, bit(4)) ? TBDDefaultCallout;
+
+    /** IOPPCIFIR_0[5]
+     *  FIR_STATUS_REG_RX_B_ERR_STATUS
+     */
+    (IopPciFir_0, bit(5)) ? TBDDefaultCallout;
+
+    /** IOPPCIFIR_1[5]
+     *  FIR_STATUS_REG_RX_B_ERR_STATUS
+     */
+    (IopPciFir_1, bit(5)) ? TBDDefaultCallout;
+
+    /** IOPPCIFIR_0[6]
+     *  FIR_STATUS_REG_ZCAL_B_ERR_STATUS
+     */
+    (IopPciFir_0, bit(6)) ? TBDDefaultCallout;
+
+    /** IOPPCIFIR_1[6]
+     *  FIR_STATUS_REG_ZCAL_B_ERR_STATUS
+     */
+    (IopPciFir_1, bit(6)) ? TBDDefaultCallout;
+
+    /** IOPPCIFIR_0[7]
+     *  FIR_STATUS_REG_SCOM_FIR_PERR0_STATUS
+     */
+    (IopPciFir_0, bit(7)) ? TBDDefaultCallout;
+
+    /** IOPPCIFIR_1[7]
+     *  FIR_STATUS_REG_SCOM_FIR_PERR0_STATUS
+     */
+    (IopPciFir_1, bit(7)) ? TBDDefaultCallout;
+
+    /** IOPPCIFIR_0[8]
+     *  FIR_STATUS_REG_SCOM_FIR_PERR1_STATUS
+     */
+    (IopPciFir_0, bit(8)) ? TBDDefaultCallout;
+
+    /** IOPPCIFIR_1[8]
+     *  FIR_STATUS_REG_SCOM_FIR_PERR1_STATUS
+     */
+    (IopPciFir_1, bit(8)) ? TBDDefaultCallout;
+};
+
+################################################################################
+# Actions specific to PCIE chiplet
+################################################################################
+

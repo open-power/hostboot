@@ -1,31 +1,31 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/include/usr/diag/prdf/prdf_proto.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
-#ifndef PRDF_PROTO_H
-#define PRDF_PROTO_H
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/include/usr/diag/prdf/prdfMain.H $                        */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2002,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+
+#ifndef PRDF_MAIN_H
+#define PRDF_MAIN_H
 
 /**
- * @file prdf_proto.H
+ * @file prdfMain.H
  * @brief Interface to Processor Run-time Diagnostics (PRD)
  * @par
  * This includes all type definitions, function interfaces/contracts and
@@ -34,9 +34,13 @@
  * from other binds.
  */
 
+#ifdef __HOSTBOOT_MODULE
+  #include <errl/errlentry.H>
+#else
+  #include <errlentry.H>
+#endif
 
 #include <stdint.h>
-#include <errl/errlentry.H>
 #include <targeting/common/target.H>
 
 namespace PRDF
@@ -46,16 +50,18 @@ namespace PRDF
 /**
  *  @brief Enum specifying attention type
  */
+// If changes are made to ATTENTION_VALUE_TYPE then subsequent changes need to be made to:
+// /prdf/sim/prdsimAttentionParser.C  and /prdf/sim/errl2tcd.C
 enum ATTENTION_VALUE_TYPE
 {
-  INVALID_ATTENTION_TYPE = 0,
-  MACHINE_CHECK = 1,
-  CHECK_STOP = MACHINE_CHECK,
-  UNIT_CS = 2,
-  PROC_CS = UNIT_CS,
-  RECOVERABLE = 3,
-  SPECIAL = 4,
-  END_ATTENTION_TYPE = 5
+    INVALID_ATTENTION_TYPE = 0,
+    MACHINE_CHECK = 1,
+    CHECK_STOP = MACHINE_CHECK,
+    UNIT_CS = 2,
+    PROC_CS = UNIT_CS,
+    RECOVERABLE = 3,
+    SPECIAL = 4,
+    END_ATTENTION_TYPE = 5
 };
 
 // Move here from xspprdsdbug.C
@@ -64,16 +70,13 @@ enum ATTENTION_VALUE_TYPE
  */
 struct AttnData
 {
-  TARGETING::TargetHandle_t targetHndl;
-  ATTENTION_VALUE_TYPE attnType;
+    TARGETING::TargetHandle_t targetHndl;
+    ATTENTION_VALUE_TYPE attnType;
 };
 
 typedef std::vector<AttnData> AttnList;
 
-
-/**
- *  @brief Enum specifying all possible PRD returned code
- */
+//! @c prd_return_code_t : possible return values from PRD
 enum prd_return_code_t
 {
     //! DD00: An assert statement failed in PRD
@@ -140,12 +143,11 @@ enum prd_return_code_t
 
 };
 
-
 /**
  * @brief Initialize PRD system model and data
  * @return Error log if error occurs
  */
-extern errlHndl_t PrdInitialize();
+extern errlHndl_t initialize();
 
 /**
  * @brief analyze attention errors
@@ -157,30 +159,40 @@ extern errlHndl_t PrdInitialize();
  * containing the analysis; otherwise, for other attention types, PRD
  * commits the error log itself and NULL is returned.
  */
-extern errlHndl_t PrdMain(ATTENTION_VALUE_TYPE i_attnType, const AttnList & i_attnList);
-
-/**
- *  @brief initiate memory background scrubbing
- *  @param[in] i_pTarget - Target handle of System or Node
- *  @return Error log if error occurs
- */
-extern errlHndl_t PrdStartScrub(const TARGETING::TargetHandle_t i_pTarget);
-
-/**
- * @brief  Restores hardware DRAM repairs to reflect what is stored in VPD.
- * @param[in]  i_pTarget - Target handle of the memory controller
- * @return Non-SUCCESS if conditions are such that a callout had to be made, SUCCESS othewise.
- */
-extern int32_t prdfRestoreDramRepairs(const TARGETING::TargetHandle_t i_pTarget);
-
+extern errlHndl_t main(ATTENTION_VALUE_TYPE i_attnType, const AttnList & i_attnList);
 
 /**
  *  @brief Clean up pieces of PRD for fresh IPLs.
  *
  *  Cleans up the PRD persistent storage areas in P1.
  */
-extern void PrdIplCleanup();
+extern void iplCleanup();
 
+//------------------------------------------------------------------------------
+//                     Hostboot specific functions
+//------------------------------------------------------------------------------
+
+#ifdef __HOSTBOOT_MODULE
+
+/**
+ *  @brief initiate memory background scrubbing
+ *  @param[in] i_pTarget - Target handle of System or Node
+ *  @return Error log if error occurs
+ */
+extern errlHndl_t startScrub(const TARGETING::TargetHandle_t i_pTarget);
+
+/**
+ * @brief  Restores hardware DRAM repairs to reflect what is stored in VPD.
+ * @param[in]  i_pTarget - Target handle of the memory controller
+ * @return Non-SUCCESS if conditions are such that a callout had to be made, SUCCESS othewise.
+ */
+extern int32_t restoreDramRepairs(const TARGETING::TargetHandle_t i_pTarget);
+
+#endif // __HOSTBOOT_MODULE
+
+//------------------------------------------------------------------------------
+//                          FSP specific functions
+//------------------------------------------------------------------------------
 
 #ifndef __HOSTBOOT_MODULE
 
@@ -188,11 +200,10 @@ extern void PrdIplCleanup();
  *  @brief handle service data collector sync over
  *  @return Error log if error occurs
  */
-extern errlHndl_t prdfFailoverComplete(void);
+extern errlHndl_t failoverComplete(void);
 
-#endif
-
+#endif // not __HOSTBOOT_MODULE
 
 } // End namespace PRDF
 
-#endif       // PRDF_PROTO_H
+#endif // PRDF_MAIN_H

@@ -1,0 +1,279 @@
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/diag/prdf/framework/rule/prdfGroup.C $                */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2004,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+
+#include <prdfGroup.H>
+#include <prdfBitString.H>
+#include <prdfResolutionMap.H>
+#include <iipResetErrorRegister.h>
+#include <prdfMain.H>
+#include <iipServiceDataCollector.h>
+
+PrdfGroup::~PrdfGroup()
+{
+    RegisterList_t::const_iterator l_errRegsEnd = cv_errRegs.end();
+    for (RegisterList_t::const_iterator i = cv_errRegs.begin();
+         i != l_errRegsEnd;
+         ++i)
+    {
+        delete *i;
+    }
+
+    ResMaps_t::const_iterator l_resMapsEnd = cv_resMaps.end();
+    for (ResMaps_t::const_iterator i = cv_resMaps.begin();
+         i != l_resMapsEnd;
+         ++i)
+    {
+        delete (ResolutionMap *)(*i).second;
+    }
+
+    // Delete filters.
+    FilterList_t::const_iterator l_filterEnd = cv_filters.end();
+    for (FilterList_t::const_iterator i = cv_filters.begin();
+         i != l_filterEnd;
+         ++i)
+    {
+        delete (*i);
+    }
+}
+
+int32_t PrdfGroup::Analyze(STEP_CODE_DATA_STRUCT & i_step)
+{
+    using namespace PRDF;
+    int32_t l_rc = -1;
+    ServiceDataCollector l_backupStep(*i_step.service_data);
+    int32_t l_tmpRC = SUCCESS;
+
+    RegisterList_t::const_iterator l_errRegsEnd = cv_errRegs.end();
+    for (RegisterList_t::const_iterator i = cv_errRegs.begin();
+         (i != l_errRegsEnd) && (l_rc != SUCCESS);
+         ++i)
+    {
+        (*i_step.service_data) = l_backupStep;
+        l_tmpRC = (*i)->Analyze(i_step);
+
+        if (PRD_SCAN_COMM_REGISTER_ZERO != l_tmpRC)
+        {
+            l_rc = l_tmpRC;
+        }
+    }
+    if (PRD_SCAN_COMM_REGISTER_ZERO == l_tmpRC)
+    {
+        l_rc = l_tmpRC;
+    }
+
+    if (0 == cv_errRegs.size())
+        l_rc = cv_defaultRes.Resolve(i_step);
+
+    return l_rc;
+};
+
+void PrdfGroup::Add(SCAN_COMM_REGISTER_CLASS * i_reg,
+                    const uint8_t * i_bits,
+                    size_t i_bitSize,
+                    Resolution & i_action,
+                    PrdfResetAndMaskPair & i_resets,
+                    uint16_t i_scrID,
+                    bool i_reqTranspose)
+{
+    prdfFilter * l_transposeFilter = NULL;
+    uint8_t l_bits[1] = { '\0' };
+    ResolutionMap * l_res = cv_resMaps[i_reg];
+
+    if (NULL == l_res)
+    {
+        l_res = cv_resMaps[i_reg] = new prdfResolutionMap(1, cv_defaultRes);
+        ResetAndMaskErrorRegister * l_errReg =
+                new ResetAndMaskErrorRegister(*i_reg, *l_res, i_scrID);
+        cv_errRegs.push_back(l_errReg);
+
+        // Sort reset and mask lists.
+        std::sort(i_resets.first.begin(), i_resets.first.end());
+        std::sort(i_resets.second.begin(), i_resets.second.end());
+
+        // Remove duplicate resets and masks.
+        i_resets.first.erase(
+                std::unique(i_resets.first.begin(), i_resets.first.end()),
+                i_resets.first.end());
+        i_resets.second.erase(
+                std::unique(i_resets.second.begin(), i_resets.second.end()),
+                i_resets.second.end());
+
+        // Add resets.
+        std::for_each(i_resets.first.begin(), i_resets.first.end(),
+                      std::bind1st(
+                          std::mem_fun(&ResetAndMaskErrorRegister::addReset),
+                          l_errReg)
+                      );
+
+        // Add masks.
+        std::for_each(i_resets.second.begin(), i_resets.second.end(),
+                      std::bind1st(
+                          std::mem_fun(&ResetAndMaskErrorRegister::addMask),
+                          l_errReg)
+                      );
+    }
+
+    // This action requires a transpose filter (multiple bits &'d)
+    if (i_reqTranspose)
+    {
+        // Create key and transposition filter.  Add to filter list.
+        prdfBitKey l_tmpKey(i_bits, i_bitSize);
+        l_transposeFilter = new prdfFilterTranspose(l_tmpKey,
+                                                    cv_nextBitForTranspose);
+        cv_filters.push_back(l_transposeFilter);
+
+        // Update bit string pointers/values.
+        l_bits[0] = cv_nextBitForTranspose++;
+        i_bits = l_bits;
+        i_bitSize = 1;
+
+        // Check for existing transposition filter, create link as needed.
+        if (NULL != l_res->getFilter())
+        {
+            l_transposeFilter = new FilterLink(*l_res->getFilter(),
+                                               *l_transposeFilter);  // pw01
+            cv_filters.push_back(l_transposeFilter);
+        }
+
+        // Assign transpose filter.
+        l_res->setFilter(l_transposeFilter);
+    }
+
+    // Add action to resolution.
+    l_res->Add(i_bits, i_bitSize, &i_action);
+};
+
+void PrdfGroup::Add(SCAN_COMM_REGISTER_CLASS * i_reg,
+                    Resolution & i_action,
+                    PrdfResetAndMaskPair & i_resets,
+                    uint16_t i_scrID)
+{
+    ResolutionMap * l_res = cv_resMaps[i_reg];
+
+    if (NULL == l_res)
+    {
+        l_res = cv_resMaps[i_reg] = new prdfResolutionMap(1, cv_defaultRes);
+        ResetAndMaskErrorRegister * l_errReg =
+                new ResetAndMaskErrorRegister(*i_reg, *l_res, i_scrID);
+        cv_errRegs.push_back(l_errReg);
+
+        // Sort reset and mask lists.
+        std::sort(i_resets.first.begin(), i_resets.first.end());
+        std::sort(i_resets.second.begin(), i_resets.second.end());
+
+        // Remove duplicate resets and masks.
+        i_resets.first.erase(
+                std::unique(i_resets.first.begin(), i_resets.first.end()),
+                i_resets.first.end());
+        i_resets.second.erase(
+                std::unique(i_resets.second.begin(), i_resets.second.end()),
+                i_resets.second.end());
+
+        // Add resets.
+        std::for_each(i_resets.first.begin(), i_resets.first.end(),
+                      std::bind1st(
+                          std::mem_fun(&ResetAndMaskErrorRegister::addReset),
+                          l_errReg)
+                      );
+
+        // Add masks.
+        std::for_each(i_resets.second.begin(), i_resets.second.end(),
+                      std::bind1st(
+                          std::mem_fun(&ResetAndMaskErrorRegister::addMask),
+                          l_errReg)
+                      );
+    }
+
+    l_res->ReplaceDefaultWith(i_action);
+
+};
+
+void PrdfGroup::AddFilter(prdfFilter * i_filter)
+{
+    // Add to filter list, for deallocation later.
+    cv_filters.push_back(i_filter);
+
+    // Iterate through all resolution maps.
+    for(ResMaps_t::const_iterator i = cv_resMaps.begin();
+        i != cv_resMaps.end();
+        i++)
+    {
+        // Get old filter.
+        prdfFilter * l_filter = ((ResolutionMap *)(*i).second)->getFilter();
+
+        // Need new filter link?
+        if (NULL != l_filter)
+        {
+            // Use original filters first. (we add transposes first.)
+            l_filter = new FilterLink(*l_filter,
+                                      *i_filter);                // pw01
+
+            // Add to filter list, for deallocation later.
+            cv_filters.push_back(l_filter);
+        }
+        else
+        {
+            l_filter = i_filter;
+        }
+
+        // Assign filter to resolution map.
+        ((ResolutionMap *)(*i).second)->setFilter(l_filter);
+    }
+}
+
+
+
+const BIT_STRING_CLASS & PrdfGroup::Read(ATTENTION_TYPE i_attn)
+{
+    static BIT_STRING_BUFFER_CLASS a(64);
+    return a;
+};
+
+BIT_LIST_CLASS PrdfGroup::Filter(const BIT_STRING_CLASS & i)
+{
+    return BIT_LIST_CLASS();
+};
+
+int32_t PrdfGroup::Lookup(STEP_CODE_DATA_STRUCT & i_step, BIT_LIST_CLASS & b)
+{
+    return -1;
+};
+
+int32_t PrdfGroup::Reset(const BIT_LIST_CLASS & b, STEP_CODE_DATA_STRUCT & i_step)
+{
+    return -1;
+};
+
+// Change Log *********************************************************
+//
+//  Flag Reason   Vers Date     Coder    Description
+//  ---- -------- ---- -------- -------- -------------------------------
+//       F494911  f310 03/04/05 iawillia Initial File Creation
+//         F510901  f300 07/15/05 iawillia Add support for resets/masks.
+//         D520844  f300 09/14/05 iawillia Add destructor to free memory.
+//         D515833  f300 09/19/05 iawillia Use VMap instead of Map.
+//         F544848  f300 04/03/06 iawillia Add multi-bit support.
+//         F548507  f300 04/21/06 iawillia Prevent multiple reset/masks.
+//         F557408  f310 06/16/06 iawillia Add single-bit filter support.
+//  pw01 D568068  f310 08/29/06 iawillia Fix filter order.
+// End Change Log *****************************************************

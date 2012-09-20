@@ -1,0 +1,1306 @@
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/usr/diag/prdf/plat/pegasus/Ex.rule $
+#
+# IBM CONFIDENTIAL
+#
+# COPYRIGHT International Business Machines Corp. 2012
+#
+# p1
+#
+# Object Code Only (OCO) source materials
+# Licensed Internal Code Source Materials
+# IBM HostBoot Licensed Internal Code
+#
+# The source code for this program is not published or otherwise
+# divested of its trade secrets, irrespective of what has been
+# deposited with the U.S. Copyright Office.
+#
+# Origin: 30
+#
+# IBM_PROLOG_END_TAG
+
+################################################################################
+#
+# Scope:
+#   Registers and actions for the following chiplets:
+#       Note that only addresses for EX0 will be used.
+#
+# Chiplet  Register Addresses       Description
+# =======  =======================  ============================================
+#   EX0    0x10000000 - 0x10FFFFFF  EX0 pervasive logic
+#   EX1    0x11000000 - 0x11FFFFFF  EX1 pervasive logic
+#   EX2    0x12000000 - 0x12FFFFFF  EX2 pervasive logic
+#   EX3    0x13000000 - 0x13FFFFFF  EX3 pervasive logic
+#   EX4    0x14000000 - 0x14FFFFFF  EX4 pervasive logic
+#   EX5    0x15000000 - 0x15FFFFFF  EX5 pervasive logic
+#   EX6    0x16000000 - 0x16FFFFFF  EX6 pervasive logic
+#   EX7    0x17000000 - 0x17FFFFFF  EX7 pervasive logic
+#   EX8    0x18000000 - 0x18FFFFFF  EX8 pervasive logic
+#   EX9    0x19000000 - 0x19FFFFFF  EX9 pervasive logic
+#   EX10   0x1A000000 - 0x1AFFFFFF  EX10 pervasive logic
+#   EX11   0x1B000000 - 0x1BFFFFFF  EX11 pervasive logic
+#   EX12   0x1C000000 - 0x1CFFFFFF  EX12 pervasive logic
+#   EX13   0x1D000000 - 0x1DFFFFFF  EX13 pervasive logic
+#   EX14   0x1E000000 - 0x1EFFFFFF  EX14 pervasive logic
+#   EX15   0x1F000000 - 0x1FFFFFFF  EX15 pervasive logic
+#
+################################################################################
+
+chip Ex
+{
+    name        "Power8 EX Chiplet";
+    targettype  TYPE_EX;
+    sigoff      0x8000;
+# FIXME May need to update dump type
+    dump        DUMP_CONTENT_HW;
+    scomlen     64;
+
+ #############################################################################
+ #                                                                           #
+ #  ######                                                                   #
+ #  #     #  ######   ####     ###    ####    #####  ######  #####    ####   #
+ #  #     #  #       #    #     #    #          #    #       #    #  #       #
+ #  ######   #####   #          #     ####      #    #####   #    #   ####   #
+ #  #   #    #       #  ###     #         #     #    #       #####        #  #
+ #  #    #   #       #    #     #    #    #     #    #       #   #   #    #  #
+ #  #     #  ######   ####     ###    ####      #    ######  #    #   ####   #
+ #                                                                           #
+ #############################################################################
+
+    ############################################################################
+    # EX Chiplet Registers
+    ############################################################################
+
+    register EX_CHIPLET_CS_FIR
+    {
+        name        "EX00.TP.ECO_DOM.XFIR";
+        scomaddr    0x10040000;
+        capture     group default;
+    };
+
+    register EX_CHIPLET_RE_FIR
+    {
+        name        "EX00.TP.ECO_DOM.RFIR";
+        scomaddr    0x10040001;
+        capture     group default;
+    };
+
+    register EX_CHIPLET_FIR_MASK
+    {
+        name        "EX00.TP.ECO_DOM.FIR_MASK";
+        scomaddr    0x10040002;
+        capture     type secondary;
+        capture     group default;
+    };
+
+    # EX special attention registers - Used for FFDC only
+    # Currently, all analysis of these registers is done by ATTN.
+
+    register EX_CHIPLET_SPA
+    {
+        name        "EX00.TP.ECO_DOM.EPS.FIR.SPATTN";
+        scomaddr    0x10040004;
+        capture     group default;
+    };
+
+    ############################################################################
+    # EX Chiplet LFIR
+    ############################################################################
+
+    register EX_LFIR
+    {
+        name        "EX00.TP.ECO_DOM.LOCAL_FIR";
+        scomaddr    0x1004000a;
+        reset       (&, 0x1004000b);
+        mask        (|, 0x1004000f);
+        capture     group default;
+    };
+
+    register EX_LFIR_MASK
+    {
+        name        "EX00.TP.ECO_DOM.EPS.FIR.LOCAL_FIR_MASK";
+        scomaddr    0x1004000d;
+        capture     type secondary;
+        capture     group default;
+    };
+
+    register EX_LFIR_ACT0
+    {
+        name        "EX00.TP.ECO_DOM.EPS.FIR.LOCAL_FIR_ACTION0";
+        scomaddr    0x10040010;
+        capture     type secondary;
+        capture     group default;
+    };
+
+    register EX_LFIR_ACT1
+    {
+        name        "EX00.TP.ECO_DOM.EPS.FIR.LOCAL_FIR_ACTION1";
+        scomaddr    0x10040011;
+        capture     type secondary;
+        capture     group default;
+    };
+
+    ############################################################################
+    # EX Chiplet COREFIR
+    ############################################################################
+
+    register COREFIR
+    {
+        name        "EX00.EC.PC.PC_NE.FIR.CORE_FIR";
+        scomaddr    0x10013100;
+        reset       (&, 0x10013101);
+        mask        (|, 0x10013108);
+        capture     group default;
+    };
+
+    register COREFIR_MASK
+    {
+        name        "EX00.EC.PC.PC_NE.FIR.CORE_FIRMASK";
+        scomaddr    0x10013106;
+        capture     type secondary;
+        capture     group default;
+    };
+
+    register COREFIR_ACT0
+    {
+        name        "EX00.EC.PC.PC_NE.FIR.CORE_ACTION0";
+        scomaddr    0x10013103;
+        capture     type secondary;
+        capture     group default;
+    };
+
+    register COREFIR_ACT1
+    {
+        name        "EX00.EC.PC.PC_NE.FIR.CORE_ACTION1";
+        scomaddr    0x10013104;
+        capture     type secondary;
+        capture     group default;
+    };
+
+    ############################################################################
+    # EX Chiplet L2FIR
+    ############################################################################
+
+    register L2FIR
+    {
+        name        "EX00.L2.L2MISC.L2CERRS.FIR_REG";
+        scomaddr    0x10012800;
+        reset       (&, 0x10012801);
+        mask        (|, 0x10012805);
+        capture     group default;
+    };
+
+    register L2FIR_MASK
+    {
+        name        "EX00.L2.L2MISC.L2CERRS.FIR_MASK_REG";
+        scomaddr    0x10012803;
+        capture     type secondary;
+        capture     group default;
+    };
+
+    register L2FIR_ACT0
+    {
+        name        "EX00.L2.L2MISC.L2CERRS.FIR_ACTION0_REG";
+        scomaddr    0x10012806;
+        capture     type secondary;
+        capture     group default;
+    };
+
+    register L2FIR_ACT1
+    {
+        name        "EX00.L2.L2MISC.L2CERRS.FIR_ACTION1_REG";
+        scomaddr    0x10012807;
+        capture     type secondary;
+        capture     group default;
+    };
+
+    ############################################################################
+    # EX Chiplet L3FIR
+    ############################################################################
+
+    register L3FIR
+    {
+        name        "EX00.L3.L3_MISC.L3CERRS.FIR_REG";
+        scomaddr    0x10010800;
+        reset       (&, 0x10010801);
+        mask        (|, 0x10010805);
+        capture     group default;
+    };
+
+    register L3FIR_MASK
+    {
+        name        "EX00.L3.L3_MISC.L3CERRS.FIR_MASK_REG";
+        scomaddr    0x10010803;
+        capture     type secondary;
+        capture     group default;
+    };
+
+    register L3FIR_ACT0
+    {
+        name        "EX00.L3.L3_MISC.L3CERRS.FIR_ACTION0_REG";
+        scomaddr    0x10010806;
+        capture     type secondary;
+        capture     group default;
+    };
+
+    register L3FIR_ACT1
+    {
+        name        "EX00.L3.L3_MISC.L3CERRS.FIR_ACTION1_REG";
+        scomaddr    0x10010807;
+        capture     type secondary;
+        capture     group default;
+    };
+
+    ############################################################################
+    # EX Chiplet NCUFIR
+    ############################################################################
+
+    register NCUFIR
+    {
+        name        "EX00.NC.NCMISC.NCSCOMS.FIR_REG";
+        scomaddr    0x10010c00;
+        reset       (&, 0x10010c01);
+        mask        (|, 0x10010c05);
+        capture     group default;
+    };
+
+    register NCUFIR_MASK
+    {
+        name        "EX00.NC.NCMISC.NCSCOMS.FIR_MASK_REG";
+        scomaddr    0x10010c03;
+        capture     type secondary;
+        capture     group default;
+    };
+
+    register NCUFIR_ACT0
+    {
+        name        "EX00.NC.NCMISC.NCSCOMS.FIR_ACTION0_REG";
+        scomaddr    0x10010c06;
+        capture     type secondary;
+        capture     group default;
+    };
+
+    register NCUFIR_ACT1
+    {
+        name        "EX00.NC.NCMISC.NCSCOMS.FIR_ACTION1_REG";
+        scomaddr    0x10010c07;
+        capture     type secondary;
+        capture     group default;
+    };
+
+    ############################################################################
+    # EX Chiplet SPATTNs
+    ############################################################################
+
+    # EX special attention registers - Used for FFDC only
+    # Currently, all analysis of these registers is done by ATTN.
+
+    register SPATTN_0
+    {
+        name        "EX00.EC.PC.PC_NE.TCTL0.SPATTN";
+        scomaddr    0x10013007;
+        capture     group default;
+    };
+
+    register SPATTN_1
+    {
+        name        "EX00.EC.PC.PC_NE.TCTL1.SPATTN";
+        scomaddr    0x10013017;
+        capture     group default;
+    };
+
+    register SPATTN_2
+    {
+        name        "EX00.EC.PC.PC_NE.TCTL2.SPATTN";
+        scomaddr    0x10013027;
+        capture     group default;
+    };
+    register SPATTN_3
+    {
+        name        "EX00.EC.PC.PC_NE.TCTL3.SPATTN";
+        scomaddr    0x10013037;
+        capture     group default;
+    };
+
+    register SPATTN_4
+    {
+        name        "EX00.EC.PC.PC_NE.TCTL4.SPATTN";
+        scomaddr    0x10013047;
+        capture     group default;
+    };
+
+    register SPATTN_5
+    {
+        name        "EX00.EC.PC.PC_NE.TCTL5.SPATTN";
+        scomaddr    0x10013057;
+        capture     group default;
+    };
+
+    register SPATTN_6
+    {
+        name        "EX00.EC.PC.PC_NE.TCTL6.SPATTN";
+        scomaddr    0x10013067;
+        capture     group default;
+    };
+
+    register SPATTN_7
+    {
+        name        "EX00.EC.PC.PC_NE.TCTL7.SPATTN";
+        scomaddr    0x10013077;
+        capture     group default;
+    };
+
+};
+
+ ##############################################################################
+ #                                                                            #
+ # ####                                 #                                     #
+ # #   # #   # #    #####  ###      #  # #    ##  ##### ###  ###  #   #  ###  #
+ # #   # #   # #    #     #        #  #   #  #  #   #    #  #   # ##  # #     #
+ # ####  #   # #    ####   ###    #  ####### #      #    #  #   # # # #  ###  #
+ # #  #  #   # #    #         #  #   #     # #  #   #    #  #   # #  ##     # #
+ # #   #  ###  #### #####  ###  #    #     #  ##    #   ###  ###  #   #  ###  #
+ #                                                                            #
+ ##############################################################################
+
+################################################################################
+# EX Chiplet Registers
+################################################################################
+
+rule ExChipetFir
+{
+  CHECK_STOP:
+     (EX_CHIPLET_CS_FIR       & `1F00000000000000`) & ~EX_CHIPLET_FIR_MASK;
+  RECOVERABLE:
+    ((EX_CHIPLET_RE_FIR >> 2) & `1F00000000000000`) & ~EX_CHIPLET_FIR_MASK;
+};
+
+group gExChipetFir attntype CHECK_STOP, RECOVERABLE filter singlebit
+{
+    /** EX_CHIPLET_FIR[3]
+     *  Attention from LFIR
+     */
+    (ExChipetFir, bit(3))? analyze(gExLFir);
+
+    /** EX_CHIPLET_FIR[4]
+     *  Attention from COREFIR
+     */
+    (ExChipetFir, bit(4)) ? analyze(gCoreFir);
+
+    /** EX_CHIPLET_FIR[5]
+     *  Attention from L2FIR
+     */
+    (ExChipetFir, bit(5)) ? analyze(gL2Fir);
+
+    /** EX_CHIPLET_FIR[6]
+     *  Attention from L3FIR
+     */
+    (ExChipetFir, bit(6)) ? analyze(gL3Fir);
+
+    /** EX_CHIPLET_FIR[7]
+     *  Attention from NCUFIR
+     */
+    (ExChipetFir, bit(7)) ? analyze(gNcuFir);
+};
+
+################################################################################
+# EX Chiplet LFIR
+################################################################################
+
+rule ExLFir
+{
+    CHECK_STOP:  EX_LFIR & ~EX_LFIR_MASK & ~EX_LFIR_ACT0 & ~EX_LFIR_ACT1;
+    RECOVERABLE: EX_LFIR & ~EX_LFIR_MASK & ~EX_LFIR_ACT0 &  EX_LFIR_ACT1;
+};
+
+group gExLFir filter singlebit
+{
+    /** EX_LFIR[0]
+     *  CFIR internal parity error
+     */
+    (ExLFir, bit(0)) ? TBDDefaultCallout;
+
+    /** EX_LFIR[1]
+     *  Local errors from GPIO (PCB error)
+     */
+    (ExLFir, bit(1)) ? TBDDefaultCallout;
+
+    /** EX_LFIR[2]
+     *  Local errors from CC (PCB error)
+     */
+    (ExLFir, bit(2)) ? TBDDefaultCallout;
+
+    /** EX_LFIR[3]
+     *  Local errors from CC (OPCG, parity, scan collision, ...)
+     */
+    (ExLFir, bit(3)) ? TBDDefaultCallout;
+
+    /** EX_LFIR[4]
+     *  Local errors from PSC (PCB error)
+     */
+    (ExLFir, bit(4)) ? TBDDefaultCallout;
+
+    /** EX_LFIR[5]
+     *  Local errors from PSC (parity error)
+     */
+    (ExLFir, bit(5)) ? TBDDefaultCallout;
+
+    /** EX_LFIR[6]
+     *  Local errors from Thermal (parity error)
+     */
+    (ExLFir, bit(6)) ? TBDDefaultCallout;
+
+    /** EX_LFIR[7]
+     *  Local errors from Thermal (PCB error)
+     */
+    (ExLFir, bit(7)) ? TBDDefaultCallout;
+
+    /** EX_LFIR[8|9]
+     *  Local errors from Thermal (Trip error)
+     */
+    (ExLFir, bit(8|9)) ? TBDDefaultCallout;
+
+    /** EX_LFIR[10|11]
+     *  Local errors from Trace Array ( error)
+     */
+    (ExLFir, bit(10|11)) ? TBDDefaultCallout;
+};
+
+################################################################################
+# EX Chiplet COREFIR
+################################################################################
+
+rule CoreFir
+{
+    CHECK_STOP:  COREFIR & ~COREFIR_MASK & ~COREFIR_ACT0 & ~COREFIR_ACT1;
+    RECOVERABLE: COREFIR & ~COREFIR_MASK & ~COREFIR_ACT0 &  COREFIR_ACT1;
+};
+
+group gCoreFir filter singlebit
+{
+    /** COREFIR[0]
+     *  IFU_SRAM_PARITY_ERR: SRAM recoverable error (ICACHE parity error, etc.)
+     */
+    (CoreFir, bit(0)) ? TBDDefaultCallout;
+
+    /** COREFIR[1]
+     *  IF_SETDELETE_ERR: set deleted
+     */
+    (CoreFir, bit(1)) ? TBDDefaultCallout;
+
+    /** COREFIR[2]
+     *  IF_RFILE_REC_ERR: RegFile recoverable error
+     */
+    (CoreFir, bit(2)) ? TBDDefaultCallout;
+
+    /** COREFIR[3]
+     *  IF_RFILE_CHKSTOP_ERR: RegFile core check stop
+     */
+    (CoreFir, bit(3)) ? TBDDefaultCallout;
+
+    /** COREFIR[4]
+     *  IF_LOG_REC_ERR: logic recoverable error
+     */
+    (CoreFir, bit(4)) ? TBDDefaultCallout;
+
+    /** COREFIR[5]
+     *  IF_LOG_CHKSTOP_ERR: logic core check stop
+     */
+    (CoreFir, bit(5)) ? TBDDefaultCallout;
+
+    /** COREFIR[6]
+     *  IF_NOT_MT_REC_ERR: recoverable if not in MT window
+     */
+    (CoreFir, bit(6)) ? TBDDefaultCallout;
+
+    /** COREFIR[7]
+     *  IF_CHKSTOP_ERR: system check stop
+     */
+    (CoreFir, bit(7)) ? TBDDefaultCallout;
+
+    /** COREFIR[8]
+     *  RECOV_FIR_CHKSTOP_ERR: recovery core check stop
+     */
+    (CoreFir, bit(8)) ? TBDDefaultCallout;
+
+    /** COREFIR[9]
+     *  SD_RFILE_REC_ERR: RegFile recoverable error
+     */
+    (CoreFir, bit(9)) ? TBDDefaultCallout;
+
+    /** COREFIR[10]
+     *  SD_RFILE_CHKSTOP_ERR: RegFile core check stop (mapper error)
+     */
+    (CoreFir, bit(10)) ? TBDDefaultCallout;
+
+    /** COREFIR[11]
+     *  SD_LOG_REC_ERR: logic recoverable error
+     */
+    (CoreFir, bit(11)) ? TBDDefaultCallout;
+
+    /** COREFIR[12]
+     *  SD_LOG_CHKSTOP_ERR: logic core check stop
+     */
+    (CoreFir, bit(12)) ? TBDDefaultCallout;
+
+    /** COREFIR[13]
+     *  SD_NOT_MT_REC_ERR: recoverable if not in MT window
+     */
+    (CoreFir, bit(13)) ? TBDDefaultCallout;
+
+    /** COREFIR[14]
+     *  SD_MCHK_AND_ME_EQ_0: MCHK received while ME=0 non recoverable
+     */
+    (CoreFir, bit(14)) ? TBDDefaultCallout;
+
+    /** COREFIR[15]
+     *  SD_PC_L2_UE_ERR: UE from L2
+     */
+    (CoreFir, bit(15)) ? TBDDefaultCallout;
+
+    /** COREFIR[16]
+     *  ISU_L2_UE_OVER_TH_ERR: Number of UEs from L2 above threshold
+     */
+    (CoreFir, bit(16)) ? TBDDefaultCallout;
+
+    /** COREFIR[17]
+     *  SD_PC_CI_UE: UE on CI load
+     */
+    (CoreFir, bit(17)) ? TBDDefaultCallout;
+
+    /** COREFIR[19]
+     *  FX_GPR_REC_ERR: GPR recoverable error
+     */
+    (CoreFir, bit(19)) ? TBDDefaultCallout;
+
+    /** COREFIR[21]
+     *  FX_LOG_CHKSTOP_ERR: logic core check stop
+     */
+    (CoreFir, bit(21)) ? TBDDefaultCallout;
+
+    /** COREFIR[22]
+     *  FX_NOT_MT_REC_ERR: recoverable if not in MT window
+     */
+    (CoreFir, bit(22)) ? TBDDefaultCallout;
+
+    /** COREFIR[23]
+     *  VS_VRF_REC_ERR: VRF recoverable error
+     */
+    (CoreFir, bit(23)) ? TBDDefaultCallout;
+
+    /** COREFIR[24]
+     *  VS_LOG_REC_ERR: logic recoverable error
+     */
+    (CoreFir, bit(24)) ? TBDDefaultCallout;
+
+    /** COREFIR[25]
+     *  VS_LOG_CHKSTOP_ERR: logic core check stop
+     */
+    (CoreFir, bit(25)) ? TBDDefaultCallout;
+
+    /** COREFIR[26]
+     *  RECOV_IN_MAINT_ERR: 26 = recov_in_maint
+     */
+    (CoreFir, bit(26)) ? TBDDefaultCallout;
+
+    /** COREFIR[27]
+     *  DU_LOG_REC_ERR: logic recoverable error
+     */
+    (CoreFir, bit(27)) ? TBDDefaultCallout;
+
+    /** COREFIR[28]
+     *  DU_LOG_CHKSTOP_ERR: logic core check stop
+     */
+    (CoreFir, bit(28)) ? TBDDefaultCallout;
+
+    /** COREFIR[29]
+     *  LSU_SRAM_PARITY_ERR: SRAM recoverable error (DCACHE parity error, etc.)
+     */
+    (CoreFir, bit(29)) ? TBDDefaultCallout;
+
+    /** COREFIR[30]
+     *  LS_SETDELETE_ERR: set deleted
+     */
+    (CoreFir, bit(30)) ? TBDDefaultCallout;
+
+    /** COREFIR[31]
+     *  LS_RFILE_REC_ERR: RegFile recoverable error
+     */
+    (CoreFir, bit(31)) ? TBDDefaultCallout;
+
+    /** COREFIR[32]
+     *  LS_RFILE_CHKSTOP_ERR: RegFile core check stop
+     */
+    (CoreFir, bit(32)) ? TBDDefaultCallout;
+
+    /** COREFIR[33]
+     *  LS_TLB_MULTIHIT_ERR: special recovery error TLB multi hit error occurred
+     */
+    (CoreFir, bit(33)) ? TBDDefaultCallout;
+
+    /** COREFIR[34]
+     *  LS_SLB_MULTIHIT_ERR: special recovery error SLBFEE multi hit error occurred
+     */
+    (CoreFir, bit(34)) ? TBDDefaultCallout;
+
+    /** COREFIR[35]
+     *  LS_DERAT_MULTIHIT_ERR: special recovery error ERAT multi hit error occurred
+     */
+    (CoreFir, bit(35)) ? TBDDefaultCallout;
+
+    /** COREFIR[36]
+     *  FORWARD_PROGRESS_ERR: forward progress error
+     */
+    (CoreFir, bit(36)) ? TBDDefaultCallout;
+
+    /** COREFIR[37]
+     *  LS_LOG_REC_ERR: logic recoverable error
+     */
+    (CoreFir, bit(37)) ? TBDDefaultCallout;
+
+    /** COREFIR[38]
+     *  LS_LOG_CHKSTOP_ERR: logic core check stop
+     */
+    (CoreFir, bit(38)) ? TBDDefaultCallout;
+
+    /** COREFIR[39]
+     *  LS_NOT_MT_REC_ERR: recoverable if not in MT window
+     */
+    (CoreFir, bit(39)) ? TBDDefaultCallout;
+
+    /** COREFIR[40]
+     *  LS_NOT_CI_REC_ERR: recoverable if not in CI window
+     */
+    (CoreFir, bit(40)) ? TBDDefaultCallout;
+
+    /** COREFIR[41]
+     *  LS_CHKSTOP_ERR: system check stop
+     */
+    (CoreFir, bit(41)) ? TBDDefaultCallout;
+
+    /** COREFIR[42]
+     *  LS_GPR_RCV_CHKSTOP_ERR: UE from GPR/VRF recovery process
+     */
+    (CoreFir, bit(42)) ? TBDDefaultCallout;
+
+    /** COREFIR[43]
+     *  THREAD_HANG_REC_ERR: thread hang recoverable error
+     */
+    (CoreFir, bit(43)) ? TBDDefaultCallout;
+
+    /** COREFIR[44]
+     *  FIR_LOG_RECOV_ERR: logic recoverable error
+     */
+    (CoreFir, bit(44)) ? TBDDefaultCallout;
+
+    /** COREFIR[45]
+     *  PC_LOG_CHKSTOP_ERR: PC logic core check stop
+     */
+    (CoreFir, bit(45)) ? TBDDefaultCallout;
+
+    /** COREFIR[47]
+     *  TFC_FIR_TFMR_P_ERR: TFMR Parity Error (timing facility may be corrupt)
+     */
+    (CoreFir, bit(47)) ? TBDDefaultCallout;
+
+    /** COREFIR[48]
+     *  SPRD_FIR_HYP_RES_P_ERR: Hypervisor Resource error - core check stop
+     */
+    (CoreFir, bit(48)) ? TBDDefaultCallout;
+
+    /** COREFIR[49]
+     *  TFC_FIR_P_ERR: TFAC parity error
+     */
+    (CoreFir, bit(49)) ? TBDDefaultCallout;
+
+    /** COREFIR[50]
+     *  TFC_FIR_CONTROL_ERR: TFAC control error
+     */
+    (CoreFir, bit(50)) ? TBDDefaultCallout;
+
+    /** COREFIR[51]
+     *  PC_FIRM_AND_SEL_ERR: TFAC firmware error and select error
+     */
+    (CoreFir, bit(51)) ? TBDDefaultCallout;
+
+    /** COREFIR[52]
+     *  CORE_HUNG: Hang recovery failed (core check stop)
+     */
+    (CoreFir, bit(52)) ? TBDDefaultCallout;
+
+    /** COREFIR[53]
+     *  CORE_HANG_DETECT: Internal hang detected (core hang)
+     */
+    (CoreFir, bit(53)) ? TBDDefaultCallout;
+
+    /** COREFIR[54]
+     *  AMBI_HANG_DETECT: Hang detected unknown source
+     */
+    (CoreFir, bit(54)) ? TBDDefaultCallout;
+
+    /** COREFIR[55]
+     *  NEST_HANG_DETECT: External Hang detected
+     */
+    (CoreFir, bit(55)) ? TBDDefaultCallout;
+
+    /** COREFIR[59]
+     *  PC_SOM_ERR: SCOM satellite error detected
+     */
+    (CoreFir, bit(59)) ? TBDDefaultCallout;
+
+    /** COREFIR[60]
+     *  DBG_FIR_CHECKSTOP_ON_TRIGGER: debug Trigger Error inject
+     */
+    (CoreFir, bit(60)) ? TBDDefaultCallout;
+
+    /** COREFIR[61]
+     *  SP_INJ_REC_ERR: SCOM or Firmware recoverable Error Inject
+     */
+    (CoreFir, bit(61)) ? TBDDefaultCallout;
+
+    /** COREFIR[62]
+     *  SP_INJ_XSTOP_ERR: Firmware Xstop Error Inject
+     */
+    (CoreFir, bit(62)) ? TBDDefaultCallout;
+
+    /** COREFIR[63]
+     *  SPRD_PHYP_ERR_INJ: Phyp Xstop via SPRC / SPRD
+     */
+    (CoreFir, bit(63)) ? TBDDefaultCallout;
+};
+
+################################################################################
+# EX Chiplet L2FIR
+################################################################################
+
+rule L2Fir
+{
+    CHECK_STOP:  L2FIR & ~L2FIR_MASK & ~L2FIR_ACT0 & ~L2FIR_ACT1;
+    RECOVERABLE: L2FIR & ~L2FIR_MASK & ~L2FIR_ACT0 &  L2FIR_ACT1;
+};
+
+group gL2Fir filter singlebit
+{
+    /** L2FIR[0]
+     *  CACHE_RD_CE
+     */
+    (L2Fir, bit(0)) ? TBDDefaultCallout;
+
+    /** L2FIR[1]
+     *  CACHE_RD_UE
+     */
+    (L2Fir, bit(1)) ? TBDDefaultCallout;
+
+    /** L2FIR[2]
+     *  CACHE_RD_SUE
+     */
+    (L2Fir, bit(2)) ? TBDDefaultCallout;
+
+    /** L2FIR[3]
+     *  HW_DIR_INTIATED_LINE_DELETE_OCCURRED
+     */
+    (L2Fir, bit(3)) ? TBDDefaultCallout;
+
+    /** L2FIR[4]
+     *  CACHE_UE_SUE_DETECTED_ON_MODIFIED_LINE_BY_CO
+     */
+    (L2Fir, bit(4)) ? TBDDefaultCallout;
+
+    /** L2FIR[5]
+     *  CACHE_UE_SUE_DETECTED_ON_NON_MODIFIED_LINE_BY_CO
+     */
+    (L2Fir, bit(5)) ? TBDDefaultCallout;
+
+    /** L2FIR[6]
+     *  DIR_CE_DETECTED
+     */
+    (L2Fir, bit(6)) ? TBDDefaultCallout;
+
+    /** L2FIR[7]
+     *  DIR_UE_DETECTED
+     */
+    (L2Fir, bit(7)) ? TBDDefaultCallout;
+
+    /** L2FIR[8]
+     *  DIR_STUCK_BIT_CE
+     */
+    (L2Fir, bit(8)) ? TBDDefaultCallout;
+
+    /** L2FIR[9]
+     *  DIR_SBCE_REPAIR_FAILED
+     */
+    (L2Fir, bit(9)) ? TBDDefaultCallout;
+
+    /** L2FIR[10]
+     *  MULTIPLE_DIR_ERRORS_DETECTED
+     */
+    (L2Fir, bit(10)) ? TBDDefaultCallout;
+
+    /** L2FIR[11]
+     *  LRU_READ_ERROR_DETECTED
+     */
+    (L2Fir, bit(11)) ? TBDDefaultCallout;
+
+    /** L2FIR[12]
+     *  RC_POWERBUS_DATA_TIMEOUT
+     */
+    (L2Fir, bit(12)) ? TBDDefaultCallout;
+
+    /** L2FIR[13]
+     *  NCU_POWERBUS_DATA_TIMEOUT
+     */
+    (L2Fir, bit(13)) ? TBDDefaultCallout;
+
+    /** L2FIR[14]
+     *  HW_CONTROL_ERROR
+     */
+    (L2Fir, bit(14)) ? TBDDefaultCallout;
+
+    /** L2FIR[15]
+     *  LRU_ALL_MEMBERS_IN_CGC_ARE_LINE_DELETED
+     */
+    (L2Fir, bit(15)) ? TBDDefaultCallout;
+
+    /** L2FIR[16]
+     *  CACHE_INHIBITED_HIT_CACHEABLE_ERROR
+     */
+    (L2Fir, bit(16)) ? TBDDefaultCallout;
+
+    /** L2FIR[17]
+     *  RC_LOAD_RECIVED_PB_CRESP_ADR_ERR
+     */
+    (L2Fir, bit(17)) ? TBDDefaultCallout;
+
+    /** L2FIR[18]
+     *  RC_STORE_RECIVED_PB_CRESP_ADR_ERR
+     */
+    (L2Fir, bit(18)) ? TBDDefaultCallout;
+
+    /** L2FIR[19]
+     *  RC_POWBUS_DATA_CE_ERR_FROM_F2CHK
+     */
+    (L2Fir, bit(19)) ? TBDDefaultCallout;
+
+    /** L2FIR[20]
+     *  RC_POWBUS_DATA_UE_ERR_FROM_F2CHK
+     */
+    (L2Fir, bit(20)) ? TBDDefaultCallout;
+
+    /** L2FIR[21]
+     *  RC_POWBUS_DATA_SUE_ERR_FROM_F2CHK
+     */
+    (L2Fir, bit(21)) ? TBDDefaultCallout;
+
+    /** L2FIR[22]
+     *  CO_ICSW_UE_SUE_DATA_ERR_FROM_F2CHK
+     */
+    (L2Fir, bit(22)) ? TBDDefaultCallout;
+
+    /** L2FIR[23]
+     *  RC_LOAD_RECIVED_PB_CRESP_ADR_ERR_FOR_HYP
+     */
+    (L2Fir, bit(23)) ? TBDDefaultCallout;
+
+    /** L2FIR[24]
+     *  RCDAT_RD_PARITY_ERR
+     */
+    (L2Fir, bit(24)) ? TBDDefaultCallout;
+
+    /** L2FIR[25]
+     *  CO_ICSW_RTY_BUSY_ABT_ERR
+     */
+    (L2Fir, bit(25)) ? TBDDefaultCallout;
+
+    /** L2FIR[26]
+     *  HA_LOG_STOP_SW_ERR
+     */
+    (L2Fir, bit(26)) ? TBDDefaultCallout;
+
+    /** L2FIR[27]
+     *  RC_LOAD_RECEIVED_PB_ACK_DEAD_FROM_FOREIGN0
+     */
+    (L2Fir, bit(27)) ? TBDDefaultCallout;
+
+    /** L2FIR[28]
+     *  RC_LOAD_RECEIVED_PB_ACK_DEAD_FROM_FOREIGN1
+     */
+    (L2Fir, bit(28)) ? TBDDefaultCallout;
+
+    /** L2FIR[29]
+     *  RC_STORE_RECEIVED_PB_ACK_DEAD_FROM_FOREIGN0
+     */
+    (L2Fir, bit(29)) ? TBDDefaultCallout;
+
+    /** L2FIR[30]
+     *  RC_STORE_RECEIVED_PB_ACK_DEAD_FROM_FOREIGN1
+     */
+    (L2Fir, bit(30)) ? TBDDefaultCallout;
+
+    /** L2FIR[31]
+     *  ILLEGAL_MPALOG_TPID_SW_ERR
+     */
+    (L2Fir, bit(31)) ? TBDDefaultCallout;
+
+    /** L2FIR[32]
+     *  UNEXP_HA_ST_ERR
+     */
+    (L2Fir, bit(32)) ? TBDDefaultCallout;
+
+    /** L2FIR[33]
+     *  HA_LINE_IN_CONS_CACHE_ERR
+     */
+    (L2Fir, bit(33)) ? TBDDefaultCallout;
+
+    /** L2FIR[34]
+     *  HA_TABLE_IN_PROD_CACHE_ERR
+     */
+    (L2Fir, bit(34)) ? TBDDefaultCallout;
+
+    /** L2FIR[35]
+     *  ILLEGAL_LOG_STOP_SW_ERR
+     */
+    (L2Fir, bit(35)) ? TBDDefaultCallout;
+
+    /** L2FIR[48]
+     *  SCOM_ERR1: scom error
+     */
+    (L2Fir, bit(48)) ? TBDDefaultCallout;
+
+    /** L2FIR[49]
+     *  SCOM_ERR2: scom error
+     */
+    (L2Fir, bit(49)) ? TBDDefaultCallout;
+};
+
+################################################################################
+# EX Chiplet L3FIR
+################################################################################
+
+rule L3Fir
+{
+    CHECK_STOP:  L3FIR & ~L3FIR_MASK & ~L3FIR_ACT0 & ~L3FIR_ACT1;
+    RECOVERABLE: L3FIR & ~L3FIR_MASK & ~L3FIR_ACT0 &  L3FIR_ACT1;
+};
+
+group gL3Fir filter singlebit
+{
+    /** L3FIR[0]
+     *  Reserved field (Access type is pb_cmd_err)
+     */
+    (L3Fir, bit(0)) ? TBDDefaultCallout;
+
+    /** L3FIR[1]
+     *  Reserved field (Access type is pb_data_err)
+     */
+    (L3Fir, bit(1)) ? TBDDefaultCallout;
+
+    /** L3FIR[2]
+     *  Reserved field (Access type is l3_spare_error1)
+     */
+    (L3Fir, bit(2)) ? TBDDefaultCallout;
+
+    /** L3FIR[3]
+     * Reserved field (Access type is l3_spare_error1)
+     */
+    (L3Fir, bit(3)) ? TBDDefaultCallout;
+
+    /** L3FIR[4]
+     *  Reserved field (Access type is l3_cac_rd_ce_det_not_lindel_req)
+     */
+    (L3Fir, bit(4)) ? TBDDefaultCallout;
+
+    /** L3FIR[5]
+     *  Reserved field (Access type is l3_cac_rd_ue_det)
+     */
+    (L3Fir, bit(5)) ? TBDDefaultCallout;
+
+    /** L3FIR[6]
+     *  Reserved field (Access type is l3_cac_rd_sue_det)
+     */
+    (L3Fir, bit(6)) ? TBDDefaultCallout;
+
+    /** L3FIR[7]
+     *  Reserved field (Access type is l3_cac_wr_data_ce_from_pb)
+     */
+    (L3Fir, bit(7)) ? TBDDefaultCallout;
+
+    /** L3FIR[8]
+     *  Reserved field (Access type is l3_cac_wr_data_ue_from_pb)
+     */
+    (L3Fir, bit(8)) ? TBDDefaultCallout;
+
+    /** L3FIR[9]
+     *  Reserved field (Access type is l3_cac_wr_data_sue_from_pb)
+     */
+    (L3Fir, bit(9)) ? TBDDefaultCallout;
+
+    /** L3FIR[10]
+     *  Reserved field (Access type is l3_cac_wr_data_ce_from_l2)
+     */
+    (L3Fir, bit(10)) ? TBDDefaultCallout;
+
+    /** L3FIR[11]
+     *  Reserved field (Access type is l3_cac_wr_data_ue_from_l2)
+     */
+    (L3Fir, bit(11)) ? TBDDefaultCallout;
+
+    /** L3FIR[12]
+     *  Reserved field (Access type is l3_cac_wr_data_sue_from_l2)
+     */
+    (L3Fir, bit(12)) ? TBDDefaultCallout;
+
+    /** L3FIR[13]
+     *  Reserved field (Access type is l3_dir_rd_ce_det)
+     */
+    (L3Fir, bit(13)) ? TBDDefaultCallout;
+
+    /** L3FIR[14]
+     *  Reserved field (Access type is l3_dir_rd_ue_det)
+     */
+    (L3Fir, bit(14)) ? TBDDefaultCallout;
+
+    /** L3FIR[15]
+     *  Reserved field (Access type is l3_dir_rd_phantom_error)
+     */
+    (L3Fir, bit(15)) ? TBDDefaultCallout;
+
+    /** L3FIR[16]
+     *  Reserved field (Access type is l3_co_sn_cresp_addr_err)
+     */
+    (L3Fir, bit(16)) ? TBDDefaultCallout;
+
+    /** L3FIR[17]
+     *  Reserved field (Access type is l3_pf_cresp_addr_err)
+     */
+    (L3Fir, bit(17)) ? TBDDefaultCallout;
+
+    /** L3FIR[18]
+     *  Reserved field (Access type is l3_addr_hang_detected)
+     */
+    (L3Fir, bit(18)) ? TBDDefaultCallout;
+
+    /** L3FIR[19]
+     *  Reserved field (Access type is l3_flink_0_load_ack_dead)
+     */
+    (L3Fir, bit(19)) ? TBDDefaultCallout;
+
+    /** L3FIR[20]
+     *  Reserved field (Access type is l3_flink_0_store_ack_dead)
+     */
+    (L3Fir, bit(20)) ? TBDDefaultCallout;
+
+    /** L3FIR[21]
+     *  Reserved field (Access type is l3_flink_1_load_ack_dead)
+     */
+    (L3Fir, bit(21)) ? TBDDefaultCallout;
+
+    /** L3FIR[22]
+     *  Reserved field (Access type is l3_flink_1_store_ack_dead)
+     */
+    (L3Fir, bit(22)) ? TBDDefaultCallout;
+
+    /** L3FIR[23]
+     *  Reserved field (Access type is l3_mach_hang_detected)
+     */
+    (L3Fir, bit(23)) ? TBDDefaultCallout;
+
+    /** L3FIR[24]
+     *  Reserved field (Access type is l3_hw_control_err)
+     */
+    (L3Fir, bit(24)) ? TBDDefaultCallout;
+
+    /** L3FIR[25]
+     *  Reserved field (Access type is l3_snoop_sw_err_detected)
+     */
+    (L3Fir, bit(25)) ? TBDDefaultCallout;
+
+    /** L3FIR[26]
+     *  Reserved field (Access type is l3_line_del_ce_done)
+     */
+    (L3Fir, bit(26)) ? TBDDefaultCallout;
+
+    /** L3FIR[27]
+     *  Reserved field (Access type is l3_dram_error)
+     */
+    (L3Fir, bit(27)) ? TBDDefaultCallout;
+
+    /** L3FIR[28]
+     *  Reserved field (Access type is l3_lru_error)
+     */
+    (L3Fir, bit(28)) ? TBDDefaultCallout;
+
+    /** L3FIR[29]
+     *  Reserved field (Access type is l3_all_members_deleted_error)
+     */
+    (L3Fir, bit(29)) ? TBDDefaultCallout;
+
+    /** L3FIR[30]
+     *  Reserved field (Access type is l3_refresh_timer_error)
+     */
+    (L3Fir, bit(30)) ? TBDDefaultCallout;
+
+    /** L3FIR[31]
+     *  Reserved field (Access type is l3_ha_consumer_sw_access_err)
+     */
+    (L3Fir, bit(31)) ? TBDDefaultCallout;
+
+    /** L3FIR[32]
+     *  Reserved field (Access type is l3_ha_producer_sw_access_err)
+     */
+    (L3Fir, bit(32)) ? TBDDefaultCallout;
+
+    /** L3FIR[33]
+     *  Reserved field (Access type is l3_ha_line_in_consumer_cac_err)
+     */
+    (L3Fir, bit(33)) ? TBDDefaultCallout;
+
+    /** L3FIR[34]
+     *  Reserved field (Access type is l3_ha_table_in_producer_cac_err)
+     */
+    (L3Fir, bit(34)) ? TBDDefaultCallout;
+
+    /** L3FIR[35]
+     *  Reserved field (Access type is l3_ha_log_overflow_err)
+     */
+    (L3Fir, bit(35)) ? TBDDefaultCallout;
+
+    /** L3FIR[36]
+     *  Reserved field (Access type is scom_err)
+     */
+    (L3Fir, bit(36)) ? TBDDefaultCallout;
+};
+
+################################################################################
+# EX Chiplet NCUFIR
+################################################################################
+
+rule NcuFir
+{
+    CHECK_STOP:  NCUFIR & ~NCUFIR_MASK & ~NCUFIR_ACT0 & ~NCUFIR_ACT1;
+    RECOVERABLE: NCUFIR & ~NCUFIR_MASK & ~NCUFIR_ACT0 &  NCUFIR_ACT1;
+};
+
+group gNcuFir filter singlebit
+{
+    /** NCUFIR[0]
+     *  CONTROL_ERR: H/W control error.
+     */
+    (NcuFir, bit(0)) ? TBDDefaultCallout;
+
+    /** NCUFIR[1]
+     *  TLBIE_SW_ERR: TLBIE received illegal AP/LP field from core.
+     */
+    (NcuFir, bit(1)) ? TBDDefaultCallout;
+
+    /** NCUFIR[2]
+     *  ST_ADDR_ERR: Store address machine or TLBIE/sync machine received addr_err cresp.
+     */
+    (NcuFir, bit(2)) ? TBDDefaultCallout;
+
+    /** NCUFIR[3]
+     *  LD_ADDR_ERR: Load address machine received addr_err cresp.
+     */
+    (NcuFir, bit(3)) ? TBDDefaultCallout;
+
+    /** NCUFIR[4]
+     *  ST_FOREIGN0_ACK_DEAD: Store received ack_dead on foreign link0.
+     */
+    (NcuFir, bit(4)) ? TBDDefaultCallout;
+
+    /** NCUFIR[5]
+     *  ST_FOREIGN1_ACK_DEAD: Store received ack_dead on foreign link1.
+     */
+    (NcuFir, bit(5)) ? TBDDefaultCallout;
+
+    /** NCUFIR[6]
+     *  LD_FOREIGN0_ACK_DEAD: Load received ack_dead on foreign link0.
+     */
+    (NcuFir, bit(6)) ? TBDDefaultCallout;
+
+    /** NCUFIR[7]
+     *  LD_FOREIGN1_ACK_DEAD: Load received ack_dead on foreign link1.
+     */
+    (NcuFir, bit(7)) ? TBDDefaultCallout;
+
+    /** NCUFIR[8]
+     *  STQ_DATA_PARITY_ERR: Store data parity error from regfile detected.
+     */
+    (NcuFir, bit(8)) ? TBDDefaultCallout;
+
+    /** NCUFIR[9]
+     *  STORE_TIMEOUT: Store timed out on PB.
+     */
+    (NcuFir, bit(9)) ? TBDDefaultCallout;
+
+    /** NCUFIR[10]
+     *  TLBIE_MASTER_TIMEOUT: TLBIE master timed out on PB.
+     */
+    (NcuFir, bit(10)) ? TBDDefaultCallout;
+
+    /** NCUFIR[11]
+     *  TLBIE_SNOOP_TIMEOUT: TLBIE snooper timed out waiting for core.
+     */
+    (NcuFir, bit(11)) ? TBDDefaultCallout;
+
+    /** NCUFIR[12]
+     *  HTM_IMA_TIMEOUT: HTM/IMA address machine timed out on PB.
+     */
+    (NcuFir, bit(12)) ? TBDDefaultCallout;
+
+    /** NCUFIR[13]
+     *  IMA_CRESP_ADDR_ERR: IMA received addr_err cresp.
+     */
+    (NcuFir, bit(13)) ? TBDDefaultCallout;
+
+    /** NCUFIR[14]
+     *  IMA_FOREIGN0_ACK_DEAD: IMA received ack_dead on foreign link0.
+     */
+    (NcuFir, bit(14)) ? TBDDefaultCallout;
+
+    /** NCUFIR[15]
+     *  IMA_FOREIGN1_ACK_DEAD: IMA received ack_dead on foreign link1.
+     */
+    (NcuFir, bit(15)) ? TBDDefaultCallout;
+
+    /** NCUFIR[16]
+     *  HTM_GOT_ACK_DEAD: HTM received ack_dead on any foreign link.
+     */
+    (NcuFir, bit(16)) ? TBDDefaultCallout;
+
+    /** NCUFIR[17]
+     *  PMISC_CRESP_ADDR_ERR: PMISC received address error cresp.
+     */
+    (NcuFir, bit(17)) ? TBDDefaultCallout;
+
+    /** NCUFIR[18]
+     *  TLBIE_CONTROL_ERR: TLBIE control error.
+     */
+    (NcuFir, bit(28)) ? TBDDefaultCallout;
+
+    /** NCUFIR[24]
+     *  SCOM_ERR1: scom erro
+     */
+    (NcuFir, bit(24)) ? TBDDefaultCallout;
+
+    /** NCUFIR[25]
+     *  SCOM_ERR2: scom error
+     */
+    (NcuFir, bit(25)) ? TBDDefaultCallout;
+};
+
+ ##############################################################################
+ #                                                                            #
+ #    #                                  ###                                  #
+ #   # #    ##  ##### ###  ###  #   #   #   # #     #    ###   ###  ###  ###  #
+ #  #   #  #  #   #    #  #   # ##  #   #     #    # #  #     #     #   #     #
+ # ####### #      #    #  #   # # # #   #     #   #####  ###   ###  ##   ###  #
+ # #     # #  #   #    #  #   # #  ##   #   # #   #   #     #     # #       # #
+ # #     #  ##    #   ###  ###  #   #    ###  ### #   #  ###   ###  ###  ###  #
+ #                                                                            #
+ ##############################################################################
+
+# Include the common action set.
+.include "CommonActions.rule"
+
