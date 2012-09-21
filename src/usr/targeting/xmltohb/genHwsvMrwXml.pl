@@ -1632,6 +1632,16 @@ sub generate_mcs
 {
     my ($proc, $mcs, $ordinalId) = @_;
     my $uidstr = sprintf("0x%02X0B%04X",${node},$mcs+$proc*8+${node}*8*8);
+
+    #IBSCOM address range starts at 0x0003E00000000000 (992 TB)
+    #128GB per MCS/Centaur
+    #Addresses assigned by logical node, not physical node
+    #For Murano, each physical node is 2 logical nodes.
+    my $nodeOffset = 0x40*(${node}*2+(int($proc/2)));
+    my $procOffset = 0x10*($proc%2);
+    my $mcsOffset = $nodeOffset + $procOffset + $mcs*2;
+    my $mscStr = sprintf("0x0003E%02X00000000", $mcsOffset);
+
     print "
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}mcs$mcs</id>
@@ -1648,6 +1658,10 @@ sub generate_mcs
     <attribute>
         <id>CHIP_UNIT</id>
         <default>$mcs</default>
+    </attribute>
+    <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
+        <!-- baseAddr = 0x0003E00000000000, 128GB per MCS -->
+        <default>$mscStr</default>
     </attribute>
     <!-- TODO When MRW provides the information, these two attributes
          should be included. values of X come from MRW.

@@ -668,6 +668,19 @@
 </attribute>
 
 <attribute>
+    <id>IBSCOM_VIRTUAL_ADDR</id>
+    <description>Cached Virtual Address of Inband Scom memory space for this Chip</description>
+    <simpleType>
+        <uint64_t>
+            <default>0</default>
+        </uint64_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
     <id>FSI_MASTER_CHIP</id>
     <description>Chip which contains the FSI master logic that drives this slave</description>
     <nativeType>
@@ -4096,15 +4109,15 @@
 </attribute>
 
 <attribute>
-    <id>IBSCOM_BASE_ADDR</id>
-    <description>System Inband Scom base address</description>
+    <id>IBSCOM_MCS_BASE_ADDR</id>
+    <description>MCS Inband Scom base address</description>
     <simpleType>
         <uint64_t>
-            <!-- 992TB, XX per proc/centaur? (@todo RTC:34743) -->
             <default>0x0003E00000000000</default>
         </uint64_t>
     </simpleType>
     <persistency>non-volatile</persistency>
+    <!-- Link to ATTR_PROC_INBAND_MCFGPRQ_BASE_ADDRESS (@todo RTC:42177) -->
     <readable/>
 </attribute>
 

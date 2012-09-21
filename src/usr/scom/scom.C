@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/scom/scom.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2011-2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/scom/scom.C $                                         */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  *  @file scom.C
  *
@@ -419,9 +418,17 @@ errlHndl_t doScomOp(DeviceFW::OperationType i_opType,
     errlHndl_t l_err = NULL;
 
     do{
+        TARGETING::ScomSwitches scomSetting;
+        scomSetting.useXscom = true;  //Default to Xscom supported.
+        if(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL != i_target)
+        {
+            scomSetting =
+              i_target->getAttr<TARGETING::ATTR_SCOM_SWITCHES>();
+        }
+
         //Always XSCOM the Master Sentinel
         if((TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL == i_target) ||
-            (i_target->getAttr<TARGETING::ATTR_SCOM_SWITCHES>().useXscom))
+            (scomSetting.useXscom))
         {  //do XSCOM
 
             l_err = deviceOp(i_opType,
@@ -431,7 +438,16 @@ errlHndl_t doScomOp(DeviceFW::OperationType i_opType,
                              DEVICE_XSCOM_ADDRESS(i_addr));
             break;
         }
-        else if(i_target->getAttr<TARGETING::ATTR_SCOM_SWITCHES>().useFsiScom)
+        else if(scomSetting.useInbandScom)
+        {   //do IBSCOM
+            l_err = deviceOp(i_opType,
+                             i_target,
+                             io_buffer,
+                             io_buflen,
+                             DEVICE_IBSCOM_ADDRESS(i_addr));
+            if( l_err ) { break; }
+        }
+        else if(scomSetting.useFsiScom)
         {   //do FSISCOM
             l_err = deviceOp(i_opType,
                              i_target,
@@ -442,8 +458,7 @@ errlHndl_t doScomOp(DeviceFW::OperationType i_opType,
         }
         else
         {
-            //@todo - add target info to assert trace
-            assert(0,"SCOM::scomPerformOp> ATTR_SCOM_SWITCHES does not indicate Xscom or FSISCOM is supported");
+            assert(0,"SCOM::scomPerformOp> ATTR_SCOM_SWITCHES does not indicate Xscom, Ibscom, or FSISCOM is supported. i_target=0x%.8x", get_huid(i_target));
             break;
         }
 

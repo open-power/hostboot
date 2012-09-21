@@ -71,7 +71,6 @@
     <attribute><id>HB_MUTEX_TEST_LOCK</id></attribute>
     <attribute><id>DUMMY_RW</id></attribute>
     <attribute><id>XSCOM_BASE_ADDRESS</id></attribute>
-    <attribute><id>IBSCOM_BASE_ADDR</id></attribute>
     <attribute><id>TEST_NULL_STRING</id></attribute>
     <attribute><id>TEST_MIN_STRING</id><default>Z</default></attribute>
     <attribute><id>TEST_MAX_STRING</id></attribute>
@@ -731,6 +730,7 @@
     </attribute>
     <attribute><id>EI_BUS_RX_MSB_LSB_SWAP</id></attribute>
     <attribute><id>EI_BUS_TX_MSB_LSB_SWAP</id></attribute>
+    <attribute><id>IBSCOM_MCS_BASE_ADDR</id></attribute>
 </targetType>
 
 <targetType>
@@ -834,6 +834,9 @@
     </attribute>
     <attribute>
         <id>SCOM_IND_MUTEX</id>
+    </attribute>
+    <attribute>
+        <id>IBSCOM_VIRTUAL_ADDR</id>
     </attribute>
     <attribute>
         <!-- Centaur memory buffer chips do not have SCOM accessible FSI GP regs -->

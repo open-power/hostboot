@@ -265,6 +265,14 @@ const compId_t KERNEL_COMP_ID = 0x1B00;
 const char KERNEL_COMP_NAME[] = "kernel";
 //@}
 
+/** @name IBSCOM
+ *  IBSCOM - Inband SCOM component
+ */
+//@{
+const compId_t IBSCOM_COMP_ID = 0x1C00;
+const char IBSCOM_COMP_NAME[] = "ibscom";
+//@}
+
 /** @name HSVC
  * Host Services component
  * For the code running under PHYP
@@ -272,7 +280,6 @@ const char KERNEL_COMP_NAME[] = "kernel";
 //@{
 const compId_t HSVC_COMP_ID = 0x2000;
 const char HSVC_COMP_NAME[] = "hsvc";
-
 
 /** @name RESERVED
  *  Reserved component ID. x3100 is the component ID
