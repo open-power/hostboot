@@ -29,7 +29,7 @@
  *  @file slave_sbe.H
  *
  *  Slave SBE Isteps that invoke HWPs.
- *  
+ *
  *  Note that a number of IStep 6 substeps are done by Hostboot specific
  *  functions, this file is for the substeps that invoke HWPs
  *
@@ -65,9 +65,21 @@ namespace SLAVE_SBE
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
- *  return any error logs to istep 
+ *  return any error logs to istep
  */
 void* call_proc_revert_sbe_mcs_setup(void *io_pArgs);
+
+
+/**
+ *  brief  proc_check_slave_sbe_seeprom_complete
+ *
+ *  6.9 :   Check Slave SBE Complete
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return any error logs to istep
+ */
+void* call_proc_check_slave_sbe_seeprom_complete(void *io_pArgs);
 
 };   // end namespace
 

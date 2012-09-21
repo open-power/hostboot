@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: common_scom_addresses.H,v 1.30 2012/09/13 19:55:40 mfred Exp $
+// $Id: common_scom_addresses.H,v 1.34 2012/10/25 11:54:47 koenig Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/common_scom_addresses.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -196,6 +196,9 @@ CONST_UINT64_T( GENERIC_HANG_PRE_0x000F0028           , ULL(0x000F0028) );
 //      CFAM Registers
 //------------------------------------------------------------------------------
 CONST_UINT32_T( CFAM_FSI_SHIFT_CTRL_0x00000C10        , ULL(0x00000C10) );
+CONST_UINT32_T( CFAM_FSI_DATA_0_0x00001000            , ULL(0x00001000) );
+CONST_UINT32_T( CFAM_FSI_DATA_1_0x00001001            , ULL(0x00001001) );
+CONST_UINT32_T( CFAM_FSI_CMD_REG_0x00001002           , ULL(0x00001002) );
 CONST_UINT32_T( CFAM_FSI_STATUS_0x00001007            , ULL(0x00001007) );
 CONST_UINT32_T( CFAM_FSI_GP1_0x00001010               , ULL(0x00001010) );
 CONST_UINT32_T( CFAM_FSI_GP2_0x00001011               , ULL(0x00001011) );
@@ -214,12 +217,14 @@ CONST_UINT32_T( CFAM_FSI_GP6_0x00002815               , ULL(0x00002815) );
 CONST_UINT32_T( CFAM_FSI_GP7_0x00002816               , ULL(0x00002816) );
 CONST_UINT32_T( CFAM_FSI_GP8_0x00002817               , ULL(0x00002817) );
 CONST_UINT32_T( CFAM_FSI_GP3_MIRROR_0x0000281B        , ULL(0x0000281B) );
+CONST_UINT32_T( CFAM_FSI_SBE_VITAL_0x0000281C         , ULL(0x0000281C) );
 
 //------------------------------------------------------------------------------
 //      OTPROM
 //------------------------------------------------------------------------------
 CONST_UINT64_T( OTPROM_0x00010000                     , ULL(0x00010000) );
 
+CONST_UINT64_T( OTPROM_SECURE_SWITCHES_0x00010005     , ULL(0x00010005) );
 
 //------------------------------------------------------------------------------
 //      PIBMEM
@@ -370,8 +375,12 @@ CONST_UINT64_T( TP_MCGR4_0x010F0004                   , ULL(0x010F0004) );
 //------------------------------------------------------------------------------
 //      TP HANG DETECTION
 //------------------------------------------------------------------------------
-CONST_UINT64_T( TP_HANG_P1_0x010F0021                  , ULL(0x010F0021) );     // PRV: setup hang pulse register0
-CONST_UINT64_T( TP_HANG_P2_0x010F0022                  , ULL(0x010F0022) );     // PRV: setup hang pulse register1
+CONST_UINT64_T( TP_HANG_P0_0x010F0020                  , ULL(0x010F0020) );     // PRV: setup hang pulse register0
+CONST_UINT64_T( TP_HANG_P1_0x010F0021                  , ULL(0x010F0021) );     // PRV: setup hang pulse register1
+CONST_UINT64_T( TP_HANG_P2_0x010F0022                  , ULL(0x010F0022) );     // PRV: setup hang pulse register2
+CONST_UINT64_T( TP_HANG_P3_0x010F0023                  , ULL(0x010F0023) );     // PRV: setup hang pulse register3
+CONST_UINT64_T( TP_HANG_P4_0x010F0024                  , ULL(0x010F0024) );     // PRV: setup hang pulse register4
+CONST_UINT64_T( TP_HANG_P5_0x010F0025                  , ULL(0x010F0025) );     // PRV: setup hang pulse register5
 CONST_UINT64_T( TP_HANG_P6_0x010F0026                  , ULL(0x010F0026) );     // PRV: setup hang pulse register6
 CONST_UINT64_T( TP_HANG_PRE_0x010F0028                 , ULL(0x010F0028) );     // PRV: setup hang precounter (HEX:01)
 
@@ -448,6 +457,8 @@ CONST_UINT64_T( NEST_HANG_P1_0x020F0021               , ULL(0x020F0021) );     /
 CONST_UINT64_T( NEST_HANG_P2_0x020F0022               , ULL(0x020F0022) );     // NEST     : setup hang pulse register2
 CONST_UINT64_T( NEST_HANG_P3_0x020F0023               , ULL(0x020F0023) );     // NEST     : setup hang pulse register3
 CONST_UINT64_T( NEST_HANG_P4_0x020F0024               , ULL(0x020F0024) );     // NEST     : setup hang pulse register4
+CONST_UINT64_T( NEST_HANG_P5_0x020F0025               , ULL(0x020F0025) );     // NEST     : setup hang pulse register5
+CONST_UINT64_T( NEST_HANG_P6_0x020F0026               , ULL(0x020F0026) );     // NEST     : setup hang pulse register6
 CONST_UINT64_T( NEST_HANG_PRE_0x020F0028              , ULL(0x020F0028) );     // NEST (PB): setup hang precounter (HEX:01)
 
 
@@ -584,6 +595,18 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: common_scom_addresses.H,v $
+Revision 1.34  2012/10/25 11:54:47  koenig
+Added some hangcounter register - AK
+
+Revision 1.33  2012/10/24 12:36:18  gweber
+added FSI_DATA reg addresses
+
+Revision 1.32  2012/10/23 12:45:50  koenig
+Added Secure Switches in OTPROM - AK
+
+Revision 1.31  2012/09/28 15:00:35  rkoester
+add FSI SBE VITAL REG
+
 Revision 1.30  2012/09/13 19:55:40  mfred
 Move group 1 multicast definitions (EX chiplet) to p8_scom_addresses.H.
 

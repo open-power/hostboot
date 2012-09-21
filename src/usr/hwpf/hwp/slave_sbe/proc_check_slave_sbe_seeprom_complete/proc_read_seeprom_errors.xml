@@ -1,0 +1,147 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hwpf/hwp/slave_sbe/proc_check_slave_sbe_seeprom_complete/proc_read_seeprom_errors.xml $ -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2012                   -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- Error definitions for proc_read_seeprom procedure -->
+<hwpErrors>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_READ_SEEPROM_PIB_BUS_ADDR_NVLD_ERR_BIT_SET</rc>
+    <description>Invalid address from PIB</description>
+  </hwpError>
+<!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_READ_SEEPROM_PIB_BUS_WRITE_NVLD_ERR_BIT_SET</rc>
+    <description>Invalid write from PIB</description>
+   </hwpError>
+<!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_READ_SEEPROM_PIB_BUS_READ_NVLD_ERR_BIT_SET</rc>
+    <description>Invalid read from PIB</description>
+   </hwpError>
+<!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_READ_SEEPROM_PIB_BUS_ADDR_PAR_ERR_BIT_SET</rc>
+    <description>Address parity error from PIB</description>
+     </hwpError>
+<!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_READ_SEEPROM_PIB_BUS_PAR_ERR_BIT_SET</rc>
+    <description>Parity error form PIB</description>
+  </hwpError>
+<!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_READ_SEEPROM_LOCAL_BUS_PAR_ERR_BIT_SET</rc>
+    <description>A parity error on LB between I2C and PIB occurred</description>
+  </hwpError>
+<!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_READ_SEEPROM_PIB_INVALID_COMMAND_BIT_SET</rc>
+    <description>Bit 45 of status register set</description>
+  </hwpError> 
+<!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_READ_SEEPROM_PIB_PARITY_ERR_BIT_SET</rc>
+    <description>Bit 46 of status register set</description>
+  </hwpError>
+<!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_READ_SEEPROM_I2C_BACK_END_OVERRUN_ERR_BIT_SET</rc>
+    <description>Bit 47 of status register set</description>
+    </hwpError>  
+<!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_READ_SEEPROM_I2C_BACK_END_ACCESS_ERR_BIT_SET</rc>
+    <description>Bit 48 of status register set</description>
+  </hwpError>
+<!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_READ_SEEPROM_I2C_ARBITRATION_LOST_ERR_BIT_SET</rc>
+    <description>Bit 49 of status register set</description>
+  </hwpError>
+<!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_READ_SEEPROM_I2C_NACK_RECIEVED_ERR_BIT_SET</rc>
+    <description>Bit 50 of status register set</description>
+ </hwpError> 
+<!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_READ_SEEPROM_I2C_COMMAND_COMPLETE_NOT_SET</rc>
+    <description>Bit 52 of status register not set after bit 44 is cleared</description>
+ </hwpError> 
+<!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_READ_SEEPROM_I2C_STOP_ERR_BIT_SET</rc>
+    <description>Bit 53 of status register set</description>
+  </hwpError>
+<!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_READ_SEEPROM_PARITY_ERROR_BIT_SET</rc>
+    <description>Bit 56 of status register set</description>
+  </hwpError>
+<!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_READ_SEEPROM_CE_COUNTER_OVERFLOW_BIT_SET</rc>
+    <description>Bit 57 of status register set</description>
+  </hwpError>
+
+<!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_READ_SEEPROM_PIB_MASTER_RESP_INFO_BITS_SET</rc>
+    <description>Some bits between 38 to 40 of status register set</description>
+  </hwpError>
+<!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_READ_SEEPROM_PIB_CONTROL_REG_DATA_LGT_ERR</rc>
+    <description>Bits 41:43 equal 100, control reg data length err</description>
+  </hwpError>
+<!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_READ_SEEPROM_PIB_CONTROL_REG_ADD_LGT_ERR</rc>
+    <description>Bit 41:43 equal 101, control reg address length err</description>
+  </hwpError>
+<!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_READ_SEEPROM_PIB_CONTROL_REG_ADDR_BDY_ERR</rc>
+    <description>Bit 41:43 equal 110, control reg address boudary err</description>
+  </hwpError>
+<!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_READ_SEEPROM_PIB_ECCADDR_REG_ERR</rc>
+    <description>Bit 41:43 equal 111, ecc address register err</description>
+  </hwpError>
+<!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_READ_SEEPROM_PIB_EFF_PIBM_RESET</rc>
+    <description>Bit 41:43 equal 010,pib master reset</description>
+  </hwpError>
+<!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_READ_SEEPROM_PIB_UEC_Q</rc>
+    <description>Bit 41:43 equal 001, uncorrectable ecc error</description>
+  </hwpError>
+<!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_READ_SEEPROM_PIB_SLAVE_RESET</rc>
+    <description>Bit 41:43 equal 011, reset from pib slave</description>
+  </hwpError>
+
+</hwpErrors>

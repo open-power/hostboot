@@ -119,23 +119,6 @@ void* host_cancontinue_clear( void *io_pArgs )
 }
 
 //******************************************************************************
-// proc_check_slave_sbe_seeprom_complete function
-//******************************************************************************
-void* proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
-{
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "proc_check_slave_sbe_seeprom_complete entry" );
-    errlHndl_t errl = NULL;
-
-    // stub -- nothing here currently
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "proc_check_slave_sbe_seeprom_complete exit" );
-
-    return errl;
-}
-
-//******************************************************************************
 // proc_xmit_sbe function
 //******************************************************************************
 void* proc_xmit_sbe( void *io_pArgs )

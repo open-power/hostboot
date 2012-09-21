@@ -37,13 +37,20 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/include
 ##  NOTE: add a new EXTRAINCDIR when you add a new HWP
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/slave_sbe
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/slave_sbe/proc_revert_sbe_mcs_setup
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/slave_sbe/proc_check_slave_sbe_seeprom_complete
+
 
 ##  NOTE: add new object files when you add a new HWP
 OBJS =  slave_sbe.o \
-		proc_revert_sbe_mcs_setup.o
-        
+        proc_revert_sbe_mcs_setup.o     \
+        proc_check_slave_sbe_seeprom_complete.o \
+        proc_extract_sbe_rc.o   \
+        proc_read_seeprom.o \
+        proc_sbe_error.o
+
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/slave_sbe/proc_revert_sbe_mcs_setup
+VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/slave_sbe/proc_check_slave_sbe_seeprom_complete
 
 include ${ROOTPATH}/config.mk
 

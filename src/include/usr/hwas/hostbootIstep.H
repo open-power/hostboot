@@ -64,7 +64,7 @@ void* host_set_ipl_parms( void *io_pArgs );
  * @brief   host_discover_targets   Builds targeting
  *
  *  This routine will walk through all the targets and initialize HWAS STATE
- *  to a known default value.  
+ *  to a known default value.
  *
  *  Currently everything is initialized to powered off, etc.
  *
@@ -98,17 +98,6 @@ void* host_gard( void *io_pArgs );
  *  return  any error logs to istep
  */
 void* host_cancontinue_clear( void *io_pArgs );
-
-/**
- * @brief   proc_check_slave_sbe_seeprom_complete   Check Slave SBE Complete
- *
- *  TBD
- *
- *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
- *                              or NULL.
- *  return  any error logs to istep
- */
-void* proc_check_slave_sbe_seeprom_complete( void *io_pArgs );
 
 /**
  * @brief   proc_xmit_sbe   vSBE Init of Slave Chips

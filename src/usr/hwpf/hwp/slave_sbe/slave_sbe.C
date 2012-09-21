@@ -53,6 +53,7 @@
 
 #include "slave_sbe.H"
 #include "proc_revert_sbe_mcs_setup/proc_revert_sbe_mcs_setup.H"
+#include "proc_check_slave_sbe_seeprom_complete.H"
 
 using namespace ISTEP;
 using namespace ISTEP_ERROR;
@@ -84,8 +85,8 @@ void* call_proc_revert_sbe_mcs_setup(void *io_pArgs)
     if (l_errl)
     {
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "ERROR : failed executing proc_revert_sbe_mcs_setup \
-                   returning error");
+                  "ERROR : failed executing proc_revert_sbe_mcs_setup "
+                  "returning error");
 
         ErrlUserDetailsTarget myDetails(l_pProcTarget);
 
@@ -123,5 +124,112 @@ void* call_proc_revert_sbe_mcs_setup(void *io_pArgs)
     // end task, returning any errorlogs to IStepDisp
     return l_stepError.getErrorHandle();
 }
+
+
+//
+//  Wrapper function to call 6.9 :
+//      proc_check_slave_sbe_seeprom_complete
+//
+void* call_proc_check_slave_sbe_seeprom_complete(void *io_pArgs)
+{
+    errlHndl_t  l_errl = NULL;
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_proc_check_slave_sbe_seeprom_complete entry" );
+
+    TARGETING::Target* l_pProcTarget = NULL;
+    TARGETING::targetService().masterProcChipTargetHandle(l_pProcTarget);
+
+    fapi::Target l_fapiProcTarget(fapi::TARGET_TYPE_PROC_CHIP, l_pProcTarget);
+
+#if 1
+    //  SIMICS HACK - The values written by simics are not correct -
+    //  Write them here until we can fix the action files.
+    //  @todo   RTC Task 52856 is opened to remove these workaround blocks
+    //  once simics is updated.
+    //  Defect SW173843 posted to Simics team to fix this - this is
+    //          not a simple action file change.
+    const  uint64_t PORE_SBE_CONTROL_0x000E0001 =   0x00000000000E0001 ;
+    const  uint64_t MBOX_SBEVITAL_0x0005001C    =   0x000000000005001C ;
+    fapi::ReturnCode    rc;
+    ecmdDataBufferBase data(64);
+    uint32_t    sbe_code    =   0;
+
+    rc = fapiGetScom(   l_fapiProcTarget,
+                        PORE_SBE_CONTROL_0x000E0001,
+                        data );
+    if(!rc.ok()) { TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,"ERROR: reading scom" ); }
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "DEBUG: PORE_SBE_CONTROL_0x000E0001  =   0x%lx",
+               data.getDoubleWord( 0 ) );
+
+    if ( !TARGETING::is_vpo() )
+    {
+        //  proc_check_slave_sbe_seeprom_complete expects bit 0 to be
+        //      on (SBE stopped)
+        data.setBit(0);
+        rc = fapiPutScom(   l_fapiProcTarget,
+                            PORE_SBE_CONTROL_0x000E0001,
+                            data );
+    }
+
+    rc = fapiGetScom(   l_fapiProcTarget,
+                        MBOX_SBEVITAL_0x0005001C,
+                        data );
+    if(!rc.ok()) { TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,"ERROR: reading scom" ); }
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "DEBUG: MBOX_SBEVITAL_0x0005001C =   0x%lx",
+               data.getDoubleWord( 0 ) );
+
+    if ( !TARGETING::is_vpo() )
+    {
+        //  proc_check_slave_sbe_seeprom_complete expects the SBE to write
+        //      000F2111 to SBE_VITAL before we get here:
+        //      halt code   =   SBE_EXIT_SUCCESS_0xF (0x0f) ,
+        //      istep_num   =   PROC_SBE_CHECK_MASTER_ISTEP_NUM ( 0x0211 ),
+        //      substep_num =   SUBSTEP_CHECK_MASTER_SLAVE_CHIP ( 0x01 )
+        sbe_code    =   0x000F2111;
+        data.insertFromRight( &sbe_code,
+                              12,           // ISTEP_NUM_BIT_POSITION
+                              20 );         // number of bits
+        rc = fapiPutScom(   l_fapiProcTarget,
+                            MBOX_SBEVITAL_0x0005001C,
+                            data );
+        if(!rc.ok()) { TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,"ERROR: writing scom" );}
+    }
+
+#else
+			            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+			                       "Simics has been fixed..." );
+#endif
+
+        // Invoke the HWP
+        FAPI_INVOKE_HWP(l_errl,
+                        proc_check_slave_sbe_seeprom_complete,
+                        l_fapiProcTarget);
+
+    if (l_errl)
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "ERROR : proc_check_slave_sbe_seeprom_complete",
+                  "failed, returning errorlog" );
+    }
+    else
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "SUCCESS : proc_check_slave_sbe_seeprom_complete",
+                  "completed ok");
+
+    }
+
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+              "call_proc_check_slave_sbe_seeprom_complete exit");
+
+    // end task, returning any errorlogs to IStepDisp
+    return  l_errl ;
+}
+
 
 }
