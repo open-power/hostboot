@@ -1,28 +1,28 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/hwp/mc_config/mss_eff_config/mss_eff_config.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
-// $Id: mss_eff_config.H,v 1.2 2012/02/15 01:34:45 asaetow Exp $
-// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_eff_config.H,v $
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/hwp/mc_config/mss_eff_config/mss_eff_config.H $  */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012                   */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+// $Id: mss_eff_config.H,v 1.3 2012/09/25 17:58:36 mjjones Exp $
+// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur
+//          /working/procedures/ipl/fapi/mss_eff_config.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -43,34 +43,42 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
-//   1.3   |          |         |
-//   1.2   | asaetow  |14-FEB-12| Fixed "fapi::" for hostboot, added "const", renamed "i_target_mba", and changed comments.
+//   1.4   |          |         |
+//   1.3   | kjpower  |27-AUG_12| Restructured code, added modularity
+//   1.2   | asaetow  |14-FEB-12| Fixed "fapi::" for hostboot, added "const",
+//         |          |         | renamed "i_target_mba", and changed comments.
 //   1.1   | asaetow  |03-NOV-11| First Draft.
+//------------------------------------------------------------------------------
 
 
 #ifndef MSS_EFF_CONFIG_H_
 #define MSS_EFF_CONFIG_H_
 
-//----------------------------------------------------------------------
-//  My Includes
-//----------------------------------------------------------------------
+//------------------------------------------------------------------------------
+// My Includes
+//------------------------------------------------------------------------------
 
-
-//----------------------------------------------------------------------
-//  Includes
-//----------------------------------------------------------------------
+//------------------------------------------------------------------------------
+// Includes
+//------------------------------------------------------------------------------
 #include <fapi.H>
-
 
 typedef fapi::ReturnCode (*mss_eff_config_FP_t)(const fapi::Target i_target_mba);
 
 extern "C" {
 
-//******************************************************************************
-//* name=mss_eff_config, param=i_target_mba, return=ReturnCode
-//******************************************************************************
+//------------------------------------------------------------------------------
+// @brief mss_eff_config(): This function is the main functionw which calls
+//                          helper functions that read and verify spd data as
+//                          well as configure effective attributes.
+//
+// @param const fapi::Target i_target_mba: the fapi target
+//
+// @return fapi::ReturnCode
+//------------------------------------------------------------------------------
 fapi::ReturnCode mss_eff_config(const fapi::Target i_target_mba);
 
 } // extern "C"
 
-#endif // MSS_EFF_CONFIG_H_
+#endif // MSS_EFF_CONFIG_H
+

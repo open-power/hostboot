@@ -1,27 +1,26 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/hwp/mc_config/mss_eff_config/mss_eff_config_termination.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
-// $Id: mss_eff_config_termination.C,v 1.1 2012/04/30 16:42:50 asaetow Exp $
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/hwp/mc_config/mss_eff_config/mss_eff_config_termination.C $ */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012                   */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+// $Id: mss_eff_config_termination.C,v 1.2 2012/09/05 23:01:02 asaetow Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_eff_config_termination.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -43,7 +42,8 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
-//   1.2   |          |         |
+//   1.3   |          |         |
+//   1.2   | asaetow  |05-SEP-12| Added ATTR_MSS_CAL_STEP_ENABLE.
 //   1.1   | asaetow  |30-APR-12| First Draft.
 
 
@@ -85,6 +85,7 @@ fapi::ReturnCode mss_eff_config_termination(const fapi::Target i_target_mba) {
    const uint8_t RANK_SIZE = 4;
 
    // Define local attribute variables
+   uint8_t my_attr_mss_cal_step_enable = 0xFF;
    uint8_t my_attr_eff_cen_drv_imp_cmd = 15;
    uint8_t my_attr_eff_cen_drv_imp_cntl = 15;
    uint8_t my_attr_eff_cen_drv_imp_dq_dqs = 24;
@@ -169,6 +170,7 @@ fapi::ReturnCode mss_eff_config_termination(const fapi::Target i_target_mba) {
       my_attr_eff_odt_wr[1][1][3] = 0x0;
 
    // Set attributes
+   rc = FAPI_ATTR_SET(ATTR_MSS_CAL_STEP_ENABLE, &i_target_mba, my_attr_mss_cal_step_enable); if(rc) return rc;
    rc = FAPI_ATTR_SET(ATTR_EFF_CEN_DRV_IMP_CMD, &i_target_mba, my_attr_eff_cen_drv_imp_cmd); if(rc) return rc;
    rc = FAPI_ATTR_SET(ATTR_EFF_CEN_DRV_IMP_CNTL, &i_target_mba, my_attr_eff_cen_drv_imp_cntl); if(rc) return rc;
    rc = FAPI_ATTR_SET(ATTR_EFF_CEN_DRV_IMP_DQ_DQS, &i_target_mba, my_attr_eff_cen_drv_imp_dq_dqs); if(rc) return rc;
