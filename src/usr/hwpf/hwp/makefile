@@ -41,7 +41,8 @@ OBJS = fapiTestHwp.o \
        fapiHwpExecInitFile.o \
        dimmBadDqBitmapFuncs.o \
        dimmBadDqBitmapAccessHwp.o \
-       RepairRingFunc.o
+       RepairRingFunc.o \
+       erepairGetFailedLanesHwp.o
 
 SUBDIRS	=	dmi_training.d  sbe_centaur_init.d mc_config.d \
             dram_training.d activate_powerbus.d build_winkle_images.d \

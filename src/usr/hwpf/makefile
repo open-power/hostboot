@@ -49,7 +49,8 @@ HWP_ERROR_XML_FILES = hwp/fapiHwpErrorInfo.xml   \
     hwp/core_activate/proc_stop_deadman_timer/proc_stop_deadman_timer_errors.xml \
     hwp/activate_powerbus/proc_build_smp/proc_build_smp_errors.xml \
     hwp/activate_powerbus/proc_build_smp/proc_adu_utils_errors.xml \
-    hwp/thread_activate/proc_thread_control/proc_thread_control.xml
+    hwp/thread_activate/proc_thread_control/proc_thread_control.xml \
+    hwp/erepair_errors.xml
 
 
 ## these get generated into obj/genfiles/AttributeIds.H
