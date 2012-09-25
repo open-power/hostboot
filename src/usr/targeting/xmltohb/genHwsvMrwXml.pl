@@ -98,6 +98,36 @@ foreach my $i (@{$powerbus->{'power-bus'}})
     push @pbus, [ lc($endp2), lc($endp1) ];
 }
 
+open (FH, "<$mrwdir/${sysname}-lpc2spi.xml") ||
+    die "ERROR: unable to open $mrwdir/${sysname}-lpc2spi.xml\n";
+close (FH);
+
+my $pnorPath = XMLin("$mrwdir/${sysname}-lpc2spi.xml",forcearray=>['proc-to-pnor-connection']);
+
+# Capture all pnor attributes into the @pnorBlock array
+use constant PNOR_MTD_CHAR_FIELD => 0;
+use constant PNOR_BLOCK_DEV_FIELD => 1;
+use constant PNOR_POS_FIELD  => 2;
+use constant PNOR_NODE_FIELD => 3;
+use constant PNOR_PROC_FIELD => 4;
+
+my @unsortedPnorTargets;
+foreach my $i (@{$pnorPath->{'proc-to-pnor-connection'}})
+{
+    my $mtdCharDev = $i->{'lpc2spi'}->{'fsp-dev-paths'}->{'fsp-dev-path'}->{'character-dev-path'};
+    my $mtdBlockDev = $i->{'lpc2spi'}->{'fsp-dev-paths'}->{'fsp-dev-path'}->{'block-dev-path'};
+
+    my $pnorPosition = $i->{'flash'}->{'target'}->{'position'};
+    my $nodePosition = $i->{'flash'}->{'target'}->{'node'};
+
+    my $procPosition = $i->{'processor'}->{'target'}->{'position'};
+
+    push (@unsortedPnorTargets,[$mtdCharDev, $mtdBlockDev, $pnorPosition, $nodePosition, $procPosition]);
+
+}
+
+my @SortedPnor = sort byPnorNodePos @unsortedPnorTargets;
+
 open (FH, "<$mrwdir/${sysname}-cec-chips.xml") ||
     die "ERROR: unable to open $mrwdir/${sysname}-cec-chips.xml\n";
 close (FH);
@@ -469,6 +499,17 @@ for my $i ( 0 .. $#SMembuses )
     }
 }
 
+if ($build eq "fsp")
+{
+    print "\n<!--$SYSNAME PNOR -->\n";
+    for my $i (0 .. $#SortedPnor)
+    {
+        generate_pnor($sys,$SortedPnor[$i][PNOR_NODE_FIELD],$SortedPnor[$i][PNOR_POS_FIELD],$SortedPnor[$i][PNOR_MTD_CHAR_FIELD],$SortedPnor[$i][PNOR_BLOCK_DEV_FIELD],
+            $SortedPnor[$i][PNOR_PROC_FIELD],$i);
+
+    }
+}
+
 print "\n</attributes>\n";
 
 # All done!
@@ -504,6 +545,37 @@ sub byDimmInstancePath ($$)
 
     # Convert each DIMM instance value string to int, and return comparison
     return int($lhsInstance) <=> int($rhsInstance);
+}
+
+################################################################################
+# Compares two PNOR instances based on the node and position #
+################################################################################
+sub byPnorNodePos($$)
+{
+    my $retVal = -1;
+
+    my $lhsInstance_node = $_[0][PNOR_NODE_FIELD];
+    my $rhsInstance_node = $_[1][PNOR_NODE_FIELD];
+    if(int($lhsInstance_node) eq int($rhsInstance_node))
+    {
+         my $lhsInstance_pos = $_[0][PNOR_POS_FIELD];
+         my $rhsInstance_pos = $_[1][PNOR_POS_FIELD];
+         if(int($lhsInstance_pos) eq int($rhsInstance_pos))
+         {
+                die "ERROR: Duplicate pnor positions: 2 pnors with same
+                    node and position, \
+                    NODE: $lhsInstance_node POSITION: $lhsInstance_pos\n";
+         }
+         elsif(int($lhsInstance_pos) > int($rhsInstance_pos))
+         {
+             $retVal = 1;
+         }
+    }
+    elsif(int($lhsInstance_node) > int($rhsInstance_node))
+    {
+        $retVal = 1;
+    }
+    return $retVal;
 }
 
 sub generate_sys
@@ -1455,6 +1527,63 @@ sub generate_dimm
 
 print "\n</targetInstance>\n";
 }
+
+sub generate_pnor
+{
+    my ($sys, $node, $pnor, $charPath, $blockPath,$proc,$count) = @_;
+
+# @TODO via RTC: 48523
+# Will need to compute the HUID using the workbook info to determine max # parts per node
+    my $uidstr = sprintf("0x%02X13%04X",${node},$pnor+${node}*2);
+
+# @TODO via RTC: 37573
+# Will need to re-evaluate how to compute the PNOR RID value once
+# the new system comes out.  Currently the 0x800 RID value is only
+# for the TULETA system
+    print "
+<targetInstance>
+    <id>sys${sys}node${node}pnor${pnor}</id>
+    <type>chip-pnor-power8</type>
+    <attribute><id>HUID</id><default>${uidstr}</default></attribute>
+    <attribute><id>ORDINAL_ID</id><default>$count</default></attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>$pnor</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-$sys/node-$node/pnor-$pnor</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-$sys/node-$node/proc-$proc/pnor-$pnor</default>
+    </attribute>
+    <attribute>
+        <id>PRIMARY_CAPABILITIES</id>
+        <default>
+             <field><id>supportsFsiScom</id><value>0</value></field>
+             <field><id>supportsXscom</id><value>0</value></field>
+             <field><id>supportsInbandScom</id><value>0</value></field>
+             <field><id>reserved</id><value>0</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>RID</id>
+        <default>0x800</default>
+    </attribute>
+     <attribute>
+        <id>FSP_A_MTD_DEVICE_PATH</id>
+        <default>$charPath</default>
+    </attribute>
+    <attribute>
+        <id>FSP_A_MTDBLOCK_DEVICE_PATH</id>
+        <default>$blockPath</default>
+    </attribute>";
+
+
+    print "\n</targetInstance>\n";
+}
+
 
 sub display_help
 {

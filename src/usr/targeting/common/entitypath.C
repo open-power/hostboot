@@ -358,6 +358,10 @@ const char* EntityPath::pathElementTypeAsString(
             return "PSI";
         case TYPE_FSP:
             return "FSP";
+        case TYPE_PNOR:
+            return "PNOR";
+        case TYPE_NA:
+            return "NA";
 //        case TYPE_FSI_LINK:
 //            return "FSI-link";
 //        case TYPE_CFAM:

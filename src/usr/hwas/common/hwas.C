@@ -128,13 +128,10 @@ errlHndl_t discoverTargets()
                 pEnc->getAttr<ATTR_HUID>(), pEnc);
         } // for pEnc_it
 
-        // find TYPE_PROC, TYPE_MEMBUF and TYPE_DIMM
-        PredicateCTM predProc(CLASS_CHIP, TYPE_PROC);
-        PredicateCTM predMembuf(CLASS_CHIP, TYPE_MEMBUF);
-        PredicateCTM predFSP(CLASS_CHIP, TYPE_FSP);
+        PredicateCTM predChip(CLASS_CHIP);
         PredicateCTM predDimm(CLASS_LOGICAL_CARD, TYPE_DIMM);
         PredicatePostfixExpr checkExpr;
-        checkExpr.push(&predProc).push(&predMembuf).Or().push(&predDimm).Or().push(&predFSP).Or();
+        checkExpr.push(&predChip).push(&predDimm).Or();
 
         TargetHandleList pCheckPres;
         targetService().getAssociated( pCheckPres, pSys,

@@ -168,6 +168,9 @@
         <name>FSP</name>
     </enumerator>
     <enumerator>
+        <name>PNOR</name>
+    </enumerator>
+    <enumerator>
         <name>LAST_IN_RANGE</name>
     </enumerator>
     <default>NA</default>
