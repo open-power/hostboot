@@ -30,7 +30,7 @@
 #include <mbox/mbox_reasoncodes.H>
 #include <errl/errludparserfactory.H>
 
-namespace mbox
+namespace MBOX
 {
     class UserDetailsParserFactory 
         : public ERRORLOG::ErrlUserDetailsParserFactory

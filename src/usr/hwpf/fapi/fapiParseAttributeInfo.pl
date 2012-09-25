@@ -1,26 +1,26 @@
 #!/usr/bin/perl
-#  IBM_PROLOG_BEGIN_TAG
-#  This is an automatically generated prolog.
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
 #
-#  $Source: src/usr/hwpf/fapi/fapiParseAttributeInfo.pl $
+# $Source: src/usr/hwpf/fapi/fapiParseAttributeInfo.pl $
 #
-#  IBM CONFIDENTIAL
+# IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2011-2012
+# COPYRIGHT International Business Machines Corp. 2011,2012
 #
-#  p1
+# p1
 #
-#  Object Code Only (OCO) source materials
-#  Licensed Internal Code Source Materials
-#  IBM HostBoot Licensed Internal Code
+# Object Code Only (OCO) source materials
+# Licensed Internal Code Source Materials
+# IBM HostBoot Licensed Internal Code
 #
-#  The source code for this program is not published or other-
-#  wise divested of its trade secrets, irrespective of what has
-#  been deposited with the U.S. Copyright Office.
+# The source code for this program is not published or otherwise
+# divested of its trade secrets, irrespective of what has been
+# deposited with the U.S. Copyright Office.
 #
-#  Origin: 30
+# Origin: 30
 #
-#  IBM_PROLOG_END_TAG
+# IBM_PROLOG_END_TAG
 #
 # Purpose:  This perl script will parse HWP Attribute XML files
 # and add attribute information to a file called fapiAttributeIds.H
@@ -61,6 +61,7 @@
 #                                      parsing enumerations
 #                  mjjones   06/12/12  Add new include file to fapiChipEcFeature.C
 #                  mjjones   08/08/12  Output target types and if PlatInit
+#                  mjjones   09/28/12  Minor change to add FFDC on error
 #
 # End Change Log ******************************************************
 
@@ -593,7 +594,7 @@ print ECFILE "            default:\n";
 print ECFILE "                FAPI_ERR(\"fapiQueryChipEcFeature: Unknown feature 0x%x\",\n";
 print ECFILE "                    i_id);\n";
 print ECFILE "                l_rc.setFapiError(FAPI_RC_INVALID_CHIP_EC_FEATURE_GET);\n";
-print ECFILE "                fapi::ReturnCodeFfdc::addEIFfdc(l_rc, i_id);\n";
+print ECFILE "                l_rc.addEIFfdc(0, &i_id, sizeof(i_id));\n";
 print ECFILE "                break;\n";
 print ECFILE "            }\n\n";
 print ECFILE "            if (o_hasFeature)\n";

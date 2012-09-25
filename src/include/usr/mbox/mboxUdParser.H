@@ -26,13 +26,12 @@
 
 #include <errl/errluserdetails.H>
 #include <errl/errludparser.H>
-#include <util/align.H>
 #include <mbox/mbox_reasoncodes.H>
+
+#if defined(PARSER)
 
 namespace MBOX
 {
-#if defined(PARSER)
-
     /**
      * Parses mbox message user detail in an error log
      */
@@ -64,7 +63,7 @@ namespace MBOX
                              const uint32_t i_buflen) const
           {
               uint32_t * b32 = static_cast<uint32_t *>(i_pBuffer);
-              uint64_t * b64 = static_cast<uint64_t *>(b32 + 4);
+              uint64_t * b64 = reinterpret_cast<uint64_t *>(b32 + 4);
 
               uint32_t msg_id = ntohl(*b32);
               uint32_t msg_q_id = ntohl(*(b32+1));
@@ -74,28 +73,28 @@ namespace MBOX
               uint64_t msg_dta1 = ntohll(*(b64+1));
               uint64_t msg_extd = ntohll(*(b64+2));
 
-              i_parser.PrintNumber("MBOX message id:   0x%08x",msg_id);
-              i_parser.PrintNumber("MBOX queue id:     0x%08x",msg_q_id);
-              i_parser.PrintNumber("MBOX message type: 0x%08x",msg_type);
+              i_parser.PrintNumber("MBOX message id","0x%08x",msg_id);
+              i_parser.PrintNumber("MBOX queue id","0x%08x",msg_q_id);
+              i_parser.PrintNumber("MBOX message type","0x%08x",msg_type);
               if(msg_flag & 0x80000000)
               {
-                 i_parser.PrintString("MBOX mesage is synchronous");
+                 i_parser.PrintString(NULL, "MBOX mesage is synchronous");
               }
               else
               {
-                 i_parser.PrintString("MBOX message is asynchronous");
+                 i_parser.PrintString(NULL, "MBOX message is asynchronous");
               }
 
-              i_parser.PrintNumber("MBOX data[0]: 0x%016lx",msg_dta0);
-              i_parser.PrintNumber("MBOX data[1]: 0x%016lx",msg_dta1);
-              i_parser.PrintNumber("MBOX Extra data pointer: 0x%016lx",msg_extd);
+              i_parser.PrintNumber("MBOX data[0]","0x%016lx",msg_dta0);
+              i_parser.PrintNumber("MBOX data[1]","0x%016lx",msg_dta1);
+              i_parser.PrintNumber("MBOX Extra data pointer","0x%016lx",msg_extd);
 
 
               if(msg_extd != 0 && i_buflen > 40)
               {
-                  i_parser.PrintString("MBOX extra data:");
+                  i_parser.PrintString(NULL, "MBOX extra data:");
 
-                  uint8_t * b08 = static_cast<uint8_t *>(b64 + 3);
+                  uint8_t * b08 = reinterpret_cast<uint8_t *>(b64 + 3);
                   size_t len = i_buflen - 40;
 
                   i_parser.PrintHexDump(b08,len);
@@ -103,8 +102,14 @@ namespace MBOX
               }
           }
     };
+}
 
 #else
+
+#include <util/align.H>
+
+namespace MBOX
+{
     class UserDetailsMboxMsg : public ERRORLOG::ErrlUserDetails
     {
         public:
@@ -145,7 +150,7 @@ namespace MBOX
         ~UserDetailsMboxMsg() {}
         
     };
+}
 
 #endif
-};
 #endif

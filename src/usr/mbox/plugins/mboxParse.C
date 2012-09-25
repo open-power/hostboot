@@ -24,5 +24,5 @@
 #include <errl/errludparser.H>
 #include <mbox/mboxUdParserFactory.H>
 
-ERRL_MAKE_UD_PARSER(mbox::UserDetailsParserFactory, HBMBOX_COMP_ID)
+ERRL_MAKE_UD_PARSER(MBOX::UserDetailsParserFactory, HBMBOX_COMP_ID)
 

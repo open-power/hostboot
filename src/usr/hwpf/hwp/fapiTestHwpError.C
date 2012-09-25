@@ -55,11 +55,17 @@ fapi::ReturnCode hwpTestError(const fapi::Target & i_target)
 
     fapi::ReturnCode l_rc;
 
-    // Error RC_TEST_ERROR_B encountered, the error information requests that
-    // hwpTestAnalyzeError be called to analyze the error condition
-    FAPI_ERR("hwpTestError: Generating RC_TEST_ERROR_B");
-    const fapi::Target & MASTER_CHIP = i_target;
-    FAPI_SET_HWP_ERROR(l_rc, RC_TEST_ERROR_B);
+    // Local data that needs to be captured as FFDC
+    uint32_t l_ffdc = 0x12345678;
+    ecmdDataBufferBase l_buf(65);
+    l_buf.setBit(1);
+    l_buf.setBit(64);
+
+    FAPI_ERR("hwpTestError: Generating RC_TEST_ERROR_A");
+    const fapi::Target & UNIT_TEST_FFDC_MASTER_CHIP_TARGET = i_target;
+    uint32_t & UNIT_TEST_FFDC_DATA_INTEGER = l_ffdc;
+    ecmdDataBufferBase & UNIT_TEST_FFDC_DATA_BUF = l_buf;
+    FAPI_SET_HWP_ERROR(l_rc, RC_TEST_ERROR_A);
 
     // Log the error
     fapiLogError(l_rc);
@@ -72,8 +78,8 @@ fapi::ReturnCode hwpTestError(const fapi::Target & i_target)
     }
 
     // Generate the same error again
-    FAPI_ERR("hwpTestError: Generating RC_TEST_ERROR_B");
-    FAPI_SET_HWP_ERROR(l_rc, RC_TEST_ERROR_B);
+    FAPI_ERR("hwpTestError: Generating RC_TEST_ERROR_A again");
+    FAPI_SET_HWP_ERROR(l_rc, RC_TEST_ERROR_A);
 
     FAPI_INF("hwpTestError: End HWP");
     return l_rc;

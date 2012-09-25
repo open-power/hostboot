@@ -34,7 +34,6 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/proc_slw_build
 
 OBJS = fapiTestHwp.o \
        fapiTestHwpError.o \
-       fapiTestHwpAnalyzeError.o \
        fapiTestHwpFfdc.o \
        fapiTestHwpConfig.o \
        fapiTestHwpAttr.o \

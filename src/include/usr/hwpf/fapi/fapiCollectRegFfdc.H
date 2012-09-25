@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/hwpf/hwp/fapiTestHwpAnalyzeError.C $                  */
+/* $Source: src/include/usr/hwpf/fapi/fapiCollectRegFfdc.H $              */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2012                   */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -21,55 +21,48 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 /**
- *  @file fapiTestHwpAnalyzeError.C
+ *  @file fapiCollectRegFfdc.H
  *
- *  @brief Implements a simple test Hardware Procedure that analyzes an error
+ *  @brief Defines the fapiCollectRegFfdc function that collects chip register
+ *         FFDC data. This is called automatically by FAPI_SET_HWP_ERROR (when
+ *         a HWP creates an error) and FAPI_ADD_INFO_TO_HWP_ERROR (when an FFDC
+ *         HWP adds error information to an existing error) if the error XML
+ *         contains a <collectRegisterFfdc> element. This function should not
+ *         be called directly by any user code. The function implementation is
+ *         automatically generated from FAPI Error XML files.
  */
 
 /*
  * Change Log ******************************************************************
  * Flag     Defect/Feature  User        Date        Description
  * ------   --------------  ----------  ----------- ----------------------------
- *                          mjjones     10/17/2011  Created (moved from other file)
- *
- *  HWP_IGNORE_VERSION_CHECK
+ *                          mjjones     09/19/2012  Created.
  */
 
-#include <fapiTestHwpAnalyzeError.H>
+#ifndef FAPICOLLECTREGFFDC_H_
+#define FAPICOLLECTREGFFDC_H_
 
-extern "C"
+#include <fapiHwpErrorInfo.H>
+
+namespace fapi
 {
 
-//******************************************************************************
-// hwpTestAnalyzeError function
-//******************************************************************************
-fapi::ReturnCode hwpTestAnalyzeError(const fapi::Target & i_target)
-{
-    FAPI_INF("hwpTestAnalyzeError: Start HWP (analysis HWP)");
+class Target;
+class ReturnCode;
 
-    // This HWP analyses an error condition to decide what the error actually is
-    // In real life, this HWP may look at chip error registers
-    fapi::ReturnCode l_rc;
-
-    // Local FFDC that needs to be captured
-    uint32_t l_ffdc = 0x12345678;
-
-    // Local ecmdDataBufferBase that needs to be captured
-    ecmdDataBufferBase l_buf(65);
-    l_buf.setBit(1);
-    l_buf.setBit(64);
-
-    // Analysis reveals that the error is RC_TEST_ERROR_A
-    FAPI_ERR("hwpTestAnalyzeError: Generating RC_TEST_ERROR_A");
-
-    // Generate error
-    const fapi::Target & MASTER_CHIP = i_target;
-    uint32_t & FFDC_DATA_1 = l_ffdc;
-    ecmdDataBufferBase & FFDC_DATA_BUF = l_buf;
-    FAPI_SET_HWP_ERROR(l_rc, RC_TEST_ERROR_A);
-
-    FAPI_INF("hwpTestAnalyzeError: End HWP");
-    return l_rc;
+/**
+ * @brief Collects Register FFDC from a chip
+ *
+ * This should only be called by FAPI during FAPI_SET_HWP_ERROR or
+ * FAPI_ADD_INFO_TO_HWP_ERROR
+ *
+ * @param[in]  i_target Reference to Target to collect FFDC from
+ * @param[in]  i_ffdcId FFDC Identifier
+ * @param[out] o_rc     Reference to ReturnCode that FFDC is added to
+ */
+void fapiCollectRegFfdc(const fapi::Target & i_target,
+                        const fapi::HwpFfdcId i_ffdcId,
+                        fapi::ReturnCode & o_rc);
 }
 
-}
+#endif

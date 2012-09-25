@@ -44,6 +44,7 @@
  *                          mjjones     03/16/2012  Allow different PLAT errors
  *                          brianh      07/31/2012  performance/size optimizations
  *                          mjjones     08/14/2012  Created getCreateReturnCodeDataRef
+ *                          mjjones     09/19/2012  Add FFDC ID to error info
  */
 
 #ifndef FAPIRETURNCODE_H_
@@ -59,18 +60,30 @@
 #include <fapiHwpErrorInfo.H>
 #include <fapiPlatTrace.H>
 #include <fapiHwpReturnCodes.H>
+#include <fapiCollectRegFfdc.H>
 
 /**
  * @brief Set HWP Error macro
  *
- * This macro should be used by a HWP to set an error code if there is
- * associated Error Information (in the Error Information XML file) that
- * needs to be processed
+ * This macro should be used by a HWP to create an error. The ReturnCode's
+ * internal return code is set and any error information in the Error XML file
+ * is added to the ReturnCode
  */
 #define FAPI_SET_HWP_ERROR(RC, ERROR) \
     RC._setHwpError(fapi::ERROR); \
-    ERROR##_CALL_FUNC_TO_ANALYZE_ERROR(RC); \
     ERROR##_CALL_FUNCS_TO_COLLECT_FFDC(RC); \
+    ERROR##_CALL_FUNCS_TO_COLLECT_REG_FFDC(RC); \
+    ERROR##_ADD_ERROR_INFO(RC)
+
+/**
+ * @brief Add info to HWP Error macro
+ *
+ * This macro should be used by an FFDC HWP to add error information from an
+ * Error XML file to an existing error.
+ */
+#define FAPI_ADD_INFO_TO_HWP_ERROR(RC, ERROR) \
+    ERROR##_CALL_FUNCS_TO_COLLECT_FFDC(RC); \
+    ERROR##_CALL_FUNCS_TO_COLLECT_REG_FFDC(RC); \
     ERROR##_ADD_ERROR_INFO(RC)
 
 namespace fapi
@@ -90,8 +103,12 @@ class ReturnCodeDataRef;
  *      function associates heap based PlatData to the ReturnCode (use-case is
  *      an error log).
  * HWP  can set an error in the ReturnCode by calling FAPI_SET_HWP_ERROR, this
- *      macro adds any error information associated with the HWP error to the
- *      ReturnCode (error information is documented in an error XML file).
+ *      macro adds any error information specified in the error XML file to the
+ *      ReturnCode
+ * HWP  can add error information to a ReturnCode that already contains an
+ *      error by calling FAPI_ADD_INFO_TO_HWP_ERROR, this is called by HWPs
+ *      that are specifically written to collect FFDC. This macro adds any error
+ *      information specified in the error XML file to the ReturnCode
  * FAPI/PLAT/HWP can set an ecmdDataBufferBase error in the ReturnCode by
  *               calling setEcmdError
  *
@@ -274,17 +291,18 @@ public:
      */
     struct ErrorInfoEntry
     {
-        uint8_t iv_type  : 3; // The type of ErrorInfo (from ErrorInfoType enum)
-        uint8_t iv_object: 5; // Which object in the i_pObjects array passed to
-                              // addErrorInfo the ErrorInfoEntry is for
-        int16_t  iv_data1;    // EI_TYPE_FFDC   : Size of FFDC
-                              // EI_TYPE_CALLOUT: CalloutPriority
+        uint8_t iv_type;   // The type of ErrorInfo (from ErrorInfoType enum)
+        uint8_t iv_object; // Which object in the i_pObjects array the
+                           // ErrorInfoEntry refers to
+        int16_t  iv_data1; // EI_TYPE_FFDC   : Size of FFDC
+                           // EI_TYPE_CALLOUT: CalloutPriority
+        uint32_t iv_data2; // EI_TYPE_FFDC   : FFDC Id
     };
 
     /**
      * @brief Add ErrorInfo
      *
-     * This is called by the FAPI_SET_HWP_ERROR macro to add ErrorInfo to the
+     * This is called by the FAPI_SET_HWP_ERROR and macro to add ErrorInfo to the
      * ReturnCode when a HWP generates an error. The function is designed to add
      * all the ErrorInfo at once rather than the FAPI_SET_HWP_ERROR macro making
      * multiple function calls to add each piece of ErrorInfo individually in
@@ -304,17 +322,15 @@ public:
     /**
      * @brief Add a copy of FFDC to the ErrorInfo
      *
-     * This is called by:
-     * - addErrorInfo
-     * - ReturnCodeFfdc::addEIFfdc (function template)
+     * This is called by addErrorInfo
      *
+     * @param[in] i_ffdcId FFDC Identifier - used for decoding
      * @param[in] i_pFfdc Pointer to the FFDC to copy
      * @param[in] i_size  Size of the FFDC to copy
-     * @param[in] i_type  Type of the FFDC to copy
      */
-    void addEIFfdc(const void * i_pFfdc,
-                   const uint32_t i_size,
-                   const FfdcType i_type);
+    void addEIFfdc(const uint32_t i_ffdcId,
+                   const void * i_pFfdc,
+                   const uint32_t i_size);
 
     /**
      * @brief Get a pointer to any ErrorInfo 
@@ -399,7 +415,7 @@ private:
 /**
  * @namespace ReturnCodeFfdc
  *
- * This namespace contains a template functions for adding FFDC data to a
+ * This namespace contains template functions used for adding FFDC data to a
  * ReturnCode. They cannot be a ReturnCode member functions because a function
  * template cannot be specialized within a class
  */
@@ -463,73 +479,6 @@ namespace ReturnCodeFfdc
     {
         Error_PtrPassedToGetErrorInfoFfdcSize();
         return 0;
-    }
-
-    /**
-     * @brief Add a copy of FFDC to the ErrorInfo in a ReturnCode
-     *
-     * This is called by FFDC HWPs
-     *
-     * @param[out] o_rc   Reference to ReturnCode to copy FFDC to
-     * @param[in]  i_ffdc Reference to FFDC to copy
-     */
-    template<typename T>
-    void addEIFfdc(ReturnCode & o_rc,
-                   const T & i_ffdc)
-    {
-        o_rc.addEIFfdc(&i_ffdc, sizeof(T), FFDC_TYPE_DATA);
-    }
-
-    /**
-     * @brief Specialization of addEIFfdc for ecmdDataBufferBase
-     *
-     * @param[out] o_rc   Reference to ReturnCode to copy FFDC to
-     * @param[in]  i_ffdc Reference to ecmdDataBufferBase to copy
-     */
-    template<>
-    inline void addEIFfdc<ecmdDataBufferBase>(ReturnCode & o_rc,
-                                              const ecmdDataBufferBase & i_ffdc)
-    {
-        uint32_t * l_pData = new uint32_t[i_ffdc.getWordLength()];
-
-        // getWordLength rounds up to the next 32bit boundary, ensure that after
-        // extracting, any unset bits are zero
-        l_pData[i_ffdc.getWordLength() - 1] = 0;
-
-        // Deliberately not checking return code from extract to save code space
-        i_ffdc.extract(l_pData, 0, i_ffdc.getBitLength());
-        o_rc.addEIFfdc(l_pData, (i_ffdc.getWordLength() * 4),
-                       FFDC_TYPE_ECMDDBB);
-        delete [] l_pData;
-    }
-
-    /**
-     * @brief Specialization of addEIFfdc for fapi::Target
-     *
-     * @param[out] o_rc   Reference to ReturnCode to copy FFDC to
-     * @param[in]  i_ffdc Reference to fapi::Target to add FFDC for
-     */
-    template<>
-    inline void addEIFfdc<fapi::Target>(ReturnCode & o_rc,
-                                        const fapi::Target & i_ffdc)
-    {
-        const char * l_ecmdString = i_ffdc.toEcmdString();
-        o_rc.addEIFfdc(l_ecmdString, (strlen(l_ecmdString) + 1),
-                       FFDC_TYPE_TARGET);
-    }
-
-    /**
-     * @brief Compile error if caller tries to add a pointer as FFDC
-     *
-     * If this function template is instantiated, the compile will fail due to
-     * the construction of an undefined class.
-     */
-    class Error_PtrPassedToAddEIFfdc;
-    template<typename T>
-    void addEIFfdc(ReturnCode &,
-                   const T *)
-    {
-        Error_PtrPassedToAddEIFfdc();
     }
 }
 

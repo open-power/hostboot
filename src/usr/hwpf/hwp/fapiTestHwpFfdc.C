@@ -54,7 +54,9 @@ fapi::ReturnCode hwpTestFfdc1(const fapi::Target & i_target,
     // Collect a uint64_t worth of FFDC
     uint64_t l_ffdc = 0x1122334455667788ULL;
 
-    fapi::ReturnCodeFfdc::addEIFfdc(o_rc, l_ffdc);
+    // Add FFDC specified by RC_TEST_ERROR_B
+    uint64_t & UNIT_TEST_FFDC_DATA = l_ffdc;
+    FAPI_ADD_INFO_TO_HWP_ERROR(o_rc, RC_TEST_ERROR_B);
 
     FAPI_INF("hwpTestFfdc1: End HWP");
     return fapi::FAPI_RC_SUCCESS;

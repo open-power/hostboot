@@ -1,26 +1,26 @@
 #!/usr/bin/perl
-#  IBM_PROLOG_BEGIN_TAG
-#  This is an automatically generated prolog.
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
 #
-#  $Source: src/usr/hwpf/fapi/fapiParseErrorInfo.pl $
+# $Source: src/usr/hwpf/fapi/fapiParseErrorInfo.pl $
 #
-#  IBM CONFIDENTIAL
+# IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2011-2012
+# COPYRIGHT International Business Machines Corp. 2011,2012
 #
-#  p1
+# p1
 #
-#  Object Code Only (OCO) source materials
-#  Licensed Internal Code Source Materials
-#  IBM HostBoot Licensed Internal Code
+# Object Code Only (OCO) source materials
+# Licensed Internal Code Source Materials
+# IBM HostBoot Licensed Internal Code
 #
-#  The source code for this program is not published or other-
-#  wise divested of its trade secrets, irrespective of what has
-#  been deposited with the U.S. Copyright Office.
+# The source code for this program is not published or otherwise
+# divested of its trade secrets, irrespective of what has been
+# deposited with the U.S. Copyright Office.
 #
-#  Origin: 30
+# Origin: 30
 #
-#  IBM_PROLOG_END_TAG
+# IBM_PROLOG_END_TAG
 #
 # Purpose:  This perl script will parse HWP Error XML files and create required
 #           FAPI code. The FAPI files created are:
@@ -48,6 +48,8 @@
 #                  mjjones   05/15/12  Detect duplicate error rcs
 #                  mjjones   05/21/12  Detect duplicate ids/hashes across files
 #                  mjjones   06/27/12  Add assembler output for SBE usage
+#                  mjjones   09/19/12  Generate FFDC ID enumeration
+#                                      Generate fapiCollectRegFfdc.C file
 #
 # End Change Log ******************************************************
 
@@ -63,6 +65,44 @@ use strict;
 # space (i.e. parse errors that do not make sense).
 #------------------------------------------------------------------------------
 $XML::Simple::PREFERRED_PARSER = 'XML::Parser';
+
+#------------------------------------------------------------------------------
+# Specify perl modules to use
+#------------------------------------------------------------------------------
+use Digest::MD5 qw(md5_hex);
+use XML::Simple;
+my $xml = new XML::Simple (KeyAttr=>[]);
+
+# Uncomment to enable debug output
+#use Data::Dumper;
+
+#------------------------------------------------------------------------------
+# Print Command Line Help
+#------------------------------------------------------------------------------
+my $numArgs = $#ARGV + 1;
+if ($numArgs < 2)
+{
+    print ("Usage: fapiParseErrorInfo.pl <output dir> <filename1> <filename2> ...\n");
+    print ("  This perl script will parse HWP Error XML files and create\n");
+    print ("  the following files:\n");
+    print ("  - fapiHwpReturnCodes.H. HwpReturnCode enumeration (HWP generated errors)\n");
+    print ("  - fapiHwpErrorInfo.H.   Error information (used by FAPI_SET_HWP_ERROR\n");
+    print ("                          when a HWP generates an error)\n");
+    print ("  - fapiCollectRegFfdc.C. Function to collect register FFDC\n");
+    exit(1);
+}
+
+#------------------------------------------------------------------------------
+# Hashes containing error names/enum-values
+#------------------------------------------------------------------------------
+my %errNameToValueHash;
+my %errValuePresentHash;
+
+#------------------------------------------------------------------------------
+# Hashes containing ffdc names/enum-values
+#------------------------------------------------------------------------------
+my %ffdcNameToValueHash;
+my %ffdcValuePresentHash;
 
 #------------------------------------------------------------------------------
 # Subroutine that checks if an entry exists in an array. If it doesn't exist
@@ -97,29 +137,93 @@ sub addEntryToArray
 }
 
 #------------------------------------------------------------------------------
-# Print Command Line Help
+# Subroutine that figures out an error enum value from an error name and stores
+# it in global hashes
 #------------------------------------------------------------------------------
-my $numArgs = $#ARGV + 1;
-if ($numArgs < 2)
+sub setErrorEnumValue
 {
-    print ("Usage: fapiParseErrorInfo.pl <output dir> <filename1> <filename2> ...\n");
-    print ("  This perl script will parse HWP Error XML files and create\n");
-    print ("  the following files:\n");
-    print ("  - fapiHwpReturnCodes.H. HwpReturnCode enumeration (HWP generated errors)\n");
-    print ("  - fapiHwpErrorInfo.H.   Error information (used by FAPI_SET_HWP_ERROR\n");
-    print ("                          when a HWP generates an error)\n");
-    exit(1);
+    my $name = $_[0];
+
+    #--------------------------------------------------------------------------
+    # Check that the error name is not a duplicate
+    #--------------------------------------------------------------------------
+    if (exists($errNameToValueHash{$name}))
+    {
+        # Two different errors with the same name!
+        print ("fapiParseErrorInfo.pl ERROR. Duplicate error name ", $name, "\n");
+        exit(1);
+    }
+
+    #--------------------------------------------------------------------------
+    # Figure out the error enum-value. This is a hash value generated from
+    # the error name. A hash is used for Cronus so that if a HWP is not
+    # recompiled against a new eCMD/Cronus version where the errors have
+    # changed then there will not be a mismatch in error values.
+    # This is a 24bit hash value because FAPI has a requirement that the
+    # top byte of the 32 bit error value be zero to store flags indicating
+    # the creator of the error
+    #--------------------------------------------------------------------------
+    my $errHash128Bit = md5_hex($name);
+    my $errHash24Bit = substr($errHash128Bit, 0, 6);
+
+    #--------------------------------------------------------------------------
+    # Check that the error enum-value is not a duplicate
+    #--------------------------------------------------------------------------
+    if (exists($errValuePresentHash{$errHash24Bit}))
+    {
+        # Two different errors generate the same hash-value!
+        print ("fapiParseAttributeInfo.pl ERROR. Duplicate error hash value\n");
+        exit(1);
+    }
+
+    #--------------------------------------------------------------------------
+    # Update the hashes with the error name and ID
+    #--------------------------------------------------------------------------
+    $errValuePresentHash{$errHash24Bit} = 1;
+    $errNameToValueHash{$name} = $errHash24Bit;
 }
 
 #------------------------------------------------------------------------------
-# Specify perl modules to use
+# Subroutine that figures out an FFDC enum value from an FFDC name and stores
+# it in global hashes
 #------------------------------------------------------------------------------
-use Digest::MD5 qw(md5_hex);
-use XML::Simple;
-my $xml = new XML::Simple (KeyAttr=>[]);
+sub setFfdcEnumValue
+{
+    my $name = $_[0];
 
-# Uncomment to enable debug output
-#use Data::Dumper;
+    #--------------------------------------------------------------------------
+    # Check that the FFDC name is not a duplicate
+    #--------------------------------------------------------------------------
+    if (exists($ffdcNameToValueHash{$name}))
+    {
+        # Two different FFDCs with the same name!
+        print ("fapiParseErrorInfo.pl ERROR. Duplicate FFDC name ", $name, "\n");
+        exit(1);
+    }
+
+    #--------------------------------------------------------------------------
+    # Figure out the FFDC enum-value. This is a hash value generated from
+    # the FFDC name.
+    #--------------------------------------------------------------------------
+    my $ffdcHash128Bit = md5_hex($name);
+    my $ffdcHash32Bit = substr($ffdcHash128Bit, 0, 8);
+
+    #--------------------------------------------------------------------------
+    # Check that the error enum-value is not a duplicate
+    #--------------------------------------------------------------------------
+    if (exists($ffdcValuePresentHash{$ffdcHash32Bit}))
+    {
+        # Two different FFDCs generate the same hash-value!
+        print ("fapiParseAttributeInfo.pl ERROR. Duplicate FFDC hash value\n");
+        exit(1);
+    }
+
+    #--------------------------------------------------------------------------
+    # Update the hashes with the error name and ID
+    #--------------------------------------------------------------------------
+    $ffdcValuePresentHash{$ffdcHash32Bit} = 1;
+    $ffdcNameToValueHash{$name} = $ffdcHash32Bit;
+}
 
 #------------------------------------------------------------------------------
 # Open output files for writing
@@ -134,6 +238,11 @@ $eiFile .= "/";
 $eiFile .= "fapiHwpErrorInfo.H";
 open(EIFILE, ">", $eiFile);
 
+my $crFile = $ARGV[0];
+$crFile .= "/";
+$crFile .= "fapiCollectRegFfdc.C";
+open(CRFILE, ">", $crFile);
+
 #------------------------------------------------------------------------------
 # Print start of file information to fapiHwpErrorInfo.H
 #------------------------------------------------------------------------------
@@ -142,21 +251,37 @@ print EIFILE "// This file is generated by perl script fapiParseErrorInfo.pl\n\n
 print EIFILE "#ifndef FAPIHWPERRORINFO_H_\n";
 print EIFILE "#define FAPIHWPERRORINFO_H_\n\n";
 print EIFILE "/**\n";
-print EIFILE " * \@brief Error Information macros\n";
+print EIFILE " * \@brief Error Information macros and HwpFfdcId enumeration\n";
 print EIFILE " *\/\n";
 
 #------------------------------------------------------------------------------
-# Element names
+# Print start of file information to fapiCollectRegFfdc.C
 #------------------------------------------------------------------------------
-my $hwpError = 'hwpError';
-my $collectFfdc = 'collectFfdc';
-my $ffdc = 'ffdc';
-my $callout = 'callout';
-my $deconfigure = 'deconfigure';
-my $gard = 'gard';
-
-my %errNameToErrValueHash;
-my %errValuePresentHash;
+print CRFILE "// fapiCollectRegFfdc.C\n";
+print CRFILE "// This file is generated by perl script fapiParseErrorInfo.pl\n\n";
+print CRFILE "#include <stdint.h>\n";
+print CRFILE "#include <vector>\n";
+print CRFILE "#include <ecmdDataBufferBase.H>\n";
+print CRFILE "#include <fapiCollectRegFfdc.H>\n";
+print CRFILE "#include <fapiTarget.H>\n";
+print CRFILE "#include <fapiReturnCode.H>\n";
+print CRFILE "#include <fapiHwAccess.H>\n\n";
+print CRFILE "namespace fapi\n";
+print CRFILE "{\n";
+print CRFILE "void fapiCollectRegFfdc(const fapi::Target & i_target,\n";
+print CRFILE "                        const fapi::HwpFfdcId i_ffdcId,\n";
+print CRFILE "                        fapi::ReturnCode & o_rc)\n";
+print CRFILE "{\n";
+print CRFILE "    FAPI_INF(\"fapiCollectRegFfdc. FFDC ID: 0x%x\", i_ffdcId);\n";
+print CRFILE "    fapi::ReturnCode l_rc;\n";
+print CRFILE "    ecmdDataBufferBase l_buf;\n";
+print CRFILE "    uint32_t l_cfamData = 0;\n";
+print CRFILE "    uint64_t l_scomData = 0;\n";
+print CRFILE "    std::vector<uint32_t> l_cfamAddresses;\n";
+print CRFILE "    std::vector<uint64_t> l_scomAddresses;\n";
+print CRFILE "    uint32_t l_ffdcSize = 0;\n\n";
+print CRFILE "    switch (i_ffdcId)\n";
+print CRFILE "    {\n";
 
 #------------------------------------------------------------------------------
 # For each XML file
@@ -171,7 +296,8 @@ foreach my $argnum (1 .. $#ARGV)
     # elements even if there is only one element
     #--------------------------------------------------------------------------
     my $errors = $xml->XMLin($infile, ForceArray =>
-        [$hwpError, $collectFfdc, $ffdc, $callout, $deconfigure, $gard]);
+        ['hwpError', 'collectFfdc', 'ffdc', 'callout', 'deconfigure', 'gard',
+         'registerFfdc', 'collectRegisterFfdc', 'cfamRegister', 'scomRegister']);
 
     # Uncomment to get debug output of all errors
     #print "\nFile: ", $infile, "\n", Dumper($errors), "\n";
@@ -197,57 +323,9 @@ foreach my $argnum (1 .. $#ARGV)
         }
 
         #----------------------------------------------------------------------
-        # Check that the error name is not a duplicate
-        #----------------------------------------------------------------------
-        if (exists($errNameToErrValueHash{$err->{rc}}))
-        {
-            # Two different errors with the same name!
-            print ("fapiParseErrorInfo.pl ERROR. Duplicate error name ",
-                $err->{rc}, "\n");
-            exit(1);
-        }
-
-        #----------------------------------------------------------------------
-        # Figure out the error value. This is a hash value generated from the
-        # error name. This is done for Cronus so that if a HWP is not
-        # recompiled against a new eCMD/Cronus version where the errors have
-        # changed then there will not be a mismatch in error values.
-        # This is a 24bit hash value because FAPI has a requirement that the
-        # top byte of the 32 bit error value be zero to store flags indicating
-        # the creator of the error
-        #----------------------------------------------------------------------
-        my $errHash128Bit = md5_hex($err->{rc});
-        my $errHash24Bit = substr($errHash128Bit, 0, 6);
-
-        #----------------------------------------------------------------------
-        # Check that the error value is not a duplicate
-        #----------------------------------------------------------------------
-        if (exists($errValuePresentHash{$errHash24Bit}))
-        {
-            # Two different errors generate the same hash-value!
-            print ("fapiParseAttributeInfo.pl ERROR. Duplicate error hash value\n");
-            exit(1);
-        }
-
-        #----------------------------------------------------------------------
-        # Update the hashes with the error name and ID
-        #----------------------------------------------------------------------
-        $errValuePresentHash{$errHash24Bit} = 1;
-        $errNameToErrValueHash{$err->{rc}} = $errHash24Bit;
-
-        #----------------------------------------------------------------------
-        # Print the CALL_FUNC_TO_ANALYZE_ERROR macro to fapiHwpErrorInfo.H
-        #----------------------------------------------------------------------
-        print EIFILE "#define $err->{rc}_CALL_FUNC_TO_ANALYZE_ERROR(RC) ";
-
-        if (exists $err->{callFunc})
-        {
-            print EIFILE "FAPI_EXEC_HWP(RC, $err->{callFunc})\n";
-        }
-        else
-        {
-            print EIFILE "\n";
-        }
+        # Set the error enum value in a global hash
+        #---------------------------------------------------------------------
+        setErrorEnumValue($err->{rc});
 
         #----------------------------------------------------------------------
         # Print the CALL_FUNCS_TO_COLLECT_FFDC macro to fapiHwpErrorInfo.H
@@ -274,6 +352,34 @@ foreach my $argnum (1 .. $#ARGV)
         print EIFILE "\n";
 
         #----------------------------------------------------------------------
+        # Print the CALL_FUNCS_TO_COLLECT_REG_FFDC macro to fapiHwpErrorInfo.H
+        #----------------------------------------------------------------------
+        print EIFILE "#define $err->{rc}_CALL_FUNCS_TO_COLLECT_REG_FFDC(RC) ";
+
+        foreach my $collectRegisterFfdc (@{$err->{collectRegisterFfdc}})
+        {
+            #------------------------------------------------------------------
+            # Check that expected fields are present
+            #----------------------------------------------------------------------
+            if (! exists $collectRegisterFfdc->{id})
+            {
+                print ("fapiParseErrorInfo.pl ERROR. id missing from collectRegisterFfdc\n");
+                exit(1);
+            }
+
+            if (! exists $collectRegisterFfdc->{target})
+            {
+                print ("fapiParseErrorInfo.pl ERROR. target missing from collectRegisterFfdc\n");
+                exit(1);
+            }
+
+            print EIFILE "fapiCollectRegFfdc($collectRegisterFfdc->{target}, ";
+            print EIFILE "fapi::$collectRegisterFfdc->{id}, RC); ";
+        }
+
+        print EIFILE "\n";
+
+        #----------------------------------------------------------------------
         # Print the ADD_ERROR_INFO macro to fapiHwpErrorInfo.H
         #----------------------------------------------------------------------
         print EIFILE "#define $err->{rc}_ADD_ERROR_INFO(RC) ";
@@ -288,6 +394,11 @@ foreach my $argnum (1 .. $#ARGV)
         # Local FFDC
         foreach my $ffdc (@{$err->{ffdc}})
         {
+            # Set the FFDC enum value in a global hash. The name is <rc>_<ffdc>
+            my $ffdcName = $err->{rc} . "_";
+            $ffdcName = $ffdcName . $ffdc;
+            setFfdcEnumValue($ffdcName);
+
             # Add the FFDC data to the EI Object array if it doesn't already exist
             my $objNum = addEntryToArray(\@eiObjects, $ffdc);
 
@@ -296,7 +407,7 @@ foreach my $argnum (1 .. $#ARGV)
             {
                 $eiEntryStr .= ", ";
             }
-            $eiEntryStr .= "{fapi::ReturnCode::EI_TYPE_FFDC, $objNum, fapi::ReturnCodeFfdc::getErrorInfoFfdcSize($ffdc)}";
+            $eiEntryStr .= "{fapi::ReturnCode::EI_TYPE_FFDC, $objNum, fapi::ReturnCodeFfdc::getErrorInfoFfdcSize($ffdc), fapi::$ffdcName}";
             $eiEntryCount++;
         }
 
@@ -326,7 +437,7 @@ foreach my $argnum (1 .. $#ARGV)
             {
                 $eiEntryStr .= ", ";
             }
-            $eiEntryStr .= "{fapi::ReturnCode::EI_TYPE_CALLOUT, $objNum, fapi::PRI_$callout->{priority}}";
+            $eiEntryStr .= "{fapi::ReturnCode::EI_TYPE_CALLOUT, $objNum, fapi::PRI_$callout->{priority}, 0}";
             $eiEntryCount++;
         }
 
@@ -350,7 +461,7 @@ foreach my $argnum (1 .. $#ARGV)
             {
                 $eiEntryStr .= ", ";
             }
-            $eiEntryStr .= "{fapi::ReturnCode::EI_TYPE_DECONF, $objNum}";
+            $eiEntryStr .= "{fapi::ReturnCode::EI_TYPE_DECONF, $objNum, 0, 0}";
             $eiEntryCount++;
         }
 
@@ -374,7 +485,7 @@ foreach my $argnum (1 .. $#ARGV)
             {
                 $eiEntryStr .= ", ";
             }
-            $eiEntryStr .= "{fapi::ReturnCode::EI_TYPE_GARD, $objNum}";
+            $eiEntryStr .= "{fapi::ReturnCode::EI_TYPE_GARD, $objNum, 0, 0}";
             $eiEntryCount++;
         }
 
@@ -403,7 +514,114 @@ foreach my $argnum (1 .. $#ARGV)
         }
         print EIFILE "\n\n";
     }
+
+    #--------------------------------------------------------------------------
+    # For each registerFfdc.
+    #--------------------------------------------------------------------------
+    foreach my $registerFfdc (@{$errors->{registerFfdc}})
+    {
+        #----------------------------------------------------------------------
+        # Check that expected fields are present
+        #----------------------------------------------------------------------
+        if (! exists $registerFfdc->{id})
+        {
+            print ("fapiParseErrorInfo.pl ERROR. id missing from registerFfdc\n");
+            exit(1);
+        }
+
+        #----------------------------------------------------------------------
+        # Set the FFDC enum value in a global hash
+        #----------------------------------------------------------------------
+        setFfdcEnumValue($registerFfdc->{id});
+
+        #----------------------------------------------------------------------
+        # Generate code to capture the registers in fapiCollectRegFfdc.C
+        #----------------------------------------------------------------------
+        print CRFILE "        case $registerFfdc->{id}:\n";
+
+        # Look for CFAM Register addresses
+        foreach my $cfamRegister (@{$registerFfdc->{cfamRegister}})
+        {
+            # Extract the address
+            if ($cfamRegister =~ m/(0x\d+)/)
+            {
+                print CRFILE "            l_cfamAddresses.push_back($1);\n";
+                print CRFILE "            l_ffdcSize += sizeof(l_cfamData);\n";
+            }
+            else
+            {
+                print ("fapiParseErrorInfo.pl ERROR. CFAM address bad: $cfamRegister\n");
+                exit(1);
+            }
+        }
+
+        # Look for SCOM Register addresses
+        foreach my $scomRegister (@{$registerFfdc->{scomRegister}})
+        {
+            # Extract the address
+            if ($scomRegister =~ m/(0x[\dA-Za-z]+)/)
+            {
+                print CRFILE "            l_scomAddresses.push_back($1);\n";
+                print CRFILE "            l_ffdcSize += sizeof(l_scomData);\n";
+            }
+            else
+            {
+                print ("fapiParseErrorInfo.pl ERROR. SCOM address bad: $scomRegister\n");
+                exit(1);
+            }
+        }
+
+        print CRFILE "            break;\n";
+    }
+
 }
+
+#------------------------------------------------------------------------------
+# Print end of file information to fapiCollectRegFfdc.C
+#------------------------------------------------------------------------------
+print CRFILE "        default:\n";
+print CRFILE "            FAPI_ERR(\"fapiCollectRegFfdc.C: Invalid FFDC ID 0x%x\", ";
+print CRFILE                     "i_ffdcId);\n";
+print CRFILE "            return;\n";
+print CRFILE "    }\n\n";
+print CRFILE "    uint8_t * l_pBuf = new uint8_t[l_ffdcSize];\n";
+print CRFILE "    uint8_t * l_pData = l_pBuf;\n\n";
+print CRFILE "    for (uint32_t i = 0; i < l_cfamAddresses.size(); i++)\n";
+print CRFILE "    {\n";
+print CRFILE "        l_rc = fapiGetCfamRegister(i_target, l_cfamAddresses[i], l_buf);\n";
+print CRFILE "        if (l_rc)\n";
+print CRFILE "        {\n";
+print CRFILE "            FAPI_ERR(\"fapiCollectRegFfdc.C: CFAM error for 0x%x\",";
+print CRFILE                     "l_cfamAddresses[i]);\n";
+print CRFILE "            l_cfamData = 0xbaddbadd;\n";
+print CRFILE "        }\n";
+print CRFILE "        else\n";
+print CRFILE "        {\n";
+print CRFILE "            l_cfamData = l_buf.getWord(0);\n";
+print CRFILE "        }\n";
+print CRFILE "        *(reinterpret_cast<uint32_t *>(l_pData)) = l_cfamData;\n";
+print CRFILE "        l_pData += sizeof(l_cfamData);\n";
+print CRFILE "    }\n\n";
+print CRFILE "    for (uint32_t i = 0; i < l_scomAddresses.size(); i++)\n";
+print CRFILE "    {\n";
+print CRFILE "        l_rc = fapiGetScom(i_target, l_scomAddresses[i], l_buf);\n";
+print CRFILE "        if (l_rc)\n";
+print CRFILE "        {\n";
+print CRFILE "            FAPI_ERR(\"fapiCollectRegFfdc.C: SCOM error for 0x%x\",";
+print CRFILE                     "l_scomAddresses[i]);\n";
+print CRFILE "            l_scomData = 0xbaddbaddbaddbadd;\n";
+print CRFILE "        }\n";
+print CRFILE "        else\n";
+print CRFILE "        {\n";
+print CRFILE "            l_scomData = l_buf.getDoubleWord(0);\n";
+print CRFILE "        }\n";
+print CRFILE "        *(reinterpret_cast<uint64_t *>(l_pData)) = l_scomData;\n";
+print CRFILE "        l_pData += sizeof(l_scomData);\n";
+print CRFILE "    }\n\n";
+print CRFILE "    o_rc.addEIFfdc(i_ffdcId, l_pBuf, l_ffdcSize);\n";
+print CRFILE "    delete [] l_pBuf;\n";
+print CRFILE "}\n";
+print CRFILE "}\n";
 
 #------------------------------------------------------------------------------
 # Print the fapiHwpReturnCodes.H file
@@ -420,19 +638,37 @@ print RCFILE " * \@brief Enumeration of HWP return codes\n";
 print RCFILE " *\/\n";
 print RCFILE "enum HwpReturnCode\n";
 print RCFILE "{\n";
-foreach my $key (keys %errNameToErrValueHash)
+foreach my $key (keys %errNameToValueHash)
 {
-    print RCFILE "    $key = 0x$errNameToErrValueHash{$key},\n";
+    print RCFILE "    $key = 0x$errNameToValueHash{$key},\n";
 }
 print RCFILE "};\n\n";
 print RCFILE "}\n\n";
 print RCFILE "#else\n";
-foreach my $key (keys %errNameToErrValueHash)
+foreach my $key (keys %errNameToValueHash)
 {
-    print RCFILE "    .set $key, 0x$errNameToErrValueHash{$key}\n";
+    print RCFILE "    .set $key, 0x$errNameToValueHash{$key}\n";
 }
 print RCFILE "#endif\n";
 print RCFILE "#endif\n";
+
+#------------------------------------------------------------------------------
+# Print the HwpFfdcId enumeration to fapiHwpErrorInfo.H
+#------------------------------------------------------------------------------
+print EIFILE "namespace fapi\n";
+print EIFILE "{\n\n";
+print EIFILE "/**\n";
+print EIFILE " * \@brief Enumeration of FFDC identifiers\n";
+print EIFILE " *\/\n";
+print EIFILE "enum HwpFfdcId\n";
+print EIFILE "{\n";
+foreach my $key (keys %ffdcNameToValueHash)
+{
+    print EIFILE "    $key = 0x$ffdcNameToValueHash{$key},\n";
+}
+print EIFILE "};\n\n";
+print EIFILE "}\n\n";
+
 
 #------------------------------------------------------------------------------
 # Print end of file information to fapiHwpErrorInfo.H
@@ -444,4 +680,5 @@ print EIFILE "\n\n#endif\n";
 #------------------------------------------------------------------------------
 close(RCFILE);
 close(EIFILE);
+close(CRFILE);
 

@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/plat/fapiPlatHwpInvoker.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2011-2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/plat/fapiPlatHwpInvoker.C $                      */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  *  @file fapiPlatHwpInvoker.C
  *
@@ -46,36 +45,27 @@ void processEIFfdcs(const ErrorInfo & i_errInfo,
 {
     // Iterate through the FFDC sections, adding each to the error log
     uint32_t l_size = 0;
-    const void * l_pFfdc = NULL;
-    FfdcType l_type = FFDC_TYPE_NONE;
 
     for (ErrorInfo::ErrorInfoFfdcCItr_t l_itr = i_errInfo.iv_ffdcs.begin();
          l_itr != i_errInfo.iv_ffdcs.end(); ++l_itr)
     {
-        l_pFfdc = (*l_itr)->getData(l_size);
-        l_type = (*l_itr)->getType();
+        const void * l_pFfdc = (*l_itr)->getData(l_size);
+        uint32_t l_ffdcId = (*l_itr)->getFfdcId();
 
-        if (l_type == FFDC_TYPE_TARGET)
-        {
-            io_pError->addFFDC(HWPF_COMP_ID, l_pFfdc, l_size, 1,
-                               HWPF_UDT_HWP_TARGET);
-        }
-        else if (l_type == FFDC_TYPE_ECMDDBB)
-        {
-            io_pError->addFFDC(HWPF_COMP_ID, l_pFfdc, l_size, 1,
-                               HWPF_UDT_HWP_ECMDDBB);
-        }
-        else
-        {
-            io_pError->addFFDC(HWPF_COMP_ID, l_pFfdc, l_size, 1,
-                               HWPF_UDT_HWP_DATA);
+        // Add the FFDC ID as the first word, then the FFDC data
+        ERRORLOG::ErrlUD * l_pUD = io_pError->addFFDC(
+            HWPF_COMP_ID, &l_ffdcId, sizeof(l_ffdcId), 1, HWPF_UDT_HWP_FFDC);
+
+        if (l_pUD)
+        { 
+            io_pError->appendToFFDC(l_pUD, l_pFfdc, l_size);
         }
     }
 }
 
 //******************************************************************************
 // processEICDGs
-// Processes any Callout/Deconfigure/GARD  requests in the ReturnCode Error
+// Processes any Callout/Deconfigure/GARD requests in the ReturnCode Error
 // Information
 //******************************************************************************
 void processEICDGs(const ErrorInfo & i_errInfo,

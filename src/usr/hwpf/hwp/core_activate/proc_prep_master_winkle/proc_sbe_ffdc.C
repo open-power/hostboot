@@ -97,7 +97,10 @@ extern "C" {
             break;
         }
         data_32 = dataBuff.getWord( 0 );
-        fapi::ReturnCodeFfdc::addEIFfdc(o_rc, data_32);
+        // TODO. When the new way to collect register FFDC is introduced in Cronus,
+        // this HWP will vanish and XML will be written to collect the data
+        // RTC Issue 50362
+        // fapi::ReturnCodeFfdc::addEIFfdc(o_rc, data_32);
         cfam_index++;
     } while (cfams[cfam_index] != END_CFAMS);
 
@@ -146,7 +149,9 @@ extern "C" {
                 break;
             }
             data_64 = dataBuff.getDoubleWord( 0 );
-            fapi::ReturnCodeFfdc::addEIFfdc(o_rc, data_64);
+            // TODO. When the new way to collect register FFDC is introduced in Cronus,
+            // this HWP will vanish and XML will be written to collect the data
+            // fapi::ReturnCodeFfdc::addEIFfdc(o_rc, data_64);
 
             scom_index++;
         } while (scoms[scom_index] != END_SCOMS);

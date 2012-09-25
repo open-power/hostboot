@@ -1,26 +1,26 @@
 #!/usr/bin/perl
-#  IBM_PROLOG_BEGIN_TAG
-#  This is an automatically generated prolog.
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
 #
-#  $Source: src/usr/hwpf/fapi/fapiCreateIfAttrService.pl $
+# $Source: src/usr/hwpf/fapi/fapiCreateIfAttrService.pl $
 #
-#  IBM CONFIDENTIAL
+# IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2011-2012
+# COPYRIGHT International Business Machines Corp. 2011,2012
 #
-#  p1
+# p1
 #
-#  Object Code Only (OCO) source materials
-#  Licensed Internal Code Source Materials
-#  IBM HostBoot Licensed Internal Code
+# Object Code Only (OCO) source materials
+# Licensed Internal Code Source Materials
+# IBM HostBoot Licensed Internal Code
 #
-#  The source code for this program is not published or other-
-#  wise divested of its trade secrets, irrespective of what has
-#  been deposited with the U.S. Copyright Office.
+# The source code for this program is not published or otherwise
+# divested of its trade secrets, irrespective of what has been
+# deposited with the U.S. Copyright Office.
 #
-#  Origin: 30
+# Origin: 30
 #
-#  IBM_PROLOG_END_TAG
+# IBM_PROLOG_END_TAG
 #
 # Purpose:  This perl script will parse HWP Attribute XML files and
 # initfile attr files and create the fapiGetInitFileAttr() function
@@ -38,6 +38,7 @@
 #                  mjjones   01/13/12  Use new ReturnCode interfaces
 #                  mjjones   02/08/12  Handle attribute files with 1 entry
 #                  mjjones   06/12/12  Handle privileged attributes
+#                  mjjones   09/28/12  Minor change to add FFDC on error
 #
 # End Change Log ******************************************************
 
@@ -282,7 +283,7 @@ if ($attCount > 0)
 print ASFILE "    {\n";
 print ASFILE "        FAPI_ERR(\"fapiGetInitFileAttr: Unrecognized attr: %d\", i_id);\n";
 print ASFILE "        l_rc.setFapiError(FAPI_RC_INVALID_ATTR_GET);\n";
-print ASFILE "        ReturnCodeFfdc::addEIFfdc(l_rc, static_cast<uint32_t>(i_id));\n";
+print ASFILE "        l_rc.addEIFfdc(0, &i_id, sizeof(i_id));\n";
 print ASFILE "    }\n\n";
 print ASFILE "    if (l_rc)\n";
 print ASFILE "    {\n";

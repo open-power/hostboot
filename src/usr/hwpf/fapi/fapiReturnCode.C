@@ -47,11 +47,13 @@
  *                          mjjones     07/11/2012  Remove a trace
  *                          brianh      07/31/2012  performance/size optimizations
  *                          mjjones     08/14/2012  Use new ErrorInfo structure
+ *                          mjjones     09/19/2012  Add FFDC ID to error info
  */
 
 #include <fapiReturnCode.H>
 #include <fapiReturnCodeDataRef.H>
 #include <fapiPlatTrace.H>
+#include <fapiTarget.H>
 
 namespace fapi
 {
@@ -228,42 +230,51 @@ void ReturnCode::addErrorInfo(const void * const * i_pObjects,
 {
     for (uint32_t i = 0; i < i_count; i++)
     {
-        // Figure out the object of this entry
+        // Figure out the object that this FFDC refers to
         const void * l_pObject = i_pObjects[i_pEntries[i].iv_object];
 
         if (i_pEntries[i].iv_type == EI_TYPE_FFDC)
         {
             // Get the size of the object to add as FFDC
             int8_t l_size = i_pEntries[i].iv_data1;
+            uint32_t l_ffdcId = i_pEntries[i].iv_data2;
 
             if (l_size > 0)
             {
                 // This is a regular FFDC data object that can be directly
                 // memcopied
-                addEIFfdc(l_pObject, l_size, FFDC_TYPE_DATA);
+                addEIFfdc(l_ffdcId, l_pObject, l_size);
+            }
+            else if (l_size == ReturnCodeFfdc::EI_FFDC_SIZE_ECMDDB)
+            {
+                // The FFDC is a ecmdDataBufferBase
+                const ecmdDataBufferBase * l_pDb =
+                    static_cast<const ecmdDataBufferBase *>(l_pObject);
+                    
+                uint32_t * l_pData = new uint32_t[l_pDb->getWordLength()];
+
+                // getWordLength rounds up to the next 32bit boundary, ensure
+                // that after extracting, any unset bits are zero
+                l_pData[l_pDb->getWordLength() - 1] = 0;
+
+                // Deliberately not checking return code from extract
+                l_pDb->extract(l_pData, 0, l_pDb->getBitLength());
+                addEIFfdc(l_ffdcId, l_pData, (l_pDb->getWordLength() * 4));
+                
+                delete [] l_pData;
+            }
+            else if (l_size == ReturnCodeFfdc::EI_FFDC_SIZE_TARGET)
+            {
+                // The FFDC is a fapi::Target
+                const fapi::Target * l_pTarget =
+                    static_cast<const fapi::Target *>(l_pObject);
+                
+                const char * l_ecmdString = l_pTarget->toEcmdString();
+                addEIFfdc(l_ffdcId, l_ecmdString, (strlen(l_ecmdString) + 1));
             }
             else
             {
-                // This is a special FFDC data object
-                if (l_size == ReturnCodeFfdc::EI_FFDC_SIZE_ECMDDB)
-                {
-                    // The FFDC is a ecmdDataBufferBase
-                    const ecmdDataBufferBase * l_pDb =
-                        static_cast<const ecmdDataBufferBase *>(l_pObject);
-                    ReturnCodeFfdc::addEIFfdc(*this, *l_pDb);
-                }
-                else if (l_size == ReturnCodeFfdc::EI_FFDC_SIZE_TARGET)
-                {
-                    // The FFDC is a fapi::Target
-                    const fapi::Target * l_pTarget =
-                        static_cast<const fapi::Target *>(l_pObject);
-                    ReturnCodeFfdc::addEIFfdc(*this, *l_pTarget);
-                }
-                else
-                {
-                    FAPI_ERR("addErrorInfo: Unrecognized FFDC data: %d",
-                             l_size);
-                }
+                 FAPI_ERR("addErrorInfo: Unrecognized FFDC data: %d", l_size);
             }
         }
         else if (i_pEntries[i].iv_type == EI_TYPE_CALLOUT)
@@ -306,12 +317,12 @@ void ReturnCode::addErrorInfo(const void * const * i_pObjects,
 //******************************************************************************
 // addEIFfdc function
 //******************************************************************************
-void ReturnCode::addEIFfdc(const void * i_pFfdc,
-                           const uint32_t i_size,
-                           const FfdcType i_type)
+void ReturnCode::addEIFfdc(const uint32_t i_ffdcId,
+                           const void * i_pFfdc,
+                           const uint32_t i_size)
 {
     // Create a ErrorInfoFfdc object and add it to the Error Information
-    ErrorInfoFfdc * l_pFfdc = new ErrorInfoFfdc(i_pFfdc, i_size, i_type);
+    ErrorInfoFfdc * l_pFfdc = new ErrorInfoFfdc(i_ffdcId, i_pFfdc, i_size);
     getCreateReturnCodeDataRef().getCreateErrorInfo().
         iv_ffdcs.push_back(l_pFfdc);
 }
