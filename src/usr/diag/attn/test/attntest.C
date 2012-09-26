@@ -43,10 +43,12 @@ namespace ATTN
 uint64_t randint(uint64_t i_min, uint64_t i_max)
 {
     static bool setup = false;
-    static uint64_t hapSeed = generate_random();
+    static uint64_t seed = 0;
 
     if(!setup)
     {
+        uint64_t hapSeed = generate_random();
+
         if(!hapSeed)
         {
             ATTN_DBG("falling back to timebase seed for PRNG");
@@ -56,10 +58,10 @@ uint64_t randint(uint64_t i_min, uint64_t i_max)
             ATTN_DBG("hapseed: %d", hapSeed);
         }
 
+        seed = hapSeed ? hapSeed : getTB() + 1;
+
         setup = true;
     }
-
-    static uint64_t seed = hapSeed ? hapSeed : getTB() + 1;
 
     uint64_t lo, hi;
 
@@ -67,8 +69,9 @@ uint64_t randint(uint64_t i_min, uint64_t i_max)
     lo = (seed & 0x0000ffffffff0000ull) >> 16;
     hi = (seed & 0x000000000000ffffull) << 32;
     hi |= (seed & 0xffff000000000000ull);
-    seed = lo;
+    seed = (lo | hi) + 2;
 
+    static const uint64_t randMax = 0xfffffffffffffffe;
     uint64_t min = i_min, max = i_max;
 
     if(i_min > i_max)
@@ -76,7 +79,12 @@ uint64_t randint(uint64_t i_min, uint64_t i_max)
         swap(min, max);
     }
 
-    return ((lo | hi) % (i_max +1 - i_min)) + i_min;
+    if(max > randMax)
+    {
+        max = randMax;
+    }
+
+    return ((lo | hi) % (max +1 - min)) + min;
 }
 
 ATTENTION_VALUE_TYPE getRandomAttentionType()

@@ -91,7 +91,7 @@ class AttnMemTest: public CxxTest::TestSuite
 
                 // put some random data in the mask register
 
-                uint64_t randomData = randint(0, 0xffffffff);
+                uint64_t randomData = randint(0, 0xffffffffffffffffull);
                 uint64_t maskbits = 0;
 
                 if(!IPOLL::getCheckbits(HOST, maskbits))
@@ -202,7 +202,7 @@ class AttnMemTest: public CxxTest::TestSuite
 
                 // put some random data in the mask register
 
-                uint64_t randomData = randint(0, 0xffffffff);
+                uint64_t randomData = randint(0, 0xffffffffffffffffull);
                 uint64_t maskbits = 0;
 
                 if(!IPOLL::getCheckbits(HOST, maskbits))
@@ -239,7 +239,7 @@ class AttnMemTest: public CxxTest::TestSuite
                 // verify that the attn was masked, and that
                 // other bits weren't touched
 
-                if(!(data & ~maskbits))
+                if(!(~data & maskbits))
                 {
                     TS_FAIL("attention not unmasked");
                     break;
