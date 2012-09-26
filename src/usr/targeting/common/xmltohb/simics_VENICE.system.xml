@@ -29,7 +29,6 @@
 
      * MAXIMUM config has 8 Venice chips
      * each Venice has 12 ex chiplets (1-6,9-14)
-           (@fixme : targets don't match this numbering RTC:38384)
      * each VENICE has 3 ABUS (0,1,2) and 4 XBUS (0,1,2,3) units
      * each Venice has 8 MCS chiplets
       * each MCS chiplet connects to 1 Centaur membuf chip

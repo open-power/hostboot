@@ -184,7 +184,7 @@
         <value>0</value>
     </enumerator>
     <enumerator>
-        <name>SALERNO</name>
+        <name>RESERVED</name><!-- Left here to keep later values the same -->
         <value>16</value>
     </enumerator>
     <enumerator>

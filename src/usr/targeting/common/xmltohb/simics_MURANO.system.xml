@@ -29,7 +29,7 @@
 
      * MAXIMUM config has 4 Murano chips
      * each Murano has 6 ex chiplets (4,5,6,12,13,14)
-     * each Murano has 3 ABUS (0,1,2) and 4 XBUS (0,1,2,3) units
+     * each Murano has 3 ABUS (0,1,2) and 1 XBUS (1) unit
      * each Murano has 4 MCS chiplets (4-7)
       * each MCS chiplet connects to 1 Centaur membuf chip
        * each Centaur membuf chip has 2 MBA chiplets
@@ -652,24 +652,6 @@
 <!-- murano n0p0 XBUS units -->
 
 <targetInstance>
-    <id>sys0node0proc0xbus0</id>
-    <type>unit-xbus-murano</type>
-    <attribute><id>HUID</id><default>0x00150000</default></attribute>
-        <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/xbus-0</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/xbus-0</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>0</default>
-    </attribute>  
-</targetInstance>
-
-<targetInstance>
     <id>sys0node0proc0xbus1</id>
     <type>unit-xbus-murano</type>
     <attribute><id>HUID</id><default>0x00150001</default></attribute>
@@ -688,42 +670,6 @@
     <attribute>
         <id>PEER_TARGET</id>
         <default>physical:sys-0/node-0/proc-1/xbus-1</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
-    <id>sys0node0proc0xbus2</id>
-    <type>unit-xbus-murano</type>
-    <attribute><id>HUID</id><default>0x00150002</default></attribute>
-        <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/xbus-2</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/xbus-2</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>2</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
-    <id>sys0node0proc0xbus3</id>
-    <type>unit-xbus-murano</type>
-    <attribute><id>HUID</id><default>0x00150003</default></attribute>
-        <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/xbus-3</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/xbus-3</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>3</default>
     </attribute>
 </targetInstance>
 
@@ -1263,24 +1209,6 @@
 <!-- murano n0p1 XBUS units -->
 
 <targetInstance>
-    <id>sys0node0proc1xbus0</id>
-    <type>unit-xbus-murano</type>
-    <attribute><id>HUID</id><default>0x00150004</default></attribute>
-        <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-1/xbus-0</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/xbus-0</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>0</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
     <id>sys0node0proc1xbus1</id>
     <type>unit-xbus-murano</type>
     <attribute><id>HUID</id><default>0x00150005</default></attribute>
@@ -1299,42 +1227,6 @@
     <attribute>
         <id>PEER_TARGET</id>
         <default>physical:sys-0/node-0/proc-0/xbus-1</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
-    <id>sys0node0proc1xbus2</id>
-    <type>unit-xbus-murano</type>
-    <attribute><id>HUID</id><default>0x00150006</default></attribute>
-        <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-1/xbus-2</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/xbus-2</default>
-    </attribute> 
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>2</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
-    <id>sys0node0proc1xbus3</id>
-    <type>unit-xbus-murano</type>
-    <attribute><id>HUID</id><default>0x00150007</default></attribute>
-        <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-1/xbus-3</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/xbus-3</default>
-    </attribute> 
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>3</default>
     </attribute>
 </targetInstance>
 
@@ -1875,24 +1767,6 @@
 <!-- murano n0p2 XBUS units -->
 
 <targetInstance>
-    <id>sys0node0proc2xbus0</id>
-    <type>unit-xbus-murano</type>
-    <attribute><id>HUID</id><default>0x00150008</default></attribute>
-        <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-2/xbus-0</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/xbus-0</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>0</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
     <id>sys0node0proc2xbus1</id>
     <type>unit-xbus-murano</type>
     <attribute><id>HUID</id><default>0x00150009</default></attribute>
@@ -1911,42 +1785,6 @@
     <attribute>
         <id>PEER_TARGET</id>
         <default>physical:sys-0/node-0/proc-3/xbus-1</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
-    <id>sys0node0proc2xbus2</id>
-    <type>unit-xbus-murano</type>
-    <attribute><id>HUID</id><default>0x0015000A</default></attribute>
-        <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-2/xbus-2</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/xbus-2</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>2</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
-    <id>sys0node0proc2xbus3</id>
-    <type>unit-xbus-murano</type>
-    <attribute><id>HUID</id><default>0x0015000B</default></attribute>
-        <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-2/xbus-3</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/xbus-3</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>3</default>
     </attribute>
 </targetInstance>
 
@@ -2486,24 +2324,6 @@
 <!-- murano n0p3 XBUS units -->
 
 <targetInstance>
-    <id>sys0node0proc3xbus0</id>
-    <type>unit-xbus-murano</type>
-    <attribute><id>HUID</id><default>0x0015000C</default></attribute>
-        <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-3/xbus-0</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/xbus-0</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>0</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
     <id>sys0node0proc3xbus1</id>
     <type>unit-xbus-murano</type>
     <attribute><id>HUID</id><default>0x0015000D</default></attribute>
@@ -2522,42 +2342,6 @@
     <attribute>
         <id>PEER_TARGET</id>
         <default>physical:sys-0/node-0/proc-2/xbus-1</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
-    <id>sys0node0proc3xbus2</id>
-    <type>unit-xbus-murano</type>
-    <attribute><id>HUID</id><default>0x0015000E</default></attribute>
-        <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-3/xbus-2</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/xbus-2</default>
-    </attribute> 
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>2</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
-    <id>sys0node0proc3xbus3</id>
-    <type>unit-xbus-murano</type>
-    <attribute><id>HUID</id><default>0x0015000F</default></attribute>
-        <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-3/xbus-3</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/xbus-3</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>3</default>
     </attribute>
 </targetInstance>
 

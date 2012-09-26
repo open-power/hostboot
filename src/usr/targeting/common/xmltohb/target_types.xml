@@ -254,17 +254,6 @@
 </targetType>
 
 <targetType>
-    <id>chip-processor-salerno</id>
-    <parent>chip-processor-power8</parent>
-    <attribute>
-        <id>MODEL</id>
-        <default>SALERNO</default>
-    </attribute>
-    <attribute><id>EEPROM_ADDR_INFO0</id></attribute>
-    <attribute><id>EEPROM_ADDR_INFO1</id></attribute>
- </targetType>
-
-<targetType>
     <id>chip-processor-venice</id>
     <parent>chip-processor-power8</parent>
     <attribute>
@@ -352,15 +341,6 @@
 </targetType>
 
 <targetType>
-    <id>unit-ex-salerno</id>
-    <parent>unit-ex-power8</parent>
-    <attribute>
-        <id>MODEL</id>
-        <default>SALERNO</default>
-    </attribute>
-</targetType>
-
-<targetType>
     <id>unit-ex-venice</id>
     <parent>unit-ex-power8</parent>
     <attribute>
@@ -385,15 +365,6 @@
     <attribute>
         <id>TYPE</id>
         <default>CORE</default>
-    </attribute>
-</targetType>
-
-<targetType>
-    <id>unit-core-salerno</id>
-    <parent>unit-core-power8</parent>
-    <attribute>
-        <id>MODEL</id>
-        <default>SALERNO</default>
     </attribute>
 </targetType>
 
@@ -426,15 +397,6 @@
 </targetType>
 
 <targetType>
-    <id>unit-pervasive-salerno</id>
-    <parent>unit-pervasive-power8</parent>
-    <attribute>
-        <id>MODEL</id>
-        <default>SALERNO</default>
-    </attribute>
-</targetType>
-
-<targetType>
     <id>unit-pervasive-venice</id>
     <parent>unit-pervasive-power8</parent>
     <attribute>
@@ -463,15 +425,6 @@
 </targetType>
 
 <targetType>
-    <id>unit-pci-salerno</id>
-    <parent>unit-pci-power8</parent>
-    <attribute>
-        <id>MODEL</id>
-        <default>SALERNO</default>
-    </attribute>
-</targetType>
-
-<targetType>
     <id>unit-pci-venice</id>
     <parent>unit-pci-power8</parent>
     <attribute>
@@ -496,15 +449,6 @@
     <attribute>
         <id>TYPE</id>
         <default>POWERBUS</default>
-    </attribute>
-</targetType>
-
-<targetType>
-    <id>unit-powerbus-salerno</id>
-    <parent>unit-powerbus-power8</parent>
-    <attribute>
-        <id>MODEL</id>
-        <default>SALERNO</default>
     </attribute>
 </targetType>
 
@@ -556,15 +500,6 @@
 </targetType>
 
 <targetType>
-    <id>unit-abus-salerno</id>
-    <parent>unit-abus-power8</parent>
-    <attribute>
-        <id>MODEL</id>
-        <default>SALERNO</default>
-    </attribute>
-</targetType>
-
-<targetType>
     <id>unit-abus-venice</id>
     <parent>unit-abus-power8</parent>
     <attribute>
@@ -591,15 +526,6 @@
     </attribute>
     <attribute><id>CHIP_UNIT</id></attribute>
     <attribute><id>PEER_TARGET</id></attribute>
-</targetType>
-
-<targetType>
-    <id>unit-xbus-salerno</id>
-    <parent>unit-xbus-power8</parent>
-    <attribute>
-        <id>MODEL</id>
-        <default>SALERNO</default>
-    </attribute>
 </targetType>
 
 <targetType>
@@ -769,15 +695,6 @@
 </targetType>
 
 <targetType>
-    <id>unit-mcs-salerno</id>
-    <parent>unit-mcs-power8</parent>
-    <attribute>
-        <id>MODEL</id>
-        <default>SALERNO</default>
-    </attribute>
-</targetType>
-
-<targetType>
     <id>unit-mcs-murano</id>
     <parent>unit-mcs-power8</parent>
     <attribute>
@@ -794,15 +711,6 @@
     <attribute>
         <id>MODEL</id>
         <default>VENICE</default>
-    </attribute>
-</targetType>
-
-<targetType>
-    <id>unit-mba-salerno</id>
-    <parent>unit-mba-power8</parent>
-    <attribute>
-        <id>MODEL</id>
-        <default>SALERNO</default>
     </attribute>
 </targetType>
 
@@ -825,29 +733,11 @@
 </targetType>
 
 <targetType>
-    <id>unit-mbs-salerno</id>
-    <parent>unit-mbs-power8</parent>
-    <attribute>
-        <id>MODEL</id>
-        <default>SALERNO</default>
-    </attribute>
-</targetType>
-
-<targetType>
     <id>unit-mbs-murano</id>
     <parent>unit-mbs-venice</parent>
     <attribute>
         <id>MODEL</id>
         <default>MURANO</default>
-    </attribute>
-</targetType>
-
-<targetType>
-    <id>unit-memport-salerno</id>
-    <parent>unit-memport-power8</parent>
-    <attribute>
-        <id>MODEL</id>
-        <default>SALERNO</default>
     </attribute>
 </targetType>
 

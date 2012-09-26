@@ -1270,15 +1270,17 @@ sub generate_ax_buses
 
     my $proc_name = "n${node}p${proc}";
     print "\n<!-- $SYSNAME $proc_name ${type}BUS units -->\n";
-    my $maxbus = ($type eq "A") ? 2 : 3;
+    my $minbus = ($type eq "A") ? 0 : 1;
+    my $maxbus = ($type eq "A") ? 2 : 1;
+    my $numperchip = ($type eq "A") ? 3 : 4;
     my $typenum = ($type eq "A") ? 0x16 : 0x15;
     $type = lc( $type );
-    for my $i ( 0 .. $maxbus )
+    for my $i ( $minbus .. $maxbus )
     {
 	my $uidstr = sprintf( "0x%02X%02X%04X",
 			     ${node},
 			       $typenum,
-			       $i+$proc*($maxbus+1)+${node}*8*($maxbus+1));
+                   $i+$proc*($numperchip)+${node}*8*($numperchip));
         my $peer = 0;
         my $p_proc = 0;
         my $p_port = 0;
