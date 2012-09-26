@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/hwp/build_winkle_images/proc_set_pore_bar/proc_pba_init.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/hwp/build_winkle_images/p8_set_pore_bar/p8_pba_init.H $ */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012                   */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 
 
 //------------------------------------------------------------------------------
@@ -42,7 +41,7 @@
 
 #include "p8_scom_addresses.H"
 
-typedef fapi::ReturnCode (*proc_pba_init_FP_t) (const fapi::Target& , uint64_t );
+typedef fapi::ReturnCode (*p8_pba_init_FP_t) (const fapi::Target& , uint64_t );
 
 // constant definitions for valid command scope. LIMIT is used by setup routine for plausibility checking.
 
@@ -195,7 +194,7 @@ extern "C"
 {
 
 fapi::ReturnCode 
-proc_pba_init (const fapi::Target& i_target, 
+p8_pba_init (const fapi::Target& i_target, 
                      uint64_t mode
               );
 

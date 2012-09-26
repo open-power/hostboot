@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/hwpf/hwp/build_winkle_images/proc_pba_bar_config/proc_pba_bar_config.H $ */
+/* $Source: src/usr/hwpf/hwp/build_winkle_images/p8_pba_bar_config/p8_pba_bar_config.H $ */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
@@ -20,9 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-
-// $Id: proc_pba_bar_config.H,v 1.7 2012/09/12 21:54:12 wenning Exp $
-
+// $Id: p8_pba_bar_config.H,v 1.1 2012/09/25 20:18:52 stillgs Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -31,27 +29,27 @@
 // *! OWNER NAME: Klaus P. Gungl         Email: kgungl@de.ibm.com
 // *!
 // *! General Description:
-// *!
-// *! include file for proc_pba_bar_config
+// *!        
+// *! include file for p8_pba_bar_config 
 // *!
 //------------------------------------------------------------------------------
-//
+// 
 
 
 // function pointer typedef definition for HWP call support
-typedef fapi::ReturnCode (*proc_pba_bar_config_FP_t) (const fapi::Target&,
-                                                            uint32_t,
-                                                            uint64_t,
-                                                            uint64_t,
+typedef fapi::ReturnCode (*p8_pba_bar_config_FP_t) (const fapi::Target&, 
+                                                            uint32_t, 
+                                                            uint64_t, 
+                                                            uint64_t, 
                                                             uint64_t);
 
-extern "C"
-{
+extern "C" 
+{				
 
-fapi::ReturnCode
-proc_pba_bar_config (const fapi::Target&    i_target,
-                             uint32_t               index,
-                             uint64_t               pba_bar_addr,
-                             uint64_t               pba_bar_size,
-                             uint64_t               pba_cmd_scope);
+fapi::ReturnCode 
+p8_pba_bar_config   (const fapi::Target&    i_target, 
+		             uint32_t               index, 
+		             uint64_t               pba_bar_addr,
+		             uint64_t               pba_bar_size,
+		             uint64_t               pba_cmd_scope);
 }

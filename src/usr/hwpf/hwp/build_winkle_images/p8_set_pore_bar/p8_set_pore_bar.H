@@ -1,35 +1,34 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/hwp/build_winkle_images/proc_set_pore_bar/proc_set_pore_bar.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
-// $Id: proc_set_pore_bar.H,v 1.4 2012/08/13 13:04:30 stillgs Exp $
-// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_set_pore_bar.H,v $
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/hwp/build_winkle_images/p8_set_pore_bar/p8_set_pore_bar.H $ */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012                   */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+// $Id: p8_set_pore_bar.H,v 1.1 2012/08/23 04:58:53 stillgs Exp $
+// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_set_pore_bar.H,v $
 //------------------------------------------------------------------------------
 // *|
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
 // *! *** IBM Confidential ***
 // *|
-// *! TITLE       : proc_set_pore_bar.H
+// *! TITLE       : p8_set_pore_bar.H
 // *! DESCRIPTION : Establish the BAR setup for the SLW image in the PBA as
 // *!               well as setting up the SLW engine with table base address
 // *!               and memory relocation regs in the SLW
@@ -48,7 +47,7 @@
 
 
 // function pointer typedef definition for HWP call support
-typedef fapi::ReturnCode (*proc_set_pore_bar_FP_t) (const fapi::Target&, 
+typedef fapi::ReturnCode (*p8_set_pore_bar_FP_t) (const fapi::Target&, 
                                                     void*, 
                                                     uint64_t,
                                                     uint64_t,
@@ -110,10 +109,10 @@ enum PORE__BA_SLAVE {
 ///                         rounded up to the next power of 2 for setting the 
 ///                         hardware mask
 /// \param[in] i_mem_type   Defines where the SLW image was loaded.  See
-///                         proc_set_pore_bar.H enum for valid values.
+///                         p8_set_pore_bar.H enum for valid values.
 
 fapi::ReturnCode 
-proc_set_pore_bar(  const fapi::Target& i_target, 
+p8_set_pore_bar(  const fapi::Target& i_target, 
                     void *i_image, 
                     uint64_t i_mem_bar, 
                     uint64_t i_mem_size, 

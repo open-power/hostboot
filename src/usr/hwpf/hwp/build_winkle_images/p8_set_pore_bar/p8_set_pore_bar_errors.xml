@@ -1,7 +1,7 @@
 <!-- IBM_PROLOG_BEGIN_TAG                                                   -->
 <!-- This is an automatically generated prolog.                             -->
 <!--                                                                        -->
-<!-- $Source: src/usr/hwpf/hwp/build_winkle_images/proc_pba_bar_config/proc_pba_bar_config_errors.xml $ -->
+<!-- $Source: src/usr/hwpf/hwp/build_winkle_images/p8_set_pore_bar/p8_set_pore_bar_errors.xml $ -->
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
@@ -20,39 +20,42 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-
-<!-- $Id: proc_pba_bar_config_errors.xml,v 1.4 2012/09/12 21:59:26 wenning Exp $ -->
-<!-- Error definitions for proc_pba_bar_config procedure -->
+<!-- Error definitions for p8_set_pore_bar procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PROC_PBA_BAR_INDEX_OUT_OF_RANGE</rc>
-    <description>pba bar index out of range, allowed is 0 to 3</description>
+    <rc>RC_PROCPM_POREBAR_IMAGE_BRANCH_VALUE_ERROR</rc>
+    <description>XIP access of branch table failed in p8_set_pore_bar</description>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PROC_PBA_BAR_SCOPE_OUT_OF_RANGE</rc>
-    <description>pba bar scope  out of range, allowed is 0 to 7</description>
+    <rc>RC_PROCPM_POREBAR_LOC_ERROR</rc>
+    <description>Invalid image location passed to p8_set_pore_bar</description>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PROC_PBA_ADDR_OUT_OF_RANGE</rc>
-    <description>pba bar scope  out of range, allowed is 0 to 7</description>
+    <rc>RC_PROCPM_POREBAR_PBABAR_ERROR</rc>
+    <description>PBA BAR image location passed to p8_set_pore_bar</description>
+  </hwpError>
+    <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_PBA_SLVRST_TIMED_OUT</rc>
+    <description>PBA Slave Reset timed out in p8_set_pore_bar</description>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PROC_PBA_BAR_MASK_OUT_OF_RANGE</rc>
-    <description>pba bar mask out of range. .</description>
+    <rc>RC_PROCPM_POREBAR_IMAGE_SIZE_ERROR</rc>
+    <description>XIP access to size value failed in p8_set_pore_bar</description>
+    <description>Image address plus image size overflows PBA region in p8_set_pore_bar</description>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PROC_PBA_BAR_MODE_NOT_SUPPORTED</rc>
-    <description>pba bar procedure mode is not supported .</description>
+    <rc>RC_PROCPM_POREBAR_IMAGE_PLACEMENT_ERROR</rc>
+    <description>Image address plus image size overflows PBA region in p8_set_pore_bar</description>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PROC_PBA_BAR_PUTSCOM_FAILED</rc>
-    <description>pba bar putscom failed .</description>
+    <rc>RC_PROCPM_POREBAR_IMAGE_ADDR_ERROR</rc>
+    <description>Image address not in PBA BAR region in p8_set_pore_bar</description>
   </hwpError>
-  <!-- *********************************************************************** -->
 </hwpErrors>

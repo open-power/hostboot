@@ -1,28 +1,27 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/hwp/build_winkle_images/proc_set_pore_bar/proc_set_pore_bar.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
-// $Id: proc_set_pore_bar.C,v 1.8 2012/08/13 13:04:28 stillgs Exp $
-// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_set_pore_bar.C,v $
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/hwp/build_winkle_images/p8_set_pore_bar/p8_set_pore_bar.C $ */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012                   */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+// $Id: p8_set_pore_bar.C,v 1.1 2012/08/23 04:58:48 stillgs Exp $
+// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_set_pore_bar.C,v $
 //-------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -30,7 +29,7 @@
 //-------------------------------------------------------------------------------
 // *! OWNER NAME: Greg Still         Email: stillgs@us.ibm.com
 // *!
-/// \file proc_set_pore_bar.C
+/// \file p8_set_pore_bar.C
 /// \brief Set up the Sleep/Winkle (SLW) PORE Memory Relocation (MRR) and
 /// Table Base Address (TBA) for accessing the SLW image
 ///
@@ -63,7 +62,7 @@
 ///     Calculate MRR address (32:63) = image address - link address (32 bit)
 ///     Store MRR to PORE SLW
 ///
-///     Call proc_pba_bar_config to set up PBA BAR 2 with the address and
+///     Call p8_pba_bar_config to set up PBA BAR 2 with the address and
 ///         size of the SLW region as passed via calling parameters
 ///         i_mem_bar and i_mem_mask.
 ///
@@ -80,10 +79,10 @@
 #include <fapi.H>
 #include "p8_scom_addresses.H"
 #include "pgp_common.h"
-#include "proc_set_pore_bar.H"
-#include "proc_pm.H"
-#include "proc_pba_init.H"
-#include "proc_pba_bar_config.H"
+#include "p8_set_pore_bar.H"
+#include "p8_pm.H"
+#include "p8_pba_init.H"
+#include "p8_pba_bar_config.H"
 #include "pba_firmware_register.H"
 #include "pgp_pba.h"
 #include "sbe_xip_image.h"
@@ -125,7 +124,7 @@ fapi::ReturnCode pba_slave_reset(   const fapi::Target& i_target,
 ///                         rounded up to the next power of 2 for setting the 
 ///                         hardware mask
 /// \param[in] i_mem_type   Defines where the SLW image was loaded.  See
-///                         proc_set_pore_bar.H enum for valid values.
+///                         p8_set_pore_bar.H enum for valid values.
 ///
 /// \retval SUCCESS
 /// \retval RC_PROCPM_POREBAR_IMAGE_BRANCH_VALUE_ERROR
@@ -134,7 +133,7 @@ fapi::ReturnCode pba_slave_reset(   const fapi::Target& i_target,
 /// \retval RC_PROCPM_POREBAR_IMAGE_PLACEMENT_ERROR (future version)
 
 fapi::ReturnCode
-proc_set_pore_bar(      const fapi::Target& i_target,
+p8_set_pore_bar(      const fapi::Target& i_target,
                         void                *i_image,
                         uint64_t            i_mem_bar,
                         uint64_t            i_mem_size,
@@ -167,7 +166,7 @@ proc_set_pore_bar(      const fapi::Target& i_target,
 
     // -----------------------------------------------------------------
 
-    FAPI_INF("Executing proc_set_pore_bar...");
+    FAPI_INF("Executing p8_set_pore_bar...");
     image_address = (uint64_t) i_image;
     FAPI_DBG("Passed address 0x%16llX ", image_address);
 
@@ -411,7 +410,7 @@ proc_set_pore_bar(      const fapi::Target& i_target,
                     pba_bar, i_mem_bar, i_mem_size);
 
     // Set the PBA BAR for the SLW region
-    FAPI_EXEC_HWP(rc, proc_pba_bar_config, i_target,
+    FAPI_EXEC_HWP(rc, p8_pba_bar_config, i_target,
                                            pba_bar,
                                            i_mem_bar,
                                            i_mem_size,

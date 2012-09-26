@@ -63,7 +63,7 @@
 
 //  Uncomment these files as they become available:
 #include    "proc_slw_build/proc_slw_build.H"
-#include    "proc_set_pore_bar/proc_set_pore_bar.H"
+#include    "p8_set_pore_bar/p8_set_pore_bar.H"
 
 namespace   BUILD_WINKLE_IMAGES
 {
@@ -445,7 +445,7 @@ void    call_proc_set_pore_bar( void    *io_pArgs )
 
         //  fetch image location and size, written by host_build_winkle above
 
-        //  Note that the "i_mem_bar" input to proc_set_pore_bar is the physical
+        //  Note that the "i_mem_bar" input to p8_set_pore_bar is the physical
         //  address of the PORE image, this is the image that will get executed
         //  at winkle.  The void * i_image parameter actually points to the same
         //  place in HostBoot; in fsp or cronus these will be different.
@@ -461,7 +461,7 @@ void    call_proc_set_pore_bar( void    *io_pArgs )
         //  of 2.  So far our images are less than 1 meg so this is 1
         uint64_t l_mem_size =  1;
 
-        //  defined in proc_set_pore_bar.H
+        //  defined in p8_set_pore_bar.H
         uint32_t        l_mem_type  =   SLW_L3 ;
 
         // cast OUR type of target to a FAPI type of target.
@@ -473,7 +473,7 @@ void    call_proc_set_pore_bar( void    *io_pArgs )
 
         //  call the HWP with each fapi::Target
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "Call proc_set_pore_bar, membar=0x%lx, size=0x%lx, mask=0x%lx, type=0x%x",
+                   "Call p8_set_pore_bar, membar=0x%lx, size=0x%lx, mask=0x%lx, type=0x%x",
                    l_imageAddr,
                    (l_cpu_target->getAttr<ATTR_SLW_IMAGE_SIZE>()),
                    l_mem_size,
@@ -483,7 +483,7 @@ void    call_proc_set_pore_bar( void    *io_pArgs )
         void * const l_pImage = reinterpret_cast<void * const>(l_imageAddr);
 
         FAPI_INVOKE_HWP( l_errl,
-                         proc_set_pore_bar,
+                         p8_set_pore_bar,
                          l_fapi_cpu_target,
                          l_pImage,
                          l_imageAddr,
@@ -494,13 +494,13 @@ void    call_proc_set_pore_bar( void    *io_pArgs )
         if ( l_errl )
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "ERROR : proc_set_pore_bar, PLID=0x%x",
+                      "ERROR : p8_set_pore_bar, PLID=0x%x",
                       l_errl->plid()  );
         }
         else
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "SUCCESS : proc_set_pore_bar" );
+                       "SUCCESS : p8_set_pore_bar" );
         }
 
     }   while ( 0 ); // end do block

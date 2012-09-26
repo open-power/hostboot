@@ -42,8 +42,8 @@ HWP_ERROR_XML_FILES = hwp/fapiHwpErrorInfo.xml   \
     ../pore/fapiporeve/fapiPoreVe_errors.xml \
     hwp/dram_initialization/proc_setup_bars/proc_setup_bars_errors.xml  \
     hwp/dram_initialization/proc_setup_bars/proc_fab_smp_errors.xml     \
-    hwp/build_winkle_images/proc_set_pore_bar/proc_set_pore_bar_errors.xml  \
-    hwp/build_winkle_images/proc_pba_bar_config/proc_pba_bar_config_errors.xml \
+    hwp/build_winkle_images/p8_set_pore_bar/p8_set_pore_bar_errors.xml  \
+    hwp/build_winkle_images/p8_pba_bar_config/p8_pba_bar_config_errors.xml \
     hwp/nest_chiplets/proc_chiplet_scominit/proc_chiplet_scominit_errors.xml \
     hwp/nest_chiplets/proc_a_x_pci_dmi_pll_setup_errors.xml \
     hwp/core_activate/proc_prep_master_winkle/proc_prep_master_winkle_errors.xml \

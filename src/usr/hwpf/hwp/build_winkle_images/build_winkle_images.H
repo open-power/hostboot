@@ -54,7 +54,7 @@
  *  @}
  *  @{
  *      @substepnum     2
- *      @substepname    proc_set_pore_bar
+ *      @substepname    p8_set_pore_bar
  *      @substepdesc    : Tell SLW Eng where winkle image is
  *          @target_sched   serial
  *  @}
