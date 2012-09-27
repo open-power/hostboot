@@ -4606,4 +4606,91 @@ bits6:7  will be consumed together to form COARSE_LVL. </description>
     <writeable/>
 </attribute>
 
+<attribute>
+    <id>ATTR_MNFG_FLAGS</id>
+    <description> Provides the mnfg flags
+        in a single value.  The bits are
+        masked together so the single value
+        will have data on several mnfg flags.
+        Should note that the MNFG_FLAG_BIT enum 
+        is used to provide the value of the 
+        different mnfg flags.  A user can bitwise
+        'OR' several of the MNFG_FLAG_BIT values
+        together to indicate that multiple mnfg
+        flags are set.
+        @TODO via RTC: 35451
+        The HostBoot side can only read the mnfg
+        flag attribute. However the FSP side will
+        need to read and write the mnfg flag 
+        attributes.  For now making it so both sides
+        are read and writeable but will need to revisit
+        to find a better way to handle persistency when
+        the hostboot and FSP differ.
+    </description>
+    <simpleType>
+        <uint64_t>
+            <default>0x0000000000000000</default>
+        </uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<enumerationType>
+    <id>MNFG_FLAG_BIT</id>
+    <description>Enumeration indicating the mnfg flags
+        that are set by the user.  The values can be
+        combined using a bitwise 'OR'.  The values will
+        need to be kept in sync with the FAPI 
+        enumerator values.  Also the enumeration type
+        is used by the ATTR_MNFG_FLAGS attribute.  Should
+        note that the MNFG_FLAG_BIT values are of type uint32_t
+    </description>
+    <enumerator>
+        <name>MNFG_THRESHOLDS</name>
+        <value>0x00000001</value>
+    </enumerator>
+    <enumerator>
+        <name>MNFG_AVP_ENABLE</name>
+        <value>0x00000002</value>
+    </enumerator>
+    <enumerator>
+        <name>MNFG_HDAT_AVP_ENABLE</name>
+        <value>0x00000004</value>
+    </enumerator>
+    <enumerator>
+        <name>MNFG_SRC_TERM</name>
+        <value>0x00000008</value>
+    </enumerator>
+    <enumerator>
+        <name>MNFG_IPL_MEMORY_CE_CHECKINGE</name>
+        <value>0x00000010</value>
+    </enumerator>
+    <enumerator>
+        <name>MNFG_FAST_BACKGROUND_SCRUB</name>
+        <value>0x00000020</value>
+    </enumerator>
+    <enumerator>
+        <name>MNFG_TEST_DRAM_REPAIRS</name>
+        <value>0x00000040</value>
+    </enumerator>
+    <enumerator>
+        <name>MNFG_DISABLE_DRAM_REPAIRS</name>
+        <value>0x00000080</value>
+    </enumerator>
+    <enumerator>
+        <name>MNFG_ENABLE_EXHAUSTIVE_PATTERN_TEST</name>
+        <value>0x00000100</value>
+    </enumerator>
+    <enumerator>
+        <name>MNFG_ENABLE_STANDARD_PATTERN_TEST</name>
+        <value>0x00000200</value>
+    </enumerator>
+    <enumerator>
+        <name>MNFG_ENABLE_MINIMUM_PATTERN_TEST</name>
+        <value>0x00000400</value>
+    </enumerator>
+</enumerationType>
+
 </attributes>
