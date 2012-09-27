@@ -28,6 +28,7 @@
      Contains the definition of the different types of targets
      ================================================================= -->
 
+
 <targetType>
     <id>base</id>
     <attribute><id>CLASS</id></attribute>
@@ -107,6 +108,7 @@
     <attribute><id>MSS_PREFETCH_ENABLE</id></attribute>
     <attribute><id>MSS_CLEANER_ENABLE</id></attribute>
     <attribute><id>MIRROR_BASE_ADDRESS</id></attribute>
+    <attribute><id>NOMINAL_FREQ_MHZ</id></attribute>
 </targetType>
 
 <targetType>

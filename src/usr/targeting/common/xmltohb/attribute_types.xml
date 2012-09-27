@@ -4592,4 +4592,18 @@ bits6:7  will be consumed together to form COARSE_LVL. </description>
     </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+    <id>NOMINAL_FREQ_MHZ</id>
+    <description>Nominal frequency in mhz for all processors in the system based on module VPD processing.</description>
+    <simpleType>
+        <uint16_t>
+            <default>0</default>
+        </uint16_t>
+    </simpleType>
+    <!-- @TODO via RTC: 35451 - This really should be p1, not p3 -->
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
 </attributes>
