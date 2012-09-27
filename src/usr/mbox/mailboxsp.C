@@ -349,14 +349,27 @@ void MailboxSp::handleNewMessage(msg_t * i_msg)
                  ERRORLOG::ERRL_SEV_INFORMATIONAL,
                  MBOX::MOD_MBOXSRV_SENDMSG,
                  MBOX::RC_MAILBOX_DISABLED,        //  reason Code
-                 i_msg->data[0],                   // queue id 
+                 i_msg->data[0],                   // queue id
                  payload->type                     // message type
                 );
 
             i_msg->data[1] = reinterpret_cast<uint64_t>(err);
 
+            payload->extra_data = NULL;
+
             msg_respond(iv_msgQ,i_msg);
         }
+
+        if( mbox_msg.msg_payload.extra_data != NULL )
+        {
+            TRACDCOMP( g_trac_mbox, "free extra_data %p",
+                        mbox_msg.msg_payload.extra_data );
+
+            free ( mbox_msg.msg_payload.extra_data );
+
+            mbox_msg.msg_payload.extra_data = NULL;
+        }
+
     }
     else
     {
