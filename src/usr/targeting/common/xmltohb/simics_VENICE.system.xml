@@ -790,38 +790,6 @@
     </attribute>
 </targetInstance>
 
-<!-- Venice n0p0 pervasive unit -->
-
-<targetInstance>
-    <id>sys0node0proc0pervasive0</id>
-    <type>unit-pervasive-venice</type>
-    <attribute><id>HUID</id><default>0x00130000</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/pervasive-0</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/pervasive-0</default>
-    </attribute>
-</targetInstance>
-
-<!-- Venice n0p0 powerbus unit -->
-
-<targetInstance>
-    <id>sys0node0proc0powerbus0</id>
-    <type>unit-powerbus-venice</type>
-    <attribute><id>HUID</id><default>0x00140000</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/powerbus-0</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/powerbus-0</default>
-    </attribute>
-</targetInstance>
-
 <!-- Venice n0p0 PCI units -->
 
 <targetInstance>
@@ -1678,38 +1646,6 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>7</default>
-    </attribute>
-</targetInstance>
-
-<!-- Venice n0p1 pervasive unit -->
-
-<targetInstance>
-    <id>sys0node0proc1pervasive0</id>
-    <type>unit-pervasive-venice</type>
-    <attribute><id>HUID</id><default>0x00130001</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-1/pervasive-0</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/pervasive-0</default>
-    </attribute>
-</targetInstance>
-
-<!-- Venice n0p1 powerbus unit -->
-
-<targetInstance>
-    <id>sys0node0proc1powerbus0</id>
-    <type>unit-powerbus-venice</type>
-    <attribute><id>HUID</id><default>0x00140001</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-1/powerbus-0</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/powerbus-0</default>
     </attribute>
 </targetInstance>
 
@@ -2572,38 +2508,6 @@
     </attribute>
 </targetInstance>
 
-<!-- Venice n0p2 pervasive unit -->
-
-<targetInstance>
-    <id>sys0node0proc2pervasive0</id>
-    <type>unit-pervasive-venice</type>
-    <attribute><id>HUID</id><default>0x00130002</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-2/pervasive-0</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/pervasive-0</default>
-    </attribute>
-</targetInstance>
-
-<!-- Venice n0p2 powerbus unit -->
-
-<targetInstance>
-    <id>sys0node0proc2powerbus0</id>
-    <type>unit-powerbus-venice</type>
-    <attribute><id>HUID</id><default>0x00140002</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-2/powerbus-0</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/powerbus-0</default>
-    </attribute>
-</targetInstance>
-
 <!-- Venice n0p2 PCI units -->
 
 <targetInstance>
@@ -3463,38 +3367,6 @@
     </attribute>
 </targetInstance>
 
-<!-- Venice n0p3 pervasive unit -->
-
-<targetInstance>
-    <id>sys0node0proc3pervasive0</id>
-    <type>unit-pervasive-venice</type>
-    <attribute><id>HUID</id><default>0x00130003</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-3/pervasive-0</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/pervasive-0</default>
-    </attribute>
-</targetInstance>
-
-<!-- Venice n0p3 powerbus unit -->
-
-<targetInstance>
-    <id>sys0node0proc3powerbus0</id>
-    <type>unit-powerbus-venice</type>
-    <attribute><id>HUID</id><default>0x00140003</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-3/powerbus-0</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/powerbus-0</default>
-    </attribute>
-</targetInstance>
-
 <!-- Venice n0p3 PCI units -->
 
 <targetInstance>
@@ -4350,38 +4222,6 @@
         <id>CHIP_UNIT</id>
         <default>7</default>
     </attribute>
-</targetInstance>
-
-<!-- Venice n0p4 pervasive unit -->
-
-<targetInstance>
-    <id>sys0node0proc4pervasive0</id>
-    <type>unit-pervasive-venice</type>
-    <attribute><id>HUID</id><default>0x00130004</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-4/pervasive-0</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/pervasive-0</default>
-    </attribute>  
-</targetInstance>
-
-<!-- Vencie n0p4 powerbus unit -->
-
-<targetInstance>
-    <id>sys0node0proc4powerbus0</id>
-    <type>unit-powerbus-venice</type>
-    <attribute><id>HUID</id><default>0x00140004</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-4/powerbus-0</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/powerbus-0</default>
-    </attribute>  
 </targetInstance>
 
 <!-- Vencie n0p4 PCI units -->
@@ -5243,38 +5083,6 @@
     </attribute>
 </targetInstance>
 
-<!-- Venice n0p5 pervasive unit -->
-
-<targetInstance>
-    <id>sys0node0proc5pervasive0</id>
-    <type>unit-pervasive-venice</type>
-    <attribute><id>HUID</id><default>0x00130005</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-5/pervasive-0</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/pervasive-0</default>
-    </attribute>
-</targetInstance>
-
-<!-- Venice n0p5 powerbus unit -->
-
-<targetInstance>
-    <id>sys0node0proc5powerbus0</id>
-    <type>unit-powerbus-venice</type>
-    <attribute><id>HUID</id><default>0x00140005</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-5/powerbus-0</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/powerbus-0</default>
-    </attribute>
-</targetInstance>
-
 <!-- Venice n0p5 PCI units -->
 
 <targetInstance>
@@ -6132,38 +5940,6 @@
     </attribute>
 </targetInstance>
 
-<!-- Venice n0p6 pervasive unit -->
-
-<targetInstance>
-    <id>sys0node0proc6pervasive0</id>
-    <type>unit-pervasive-venice</type>
-    <attribute><id>HUID</id><default>0x00130006</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-6/pervasive-0</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/pervasive-0</default>
-    </attribute>
-</targetInstance>
-
-<!-- Venice n0p6 powerbus unit -->
-
-<targetInstance>
-    <id>sys0node0proc6powerbus0</id>
-    <type>unit-powerbus-venice</type>
-    <attribute><id>HUID</id><default>0x00140006</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-6/powerbus-0</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/powerbus-0</default>
-    </attribute>
-</targetInstance>
-
 <!-- Venice n0p6 PCI units -->
 
 <targetInstance>
@@ -7018,38 +6794,6 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>7</default>
-    </attribute>
-</targetInstance>
-
-<!-- Venice n0p7 pervasive unit -->
-
-<targetInstance>
-    <id>sys0node0proc7pervasive0</id>
-    <type>unit-pervasive-venice</type>
-    <attribute><id>HUID</id><default>0x00130007</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-7/pervasive-0</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/pervasive-0</default>
-    </attribute>
-</targetInstance>
-
-<!-- Venice n0p7 powerbus unit -->
-
-<targetInstance>
-    <id>sys0node0proc7powerbus0</id>
-    <type>unit-powerbus-venice</type>
-    <attribute><id>HUID</id><default>0x00140007</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-7/powerbus-0</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/powerbus-0</default>
     </attribute>
 </targetInstance>
 
@@ -13548,8 +13292,8 @@
 <!-- DIMMS
      id/physical is sys-0/node-0/dimm-[d]
             where d=[0-512]
-     affinity    is sys-0/node-0/proc-[i]/mcs-[j]/membuf-0/mbs-0/mba-[k]/mem_port-[l]/dimm-[m]
-            where i=[0-7] j=[0-7] k=[0-1] l=[0-1] m=[0-1]
+     affinity    is sys-0/node-0/proc-[i]/mcs-[j]/membuf-0/mbs-0/mba-[k]/dimm-[m]
+            where i=[0-7] j=[0-7] k=[0-1] l=[0-1] m=[0-3]
 -->
 
 <targetInstance>
@@ -13562,7 +13306,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-0/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-0/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -13585,7 +13329,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-0/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-0/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -13608,7 +13352,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-0/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-0/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -13631,7 +13375,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-0/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-0/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -13654,7 +13398,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-0/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-0/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -13677,7 +13421,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-0/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-0/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -13700,7 +13444,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-0/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-0/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -13723,7 +13467,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-0/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-0/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -13746,7 +13490,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-1/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-1/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -13769,7 +13513,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-1/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-1/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -13792,7 +13536,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-1/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-1/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -13815,7 +13559,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-1/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-1/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -13838,7 +13582,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-1/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-1/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -13861,7 +13605,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-1/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-1/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -13884,7 +13628,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-1/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-1/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -13907,7 +13651,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-1/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-1/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -13930,7 +13674,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-2/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-2/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -13953,7 +13697,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-2/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-2/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -13976,7 +13720,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-2/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-2/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -13999,7 +13743,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-2/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-2/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -14022,7 +13766,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-2/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-2/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -14045,7 +13789,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-2/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-2/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -14068,7 +13812,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-2/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-2/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -14091,7 +13835,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-2/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-2/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -14114,7 +13858,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-3/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-3/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -14137,7 +13881,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-3/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-3/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -14160,7 +13904,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-3/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-3/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -14183,7 +13927,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-3/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-3/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -14206,7 +13950,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-3/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-3/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -14229,7 +13973,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-3/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-3/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -14252,7 +13996,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-3/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-3/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -14275,7 +14019,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-3/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-3/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -14298,7 +14042,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-4/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-4/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -14321,7 +14065,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-4/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-4/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -14344,7 +14088,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-4/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-4/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -14367,7 +14111,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-4/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-4/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -14390,7 +14134,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-4/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-4/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -14413,7 +14157,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-4/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-4/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -14436,7 +14180,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-4/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-4/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -14459,7 +14203,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-4/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-4/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -14482,7 +14226,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-5/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-5/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -14505,7 +14249,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-5/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-5/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -14528,7 +14272,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-5/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-5/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -14551,7 +14295,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-5/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-5/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -14574,7 +14318,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-5/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-5/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -14597,7 +14341,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-5/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-5/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -14620,7 +14364,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-5/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-5/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -14643,7 +14387,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-5/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-5/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -14666,7 +14410,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-6/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-6/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -14689,7 +14433,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-6/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-6/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -14712,7 +14456,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-6/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-6/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -14735,7 +14479,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-6/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-6/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -14758,7 +14502,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-6/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-6/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -14781,7 +14525,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-6/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-6/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -14804,7 +14548,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-6/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-6/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -14827,7 +14571,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-6/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-6/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -14850,7 +14594,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-7/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-7/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -14873,7 +14617,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-7/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-7/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -14896,7 +14640,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-7/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-7/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -14919,7 +14663,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-7/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-7/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -14942,7 +14686,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-7/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-7/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -14965,7 +14709,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-7/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-7/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -14988,7 +14732,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-7/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-7/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -15011,7 +14755,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-7/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-7/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -15034,7 +14778,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-0/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-0/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -15057,7 +14801,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-0/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-0/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -15080,7 +14824,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-0/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-0/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -15103,7 +14847,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-0/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-0/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -15126,7 +14870,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-0/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-0/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -15149,7 +14893,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-0/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-0/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -15172,7 +14916,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-0/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-0/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -15195,7 +14939,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-0/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-0/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -15218,7 +14962,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-1/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-1/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -15241,7 +14985,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-1/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-1/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -15264,7 +15008,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-1/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-1/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -15287,7 +15031,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-1/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-1/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -15310,7 +15054,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-1/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-1/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -15333,7 +15077,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-1/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-1/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -15356,7 +15100,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-1/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-1/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -15379,7 +15123,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-1/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-1/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -15402,7 +15146,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-2/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-2/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -15425,7 +15169,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-2/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-2/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -15448,7 +15192,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-2/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-2/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -15471,7 +15215,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-2/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-2/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -15494,7 +15238,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-2/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-2/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -15517,7 +15261,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-2/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-2/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -15540,7 +15284,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-2/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-2/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -15563,7 +15307,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-2/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-2/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -15586,7 +15330,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-3/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-3/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -15609,7 +15353,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-3/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-3/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -15632,7 +15376,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-3/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-3/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -15655,7 +15399,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-3/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-3/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -15678,7 +15422,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-3/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-3/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -15701,7 +15445,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-3/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-3/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -15724,7 +15468,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-3/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-3/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -15747,7 +15491,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-3/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-3/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -15770,7 +15514,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-4/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-4/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -15793,7 +15537,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-4/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-4/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -15816,7 +15560,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-4/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-4/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -15839,7 +15583,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-4/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-4/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -15862,7 +15606,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-4/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-4/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -15885,7 +15629,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-4/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-4/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -15908,7 +15652,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-4/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-4/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -15931,7 +15675,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-4/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-4/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -15954,7 +15698,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-5/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-5/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -15977,7 +15721,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-5/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-5/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -16000,7 +15744,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-5/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-5/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -16023,7 +15767,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-5/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-5/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -16046,7 +15790,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-5/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-5/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -16069,7 +15813,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-5/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-5/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -16092,7 +15836,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-5/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-5/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -16115,7 +15859,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-5/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-5/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -16138,7 +15882,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-6/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-6/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -16161,7 +15905,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-6/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-6/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -16184,7 +15928,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-6/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-6/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -16207,7 +15951,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-6/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-6/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -16230,7 +15974,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-6/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-6/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -16253,7 +15997,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-6/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-6/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -16276,7 +16020,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-6/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-6/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -16299,7 +16043,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-6/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-6/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -16322,7 +16066,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-7/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-7/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -16345,7 +16089,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-7/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-7/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -16368,7 +16112,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-7/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-7/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -16391,7 +16135,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-7/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-7/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -16414,7 +16158,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-7/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-7/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -16437,7 +16181,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-7/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-7/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -16460,7 +16204,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-7/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-7/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -16483,7 +16227,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-7/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-7/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -16506,7 +16250,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-0/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-0/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -16529,7 +16273,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-0/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-0/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -16552,7 +16296,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-0/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-0/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -16575,7 +16319,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-0/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-0/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -16598,7 +16342,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-0/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-0/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -16621,7 +16365,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-0/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-0/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -16644,7 +16388,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-0/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-0/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -16667,7 +16411,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-0/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-0/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -16690,7 +16434,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-1/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-1/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -16713,7 +16457,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-1/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-1/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -16736,7 +16480,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-1/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-1/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -16759,7 +16503,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-1/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-1/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -16782,7 +16526,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-1/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-1/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -16805,7 +16549,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-1/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-1/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -16828,7 +16572,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-1/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-1/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -16851,7 +16595,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-1/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-1/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -16874,7 +16618,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-2/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-2/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -16897,7 +16641,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-2/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-2/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -16920,7 +16664,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-2/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-2/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -16943,7 +16687,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-2/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-2/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -16966,7 +16710,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-2/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-2/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -16989,7 +16733,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-2/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-2/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -17012,7 +16756,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-2/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-2/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -17035,7 +16779,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-2/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-2/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -17058,7 +16802,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-3/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-3/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -17081,7 +16825,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-3/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-3/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -17104,7 +16848,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-3/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-3/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -17127,7 +16871,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-3/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-3/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -17150,7 +16894,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-3/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-3/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -17173,7 +16917,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-3/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-3/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -17196,7 +16940,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-3/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-3/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -17219,7 +16963,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-3/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-3/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -17242,7 +16986,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-4/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-4/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -17265,7 +17009,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-4/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-4/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -17288,7 +17032,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-4/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-4/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -17311,7 +17055,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-4/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-4/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -17334,7 +17078,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-4/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-4/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -17357,7 +17101,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-4/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-4/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -17380,7 +17124,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-4/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-4/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -17403,7 +17147,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-4/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-4/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -17426,7 +17170,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-5/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-5/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -17449,7 +17193,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-5/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-5/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -17472,7 +17216,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-5/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-5/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -17495,7 +17239,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-5/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-5/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -17518,7 +17262,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-5/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-5/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -17541,7 +17285,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-5/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-5/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -17564,7 +17308,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-5/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-5/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -17587,7 +17331,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-5/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-5/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -17610,7 +17354,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-6/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-6/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -17633,7 +17377,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-6/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-6/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -17656,7 +17400,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-6/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-6/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -17679,7 +17423,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-6/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-6/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -17702,7 +17446,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-6/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-6/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -17725,7 +17469,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-6/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-6/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -17748,7 +17492,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-6/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-6/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -17771,7 +17515,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-6/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-6/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -17794,7 +17538,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-7/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-7/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -17817,7 +17561,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-7/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-7/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -17840,7 +17584,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-7/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-7/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -17863,7 +17607,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-7/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-7/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -17886,7 +17630,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-7/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-7/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -17909,7 +17653,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-7/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-7/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -17932,7 +17676,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-7/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-7/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -17955,7 +17699,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-7/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-7/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -17978,7 +17722,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-0/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-0/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -18001,7 +17745,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-0/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-0/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -18024,7 +17768,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-0/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-0/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -18047,7 +17791,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-0/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-0/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -18070,7 +17814,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-0/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-0/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -18093,7 +17837,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-0/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-0/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -18116,7 +17860,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-0/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-0/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -18139,7 +17883,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-0/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-0/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -18162,7 +17906,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-1/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-1/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -18185,7 +17929,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-1/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-1/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -18208,7 +17952,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-1/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-1/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -18231,7 +17975,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-1/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-1/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -18254,7 +17998,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-1/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-1/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -18277,7 +18021,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-1/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-1/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -18300,7 +18044,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-1/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-1/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -18323,7 +18067,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-1/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-1/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -18346,7 +18090,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-2/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-2/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -18369,7 +18113,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-2/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-2/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -18392,7 +18136,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-2/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-2/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -18415,7 +18159,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-2/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-2/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -18438,7 +18182,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-2/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-2/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -18461,7 +18205,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-2/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-2/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -18484,7 +18228,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-2/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-2/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -18507,7 +18251,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-2/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-2/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -18530,7 +18274,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-3/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-3/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -18553,7 +18297,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-3/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-3/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -18576,7 +18320,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-3/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-3/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -18599,7 +18343,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-3/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-3/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -18622,7 +18366,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-3/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-3/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -18645,7 +18389,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-3/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-3/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -18668,7 +18412,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-3/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-3/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -18691,7 +18435,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-3/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-3/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -18714,7 +18458,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-4/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-4/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -18737,7 +18481,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-4/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-4/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -18760,7 +18504,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-4/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-4/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -18783,7 +18527,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-4/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-4/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -18806,7 +18550,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-4/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-4/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -18829,7 +18573,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-4/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-4/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -18852,7 +18596,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-4/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-4/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -18875,7 +18619,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-4/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-4/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -18898,7 +18642,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-5/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-5/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -18921,7 +18665,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-5/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-5/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -18944,7 +18688,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-5/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-5/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -18967,7 +18711,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-5/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-5/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -18990,7 +18734,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-5/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-5/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -19013,7 +18757,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-5/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-5/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -19036,7 +18780,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-5/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-5/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -19059,7 +18803,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-5/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-5/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -19082,7 +18826,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-6/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-6/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -19105,7 +18849,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-6/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-6/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -19128,7 +18872,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-6/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-6/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -19151,7 +18895,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-6/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-6/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -19174,7 +18918,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-6/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-6/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -19197,7 +18941,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-6/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-6/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -19220,7 +18964,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-6/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-6/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -19243,7 +18987,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-6/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-6/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -19266,7 +19010,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-7/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-7/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -19289,7 +19033,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-7/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-7/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -19312,7 +19056,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-7/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-7/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -19335,7 +19079,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-7/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-7/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -19358,7 +19102,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-7/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-7/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -19381,7 +19125,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-7/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-7/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -19404,7 +19148,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-7/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-7/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -19427,7 +19171,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-7/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-7/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -19450,7 +19194,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-0/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-0/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -19473,7 +19217,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-0/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-0/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -19496,7 +19240,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-0/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-0/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -19519,7 +19263,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-0/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-0/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -19542,7 +19286,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-0/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-0/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -19565,7 +19309,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-0/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-0/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -19588,7 +19332,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-0/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-0/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -19611,7 +19355,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-0/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-0/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -19634,7 +19378,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-1/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-1/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -19657,7 +19401,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-1/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-1/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -19680,7 +19424,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-1/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-1/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -19703,7 +19447,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-1/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-1/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -19726,7 +19470,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-1/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-1/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -19749,7 +19493,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-1/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-1/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -19772,7 +19516,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-1/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-1/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -19795,7 +19539,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-1/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-1/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -19818,7 +19562,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-2/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-2/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -19841,7 +19585,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-2/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-2/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -19864,7 +19608,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-2/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-2/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -19887,7 +19631,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-2/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-2/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -19910,7 +19654,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-2/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-2/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -19933,7 +19677,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-2/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-2/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -19956,7 +19700,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-2/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-2/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -19979,7 +19723,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-2/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-2/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -20002,7 +19746,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-3/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-3/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -20025,7 +19769,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-3/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-3/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -20048,7 +19792,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-3/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-3/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -20071,7 +19815,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-3/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-3/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -20094,7 +19838,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-3/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-3/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -20117,7 +19861,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-3/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-3/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -20140,7 +19884,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-3/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-3/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -20163,7 +19907,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-3/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-3/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -20186,7 +19930,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-4/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-4/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -20209,7 +19953,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-4/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-4/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -20232,7 +19976,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-4/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-4/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -20255,7 +19999,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-4/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-4/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -20278,7 +20022,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-4/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-4/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -20301,7 +20045,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-4/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-4/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -20324,7 +20068,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-4/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-4/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -20347,7 +20091,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-4/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-4/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -20370,7 +20114,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-5/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-5/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -20393,7 +20137,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-5/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-5/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -20416,7 +20160,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-5/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-5/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -20439,7 +20183,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-5/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-5/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -20462,7 +20206,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-5/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-5/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -20485,7 +20229,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-5/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-5/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -20508,7 +20252,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-5/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-5/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -20531,7 +20275,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-5/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-5/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -20554,7 +20298,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-6/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-6/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -20577,7 +20321,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-6/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-6/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -20600,7 +20344,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-6/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-6/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -20623,7 +20367,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-6/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-6/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -20646,7 +20390,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-6/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-6/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -20669,7 +20413,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-6/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-6/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -20692,7 +20436,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-6/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-6/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -20715,7 +20459,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-6/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-6/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -20738,7 +20482,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-7/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-7/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -20761,7 +20505,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-7/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-7/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -20784,7 +20528,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-7/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-7/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -20807,7 +20551,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-7/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-7/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -20830,7 +20574,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-7/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-7/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -20853,7 +20597,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-7/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-7/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -20876,7 +20620,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-7/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-7/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -20899,7 +20643,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-4/mcs-7/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-4/mcs-7/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -20922,7 +20666,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-0/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-0/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -20945,7 +20689,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-0/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-0/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -20968,7 +20712,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-0/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-0/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -20991,7 +20735,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-0/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-0/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -21014,7 +20758,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-0/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-0/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -21037,7 +20781,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-0/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-0/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -21060,7 +20804,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-0/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-0/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -21083,7 +20827,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-0/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-0/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -21106,7 +20850,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-1/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-1/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -21129,7 +20873,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-1/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-1/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -21152,7 +20896,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-1/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-1/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -21175,7 +20919,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-1/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-1/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -21198,7 +20942,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-1/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-1/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -21221,7 +20965,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-1/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-1/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -21244,7 +20988,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-1/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-1/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -21267,7 +21011,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-1/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-1/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -21290,7 +21034,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-2/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-2/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -21313,7 +21057,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-2/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-2/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -21336,7 +21080,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-2/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-2/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -21359,7 +21103,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-2/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-2/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -21382,7 +21126,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-2/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-2/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -21405,7 +21149,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-2/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-2/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -21428,7 +21172,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-2/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-2/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -21451,7 +21195,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-2/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-2/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -21474,7 +21218,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-3/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-3/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -21497,7 +21241,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-3/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-3/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -21520,7 +21264,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-3/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-3/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -21543,7 +21287,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-3/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-3/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -21566,7 +21310,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-3/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-3/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -21589,7 +21333,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-3/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-3/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -21612,7 +21356,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-3/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-3/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -21635,7 +21379,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-3/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-3/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -21658,7 +21402,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-4/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-4/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -21681,7 +21425,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-4/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-4/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -21704,7 +21448,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-4/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-4/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -21727,7 +21471,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-4/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-4/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -21750,7 +21494,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-4/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-4/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -21773,7 +21517,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-4/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-4/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -21796,7 +21540,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-4/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-4/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -21819,7 +21563,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-4/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-4/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -21842,7 +21586,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-5/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-5/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -21865,7 +21609,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-5/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-5/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -21888,7 +21632,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-5/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-5/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -21911,7 +21655,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-5/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-5/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -21934,7 +21678,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-5/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-5/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -21957,7 +21701,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-5/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-5/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -21980,7 +21724,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-5/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-5/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -22003,7 +21747,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-5/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-5/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -22026,7 +21770,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-6/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-6/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -22049,7 +21793,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-6/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-6/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -22072,7 +21816,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-6/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-6/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -22095,7 +21839,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-6/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-6/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -22118,7 +21862,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-6/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-6/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -22141,7 +21885,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-6/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-6/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -22164,7 +21908,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-6/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-6/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -22187,7 +21931,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-6/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-6/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -22210,7 +21954,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-7/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-7/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -22233,7 +21977,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-7/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-7/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -22256,7 +22000,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-7/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-7/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -22279,7 +22023,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-7/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-7/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -22302,7 +22046,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-7/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-7/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -22325,7 +22069,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-7/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-7/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -22348,7 +22092,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-7/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-7/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -22371,7 +22115,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-5/mcs-7/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-5/mcs-7/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -22394,7 +22138,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-0/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-0/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -22417,7 +22161,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-0/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-0/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -22440,7 +22184,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-0/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-0/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -22463,7 +22207,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-0/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-0/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -22486,7 +22230,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-0/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-0/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -22509,7 +22253,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-0/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-0/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -22532,7 +22276,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-0/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-0/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -22555,7 +22299,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-0/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-0/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -22578,7 +22322,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-1/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-1/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -22601,7 +22345,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-1/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-1/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -22624,7 +22368,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-1/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-1/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -22647,7 +22391,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-1/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-1/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -22670,7 +22414,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-1/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-1/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -22693,7 +22437,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-1/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-1/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -22716,7 +22460,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-1/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-1/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -22739,7 +22483,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-1/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-1/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -22762,7 +22506,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-2/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-2/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -22785,7 +22529,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-2/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-2/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -22808,7 +22552,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-2/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-2/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -22831,7 +22575,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-2/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-2/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -22854,7 +22598,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-2/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-2/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -22877,7 +22621,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-2/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-2/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -22900,7 +22644,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-2/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-2/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -22923,7 +22667,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-2/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-2/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -22946,7 +22690,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-3/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-3/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -22969,7 +22713,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-3/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-3/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -22992,7 +22736,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-3/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-3/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -23015,7 +22759,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-3/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-3/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -23038,7 +22782,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-3/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-3/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -23061,7 +22805,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-3/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-3/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -23084,7 +22828,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-3/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-3/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -23107,7 +22851,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-3/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-3/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -23130,7 +22874,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-4/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-4/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -23153,7 +22897,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-4/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-4/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -23176,7 +22920,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-4/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-4/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -23199,7 +22943,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-4/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-4/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -23222,7 +22966,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-4/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-4/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -23245,7 +22989,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-4/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-4/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -23268,7 +23012,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-4/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-4/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -23291,7 +23035,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-4/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-4/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -23314,7 +23058,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-5/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-5/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -23337,7 +23081,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-5/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-5/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -23360,7 +23104,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-5/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-5/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -23383,7 +23127,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-5/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-5/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -23406,7 +23150,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-5/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-5/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -23429,7 +23173,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-5/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-5/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -23452,7 +23196,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-5/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-5/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -23475,7 +23219,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-5/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-5/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -23498,7 +23242,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-6/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-6/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -23521,7 +23265,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-6/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-6/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -23544,7 +23288,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-6/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-6/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -23567,7 +23311,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-6/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-6/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -23590,7 +23334,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-6/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-6/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -23613,7 +23357,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-6/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-6/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -23636,7 +23380,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-6/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-6/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -23659,7 +23403,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-6/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-6/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -23682,7 +23426,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-7/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-7/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -23705,7 +23449,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-7/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-7/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -23728,7 +23472,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-7/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-7/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -23751,7 +23495,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-7/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-7/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -23774,7 +23518,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-7/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-7/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -23797,7 +23541,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-7/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-7/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -23820,7 +23564,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-7/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-7/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -23843,7 +23587,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-6/mcs-7/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-6/mcs-7/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -23866,7 +23610,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-0/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-0/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -23889,7 +23633,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-0/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-0/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -23912,7 +23656,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-0/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-0/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -23935,7 +23679,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-0/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-0/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -23958,7 +23702,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-0/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-0/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -23981,7 +23725,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-0/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-0/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -24004,7 +23748,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-0/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-0/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -24027,7 +23771,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-0/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-0/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -24050,7 +23794,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-1/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-1/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -24073,7 +23817,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-1/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-1/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -24096,7 +23840,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-1/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-1/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -24119,7 +23863,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-1/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-1/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -24142,7 +23886,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-1/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-1/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -24165,7 +23909,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-1/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-1/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -24188,7 +23932,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-1/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-1/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -24211,7 +23955,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-1/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-1/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -24234,7 +23978,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-2/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-2/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -24257,7 +24001,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-2/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-2/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -24280,7 +24024,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-2/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-2/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -24303,7 +24047,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-2/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-2/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -24326,7 +24070,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-2/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-2/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -24349,7 +24093,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-2/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-2/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -24372,7 +24116,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-2/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-2/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -24395,7 +24139,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-2/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-2/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -24418,7 +24162,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-3/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-3/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -24441,7 +24185,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-3/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-3/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -24464,7 +24208,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-3/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-3/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -24487,7 +24231,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-3/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-3/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -24510,7 +24254,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-3/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-3/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -24533,7 +24277,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-3/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-3/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -24556,7 +24300,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-3/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-3/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -24579,7 +24323,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-3/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-3/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -24602,7 +24346,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-4/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-4/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -24625,7 +24369,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-4/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-4/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -24648,7 +24392,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-4/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-4/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -24671,7 +24415,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-4/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-4/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -24694,7 +24438,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-4/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-4/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -24717,7 +24461,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-4/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-4/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -24740,7 +24484,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-4/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-4/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -24763,7 +24507,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-4/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-4/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -24786,7 +24530,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-5/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-5/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -24809,7 +24553,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-5/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-5/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -24832,7 +24576,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-5/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-5/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -24855,7 +24599,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-5/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-5/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -24878,7 +24622,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-5/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-5/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -24901,7 +24645,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-5/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-5/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -24924,7 +24668,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-5/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-5/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -24947,7 +24691,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-5/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-5/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -24970,7 +24714,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-6/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-6/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -24993,7 +24737,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-6/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-6/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -25016,7 +24760,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-6/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-6/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -25039,7 +24783,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-6/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-6/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -25062,7 +24806,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-6/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-6/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -25085,7 +24829,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-6/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-6/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -25108,7 +24852,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-6/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-6/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -25131,7 +24875,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-6/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-6/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -25154,7 +24898,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-7/membuf-0/mbs-0/mba-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-7/membuf-0/mbs-0/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -25177,7 +24921,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-7/membuf-0/mbs-0/mba-0/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-7/membuf-0/mbs-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -25200,7 +24944,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-7/membuf-0/mbs-0/mba-0/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-7/membuf-0/mbs-0/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -25223,7 +24967,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-7/membuf-0/mbs-0/mba-0/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-7/membuf-0/mbs-0/mba-0/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -25246,7 +24990,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-7/membuf-0/mbs-0/mba-1/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-7/membuf-0/mbs-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -25269,7 +25013,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-7/membuf-0/mbs-0/mba-1/mem_port-0/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-7/membuf-0/mbs-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -25292,7 +25036,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-7/membuf-0/mbs-0/mba-1/mem_port-1/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-7/membuf-0/mbs-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
@@ -25315,7 +25059,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-7/mcs-7/membuf-0/mbs-0/mba-1/mem_port-1/dimm-1</default>
+        <default>affinity:sys-0/node-0/proc-7/mcs-7/membuf-0/mbs-0/mba-1/dimm-3</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>

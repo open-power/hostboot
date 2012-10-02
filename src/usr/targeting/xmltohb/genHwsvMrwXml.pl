@@ -321,7 +321,7 @@ generate_sys();
 # Second, generate system node using the master processor's node
 generate_system_node();
 
-# Third, generate the proc, occ, ex-chiplet, mcs-chiplet, pervasive-bus, powerbus,
+# Third, generate the proc, occ, ex-chiplet, mcs-chiplet
 # unit-tp (if on fsp), pcie bus and A/X-bus.
 my $ex_count = 0;
 my $mcs_count = 0;
@@ -405,8 +405,6 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
             ($STargets[$i+1][NAME_FIELD] eq "memb"))
         {
             $mcs_count = 0;
-            generate_pervasive_bus($proc);
-            generate_powerbus($proc);
             if ($build eq "fsp")
             {
                  generate_unit_tp($proc);
@@ -1159,52 +1157,6 @@ sub generate_mcs
 ";
 }
 
-sub generate_pervasive_bus
-{
-    my $proc = shift;
-    my $uidstr = sprintf("0x%02X13%04X",${node},$proc+${node}*8);
-    print "
-<!-- $SYSNAME n${node}p$proc pervasive unit -->
-
-<targetInstance>
-    <id>sys${sys}node${node}proc${proc}pervasive0</id>
-    <type>unit-pervasive-murano</type>
-    <attribute><id>HUID</id><default>${uidstr}</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-$sys/node-$node/proc-$proc/pervasive-0</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-$sys/node-$node/proc-$proc/pervasive-0</default>
-    </attribute>
-</targetInstance>
-";
-}
-
-sub generate_powerbus
-{
-    my $proc = shift;
-    my $uidstr = sprintf("0x%02X14%04X",${node},$proc+${node}*8);
-    print "
-<!-- $SYSNAME n${node}p$proc powerbus unit -->
-
-<targetInstance>
-    <id>sys${sys}node${node}proc${proc}powerbus0</id>
-    <type>unit-powerbus-murano</type>
-    <attribute><id>HUID</id><default>${uidstr}</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-$sys/node-$node/proc-$proc/powerbus-0</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-$sys/node-$node/proc-$proc/powerbus-0</default>
-    </attribute>
-</targetInstance>
-";
-}
-
 sub generate_unit_tp
 {
     my $proc = shift;
@@ -1466,15 +1418,18 @@ sub generate_dimm
     $y = int(($y - 4 * $x) / 2);
     my $z = $id;
     $z = $z % 2;
+    my $zz = $id;
+    $zz = $zz % 4;
     #$x = sprintf ("%d", $x);
     #$y = sprintf ("%d", $y);
     #$z = sprintf ("%d", $z);
+    #$zz = sprintf ("%d", $zz);
     my $uidstr = sprintf("0x%02X03%04X",${node},$dimm+${node}*512);
 
     # Calculate the VPD Record number value
     my $vpdRec = 0;
 
-    # Set offsets based on mba, mem_port, and dimm values
+    # Set offsets based on mba and dimm values
     if( 1 == $x )
     {
         $vpdRec = $vpdRec + 4;
@@ -1495,8 +1450,8 @@ sub generate_dimm
     # Adjust offset basedon processor value
     $vpdRec = ($proc * 64) + $vpdRec;
 
-	my $dimmNum=($dimm - ($dimm%8))/8;
-	my $dimmHex=sprintf("0xD00%01X",$dimmNum);
+    my $dimmNum=($dimm - ($dimm%8))/8;
+    my $dimmHex=sprintf("0xD00%01X",$dimmNum);
     print "
 <targetInstance>
     <id>sys${sys}node${node}dimm$dimm</id>
@@ -1509,7 +1464,7 @@ sub generate_dimm
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs/membuf-$pos/mbs-0/mba-$x/mem_port-$y/dimm-$z</default>
+        <default>affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs/membuf-$pos/mbs-0/mba-$x/dimm-$zz</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>

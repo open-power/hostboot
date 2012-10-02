@@ -389,34 +389,6 @@
 
 
 <targetType>
-    <id>unit-pervasive-power8</id>
-    <parent>unit</parent>
-    <attribute>
-        <id>TYPE</id>
-        <default>PERVASIVE</default>
-    </attribute>
-</targetType>
-
-<targetType>
-    <id>unit-pervasive-venice</id>
-    <parent>unit-pervasive-power8</parent>
-    <attribute>
-        <id>MODEL</id>
-        <default>VENICE</default>
-    </attribute>
-</targetType>
-
-<targetType>
-    <id>unit-pervasive-murano</id>
-    <parent>unit-pervasive-power8</parent>
-    <attribute>
-        <id>MODEL</id>
-        <default>MURANO</default>
-    </attribute>
-</targetType>
-
-
-<targetType>
     <id>unit-pci-power8</id>
     <parent>unit</parent>
     <attribute>
@@ -437,34 +409,6 @@
 <targetType>
     <id>unit-pci-murano</id>
     <parent>unit-pci-power8</parent>
-    <attribute>
-        <id>MODEL</id>
-        <default>MURANO</default>
-    </attribute>
-</targetType>
-
-
-<targetType>
-    <id>unit-powerbus-power8</id>
-    <parent>unit</parent>
-    <attribute>
-        <id>TYPE</id>
-        <default>POWERBUS</default>
-    </attribute>
-</targetType>
-
-<targetType>
-    <id>unit-powerbus-venice</id>
-    <parent>unit-powerbus-power8</parent>
-    <attribute>
-        <id>MODEL</id>
-        <default>VENICE</default>
-    </attribute>
-</targetType>
-
-<targetType>
-    <id>unit-powerbus-murano</id>
-    <parent>unit-powerbus-power8</parent>
     <attribute>
         <id>MODEL</id>
         <default>MURANO</default>
@@ -548,15 +492,6 @@
 </targetType>
 
 <!-- Hybrid targets -->
-
-<targetType>
-    <id>unit-memport-power8</id>
-    <parent>unit</parent>
-    <attribute>
-        <id>TYPE</id>
-        <default>MEM_PORT</default>
-    </attribute>
-</targetType>
 
 <targetType>
     <id>unit-mbs-power8</id>
@@ -742,24 +677,6 @@
     </attribute>
 </targetType>
 
-<targetType>
-    <id>unit-memport-venice</id>
-    <parent>unit-memport-power8</parent>
-    <attribute>
-        <id>MODEL</id>
-        <default>VENICE</default>
-    </attribute>
-</targetType>
-
-<targetType>
-    <id>unit-memport-murano</id>
-    <parent>unit-memport-venice</parent>
-    <attribute>
-        <id>MODEL</id>
-        <default>MURANO</default>
-    </attribute>
-</targetType>
-
 <!-- Memory Buffer Target Types -->
 
 <!-- Centaur chip/DMI -->
@@ -850,26 +767,6 @@
             <field><id>supportsFsiScom</id><value>1</value></field>
             <field><id>supportsXscom</id><value>0</value></field>
             <field><id>supportsInbandScom</id><value>1</value></field>
-            <field><id>reserved</id><value>0</value></field>
-        </default>
-    </attribute>
-    <attribute>
-        <id>MODEL</id>
-        <default>CENTAUR</default>
-    </attribute>
-</targetType>
-
-<!-- Centaur memory port -->
-
-<targetType>
-    <id>unit-memport-centaur</id>
-    <parent>unit-memport-power8</parent>
-    <attribute>
-        <id>PRIMARY_CAPABILITIES</id>
-        <default>
-            <field><id>supportsFsiScom</id><value>0</value></field>
-            <field><id>supportsXscom</id><value>0</value></field>
-            <field><id>supportsInbandScom</id><value>0</value></field>
             <field><id>reserved</id><value>0</value></field>
         </default>
     </attribute>

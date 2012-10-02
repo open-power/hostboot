@@ -87,22 +87,10 @@
         <name>DIMM</name>
     </enumerator>
     <enumerator>
-        <name>SCM</name>
-    </enumerator>
-    <enumerator>
-        <name>DCM</name>
-    </enumerator>
-    <enumerator>
         <name>MEMBUF</name>
     </enumerator>
     <enumerator>
         <name>PROC</name>
-    </enumerator>
-    <enumerator>
-        <name>MEMVRM</name>
-    </enumerator>
-    <enumerator>
-        <name>PROCVRM</name>
     </enumerator>
     <enumerator>
         <name>EX</name>
@@ -129,15 +117,6 @@
         <name>MBA</name>
     </enumerator>
     <enumerator>
-        <name>MEM_PORT</name>
-    </enumerator>
-    <enumerator>
-        <name>PERVASIVE</name>
-    </enumerator>
-    <enumerator>
-        <name>POWERBUS</name>
-    </enumerator>
-    <enumerator>
         <name>XBUS</name>
     </enumerator>
     <enumerator>
@@ -145,12 +124,6 @@
     </enumerator>
     <enumerator>
         <name>PCI</name>
-    </enumerator>
-    <enumerator>
-        <name>TP</name>
-    </enumerator>
-    <enumerator>
-        <name>DMI</name>
     </enumerator>
     <enumerator>
         <name>DPSS</name>
