@@ -1,25 +1,25 @@
-<!--  IBM_PROLOG_BEGIN_TAG
-     This is an automatically generated prolog.
-   
-     $Source: src/usr/hwpf/hwp/fapiHwpAttributeInfo.xml $
-   
-     IBM CONFIDENTIAL
-   
-     COPYRIGHT International Business Machines Corp. 2011
-   
-     p1
-   
-     Object Code Only (OCO) source materials
-     Licensed Internal Code Source Materials
-     IBM HostBoot Licensed Internal Code
-   
-     The source code for this program is not published or other-
-     wise divested of its trade secrets, irrespective of what has
-     been deposited with the U.S. Copyright Office.
-   
-     Origin: 30
-   
-     IBM_PROLOG_END -->
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hwpf/hwp/system_attributes.xml $                      -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2011,2012              -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
 <!--
     XML file specifying HWPF attributes.
     These are platInit attributes associated with the system.
@@ -51,6 +51,29 @@
     <platInit/>
   </attribute>
   <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_MNFG_FLAGS</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        The manufacturing flags.
+        This is a bitfield. Each bit is a flag and multiple flags can be set
+    </description>
+    <valueType>uint64</valueType>
+    <enum>
+        MNFG_THRESHOLDS                     = 0x0000000000000001,
+        MNFG_AVP_ENABLE                     = 0x0000000000000002,
+        MNFG_HDAT_AVP_ENABLE                = 0x0000000000000004,
+        MNFG_SRC_TERM                       = 0x0000000000000008,
+        MNFG_IPL_MEMORY_CE_CHECKINGE        = 0x0000000000000010,
+        MNFG_FAST_BACKGROUND_SCRUB          = 0x0000000000000020,
+        MNFG_TEST_DRAM_REPAIRS              = 0x0000000000000040,
+        MNFG_DISABLE_DRAM_REPAIRS           = 0x0000000000000080,
+        MNFG_ENABLE_EXHAUSTIVE_PATTERN_TEST = 0x0000000000000100,
+        MNFG_ENABLE_STANDARD_PATTERN_TEST   = 0x0000000000000200,
+        MNFG_ENABLE_MINIMUM_PATTERN_TEST    = 0x0000000000000400,
+    </enum>
+    <platInit/>
+  </attribute>
   <attribute>
     <id>ATTR_PROC_EPS_TABLE_TYPE</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>

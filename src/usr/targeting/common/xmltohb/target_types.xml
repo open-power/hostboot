@@ -109,7 +109,7 @@
     <attribute><id>MSS_CLEANER_ENABLE</id></attribute>
     <attribute><id>MIRROR_BASE_ADDRESS</id></attribute>
     <attribute><id>NOMINAL_FREQ_MHZ</id></attribute>
-    <attribute><id>ATTR_MNFG_FLAGS</id></attribute>
+    <attribute><id>MNFG_FLAGS</id></attribute>
 </targetType>
 
 <targetType>

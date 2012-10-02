@@ -4607,7 +4607,7 @@ bits6:7  will be consumed together to form COARSE_LVL. </description>
 </attribute>
 
 <attribute>
-    <id>ATTR_MNFG_FLAGS</id>
+    <id>MNFG_FLAGS</id>
     <description> Provides the mnfg flags
         in a single value.  The bits are
         masked together so the single value
@@ -4635,6 +4635,10 @@ bits6:7  will be consumed together to form COARSE_LVL. </description>
     <persistency>non-volatile</persistency>
     <readable/>
     <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MNFG_FLAGS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
 </attribute>
 
 <enumerationType>
