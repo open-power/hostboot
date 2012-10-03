@@ -32,15 +32,15 @@
 /*****************************************************************************/
 // I n c l u d e s
 /*****************************************************************************/
-#include <stdint.h>
-#include <stdlib.h>
 #include <util/singleton.H>
 #include <errl/errlentry.H>
 #include <sys/sync.h>
-#include <vector>
 #include <kernel/timemgr.H>
 #include <hbotcompid.H>
 #include <hwas/common/hwasCallout.H>
+#include <mbox/mbox_queues.H>
+#include <mbox/mboxif.H>
+
 
 namespace ERRORLOG
 {
@@ -65,6 +65,7 @@ namespace ERRORLOG
  *  @return None
  */
 void errlCommit(errlHndl_t& io_err, compId_t i_committerComp );
+
 
 /*****************************************************************************/
 // Forward class declarations
@@ -124,6 +125,7 @@ public:
       */
      static void setHwasProcessCalloutFn(HWAS::processCalloutFn i_fn);
 
+
      /**
       * @brief  Returns the HWAS ProcessCallout function pointer
       *
@@ -161,18 +163,94 @@ protected:
 private:
 
     /**
+     * @enum ERRLOG_MSG_TYPE
+     *
+     * @brief Message types that recognized by the error log message queue
+     */
+    enum ERRLOG_MSG_TYPE
+    {
+        ERRLOG_NEEDS_TO_BE_COMMITTED_TYPE  = 0x00000030 | MBOX::FIRST_SECURE_MSG, 
+        ERRLOG_SEND_TO_FSP_TYPE            = 0x00000031 | MBOX::FIRST_SECURE_MSG, 
+        ERRLOG_COMMITTED_ACK_RESPONSE_TYPE = 0x00000032 | MBOX::FIRST_UNSECURE_MSG,
+        ERRLOG_SHUTDOWN                    = 0x00000033 | MBOX::FIRST_SECURE_MSG, 
+    };
+
+    /**
       * @brief   Disabled copy constructor and assignment operator
       */
     ErrlManager(const ErrlManager& i_right);
     ErrlManager& operator=(const ErrlManager& i_right);
 
+    /**
+     * @brief Create and register the error log message queue
+     *
+     * @param[in/out] NONE
+     * @return NONE.
+     */
+    void msgQueueInit ( void );
+
+
+    /**
+     *  @brief Performs startup of the error log processing thread.
+     *
+     *  @param[in/out]  
+     *  @return NONE 
+     */
+     static void * startup ( void* i_self );
+
+    /**
+     * @brief Message handler for process Hostboot error log message
+     *        and send it to FSP.
+     *
+     * @param[in/out] NONE
+     * @return NONE 
+     *
+     */
+    void errlogMsgHndlr ( void );
+
+    /**
+     * @brief Send Host boot error log to error message queue for committing.  
+     *
+     * @param[in,out] io_err Error log handle to be committed
+     * @param[in] i_committerComp Component id that committed the error
+     *
+     * @return NONE 
+     * 
+     */
+    void sendErrlogToMessageQueue ( errlHndl_t& io_err, compId_t i_committerComp );
+
+    /**
+     * @brief Create a mailbox message with the error log and send it to Fsp.
+     *
+     * @param[in,out] io_err Error log handle to be committed
+     * @return NONE
+     *
+     */
+    void sendMboxMsg ( errlHndl_t& io_err );
+
+    /**
+     * @brief Save errlog entry in the memory
+     *
+     * @param[in,out] io_err Error log handle to be committed 
+     * @return NULL 
+     *
+     */
+    void saveErrLogEntry( errlHndl_t& io_err );
+
+    /**
+     * @brief Shutdown error log manager 
+     *
+     * @param[in,out] None 
+     * @return NULL
+     *
+     */
+    void errlogShutdown( void ); 
 
     /**
       * @brief    Current log ID.  As new error logs are created,
       * this value will be used to assign the new error log its ID.
       */
     uint32_t    iv_currLogId;
-
 
     /**
       * @brief
@@ -184,14 +262,14 @@ private:
     storage_header_t * iv_pStorage;
 
     /**
-      * @brief Serialization for error log commits.
-      */
-    mutex_t iv_commitMutex;
-
-    /**
       * @brief    Pointer to the HWAS processCallout function
       */
     HWAS::processCalloutFn iv_hwasProcessCalloutFn;
+
+    /**
+      * @brief Message queue for error log
+      */
+    msg_q_t iv_msgQ;
 
 };
 

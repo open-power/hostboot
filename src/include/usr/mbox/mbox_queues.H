@@ -43,6 +43,7 @@ namespace MBOX
         HB_MAILBOX_MSGQ,
         HB_ISTEP_MSGQ,
         HB_ATTR_SYNC_MSGQ,
+        HB_ERROR_MSGQ,
         // Add HB services here:
 
         HB_TEST_MSGQ            = 0x7FFFFFFF,
@@ -52,9 +53,10 @@ namespace MBOX
         FSP_MAILBOX_MSGQ,
         FSP_PROGRESS_CODES_MSGQ,
         FSP_TRACE_MSGQ,
-        FSP_ERRL_MSGQ,
+        FSP_ERROR_MSGQ          = 0x80000004,
         IPL_SERVICE_QUEUE       = 0x80000008,   // Defined by Fsp team
         FSP_ATTR_SYNC_MSGQ      = 0x80000009,
+
         // Add FSP services here:
         FSP_ECHO_MSGQ = 0xFFFFFFFF,     // Fake FSP for test
     };

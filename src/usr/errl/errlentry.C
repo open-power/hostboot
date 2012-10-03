@@ -300,16 +300,6 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
     iv_User.setComponentId( i_committerComponent );
 
     // see if HWAS has been loaded and has set the processCallout function
-    // TODO RTC 46680
-    // If the PNOR resource provider commits an error then this function will
-    // call HWAS to process the callouts/deconfigure/GARD requests in the
-    // error log, if the HWAS function is not paged into memory then VMM will
-    // attempt to page it in which will invoke the PNOR resource provider,
-    // this will deadlock if the PNOR resource provider is waiting for the
-    // error log commit to complete before processing further requests. There
-    // may be other similar deadlock scenarios involving 'base' functions
-    // logging errors. This can be solved with a separate errl-manager task
-    // that processes error logs
     HWAS::processCalloutFn pFn;
     pFn = ERRORLOG::theErrlManager::instance().getHwasProcessCalloutFn();
     if (pFn != NULL)
