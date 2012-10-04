@@ -212,6 +212,7 @@
      <attribute><id>SLW_IMAGE_ADDR</id></attribute>
      <attribute><id>SLW_IMAGE_SIZE</id></attribute>
      <attribute><id>MSS_INTERLEAVE_ENABLE</id></attribute>
+     <attribute><id>MSS_MCS_GROUP_32</id></attribute>
 </targetType>
 
 <targetType>

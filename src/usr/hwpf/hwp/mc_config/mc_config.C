@@ -67,6 +67,7 @@
 #include    "mss_volt/mss_volt.H"
 #include    "mss_freq/mss_freq.H"
 #include    "mss_eff_config/mss_eff_config.H"
+#include    "mss_eff_config/mss_eff_grouping.H"
 
 namespace   MC_CONFIG
 {
@@ -248,6 +249,73 @@ void    call_mss_freq( void *io_pArgs )
     task_end2( NULL );
 }
 
+errlHndl_t call_mss_eff_grouping()
+{
+    errlHndl_t l_err = NULL;
+
+    TARGETING::TargetHandleList l_procsList;
+    getAllChips(l_procsList, TYPE_PROC);
+ 
+    for ( size_t i = 0; i < l_procsList.size(); i++ )
+    {
+        //  make a local copy of the target for ease of use
+        const TARGETING::Target*  l_cpu_target = l_procsList[i];
+
+        //  print call to hwp and dump physical path of the target(s)
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "=====  mss_eff_grouping HWP( cpu %d )", i );
+        //  dump physical path to targets
+        EntityPath l_path;
+        l_path  =   l_cpu_target->getAttr<ATTR_PHYS_PATH>();
+        l_path.dump();
+
+        // cast OUR type of target to a FAPI type of target.
+        const fapi::Target l_fapi_cpu_target(
+                TARGET_TYPE_PROC_CHIP,
+                reinterpret_cast<void *>
+        (const_cast<TARGETING::Target*>(l_cpu_target)) );
+
+        TARGETING::TargetHandleList l_membufsList;
+        getAffinityChips(l_membufsList, l_cpu_target, TYPE_MEMBUF);
+        std::vector<fapi::Target> l_associated_centaurs;
+
+        size_t j = 0;
+        for ( ; j < l_membufsList.size(); j++ )
+        {
+            // cast OUR type of target to a FAPI type of target.
+            const fapi::Target l_fapi_centaur_target(
+                    TARGET_TYPE_MEMBUF_CHIP,
+                    reinterpret_cast<void *>
+                   (const_cast<TARGETING::Target*>(l_membufsList[j])) );
+
+            EntityPath l_path;
+            l_path  =   l_membufsList[j]->getAttr<ATTR_PHYS_PATH>();
+            l_path.dump();
+
+            l_associated_centaurs.push_back(l_fapi_centaur_target);
+        }
+   
+        FAPI_INVOKE_HWP(l_err, mss_eff_grouping,
+                        l_fapi_cpu_target, l_associated_centaurs);
+
+        //  process return code.
+        if ( l_err )
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "ERROR 0x%.8X:  mss_eff_grouping HWP( cpu %d centaur %d ) ",
+                l_err->reasonCode(), i, j );
+            break; // break out mba loop
+        }
+        else
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "SUCCESS :  mss_eff_grouping HWP( cpu %d )", i );
+        }
+    }   // endfor
+
+    return l_err;
+}
+
 //
 //  Wrapper function to call 12.4 : mss_eff_config
 //
@@ -298,6 +366,18 @@ void    call_mss_eff_config( void *io_pArgs )
         }
     }   // endfor
 
+    if (!l_err)
+    {
+        l_err = call_mss_eff_grouping();
+    }
+
+    // When opt_memmap HWP is available, it will be called
+    // here between the two call_mss_eff_grouping()
+
+    if (!l_err)
+    {
+        l_err = call_mss_eff_grouping();
+    }
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_eff_config exit" );
 

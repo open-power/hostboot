@@ -44,6 +44,7 @@ OBJS =  mc_config.o			\
         mss_volt.o 			\
         mss_freq.o 			\
         mss_eff_config.o                \
+        mss_eff_grouping.o              \
         mss_eff_config_thermal.o        \
         mss_eff_config_termination.o    \
         mss_eff_config_rank_group.o

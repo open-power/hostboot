@@ -1609,7 +1609,7 @@ sub writeAttrErrlCFile {
     print $outFile "void ErrlUserDetailsAttribute::addData(\n";
     print $outFile "    uint32_t i_attr)\n";
     print $outFile "{\n";
-    print $outFile "    char tmpBuffer[128];\n";
+    print $outFile "    char *tmpBuffer = new char[1024];\n";
     print $outFile "    uint32_t attrSize = 0;\n";
     print $outFile "\n";
     print $outFile "    switch (i_attr) {\n";
@@ -1646,6 +1646,7 @@ sub writeAttrErrlCFile {
     print $outFile "        memcpy(pBuf + iv_dataSize, tmpBuffer, attrSize); // copy into iv_pBuffer\n";
     print $outFile "        iv_dataSize += attrSize;\n";
     print $outFile "    }\n";
+    print $outFile "    delete [] tmpBuffer;\n";
     print $outFile "}\n";
     print $outFile "\n";
 
