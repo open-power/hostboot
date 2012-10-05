@@ -34,7 +34,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
 ## pointer to common HWP files
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/include
 
-OBJS =  gcr_funcs.o io_funcs.o io_run_training.o
+OBJS =  gcr_funcs.o io_funcs.o io_run_training.o pbusLinkSvc.o proc_fab_smp.o
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 ## vpath   %.C proc_cen_framelock:io_run_training

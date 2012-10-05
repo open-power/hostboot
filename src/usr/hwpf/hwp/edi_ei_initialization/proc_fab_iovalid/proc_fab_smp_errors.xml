@@ -1,38 +1,71 @@
-<!--  IBM_PROLOG_BEGIN_TAG
-     This is an automatically generated prolog.
-   
-     $Source: src/usr/hwpf/hwp/edi_ei_initialization/proc_fab_iovalid/proc_fab_smp_errors.xml $
-   
-     IBM CONFIDENTIAL
-   
-     COPYRIGHT International Business Machines Corp. 2012
-   
-     p1
-   
-     Object Code Only (OCO) source materials
-     Licensed Internal Code Source Materials
-     IBM HostBoot Licensed Internal Code
-   
-     The source code for this program is not published or other-
-     wise divested of its trade secrets, irrespective of what has
-     been deposited with the U.S. Copyright Office.
-   
-     Origin: 30
-   
-     IBM_PROLOG_END -->
-<!-- Error definitions for proc_fab_smp library -->
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hwpf/hwp/edi_ei_initialization/proc_fab_iovalid/proc_fab_smp_errors.xml $ -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2012                   -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- Error definitions for proc_fab_smp -->
 <hwpErrors>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PROC_FAB_SMP_INVALID_PROC_FAB_SMP_PROC_CHIP_ARG</rc>
-    <description>Invalid/NULL proc_fab_smp_proc_chip_argument passed in HWP argument vector.</description>
+    <rc>RC_PROC_FAB_SMP_PCIE_NOT_F_LINK_ATTR_ERR</rc>
+    <description>Invalid definition for PCIe/DSMP mux attribute value.</description>
+    <ffdc>ATTR_DATA</ffdc>
   </hwpError>
   <hwpError>
-    <rc>RC_PROC_FAB_SMP_INVALID_PROC_FAB_SMP_A_BUS_ARG</rc>
-    <description>Invalid/NULL proc_fab_smp_a_bus argument passed in HWP argument vector.</description>
+    <rc>RC_PROC_FAB_SMP_FABRIC_NODE_ID_ATTR_ERR</rc>
+    <description>Invalid definition for fabric node ID attribute value.</description>
+    <ffdc>ATTR_DATA</ffdc>
   </hwpError>
   <hwpError>
-    <rc>RC_PROC_FAB_SMP_INVALID_PROC_FAB_SMP_X_BUS_ARG</rc>
-    <description>Invalid/NULL proc_fab_smp_x_bus argument passed in HWP argument vector.</description>
+    <rc>RC_PROC_FAB_SMP_FABRIC_CHIP_ID_ATTR_ERR</rc>
+    <description>Invalid definition for fabric chip ID attribute value.</description>
+    <ffdc>ATTR_DATA</ffdc>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_FAB_SMP_EPSILON_TABLE_TYPE_ATTR_ERR</rc>
+    <description>Invalid definition for epsilon table type attribute value.</description>
+    <ffdc>ATTR_DATA</ffdc>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_FAB_SMP_EPSILON_GB_DIRECTION_ATTR_ERR</rc>
+    <description>Invalid definition for epsilon guardband direction attribute value.</description>
+    <ffdc>ATTR_DATA</ffdc>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_FAB_SMP_ASYNC_SAFE_MODE_ATTR_ERR</rc>
+    <description>Invalid definition for fabric async safe mode attribute value.</description>
+    <ffdc>ATTR_DATA</ffdc>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_FAB_SMP_PUMP_MODE_ATTR_ERR</rc>
+    <description>Invalid definition for fabric pump mode attribute value.</description>
+    <ffdc>ATTR_DATA</ffdc>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_FAB_SMP_X_BUS_WIDTH_ATTR_ERR</rc>
+    <description>Invalid definition for X bus width attribute value.</description>
+    <ffdc>ATTR_DATA</ffdc>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_FAB_SMP_MCS_INTERLEAVED_ATTR_ERR</rc>
+    <description>Invalid definition for MCS interleaving attribute value.</description>
+    <ffdc>ATTR_DATA</ffdc>
   </hwpError>
 </hwpErrors>

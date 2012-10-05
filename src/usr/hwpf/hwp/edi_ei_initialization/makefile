@@ -47,8 +47,8 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/edi_ei_initialization/fabric_io_run_
 
 
 ##  NOTE: add new object files when you add a new HWP
-OBJS =  edi_ei_initialization.o pbusLinkSvc.o \
-        proc_fab_iovalid.o proc_fab_smp.o fabric_io_run_training.o
+OBJS =  edi_ei_initialization.o \
+        proc_fab_iovalid.o fabric_io_run_training.o
 
         
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP

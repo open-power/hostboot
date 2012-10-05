@@ -1,7 +1,7 @@
 <!-- IBM_PROLOG_BEGIN_TAG                                                   -->
 <!-- This is an automatically generated prolog.                             -->
 <!--                                                                        -->
-<!-- $Source: src/usr/hwpf/hwp/L2_L3_attributes.xml $                       -->
+<!-- $Source: src/usr/hwpf/hwp/activate_powerbus/proc_build_smp/proc_fab_smp_fabric_attributes.xml $ -->
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
@@ -20,103 +20,73 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!--
-    XML file specifying HWPF attributes.
-    These are L2/L3 non-platInit attributes associated with proc EX chiplets
--->
-
-
+<!-- proc_fab_smp_fabric_attributes.xml -->
 <attributes>
   <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_L2_R_T0_EPS</id>
+    <id>ATTR_FREQ_CORE</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>L2 tier0 read epsilon register value.</description>
+    <description>
+      firmware notes:
+        Nominal processor's core DPLL frequency (MHz).
+        Default value provided by Machine Readable Workbook.
+        This attribute is the current value.
+    </description>
     <valueType>uint32</valueType>
     <writeable/>
     <persistRuntime/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_L2_R_T1_EPS</id>
+    <id>ATTR_PROC_EPS_GB_PERCENTAGE</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>L2 tier1 read epsilon register value.</description>
-    <valueType>uint32</valueType>
-    <writeable/>
-    <persistRuntime/>
-  </attribute>
-  <!-- ********************************************************************* -->
-  <attribute>
-    <id>ATTR_L2_R_T2_EPS</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>L2 tier2 read epsilon register value.</description>
-    <valueType>uint32</valueType>
-    <writeable/>
-    <persistRuntime/>
-  </attribute>
-  <!-- ********************************************************************* -->
-  <attribute>
-    <id>ATTR_L2_FORCE_R_T2_EPS</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>L2 force tier2 read epsilon protect (all tiers).</description>
+    <description>
+      firmware notes:
+        Guardband percentage to apply to baseline epsilon values
+    </description>
     <valueType>uint8</valueType>
-    <enum>OFF = 0x00, ON = 0x01</enum>
     <writeable/>
     <persistRuntime/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_L2_W_EPS</id>
+    <id>ATTR_PROC_EPS_GB_DIRECTION</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>L2 write epsilon register value.</description>
-    <valueType>uint32</valueType>
-    <writeable/>
-    <persistRuntime/>
-  </attribute>
-  <!-- ********************************************************************* -->
-  <attribute>
-    <id>ATTR_L3_R_T0_EPS</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>L3 tier0 read epsilon register value.</description>
-    <valueType>uint32</valueType>
-    <writeable/>
-    <persistRuntime/>
-  </attribute>
-  <!-- ********************************************************************* -->
-  <attribute>
-    <id>ATTR_L3_R_T1_EPS</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>L3 tier1 read epsilon register value.</description>
-    <valueType>uint32</valueType>
-    <writeable/>
-    <persistRuntime/>
-  </attribute>
-  <!-- ********************************************************************* -->
-  <attribute>
-    <id>ATTR_L3_R_T2_EPS</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>L3 tier2 read epsilon register value.</description>
-    <valueType>uint32</valueType>
-    <writeable/>
-    <persistRuntime/>
-  </attribute>
-  <!-- ********************************************************************* -->
-  <attribute>
-    <id>ATTR_L3_FORCE_R_T2_EPS</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>L3 force tier2 read epsilon protect (all tiers).</description>
+    <description>
+      firmware notes:
+        Direction to apply guardband margin (positive/negative)
+    </description>
     <valueType>uint8</valueType>
-    <enum>OFF = 0x00, ON = 0x01</enum>
     <writeable/>
+    <enum>POSITIVE = 0x0, NEGATIVE = 0x1</enum>
     <persistRuntime/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_L3_W_EPS</id>
+    <id>ATTR_PROC_FABRIC_ASYNC_SAFE_MODE</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>L3 write epsilon register value.</description>
-    <valueType>uint32</valueType>
+    <description>
+      firmware notes:
+        Set to force all asynchronous boundary crossings into safe mode.
+    </description>
+    <valueType>uint8</valueType>
     <writeable/>
+    <enum>PERFORMANCE_MODE = 0x0, SAFE_MODE = 0x1</enum>
     <persistRuntime/>
   </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_NOT_F_LINK</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      firmware notes:
+        Set IPL time mux/switch between PCIE PHB/F link function
+        (one per foreign link)
+    </description>
+    <valueType>uint8</valueType>
+    <array>2</array>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
 </attributes>

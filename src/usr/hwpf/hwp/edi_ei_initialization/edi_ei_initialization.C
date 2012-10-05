@@ -59,7 +59,7 @@
 #include    <fapiPlatHwpInvoker.H>
 
 #include    "edi_ei_initialization.H"
-#include    "pbusLinkSvc.H"
+#include    <pbusLinkSvc.H>
 
 //  Uncomment these files as they become available:
 // #include    "fabric_erepair/fabric_erepair.H"

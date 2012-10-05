@@ -2948,7 +2948,6 @@
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
-    <hasStringConversion/>
     <readable/>
     <hwpfToHbAttrMap>
         <id>ATTR_PROC_EPS_TABLE_TYPE</id>
@@ -2982,7 +2981,6 @@
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
-    <hasStringConversion/>
     <readable/>
     <hwpfToHbAttrMap>
         <id>ATTR_PROC_FABRIC_PUMP_MODE</id>
@@ -3014,7 +3012,6 @@
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
-    <hasStringConversion/>
     <readable/>
     <hwpfToHbAttrMap>
         <id>ATTR_PROC_X_BUS_WIDTH</id>
@@ -3158,8 +3155,9 @@
           reads ATTR_FREQ_PROC_REFCLOCK and the PB PLL settings.
     </description>
     <simpleType><uint32_t></uint32_t></simpleType>
-    <persistency>volatile-zeroed</persistency>
+    <persistency>non-volatile</persistency>
     <readable/>
+    <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_FREQ_PB</id>
         <macro>DIRECT</macro>
@@ -3176,8 +3174,9 @@
         - Is set by the HWP that sets up the A-bus PLL.
     </description>
     <simpleType><uint32_t></uint32_t></simpleType>
-    <persistency>volatile-zeroed</persistency>
+    <persistency>non-volatile</persistency>
     <readable/>
+    <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_FREQ_A</id>
         <macro>DIRECT</macro>
@@ -3194,8 +3193,9 @@
         - Is set by the HWP that sets up the X-bus PLL.
     </description>
     <simpleType><uint32_t></uint32_t></simpleType>
-    <persistency>volatile-zeroed</persistency>
+    <persistency>non-volatile</persistency>
     <readable/>
+    <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_FREQ_X</id>
         <macro>DIRECT</macro>
@@ -3990,7 +3990,7 @@
   </description>
   <simpleType>
       <uint8_t>
-          <default>0,0</default>
+          <default>1,1</default>
       </uint8_t>
       <array>2</array>
   </simpleType>
@@ -4563,6 +4563,77 @@ bits6:7  will be consumed together to form COARSE_LVL. </description>
         <id>ATTR_MSS_MEM_IPL_COMPLETE</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_EPS_GB_PERCENTAGE</id>
+  <description>
+     firmware notes:
+        Guardband percentage to apply to baseline epsilon values
+  </description>
+  <simpleType>
+      <uint8_t></uint8_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <writeable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_EPS_GB_PERCENTAGE</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_EPS_GB_DIRECTION</id>
+  <description>
+    firmware notes:
+      Direction to apply guardband margin (positive/negative)
+  </description>
+  <simpleType>
+      <uint8_t></uint8_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <writeable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_EPS_GB_DIRECTION</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_FABRIC_ASYNC_SAFE_MODE</id>
+  <description>
+    firmware notes:
+      Set to force all asynchronous boundary crossings into safe mode.
+  </description>
+  <simpleType>
+      <uint8_t></uint8_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <writeable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_FABRIC_ASYNC_SAFE_MODE</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>FREQ_PCIE</id>
+  <description>
+    The frequency of a processor's PCI-e bus in MHz.
+    This is the same for all PCI-e busses in the system.
+    This is set by the HWP that sets up the PCI-e PLL.
+  </description>
+  <simpleType><uint32_t></uint32_t></simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <writeable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_FREQ_PCIE</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>

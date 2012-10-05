@@ -108,6 +108,20 @@
     <attribute><id>MSS_PREFETCH_ENABLE</id></attribute>
     <attribute><id>MSS_CLEANER_ENABLE</id></attribute>
     <attribute><id>MIRROR_BASE_ADDRESS</id></attribute>
+    <attribute><id>PROC_EPS_GB_PERCENTAGE</id></attribute>
+    <attribute><id>PROC_EPS_GB_DIRECTION</id></attribute>
+    <attribute><id>PROC_FABRIC_ASYNC_SAFE_MODE</id></attribute>
+    <attribute><id>FREQ_PCIE</id></attribute>
+    <attribute><id>L2_R_T0_EPS</id></attribute>
+    <attribute><id>L2_R_T1_EPS</id></attribute>
+    <attribute><id>L2_R_T2_EPS</id></attribute>
+    <attribute><id>L2_FORCE_R_T2_EPS</id></attribute>
+    <attribute><id>L2_W_EPS</id></attribute>
+    <attribute><id>L3_R_T0_EPS</id></attribute>
+    <attribute><id>L3_R_T1_EPS</id></attribute>
+    <attribute><id>L3_R_T2_EPS</id></attribute>
+    <attribute><id>L3_FORCE_R_T2_EPS</id></attribute>
+    <attribute><id>L3_W_EPS</id></attribute>
     <attribute><id>NOMINAL_FREQ_MHZ</id></attribute>
     <attribute><id>MNFG_FLAGS</id></attribute>
 </targetType>
@@ -308,36 +322,6 @@
     <attribute>
         <id>TYPE</id>
         <default>EX</default>
-    </attribute>
-    <attribute>
-        <id>L2_R_T0_EPS</id>
-    </attribute>
-    <attribute>
-        <id>L2_R_T1_EPS</id>
-    </attribute>
-    <attribute>
-        <id>L2_R_T2_EPS</id>
-    </attribute>
-    <attribute>
-        <id>L2_FORCE_R_T2_EPS</id>
-    </attribute>
-    <attribute>
-        <id>L2_W_EPS</id>
-    </attribute>
-    <attribute>
-        <id>L3_R_T0_EPS</id>
-    </attribute>
-    <attribute>
-        <id>L3_R_T1_EPS</id>
-    </attribute>
-    <attribute>
-        <id>L3_R_T2_EPS</id>
-    </attribute>
-    <attribute>
-        <id>L3_FORCE_R_T2_EPS</id>
-    </attribute>
-    <attribute>
-        <id>L3_W_EPS</id>
     </attribute>
 </targetType>
 

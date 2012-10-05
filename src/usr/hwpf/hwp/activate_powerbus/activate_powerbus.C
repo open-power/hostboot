@@ -48,20 +48,23 @@
 
 //  targeting support
 #include    <targeting/common/commontargeting.H>
+#include    <targeting/common/utilFilter.H>
 
 //  fapi support
 #include    <fapi.H>
 #include    <fapiPlatHwpInvoker.H>
 
 #include    "activate_powerbus.H"
+#include    <pbusLinkSvc.H>
 
 //  Uncomment these files as they become available:
-// #include    "proc_build_smp/proc_build_smp.H"
+#include    "proc_build_smp/proc_build_smp.H"
 
 namespace   ACTIVATE_POWERBUS
 {
 
 using   namespace   TARGETING;
+using   namespace   EDI_EI_INITIALIZATION;
 using   namespace   fapi;
 
 
@@ -77,38 +80,118 @@ void    call_proc_build_smp( void    *io_pArgs )
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
                "call_proc_build_smp entry" );
 
-#if 0
-    // @@@@@    CUSTOM BLOCK:   @@@@@
-    //  figure out what targets we need
-    //  customize any other inputs
-    //  set up loops to go through all targets (if parallel, spin off a task)
+    // Get all functional proc chip targets
+    TARGETING::TargetHandleList l_cpuTargetList;
+    getAllChips(l_cpuTargetList, TYPE_PROC);
 
-    //  dump physical path to targets
-    EntityPath l_path;
-    l_path  =   l_@targetN_target->getAttr<ATTR_PHYS_PATH>();
-    l_path.dump();
+    // Collect all valid abus connections and xbus connections
+    TargetPairs_t l_abusConnections;
+    TargetPairs_t l_xbusConnections;
+    l_errl = PbusLinkSvc::getTheInstance().getPbusConnections(
+                                 l_abusConnections, TYPE_ABUS );
+    if (!l_errl)
+    {
+        l_errl = PbusLinkSvc::getTheInstance().getPbusConnections(
+                                 l_xbusConnections, TYPE_XBUS );
+    }
 
-    // cast OUR type of target to a FAPI type of target.
-    const fapi::Target l_fapi_@targetN_target(
-                    TARGET_TYPE_MEMBUF_CHIP,
-                    reinterpret_cast<void *>
-                        (const_cast<TARGETING::Target*>(l_@targetN_target)) );
+    // Populate l_proc_Chips vector for each good processor chip
+    //   if a A/X-bus endpoint has a valid connection, then
+    //   obtain the proc chip target of the other endpoint of the
+    //   connection, build the fapi target to update the corresponding
+    //   chip object of this A/X-bus endpoint for the procEntry
+    std::vector<proc_build_smp_proc_chip> l_procChips;
+
+    for ( size_t i = 0; (!l_errl) && (i < l_cpuTargetList.size()); i++ )
+    {
+        proc_build_smp_proc_chip l_procEntry;
+
+        l_procEntry.enable_f0  = false;
+        l_procEntry.enable_f1  = false;
+        l_procEntry.f0_node_id = FBC_NODE_ID_0;
+        l_procEntry.f1_node_id = FBC_NODE_ID_0;
+
+        const TARGETING::Target * l_pTarget = l_cpuTargetList[i];
+        fapi::Target l_fapiproc_target( TARGET_TYPE_PROC_CHIP,
+                       reinterpret_cast<void *>
+                       (const_cast<TARGETING::Target*>(l_pTarget)) );
+
+        l_procEntry.this_chip = l_fapiproc_target;
+
+        TARGETING::TargetHandleList l_abuses;
+        getChildChiplets( l_abuses, l_pTarget, TYPE_ABUS );
+
+        for (size_t j = 0; j < l_abuses.size(); j++)
+        {
+            TARGETING::Target * l_target = l_abuses[j];
+            uint8_t l_srcID = l_target->getAttr<ATTR_CHIP_UNIT>();
+            TargetPairs_t::iterator l_itr = l_abusConnections.find(l_target);
+            if ( l_itr == l_abusConnections.end() )
+            {
+                continue;
+            }
+
+            const TARGETING::Target *l_pParent = NULL;
+            l_pParent = getParentChip(
+                              (const_cast<TARGETING::Target*>(l_itr->second)));
+            fapi::Target l_fapiproc_parent( TARGET_TYPE_PROC_CHIP,
+                                         (void *)l_pParent );
+
+            switch (l_srcID)
+            {
+                case 0: l_procEntry.a0_chip = l_fapiproc_parent; break;
+                case 1: l_procEntry.a1_chip = l_fapiproc_parent; break;
+                case 2: l_procEntry.a2_chip = l_fapiproc_parent; break;
+               default: break;
+            }
+        }
+
+        TARGETING::TargetHandleList l_xbuses;
+        getChildChiplets( l_xbuses, l_pTarget, TYPE_XBUS );
+
+        for (size_t j = 0; j < l_xbuses.size(); j++)
+        {
+            TARGETING::Target * l_target = l_xbuses[j];
+            uint8_t l_srcID = l_target->getAttr<ATTR_CHIP_UNIT>();
+            TargetPairs_t::iterator l_itr = l_xbusConnections.find(l_target);
+            if ( l_itr == l_xbusConnections.end() )
+            {
+                continue;
+            }
+
+            const TARGETING::Target *l_pParent = NULL;
+            l_pParent = getParentChip(
+                              (const_cast<TARGETING::Target*>(l_itr->second)));
+            fapi::Target l_fapiproc_parent( TARGET_TYPE_PROC_CHIP,
+                                         (void *)l_pParent );
+
+            switch (l_srcID)
+            {
+                case 0: l_procEntry.x0_chip = l_fapiproc_parent; break;
+                case 1: l_procEntry.x1_chip = l_fapiproc_parent; break;
+                case 2: l_procEntry.x2_chip = l_fapiproc_parent; break;
+                case 3: l_procEntry.x3_chip = l_fapiproc_parent; break;
+               default: break;
+            }
+        }
+
+        l_procChips.push_back( l_procEntry );
+    }
 
     //  call the HWP with each fapi::Target
-    FAPI_INVOKE_HWP( l_errl, proc_build_smp, _args_...);
+    FAPI_INVOKE_HWP( l_errl, proc_build_smp, 
+                     l_procChips, SMP_ACTIVATE_PHASE1 );
+
     if ( l_errl )
     {
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, 
-                  "ERROR : .........." );
-        errlCommit( l_errl, HWPF_COMP_ID );
+                  "ERROR : proc_build_smp" );
     }
     else
     {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
-                   "SUCCESS : .........." );
+                   "SUCCESS : proc_build_smp" );
     }
-    // @@@@@    END CUSTOM BLOCK:   @@@@@
-#endif
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
                "call_proc_build_smp exit" );

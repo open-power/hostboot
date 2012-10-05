@@ -1,0 +1,112 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hwpf/hwp/activate_powerbus/proc_build_smp/proc_build_smp_errors.xml $ -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2012                   -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- Error definitions for proc_build_smp -->
+<hwpErrors>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_BUILD_SMP_NODE_ADD_INTERNAL_ERR</rc>
+    <description>Internal Error.  Error encountered adding node to SMP structure.</description>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_BUILD_SMP_DUPLICATE_FABRIC_ID_ERR</rc>
+    <description>Multiple chips found with identifcal fabric node/chip ID attribute values.</description>
+    <ffdc>NODE_ID</ffdc>
+    <ffdc>CHIP_ID</ffdc>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_BUILD_SMP_INVALID_OPERATION_ERR</rc>
+    <description>Unsupported SMP build operation presented.</description>
+    <ffdc>OP</ffdc>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_BUILD_SMP_MASTER_DESIGNATION_ERR</rc>
+    <description>Node or system master chip designation error.</description>
+    <ffdc>OP</ffdc>
+    <ffdc>MASTER_CHIP_SYS_CURR</ffdc>
+    <ffdc>MASTER_CHIP_NODE_CURR</ffdc>
+    <ffdc>FIRST_CHIP_IN_SYS</ffdc>
+    <ffdc>FIRST_CHIP_IN_NODE</ffdc>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_BUILD_SMP_EPSILON_RANGE_ERR</rc>
+    <description>Target epsilon value exceeds maximum value supported by HW capabilities.</description>
+    <ffdc>VALUE</ffdc>
+    <ffdc>MAX_HW_VALUE</ffdc>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_BUILD_SMP_EPSILON_INVALID_TABLE_ERR</rc>
+    <description>Invalid epsilon table type or content detected.</description>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_BUILD_SMP_PACING_RATE_TABLE_ERR</rc>
+    <description>Command rate pacing table lookup error.</description>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_BUILD_SMP_CORE_FLOOR_FREQ_RATIO_ERR</rc>
+    <description>Unsupported core floor to PB frequency ratio.</description>
+    <ffdc>FREQ_PB</ffdc>
+    <ffdc>FREQ_CORE_FLOOR</ffdc>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_BUILD_SMP_CORE_FLOOR_RATIO_ERR</rc>
+    <description>Unsupported core floor frequency enumerated value.</description>
+    <ffdc>CORE_FLOOR_RATIO</ffdc>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_BUILD_SMP_INVALID_GROUP_SIZE_ERR</rc>
+    <description>Invalid chips per group configuration detected.</description>
+    <ffdc>SIZE</ffdc>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_BUILD_SMP_INVALID_AGGREGATE_CONFIG_ERR</rc>
+    <description>Invalid aggregate link configuration detected.</description>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_BUILD_SMP_HOTPLUG_SHADOW_ERR</rc>
+    <description>Inconsistent state in hotplug (CURR) shadow copies.</description>
+    <ffdc>ADDRESS0</ffdc>
+    <ffdc>ADDRESS1</ffdc>
+    <ffdc>DATA0</ffdc>
+    <ffdc>DATA1</ffdc>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_BUILD_SMP_X_CMD_RATE_ERR</rc>
+    <description>Target link command rate value is out of range.</description>
+    <ffdc>CMD_RATE</ffdc>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_BUILD_SMP_A_CMD_RATE_ERR</rc>
+    <description>Target link command rate value is out of range.</description>
+    <ffdc>CMD_RATE</ffdc>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_BUILD_SMP_F_CMD_RATE_ERR</rc>
+    <description>Target link command rate value is out of range.</description>
+    <ffdc>CMD_RATE</ffdc>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_BUILD_SMP_ADU_STATUS_MISMATCH</rc>
+    <description>Status mismatch detected on ADU operation executed for SMP configuration.</description>
+    <ffdc>STATUS_DATA</ffdc>
+  </hwpError>
+</hwpErrors>
