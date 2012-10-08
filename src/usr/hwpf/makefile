@@ -73,8 +73,8 @@ HWP_ATTR_XML_FILES = hwp/memory_attributes.xml \
                      hwp/dram_initialization/proc_setup_bars/proc_setup_bars_l3_attributes.xml \
                      hwp/dram_initialization/proc_setup_bars/proc_setup_bars_mmio_attributes.xml \
                      hwp/activate_powerbus/proc_build_smp/proc_fab_smp_fabric_attributes.xml \
-                     hwp/runtime_attributes/pm_plat_attributes.xml \
-                     hwp/runtime_attributes/pm_hwp_attributes.xml
+                     hwp/runtime_attributes/pm_attributes_all_plat.xml \
+                     hwp/runtime_attributes/pm_attributes_all_hwp.xml 
 
 #------------------------------------------------------------------------------
 # Initfiles

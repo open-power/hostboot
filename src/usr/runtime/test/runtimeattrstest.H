@@ -87,11 +87,11 @@ class RuntimeTest: public CxxTest::TestSuite
             TS_FAIL("Error getting fapi::ATTR_FREQ_PB");
         }
 
-        fapi::ATTR_PM_SPIVID_CRC_GEN_ENABLE_Type crc_gen_enable = 0;
-        l_rc = FAPI_ATTR_GET(ATTR_PM_SPIVID_CRC_GEN_ENABLE,NULL,crc_gen_enable);
+        fapi::ATTR_PROC_R_LOADLINE_Type spivid = 0;
+        l_rc = FAPI_ATTR_GET(ATTR_PROC_R_LOADLINE,NULL,spivid);
         if( l_rc )
         {
-            TS_FAIL("Error getting fapi::ATTR_PM_SPIVID_CRC_GEN_ENABLE");
+            TS_FAIL("Error getting fapi::ATTR_PROC_R_LOADLINE");
         }
 
         uint64_t attr = 0;
@@ -117,23 +117,23 @@ class RuntimeTest: public CxxTest::TestSuite
                     }
                 }
             }
-            else if( headers[attr].id == fapi::ATTR_PM_SPIVID_CRC_GEN_ENABLE )
+            else if( headers[attr].id == fapi::ATTR_PROC_R_LOADLINE )
             {
                 if( headers[attr].sizeBytes !=
-                    sizeof(fapi::ATTR_PM_SPIVID_CRC_GEN_ENABLE_Type) )
+                    sizeof(fapi::ATTR_PROC_R_LOADLINE_Type) )
                 {
                     TRACFCOMP( g_trac_runtime, "size=%.16X", headers[attr].sizeBytes );
-                    TS_FAIL("Size of fapi::ATTR_PM_SPIVID_CRC_GEN_ENABLE data is wrong");
+                    TS_FAIL("Size of fapi::ATTR_PROC_R_LOADLINE data is wrong");
                 }
                 else
                 {
-                    fapi::ATTR_PM_SPIVID_CRC_GEN_ENABLE_Type* crc_gen_enable_act =
-                      reinterpret_cast<fapi::ATTR_PM_SPIVID_CRC_GEN_ENABLE_Type*>
+                    fapi::ATTR_PROC_R_LOADLINE_Type* spivid_act =
+                      reinterpret_cast<fapi::ATTR_PROC_R_LOADLINE_Type*>
                       (beginning+headers[attr].offset);
-                    if( *crc_gen_enable_act != crc_gen_enable )
+                    if( *spivid_act != spivid )
                     {
-                        TRACFCOMP( g_trac_runtime, "Expected=%X, Actual=%X", crc_gen_enable, *crc_gen_enable_act );
-                        TS_FAIL("fapi::ATTR_PM_SPIVID_CRC_GEN_ENABLE data is wrong");
+                        TRACFCOMP( g_trac_runtime, "Expected=%X, Actual=%X", spivid, *spivid_act );
+                        TS_FAIL("fapi::ATTR_PROC_R_LOADLINE data is wrong");
                     }
                 }
             }

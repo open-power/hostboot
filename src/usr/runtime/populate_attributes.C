@@ -49,7 +49,7 @@ TRAC_INIT(&g_trac_runtime, "RUNTIME", 4096);
     fapi::__fid##_Type result_##__fid; \
     _rc = FAPI_ATTR_GET( __fid, _target, result_##__fid ); \
     if( _rc ) { \
-        TRACFCOMP( g_trac_runtime, "Error reading %d, rc=0x%X", fapi::__fid, _rc ); \
+        TRACFCOMP( g_trac_runtime, "Error reading 0x%X, rc=0x%X", fapi::__fid, _rc ); \
         _failed_attribute = fapi::__fid; \
         break; \
     } \
@@ -69,7 +69,7 @@ TRAC_INIT(&g_trac_runtime, "RUNTIME", 4096);
     fapi::__fid##_Type result_##__fid; \
     _rc = FAPI_ATTR_GET_PRIVILEGED( __fid, _target, result_##__fid ); \
     if( _rc ) { \
-        TRACFCOMP( g_trac_runtime, "Error reading %d, rc=0x%X", fapi::__fid, _rc ); \
+        TRACFCOMP( g_trac_runtime, "Error reading 0x%X, rc=0x%X", fapi::__fid, _rc ); \
         _failed_attribute = fapi::__fid; \
         break; \
     } \
@@ -188,7 +188,8 @@ errlHndl_t populate_system_attributes( void )
         TRACFCOMP( g_trac_runtime, "-SYSTEM-" );
 
         // allocate memory and fill it with some junk data
-        system_data_t* sys_data = reinterpret_cast<system_data_t*>(SYSTEM_DATA_POINTER);
+        system_data_t* sys_data =
+          reinterpret_cast<system_data_t*>(SYSTEM_DATA_POINTER);
         memset( sys_data, 'A', sizeof(system_data_t) );
 
         // These variables are used by the HSVC_LOAD_ATTR macros directly
@@ -212,7 +213,8 @@ errlHndl_t populate_system_attributes( void )
         TARGETING::targetService().getTopLevelTarget(sys);
 
         // Fill in the metadata
-        sys_data->hsvc.offset = reinterpret_cast<uint64_t>(sys_data->attrHeaders)
+        sys_data->hsvc.offset =
+          reinterpret_cast<uint64_t>(sys_data->attrHeaders)
           - reinterpret_cast<uint64_t>(sys_data);
         sys_data->hsvc.nodePresent = 0x8000000000000000;
         sys_data->hsvc.numAttr = 0;
@@ -268,7 +270,8 @@ errlHndl_t populate_node_attributes( uint64_t i_nodeNum )
         TRACFCOMP( g_trac_runtime, "-NODE-" );
 
         // allocate memory and fill it with some junk data
-        node_data_t* node_data = reinterpret_cast<node_data_t*>(NODE_DATA_POINTER);
+        node_data_t* node_data =
+          reinterpret_cast<node_data_t*>(NODE_DATA_POINTER);
         memset( node_data, 'A', sizeof(node_data) );
 
         // These variables are used by the HSVC_LOAD_ATTR macros directly
@@ -290,7 +293,9 @@ errlHndl_t populate_node_attributes( uint64_t i_nodeNum )
 
         // Fill in the metadat
         node_data->hsvc.numTargets = 0;
-        node_data->hsvc.procOffset = reinterpret_cast<uint64_t>(node_data->procs) - reinterpret_cast<uint64_t>(node_data);
+        node_data->hsvc.procOffset =
+          reinterpret_cast<uint64_t>(node_data->procs)
+          - reinterpret_cast<uint64_t>(node_data);
 
         // Get the list of processors
         TARGETING::TargetHandleList all_procs;
@@ -314,7 +319,9 @@ errlHndl_t populate_node_attributes( uint64_t i_nodeNum )
 
             // Fill in the metadata
             node_data->procs[p].procid = procid;
-            node_data->procs[p].offset = reinterpret_cast<uint64_t>(&(node_data->procAttrHeaders[p][0])) - reinterpret_cast<uint64_t>(node_data);
+            node_data->procs[p].offset =
+              reinterpret_cast<uint64_t>(&(node_data->procAttrHeaders[p][0]))
+              - reinterpret_cast<uint64_t>(node_data);
             node_data->procs[p].numAttr = 0;
             (node_data->hsvc.numTargets)++;
 
@@ -326,6 +333,7 @@ errlHndl_t populate_node_attributes( uint64_t i_nodeNum )
             // Fill up the attributes
             ADD_HUID( (all_procs[p]) ); // for debug
             ADD_PHYS_PATH( (all_procs[p]) );
+            HSVC_LOAD_ATTR_P( ATTR_EC ); 
             // Use a generated file for the list of attributes to load
             #include "common/hsvc_procdata.C"
 
@@ -339,15 +347,21 @@ errlHndl_t populate_node_attributes( uint64_t i_nodeNum )
                                          TARGETING::TYPE_EX, false );
             for( size_t e = 0; e < all_ex.size(); e++ )
             {
-                uint32_t chiplet = all_ex[e]->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+                uint32_t chiplet =
+                  all_ex[e]->getAttr<TARGETING::ATTR_CHIP_UNIT>();
                 TRACFCOMP( g_trac_runtime, "EX:p%d c%d(%.8X)", procid, chiplet, get_huid(all_ex[e]) );
 
                 // Fill in the metadata
                 (node_data->hsvc.numTargets)++;
                 node_data->ex[next_ex].parent_procid = procid;
                 node_data->ex[next_ex].chiplet = chiplet;
-                node_data->ex[next_ex].offset = reinterpret_cast<uint64_t>(&(node_data->exAttrHeaders[next_ex][0])) - reinterpret_cast<uint64_t>(node_data);
-                node_data->hsvc.exOffset = reinterpret_cast<uint64_t>(node_data->ex) - reinterpret_cast<uint64_t>(node_data);
+                node_data->ex[next_ex].offset =
+                  reinterpret_cast<uint64_t>(
+                         &(node_data->exAttrHeaders[next_ex][0]))
+                  - reinterpret_cast<uint64_t>(node_data);
+                node_data->hsvc.exOffset =
+                  reinterpret_cast<uint64_t>(node_data->ex)
+                  - reinterpret_cast<uint64_t>(node_data);
                 node_data->ex[next_ex].numAttr = 0;
 
                 // Cast to a FAPI type of target.

@@ -55,23 +55,6 @@ namespace fapi
 
 namespace platAttrSvc
 {
-//@fixme begin  RTC:42293
-fapi::ReturnCode return0_uint8( uint8_t &o_data ) {
-    fapi::ReturnCode l_rc;
-    o_data = 0;
-    return l_rc;
-}
-fapi::ReturnCode return0_uint32( uint32_t &o_data ) {
-    fapi::ReturnCode l_rc;
-    o_data = 0;
-    return l_rc;
-}
-fapi::ReturnCode set_ignore( void ) {
-    fapi::ReturnCode l_rc;
-    return l_rc;
-}
-//@fixme end
-
 //******************************************************************************
 // fapi::platAttrSvc::getHostbootTarget
 //******************************************************************************

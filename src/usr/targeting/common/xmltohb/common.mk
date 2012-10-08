@@ -69,7 +69,9 @@ FAPI_ATTR_SOURCES =          \
     dram_initialization/proc_setup_bars/proc_setup_bars_memory_attributes.xml \
     dram_initialization/proc_setup_bars/proc_setup_bars_l3_attributes.xml \
     dram_initialization/proc_setup_bars/proc_setup_bars_mmio_attributes.xml \
-    activate_powerbus/proc_build_smp/proc_fab_smp_fabric_attributes.xml
+    activate_powerbus/proc_build_smp/proc_fab_smp_fabric_attributes.xml \
+    runtime_attributes/pm_attributes_all_hwp.xml \
+    runtime_attributes/pm_attributes_all_plat.xml 
 
 
 XMLTOHB_GENERIC_XML     = generic.xml

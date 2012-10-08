@@ -275,6 +275,7 @@ sub validateSubElements {
 
     if($mustBeHash && (ref($element) ne "HASH"))
     {
+        print "name=$name, mustBeHash=$mustBeHash, element=$element, criteria=$criteria \n";
         fatal("$name must be in the form of a hash.");
     }
 
@@ -285,7 +286,7 @@ sub validateSubElements {
         if(!exists $criteria->{$subElementName})
         {
             fatal("$name element cannot have child element of type "
-                . "\"$subElementName\".");
+                  . "\"$subElementName\".");
         }
     }
 
@@ -295,15 +296,15 @@ sub validateSubElements {
            && (!exists $element->{$subElementName}))
         {
             fatal("$name element missing required child element "
-                . "\"$subElementName\".");
+                  . "\"$subElementName\".");
         }
 
         if(exists $element->{$subElementName}
-            && ($criteria->{$subElementName}{isscalar} == 1)
-            && (ref ($element->{$subElementName}) eq "HASH"))
+           && ($criteria->{$subElementName}{isscalar} == 1)
+             && (ref ($element->{$subElementName}) eq "HASH"))
         {
             fatal("$name element child element \"$subElementName\" should be "
-                . "scalar, but is a hash.");
+                  . "scalar, but is a hash.");
         }
     }
 }
