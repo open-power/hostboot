@@ -268,11 +268,25 @@ sub createSPDData
         {
             # Plugging order is:
             #   Processor 0 - 3
-            #   MCS 7 - 4 (1 Centaury/MCS)
-            if( $mcs >= (7 - ($numCentPerProc - 1)) &&
-                $mcs <= 7 )
+            #   MCS 4 - 7, then 0 - 3 (1 Centaur/MCS)
+            if( ($numCentPerProc <= 4) &&
+                ($mcs >= 4) &&
+                ($mcs <= (4 + ($numCentPerProc - 1))) )
             {
                 $mcsArray[$mcs] = 1;
+            }
+            elsif( $numCentPerProc > 4 )
+            {
+                if( $mcs >= 4 &&
+                    $mcs <= 7 )
+                {
+                    $mcsArray[$mcs] = 1;
+                }
+                elsif( $mcs >= 0 &&
+                       $mcs < ($numCentPerProc - 4) )
+                   {
+                       $mcsArray[$mcs] = 1;
+                   }
             }
         }
         else
