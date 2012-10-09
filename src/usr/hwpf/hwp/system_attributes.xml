@@ -60,6 +60,7 @@
     </description>
     <valueType>uint64</valueType>
     <enum>
+        MNFG_NO_FLAG                        = 0x0000000000000000,
         MNFG_THRESHOLDS                     = 0x0000000000000001,
         MNFG_AVP_ENABLE                     = 0x0000000000000002,
         MNFG_HDAT_AVP_ENABLE                = 0x0000000000000004,
