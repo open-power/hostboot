@@ -268,4 +268,64 @@ fapi::ReturnCode fapiGetMvpdField(const fapi::MvpdRecord i_record,
     return  l_rc;
 }
 
+//******************************************************************************
+// fapiSetMvpdField
+//******************************************************************************
+fapi::ReturnCode fapiSetMvpdField(const fapi::MvpdRecord i_record,
+                                  const fapi::MvpdKeyword i_keyword,
+                                  const fapi::Target &i_procTarget,
+                                  const uint8_t * const i_pBuffer,
+                                  const uint32_t i_fieldSize)
+{
+    fapi::ReturnCode l_rc;
+    FAPI_DBG("fapiSetMvpdField entry");
+
+    do
+    {
+        // Translate the FAPI record to a Hostboot record
+        MVPD::mvpdRecord l_hbRecord = MVPD::MVPD_INVALID_RECORD;
+        
+        l_rc = fapi::MvpdRecordXlate(i_record, l_hbRecord);
+        
+        if (l_rc)
+        {
+            break;
+        }
+        
+        // Translate the FAPI keyword to a Hostboot keyword
+        MVPD::mvpdKeyword l_hbKeyword = MVPD::INVALID_MVPD_KEYWORD;
+        
+        l_rc = fapi::MvpdKeywordXlate(i_keyword, l_hbKeyword);
+        
+        if (l_rc)
+        {
+            break;
+        }
+                
+        size_t l_fieldLen = i_fieldSize;
+
+        errlHndl_t l_errl = deviceWrite(
+            reinterpret_cast< TARGETING::Target*>(i_procTarget.get()),
+            const_cast<uint8_t *>(i_pBuffer),
+            l_fieldLen,
+            DEVICE_MVPD_ADDRESS(l_hbRecord, l_hbKeyword));
+        
+        if (l_errl)
+        {
+            FAPI_ERR("fapiSetMvpdField: ERROR: deviceWrite : errorlog PLID=0x%x",
+                     l_errl->plid());
+
+            // Add the error log pointer as data to the ReturnCode
+            l_rc.setPlatError(reinterpret_cast<void *> (l_errl));
+
+            break;
+        }
+
+    } while(0);
+
+    FAPI_DBG( "fapiSetMvpdField: exit" );
+
+    return  l_rc;
+}
+
 } // extern "C"
